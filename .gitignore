@@ -141,3 +141,12 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Storybook build output
+storybook-static
+
+# macOS
+.DS_Store
+
+# Worktrees of Claude Code sessions in the main checkout
+.claude/worktrees/
