@@ -20,13 +20,37 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 
 - **Datum:** 20 oktober 2026
 - **Besluit:** AI-agents schrijven het meeste code, onder regie van de projecteigenaar, in drie rollen:
-  - de Coordinator, de sessie waarmee de projecteigenaar overlegt. Die houdt het bord bij, specificeert issues en zet hooguit twee issues tegelijk in gang;
+  - de Coordinator, de sessie waarmee de projecteigenaar overlegt.
+    Die houdt het bord bij, specificeert issues en zet hooguit twee issues tegelijk in gang;
   - een Builder per issue, in een eigen branch en worktree;
   - de Reviewer, die elke pull request beoordeelt in een frisse context, met drie verplichte checklists.
-- **Poorten:** de projecteigenaar keurt eerst de specificatie goed, daarna de pull request en het resultaat op de acceptatieomgeving (#6). Alleen de projecteigenaar voegt samen. Na twee reviewrondes beslist een mens.
-- **Waar:** de afspraken staan in `AGENTS.md`, in het Engels, zoals al het gereedschap voor agents. `CLAUDE.md` laadt dat bestand en voegt niets toe. Tot er een bijdragegids is (#7), staan ook de regels voor mensen in `AGENTS.md`; de bijdragegids neemt dat deel daarna over.
-- **Waarom:** het project mag niet meer tijd kosten dan het oplevert. Met vaste rollen en poorten weet elke sessie wat ze moet doen, en houdt de projecteigenaar de regie zonder alles zelf te doen. Een aparte reviewer, omdat wie zijn eigen werk controleert, zijn eigen fouten over het hoofd ziet. Twee rondes, zodat agents niet eindeloos heen en weer gaan. `AGENTS.md` is de gangbare plek voor afspraken met agents, en ook andere agents dan Claude Code lezen het.
-- **Alternatieven:** één agent die alles doet, ook de review. Of de afspraken in `CLAUDE.md`, dat alleen Claude Code leest.
+- **Poorten:** de projecteigenaar keurt eerst de specificatie goed, daarna de pull request en het resultaat op de acceptatieomgeving (#6).
+  Alleen de projecteigenaar voegt samen.
+  Na twee reviewrondes beslist een mens.
+- **Waar:** de afspraken staan in `AGENTS.md`, in het Engels, zoals al het gereedschap voor agents.
+  `CLAUDE.md` laadt dat bestand en voegt niets toe.
+  Tot er een bijdragegids is (#7), staan ook de regels voor mensen in `AGENTS.md`; de bijdragegids neemt dat deel daarna over.
+- **Waarom:** het project mag niet meer tijd kosten dan het oplevert.
+  Met vaste rollen en poorten weet elke sessie wat ze moet doen, en houdt de projecteigenaar de regie zonder alles zelf te doen.
+  Een aparte reviewer, omdat wie zijn eigen werk controleert, zijn eigen fouten over het hoofd ziet.
+  Twee rondes, zodat agents niet eindeloos heen en weer gaan.
+  `AGENTS.md` is de gangbare plek voor afspraken met agents, en ook andere agents dan Claude Code lezen het.
+- **Alternatieven:** één agent die alles doet, ook de review.
+  Of de afspraken in `CLAUDE.md`, dat alleen Claude Code leest.
+
+### Eén zin per regel
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** in Markdown- en MDX-bestanden staat elke zin op een eigen regel, ook in een lijst.
+  Dat geldt niet voor het sjabloon voor pull requests, en niet voor issues, beschrijvingen van pull requests en reacties: daar toont GitHub elke regelovergang.
+- **Waarom:** een wijziging in één zin is dan één gewijzigde regel, en een reactie in een review wijst precies die zin aan.
+  Wat je leest, verandert niet: Markdown voegt de regels van een alinea samen.
+  Prettier laat de regelovergangen staan.
+  Het Amsterdamse designsysteem doet het ook zo.
+- **Overgang:** wat de pull requests voor de werkwijze toevoegen, heeft het al.
+  De bestaande bestanden zetten we om in één aparte pull request.
+- **Alternatieven:** regels afbreken op een vaste breedte, zoals 80 tekens; dan verschuift één woord extra de rest van de alinea.
+  Of een hele alinea op één regel, zoals eerst; dan is elke wijziging een lange gewijzigde regel.
 
 ## Hosting en data
 
