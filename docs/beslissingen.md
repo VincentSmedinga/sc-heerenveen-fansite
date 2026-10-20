@@ -2,7 +2,7 @@
 
 Per beslissing een kort blok: datum, besluit, waarom en welke alternatieven we hebben overwogen. Een beslissing die een langer betoog nodig heeft, krijgt een eigen bestand. Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
-De beslissingen over stack, database, hosting, contentbeleid en taal komen hier nog bij.
+De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 
 ## Project
 
@@ -14,6 +14,111 @@ De beslissingen over stack, database, hosting, contentbeleid en taal komen hier 
 - **Gevolg:** issues en documentatie beschrijven in eigen woorden wat ze uit het prototype overnemen, zonder ernaar te linken.
 - **Alternatieven:** het prototype publiceren, met toestemming van de maker en een licentie.
 
+## Hosting en data
+
+### Beginnen op de gedeelde hosting van mijn.host
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** we beginnen op de gedeelde webhosting van mijn.host waar het forum al draait, het pakket Basic. We houden in de gaten hoe dat gaat.
+- **Wat de hosting biedt:** volgens mijn.host:
+  - Node.js 22 en 24. Next.js draait via Phusion Passenger, het liefst als standalone build.
+  - MariaDB 10.11 als database. Er is geen PostgreSQL, en er zijn geen processen die blijven draaien. Taken lopen via cron, hooguit één keer per minuut.
+  - 4 cores, 4 GB geheugen en 10 GB opslag, voor maximaal vijf websites, samen met het forum.
+  - Uitrollen vanuit GitHub Actions over SSH, op poort 26.
+- **Waarom:** de hosting is er al, voor het forum. Een eigen server kost geld en onderhoud.
+- **Overstappen:** naar een VPS, zodra we tegen een grens aanlopen:
+  - live-updates om de paar seconden, of WebSockets;
+  - het forum wordt trager;
+  - de opslag raakt op;
+  - een preview per pull request, of zware statistieken.
+- **Alternatieven:** een unmanaged VPS van € 12,50 tot € 25 per maand (zonder btw), met root, Docker, Postgres en workers. Dat doen we voorlopig niet, vanwege de kosten en het onderhoud van de server: updates, beveiliging en back-ups.
+
+### MariaDB in plaats van Postgres
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** de database is MariaDB 10.11, met Drizzle. Dat vervangt het eerdere plan voor Postgres.
+- **Waarom:** MariaDB is de database van de hosting. De belangrijkste reden voor Postgres was pg-boss, en dat valt weg zonder workers (zie _Importtaken via cron_).
+- **Alternatieven:** Postgres op een VPS. SQLite viel al eerder af.
+
+### Importtaken via cron
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** cron start de importtaken, in plaats van pg-boss. Elke taak is een gewone opdracht die zijn werk doet en stopt. Een lock in de database zorgt dat een taak nooit twee keer tegelijk draait.
+- **Waarom:** de hosting heeft geen processen die blijven draaien, en pg-boss werkt alleen met Postgres. Op een VPS kan een worker later dezelfde opdrachten aanroepen.
+- **Alternatieven:** pg-boss met een worker die blijft draaien, op een VPS met Postgres.
+
+## Werkruimte
+
+### Packages komen met het issue dat ze nodig heeft
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** `apps/web`, `apps/importer` en `packages/db` komen er pas met het eerste issue dat er code in zet. `packages/shared` kwam met #2, voor de controle van omgevingsvariabelen. De namen zijn voorlopig.
+- **Waarom:** een leeg skelet moeten we bijhouden zonder dat het iets doet, en het legt een opzet vast voordat we weten wat het package nodig heeft.
+- **Alternatieven:** alle packages nu als leeg skelet.
+
+### TypeScript met project references
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** de strikte opties staan in één `tsconfig.base.json`. De `tsconfig.json` in de root noemt elk package als project reference, en een package dat een ander importeert, verwijst ernaar. `pnpm typecheck` is `tsc -b`. Daarnaast staat `erasableSyntaxOnly` aan: geen enums, namespaces of parameter properties.
+- **Waarom:** `tsc -b` controleert de packages in de goede volgorde en alleen wat veranderd is, en een package krijgt de types van een ander zonder aparte build. Met `erasableSyntaxOnly` kan Node 24 elk bestand zelf draaien, wat de importer kan gebruiken.
+- **Let op:** TypeScript laat alleen naar een project verwijzen dat uitvoer schrijft. Daarom schrijven de packages alleen declaraties, in `node_modules/.cache/tsc`. Alleen `tsc -b` leest die bestanden; apps en bundlers lezen de TypeScript-bron.
+- **Alternatieven:** `tsc --noEmit` per package, zoals eerst. Dat controleert elk package los en elke keer helemaal. Of een echte build per package naar `dist`, die we niet nodig hebben zolang niets gepubliceerd wordt.
+
+### Controles: snel bij de commit, volledig in CI
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** husky installeert bij `pnpm install` twee git hooks. Voor een commit herstelt lint-staged met ESLint, Stylelint en Prettier wat het kan, alleen in de gestagede bestanden. commitlint controleert of het commitbericht Conventional Commits volgt. De workflow CI doet bij elke pull request en op `main` de rest: lint, typecontrole, tests en build.
+- **Waarom:** een commit moet snel blijven; de typecontrole van de hele werkruimte past daar niet bij, en CI vangt die toch.
+- **Alternatieven:** ook de typecontrole in de pre-commit-hook. Grondiger, maar elke commit wordt trager.
+
+### GitHub Actions vastgezet op een commit
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** een workflow noemt elke action met de volledige SHA van een commit, met de versie als commentaar erachter, zoals `actions/checkout@3d3c42e… # v7.0.1`. GitHub dwingt dat af: een workflow met een action die niet zo vastligt, faalt. Renovate werkt de SHA en het commentaar samen bij.
+- **Waarom:** de eigenaar van een action, of iemand die zijn account overneemt, kan een tag als `v7` naar andere code laten wijzen. Een SHA ligt vast. Dat telt extra in een openbare repository, en in workflows met schrijfrechten, zoals die voor releases en Storybook.
+- **Alternatieven:** vastzetten op de hoofdversie (`@v7`), zoals eerst. Nieuwe versies komen dan vanzelf binnen, maar ook zonder dat iemand ze heeft gezien.
+
+### Omgevingsvariabelen
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** `.env.example` noemt en beschrijft elke variabele; `.env` zelf staat in `.gitignore`. Elke app controleert bij het opstarten zijn variabelen met `parseEnv` uit `@fansite/shared/env`, met een Zod-schema. Eén foutmelding noemt alle ontbrekende en ongeldige variabelen. Een lege waarde telt als ontbrekend, en de melding herhaalt nooit een waarde, omdat het een geheim kan zijn. Secret scanning en push protection van GitHub staan aan.
+- **Voorlopig:** één `.env` in de root voor alle apps. Next.js leest alleen een `.env` in zijn eigen map; `apps/web` moet de root-`.env` dus zelf laden.
+- **Waarom:** het prototype werd gedeeld met het echte `.env`-bestand erin. Een verse clone moet draaien met alleen een ingevulde kopie van `.env.example`, en anders meteen zeggen wat er ontbreekt.
+- **Alternatieven:** t3-env (`@t3-oss/env-nextjs`), dat ook client- en servervariabelen scheidt, maar voor de importer niets toevoegt. Of zonder controle, met de fout pas als een variabele gebruikt wordt.
+
+### Renovate in plaats van Dependabot
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** Renovate houdt de dependencies, pnpm, Node en de GitHub Actions bij, via de GitHub-app van Mend. Eén keer per week, met alle kleine updates (minor en patch) in één pull request en een eigen pull request per major-update. Een nieuwe versie wacht drie dagen. Beveiligingsupdates komen uit de OSV-database en wachten niet op het schema. TypeScript blijft onder 7.
+- **Waarom:** Dependabot ondersteunt pnpm 12 nog niet officieel. Het lockfile van pnpm 12 bestaat uit twee YAML-documenten, en de dependency graph van GitHub leest alleen het eerste. Hij ziet dus geen enkele dependency, en geeft ook geen beveiligingsmeldingen ([dependabot-core#15904](https://github.com/dependabot/dependabot-core/issues/15904)). Renovate leest dat lockfile sinds juni 2026 wel. Het houdt ook monorepo's als Storybook en typescript-eslint vanzelf bij elkaar, en werkt `packageManager` en `.nvmrc` bij.
+- **Nadeel:** een app van een andere partij krijgt schrijfrechten op de repository.
+- **Alternatieven:** Dependabot, ingebouwd en zonder extra app. Dat bekijken we opnieuw zodra het pnpm 12 ondersteunt. Of Renovate zelf draaien als GitHub Action: geen app van een ander, maar wel een token en onderhoud.
+
+### Conventional Commits in het Engels, ook in de titel van een pull request
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** commits volgen Conventional Commits, in Brits Engels, zoals de code. We voegen samen met squash, en dan wordt de titel van de pull request de commit op `main`. Die titel volgt daarom ook Conventional Commits in het Engels, bijvoorbeeld `feat(web): add the news archive`. Een workflow controleert de titel met commitlint. De beschrijving van een pull request blijft Nederlands.
+- **Wat is er nieuw:** dit beantwoordt de open vraag uit #29. De changelog van release-please blijft Engels en technisch. De tekst voor de pagina 'Wat is er nieuw' schrijven we per release met de hand, in gewone taal. Dat gebeurt in een gewone pull request voordat de release-pull request wordt samengevoegd, want release-please schrijft zijn eigen branch bij elke merge naar `main` opnieuw. Hoe de pagina die teksten leest, bepaalt #29.
+- **Waarom:** release-please maakt versienummers en changelog uit de commits op `main`. De geschiedenis van git blijft zo in één taal. En een commitbericht is geen tekst voor bezoekers: ook een Nederlands bericht zou voor 'Wat is er nieuw' herschreven moeten worden.
+- **Instelling:** een squash-commit krijgt altijd de titel van de pull request, ook bij een pull request met één commit. Anders zou GitHub de titel van die commit nemen.
+- **Alternatieven:** een Nederlandse onderwerpregel met een Engels type, zoals `feat(web): nieuwsarchief toevoegen`. Dan wordt de changelog Nederlands, en kan #29 met de regels daaruit beginnen. Maar de commits op een branch zijn Engels, en de titels op `main` dan niet.
+
+### Eén versie voor de hele site, met release-please
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** de hele repository heeft één versie, in `package.json` in de root. De eerste release is 0.1.0, met de tag `v0.1.0`. release-please houdt een release-pull request bij. Samenvoegen verhoogt de versie, vult `CHANGELOG.md` aan en maakt een release op GitHub. Tot 1.0.0, dat we voor de lancering bewaren, verhogen een feature en een breaking change het middelste cijfer.
+- **Waarom:** de site en de importer gaan samen live, en we publiceren geen packages.
+- **Let op:** release-please maakt zijn pull request met het token van GitHub Actions. Daarvoor mag GitHub Actions in deze repository pull requests maken. Een pull request van een workflow start geen andere workflows, dus de controles ontbreken. Sluit de release-pull request en open hem weer; dan starten ze wel. Dat staat ook onderaan die pull request.
+- **Alternatieven:** een versie per package. Of release-please met het token van een eigen GitHub App, zodat de controles vanzelf starten. Dat is een geheim meer om te beheren; als het sluiten en openen gaat tegenstaan, stappen we over.
+
+### Regels voor main
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** de ruleset 'main' geldt alleen voor `main`. Een wijziging komt er alleen via een pull request, samengevoegd met squash, en alleen als drie controles slagen: _Lint, typecheck, test and build_ (CI), _Build Storybook_ en _Conventional Commits title_. Niemand mag de regels omzeilen. `main` verwijderen of force-pushen kan niet. Op andere branches gelden geen regels, zodat je ze kunt rebasen en na het samenvoegen kunt verwijderen.
+- **Waarom:** zo kan een pull request met een typefout echt niet samengevoegd worden. De vorige ruleset, 'All branches', gold voor elke branch, met de regels _creation_ en _update_. Daardoor kon alleen wie de regels mocht omzeilen een branch maken of bijwerken, vroeg elke merge naar `main` om dat vinkje, en konden release-please en Renovate hun eigen branches niet maken.
+- **Let op:** de ruleset kent de controles aan hun naam, van de app GitHub Actions. Wie een job hernoemt, past de ruleset mee aan. In een noodgeval kan een beheerder de ruleset tijdelijk aanpassen.
+- **Alternatieven:** de oude ruleset houden en het vinkje blijven zetten. Of wie schrijfrechten heeft de regels laten omzeilen; dan kan ook een pull request met een fout erdoor.
+
 ## Designsysteem
 
 ### Werkruimte met één package
@@ -22,6 +127,7 @@ De beslissingen over stack, database, hosting, contentbeleid en taal komen hier 
 - **Besluit:** een pnpm 12-werkruimte op Node 24, met voorlopig één package: `packages/design-system`, met de naam `@fansite/design-system`. De naam is voorlopig.
 - **Waarom:** het designsysteem kan nu al beginnen, los van de site en de import. De andere packages komen erbij als de monorepo verder wordt opgezet.
 - **Alternatieven:** meteen de hele monorepo opzetten. Dat is meer werk voordat er iets te zien is.
+- **Later:** zie _Packages komen met het issue dat ze nodig heeft_.
 
 ### TypeScript 6 in plaats van 7
 

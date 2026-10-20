@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "bump-minor-pre-major": true,
+      "changelog-path": "CHANGELOG.md",
+      "include-component-in-tag": false,
+      "initial-version": "0.1.0",
+      "pull-request-footer": "De controles starten niet vanzelf bij deze pull request, omdat een workflow hem heeft gemaakt. Sluit hem en open hem weer om ze te starten; voeg hem daarna samen.",
+      "release-type": "node"
+    }
+  }
+}

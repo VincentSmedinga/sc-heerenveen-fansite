@@ -1,0 +1,29 @@
+// Renovate keeps the dependencies, pnpm, Node and the GitHub Actions up to date. Why Renovate and not Dependabot is in
+// docs/beslissingen.md.
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  // Actions stay pinned to a full commit SHA; Renovate updates the SHA and the version comment together.
+  extends: ['config:recommended', 'group:allNonMajor', 'helpers:pinGitHubActionDigests', 'schedule:weekly'],
+  // Updates are Conventional Commits too, since their titles land on main as squash commits.
+  semanticCommits: 'enabled',
+  timezone: 'Europe/Amsterdam',
+  labels: ['gebied: infra'],
+  dependencyDashboardTitle: 'Updates van dependencies (Renovate)',
+  // Wait a few days before proposing a new version, so a broken or malicious release is usually pulled by then. pnpm
+  // itself refuses versions younger than a day.
+  minimumReleaseAge: '3 days',
+  // Refresh the versions that no package.json names, such as the dependencies of dependencies.
+  lockFileMaintenance: {
+    enabled: true,
+  },
+  // GitHub's dependency graph can't read the pnpm 12 lockfile yet, so its security alerts miss our dependencies. The
+  // OSV database covers them instead. Security updates ignore the weekly schedule.
+  osvVulnerabilityAlerts: true,
+  packageRules: [
+    {
+      // TypeScript 7 has no JavaScript API yet; see "TypeScript 6 in plaats van 7" in docs/beslissingen.md.
+      allowedVersions: '<7',
+      matchPackageNames: ['typescript'],
+    },
+  ],
+}

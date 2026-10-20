@@ -1,0 +1,25 @@
+# Keeps a release pull request up to date from the Conventional Commits on main. Merging it raises the version in
+# package.json, adds the changes to CHANGELOG.md, tags the commit and publishes a GitHub release.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+# Each run works from the latest main, so a newer push replaces a waiting one.
+concurrency:
+  cancel-in-progress: false
+  group: ${{ github.workflow }}
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      # Reads release-please-config.json and .release-please-manifest.json.
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0

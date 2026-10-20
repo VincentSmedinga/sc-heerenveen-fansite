@@ -1,0 +1,40 @@
+# Checks that the pull request title follows Conventional Commits. A squash merge makes the title the commit on main,
+# and release-please builds the version number and the changelog from those commits.
+
+name: PR title
+
+on:
+  pull_request:
+    # Also when the title changes, and on every push, so the check is there for the latest commit.
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  commitlint:
+    name: Conventional Commits title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The pnpm version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          cache: pnpm
+          node-version-file: .nvmrc
+
+      - run: pnpm install --frozen-lockfile
+
+      # The title goes through an environment variable, so it's never run as part of the script.
+      - env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$TITLE" | pnpm exec commitlint --verbose

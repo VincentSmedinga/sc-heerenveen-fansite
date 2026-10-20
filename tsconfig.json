@@ -1,0 +1,6 @@
+// Lists every package, so `tsc -b` typechecks the whole workspace in dependency order. Add a package here when you
+// create it, and add its own references to the packages it imports.
+{
+  "files": [],
+  "references": [{ "path": "packages/design-system" }, { "path": "packages/shared" }]
+}
