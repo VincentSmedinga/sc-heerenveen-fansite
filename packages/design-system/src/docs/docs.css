@@ -1,0 +1,175 @@
+/* Styles for the Storybook docs only. Not part of the design system. */
+
+@layer hf.components {
+  /*
+   * Storybook's own headings (page titles, story names, Markdown headings) would pick up the capitals,
+   * width and spacing of our heading styles, in Storybook's font. Reset them; story content is left alone.
+   */
+  .sbdocs-wrapper :is(h1, h2, h3, h4, h5, h6):not(.sb-story *) {
+    font-stretch: normal;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  ._hf-docs-stack {
+    display: grid;
+    gap: 2rem;
+  }
+
+  ._hf-docs-secondary {
+    color: var(--hf-colour-text-secondary);
+  }
+
+  ._hf-docs-scale {
+    display: grid;
+    gap: 1rem 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: grid;
+      gap: 0.125rem;
+    }
+
+    code {
+      background-color: transparent;
+      font-size: var(--hf-meta-font-size);
+      padding: 0;
+    }
+  }
+
+  ._hf-docs-swatch {
+    block-size: 4rem;
+    border-radius: 0.375rem;
+    box-shadow: inset 0 0 0 1px var(--hf-colour-border-surface);
+    display: block;
+    margin-block-end: 0.25rem;
+  }
+
+  ._hf-docs-strip {
+    border: 1px solid var(--hf-colour-border-surface);
+    border-radius: 0.375rem;
+    display: grid;
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+    overflow: hidden;
+
+    span {
+      block-size: 3rem;
+    }
+  }
+
+  ._hf-docs-step {
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  ._hf-docs-table {
+    margin-block-end: 2rem;
+
+    caption {
+      font-size: var(--hf-headline-font-size);
+    }
+
+    code {
+      font-size: 0.85em;
+    }
+  }
+
+  ._hf-docs-caption-note {
+    color: var(--hf-colour-text-secondary);
+    display: block;
+    font-weight: var(--hf-meta-font-weight);
+  }
+
+  ._hf-docs-value {
+    align-items: center;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  ._hf-docs-chip {
+    block-size: 1.25rem;
+    border-radius: 0.25rem;
+    box-shadow: inset 0 0 0 1px var(--hf-colour-border-surface);
+    display: inline-block;
+    inline-size: 1.25rem;
+  }
+
+  ._hf-docs-provisional {
+    background-color: var(--hf-colour-background-surface-tonal);
+    border-radius: 0.25rem;
+    color: var(--hf-colour-text-default);
+    font-size: var(--hf-meta-font-size);
+    padding-inline: 0.375rem;
+  }
+
+  ._hf-docs-theme-panel {
+    border: 1px solid var(--hf-colour-border-surface);
+    border-radius: 0.5rem;
+    margin-block-end: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  ._hf-docs-sample {
+    align-items: center;
+    border-radius: 0.25rem;
+    box-shadow: inset 0 0 0 1px var(--hf-colour-border-surface);
+    display: inline-flex;
+    font-weight: 600;
+    min-block-size: 2.5rem;
+    min-inline-size: 7.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  ._hf-docs-sample-ring::after {
+    block-size: 1.25rem;
+    border: 0.1875rem solid currentcolor;
+    border-radius: 0.25rem;
+    content: '';
+    inline-size: 4rem;
+  }
+
+  ._hf-docs-pair {
+    background-color: transparent;
+    color: var(--hf-colour-text-secondary);
+    padding: 0;
+  }
+
+  ._hf-docs-fail {
+    color: var(--hf-colour-text-accent);
+  }
+
+  ._hf-docs-specimen {
+    display: grid;
+    gap: 0.25rem 2rem;
+    grid-template-columns: minmax(12rem, 20rem) minmax(0, 1fr);
+    padding-block: 1.25rem;
+
+    & + & {
+      border-block-start: 1px solid var(--hf-colour-border-default);
+    }
+
+    @media (width < 40em) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  ._hf-docs-compare {
+    display: inline-block;
+    block-size: 1.25rem;
+    border-radius: 0.25rem;
+    inline-size: 2.5rem;
+    margin-inline-end: 0.5rem;
+    vertical-align: middle;
+  }
+
+  ._hf-docs-card {
+    background-color: var(--hf-colour-background-surface);
+    border: 1px solid var(--hf-colour-border-surface);
+    border-radius: 0.5rem;
+    padding-block: 1.25rem;
+    padding-inline: 1.5rem;
+  }
+}
