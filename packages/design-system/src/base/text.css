@@ -1,0 +1,128 @@
+/* Running text: headings, paragraphs, links, inline semantics, quotes, code, rules and figures. */
+
+@layer hf.base {
+  /* Colour and spacing of headings. Their type styles are in typography/styles.css. */
+  :is(h1, h2, h3, h4, h5, h6) {
+    color: var(--hf-colour-text-heading);
+    margin-block: 2rem 0.75rem;
+    text-wrap: balance;
+
+    &:first-child {
+      margin-block-start: 0;
+    }
+  }
+
+  p {
+    margin-block: 0 1rem;
+  }
+
+  a {
+    color: var(--hf-colour-text-link);
+    text-decoration-thickness: 0.0625em;
+    text-underline-offset: 0.15em;
+
+    &:visited {
+      color: var(--hf-colour-text-link-visited);
+    }
+
+    &:hover {
+      color: var(--hf-colour-text-link-hover);
+      text-decoration-thickness: 0.125em;
+    }
+  }
+
+  b,
+  strong {
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  small {
+    font-size: var(--hf-meta-font-size);
+    line-height: var(--hf-meta-line-height);
+  }
+
+  abbr[title] {
+    cursor: help;
+    text-decoration-color: var(--hf-colour-marker-graphic);
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 0.15em;
+  }
+
+  blockquote {
+    border-inline-start: 0.25rem solid;
+    border-inline-start-color: var(--hf-colour-marker-graphic);
+    margin-block: 0 1rem;
+    margin-inline: 0;
+    padding-inline-start: 1rem;
+
+    > :last-child {
+      margin-block-end: 0;
+    }
+
+    footer {
+      color: var(--hf-colour-text-secondary);
+      font-size: var(--hf-meta-font-size);
+      line-height: var(--hf-meta-line-height);
+    }
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--hf-font-family-code);
+    font-size: 0.9em;
+  }
+
+  code {
+    background-color: var(--hf-colour-background-surface-tonal);
+    border-radius: 0.25rem;
+    padding-inline: 0.25em;
+  }
+
+  pre {
+    background-color: var(--hf-colour-background-surface-tonal);
+    border: 1px solid;
+    border-color: var(--hf-colour-border-surface-tonal);
+    border-radius: 0.25rem;
+    line-height: 1.45;
+    margin-block: 0 1rem;
+    overflow: auto;
+    padding-block: 0.75rem;
+    padding-inline: 1rem;
+
+    code {
+      background-color: transparent;
+      font-size: inherit;
+      padding-inline: 0;
+    }
+  }
+
+  hr {
+    border: none;
+    border-block-start: 1px solid;
+    border-block-start-color: var(--hf-colour-border-default);
+    margin-block: 2rem;
+  }
+
+  figure {
+    margin-block: 0 1rem;
+    margin-inline: 0;
+  }
+
+  figcaption {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    line-height: var(--hf-meta-line-height);
+    margin-block-start: 0.5rem;
+  }
+
+  img,
+  svg,
+  video {
+    block-size: auto;
+    display: block;
+    max-inline-size: 100%;
+  }
+}

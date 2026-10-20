@@ -1,0 +1,86 @@
+/*
+ * Typography tokens.
+ *
+ * Truculenta (display) for the wordmark, headings 1–3 and labels: always uppercase through text-transform.
+ * Atkinson Hyperlegible Next (text) for heading 4, news headlines, body text and meta.
+ * Letter spacing never goes beyond +0.04em.
+ *
+ * Heading 1 and 2 scale fluidly with clamp() between a 360px and a 1280px viewport.
+ * The wordmark, heading 3, heading 4 and the headline switch once, below the mobile breakpoint of 40em.
+ * Label, body and meta keep one size.
+ */
+
+@layer hf.tokens {
+  :root {
+    --hf-font-family-display: truculenta, 'Arial Narrow', sans-serif;
+    --hf-font-family-text: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+    --hf-font-family-code: ui-monospace, menlo, consolas, monospace;
+
+    /* Woordmerk */
+    --hf-wordmark-font-size: 2.25rem;
+    --hf-wordmark-font-stretch: 125%;
+    --hf-wordmark-font-weight: 900;
+    --hf-wordmark-letter-spacing: 0.02em;
+    --hf-wordmark-line-height: 1;
+
+    /* Kop 1: 34px at 360px, 52px from 1280px */
+    --hf-heading-1-font-size: clamp(2.125rem, 1.685rem + 1.957vw, 3.25rem);
+    --hf-heading-1-font-stretch: 125%;
+    --hf-heading-1-font-weight: 900;
+    --hf-heading-1-letter-spacing: 0.01em;
+    --hf-heading-1-line-height: 1;
+
+    /* Kop 2: 26px at 360px, 32px from 1280px */
+    --hf-heading-2-font-size: clamp(1.625rem, 1.478rem + 0.652vw, 2rem);
+    --hf-heading-2-font-stretch: 125%;
+    --hf-heading-2-font-weight: 900;
+    --hf-heading-2-letter-spacing: 0.02em;
+    --hf-heading-2-line-height: 1.05;
+
+    /* Kop 3 */
+    --hf-heading-3-font-size: 1.25rem;
+    --hf-heading-3-font-stretch: 115%;
+    --hf-heading-3-font-weight: 800;
+    --hf-heading-3-letter-spacing: 0.03em;
+    --hf-heading-3-line-height: 1.15;
+
+    /* Label */
+    --hf-label-font-size: 0.875rem;
+    --hf-label-font-stretch: 125%;
+    --hf-label-font-weight: 700;
+    --hf-label-letter-spacing: 0.04em;
+    --hf-label-line-height: 1.2;
+
+    /* Kop 4 */
+    --hf-heading-4-font-size: 1.25rem;
+    --hf-heading-4-font-weight: 700;
+    --hf-heading-4-line-height: 1.3;
+
+    /* Nieuwskop */
+    --hf-headline-font-size: 1.125rem;
+    --hf-headline-font-weight: 600;
+    --hf-headline-line-height: 1.35;
+
+    /* Tekst */
+    --hf-body-font-size: 1.0625rem;
+    --hf-body-font-weight: 400;
+    --hf-body-line-height: 1.5;
+
+    /* Meta */
+    --hf-meta-font-size: 0.9375rem;
+    --hf-meta-font-weight: 400;
+    --hf-meta-line-height: 1.4;
+
+    /* Weight for strong and b in body text */
+    --hf-strong-font-weight: 700;
+  }
+
+  @media (width < 40em) {
+    :root {
+      --hf-wordmark-font-size: 1.75rem;
+      --hf-heading-3-font-size: 1.1875rem;
+      --hf-heading-4-font-size: 1.1875rem;
+      --hf-headline-font-size: 1.0625rem;
+    }
+  }
+}

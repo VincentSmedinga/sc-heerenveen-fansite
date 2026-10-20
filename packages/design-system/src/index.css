@@ -1,0 +1,19 @@
+/*
+ * Entry point of the design system's CSS.
+ *
+ * Cascade layers, from weak to strong: tokens, base (HTML elements), typography (type styles),
+ * components. Styles outside a layer, such as an app's own, always win over these.
+ * Class prefix: hf- (Heerenveen Fansite).
+ */
+
+@layer hf.tokens, hf.base, hf.typography, hf.components;
+
+@import url('./fonts.css');
+@import url('./tokens/colour.css');
+@import url('./tokens/typography.css');
+@import url('./base/document.css');
+@import url('./base/text.css');
+@import url('./base/lists.css');
+@import url('./base/table.css');
+@import url('./base/forms.css');
+@import url('./typography/styles.css');

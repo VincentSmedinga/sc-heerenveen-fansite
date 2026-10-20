@@ -1,0 +1,30 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks'
+
+import * as TypographyStories from './typography.stories'
+
+<Meta of={TypographyStories} />
+
+# Typografie
+
+Twee lettertypes, allebei open (OFL) en zelf gehost: er gaat geen verzoek naar een ander domein.
+
+- **Truculenta** voor het woordmerk, kop 1 tot en met 3 en labels. Altijd in kapitalen.
+- **Atkinson Hyperlegible Next** voor kop 4, nieuwskoppen, tekst en meta. Nooit in kapitalen.
+
+## Afspraken
+
+- Kapitalen komen uit CSS (`text-transform: uppercase`). Typ koppen in gewone zinnen.
+- De letterafstand is nooit ruimer dan +0,04 em.
+- Kop 1 en kop 2 schalen mee met de breedte van het scherm (`clamp()`), tussen 360 en 1280 pixels. Woordmerk, kop 3, kop 4 en nieuwskop springen één keer naar hun mobiele maat, onder 40 em (640 pixels). Label, tekst en meta hebben één maat.
+- De stijl staat los van het HTML-niveau. Elke stijl is een klasse: `<h2 class="hf-heading-3">` is een kop van niveau 2 die eruitziet als kop 3. Zie [Koppen](?path=/docs/html-elementen-koppen--documentatie).
+- Zonder klasse krijgen `h1` tot en met `h4` de stijl met hetzelfde nummer, `h5` de nieuwskop en `h6` het label. Die laatste twee zijn voorlopig.
+
+Elke stijl heeft zijn eigen tokens, zoals `--hf-heading-3-font-size`, `--hf-heading-3-font-stretch` en `--hf-heading-3-letter-spacing`.
+
+## Stijlen
+
+<Story of={TypographyStories.Styles} />
+
+## Lettertypes
+
+<Story of={TypographyStories.Fonts} />

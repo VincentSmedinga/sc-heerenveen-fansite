@@ -1,0 +1,67 @@
+import '../src/index.css'
+import '../src/docs/docs.css'
+
+import addonA11y from '@storybook/addon-a11y'
+import addonDocs from '@storybook/addon-docs'
+import { definePreview } from '@storybook/react-vite'
+import addonPseudoStates from 'storybook-addon-pseudo-states'
+
+import { DocsPage } from './DocsPage'
+import { ThemedDocsContainer } from './ThemedDocsContainer'
+import { withTheme } from './withTheme'
+
+// Every page in Storybook is Dutch.
+document.documentElement.lang = 'nl'
+
+export default definePreview({
+  addons: [addonDocs(), addonA11y(), addonPseudoStates()],
+  decorators: [withTheme],
+  globalTypes: {
+    theme: {
+      description: 'Kleurthema',
+      toolbar: {
+        dynamicTitle: true,
+        icon: 'contrast',
+        items: [
+          { icon: 'browser', title: 'Volgens systeem', value: 'system' },
+          { icon: 'sun', title: 'Licht', value: 'light' },
+          { icon: 'moon', title: 'Donker', value: 'dark' },
+        ],
+        title: 'Thema',
+      },
+    },
+  },
+  initialGlobals: {
+    theme: 'system',
+  },
+  parameters: {
+    a11y: {
+      // Fail the story when axe finds a violation, once tests run (see #24).
+      test: 'error',
+    },
+    backgrounds: {
+      // The theme sets the background; Storybook's own backgrounds would hide it.
+      disable: true,
+    },
+    docs: {
+      container: ThemedDocsContainer,
+      page: DocsPage,
+    },
+    options: {
+      // There are no components with controls yet; show the accessibility check first.
+      selectedPanel: 'storybook/a11y/panel',
+      storySort: {
+        order: [
+          'Huisstijl',
+          'Tokens',
+          ['Kleur', 'Typografie'],
+          'Redactie',
+          'HTML-elementen',
+          ['Koppen', 'Tekst', 'Links', 'Lijsten', 'Citaat', 'Scheidingslijn', 'Figuur', 'Tabel', 'Code', 'Formulier'],
+          'Componenten',
+          'Patronen',
+        ],
+      },
+    },
+  },
+})

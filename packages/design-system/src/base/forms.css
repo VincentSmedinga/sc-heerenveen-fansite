@@ -1,0 +1,110 @@
+/*
+ * Form elements. Fields and buttons are at least 44px high; field borders reach 3:1 against the field.
+ * Borders set their width and style in the shorthand and take only the colour from a token. If a token can't
+ * be resolved, the border falls back to the text colour instead of disappearing.
+ */
+
+@layer hf.base {
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  label {
+    font-weight: 600;
+  }
+
+  /* Text fields. An input without a type is a text field too. */
+  input:is(
+    :not([type]),
+    [type='date'],
+    [type='datetime-local'],
+    [type='email'],
+    [type='month'],
+    [type='number'],
+    [type='password'],
+    [type='search'],
+    [type='tel'],
+    [type='text'],
+    [type='time'],
+    [type='url'],
+    [type='week']
+  ),
+  select,
+  textarea {
+    background-color: var(--hf-colour-background-surface);
+    border: 1px solid;
+    border-color: var(--hf-colour-border-input);
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-default);
+    display: block;
+    inline-size: 100%;
+    margin-block: 0.25rem 1rem;
+    max-inline-size: 30rem;
+    min-block-size: 2.75rem;
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  textarea {
+    min-block-size: 6rem;
+    resize: vertical;
+  }
+
+  ::placeholder {
+    color: var(--hf-colour-text-secondary);
+    opacity: 1;
+  }
+
+  input:is([type='checkbox'], [type='radio']) {
+    accent-color: var(--hf-colour-background-button);
+    block-size: 1.25rem;
+    inline-size: 1.25rem;
+    margin-block: 0;
+    margin-inline: 0 0.5rem;
+    vertical-align: -0.2em;
+  }
+
+  fieldset {
+    border: 1px solid;
+    border-color: var(--hf-colour-border-surface);
+    border-radius: 0.25rem;
+    margin-block: 0 1rem;
+    margin-inline: 0;
+    padding-block: 0.5rem 1rem;
+    padding-inline: 1rem;
+  }
+
+  legend {
+    color: var(--hf-colour-text-heading);
+    font-weight: var(--hf-strong-font-weight);
+    padding-inline: 0.25rem;
+  }
+
+  /*
+   * The border matches the background, so it doesn't show. In forced-colours mode it becomes the system's
+   * button border, so the button keeps an outline there.
+   */
+  button,
+  input:is([type='button'], [type='reset'], [type='submit']) {
+    background-color: var(--hf-colour-background-button);
+    border: 1px solid;
+    border-color: var(--hf-colour-background-button);
+    border-radius: 0.25rem;
+    color: var(--hf-colour-text-on-button);
+    cursor: pointer;
+    font-weight: var(--hf-strong-font-weight);
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
+    padding-block: 0.5rem;
+    padding-inline: 1.25rem;
+
+    &:hover {
+      background-color: var(--hf-colour-background-button-hover);
+      border-color: var(--hf-colour-background-button-hover);
+    }
+  }
+}

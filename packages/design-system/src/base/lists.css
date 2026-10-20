@@ -1,0 +1,42 @@
+/* Lists: square bullets, as on the old fansite. Markers are quieter than the item text and never bold. */
+
+@layer hf.base {
+  ul,
+  ol {
+    margin-block: 0 1rem;
+    padding-inline-start: 1.5em;
+  }
+
+  ul {
+    list-style-type: square;
+  }
+
+  li > :is(ul, ol) {
+    margin-block-end: 0;
+  }
+
+  ul > li::marker {
+    color: var(--hf-colour-marker-graphic);
+    font-weight: var(--hf-body-font-weight);
+  }
+
+  ol > li::marker {
+    color: var(--hf-colour-marker-text);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-body-font-weight);
+  }
+
+  dl {
+    margin-block: 0 1rem;
+  }
+
+  dt {
+    color: var(--hf-colour-text-heading);
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  dd {
+    margin-block-end: 0.5rem;
+    margin-inline-start: 0;
+  }
+}

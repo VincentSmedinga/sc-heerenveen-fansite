@@ -1,0 +1,179 @@
+/*
+ * Colour tokens, in three layers.
+ *
+ * Colours: blue (hue 255), red (hue 27) and sand (hue 85).
+ * Scales: a colour in one strength, made in OKLCH and numbered from light to dark. Only scales have numbers.
+ * - Vivid: blue and red, 11 steps each.
+ * - Muted: steel, a muted blue (chroma 0.030 to 0.075, steps 200 to 600), and sand (chroma 0.030 and 0.042,
+ *   steps 100 and 300). Steel and sand-300 are as light as the grey step with the same number; sand-100 is as
+ *   light as blue-100.
+ * - Neutral: grey, a neutral sand (chroma 0.006 to 0.017), 11 steps: warm and never fully neutral.
+ * Roles: the semantic tokens. They have names, never numbers.
+ *
+ * Roles use light-dark(), which picks a value from the element's colour scheme:
+ * - no data-theme attribute: follows prefers-color-scheme;
+ * - data-theme="light" or data-theme="dark" on :root, or on any element, forces that theme for its subtree.
+ * Use roles in components and pages. Use scales only to define roles.
+ * Browsers without light-dark() get the light values and a light colour scheme through an @supports block below.
+ */
+
+@layer hf.tokens {
+  :root {
+    color-scheme: light dark;
+
+    /* Scales: the primitive tokens */
+    --hf-colour-white: #fff;
+    --hf-colour-blue-50: #eff6ff;
+    --hf-colour-blue-100: #dcebfe;
+    --hf-colour-blue-200: #bbd7f8;
+    --hf-colour-blue-300: #8fbbf0;
+    --hf-colour-blue-400: #6098de;
+    --hf-colour-blue-500: #3575c4;
+    --hf-colour-blue-600: #1559aa;
+    --hf-colour-blue-700: #07458e;
+    --hf-colour-blue-800: #05326f;
+    --hf-colour-blue-900: #04214e;
+    --hf-colour-blue-950: #041433;
+    --hf-colour-red-50: #fef2f1;
+    --hf-colour-red-100: #fde2e1;
+    --hf-colour-red-200: #fbc7c3;
+    --hf-colour-red-300: #f7a09a;
+    --hf-colour-red-400: #ea726b;
+    --hf-colour-red-500: #d74843;
+    --hf-colour-red-600: #c22826;
+    --hf-colour-red-700: #a91518;
+    --hf-colour-red-800: #861116;
+    --hf-colour-red-900: #641114;
+    --hf-colour-red-950: #450c0e;
+    --hf-colour-grey-50: #faf8f4;
+    --hf-colour-grey-100: #f1eee7;
+    --hf-colour-grey-200: #e3dfd7;
+    --hf-colour-grey-300: #cdc8bf;
+    --hf-colour-grey-400: #a8a298;
+    --hf-colour-grey-500: #807b71;
+    --hf-colour-grey-600: #635e54;
+    --hf-colour-grey-700: #4c473e;
+    --hf-colour-grey-800: #35312a;
+    --hf-colour-grey-900: #211e18;
+    --hf-colour-grey-950: #12100c;
+    --hf-colour-steel-200: #d3e1f4;
+    --hf-colour-steel-300: #b7cbe5;
+    --hf-colour-steel-400: #83a5d2;
+    --hf-colour-steel-500: #5d7ea8;
+    --hf-colour-steel-600: #416088;
+    --hf-colour-sand-100: #f3e8d3;
+    --hf-colour-sand-300: #d6c7ab;
+
+    /*
+     * Semantic tokens: light value first, dark value second. A custom property keeps light-dark()
+     * unresolved; the browser picks the value where the token is used, from that element's colour scheme.
+     */
+
+    /*
+     * Backgrounds. There are four surfaces, each with a border below: the surface (white), tonal, soft and warm.
+     * A card is a component: a surface with its border, rounded corners and padding.
+     */
+    --hf-colour-background-page: light-dark(var(--hf-colour-grey-100), var(--hf-colour-blue-950));
+    --hf-colour-background-surface: light-dark(var(--hf-colour-white), var(--hf-colour-blue-900));
+    --hf-colour-background-surface-tonal: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
+    --hf-colour-background-surface-soft: light-dark(var(--hf-colour-blue-50), var(--hf-colour-blue-900));
+    --hf-colour-background-surface-warm: light-dark(var(--hf-colour-sand-100), var(--hf-colour-blue-800));
+    --hf-colour-background-header: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-800));
+    --hf-colour-background-band: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-900));
+    --hf-colour-background-button: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-300));
+    --hf-colour-background-button-hover: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-200));
+    --hf-colour-background-hover: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
+    --hf-colour-background-zebra: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
+    --hf-colour-background-highlight: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
+
+    /* Text */
+    --hf-colour-text-default: light-dark(var(--hf-colour-grey-900), var(--hf-colour-grey-50));
+    --hf-colour-text-heading: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-50));
+    --hf-colour-text-secondary: light-dark(var(--hf-colour-grey-600), var(--hf-colour-blue-200));
+    --hf-colour-text-link: light-dark(var(--hf-colour-blue-700), var(--hf-colour-blue-300));
+    --hf-colour-text-link-hover: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-200));
+    --hf-colour-text-link-visited: light-dark(var(--hf-colour-grey-600), var(--hf-colour-grey-400));
+    --hf-colour-text-accent: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
+    --hf-colour-text-highlight: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
+    --hf-colour-text-on-header: var(--hf-colour-blue-50);
+    --hf-colour-text-on-header-secondary: var(--hf-colour-blue-200);
+    --hf-colour-text-on-band: var(--hf-colour-blue-100);
+    --hf-colour-text-on-button: light-dark(var(--hf-colour-white), var(--hf-colour-blue-950));
+
+    /*
+     * Markers: what numbers, separates or points, such as list markers and positions in a table.
+     * Quieter than the text, in steel. Text markers reach 4.5:1; graphic ones (bullets, lines, icons) 3:1.
+     */
+    --hf-colour-marker-text: light-dark(var(--hf-colour-steel-600), var(--hf-colour-blue-200));
+    --hf-colour-marker-graphic: light-dark(var(--hf-colour-steel-500), var(--hf-colour-steel-400));
+
+    /*
+     * Borders of the surfaces. A surface's border comes from the muted or neutral scale of its colour, so a new
+     * surface can follow the rule. Light surfaces use step 200 (surface grey-200, soft steel-200), tonal surfaces
+     * step 300 (tonal steel-300, warm sand-300). Dark: surface and soft surface blue-700, tonal and warm blue-600.
+     */
+    --hf-colour-border-surface: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-700));
+    --hf-colour-border-surface-tonal: light-dark(var(--hf-colour-steel-300), var(--hf-colour-blue-600));
+    --hf-colour-border-surface-soft: light-dark(var(--hf-colour-steel-200), var(--hf-colour-blue-700));
+    --hf-colour-border-surface-warm: light-dark(var(--hf-colour-sand-300), var(--hf-colour-blue-600));
+
+    /* Lines between rows and the horizontal rule. The same values as the surface border, for now. */
+    --hf-colour-border-default: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-700));
+    --hf-colour-border-input: light-dark(var(--hf-colour-grey-500), var(--hf-colour-blue-400));
+    --hf-colour-focus: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-300));
+  }
+
+  [data-theme='light'] {
+    color-scheme: light;
+  }
+
+  [data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  /*
+   * Browsers without light-dark() (before 2024) can't resolve the tokens above. They get the light theme.
+   * Keep these values the same as the light values above.
+   * The colour scheme is forced to light too, so native controls and scrollbars match the light tokens.
+   * This block comes after the data-theme rules so it wins over them.
+   */
+  @supports not (color: light-dark(#000, #fff)) {
+    :root,
+    [data-theme] {
+      color-scheme: light;
+    }
+
+    :root {
+      --hf-colour-background-page: var(--hf-colour-grey-100);
+      --hf-colour-background-surface: var(--hf-colour-white);
+      --hf-colour-background-surface-tonal: var(--hf-colour-blue-100);
+      --hf-colour-background-surface-soft: var(--hf-colour-blue-50);
+      --hf-colour-background-surface-warm: var(--hf-colour-sand-100);
+      --hf-colour-background-header: var(--hf-colour-blue-900);
+      --hf-colour-background-band: var(--hf-colour-blue-800);
+      --hf-colour-background-button: var(--hf-colour-blue-800);
+      --hf-colour-background-button-hover: var(--hf-colour-blue-900);
+      --hf-colour-background-hover: var(--hf-colour-grey-50);
+      --hf-colour-background-zebra: var(--hf-colour-grey-50);
+      --hf-colour-background-highlight: var(--hf-colour-blue-100);
+      --hf-colour-text-default: var(--hf-colour-grey-900);
+      --hf-colour-text-heading: var(--hf-colour-blue-900);
+      --hf-colour-text-secondary: var(--hf-colour-grey-600);
+      --hf-colour-text-link: var(--hf-colour-blue-700);
+      --hf-colour-text-link-hover: var(--hf-colour-blue-800);
+      --hf-colour-text-link-visited: var(--hf-colour-grey-600);
+      --hf-colour-text-accent: var(--hf-colour-red-700);
+      --hf-colour-text-highlight: var(--hf-colour-blue-800);
+      --hf-colour-text-on-button: var(--hf-colour-white);
+      --hf-colour-marker-text: var(--hf-colour-steel-600);
+      --hf-colour-marker-graphic: var(--hf-colour-steel-500);
+      --hf-colour-border-surface: var(--hf-colour-grey-200);
+      --hf-colour-border-surface-tonal: var(--hf-colour-steel-300);
+      --hf-colour-border-surface-soft: var(--hf-colour-steel-200);
+      --hf-colour-border-surface-warm: var(--hf-colour-sand-300);
+      --hf-colour-border-default: var(--hf-colour-grey-200);
+      --hf-colour-border-input: var(--hf-colour-grey-500);
+      --hf-colour-focus: var(--hf-colour-blue-500);
+    }
+  }
+}
