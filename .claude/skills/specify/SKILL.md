@@ -62,7 +62,7 @@ If one is no, go back to the step it needs.
 - After the owner approves, update the issue.
   Write the body to a temporary file outside the repository, then run `gh issue edit <number> --body-file <file>`, or `gh api -X PATCH repos/VincentSmedinga/sc-heerenveen-fansite/issues/<number> -F body=@<file>`.
   Change the title the same way if it changed.
-- End the body with the approval, with the date in Dutch: "Goedgekeurd door de projecteigenaar op 21 oktober 2026."
+- End the body with the approval, with the date of the approval in Dutch: "Goedgekeurd door de projecteigenaar op `<dag> <maand> <jaar>`.", such as "op 3 november 2026".
 
 ## 7. Record the decisions
 

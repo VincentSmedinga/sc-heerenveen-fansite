@@ -33,6 +33,10 @@ try {
 // One command at a time: no chaining, pipes, redirection, substitution, variables or line continuation.
 if (/[;&|<>`$\\\n]/.test(command)) block('Run one command at a time, without ; & | < > ` $ or a backslash.')
 
-if (!rules.some(({ allow, unless }) => allow.test(command) && !unless?.test(command))) {
+// The shell drops quotes before a command sees its arguments, so "-f" or '-XPOST' is still a flag. Check the
+// exceptions without quotes, so quoting a flag can't slip it past them.
+const unquoted = command.replace(/["']/g, '')
+
+if (!rules.some(({ allow, unless }) => allow.test(command) && !unless?.test(unquoted))) {
   block(`Not on the reviewer's list: ${command}.`)
 }

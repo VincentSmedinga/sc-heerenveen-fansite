@@ -75,6 +75,20 @@ test('blocks chained, piped and redirected commands', () => {
   }
 })
 
+test('blocks flags in quotes', () => {
+  for (const command of [
+    'gh api repos/owner/repo/issues/1/comments "-f" "body=test"',
+    "gh api '-XPOST' repos/owner/repo/issues/1/comments",
+    "gh api repos/owner/repo/issues/1 '--method=PATCH'",
+    'gh api graphql "--raw-field" query=test',
+    'git diff "--output=/tmp/diff"',
+    "pnpm exec playwright test '-u'",
+    'pnpm exec playwright test "--update-snapshots"',
+  ]) {
+    assert.equal(runCommand(command), 2, command)
+  }
+})
+
 test("blocks when it can't read the command", () => {
   assert.equal(run('not json'), 2)
   assert.equal(run(JSON.stringify({ tool_name: 'Bash' })), 2)
