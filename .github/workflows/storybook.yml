@@ -11,6 +11,12 @@ on:
 permissions:
   contents: read
 
+# One run per branch at a time, so an older build can't deploy over a newer one.
+# Pull requests cancel their older run; main lets a running deployment finish.
+concurrency:
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,9 +52,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    concurrency:
-      cancel-in-progress: false
-      group: pages
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
