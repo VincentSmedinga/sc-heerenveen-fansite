@@ -46,7 +46,6 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 - **Waarom:** een wijziging in één zin is dan één gewijzigde regel, en een reactie in een review wijst precies die zin aan.
   Wat je leest, verandert niet: Markdown voegt de regels van een alinea samen.
   Prettier laat de regelovergangen staan.
-  Het Amsterdamse designsysteem doet het ook zo.
 - **Overgang:** wat de pull requests voor de werkwijze toevoegen, heeft het al.
   De bestaande bestanden zetten we om in één aparte pull request.
 - **Alternatieven:** regels afbreken op een vaste breedte, zoals 80 tekens; dan verschuift één woord extra de rest van de alinea.
