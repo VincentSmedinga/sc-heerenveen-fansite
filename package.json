@@ -11,6 +11,7 @@
     "pnpm": "^12"
   },
   "scripts": {
+    "build": "pnpm -r --if-present run build",
     "format": "prettier --write .",
     "lint": "pnpm run lint:js && pnpm run lint:css && pnpm run lint:format",
     "lint:css": "stylelint --allow-empty-input '**/*.css'",

@@ -19,6 +19,8 @@ concurrency:
 
 jobs:
   build:
+    # Rules for main can require this check by its name, so rename it there too.
+    name: Build Storybook
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
