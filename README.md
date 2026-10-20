@@ -27,3 +27,4 @@ Vul in `.env` de waarden in; `.env.example` zegt waar elke variabele voor is. `.
 - [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens en Storybook
 - [`packages/shared`](packages/shared/README.md): hulpfuncties voor de site en de importer, zoals de controle van omgevingsvariabelen
 - [`docs/beslissingen.md`](docs/beslissingen.md): welke keuzes we hebben gemaakt, en waarom
+- [`AGENTS.md`](AGENTS.md): werkafspraken voor AI-agents, in het Engels, en tot er een bijdragegids is ook de regels voor mensen
