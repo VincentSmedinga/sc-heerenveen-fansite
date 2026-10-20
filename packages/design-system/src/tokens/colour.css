@@ -14,7 +14,7 @@
  * - no data-theme attribute: follows prefers-color-scheme;
  * - data-theme="light" or data-theme="dark" on :root, or on any element, forces that theme for its subtree.
  * Use roles in components and pages. Use scales only to define roles.
- * Browsers without light-dark() get the light values through an @supports block below.
+ * Browsers without light-dark() get the light values and a light colour scheme through an @supports block below.
  */
 
 @layer hf.tokens {
@@ -123,11 +123,26 @@
     --hf-colour-focus: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-300));
   }
 
+  [data-theme='light'] {
+    color-scheme: light;
+  }
+
+  [data-theme='dark'] {
+    color-scheme: dark;
+  }
+
   /*
    * Browsers without light-dark() (before 2024) can't resolve the tokens above. They get the light theme.
    * Keep these values the same as the light values above.
+   * The colour scheme is forced to light too, so native controls and scrollbars match the light tokens.
+   * This block comes after the data-theme rules so it wins over them.
    */
   @supports not (color: light-dark(#000, #fff)) {
+    :root,
+    [data-theme] {
+      color-scheme: light;
+    }
+
     :root {
       --hf-colour-background-page: var(--hf-colour-grey-100);
       --hf-colour-background-surface: var(--hf-colour-white);
@@ -160,13 +175,5 @@
       --hf-colour-border-input: var(--hf-colour-grey-500);
       --hf-colour-focus: var(--hf-colour-blue-500);
     }
-  }
-
-  [data-theme='light'] {
-    color-scheme: light;
-  }
-
-  [data-theme='dark'] {
-    color-scheme: dark;
   }
 }
