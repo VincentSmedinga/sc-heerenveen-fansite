@@ -100,7 +100,7 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 - **Besluit:** commits volgen Conventional Commits, in Brits Engels, zoals de code. We voegen samen met squash, en dan wordt de titel van de pull request de commit op `main`. Die titel volgt daarom ook Conventional Commits in het Engels, bijvoorbeeld `feat(web): add the news archive`. Een workflow controleert de titel met commitlint. De beschrijving van een pull request blijft Nederlands.
 - **Wat is er nieuw:** dit beantwoordt de open vraag uit #29. De changelog van release-please blijft Engels en technisch. De tekst voor de pagina 'Wat is er nieuw' schrijven we per release met de hand, in gewone taal. Dat gebeurt in een gewone pull request voordat de release-pull request wordt samengevoegd, want release-please schrijft zijn eigen branch bij elke merge naar `main` opnieuw. Hoe de pagina die teksten leest, bepaalt #29.
 - **Waarom:** release-please maakt versienummers en changelog uit de commits op `main`. De geschiedenis van git blijft zo in één taal. En een commitbericht is geen tekst voor bezoekers: ook een Nederlands bericht zou voor 'Wat is er nieuw' herschreven moeten worden.
-- **Let op:** bij een pull request met één commit neemt GitHub nu de titel van die commit voor de squash-commit, niet de titel van de pull request. Zie _Open: regels voor main_.
+- **Instelling:** een squash-commit krijgt altijd de titel van de pull request, ook bij een pull request met één commit. Anders zou GitHub de titel van die commit nemen.
 - **Alternatieven:** een Nederlandse onderwerpregel met een Engels type, zoals `feat(web): nieuwsarchief toevoegen`. Dan wordt de changelog Nederlands, en kan #29 met de regels daaruit beginnen. Maar de commits op een branch zijn Engels, en de titels op `main` dan niet.
 
 ### Eén versie voor de hele site, met release-please
@@ -108,14 +108,16 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 - **Datum:** 20 oktober 2026
 - **Besluit:** de hele repository heeft één versie, in `package.json` in de root. De eerste release is 0.1.0, met de tag `v0.1.0`. release-please houdt een release-pull request bij. Samenvoegen verhoogt de versie, vult `CHANGELOG.md` aan en maakt een release op GitHub. Tot 1.0.0, dat we voor de lancering bewaren, verhogen een feature en een breaking change het middelste cijfer.
 - **Waarom:** de site en de importer gaan samen live, en we publiceren geen packages.
-- **Let op:** release-please maakt zijn pull request met het token van GitHub Actions. Daarvoor moet GitHub Actions pull requests mogen maken; die instelling staat nog uit. Een pull request van een workflow start geen andere workflows, dus de controles ontbreken. Sluit de release-pull request en open hem weer; dan starten ze wel. Dat staat ook onderaan die pull request.
+- **Let op:** release-please maakt zijn pull request met het token van GitHub Actions. Daarvoor mag GitHub Actions in deze repository pull requests maken. Een pull request van een workflow start geen andere workflows, dus de controles ontbreken. Sluit de release-pull request en open hem weer; dan starten ze wel. Dat staat ook onderaan die pull request.
 - **Alternatieven:** een versie per package. Of release-please met het token van een eigen GitHub App, zodat de controles vanzelf starten. Dat is een geheim meer om te beheren; als het sluiten en openen gaat tegenstaan, stappen we over.
 
-### Open: regels voor main
+### Regels voor main
 
 - **Datum:** 20 oktober 2026
-- **Stand:** de ruleset 'All branches' geldt voor elke branch, met onder meer de regels _creation_ en _update_. Daardoor kan alleen wie de regels mag omzeilen een branch maken of bijwerken, en vraagt elke merge naar `main` om dat vinkje. release-please en Renovate kunnen zo ook hun eigen branches niet maken. Controles zijn nog niet verplicht.
-- **Voorstel:** de ruleset alleen voor `main`, zonder _creation_ en _update_, en met verplichte controles: CI, de build van Storybook en de titelcontrole. Niemand mag de regels omzeilen, zodat een pull request met een typefout echt niet samengevoegd kan worden. Op andere branches gelden dan geen regels meer, zodat je ze kunt rebasen en na het samenvoegen kunt verwijderen. Daarnaast twee instellingen: GitHub Actions mag pull requests maken, voor release-please, en een squash-commit krijgt altijd de titel van de pull request.
+- **Besluit:** de ruleset 'main' geldt alleen voor `main`. Een wijziging komt er alleen via een pull request, samengevoegd met squash, en alleen als drie controles slagen: _Lint, typecheck, test and build_ (CI), _Build Storybook_ en _Conventional Commits title_. Niemand mag de regels omzeilen. `main` verwijderen of force-pushen kan niet. Op andere branches gelden geen regels, zodat je ze kunt rebasen en na het samenvoegen kunt verwijderen.
+- **Waarom:** zo kan een pull request met een typefout echt niet samengevoegd worden. De vorige ruleset, 'All branches', gold voor elke branch, met de regels _creation_ en _update_. Daardoor kon alleen wie de regels mocht omzeilen een branch maken of bijwerken, vroeg elke merge naar `main` om dat vinkje, en konden release-please en Renovate hun eigen branches niet maken.
+- **Let op:** de ruleset kent de controles aan hun naam, van de app GitHub Actions. Wie een job hernoemt, past de ruleset mee aan. In een noodgeval kan een beheerder de ruleset tijdelijk aanpassen.
+- **Alternatieven:** de oude ruleset houden en het vinkje blijven zetten. Of wie schrijfrechten heeft de regels laten omzeilen; dan kan ook een pull request met een fout erdoor.
 
 ## Designsysteem
 
