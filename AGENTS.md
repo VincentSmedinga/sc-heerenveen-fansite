@@ -6,7 +6,7 @@ Until there is a contributing guide (`CONTRIBUTING.md`, #7), this file also hold
 
 ## The project
 
-The sc Heerenveen Fansite ran from 1997 to 2006 and is coming back as an ethical news aggregator: headlines and links, no ads, and respect for the journalists we link to. AI agents write most of the code; the project owner directs.
+The sc Heerenveen Fansite ran from 1997 to 2006 and is coming back as an ethical news aggregator: we show headlines and links, and an intro or photo where the source allows it. That invites readers to go on to the journalism itself. We make no profit and have no ads or subscriptions. We leave our visitors alone: no tracking cookies, no profiles, no data for sale. And we make the site work for everyone, with a keyboard or a screen reader too. AI agents write most of the code; the project owner directs.
 
 - A pnpm 12 workspace on Node 24. [`README.md`](README.md) explains the setup and the commands.
 - `packages/design-system` holds the house style, the tokens and Storybook; `packages/shared` holds helpers for the site and the importer. `apps/site` (the Next.js site, admin included), `apps/importer` and `packages/db` arrive with the first issue that needs them.
