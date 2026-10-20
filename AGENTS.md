@@ -116,7 +116,7 @@ The Reviewer's first section. Builders check it themselves before they open a pu
 
 - **Branches:** `<type>/<issue>-<description>`, with a Conventional Commit type, the issue number and a short description in English, in lower case with hyphens: `feat/26-news-archive`, `docs/43-agent-guidelines`. Without an issue, leave out the number. Never start a branch name with `claude/`.
 - **Commits and pull request titles:** [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) in UK English, in the imperative: `feat(site): add the news archive`. The scope is optional: the package or app, such as `design-system`, `shared`, `site` or `importer`. We squash merge, so the pull request title becomes the commit on `main`, and release-please builds the changelog from it. commitlint checks commit messages in a git hook and pull request titles in CI.
-- **Language:** everything public is in Dutch: issues, pull request descriptions, documentation, Storybook and all text on the site. Code, comments, commit messages, pull request titles and agent tooling (this file and `.claude/`) are in UK English: `colour`, `initialise`.
+- **Language:** everything public is in Dutch: issues, pull request descriptions, documentation, Storybook and all text on the site. Code, comments, commit messages, pull request titles and agent tooling (this file and `.claude/`) are in UK English: `colour`, `initialise`. How to write the Dutch is below.
 - **The club:** always "sc Heerenveen", with a lower-case s and c, also at the start of a sentence and in the site name, sc Heerenveen Fansite. Headlines from the media keep their own spelling.
 - **Words:** say "import" or "importer". Never "ingestion".
 - **Go-ahead:** never push, open a pull request or merge without the owner's go-ahead. A go-ahead covers what you asked for, such as one push, or one push and the pull request it opens; a later push needs a new one. Posting the Reviewer's report and ticking checkboxes need none.
@@ -124,6 +124,19 @@ The Reviewer's first section. Builders check it themselves before they open a pu
 - **Choices:** make the small choices an issue leaves open yourself. Ask the owner first when a choice changes what visitors see, adds a dependency or is hard to undo.
 - **Decisions:** a real choice between alternatives goes in `docs/beslissingen.md`, in Dutch and in its format: date, decision, why, and the alternatives.
 - **Dependencies:** exact versions only. Don't add one when a few lines of code will do.
+
+### Writing Dutch
+
+Write so that anyone understands it the first time they read it.
+
+- **Plain words**, at about language level B1. Use a Dutch word where a good one exists: "samenvoegen", not "mergen". Words people already use, such as pull request, branch and commit, stay as they are.
+- **Sentences that aren't too long**, about twenty words at most, with one point each. Split a sentence that runs on, but don't chop the text into fragments. Use a list for steps or choices.
+- **Active and direct:** "we" for the project, "je" for the reader. Say who does what: "De reviewer controleert de titel", not "De titel wordt gecontroleerd".
+- **No fluff:** no filler words such as "eigenlijk", "gewoon" or "natuurlijk", no opening that announces the text, no closing that repeats it, and no sales talk.
+- **Concrete:** name the file, the command or the number. "Tekst haalt 4,5:1", not "voldoende contrast".
+- **Dutch notation:** dates as "3 november 2026", and a decimal comma: "4,5:1".
+
+The tone of the site itself, from supporter to supporter, follows in the style guide (#19).
 
 ## Agents never
 
