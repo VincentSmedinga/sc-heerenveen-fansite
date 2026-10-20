@@ -1,0 +1,54 @@
+# Builds Storybook on every pull request, and publishes it to GitHub Pages from main.
+
+name: Storybook
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # The pnpm version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          cache: pnpm
+          node-version-file: .nvmrc
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter design-system build-storybook
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: packages/design-system/storybook-static
+
+  deploy:
+    # Only main publishes; pull requests stop after the build.
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      pages: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      cancel-in-progress: false
+      group: pages
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
