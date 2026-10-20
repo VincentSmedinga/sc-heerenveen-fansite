@@ -9,7 +9,7 @@ Until there is a contributing guide (`CONTRIBUTING.md`, #7), this file also hold
 The sc Heerenveen Fansite ran from 1997 to 2006 and is coming back as an ethical news aggregator: headlines and links, no ads, and respect for the journalists we link to. AI agents write most of the code; the project owner directs.
 
 - A pnpm 12 workspace on Node 24. [`README.md`](README.md) explains the setup and the commands.
-- `packages/design-system` holds the house style, the tokens and Storybook; `packages/shared` holds helpers for the site and the importer. `apps/web`, `apps/importer` and `packages/db` arrive with the first issue that needs them.
+- `packages/design-system` holds the house style, the tokens and Storybook; `packages/shared` holds helpers for the site and the importer. `apps/site` (the Next.js site, admin included), `apps/importer` and `packages/db` arrive with the first issue that needs them.
 - The site will run on shared web hosting at mijn.host, so there is no preview per pull request.
 - [`docs/beslissingen.md`](docs/beslissingen.md) records what we decided and why. Read the parts that touch your issue.
 
@@ -52,7 +52,7 @@ Reviews each pull request in a fresh context, with three required checklists (#4
 
 The owner approves at three points:
 
-1. **The specification**, before a Builder starts. The Coordinator records the approval at the end of the issue: "Goedgekeurd door de projecteigenaar op 21 oktober 2026."
+1. **The specification**, before a Builder starts. The Coordinator records the approval at the end of the issue, with the date of the approval in Dutch: "Goedgekeurd door de projecteigenaar op `<dag> <maand> <jaar>`.", such as "op 3 november 2026".
 2. **The pull request.** The owner merges, one pull request at a time.
 3. **The result on the acceptance environment** (#6), before it goes live. Until that exists, the owner checks a local build or the Storybook build.
 
@@ -115,7 +115,7 @@ The Reviewer's first section. Builders check it themselves before they open a pu
 ## Conventions
 
 - **Branches:** `<type>/<description>`, with a Conventional Commit type and a short description in English, in lower case with hyphens: `feat/news-archive`, `docs/agent-guidelines`. Never start a branch name with `claude/`.
-- **Commits and pull request titles:** [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) in UK English, in the imperative: `feat(web): add the news archive`. The scope is optional: the package or app, such as `design-system`, `shared`, `web` or `importer`. We squash merge, so the pull request title becomes the commit on `main`, and release-please builds the changelog from it. commitlint checks commit messages in a git hook and pull request titles in CI.
+- **Commits and pull request titles:** [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) in UK English, in the imperative: `feat(site): add the news archive`. The scope is optional: the package or app, such as `design-system`, `shared`, `site` or `importer`. We squash merge, so the pull request title becomes the commit on `main`, and release-please builds the changelog from it. commitlint checks commit messages in a git hook and pull request titles in CI.
 - **Language:** everything public is in Dutch: issues, pull request descriptions, documentation, Storybook and all text on the site. Code, comments, commit messages, pull request titles and agent tooling (this file and `.claude/`) are in UK English: `colour`, `initialise`.
 - **The club:** always "sc Heerenveen", with a lower-case s and c, also at the start of a sentence and in the site name, sc Heerenveen Fansite. Headlines from the media keep their own spelling.
 - **Words:** say "import" or "importer". Never "ingestion".

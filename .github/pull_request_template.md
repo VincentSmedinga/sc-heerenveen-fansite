@@ -1,5 +1,5 @@
 <!--
-Titel: een Conventional Commit in het Engels, zoals `feat(web): add the news archive`. We voegen samen met squash: dan wordt de titel het commitbericht op main, en dat bericht komt in de changelog. CI controleert de titel.
+Titel: een Conventional Commit in het Engels, zoals `feat(site): add the news archive`. We voegen samen met squash: dan wordt de titel het commitbericht op main, en dat bericht komt in de changelog. CI controleert de titel.
 -->
 
 ## Wat en waarom
