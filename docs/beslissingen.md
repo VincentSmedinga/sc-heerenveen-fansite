@@ -2,7 +2,7 @@
 
 Per beslissing een kort blok: datum, besluit, waarom en welke alternatieven we hebben overwogen. Een beslissing die een langer betoog nodig heeft, krijgt een eigen bestand. Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
-De beslissingen over stack, database, hosting, contentbeleid en taal komen hier nog bij.
+De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 
 ## Project
 
@@ -13,6 +13,39 @@ De beslissingen over stack, database, hosting, contentbeleid en taal komen hier 
 - **Waarom:** het is niet nodig. De herbouw werkt met de lokale kopie, en publiceren zou toestemming van de maker en een licentie vragen.
 - **Gevolg:** issues en documentatie beschrijven in eigen woorden wat ze uit het prototype overnemen, zonder ernaar te linken.
 - **Alternatieven:** het prototype publiceren, met toestemming van de maker en een licentie.
+
+## Hosting en data
+
+### Beginnen op de gedeelde hosting van mijn.host
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** we beginnen op de gedeelde webhosting van mijn.host waar het forum al draait, het pakket Basic. We houden in de gaten hoe dat gaat.
+- **Wat de hosting biedt:** volgens mijn.host:
+  - Node.js 22 en 24. Next.js draait via Phusion Passenger, het liefst als standalone build.
+  - MariaDB 10.11 als database. Er is geen PostgreSQL, en er zijn geen processen die blijven draaien. Taken lopen via cron, hooguit één keer per minuut.
+  - 4 cores, 4 GB geheugen en 10 GB opslag, voor maximaal vijf websites, samen met het forum.
+  - Uitrollen vanuit GitHub Actions over SSH, op poort 26.
+- **Waarom:** de hosting is er al, voor het forum. Een eigen server kost geld en onderhoud.
+- **Overstappen:** naar een VPS, zodra we tegen een grens aanlopen:
+  - live-updates om de paar seconden, of WebSockets;
+  - het forum wordt trager;
+  - de opslag raakt op;
+  - een preview per pull request, of zware statistieken.
+- **Alternatieven:** een unmanaged VPS van € 12,50 tot € 25 per maand (zonder btw), met root, Docker, Postgres en workers. Dat doen we voorlopig niet, vanwege de kosten en het onderhoud van de server: updates, beveiliging en back-ups.
+
+### MariaDB in plaats van Postgres
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** de database is MariaDB 10.11, met Drizzle. Dat vervangt het eerdere plan voor Postgres.
+- **Waarom:** MariaDB is de database van de hosting. De belangrijkste reden voor Postgres was pg-boss, en dat valt weg zonder workers (zie _Importtaken via cron_).
+- **Alternatieven:** Postgres op een VPS. SQLite viel al eerder af.
+
+### Importtaken via cron
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** cron start de importtaken, in plaats van pg-boss. Elke taak is een gewone opdracht die zijn werk doet en stopt. Een lock in de database zorgt dat een taak nooit twee keer tegelijk draait.
+- **Waarom:** de hosting heeft geen processen die blijven draaien, en pg-boss werkt alleen met Postgres. Op een VPS kan een worker later dezelfde opdrachten aanroepen.
+- **Alternatieven:** pg-boss met een worker die blijft draaien, op een VPS met Postgres.
 
 ## Werkruimte
 
