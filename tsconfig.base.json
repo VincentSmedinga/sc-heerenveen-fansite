@@ -7,6 +7,7 @@
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "strict": true,
+    "erasableSyntaxOnly": true,
     "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -20,6 +21,10 @@
     "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "noEmit": true
+    // Every package is a project reference, and TypeScript only lets a project be referenced if it emits. So we emit
+    // declarations only, into a cache that nothing ships: apps and bundlers read the TypeScript source.
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "outDir": "${configDir}/node_modules/.cache/tsc"
   }
 }
