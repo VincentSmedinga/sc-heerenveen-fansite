@@ -16,6 +16,7 @@
     "lint:css": "stylelint --allow-empty-input '**/*.css'",
     "lint:format": "prettier --check .",
     "lint:js": "eslint .",
+    "test": "pnpm -r --if-present run test",
     "typecheck": "tsc -b"
   },
   "devDependencies": {

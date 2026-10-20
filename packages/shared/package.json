@@ -1,0 +1,21 @@
+{
+  "name": "@fansite/shared",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Hulpfuncties die de site en de importer allebei gebruiken.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./env": "./src/env.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "vitest": "5.0.5"
+  }
+}
