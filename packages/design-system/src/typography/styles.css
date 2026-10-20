@@ -1,0 +1,105 @@
+/*
+ * Type styles. Each style is a class, so the look stays separate from the HTML level:
+ * <h2 class="hf-heading-3"> is a level 2 heading that looks like Kop 3.
+ * Headings h1–h6 get a style by default: h5 looks like Nieuwskop and h6 like Label (provisional).
+ * A class wins over the element because it is more specific.
+ * Every rule sets the same properties, so a class fully replaces the element's default style.
+ */
+
+@layer hf.typography {
+  .hf-wordmark {
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-wordmark-font-size);
+    font-stretch: var(--hf-wordmark-font-stretch);
+    font-weight: var(--hf-wordmark-font-weight);
+    letter-spacing: var(--hf-wordmark-letter-spacing);
+    line-height: var(--hf-wordmark-line-height);
+    text-transform: uppercase;
+  }
+
+  h1,
+  .hf-heading-1 {
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-heading-1-font-size);
+    font-stretch: var(--hf-heading-1-font-stretch);
+    font-weight: var(--hf-heading-1-font-weight);
+    letter-spacing: var(--hf-heading-1-letter-spacing);
+    line-height: var(--hf-heading-1-line-height);
+    text-transform: uppercase;
+  }
+
+  h2,
+  .hf-heading-2 {
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-heading-2-font-size);
+    font-stretch: var(--hf-heading-2-font-stretch);
+    font-weight: var(--hf-heading-2-font-weight);
+    letter-spacing: var(--hf-heading-2-letter-spacing);
+    line-height: var(--hf-heading-2-line-height);
+    text-transform: uppercase;
+  }
+
+  h3,
+  .hf-heading-3 {
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-heading-3-font-size);
+    font-stretch: var(--hf-heading-3-font-stretch);
+    font-weight: var(--hf-heading-3-font-weight);
+    letter-spacing: var(--hf-heading-3-letter-spacing);
+    line-height: var(--hf-heading-3-line-height);
+    text-transform: uppercase;
+  }
+
+  h6,
+  .hf-label {
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-label-font-size);
+    font-stretch: var(--hf-label-font-stretch);
+    font-weight: var(--hf-label-font-weight);
+    letter-spacing: var(--hf-label-letter-spacing);
+    line-height: var(--hf-label-line-height);
+    text-transform: uppercase;
+  }
+
+  h4,
+  .hf-heading-4 {
+    font-family: var(--hf-font-family-text);
+    font-size: var(--hf-heading-4-font-size);
+    font-stretch: normal;
+    font-weight: var(--hf-heading-4-font-weight);
+    letter-spacing: normal;
+    line-height: var(--hf-heading-4-line-height);
+    text-transform: none;
+  }
+
+  h5,
+  .hf-headline {
+    font-family: var(--hf-font-family-text);
+    font-size: var(--hf-headline-font-size);
+    font-stretch: normal;
+    font-weight: var(--hf-headline-font-weight);
+    letter-spacing: normal;
+    line-height: var(--hf-headline-line-height);
+    text-transform: none;
+  }
+
+  .hf-body {
+    font-family: var(--hf-font-family-text);
+    font-size: var(--hf-body-font-size);
+    font-stretch: normal;
+    font-weight: var(--hf-body-font-weight);
+    letter-spacing: normal;
+    line-height: var(--hf-body-line-height);
+    text-transform: none;
+  }
+
+  .hf-meta {
+    font-family: var(--hf-font-family-text);
+    font-size: var(--hf-meta-font-size);
+    font-stretch: normal;
+    font-weight: var(--hf-meta-font-weight);
+    letter-spacing: normal;
+    line-height: var(--hf-meta-line-height);
+    text-transform: none;
+  }
+}
