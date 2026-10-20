@@ -71,6 +71,13 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 - **Waarom:** een commit moet snel blijven; de typecontrole van de hele werkruimte past daar niet bij, en CI vangt die toch.
 - **Alternatieven:** ook de typecontrole in de pre-commit-hook. Grondiger, maar elke commit wordt trager.
 
+### GitHub Actions vastgezet op een commit
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** een workflow noemt elke action met de volledige SHA van een commit, met de versie als commentaar erachter, zoals `actions/checkout@3d3c42e… # v7.0.1`. GitHub dwingt dat af: een workflow met een action die niet zo vastligt, faalt. Renovate werkt de SHA en het commentaar samen bij.
+- **Waarom:** de eigenaar van een action, of iemand die zijn account overneemt, kan een tag als `v7` naar andere code laten wijzen. Een SHA ligt vast. Dat telt extra in een openbare repository, en in workflows met schrijfrechten, zoals die voor releases en Storybook.
+- **Alternatieven:** vastzetten op de hoofdversie (`@v7`), zoals eerst. Nieuwe versies komen dan vanzelf binnen, maar ook zonder dat iemand ze heeft gezien.
+
 ### Omgevingsvariabelen
 
 - **Datum:** 20 oktober 2026

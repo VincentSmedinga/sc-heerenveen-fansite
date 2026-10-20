@@ -2,7 +2,8 @@
 // docs/beslissingen.md.
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-  extends: ['config:recommended', 'group:allNonMajor', 'schedule:weekly'],
+  // Actions stay pinned to a full commit SHA; Renovate updates the SHA and the version comment together.
+  extends: ['config:recommended', 'group:allNonMajor', 'helpers:pinGitHubActionDigests', 'schedule:weekly'],
   // Updates are Conventional Commits too, since their titles land on main as squash commits.
   semanticCommits: 'enabled',
   timezone: 'Europe/Amsterdam',
