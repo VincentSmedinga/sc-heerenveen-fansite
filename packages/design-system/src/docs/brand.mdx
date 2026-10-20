@@ -1,0 +1,121 @@
+import { Meta, Unstyled } from '@storybook/addon-docs/blocks'
+
+import { PaletteStrip } from './ColourDocs'
+import { Pompebled } from './Pompebled'
+
+<Meta title="Huisstijl" />
+
+# Huisstijl
+
+De oude fansite hield van 1997 tot 2006 dezelfde kleurfamilie: marineblauw voor tekst, rood voor datums en links, en lichte blauwgrijze vlakken. Daar bouwen we op voort, met het contrast en de leesbaarheid van nu.
+
+## Kleur
+
+- **Dieper blauw en rood.** Een tint donkerder dan het clubwapen, de officiële site en de oude fansite. Zo haalt tekst ruim het nodige contrast, ook in rood.
+- **Ton-sur-ton.** Vlakken en tekst komen uit dezelfde kleurfamilie: donkerblauwe tekst op lichtblauw, lichte tekst op donkerblauw.
+- **Grijs met zand.** De grijzen hebben een vleugje zand: een rustige, vriendelijke basis waar blauw en rood uit springen. Ze zijn nooit helemaal neutraal.
+- **Staal voor markeringen.** Wat nummert, scheidt of aanwijst, zoals opsommingstekens en de positie in de stand, is staal: een gedempt blauw, rustiger dan de tekst en niet te verwarren met links of datums.
+
+<Unstyled>
+  <PaletteStrip />
+</Unstyled>
+
+<Unstyled>
+  <table style={{ marginBlockStart: '2rem', maxInlineSize: '32rem' }}>
+    <caption>Dieper dan voorheen</caption>
+    <thead>
+      <tr>
+        <th scope="col">Bron</th>
+        <th scope="col">Blauw</th>
+        <th scope="col">Rood</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Clubwapen</th>
+        <td>
+          <span className="_hf-docs-compare" style={{ backgroundColor: '#004f9f' }} />
+          <code>#004F9F</code>
+        </td>
+        <td>
+          <span className="_hf-docs-compare" style={{ backgroundColor: '#e30613' }} />
+          <code>#E30613</code>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Officiële site</th>
+        <td>
+          <span className="_hf-docs-compare" style={{ backgroundColor: '#0061ac' }} />
+          <code>#0061AC</code>
+        </td>
+        <td>
+          <span className="_hf-docs-compare" style={{ backgroundColor: '#ee3135' }} />
+          <code>#EE3135</code>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Oude fansite (2003)</th>
+        <td>
+          <span className="_hf-docs-compare" style={{ backgroundColor: '#000099' }} />
+          <code>#000099</code>
+        </td>
+        <td>
+          <span className="_hf-docs-compare" style={{ backgroundColor: '#cc0000' }} />
+          <code>#CC0000</code>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Nieuw</th>
+        <td>
+          <span className="_hf-docs-compare" style={{ backgroundColor: '#05326f' }} />
+          <code>#05326F</code>
+        </td>
+        <td>
+          <span className="_hf-docs-compare" style={{ backgroundColor: '#a91518' }} />
+          <code>#A91518</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+Alle tokens en hun contrast staan bij [Tokens › Kleur](?path=/docs/tokens-kleur--documentatie).
+
+## Letters
+
+- **Truculenta** voor het woordmerk, koppen en labels: stevig en hoekig, met lage middenstrepen zoals in reclame uit de jaren vijftig. Van 731 open lettertypes met een zware snede heeft alleen Truculenta zulke lage middenstrepen én scherpe hoeken.
+- **Atkinson Hyperlegible Next** voor nieuwskoppen, tekst en meta. Het Braille Institute maakte deze letter voor mensen die slecht zien: elke letter heeft een eigen vorm, dus I, l en 1 zijn niet te verwarren. Niet Lato, want die gebruikt de officiële site al.
+
+<Unstyled>
+  <div className="_hf-docs-card">
+    <p className="hf-wordmark" style={{ color: 'var(--hf-colour-text-heading)' }}>
+      sc Heerenveen Fansite
+    </p>
+    <p className="hf-headline" style={{ color: 'var(--hf-colour-text-heading)', marginBlockEnd: '0.25rem' }}>
+      Dylan Vente opgelucht na eerste goal: ‘Ik word afgerekend op doelpunten’
+    </p>
+    <p className="hf-meta" style={{ color: 'var(--hf-colour-text-secondary)', marginBlockEnd: 0 }}>
+      <span style={{ color: 'var(--hf-colour-text-accent)', fontWeight: 600 }}>vr 16/10</span> · Omrop Fryslân
+    </p>
+  </div>
+</Unstyled>
+
+Meer bij [Tokens › Typografie](?path=/docs/tokens-typografie--documentatie).
+
+## Pompeblêden
+
+Een pompeblêd is het blad van een waterlelie, geen hartje. Dat gaat vaak mis. We tekenen het naar de officiële tekening van de Friese vlag uit 1954: schuin, met een smalle, ronde inkeping, als een gekromde boon. Meer op [Wikipedia](https://nl.wikipedia.org/wiki/Pompebl%C3%AAd).
+
+<Unstyled>
+  <svg aria-label="Een pompeblêd" role="img" style={{ inlineSize: '8rem' }} viewBox="-14 -17 31 31">
+    <Pompebled fill="var(--hf-colour-red-600)" />
+  </svg>
+</Unstyled>
+
+## Geen clubwapen
+
+We gebruiken het officiële wapen van sc Heerenveen niet. De fansite is geen officieel onderdeel van de club, en dat moet je meteen kunnen zien. Ons herkenningsteken is het woordmerk.
+
+## Wat we niet overnemen
+
+Van de oude site laten we liggen: tekst als plaatje, achtergronden met een textuur, letters van 8 punten en de lage contrasten van 1999.
