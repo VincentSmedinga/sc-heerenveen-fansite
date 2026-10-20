@@ -3,3 +3,5 @@ dist/
 storybook-static/
 pnpm-lock.yaml
 .claude/worktrees/
+# Written by release-please, in its own format.
+CHANGELOG.md
