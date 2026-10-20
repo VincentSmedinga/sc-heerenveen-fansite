@@ -3,8 +3,11 @@ import { addons } from 'storybook/manager-api'
 
 import type { ThemeChoice } from './theme'
 
-import { darkTheme, lightTheme } from './docsThemes'
+import { brandTitle, darkTheme, lightTheme } from './docsThemes'
 import { isDark, isThemeChoice, onSystemSchemeChange, themeFromUrl } from './theme'
+
+// Storybook renders the brand title as HTML when there's no brand image. The logo is served from staticDirs.
+const brand = `<span style="display: inline-flex; align-items: center; gap: 0.625rem"><img alt="" src="./assets/logo.svg" width="40" height="40">${brandTitle}</span>`
 
 /*
  * In the dark sidebar Storybook darkens the accent for the selected item and puts white text on it.
@@ -15,7 +18,8 @@ const managerDarkTheme = { ...darkTheme, colorSecondary: '#6098de' } // blue-400
 let choice: ThemeChoice = themeFromUrl(window.location.search) ?? 'system'
 
 // The sidebar follows the Thema menu and, with Volgens systeem, the system preference.
-const applyManagerTheme = () => addons.setConfig({ theme: isDark(choice) ? managerDarkTheme : lightTheme })
+const applyManagerTheme = () =>
+  addons.setConfig({ theme: { ...(isDark(choice) ? managerDarkTheme : lightTheme), brandTitle: brand } })
 
 addons.setConfig({
   // Chapters in the order of storySort, rather than loose pages above the groups.

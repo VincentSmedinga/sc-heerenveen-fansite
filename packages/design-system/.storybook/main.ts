@@ -18,5 +18,7 @@ export default defineMain({
     sidebarOnboardingChecklist: false,
   },
   framework: '@storybook/react-vite',
+  // The logo in the sidebar is served from here.
+  staticDirs: [{ from: '../src/assets', to: '/assets' }],
   stories: ['../src/**/*.mdx', '../src/**/*.stories.tsx'],
 })

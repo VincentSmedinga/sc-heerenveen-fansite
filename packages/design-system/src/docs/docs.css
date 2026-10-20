@@ -165,6 +165,22 @@
     vertical-align: middle;
   }
 
+  ._hf-docs-logos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    div {
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+    }
+
+    img {
+      block-size: 6rem;
+      inline-size: 6rem;
+    }
+  }
+
   ._hf-docs-card {
     background-color: var(--hf-colour-background-surface);
     border: 1px solid var(--hf-colour-border-surface);

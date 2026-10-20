@@ -6,7 +6,8 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    "./index.css": "./src/index.css"
+    "./index.css": "./src/index.css",
+    "./assets/*": "./src/assets/*"
   },
   "imports": {
     "#.storybook/preview": "./.storybook/preview.tsx"

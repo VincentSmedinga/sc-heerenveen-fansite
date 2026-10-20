@@ -42,5 +42,6 @@ De keuzes en hun redenen staan in [`docs/beslissingen.md`](../../docs/beslissing
 | `src/tokens`     | Kleur- en typografietokens, met hun verhalen en documentatie                     |
 | `src/base`       | Stijlen voor HTML-elementen, met een verhaal per soort element                   |
 | `src/typography` | Typestijlen als klassen                                                          |
+| `src/assets`     | Logo's als SVG                                                                   |
 | `src/docs`       | Huisstijl, lege hoofdstukken en hulpcomponenten voor de documentatie             |
 | `.storybook`     | Instellingen van Storybook: themaknop, documentatie en toegankelijkheidscontrole |
