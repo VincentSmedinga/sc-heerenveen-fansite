@@ -22,6 +22,7 @@ AI agents write most of the code; the project owner directs.
 - The site will run on shared web hosting at mijn.host, so there is no preview per pull request.
 - [`docs/beslissingen.md`](docs/beslissingen.md) records what we decided and why.
   Read the parts that touch your issue.
+- The editorial principles are in the Redactie chapter of Storybook: by default only the headline, the link and the source name; intros and photos only with permission; no requests to third parties; always credit the source.
 
 Keep it light.
 The project must not cost more time than it gives.
@@ -59,7 +60,13 @@ Picks up one issue, in its own branch and worktree.
 
 ### Reviewer
 
-Reviews each pull request in a fresh context, with three required checklists (#44): code and security (below), accessibility (#46) and editorial and source policy (#47).
+Reviews each pull request in a fresh context, with three required checklists (#44):
+
+- code and security: below, under _Reviews_;
+- accessibility: [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md);
+- editorial and source policy: the checklist at the end of the Redactie chapter in Storybook, [`packages/design-system/src/docs/editorial.mdx`](packages/design-system/src/docs/editorial.mdx).
+
+The Reviewer:
 
 - Reads and searches the code, looks at `git diff`, and runs the checks: lint, typecheck, tests and builds, and axe and Playwright once they exist (#25).
 - Changes nothing: no edits, commits, pushes or approvals.
@@ -205,8 +212,7 @@ The tone of the site itself, from supporter to supporter, follows in the style g
 
 - put secrets in the repository: tokens, passwords, a real `.env` or personal data;
 - add requests to third parties: no fonts, scripts, images, embeds, analytics or CDNs from another domain;
-- take content from journalists beyond the source policy (#9).
-  By default we show the headline, the link and the source name; intros and photos only with permission;
+- take content from journalists beyond the source policy: the principles in the Redactie chapter, and per source the source register (#9);
 - merge a pull request: the owner does that;
 - request a Copilot review;
 - skip the git hooks (`--no-verify`), or skip or weaken a test to get CI green.

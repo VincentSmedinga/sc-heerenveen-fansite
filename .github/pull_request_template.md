@@ -19,5 +19,5 @@ Closes #
 De reviewer vult elk onderdeel in: gecontroleerd, met bewijs, of niet van toepassing, met een reden. Het verslag staat als reactie bij deze pull request.
 
 - [ ] Code en beveiliging ([checklist](https://github.com/VincentSmedinga/sc-heerenveen-fansite/blob/main/AGENTS.md#code-and-security-checklist))
-- [ ] Toegankelijkheid (checklist volgt in #46)
-- [ ] Redactie en bronbeleid (checklist volgt in #47)
+- [ ] Toegankelijkheid ([checklist](https://github.com/VincentSmedinga/sc-heerenveen-fansite/blob/main/docs/toegankelijkheid.md))
+- [ ] Redactie en bronbeleid ([checklist](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/redactie--documentatie), onderaan het hoofdstuk Redactie)

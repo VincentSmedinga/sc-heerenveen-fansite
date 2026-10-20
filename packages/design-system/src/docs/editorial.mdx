@@ -4,20 +4,93 @@ import { Meta } from '@storybook/addon-docs/blocks'
 
 # Redactie
 
-Hoe we schrijven. Het hoofdstuk begint net: hieronder staat wat al vastligt, daarna wat nog komt.
+Wat we tonen en hoe we schrijven.
+Hieronder staan eerst de principes, dan de schrijfwijze van de club en wat nog komt, en tot slot de checklist voor de review.
+
+## Principes
+
+De site is een fatsoenlijke nieuwsverzamelaar: we tonen koppen en links, en een intro of foto als de bron dat toestaat.
+Dat nodigt lezers uit om door te gaan naar de journalistiek zelf.
+We maken geen winst en hebben geen advertenties of abonnementen.
+We laten bezoekers met rust: geen trackingcookies, geen profielen, geen gegevens te koop.
+Vier principes gelden voor alles wat we van anderen tonen.
+Ze leggen uit waarom; het [bronnenregister](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/9) legt per bron vast wat er mag.
+
+### 1. Standaard alleen kop, link en bronnaam
+
+Van een bericht van een ander tonen we de kop, een link naar het bericht en de naam van de bron.
+De datum en tijd van publicatie horen erbij; dat is een gegeven, geen inhoud.
+Meer tonen we niet, tenzij de bron toestemming heeft gegeven.
+
+**Waarom:** een kop en een link sturen de lezer naar de journalist.
+Daar staat het verhaal, en daar hoort de lezer het te lezen.
+Een samenvatting of een foto kan dat bezoek vervangen; dan mist de journalist de lezer en de uitgever de inkomsten.
+
+### 2. Intro's en foto's alleen met toestemming
+
+Een intro, zoals de eerste zinnen of een samenvatting, en een foto tonen we alleen als de bron daar toestemming voor heeft gegeven.
+Het bronnenregister houdt per bron bij of we toestemming hebben, sinds wanneer en voor wat.
+Zonder toestemming tonen we ze niet, ook niet als een feed ze meelevert.
+Mogen we een foto tonen, dan komt hij van onze eigen server (principe 3).
+
+**Waarom:** tekst en foto's zijn van de maker.
+Een foto is vaak van een fotograaf of een persbureau, met eigen rechten.
+Dat een feed iets meestuurt, betekent niet dat we het mogen tonen.
+
+### 3. Geen verzoeken naar derden
+
+Een pagina laadt niets van een ander domein: geen lettertypes, scripts, afbeeldingen, video's, kaarten, knoppen van sociale media of statistieken.
+Ook een ingesloten video of bericht valt hieronder.
+Alles komt van onze eigen server.
+Een link naar een andere site is geen verzoek; die volgt de bezoeker pas na een klik.
+
+**Waarom:** elk verzoek naar een ander domein vertelt dat domein wie onze pagina bekijkt.
+Zo volgt niemand onze bezoekers, en zijn er geen cookies van anderen.
+Daarom hosten we ook de lettertypes zelf ([#23](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/23)).
+
+### 4. Altijd de bron vermelden
+
+Bij alles wat van een ander komt, staat de naam van de bron.
+Bij een foto staat ook de maker, zoals de bron dat vraagt.
+Vertellen we iets in eigen woorden na, dan noemen we waar het vandaan komt, met een link.
+
+**Waarom:** de lezer weet zo waar iets vandaan komt en kan het zelf beoordelen, en de maker krijgt de eer.
 
 ## De club
 
-We schrijven **sc Heerenveen**, met een kleine s en c, zoals de club het zelf doet. Ook aan het begin van een zin en in de naam van de site: sc Heerenveen Fansite. Het woordmerk toont kapitalen, maar de tekst erachter blijft "sc", voor schermlezers en wie de tekst kopieert.
+We schrijven **sc Heerenveen**, met een kleine s en c, zoals de club het zelf doet.
+Ook aan het begin van een zin en in de naam van de site: sc Heerenveen Fansite.
+Het woordmerk toont kapitalen, maar de tekst erachter blijft "sc", voor schermlezers en wie de tekst kopieert.
 
 Twee uitzonderingen:
 
-- **Koppen uit de media** laten we zoals ze zijn gepubliceerd, bijvoorbeeld "Samenvatting: SC Heerenveen bezorgt Excelsior…". We delen ze, we passen ze niet aan.
+- **Koppen uit de media** laten we zoals ze zijn gepubliceerd, bijvoorbeeld "Samenvatting: SC Heerenveen bezorgt Excelsior…".
+  We delen ze, we passen ze niet aan.
 - **Oude namen van de site** blijven zoals ze waren: SC Heerenveen Online (1997–98).
 
 ## Nog te schrijven
+
+De schrijfwijzer volgt in [#19](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/19):
 
 - **Toon:** hoe we klinken, van supporter tot supporter, en wanneer we Fries gebruiken, zoals in Pronkkeamer.
 - **Schrijfwijzer:** hoe we spelers, datums en tijden schrijven, zoals de korte datum "wo 01/09" vóór een kop.
 - **Bronnen en tijden:** hoe we een bron noemen, wanneer we "vandaag" of een datum schrijven, en hoe we omgaan met berichten die op meer plekken verschijnen.
 - **Lege toestanden en meldingen:** teksten voor bezoekers, niet voor ontwikkelaars.
+
+## Checklist voor de review
+
+De reviewer loopt deze punten na bij elke pull request die iets van een ander importeert, opslaat of toont.
+Raakt de wijziging dat niet, dan is dit onderdeel niet van toepassing, met de reden.
+
+- **Kop, link en bronnaam (principe 1):** toont de wijziging van een bericht meer dan de kop, de link, de bronnaam en de tijd?
+  Dan alleen met toestemming in het bronnenregister.
+- **Toestemming (principe 2):** komen een intro of foto alleen in beeld als het bronnenregister het toestaat?
+  En slaat de importer niets op wat we niet mogen tonen?
+- **Geen verzoeken naar derden (principe 3):** zoek in de wijziging naar adressen van andere domeinen, zoals `https://` in `src`, `srcset`, `<script>`, `<iframe>`, `<link>`, `@import` en `url()`.
+  Een gewone link (`<a href>`) telt niet.
+  Kijk ook in het netwerkpaneel van de browser of elk verzoek naar onze eigen server gaat.
+- **Bron vermeld (principe 4):** staat bij alles van een ander de naam van de bron, en bij een foto de maker?
+- **Koppen ongewijzigd:** staan koppen van anderen er zoals ze zijn gepubliceerd?
+  Eigen tekst schrijft sc Heerenveen met kleine letters.
+- **Testdata:** bevatten testdata en voorbeelden alleen wat we mogen tonen?
+  Voor een intro of foto in testdata gebruik je verzonnen tekst of een eigen afbeelding, in de vorm van het echte bericht.
