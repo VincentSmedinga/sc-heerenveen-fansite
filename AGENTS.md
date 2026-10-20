@@ -38,7 +38,7 @@ The session the project owner plans with.
 
 - Keeps the board up to date: issues, labels and milestones.
   Only the Coordinator creates issues.
-- Specifies issues with the owner until they are ready to build (see _Definition of Ready_).
+- Specifies issues with the owner until they are ready to build (see _Definition of Ready_), with the `specify` skill in [`.claude/skills/specify/SKILL.md`](.claude/skills/specify/SKILL.md).
 - Starts at most two issues at a time, each with its own Builder.
 - Writes the decisions from a specification into the issue, so the Builder adds them to `docs/beslissingen.md`.
   A decision that belongs to no issue gets its own small pull request.
@@ -60,7 +60,7 @@ Picks up one issue, in its own branch and worktree.
 
 ### Reviewer
 
-Reviews each pull request in a fresh context, with three required checklists (#44):
+Reviews each pull request in a fresh context, as the `reviewer` subagent in [`.claude/agents/reviewer.md`](.claude/agents/reviewer.md), with three required checklists:
 
 - code and security: below, under _Reviews_;
 - accessibility: [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md);
@@ -69,6 +69,8 @@ Reviews each pull request in a fresh context, with three required checklists (#4
 The Reviewer:
 
 - Reads and searches the code, looks at `git diff`, and runs the checks: lint, typecheck, tests and builds, and axe and Playwright once they exist (#25).
+  A hook, `.claude/hooks/reviewer-bash.js`, blocks every other command.
+  Claude Code only runs that hook in a folder you have trusted; elsewhere it skips the hook without a warning.
 - Changes nothing: no edits, commits, pushes or approvals.
 - Writes a report with three sections: code and security; accessibility; editorial and source policy.
   Each section says "gecontroleerd, met bewijs" (checked, with evidence) or "niet van toepassing" (not applicable), with a reason.
@@ -107,8 +109,8 @@ A pull request is done when:
 - At most two review rounds.
   A round is a report from the Reviewer and the Builder's fixes.
   If the second report still says "not ready", a person decides: merge as it is, fix it by hand, or split the rest into a new issue.
-- The Builder starts the Reviewer (the `reviewer` subagent, #44) from its worktree, so the Reviewer can run the checks.
-  It gives the Reviewer only the pull request and the issue number, nothing about how the work went, so it forms its own view.
+- The Builder runs `git fetch origin` and then starts the Reviewer (the `reviewer` subagent) from its worktree, so the Reviewer can run the checks and compare against the current base.
+  The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
 - The Builder posts the report on the pull request as a comment, unchanged, and ticks the three review checkboxes in the description to match.
 - We don't use Copilot reviews.
   Never request one.

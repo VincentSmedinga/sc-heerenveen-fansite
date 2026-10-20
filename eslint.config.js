@@ -28,7 +28,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.config.{js,ts}', '**/.storybook/main.ts'],
+    files: ['**/*.config.{js,ts}', '**/.storybook/main.ts', '.claude/hooks/*.js'],
     languageOptions: {
       globals: globals.node,
     },
