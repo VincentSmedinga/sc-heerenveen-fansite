@@ -99,8 +99,8 @@ The Reviewer's first section. Builders check it themselves before they open a pu
 
    ```sh
    git fetch origin main
-   git worktree add .claude/worktrees/<description> -b <type>/<description> origin/main
-   cd .claude/worktrees/<description> && pnpm install
+   git worktree add .claude/worktrees/<issue>-<description> -b <type>/<issue>-<description> origin/main
+   cd .claude/worktrees/<issue>-<description> && pnpm install
    ```
 
    If the code reads environment variables, copy `.env.example` to `.env` in the worktree and fill it in.
@@ -114,7 +114,7 @@ The Reviewer's first section. Builders check it themselves before they open a pu
 
 ## Conventions
 
-- **Branches:** `<type>/<description>`, with a Conventional Commit type and a short description in English, in lower case with hyphens: `feat/news-archive`, `docs/agent-guidelines`. Never start a branch name with `claude/`.
+- **Branches:** `<type>/<issue>-<description>`, with a Conventional Commit type, the issue number and a short description in English, in lower case with hyphens: `feat/26-news-archive`, `docs/43-agent-guidelines`. Without an issue, leave out the number. Never start a branch name with `claude/`.
 - **Commits and pull request titles:** [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) in UK English, in the imperative: `feat(site): add the news archive`. The scope is optional: the package or app, such as `design-system`, `shared`, `site` or `importer`. We squash merge, so the pull request title becomes the commit on `main`, and release-please builds the changelog from it. commitlint checks commit messages in a git hook and pull request titles in CI.
 - **Language:** everything public is in Dutch: issues, pull request descriptions, documentation, Storybook and all text on the site. Code, comments, commit messages, pull request titles and agent tooling (this file and `.claude/`) are in UK English: `colour`, `initialise`.
 - **The club:** always "sc Heerenveen", with a lower-case s and c, also at the start of a sentence and in the site name, sc Heerenveen Fansite. Headlines from the media keep their own spelling.
