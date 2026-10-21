@@ -22,8 +22,25 @@ jobs:
     name: Lint, typecheck, test and build
     runs-on: ubuntu-latest
     env:
+      # The database below. The tests make a database of their own on this server and drop it afterwards.
+      DATABASE_URL: mysql://root@127.0.0.1:3306/fansite
       # next build would otherwise send anonymous telemetry to Vercel.
       NEXT_TELEMETRY_DISABLED: '1'
+    # The same MariaDB version as locally (compose.yaml) and on the host. It's empty and gone after the run, so it has no
+    # password.
+    services:
+      mariadb:
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
+          MARIADB_DATABASE: fansite
+        image: mariadb:10.11
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-retries=20
+          --health-timeout=5s
+        ports:
+          - 3306:3306
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -42,6 +59,12 @@ jobs:
       - run: pnpm lint
 
       - run: pnpm typecheck
+
+      # The migrations must make the schema on an empty database, and the seed must run on it.
+      - name: Migrate and seed an empty database
+        run: |
+          pnpm db:migrate
+          pnpm db:seed
 
       - run: pnpm test
 

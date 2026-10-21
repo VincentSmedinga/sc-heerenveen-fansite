@@ -202,6 +202,56 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Op een VPS kan een worker later dezelfde opdrachten aanroepen.
 - **Alternatieven:** pg-boss met een worker die blijft draaien, op een VPS met Postgres.
 
+### Weergavebeleid en toestemming zitten in `sources`, met een CHECK-constraint
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de kolommen voor het weergavebeleid en de toestemming horen bij de tabel `sources`, met de strengste standaardwaarden.
+  Een CHECK-constraint laat een intro, afbeelding of insluiten alleen toe als de toestemming `given` is.
+- **Waarom:** de redactionele principes 1 en 2 zeggen dat we standaard alleen kop, link en bronnaam tonen, en meer alleen met toestemming.
+  Zo kan een fout in een scherm, een seed of een import geen beleid opslaan dat verder gaat dan de toestemming, en krijgt elke nieuwe bron vanzelf het strengste beleid.
+- **Alternatieven:** de kolommen later toevoegen met #9; dan kan er een bron bestaan zonder beleid.
+  Of de regel alleen in de code toepassen; dan wordt een verkeerde rij getoond tot de code hem vangt.
+
+### De lokale database draait met Docker Compose
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de lokale MariaDB draait met Docker Compose, met de image `mariadb:10.11`.
+  CI gebruikt dezelfde versie als servicecontainer.
+- **Waarom:** één commando, dezelfde versie als op de hosting, en wat in CI draait is wat lokaal draait.
+- **Alternatieven:** alleen een gids voor `mariadb@10.11` met Homebrew.
+  Dat vraagt geen Docker, maar werkt alleen op macOS en is lastiger gelijk te houden met CI.
+
+### Migraties draaien met de migrator van drizzle-orm
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** `pnpm db:migrate` draait de migraties met de migrator van `drizzle-orm`.
+  `drizzle-kit` dient alleen om ze te maken (`db:generate`).
+- **Waarom:** op de hosting staat geen ontwikkelgereedschap, en dezelfde opdracht moet daar kunnen draaien als we migraties bij het uitrollen gaan doen (#70).
+- **Alternatieven:** `drizzle-kit migrate`.
+  Dat vraagt dat `drizzle-kit` en zijn dependencies op de server staan.
+
+### Drizzle 0.45 in plaats van de 1.0-kandidaat
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** we gebruiken `drizzle-orm` 0.45.4 en `drizzle-kit` 0.31.11, de versies die npm als `latest` geeft.
+- **Waarom:** de migraties staan in de repository en draaien op elke omgeving.
+  Dat vraagt een versie die niet meer verandert, en de 1.0 is nog een kandidaat (rc.5, van 21 oktober 2026).
+- **Alternatieven:** de 1.0-kandidaat nu nemen.
+  Dan zitten we straks met een overstap op een versie die nog kan veranderen.
+  Renovate stelt de overstap voor zodra 1.0 uit is, in een eigen pull request (zie _Renovate in plaats van Dependabot_).
+
+### Tijden in UTC en tekst in utf8mb4
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** tijden slaan we op als `datetime` in UTC, met `UTC_TIMESTAMP()` als standaardwaarde.
+  Elke tabel krijgt in de migratie zelf de tekenset `utf8mb4`, met de sortering `utf8mb4_unicode_ci`.
+- **Waarom:** een `datetime` verandert niet met de tijdzone van de server of de sessie, en een `timestamp` stopt in MariaDB 10.11 in 2038.
+  MariaDB 10.11 gebruikt zelf latin1, en wat de database op de hosting als standaard heeft, weten we niet.
+  Koppen bevatten tekens die niet in latin1 passen, zoals emoji en letters als ł en ć.
+  drizzle-kit laat de tekenset weg, dus zetten we hem met de hand in de migratie, en een test controleert elke tabel.
+- **Alternatieven:** de tekenset van de database of van de server instellen.
+  Dat staat niet in de repository, en bij een servicecontainer in CI kunnen we de instelling niet meegeven.
+
 ### Eerste versie op acceptatie: een minimale site
 
 - **Datum:** 21 oktober 2026
@@ -270,6 +320,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** `apps/site`, `apps/importer` en `packages/db` komen er pas met het eerste issue dat er code in zet.
   `packages/shared` kwam met #2, voor de controle van omgevingsvariabelen.
   `apps/site` kwam met #6.
+  `packages/db` kwam met #69.
   De site heet `apps/site` en niet `apps/web` of `apps/front-end`: het is de hele site, met de server en het beheer erbij, en "site" is het woord dat we overal gebruiken (besloten op 20 oktober 2026).
   De namen `apps/importer` en `packages/db` zijn voorlopig.
 - **Waarom:** een leeg skelet moeten we bijhouden zonder dat het iets doet, en het legt een opzet vast voordat we weten wat het package nodig heeft.

@@ -1,0 +1,25 @@
+# The database for local development: MariaDB 10.11, the same version as on the host and in CI.
+# Start it with `docker compose up -d --wait`, stop it with `docker compose down`, and add `--volumes` to start over.
+# It has no password and only listens on this computer, so it's for local use only.
+
+name: sc-heerenveen-fansite
+
+services:
+  mariadb:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
+      MARIADB_DATABASE: fansite
+    healthcheck:
+      interval: 5s
+      retries: 20
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+      timeout: 5s
+    ports:
+      - '127.0.0.1:3306:3306'
+    restart: unless-stopped
+    volumes:
+      - mariadb-data:/var/lib/mysql
+
+volumes:
+  mariadb-data:

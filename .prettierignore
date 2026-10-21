@@ -5,3 +5,5 @@ pnpm-lock.yaml
 .claude/worktrees/
 # Written by release-please, in its own format.
 CHANGELOG.md
+# Written by drizzle-kit, in its own format.
+packages/db/drizzle/
