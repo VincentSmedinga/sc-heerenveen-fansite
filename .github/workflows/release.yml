@@ -1,11 +1,15 @@
-# Keeps a release pull request up to date from the Conventional Commits on main. Merging it raises the version in
-# package.json, adds the changes to CHANGELOG.md, tags the commit and publishes a GitHub release.
+# Opens or updates the release pull request from the Conventional Commits on main, when the owner runs `pnpm release`.
+# Merging that pull request raises the version in package.json and adds the changes to CHANGELOG.md. Its push to main
+# then runs this workflow again, which tags the commit and publishes a GitHub release.
 
 name: Release
 
 on:
   push:
     branches: [main]
+    # Only the merge of a release pull request changes the manifest.
+    paths: [.release-please-manifest.json]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,3 +27,6 @@ jobs:
     steps:
       # Reads release-please-config.json and .release-please-manifest.json.
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          # After a merge the run only tags and publishes; a new release pull request waits for `pnpm release`.
+          skip-github-pull-request: ${{ github.event_name == 'push' }}

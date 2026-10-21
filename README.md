@@ -42,6 +42,7 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm typecheck` | TypeScript in alle packages                                   |
 | `pnpm test`      | De tests van alle packages en van de hooks in `.claude/hooks` |
 | `pnpm build`     | De build van alle packages                                    |
+| `pnpm release`   | Opent of werkt de release-pull request bij (vraagt `gh`)      |
 
 `pnpm install` zet ook twee git hooks klaar.
 Vóór elke commit herstellen ESLint, Stylelint en Prettier wat ze kunnen; een fout die overblijft, houdt de commit tegen.
