@@ -343,3 +343,21 @@ Per beslissing een kort blok: datum, besluit, waarom en welke alternatieven we h
 - **Uitzonderingen:** koppen uit de media citeren we zoals ze zijn gepubliceerd, ook met SC Heerenveen. Oude namen van de site blijven zoals ze waren, zoals SC Heerenveen Online (1997–98).
 - **Waarom:** zo schrijft de club zichzelf. Koppen van anderen delen we; die passen we niet aan.
 - **Alternatieven:** SC Heerenveen met hoofdletters, zoals in veel koppen uit de media.
+
+### Standaard alleen kop, link en bronnaam
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** vier principes gelden voor alles wat we van anderen tonen:
+  - standaard alleen de kop, de link en de naam van de bron, met de tijd van publicatie;
+  - intro's en foto's alleen met toestemming van de bron;
+  - geen verzoeken naar derden: een pagina laadt niets van een ander domein;
+  - bij alles de bron vermelden.
+- **Waar:** de principes en een korte checklist voor de reviewer staan in het hoofdstuk Redactie van Storybook.
+  Wat per bron mag, komt in het bronnenregister (#9); de principes leggen uit waarom.
+  De schrijfwijzer volgt in #19.
+- **Waarom:** een kop en een link sturen de lezer naar de journalist, en een samenvatting of foto kan dat bezoek vervangen.
+  Tekst en foto's zijn van de maker.
+  En een verzoek naar een ander domein vertelt dat domein wie onze pagina bekijkt.
+  De principes stonden verspreid over issues; de reviewer en nieuwe vrijwilligers vinden ze nu op één plek.
+- **Alternatieven:** korte intro's standaard tonen, zoals veel nieuwsverzamelaars doen.
+  Of de principes in `docs/`, naast de checklist voor toegankelijkheid; maar Storybook is ook het handboek voor wie schrijft.
