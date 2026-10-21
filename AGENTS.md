@@ -95,7 +95,7 @@ Each role has a default model (the reasons are in `docs/beslissingen.md`, under 
 - **Coordinator:** a stronger model than the Builders (Opus or Fable), in a fresh session per task.
 - **Builder:** Sonnet.
   For an issue that asks for a lot of judgment about design or security, the Coordinator names a stronger model in the brief.
-- **Reviewer:** Fable, set in its agent file, so it isn't the Builder's model.
+- **Reviewer:** Fable, set in its agent file and on the call that starts it (see _Reviews_), so it isn't the Builder's model.
 - **Routine sessions**, such as updating the board: Haiku or Sonnet.
 
 A session the Coordinator starts uses at most the Coordinator's own model.
@@ -137,6 +137,9 @@ For agents:
   The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
 - The Reviewer's hook blocks `docker`, and the tests of `packages/db` need a MariaDB.
   Before starting the Reviewer, the Builder makes sure the database is running (`docker compose up -d --wait`).
+- The `model` line in the agent file isn't always picked up: three Reviewers ran on Sonnet although the file says Fable.
+  So whoever starts the Reviewer sets `model: "fable"` on the call, next to `subagent_type: "reviewer"`.
+  Afterwards, check the `model` field of the subagent's assistant messages in its output file, and tell the owner if it isn't Fable.
 - The Builder posts the report on the pull request as a comment, unchanged, and ticks the three review checkboxes in the description to match.
 - Before opening a pull request, the Builder goes through the code and security checklist itself.
 

@@ -127,7 +127,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** elke rol heeft een standaardmodel:
   - de Coordinator: een sterker model dan de Builders (Opus of Fable), in een verse sessie per taak;
   - een Builder: Sonnet, en voor een issue dat veel oordeel vraagt over ontwerp of beveiliging een sterker model, dat de Coordinator in de opdracht noemt;
-  - de Reviewer: Fable, via de regel `model` in `.claude/agents/reviewer.md`, zodat hij een ander model gebruikt dan de Builder;
+  - de Reviewer: Fable, via de regel `model` in `.claude/agents/reviewer.md` en op de aanroep die hem start, zodat hij een ander model gebruikt dan de Builder;
   - sessies voor routinewerk, zoals het bijwerken van het bord: Haiku of Sonnet.
 - **Waarom:** specificeren en plannen vragen oordeel: afwegingen, onduidelijkheden en samenhang tussen issues.
   Dat zijn weinig, korte sessies, dus het sterkere model kost weinig.
