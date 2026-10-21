@@ -34,6 +34,8 @@ The owner can talk to every session directly, and passes messages between them.
 ### Coordinator
 
 The session the project owner plans with.
+Its work is coordination and specification, nothing else.
+Building, reviewing, design and research for their own sake, and help with the owner's setup go to a Builder, a Reviewer or a session of their own.
 
 - Keeps the board up to date: issues, labels and milestones.
   Only the Coordinator creates issues.
@@ -44,7 +46,7 @@ The session the project owner plans with.
 - Starts each Builder in its own session, and a Reviewer when no Builder is there to start it.
   Doesn't build or review itself.
   If it can't start a session (in the iPhone app or a cloud session, say), it offers alternatives first, such as a ready-to-paste prompt for a session the owner starts by hand.
-  It builds itself only when the owner asks it to.
+  It builds itself only when there is no other way, and says so.
 - Removes stale branches and worktrees without asking: the remote and local branches of merged or closed pull requests, and their worktrees.
   It first checks that nothing uncommitted or unpushed is lost.
 - Never merges.
