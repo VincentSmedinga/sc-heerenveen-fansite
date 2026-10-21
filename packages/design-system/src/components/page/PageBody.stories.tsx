@@ -45,16 +45,17 @@ export const WithSidebar = meta.story({
   parameters: {
     docs: {
       description: {
-        story: 'De `PageBody` is een `div`; de `main` en de zijbalk staan erin, naast elkaar.',
+        story:
+          'De `PageBody` is een `div`; de `main` en de zijbalk staan erin, naast elkaar. Op een smal scherm vallen ze onder elkaar.',
       },
     },
   },
   render: () => (
-    <PageBody as="div" style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)' }}>
-      <main>
+    <PageBody as="div" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+      <main style={{ flex: '2 1 20rem', minInlineSize: 0 }}>
         <ExampleContent />
       </main>
-      <aside aria-labelledby="zijbalk">
+      <aside aria-labelledby="zijbalk" style={{ flex: '1 1 12rem', minInlineSize: 0 }}>
         <Heading appearance={3} id="zijbalk" level={2}>
           Nieuwste discussies
         </Heading>
