@@ -76,7 +76,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Na twee reviewrondes beslist een mens.
 - **Waar:** de afspraken staan in `AGENTS.md`, in het Engels, zoals al het gereedschap voor agents.
   `CLAUDE.md` laadt dat bestand en voegt niets toe.
-  Tot er een bijdragegids is (#7), staan ook de regels voor mensen in `AGENTS.md`; de bijdragegids neemt dat deel daarna over.
+  De regels voor mensen staan sinds #7 in `CONTRIBUTING.md` (zie _Bijdragegids voor mensen, AGENTS.md voor agents_).
 - **Waarom:** het project mag niet meer tijd kosten dan het oplevert.
   Met vaste rollen en poorten weet elke sessie wat ze moet doen, en houdt de projecteigenaar de regie zonder alles zelf te doen.
   Een aparte reviewer, omdat wie zijn eigen werk controleert, zijn eigen fouten over het hoofd ziet.
@@ -84,6 +84,26 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `AGENTS.md` is de gangbare plek voor afspraken met agents, en ook andere agents dan Claude Code lezen het.
 - **Alternatieven:** één agent die alles doet, ook de review.
   Of de afspraken in `CLAUDE.md`, dat alleen Claude Code leest.
+
+### Bijdragegids voor mensen, AGENTS.md voor agents
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de regels voor mensen staan in `CONTRIBUTING.md`, in het Nederlands.
+  `AGENTS.md` houdt de regels voor agents en verwijst naar de bijdragegids.
+  `CLAUDE.md` laadt allebei.
+- **Waarom:** de vrijwilligers zijn Nederlands, en wat zij lezen is Nederlands (zie _Nederlands voor bezoekers, Brits Engels voor code_).
+  Eén plek per regel voorkomt dat de twee bestanden uit elkaar lopen.
+- **Alternatieven:** alles in `AGENTS.md` houden en daar vanuit de bijdragegids naar verwijzen; maar dat bestand is Engels en voor agents geschreven.
+  Of de regels in beide bestanden herhalen; dan lopen ze vroeg of laat uit elkaar.
+
+### Gedragscode: de Contributor Covenant 2.0 in het Nederlands
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** `CODE_OF_CONDUCT.md` is de officiële Nederlandse vertaling van de Contributor Covenant 2.0, met `fansite@heerenveen.org` als meldadres.
+- **Waarom:** de Contributor Covenant heeft geen Nederlandse vertaling van 2.1 of 3.0, wel van 2.0.
+  Een officiële vertaling hoeven we niet zelf te onderhouden of te verantwoorden.
+- **Alternatieven:** zelf een Nederlandse vertaling van 2.1 maken; die zou onofficieel zijn.
+  Of de Engelse tekst van 2.1 nemen, terwijl de vrijwilligers Nederlands lezen.
 
 ### Eén zin per regel
 

@@ -18,7 +18,7 @@ Keep it light: a short conversation and a clear issue, not a document.
   If GraphQL isn't available, use `gh api repos/VincentSmedinga/sc-heerenveen-fansite/issues/<number>` and `.../issues/<number>/comments`.
 - The issues it mentions, and whether they are done.
   Waiting on an open issue is an open question.
-- `AGENTS.md`, the parts of `docs/beslissingen.md` that touch the issue, and the code and Storybook chapters it touches.
+- `AGENTS.md`, `CONTRIBUTING.md`, the parts of `docs/beslissingen.md` that touch the issue, and the code and Storybook chapters it touches.
   Find out what already exists, so the criteria don't ask for it again or contradict a decision.
 
 ## 2. Ask the open questions
@@ -31,7 +31,7 @@ Keep it light: a short conversation and a clear issue, not a document.
 
 ## 3. Write the acceptance criteria
 
-- In Dutch, as _Writing Dutch_ in `AGENTS.md` describes, and in the style of the existing issues: a list of checkboxes (`- [ ]`), and a closing line that starts with "Klaar als".
+- In Dutch, as _Nederlands schrijven_ in `CONTRIBUTING.md` describes, and in the style of the existing issues: a list of checkboxes (`- [ ]`), and a closing line that starts with "Klaar als".
 - Each criterion can be checked by someone else: in a test, a story, a page or a file.
 - If the issue touches what visitors see, include the accessibility points from `docs/toegankelijkheid.md` that apply.
   If it touches what we import or show from others, include the editorial principles from the Redactie chapter.
