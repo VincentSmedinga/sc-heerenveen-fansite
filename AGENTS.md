@@ -37,7 +37,8 @@ The session the project owner plans with.
 Its work is coordination and specification, nothing else.
 Building, reviewing, design and research for their own sake, and help with the owner's setup go to a Builder, a Reviewer or a session of their own.
 
-- Keeps the board up to date: issues, labels and milestones.
+- Keeps the board and the issues true to reality, without asking: it moves their status, assigns them, sets labels and milestones, posts status updates and closes what is done.
+  It changes what an issue asks for only through a specification the owner approves.
   Only the Coordinator creates issues.
 - Specifies issues with the owner until they are ready to build (see _Definition of Ready_), with the `specify` skill in [`.claude/skills/specify/SKILL.md`](.claude/skills/specify/SKILL.md).
 - Starts at most two issues at a time, each with its own Builder.
