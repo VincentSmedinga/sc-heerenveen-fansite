@@ -176,7 +176,12 @@ Per beslissing een kort blok: datum, besluit, waarom en welke alternatieven we h
 - **Besluit:** Renovate houdt de dependencies, pnpm, Node en de GitHub Actions bij, via de GitHub-app van Mend. Eén keer per week, met alle kleine updates (minor en patch) in één pull request en een eigen pull request per major-update. Een nieuwe versie wacht drie dagen. Beveiligingsupdates komen uit de OSV-database en wachten niet op het schema. TypeScript blijft onder 7.
 - **Waarom:** Dependabot ondersteunt pnpm 12 nog niet officieel. Het lockfile van pnpm 12 bestaat uit twee YAML-documenten, en de dependency graph van GitHub leest alleen het eerste. Hij ziet dus geen enkele dependency, en geeft ook geen beveiligingsmeldingen ([dependabot-core#15904](https://github.com/dependabot/dependabot-core/issues/15904)). Renovate leest dat lockfile sinds juni 2026 wel. Het houdt ook monorepo's als Storybook en typescript-eslint vanzelf bij elkaar, en werkt `packageManager` en `.nvmrc` bij.
 - **Nadeel:** een app van een andere partij krijgt schrijfrechten op de repository.
+- **Commitberichten:** Renovate geeft een update van een dependency die in productie draait de titel `fix(deps)`, en alle andere updates `chore(deps)`, zoals die van de Actions en de dev-dependencies.
+  We laten dat zo (besloten op 20 oktober 2026).
+  Voor release-please maakt een `fix` een patch-release en een `chore` geen release (zie _Eén versie voor de hele site, met release-please_).
+  Een update van een dependency in productie verandert wat bezoekers krijgen, bijvoorbeeld bij een beveiligingsfix, dus die hoort in de changelog.
 - **Alternatieven:** Dependabot, ingebouwd en zonder extra app. Dat bekijken we opnieuw zodra het pnpm 12 ondersteunt. Of Renovate zelf draaien als GitHub Action: geen app van een ander, maar wel een token en onderhoud.
+  Of elke update `chore(deps)` noemen, zodat een update nooit een release maakt; maar dan blijft een beveiligingsfix liggen tot een andere wijziging een release maakt.
 
 ### Conventional Commits in het Engels, ook in de titel van een pull request
 
