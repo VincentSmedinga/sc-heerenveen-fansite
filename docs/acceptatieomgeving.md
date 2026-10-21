@@ -33,8 +33,10 @@ De eigenaar doet dit zelf, in DirectAdmin en in GitHub.
 Een agent heeft daar geen toegang.
 
 1. **Subdomein.**
-   Maak in DirectAdmin voor `heerenveen.org` het subdomein `acc.sc` aan, dus `acc.sc.heerenveen.org`, en zet SSL aan (Let's Encrypt).
-   Staat DirectAdmin geen subdomein met twee delen toe, voeg dan `acc.sc.heerenveen.org` toe als apart domein.
+   Maak in DirectAdmin onder het domein `sc.heerenveen.org` het subdomein `acc` aan, dus `acc.sc.heerenveen.org`.
+   Kies bij _Document Root_ de standaardmap (`/domains/acc.sc.heerenveen.org/public_html`).
+   Vraag daarna een SSL-certificaat aan (Let's Encrypt) voor het subdomein.
+   Zonder certificaat geeft `https://acc.sc.heerenveen.org` een certificaatfout.
 2. **Node.js-app.**
    Maak in DirectAdmin onder _Setup Node.js App_ een app:
    - Node.js-versie: 24.
@@ -100,7 +102,6 @@ Getest zijn de build, de map en de rooktest, lokaal en in CI.
 Deze punten blijken pas bij de eerste deploy:
 
 - of Passenger op mijn.host de standalone build van Next.js start, en `apps/site/server.js` als startbestand accepteert;
-- of DirectAdmin een subdomein met twee delen (`acc.sc`) toestaat;
 - of rsync met `--delete` de bestanden die de hosting zelf in de map van de app zet, ongemoeid laat.
   Alleen `tmp/` en `.htaccess` staan op de uitzonderingenlijst in de workflow.
 
