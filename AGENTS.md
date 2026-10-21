@@ -1,10 +1,9 @@
 # AGENTS.md
 
 Working agreements for AI agents in this repository.
-Read this file in full before you start; it should be all you need to pick up an issue.
-
-Until there is a contributing guide (`CONTRIBUTING.md`, #7), this file also holds the rules that people follow.
-When the guide arrives, it takes over the parts for people (issues, branches, pull requests, reviews and language), and this file links to it for those.
+Read this file and [`CONTRIBUTING.md`](CONTRIBUTING.md) in full before you start; together they should be all you need to pick up an issue.
+`CONTRIBUTING.md`, in Dutch, holds the rules for everyone: the checks, branches, commits and pull request titles, reviews and the code and security checklist, and the language rules, including how to write Dutch.
+This file holds what only agents need: the roles, the checkpoints and how an issue gets worked on.
 
 ## The project
 
@@ -62,7 +61,7 @@ Picks up one issue, in its own branch and worktree.
 
 Reviews each pull request in a fresh context, as the `reviewer` subagent in [`.claude/agents/reviewer.md`](.claude/agents/reviewer.md), with three required checklists:
 
-- code and security: below, under _Reviews_;
+- code and security: the checklist in [`CONTRIBUTING.md`](CONTRIBUTING.md), under _Checklist voor code en beveiliging_;
 - accessibility: [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md);
 - editorial and source policy: the checklist at the end of the Redactie chapter in Storybook, [`packages/design-system/src/docs/editorial.mdx`](packages/design-system/src/docs/editorial.mdx).
 
@@ -106,38 +105,20 @@ A pull request is done when:
 
 ## Reviews
 
-- At most two review rounds.
-  A round is a report from the Reviewer and the Builder's fixes.
-  If the second report still says "not ready", a person decides: merge as it is, fix it by hand, or split the rest into a new issue.
+How a review works, with the limit of two rounds and the code and security checklist, is in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+For agents:
+
 - The Builder runs `git fetch origin` and then starts the Reviewer (the `reviewer` subagent) from its worktree, so the Reviewer can run the checks and compare against the current base.
   The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
 - The Builder posts the report on the pull request as a comment, unchanged, and ticks the three review checkboxes in the description to match.
-- We don't use Copilot reviews.
-  Never request one.
-
-### Code and security checklist
-
-The Reviewer's first section.
-Builders check it themselves before they open a pull request.
-
-- The change meets every acceptance criterion, and does nothing the issue didn't ask for.
-- New behaviour has tests; anything visible has a story, checked in light and dark.
-- CI passes: lint, typecheck, tests, build, the Storybook build and the title check.
-- The code follows the conventions below and in [`packages/design-system/README.md`](packages/design-system/README.md).
-- No secrets or personal data in code, tests, fixtures or logs.
-  A new environment variable is in `.env.example` and checked with `parseEnv` from `@fansite/shared/env`.
-- Input from outside, such as feeds, forms and URLs, is validated; output is escaped.
-  No `dangerouslySetInnerHTML` with content from elsewhere.
-- A new dependency is needed, maintained and under a licence compatible with MIT, pinned to an exact version.
-  Its install script, if any, has been read before it goes into `allowBuilds`.
-- Workflows pin each action to a full commit SHA with the version as a comment, ask for the fewest permissions, and pass untrusted input through environment variables.
+- Before opening a pull request, the Builder goes through the code and security checklist itself.
 
 ## Working on an issue
 
 1. Read the issue: `gh issue view <number>`.
    Where GraphQL isn't available, use `gh api repos/VincentSmedinga/sc-heerenveen-fansite/issues/<number>`.
    If the issue isn't ready, or the owner hasn't approved it, stop and say so.
-2. Make a worktree with a new branch from an up-to-date `main`, and install the dependencies there:
+2. Make a worktree with a new branch from an up-to-date `main`, named as `CONTRIBUTING.md` says (never starting with `claude/`), and install the dependencies there:
 
    ```sh
    git fetch origin main
@@ -148,9 +129,7 @@ Builders check it themselves before they open a pull request.
    If the code reads environment variables, copy `.env.example` to `.env` in the worktree and fill it in.
 
 3. Build the smallest change that meets the acceptance criteria.
-4. Run the checks: `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`.
-   After a change in the design system, also `pnpm --filter design-system build-storybook`.
-   Check the pull request title with `printf '%s\n' '<title>' | pnpm exec commitlint`.
+4. Run the checks listed in `CONTRIBUTING.md` under _De controles_, and check the pull request title.
 5. Commit.
    The git hooks fix the formatting and check the message.
 6. Ask the owner, then push and open a pull request with the template in `.github/pull_request_template.md`.
@@ -162,23 +141,10 @@ Builders check it themselves before they open a pull request.
 
 ## Conventions
 
-- **Branches:** `<type>/<issue>-<description>`, with a Conventional Commit type, the issue number and a short description in English, in lower case with hyphens: `feat/26-news-archive`, `docs/43-agent-guidelines`.
-  Without an issue, leave out the number.
-  Never start a branch name with `claude/`.
-- **Commits and pull request titles:** [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) in UK English, in the imperative: `feat(site): add the news archive`.
-  The scope is optional: the package or app, such as `design-system`, `shared`, `site` or `importer`.
-  We squash merge, so the pull request title becomes the commit on `main`, and release-please builds the changelog from it.
-  commitlint checks commit messages in a git hook and pull request titles in CI.
-- **Language:** everything public is in Dutch: issues, pull request descriptions, documentation, Storybook and all text on the site.
-  Code, comments, commit messages, pull request titles and agent tooling (this file and `.claude/`) are in UK English: `colour`, `initialise`.
-  How to write the Dutch is below.
-- **One sentence per line** in Markdown and MDX files, so a change to a sentence is one changed line in the diff.
-  A sentence in a list item continues on the next line, indented.
-  Not in the pull request template, nor in issues, pull request descriptions and comments: GitHub shows every line break there.
-- **The club:** always "sc Heerenveen", with a lower-case s and c, also at the start of a sentence and in the site name, sc Heerenveen Fansite.
-  Headlines from the media keep their own spelling.
-- **Words:** say "import" or "importer".
-  Never "ingestion".
+The conventions for everyone are in [`CONTRIBUTING.md`](CONTRIBUTING.md): branches, commits and pull request titles, language, one sentence per line, the spelling of the club, words, decisions and dependencies.
+How to write the Dutch is there too, under _Nederlands schrijven_.
+Agents also follow these:
+
 - **Go-ahead:** never push, open a pull request or merge without the owner's go-ahead.
   A go-ahead covers what you asked for, such as one push, or one push and the pull request it opens; a later push needs a new one.
   Posting the Reviewer's report and ticking checkboxes need none.
@@ -187,28 +153,6 @@ Builders check it themselves before they open a pull request.
   Describe what you take from it in your own words.
 - **Choices:** make the small choices an issue leaves open yourself.
   Ask the owner first when a choice changes what visitors see, adds a dependency or is hard to undo.
-- **Decisions:** a real choice between alternatives goes in `docs/beslissingen.md`, in Dutch and in its format: date, decision, why, and the alternatives.
-- **Dependencies:** exact versions only.
-  Don't add one when a few lines of code will do.
-
-### Writing Dutch
-
-Write so that anyone understands it the first time they read it.
-
-- **Plain words**, at about language level B1.
-  Use a Dutch word where a good one exists: "samenvoegen", not "mergen".
-  Words people already use, such as pull request, branch and commit, stay as they are.
-- **Sentences that aren't too long**, about twenty words at most, with one point each.
-  Split a sentence that runs on, but don't chop the text into fragments.
-  Use a list for steps or choices.
-- **Active and direct:** "we" for the project, "je" for the reader.
-  Say who does what: "De reviewer controleert de titel", not "De titel wordt gecontroleerd".
-- **No fluff:** no filler words such as "eigenlijk", "gewoon" or "natuurlijk", no opening that announces the text, no closing that repeats it, and no sales talk.
-- **Concrete:** name the file, the command or the number.
-  "Tekst haalt 4,5:1", not "voldoende contrast".
-- **Dutch notation:** dates as "3 november 2026", and a decimal comma: "4,5:1".
-
-The tone of the site itself, from supporter to supporter, follows in the style guide (#19).
 
 ## Agents never
 

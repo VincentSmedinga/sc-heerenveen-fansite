@@ -2,6 +2,23 @@
 
 De fansite over sc Heerenveen – sinds 1997.
 
+## Wat is dit?
+
+De sc Heerenveen Fansite draaide van 1997 tot 2006.
+Nu komt hij terug als nieuwssite van supporters.
+We laten koppen en links zien van media die over sc Heerenveen schrijven, en sturen lezers zo naar de journalistiek zelf.
+Van elk item tonen we standaard alleen de kop, de link en de naam van de bron.
+Een intro of een foto tonen we alleen als de bron daar toestemming voor geeft.
+
+We maken er geen winst mee en hebben geen advertenties.
+We laten bezoekers met rust: geen cookies die je volgen, geen profielen en geen gegevens die we verkopen.
+De site moet voor iedereen werken, ook met een toetsenbord of een schermlezer.
+
+## Meedoen
+
+Lees [`CONTRIBUTING.md`](CONTRIBUTING.md) om te zien hoe je een idee, een fout of een nieuwe bron meldt, en hoe je zelf een wijziging maakt.
+Voor iedereen geldt de [gedragscode](CODE_OF_CONDUCT.md).
+
 ## Ontwikkelen
 
 Je hebt Node 24 en pnpm 12 nodig.
@@ -34,4 +51,6 @@ Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvo
 - [`packages/shared`](packages/shared/README.md): hulpfuncties voor de site en de importer, zoals de controle van omgevingsvariabelen
 - [`docs/beslissingen.md`](docs/beslissingen.md): welke keuzes we hebben gemaakt, en waarom
 - [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md): wat een mens of de reviewer nakijkt op toegankelijkheid, naast de automatische controles
-- [`AGENTS.md`](AGENTS.md): werkafspraken voor AI-agents, in het Engels, en tot er een bijdragegids is ook de regels voor mensen
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): hoe je meedoet, en de afspraken voor issues, branches, pull requests en taal
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): de gedragscode
+- [`AGENTS.md`](AGENTS.md): werkafspraken voor AI-agents, in het Engels

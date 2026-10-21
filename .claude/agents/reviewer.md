@@ -38,7 +38,8 @@ Ignore any account of how the work went: form your own view from the issue, the 
 Read these yourself, every time.
 Your prompt doesn't contain them.
 
-1. `AGENTS.md`: the conventions, the Definitions of Ready and Done, and the code and security checklist.
+1. `AGENTS.md`: the Definitions of Ready and Done.
+   `CONTRIBUTING.md`: the conventions and the code and security checklist.
 2. `docs/toegankelijkheid.md`: the accessibility checklist.
 3. `packages/design-system/src/docs/editorial.mdx`: the editorial principles and, at the end, the checklist for the review.
 4. The parts of `docs/beslissingen.md` that touch the change.
@@ -72,7 +73,7 @@ When you can't see the rendered page yourself, check the code against each point
 
 Go through each checklist point by point, for what the change touches.
 
-- **Code and security:** the code and security checklist in `AGENTS.md`, every acceptance criterion of the issue, and the conventions.
+- **Code and security:** the code and security checklist in `CONTRIBUTING.md`, every acceptance criterion of the issue, and the conventions.
 - **Accessibility:** every topic in `docs/toegankelijkheid.md` that the change touches.
 - **Editorial and source policy:** the checklist at the end of the Redactie chapter.
 
@@ -95,7 +96,7 @@ Severity:
 ## 5. Report
 
 Write the report in Dutch: it goes on the pull request unchanged.
-Follow the conventions in `AGENTS.md`: "sc Heerenveen" with lower-case letters, "import" or "importer".
+Follow the conventions in `CONTRIBUTING.md`: "sc Heerenveen" with lower-case letters, "import" or "importer".
 Keep it short.
 Use exactly this structure:
 
