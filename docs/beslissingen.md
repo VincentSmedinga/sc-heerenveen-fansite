@@ -365,7 +365,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gereedschap:** `stylelint-plugin-use-baseline` voor CSS en `eslint-plugin-baseline-js` voor JavaScript en TypeScript.
   Beide zijn MIT, hebben geen installatiescript en brengen de Baseline-gegevens zelf mee, dus ze doen geen verzoeken naar buiten.
   Een nieuwe versie van het package kan een functie 'widely available' maken; Renovate stelt die voor.
-  De ESLint-regel draait met de typen van het project, zodat ook methoden zoals `document.startViewTransition()` opvallen.
+  De ESLint-regel draait met de typen van het project, zodat ook methoden zoals `screen.orientation.lock()` opvallen.
 - **Alternatieven:** een lijst van doelbrowsers (browserslist), die een versie per browser vastlegt in plaats van per functie.
   Of ook functies toestaan die 'newly available' zijn; dat geeft nieuwere mogelijkheden, maar sluit bezoekers met oudere browsers uit.
   Voor CSS kan ook `css/use-baseline` van `@eslint/css`, maar dat is een tweede CSS-linter naast Stylelint voor één regel.
@@ -377,6 +377,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `light-dark()` in de kleurtokens krijgt één tijdelijke uitzondering: een `stylelint-disable` met de reden en de datum.
   Stylelint meldt die als fout zodra ze overbodig is (`reportNeedlessDisables`).
   Dezelfde regel meldt een `@supports` als overbodig zodra de functie erin 'widely available' is.
+  In JavaScript is er geen `@supports`.
+  Daar is de tijdelijke uitzondering een `eslint-disable-next-line` met reden en datum, en ESLint meldt een overbodige als fout.
+  Er is er nu één: de hint `willReadFrequently` in de contrastmeter van de documentatie, die tot 16 maart 2027 een waarschuwing in de console van Chrome voorkomt.
 - **Waarom:** `light-dark()` is bijna zover.
   Volgens de gegevens van de regel wordt ze 'widely available' op 13 november 2026, dertig maanden nadat Safari 17.5 haar kreeg.
   De dertig regels herschrijven met `prefers-color-scheme` zouden we binnen weken weer terugdraaien.

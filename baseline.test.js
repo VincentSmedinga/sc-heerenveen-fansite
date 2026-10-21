@@ -1,6 +1,6 @@
 // Runs Stylelint and ESLint with the configuration of this repository on code that uses a feature that is not Baseline
-// widely available, and checks that both report it. The features are far from widely available (only Chrome has the
-// property, Firefox and Safari won't ship the API), so these tests don't start failing when the linters' data moves on.
+// widely available, and checks that both report it. The features are far from widely available (Chrome has them, and
+// Safari doesn't or won't), so these tests don't start failing when the linters' data moves on.
 import { ESLint } from 'eslint'
 import assert from 'node:assert/strict'
 import { join } from 'node:path'
@@ -64,13 +64,13 @@ test('Stylelint reports a temporary exception that is no longer needed', async (
 
 test('ESLint reports a method that is not widely available in the design system', async () => {
   const messages = await lintJs(
-    'export const a = document.startViewTransition(() => {})\n',
+    "export const a = screen.orientation.lock('portrait')\n",
     'packages/design-system/src/probe.ts',
   )
   assert.equal(messages.length, 1)
   assert.match(
     messages[0],
-    /^error baseline-js\/use-baseline 'startViewTransition' on Document is not Baseline Widely available/,
+    /^error baseline-js\/use-baseline 'lock' on ScreenOrientation is not Baseline Widely available/,
   )
 })
 

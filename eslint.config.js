@@ -62,7 +62,7 @@ export default defineConfig([
   },
   {
     // Only Baseline widely available features (see packages/design-system/README.md). The type-aware preset also
-    // checks methods on objects, such as document.startViewTransition(), and needs the project's types for that.
+    // checks methods on objects, such as screen.orientation.lock(), and needs the project's types for that.
     files: browserFiles,
     ignores: notBrowserFiles,
     languageOptions: {

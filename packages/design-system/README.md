@@ -68,6 +68,7 @@ In JavaScript is er geen `@supports`: een functie die nog niet zover is, gebruik
 
 Een tijdelijke uitzondering is een `stylelint-disable` om een functie die bijna 'widely available' is en niet in `@supports` past.
 Zo staat `light-dark()` in `src/tokens/colour.css` er nu omheen.
+In JavaScript is dat een `eslint-disable-next-line`, zoals bij `willReadFrequently` in `src/docs/contrast.ts`.
 Zet de reden erbij, en de datum waarop de functie 'widely available' wordt.
 Een uitzondering die niet meer nodig is, meldt Stylelint als fout (`reportNeedlessDisables`), en ESLint doet dat voor een `eslint-disable`.
 Zo blijft een uitzondering niet hangen.
