@@ -13,6 +13,10 @@ export const toRgb = (value: string): Rgb | undefined => {
   const colour = value.trim()
   if (!colour || !CSS.supports('color', colour)) return undefined
 
+  // Temporary exception to the Baseline rule: the hint stops Chrome's console warning about repeated readbacks. It has
+  // been newly available since 16 September 2024 and becomes widely available on 16 March 2027. ESLint then reports
+  // this disable as unused. Then remove it.
+  // eslint-disable-next-line baseline-js/use-baseline -- willReadFrequently is widely available from 16 March 2027
   canvas ??= document.createElement('canvas').getContext('2d', { willReadFrequently: true })
   if (!canvas) return undefined
 

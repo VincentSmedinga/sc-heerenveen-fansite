@@ -35,14 +35,14 @@ Vul in `.env` de waarden in; `.env.example` zegt waar elke variabele voor is.
 
 Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:3000>.
 
-| Opdracht         | Wat het doet                                                  |
-| ---------------- | ------------------------------------------------------------- |
-| `pnpm lint`      | ESLint, Stylelint en Prettier                                 |
-| `pnpm format`    | Prettier zet de opmaak recht                                  |
-| `pnpm typecheck` | TypeScript in alle packages                                   |
-| `pnpm test`      | De tests van alle packages en van de hooks in `.claude/hooks` |
-| `pnpm build`     | De build van alle packages                                    |
-| `pnpm release`   | Opent of werkt de release-pull request bij (vraagt `gh`)      |
+| Opdracht         | Wat het doet                                               |
+| ---------------- | ---------------------------------------------------------- |
+| `pnpm lint`      | ESLint, Stylelint en Prettier                              |
+| `pnpm format`    | Prettier zet de opmaak recht                               |
+| `pnpm typecheck` | TypeScript in alle packages                                |
+| `pnpm test`      | De tests van alle packages, van de hooks en van de linters |
+| `pnpm build`     | De build van alle packages                                 |
+| `pnpm release`   | Opent of werkt de release-pull request bij (vraagt `gh`)   |
 
 De database draait in Docker.
 Start hem met `docker compose up -d --wait`, en maak dan de tabellen met `pnpm db:migrate`.

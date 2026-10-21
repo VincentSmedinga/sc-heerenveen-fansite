@@ -392,6 +392,44 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** ook de typecontrole in de pre-commit-hook.
   Grondiger, maar elke commit wordt trager.
 
+### Alleen Baseline 'widely available', bewaakt door linters
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** in CSS en in JavaScript voor de browser gebruiken we alleen functies die Baseline 'widely available' zijn.
+  Linters bewaken dat, en `pnpm lint` faalt erop.
+  Stylelint controleert alle CSS.
+  ESLint controleert de TypeScript van het designsysteem en van de site, behalve bestanden die alleen op de server of tijdens de bouw draaien.
+- **Waarom:** zo'n functie werkt al minstens dertig maanden in alle grote browsers.
+  Dan zijn er geen voorvoegsels of polyfills nodig, en werkt de site voor iedereen, ook met een oudere browser of een ouder apparaat.
+  Een regel in de linter blijft gelden als niemand eraan denkt.
+- **Gereedschap:** `stylelint-plugin-use-baseline` voor CSS en `eslint-plugin-baseline-js` voor JavaScript en TypeScript.
+  Beide zijn MIT, hebben geen installatiescript en brengen de Baseline-gegevens zelf mee, dus ze doen geen verzoeken naar buiten.
+  Een nieuwe versie van het package kan een functie 'widely available' maken; Renovate stelt die voor.
+  De ESLint-regel draait met de typen van het project, zodat ook methoden zoals `screen.orientation.lock()` opvallen.
+- **Alternatieven:** een lijst van doelbrowsers (browserslist), die een versie per browser vastlegt in plaats van per functie.
+  Of ook functies toestaan die 'newly available' zijn; dat geeft nieuwere mogelijkheden, maar sluit bezoekers met oudere browsers uit.
+  Voor CSS kan ook `css/use-baseline` van `@eslint/css`, maar dat is een tweede CSS-linter naast Stylelint voor één regel.
+
+### Functies die nog niet zover zijn: `@supports`, of een tijdelijke uitzondering
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** een verbetering die niet overal werkt, zoals `accent-color`, `resize`, `::marker` en `text-wrap: balance`, staat binnen `@supports`, zodat andere browsers de standaardopmaak krijgen.
+  `light-dark()` in de kleurtokens krijgt één tijdelijke uitzondering: een `stylelint-disable` met de reden en de datum.
+  Stylelint meldt die als fout zodra ze overbodig is (`reportNeedlessDisables`).
+  Dezelfde regel meldt een `@supports` als overbodig zodra de functie erin 'widely available' is.
+  In JavaScript is er geen `@supports`.
+  Daar is de tijdelijke uitzondering een `eslint-disable-next-line` met reden en datum, en ESLint meldt een overbodige als fout.
+  Er is er nu één: de hint `willReadFrequently` in de contrastmeter van de documentatie, die tot 16 maart 2027 een waarschuwing in de console van Chrome voorkomt.
+- **Waarom:** `light-dark()` is bijna zover.
+  Volgens de gegevens van de regel wordt ze 'widely available' op 13 november 2026, dertig maanden nadat Safari 17.5 haar kreeg.
+  De dertig regels herschrijven met `prefers-color-scheme` zouden we binnen weken weer terugdraaien.
+  Een uitzondering die vanzelf faalt als ze niet meer nodig is, blijft niet hangen.
+- **Let op:** `text-wrap: balance` wordt op dezelfde dag 'widely available'.
+  Zodra de gegevens van de regel dat zeggen, falen de uitzondering en haar `@supports`, en haal je ze weg.
+  Kijk dan ook of het `@supports not`-blok met de lichte waarden in `colour.css` nog nodig is (zie _Licht en donker met light-dark()_).
+- **Alternatieven:** `light-dark()` nu vervangen door mediaquery's met `prefers-color-scheme`; dat draait het besluit 'Licht en donker met light-dark()' terug.
+  Of de regel pas aanzetten als `light-dark()` doorkomt; dan beschermt hij tot die tijd niets.
+
 ### GitHub Actions vastgezet op een commit
 
 - **Datum:** 20 oktober 2026

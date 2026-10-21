@@ -15,15 +15,18 @@
     margin-block-end: 0;
   }
 
-  ul > li::marker {
-    color: var(--hf-colour-marker-graphic);
-    font-weight: var(--hf-body-font-weight);
-  }
+  /* Not Baseline widely available yet. Without it, a marker keeps the colour and weight of its item. */
+  @supports selector(::marker) {
+    ul > li::marker {
+      color: var(--hf-colour-marker-graphic);
+      font-weight: var(--hf-body-font-weight);
+    }
 
-  ol > li::marker {
-    color: var(--hf-colour-marker-text);
-    font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-body-font-weight);
+    ol > li::marker {
+      color: var(--hf-colour-marker-text);
+      font-variant-numeric: tabular-nums;
+      font-weight: var(--hf-body-font-weight);
+    }
   }
 
   dl {

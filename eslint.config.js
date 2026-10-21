@@ -1,11 +1,24 @@
 import js from '@eslint/js'
 import prettier from 'eslint-config-prettier'
+import baselineJs from 'eslint-plugin-baseline-js'
 import perfectionist from 'eslint-plugin-perfectionist'
 import reactHooks from 'eslint-plugin-react-hooks'
 import storybook from 'eslint-plugin-storybook'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+
+// Code that runs in a visitor's browser: the design system, and the site. Next.js server components are included on
+// purpose: until the site has a way to tell client files apart, we check too much rather than too little.
+const browserFiles = ['packages/design-system/**/*.{ts,tsx}', 'apps/site/src/**/*.{ts,tsx}']
+// Code that only runs on the server, during the build or in a test. Add a file here when it never reaches the browser.
+const notBrowserFiles = [
+  '**/*.config.{js,ts}',
+  '**/*.test.{ts,tsx}',
+  '**/.storybook/main.ts',
+  'apps/site/src/{env,instrumentation,instrumentation-node,proxy}.ts',
+  'apps/site/src/app/robots.ts',
+]
 
 export default defineConfig([
   globalIgnores([
@@ -35,11 +48,41 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.config.{js,ts}', '**/.storybook/main.ts', '.claude/hooks/*.js', 'apps/site/scripts/*.js'],
+    files: [
+      '**/*.config.{js,ts}',
+      '**/.storybook/main.ts',
+      '.claude/hooks/*.js',
+      'apps/site/scripts/*.js',
+      'baseline.test.js',
+    ],
     languageOptions: {
       globals: globals.node,
     },
     name: 'fansite/node',
+  },
+  {
+    // Only Baseline widely available features (see packages/design-system/README.md). The type-aware preset also
+    // checks methods on objects, such as screen.orientation.lock(), and needs the project's types for that.
+    files: browserFiles,
+    ignores: notBrowserFiles,
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    name: 'fansite/baseline',
+    plugins: { 'baseline-js': baselineJs },
+    rules: {
+      'baseline-js/use-baseline': [
+        'error',
+        {
+          available: 'widely',
+          includeJsBuiltins: { preset: 'type-aware' },
+          includeWebApis: { preset: 'type-aware' },
+        },
+      ],
+    },
   },
   {
     // The order of the columns is the order of the table, and it reads best grouped by what a column is for.
