@@ -37,6 +37,8 @@ The session the project owner plans with.
 
 - Keeps the board up to date: issues, labels and milestones.
   Only the Coordinator creates issues.
+- Assigns an issue to the project owner when work on it starts, and leaves it assigned when it closes.
+  Issues that are still "Te doen" stay unassigned.
 - Specifies issues with the owner until they are ready to build (see _Definition of Ready_), with the `specify` skill in [`.claude/skills/specify/SKILL.md`](.claude/skills/specify/SKILL.md).
 - Starts at most two issues at a time, each with its own Builder.
 - Writes the decisions from a specification into the issue, so the Builder adds them to `docs/beslissingen.md`.
