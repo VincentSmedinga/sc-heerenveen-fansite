@@ -1,6 +1,6 @@
 import preview from '#.storybook/preview'
 
-import { Pompebled } from '../docs/Pompebled'
+import { Pompebled } from '../components/logo/Pompebled'
 
 const meta = preview.meta({
   parameters: {

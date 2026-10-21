@@ -20,10 +20,7 @@ export const Paragraph = meta.story({
         De sc Heerenveen Fansite verzamelt sinds 15 maart 1997 het nieuws over de club uit It Hearrenfean. We tonen de
         kop, de bron en de tijd, en linken naar het bericht van de journalist.
       </p>
-      <p>
-        Supporters maken de site, zonder advertenties en zonder winstoogmerk. We zijn geen officieel onderdeel van sc
-        Heerenveen.
-      </p>
+      <p>We maken de site zonder advertenties en zonder winstoogmerk: voor supporters, door supporters.</p>
     </div>
   ),
 })

@@ -1,0 +1,39 @@
+/*
+ * The logo: the shield, and beside it the wordmark with "sinds 1997". The text follows the heading and secondary
+ * text roles, so it is dark on the page in light, light in dark, and light in the header.
+ * An inline-flex box passes no underline on from a link around it.
+ */
+
+@layer hf.components {
+  .hf-logo {
+    --hf-logo-mark-size: calc(var(--hf-wordmark-font-size) * 1.55);
+
+    align-items: center;
+    display: inline-flex;
+    gap: 0.75rem;
+  }
+
+  .hf-logo-mark {
+    block-size: var(--hf-logo-mark-size);
+    flex: none;
+    inline-size: var(--hf-logo-mark-size);
+  }
+
+  /* On a narrow screen the tagline wraps under the wordmark. */
+  .hf-logo-text {
+    align-items: baseline;
+    column-gap: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .hf-logo-wordmark {
+    color: var(--hf-colour-text-heading);
+  }
+
+  .hf-logo-tagline {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-label-font-size);
+    line-height: var(--hf-label-line-height);
+  }
+}

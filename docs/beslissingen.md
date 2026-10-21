@@ -382,6 +382,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat controleert elk package los en elke keer helemaal.
   Of een echte build per package naar `dist`, die we niet nodig hebben zolang niets gepubliceerd wordt.
 
+### Het designsysteem levert de componenten als TypeScript-bronbestanden
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** het package geeft de componenten als TypeScript-bronbestanden, zonder eigen bouwstap, zoals `@fansite/shared` dat al doet.
+  De site compileert ze mee.
+- **Waarom:** één manier van werken in de hele werkruimte, en geen aparte bouwstap die kan achterlopen op de bron.
+- **Alternatieven:** het package naar JavaScript en typebestanden bouwen.
+  Dat vraagt een bouwstap en een publicatiepijplijn die we niet nodig hebben, zolang alleen onze eigen site het gebruikt.
+
 ### Controles: snel bij de commit, volledig in CI
 
 - **Datum:** 20 oktober 2026
@@ -712,14 +721,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Eén begrip is makkelijker uit te leggen: een kaart is een vlak met een rand, en er zijn vier vlakken.
 - **Alternatieven:** kaart en tonaal vlak als twee aparte rollen, zoals eerst.
 
-### Open: focusrand op de wedstrijdband
+### Eigen focusrand op de donkere blauwe vlakken
 
-- **Datum:** 20 oktober 2026
-- **Stand:** in het lichte thema haalt de focusrand (blauw-500) op de wedstrijdband (blauw-800) maar 2,65:1.
-  Nodig is 3:1.
-  In het donkere thema is het 7,9:1.
-  Het palet is niet aangepast.
-- **Mogelijkheden:** een eigen token voor de focusrand op donkere achtergronden, zoals blauw-300 uit het donkere thema, of een focusrand in twee kleuren (bijvoorbeeld blauw-500 met een witte binnenrand) die op elke achtergrond werkt.
+- **Datum:** 22 oktober 2026
+- **Besluit:** de header en de wedstrijdband krijgen een eigen kleur voor de focusrand: `--hf-colour-focus-on-header` en `--hf-colour-focus-on-band`, allebei blauw-300, in licht en donker.
+  Dat beantwoordt de open vraag van 20 oktober 2026.
+- **Waarom:** in het lichte thema haalde de focusrand (blauw-500) op de wedstrijdband (blauw-800) maar 2,65:1, en nodig is 3:1.
+  Blauw-300 haalt 7,90:1 op de header en 6,22:1 op de band in licht, en 6,22:1 en 7,90:1 in donker.
+  Het palet verandert niet.
+  Elk vlak heeft een eigen token, zoals bij de tekstkleuren, zodat het ene vlak kan veranderen zonder het andere.
+- **Hoe:** de `PageHeader` zet de rollen voor tekst, links en focus opnieuw voor alles wat erin staat.
+  Een component in de header hoeft daar niets voor te doen.
+  Het contrast staat bij Tokens › Kleur in Storybook, en een story van de `PageHeader` laat de focusrand zien.
+- **Alternatieven:** een focusrand in twee kleuren (bijvoorbeeld blauw-500 met een witte binnenrand) die op elke achtergrond werkt.
+  Dat vraagt meer CSS en geeft een andere rand dan op de rest van de site.
+  Of blauw-500 in licht donkerder maken; dat verandert de focusrand op alle lichte vlakken.
 
 ### Storybook
 
@@ -733,6 +749,70 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** CSF Next is de nieuwe manier van schrijven, met betere typen; nu beginnen voorkomt een omzetting later.
   Storybook zelf is Engels, maar alles wat wij schrijven is Nederlands: hoofdstukken, verhalen, documentatie en de themaknop.
 - **Alternatieven:** CSF 3, de huidige standaard.
+
+### De namen van de paginacomponenten volgen NL Design System
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de componenten heten `Root` (de `html`), `Body` (de `body`), `Page`, `PageHeader`, `PageBody` en `PageFooter`.
+  Dat zijn de namen en de rolverdeling uit de discussies van NL Design System.
+  Root is de `html`, Body de `body` en Page Body het deel tussen header en footer.
+- **Waarom:** we delen zo de woorden met de ontwerpsystemen van de Nederlandse overheid.
+  Een `Body` die de `body` is, botst niet met een `PageBody` die de `main` bevat.
+  Het is ook de plek waar de `head` apart blijft: Next.js beheert die, en een eventuele `Head` komt als eigen component naast `Body`.
+- **Alternatieven:** eigen namen, zoals `Document`, `Header`, `Body` en `Footer`.
+  Dat zijn minder componenten, maar `Document` moet dan zowel `html` als `body` maken, en `Body` zou dan iets anders betekenen dan de `body`.
+
+### Componenten testen we met Vitest en Testing Library
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de componenten van het designsysteem hebben tests met Vitest en Testing Library, die de rol, de naam en de structuur controleren, zonder browser.
+  De tests draaien in jsdom.
+- **Waarom:** Vitest gebruiken we al.
+  Zulke tests draaien in milliseconden, en ze vangen de fouten die bij een component horen: een ontbrekende naam, een verkeerd niveau, een kapotte structuur.
+  De controle met axe in een echte browser komt apart (#79).
+- **Alternatieven:** de Vitest-addon van Storybook, die de stories zelf in een echte browser draait.
+  Dat is sterker, maar zwaarder, het vraagt een browser in CI en het overlapt met #79.
+  Of alleen stories; dat voldoet niet aan de regel dat nieuw gedrag tests heeft.
+
+### Het logo is een schild met echte tekst
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** het component `Logo` tekent het schild als SVG in de pagina en zet het woordmerk en "sinds 1997" als tekst ernaast, in de typestijl van het woordmerk.
+  De SVG-bestanden in `src/assets` blijven bestaan voor plekken buiten de site, zoals een social-afbeelding.
+- **Vaste kleuren:** het schild houdt in elk thema dezelfde kleuren (blauw-500, blauw-700, rood-600 en wit), zoals de SVG-bestanden.
+  Dat is de uitzondering op de regel om geen primitieve kleuren in componenten te gebruiken: een beeldmerk verandert niet met het thema.
+- **Waarom:** de tekst volgt de kleuren van het thema en van de header, dus één component dekt licht, donker en de header.
+  De tekstkleuren van de SVG-bestanden voor licht en donker zijn al die van de rollen voor koppen en secundaire tekst.
+  Het is ook veel kleiner: ongeveer 2 kB in plaats van 24 kB, omdat de letters in de bestanden omtrekken zijn.
+  En een schermlezer en wie kopieert krijgen echte tekst, zoals het besluit over "sc Heerenveen met kleine letters" al veronderstelt.
+  Een SVG-bestand importeren werkt bovendien in Vite en in Next.js niet op dezelfde manier.
+- **Nadeel:** het woordmerk hangt af van het lettertype.
+  Tot dat geladen is, toont de browser een vervangend lettertype (`font-display: swap`).
+- **Alternatieven:** de SVG-bestanden als plaatje gebruiken, met een variant per thema en de andere met CSS verbergen.
+  Of de bestanden in de pagina zetten, wat 24 kB per pagina kost.
+
+### Geen disclaimer, wel "Voor supporters, door supporters"
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de header en de footer dragen "sinds 1997" en "Voor supporters, door supporters."
+  Er komt geen zin in die zegt dat we geen onderdeel van sc Heerenveen zijn.
+  Het clubwapen gebruiken we nog steeds niet: ons eigen logo en die zin maken duidelijk van wie de site is.
+- **Waarom:** een aparte disclaimer klinkt als een excuus, terwijl "Voor supporters, door supporters" zegt wat we zijn.
+  Wie het logo en die zin ziet, begrijpt dat dit een site van supporters is en geen kanaal van de club.
+- **Alternatieven:** een uitdrukkelijke zin in de footer houden, zoals "De sc Heerenveen Fansite is geen officieel onderdeel van sc Heerenveen".
+  Dat is duidelijk, maar defensief.
+
+### Storybook toont de code van het voorbeeld
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** onder elk voorbeeld in Storybook toont "Show code" de JSX die het voorbeeld rendert, en niet de aanroep `meta.story({ ... })` eromheen.
+  Daarvoor staat `parameters.docs.source` op `dynamic`, zonder de decorators.
+  De stories die een hulpcomponent uit `ExamplePage.tsx` renderen, tonen dat bestand zelf, via `src/docs/exampleSource.ts`, dat het met `?raw` inleest.
+- **Waarom:** wie een component wil gebruiken, wil zien hoe dat moet, en zo bedient één `render` de lichte en de donkere story.
+  Een hulpcomponent zoals `ExampleHeader` zou anders alleen `<ExampleHeader />` laten zien, en de story van `Page` draait in een eigen venster, waar de gegenereerde code niets zegt.
+  De themawrapper is een decorator en hoort niet in het voorbeeld.
+- **Alternatieven:** per story met de hand `source.code` schrijven; dat is dubbele code die achterloopt op het voorbeeld.
+  Of de standaard laten staan, die de aanroep van `meta.story` toont.
 
 ## Redactie
 

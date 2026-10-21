@@ -107,6 +107,13 @@
     --hf-colour-text-on-button: light-dark(var(--hf-colour-white), var(--hf-colour-blue-950));
 
     /*
+     * The focus ring on the dark blue of the header and the match band. The ring of the page (blue-500 in light) is
+     * too dark there: it reaches 2,65:1 on the band. Blue-300 reaches 3:1 and more on both, in both themes.
+     */
+    --hf-colour-focus-on-header: var(--hf-colour-blue-300);
+    --hf-colour-focus-on-band: var(--hf-colour-blue-300);
+
+    /*
      * Markers: what numbers, separates or points, such as list markers and positions in a table.
      * Quieter than the text, in steel. Text markers reach 4.5:1; graphic ones (bullets, lines, icons) 3:1.
      */
