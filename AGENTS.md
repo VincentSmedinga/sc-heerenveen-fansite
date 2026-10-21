@@ -88,6 +88,19 @@ The Reviewer:
   The Reviewer keeps the evidence for each point and writes it down only for findings and for what it couldn't check.
   The report is in Dutch, because it goes on the pull request, and short enough to read in a minute.
 
+## Models
+
+Each role has a default model (the reasons are in `docs/beslissingen.md`, under _Een model per rol_):
+
+- **Coordinator:** a stronger model than the Builders (Opus or Fable), in a fresh session per task.
+- **Builder:** Sonnet.
+  For an issue that asks for a lot of judgment about design or security, the Coordinator names a stronger model in the brief.
+- **Reviewer:** Fable, set in its agent file, so it isn't the Builder's model.
+- **Routine sessions**, such as updating the board: Haiku or Sonnet.
+
+A session the Coordinator starts uses at most the Coordinator's own model.
+The owner picks a stronger Builder in the model menu.
+
 ## Human checkpoints
 
 The owner approves at three points:
