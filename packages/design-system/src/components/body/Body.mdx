@@ -14,13 +14,19 @@ De tests van `Body` controleren het wel, in een eigen document.
 `Body` staat in `Root` en bevat de `Page`:
 
 ```tsx
+import type { ReactNode } from 'react'
+
 import { Body, Page, Root } from '@fansite/design-system'
 
-;<Root>
-  <Body>
-    <Page>…</Page>
-  </Body>
-</Root>
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <Root>
+      <Body>
+        <Page>{children}</Page>
+      </Body>
+    </Root>
+  )
+}
 ```
 
 ## Wat het doet

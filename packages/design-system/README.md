@@ -48,6 +48,7 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
 - **Logische eigenschappen:** `margin-inline-start` in plaats van `margin-left`.
   Stylelint controleert dit.
 - **Kleur:** gebruik semantische tokens, zoals `--hf-colour-text-secondary`, nooit de primitieven (`--hf-colour-grey-600`) in componenten.
+  Alleen het schild van het logo houdt vaste kleuren: een beeldmerk verandert niet met het thema.
 - **Typografie:** een typestijl is een klasse en staat los van het HTML-niveau.
   Kapitalen komen uit CSS.
 - **Componenten:** een React-component per HTML-element of onderdeel, met getypeerde props en de klassen met `hf-`.

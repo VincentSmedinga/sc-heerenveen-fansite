@@ -33,7 +33,7 @@
 
   .hf-logo-tagline {
     color: var(--hf-colour-text-secondary);
-    font-size: 0.875rem;
-    line-height: 1.2;
+    font-size: var(--hf-label-font-size);
+    line-height: var(--hf-label-line-height);
   }
 }
