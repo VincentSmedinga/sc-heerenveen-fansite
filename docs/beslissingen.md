@@ -94,6 +94,28 @@ Per beslissing een kort blok: datum, besluit, waarom en welke alternatieven we h
 - **Alternatieven:** regels afbreken op een vaste breedte, zoals 80 tekens; dan verschuift één woord extra de rest van de alinea.
   Of een hele alinea op één regel, zoals eerst; dan is elke wijziging een lange gewijzigde regel.
 
+### Een eigen reviewer in plaats van Copilot-reviews
+
+- **Datum:** 20 oktober 2026
+- **Besluit:** een subagent van Claude Code, `.claude/agents/reviewer.md`, beoordeelt elke pull request, met drie verplichte checklists: code en beveiliging, toegankelijkheid, en redactie en bronbeleid.
+  De Builder start de reviewer vanuit zijn worktree en geeft alleen het nummer van de pull request en van het issue mee.
+  Het verslag is Nederlands en komt ongewijzigd als reactie bij de pull request.
+  Copilot-reviews gebruiken we niet.
+- **Alleen lezen:** het veld `tools` van een subagent kent alleen hele gereedschappen, zoals Bash, en geen losse opdrachten zoals `git diff`.
+  Daarom laat een hook (`.claude/hooks/reviewer-bash.js`) alleen een vaste lijst opdrachten door: `git diff`, `log`, `show` en `status`, `gh` om te lezen, en lint, typecontrole, tests, builds en Playwright.
+  De gewone instellingen voor permissies gelden daarna nog steeds.
+- **Let op:** Claude Code voert de hook alleen uit in een map die je vertrouwt; dat vraagt het de eerste keer dat je het in de repository start.
+  In een map die je niet vertrouwt, slaat het de hook zonder melding over, en bewaken alleen je permissies wat de reviewer mag draaien.
+- **Checklists:** een subagent laadt `CLAUDE.md` en dus `AGENTS.md`, maar niet de checklists.
+  Die leest de reviewer daarom zelf, elke keer.
+- **Toegankelijkheid:** er is geen preview per pull request, dus de reviewer controleert op een lokale build of de Storybook-build.
+  Zolang er geen Playwright met axe is (#25), controleert hij de code tegen de checklist en noemt hij wat een mens nog in de browser moet nakijken.
+- **Waarom:** wie zijn eigen werk controleert, ziet zijn eigen fouten over het hoofd.
+  Een frisse context zonder het verhaal van de Builder kijkt onbevangen.
+  De reviewer kent onze checklists en draait de controles zelf.
+- **Alternatieven:** Copilot-reviews op GitHub.
+  Of reviews met de Claude GitHub Action; dat bekijken we later (#50).
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host

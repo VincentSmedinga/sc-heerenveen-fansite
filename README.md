@@ -14,13 +14,13 @@ pnpm --filter design-system storybook
 
 Vul in `.env` de waarden in; `.env.example` zegt waar elke variabele voor is. `.env` komt nooit in de repository.
 
-| Opdracht         | Wat het doet                  |
-| ---------------- | ----------------------------- |
-| `pnpm lint`      | ESLint, Stylelint en Prettier |
-| `pnpm format`    | Prettier zet de opmaak recht  |
-| `pnpm typecheck` | TypeScript in alle packages   |
-| `pnpm test`      | De tests van alle packages    |
-| `pnpm build`     | De build van alle packages    |
+| Opdracht         | Wat het doet                                                  |
+| ---------------- | ------------------------------------------------------------- |
+| `pnpm lint`      | ESLint, Stylelint en Prettier                                 |
+| `pnpm format`    | Prettier zet de opmaak recht                                  |
+| `pnpm typecheck` | TypeScript in alle packages                                   |
+| `pnpm test`      | De tests van alle packages en van de hooks in `.claude/hooks` |
+| `pnpm build`     | De build van alle packages                                    |
 
 `pnpm install` zet ook twee git hooks klaar. Vóór elke commit herstellen ESLint, Stylelint en Prettier wat ze kunnen; een fout die overblijft, houdt de commit tegen. Daarna controleert commitlint of het bericht [Conventional Commits](https://www.conventionalcommits.org/nl/v1.0.0/) volgt. Schrijf het in het Engels. Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvoegen de commit op `main`.
 
