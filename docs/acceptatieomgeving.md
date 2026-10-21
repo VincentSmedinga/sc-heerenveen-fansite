@@ -35,7 +35,9 @@ Een agent heeft daar geen toegang.
 1. **Subdomein.**
    Maak in DirectAdmin onder het domein `sc.heerenveen.org` het subdomein `acc` aan, dus `acc.sc.heerenveen.org`.
    Kies bij _Document Root_ de standaardmap (`/domains/acc.sc.heerenveen.org/public_html`).
-   Vraag daarna een SSL-certificaat aan (Let's Encrypt) voor het subdomein.
+   Vraag daarna een certificaat aan (Let's Encrypt), zonder wildcard.
+   Let's Encrypt controleert zo via HTTP of het domein van jou is.
+   Een wildcard-certificaat (`*.sc.heerenveen.org`) vraagt een controle via DNS, en die mislukte: de naamservers van mijn.host toonden de TXT-record voor de controle niet.
    Zonder certificaat geeft `https://acc.sc.heerenveen.org` een certificaatfout.
 2. **Node.js-app.**
    Maak in DirectAdmin onder _Setup Node.js App_ een app:
