@@ -121,13 +121,18 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** zelf een Nederlandse vertaling van 2.1 maken; die zou onofficieel zijn.
   Of de Engelse tekst van 2.1 nemen, terwijl de vrijwilligers Nederlands lezen.
 
-### De Reviewer draait op een ander model dan de Builder
+### Een model per rol
 
 - **Datum:** 22 oktober 2026
-- **Besluit:** de Reviewer gebruikt het model Fable, via de regel `model` in `.claude/agents/reviewer.md`. De Builders en de Coordinator blijven op hun eigen model.
-- **Waarom:** een Reviewer op hetzelfde model als de Builder deelt zijn blinde vlekken. Een ander, sterker model is een onafhankelijke controle bij de poort die het meeste telt. Het is één review per pull request met een kort verslag, dus de kosten blijven klein.
-- **Alternatieven:** geen `model`-regel, zodat de Reviewer het model van de Builder overneemt; dat was tot nu toe zo. Of Opus, dat in dezelfde limieten van het abonnement valt als Sonnet.
-- **Herzien:** als de reviews er niet beter van worden, of de limiet van het abonnement knelt.
+- **Besluit:** elke rol heeft een standaardmodel:
+  - de Coordinator: een sterker model dan de Builders (Opus of Fable), in een verse sessie per taak;
+  - een Builder: Sonnet, en voor een issue dat veel oordeel vraagt over ontwerp of beveiliging een sterker model, dat de Coordinator in de opdracht noemt;
+  - de Reviewer: Fable, via de regel `model` in `.claude/agents/reviewer.md`, zodat hij een ander model gebruikt dan de Builder;
+  - sessies voor routinewerk, zoals het bijwerken van het bord: Haiku of Sonnet.
+- **Waarom:** specificeren en plannen vragen oordeel: afwegingen, onduidelijkheden en samenhang tussen issues. Dat zijn weinig, korte sessies, dus het sterkere model kost weinig. Bouwen volgens een goede specificatie is werk waar Sonnet goed in is. De Reviewer controleert werk dat hij niet schreef; op hetzelfde model als de Builder deelt hij diens blinde vlekken. Een verse sessie per taak houdt de context klein.
+- **Let op:** een sessie die de Coordinator start, gebruikt hooguit het model van de Coordinator. Een sterkere Builder kiest de projecteigenaar zelf in het modelmenu.
+- **Alternatieven:** alles op één model, zoals tot nu toe (Sonnet). Dat is eenvoudig, maar de Reviewer deelt dan de blinde vlekken van de Builder en de specificaties krijgen geen sterker oordeel. Of overal het sterkste model; dat kost meer van de limiet van het abonnement voor werk dat een goede specificatie al grotendeels bepaalt.
+- **Herzien:** als het verschil in de praktijk niet opweegt tegen de kosten, of de limiet van het abonnement knelt.
 
 ### Eén zin per regel
 
