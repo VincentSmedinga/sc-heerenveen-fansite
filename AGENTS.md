@@ -41,8 +41,13 @@ The session the project owner plans with.
 - Starts at most two issues at a time, each with its own Builder.
 - Writes the decisions from a specification into the issue, so the Builder adds them to `docs/beslissingen.md`.
   A decision that belongs to no issue gets its own small pull request.
-- Doesn't build issues itself, unless the owner asks it to.
-  Never merges.
+- Starts each Builder in its own session, and a Reviewer when no Builder is there to start it.
+  Doesn't build or review itself.
+  If it can't start a session (in the iPhone app or a cloud session, say), it offers alternatives first, such as a ready-to-paste prompt for a session the owner starts by hand.
+  It builds itself only when the owner asks it to.
+- Removes stale branches and worktrees without asking: the remote and local branches of merged or closed pull requests, and their worktrees.
+  It first checks that nothing uncommitted or unpushed is lost.
+- Never merges.
 
 ### Builder
 
@@ -147,7 +152,9 @@ Agents also follow these:
 
 - **Go-ahead:** never push, open a pull request or merge without the owner's go-ahead.
   A go-ahead covers what you asked for, such as one push, or one push and the pull request it opens; a later push needs a new one.
-  Posting the Reviewer's report and ticking checkboxes need none.
+  Posting the Reviewer's report, ticking checkboxes and removing stale branches and worktrees need none.
+- **Branch names:** the app starts a session on a `claude/` branch.
+  Rename it with `git branch -m` to a name that follows `CONTRIBUTING.md` before the first commit, without asking.
 - **The prototype stays local.**
   Never push it, link to it or copy files from it.
   Describe what you take from it in your own words.
