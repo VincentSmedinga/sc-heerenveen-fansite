@@ -83,6 +83,13 @@ await withServer('acceptance', async (server) => {
   }
 
   assert.equal((await fetch(origin + asset)).status, 200, 'the static file is missing from the folder')
+
+  // The 404 page is in Dutch too, not the English page of Next.js.
+  const missing = await fetch(`${origin}/bestaat-niet`)
+  const missingHtml = await missing.text()
+  assert.equal(missing.status, 404)
+  assert.match(missingHtml, /Pagina niet gevonden/)
+  assert.doesNotMatch(missingHtml, /could not be found/)
 })
 
 await withServer('production', async (server) => {
