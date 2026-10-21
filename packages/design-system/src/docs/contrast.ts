@@ -13,7 +13,7 @@ export const toRgb = (value: string): Rgb | undefined => {
   const colour = value.trim()
   if (!colour || !CSS.supports('color', colour)) return undefined
 
-  canvas ??= document.createElement('canvas').getContext('2d', { willReadFrequently: true })
+  canvas ??= document.createElement('canvas').getContext('2d')
   if (!canvas) return undefined
 
   canvas.clearRect(0, 0, 1, 1)

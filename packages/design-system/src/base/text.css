@@ -5,10 +5,16 @@
   :is(h1, h2, h3, h4, h5, h6) {
     color: var(--hf-colour-text-heading);
     margin-block: 2rem 0.75rem;
-    text-wrap: balance;
 
     &:first-child {
       margin-block-start: 0;
+    }
+  }
+
+  /* Not Baseline widely available yet. Without it, a heading wraps as a paragraph does. */
+  @supports (text-wrap: balance) {
+    :is(h1, h2, h3, h4, h5, h6) {
+      text-wrap: balance;
     }
   }
 

@@ -51,7 +51,13 @@
 
   textarea {
     min-block-size: 6rem;
-    resize: vertical;
+  }
+
+  /* Not Baseline widely available yet. Without it, the browser keeps its own resize handle. */
+  @supports (resize: vertical) {
+    textarea {
+      resize: vertical;
+    }
   }
 
   ::placeholder {
@@ -60,12 +66,18 @@
   }
 
   input:is([type='checkbox'], [type='radio']) {
-    accent-color: var(--hf-colour-background-button);
     block-size: 1.25rem;
     inline-size: 1.25rem;
     margin-block: 0;
     margin-inline: 0 0.5rem;
     vertical-align: -0.2em;
+  }
+
+  /* Not Baseline widely available yet. Without it, the browser keeps its own accent colour. */
+  @supports (accent-color: auto) {
+    input:is([type='checkbox'], [type='radio']) {
+      accent-color: var(--hf-colour-background-button);
+    }
   }
 
   fieldset {
