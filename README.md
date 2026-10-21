@@ -44,6 +44,11 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm build`     | De build van alle packages                                    |
 | `pnpm release`   | Opent of werkt de release-pull request bij (vraagt `gh`)      |
 
+De database draait in Docker.
+Start hem met `docker compose up -d --wait`, en maak dan de tabellen met `pnpm db:migrate`.
+Zonder database slagen de tests van `packages/db` niet.
+[`packages/db`](packages/db/README.md) legt de opdrachten `pnpm db:generate`, `pnpm db:migrate` en `pnpm db:seed` uit.
+
 `pnpm install` zet ook twee git hooks klaar.
 Vóór elke commit herstellen ESLint, Stylelint en Prettier wat ze kunnen; een fout die overblijft, houdt de commit tegen.
 Daarna controleert commitlint of het bericht [Conventional Commits](https://www.conventionalcommits.org/nl/v1.0.0/) volgt.
@@ -51,6 +56,7 @@ Schrijf het in het Engels.
 Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvoegen de commit op `main`.
 
 - [`apps/site`](apps/site/README.md): de site
+- [`packages/db`](packages/db/README.md): de database, met het schema, de migraties en de seed
 - [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens en Storybook
 - [`packages/shared`](packages/shared/README.md): hulpfuncties voor de site en de importer, zoals de controle van omgevingsvariabelen
 - [`docs/beslissingen.md`](docs/beslissingen.md): welke keuzes we hebben gemaakt, en waarom

@@ -16,8 +16,8 @@ AI agents write most of the code; the project owner directs.
 
 - A pnpm 12 workspace on Node 24.
   [`README.md`](README.md) explains the setup and the commands.
-- `packages/design-system` holds the house style, the tokens and Storybook; `packages/shared` holds helpers for the site and the importer.
-  `apps/site` (the Next.js site, admin included), `apps/importer` and `packages/db` arrive with the first issue that needs them.
+- `packages/design-system` holds the house style, the tokens and Storybook; `packages/shared` holds helpers for the site and the importer; `packages/db` holds the database (Drizzle on MariaDB 10.11): the schema, the migrations and the seed.
+  `apps/site` is the Next.js site, admin included; `apps/importer` arrives with the first issue that needs it.
 - The site will run on shared web hosting at mijn.host, so there is no preview per pull request.
 - [`docs/beslissingen.md`](docs/beslissingen.md) records what we decided and why.
   Read the parts that touch your issue.
@@ -122,6 +122,8 @@ For agents:
 
 - The Builder runs `git fetch origin` and then starts the Reviewer (the `reviewer` subagent) from its worktree, so the Reviewer can run the checks and compare against the current base.
   The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
+- The Reviewer's hook blocks `docker`, and the tests of `packages/db` need a MariaDB.
+  Before starting the Reviewer, the Builder makes sure the database is running (`docker compose up -d --wait`).
 - The Builder posts the report on the pull request as a comment, unchanged, and ticks the three review checkboxes in the description to match.
 - Before opening a pull request, the Builder goes through the code and security checklist itself.
 

@@ -42,6 +42,14 @@ export default defineConfig([
     name: 'fansite/node',
   },
   {
+    // The order of the columns is the order of the table, and it reads best grouped by what a column is for.
+    files: ['packages/db/src/schema.ts'],
+    name: 'fansite/database-schema',
+    rules: {
+      'perfectionist/sort-objects': 'off',
+    },
+  },
+  {
     extends: [reactHooks.configs.flat['recommended-latest']],
     files: ['**/*.tsx'],
     name: 'fansite/react',
