@@ -2,6 +2,7 @@
 name: reviewer
 description: Reviews a pull request it didn't write, against the three required checklists (code and security, accessibility, editorial and source policy), and reports findings with file and line, sorted by severity, and a verdict. Read-only. Start it from the pull request's worktree once CI passes, and give it only the pull request and issue number.
 tools: Read, Grep, Glob, Bash
+model: fable
 hooks:
   PreToolUse:
     - matcher: Bash

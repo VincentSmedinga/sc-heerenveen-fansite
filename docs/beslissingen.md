@@ -121,6 +121,46 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** zelf een Nederlandse vertaling van 2.1 maken; die zou onofficieel zijn.
   Of de Engelse tekst van 2.1 nemen, terwijl de vrijwilligers Nederlands lezen.
 
+### Een model per rol
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** elke rol heeft een standaardmodel:
+  - de Coordinator: een sterker model dan de Builders (Opus of Fable), in een verse sessie per taak;
+  - een Builder: Sonnet, en voor een issue dat veel oordeel vraagt over ontwerp of beveiliging een sterker model, dat de Coordinator in de opdracht noemt;
+  - de Reviewer: Fable, via de regel `model` in `.claude/agents/reviewer.md` en op de aanroep die hem start, zodat hij een ander model gebruikt dan de Builder;
+  - sessies voor routinewerk, zoals het bijwerken van het bord: Haiku of Sonnet.
+- **Waarom:** specificeren en plannen vragen oordeel: afwegingen, onduidelijkheden en samenhang tussen issues.
+  Dat zijn weinig, korte sessies, dus het sterkere model kost weinig.
+  Bouwen volgens een goede specificatie is werk waar Sonnet goed in is.
+  De Reviewer controleert werk dat hij niet schreef; op hetzelfde model als de Builder deelt hij diens blinde vlekken.
+  Een verse sessie per taak houdt de context klein.
+- **Let op:** een sessie die de Coordinator start, gebruikt hooguit het model van de Coordinator.
+  Een sterkere Builder kiest de projecteigenaar zelf in het modelmenu.
+- **Alternatieven:** alles op één model, zoals tot nu toe (Sonnet).
+  Dat is eenvoudig, maar de Reviewer deelt dan de blinde vlekken van de Builder en de specificaties krijgen geen sterker oordeel.
+  Of overal het sterkste model; dat kost meer van de limiet van het abonnement voor werk dat een goede specificatie al grotendeels bepaalt.
+- **Herzien:** als het verschil in de praktijk niet opweegt tegen de kosten, of de limiet van het abonnement knelt.
+
+### Bouwen in plakken, per release
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** we bouwen de site in dunne plakken.
+  Elk issue levert iets op dat je op de acceptatieomgeving kunt zien, met alle lagen die het nodig heeft en niet meer.
+  Releases vervangen de mijlpalen.
+  Release 1, "Nieuws", is de kleinste site die we durven te lanceren: koppen met link en bronnaam uit de bronnen die we mogen gebruiken, met inloggen en verbergen in het beheer.
+  Tabellen, componenten, pagina's en adapters komen met het eerste issue dat ze nodig heeft.
+  Vier dingen zitten vanaf de eerste plak in: het weergavebeleid met de strengste standaardwaarden, een nette fetcher, automatische toegankelijkheidscontroles en een Content Security Policy die verzoeken naar derden blokkeert.
+- **Waarom:** op het oude bord, laag voor laag, kwam het eerste zichtbare resultaat na ongeveer twintig issues.
+  In plakken laat elke pull request iets zien, dus het derde controlemoment (het resultaat op acceptatie) betekent elke keer iets.
+  Risico's komen vroeg boven: de eerste deploy gaf op de hosting problemen die CI niet zag, en de importer met cron en MariaDB op diezelfde hosting is het volgende onbekende.
+  De issues worden kleiner, en een kleine site kan eerder live.
+- **Gevolg:** de issues #8, #9, #11, #12, #20, #21, #22, #23 en #32 zijn vervangen door nieuwe issues (#69 tot en met #76) en gesloten als niet gepland; hun tekst staat in de nieuwe issues onder "Uit het oorspronkelijke plan".
+  Een issue wordt dus niet omgebouwd, maar vervangen.
+  Elk nieuw issue wordt gespecificeerd met de `specify`-skill als het begint.
+  Daardoor kunnen twee Builders vaker over dezelfde bestanden gaan; de Coordinator zet daarom een issue naast een issue dat iets anders raakt.
+- **Alternatieven:** laag voor laag blijven bouwen: eerst de database, dan de adapters, dan de site, dan het beheer.
+  Het verbergen van een item bij de lancering met een opdracht op de server; dat is verworpen, omdat er bij de lancering inloggen en schermen zijn.
+
 ### Eén zin per regel
 
 - **Datum:** 21 oktober 2026
@@ -360,6 +400,44 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een commit moet snel blijven; de typecontrole van de hele werkruimte past daar niet bij, en CI vangt die toch.
 - **Alternatieven:** ook de typecontrole in de pre-commit-hook.
   Grondiger, maar elke commit wordt trager.
+
+### Alleen Baseline 'widely available', bewaakt door linters
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** in CSS en in JavaScript voor de browser gebruiken we alleen functies die Baseline 'widely available' zijn.
+  Linters bewaken dat, en `pnpm lint` faalt erop.
+  Stylelint controleert alle CSS.
+  ESLint controleert de TypeScript van het designsysteem en van de site, behalve bestanden die alleen op de server of tijdens de bouw draaien.
+- **Waarom:** zo'n functie werkt al minstens dertig maanden in alle grote browsers.
+  Dan zijn er geen voorvoegsels of polyfills nodig, en werkt de site voor iedereen, ook met een oudere browser of een ouder apparaat.
+  Een regel in de linter blijft gelden als niemand eraan denkt.
+- **Gereedschap:** `stylelint-plugin-use-baseline` voor CSS en `eslint-plugin-baseline-js` voor JavaScript en TypeScript.
+  Beide zijn MIT, hebben geen installatiescript en brengen de Baseline-gegevens zelf mee, dus ze doen geen verzoeken naar buiten.
+  Een nieuwe versie van het package kan een functie 'widely available' maken; Renovate stelt die voor.
+  De ESLint-regel draait met de typen van het project, zodat ook methoden zoals `screen.orientation.lock()` opvallen.
+- **Alternatieven:** een lijst van doelbrowsers (browserslist), die een versie per browser vastlegt in plaats van per functie.
+  Of ook functies toestaan die 'newly available' zijn; dat geeft nieuwere mogelijkheden, maar sluit bezoekers met oudere browsers uit.
+  Voor CSS kan ook `css/use-baseline` van `@eslint/css`, maar dat is een tweede CSS-linter naast Stylelint voor één regel.
+
+### Functies die nog niet zover zijn: `@supports`, of een tijdelijke uitzondering
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** een verbetering die niet overal werkt, zoals `accent-color`, `resize`, `::marker` en `text-wrap: balance`, staat binnen `@supports`, zodat andere browsers de standaardopmaak krijgen.
+  `light-dark()` in de kleurtokens krijgt één tijdelijke uitzondering: een `stylelint-disable` met de reden en de datum.
+  Stylelint meldt die als fout zodra ze overbodig is (`reportNeedlessDisables`).
+  Dezelfde regel meldt een `@supports` als overbodig zodra de functie erin 'widely available' is.
+  In JavaScript is er geen `@supports`.
+  Daar is de tijdelijke uitzondering een `eslint-disable-next-line` met reden en datum, en ESLint meldt een overbodige als fout.
+  Er is er nu één: de hint `willReadFrequently` in de contrastmeter van de documentatie, die tot 16 maart 2027 een waarschuwing in de console van Chrome voorkomt.
+- **Waarom:** `light-dark()` is bijna zover.
+  Volgens de gegevens van de regel wordt ze 'widely available' op 13 november 2026, dertig maanden nadat Safari 17.5 haar kreeg.
+  De dertig regels herschrijven met `prefers-color-scheme` zouden we binnen weken weer terugdraaien.
+  Een uitzondering die vanzelf faalt als ze niet meer nodig is, blijft niet hangen.
+- **Let op:** `text-wrap: balance` wordt op dezelfde dag 'widely available'.
+  Zodra de gegevens van de regel dat zeggen, falen de uitzondering en haar `@supports`, en haal je ze weg.
+  Kijk dan ook of het `@supports not`-blok met de lichte waarden in `colour.css` nog nodig is (zie _Licht en donker met light-dark()_).
+- **Alternatieven:** `light-dark()` nu vervangen door mediaquery's met `prefers-color-scheme`; dat draait het besluit 'Licht en donker met light-dark()' terug.
+  Of de regel pas aanzetten als `light-dark()` doorkomt; dan beschermt hij tot die tijd niets.
 
 ### GitHub Actions vastgezet op een commit
 

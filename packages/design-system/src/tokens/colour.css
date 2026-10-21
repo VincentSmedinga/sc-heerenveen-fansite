@@ -67,7 +67,13 @@
     /*
      * Semantic tokens: light value first, dark value second. A custom property keeps light-dark()
      * unresolved; the browser picks the value where the token is used, from that element's colour scheme.
+     *
+     * Temporary exception to the Baseline rule: light-dark() has been newly available since 13 May 2024 and
+     * becomes widely available on 13 November 2026, thirty months later. Once the data of the rule says so,
+     * Stylelint reports this disable as needless. Then remove it, and check whether the @supports block
+     * below is still needed.
      */
+    /* stylelint-disable plugin/use-baseline -- light-dark() is widely available from 13 November 2026 */
 
     /*
      * Backgrounds. There are four surfaces, each with a border below: the surface (white), tonal, soft and warm.
@@ -128,6 +134,7 @@
     --hf-colour-border-default: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-700));
     --hf-colour-border-input: light-dark(var(--hf-colour-grey-500), var(--hf-colour-blue-400));
     --hf-colour-focus: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-300));
+    /* stylelint-enable plugin/use-baseline */
   }
 
   [data-theme='light'] {
