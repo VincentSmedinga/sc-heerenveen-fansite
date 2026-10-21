@@ -198,6 +198,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** `acceptatie.heerenveen.org`, los van het adres van productie.
   Of de site op `heerenveen.org` zelf; daar staat de doorverwijzing naar het forum.
 
+### Eén tak: main is acceptatie, productie krijgt een release-tag
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** er is één langlevende tak, `main`.
+  Elke merge naar `main` gaat naar de acceptatieomgeving.
+  Productie krijgt een versie na goedkeuring op acceptatie: de tag die release-please maakt als de eigenaar de release-pull request samenvoegt (zie #33).
+  Elke deploy staat met zijn commit in de lijst Deployments van GitHub.
+- **Waarom:** we voegen samen met squash en houden de geschiedenis lineair.
+  Een tak `develop` zou bij elke release uit de pas lopen met `main`.
+  Samenvoegen met een squash geeft release-please bovendien één regel in de changelog in plaats van één per wijziging.
+  Een tag verandert niet meer, een tak wel.
+- **Alternatieven:** `develop` voor acceptatie en `main` voor productie.
+  Dat past bij samenvoegen zonder squash, en dat doen we niet.
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft
