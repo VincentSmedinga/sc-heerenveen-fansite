@@ -121,6 +121,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** zelf een Nederlandse vertaling van 2.1 maken; die zou onofficieel zijn.
   Of de Engelse tekst van 2.1 nemen, terwijl de vrijwilligers Nederlands lezen.
 
+### De Reviewer draait op een ander model dan de Builder
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de Reviewer gebruikt het model Fable, via de regel `model` in `.claude/agents/reviewer.md`. De Builders en de Coordinator blijven op hun eigen model.
+- **Waarom:** een Reviewer op hetzelfde model als de Builder deelt zijn blinde vlekken. Een ander, sterker model is een onafhankelijke controle bij de poort die het meeste telt. Het is één review per pull request met een kort verslag, dus de kosten blijven klein.
+- **Alternatieven:** geen `model`-regel, zodat de Reviewer het model van de Builder overneemt; dat was tot nu toe zo. Of Opus, dat in dezelfde limieten van het abonnement valt als Sonnet.
+- **Herzien:** als de reviews er niet beter van worden, of de limiet van het abonnement knelt.
+
 ### Eén zin per regel
 
 - **Datum:** 21 oktober 2026
