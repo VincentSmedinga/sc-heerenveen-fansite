@@ -72,9 +72,11 @@ The Reviewer:
   Claude Code only runs that hook in a folder you have trusted; elsewhere it skips the hook without a warning.
 - Changes nothing: no edits, commits, pushes or approvals.
 - Writes a report with three sections: code and security; accessibility; editorial and source policy.
-  Each section says "gecontroleerd, met bewijs" (checked, with evidence) or "niet van toepassing" (not applicable), with a reason.
-  Findings come with file and line, sorted by severity, followed by a clear verdict: ready to merge or not.
-  The report is in Dutch, because it goes on the pull request.
+  The report starts with the verdict: ready to merge or not.
+  Then come the findings, with file and line, sorted by severity.
+  Each section is only marked "gecontroleerd" (checked) or "niet van toepassing" (not applicable, with a reason).
+  The Reviewer keeps the evidence for each point and writes it down only for findings and for what it couldn't check.
+  The report is in Dutch, because it goes on the pull request, and short enough to read in a minute.
 
 ## Human checkpoints
 
@@ -100,7 +102,7 @@ An issue is ready to build when:
 A pull request is done when:
 
 - CI passes;
-- the Reviewer has filled in all three checklists, with evidence;
+- the Reviewer has checked all three checklists, with evidence, and its report says so;
 - the decisions it makes are in `docs/beslissingen.md`.
 
 ## Reviews
