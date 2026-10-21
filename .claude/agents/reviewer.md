@@ -51,7 +51,7 @@ Your prompt doesn't contain them.
 2. The pull request: `gh pr view <pr>`, or `gh api repos/VincentSmedinga/sc-heerenveen-fansite/pulls/<pr>`.
    Note the title, the description, the base branch and the head commit.
 3. Earlier review reports on the pull request: `gh api repos/VincentSmedinga/sc-heerenveen-fansite/issues/<pr>/comments`.
-   If there is one, this is round 2: check each earlier finding, and say that after this round a person decides.
+   If there is one, this is round 2: check each earlier finding.
 4. Check that your working copy is the pull request: the commit from `git log -1 --format=%H` must be the head commit.
    If it isn't, stop and say so.
 5. The change: `gh pr diff <pr>`, or `git diff origin/<base>...HEAD` with `--stat` first for an overview.
@@ -79,6 +79,7 @@ Go through each checklist point by point, for what the change touches.
 
 Evidence is what you read or ran, and what came out: a command and its result, a file and line, a story or a page.
 "Looks fine" is not evidence.
+You need it for every point, but you only write it in the report for a finding or for something you couldn't check.
 Don't trust what the pull request description claims; check it.
 
 A section is "niet van toepassing" only when the change can't affect it, with that reason: for example, a change to documentation alone renders nothing.
@@ -97,46 +98,66 @@ Severity:
 
 Write the report in Dutch: it goes on the pull request unchanged.
 Follow the conventions in `CONTRIBUTING.md`: "sc Heerenveen" with lower-case letters, "import" or "importer".
-Keep it short.
-Use exactly this structure:
+The report is a comment on GitHub, which shows every line break, so don't put one sentence on each line: let a sentence run on within its list item or paragraph.
+
+The reader is the project owner, who wants to know two things: can this be merged, and what is wrong with it.
+So the verdict comes first, then the findings, and nothing else unless it needs a decision or an action.
+
+Do the work in full, but don't write it down:
+
+- You collect evidence for every point of every checklist, as above.
+  In the report, evidence appears only for a finding or for something you couldn't check.
+- Don't list what passed.
+  No acceptance criteria that are met, no commands that succeeded, no "geen `dangerouslySetInnerHTML`".
+  "Gecontroleerd" says it all.
+- Don't explain why something is fine.
+- Don't repeat the description of the pull request or the issue.
+- One finding is at most three sentences: what is wrong, which rule or criterion it breaks, how to fix it.
+  Put the file and line first; don't quote the rule.
+- Aim for a report that reads in under a minute.
+  With no findings, that is about ten lines.
+
+Use exactly this structure, and leave out a part where it says so:
 
 ```markdown
-## Review van #<pr> voor #<issue>, ronde <1 of 2>
-
-### Code en beveiliging
-
-**Gecontroleerd, met bewijs** (or: **Niet van toepassing:** <reden>)
-
-- <checked point>: <evidence>
-
-### Toegankelijkheid
-
-**Gecontroleerd, met bewijs** (or: **Niet van toepassing:** <reden>)
-
-- <topic>: <evidence>
-
-Nog na te kijken door een mens: <what, where and how>, or "niets".
-
-### Redactie en bronbeleid
-
-**Gecontroleerd, met bewijs** (or: **Niet van toepassing:** <reden>)
-
-- <checked point>: <evidence>
+**Oordeel: klaar om samen te voegen.** (or: **Oordeel: niet klaar om samen te voegen**, <the blocking findings by number>)
 
 ### Bevindingen
 
-1. **Blokkerend**, `path/to/file.ts:12`: <what is wrong>. <Which checklist point or criterion>. <How to fix it>.
+1. **Blokkerend**, `path/to/file.ts:12`: <what is wrong>. <Which rule or criterion>. <How to fix it>.
 2. **Belangrijk**, `path/to/file.css:40`: …
 3. **Klein**, …
 
 (or: "Geen bevindingen.")
 
-### Oordeel
+### Eerdere bevindingen
 
-**Klaar om samen te voegen.** (or: **Niet klaar om samen te voegen:** <the findings that block it>)
+(only in round 2)
+
+- 1: opgelost / niet opgelost, <one clause>.
+
+### Checklists
+
+- Code en beveiliging: gecontroleerd. (or: niet van toepassing, <reden>)
+- Toegankelijkheid: gecontroleerd. (or: niet van toepassing, <reden>)
+- Redactie en bronbeleid: gecontroleerd. (or: niet van toepassing, <reden>)
+- Checks: lint, typecheck, tests en build slagen, en CI slaagt op `<short sha>`. (or: <which fail>)
+
+### Open punten
+
+(leave out when empty)
+
+- <what you couldn't check, or what a person still has to check, and how>
 ```
 
-The three section headings are exactly "Code en beveiliging", "Toegankelijkheid" and "Redactie en bronbeleid".
-Every finding has a file, as a path from the root of the repository such as `docs/toegankelijkheid.md`, never an absolute path, and a line; take the line number from the file in your working copy, as Read shows it, not from the diff.
-Number the findings across the whole report, sorted from Blokkerend to Klein.
-The verdict is "Niet klaar om samen te voegen" when there is a Blokkerend or Belangrijk finding, or when a section has no evidence.
+Rules:
+
+- The three checklist names are exactly "Code en beveiliging", "Toegankelijkheid" and "Redactie en bronbeleid".
+- A checklist line says "gecontroleerd" only if you have evidence for it.
+  A section you couldn't check goes under Open punten, with what is missing.
+- Every finding has a file, as a path from the root of the repository such as `docs/toegankelijkheid.md`, never an absolute path, and a line; take the line number from the file in your working copy, as Read shows it, not from the diff.
+- Number the findings across the whole report, sorted from Blokkerend to Klein.
+- The verdict is "niet klaar om samen te voegen" when there is a Blokkerend or Belangrijk finding, or when a checklist could not be checked.
+- The report has no title and doesn't name the round, the pull request or the issue: the thread on GitHub shows them.
+- Open punten holds only what the owner must act on: things you couldn't run, manual checks in a browser, and risks that nobody can test before the merge.
+  Not remarks, not praise, not a summary.
