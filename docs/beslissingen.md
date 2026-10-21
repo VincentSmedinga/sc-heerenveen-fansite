@@ -802,6 +802,18 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een uitdrukkelijke zin in de footer houden, zoals "De sc Heerenveen Fansite is geen officieel onderdeel van sc Heerenveen".
   Dat is duidelijk, maar defensief.
 
+### Storybook toont de code van het voorbeeld
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** onder elk voorbeeld in Storybook toont "Show code" de JSX die het voorbeeld rendert, en niet de aanroep `meta.story({ ... })` eromheen.
+  Daarvoor staat `parameters.docs.source` op `dynamic`, zonder de decorators.
+  De stories die een hulpcomponent uit `ExamplePage.tsx` renderen, tonen dat bestand zelf, via `src/docs/exampleSource.ts`, dat het met `?raw` inleest.
+- **Waarom:** wie een component wil gebruiken, wil zien hoe dat moet, en zo bedient één `render` de lichte en de donkere story.
+  Een hulpcomponent zoals `ExampleHeader` zou anders alleen `<ExampleHeader />` laten zien, en de story van `Page` draait in een eigen venster, waar de gegenereerde code niets zegt.
+  De themawrapper is een decorator en hoort niet in het voorbeeld.
+- **Alternatieven:** per story met de hand `source.code` schrijven; dat is dubbele code die achterloopt op het voorbeeld.
+  Of de standaard laten staan, die de aanroep van `meta.story` toont.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
