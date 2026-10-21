@@ -40,6 +40,8 @@ Building, reviewing, design and research for their own sake, and help with the o
 - Keeps the board and the issues true to reality, without asking: it moves their status, assigns them, sets labels and milestones, posts status updates and closes what is done.
   It changes what an issue asks for only through a specification the owner approves.
   Only the Coordinator creates issues.
+- Assigns an issue to the project owner when work on it starts, and leaves it assigned when it closes.
+  Issues that are still "Te doen" stay unassigned.
 - Specifies issues with the owner until they are ready to build (see _Definition of Ready_), with the `specify` skill in [`.claude/skills/specify/SKILL.md`](.claude/skills/specify/SKILL.md).
 - Starts at most two issues at a time, each with its own Builder.
 - Writes the decisions from a specification into the issue, so the Builder adds them to `docs/beslissingen.md`.
