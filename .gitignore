@@ -149,5 +149,8 @@ storybook-static
 # macOS
 .DS_Store
 
+# JetBrains IDEs
+.idea/
+
 # Worktrees of Claude Code sessions in the main checkout
 .claude/worktrees/
