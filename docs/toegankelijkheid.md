@@ -13,7 +13,8 @@ Controleer daarom op de gerenderde pagina, in licht en donker:
 - **In Storybook:** lokaal met `pnpm --filter design-system storybook`, of in de statische build van `pnpm --filter design-system build-storybook`.
   CI maakt die build ook bij elke pull request; hij staat als artifact `github-pages` bij de run van de workflow Storybook.
   De themaknop wisselt tussen licht en donker.
-- **Op de site:** in een lokale build, zodra er een app is.
+- **Op de site:** lokaal met `pnpm --filter site dev`.
+  Zet `SITE_ENV=local` in de `.env` in de root.
   Met `data-theme="light"` of `data-theme="dark"` op het `html`-element kies je een thema.
 
 ## Wat CI controleert, en wat niet
