@@ -16,6 +16,8 @@ pnpm --filter design-system storybook
 Vul in `.env` de waarden in; `.env.example` zegt waar elke variabele voor is.
 `.env` komt nooit in de repository.
 
+Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:3000>.
+
 | Opdracht         | Wat het doet                                                  |
 | ---------------- | ------------------------------------------------------------- |
 | `pnpm lint`      | ESLint, Stylelint en Prettier                                 |
@@ -30,8 +32,10 @@ Daarna controleert commitlint of het bericht [Conventional Commits](https://www.
 Schrijf het in het Engels.
 Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvoegen de commit op `main`.
 
+- [`apps/site`](apps/site/README.md): de site
 - [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens en Storybook
 - [`packages/shared`](packages/shared/README.md): hulpfuncties voor de site en de importer, zoals de controle van omgevingsvariabelen
 - [`docs/beslissingen.md`](docs/beslissingen.md): welke keuzes we hebben gemaakt, en waarom
+- [`docs/acceptatieomgeving.md`](docs/acceptatieomgeving.md): hoe de acceptatieomgeving op de hosting staat, en wat de eigenaar daarvoor instelt
 - [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md): wat een mens of de reviewer nakijkt op toegankelijkheid, naast de automatische controles
 - [`AGENTS.md`](AGENTS.md): werkafspraken voor AI-agents, in het Engels, en tot er een bijdragegids is ook de regels voor mensen
