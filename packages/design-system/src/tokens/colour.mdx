@@ -9,41 +9,55 @@ import * as ColourStories from './colour.stories'
 Het palet heeft drie lagen:
 
 - **Kleuren:** blauw (tint 255°), rood (27°) en zand (85°).
-- **Reeksen:** een kleur in één sterkte, gemaakt in OKLCH, met genummerde stappen van licht naar donker. Helder: blauw en rood. Gedempt: staal (een gedempt blauw) en zand. Neutraal: grijs (neutraal zand). Alleen reeksen hebben nummers.
-- **Rollen:** waarvoor een kleur dient, zoals pagina, vlak, rand, lijn en tekst. Dat zijn de semantische tokens. Ze hebben een naam, nooit een nummer, en kiezen per thema een stap uit een reeks.
+- **Reeksen:** een kleur in één sterkte, gemaakt in OKLCH, met genummerde stappen van licht naar donker.
+  Helder: blauw en rood.
+  Gedempt: staal (een gedempt blauw) en zand.
+  Neutraal: grijs (neutraal zand).
+  Alleen reeksen hebben nummers.
+- **Rollen:** waarvoor een kleur dient, zoals pagina, vlak, rand, lijn en tekst.
+  Dat zijn de semantische tokens.
+  Ze hebben een naam, nooit een nummer, en kiezen per thema een stap uit een reeks.
 
 ## Reeksen
 
-De stappen van de reeksen zijn de primitieve tokens, zoals `--hf-colour-blue-100`. Gebruik ze alleen om rollen te maken. Het contrast staat steeds tegen wit.
+De stappen van de reeksen zijn de primitieve tokens, zoals `--hf-colour-blue-100`.
+Gebruik ze alleen om rollen te maken.
+Het contrast staat steeds tegen wit.
 
 <Story of={ColourStories.Primitives} />
 
 ## Rollen
 
-Er zijn vier vlakken, elk met een achtergrond en een rand: vlak (wit), tonaal vlak, zacht vlak en warm vlak. Een kaart is een onderdeel: een vlak met een rand, ronde hoeken en binnenruimte.
+Er zijn vier vlakken, elk met een achtergrond en een rand: vlak (wit), tonaal vlak, zacht vlak en warm vlak.
+Een kaart is een onderdeel: een vlak met een rand, ronde hoeken en binnenruimte.
 
-Gebruik in componenten en pagina's altijd een rol, zoals `--hf-colour-text-default`. Elk token heeft een waarde voor licht en voor donker, via de CSS-functie `light-dark()`.
+Gebruik in componenten en pagina's altijd een rol, zoals `--hf-colour-text-default`.
+Elk token heeft een waarde voor licht en voor donker, via de CSS-functie `light-dark()`.
 
 - Zonder keuze volgt de site de systeeminstelling (`prefers-color-scheme`).
 - `data-theme="light"` of `data-theme="dark"` op het `html`-element kiest een thema.
 - Hetzelfde attribuut werkt ook op een los element: alles daarbinnen krijgt dan dat thema, zoals in de contrasttabellen hieronder.
 
-Op de header en de wedstrijdband gelden eigen tokens: `--hf-colour-text-on-header`, `--hf-colour-text-on-header-secondary` en `--hf-colour-text-on-band`. Gewone links, koppen en secundaire tekst zijn daar niet leesbaar, dus componenten op die achtergronden zetten hun kleuren zelf.
+Op de header en de wedstrijdband gelden eigen tokens: `--hf-colour-text-on-header`, `--hf-colour-text-on-header-secondary` en `--hf-colour-text-on-band`.
+Gewone links, koppen en secundaire tekst zijn daar niet leesbaar, dus componenten op die achtergronden zetten hun kleuren zelf.
 
 Oudere browsers zonder `light-dark()` (van vóór 2024) krijgen alleen het lichte thema.
 
-Waarden met het label _voorlopig_ stonden niet in het afgesproken palet en wachten nog op een besluit. Zie `docs/beslissingen.md`.
+Waarden met het label _voorlopig_ stonden niet in het afgesproken palet en wachten nog op een besluit.
+Zie `docs/beslissingen.md`.
 
 <Story of={ColourStories.SemanticTokens} />
 
 ## Contrast
 
-Elk paar staat hieronder met zijn contrast, in beide thema's tegelijk. De verhoudingen worden in de browser uitgerekend uit de echte CSS, dus ze kloppen ook na een wijziging van een token.
+Elk paar staat hieronder met zijn contrast, in beide thema's tegelijk.
+De verhoudingen worden in de browser uitgerekend uit de echte CSS, dus ze kloppen ook na een wijziging van een token.
 
 - Lopende tekst haalt WCAG 2.2 AAA: minstens 7:1.
 - Alle andere tekst haalt AA: minstens 4,5:1.
 - Een focusrand of de rand van een invoerveld haalt minstens 3:1 tegen wat eromheen ligt.
 
-Een paar dat de eis niet haalt, krijgt de uitkomst **voldoet niet**. Dan passen we niet stilletjes het palet aan, maar leggen we het voor.
+Een paar dat de eis niet haalt, krijgt de uitkomst **voldoet niet**.
+Dan passen we niet stilletjes het palet aan, maar leggen we het voor.
 
 <Story of={ColourStories.Contrast} />
