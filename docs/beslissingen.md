@@ -33,6 +33,17 @@ Per beslissing een kort blok: datum, besluit, waarom en welke alternatieven we h
   Een statische site, bijvoorbeeld met Astro; die is lichter, maar inloggen, het beheer en het voorspellingsspel vragen toch om een server.
   Of PHP, zoals het forum; dat draait overal, maar de projecteigenaar en de agents werken in TypeScript.
 
+### Standaard alleen kop, link en bronnaam
+
+- **Datum:** 19 oktober 2026
+- **Besluit:** van elk item uit een bron tonen we standaard de kop, de link naar de bron en de bronnaam.
+  Een intro of een foto tonen we alleen met schriftelijke toestemming van de bron.
+  Het bronnenregister legt dat per bron vast (#9), en de importer slaat niets op wat we niet mogen tonen.
+- **Waarom:** we willen lezers naar de journalistiek zelf sturen, niet die vervangen.
+  Het werk blijft van de journalisten en de uitgevers.
+  Wat we niet opslaan, kunnen we ook niet per ongeluk tonen.
+- **Alternatieven:** intro's en foto's standaard tonen en op verzoek weghalen; maar dan gebruiken we werk zonder dat iemand ons dat heeft toegestaan.
+
 ### Nederlands voor bezoekers, Brits Engels voor code
 
 - **Datum:** 19 oktober 2026
