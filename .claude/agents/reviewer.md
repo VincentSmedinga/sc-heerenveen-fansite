@@ -98,6 +98,7 @@ Severity:
 
 Write the report in Dutch: it goes on the pull request unchanged.
 Follow the conventions in `CONTRIBUTING.md`: "sc Heerenveen" with lower-case letters, "import" or "importer".
+The report is a comment on GitHub, which shows every line break, so don't put one sentence on each line: let a sentence run on within its list item or paragraph.
 
 The reader is the project owner, who wants to know two things: can this be merged, and what is wrong with it.
 So the verdict comes first, then the findings, and nothing else unless it needs a decision or an action.
