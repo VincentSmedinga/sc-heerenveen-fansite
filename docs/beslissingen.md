@@ -129,9 +129,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - een Builder: Sonnet, en voor een issue dat veel oordeel vraagt over ontwerp of beveiliging een sterker model, dat de Coordinator in de opdracht noemt;
   - de Reviewer: Fable, via de regel `model` in `.claude/agents/reviewer.md`, zodat hij een ander model gebruikt dan de Builder;
   - sessies voor routinewerk, zoals het bijwerken van het bord: Haiku of Sonnet.
-- **Waarom:** specificeren en plannen vragen oordeel: afwegingen, onduidelijkheden en samenhang tussen issues. Dat zijn weinig, korte sessies, dus het sterkere model kost weinig. Bouwen volgens een goede specificatie is werk waar Sonnet goed in is. De Reviewer controleert werk dat hij niet schreef; op hetzelfde model als de Builder deelt hij diens blinde vlekken. Een verse sessie per taak houdt de context klein.
-- **Let op:** een sessie die de Coordinator start, gebruikt hooguit het model van de Coordinator. Een sterkere Builder kiest de projecteigenaar zelf in het modelmenu.
-- **Alternatieven:** alles op één model, zoals tot nu toe (Sonnet). Dat is eenvoudig, maar de Reviewer deelt dan de blinde vlekken van de Builder en de specificaties krijgen geen sterker oordeel. Of overal het sterkste model; dat kost meer van de limiet van het abonnement voor werk dat een goede specificatie al grotendeels bepaalt.
+- **Waarom:** specificeren en plannen vragen oordeel: afwegingen, onduidelijkheden en samenhang tussen issues.
+  Dat zijn weinig, korte sessies, dus het sterkere model kost weinig.
+  Bouwen volgens een goede specificatie is werk waar Sonnet goed in is.
+  De Reviewer controleert werk dat hij niet schreef; op hetzelfde model als de Builder deelt hij diens blinde vlekken.
+  Een verse sessie per taak houdt de context klein.
+- **Let op:** een sessie die de Coordinator start, gebruikt hooguit het model van de Coordinator.
+  Een sterkere Builder kiest de projecteigenaar zelf in het modelmenu.
+- **Alternatieven:** alles op één model, zoals tot nu toe (Sonnet).
+  Dat is eenvoudig, maar de Reviewer deelt dan de blinde vlekken van de Builder en de specificaties krijgen geen sterker oordeel.
+  Of overal het sterkste model; dat kost meer van de limiet van het abonnement voor werk dat een goede specificatie al grotendeels bepaalt.
 - **Herzien:** als het verschil in de praktijk niet opweegt tegen de kosten, of de limiet van het abonnement knelt.
 
 ### Eén zin per regel
