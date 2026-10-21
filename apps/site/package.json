@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "assemble": "node scripts/assemble.js",
-    "build": "next build",
+    "build": "tsc -b && next build",
     "dev": "next dev",
     "smoke": "node scripts/smoke.js",
     "test": "vitest run",
