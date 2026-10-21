@@ -14,11 +14,11 @@ De workflow [`acceptance.yml`](../.github/workflows/acceptance.yml) doet bij elk
 1. Hij bouwt de site (`pnpm --filter site build`) en zet het resultaat in één map (`pnpm --filter site assemble`).
 2. Hij start die map zoals de host dat doet en controleert wat een bezoeker en een zoekmachine krijgen (`pnpm --filter site smoke`).
 3. Hij kopieert de map met rsync over SSH, op poort 26, naar de map van de app op de host.
-4. Hij raakt `tmp/restart.txt` aan, zodat Passenger de app opnieuw start.
+4. Hij raakt `tmp/restart.txt` aan, zodat de host de app opnieuw start.
 
 Op de server bouwen we niets.
 De map bevat de standalone build van Next.js met zijn eigen `node_modules`, zonder symbolische links.
-Waarom dat zo is, staat onder _Als het niet werkt_.
+Waarom dat zo is, staat onder _Wat de eerste deploy ons leerde_.
 
 Ontbreekt een van de geheimen hieronder, dan doet de workflow alleen stap 1 en 2 en meldt dat het kopiëren is overgeslagen.
 `main` wordt er niet rood van.
@@ -81,7 +81,7 @@ Een agent heeft daar geen toegang.
    | ----------------- | ------------------------------------------------------------------ |
    | `SSH_PRIVATE_KEY` | De hele inhoud van `~/.ssh/fansite-acceptatie`                     |
    | `SSH_KNOWN_HOSTS` | De uitvoer van `ssh-keyscan -p 26 <host>`                          |
-   | `SSH_HOST`        | De hostnaam van de SSH-server, bij deze hosting `h68.mijn.host`    |
+   | `SSH_HOST`        | De hostnaam van de SSH-server                                      |
    | `SSH_USER`        | De gebruikersnaam voor SSH, dezelfde als die van DirectAdmin       |
    | `DEPLOY_PATH`     | Het volledige pad van de map van de app, zonder slash aan het eind |
 
