@@ -348,7 +348,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Wat is er nieuw:** dit beantwoordt de open vraag uit #29.
   De changelog van release-please blijft Engels en technisch.
   De tekst voor de pagina 'Wat is er nieuw' schrijven we per release met de hand, in gewone taal.
-  Dat gebeurt in een gewone pull request voordat de release-pull request wordt samengevoegd, want release-please schrijft zijn eigen branch bij elke merge naar `main` opnieuw.
+  Dat gebeurt in een gewone pull request voordat de release-pull request wordt samengevoegd, want release-please schrijft zijn eigen branch bij elke run opnieuw.
   Hoe de pagina die teksten leest, bepaalt #29.
 - **Waarom:** release-please maakt versienummers en changelog uit de commits op `main`.
   De geschiedenis van git blijft zo in één taal.
@@ -363,10 +363,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 20 oktober 2026
 - **Besluit:** de hele repository heeft één versie, in `package.json` in de root.
-  De eerste release is 0.1.0, met de tag `v0.1.0`. release-please houdt een release-pull request bij.
-  Samenvoegen verhoogt de versie, vult `CHANGELOG.md` aan en maakt een release op GitHub.
+  De eerste release is 0.1.0, met de tag `v0.1.0`.
+  De eigenaar start release-please met `pnpm release` (een handmatige run van de workflow Release); die opent of werkt de release-pull request bij.
+  Samenvoegen verhoogt de versie en vult `CHANGELOG.md` aan.
+  De samenvoeging wijzigt `.release-please-manifest.json`, en die push start de workflow weer, nu alleen om te taggen en een release op GitHub te maken.
   Tot 1.0.0, dat we voor de lancering bewaren, verhogen een feature en een breaking change het middelste cijfer.
 - **Waarom:** de site en de importer gaan samen live, en we publiceren geen packages.
+  De release-pull request komt er pas als de eigenaar erom vraagt (besloten op 21 oktober 2026).
+  Anders staat er bij elke `feat` of `fix` op `main` een openstaande pull request, en herschrijft release-please zijn branch bij elke merge.
 - **Let op:** release-please maakt zijn pull request met het token van GitHub Actions.
   Daarvoor mag GitHub Actions in deze repository pull requests maken.
   Een pull request van een workflow start geen andere workflows, dus de controles ontbreken.
