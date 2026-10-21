@@ -141,6 +141,26 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of overal het sterkste model; dat kost meer van de limiet van het abonnement voor werk dat een goede specificatie al grotendeels bepaalt.
 - **Herzien:** als het verschil in de praktijk niet opweegt tegen de kosten, of de limiet van het abonnement knelt.
 
+### Bouwen in plakken, per release
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** we bouwen de site in dunne plakken.
+  Elk issue levert iets op dat je op de acceptatieomgeving kunt zien, met alle lagen die het nodig heeft en niet meer.
+  Releases vervangen de mijlpalen.
+  Release 1, "Nieuws", is de kleinste site die we durven te lanceren: koppen met link en bronnaam uit de bronnen die we mogen gebruiken, met inloggen en verbergen in het beheer.
+  Tabellen, componenten, pagina's en adapters komen met het eerste issue dat ze nodig heeft.
+  Vier dingen zitten vanaf de eerste plak in: het weergavebeleid met de strengste standaardwaarden, een nette fetcher, automatische toegankelijkheidscontroles en een Content Security Policy die verzoeken naar derden blokkeert.
+- **Waarom:** op het oude bord, laag voor laag, kwam het eerste zichtbare resultaat na ongeveer twintig issues.
+  In plakken laat elke pull request iets zien, dus het derde controlemoment (het resultaat op acceptatie) betekent elke keer iets.
+  Risico's komen vroeg boven: de eerste deploy gaf op de hosting problemen die CI niet zag, en de importer met cron en MariaDB op diezelfde hosting is het volgende onbekende.
+  De issues worden kleiner, en een kleine site kan eerder live.
+- **Gevolg:** de issues #8, #9, #11, #12, #20, #21, #22, #23 en #32 zijn vervangen door nieuwe issues (#69 tot en met #76) en gesloten als niet gepland; hun tekst staat in de nieuwe issues onder "Uit het oorspronkelijke plan".
+  Een issue wordt dus niet omgebouwd, maar vervangen.
+  Elk nieuw issue wordt gespecificeerd met de `specify`-skill als het begint.
+  Daardoor kunnen twee Builders vaker over dezelfde bestanden gaan; de Coordinator zet daarom een issue naast een issue dat iets anders raakt.
+- **Alternatieven:** laag voor laag blijven bouwen: eerst de database, dan de adapters, dan de site, dan het beheer.
+  Het verbergen van een item bij de lancering met een opdracht op de server; dat is verworpen, omdat er bij de lancering inloggen en schermen zijn.
+
 ### Eén zin per regel
 
 - **Datum:** 21 oktober 2026
