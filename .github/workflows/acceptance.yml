@@ -92,7 +92,7 @@ jobs:
             -e "ssh -p 26 -i $HOME/.ssh/acceptance_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
             "$RUNNER_TEMP/site/" "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
 
-      # Passenger starts the app again when tmp/restart.txt changes.
+      # The host starts the app again when tmp/restart.txt changes.
       - name: Restart the app
         if: steps.secrets.outputs.ready == 'true'
         env:

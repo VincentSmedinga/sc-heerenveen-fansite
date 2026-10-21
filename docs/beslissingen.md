@@ -224,6 +224,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een wachtwoord via DirectAdmin.
   Dat bekijken we zodra er testgegevens op staan.
 
+### De map voor de host heeft geen symbolische links
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** `pnpm --filter site assemble` maakt een map met één platte `node_modules` van echte mappen, zonder symbolische links.
+  Het script stopt met een foutmelding als er toch een link overblijft.
+- **Waarom:** de eerste deploy gaf op acceptatie een 500.
+  Node laadt op de host één bestand van Next.js via het pad van de link, en zoekt de pakketten naast Next.js, zoals `@swc/helpers`, dan op de verkeerde plek.
+  Lokaal en in CI gebeurt dat niet, dus de rooktest zag het niet.
+  Waarom Node dat op de host doet, hebben we niet uitgezocht.
+  Zonder links is er niets om verkeerd te volgen.
+- **Alternatieven:** `node-linker=hoisted` in pnpm voor de hele werkruimte.
+  Dat verandert de installatie van alle packages voor een probleem van één map.
+  Of een startbestand dat Node de paden voorbereidt; dat hangt af van interne details van Next.js en Node.
+
 ### Adressen: sc.heerenveen.org voor productie, acc.sc.heerenveen.org voor acceptatie
 
 - **Datum:** 21 oktober 2026

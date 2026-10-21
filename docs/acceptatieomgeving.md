@@ -14,10 +14,11 @@ De workflow [`acceptance.yml`](../.github/workflows/acceptance.yml) doet bij elk
 1. Hij bouwt de site (`pnpm --filter site build`) en zet het resultaat in één map (`pnpm --filter site assemble`).
 2. Hij start die map zoals de host dat doet en controleert wat een bezoeker en een zoekmachine krijgen (`pnpm --filter site smoke`).
 3. Hij kopieert de map met rsync over SSH, op poort 26, naar de map van de app op de host.
-4. Hij raakt `tmp/restart.txt` aan, zodat Passenger de app opnieuw start.
+4. Hij raakt `tmp/restart.txt` aan, zodat de host de app opnieuw start.
 
 Op de server bouwen we niets.
-De map bevat de standalone build van Next.js met zijn eigen `node_modules`.
+De map bevat de standalone build van Next.js met zijn eigen `node_modules`, zonder symbolische links.
+Waarom dat zo is, staat onder _Wat de eerste deploy ons leerde_.
 
 Ontbreekt een van de geheimen hieronder, dan doet de workflow alleen stap 1 en 2 en meldt dat het kopiëren is overgeslagen.
 `main` wordt er niet rood van.
@@ -50,6 +51,11 @@ Een agent heeft daar geen toegang.
    - Omgevingsvariabele: `SITE_ENV` met de waarde `acceptance`.
    - Kies **niet** _Run NPM Install_: de build brengt zijn eigen `node_modules` mee.
      Staat er in de map van de app al een `node_modules` die een symbolische link is, verwijder die link dan.
+
+   Verwijder daarna het bestand `domains/acc.sc.heerenveen.org/public_html/index.html`.
+   Dat is de plaatsvervangende pagina van mijn.host.
+   Zolang hij er staat, toont `https://acc.sc.heerenveen.org` die pagina in plaats van de site.
+
 3. **Database.**
    Maak onder _MySQL Management_ een lege database met een eigen gebruiker voor acceptatie.
    Bewaar de gegevens in je wachtwoordmanager.
@@ -76,7 +82,7 @@ Een agent heeft daar geen toegang.
    | `SSH_PRIVATE_KEY` | De hele inhoud van `~/.ssh/fansite-acceptatie`                     |
    | `SSH_KNOWN_HOSTS` | De uitvoer van `ssh-keyscan -p 26 <host>`                          |
    | `SSH_HOST`        | De hostnaam van de SSH-server                                      |
-   | `SSH_USER`        | De gebruikersnaam voor SSH                                         |
+   | `SSH_USER`        | De gebruikersnaam voor SSH, dezelfde als die van DirectAdmin       |
    | `DEPLOY_PATH`     | Het volledige pad van de map van de app, zonder slash aan het eind |
 
 7. **Eerste deploy.**
@@ -86,7 +92,9 @@ Een agent heeft daar geen toegang.
 
 - De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" en "Binnenkort meer." zien.
 - `curl -I https://acc.sc.heerenveen.org` toont `x-robots-tag: noindex, nofollow`.
+  Die header staat ook bij `/robots.txt` en bij een pagina die niet bestaat.
 - <https://acc.sc.heerenveen.org/robots.txt> toont `Disallow: /`.
+- <https://acc.sc.heerenveen.org/bestaat-niet> toont de Nederlandse 404-pagina "Pagina niet gevonden".
 
 ## Als het niet werkt
 
@@ -94,18 +102,27 @@ Een agent heeft daar geen toegang.
   De melding noemt welk.
 - De site start niet: kijk in het logboek van de app (_Setup Node.js App_ of het bestand `stderr.log` in de map van de app).
   Een ontbrekende of verkeerde `SITE_ENV` staat daar met naam bij.
-- Passenger kan `apps/site/server.js` niet laden: dat bestand is een ES-module.
-  Meld dat op #6; een klein startbestand met `import()` lost het op.
+- De site geeft een 500 en `stderr.log` zegt `Cannot find module '@swc/helpers/...'`: de map op de host bevat symbolische links.
+  `pnpm --filter site assemble` haalt ze weg en stopt als er een overblijft.
+  Controleer de map op de host met `find <map van de app> -type l`; die opdracht mag niets tonen.
 
-## Wat we nog niet hebben getest
+## Wat de eerste deploy ons leerde
 
 We hadden bij het bouwen geen toegang tot de hosting.
-Getest zijn de build, de map en de rooktest, lokaal en in CI.
-Deze punten blijken pas bij de eerste deploy:
+De eerste deploy, op 21 oktober 2026, liet zien hoe die werkt:
 
-- of Passenger op mijn.host de standalone build van Next.js start, en `apps/site/server.js` als startbestand accepteert;
-- of rsync met `--delete` de bestanden die de hosting zelf in de map van de app zet, ongemoeid laat.
-  Alleen `tmp/`, `.htaccess` en `stderr.log` staan op de uitzonderingenlijst in de workflow.
+- De host start de app met `lsnode.js` van LiteSpeed, niet met Passenger zelf, op Node 24.20 en zonder bijzondere opties.
+  `apps/site/server.js` is een ES-module en laadt zonder omweg.
+- Op de host staat rsync (`/usr/bin/rsync`).
+  Met `--delete` en de uitzonderingen in de workflow bleven `tmp/` en `stderr.log` staan.
+- De app start opnieuw zodra iemand `tmp/restart.txt` aanraakt.
+- Een map met symbolische links, zoals pnpm ze maakt, werkte niet.
+  Node laadt op de host één bestand van Next.js via het pad van de link, en zoekt de pakketten naast Next.js dan op de verkeerde plek.
+  Lokaal en in CI gebeurt dat niet, dus de rooktest zag het niet.
+  Waarom Node dat op de host doet, is niet uitgezocht.
+  `assemble` maakt daarom een platte `node_modules` van echte mappen (zie `docs/beslissingen.md`).
+- Een bestand in `public_html` gaat voor de app.
+  De plaatsvervangende pagina `index.html` verborg daarom de site op `/`, tot we hem verwijderden.
 
 ## Productie
 

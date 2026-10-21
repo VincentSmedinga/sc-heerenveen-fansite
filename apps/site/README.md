@@ -14,12 +14,12 @@ pnpm --filter site dev
 De site luistert op <http://localhost:3000>.
 Next.js leest alleen een `.env` in deze map, dus `next.config.ts` laadt de `.env` uit de root zelf.
 
-| Opdracht                                   | Wat het doet                                                                               |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| `pnpm --filter site dev`                   | De site met live herladen                                                                  |
-| `pnpm --filter site build`                 | De build, als standalone map in `.next/standalone`                                         |
-| `pnpm --filter site assemble <nieuwe map>` | Zet de standalone build en de statische bestanden in één map, zoals de host ze nodig heeft |
-| `pnpm --filter site smoke <map>`           | Start die map en controleert wat een bezoeker en een zoekmachine krijgen                   |
+| Opdracht                                   | Wat het doet                                                                           |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `pnpm --filter site dev`                   | De site met live herladen                                                              |
+| `pnpm --filter site build`                 | De build, als standalone map in `.next/standalone`                                     |
+| `pnpm --filter site assemble <nieuwe map>` | Zet de standalone build en de statische bestanden in één map, zonder symbolische links |
+| `pnpm --filter site smoke <map>`           | Start die map en controleert wat een bezoeker en een zoekmachine krijgen               |
 
 ## Zoekmachines
 
