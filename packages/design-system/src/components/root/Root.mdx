@@ -1,0 +1,36 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Componenten/Root" />
+
+# Root
+
+De `html` van een pagina, met `lang="nl"`.
+
+`Root` heeft geen voorbeeld in Storybook, want het maakt de `html` zelf, en die past niet in een pagina die al een `html` heeft.
+De tests van `Root` controleren het wel, in een eigen document.
+
+## Gebruik
+
+In Next.js zet je `Root` en `Body` in de layout van de hele site:
+
+```tsx
+import { Body, Root } from '@fansite/design-system'
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <Root>
+      <Body>{children}</Body>
+    </Root>
+  )
+}
+```
+
+## Wat het doet
+
+- **De taal:** `Root` zet altijd `lang="nl"` op de `html`.
+  Een andere taal geef je niet mee.
+  Een zin of passage in een andere taal krijgt een eigen `lang` op het element zelf.
+- **Andere attributen:** die gaan door naar de `html`, zoals `data-theme="dark"` om een thema te kiezen.
+- **De `head`:** `Root` heeft er geen plek voor.
+  Next.js beheert de `head`, met de Metadata API.
+  Een `Head`-component naast `Body` komt pas als er extra inhoud in de `head` nodig is.

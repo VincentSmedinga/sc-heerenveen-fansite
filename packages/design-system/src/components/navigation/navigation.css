@@ -1,0 +1,25 @@
+/* A row of links that wraps on a narrow screen. */
+
+@layer hf.components {
+  .hf-navigation-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* A target of at least 44 pixels high, more than the 24 that WCAG asks for. */
+  .hf-navigation-link {
+    align-items: center;
+    display: inline-flex;
+    min-block-size: 2.75rem;
+
+    /* The current page is not told by colour alone: it is bolder, with a thicker underline. */
+    &[aria-current='page'] {
+      font-weight: var(--hf-strong-font-weight);
+      text-decoration-thickness: 0.2em;
+    }
+  }
+}

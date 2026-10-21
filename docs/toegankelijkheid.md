@@ -87,7 +87,7 @@ Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het
 
 Zo test je het: Tokens/Kleur in Storybook toont het contrast van elk paar in beide thema's.
 Gebruik de semantische tokens; een paar dat daar niet staat, meet je na met de contrastmeter in de ontwikkelhulpmiddelen van je browser.
-Een bekend open punt is de focusrand op de wedstrijdband; zie `docs/beslissingen.md`.
+Op de donkerblauwe header en wedstrijdband gelden eigen tokens voor de focusrand, die daar ook 3:1 halen.
 
 ### Inzoomen tot 400%
 
@@ -136,5 +136,6 @@ Gebruik wat er is, in plaats van het opnieuw te bouwen (#19):
 - [HTML-elementen/Koppen](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/html-elementen-koppen--documentatie): de stijl van een kop staat los van het niveau.
 - [HTML-elementen/Links](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/html-elementen-links--documentatie): onderstreepte links, met hover, focus en bezocht.
 - [HTML-elementen/Formulier](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/html-elementen-formulier--documentatie): labels, velden en knoppen van 44 pixels hoog, en randen van 3:1.
+- [Componenten](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/componenten-overzicht--documentatie): de componenten voor de paginaopbouw, met de landmarks `header`, `nav`, `main` en `footer`, een navigatie met een naam en een kop met een niveau los van zijn stijl.
 
-De componenten en patronen volgen in #20.
+De patronen volgen met de pagina's die ze nodig hebben.

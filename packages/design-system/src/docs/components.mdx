@@ -1,13 +1,225 @@
-import { Meta } from '@storybook/addon-docs/blocks'
+import { Meta, Unstyled } from '@storybook/addon-docs/blocks'
 
-<Meta title="Componenten" />
+<Meta title="Componenten/Overzicht" />
 
 # Componenten
 
-Dit hoofdstuk is nog leeg.
-Hier komen de React-componenten, elk met voorbeelden, documentatie en tests:
+De React-componenten van het designsysteem.
+Elk onderdeel heeft hieronder een eigen pagina, met voorbeelden in licht en donker.
+Een template voor een pagina bevat geen HTML, alleen deze componenten.
 
-- **Basis:** link, knop, kop, tekst, pictogram, bronlabel en tijdsaanduiding.
-- **Inhoud:** nieuwsregel met kop, bron en tijd, kaart met foto, podcastregel en forumregel.
+Dit zijn de eerste twaalf: wat een pagina minimaal nodig heeft.
+Knoppen, pictogrammen en de componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
 
-Tot die er zijn, staan de stijlen voor gewone HTML onder [HTML-elementen](?path=/docs/html-elementen-koppen--documentatie).
+## Gebruiken
+
+Het package geeft de componenten als TypeScript-bronbestanden, zonder eigen bouwstap.
+De site compileert ze mee (in Next.js met `transpilePackages`).
+Importeer de componenten uit het package, en de stijlen uit `index.css`:
+
+```tsx
+import { Heading, Page, PageBody } from '@fansite/design-system'
+```
+
+```css
+@import url('@fansite/design-system/index.css');
+```
+
+## Een pagina bouwen
+
+`Root` en `Body` zijn de `html` en de `body`.
+`Page` bevat een `PageHeader`, een `PageBody` en een `PageFooter`, in die volgorde.
+De `main` van de pagina is de `PageBody` zelf, of zit erin.
+
+```tsx
+<Root>
+  <Body>
+    <Page>
+      <PageHeader>
+        <Link href="/">
+          <Logo />
+        </Link>
+        <Navigation items={menu} label="Hoofdmenu" />
+      </PageHeader>
+      <PageBody>
+        <Heading level={1}>Nieuws</Heading>
+        <Text>…</Text>
+      </PageBody>
+      <PageFooter>
+        <Text appearance="meta">…</Text>
+      </PageFooter>
+    </Page>
+  </Body>
+</Root>
+```
+
+De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata API.
+
+## De componenten
+
+<Unstyled>
+  <table>
+    <caption>De twaalf componenten</caption>
+    <thead>
+      <tr>
+        <th scope="col">Component</th>
+        <th scope="col">Maakt</th>
+        <th scope="col">Eigen props</th>
+        <th scope="col">
+          Toegestane elementen (<code>as</code>)
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">
+          <code>Root</code>
+        </th>
+        <td>
+          <code>html</code>, met <code>lang="nl"</code>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Body</code>
+        </th>
+        <td>
+          <code>body</code>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Page</code>
+        </th>
+        <td>
+          <code>div</code>, met de maximale breedte
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>PageHeader</code>
+        </th>
+        <td>
+          <code>header</code>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>PageBody</code>
+        </th>
+        <td>
+          <code>main</code> of <code>div</code>
+        </td>
+        <td>
+          <code>as</code>
+        </td>
+        <td>
+          <code>main</code> (standaard), <code>div</code>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>PageFooter</code>
+        </th>
+        <td>
+          <code>footer</code>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Navigation</code>
+        </th>
+        <td>
+          <code>nav</code> met een lijst met links
+        </td>
+        <td>
+          <code>label</code> (verplicht), <code>items</code>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Heading</code>
+        </th>
+        <td>
+          <code>h1</code> tot en met <code>h4</code>
+        </td>
+        <td>
+          <code>level</code> (verplicht), <code>appearance</code>
+        </td>
+        <td>het niveau kiest het element</td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Text</code>
+        </th>
+        <td>
+          <code>p</code> of <code>span</code>
+        </td>
+        <td>
+          <code>appearance</code>, <code>as</code>
+        </td>
+        <td>
+          <code>p</code> (standaard), <code>span</code>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Link</code>
+        </th>
+        <td>
+          <code>a</code>
+        </td>
+        <td>
+          <code>href</code> (verplicht)
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>List</code>
+        </th>
+        <td>
+          <code>ul</code> of <code>ol</code>
+        </td>
+        <td>
+          <code>as</code>
+        </td>
+        <td>
+          <code>ul</code> (standaard), <code>ol</code>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Logo</code>
+        </th>
+        <td>een plaatje met een naam</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Afspraken
+
+- **Attributen:** elk component neemt de attributen van zijn element over, zoals `id`, `lang` en `aria-*`.
+  Een `className` komt bij de klassen van het component.
+  Alleen wat een component zelf vastlegt, geef je niet mee: de `lang` van `Root` en de naam van `Navigation` en `Logo`.
+- **Het element kiezen:** waar een component meer dan één element kan zijn, kies je met `as` uit een vaste lijst.
+  De typen laten geen ander element toe.
+- **Klassen:** de componenten gebruiken de klassen met het voorvoegsel `hf-` en zitten in de laag `hf.components`.
+- **Niveau en stijl:** het niveau van een kop volgt de structuur van de pagina, de stijl het ontwerp.
+  Zie [Heading](?path=/docs/componenten-heading--documentatie).
+
+Tot er meer componenten zijn, staan de stijlen voor gewone HTML onder [HTML-elementen](?path=/docs/html-elementen-koppen--documentatie).

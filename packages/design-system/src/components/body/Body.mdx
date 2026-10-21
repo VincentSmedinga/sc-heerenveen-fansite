@@ -1,0 +1,32 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Componenten/Body" />
+
+# Body
+
+De `body` van een pagina.
+
+`Body` heeft geen voorbeeld in Storybook, want het maakt de `body` zelf, en die past niet in een pagina die al een `body` heeft.
+De tests van `Body` controleren het wel, in een eigen document.
+
+## Gebruik
+
+`Body` staat in `Root` en bevat de `Page`:
+
+```tsx
+import { Body, Page, Root } from '@fansite/design-system'
+
+;<Root>
+  <Body>
+    <Page>…</Page>
+  </Body>
+</Root>
+```
+
+## Wat het doet
+
+- **Kleur en lettertype:** die komen uit de basisstijlen van het designsysteem.
+  `Body` voegt geen klasse toe.
+- **Andere attributen:** die gaan door naar de `body`.
+- **Niet te verwarren met `PageBody`:** `Body` is de `body` van het document, `PageBody` het deel van de pagina tussen de header en de footer.
+  Zo heten ze ook in de ontwerpsystemen van de Nederlandse overheid (NL Design System).

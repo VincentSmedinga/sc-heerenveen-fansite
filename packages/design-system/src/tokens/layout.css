@@ -1,0 +1,11 @@
+/*
+ * Layout tokens: the maximum width of a page, and the margin on either side of it on a narrow screen.
+ * The Page component uses them; a page that isn't built with it can use them too.
+ */
+
+@layer hf.tokens {
+  :root {
+    --hf-page-margin: 1rem;
+    --hf-page-max-width: 75rem;
+  }
+}

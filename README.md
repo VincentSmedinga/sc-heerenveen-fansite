@@ -57,7 +57,7 @@ Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvo
 
 - [`apps/site`](apps/site/README.md): de site
 - [`packages/db`](packages/db/README.md): de database, met het schema, de migraties en de seed
-- [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens en Storybook
+- [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens, componenten en Storybook
 - [`packages/shared`](packages/shared/README.md): hulpfuncties voor de site en de importer, zoals de controle van omgevingsvariabelen
 - [`docs/beslissingen.md`](docs/beslissingen.md): welke keuzes we hebben gemaakt, en waarom
 - [`docs/acceptatieomgeving.md`](docs/acceptatieomgeving.md): hoe de acceptatieomgeving op de hosting staat, en wat de eigenaar daarvoor instelt

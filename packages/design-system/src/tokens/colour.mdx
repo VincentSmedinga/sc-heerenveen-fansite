@@ -38,8 +38,9 @@ Elk token heeft een waarde voor licht en voor donker, via de CSS-functie `light-
 - `data-theme="light"` of `data-theme="dark"` op het `html`-element kiest een thema.
 - Hetzelfde attribuut werkt ook op een los element: alles daarbinnen krijgt dan dat thema, zoals in de contrasttabellen hieronder.
 
-Op de header en de wedstrijdband gelden eigen tokens: `--hf-colour-text-on-header`, `--hf-colour-text-on-header-secondary` en `--hf-colour-text-on-band`.
-Gewone links, koppen en secundaire tekst zijn daar niet leesbaar, dus componenten op die achtergronden zetten hun kleuren zelf.
+Op de header en de wedstrijdband gelden eigen tokens: `--hf-colour-text-on-header`, `--hf-colour-text-on-header-secondary` en `--hf-colour-text-on-band`, en voor de focusrand `--hf-colour-focus-on-header` en `--hf-colour-focus-on-band`.
+Gewone links, koppen, secundaire tekst en de gewone focusrand zijn daar niet leesbaar of niet zichtbaar genoeg, dus componenten op die achtergronden zetten hun kleuren zelf.
+De `PageHeader` doet dat voor alles wat erin staat.
 
 Oudere browsers zonder `light-dark()` (van vóór 2024) krijgen alleen het lichte thema.
 
