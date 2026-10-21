@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "Hulpfuncties die de site en de importer allebei gebruiken.",
-  "license": "MIT",
+  "license": "EUPL-1.2",
   "type": "module",
   "exports": {
     "./env": "./src/env.ts"

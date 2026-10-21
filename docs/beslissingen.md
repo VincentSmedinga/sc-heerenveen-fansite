@@ -61,6 +61,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alles in het Engels, zodat ook wie geen Nederlands spreekt kan meedoen; maar de site en de mensen eromheen zijn Nederlands.
   Of alles in het Nederlands, ook de code; dan ontstaat een mengsel met de Engelse namen uit de bibliotheken.
 
+### Licentie: EUPL-1.2 voor de code en onze eigen teksten
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de code en onze eigen teksten (documentatie, Storybook) vallen onder de EUPL-1.2.
+  Dat vervangt de MIT-licentie waarmee de repository begon.
+  Niet onder de licentie vallen de lettertypes (OFL), de tekst van de gedragscode (Contributor Covenant), het clubwapen en ander materiaal van derden, en de wedstrijdgegevens (zie #39).
+- **Waarom:** de EUPL is een copyleft-licentie met een bepaling voor gebruik via het netwerk.
+  Wie de code aanpast en als site laat draaien, moet de aangepaste broncode delen.
+  Dat past bij een project zonder winst dat niemand wil zien verdwijnen in een gesloten kopie.
+  De EUPL heeft een officiële Nederlandse tekst, en dependencies onder MIT, Apache-2.0 of BSD passen erin.
+  Er waren nog geen andere bijdragers, dus we hoefden niemand om toestemming te vragen.
+  Wie de code al onder MIT heeft ontvangen, houdt die rechten voor die versies.
+- **Alternatieven:** MIT houden; dat staat ook gesloten kopieën toe.
+  Een andere copyleft-licentie, zoals de AGPL-3.0; die is vergelijkbaar, maar heeft geen officiële Nederlandse tekst.
+  Voor de teksten CC BY-SA 4.0; dat zijn twee licenties in plaats van één.
+
 ## Werkwijze
 
 ### Drie rollen voor AI-agents

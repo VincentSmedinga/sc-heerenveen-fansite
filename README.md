@@ -54,3 +54,20 @@ Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvo
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): hoe je meedoet, en de afspraken voor issues, branches, pull requests en taal
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): de gedragscode
 - [`AGENTS.md`](AGENTS.md): werkafspraken voor AI-agents, in het Engels
+
+## Licentie
+
+Copyright (c) 2026 Vincent Smedinga.
+Licensed under the EUPL.
+
+De code en onze eigen teksten vallen onder de [EUPL-1.2](LICENSE), de European Union Public Licence.
+Er is ook een [officiële Nederlandse tekst](https://eupl.eu/1.2/nl/) die even zwaar weegt.
+
+Dit valt er niet onder:
+
+- de lettertypes, die hun eigen open licentie houden (OFL);
+- de tekst van de gedragscode, die van de Contributor Covenant komt;
+- het clubwapen en andere beelden en teksten van derden;
+- de wedstrijdgegevens, waarover een apart besluit volgt (#39).
+
+Wie de code al onder MIT heeft ontvangen, houdt die rechten voor die versies.
