@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "De fansite over sc Heerenveen, sinds 1997: koppen en links, zonder advertenties.",
-  "license": "MIT",
+  "license": "EUPL-1.2",
   "type": "module",
   "packageManager": "pnpm@12.14.0",
   "engines": {

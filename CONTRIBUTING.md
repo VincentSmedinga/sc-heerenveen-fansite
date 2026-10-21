@@ -138,6 +138,7 @@ Wie een pull request maakt, doet dat zelf al voordat hij hem opent.
   Een nieuwe omgevingsvariabele staat in `.env.example` en wordt gecontroleerd met `parseEnv` uit `@fansite/shared/env`.
 - Invoer van buiten, zoals feeds, formulieren en URL's, wordt gecontroleerd, en uitvoer wordt veilig weergegeven (geëscaped).
   Er is geen `dangerouslySetInnerHTML` met inhoud van elders.
-- Een nieuwe dependency is nodig, wordt onderhouden, heeft een licentie die bij MIT past en staat op een exacte versie.
+- Een nieuwe dependency is nodig, wordt onderhouden en staat op een exacte versie.
+  De licentie past bij de EUPL-1.2: een vrije licentie zoals MIT, Apache-2.0 of BSD, of een licentie uit de lijst in de bijlage van de EUPL.
   Een installatiescript ervan is gelezen voordat het in `allowBuilds` komt.
 - Workflows zetten elke actie vast op een volledige commit-SHA met de versie als commentaar, vragen de minste rechten en geven onbetrouwbare invoer door via omgevingsvariabelen.
