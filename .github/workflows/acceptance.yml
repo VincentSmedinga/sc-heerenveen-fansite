@@ -1,0 +1,104 @@
+# Puts every merge to main on the acceptance environment, https://acc.sc.heerenveen.org. It builds the site, starts the
+# build the way the host does to check it, and copies it over SSH. docs/acceptatieomgeving.md says what the owner sets up
+# on the host and in GitHub. Until the secrets are there, the job builds and checks, and skips the copy with a notice, so
+# main stays green.
+
+name: Acceptance
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time, and a running deploy finishes: a half-copied folder would break the site.
+concurrency:
+  cancel-in-progress: false
+  group: acceptance
+
+jobs:
+  deploy:
+    name: Deploy to acceptance
+    runs-on: ubuntu-latest
+    environment:
+      name: acceptatie
+      url: https://acc.sc.heerenveen.org
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The pnpm version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          cache: pnpm
+          node-version-file: .nvmrc
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter site build
+
+      # Copies the build and the static files, which Next.js leaves out of the standalone folder, to one folder, and starts it.
+      - name: Assemble the folder for the host and check what it serves
+        run: |
+          pnpm --filter site assemble "$RUNNER_TEMP/site"
+          pnpm --filter site smoke "$RUNNER_TEMP/site"
+
+      - id: secrets
+        name: Check the secrets
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          for name in DEPLOY_PATH SSH_HOST SSH_KNOWN_HOSTS SSH_PRIVATE_KEY SSH_USER; do
+            if [ -z "${!name}" ]; then
+              echo "::notice title=Deploy skipped::$name is not set in the environment acceptatie. See docs/acceptatieomgeving.md."
+              echo "ready=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: Set up SSH
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/acceptance_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # --delete removes files that are gone from the build. tmp/ holds the restart file of the host, and stderr.log the
+      # log of the app, so they stay.
+      - name: Copy the folder to the host
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          rsync -az --delete --exclude=/tmp/ --exclude=/.htaccess --exclude=/stderr.log \
+            -e "ssh -p 26 -i $HOME/.ssh/acceptance_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            "$RUNNER_TEMP/site/" "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+
+      # Passenger starts the app again when tmp/restart.txt changes.
+      - name: Restart the app
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh -p 26 -i "$HOME/.ssh/acceptance_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" "mkdir -p $(printf '%q' "$DEPLOY_PATH")/tmp && touch $(printf '%q' "$DEPLOY_PATH")/tmp/restart.txt"

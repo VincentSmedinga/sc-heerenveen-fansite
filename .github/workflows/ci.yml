@@ -21,6 +21,9 @@ jobs:
   check:
     name: Lint, typecheck, test and build
     runs-on: ubuntu-latest
+    env:
+      # next build would otherwise send anonymous telemetry to Vercel.
+      NEXT_TELEMETRY_DISABLED: '1'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -43,3 +46,10 @@ jobs:
       - run: pnpm test
 
       - run: pnpm build
+
+      # The site must also work the way the host runs it: from the standalone build, with its static files, and with
+      # search engines kept out of acceptance.
+      - name: Check the site the way the host runs it
+        run: |
+          pnpm --filter site assemble "$RUNNER_TEMP/site"
+          pnpm --filter site smoke "$RUNNER_TEMP/site"

@@ -8,7 +8,14 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig([
-  globalIgnores(['**/node_modules/', '**/dist/', '**/storybook-static/', '.claude/worktrees/']),
+  globalIgnores([
+    '**/node_modules/',
+    '**/dist/',
+    '**/storybook-static/',
+    '**/.next/',
+    '**/next-env.d.ts',
+    '.claude/worktrees/',
+  ]),
   {
     linterOptions: {
       reportUnusedDisableDirectives: 'error',
@@ -28,7 +35,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.config.{js,ts}', '**/.storybook/main.ts', '.claude/hooks/*.js'],
+    files: ['**/*.config.{js,ts}', '**/.storybook/main.ts', '.claude/hooks/*.js', 'apps/site/scripts/*.js'],
     languageOptions: {
       globals: globals.node,
     },

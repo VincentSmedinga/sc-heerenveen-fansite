@@ -2,5 +2,5 @@
 // create it, and add its own references to the packages it imports.
 {
   "files": [],
-  "references": [{ "path": "packages/design-system" }, { "path": "packages/shared" }]
+  "references": [{ "path": "apps/site" }, { "path": "packages/design-system" }, { "path": "packages/shared" }]
 }

@@ -202,6 +202,52 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Op een VPS kan een worker later dezelfde opdrachten aanroepen.
 - **Alternatieven:** pg-boss met een worker die blijft draaien, op een VPS met Postgres.
 
+### Eerste versie op acceptatie: een minimale site
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de eerste versie op de acceptatieomgeving is een minimale `apps/site` met één pagina.
+- **Waarom:** het grootste risico van de gedeelde hosting is dat Next.js er via Passenger niet draait.
+  Dat testen we nu, met een pagina die weinig kan breken.
+- **Alternatieven:** de Storybook-build uitrollen; die is statisch en test Node.js niet.
+  Of wachten op het eerste issue dat de site bouwt.
+
+### Acceptatie met noindex, zonder wachtwoord
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de acceptatieomgeving weert zoekmachines met de header `X-Robots-Tag: noindex, nofollow` en een `robots.txt` die alles weigert, en heeft voorlopig geen wachtwoord.
+- **Hoe:** de site leest `SITE_ENV` (`local`, `acceptance` of `production`) als de server draait, niet bij het bouwen.
+  Alleen `production` komt in zoekmachines.
+  Zo kan dezelfde build later naar productie, en een omgeving die vergeet `SITE_ENV` goed te zetten, blijft uit de zoekmachines in plaats van erin.
+  Productie moet dus `SITE_ENV=production` krijgen; de lanceringschecklist (#34) noemt dat.
+- **Waarom:** een lege pagina bevat niets om te beschermen.
+  Een wachtwoord vraagt instellingen in DirectAdmin en test de deploy niet.
+- **Alternatieven:** een wachtwoord via DirectAdmin.
+  Dat bekijken we zodra er testgegevens op staan.
+
+### Adressen: sc.heerenveen.org voor productie, acc.sc.heerenveen.org voor acceptatie
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de site komt op `sc.heerenveen.org`, de acceptatieomgeving op `acc.sc.heerenveen.org`.
+  Het forum blijft op `forum.heerenveen.org`.
+- **Waarom:** `sc.heerenveen.org` was het adres van de fansite van 1999 tot 2006, dus oude links en lezers vinden de nieuwe site terug.
+  Acceptatie krijgt het adres van productie met `acc.` ervoor, zodat je ziet bij welke omgeving het hoort.
+- **Alternatieven:** `acceptatie.heerenveen.org`, los van het adres van productie.
+  Of de site op `heerenveen.org` zelf; daar staat de doorverwijzing naar het forum.
+
+### Eén tak: main is acceptatie, productie krijgt een release-tag
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** er is één langlevende tak, `main`.
+  Elke merge naar `main` gaat naar de acceptatieomgeving.
+  Productie krijgt een versie na goedkeuring op acceptatie: de tag die release-please maakt als de eigenaar de release-pull request samenvoegt (zie #33).
+  Elke deploy staat met zijn commit in de lijst Deployments van GitHub.
+- **Waarom:** we voegen samen met squash en houden de geschiedenis lineair.
+  Een tak `develop` zou bij elke release uit de pas lopen met `main`.
+  Samenvoegen met een squash geeft release-please bovendien één regel in de changelog in plaats van één per wijziging.
+  Een tag verandert niet meer, een tak wel.
+- **Alternatieven:** `develop` voor acceptatie en `main` voor productie.
+  Dat past bij samenvoegen zonder squash, en dat doen we niet.
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft
@@ -209,6 +255,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 20 oktober 2026
 - **Besluit:** `apps/site`, `apps/importer` en `packages/db` komen er pas met het eerste issue dat er code in zet.
   `packages/shared` kwam met #2, voor de controle van omgevingsvariabelen.
+  `apps/site` kwam met #6.
   De site heet `apps/site` en niet `apps/web` of `apps/front-end`: het is de hele site, met de server en het beheer erbij, en "site" is het woord dat we overal gebruiken (besloten op 20 oktober 2026).
   De namen `apps/importer` en `packages/db` zijn voorlopig.
 - **Waarom:** een leeg skelet moeten we bijhouden zonder dat het iets doet, en het legt een opzet vast voordat we weten wat het package nodig heeft.
@@ -260,8 +307,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Eén foutmelding noemt alle ontbrekende en ongeldige variabelen.
   Een lege waarde telt als ontbrekend, en de melding herhaalt nooit een waarde, omdat het een geheim kan zijn.
   Secret scanning en push protection van GitHub staan aan.
-- **Voorlopig:** één `.env` in de root voor alle apps.
-  Next.js leest alleen een `.env` in zijn eigen map; `apps/site` moet de root-`.env` dus zelf laden.
+- **Eén `.env`:** in de root, voor alle apps.
+  Next.js leest alleen een `.env` in zijn eigen map, dus `apps/site/next.config.ts` laadt de `.env` uit de root zelf, met `loadEnvConfig` uit `@next/env`.
 - **Waarom:** het prototype werd gedeeld met het echte `.env`-bestand erin.
   Een verse clone moet draaien met alleen een ingevulde kopie van `.env.example`, en anders meteen zeggen wat er ontbreekt.
 - **Alternatieven:** t3-env (`@t3-oss/env-nextjs`), dat ook client- en servervariabelen scheidt, maar voor de importer niets toevoegt.
