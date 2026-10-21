@@ -79,7 +79,8 @@ jobs:
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/acceptance_key
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
-      # --delete removes files that are gone from the build. tmp/ holds the restart file of the host, so it stays.
+      # --delete removes files that are gone from the build. tmp/ holds the restart file of the host, and stderr.log the
+      # log of the app, so they stay.
       - name: Copy the folder to the host
         if: steps.secrets.outputs.ready == 'true'
         env:
@@ -87,7 +88,7 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
         run: |
-          rsync -az --delete --exclude=/tmp/ --exclude=/.htaccess \
+          rsync -az --delete --exclude=/tmp/ --exclude=/.htaccess --exclude=/stderr.log \
             -e "ssh -p 26 -i $HOME/.ssh/acceptance_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
             "$RUNNER_TEMP/site/" "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
 

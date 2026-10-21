@@ -105,7 +105,7 @@ Deze punten blijken pas bij de eerste deploy:
 
 - of Passenger op mijn.host de standalone build van Next.js start, en `apps/site/server.js` als startbestand accepteert;
 - of rsync met `--delete` de bestanden die de hosting zelf in de map van de app zet, ongemoeid laat.
-  Alleen `tmp/` en `.htaccess` staan op de uitzonderingenlijst in de workflow.
+  Alleen `tmp/`, `.htaccess` en `stderr.log` staan op de uitzonderingenlijst in de workflow.
 
 ## Productie
 
