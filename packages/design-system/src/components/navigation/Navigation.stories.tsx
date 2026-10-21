@@ -1,6 +1,7 @@
 import preview from '#.storybook/preview'
 
 import { exampleMenu } from '../../docs/ExamplePage'
+import { exampleSource } from '../../docs/exampleSource'
 import { PageHeader } from '../page/PageHeader'
 import { Navigation } from './Navigation'
 
@@ -22,6 +23,7 @@ const meta = preview.meta({
           'De links zijn 44 pixels hoog en lopen op een smal scherm door op een tweede regel.',
         ].join('\n'),
       },
+      source: exampleSource,
     },
   },
   tags: ['autodocs'],

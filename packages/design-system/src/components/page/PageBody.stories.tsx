@@ -1,6 +1,7 @@
 import preview from '#.storybook/preview'
 
 import { ExampleContent } from '../../docs/ExamplePage'
+import { exampleSource } from '../../docs/exampleSource'
 import { Heading } from '../heading/Heading'
 import { Text } from '../text/Text'
 import { PageBody } from './PageBody'
@@ -22,6 +23,7 @@ const meta = preview.meta({
           'Er is maar één `main` per pagina, en die zit in de `PageBody` of dieper.',
         ].join('\n'),
       },
+      source: exampleSource,
     },
   },
   tags: ['autodocs'],

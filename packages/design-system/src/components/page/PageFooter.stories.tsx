@@ -1,6 +1,7 @@
 import preview from '#.storybook/preview'
 
 import { ExampleFooter } from '../../docs/ExamplePage'
+import { exampleSource } from '../../docs/exampleSource'
 
 const meta = preview.meta({
   parameters: {
@@ -15,6 +16,7 @@ const meta = preview.meta({
           'Zet er bijvoorbeeld "Voor supporters, door supporters." in.',
         ].join('\n'),
       },
+      source: exampleSource,
     },
   },
   tags: ['autodocs'],

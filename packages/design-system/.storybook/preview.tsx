@@ -46,6 +46,12 @@ export default definePreview({
     docs: {
       container: ThemedDocsContainer,
       page: DocsPage,
+      source: {
+        // Show the JSX the story renders, not the `meta.story({ ... })` call around it, so one `render` can serve
+        // the light and the dark story. The theme wrapper is a decorator and doesn't belong in the example.
+        excludeDecorators: true,
+        type: 'dynamic',
+      },
     },
     options: {
       // There are no components with controls yet; show the accessibility check first.

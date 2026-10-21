@@ -1,6 +1,7 @@
 import preview from '#.storybook/preview'
 
 import { ExamplePage } from '../../docs/ExamplePage'
+import { exampleSource } from '../../docs/exampleSource'
 
 const meta = preview.meta({
   parameters: {
@@ -18,6 +19,7 @@ const meta = preview.meta({
           'Een `Page` hoort in een `Body`; de stories hieronder staan in een eigen venster, dat de hoogte van het scherm nabootst.',
         ].join('\n'),
       },
+      source: exampleSource,
       story: { iframeHeight: '30rem', inline: false },
     },
     layout: 'fullscreen',

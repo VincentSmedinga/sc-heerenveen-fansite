@@ -1,6 +1,7 @@
 import preview from '#.storybook/preview'
 
 import { ExampleHeader } from '../../docs/ExamplePage'
+import { exampleSource } from '../../docs/exampleSource'
 
 const meta = preview.meta({
   parameters: {
@@ -20,6 +21,7 @@ const meta = preview.meta({
           'Ze staan naast elkaar en lopen op een smal scherm onder elkaar.',
         ].join('\n'),
       },
+      source: exampleSource,
     },
   },
   tags: ['autodocs'],
