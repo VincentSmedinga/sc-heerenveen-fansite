@@ -122,6 +122,8 @@ For agents:
 
 - The Builder runs `git fetch origin` and then starts the Reviewer (the `reviewer` subagent) from its worktree, so the Reviewer can run the checks and compare against the current base.
   The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
+- The Reviewer's hook blocks `docker`, and the tests of `packages/db` need a MariaDB.
+  Before starting the Reviewer, the Builder makes sure the database is running (`docker compose up -d --wait`).
 - The Builder posts the report on the pull request as a comment, unchanged, and ticks the three review checkboxes in the description to match.
 - Before opening a pull request, the Builder goes through the code and security checklist itself.
 
