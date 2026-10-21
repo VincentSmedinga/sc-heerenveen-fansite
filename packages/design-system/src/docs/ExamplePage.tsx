@@ -29,10 +29,10 @@ export const ExampleHeader = () => (
   </PageHeader>
 )
 
-/** The footer with the sentence that the Fansite is not part of the club. */
+/** The footer with "Voor supporters, door supporters." */
 export const ExampleFooter = () => (
   <PageFooter>
-    <Text appearance="meta">De sc Heerenveen Fansite is geen officieel onderdeel van sc Heerenveen.</Text>
+    <Text appearance="meta">Voor supporters, door supporters.</Text>
   </PageFooter>
 )
 

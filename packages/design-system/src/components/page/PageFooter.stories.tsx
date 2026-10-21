@@ -12,7 +12,7 @@ const meta = preview.meta({
           'Links in de footer hebben de gewone kleuren van links.',
           '',
           'De inhoud zet je zelf neer.',
-          'Zet erin dat de Fansite geen officieel onderdeel van sc Heerenveen is.',
+          'Zet er bijvoorbeeld "Voor supporters, door supporters." in.',
         ].join('\n'),
       },
     },

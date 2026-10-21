@@ -791,6 +791,17 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de SVG-bestanden als plaatje gebruiken, met een variant per thema en de andere met CSS verbergen.
   Of de bestanden in de pagina zetten, wat 24 kB per pagina kost.
 
+### Geen disclaimer, wel "Voor supporters, door supporters"
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de header en de footer dragen "sinds 1997" en "Voor supporters, door supporters."
+  Er komt geen zin in die zegt dat we geen onderdeel van sc Heerenveen zijn.
+  Het clubwapen gebruiken we nog steeds niet: ons eigen logo en die zin maken duidelijk van wie de site is.
+- **Waarom:** een aparte disclaimer klinkt als een excuus, terwijl "Voor supporters, door supporters" zegt wat we zijn.
+  Wie het logo en die zin ziet, begrijpt dat dit een site van supporters is en geen kanaal van de club.
+- **Alternatieven:** een uitdrukkelijke zin in de footer houden, zoals "De sc Heerenveen Fansite is geen officieel onderdeel van sc Heerenveen".
+  Dat is duidelijk, maar defensief.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
