@@ -2,8 +2,6 @@
 
 Per beslissing een kort blok: datum, besluit, waarom en welke alternatieven we hebben overwogen. Een beslissing die een langer betoog nodig heeft, krijgt een eigen bestand. Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
-De beslissingen over stack, contentbeleid en taal komen hier nog bij.
-
 ## Project
 
 ### Prototype blijft lokaal
@@ -13,6 +11,51 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 - **Waarom:** het is niet nodig. De herbouw werkt met de lokale kopie, en publiceren zou toestemming van de maker en een licentie vragen.
 - **Gevolg:** issues en documentatie beschrijven in eigen woorden wat ze uit het prototype overnemen, zonder ernaar te linken.
 - **Alternatieven:** het prototype publiceren, met toestemming van de maker en een licentie.
+
+### TypeScript, Next.js en Drizzle
+
+- **Datum:** 19 oktober 2026
+- **Besluit:** we bouwen de site en de importer opnieuw, in TypeScript, in één pnpm-werkruimte op Node 24:
+  - de site in Next.js 16 met React 19, in `apps/site`, met het beheer erbij;
+  - de importer als gewone opdrachten in Node, in `apps/importer`, die cron start (zie _Importtaken via cron_);
+  - Drizzle voor het schema, de queries en de migraties, in `packages/db` (zie _MariaDB in plaats van Postgres_);
+  - Zod om invoer van buiten te controleren, zoals omgevingsvariabelen en feeds;
+  - puur CSS uit het designsysteem, zonder Sass, CSS-in-JS of Tailwind;
+  - Vitest voor tests, en Playwright voor de pagina's en de controles met axe (#25).
+- **Waarom:** één taal voor de site, de importer en de database, met types die fouten vroeg vangen.
+  De projecteigenaar en de agents werken ook in andere projecten met TypeScript en React.
+  Next.js maakt de pagina's op de server en kan ze cachen, dus bezoekers krijgen snel een complete pagina, ook zonder veel JavaScript.
+  Het beheer en later het voorspellingsspel passen in dezelfde app.
+  En Next.js draait op de hosting als standalone build.
+  Drizzle blijft dicht bij SQL, legt het schema vast in TypeScript en zet migraties in de repository.
+  Het werkt met MariaDB en met Postgres, dus een overstap naar een VPS blijft klein.
+- **Alternatieven:** verder bouwen op het prototype, in JavaScript met Prisma; maar daar liep het schema uit de pas met de migraties.
+  Een statische site, bijvoorbeeld met Astro; die is lichter, maar inloggen, het beheer en het voorspellingsspel vragen toch om een server.
+  Of PHP, zoals het forum; dat draait overal, maar de projecteigenaar en de agents werken in TypeScript.
+
+### Standaard alleen kop, link en bronnaam
+
+- **Datum:** 19 oktober 2026
+- **Besluit:** van elk item uit een bron tonen we standaard de kop, de link naar de bron en de bronnaam.
+  Een intro of een foto tonen we alleen met schriftelijke toestemming van de bron.
+  Het bronnenregister legt dat per bron vast (#9), en de importer slaat niets op wat we niet mogen tonen.
+- **Waarom:** we willen lezers naar de journalistiek zelf sturen, niet die vervangen.
+  Het werk blijft van de journalisten en de uitgevers.
+  Wat we niet opslaan, kunnen we ook niet per ongeluk tonen.
+- **Alternatieven:** intro's en foto's standaard tonen en op verzoek weghalen; maar dan gebruiken we werk zonder dat iemand ons dat heeft toegestaan.
+
+### Nederlands voor bezoekers, Brits Engels voor code
+
+- **Datum:** 19 oktober 2026
+- **Besluit:** alles wat openbaar is, is Nederlands: de site, Storybook, de documentatie zoals dit log, issues, mijlpalen, labels, het bord, en de beschrijvingen en reviews van pull requests.
+  Code, namen, commentaar, commitberichten en titels van pull requests zijn Brits Engels, zoals `colour` en `initialise` (zie _Conventional Commits in het Engels_).
+  Het gereedschap voor agents, `AGENTS.md` en `.claude/`, is ook Engels.
+- **Uitzondering:** het label `good first issue` blijft Engels, omdat GitHub nieuwkomers naar precies dat label verwijst.
+- **Waarom:** de supporters, de bronnen en de vrijwilligers zijn Nederlands, dus wat zij lezen, is Nederlands.
+  Code en gereedschap volgen de taal van de bibliotheken en de tools.
+  Eén vaste spelling voorkomt een mengsel van `color` en `colour`.
+- **Alternatieven:** alles in het Engels, zodat ook wie geen Nederlands spreekt kan meedoen; maar de site en de mensen eromheen zijn Nederlands.
+  Of alles in het Nederlands, ook de code; dan ontstaat een mengsel met de Engelse namen uit de bibliotheken.
 
 ## Werkwijze
 
@@ -97,7 +140,9 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 - **Datum:** 20 oktober 2026
 - **Besluit:** de database is MariaDB 10.11, met Drizzle. Dat vervangt het eerdere plan voor Postgres.
 - **Waarom:** MariaDB is de database van de hosting. De belangrijkste reden voor Postgres was pg-boss, en dat valt weg zonder workers (zie _Importtaken via cron_).
-- **Alternatieven:** Postgres op een VPS. SQLite viel al eerder af.
+- **Alternatieven:** Postgres op een VPS.
+  Of SQLite, één bestand op de server zonder databaseserver; maar dan regelen we de back-ups zelf, terwijl MariaDB er al staat met de back-ups van de hosting.
+  En de site en de importtaken schrijven allebei, wat een databaseserver beter opvangt dan één bestand op gedeelde opslag.
 
 ### Importtaken via cron
 
@@ -111,7 +156,9 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 ### Packages komen met het issue dat ze nodig heeft
 
 - **Datum:** 20 oktober 2026
-- **Besluit:** `apps/web`, `apps/importer` en `packages/db` komen er pas met het eerste issue dat er code in zet. `packages/shared` kwam met #2, voor de controle van omgevingsvariabelen. De namen zijn voorlopig.
+- **Besluit:** `apps/site`, `apps/importer` en `packages/db` komen er pas met het eerste issue dat er code in zet. `packages/shared` kwam met #2, voor de controle van omgevingsvariabelen.
+  De site heet `apps/site` en niet `apps/web` of `apps/front-end`: het is de hele site, met de server en het beheer erbij, en "site" is het woord dat we overal gebruiken (besloten op 20 oktober 2026).
+  De namen `apps/importer` en `packages/db` zijn voorlopig.
 - **Waarom:** een leeg skelet moeten we bijhouden zonder dat het iets doet, en het legt een opzet vast voordat we weten wat het package nodig heeft.
 - **Alternatieven:** alle packages nu als leeg skelet.
 
@@ -141,7 +188,7 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 
 - **Datum:** 20 oktober 2026
 - **Besluit:** `.env.example` noemt en beschrijft elke variabele; `.env` zelf staat in `.gitignore`. Elke app controleert bij het opstarten zijn variabelen met `parseEnv` uit `@fansite/shared/env`, met een Zod-schema. Eén foutmelding noemt alle ontbrekende en ongeldige variabelen. Een lege waarde telt als ontbrekend, en de melding herhaalt nooit een waarde, omdat het een geheim kan zijn. Secret scanning en push protection van GitHub staan aan.
-- **Voorlopig:** één `.env` in de root voor alle apps. Next.js leest alleen een `.env` in zijn eigen map; `apps/web` moet de root-`.env` dus zelf laden.
+- **Voorlopig:** één `.env` in de root voor alle apps. Next.js leest alleen een `.env` in zijn eigen map; `apps/site` moet de root-`.env` dus zelf laden.
 - **Waarom:** het prototype werd gedeeld met het echte `.env`-bestand erin. Een verse clone moet draaien met alleen een ingevulde kopie van `.env.example`, en anders meteen zeggen wat er ontbreekt.
 - **Alternatieven:** t3-env (`@t3-oss/env-nextjs`), dat ook client- en servervariabelen scheidt, maar voor de importer niets toevoegt. Of zonder controle, met de fout pas als een variabele gebruikt wordt.
 
@@ -151,16 +198,21 @@ De beslissingen over stack, contentbeleid en taal komen hier nog bij.
 - **Besluit:** Renovate houdt de dependencies, pnpm, Node en de GitHub Actions bij, via de GitHub-app van Mend. Eén keer per week, met alle kleine updates (minor en patch) in één pull request en een eigen pull request per major-update. Een nieuwe versie wacht drie dagen. Beveiligingsupdates komen uit de OSV-database en wachten niet op het schema. TypeScript blijft onder 7.
 - **Waarom:** Dependabot ondersteunt pnpm 12 nog niet officieel. Het lockfile van pnpm 12 bestaat uit twee YAML-documenten, en de dependency graph van GitHub leest alleen het eerste. Hij ziet dus geen enkele dependency, en geeft ook geen beveiligingsmeldingen ([dependabot-core#15904](https://github.com/dependabot/dependabot-core/issues/15904)). Renovate leest dat lockfile sinds juni 2026 wel. Het houdt ook monorepo's als Storybook en typescript-eslint vanzelf bij elkaar, en werkt `packageManager` en `.nvmrc` bij.
 - **Nadeel:** een app van een andere partij krijgt schrijfrechten op de repository.
+- **Commitberichten:** Renovate geeft een update van een dependency die in productie draait de titel `fix(deps)`, en alle andere updates `chore(deps)`, zoals die van de Actions en de dev-dependencies.
+  We laten dat zo (besloten op 20 oktober 2026).
+  Voor release-please maakt een `fix` een patch-release en een `chore` geen release (zie _Eén versie voor de hele site, met release-please_).
+  Een update van een dependency in productie verandert wat bezoekers krijgen, bijvoorbeeld bij een beveiligingsfix, dus die hoort in de changelog.
 - **Alternatieven:** Dependabot, ingebouwd en zonder extra app. Dat bekijken we opnieuw zodra het pnpm 12 ondersteunt. Of Renovate zelf draaien als GitHub Action: geen app van een ander, maar wel een token en onderhoud.
+  Of elke update `chore(deps)` noemen, zodat een update nooit een release maakt; maar dan blijft een beveiligingsfix liggen tot een andere wijziging een release maakt.
 
 ### Conventional Commits in het Engels, ook in de titel van een pull request
 
 - **Datum:** 20 oktober 2026
-- **Besluit:** commits volgen Conventional Commits, in Brits Engels, zoals de code. We voegen samen met squash, en dan wordt de titel van de pull request de commit op `main`. Die titel volgt daarom ook Conventional Commits in het Engels, bijvoorbeeld `feat(web): add the news archive`. Een workflow controleert de titel met commitlint. De beschrijving van een pull request blijft Nederlands.
+- **Besluit:** commits volgen Conventional Commits, in Brits Engels, zoals de code. We voegen samen met squash, en dan wordt de titel van de pull request de commit op `main`. Die titel volgt daarom ook Conventional Commits in het Engels, bijvoorbeeld `feat(site): add the news archive`. Een workflow controleert de titel met commitlint. De beschrijving van een pull request blijft Nederlands.
 - **Wat is er nieuw:** dit beantwoordt de open vraag uit #29. De changelog van release-please blijft Engels en technisch. De tekst voor de pagina 'Wat is er nieuw' schrijven we per release met de hand, in gewone taal. Dat gebeurt in een gewone pull request voordat de release-pull request wordt samengevoegd, want release-please schrijft zijn eigen branch bij elke merge naar `main` opnieuw. Hoe de pagina die teksten leest, bepaalt #29.
 - **Waarom:** release-please maakt versienummers en changelog uit de commits op `main`. De geschiedenis van git blijft zo in één taal. En een commitbericht is geen tekst voor bezoekers: ook een Nederlands bericht zou voor 'Wat is er nieuw' herschreven moeten worden.
 - **Instelling:** een squash-commit krijgt altijd de titel van de pull request, ook bij een pull request met één commit. Anders zou GitHub de titel van die commit nemen.
-- **Alternatieven:** een Nederlandse onderwerpregel met een Engels type, zoals `feat(web): nieuwsarchief toevoegen`. Dan wordt de changelog Nederlands, en kan #29 met de regels daaruit beginnen. Maar de commits op een branch zijn Engels, en de titels op `main` dan niet.
+- **Alternatieven:** een Nederlandse onderwerpregel met een Engels type, zoals `feat(site): nieuwsarchief toevoegen`. Dan wordt de changelog Nederlands, en kan #29 met de regels daaruit beginnen. Maar de commits op een branch zijn Engels, en de titels op `main` dan niet.
 
 ### Eén versie voor de hele site, met release-please
 
