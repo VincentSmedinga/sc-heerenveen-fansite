@@ -1,0 +1,3 @@
+# The project owner reviews every change.
+# The ruleset on main requires a review from a code owner, so a pull request can't be merged without it.
+* @VincentSmedinga
