@@ -91,7 +91,7 @@ Per feed staan in `feeds` de laatste geslaagde run, het aantal mislukte runs op 
 - **Geslaagd** is gelezen en bewaard, of niet gewijzigd.
   Dat zet de teller op 0.
 - **Mislukt** is een fout.
-  Dat telt een op.
+  De teller gaat met één omhoog.
 - **Wachten** (429 of 503) en een **weigering door `robots.txt`** liggen niet aan ons.
   Ze tellen niet mee, maar staan wel in het logboek.
 
