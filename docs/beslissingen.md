@@ -945,14 +945,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** korte intro's standaard tonen, zoals veel nieuwsverzamelaars doen.
   Of de principes in `docs/`, naast de checklist voor toegankelijkheid; maar Storybook is ook het handboek voor wie schrijft.
 
-### De pagina 'Onze bronnen' toont het beleid en niet de toestemming
+### De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen
 
-- **Datum:** 21 oktober 2026
-- **Besluit:** de pagina toont per bron de naam, de link, de soort en wat we ervan tonen.
-  De toestemmingsstatus, de datum en de notitie uit het register blijven intern.
-- **Hoe:** `listEnabledSources` in `@fansite/db/queries` haalt alleen de kolommen op die bezoekers mogen zien, dus de toestemming komt niet bij een pagina.
-  `apps/site/src/register.ts` zet het beleid om in de tekst op de pagina, zoals "kop, link en bronnaam".
-- **Waarom:** bezoekers willen weten wat we van een bron laten zien.
+- **Datum:** 22 oktober 2026
+- **Besluit:** de pagina zegt in één zin dat dit de bronnen zijn waar we het nieuws vandaan halen.
+  Per bron staan er de naam als link naar de website en een beschrijving van een of twee zinnen, per soort onder een kop.
+  Wat we van een bron tonen, en de toestemming, staan er niet.
+- **Hoe:** de beschrijving staat in het register, in de kolom `description` van `sources` (hoogstens 300 tekens).
+  We schrijven haar zelf, in eigen woorden.
+  `listEnabledSources` in `@fansite/db/queries` haalt alleen de naam, het domein, de soort en de beschrijving op, dus het beleid en de toestemming komen niet bij een pagina.
+- **Waarom:** bezoekers hoeven niet te lezen wat we wel of niet van een bron tonen; dat zien ze zelf.
+  Een korte beschrijving zegt wat de bron is, en dat helpt bij het kiezen.
   De toestemming beschrijft ons contact met de bron, en dat is niet aan de pagina.
-- **Alternatieven:** ook de toestemmingsstatus tonen.
-  Dat is opener, maar het laat zien wie we hebben gevraagd en wie nog niet heeft geantwoord.
+- **Alternatieven:** per bron in gewone taal zeggen wat we tonen, zoals "kop, link en bronnaam", met één plek die het beleid in die tekst omzet.
+  Zo stond het eerst in #70.
+  Of ook de toestemmingsstatus tonen; dat laat zien wie we hebben gevraagd en wie nog niet heeft geantwoord.
+  Of de beschrijvingen in de code van de site zetten; dan staat een bron op twee plekken, en kan het beheer (#30) ze niet aanpassen.

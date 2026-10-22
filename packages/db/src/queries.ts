@@ -7,16 +7,14 @@ import { sources } from './schema.ts'
 export type PublicSource = Awaited<ReturnType<typeof listEnabledSources>>[number]
 
 /**
- * The sources that are switched on, by name, with what visitors may know about them: the name, the domain, the kind
- * and the display policy. The permission (its status, date and note) stays internal, so it can't reach a page.
+ * The sources that are switched on, by name, with what the page 'Onze bronnen' shows of them: the name, the domain, the
+ * kind and the description. The policy and the permission stay internal, so they can't reach a page.
  */
 export function listEnabledSources(db: Database) {
   return db
     .select({
-      allowEmbed: sources.allowEmbed,
-      allowImage: sources.allowImage,
+      description: sources.description,
       domain: sources.domain,
-      introMaxLength: sources.introMaxLength,
       kind: sources.kind,
       name: sources.name,
     })

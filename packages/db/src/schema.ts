@@ -23,6 +23,8 @@ export const sources = mysqlTable(
     name: varchar('name', { length: 100 }).notNull(),
     domain: varchar('domain', { length: 253 }).notNull().unique(),
     kind: mysqlEnum('kind', sourceKinds).notNull(),
+    // What the source is, in one or two sentences of our own, for the page 'Onze bronnen'. Empty means no description.
+    description: varchar('description', { length: 300 }),
 
     // The display policy. An intro is shown up to this many characters; 0 means no intro.
     introMaxLength: int('intro_max_length', { unsigned: true }).notNull().default(0),

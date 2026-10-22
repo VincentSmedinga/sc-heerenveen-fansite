@@ -7,10 +7,12 @@ import { sources } from './schema.ts'
 
 /**
  * Made-up sources for local development, with different policies and permissions. None is real: the domains end in
- * `.test`, which is reserved for tests and never resolves. The real sources come with #10 and #72.
+ * `.test`, which is reserved for tests and never resolves. The real sources come with #10 and #72. Proefforum has no
+ * description, so the page shows a source without one too.
  */
 export const testSources = [
   {
+    description: 'Een verzonnen dagblad om de site mee te testen. Het schrijft elke dag over sc Heerenveen.',
     domain: 'testkrant.test',
     kind: 'news',
     name: 'Testkrant',
@@ -18,6 +20,7 @@ export const testSources = [
   {
     consentNote: 'Verzonnen: toestemming gevraagd, nog geen antwoord.',
     consentStatus: 'asked',
+    description: 'Een verzonnen nieuwssite met verslagen van elke wedstrijd.',
     domain: 'proefnieuws.test',
     kind: 'news',
     name: 'Proefnieuws',
@@ -28,6 +31,7 @@ export const testSources = [
     consentDate: '2026-01-15',
     consentNote: 'Verzonnen: intro tot 200 tekens en foto, zonder insluiten.',
     consentStatus: 'given',
+    description: 'Een verzonnen regionale krant, met nieuws over de club en de spelers.',
     domain: 'voorbeeldkrant.test',
     introMaxLength: 200,
     kind: 'news',
@@ -38,6 +42,7 @@ export const testSources = [
     consentDate: '2026-02-03',
     consentNote: 'Verzonnen: alleen insluiten van afleveringen.',
     consentStatus: 'given',
+    description: 'Een verzonnen podcast waarin supporters na elke wedstrijd napraten.',
     domain: 'testpodcast.test',
     kind: 'podcast',
     name: 'Testpodcast',
@@ -52,6 +57,7 @@ export const testSources = [
     consentDate: '2026-03-20',
     consentNote: 'Verzonnen: alleen foto.',
     consentStatus: 'given',
+    description: 'Een verzonnen clubsite, met het nieuws van de club zelf.',
     domain: 'testclub.test',
     kind: 'club',
     name: 'Testclub',
@@ -60,6 +66,7 @@ export const testSources = [
     allowEmbed: true,
     consentDate: '2026-04-09',
     consentStatus: 'given',
+    description: 'Een verzonnen videokanaal met samenvattingen en interviews.',
     domain: 'voorbeeldvideo.test',
     kind: 'video',
     name: 'Voorbeeldvideo',

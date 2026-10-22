@@ -36,8 +36,8 @@ De header, met het logo en het hoofdmenu, en de footer staan in `src/app/layout.
 
 ## De bronnen
 
-`/bronnen` toont de bronnen die aanstaan, per soort, met wat we van elke bron tonen.
-Die tekst komt uit `src/register.ts`; een andere pagina die het beleid noemt, gebruikt hem ook.
+`/bronnen` toont de bronnen die aanstaan, per soort, elk met een link naar de website en de beschrijving uit het register.
+De koppen van de soorten staan in `src/register.ts`.
 De server bewaart de lijst een uur (`src/sources.ts`), dus een wijziging in het register staat binnen een uur op de pagina.
 
 ## Content Security Policy

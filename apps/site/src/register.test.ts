@@ -1,25 +1,7 @@
 import { sourceKinds } from '@fansite/db/schema'
 import { describe, expect, it } from 'vitest'
 
-import { describePolicy, groupByKind, kindHeadings, websiteOf } from './register'
-
-const strictest = { allowEmbed: false, allowImage: false, introMaxLength: 0 }
-
-describe('describePolicy', () => {
-  it('names the headline, the link and the source name by default', () => {
-    expect(describePolicy(strictest)).toBe('kop, link en bronnaam')
-  })
-
-  it('adds what a wider policy allows', () => {
-    expect(describePolicy({ ...strictest, allowImage: true, introMaxLength: 200 })).toBe(
-      'kop, link, bronnaam, intro en afbeelding',
-    )
-    expect(describePolicy({ ...strictest, allowEmbed: true })).toBe('kop, link, bronnaam en insluiten')
-    expect(describePolicy({ allowEmbed: true, allowImage: true, introMaxLength: 1 })).toBe(
-      'kop, link, bronnaam, intro, afbeelding en insluiten',
-    )
-  })
-})
+import { groupByKind, kindHeadings, websiteOf } from './register'
 
 describe('groupByKind', () => {
   it('groups the sources in the order news, podcasts, forum, club and video, and leaves empty kinds out', () => {

@@ -56,6 +56,7 @@ Al het andere staat uit tot de bron toestemming geeft (principe 1 en 2 in het ho
 | Kolom                                            | Betekenis                                                                            | Standaard |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------ | --------- |
 | `name`, `domain`, `kind`                         | De naam, het domein (uniek) en de soort: `news`, `podcast`, `forum`, `club`, `video` | geen      |
+| `description`                                    | Wat de bron is, in een of twee zinnen van onszelf, voor de pagina 'Onze bronnen'     | leeg      |
 | `intro_max_length`                               | Hoeveel tekens van een intro we tonen; 0 is geen intro                               | 0         |
 | `allow_image`, `allow_embed`                     | Of we een afbeelding tonen, en of we de bron insluiten                               | onwaar    |
 | `attribution`                                    | De bronvermelding zoals de bron die wil; leeg betekent de naam van de bron           | leeg      |
@@ -66,6 +67,8 @@ Al het andere staat uit tot de bron toestemming geeft (principe 1 en 2 in het ho
 Een bron met alleen een naam, een domein en een soort krijgt dus de strengste waarden.
 De CHECK-constraint `sources_display_needs_consent` weigert een bron met een intro, een afbeelding of insluiten zolang `consent_status` niet `given` is.
 Het geldt voor een nieuwe bron en voor een wijziging, in elke tool.
+
+De beschrijving schrijven we zelf; we nemen geen tekst van de bron over.
 
 ## Tijden
 
@@ -88,5 +91,5 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
 - `@fansite/db/schema`: de tabellen en hun types;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
-- `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, zonder de toestemming;
+- `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten.

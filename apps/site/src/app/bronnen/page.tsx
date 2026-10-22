@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Heading, Link, List, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
-import { describePolicy, groupByKind, websiteOf } from '../../register'
+import { groupByKind, websiteOf } from '../../register'
 import { getSources } from '../../sources'
 
 export const metadata: Metadata = {
@@ -19,25 +19,25 @@ export default async function SourcesPage() {
   return (
     <>
       <Heading level={1}>Onze bronnen</Heading>
-      <Text>
-        Van elk bericht tonen we de kop, de link en de naam van de bron. Meer tonen we alleen als de bron ons
-        toestemming geeft: een intro, een afbeelding of het hele bericht op onze pagina. Dat laatste heet insluiten.
-      </Text>
       {groups.length === 0 ? (
-        <Text>We hebben nog geen bronnen. Binnenkort lees je hier van welke media we koppen en links tonen.</Text>
+        <Text>We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.</Text>
       ) : (
-        groups.map(({ heading, kind, sources }) => (
-          <Fragment key={kind}>
-            <Heading level={2}>{heading}</Heading>
-            <List>
-              {sources.map((source) => (
-                <List.Item key={source.domain}>
-                  <Link href={websiteOf(source)}>{source.name}</Link>: {describePolicy(source)}
-                </List.Item>
-              ))}
-            </List>
-          </Fragment>
-        ))
+        <>
+          <Text>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.</Text>
+          {groups.map(({ heading, kind, sources }) => (
+            <Fragment key={kind}>
+              <Heading level={2}>{heading}</Heading>
+              <List>
+                {sources.map((source) => (
+                  <List.Item key={source.domain}>
+                    <Link href={websiteOf(source)}>{source.name}</Link>
+                    {source.description && <Text>{source.description}</Text>}
+                  </List.Item>
+                ))}
+              </List>
+            </Fragment>
+          ))}
+        </>
       )}
     </>
   )
