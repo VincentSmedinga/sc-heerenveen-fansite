@@ -57,10 +57,13 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm test:a11y
 ```
 
 De tests van `packages/db` draaien op een echte MariaDB.
 Start die eerst met `docker compose up -d --wait` (zie de [README van het package](packages/db/README.md)).
+`pnpm test:a11y` toetst na de build de pagina's met axe.
+Het heeft die database ook nodig, met de seed, en eenmalig Chromium (zie de [README van de site](apps/site/README.md)).
 Na een wijziging in het designsysteem draai je ook `pnpm --filter design-system build-storybook`.
 Controleer de titel van de pull request met:
 
@@ -134,7 +137,8 @@ Wie een pull request maakt, doet dat zelf al voordat hij hem opent.
 - De wijziging voldoet aan elk acceptatiecriterium en doet niets wat het issue niet vroeg.
 - Nieuw gedrag heeft tests.
   Wat bezoekers zien, heeft een story, nagekeken in licht en donker.
-- CI slaagt: lint, typecheck, tests, build, de Storybook-build en de controle van de titel.
+  Een nieuwe pagina staat in de lijst van `apps/site/e2e/pages.spec.ts`.
+- CI slaagt: lint, typecheck, tests, build, de toegankelijkheidscontrole, de Storybook-build en de controle van de titel.
 - De code volgt de afspraken hierboven en die in [`packages/design-system/README.md`](packages/design-system/README.md).
 - Er staan geen geheimen of persoonsgegevens in code, tests, testgegevens of logs.
   Een nieuwe omgevingsvariabele staat in `.env.example` en wordt gecontroleerd met `parseEnv` uit `@fansite/shared/env`.

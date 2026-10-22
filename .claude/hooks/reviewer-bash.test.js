@@ -26,7 +26,7 @@ test('lets the read-only commands through', () => {
     'pnpm build',
     'pnpm --filter design-system build-storybook',
     'pnpm --filter @fansite/shared test',
-    'pnpm exec playwright test tests/home.spec.ts',
+    'pnpm --filter site test:a11y',
   ]) {
     assert.equal(runCommand(command), 0, command)
   }
@@ -52,8 +52,7 @@ test('blocks commands that change something or are not on the list', () => {
     'pnpm lint --fix',
     'pnpm --filter design-system lint',
     'pnpm exec eslint --fix .',
-    'pnpm exec playwright test -u',
-    'pnpm exec playwright test --update-snapshots',
+    'pnpm exec playwright test',
     'sed -i s/a/b/ AGENTS.md',
     'cat AGENTS.md',
   ]) {
@@ -82,8 +81,6 @@ test('blocks flags in quotes', () => {
     "gh api repos/owner/repo/issues/1 '--method=PATCH'",
     'gh api graphql "--raw-field" query=test',
     'git diff "--output=/tmp/diff"',
-    "pnpm exec playwright test '-u'",
-    'pnpm exec playwright test "--update-snapshots"',
   ]) {
     assert.equal(runCommand(command), 2, command)
   }

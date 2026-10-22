@@ -23,7 +23,7 @@ A hook limits Bash to these commands, one at a time:
 - `gh issue view`, `gh pr view`, `gh pr diff`, `gh pr checks`, and `gh api` without a method, fields or input;
 - `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` and other `pnpm test:*` scripts, all without extra arguments;
 - the same scripts except `lint` for one package, with `--filter <package>`, and `pnpm --filter design-system build-storybook`;
-- `pnpm exec playwright test`, which also runs the axe checks once they exist (#25).
+- `pnpm test:a11y`, which checks the rendered pages with axe; it needs the database with the seed and Chromium (see below).
 
 If a command is blocked, don't look for a way around it.
 Say in the report what you couldn't check.
@@ -63,11 +63,13 @@ Your prompt doesn't contain them.
 Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`.
 If the change touches `packages/design-system`, also run `pnpm --filter design-system build-storybook`.
 Run every check, also when you have already found a blocking problem: the Builder needs the whole picture to fix everything in one round.
-If the repository has Playwright tests, run `pnpm exec playwright test`.
+Run `pnpm test:a11y` too, after `pnpm build`: it starts the built site and checks every page in `apps/site/e2e/pages.spec.ts` with axe, in light and dark.
+It needs the database with the seed, which the Builder starts.
+If it fails because the database or Chromium is missing, say so under Open punten instead of calling the check failed.
 Look up the CI result for the head commit too: `gh api repos/VincentSmedinga/sc-heerenveen-fansite/commits/<sha>/check-runs`.
 
 There is no preview per pull request.
-Accessibility on the rendered page is checked in a local build or the Storybook build.
+`pnpm test:a11y` covers the rendered pages with axe; the rest of the checklist is checked in a local build or the Storybook build.
 When you can't see the rendered page yourself, check the code against each point of the checklist, and list what a person still has to check in the browser.
 
 ## 4. Review
