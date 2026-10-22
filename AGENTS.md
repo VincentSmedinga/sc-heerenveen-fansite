@@ -170,7 +170,7 @@ It lists the components of the design system with their props and types, the doc
   Leave another worktree's Storybook alone.
   Stop the one you started when you are done, so the next worktree gets the port.
 - Claude Code connects to the server when a session starts.
-  Storybook was not running then: the server shows as failed in `/mcp`, and starting Storybook later doesn't change that (we tried, over thirty seconds later it was still failed).
+  If Storybook wasn't running then, the server shows as failed in `/mcp`, and starting Storybook later doesn't change that (we tried, over thirty seconds later it was still failed).
   Only a reconnect helps: the owner chooses Reconnect for `storybook` in `/mcp`, or starts a new session.
   You can't do it yourself.
   If the tools are missing after you started Storybook, say so once and carry on.
