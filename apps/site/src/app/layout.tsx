@@ -3,7 +3,7 @@ import '@fansite/design-system/index.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
-import { Body, Link, Logo, Page, Root, Text } from '@fansite/design-system'
+import { Body, Link, Logo, Navigation, Page, Root, Text } from '@fansite/design-system'
 
 import { SiteNavigation } from '../SiteNavigation'
 
@@ -13,6 +13,12 @@ export const metadata: Metadata = {
     template: '%s – sc Heerenveen Fansite',
   },
 }
+
+// The links to the page about the site and to its privacy section, below every page. The main menu stays as it is.
+const footerItems = [
+  { href: '/over-ons', label: 'Over ons' },
+  { href: '/over-ons#privacy', label: 'Privacy' },
+]
 
 // Every page has the same header and footer. Without data-theme on Root, light and dark follow the system setting.
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -29,6 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
             <Text appearance="meta">Alle koppen en links op één plek. Voor supporters, door supporters.</Text>
+            <Navigation items={footerItems} label="Over de site" />
           </Page.Footer>
         </Page>
       </Body>
