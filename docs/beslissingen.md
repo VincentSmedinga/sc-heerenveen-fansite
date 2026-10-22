@@ -195,6 +195,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De reviewer kent onze checklists en draait de controles zelf.
 - **Alternatieven:** Copilot-reviews op GitHub.
   Of reviews met de Claude GitHub Action; dat bekijken we later (#50).
+- **Later:** zie _De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job_.
+  Sindsdien draait de reviewer `pnpm test:a11y` in plaats van `pnpm exec playwright test`, en toetst axe de pagina's.
 
 ## Hosting en data
 
