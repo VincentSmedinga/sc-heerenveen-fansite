@@ -1,5 +1,6 @@
 // Puts a pull request or a branch where you can look at it, in one folder next to the repository, and starts the site and
-// Storybook for it in the background: the site on port 3000 and Storybook on port 6006. `pnpm review:stop` stops them.
+// Storybook for it in the background: the site on port 3000 and Storybook on port 6006, both opened in your browser.
+// `pnpm review:stop` stops them.
 // The decision "Een branch bekijk je met pnpm review, in één vaste map" in docs/beslissingen.md says why.
 //
 //   pnpm review <number of a pull request, or name of a branch>
@@ -235,13 +236,25 @@ export function foreignMessage(foreign) {
   ].join('\n')
 }
 
+/** The address of a server, on this computer. */
+export const addressOf = ({ port }) => `http://localhost:${port}`
+
+/** The command that opens an address in the default browser, or nothing on a system we don't know. */
+export function openCommand(platform, address) {
+  if (platform === 'darwin') {
+    return { args: [address], command: 'open' }
+  }
+
+  return platform === 'linux' ? { args: [address], command: 'xdg-open' } : undefined
+}
+
 /** What `pnpm review` prints once both servers answer. */
 export function summarise({ branch, commit, logFile, pullRequest }) {
   const rows = [
     ['Branch', branch],
     ...(pullRequest === undefined ? [] : [['Pull request', `#${pullRequest.number} ${pullRequest.url}`]]),
     ['Commit', commit],
-    ...servers.map(({ label, port }) => [label, `http://localhost:${port}`]),
+    ...servers.map((server) => [server.label, addressOf(server)]),
     ['Log', logFile],
   ]
 
@@ -498,6 +511,19 @@ async function review(argument) {
     failure: 'Could not read the commit.',
   })
   console.log(`\n${summarise({ branch, commit: subject, logFile, pullRequest })}`)
+
+  // The browser is a convenience: when it doesn't open, the addresses above still work. The opener runs on its own, so
+  // an xdg-open that stays until the browser closes doesn't hold up this command, and a missing opener isn't an error.
+  for (const server of servers) {
+    const opener = openCommand(process.platform, addressOf(server))
+
+    if (opener !== undefined) {
+      const child = spawn(opener.command, opener.args, { detached: true, stdio: 'ignore' })
+
+      child.once('error', () => {})
+      child.unref()
+    }
+  }
 }
 
 /** Starts both servers in the background and waits until they answer. It gives a message when one doesn't. */

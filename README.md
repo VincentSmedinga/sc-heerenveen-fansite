@@ -95,7 +95,7 @@ De import draait hij niet: de koppen zijn die van de laatste `pnpm run import`.
 Daarna stopt hij de site en Storybook van de fansite die al op poort 3000 en 6006 draaien, uit welke map ook.
 Houdt iets anders een van die poorten bezet, dan stopt hij met een melding en verandert hij niets.
 Heeft de reviewmap wijzigingen die niet gecommit zijn, dan stopt hij ook, en verandert hij niets.
-Hij start de site op <http://localhost:3000> en Storybook op <http://localhost:6006>, allebei op de achtergrond.
+Hij start de site op <http://localhost:3000> en Storybook op <http://localhost:6006>, allebei op de achtergrond, en opent ze in je browser.
 De uitvoer van beide staat in `review.log` in de reviewmap.
 In het tabblad van de site en in de zijbalk van Storybook staat de naam van de branch, zodat je ziet wat er draait.
 Dat gebeurt alleen in ontwikkeling: acceptatie, productie en de Storybook op GitHub Pages tonen hem nooit.
