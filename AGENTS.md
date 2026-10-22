@@ -133,9 +133,11 @@ A pull request is done when:
 How a review works, with the limit of two rounds and the code and security checklist, is in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 For agents:
 
-- The Builder starts the Reviewer right after opening the pull request, without waiting for CI.
-  The app doesn't let a session watch CI itself, and Auto-fix only wakes the Builder when a check fails, not when CI passes.
-  The Reviewer runs the checks itself and looks up CI's result last.
+- Right after opening the pull request, the Builder turns on Auto-fix for it: a switch per pull request in the Claude desktop app (`get_status`, then `set_monitor` with `auto_fix` and `address_comments`).
+  Auto-fix wakes the Builder's session when a check fails, a merge conflict appears or a review comment arrives, and the Builder may push those fixes to that pull request without a new go-ahead.
+- The Builder then starts the Reviewer straight away, without waiting for CI.
+  The app doesn't let a session watch CI itself, and Auto-fix doesn't report a CI run that passes.
+  The Reviewer runs the checks itself and looks up CI's result right before it writes its report.
 - The Builder runs `git fetch origin` and then starts the Reviewer (the `reviewer` subagent) from its worktree, so the Reviewer can run the checks and compare against the current base.
   The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
 - The Reviewer's hook blocks `docker`, and the tests of `packages/db` need a MariaDB.
@@ -166,7 +168,7 @@ For agents:
 5. Commit.
    The git hooks fix the formatting and check the message.
 6. Ask the owner, then push and open a pull request with the template in `.github/pull_request_template.md`.
-   Tick the boxes in the issue to match what the pull request delivers.
+   Tick the boxes in the issue to match what the pull request delivers, and turn Auto-fix on (see _Reviews_).
 7. Right after opening the pull request, start the Reviewer and post its report (see _Reviews_).
    Fix its findings, for at most two rounds, and fix CI if Auto-fix reports a failed check.
 8. After the merge, remove the worktree (`git worktree remove`).
@@ -179,7 +181,7 @@ How to write the Dutch is there too, under _Nederlands schrijven_.
 Agents also follow these:
 
 - **Go-ahead:** never push, open a pull request or merge without the owner's go-ahead.
-  A go-ahead covers what you asked for, such as one push, or one push and the pull request it opens; a later push needs a new one.
+  A go-ahead covers what you asked for, such as one push, or one push and the pull request it opens; a later push needs a new one, except for the fixes Auto-fix reports on that pull request (see _Reviews_).
   Posting the Reviewer's report, ticking checkboxes and removing stale branches and worktrees need none.
 - **Branch names:** the app starts a session on a `claude/` branch.
   Rename it with `git branch -m` to a name that follows `CONTRIBUTING.md` before the first commit, without asking.

@@ -202,9 +202,12 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 22 oktober 2026
 - **Besluit:** de Builder start de reviewer zodra de pull request open is, zonder op CI te wachten.
-  De reviewer draait de controles zelf en kijkt als laatste naar de uitkomst van CI voor de laatste commit.
+  De reviewer draait de controles zelf en kijkt vlak voor zijn verslag naar de uitkomst van CI voor de laatste commit.
   Loopt CI dan nog, dan staat dat in zijn verslag.
-  Faalt CI, dan maakt Auto-fix de Builder wakker, en die herstelt het.
+  Dat verandert zijn oordeel niet, want de regels voor `main` houden het samenvoegen tegen tot CI slaagt.
+- **Auto-fix:** bij het openen zet de Builder Auto-fix aan, een schakelaar per pull request in de app van Claude.
+  Die maakt de sessie van de Builder wakker als een controle faalt, er een conflict met `main` is of er een reactie komt.
+  Dat herstel mag de Builder naar die pull request pushen zonder nieuw akkoord van de projecteigenaar.
 - **Waarom:** de app van Claude laat een sessie CI niet zelf in de gaten houden, en Auto-fix maakt de Builder alleen wakker als een controle faalt, niet als CI slaagt.
   Met "start de reviewer als CI slaagt" wachtte de Builder dus tot iemand hem een seintje gaf.
   De Builder heeft alle controles al lokaal gedraaid voordat hij pusht, en een review duurt langer dan CI.
