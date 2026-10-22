@@ -151,6 +151,33 @@ For agents:
 - The Builder posts the report on the pull request as a comment, unchanged, and ticks the three review checkboxes in the description to match.
 - Before opening a pull request, the Builder goes through the code and security checklist itself.
 
+## The Storybook server
+
+Storybook has an MCP server for agents, in the dev server at `http://localhost:6006/mcp`.
+It lists the components of the design system with their props and types, the documentation and the stories.
+`.mcp.json` in the root makes it known to Claude Code, which asks each person once to trust it.
+
+- Before you build with components or write a story, ask the server: `docs-list` for the overview, then `docs-show` for each component you use.
+  Before you write a story, also call `get-storybook-story-instructions`.
+  Don't dig the props out of the code.
+- Our conventions win where Storybook's instructions differ.
+  The instructions are generic and still show CSF 3 (`Meta`, `StoryObj`); we write CSF Next (`preview.meta()` and `meta.story()`), and `packages/design-system/README.md` holds the rest.
+- The server shows the Storybook of the worktree where it runs, which isn't always yours, and two worktrees can't both use port 6006.
+  Read your own changes in your own code, not through the server.
+  To see whose Storybook holds the port: `lsof -a -d cwd -p $(lsof -tiTCP:6006 -sTCP:LISTEN)`.
+- If Storybook isn't running, start it in the background from your own worktree: `pnpm --filter design-system storybook --no-open --exact-port`.
+  With `--exact-port` it stops when another worktree has the port, instead of moving to a port the `.mcp.json` doesn't point at.
+  Leave another worktree's Storybook alone.
+  Stop the one you started when you are done, so the next worktree gets the port.
+- Claude Code connects to the server when a session starts.
+  Storybook was not running then: the server shows as failed in `/mcp`, and starting Storybook later doesn't change that (we tried, over thirty seconds later it was still failed).
+  Only a reconnect helps: the owner chooses Reconnect for `storybook` in `/mcp`, or starts a new session.
+  You can't do it yourself.
+  If the tools are missing after you started Storybook, say so once and carry on.
+- Without the server you work as before, from the code.
+  The server is a help, not a condition.
+- The Reviewer doesn't use the server: it reads the code, which is the source.
+
 ## Working on an issue
 
 1. Read the issue: `gh issue view <number>`.
@@ -167,6 +194,7 @@ For agents:
    If the code reads environment variables, copy `.env.example` to `.env` in the worktree and fill it in.
 
 3. Build the smallest change that meets the acceptance criteria.
+   For components and stories, ask the Storybook server first (see _The Storybook server_).
 4. Run the checks listed in `CONTRIBUTING.md` under _De controles_, and check the pull request title.
 5. Commit.
    The git hooks fix the formatting and check the message.
