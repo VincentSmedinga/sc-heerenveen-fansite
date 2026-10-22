@@ -848,6 +848,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** met meer tonale vlakken kan elke soort inhoud een eigen vlak krijgen, en sturen we de aandacht van de lezer.
   Het maakt de pagina ook levendiger; er was te veel blauw.
   De rand maakt tonale vlakken even duidelijk afgebakend als kaarten.
+- **Later:** zie _Een kaart is een eigen component, en de koppen staan op een wit vlak_.
+  Het tonale vlak heet nu het sterke vlak, met de tokens `background-surface-strong` en `border-surface-strong`.
 
 ### Kleuren, reeksen en rollen
 
@@ -876,6 +878,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** sinds tonale vlakken een rand hebben, verschillen kaart en vlak alleen in kleur, en in donker is het zachte vlak al gelijk aan het vlak.
   Eén begrip is makkelijker uit te leggen: een kaart is een vlak met een rand, en er zijn vier vlakken.
 - **Alternatieven:** kaart en tonaal vlak als twee aparte rollen, zoals eerst.
+- **Later:** zie _Een kaart is een eigen component, en de koppen staan op een wit vlak_.
+  Het tonale vlak heet nu het sterke vlak, met de tokens `-strong` in plaats van `-tonal`.
 
 ### Eigen focusrand op de donkere blauwe vlakken
 
@@ -1165,6 +1169,35 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Stylelint controleert dat niet.
 - **Alternatieven:** `box-sizing: border-box` op `*`, `*::before` en `*::after`, zoals de meeste resets doen; dat raakt ook elementen van derden en elke regel die er niet om vraagt.
   Of `html { box-sizing: border-box }` met `inherit` op alle elementen; dat is ook een regel op `*`.
+
+### Een kaart is een eigen component, en de koppen staan op een wit vlak
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `Card` maakt een kaart op een van de vier vlakken: `default`, `strong`, `soft` of `warm`.
+  Hij heeft een rand van 1 pixel, ronde hoeken van 0,5 rem en binnenruimte, maar geen marge, en is standaard een `section`.
+  In een kolom is elke kaart een eigen cel.
+  Op de homepage en op Onze bronnen staan de blokken op het witte vlak.
+- **Hoe:** `surface` kiest het vlak uit een vaste lijst, en `as` het element: `section`, `div`, `article` of `aside`.
+  De achtergrond en de rand komen uit de tokens van het vlak, dus ze volgen het thema.
+  Het tonale vlak heet daarbij voortaan het sterke vlak, `strong`; zie hieronder.
+  De binnenruimte is 1,5 rem boven en onder en 1,75 rem opzij, zoals op de artboards (24 en 28 pixels), en 1 rem en 1,25 rem op een scherm smaller dan 40 rem.
+  Het eerste en het laatste kind in een kaart hebben geen marge naar buiten, zoals in een `Page.Cell`.
+  Een `section` krijgt de naam van haar kop met `aria-labelledby`: de pagina geeft de kaart die verwijzing en de kop een `id`.
+  Het component doet dat niet zelf, want de kop is een kind dat het component niet kent.
+- **De naam `strong`:** de tokens `background-surface-tonal` en `border-surface-tonal` heten nu `background-surface-strong` en `border-surface-strong`.
+  `tonal` komt uit Material Design en zegt niets over hoe het vlak eruitziet.
+  `strong` hoort bij `soft`: het duidelijke blauw naast het zachte blauw, in licht en in donker.
+  In het Nederlands is het het sterke vlak.
+  De projecteigenaar koos de naam.
+- **Waarom:** op de artboards staat elk blok als kaart op het zandgrijze vlak van de pagina, en dat geeft de pagina rust en richting.
+  Het witte vlak laat de koppen het best uitkomen; het sterke vlak houden we voor het officiële clubnieuws (#16).
+  Omdat `Page.Body` de ruimte tussen de cellen regelt, heeft een kaart geen marge, en past ze overal.
+  In de hoofdkolom van 48 rem maakt de binnenruimte de regels in een kaart wat korter.
+- **Alternatieven:** een cel met een uiterlijk als kaart; dan is elke kaart een cel, en kan een kaart nergens anders staan.
+  Of meer kaarten in één cel, met de ruimte in de kaart.
+  Of het sterke vlak voor het blok op de homepage.
+  Of nu al tokens voor ruimte (#19).
+  Of een andere naam dan `strong` voor het tonale vlak: `blue` lijkt te veel op `soft`, `tinted` is ook waar voor `soft` en `warm`, `accent` is al de rode tekstkleur en `highlight` is al een achtergrond met dezelfde waarden.
 
 ## Site
 

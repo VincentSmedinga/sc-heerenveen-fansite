@@ -98,7 +98,7 @@
   }
 
   ._hf-docs-provisional {
-    background-color: var(--hf-colour-background-surface-tonal);
+    background-color: var(--hf-colour-background-surface-strong);
     border-radius: 0.25rem;
     color: var(--hf-colour-text-default);
     font-size: var(--hf-meta-font-size);

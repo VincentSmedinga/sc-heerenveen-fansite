@@ -40,15 +40,15 @@
   }
 
   code {
-    background-color: var(--hf-colour-background-surface-tonal);
+    background-color: var(--hf-colour-background-surface-strong);
     border-radius: 0.25rem;
     padding-inline: 0.25em;
   }
 
   pre {
-    background-color: var(--hf-colour-background-surface-tonal);
+    background-color: var(--hf-colour-background-surface-strong);
     border: 1px solid;
-    border-color: var(--hf-colour-border-surface-tonal);
+    border-color: var(--hf-colour-border-surface-strong);
     border-radius: 0.25rem;
     box-sizing: border-box;
     line-height: 1.45;

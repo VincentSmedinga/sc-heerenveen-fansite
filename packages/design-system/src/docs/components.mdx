@@ -8,7 +8,7 @@ De React-componenten van het designsysteem.
 Elk onderdeel heeft hieronder een eigen pagina, met voorbeelden in licht en donker.
 Een sjabloon voor een pagina bevat geen HTML, alleen deze componenten.
 
-Dit zijn de eerste tien, met de drie onderdelen van `Page`: wat een pagina minimaal nodig heeft, en de regel nieuws van de homepage.
+Dit zijn de eerste elf, met de onderdelen van `Page`: wat een pagina minimaal nodig heeft, de kaart, en de regel nieuws van de homepage.
 Knoppen, pictogrammen en de overige componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
 
 ## Gebruiken
@@ -31,6 +31,7 @@ import { Heading, Page } from '@fansite/design-system'
 `Page` bevat een `Page.Header`, een `Page.Body` en een `Page.Footer`, in die volgorde.
 De `Page.Body` is het raster van de pagina, met de kolommen `Page.Main` (de `main` van de pagina) en, als de pagina er een heeft, `Page.Sidebar` (een `aside`).
 Elk kind van een kolom is een cel; met `Page.Cell` zet je wat bij elkaar hoort in één cel.
+Een `Card` is zelf een cel: ze heeft geen marge naar buiten.
 De `Page.Body` regelt alle witruimte tussen de kolommen en de cellen.
 
 ```tsx
@@ -65,7 +66,7 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
 
 <Unstyled>
   <table>
-    <caption>De tien componenten en de onderdelen van Page</caption>
+    <caption>De elf componenten en de onderdelen van Page</caption>
     <thead>
       <tr>
         <th scope="col">Component</th>
@@ -166,6 +167,20 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
         </td>
         <td></td>
         <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Card</code>
+        </th>
+        <td>een vlak met een rand, ronde hoeken en binnenruimte, zonder marge naar buiten</td>
+        <td>
+          <code>surface</code>, <code>as</code>
+        </td>
+        <td>
+          <code>section</code> (standaard), <code>div</code>, <code>article</code>, <code>aside</code>;{' '}
+          <code>surface</code> is <code>default</code> (wit), <code>strong</code>, <code>soft</code> of{' '}
+          <code>warm</code>
+        </td>
       </tr>
       <tr>
         <th scope="row">

@@ -6,7 +6,7 @@ import * as designSystem from './index'
 
 const root = join(import.meta.dirname, '..')
 
-const components = ['Body', 'Heading', 'Link', 'List', 'Logo', 'Navigation', 'NewsItem', 'Page', 'Root', 'Text']
+const components = ['Body', 'Card', 'Heading', 'Link', 'List', 'Logo', 'Navigation', 'NewsItem', 'Page', 'Root', 'Text']
 
 describe('the JavaScript entry of the package', () => {
   it.each(components)('gives the component %s', (name) => {
@@ -30,6 +30,8 @@ describe('the JavaScript entry of the package', () => {
   })
 
   it('gives the lists of allowed elements', () => {
+    expect(designSystem.cardElements).toEqual(['section', 'div', 'article', 'aside'])
+    expect(designSystem.cardSurfaces).toEqual(['default', 'strong', 'soft', 'warm'])
     expect(designSystem.listElements).toEqual(['ul', 'ol'])
     expect(designSystem.textElements).toEqual(['p', 'span'])
   })

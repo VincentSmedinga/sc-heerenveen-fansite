@@ -1,0 +1,44 @@
+/* A card: one of the four surfaces with its border, rounded corners and padding. */
+
+@layer hf.components {
+  /*
+   * The padding and the border count in the size of the card. A card has no margin: the space between cards is the gap
+   * of the column they are in. Its first and last child have none against the padding either, so a heading at the top
+   * has no space above it.
+   * The padding is 24px 28px, and less on a screen narrower than 40rem.
+   */
+  .hf-card {
+    background-color: var(--hf-colour-background-surface);
+    border: 1px solid var(--hf-colour-border-surface);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    padding: 1rem 1.25rem;
+
+    @media (width >= 40rem) {
+      padding: 1.5rem 1.75rem;
+    }
+
+    > :first-child {
+      margin-block-start: 0;
+    }
+
+    > :last-child {
+      margin-block-end: 0;
+    }
+  }
+
+  .hf-card-strong {
+    background-color: var(--hf-colour-background-surface-strong);
+    border-color: var(--hf-colour-border-surface-strong);
+  }
+
+  .hf-card-soft {
+    background-color: var(--hf-colour-background-surface-soft);
+    border-color: var(--hf-colour-border-surface-soft);
+  }
+
+  .hf-card-warm {
+    background-color: var(--hf-colour-background-surface-warm);
+    border-color: var(--hf-colour-border-surface-warm);
+  }
+}
