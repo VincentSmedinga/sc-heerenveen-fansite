@@ -1295,6 +1295,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het adres uit de `Host`-header van het verzoek; die kiest de bezoeker zelf, en een cache bewaart dan zijn adres.
   Of een variabele met het adres; die moet dan op elke omgeving kloppen met `SITE_ENV`.
 
+### Eén korte pagina Over ons, met het bronnenbeleid en de privacyverklaring
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** wie we zijn, hoe we werken (met verwijderverzoeken) en privacy staan op één korte pagina, `/over-ons`, elk onder een eigen kop en in een paar zinnen.
+  De geschiedenis is een paar zinnen, met de oprichter, Vincent Smedinga, bij naam, en de mensen die meehielpen.
+  De footer linkt naar de pagina en naar het onderdeel privacy.
+- **Hoe:** de links staan onder elke pagina in de navigatie "Over de site", vóór Wat is er nieuw.
+  Het onderdeel privacy heeft het vaste anker `#privacy`.
+- **Waarom:** een korte pagina wordt gelezen, en een bezoeker of uitgever vindt alles op één plek.
+  De details van het bronnenbeleid staan in het hoofdstuk Redactie van Storybook en op Onze bronnen.
+  De AVG vraagt een privacyverklaring die makkelijk te vinden en te begrijpen is, geen lange of aparte pagina.
+- **Alternatieven:** drie of vier pagina's (Over ons, Bronnenbeleid, Verwijderverzoeken en Privacy), zoals #24 eerst noemde.
+  Of één uitgebreide pagina, met de hele geschiedenis, de importer en `robots.txt`, en een privacyverklaring met een vaste bewaartermijn.
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
@@ -1557,3 +1571,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Tekst werkt ook voor een schermlezer en zonder kleur.
 - **Alternatieven:** de betaalmuur niet tonen.
   Of alleen een pictogram.
+
+### De redactie is het aanspreekpunt, en pakt een verwijderverzoek zo snel mogelijk op
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** het aanspreekpunt voor bezoekers, uitgevers en de privacyverklaring is "De redactie van de sc Heerenveen Fansite", op fansite@heerenveen.org.
+  Een verwijderverzoek pakken we zo snel mogelijk op, zonder vaste termijn.
+- **Waarom:** de site is van een groep supporters, niet van één persoon.
+  Een vaste termijn kunnen vrijwilligers niet altijd halen, en een belofte die we niet houden, kost meer vertrouwen dan geen getal.
+- **Alternatieven:** de projecteigenaar bij naam als verantwoordelijke; dat is voor de AVG herkenbaarder.
+  Of een vaste termijn, zoals twee werkdagen of een week.

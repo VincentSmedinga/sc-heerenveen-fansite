@@ -14,7 +14,7 @@ const meta = preview.meta({
           '',
           'De inhoud zet je zelf neer.',
           'Zet er bijvoorbeeld "Alle koppen en links op één plek. Voor supporters, door supporters." in.',
-          'Links over de site zelf, zoals Wat is er nieuw, staan eronder in een `Navigation` met de naam "Over de site".',
+          'Links over de site zelf, zoals Over ons, Privacy en Wat is er nieuw, staan eronder in een `Navigation` met de naam "Over de site".',
         ].join('\n'),
       },
       source: exampleSource,

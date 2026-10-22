@@ -26,8 +26,12 @@ export const ExampleHeader = () => (
   </Page.Header>
 )
 
-/** The links about the site itself, in the footer of the example pages. */
-export const exampleFooterMenu = [{ href: '#wat-is-er-nieuw', label: 'Wat is er nieuw' }]
+/** The links about the site itself, in the footer of the example pages, as on the site. */
+export const exampleFooterMenu = [
+  { href: '#over-ons', label: 'Over ons' },
+  { href: '#privacy', label: 'Privacy' },
+  { href: '#wat-is-er-nieuw', label: 'Wat is er nieuw' },
+]
 
 /** The footer with "Alle koppen en links op één plek. Voor supporters, door supporters." and the links about the site. */
 export const ExampleFooter = () => (
