@@ -512,12 +512,16 @@ async function review(argument) {
   })
   console.log(`\n${summarise({ branch, commit: subject, logFile, pullRequest })}`)
 
-  // The browser is a convenience: when it doesn't open, the addresses above still work.
+  // The browser is a convenience: when it doesn't open, the addresses above still work. The opener runs on its own, so
+  // an xdg-open that stays until the browser closes doesn't hold up this command, and a missing opener isn't an error.
   for (const server of servers) {
     const opener = openCommand(process.platform, addressOf(server))
 
     if (opener !== undefined) {
-      spawnSync(opener.command, opener.args, { stdio: 'ignore' })
+      const child = spawn(opener.command, opener.args, { detached: true, stdio: 'ignore' })
+
+      child.once('error', () => {})
+      child.unref()
     }
   }
 }
