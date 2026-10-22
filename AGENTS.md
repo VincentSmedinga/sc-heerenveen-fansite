@@ -61,7 +61,7 @@ Picks up one issue, in its own branch and worktree.
 - Writes the code, with tests, and stories for anything visible.
 - Adds the decisions from the issue, and its own, to `docs/beslissingen.md`.
 - Runs the checks, commits on its own branch, and opens a pull request once the owner agrees.
-- Starts the Reviewer once CI passes, and fixes what it finds.
+- Starts the Reviewer right after opening the pull request, and fixes what the Reviewer and CI find.
 - Stays within the issue.
   Anything else it notices goes to the Coordinator as a note or a proposal for an issue, not into the branch.
 - Never judges its own pull request: the Reviewer does that.
@@ -133,6 +133,9 @@ A pull request is done when:
 How a review works, with the limit of two rounds and the code and security checklist, is in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 For agents:
 
+- The Builder starts the Reviewer right after opening the pull request, without waiting for CI.
+  The app doesn't let a session watch CI itself, and Auto-fix only wakes the Builder when a check fails, not when CI passes.
+  The Reviewer runs the checks itself and looks up CI's result last.
 - The Builder runs `git fetch origin` and then starts the Reviewer (the `reviewer` subagent) from its worktree, so the Reviewer can run the checks and compare against the current base.
   The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
 - The Reviewer's hook blocks `docker`, and the tests of `packages/db` need a MariaDB.
@@ -164,8 +167,8 @@ For agents:
    The git hooks fix the formatting and check the message.
 6. Ask the owner, then push and open a pull request with the template in `.github/pull_request_template.md`.
    Tick the boxes in the issue to match what the pull request delivers.
-7. Once CI passes, start the Reviewer and post its report (see _Reviews_).
-   Fix the findings, for at most two rounds.
+7. Right after opening the pull request, start the Reviewer and post its report (see _Reviews_).
+   Fix its findings, for at most two rounds, and fix CI if Auto-fix reports a failed check.
 8. After the merge, remove the worktree (`git worktree remove`).
    If your next branch builds on the merged one, rebase it onto `main`.
 

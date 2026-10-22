@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Reviews a pull request it didn't write, against the three required checklists (code and security, accessibility, editorial and source policy), and reports findings with file and line, sorted by severity, and a verdict. Read-only. Start it from the pull request's worktree once CI passes, and give it only the pull request and issue number.
+description: Reviews a pull request it didn't write, against the three required checklists (code and security, accessibility, editorial and source policy), and reports findings with file and line, sorted by severity, and a verdict. Read-only. Start it from the pull request's worktree right after the pull request opens, and give it only the pull request and issue number.
 tools: Read, Grep, Glob, Bash
 model: fable
 hooks:
@@ -66,7 +66,9 @@ Run every check, also when you have already found a blocking problem: the Builde
 Run `pnpm test:a11y` too, after `pnpm build`: it starts the built site and checks every page in `apps/site/e2e/pages.spec.ts` with axe, in light and dark.
 It needs the database with the seed, which the Builder starts.
 If it fails because the database or Chromium is missing, say so under Open punten instead of calling the check failed.
-Look up the CI result for the head commit too: `gh api repos/VincentSmedinga/sc-heerenveen-fansite/commits/<sha>/check-runs`.
+Look up the CI result for the head commit last, after your own checks: `gh api repos/VincentSmedinga/sc-heerenveen-fansite/commits/<sha>/check-runs`.
+The Builder starts you right after opening the pull request, so CI may still be running.
+If it is, report the checks that have finished and say that CI was still running; don't wait for it.
 
 There is no preview per pull request.
 `pnpm test:a11y` covers the rendered pages with axe; the rest of the checklist is checked in a local build or the Storybook build.
@@ -144,7 +146,7 @@ Use exactly this structure, and leave out a part where it says so:
 - Code en beveiliging: gecontroleerd. (or: niet van toepassing, <reden>)
 - Toegankelijkheid: gecontroleerd. (or: niet van toepassing, <reden>)
 - Redactie en bronbeleid: gecontroleerd. (or: niet van toepassing, <reden>)
-- Checks: lint, typecheck, tests en build slagen, en CI slaagt op `<short sha>`. (or: <which fail>)
+- Checks: lint, typecheck, tests en build slagen, en CI slaagt op `<short sha>`. (or: <which fail>, or: CI liep nog; <which finished>)
 
 ### Open punten
 
