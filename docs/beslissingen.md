@@ -884,6 +884,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een los component `ListItem`, zoals de andere componenten.
   Dat is een export meer, en de naam zegt niet dat het alleen in een `List` werkt.
 
+### Een ruime lijst vraag je aan
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `List` heeft de eigenschap `loose` voor een ruime lijst, zoals Markdown die kent.
+  Elk item krijgt dan 1rem ruimte onder zich, en de laatste alinea in een item heeft zelf geen ruimte onder zich.
+  Het laatste item heeft geen eigen ruimte, dus onder een ruime lijst staat evenveel ruimte als onder een gewone lijst.
+  Een pagina kiest daar zelf voor; een gewone lijst blijft compact.
+  `/bronnen` gebruikt het voor de lijst van elke soort.
+- **Waarom:** de ruimte hoort bij het item, niet bij de alinea erin, zodat een item zonder alinea dezelfde ruimte krijgt.
+  Een eigenschap is voorspelbaar: de pagina krijgt wat ze vraagt, los van wat er in de items staat.
+- **Alternatieven:** de ruimte automatisch geven zodra een item in de lijst een alinea bevat, met `:has()`.
+  Dan hoeft een pagina niets te kiezen, maar de inhoud van één item verandert dan de hele lijst.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

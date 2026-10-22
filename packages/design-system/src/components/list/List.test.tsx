@@ -32,6 +32,45 @@ describe('List', () => {
     ).toEqual(['Een', 'Twee'])
   })
 
+  it('is a tight list unless it is loose', () => {
+    const { container } = render(
+      <List>
+        <li>Een</li>
+      </List>,
+    )
+
+    expect(container.firstElementChild?.className).toBe('')
+    expect(container.firstElementChild?.hasAttribute('class')).toBe(false)
+  })
+
+  it.each(listElements)('can be a loose %s', (element) => {
+    const { container } = render(
+      <List as={element} loose>
+        <li>Een</li>
+      </List>,
+    )
+
+    expect(container.firstElementChild?.tagName.toLowerCase()).toBe(element)
+    expect(container.firstElementChild?.className).toBe('hf-list-loose')
+    expect(container.firstElementChild?.hasAttribute('loose')).toBe(false)
+  })
+
+  it('does not make a list loose when loose is false', () => {
+    const { container } = render(
+      <List loose={false}>
+        <li>Een</li>
+      </List>,
+    )
+
+    expect(container.firstElementChild?.hasAttribute('class')).toBe(false)
+  })
+
+  it('keeps its own class next to the other classes', () => {
+    const { container } = render(<List className="extra" loose />)
+
+    expect(container.firstElementChild?.className).toBe('hf-list-loose extra')
+  })
+
   it('takes the attributes of a numbered list when it is one', () => {
     const { container } = render(
       <List as="ol" reversed start={3}>
