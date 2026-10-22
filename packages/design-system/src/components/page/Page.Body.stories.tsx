@@ -72,7 +72,7 @@ export const Light = meta.story({
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render: onlyMain })
 
 const sidebarDescription =
-  'Een hoofdkolom met een zijbalk. De cellen in de zijbalk zijn hoger of lager dan die in de hoofdkolom, en elke kolom stapelt haar eigen cellen: er is geen ruimte om de cellen van de ene kolom op die van de andere te laten aansluiten.'
+  'Een hoofdkolom met een zijbalk. De cellen in de zijbalk zijn hoger of lager dan die in de hoofdkolom, en elke kolom stapelt haar eigen cellen: de cellen van de ene kolom sluiten niet aan op die van de andere.'
 
 export const WithSidebarLight = meta.story({
   globals: { theme: 'light' },
