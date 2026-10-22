@@ -2,7 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { createTestDatabase } from '@fansite/db/test-database'
 import { execFile } from 'node:child_process'
-import { mkdtempSync, readdirSync, rmSync } from 'node:fs'
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { promisify } from 'node:util'
@@ -31,6 +31,8 @@ it('bundles the import command into one file that runs on its own, without node_
   await bundleImporter(file)
 
   expect(readdirSync(folder)).toEqual(['import.mjs'])
+  // Node only has `import.meta.main` since 24.2, and the host may run an older Node 24.
+  expect(readFileSync(file, 'utf8')).not.toContain('import.meta.main')
 
   const { stdout } = await promisify(execFile)(process.execPath, [file], {
     cwd: folder,

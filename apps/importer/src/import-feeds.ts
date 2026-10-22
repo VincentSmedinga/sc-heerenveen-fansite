@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 import type { Feed } from '@fansite/db/schema'
 
+import { connect } from '@fansite/db/client'
 import { feeds, items, sources } from '@fansite/db/schema'
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
@@ -155,6 +156,33 @@ export function listFeedsToImport(db: Database) {
     .innerJoin(sources, eq(sources.id, feeds.sourceId))
     .where(eq(sources.enabled, true))
     .orderBy(asc(feeds.id))
+}
+
+/**
+ * Reads every feed of every source that is switched on and writes a line for each. One fetcher serves all feeds, so a
+ * host's robots.txt is read once. Returns the exit code: 1 when a feed failed, so a scheduler can tell.
+ */
+export async function runImport(
+  databaseUrl: string,
+  fetcher: Fetcher,
+  write: (line: string) => void = console.log,
+): Promise<number> {
+  const { close, db } = connect(databaseUrl)
+
+  try {
+    const reports = await importFeeds(db, fetcher)
+
+    if (reports.length === 0) {
+      write('There are no feeds to read: no source that is switched on has a feed. See `pnpm db:seed`.')
+    }
+    for (const report of reports) {
+      write(formatReport(report))
+    }
+
+    return reports.some((report) => report.kind === 'error') ? 1 : 0
+  } finally {
+    await close()
+  }
 }
 
 /** Cuts an array into pieces of at most `size`. */

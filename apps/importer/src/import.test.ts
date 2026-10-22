@@ -10,7 +10,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { TestServer } from './test-server.ts'
 
-import { runImport } from './import.ts'
+import { runImport } from './import-feeds.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
 const script = fileURLToPath(new URL('./import.ts', import.meta.url))
