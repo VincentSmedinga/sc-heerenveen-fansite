@@ -198,6 +198,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job_.
   Sindsdien draait de reviewer `pnpm test:a11y` in plaats van `pnpm exec playwright test`, en toetst axe de pagina's.
 
+### De reviewer start direct na het openen van de pull request
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de Builder start de reviewer zodra de pull request open is, zonder op CI te wachten.
+  De reviewer draait de controles zelf en kijkt als laatste naar de uitkomst van CI voor de laatste commit.
+  Loopt CI dan nog, dan staat dat in zijn verslag.
+  Faalt CI, dan maakt Auto-fix de Builder wakker, en die herstelt het.
+- **Waarom:** de app van Claude laat een sessie CI niet zelf in de gaten houden, en Auto-fix maakt de Builder alleen wakker als een controle faalt, niet als CI slaagt.
+  Met "start de reviewer als CI slaagt" wachtte de Builder dus tot iemand hem een seintje gaf.
+  De Builder heeft alle controles al lokaal gedraaid voordat hij pusht, en een review duurt langer dan CI.
+- **Nadeel:** soms beoordeelt de reviewer een commit die daarna in CI faalt, door iets wat alleen in CI gebeurt.
+  Zo'n herstel is meestal klein.
+- **Alternatieven:** wachten tot CI slaagt, zoals eerst; dan wacht de Builder op een seintje.
+  Of de Builder CI laten volgen met een lus; dat staat de app niet toe, en elke keer kijken kost een beurt van het model.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host
