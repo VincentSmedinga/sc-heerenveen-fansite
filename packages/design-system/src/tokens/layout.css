@@ -13,6 +13,6 @@
      * A percentage refers to the width of the parent, so as padding or margin this keeps the column centred at any width.
      * The header can then run edge to edge without 100vw, which includes the scrollbar and makes the page scroll sideways.
      */
-    --hf-page-inset: max(var(--hf-page-margin), calc((100% - var(--hf-page-max-width)) / 2 + var(--hf-page-margin)));
+    --hf-page-inset: max(var(--hf-page-margin), calc((100% - var(--hf-page-max-width)) / 2));
   }
 }

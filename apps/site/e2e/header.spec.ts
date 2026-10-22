@@ -9,7 +9,7 @@ const visibleScrollbar = 'html { overflow-y: scroll } ::-webkit-scrollbar { widt
 
 // The margin on either side of the column, and its widest, from the tokens of the design system.
 const margin = 16
-const columnWidth = 1200 - 2 * margin
+const columnWidth = 1200
 
 for (const width of [320, 1920]) {
   test(`the header runs from edge to edge in a window of ${width} pixels, with the logo in line with the content`, async ({

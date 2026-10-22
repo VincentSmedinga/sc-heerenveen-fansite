@@ -976,7 +976,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het logo en de navigatie blijven in de kolom van de pagina, in lijn met de inhoud eronder.
   De footer blijft in de kolom.
 - **Hoe:** de `Page` is zo breed als het venster.
-  De header, de body en de footer zetten zelf de ruimte aan de zijkanten, uit het token `--hf-page-inset`: de marge, plus de helft van wat het venster breder is dan de kolom.
+  De header, de body en de footer zetten zelf de ruimte aan de zijkanten, uit het token `--hf-page-inset`: de helft van wat het venster breder is dan `--hf-page-max-width`, en nooit minder dan de marge.
+  De kolom blijft zo 75 rem breed, zoals voorheen.
   De header gebruikt het als `padding-inline`, de body en de footer als `margin-inline`.
   Een percentage verwijst naar de breedte van de ouder, en die telt de scrollbalk niet mee.
   De header heeft de eigen zijruimte van 1,5 rem (op een smal scherm 1 rem) niet meer, zodat het logo op dezelfde plek staat als de inhoud.
