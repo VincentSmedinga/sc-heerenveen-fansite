@@ -45,8 +45,8 @@ export default function AboutPage() {
       </Text>
       <List>
         <List.Item>
-          Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. De hosting bewaart ze
-          niet langer dan nodig, en we geven ze aan niemand.
+          Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. We bewaren ze niet langer
+          dan nodig en geven ze aan niemand.
         </List.Item>
         <List.Item>Een mail aan ons gebruiken we alleen om te antwoorden.</List.Item>
         <List.Item>
