@@ -13,7 +13,7 @@ const meta = preview.meta({
           'Elke pagina heeft er precies één, en zet haar inhoud erin.',
           'Een `Page.Main` staat in de `Page.Body`, voor een eventuele `Page.Sidebar`.',
           '',
-          'Op een breed scherm is de kolom hoogstens 36 rem breed (`--hf-content-max-width`), zodat een regel hoogstens 80 tekens telt.',
+          'Op een breed scherm is de kolom hoogstens 48 rem breed (`--hf-content-max-width`).',
           'Op een smaller scherm is hij zo breed als het scherm tussen de marges.',
           '',
           'Elk kind van de kolom is een cel, zoals een kop, een tekst of een kaart.',

@@ -7,11 +7,11 @@ test.use({ launchOptions: { ignoreDefaultArgs: ['--hide-scrollbars'] } })
 
 const visibleScrollbar = 'html { overflow-y: scroll } ::-webkit-scrollbar { width: 15px }'
 
-// The margin on either side of the column, and its widest, from the tokens of the design system. The content is narrower
-// than the column (content-column.spec.ts checks that).
+// The margin on either side of the column, and its widest, from the tokens of the design system. The main column is
+// narrower than the column of the page (content-column.spec.ts checks that).
 const margin = 16
 const columnWidth = 1200
-const contentWidth = 576
+const contentWidth = 768
 
 for (const width of [320, 1920]) {
   test(`the header runs from edge to edge in a window of ${width} pixels, with the logo in line with the content`, async ({

@@ -84,6 +84,7 @@
     border: 1px solid;
     border-color: var(--hf-colour-border-surface);
     border-radius: 0.25rem;
+    box-sizing: border-box;
     margin-block: 0 1rem;
     margin-inline: 0;
     padding-block: 0.5rem 1rem;
@@ -106,6 +107,7 @@
     border: 1px solid;
     border-color: var(--hf-colour-background-button);
     border-radius: 0.25rem;
+    box-sizing: border-box;
     color: var(--hf-colour-text-on-button);
     cursor: pointer;
     font-weight: var(--hf-strong-font-weight);

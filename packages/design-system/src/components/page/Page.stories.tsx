@@ -70,7 +70,7 @@ const screens = { tags: ['!autodocs'] }
 const narrowDescription = 'Op een smal scherm gebruikt de inhoud de hele breedte, tussen de marges van 1 rem.'
 
 const wideDescription =
-  'Op een breed scherm staat de inhoud in een smallere kolom, van 36 rem, in lijn met het logo. Een regel telt er hoogstens 80 tekens. De rest van de kolom van de pagina blijft leeg, of is voor een zijbalk. De header en de footer lopen over de hele kolom.'
+  'Op een breed scherm staat de inhoud in de hoofdkolom, van 48 rem, in lijn met het logo. De rest van de kolom van de pagina blijft leeg, of is voor een zijbalk van 24 rem. De header en de footer lopen over de hele kolom.'
 
 export const NarrowLight = meta.story({
   ...screens,

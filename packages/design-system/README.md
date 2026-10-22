@@ -48,6 +48,8 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
   CSS buiten een laag wint altijd.
   Het CSS-bestand van een component mag regels in meer dan één laag hebben: `heading/heading.css` heeft een basislaag en een typografielaag.
   De volgorde van de imports in `src/index.css` is de volgorde van de regels binnen een laag.
+- **Box-model:** een regel die padding of een rand zet op een element met een maat, zet ook `box-sizing: border-box`.
+  Er is geen globale regel op `*`.
 - **Logische eigenschappen:** `margin-inline-start` in plaats van `margin-left`.
   Stylelint controleert dit.
 - **Kleur:** gebruik semantische tokens, zoals `--hf-colour-text-secondary`, nooit de primitieven (`--hf-colour-grey-600`) in componenten.

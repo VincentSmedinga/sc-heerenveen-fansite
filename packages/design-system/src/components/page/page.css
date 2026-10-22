@@ -28,6 +28,7 @@
 
     align-items: center;
     background-color: var(--hf-colour-background-header);
+    box-sizing: border-box;
     color: var(--hf-colour-text-default);
     display: flex;
     flex-wrap: wrap;
@@ -40,32 +41,36 @@
   /*
    * The grid of the page between the header and the footer. It takes the space the page has left, so the footer sits at
    * the bottom of a short page, and keeps its rows at the top instead of stretching them. The columns start in line with
-   * the logo, and the rest of the page column stays empty. On a screen narrower than a column the column is as wide as
-   * the screen: the margin on the end side gives way.
+   * the logo. On a screen narrower than a column the column is as wide as the screen: the margin on the end side gives
+   * way.
    *
-   * There is one track, as wide as the main (--hf-content-max-width), so the sidebar sits under the main, both over the
-   * whole track. From 60rem there is a second track for the sidebar: 36rem, 2rem of space, 20rem, and 1rem of margin on
-   * either side. A media query can't use a custom property, so the number is written out here.
+   * There is one track, as wide as the main (--hf-content-max-width, 48rem), so the sidebar sits under the main, both over
+   * the whole track. From 77rem there is a second track for the sidebar: 48rem, 3rem of space, 24rem, which is the whole
+   * column of the page (--hf-page-max-width, 75rem), and 1rem of margin on either side. A media query can't use a custom
+   * property, so the number is written out here.
    * The sidebar is second in the source and so in the grid. There is no `order`, which would split the reading order from
    * what is on the screen.
    *
-   * The space is one size, 2rem. It is the gap between the columns, the padding above and below them, and, through the
-   * custom property, the gap between the cells in a column.
+   * There are two sizes of space. The columns are 3rem apart, side by side and under each other, and the padding under
+   * them is 3rem. The cells in a column are 2rem apart, and that is also the padding above the columns. A column gets
+   * the space between its cells through a custom property.
    */
   .hf-page-body {
-    --hf-page-body-gap: 2rem;
+    --hf-page-body-cell-gap: 2rem;
+    --hf-page-body-column-gap: 3rem;
 
     align-content: start;
     align-items: start;
+    box-sizing: border-box;
     display: grid;
     flex: 1 0 auto;
-    gap: var(--hf-page-body-gap);
+    gap: var(--hf-page-body-column-gap);
     grid-template-columns: minmax(0, var(--hf-content-max-width));
     margin-inline: var(--hf-page-inset);
-    padding-block: var(--hf-page-body-gap);
+    padding-block: var(--hf-page-body-cell-gap) var(--hf-page-body-column-gap);
 
-    @media (width >= 60rem) {
-      grid-template-columns: minmax(0, var(--hf-content-max-width)) 20rem;
+    @media (width >= 77rem) {
+      grid-template-columns: minmax(0, var(--hf-content-max-width)) 24rem;
     }
   }
 
@@ -80,7 +85,7 @@
   .hf-page-sidebar {
     align-content: start;
     display: grid;
-    gap: var(--hf-page-body-gap);
+    gap: var(--hf-page-body-cell-gap);
     grid-template-columns: minmax(0, 1fr);
 
     > * {
@@ -105,6 +110,7 @@
   .hf-page-footer {
     border-block-start: 1px solid;
     border-block-start-color: var(--hf-colour-border-default);
+    box-sizing: border-box;
     color: var(--hf-colour-text-secondary);
     margin-inline: var(--hf-page-inset);
     padding-block: 1.5rem 2rem;

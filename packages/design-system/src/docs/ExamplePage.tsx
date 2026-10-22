@@ -50,8 +50,8 @@ export const ExampleContent = (): ReactNode => (
       naam van de bron erbij.
     </Text>
     <Text>
-      Op een breed scherm staat deze tekst in een smallere kolom dan de pagina: een regel telt er hoogstens 80 tekens.
-      Rechts ervan is plaats voor een zijbalk.
+      Op een breed scherm staat deze tekst in de hoofdkolom, die 48 rem breed is. Rechts ervan is plaats voor een
+      zijbalk.
     </Text>
     <Heading appearance={3} level={2}>
       Zo lees je de site

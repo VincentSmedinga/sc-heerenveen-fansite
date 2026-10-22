@@ -13,7 +13,7 @@ const meta = preview.meta({
           'Een pagina heeft er een als ze iets heeft naast de hoofdinhoud; zonder zijbalk laat je hem weg.',
           'Hij staat in de `Page.Body`, na de `Page.Main`.',
           '',
-          'Op een breed scherm is de zijbalk 20 rem breed en staat hij naast de hoofdkolom.',
+          'Op een breed scherm is de zijbalk 24 rem breed en staat hij naast de hoofdkolom.',
           'Is het scherm te smal voor beide, dan staat hij onder de hoofdkolom, over de hele breedte.',
           'In beide gevallen komt hij in de HTML na de hoofdkolom, dus ook in de leesvolgorde en bij het tabben.',
           '',

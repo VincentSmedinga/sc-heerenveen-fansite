@@ -1115,23 +1115,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of nu al een zijbalk met inhoud; daar is nog niets voor.
   Of de smalle kolom pas vanaf een breakpoint; dan krijgt een tablet regels van ruim 90 tekens.
 - **Later:** zie _Page.Body is het raster, met een hoofdkolom en een zijbalk_.
-  De kolom van 36 rem en de plek voor een zijbalk blijven.
-  Het token zet nu de breedte van het eerste spoor in het raster van `Page.Body`, en niet meer een `max-inline-size` op de `main`; de zijbalk is er, 20 rem breed.
+  De hoofdkolom is nu 48 rem, en de grens van 80 tekens per regel is vervallen.
+  Het token `--hf-content-max-width` zet nu de breedte van het eerste spoor in het raster van `Page.Body`, en niet meer een `max-inline-size` op de `main`; de zijbalk is er, 24 rem breed.
 
 ### Page.Body is het raster, met een hoofdkolom en een zijbalk
 
 - **Datum:** 22 oktober 2026
-- **Besluit:** `Page.Body` is het raster van een pagina, met twee kolommen: `Page.Main`, hoogstens 36 rem voor regels van hoogstens 80 tekens, en `Page.Sidebar`, 20 rem, zoals op de artboards.
-  Ze beginnen in lijn met het logo; de rest van de kolom van de pagina blijft leeg.
+- **Besluit:** `Page.Body` is het raster van een pagina, met twee kolommen: `Page.Main`, hoogstens 48 rem, en `Page.Sidebar`, 24 rem.
+  Samen met de 3 rem ertussen zijn ze de hele kolom van de pagina van 75 rem, en ze beginnen in lijn met het logo.
+  Heeft een pagina geen zijbalk, dan blijft de rest van de kolom leeg.
   `Page.Main` is altijd de `main`, `Page.Sidebar` een `aside`, en `Page.Body` altijd een `div`.
   Elk kind van een kolom is een cel; `Page.Cell` zet meer dingen in één cel.
   Elke kolom stapelt haar eigen cellen, en `Page.Body` regelt alle witruimte.
   Op een smal scherm staan de kolommen onder elkaar, de hoofdkolom eerst.
-- **Hoe:** `Page.Body` is een raster met één spoor van 36 rem, dat krimpt als het scherm smaller is.
-  Vanaf 60 rem (36 rem, 2 rem ertussen en 20 rem, met een marge van 1 rem aan beide kanten) komt er een tweede spoor van 20 rem bij.
+  De grens van 80 tekens per regel, die _De inhoud staat in een smallere kolom, met plaats voor een zijbalk_ stelde, vervalt.
+- **Hoe:** `Page.Body` is een raster met één spoor van 48 rem, dat krimpt als het scherm smaller is.
+  Vanaf 77 rem (48 rem, 3 rem ertussen en 24 rem, met een marge van 1 rem aan beide kanten) komt er een tweede spoor van 24 rem bij.
   De breedte staat in de media query zelf, want een custom property kan daar niet in.
-  Elke kolom is een gewoon raster van één spoor, met dezelfde witruimte als `gap`, uit een custom property op `Page.Body`.
-  De witruimte is één maat van 2 rem, ook boven en onder de kolommen; tokens voor ruimte komen met #19.
+  Elke kolom is een gewoon raster van één spoor, met de witruimte tussen de cellen als `gap`, uit een custom property op `Page.Body`.
+  Er zijn twee maten witruimte, tot tokens voor ruimte komen (#19): 3 rem tussen de kolommen, naast elkaar en onder elkaar, en onder de kolommen, en 2 rem tussen de cellen en boven de kolommen.
   Een kind van een kolom heeft `margin: 0`, en in een `Page.Cell` hebben het eerste en het laatste kind geen marge naar buiten.
   De zijbalk staat in de bron na de hoofdkolom, en er is geen `order`, dus de leesvolgorde en de tabvolgorde zijn op elke breedte die van de bron.
 - **Waarom:** met twee vaste kolommen bestaat het raster alleen direct in `Page.Body`; een los `Grid` zou daar altijd in staan en dezelfde taak hebben.
@@ -1139,11 +1141,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Elke pagina heeft dezelfde landmarks, en de layout van de site blijft `Page.Body` maken.
   In een gewoon raster delen cellen in dezelfde rij hun hoogte; met een eigen raster per kolom stapelt elke kolom haar eigen cellen, zoals op de artboards.
   Een subgrid helpt hier niet: een kolom beslaat één spoor van `Page.Body`, dus hij erft er niets bruikbaars van, en met subgrid-rijen zouden de cellen van beide kolommen dezelfde rijen delen, wat we niet willen.
+  De projecteigenaar koos na de review van de eerste versie voor kolommen van 48 en 24 rem en voor 3 rem tussen de kolommen en onder de inhoud.
+  Een regel lopende tekst telt in 48 rem nu zo'n 96 tekens, meer dan de 80 van WCAG 1.4.8 (niveau AAA).
+  De projecteigenaar liet de grens vallen.
+  Het lettertype wordt binnenkort groter, en dan telt een regel minder tekens.
 - **Alternatieven:** een los component `Grid` in `Page.Body`, dat de kolommen en de witruimte regelt, terwijl `Page.Body` alleen het kader is.
-  Of een raster van 12 kolommen met `start` en `span`, zoals in het designsysteem van Amsterdam; flexibeler, maar meer API, en de grens van 80 tekens wordt een `span` die je goed moet houden.
+  Of een raster van 12 kolommen met `start` en `span`, zoals in het designsysteem van Amsterdam; flexibeler, maar meer API.
   Of rijen over beide kolommen met cellen die even hoog worden; dan stapelen de kolommen niet los.
   Of meer kaarten in één cel, met de ruimte in de kaart.
   Of de kolom in `Page.Body` laten zoals #73 deed, zonder plek voor een zijbalk.
+  Of de tekst in de kolom van 48 rem toch beperken tot 36 rem, zodat de grens van 80 tekens blijft; dat is niet gekozen.
+
+### Een regel met padding of een rand zet zelf `box-sizing: border-box`
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** elke regel in het designsysteem die padding of een rand zet op een element met een maat, zet daar `box-sizing: border-box` bij.
+  Zo tellen padding en rand mee in de breedte en de hoogte, en doet een maat van 24 rem wat ze zegt.
+  Er is geen globale regel op `*`.
+  Dit staat op de delen van `Page` (`Page.Header`, `Page.Body` en `Page.Footer`), op `blockquote`, `pre`, `hr`, `fieldset`, de knoppen, `textarea` en de voorbeelden in de documentatie met een maat en een rand.
+- **Waarom:** padding en rand veranderen de maat dan niet, en een element met een maat houdt die maat als er padding bij komt.
+  Een regel zonder padding of rand heeft de instelling niet nodig, dus er staat niets wat niets doet.
+- **Let op:** een nieuwe regel met padding of een rand moet de instelling zelf zetten.
+  Stylelint controleert dat niet.
+- **Alternatieven:** `box-sizing: border-box` op `*`, `*::before` en `*::after`, zoals de meeste resets doen; dat raakt ook elementen van derden en elke regel die er niet om vraagt.
+  Of `html { box-sizing: border-box }` met `inherit` op alle elementen; dat is ook een regel op `*`.
 
 ## Site
 
