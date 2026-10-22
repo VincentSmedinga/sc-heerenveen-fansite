@@ -384,6 +384,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `packages/shared` kwam met #2, voor de controle van omgevingsvariabelen.
   `apps/site` kwam met #6.
   `packages/db` kwam met #69.
+  `apps/importer` kwam met #71, voor de fetcher.
   De site heet `apps/site` en niet `apps/web` of `apps/front-end`: het is de hele site, met de server en het beheer erbij, en "site" is het woord dat we overal gebruiken (besloten op 20 oktober 2026).
   De namen `apps/importer` en `packages/db` zijn voorlopig.
 - **Waarom:** een leeg skelet moeten we bijhouden zonder dat het iets doet, en het legt een opzet vast voordat we weten wat het package nodig heeft.
@@ -1006,6 +1007,46 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de header in elke pagina, met de huidige pagina als prop; dan herhaalt elke pagina de header.
   Of het pad lezen uit de headers van het verzoek; dan maakt de server elke pagina per bezoek, ook de homepage.
   Of de huidige pagina niet markeren.
+
+## Importer
+
+### Een herkenbare fetcher die zich aan robots.txt houdt
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** alle adapters halen hun gegevens op met één fetcher in `apps/importer`.
+  Hij noemt zich `scHeerenveenFansite`, met een link naar de repository, en volgt `robots.txt` volgens RFC 9309.
+  Is `robots.txt` niet te lezen, dan haalt hij niets op.
+  Hij stuurt geen cookies, doet zich niet voor als browser en vraagt een feed die niet veranderd is met `If-None-Match` en `If-Modified-Since`.
+- **Waarom:** een site moet kunnen zien wie wij zijn en ons kunnen weren, met de regels die ze al gebruiken.
+  Een strenge lezing van `robots.txt` past bij wat we beloven: we nemen niets wat een bron ons niet wil geven.
+  Een feed die niet veranderd is, kost de bron dan bijna niets.
+- **Alternatieven:** een user agent die op een browser lijkt; dat komt vaker langs blokkades, maar dat is precies wat we niet willen.
+  Of `robots.txt` overslaan voor feeds, zoals veel feedlezers doen omdat een feed bedoeld is om gelezen te worden; dan negeren we een bron die ons wil weren.
+  Of een `robots.txt` die niet te lezen is als "alles mag" opvatten; dan halen we misschien iets wat de eigenaar verbiedt.
+
+### robots.txt lezen we met eigen code
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de fetcher leest `robots.txt` met een kleine eigen parser, getest met de voorbeelden uit RFC 9309.
+- **Waarom:** we hebben weinig van de regels nodig: onze naam of `*`, `Allow` en `Disallow`, `*` en `$`, en de langste regel wint.
+  Dat zijn een paar tientallen regels code, zonder dependency om na te lopen.
+- **Alternatieven:** het package `robots-parser` (MIT).
+  Dat kan meer, zoals `Crawl-delay` en `Sitemap`, maar het is een dependency, en de laatste versie is van 2023.
+
+### De fetcher meldt elke uitkomst als waarde
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `fetch` van de fetcher gooit geen fout voor wat een bron doet.
+  Het antwoord is altijd een van vijf uitkomsten: gelukt, niet gewijzigd, geweigerd door `robots.txt`, wachten (429 of 503) of fout.
+  Bij een fout staat een reden in een vaste lijst en een bericht in gewone woorden.
+  Bij wachten staat het aantal seconden uit `Retry-After`, of niets als de bron dat niet zegt.
+  De inhoud van een antwoord is een rij bytes: de adapter kent de tekenset van zijn feed.
+- **Anders dan de RFC:** een 429 op `robots.txt` telt als niet te lezen, niet als "geen `robots.txt`".
+  RFC 9309 zegt dat een 4xx betekent dat het bestand er niet is, maar een 429 betekent dat de host ons vraagt te wachten, en dan weten we niet wat hij zou antwoorden.
+- **Waarom:** een adapter kan zo geen uitkomst vergeten, de jobplanner (#13) kan elke uitkomst gebruiken voor de gezondheid van een bron, en `Retry-After` kan hij zonder opnieuw te lezen gebruiken.
+  Bytes verliezen geen tekens bij een feed die niet in UTF-8 staat.
+- **Alternatieven:** fouten gooien en de adapter laten vangen; dat laat een adapter een fout vergeten.
+  Of de inhoud als tekst geven; dat is handiger, maar het raadt de tekenset van de bron.
 
 ## Redactie
 

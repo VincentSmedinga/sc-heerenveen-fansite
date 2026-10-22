@@ -3,6 +3,7 @@
 {
   "files": [],
   "references": [
+    { "path": "apps/importer" },
     { "path": "apps/site" },
     { "path": "packages/db" },
     { "path": "packages/design-system" },

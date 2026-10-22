@@ -56,6 +56,7 @@ Daarna controleert commitlint of het bericht [Conventional Commits](https://www.
 Schrijf het in het Engels.
 Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvoegen de commit op `main`.
 
+- [`apps/importer`](apps/importer/README.md): de importer, voorlopig alleen de fetcher die bronnen ophaalt
 - [`apps/site`](apps/site/README.md): de site
 - [`packages/db`](packages/db/README.md): de database, met het schema, de migraties en de seed
 - [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens, componenten en Storybook
