@@ -1,19 +1,21 @@
 /* The page and its three parts: header, body and footer. */
 
 @layer hf.components {
-  /* A centred column. On a screen narrower than the maximum width, the margin keeps the content off the edges. */
+  /*
+   * As wide as the window, so the header can run from edge to edge. The header pads its content into a centred column,
+   * and the body and the footer sit in that column. On a screen narrower than the maximum width, the margin keeps the
+   * content off the edges.
+   */
   .hf-page {
     display: flex;
     flex-direction: column;
-    margin-inline: auto;
-    max-inline-size: var(--hf-page-max-width);
     min-block-size: 100dvh;
-    padding-inline: var(--hf-page-margin);
   }
 
   /*
    * The header is dark blue in both themes, so the roles that text, links and the focus ring use are set again for
    * everything inside it. A component in the header then needs no styles of its own for the header.
+   * The band is as wide as the page, and the padding on the sides keeps what is in it in the column, in line with the body.
    */
   .hf-page-header {
     --hf-colour-focus: var(--hf-colour-focus-on-header);
@@ -32,17 +34,13 @@
     gap: 0.5rem 2rem;
     justify-content: space-between;
     padding-block: 1rem;
-    padding-inline: 1.5rem;
-
-    /* Less room on the sides on a narrow screen, so the logo needs fewer lines. The breakpoint is the one of the type tokens. */
-    @media (width < 40em) {
-      padding-inline: 1rem;
-    }
+    padding-inline: var(--hf-page-inset);
   }
 
   /* Takes the space the page has left, so the footer sits at the bottom of a short page. */
   .hf-page-body {
     flex: 1 0 auto;
+    margin-inline: var(--hf-page-inset);
     padding-block: 2rem;
   }
 
@@ -50,6 +48,7 @@
     border-block-start: 1px solid;
     border-block-start-color: var(--hf-colour-border-default);
     color: var(--hf-colour-text-secondary);
+    margin-inline: var(--hf-page-inset);
     padding-block: 1.5rem 2rem;
   }
 }

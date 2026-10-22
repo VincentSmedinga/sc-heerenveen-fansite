@@ -9,6 +9,9 @@ const meta = preview.meta({
       description: {
         component: [
           'De bovenkant van de pagina: een `header`, dus de banner van de pagina.',
+          'De achtergrond loopt van de linker- tot de rechterrand van het venster, op elke breedte.',
+          'Wat erin staat, blijft in de kolom van de pagina, in lijn met de inhoud eronder.',
+          'De verhalen voor een smal en een breed scherm staan alleen in het canvas, met de instelling Viewport van de werkbalk.',
           'De header is in licht en donker donkerblauw.',
           'Daarom krijgt alles erin andere kleuren voor tekst, links en de focusrand: licht op donker.',
           'Een component in de header hoeft daar niets voor te doen.',
@@ -23,6 +26,7 @@ const meta = preview.meta({
       },
       source: exampleSource,
     },
+    layout: 'fullscreen',
   },
   tags: ['autodocs'],
   title: 'Componenten/Page.Header',
@@ -33,6 +37,37 @@ const render = () => <ExampleHeader />
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
+
+// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the same as the stories above.
+const screens = { tags: ['!autodocs'] }
+
+export const NarrowLight = meta.story({
+  ...screens,
+  globals: { theme: 'light', viewport: { value: 'mobile1' } },
+  name: 'Smal scherm, licht',
+  render,
+})
+
+export const NarrowDark = meta.story({
+  ...screens,
+  globals: { theme: 'dark', viewport: { value: 'mobile1' } },
+  name: 'Smal scherm, donker',
+  render,
+})
+
+export const WideLight = meta.story({
+  ...screens,
+  globals: { theme: 'light', viewport: { value: 'wide' } },
+  name: 'Breed scherm, licht',
+  render,
+})
+
+export const WideDark = meta.story({
+  ...screens,
+  globals: { theme: 'dark', viewport: { value: 'wide' } },
+  name: 'Breed scherm, donker',
+  render,
+})
 
 const focusParameters = {
   docs: {

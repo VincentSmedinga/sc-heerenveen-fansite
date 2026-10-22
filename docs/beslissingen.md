@@ -967,6 +967,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de ruimte automatisch geven zodra een item in de lijst een alinea bevat, met `:has()`.
   Dan hoeft een pagina niets te kiezen, maar de inhoud van één item verandert dan de hele lijst.
 
+### De header loopt over de hele breedte van het venster
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de achtergrond van de header loopt op elke breedte van rand tot rand.
+  Het logo en de navigatie blijven in de kolom van de pagina, in lijn met de inhoud eronder.
+  De footer blijft in de kolom.
+- **Hoe:** de `Page` is zo breed als het venster.
+  De header, de body en de footer zetten zelf de ruimte aan de zijkanten, uit het token `--hf-page-inset`: de marge, plus de helft van wat het venster breder is dan de kolom.
+  De header gebruikt het als `padding-inline`, de body en de footer als `margin-inline`.
+  Een percentage verwijst naar de breedte van de ouder, en die telt de scrollbalk niet mee.
+  De header heeft de eigen zijruimte van 1,5 rem (op een smal scherm 1 rem) niet meer, zodat het logo op dezelfde plek staat als de inhoud.
+- **Waarom:** een band van rand tot rand is duidelijk de bovenkant van de site.
+  Op een telefoon stond de blauwe balk met een smalle rand aan beide kanten los.
+  Omdat de inhoud in de kolom blijft, staat het logo in lijn met de rest van de pagina.
+- **Alternatieven:** alleen op een smal scherm van rand tot rand, onder 40em of onder 75rem; op een breder scherm staat de balk dan nog in de kolom.
+  Of de header in de kolom laten, zoals voorheen.
+  Of de header `100vw` breed maken, met een negatieve marge: `100vw` telt de scrollbalk mee, dus op Windows scrolt de pagina dan opzij.
+  Of een omhulsel in de header voor de kolom; dat is een element meer, en de inhoud van de header zou dan altijd in dat omhulsel moeten.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
