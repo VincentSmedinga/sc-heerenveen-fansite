@@ -25,7 +25,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/PageHeader',
+  title: 'Componenten/Page.Header',
 })
 
 const render = () => <ExampleHeader />

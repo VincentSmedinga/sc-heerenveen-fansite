@@ -3,7 +3,7 @@ import '@fansite/design-system/index.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
-import { Body, Link, Logo, Page, PageBody, PageFooter, PageHeader, Root, Text } from '@fansite/design-system'
+import { Body, Link, Logo, Page, Root, Text } from '@fansite/design-system'
 
 import { SiteNavigation } from '../SiteNavigation'
 
@@ -20,16 +20,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <Root>
       <Body>
         <Page>
-          <PageHeader>
+          <Page.Header>
             <Link href="/">
               <Logo />
             </Link>
             <SiteNavigation />
-          </PageHeader>
-          <PageBody>{children}</PageBody>
-          <PageFooter>
+          </Page.Header>
+          <Page.Body>{children}</Page.Body>
+          <Page.Footer>
             <Text appearance="meta">sc Heerenveen Fansite, sinds 1997. Voor supporters, door supporters.</Text>
-          </PageFooter>
+          </Page.Footer>
         </Page>
       </Body>
     </Root>

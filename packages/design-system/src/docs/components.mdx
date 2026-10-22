@@ -8,7 +8,7 @@ De React-componenten van het designsysteem.
 Elk onderdeel heeft hieronder een eigen pagina, met voorbeelden in licht en donker.
 Een sjabloon voor een pagina bevat geen HTML, alleen deze componenten.
 
-Dit zijn de eerste twaalf: wat een pagina minimaal nodig heeft.
+Dit zijn de eerste negen, met de drie onderdelen van `Page`: wat een pagina minimaal nodig heeft.
 Knoppen, pictogrammen en de componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
 
 ## Gebruiken
@@ -18,7 +18,7 @@ De site compileert ze mee (in Next.js met `transpilePackages`).
 Importeer de componenten uit het package, en de stijlen uit `index.css`:
 
 ```tsx
-import { Heading, Page, PageBody } from '@fansite/design-system'
+import { Heading, Page } from '@fansite/design-system'
 ```
 
 ```css
@@ -28,26 +28,26 @@ import { Heading, Page, PageBody } from '@fansite/design-system'
 ## Een pagina bouwen
 
 `Root` en `Body` zijn de `html` en de `body`.
-`Page` bevat een `PageHeader`, een `PageBody` en een `PageFooter`, in die volgorde.
-De `main` van de pagina is de `PageBody` zelf, of zit erin.
+`Page` bevat een `Page.Header`, een `Page.Body` en een `Page.Footer`, in die volgorde.
+De `main` van de pagina is de `Page.Body` zelf, of zit erin.
 
 ```tsx
 <Root>
   <Body>
     <Page>
-      <PageHeader>
+      <Page.Header>
         <Link href="/">
           <Logo />
         </Link>
         <Navigation items={menu} label="Hoofdmenu" />
-      </PageHeader>
-      <PageBody>
+      </Page.Header>
+      <Page.Body>
         <Heading level={1}>Nieuws</Heading>
         <Text>…</Text>
-      </PageBody>
-      <PageFooter>
+      </Page.Body>
+      <Page.Footer>
         <Text appearance="meta">…</Text>
-      </PageFooter>
+      </Page.Footer>
     </Page>
   </Body>
 </Root>
@@ -59,7 +59,7 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
 
 <Unstyled>
   <table>
-    <caption>De twaalf componenten</caption>
+    <caption>De negen componenten en de onderdelen van Page</caption>
     <thead>
       <tr>
         <th scope="col">Component</th>
@@ -103,7 +103,7 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
       </tr>
       <tr>
         <th scope="row">
-          <code>PageHeader</code>
+          <code>Page.Header</code>
         </th>
         <td>
           <code>header</code>
@@ -113,7 +113,7 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
       </tr>
       <tr>
         <th scope="row">
-          <code>PageBody</code>
+          <code>Page.Body</code>
         </th>
         <td>
           <code>main</code> of <code>div</code>
@@ -127,7 +127,7 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
       </tr>
       <tr>
         <th scope="row">
-          <code>PageFooter</code>
+          <code>Page.Footer</code>
         </th>
         <td>
           <code>footer</code>
@@ -218,8 +218,9 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
   Alleen wat een component zelf vastlegt, geef je niet mee: de `lang` van `Root` en de naam van `Navigation` en `Logo`.
 - **Het element kiezen:** waar een component meer dan één element kan zijn, kies je met `as` uit een vaste lijst.
   De typen laten geen ander element toe.
-- **Onderdelen met een punt:** een onderdeel dat alleen binnen zijn ouder werkt, schrijf je met een punt achter die ouder.
+- **Onderdelen met een punt:** een onderdeel dat bij één oudercomponent hoort, schrijf je met een punt achter die ouder, ook als het element buiten die ouder wel geldig is.
   Een item van een lijst is `List.Item`, want een `li` hoort in een `ul` of `ol`.
+  De header, de inhoud en de footer van een pagina zijn `Page.Header`, `Page.Body` en `Page.Footer`.
 - **Klassen:** de componenten gebruiken de klassen met het voorvoegsel `hf-` en zitten in de laag `hf.components`.
 - **Niveau en stijl:** het niveau van een kop volgt de structuur van de pagina, de stijl het ontwerp.
   Zie [Heading](?path=/docs/componenten-heading--documentatie).

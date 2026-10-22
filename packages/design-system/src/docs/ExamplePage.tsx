@@ -6,9 +6,6 @@ import { List } from '../components/list/List'
 import { Logo } from '../components/logo/Logo'
 import { Navigation } from '../components/navigation/Navigation'
 import { Page } from '../components/page/Page'
-import { PageBody } from '../components/page/PageBody'
-import { PageFooter } from '../components/page/PageFooter'
-import { PageHeader } from '../components/page/PageHeader'
 import { Text } from '../components/text/Text'
 
 /** The menu of the example pages in the docs. */
@@ -21,19 +18,19 @@ export const exampleMenu = [
 
 /** The logo as a link to the home page, with the menu beside it. This is what a header holds. */
 export const ExampleHeader = () => (
-  <PageHeader>
+  <Page.Header>
     <Link href="#home">
       <Logo />
     </Link>
     <Navigation items={exampleMenu} label="Hoofdmenu" />
-  </PageHeader>
+  </Page.Header>
 )
 
 /** The footer with "Voor supporters, door supporters." */
 export const ExampleFooter = () => (
-  <PageFooter>
+  <Page.Footer>
     <Text appearance="meta">Voor supporters, door supporters.</Text>
-  </PageFooter>
+  </Page.Footer>
 )
 
 /** Content for the body of an example page. */
@@ -60,9 +57,9 @@ export const ExampleContent = (): ReactNode => (
 export const ExamplePage = () => (
   <Page>
     <ExampleHeader />
-    <PageBody>
+    <Page.Body>
       <ExampleContent />
-    </PageBody>
+    </Page.Body>
     <ExampleFooter />
   </Page>
 )

@@ -20,7 +20,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/PageFooter',
+  title: 'Componenten/Page.Footer',
 })
 
 const render = () => <ExampleFooter />

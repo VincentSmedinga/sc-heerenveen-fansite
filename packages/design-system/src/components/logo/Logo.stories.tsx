@@ -1,7 +1,7 @@
 import preview from '#.storybook/preview'
 
 import { Link } from '../link/Link'
-import { PageHeader } from '../page/PageHeader'
+import { Page } from '../page/Page'
 import { Logo } from './Logo'
 
 const meta = preview.meta({
@@ -36,10 +36,10 @@ export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', ren
 export const InHeader = meta.story({
   name: 'In de header, als link',
   render: () => (
-    <PageHeader>
+    <Page.Header>
       <Link href="#home">
         <Logo />
       </Link>
-    </PageHeader>
+    </Page.Header>
   ),
 })
