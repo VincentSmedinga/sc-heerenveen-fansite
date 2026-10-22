@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu twee pagina's: de homepage met de koppen van de afgelopen week, en `/bronnen` met de bronnen uit het register.
+Er zijn nu drie pagina's: de homepage met de koppen van de afgelopen week, `/bronnen` met de bronnen uit het register, en `/over-ons` over de site, met de privacyverklaring.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien

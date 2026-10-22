@@ -25,7 +25,8 @@ export default function AboutPage() {
       </Text>
       <Text>
         Vincent Smedinga begon de site in 1997, als SC Heerenveen Online. In de tussentijd hielpen veel mensen mee,
-        zowel aan de site als het forum. En ook nu weer. De laatste versie liep tot 2006, en in 2026 is de site terug.
+        zowel aan de site als aan het forum. En ook nu weer. De laatste versie liep tot 2006, en in 2026 is de site
+        terug.
       </Text>
       <Heading level={2}>Hoe we werken</Heading>
       <Text>
@@ -45,8 +46,8 @@ export default function AboutPage() {
       </Text>
       <List>
         <List.Item>
-          Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. We bewaren ze niet langer
-          dan nodig en geven ze aan niemand.
+          Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. We gebruiken ze alleen
+          daarvoor, bewaren ze niet langer dan nodig en geven ze aan niemand.
         </List.Item>
         <List.Item>Een mail aan ons gebruiken we alleen om te antwoorden.</List.Item>
         <List.Item>

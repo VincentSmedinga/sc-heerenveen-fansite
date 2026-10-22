@@ -1256,7 +1256,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 22 oktober 2026
 - **Besluit:** wie we zijn, hoe we werken (met verwijderverzoeken) en privacy staan op één korte pagina, `/over-ons`, elk onder een eigen kop en in een paar zinnen.
-  De geschiedenis is één zin, met de oprichter, Vincent Smedinga, bij naam.
+  De geschiedenis is een paar zinnen, met de oprichter, Vincent Smedinga, bij naam, en de mensen die meehielpen.
   De footer linkt naar de pagina en naar het onderdeel privacy.
 - **Hoe:** de links staan onder elke pagina in een navigatie met de naam "Over de site", naast het hoofdmenu.
   Het onderdeel privacy heeft het vaste anker `#privacy`.
