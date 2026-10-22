@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { TestDatabase } from './test-database.ts'
 
 import { lockNameFor, prepareDatabase } from './prepare.ts'
-import { testSources } from './seed.ts'
+import { realSources, testSources } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 const migrationsFolder = fileURLToPath(new URL('../drizzle', import.meta.url))
@@ -56,7 +56,7 @@ describe('prepareDatabase', () => {
     await prepareDatabase({ migrationsFolder, seed: true, url: database.url })
     await prepareDatabase({ migrationsFolder, seed: true, url: database.url })
 
-    expect(await count('sources')).toBe(testSources.length)
+    expect(await count('sources')).toBe(testSources.length + realSources.length)
   })
 
   it('lets go of the lock when it is done', async () => {
@@ -70,9 +70,9 @@ describe('prepareDatabase', () => {
       Array.from({ length: 4 }, () => prepareDatabase({ migrationsFolder, seed: true, url: database.url })),
     )
 
-    expect(await count('sources')).toBe(testSources.length)
-    // The folder holds two migrations, and each is recorded once.
-    expect(await count('__drizzle_migrations')).toBe(2)
+    expect(await count('sources')).toBe(testSources.length + realSources.length)
+    // The folder holds three migrations, and each is recorded once.
+    expect(await count('__drizzle_migrations')).toBe(3)
   })
 
   it('gives up when another process keeps the lock, and goes on once it is free', async () => {

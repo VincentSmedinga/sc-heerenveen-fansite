@@ -1,14 +1,16 @@
+import { eq } from 'drizzle-orm'
+
 import type { Database } from './client.ts'
 import type { NewSource } from './schema.ts'
 
 import { connect } from './client.ts'
 import { readDatabaseEnv } from './env.ts'
-import { sources } from './schema.ts'
+import { feeds, sources } from './schema.ts'
 
 /**
  * Made-up sources for local development, with different policies and permissions. None is real: the domains end in
- * `.test`, which is reserved for tests and never resolves. The real sources come with #10 and #72. Proefforum has no
- * description, so the page shows a source without one too.
+ * `.test`, which is reserved for tests and never resolves. Proefforum has no description, so the page shows a source
+ * without one too.
  */
 export const testSources = [
   {
@@ -79,10 +81,45 @@ export const testSources = [
   },
 ] satisfies NewSource[]
 
-/** Puts the test sources in the register. Running it again updates them by domain and adds no duplicates. */
+/**
+ * The real sources, with the feeds we read. They get the strictest policy, because none has given permission yet: only
+ * the headline, the link and the name. The descriptions are in our own words. More real sources come with #10.
+ */
+export const realSources = [
+  {
+    description:
+      'Dagblad uit Leeuwarden voor Friesland. Op de sportpagina’s staan verslagen, interviews en columns over sc Heerenveen.',
+    domain: 'www.lc.nl',
+    feeds: ['https://www.lc.nl/sport/sc-heerenveen/rss/'],
+    kind: 'news',
+    name: 'Leeuwarder Courant',
+  },
+] satisfies (NewSource & { feeds: string[] })[]
+
+/**
+ * Puts the test sources and the real sources, with their feeds, in the register. Running it again updates them by
+ * domain and by feed address and adds no duplicates. It leaves the `ETag` and `Last-Modified` of a feed alone.
+ */
 export async function seedSources(db: Database) {
   for (const source of testSources) {
     await db.insert(sources).values(source).onDuplicateKeyUpdate({ set: source })
+  }
+
+  for (const { feeds: urls, ...source } of realSources) {
+    await db.insert(sources).values(source).onDuplicateKeyUpdate({ set: source })
+
+    const [row] = await db.select({ id: sources.id }).from(sources).where(eq(sources.domain, source.domain))
+
+    if (row === undefined) {
+      throw new Error(`The source ${source.domain} is not in the register after the seed put it there.`)
+    }
+
+    for (const url of urls) {
+      await db
+        .insert(feeds)
+        .values({ sourceId: row.id, url })
+        .onDuplicateKeyUpdate({ set: { sourceId: row.id } })
+    }
   }
 }
 
@@ -98,7 +135,9 @@ if (import.meta.main) {
 
   try {
     await seedSources(db)
-    console.log(`The register holds the ${testSources.length} test sources.`)
+    console.log(
+      `The register holds ${testSources.length} test sources and the real sources: ${realSources.map((source) => source.name).join(', ')}.`,
+    )
   } finally {
     await close()
   }

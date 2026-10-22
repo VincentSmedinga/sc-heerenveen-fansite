@@ -1,6 +1,6 @@
 # @fansite/db
 
-De database van de site en de importer: het schema in TypeScript, de migraties en een seed met testbronnen.
+De database van de site en de importer: het schema in TypeScript, de migraties en een seed met testbronnen en de eerste echte bron.
 De database is MariaDB 10.11, met Drizzle.
 De naam is voorlopig.
 
@@ -25,17 +25,19 @@ Wil je opnieuw beginnen, voeg dan `--volumes` toe: dat wist de gegevens.
 
 Draai ze vanuit de root van de repository.
 
-| Opdracht           | Wat het doet                                                                    |
-| ------------------ | ------------------------------------------------------------------------------- |
-| `pnpm db:generate` | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`           |
-| `pnpm db:migrate`  | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had          |
-| `pnpm db:seed`     | Zet testbronnen in het register; een tweede keer maakt het geen dubbele bronnen |
-| `pnpm test`        | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                     |
+| Opdracht           | Wat het doet                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `pnpm db:generate` | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                |
+| `pnpm db:migrate`  | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had               |
+| `pnpm db:seed`     | Zet de bronnen met hun feeds in het register; een tweede keer maakt het geen dubbele |
+| `pnpm test`        | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                          |
 
 `db:migrate` gebruikt de migrator van `drizzle-orm` en niet drizzle-kit.
 Daardoor kan dezelfde code op de hosting draaien, zonder ontwikkelgereedschap: de site doet dat als hij start (zie _In andere packages_).
 
 `db:seed` weigert als `SITE_ENV` `production` is, want de testbronnen zijn verzonnen en mogen daar nooit komen.
+De seed zet ook de Leeuwarder Courant met haar feed erin; zij staat dus lokaal en op acceptatie in het register, en nooit op productie.
+Hoe echte bronnen op productie komen, beslissen we met de bronnenlijst (#10) en het beheer (#30).
 
 ## Het schema wijzigen
 
@@ -72,6 +74,38 @@ Het geldt voor een nieuwe bron en voor een wijziging, in elke tool.
 
 De beschrijving schrijven we zelf; we nemen geen tekst van de bron over.
 
+## De tabellen `feeds` en `items`
+
+De importer (`apps/importer`) schrijft in deze twee tabellen.
+
+`feeds` legt per feed vast welke feeds we lezen.
+Een bron kan meer feeds hebben.
+
+| Kolom                   | Betekenis                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `source_id`             | De bron van de feed; een feed gaat weg als zijn bron wordt verwijderd              |
+| `url`                   | Het adres van de feed (hoogstens 500 tekens), uniek                                |
+| `etag`, `last_modified` | De waarden van de vorige keer dat de importer de feed las en de berichten bewaarde |
+
+`items` legt per bericht vast wat de bron publiceert en we mogen bewaren: de kop, de link en de tijd.
+Een intro, een afbeelding, een auteur of een categorie heeft geen kolom, want geen bron heeft daar nu toestemming voor (principe 2 van de Redactie).
+Een kolom daarvoor komt met de eerste bron die het wel mag; een test houdt de lijst met kolommen vast.
+
+| Kolom                           | Betekenis                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `source_id`, `feed_id`          | De bron en de feed waar het bericht voor het laatst in stond                                    |
+| `item_key`                      | De sleutel per bron: de `guid` van het bericht, of anders de link (hoogstens 700 tekens)        |
+| `title`                         | De kop als tekst (hoogstens 500 tekens)                                                         |
+| `url`                           | De link, altijd `http` of `https` (hoogstens 2048 tekens)                                       |
+| `published_at`                  | De tijd van publicatie, in UTC; zonder geldige tijd de tijd van de eerste keer dat we het zagen |
+| `paywalled`                     | Of het bericht achter de betaalmuur staat; een kenmerk van het bericht en geen inhoud           |
+| `first_seen_at`, `last_seen_at` | Wanneer we het bericht voor het eerst en het laatst zagen, in UTC                               |
+
+`item_key` is uniek per bron (`source_id` en `item_key` samen) en hoofdlettergevoelig: de kolom heeft de collatie `utf8mb4_bin`, want een `guid` en het pad van een URL kennen hoofdletters.
+Een lengte die niet past, geeft een fout in plaats van dat de database de tekst afkapt; de importer slaat zo'n bericht eerder al over.
+`itemLimits` in `@fansite/db/schema` heeft de lengtes, voor schema en importer samen.
+De importer verwijdert geen berichten.
+
 ## Tijden
 
 Tijden staan in UTC, als `datetime`.
@@ -91,11 +125,12 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen en hun types;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`), hun types en de lengtes van `items`;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
+- `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;
-- `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de testbronnen erin.
+- `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de bronnen uit de seed erin.
   Een slot in de database (`GET_LOCK`, met de naam van de database erin) laat twee processen die tegelijk starten, om de beurt werken.
   De site roept het aan als hij start.
   De functie gooit bij een fout en laat het aan de aanroeper wat dat betekent; de aanroeper geeft zelf de map met de migraties, want een gebundelde build weet niet waar die staat.

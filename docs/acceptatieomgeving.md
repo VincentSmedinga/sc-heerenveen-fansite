@@ -43,9 +43,9 @@ Dat gebeurt in `register()` in `apps/site/src/instrumentation.ts`, en de site be
 
 1. Hij draait de migraties die de database nog niet had.
    `assemble` zet ze in `packages/db/drizzle` van de map, twee mappen boven `apps/site`, want Next.js neemt de SQL-bestanden zelf niet mee.
-2. Alleen met `SITE_ENV=acceptance` zet hij daarna de testbronnen uit de seed in het register.
+2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen en de Leeuwarder Courant met haar feed.
    Met `local` en `production` doet hij dat niet.
-   Een testbron die er al staat, werkt hij bij op zijn domein, dus er komen geen dubbele.
+   Een bron die er al staat, werkt hij bij op haar domein, dus er komen geen dubbele.
 
 Een slot in de database (`GET_LOCK`) zorgt dat twee processen die tegelijk starten, om de beurt migreren.
 Het proces dat wacht, geeft na 30 seconden op en schrijft dat in het logboek.
@@ -129,7 +129,7 @@ Een agent heeft daar geen toegang.
   Die header staat ook bij `/robots.txt` en bij een pagina die niet bestaat.
 - <https://acc.sc.heerenveen.org/robots.txt> toont `Disallow: /`.
 - <https://acc.sc.heerenveen.org/bestaat-niet> toont de Nederlandse 404-pagina "Pagina niet gevonden".
-- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant.
+- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, en de Leeuwarder Courant.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 
 ## Als het niet werkt

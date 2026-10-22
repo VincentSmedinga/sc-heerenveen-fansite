@@ -2,15 +2,23 @@
   "name": "@fansite/importer",
   "version": "0.0.0",
   "private": true,
-  "description": "De importer van de site: haalt koppen en links op bij de bronnen. Voorlopig alleen de fetcher.",
+  "description": "De importer van de site: haalt koppen en links op bij de bronnen, voorlopig de fetcher en de adapter voor RSS- en Atom-feeds.",
   "license": "EUPL-1.2",
   "type": "module",
   "scripts": {
+    "import": "node --env-file-if-exists=../../.env src/import.ts",
     "test": "vitest run",
     "typecheck": "tsc -b"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
     "vitest": "5.0.5"
+  },
+  "dependencies": {
+    "@fansite/db": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "entities": "7.0.1",
+    "fast-xml-parser": "5.11.2",
+    "feedsmith": "3.0.1"
   }
 }

@@ -15,6 +15,13 @@
       "when": 1792651744588,
       "tag": "0001_add_source_description",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1792662855732,
+      "tag": "0002_add_feeds_and_items",
+      "breakpoints": true
     }
   ]
 }
