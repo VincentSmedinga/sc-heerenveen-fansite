@@ -1,8 +1,8 @@
-# Puts every merge to main on the acceptance environment, https://acc.sc.heerenveen.org. It builds the site, starts the
-# build the way the host does to check it, copies it over SSH and checks the sources page. The site makes its own tables
-# and puts the test sources in them when the host starts it. docs/acceptatieomgeving.md says what the owner sets up on the
-# host and in GitHub. Until the secrets are there, the job builds and checks, and skips the copy and the last check with a
-# notice, so main stays green.
+# Puts every merge to main on the acceptance environment, https://acc.sc.heerenveen.org. It builds the site and the
+# importer, starts the build the way the host does to check it, runs the importer once, copies both over SSH and checks
+# the sources page. The site makes its own tables and puts the test sources in them when the host starts it, and cron
+# starts the importer there. docs/acceptatieomgeving.md says what the owner sets up on the host and in GitHub. Until the
+# secrets are there, the job builds and checks, and skips the copy and the last check with a notice, so main stays green.
 
 name: Acceptance
 
@@ -63,11 +63,22 @@ jobs:
       - run: pnpm --filter site build
 
       # Copies the build, the static files and the migrations, which Next.js leaves out of the standalone folder, to one folder,
-      # and starts it on an empty database.
+      # with the importer as one file, and starts it on an empty database.
       - name: Assemble the folder for the host and check what it serves
         run: |
           pnpm --filter site assemble "$RUNNER_TEMP/site"
           pnpm --filter site smoke "$RUNNER_TEMP/site"
+
+      # Runs the importer from the folder once, as cron does on the host. The database in DATABASE_URL gets the tables but
+      # not the seed, so it has no feeds and the importer asks no real site. If it doesn't start or can't reach the
+      # database, it exits with an error, and the run turns red before anything is copied. `shell: bash` sets pipefail, so
+      # tee doesn't hide that error.
+      - name: Run the importer from the folder
+        shell: bash
+        run: |
+          pnpm db:migrate
+          node "$RUNNER_TEMP/site/apps/importer/import.mjs" | tee "$RUNNER_TEMP/import.txt"
+          grep -q 'There are no feeds to read' "$RUNNER_TEMP/import.txt"
 
       - id: secrets
         name: Check the secrets
@@ -99,7 +110,8 @@ jobs:
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
       # --delete removes files that are gone from the build. tmp/ holds the restart file of the host, and stderr.log the
-      # log of the app, so they stay.
+      # log of the app, so they stay. The file with DATABASE_URL for cron and the log of the import are in the home folder,
+      # outside this folder, so the copy doesn't touch them.
       - name: Copy the folder to the host
         if: steps.secrets.outputs.ready == 'true'
         env:

@@ -8,9 +8,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { Handler, TestServer } from './test-server.ts'
 
-import { createFetcher } from './fetcher.ts'
 import { formatReport, importFeed, importFeeds, listFeedsToImport } from './import-feeds.ts'
-import { reply, startServer } from './test-server.ts'
+import { fetcherFor, reply, startServer } from './test-server.ts'
 
 const firstRun = new Date('2026-10-22T10:00:00Z')
 const secondRun = new Date('2026-10-22T11:00:00Z')
@@ -98,7 +97,7 @@ describe('importing the recording of the Leeuwarder Courant', () => {
     const server = await serve(recording)
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    const report = await importFeed(database.db, createFetcher(), feed, firstRun)
+    const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
     expect(report).toMatchObject({ added: 50, kind: 'imported', skipped: [], unchanged: 0, updated: 0 })
 
@@ -122,7 +121,7 @@ describe('importing the recording of the Leeuwarder Courant', () => {
   it('makes no duplicates when it runs twice, and only moves the time we last saw each item', async () => {
     const server = await serve(recording)
     const feed = await addFeed(`${server.origin}/rss/`)
-    const fetcher = createFetcher()
+    const fetcher = fetcherFor(servers)
 
     await importFeed(database.db, fetcher, feed, firstRun)
     const second = await importFeed(database.db, fetcher, feed, secondRun)
@@ -147,7 +146,7 @@ describe('importing the recording of the Leeuwarder Courant', () => {
     )
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    await importFeed(database.db, createFetcher(), feed, firstRun)
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
     const [everything] = await database.pool.query('SELECT * FROM items')
 
@@ -161,7 +160,7 @@ describe('an item that is already known', () => {
     const first = await serve(before)
     const feed = await addFeed(`${first.origin}/rss/`)
 
-    await importFeed(database.db, createFetcher(), feed, firstRun)
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
     const second = await serve(after)
 
@@ -170,7 +169,7 @@ describe('an item that is already known', () => {
       .set({ url: `${second.origin}/rss/` })
       .where(eq(feeds.id, feed.id))
 
-    return importFeed(database.db, createFetcher(), await storedFeed(feed.id), secondRun)
+    return importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), secondRun)
   }
 
   it('gets the new headline when the source changes it, and stays one item', async () => {
@@ -250,7 +249,7 @@ describe('an item that cannot be stored', () => {
     )
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    const report = await importFeed(database.db, createFetcher(), feed, firstRun)
+    const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
     expect(report).toEqual({
       added: 2,
@@ -270,10 +269,10 @@ describe('an item that cannot be stored', () => {
     const good = await serve(feedWith(entry('g1')))
     const feed = await addFeed(`${good.origin}/rss/`)
 
-    await importFeed(database.db, createFetcher(), feed, firstRun)
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
     const bad = await serve(feedWith('<item><link>https://krant.test/g1</link><guid>g1</guid></item>'))
-    const report = await importFeed(database.db, createFetcher(), { ...feed, url: `${bad.origin}/rss/` }, secondRun)
+    const report = await importFeed(database.db, fetcherFor(servers), { ...feed, url: `${bad.origin}/rss/` }, secondRun)
 
     expect(report).toMatchObject({ added: 0, skipped: [{ position: 1 }], unchanged: 0, updated: 0 })
     expect((await itemsInDatabase())[0]).toMatchObject({ lastSeenAt: firstRun, title: 'Kop g1' })
@@ -284,7 +283,7 @@ describe('a feed with very many items', () => {
   it('is stored in batches, and a second run makes no duplicates', async () => {
     const server = await serve(feedWith(...Array.from({ length: 1200 }, (_, index) => entry(`g${index}`))))
     const feed = await addFeed(`${server.origin}/rss/`)
-    const fetcher = createFetcher()
+    const fetcher = fetcherFor(servers)
 
     expect(await importFeed(database.db, fetcher, feed, firstRun)).toMatchObject({ added: 1200 })
     expect(await importFeed(database.db, fetcher, feed, secondRun)).toMatchObject({ added: 0, unchanged: 1200 })
@@ -307,13 +306,13 @@ describe('the ETag and Last-Modified', () => {
     const server = await serve(conditional)
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    await importFeed(database.db, createFetcher(), feed, firstRun)
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
     const saved = await storedFeed(feed.id)
 
     expect(saved).toMatchObject({ etag: '"v1"', lastModified: 'Wed, 21 Oct 2026 07:28:00 GMT' })
 
-    await importFeed(database.db, createFetcher(), saved, secondRun)
+    await importFeed(database.db, fetcherFor(servers), saved, secondRun)
 
     const asked = server.requests.filter((request) => request.url === '/rss/')
 
@@ -325,9 +324,9 @@ describe('the ETag and Last-Modified', () => {
     const server = await serve(conditional)
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    await importFeed(database.db, createFetcher(), feed, firstRun)
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
-    const report = await importFeed(database.db, createFetcher(), await storedFeed(feed.id), secondRun)
+    const report = await importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), secondRun)
 
     expect(report).toEqual({ kind: 'not-modified', url: feed.url })
     expect((await itemsInDatabase())[0]?.lastSeenAt).toEqual(firstRun)
@@ -338,7 +337,7 @@ describe('the ETag and Last-Modified', () => {
     const server = await serve(conditional)
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    await importFeed(database.db, createFetcher(), feed, firstRun)
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
     await database.db.update(feeds).set({ etag: '"v0"' }).where(eq(feeds.id, feed.id))
 
     const broken = await serve((_request, response) => {
@@ -347,7 +346,7 @@ describe('the ETag and Last-Modified', () => {
     })
     const report = await importFeed(
       database.db,
-      createFetcher(),
+      fetcherFor(servers),
       { ...(await storedFeed(feed.id)), url: `${broken.origin}/rss/` },
       secondRun,
     )
@@ -363,7 +362,7 @@ describe('the ETag and Last-Modified', () => {
 
     // A feed that is not in the register: the database refuses the items, and the transaction takes everything back.
     await expect(
-      importFeed(database.db, createFetcher(), { ...feed, sourceId: feed.sourceId + 1000 }, firstRun),
+      importFeed(database.db, fetcherFor(servers), { ...feed, sourceId: feed.sourceId + 1000 }, firstRun),
     ).rejects.toThrow()
 
     expect(await storedFeed(feed.id)).toMatchObject({ etag: null, lastModified: null })
@@ -376,7 +375,7 @@ describe('a feed the source does not give', () => {
     const server = await serve(recording, { '/robots.txt': reply(200, 'User-agent: *\nDisallow: /rss/\n') })
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    expect(await importFeed(database.db, createFetcher(), feed, firstRun)).toEqual({
+    expect(await importFeed(database.db, fetcherFor(servers), feed, firstRun)).toEqual({
       kind: 'blocked-by-robots',
       url: feed.url,
     })
@@ -387,7 +386,7 @@ describe('a feed the source does not give', () => {
     const server = await serve(reply(429, 'Te druk', { 'Retry-After': '120' }))
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    expect(await importFeed(database.db, createFetcher(), feed, firstRun)).toEqual({
+    expect(await importFeed(database.db, fetcherFor(servers), feed, firstRun)).toEqual({
       kind: 'wait',
       retryAfterSeconds: 120,
       url: feed.url,
@@ -410,7 +409,7 @@ describe('a feed the source does not give', () => {
     const server = await serve(handler)
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    const report = await importFeed(database.db, createFetcher(), feed, firstRun)
+    const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
     expect(report).toMatchObject({ kind: 'error', message: expect.stringContaining(message) as string, url: feed.url })
     expect(await itemsInDatabase()).toHaveLength(0)
@@ -425,7 +424,7 @@ describe('importing all feeds', () => {
     await addFeed(`${on.origin}/rss/`, { domain: 'aan.test' })
     await addFeed(`${off.origin}/rss/`, { domain: 'uit.test', enabled: false })
 
-    const reports = await importFeeds(database.db, createFetcher(), firstRun)
+    const reports = await importFeeds(database.db, fetcherFor(servers), firstRun)
 
     expect(reports).toHaveLength(1)
     expect(off.requests).toHaveLength(0)
@@ -441,7 +440,7 @@ describe('importing all feeds', () => {
     await addFeed(`${broken.origin}/rss/`, { domain: 'b.test' })
     await addFeed(`${good.origin}/rss/`, { domain: 'c.test' })
 
-    const reports = await importFeeds(database.db, createFetcher(), firstRun)
+    const reports = await importFeeds(database.db, fetcherFor(servers), firstRun)
 
     expect(reports.map((report) => report.kind)).toEqual(['wait', 'error', 'imported'])
     expect(reports[2]).toMatchObject({ added: 2 })
@@ -455,7 +454,7 @@ describe('importing all feeds', () => {
 
     await database.db.insert(feeds).values({ sourceId: first.sourceId, url: `${two.origin}/rss/` })
 
-    await importFeeds(database.db, createFetcher(), firstRun)
+    await importFeeds(database.db, fetcherFor(servers), firstRun)
 
     const rows = await itemsInDatabase()
 
@@ -468,13 +467,13 @@ describe('importing all feeds', () => {
     const first = await addFeed(`${server.origin}/rss/`)
 
     await database.db.insert(feeds).values({ sourceId: first.sourceId, url: `${server.origin}/rss/twee` })
-    await importFeeds(database.db, createFetcher(), firstRun)
+    await importFeeds(database.db, fetcherFor(servers), firstRun)
 
     expect(server.paths().filter((path) => path === '/robots.txt')).toHaveLength(1)
   })
 
   it('has nothing to do without feeds', async () => {
-    expect(await importFeeds(database.db, createFetcher(), firstRun)).toEqual([])
+    expect(await importFeeds(database.db, fetcherFor(servers), firstRun)).toEqual([])
     expect(await listFeedsToImport(database.db)).toEqual([])
   })
 })

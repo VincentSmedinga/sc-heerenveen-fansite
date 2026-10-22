@@ -5,7 +5,7 @@ import type { Handler, TestServer } from './test-server.ts'
 
 import rootPackage from '../../../package.json' with { type: 'json' }
 import { createFetcher, defaultLimits, parseRetryAfter, userAgent } from './fetcher.ts'
-import { reply, startServer } from './test-server.ts'
+import { fetcherFor, reply, startServer } from './test-server.ts'
 
 const servers: TestServer[] = []
 
@@ -38,7 +38,7 @@ describe('the user agent', () => {
   it('goes with every request, robots.txt included, and the fetcher sends no cookies and no other identity', async () => {
     const server = await serve({ '/feed': reply(200, 'feed') })
 
-    await createFetcher().fetch(`${server.origin}/feed`)
+    await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(server.paths()).toEqual(['/robots.txt', '/feed'])
     for (const request of server.requests) {
@@ -61,7 +61,7 @@ describe('a successful request', () => {
       }),
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome.kind).toBe('fetched')
     if (outcome.kind !== 'fetched') {
@@ -79,7 +79,7 @@ describe('a successful request', () => {
   it('returns null for an ETag and Last-Modified the source did not send', async () => {
     const server = await serve({ '/feed': reply(200, 'feed') })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ etag: null, kind: 'fetched', lastModified: null })
   })
@@ -87,7 +87,7 @@ describe('a successful request', () => {
   it('reads a response with a gzip encoding', async () => {
     const server = await serve({ '/feed': reply(200, gzipSync('packed feed'), { 'Content-Encoding': 'gzip' }) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome.kind === 'fetched' && decode(outcome.body)).toBe('packed feed')
   })
@@ -95,7 +95,7 @@ describe('a successful request', () => {
   it('accepts a URL object', async () => {
     const server = await serve({ '/feed': reply(200, 'feed') })
 
-    const outcome = await createFetcher().fetch(new URL(`${server.origin}/feed`))
+    const outcome = await fetcherFor(servers).fetch(new URL(`${server.origin}/feed`))
 
     expect(outcome.kind).toBe('fetched')
   })
@@ -105,7 +105,7 @@ describe('conditional requests', () => {
   it('asks with If-None-Match and If-Modified-Since, and reports a 304 as not modified, without content', async () => {
     const server = await serve({ '/feed': reply(304) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`, {
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`, {
       etag: '"v1"',
       lastModified: 'Tue, 20 Oct 2026 07:28:00 GMT',
     })
@@ -119,7 +119,7 @@ describe('conditional requests', () => {
   it('sends only what the adapter has', async () => {
     const server = await serve({ '/feed': reply(200, 'feed') })
 
-    await createFetcher().fetch(`${server.origin}/feed`, { etag: '"v1"', lastModified: null })
+    await fetcherFor(servers).fetch(`${server.origin}/feed`, { etag: '"v1"', lastModified: null })
 
     const request = server.requests.find((candidate) => candidate.url === '/feed')
     expect(request?.headers['if-none-match']).toBe('"v1"')
@@ -129,7 +129,7 @@ describe('conditional requests', () => {
   it('sends nothing the first time', async () => {
     const server = await serve({ '/feed': reply(200, 'feed') })
 
-    await createFetcher().fetch(`${server.origin}/feed`, { etag: null, lastModified: undefined })
+    await fetcherFor(servers).fetch(`${server.origin}/feed`, { etag: null, lastModified: undefined })
 
     const request = server.requests.find((candidate) => candidate.url === '/feed')
     expect(request?.headers['if-none-match']).toBeUndefined()
@@ -139,7 +139,7 @@ describe('conditional requests', () => {
   it('returns the content and the new ETag when the source answers 200', async () => {
     const server = await serve({ '/feed': reply(200, 'new feed', { ETag: '"v2"' }) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`, { etag: '"v1"' })
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`, { etag: '"v1"' })
 
     expect(outcome).toMatchObject({ etag: '"v2"', kind: 'fetched' })
   })
@@ -147,7 +147,7 @@ describe('conditional requests', () => {
   it('does not take a 304 for an answer when it asked for nothing', async () => {
     const server = await serve({ '/feed': reply(304) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'http-status', status: 304 })
   })
@@ -157,7 +157,7 @@ describe('a source that asks us to wait', () => {
   it('reports a 429 with the seconds of Retry-After, and does not try again', async () => {
     const server = await serve({ '/feed': reply(429, 'Slow down', { 'Retry-After': '120' }) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toEqual({ kind: 'wait', retryAfterSeconds: 120, status: 429, url: `${server.origin}/feed` })
     expect(server.paths()).toEqual(['/robots.txt', '/feed'])
@@ -168,7 +168,7 @@ describe('a source that asks us to wait', () => {
       '/feed': reply(503, '', { 'Retry-After': new Date(Date.now() + 90_000).toUTCString() }),
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'wait', status: 503 })
     const seconds = outcome.kind === 'wait' ? outcome.retryAfterSeconds : null
@@ -179,7 +179,7 @@ describe('a source that asks us to wait', () => {
   it('reports null when the source does not say how long', async () => {
     const server = await serve({ '/feed': reply(503) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'wait', retryAfterSeconds: null, status: 503 })
   })
@@ -220,7 +220,7 @@ describe('the limits on time and size', () => {
   it('stops a request that is not answered in time', async () => {
     const server = await serve({ '/feed': () => undefined })
 
-    const outcome = await createFetcher({ timeoutMs: 150 }).fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers, { timeoutMs: 150 }).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'timeout', url: `${server.origin}/feed` })
   })
@@ -228,7 +228,7 @@ describe('the limits on time and size', () => {
   it('stops a response that stalls halfway', async () => {
     const server = await serve({ '/feed': stall })
 
-    const outcome = await createFetcher({ timeoutMs: 150 }).fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers, { timeoutMs: 150 }).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'timeout' })
   })
@@ -236,7 +236,7 @@ describe('the limits on time and size', () => {
   it('reads a response of exactly the size it allows', async () => {
     const server = await serve({ '/feed': reply(200, Buffer.alloc(defaultLimits.maxBytes, 'a')) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome.kind === 'fetched' && outcome.body.byteLength).toBe(defaultLimits.maxBytes)
   })
@@ -244,7 +244,7 @@ describe('the limits on time and size', () => {
   it('refuses a response of one byte more', async () => {
     const server = await serve({ '/feed': reply(200, Buffer.alloc(defaultLimits.maxBytes + 1, 'a')) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'too-large' })
     expect(outcome).not.toHaveProperty('body')
@@ -271,7 +271,7 @@ describe('the limits on time and size', () => {
       },
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'too-large' })
     await expect.poll(() => stopped).toBe(true)
@@ -282,7 +282,7 @@ describe('the limits on time and size', () => {
       '/feed': reply(200, gzipSync(Buffer.alloc(defaultLimits.maxBytes + 1)), { 'Content-Encoding': 'gzip' }),
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'too-large' })
   })
@@ -295,7 +295,7 @@ describe('robots.txt', () => {
       '/robots.txt': reply(200, 'User-agent: *\nDisallow: /news/'),
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/news/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/news/feed`)
 
     expect(outcome).toEqual({ kind: 'blocked-by-robots', url: `${server.origin}/news/feed` })
     expect(server.paths()).toEqual(['/robots.txt'])
@@ -310,8 +310,8 @@ describe('robots.txt', () => {
       ),
     })
 
-    expect((await createFetcher().fetch(`${server.origin}/feed`)).kind).toBe('fetched')
-    expect((await createFetcher().fetch(`${server.origin}/other`)).kind).toBe('blocked-by-robots')
+    expect((await fetcherFor(servers).fetch(`${server.origin}/feed`)).kind).toBe('fetched')
+    expect((await fetcherFor(servers).fetch(`${server.origin}/other`)).kind).toBe('blocked-by-robots')
   })
 
   it('lets the longest rule win, and Allow win a tie', async () => {
@@ -323,7 +323,7 @@ describe('robots.txt', () => {
         'User-agent: *\nDisallow: /news/\nAllow: /news/feed.xml\nDisallow: /news/other\nAllow: /news/other',
       ),
     })
-    const fetcher = createFetcher()
+    const fetcher = fetcherFor(servers)
 
     expect((await fetcher.fetch(`${server.origin}/news/feed.xml`)).kind).toBe('fetched')
     expect((await fetcher.fetch(`${server.origin}/news/other`)).kind).toBe('fetched')
@@ -333,19 +333,19 @@ describe('robots.txt', () => {
   it('allows everything when robots.txt is a 404', async () => {
     const server = await serve({ '/feed': reply(200, 'feed') })
 
-    expect((await createFetcher().fetch(`${server.origin}/feed`)).kind).toBe('fetched')
+    expect((await fetcherFor(servers).fetch(`${server.origin}/feed`)).kind).toBe('fetched')
   })
 
   it('allows everything for any other 4xx', async () => {
     const server = await serve({ '/feed': reply(200, 'feed'), '/robots.txt': reply(403, 'Forbidden') })
 
-    expect((await createFetcher().fetch(`${server.origin}/feed`)).kind).toBe('fetched')
+    expect((await fetcherFor(servers).fetch(`${server.origin}/feed`)).kind).toBe('fetched')
   })
 
   it.each([500, 502, 503, 429])('fetches nothing when robots.txt is a %i', async (status) => {
     const server = await serve({ '/feed': reply(200, 'feed'), '/robots.txt': reply(status) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'robots-unreadable' })
     expect(outcome).toHaveProperty('message', expect.stringContaining(String(status)))
@@ -355,7 +355,7 @@ describe('robots.txt', () => {
   it('fetches nothing when robots.txt does not answer in time', async () => {
     const server = await serve({ '/feed': reply(200, 'feed'), '/robots.txt': () => undefined })
 
-    const outcome = await createFetcher({ timeoutMs: 150 }).fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers, { timeoutMs: 150 }).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'robots-unreadable' })
     expect(server.paths()).toEqual(['/robots.txt'])
@@ -366,7 +366,7 @@ describe('robots.txt', () => {
     const { origin } = server
     await server.close()
 
-    const outcome = await createFetcher().fetch(`${origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'robots-unreadable' })
   })
@@ -377,7 +377,7 @@ describe('robots.txt', () => {
       '/robots.txt': reply(200, Buffer.alloc(defaultLimits.maxBytes + 1, '#')),
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'robots-unreadable' })
   })
@@ -389,7 +389,7 @@ describe('robots.txt', () => {
       '/rules.txt': reply(200, 'User-agent: *\nDisallow: /feed'),
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome.kind).toBe('blocked-by-robots')
   })
@@ -400,7 +400,7 @@ describe('robots.txt', () => {
       '/robots.txt': reply(302, '', { Location: '/robots.txt' }),
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'robots-unreadable' })
     expect(server.paths().filter((path) => path === '/robots.txt')).toHaveLength(defaultLimits.maxRedirects + 1)
@@ -408,21 +408,21 @@ describe('robots.txt', () => {
 
   it('reads robots.txt of a host once for as long as the fetcher lives, also for requests at the same time', async () => {
     const server = await serve({ '/a': reply(200, 'a'), '/b': reply(200, 'b'), '/c': reply(200, 'c') })
-    const fetcher = createFetcher()
+    const fetcher = fetcherFor(servers)
 
     await Promise.all([fetcher.fetch(`${server.origin}/a`), fetcher.fetch(`${server.origin}/b`)])
     await fetcher.fetch(`${server.origin}/c`)
 
     expect(server.paths().filter((path) => path === '/robots.txt')).toHaveLength(1)
 
-    await createFetcher().fetch(`${server.origin}/a`)
+    await fetcherFor(servers).fetch(`${server.origin}/a`)
 
     expect(server.paths().filter((path) => path === '/robots.txt')).toHaveLength(2)
   })
 
   it('remembers a robots.txt that could not be read, too', async () => {
     const server = await serve({ '/feed': reply(200, 'feed'), '/robots.txt': reply(500) })
-    const fetcher = createFetcher()
+    const fetcher = fetcherFor(servers)
 
     await fetcher.fetch(`${server.origin}/feed`)
     await fetcher.fetch(`${server.origin}/feed`)
@@ -435,7 +435,7 @@ describe('redirects', () => {
   it('follows a redirect on the same host, with a relative address', async () => {
     const server = await serve({ '/feed': reply(301, '', { Location: '/new/feed' }), '/new/feed': reply(200, 'moved') })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'fetched', url: `${server.origin}/new/feed` })
     expect(outcome.kind === 'fetched' && decode(outcome.body)).toBe('moved')
@@ -445,7 +445,7 @@ describe('redirects', () => {
     const other = await serve({ '/feed': reply(200, 'there') }, 'localhost')
     const server = await serve({ '/feed': reply(302, '', { Location: `${other.origin}/feed` }) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'fetched', url: `${other.origin}/feed` })
     expect(other.paths()).toEqual(['/robots.txt', '/feed'])
@@ -459,7 +459,7 @@ describe('redirects', () => {
     )
     const server = await serve({ '/feed': reply(302, '', { Location: `${other.origin}/feed` }) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toEqual({ kind: 'blocked-by-robots', url: `${other.origin}/feed` })
     expect(other.paths()).toEqual(['/robots.txt'])
@@ -469,7 +469,7 @@ describe('redirects', () => {
     const other = await serve({ '/feed': reply(200, 'there'), '/robots.txt': reply(500) }, 'localhost')
     const server = await serve({ '/feed': reply(302, '', { Location: `${other.origin}/feed` }) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'robots-unreadable', url: `${other.origin}/feed` })
     expect(other.paths()).toEqual(['/robots.txt'])
@@ -482,7 +482,7 @@ describe('redirects', () => {
       '/robots.txt': reply(200, 'User-agent: *\nDisallow: /private/'),
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toEqual({ kind: 'blocked-by-robots', url: `${server.origin}/private/feed` })
   })
@@ -498,8 +498,8 @@ describe('redirects', () => {
     const five = await serve(chain(6))
     const six = await serve(chain(7))
 
-    expect((await createFetcher().fetch(`${five.origin}/hop0`)).kind).toBe('fetched')
-    expect(await createFetcher().fetch(`${six.origin}/hop0`)).toMatchObject({
+    expect((await fetcherFor(servers).fetch(`${five.origin}/hop0`)).kind).toBe('fetched')
+    expect(await fetcherFor(servers).fetch(`${six.origin}/hop0`)).toMatchObject({
       kind: 'error',
       reason: 'too-many-redirects',
     })
@@ -514,7 +514,7 @@ describe('redirects', () => {
     ]) {
       const server = await serve({ '/feed': reply(302, '', { Location: location }) })
 
-      const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+      const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
       expect(outcome, location).toMatchObject({ kind: 'error', reason: 'invalid-redirect' })
       expect(server.paths()).toEqual(['/robots.txt', '/feed'])
@@ -524,7 +524,7 @@ describe('redirects', () => {
   it('follows no redirect to a URL with a password', async () => {
     const server = await serve({ '/feed': reply(302, '', { Location: 'http://user:secret@localhost/feed' }) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'invalid-redirect' })
     expect(JSON.stringify(outcome)).not.toContain('secret')
@@ -533,9 +533,97 @@ describe('redirects', () => {
   it('reports a redirect without a Location as an error', async () => {
     const server = await serve({ '/feed': reply(302) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'invalid-redirect' })
+  })
+})
+
+describe('addresses that are not on the public internet', () => {
+  // The fetcher checks the address it connects to. A server on this computer shows that it never gets that far: the
+  // server gets no request.
+  const named = ['localhost', '127.0.0.1', '[::1]', '10.0.0.1', '169.254.169.254']
+
+  it.each([...named, '0.0.0.0', '[::ffff:127.0.0.1]'])('refuses %s in the URL, and asks it nothing', async (host) => {
+    const server = await serve({ '/feed': reply(200, 'feed') })
+    const url = new URL(`http://${host}:${new URL(server.origin).port}/feed`)
+
+    const outcome = await createFetcher().fetch(url)
+
+    expect(outcome).toMatchObject({ kind: 'error', reason: 'private-address', url: url.href })
+    expect(server.requests).toEqual([])
+  })
+
+  it('says which address it refused', async () => {
+    const outcome = await createFetcher().fetch('http://127.0.0.1/feed')
+
+    expect(outcome).toEqual({
+      kind: 'error',
+      message: 'robots.txt: 127.0.0.1 is not on the public internet',
+      reason: 'private-address',
+      url: 'http://127.0.0.1/feed',
+    })
+  })
+
+  it.each(named)('refuses %s after a redirect', async (host) => {
+    const server = await serve({ '/feed': reply(302, '', { Location: `http://${host}/feed` }) })
+
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
+
+    expect(outcome).toMatchObject({ kind: 'error', reason: 'private-address', url: `http://${host}/feed` })
+    expect(server.paths()).toEqual(['/robots.txt', '/feed'])
+  })
+
+  it('refuses a robots.txt that redirects to such an address, and does not ask for the feed', async () => {
+    const server = await serve({
+      '/feed': reply(200, 'feed'),
+      '/robots.txt': reply(301, '', { Location: 'http://169.254.169.254/latest/meta-data/' }),
+    })
+
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
+
+    expect(outcome).toMatchObject({ kind: 'error', reason: 'private-address', url: `${server.origin}/feed` })
+    expect(server.paths()).toEqual(['/robots.txt'])
+  })
+
+  it.each(['127.0.0.1', '::1', '10.0.0.1', '169.254.169.254'])('refuses a name that points to %s', async (address) => {
+    const resolve = async () => [{ address, family: address.includes(':') ? 6 : 4 }]
+
+    const outcome = await createFetcher({ resolve }).fetch('http://bron.test/feed')
+
+    expect(outcome).toEqual({
+      kind: 'error',
+      message: `robots.txt: bron.test points to ${address}, which is not on the public internet`,
+      reason: 'private-address',
+      url: 'http://bron.test/feed',
+    })
+  })
+
+  it('refuses a name that points to such an address after a redirect', async () => {
+    const asked: string[] = []
+    const resolve = async (hostname: string) => {
+      asked.push(hostname)
+      return [{ address: '10.0.0.1', family: 4 }]
+    }
+    const server = await serve({ '/feed': reply(302, '', { Location: 'https://intern.test/feed' }) })
+
+    const outcome = await fetcherFor(servers, { resolve }).fetch(`${server.origin}/feed`)
+
+    expect(outcome).toMatchObject({ kind: 'error', reason: 'private-address', url: 'https://intern.test/feed' })
+    expect(asked).toEqual(['intern.test'])
+  })
+
+  it('reaches only the test servers it is given, not another port on the same computer', async () => {
+    const server = await serve({ '/feed': reply(200, 'feed') })
+    const other = await startServer({ '/feed': reply(200, 'feed') })
+
+    try {
+      expect((await fetcherFor([server]).fetch(`${server.origin}/feed`)).kind).toBe('fetched')
+      expect(await fetcherFor([server]).fetch(`${other.origin}/feed`)).toMatchObject({ reason: 'private-address' })
+      expect(other.requests).toEqual([])
+    } finally {
+      await other.close()
+    }
   })
 })
 
@@ -548,11 +636,11 @@ describe('cookies and consent screens', () => {
       '/real/feed': reply(200, 'feed', cookie),
       '/robots.txt': reply(200, 'User-agent: *\nAllow: /', cookie),
     })
-    const fetcher = createFetcher()
+    const fetcher = fetcherFor(servers)
 
     await fetcher.fetch(`${server.origin}/feed`)
     await fetcher.fetch(`${server.origin}/other`)
-    await createFetcher().fetch(`${server.origin}/feed`)
+    await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(server.requests.length).toBeGreaterThanOrEqual(5)
     for (const request of server.requests) {
@@ -566,7 +654,7 @@ describe('cookies and consent screens', () => {
       '/feed': reply(403, 'Please accept the cookies first'),
     })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'http-status', status: 403 })
     expect(server.paths()).toEqual(['/robots.txt', '/feed'])
@@ -577,7 +665,7 @@ describe('errors', () => {
   it.each([400, 404, 410, 451, 500, 502])('reports a %i as an error with the status', async (status) => {
     const server = await serve({ '/feed': reply(status) })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toEqual({
       kind: 'error',
@@ -591,13 +679,13 @@ describe('errors', () => {
   it('reports a connection that breaks as a network error', async () => {
     const server = await serve({ '/feed': (request) => request.socket.destroy() })
 
-    const outcome = await createFetcher().fetch(`${server.origin}/feed`)
+    const outcome = await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'network' })
   })
 
   it('asks for nothing at a URL that is not http or https', async () => {
-    const fetcher = createFetcher()
+    const fetcher = fetcherFor(servers)
 
     for (const url of ['ftp://example.com/feed', 'file:///etc/passwd', 'not a url', '/relative']) {
       expect(await fetcher.fetch(url), url).toMatchObject({ kind: 'error', reason: 'invalid-url' })
@@ -607,7 +695,7 @@ describe('errors', () => {
   it('asks for nothing at a URL with a password, and keeps the password out of the outcome', async () => {
     const server = await serve({ '/feed': reply(200, 'feed') })
 
-    const outcome = await createFetcher().fetch(server.origin.replace('http://', 'http://user:secret@') + '/feed')
+    const outcome = await fetcherFor(servers).fetch(server.origin.replace('http://', 'http://user:secret@') + '/feed')
 
     expect(outcome).toMatchObject({ kind: 'error', reason: 'invalid-url', url: `${server.origin}/feed` })
     expect(server.requests).toEqual([])
@@ -616,7 +704,7 @@ describe('errors', () => {
   it('does not retry a request that failed', async () => {
     const server = await serve({ '/feed': reply(500) })
 
-    await createFetcher().fetch(`${server.origin}/feed`)
+    await fetcherFor(servers).fetch(`${server.origin}/feed`)
 
     expect(server.paths()).toEqual(['/robots.txt', '/feed'])
   })
