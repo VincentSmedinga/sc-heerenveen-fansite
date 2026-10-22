@@ -3,6 +3,10 @@ import type { AddressInfo } from 'node:net'
 
 import { createServer } from 'node:http'
 
+import type { FetcherOptions } from './fetcher.ts'
+
+import { createFetcher } from './fetcher.ts'
+
 export type Handler = (request: IncomingMessage, response: ServerResponse) => void
 
 export type RecordedRequest = {
@@ -19,6 +23,14 @@ export type TestServer = {
   paths: () => (string | undefined)[]
   /** Every request the server got, in order. */
   requests: RecordedRequest[]
+}
+
+/**
+ * Makes a fetcher that may reach these test servers on this computer. It refuses every other address that is not on
+ * the public internet, as the fetcher of the import command does.
+ */
+export function fetcherFor(servers: TestServer[], options: FetcherOptions = {}) {
+  return createFetcher({ ...options, testOrigins: servers.map((server) => server.origin) })
 }
 
 /** A handler that answers with a status, headers and a body. */

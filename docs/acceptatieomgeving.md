@@ -5,29 +5,35 @@ Het is een tweede website op de gedeelde hosting van mijn.host, naast het forum.
 Elke merge naar `main` zet er een nieuwe versie van de site op.
 Zo kijkt de groep een versie na voordat hij live gaat (productie komt met #33).
 
+Op de host haalt de importer elke 15 minuten de koppen op van de bronnen.
 Dit bestand zegt hoe dat werkt, wat de eigenaar eenmalig zelf instelt, en hoe je controleert dat het klopt.
 
 ## Zo werkt het
 
-De workflow [`acceptance.yml`](../.github/workflows/acceptance.yml) doet bij elke merge naar `main` vijf dingen:
+De workflow [`acceptance.yml`](../.github/workflows/acceptance.yml) doet bij elke merge naar `main` zes dingen:
 
-1. Hij bouwt de site (`pnpm --filter site build`) en zet het resultaat in één map (`pnpm --filter site assemble`), met de migraties erbij.
+1. Hij bouwt de site (`pnpm --filter site build`) en zet het resultaat in één map (`pnpm --filter site assemble`), met de migraties en de importer erbij.
+   De importer is één JavaScript-bestand, `apps/importer/import.mjs`, dat `esbuild` maakt.
 2. Hij start die map zoals de host dat doet en controleert wat een bezoeker en een zoekmachine krijgen (`pnpm --filter site smoke`).
    Daarvoor start de workflow een eigen MariaDB die na de run weer weg is.
    De rooktest maakt daarop lege databases, en de site maakt er zelf de tabellen en de testbronnen in.
    Ook als de database niet bereikbaar is, controleert hij dat de homepage en `/bronnen` de foutpagina tonen.
-3. Hij kopieert de map met rsync over SSH, op poort 26, naar de map van de app op de host.
-4. Hij raakt `tmp/restart.txt` aan, zodat de host de app opnieuw start.
-5. Hij vraagt <https://acc.sc.heerenveen.org/bronnen> op, tot een minuut lang.
+3. Hij draait de importer één keer uit die map, op dezelfde MariaDB.
+   De database krijgt de tabellen maar niet de seed, dus er zijn geen feeds en de importer vraagt geen echte site iets.
+   Start de importer niet of bereikt hij de database niet, dan wordt de run rood.
+4. Hij kopieert de map met rsync over SSH, op poort 26, naar de map van de app op de host.
+5. Hij raakt `tmp/restart.txt` aan, zodat de host de app opnieuw start.
+6. Hij vraagt <https://acc.sc.heerenveen.org/bronnen> op, tot een minuut lang.
    Hij faalt als de pagina niet met 200 antwoordt of geen testbron toont.
    Zo geeft een migratie die op de host mislukt, een rode run.
 
 Op de server bouwen we niets.
 De map bevat de standalone build van Next.js met zijn eigen `node_modules`, zonder symbolische links.
 Waarom dat zo is, staat onder _Wat de eerste deploy ons leerde_.
+De importer heeft geen `node_modules` nodig: alles wat hij gebruikt, zit in zijn ene bestand.
 
-Ontbreekt een van de geheimen hieronder, dan doet de workflow alleen stap 1 en 2 en meldt dat het kopiëren is overgeslagen.
-Stap 5 vervalt dan ook.
+Ontbreekt een van de geheimen hieronder, dan doet de workflow alleen stap 1 tot en met 3 en meldt dat het kopiëren is overgeslagen.
+Stap 6 vervalt dan ook.
 `main` wordt er niet rood van.
 
 De site leest bij het opstarten de variabelen `SITE_ENV` en `DATABASE_URL`.
@@ -58,6 +64,25 @@ Het logboek zegt wat er misging (zie _Als het niet werkt_).
 Lees het in _Setup Node.js App_ of in `stderr.log` in de map van de app.
 
 `pnpm db:seed` op je eigen computer weigert als `SITE_ENV` `production` is.
+
+## De import
+
+Cron start op de host elke 15 minuten de importer, `apps/importer/import.mjs` in de map van de app.
+Hij leest de feeds van de bronnen die aanstaan, nu de Leeuwarder Courant uit de seed, en zet de koppen in de tabel `items`.
+Wat hij per feed schrijft, staat in de [README van de importer](../apps/importer/README.md).
+
+- Cron start hem op minuut 7, 22, 37 en 52 van elk uur, niet op het hele kwartier: dan starten veel andere cronjobs.
+- Een cronjob krijgt de variabelen van de Node.js-app niet.
+  De importer leest `DATABASE_URL` daarom uit een eigen bestand in de thuismap, `~/fansite-acceptatie.env`, met `node --env-file`.
+- De uitvoer komt achteraan in `~/fansite-import.log`, met de tijd van de run ervoor.
+  Er gaat geen e-mail.
+  Niets ruimt dat bestand op; het groeit met een paar regels per run.
+- De importer weigert adressen die niet op het openbare internet liggen, zoals `localhost` of `10.0.0.1`, ook na een doorverwijzing.
+- Er is nog geen lock in de database (#13).
+  Een run duurt een paar seconden, dus twee runs halen elkaar niet in.
+
+Elke deploy kopieert de importer samen met de site.
+Zo past hij bij het schema, dat de site bijwerkt als de host haar start.
 
 ## Eenmalig instellen
 
@@ -121,10 +146,65 @@ Een agent heeft daar geen toegang.
 7. **Eerste deploy.**
    Start de workflow met _Actions → Acceptance → Run workflow_, of voeg een wijziging samen met `main`.
 
+De import vraagt nog drie stappen op de host.
+Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
+
+8. **Het bestand met `DATABASE_URL` voor de import.**
+   Maak in de thuismap een bestand dat alleen jouw account mag lezen en schrijven:
+
+   ```sh
+   touch ~/fansite-acceptatie.env
+   chmod 600 ~/fansite-acceptatie.env
+   ```
+
+   Open het met een editor, zoals `nano` of `vi`, en zet er één regel in, met dezelfde waarde als bij de Node.js-app (stap 2):
+
+   ```sh
+   DATABASE_URL=mysql://gebruiker:wachtwoord@localhost:3306/database
+   ```
+
+   Gebruik geen `echo`: dan komt het wachtwoord in de geschiedenis van je shell.
+   `ls -l ~/fansite-acceptatie.env` moet beginnen met `-rw-------`.
+   Het bestand staat buiten de map van de app en buiten `public_html`, dus de deploy raakt het niet aan en een bezoeker kan het niet opvragen.
+   Het wachtwoord staat nu op twee plekken op de host.
+   Verander je het, pas het dan hier en bij de Node.js-app aan.
+
+9. **Het pad van Node 24.**
+   Cron weet niet waar Node 24 staat, dus de opdracht noemt het volledige pad.
+   Op hosting met CloudLinux staat elke versie van Node in een eigen map onder `/opt/alt`.
+   Of dat op mijn.host zo is, weten we nog niet; deze opdrachten laten het zien:
+
+   ```sh
+   ls -d /opt/alt/alt-nodejs*/root/usr/bin/node
+   /opt/alt/alt-nodejs24/root/usr/bin/node --version
+   ```
+
+   De eerste opdracht toont de versies die er zijn.
+   De tweede moet een versie tonen die met `v24.` begint.
+   Staat Node 24 daar niet, open dan in DirectAdmin _Setup Node.js App_ en kopieer de opdracht bovenaan de app, die met `source` begint.
+   Draai die met SSH, en daarna `readlink -f "$(command -v node)"`.
+   Dat toont het pad dat je in de opdracht hieronder gebruikt.
+
+10. **De cronjob.**
+    Open in DirectAdmin _Advanced Features → Cron Jobs_ en maak een cronjob:
+    - Minuut: `7,22,37,52`.
+    - Uur, dag van de maand, maand en dag van de week: `*`.
+    - Opdracht, op één regel:
+
+      ```sh
+      (date; /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/importer/import.mjs) >> /home/<gebruiker>/fansite-import.log 2>&1
+      ```
+
+    Vervang `<gebruiker>` door je gebruikersnaam.
+    Heet de map van de app anders, gebruik dan `DEPLOY_PATH` uit stap 6 in plaats van `/home/<gebruiker>/domains/acc.sc.heerenveen.org/app`.
+    Gebruik het pad van Node uit stap 9 als dat anders is.
+    Laat het e-mailadres voor de uitvoer van cron leeg.
+    De opdracht schrijft alles in het logbestand, dus er is ook niets om te mailen.
+
 ## Controleren
 
 - De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" en "sc Heerenveen in de media" zien.
-  Tot de import op acceptatie draait (#98), staat er "We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens."
+  Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens."
   Daarna staan er de koppen van de Leeuwarder Courant van de afgelopen week.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - `curl -I https://acc.sc.heerenveen.org` toont `x-robots-tag: noindex, nofollow`.
@@ -133,6 +213,17 @@ Een agent heeft daar geen toegang.
 - <https://acc.sc.heerenveen.org/bestaat-niet> toont de Nederlandse 404-pagina "Pagina niet gevonden".
 - <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, en de Leeuwarder Courant.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
+- De import werkt als `tail -n 20 ~/fansite-import.log` na een kwartier een tijd toont, met een regel voor de feed eronder:
+
+  ```text
+  Thu Oct 22 14:07:01 CEST 2026
+  https://www.lc.nl/sport/sc-heerenveen/rss/: 3 new, 0 updated, 47 unchanged, 0 skipped
+  ```
+
+  Wil je niet wachten, draai dan de opdracht van de cronjob met SSH, zonder het deel vanaf `>>`.
+  Dan zie je de uitvoer meteen.
+
+- In de database staan de koppen in de tabel `items`: `SELECT COUNT(*) FROM items` in phpMyAdmin telt ze.
 
 ## Als het niet werkt
 
@@ -160,6 +251,21 @@ Een agent heeft daar geen toegang.
 - De site geeft een 500 en `stderr.log` zegt `Cannot find module '@swc/helpers/...'`: de map op de host bevat symbolische links.
   `pnpm --filter site assemble` haalt ze weg en stopt als er een overblijft.
   Controleer de map op de host met `find <map van de app> -type l`; die opdracht mag niets tonen.
+- De import werkt niet: kijk in `~/fansite-import.log`.
+  Elke run begint met de tijd.
+  Komen er geen nieuwe tijden bij, dan start cron de opdracht niet: controleer de cronjob in DirectAdmin.
+  Anders staat de reden onder de tijd:
+
+  | Wat er in het logbestand staat                              | Wat je doet                                                                                                                                                          |
+  | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Het pad van Node met `No such file or directory`            | Het pad van Node klopt niet. Zoek het op zoals in stap 9.                                                                                                            |
+  | `node: /home/<gebruiker>/fansite-acceptatie.env: not found` | Het bestand met `DATABASE_URL` ontbreekt of heeft een andere naam. Maak het zoals in stap 8.                                                                         |
+  | `Cannot find module` met het pad van `import.mjs`           | Het pad van de app in de opdracht klopt niet, of de deploy heeft de importer nog niet gekopieerd. Controleer het met `ls <map van de app>/apps/importer/import.mjs`. |
+  | `DATABASE_URL is missing` of `DATABASE_URL: Invalid URL`    | Het bestand heeft geen regel `DATABASE_URL=…`, of de waarde is geen goede URL. Kopieer de waarde van de Node.js-app.                                                 |
+  | `Access denied for user`                                    | De gebruiker of het wachtwoord in het bestand klopt niet. Kopieer de waarde van de Node.js-app; is het wachtwoord veranderd, pas het dan op beide plekken aan.       |
+  | `connect ECONNREFUSED` of `getaddrinfo ENOTFOUND`           | De database is niet bereikbaar. Controleer de host en de poort in het bestand.                                                                                       |
+  | `Table '…feeds' doesn't exist`                              | De database heeft de tabellen nog niet. De site maakt ze als de host haar start: open <https://acc.sc.heerenveen.org> en wacht op de volgende run.                   |
+  | Een regel met `failed,` achter het adres van een feed       | De importer startte, maar las die feed niet. De reden staat erachter; de volgende run probeert het opnieuw.                                                          |
 
 ## Wat de eerste deploy ons leerde
 

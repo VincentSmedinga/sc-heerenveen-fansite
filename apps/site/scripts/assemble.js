@@ -1,11 +1,14 @@
 // Copies the standalone build to a new folder, with the static files next to the server, the way the host needs them.
 // Next.js leaves those files out of the standalone folder, and the SQL files of the migrations too: it only follows what the
-// code imports. CI copies the result to the host, and runs smoke.js on it first.
+// code imports. The importer goes in the same folder, as one file. CI copies the result to the host, and runs smoke.js and
+// the importer on it first.
 // The folder has no symbolic links: pnpm's node_modules is flattened into real folders (see flattenModules).
 //
 //   node scripts/assemble.js <new folder>
 import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
 import path from 'node:path'
+
+import { bundleImporter } from '../../importer/src/bundle.ts'
 
 /** Lists the folders and files inside a folder, without following links. */
 function entries(folder) {
@@ -104,3 +107,7 @@ cpSync(path.resolve(import.meta.dirname, '../.next/static'), path.join(siteFolde
 cpSync(path.resolve(import.meta.dirname, '../../../packages/db/drizzle'), path.join(target, 'packages/db/drizzle'), {
   recursive: true,
 })
+// Cron starts the importer on the host, from apps/importer/import.mjs (see docs/acceptatieomgeving.md). It is one file with
+// everything it needs, so it uses no node_modules. Deployed together, the importer keeps in step with the schema, which
+// the site brings up to date when it starts.
+await bundleImporter(path.join(target, 'apps/importer/import.mjs'))

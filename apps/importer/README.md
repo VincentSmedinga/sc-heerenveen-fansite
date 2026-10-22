@@ -2,7 +2,8 @@
 
 De importer haalt koppen en links op bij de bronnen.
 Hij bevat de fetcher, de ene HTTP-client voor alle adapters, en de adapter voor RSS- en Atom-feeds, met de Leeuwarder Courant als eerste bron.
-De import op acceptatie komt met #98, en het rooster, een slot in de database en de gezondheid van een bron met #13.
+Op acceptatie start cron de import elke 15 minuten (zie _De import op acceptatie_).
+Het rooster per soort bron, een slot in de database en de gezondheid van een bron komen met #13.
 
 ## De import draaien
 
@@ -121,7 +122,8 @@ De adapter waarschuwt daar nu niet voor.
 De fetcher noemt zich `scHeerenveenFansite/<versie> (+https://github.com/VincentSmedinga/sc-heerenveen-fansite)`, met de versie uit de `package.json` in de root.
 Een bron ziet zo wie er komt, en kan ons weren met `robots.txt`.
 Hij doet zich niet voor als browser en stuurt nooit cookies, ook niet als een site er een zet.
-Hij gebruikt `fetch` van Node en heeft geen dependencies.
+Hij gebruikt `fetch` en een `Agent` van `undici`, de bibliotheek onder de `fetch` van Node.
+Met de `Agent` controleert hij het adres waarmee hij verbindt.
 
 Bij elk verzoek geldt:
 
@@ -139,6 +141,14 @@ Bij elk verzoek geldt:
 - Een verzoek stopt na 15 seconden, ook het verzoek om `robots.txt` en dat om een doorverwijzing.
   Een antwoord groter dan 5 MB leest de fetcher niet verder, ook niet na het uitpakken.
 - De fetcher probeert het nooit opnieuw.
+- De fetcher verbindt alleen met een adres op het openbare internet.
+  Hij weigert loopback (`localhost`, `127.0.0.1`, `::1`), privé (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `fc00::/7`), link-local (`169.254.0.0/16`, `fe80::/10`), gedeeld (`100.64.0.0/10`), niet gespecificeerd (`0.0.0.0`, `::`), multicast en gereserveerd.
+  Een IPv4-adres in IPv6-vorm, zoals `::ffff:127.0.0.1`, weigert hij altijd.
+  De hele lijst staat in [`src/address-check.ts`](src/address-check.ts).
+- Hij controleert het adres waarmee hij echt verbindt: het adres in de URL, of elk adres van de naam op het moment van verbinden.
+  Dat geldt ook voor `robots.txt` en voor elke doorverwijzing.
+  Wijst een naam naar zo'n adres, ook als hij daarnaast naar een openbaar adres wijst, dan verbindt de fetcher niet.
+  De uitkomst is dan een fout met de reden `private-address`.
 
 ## Een adapter gebruikt hem zo
 
@@ -182,9 +192,17 @@ Twee dingen voor wie een adapter schrijft:
 
 - Opnieuw proberen met uitstel, een limiet per host, het rooster en een `robots.txt` bewaren tussen runs: dat komt met de jobplanner (#13).
 - `Crawl-delay` lezen: dat staat niet in RFC 9309.
-- Adressen op een eigen netwerk weigeren: een bron kan doorverwijzen naar `localhost`.
-  De fetcher kijkt naar het schema van een URL, niet naar het adres waar de naam naartoe wijst.
-  Dat komt met #98, voordat de importer op de hosting draait.
+
+## De import op acceptatie
+
+- `pnpm --filter site assemble <nieuwe map>` bundelt de importer met `esbuild` tot één bestand, `apps/importer/import.mjs` in de map voor de host ([`src/bundle.ts`](src/bundle.ts)).
+  Het bestand bevat alles wat de importer gebruikt, dus het heeft geen `node_modules` nodig.
+  Draai eerst `pnpm --filter site build`.
+- De workflow Acceptance draait het bestand één keer op een database zonder feeds, en kopieert het samen met de site naar de host.
+- Cron start het daar elke 15 minuten, op minuut 7, 22, 37 en 52, met `DATABASE_URL` uit een eigen bestand in de thuismap.
+  De uitvoer komt achteraan in `~/fansite-import.log`.
+
+Wat de eigenaar daarvoor eenmalig instelt, hoe je controleert dat de import werkt en wat je doet als hij niet werkt, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
 
 ## Tests
 
@@ -193,10 +211,15 @@ pnpm --filter importer test
 ```
 
 De tests starten een eigen webserver op deze computer en doen geen verzoeken naar echte sites.
+De fetcher weigert zo'n server, want hij staat niet op het openbare internet.
+Een test maakt zijn fetcher daarom met `fetcherFor` uit [`src/test-server.ts`](src/test-server.ts), die de optie `testOrigins` zet voor de servers van die test.
+De opdracht `pnpm run import` zet die optie nooit; `src/import.test.ts` laat zien dat hij een feed op deze computer weigert.
+Met de optie `resolve` geeft een test een nagebootste DNS, zodat hij ook een naam kan laten wijzen naar een adres op een eigen netwerk.
 De parser voor `robots.txt` staat in `src/robots.ts`, met de voorbeelden uit RFC 9309 in `src/robots.test.ts`.
 
 De tests van de adapter gebruiken een opname van de feed van de Leeuwarder Courant in [`src/fixtures/lc-sc-heerenveen.xml`](src/fixtures/lc-sc-heerenveen.xml).
 Die is ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en `premium`.
 Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
 `src/read-feed.test.ts` leest feeds zonder database.
-`src/import-feeds.test.ts` en `src/import.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+`src/import-feeds.test.ts`, `src/import.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+`src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.
