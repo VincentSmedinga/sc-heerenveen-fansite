@@ -47,7 +47,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'accent',
     name: 'Label',
     sample: 'Volgende wedstrijd',
-    spec: 'Truculenta 700 · breedte 125 · 14 px · 1,2 · +0,04 em · kapitalen',
+    spec: 'Truculenta 700 · breedte 125 · 15 px · 1,2 · +0,04 em · kapitalen',
     use: 'Bovenregels en badges, zoals Volgende wedstrijd of Uit.',
   },
   {
@@ -63,7 +63,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Nieuwskop',
     sample: 'Samenvatting: SC Heerenveen bezorgt Excelsior opnieuw een grote nederlaag',
-    spec: 'Atkinson Hyperlegible Next 600 · 18 px (mobiel 17) · 1,35',
+    spec: 'Atkinson Hyperlegible Next 600 · 20 px (mobiel 19) · 1,35',
     use: 'Koppen van berichten in lijsten. Nooit in kapitalen.',
   },
   {
@@ -71,14 +71,14 @@ export const typeStyles: TypeStyle[] = [
     name: 'Tekst',
     sample:
       'Gemaakt door supporters, zonder advertenties en zonder winstoogmerk. We tonen de kop en linken naar het bericht van de journalist.',
-    spec: 'Atkinson Hyperlegible Next 400 · 17 px · 1,5',
+    spec: 'Atkinson Hyperlegible Next 400 · 18 px · 1,5',
     use: 'Lopende tekst.',
   },
   {
     className: 'hf-meta',
     name: 'Meta',
     sample: 'Leeuwarder Courant · 83 reacties · laatst 13:28',
-    spec: 'Atkinson Hyperlegible Next 400 · 15 px · 1,4',
+    spec: 'Atkinson Hyperlegible Next 400 · 16 px · 1,4',
     use: 'Bron, tijd en aantallen.',
   },
 ]
