@@ -11,11 +11,14 @@ const withoutDatabasePort = '3125'
 // into .next/a11y first, so `pnpm build` is all you need before `pnpm test:a11y`. The server reads DATABASE_URL from the
 // .env in the root, if there is one; the standalone build doesn't load it itself.
 const serve = 'node --env-file-if-exists=../../.env'
-const folder = process.env['SITE_FOLDER']
-const command =
-  folder === undefined
-    ? `rm -rf .next/a11y && node scripts/assemble.js .next/a11y && ${serve} .next/a11y/apps/site/server.js`
-    : `${serve} "${folder}/apps/site/server.js"`
+const folder = process.env['SITE_FOLDER'] ?? '.next/a11y'
+const startServer = `${serve} "${folder}/apps/site/server.js"`
+// Only the first server assembles the folder. Playwright starts the servers one after another and waits until each one
+// answers, so the second finds the folder ready, and it must not assemble it again under the first.
+const assembleAndStartServer =
+  process.env['SITE_FOLDER'] === undefined
+    ? `rm -rf "${folder}" && node scripts/assemble.js "${folder}" && ${startServer}`
+    : startServer
 
 export default defineConfig({
   forbidOnly: process.env['CI'] !== undefined,
@@ -28,14 +31,14 @@ export default defineConfig({
   use: { baseURL: origin },
   webServer: [
     {
-      command,
+      command: assembleAndStartServer,
       // HOSTNAME is the name of the machine in many shells, and the server would listen on that.
       env: { HOSTNAME: '127.0.0.1', PORT: port, SITE_ENV: 'acceptance' },
       timeout: 60_000,
       url: origin,
     },
     {
-      command,
+      command: startServer,
       env: {
         DATABASE_URL: 'mysql://root@127.0.0.1:1/fansite',
         HOSTNAME: '127.0.0.1',

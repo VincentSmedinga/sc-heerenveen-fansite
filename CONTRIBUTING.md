@@ -63,7 +63,8 @@ pnpm test:a11y
 De tests van `packages/db` draaien op een echte MariaDB.
 Start die eerst met `docker compose up -d --wait` (zie de [README van het package](packages/db/README.md)).
 `pnpm test:a11y` toetst na de build de pagina's met axe.
-Het heeft die database ook nodig, met de seed, en eenmalig Chromium (zie de [README van de site](apps/site/README.md)).
+Het heeft die database ook nodig, en eenmalig Chromium (zie de [README van de site](apps/site/README.md)).
+De gebouwde site maakt zelf de tabellen en zet de testbronnen erin.
 Na een wijziging in het designsysteem draai je ook `pnpm --filter design-system build-storybook`.
 Controleer de titel van de pull request met:
 
