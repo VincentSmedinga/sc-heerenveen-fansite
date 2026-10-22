@@ -1,0 +1,1 @@
+ALTER TABLE `sources` ADD `description` varchar(300);

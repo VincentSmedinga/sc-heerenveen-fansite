@@ -871,6 +871,92 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de stijlen gegroepeerd houden naar soort: `base`, `typography` en `components`.
   Dat sluit aan op de lagen, maar verspreidt één component over drie bestanden.
 
+### Onderdelen met een punt: `List.Item`
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** een onderdeel dat alleen binnen zijn ouder werkt, is een eigenschap van die ouder.
+  Je schrijft het met een punt: `List.Item` is het `li` in een `List`.
+  Het package geeft het niet als los component.
+- **Waarom:** de naam zegt waar het onderdeel hoort, en je importeert alleen de ouder.
+  Een `li` buiten een `ul` of `ol` is geen geldige HTML.
+- **Let op:** een servercomponent kan geen onderdeel met een punt gebruiken van een component met `'use client'`.
+  De componenten van het designsysteem hebben geen `'use client'`, dus bij hen werkt het.
+- **Alternatieven:** een los component `ListItem`, zoals de andere componenten.
+  Dat is een export meer, en de naam zegt niet dat het alleen in een `List` werkt.
+
+## Site
+
+### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de sjablonen in `apps/site` (de layouts, de pagina's en de pagina voor een onbekend adres) bevatten geen HTML-elementen, alleen componenten uit het designsysteem.
+  Een ESLint-regel bewaakt dat.
+- **Waarom:** de opmaak en de toegankelijkheid zitten dan op één plek.
+  Een pagina kan niet om het designsysteem heen, en een kop, een link of een lijst is overal gelijk en wordt alleen daar gecontroleerd.
+- **Alternatieven:** HTML in de sjablonen, met de CSS-klassen van het designsysteem.
+  Dat is vrijer, maar elke pagina kan dan eigen opmaak en eigen toegankelijkheidsfouten maken.
+
+### De ESLint-regel herkent HTML aan de kleine letter
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de regel `no-restricted-syntax` van ESLint zelf meldt elk JSX-element waarvan de naam met een kleine letter begint, zoals `<main>` of `<li>`.
+  In JSX is dat een HTML- of SVG-element.
+  Een component begint met een hoofdletter, ook met een punt erin, zoals `List.Item`.
+  De regel geldt voor alle `.tsx`-bestanden in `apps/site/src`, behalve tests.
+  `templates.test.js` controleert dat hij werkt.
+- **Waarom:** het is één regel in `eslint.config.js`, zonder nieuwe dependency.
+  Omdat hij voor de hele site geldt en niet alleen voor de sjablonen, kan een pagina haar HTML niet naar een eigen component verplaatsen.
+- **Alternatieven:** `react/forbid-elements` uit `eslint-plugin-react`.
+  Dat is een nieuwe dependency, en je moet elk element zelf opsommen.
+  Of een eigen ESLint-plugin; dat is meer code voor hetzelfde.
+  Of de regel alleen voor `layout.tsx`, `page.tsx` en `not-found.tsx`; dan kan HTML in een ander bestand toch.
+
+### Een Content Security Policy die derden blokkeert, zonder nonces
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de CSP stelt `default-src 'self'` in, met dezelfde grens voor de andere soorten verzoeken.
+  Inline scripts en stijlen blijven toegestaan voor Next.js.
+- **Hoe:** `apps/site/src/proxy.ts` zet de header, net als `X-Robots-Tag`.
+  De proxy draait voor elk verzoek, dus ook een statisch bestand en de 404 krijgen hem.
+  Hij noemt `script-src`, `style-src`, `img-src`, `font-src`, `connect-src`, `frame-src` en `form-action` apart, en `base-uri 'self'`, zodat een ingespoten `base` de adressen niet naar een ander domein kan sturen.
+  Alleen `next dev` krijgt ook `'unsafe-eval'`, voor het herladen van code tijdens het werk.
+  De rooktest controleert de header op elk soort antwoord, en dat de gebouwde pagina's niets van een ander domein laden.
+- **Waarom:** het doel is dat een pagina niets van een ander domein laadt (principe 3 van de Redactie).
+  Een CSP met nonces maakt elke pagina per verzoek anders, dus niets is nog te cachen, en dat kost snelheid op de gedeelde hosting en botst met de gecachete homepage (#73).
+- **Alternatieven:** nonces vanaf het begin.
+  Dat is strenger tegen ingespoten scripts.
+  We bewaren het voor de beheerpagina's, waar inloggen het de moeite waard maakt (#30).
+  Voor de plek: `headers()` in `next.config.ts`; maar de headers staan nu al in de proxy, en zo blijven ze op één plek.
+
+### De lijst met bronnen staat een uur in het geheugen van de server
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de server maakt `/bronnen` bij elk bezoek opnieuw, maar vraagt de bronnen hoogstens één keer per uur aan de database.
+  `cacheFor` in `apps/site/src/cache.ts` bewaart de lijst een uur in het geheugen van het serverproces.
+  Daarna haalt het eerstvolgende bezoek hem opnieuw op.
+  Een query die mislukt, bewaart het niet.
+- **Waarom:** een wijziging in het register staat zo altijd binnen een uur op de pagina, ook na een rustige periode.
+  De build leest de database niet, dus hij heeft geen database nodig en bevat geen testbronnen uit CI.
+  De pagina opmaken kost weinig; de query is wat we besparen.
+- **Let op:** draait de host meer processen, dan heeft elk proces een eigen lijst en doet elk hoogstens één query per uur.
+- **Alternatieven:** `unstable_cache` van Next.js.
+  Next.js 16 vervangt die door `'use cache'`.
+  Hij geeft na het uur eerst nog de oude lijst en haalt de nieuwe op de achtergrond, dus na een rustige periode ziet de eerste bezoeker een lijst die ouder is dan een uur.
+  Of `'use cache'` met Cache Components.
+  Dat verandert hoe Next.js elke pagina maakt: de lijst komt dan bij het bouwen in de pagina, of in een Suspense-grens die zonder JavaScript verborgen blijft.
+  Of ISR met `revalidate = 3600` op de pagina; dan leest de build de database en komen de bronnen van CI in de build.
+
+### Het hoofdmenu leest het pad in een clientcomponent
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `SiteNavigation` is een clientcomponent die met `usePathname` de huidige pagina markeert, met `aria-current="page"`.
+  De layout zet het menu in de header van elke pagina.
+- **Waarom:** in Next.js krijgt een layout het pad niet, en de header hoort in de layout, zodat elke pagina hem heeft.
+  De server zet de markering al in de HTML.
+- **Alternatieven:** de header in elke pagina, met de huidige pagina als prop; dan herhaalt elke pagina de header.
+  Of het pad lezen uit de headers van het verzoek; dan maakt de server elke pagina per bezoek, ook de homepage.
+  Of de huidige pagina niet markeren.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
@@ -901,3 +987,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De principes stonden verspreid over issues; de reviewer en nieuwe vrijwilligers vinden ze nu op één plek.
 - **Alternatieven:** korte intro's standaard tonen, zoals veel nieuwsverzamelaars doen.
   Of de principes in `docs/`, naast de checklist voor toegankelijkheid; maar Storybook is ook het handboek voor wie schrijft.
+
+### De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de pagina zegt in één zin dat dit de bronnen zijn waar we het nieuws vandaan halen.
+  Per bron staan er de naam als link naar de website en een beschrijving van een of twee zinnen, per soort onder een kop.
+  Wat we van een bron tonen, en de toestemming, staan er niet.
+- **Hoe:** de beschrijving staat in het register, in de kolom `description` van `sources` (hoogstens 300 tekens).
+  We schrijven haar zelf, in eigen woorden.
+  `listEnabledSources` in `@fansite/db/queries` haalt alleen de naam, het domein, de soort en de beschrijving op, dus het beleid en de toestemming komen niet bij een pagina.
+- **Waarom:** bezoekers hoeven niet te lezen wat we wel of niet van een bron tonen; dat zien ze zelf.
+  Een korte beschrijving zegt wat de bron is, en dat helpt bij het kiezen.
+  De toestemming beschrijft ons contact met de bron, en dat is niet aan de pagina.
+- **Alternatieven:** per bron in gewone taal zeggen wat we tonen, zoals "kop, link en bronnaam", met één plek die het beleid in die tekst omzet.
+  Zo stond het eerst in #70.
+  Of ook de toestemmingsstatus tonen; dat laat zien wie we hebben gevraagd en wie nog niet heeft geantwoord.
+  Of de beschrijvingen in de code van de site zetten; dan staat een bron op twee plekken, en kan het beheer (#30) ze niet aanpassen.

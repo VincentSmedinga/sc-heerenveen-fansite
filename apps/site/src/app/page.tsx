@@ -1,8 +1,13 @@
-export default function Page() {
+import { Heading, Link, Text } from '@fansite/design-system'
+
+export default function HomePage() {
   return (
-    <main>
-      <h1>sc Heerenveen Fansite</h1>
-      <p>Binnenkort meer.</p>
-    </main>
+    <>
+      <Heading level={1}>sc Heerenveen Fansite</Heading>
+      <Text>Binnenkort meer.</Text>
+      <Text>
+        Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
+      </Text>
+    </>
   )
 }

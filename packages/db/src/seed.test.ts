@@ -45,4 +45,9 @@ describe('the seed', () => {
     expect(testSources.some((source) => source.allowEmbed === true)).toBe(true)
     expect(testSources.some((source) => source.attribution !== undefined)).toBe(true)
   })
+
+  it('has sources with a description and a source without one', () => {
+    expect(testSources.some((source) => source.description !== undefined)).toBe(true)
+    expect(testSources.some((source) => source.enabled !== false && source.description === undefined)).toBe(true)
+  })
 })

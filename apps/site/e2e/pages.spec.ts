@@ -6,6 +6,7 @@ import { checkPage } from './check-page'
 // doesn't exist is the page "niet gevonden"; the status code also keeps a typo in a path from testing that page by mistake.
 const pages = [
   { path: '/', status: 200 },
+  { path: '/bronnen', status: 200 },
   { path: '/bestaat-niet', status: 404 },
 ]
 

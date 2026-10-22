@@ -16,7 +16,7 @@ const notBrowserFiles = [
   '**/*.config.{js,ts}',
   '**/*.test.{ts,tsx}',
   '**/.storybook/main.ts',
-  'apps/site/src/{env,instrumentation,instrumentation-node,proxy}.ts',
+  'apps/site/src/{env,instrumentation,instrumentation-node,proxy,sources}.ts',
   'apps/site/src/app/robots.ts',
 ]
 
@@ -90,6 +90,23 @@ export default defineConfig([
     name: 'fansite/database-schema',
     rules: {
       'perfectionist/sort-objects': 'off',
+    },
+  },
+  {
+    // The site's templates hold no HTML, only components from the design system (see docs/beslissingen.md). In JSX a
+    // lowercase name is an HTML or SVG element, and a capitalised one a component. This covers every component in the
+    // site, so a page can't move its HTML into a component of its own.
+    files: ['apps/site/src/**/*.tsx'],
+    ignores: ['**/*.test.tsx'],
+    name: 'fansite/site-templates',
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          message: 'Use a component from @fansite/design-system instead of an HTML element.',
+          selector: 'JSXOpeningElement[name.type="JSXIdentifier"][name.name=/^[a-z]/], JSXNamespacedName',
+        },
+      ],
     },
   },
   {

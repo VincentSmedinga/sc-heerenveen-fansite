@@ -7,7 +7,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een lijst met `li`-elementen.',
+          'Een lijst met items. Elk item is een `List.Item`: het `li`-element, dat alleen in een lijst werkt.',
           '',
           'Met `as` kies je het element uit een vaste lijst:',
           '',
@@ -25,12 +25,12 @@ const meta = preview.meta({
 const render = () => (
   <>
     <List>
-      <li>Nieuws over sc Heerenveen uit de media</li>
-      <li>De nieuwste discussies op het forum</li>
+      <List.Item>Nieuws over sc Heerenveen uit de media</List.Item>
+      <List.Item>De nieuwste discussies op het forum</List.Item>
     </List>
     <List as="ol">
-      <li>Stuur ons de link naar het bericht dat weg moet.</li>
-      <li>Vertel erbij wie je bent en waarom het weg moet.</li>
+      <List.Item>Stuur ons de link naar het bericht dat weg moet.</List.Item>
+      <List.Item>Vertel erbij wie je bent en waarom het weg moet.</List.Item>
     </List>
   </>
 )

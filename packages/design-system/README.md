@@ -55,6 +55,7 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
   Kapitalen komen uit CSS.
 - **Componenten:** een React-component per HTML-element of onderdeel, met getypeerde props en de klassen met `hf-`.
   Kan een component meer dan één element zijn, dan kiest een `as`-prop uit een vaste lijst die de typen afdwingen.
+  Een onderdeel dat alleen binnen zijn ouder werkt, is een eigenschap van die ouder: `List.Item` voor het `li` in een `List`.
   Een component zonder hooks of toestand blijft een servercomponent.
   Elk component heeft in zijn map een eigen CSS-bestand (`heading/heading.css`), stories in licht en donker, documentatie in Storybook en tests met Vitest en Testing Library.
 - **Taal:** code en commentaar in Brits Engels (`colour`, `initialise`); alles wat bezoekers en lezers van Storybook zien in het Nederlands.

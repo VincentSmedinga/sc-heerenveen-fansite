@@ -48,10 +48,10 @@ export const ExampleContent = (): ReactNode => (
       Zo lees je de site
     </Heading>
     <List>
-      <li>Kies een kop om naar het bericht bij de bron te gaan.</li>
-      <li>
+      <List.Item>Kies een kop om naar het bericht bij de bron te gaan.</List.Item>
+      <List.Item>
         Meer over wat we tonen staat bij <Link href="#over">Over de site</Link>.
-      </li>
+      </List.Item>
     </List>
   </>
 )

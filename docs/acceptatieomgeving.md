@@ -13,6 +13,7 @@ De workflow [`acceptance.yml`](../.github/workflows/acceptance.yml) doet bij elk
 
 1. Hij bouwt de site (`pnpm --filter site build`) en zet het resultaat in één map (`pnpm --filter site assemble`).
 2. Hij start die map zoals de host dat doet en controleert wat een bezoeker en een zoekmachine krijgen (`pnpm --filter site smoke`).
+   Daarvoor start de workflow een eigen MariaDB, met de migraties en de testbronnen, die na de run weer weg is.
 3. Hij kopieert de map met rsync over SSH, op poort 26, naar de map van de app op de host.
 4. Hij raakt `tmp/restart.txt` aan, zodat de host de app opnieuw start.
 
@@ -23,10 +24,11 @@ Waarom dat zo is, staat onder _Wat de eerste deploy ons leerde_.
 Ontbreekt een van de geheimen hieronder, dan doet de workflow alleen stap 1 en 2 en meldt dat het kopiëren is overgeslagen.
 `main` wordt er niet rood van.
 
-De site leest bij het opstarten de variabele `SITE_ENV`.
-Op acceptatie is dat `acceptance`.
+De site leest bij het opstarten de variabelen `SITE_ENV` en `DATABASE_URL`.
+Op acceptatie is `SITE_ENV` `acceptance`.
 Dan krijgt elk antwoord de header `X-Robots-Tag: noindex, nofollow`, en weigert `/robots.txt` alles.
-Zonder `SITE_ENV` start de site niet.
+`DATABASE_URL` wijst naar de database van acceptatie (stap 3 hieronder).
+Zonder een van de twee start de site niet.
 
 ## Eenmalig instellen
 
@@ -48,7 +50,7 @@ Een agent heeft daar geen toegang.
      Het pad van deze map is straks `DEPLOY_PATH`.
    - Adres van de app (_Application URL_): `acc.sc.heerenveen.org`.
    - Startbestand (_Application startup file_): `apps/site/server.js`.
-   - Omgevingsvariabele: `SITE_ENV` met de waarde `acceptance`.
+   - Omgevingsvariabelen: `SITE_ENV` met de waarde `acceptance`, en `DATABASE_URL` met de database uit stap 3, als `mysql://gebruiker:wachtwoord@localhost:3306/database`.
    - Kies **niet** _Run NPM Install_: de build brengt zijn eigen `node_modules` mee.
      Staat er in de map van de app al een `node_modules` die een symbolische link is, verwijder die link dan.
 
@@ -59,7 +61,9 @@ Een agent heeft daar geen toegang.
 3. **Database.**
    Maak onder _MySQL Management_ een lege database met een eigen gebruiker voor acceptatie.
    Bewaar de gegevens in je wachtwoordmanager.
-   De site gebruikt de database nog niet (dat komt met #8), en de gegevens komen nooit in GitHub of in de repository.
+   De site leest de bronnen voor `/bronnen` uit deze database.
+   De gegevens komen nooit in GitHub of in de repository.
+   De tabellen komen erin met #78; tot dan geeft `/bronnen` op acceptatie een foutmelding.
 4. **SSH-sleutel voor de deploys.**
    Maak een sleutel die alleen hiervoor dient, zonder wachtwoord (de workflow kan er geen invullen):
 
@@ -101,7 +105,7 @@ Een agent heeft daar geen toegang.
 - De workflow meldt "Deploy skipped": een geheim ontbreekt.
   De melding noemt welk.
 - De site start niet: kijk in het logboek van de app (_Setup Node.js App_ of het bestand `stderr.log` in de map van de app).
-  Een ontbrekende of verkeerde `SITE_ENV` staat daar met naam bij.
+  Een ontbrekende of verkeerde `SITE_ENV` of `DATABASE_URL` staat daar met naam bij.
 - De site geeft een 500 en `stderr.log` zegt `Cannot find module '@swc/helpers/...'`: de map op de host bevat symbolische links.
   `pnpm --filter site assemble` haalt ze weg en stopt als er een overblijft.
   Controleer de map op de host met `find <map van de app> -type l`; die opdracht mag niets tonen.

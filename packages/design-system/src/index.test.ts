@@ -27,6 +27,11 @@ describe('the JavaScript entry of the package', () => {
     expect(typeof designSystem[name as keyof typeof designSystem]).toBe('function')
   })
 
+  it('gives List.Item on List, because an item only works inside its list', () => {
+    expect(typeof designSystem.List.Item).toBe('function')
+    expect(designSystem).not.toHaveProperty('ListItem')
+  })
+
   it('gives the lists of allowed elements', () => {
     expect(designSystem.listElements).toEqual(['ul', 'ol'])
     expect(designSystem.pageBodyElements).toEqual(['main', 'div'])

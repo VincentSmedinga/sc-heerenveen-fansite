@@ -19,6 +19,31 @@ const port = process.env['SMOKE_PORT'] ?? '3123'
 const origin = `http://127.0.0.1:${port}`
 const serverFile = path.resolve(folder, 'apps/site/server.js')
 
+/**
+ * Finds every address a page loads by itself: scripts, stylesheets, fonts, images, media and frames, in the HTML and in
+ * the stylesheets it links. A link to another site (`<a href>`) isn't loaded until a visitor follows it, so it isn't
+ * one of them.
+ */
+async function loadedUrls(pageUrl, html) {
+  const tags = html.match(/<(?:audio|embed|iframe|img|link|object|script|source|track|video)\b[^>]*>/gi) ?? []
+  const urls = tags.flatMap((tag) =>
+    [...tag.matchAll(/\s(?:data|href|poster|src|srcset)="([^"]*)"/gi)].flatMap(([, value]) =>
+      value.split(',').map((candidate) => new URL(candidate.trim().split(/\s+/)[0], pageUrl)),
+    ),
+  )
+  const stylesheets = urls.filter((url) => url.origin === origin && url.pathname.endsWith('.css'))
+
+  for (const stylesheet of stylesheets) {
+    const css = await (await fetch(stylesheet)).text()
+
+    for (const [, , value] of css.matchAll(/(?:url\(|@import\s+)\s*(['"]?)([^'")\s;]+)\1/g)) {
+      urls.push(new URL(value, stylesheet))
+    }
+  }
+
+  return urls
+}
+
 async function waitUntilUp(server) {
   for (let attempt = 0; attempt < 60; attempt++) {
     assert.equal(server.exitCode, null, 'the server stopped while starting')
@@ -77,9 +102,32 @@ await withServer('acceptance', async (server) => {
   const robots = await fetch(`${origin}/robots.txt`)
   assert.match(await robots.text(), /^Disallow: \/$/m)
 
-  // Every kind of response carries the header: a page, robots.txt, a static file and a 404.
-  for (const response of [home, robots, await fetch(origin + asset), await fetch(`${origin}/bestaat-niet`)]) {
+  // The sources page reads the register, so the database driver must be in the folder too.
+  const sources = await fetch(`${origin}/bronnen`)
+  const sourcesHtml = await sources.text()
+  assert.equal(sources.status, 200)
+  assert.match(sourcesHtml, /<h1[^>]*>Onze bronnen<\/h1>/)
+
+  // Every kind of response carries the headers: a page, a page from the database, robots.txt, a static file and a 404.
+  for (const response of [home, sources, robots, await fetch(origin + asset), await fetch(`${origin}/bestaat-niet`)]) {
     assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow', response.url)
+    assert.match(response.headers.get('content-security-policy') ?? '', /^default-src 'self';/, response.url)
+  }
+
+  // A page loads nothing from another domain: no script, stylesheet, font or image (editorial principle 3).
+  for (const [page, pageHtml] of [
+    [origin, html],
+    [`${origin}/bronnen`, sourcesHtml],
+  ]) {
+    const urls = await loadedUrls(page, pageHtml)
+    assert.ok(
+      urls.some((url) => url.pathname.endsWith('.woff2')),
+      `${page} loads no font of our own`,
+    )
+
+    for (const url of urls) {
+      assert.equal(url.origin, origin, `${page} loads ${url.href}`)
+    }
   }
 
   assert.equal((await fetch(origin + asset)).status, 200, 'the static file is missing from the folder')
