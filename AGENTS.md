@@ -182,6 +182,17 @@ It lists the components of the design system with their props and types, the doc
   The server is a help, not a condition.
 - The Reviewer doesn't use the server: it reads the code, which is the source.
 
+## The review folder
+
+`pnpm review <pull request or branch>` is for the project owner.
+It puts a branch in `../sc-heerenveen-fansite-review`, next to the repository, and starts the site and Storybook from there on ports 3000 and 6006.
+Agents don't use that command and don't work in the review folder.
+The Coordinator's clean-up of worktrees leaves it alone.
+
+`pnpm review` stops the fansite's site and Storybook on those ports, whichever folder they run from.
+That includes the Storybook you started for the MCP server (see _The Storybook server_): the server then shows as failed in `/mcp` until the owner reconnects.
+That is expected; carry on from the code.
+
 ## Working on an issue
 
 1. Read the issue: `gh issue view <number>`.

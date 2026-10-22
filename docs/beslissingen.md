@@ -240,6 +240,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of in `AGENTS.md` alleen melden dat de server er is.
   Of de reviewer de hulpmiddelen voor documentatie geven; die lezen alleen.
 
+### Een branch bekijk je met pnpm review, in één vaste map
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `pnpm review <pull request of branch>` zet de branch klaar in één vaste map naast de repository.
+  Hij stopt de site en Storybook van de fansite die op poort 3000 en 6006 draaien, en start daar de site en Storybook van die branch.
+  In ontwikkeling tonen het tabblad en Storybook de naam van de branch.
+  De opdracht migreert en seedt de lokale database, maar importeert niet.
+- **Waarom:** de projecteigenaar raakte de weg kwijt tussen worktrees, poorten en branches.
+  Eén map en vaste adressen betekenen dat `localhost` altijd de branch toont die je het laatst startte, en de naam in het tabblad bevestigt dat.
+  Zonder import start het snel, en doet het geen verzoeken bij de bron.
+- **Gevolg:** houdt iets anders dan de fansite een van de poorten bezet, dan stopt de opdracht met een melding en verandert hij niets.
+  Een pull request van een fork neemt hij niet, want hij draait de code van de branch op je computer.
+  De naam van de branch komt in de omgevingsvariabele `REVIEW_BRANCH`, en alleen `next dev` en `storybook dev` lezen die.
+- **Alternatieven:** `pnpm dev` in elke map, die zegt welke map een poort bezet; dan zoek je de worktree nog zelf.
+  Of startconfiguraties voor de app van Claude; dan botsen de poorten tussen sessies.
+  Of een eigen paar poorten per branch, zodat je branches naast elkaar ziet.
+  Of bij elke start ook importeren.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host

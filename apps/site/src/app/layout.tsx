@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import { Body, Link, Logo, Navigation, Page, Root, Text } from '@fansite/design-system'
 
 import { SiteNavigation } from '../SiteNavigation'
+import { withBranch } from '../title'
 import { whatsNewPath, whatsNewTitle } from '../whats-new'
 
 // The links in the footer, about the site itself: the page about us, its privacy section and what is new. The main menu
@@ -18,8 +19,8 @@ const footerItems = [
 
 export const metadata: Metadata = {
   title: {
-    default: 'sc Heerenveen Fansite',
-    template: '%s – sc Heerenveen Fansite',
+    default: withBranch('sc Heerenveen Fansite'),
+    template: withBranch('%s – sc Heerenveen Fansite'),
   },
 }
 

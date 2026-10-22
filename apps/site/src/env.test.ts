@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isIndexable, originOf, readEnv } from './env'
+import { isIndexable, originOf, readEnv, reviewBranch } from './env'
 
 const DATABASE_URL = 'mysql://root@127.0.0.1:3306/fansite'
 
@@ -51,5 +51,27 @@ describe('originOf', () => {
 
   it('names a missing SITE_ENV', () => {
     expect(() => originOf({})).toThrow('SITE_ENV is missing')
+  })
+})
+
+describe('reviewBranch', () => {
+  it('gives the branch in the dev server', () => {
+    expect(reviewBranch({ NODE_ENV: 'development', REVIEW_BRANCH: 'feat/120-bigger-type' })).toBe(
+      'feat/120-bigger-type',
+    )
+  })
+
+  it('gives nothing without a branch, or with an empty one', () => {
+    expect(reviewBranch({ NODE_ENV: 'development' })).toBeUndefined()
+    expect(reviewBranch({ NODE_ENV: 'development', REVIEW_BRANCH: '' })).toBeUndefined()
+  })
+
+  it.each(['production', 'test', undefined])('never shows the branch when NODE_ENV is %s', (nodeEnv) => {
+    expect(reviewBranch({ NODE_ENV: nodeEnv, REVIEW_BRANCH: 'feat/120-bigger-type' })).toBeUndefined()
+  })
+
+  it('rejects a value that is not a branch name, without repeating it', () => {
+    expect(() => reviewBranch({ NODE_ENV: 'development', REVIEW_BRANCH: '<b>x</b>' })).toThrow(/REVIEW_BRANCH/)
+    expect(() => reviewBranch({ NODE_ENV: 'development', REVIEW_BRANCH: '<b>x</b>' })).not.toThrow(/<b>/)
   })
 })

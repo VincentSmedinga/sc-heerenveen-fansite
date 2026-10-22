@@ -3,11 +3,14 @@ import { addons } from 'storybook/manager-api'
 
 import type { ThemeChoice } from './theme'
 
+import { branchLine, branchMetaName } from './branch'
 import { brandTitle, darkTheme, lightTheme } from './docsThemes'
 import { isDark, isThemeChoice, onSystemSchemeChange, themeFromUrl } from './theme'
 
-// Storybook renders the brand title as HTML when there's no brand image. The logo is served from staticDirs.
-const brand = `<span style="display: inline-flex; align-items: center; gap: 0.625rem"><img alt="" src="./assets/logo.svg" width="40" height="40">${brandTitle}</span>`
+// Storybook renders the brand title as HTML when there's no brand image. The logo is served from staticDirs. In the dev
+// server that `pnpm review` starts, the name of the branch stands under the title (see branch.ts).
+const branch = document.querySelector<HTMLMetaElement>(`meta[name="${branchMetaName}"]`)?.content
+const brand = `<span style="display: inline-flex; align-items: center; gap: 0.625rem"><img alt="" src="./assets/logo.svg" width="40" height="40"><span>${brandTitle}${branchLine(branch)}</span></span>`
 
 /*
  * In the dark sidebar Storybook darkens the accent for the selected item and puts white text on it.

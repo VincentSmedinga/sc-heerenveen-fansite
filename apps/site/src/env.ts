@@ -8,6 +8,15 @@ const siteEnvSchema = z.object({
 
 const schema = databaseEnvSchema.extend(siteEnvSchema.shape)
 
+// Set by `pnpm review` (see scripts/review.js), and nowhere else. Optional, and not part of the schema above: only the
+// dev server reads it, and the site must start without it.
+const reviewEnvSchema = z.object({
+  REVIEW_BRANCH: z
+    .string()
+    .regex(/^[\w./-]+$/, 'must be the name of a branch')
+    .optional(),
+})
+
 // The address of each environment (see the decision Adressen in docs/beslissingen.md). Locally it is `next dev`.
 const origins = {
   acceptance: 'https://acc.sc.heerenveen.org',
@@ -37,4 +46,12 @@ export function originOf(source: Record<string, string | undefined> = process.en
  */
 export function readEnv(source: Record<string, string | undefined> = process.env) {
   return parseEnv(schema, source)
+}
+
+/**
+ * The name of the branch that `pnpm review` is showing, for the title of the tab. Only `next dev` has one: a build, and so
+ * acceptance and production, never shows a branch, whatever REVIEW_BRANCH holds. It reads only that variable and NODE_ENV.
+ */
+export function reviewBranch(source: Record<string, string | undefined> = process.env) {
+  return source['NODE_ENV'] === 'development' ? parseEnv(reviewEnvSchema, source).REVIEW_BRANCH : undefined
 }

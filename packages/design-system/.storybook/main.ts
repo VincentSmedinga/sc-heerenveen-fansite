@@ -1,5 +1,7 @@
 import { defineMain } from '@storybook/react-vite/node'
 
+import { addBranchTo } from './branch'
+
 export default defineMain({
   addons: [
     '@storybook/addon-docs',
@@ -34,6 +36,9 @@ export default defineMain({
     sidebarOnboardingChecklist: false,
   },
   framework: '@storybook/react-vite',
+  // `pnpm review` sets REVIEW_BRANCH for the dev server it starts. The sidebar shows it only there (see branch.ts).
+  managerHead: (head, { configType }) =>
+    addBranchTo(head ?? '', process.env['REVIEW_BRANCH'], configType ?? 'PRODUCTION'),
   // The logo in the sidebar is served from here.
   staticDirs: [{ from: '../src/assets', to: '/assets' }],
   stories: ['../src/**/*.mdx', '../src/**/*.stories.tsx'],

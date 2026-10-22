@@ -46,6 +46,8 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm run import`        | Haalt de feeds van de bronnen op en bewaart de koppen      |
 | `pnpm run import:status` | Toont per feed of hij gezond is, en de laatste fout        |
 | `pnpm release`           | Opent of werkt de release-pull request bij (vraagt `gh`)   |
+| `pnpm review <branch>`   | Start de site en Storybook voor een branch of pull request |
+| `pnpm review:stop`       | Stopt ze weer                                              |
 
 Na `pnpm release` en vóór je de release-pull request samenvoegt, schrijft de Coordinator de Nederlandse zinnen voor de pagina Wat is er nieuw.
 Een kleine pull request zet ze in [`apps/site/src/release-notes.ts`](apps/site/src/release-notes.ts).
@@ -55,6 +57,41 @@ De database draait in Docker.
 Start hem met `docker compose up -d --wait`, en maak dan de tabellen met `pnpm db:migrate`.
 Zonder database slagen de tests van `packages/db` niet.
 [`packages/db`](packages/db/README.md) legt de opdrachten `pnpm db:generate`, `pnpm db:migrate` en `pnpm db:seed` uit.
+
+## Een branch bekijken
+
+Wil je zien wat een pull request doet, draai dan vanuit de map van de repository:
+
+```sh
+pnpm review 124
+pnpm review feat/120-bigger-type
+```
+
+Je geeft het nummer van een pull request of de naam van een branch.
+Bij een nummer zoekt de opdracht de branch met `gh`.
+Hij zet de laatste commit van die branch op GitHub klaar in `../sc-heerenveen-fansite-review`, naast de repository.
+Dat is een git-worktree zonder lokale branch.
+Hij kopieert `.env` uit de repository als de reviewmap er nog geen heeft, installeert de dependencies, start de database en draait de migraties en de seed van die branch.
+De import draait hij niet: de koppen zijn die van de laatste `pnpm run import`.
+
+Daarna stopt hij de site en Storybook van de fansite die al op poort 3000 en 6006 draaien, uit welke map ook.
+Houdt iets anders een van die poorten bezet, dan stopt hij met een melding en verandert hij niets.
+Heeft de reviewmap wijzigingen die niet gecommit zijn, dan stopt hij ook, en verandert hij niets.
+Hij start de site op <http://localhost:3000> en Storybook op <http://localhost:6006>, allebei op de achtergrond.
+De uitvoer van beide staat in `review.log` in de reviewmap.
+In het tabblad van de site en in de zijbalk van Storybook staat de naam van de branch, zodat je ziet wat er draait.
+Dat gebeurt alleen in ontwikkeling: acceptatie, productie en de Storybook op GitHub Pages tonen hem nooit.
+
+Stop ze met:
+
+```sh
+pnpm review:stop
+```
+
+De reviewmap en de lokale database zijn voor alle branches dezelfde.
+Een migratie van een nieuwere branch blijft dus in de database staan als je daarna een oudere branch bekijkt.
+Wil je opnieuw beginnen, dan wist `docker compose down --volumes` de database.
+De opdracht gebruikt `lsof` om te zien wat een poort bezet houdt, en neemt alleen branches uit deze repository, geen forks.
 
 `pnpm install` zet ook twee git hooks klaar.
 Vóór elke commit herstellen ESLint, Stylelint en Prettier wat ze kunnen; een fout die overblijft, houdt de commit tegen.
