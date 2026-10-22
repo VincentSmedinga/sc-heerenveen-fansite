@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 
 import { Body, Link, Logo, Navigation, Page, Root, Text } from '@fansite/design-system'
 
+import { reviewBranch } from '../env'
 import { SiteNavigation } from '../SiteNavigation'
 import { withBranch } from '../title'
 import { whatsNewPath, whatsNewTitle } from '../whats-new'
@@ -17,10 +18,14 @@ const footerItems = [
   { href: whatsNewPath, label: whatsNewTitle },
 ]
 
+const branch = reviewBranch()
+
 export const metadata: Metadata = {
+  // The error page sets its own title in the browser, and reads the branch from this tag (see app/error.tsx).
+  ...(branch === undefined ? {} : { other: { 'review-branch': branch } }),
   title: {
-    default: withBranch('sc Heerenveen Fansite'),
-    template: withBranch('%s – sc Heerenveen Fansite'),
+    default: withBranch('sc Heerenveen Fansite', branch),
+    template: withBranch('%s – sc Heerenveen Fansite', branch),
   },
 }
 

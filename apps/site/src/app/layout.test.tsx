@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import RootLayout from './layout'
 
@@ -25,5 +25,36 @@ describe('RootLayout', () => {
       ['/over-ons#privacy', 'Privacy'],
       ['/wat-is-er-nieuw', 'Wat is er nieuw'],
     ])
+  })
+})
+
+describe('the title of the layout', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+  })
+
+  const metadataWith = async (nodeEnv: string) => {
+    vi.stubEnv('NODE_ENV', nodeEnv)
+    vi.stubEnv('REVIEW_BRANCH', 'feat/125-pnpm-review')
+    vi.resetModules()
+
+    return (await import('./layout')).metadata
+  }
+
+  it('shows the branch of pnpm review in the dev server, in the title and in a meta tag for the error page', async () => {
+    expect(await metadataWith('development')).toEqual({
+      other: { 'review-branch': 'feat/125-pnpm-review' },
+      title: {
+        default: 'feat/125-pnpm-review · sc Heerenveen Fansite',
+        template: 'feat/125-pnpm-review · %s – sc Heerenveen Fansite',
+      },
+    })
+  })
+
+  it('never shows it in a build, whatever REVIEW_BRANCH holds', async () => {
+    expect(await metadataWith('production')).toEqual({
+      title: { default: 'sc Heerenveen Fansite', template: '%s – sc Heerenveen Fansite' },
+    })
   })
 })

@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
 import { ServerError, serverErrorTitle } from '../ServerError'
+import { withBranch } from '../title'
 
 /**
  * The page for an error that nothing caught: Next.js shows it inside the layout, in place of the page that failed. It
@@ -14,9 +15,12 @@ import { ServerError, serverErrorTitle } from '../ServerError'
 export default function ErrorPage() {
   const pathname = usePathname()
 
-  // The title is still the one of the page that failed, and a client component can't export metadata.
+  // The title is still the one of the page that failed, and a client component can't export metadata. In the dev server
+  // that `pnpm review` starts, the layout has put the branch in a meta tag, and the title keeps it.
   useEffect(() => {
-    document.title = `${serverErrorTitle} – sc Heerenveen Fansite`
+    const branch = document.querySelector<HTMLMetaElement>('meta[name="review-branch"]')?.content
+
+    document.title = withBranch(`${serverErrorTitle} – sc Heerenveen Fansite`, branch)
   }, [])
 
   return <ServerError retryHref={pathname} />

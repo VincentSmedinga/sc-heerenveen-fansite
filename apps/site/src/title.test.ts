@@ -17,7 +17,7 @@ describe('withBranch', () => {
     expect(withBranch('Onze bronnen', undefined)).toBe('Onze bronnen')
   })
 
-  it('shows no branch outside the dev server', () => {
-    expect(withBranch('Onze bronnen')).toBe('Onze bronnen')
+  it('leaves the title as it is for an empty branch', () => {
+    expect(withBranch('Onze bronnen', '')).toBe('Onze bronnen')
   })
 })
