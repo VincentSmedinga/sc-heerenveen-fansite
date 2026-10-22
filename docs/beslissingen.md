@@ -814,6 +814,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** per story met de hand `source.code` schrijven; dat is dubbele code die achterloopt op het voorbeeld.
   Of de standaard laten staan, die de aanroep van `meta.story` toont.
 
+### Elk component heeft zijn eigen CSS
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** elke map in `src/components` heeft een eigen CSS-bestand met de stijlen van dat component, zoals `navigation/navigation.css`.
+  De stijlen van `Heading`, `Text`, `Link`, `List`, `Body` en `Root` zijn daarheen verhuisd, uit `typography/styles.css` en `base/`.
+  `base/` houdt de elementen zonder component: de focusrand, tabel, formulier, code, citaat, figuur, scheidingslijn en afbeelding.
+  Een CSS-bestand mag regels in meer dan één laag hebben, zoals `heading.css` in `hf.base` en `hf.typography`.
+  Elke regel houdt zijn laag, en de volgorde van de imports in `index.css` houdt regels die elkaar kunnen overschrijven in dezelfde volgorde.
+  De cascade verandert dus niet.
+- **Waarom:** de stijlen van een component staan naast zijn code, stories en tests.
+  Een component verplaatsen of weghalen is dan een wijziging in één map.
+- **Alternatieven:** de stijlen gegroepeerd houden naar soort: `base`, `typography` en `components`.
+  Dat sluit aan op de lagen, maar verspreidt één component over drie bestanden.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters

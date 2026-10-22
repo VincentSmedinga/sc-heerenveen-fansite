@@ -1,0 +1,18 @@
+/* Links: underlined, with a colour for a visited link and for hover. */
+
+@layer hf.base {
+  a {
+    color: var(--hf-colour-text-link);
+    text-decoration-thickness: 0.0625em;
+    text-underline-offset: 0.15em;
+
+    &:visited {
+      color: var(--hf-colour-text-link-visited);
+    }
+
+    &:hover {
+      color: var(--hf-colour-text-link-hover);
+      text-decoration-thickness: 0.125em;
+    }
+  }
+}

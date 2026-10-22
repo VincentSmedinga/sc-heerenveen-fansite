@@ -1,52 +1,9 @@
-/* Running text: headings, paragraphs, links, inline semantics, quotes, code, rules and figures. */
+/*
+ * Elements without a component yet: abbreviations, quotes, code, rules, figures and media.
+ * An element that gets a component moves its rules to the directory of that component.
+ */
 
 @layer hf.base {
-  /* Colour and spacing of headings. Their type styles are in typography/styles.css. */
-  :is(h1, h2, h3, h4, h5, h6) {
-    color: var(--hf-colour-text-heading);
-    margin-block: 2rem 0.75rem;
-
-    &:first-child {
-      margin-block-start: 0;
-    }
-  }
-
-  /* Not Baseline widely available yet. Without it, a heading wraps as a paragraph does. */
-  @supports (text-wrap: balance) {
-    :is(h1, h2, h3, h4, h5, h6) {
-      text-wrap: balance;
-    }
-  }
-
-  p {
-    margin-block: 0 1rem;
-  }
-
-  a {
-    color: var(--hf-colour-text-link);
-    text-decoration-thickness: 0.0625em;
-    text-underline-offset: 0.15em;
-
-    &:visited {
-      color: var(--hf-colour-text-link-visited);
-    }
-
-    &:hover {
-      color: var(--hf-colour-text-link-hover);
-      text-decoration-thickness: 0.125em;
-    }
-  }
-
-  b,
-  strong {
-    font-weight: var(--hf-strong-font-weight);
-  }
-
-  small {
-    font-size: var(--hf-meta-font-size);
-    line-height: var(--hf-meta-line-height);
-  }
-
   abbr[title] {
     cursor: help;
     text-decoration-color: var(--hf-colour-marker-graphic);
