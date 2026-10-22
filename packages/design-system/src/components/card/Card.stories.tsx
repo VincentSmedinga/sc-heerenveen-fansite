@@ -123,7 +123,7 @@ const renderPage = () => (
       </Text>
     </Page.Main>
     <Page.Sidebar aria-label="Naast het nieuws">
-      <Card aria-labelledby="page-match" surface="strong">
+      <Card aria-labelledby="page-match" surface="soft">
         <Heading appearance={3} id="page-match" level={2}>
           Volgende wedstrijd
         </Heading>
