@@ -26,7 +26,24 @@ jobs:
       name: acceptatie
       url: https://acc.sc.heerenveen.org
     env:
+      # The database below, for the smoke test only. The site on the host uses its own DATABASE_URL.
+      DATABASE_URL: mysql://root@127.0.0.1:3306/fansite
       NEXT_TELEMETRY_DISABLED: '1'
+    # The smoke test starts the site, which reads the source register. This MariaDB is empty and gone after the run, as in
+    # CI, so it has no password.
+    services:
+      mariadb:
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
+          MARIADB_DATABASE: fansite
+        image: mariadb:10.11
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-retries=20
+          --health-timeout=5s
+        ports:
+          - 3306:3306
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -43,6 +60,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm --filter site build
+
+      - name: Migrate and seed the database for the smoke test
+        run: |
+          pnpm db:migrate
+          pnpm db:seed
 
       # Copies the build and the static files, which Next.js leaves out of the standalone folder, to one folder, and starts it.
       - name: Assemble the folder for the host and check what it serves

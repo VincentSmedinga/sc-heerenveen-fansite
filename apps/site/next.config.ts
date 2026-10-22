@@ -18,7 +18,7 @@ const config: NextConfig = {
   outputFileTracingRoot: root,
   poweredByHeader: false,
   // The packages in this workspace are TypeScript source.
-  transpilePackages: ['@fansite/shared'],
+  transpilePackages: ['@fansite/db', '@fansite/design-system', '@fansite/shared'],
 }
 
 export default config

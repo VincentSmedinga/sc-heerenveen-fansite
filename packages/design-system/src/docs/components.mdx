@@ -190,7 +190,7 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
           <code>List</code>
         </th>
         <td>
-          <code>ul</code> of <code>ol</code>
+          <code>ul</code> of <code>ol</code>, met een <code>List.Item</code> (<code>li</code>) per item
         </td>
         <td>
           <code>as</code>
@@ -218,6 +218,8 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
   Alleen wat een component zelf vastlegt, geef je niet mee: de `lang` van `Root` en de naam van `Navigation` en `Logo`.
 - **Het element kiezen:** waar een component meer dan één element kan zijn, kies je met `as` uit een vaste lijst.
   De typen laten geen ander element toe.
+- **Onderdelen met een punt:** een onderdeel dat alleen binnen zijn ouder werkt, schrijf je met een punt achter die ouder.
+  Een item van een lijst is `List.Item`, want een `li` hoort in een `ul` of `ol`.
 - **Klassen:** de componenten gebruiken de klassen met het voorvoegsel `hf-` en zitten in de laag `hf.components`.
 - **Niveau en stijl:** het niveau van een kop volgt de structuur van de pagina, de stijl het ontwerp.
   Zie [Heading](?path=/docs/componenten-heading--documentatie).

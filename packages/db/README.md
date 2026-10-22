@@ -88,4 +88,5 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
 - `@fansite/db/schema`: de tabellen en hun types;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
+- `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, zonder de toestemming;
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten.

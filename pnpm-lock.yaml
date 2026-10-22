@@ -226,6 +226,12 @@ importers:
 
   apps/site:
     dependencies:
+      '@fansite/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@fansite/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@fansite/shared':
         specifier: workspace:*
         version: link:../../packages/shared

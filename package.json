@@ -22,7 +22,7 @@
     "lint:js": "eslint .",
     "prepare": "husky",
     "release": "gh workflow run release.yml --ref main",
-    "test": "pnpm -r --if-present run test && node --test '.claude/hooks/*.test.js' 'baseline.test.js'",
+    "test": "pnpm -r --if-present run test && node --test '.claude/hooks/*.test.js' 'baseline.test.js' 'templates.test.js'",
     "typecheck": "tsc -b"
   },
   "devDependencies": {

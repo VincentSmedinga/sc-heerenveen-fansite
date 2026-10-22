@@ -61,3 +61,38 @@ describe('List', () => {
     expect(elements).toHaveLength(2)
   })
 })
+
+describe('List.Item', () => {
+  it('is an item of the list around it', () => {
+    render(
+      <List>
+        <List.Item>Een</List.Item>
+        <List.Item>Twee</List.Item>
+      </List>,
+    )
+
+    expect(
+      within(screen.getByRole('list'))
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual(['Een', 'Twee'])
+  })
+
+  it('keeps the other attributes', () => {
+    render(
+      <List>
+        <List.Item className="extra" id="item">
+          Een
+        </List.Item>
+      </List>,
+    )
+
+    expect(screen.getByRole('listitem').tagName).toBe('LI')
+    expect(screen.getByRole('listitem').className).toBe('extra')
+    expect(screen.getByRole('listitem').id).toBe('item')
+  })
+
+  it('is called List.Item in the developer tools and the code examples', () => {
+    expect(List.Item.displayName).toBe('List.Item')
+  })
+})

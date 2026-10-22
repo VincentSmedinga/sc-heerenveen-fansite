@@ -2,22 +2,35 @@ import { describe, expect, it } from 'vitest'
 
 import { isIndexable, readEnv } from './env'
 
+const DATABASE_URL = 'mysql://root@127.0.0.1:3306/fansite'
+
 describe('readEnv', () => {
   it.each(['local', 'acceptance', 'production'])('accepts SITE_ENV=%s', (siteEnv) => {
-    expect(readEnv({ SITE_ENV: siteEnv })).toEqual({ SITE_ENV: siteEnv })
+    expect(readEnv({ DATABASE_URL, SITE_ENV: siteEnv })).toEqual({ DATABASE_URL, SITE_ENV: siteEnv })
   })
 
   it('names a missing SITE_ENV', () => {
-    expect(() => readEnv({})).toThrow('SITE_ENV is missing')
+    expect(() => readEnv({ DATABASE_URL })).toThrow('SITE_ENV is missing')
   })
 
   it('treats an empty SITE_ENV as missing', () => {
-    expect(() => readEnv({ SITE_ENV: '' })).toThrow('SITE_ENV is missing')
+    expect(() => readEnv({ DATABASE_URL, SITE_ENV: '' })).toThrow('SITE_ENV is missing')
   })
 
   it('rejects an unknown value without repeating it', () => {
-    expect(() => readEnv({ SITE_ENV: 'productie' })).toThrow(/SITE_ENV/)
-    expect(() => readEnv({ SITE_ENV: 'productie' })).not.toThrow(/productie/)
+    expect(() => readEnv({ DATABASE_URL, SITE_ENV: 'productie' })).toThrow(/SITE_ENV/)
+    expect(() => readEnv({ DATABASE_URL, SITE_ENV: 'productie' })).not.toThrow(/productie/)
+  })
+
+  it('names a missing DATABASE_URL, because the site reads the source register', () => {
+    expect(() => readEnv({ SITE_ENV: 'local' })).toThrow('DATABASE_URL is missing')
+  })
+
+  it('rejects a DATABASE_URL that is not for MariaDB, without repeating it', () => {
+    const postgres = 'postgres://user:secret@localhost:5432/fansite'
+
+    expect(() => readEnv({ DATABASE_URL: postgres, SITE_ENV: 'local' })).toThrow(/DATABASE_URL/)
+    expect(() => readEnv({ DATABASE_URL: postgres, SITE_ENV: 'local' })).not.toThrow(/secret/)
   })
 })
 
