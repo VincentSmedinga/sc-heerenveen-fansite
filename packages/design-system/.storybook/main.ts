@@ -1,6 +1,6 @@
 import { defineMain } from '@storybook/react-vite/node'
 
-import { addBranchTo } from './branch'
+import { addBranchTo } from './branch.ts'
 
 export default defineMain({
   addons: [

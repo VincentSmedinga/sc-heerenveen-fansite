@@ -560,7 +560,8 @@ async function stop() {
   }
 }
 
-if (import.meta.main) {
+// `import.meta.main` only exists from Node 24.2, and engines allows 24.0 and 24.1 too, so compare the paths ourselves.
+if (process.argv[1] !== undefined && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     await (process.argv[2] === '--stop' ? stop() : review(process.argv[2]))
   } catch (error) {

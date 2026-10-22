@@ -58,6 +58,24 @@ Start hem met `docker compose up -d --wait`, en maak dan de tabellen met `pnpm d
 Zonder database slagen de tests van `packages/db` niet.
 [`packages/db`](packages/db/README.md) legt de opdrachten `pnpm db:generate`, `pnpm db:migrate` en `pnpm db:seed` uit.
 
+`pnpm install` zet ook twee git hooks klaar.
+Vóór elke commit herstellen ESLint, Stylelint en Prettier wat ze kunnen; een fout die overblijft, houdt de commit tegen.
+Daarna controleert commitlint of het bericht [Conventional Commits](https://www.conventionalcommits.org/nl/v1.0.0/) volgt.
+Schrijf het in het Engels.
+Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvoegen de commit op `main`.
+
+- [`apps/importer`](apps/importer/README.md): de importer, met de fetcher die bronnen ophaalt en de adapter voor RSS- en Atom-feeds
+- [`apps/site`](apps/site/README.md): de site
+- [`packages/db`](packages/db/README.md): de database, met het schema, de migraties en de seed
+- [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens, componenten en Storybook
+- [`packages/shared`](packages/shared/README.md): hulpfuncties voor de site en de importer, zoals de controle van omgevingsvariabelen
+- [`docs/beslissingen.md`](docs/beslissingen.md): welke keuzes we hebben gemaakt, en waarom
+- [`docs/acceptatieomgeving.md`](docs/acceptatieomgeving.md): hoe de acceptatieomgeving op de hosting staat, en wat de eigenaar daarvoor instelt
+- [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md): wat een mens of de reviewer nakijkt op toegankelijkheid, naast de automatische controles
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): hoe je meedoet, en de afspraken voor issues, branches, pull requests en taal
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): de gedragscode
+- [`AGENTS.md`](AGENTS.md): werkafspraken voor AI-agents, in het Engels
+
 ## Een branch bekijken
 
 Wil je zien wat een pull request doet, draai dan vanuit de map van de repository:
@@ -92,24 +110,6 @@ De reviewmap en de lokale database zijn voor alle branches dezelfde.
 Een migratie van een nieuwere branch blijft dus in de database staan als je daarna een oudere branch bekijkt.
 Wil je opnieuw beginnen, dan wist `docker compose down --volumes` de database.
 De opdracht gebruikt `lsof` om te zien wat een poort bezet houdt, en neemt alleen branches uit deze repository, geen forks.
-
-`pnpm install` zet ook twee git hooks klaar.
-Vóór elke commit herstellen ESLint, Stylelint en Prettier wat ze kunnen; een fout die overblijft, houdt de commit tegen.
-Daarna controleert commitlint of het bericht [Conventional Commits](https://www.conventionalcommits.org/nl/v1.0.0/) volgt.
-Schrijf het in het Engels.
-Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvoegen de commit op `main`.
-
-- [`apps/importer`](apps/importer/README.md): de importer, met de fetcher die bronnen ophaalt en de adapter voor RSS- en Atom-feeds
-- [`apps/site`](apps/site/README.md): de site
-- [`packages/db`](packages/db/README.md): de database, met het schema, de migraties en de seed
-- [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens, componenten en Storybook
-- [`packages/shared`](packages/shared/README.md): hulpfuncties voor de site en de importer, zoals de controle van omgevingsvariabelen
-- [`docs/beslissingen.md`](docs/beslissingen.md): welke keuzes we hebben gemaakt, en waarom
-- [`docs/acceptatieomgeving.md`](docs/acceptatieomgeving.md): hoe de acceptatieomgeving op de hosting staat, en wat de eigenaar daarvoor instelt
-- [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md): wat een mens of de reviewer nakijkt op toegankelijkheid, naast de automatische controles
-- [`CONTRIBUTING.md`](CONTRIBUTING.md): hoe je meedoet, en de afspraken voor issues, branches, pull requests en taal
-- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): de gedragscode
-- [`AGENTS.md`](AGENTS.md): werkafspraken voor AI-agents, in het Engels
 
 ## Licentie
 

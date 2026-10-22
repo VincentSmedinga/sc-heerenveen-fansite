@@ -18,5 +18,5 @@ export const addBranchTo = (head: string, branch: string | undefined, configType
 /** The line with the branch for under the title in the sidebar, or nothing without a branch. */
 export const branchLine = (branch: string | undefined) =>
   branch !== undefined && branchName.test(branch)
-    ? `<span style="display: block; font-size: 0.8125rem; font-weight: normal">${branch}</span>`
+    ? `<span style="display: block; font-size: 0.8125rem; font-weight: normal; overflow-wrap: anywhere">${branch}</span>`
     : ''
