@@ -1771,3 +1771,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of blauwe links, zoals op de rest van de site; dat vraagt geen nieuwe tokens, maar de footer valt dan meer op.
   Of één alinea met een `br` tussen de zinnen, zodat de links naar de volgende regel gaan zodra ze niet meer passen, zoals in de header.
   Dan moet de ESLint-regel `br` toestaan, of krijgt het designsysteem een component voor een regeleinde.
+
+### Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** het hoofdmenu toont Nieuws (de homepage), Onze bronnen en Forum, halfvet.
+  De huidige pagina staat in de lichtste kleur van de header, met een rode streep van 3 pixels eronder.
+  De andere onderdelen staan in de lichtblauwe kleur van de header, zonder onderstreping, en worden onderstreept onder de muis.
+- **Waarom:** met Nieuws in het menu heeft ook de homepage een onderdeel dat de huidige pagina aanwijst.
+  De streep wijst de huidige pagina aan met een vorm, niet alleen met een kleur.
+  Over ons hoort bij de site, niet bij de inhoud, en blijft in de footer.
+  Wedstrijden en Podcasts komen in het menu met hun eigen pagina's.
+- **Hoe:** de opmaak van de header geldt voor de links van een `Navigation` die in een `Page.Header` staat, via `navigation.css`.
+  Het menu in de footer heeft er geen last van en blijft zoals het was: de huidige pagina is vetter, met een dikkere onderstreping.
+  De streep is de onderstreping van de link, zonder afbreking bij letters met een staart, en een nieuw token geeft hem zijn kleur: `--hf-colour-accent-on-header`, rood-400 in licht en donker.
+  Rood-400 haalt 5,34:1 op de header in licht en 4,20:1 in donker, en nodig is 3:1 (WCAG 1.4.11).
+  Het palet verandert niet.
+  Het contrast staat bij Tokens › Kleur in Storybook.
+- **Alternatieven:** het menu laten zoals het is, met alleen Onze bronnen en Forum; dan heeft de homepage geen onderdeel.
+  Of Over ons ook in het menu, zoals op de artboard.
+  Of een prop op `Navigation` voor de opmaak van de header; dan moet elke plek die het menu in een header zet, eraan denken.

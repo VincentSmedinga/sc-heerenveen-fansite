@@ -1,6 +1,6 @@
 import preview from '#.storybook/preview'
 
-import { exampleMenu } from '../../docs/ExamplePage'
+import { exampleMenu, exampleMenuAt, type ExampleMenuPage } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
 import { Page } from '../page/Page'
 import { Navigation } from './Navigation'
@@ -17,9 +17,16 @@ const meta = preview.meta({
           '- `items` is de lijst met links.',
           '  Elk item heeft een `href` en een `label`, de tekst van de link.',
           '- `current` op een item zet `aria-current="page"` op die link.',
-          '  De huidige pagina is ook te zien zonder kleur: de link is vetter, met een dikkere onderstreping.',
+          '',
+          'Buiten de header is de huidige pagina ook te zien zonder kleur: de link is vetter, met een dikkere onderstreping.',
+          'Zo ziet het menu in de footer eruit.',
           '',
           'In de header krijgen de links de kleuren van de header.',
+          'Ze zijn halfvet en niet onderstreept, tot je er met de muis op staat.',
+          'De huidige pagina staat in de lichtste kleur van de header, met een rode streep eronder.',
+          'Die streep heeft de kleur `--hf-colour-accent-on-header`.',
+          'Zo is de huidige pagina ook zonder kleur te herkennen.',
+          '',
           'De links zijn 44 pixels hoog en lopen op een smal scherm door op een tweede regel.',
         ].join('\n'),
       },
@@ -36,11 +43,44 @@ export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', re
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
 
-export const InHeader = meta.story({
-  name: 'In de header',
-  render: () => (
-    <Page.Header>
-      <Navigation items={exampleMenu} label="Hoofdmenu" />
-    </Page.Header>
-  ),
+const inHeader = (current: ExampleMenuPage) => () => (
+  <Page.Header>
+    <Navigation items={exampleMenuAt(current)} label="Hoofdmenu" />
+  </Page.Header>
+)
+
+export const NewsInHeaderLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'In de header: Nieuws, licht',
+  render: inHeader('Nieuws'),
+})
+
+export const NewsInHeaderDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'In de header: Nieuws, donker',
+  render: inHeader('Nieuws'),
+})
+
+export const SourcesInHeaderLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'In de header: Onze bronnen, licht',
+  render: inHeader('Onze bronnen'),
+})
+
+export const SourcesInHeaderDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'In de header: Onze bronnen, donker',
+  render: inHeader('Onze bronnen'),
+})
+
+export const ForumInHeaderLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'In de header: Forum, licht',
+  render: inHeader('Forum'),
+})
+
+export const ForumInHeaderDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'In de header: Forum, donker',
+  render: inHeader('Forum'),
 })

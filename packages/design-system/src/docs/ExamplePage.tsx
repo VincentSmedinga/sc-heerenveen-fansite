@@ -8,21 +8,28 @@ import { Navigation } from '../components/navigation/Navigation'
 import { Page } from '../components/page/Page'
 import { Text } from '../components/text/Text'
 
-/** The menu of the example pages in the docs. */
-export const exampleMenu = [
-  { current: true, href: '#nieuws', label: 'Nieuws' },
+const menuItems = [
+  { href: '#nieuws', label: 'Nieuws' },
+  { href: '#bronnen', label: 'Onze bronnen' },
   { href: '#forum', label: 'Forum' },
-  { href: '#wedstrijden', label: 'Wedstrijden' },
-  { href: '#over', label: 'Over de site' },
 ]
 
+export type ExampleMenuPage = (typeof menuItems)[number]['label']
+
+/** The main menu of the site, with one of its pages as the current page. */
+export const exampleMenuAt = (current: ExampleMenuPage) =>
+  menuItems.map((item) => ({ ...item, current: item.label === current }))
+
+/** The menu of the example pages in the docs: the news is the current page. */
+export const exampleMenu = exampleMenuAt('Nieuws')
+
 /** The logo as a link to the home page, with the menu beside it. This is what a header holds. */
-export const ExampleHeader = () => (
+export const ExampleHeader = ({ current = 'Nieuws' }: { current?: ExampleMenuPage }) => (
   <Page.Header>
     <Link href="#home">
       <Logo />
     </Link>
-    <Navigation items={exampleMenu} label="Hoofdmenu" />
+    <Navigation items={exampleMenuAt(current)} label="Hoofdmenu" />
   </Page.Header>
 )
 
@@ -60,7 +67,7 @@ export const ExampleContent = (): ReactNode => (
     <List>
       <List.Item>Kies een kop om naar het bericht bij de bron te gaan.</List.Item>
       <List.Item>
-        Meer over wat we tonen staat bij <Link href="#over">Over de site</Link>.
+        Meer over wat we tonen staat bij <Link href="#over-ons">Over ons</Link>.
       </List.Item>
     </List>
   </>
@@ -87,7 +94,7 @@ export const ExampleMain = () => (
       <List>
         <List.Item>Kies een kop om naar het bericht bij de bron te gaan.</List.Item>
         <List.Item>
-          Meer over wat we tonen staat bij <Link href="#over">Over de site</Link>.
+          Meer over wat we tonen staat bij <Link href="#over-ons">Over ons</Link>.
         </List.Item>
       </List>
     </Page.Cell>

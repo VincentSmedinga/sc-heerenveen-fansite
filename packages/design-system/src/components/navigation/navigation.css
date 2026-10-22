@@ -22,4 +22,29 @@
       text-decoration-thickness: 0.2em;
     }
   }
+
+  /*
+   * In the header, the menu is semibold and not underlined, except under the mouse. The current page is told by a red
+   * bar under its text, and its text has the lightest colour of the header. The colours of the other links come from
+   * the roles that the header sets (see page.css). A menu elsewhere, such as the one in the footer, keeps the look above.
+   * The underline doesn't skip the descenders of letters, so the bar is one unbroken line.
+   */
+  .hf-page-header .hf-navigation-link {
+    font-weight: 600;
+    text-decoration-line: none;
+
+    &:hover {
+      text-decoration-line: underline;
+    }
+
+    &[aria-current='page'] {
+      color: var(--hf-colour-text-on-header);
+      font-weight: 600;
+      text-decoration-color: var(--hf-colour-accent-on-header);
+      text-decoration-line: underline;
+      text-decoration-skip-ink: none;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 0.35em;
+    }
+  }
 }

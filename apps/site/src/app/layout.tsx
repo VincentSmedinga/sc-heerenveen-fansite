@@ -11,7 +11,7 @@ import { withBranch } from '../title'
 import { whatsNewPath, whatsNewTitle } from '../whats-new'
 
 // The links in the footer, about the site itself: the page about us, its privacy section and what is new. The main menu
-// stays as it is.
+// does not have them.
 const footerItems = [
   { href: '/over-ons', label: 'Over ons' },
   { href: '/over-ons#privacy', label: 'Privacy' },

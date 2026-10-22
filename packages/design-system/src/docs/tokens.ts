@@ -116,6 +116,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-focus', use: 'Focusrand' },
       { name: '--hf-colour-focus-on-header', use: 'Focusrand in de header' },
       { name: '--hf-colour-focus-on-band', use: 'Focusrand op de wedstrijdband' },
+      { name: '--hf-colour-accent-on-header', use: 'Streep onder de huidige pagina in het menu van de header' },
     ],
   },
 ]
@@ -220,6 +221,7 @@ export const pairGroups: { description: string; label: string; pairs: Pair[]; te
       pair('focus-on-header', 'header', 'Focusrand in de header', 'grafisch'),
       pair('focus', 'footer', 'Focusrand in de footer', 'grafisch'),
       pair('focus-on-band', 'band', 'Focusrand op de wedstrijdband', 'grafisch'),
+      pair('accent-on-header', 'header', 'Streep onder de huidige pagina in de header', 'grafisch'),
       pair('border-input', 'surface', 'Rand van een invoerveld op een vlak', 'grafisch'),
       pair('border-input', 'page', 'Rand van een invoerveld op de pagina', 'grafisch'),
       pair('marker-graphic', 'page', 'Opsommingsteken of lijn op de pagina', 'grafisch'),
