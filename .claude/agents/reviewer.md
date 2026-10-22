@@ -66,9 +66,7 @@ Run every check, also when you have already found a blocking problem: the Builde
 Run `pnpm test:a11y` too, after `pnpm build`: it starts the built site and checks every page in `apps/site/e2e/pages.spec.ts` with axe, in light and dark.
 It needs the database with the seed, which the Builder starts.
 If it fails because the database or Chromium is missing, say so under Open punten instead of calling the check failed.
-Look up the CI result for the head commit last, after your own checks: `gh api repos/VincentSmedinga/sc-heerenveen-fansite/commits/<sha>/check-runs`.
-The Builder starts you right after opening the pull request, so CI may still be running.
-If it is, report the checks that have finished and say that CI was still running; don't wait for it.
+You look up CI's result later, right before you write the report (step 5).
 
 There is no preview per pull request.
 `pnpm test:a11y` covers the rendered pages with axe; the rest of the checklist is checked in a local build or the Storybook build.
@@ -100,6 +98,10 @@ Severity:
   The Builder may leave it.
 
 ## 5. Report
+
+First look up the CI result for the head commit: `gh api repos/VincentSmedinga/sc-heerenveen-fansite/commits/<sha>/check-runs`.
+The Builder starts you right after opening the pull request, so CI may still be running; looking it up now gives it the most time.
+If it is still running, report the checks that have finished and put the rest under Open punten; don't wait for it.
 
 Write the report in Dutch: it goes on the pull request unchanged.
 Follow the conventions in `CONTRIBUTING.md`: "sc Heerenveen" with lower-case letters, "import" or "importer".
@@ -163,6 +165,7 @@ Rules:
 - Every finding has a file, as a path from the root of the repository such as `docs/toegankelijkheid.md`, never an absolute path, and a line; take the line number from the file in your working copy, as Read shows it, not from the diff.
 - Number the findings across the whole report, sorted from Blokkerend to Klein.
 - The verdict is "niet klaar om samen te voegen" when there is a Blokkerend or Belangrijk finding, or when a checklist could not be checked.
+  A CI run that is still going doesn't change the verdict, because the rules for `main` block the merge until CI passes; a failed check is Blokkerend.
 - The report has no title and doesn't name the round, the pull request or the issue: the thread on GitHub shows them.
 - Open punten holds only what the owner must act on: things you couldn't run, manual checks in a browser, and risks that nobody can test before the merge.
   Not remarks, not praise, not a summary.
