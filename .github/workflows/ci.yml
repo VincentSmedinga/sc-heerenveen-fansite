@@ -76,3 +76,11 @@ jobs:
         run: |
           pnpm --filter site assemble "$RUNNER_TEMP/site"
           pnpm --filter site smoke "$RUNNER_TEMP/site"
+
+      # Chromium only; the checks below don't use another browser.
+      - run: pnpm --filter site exec playwright install --with-deps chromium
+
+      # axe and a few checks of our own on every page, in light and dark, on the folder the smoke test just checked and
+      # against the database with the seed.
+      - name: Check accessibility
+        run: SITE_FOLDER="$RUNNER_TEMP/site" pnpm test:a11y

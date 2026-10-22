@@ -42,6 +42,7 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm typecheck` | TypeScript in alle packages                                |
 | `pnpm test`      | De tests van alle packages, van de hooks en van de linters |
 | `pnpm build`     | De build van alle packages                                 |
+| `pnpm test:a11y` | axe op de pagina's van de gebouwde site, na `pnpm build`   |
 | `pnpm release`   | Opent of werkt de release-pull request bij (vraagt `gh`)   |
 
 De database draait in Docker.

@@ -77,7 +77,7 @@ Reviews each pull request in a fresh context, as the `reviewer` subagent in [`.c
 
 The Reviewer:
 
-- Reads and searches the code, looks at `git diff`, and runs the checks: lint, typecheck, tests and builds, and axe and Playwright once they exist (#25).
+- Reads and searches the code, looks at `git diff`, and runs the checks: lint, typecheck, tests and builds, and the accessibility checks on the pages, `pnpm test:a11y`.
   A hook, `.claude/hooks/reviewer-bash.js`, blocks every other command.
   Claude Code only runs that hook in a folder you have trusted; elsewhere it skips the hook without a warning.
 - Changes nothing: no edits, commits, pushes or approvals.
@@ -136,7 +136,7 @@ For agents:
 - The Builder runs `git fetch origin` and then starts the Reviewer (the `reviewer` subagent) from its worktree, so the Reviewer can run the checks and compare against the current base.
   The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
 - The Reviewer's hook blocks `docker`, and the tests of `packages/db` need a MariaDB.
-  Before starting the Reviewer, the Builder makes sure the database is running (`docker compose up -d --wait`).
+  Before starting the Reviewer, the Builder makes sure the database is running and seeded (`docker compose up -d --wait`, `pnpm db:migrate`, `pnpm db:seed`), because `pnpm test:a11y` needs the seed too.
 - The `model` line in the agent file isn't always picked up: three Reviewers ran on Sonnet although the file says Fable.
   So whoever starts the Reviewer sets `model: "fable"` on the call, next to `subagent_type: "reviewer"`.
   Afterwards, check the `model` field of the subagent's assistant messages in its output file, and tell the owner if it isn't Fable.

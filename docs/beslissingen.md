@@ -195,6 +195,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De reviewer kent onze checklists en draait de controles zelf.
 - **Alternatieven:** Copilot-reviews op GitHub.
   Of reviews met de Claude GitHub Action; dat bekijken we later (#50).
+- **Later:** zie _De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job_.
+  Sindsdien draait de reviewer `pnpm test:a11y` in plaats van `pnpm exec playwright test`, en toetst axe de pagina's.
 
 ## Hosting en data
 
@@ -400,6 +402,47 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een commit moet snel blijven; de typecontrole van de hele werkruimte past daar niet bij, en CI vangt die toch.
 - **Alternatieven:** ook de typecontrole in de pre-commit-hook.
   Grondiger, maar elke commit wordt trager.
+
+### De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** Playwright met axe draait in Chromium tegen de standalone build die ook de rooktest gebruikt, met een database met de seed.
+  Het is een stap in de job "Lint, typecheck, test and build", na de rooktest.
+  Elke pagina staat als één regel in de lijst in `apps/site/e2e/pages.spec.ts`, met het antwoord dat hij moet geven: 200, of 404 voor de pagina 'niet gevonden'.
+  Een tikfout in een adres laat de test dus falen in plaats van stil de pagina 'niet gevonden' te toetsen.
+- **Zo draait het:** CI geeft de map van de rooktest mee in `SITE_FOLDER`.
+  Zonder die variabele zet `pnpm test:a11y` de laatste build zelf klaar in `.next/a11y`, zodat `pnpm build` en de database met de seed genoeg zijn.
+  De reviewer kan `assemble` en de seed niet zelf draaien, maar `pnpm test:a11y` staat op zijn lijst.
+  Zijn losse regel voor `pnpm exec playwright test` is daarom weggehaald: vanuit de root bestaat die opdracht niet.
+- **Waarom:** we toetsen dezelfde pagina's die de host serveert.
+  De build en de database zijn er in die job al.
+  En de verplichte controle op `main` blijft dezelfde, dus de regels voor `main` veranderen niet.
+- **Alternatieven:** een eigen job.
+  Die staat apart in de lijst met controles, maar moet opnieuw bouwen of de build doorgeven, en moet als verplichte controle in de regels voor `main`.
+  Of toetsen tegen `next dev`; dat is sneller, maar bezoekers krijgen een andere pagina.
+  Of ook Firefox en WebKit; die kosten tijd, en axe vindt daar zelden iets anders.
+
+### axe toetst de pagina's, niet de stories
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de controle met axe in CI toetst de pagina's van de site.
+  De stories in Storybook toetst axe alleen in het paneel Toegankelijkheid.
+- **Waarom:** een component wordt getoetst op de pagina's die het gebruiken.
+  Een browsertest voor alle stories hebben we op 22 oktober al laten liggen (zie _Componenten testen we met Vitest en Testing Library_): hij is zwaarder en overlapt met deze controle.
+- **Alternatieven:** de Vitest-addon van Storybook, die elke story met axe toetst in een echte browser.
+  Die vangt ook hover en focus per component, maar vraagt een tweede testopzet en maakt CI langer.
+  We kijken opnieuw als een component op geen enkele pagina staat.
+
+### Naast axe drie eigen controles
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de test controleert per pagina ook precies één `h1`, `lang="nl"` en geen horizontaal scrollen bij 320 pixels breed.
+  Een test met pagina's die een fout hebben, zoals een link zonder naam, laat zien dat de controle die fout vangt.
+- **Waarom:** axe ziet die punten niet of maar half.
+  Het ziet of er een `lang` is, niet of die `nl` is, en het meet niet of de pagina bij 400% zoom past.
+  Elke controle is een paar regels.
+- **Alternatieven:** alleen axe, en de rest aan de checklist laten.
+  Of ook de bediening met het toetsenbord en de volgorde van de focus; die zijn lastig betrouwbaar te automatiseren en blijven bij #25.
 
 ### Alleen Baseline 'widely available', bewaakt door linters
 

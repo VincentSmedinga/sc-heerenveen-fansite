@@ -10,11 +10,9 @@ const rules = [
   // short flags run together, such as -XPOST.
   { allow: /^gh (issue view|pr checks|pr diff|pr view)(\s|$)/ },
   { allow: /^gh api\s/, unless: /\s(-[a-zA-Z]*[XfF]|--method|--field|--raw-field|--input)/ },
-  // The checks, as the package scripts define them, without extra arguments.
+  // The checks, as the package scripts define them, without extra arguments. pnpm test:a11y runs Playwright with axe.
   { allow: /^pnpm (build|lint|test|test:[\w:-]+|typecheck)$/ },
   { allow: /^pnpm --filter [\w@/.-]+ (build|build-storybook|test|test:[\w:-]+|typecheck)$/ },
-  // Playwright, with the axe checks in it (#25). Updating snapshots would write files.
-  { allow: /^pnpm exec playwright test(\s|$)/, unless: /\s(-u|--update-snapshots)(\s|=|$)/ },
 ]
 
 const block = (reason) => {
