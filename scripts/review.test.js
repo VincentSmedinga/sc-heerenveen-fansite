@@ -4,12 +4,14 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
 import {
+  addressOf,
   buildServerCommand,
   buildSteps,
   cleanEnv,
   foreignMessage,
   isFansiteServer,
   mainFolderOf,
+  openCommand,
   parseCwd,
   parseOpenPullRequest,
   parsePids,
@@ -291,4 +293,13 @@ test('leaves out the pull request when the branch has none', () => {
   })
 
   assert.doesNotMatch(summary, /Pull request/)
+})
+
+test('opens an address in the default browser on macOS and Linux, and nowhere else', () => {
+  const address = addressOf(site)
+
+  assert.equal(address, 'http://localhost:3000')
+  assert.deepEqual(openCommand('darwin', address), { args: [address], command: 'open' })
+  assert.deepEqual(openCommand('linux', address), { args: [address], command: 'xdg-open' })
+  assert.equal(openCommand('win32', address), undefined)
 })

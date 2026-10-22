@@ -244,7 +244,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 22 oktober 2026
 - **Besluit:** `pnpm review <pull request of branch>` zet de branch klaar in één vaste map naast de repository.
-  Hij stopt de site en Storybook van de fansite die op poort 3000 en 6006 draaien, en start daar de site en Storybook van die branch.
+  Hij stopt de site en Storybook van de fansite die op poort 3000 en 6006 draaien, start daar de site en Storybook van die branch, en opent ze in je browser.
   In ontwikkeling tonen het tabblad en Storybook de naam van de branch.
   De opdracht migreert en seedt de lokale database, maar importeert niet.
 - **Waarom:** de projecteigenaar raakte de weg kwijt tussen worktrees, poorten en branches.
