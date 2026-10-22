@@ -25,6 +25,9 @@ Next.js leest alleen een `.env` in deze map, dus `next.config.ts` laadt de `.env
 | `pnpm --filter site smoke <map>`           | Start die map en controleert wat een bezoeker en een zoekmachine krijgen               |
 | `pnpm test:a11y`                           | Toetst de pagina's van de gebouwde site met axe (zie _Toegankelijkheid controleren_)   |
 
+De rooktest heeft de database nodig, met de migraties gedraaid.
+Hij leest `DATABASE_URL` uit de `.env` in de root, als die er is.
+
 ## Toegankelijkheid controleren
 
 `pnpm test:a11y` start de gebouwde site en toetst elke pagina uit de lijst in [`e2e/pages.spec.ts`](e2e/pages.spec.ts) met axe, in Chromium, in licht en donker.
@@ -47,9 +50,6 @@ Faalt een pagina, dan noemt de log de pagina en het thema (in de naam van de tes
 `e2e/check-page.spec.ts` laat zien dat de controle een fout vangt: een link zonder naam, een tweede `h1`, een verkeerde `lang` en een pagina die op 320 pixels opzij scrolt.
 De test serveert die pagina's zelf; ze staan niet op de site.
 De stories in Storybook toetst axe niet in CI; dat doet het paneel Toegankelijkheid.
-
-De rooktest heeft de database nodig, met de migraties gedraaid.
-Hij leest `DATABASE_URL` uit de `.env` in de root, als die er is.
 
 ## Sjablonen
 
