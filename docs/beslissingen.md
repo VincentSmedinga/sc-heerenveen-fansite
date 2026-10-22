@@ -1252,13 +1252,56 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de pagina in een test renderen met een nepquery; dan toetst axe niet de gebouwde site en niet de query.
   Of de cache voor de test uitzetten; dat is een codepad dat alleen de test gebruikt.
 
+### De Coordinator schrijft per release wat er nieuw is, in het Nederlands
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de pagina Wat is er nieuw toont per versie een paar zinnen in gewone taal.
+  Bij elke release schrijft de Coordinator die uit `CHANGELOG.md` en de release-pull request, en de eigenaar keurt ze goed.
+  Een kleine pull request zet ze in een bestand in de repository, vóór de release.
+  Het nummer en de datum komen uit `CHANGELOG.md`, dus een versie verschijnt pas als ze is uitgebracht.
+  De pagina begint bij de eerste versie, 0.1.0.
+- **Waarom:** commitberichten blijven Engels en gaan over code; bezoekers willen weten wat ze merken.
+  Eén stap per release kost minder dan een regel in elke pull request.
+  Omdat release-please het nummer en de datum al schrijft, kunnen ze niet uit elkaar lopen.
+  De site wordt in het openbaar gebouwd, dus ook de versies vóór de lancering horen erbij.
+- **Alternatieven:** elke pull request die iets merkbaars verandert, schrijft zelf een zin onder "Binnenkort"; dan wordt niets vergeten, maar elke pull request krijgt een taak erbij.
+  Of commitberichten in het Nederlands, zodat de changelog de pagina is; dat verandert een afspraak in `CONTRIBUTING.md`, en een commit gaat dan ook over bezoekers.
+  Of de pagina pas laten beginnen bij 1.0.0, de lancering.
+
+### Wat is er nieuw leest `CHANGELOG.md` bij de build
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de Nederlandse zinnen staan in `apps/site/src/release-notes.ts`, een object met per versie een lijst zinnen.
+  De tekst van `CHANGELOG.md` zet de bundler bij de build in de code, met `import.meta.glob` en een regel voor `?raw` in `next.config.ts`.
+  Next.js maakt de pagina bij de build.
+  De smoke test vergelijkt de pagina met de `CHANGELOG.md` in de checkout.
+- **Waarom:** TypeScript leest het bestand zonder parser en controleert de vorm, en een zin per regel geeft een kleine diff.
+  Zo heeft de server geen bestand nodig, en een versie staat pas op de site als de build haar heeft.
+  Zolang er nog geen release is, bestaat `CHANGELOG.md` niet; `import.meta.glob` vindt dan niets, waar een gewone `import` de build zou breken.
+  Lukt het de bundler niet, dan toont de pagina zonder foutmelding geen versies; dat merkt alleen de vergelijking in de smoke test.
+- **Alternatieven:** de zinnen in JSON, zonder commentaar en zonder controle van de vorm, of in Markdown, waar een parser bij hoort.
+  Of `CHANGELOG.md` lezen als de server draait, en het bestand met `assemble.js` meekopiëren, zoals de migraties; dan zoekt de server een bestand, en een vergeten kopie geeft ook een lege pagina.
+  Of een script dat vóór de build een TypeScript-bestand maakt; dat is een stap en een bestand meer.
+
+### De feed van Wat is er nieuw kiest zijn adres met `SITE_ENV`
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de feed op `/wat-is-er-nieuw/feed.xml` leest bij elk verzoek `SITE_ENV`, en begint elke link met het adres van die omgeving: `https://acc.sc.heerenveen.org` op acceptatie, `https://sc.heerenveen.org` op productie en `http://localhost:3000` lokaal.
+  De versies komen uit de build, zoals bij de pagina.
+  De smoke test controleert de links op acceptatie en op productie.
+- **Waarom:** een feedlezer heeft volledige adressen nodig.
+  Dezelfde build draait op acceptatie en later op productie, dus het adres kan niet in de build staan.
+  De adressen liggen vast (zie _Adressen_), en `SITE_ENV` kan een bezoeker niet veranderen.
+- **Alternatieven:** het adres uit de `Host`-header van het verzoek; die kiest de bezoeker zelf, en een cache bewaart dan zijn adres.
+  Of een variabele met het adres; die moet dan op elke omgeving kloppen met `SITE_ENV`.
+
 ### Eén korte pagina Over ons, met het bronnenbeleid en de privacyverklaring
 
 - **Datum:** 22 oktober 2026
 - **Besluit:** wie we zijn, hoe we werken (met verwijderverzoeken) en privacy staan op één korte pagina, `/over-ons`, elk onder een eigen kop en in een paar zinnen.
   De geschiedenis is een paar zinnen, met de oprichter, Vincent Smedinga, bij naam, en de mensen die meehielpen.
   De footer linkt naar de pagina en naar het onderdeel privacy.
-- **Hoe:** de links staan onder elke pagina in een navigatie met de naam "Over de site", naast het hoofdmenu.
+- **Hoe:** de links staan onder elke pagina in de navigatie "Over de site", vóór Wat is er nieuw.
   Het onderdeel privacy heeft het vaste anker `#privacy`.
 - **Waarom:** een korte pagina wordt gelezen, en een bezoeker of uitgever vindt alles op één plek.
   De details van het bronnenbeleid staan in het hoofdstuk Redactie van Storybook en op Onze bronnen.

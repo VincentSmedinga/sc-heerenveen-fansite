@@ -9,6 +9,7 @@ const pages = [
   { origin: undefined, path: '/' },
   { origin: undefined, path: '/bronnen' },
   { origin: undefined, path: '/over-ons' },
+  { origin: undefined, path: '/wat-is-er-nieuw' },
   { origin: undefined, path: '/bestaat-niet' },
   { origin: 'http://127.0.0.1:3125', path: '/bronnen' },
 ]

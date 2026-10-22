@@ -10,8 +10,12 @@ import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
 import { once } from 'node:events'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
+
+import { releaseNotes } from '../src/release-notes.ts'
+import { dateOf, releasesOf } from '../src/whats-new.ts'
 
 const [folder] = process.argv.slice(2)
 
@@ -30,6 +34,29 @@ if (databaseUrl === undefined) {
 const port = process.env['SMOKE_PORT'] ?? '3123'
 const origin = `http://127.0.0.1:${port}`
 const serverFile = path.resolve(folder, 'apps/site/server.js')
+
+// The versions Wat is er nieuw must show: those in the CHANGELOG.md of this checkout that have Dutch sentences. The bundler
+// puts the file into the build, and the page shows nothing when that fails, so the smoke test compares the two. Before
+// the first release there is no file and no version.
+const changelogFile = path.resolve(import.meta.dirname, '../../../CHANGELOG.md')
+const releases = releasesOf(existsSync(changelogFile) ? readFileSync(changelogFile, 'utf8') : '', releaseNotes)
+
+/** Fetches the feed of Wat is er nieuw and checks it: RSS, an item per version, and links to the site in `siteOrigin`. */
+async function checkFeed(siteOrigin) {
+  const feed = await fetch(`${origin}/wat-is-er-nieuw/feed.xml`)
+  const xml = await feed.text()
+  assert.equal(feed.status, 200)
+  assert.equal(feed.headers.get('content-type'), 'application/rss+xml; charset=utf-8')
+  assert.match(xml, /^<\?xml version="1\.0" encoding="UTF-8"\?>\n<rss version="2\.0"/)
+  assert.ok(xml.includes(`<link>${siteOrigin}/wat-is-er-nieuw</link>`), `the feed doesn't link to ${siteOrigin}`)
+  assert.equal(xml.match(/<item>/g)?.length ?? 0, releases.length)
+
+  for (const { version } of releases) {
+    assert.ok(xml.includes(`<link>${siteOrigin}/wat-is-er-nieuw#versie-${version}</link>`), `no link to ${version}`)
+  }
+
+  return feed
+}
 
 /**
  * Finds every address a page loads by itself: scripts, stylesheets, fonts, images, media and frames, in the HTML and in
@@ -143,6 +170,7 @@ await withEmptyDatabase((database) =>
     assert.match(html, /We hebben deze week nog geen nieuws gevonden\. Kijk straks nog eens\./)
     assert.match(html, /<a href="\/bronnen">Onze bronnen<\/a>/)
     assert.doesNotMatch(html, /Binnenkort meer/)
+    assert.match(html, /<footer[^>]*>.*href="\/wat-is-er-nieuw">Wat is er nieuw<\/a>.*<\/footer>/s)
 
     const asset = html.match(/\/_next\/static\/[^"'\\]+\.(?:css|js)/)?.[0]
     assert.ok(asset, 'the page links to no static file')
@@ -159,11 +187,30 @@ await withEmptyDatabase((database) =>
     assert.match(sourcesHtml, /Testkrant/)
     assert.doesNotMatch(sourcesHtml, /Uitgezette testbron/)
 
-    // Every kind of response carries the headers: a page, a page from the database, robots.txt, a static file and a 404.
+    // Wat is er nieuw shows the versions of the build, newest first, and points feed readers to its feed.
+    const whatsNew = await fetch(`${origin}/wat-is-er-nieuw`)
+    const whatsNewHtml = await whatsNew.text()
+    assert.equal(whatsNew.status, 200)
+    assert.match(whatsNewHtml, /<h1[^>]*>Wat is er nieuw<\/h1>/)
+    assert.match(whatsNewHtml, /<link rel="alternate" type="application\/rss\+xml" href="\/wat-is-er-nieuw\/feed\.xml"/)
+    assert.deepEqual(
+      [...whatsNewHtml.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map(([, heading]) => heading.replaceAll(/<[^>]*>/g, '')),
+      releases.map((release) => `${dateOf(release)} versie ${release.version}`),
+    )
+
+    if (releases.length === 0) {
+      assert.match(whatsNewHtml, /We hebben nog geen versie uitgebracht\./)
+    }
+
+    const feed = await checkFeed('https://acc.sc.heerenveen.org')
+
+    // Every kind of response carries the headers: a page, a page from the database, robots.txt, a static file, a feed
+    // and a 404.
     for (const response of [
       home,
       sources,
       robots,
+      feed,
       await fetch(origin + asset),
       await fetch(`${origin}/bestaat-niet`),
     ]) {
@@ -175,6 +222,7 @@ await withEmptyDatabase((database) =>
     for (const [page, pageHtml] of [
       [origin, html],
       [`${origin}/bronnen`, sourcesHtml],
+      [`${origin}/wat-is-er-nieuw`, whatsNewHtml],
     ]) {
       const urls = await loadedUrls(page, pageHtml)
       assert.ok(
@@ -214,6 +262,9 @@ await withEmptyDatabase((database) =>
     assert.equal(sources.status, 200)
     assert.match(sourcesHtml, /We hebben nog geen bronnen/)
     assert.doesNotMatch(sourcesHtml, /Testkrant/)
+
+    // The feed links to production, not to acceptance.
+    await checkFeed('https://sc.heerenveen.org')
   }),
 )
 

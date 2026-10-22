@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isIndexable, readEnv } from './env'
+import { isIndexable, originOf, readEnv } from './env'
 
 const DATABASE_URL = 'mysql://root@127.0.0.1:3306/fansite'
 
@@ -39,5 +39,17 @@ describe('isIndexable', () => {
     expect(isIndexable({ SITE_ENV: 'production' })).toBe(true)
     expect(isIndexable({ SITE_ENV: 'acceptance' })).toBe(false)
     expect(isIndexable({ SITE_ENV: 'local' })).toBe(false)
+  })
+})
+
+describe('originOf', () => {
+  it('gives the address of each environment', () => {
+    expect(originOf({ SITE_ENV: 'production' })).toBe('https://sc.heerenveen.org')
+    expect(originOf({ SITE_ENV: 'acceptance' })).toBe('https://acc.sc.heerenveen.org')
+    expect(originOf({ SITE_ENV: 'local' })).toBe('http://localhost:3000')
+  })
+
+  it('names a missing SITE_ENV', () => {
+    expect(() => originOf({})).toThrow('SITE_ENV is missing')
   })
 })

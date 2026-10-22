@@ -6,7 +6,7 @@ import RootLayout from './layout'
 vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
 
 describe('RootLayout', () => {
-  it('links to Over ons and its privacy section in the footer, in a navigation named Over de site', () => {
+  it('links to Over ons, its privacy section and Wat is er nieuw in the footer, in a navigation named Over de site', () => {
     const html = renderToStaticMarkup(<RootLayout>Inhoud</RootLayout>)
     const footer = html.match(/<footer[^>]*>.*<\/footer>/s)?.[0] ?? ''
 
@@ -16,6 +16,7 @@ describe('RootLayout', () => {
     ).toEqual([
       ['/over-ons', 'Over ons'],
       ['/over-ons#privacy', 'Privacy'],
+      ['/wat-is-er-nieuw', 'Wat is er nieuw'],
     ])
   })
 })

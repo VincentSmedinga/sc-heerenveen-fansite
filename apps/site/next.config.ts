@@ -19,6 +19,9 @@ const config: NextConfig = {
   poweredByHeader: false,
   // The packages in this workspace are TypeScript source.
   transpilePackages: ['@fansite/db', '@fansite/design-system', '@fansite/shared'],
+  // `import.meta.glob(..., { query: '?raw' })` gives the text of a Markdown file, put into the code when the site is built.
+  // The page Wat is er nieuw reads CHANGELOG.md this way (see src/releases.ts). Vitest knows `?raw` by itself.
+  turbopack: { rules: { '*.md': { condition: { query: '?raw' }, type: 'raw' } } },
 }
 
 export default config

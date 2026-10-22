@@ -11,6 +11,14 @@
     }
   }
 
+  /*
+   * Small print in a heading, such as the number of a version after its date. Like "sinds 1997" after the wordmark of
+   * the logo, it has the colour of secondary text. The Meta type style gives it its size, and no capitals.
+   */
+  :is(h1, h2, h3, h4, h5, h6) .hf-meta {
+    color: var(--hf-colour-text-secondary);
+  }
+
   /* Not Baseline widely available yet. Without it, a heading wraps as a paragraph does. */
   @supports (text-wrap: balance) {
     :is(h1, h2, h3, h4, h5, h6) {

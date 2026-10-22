@@ -1,0 +1,61 @@
+/*
+ * The page Wat is er nieuw: which versions it shows and how. This module imports nothing, so the smoke test can use it
+ * too, to check the page against the CHANGELOG.md of the build.
+ */
+
+/** A released version as visitors see it: its number, its date as `2026-11-03`, and what changed, in Dutch. */
+export type Release = {
+  date: string
+  sentences: readonly string[]
+  version: string
+}
+
+/** The Dutch sentences per version, as in release-notes.ts. */
+export type ReleaseNotes = Readonly<Record<string, readonly string[]>>
+
+/** The title of the page, and of its feed with the name of the site after it. */
+export const whatsNewTitle = 'Wat is er nieuw'
+
+/** The address of the page. */
+export const whatsNewPath = '/wat-is-er-nieuw'
+
+/** The address of its RSS feed. */
+export const feedPath = `${whatsNewPath}/feed.xml`
+
+// The heading release-please writes above a version: "## 0.1.0 (2026-10-21)" for the first, and later ones with a link to
+// the changes since the version before: "## [0.2.0](https://github.com/...) (2026-11-03)". Older versions of
+// release-please wrote a patch version with three #.
+const versionHeading =
+  /^#{2,3} (?:\[(?<linked>\d+\.\d+\.\d+)\]\([^)\s]*\)|(?<plain>\d+\.\d+\.\d+)) \((?<date>\d{4}-\d{2}-\d{2})\)$/gm
+
+const dateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', timeZone: 'UTC', year: 'numeric' })
+
+/** The id of the heading of a version on the page, such as `versie-0.2.0`. The feed links to it. */
+export function anchorOf({ version }: Pick<Release, 'version'>) {
+  return `versie-${version}`
+}
+
+/** The date of a version the Dutch way, such as "3 november 2026". */
+export function dateOf({ date }: Pick<Release, 'date'>) {
+  return dateFormat.format(new Date(`${date}T00:00:00Z`))
+}
+
+/** The versions in a CHANGELOG.md by release-please, in the order of the file: newest first. */
+export function parseChangelog(changelog: string) {
+  return [...changelog.matchAll(versionHeading)].map(({ groups = {} }) => ({
+    date: groups['date'] ?? '',
+    version: groups['linked'] ?? groups['plain'] ?? '',
+  }))
+}
+
+/**
+ * The versions in the changelog that have sentences, in the order of the changelog. A version shows only once it is
+ * released, so sentences written ahead wait for it. A version without sentences is left out.
+ */
+export function releasesOf(changelog: string, notes: ReleaseNotes): Release[] {
+  return parseChangelog(changelog).flatMap(({ date, version }) => {
+    const sentences = notes[version] ?? []
+
+    return sentences.length === 0 ? [] : [{ date, sentences, version }]
+  })
+}

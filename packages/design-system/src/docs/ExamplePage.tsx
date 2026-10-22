@@ -26,16 +26,14 @@ export const ExampleHeader = () => (
   </Page.Header>
 )
 
-/** The links in the footer of the example pages, to the page about the site and its privacy section. */
+/** The links about the site itself, in the footer of the example pages, as on the site. */
 export const exampleFooterMenu = [
   { href: '#over-ons', label: 'Over ons' },
   { href: '#privacy', label: 'Privacy' },
+  { href: '#wat-is-er-nieuw', label: 'Wat is er nieuw' },
 ]
 
-/**
- * The footer with "Alle koppen en links op één plek. Voor supporters, door supporters.", and below it the links to Over
- * ons and Privacy, as on the site.
- */
+/** The footer with "Alle koppen en links op één plek. Voor supporters, door supporters." and the links about the site. */
 export const ExampleFooter = () => (
   <Page.Footer>
     <Text appearance="meta">Alle koppen en links op één plek. Voor supporters, door supporters.</Text>
