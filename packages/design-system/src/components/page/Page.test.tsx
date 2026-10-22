@@ -1,14 +1,16 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { Page, pageBodyElements } from './Page'
+import { Page } from './Page'
 
 const renderPage = () =>
   render(
     <Page>
       <Page.Header>Kop van de pagina</Page.Header>
       <Page.Body>
-        <h1>Nieuws</h1>
+        <Page.Main>
+          <h1>Nieuws</h1>
+        </Page.Main>
       </Page.Body>
       <Page.Footer>Voet van de pagina</Page.Footer>
     </Page>,
@@ -22,7 +24,7 @@ describe('Page', () => {
     expect(page?.className).toBe('hf-page')
     expect(Array.from(page?.children ?? []).map((child) => child.tagName.toLowerCase())).toEqual([
       'header',
-      'main',
+      'div',
       'footer',
     ])
   })
@@ -43,11 +45,11 @@ describe('Page', () => {
   })
 
   it('has the main in the body, not in the page itself', () => {
-    renderPage()
+    const { container } = renderPage()
     const main = screen.getByRole('main')
 
-    expect(main.parentElement?.className).toBe('hf-page')
-    expect(main.className).toContain('hf-page-body')
+    expect(container.querySelector('.hf-page-body')?.contains(main)).toBe(true)
+    expect(main.parentElement?.className).toBe('hf-page-body')
     expect(within(main).getByRole('heading', { level: 1 })).toBeTruthy()
   })
 })
@@ -75,46 +77,41 @@ describe('Page.Header', () => {
 })
 
 describe('Page.Body', () => {
-  it('is the main of the page by default', () => {
-    render(<Page.Body>Inhoud</Page.Body>)
-    const main = screen.getByRole('main')
+  it('is a div, so the main goes inside it', () => {
+    const { container } = render(<Page.Body>Inhoud</Page.Body>)
 
-    expect(main.tagName).toBe('MAIN')
-    expect(main.className).toBe('hf-page-body')
-  })
-
-  it.each(pageBodyElements)('can be a %s', (element) => {
-    const { container } = render(<Page.Body as={element}>Inhoud</Page.Body>)
-
-    expect(container.firstElementChild?.tagName.toLowerCase()).toBe(element)
+    expect(container.firstElementChild?.tagName).toBe('DIV')
     expect(container.firstElementChild?.className).toBe('hf-page-body')
     expect(container.firstElementChild?.textContent).toBe('Inhoud')
+    expect(screen.queryByRole('main')).toBeNull()
   })
 
-  it('has the main inside it when it is a div, so a sidebar can sit beside the main', () => {
+  it('holds the main and the sidebar in the order of the source, with no other order', () => {
     const { container } = render(
-      <Page.Body as="div">
-        <main>Inhoud</main>
-        <aside>Zijbalk</aside>
+      <Page.Body>
+        <Page.Main>Inhoud</Page.Main>
+        <Page.Sidebar>Zijbalk</Page.Sidebar>
       </Page.Body>,
     )
+    const body = container.querySelector<HTMLElement>('.hf-page-body')!
 
-    expect(container.querySelector('.hf-page-body')?.tagName).toBe('DIV')
-    expect(within(container.querySelector<HTMLElement>('.hf-page-body')!).getByRole('main').textContent).toBe('Inhoud')
+    expect(Array.from(body.children).map((child) => child.tagName.toLowerCase())).toEqual(['main', 'aside'])
     expect(screen.getAllByRole('main')).toHaveLength(1)
+    expect(screen.getAllByRole('complementary')).toHaveLength(1)
+    expect(body.querySelector('[style]')).toBeNull()
   })
 
   it('keeps the other attributes and adds a class to its own', () => {
-    render(<Page.Body className="extra" id="inhoud" />)
+    const { container } = render(<Page.Body className="extra" id="inhoud" />)
 
-    expect(screen.getByRole('main').className).toBe('hf-page-body extra')
-    expect(screen.getByRole('main').id).toBe('inhoud')
+    expect(container.firstElementChild?.className).toBe('hf-page-body extra')
+    expect(container.firstElementChild?.id).toBe('inhoud')
   })
 
-  it('allows no other element', () => {
+  it('has no as prop: it is always a div', () => {
     const elements = [
-      // @ts-expect-error A section is not an element a Page.Body can be.
-      <Page.Body as="section" />,
+      // @ts-expect-error A Page.Body is always a div, so it takes no element.
+      <Page.Body as="main" />,
     ]
 
     expect(elements).toHaveLength(1)
@@ -122,6 +119,96 @@ describe('Page.Body', () => {
 
   it('is called Page.Body in the developer tools and the code examples', () => {
     expect(Page.Body.displayName).toBe('Page.Body')
+  })
+})
+
+describe('Page.Main', () => {
+  it('is the main of the page', () => {
+    render(<Page.Main>Inhoud</Page.Main>)
+    const main = screen.getByRole('main')
+
+    expect(main.tagName).toBe('MAIN')
+    expect(main.className).toBe('hf-page-main')
+    expect(main.textContent).toBe('Inhoud')
+  })
+
+  it('keeps the other attributes and adds a class to its own', () => {
+    render(<Page.Main className="extra" id="inhoud" />)
+
+    expect(screen.getByRole('main').className).toBe('hf-page-main extra')
+    expect(screen.getByRole('main').id).toBe('inhoud')
+  })
+
+  it('has every child as a cell of its own, in the order of the source', () => {
+    render(
+      <Page.Main>
+        <h1>Nieuws</h1>
+        <Page.Cell>
+          <h2>Kop</h2>
+          <p>Inleiding</p>
+        </Page.Cell>
+        <p>Tekst</p>
+      </Page.Main>,
+    )
+
+    expect(Array.from(screen.getByRole('main').children).map((child) => child.tagName.toLowerCase())).toEqual([
+      'h1',
+      'div',
+      'p',
+    ])
+  })
+
+  it('is called Page.Main in the developer tools and the code examples', () => {
+    expect(Page.Main.displayName).toBe('Page.Main')
+  })
+})
+
+describe('Page.Sidebar', () => {
+  it('is a complementary landmark', () => {
+    render(<Page.Sidebar>Zijbalk</Page.Sidebar>)
+    const sidebar = screen.getByRole('complementary')
+
+    expect(sidebar.tagName).toBe('ASIDE')
+    expect(sidebar.className).toBe('hf-page-sidebar')
+    expect(sidebar.textContent).toBe('Zijbalk')
+  })
+
+  it('keeps the other attributes, such as a name, and adds a class to its own', () => {
+    render(<Page.Sidebar aria-label="Wedstrijden" className="extra" id="zijbalk" />)
+
+    expect(screen.getByRole('complementary', { name: 'Wedstrijden' }).className).toBe('hf-page-sidebar extra')
+    expect(screen.getByRole('complementary').id).toBe('zijbalk')
+  })
+
+  it('is called Page.Sidebar in the developer tools and the code examples', () => {
+    expect(Page.Sidebar.displayName).toBe('Page.Sidebar')
+  })
+})
+
+describe('Page.Cell', () => {
+  it('puts what belongs together in one div, without a role of its own', () => {
+    const { container } = render(
+      <Page.Cell>
+        <h2>Kop</h2>
+        <p>Inleiding</p>
+      </Page.Cell>,
+    )
+
+    expect(container.firstElementChild?.tagName).toBe('DIV')
+    expect(container.firstElementChild?.className).toBe('hf-page-cell')
+    expect(container.firstElementChild?.children).toHaveLength(2)
+    expect(screen.queryByRole('region')).toBeNull()
+  })
+
+  it('keeps the other attributes and adds a class to its own', () => {
+    const { container } = render(<Page.Cell className="extra" id="blok" />)
+
+    expect(container.firstElementChild?.className).toBe('hf-page-cell extra')
+    expect(container.firstElementChild?.id).toBe('blok')
+  })
+
+  it('is called Page.Cell in the developer tools and the code examples', () => {
+    expect(Page.Cell.displayName).toBe('Page.Cell')
   })
 })
 

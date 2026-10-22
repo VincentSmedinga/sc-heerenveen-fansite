@@ -1,9 +1,7 @@
 import preview from '#.storybook/preview'
 
-import { ExampleContent } from '../../docs/ExamplePage'
+import { ExampleContent, ExampleMain, ExampleSidebar } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
-import { Heading } from '../heading/Heading'
-import { Text } from '../text/Text'
 import { Page } from './Page'
 
 const meta = preview.meta({
@@ -11,24 +9,13 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Het deel van de pagina tussen de header en de footer.',
-          'Het groeit mee met de hoogte van het scherm, zodat de footer onderaan blijft staan.',
+          'Het raster van de pagina, tussen de header en de footer.',
+          'Het is een `div` met een `Page.Main` en, als de pagina er een heeft, een `Page.Sidebar`.',
           '',
-          'De inhoud staat op een breed scherm in een smallere kolom, alsof er een zijbalk naast staat.',
-          'Een regel lopende tekst telt daar hoogstens 80 tekens, en een kop van een bericht ook.',
-          'De kolom begint in lijn met het logo, en de rest van de kolom van de pagina blijft leeg, als plek voor een zijbalk later.',
-          'Op een scherm dat smaller is dan de kolom gebruikt de inhoud de hele breedte.',
-          'De breedte komt uit het token `--hf-content-max-width` (36 rem), gemeten in de lettertypes van de site.',
-          'Dit geldt voor elke `Page.Body`, dus voor elke pagina; de header en de footer blijven over de hele kolom van de pagina lopen.',
-          'Is de `Page.Body` een `div`, dan geldt de breedte voor de `main` erin, en niet voor de zijbalk.',
-          '',
-          'Met `as` kies je het element uit een vaste lijst:',
-          '',
-          '- `main` (standaard): de `Page.Body` is de `main` van de pagina, de landmark met de inhoud.',
-          '- `div`: voor een pagina met meer dan de hoofdinhoud, zoals een zijbalk.',
-          '  Dan zet je zelf een `main` in de `Page.Body` en de zijbalk (`aside`) ernaast.',
-          '',
-          'Er is maar één `main` per pagina, en die zit in de `Page.Body` of dieper.',
+          '- Op een breed scherm staan de kolommen naast elkaar, op een smal scherm onder elkaar, de hoofdkolom eerst.',
+          '- De `Page.Body` regelt alle witruimte: tussen de kolommen en tussen de cellen. Kolommen en cellen hebben zelf geen marge naar buiten.',
+          '- Elke kolom stapelt haar eigen cellen. Een cel in de zijbalk staat dus niet op dezelfde hoogte als een cel in de hoofdkolom.',
+          '- Het groeit mee met het scherm, zodat de footer onderaan blijft staan.',
         ].join('\n'),
       },
       source: exampleSource,
@@ -38,37 +25,123 @@ const meta = preview.meta({
   title: 'Componenten/Page.Body',
 })
 
-const render = () => (
+const onlyMain = () => (
   <Page.Body>
-    <ExampleContent />
+    <Page.Main>
+      <Page.Cell>
+        <ExampleContent />
+      </Page.Cell>
+    </Page.Main>
   </Page.Body>
 )
 
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
+const withSidebar = () => (
+  <Page.Body>
+    <ExampleMain />
+    <ExampleSidebar />
+  </Page.Body>
+)
 
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
-
-export const WithSidebar = meta.story({
-  name: 'Met zijbalk',
+export const Light = meta.story({
+  globals: { theme: 'light' },
+  name: 'Licht',
   parameters: {
     docs: {
+      description: { story: 'Alleen een hoofdkolom, met de hele inhoud in één cel.' },
+    },
+  },
+  render: onlyMain,
+})
+
+export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render: onlyMain })
+
+const sidebarDescription =
+  'Een hoofdkolom met een zijbalk. De cellen van elke kolom staan los van die van de andere kolom.'
+
+export const WithSidebarLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Met zijbalk, licht',
+  parameters: { docs: { description: { story: sidebarDescription } } },
+  render: withSidebar,
+})
+
+export const WithSidebarDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Met zijbalk, donker',
+  render: withSidebar,
+})
+
+// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the same as the stories above,
+// because the docs page can't resize the window. The window is what the breakpoint follows, so the story fills it.
+const screens = { parameters: { layout: 'fullscreen' as const }, tags: ['!autodocs'] }
+
+const narrow = { value: 'mobile1' }
+const wide = { value: 'wide' }
+
+export const OnlyMainNarrowLight = meta.story({
+  ...screens,
+  globals: { theme: 'light', viewport: narrow },
+  name: 'Alleen een hoofdkolom, smal scherm, licht',
+  render: onlyMain,
+})
+
+export const OnlyMainNarrowDark = meta.story({
+  ...screens,
+  globals: { theme: 'dark', viewport: narrow },
+  name: 'Alleen een hoofdkolom, smal scherm, donker',
+  render: onlyMain,
+})
+
+export const OnlyMainWideLight = meta.story({
+  ...screens,
+  globals: { theme: 'light', viewport: wide },
+  name: 'Alleen een hoofdkolom, breed scherm, licht',
+  render: onlyMain,
+})
+
+export const OnlyMainWideDark = meta.story({
+  ...screens,
+  globals: { theme: 'dark', viewport: wide },
+  name: 'Alleen een hoofdkolom, breed scherm, donker',
+  render: onlyMain,
+})
+
+export const WithSidebarNarrowLight = meta.story({
+  ...screens,
+  globals: { theme: 'light', viewport: narrow },
+  name: 'Met zijbalk, smal scherm, licht',
+  parameters: {
+    ...screens.parameters,
+    docs: { description: { story: 'Op een smal scherm staat de zijbalk onder de hoofdkolom.' } },
+  },
+  render: withSidebar,
+})
+
+export const WithSidebarNarrowDark = meta.story({
+  ...screens,
+  globals: { theme: 'dark', viewport: narrow },
+  name: 'Met zijbalk, smal scherm, donker',
+  render: withSidebar,
+})
+
+export const WithSidebarWideLight = meta.story({
+  ...screens,
+  globals: { theme: 'light', viewport: wide },
+  name: 'Met zijbalk, breed scherm, licht',
+  parameters: {
+    ...screens.parameters,
+    docs: {
       description: {
-        story:
-          'De `Page.Body` is een `div`; de `main` en de zijbalk staan erin, naast elkaar. Op een smal scherm vallen ze onder elkaar.',
+        story: 'Op een breed scherm staan de hoofdkolom en de zijbalk naast elkaar.',
       },
     },
   },
-  render: () => (
-    <Page.Body as="div" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
-      <main style={{ flex: '2 1 20rem', minInlineSize: 0 }}>
-        <ExampleContent />
-      </main>
-      <aside aria-labelledby="zijbalk" style={{ flex: '1 1 12rem', minInlineSize: 0 }}>
-        <Heading appearance={3} id="zijbalk" level={2}>
-          Nieuwste discussies
-        </Heading>
-        <Text appearance="meta">Hier komt een blok uit het forum.</Text>
-      </aside>
-    </Page.Body>
-  ),
+  render: withSidebar,
+})
+
+export const WithSidebarWideDark = meta.story({
+  ...screens,
+  globals: { theme: 'dark', viewport: wide },
+  name: 'Met zijbalk, breed scherm, donker',
+  render: withSidebar,
 })

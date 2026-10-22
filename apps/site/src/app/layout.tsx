@@ -23,7 +23,8 @@ export const metadata: Metadata = {
   },
 }
 
-// Every page has the same header and footer. Without data-theme on Root, light and dark follow the system setting.
+// Every page has the same header and footer, and puts its content in a Page.Main in the Page.Body, so a page with a
+// sidebar can add a Page.Sidebar beside it. Without data-theme on Root, light and dark follow the system setting.
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <Root>

@@ -6,6 +6,11 @@ import { ServerError } from './ServerError'
 describe('ServerError', () => {
   const html = renderToStaticMarkup(<ServerError retryHref="/bronnen" />)
 
+  it('is the one main of the page, with all its content in one cell', () => {
+    expect(html.match(/<main/g)).toHaveLength(1)
+    expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
+  })
+
   it('has one h1, which is the title', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
   })

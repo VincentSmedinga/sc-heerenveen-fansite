@@ -41,7 +41,7 @@ export const ExampleFooter = () => (
   </Page.Footer>
 )
 
-/** Content for the body of an example page. */
+/** Content for the main column of an example page, as the pages of the site have it: all in one cell. */
 export const ExampleContent = (): ReactNode => (
   <>
     <Heading level={1}>Nieuws over sc Heerenveen</Heading>
@@ -49,10 +49,7 @@ export const ExampleContent = (): ReactNode => (
       Hier komen de koppen van de media die over de club schrijven. Elke kop is een link naar de journalist zelf, met de
       naam van de bron erbij.
     </Text>
-    <Text>
-      Op een breed scherm staat deze tekst in een smallere kolom dan de pagina: een regel telt er hoogstens 80 tekens.
-      Rechts ervan blijft ruimte over, voor een zijbalk later.
-    </Text>
+    <Text>Op een breed scherm staat deze tekst in de hoofdkolom. Rechts ervan is plaats voor een zijbalk.</Text>
     <Heading appearance={3} level={2}>
       Zo lees je de site
     </Heading>
@@ -65,12 +62,79 @@ export const ExampleContent = (): ReactNode => (
   </>
 )
 
+/** The main column with three cells: a heading with its introduction in one cell, a text, and a list under a heading. */
+export const ExampleMain = () => (
+  <Page.Main>
+    <Page.Cell>
+      <Heading level={1}>Nieuws over sc Heerenveen</Heading>
+      <Text>
+        Hier komen de koppen van de media die over de club schrijven. Elke kop is een link naar de journalist zelf, met
+        de naam van de bron erbij.
+      </Text>
+    </Page.Cell>
+    <Text>
+      Op een breed scherm staat deze kolom naast de zijbalk. Op een smal scherm staat de zijbalk eronder, over de hele
+      breedte.
+    </Text>
+    <Page.Cell>
+      <Heading appearance={3} level={2}>
+        Zo lees je de site
+      </Heading>
+      <List>
+        <List.Item>Kies een kop om naar het bericht bij de bron te gaan.</List.Item>
+        <List.Item>
+          Meer over wat we tonen staat bij <Link href="#over">Over de site</Link>.
+        </List.Item>
+      </List>
+    </Page.Cell>
+  </Page.Main>
+)
+
+/** The sidebar with two cells of different heights. They stack on their own, not on the rows of the main column. */
+export const ExampleSidebar = () => (
+  <Page.Sidebar aria-label="Naast het nieuws">
+    <Page.Cell>
+      <Heading appearance={3} level={2}>
+        Volgende wedstrijd
+      </Heading>
+      <Text appearance="meta">Hier komt een blok met de volgende wedstrijd.</Text>
+    </Page.Cell>
+    <Page.Cell>
+      <Heading appearance={3} level={2}>
+        Nieuwste discussies
+      </Heading>
+      <List>
+        <List.Item>Hier komt een lijst uit het forum.</List.Item>
+        <List.Item>Met een paar onderwerpen onder elkaar.</List.Item>
+        <List.Item>Zodat deze cel hoger is dan de cel erboven.</List.Item>
+        <List.Item>En hoger of lager dan de cellen in de hoofdkolom.</List.Item>
+      </List>
+    </Page.Cell>
+  </Page.Sidebar>
+)
+
 /** A whole page, built from the components. */
 export const ExamplePage = () => (
   <Page>
     <ExampleHeader />
     <Page.Body>
-      <ExampleContent />
+      <Page.Main>
+        <Page.Cell>
+          <ExampleContent />
+        </Page.Cell>
+      </Page.Main>
+    </Page.Body>
+    <ExampleFooter />
+  </Page>
+)
+
+/** A whole page with a sidebar beside the main column. */
+export const ExamplePageWithSidebar = () => (
+  <Page>
+    <ExampleHeader />
+    <Page.Body>
+      <ExampleMain />
+      <ExampleSidebar />
     </Page.Body>
     <ExampleFooter />
   </Page>

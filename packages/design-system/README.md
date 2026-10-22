@@ -48,6 +48,8 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
   CSS buiten een laag wint altijd.
   Het CSS-bestand van een component mag regels in meer dan één laag hebben: `heading/heading.css` heeft een basislaag en een typografielaag.
   De volgorde van de imports in `src/index.css` is de volgorde van de regels binnen een laag.
+- **Box-model:** een regel die padding of een rand zet op een element met een maat, zet ook `box-sizing: border-box`.
+  Er is geen globale regel op `*`.
 - **Logische eigenschappen:** `margin-inline-start` in plaats van `margin-left`.
   Stylelint controleert dit.
 - **Kleur:** gebruik semantische tokens, zoals `--hf-colour-text-secondary`, nooit de primitieven (`--hf-colour-grey-600`) in componenten.
@@ -56,7 +58,7 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
   Kapitalen komen uit CSS.
 - **Componenten:** een React-component per HTML-element of onderdeel, met getypeerde props en de klassen met `hf-`.
   Kan een component meer dan één element zijn, dan kiest een `as`-prop uit een vaste lijst die de typen afdwingen.
-  Een onderdeel dat bij één oudercomponent hoort, is een eigenschap van die ouder, ook als het element buiten die ouder wel geldig is: `List.Item` voor het `li` in een `List`, `Page.Header`, `Page.Body` en `Page.Footer` voor de delen van een `Page`.
+  Een onderdeel dat bij één oudercomponent hoort, is een eigenschap van die ouder, ook als het element buiten die ouder wel geldig is: `List.Item` voor het `li` in een `List`, `Page.Header`, `Page.Body`, `Page.Main`, `Page.Sidebar`, `Page.Cell` en `Page.Footer` voor de delen van een `Page`.
   Een component zonder hooks of toestand blijft een servercomponent.
   Elk component heeft in zijn map een eigen CSS-bestand (`heading/heading.css`), stories in licht en donker, documentatie in Storybook en tests met Vitest en Testing Library.
 - **Taal:** code en commentaar in Brits Engels (`colour`, `initialise`); alles wat bezoekers en lezers van Storybook zien in het Nederlands.

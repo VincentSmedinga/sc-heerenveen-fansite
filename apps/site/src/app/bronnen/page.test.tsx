@@ -49,6 +49,15 @@ describe('the page Onze bronnen', () => {
     expect(html).toContain('<li><a href="https://testpodcast.test">Testpodcast</a><p>Een podcast.</p></li>')
   })
 
+  it('is the one main of the page, with all its content in one cell', async () => {
+    vi.mocked(getSources).mockResolvedValue(sources)
+
+    const html = await render()
+
+    expect(html.match(/<main/g)).toHaveLength(1)
+    expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
+  })
+
   it('shows a source without a description with its link only', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 

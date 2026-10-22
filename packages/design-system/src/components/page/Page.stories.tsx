@@ -1,6 +1,6 @@
 import preview from '#.storybook/preview'
 
-import { ExamplePage } from '../../docs/ExamplePage'
+import { ExamplePage, ExamplePageWithSidebar } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
 
 const meta = preview.meta({
@@ -13,12 +13,12 @@ const meta = preview.meta({
           'De achtergrond van de `Page.Header` loopt van rand tot rand; het logo en de navigatie, de `Page.Body` en de `Page.Footer` staan in de kolom.',
           '',
           'De breedte en de marge komen uit twee tokens: `--hf-page-max-width` (75 rem) en `--hf-page-margin` (1 rem).',
-          'De inhoud in de `Page.Body` staat op een breed scherm in een smallere kolom: zie de `Page.Body`.',
+          'De `Page.Body` is het raster tussen de header en de footer, met een `Page.Main` en, als de pagina er een heeft, een `Page.Sidebar`.',
           'Het token `--hf-page-inset` is de ruimte aan de zijkanten die daaruit volgt, voor alles wat zo breed is als zijn ouder, ook buiten een `Page`.',
           'De pagina is minstens zo hoog als het scherm, zodat de footer onderaan blijft staan als er weinig inhoud is.',
           '',
           'De `Page` heeft geen eigen element met een rol.',
-          'De `main` zit in de `Page.Body` of dieper, nooit in de `Page` zelf.',
+          'De `main` is de `Page.Main`, in de `Page.Body`, nooit in de `Page` zelf.',
           'Een `Page` hoort in een `Body`; de stories hieronder staan in een eigen venster, dat de hoogte van het scherm nabootst.',
           'De verhalen voor een smal en een breed scherm staan alleen in het canvas, met de instelling Viewport van de werkbalk.',
         ].join('\n'),
@@ -34,6 +34,8 @@ const meta = preview.meta({
 
 const render = () => <ExamplePage />
 
+const renderWithSidebar = () => <ExamplePageWithSidebar />
+
 // Storybook's viewport setting: the width of the window is what the page follows, not the width of a container.
 const narrow = { value: 'mobile1' }
 const wide = { value: 'wide' }
@@ -42,13 +44,33 @@ export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', re
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
 
+export const WithSidebarLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Met zijbalk, licht',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een pagina met een zijbalk: de hoofdkolom en de zijbalk naast elkaar, en de cellen in elke kolom onder elkaar.',
+      },
+    },
+  },
+  render: renderWithSidebar,
+})
+
+export const WithSidebarDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Met zijbalk, donker',
+  render: renderWithSidebar,
+})
+
 // Only on the canvas: on the docs page they would show the same as the stories above, because the docs page can't resize the window.
 const screens = { tags: ['!autodocs'] }
 
 const narrowDescription = 'Op een smal scherm gebruikt de inhoud de hele breedte, tussen de marges van 1 rem.'
 
 const wideDescription =
-  'Op een breed scherm staat de inhoud in een smallere kolom, van 36 rem, in lijn met het logo. Een regel telt er hoogstens 80 tekens. De rest van de kolom van de pagina blijft leeg, als plek voor een zijbalk. De header en de footer lopen over de hele kolom.'
+  'Op een breed scherm staat de hoofdkolom in lijn met het logo, met plek voor een zijbalk ernaast. De header en de footer lopen over de hele kolom.'
 
 export const NarrowLight = meta.story({
   ...screens,
