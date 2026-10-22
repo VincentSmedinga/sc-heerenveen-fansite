@@ -5,28 +5,34 @@ import { classNames } from '../classNames'
 /** The elements a Page.Body can be. */
 export const pageBodyElements = ['main', 'div'] as const
 
-export type PageProps = ComponentPropsWithoutRef<'div'>
+export type PageBodyElement = (typeof pageBodyElements)[number]
 
-/** The top of the page, on the blue of the header: a `header` element, which is the page's banner landmark. */
-const Header = ({ className, ...props }: ComponentPropsWithoutRef<'header'>) => (
-  <header className={classNames('hf-page-header', className)} {...props} />
-)
-
-/** The part of the page between the header and the footer. It grows to fill the screen, so the footer stays down. */
-const Body = ({
-  as: Element = 'main',
-  className,
-  ...props
-}: ComponentPropsWithoutRef<'main'> & {
+export type PageBodyProps = ComponentPropsWithoutRef<'main'> & {
   /**
    * `main` makes the Page.Body the page's main landmark, which is what most pages want. Use `div` when the page has
    * more than the main content in its body, such as a sidebar: then the `main` goes inside the Page.Body.
    */
-  as?: (typeof pageBodyElements)[number]
-}) => <Element className={classNames('hf-page-body', className)} {...props} />
+  as?: PageBodyElement
+}
+
+export type PageFooterProps = ComponentPropsWithoutRef<'footer'>
+
+export type PageHeaderProps = ComponentPropsWithoutRef<'header'>
+
+export type PageProps = ComponentPropsWithoutRef<'div'>
+
+/** The top of the page, on the blue of the header: a `header` element, which is the page's banner landmark. */
+const Header = ({ className, ...props }: PageHeaderProps) => (
+  <header className={classNames('hf-page-header', className)} {...props} />
+)
+
+/** The part of the page between the header and the footer. It grows to fill the screen, so the footer stays down. */
+const Body = ({ as: Element = 'main', className, ...props }: PageBodyProps) => (
+  <Element className={classNames('hf-page-body', className)} {...props} />
+)
 
 /** The bottom of the page: a `footer` element, which is the page's contentinfo landmark. */
-const Footer = ({ className, ...props }: ComponentPropsWithoutRef<'footer'>) => (
+const Footer = ({ className, ...props }: PageFooterProps) => (
   <footer className={classNames('hf-page-footer', className)} {...props} />
 )
 

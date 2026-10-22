@@ -773,9 +773,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Blauw-300 haalt 7,90:1 op de header en 6,22:1 op de band in licht, en 6,22:1 en 7,90:1 in donker.
   Het palet verandert niet.
   Elk vlak heeft een eigen token, zoals bij de tekstkleuren, zodat het ene vlak kan veranderen zonder het andere.
-- **Hoe:** de `PageHeader` zet de rollen voor tekst, links en focus opnieuw voor alles wat erin staat.
+- **Hoe:** de `Page.Header` zet de rollen voor tekst, links en focus opnieuw voor alles wat erin staat.
   Een component in de header hoeft daar niets voor te doen.
-  Het contrast staat bij Tokens › Kleur in Storybook, en een story van de `PageHeader` laat de focusrand zien.
+  Het contrast staat bij Tokens › Kleur in Storybook, en een story van de `Page.Header` laat de focusrand zien.
 - **Alternatieven:** een focusrand in twee kleuren (bijvoorbeeld blauw-500 met een witte binnenrand) die op elke achtergrond werkt.
   Dat vraagt meer CSS en geeft een andere rand dan op de rest van de site.
   Of blauw-500 in licht donkerder maken; dat verandert de focusrand op alle lichte vlakken.

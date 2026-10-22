@@ -16,7 +16,13 @@ export type { LogoProps } from './components/logo/Logo'
 export { Navigation } from './components/navigation/Navigation'
 export type { NavigationItem, NavigationProps } from './components/navigation/Navigation'
 export { Page, pageBodyElements } from './components/page/Page'
-export type { PageProps } from './components/page/Page'
+export type {
+  PageBodyElement,
+  PageBodyProps,
+  PageFooterProps,
+  PageHeaderProps,
+  PageProps,
+} from './components/page/Page'
 export { Root } from './components/root/Root'
 export type { RootProps } from './components/root/Root'
 export { Text, textAppearances, textElements } from './components/text/Text'
