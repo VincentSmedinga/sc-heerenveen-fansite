@@ -1094,6 +1094,52 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de standaardpagina van Next.js; die is Engels en legt niets uit.
   Of de oorzaak noemen, zoals de database; dat klopt niet bij elke fout, want de pagina weet de oorzaak niet.
 
+### De homepage toont het nieuws van de afgelopen week, per dag
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de homepage toont alle berichten van vandaag en de zes dagen ervoor, in Nederlandse tijd, het nieuwste eerst, zonder maximum.
+  Ze staan per dag onder een kop met de dag, zoals "woensdag 21 oktober", en elk bericht krijgt de tijd, zoals "14:05".
+- **Waarom:** een week laat zien wat er speelt, ook als een bezoeker een paar dagen niet keek.
+  Een kop per dag maakt een lange week overzichtelijk.
+  Een vaste dag en tijd blijft kloppen in een pagina uit de cache en zonder JavaScript, anders dan "2 uur geleden".
+- **Alternatieven:** een vast aantal, zoals de nieuwste 10 of 20.
+  Of een maximum van 50 bij een drukke week.
+  Of één lijst met de datum bij elk bericht.
+  Of "vandaag" en "gisteren", of een relatieve tijd.
+
+### Voorlopig is de query de poort voor het weergavebeleid
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de query voor de homepage geeft alleen de kop, de link, de tijd, de betaalmuur en de bronnaam.
+  Het component voor een nieuwsregel heeft geen props voor een intro of foto.
+  Het component dat het weergavebeleid van een bron leest, komt met de eerste bron die toestemming geeft.
+- **Waarom:** de importer bewaart geen intro of foto, dus er valt nu niets te kiezen.
+  Een component dat altijd hetzelfde beslist, is code zonder werking.
+  Wat de query niet ophaalt, kan geen pagina tonen.
+- **Alternatieven:** het component nu al bouwen, zoals #9 voorstelde, met het bericht en het beleid als invoer.
+
+### De koppen staan vijf minuten in het geheugen van de server
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de server maakt de homepage bij elk bezoek, en vraagt de berichten hoogstens één keer per vijf minuten aan de database, met `cacheFor`, zoals bij `/bronnen`.
+- **Waarom:** nieuws moet snel op de pagina staan, en één query per vijf minuten kost de gedeelde hosting niets.
+  De build leest de database niet, net als bij `/bronnen`.
+- **Alternatieven:** een uur, zoals de lijst met bronnen; dan staat een nieuw bericht er pas na een uur.
+  Of ISR of `'use cache'`; die vielen om dezelfde redenen af als bij _De lijst met bronnen staat een uur in het geheugen van de server_.
+
+### De toegankelijkheidscontrole zet zelf verzonnen koppen in de database
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `pnpm test:a11y` zet vóór de eerste test verzonnen koppen in de database, op de testbronnen van de seed, en haalt ze er na de laatste test weer uit (`apps/site/e2e/headlines.ts`).
+  De seed bevat ze niet.
+  Playwright wacht tot de site `/robots.txt` beantwoordt, en niet tot de homepage: een verzoek aan de homepage voor de koppen er staan, bewaart een lege lijst voor vijf minuten.
+- **Waarom:** de seed draait ook op acceptatie, waar verzonnen koppen tussen de echte van de Leeuwarder Courant zouden staan.
+  Zo toetst axe de homepage met berichten, op de gebouwde site en met de echte query.
+  De test maakt de koppen ook zo dat ze altijd in de week vallen, en zet er een bericht van ouder dan een week en een van een uitgezette bron tussen, om te zien dat de pagina die weglaat.
+- **Alternatieven:** de koppen in de seed zetten.
+  Of de pagina in een test renderen met een nepquery; dan toetst axe niet de gebouwde site en niet de query.
+  Of de cache voor de test uitzetten; dat is een codepad dat alleen de test gebruikt.
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
@@ -1280,3 +1326,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zo stond het eerst in #70.
   Of ook de toestemmingsstatus tonen; dat laat zien wie we hebben gevraagd en wie nog niet heeft geantwoord.
   Of de beschrijvingen in de code van de site zetten; dan staat een bron op twee plekken, en kan het beheer (#30) ze niet aanpassen.
+
+### Een bericht achter de betaalmuur krijgt de tekst "voor abonnees"
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** staat een bericht achter de betaalmuur, dan staat er "voor abonnees" bij, in tekst.
+- **Waarom:** de bezoeker weet dan vóór de klik dat hij een abonnement nodig heeft.
+  De importer bewaart het al, en het is geen inhoud van de bron.
+  Tekst werkt ook voor een schermlezer en zonder kleur.
+- **Alternatieven:** de betaalmuur niet tonen.
+  Of alleen een pictogram.

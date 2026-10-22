@@ -8,8 +8,8 @@ De React-componenten van het designsysteem.
 Elk onderdeel heeft hieronder een eigen pagina, met voorbeelden in licht en donker.
 Een sjabloon voor een pagina bevat geen HTML, alleen deze componenten.
 
-Dit zijn de eerste negen, met de drie onderdelen van `Page`: wat een pagina minimaal nodig heeft.
-Knoppen, pictogrammen en de componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
+Dit zijn de eerste tien, met de drie onderdelen van `Page`: wat een pagina minimaal nodig heeft, en de regel nieuws van de homepage.
+Knoppen, pictogrammen en de overige componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
 
 ## Gebruiken
 
@@ -59,7 +59,7 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
 
 <Unstyled>
   <table>
-    <caption>De negen componenten en de onderdelen van Page</caption>
+    <caption>De tien componenten en de onderdelen van Page</caption>
     <thead>
       <tr>
         <th scope="col">Component</th>
@@ -198,6 +198,19 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
         <td>
           <code>ul</code> (standaard), <code>ol</code>; met <code>loose</code> krijgt elk item ruimte onder zich
         </td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>NewsItem</code>
+        </th>
+        <td>
+          een <code>div</code> met de kop als link, en de bron, de tijd en de betaalmuur eronder
+        </td>
+        <td>
+          <code>headline</code>, <code>href</code>, <code>source</code>, <code>time</code> en <code>dateTime</code>{' '}
+          (alle verplicht), <code>paywalled</code>
+        </td>
+        <td></td>
       </tr>
       <tr>
         <th scope="row">

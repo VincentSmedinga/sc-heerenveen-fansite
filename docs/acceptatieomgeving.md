@@ -15,7 +15,7 @@ De workflow [`acceptance.yml`](../.github/workflows/acceptance.yml) doet bij elk
 2. Hij start die map zoals de host dat doet en controleert wat een bezoeker en een zoekmachine krijgen (`pnpm --filter site smoke`).
    Daarvoor start de workflow een eigen MariaDB die na de run weer weg is.
    De rooktest maakt daarop lege databases, en de site maakt er zelf de tabellen en de testbronnen in.
-   Ook als de database niet bereikbaar is, controleert hij dat de homepage werkt en `/bronnen` de foutpagina toont.
+   Ook als de database niet bereikbaar is, controleert hij dat de homepage en `/bronnen` de foutpagina tonen.
 3. Hij kopieert de map met rsync over SSH, op poort 26, naar de map van de app op de host.
 4. Hij raakt `tmp/restart.txt` aan, zodat de host de app opnieuw start.
 5. Hij vraagt <https://acc.sc.heerenveen.org/bronnen> op, tot een minuut lang.
@@ -53,8 +53,7 @@ Op een lege database maakt dit de tabellen.
 Een nieuwe versie met een nieuwe migratie voegt die toe zodra de host hem start.
 
 Lukt het niet, dan blijft de site draaien.
-De homepage werkt dan nog.
-Een pagina die de database nodig heeft, zoals `/bronnen`, toont de foutpagina "Er ging iets mis".
+Een pagina die de database nodig heeft, zoals de homepage en `/bronnen`, toont de foutpagina "Er ging iets mis".
 Het logboek zegt wat er misging (zie _Als het niet werkt_).
 Lees het in _Setup Node.js App_ of in `stderr.log` in de map van de app.
 
@@ -124,7 +123,10 @@ Een agent heeft daar geen toegang.
 
 ## Controleren
 
-- De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" en "Binnenkort meer." zien.
+- De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" en "sc Heerenveen in de media" zien.
+  Tot de import op acceptatie draait (#98), staat er "We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens."
+  Daarna staan er de koppen van de Leeuwarder Courant van de afgelopen week.
+  Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - `curl -I https://acc.sc.heerenveen.org` toont `x-robots-tag: noindex, nofollow`.
   Die header staat ook bij `/robots.txt` en bij een pagina die niet bestaat.
 - <https://acc.sc.heerenveen.org/robots.txt> toont `Disallow: /`.
@@ -152,7 +154,7 @@ Een agent heeft daar geen toegang.
   Is de database weer in orde, start de app dan opnieuw (raak `tmp/restart.txt` aan).
   De site probeert de migraties alleen bij het starten.
 
-- Een bezoeker kreeg "Er ging iets mis" op `/bronnen`, terwijl de start goed ging: de regel `Could not read the sources for /bronnen` in het logboek noemt de reden.
+- Een bezoeker kreeg "Er ging iets mis" op `/bronnen` of de homepage, terwijl de start goed ging: de regel `Could not read the sources for /bronnen` of `Could not read the headlines for the homepage` in het logboek noemt de reden.
   De database was dan waarschijnlijk even niet bereikbaar.
   Een mislukte vraag bewaart de site niet, dus de volgende bezoeker krijgt het opnieuw geprobeerd.
 - De site geeft een 500 en `stderr.log` zegt `Cannot find module '@swc/helpers/...'`: de map op de host bevat symbolische links.

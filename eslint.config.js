@@ -16,7 +16,7 @@ const notBrowserFiles = [
   '**/*.config.{js,ts}',
   '**/*.test.{ts,tsx}',
   '**/.storybook/main.ts',
-  'apps/site/src/{env,instrumentation,instrumentation-node,proxy,sources}.ts',
+  'apps/site/src/{database,env,headlines,instrumentation,instrumentation-node,proxy,sources}.ts',
   'apps/site/src/app/robots.ts',
 ]
 
