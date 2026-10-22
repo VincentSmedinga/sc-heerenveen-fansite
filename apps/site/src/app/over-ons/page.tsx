@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Heading, Link, Text } from '@fansite/design-system'
+import { Heading, Link, List, Text } from '@fansite/design-system'
 
 export const metadata: Metadata = {
   title: 'Over ons',
@@ -24,8 +24,8 @@ export default function AboutPage() {
         <Link href="https://forum.heerenveen.org">ons forum</Link>, waar supporters met elkaar praten.
       </Text>
       <Text>
-        Vincent Smedinga begon de site in 1997, als SC Heerenveen Online. De laatste versie liep tot 2006, en in 2026 is
-        de site terug.
+        Vincent Smedinga begon de site in 1997, als SC Heerenveen Online. In de tussentijd hielpen veel mensen mee,
+        zowel aan de site als het forum. En ook nu weer. De laatste versie liep tot 2006, en in 2026 is de site terug.
       </Text>
       <Heading level={2}>Hoe we werken</Heading>
       <Text>
@@ -33,23 +33,31 @@ export default function AboutPage() {
         daar toestemming voor geeft. Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
       </Text>
       <Text>
-        Ben je uitgever en wil je dat we iets weghalen? Mail dan naar <EmailLink />. We pakken je verzoek zo snel
-        mogelijk op.
+        Ben je uitgever en wil je dat we iets veranderen of weghalen? Mail dan naar <EmailLink />. We pakken je verzoek
+        zo snel mogelijk op.
       </Text>
       <Heading id="privacy" level={2}>
         Privacy
       </Heading>
-      <Text>De site zet geen cookies, volgt niemand en laadt niets van een ander domein.</Text>
       <Text>
-        Onze hosting houdt logbestanden bij met onder meer IP-adressen, voor de beveiliging. We gebruiken ze alleen
-        daarvoor en geven ze aan niemand. De hosting bewaart ze niet langer dan nodig. Mail je ons, dan gebruiken we je
-        mail alleen om te antwoorden.
+        De site zet geen cookies, volgt niemand en laadt niets van een ander domein. Toch moeten we de volgende dingen
+        even noemen.
       </Text>
-      <Text>
-        Vragen over je gegevens, zoals inzage of verwijdering, stel je aan de redactie van de sc Heerenveen Fansite:{' '}
-        <EmailLink />. Maar ons antwoord zal zijn: we hebben geen gegevens van je. Ben je het daar niet mee eens, dan
-        kun je klagen bij de <Link href="https://www.autoriteitpersoonsgegevens.nl">Autoriteit Persoonsgegevens</Link>.
-      </Text>
+      <List>
+        <List.Item>
+          Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. De hosting bewaart ze
+          niet langer dan nodig, en we geven ze aan niemand.
+        </List.Item>
+        <List.Item>Een mail aan ons gebruiken we alleen om te antwoorden.</List.Item>
+        <List.Item>
+          Vragen over je gegevens stel je aan de redactie: <EmailLink />. Maar ons antwoord zal zijn: we hebben geen
+          gegevens van je.
+        </List.Item>
+        <List.Item>
+          Voor een klacht kun je terecht bij de{' '}
+          <Link href="https://www.autoriteitpersoonsgegevens.nl">Autoriteit Persoonsgegevens</Link>.
+        </List.Item>
+      </List>
     </>
   )
 }
