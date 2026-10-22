@@ -352,6 +352,22 @@ describe('the paywall', () => {
     ])
   })
 
+  it.each([
+    ['an entity in the GUID', rssItem({ guid: 'a&amp;b', premium: 'true' }), 'a&b'],
+    [
+      'an entity in the link of an item without a GUID',
+      rssItem({ guid: null, link: 'https://krant.test/a?x=1&amp;y=2', premium: 'true' }),
+      'https://krant.test/a?x=1&y=2',
+    ],
+    [
+      'an entity in a GUID in CDATA, which stays as it is',
+      rssItem({ guid: '<![CDATA[a&amp;b]]>', premium: 'true' }),
+      'a&amp;b',
+    ],
+  ])('is kept for %s', (_, item, key) => {
+    expect(itemsOf(rss(item))[0]).toMatchObject({ key, paywalled: true })
+  })
+
   it('does not exist in an Atom feed', () => {
     const atom = `<feed xmlns="http://www.w3.org/2005/Atom"><title>t</title><entry><title>Kop</title><link href="https://krant.test/een"/><id>1</id><premium>true</premium></entry></feed>`
 

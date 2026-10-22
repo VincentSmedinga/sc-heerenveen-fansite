@@ -1,7 +1,7 @@
 import type { Atom, Rss } from 'feedsmith'
 
 import { itemLimits } from '@fansite/db/schema'
-import { decodeHTMLStrict } from 'entities'
+import { decodeHTML, decodeHTMLStrict } from 'entities'
 import { XMLParser, XMLValidator } from 'fast-xml-parser'
 import { parseFeed } from 'feedsmith'
 
@@ -208,6 +208,10 @@ function decode(body: Uint8Array, contentType: null | string): string {
   }
 }
 
+function decodeEntities(value: string | undefined) {
+  return value === undefined ? undefined : decodeHTML(value)
+}
+
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
 }
@@ -281,7 +285,13 @@ function paywalledKeys(text: string): Set<string> {
     const fields = asRecord(item)
 
     if (typeof fields?.['premium'] === 'string' && fields['premium'].trim().toLowerCase() === 'true') {
-      keys.add(keyOf({ guid: stringOrUndefined(fields['guid']), link: stringOrUndefined(fields['link']) }))
+      const guid = stringOrUndefined(fields['guid'])
+      const link = stringOrUndefined(fields['link'])
+
+      // feedsmith turns an entity such as `&amp;` into a character, except inside CDATA. This pass can't tell the two
+      // apart, so it adds the key both ways and the one feedsmith made is among them.
+      keys.add(keyOf({ guid, link }))
+      keys.add(keyOf({ guid: decodeEntities(guid), link: decodeEntities(link) }))
     }
   }
 
