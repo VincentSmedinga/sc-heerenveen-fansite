@@ -49,10 +49,7 @@ export const ExampleContent = (): ReactNode => (
       Hier komen de koppen van de media die over de club schrijven. Elke kop is een link naar de journalist zelf, met de
       naam van de bron erbij.
     </Text>
-    <Text>
-      Op een breed scherm staat deze tekst in de hoofdkolom, die 48 rem breed is. Rechts ervan is plaats voor een
-      zijbalk.
-    </Text>
+    <Text>Op een breed scherm staat deze tekst in de hoofdkolom. Rechts ervan is plaats voor een zijbalk.</Text>
     <Heading appearance={3} level={2}>
       Zo lees je de site
     </Heading>

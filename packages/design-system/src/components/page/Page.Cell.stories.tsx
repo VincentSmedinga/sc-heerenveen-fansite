@@ -11,14 +11,12 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een cel in een kolom, voor wat bij elkaar hoort, zoals een kop met een inleiding.',
-          'Elk kind van een `Page.Main` of een `Page.Sidebar` is al een cel: een kop, een tekst of een kaart hoeft nergens in.',
-          'Een `Page.Cell` maakt van meer dingen één cel, een `div` zonder rol.',
+          'Zet wat bij elkaar hoort in één cel van een kolom, zoals een kop met een inleiding.',
+          'Het is een `div` zonder rol.',
           '',
-          'Tussen de cellen staat de witruimte van de `Page.Body`.',
-          'Wat in een `Page.Cell` staat, houdt de ruimte die het zelf heeft, zoals tussen een kop en de tekst eronder.',
-          'De cel en wat erin staat, hebben geen marge naar buiten.',
-          'Een cel zonder `Page.Cell` is dus even breed en even hoog als zijn inhoud, en de ruimte eromheen is altijd even groot.',
+          '- Elk kind van een `Page.Main` of een `Page.Sidebar` is al een cel. Een `Page.Cell` maakt van meer dingen één cel.',
+          '- Wat erin staat houdt de ruimte die het zelf heeft, zoals tussen een kop en de tekst eronder, en heeft geen marge naar buiten.',
+          '- De ruimte tussen de cellen komt van de `Page.Body`.',
         ].join('\n'),
       },
       source: exampleSource,

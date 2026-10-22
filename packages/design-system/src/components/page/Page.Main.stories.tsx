@@ -9,17 +9,12 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De hoofdkolom van de pagina: de `main`, dus de main-landmark.',
-          'Elke pagina heeft er precies één, en zet haar inhoud erin.',
-          'Een `Page.Main` staat in de `Page.Body`, voor een eventuele `Page.Sidebar`.',
+          'De hoofdkolom van de pagina: een `main`.',
+          'Elke pagina heeft er één en zet haar inhoud erin.',
           '',
-          'Op een breed scherm is de kolom hoogstens 48 rem breed (`--hf-content-max-width`).',
-          'Op een smaller scherm is hij zo breed als het scherm tussen de marges.',
-          '',
-          'Elk kind van de kolom is een cel, zoals een kop, een tekst of een kaart.',
-          'De cellen staan onder elkaar, elk zo hoog als zijn inhoud.',
-          'De ruimte ertussen komt van de `Page.Body`, en een cel heeft geen marge naar buiten.',
-          'Zet wat bij elkaar hoort, zoals een kop met een inleiding, in een `Page.Cell`.',
+          '- Elk kind van de kolom is een cel, zoals een kop, een tekst of een kaart. De cellen staan onder elkaar.',
+          '- Zet wat bij elkaar hoort, zoals een kop met een inleiding, in een `Page.Cell`.',
+          '- De ruimte tussen de cellen komt van de `Page.Body`.',
         ].join('\n'),
       },
       source: exampleSource,
@@ -41,8 +36,7 @@ export const Light = meta.story({
   parameters: {
     docs: {
       description: {
-        story:
-          'Drie cellen: een kop met een inleiding in een `Page.Cell`, een tekst, en een lijst onder een kop in een `Page.Cell`.',
+        story: 'Drie cellen: een kop met een inleiding, een tekst, en een lijst onder een kop.',
       },
     },
   },

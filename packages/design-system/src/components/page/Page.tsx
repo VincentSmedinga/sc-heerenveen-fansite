@@ -22,9 +22,8 @@ const Header = ({ className, ...props }: PageHeaderProps) => (
 )
 
 /**
- * The grid of the page between the header and the footer, always a `div`. It holds a Page.Main and, on a page that has
- * one, a Page.Sidebar, in that order. It grows to fill the screen, so the footer stays down, and it sets all the space:
- * between the columns and between the cells in a column.
+ * The grid of the page between the header and the footer: a `div` with a Page.Main and, if the page has one, a
+ * Page.Sidebar. It sets the space between the columns and between the cells.
  */
 const Body = ({ className, ...props }: PageBodyProps) => (
   <div className={classNames('hf-page-body', className)} {...props} />
@@ -35,14 +34,14 @@ const Main = ({ className, ...props }: PageMainProps) => (
   <main className={classNames('hf-page-main', className)} {...props} />
 )
 
-/** The sidebar, an `aside`, beside the Page.Main or under it on a narrow screen. Each of its children is a cell. */
+/** The sidebar, an `aside`: beside the Page.Main, or under it on a narrow screen. Each of its children is a cell. */
 const Sidebar = ({ className, ...props }: PageSidebarProps) => (
   <aside className={classNames('hf-page-sidebar', className)} {...props} />
 )
 
 /**
- * Puts what belongs together in one cell of a column, such as a heading with its introduction. Every child of a column
- * is a cell already; a Page.Cell makes several things one. It has no margin to the outside, and nor does what is in it.
+ * Puts what belongs together in one cell of a column, such as a heading with its introduction. It has no margin to the
+ * outside, and nor does what is in it.
  */
 const Cell = ({ className, ...props }: PageCellProps) => (
   <div className={classNames('hf-page-cell', className)} {...props} />
