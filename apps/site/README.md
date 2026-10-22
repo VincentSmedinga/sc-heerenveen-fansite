@@ -76,13 +76,13 @@ De header, met het logo en het hoofdmenu, en de footer staan in `src/app/layout.
 
 ## De homepage
 
-De homepage toont onder de `h1` het blok "sc Heerenveen in de media": de berichten van de bronnen die aanstaan, van vandaag en de zes dagen ervoor, het nieuwste eerst, per dag onder een `h3`.
-Een bericht is een `NewsItem` uit het designsysteem, met de kop als link naar de bron, de bronnaam, de tijd en, achter een betaalmuur, "voor abonnees".
+De homepage toont onder de `h1` het blok "sc Heerenveen in de media": de berichten van de bronnen die aanstaan, van vandaag en de zes dagen ervoor, het nieuwste eerst, in één lijst zonder kop per dag.
+Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05", dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
 Onder het blok staat de link naar Onze bronnen.
 
 `listRecentItems` in `@fansite/db/queries` haalt de berichten op, met alleen die velden.
-`src/news.ts` rekent de week en de dagen uit in Nederlandse tijd (`Europe/Amsterdam`), en schrijft de dag en de tijd.
+`src/news.ts` rekent de week uit in Nederlandse tijd (`Europe/Amsterdam`), en schrijft de dag en de tijd.
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.

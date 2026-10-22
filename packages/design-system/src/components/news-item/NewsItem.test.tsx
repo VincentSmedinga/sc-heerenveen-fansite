@@ -8,7 +8,7 @@ const props = {
   headline: 'Heerenveen wint in blessuretijd van Testclub',
   href: 'https://testkrant.test/heerenveen-wint',
   source: 'Testkrant',
-  time: '14:05',
+  time: 'wo 14:05',
 }
 
 describe('NewsItem', () => {
@@ -36,13 +36,38 @@ describe('NewsItem', () => {
     expect(document.querySelector('b')).toBeNull()
   })
 
-  it('shows the name of the source and the time, with the full time in a time element', () => {
+  it('shows the name of the source under the headline', () => {
     render(<NewsItem {...props} />)
-    const time = screen.getByText('14:05')
 
     expect(screen.getByText('Testkrant').tagName).toBe('SPAN')
+    expect(screen.getByText('Testkrant').closest('p')?.className).toBe('hf-meta hf-news-item-meta')
+  })
+
+  it('shows the short day and the time as they are given, with the full time in a time element', () => {
+    render(<NewsItem {...props} />)
+    const time = screen.getByText('wo 14:05')
+
     expect(time.tagName).toBe('TIME')
     expect(time.getAttribute('datetime')).toBe('2026-10-21T12:05:00Z')
+    expect(time.className).toBe('hf-meta hf-news-item-time')
+  })
+
+  it('puts the time before the headline, as it is on the screen', () => {
+    const { container } = render(<NewsItem {...props} />)
+    const item = container.firstElementChild
+
+    expect([...(item?.children ?? [])].map((child) => child.className)).toEqual([
+      'hf-meta hf-news-item-time',
+      'hf-news-item-body',
+    ])
+    expect(item?.querySelector('.hf-news-item-body')?.firstElementChild?.tagName).toBe('A')
+  })
+
+  it('keeps the time out of the name of the link', () => {
+    render(<NewsItem {...props} />)
+
+    expect(screen.getByRole('link').textContent).not.toContain('14:05')
+    expect(screen.getByRole('link').closest('time')).toBeNull()
   })
 
   it('says nothing about a paywall when the item has none', () => {
@@ -61,15 +86,15 @@ describe('NewsItem', () => {
     render(<NewsItem {...props} paywalled />)
 
     expect(screen.getByText('voor abonnees').tagName).toBe('SPAN')
-    expect(screen.getByText('voor abonnees').closest('p')?.textContent).toBe('Testkrant · 14:05 · voor abonnees')
+    expect(screen.getByText('voor abonnees').closest('p')?.textContent).toBe('Testkrant · voor abonnees')
   })
 
-  it('puts the source, the time and the paywall in one paragraph under the headline', () => {
+  it('puts the source and the paywall in one paragraph under the headline', () => {
     const { container } = render(<NewsItem {...props} paywalled />)
-    const item = container.firstElementChild
+    const body = container.querySelector('.hf-news-item-body')
 
-    expect([...(item?.children ?? [])].map((child) => child.tagName)).toEqual(['A', 'P'])
-    expect(item?.querySelector('p')?.className).toBe('hf-meta hf-news-item-meta')
+    expect([...(body?.children ?? [])].map((child) => child.tagName)).toEqual(['A', 'P'])
+    expect(body?.querySelector('p')?.className).toBe('hf-meta hf-news-item-meta')
   })
 
   it('keeps the spaces around the separators outside the hidden part, so the words stay apart for a screen reader', () => {
@@ -81,23 +106,53 @@ describe('NewsItem', () => {
       .join('')
 
     // The browser collapses a run of spaces into one.
-    expect(visibleToAssistiveTechnology.replace(/\s+/g, ' ')).toBe('Testkrant 14:05 voor abonnees')
+    expect(visibleToAssistiveTechnology.replace(/\s+/g, ' ')).toBe('Testkrant voor abonnees')
   })
 
-  it('hides the separators from assistive technology', () => {
+  it('hides the separator and the icon from assistive technology', () => {
     const { container } = render(<NewsItem {...props} paywalled />)
-    const separators = container.querySelectorAll('[aria-hidden="true"]')
+    const hidden = container.querySelectorAll('[aria-hidden="true"]')
 
-    expect(separators).toHaveLength(2)
-    expect([...separators].map((separator) => separator.textContent)).toEqual(['·', '·'])
+    expect([...hidden].map((element) => element.tagName)).toEqual(['svg', 'SPAN'])
+    expect(hidden[1]?.textContent).toBe('·')
   })
 
-  it('holds only a link, a paragraph and their text: no image, no icon and no other element', () => {
+  it('draws an icon for a link to another site next to the source, in the colour of the text', () => {
+    const { container } = render(<NewsItem {...props} />)
+    const icon = container.querySelector('p svg')
+
+    expect(container.querySelectorAll('svg')).toHaveLength(1)
+    expect(icon?.getAttribute('aria-hidden')).toBe('true')
+    expect(icon?.getAttribute('focusable')).toBe('false')
+    expect(icon?.getAttribute('stroke')).toBe('currentColor')
+    expect(icon?.previousElementSibling?.textContent).toBe('Testkrant')
+    // The icon says nothing a screen reader needs, and the link is not in the icon.
+    expect(icon?.closest('a')).toBeNull()
+    expect(icon?.textContent).toBe('')
+  })
+
+  it('draws the icon itself: nothing in it points to another file or address', () => {
+    const { container } = render(<NewsItem {...props} />)
+    const icon = container.querySelector('svg')
+    const elements = [...(icon?.querySelectorAll('*') ?? [])].map((element) => element.tagName)
+
+    expect(elements.length).toBeGreaterThan(0)
+    expect(new Set(elements)).toEqual(new Set(['path']))
+    expect(icon?.outerHTML).not.toMatch(/(href|src)=|https?:|url\(/)
+  })
+
+  it('has the icon with or without a paywall, once', () => {
+    const { container } = render(<NewsItem {...props} paywalled />)
+
+    expect(container.querySelectorAll('svg')).toHaveLength(1)
+  })
+
+  it('holds a time, a link, a paragraph, an icon and their text: no image and no other element', () => {
     const { container } = render(<NewsItem {...props} paywalled />)
     const names = [...container.querySelectorAll('*')].map((element) => element.tagName)
 
-    expect(names).toEqual(['DIV', 'A', 'P', 'SPAN', 'SPAN', 'TIME', 'SPAN', 'SPAN'])
-    expect(container.querySelector('img, svg, picture, iframe')).toBeNull()
+    expect(names).toEqual(['DIV', 'TIME', 'DIV', 'A', 'P', 'SPAN', 'svg', 'path', 'path', 'path', 'SPAN', 'SPAN'])
+    expect(container.querySelector('img, picture, iframe, video, audio, image, use')).toBeNull()
   })
 
   it('is a div, so it fits in a List.Item and in other places', () => {

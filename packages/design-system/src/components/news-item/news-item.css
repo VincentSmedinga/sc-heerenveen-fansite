@@ -1,14 +1,33 @@
-/* A line of news: the headline as a link, with the source, the time and the paywall under it. */
+/*
+ * A line of news: the short day and the time in red on the left, and next to it the headline as a link, with the source
+ * and the paywall under it. A List of lines has a thin line between the lines.
+ */
 
 @layer hf.components {
+  /*
+   * The columns of every line are the same width, so the headlines start at the same place down the list. The first
+   * baselines of the time and the headline are on one line. A long word breaks instead of making the page scroll sideways.
+   */
   .hf-news-item {
+    align-items: baseline;
+    column-gap: 1rem;
+    display: grid;
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+    overflow-wrap: anywhere;
+    padding-block: 0.75rem;
+  }
+
+  /* Red, with digits of the same width, so the times line up. */
+  .hf-news-item-time {
+    color: var(--hf-colour-text-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hf-news-item-body {
     align-items: flex-start;
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
-
-    /* A long word breaks instead of making the page scroll sideways. */
-    overflow-wrap: anywhere;
   }
 
   /* A target of at least 24 pixels high (WCAG 2.5.8). One line of the smallest headline is 26 pixels. */
@@ -19,5 +38,40 @@
   .hf-news-item-meta {
     color: var(--hf-colour-text-secondary);
     margin-block: 0;
+  }
+
+  /*
+   * Next to the name of the source, a little smaller than the text and in line with it. It has the colour of the text.
+   * The base styles make an svg a block, so it is put back in the line here.
+   */
+  .hf-news-item-icon {
+    block-size: 0.875em;
+    display: inline-block;
+    inline-size: 0.875em;
+    margin-inline-start: 0.25em;
+    vertical-align: -0.1em;
+  }
+
+  /*
+   * A List with lines in it: no bullets, no indent and no space between the items. The lines take care of that, with a thin
+   * line between them. The first line has no space above it and the last none below it, so the list starts and ends
+   * where the surface around it pads.
+   */
+  :is(ul, ol):has(> li > .hf-news-item) {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  li > .hf-news-item {
+    border-block-start: 1px solid var(--hf-colour-border-default);
+  }
+
+  li:first-child > .hf-news-item {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  li:last-child > .hf-news-item {
+    padding-block-end: 0;
   }
 }

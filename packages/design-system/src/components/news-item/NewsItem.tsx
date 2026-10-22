@@ -17,7 +17,7 @@ export type NewsItemProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
   paywalled?: boolean
   /** The name of the source, as it wants to be credited. */
   source: string
-  /** The time as a visitor reads it, such as `14:05`. */
+  /** The short day and the time as a visitor reads them, such as `wo 14:05`. */
   time: string
 }
 
@@ -30,26 +30,52 @@ const separator = (
   </>
 )
 
+// A square with an arrow out of its corner: the headline goes to another site. It is drawn here, so nothing loads from
+// elsewhere, and it takes the colour of the text around it. The link is named by the headline alone, so the icon is hidden.
+const externalLinkIcon = (
+  <svg
+    aria-hidden="true"
+    className="hf-news-item-icon"
+    fill="none"
+    focusable="false"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="1.5"
+    viewBox="0 0 16 16"
+  >
+    <path d="M9.5 2.5h4v4" />
+    <path d="M13.5 2.5 7.5 8.5" />
+    <path d="M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3" />
+  </svg>
+)
+
 /**
- * A line of news from another source: the headline as a link to the item at the source, and under it the name of the
- * source, the time and, if the item is behind a paywall, "voor abonnees". There is no intro and no image: we only show
- * those with the permission of the source (editorial principles 1 and 2). news-item.css gives it its look.
+ * A line of news from another source. On the left the short day and the time, in red. Next to it the headline as a link
+ * to the item at the source, and under it the name of the source with an icon for a link to another site and, if the item
+ * is behind a paywall, "voor abonnees". There is no intro and no image: we only show those with the permission of the
+ * source (editorial principles 1 and 2). news-item.css gives it its look, and draws the lines between the lines of a
+ * List.
  */
 export const NewsItem = ({ className, dateTime, headline, href, paywalled, source, time, ...props }: NewsItemProps) => (
   <div {...props} className={classNames('hf-news-item', className)}>
-    <Link className="hf-headline hf-news-item-headline" href={href}>
-      {headline}
-    </Link>
-    <Text appearance="meta" className="hf-news-item-meta">
-      <span>{source}</span>
-      {separator}
-      <time dateTime={dateTime}>{time}</time>
-      {paywalled && (
-        <>
-          {separator}
-          <span>voor abonnees</span>
-        </>
-      )}
-    </Text>
+    <time className="hf-meta hf-news-item-time" dateTime={dateTime}>
+      {time}
+    </time>
+    <div className="hf-news-item-body">
+      <Link className="hf-headline hf-news-item-headline" href={href}>
+        {headline}
+      </Link>
+      <Text appearance="meta" className="hf-news-item-meta">
+        <span>{source}</span>
+        {externalLinkIcon}
+        {paywalled && (
+          <>
+            {separator}
+            <span>voor abonnees</span>
+          </>
+        )}
+      </Text>
+    </div>
   </div>
 )

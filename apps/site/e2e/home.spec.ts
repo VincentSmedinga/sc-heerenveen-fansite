@@ -5,15 +5,12 @@ import { headlines } from './headlines'
 // The headlines are made up and put in the database by global-setup.ts. The axe check of this page is in pages.spec.ts;
 // this file checks what axe doesn't see: the order of the headings, what is shown and left out, and the size of the links.
 
-test('has the headings in order: an h1, an h2 for the news and an h3 for each day', async ({ page }) => {
+test('has the headings in order: an h1 and an h2 for the news, and no heading for a day', async ({ page }) => {
   await page.goto('/')
 
   const levels = await page.getByRole('heading').evaluateAll((headings) => headings.map((h) => Number(h.tagName[1])))
 
-  expect(levels.slice(0, 2)).toEqual([1, 2])
-  // The items are spread over at least four days, so there are at least four day headings.
-  expect(levels.slice(2).length).toBeGreaterThanOrEqual(4)
-  expect(levels.slice(2).every((level) => level === 3)).toBe(true)
+  expect(levels).toEqual([1, 2])
   await expect(page.getByRole('heading', { level: 2 })).toHaveText('sc Heerenveen in de media')
 })
 
@@ -45,7 +42,7 @@ test('gives each item its source, its time and, behind a paywall, "voor abonnees
     // The name of the source is what the register says: the credit line, or else the name.
     await expect(line.getByText(source, { exact: true })).toBeVisible()
     await expect(line.getByText('voor abonnees')).toHaveCount(paywalled ? 1 : 0)
-    await expect(line.locator('time')).toHaveText(/^\d{2}:\d{2}$/)
+    await expect(line.locator('time')).toHaveText(/^[a-z]{2} \d{2}:\d{2}$/)
     await expect(line.locator('time')).toHaveAttribute('datetime', /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/)
   }
 })

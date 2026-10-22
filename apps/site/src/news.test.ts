@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { dateTimeOf, formatDay, formatTime, groupByDay, windowStart } from './news'
+import { dateTimeOf, formatDayAndTime, windowStart } from './news'
 
 describe('windowStart', () => {
   it('is the first moment of the Dutch day six days before today, in summer time', () => {
@@ -59,113 +59,59 @@ describe('windowStart', () => {
   })
 })
 
-describe('formatDay', () => {
-  it('writes the weekday, the day and the month in Dutch', () => {
-    expect(formatDay(new Date('2026-10-21T12:05:00Z'))).toBe('woensdag 21 oktober')
-    expect(formatDay(new Date('2026-03-01T12:00:00Z'))).toBe('zondag 1 maart')
+describe('formatDayAndTime', () => {
+  it('writes the short weekday and the time in Dutch, such as "wo 14:05"', () => {
+    expect(formatDayAndTime(new Date('2026-10-21T12:05:00Z'))).toBe('wo 14:05')
   })
 
-  it('names the day by the Dutch calendar', () => {
+  it('writes the time with two digits for the hour and the minutes', () => {
+    expect(formatDayAndTime(new Date('2026-10-21T04:07:00Z'))).toBe('wo 06:07')
+  })
+
+  it('writes each weekday as two letters, without a full stop', () => {
+    // Monday 19 October to Sunday 25 October 2026, at noon UTC.
+    const week = ['19', '20', '21', '22', '23', '24', '25'].map((day) =>
+      formatDayAndTime(new Date(`2026-10-${day}T10:00:00Z`)),
+    )
+
+    expect(week).toEqual(['ma 12:00', 'di 12:00', 'wo 12:00', 'do 12:00', 'vr 12:00', 'za 12:00', 'zo 11:00'])
+  })
+
+  it('names the day by the Dutch calendar, not by UTC', () => {
     // 23:30 UTC on Wednesday is 01:30 on Thursday in the Netherlands in summer time.
-    expect(formatDay(new Date('2026-10-21T23:30:00Z'))).toBe('donderdag 22 oktober')
-  })
-})
-
-describe('formatTime', () => {
-  it('writes the Dutch time with two digits for the hour and the minutes', () => {
-    expect(formatTime(new Date('2026-10-21T12:05:00Z'))).toBe('14:05')
-    expect(formatTime(new Date('2026-10-21T04:07:00Z'))).toBe('06:07')
+    expect(formatDayAndTime(new Date('2026-10-21T23:30:00Z'))).toBe('do 01:30')
   })
 
   it('writes the time in winter time with one hour more than UTC', () => {
-    expect(formatTime(new Date('2026-12-02T12:05:00Z'))).toBe('13:05')
+    expect(formatDayAndTime(new Date('2026-12-02T12:05:00Z'))).toBe('wo 13:05')
   })
 
   it('writes the time on both sides of the change back to winter time', () => {
     // Summer time ends on 25 October 2026 at 01:00 UTC: the clock goes from 03:00 back to 02:00.
-    expect(formatTime(new Date('2026-10-25T00:59:00Z'))).toBe('02:59')
-    expect(formatTime(new Date('2026-10-25T01:00:00Z'))).toBe('02:00')
+    expect(formatDayAndTime(new Date('2026-10-25T00:59:00Z'))).toBe('zo 02:59')
+    expect(formatDayAndTime(new Date('2026-10-25T01:00:00Z'))).toBe('zo 02:00')
   })
 
-  it('writes midnight as 00:00', () => {
-    expect(formatTime(new Date('2026-10-21T22:00:00Z'))).toBe('00:00')
-    expect(formatTime(new Date('2026-10-21T22:05:00Z'))).toBe('00:05')
+  it('writes midnight as 00:00, on the new day', () => {
+    // 22:00 UTC on Wednesday is midnight on Thursday in summer time.
+    expect(formatDayAndTime(new Date('2026-10-21T21:59:00Z'))).toBe('wo 23:59')
+    expect(formatDayAndTime(new Date('2026-10-21T22:00:00Z'))).toBe('do 00:00')
+    expect(formatDayAndTime(new Date('2026-10-21T22:05:00Z'))).toBe('do 00:05')
+  })
+
+  it('does not repeat a weekday in the week the homepage shows', () => {
+    const now = new Date('2026-10-22T12:30:00Z')
+    const first = windowStart(now)
+    const days = Array.from({ length: 7 }, (_, index) =>
+      formatDayAndTime(new Date(first.getTime() + index * 24 * 60 * 60 * 1000 + 60 * 60 * 1000)).slice(0, 2),
+    )
+
+    expect(new Set(days).size).toBe(7)
   })
 })
 
 describe('dateTimeOf', () => {
   it('gives the full time in UTC', () => {
     expect(dateTimeOf(new Date('2026-10-21T12:05:00Z'))).toBe('2026-10-21T12:05:00.000Z')
-  })
-})
-
-describe('groupByDay', () => {
-  const item = (time: string) => ({ publishedAt: new Date(time), title: time })
-
-  it('groups the items by Dutch day, newest first, with a heading for each day', () => {
-    const days = groupByDay([
-      item('2026-10-22T08:00:00Z'),
-      item('2026-10-22T06:00:00Z'),
-      item('2026-10-21T15:00:00Z'),
-      item('2026-10-19T09:00:00Z'),
-    ])
-
-    expect(days.map(({ day, items }) => [day, items.map((entry) => entry.title)])).toEqual([
-      ['donderdag 22 oktober', ['2026-10-22T08:00:00Z', '2026-10-22T06:00:00Z']],
-      ['woensdag 21 oktober', ['2026-10-21T15:00:00Z']],
-      ['maandag 19 oktober', ['2026-10-19T09:00:00Z']],
-    ])
-  })
-
-  it('leaves out a day without items', () => {
-    const days = groupByDay([item('2026-10-22T08:00:00Z'), item('2026-10-17T08:00:00Z')])
-
-    expect(days.map(({ day }) => day)).toEqual(['donderdag 22 oktober', 'zaterdag 17 oktober'])
-  })
-
-  it('starts a new day at midnight in the Netherlands, not at midnight UTC', () => {
-    // 21:59 UTC is 23:59 on Wednesday in summer time; 22:00 UTC is 00:00 on Thursday.
-    const days = groupByDay([item('2026-10-21T22:00:00Z'), item('2026-10-21T21:59:00Z')])
-
-    expect(days.map(({ day }) => day)).toEqual(['donderdag 22 oktober', 'woensdag 21 oktober'])
-  })
-
-  it('starts a new day at midnight in winter time one hour later than in summer time', () => {
-    // On 2 December midnight in the Netherlands is 23:00 UTC.
-    const days = groupByDay([item('2026-12-01T23:00:00Z'), item('2026-12-01T22:59:00Z')])
-
-    expect(days.map(({ day }) => day)).toEqual(['woensdag 2 december', 'dinsdag 1 december'])
-  })
-
-  it('gives the day of the change back to winter time all its 25 hours', () => {
-    // Sunday 25 October 2026 runs from 22:00 UTC on Saturday to 23:00 UTC on Sunday.
-    const days = groupByDay([
-      item('2026-10-25T22:59:00Z'),
-      item('2026-10-25T01:30:00Z'),
-      item('2026-10-24T22:00:00Z'),
-      item('2026-10-24T21:59:00Z'),
-    ])
-
-    expect(days.map(({ day, items }) => [day, items.length])).toEqual([
-      ['zondag 25 oktober', 3],
-      ['zaterdag 24 oktober', 1],
-    ])
-    expect(days[0]?.items.map((entry) => formatTime(entry.publishedAt))).toEqual(['23:59', '02:30', '00:00'])
-  })
-
-  it('gives each day a key, and the same key to the same day', () => {
-    const days = groupByDay([item('2026-10-22T08:00:00Z'), item('2026-10-21T08:00:00Z'), item('2026-11-21T08:00:00Z')])
-
-    expect(new Set(days.map(({ key }) => key)).size).toBe(3)
-  })
-
-  it('gives no days when there are no items', () => {
-    expect(groupByDay([])).toEqual([])
-  })
-
-  it('keeps whatever else the items hold', () => {
-    const [day] = groupByDay([{ paywalled: true, publishedAt: new Date('2026-10-22T08:00:00Z') }])
-
-    expect(day?.items).toEqual([{ paywalled: true, publishedAt: new Date('2026-10-22T08:00:00Z') }])
   })
 })

@@ -1306,6 +1306,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of een maximum van 50 bij een drukke week.
   Of één lijst met de datum bij elk bericht.
   Of "vandaag" en "gisteren", of een relatieve tijd.
+- **Later:** zie _Het nieuws staat in één lijst, met dag en tijd in een eigen kolom_.
+  De kop per dag is weg; de week en het ontbreken van een maximum blijven.
 
 ### Voorlopig is de query de poort voor het weergavebeleid
 
@@ -1680,3 +1682,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Eén stap houdt de verhoudingen tussen de stijlen, en de koppen zijn al groot genoeg.
 - **Alternatieven:** twee stappen, met Tekst op 19 pixels; dan passen er nog minder woorden in een kaart.
   Of alles, de koppen en het woordmerk inbegrepen, 12,5% groter.
+
+### Het nieuws staat in één lijst, met dag en tijd in een eigen kolom
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de homepage toont het nieuws van de week in één lijst, het nieuwste bovenaan, zonder kop per dag.
+  Elke regel heeft links de korte dag en de tijd in rood, zoals "wo 14:05", dan de kop en daaronder de bron, met een dunne lijn tussen de regels, zoals op de artboard.
+- **Waarom:** zo ziet het blok eruit zoals ontworpen, en leest een bezoeker de koppen achter elkaar.
+  De lijst beslaat vandaag en de zes dagen ervoor, dus een weekdag komt maar één keer voor en is altijd duidelijk.
+  Dag en tijd blijven kloppen in een pagina uit de cache.
+- **Alternatieven:** de kop per dag houden, zoals #73 deed.
+  Of zoals op de artboard: dag en tijd voor vandaag en dag en datum voor oudere berichten, zoals "za 17/10"; dan toont een pagina uit de cache rond middernacht even een tijd zonder datum.
