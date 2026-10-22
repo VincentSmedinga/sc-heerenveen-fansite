@@ -55,7 +55,7 @@ export default definePreview({
       },
     },
     options: {
-      // There are no components with controls yet; show the accessibility check first.
+      // Only Card has controls so far, and the accessibility check is what every story needs; show that panel first.
       selectedPanel: 'storybook/a11y/panel',
       storySort: {
         order: [
