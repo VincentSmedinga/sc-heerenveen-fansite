@@ -31,7 +31,7 @@ Het package geeft ze als TypeScript-bronbestanden, zonder eigen bouwstap, zoals 
 Een app compileert ze mee; in Next.js zet je `@fansite/design-system` bij `transpilePackages`.
 
 ```tsx
-import { Body, Page, PageBody, PageFooter, PageHeader, Root } from '@fansite/design-system'
+import { Body, Page, Root } from '@fansite/design-system'
 ```
 
 `Root` maakt het `html`-element met `lang="nl"`.
@@ -55,7 +55,7 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
   Kapitalen komen uit CSS.
 - **Componenten:** een React-component per HTML-element of onderdeel, met getypeerde props en de klassen met `hf-`.
   Kan een component meer dan één element zijn, dan kiest een `as`-prop uit een vaste lijst die de typen afdwingen.
-  Een onderdeel dat alleen binnen zijn ouder werkt, is een eigenschap van die ouder: `List.Item` voor het `li` in een `List`.
+  Een onderdeel dat bij één oudercomponent hoort, is een eigenschap van die ouder, ook als het element buiten die ouder wel geldig is: `List.Item` voor het `li` in een `List`, `Page.Header`, `Page.Body` en `Page.Footer` voor de delen van een `Page`.
   Een component zonder hooks of toestand blijft een servercomponent.
   Elk component heeft in zijn map een eigen CSS-bestand (`heading/heading.css`), stories in licht en donker, documentatie in Storybook en tests met Vitest en Testing Library.
 - **Taal:** code en commentaar in Brits Engels (`colour`, `initialise`); alles wat bezoekers en lezers van Storybook zien in het Nederlands.

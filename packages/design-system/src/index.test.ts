@@ -6,20 +6,7 @@ import * as designSystem from './index'
 
 const root = join(import.meta.dirname, '..')
 
-const components = [
-  'Body',
-  'Heading',
-  'Link',
-  'List',
-  'Logo',
-  'Navigation',
-  'Page',
-  'PageBody',
-  'PageFooter',
-  'PageHeader',
-  'Root',
-  'Text',
-]
+const components = ['Body', 'Heading', 'Link', 'List', 'Logo', 'Navigation', 'Page', 'Root', 'Text']
 
 describe('the JavaScript entry of the package', () => {
   it.each(components)('gives the component %s', (name) => {
@@ -30,6 +17,13 @@ describe('the JavaScript entry of the package', () => {
   it('gives List.Item on List, because an item only works inside its list', () => {
     expect(typeof designSystem.List.Item).toBe('function')
     expect(designSystem).not.toHaveProperty('ListItem')
+  })
+
+  it('gives Page.Header, Page.Body and Page.Footer on Page, because they only work inside a page', () => {
+    expect(typeof designSystem.Page.Header).toBe('function')
+    expect(typeof designSystem.Page.Body).toBe('function')
+    expect(typeof designSystem.Page.Footer).toBe('function')
+    expect(Object.keys(designSystem).filter((name) => name.startsWith('Page'))).toEqual(['Page'])
   })
 
   it('gives the lists of allowed elements', () => {

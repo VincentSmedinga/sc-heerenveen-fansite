@@ -773,9 +773,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Blauw-300 haalt 7,90:1 op de header en 6,22:1 op de band in licht, en 6,22:1 en 7,90:1 in donker.
   Het palet verandert niet.
   Elk vlak heeft een eigen token, zoals bij de tekstkleuren, zodat het ene vlak kan veranderen zonder het andere.
-- **Hoe:** de `PageHeader` zet de rollen voor tekst, links en focus opnieuw voor alles wat erin staat.
+- **Hoe:** de `Page.Header` zet de rollen voor tekst, links en focus opnieuw voor alles wat erin staat.
   Een component in de header hoeft daar niets voor te doen.
-  Het contrast staat bij Tokens › Kleur in Storybook, en een story van de `PageHeader` laat de focusrand zien.
+  Het contrast staat bij Tokens › Kleur in Storybook, en een story van de `Page.Header` laat de focusrand zien.
 - **Alternatieven:** een focusrand in twee kleuren (bijvoorbeeld blauw-500 met een witte binnenrand) die op elke achtergrond werkt.
   Dat vraagt meer CSS en geeft een andere rand dan op de rest van de site.
   Of blauw-500 in licht donkerder maken; dat verandert de focusrand op alle lichte vlakken.
@@ -804,6 +804,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het is ook de plek waar de `head` apart blijft: Next.js beheert die, en een eventuele `Head` komt als eigen component naast `Body`.
 - **Alternatieven:** eigen namen, zoals `Document`, `Header`, `Body` en `Footer`.
   Dat zijn minder componenten, maar `Document` moet dan zowel `html` als `body` maken, en `Body` zou dan iets anders betekenen dan de `body`.
+- **Later:** zie _De onderdelen van een pagina hebben een punt: `Page.Header`, `Page.Body` en `Page.Footer`_.
+  De rollen blijven die van NL Design System; alleen de schrijfwijze is veranderd.
 
 ### Componenten testen we met Vitest en Testing Library
 
@@ -883,6 +885,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De componenten van het designsysteem hebben geen `'use client'`, dus bij hen werkt het.
 - **Alternatieven:** een los component `ListItem`, zoals de andere componenten.
   Dat is een export meer, en de naam zegt niet dat het alleen in een `List` werkt.
+- **Later:** zie _De onderdelen van een pagina hebben een punt: `Page.Header`, `Page.Body` en `Page.Footer`_.
+  De regel is sindsdien breder: een onderdeel dat bij één oudercomponent hoort, krijgt een punt, ook als het element buiten die ouder wel geldig is.
+
+### De onderdelen van een pagina hebben een punt: `Page.Header`, `Page.Body` en `Page.Footer`
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de header, de inhoud en de footer van een pagina zijn eigenschappen van `Page`, met een punt in de naam, net als `List.Item`.
+  De regel voor een punt wordt breder: een onderdeel dat bij één oudercomponent hoort, krijgt een punt, ook als het element buiten die ouder wel geldig is.
+  De rollen blijven die van NL Design System; alleen de schrijfwijze verandert.
+  Het package geeft `PageHeader`, `PageBody` en `PageFooter` niet meer als losse componenten.
+- **Waarom:** één schrijfwijze voor de onderdelen van een component.
+  Je importeert alleen `Page`, en de naam zegt waar het onderdeel hoort.
+- **Alternatieven:** de losse namen van NL Design System houden, zoals de beslissing _De namen van de paginacomponenten volgen NL Design System_ koos.
+  Die delen de woorden met de ontwerpsystemen van de overheid, en een `header`, `main` of `footer` is ook buiten een pagina geldige HTML.
 
 ### Een ruime lijst vraag je aan
 

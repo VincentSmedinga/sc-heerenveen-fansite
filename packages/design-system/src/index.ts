@@ -15,14 +15,14 @@ export { Logo } from './components/logo/Logo'
 export type { LogoProps } from './components/logo/Logo'
 export { Navigation } from './components/navigation/Navigation'
 export type { NavigationItem, NavigationProps } from './components/navigation/Navigation'
-export { Page } from './components/page/Page'
-export type { PageProps } from './components/page/Page'
-export { PageBody, pageBodyElements } from './components/page/PageBody'
-export type { PageBodyElement, PageBodyProps } from './components/page/PageBody'
-export { PageFooter } from './components/page/PageFooter'
-export type { PageFooterProps } from './components/page/PageFooter'
-export { PageHeader } from './components/page/PageHeader'
-export type { PageHeaderProps } from './components/page/PageHeader'
+export { Page, pageBodyElements } from './components/page/Page'
+export type {
+  PageBodyElement,
+  PageBodyProps,
+  PageFooterProps,
+  PageHeaderProps,
+  PageProps,
+} from './components/page/Page'
 export { Root } from './components/root/Root'
 export type { RootProps } from './components/root/Root'
 export { Text, textAppearances, textElements } from './components/text/Text'
