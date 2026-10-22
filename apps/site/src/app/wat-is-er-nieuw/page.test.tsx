@@ -16,19 +16,17 @@ beforeEach(() => {
 })
 
 describe('the page Wat is er nieuw', () => {
-  it('shows each version under a heading with its number and date, newest first, with a sentence per change', () => {
+  it('shows each version under a heading with its date and its number in small print, newest first, with a sentence per change', () => {
     vi.mocked(getReleases).mockReturnValue(releases)
 
     const html = renderToStaticMarkup(WhatsNewPage())
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Wat is er nieuw</h1>'])
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
-      '<h2 class="hf-heading-2" id="versie-0.2.0">Versie 0.2.0, 3 november 2026</h2>',
-      '<h2 class="hf-heading-2" id="versie-0.1.0">Versie 0.1.0, 21 oktober 2026</h2>',
+      '<h2 class="hf-heading-2" id="versie-0.2.0">3 november 2026 <span class="hf-meta">versie 0.2.0</span></h2>',
+      '<h2 class="hf-heading-2" id="versie-0.1.0">21 oktober 2026 <span class="hf-meta">versie 0.1.0</span></h2>',
     ])
-    expect(html).toContain(
-      '<h2 class="hf-heading-2" id="versie-0.2.0">Versie 0.2.0, 3 november 2026</h2><ul><li>Een verandering.</li><li>Nog een verandering.</li></ul>',
-    )
+    expect(html).toContain('versie 0.2.0</span></h2><ul><li>Een verandering.</li><li>Nog een verandering.</li></ul>')
     expect(html).not.toContain('nog geen versie')
   })
 

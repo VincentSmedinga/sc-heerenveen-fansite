@@ -15,7 +15,7 @@ import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import { releaseNotes } from '../src/release-notes.ts'
-import { headingOf, releasesOf } from '../src/whats-new.ts'
+import { dateOf, releasesOf } from '../src/whats-new.ts'
 
 const [folder] = process.argv.slice(2)
 
@@ -194,8 +194,8 @@ await withEmptyDatabase((database) =>
     assert.match(whatsNewHtml, /<h1[^>]*>Wat is er nieuw<\/h1>/)
     assert.match(whatsNewHtml, /<link rel="alternate" type="application\/rss\+xml" href="\/wat-is-er-nieuw\/feed\.xml"/)
     assert.deepEqual(
-      [...whatsNewHtml.matchAll(/<h2[^>]*>([^<]*)<\/h2>/g)].map(([, heading]) => heading),
-      releases.map(headingOf),
+      [...whatsNewHtml.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map(([, heading]) => heading.replaceAll(/<[^>]*>/g, '')),
+      releases.map((release) => `${dateOf(release)} versie ${release.version}`),
     )
 
     if (releases.length === 0) {

@@ -4,7 +4,7 @@ import { Heading, Link, List, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
 import { getReleases } from '../../releases'
-import { anchorOf, feedPath, headingOf, whatsNewTitle } from '../../whats-new'
+import { anchorOf, dateOf, feedPath, whatsNewTitle } from '../../whats-new'
 
 export const metadata: Metadata = {
   alternates: { types: { 'application/rss+xml': [{ title: whatsNewTitle, url: feedPath }] } },
@@ -26,8 +26,10 @@ export default function WhatsNewPage() {
       </Text>
       {releases.map((release) => (
         <Fragment key={release.version}>
+          {/* The date, with the number of the version small after it, like "sinds 1997" in the logo. */}
           <Heading id={anchorOf(release)} level={2}>
-            {headingOf(release)}
+            {`${dateOf(release)} `}
+            <Text appearance="meta" as="span">{`versie ${release.version}`}</Text>
           </Heading>
           <List>
             {release.sentences.map((sentence) => (

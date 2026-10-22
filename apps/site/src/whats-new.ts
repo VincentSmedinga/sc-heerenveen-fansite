@@ -35,9 +35,9 @@ export function anchorOf({ version }: Pick<Release, 'version'>) {
   return `versie-${version}`
 }
 
-/** The heading of a version, such as "Versie 0.2.0, 3 november 2026". */
-export function headingOf({ date, version }: Pick<Release, 'date' | 'version'>) {
-  return `Versie ${version}, ${dateFormat.format(new Date(`${date}T00:00:00Z`))}`
+/** The date of a version the Dutch way, such as "3 november 2026". */
+export function dateOf({ date }: Pick<Release, 'date'>) {
+  return dateFormat.format(new Date(`${date}T00:00:00Z`))
 }
 
 /** The versions in a CHANGELOG.md by release-please, in the order of the file: newest first. */

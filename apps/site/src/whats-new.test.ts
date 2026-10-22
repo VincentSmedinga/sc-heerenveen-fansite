@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { anchorOf, headingOf, parseChangelog, releasesOf } from './whats-new'
+import { anchorOf, dateOf, parseChangelog, releasesOf } from './whats-new'
 
 // As release-please writes the first release, and the later ones with a link to the changes since the version before.
 const changelog = `# Changelog
@@ -87,9 +87,9 @@ describe('releasesOf', () => {
   })
 })
 
-describe('headingOf', () => {
-  it('writes the number and the date the Dutch way', () => {
-    expect(headingOf({ date: '2026-11-03', version: '0.2.0' })).toBe('Versie 0.2.0, 3 november 2026')
+describe('dateOf', () => {
+  it('writes the date the Dutch way', () => {
+    expect(dateOf({ date: '2026-11-03' })).toBe('3 november 2026')
   })
 })
 
