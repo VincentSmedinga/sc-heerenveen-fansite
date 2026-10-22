@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-// The content of every page is in a narrower column than the page, with room beside it for a sidebar later. A line of
+// The content of every page is in a narrower column than the page, with room beside it for a sidebar. A line of
 // running text or a headline holds at most 80 characters there. These are the pages that have text of some length. The
 // second copy of the site has no database, so its pages are the error page (see playwright.config.ts).
 const pages = [
@@ -91,7 +91,7 @@ for (const { origin = '', path } of pages) {
 test('counts the characters of a line that is too long when the column is as wide as the page', async ({ page }) => {
   await page.setViewportSize({ height: 900, width: 1920 })
   await page.goto('/bronnen')
-  await page.addStyleTag({ content: 'main { max-inline-size: none !important }' })
+  await page.addStyleTag({ content: '.hf-page-body { grid-template-columns: minmax(0, 1fr) !important }' })
 
   expect(await longestLine(page)).toBeGreaterThan(100)
 })

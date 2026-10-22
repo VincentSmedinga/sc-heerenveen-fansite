@@ -1014,6 +1014,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Je importeert alleen `Page`, en de naam zegt waar het onderdeel hoort.
 - **Alternatieven:** de losse namen van NL Design System houden, zoals de beslissing _De namen van de paginacomponenten volgen NL Design System_ koos.
   Die delen de woorden met de ontwerpsystemen van de overheid, en een `header`, `main` of `footer` is ook buiten een pagina geldige HTML.
+- **Later:** zie _Page.Body is het raster, met een hoofdkolom en een zijbalk_.
+  `Page.Body` is nu altijd een `div` met de onderdelen `Page.Main`, `Page.Sidebar` en `Page.Cell`; de `main` is `Page.Main`.
 
 ### Een ruime lijst vraag je aan
 
@@ -1112,6 +1114,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of alleen een maximale breedte voor alinea's; dan blijven koppen en lijsten breed, en moet elk component het zelf regelen.
   Of nu al een zijbalk met inhoud; daar is nog niets voor.
   Of de smalle kolom pas vanaf een breakpoint; dan krijgt een tablet regels van ruim 90 tekens.
+- **Later:** zie _Page.Body is het raster, met een hoofdkolom en een zijbalk_.
+  De kolom van 36 rem en de plek voor een zijbalk blijven.
+  Het token zet nu de breedte van het eerste spoor in het raster van `Page.Body`, en niet meer een `max-inline-size` op de `main`; de zijbalk is er, 20 rem breed.
+
+### Page.Body is het raster, met een hoofdkolom en een zijbalk
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `Page.Body` is het raster van een pagina, met twee kolommen: `Page.Main`, hoogstens 36 rem voor regels van hoogstens 80 tekens, en `Page.Sidebar`, 20 rem, zoals op de artboards.
+  Ze beginnen in lijn met het logo; de rest van de kolom van de pagina blijft leeg.
+  `Page.Main` is altijd de `main`, `Page.Sidebar` een `aside`, en `Page.Body` altijd een `div`.
+  Elk kind van een kolom is een cel; `Page.Cell` zet meer dingen in één cel.
+  Elke kolom stapelt haar eigen cellen, en `Page.Body` regelt alle witruimte.
+  Op een smal scherm staan de kolommen onder elkaar, de hoofdkolom eerst.
+- **Hoe:** `Page.Body` is een raster met één spoor van 36 rem, dat krimpt als het scherm smaller is.
+  Vanaf 60 rem (36 rem, 2 rem ertussen en 20 rem, met een marge van 1 rem aan beide kanten) komt er een tweede spoor van 20 rem bij.
+  De breedte staat in de media query zelf, want een custom property kan daar niet in.
+  Elke kolom is een gewoon raster van één spoor, met dezelfde witruimte als `gap`, uit een custom property op `Page.Body`.
+  De witruimte is één maat van 2 rem, ook boven en onder de kolommen; tokens voor ruimte komen met #19.
+  Een kind van een kolom heeft `margin: 0`, en in een `Page.Cell` hebben het eerste en het laatste kind geen marge naar buiten.
+  De zijbalk staat in de bron na de hoofdkolom, en er is geen `order`, dus de leesvolgorde en de tabvolgorde zijn op elke breedte die van de bron.
+- **Waarom:** met twee vaste kolommen bestaat het raster alleen direct in `Page.Body`; een los `Grid` zou daar altijd in staan en dezelfde taak hebben.
+  Zo is er één plek voor de opbouw van een pagina en de ruimte tussen de blokken, en hoeft een pagina of een kaart dat niet zelf te regelen.
+  Elke pagina heeft dezelfde landmarks, en de layout van de site blijft `Page.Body` maken.
+  In een gewoon raster delen cellen in dezelfde rij hun hoogte; met een eigen raster per kolom stapelt elke kolom haar eigen cellen, zoals op de artboards.
+  Een subgrid helpt hier niet: een kolom beslaat één spoor van `Page.Body`, dus hij erft er niets bruikbaars van, en met subgrid-rijen zouden de cellen van beide kolommen dezelfde rijen delen, wat we niet willen.
+- **Alternatieven:** een los component `Grid` in `Page.Body`, dat de kolommen en de witruimte regelt, terwijl `Page.Body` alleen het kader is.
+  Of een raster van 12 kolommen met `start` en `span`, zoals in het designsysteem van Amsterdam; flexibeler, maar meer API, en de grens van 80 tekens wordt een `span` die je goed moet houden.
+  Of rijen over beide kolommen met cellen die even hoog worden; dan stapelen de kolommen niet los.
+  Of meer kaarten in één cel, met de ruimte in de kaart.
+  Of de kolom in `Page.Body` laten zoals #73 deed, zonder plek voor een zijbalk.
 
 ## Site
 

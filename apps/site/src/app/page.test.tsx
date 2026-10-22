@@ -58,6 +58,15 @@ describe('the homepage', () => {
     ])
   })
 
+  it('is the one main of the page, with all its content in one cell', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
+
+    const html = await render()
+
+    expect(html.match(/<main/g)).toHaveLength(1)
+    expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
+  })
+
   it('shows each headline as a link to the item at the source, with the source and the time', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 

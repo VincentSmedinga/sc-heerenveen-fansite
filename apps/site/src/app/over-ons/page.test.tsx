@@ -13,6 +13,11 @@ describe('the page Over ons', () => {
     expect(metadata).toEqual({ title: 'Over ons' })
   })
 
+  it('is the one main of the page, with all its content in one cell', () => {
+    expect(html.match(/<main/g)).toHaveLength(1)
+    expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
+  })
+
   it('has one h1 and an h2 per section, with a fixed anchor on the privacy section', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Over ons</h1>'])
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([

@@ -17,13 +17,15 @@ export { Navigation } from './components/navigation/Navigation'
 export type { NavigationItem, NavigationProps } from './components/navigation/Navigation'
 export { NewsItem } from './components/news-item/NewsItem'
 export type { NewsItemProps } from './components/news-item/NewsItem'
-export { Page, pageBodyElements } from './components/page/Page'
+export { Page } from './components/page/Page'
 export type {
-  PageBodyElement,
   PageBodyProps,
+  PageCellProps,
   PageFooterProps,
   PageHeaderProps,
+  PageMainProps,
   PageProps,
+  PageSidebarProps,
 } from './components/page/Page'
 export { Root } from './components/root/Root'
 export type { RootProps } from './components/root/Root'

@@ -19,16 +19,18 @@ describe('the JavaScript entry of the package', () => {
     expect(designSystem).not.toHaveProperty('ListItem')
   })
 
-  it('gives Page.Header, Page.Body and Page.Footer on Page, because they only work inside a page', () => {
+  it('gives the parts of a page on Page, because they only work inside a page', () => {
     expect(typeof designSystem.Page.Header).toBe('function')
     expect(typeof designSystem.Page.Body).toBe('function')
+    expect(typeof designSystem.Page.Main).toBe('function')
+    expect(typeof designSystem.Page.Sidebar).toBe('function')
+    expect(typeof designSystem.Page.Cell).toBe('function')
     expect(typeof designSystem.Page.Footer).toBe('function')
     expect(Object.keys(designSystem).filter((name) => name.startsWith('Page'))).toEqual(['Page'])
   })
 
   it('gives the lists of allowed elements', () => {
     expect(designSystem.listElements).toEqual(['ul', 'ol'])
-    expect(designSystem.pageBodyElements).toEqual(['main', 'div'])
     expect(designSystem.textElements).toEqual(['p', 'span'])
   })
 

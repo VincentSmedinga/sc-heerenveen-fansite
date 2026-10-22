@@ -29,7 +29,9 @@ import { Heading, Page } from '@fansite/design-system'
 
 `Root` en `Body` zijn de `html` en de `body`.
 `Page` bevat een `Page.Header`, een `Page.Body` en een `Page.Footer`, in die volgorde.
-De `main` van de pagina is de `Page.Body` zelf, of zit erin.
+De `Page.Body` is het raster van de pagina, met de kolommen `Page.Main` (de `main` van de pagina) en, als de pagina er een heeft, `Page.Sidebar` (een `aside`).
+Elk kind van een kolom is een cel; met `Page.Cell` zet je wat bij elkaar hoort in één cel.
+De `Page.Body` regelt alle witruimte tussen de kolommen en de cellen.
 
 ```tsx
 <Root>
@@ -42,8 +44,12 @@ De `main` van de pagina is de `Page.Body` zelf, of zit erin.
         <Navigation items={menu} label="Hoofdmenu" />
       </Page.Header>
       <Page.Body>
-        <Heading level={1}>Nieuws</Heading>
-        <Text>…</Text>
+        <Page.Main>
+          <Page.Cell>
+            <Heading level={1}>Nieuws</Heading>
+            <Text>…</Text>
+          </Page.Cell>
+        </Page.Main>
       </Page.Body>
       <Page.Footer>
         <Text appearance="meta">…</Text>
@@ -116,14 +122,40 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
           <code>Page.Body</code>
         </th>
         <td>
-          <code>main</code> of <code>div</code>
+          <code>div</code>, het raster met de kolommen
         </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Page.Main</code>
+        </th>
         <td>
-          <code>as</code>
+          <code>main</code>, de hoofdkolom
         </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Page.Sidebar</code>
+        </th>
         <td>
-          <code>main</code> (standaard), <code>div</code>
+          <code>aside</code>, de zijbalk
         </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Page.Cell</code>
+        </th>
+        <td>
+          <code>div</code>, meer dingen in één cel van een kolom
+        </td>
+        <td></td>
+        <td></td>
       </tr>
       <tr>
         <th scope="row">
@@ -233,7 +265,7 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
   De typen laten geen ander element toe.
 - **Onderdelen met een punt:** een onderdeel dat bij één oudercomponent hoort, schrijf je met een punt achter die ouder, ook als het element buiten die ouder wel geldig is.
   Een item van een lijst is `List.Item`, want een `li` hoort in een `ul` of `ol`.
-  De header, de inhoud en de footer van een pagina zijn `Page.Header`, `Page.Body` en `Page.Footer`.
+  De delen van een pagina zijn `Page.Header`, `Page.Body`, `Page.Main`, `Page.Sidebar`, `Page.Cell` en `Page.Footer`.
 - **Klassen:** de componenten gebruiken de klassen met het voorvoegsel `hf-` en zitten in de laag `hf.components`.
 - **Niveau en stijl:** het niveau van een kop volgt de structuur van de pagina, de stijl het ontwerp.
   Zie [Heading](?path=/docs/componenten-heading--documentatie).

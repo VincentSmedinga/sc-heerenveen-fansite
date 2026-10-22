@@ -30,6 +30,15 @@ describe('the page Wat is er nieuw', () => {
     expect(html).not.toContain('nog geen versie')
   })
 
+  it('is the one main of the page, with all its content in one cell', () => {
+    vi.mocked(getReleases).mockReturnValue(releases)
+
+    const html = renderToStaticMarkup(WhatsNewPage())
+
+    expect(html.match(/<main/g)).toHaveLength(1)
+    expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
+  })
+
   it('says so when there is no version yet', () => {
     vi.mocked(getReleases).mockReturnValue([])
 

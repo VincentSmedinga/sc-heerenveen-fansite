@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Heading, Link, List, NewsItem, Text } from '@fansite/design-system'
+import { Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
 import { cache, Fragment } from 'react'
 
 import { reasonOf } from '../errors'
@@ -42,35 +42,37 @@ export default async function HomePage() {
   const days = groupByDay(headlines)
 
   return (
-    <>
-      <Heading level={1}>sc Heerenveen Fansite</Heading>
-      <Heading level={2}>sc Heerenveen in de media</Heading>
-      {days.length === 0 ? (
-        <Text>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</Text>
-      ) : (
-        days.map(({ day, items, key }) => (
-          <Fragment key={key}>
-            <Heading level={3}>{day}</Heading>
-            <List loose>
-              {items.map((item, index) => (
-                <List.Item key={index}>
-                  <NewsItem
-                    dateTime={dateTimeOf(item.publishedAt)}
-                    headline={item.title}
-                    href={item.url}
-                    paywalled={item.paywalled}
-                    source={item.sourceName}
-                    time={formatTime(item.publishedAt)}
-                  />
-                </List.Item>
-              ))}
-            </List>
-          </Fragment>
-        ))
-      )}
-      <Text>
-        Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
-      </Text>
-    </>
+    <Page.Main>
+      <Page.Cell>
+        <Heading level={1}>sc Heerenveen Fansite</Heading>
+        <Heading level={2}>sc Heerenveen in de media</Heading>
+        {days.length === 0 ? (
+          <Text>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</Text>
+        ) : (
+          days.map(({ day, items, key }) => (
+            <Fragment key={key}>
+              <Heading level={3}>{day}</Heading>
+              <List loose>
+                {items.map((item, index) => (
+                  <List.Item key={index}>
+                    <NewsItem
+                      dateTime={dateTimeOf(item.publishedAt)}
+                      headline={item.title}
+                      href={item.url}
+                      paywalled={item.paywalled}
+                      source={item.sourceName}
+                      time={formatTime(item.publishedAt)}
+                    />
+                  </List.Item>
+                ))}
+              </List>
+            </Fragment>
+          ))
+        )}
+        <Text>
+          Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
+        </Text>
+      </Page.Cell>
+    </Page.Main>
   )
 }

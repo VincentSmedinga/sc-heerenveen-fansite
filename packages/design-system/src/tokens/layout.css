@@ -20,8 +20,8 @@
      * The widest the content of a page gets, so that a line of running text holds at most 80 characters (WCAG 1.4.8).
      * Measured in Atkinson Hyperlegible Next at the size of Tekst (17px): in 36rem none of 28 lines of Dutch news text
      * held more than 80 characters, and the average was 72. A headline (Nieuwskop, 18px, semibold) has fewer, 64 on
-     * average. 37rem was the first width where a line went over 80. The rest of the column of the page stays empty, for a
-     * sidebar later.
+     * average. 37rem was the first width where a line went over 80. The rest of the column of the page stays empty, or holds
+     * the sidebar (Page.Sidebar).
      */
     --hf-content-max-width: 36rem;
   }

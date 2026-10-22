@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Heading, Link, List, Text } from '@fansite/design-system'
+import { Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { cache, Fragment } from 'react'
 
 import { reasonOf } from '../../errors'
@@ -43,28 +43,30 @@ export default async function SourcesPage() {
   const groups = groupByKind(sources)
 
   return (
-    <>
-      <Heading level={1}>Onze bronnen</Heading>
-      {groups.length === 0 ? (
-        <Text>We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.</Text>
-      ) : (
-        <>
-          <Text>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.</Text>
-          {groups.map(({ heading, kind, sources }) => (
-            <Fragment key={kind}>
-              <Heading level={2}>{heading}</Heading>
-              <List loose>
-                {sources.map((source) => (
-                  <List.Item key={source.domain}>
-                    <Link href={websiteOf(source)}>{source.name}</Link>
-                    {source.description && <Text>{source.description}</Text>}
-                  </List.Item>
-                ))}
-              </List>
-            </Fragment>
-          ))}
-        </>
-      )}
-    </>
+    <Page.Main>
+      <Page.Cell>
+        <Heading level={1}>Onze bronnen</Heading>
+        {groups.length === 0 ? (
+          <Text>We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.</Text>
+        ) : (
+          <>
+            <Text>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.</Text>
+            {groups.map(({ heading, kind, sources }) => (
+              <Fragment key={kind}>
+                <Heading level={2}>{heading}</Heading>
+                <List loose>
+                  {sources.map((source) => (
+                    <List.Item key={source.domain}>
+                      <Link href={websiteOf(source)}>{source.name}</Link>
+                      {source.description && <Text>{source.description}</Text>}
+                    </List.Item>
+                  ))}
+                </List>
+              </Fragment>
+            ))}
+          </>
+        )}
+      </Page.Cell>
+    </Page.Main>
   )
 }
