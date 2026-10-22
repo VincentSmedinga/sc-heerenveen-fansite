@@ -5,6 +5,8 @@
 
 export { Body } from './components/body/Body'
 export type { BodyProps } from './components/body/Body'
+export { Card, cardElements, cardSurfaces } from './components/card/Card'
+export type { CardElement, CardProps, CardSurface } from './components/card/Card'
 export { Heading, headingLevels } from './components/heading/Heading'
 export type { HeadingLevel, HeadingProps } from './components/heading/Heading'
 export { Link } from './components/link/Link'

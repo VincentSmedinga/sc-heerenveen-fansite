@@ -40,8 +40,8 @@ describe('the page Onze bronnen', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Onze bronnen</h1>'])
     expect(html).toContain('<p>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.</p>')
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
-      '<h2 class="hf-heading-2">Nieuws</h2>',
-      '<h2 class="hf-heading-2">Podcasts</h2>',
+      '<h2 class="hf-heading-2" id="news-heading">Nieuws</h2>',
+      '<h2 class="hf-heading-2" id="podcast-heading">Podcasts</h2>',
     ])
     expect(html).toContain(
       '<li><a href="https://testkrant.test">Testkrant</a><p>Een dagblad. Het schrijft over sc Heerenveen.</p></li>',
@@ -49,13 +49,31 @@ describe('the page Onze bronnen', () => {
     expect(html).toContain('<li><a href="https://testpodcast.test">Testpodcast</a><p>Een podcast.</p></li>')
   })
 
-  it('is the one main of the page, with all its content in one cell', async () => {
+  it('is the one main of the page, with the h1 and the introduction in one cell and a card for each kind', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
+    expect(html).toMatch(
+      /^<main class="hf-page-main"><div class="hf-page-cell"><h1 class="hf-heading-1">Onze bronnen<\/h1><p>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/p><\/div><section class="hf-card" aria-labelledby="news-heading">.*<\/section><section class="hf-card" aria-labelledby="podcast-heading">.*<\/section><\/main>$/,
+    )
+  })
+
+  it('puts each kind, with its heading and its sources, in a card that takes its name from the heading', async () => {
+    vi.mocked(getSources).mockResolvedValue(sources)
+
+    const html = await render()
+    const cards = html.match(/<section.*?<\/section>/g) ?? []
+
+    expect(cards).toHaveLength(2)
+    expect(cards[0]).toContain('<h2 class="hf-heading-2" id="news-heading">Nieuws</h2>')
+    expect(cards[0]?.match(/<li>/g)).toHaveLength(2)
+    expect(cards[1]).toContain('<h2 class="hf-heading-2" id="podcast-heading">Podcasts</h2>')
+    expect(cards[1]?.match(/<li>/g)).toHaveLength(1)
+    // The h1 and the introduction are in the cell above the cards.
+    expect(cards.join('')).not.toContain('<h1')
+    expect(cards.join('')).not.toContain('Dit zijn de bronnen')
   })
 
   it('shows a source without a description with its link only', async () => {
@@ -72,6 +90,7 @@ describe('the page Onze bronnen', () => {
     expect(html).toContain('We hebben nog geen bronnen.')
     expect(html).not.toContain('Dit zijn de bronnen')
     expect(html).not.toContain('<h2')
+    expect(html).not.toContain('<section')
     expect(html).not.toContain('<ul')
   })
 })

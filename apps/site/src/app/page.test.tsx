@@ -52,19 +52,36 @@ describe('the homepage', () => {
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">sc Heerenveen Fansite</h1>',
-      '<h2 class="hf-heading-2">sc Heerenveen in de media</h2>',
+      '<h2 class="hf-heading-2" id="media-heading">sc Heerenveen in de media</h2>',
       '<h3 class="hf-heading-3">donderdag 22 oktober</h3>',
       '<h3 class="hf-heading-3">woensdag 21 oktober</h3>',
     ])
   })
 
-  it('is the one main of the page, with all its content in one cell', async () => {
+  it('is the one main of the page, with the h1, the news in a card and the link to Onze bronnen as cells', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
+    expect(html).toMatch(
+      /^<main class="hf-page-main"><h1 class="hf-heading-1">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><p>Welke media we volgen, lees je bij <a href="\/bronnen">Onze bronnen<\/a>\.<\/p><\/main>$/,
+    )
+  })
+
+  it('puts the h2, the days and the headlines in the card, which takes its name from the h2', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
+
+    const html = await render()
+    const cards = html.match(/<section.*?<\/section>/g) ?? []
+
+    expect(cards).toHaveLength(1)
+    expect(cards[0]).toContain('<h2 class="hf-heading-2" id="media-heading">sc Heerenveen in de media</h2>')
+    expect(cards[0]?.match(/<h3/g)).toHaveLength(2)
+    expect(cards[0]?.match(/<li>/g)).toHaveLength(3)
+    // The h1 and the link to Onze bronnen are cells of their own, outside the card.
+    expect(cards[0]).not.toContain('<h1')
+    expect(cards[0]).not.toContain('Onze bronnen')
   })
 
   it('shows each headline as a link to the item at the source, with the source and the time', async () => {
@@ -157,8 +174,9 @@ describe('the homepage', () => {
 
     const html = await render()
 
-    expect(html).toContain('<h2 class="hf-heading-2">sc Heerenveen in de media</h2>')
+    expect(html).toContain('<h2 class="hf-heading-2" id="media-heading">sc Heerenveen in de media</h2>')
     expect(html).toContain('<p>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</p>')
+    expect(html.match(/<section/g)).toHaveLength(1)
     expect(html).not.toContain('<h3')
     expect(html).not.toContain('<ul')
     expect(html).toContain('<a href="/bronnen">Onze bronnen</a>')

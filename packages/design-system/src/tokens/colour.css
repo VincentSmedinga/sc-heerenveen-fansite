@@ -76,12 +76,12 @@
     /* stylelint-disable plugin/use-baseline -- light-dark() is widely available from 13 November 2026 */
 
     /*
-     * Backgrounds. There are four surfaces, each with a border below: the surface (white), tonal, soft and warm.
+     * Backgrounds. There are four surfaces, each with a border below: the surface (white), strong, soft and warm.
      * A card is a component: a surface with its border, rounded corners and padding.
      */
     --hf-colour-background-page: light-dark(var(--hf-colour-grey-100), var(--hf-colour-blue-950));
     --hf-colour-background-surface: light-dark(var(--hf-colour-white), var(--hf-colour-blue-900));
-    --hf-colour-background-surface-tonal: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
+    --hf-colour-background-surface-strong: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
     --hf-colour-background-surface-soft: light-dark(var(--hf-colour-blue-50), var(--hf-colour-blue-900));
     --hf-colour-background-surface-warm: light-dark(var(--hf-colour-sand-100), var(--hf-colour-blue-800));
     --hf-colour-background-header: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-800));
@@ -122,11 +122,11 @@
 
     /*
      * Borders of the surfaces. A surface's border comes from the muted or neutral scale of its colour, so a new
-     * surface can follow the rule. Light surfaces use step 200 (surface grey-200, soft steel-200), tonal surfaces
-     * step 300 (tonal steel-300, warm sand-300). Dark: surface and soft surface blue-700, tonal and warm blue-600.
+     * surface can follow the rule. Light surfaces use step 200 (surface grey-200, soft steel-200), strong surfaces
+     * step 300 (strong steel-300, warm sand-300). Dark: surface and soft surface blue-700, strong and warm blue-600.
      */
     --hf-colour-border-surface: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-700));
-    --hf-colour-border-surface-tonal: light-dark(var(--hf-colour-steel-300), var(--hf-colour-blue-600));
+    --hf-colour-border-surface-strong: light-dark(var(--hf-colour-steel-300), var(--hf-colour-blue-600));
     --hf-colour-border-surface-soft: light-dark(var(--hf-colour-steel-200), var(--hf-colour-blue-700));
     --hf-colour-border-surface-warm: light-dark(var(--hf-colour-sand-300), var(--hf-colour-blue-600));
 
@@ -160,7 +160,7 @@
     :root {
       --hf-colour-background-page: var(--hf-colour-grey-100);
       --hf-colour-background-surface: var(--hf-colour-white);
-      --hf-colour-background-surface-tonal: var(--hf-colour-blue-100);
+      --hf-colour-background-surface-strong: var(--hf-colour-blue-100);
       --hf-colour-background-surface-soft: var(--hf-colour-blue-50);
       --hf-colour-background-surface-warm: var(--hf-colour-sand-100);
       --hf-colour-background-header: var(--hf-colour-blue-900);
@@ -182,7 +182,7 @@
       --hf-colour-marker-text: var(--hf-colour-steel-600);
       --hf-colour-marker-graphic: var(--hf-colour-steel-500);
       --hf-colour-border-surface: var(--hf-colour-grey-200);
-      --hf-colour-border-surface-tonal: var(--hf-colour-steel-300);
+      --hf-colour-border-surface-strong: var(--hf-colour-steel-300);
       --hf-colour-border-surface-soft: var(--hf-colour-steel-200);
       --hf-colour-border-surface-warm: var(--hf-colour-sand-300);
       --hf-colour-border-default: var(--hf-colour-grey-200);

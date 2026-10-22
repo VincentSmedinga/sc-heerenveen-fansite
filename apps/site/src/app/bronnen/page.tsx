@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
-import { Heading, Link, List, Page, Text } from '@fansite/design-system'
-import { cache, Fragment } from 'react'
+import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
+import { cache } from 'react'
 
 import { reasonOf } from '../../errors'
 import { groupByKind, websiteOf } from '../../register'
@@ -46,27 +46,27 @@ export default async function SourcesPage() {
     <Page.Main>
       <Page.Cell>
         <Heading level={1}>Onze bronnen</Heading>
-        {groups.length === 0 ? (
-          <Text>We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.</Text>
-        ) : (
-          <>
-            <Text>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.</Text>
-            {groups.map(({ heading, kind, sources }) => (
-              <Fragment key={kind}>
-                <Heading level={2}>{heading}</Heading>
-                <List loose>
-                  {sources.map((source) => (
-                    <List.Item key={source.domain}>
-                      <Link href={websiteOf(source)}>{source.name}</Link>
-                      {source.description && <Text>{source.description}</Text>}
-                    </List.Item>
-                  ))}
-                </List>
-              </Fragment>
-            ))}
-          </>
-        )}
+        <Text>
+          {groups.length === 0
+            ? 'We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.'
+            : 'Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.'}
+        </Text>
       </Page.Cell>
+      {groups.map(({ heading, kind, sources }) => (
+        <Card aria-labelledby={`${kind}-heading`} key={kind}>
+          <Heading id={`${kind}-heading`} level={2}>
+            {heading}
+          </Heading>
+          <List loose>
+            {sources.map((source) => (
+              <List.Item key={source.domain}>
+                <Link href={websiteOf(source)}>{source.name}</Link>
+                {source.description && <Text>{source.description}</Text>}
+              </List.Item>
+            ))}
+          </List>
+        </Card>
+      ))}
     </Page.Main>
   )
 }

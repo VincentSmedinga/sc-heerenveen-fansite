@@ -77,6 +77,7 @@ export default definePreview({
             'Page.Sidebar',
             'Page.Cell',
             'Page.Footer',
+            'Card',
             'Navigation',
             'Heading',
             'Text',

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
+import { Card, Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
 import { cache, Fragment } from 'react'
 
 import { reasonOf } from '../errors'
@@ -43,9 +43,11 @@ export default async function HomePage() {
 
   return (
     <Page.Main>
-      <Page.Cell>
-        <Heading level={1}>sc Heerenveen Fansite</Heading>
-        <Heading level={2}>sc Heerenveen in de media</Heading>
+      <Heading level={1}>sc Heerenveen Fansite</Heading>
+      <Card aria-labelledby="media-heading">
+        <Heading id="media-heading" level={2}>
+          sc Heerenveen in de media
+        </Heading>
         {days.length === 0 ? (
           <Text>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</Text>
         ) : (
@@ -69,10 +71,10 @@ export default async function HomePage() {
             </Fragment>
           ))
         )}
-        <Text>
-          Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
-        </Text>
-      </Page.Cell>
+      </Card>
+      <Text>
+        Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
+      </Text>
     </Page.Main>
   )
 }

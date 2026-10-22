@@ -4,7 +4,7 @@ const meta = preview.meta({
   parameters: {
     docs: {
       description: {
-        component: 'Code in een zin en een blok code, op een tonaal vlak.',
+        component: 'Code in een zin en een blok code, op een sterk vlak.',
       },
     },
   },
