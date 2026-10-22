@@ -13,7 +13,7 @@ const meta = preview.meta({
           'Links in de footer hebben de gewone kleuren van links.',
           '',
           'De inhoud zet je zelf neer.',
-          'Zet er bijvoorbeeld "Voor supporters, door supporters." in.',
+          'Zet er bijvoorbeeld "Alle koppen en links op één plek. Voor supporters, door supporters." in.',
         ].join('\n'),
       },
       source: exampleSource,

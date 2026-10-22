@@ -900,6 +900,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Wie het logo en die zin ziet, begrijpt dat dit een site van supporters is en geen kanaal van de club.
 - **Alternatieven:** een uitdrukkelijke zin in de footer houden, zoals "De sc Heerenveen Fansite is geen officieel onderdeel van sc Heerenveen".
   Dat is duidelijk, maar defensief.
+- **Later:** zie _De footer zegt wat je op de site vindt_.
+  "sinds 1997" staat sindsdien alleen nog in het logo.
 
 ### Storybook toont de code van het voorbeeld
 
@@ -985,6 +987,18 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de header in de kolom laten, zoals voorheen.
   Of de header `100vw` breed maken, met een negatieve marge: `100vw` telt de scrollbalk mee, dus op Windows scrolt de pagina dan opzij.
   Of een omhulsel in de header voor de kolom; dat is een element meer, en de inhoud van de header zou dan altijd in dat omhulsel moeten.
+
+### De footer zegt wat je op de site vindt
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de footer zegt "Alle koppen en links op één plek. Voor supporters, door supporters."
+  "sinds 1997" staat alleen nog in het logo in de header.
+  Dit past de beslissing _Geen disclaimer, wel "Voor supporters, door supporters"_ aan, die "sinds 1997" ook in de footer zette.
+- **Waarom:** de footer zegt nu wat een bezoeker hier vindt.
+  "sinds 1997" staat al in het logo, vlak boven de pagina.
+- **Alternatieven:** "sc Heerenveen Fansite, sinds 1997.", zoals eerst.
+  Of "Je startpagina voor nieuws over sc Heerenveen."
+  Of "Koppen over sc Heerenveen uit de media, met een link naar het hele verhaal."
 
 ## Site
 
