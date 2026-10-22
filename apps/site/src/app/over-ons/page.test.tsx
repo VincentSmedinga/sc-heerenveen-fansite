@@ -22,13 +22,12 @@ describe('the page Over ons', () => {
     ])
   })
 
-  it('links to the forum, the sources, the editors by email and the Autoriteit Persoonsgegevens', () => {
+  it('links to the forum, the sources and the editors by email', () => {
     expect(links).toEqual([
       ['https://forum.heerenveen.org', 'ons forum'],
       ['/bronnen', 'Onze bronnen'],
       ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
       ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
-      ['https://www.autoriteitpersoonsgegevens.nl', 'Autoriteit Persoonsgegevens'],
     ])
   })
 
