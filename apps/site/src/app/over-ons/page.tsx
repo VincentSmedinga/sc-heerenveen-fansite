@@ -47,7 +47,8 @@ export default function AboutPage() {
       </Text>
       <Text>
         Vragen over je gegevens, zoals inzage of verwijdering, stel je aan de redactie van de sc Heerenveen Fansite:{' '}
-        <EmailLink />. Maar ons antwoord zal zijn: we hebben geen gegevens van je.
+        <EmailLink />. Maar ons antwoord zal zijn: we hebben geen gegevens van je. Ben je het daar niet mee eens, dan
+        kun je klagen bij de <Link href="https://www.autoriteitpersoonsgegevens.nl">Autoriteit Persoonsgegevens</Link>.
       </Text>
     </>
   )
