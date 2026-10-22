@@ -4,15 +4,18 @@
  *
  * The result lives in the memory of the server process. The period starts when the load starts, so a result is never
  * older than the period.
+ *
+ * The load may return a thenable that does its work each time it is awaited, as a Drizzle query does. So the cache
+ * keeps a promise that has taken over the result, and never the thenable itself.
  */
-export function cacheFor<T>(milliseconds: number, load: () => Promise<T>) {
+export function cacheFor<T>(milliseconds: number, load: () => PromiseLike<T>) {
   let entry: undefined | { result: Promise<T>; since: number }
 
   return () => {
     const now = Date.now()
 
     if (entry === undefined || now - entry.since >= milliseconds) {
-      const current = { result: load(), since: now }
+      const current = { result: Promise.resolve(load()), since: now }
 
       entry = current
       current.result.catch(() => {

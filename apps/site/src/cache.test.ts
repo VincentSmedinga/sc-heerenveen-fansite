@@ -44,6 +44,24 @@ describe('cacheFor', () => {
     expect(load).toHaveBeenCalledTimes(1)
   })
 
+  it('runs a thenable that works on each await only once, as a Drizzle query is', async () => {
+    let runs = 0
+    const query: PromiseLike<string[]> = {
+      then(onFulfilled, onRejected) {
+        runs++
+
+        return Promise.resolve(['Testkrant']).then(onFulfilled, onRejected)
+      },
+    }
+    const get = cacheFor(hour, () => query)
+
+    await get()
+    await get()
+    await get()
+
+    expect(runs).toBe(1)
+  })
+
   it('keeps no failed load, so the next call tries again', async () => {
     const load = vi.fn().mockRejectedValueOnce(new Error('no database')).mockResolvedValueOnce(['Testkrant'])
     const get = cacheFor(hour, load)
