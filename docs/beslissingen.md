@@ -1100,6 +1100,105 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** fouten gooien en de adapter laten vangen; dat laat een adapter een fout vergeten.
   Of de inhoud als tekst geven; dat is handiger, maar het raadt de tekenset van de bron.
 
+### De Leeuwarder Courant als eerste bron, ondanks het voorbehoud in robots.txt
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** we lezen de RSS-feed van de Leeuwarder Courant voor kop, link en bronnaam.
+  Tegelijk vragen we om toestemming (#35); zegt de krant nee, dan stoppen we met deze bron.
+- **Waarom:** een RSS-feed is gepubliceerd om gelezen te worden, en de regels in `robots.txt` staan elke user agent toe.
+  We tonen alleen de kop, de link en de naam, en sturen lezers door naar de krant.
+  Het voorbehoud in een commentaar in `robots.txt` is breed geformuleerd, maar spreekt de regels zelf niet tegen.
+- **Alternatieven:** eerst om toestemming vragen en wachten met de import.
+  Of een andere eerste bron, zonder zo'n voorbehoud.
+
+### De importer bewaart alleen wat we mogen tonen
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `items` heeft alleen kolommen voor de kop, de link, de sleutel, de tijd en de betaalmuur.
+  Kolommen voor een intro of een afbeelding komen met de eerste bron die daar toestemming voor geeft.
+- **Waarom:** principe 2 van de Redactie: wat we niet mogen tonen, slaan we ook niet op.
+  Een kolom die er niet is, kan geen pagina per ongeluk tonen.
+  Of een bericht achter de betaalmuur staat, is geen inhoud van de bron, en #73 kan het gebruiken.
+- **Alternatieven:** alles uit de feed bewaren en pas bij het tonen filteren.
+  Dan staat er inhoud in de database die we niet mogen gebruiken.
+
+### Feeds lezen we met feedsmith
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de adapter leest feeds met `feedsmith` (MIT).
+- **Waarom:** Node heeft geen XML-parser.
+  `feedsmith` leest RSS, Atom, RDF en JSON Feed, ook met namespaces zoals Dublin Core en Media RSS, dus latere feeds, zoals die van podcasts (#14), passen er ook in.
+  Het wordt onderhouden: versie 3 kwam in september 2026.
+- **Alternatieven:** `fast-xml-parser` met eigen code die RSS en Atom naar onze velden vertaalt; dat is een laag minder, maar meer eigen code die moet kloppen.
+  Of `rss-parser`; die is sinds 2023 niet bijgewerkt.
+
+### De eerste echte bron komt via de seed
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de Leeuwarder Courant komt met haar feed in de seed, naast de testbronnen.
+  Zo staat ze lokaal en op acceptatie in het register.
+- **Waarom:** het register kent nog geen beheer (#30), en acceptatie krijgt de seed al bij elke start (#78).
+- **Gevolg:** hoe echte bronnen op productie in het register komen, beslissen we met de bronnenlijst (#10) en het beheer (#30).
+- **Alternatieven:** een migratie die de bron invoegt; dan staan gegevens tussen het schema.
+  Of wachten op het beheer.
+
+### De opdracht heet `pnpm run import`
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** we starten de import met `pnpm run import`, niet met `pnpm import`.
+- **Waarom:** `import` is een opdracht van pnpm zelf, die een lockfile van npm of yarn omzet.
+  Zonder `run` start pnpm die opdracht en niet ons script, en meldt dat er geen lockfile is.
+  Het script heet toch `import`, zodat de naam in het issue, de documentatie en het rooster (#98) dezelfde blijft.
+- **Alternatieven:** een andere naam die pnpm niet kent, zoals `pnpm import-feeds`; dan kun je `run` weglaten, maar de naam wijkt af van wat we zeggen: de import.
+
+### Wat feedsmith niet geeft, lezen we er zelf bij
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de adapter noemt twee dependencies zelf, op een exacte versie: `entities` (BSD-2-Clause) en `fast-xml-parser` (MIT).
+  Beide zijn al geïnstalleerd, want `feedsmith` gebruikt ze.
+  - `entities` zet HTML-entiteiten in een kop om in tekens, met `decodeHTMLStrict`: alleen entiteiten met een puntkomma.
+  - `fast-xml-parser` leest in een tweede lezing het element `<premium>` van de Leeuwarder Courant.
+    Dezelfde parser controleert ook of de XML goed gevormd is.
+- **Waarom:** een kop in CDATA, zoals bij de Leeuwarder Courant, kan HTML bevatten, en `feedsmith` laat de tekst daarin staan.
+  `feedsmith` slaat ook elementen over die het niet kent, zoals `<premium>`, en leest een feed die halverwege stopt toch half.
+  Met de tweede lezing zien we de betaalmuur en bewaren we niets uit een afgebroken feed.
+  Die lezing zet geen entiteiten om, dus een feed kan er geen grote tekst mee opblazen.
+- **Alternatieven:** de betaalmuur met een reguliere expressie uit de tekst halen; dat is minder code, maar fragiel bij CDATA en commentaar.
+  Of de betaalmuur nog niet lezen; dan klopt de kolom `paywalled` niet.
+  Of een eigen tabel met een paar entiteiten; dan blijft elke andere entiteit als tekst in de kop staan.
+
+### Een bericht dat niet klopt, slaan we over
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de adapter slaat een bericht over, en meldt het, als het geen kop heeft, geen `http`- of `https`-link, of een kop, link of sleutel die niet in de kolom past.
+  Hij kapt niets af.
+  Een bericht zonder geldige tijd krijgt de tijd waarop we het zagen.
+  Een tijd is geldig als hij een zone heeft, na 1990 ligt en niet meer dan een dag vooruit.
+- **Waarom:** een afgekapte kop of link is niet meer wat de bron publiceert.
+  Een tijd zonder zone telt in JavaScript als lokale tijd, en een tijd ver in de toekomst zet een bericht dagenlang bovenaan.
+- **Alternatieven:** de kop afkappen met een beletselteken.
+  Of een bericht zonder geldige tijd overslaan; dan verliezen we een kop die verder goed is.
+
+### Een bericht heeft een sleutel per bron, en die is hoofdlettergevoelig
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** een bericht is uniek op de bron en de sleutel samen (de `guid`, of anders de link).
+  De kolom `item_key` vergelijkt hoofdlettergevoelig (`utf8mb4_bin`) en is hoogstens 700 tekens.
+- **Waarom:** de collatie van de andere tabellen (`utf8mb4_unicode_ci`) ziet `A` en `a` en `é` en `e` als gelijk.
+  Twee verschillende berichten zouden dan één rij worden, en het ene overschrijft het andere zonder dat iemand het merkt.
+  Zonder sleutel per bron gaat een bericht dat in twee feeds van dezelfde bron staat, dubbel.
+  700 tekens is het meeste dat een unieke index met `source_id` toestaat (3072 bytes).
+- **Alternatieven:** een unieke index per feed; dan staat hetzelfde bericht uit twee feeds twee keer in `items`.
+  Of een hash van de sleutel; dan kun je de sleutel niet lezen.
+
+### De ETag en Last-Modified bewaren we samen met de berichten
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de adapter bewaart de berichten en de nieuwe `ETag` en `Last-Modified` van een feed in één transactie.
+  Lukt het lezen of bewaren niet, dan blijven de oude waarden staan.
+- **Waarom:** bewaren we de `ETag` voordat de berichten er staan, en mislukt het bewaren, dan zegt de bron de volgende keer dat niets veranderd is, en missen we die berichten.
+- **Alternatieven:** de `ETag` meteen bewaren; dat is eenvoudiger, maar kan berichten laten ontbreken tot de feed verandert.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters

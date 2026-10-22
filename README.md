@@ -35,15 +35,16 @@ Vul in `.env` de waarden in; `.env.example` zegt waar elke variabele voor is.
 
 Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:3000>.
 
-| Opdracht         | Wat het doet                                               |
-| ---------------- | ---------------------------------------------------------- |
-| `pnpm lint`      | ESLint, Stylelint en Prettier                              |
-| `pnpm format`    | Prettier zet de opmaak recht                               |
-| `pnpm typecheck` | TypeScript in alle packages                                |
-| `pnpm test`      | De tests van alle packages, van de hooks en van de linters |
-| `pnpm build`     | De build van alle packages                                 |
-| `pnpm test:a11y` | axe op de pagina's van de gebouwde site, na `pnpm build`   |
-| `pnpm release`   | Opent of werkt de release-pull request bij (vraagt `gh`)   |
+| Opdracht          | Wat het doet                                               |
+| ----------------- | ---------------------------------------------------------- |
+| `pnpm lint`       | ESLint, Stylelint en Prettier                              |
+| `pnpm format`     | Prettier zet de opmaak recht                               |
+| `pnpm typecheck`  | TypeScript in alle packages                                |
+| `pnpm test`       | De tests van alle packages, van de hooks en van de linters |
+| `pnpm build`      | De build van alle packages                                 |
+| `pnpm test:a11y`  | axe op de pagina's van de gebouwde site, na `pnpm build`   |
+| `pnpm run import` | Haalt de feeds van de bronnen op en bewaart de koppen      |
+| `pnpm release`    | Opent of werkt de release-pull request bij (vraagt `gh`)   |
 
 De database draait in Docker.
 Start hem met `docker compose up -d --wait`, en maak dan de tabellen met `pnpm db:migrate`.
@@ -56,7 +57,7 @@ Daarna controleert commitlint of het bericht [Conventional Commits](https://www.
 Schrijf het in het Engels.
 Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvoegen de commit op `main`.
 
-- [`apps/importer`](apps/importer/README.md): de importer, voorlopig alleen de fetcher die bronnen ophaalt
+- [`apps/importer`](apps/importer/README.md): de importer, met de fetcher die bronnen ophaalt en de adapter voor RSS- en Atom-feeds
 - [`apps/site`](apps/site/README.md): de site
 - [`packages/db`](packages/db/README.md): de database, met het schema, de migraties en de seed
 - [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens, componenten en Storybook

@@ -124,11 +124,12 @@ async function withServer({ database, siteEnv }, checks) {
   }
 }
 
-// On acceptance the site makes the tables in an empty database and puts the test sources in them, before it answers.
+// On acceptance the site makes the tables in an empty database and puts the sources from the seed in them, before it
+// answers.
 await withEmptyDatabase((database) =>
   withServer({ database, siteEnv: 'acceptance' }, async (server, log) => {
     await waitUntilUp(server)
-    assert.match(log(), /The database is up to date, with the test sources\./)
+    assert.match(log(), /The database is up to date, with the sources from the seed\./)
 
     const home = await fetch(origin)
     const html = await home.text()

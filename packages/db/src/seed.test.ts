@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { execFile } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
@@ -5,8 +6,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { consentStatuses, sourceKinds, sources } from './schema.ts'
-import { seedSources, testSources } from './seed.ts'
+import { consentStatuses, feeds, sourceKinds, sources } from './schema.ts'
+import { realSources, seedSources, testSources } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -38,14 +39,54 @@ describe('the seed', () => {
     await seedSources(database.db)
     await seedSources(database.db)
 
-    const rows = await database.db.select().from(sources)
-
-    expect(rows).toHaveLength(testSources.length)
+    expect(await database.db.select().from(sources)).toHaveLength(testSources.length + realSources.length)
+    expect(await database.db.select().from(feeds)).toHaveLength(
+      realSources.reduce((count, source) => count + source.feeds.length, 0),
+    )
   })
 
-  it('holds made-up sources only', () => {
+  it('leaves the ETag and Last-Modified of a feed alone when it runs again', async () => {
+    await seedSources(database.db)
+    await database.pool.query("UPDATE feeds SET etag = '\"v1\"', last_modified = 'Wed, 21 Oct 2026 07:28:00 GMT'")
+    await seedSources(database.db)
+
+    const rows = await database.db.select().from(feeds)
+
+    expect(rows).not.toHaveLength(0)
+    expect(rows.every((feed) => feed.etag === '"v1"' && feed.lastModified === 'Wed, 21 Oct 2026 07:28:00 GMT')).toBe(
+      true,
+    )
+  })
+
+  it('puts the Leeuwarder Courant in the register with its feed and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [courant] = await database.db.select().from(sources).where(eq(sources.domain, 'www.lc.nl'))
+    const courantFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, courant?.id ?? 0))
+
+    expect(courant).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'Leeuwarder Courant',
+    })
+    expect(courant?.consentStatus).not.toBe('given')
+    expect(courant?.description).toBeTruthy()
+    expect(courant?.description?.length).toBeLessThanOrEqual(300)
+    expect(courantFeeds.map((feed) => feed.url)).toEqual(['https://www.lc.nl/sport/sc-heerenveen/rss/'])
+  })
+
+  it('holds made-up test sources only, and real sources that are not made up', () => {
     for (const source of testSources) {
       expect(source.domain, source.name).toMatch(/\.test$/)
+    }
+    for (const source of realSources) {
+      expect(source.domain, source.name).not.toMatch(/\.test$/)
     }
   })
 
@@ -71,7 +112,7 @@ describe('the seed', () => {
     const { stdout } = await runSeedScript('local')
 
     expect(stdout).toContain(`${testSources.length} test sources`)
-    expect(await database.db.select().from(sources)).toHaveLength(testSources.length)
+    expect(await database.db.select().from(sources)).toHaveLength(testSources.length + realSources.length)
   })
 
   it('refuses to run from the command line when SITE_ENV is production, and writes nothing', async () => {
@@ -80,5 +121,6 @@ describe('the seed', () => {
       stderr: expect.stringContaining('SITE_ENV=production'),
     })
     expect(await database.db.select().from(sources)).toHaveLength(0)
+    expect(await database.db.select().from(feeds)).toHaveLength(0)
   })
 })

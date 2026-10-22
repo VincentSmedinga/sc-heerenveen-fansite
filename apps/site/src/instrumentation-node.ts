@@ -28,7 +28,8 @@ export function migrationsFolder() {
 
 /**
  * Brings the database up to date when the server starts: it runs the migrations the database hasn't had yet, and on
- * acceptance it puts the test sources in the register. Production and local never get the made-up sources.
+ * acceptance it puts the sources from the seed in the register: the made-up test sources and the real sources. Production
+ * and local never get them.
  *
  * It never throws. A database that isn't there, or a migration that fails, is no reason to stop: the homepage doesn't
  * need the database, and a visitor to a page that does gets the error page. The log says what went wrong, so
@@ -39,7 +40,7 @@ export async function prepareDatabaseOnStart({ DATABASE_URL, SITE_ENV }: ReturnT
 
   try {
     await prepareDatabase({ migrationsFolder: migrationsFolder(), seed, url: DATABASE_URL })
-    console.log(`The database is up to date${seed ? ', with the test sources' : ''}.`)
+    console.log(`The database is up to date${seed ? ', with the sources from the seed' : ''}.`)
   } catch (error) {
     console.error(
       `Could not bring the database up to date, so the site keeps running without it: ${reasonOf(error)}. ` +

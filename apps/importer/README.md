@@ -1,8 +1,87 @@
 # @fansite/importer
 
 De importer haalt koppen en links op bij de bronnen.
-Voorlopig bevat hij alleen de fetcher, de ene HTTP-client voor alle adapters.
-De eerste adapter komt met #72, en de opdrachten en het rooster komen met #13.
+Hij bevat de fetcher, de ene HTTP-client voor alle adapters, en de adapter voor RSS- en Atom-feeds, met de Leeuwarder Courant als eerste bron.
+De import op acceptatie komt met #98, en het rooster, een slot in de database en de gezondheid van een bron met #13.
+
+## De import draaien
+
+Zet in de root `.env` klaar, start de database en zet de bronnen erin (zie de [README van `@fansite/db`](../../packages/db/README.md)).
+Draai dan, vanuit de root:
+
+```sh
+docker compose up -d --wait
+pnpm db:migrate
+pnpm db:seed
+pnpm run import
+```
+
+Schrijf `pnpm run import` en niet `pnpm import`: `import` is een opdracht van pnpm zelf, die een lockfile van npm of yarn omzet.
+
+De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), één voor één, met één fetcher.
+Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
+
+```text
+https://www.lc.nl/sport/sc-heerenveen/rss/: 3 new, 1 updated, 46 unchanged, 1 skipped
+  item 12 skipped: the link does not start with http or https
+```
+
+- **new**: berichten die de bron nog niet had.
+- **updated**: berichten die we kenden en waarvan de kop, de link, de tijd of de betaalmuur veranderde.
+- **unchanged**: berichten die we kenden en die hetzelfde waren.
+- **skipped**: berichten die we niet bewaren, met de reden.
+
+Een feed die niet gelezen wordt, krijgt ook een regel:
+
+- niet gewijzigd sinds de vorige keer (`ETag` of `Last-Modified`);
+- `robots.txt` staat het niet toe;
+- de bron vraagt om te wachten (429 of 503);
+- een fout, met de reden.
+
+Een feed die faalt, stopt de andere feeds niet.
+De opdracht stopt met exitcode 1 als een feed een fout gaf: de bron geeft een foutstatus of iets wat geen feed is, of de database weigert iets.
+Een feed die niet gewijzigd is, die `robots.txt` weigert of die om wachten vraagt, is geen fout van ons en geeft exitcode 0.
+Gebruik `DATABASE_URL` uit `.env`; zonder die variabele stopt de opdracht met een melding.
+
+## Wat de adapter bewaart
+
+Per bericht bewaart hij de kop, de link, een sleutel per bron, de tijd van publicatie, of het bericht achter de betaalmuur staat, en wanneer we het voor het eerst en het laatst zagen (tabel `items`).
+Een intro, een afbeelding, een auteur of een categorie bewaart hij niet, ook niet als de feed ze heeft: geen bron heeft daar nu toestemming voor (principe 2 van de Redactie).
+Een kolom daarvoor komt met de eerste bron die het wel mag.
+Per feed bewaart hij het adres en de `ETag` en `Last-Modified` van de laatste keer (tabel `feeds`).
+Een bericht dat uit de feed verdwijnt, blijft staan; `last_seen_at` laat zien wanneer we het het laatst zagen.
+
+Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
+
+- **Formaat:** RSS 2.0 en Atom, gelezen met `feedsmith`.
+  Een feed in een ander formaat, of tekst die geen feed is, geeft een fout.
+  Is de XML niet goed gevormd, bijvoorbeeld omdat de feed halverwege stopt, dan bewaren we niets uit die feed.
+- **Tekenset:** die van de `Content-Type`, anders die van de XML-verklaring, anders UTF-8.
+- **Kop:** als tekst.
+  Tags gaan eruit, HTML-entiteiten worden tekens (eenmaal), en witruimte wordt één spatie.
+  Een pagina maakt de tekst veilig als hij hem toont.
+- **Link:** moet met `http` of `https` beginnen en mag geen gebruikersnaam of wachtwoord hebben.
+  Een bericht zonder bruikbare link slaat de adapter over.
+- **Sleutel:** de `guid` (RSS) of de `id` (Atom), zoals de bron hem schrijft, of anders de link.
+  Hij is uniek per bron en hoofdlettergevoelig.
+  Een bericht dat al een sleutel heeft die eerder in dezelfde feed stond, slaat de adapter over.
+- **Tijd:** `pubDate` (RSS) of `published` (Atom, anders `updated`), omgezet naar UTC, op hele seconden.
+  Een tijd zonder zone, in een vorm die we niet kennen, van vóór 1990 of meer dan een dag in de toekomst is niet geldig.
+  Dan geldt de tijd waarop we het bericht voor het eerst zagen, en een bekend bericht houdt de tijd die het had.
+- **Betaalmuur:** het element `<premium>true</premium>` van de Leeuwarder Courant.
+  `feedsmith` leest elementen die het niet kent niet, dus een tweede lezing met `fast-xml-parser` zoekt dit ene element.
+  Een feed zonder dat element heeft geen betaalmuur.
+- **Te lang:** een kop van meer dan 500 tekens, een link van meer dan 2048 of een sleutel van meer dan 700 slaat de adapter over, in plaats van hem af te kappen.
+- **Bijwerken:** een nieuw bericht komt erbij.
+  Een bekend bericht krijgt de nieuwe kop, link, tijd en betaalmuur als de bron die veranderde.
+  We bewaren geen eerdere koppen.
+- **ETag en Last-Modified:** de adapter bewaart ze in dezelfde transactie als de berichten.
+  Lukt het bewaren of lezen niet, dan blijven de oude waarden staan en vraagt de volgende run de hele feed opnieuw.
+  Is de feed niet gewijzigd, dan doet de adapter verder niets.
+  De Leeuwarder Courant stuurt geen van beide, dus daar leest elke run de hele feed.
+
+Een nieuwe feed komt in de tabel `feeds`, bij een bron.
+Er is nog geen beheer (#30), dus de seed zet ze erin (`packages/db/src/seed.ts`).
 
 ## De fetcher
 
@@ -69,7 +148,6 @@ Twee dingen voor wie een adapter schrijft:
 ## Wat de fetcher niet doet
 
 - Opnieuw proberen met uitstel, een limiet per host, het rooster en een `robots.txt` bewaren tussen runs: dat komt met de jobplanner (#13).
-- `ETag` en `Last-Modified` bewaren: dat komt met de eerste adapter (#72).
 - `Crawl-delay` lezen: dat staat niet in RFC 9309.
 - Adressen op een eigen netwerk weigeren: een bron kan doorverwijzen naar `localhost`.
   De fetcher kijkt naar het schema van een URL, niet naar het adres waar de naam naartoe wijst.
@@ -83,3 +161,9 @@ pnpm --filter importer test
 
 De tests starten een eigen webserver op deze computer en doen geen verzoeken naar echte sites.
 De parser voor `robots.txt` staat in `src/robots.ts`, met de voorbeelden uit RFC 9309 in `src/robots.test.ts`.
+
+De tests van de adapter gebruiken een opname van de feed van de Leeuwarder Courant in [`src/fixtures/lc-sc-heerenveen.xml`](src/fixtures/lc-sc-heerenveen.xml).
+Die is ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en `premium`.
+Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
+`src/read-feed.test.ts` leest feeds zonder database.
+`src/import-feeds.test.ts` en `src/import.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.

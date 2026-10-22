@@ -7,8 +7,8 @@ De andere pagina's komen met de volgende issues.
 ## Draaien
 
 Zet in de root eerst `.env` klaar (zie de [README](../../README.md)).
-Start de database en zet er de testbronnen in, zoals de [README van `@fansite/db`](../../packages/db/README.md) zegt.
-De site draait de migraties zelf als hij start (zie _De database bij het starten_), maar de testbronnen zet hij er alleen op acceptatie in.
+Start de database en zet er de bronnen uit de seed in, zoals de [README van `@fansite/db`](../../packages/db/README.md) zegt.
+De site draait de migraties zelf als hij start (zie _De database bij het starten_), maar de bronnen uit de seed zet hij er alleen op acceptatie in.
 Start dan de site:
 
 ```sh
@@ -45,7 +45,7 @@ Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de
 Dit moet eerst draaien, vanuit de root:
 
 1. De database: `docker compose up -d --wait`.
-   De gebouwde site draait de migraties en zet de testbronnen er zelf in, want de controle start hem met `SITE_ENV=acceptance`.
+   De gebouwde site draait de migraties en zet de bronnen uit de seed er zelf in, want de controle start hem met `SITE_ENV=acceptance`.
 2. `pnpm build`.
 3. Eenmalig Chromium: `pnpm --filter site exec playwright install chromium`.
 
@@ -74,7 +74,7 @@ De server bewaart de lijst een uur (`src/sources.ts`), dus een wijziging in het 
 ## De database bij het starten
 
 Als de server start, zet hij de database klaar, en pas daarna beantwoordt hij verzoeken (`src/instrumentation.ts`).
-Hij draait de migraties die de database nog niet had, uit `packages/db/drizzle`, en alleen met `SITE_ENV=acceptance` zet hij de testbronnen in het register.
+Hij draait de migraties die de database nog niet had, uit `packages/db/drizzle`, en alleen met `SITE_ENV=acceptance` zet hij de bronnen uit de seed in het register.
 `assemble` zet de migraties in de map, op dezelfde plek ten opzichte van `apps/site` als in de repository.
 Een slot in de database (`GET_LOCK`) laat twee processen die tegelijk starten, om de beurt migreren.
 Lukt het niet, bijvoorbeeld omdat de database niet bereikbaar is, dan staat de reden in het logboek en blijft de server draaien.

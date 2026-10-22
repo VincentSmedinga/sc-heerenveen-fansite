@@ -10,7 +10,8 @@
     "./env": "./src/env.ts",
     "./prepare": "./src/prepare.ts",
     "./queries": "./src/queries.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./test-database": "./src/test-database.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",

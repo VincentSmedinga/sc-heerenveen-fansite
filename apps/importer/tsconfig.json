@@ -4,5 +4,6 @@
     // TypeScript 6 loads no @types package by itself. The importer is a Node program, and its tests start a server.
     "types": ["node"]
   },
-  "include": ["src"]
+  "include": ["src", "vitest.config.ts"],
+  "references": [{ "path": "../../packages/db" }]
 }

@@ -4,7 +4,7 @@ import type { TestDatabase } from './test-database.ts'
 
 import { listEnabledSources } from './queries.ts'
 import { sources } from './schema.ts'
-import { seedSources, testSources } from './seed.ts'
+import { realSources, seedSources, testSources } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -29,8 +29,7 @@ describe('listEnabledSources', () => {
     const names = (await listEnabledSources(database.db)).map((source) => source.name)
 
     expect(names).toEqual(
-      testSources
-        .filter((source) => source.enabled !== false)
+      [...testSources.filter((source) => source.enabled !== false), ...realSources]
         .map((source) => source.name)
         .sort((a, b) => a.localeCompare(b, 'nl')),
     )
