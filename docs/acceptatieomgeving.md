@@ -78,8 +78,13 @@ Wat hij per feed schrijft, staat in de [README van de importer](../apps/importer
   Er gaat geen e-mail.
   Niets ruimt dat bestand op; het groeit met een paar regels per run.
 - De importer weigert adressen die niet op het openbare internet liggen, zoals `localhost` of `10.0.0.1`, ook na een doorverwijzing.
-- Er is nog geen lock in de database (#13).
-  Een run duurt een paar seconden, dus twee runs halen elkaar niet in.
+- Een run neemt een lock in de database, dus er draaien nooit twee runs tegelijk.
+  Vindt een run de lock bezet, dan stopt hij meteen.
+- Elke run komt in het logboek in de database, met per feed wat er gebeurde.
+  Daaruit volgt de gezondheid van elke feed: na drie mislukte runs op rij is een feed ongezond.
+  Het overzicht daarvan vraag je op met SSH (zie _Controleren_).
+- Vraagt een bron om te wachten, of faalt een feed drie runs op rij, dan slaat de import de feed een tijd over.
+  Hoe lang, staat in de [README van de importer](../apps/importer/README.md).
 
 Elke deploy kopieert de importer samen met de site.
 Zo past hij bij het schema, dat de site bijwerkt als de host haar start.
@@ -223,6 +228,19 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
   Wil je niet wachten, draai dan de opdracht van de cronjob met SSH, zonder het deel vanaf `>>`.
   Dan zie je de uitvoer meteen.
 
+- Het overzicht van de gezondheid krijg je met SSH.
+  Draai hetzelfde bestand als de cronjob, met `--status` erachter, op één regel:
+
+  ```sh
+  /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/importer/import.mjs --status
+  ```
+
+  Gebruik dezelfde paden als in de cronjob (stap 9 en 10).
+  Het overzicht toont de laatste run, en per feed de bron, het adres, de laatste geslaagde run, het aantal mislukte runs op rij, de laatste fout, en of de feed gezond is.
+  Het verandert niets in de database.
+  `echo $?` direct daarna toont 0 als elke feed gezond is, en 1 als een feed ongezond is.
+  De README van de importer laat zien hoe het eruitziet.
+
 - In de database staan de koppen in de tabel `items`: `SELECT COUNT(*) FROM items` in phpMyAdmin telt ze.
 
 ## Als het niet werkt
@@ -264,8 +282,10 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
   | `DATABASE_URL is missing` of `DATABASE_URL: Invalid URL`    | Het bestand heeft geen regel `DATABASE_URL=…`, of de waarde is geen goede URL. Kopieer de waarde van de Node.js-app.                                                 |
   | `Access denied for user`                                    | De gebruiker of het wachtwoord in het bestand klopt niet. Kopieer de waarde van de Node.js-app; is het wachtwoord veranderd, pas het dan op beide plekken aan.       |
   | `connect ECONNREFUSED` of `getaddrinfo ENOTFOUND`           | De database is niet bereikbaar. Controleer de host en de poort in het bestand.                                                                                       |
-  | `Table '…feeds' doesn't exist`                              | De database heeft de tabellen nog niet. De site maakt ze als de host haar start: open <https://acc.sc.heerenveen.org> en wacht op de volgende run.                   |
+  | `Table '…' doesn't exist`, zoals `…feeds` of `…import_runs` | De database heeft de tabellen nog niet. De site maakt ze als de host haar start: open <https://acc.sc.heerenveen.org> en wacht op de volgende run.                   |
   | Een regel met `failed,` achter het adres van een feed       | De importer startte, maar las die feed niet. De reden staat erachter; de volgende run probeert het opnieuw.                                                          |
+  | Een regel met `runs in a row; next try from`                | De feed is ongezond, en de import probeert hem eens per uur. De reden van de fouten staat in het overzicht (`--status`) en in eerdere regels van het logbestand.     |
+  | `Another import is still running` bij elke run              | Een run blijft hangen en houdt de lock vast. Zoek het proces met `ps -u <gebruiker> -f`, de regel met `import.mjs`, en stop het met `kill` en het nummer ervan.      |
 
 ## Wat de eerste deploy ons leerde
 

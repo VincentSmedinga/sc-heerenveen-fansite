@@ -1,8 +1,7 @@
-import type { RowDataPacket } from 'mysql2/promise'
-
 import { migrate } from 'drizzle-orm/mysql2/migrator'
 
 import { connect } from './client.ts'
+import { lockNameFor, withLock } from './lock.ts'
 import { seedSources } from './seed.ts'
 
 export type PrepareOptions = {
@@ -14,14 +13,6 @@ export type PrepareOptions = {
   seed: boolean
   /** The `DATABASE_URL`. */
   url: string
-}
-
-/**
- * The name of the lock. A MariaDB server shares its lock names between all its databases, so the name has the database in
- * it, and databases on one server don't wait for each other. MariaDB allows 64 characters.
- */
-export function lockNameFor(url: string) {
-  return `fansite_migrate_${new URL(url).pathname.slice(1)}`.slice(0, 64)
 }
 
 /**
@@ -38,33 +29,21 @@ export function lockNameFor(url: string) {
  */
 export async function prepareDatabase({ lockSeconds = 30, migrationsFolder, seed, url }: PrepareOptions) {
   const { close, db, pool } = connect(url)
-  const lockName = lockNameFor(url)
+  const lockName = lockNameFor(url, 'migrate')
 
   try {
-    // A lock belongs to the connection that takes it, so that connection stays out of the pool until it lets go.
-    const connection = await pool.getConnection()
+    const { ran } = await withLock(pool, lockName, lockSeconds, async () => {
+      await migrate(db, { migrationsFolder })
 
-    try {
-      const [rows] = await connection.query<RowDataPacket[]>('SELECT GET_LOCK(?, ?) AS locked', [lockName, lockSeconds])
-
-      if (rows[0]?.['locked'] !== 1) {
-        throw new Error(
-          `Could not get the lock '${lockName}' within ${lockSeconds} seconds. Another process may be migrating this database.`,
-        )
+      if (seed) {
+        await seedSources(db)
       }
+    })
 
-      try {
-        await migrate(db, { migrationsFolder })
-
-        if (seed) {
-          await seedSources(db)
-        }
-      } finally {
-        // MariaDB lets go of the lock when the connection ends, so a failure here changes nothing.
-        await connection.query('DO RELEASE_LOCK(?)', [lockName]).catch(() => undefined)
-      }
-    } finally {
-      connection.release()
+    if (!ran) {
+      throw new Error(
+        `Could not get the lock '${lockName}' within ${lockSeconds} seconds. Another process may be migrating this database.`,
+      )
     }
   } finally {
     await close()

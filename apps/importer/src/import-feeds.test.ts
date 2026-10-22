@@ -9,6 +9,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { Handler, TestServer } from './test-server.ts'
 
 import { formatReport, importFeed, importFeeds, listFeedsToImport } from './import-feeds.ts'
+import { startRun } from './run-log.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
 
 const firstRun = new Date('2026-10-22T10:00:00Z')
@@ -91,6 +92,13 @@ async function storedFeed(id: number) {
 }
 
 const itemsInDatabase = () => database.db.select().from(items).orderBy(items.id)
+
+/** Reads every feed as a run of the import does, at the time of the first run. */
+async function importAll() {
+  const runId = await startRun(database.db, firstRun)
+
+  return importFeeds(database.db, fetcherFor(servers), { clock: () => firstRun, runId })
+}
 
 describe('importing the recording of the Leeuwarder Courant', () => {
   it('stores its 50 items with the headline, the link, the key, the time and the paywall', async () => {
@@ -424,7 +432,7 @@ describe('importing all feeds', () => {
     await addFeed(`${on.origin}/rss/`, { domain: 'aan.test' })
     await addFeed(`${off.origin}/rss/`, { domain: 'uit.test', enabled: false })
 
-    const reports = await importFeeds(database.db, fetcherFor(servers), firstRun)
+    const reports = await importAll()
 
     expect(reports).toHaveLength(1)
     expect(off.requests).toHaveLength(0)
@@ -440,7 +448,7 @@ describe('importing all feeds', () => {
     await addFeed(`${broken.origin}/rss/`, { domain: 'b.test' })
     await addFeed(`${good.origin}/rss/`, { domain: 'c.test' })
 
-    const reports = await importFeeds(database.db, fetcherFor(servers), firstRun)
+    const reports = await importAll()
 
     expect(reports.map((report) => report.kind)).toEqual(['wait', 'error', 'imported'])
     expect(reports[2]).toMatchObject({ added: 2 })
@@ -454,7 +462,7 @@ describe('importing all feeds', () => {
 
     await database.db.insert(feeds).values({ sourceId: first.sourceId, url: `${two.origin}/rss/` })
 
-    await importFeeds(database.db, fetcherFor(servers), firstRun)
+    await importAll()
 
     const rows = await itemsInDatabase()
 
@@ -467,13 +475,13 @@ describe('importing all feeds', () => {
     const first = await addFeed(`${server.origin}/rss/`)
 
     await database.db.insert(feeds).values({ sourceId: first.sourceId, url: `${server.origin}/rss/twee` })
-    await importFeeds(database.db, fetcherFor(servers), firstRun)
+    await importAll()
 
     expect(server.paths().filter((path) => path === '/robots.txt')).toHaveLength(1)
   })
 
   it('has nothing to do without feeds', async () => {
-    expect(await importFeeds(database.db, fetcherFor(servers), firstRun)).toEqual([])
+    expect(await importAll()).toEqual([])
     expect(await listFeedsToImport(database.db)).toEqual([])
   })
 })
@@ -513,6 +521,12 @@ describe('the report', () => {
     expect(formatReport({ kind: 'wait', retryAfterSeconds: null, url })).toBe(
       'https://krant.test/rss/: not read, the source asks us to wait',
     )
+    expect(formatReport({ failuresInARow: 0, kind: 'postponed', retryAt: new Date('2026-10-22T11:30:00Z'), url })).toBe(
+      'https://krant.test/rss/: not read, the source asked us to wait until 2026-10-22 11:30:00 UTC',
+    )
+    expect(formatReport({ failuresInARow: 4, kind: 'postponed', retryAt: new Date('2026-10-22T11:59:00Z'), url })).toBe(
+      'https://krant.test/rss/: not read, it failed 4 runs in a row; next try from 2026-10-22 11:59:00 UTC',
+    )
   })
 
   it('leaves control characters out of a message that came from outside, and cuts it off', () => {
@@ -523,7 +537,8 @@ describe('the report', () => {
     })
 
     expect(line).not.toMatch(/\p{Cc}/u)
-    expect(line.length).toBeLessThan(400)
+    // 300 characters at most, the length of a reason in the database.
+    expect(line.slice(`${url}: failed, `.length)).toHaveLength(300)
     expect(line.endsWith('…')).toBe(true)
   })
 })

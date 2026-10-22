@@ -1,15 +1,19 @@
 import type { RowDataPacket } from 'mysql2/promise'
 
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { lockNameFor, prepareDatabase } from './prepare.ts'
+import { lockNameFor } from './lock.ts'
+import { prepareDatabase } from './prepare.ts'
 import { realSources, testSources } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 const migrationsFolder = fileURLToPath(new URL('../drizzle', import.meta.url))
+
+const journal = JSON.parse(readFileSync(`${migrationsFolder}/meta/_journal.json`, 'utf8')) as { entries: unknown[] }
 
 let database: TestDatabase
 
@@ -30,7 +34,7 @@ async function count(table: string) {
 
 async function lockIsFree() {
   const [rows] = await database.pool.query<RowDataPacket[]>('SELECT IS_FREE_LOCK(?) AS free', [
-    lockNameFor(database.url),
+    lockNameFor(database.url, 'migrate'),
   ])
 
   return rows[0]?.['free'] === 1
@@ -71,22 +75,22 @@ describe('prepareDatabase', () => {
     )
 
     expect(await count('sources')).toBe(testSources.length + realSources.length)
-    // The folder holds three migrations, and each is recorded once.
-    expect(await count('__drizzle_migrations')).toBe(3)
+    // Each migration in the folder is recorded once.
+    expect(await count('__drizzle_migrations')).toBe(journal.entries.length)
   })
 
   it('gives up when another process keeps the lock, and goes on once it is free', async () => {
     const holder = await database.pool.getConnection()
 
     try {
-      await holder.query('SELECT GET_LOCK(?, 0)', [lockNameFor(database.url)])
+      await holder.query('SELECT GET_LOCK(?, 0)', [lockNameFor(database.url, 'migrate')])
 
       await expect(
         prepareDatabase({ lockSeconds: 1, migrationsFolder, seed: false, url: database.url }),
       ).rejects.toThrow(/Could not get the lock .* within 1 seconds/)
       expect(await tables()).toEqual([])
     } finally {
-      await holder.query('DO RELEASE_LOCK(?)', [lockNameFor(database.url)])
+      await holder.query('DO RELEASE_LOCK(?)', [lockNameFor(database.url, 'migrate')])
       holder.release()
     }
 

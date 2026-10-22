@@ -1407,6 +1407,56 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het transport zelf schrijven met `node:https` en een eigen `lookup`, met het uitpakken en de grens van 5 MB erbij; geen dependency, maar meer eigen code die moet kloppen.
   Of de naam vooraf opzoeken en daarna `fetch` aanroepen; dat mist een naam die tussendoor verandert.
 
+### Een run neemt een lock, en een tweede run stopt meteen
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de import neemt aan het begin een lock in de database met `GET_LOCK`, met een naam per database, zoals de migraties.
+  Is de lock bezet, dan stopt de run meteen, met exitcode 0.
+- **Hoe:** `withLock` in `@fansite/db/lock` doet dat voor de import en voor de migraties, elk met een eigen naam: `fansite_import_<database>` en `fansite_migrate_<database>`.
+- **Waarom:** _Importtaken via cron_ beloofde een lock, zodat een taak nooit twee keer tegelijk draait.
+  Een run die stopt, mist niets, want een kwartier later komt de volgende.
+  Er is niets kapot, dus exitcode 0.
+  `GET_LOCK` hoort bij de verbinding, dus een proces dat sterft, laat de lock vanzelf los.
+- **Alternatieven:** wachten tot de lock vrij is; dan stapelen de runs zich op als er een blijft hangen.
+  Of een rij in een tabel als lock; die blijft staan als het proces sterft.
+
+### Elke run komt in de database, en een feed is ongezond na drie mislukte runs op rij
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** een tabel legt elke run vast, met per feed de uitkomst, 30 dagen lang.
+  Per feed staan de laatste geslaagde run en het aantal mislukte runs op rij.
+  Na drie mislukte runs op rij is een feed ongezond.
+  Wachten en een weigering door `robots.txt` tellen niet als mislukt.
+  `pnpm run import:status` toont de gezondheid; een pagina komt met het beheer (#31).
+- **Hoe:** het logboek is twee tabellen: `import_runs` met een rij per run, en `import_results` met een rij per feed per run.
+  De gezondheid staat in `feeds` zelf, naast de `ETag`: zo telt hij ook door na 30 dagen, en hoeft het overzicht geen runs na te tellen.
+- **Waarom:** één fout kan toeval zijn; drie op rij is drie kwartier.
+  Een bron die om rust vraagt of ons weert, is niet kapot.
+  Dertig dagen is zo'n 2.900 runs per feed, genoeg om een patroon te zien en weinig opslag.
+  Een opdracht werkt lokaal en op de host, zonder een pagina die interne gegevens aan iedereen toont.
+- **Alternatieven:** ongezond na één fout, of na een tijd zonder geslaagde run, zoals twee uur.
+  Of de runs altijd bewaren.
+  Of een pagina met `noindex`, die ook de Coordinator kan lezen (#49).
+  Of alleen het logbestand.
+
+### De importer wacht als een bron daarom vraagt, en bewaart robots.txt een dag
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** na een 429 of 503 slaat de import een feed over tot het moment uit `Retry-After`, hoogstens een dag, of een uur zonder `Retry-After`.
+  Na drie mislukte runs op rij probeert hij de feed eens per uur, tot hij weer slaagt.
+  De `robots.txt` van een host bewaart de fetcher hoogstens 24 uur in de database; een die niet te lezen was, bewaart hij niet.
+- **Hoe:** `feeds.retry_at` zegt tot wanneer de import een feed overslaat.
+  Is een feed ongezond, dan probeert de import hem 59 minuten na de vorige poging opnieuw.
+  Cron start een run soms een paar seconden vroeger, en met een uur precies viel de poging dan een run later.
+  De fetcher bewaart per origin, zoals `https://www.lc.nl`, de regels die voor ons gelden, in de tabel `robots_txt`.
+- **Waarom:** een bron die om rust vraagt, krijgt die.
+  Een kapotte feed hoeft geen 96 pogingen per dag.
+  RFC 9309 staat toe dat een crawler `robots.txt` 24 uur bewaart, en dat scheelt 95 van de 96 verzoeken per dag per host.
+  De database is de enige plek die tussen runs blijft staan: de deploy vervangt de map van de app.
+- **Alternatieven:** elke run opnieuw proberen, zoals nu.
+  Of uitstel dat steeds langer wordt; dat is meer code voor weinig winst bij één feed.
+  Of `robots.txt` in een bestand op de host bewaren.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters

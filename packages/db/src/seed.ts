@@ -98,7 +98,8 @@ export const realSources = [
 
 /**
  * Puts the test sources and the real sources, with their feeds, in the register. Running it again updates them by
- * domain and by feed address and adds no duplicates. It leaves the `ETag` and `Last-Modified` of a feed alone.
+ * domain and by feed address and adds no duplicates. It leaves the `ETag`, the `Last-Modified` and the health of a feed
+ * alone.
  */
 export async function seedSources(db: Database) {
   for (const source of testSources) {

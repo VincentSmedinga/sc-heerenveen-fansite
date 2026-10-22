@@ -6,6 +6,7 @@ import {
   date,
   datetime,
   int,
+  mediumtext,
   mysqlEnum,
   mysqlTable,
   text,
@@ -83,9 +84,16 @@ const itemKey = customType<{ data: string }>({
   dataType: () => `varchar(${itemLimits.key}) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin`,
 })
 
+/** The most characters of the reason a feed failed or waits, in `feeds` and `import_results`. */
+export const reasonMaxLength = 300
+
 /**
  * The feeds we read. A source can have more than one. The `ETag` and `Last-Modified` are from the last time the
  * importer read the feed and stored its items, so the source can answer that nothing changed.
+ *
+ * The importer also keeps the health of each feed here. A run succeeded for a feed when it read and stored it, or when
+ * the source said it had not changed. An error counts as a failure. Waiting and a refusal by robots.txt count as
+ * neither. Times are UTC.
  */
 export const feeds = mysqlTable('feeds', {
   id: int('id', { unsigned: true }).autoincrement().primaryKey(),
@@ -95,6 +103,12 @@ export const feeds = mysqlTable('feeds', {
   url: varchar('url', { length: 500 }).notNull().unique(),
   etag: text('etag'),
   lastModified: text('last_modified'),
+  lastSuccessAt: datetime('last_success_at'),
+  failuresInARow: int('failures_in_a_row', { unsigned: true }).notNull().default(0),
+  lastError: varchar('last_error', { length: reasonMaxLength }),
+  lastErrorAt: datetime('last_error_at'),
+  // The importer leaves the feed alone until then: the source asked us to wait, or the feed keeps failing.
+  retryAt: datetime('retry_at'),
 })
 
 export type Feed = typeof feeds.$inferSelect
@@ -136,3 +150,52 @@ export const items = mysqlTable(
 export type Item = typeof items.$inferSelect
 
 export type NewItem = typeof items.$inferInsert
+
+/**
+ * The log of the import: one row for each run, kept for 30 days. `finished_at` is empty while the run is busy, and stays
+ * empty when the process stopped halfway. A run that found another run holding the lock did nothing but write its row.
+ */
+export const importRuns = mysqlTable('import_runs', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  startedAt: datetime('started_at').notNull(),
+  finishedAt: datetime('finished_at'),
+  lockTaken: boolean('lock_taken').notNull().default(false),
+})
+
+export type ImportRun = typeof importRuns.$inferSelect
+
+export const importOutcomes = ['imported', 'not-modified', 'blocked-by-robots', 'wait', 'postponed', 'error'] as const
+
+export type ImportOutcome = (typeof importOutcomes)[number]
+
+/**
+ * What a run did with each feed: the outcome, how many items were new, changed, the same or skipped, and why the feed
+ * failed or was not read. The reason never holds values from a query. A row goes when its run or its feed goes.
+ */
+export const importResults = mysqlTable('import_results', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  runId: int('run_id', { unsigned: true })
+    .notNull()
+    .references(() => importRuns.id, { onDelete: 'cascade' }),
+  feedId: int('feed_id', { unsigned: true })
+    .notNull()
+    .references(() => feeds.id, { onDelete: 'cascade' }),
+  outcome: mysqlEnum('outcome', importOutcomes).notNull(),
+  added: int('added', { unsigned: true }).notNull().default(0),
+  updated: int('updated', { unsigned: true }).notNull().default(0),
+  unchanged: int('unchanged', { unsigned: true }).notNull().default(0),
+  skipped: int('skipped', { unsigned: true }).notNull().default(0),
+  reason: varchar('reason', { length: reasonMaxLength }),
+})
+
+export type ImportResult = typeof importResults.$inferSelect
+
+/**
+ * The rules of robots.txt that apply to us, per origin (`https://www.lc.nl`), as JSON. The fetcher keeps them for at
+ * most 24 hours (RFC 9309), so the next runs need not ask the host again. A robots.txt it could not read is not kept.
+ */
+export const robotsTxt = mysqlTable('robots_txt', {
+  origin: varchar('origin', { length: 300 }).primaryKey(),
+  rules: mediumtext('rules').notNull(),
+  fetchedAt: datetime('fetched_at').notNull(),
+})
