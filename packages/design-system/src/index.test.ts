@@ -6,7 +6,7 @@ import * as designSystem from './index'
 
 const root = join(import.meta.dirname, '..')
 
-const components = ['Body', 'Heading', 'Link', 'List', 'Logo', 'Navigation', 'Page', 'Root', 'Text']
+const components = ['Body', 'Heading', 'Link', 'List', 'Logo', 'Navigation', 'NewsItem', 'Page', 'Root', 'Text']
 
 describe('the JavaScript entry of the package', () => {
   it.each(components)('gives the component %s', (name) => {

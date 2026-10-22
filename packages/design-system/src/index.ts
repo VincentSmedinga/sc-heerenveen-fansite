@@ -15,6 +15,8 @@ export { Logo } from './components/logo/Logo'
 export type { LogoProps } from './components/logo/Logo'
 export { Navigation } from './components/navigation/Navigation'
 export type { NavigationItem, NavigationProps } from './components/navigation/Navigation'
+export { NewsItem } from './components/news-item/NewsItem'
+export type { NewsItemProps } from './components/news-item/NewsItem'
 export { Page, pageBodyElements } from './components/page/Page'
 export type {
   PageBodyElement,

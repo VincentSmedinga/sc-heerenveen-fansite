@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu twee pagina's: de homepage met "Binnenkort meer", en `/bronnen` met de bronnen uit het register.
+Er zijn nu twee pagina's: de homepage met de koppen van de afgelopen week, en `/bronnen` met de bronnen uit het register.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -31,7 +31,7 @@ Hij leest `DATABASE_URL` uit de `.env` in de root, als die er is.
 De gebruiker daarin moet databases mogen maken.
 Voor elke run die een database nodig heeft, maakt hij een lege database op die server, laat de site er zelf de tabellen in maken, en haalt de database daarna weg.
 Zo bewijst hij ook dat de migraties in de map zitten.
-Hij start de map ook met een database die niet bereikbaar is, en controleert dat de homepage werkt en `/bronnen` de foutpagina toont.
+Hij start de map ook met een database die niet bereikbaar is, en controleert dat de homepage en `/bronnen` de foutpagina tonen.
 
 ## Toegankelijkheid controleren
 
@@ -39,8 +39,16 @@ Hij start de map ook met een database die niet bereikbaar is, en controleert dat
 axe toetst op WCAG 2.0, 2.1 en 2.2, niveau A en AA, en op de best practices van axe.
 Elke schending laat de controle falen; er staan geen regels uit.
 Per pagina controleert de test ook precies één `h1`, `lang="nl"` op het `html`-element en geen horizontale scrollbalk in een venster van 320 pixels breed.
+`e2e/home.spec.ts` controleert wat axe niet ziet op de homepage: de volgorde van de koppen, wat er wel en niet staat, de hoogte van de links en dat er niets van een ander domein komt.
+`e2e/content-column.spec.ts` controleert dat de inhoud van elke pagina op een breed scherm in een kolom van 36 rem staat, in lijn met het logo, en dat geen regel meer dan 80 tekens telt.
 Een nieuwe pagina is één regel in de lijst, met het antwoord dat de pagina moet geven: 200, of 404 voor de pagina 'niet gevonden'.
 Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de pagina 'niet gevonden' toetst.
+
+De homepage toont koppen uit de database, en de seed heeft er geen.
+Daarom zet `e2e/global-setup.ts` vóór de eerste test verzonnen koppen op de testbronnen in de database, en haalt ze er na de laatste test weer uit (`e2e/headlines.ts`).
+Daarbij staan een bericht van ouder dan een week en een van een uitgezette bron, die de pagina moet weglaten.
+Draait de database van de controle ook echte berichten, door `pnpm run import`, dan staan die er gewoon tussen.
+Playwright wacht tot `/robots.txt` antwoordt en niet tot de homepage, want die bewaart haar koppen vijf minuten in het geheugen.
 
 Dit moet eerst draaien, vanuit de root:
 
@@ -65,11 +73,26 @@ Dat geldt voor elk `.tsx`-bestand in `src`, behalve tests.
 `pnpm lint` faalt op een HTML-element, zoals `<p>` of `<li>`.
 De header, met het logo en het hoofdmenu, en de footer staan in `src/app/layout.tsx`, dus elke pagina heeft ze.
 
+## De homepage
+
+De homepage toont onder de `h1` het blok "sc Heerenveen in de media": de berichten van de bronnen die aanstaan, van vandaag en de zes dagen ervoor, het nieuwste eerst, per dag onder een `h3`.
+Een bericht is een `NewsItem` uit het designsysteem, met de kop als link naar de bron, de bronnaam, de tijd en, achter een betaalmuur, "voor abonnees".
+Zijn er geen berichten, dan staat er een tekst voor bezoekers.
+Onder het blok staat de link naar Onze bronnen.
+
+`listRecentItems` in `@fansite/db/queries` haalt de berichten op, met alleen die velden.
+`src/news.ts` rekent de week en de dagen uit in Nederlandse tijd (`Europe/Amsterdam`), en schrijft de dag en de tijd.
+De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
+De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
+Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
+Lokaal staan er berichten na `pnpm run import` (zie de [README van de importer](../importer/README.md)).
+
 ## De bronnen
 
 `/bronnen` toont de bronnen die aanstaan, per soort, elk met een link naar de website en de beschrijving uit het register.
 De koppen van de soorten staan in `src/register.ts`.
 De server bewaart de lijst een uur (`src/sources.ts`), dus een wijziging in het register staat binnen een uur op de pagina.
+De pagina's delen één verbinding met de database (`src/database.ts`).
 
 ## De database bij het starten
 

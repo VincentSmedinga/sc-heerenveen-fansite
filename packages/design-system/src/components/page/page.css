@@ -44,6 +44,18 @@
     padding-block: 2rem;
   }
 
+  /*
+   * The content is in a narrower column than the page, as if a sidebar stood beside it, so that a line holds at most 80
+   * characters. The column starts in line with the logo, and the rest of the page column stays empty, for a sidebar
+   * later. On a screen narrower than the content column the content is as wide as the screen. The margin on the end side
+   * gives way, so the column stays at the start. When the Page.Body is a div, it holds the main and a sidebar next to
+   * each other, and the limit is on the main inside it.
+   */
+  .hf-page-body:is(main),
+  .hf-page-body > main {
+    max-inline-size: var(--hf-content-max-width);
+  }
+
   .hf-page-footer {
     border-block-start: 1px solid;
     border-block-start-color: var(--hf-colour-border-default);

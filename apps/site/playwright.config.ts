@@ -23,6 +23,8 @@ const assembleAndStartServer =
 export default defineConfig({
   forbidOnly: process.env['CI'] !== undefined,
   fullyParallel: true,
+  // Puts the made-up headlines in the database for the homepage, once the site is up and before the first test.
+  globalSetup: './e2e/global-setup.ts',
   // Chromium only (see docs/beslissingen.md). Install it once with `pnpm --filter site exec playwright install chromium`.
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   // Not the default HTML report, which opens a server after a failure.
@@ -35,7 +37,9 @@ export default defineConfig({
       // HOSTNAME is the name of the machine in many shells, and the server would listen on that.
       env: { HOSTNAME: '127.0.0.1', PORT: port, SITE_ENV: 'acceptance' },
       timeout: 60_000,
-      url: origin,
+      // Not the homepage: it keeps its headlines for five minutes, and a request before global-setup.ts has put the made-up
+      // headlines in would keep an empty list for the whole run. robots.txt doesn't read the database.
+      url: `${origin}/robots.txt`,
     },
     {
       command: startServer,

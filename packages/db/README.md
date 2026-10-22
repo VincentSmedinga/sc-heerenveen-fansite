@@ -128,6 +128,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`), hun types en de lengtes van `items`;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
+  `listRecentItems(db, since, until)` geeft de berichten van die bronnen van `since` tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam);
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;
 - `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de bronnen uit de seed erin.

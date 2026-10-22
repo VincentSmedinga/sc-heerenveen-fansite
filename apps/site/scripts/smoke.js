@@ -137,6 +137,13 @@ await withEmptyDatabase((database) =>
     assert.match(html, /<html lang="nl"/)
     assert.equal(home.headers.get('x-powered-by'), null)
 
+    // The homepage reads the items from the database, and the seed has none. So it says there is no news this week.
+    assert.match(html, /<h1[^>]*>sc Heerenveen Fansite<\/h1>/)
+    assert.match(html, /<h2[^>]*>sc Heerenveen in de media<\/h2>/)
+    assert.match(html, /We hebben deze week nog geen nieuws gevonden\. Kijk straks nog eens\./)
+    assert.match(html, /<a href="\/bronnen">Onze bronnen<\/a>/)
+    assert.doesNotMatch(html, /Binnenkort meer/)
+
     const asset = html.match(/\/_next\/static\/[^"'\\]+\.(?:css|js)/)?.[0]
     assert.ok(asset, 'the page links to no static file')
 
@@ -199,6 +206,7 @@ await withEmptyDatabase((database) =>
 
     const home = await fetch(origin)
     assert.equal(home.headers.get('x-robots-tag'), null, 'production must be indexable')
+    assert.match(await home.text(), /We hebben deze week nog geen nieuws gevonden\./)
     assert.doesNotMatch(await (await fetch(`${origin}/robots.txt`)).text(), /^Disallow: \/$/m)
 
     const sources = await fetch(`${origin}/bronnen`)
@@ -209,9 +217,10 @@ await withEmptyDatabase((database) =>
   }),
 )
 
-// A database that isn't there doesn't stop the site. The homepage doesn't need it, the log says what is wrong, and the
-// sources page is the error page. The error page is in the HTML, so it works without JavaScript. The status is 200: Next.js
-// can't send a page that failed with a 5xx and the page in the HTML, so the page asks search engines to leave it out.
+// A database that isn't there doesn't stop the site. The log says what is wrong, and the pages that read the database, the
+// homepage and the sources page, are the error page. The error page is in the HTML, so it works without JavaScript. The
+// status is 200: Next.js can't send a page that failed with a 5xx and the page in the HTML, so the page asks search
+// engines to leave it out.
 const unreachable = new URL(databaseUrl)
 unreachable.hostname = '127.0.0.1'
 unreachable.port = '1'
@@ -221,8 +230,15 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   assert.match(log(), /Could not bring the database up to date.*ECONNREFUSED/)
 
   const home = await fetch(origin)
+  const homeHtml = await home.text()
   assert.equal(home.status, 200)
-  assert.match(await home.text(), /<h1[^>]*>sc Heerenveen Fansite<\/h1>/)
+  assert.match(homeHtml, /<h1[^>]*>Er ging iets mis<\/h1>/)
+  // The title template of the layout doesn't reach the page in its own segment, so the title is the error title alone.
+  assert.match(homeHtml, /<title>Er ging iets mis<\/title>/)
+  assert.match(homeHtml, /<meta name="robots" content="noindex"\/>/)
+  assert.match(homeHtml, /<a href="\/">Probeer het opnieuw<\/a>/)
+  assert.doesNotMatch(homeHtml, /sc Heerenveen in de media|Binnenkort meer/)
+  assert.match(log(), /Could not read the headlines for the homepage: .*ECONNREFUSED/)
 
   const sources = await fetch(`${origin}/bronnen`)
   const sourcesHtml = await sources.text()

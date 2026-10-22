@@ -79,6 +79,7 @@ export default definePreview({
             'Text',
             'Link',
             'List',
+            'NewsItem',
             'Logo',
           ],
           'Patronen',

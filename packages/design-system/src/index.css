@@ -30,5 +30,6 @@
 @import url('./components/link/link.css');
 @import url('./base/elements.css');
 @import url('./components/list/list.css');
+@import url('./components/news-item/news-item.css');
 @import url('./base/table.css');
 @import url('./base/forms.css');

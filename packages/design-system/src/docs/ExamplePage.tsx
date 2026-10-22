@@ -41,6 +41,10 @@ export const ExampleContent = (): ReactNode => (
       Hier komen de koppen van de media die over de club schrijven. Elke kop is een link naar de journalist zelf, met de
       naam van de bron erbij.
     </Text>
+    <Text>
+      Op een breed scherm staat deze tekst in een smallere kolom dan de pagina: een regel telt er hoogstens 80 tekens.
+      Rechts ervan blijft ruimte over, voor een zijbalk later.
+    </Text>
     <Heading appearance={3} level={2}>
       Zo lees je de site
     </Heading>

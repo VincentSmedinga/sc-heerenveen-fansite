@@ -1,0 +1,23 @@
+/* A line of news: the headline as a link, with the source, the time and the paywall under it. */
+
+@layer hf.components {
+  .hf-news-item {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+
+    /* A long word breaks instead of making the page scroll sideways. */
+    overflow-wrap: anywhere;
+  }
+
+  /* A target of at least 24 pixels high (WCAG 2.5.8). One line of the smallest headline is 23 pixels. */
+  .hf-news-item-headline {
+    min-block-size: 1.5rem;
+  }
+
+  .hf-news-item-meta {
+    color: var(--hf-colour-text-secondary);
+    margin-block: 0;
+  }
+}
