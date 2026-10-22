@@ -429,6 +429,44 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** acceptatie leeg laten en de bronnen met de hand invoeren.
   Dat kan pas met het beheer (#30), en dan vervangen de echte bronnen de testbronnen.
 
+### De importer gaat als één bestand mee in de map van de site
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `esbuild` bundelt de importer met alles wat hij nodig heeft tot één JavaScript-bestand.
+  `assemble` zet het in de map voor de host, dus dezelfde deploy kopieert de site en de importer.
+- **Hoe:** het bestand is `apps/importer/import.mjs`.
+  De map heeft geen `package.json` die zegt dat `.js` een ES-module is, dus de extensie zegt het.
+- **Waarom:** op de server bouwen we niets.
+  Node haalt geen typen weg uit bestanden in `node_modules`, dus `@fansite/db`, dat als TypeScript wordt geleverd, werkt daar niet zonder bouwstap.
+  Eén bestand heeft geen `node_modules` en geen symbolische links nodig.
+  Samen uitrollen houdt de importer gelijk met het schema, dat de site bij het starten bijwerkt.
+- **Alternatieven:** een eigen map met een eigen `node_modules` via `pnpm deploy`, plat gemaakt zoals bij de site; dan moet `@fansite/db` alsnog gebouwd worden.
+  Of een eigen map met een eigen stap in de workflow; dan kunnen de importer en het schema uit de pas lopen.
+
+### Cron krijgt DATABASE_URL uit een eigen bestand op de host
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de cronjob start de importer met `node --env-file` en een bestand in de thuismap, buiten de map van de app en buiten `public_html`, dat alleen het account mag lezen.
+- **Waarom:** een cronjob krijgt de variabelen van de Node.js-app in DirectAdmin niet.
+  Het bestand blijft op de host en komt niet in GitHub.
+- **Let op:** het wachtwoord van de database staat nu op twee plekken op de host: bij de app en in dit bestand.
+  Wie het verandert, past beide aan.
+  Dat wijkt af van _De site draait de migraties als ze start_, waar het op één plek bleef.
+- **Alternatieven:** cron vraagt een adres van de site op, met een token, en de site draait de import met haar eigen `DATABASE_URL`.
+  Dan staat het wachtwoord op één plek, maar draait de import in het webproces, en heeft de site een nieuw adres en een nieuw geheim nodig.
+  Of `DATABASE_URL` in de opdracht van de cronjob; dan staat het wachtwoord leesbaar in DirectAdmin.
+
+### Tot de jobplanner draait de import elke 15 minuten, zonder lock
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** cron start de importer op acceptatie elke 15 minuten, niet op het hele kwartier.
+  De lock in de database komt met de jobplanner (#13).
+- **Waarom:** zo staat nieuws binnen een kwartier op de site, en de homepage bewaart de koppen vijf minuten.
+  Eén feed kost een paar seconden, en de fetcher stopt na 15 seconden per verzoek, dus twee runs halen elkaar niet in.
+  Op het hele kwartier starten veel cronjobs tegelijk.
+- **Alternatieven:** elke 30 minuten; de Leeuwarder Courant stuurt geen `ETag`, dus elke run haalt de hele feed, maar het nieuws komt dan tot een half uur later.
+  Of nu al een lock met `GET_LOCK`, zoals bij de migraties.
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft
@@ -1283,6 +1321,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Lukt het lezen of bewaren niet, dan blijven de oude waarden staan.
 - **Waarom:** bewaren we de `ETag` voordat de berichten er staan, en mislukt het bewaren, dan zegt de bron de volgende keer dat niets veranderd is, en missen we die berichten.
 - **Alternatieven:** de `ETag` meteen bewaren; dat is eenvoudiger, maar kan berichten laten ontbreken tot de feed verandert.
+
+### De fetcher weigert adressen op een eigen netwerk, en controleert dat bij het verbinden
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de fetcher verbindt niet met een adres dat niet op het openbare internet ligt, zoals `localhost`, `127.0.0.1` of `10.0.0.1`, ook niet na een doorverwijzing.
+  Hij gebruikt daarvoor `fetch` en een `Agent` van `undici`, met een `lookup` die het adres controleert waarmee hij echt verbindt.
+- **Hoe:** de lijst volgt de registers van IANA voor adressen met een bijzonder doel.
+  Van IPv6 is alleen `2000::/3` openbaar, zonder de bijzondere delen daarin, dus een IPv4-adres in IPv6-vorm weigert de fetcher altijd.
+  Wijst een naam naar een openbaar adres en naar een adres op een eigen netwerk, dan weigert hij de naam.
+  Tests met een eigen webserver geven de fetcher precies de adressen van die servers mee (`testOrigins`); de opdracht `pnpm run import` doet dat nooit, en een omgevingsvariabele kan het niet aanzetten.
+- **Waarom:** de importer draait op gedeelde hosting, naast het forum en de database.
+  Een bron kan doorverwijzen naar een adres op dat netwerk, of een naam laten wijzen naar zo'n adres, en dan haalt de importer iets op wat niet voor hem bedoeld is.
+  Een controle vóór het verzoek mist een naam die bij het verbinden naar een ander adres wijst.
+  `fetch` van Node zelf heeft geen haak voor het verbinden; `undici` is de bibliotheek eronder, onderhouden door het Node.js-team.
+- **Alternatieven:** het transport zelf schrijven met `node:https` en een eigen `lookup`, met het uitpakken en de grens van 5 MB erbij; geen dependency, maar meer eigen code die moet kloppen.
+  Of de naam vooraf opzoeken en daarna `fetch` aanroepen; dat mist een naam die tussendoor verandert.
 
 ## Redactie
 

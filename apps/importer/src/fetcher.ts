@@ -1,6 +1,12 @@
+import type { Response } from 'undici'
+
+import { Agent, fetch } from 'undici'
+
+import type { Resolve } from './address-check.ts'
 import type { RobotsRule } from './robots.ts'
 
 import rootPackage from '../../../package.json' with { type: 'json' }
+import { checkedConnector, PrivateAddressError, resolveInDns } from './address-check.ts'
 import { isAllowed, parseRobots } from './robots.ts'
 
 /** The name robots.txt files know us by. It is part of the user agent. */
@@ -23,6 +29,7 @@ export type ErrorReason =
   | 'invalid-redirect'
   | 'invalid-url'
   | 'network'
+  | 'private-address'
   | 'robots-unreadable'
   | 'timeout'
   | 'too-large'
@@ -31,6 +38,20 @@ export type ErrorReason =
 export type Fetcher = {
   /** Gets a URL, following the rules in the README. It never retries and never throws. */
   fetch: (url: string | URL, previous?: PreviousVersion) => Promise<FetchOutcome>
+}
+
+export type FetcherOptions = {
+  /**
+   * Finds the addresses of a host name, as `lookup` of `node:dns` does with `all: true`. A test gives its own, so it
+   * asks no real DNS server. The fetcher checks the addresses it gets either way.
+   */
+  resolve?: Resolve
+  /**
+   * Origins the fetcher may reach although they are not on the public internet, such as `http://127.0.0.1:41234`.
+   * Only for tests with a web server of their own on this computer: the import command never sets this.
+   */
+  testOrigins?: string[]
+  timeoutMs?: number
 }
 
 /**
@@ -81,21 +102,34 @@ type ErrorOutcome = Extract<FetchOutcome, { kind: 'error' }>
 
 type Failure = ErrorOutcome | Extract<FetchOutcome, { kind: 'blocked-by-robots' }>
 
-type Robots = { kind: 'rules'; rules: RobotsRule[] } | { kind: 'unreadable'; message: string }
+type Robots = { kind: 'rules'; rules: RobotsRule[] } | { kind: 'unreadable'; message: string; reason: RobotsFailure }
+
+/** Why a robots.txt could not be read: the host failed to give it, or the fetcher refused the address. */
+type RobotsFailure = Extract<ErrorReason, 'private-address' | 'robots-unreadable'>
 
 const redirectStatuses = new Set([301, 302, 303, 307, 308])
+
+/** Asks for a URL once, without following a redirect, through the agent that checks each address. */
+type Get = (url: URL, headers: Record<string, string>) => Promise<Response>
 
 /**
  * Makes a fetcher. One fetcher reads the robots.txt of each host once, so make one per run of a command and share it
  * between adapters.
  */
-export function createFetcher({ timeoutMs = defaultLimits.timeoutMs }: { timeoutMs?: number } = {}): Fetcher {
+export function createFetcher({
+  resolve = resolveInDns,
+  testOrigins = [],
+  timeoutMs = defaultLimits.timeoutMs,
+}: FetcherOptions = {}): Fetcher {
+  const dispatcher = new Agent({ connect: checkedConnector(resolve, testOrigins) })
   const robotsByOrigin = new Map<string, Promise<Robots>>()
+  const get: Get = (url, headers) =>
+    fetch(url, { dispatcher, headers, redirect: 'manual', signal: AbortSignal.timeout(timeoutMs) })
 
   function robotsFor(url: URL) {
     let robots = robotsByOrigin.get(url.origin)
     if (robots === undefined) {
-      robots = loadRobots(url.origin, timeoutMs)
+      robots = loadRobots(url.origin, get, timeoutMs)
       robotsByOrigin.set(url.origin, robots)
     }
     return robots
@@ -104,7 +138,7 @@ export function createFetcher({ timeoutMs = defaultLimits.timeoutMs }: { timeout
   async function checkRobots(url: URL): Promise<Failure | undefined> {
     const robots = await robotsFor(url)
     if (robots.kind === 'unreadable') {
-      return failure(url, 'robots-unreadable', robots.message)
+      return failure(url, robots.reason, robots.message)
     }
     return isAllowed(robots.rules, url) ? undefined : { kind: 'blocked-by-robots', url: url.href }
   }
@@ -166,7 +200,7 @@ export function createFetcher({ timeoutMs = defaultLimits.timeoutMs }: { timeout
         headers['If-Modified-Since'] = previous.lastModified
       }
 
-      const followed = await follow(start, headers, timeoutMs, checkRobots)
+      const followed = await follow(start, headers, get, timeoutMs, checkRobots)
       if (!('response' in followed)) {
         return followed
       }
@@ -198,6 +232,9 @@ function describeError(url: URL, error: unknown, timeoutMs: number): ErrorOutcom
   }
   // The reason of a failed connection is in the cause: `fetch failed` says nothing.
   const cause = error instanceof Error && error.cause instanceof Error ? error.cause : error
+  if (cause instanceof PrivateAddressError) {
+    return failure(url, 'private-address', cause.message)
+  }
   return failure(url, 'network', cause instanceof Error ? cause.message : String(cause))
 }
 
@@ -228,6 +265,7 @@ function failure(url: string | URL, reason: ErrorReason, message: string, status
 async function follow(
   start: URL,
   headers: Record<string, string>,
+  get: Get,
   timeoutMs: number,
   check: (url: URL) => Failure | Promise<Failure | undefined> | undefined,
 ): Promise<Failure | { response: Response; url: URL }> {
@@ -241,9 +279,9 @@ async function follow(
 
     let response: Response
     try {
-      // `manual` hands us the redirect itself. No cookies are stored or sent: `fetch` in Node has no cookie jar, and
-      // we set no `Cookie` header.
-      response = await fetch(url, { headers, redirect: 'manual', signal: AbortSignal.timeout(timeoutMs) })
+      // `get` asks with `redirect: 'manual'`, which hands us the redirect itself. No cookies are stored or sent:
+      // undici's `fetch` has no cookie jar, and we set no `Cookie` header.
+      response = await get(url, headers)
     } catch (error) {
       return describeError(url, error, timeoutMs)
     }
@@ -274,11 +312,25 @@ async function follow(
 }
 
 /** Reads the robots.txt of an origin, as RFC 9309 says to treat each answer. */
-async function loadRobots(origin: string, timeoutMs: number): Promise<Robots> {
-  const unreadable = (message: string): Robots => ({ kind: 'unreadable', message: `robots.txt: ${message}` })
-  const followed = await follow(new URL('/robots.txt', origin), { 'User-Agent': userAgent }, timeoutMs, () => undefined)
+async function loadRobots(origin: string, get: Get, timeoutMs: number): Promise<Robots> {
+  const unreadable = (message: string, reason: RobotsFailure = 'robots-unreadable'): Robots => ({
+    kind: 'unreadable',
+    message: `robots.txt: ${message}`,
+    reason,
+  })
+  const followed = await follow(
+    new URL('/robots.txt', origin),
+    { 'User-Agent': userAgent },
+    get,
+    timeoutMs,
+    () => undefined,
+  )
   if (!('response' in followed)) {
-    return unreadable(followed.kind === 'error' ? followed.message : 'blocked')
+    if (followed.kind !== 'error') {
+      return unreadable('blocked')
+    }
+    // An address the fetcher refused keeps that reason: it is not the host that failed.
+    return unreadable(followed.message, followed.reason === 'private-address' ? 'private-address' : 'robots-unreadable')
   }
 
   const { response, url } = followed

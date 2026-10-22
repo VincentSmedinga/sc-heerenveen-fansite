@@ -10,7 +10,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { TestServer } from './test-server.ts'
 
-import { reply, startServer } from './test-server.ts'
+import { runImport } from './import.ts'
+import { fetcherFor, reply, startServer } from './test-server.ts'
 
 const script = fileURLToPath(new URL('./import.ts', import.meta.url))
 
@@ -49,8 +50,19 @@ async function addFeed(domain: string, answer: ReturnType<typeof reply>) {
   return server
 }
 
+/**
+ * Runs the import as the command does, with a fetcher that may reach the test servers. The command itself refuses them:
+ * they are on this computer. Returns the exit code and what the command would print.
+ */
+async function importFromTestServers() {
+  const lines: string[] = []
+  const code = await runImport(database.url, fetcherFor(servers), (line) => lines.push(line))
+
+  return { code, stdout: `${lines.join('\n')}\n` }
+}
+
 /** Runs `pnpm run import` the way it starts: as its own process, with the database from the environment. */
-async function runImport(env: Record<string, string | undefined> = { DATABASE_URL: database.url }) {
+async function runCommand(env: Record<string, string | undefined> = { DATABASE_URL: database.url }) {
   try {
     const { stderr, stdout } = await promisify(execFile)(process.execPath, [script], {
       env: { ...process.env, ...env },
@@ -64,11 +76,11 @@ async function runImport(env: Record<string, string | undefined> = { DATABASE_UR
   }
 }
 
-describe('the import command', () => {
+describe('the import', () => {
   it('reads the feeds, stores their items, and prints a line for each feed', async () => {
     const server = await addFeed('krant.test', reply(200, recording, { 'Content-Type': 'text/xml' }))
 
-    const { code, stdout } = await runImport()
+    const { code, stdout } = await importFromTestServers()
 
     expect(code).toBe(0)
     expect(stdout.trim().split('\n')).toEqual([`${server.origin}/rss/: 50 new, 0 updated, 0 unchanged, 0 skipped`])
@@ -78,9 +90,9 @@ describe('the import command', () => {
   it('makes no duplicates when it runs again', async () => {
     const server = await addFeed('krant.test', reply(200, recording, { 'Content-Type': 'text/xml' }))
 
-    await runImport()
+    await importFromTestServers()
 
-    const { code, stdout } = await runImport()
+    const { code, stdout } = await importFromTestServers()
 
     expect(code).toBe(0)
     expect(stdout.trim()).toBe(`${server.origin}/rss/: 0 new, 0 updated, 50 unchanged, 0 skipped`)
@@ -92,7 +104,7 @@ describe('the import command', () => {
 
     await addFeed('krant.test', reply(200, recording, { 'Content-Type': 'text/xml' }))
 
-    const { code, stdout } = await runImport()
+    const { code, stdout } = await importFromTestServers()
     const lines = stdout.trim().split('\n')
 
     expect(code).toBe(1)
@@ -104,21 +116,34 @@ describe('the import command', () => {
   it('exits with 0 when the source asks us to wait or does not allow the feed: that is no failure of ours', async () => {
     await addFeed('druk.test', reply(429, 'Te druk', { 'Retry-After': '60' }))
 
-    const { code, stdout } = await runImport()
+    const { code, stdout } = await importFromTestServers()
 
     expect(code).toBe(0)
     expect(stdout).toContain('the source asks us to wait 60 seconds')
   })
+})
 
+describe('the import command', () => {
   it('says so when no source has a feed', async () => {
-    const { code, stdout } = await runImport()
+    const { code, stdout } = await runCommand()
 
     expect(code).toBe(0)
     expect(stdout).toContain('There are no feeds to read')
   })
 
+  it('refuses a feed on this computer, and exits with 1', async () => {
+    const server = await addFeed('lokaal.test', reply(200, recording, { 'Content-Type': 'text/xml' }))
+
+    const { code, stdout } = await runCommand()
+
+    expect(code).toBe(1)
+    expect(stdout.trim()).toBe(`${server.origin}/rss/: failed, robots.txt: 127.0.0.1 is not on the public internet`)
+    expect(server.requests).toEqual([])
+    expect(await database.db.select().from(items)).toHaveLength(0)
+  })
+
   it('stops with a clear message when there is no DATABASE_URL', async () => {
-    const { code, stderr } = await runImport({ DATABASE_URL: undefined })
+    const { code, stderr } = await runCommand({ DATABASE_URL: undefined })
 
     expect(code).not.toBe(0)
     expect(stderr).toContain('DATABASE_URL')
