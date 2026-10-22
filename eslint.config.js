@@ -54,6 +54,7 @@ export default defineConfig([
       '.claude/hooks/*.js',
       'apps/site/scripts/*.js',
       'baseline.test.js',
+      'scripts/*.js',
     ],
     languageOptions: {
       globals: globals.node,

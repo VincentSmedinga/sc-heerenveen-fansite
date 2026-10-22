@@ -3,10 +3,12 @@ import type { Metadata } from 'next'
 import { Card, Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
 import { cache, Fragment } from 'react'
 
+import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
 import { getHeadlines } from '../headlines'
 import { dateTimeOf, formatTime, groupByDay } from '../news'
 import { ServerError, serverErrorTitle } from '../ServerError'
+import { withBranch } from '../title'
 
 // Render on each request, so the build never reads the database. getHeadlines caches the list itself.
 export const dynamic = 'force-dynamic'
@@ -29,7 +31,9 @@ const loadHeadlines = cache(async () => {
 export async function generateMetadata(): Promise<Metadata> {
   // A page that failed answers 200, so noindex keeps search engines from keeping it. The title template of the layout
   // doesn't apply to the page in its own segment, so the title of the error page is the title alone.
-  return (await loadHeadlines()) === undefined ? { robots: { index: false }, title: serverErrorTitle } : {}
+  return (await loadHeadlines()) === undefined
+    ? { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
+    : {}
 }
 
 export default async function HomePage() {
