@@ -11,7 +11,7 @@
     overflow-wrap: anywhere;
   }
 
-  /* A target of at least 24 pixels high (WCAG 2.5.8). One line of the smallest headline is 23 pixels. */
+  /* A target of at least 24 pixels high (WCAG 2.5.8). One line of the smallest headline is 26 pixels. */
   .hf-news-item-headline {
     min-block-size: 1.5rem;
   }

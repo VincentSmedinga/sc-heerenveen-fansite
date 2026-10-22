@@ -793,6 +793,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat breekpunt is voorlopig.
 - **Waarom:** bij de grote koppen is het verschil groot genoeg om geleidelijk te schalen; bij de kleine is het 1 pixel.
 - **Alternatieven:** alles met `clamp()`.
+- **Later:** zie _Elke tekststijl een stap groter_.
+  De maten zijn een stap groter; de nieuwskop springt op een smal scherm nu naar 19 pixels.
 
 ### Voorlopige kleurtokens
 
@@ -1667,3 +1669,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een vaste termijn kunnen vrijwilligers niet altijd halen, en een belofte die we niet houden, kost meer vertrouwen dan geen getal.
 - **Alternatieven:** de projecteigenaar bij naam als verantwoordelijke; dat is voor de AVG herkenbaarder.
   Of een vaste termijn, zoals twee werkdagen of een week.
+
+### Elke tekststijl een stap groter
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** Tekst is 18 pixels, Nieuwskop 20 (op een smal scherm 19), Meta 16 en Label 15.
+  De koppen en het woordmerk blijven gelijk, en de regelafstanden houden dezelfde verhoudingen.
+- **Waarom:** in de hoofdkolom van 48 rem telt een regel bij 17 pixels zo'n 96 tekens.
+  Groter leest prettiger en past bij een site die iedereen moet kunnen lezen.
+  Eén stap houdt de verhoudingen tussen de stijlen, en de koppen zijn al groot genoeg.
+- **Alternatieven:** twee stappen, met Tekst op 19 pixels; dan passen er nog minder woorden in een kaart.
+  Of alles, de koppen en het woordmerk inbegrepen, 12,5% groter.
