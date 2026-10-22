@@ -1,7 +1,8 @@
 # Puts every merge to main on the acceptance environment, https://acc.sc.heerenveen.org. It builds the site, starts the
-# build the way the host does to check it, and copies it over SSH. docs/acceptatieomgeving.md says what the owner sets up
-# on the host and in GitHub. Until the secrets are there, the job builds and checks, and skips the copy with a notice, so
-# main stays green.
+# build the way the host does to check it, copies it over SSH and checks the sources page. The site makes its own tables
+# and puts the test sources in them when the host starts it. docs/acceptatieomgeving.md says what the owner sets up on the
+# host and in GitHub. Until the secrets are there, the job builds and checks, and skips the copy and the last check with a
+# notice, so main stays green.
 
 name: Acceptance
 
@@ -29,8 +30,8 @@ jobs:
       # The database below, for the smoke test only. The site on the host uses its own DATABASE_URL.
       DATABASE_URL: mysql://root@127.0.0.1:3306/fansite
       NEXT_TELEMETRY_DISABLED: '1'
-    # The smoke test starts the site, which reads the source register. This MariaDB is empty and gone after the run, as in
-    # CI, so it has no password.
+    # The smoke test starts the site on empty databases that it makes on this server. The site migrates them itself, so
+    # nothing here does. This MariaDB is gone after the run, as in CI, so it has no password.
     services:
       mariadb:
         env:
@@ -61,12 +62,8 @@ jobs:
 
       - run: pnpm --filter site build
 
-      - name: Migrate and seed the database for the smoke test
-        run: |
-          pnpm db:migrate
-          pnpm db:seed
-
-      # Copies the build and the static files, which Next.js leaves out of the standalone folder, to one folder, and starts it.
+      # Copies the build, the static files and the migrations, which Next.js leaves out of the standalone folder, to one folder,
+      # and starts it on an empty database.
       - name: Assemble the folder for the host and check what it serves
         run: |
           pnpm --filter site assemble "$RUNNER_TEMP/site"
@@ -124,3 +121,21 @@ jobs:
         run: |
           ssh -p 26 -i "$HOME/.ssh/acceptance_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
             "$SSH_USER@$SSH_HOST" "mkdir -p $(printf '%q' "$DEPLOY_PATH")/tmp && touch $(printf '%q' "$DEPLOY_PATH")/tmp/restart.txt"
+
+      # The site migrates the database and puts the test sources in it when the host starts the app, so a page that reads
+      # the register shows whether that worked. A migration that fails turns this run red. The host starts the app on the
+      # first request after the restart, so the check tries for a minute.
+      - name: Check the sources page on acceptance
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          while [ "$SECONDS" -lt 60 ]; do
+            status=$(curl --silent --max-time 10 --output "$RUNNER_TEMP/bronnen.html" --write-out '%{http_code}' https://acc.sc.heerenveen.org/bronnen || true)
+            if [ "$status" = 200 ] && grep -q Testkrant "$RUNNER_TEMP/bronnen.html"; then
+              echo "https://acc.sc.heerenveen.org/bronnen shows the test sources."
+              exit 0
+            fi
+            echo "Status $status, and no test source on the page yet."
+            sleep 5
+          done
+          echo "::error title=Acceptance check failed::https://acc.sc.heerenveen.org/bronnen does not answer 200 with the test sources. See docs/acceptatieomgeving.md."
+          exit 1

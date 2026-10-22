@@ -8,6 +8,7 @@ De andere pagina's komen met de volgende issues.
 
 Zet in de root eerst `.env` klaar (zie de [README](../../README.md)).
 Start de database en zet er de testbronnen in, zoals de [README van `@fansite/db`](../../packages/db/README.md) zegt.
+De site draait de migraties zelf als hij start (zie _De database bij het starten_), maar de testbronnen zet hij er alleen op acceptatie in.
 Start dan de site:
 
 ```sh
@@ -25,8 +26,12 @@ Next.js leest alleen een `.env` in deze map, dus `next.config.ts` laadt de `.env
 | `pnpm --filter site smoke <map>`           | Start die map en controleert wat een bezoeker en een zoekmachine krijgen               |
 | `pnpm test:a11y`                           | Toetst de pagina's van de gebouwde site met axe (zie _Toegankelijkheid controleren_)   |
 
-De rooktest heeft de database nodig, met de migraties gedraaid.
+De rooktest heeft een MariaDB nodig, zoals de tests van `@fansite/db`: `docker compose up -d --wait`.
 Hij leest `DATABASE_URL` uit de `.env` in de root, als die er is.
+De gebruiker daarin moet databases mogen maken.
+Voor elke run die een database nodig heeft, maakt hij een lege database op die server, laat de site er zelf de tabellen in maken, en haalt de database daarna weg.
+Zo bewijst hij ook dat de migraties in de map zitten.
+Hij start de map ook met een database die niet bereikbaar is, en controleert dat de homepage werkt en `/bronnen` de foutpagina toont.
 
 ## Toegankelijkheid controleren
 
@@ -39,11 +44,13 @@ Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de
 
 Dit moet eerst draaien, vanuit de root:
 
-1. De database met de seed: `docker compose up -d --wait`, `pnpm db:migrate` en `pnpm db:seed`.
+1. De database: `docker compose up -d --wait`.
+   De gebouwde site draait de migraties en zet de testbronnen er zelf in, want de controle start hem met `SITE_ENV=acceptance`.
 2. `pnpm build`.
 3. Eenmalig Chromium: `pnpm --filter site exec playwright install chromium`.
 
 De opdracht zet de build zelf klaar in `.next/a11y`, zoals `assemble` dat doet, en start die.
+Hij start de site een tweede keer, zonder bereikbare database, voor de foutpagina (`e2e/error-page.spec.ts`): in licht en donker, en zonder JavaScript.
 CI geeft de map van de rooktest mee in `SITE_FOLDER`, zodat dezelfde map wordt getoetst.
 Faalt een pagina, dan noemt de log de pagina en het thema (in de naam van de test), de regel van axe en het element.
 
@@ -63,6 +70,25 @@ De header, met het logo en het hoofdmenu, en de footer staan in `src/app/layout.
 `/bronnen` toont de bronnen die aanstaan, per soort, elk met een link naar de website en de beschrijving uit het register.
 De koppen van de soorten staan in `src/register.ts`.
 De server bewaart de lijst een uur (`src/sources.ts`), dus een wijziging in het register staat binnen een uur op de pagina.
+
+## De database bij het starten
+
+Als de server start, zet hij de database klaar, en pas daarna beantwoordt hij verzoeken (`src/instrumentation.ts`).
+Hij draait de migraties die de database nog niet had, uit `packages/db/drizzle`, en alleen met `SITE_ENV=acceptance` zet hij de testbronnen in het register.
+`assemble` zet de migraties in de map, op dezelfde plek ten opzichte van `apps/site` als in de repository.
+Een slot in de database (`GET_LOCK`) laat twee processen die tegelijk starten, om de beurt migreren.
+Lukt het niet, bijvoorbeeld omdat de database niet bereikbaar is, dan staat de reden in het logboek en blijft de server draaien.
+`docs/acceptatieomgeving.md` zegt wat je in het logboek ziet.
+
+## De foutpagina
+
+Een pagina die door een fout op de server niet lukt, toont `Er ging iets mis` in de paginaopbouw (`src/ServerError.tsx`).
+Next.js 16 kan niet allebei: een pagina die gooit, geeft een 500 met een lege `body`, en de tekst van `app/error.tsx` komt pas nadat de browser JavaScript heeft uitgevoerd.
+Daarom vangt een pagina die een fout verwacht, hem zelf op en toont `ServerError` in de HTML, zoals `/bronnen` doet.
+Dat antwoord is een 200, met `noindex` in de HTML, zodat zoekmachines de pagina niet bewaren.
+Een fout die niemand opvangt, valt terug op `app/error.tsx`, met dezelfde tekst en een 500, maar alleen met JavaScript.
+Een nieuwe pagina die de database leest, doet wat `src/app/bronnen/page.tsx` doet: de query vangen, de reden loggen met `reasonOf`, en `ServerError` tonen, met `robots: { index: false }` in de metadata.
+De beslissing en de alternatieven staan in `docs/beslissingen.md`.
 
 ## Content Security Policy
 

@@ -1,10 +1,10 @@
 import type { PublicSource } from '@fansite/db/queries'
 
 import { renderToStaticMarkup } from 'react-dom/server'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getSources } from '../../sources'
-import SourcesPage from './page'
+import SourcesPage, { generateMetadata } from './page'
 
 vi.mock('../../sources', () => ({ getSources: vi.fn() }))
 
@@ -25,6 +25,10 @@ async function render() {
 
 beforeEach(() => {
   vi.mocked(getSources).mockReset()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 describe('the page Onze bronnen', () => {
@@ -60,5 +64,43 @@ describe('the page Onze bronnen', () => {
     expect(html).not.toContain('Dit zijn de bronnen')
     expect(html).not.toContain('<h2')
     expect(html).not.toContain('<ul')
+  })
+})
+
+describe('the page Onze bronnen when the register can not be read', () => {
+  const failure = new Error('Failed query: select 1\nparams: geheim', {
+    cause: new Error('connect ECONNREFUSED 127.0.0.1:3306'),
+  })
+
+  beforeEach(() => {
+    vi.mocked(getSources).mockRejectedValue(failure)
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+  })
+
+  it('shows the error page in the HTML, with a way back to this page and to the homepage', async () => {
+    const html = await render()
+
+    expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
+    expect(html).toContain('<a href="/bronnen">Probeer het opnieuw</a>')
+    expect(html).toContain('<a href="/">Naar de homepage</a>')
+    expect(html).not.toContain('Onze bronnen')
+  })
+
+  it('titles the page Er ging iets mis and keeps it out of the search engines', async () => {
+    expect(await generateMetadata()).toEqual({ robots: { index: false }, title: 'Er ging iets mis' })
+  })
+
+  it('titles the page Onze bronnen when the register can be read', async () => {
+    vi.mocked(getSources).mockResolvedValue(sources)
+
+    expect(await generateMetadata()).toEqual({ title: 'Onze bronnen' })
+  })
+
+  it('writes the reason to the log, without the values of the query', async () => {
+    await render()
+
+    expect(console.error).toHaveBeenCalledExactlyOnceWith(
+      'Could not read the sources for /bronnen: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
+    )
   })
 })
