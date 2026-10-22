@@ -26,12 +26,16 @@ afterEach(() => {
 })
 
 describe('getHeadlines', () => {
-  it('asks the query for the week that starts at the first moment of the Dutch day six days ago', async () => {
+  it('asks the query for the week that starts at the first moment of the Dutch day six days ago, up to now', async () => {
     await (
       await loadHeadlines()
     )()
 
-    expect(listRecentItems).toHaveBeenCalledExactlyOnceWith(db, new Date('2026-10-15T22:00:00.000Z'))
+    expect(listRecentItems).toHaveBeenCalledExactlyOnceWith(
+      db,
+      new Date('2026-10-15T22:00:00.000Z'),
+      new Date('2026-10-22T12:30:00.000Z'),
+    )
   })
 
   it('gives what the query gives', async () => {
@@ -63,8 +67,18 @@ describe('getHeadlines', () => {
     await getHeadlines()
 
     expect(listRecentItems).toHaveBeenCalledTimes(2)
-    expect(listRecentItems).toHaveBeenNthCalledWith(1, db, new Date('2026-10-15T22:00:00.000Z'))
-    expect(listRecentItems).toHaveBeenNthCalledWith(2, db, new Date('2026-10-16T22:00:00.000Z'))
+    expect(listRecentItems).toHaveBeenNthCalledWith(
+      1,
+      db,
+      new Date('2026-10-15T22:00:00.000Z'),
+      new Date('2026-10-22T21:58:00.000Z'),
+    )
+    expect(listRecentItems).toHaveBeenNthCalledWith(
+      2,
+      db,
+      new Date('2026-10-16T22:00:00.000Z'),
+      new Date('2026-10-22T22:04:00.000Z'),
+    )
   })
 
   it('does not keep a load that fails, so the next visit tries again', async () => {

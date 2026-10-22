@@ -72,12 +72,24 @@ describe('NewsItem', () => {
     expect(item?.querySelector('p')?.className).toBe('hf-meta hf-news-item-meta')
   })
 
+  it('keeps the spaces around the separators outside the hidden part, so the words stay apart for a screen reader', () => {
+    const { container } = render(<NewsItem {...props} paywalled />)
+    const meta = container.querySelector('p')
+    const visibleToAssistiveTechnology = [...(meta?.childNodes ?? [])]
+      .filter((node) => !(node instanceof Element && node.getAttribute('aria-hidden') === 'true'))
+      .map((node) => node.textContent)
+      .join('')
+
+    // The browser collapses a run of spaces into one.
+    expect(visibleToAssistiveTechnology.replace(/\s+/g, ' ')).toBe('Testkrant 14:05 voor abonnees')
+  })
+
   it('hides the separators from assistive technology', () => {
     const { container } = render(<NewsItem {...props} paywalled />)
     const separators = container.querySelectorAll('[aria-hidden="true"]')
 
     expect(separators).toHaveLength(2)
-    expect([...separators].map((separator) => separator.textContent)).toEqual([' · ', ' · '])
+    expect([...separators].map((separator) => separator.textContent)).toEqual(['·', '·'])
   })
 
   it('holds only a link, a paragraph and their text: no image, no icon and no other element', () => {

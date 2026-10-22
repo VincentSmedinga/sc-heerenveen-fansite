@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
@@ -26,12 +26,15 @@ export function listEnabledSources(db: Database) {
 }
 
 /**
- * The news items published at or after `since`, newest first, from the sources that are switched on, with what the
- * homepage shows of them: the headline, the link, the time, whether it is behind a paywall, and the name of the source.
- * That name is the way the source wants to be credited, or else its own name. The policy and the permission stay
- * internal, and so does every other column, so none of them can reach a page.
+ * The news items published from `since` up to and including `until`, newest first, from the sources that are switched
+ * on, with what the homepage shows of them: the headline, the link, the time, whether it is behind a paywall, and the
+ * name of the source. That name is the way the source wants to be credited, or else its own name. The policy and the
+ * permission stay internal, and so does every other column, so none of them can reach a page.
+ *
+ * Pass the moment of now as `until`: the importer keeps a time up to a day ahead, because feeds are sometimes wrong
+ * about their clock, and such an item doesn't belong under a day that hasn't begun.
  */
-export function listRecentItems(db: Database, since: Date) {
+export function listRecentItems(db: Database, since: Date, until: Date) {
   return db
     .select({
       paywalled: items.paywalled,
@@ -42,6 +45,6 @@ export function listRecentItems(db: Database, since: Date) {
     })
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(and(eq(sources.enabled, true), gte(items.publishedAt, since)))
+    .where(and(eq(sources.enabled, true), gte(items.publishedAt, since), lte(items.publishedAt, until)))
     .orderBy(desc(items.publishedAt), desc(items.id))
 }

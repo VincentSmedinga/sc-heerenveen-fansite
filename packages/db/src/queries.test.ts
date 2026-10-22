@@ -115,7 +115,7 @@ describe('listRecentItems', () => {
     await addItem(ids, 'gisteren', new Date('2026-10-21T12:05:00Z'))
     await addItem(ids, 'vanochtend', new Date('2026-10-22T07:30:00Z'))
 
-    const result = await listRecentItems(database.db, sevenDaysAgo)
+    const result = await listRecentItems(database.db, sevenDaysAgo, now)
 
     expect(result.map((item) => item.title)).toEqual(['Kop vanochtend', 'Kop gisteren', 'Kop net-binnen'])
   })
@@ -126,7 +126,25 @@ describe('listRecentItems', () => {
     await addItem(ids, 'precies', sevenDaysAgo)
     await addItem(ids, 'een-seconde-eerder', new Date(sevenDaysAgo.getTime() - 1000))
 
-    expect((await listRecentItems(database.db, sevenDaysAgo)).map((item) => item.title)).toEqual(['Kop precies'])
+    expect((await listRecentItems(database.db, sevenDaysAgo, now)).map((item) => item.title)).toEqual(['Kop precies'])
+  })
+
+  it('gives an item published at exactly the end time, and not one a second after it', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'nu', now)
+    await addItem(ids, 'een-seconde-later', new Date(now.getTime() + 1000))
+
+    expect((await listRecentItems(database.db, sevenDaysAgo, now)).map((item) => item.title)).toEqual(['Kop nu'])
+  })
+
+  it('gives no item from the future, such as one whose feed was a day ahead', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'vandaag', new Date('2026-10-22T07:30:00Z'))
+    await addItem(ids, 'morgen', new Date(now.getTime() + 20 * 60 * 60 * 1000))
+
+    expect((await listRecentItems(database.db, sevenDaysAgo, now)).map((item) => item.title)).toEqual(['Kop vandaag'])
   })
 
   it('gives no items of a source that is switched off, and the items of the others', async () => {
@@ -136,7 +154,7 @@ describe('listRecentItems', () => {
     await addItem(on, 'aan', new Date('2026-10-21T12:05:00Z'))
     await addItem(off, 'uit', new Date('2026-10-21T12:06:00Z'))
 
-    expect((await listRecentItems(database.db, sevenDaysAgo)).map((item) => item.title)).toEqual(['Kop aan'])
+    expect((await listRecentItems(database.db, sevenDaysAgo, now)).map((item) => item.title)).toEqual(['Kop aan'])
   })
 
   it('gives the items of every source mixed, by time', async () => {
@@ -147,7 +165,7 @@ describe('listRecentItems', () => {
     await addItem(second, 'twee', new Date('2026-10-21T09:00:00Z'))
     await addItem(first, 'drie', new Date('2026-10-21T10:00:00Z'))
 
-    expect((await listRecentItems(database.db, sevenDaysAgo)).map((item) => item.sourceName)).toEqual([
+    expect((await listRecentItems(database.db, sevenDaysAgo, now)).map((item) => item.sourceName)).toEqual([
       'Testkrant',
       'Proefnieuws',
       'Testkrant',
@@ -161,7 +179,7 @@ describe('listRecentItems', () => {
     await addItem(ids, 'eerst', time)
     await addItem(ids, 'daarna', time)
 
-    expect((await listRecentItems(database.db, sevenDaysAgo)).map((item) => item.title)).toEqual([
+    expect((await listRecentItems(database.db, sevenDaysAgo, now)).map((item) => item.title)).toEqual([
       'Kop daarna',
       'Kop eerst',
     ])
@@ -178,7 +196,7 @@ describe('listRecentItems', () => {
 
     await addItem(ids, 'een', new Date('2026-10-21T12:05:00Z'), { paywalled: true })
 
-    expect(await listRecentItems(database.db, sevenDaysAgo)).toEqual([
+    expect(await listRecentItems(database.db, sevenDaysAgo, now)).toEqual([
       {
         paywalled: true,
         publishedAt: new Date('2026-10-21T12:05:00Z'),
@@ -201,7 +219,7 @@ describe('listRecentItems', () => {
     await addItem(empty, 'twee', new Date('2026-10-21T09:00:00Z'))
     await addItem(missing, 'drie', new Date('2026-10-21T10:00:00Z'))
 
-    expect((await listRecentItems(database.db, sevenDaysAgo)).map((item) => item.sourceName)).toEqual([
+    expect((await listRecentItems(database.db, sevenDaysAgo, now)).map((item) => item.sourceName)).toEqual([
       'Testclub',
       'Proefnieuws',
       'Voorbeeldkrant, met dank aan de redactie',
@@ -214,7 +232,7 @@ describe('listRecentItems', () => {
     await addItem(ids, 'open', new Date('2026-10-21T22:30:00Z'))
     await addItem(ids, 'betaald', new Date('2026-10-21T23:45:00Z'), { paywalled: true })
 
-    const [paid, open] = await listRecentItems(database.db, sevenDaysAgo)
+    const [paid, open] = await listRecentItems(database.db, sevenDaysAgo, now)
 
     expect(paid).toMatchObject({ paywalled: true, publishedAt: new Date('2026-10-21T23:45:00Z') })
     expect(open).toMatchObject({ paywalled: false, publishedAt: new Date('2026-10-21T22:30:00Z') })
@@ -223,6 +241,6 @@ describe('listRecentItems', () => {
   it('gives an empty list when there are no items', async () => {
     await addSource()
 
-    expect(await listRecentItems(database.db, sevenDaysAgo)).toEqual([])
+    expect(await listRecentItems(database.db, sevenDaysAgo, now)).toEqual([])
   })
 })

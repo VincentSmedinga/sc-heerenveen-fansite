@@ -21,8 +21,14 @@ export type NewsItemProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
   time: string
 }
 
-// Between the parts of the line. It is only for the eye: a screen reader reads the parts one after the other.
-const separator = <span aria-hidden="true"> · </span>
+// Between the parts of the line. The dot is only for the eye and is hidden from a screen reader. The spaces stay outside the
+// hidden span, so the parts don't run together in the accessibility tree.
+const separator = (
+  <>
+    {' '}
+    <span aria-hidden="true">·</span>{' '}
+  </>
+)
 
 /**
  * A line of news from another source: the headline as a link to the item at the source, and under it the name of the

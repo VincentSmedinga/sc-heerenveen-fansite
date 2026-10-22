@@ -65,7 +65,7 @@ describe('the homepage', () => {
 
     expect(html).toContain(
       '<li><div class="hf-news-item"><a class="hf-headline hf-news-item-headline" href="https://testkrant.test/heerenveen-testclub">Heerenveen houdt Testclub op afstand</a>' +
-        '<p class="hf-meta hf-news-item-meta"><span>Testkrant</span><span aria-hidden="true"> · </span><time dateTime="2026-10-22T08:15:00.000Z">10:15</time></p></div></li>',
+        '<p class="hf-meta hf-news-item-meta"><span>Testkrant</span> <span aria-hidden="true">·</span> <time dateTime="2026-10-22T08:15:00.000Z">10:15</time></p></div></li>',
     )
   })
 
