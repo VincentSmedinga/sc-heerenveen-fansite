@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { Text } from '../text/Text'
 import { Heading } from './Heading'
 
 const meta = preview.meta({
@@ -54,4 +55,40 @@ export const StyleApartFromLevel = meta.story({
       </Heading>
     </section>
   ),
+})
+
+const renderSmallPrint = () => (
+  <Heading level={2}>
+    21 oktober 2026{' '}
+    <Text appearance="meta" as="span">
+      versie 0.1.0
+    </Text>
+  </Heading>
+)
+
+const smallPrint = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'Een kop kan klein iets bij zich hebben, zoals het nummer van een versie achter de datum, net als "sinds 1997" achter de naam in het logo.',
+          'Zet het in een `Text` met `appearance="meta"` en `as="span"`: dan is het klein, zonder kapitalen en in de kleur van secundaire tekst.',
+          'Het hoort bij de kop, dus een schermlezer leest het mee.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: renderSmallPrint,
+}
+
+export const SmallPrintLight = meta.story({
+  ...smallPrint,
+  globals: { theme: 'light' },
+  name: 'Met kleine tekst, licht',
+})
+
+export const SmallPrintDark = meta.story({
+  ...smallPrint,
+  globals: { theme: 'dark' },
+  name: 'Met kleine tekst, donker',
 })

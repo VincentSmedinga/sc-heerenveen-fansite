@@ -26,10 +26,14 @@ export const ExampleHeader = () => (
   </Page.Header>
 )
 
-/** The footer with "Alle koppen en links op één plek. Voor supporters, door supporters." */
+/** The links about the site itself, in the footer of the example pages. */
+export const exampleFooterMenu = [{ href: '#wat-is-er-nieuw', label: 'Wat is er nieuw' }]
+
+/** The footer with "Alle koppen en links op één plek. Voor supporters, door supporters." and the links about the site. */
 export const ExampleFooter = () => (
   <Page.Footer>
     <Text appearance="meta">Alle koppen en links op één plek. Voor supporters, door supporters.</Text>
+    <Navigation items={exampleFooterMenu} label="Over de site" />
   </Page.Footer>
 )
 

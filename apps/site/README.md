@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu twee pagina's: de homepage met de koppen van de afgelopen week, en `/bronnen` met de bronnen uit het register.
+Er zijn nu drie pagina's: de homepage met de koppen van de afgelopen week, `/bronnen` met de bronnen uit het register, en `/wat-is-er-nieuw` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -32,6 +32,7 @@ De gebruiker daarin moet databases mogen maken.
 Voor elke run die een database nodig heeft, maakt hij een lege database op die server, laat de site er zelf de tabellen in maken, en haalt de database daarna weg.
 Zo bewijst hij ook dat de migraties in de map zitten.
 Hij start de map ook met een database die niet bereikbaar is, en controleert dat de homepage en `/bronnen` de foutpagina tonen.
+Op `/wat-is-er-nieuw` controleert hij dat de pagina de versies uit `CHANGELOG.md` toont die zinnen hebben, en dat de links in de feed naar het adres van acceptatie of productie gaan.
 
 ## Toegankelijkheid controleren
 
