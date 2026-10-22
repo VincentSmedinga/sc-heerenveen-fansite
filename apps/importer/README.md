@@ -3,7 +3,8 @@
 De importer haalt koppen en links op bij de bronnen.
 Hij bevat de fetcher, de ene HTTP-client voor alle adapters, en de adapter voor RSS- en Atom-feeds, met de Leeuwarder Courant als eerste bron.
 Op acceptatie start cron de import elke 15 minuten (zie _De import op acceptatie_).
-Het rooster per soort bron, een slot in de database en de gezondheid van een bron komen met #13.
+Een run neemt een lock, schrijft een logboek, houdt de gezondheid van elke feed bij en wacht als een bron daarom vraagt (zie _Het logboek en de gezondheid_).
+Een rooster per soort bron komt met de adapters (#14 en #15).
 
 ## De import draaien
 
@@ -20,6 +21,7 @@ pnpm run import
 Schrijf `pnpm run import` en niet `pnpm import`: `import` is een opdracht van pnpm zelf, die een lockfile van npm of yarn omzet.
 
 De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), één voor één, met één fetcher.
+Een feed die nog moet wachten, slaat hij over.
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
 
 ```text
@@ -37,12 +39,115 @@ Een feed die niet gelezen wordt, krijgt ook een regel:
 - niet gewijzigd sinds de vorige keer (`ETag` of `Last-Modified`);
 - `robots.txt` staat het niet toe;
 - de bron vraagt om te wachten (429 of 503);
+- de feed wacht nog, met de tijd tot wanneer (zie _Wachten_);
 - een fout, met de reden.
 
 Een feed die faalt, stopt de andere feeds niet.
 De opdracht stopt met exitcode 1 als een feed een fout gaf: de bron geeft een foutstatus of iets wat geen feed is, of de database weigert iets.
-Een feed die niet gewijzigd is, die `robots.txt` weigert of die om wachten vraagt, is geen fout van ons en geeft exitcode 0.
+Een feed die niet gewijzigd is, die `robots.txt` weigert, die om wachten vraagt of die nog wacht, is geen fout van ons en geeft exitcode 0.
 Gebruik `DATABASE_URL` uit `.env`; zonder die variabele stopt de opdracht met een melding.
+`pnpm run import:status` toont de gezondheid van de feeds (zie _Het overzicht_).
+
+## Het logboek en de gezondheid
+
+Elke run houdt in de database bij wat hij deed, zodat je ziet of een feed het doet.
+De tijden staan in UTC.
+
+### Eén run tegelijk
+
+Een run neemt eerst een lock in de database, met `GET_LOCK` en de naam `fansite_import_<database>`.
+Is de lock bezet, omdat een andere run nog bezig is, dan schrijft de run dat in het logboek en stopt hij meteen, met exitcode 0:
+
+```text
+Another import is still running on this database, so this run does nothing.
+```
+
+Er is niets kapot, en een kwartier later komt de volgende run.
+Stopt een proces halverwege, dan laat de database de lock vanzelf los.
+
+### Het logboek
+
+De tabel `import_runs` heeft een rij per run, met het begin en het eind.
+Een run die de lock bezet vond, staat er ook in, met `lock_taken`.
+De tabel `import_results` heeft per run een rij per feed: de uitkomst, het aantal nieuwe, bijgewerkte, ongewijzigde en overgeslagen berichten, en waarom de feed faalde of wachtte.
+
+| Uitkomst            | Wat het betekent                                      |
+| ------------------- | ----------------------------------------------------- |
+| `imported`          | Gelezen en bewaard                                    |
+| `not-modified`      | Niet gewijzigd sinds de vorige keer                   |
+| `blocked-by-robots` | `robots.txt` staat het niet toe                       |
+| `wait`              | De bron antwoordde met 429 of 503                     |
+| `postponed`         | Niet gevraagd, want de feed wacht nog (zie _Wachten_) |
+| `error`             | Een fout; de reden staat erbij                        |
+
+Een fout van de database staat er alleen met de code in, zoals `database error ER_DUP_ENTRY`, net als in het logbestand.
+De query met zijn waarden staat er niet in.
+Elke run haalt de runs weg die ouder zijn dan 30 dagen, met hun rijen in `import_results`.
+
+### De gezondheid
+
+Per feed staan in `feeds` de laatste geslaagde run, het aantal mislukte runs op rij, en de laatste fout met de tijd.
+
+- **Geslaagd** is gelezen en bewaard, of niet gewijzigd.
+  Dat zet de teller op 0.
+- **Mislukt** is een fout.
+  Dat telt een op.
+- **Wachten** (429 of 503) en een **weigering door `robots.txt`** liggen niet aan ons.
+  Ze tellen niet mee, maar staan wel in het logboek.
+
+Na drie mislukte runs op rij is een feed ongezond.
+De laatste fout blijft staan als de feed daarna weer slaagt.
+
+### Wachten
+
+De kolom `feeds.retry_at` zegt tot wanneer de import een feed overslaat.
+Een run die een feed overslaat, schrijft dat in het logboek (`postponed`) en in de uitvoer:
+
+```text
+https://www.lc.nl/sport/sc-heerenveen/rss/: not read, the source asked us to wait until 2026-10-22 15:07:03 UTC
+```
+
+- Antwoordt een bron met 429 of 503, dan wacht de import tot het moment uit `Retry-After`, hoogstens een dag.
+  Noemt de bron geen tijd, dan wacht hij een uur.
+- Na drie mislukte runs op rij probeert de import de feed eens per uur, tot hij weer slaagt.
+  Hij wacht 59 minuten na de vorige poging: cron start een run soms een paar seconden vroeger, en met een uur precies viel de poging dan een run later.
+
+### robots.txt bewaren
+
+De import geeft de fetcher een opslag in de database, de tabel `robots_txt` ([`src/robots-store.ts`](src/robots-store.ts)).
+Daarin bewaart de fetcher per origin, zoals `https://www.lc.nl`, de regels van `robots.txt` die voor ons gelden, hoogstens 24 uur (RFC 9309).
+Zo vraagt de import `robots.txt` één keer per dag per host, en niet elke run.
+Een `robots.txt` die niet te lezen was, bewaart de fetcher niet, dus de volgende run probeert het opnieuw.
+Lukt het lezen of bewaren in de database niet, dan vraagt de fetcher `robots.txt` aan de host, zoals zonder opslag.
+
+### Het overzicht
+
+Draai vanuit de root:
+
+```sh
+pnpm run import:status
+```
+
+Het overzicht toont de laatste run, zodat je ziet dat cron de import start.
+Daaronder staan per feed van een bron die aanstaat de bron, het adres, de laatste geslaagde run, het aantal mislukte runs op rij, de laatste fout, en of de feed gezond is:
+
+```text
+Last run: started 2026-10-22 14:07:01 UTC, finished 2026-10-22 14:07:03 UTC
+
+Leeuwarder Courant: healthy
+  feed: https://www.lc.nl/sport/sc-heerenveen/rss/
+  last success: 2026-10-22 14:07:01 UTC
+  failed runs in a row: 0
+  last error: none
+
+Unhealthy feeds: 0 of 1
+```
+
+Wacht een feed nog, dan staat er ook `next try from` met de tijd.
+Het overzicht verandert niets in de database, en neemt geen lock.
+Het stopt met exitcode 1 als een feed ongezond is.
+Op de host doet het gebundelde bestand hetzelfde met de optie `--status` (zie _De import op acceptatie_).
+Een optie die de opdracht niet kent, laat hem stoppen voordat hij iets doet.
 
 ## Wat de adapter bewaart
 
@@ -135,6 +240,8 @@ Bij elk verzoek geldt:
 - Is `robots.txt` niet te lezen, door een 429, een 5xx, een time-out of een netwerkfout, dan haalt de fetcher niets van die host.
 - Eén fetcher leest de `robots.txt` van een host één keer, ook als hij niet te lezen was.
   Maak daarom één fetcher per run van een opdracht, en deel hem tussen de adapters.
+- Geef je de fetcher een opslag (de optie `robots`), dan kijkt hij daar eerst, en bewaart hij er de regels die hij las.
+  De import bewaart ze zo 24 uur in de database (zie _robots.txt bewaren_).
 - Geeft de adapter de `ETag` en `Last-Modified` van de vorige keer mee, dan vraagt de fetcher met `If-None-Match` en `If-Modified-Since`.
 - De fetcher volgt hoogstens 5 doorverwijzingen, alleen naar `http` en `https`.
   Bij elke stap leest hij de `robots.txt` van de nieuwe host en toetst hij de URL ertegen.
@@ -186,11 +293,11 @@ Twee dingen voor wie een adapter schrijft:
 - Een toestemmingsscherm omzeilt de fetcher niet: hij zet geen cookies en klikt niets weg.
   Krijgt de adapter een scherm in plaats van een feed, dan meldt zij dat als fout.
   Kijk daarvoor naar `contentType` en `url`.
-- De jobplanner (#13) beslist hoe lang we echt wachten na een `wait`.
+- De import beslist hoe lang we echt wachten na een `wait` (zie _Wachten_).
 
 ## Wat de fetcher niet doet
 
-- Opnieuw proberen met uitstel, een limiet per host, het rooster en een `robots.txt` bewaren tussen runs: dat komt met de jobplanner (#13).
+- Een limiet per host.
 - `Crawl-delay` lezen: dat staat niet in RFC 9309.
 
 ## De import op acceptatie
@@ -201,6 +308,7 @@ Twee dingen voor wie een adapter schrijft:
 - De workflow Acceptance draait het bestand één keer op een database zonder feeds, en kopieert het samen met de site naar de host.
 - Cron start het daar elke 15 minuten, op minuut 7, 22, 37 en 52, met `DATABASE_URL` uit een eigen bestand in de thuismap.
   De uitvoer komt achteraan in `~/fansite-import.log`.
+- Met `--status` toont hetzelfde bestand het overzicht van de gezondheid.
 
 Wat de eigenaar daarvoor eenmalig instelt, hoe je controleert dat de import werkt en wat je doet als hij niet werkt, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
 
@@ -221,5 +329,6 @@ De tests van de adapter gebruiken een opname van de feed van de Leeuwarder Coura
 Die is ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en `premium`.
 Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
 `src/read-feed.test.ts` leest feeds zonder database.
-`src/import-feeds.test.ts`, `src/import.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+`src/import-feeds.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+De tests van het logboek, de gezondheid en het wachten geven de import een nagebootste klok (de optie `clock`), zodat een test een dag of een maand overslaat zonder te wachten.
 `src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.

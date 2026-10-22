@@ -168,8 +168,25 @@ describe('the table items', () => {
 })
 
 describe('the table feeds', () => {
-  it('has the source, the address and the ETag and Last-Modified of the last time, and nothing else', async () => {
-    expect(await columnsOf('feeds')).toEqual(['id', 'source_id', 'url', 'etag', 'last_modified'])
+  it('has the source, the address, the ETag and Last-Modified of the last time and the health, and nothing else', async () => {
+    expect(await columnsOf('feeds')).toEqual([
+      'id',
+      'source_id',
+      'url',
+      'etag',
+      'last_modified',
+      'last_success_at',
+      'failures_in_a_row',
+      'last_error',
+      'last_error_at',
+      'retry_at',
+    ])
+  })
+
+  it('starts healthy: no failures, no error and nothing to wait for', async () => {
+    const [feed] = await database.db.select().from(feeds)
+
+    expect(feed).toMatchObject({ failuresInARow: 0, lastError: null, lastSuccessAt: null, retryAt: null })
   })
 
   it('starts without an ETag and a Last-Modified', async () => {

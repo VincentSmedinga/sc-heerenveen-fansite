@@ -2,13 +2,17 @@ import type { Database } from '@fansite/db/client'
 import type { Feed } from '@fansite/db/schema'
 
 import { connect } from '@fansite/db/client'
+import { lockNameFor, withLock } from '@fansite/db/lock'
 import { feeds, items, sources } from '@fansite/db/schema'
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
-import type { Fetcher } from './fetcher.ts'
+import type { Fetcher, RobotsStore } from './fetcher.ts'
 import type { FeedItem, SkippedItem } from './read-feed.ts'
 
+import { createFetcher } from './fetcher.ts'
 import { readFeed } from './read-feed.ts'
+import { robotsStoreFor } from './robots-store.ts'
+import { finishRun, reasonOf, recordLockTaken, recordReport, removeOldRuns, startRun } from './run-log.ts'
 
 /** What came of one feed. Like `FetchOutcome`, every result is a value, so a failing feed never stops the others. */
 export type FeedReport =
@@ -20,6 +24,13 @@ export type FeedReport =
       skipped: SkippedItem[]
       unchanged: number
       updated: number
+      url: string
+    }
+  | {
+      /** The import did not ask for the feed: its time to try again has not come yet. */
+      failuresInARow: number
+      kind: 'postponed'
+      retryAt: Date
       url: string
     }
   | {
@@ -41,7 +52,16 @@ export type FeedReport =
       url: string
     }
 
-export type StoredFeed = Pick<Feed, 'etag' | 'id' | 'lastModified' | 'sourceId' | 'url'>
+export type ImportOptions = {
+  /** Gives the time. A test gives its own, to run the import at a moment it chooses. */
+  clock?: () => Date
+  /** Makes the fetcher of the run, with the store for robots.txt. A test gives one that may reach its own web servers. */
+  makeFetcher?: (robots: RobotsStore) => Fetcher
+  /** Writes a line of output. */
+  write?: (line: string) => void
+}
+
+export type StoredFeed = Pick<Feed, 'etag' | 'failuresInARow' | 'id' | 'lastModified' | 'retryAt' | 'sourceId' | 'url'>
 
 /** The queries below also run inside a transaction, which has these methods but is not a `Database`. */
 type Executor = Pick<Database, 'insert' | 'select' | 'update'>
@@ -58,7 +78,7 @@ export function formatReport(report: FeedReport): string {
     case 'blocked-by-robots':
       return `${report.url}: not read, robots.txt does not allow it`
     case 'error':
-      return `${report.url}: failed, ${printable(report.message)}`
+      return `${report.url}: failed, ${reasonOf(report)}`
     case 'imported':
       return [
         `${report.url}: ${report.added} new, ${report.updated} updated, ${report.unchanged} unchanged, ${report.skipped.length} skipped`,
@@ -66,10 +86,9 @@ export function formatReport(report: FeedReport): string {
       ].join('\n')
     case 'not-modified':
       return `${report.url}: not modified since the last time`
+    case 'postponed':
     case 'wait':
-      return `${report.url}: not read, the source asks us to wait${
-        report.retryAfterSeconds === null ? '' : ` ${report.retryAfterSeconds} seconds`
-      }`
+      return `${report.url}: not read, ${reasonOf(report)}`
   }
 }
 
@@ -126,17 +145,22 @@ export async function importFeed(
 
 /**
  * Reads every feed of every source that is switched on, one after the other, and reports on each. A feed that fails,
- * because the source is down or the database refuses something, stops no other feed.
+ * because the source is down or the database refuses something, stops no other feed. A feed whose time to try again
+ * has not come yet is not asked for. What came of each feed goes in the log of the run, and into its health.
  */
-export async function importFeeds(db: Database, fetcher: Fetcher, now?: Date): Promise<FeedReport[]> {
+export async function importFeeds(
+  db: Database,
+  fetcher: Fetcher,
+  { clock = () => new Date(), runId }: Pick<ImportOptions, 'clock'> & { runId: number },
+): Promise<FeedReport[]> {
   const reports: FeedReport[] = []
 
   for (const feed of await listFeedsToImport(db)) {
-    try {
-      reports.push(await importFeed(db, fetcher, feed, now))
-    } catch (error) {
-      reports.push({ kind: 'error', message: describeError(error), url: feed.url })
-    }
+    const report = await importDueFeed(db, fetcher, feed, clock())
+
+    // The time after the request, so a wait counts from the moment the source answered.
+    await recordReport(db, runId, feed, report, clock())
+    reports.push(report)
   }
 
   return reports
@@ -147,8 +171,10 @@ export function listFeedsToImport(db: Database) {
   return db
     .select({
       etag: feeds.etag,
+      failuresInARow: feeds.failuresInARow,
       id: feeds.id,
       lastModified: feeds.lastModified,
+      retryAt: feeds.retryAt,
       sourceId: feeds.sourceId,
       url: feeds.url,
     })
@@ -160,17 +186,44 @@ export function listFeedsToImport(db: Database) {
 
 /**
  * Reads every feed of every source that is switched on and writes a line for each. One fetcher serves all feeds, so a
- * host's robots.txt is read once. Returns the exit code: 1 when a feed failed, so a scheduler can tell.
+ * host's robots.txt is read once, and the database keeps it for a day. Returns the exit code: 1 when a feed failed, so a
+ * scheduler can tell.
+ *
+ * A run takes a lock in the database first. When another run holds it, this run writes that in the log and stops, with
+ * exit code 0: nothing is broken, and the next run comes a quarter of an hour later. A run also removes the runs older
+ * than 30 days from the log.
  */
 export async function runImport(
   databaseUrl: string,
-  fetcher: Fetcher,
-  write: (line: string) => void = console.log,
+  {
+    clock = () => new Date(),
+    makeFetcher = (robots) => createFetcher({ robots }),
+    write = console.log,
+  }: ImportOptions = {},
 ): Promise<number> {
-  const { close, db } = connect(databaseUrl)
+  const { close, db, pool } = connect(databaseUrl)
 
   try {
-    const reports = await importFeeds(db, fetcher)
+    const run = await withLock(pool, lockNameFor(databaseUrl, 'import'), 0, async () => {
+      const runId = await startRun(db, clock())
+
+      await removeOldRuns(db, clock())
+
+      const reports = await importFeeds(db, makeFetcher(robotsStoreFor(db, clock)), { clock, runId })
+
+      await finishRun(db, runId, clock())
+
+      return reports
+    })
+
+    if (!run.ran) {
+      await recordLockTaken(db, clock())
+      write('Another import is still running on this database, so this run does nothing.')
+
+      return 0
+    }
+
+    const reports = run.result
 
     if (reports.length === 0) {
       write('There are no feeds to read: no source that is switched on has a feed. See `pnpm db:seed`.')
@@ -207,11 +260,17 @@ function describeError(error: unknown): string {
   return cause instanceof Error ? cause.message : String(cause)
 }
 
-/** Text from outside that is safe to print on one line: no control characters, and no more than 300 characters. */
-function printable(text: string): string {
-  const clean = text.replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ').trim()
+/** Reads a feed whose time has come, or reports that it waits. A failure of the database becomes an error report. */
+async function importDueFeed(db: Database, fetcher: Fetcher, feed: StoredFeed, now: Date): Promise<FeedReport> {
+  if (feed.retryAt !== null && feed.retryAt > now) {
+    return { failuresInARow: feed.failuresInARow, kind: 'postponed', retryAt: feed.retryAt, url: feed.url }
+  }
 
-  return clean.length > 300 ? `${clean.slice(0, 300)}…` : clean
+  try {
+    return await importFeed(db, fetcher, feed, now)
+  } catch (error) {
+    return { kind: 'error', message: describeError(error), url: feed.url }
+  }
 }
 
 /**

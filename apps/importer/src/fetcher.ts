@@ -46,6 +46,8 @@ export type FetcherOptions = {
    * asks no real DNS server. The fetcher checks the addresses it gets either way.
    */
   resolve?: Resolve
+  /** Keeps the rules of robots.txt between runs. Without it, the fetcher reads robots.txt once for as long as it lives. */
+  robots?: RobotsStore
   /**
    * Origins the fetcher may reach although they are not on the public internet, such as `http://127.0.0.1:41234`.
    * Only for tests with a web server of their own on this computer: the import command never sets this.
@@ -98,6 +100,16 @@ export type PreviousVersion = {
   lastModified?: null | string | undefined
 }
 
+/**
+ * Keeps the rules of the robots.txt of an origin, such as `https://www.lc.nl`, between runs. `get` gives undefined when it
+ * has none, or none that are young enough. The fetcher only keeps rules it could read: a robots.txt that failed is read
+ * again next time.
+ */
+export type RobotsStore = {
+  get: (origin: string) => Promise<RobotsRule[] | undefined>
+  set: (origin: string, rules: RobotsRule[]) => Promise<void>
+}
+
 type ErrorOutcome = Extract<FetchOutcome, { kind: 'error' }>
 
 type Failure = ErrorOutcome | Extract<FetchOutcome, { kind: 'blocked-by-robots' }>
@@ -114,10 +126,11 @@ type Get = (url: URL, headers: Record<string, string>) => Promise<Response>
 
 /**
  * Makes a fetcher. One fetcher reads the robots.txt of each host once, so make one per run of a command and share it
- * between adapters.
+ * between adapters. With a store, it asks the store before the host, and keeps what it read there.
  */
 export function createFetcher({
   resolve = resolveInDns,
+  robots: store,
   testOrigins = [],
   timeoutMs = defaultLimits.timeoutMs,
 }: FetcherOptions = {}): Fetcher {
@@ -129,8 +142,22 @@ export function createFetcher({
   function robotsFor(url: URL) {
     let robots = robotsByOrigin.get(url.origin)
     if (robots === undefined) {
-      robots = loadRobots(url.origin, get, timeoutMs)
+      robots = store === undefined ? loadRobots(url.origin, get, timeoutMs) : loadKeptRobots(url.origin, store)
       robotsByOrigin.set(url.origin, robots)
+    }
+    return robots
+  }
+
+  // The store saves requests and decides nothing: when it fails, the fetcher reads robots.txt from the host, as it would
+  // without a store.
+  async function loadKeptRobots(origin: string, store: RobotsStore): Promise<Robots> {
+    const kept = await store.get(origin).catch(() => undefined)
+    if (kept !== undefined) {
+      return { kind: 'rules', rules: kept }
+    }
+    const robots = await loadRobots(origin, get, timeoutMs)
+    if (robots.kind === 'rules') {
+      await store.set(origin, robots.rules).catch(() => undefined)
     }
     return robots
   }

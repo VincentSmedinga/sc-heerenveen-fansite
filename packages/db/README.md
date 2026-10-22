@@ -78,14 +78,20 @@ De beschrijving schrijven we zelf; we nemen geen tekst van de bron over.
 
 De importer (`apps/importer`) schrijft in deze twee tabellen.
 
-`feeds` legt per feed vast welke feeds we lezen.
+`feeds` legt per feed vast welke feeds we lezen, en hoe gezond ze zijn.
 Een bron kan meer feeds hebben.
 
-| Kolom                   | Betekenis                                                                          |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| `source_id`             | De bron van de feed; een feed gaat weg als zijn bron wordt verwijderd              |
-| `url`                   | Het adres van de feed (hoogstens 500 tekens), uniek                                |
-| `etag`, `last_modified` | De waarden van de vorige keer dat de importer de feed las en de berichten bewaarde |
+| Kolom                         | Betekenis                                                                                 |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `source_id`                   | De bron van de feed; een feed gaat weg als zijn bron wordt verwijderd                     |
+| `url`                         | Het adres van de feed (hoogstens 500 tekens), uniek                                       |
+| `etag`, `last_modified`       | De waarden van de vorige keer dat de importer de feed las en de berichten bewaarde        |
+| `last_success_at`             | De laatste run die de feed las en bewaarde, of hoorde dat hij niet gewijzigd was, in UTC  |
+| `failures_in_a_row`           | Het aantal mislukte runs op rij; vanaf 3 is de feed ongezond                              |
+| `last_error`, `last_error_at` | De reden van de laatste fout (hoogstens 300 tekens) en wanneer die was, in UTC            |
+| `retry_at`                    | Tot wanneer de importer de feed overslaat: de bron vroeg om te wachten, of hij faalt vaak |
+
+Wat als geslaagd of mislukt telt, en hoe lang de importer wacht, staat in de [README van de importer](../../apps/importer/README.md).
 
 `items` legt per bericht vast wat de bron publiceert en we mogen bewaren: de kop, de link en de tijd.
 Een intro, een afbeelding, een auteur of een categorie heeft geen kolom, want geen bron heeft daar nu toestemming voor (principe 2 van de Redactie).
@@ -106,6 +112,37 @@ Een lengte die niet past, geeft een fout in plaats van dat de database de tekst 
 `itemLimits` in `@fansite/db/schema` heeft de lengtes, voor schema en importer samen.
 De importer verwijdert geen berichten.
 
+## Het logboek van de import en `robots_txt`
+
+Ook deze drie tabellen vult de importer.
+
+`import_runs` heeft een rij per run van de import.
+
+| Kolom         | Betekenis                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| `started_at`  | Het begin van de run, in UTC                                                               |
+| `finished_at` | Het eind van de run, in UTC; leeg zolang hij bezig is, of als het proces halverwege stopte |
+| `lock_taken`  | Of de run de lock bezet vond, en dus niets deed                                            |
+
+`import_results` heeft per run een rij per feed.
+
+| Kolom                                      | Betekenis                                                                                           |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `run_id`, `feed_id`                        | De run en de feed; de rij gaat weg met de run of de feed                                            |
+| `outcome`                                  | `imported`, `not-modified`, `blocked-by-robots`, `wait`, `postponed` of `error`                     |
+| `added`, `updated`, `unchanged`, `skipped` | Het aantal nieuwe, bijgewerkte, ongewijzigde en overgeslagen berichten                              |
+| `reason`                                   | Waarom de feed faalde of wachtte (hoogstens 300 tekens); van de database alleen de code van de fout |
+
+De importer haalt runs weg die ouder zijn dan 30 dagen.
+
+`robots_txt` bewaart per origin, zoals `https://www.lc.nl`, de regels van `robots.txt` die voor ons gelden.
+
+| Kolom        | Betekenis                                                                          |
+| ------------ | ---------------------------------------------------------------------------------- |
+| `origin`     | Het schema, de host en de poort, uniek                                             |
+| `rules`      | De regels voor `scHeerenveenFansite` of anders `*`, als JSON: `allow` en `pattern` |
+| `fetched_at` | Wanneer de fetcher `robots.txt` las, in UTC; na 24 uur leest hij het opnieuw       |
+
 ## Tijden
 
 Tijden staan in UTC, als `datetime`.
@@ -125,13 +162,15 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `import_runs`, `import_results`, `robots_txt`), hun types en de lengtes van `items`;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
   `listRecentItems(db, since, until)` geeft de berichten van die bronnen van `since` tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam);
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;
+- `@fansite/db/lock`: `withLock(pool, name, waitSeconds, task)` doet een taak terwijl het een slot in de database houdt (`GET_LOCK`), en `lockNameFor(url, task)` geeft de naam daarvan, met de taak en de naam van de database erin.
+  De migraties en de import gebruiken het, elk met een eigen naam;
 - `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de bronnen uit de seed erin.
-  Een slot in de database (`GET_LOCK`, met de naam van de database erin) laat twee processen die tegelijk starten, om de beurt werken.
+  Een slot in de database (`fansite_migrate_<database>`) laat twee processen die tegelijk starten, om de beurt werken.
   De site roept het aan als hij start.
   De functie gooit bij een fout en laat het aan de aanroeper wat dat betekent; de aanroeper geeft zelf de map met de migraties, want een gebundelde build weet niet waar die staat.

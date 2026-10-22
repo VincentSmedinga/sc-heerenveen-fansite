@@ -56,15 +56,21 @@ async function addFeed(domain: string, answer: ReturnType<typeof reply>) {
  */
 async function importFromTestServers() {
   const lines: string[] = []
-  const code = await runImport(database.url, fetcherFor(servers), (line) => lines.push(line))
+  const code = await runImport(database.url, {
+    makeFetcher: (robots) => fetcherFor(servers, { robots }),
+    write: (line) => lines.push(line),
+  })
 
   return { code, stdout: `${lines.join('\n')}\n` }
 }
 
 /** Runs `pnpm run import` the way it starts: as its own process, with the database from the environment. */
-async function runCommand(env: Record<string, string | undefined> = { DATABASE_URL: database.url }) {
+async function runCommand(
+  env: Record<string, string | undefined> = { DATABASE_URL: database.url },
+  args: string[] = [],
+) {
   try {
-    const { stderr, stdout } = await promisify(execFile)(process.execPath, [script], {
+    const { stderr, stdout } = await promisify(execFile)(process.execPath, [script, ...args], {
       env: { ...process.env, ...env },
     })
 
@@ -147,5 +153,27 @@ describe('the import command', () => {
 
     expect(code).not.toBe(0)
     expect(stderr).toContain('DATABASE_URL')
+  })
+
+  it('shows the health of the feeds with --status, and exits with 1 when a feed is unhealthy', async () => {
+    const server = await addFeed('kapot.test', reply(500, 'Kapot'))
+
+    await database.db.update(feeds).set({ failuresInARow: 3, lastError: 'HTTP 500' })
+
+    const { code, stdout } = await runCommand(undefined, ['--status'])
+
+    expect(code).toBe(1)
+    expect(stdout).toContain('kapot.test: unhealthy')
+    expect(server.requests).toEqual([])
+  })
+
+  it('stops before it does anything with an option it does not know', async () => {
+    const server = await addFeed('krant.test', reply(200, recording, { 'Content-Type': 'text/xml' }))
+
+    const { code, stderr } = await runCommand(undefined, ['--stats'])
+
+    expect(code).not.toBe(0)
+    expect(stderr).toContain("Unknown option '--stats'")
+    expect(server.requests).toEqual([])
   })
 })

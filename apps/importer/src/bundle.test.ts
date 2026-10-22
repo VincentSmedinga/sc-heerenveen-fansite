@@ -34,10 +34,13 @@ it('bundles the import command into one file that runs on its own, without node_
   // Node only has `import.meta.main` since 24.2, and the host may run an older Node 24.
   expect(readFileSync(file, 'utf8')).not.toContain('import.meta.main')
 
-  const { stdout } = await promisify(execFile)(process.execPath, [file], {
-    cwd: folder,
-    env: { DATABASE_URL: database.url, PATH: process.env['PATH'] },
-  })
+  const run = (...args: string[]) =>
+    promisify(execFile)(process.execPath, [file, ...args], {
+      cwd: folder,
+      env: { DATABASE_URL: database.url, PATH: process.env['PATH'] },
+    })
 
-  expect(stdout).toContain('There are no feeds to read')
+  expect((await run()).stdout).toContain('There are no feeds to read')
+  // The same file shows the health of the feeds, so the host needs no second one.
+  expect((await run('--status')).stdout).toContain('There are no feeds: no source that is switched on has a feed')
 }, 30_000)

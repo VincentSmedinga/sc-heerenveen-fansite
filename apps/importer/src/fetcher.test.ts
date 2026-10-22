@@ -1,6 +1,8 @@
 import { gzipSync } from 'node:zlib'
 import { afterEach, describe, expect, it } from 'vitest'
 
+import type { RobotsStore } from './fetcher.ts'
+import type { RobotsRule } from './robots.ts'
 import type { Handler, TestServer } from './test-server.ts'
 
 import rootPackage from '../../../package.json' with { type: 'json' }
@@ -428,6 +430,61 @@ describe('robots.txt', () => {
     await fetcher.fetch(`${server.origin}/feed`)
 
     expect(server.paths()).toEqual(['/robots.txt'])
+  })
+
+  describe('with a store that keeps it between runs', () => {
+    /** A store in memory, in place of the database. */
+    function memoryStore(kept: Record<string, RobotsRule[]> = {}) {
+      return {
+        get: async (origin: string) => kept[origin],
+        kept,
+        set: async (origin: string, rules: RobotsRule[]) => {
+          kept[origin] = rules
+        },
+      } satisfies RobotsStore & { kept: Record<string, RobotsRule[]> }
+    }
+
+    it('takes the rules from the store, and does not ask the host', async () => {
+      const server = await serve({ '/feed': reply(200, 'feed'), '/geheim': reply(200, 'geheim') })
+      const robots = memoryStore({ [server.origin]: [{ allow: false, pattern: '/geheim' }] })
+      const fetcher = fetcherFor(servers, { robots })
+
+      expect(await fetcher.fetch(`${server.origin}/feed`)).toMatchObject({ kind: 'fetched' })
+      expect(await fetcher.fetch(`${server.origin}/geheim`)).toMatchObject({ kind: 'blocked-by-robots' })
+      expect(server.paths()).toEqual(['/feed'])
+    })
+
+    it('puts the rules it read at the host in the store', async () => {
+      const server = await serve({
+        '/feed': reply(200, 'feed'),
+        '/robots.txt': reply(200, 'User-agent: *\nDisallow: /geheim\n'),
+      })
+      const robots = memoryStore()
+
+      await fetcherFor(servers, { robots }).fetch(`${server.origin}/feed`)
+
+      expect(robots.kept).toEqual({ [server.origin]: [{ allow: false, pattern: '/geheim' }] })
+    })
+
+    it('puts nothing in the store when robots.txt could not be read', async () => {
+      const server = await serve({ '/feed': reply(200, 'feed'), '/robots.txt': reply(503) })
+      const robots = memoryStore()
+
+      await fetcherFor(servers, { robots }).fetch(`${server.origin}/feed`)
+
+      expect(robots.kept).toEqual({})
+    })
+
+    it('reads robots.txt at the host when the store fails', async () => {
+      const server = await serve({ '/feed': reply(200, 'feed') })
+      const robots: RobotsStore = {
+        get: () => Promise.reject(new Error('De database is weg')),
+        set: () => Promise.reject(new Error('De database is weg')),
+      }
+
+      expect(await fetcherFor(servers, { robots }).fetch(`${server.origin}/feed`)).toMatchObject({ kind: 'fetched' })
+      expect(server.paths()).toEqual(['/robots.txt', '/feed'])
+    })
   })
 })
 
