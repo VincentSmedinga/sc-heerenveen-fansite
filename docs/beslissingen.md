@@ -1189,11 +1189,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `strong` hoort bij `soft`: het duidelijke blauw naast het zachte blauw, in licht en in donker.
   In het Nederlands is het het sterke vlak.
   De projecteigenaar koos de naam.
-- **Storybook:** de pagina Card heeft een kop, een alinea over waarom het component er is, het voorbeeld en de controls, en verder niets.
-  Er zijn geen verhalen voor elk vlak, de linktoestanden en een pagina met kaarten, en geen verhalen in licht en donker: het thema wissel je met de knop in de werkbalk.
-  Dat wijkt af van de afspraak in de README van het designsysteem (stories in licht en donker) en van het criterium in het issue.
-  De projecteigenaar koos dit tijdens het werk aan #116.
-  Of de rest van Storybook hetzelfde wordt, beslist een eigen issue.
 - **Waarom:** op de artboards staat elk blok als kaart op het zandgrijze vlak van de pagina, en dat geeft de pagina rust en richting.
   Het witte vlak laat de koppen het best uitkomen; het sterke vlak houden we voor het officiële clubnieuws (#16).
   Omdat `Page.Body` de ruimte tussen de cellen regelt, heeft een kaart geen marge, en past ze overal.
