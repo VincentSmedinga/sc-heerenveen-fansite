@@ -56,24 +56,15 @@ switch (outcome.kind) {
 }
 ```
 
-| `kind`              | Wanneer                                                              | Wat erbij zit                                              |
-| ------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `fetched`           | De bron geeft een 2xx                                                | `body`, `contentType`, `etag`, `lastModified`, `url`       |
-| `not-modified`      | De bron geeft een 304 op een verzoek met `etag` of `lastModified`    | `url`                                                      |
-| `blocked-by-robots` | `robots.txt` verbiedt de URL, ook na een doorverwijzing              | `url`: de URL die verboden is                              |
-| `wait`              | De bron geeft een 429 of een 503                                     | `status`, `retryAfterSeconds`, `url`                       |
-| `error`             | Al het andere, met een `reason` uit een vaste lijst en een `message` | `reason`, `message`, `url`, bij `http-status` ook `status` |
+De fetcher gooit geen fout voor wat een bron doet: elke uitkomst is een waarde.
+`FetchOutcome` en `ErrorReason` in [`src/fetcher.ts`](src/fetcher.ts) leggen vast welke uitkomsten en redenen er zijn, en wat erbij zit.
 
-- De fetcher gooit geen fout voor wat een bron doet; elke uitkomst is een waarde.
-- De mogelijke waarden van `reason` zijn `http-status`, `invalid-redirect`, `invalid-url`, `network`, `robots-unreadable`, `timeout`, `too-large` en `too-many-redirects`.
-- `url` is de laatste URL waar de fetcher om vroeg.
-  Na een doorverwijzing is dat een andere dan de URL die je meegaf.
-- `body` is een `Uint8Array`: de adapter weet in welke tekenset zijn feed staat.
-- `retryAfterSeconds` komt uit `Retry-After`, in seconden of als datum, en is `null` zonder geldige waarde.
-  De jobplanner (#13) beslist hoe lang we echt wachten.
+Twee dingen voor wie een adapter schrijft:
+
 - Een toestemmingsscherm omzeilt de fetcher niet: hij zet geen cookies en klikt niets weg.
   Krijgt de adapter een scherm in plaats van een feed, dan meldt zij dat als fout.
   Kijk daarvoor naar `contentType` en `url`.
+- De jobplanner (#13) beslist hoe lang we echt wachten na een `wait`.
 
 ## Wat de fetcher niet doet
 

@@ -386,7 +386,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `packages/db` kwam met #69.
   `apps/importer` kwam met #71, voor de fetcher.
   De site heet `apps/site` en niet `apps/web` of `apps/front-end`: het is de hele site, met de server en het beheer erbij, en "site" is het woord dat we overal gebruiken (besloten op 20 oktober 2026).
-  De namen `apps/importer` en `packages/db` zijn voorlopig.
 - **Waarom:** een leeg skelet moeten we bijhouden zonder dat het iets doet, en het legt een opzet vast voordat we weten wat het package nodig heeft.
 - **Alternatieven:** alle packages nu als leeg skelet.
 
