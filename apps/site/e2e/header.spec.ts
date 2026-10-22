@@ -7,9 +7,11 @@ test.use({ launchOptions: { ignoreDefaultArgs: ['--hide-scrollbars'] } })
 
 const visibleScrollbar = 'html { overflow-y: scroll } ::-webkit-scrollbar { width: 15px }'
 
-// The margin on either side of the column, and its widest, from the tokens of the design system.
+// The margin on either side of the column, and its widest, from the tokens of the design system. The content is narrower
+// than the column (content-column.spec.ts checks that).
 const margin = 16
 const columnWidth = 1200
+const contentWidth = 576
 
 for (const width of [320, 1920]) {
   test(`the header runs from edge to edge in a window of ${width} pixels, with the logo in line with the content`, async ({
@@ -33,11 +35,11 @@ for (const width of [320, 1920]) {
     expect(header?.x).toBe(0)
     expect(header?.width).toBe(pageWidth)
 
-    // The column is the content, between the margins and no wider than the maximum. The footer stays in it.
-    const expectedWidth = Math.min(pageWidth - 2 * margin, columnWidth)
-    expect(main?.width).toBeCloseTo(expectedWidth, 1)
+    // The column is between the margins and no wider than the maximum. The footer fills it. The content starts in line with
+    // it, and is no wider than its own maximum.
+    expect(footer?.width).toBeCloseTo(Math.min(pageWidth - 2 * margin, columnWidth), 1)
+    expect(main?.width).toBeCloseTo(Math.min(pageWidth - 2 * margin, contentWidth), 1)
     expect(footer?.x).toBeCloseTo(main?.x ?? NaN, 1)
-    expect(footer?.width).toBeCloseTo(main?.width ?? NaN, 1)
     expect(logo?.x).toBeCloseTo(main?.x ?? NaN, 1)
 
     const tooWide = await page.evaluate(

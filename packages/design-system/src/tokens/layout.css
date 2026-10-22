@@ -1,6 +1,7 @@
 /*
- * Layout tokens: the maximum width of a page, the margin on either side of it on a narrow screen, and the space that
- * puts content in that column. The Page component uses them; a page that isn't built with it can use them too.
+ * Layout tokens: the maximum width of a page, the margin on either side of it on a narrow screen, the space that
+ * puts content in that column, and the maximum width of the content in it. The Page component uses them; a page that
+ * isn't built with it can use them too.
  */
 
 @layer hf.tokens {
@@ -14,5 +15,14 @@
      * The header can then run edge to edge without 100vw, which includes the scrollbar and makes the page scroll sideways.
      */
     --hf-page-inset: max(var(--hf-page-margin), calc((100% - var(--hf-page-max-width)) / 2));
+
+    /*
+     * The widest the content of a page gets, so that a line of running text holds at most 80 characters (WCAG 1.4.8).
+     * Measured in Atkinson Hyperlegible Next at the size of Tekst (17px): in 36rem none of 28 lines of Dutch news text
+     * held more than 80 characters, and the average was 72. A headline (Nieuwskop, 18px, semibold) has fewer, 64 on
+     * average. 37rem was the first width where a line went over 80. The rest of the column of the page stays empty, for a
+     * sidebar later.
+     */
+    --hf-content-max-width: 36rem;
   }
 }

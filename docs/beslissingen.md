@@ -1052,6 +1052,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Geeft het daarna slechte props, dan is `typescript.reactDocgen: 'react-docgen-typescript'` de terugval.
 - **Alternatieven:** react-docgen, de standaard, of react-docgen-typescript.
 
+### De inhoud staat in een smallere kolom, met plaats voor een zijbalk
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** op een breed scherm staat de inhoud van een pagina in een kolom waarin een regel hoogstens 80 tekens telt, in lijn met het logo.
+  De rest van de kolom van 75 rem blijft leeg: daar komt later een zijbalk.
+  Op een smal scherm gebruikt de inhoud de hele breedte.
+  De header en de footer blijven over de hele kolom lopen.
+- **Hoe:** het token `--hf-content-max-width` is 36 rem (576 pixels), en `Page.Body` zet het als `max-inline-size` op de `main`.
+  Is de `Page.Body` zelf de `main`, dan staat het op de `Page.Body`; is het een `div` voor een pagina met een zijbalk, dan op de `main` erin.
+  De zijruimte blijft die van `--hf-page-inset`, dus de kolom begint in lijn met het logo, en de marge aan het einde geeft mee.
+  Het geldt voor elke pagina, ook voor `/bronnen`, de pagina voor een onbekend adres en de foutpagina.
+  Er is geen breakpoint: onder de 36 rem plus de marges is de kolom zo breed als het scherm.
+- **Gemeten:** in Atkinson Hyperlegible Next op 17 pixels (Tekst) telde in 36 rem geen van 28 regels Nederlandse nieuwstekst meer dan 80 tekens, en het gemiddelde was 72.
+  In 37 rem ging de eerste regel erover (81).
+  Een kop van een bericht (Nieuwskop, 18 pixels, halfvet) heeft in 36 rem gemiddeld 64 tekens en hoogstens 72.
+  Een Playwright-test in `apps/site/e2e/content-column.spec.ts` telt de tekens van elke regel op `/`, `/bronnen`, de pagina voor een onbekend adres en de foutpagina.
+- **Waarom:** in de kolom van 75 rem telt een regel zo'n 130 tekens, en zulke regels lezen moeilijk; WCAG raadt hoogstens 80 tekens aan (1.4.8).
+  Houden we de plek voor een zijbalk nu al vrij, dan verschuift de inhoud niet als die komt, bijvoorbeeld met de volgende wedstrijd en de stand (#27).
+- **Alternatieven:** een smalle kolom in het midden; dan verandert de opbouw opnieuw als de zijbalk komt.
+  Of alleen een maximale breedte voor alinea's; dan blijven koppen en lijsten breed, en moet elk component het zelf regelen.
+  Of nu al een zijbalk met inhoud; daar is nog niets voor.
+  Of de smalle kolom pas vanaf een breakpoint; dan krijgt een tablet regels van ruim 90 tekens.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

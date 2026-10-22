@@ -40,6 +40,7 @@ axe toetst op WCAG 2.0, 2.1 en 2.2, niveau A en AA, en op de best practices van 
 Elke schending laat de controle falen; er staan geen regels uit.
 Per pagina controleert de test ook precies één `h1`, `lang="nl"` op het `html`-element en geen horizontale scrollbalk in een venster van 320 pixels breed.
 `e2e/home.spec.ts` controleert wat axe niet ziet op de homepage: de volgorde van de koppen, wat er wel en niet staat, de hoogte van de links en dat er niets van een ander domein komt.
+`e2e/content-column.spec.ts` controleert dat de inhoud van elke pagina op een breed scherm in een kolom van 36 rem staat, in lijn met het logo, en dat geen regel meer dan 80 tekens telt.
 Een nieuwe pagina is één regel in de lijst, met het antwoord dat de pagina moet geven: 200, of 404 voor de pagina 'niet gevonden'.
 Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de pagina 'niet gevonden' toetst.
 

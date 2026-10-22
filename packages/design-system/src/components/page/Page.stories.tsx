@@ -13,6 +13,7 @@ const meta = preview.meta({
           'De achtergrond van de `Page.Header` loopt van rand tot rand; het logo en de navigatie, de `Page.Body` en de `Page.Footer` staan in de kolom.',
           '',
           'De breedte en de marge komen uit twee tokens: `--hf-page-max-width` (75 rem) en `--hf-page-margin` (1 rem).',
+          'De inhoud in de `Page.Body` staat op een breed scherm in een smallere kolom: zie de `Page.Body`.',
           'Het token `--hf-page-inset` is de ruimte aan de zijkanten die daaruit volgt, voor alles wat zo breed is als zijn ouder, ook buiten een `Page`.',
           'De pagina is minstens zo hoog als het scherm, zodat de footer onderaan blijft staan als er weinig inhoud is.',
           '',
@@ -44,10 +45,16 @@ export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', ren
 // Only on the canvas: on the docs page they would show the same as the stories above, because the docs page can't resize the window.
 const screens = { tags: ['!autodocs'] }
 
+const narrowDescription = 'Op een smal scherm gebruikt de inhoud de hele breedte, tussen de marges van 1 rem.'
+
+const wideDescription =
+  'Op een breed scherm staat de inhoud in een smallere kolom, van 36 rem, in lijn met het logo. Een regel telt er hoogstens 80 tekens. De rest van de kolom van de pagina blijft leeg, als plek voor een zijbalk. De header en de footer lopen over de hele kolom.'
+
 export const NarrowLight = meta.story({
   ...screens,
   globals: { theme: 'light', viewport: narrow },
   name: 'Smal scherm, licht',
+  parameters: { docs: { description: { story: narrowDescription } } },
   render,
 })
 
@@ -55,6 +62,7 @@ export const NarrowDark = meta.story({
   ...screens,
   globals: { theme: 'dark', viewport: narrow },
   name: 'Smal scherm, donker',
+  parameters: { docs: { description: { story: narrowDescription } } },
   render,
 })
 
@@ -62,6 +70,7 @@ export const WideLight = meta.story({
   ...screens,
   globals: { theme: 'light', viewport: wide },
   name: 'Breed scherm, licht',
+  parameters: { docs: { description: { story: wideDescription } } },
   render,
 })
 
@@ -69,5 +78,6 @@ export const WideDark = meta.story({
   ...screens,
   globals: { theme: 'dark', viewport: wide },
   name: 'Breed scherm, donker',
+  parameters: { docs: { description: { story: wideDescription } } },
   render,
 })
