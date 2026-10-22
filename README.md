@@ -46,6 +46,10 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm run import` | Haalt de feeds van de bronnen op en bewaart de koppen      |
 | `pnpm release`    | Opent of werkt de release-pull request bij (vraagt `gh`)   |
 
+Na `pnpm release` en vóór je de release-pull request samenvoegt, schrijft de Coordinator de Nederlandse zinnen voor de pagina Wat is er nieuw.
+Een kleine pull request zet ze in [`apps/site/src/release-notes.ts`](apps/site/src/release-notes.ts).
+Zonder zinnen toont de pagina de nieuwe versie niet.
+
 De database draait in Docker.
 Start hem met `docker compose up -d --wait`, en maak dan de tabellen met `pnpm db:migrate`.
 Zonder database slagen de tests van `packages/db` niet.

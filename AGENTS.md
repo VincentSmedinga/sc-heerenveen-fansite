@@ -45,6 +45,10 @@ Building, reviewing, design and research for their own sake, and help with the o
 - Specifies issues with the owner until they are ready to build (see _Definition of Ready_), with the `specify` skill in [`.claude/skills/specify/SKILL.md`](.claude/skills/specify/SKILL.md).
 - Starts at most two issues at a time, each with its own Builder.
 - Writes the decisions from a specification into the issue, so the Builder adds them to `docs/beslissingen.md`.
+- At each release, writes what is new for visitors: a few Dutch sentences per version, from `CHANGELOG.md` and the release pull request, as _Nederlands schrijven_ in `CONTRIBUTING.md` asks.
+  They say what a visitor notices, not how it's built.
+  The owner approves them, and a small pull request puts them in `apps/site/src/release-notes.ts` before the owner merges the release.
+  The page Wat is er nieuw shows a version only once `CHANGELOG.md` has it, so the sentences can wait in the file.
   A decision that belongs to no issue gets its own small pull request.
 - Starts each Builder in its own session, and a Reviewer when no Builder is there to start it.
   Doesn't build or review itself.

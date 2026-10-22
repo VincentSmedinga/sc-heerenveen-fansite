@@ -3,9 +3,13 @@ import '@fansite/design-system/index.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
-import { Body, Link, Logo, Page, Root, Text } from '@fansite/design-system'
+import { Body, Link, Logo, Navigation, Page, Root, Text } from '@fansite/design-system'
 
 import { SiteNavigation } from '../SiteNavigation'
+import { whatsNewPath, whatsNewTitle } from '../whats-new'
+
+// The links in the footer, about the site itself.
+const footerItems = [{ href: whatsNewPath, label: whatsNewTitle }]
 
 export const metadata: Metadata = {
   title: {
@@ -29,6 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
             <Text appearance="meta">Alle koppen en links op één plek. Voor supporters, door supporters.</Text>
+            <Navigation items={footerItems} label="Over de site" />
           </Page.Footer>
         </Page>
       </Body>
