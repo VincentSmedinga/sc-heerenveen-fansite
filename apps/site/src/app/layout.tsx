@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </Page.Header>
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
-            <Text appearance="meta">sc Heerenveen Fansite, sinds 1997. Voor supporters, door supporters.</Text>
+            <Text appearance="meta">Alle koppen en links op één plek. Voor supporters, door supporters.</Text>
           </Page.Footer>
         </Page>
       </Body>

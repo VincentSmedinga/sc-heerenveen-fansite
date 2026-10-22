@@ -900,6 +900,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Wie het logo en die zin ziet, begrijpt dat dit een site van supporters is en geen kanaal van de club.
 - **Alternatieven:** een uitdrukkelijke zin in de footer houden, zoals "De sc Heerenveen Fansite is geen officieel onderdeel van sc Heerenveen".
   Dat is duidelijk, maar defensief.
+- **Later:** zie _De footer zegt wat je op de site vindt_.
+  "sinds 1997" staat sindsdien alleen nog in het logo.
 
 ### Storybook toont de code van het voorbeeld
 
@@ -966,6 +968,38 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een eigenschap is voorspelbaar: de pagina krijgt wat ze vraagt, los van wat er in de items staat.
 - **Alternatieven:** de ruimte automatisch geven zodra een item in de lijst een alinea bevat, met `:has()`.
   Dan hoeft een pagina niets te kiezen, maar de inhoud van één item verandert dan de hele lijst.
+
+### De header loopt over de hele breedte van het venster
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de achtergrond van de header loopt op elke breedte van rand tot rand.
+  Het logo en de navigatie blijven in de kolom van de pagina, in lijn met de inhoud eronder.
+  De footer blijft in de kolom.
+- **Hoe:** de `Page` is zo breed als het venster.
+  De header, de body en de footer zetten zelf de ruimte aan de zijkanten, uit het token `--hf-page-inset`: de helft van wat het venster breder is dan `--hf-page-max-width`, en nooit minder dan de marge.
+  De kolom blijft zo 75 rem breed, zoals voorheen.
+  De header gebruikt het als `padding-inline`, de body en de footer als `margin-inline`.
+  Een percentage verwijst naar de breedte van de ouder, en die telt de scrollbalk niet mee.
+  De header heeft de eigen zijruimte van 1,5 rem (op een smal scherm 1 rem) niet meer, zodat het logo op dezelfde plek staat als de inhoud.
+- **Waarom:** een band van rand tot rand is duidelijk de bovenkant van de site.
+  Op een telefoon stond de blauwe balk met een smalle rand aan beide kanten los.
+  Omdat de inhoud in de kolom blijft, staat het logo in lijn met de rest van de pagina.
+- **Alternatieven:** alleen op een smal scherm van rand tot rand, onder 40em of onder 75rem; op een breder scherm staat de balk dan nog in de kolom.
+  Of de header in de kolom laten, zoals voorheen.
+  Of de header `100vw` breed maken, met een negatieve marge: `100vw` telt de scrollbalk mee, dus op Windows scrolt de pagina dan opzij.
+  Of een omhulsel in de header voor de kolom; dat is een element meer, en de inhoud van de header zou dan altijd in dat omhulsel moeten.
+
+### De footer zegt wat je op de site vindt
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de footer zegt "Alle koppen en links op één plek. Voor supporters, door supporters."
+  "sinds 1997" staat alleen nog in het logo in de header.
+  Dit past de beslissing _Geen disclaimer, wel "Voor supporters, door supporters"_ aan, die "sinds 1997" ook in de footer zette.
+- **Waarom:** de footer zegt nu wat een bezoeker hier vindt.
+  "sinds 1997" staat al in het logo, vlak boven de pagina.
+- **Alternatieven:** "sc Heerenveen Fansite, sinds 1997.", zoals eerst.
+  Of "Je startpagina voor nieuws over sc Heerenveen."
+  Of "Koppen over sc Heerenveen uit de media, met een link naar het hele verhaal."
 
 ## Site
 

@@ -26,10 +26,10 @@ export const ExampleHeader = () => (
   </Page.Header>
 )
 
-/** The footer with "Voor supporters, door supporters." */
+/** The footer with "Alle koppen en links op één plek. Voor supporters, door supporters." */
 export const ExampleFooter = () => (
   <Page.Footer>
-    <Text appearance="meta">Voor supporters, door supporters.</Text>
+    <Text appearance="meta">Alle koppen en links op één plek. Voor supporters, door supporters.</Text>
   </Page.Footer>
 )
 

@@ -42,7 +42,9 @@ Body.displayName = 'Page.Body'
 Footer.displayName = 'Page.Footer'
 
 /**
- * The page: a centred column of a maximum width, with a margin on either side on a narrow screen.
+ * The page: as wide as the window. The background of the Page.Header runs from edge to edge, and what is in the header,
+ * the Page.Body and the Page.Footer sit in a centred column of a maximum width, with a margin on either side on a
+ * narrow screen.
  * It holds a Page.Header, a Page.Body and a Page.Footer, in that order. They only work inside a Page, so they are
  * written as properties of it.
  */

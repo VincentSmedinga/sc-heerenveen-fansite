@@ -5,6 +5,7 @@ import addonA11y from '@storybook/addon-a11y'
 import addonDocs from '@storybook/addon-docs'
 import { definePreview } from '@storybook/react-vite'
 import addonPseudoStates from 'storybook-addon-pseudo-states'
+import { MINIMAL_VIEWPORTS } from 'storybook/viewport'
 
 import { DocsPage } from './DocsPage'
 import { ThemedDocsContainer } from './ThemedDocsContainer'
@@ -82,6 +83,13 @@ export default definePreview({
           ],
           'Patronen',
         ],
+      },
+    },
+    viewport: {
+      // The standard screens, and one wider than the page column, to see what is outside it.
+      options: {
+        ...MINIMAL_VIEWPORTS,
+        wide: { name: 'Breed scherm', styles: { height: '1080px', width: '1920px' }, type: 'desktop' },
       },
     },
   },
