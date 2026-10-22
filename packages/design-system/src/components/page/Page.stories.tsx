@@ -13,7 +13,7 @@ const meta = preview.meta({
           'De achtergrond van de `Page.Header` loopt van rand tot rand; het logo en de navigatie, de `Page.Body` en de `Page.Footer` staan in de kolom.',
           '',
           'De breedte en de marge komen uit twee tokens: `--hf-page-max-width` (75 rem) en `--hf-page-margin` (1 rem).',
-          'Het token `--hf-page-inset` is de ruimte aan de zijkanten die daaruit volgt, voor alles dat zo breed is als zijn ouder, ook buiten een `Page`.',
+          'Het token `--hf-page-inset` is de ruimte aan de zijkanten die daaruit volgt, voor alles wat zo breed is als zijn ouder, ook buiten een `Page`.',
           'De pagina is minstens zo hoog als het scherm, zodat de footer onderaan blijft staan als er weinig inhoud is.',
           '',
           'De `Page` heeft geen eigen element met een rol.',
