@@ -19,10 +19,15 @@ Controleer daarom op de gerenderde pagina, in licht en donker:
 
 ## Wat CI controleert, en wat niet
 
-- **Nu:** CI bouwt Storybook, maar draait axe nog niet.
+- **De pagina's:** CI start de gebouwde site en toetst elke pagina uit de lijst in `apps/site/e2e/pages.spec.ts` met axe, in Chromium, in licht en donker.
+  axe toetst op WCAG 2.0, 2.1 en 2.2, niveau A en AA, en op de best practices van axe.
+  Elke schending laat de controle falen.
+  Per pagina controleert de test ook precies één `h1`, `lang="nl"` en geen horizontale scrollbalk in een venster van 320 pixels breed.
+  Lokaal draai je dit met `pnpm test:a11y`; wat eerst moet draaien, staat in de [README van de site](../apps/site/README.md).
+- **De stories:** CI bouwt Storybook, maar toetst de stories niet met axe.
   In Storybook toont het paneel Toegankelijkheid voor elk verhaal wat axe vindt.
-  Zodra de tests van Storybook draaien, laat een overtreding het verhaal falen.
-- **Straks:** axe in Playwright voor elk soort pagina, in CI (#25).
+  Een component toetst CI dus alleen op de pagina's waar hij staat.
+- **Een mens, straks:** de bediening met het toetsenbord, de volgorde van de focus, schermlezers en de laatste ronde WCAG-controle (#25).
 
 axe vindt onder meer: afbeeldingen zonder alt-tekst, velden zonder label, links en knoppen zonder naam, een pagina zonder `lang`, te weinig contrast bij tekst op een effen achtergrond, en ongeldige ARIA.
 
