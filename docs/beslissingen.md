@@ -219,6 +219,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de Builder CI laten volgen met een lus; dat staat de app niet toe, en elke keer kijken kost een beurt van het model.
   Of een akkoord voor elke push, ook voor herstel; dat is strenger, maar elk herstel wacht dan op de projecteigenaar.
 
+### Een agent start Storybook zelf, en werkt ook zonder
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** voordat een agent met componenten bouwt of een story schrijft, raadpleegt hij de MCP-server van Storybook (zie _De MCP-server van Storybook draait als add-on in de dev-server_).
+  Draait Storybook niet, dan start hij het zelf op de achtergrond, vanuit zijn eigen worktree.
+  Waar de instructies van Storybook afwijken van onze afspraken, zoals CSF Next, winnen onze afspraken.
+  Zonder server werkt hij vanuit de code, zoals nu.
+  De reviewer gebruikt de server niet.
+- **Waarom:** de server is een hulp, geen voorwaarde, dus een sessie loopt zonder Storybook niet vast.
+  De algemene instructies van Storybook kennen onze afspraken niet.
+  De reviewer leest de code, en die is de bron; met de server zou zijn review afhangen van een Storybook die in de juiste worktree draait.
+- **Let op:** Claude Code maakt verbinding met de server als een sessie begint.
+  Draaide Storybook toen niet, dan staat de server op "failed", en dat blijft zo als Storybook later start; we probeerden het meer dan dertig seconden.
+  Pas Reconnect in `/mcp` of een nieuwe sessie brengt de gereedschappen.
+  Een agent kan dat zelf niet.
+  Het opstarten door de agent helpt dus de volgende sessie, of de huidige na een Reconnect van de projecteigenaar.
+  Draait Storybook al bij het begin van een sessie, dan werkt alles meteen.
+- **Alternatieven:** de projecteigenaar houdt Storybook draaiend vanuit de hoofdmap, zodat de server er is als een sessie begint; dat is betrouwbaarder, maar een stap bij elke sessie, en de server toont dan de code van de hoofdmap in plaats van die van de worktree.
+  Of in `AGENTS.md` alleen melden dat de server er is.
+  Of de reviewer de hulpmiddelen voor documentatie geven; die lezen alleen.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host
@@ -1000,6 +1021,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** "sc Heerenveen Fansite, sinds 1997.", zoals eerst.
   Of "Je startpagina voor nieuws over sc Heerenveen."
   Of "Koppen over sc Heerenveen uit de media, met een link naar het hele verhaal."
+
+### De MCP-server van Storybook draait als add-on in de dev-server
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** agents vragen het designsysteem op bij `@storybook/addon-mcp`, in de dev-server van Storybook, op `http://localhost:6006/mcp`.
+  De hulpmiddelen voor documentatie en voor ontwikkelen staan aan, die voor tests uit.
+  Een `.mcp.json` in de hoofdmap maakt de server bekend bij elke sessie van Claude Code.
+  Storybook staat daarmee op 10.6.3, met al zijn packages.
+- **Waarom:** de add-on draait in de server die we al hebben, en geeft naast de documentatie ook instructies voor stories.
+  De losse `@storybook/mcp` is een bibliotheek: we zouden er een eigen server omheen moeten schrijven en draaien, en hij geeft alleen de documentatie.
+  De hulpmiddelen voor tests vragen `@storybook/addon-vitest`, die we niet gebruiken (zie _Componenten testen we met Vitest en Testing Library_).
+- **Let op:** de add-on stuurt zelf geen telemetrie, maar roept die van Storybook aan.
+  Die staat uit met `core.disableTelemetry`.
+  Zet je dat aan, dan gaan er gebeurtenissen van de add-on naar storybook.js.org, met de naam van de client die de server gebruikt.
+- **Alternatieven:** de losse server `@storybook/mcp`, die de gegevens uit een gebouwde Storybook leest.
+  Of geen MCP-server; dan zoeken agents alles zelf in de code, zoals nu.
+
+### Storybook haalt de props uit react-component-meta
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `features.experimentalReactComponentMeta` staat aan.
+  De props die de MCP-server van een component geeft, komen dan van de TypeScript-compiler.
+- **Waarom:** de standaard, react-docgen, laat een type als `(typeof headingLevels)[number]` staan.
+  Een agent ziet dan niet welke waarden mogen.
+  react-docgen-typescript lost dat op, maar laat de props van `List` (`as` en `loose`) en `Link` (`href`) weg.
+  react-component-meta geeft alle props, met de waarden van een type als `1 | 2 | 3 | 4`.
+- **Let op:** Storybook noemt dit experimenteel.
+  De versie staat vast, dus het verandert pas met een update.
+  Geeft het daarna slechte props, dan is `typescript.reactDocgen: 'react-docgen-typescript'` de terugval.
+- **Alternatieven:** react-docgen, de standaard, of react-docgen-typescript.
 
 ## Site
 

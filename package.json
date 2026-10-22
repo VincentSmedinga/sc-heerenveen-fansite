@@ -36,7 +36,7 @@
     "eslint-plugin-baseline-js": "0.7.5",
     "eslint-plugin-perfectionist": "5.12.1",
     "eslint-plugin-react-hooks": "7.1.1",
-    "eslint-plugin-storybook": "10.6.2",
+    "eslint-plugin-storybook": "10.6.3",
     "globals": "17.13.0",
     "husky": "9.1.7",
     "lint-staged": "17.6.0",

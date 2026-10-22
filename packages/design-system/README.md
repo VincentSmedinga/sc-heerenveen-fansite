@@ -13,6 +13,7 @@ pnpm --filter design-system storybook
 ```
 
 Storybook draait dan op <http://localhost:6006>.
+Het heeft ook een MCP-server voor agents, op <http://localhost:6006/mcp>.
 Met `pnpm --filter design-system build-storybook` bouw je een statische versie in `storybook-static/`.
 
 De tests van de componenten draai je met `pnpm --filter design-system test`.
