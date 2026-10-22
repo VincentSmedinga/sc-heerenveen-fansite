@@ -286,6 +286,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** op de hosting staat geen ontwikkelgereedschap, en dezelfde opdracht moet daar kunnen draaien als we migraties bij het uitrollen gaan doen (#70).
 - **Alternatieven:** `drizzle-kit migrate`.
   Dat vraagt dat `drizzle-kit` en zijn dependencies op de server staan.
+- **Later:** zie _De site draait de migraties als ze start_.
 
 ### Drizzle 0.45 in plaats van de 1.0-kandidaat
 
@@ -368,6 +369,38 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een tag verandert niet meer, een tak wel.
 - **Alternatieven:** `develop` voor acceptatie en `main` voor productie.
   Dat past bij samenvoegen zonder squash, en dat doen we niet.
+
+### De site draait de migraties als ze start
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de server van de site draait de migraties die de database nog niet had als de host hem start, voordat hij verzoeken beantwoordt.
+  Een slot in de database (`GET_LOCK`) voorkomt dat twee processen tegelijk migreren.
+  Lukt het niet, dan schrijft de server een melding in het logboek en blijft hij draaien.
+  De workflow Acceptance vraagt na het uitrollen `/bronnen` op, zodat een mislukte migratie een rode run geeft.
+- **Hoe:** `register()` in `apps/site/src/instrumentation.ts` roept `prepareDatabase` aan uit `@fansite/db/prepare`, en Next.js beantwoordt geen verzoek voordat die klaar is.
+  `assemble` zet de migraties in `packages/db/drizzle` van de map, want Next.js volgt alleen wat de code importeert en laat de SQL-bestanden weg.
+  De rooktest maakt voor elke run een lege database aan op de server uit `DATABASE_URL`, en laat de site daar zijn tabellen maken.
+  Zo bewijst hij ook dat de migraties in de map zitten.
+- **Waarom:** `DATABASE_URL` staat alleen in de Node.js-app in DirectAdmin.
+  Zo blijft het wachtwoord op één plek: niet in GitHub en niet in een tweede bestand op de host.
+  Elke versie die start, heeft het schema dat ze nodig heeft, en productie (#33) werkt straks net zo.
+- **Let op:** MariaDB kan `CREATE TABLE` en `ALTER TABLE` niet terugdraaien.
+  Een migratie die halverwege mislukt, kan een half veranderd schema achterlaten.
+  Productie krijgt daarom een back-up vóór een migratie (#33).
+- **Alternatieven:** na het kopiëren een opdracht op de host draaien via SSH.
+  Een SSH-sessie krijgt de variabelen van de app niet, dus `DATABASE_URL` moet dan ook in een bestand op de host, en we moeten Node daar zelf vinden.
+  Of vanuit GitHub migreren door een SSH-tunnel; dan komt `DATABASE_URL` in de geheimen van GitHub.
+  Of de server laten stoppen als het niet lukt; dan toont de host zijn eigen foutpagina, zonder uitleg en buiten onze huisstijl.
+
+### De testbronnen staan alleen op acceptatie
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de site zet de testbronnen alleen met `SITE_ENV` `acceptance`, bij elke start.
+  De seed werkt bestaande testbronnen bij op hun domein, dus er komen geen dubbele.
+  `pnpm db:seed` weigert als `SITE_ENV` `production` is.
+- **Waarom:** de groep moet op acceptatie een gevulde pagina kunnen nakijken, en op productie mogen nooit testbronnen komen.
+- **Alternatieven:** acceptatie leeg laten en de bronnen met de hand invoeren.
+  Dat kan pas met het beheer (#30), en dan vervangen de echte bronnen de testbronnen.
 
 ## Werkruimte
 
@@ -1000,6 +1033,26 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de header in elke pagina, met de huidige pagina als prop; dan herhaalt elke pagina de header.
   Of het pad lezen uit de headers van het verzoek; dan maakt de server elke pagina per bezoek, ook de homepage.
   Of de huidige pagina niet markeren.
+
+### Een eigen foutpagina bij een fout op de server
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** lukt een pagina niet door een fout op de server, dan toont de site een eigen foutpagina in de paginaopbouw.
+  Die zegt dat het aan ons ligt en wat de bezoeker kan doen: later opnieuw proberen, naar de homepage gaan, of het op het forum melden.
+  Een pagina die een fout verwacht, zoals `/bronnen` zonder database, vangt hem zelf op en zet de foutpagina in de HTML.
+  Ze antwoordt dan met 200, met `noindex` in de HTML, en werkt zonder JavaScript.
+  Een fout die niemand opvangt, valt terug op `app/error.tsx`: dezelfde tekst, met status 500, maar pas nadat de browser JavaScript heeft uitgevoerd.
+- **Waarom:** een bezoeker moet weten dat de fout bij ons ligt, en wat er te doen is.
+  De rest van de site blijft werken, dus alleen de pagina die de database nodig heeft, valt uit.
+  Next.js 16 kan niet allebei: een pagina die gooit, geeft een 500 met een lege `body`, want `error.tsx` en `global-error.tsx` zijn clientcomponenten.
+  Een pagina kan haar eigen statuscode niet kiezen (alleen 404, 403, 401 en een redirect).
+  We kozen voor de tekst in de HTML boven de 5xx: ook zonder JavaScript weet de bezoeker wat er aan de hand is.
+- **Let op:** een zoekmachine die de pagina binnenkrijgt terwijl de database uitvalt, haalt haar uit de index tot hij weer langskomt.
+  Met een 5xx zou hij de oude versie houden.
+- **Alternatieven:** de pagina laten gooien, met een echte 500 en de tekst pas na JavaScript; dan ziet een bezoeker zonder JavaScript een lege pagina.
+  Of de pagina doorsturen naar `/fout`, dat de proxy met een 503 herschrijft; dan komen de HTML en de 5xx samen, maar verandert het adres en vraagt elke pagina een eigen terugpad.
+  Of de standaardpagina van Next.js; die is Engels en legt niets uit.
+  Of de oorzaak noemen, zoals de database; dat klopt niet bij elke fout, want de pagina weet de oorzaak niet.
 
 ## Redactie
 

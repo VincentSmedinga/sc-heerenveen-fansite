@@ -1,5 +1,6 @@
 // Copies the standalone build to a new folder, with the static files next to the server, the way the host needs them.
-// Next.js leaves those files out of the standalone folder. CI copies the result to the host, and runs smoke.js on it first.
+// Next.js leaves those files out of the standalone folder, and the SQL files of the migrations too: it only follows what the
+// code imports. CI copies the result to the host, and runs smoke.js on it first.
 // The folder has no symbolic links: pnpm's node_modules is flattened into real folders (see flattenModules).
 //
 //   node scripts/assemble.js <new folder>
@@ -98,3 +99,8 @@ cpSync(standalone, target, { recursive: true, verbatimSymlinks: true })
 flattenModules(target)
 mkdirSync(path.join(siteFolder, '.next'), { recursive: true })
 cpSync(path.resolve(import.meta.dirname, '../.next/static'), path.join(siteFolder, '.next/static'), { recursive: true })
+// The server runs the migrations when it starts. It looks for them in packages/db/drizzle, two folders above apps/site, as in
+// the repository (see migrationsFolder in src/instrumentation-node.ts).
+cpSync(path.resolve(import.meta.dirname, '../../../packages/db/drizzle'), path.join(target, 'packages/db/drizzle'), {
+  recursive: true,
+})
