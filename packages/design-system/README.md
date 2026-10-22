@@ -98,7 +98,7 @@ Zo blijft een uitzondering niet hangen.
 | Map              | Inhoud                                                                           |
 | ---------------- | -------------------------------------------------------------------------------- |
 | `src/tokens`     | Kleur- en typografietokens, met hun verhalen en documentatie                     |
-| `src/base`       | Stijlen voor HTML-elementen zonder component, met een verhaal per soort element  |
+| `src/base`       | Stijlen voor elementen zonder component, en alle verhalen van HTML-elementen     |
 | `src/components` | De componenten, elk met stories, tests en CSS                                    |
 | `src/assets`     | Logo's als SVG                                                                   |
 | `src/docs`       | Huisstijl, lege hoofdstukken en hulpcomponenten voor de documentatie             |
