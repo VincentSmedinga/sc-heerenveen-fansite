@@ -24,9 +24,8 @@ export default function AboutPage() {
         <Link href="https://forum.heerenveen.org">ons forum</Link>, waar supporters met elkaar praten.
       </Text>
       <Text>
-        Vincent Smedinga begon de site in 1997, als SC Heerenveen Online. In de tussentijd hielpen veel mensen mee,
-        zowel aan de site als aan het forum. En ook nu weer. De laatste versie liep tot 2006, en in 2026 is de site
-        terug.
+        Vincent Smedinga begon de site in 1997, als SC Heerenveen Online. In die jaren hielpen veel mensen mee, aan de
+        site en aan het forum, en ook nu weer. De laatste versie liep tot 2006, en in 2026 is de site terug.
       </Text>
       <Heading level={2}>Hoe we werken</Heading>
       <Text>
