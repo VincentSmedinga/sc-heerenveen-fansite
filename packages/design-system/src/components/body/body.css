@@ -1,0 +1,12 @@
+/* The body element: the colour, font and margin of all text on the page. */
+
+@layer hf.base {
+  body {
+    color: var(--hf-colour-text-default);
+    font-family: var(--hf-font-family-text);
+    font-size: var(--hf-body-font-size);
+    font-weight: var(--hf-body-font-weight);
+    line-height: var(--hf-body-line-height);
+    margin: 0;
+  }
+}

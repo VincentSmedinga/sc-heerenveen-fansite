@@ -1,0 +1,10 @@
+/* The focus ring of every element that can take focus. */
+
+@layer hf.base {
+  /* The ring takes only its colour from the token, so it falls back to the text colour rather than vanish. */
+  :focus-visible {
+    outline: 0.1875rem solid;
+    outline-color: var(--hf-colour-focus);
+    outline-offset: 0.125rem;
+  }
+}

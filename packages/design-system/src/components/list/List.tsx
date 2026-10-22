@@ -14,7 +14,7 @@ export type ListProps =
       as?: 'ul'
     })
 
-/** A list of `li` elements, bulleted or numbered. The base styles give it its look. */
+/** A list of `li` elements, bulleted or numbered. list.css gives it its look. */
 export const List = (props: ListProps) => {
   if (props.as === 'ol') {
     const { as: Element, ...rest } = props

@@ -5,5 +5,5 @@ export type LinkProps = ComponentPropsWithoutRef<'a'> & {
   href: string
 }
 
-/** A link, underlined as the base styles make it. Its text says where it goes, also on its own. */
+/** A link, underlined as link.css makes it. Its text says where it goes, also on its own. */
 export const Link = (props: LinkProps) => <a {...props} />

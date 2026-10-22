@@ -1,3 +1,24 @@
+/* Headings h1 to h6: their colour and spacing, and the type styles they take by default. */
+
+@layer hf.base {
+  /* Colour and spacing of headings. Their type styles follow below, in the typography layer. */
+  :is(h1, h2, h3, h4, h5, h6) {
+    color: var(--hf-colour-text-heading);
+    margin-block: 2rem 0.75rem;
+
+    &:first-child {
+      margin-block-start: 0;
+    }
+  }
+
+  /* Not Baseline widely available yet. Without it, a heading wraps as a paragraph does. */
+  @supports (text-wrap: balance) {
+    :is(h1, h2, h3, h4, h5, h6) {
+      text-wrap: balance;
+    }
+  }
+}
+
 /*
  * Type styles. Each style is a class, so the look stays separate from the HTML level:
  * <h2 class="hf-heading-3"> is a level 2 heading that looks like Kop 3.
@@ -5,18 +26,7 @@
  * A class wins over the element because it is more specific.
  * Every rule sets the same properties, so a class fully replaces the element's default style.
  */
-
 @layer hf.typography {
-  .hf-wordmark {
-    font-family: var(--hf-font-family-display);
-    font-size: var(--hf-wordmark-font-size);
-    font-stretch: var(--hf-wordmark-font-stretch);
-    font-weight: var(--hf-wordmark-font-weight);
-    letter-spacing: var(--hf-wordmark-letter-spacing);
-    line-height: var(--hf-wordmark-line-height);
-    text-transform: uppercase;
-  }
-
   h1,
   .hf-heading-1 {
     font-family: var(--hf-font-family-display);
@@ -80,26 +90,6 @@
     font-weight: var(--hf-headline-font-weight);
     letter-spacing: normal;
     line-height: var(--hf-headline-line-height);
-    text-transform: none;
-  }
-
-  .hf-body {
-    font-family: var(--hf-font-family-text);
-    font-size: var(--hf-body-font-size);
-    font-stretch: normal;
-    font-weight: var(--hf-body-font-weight);
-    letter-spacing: normal;
-    line-height: var(--hf-body-line-height);
-    text-transform: none;
-  }
-
-  .hf-meta {
-    font-family: var(--hf-font-family-text);
-    font-size: var(--hf-meta-font-size);
-    font-stretch: normal;
-    font-weight: var(--hf-meta-font-weight);
-    letter-spacing: normal;
-    line-height: var(--hf-meta-line-height);
     text-transform: none;
   }
 }

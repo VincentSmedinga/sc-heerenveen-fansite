@@ -4,6 +4,19 @@
  * An inline-flex box passes no underline on from a link around it.
  */
 
+/* The wordmark type style: the name of the site in capitals. The logo takes it, and it also stands on its own. */
+@layer hf.typography {
+  .hf-wordmark {
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-wordmark-font-size);
+    font-stretch: var(--hf-wordmark-font-stretch);
+    font-weight: var(--hf-wordmark-font-weight);
+    letter-spacing: var(--hf-wordmark-letter-spacing);
+    line-height: var(--hf-wordmark-line-height);
+    text-transform: uppercase;
+  }
+}
+
 @layer hf.components {
   .hf-logo {
     --hf-logo-mark-size: calc(var(--hf-wordmark-font-size) * 1.55);

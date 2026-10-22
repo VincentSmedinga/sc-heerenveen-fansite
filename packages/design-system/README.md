@@ -45,6 +45,8 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
 - **Voorvoegsel `hf-`** (Heerenveen Fansite) voor klassen en custom properties: `.hf-heading-3`, `--hf-colour-text-default`.
 - **Lagen:** `hf.tokens`, `hf.base`, `hf.typography`, `hf.components`.
   CSS buiten een laag wint altijd.
+  Het CSS-bestand van een component mag regels in meer dan één laag hebben: `heading/heading.css` heeft een basislaag en een typografielaag.
+  De volgorde van de imports in `src/index.css` is de volgorde van de regels binnen een laag.
 - **Logische eigenschappen:** `margin-inline-start` in plaats van `margin-left`.
   Stylelint controleert dit.
 - **Kleur:** gebruik semantische tokens, zoals `--hf-colour-text-secondary`, nooit de primitieven (`--hf-colour-grey-600`) in componenten.
@@ -54,7 +56,7 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
 - **Componenten:** een React-component per HTML-element of onderdeel, met getypeerde props en de klassen met `hf-`.
   Kan een component meer dan één element zijn, dan kiest een `as`-prop uit een vaste lijst die de typen afdwingen.
   Een component zonder hooks of toestand blijft een servercomponent.
-  Elk component heeft stories in licht en donker, documentatie in Storybook en tests met Vitest en Testing Library.
+  Elk component heeft in zijn map een eigen CSS-bestand (`heading/heading.css`), stories in licht en donker, documentatie in Storybook en tests met Vitest en Testing Library.
 - **Taal:** code en commentaar in Brits Engels (`colour`, `initialise`); alles wat bezoekers en lezers van Storybook zien in het Nederlands.
 
 De keuzes en hun redenen staan in [`docs/beslissingen.md`](../../docs/beslissingen.md).
@@ -96,9 +98,8 @@ Zo blijft een uitzondering niet hangen.
 | Map              | Inhoud                                                                           |
 | ---------------- | -------------------------------------------------------------------------------- |
 | `src/tokens`     | Kleur- en typografietokens, met hun verhalen en documentatie                     |
-| `src/base`       | Stijlen voor HTML-elementen, met een verhaal per soort element                   |
-| `src/components` | De componenten, elk met stories, tests en waar nodig CSS                         |
-| `src/typography` | Typestijlen als klassen                                                          |
+| `src/base`       | Stijlen voor elementen zonder component, en alle verhalen van HTML-elementen     |
+| `src/components` | De componenten, elk met stories, tests en CSS                                    |
 | `src/assets`     | Logo's als SVG                                                                   |
 | `src/docs`       | Huisstijl, lege hoofdstukken en hulpcomponenten voor de documentatie             |
 | `.storybook`     | Instellingen van Storybook: themaknop, documentatie en toegankelijkheidscontrole |

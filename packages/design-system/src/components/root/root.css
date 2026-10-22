@@ -1,0 +1,22 @@
+/* The html element: the page background, the theme of a subtree and smooth scrolling. */
+
+@layer hf.base {
+  html {
+    background-color: var(--hf-colour-background-page);
+  }
+
+  /*
+   * A subtree with its own data-theme resolves the colour tokens again. Inherited colours were resolved
+   * for the parent's theme, so set them here once more.
+   */
+  [data-theme] {
+    background-color: var(--hf-colour-background-page);
+    color: var(--hf-colour-text-default);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
