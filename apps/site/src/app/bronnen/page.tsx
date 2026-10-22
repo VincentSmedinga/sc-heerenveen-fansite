@@ -27,7 +27,7 @@ export default async function SourcesPage() {
           {groups.map(({ heading, kind, sources }) => (
             <Fragment key={kind}>
               <Heading level={2}>{heading}</Heading>
-              <List>
+              <List loose>
                 {sources.map((source) => (
                   <List.Item key={source.domain}>
                     <Link href={websiteOf(source)}>{source.name}</Link>

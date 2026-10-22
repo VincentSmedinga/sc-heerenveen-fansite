@@ -43,3 +43,18 @@
     margin-inline-start: 0;
   }
 }
+
+/*
+ * A loose list: the space belongs to the item, not to the paragraph in it.
+ * The last item and the last element in an item have none, so the list ends with the same space as a tight one.
+ */
+@layer hf.components {
+  .hf-list-loose > li {
+    margin-block-end: 1rem;
+
+    &:last-child,
+    > :last-child {
+      margin-block-end: 0;
+    }
+  }
+}
