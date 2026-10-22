@@ -33,7 +33,9 @@ Draai ze vanuit de root van de repository.
 | `pnpm test`        | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                     |
 
 `db:migrate` gebruikt de migrator van `drizzle-orm` en niet drizzle-kit.
-Daardoor kan dezelfde opdracht later op de hosting draaien, zonder ontwikkelgereedschap.
+Daardoor kan dezelfde code op de hosting draaien, zonder ontwikkelgereedschap: de site doet dat als hij start (zie _In andere packages_).
+
+`db:seed` weigert als `SITE_ENV` `production` is, want de testbronnen zijn verzonnen en mogen daar nooit komen.
 
 ## Het schema wijzigen
 
@@ -92,4 +94,8 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/schema`: de tabellen en hun types;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
-- `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten.
+- `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;
+- `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de testbronnen erin.
+  Een slot in de database (`GET_LOCK`, met de naam van de database erin) laat twee processen die tegelijk starten, om de beurt werken.
+  De site roept het aan als hij start.
+  De functie gooit bij een fout en laat het aan de aanroeper wat dat betekent; de aanroeper geeft zelf de map met de migraties, want een gebundelde build weet niet waar die staat.

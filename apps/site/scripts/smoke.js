@@ -1,9 +1,14 @@
 // Starts the built site the way the host does and checks what a visitor and a search engine get. CI runs it on the
 // folder it is about to deploy, so a broken copy never leaves the runner.
 //
+// The site makes its own tables when it starts, so each run that needs a database gets an empty one, made on the server
+// in DATABASE_URL and dropped afterwards. That also proves that the folder holds the migrations.
+//
 //   node scripts/smoke.js <folder with apps/site/server.js>
+import { connect } from '@fansite/db/client'
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
+import { randomBytes } from 'node:crypto'
 import { once } from 'node:events'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
@@ -12,6 +17,13 @@ const [folder] = process.argv.slice(2)
 
 if (folder === undefined) {
   console.error('Usage: node scripts/smoke.js <folder with apps/site/server.js>')
+  process.exit(2)
+}
+
+const databaseUrl = process.env['DATABASE_URL']
+
+if (databaseUrl === undefined) {
+  console.error('DATABASE_URL is missing: the smoke test makes a database of its own on that server.')
   process.exit(2)
 }
 
@@ -59,9 +71,34 @@ async function waitUntilUp(server) {
   assert.fail('the server did not answer within 30 seconds')
 }
 
-/** Starts the server with the given SITE_ENV (or none), runs the checks and always stops the server again. */
-async function withServer(siteEnv, checks) {
-  const env = { ...process.env, HOSTNAME: '127.0.0.1', PORT: port }
+/** Makes an empty database on the server in DATABASE_URL, runs the checks with its address and always drops it again. */
+async function withEmptyDatabase(checks) {
+  const server = new URL(databaseUrl)
+  server.pathname = ''
+  const name = `fansite_smoke_${randomBytes(6).toString('hex')}`
+  const { close, pool } = connect(server.href)
+
+  try {
+    await pool.query('CREATE DATABASE ??', [name])
+
+    try {
+      const url = new URL(databaseUrl)
+      url.pathname = `/${name}`
+      await checks(url.href)
+    } finally {
+      await pool.query('DROP DATABASE IF EXISTS ??', [name])
+    }
+  } finally {
+    await close()
+  }
+}
+
+/**
+ * Starts the server with the given SITE_ENV (or none) and database, runs the checks and always stops the server again.
+ * The checks get the server and a function that returns what the server has written to its log so far.
+ */
+async function withServer({ database, siteEnv }, checks) {
+  const env = { ...process.env, DATABASE_URL: database, HOSTNAME: '127.0.0.1', PORT: port }
   delete env['SITE_ENV']
 
   if (siteEnv !== undefined) {
@@ -74,7 +111,7 @@ async function withServer(siteEnv, checks) {
   server.stderr.on('data', (chunk) => (output += chunk))
 
   try {
-    await checks(server)
+    await checks(server, () => output)
   } catch (error) {
     console.error(output)
     throw error
@@ -87,68 +124,122 @@ async function withServer(siteEnv, checks) {
   }
 }
 
-await withServer('acceptance', async (server) => {
+// On acceptance the site makes the tables in an empty database and puts the test sources in them, before it answers.
+await withEmptyDatabase((database) =>
+  withServer({ database, siteEnv: 'acceptance' }, async (server, log) => {
+    await waitUntilUp(server)
+    assert.match(log(), /The database is up to date, with the test sources\./)
+
+    const home = await fetch(origin)
+    const html = await home.text()
+    assert.equal(home.status, 200)
+    assert.match(html, /<html lang="nl"/)
+    assert.equal(home.headers.get('x-powered-by'), null)
+
+    const asset = html.match(/\/_next\/static\/[^"'\\]+\.(?:css|js)/)?.[0]
+    assert.ok(asset, 'the page links to no static file')
+
+    const robots = await fetch(`${origin}/robots.txt`)
+    assert.match(await robots.text(), /^Disallow: \/$/m)
+
+    // The sources page reads the register, so the database driver must be in the folder too, and the test sources must
+    // be in it. The source that is switched off isn't on the page.
+    const sources = await fetch(`${origin}/bronnen`)
+    const sourcesHtml = await sources.text()
+    assert.equal(sources.status, 200)
+    assert.match(sourcesHtml, /<h1[^>]*>Onze bronnen<\/h1>/)
+    assert.match(sourcesHtml, /Testkrant/)
+    assert.doesNotMatch(sourcesHtml, /Uitgezette testbron/)
+
+    // Every kind of response carries the headers: a page, a page from the database, robots.txt, a static file and a 404.
+    for (const response of [
+      home,
+      sources,
+      robots,
+      await fetch(origin + asset),
+      await fetch(`${origin}/bestaat-niet`),
+    ]) {
+      assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow', response.url)
+      assert.match(response.headers.get('content-security-policy') ?? '', /^default-src 'self';/, response.url)
+    }
+
+    // A page loads nothing from another domain: no script, stylesheet, font or image (editorial principle 3).
+    for (const [page, pageHtml] of [
+      [origin, html],
+      [`${origin}/bronnen`, sourcesHtml],
+    ]) {
+      const urls = await loadedUrls(page, pageHtml)
+      assert.ok(
+        urls.some((url) => url.pathname.endsWith('.woff2')),
+        `${page} loads no font of our own`,
+      )
+
+      for (const url of urls) {
+        assert.equal(url.origin, origin, `${page} loads ${url.href}`)
+      }
+    }
+
+    assert.equal((await fetch(origin + asset)).status, 200, 'the static file is missing from the folder')
+
+    // The 404 page is in Dutch too, not the English page of Next.js.
+    const missing = await fetch(`${origin}/bestaat-niet`)
+    const missingHtml = await missing.text()
+    assert.equal(missing.status, 404)
+    assert.match(missingHtml, /Pagina niet gevonden/)
+    assert.doesNotMatch(missingHtml, /could not be found/)
+  }),
+)
+
+// On production the tables come too, but never the test sources.
+await withEmptyDatabase((database) =>
+  withServer({ database, siteEnv: 'production' }, async (server, log) => {
+    await waitUntilUp(server)
+    assert.match(log(), /The database is up to date\./)
+
+    const home = await fetch(origin)
+    assert.equal(home.headers.get('x-robots-tag'), null, 'production must be indexable')
+    assert.doesNotMatch(await (await fetch(`${origin}/robots.txt`)).text(), /^Disallow: \/$/m)
+
+    const sources = await fetch(`${origin}/bronnen`)
+    const sourcesHtml = await sources.text()
+    assert.equal(sources.status, 200)
+    assert.match(sourcesHtml, /We hebben nog geen bronnen/)
+    assert.doesNotMatch(sourcesHtml, /Testkrant/)
+  }),
+)
+
+// A database that isn't there doesn't stop the site. The homepage doesn't need it, the log says what is wrong, and the
+// sources page is the error page. The error page is in the HTML, so it works without JavaScript. The status is 200: Next.js
+// can't send a page that failed with a 5xx and the page in the HTML, so the page asks search engines to leave it out.
+const unreachable = new URL(databaseUrl)
+unreachable.hostname = '127.0.0.1'
+unreachable.port = '1'
+
+await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (server, log) => {
   await waitUntilUp(server)
+  assert.match(log(), /Could not bring the database up to date.*ECONNREFUSED/)
 
   const home = await fetch(origin)
-  const html = await home.text()
   assert.equal(home.status, 200)
-  assert.match(html, /<html lang="nl"/)
-  assert.equal(home.headers.get('x-powered-by'), null)
+  assert.match(await home.text(), /<h1[^>]*>sc Heerenveen Fansite<\/h1>/)
 
-  const asset = html.match(/\/_next\/static\/[^"'\\]+\.(?:css|js)/)?.[0]
-  assert.ok(asset, 'the page links to no static file')
-
-  const robots = await fetch(`${origin}/robots.txt`)
-  assert.match(await robots.text(), /^Disallow: \/$/m)
-
-  // The sources page reads the register, so the database driver must be in the folder too.
   const sources = await fetch(`${origin}/bronnen`)
   const sourcesHtml = await sources.text()
   assert.equal(sources.status, 200)
-  assert.match(sourcesHtml, /<h1[^>]*>Onze bronnen<\/h1>/)
-
-  // Every kind of response carries the headers: a page, a page from the database, robots.txt, a static file and a 404.
-  for (const response of [home, sources, robots, await fetch(origin + asset), await fetch(`${origin}/bestaat-niet`)]) {
-    assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow', response.url)
-    assert.match(response.headers.get('content-security-policy') ?? '', /^default-src 'self';/, response.url)
-  }
-
-  // A page loads nothing from another domain: no script, stylesheet, font or image (editorial principle 3).
-  for (const [page, pageHtml] of [
-    [origin, html],
-    [`${origin}/bronnen`, sourcesHtml],
-  ]) {
-    const urls = await loadedUrls(page, pageHtml)
-    assert.ok(
-      urls.some((url) => url.pathname.endsWith('.woff2')),
-      `${page} loads no font of our own`,
-    )
-
-    for (const url of urls) {
-      assert.equal(url.origin, origin, `${page} loads ${url.href}`)
-    }
-  }
-
-  assert.equal((await fetch(origin + asset)).status, 200, 'the static file is missing from the folder')
-
-  // The 404 page is in Dutch too, not the English page of Next.js.
-  const missing = await fetch(`${origin}/bestaat-niet`)
-  const missingHtml = await missing.text()
-  assert.equal(missing.status, 404)
-  assert.match(missingHtml, /Pagina niet gevonden/)
-  assert.doesNotMatch(missingHtml, /could not be found/)
+  assert.match(sourcesHtml, /<h1[^>]*>Er ging iets mis<\/h1>/)
+  assert.match(sourcesHtml, /<title>Er ging iets mis – sc Heerenveen Fansite<\/title>/)
+  assert.match(sourcesHtml, /<meta name="robots" content="noindex"\/>/)
+  assert.match(sourcesHtml, /<a href="https:\/\/forum\.heerenveen\.org">het forum<\/a>/)
+  assert.match(sourcesHtml, /<a href="\/bronnen">Probeer het opnieuw<\/a>/)
+  assert.match(sourcesHtml, /<a href="\/">Naar de homepage<\/a>/)
+  // In the page layout, with the header and the footer.
+  assert.match(sourcesHtml, /<header[^>]*>[\s\S]*<main[^>]*>[\s\S]*Er ging iets mis[\s\S]*<\/main>[\s\S]*<footer/)
+  assert.doesNotMatch(sourcesHtml, /Testkrant|Onze bronnen<\/h1>/)
+  assert.match(log(), /Could not read the sources for \/bronnen: .*ECONNREFUSED/)
+  assert.equal(server.exitCode, null, 'the server must keep running')
 })
 
-await withServer('production', async (server) => {
-  await waitUntilUp(server)
-
-  const home = await fetch(origin)
-  assert.equal(home.headers.get('x-robots-tag'), null, 'production must be indexable')
-  assert.doesNotMatch(await (await fetch(`${origin}/robots.txt`)).text(), /^Disallow: \/$/m)
-})
-
-await withServer(undefined, async (server) => {
+await withServer({ database: databaseUrl, siteEnv: undefined }, async (server) => {
   const [code] = await Promise.race([once(server, 'exit'), sleep(30_000).then(() => [undefined])])
   assert.ok(code !== undefined && code !== 0, 'the server must refuse to start without SITE_ENV')
 })

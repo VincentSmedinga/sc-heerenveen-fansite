@@ -9,12 +9,13 @@ export type TestDatabase = Awaited<ReturnType<typeof createTestDatabase>>
 
 /**
  * Makes a database of its own on the server in `DATABASE_URL`, with the migrations run, and leaves the development
- * database alone. Call `drop()` when the tests are done.
+ * database alone. Call `drop()` when the tests are done. With `migrate: false` the database stays empty, for a test that
+ * runs the migrations itself.
  *
  * The database starts with the character set latin1, which MariaDB 10.11 uses unless the server says otherwise. Our
  * tables must come out as utf8mb4 anyway.
  */
-export async function createTestDatabase() {
+export async function createTestDatabase({ migrate = true }: { migrate?: boolean } = {}) {
   const server = await connectToServer()
   const name = `fansite_test_${randomBytes(6).toString('hex')}`
 
@@ -32,7 +33,9 @@ export async function createTestDatabase() {
   const { close, db, pool } = connect(url.href)
 
   try {
-    await migrateDatabase(db)
+    if (migrate) {
+      await migrateDatabase(db)
+    }
   } catch (error) {
     await close()
     await drop()
@@ -47,6 +50,7 @@ export async function createTestDatabase() {
       await drop()
     },
     pool,
+    url: url.href,
   }
 }
 

@@ -87,6 +87,13 @@ export async function seedSources(db: Database) {
 }
 
 if (import.meta.main) {
+  // The made-up sources must never reach production. The site seeds only on acceptance; this keeps `pnpm db:seed` from
+  // doing it by hand.
+  if (process.env['SITE_ENV'] === 'production') {
+    console.error('The seed puts made-up test sources in the register, so it never runs with SITE_ENV=production.')
+    process.exit(1)
+  }
+
   const { close, db } = connect(readDatabaseEnv().DATABASE_URL)
 
   try {
