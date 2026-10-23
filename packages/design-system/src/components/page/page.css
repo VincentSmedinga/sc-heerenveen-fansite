@@ -141,10 +141,20 @@
    * the main spans both rows, so a page without a sidebar has nothing empty: the cells sit under the introduction as before.
    * The introduction is as wide as the main, so its lines are as long as those of the other cells, and the track of the
    * sidebar beside it is empty.
+   *
+   * A main without cells under its introduction, such as a page with nothing to list yet, has no second row of its own on a
+   * narrow screen, and the empty `div` is left out, so the sidebar sits one gap under the introduction, not two.
    */
   .hf-page-main:has(> .hf-page-intro) {
-    grid-row: span 2;
     grid-template-rows: subgrid;
+  }
+
+  .hf-page-main:has(> .hf-page-cells:not(:empty)) {
+    grid-row: span 2;
+  }
+
+  .hf-page-cells:empty {
+    display: none;
   }
 
   @media (width >= 56rem) {

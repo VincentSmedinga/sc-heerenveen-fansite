@@ -101,6 +101,8 @@ describe('the page Onze bronnen', () => {
     const html = await render()
 
     expect(html).toContain('We hebben nog geen bronnen.')
+    // The div for the cards stays empty, which page.css leaves out.
+    expect(html).toContain('</div><div class="hf-page-cells"></div></main>')
     expect(html).not.toContain('Dit zijn de bronnen')
     expect(html).not.toContain('id="news-heading"')
     expect(html).not.toContain('<ul')

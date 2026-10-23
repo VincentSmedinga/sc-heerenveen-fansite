@@ -183,6 +183,14 @@ describe('Page.Main', () => {
     )
   })
 
+  it('leaves the div for the cells empty when an intro has no children, so page.css can leave it out', () => {
+    render(<Page.Main intro={<h1>Bronnen</h1>}>{[]}</Page.Main>)
+
+    expect(screen.getByRole('main').innerHTML).toBe(
+      '<div class="hf-page-intro"><h1>Bronnen</h1></div><div class="hf-page-cells"></div>',
+    )
+  })
+
   it('keeps the heading in the intro inside the main, as the one level one heading of the page', () => {
     render(
       <Page.Main intro={<h1>Bronnen</h1>}>

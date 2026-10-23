@@ -2158,6 +2158,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Op een smal scherm zijn er geen gebieden nodig: de zijbalk volgt in de bron op de `main` en staat daaronder.
   Alleen een `Page.Body` met een inleiding krijgt gebieden, want een leeg gebied houdt zijn rij en zijn ruimte.
   De `main` beslaat beide rijen, dus een pagina met een inleiding maar zonder zijbalk heeft niets leeg: de cellen staan onder de inleiding zoals onder een eerste cel.
+  Staan er geen cellen onder de inleiding, zoals op Onze bronnen zonder bronnen, dan laat `page.css` de lege `div` voor de cellen weg en beslaat de `main` één rij: de zijbalk staat dan één tussenruimte onder de inleiding, niet twee.
 - **Alternatieven:** een inleiding over de volle breedte, met `Page.Main` als subgrid in beide richtingen.
   Die werkt, maar de `main` ligt dan onder de zijbalk, en een lange inleiding loopt over de hele pagina.
   Of de inleiding naast de `main` in `Page.Body`; dan staan de `h1` en de inleiding buiten de landmarks.
