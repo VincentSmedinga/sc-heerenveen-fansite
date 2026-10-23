@@ -1465,12 +1465,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of het blijft, volgt als we het gezien hebben.
 - **Hoe:** alleen de CSS van de nieuwsregel verandert: `.hf-news-item-headline` krijgt `font-size: var(--hf-body-font-size)` en `font-weight: 500`.
   De klasse `hf-headline` blijft, voor de regelafstand en het lettertype.
-  De regel staat in de laag `hf.typography`, achter `.hf-headline`, en niet in `hf.components`: in de gebouwde site komen de lagen van het designsysteem in een andere volgorde dan `index.css` ze geeft, met typografie boven componenten, en dan wint `.hf-headline` van een regel in `hf.components`.
+  De regel staat in de laag `hf.components`, bij de rest van de kop, en wint daar van `.hf-headline` in `hf.typography`.
+  Eerst stond hij in `hf.typography`, achter `.hf-headline`: in de gebouwde site kwamen de lagen toen in een andere volgorde dan `index.css` ze geeft, met typografie boven componenten.
   Eén regel van de kop is nu zo'n 22 pixels hoog, dus de minimale hoogte van 24 pixels voor het doel (WCAG 2.5.8) komt nu van `min-block-size`.
 - **Alternatieven:** de Nieuwskop van 18 pixels en gewicht 600 houden, zoals voor dit besluit.
   Of de maat en het gewicht van de Nieuwskop zelf veranderen, in `--hf-headline-font-size` en `--hf-headline-font-weight`; alleen de nieuwsregel gebruikt ze, maar dan verandert ook wat Storybook bij Typografie over de Nieuwskop zegt.
 - **Later:** de grens van 24 rem in _Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query_ ging uit van de Nieuwskop.
   Met een kop van 16 pixels past er bij 24 rem iets meer dan dertig tekens op een regel, zo'n vierendertig, en de grens blijft staan.
+- **Later:** de regel staat weer in `hf.components`, nu de lagen op de site in de goede volgorde staan; zie _De volgorde van de lagen staat in een eigen bestand_.
 
 ### De kolom met dag en tijd in een nieuwsregel is zo breed als de breedste tijd
 
@@ -1511,7 +1513,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Op de CSS van vóór deze wijziging faalt de test.
   Een test van het designsysteem controleert dat `layers.css` de eerste import van `index.css` is.
 - **Gevolg:** op de site wint een regel in `hf.components` nu van een regel in `hf.typography`, zoals in Storybook.
-  Een regel die alleen om deze fout in een andere laag staat, kan terug naar `hf.components`.
+  Een regel die alleen om deze fout in een andere laag stond, gaat terug naar `hf.components`: de grootte en het gewicht van de kop van een nieuwsregel (zie _Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500_).
 - **Alternatieven:** de regel in een bestand dat `layout.tsx` vóór `index.css` importeert; dan moet elke app die het designsysteem gebruikt dat zelf onthouden.
   Of de regel ook in `index.css` laten staan; dat is een tweede plek die kan afwijken, en de eerste import doet het werk al.
   Of een instelling van Next.js of Turbopack zoeken; dat hebben we niet onderzocht, omdat één import genoeg is.
