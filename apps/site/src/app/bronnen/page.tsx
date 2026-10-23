@@ -3,12 +3,11 @@ import type { Metadata } from 'next'
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
+import { email } from '../../contact'
 import { reasonOf } from '../../errors'
 import { groupByKind, websiteOf } from '../../register'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { getSources } from '../../sources'
-
-const email = 'fansite@heerenveen.org'
 
 // Render on each request, so the build never reads the database. getSources caches the list itself.
 export const dynamic = 'force-dynamic'
