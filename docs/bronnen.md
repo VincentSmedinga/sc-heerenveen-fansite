@@ -11,6 +11,7 @@ Het beleid erachter staat in _Een bron nemen we als zijn feed over de club gaat 
 ## De controle van 24 oktober 2026
 
 Op 24 oktober 2026 hebben we elke feed en elke `robots.txt` één keer opgehaald.
+Alleen bij De Telegraaf draaiden we daarna de importer lokaal, om te zien dat hij de feed zonder aanpassing leest.
 We deden dat met de user agent van de importer, `scHeerenveenFansite/0.1.0 (+https://github.com/VincentSmedinga/sc-heerenveen-fansite)`.
 Een pad dat `robots.txt` voor ons weigert, hebben we niet opgehaald.
 Een feed die doorverwees, hebben we op het nieuwe adres één keer opgehaald.
@@ -127,7 +128,6 @@ Al in het register (#142).
 - **Besluit: nemen.**
   De feed is het onderwerp "sc Heerenveen" van de krant zelf en de grote meerderheid van de berichten noemt de club; `robots.txt` laat ons de feed lezen.
   Het voorbehoud tegen datamining houdt dat niet tegen.
-  Met 42 van de 50 noemt iets minder dan bij de twee andere feeds de club; de projecteigenaar kan hier anders over oordelen.
 - **Importer:** leest de feed zonder aanpassing.
   Een lokale run op 24 oktober 2026 bewaarde 50 berichten, waarvan 8 achter de betaalmuur.
 
