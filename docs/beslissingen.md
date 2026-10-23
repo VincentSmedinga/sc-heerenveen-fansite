@@ -1686,6 +1686,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een migratie die de bron invoegt; dan staan gegevens tussen het schema.
   Of wachten op het beheer.
 
+### Voetbal International als tweede bron
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** we lezen de tagfeed van Voetbal International over sc Heerenveen voor kop, link en bronnaam.
+  Tegelijk vragen we om toestemming (#35); zegt VI nee, dan stoppen we met deze bron.
+- **Waarom:** de feed gaat over de club, komt vaak met nieuws (ongeveer elf berichten per week) en geeft een landelijke blik naast die van de Leeuwarder Courant.
+  `robots.txt` staat elke user agent toe en bevat geen voorbehoud over datamining.
+- **Alternatieven:** De Telegraaf (gaat alleen over de club, maar ongeveer één bericht per week, en met een voorbehoud tegen datamining), de algemene feed van Omrop Fryslân (te weinig over de club, zonder filter) en het Friesch Dagblad (geen feed over de club).
+
+### De betaalmuur herkent de adapter per bron
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** bij VI geldt een bericht als betaald als het de categorie `https://www.vi.nl/pro` heeft.
+  De Leeuwarder Courant blijft het element `<premium>` gebruiken.
+  De adapter kiest het teken aan de hand van het domein van de bron.
+- **Waarom:** de Leeuwarder Courant en VI zeggen het op een andere manier, en een feed zonder zo'n teken heeft geen betaalmuur.
+  De categorie is alleen een teken; we bewaren haar niet (zie "De importer bewaart alleen wat we mogen tonen").
+- **Alternatieven:** de link controleren op `/pro/`; dat werkt nu ook, maar de categorie is bedoeld om dit te zeggen en de link kan veranderen.
+
 ### De opdracht heet `pnpm run import`
 
 - **Datum:** 22 oktober 2026

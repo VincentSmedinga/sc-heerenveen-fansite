@@ -96,12 +96,30 @@ export function cleanHeadline(raw: string): string {
 }
 
 /**
+ * How a source says an item is behind a paywall, by the domain of the source. Voetbal International gives such an item
+ * a category with this `domain`; every other source uses the `<premium>` element of the Leeuwarder Courant. A feed
+ * without either sign has no paywall.
+ */
+const paywallCategories: Record<string, string> = {
+  'www.vi.nl': 'https://www.vi.nl/pro',
+}
+
+/** The category `domain` that marks a paywalled item for this source, or undefined when the feed uses `<premium>`. */
+export function paywallCategoryFor(sourceDomain: string): string | undefined {
+  return paywallCategories[sourceDomain]
+}
+
+/**
  * Reads the items of a feed: RSS or Atom, in the encoding the response names. An item without a headline or a usable
  * link, or that doesn't fit its columns, is left out and reported in `skipped`. The rest of the feed goes on.
  */
 export function readFeed(
   body: Uint8Array,
-  { contentType = null, now = new Date() }: { contentType?: null | string; now?: Date } = {},
+  {
+    contentType = null,
+    now = new Date(),
+    paywallCategory,
+  }: { contentType?: null | string; now?: Date; paywallCategory?: string | undefined } = {},
 ): ReadFeed {
   const text = decode(body, contentType)
 
@@ -122,7 +140,7 @@ export function readFeed(
       return { kind: 'error', message: `The feed is not well-formed XML: ${validation.err.msg}` }
     }
 
-    raw = parsed.format === 'rss' ? rssItems(parsed.feed, text) : atomItems(parsed.feed)
+    raw = parsed.format === 'rss' ? rssItems(parsed.feed, text, paywallCategory) : atomItems(parsed.feed)
   } catch (error) {
     return { kind: 'error', message: `The response is not an RSS or Atom feed: ${errorMessage(error)}` }
   }
@@ -298,14 +316,23 @@ function paywalledKeys(text: string): Set<string> {
   return keys
 }
 
-/** The items of an RSS feed, with the paywall flag that feedsmith doesn't give. */
-function rssItems(feed: Rss.Feed<string>, text: string): RawItem[] {
-  const paywalled = paywalledKeys(text)
+/**
+ * The items of an RSS feed, with the paywall flag. With a `paywallCategory` an item is paywalled when it has that
+ * category, and the category is not kept. Without one, feedsmith doesn't give the flag, so a second pass finds it.
+ */
+function rssItems(feed: Rss.Feed<string>, text: string, paywallCategory: string | undefined): RawItem[] {
+  const paywalled = paywallCategory === undefined ? paywalledKeys(text) : new Set<string>()
 
   return (feed.items ?? []).map((item) => {
     const candidate = { guid: item.guid?.value, link: item.link, time: item.pubDate, title: item.title }
 
-    return { ...candidate, paywalled: paywalled.has(keyOf(candidate)) }
+    return {
+      ...candidate,
+      paywalled:
+        paywallCategory === undefined
+          ? paywalled.has(keyOf(candidate))
+          : (item.categories ?? []).some((category) => category.domain === paywallCategory),
+    }
   })
 }
 

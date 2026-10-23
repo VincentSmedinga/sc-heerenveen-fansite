@@ -1,7 +1,7 @@
 # @fansite/importer
 
 De importer haalt koppen en links op bij de bronnen.
-Hij bevat de fetcher, de ene HTTP-client voor alle adapters, en de adapter voor RSS- en Atom-feeds, met de Leeuwarder Courant als eerste bron.
+Hij bevat de fetcher, de ene HTTP-client voor alle adapters, en de adapter voor RSS- en Atom-feeds, met de Leeuwarder Courant als eerste bron en Voetbal International als tweede.
 Op acceptatie start cron de import elke 15 minuten (zie _De import op acceptatie_).
 Een run neemt een lock, schrijft een logboek, houdt de gezondheid van elke feed bij en wacht als een bron daarom vraagt (zie _Het logboek en de gezondheid_).
 Een rooster per soort bron komt met de adapters (#14 en #15).
@@ -174,9 +174,12 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
 - **Tijd:** `pubDate` (RSS) of `published` (Atom, anders `updated`), omgezet naar UTC, op hele seconden.
   Een tijd zonder zone, in een vorm die we niet kennen, van vóór 1990 of meer dan een dag in de toekomst is niet geldig.
   Dan geldt de tijd waarop we het bericht voor het eerst zagen, en een bekend bericht houdt de tijd die het had.
-- **Betaalmuur:** het element `<premium>true</premium>` van de Leeuwarder Courant.
+- **Betaalmuur:** elke bron zegt het op een eigen manier, en de adapter kiest aan de hand van het domein van de bron (`paywallCategories` in [`src/read-feed.ts`](src/read-feed.ts)).
+  Bij de Leeuwarder Courant is het het element `<premium>true</premium>`.
   `feedsmith` leest elementen die het niet kent niet, dus een tweede lezing met `fast-xml-parser` zoekt dit ene element.
-  Een feed zonder dat element heeft geen betaalmuur.
+  Bij Voetbal International is het de categorie met `domain="https://www.vi.nl/pro"` (tekst `PRO`), die `feedsmith` wel leest.
+  De categorie zelf bewaren we niet; de adapter gebruikt haar alleen voor `items.paywalled`.
+  Een feed zonder het teken van zijn bron heeft geen betaalmuur.
 - **Te lang:** een kop van meer dan 500 tekens, een link van meer dan 2048 of een sleutel van meer dan 700 slaat de adapter over, in plaats van hem af te kappen.
 - **Bijwerken:** een nieuw bericht komt erbij.
   Een bekend bericht krijgt de nieuwe kop, link, tijd en betaalmuur als de bron die veranderde.
@@ -220,6 +223,41 @@ Wat de bron er verder bij doet:
 - De bron zet cookies bij het antwoord. De fetcher bewaart en stuurt geen cookies.
 
 Let op: wijzigt de krant het element `premium`, bijvoorbeeld de naam, dan staat elk nieuw bericht als "niet achter de betaalmuur" in de database.
+De adapter waarschuwt daar nu niet voor.
+
+## De velden van de feed van Voetbal International
+
+De feed `https://www.vi.nl/feed/news.xml?tag=sc-heerenveen` is RSS 2.0, met 24 berichten.
+De lijst hieronder komt uit de opname van 23 oktober 2026.
+De opname in [`src/fixtures/vi-sc-heerenveen.xml`](src/fixtures/vi-sc-heerenveen.xml) bevat alleen de velden die we lezen, met berichten onder `/nieuws/`, `/pro/` en `/video/`.
+
+Per bericht (`<item>`):
+
+| Element                                         | Wat het is                                                         | Wat we ermee doen                                                                  |
+| ----------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `title`                                         | De kop, in CDATA                                                   | We lezen hem: de kop in `items.title`, als tekst                                   |
+| `link`                                          | Het adres van het artikel, onder `/nieuws/`, `/pro/` of `/video/`  | We lezen het: `items.url`                                                          |
+| `guid` (met `isPermaLink="false"`)              | Een vaste code per bericht, zoals `www.vi.nl-news-2149501`         | We lezen hem: de sleutel in `items.item_key`; het attribuut gebruiken we niet      |
+| `pubDate`                                       | De tijd van publicatie, als RFC 822 met een zone (`+0200`)         | We lezen hem: `items.published_at`, in UTC                                         |
+| `category` met `domain="https://www.vi.nl/pro"` | Het teken dat het bericht achter de betaalmuur staat (tekst `PRO`) | We lezen alleen of hij er is: `items.paywalled`; de categorie zelf bewaren we niet |
+| andere `category`'s                             | De club, spelers en competitie van het bericht                     | We lezen ze niet: een categorie bewaren we niet                                    |
+| `description`                                   | Een intro van het bericht, in CDATA                                | We lezen hem niet: een intro bewaren we alleen met toestemming                     |
+| `enclosure`                                     | De afbeelding                                                      | We lezen hem niet: een afbeelding bewaren we alleen met toestemming                |
+| `author`                                        | `info@vi.nl (Voetbal International)`, voor elk bericht hetzelfde   | We lezen hem niet: een auteur bewaren we niet                                      |
+| `comments`                                      | Het adres van de reacties                                          | We lezen hem niet                                                                  |
+
+Niet elk bericht heeft elke categorie; `title`, `link`, `guid` en `pubDate` stonden in alle 24.
+Van de gegevens van de feed zelf (`channel`) gebruiken we niets.
+
+Wat de bron er verder bij doet:
+
+- De feed stuurt geen `ETag` of `Last-Modified`, dus een voorwaardelijk verzoek bespaart bij deze bron niets.
+- De bron zet een cookie (`experimentGroup`) bij het antwoord.
+  De fetcher bewaart en stuurt geen cookies.
+- De feed heeft ook berichten die de club maar kort noemen, zoals "Rondje Eredivisie".
+  Een filter daarvoor komt met het relevantiefilter (#74).
+
+Let op: verandert VI de categorie of het domein ervan, dan staat elk nieuw bericht als "niet achter de betaalmuur" in de database.
 De adapter waarschuwt daar nu niet voor.
 
 ## De fetcher
@@ -325,8 +363,8 @@ De opdracht `pnpm run import` zet die optie nooit; `src/import.test.ts` laat zie
 Met de optie `resolve` geeft een test een nagebootste DNS, zodat hij ook een naam kan laten wijzen naar een adres op een eigen netwerk.
 De parser voor `robots.txt` staat in `src/robots.ts`, met de voorbeelden uit RFC 9309 in `src/robots.test.ts`.
 
-De tests van de adapter gebruiken een opname van de feed van de Leeuwarder Courant in [`src/fixtures/lc-sc-heerenveen.xml`](src/fixtures/lc-sc-heerenveen.xml).
-Die is ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en `premium`.
+De tests van de adapter gebruiken opnames van de feeds van de Leeuwarder Courant ([`src/fixtures/lc-sc-heerenveen.xml`](src/fixtures/lc-sc-heerenveen.xml)) en van Voetbal International ([`src/fixtures/vi-sc-heerenveen.xml`](src/fixtures/vi-sc-heerenveen.xml)).
+Ze zijn ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en het teken voor de betaalmuur (`premium` of de categorie `PRO`).
 Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
 `src/read-feed.test.ts` leest feeds zonder database.
 `src/import-feeds.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.

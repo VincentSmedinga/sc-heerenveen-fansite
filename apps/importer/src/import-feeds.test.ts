@@ -163,6 +163,59 @@ describe('importing the recording of the Leeuwarder Courant', () => {
   })
 })
 
+describe('importing the recording of Voetbal International', () => {
+  const viRecording = readFileSync(new URL('./fixtures/vi-sc-heerenveen.xml', import.meta.url), 'utf8')
+
+  it('stores its 24 items, with the paywall from the pro category and nothing else of the feed', async () => {
+    const server = await serve(viRecording)
+    const feed = await addFeed(`${server.origin}/rss/`, { domain: 'www.vi.nl' })
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect(report).toMatchObject({ added: 24, kind: 'imported', skipped: [], unchanged: 0, updated: 0 })
+
+    const rows = await itemsInDatabase()
+
+    expect(rows).toHaveLength(24)
+    expect(rows[0]).toMatchObject({
+      key: 'www.vi.nl-news-2149501',
+      paywalled: true,
+      publishedAt: new Date('2026-10-21T13:00:00Z'),
+      sourceId: feed.sourceId,
+    })
+    expect(rows.filter((row) => row.paywalled)).toHaveLength(5)
+    expect(JSON.stringify(rows)).not.toContain('PRO')
+  })
+
+  it('makes no duplicates when it runs twice, and updates a headline that changed', async () => {
+    const server = await serve(viRecording)
+    const feed = await addFeed(`${server.origin}/rss/`, { domain: 'www.vi.nl' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    const changed = await serve(viRecording.replace('Drie conclusies na PSV-SC Heerenveen', 'Vier conclusies'))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${changed.origin}/rss/` })
+      .where(eq(feeds.id, feed.id))
+
+    const second = await importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), secondRun)
+
+    expect(second).toMatchObject({ added: 0, unchanged: 23, updated: 1 })
+    expect(await itemsInDatabase()).toHaveLength(24)
+  })
+
+  it('keeps the premium element for another source and ignores the pro category there', async () => {
+    const server = await serve(viRecording)
+    const feed = await addFeed(`${server.origin}/rss/`, { domain: 'krant.test' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect((await itemsInDatabase()).some((row) => row.paywalled)).toBe(false)
+  })
+})
+
 describe('an item that is already known', () => {
   async function importTwice(before: string, after: string) {
     const first = await serve(before)

@@ -81,6 +81,29 @@ describe('the seed', () => {
     expect(courantFeeds.map((feed) => feed.url)).toEqual(['https://www.lc.nl/sport/sc-heerenveen/rss/'])
   })
 
+  it('puts Voetbal International in the register with its feed and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [vi] = await database.db.select().from(sources).where(eq(sources.domain, 'www.vi.nl'))
+    const viFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, vi?.id ?? 0))
+
+    expect(vi).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'Voetbal International',
+    })
+    expect(vi?.consentStatus).not.toBe('given')
+    expect(vi?.description).toBeTruthy()
+    expect(vi?.description?.length).toBeLessThanOrEqual(300)
+    expect(viFeeds.map((feed) => feed.url)).toEqual(['https://www.vi.nl/feed/news.xml?tag=sc-heerenveen'])
+  })
+
   it('holds made-up test sources only, and real sources that are not made up', () => {
     for (const source of testSources) {
       expect(source.domain, source.name).toMatch(/\.test$/)
