@@ -266,10 +266,10 @@ await withEmptyDatabase((database) =>
     assert.match(html, /<html lang="nl"/)
     assert.equal(home.headers.get('x-powered-by'), null)
 
-    // The homepage reads the items from the database, and the seed has none. So it says there is no news this week.
+    // The homepage reads the items from the database, and the seed has none. So it says there is no news in the last two weeks.
     assert.match(html, /<h1[^>]*>sc Heerenveen Fansite<\/h1>/)
     assert.match(html, /<h2[^>]*>Laatste nieuws<\/h2>/)
-    assert.match(html, /We hebben deze week nog geen nieuws gevonden\. Kijk straks nog eens\./)
+    assert.match(html, /We hebben de afgelopen twee weken nog geen nieuws gevonden\. Kijk straks nog eens\./)
     assert.match(html, /<a href="\/bronnen">Onze bronnen<\/a>/)
     assert.doesNotMatch(html, /Binnenkort meer/)
     assert.match(html, /<footer[^>]*>.*href="\/wat-is-er-nieuw">Wat is er nieuw<\/a>.*<\/footer>/s)
@@ -373,7 +373,7 @@ await withEmptyDatabase((database) =>
 
     const home = await fetch(origin)
     assert.equal(home.headers.get('x-robots-tag'), null, 'production must be indexable')
-    assert.match(await home.text(), /We hebben deze week nog geen nieuws gevonden\./)
+    assert.match(await home.text(), /We hebben de afgelopen twee weken nog geen nieuws gevonden\./)
     const robots = await (await fetch(`${origin}/robots.txt`)).text()
     assert.doesNotMatch(robots, /^Disallow: \/$/m)
     assert.match(robots, /^Sitemap: https:\/\/sc\.heerenveen\.org\/sitemap\.xml$/m)
