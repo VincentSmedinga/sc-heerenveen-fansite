@@ -2417,3 +2417,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een bredere kolom, 5,75 rem, voor de breedste datum op één regel; dat kost elke weekdagregel ruimte.
   Of de kolom door de inhoud laten bepalen (`max-content`); dan beginnen de koppen niet op dezelfde plek.
   Of de datum en de tijd los doorgeven en onder elkaar zetten in het component; dat is een grotere wijziging van het component.
+
+### Onder de kop van een kaart staat een lijst op 1,25 rem
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** staat er in een kaart direct onder de kop een lijst (`ul`, `ol` of `dl`), dan is de ruimte tussen de kop en de lijst 1,25 rem in plaats van de 0,75 rem onder een kop.
+  Dat geldt voor elke kaart met dit patroon: het nieuws en de discussies op de homepage, de bronnen op Onze bronnen en de stories.
+- **Waarom:** de regels van een lijst zijn zelf blokken met een eigen witruimte, en met de ruimte van een alinea zit de eerste regel te dicht tegen de kop.
+  De projecteigenaar vroeg om meer ruimte.
+- **Hoe:** één regel in `card.css`, op de kop gevolgd door een lijst direct in de kaart.
+  De marges van kop en lijst vallen samen, dus de grootste telt.
+  Tekst onder een kop houdt de ruimte van een kop.
+- **Alternatieven:** de ruimte onder elke kop groter maken; dat verandert ook tekst en pagina's zonder kaart.
+  Of de ruimte in elke lijst of op elke pagina zelf zetten; dat laat het patroon uit elkaar lopen.
