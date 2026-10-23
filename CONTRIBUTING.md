@@ -122,6 +122,10 @@ De toon van de site zelf, van supporter tot supporter, volgt in de stijlgids (#1
   Zegt het tweede verslag nog dat de pull request niet klaar is, dan beslist een mens: samenvoegen zoals hij is, met de hand verbeteren, of de rest in een nieuw issue zetten.
 - De reviewer schrijft een verslag met drie onderdelen: code en beveiliging, toegankelijkheid, en redactie en bronbeleid.
   Het verslag staat als reactie bij de pull request.
+- Een pull request die alleen verhalen (`*.stories.tsx`), Markdown of MDX wijzigt, krijgt geen reviewer: CI doet de controles.
+  Daarop zijn twee bestanden een uitzondering, omdat het de checklists van de reviewer zelf zijn: `docs/toegankelijkheid.md` en `packages/design-system/src/docs/editorial.mdx`.
+  De maker loopt de drie checklists dan zelf door en schrijft in de beschrijving "Geen reviewer: de pull request wijzigt alleen verhalen of documentatie." in plaats van de vakjes voor de review.
+  De projecteigenaar kan altijd om een reviewer vragen.
 - We gebruiken geen reviews van Copilot en vragen ze ook niet aan.
 
 Wat de reviewer bij elk onderdeel nakijkt:
