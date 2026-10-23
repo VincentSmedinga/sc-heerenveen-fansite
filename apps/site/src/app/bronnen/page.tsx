@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
+import { email } from '../../contact'
 import { reasonOf } from '../../errors'
 import { groupByKind, websiteOf } from '../../register'
 import { ServerError, serverErrorTitle } from '../../ServerError'
@@ -43,30 +44,52 @@ export default async function SourcesPage() {
   const groups = groupByKind(sources)
 
   return (
-    <Page.Main>
-      <Page.Cell>
-        <Heading level={1}>Onze bronnen</Heading>
-        <Text>
-          {groups.length === 0
-            ? 'We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.'
-            : 'Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.'}
-        </Text>
-      </Page.Cell>
-      {groups.map(({ heading, kind, sources }) => (
-        <Card aria-labelledby={`${kind}-heading`} key={kind}>
-          <Heading id={`${kind}-heading`} level={2}>
-            {heading}
+    <>
+      <Page.Main>
+        <Page.Cell>
+          <Heading level={1}>Onze bronnen</Heading>
+          <Text>
+            {groups.length === 0
+              ? 'We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.'
+              : 'Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.'}
+          </Text>
+        </Page.Cell>
+        {groups.map(({ heading, kind, sources }) => (
+          <Card aria-labelledby={`${kind}-heading`} key={kind}>
+            <Heading id={`${kind}-heading`} level={2}>
+              {heading}
+            </Heading>
+            <List loose>
+              {sources.map((source) => (
+                <List.Item key={source.domain}>
+                  <Link href={websiteOf(source)}>{source.name}</Link>
+                  {source.description && <Text>{source.description}</Text>}
+                </List.Item>
+              ))}
+            </List>
+          </Card>
+        ))}
+      </Page.Main>
+      <Page.Sidebar aria-label="Contact over bronnen">
+        <Card aria-labelledby="suggest-heading" surface="soft">
+          <Heading id="suggest-heading" level={2}>
+            Mis je een bron?
           </Heading>
-          <List loose>
-            {sources.map((source) => (
-              <List.Item key={source.domain}>
-                <Link href={websiteOf(source)}>{source.name}</Link>
-                {source.description && <Text>{source.description}</Text>}
-              </List.Item>
-            ))}
-          </List>
+          <Text>
+            Schrijft een medium over sc Heerenveen en staat het hier nog niet? Stuur ons de naam en de website via{' '}
+            <Link href={`mailto:${email}`}>{email}</Link>.
+          </Text>
         </Card>
-      ))}
-    </Page.Main>
+        <Card aria-labelledby="inquiry-heading" surface="warm">
+          <Heading id="inquiry-heading" level={2}>
+            Ben je zelf een bron?
+          </Heading>
+          <Text>
+            Heb je een vraag of een verzoek over hoe we jouw medium tonen? Mail ons via{' '}
+            <Link href={`mailto:${email}`}>{email}</Link>.
+          </Text>
+        </Card>
+      </Page.Sidebar>
+    </>
   )
 }

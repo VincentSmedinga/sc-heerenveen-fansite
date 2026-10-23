@@ -2,11 +2,11 @@ import type { Metadata } from 'next'
 
 import { Heading, Link, List, Page, Text } from '@fansite/design-system'
 
+import { email } from '../../contact'
+
 export const metadata: Metadata = {
   title: 'Over ons',
 }
-
-const email = 'fansite@heerenveen.org'
 
 const EmailLink = () => <Link href={`mailto:${email}`}>{email}</Link>
 

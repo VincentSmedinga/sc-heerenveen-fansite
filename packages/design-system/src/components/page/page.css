@@ -80,6 +80,8 @@
    * columns on the same rows. The track can shrink to 0, so a long word or address can't make the column wider than the
    * screen.
    * A child of a column is a cell and has no margin to the outside: the gap is all the space between cells.
+   * Under the main, between 40rem and 77rem, the cells of the sidebar sit side by side in two columns. Below 40rem two
+   * cards would be too narrow, and from 77rem the sidebar is a column of its own.
    */
   .hf-page-main,
   .hf-page-sidebar {
@@ -90,6 +92,12 @@
 
     > * {
       margin: 0;
+    }
+  }
+
+  .hf-page-sidebar {
+    @media (40rem <= width < 77rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 

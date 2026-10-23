@@ -1248,6 +1248,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of meer kaarten in één cel, met de ruimte in de kaart.
   Of de kolom in `Page.Body` laten zoals #73 deed, zonder plek voor een zijbalk.
   Of de tekst in de kolom van 48 rem toch beperken tot 36 rem, zodat de grens van 80 tekens blijft; dat is niet gekozen.
+- **Later:** de zijbalk staat tussen 40 rem en 77 rem onder de hoofdkolom, met haar cellen in twee gelijke kolommen (#137).
+  Onder 40 rem staan de cellen onder elkaar, en vanaf 77 rem staat de zijbalk naast de hoofdkolom.
+  Dat is een tweede raster op `Page.Sidebar` in `page.css`; de volgorde in de bron blijft gelijk en er is geen `order`.
+  Een cel die de volle breedte neemt, is er nog niet; of dat nodig is, beslissen we na de proef op Onze bronnen.
 
 ### Een regel met padding of een rand zet zelf `box-sizing: border-box`
 
