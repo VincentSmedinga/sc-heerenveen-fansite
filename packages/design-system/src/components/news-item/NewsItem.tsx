@@ -54,28 +54,31 @@ const externalLinkIcon = (
  * A line of news from another source. On the left the short day and the time, in red. Next to it the headline as a link
  * to the item at the source, and under it the name of the source with an icon for a link to another site and, if the item
  * is behind a paywall, "voor abonnees". There is no intro and no image: we only show those with the permission of the
- * source (editorial principles 1 and 2). news-item.css gives it its look, and draws the lines between the lines of a
- * List.
+ * source (editorial principles 1 and 2). In a line narrower than 24rem the day and the time are above the headline, chosen
+ * with a container query in news-item.css; the order in the HTML is the same. The outer div is the container, and the
+ * layout div inside it is the grid. news-item.css gives it its look, and draws the lines between the lines of a List.
  */
 export const NewsItem = ({ className, dateTime, headline, href, paywalled, source, time, ...props }: NewsItemProps) => (
   <div {...props} className={classNames('hf-news-item', className)}>
-    <time className="hf-meta hf-news-item-time" dateTime={dateTime}>
-      {time}
-    </time>
-    <div className="hf-news-item-body">
-      <Link className="hf-headline hf-news-item-headline" href={href}>
-        {headline}
-      </Link>
-      <Text appearance="meta" className="hf-news-item-meta">
-        <span>{source}</span>
-        {externalLinkIcon}
-        {paywalled && (
-          <>
-            {separator}
-            <span>voor abonnees</span>
-          </>
-        )}
-      </Text>
+    <div className="hf-news-item-layout">
+      <time className="hf-meta hf-news-item-time" dateTime={dateTime}>
+        {time}
+      </time>
+      <div className="hf-news-item-body">
+        <Link className="hf-headline hf-news-item-headline" href={href}>
+          {headline}
+        </Link>
+        <Text appearance="meta" className="hf-news-item-meta">
+          <span>{source}</span>
+          {externalLinkIcon}
+          {paywalled && (
+            <>
+              {separator}
+              <span>voor abonnees</span>
+            </>
+          )}
+        </Text>
+      </div>
     </div>
   </div>
 )

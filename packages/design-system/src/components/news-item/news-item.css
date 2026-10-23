@@ -1,20 +1,44 @@
 /*
  * A line of news: the short day and the time in red on the left, and next to it the headline as a link, with the source
- * and the paywall under it. A List of lines has a thin line between the lines.
+ * and the paywall under it. A line narrower than 24rem puts the day and the time above the headline instead. A List of
+ * lines has a thin line between the lines.
  */
 
 @layer hf.components {
   /*
-   * The columns of every line are the same width, so the headlines start at the same place down the list. The first
-   * baselines of the time and the headline are on one line. A long word breaks instead of making the page scroll sideways.
+   * The line is a container for the query below: an element can't query its own size, so the grid is inside it. It looks
+   * at its own width and not at the window, so it also fits a narrow column such as the sidebar. It has no padding or
+   * border on the inline sides, so its width is the width of the line. A long word breaks instead of making the page
+   * scroll sideways.
    */
   .hf-news-item {
+    container-name: hf-news-item;
+    container-type: inline-size;
+    overflow-wrap: anywhere;
+    padding-block: 0.75rem;
+  }
+
+  /*
+   * The columns of every line are the same width, so the headlines start at the same place down the list. The first
+   * baselines of the time and the headline are on one line.
+   */
+  .hf-news-item-layout {
     align-items: baseline;
     column-gap: 1rem;
     display: grid;
     grid-template-columns: 4.75rem minmax(0, 1fr);
-    overflow-wrap: anywhere;
-    padding-block: 0.75rem;
+  }
+
+  /*
+   * Narrower than 24rem the headline would be a tower of short lines, so the time goes above it and the headline and the
+   * source get the whole width. The order in the HTML stays the same. The time is close to the headline: closer than the
+   * lines are to each other.
+   */
+  @container hf-news-item (inline-size < 24rem) {
+    .hf-news-item-layout {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 0.125rem;
+    }
   }
 
   /* Red, with digits of the same width, so the times line up. */
