@@ -10,7 +10,7 @@ export type Release = {
   version: string
 }
 
-/** The Dutch sentences per version, as in release-notes.ts. */
+/** The Dutch lines per version, as in release-notes.ts. */
 export type ReleaseNotes = Readonly<Record<string, readonly string[]>>
 
 /** The title of the page, and of its feed with the name of the site after it. */
@@ -49,8 +49,8 @@ export function parseChangelog(changelog: string) {
 }
 
 /**
- * The versions in the changelog that have sentences, in the order of the changelog. A version shows only once it is
- * released, so sentences written ahead wait for it. A version without sentences is left out.
+ * The versions in the changelog that have lines, in the order of the changelog. A version shows only once it is
+ * released, so lines written ahead wait for it. A version without lines is left out.
  */
 export function releasesOf(changelog: string, notes: ReleaseNotes): Release[] {
   return parseChangelog(changelog).flatMap(({ date, version }) => {

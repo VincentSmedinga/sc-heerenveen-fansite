@@ -13,7 +13,7 @@ const changelog =
   Object.values(import.meta.glob<{ default: string }>('../../../CHANGELOG.md', { eager: true, query: '?raw' }))[0]
     ?.default ?? ''
 
-/** The released versions that have Dutch sentences, newest first, from the CHANGELOG.md in the build. */
+/** The released versions that have Dutch lines, newest first, from the CHANGELOG.md in the build. */
 export function getReleases() {
   return releasesOf(changelog, releaseNotes)
 }

@@ -53,10 +53,11 @@ Building, reviewing, design and research for their own sake, and help with the o
   The page Wat is er nieuw shows a version only once `CHANGELOG.md` has it, so the lines can wait in the file.
   The lines follow these rules:
   - One line per thing a visitor can find or do, with related facts on one line, about five to eight lines per version.
-  - The place first, then a colon: "Op home: het nieuws over onze club van de afgelopen week."
+  - The place first, then a colon, when a line is about one page or part of the site: "Op home: het nieuws over onze club van de afgelopen week."
+    A line that carries on from the one before needs no place.
   - A condition as a question with a short answer: "Alleen voor abonnees? Staat erbij."
   - A supporter's words: "home", "onze club", and the abbreviations supporters know, such as LC and VI.
-  - Nothing about the look, such as colours, cards, type or layout; nothing about error pages or other edge cases; nothing obvious, such as "nieuwste bovenaan".
+  - Nothing about the look, such as colours, cards, type or layout; light and dark is something a visitor can use, so it may have a line; nothing about error pages or other edge cases; nothing obvious, such as "nieuwste bovenaan".
 - Starts each Builder in its own session, and a Reviewer when no Builder is there to start it.
   Doesn't build or review itself.
   If it can't start a session (in the iPhone app or a cloud session, say), it offers alternatives first, such as a ready-to-paste prompt for a session the owner starts by hand.

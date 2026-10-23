@@ -2,14 +2,14 @@ import { anchorOf, feedPath, type Release, whatsNewPath, whatsNewTitle } from '.
 
 /**
  * The RSS 2.0 feed of the page Wat is er nieuw: an item per version, newest first, with the number as its title, the date,
- * the sentences as a list and a link to the version on the page. A feed reader needs full addresses, so every link starts
+ * the lines as a list and a link to the version on the page. A feed reader needs full addresses, so every link starts
  * with the address of the site the feed comes from.
  */
 export function feedOf(releases: readonly Release[], origin: string) {
   const page = `${origin}${whatsNewPath}`
   const items = releases.map((release) => {
     const link = `${page}#${anchorOf(release)}`
-    // The description is HTML, written as text in the XML, so the sentences are escaped twice.
+    // The description is HTML, written as text in the XML, so the lines are escaped twice.
     const list = `<ul>${release.sentences.map((sentence) => `<li>${escape(sentence)}</li>`).join('')}</ul>`
 
     return [

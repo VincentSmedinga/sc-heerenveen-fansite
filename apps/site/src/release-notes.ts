@@ -8,7 +8,7 @@ import type { ReleaseNotes } from './whats-new'
 export const releaseNotes: ReleaseNotes = {
   '0.1.0': [
     'Op home: het nieuws over onze club van de afgelopen week.',
-    'Koppen van LC en VI met datum en tijd. Alleen voor abonnees? Staat erbij.',
+    'Koppen van LC en VI met dag en tijd. Alleen voor abonnees? Staat erbij.',
     'Onze bronnen: welke media we volgen.',
     'Menu bovenaan: Nieuws, Onze bronnen en Forum.',
     'Onderaan: Over ons, met wie we zijn, hoe we werken en privacy.',
