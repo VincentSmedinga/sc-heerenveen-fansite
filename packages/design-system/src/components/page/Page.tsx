@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import { classNames } from '../classNames'
 
@@ -10,7 +10,14 @@ export type PageFooterProps = ComponentPropsWithoutRef<'footer'>
 
 export type PageHeaderProps = ComponentPropsWithoutRef<'header'>
 
-export type PageMainProps = ComponentPropsWithoutRef<'main'>
+export type PageMainProps = ComponentPropsWithoutRef<'main'> & {
+  /**
+   * The introduction of the page, such as its heading with a text: one cell at the top of the main column, which the
+   * children follow. On a wide screen the Page.Sidebar starts under it, level with the first child. Without an `intro` the
+   * children are the cells of the column and the sidebar starts at the top.
+   */
+  intro?: ReactNode
+}
 
 export type PageProps = ComponentPropsWithoutRef<'div'>
 
@@ -23,15 +30,30 @@ const Header = ({ className, ...props }: PageHeaderProps) => (
 
 /**
  * The grid of the page between the header and the footer: a `div` with a Page.Main and, if the page has one, a
- * Page.Sidebar. It sets the space between the columns and between the cells.
+ * Page.Sidebar. It sets the space between the columns and between the cells. If the Page.Main has an `intro`, the
+ * Page.Sidebar starts under it on a wide screen.
  */
 const Body = ({ className, ...props }: PageBodyProps) => (
   <div className={classNames('hf-page-body', className)} {...props} />
 )
 
-/** The main column and the `main` of the page, so every page has exactly one. Each of its children is a cell. */
-const Main = ({ className, ...props }: PageMainProps) => (
-  <main className={classNames('hf-page-main', className)} {...props} />
+/**
+ * The main column and the `main` of the page, so every page has exactly one. Each of its children is a cell.
+ * With an `intro` the column holds the introduction in a `div` of its own, and the children in a second `div`, which
+ * stacks them like the column does without an introduction. The Page.Body needs the two to start the Page.Sidebar under
+ * the introduction. The `intro` prop adds them, so a page can't leave one out.
+ */
+const Main = ({ children, className, intro, ...props }: PageMainProps) => (
+  <main className={classNames('hf-page-main', className)} {...props}>
+    {intro === undefined || intro === null || intro === false ? (
+      children
+    ) : (
+      <>
+        <div className="hf-page-intro">{intro}</div>
+        <div className="hf-page-cells">{children}</div>
+      </>
+    )}
+  </main>
 )
 
 /** The sidebar, an `aside`: beside the Page.Main, or under it on a narrow screen. Each of its children is a cell. */

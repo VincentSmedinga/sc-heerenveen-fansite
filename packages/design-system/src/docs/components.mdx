@@ -31,6 +31,9 @@ import { Heading, Page } from '@fansite/design-system'
 `Page` bevat een `Page.Header`, een `Page.Body` en een `Page.Footer`, in die volgorde.
 De `Page.Body` is het raster van de pagina, met de kolommen `Page.Main` (de `main` van de pagina) en, als de pagina er een heeft, `Page.Sidebar` (een `aside`).
 Elk kind van een kolom is een cel; met `Page.Cell` zet je wat bij elkaar hoort in één cel.
+De `Page.Main` heeft de eigenschap `intro` voor de inleiding van de pagina, zoals de kop met een tekst.
+Die staat als één cel bovenaan de `main`, en de kinderen van de `Page.Main` zijn de cellen eronder.
+Op een breed scherm begint de `Page.Sidebar` dan onder de inleiding, op dezelfde hoogte als de eerste cel eronder.
 Een `Card` is zelf een cel: ze heeft geen marge naar buiten.
 De `Page.Body` regelt alle witruimte tussen de kolommen en de cellen.
 Op een middelbaar scherm staat de zijbalk onder de hoofdkolom, met haar cellen in twee gelijke kolommen.
@@ -136,7 +139,9 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
         <td>
           <code>main</code>, de hoofdkolom
         </td>
-        <td></td>
+        <td>
+          <code>intro</code>, de inleiding van de pagina
+        </td>
         <td></td>
       </tr>
       <tr>

@@ -98,6 +98,40 @@ export const ExampleMain = () => (
   </Page.Main>
 )
 
+/**
+ * The main column with an introduction: the heading with its text is the `intro`, and a text and a list under a heading are
+ * the cells under it. On a wide screen a sidebar starts under the intro, level with the first cell.
+ */
+export const ExampleMainWithIntro = () => (
+  <Page.Main
+    intro={
+      <>
+        <Heading level={1}>Nieuws over sc Heerenveen</Heading>
+        <Text>
+          Hier komen de koppen van de media die over de club schrijven. Elke kop is een link naar de journalist zelf,
+          met de naam van de bron erbij.
+        </Text>
+      </>
+    }
+  >
+    <Text>
+      Op een breed scherm begint de zijbalk onder de inleiding, op dezelfde hoogte als deze tekst. Op een smaller scherm
+      staan de inleiding, deze cellen en de zijbalk onder elkaar.
+    </Text>
+    <Page.Cell>
+      <Heading appearance={3} level={2}>
+        Zo lees je de site
+      </Heading>
+      <List>
+        <List.Item>Kies een kop om naar het bericht bij de bron te gaan.</List.Item>
+        <List.Item>
+          Meer over wat we tonen staat bij <Link href="#over-ons">Over ons</Link>.
+        </List.Item>
+      </List>
+    </Page.Cell>
+  </Page.Main>
+)
+
 /** The sidebar with two cells of different heights. They stack on their own, not on the rows of the main column. */
 export const ExampleSidebar = () => (
   <Page.Sidebar aria-label="Naast het nieuws">

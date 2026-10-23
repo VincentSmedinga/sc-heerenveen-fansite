@@ -52,14 +52,14 @@ describe('the page Onze bronnen', () => {
     expect(html).toContain('<li><a href="https://testpodcast.test">Testpodcast</a><p>Een podcast.</p></li>')
   })
 
-  it('is the one main of the page, with the h1 and the introduction in one cell and a card for each kind, and a sidebar with two coloured cards', async () => {
+  it('is the one main of the page, with the h1 and the introduction as its intro and a card for each kind under it, and a sidebar with two coloured cards', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><div class="hf-page-cell"><h1 class="hf-heading-1">Onze bronnen<\/h1><p>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/p><\/div><section class="hf-card" aria-labelledby="news-heading">.*<\/section><section class="hf-card" aria-labelledby="podcast-heading">.*<\/section><\/main><aside class="hf-page-sidebar" aria-label="Contact over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="suggest-heading">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="inquiry-heading">.*<\/section><\/aside>$/,
+      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><p>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/p><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="news-heading">.*<\/section><section class="hf-card" aria-labelledby="podcast-heading">.*<\/section><\/div><\/main><aside class="hf-page-sidebar" aria-label="Contact over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="suggest-heading">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="inquiry-heading">.*<\/section><\/aside>$/,
     )
   })
 
@@ -74,7 +74,7 @@ describe('the page Onze bronnen', () => {
     expect(cards[0]?.match(/<li>/g)).toHaveLength(2)
     expect(cards[1]).toContain('<h2 class="hf-heading-2" id="podcast-heading">Podcasts</h2>')
     expect(cards[1]?.match(/<li>/g)).toHaveLength(1)
-    // The h1 and the introduction are in the cell above the cards.
+    // The h1 and the introduction are in the intro above the cards.
     expect(cards.join('')).not.toContain('<h1')
     expect(cards.join('')).not.toContain('Dit zijn de bronnen')
   })
@@ -101,6 +101,8 @@ describe('the page Onze bronnen', () => {
     const html = await render()
 
     expect(html).toContain('We hebben nog geen bronnen.')
+    // The div for the cards stays empty, which page.css leaves out.
+    expect(html).toContain('</div><div class="hf-page-cells"></div></main>')
     expect(html).not.toContain('Dit zijn de bronnen')
     expect(html).not.toContain('id="news-heading"')
     expect(html).not.toContain('<ul')
