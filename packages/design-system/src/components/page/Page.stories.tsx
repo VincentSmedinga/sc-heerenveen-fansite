@@ -40,7 +40,7 @@ const renderWithSidebar = () => <ExamplePageWithSidebar />
 
 // Storybook's viewport setting: the width of the window is what the page follows, not the width of a container.
 const narrow = { value: 'mobile1' }
-const middle = { value: 'desktop' }
+const middle = { value: 'middle' }
 const wide = { value: 'wide' }
 
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
