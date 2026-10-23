@@ -23,12 +23,13 @@ for (const { origin = '', path } of pages) {
 
     const logo = await page.getByRole('banner').getByRole('link').first().boundingBox()
     const main = await page.getByRole('main').boundingBox()
-    const footer = await page.getByRole('contentinfo').boundingBox()
+    const footerLinks = await page.getByRole('contentinfo').getByRole('navigation').boundingBox()
 
-    // In line with the logo, no wider than the main column, and the rest of the page column left free.
+    // In line with the logo, no wider than the main column, and the rest of the page column left free. The links in the
+    // footer end where the column of the page ends.
     expect(main?.x).toBeCloseTo(logo?.x ?? NaN, 1)
     expect(main?.width).toBeCloseTo(contentWidth, 1)
-    expect(footer?.width).toBeCloseTo(columnWidth, 1)
+    expect((footerLinks?.x ?? NaN) + (footerLinks?.width ?? NaN) - (logo?.x ?? NaN)).toBeCloseTo(columnWidth, 1)
   })
 
   test(`${origin}${path} uses the whole width on a narrow screen`, async ({ page }) => {

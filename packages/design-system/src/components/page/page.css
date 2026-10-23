@@ -2,9 +2,9 @@
 
 @layer hf.components {
   /*
-   * As wide as the window, so the header can run from edge to edge. The header pads its content into a centred column,
-   * and the body and the footer sit in that column. On a screen narrower than the maximum width, the margin keeps the
-   * content off the edges.
+   * As wide as the window, so the header and the footer can run from edge to edge. They pad their content into a centred
+   * column, and the body sits in that column. On a screen narrower than the maximum width, the margin keeps the content
+   * off the edges.
    */
   .hf-page {
     display: flex;
@@ -107,12 +107,49 @@
     }
   }
 
+  /*
+   * The footer closes the page as the header opens it: a band as wide as the page, a step off the page, with a line on
+   * top. The padding on the sides keeps what is in it in the column, as in the header.
+   * The links are dark sand, so the roles that links use are set again for everything inside it. A visited link has the
+   * colour of a normal one, and the underline stays.
+   *
+   * It holds two lines of text, a paragraph each, and the links last. What is in it has no margin, so the lines of text sit
+   * right under each other. On a narrow screen everything is in one column, with the links under the text. From 40rem,
+   * as in the card, the links are in a second column on the right, over both lines of text and centred on them.
+   */
   .hf-page-footer {
+    --hf-colour-text-link: var(--hf-colour-text-link-on-footer);
+    --hf-colour-text-link-hover: var(--hf-colour-text-link-hover-on-footer);
+    --hf-colour-text-link-visited: var(--hf-colour-text-link-on-footer);
+
+    background-color: var(--hf-colour-background-footer);
     border-block-start: 1px solid;
-    border-block-start-color: var(--hf-colour-border-default);
+    border-block-start-color: var(--hf-colour-border-footer);
     box-sizing: border-box;
     color: var(--hf-colour-text-secondary);
-    margin-inline: var(--hf-page-inset);
-    padding-block: 1.5rem 2rem;
+    column-gap: 2rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 1.5rem;
+    padding-inline: var(--hf-page-inset);
+
+    > * {
+      margin: 0;
+    }
+
+    > :last-child {
+      margin-block-start: 0.5rem;
+    }
+
+    @media (width >= 40rem) {
+      grid-template-columns: minmax(0, 1fr) auto;
+
+      > :last-child {
+        align-self: center;
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        margin-block-start: 0;
+      }
+    }
   }
 }

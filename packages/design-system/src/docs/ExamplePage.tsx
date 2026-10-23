@@ -33,10 +33,14 @@ export const exampleFooterMenu = [
   { href: '#wat-is-er-nieuw', label: 'Wat is er nieuw' },
 ]
 
-/** The footer with "Alle koppen en links op één plek. Voor supporters, door supporters." and the links about the site. */
+/**
+ * The footer with "Alle koppen en links op één plek." and "Voor supporters, door supporters.", a paragraph each, and the
+ * links about the site, as on the site.
+ */
 export const ExampleFooter = () => (
   <Page.Footer>
-    <Text appearance="meta">Alle koppen en links op één plek. Voor supporters, door supporters.</Text>
+    <Text appearance="meta">Alle koppen en links op één plek.</Text>
+    <Text appearance="meta">Voor supporters, door supporters.</Text>
     <Navigation items={exampleFooterMenu} label="Over de site" />
   </Page.Footer>
 )

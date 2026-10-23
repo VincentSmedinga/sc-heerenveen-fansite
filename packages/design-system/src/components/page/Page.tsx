@@ -47,7 +47,11 @@ const Cell = ({ className, ...props }: PageCellProps) => (
   <div className={classNames('hf-page-cell', className)} {...props} />
 )
 
-/** The bottom of the page: a `footer` element, which is the page's contentinfo landmark. */
+/**
+ * The bottom of the page, on a band of its own with a line on top: a `footer` element, which is the page's contentinfo
+ * landmark. It holds two lines of text, a Text each, and the links last: beside the text on a wide screen, under it on a
+ * narrow one. Links in it are dark sand.
+ */
 const Footer = ({ className, ...props }: PageFooterProps) => (
   <footer className={classNames('hf-page-footer', className)} {...props} />
 )
@@ -61,9 +65,9 @@ Cell.displayName = 'Page.Cell'
 Footer.displayName = 'Page.Footer'
 
 /**
- * The page: as wide as the window. The background of the Page.Header runs from edge to edge, and what is in the header,
- * the Page.Body and the Page.Footer sit in a centred column of a maximum width, with a margin on either side on a
- * narrow screen.
+ * The page: as wide as the window. The backgrounds of the Page.Header and the Page.Footer run from edge to edge, and what
+ * is in them and the Page.Body sit in a centred column of a maximum width, with a margin on either side on a narrow
+ * screen.
  * It holds a Page.Header, a Page.Body and a Page.Footer, in that order. The Page.Body holds a Page.Main and, if the page
  * has one, a Page.Sidebar, and in them the cells, some of them a Page.Cell. They only work inside a Page, so they are
  * written as properties of it.

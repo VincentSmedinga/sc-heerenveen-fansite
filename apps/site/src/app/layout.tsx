@@ -44,7 +44,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </Page.Header>
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
-            <Text appearance="meta">Alle koppen en links op één plek. Voor supporters, door supporters.</Text>
+            <Text appearance="meta">Alle koppen en links op één plek.</Text>
+            <Text appearance="meta">Voor supporters, door supporters.</Text>
             <Navigation items={footerItems} label="Over de site" />
           </Page.Footer>
         </Page>

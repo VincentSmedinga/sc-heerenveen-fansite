@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
+import { ExampleFooter } from '../../docs/ExamplePage'
 import { Page } from './Page'
 
 const renderPage = () =>
@@ -227,6 +228,18 @@ describe('Page.Footer', () => {
 
     expect(screen.getByRole('contentinfo').className).toBe('hf-page-footer extra')
     expect(screen.getByRole('contentinfo').id).toBe('voet')
+  })
+
+  it('holds the two lines of text and then the links as its own children, which its grid places', () => {
+    render(<ExampleFooter />)
+    const footer = screen.getByRole('contentinfo')
+
+    expect(Array.from(footer.children).map((child) => child.tagName.toLowerCase())).toEqual(['p', 'p', 'nav'])
+    expect(Array.from(footer.querySelectorAll('p')).map((paragraph) => paragraph.textContent)).toEqual([
+      'Alle koppen en links op één plek.',
+      'Voor supporters, door supporters.',
+    ])
+    expect(within(footer).getByRole('navigation', { name: 'Over de site' })).toBe(footer.lastElementChild)
   })
 
   it('is called Page.Footer in the developer tools and the code examples', () => {

@@ -13,6 +13,14 @@ describe('RootLayout', () => {
     expect(html).not.toContain('<main')
   })
 
+  it('puts the two sentences of the footer in a paragraph each, before the links', () => {
+    const html = renderToStaticMarkup(<RootLayout>Inhoud</RootLayout>)
+
+    expect(html).toContain(
+      '<footer class="hf-page-footer"><p class="hf-meta">Alle koppen en links op één plek.</p><p class="hf-meta">Voor supporters, door supporters.</p><nav',
+    )
+  })
+
   it('links to Over ons, its privacy section and Wat is er nieuw in the footer, in a navigation named Over de site', () => {
     const html = renderToStaticMarkup(<RootLayout>Inhoud</RootLayout>)
     const footer = html.match(/<footer[^>]*>.*<\/footer>/s)?.[0] ?? ''
