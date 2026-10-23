@@ -8,8 +8,8 @@ const tags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-prac
 
 /**
  * Checks the page that is open with axe, and for what axe doesn't see or sees only half: exactly one h1, lang="nl" on the
- * html element, and no sideways scrolling in a window of 320 pixels wide. Returns one line per problem, with the rule and
- * the element, or an empty list. It resizes the window.
+ * html element, nothing loaded from another domain (principle 3 of the Redactie), and no sideways scrolling in a window of
+ * 320 pixels wide. Returns one line per problem, with the rule and the element, or an empty list. It resizes the window.
  */
 export async function checkPage(page: Page) {
   const problems: string[] = []
@@ -32,6 +32,15 @@ export async function checkPage(page: Page) {
 
   if (lang !== 'nl') {
     problems.push(`html-lang-nl (the lang of the html element is ${JSON.stringify(lang)}, not "nl")`)
+  }
+
+  // Everything the page has loaded, as the browser lists it, also what failed. The first check runs after the page has loaded.
+  const loaded = await page.evaluate(() => performance.getEntriesByType('resource').map((entry) => entry.name))
+  const { origin } = new URL(page.url())
+  const foreign = new Set(loaded.map((url) => new URL(url).origin).filter((other) => other !== origin))
+
+  for (const other of foreign) {
+    problems.push(`no-third-party-requests (the page loads something from ${other}, another domain than ${origin})`)
   }
 
   await page.setViewportSize({ height: 800, width: 320 })

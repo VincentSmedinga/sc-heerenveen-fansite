@@ -39,9 +39,8 @@ Op `/wat-is-er-nieuw` controleert hij dat de pagina de versies uit `CHANGELOG.md
 `pnpm test:a11y` start de gebouwde site en toetst elke pagina uit de lijst in [`e2e/pages.spec.ts`](e2e/pages.spec.ts) met axe, in Chromium, in licht en donker.
 axe toetst op WCAG 2.0, 2.1 en 2.2, niveau A en AA, en op de best practices van axe.
 Elke schending laat de controle falen; er staan geen regels uit.
-Per pagina controleert de test ook precies één `h1`, `lang="nl"` op het `html`-element en geen horizontale scrollbalk in een venster van 320 pixels breed.
-`e2e/home.spec.ts` controleert wat axe niet ziet op de homepage: de volgorde van de koppen, wat er wel en niet staat, de hoogte van de links en dat er niets van een ander domein komt.
-`e2e/content-column.spec.ts` controleert dat de inhoud van elke pagina op een breed scherm in de hoofdkolom van 48 rem staat, in lijn met het logo, dat er 3 rem tussen de inhoud en de footer zit, en dat de delen van de pagina hun padding en rand meetellen in hun maat.
+Per pagina controleert de test ook precies één `h1`, `lang="nl"` op het `html`-element, dat de browser niets van een ander domein laadt, en geen horizontale scrollbalk in een venster van 320 pixels breed.
+Wat er op een pagina staat, controleren de unit-tests; maten en uitlijning kijk je na in Storybook en in de review (zie _Checklist voor code en beveiliging_ in [`CONTRIBUTING.md`](../../CONTRIBUTING.md)).
 Een nieuwe pagina is één regel in de lijst, met het antwoord dat de pagina moet geven: 200, of 404 voor de pagina 'niet gevonden'.
 Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de pagina 'niet gevonden' toetst.
 
@@ -63,7 +62,7 @@ Hij start de site een tweede keer, zonder bereikbare database, voor de foutpagin
 CI geeft de map van de rooktest mee in `SITE_FOLDER`, zodat dezelfde map wordt getoetst.
 Faalt een pagina, dan noemt de log de pagina en het thema (in de naam van de test), de regel van axe en het element.
 
-`e2e/check-page.spec.ts` laat zien dat de controle een fout vangt: een link zonder naam, een tweede `h1`, een verkeerde `lang` en een pagina die op 320 pixels opzij scrolt.
+`e2e/check-page.spec.ts` laat zien dat de controle een fout vangt: een link zonder naam, een tweede `h1`, een verkeerde `lang`, een verzoek naar een ander domein en een pagina die op 320 pixels opzij scrolt.
 De test serveert die pagina's zelf; ze staan niet op de site.
 De stories in Storybook toetst axe niet in CI; dat doet het paneel Toegankelijkheid.
 

@@ -62,6 +62,26 @@ test('Stylelint reports a temporary exception that is no longer needed', async (
   )
 })
 
+// Not about Baseline, but the same way to show that a rule catches what it is for: 100vw includes the scrollbar.
+test('Stylelint reports a width of 100vw, also inside calc() and as a maximum', async () => {
+  for (const declaration of [
+    'inline-size: 100vw',
+    'max-inline-size: 100vw',
+    'min-inline-size: 100vw',
+    'inline-size: calc(100vw - 2rem)',
+  ]) {
+    assert.deepEqual(
+      await lintCss(`a {\n  ${declaration};\n}\n`),
+      ['error declaration-property-value-disallowed-list'],
+      declaration,
+    )
+  }
+})
+
+test('Stylelint accepts a width of 100%, and 100vw in a property that is not a width', async () => {
+  assert.deepEqual(await lintCss('a {\n  inline-size: 100%;\n  min-block-size: 100vh;\n}\n'), [])
+})
+
 test('ESLint reports a method that is not widely available in the design system', async () => {
   const messages = await lintJs(
     "export const a = screen.orientation.lock('portrait')\n",

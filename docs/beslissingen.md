@@ -575,6 +575,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alleen axe, en de rest aan de checklist laten.
   Of ook de bediening met het toetsenbord en de volgorde van de focus; die zijn lastig betrouwbaar te automatiseren en blijven bij #25.
 
+### E2e-tests alleen voor wat anders ongemerkt kapotgaat
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** Playwright test in een echte browser alleen wat axe en de unit-tests niet zien en wat zonder test ongemerkt kapotgaat: axe met onze eigen controles op elke pagina, geen verzoeken naar een ander domein, en de foutpagina zonder database en zonder JavaScript.
+  Maten, breedtes en uitlijning krijgen geen e2e-test; die kijk je na in Storybook en in de review.
+  Stylelint weigert `100vw` als breedte.
+- **Waarom:** een test met een maat moet mee veranderen bij elke keuze in het ontwerp, zoals bij #117, en legt dus het ontwerp vast in plaats van gedrag.
+  `home.spec.ts` herhaalde de unit-tests van de homepage.
+  Een lintregel vangt `100vw` eerder en goedkoper dan een browser.
+  Minder tests in de browser maken CI sneller en een pull request kleiner.
+- **Alternatieven:** alle tests laten staan.
+  Of de maten in de tests uit de tokens lezen, zodat ze meebewegen; dan testen ze nog steeds het ontwerp.
+  Of visuele regressietests met schermafbeeldingen; dat is een nieuw hulpmiddel, en de referentiebeelden vragen onderhoud.
+
 ### Alleen Baseline 'widely available', bewaakt door linters
 
 - **Datum:** 21 oktober 2026
@@ -1133,7 +1147,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gemeten:** in Atkinson Hyperlegible Next op 17 pixels (Tekst) telde in 36 rem geen van 28 regels Nederlandse nieuwstekst meer dan 80 tekens, en het gemiddelde was 72.
   In 37 rem ging de eerste regel erover (81).
   Een kop van een bericht (Nieuwskop, 18 pixels, halfvet) heeft in 36 rem gemiddeld 64 tekens en hoogstens 72.
-  Een Playwright-test in `apps/site/e2e/content-column.spec.ts` telt de tekens van elke regel op `/`, `/bronnen`, de pagina voor een onbekend adres en de foutpagina.
+  Een Playwright-test telde de tekens van elke regel op `/`, `/bronnen`, de pagina voor een onbekend adres en de foutpagina; die test is weg (zie _E2e-tests alleen voor wat anders ongemerkt kapotgaat_).
 - **Waarom:** in de kolom van 75 rem telt een regel zo'n 130 tekens, en zulke regels lezen moeilijk; WCAG raadt hoogstens 80 tekens aan (1.4.8).
   Houden we de plek voor een zijbalk nu al vrij, dan verschuift de inhoud niet als die komt, bijvoorbeeld met de volgende wedstrijd en de stand (#27).
 - **Alternatieven:** een smalle kolom in het midden; dan verandert de opbouw opnieuw als de zijbalk komt.
