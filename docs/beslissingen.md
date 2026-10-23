@@ -1440,7 +1440,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Met eerst latin en dan latin-ext tekende Safari de lijn door de g en de p, ook met `text-decoration-skip-ink: auto`; Chrome en Firefox deden het wel goed.
   Daarom staat latin-ext nu voor latin, bij alle drie de paren (Truculenta, Atkinson en Atkinson cursief), zoals Fontsource ze ook ordent.
   Van twee lettertypebestanden die hetzelfde teken hebben, wint het laatste, en dat hoort latin te zijn.
-  De dikte en de afstand zijn voorlopig: de projecteigenaar probeert ze uit.
   De kleuren veranderen niet: een bezochte kop houdt de kleur voor bezocht, en onder de muis krijgt hij de kleur voor hover.
   Bij de focus blijft de kleur zoals hij is.
   De focusrand blijft zichtbaar (2.4.7).
@@ -1481,13 +1480,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   In een kolom van 4,75 rem stond er tussen de tijd en de kop 31 tot 39 pixels lucht, naast een kop van 16 pixels.
   De projecteigenaar vond dat te veel.
   Nu is het 15 tot 23 pixels.
-- **Hoe:** in `news-item.css` is `grid-template-columns` nu `4rem minmax(0, 1fr)` en `column-gap` is `0.75rem`.
+- **Hoe:** in `news-item.css` is `grid-template-columns` nu `minmax(4rem, max-content) minmax(0, 1fr)` en `column-gap` is `0.75rem`.
   De tijd krijgt `white-space: nowrap`: een breder lettertype, zoals de reservefont voordat het lettertype is geladen, mag de tijd niet over twee regels verdelen.
-  De kolom blijft voor elke regel even breed, dus de koppen beginnen onder elkaar op dezelfde plek.
+  De kolom is voor elke regel even breed, dus de koppen beginnen onder elkaar op dezelfde plek.
+  Is een tijd breder dan 4 rem, bijvoorbeeld met de tekstafstand van WCAG 1.4.12 (letterafstand 0,12 em, woordafstand 0,16 em) of in een breder reservelettertype, dan groeit de kolom mee (`max-content`).
+  Dan beginnen de koppen niet meer allemaal op één plek, maar raakt de tijd de kop niet: zonder dat stak "ma 08:14" met die tekstafstand 1 pixel over de ruimte tot de kop heen.
   De rem schaalt mee met de tekstgrootte van de bezoeker, net als de tijd.
 - **Later:** de grens van 24 rem in _Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query_ rekende met een kolom en tussenruimte van samen 5,75 rem.
   Die zijn nu samen 4,75 rem, dus de kop houdt bij 24 rem 19,25 rem in plaats van 18,25 rem, en de grens blijft staan.
-- **Alternatieven:** de kolom door de inhoud laten bepalen (`max-content`); dan begint de kop per regel op een andere plek, want "ma" is breder dan "di".
+- **Alternatieven:** de kolom altijd door de inhoud laten bepalen (`max-content`); dan begint de kop per regel op een andere plek, want "ma" is breder dan "di".
+  Of de tijd laten afbreken in plaats van `nowrap`; dan staat "ma" boven "08:14" zodra het lettertype breder is, en springt de regel in hoogte.
   Of de kolom of de tussenruimte nog smaller; dan staat de breedste tijd bijna tegen de kop.
 
 ## Site

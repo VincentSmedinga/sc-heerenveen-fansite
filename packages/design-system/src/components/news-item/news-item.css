@@ -23,13 +23,14 @@
    * The columns of every line are the same width, so the headlines start at the same place down the list. The first
    * baselines of the time and the headline are on one line. The column of the time is as wide as the widest time, "ma
    * 20:08" (61 pixels at the size of Meta), with a little to spare, so there is not much air between the time and the
-   * headline.
+   * headline. It grows when a time is wider, with the text spacing of WCAG 1.4.12 or a wider fallback font: then the
+   * headlines of the lines may start in different places, which is better than a time that touches its headline.
    */
   .hf-news-item-layout {
     align-items: baseline;
     column-gap: 0.75rem;
     display: grid;
-    grid-template-columns: 4rem minmax(0, 1fr);
+    grid-template-columns: minmax(4rem, max-content) minmax(0, 1fr);
   }
 
   /*
@@ -65,13 +66,14 @@
    * A target of at least 24 pixels high (WCAG 2.5.8): one line of the headline is 22 pixels, so the height is set here.
    * The size and the weight of the text are set at the bottom of this file.
    *
-   * Not underlined, except under the mouse and with the focus of the keyboard: a list of headlines with a line under each
-   * is busy. The headline is on a line of its own, heavier than the text and in the colour of links, so it is a link
-   * without the line (WCAG 1.4.1 asks for more than colour mostly for a link in a sentence). The line is 1.5 pixels
-   * thick, between the 1 pixel of a link that is not under the mouse and the 2 of the base styles under the mouse, to go
-   * with the weight of the text. It sits closer to the text than for other links. Both are set for the two states, so the focus gets the same
-   * line as hover. The line skips the descenders of letters, such as the g and the p. Only the line is set here: the
-   * colours of a visited link and of hover, and the focus ring, stay as the base styles make them.
+   * Not underlined, except under the mouse and with the focus of the keyboard: a list of headlines with a line under
+   * each is busy. The headline is on a line of its own, heavier than the text and in the colour of links, so it is a
+   * link without the line (WCAG 1.4.1 asks for more than colour mostly for a link in a sentence). The line is 1.5
+   * pixels thick, between the 1 pixel of a link that is not under the mouse and the 2 of the base styles under the
+   * mouse, to go with the weight of the text. It sits closer to the text than for other links. Both are set for the
+   * two states, so the focus gets the same line as hover. The line skips the descenders of letters, such as the g and
+   * the p. Only the line is set here: the colours of a visited link and of hover, and the focus ring, stay as the base
+   * styles make them.
    */
   .hf-news-item-headline {
     min-block-size: 1.5rem;
