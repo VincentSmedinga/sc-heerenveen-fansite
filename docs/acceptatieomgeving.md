@@ -290,12 +290,12 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 ## Wat de eerste deploy ons leerde
 
 We hadden bij het bouwen geen toegang tot de hosting.
-De eerste deploy, op 21 oktober 2026, liet zien hoe die werkt:
+De eerste deploy, op 21 oktober 2026, en de eerste run van de importer, op 23 oktober 2026, lieten zien hoe de host werkt:
 
 - De host start de app met `lsnode.js` van LiteSpeed, niet met Passenger zelf, op Node 24.20 en zonder bijzondere opties.
   `apps/site/server.js` is een ES-module en laadt zonder omweg.
-- Het pad van Node 24 is `/opt/alt/alt-nodejs24/root/usr/bin/node`, zoals we van CloudLinux verwachtten.
-  Dat bleek op 23 oktober 2026, bij de eerste handmatige run van de importer (zie stap 9).
+- Het pad van Node 24 is `/opt/alt/alt-nodejs24/root/usr/bin/node`: CloudLinux zet elke versie van Node in een eigen map onder `/opt/alt`.
+  Dat bleek bij de eerste handmatige run van de importer (zie stap 9).
 - Op de host staat rsync (`/usr/bin/rsync`).
   Met `--delete` en de uitzonderingen in de workflow bleven `tmp/` en `stderr.log` staan.
 - De app start opnieuw zodra iemand `tmp/restart.txt` aanraakt.
