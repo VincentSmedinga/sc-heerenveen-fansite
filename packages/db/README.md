@@ -36,7 +36,7 @@ Draai ze vanuit de root van de repository.
 Daardoor kan dezelfde code op de hosting draaien, zonder ontwikkelgereedschap: de site doet dat als hij start (zie _In andere packages_).
 
 `db:seed` weigert als `SITE_ENV` `production` is, want de testbronnen zijn verzonnen en mogen daar nooit komen.
-De seed zet ook de Leeuwarder Courant en Voetbal International met hun feeds erin; zij staan dus lokaal en op acceptatie in het register, en nooit op productie.
+De seed zet ook de Leeuwarder Courant, Voetbal International en ons eigen forum, sc Heerenveen Forum, met hun feeds erin; zij staan dus lokaal en op acceptatie in het register, en nooit op productie.
 Hoe echte bronnen op productie komen, beslissen we met de bronnenlijst (#10) en het beheer (#30).
 
 ## Het schema wijzigen

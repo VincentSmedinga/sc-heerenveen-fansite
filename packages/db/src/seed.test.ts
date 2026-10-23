@@ -104,6 +104,31 @@ describe('the seed', () => {
     expect(viFeeds.map((feed) => feed.url)).toEqual(['https://www.vi.nl/feed/news.xml?tag=sc-heerenveen'])
   })
 
+  it('puts the forum in the register as a forum, with its API as the feed and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [forum] = await database.db.select().from(sources).where(eq(sources.domain, 'forum.heerenveen.org'))
+    const forumFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, forum?.id ?? 0))
+
+    expect(forum).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'forum',
+      name: 'sc Heerenveen Forum',
+    })
+    expect(forum?.consentStatus).not.toBe('given')
+    expect(forum?.description).toBeTruthy()
+    expect(forum?.description?.length).toBeLessThanOrEqual(300)
+    expect(forumFeeds.map((feed) => feed.url)).toEqual([
+      'https://forum.heerenveen.org/api/discussions?sort=-lastPostedAt&page[limit]=30&include=lastPostedUser,tags',
+    ])
+  })
+
   it('holds made-up test sources only, and real sources that are not made up', () => {
     for (const source of testSources) {
       expect(source.domain, source.name).toMatch(/\.test$/)

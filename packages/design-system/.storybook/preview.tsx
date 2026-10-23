@@ -92,6 +92,7 @@ export default definePreview({
             'Link',
             'List',
             'NewsItem',
+            'DiscussionItem',
             'Logo',
           ],
           'Hulpklassen',

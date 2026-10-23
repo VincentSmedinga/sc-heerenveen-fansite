@@ -29,6 +29,13 @@
       "when": 1792680888832,
       "tag": "0003_add_import_log_and_robots_txt",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1792792836624,
+      "tag": "0004_add_discussions",
+      "breakpoints": true
     }
   ]
 }

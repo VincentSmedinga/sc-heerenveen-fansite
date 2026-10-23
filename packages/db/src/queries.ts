@@ -2,7 +2,9 @@ import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
-import { items, sources } from './schema.ts'
+import { discussions, items, sources } from './schema.ts'
+
+export type PublicDiscussion = Awaited<ReturnType<typeof listNewestDiscussions>>[number]
 
 export type PublicItem = Awaited<ReturnType<typeof listRecentItems>>[number]
 
@@ -23,6 +25,29 @@ export function listEnabledSources(db: Database) {
     .from(sources)
     .where(eq(sources.enabled, true))
     .orderBy(asc(sources.name))
+}
+
+/**
+ * The discussions the importer kept of the forums that are switched on, the one with the latest post first, with what the
+ * homepage shows of them: the title, the address, the number of replies, the time of the last post and the screen name of
+ * whoever wrote it, which is null when the forum doesn't say. Every other column stays internal, so none can reach a page.
+ *
+ * The importer keeps the newest four, so `limit` only matters when there is more than one forum.
+ */
+export function listNewestDiscussions(db: Database, limit = 4) {
+  return db
+    .select({
+      lastPostedAt: discussions.lastPostedAt,
+      lastPostedBy: discussions.lastPostedBy,
+      replyCount: discussions.replyCount,
+      title: discussions.title,
+      url: discussions.url,
+    })
+    .from(discussions)
+    .innerJoin(sources, eq(discussions.sourceId, sources.id))
+    .where(eq(sources.enabled, true))
+    .orderBy(desc(discussions.lastPostedAt), desc(discussions.id))
+    .limit(limit)
 }
 
 /**

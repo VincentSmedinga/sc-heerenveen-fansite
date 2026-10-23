@@ -1,12 +1,14 @@
-import type { PublicItem } from '@fansite/db/queries'
+import type { PublicDiscussion, PublicItem } from '@fansite/db/queries'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { getDiscussions } from '../discussions'
 import { getHeadlines } from '../headlines'
 import HomePage, { generateMetadata } from './page'
 
 vi.mock('../headlines', () => ({ getHeadlines: vi.fn() }))
+vi.mock('../discussions', () => ({ getDiscussions: vi.fn() }))
 
 const headlines: PublicItem[] = [
   {
@@ -32,21 +34,67 @@ const headlines: PublicItem[] = [
   },
 ]
 
+// Made up, like the screen names. The moment of now is the afternoon of Friday 23 October 2026 in the Netherlands.
+const now = new Date('2026-10-23T13:40:00Z')
+
+const discussions: PublicDiscussion[] = [
+  {
+    lastPostedAt: new Date('2026-10-23T11:28:21Z'),
+    lastPostedBy: 'Buffon1',
+    replyCount: 83,
+    title: 'Wie wint er zondag?',
+    url: 'https://forum.test/d/41-wie-wint-zondag',
+  },
+  {
+    lastPostedAt: new Date('2026-10-21T19:45:00Z'),
+    lastPostedBy: 'Tribunetijger',
+    replyCount: 1,
+    title: 'Nieuwe spits & <b>gezocht</b>',
+    url: 'https://forum.test/d/37-nieuwe-spits-gezocht',
+  },
+  {
+    lastPostedAt: new Date('2026-10-10T08:10:00Z'),
+    lastPostedBy: null,
+    replyCount: 0,
+    title: 'Het stadion in de winter',
+    url: 'https://forum.test/d/12-het-stadion-in-de-winter',
+  },
+]
+
 async function render() {
   return renderToStaticMarkup(await HomePage())
 }
 
+/** The main column alone: the news and the link to Onze bronnen, without the sidebar. */
+async function renderMain() {
+  const html = await render()
+
+  return html.slice(0, html.indexOf('</main>') + '</main>'.length)
+}
+
+/** The sidebar alone: the discussions of the forum. */
+async function renderSidebar() {
+  const html = await render()
+
+  return html.slice(html.indexOf('<aside'))
+}
+
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(now)
   vi.mocked(getHeadlines).mockReset()
+  vi.mocked(getDiscussions).mockReset()
+  vi.mocked(getDiscussions).mockResolvedValue([])
 })
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
   vi.unstubAllEnvs()
 })
 
 describe('the homepage', () => {
-  it('has one h1, for screen readers only, and an h2 for the news, and no heading for a day', async () => {
+  it('has one h1, for screen readers only, and an h2 for the news and one for the discussions, and no heading for a day', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
@@ -55,6 +103,7 @@ describe('the homepage', () => {
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite</h1>',
       '<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>',
+      '<h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies</h2>',
     ])
   })
 
@@ -65,14 +114,14 @@ describe('the homepage', () => {
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><p>Welke media we volgen, lees je bij <a href="\/bronnen">Onze bronnen<\/a>\.<\/p><\/main>$/,
+      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><p>Welke media we volgen, lees je bij <a href="\/bronnen">Onze bronnen<\/a>\.<\/p><\/main><aside/,
     )
   })
 
   it('puts the h2 and the headlines in the card, which takes its name from the h2', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
-    const html = await render()
+    const html = await renderMain()
     const cards = html.match(/<section.*?<\/section>/g) ?? []
 
     expect(cards).toHaveLength(1)
@@ -141,7 +190,7 @@ describe('the homepage', () => {
   it('shows the items in one list, in the order the query gives them, with no heading for a day', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
-    const html = await render()
+    const html = await renderMain()
 
     expect(html.match(/<ul/g)).toHaveLength(1)
     expect(html).toContain('<ul role="list">')
@@ -154,7 +203,7 @@ describe('the homepage', () => {
   it('shows nothing of a source but the headline, the link, the name, the day and time and the paywall', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
-    const html = await render()
+    const html = await renderMain()
 
     expect(html).not.toMatch(/<(img|picture|iframe|video|audio|script|image|use)/)
     expect(html).not.toMatch(/(src|srcset|poster)=/)
@@ -173,7 +222,7 @@ describe('the homepage', () => {
   it('keeps the link to Onze bronnen under the news, and the old text is gone', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
-    const html = await render()
+    const html = await renderMain()
 
     expect(html).toContain('<a href="/bronnen">Onze bronnen</a>')
     expect(html.indexOf('Onze bronnen')).toBeGreaterThan(html.lastIndexOf('</ul>'))
@@ -183,7 +232,7 @@ describe('the homepage', () => {
   it('tells visitors there is no news this week, without a heading for a day', async () => {
     vi.mocked(getHeadlines).mockResolvedValue([])
 
-    const html = await render()
+    const html = await renderMain()
 
     expect(html).toContain('<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>')
     expect(html).toContain('<p>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</p>')
@@ -206,6 +255,101 @@ describe('the homepage', () => {
     })
     expect(metadata).not.toHaveProperty('title')
     expect(metadata).not.toHaveProperty('robots')
+  })
+})
+
+describe('the discussions in the sidebar of the homepage', () => {
+  beforeEach(() => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
+    vi.mocked(getDiscussions).mockResolvedValue(discussions)
+  })
+
+  it('puts the block in the sidebar beside the news, named by its h2', async () => {
+    const html = await render()
+
+    expect(html.match(/<aside/g)).toHaveLength(1)
+    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(await renderSidebar()).toMatch(
+      /^<aside class="hf-page-sidebar" aria-label="Van het forum"><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><\/aside>$/,
+    )
+  })
+
+  it('shows each discussion as a link to the forum with the replies, the last poster and the time', async () => {
+    const html = await renderSidebar()
+
+    expect(html.match(/<li>/g)).toHaveLength(3)
+    expect(html).toContain(
+      '<a class="hf-headline hf-discussion-item-title" href="https://forum.test/d/41-wie-wint-zondag">Wie wint er zondag?</a>',
+    )
+    expect(html).toContain('<span>83 reacties</span>')
+    expect(html).toContain(
+      '<span>laatst Buffon1</span> <span aria-hidden="true">·</span> <time dateTime="2026-10-23T11:28:21.000Z">13:28</time>',
+    )
+  })
+
+  it('shows today as the time alone, the days before as the weekday and the time, and older ones as the date', async () => {
+    const html = await renderSidebar()
+
+    expect(html).toContain('<time dateTime="2026-10-23T11:28:21.000Z">13:28</time>')
+    expect(html).toContain('<time dateTime="2026-10-21T19:45:00.000Z">wo 21:45</time>')
+    expect(html).toContain('<time dateTime="2026-10-10T08:10:00.000Z">10 okt</time>')
+  })
+
+  it('writes "1 reactie" and "0 reacties", and only the time when the last poster is not known', async () => {
+    const html = await renderSidebar()
+
+    expect(html).toContain('<span>1 reactie</span>')
+    expect(html).toContain('<span>0 reacties</span>')
+    expect(html).toContain('<span>laatst</span> <time dateTime="2026-10-10T08:10:00.000Z">')
+  })
+
+  it('shows a title as text, escaped, and the addresses as our database has them', async () => {
+    const html = await renderSidebar()
+
+    expect(html).toContain('Nieuwe spits &amp; &lt;b&gt;gezocht&lt;/b&gt;')
+    expect(html).not.toContain('<b>')
+    expect([...html.matchAll(/href="([^"]*)"/g)].map(([, href]) => href)).toEqual([
+      'https://forum.test/d/41-wie-wint-zondag',
+      'https://forum.test/d/37-nieuwe-spits-gezocht',
+      'https://forum.test/d/12-het-stadion-in-de-winter',
+      'https://forum.heerenveen.org',
+    ])
+    expect(html).not.toContain('target=')
+  })
+
+  it('loads nothing from the forum: no image, avatar, frame or script, and only links', async () => {
+    const html = await renderSidebar()
+
+    expect(html).not.toMatch(/<(img|picture|iframe|video|audio|script|image|use|svg|link|source)/)
+    expect(html).not.toMatch(/(src|srcset|poster)=/)
+  })
+
+  it('shows the screen name as text, with no link', async () => {
+    const html = await renderSidebar()
+
+    expect(html).not.toMatch(/<a [^>]*>[^<]*(Buffon1|Tribunetijger)/)
+    expect(html.match(/<a /g)).toHaveLength(discussions.length + 1)
+  })
+
+  it('says there are no discussions yet, with the link to the forum under it', async () => {
+    vi.mocked(getDiscussions).mockResolvedValue([])
+
+    const html = await renderSidebar()
+
+    expect(html).toContain('<h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies</h2>')
+    expect(html).toContain('<p>We hebben nog geen discussies van het forum.</p>')
+    expect(html).not.toContain('<ul')
+    expect(html.indexOf('nog geen discussies')).toBeLessThan(html.indexOf('Naar het forum'))
+    expect(html).toContain('<a href="https://forum.heerenveen.org">Naar het forum</a>')
+  })
+
+  it('shows the discussions when there is no news', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue([])
+
+    const html = await render()
+
+    expect(html).toContain('We hebben deze week nog geen nieuws gevonden.')
+    expect(html).toContain('Wie wint er zondag?')
   })
 })
 
@@ -232,11 +376,22 @@ describe('the homepage when the database can not be read', () => {
     expect(await generateMetadata()).toEqual({ robots: { index: false }, title: 'Er ging iets mis' })
   })
 
+  it('shows the error page when only the discussions can not be read', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
+    vi.mocked(getDiscussions).mockRejectedValue(failure)
+
+    const html = await render()
+
+    expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
+    expect(html).not.toContain('Nieuwste discussies')
+    expect(await generateMetadata()).toEqual({ robots: { index: false }, title: 'Er ging iets mis' })
+  })
+
   it('writes the reason to the log, without the values of the query', async () => {
     await render()
 
     expect(console.error).toHaveBeenCalledExactlyOnceWith(
-      'Could not read the headlines for the homepage: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
+      'Could not read the headlines and discussions for the homepage: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
     )
   })
 })

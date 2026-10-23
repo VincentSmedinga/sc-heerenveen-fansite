@@ -418,7 +418,7 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   assert.match(homeHtml, /<meta name="robots" content="noindex"\/>/)
   assert.match(homeHtml, /<a href="\/">Probeer het opnieuw<\/a>/)
   assert.doesNotMatch(homeHtml, /Laatste nieuws|Binnenkort meer/)
-  assert.match(log(), /Could not read the headlines for the homepage: .*ECONNREFUSED/)
+  assert.match(log(), /Could not read the headlines and discussions for the homepage: .*ECONNREFUSED/)
 
   const sources = await fetch(`${origin}/bronnen`)
   const sourcesHtml = await sources.text()

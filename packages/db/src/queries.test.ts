@@ -1,9 +1,10 @@
+import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { listEnabledSources, listRecentItems } from './queries.ts'
-import { feeds, items, sources } from './schema.ts'
+import { listEnabledSources, listNewestDiscussions, listRecentItems } from './queries.ts'
+import { discussions, feeds, items, sources } from './schema.ts'
 import { realSources, seedSources, testSources } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -242,5 +243,120 @@ describe('listRecentItems', () => {
     await addSource()
 
     expect(await listRecentItems(database.db, sevenDaysAgo, now)).toEqual([])
+  })
+})
+
+describe('listNewestDiscussions', () => {
+  async function addForum(overrides: Partial<typeof sources.$inferInsert> = {}) {
+    const [forum] = await database.db
+      .insert(sources)
+      .values({ domain: 'proefforum.test', kind: 'forum', name: 'Proefforum', ...overrides })
+      .$returningId()
+
+    return forum?.id ?? 0
+  }
+
+  async function addDiscussion(
+    sourceId: number,
+    number: number,
+    lastPostedAt: Date,
+    overrides: Partial<typeof discussions.$inferInsert> = {},
+  ) {
+    await database.db.insert(discussions).values({
+      lastPostedAt,
+      lastPostedBy: 'Tribunetijger',
+      replyCount: number,
+      sourceId,
+      title: `Discussie ${number}`,
+      url: `https://proefforum.test/d/${number}-discussie`,
+      ...overrides,
+    })
+  }
+
+  it('gives the discussion with the latest post first', async () => {
+    const forum = await addForum()
+
+    await addDiscussion(forum, 1, new Date('2026-10-22T10:00:00Z'))
+    await addDiscussion(forum, 2, new Date('2026-10-23T09:00:00Z'))
+    await addDiscussion(forum, 3, new Date('2026-10-21T08:00:00Z'))
+
+    expect((await listNewestDiscussions(database.db)).map((discussion) => discussion.title)).toEqual([
+      'Discussie 2',
+      'Discussie 1',
+      'Discussie 3',
+    ])
+  })
+
+  it('puts the newest stored discussion first when two have the same time', async () => {
+    const forum = await addForum()
+    const time = new Date('2026-10-23T09:00:00Z')
+
+    await addDiscussion(forum, 1, time)
+    await addDiscussion(forum, 2, time)
+
+    expect((await listNewestDiscussions(database.db)).map((discussion) => discussion.title)).toEqual([
+      'Discussie 2',
+      'Discussie 1',
+    ])
+  })
+
+  it('gives no discussions of a forum that is switched off, and the discussions of the others', async () => {
+    const on = await addForum()
+    const off = await addForum({ domain: 'uitgezet.test', enabled: false, name: 'Uitgezet forum' })
+
+    await addDiscussion(on, 1, new Date('2026-10-22T10:00:00Z'))
+    await addDiscussion(off, 2, new Date('2026-10-23T10:00:00Z'))
+
+    expect((await listNewestDiscussions(database.db)).map((discussion) => discussion.title)).toEqual(['Discussie 1'])
+  })
+
+  it('gives only the title, the address, the replies, the time and the screen name', async () => {
+    const forum = await addForum()
+
+    await addDiscussion(forum, 1, new Date('2026-10-23T11:28:00Z'), { replyCount: 83 })
+
+    expect(await listNewestDiscussions(database.db)).toEqual([
+      {
+        lastPostedAt: new Date('2026-10-23T11:28:00Z'),
+        lastPostedBy: 'Tribunetijger',
+        replyCount: 83,
+        title: 'Discussie 1',
+        url: 'https://proefforum.test/d/1-discussie',
+      },
+    ])
+  })
+
+  it('gives a missing screen name as null', async () => {
+    const forum = await addForum()
+
+    await addDiscussion(forum, 1, new Date('2026-10-23T11:28:00Z'), { lastPostedBy: null })
+
+    expect((await listNewestDiscussions(database.db))[0]?.lastPostedBy).toBeNull()
+  })
+
+  it('gives at most the number it is asked for, four by default', async () => {
+    const forum = await addForum()
+
+    for (let number = 1; number <= 6; number++) {
+      await addDiscussion(forum, number, new Date(Date.UTC(2026, 9, 20 + number)))
+    }
+
+    expect(await listNewestDiscussions(database.db)).toHaveLength(4)
+    expect(await listNewestDiscussions(database.db, 2)).toHaveLength(2)
+  })
+
+  it('gives an empty list when there are no discussions', async () => {
+    await addForum()
+
+    expect(await listNewestDiscussions(database.db)).toEqual([])
+  })
+
+  it('loses the discussions of a forum when the forum leaves the register', async () => {
+    const forum = await addForum()
+
+    await addDiscussion(forum, 1, new Date('2026-10-23T11:28:00Z'))
+    await database.db.delete(sources).where(eq(sources.id, forum))
+
+    expect(await database.db.select().from(discussions)).toEqual([])
   })
 })

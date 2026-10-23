@@ -2070,6 +2070,54 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of uitstel dat steeds langer wordt; dat is meer code voor weinig winst bij één feed.
   Of `robots.txt` in een bestand op de host bewaren.
 
+### De forumdiscussies komen via de Flarum-API, niet uit de database van het forum
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de importer leest de nieuwste discussies bij de openbare API van het forum, als gast, en bewaart ze in onze eigen database.
+  De site leest alleen onze database.
+- **Waarom:** Flarum bepaalt zelf wat een gast mag zien, dus een besloten tag of een verborgen discussie komt er niet in.
+  We hoeven de regels van het forum niet na te bouwen, en een fout daarin kan niets lekken.
+  We hebben geen toegang tot de forumdatabase nodig.
+  Die bevat e-mailadressen en wachtwoordhashes van leden, en een gebruiker op de gedeelde hosting kan mogelijk meer lezen dan we nodig hebben.
+  De importer en de site hangen niet af van het schema van Flarum, dat bij een update kan veranderen.
+  De importer heeft de lock, het logboek en de gezondheid van de bronnen al.
+- **Alternatieven:** de database van het forum lezen met een gebruiker met leesrechten; die staat naast de onze bij mijn.host.
+  Dat geeft geen vertraging van een kwartier, maar vraagt een tweede verbinding, een kopie van het schema voor tests en onze eigen regels voor wat zichtbaar is.
+  Of de database van het forum bij elk bezoek lezen; dan werkt het blok niet meer als die database even wegvalt.
+  We komen erop terug als de API voor gasten wegvalt of ons begrenst.
+
+### Welke discussies in het blok komen
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het blok toont de discussies waar het laatst op is gereageerd, in alle tags die een gast ziet, behalve Offtopics en Sport overig.
+- **Waarom:** de nieuwste activiteit zit vaak in Offtopics, zoals een algemeen muziektopic.
+  Dat zegt een bezoeker van een clubsite weinig.
+  De lijst met tags die we weglaten staat op één plek, dus een wijziging is klein.
+- **Alternatieven:** alle tags die een gast ziet; dan kan het blok vol staan met discussies die niet over de club gaan.
+  Of alleen Wedstrijden, Spelers & staf en Transfers & geruchten; dat is strakker, maar sluit supportersdiscussies uit.
+
+### Het forum is een feed met een eigen lezer, en de discussies worden bij elke run vervangen
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** het forum is een bron van het soort forum, en het adres van de lijst met discussies in de API is zijn feed.
+  De import leest hem met dezelfde fetcher, lock, logboek en gezondheid als de andere feeds.
+  Voor een bron van het soort forum gaat het antwoord naar `read-forum.ts` in plaats van naar de lezer van RSS en Atom.
+  Na elke run staan in de tabel `discussions` precies de vier nieuwste discussies die aan de regels voldoen, en niets anders.
+- **Hoe:** de lezer vraagt 30 discussies, laat die in een tag die we weglaten vallen, sorteert zelf op het moment van het laatste bericht en houdt de nieuwste vier.
+  Een vastgezette discussie kan bij Flarum vooraan staan, dus de sortering van het forum is niet genoeg.
+  De fetcher accepteert al elk soort antwoord en negeert de sessiecookie van de API, dus hij hoefde niet te veranderen.
+  Het adres van een discussie bouwt de lezer uit het adres van de feed, het id, de slug en het nummer van het laatste bericht: een link uit het antwoord vertrouwen we niet.
+  De `slug` in het antwoord begint al met het id, dus de lezer zet het id er niet nog eens voor.
+  De lezer slaat een discussie met iets mis over en meldt waarom, zoals bij berichten.
+  Een discussie in een tag die niet in het antwoord staat, slaat hij ook over, want die tag kon er een zijn die we weglaten.
+  Zijn er discussies in het antwoord en kan er geen worden gelezen, dan is dat een fout en blijven de vorige discussies staan: dat wijst eerder op een verandering in de API dan op een leeg forum.
+  Het forum vraagt geen `ETag` of `Last-Modified`: een lege database moet na één run discussies hebben, en de lijst is klein.
+  Een run vervangt de rijen van het forum in één transactie, dus een lezer ziet nooit een halve lijst.
+- **Waarom:** de machinerie bestaat en is getest, en het forum hoort bij `pnpm run import:status` te staan zoals de andere bronnen.
+  Geen geschiedenis van titels of namen bewaren was een eis, en vervangen is de eenvoudigste manier.
+- **Alternatieven:** een eigen opdracht voor het forum, met een eigen lock en logboek; dat zijn twee plekken om te bewaken.
+  Of de discussies bijwerken en oude weghalen op id; dat is meer code, en een titel die het forum wijzigt zou dan niet vanzelf vervangen worden.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
@@ -2255,3 +2303,51 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of `Page.Body` als de `main`; dan staat de `aside` in de `main`.
   Of een onderdeel `Page.Intro`, met een tweede onderdeel om de cellen; dan schrijft elke pagina die twee zelf.
   Of een vaste marge boven de zijbalk; die klopt niet meer bij een langere inleiding of als je inzoomt.
+
+### We tonen de schermnaam van de laatste reageerder, als gewone tekst
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het blok toont de schermnaam van de laatste reageerder, zonder avatar en zonder link naar een profiel.
+  De importer bewaart alleen de naam bij de vier discussies in het blok en vervangt ze bij elke run.
+- **Waarom:** een gast ziet die naam al op het forum, en het blok laat de bezoeker zien dat er gepraat wordt.
+  Door de lijst bij elke run te vervangen, houden we geen geschiedenis van namen bij, en verdwijnt een naam binnen een kwartier nadat het forum hem weghaalt.
+- **Alternatieven:** geen naam tonen, alleen de reacties en de tijd.
+
+### Ons eigen forum is een bron met eigen regels
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het forum staat in het bronnenregister als bron van het soort forum, "sc Heerenveen Forum", en dus op Onze bronnen.
+  In het hoofdstuk Redactie staat wat we ervan tonen: de titel, de link, het aantal reacties, de schermnaam van de laatste reageerder en de tijd.
+  De tekst van een bericht tonen we niet; citaten komen met #108.
+- **Waarom:** het forum is van onze eigen gemeenschap, geen werk van journalisten, dus de regels over intro's en foto's passen er niet op.
+  Een bezoeker kan wel zien waar het blok vandaan komt, en de reviewer heeft een regel om aan te toetsen.
+- **Alternatieven:** het forum niet in het register zetten en het blok vastleggen in de code; dan staat nergens wat we ervan tonen.
+  Of het forum niet op Onze bronnen tonen; dat vraagt een extra schakelaar in het register en op de pagina.
+
+### De link van een discussie gaat naar het laatste bericht
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de titel in het blok linkt naar het laatste bericht van de discussie, zoals `https://forum.heerenveen.org/d/2859-<titel>/9`.
+  De importer bewaart het adres met het nummer van het laatste bericht erin.
+- **Waarom:** de regel zegt wie het laatst reageerde en wanneer, en de link brengt de bezoeker bij dat bericht.
+  Het forum zelf opent een discussie bij het eerste ongelezen bericht, maar dat weet het alleen in de browser van een ingelogd lid, en onze pagina vraagt het forum niets (principe 3).
+  Het forum is nog rustig, dus een bezoeker slaat niet veel ongelezen berichten over, en kan terugscrollen.
+- **Hoe:** het nummer is het attribuut `lastPostNumber` van de API.
+  Het is hoger dan het aantal berichten als er een bericht is verwijderd, dus de importer telt het niet zelf.
+  Heeft het antwoord geen bruikbaar nummer, dan linkt het adres naar de discussie zelf.
+  Het adres verandert nu met elk nieuw bericht, dus de import herkent een discussie aan het id en niet aan het adres.
+- **Alternatieven:** naar het begin van de discussie linken, zoals eerst.
+  Of het forum laten kiezen: een extensie of instelling op het forum die ingelogde leden bij het eerste ongelezen bericht laat beginnen, voor elke link naar het forum.
+
+### De tijd van een discussie: vandaag alleen de tijd, daarna de dag, na een week de datum
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** van een discussie van vandaag staat alleen de tijd, zoals "13:28".
+  Van de zes dagen daarvoor staan de korte dag en de tijd, zoals bij het nieuws: "wo 14:05".
+  Wat ouder is, krijgt de datum: "16 okt", en met het jaar erbij als het een ander jaar is.
+  Zonder schermnaam staat er "83 reacties · laatst 13:28".
+- **Waarom:** in een smalle zijbalk past weinig, en de tijd alleen is genoeg voor wat van vandaag is.
+  Dezelfde week als bij het nieuws houdt de site voorspelbaar, en een weekdag zou na een week voor een andere dag kunnen staan.
+  "laatst" laat de tijd ook zonder schermnaam zeggen waarvan hij is.
+- **Alternatieven:** altijd dag en tijd; dat is drukker en zegt over vandaag minder.
+  Of een relatieve tijd, zoals "2 uur geleden"; die klopt niet meer in een pagina uit de cache en een schermlezer leest hem minder gemakkelijk.

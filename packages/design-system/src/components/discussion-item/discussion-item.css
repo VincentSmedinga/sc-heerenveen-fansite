@@ -1,0 +1,68 @@
+/*
+ * A line of the discussions of the forum: the title as a link, and under it the replies, the screen name of the last
+ * poster and the time. The title is underlined under the mouse and with the focus of the keyboard, not otherwise, as the
+ * headline of a news line is. A List of lines has a thin line between the lines.
+ */
+
+@layer hf.components {
+  /* A long word in a title or a name breaks instead of making the page scroll sideways. */
+  .hf-discussion-item {
+    overflow-wrap: anywhere;
+    padding-block: 0.75rem;
+  }
+
+  /*
+   * A target of at least 24 pixels high (WCAG 2.5.8): one line of the title is 22 pixels, so the height is set here. The
+   * title has the size of the text and the weight Medium, as a news headline has. The components layer comes after the
+   * typography layer, so this wins over the .hf-headline rule.
+   *
+   * The title is on a line of its own, heavier than the text and in the colour of links, so it is a link without the
+   * line to the eye (WCAG 1.4.1 asks for more than colour mostly for a link in a sentence). The line is 1.5 pixels thick
+   * and sits close to the text, and skips the descenders of letters. Both are set for the two states, so the focus gets
+   * the same line as hover. The colours of a visited link and of hover, and the focus ring, stay as the base styles make
+   * them.
+   */
+  .hf-discussion-item-title {
+    display: inline-block;
+    font-size: var(--hf-body-font-size);
+    font-weight: 500;
+    min-block-size: 1.5rem;
+    text-decoration-line: none;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.1em;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration-line: underline;
+    }
+  }
+
+  .hf-discussion-item-meta {
+    color: var(--hf-colour-text-secondary);
+    margin-block: 0.125rem 0;
+  }
+
+  /*
+   * A List with lines in it: no bullets, no indent and no space between the items. The lines take care of that, with a
+   * thin line between them. The first line has no space above it and the last none below it, so the list starts and ends
+   * where the surface around it pads.
+   */
+  :is(ul, ol):has(> li > .hf-discussion-item) {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  li > .hf-discussion-item {
+    border-block-start: 1px solid var(--hf-colour-border-default);
+  }
+
+  li:first-child > .hf-discussion-item {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  li:last-child > .hf-discussion-item {
+    padding-block-end: 0;
+  }
+}
