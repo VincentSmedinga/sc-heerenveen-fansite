@@ -5,6 +5,7 @@ import { cache } from 'react'
 
 import { email } from '../../contact'
 import { reasonOf } from '../../errors'
+import { pageMetadata } from '../../metadata'
 import { groupByKind, websiteOf } from '../../register'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { getSources } from '../../sources'
@@ -31,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   // A page that failed answers 200, so noindex keeps search engines from keeping it.
   return (await loadSources()) === undefined
     ? { robots: { index: false }, title: serverErrorTitle }
-    : { title: 'Onze bronnen' }
+    : pageMetadata('/bronnen', 'Onze bronnen')
 }
 
 export default async function SourcesPage() {

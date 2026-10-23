@@ -1,8 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getReleases } from '../../releases'
-import WhatsNewPage, { metadata } from './page'
+import WhatsNewPage, { generateMetadata } from './page'
 
 vi.mock('../../releases', () => ({ getReleases: vi.fn() }))
 
@@ -13,6 +13,10 @@ const releases = [
 
 beforeEach(() => {
   vi.mocked(getReleases).mockReset()
+})
+
+afterEach(() => {
+  vi.unstubAllEnvs()
 })
 
 describe('the page Wat is er nieuw', () => {
@@ -57,11 +61,16 @@ describe('the page Wat is er nieuw', () => {
     )
   })
 
-  it('has the title Wat is er nieuw and points feed readers to the feed', () => {
-    expect(metadata).toEqual({
+  it('has the title Wat is er nieuw, a canonical URL, and points feed readers to the feed', () => {
+    vi.stubEnv('SITE_ENV', 'acceptance')
+
+    expect(generateMetadata()).toMatchObject({
       alternates: {
+        canonical: 'https://acc.sc.heerenveen.org/wat-is-er-nieuw',
         types: { 'application/rss+xml': [{ title: 'Wat is er nieuw', url: '/wat-is-er-nieuw/feed.xml' }] },
       },
+      description: expect.stringMatching(/^Wat er nieuw is/),
+      openGraph: { title: 'Wat is er nieuw', url: 'https://acc.sc.heerenveen.org/wat-is-er-nieuw' },
       title: 'Wat is er nieuw',
     })
   })

@@ -29,6 +29,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.unstubAllEnvs()
 })
 
 describe('the page Onze bronnen', () => {
@@ -132,7 +133,14 @@ describe('the page Onze bronnen when the register can not be read', () => {
   it('titles the page Onze bronnen when the register can be read', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
-    expect(await generateMetadata()).toEqual({ title: 'Onze bronnen' })
+    vi.stubEnv('SITE_ENV', 'acceptance')
+
+    expect(await generateMetadata()).toMatchObject({
+      alternates: { canonical: 'https://acc.sc.heerenveen.org/bronnen' },
+      description: expect.stringMatching(/^De media waar we het nieuws/),
+      openGraph: { title: 'Onze bronnen', url: 'https://acc.sc.heerenveen.org/bronnen' },
+      title: 'Onze bronnen',
+    })
   })
 
   it('writes the reason to the log, without the values of the query', async () => {
