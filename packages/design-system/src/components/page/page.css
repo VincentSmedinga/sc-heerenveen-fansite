@@ -16,6 +16,14 @@
    * The header is dark blue in both themes, so the roles that text, links and the focus ring use are set again for
    * everything inside it. A component in the header then needs no styles of its own for the header.
    * The band is as wide as the page, and the padding on the sides keeps what is in it in the column, in line with the body.
+   *
+   * The logo is in the column with its shield, so on a narrow screen the text of the page is in line with the shield. On a
+   * wide screen the shield hangs in the margin to the left of the column, and the text of the page is in line with the
+   * wordmark: the logo gets a negative margin as wide as the shield and the space beside it (--hf-logo-hang), which is
+   * worked out from the tokens of the logo. It only does so when the margin is wide enough for that and for 1rem to the edge
+   * of the window: 64rem for the column, twice (4.2375rem + 1rem) for the margins, which makes 74.475rem, rounded up to
+   * 74.5rem. A media query can't use a custom property, so the number is written out here. The focus ring of the link around
+   * the logo then sits in the margin as well, inside the window. The logo is the first thing in the header.
    */
   .hf-page-header {
     --hf-colour-focus: var(--hf-colour-focus-on-header);
@@ -36,6 +44,12 @@
     justify-content: space-between;
     padding-block: 1rem;
     padding-inline: var(--hf-page-inset);
+
+    @media (width >= 74.5rem) {
+      > :is(.hf-logo, :has(> .hf-logo)):first-child {
+        margin-inline-start: calc(-1 * var(--hf-logo-hang));
+      }
+    }
   }
 
   /*
@@ -44,20 +58,27 @@
    * the logo. On a screen narrower than a column the column is as wide as the screen: the margin on the end side gives
    * way.
    *
-   * There is one track, as wide as the main (--hf-content-max-width, 48rem), so the sidebar sits under the main, both over
-   * the whole track. From 77rem there is a second track for the sidebar: 48rem, 3rem of space, 24rem, which is the whole
-   * column of the page (--hf-page-max-width, 75rem), and 1rem of margin on either side. A media query can't use a custom
-   * property, so the number is written out here.
+   * There is one track, as wide as the main (--hf-content-max-width, 36rem), so the sidebar sits under the main, both over
+   * the whole track. From 56rem there are two tracks: the main, 36rem, and the sidebar, 24rem, with 4rem of space between
+   * them, which is the whole column of the page (--hf-page-max-width, 64rem), and 1rem of margin on either side. A media
+   * query can't use a custom property, so the number is written out here. Between 56rem and the full width of the column
+   * plus the margins (66rem) the tracks shrink, the main to 24rem at the least and the sidebar to 16rem; at 56rem there is
+   * 54rem for them, so they never get there and nothing scrolls sideways.
+   * The track of a column is a minmax() of fixed sizes, not fr: the space left over is shared out equally until a column is
+   * as wide as its maximum.
+   * The text in the main lines up with the wordmark of the logo on a wide screen, where the shield hangs in the margin
+   * (see .hf-page-header).
    * The sidebar is second in the source and so in the grid. There is no `order`, which would split the reading order from
    * what is on the screen.
    *
-   * There are two sizes of space. The columns are 3rem apart, side by side and under each other, and the padding under
-   * them is 3rem. The cells in a column are 2rem apart, and that is also the padding above the columns. A column gets
-   * the space between its cells through a custom property.
+   * There are three sizes of space. The columns are 3rem apart when they are under each other, and the padding under them
+   * is 3rem. Side by side they are 4rem apart. The cells in a column are 2rem apart, and that is also the padding above the
+   * columns. A column gets the space between its cells through a custom property.
    */
   .hf-page-body {
     --hf-page-body-cell-gap: 2rem;
     --hf-page-body-column-gap: 3rem;
+    --hf-page-body-gutter: 4rem;
 
     align-content: start;
     align-items: start;
@@ -69,8 +90,9 @@
     margin-inline: var(--hf-page-inset);
     padding-block: var(--hf-page-body-cell-gap) var(--hf-page-body-column-gap);
 
-    @media (width >= 77rem) {
-      grid-template-columns: minmax(0, var(--hf-content-max-width)) 24rem;
+    @media (width >= 56rem) {
+      column-gap: var(--hf-page-body-gutter);
+      grid-template-columns: minmax(24rem, var(--hf-content-max-width)) minmax(16rem, 24rem);
     }
   }
 
@@ -80,8 +102,8 @@
    * columns on the same rows. The track can shrink to 0, so a long word or address can't make the column wider than the
    * screen.
    * A child of a column is a cell and has no margin to the outside: the gap is all the space between cells.
-   * Under the main, between 40rem and 77rem, the cells of the sidebar sit side by side in two columns. Below 40rem two
-   * cards would be too narrow, and from 77rem the sidebar is a column of its own.
+   * Under the main, between 40rem and 56rem, the cells of the sidebar sit side by side in two columns. Below 40rem two
+   * cards would be too narrow, and from 56rem the sidebar is a column of its own.
    */
   .hf-page-main,
   .hf-page-sidebar {
@@ -96,7 +118,7 @@
   }
 
   .hf-page-sidebar {
-    @media (40rem <= width < 77rem) {
+    @media (40rem <= width < 56rem) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
