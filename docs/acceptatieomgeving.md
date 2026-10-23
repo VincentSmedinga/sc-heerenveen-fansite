@@ -49,7 +49,7 @@ Dat gebeurt in `register()` in `apps/site/src/instrumentation.ts`, en de site be
 
 1. Hij draait de migraties die de database nog niet had.
    `assemble` zet ze in `packages/db/drizzle` van de map, twee mappen boven `apps/site`, want Next.js neemt de SQL-bestanden zelf niet mee.
-2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen, de Leeuwarder Courant, Voetbal International en ons eigen forum, de laatste drie met hun feeds.
+2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen, de echte nieuwsbronnen met hun feeds (zie [`bronnen.md`](bronnen.md)) en ons eigen forum.
    Met `local` en `production` doet hij dat niet.
    Een bron die er al staat, werkt hij bij op haar domein, dus er komen geen dubbele.
 
@@ -68,7 +68,7 @@ Lees het in _Setup Node.js App_ of in `stderr.log` in de map van de app.
 ## De import
 
 Cron start op de host elke 15 minuten de importer, `apps/importer/import.mjs` in de map van de app.
-Hij leest de feeds van de bronnen die aanstaan, nu de Leeuwarder Courant, Voetbal International en ons forum uit de seed.
+Hij leest de feeds van de bronnen die aanstaan, die uit de seed (zie [`bronnen.md`](bronnen.md)), en ons forum.
 De koppen komen in de tabel `items`.
 Van het forum leest hij als gast de API, en de vier nieuwste discussies komen in de tabel `discussions`.
 Die vervangt hij bij elke run, dus de tabel houdt geen geschiedenis.
@@ -214,7 +214,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 
 - De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, het blok "Laatste nieuws" en in de zijbalk het blok "Nieuwste discussies".
   Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens." en "We hebben nog geen discussies van het forum."
-  Daarna staan er de koppen van de Leeuwarder Courant en Voetbal International van de afgelopen week.
+  Daarna staan er de koppen van de echte nieuwsbronnen uit de seed van de afgelopen week.
   In het blok "Nieuwste discussies" staan dan de vier discussies waar het laatst op is gereageerd, elk met het aantal reacties, de laatste reageerder en de tijd, en onderaan de link "Naar het forum".
   Controleer dat er geen discussie van Offtopics of Sport overig bij staat.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
@@ -222,7 +222,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
   Die header staat ook bij `/robots.txt` en bij een pagina die niet bestaat.
 - <https://acc.sc.heerenveen.org/robots.txt> toont `Disallow: /`.
 - <https://acc.sc.heerenveen.org/bestaat-niet> toont de Nederlandse 404-pagina "Pagina niet gevonden".
-- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, de Leeuwarder Courant, Voetbal International en onder Forum sc Heerenveen Forum.
+- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, de echte nieuwsbronnen uit de seed en onder Forum sc Heerenveen Forum.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - De import werkt als `tail -n 20 ~/fansite-import.log` na een kwartier een tijd toont, met een regel voor de feed eronder:
 

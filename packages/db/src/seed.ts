@@ -83,7 +83,8 @@ export const testSources = [
 
 /**
  * The real sources, with the feeds we read. They get the strictest policy, because none has given permission yet: only
- * the headline, the link and the name. The descriptions are in our own words. More real sources come with #10.
+ * the headline, the link and the name. The descriptions are in our own words. `docs/bronnen.md` says which news sources
+ * belong here and why.
  *
  * The forum's "feed" is the list of discussions of its API, which the importer reads as a guest (see `read-forum.ts`).
  */
@@ -103,6 +104,14 @@ export const realSources = [
     feeds: ['https://www.vi.nl/feed/news.xml?tag=sc-heerenveen'],
     kind: 'news',
     name: 'Voetbal International',
+  },
+  {
+    description:
+      'Landelijk dagblad uit Amsterdam. Onder het onderwerp sc Heerenveen staan verslagen, nieuws over transfers en interviews; een deel daarvan staat achter een betaalmuur.',
+    domain: 'www.telegraaf.nl',
+    feeds: ['https://www.telegraaf.nl/tag/sc-heerenveen/rss/'],
+    kind: 'news',
+    name: 'De Telegraaf',
   },
   {
     description:

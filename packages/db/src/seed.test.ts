@@ -104,6 +104,28 @@ describe('the seed', () => {
     expect(viFeeds.map((feed) => feed.url)).toEqual(['https://www.vi.nl/feed/news.xml?tag=sc-heerenveen'])
   })
 
+  it('puts De Telegraaf in the register with its feed and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [telegraaf] = await database.db.select().from(sources).where(eq(sources.domain, 'www.telegraaf.nl'))
+    const telegraafFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, telegraaf?.id ?? 0))
+
+    expect(telegraaf).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'De Telegraaf',
+    })
+    expect(telegraaf?.consentStatus).not.toBe('given')
+    expect(telegraaf?.description?.length).toBeLessThanOrEqual(300)
+    expect(telegraafFeeds.map((feed) => feed.url)).toEqual(['https://www.telegraaf.nl/tag/sc-heerenveen/rss/'])
+  })
+
   it('puts the forum in the register as a forum, with its API as the feed and the strictest policy', async () => {
     await seedSources(database.db)
 
@@ -135,6 +157,20 @@ describe('the seed', () => {
     }
     for (const source of realSources) {
       expect(source.domain, source.name).not.toMatch(/\.test$/)
+    }
+  })
+
+  it('gives every real source a description, a domain of its own and https feeds', () => {
+    const domains = realSources.map((source) => source.domain)
+
+    expect(new Set(domains).size).toBe(domains.length)
+    for (const source of realSources) {
+      expect(source.description, source.name).toBeTruthy()
+      expect(source.description.length, source.name).toBeLessThanOrEqual(300)
+      expect(source.feeds, source.name).not.toHaveLength(0)
+      for (const feed of source.feeds) {
+        expect(feed, source.name).toMatch(/^https:\/\//)
+      }
     }
   })
 
