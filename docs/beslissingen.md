@@ -1469,7 +1469,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Playwright wacht tot de site `/robots.txt` beantwoordt, en niet tot de homepage: een verzoek aan de homepage voor de koppen er staan, bewaart een lege lijst voor vijf minuten.
 - **Waarom:** de seed draait ook op acceptatie, waar verzonnen koppen tussen de echte van de Leeuwarder Courant zouden staan.
   Zo toetst axe de homepage met berichten, op de gebouwde site en met de echte query.
-  De test maakt de koppen ook zo dat ze altijd in de week vallen, en zet er een bericht van ouder dan een week en een van een uitgezette bron tussen, om te zien dat de pagina die weglaat.
+  De test maakt de koppen ook zo dat ze altijd in de week vallen.
+  Dat een bericht van ouder dan een week of van een uitgezette bron wegblijft, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
 - **Alternatieven:** de koppen in de seed zetten.
   Of de pagina in een test renderen met een nepquery; dan toetst axe niet de gebouwde site en niet de query.
   Of de cache voor de test uitzetten; dat is een codepad dat alleen de test gebruikt.

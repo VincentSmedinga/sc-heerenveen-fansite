@@ -63,12 +63,14 @@ test('Stylelint reports a temporary exception that is no longer needed', async (
 })
 
 // Not about Baseline, but the same way to show that a rule catches what it is for: 100vw includes the scrollbar.
-test('Stylelint reports a width of 100vw, also inside calc() and as a maximum', async () => {
+test('Stylelint reports a width of 100vw, also inside calc(), as a maximum and as svw, lvw or dvw', async () => {
   for (const declaration of [
     'inline-size: 100vw',
     'max-inline-size: 100vw',
     'min-inline-size: 100vw',
     'inline-size: calc(100vw - 2rem)',
+    'inline-size: 100svw',
+    'max-inline-size: 100dvw',
   ]) {
     assert.deepEqual(
       await lintCss(`a {\n  ${declaration};\n}\n`),

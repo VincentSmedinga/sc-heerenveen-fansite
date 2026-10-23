@@ -26,7 +26,7 @@ export default {
     // Windows. Use 100% instead, which is the width of the parent without the scrollbar.
     'declaration-property-value-disallowed-list': [
       {
-        '/^(min-|max-)?(width|inline-size)$/': ['/100vw/'],
+        '/^(min-|max-)?(width|inline-size)$/': ['/100[sld]?vw/'],
       },
       { message: 'Do not size with 100vw: it includes the scrollbar, and the page then scrolls sideways. Use 100%' },
     ],
