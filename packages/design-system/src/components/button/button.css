@@ -1,0 +1,27 @@
+/*
+ * Buttons. At least 44px high. The border matches the background, so it doesn't show. In forced-colours mode it becomes
+ * the system's button border, so the button keeps an outline there.
+ */
+
+@layer hf.base {
+  button,
+  input:is([type='button'], [type='reset'], [type='submit']) {
+    background-color: var(--hf-colour-background-button);
+    border: 1px solid;
+    border-color: var(--hf-colour-background-button);
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-on-button);
+    cursor: pointer;
+    font-weight: var(--hf-strong-font-weight);
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
+    padding-block: 0.5rem;
+    padding-inline: 1.25rem;
+
+    &:hover {
+      background-color: var(--hf-colour-background-button-hover);
+      border-color: var(--hf-colour-background-button-hover);
+    }
+  }
+}

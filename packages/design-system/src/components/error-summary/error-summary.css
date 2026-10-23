@@ -1,0 +1,14 @@
+/* A block with the errors of a form: a thick border in the colour of errors, and the links under a heading. */
+
+@layer hf.components {
+  .hf-error-summary {
+    background-color: var(--hf-colour-background-surface);
+    border: 0.25rem solid;
+    border-color: var(--hf-colour-text-accent);
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+    margin-block: 0 1.5rem;
+    padding-block: 1rem 0.5rem;
+    padding-inline: 1rem;
+  }
+}

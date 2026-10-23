@@ -1,0 +1,9 @@
+/* A text field of one line. The look of the field is in base/forms.css; this file adds the field with an error. */
+
+@layer hf.base {
+  /* A thicker border in the colour of errors. The error itself is in text, in the Field. */
+  input[aria-invalid='true'] {
+    border-color: var(--hf-colour-text-accent);
+    border-width: 0.125rem;
+  }
+}

@@ -1518,6 +1518,92 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de regel ook in `index.css` laten staan; dat is een tweede plek die kan afwijken, en de eerste import doet het werk al.
   Of een instelling van Next.js of Turbopack zoeken; dat hebben we niet onderzocht, omdat één import genoeg is.
 
+### Een eigen component per soort veld, en één Field eromheen
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** `Input`, `Textarea` en `Select` zijn eigen componenten, en `Field` zet er het label, de hulptekst en de foutmelding omheen.
+  Er is geen `TextField` met een `type`-prop voor alles.
+  Verder zijn er `Form`, `Button`, `ErrorSummary` en `Honeypot`.
+- **Waarom:** `Select` en `Textarea` hebben andere eigenschappen dan `Input`; één component met alles wordt een berg condities.
+  `Field` regelt de koppeling van label en fout op één plek.
+  De sjablonen van de site mogen geen HTML bevatten (zie _Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem_), dus ook de `option` van een keuzelijst is een component: `Select.Option`.
+- **Alternatieven:** één `TextField` voor alles; of de HTML-elementen in de site toestaan voor formulieren, door de regel te verzwakken.
+- **Buiten dit besluit:** een vinkje, een keuzerondje en een bestandsveld.
+  Die komen met het eerste issue dat ze nodig heeft.
+
+### Field krijgt een `id` en geeft het veld zijn koppelingen
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** je geeft `Field` de `id` van het veld, en het zet op zijn kind (een `Input`, `Textarea` of `Select`) de `id`, `aria-describedby`, `aria-invalid` en `required`.
+  De hulptekst krijgt de id `<id>-hint` en de foutmelding `<id>-error`.
+  Het label zegt in woorden "(verplicht)" of "(niet verplicht)".
+  De prop `required` is verplicht, zodat de maker van het formulier altijd kiest.
+- **Waarom:** de `id` hoort bij het veld en is ook het doel van een link in de `ErrorSummary`, dus hij moet voorspelbaar zijn en niet gegenereerd.
+  Een kind dat `Field` aanpast met `cloneElement` houdt het sjabloon kort: `<Field …><Input name="naam" /></Field>`.
+  Een woord als "verplicht" kan iedereen lezen, en een veld dat niet verplicht is, zegt dat ook.
+  Zo hoeft niemand te raden wat een sterretje betekent (3.3.2).
+- **Alternatieven:** een render-prop (`{(veld) => <Input {...veld} />}`), die explicieter is maar elk veld langer maakt; of een context, die in een servercomponent niet werkt zonder dat `Field` een clientcomponent wordt.
+  Of een `id` die `useId` maakt: de `ErrorSummary` kent die niet, tenzij de pagina hem doorgeeft.
+
+### De foutmelding is tekst, met een dikkere rand in de kleur van fouten
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** een foutmelding bij een veld staat in tekst, vet en in `--hf-colour-text-accent`, en begint voor een schermlezer met "Fout:" (verborgen met `hf-visually-hidden`).
+  Een veld met een fout heeft een dikkere rand in dezelfde kleur.
+  We maken geen apart kleurtoken voor fouten.
+- **Waarom:** kleur is nooit het enige teken (1.4.1), en de tekst zegt wat er mis is en hoe het wel moet (3.3.1, 3.3.3).
+  Het accentrood haalt in licht en donker 6,3:1 tot 9,1:1 tegen de pagina en tegen een vlak, dus ruim genoeg voor tekst en voor de rand (3:1).
+  Een nieuw token voor een kleur die al bestaat, geeft twee plekken om bij te houden.
+- **Alternatieven:** een eigen token `--hf-colour-text-error`.
+  Dat kan als fouten ooit een andere kleur dan het accent moeten krijgen.
+
+### Een formulier laat de controle aan de site, en toont de fouten in een blok
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** `Form` zet `noValidate` aan, en met `noValidate={false}` krijg je de controle van de browser terug.
+  De site controleert zelf en toont de fouten bij het veld en in een `ErrorSummary` bovenaan: een gebied met een kop en een link naar elk veld.
+  Het blok verplaatst de focus niet.
+  Zonder fouten toont het niets.
+- **Waarom:** de bubbel van de browser staat in de taal van de browser, wordt niet altijd voorgelezen en past niet bij onze woorden.
+  Een formulier dat de server controleert, laadt de pagina opnieuw, en een schermlezer begint dan boven aan, bij het blok.
+  Controle in de browser met JavaScript valt buiten het issue en komt, als we het nodig hebben, met een eigen issue.
+- **Alternatieven:** het blok `role="alert"` geven.
+  Op een pagina die opnieuw laadt, leest een schermlezer dat niet betrouwbaar voor, en met JavaScript is de focus verplaatsen een betere oplossing.
+
+### De Honeypot verbergt het veld met `inert` en uit beeld, niet met `display: none`
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de `Honeypot` is een tekstveld in een `div` met `hf-visually-hidden`, `inert` en `aria-hidden`.
+  Het veld heeft `tabIndex={-1}` en `autoComplete="off"`.
+  De site weigert een formulier waarin het veld niet leeg is.
+- **Waarom:** het veld mag niet zichtbaar zijn, niet bereikbaar met Tab en niet voorgelezen worden.
+  Robots herkennen `display: none` en slaan zo'n veld over, en dan vangt de val niets.
+  Een veld dat uit beeld staat, vullen ze wel in.
+  `inert` laat het veld buiten het toetsenbord en de toegankelijkheidsboom, en een browser of wachtwoordmanager vult het niet in, dus er komen geen mensen mee in de val.
+  `aria-hidden` en `tabIndex={-1}` vangen een browser op die `inert` niet kent.
+- **Alternatieven:** het veld met `display: none` of het attribuut `hidden` verbergen.
+  Dat is makkelijker, en een schermlezer leest het ook niet voor, maar robots herkennen het.
+
+### Button heeft een verplicht `type`, Input een lijst van soorten
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** `Button` heeft een verplichte prop `type` (`submit`, `button` of `reset`).
+  `Input` heeft een `type` uit een vaste lijst, zoals `email` en `url`; een ander type, zoals `checkbox`, laten de types niet toe.
+- **Waarom:** een knop in een formulier verstuurt het formulier als je niets zegt, en dat gaat een keer mis.
+  Een vinkje, een keuzerondje en een bestandsveld krijgen een eigen component, met hun eigen label en hulptekst; `Input` is alleen voor tekst.
+- **Alternatieven:** `submit` als standaard; of elk type van HTML toestaan.
+
+### De opmaak van de velden blijft in `base/forms.css`, de rest zit bij het component
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de regel die `input`, `select` en `textarea` hun look geeft, blijft in `base/forms.css`, want drie componenten delen hem.
+  De knop (`button/button.css`), de hoogte van een tekstvak (`textarea/textarea.css`) en het veld met een fout (`input.css`, `select.css`, `textarea.css`) staan bij hun component, in dezelfde laag, met een elementselector zoals bij `Link` en `List`.
+  De opmaak zelf is niet veranderd.
+- **Waarom:** de regel drie keer overschrijven zou drie plekken geven die uit de pas kunnen lopen.
+  De regels bij een component zonder eigen klasse volgen `list.css`: een element in `hf.base`.
+- **Alternatieven:** de gedeelde regel in elk van de drie bestanden herhalen; of klassen (`hf-input`) en de regels naar `hf.components` verplaatsen.
+  Dan is de ruwe `input` zonder component niet meer opgemaakt, en dat is de bedoeling van `base/` niet.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

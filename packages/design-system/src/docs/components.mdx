@@ -8,8 +8,8 @@ De React-componenten van het designsysteem.
 Elk onderdeel heeft hieronder een eigen pagina, met voorbeelden in licht en donker.
 Een sjabloon voor een pagina bevat geen HTML, alleen deze componenten.
 
-Dit zijn de eerste elf, met de onderdelen van `Page`: wat een pagina minimaal nodig heeft, de kaart, en de regel nieuws van de homepage.
-Knoppen, pictogrammen en de overige componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
+Dit zijn de eerste componenten, met de onderdelen van `Page`: wat een pagina minimaal nodig heeft, de kaart, de regel nieuws van de homepage en de onderdelen van een formulier.
+Pictogrammen, een vinkje, een keuzerondje en de overige componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
 
 ## Gebruiken
 
@@ -67,7 +67,7 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
 
 <Unstyled>
   <table>
-    <caption>De elf componenten en de onderdelen van Page</caption>
+    <caption>De componenten en de onderdelen van Page en Select</caption>
     <thead>
       <tr>
         <th scope="col">Component</th>
@@ -263,6 +263,98 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
       </tr>
       <tr>
         <th scope="row">
+          <code>Form</code>
+        </th>
+        <td>
+          <code>form</code>, zonder de controle van de browser (<code>noValidate</code>)
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Field</code>
+        </th>
+        <td>
+          een <code>div</code> met het label, de hulptekst, de foutmelding en het veld, aan elkaar gekoppeld
+        </td>
+        <td>
+          <code>id</code>, <code>label</code>, <code>required</code> (alle verplicht), <code>hint</code>,{' '}
+          <code>error</code>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Input</code>
+        </th>
+        <td>
+          <code>input</code>, een tekstveld van één regel
+        </td>
+        <td>
+          <code>type</code>
+        </td>
+        <td>
+          <code>text</code> (standaard), <code>email</code>, <code>url</code>, <code>tel</code>, <code>password</code>,{' '}
+          <code>search</code>, <code>number</code> en de typen voor datum en tijd
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Textarea</code>
+        </th>
+        <td>
+          <code>textarea</code>, een tekstveld van meer regels
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Select</code>
+        </th>
+        <td>
+          <code>select</code>, met een <code>Select.Option</code> (<code>option</code>) per keuze
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Button</code>
+        </th>
+        <td>
+          <code>button</code>
+        </td>
+        <td>
+          <code>type</code> (verplicht)
+        </td>
+        <td>
+          <code>submit</code>, <code>button</code>, <code>reset</code>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>ErrorSummary</code>
+        </th>
+        <td>een gebied met een kop en een link naar elk veld met een fout; zonder fouten niets</td>
+        <td>
+          <code>errors</code>, <code>level</code> (beide verplicht), <code>title</code>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Honeypot</code>
+        </th>
+        <td>een tekstveld tegen spam dat niemand ziet, bereikt of hoort</td>
+        <td>
+          <code>name</code> (verplicht), <code>label</code>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
           <code>Logo</code>
         </th>
         <td>een plaatje met een naam</td>
@@ -282,9 +374,10 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
   De typen laten geen ander element toe.
 - **Onderdelen met een punt:** een onderdeel dat bij één oudercomponent hoort, schrijf je met een punt achter die ouder, ook als het element buiten die ouder wel geldig is.
   Een item van een lijst is `List.Item`, want een `li` hoort in een `ul` of `ol`.
+  Een keuze in een keuzelijst is `Select.Option`.
   De delen van een pagina zijn `Page.Header`, `Page.Body`, `Page.Main`, `Page.Sidebar`, `Page.Cell` en `Page.Footer`.
 - **Klassen:** de componenten gebruiken de klassen met het voorvoegsel `hf-` en zitten in de laag `hf.components`.
 - **Niveau en stijl:** het niveau van een kop volgt de structuur van de pagina, de stijl het ontwerp.
   Zie [Heading](?path=/docs/componenten-heading--documentatie).
 
-Tot er meer componenten zijn, staan de stijlen voor gewone HTML onder [HTML-elementen](?path=/docs/html-elementen-koppen--documentatie).
+Tot er meer componenten zijn, staan de stijlen voor gewone HTML, zoals een vinkje en een keuzerondje, onder [HTML-elementen](?path=/docs/html-elementen-koppen--documentatie).

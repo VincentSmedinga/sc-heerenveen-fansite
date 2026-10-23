@@ -1,0 +1,20 @@
+/* A text field of more than one line. The look of the field is in base/forms.css; this file adds the height and the error. */
+
+@layer hf.base {
+  textarea {
+    min-block-size: 6rem;
+  }
+
+  /* Not Baseline widely available yet. Without it, the browser keeps its own resize handle. */
+  @supports (resize: vertical) {
+    textarea {
+      resize: vertical;
+    }
+  }
+
+  /* A thicker border in the colour of errors. The error itself is in text, in the Field. */
+  textarea[aria-invalid='true'] {
+    border-color: var(--hf-colour-text-accent);
+    border-width: 0.125rem;
+  }
+}
