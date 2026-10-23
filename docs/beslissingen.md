@@ -121,13 +121,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** zelf een Nederlandse vertaling van 2.1 maken; die zou onofficieel zijn.
   Of de Engelse tekst van 2.1 nemen, terwijl de vrijwilligers Nederlands lezen.
 
+### Reviewer standaard op Sonnet
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de Reviewer draait standaard op Sonnet.
+  Voor een pull request die de database, de importer, beveiliging, workflows of dependencies raakt, vraagt de Builder de projecteigenaar om Fable.
+- **Waarom:** de limiet van het abonnement was weer bijna op.
+  Een Fable-review van een wijziging van drie regels in een verhaal kostte ongeveer 72.000 tokens en 31 toolaanroepen.
+- **Gevolg:** dit herziet het deel over de Reviewer in _Een model per rol_.
+  De Reviewer deelt weer het model van de Builder, en dus ook diens blinde vlekken.
+  Daarom blijft Fable voor wijzigingen waar een fout veel kost.
+- **Alternatieven:** de Reviewer altijd op Fable laten, zoals voorheen.
+  Of Opus voor de Reviewer; dat kost minder dan Fable en deelt de blinde vlekken van de Builder niet.
+- **Herzien:** als Sonnet in de praktijk te veel mist, of de limiet niet meer knelt.
+
 ### Een model per rol
 
 - **Datum:** 22 oktober 2026
 - **Besluit:** elke rol heeft een standaardmodel:
   - de Coordinator: een sterker model dan de Builders (Opus of Fable), in een verse sessie per taak;
   - een Builder: Sonnet, en voor een issue dat veel oordeel vraagt over ontwerp of beveiliging een sterker model, dat de Coordinator in de opdracht noemt;
-  - de Reviewer: Fable, via de regel `model` in `.claude/agents/reviewer.md` en op de aanroep die hem start, zodat hij een ander model gebruikt dan de Builder;
+  - de Reviewer: Fable, via de regel `model` in `.claude/agents/reviewer.md` en op de aanroep die hem start, zodat hij een ander model gebruikt dan de Builder (herzien op 23 oktober 2026, zie _Reviewer standaard op Sonnet_);
   - sessies voor routinewerk, zoals het bijwerken van het bord: Haiku of Sonnet.
 - **Waarom:** specificeren en plannen vragen oordeel: afwegingen, onduidelijkheden en samenhang tussen issues.
   Dat zijn weinig, korte sessies, dus het sterkere model kost weinig.
