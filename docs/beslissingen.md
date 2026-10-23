@@ -1548,6 +1548,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** elke pull request die iets merkbaars verandert, schrijft zelf een zin onder "Binnenkort"; dan wordt niets vergeten, maar elke pull request krijgt een taak erbij.
   Of commitberichten in het Nederlands, zodat de changelog de pagina is; dat verandert een afspraak in `CONTRIBUTING.md`, en een commit gaat dan ook over bezoekers.
   Of de pagina pas laten beginnen bij 1.0.0, de lancering.
+- **Later:** sinds 0.1.0 zijn het korte regels in plaats van hele zinnen.
+  Hoe je ze schrijft, staat in `AGENTS.md`.
 
 ### Wat is er nieuw leest `CHANGELOG.md` bij de build
 
