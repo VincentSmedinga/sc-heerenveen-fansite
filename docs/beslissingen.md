@@ -888,6 +888,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** geen lagen, en dan specificiteit en volgorde bewaken.
   Dat wordt lastiger naarmate er meer componenten zijn.
 - **Later:** er is een vijfde laag, `hf.utilities`, na `hf.components`; zie _Hulpklassen zitten in de sterkste laag_.
+- **Later:** de volgorde van de lagen staat in een eigen bestand; zie _De volgorde van de lagen staat in een eigen bestand_.
 
 ### Typestijl los van het HTML-niveau
 
@@ -1419,6 +1420,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de dag en de tijd altijd boven de kop; dan lijnen de koppen op een breed scherm niet meer uit en wordt de lijst langer.
   Of de kolom smaller maken; "wo 14:05" past niet in minder ruimte.
   Of het `li` als container nemen, zonder extra element; dan klopt het niet voor een `NewsItem` buiten een `List`.
+
+### De volgorde van de lagen staat in een eigen bestand
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de regel met de volgorde van de lagen staat in `src/layers.css`, en `index.css` importeert dat bestand als eerste.
+  `index.css` heeft zelf geen `@layer`-regel meer.
+  De rooktest controleert op elke pagina dat de lagen in de CSS van de gebouwde site die volgorde hebben.
+- **Waarom:** Next.js (Turbopack) voegt de bestanden samen die `index.css` importeert en zet de eigen regels van `index.css` erachter.
+  Daardoor stond de `@layer`-regel op de site aan het eind van de CSS, in dev en in productie: op acceptatie op byte 27.113 van 27.180.
+  De lagen kregen de volgorde van hun eerste blok: tokens, base, components, typography, utilities.
+  Een regel in `hf.components` die een typestijl aanpast, verloor dan op de site, terwijl hij in Storybook won.
+  Een geïmporteerd bestand komt op de plek van zijn import, dus nu staat de regel vooraan.
+  Storybook (Vite) had de goede volgorde al, en zijn gebouwde CSS is niet veranderd.
+- **Hoe:** de rooktest haalt de stylesheets van elke pagina op, in de volgorde van de links.
+  Hij zet de lagen in de volgorde waarin ze voor het eerst voorkomen, in een regel of in een blok: de volgorde die een browser kiest.
+  Die volgorde vergelijkt hij met `layers.css`, dus de volgorde staat nergens twee keer.
+  Op de CSS van vóór deze wijziging faalt de test.
+  Een test van het designsysteem controleert dat `layers.css` de eerste import van `index.css` is.
+- **Gevolg:** op de site wint een regel in `hf.components` nu van een regel in `hf.typography`, zoals in Storybook.
+  Een regel die alleen om deze fout in een andere laag staat, kan terug naar `hf.components`.
+- **Alternatieven:** de regel in een bestand dat `layout.tsx` vóór `index.css` importeert; dan moet elke app die het designsysteem gebruikt dat zelf onthouden.
+  Of de regel ook in `index.css` laten staan; dat is een tweede plek die kan afwijken, en de eerste import doet het werk al.
+  Of een instelling van Next.js of Turbopack zoeken; dat hebben we niet onderzocht, omdat één import genoeg is.
 
 ## Site
 

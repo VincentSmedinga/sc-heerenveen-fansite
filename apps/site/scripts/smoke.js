@@ -41,6 +41,11 @@ const serverFile = path.resolve(folder, 'apps/site/server.js')
 const changelogFile = path.resolve(import.meta.dirname, '../../../CHANGELOG.md')
 const releases = releasesOf(existsSync(changelogFile) ? readFileSync(changelogFile, 'utf8') : '', releaseNotes)
 
+// The layers of the design system, from weak to strong, as layers.css declares them. The build must keep that order.
+const layersFile = path.resolve(import.meta.dirname, '../../../packages/design-system/src/layers.css')
+const declaredLayers = layersIn(readFileSync(layersFile, 'utf8'))
+assert.ok(declaredLayers.length > 0, 'layers.css declares no layers')
+
 /** Fetches the feed of Wat is er nieuw and checks it: RSS, an item per version, and links to the site in `siteOrigin`. */
 async function checkFeed(siteOrigin) {
   const feed = await fetch(`${origin}/wat-is-er-nieuw/feed.xml`)
@@ -56,6 +61,43 @@ async function checkFeed(siteOrigin) {
   }
 
   return feed
+}
+
+/**
+ * Checks that a page gives the layers of the design system their declared order. A browser orders the layers by their
+ * first appearance, across all the stylesheets of the page in the order of the links. So the statement with the order
+ * must come before the first block of any layer. The bundler once put it at the end, and typography beat the components.
+ */
+async function checkLayerOrder(pageUrl, html) {
+  const links = html.match(/<link\b[^>]*>/gi) ?? []
+  let css = ''
+
+  for (const link of links.filter((tag) => /\srel="stylesheet"/i.test(tag))) {
+    const href = link.match(/\shref="([^"]*)"/i)?.[1]
+    assert.ok(href, `${pageUrl} has a stylesheet without an address`)
+    css += await (await fetch(new URL(href, pageUrl))).text()
+  }
+
+  assert.deepEqual(
+    layersIn(css).filter((layer) => layer.startsWith('hf.')),
+    declaredLayers,
+    `${pageUrl} doesn't order the layers of the design system as layers.css does`,
+  )
+}
+
+/** Lists the names of the cascade layers in some CSS, in the order they first appear in a statement or a block. */
+function layersIn(css) {
+  const layers = []
+
+  for (const [, names] of css.replaceAll(/\/\*[\s\S]*?\*\//g, '').matchAll(/@layer\s+([^;{]*)[;{]/g)) {
+    for (const name of names.split(',').map((candidate) => candidate.trim())) {
+      if (name !== '' && !layers.includes(name)) {
+        layers.push(name)
+      }
+    }
+  }
+
+  return layers
 }
 
 /**
@@ -233,6 +275,8 @@ await withEmptyDatabase((database) =>
       for (const url of urls) {
         assert.equal(url.origin, origin, `${page} loads ${url.href}`)
       }
+
+      await checkLayerOrder(page, pageHtml)
     }
 
     assert.equal((await fetch(origin + asset)).status, 200, 'the static file is missing from the folder')

@@ -48,3 +48,12 @@ describe('the JavaScript entry of the package', () => {
     }
   })
 })
+
+describe('the CSS entry of the package', () => {
+  it('imports the order of the layers first, because Next.js puts an @layer statement of index.css after the rules it imports', () => {
+    const entry = readFileSync(join(root, 'src/index.css'), 'utf8')
+
+    expect([...entry.matchAll(/@import url\('([^']+)'\);/g)][0]?.[1]).toBe('./layers.css')
+    expect(entry).not.toMatch(/^@layer/m)
+  })
+})

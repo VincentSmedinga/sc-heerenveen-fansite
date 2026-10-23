@@ -1,0 +1,8 @@
+/*
+ * The order of the cascade layers of the design system, from weak to strong.
+ * This statement has its own file so that index.css can import it first: Next.js (Turbopack) puts an @layer statement
+ * from the file that imports the others after all of their rules, and the layers then get the order of their first
+ * block. An imported file is placed where its import is.
+ */
+
+@layer hf.tokens, hf.base, hf.typography, hf.components, hf.utilities;

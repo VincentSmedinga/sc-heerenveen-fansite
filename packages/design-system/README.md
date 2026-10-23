@@ -48,7 +48,8 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
   Een hulpklasse zit in `hf.utilities`, de sterkste laag, zodat een component of typestijl haar niet ongedaan maakt.
   CSS buiten een laag wint altijd.
   Het CSS-bestand van een component mag regels in meer dan één laag hebben: `heading/heading.css` heeft een basislaag en een typografielaag.
-  De volgorde van de imports in `src/index.css` is de volgorde van de regels binnen een laag.
+  De volgorde van de lagen staat in `src/layers.css`, dat `src/index.css` als eerste importeert.
+  De volgorde van de overige imports in `src/index.css` is de volgorde van de regels binnen een laag.
 - **Box-model:** een regel die padding of een rand zet op een element met een maat, zet ook `box-sizing: border-box`.
   Er is geen globale regel op `*`.
 - **Logische eigenschappen:** `margin-inline-start` in plaats van `margin-left`.
