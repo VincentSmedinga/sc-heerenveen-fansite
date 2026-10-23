@@ -176,8 +176,9 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 
 9. **Het pad van Node 24.**
    Cron weet niet waar Node 24 staat, dus de opdracht noemt het volledige pad.
-   Op hosting met CloudLinux staat elke versie van Node in een eigen map onder `/opt/alt`.
-   Of dat op mijn.host zo is, weten we nog niet; deze opdrachten laten het zien:
+   Op mijn.host is dat `/opt/alt/alt-nodejs24/root/usr/bin/node`.
+   Dat is bevestigd op 23 oktober 2026: de importer draaide er met Node v24.22.1.
+   Verandert het pad ooit, dan laten deze opdrachten het zien:
 
    ```sh
    ls -d /opt/alt/alt-nodejs*/root/usr/bin/node
@@ -186,9 +187,8 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 
    De eerste opdracht toont de versies die er zijn.
    De tweede moet een versie tonen die met `v24.` begint.
-   Staat Node 24 daar niet, open dan in DirectAdmin _Setup Node.js App_ en kopieer de opdracht bovenaan de app, die met `source` begint.
-   Draai die met SSH, en daarna `readlink -f "$(command -v node)"`.
-   Dat toont het pad dat je in de opdracht hieronder gebruikt.
+   Staat Node 24 daar niet, kopieer dan in _Setup Node.js App_ de opdracht bovenaan de app, die met `source` begint.
+   Draai die met SSH, en daarna `readlink -f "$(command -v node)"`: dat toont het pad voor stap 10.
 
 10. **De cronjob.**
     Open in DirectAdmin _Advanced Features → Cron Jobs_ en maak een cronjob:
@@ -202,7 +202,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 
     Vervang `<gebruiker>` door je gebruikersnaam.
     Heet de map van de app anders, gebruik dan `DEPLOY_PATH` uit stap 6 in plaats van `/home/<gebruiker>/domains/acc.sc.heerenveen.org/app`.
-    Gebruik het pad van Node uit stap 9 als dat anders is.
+    Is het pad van Node veranderd, gebruik dan het pad dat stap 9 laat zien.
     Laat het e-mailadres voor de uitvoer van cron leeg.
     De opdracht schrijft alles in het logbestand, dus er is ook niets om te mailen.
 
@@ -290,10 +290,12 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 ## Wat de eerste deploy ons leerde
 
 We hadden bij het bouwen geen toegang tot de hosting.
-De eerste deploy, op 21 oktober 2026, liet zien hoe die werkt:
+De eerste deploy, op 21 oktober 2026, en de eerste run van de importer, op 23 oktober 2026, lieten zien hoe de host werkt:
 
 - De host start de app met `lsnode.js` van LiteSpeed, niet met Passenger zelf, op Node 24.20 en zonder bijzondere opties.
   `apps/site/server.js` is een ES-module en laadt zonder omweg.
+- Het pad van Node 24 is `/opt/alt/alt-nodejs24/root/usr/bin/node`: CloudLinux zet elke versie van Node in een eigen map onder `/opt/alt`.
+  Dat bleek bij de eerste handmatige run van de importer (zie stap 9).
 - Op de host staat rsync (`/usr/bin/rsync`).
   Met `--delete` en de uitzonderingen in de workflow bleven `tmp/` en `stderr.log` staan.
 - De app start opnieuw zodra iemand `tmp/restart.txt` aanraakt.

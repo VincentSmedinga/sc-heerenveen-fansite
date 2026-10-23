@@ -17,7 +17,8 @@ AI agents write most of the code; the project owner directs.
 - A pnpm 12 workspace on Node 24.
   [`README.md`](README.md) explains the setup and the commands.
 - `packages/design-system` holds the house style, the tokens and Storybook; `packages/shared` holds helpers for the site and the importer; `packages/db` holds the database (Drizzle on MariaDB 10.11): the schema, the migrations and the seed.
-  `apps/site` is the Next.js site, admin included; `apps/importer` is the importer, for now only the fetcher.
+  `apps/site` is the Next.js site, admin included.
+  `apps/importer` is the importer: the fetcher, the RSS and Atom adapter, and the import command that cron runs on acceptance, with a lock, a run log and feed health.
 - The site will run on shared web hosting at mijn.host, so there is no preview per pull request.
 - [`docs/beslissingen.md`](docs/beslissingen.md) records what we decided and why.
   Read the parts that touch your issue.
