@@ -10,6 +10,7 @@ const components = [
   'Body',
   'Button',
   'Card',
+  'DiscussionItem',
   'ErrorSummary',
   'Field',
   'Form',

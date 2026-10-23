@@ -4,6 +4,7 @@ Dit document beoordeelt de bronnen die we voor de site hebben overwogen: 24 bron
 Elke bron krijgt één besluit, met een reden.
 De bronnen met het besluit "nemen" staan in het register (`realSources` in `packages/db/src/seed.ts`) en draaien mee in de import.
 Dit document is de enige plek met de lijst; de andere documenten verwijzen hiernaartoe.
+Ons eigen forum, sc Heerenveen Forum, staat ook in het register (#15); het is geen nieuwsbron en valt buiten deze beoordeling.
 
 De besluiten zijn voorstellen, tot de projecteigenaar de pull request samenvoegt.
 Het beleid erachter staat in _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_ in [`beslissingen.md`](beslissingen.md).

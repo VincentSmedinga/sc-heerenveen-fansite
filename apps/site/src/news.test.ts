@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { dateTimeOf, formatDayAndTime, windowStart } from './news'
+import { dateTimeOf, formatDayAndTime, formatDiscussionTime, windowStart } from './news'
 
 describe('windowStart', () => {
   it('is the first moment of the Dutch day six days before today, in summer time', () => {
@@ -113,5 +113,55 @@ describe('formatDayAndTime', () => {
 describe('dateTimeOf', () => {
   it('gives the full time in UTC', () => {
     expect(dateTimeOf(new Date('2026-10-21T12:05:00Z'))).toBe('2026-10-21T12:05:00.000Z')
+  })
+})
+
+describe('formatDiscussionTime', () => {
+  // Friday 23 October 2026, 15:40 in the Netherlands.
+  const now = new Date('2026-10-23T13:40:00Z')
+  const format = (moment: string) => formatDiscussionTime(new Date(moment), now)
+
+  it('gives the time alone for a moment today', () => {
+    expect(format('2026-10-23T11:28:21Z')).toBe('13:28')
+  })
+
+  it('gives the time alone from the first moment of the Dutch day, and not before it', () => {
+    // Midnight in the Netherlands is 22:00 UTC the day before.
+    expect(format('2026-10-22T22:00:00Z')).toBe('00:00')
+    expect(format('2026-10-22T21:59:59Z')).toBe('do 23:59')
+  })
+
+  it('counts the Dutch day, not the UTC day', () => {
+    expect(formatDiscussionTime(new Date('2026-10-22T22:30:00Z'), new Date('2026-10-23T09:00:00Z'))).toBe('00:30')
+  })
+
+  it('gives a moment after now as the time alone, as a clock that is ahead would give', () => {
+    expect(format('2026-10-23T13:50:00Z')).toBe('15:50')
+  })
+
+  it('gives the short weekday and the time for the six days before today', () => {
+    expect(format('2026-10-22T19:45:00Z')).toBe('do 21:45')
+    expect(format('2026-10-17T10:05:00Z')).toBe('za 12:05')
+  })
+
+  it('gives the date from the seventh day before today, with no time', () => {
+    // The week starts on Saturday 17 October at 00:00 in the Netherlands, which is 22:00 UTC on Friday 16 October.
+    expect(format('2026-10-16T22:00:00Z')).toBe('za 00:00')
+    expect(format('2026-10-16T21:59:59Z')).toBe('16 okt')
+    expect(format('2026-10-10T08:10:00Z')).toBe('10 okt')
+  })
+
+  it('gives the year too when the moment is not in this year', () => {
+    expect(format('2025-12-30T12:00:00Z')).toBe('30 dec 2025')
+    // Half past midnight on 1 January is this year in the Netherlands, although it is still last year in UTC.
+    expect(format('2025-12-31T23:30:00Z')).toBe('1 jan')
+  })
+
+  it('keeps the Dutch time across the end of summer time', () => {
+    // Summer time ended on Sunday 25 October 2026 at 03:00. On Monday 26 October at 10:00 it is 09:00 UTC.
+    const monday = new Date('2026-10-26T09:00:00Z')
+
+    expect(formatDiscussionTime(new Date('2026-10-26T07:15:00Z'), monday)).toBe('08:15')
+    expect(formatDiscussionTime(new Date('2026-10-24T20:15:00Z'), monday)).toBe('za 22:15')
   })
 })

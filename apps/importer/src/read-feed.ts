@@ -62,7 +62,7 @@ const rfc822Time =
   /^(?:[a-z]{3},\s*)?\d{1,2}\s+[a-z]{3}\s+(?:19|20)\d{2}\s+\d{2}:\d{2}(?::\d{2})?\s+(?:gmt|utc?|z|[+-]\d{4})$/iu
 
 /** RFC 3339, as Atom has it. */
-const rfc3339Time = /^(?:19|20)\d{2}-\d{2}-\d{2}t\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:z|[+-]\d{2}:\d{2})$/iu
+export const rfc3339Time = /^(?:19|20)\d{2}-\d{2}-\d{2}t\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:z|[+-]\d{2}:\d{2})$/iu
 
 /**
  * Reads the paywall flag. feedsmith leaves out elements it doesn't know, such as the `<premium>` of the Leeuwarder

@@ -1,11 +1,11 @@
 # @fansite/importer
 
 De importer haalt koppen en links op bij de bronnen.
-Hij bevat de fetcher, de ene HTTP-client voor alle adapters, en de adapter voor RSS- en Atom-feeds.
-Welke bronnen we lezen en waarom, staat in [`docs/bronnen.md`](../../docs/bronnen.md).
+Hij bevat de fetcher, de ene HTTP-client voor alle adapters, de adapter voor RSS- en Atom-feeds en de lezer van de forumdiscussies van ons eigen forum (zie _Het forum_).
+Welke nieuwsbronnen we lezen en waarom, staat in [`docs/bronnen.md`](../../docs/bronnen.md).
 Op acceptatie start cron de import elke 15 minuten (zie _De import op acceptatie_).
 Een run neemt een lock, schrijft een logboek, houdt de gezondheid van elke feed bij en wacht als een bron daarom vraagt (zie _Het logboek en de gezondheid_).
-Een rooster per soort bron komt met de adapters (#14 en #15).
+Een rooster per soort bron komt met de adapters (#14).
 
 ## De import draaien
 
@@ -334,6 +334,52 @@ Twee dingen voor wie een adapter schrijft:
   Kijk daarvoor naar `contentType` en `url`.
 - De import beslist hoe lang we echt wachten na een `wait` (zie _Wachten_).
 
+## Het forum
+
+Het forum van sc Heerenveen is een bron van het soort forum.
+Zijn "feed" is de lijst met discussies in de openbare API van Flarum, die de importer als gast leest: zonder inloggen, zonder sleutel, zonder cookies.
+Het adres staat in de seed ([`packages/db/src/seed.ts`](../../packages/db/src/seed.ts)).
+De import gebruikt voor het forum dezelfde fetcher, lock, logboek en gezondheid als voor de andere feeds, dus `pnpm run import:status` toont het forum ook.
+Alleen het lezen en bewaren is anders: een bron van het soort forum gaat naar [`src/read-forum.ts`](src/read-forum.ts) in plaats van naar de lezer van RSS en Atom.
+
+Wat de lezer van een discussie bewaart (tabel `discussions`):
+
+- het adres, uit het adres van de feed, het id, de slug en het nummer van het laatste bericht (`https://forum.heerenveen.org/d/<id>-<titel>/<nummer>`);
+  het adres opent de discussie bij het laatste bericht, en dat nummer is hoger dan het aantal berichten als er een bericht is verwijderd;
+  heeft het antwoord geen bruikbaar nummer, dan is het adres dat van de discussie zelf;
+  de `slug` in het antwoord begint al met het id, dus de lezer zet het id niet nog eens voor de slug;
+  een link uit het antwoord vertrouwen we niet;
+- de titel, als tekst;
+- het aantal reacties: het aantal berichten min het openingsbericht, zoals het forum zelf telt;
+- het moment van het laatste bericht;
+- de schermnaam van de laatste reageerder, of niets als het forum die niet geeft.
+
+Niets van de tekst van een bericht, geen avatars of afbeeldingen, geen e-mailadressen en geen andere gegevens van leden.
+Het antwoord bevat die wel (zoals `customThumbnail` en `avatarUrl`); de lezer neemt alleen de velden hierboven.
+
+Zo kiest de lezer de discussies:
+
+- Het forum bepaalt wat een gast ziet.
+  De importer maakt geen eigen regels voor wie wat mag zien.
+- Discussies in de tags Offtopics en Sport overig laat de lezer weg.
+  De lijst staat op één plek, `leftOutTags` in `src/read-forum.ts`, op slug.
+- Van de rest houdt hij de vier waarop het laatst is gereageerd.
+  De lijst vraagt 30 discussies, zodat er na het weglaten van die tags genoeg overblijven.
+  De lezer sorteert zelf op het laatste bericht, want een vastgezette discussie kan vooraan staan.
+- Een discussie waar iets mis mee is, slaat hij over, met de reden in de uitvoer.
+  Dat is een titel van meer dan 500 tekens, een schermnaam van meer dan 150, of een adres van meer dan 2048, een ontbrekende titel, een tijd zonder tijdzone, of een tag die niet in het antwoord staat.
+- Is het antwoord geen JSON, of staan er discussies in en kan er geen enkele worden gelezen, dan is dat een fout.
+  De vorige discussies blijven dan staan.
+
+Na elke run staan er precies de vier nieuwste discussies die aan de regels voldoen in `discussions`, in één transactie.
+Een discussie die niet meer bij de vier hoort, die het forum heeft verwijderd of die een gast niet meer ziet, is dus na de volgende run weg.
+We bewaren geen geschiedenis van titels of schermnamen.
+De regel in de uitvoer telt de nieuwe, de gewijzigde en de ongewijzigde discussies van de vier die blijven.
+Een discussie is dezelfde als het id gelijk is: het adres verandert met elk nieuw bericht, want het eindigt op het nummer van het laatste bericht.
+Het forum vraagt de import nooit "is het veranderd?" (geen `ETag` of `Last-Modified`): een lege database moet na één run discussies hebben.
+
+De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en slaat geen cookies op, dus ook de sessiecookie van de API niet.
+
 ## Wat de fetcher niet doet
 
 - Een limiet per host.
@@ -367,7 +413,7 @@ De parser voor `robots.txt` staat in `src/robots.ts`, met de voorbeelden uit RFC
 De tests van de adapter gebruiken opnames van de feeds van de Leeuwarder Courant ([`src/fixtures/lc-sc-heerenveen.xml`](src/fixtures/lc-sc-heerenveen.xml)) en van Voetbal International ([`src/fixtures/vi-sc-heerenveen.xml`](src/fixtures/vi-sc-heerenveen.xml)).
 Ze zijn ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en het teken voor de betaalmuur (`premium` of de categorie `PRO`).
 Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
-`src/read-feed.test.ts` leest feeds zonder database.
-`src/import-feeds.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+`src/read-feed.test.ts` leest feeds zonder database, en `src/read-forum.test.ts` doet hetzelfde met verzonnen antwoorden van de API van het forum (`src/test-forum.ts`): in de vorm van het echte antwoord, met verzonnen titels en schermnamen, ook een discussie in een tag die we weglaten en een zonder laatste reageerder.
+`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
 De tests van het logboek, de gezondheid en het wachten geven de import een nagebootste klok (de optie `clock`), zodat een test een dag of een maand overslaat zonder te wachten.
 `src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.

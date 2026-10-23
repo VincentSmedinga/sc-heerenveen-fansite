@@ -151,6 +151,34 @@ export type Item = typeof items.$inferSelect
 
 export type NewItem = typeof items.$inferInsert
 
+/** The most characters a column of `discussions` holds. The importer skips a discussion that doesn't fit. */
+export const discussionLimits = { lastPostedBy: 150, title: 500, url: 2048 }
+
+/**
+ * The newest discussions of a forum, as a guest sees them. The importer replaces the rows of a forum in every run, so
+ * this holds no history: a discussion, a title or a screen name the forum no longer shows is gone after the next run.
+ * Of a discussion we keep the address, the title, the number of replies, the time of the last post and the screen name
+ * of whoever wrote it, which the forum shows to a guest too. No text of a post, no avatar and nothing else of a member.
+ *
+ * `reply_count` is the number of posts minus the opening post, as the forum counts. `last_posted_by` is empty when the
+ * forum doesn't say. Times are UTC.
+ */
+export const discussions = mysqlTable('discussions', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  sourceId: int('source_id', { unsigned: true })
+    .notNull()
+    .references(() => sources.id, { onDelete: 'cascade' }),
+  url: varchar('url', { length: discussionLimits.url }).notNull(),
+  title: varchar('title', { length: discussionLimits.title }).notNull(),
+  replyCount: int('reply_count', { unsigned: true }).notNull(),
+  lastPostedAt: datetime('last_posted_at').notNull(),
+  lastPostedBy: varchar('last_posted_by', { length: discussionLimits.lastPostedBy }),
+})
+
+export type Discussion = typeof discussions.$inferSelect
+
+export type NewDiscussion = typeof discussions.$inferInsert
+
 /**
  * The log of the import: one row for each run, kept for 30 days. `finished_at` is empty while the run is busy, and stays
  * empty when the process stopped halfway. A run that found another run holding the lock did nothing but write its row.

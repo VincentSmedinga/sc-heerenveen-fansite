@@ -23,7 +23,7 @@ const assembleAndStartServer =
 export default defineConfig({
   forbidOnly: process.env['CI'] !== undefined,
   fullyParallel: true,
-  // Puts the made-up headlines in the database for the homepage, once the site is up and before the first test.
+  // Puts the made-up headlines and discussions in the database for the homepage, once the site is up and before the first test.
   globalSetup: './e2e/global-setup.ts',
   // Chromium only (see docs/beslissingen.md). Locally the Chromium of Playwright, installed once with `pnpm --filter site exec
   // playwright install chromium`. In CI the Google Chrome of the runner, which saves the install (see docs/beslissingen.md).

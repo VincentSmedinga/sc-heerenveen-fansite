@@ -83,8 +83,10 @@ export const testSources = [
 
 /**
  * The real sources, with the feeds we read. They get the strictest policy, because none has given permission yet: only
- * the headline, the link and the name. The descriptions are in our own words. `docs/bronnen.md` says which sources
+ * the headline, the link and the name. The descriptions are in our own words. `docs/bronnen.md` says which news sources
  * belong here and why.
+ *
+ * The forum's "feed" is the list of discussions of its API, which the importer reads as a guest (see `read-forum.ts`).
  */
 export const realSources = [
   {
@@ -110,6 +112,16 @@ export const realSources = [
     feeds: ['https://www.telegraaf.nl/tag/sc-heerenveen/rss/'],
     kind: 'news',
     name: 'De Telegraaf',
+  },
+  {
+    description:
+      'Het forum van onze eigen gemeenschap, waar supporters praten over wedstrijden, spelers en transfers. We tonen alleen de titels van de nieuwste discussies, hoeveel reacties er zijn en wie het laatst reageerde.',
+    domain: 'forum.heerenveen.org',
+    feeds: [
+      'https://forum.heerenveen.org/api/discussions?sort=-lastPostedAt&page[limit]=30&include=lastPostedUser,tags',
+    ],
+    kind: 'forum',
+    name: 'sc Heerenveen Forum',
   },
 ] satisfies (NewSource & { feeds: string[] })[]
 
