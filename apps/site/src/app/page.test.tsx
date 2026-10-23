@@ -45,14 +45,15 @@ afterEach(() => {
 })
 
 describe('the homepage', () => {
-  it('has one h1 and an h2 for the news, and no heading for a day', async () => {
+  it('has one h1, for screen readers only, and an h2 for the news, and no heading for a day', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
+    // The logo in the header shows the name of the site, so the h1 is hidden from the eye, not from a screen reader.
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
-      '<h1 class="hf-heading-1">sc Heerenveen Fansite</h1>',
-      '<h2 class="hf-heading-2" id="media-heading">sc Heerenveen in de media</h2>',
+      '<h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite</h1>',
+      '<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>',
     ])
   })
 
@@ -63,7 +64,7 @@ describe('the homepage', () => {
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><h1 class="hf-heading-1">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><p>Welke media we volgen, lees je bij <a href="\/bronnen">Onze bronnen<\/a>\.<\/p><\/main>$/,
+      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><p>Welke media we volgen, lees je bij <a href="\/bronnen">Onze bronnen<\/a>\.<\/p><\/main>$/,
     )
   })
 
@@ -74,7 +75,7 @@ describe('the homepage', () => {
     const cards = html.match(/<section.*?<\/section>/g) ?? []
 
     expect(cards).toHaveLength(1)
-    expect(cards[0]).toContain('<h2 class="hf-heading-2" id="media-heading">sc Heerenveen in de media</h2>')
+    expect(cards[0]).toContain('<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>')
     expect(cards[0]?.match(/<li>/g)).toHaveLength(3)
     // The h1 and the link to Onze bronnen are cells of their own, outside the card.
     expect(cards[0]).not.toContain('<h1')
@@ -183,7 +184,7 @@ describe('the homepage', () => {
 
     const html = await render()
 
-    expect(html).toContain('<h2 class="hf-heading-2" id="media-heading">sc Heerenveen in de media</h2>')
+    expect(html).toContain('<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>')
     expect(html).toContain('<p>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</p>')
     expect(html.match(/<section/g)).toHaveLength(1)
     expect(html).not.toContain('<h3')
@@ -213,7 +214,7 @@ describe('the homepage when the database can not be read', () => {
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
     expect(html).toContain('<a href="/">Probeer het opnieuw</a>')
-    expect(html).not.toContain('sc Heerenveen in de media')
+    expect(html).not.toContain('Laatste nieuws')
     expect(html).not.toContain('We hebben deze week nog geen nieuws gevonden')
   })
 

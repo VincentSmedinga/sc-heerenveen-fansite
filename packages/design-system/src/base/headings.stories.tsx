@@ -19,7 +19,7 @@ export const AllLevels = meta.story({
     <>
       <h1>ADO Den Haag – sc Heerenveen</h1>
       <p className="hf-meta">h1 · kop 1</p>
-      <h2>sc Heerenveen in de media</h2>
+      <h2>Laatste nieuws</h2>
       <p className="hf-meta">h2 · kop 2</p>
       <h3>Nieuwste discussies</h3>
       <p className="hf-meta">h3 · kop 3</p>

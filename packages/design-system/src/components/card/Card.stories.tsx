@@ -113,7 +113,7 @@ const renderPage = () => (
       <Heading level={1}>Nieuws over sc Heerenveen</Heading>
       <Card aria-labelledby="page-media">
         <Heading id="page-media" level={2}>
-          sc Heerenveen in de media
+          Laatste nieuws
         </Heading>
         <Heading level={3}>donderdag 22 oktober</Heading>
         {newsItems}

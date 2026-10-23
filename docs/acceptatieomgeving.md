@@ -208,7 +208,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 
 ## Controleren
 
-- De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" en "sc Heerenveen in de media" zien.
+- De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, en het blok "Laatste nieuws".
   Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens."
   Daarna staan er de koppen van de Leeuwarder Courant van de afgelopen week.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.

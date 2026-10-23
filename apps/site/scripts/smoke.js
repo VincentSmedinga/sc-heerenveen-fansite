@@ -166,7 +166,7 @@ await withEmptyDatabase((database) =>
 
     // The homepage reads the items from the database, and the seed has none. So it says there is no news this week.
     assert.match(html, /<h1[^>]*>sc Heerenveen Fansite<\/h1>/)
-    assert.match(html, /<h2[^>]*>sc Heerenveen in de media<\/h2>/)
+    assert.match(html, /<h2[^>]*>Laatste nieuws<\/h2>/)
     assert.match(html, /We hebben deze week nog geen nieuws gevonden\. Kijk straks nog eens\./)
     assert.match(html, /<a href="\/bronnen">Onze bronnen<\/a>/)
     assert.doesNotMatch(html, /Binnenkort meer/)
@@ -288,7 +288,7 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   assert.match(homeHtml, /<title>Er ging iets mis<\/title>/)
   assert.match(homeHtml, /<meta name="robots" content="noindex"\/>/)
   assert.match(homeHtml, /<a href="\/">Probeer het opnieuw<\/a>/)
-  assert.doesNotMatch(homeHtml, /sc Heerenveen in de media|Binnenkort meer/)
+  assert.doesNotMatch(homeHtml, /Laatste nieuws|Binnenkort meer/)
   assert.match(log(), /Could not read the headlines for the homepage: .*ECONNREFUSED/)
 
   const sources = await fetch(`${origin}/bronnen`)

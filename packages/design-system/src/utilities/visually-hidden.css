@@ -1,0 +1,21 @@
+/* A utility class: it does one thing, on any element, whatever its component or type style. */
+
+@layer hf.utilities {
+  /*
+   * Hidden from the eye, but still in the accessibility tree, so a screen reader reads it out. display: none and the
+   * hidden attribute hide it from everyone. The element leaves the flow and is clipped to nothing. Its box is one pixel,
+   * without margin, padding or border, so it takes no room and can't make the page wider. Its text stays on one line:
+   * some screen readers read wrapped text in so narrow a box as one long word.
+   */
+  .hf-visually-hidden {
+    block-size: 1px;
+    border: 0;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+  }
+}

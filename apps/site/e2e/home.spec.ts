@@ -8,10 +8,29 @@ import { headlines } from './headlines'
 test('has the headings in order: an h1 and an h2 for the news, and no heading for a day', async ({ page }) => {
   await page.goto('/')
 
-  const levels = await page.getByRole('heading').evaluateAll((headings) => headings.map((h) => Number(h.tagName[1])))
+  const headings = await page
+    .getByRole('heading')
+    .evaluateAll((headings) => headings.map((h) => `${h.tagName} ${h.textContent ?? ''}`))
 
-  expect(levels).toEqual([1, 2])
-  await expect(page.getByRole('heading', { level: 2 })).toHaveText('sc Heerenveen in de media')
+  expect(headings).toEqual(['H1 sc Heerenveen Fansite', 'H2 Laatste nieuws'])
+  await expect(page.getByRole('region', { name: 'Laatste nieuws' })).toBeVisible()
+})
+
+test('hides the h1 from the eye, but not from a screen reader, and gives it no room', async ({ page }) => {
+  await page.goto('/')
+
+  // getByRole finds only what is in the accessibility tree, with its name.
+  const heading = page.getByRole('heading', { level: 1, name: 'sc Heerenveen Fansite' })
+  await expect(heading).toHaveCount(1)
+
+  // The logo shows the name: the h1 is one pixel, clipped to nothing.
+  expect(await heading.boundingBox()).toMatchObject({ height: 1, width: 1 })
+  expect(await heading.evaluate((element) => getComputedStyle(element).clipPath)).toBe('inset(50%)')
+
+  // The card with the news is the first thing you see in the main.
+  const main = await page.getByRole('main').boundingBox()
+  const card = await page.getByRole('region', { name: 'Laatste nieuws' }).boundingBox()
+  expect(card?.y).toBeCloseTo(main?.y ?? NaN, 1)
 })
 
 test('shows the news of the week as links to the sources, and leaves out the rest', async ({ page }) => {

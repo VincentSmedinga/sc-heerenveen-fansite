@@ -45,10 +45,13 @@ export default async function HomePage() {
 
   return (
     <Page.Main>
-      <Heading level={1}>sc Heerenveen Fansite</Heading>
+      {/* The logo just above already shows the name, so the h1 is for screen readers only. Every page has one h1. */}
+      <Heading className="hf-visually-hidden" level={1}>
+        sc Heerenveen Fansite
+      </Heading>
       <Card aria-labelledby="media-heading">
         <Heading id="media-heading" level={2}>
-          sc Heerenveen in de media
+          Laatste nieuws
         </Heading>
         {headlines.length === 0 ? (
           <Text>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</Text>

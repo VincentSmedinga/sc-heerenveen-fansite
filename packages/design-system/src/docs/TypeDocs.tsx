@@ -30,7 +30,7 @@ export const typeStyles: TypeStyle[] = [
     className: 'hf-heading-2',
     colour: 'heading',
     name: 'Kop 2',
-    sample: 'sc Heerenveen in de media',
+    sample: 'Laatste nieuws',
     spec: 'Truculenta 900 · breedte 125 · 32 px (mobiel 26, met clamp) · 1,05 · +0,02 em · kapitalen',
     use: 'Secties op een pagina.',
   },
