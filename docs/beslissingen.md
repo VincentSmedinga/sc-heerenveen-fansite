@@ -1187,7 +1187,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Op een smal scherm staan de kolommen onder elkaar, de hoofdkolom eerst.
   De grens van 80 tekens per regel, die _De inhoud staat in een smallere kolom, met plaats voor een zijbalk_ stelde, vervalt.
 - **Hoe:** `Page.Body` is een raster met één spoor van 48 rem, dat krimpt als het scherm smaller is.
-  Vanaf 76 rem komt er een tweede spoor van 24 rem bij; zonder de marge van 1 rem aan beide kanten is het raster 75 rem breed (48 rem, 3 rem ertussen en 24 rem), dus tussen 76 en 77 rem krimpt het eerste spoor met hoogstens 1 rem.
+  Vanaf 77 rem (48 rem, 3 rem ertussen en 24 rem, met een marge van 1 rem aan beide kanten) komt er een tweede spoor van 24 rem bij.
   De breedte staat in de media query zelf, want een custom property kan daar niet in.
   Elke kolom is een gewoon raster van één spoor, met de witruimte tussen de cellen als `gap`, uit een custom property op `Page.Body`.
   Er zijn twee maten witruimte, tot tokens voor ruimte komen (#19): 3 rem tussen de kolommen, naast elkaar en onder elkaar, en onder de kolommen, en 2 rem tussen de cellen en boven de kolommen.
@@ -1208,8 +1208,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of meer kaarten in één cel, met de ruimte in de kaart.
   Of de kolom in `Page.Body` laten zoals #73 deed, zonder plek voor een zijbalk.
   Of de tekst in de kolom van 48 rem toch beperken tot 36 rem, zodat de grens van 80 tekens blijft; dat is niet gekozen.
-- **Later:** de zijbalk staat tussen 40 rem en 76 rem onder de hoofdkolom, met haar cellen in twee gelijke kolommen (#137).
-  Onder 40 rem staan de cellen onder elkaar, en vanaf 76 rem staat de zijbalk naast de hoofdkolom.
+- **Later:** de zijbalk staat tussen 40 rem en 77 rem onder de hoofdkolom, met haar cellen in twee gelijke kolommen (#137).
+  Onder 40 rem staan de cellen onder elkaar, en vanaf 77 rem staat de zijbalk naast de hoofdkolom.
   Dat is een tweede raster op `Page.Sidebar` in `page.css`; de volgorde in de bron blijft gelijk en er is geen `order`.
   Een cel die de volle breedte neemt, is er nog niet; of dat nodig is, beslissen we na de proef op Onze bronnen.
 

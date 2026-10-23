@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-// The cells of the sidebar sit in two equal columns under the main column from 40 rem (640 pixels) to 76 rem (1216
-// pixels), under each other below that, and beside the main column from 76 rem on. /bronnen has a sidebar with two cards.
+// The cells of the sidebar sit in two equal columns under the main column from 40 rem (640 pixels) to 77 rem (1232
+// pixels), under each other below that, and beside the main column from 77 rem on. /bronnen has a sidebar with two cards.
 
 const boxesOf = async (page: Page) => {
   const main = await page.getByRole('main').boundingBox()
