@@ -12,7 +12,7 @@ const menuItems = [
   { href: '#nieuws', label: 'Nieuws' },
   { href: '#bronnen', label: 'Onze bronnen' },
   { href: '#forum', label: 'Forum' },
-]
+] as const
 
 export type ExampleMenuPage = (typeof menuItems)[number]['label']
 
