@@ -343,7 +343,8 @@ Alleen het lezen en bewaren is anders: een bron van het soort forum gaat naar [`
 
 Wat de lezer van een discussie bewaart (tabel `discussions`):
 
-- het adres, uit het adres van de feed, het id en de slug (`https://forum.heerenveen.org/d/<id>-<slug>`);
+- het adres, uit het adres van de feed, het id en de slug (`https://forum.heerenveen.org/d/<id>-<titel>`);
+  de `slug` in het antwoord begint al met het id, dus de lezer zet het id niet nog eens voor de slug;
   een link uit het antwoord vertrouwen we niet;
 - de titel, als tekst;
 - het aantal reacties: het aantal berichten min het openingsbericht, zoals het forum zelf telt;

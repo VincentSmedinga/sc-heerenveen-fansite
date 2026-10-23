@@ -158,8 +158,11 @@ function cleanDiscussion(
     return { reason: 'there is no valid time of the last post' }
   }
 
-  const slug = typeof attributes['slug'] === 'string' ? attributes['slug'] : ''
-  // Flarum answers `/d/<id>` with or without the slug. The slug is only there for people, and may hold any character.
+  // The `slug` of the API already starts with the id, as in "2859-24-10-2026-ado-den-haag", so the id comes off before it
+  // goes in front again. Flarum answers `/d/<id>` with or without the rest, which is only there for people, and it may hold
+  // any character.
+  const rawSlug = typeof attributes['slug'] === 'string' ? attributes['slug'] : ''
+  const slug = rawSlug.startsWith(`${id}-`) ? rawSlug.slice(id.length + 1) : rawSlug === id ? '' : rawSlug
   const url = new URL(`/d/${id}${slug === '' ? '' : `-${encodeURIComponent(slug)}`}`, origin).href
 
   if (url.length > discussionLimits.url) {

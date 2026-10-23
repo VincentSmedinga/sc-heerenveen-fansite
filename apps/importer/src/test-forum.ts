@@ -10,6 +10,7 @@ export type MadeUpDiscussion = {
   lastPostedAt?: string
   /** The id of a user in `madeUpUsers`, or null for a discussion without a last poster. */
   lastPostedUser?: null | number
+  /** As the API gives it: the id, a dash and the title in lower case, such as `2859-wie-wint-zondag`. */
   slug?: string
   tags?: number[]
   title?: string
@@ -65,7 +66,7 @@ function resource(discussion: MadeUpDiscussion) {
     commentCount = 5,
     id,
     lastPostedAt = '2026-10-23T11:28:21+00:00',
-    slug = `discussie-${id}`,
+    slug = `${id}-discussie-${id}`,
     tags = [2],
   } = discussion
   const lastPostedUser = discussion.lastPostedUser === undefined ? 501 : discussion.lastPostedUser

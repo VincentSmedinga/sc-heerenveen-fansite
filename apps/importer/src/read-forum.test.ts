@@ -28,7 +28,7 @@ describe('readForum', () => {
         id: 41,
         lastPostedAt: '2026-10-23T13:28:21+02:00',
         lastPostedUser: 502,
-        slug: 'wie-wint-zondag',
+        slug: '41-wie-wint-zondag',
         title: 'Wie wint er zondag?',
       },
     ])
@@ -110,7 +110,7 @@ describe('readForum', () => {
   })
 
   it('builds the address from the origin we asked, the id and the slug, and trusts no link of the answer', () => {
-    const answer = JSON.parse(forumAnswer([{ id: 7, slug: 'een slug/met?tekens' }]))
+    const answer = JSON.parse(forumAnswer([{ id: 7, slug: '7-een slug/met?tekens' }]))
 
     answer.data[0].links = { self: 'https://kwaad.test/discussions/7' }
 
@@ -120,6 +120,24 @@ describe('readForum', () => {
       discussions: [{ url: 'https://forum.test/d/7-een%20slug%2Fmet%3Ftekens' }],
       kind: 'read',
     })
+  })
+
+  it('does not put the id in the address twice, because the slug of the API starts with it', () => {
+    const { discussions } = read([{ id: 2859, slug: '2859-24-10-2026-ado-den-haag-sc-heerenveen-2100-uur' }])
+
+    expect(discussions[0]?.url).toBe('https://forum.test/d/2859-24-10-2026-ado-den-haag-sc-heerenveen-2100-uur')
+  })
+
+  it('puts the id in front of a slug that does not start with it', () => {
+    const { discussions } = read([{ id: 2859, slug: 'ado-den-haag' }])
+
+    expect(discussions[0]?.url).toBe('https://forum.test/d/2859-ado-den-haag')
+  })
+
+  it('gives the address with the id alone when the slug is the id', () => {
+    const { discussions } = read([{ id: 2859, slug: '2859' }])
+
+    expect(discussions[0]?.url).toBe('https://forum.test/d/2859')
   })
 
   it('gives the address without a slug when the discussion has none', () => {

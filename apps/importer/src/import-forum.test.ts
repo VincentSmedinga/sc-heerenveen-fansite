@@ -138,7 +138,7 @@ describe('importing the discussions of a forum', () => {
   })
 
   it('builds the addresses from the address of the forum in the register', async () => {
-    const server = await serve(forumAnswer([{ id: 7, slug: 'een-slug' }]))
+    const server = await serve(forumAnswer([{ id: 7, slug: '7-een-slug' }]))
     const feed = await addForum(server)
 
     await importFeed(database.db, fetcherFor(servers), feed, firstRun)
