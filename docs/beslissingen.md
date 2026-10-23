@@ -126,13 +126,17 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 23 oktober 2026
 - **Besluit:** de Reviewer draait standaard op Sonnet.
   Voor een pull request die de database, de importer, beveiliging, workflows of dependencies raakt, vraagt de Builder de projecteigenaar om Fable.
-  Een pull request die alleen verhalen (`*.stories.tsx`), Markdown of MDX wijzigt, krijgt geen Reviewer.
+  Een pull request krijgt geen Reviewer als hij alleen Markdown of MDX in `docs/` of `packages/design-system/src/docs/` wijzigt, of verhalen (`*.stories.tsx`) zonder visuele wijziging, zoals een titel, een beschrijving of commentaar.
+  Een verhaal dat iets visueels verandert, houdt zijn Reviewer.
   Twee bestanden zijn een uitzondering, omdat het de checklists van de Reviewer zelf zijn: `docs/toegankelijkheid.md` en `packages/design-system/src/docs/editorial.mdx`.
-  De Builder loopt de drie checklists dan zelf door en schrijft in de beschrijving "Geen reviewer: de pull request wijzigt alleen verhalen of documentatie." in plaats van de vakjes voor de review.
+  Al het andere houdt zijn Reviewer, ook de bestanden voor agents en beveiliging: `.claude/`, `.github/`, `AGENTS.md`, `CONTRIBUTING.md` en `SECURITY.md`.
+  Zonder Reviewer loopt de Builder de drie checklists zelf door en schrijft in de beschrijving "Geen reviewer: de pull request wijzigt alleen verhalen of documentatie." in plaats van de vakjes voor de review.
   De projecteigenaar kan altijd om een Reviewer vragen.
 - **Waarom:** de limiet van het abonnement was weer bijna op.
   Een Fable-review van een wijziging van drie regels in een verhaal kostte ongeveer 72.000 tokens en 31 toolaanroepen.
-  Bij zulke wijzigingen doet CI de controles al: lint, typecheck, de build van Storybook en de toegankelijkheidscontrole.
+  Bij documentatie en verhalen zonder visuele wijziging toetst CI de opmaak, de types en de build van Storybook, en dat is alles wat er te controleren valt.
+  Bij een visuele wijziging in een verhaal ontbreekt die controle: `pnpm test:a11y` toetst alleen de pagina's van de site, en de tests van het designsysteem draaien de verhalen niet met axe.
+  Daarom houdt zo'n verhaal zijn Reviewer.
 - **Gevolg:** dit herziet het deel over de Reviewer in _Een model per rol_.
   De Reviewer deelt weer het model van de Builder, en dus ook diens blinde vlekken.
   Daarom blijft Fable voor wijzigingen waar een fout veel kost.
