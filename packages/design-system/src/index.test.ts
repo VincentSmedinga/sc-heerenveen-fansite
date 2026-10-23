@@ -6,7 +6,27 @@ import * as designSystem from './index'
 
 const root = join(import.meta.dirname, '..')
 
-const components = ['Body', 'Card', 'Heading', 'Link', 'List', 'Logo', 'Navigation', 'NewsItem', 'Page', 'Root', 'Text']
+const components = [
+  'Body',
+  'Button',
+  'Card',
+  'ErrorSummary',
+  'Field',
+  'Form',
+  'Heading',
+  'Honeypot',
+  'Input',
+  'Link',
+  'List',
+  'Logo',
+  'Navigation',
+  'NewsItem',
+  'Page',
+  'Root',
+  'Select',
+  'Text',
+  'Textarea',
+]
 
 describe('the JavaScript entry of the package', () => {
   it.each(components)('gives the component %s', (name) => {
@@ -17,6 +37,11 @@ describe('the JavaScript entry of the package', () => {
   it('gives List.Item on List, because an item only works inside its list', () => {
     expect(typeof designSystem.List.Item).toBe('function')
     expect(designSystem).not.toHaveProperty('ListItem')
+  })
+
+  it('gives Select.Option on Select, because an option only works inside its list', () => {
+    expect(typeof designSystem.Select.Option).toBe('function')
+    expect(designSystem).not.toHaveProperty('Option')
   })
 
   it('gives the parts of a page on Page, because they only work inside a page', () => {
@@ -30,8 +55,10 @@ describe('the JavaScript entry of the package', () => {
   })
 
   it('gives the lists of allowed elements', () => {
+    expect(designSystem.buttonTypes).toEqual(['submit', 'button', 'reset'])
     expect(designSystem.cardElements).toEqual(['section', 'div', 'article', 'aside'])
     expect(designSystem.cardSurfaces).toEqual(['default', 'strong', 'soft', 'warm'])
+    expect(designSystem.inputTypes).toContain('email')
     expect(designSystem.listElements).toEqual(['ul', 'ol'])
     expect(designSystem.textElements).toEqual(['p', 'span'])
   })
