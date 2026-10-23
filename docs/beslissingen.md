@@ -553,6 +553,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of toetsen tegen `next dev`; dat is sneller, maar bezoekers krijgen een andere pagina.
   Of ook Firefox en WebKit; die kosten tijd, en axe vindt daar zelden iets anders.
 
+### CI gebruikt de Chrome van de runner
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** in CI draait Playwright op de Google Chrome die op de runner `ubuntu-latest` staat (`channel: 'chrome'`, als `CI` gezet is).
+  De stap `playwright install --with-deps chromium` is weg.
+  Lokaal blijft het de Chromium van Playwright, zoals in de README van de site staat.
+- **Waarom:** die stap haalde pakketten via `apt` van een Ubuntu-spiegelserver.
+  Die was in 14 van de laatste 40 runs zo traag (tot 49,7 kB/s) dat de stap tussen de 1,5 en 10,5 minuut duurde, tegen 16 tot 27 seconden als het goed gaat.
+  De tests zelf duren 15 tot 20 seconden.
+  Chrome van de runner komt met zijn eigen bibliotheken, dus er hoeft niets gedownload te worden.
+- **Gevolg:** CI toetst met de Chrome-versie van de runner, die de beheerders van de image bijwerken, en niet met de Chromium-versie die bij Playwright hoort.
+  Het blijft dezelfde engine.
+  Faalt er ooit een test alleen in CI, kijk dan eerst naar het verschil in versie.
+- **Alternatieven:** de browser cachen; dan draait `apt` nog steeds bij een lege cache.
+  Of alleen de bibliotheken installeren die Chromium nodig heeft, zonder de lettertypes; dat is een lijst die we zelf moeten bijhouden.
+  Of een container van Playwright voor de job; dat past slecht bij de MariaDB-service.
+
 ### axe toetst de pagina's, niet de stories
 
 - **Datum:** 22 oktober 2026
