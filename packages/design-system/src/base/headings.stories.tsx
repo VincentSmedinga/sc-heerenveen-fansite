@@ -5,7 +5,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          'Koppen `h1` tot en met `h6`. Elk niveau heeft een standaardstijl; met een klasse kies je een andere stijl zonder het niveau te veranderen.',
+          'Koppen `h1` tot en met `h4`. Elk niveau heeft een standaardstijl; met een klasse kies je een andere stijl zonder het niveau te veranderen.',
       },
     },
   },
@@ -25,10 +25,6 @@ export const AllLevels = meta.story({
       <p className="hf-meta">h3 · kop 3</p>
       <h4>Hoe we bronnen kiezen</h4>
       <p className="hf-meta">h4 · kop 4</p>
-      <h5>Samenvatting: SC Heerenveen bezorgt Excelsior opnieuw een grote nederlaag</h5>
-      <p className="hf-meta">h5 · nieuwskop (voorlopig)</p>
-      <h6>Volgende wedstrijd</h6>
-      <p className="hf-meta">h6 · label (voorlopig)</p>
     </>
   ),
 })

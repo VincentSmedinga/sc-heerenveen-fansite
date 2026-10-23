@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
 
-/** The heading levels a Heading can have. Levels 5 and 6 have no style of their own yet. */
+/** The heading levels a Heading can have. Levels 5 and 6 are only a fallback in CSS. */
 export const headingLevels = [1, 2, 3, 4] as const
 
 export type HeadingLevel = (typeof headingLevels)[number]

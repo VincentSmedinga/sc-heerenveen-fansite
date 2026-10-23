@@ -13,7 +13,6 @@ const meta = preview.meta({
           'Zonder `appearance` heeft de kop de stijl van zijn niveau.',
           '',
           'Een pagina heeft één `h1`, en je slaat geen niveau over: na een `h2` komt een `h2` of een `h3`.',
-          'De niveaus 5 en 6 bestaan hier nog niet, omdat ze nog geen eigen stijl hebben.',
         ].join('\n'),
       },
     },

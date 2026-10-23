@@ -23,7 +23,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 1',
     sample: 'ADO Den Haag – sc Heerenveen',
-    spec: 'Truculenta 900 · breedte 125 · 52 px (mobiel 34, met clamp) · 1,0 · +0,01 em · kapitalen',
+    spec: 'Truculenta 800 · breedte 125 · schaalt mee met de breedte · 1,0 · +0,01 em · kapitalen',
     use: 'Paginatitel, titel op de wedstrijdband.',
   },
   {
@@ -31,7 +31,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 2',
     sample: 'Laatste nieuws',
-    spec: 'Truculenta 900 · breedte 125 · 32 px (mobiel 26, met clamp) · 1,05 · +0,02 em · kapitalen',
+    spec: 'Truculenta 800 · breedte 125 · schaalt mee met de breedte · 1,05 · +0,02 em · kapitalen',
     use: 'Secties op een pagina.',
   },
   {
@@ -39,7 +39,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 3',
     sample: 'Nieuwste discussies',
-    spec: 'Truculenta 800 · breedte 115 · 20 px (mobiel 19) · 1,15 · +0,03 em · kapitalen',
+    spec: 'Truculenta 800 · breedte 115 · schaalt mee met de breedte · 1,15 · +0,03 em · kapitalen',
     use: 'Titels van kaarten en blokken in de zijbalk.',
   },
   {
@@ -47,7 +47,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'accent',
     name: 'Label',
     sample: 'Volgende wedstrijd',
-    spec: 'Truculenta 700 · breedte 125 · 15 px · 1,2 · +0,04 em · kapitalen',
+    spec: 'Truculenta 700 · breedte 125 · één maat · 1,2 · +0,04 em · kapitalen',
     use: 'Bovenregels en badges, zoals Volgende wedstrijd of Uit.',
   },
   {
@@ -55,7 +55,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 4',
     sample: 'Hoe we bronnen kiezen',
-    spec: 'Atkinson Hyperlegible Next 700 · 20 px (mobiel 19) · 1,3',
+    spec: 'Truculenta 800 · breedte 115 · één maat · 1,3 · +0,03 em · kapitalen',
     use: 'Tussenkoppen in lopende tekst, zoals op Over ons.',
   },
   {
@@ -63,7 +63,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Nieuwskop',
     sample: 'Samenvatting: SC Heerenveen bezorgt Excelsior opnieuw een grote nederlaag',
-    spec: 'Atkinson Hyperlegible Next 600 · 20 px (mobiel 19) · 1,35',
+    spec: 'Atkinson Hyperlegible Next 600 · één maat · 1,35',
     use: 'Koppen van berichten in lijsten. Nooit in kapitalen.',
   },
   {
@@ -71,14 +71,14 @@ export const typeStyles: TypeStyle[] = [
     name: 'Tekst',
     sample:
       'Gemaakt door supporters, zonder advertenties en zonder winstoogmerk. We tonen de kop en linken naar het bericht van de journalist.',
-    spec: 'Atkinson Hyperlegible Next 400 · 18 px · 1,5',
+    spec: 'Atkinson Hyperlegible Next 400 · één maat · 1,5',
     use: 'Lopende tekst.',
   },
   {
     className: 'hf-meta',
     name: 'Meta',
     sample: 'Leeuwarder Courant · 83 reacties · laatst 13:28',
-    spec: 'Atkinson Hyperlegible Next 400 · 16 px · 1,4',
+    spec: 'Atkinson Hyperlegible Next 400 · één maat · 1,4',
     use: 'Bron, tijd en aantallen.',
   },
 ]
@@ -126,8 +126,8 @@ export const FontSpecimens = () => (
         Truculenta
       </h3>
       <p>
-        Voor woordmerk, kop 1 tot en met 3 en labels. Variabel in gewicht (100–900), breedte (75–125) en optische
-        grootte (12–72). Die laatste volgt vanzelf de lettergrootte. Let op de lage middenstrepen van E, F, H en R.
+        Voor woordmerk, alle koppen en labels. Variabel in gewicht (100–900), breedte (75–125) en optische grootte
+        (12–72). Die laatste volgt vanzelf de lettergrootte. Let op de lage middenstrepen van E, F, H en R.
       </p>
       {truculentaWeights.map((weight) => (
         <p key={weight} style={{ ...display, fontSize: '2rem', fontStretch: '125%', fontWeight: weight }}>
@@ -145,8 +145,8 @@ export const FontSpecimens = () => (
         Atkinson Hyperlegible Next
       </h3>
       <p>
-        Voor kop 4, nieuwskoppen, tekst en meta. Variabel in gewicht (200–800), met cursief. Elke letter heeft een eigen
-        vorm, dus Il1 en O0 zijn niet te verwarren.
+        Voor nieuwskoppen, tekst en meta. Variabel in gewicht (200–800), met cursief. Elke letter heeft een eigen vorm,
+        dus Il1 en O0 zijn niet te verwarren.
       </p>
       {atkinsonWeights.map((weight) => (
         <p key={weight} style={{ ...text, fontSize: '1.375rem', fontWeight: weight }}>

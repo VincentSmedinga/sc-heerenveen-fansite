@@ -11,6 +11,11 @@
     }
   }
 
+  /* Heading 6 is a fallback, like heading 5 in the typography layer: heading 4 in the colour of secondary text. */
+  h6 {
+    color: var(--hf-colour-text-secondary);
+  }
+
   /*
    * Small print in a heading, such as the number of a version after its date. Like "sinds 1997" after the wordmark of
    * the logo, it has the colour of secondary text. The Meta type style gives it its size, and no capitals.
@@ -30,7 +35,8 @@
 /*
  * Type styles. Each style is a class, so the look stays separate from the HTML level:
  * <h2 class="hf-heading-3"> is a level 2 heading that looks like Kop 3.
- * Headings h1–h6 get a style by default: h5 looks like Nieuwskop and h6 like Label (provisional).
+ * Headings h1–h6 get a style by default, all in the display font: h1–h4 the style with the same number, and h5 and h6 as
+ * a fallback that looks like heading 4, in weight 600 (h6 also in the colour of secondary text). Nothing uses h5 or h6 yet.
  * A class wins over the element because it is more specific.
  * Every rule sets the same properties, so a class fully replaces the element's default style.
  */
@@ -68,7 +74,6 @@
     text-transform: uppercase;
   }
 
-  h6,
   .hf-label {
     font-family: var(--hf-font-family-display);
     font-size: var(--hf-label-font-size);
@@ -80,17 +85,23 @@
   }
 
   h4,
+  h5,
+  h6,
   .hf-heading-4 {
-    font-family: var(--hf-font-family-text);
+    font-family: var(--hf-font-family-display);
     font-size: var(--hf-heading-4-font-size);
-    font-stretch: normal;
+    font-stretch: var(--hf-heading-4-font-stretch);
     font-weight: var(--hf-heading-4-font-weight);
-    letter-spacing: normal;
+    letter-spacing: var(--hf-heading-4-letter-spacing);
     line-height: var(--hf-heading-4-line-height);
-    text-transform: none;
+    text-transform: uppercase;
   }
 
   h5,
+  h6 {
+    font-weight: 600;
+  }
+
   .hf-headline {
     font-family: var(--hf-font-family-text);
     font-size: var(--hf-headline-font-size);
