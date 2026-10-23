@@ -1394,6 +1394,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De pagina van 75 rem laten, met 48 + 3 + 24; regels van zo'n 108 tekens.
   Het schild altijd laten hangen of de tekst altijd inspringen; op een telefoon kost dat zo'n 4 rem breedte.
 - **Later:** de projecteigenaar beslist na de screenshots in de pull request of de hang blijft; zo niet, dan haalt de review die eruit.
+- **Daarna:** onder 56 rem, waar de zijbalk onder de hoofdkolom staat, staan beide gecentreerd, hoogstens 36 rem breed.
+  De ruimte tussen de hoofdkolom en de zijbalk is dan 2 rem, net als tussen de cellen; de 4 rem blijft tussen de kolommen naast elkaar en onder de kolommen.
 
 ## Site
 
