@@ -8,8 +8,11 @@ export type FieldProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'id'
   children: ReactElement<FieldControlProps>
   /** What is wrong with the answer, and how to put it right. Without it, the field has no error. */
   error?: string | undefined
-  /** Extra help under the label, such as the format of the answer. */
-  hint?: ReactNode
+  /**
+   * Extra help under the label, such as the format of the answer. Plain text only: some screen readers, such as VoiceOver,
+   * skip a link or a list in a description, so the reader would not hear it.
+   */
+  hint?: string
   /** The `id` of the field. The label, the hint and the error are tied to it, and an ErrorSummary links to it. */
   id: string
   /** The visible label. A placeholder is not a label. */

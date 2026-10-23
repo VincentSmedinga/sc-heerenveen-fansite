@@ -72,6 +72,17 @@ describe('Field', () => {
     expect(screen.getByRole('textbox', { description: 'Dit staat niet op de site.' })).toBe(field)
   })
 
+  it('allows a hint of plain text only, because a screen reader may skip a link or a list in a description', () => {
+    const elements = [
+      // @ts-expect-error A hint with a link in it is not allowed.
+      <Field hint={<a href="/privacy">Zie de privacyverklaring</a>} id="e-mail" label="E-mailadres">
+        <Input />
+      </Field>,
+    ]
+
+    expect(elements).toHaveLength(1)
+  })
+
   it('ties the error to the field with aria-describedby and marks the field invalid', () => {
     render(
       <Field error="Vul je e-mailadres in." id="e-mail" label="E-mailadres">

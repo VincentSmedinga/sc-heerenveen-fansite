@@ -12,6 +12,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Een formulier. Het bevat velden (`Field`), een `Honeypot` tegen spam en een `Button` om te versturen.',
+          'Een `ErrorSummary` hoort boven het formulier, buiten het `Form`.',
           'Het volledige voorbeeld staat bij HTML-elementen/Formulier, onder Verwijderverzoek, met een fout erbij.',
           '',
           'De browser controleert het formulier niet zelf: `Form` zet `noValidate` aan.',

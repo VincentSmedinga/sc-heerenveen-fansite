@@ -1536,6 +1536,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 23 oktober 2026
 - **Besluit:** je geeft `Field` de `id` van het veld, en het zet op zijn kind (een `Input`, `Textarea` of `Select`) de `id`, `aria-describedby`, `aria-invalid` en `required`.
   De hulptekst krijgt de id `<id>-hint` en de foutmelding `<id>-error`.
+  De hulptekst is een `string`: gewone tekst, zonder links of lijsten, net als de foutmelding.
   Een veld is verplicht tenzij `required={false}`, en alleen een veld dat niet verplicht is, zegt dat in het label: "(niet verplicht)".
 - **Waarom:** de `id` hoort bij het veld en is ook het doel van een link in de `ErrorSummary`, dus hij moet voorspelbaar zijn en niet gegenereerd.
   Een kind dat `Field` aanpast met `cloneElement` houdt het sjabloon kort: `<Field …><Input name="naam" /></Field>`.
@@ -1544,6 +1545,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een schermlezer zegt dat een veld verplicht is, want het veld heeft het attribuut `required`.
 - **Alternatieven:** een render-prop (`{(veld) => <Input {...veld} />}`), die explicieter is maar elk veld langer maakt; of een context, die in een servercomponent niet werkt zonder dat `Field` een clientcomponent wordt.
   Of een `id` die `useId` maakt: de `ErrorSummary` kent die niet, tenzij de pagina hem doorgeeft.
+  Of een hulptekst van het type `ReactNode`, zodat er een link in kan; het Amsterdam Design System raadt dat af, want sommige schermlezers, zoals VoiceOver, slaan opgemaakte tekst in een beschrijving over.
 
 ### De foutmelding is tekst, met een dikkere rand in de kleur van fouten
 
@@ -1561,7 +1563,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 23 oktober 2026
 - **Besluit:** `Form` zet `noValidate` aan, en met `noValidate={false}` krijg je de controle van de browser terug.
-  De site controleert zelf en toont de fouten bij het veld en in een `ErrorSummary` bovenaan: een gebied met een kop en een link naar elk veld.
+  De site controleert zelf en toont de fouten bij het veld en in een `ErrorSummary` boven het formulier: een gebied met een kop en een link naar elk veld.
+  Het blok staat buiten het `Form`: een schermlezer slaat een blok binnen het formulier soms over in de formuliermodus, en de maximale breedte van het formulier geldt er dan niet voor.
   Het blok verplaatst de focus niet.
   Zonder fouten toont het niets.
 - **Waarom:** de bubbel van de browser staat in de taal van de browser, wordt niet altijd voorgelezen en past niet bij onze woorden.

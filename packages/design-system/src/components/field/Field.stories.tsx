@@ -14,6 +14,7 @@ const meta = preview.meta({
           '',
           '- Het label hoort bij het veld met `for` en `id`. De `id` geef je aan `Field`; die zet hem op het veld.',
           '- De hulptekst en de foutmelding horen bij het veld met `aria-describedby`. Een schermlezer leest ze voor bij het veld.',
+          '  Beide zijn gewone tekst, zonder links of lijsten: sommige schermlezers, zoals VoiceOver, slaan opgemaakte tekst in een beschrijving over, en dan hoort de lezer hem niet.',
           '- Heeft het veld een fout, dan krijgt het ook `aria-invalid`, en een dikkere rand in de kleur van fouten.',
           '  De fout staat in tekst en begint voor een schermlezer met "Fout:". Een rode rand is nooit het enige teken.',
           '- Een veld is verplicht, tenzij je `required={false}` zet. We vragen alleen wat we echt nodig hebben, dus verplicht is de gewone staat.',
