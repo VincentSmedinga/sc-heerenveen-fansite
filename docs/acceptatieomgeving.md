@@ -271,7 +271,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
   Is de database weer in orde, start de app dan opnieuw (raak `tmp/restart.txt` aan).
   De site probeert de migraties alleen bij het starten.
 
-- Een bezoeker kreeg "Er ging iets mis" op `/bronnen` of de homepage, terwijl de start goed ging: de regel `Could not read the sources for /bronnen` of `Could not read the headlines for the homepage` in het logboek noemt de reden.
+- Een bezoeker kreeg "Er ging iets mis" op `/bronnen` of de homepage, terwijl de start goed ging: de regel `Could not read the sources for /bronnen` of `Could not read the headlines and discussions for the homepage` in het logboek noemt de reden.
   De database was dan waarschijnlijk even niet bereikbaar.
   Een mislukte vraag bewaart de site niet, dus de volgende bezoeker krijgt het opnieuw geprobeerd.
 - De site geeft een 500 en `stderr.log` zegt `Cannot find module '@swc/helpers/...'`: de map op de host bevat symbolische links.
