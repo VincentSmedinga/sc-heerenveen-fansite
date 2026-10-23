@@ -14,6 +14,7 @@ const meta = preview.meta({
           '',
           '- Hij staat in de `Page.Body`, na de `Page.Main`.',
           '- Op een breed scherm staat hij naast de hoofdkolom, op een smal scherm eronder.',
+          '- Op een middelbaar scherm staan zijn cellen in twee kolommen naast elkaar, onder de hoofdkolom.',
           '- Net als de hoofdkolom bestaat hij uit cellen die onder elkaar staan.',
           '- Geef hem een naam met `aria-label` of `aria-labelledby`.',
         ].join('\n'),

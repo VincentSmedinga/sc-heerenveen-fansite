@@ -45,9 +45,10 @@
    * way.
    *
    * There is one track, as wide as the main (--hf-content-max-width, 48rem), so the sidebar sits under the main, both over
-   * the whole track. From 77rem there is a second track for the sidebar: 48rem, 3rem of space, 24rem, which is the whole
-   * column of the page (--hf-page-max-width, 75rem), and 1rem of margin on either side. A media query can't use a custom
-   * property, so the number is written out here.
+   * the whole track. From 76rem there is a second track for the sidebar: 48rem, 3rem of space, 24rem, which is the whole
+   * column of the page (--hf-page-max-width, 75rem), and 1rem of margin on either side. That is 77rem, but the breakpoint
+   * is 76rem, so between 76rem and 77rem the main track gives up to 1rem. A media query can't use a custom property, so
+   * the number is written out here.
    * The sidebar is second in the source and so in the grid. There is no `order`, which would split the reading order from
    * what is on the screen.
    *
@@ -69,7 +70,7 @@
     margin-inline: var(--hf-page-inset);
     padding-block: var(--hf-page-body-cell-gap) var(--hf-page-body-column-gap);
 
-    @media (width >= 77rem) {
+    @media (width >= 76rem) {
       grid-template-columns: minmax(0, var(--hf-content-max-width)) 24rem;
     }
   }
@@ -80,6 +81,8 @@
    * columns on the same rows. The track can shrink to 0, so a long word or address can't make the column wider than the
    * screen.
    * A child of a column is a cell and has no margin to the outside: the gap is all the space between cells.
+   * Under the main, between 40rem and 76rem, the cells of the sidebar sit side by side in two columns. Below 40rem two
+   * cards would be too narrow, and from 76rem the sidebar is a column of its own.
    */
   .hf-page-main,
   .hf-page-sidebar {
@@ -90,6 +93,12 @@
 
     > * {
       margin: 0;
+    }
+  }
+
+  .hf-page-sidebar {
+    @media (40rem <= width < 76rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
