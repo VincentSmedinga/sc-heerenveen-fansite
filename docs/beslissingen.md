@@ -1421,6 +1421,78 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de kolom smaller maken; "wo 14:05" past niet in minder ruimte.
   Of het `li` als container nemen, zonder extra element; dan klopt het niet voor een `NewsItem` buiten een `List`.
 
+### Koppen in een nieuwsregel zijn pas onderstreept bij hover en focus
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de kop van een nieuwsregel is niet onderstreept.
+  Onder de muis en met de focus van het toetsenbord krijgt hij de onderstreping.
+  Andere links blijven altijd onderstreept.
+- **Waarom:** een lijst met veel onderstreepte koppen is druk, en een kop staat op een eigen regel, zwaarder dan gewone tekst en in de kleur voor links, dus je herkent hem ook zonder streep.
+  WCAG vraagt een onderstreping vooral voor een link in een zin (1.4.1).
+  Met de onderstreping bij de focus krijgt wie het toetsenbord gebruikt hetzelfde teken als wie de muis gebruikt.
+- **Hoe:** alleen de CSS van de nieuwsregel verandert (`news-item.css`), niet de basisstijl van links.
+  De kop krijgt `text-decoration-line: none`, en bij `:hover` en `:focus-visible` weer `underline`, zoals het hoofdmenu in de header dat al doet.
+  De lijn is 1,5 pixel dik (`1.5px`), onder de muis en bij de focus: dikker dan de lijn van een link die niet onder de muis staat (`0.0625em`, 1 pixel) en dunner dan die van `link.css` bij hover (`0.125em`, 2 pixels).
+  Bij de focus staan de dikte en de afstand er ook, zodat die dezelfde lijn krijgt als hover.
+  Een dikkere lijn dan de gewone past bij het gewicht van de kop.
+  De lijn staat `0.1em` onder de tekst, dichter erbij dan bij andere links (`0.15em`).
+  De lijn slaat de staarten van letters over, zoals de g en de p (`text-decoration-skip-ink: auto`).
+  Safari doet dat alleen als in `fonts.css` de subset latin-ext vóór latin staat.
+  Met eerst latin en dan latin-ext tekende Safari de lijn door de g en de p, ook met `text-decoration-skip-ink: auto`; Chrome en Firefox deden het wel goed.
+  Daarom staat latin-ext nu voor latin, bij alle drie de paren (Truculenta, Atkinson en Atkinson cursief), zoals Fontsource ze ook ordent.
+  Van twee lettertypebestanden die hetzelfde teken hebben, wint het laatste, en dat hoort latin te zijn.
+  De kleuren veranderen niet: een bezochte kop houdt de kleur voor bezocht, en onder de muis krijgt hij de kleur voor hover.
+  Bij de focus blijft de kleur zoals hij is.
+  De focusrand blijft zichtbaar (2.4.7).
+  Storybook toont hover, focus en bezocht met de add-on Pseudo States, in licht en donker.
+- **Alternatieven:** alle koppen onderstreept laten, zoals nu.
+  Of alleen bij hover, zonder de focus.
+  Of alle links pas bij hover onderstrepen; dan is een link in een zin alleen aan de kleur te herkennen.
+  Of een dunne lijn, zoals bij een link die niet onder de muis staat (`0.0625em`); dat was een tijd de opzet, maar het paste niet bij het gewicht van de kop.
+  Of de lijn net zo dik als bij hover (`0.125em`, 2 pixels) en op de gewone afstand; dat was de opzet daarna, tot de proef met 1,5 pixel.
+  Voor Safari: latin-ext weglaten; dan vallen de ligaturen Ĳ en ĳ en andere tekens terug op een ander lettertype.
+  Of de lijn zo ver van de tekst zetten dat hij onder de staarten blijft; dan staat hij ver van de kop.
+
+### Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** voorlopig heeft de kop van een nieuwsregel de maat van Tekst, 16 pixels, in plaats van die van de Nieuwskop, 18 pixels.
+  Het gewicht is 500 (Medium) in plaats van 600 (Halfvet).
+  De kop blijft in de kleur voor links, met de regelafstand van de Nieuwskop.
+- **Waarom:** de projecteigenaar wil zien hoe de lijst leest met koppen in de gewone maat en een lichter gewicht.
+  Zonder onderstreping is een kop als link nog te herkennen aan de kleur voor links en zijn eigen regel.
+  Het gewicht onderscheidt hem met 500 minder van gewone tekst (400) dan met 600; de reviewer let daar bij toegankelijkheid op (1.4.1).
+  Of het blijft, volgt als we het gezien hebben.
+- **Hoe:** alleen de CSS van de nieuwsregel verandert: `.hf-news-item-headline` krijgt `font-size: var(--hf-body-font-size)` en `font-weight: 500`.
+  De klasse `hf-headline` blijft, voor de regelafstand en het lettertype.
+  De regel staat in de laag `hf.typography`, achter `.hf-headline`, en niet in `hf.components`: in de gebouwde site komen de lagen van het designsysteem in een andere volgorde dan `index.css` ze geeft, met typografie boven componenten, en dan wint `.hf-headline` van een regel in `hf.components`.
+  Eén regel van de kop is nu zo'n 22 pixels hoog, dus de minimale hoogte van 24 pixels voor het doel (WCAG 2.5.8) komt nu van `min-block-size`.
+- **Alternatieven:** de Nieuwskop van 18 pixels en gewicht 600 houden, zoals voor dit besluit.
+  Of de maat en het gewicht van de Nieuwskop zelf veranderen, in `--hf-headline-font-size` en `--hf-headline-font-weight`; alleen de nieuwsregel gebruikt ze, maar dan verandert ook wat Storybook bij Typografie over de Nieuwskop zegt.
+- **Later:** de grens van 24 rem in _Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query_ ging uit van de Nieuwskop.
+  Met een kop van 16 pixels past er bij 24 rem iets meer dan dertig tekens op een regel, zo'n vierendertig, en de grens blijft staan.
+
+### De kolom met dag en tijd in een nieuwsregel is zo breed als de breedste tijd
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de kolom met de korte dag en de tijd is 4 rem breed, met 0,75 rem ertussen en de kop, samen 4,75 rem in plaats van 5,75 rem (4,75 rem en 1 rem).
+  De dag en de tijd staan altijd op één regel.
+- **Waarom:** de breedste dag en tijd, "ma 20:08", is 61 pixels (3,84 rem) op de maat van Meta.
+  In een kolom van 4,75 rem stond er tussen de tijd en de kop 31 tot 39 pixels lucht, naast een kop van 16 pixels.
+  De projecteigenaar vond dat te veel.
+  Nu is het 15 tot 23 pixels.
+- **Hoe:** in `news-item.css` is `grid-template-columns` nu `minmax(4rem, max-content) minmax(0, 1fr)` en `column-gap` is `0.75rem`.
+  De tijd krijgt `white-space: nowrap`: een breder lettertype, zoals de reservefont voordat het lettertype is geladen, mag de tijd niet over twee regels verdelen.
+  De kolom is voor elke regel even breed, dus de koppen beginnen onder elkaar op dezelfde plek.
+  Is een tijd breder dan 4 rem, bijvoorbeeld met de tekstafstand van WCAG 1.4.12 (letterafstand 0,12 em, woordafstand 0,16 em) of in een breder reservelettertype, dan groeit de kolom mee (`max-content`).
+  Dan beginnen de koppen niet meer allemaal op één plek, maar raakt de tijd de kop niet: zonder dat stak "ma 08:14" met die tekstafstand 1 pixel over de ruimte tot de kop heen.
+  De rem schaalt mee met de tekstgrootte van de bezoeker, net als de tijd.
+- **Later:** de grens van 24 rem in _Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query_ rekende met een kolom en tussenruimte van samen 5,75 rem.
+  Die zijn nu samen 4,75 rem, dus de kop houdt bij 24 rem 19,25 rem in plaats van 18,25 rem, en de grens blijft staan.
+- **Alternatieven:** de kolom altijd door de inhoud laten bepalen (`max-content`); dan begint de kop per regel op een andere plek, want "ma" is breder dan "di".
+  Of de tijd laten afbreken in plaats van `nowrap`; dan staat "ma" boven "08:14" zodra het lettertype breder is, en springt de regel in hoogte.
+  Of de kolom of de tussenruimte nog smaller; dan staat de breedste tijd bijna tegen de kop.
+
 ### De volgorde van de lagen staat in een eigen bestand
 
 - **Datum:** 23 oktober 2026
