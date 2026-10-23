@@ -252,8 +252,10 @@ Van de gegevens van de feed zelf (`channel`) gebruiken we niets.
 Wat de bron er verder bij doet:
 
 - De feed stuurt geen `ETag` of `Last-Modified`, dus een voorwaardelijk verzoek bespaart bij deze bron niets.
-- De bron zet een cookie (`experimentGroup`) bij het antwoord. De fetcher bewaart en stuurt geen cookies.
-- De feed heeft ook berichten die de club maar kort noemen, zoals "Rondje Eredivisie". Een filter daarvoor komt met het relevantiefilter (#74).
+- De bron zet een cookie (`experimentGroup`) bij het antwoord.
+  De fetcher bewaart en stuurt geen cookies.
+- De feed heeft ook berichten die de club maar kort noemen, zoals "Rondje Eredivisie".
+  Een filter daarvoor komt met het relevantiefilter (#74).
 
 Let op: verandert VI de categorie of het domein ervan, dan staat elk nieuw bericht als "niet achter de betaalmuur" in de database.
 De adapter waarschuwt daar nu niet voor.
