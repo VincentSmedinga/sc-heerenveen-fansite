@@ -1270,7 +1270,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De projecteigenaar liet de grens vallen.
   Het lettertype wordt binnenkort groter, en dan telt een regel minder tekens.
 - **Alternatieven:** een los component `Grid` in `Page.Body`, dat de kolommen en de witruimte regelt, terwijl `Page.Body` alleen het kader is.
-  Of een raster van 12 kolommen met `start` en `span`, zoals in het designsysteem van Amsterdam; flexibeler, maar meer API.
+  Of een raster van 12 kolommen met `start` en `span`; flexibeler, maar meer API.
   Of rijen over beide kolommen met cellen die even hoog worden; dan stapelen de kolommen niet los.
   Of meer kaarten in één cel, met de ruimte in de kaart.
   Of de kolom in `Page.Body` laten zoals #73 deed, zonder plek voor een zijbalk.
@@ -1548,7 +1548,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een schermlezer zegt dat een veld verplicht is, want het veld heeft het attribuut `required`.
 - **Alternatieven:** een render-prop (`{(veld) => <Input {...veld} />}`), die explicieter is maar elk veld langer maakt; of een context, die in een servercomponent niet werkt zonder dat `Field` een clientcomponent wordt.
   Of een `id` die `useId` maakt: de `ErrorSummary` kent die niet, tenzij de pagina hem doorgeeft.
-  Of een hulptekst van het type `ReactNode`, zodat er een link in kan; het Amsterdam Design System raadt dat af, want sommige schermlezers, zoals VoiceOver, slaan opgemaakte tekst in een beschrijving over.
+  Of een hulptekst van het type `ReactNode`, zodat er een link in kan; dat raden we af, want sommige schermlezers, zoals VoiceOver, slaan opgemaakte tekst in een beschrijving over.
 
 ### De foutmelding is tekst, met een dikkere rand in de kleur van fouten
 
