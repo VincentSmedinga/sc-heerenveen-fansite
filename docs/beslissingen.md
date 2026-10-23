@@ -298,6 +298,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of een vlag om te kiezen tussen lokaal en GitHub.
   Of altijd de beginpagina openen.
 
+### Wekelijkse iteraties naast de mijlpalen
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het bord krijgt een veld Iteratie met iteraties van een week, van maandag tot en met zondag, genoemd naar het weeknummer: "Week 43".
+  De eerste is week 43 (19 oktober 2026), de week van het eerste werk.
+  Het veld loopt vier weken vooruit.
+  Een issue krijgt de iteratie van de week waarin het Bezig wordt.
+  Wat op maandag nog open is, gaat mee naar de nieuwe week.
+  Een gesloten issue houdt de iteratie van de week waarin het dicht ging.
+  Issues die nog Te doen zijn, hebben geen iteratie.
+  Er is geen maximum aantal issues per iteratie.
+- **Waarom:** een mijlpaal zegt wat erin zit, een iteratie zegt wanneer we eraan werken.
+  Release 1 heeft veertien open issues die even zwaar lijken, en de mijlpalen hebben geen datum.
+  Een weekweergave laat zien waar we mee bezig zijn, en per week is te zien hoeveel er klaar kwam.
+  De projecteigenaar werkt in vlagen, dus een limiet of een vaste planning zou alleen regels toevoegen.
+- **Gevolg:** een issue heeft hoogstens één mijlpaal en één iteratie, en de twee staan los van elkaar.
+  Alle 53 issues die tot nu toe klaar zijn, staan in week 43, dus de weken zeggen voorlopig weinig over de snelheid.
+  Op maandag verplaatst de coördinator de open issues van vorige week naar de nieuwe week.
+  Releaseversies van release-please horen niet bij een iteratie: alleen issues hebben er een.
+- **Alternatieven:** geen iteraties, alleen mijlpalen.
+  Iteraties van twee weken, die voor onze doorloop te lang zijn.
+  Kanban met een grens aan het werk in uitvoering, zonder tijdvak.
+  Een maximum van vier issues per iteratie, dat bij werken in vlagen alleen in de weg zit.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host
