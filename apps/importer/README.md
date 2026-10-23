@@ -343,7 +343,9 @@ Alleen het lezen en bewaren is anders: een bron van het soort forum gaat naar [`
 
 Wat de lezer van een discussie bewaart (tabel `discussions`):
 
-- het adres, uit het adres van de feed, het id en de slug (`https://forum.heerenveen.org/d/<id>-<titel>`);
+- het adres, uit het adres van de feed, het id, de slug en het nummer van het laatste bericht (`https://forum.heerenveen.org/d/<id>-<titel>/<nummer>`);
+  het adres opent de discussie bij het laatste bericht, en dat nummer is hoger dan het aantal berichten als er een bericht is verwijderd;
+  heeft het antwoord geen bruikbaar nummer, dan is het adres dat van de discussie zelf;
   de `slug` in het antwoord begint al met het id, dus de lezer zet het id niet nog eens voor de slug;
   een link uit het antwoord vertrouwen we niet;
 - de titel, als tekst;
@@ -372,6 +374,7 @@ Na elke run staan er precies de vier nieuwste discussies die aan de regels voldo
 Een discussie die niet meer bij de vier hoort, die het forum heeft verwijderd of die een gast niet meer ziet, is dus na de volgende run weg.
 We bewaren geen geschiedenis van titels of schermnamen.
 De regel in de uitvoer telt de nieuwe, de gewijzigde en de ongewijzigde discussies van de vier die blijven.
+Een discussie is dezelfde als het id gelijk is: het adres verandert met elk nieuw bericht, want het eindigt op het nummer van het laatste bericht.
 Het forum vraagt de import nooit "is het veranderd?" (geen `ETag` of `Last-Modified`): een lege database moet na één run discussies hebben.
 
 De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en slaat geen cookies op, dus ook de sessiecookie van de API niet.

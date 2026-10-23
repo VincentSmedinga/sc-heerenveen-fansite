@@ -279,6 +279,11 @@ function describeError(error: unknown): string {
   return cause instanceof Error ? cause.message : String(cause)
 }
 
+/** The address of a forum discussion without the slug and the number of the last post, which change: `/d/2859`. */
+function discussionKey(url: string): string {
+  return new URL(url).pathname.replace(/^(\/d\/\d+).*$/u, '$1')
+}
+
 /** Reads a feed whose time has come, or reports that it waits. A failure of the database becomes an error report. */
 async function importDueFeed(db: Database, fetcher: Fetcher, feed: StoredFeed, now: Date): Promise<FeedReport> {
   if (feed.retryAt !== null && feed.retryAt > now) {
@@ -305,21 +310,25 @@ async function importForum(db: Database, feed: StoredFeed, read: ReturnType<type
 
 /**
  * Makes the discussions of a forum in the database the ones we found, and nothing else: no discussion, title or screen
- * name stays that the forum no longer has among the newest. A discussion is new when we had no row with its address, and
- * changed when its row differs.
+ * name stays that the forum no longer has among the newest. A discussion is new when we had no row with its id, and
+ * changed when its row differs. The address ends in the number of the last post, so it changes with every new post.
  */
 async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDiscussion[]) {
   const counts = { added: 0, unchanged: 0, updated: 0 }
   const known = new Map(
-    (await db.select().from(discussions).where(eq(discussions.sourceId, feed.sourceId))).map((row) => [row.url, row]),
+    (await db.select().from(discussions).where(eq(discussions.sourceId, feed.sourceId))).map((row) => [
+      discussionKey(row.url),
+      row,
+    ]),
   )
 
   for (const discussion of found) {
-    const before = known.get(discussion.url)
+    const before = known.get(discussionKey(discussion.url))
 
     if (before === undefined) {
       counts.added++
     } else if (
+      before.url === discussion.url &&
       before.title === discussion.title &&
       before.replyCount === discussion.replyCount &&
       before.lastPostedBy === discussion.lastPostedBy &&

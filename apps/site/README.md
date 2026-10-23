@@ -86,7 +86,7 @@ Zijn er geen berichten, dan staat er een tekst voor bezoekers.
 Onder het blok staat de link naar Onze bronnen.
 
 In de zijbalk naast het nieuws staat het blok "Nieuwste discussies": de vier discussies van het forum waar het laatst op is gereageerd.
-Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1, 13:28".
+Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar het laatste bericht van de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1, 13:28".
 Van vandaag staat alleen de tijd, van de zes dagen ervoor de korte dag en de tijd, en daarvoor de datum.
 Onder de discussies staat de link "Naar het forum"; zijn er geen discussies, dan staat er een tekst voor bezoekers boven die link.
 De pagina laadt niets van het forum: alleen de links gaan erheen.

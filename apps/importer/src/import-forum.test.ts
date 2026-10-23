@@ -122,7 +122,7 @@ describe('importing the discussions of a forum', () => {
         replyCount: 83,
         sourceId: feed.sourceId,
         title: 'Wie wint er zondag?',
-        url: `${server.origin}/d/1-discussie-1`,
+        url: `${server.origin}/d/1-discussie-1/84`,
       },
       {
         lastPostedAt: new Date('2026-10-23T09:00:00Z'),
@@ -130,7 +130,7 @@ describe('importing the discussions of a forum', () => {
         replyCount: 0,
         sourceId: feed.sourceId,
         title: 'Opstelling',
-        url: `${server.origin}/d/3-discussie-3`,
+        url: `${server.origin}/d/3-discussie-3/1`,
       },
       expect.objectContaining({ title: 'Nieuwe spits gezocht' }),
       expect.objectContaining({ title: 'Het stadion in de winter' }),
@@ -143,7 +143,7 @@ describe('importing the discussions of a forum', () => {
 
     await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
-    expect((await discussionsInDatabase())[0]?.url).toBe(`${server.origin}/d/7-een-slug`)
+    expect((await discussionsInDatabase())[0]?.url).toBe(`${server.origin}/d/7-een-slug/5`)
   })
 
   it('stores nothing of the forum that it was not asked to keep', async () => {

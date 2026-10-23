@@ -40,7 +40,7 @@ describe('readForum', () => {
         lastPostedBy: 'Buffon1',
         replyCount: 83,
         title: 'Wie wint er zondag?',
-        url: 'https://forum.test/d/41-wie-wint-zondag',
+        url: 'https://forum.test/d/41-wie-wint-zondag/84',
       },
     ])
   })
@@ -67,10 +67,10 @@ describe('readForum', () => {
 
     expect(discussions).toHaveLength(discussionsToKeep)
     expect(discussions.map((discussion) => discussion.url)).toEqual([
-      'https://forum.test/d/6-discussie-6',
-      'https://forum.test/d/2-discussie-2',
-      'https://forum.test/d/3-discussie-3',
-      'https://forum.test/d/4-discussie-4',
+      'https://forum.test/d/6-discussie-6/5',
+      'https://forum.test/d/2-discussie-2/5',
+      'https://forum.test/d/3-discussie-3/5',
+      'https://forum.test/d/4-discussie-4/5',
     ])
   })
 
@@ -90,10 +90,10 @@ describe('readForum', () => {
 
     expect(skipped).toEqual([])
     expect(discussions.map((discussion) => discussion.url)).toEqual([
-      'https://forum.test/d/4-discussie-4',
-      'https://forum.test/d/5-discussie-5',
-      'https://forum.test/d/6-discussie-6',
-      'https://forum.test/d/7-discussie-7',
+      'https://forum.test/d/4-discussie-4/5',
+      'https://forum.test/d/5-discussie-5/5',
+      'https://forum.test/d/6-discussie-6/5',
+      'https://forum.test/d/7-discussie-7/5',
     ])
   })
 
@@ -117,7 +117,7 @@ describe('readForum', () => {
     const result = readForum(encode(JSON.stringify(answer)), origin)
 
     expect(result).toMatchObject({
-      discussions: [{ url: 'https://forum.test/d/7-een%20slug%2Fmet%3Ftekens' }],
+      discussions: [{ url: 'https://forum.test/d/7-een%20slug%2Fmet%3Ftekens/5' }],
       kind: 'read',
     })
   })
@@ -125,20 +125,44 @@ describe('readForum', () => {
   it('does not put the id in the address twice, because the slug of the API starts with it', () => {
     const { discussions } = read([{ id: 2859, slug: '2859-24-10-2026-ado-den-haag-sc-heerenveen-2100-uur' }])
 
-    expect(discussions[0]?.url).toBe('https://forum.test/d/2859-24-10-2026-ado-den-haag-sc-heerenveen-2100-uur')
+    expect(discussions[0]?.url).toBe('https://forum.test/d/2859-24-10-2026-ado-den-haag-sc-heerenveen-2100-uur/5')
   })
 
   it('puts the id in front of a slug that does not start with it', () => {
     const { discussions } = read([{ id: 2859, slug: 'ado-den-haag' }])
 
-    expect(discussions[0]?.url).toBe('https://forum.test/d/2859-ado-den-haag')
+    expect(discussions[0]?.url).toBe('https://forum.test/d/2859-ado-den-haag/5')
   })
 
   it('gives the address with the id alone when the slug is the id', () => {
     const { discussions } = read([{ id: 2859, slug: '2859' }])
 
-    expect(discussions[0]?.url).toBe('https://forum.test/d/2859')
+    expect(discussions[0]?.url).toBe('https://forum.test/d/2859/5')
   })
+
+  it('ends the address in the number of the last post, which is higher than the posts that are left after a deleted post', () => {
+    const { discussions } = read([{ commentCount: 53, id: 2856, lastPostNumber: 55 }])
+
+    expect(discussions[0]?.url).toBe('https://forum.test/d/2856-discussie-2856/55')
+    expect(discussions[0]?.replyCount).toBe(52)
+  })
+
+  it.each([undefined, 0, -1, 1.5, '9'])(
+    'gives the address of the discussion itself when the last post number is %j',
+    (number) => {
+      const answer = JSON.parse(forumAnswer([{ id: 2856 }]))
+
+      if (number === undefined) {
+        delete answer.data[0].attributes.lastPostNumber
+      } else {
+        answer.data[0].attributes.lastPostNumber = number
+      }
+
+      expect(readForum(encode(JSON.stringify(answer)), origin)).toMatchObject({
+        discussions: [{ url: 'https://forum.test/d/2856-discussie-2856' }],
+      })
+    },
+  )
 
   it('gives the address without a slug when the discussion has none', () => {
     const answer = JSON.parse(forumAnswer([{ id: 7 }]))
@@ -146,7 +170,7 @@ describe('readForum', () => {
     delete answer.data[0].attributes.slug
 
     expect(readForum(encode(JSON.stringify(answer)), origin)).toMatchObject({
-      discussions: [{ url: 'https://forum.test/d/7' }],
+      discussions: [{ url: 'https://forum.test/d/7/5' }],
     })
   })
 
@@ -182,7 +206,7 @@ describe('readForum', () => {
 
     const result = readForum(encode(JSON.stringify(answer)), origin)
 
-    expect(result).toMatchObject({ discussions: [{ url: 'https://forum.test/d/6-discussie-6' }], kind: 'read' })
+    expect(result).toMatchObject({ discussions: [{ url: 'https://forum.test/d/6-discussie-6/5' }], kind: 'read' })
     expect(result.kind === 'read' && result.skipped).toEqual([
       { position: 1, reason: 'there is no title' },
       { position: 2, reason: 'there is no valid number of posts' },
@@ -202,7 +226,7 @@ describe('readForum', () => {
 
     const result = readForum(encode(JSON.stringify(answer)), origin)
 
-    expect(result).toMatchObject({ discussions: [{ url: 'https://forum.test/d/4-discussie-4' }], kind: 'read' })
+    expect(result).toMatchObject({ discussions: [{ url: 'https://forum.test/d/4-discussie-4/5' }], kind: 'read' })
     expect(result.kind === 'read' && result.skipped.map((item) => item.reason)).toEqual([
       'the title is longer than 500 characters',
       'the screen name is longer than 150 characters',

@@ -2106,7 +2106,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** de lezer vraagt 30 discussies, laat die in een tag die we weglaten vallen, sorteert zelf op het moment van het laatste bericht en houdt de nieuwste vier.
   Een vastgezette discussie kan bij Flarum vooraan staan, dus de sortering van het forum is niet genoeg.
   De fetcher accepteert al elk soort antwoord en negeert de sessiecookie van de API, dus hij hoefde niet te veranderen.
-  Het adres van een discussie bouwt de lezer uit het adres van de feed, het id en de slug: een link uit het antwoord vertrouwen we niet.
+  Het adres van een discussie bouwt de lezer uit het adres van de feed, het id, de slug en het nummer van het laatste bericht: een link uit het antwoord vertrouwen we niet.
+  De `slug` in het antwoord begint al met het id, dus de lezer zet het id er niet nog eens voor.
   De lezer slaat een discussie met iets mis over en meldt waarom, zoals bij berichten.
   Een discussie in een tag die niet in het antwoord staat, slaat hij ook over, want die tag kon er een zijn die we weglaten.
   Zijn er discussies in het antwoord en kan er geen worden gelezen, dan is dat een fout en blijven de vorige discussies staan: dat wijst eerder op een verandering in de API dan op een leeg forum.
@@ -2322,6 +2323,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een bezoeker kan wel zien waar het blok vandaan komt, en de reviewer heeft een regel om aan te toetsen.
 - **Alternatieven:** het forum niet in het register zetten en het blok vastleggen in de code; dan staat nergens wat we ervan tonen.
   Of het forum niet op Onze bronnen tonen; dat vraagt een extra schakelaar in het register en op de pagina.
+
+### De link van een discussie gaat naar het laatste bericht
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de titel in het blok linkt naar het laatste bericht van de discussie, zoals `https://forum.heerenveen.org/d/2859-<titel>/9`.
+  De importer bewaart het adres met het nummer van het laatste bericht erin.
+- **Waarom:** de regel zegt wie het laatst reageerde en wanneer, en de link brengt de bezoeker bij dat bericht.
+  Het forum zelf opent een discussie bij het eerste ongelezen bericht, maar dat weet het alleen in de browser van een ingelogd lid, en onze pagina vraagt het forum niets (principe 3).
+  Het forum is nog rustig, dus een bezoeker slaat niet veel ongelezen berichten over, en kan terugscrollen.
+- **Hoe:** het nummer is het attribuut `lastPostNumber` van de API.
+  Het is hoger dan het aantal berichten als er een bericht is verwijderd, dus de importer telt het niet zelf.
+  Heeft het antwoord geen bruikbaar nummer, dan linkt het adres naar de discussie zelf.
+  Het adres verandert nu met elk nieuw bericht, dus de import herkent een discussie aan het id en niet aan het adres.
+- **Alternatieven:** naar het begin van de discussie linken, zoals eerst.
+  Of het forum laten kiezen: een extensie of instelling op het forum die ingelogde leden bij het eerste ongelezen bericht laat beginnen, voor elke link naar het forum.
 
 ### De tijd van een discussie: vandaag alleen de tijd, daarna de dag, na een week de datum
 

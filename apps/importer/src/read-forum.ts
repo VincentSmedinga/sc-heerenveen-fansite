@@ -16,7 +16,7 @@ export type ForumDiscussion = {
   /** The number of posts minus the opening post, as the forum counts. */
   replyCount: number
   title: string
-  /** The address of the discussion on the forum. */
+  /** The address of the discussion on the forum, at its last post. */
   url: string
 }
 
@@ -48,7 +48,8 @@ export const discussionsToKeep = 4
  * Reads the answer of the Flarum API to a request for the discussions, sorted by the time of the last post and with
  * `include=lastPostedUser,tags`, as a guest gets it. Flarum only lists what a guest may see, so the importer makes no
  * rules about that. It leaves out the discussions in the tags of `leftOutTags`, keeps the newest `discussionsToKeep` of
- * the rest, and builds their addresses from `origin` (the address of the forum we asked) and the id and slug.
+ * the rest, and builds their addresses from `origin` (the address of the forum we asked), the id, the slug and the number
+ * of the last post.
  *
  * It gives an error when the answer is not what we expect, or when it holds discussions and none could be read: that is
  * more likely a change in the API than an empty forum, and the discussions we have are better than none.
@@ -163,7 +164,14 @@ function cleanDiscussion(
   // any character.
   const rawSlug = typeof attributes['slug'] === 'string' ? attributes['slug'] : ''
   const slug = rawSlug.startsWith(`${id}-`) ? rawSlug.slice(id.length + 1) : rawSlug === id ? '' : rawSlug
-  const url = new URL(`/d/${id}${slug === '' ? '' : `-${encodeURIComponent(slug)}`}`, origin).href
+  // The address ends in the number of the last post, so a visitor lands on the post that the line is about, as the
+  // forum does for a member who has read up to there. The number is not the number of posts: a deleted post leaves a gap.
+  const lastPostNumber = attributes['lastPostNumber']
+  const jump =
+    typeof lastPostNumber === 'number' && Number.isSafeInteger(lastPostNumber) && lastPostNumber > 0
+      ? `/${lastPostNumber}`
+      : ''
+  const url = new URL(`/d/${id}${slug === '' ? '' : `-${encodeURIComponent(slug)}`}${jump}`, origin).href
 
   if (url.length > discussionLimits.url) {
     return { reason: `the address is longer than ${discussionLimits.url} characters` }
