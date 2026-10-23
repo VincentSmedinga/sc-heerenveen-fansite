@@ -1599,6 +1599,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** de regel die `input`, `select` en `textarea` hun look geeft, blijft in `base/forms.css`, want drie componenten delen hem.
   De knop (`button/button.css`), de hoogte van een tekstvak (`textarea/textarea.css`) en het veld met een fout (`input.css`, `select.css`, `textarea.css`) staan bij hun component, in dezelfde laag, met een elementselector zoals bij `Link` en `List`.
   De opmaak zelf is niet veranderd.
+  Daarom hebben `Input`, `Textarea`, `Select` en `Button` geen eigen klasse met `hf-`, anders dan het issue vroeg; `Form`, `Field` en `ErrorSummary` hebben die wel.
 - **Waarom:** de regel drie keer overschrijven zou drie plekken geven die uit de pas kunnen lopen.
   De regels bij een component zonder eigen klasse volgen `list.css`: een element in `hf.base`.
 - **Alternatieven:** de gedeelde regel in elk van de drie bestanden herhalen; of klassen (`hf-input`) en de regels naar `hf.components` verplaatsen.
