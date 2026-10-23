@@ -15,6 +15,7 @@ const meta = preview.meta({
           '- Elk kind van de kolom is een cel, zoals een kop, een tekst of een kaart. De cellen staan onder elkaar.',
           '- Zet wat bij elkaar hoort, zoals een kop met een inleiding, in een `Page.Cell`.',
           '- De ruimte tussen de cellen komt van de `Page.Body`.',
+          '- Met de eigenschap `intro` zet je de inleiding van de pagina, zoals de kop met een tekst, bovenaan. De kinderen zijn dan de cellen eronder, en op een breed scherm begint de zijbalk onder de inleiding. Zie `Page.Body`.',
         ].join('\n'),
       },
       source: exampleSource,

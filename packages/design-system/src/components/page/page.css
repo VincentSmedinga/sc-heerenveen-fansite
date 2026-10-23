@@ -101,14 +101,15 @@
   /*
    * A column is a grid of one track, its own, so its cells stack under each other, each as tall as its content, and not
    * on the rows of the other column. That is why a plain grid is enough here: a subgrid would put the cells of both
-   * columns on the same rows. The track can shrink to 0, so a long word or address can't make the column wider than the
-   * screen.
+   * columns on the same rows. Only a main with an introduction is a subgrid, and then in two rows only (see below).
+   * The track can shrink to 0, so a long word or address can't make the column wider than the screen.
    * A child of a column is a cell and has no margin to the outside: the gap is all the space between cells.
    * The cells of the sidebar sit side by side as long as two of them fit, at 16rem each and 2rem apart (34rem), and
    * otherwise under each other. That is the case under the main, in a track of up to 36rem, on a screen from 36rem wide.
    * From 56rem the sidebar is a column of 24rem at most, in which two cells never fit, so no media query is needed.
    */
   .hf-page-main,
+  .hf-page-cells,
   .hf-page-sidebar {
     align-content: start;
     display: grid;
@@ -125,10 +126,49 @@
   }
 
   /*
+   * A main with an introduction (Page.Main with `intro`) holds two things: the introduction, a cell, and a `div` around the
+   * cells under it, which stacks them like the main does without an introduction. They are two rows, and the main is a
+   * subgrid in the rows of the body: it sits on two of them, so the body knows how tall the introduction is. That is how
+   * the sidebar starts under it. The gap between the rows is the gap between cells, so the introduction is a cell like the
+   * others. :has() tells the body about it, so a page without an introduction keeps the layout above.
+   *
+   * Under 56rem the columns are under each other, so the sidebar, which comes after the main in the body, is on the third
+   * row. A narrow screen needs nothing more.
+   *
+   * From 56rem the main takes the first track on both rows and the sidebar the second track on the second row. The areas
+   * are named, not numbered: an item with a row number of its own is placed before the others, and the sidebar then ended up
+   * in the first track. Only a body with an introduction has areas, because an empty area keeps its row and its gap. Here
+   * the main spans both rows, so a page without a sidebar has nothing empty: the cells sit under the introduction as before.
+   * The introduction is as wide as the main, so its lines are as long as those of the other cells, and the track of the
+   * sidebar beside it is empty.
+   */
+  .hf-page-main:has(> .hf-page-intro) {
+    grid-row: span 2;
+    grid-template-rows: subgrid;
+  }
+
+  @media (width >= 56rem) {
+    .hf-page-body:has(> .hf-page-main > .hf-page-intro) {
+      grid-template-areas:
+        'main .'
+        'main sidebar';
+
+      > .hf-page-main {
+        grid-area: main;
+      }
+
+      > .hf-page-sidebar {
+        grid-area: sidebar;
+      }
+    }
+  }
+
+  /*
    * Several things in one cell keep the space they have between them, and the first and last have none to the outside.
    * A cell is a grid item, so margins of what is in it don't collapse out of it and would add to the gap.
    */
-  .hf-page-cell {
+  .hf-page-cell,
+  .hf-page-intro {
     > :first-child {
       margin-block-start: 0;
     }

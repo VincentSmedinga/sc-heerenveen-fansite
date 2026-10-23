@@ -45,15 +45,18 @@ export default async function SourcesPage() {
 
   return (
     <>
-      <Page.Main>
-        <Page.Cell>
-          <Heading level={1}>Onze bronnen</Heading>
-          <Text>
-            {groups.length === 0
-              ? 'We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.'
-              : 'Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.'}
-          </Text>
-        </Page.Cell>
+      <Page.Main
+        intro={
+          <>
+            <Heading level={1}>Onze bronnen</Heading>
+            <Text>
+              {groups.length === 0
+                ? 'We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.'
+                : 'Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.'}
+            </Text>
+          </>
+        }
+      >
         {groups.map(({ heading, kind, sources }) => (
           <Card aria-labelledby={`${kind}-heading`} key={kind}>
             <Heading id={`${kind}-heading`} level={2}>

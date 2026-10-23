@@ -159,6 +159,74 @@ describe('Page.Main', () => {
     ])
   })
 
+  it('has no extra elements without an intro: the children are the direct children of the main', () => {
+    render(
+      <Page.Main>
+        <p>Een</p>
+        <p>Twee</p>
+      </Page.Main>,
+    )
+
+    expect(screen.getByRole('main').innerHTML).toBe('<p>Een</p><p>Twee</p>')
+  })
+
+  it('puts an intro in a div of its own, and the children in a second div, in that order', () => {
+    render(
+      <Page.Main intro={<h1>Bronnen</h1>}>
+        <p>Een</p>
+        <p>Twee</p>
+      </Page.Main>,
+    )
+
+    expect(screen.getByRole('main').innerHTML).toBe(
+      '<div class="hf-page-intro"><h1>Bronnen</h1></div><div class="hf-page-cells"><p>Een</p><p>Twee</p></div>',
+    )
+  })
+
+  it('keeps the heading in the intro inside the main, as the one level one heading of the page', () => {
+    render(
+      <Page.Main intro={<h1>Bronnen</h1>}>
+        <p>Een</p>
+      </Page.Main>,
+    )
+
+    expect(within(screen.getByRole('main')).getByRole('heading', { level: 1 })).toBeTruthy()
+  })
+
+  it('treats an empty intro as no intro', () => {
+    const { rerender } = render(<Page.Main intro={undefined}>Inhoud</Page.Main>)
+
+    expect(screen.getByRole('main').innerHTML).toBe('Inhoud')
+
+    rerender(<Page.Main intro={null}>Inhoud</Page.Main>)
+    expect(screen.getByRole('main').innerHTML).toBe('Inhoud')
+
+    rerender(<Page.Main intro={false}>Inhoud</Page.Main>)
+    expect(screen.getByRole('main').innerHTML).toBe('Inhoud')
+  })
+
+  it('does not pass the intro on to the main as an attribute', () => {
+    render(<Page.Main intro="Inleiding">Inhoud</Page.Main>)
+
+    expect(screen.getByRole('main').hasAttribute('intro')).toBe(false)
+  })
+
+  it('keeps the sidebar outside the main when the main has an intro, in the order of the source', () => {
+    render(
+      <Page.Body>
+        <Page.Main intro={<h1>Bronnen</h1>}>
+          <p>Een</p>
+        </Page.Main>
+        <Page.Sidebar aria-label="Zijbalk">Zijbalk</Page.Sidebar>
+      </Page.Body>,
+    )
+
+    expect(screen.getByRole('main').contains(screen.getByRole('complementary'))).toBe(false)
+    expect(
+      Array.from(screen.getByRole('main').parentElement?.children ?? []).map((child) => child.tagName.toLowerCase()),
+    ).toEqual(['main', 'aside'])
+  })
+
   it('is called Page.Main in the developer tools and the code examples', () => {
     expect(Page.Main.displayName).toBe('Page.Main')
   })

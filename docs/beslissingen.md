@@ -1282,6 +1282,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_.
   De hoofdkolom is nu 36 rem, met 4 rem ertussen, en de kolommen staan naast elkaar vanaf 56 rem; de zijbalk staat tussen 40 rem en 56 rem onder de hoofdkolom.
   De ruimte tussen de kolommen en onder de kolommen is nu 4 rem, ook onder elkaar, en de 3 rem is vervallen.
+- **Later:** zie _De zijbalk kan onder een inleiding beginnen, met benoemde gebieden en een subgrid_.
+  `Page.Main` heeft nu de eigenschap `intro`, en met een inleiding is `Page.Main` een subgrid in de rijen van `Page.Body`.
+  Een kolom zonder inleiding blijft een eigen raster, zoals hierboven staat.
 
 ### Een regel met padding of een rand zet zelf `box-sizing: border-box`
 
@@ -2095,3 +2098,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of blauwe links, zoals op de rest van de site; dat vraagt geen nieuwe tokens, maar de footer valt dan meer op.
   Of één alinea met een `br` tussen de zinnen, zodat de links naar de volgende regel gaan zodra ze niet meer passen, zoals in de header.
   Dan moet de ESLint-regel `br` toestaan, of krijgt het designsysteem een component voor een regeleinde.
+
+### De zijbalk kan onder een inleiding beginnen, met benoemde gebieden en een subgrid
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** `Page.Main` krijgt een eigenschap `intro` voor een inleiding, zoals de kop en de inleiding van een pagina.
+  Op een breed scherm begint de zijbalk onder die inleiding, naast de eerste cel eronder.
+  De inleiding is zo breed als de hoofdkolom.
+  `Page.Body` tekent die opbouw met benoemde gebieden, en `Page.Main` is dan een subgrid in de rijen, met de inleiding en de cellen elk in een eigen `div`.
+- **Waarom:** de `h1` moet in de `main` blijven, want met de landmarks sla je het menu over (2.4.1).
+  De `aside` moet buiten de `main` blijven.
+  axe controleert allebei, met `region` en `landmark-complementary-is-top-level`.
+  Alleen met een subgrid weet `Page.Body` dan hoe hoog de inleiding is.
+  Een subgrid zet elk kind in een eigen rij, dus de cellen eronder staan samen in één `div`.
+  De eigenschap zet die `div` er zelf omheen, zodat een pagina hem niet kan vergeten.
+  Benoemde gebieden laten de opbouw zien als een tekening.
+  Met regelnummers, `grid-row: 2` op de zijbalk, sprong de zijbalk in Chromium en WebKit naar de eerste kolom: een raster plaatst een item met een vaste rij als eerste.
+  Een inleiding zo breed als de hoofdkolom houdt de regels zo lang als _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_ koos.
+- **Hoe:** `:has()` kiest de opbouw, dus een pagina zonder inleiding houdt het raster van nu.
+  Op een smal scherm zijn er geen gebieden nodig: de zijbalk volgt in de bron op de `main` en staat daaronder.
+  Alleen een `Page.Body` met een inleiding krijgt gebieden, want een leeg gebied houdt zijn rij en zijn ruimte.
+  De `main` beslaat beide rijen, dus een pagina met een inleiding maar zonder zijbalk heeft niets leeg: de cellen staan onder de inleiding zoals onder een eerste cel.
+- **Alternatieven:** een inleiding over de volle breedte, met `Page.Main` als subgrid in beide richtingen.
+  Die werkt, maar de `main` ligt dan onder de zijbalk, en een lange inleiding loopt over de hele pagina.
+  Of de inleiding naast de `main` in `Page.Body`; dan staan de `h1` en de inleiding buiten de landmarks.
+  Of `Page.Body` als de `main`; dan staat de `aside` in de `main`.
+  Of een onderdeel `Page.Intro`, met een tweede onderdeel om de cellen; dan schrijft elke pagina die twee zelf.
+  Of een vaste marge boven de zijbalk; die klopt niet meer bij een langere inleiding of als je inzoomt.
