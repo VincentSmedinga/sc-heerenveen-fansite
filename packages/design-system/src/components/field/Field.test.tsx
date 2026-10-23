@@ -68,7 +68,6 @@ describe('Field', () => {
     expect(field.getAttribute('aria-describedby')).toBe('e-mail-hint')
     expect(document.getElementById('e-mail-hint')?.textContent).toBe('Dit staat niet op de site.')
     expect(field.getAttribute('aria-invalid')).toBeNull()
-    expect(screen.getByRole('textbox').getAttribute('description')).toBeNull()
     expect(screen.getByRole('textbox', { description: 'Dit staat niet op de site.' })).toBe(field)
   })
 

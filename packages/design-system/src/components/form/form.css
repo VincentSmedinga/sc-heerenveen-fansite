@@ -1,4 +1,4 @@
-/* A form: no wider than the longest field, so the lines of a field, its text and an error summary read at one width. */
+/* A form: no wider than the longest field, so the lines of a field and its text read at one width. */
 
 @layer hf.components {
   .hf-form {
