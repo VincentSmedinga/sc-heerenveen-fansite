@@ -42,23 +42,23 @@ describe('DiscussionItem', () => {
     const meta = container.querySelector('p')
 
     expect(meta?.className).toBe('hf-meta hf-discussion-item-meta')
-    expect(meta?.textContent).toBe('83 reacties · laatst Buffon1, 13:28')
+    expect(meta?.textContent).toBe('83 reacties · laatst Buffon1 · 13:28')
   })
 
   it('writes "1 reactie" for one reply and "0 reacties" for none', () => {
     const { container, rerender } = render(<DiscussionItem {...props} replies={1} />)
 
-    expect(container.querySelector('p')?.textContent).toBe('1 reactie · laatst Buffon1, 13:28')
+    expect(container.querySelector('p')?.textContent).toBe('1 reactie · laatst Buffon1 · 13:28')
 
     rerender(<DiscussionItem {...props} replies={0} />)
 
-    expect(container.querySelector('p')?.textContent).toBe('0 reacties · laatst Buffon1, 13:28')
+    expect(container.querySelector('p')?.textContent).toBe('0 reacties · laatst Buffon1 · 13:28')
   })
 
   it('writes the thousands of replies the Dutch way', () => {
     const { container } = render(<DiscussionItem {...props} replies={1234} />)
 
-    expect(container.querySelector('p')?.textContent).toBe('1.234 reacties · laatst Buffon1, 13:28')
+    expect(container.querySelector('p')?.textContent).toBe('1.234 reacties · laatst Buffon1 · 13:28')
   })
 
   it.each([undefined, null, ''])('gives only the time when the last poster is %j', (lastPostedBy) => {
@@ -70,7 +70,7 @@ describe('DiscussionItem', () => {
   it('shows the screen name as plain text: no link, no image', () => {
     const { container } = render(<DiscussionItem {...props} lastPostedBy="<b>Buffon1</b>" />)
 
-    expect(container.querySelector('p')?.textContent).toContain('laatst <b>Buffon1</b>,')
+    expect(container.querySelector('p')?.textContent).toContain('laatst <b>Buffon1</b> ·')
     expect(container.querySelector('b')).toBeNull()
     expect(container.querySelector('img, svg, picture')).toBeNull()
     expect(screen.getAllByRole('link')).toHaveLength(1)

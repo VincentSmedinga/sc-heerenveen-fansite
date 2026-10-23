@@ -14,7 +14,7 @@ const meta = preview.meta({
         component: [
           'Een regel met een discussie van ons eigen forum.',
           'De titel is een link naar de discussie op het forum.',
-          'Daaronder staan het aantal reacties, wie het laatst reageerde en wanneer, zoals "83 reacties · laatst Buffon1, 13:28".',
+          'Daaronder staan het aantal reacties, wie het laatst reageerde en wanneer, zoals "83 reacties · laatst Buffon1 · 13:28".',
           'Het aantal telt de reacties, dus zonder het openingsbericht.',
           'Het component schrijft "1 reactie" en "0 reacties" goed.',
           '',

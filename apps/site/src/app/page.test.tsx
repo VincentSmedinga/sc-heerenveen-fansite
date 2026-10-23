@@ -282,7 +282,9 @@ describe('the discussions in the sidebar of the homepage', () => {
       '<a class="hf-headline hf-discussion-item-title" href="https://forum.test/d/41-wie-wint-zondag">Wie wint er zondag?</a>',
     )
     expect(html).toContain('<span>83 reacties</span>')
-    expect(html).toContain('<span>laatst Buffon1,</span> <time dateTime="2026-10-23T11:28:21.000Z">13:28</time>')
+    expect(html).toContain(
+      '<span>laatst Buffon1</span> <span aria-hidden="true">·</span> <time dateTime="2026-10-23T11:28:21.000Z">13:28</time>',
+    )
   })
 
   it('shows today as the time alone, the days before as the weekday and the time, and older ones as the date', async () => {
