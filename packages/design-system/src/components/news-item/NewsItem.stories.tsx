@@ -16,6 +16,14 @@ const meta = preview.meta({
           'Het component kiest dat met een container query op zijn eigen breedte, niet op die van het venster.',
           'De volgorde in de HTML en voor een schermlezer blijft gelijk: eerst de dag en de tijd, dan de kop.',
           '',
+          'De kop is niet onderstreept, want een lijst met veel onderstreepte koppen is druk.',
+          'Onder de muis en met de focus van het toetsenbord krijgt hij de onderstreping, naast de focusrand.',
+          'De onderstreping is iets dunner dan bij andere links onder de muis, passend bij het gewicht van de kop, staat iets dichter bij de tekst, en loopt niet door de staarten van letters als de g en de p.',
+          'De kleuren veranderen niet: een bezochte kop houdt de kleur voor bezocht, en onder de muis krijgt hij de kleur voor hover.',
+          'Een kop staat op een eigen regel, iets zwaarder dan gewone tekst en in de kleur voor links, dus je herkent hem ook zonder onderstreping als link.',
+          'Andere links blijven onderstreept.',
+          'De kop heeft de maat van gewone tekst en een iets zwaarder gewicht, Medium.',
+          '',
           '- `headline` is de kop, zoals de bron hem publiceerde.',
           '  Het component past hem niet aan.',
           '- `href` is het adres van het bericht bij de bron.',
@@ -115,6 +123,36 @@ export const NarrowDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Smalle container, dag en tijd boven de kop, donker',
   render: renderNarrow,
+})
+
+// A headline is only underlined under the mouse and with the focus of the keyboard, so those states are imitated: the
+// first headline is under the mouse, the second has the focus and the third has been visited.
+const stateParameters = {
+  docs: {
+    description: {
+      story:
+        'De eerste kop staat onder de muis, de tweede heeft de focus van het toetsenbord en de derde is bezocht, nagebootst met de add-on Pseudo States. Alleen de eerste twee zijn onderstreept. Met de Tab-toets zie je de echte focusrand.',
+    },
+  },
+  pseudo: {
+    focusVisible: ['li:nth-child(2) .hf-news-item-headline'],
+    hover: ['li:nth-child(1) .hf-news-item-headline'],
+    visited: ['li:nth-child(3) .hf-news-item-headline'],
+  },
+}
+
+export const StatesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Kop onder de muis, met focus en bezocht, licht',
+  parameters: stateParameters,
+  render: renderWide,
+})
+
+export const StatesDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Kop onder de muis, met focus en bezocht, donker',
+  parameters: stateParameters,
+  render: renderWide,
 })
 
 const renderLong = () => (
