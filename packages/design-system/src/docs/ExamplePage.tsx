@@ -83,10 +83,7 @@ export const ExampleMain = () => (
         de naam van de bron erbij.
       </Text>
     </Page.Cell>
-    <Text>
-      Op een breed scherm staat deze kolom naast de zijbalk. Op een smal scherm staat de zijbalk eronder, over de hele
-      breedte.
-    </Text>
+    <Text>Op een breed scherm staat deze kolom naast de zijbalk. Op een smaller scherm staat de zijbalk eronder.</Text>
     <Page.Cell>
       <Heading appearance={3} level={2}>
         Zo lees je de site
