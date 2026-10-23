@@ -47,7 +47,7 @@ const meta = preview.meta({
 const render = () => (
   <Card aria-labelledby="nieuws-kop">
     <Heading id="nieuws-kop" level={2}>
-      sc Heerenveen in de media
+      Laatste nieuws
     </Heading>
     <List role="list">
       <List.Item>

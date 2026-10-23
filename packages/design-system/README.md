@@ -21,7 +21,7 @@ De tests van de componenten draai je met `pnpm --filter design-system test`.
 ## Gebruiken
 
 Importeer één bestand voor de stijlen.
-Daarin zitten de lettertypes, de tokens, de stijlen voor HTML-elementen, de typestijlen en de stijlen van de componenten.
+Daarin zitten de lettertypes, de tokens, de stijlen voor HTML-elementen, de typestijlen, de stijlen van de componenten en de hulpklassen.
 
 ```css
 @import url('@fansite/design-system/index.css');
@@ -44,7 +44,8 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
 - **Puur CSS:** custom properties, cascade layers en geneste regels.
   Geen Sass, CSS-in-JS of Tailwind.
 - **Voorvoegsel `hf-`** (Heerenveen Fansite) voor klassen en custom properties: `.hf-heading-3`, `--hf-colour-text-default`.
-- **Lagen:** `hf.tokens`, `hf.base`, `hf.typography`, `hf.components`.
+- **Lagen:** `hf.tokens`, `hf.base`, `hf.typography`, `hf.components`, `hf.utilities`.
+  Een hulpklasse zit in `hf.utilities`, de sterkste laag, zodat een component of typestijl haar niet ongedaan maakt.
   CSS buiten een laag wint altijd.
   Het CSS-bestand van een component mag regels in meer dan één laag hebben: `heading/heading.css` heeft een basislaag en een typografielaag.
   De volgorde van de imports in `src/index.css` is de volgorde van de regels binnen een laag.
@@ -104,6 +105,7 @@ Zo blijft een uitzondering niet hangen.
 | `src/tokens`     | Kleur- en typografietokens, met hun verhalen en documentatie                     |
 | `src/base`       | Stijlen voor elementen zonder component, en alle verhalen van HTML-elementen     |
 | `src/components` | De componenten, elk met stories, tests en CSS                                    |
+| `src/utilities`  | Hulpklassen die één ding doen, zoals `hf-visually-hidden`, met stories en tests  |
 | `src/assets`     | Logo's als SVG                                                                   |
 | `src/docs`       | Huisstijl, lege hoofdstukken en hulpcomponenten voor de documentatie             |
 | `.storybook`     | Instellingen van Storybook: themaknop, documentatie en toegankelijkheidscontrole |

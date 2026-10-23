@@ -2,11 +2,12 @@
  * Entry point of the design system's CSS.
  *
  * Cascade layers, from weak to strong: tokens, base (HTML elements), typography (type styles),
- * components. Styles outside a layer, such as an app's own, always win over these.
+ * components, utilities (classes that do one thing, such as hf-visually-hidden).
+ * Styles outside a layer, such as an app's own, always win over these.
  * Class prefix: hf- (Heerenveen Fansite).
  */
 
-@layer hf.tokens, hf.base, hf.typography, hf.components;
+@layer hf.tokens, hf.base, hf.typography, hf.components, hf.utilities;
 
 @import url('./fonts.css');
 @import url('./tokens/colour.css');
@@ -14,9 +15,9 @@
 @import url('./tokens/layout.css');
 
 /*
- * Every component has its own file, and base/ holds the elements without a component. A file can have rules in more
- * than one layer, such as heading.css in base and typography. The order of the imports is the order of the rules
- * within each layer, so moving a rule between files does not change the cascade.
+ * Every component has its own file, base/ holds the elements without a component, and utilities/ the utility classes.
+ * A file can have rules in more than one layer, such as heading.css in base and typography. The order of the imports
+ * is the order of the rules within each layer, so moving a rule between files does not change the cascade.
  * logo.css comes before heading.css because the wordmark is the first type style.
  */
 @import url('./components/root/root.css');
@@ -34,3 +35,4 @@
 @import url('./components/news-item/news-item.css');
 @import url('./base/table.css');
 @import url('./base/forms.css');
+@import url('./utilities/visually-hidden.css');

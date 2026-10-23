@@ -791,6 +791,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   CSS van de site zelf, buiten een laag, wint altijd van het designsysteem.
 - **Alternatieven:** geen lagen, en dan specificiteit en volgorde bewaken.
   Dat wordt lastiger naarmate er meer componenten zijn.
+- **Later:** er is een vijfde laag, `hf.utilities`, na `hf.components`; zie _Hulpklassen zitten in de sterkste laag_.
 
 ### Typestijl los van het HTML-niveau
 
@@ -1219,6 +1220,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of nu al tokens voor ruimte (#19).
   Of een andere naam dan `strong` voor het tonale vlak: `blue` lijkt te veel op `soft`, `tinted` is ook waar voor `soft` en `warm`, `accent` is al de rode tekstkleur en `highlight` is al een achtergrond met dezelfde waarden.
 
+### Hulpklassen zitten in de sterkste laag
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het designsysteem heeft hulpklassen: een klasse die één ding doet, op elk element.
+  De eerste is `hf-visually-hidden`: wat die klasse heeft, zie je niet, maar een schermlezer leest het wel voor.
+  Hulpklassen staan in `src/utilities`, met een story en een test, en zitten in een vijfde laag, `hf.utilities`, na `hf.components`.
+- **Hoe:** `hf-visually-hidden` haalt het element uit de stroom, maakt het één pixel groot en knipt het weg met `clip-path: inset(50%)`.
+  Zonder marge, padding en rand neemt het geen ruimte in en maakt het de pagina niet breder.
+  De tekst blijft op één regel, want sommige schermlezers lezen afgebroken tekst in zo'n smal vak als één lang woord.
+  Het element blijft in de toegankelijkheidsboom, anders dan met `display: none` of het attribuut `hidden`.
+- **Waarom:** een hulpklasse moet winnen van het component of de typestijl op hetzelfde element.
+  Een `Card` zet bijvoorbeeld padding en een rand; die mogen een kaart met `hf-visually-hidden` niet groter maken dan één pixel.
+  In de sterkste laag wint de hulpklasse altijd, hoe specifiek de regel van het component ook is.
+  CSS van de site zelf, buiten een laag, wint nog steeds.
+- **Alternatieven:** de klasse in `hf.components`, als laatste import; dan wint een specifiekere regel van een component, en moeten we specificiteit en volgorde weer bewaken.
+  Of `!important` op elke eigenschap, zoals veel CSS-bibliotheken doen; dan wint de klasse ook van de CSS van de site, en die moet altijd kunnen winnen.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -1416,6 +1434,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De AVG vraagt een privacyverklaring die makkelijk te vinden en te begrijpen is, geen lange of aparte pagina.
 - **Alternatieven:** drie of vier pagina's (Over ons, Bronnenbeleid, Verwijderverzoeken en Privacy), zoals #24 eerst noemde.
   Of één uitgebreide pagina, met de hele geschiedenis, de importer en `robots.txt`, en een privacyverklaring met een vaste bewaartermijn.
+
+### De homepage verbergt zijn `h1` voor het oog, en het blok heet Laatste nieuws
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de `h1` "sc Heerenveen Fansite" blijft op de homepage, maar alleen voor schermlezers.
+  Het blok met het nieuws uit de media heet "Laatste nieuws".
+- **Hoe:** de `h1` heeft de klasse `hf-visually-hidden` uit het designsysteem (zie _Hulpklassen zitten in de sterkste laag_).
+- **Waarom:** het logo in de header zegt al "sc Heerenveen Fansite", vlak boven de kop.
+  Een schermlezer heeft de `h1` nodig om te weten waar hij is, en elke pagina heeft er precies één.
+  "Laatste nieuws" zegt wat er in het blok staat; dat het over sc Heerenveen gaat, zegt de site al.
+- **Alternatieven:** de `h1` weghalen; dan heeft de homepage geen `h1`.
+  Of "sc Heerenveen in de media" de `h1` maken; dan vallen latere blokken, zoals het forum of podcasts, onder die kop.
+  Of een andere zichtbare `h1`, zoals "Nieuws over sc Heerenveen".
+  Voor het blok: "In de media", of "sc Heerenveen in de media", zoals het eerst heette.
 
 ## Importer
 

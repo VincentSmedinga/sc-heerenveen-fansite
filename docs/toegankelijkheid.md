@@ -143,5 +143,6 @@ Gebruik wat er is, in plaats van het opnieuw te bouwen (#19):
 - [HTML-elementen/Links](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/html-elementen-links--documentatie): onderstreepte links, met hover, focus en bezocht.
 - [HTML-elementen/Formulier](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/html-elementen-formulier--documentatie): labels, velden en knoppen van 44 pixels hoog, en randen van 3:1.
 - [Componenten](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/componenten-overzicht--documentatie): de componenten voor de paginaopbouw, met de landmarks `header`, `nav`, `main` en `footer`, een navigatie met een naam en een kop met een niveau los van zijn stijl.
+- [Hulpklassen/Alleen voor schermlezers](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/hulpklassen-alleen-voor-schermlezers--documentatie): de klasse `hf-visually-hidden`, voor tekst die je niet ziet maar die een schermlezer wel voorleest.
 
 De patronen volgen met de pagina's die ze nodig hebben.
