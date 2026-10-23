@@ -1497,6 +1497,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de kolom altijd door de inhoud laten bepalen (`max-content`); dan begint de kop per regel op een andere plek, want "ma" is breder dan "di".
   Of de tijd laten afbreken in plaats van `nowrap`; dan staat "ma" boven "08:14" zodra het lettertype breder is, en springt de regel in hoogte.
   Of de kolom of de tussenruimte nog smaller; dan staat de breedste tijd bijna tegen de kop.
+- **Later:** de kolom is nu 5,75 rem breed; zie _De kolom met dag of datum in een nieuwsregel is zo breed als de breedste datum_.
 
 ### De volgorde van de lagen staat in een eigen bestand
 
@@ -1738,6 +1739,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of "vandaag" en "gisteren", of een relatieve tijd.
 - **Later:** zie _Het nieuws staat in één lijst, met dag en tijd in een eigen kolom_.
   De kop per dag is weg; de week en het ontbreken van een maximum blijven.
+- **Later:** zie _De homepage toont het nieuws van twee weken_.
+  De lijst beslaat nu twee weken in plaats van een week; het ontbreken van een maximum blijft.
 
 ### Voorlopig is de query de poort voor het weergavebeleid
 
@@ -2231,6 +2234,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dag en tijd blijven kloppen in een pagina uit de cache.
 - **Alternatieven:** de kop per dag houden, zoals #73 deed.
   Of zoals op de artboard: dag en tijd voor vandaag en dag en datum voor oudere berichten, zoals "za 17/10"; dan toont een pagina uit de cache rond middernacht even een tijd zonder datum.
+- **Later:** zie _De homepage toont het nieuws van twee weken_ en _De tijd van een bericht: een weekdag in de week, daarna de datum_.
+  De lijst blijft, maar beslaat nu twee weken, en een weekdag staat er alleen voor de laatste zeven dagen.
 
 ### De footer staat op een eigen vlak, met links in donker zand
 
@@ -2373,3 +2378,42 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   "laatst" laat de tijd ook zonder schermnaam zeggen waarvan hij is.
 - **Alternatieven:** altijd dag en tijd; dat is drukker en zegt over vandaag minder.
   Of een relatieve tijd, zoals "2 uur geleden"; die klopt niet meer in een pagina uit de cache en een schermlezer leest hem minder gemakkelijk.
+- **Later:** de homepage toont nu twee weken nieuws, maar de weekdag staat bij het nieuws nog voor dezelfde zeven dagen als hier.
+  Zie _De tijd van een bericht: een weekdag in de week, daarna de datum_.
+  De tijd van een discussie verandert niet.
+
+### De homepage toont het nieuws van twee weken
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de homepage toont alle berichten van vandaag en de dertien dagen ervoor, in Nederlandse tijd, het nieuwste eerst, zonder maximum, in één lijst.
+- **Waarom:** met een paar bronnen komen er per week weinig berichten bij, en een bezoeker die een paar dagen niet keek, ziet zo meer.
+  Wachten op het archief (#26) laat de homepage tot Release 2 bij een week.
+- **Alternatieven:** een week houden en een pagina met meer nieuws bouwen (#26); dat is groter en komt later.
+  Of een vast aantal, zoals de nieuwste 20 of 50, wat we eerder al afwezen.
+- **Later:** zie _De homepage toont het nieuws van de afgelopen week, per dag_ en _Het nieuws staat in één lijst, met dag en tijd in een eigen kolom_; van die twee blijft de lijst en vervalt de week.
+
+### De tijd van een bericht: een weekdag in de week, daarna de datum
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** van een bericht van vandaag en de zes dagen ervoor staan de korte dag en de tijd ("wo 14:05"); van een ouder bericht de datum en de tijd ("14 okt 14:05").
+- **Waarom:** een weekdag is alleen duidelijk binnen zeven dagen; bij veertien dagen kan "wo" twee verschillende woensdagen zijn.
+  De datum voor wat ouder is, houdt de regel van de discussies in de zijbalk aan (daar staat "16 okt" na een week).
+  Dag en tijd blijven kloppen in een pagina uit de cache.
+- **Alternatieven:** op elke regel de datum en de tijd; dat is altijd duidelijk, maar langer, en de weekdag helpt bij recent nieuws.
+  Of de weekdag voor alles; dat is dubbelzinnig vanaf de achtste dag.
+- **Hoe:** `news.ts` kent twee vensters: `windowStart` voor de twee weken van de homepage en `weekdayStart` voor de zeven dagen met een weekdag.
+  De tijd van een discussie gebruikt `weekdayStart`, dus die regel verandert niet.
+
+### De kolom met dag of datum in een nieuwsregel is zo breed als de breedste datum
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de kolom met de dag of de datum en de tijd is 5,75 rem breed in plaats van 4 rem, met 0,75 rem ertussen en de kop.
+  De koppen beginnen op elke regel op dezelfde plek, ook als de ene regel een weekdag heeft en de andere een datum.
+- **Waarom:** de breedste datum en tijd, zoals "28 mei 20:08", is 87 pixels (5,4 rem) op de maat van Meta, tegen 61 pixels voor "ma 20:08".
+  Met een kolom van 4 rem zou elke regel zijn eigen kolom uitrekken, en begonnen de koppen met een datum verder naar rechts dan die met een weekdag.
+  De kolom heeft er een klein beetje ruimte bij, zoals eerder.
+- **Alternatieven:** de datum boven de tijd zetten in de kolom; dan wijkt een regel met een datum in hoogte af van een regel met een weekdag.
+  Of de component de tijd in twee delen laten krijgen; dat is een grotere wijziging van het component, die dit issue niet vraagt.
+  Of de kolom door de inhoud laten bepalen (`max-content`); dan beginnen de koppen niet op dezelfde plek.
+- **Later:** zie _De kolom met dag en tijd in een nieuwsregel is zo breed als de breedste tijd_; de kolom van 4 rem was alleen voor weekdagen genoeg.
+  De grens van 24 rem blijft staan; de kop houdt daar nu 17,5 rem in plaats van 19,25 rem.

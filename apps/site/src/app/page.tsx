@@ -9,7 +9,7 @@ import { reasonOf } from '../errors'
 import { forumUrl } from '../forum'
 import { getHeadlines } from '../headlines'
 import { pageMetadata } from '../metadata'
-import { dateTimeOf, formatDayAndTime, formatDiscussionTime } from '../news'
+import { dateTimeOf, formatDiscussionTime, formatNewsTime } from '../news'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
 
@@ -17,7 +17,7 @@ import { withBranch } from '../title'
 export const dynamic = 'force-dynamic'
 
 /**
- * The headlines of the week and the newest discussions of the forum, or undefined when the database can't give them. A
+ * The headlines of the last two weeks and the newest discussions of the forum, or undefined when the database can't give them. A
  * page that throws gets an empty page with a 500 from Next.js, and the text only after JavaScript runs. So this page
  * catches the error and shows the error page itself, in the HTML. `cache` makes the page and its metadata share one call
  * per request.
@@ -64,7 +64,7 @@ export default async function HomePage() {
             Laatste nieuws
           </Heading>
           {headlines.length === 0 ? (
-            <Text>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</Text>
+            <Text>We hebben de afgelopen twee weken nog geen nieuws gevonden. Kijk straks nog eens.</Text>
           ) : (
             <List role="list">
               {headlines.map((item, index) => (
@@ -75,7 +75,7 @@ export default async function HomePage() {
                     href={item.url}
                     paywalled={item.paywalled}
                     source={item.sourceName}
-                    time={formatDayAndTime(item.publishedAt)}
+                    time={formatNewsTime(item.publishedAt, now)}
                   />
                 </List.Item>
               ))}

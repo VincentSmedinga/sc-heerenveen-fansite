@@ -1,9 +1,15 @@
-/* How the site shows the news to visitors: the week it covers and the day and time of an item, in Dutch time. The database holds UTC. */
+/* How the site shows the news to visitors: the two weeks it covers and the day or date and time of an item, in Dutch time. The database holds UTC. */
 
 const timeZone = 'Europe/Amsterdam'
 
-/** The week the homepage shows: today and the six days before it. */
-const daysShown = 7
+/** The days the homepage shows news from: today and the thirteen days before it. */
+const daysShown = 14
+
+/**
+ * The days that get a weekday: today and the six days before it. A weekday is only clear within seven days; further
+ * back "wo" could be either of two Wednesdays, so older news gets a date. The time of a discussion follows the same rule.
+ */
+const daysWithWeekday = 7
 
 const dayAndTimeFormat = new Intl.DateTimeFormat('nl-NL', {
   hour: '2-digit',
@@ -46,8 +52,8 @@ export function dateTimeOf(moment: Date) {
 }
 
 /**
- * The short weekday and the time of day in the Netherlands, such as "wo 14:05". The week is seven days, so a weekday
- * never appears twice in it, and the time stays right in a page from the cache.
+ * The short weekday and the time of day in the Netherlands, such as "wo 14:05". Within seven days a weekday never
+ * appears twice, and the time stays right in a page from the cache.
  */
 export function formatDayAndTime(moment: Date) {
   const parts = Object.fromEntries(dayAndTimeFormat.formatToParts(moment).map(({ type, value }) => [type, value]))
@@ -65,14 +71,32 @@ export function formatDiscussionTime(moment: Date, now: Date) {
   if (moment >= startOfDay(now, 0)) {
     return timeFormat.format(moment)
   }
-  if (moment >= windowStart(now)) {
+  if (moment >= weekdayStart(now)) {
     return formatDayAndTime(moment)
   }
 
   return (clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)
 }
 
-/** The start of the week the homepage shows: the first moment of the Dutch day six days before today. */
+/**
+ * The time of a news item as a visitor reads it, in Dutch time. Of today and the six days before it is the short weekday
+ * and the time, such as "wo 14:05". Anything older is the date and the time, such as "14 okt 14:05". A moment after now,
+ * from a clock that is ahead, counts as today. The news covers fourteen days, so the year is never needed.
+ */
+export function formatNewsTime(moment: Date, now: Date) {
+  if (moment >= weekdayStart(now)) {
+    return formatDayAndTime(moment)
+  }
+
+  return `${dateFormat.format(moment)} ${timeFormat.format(moment)}`
+}
+
+/** The start of the days that get a weekday: the first moment of the Dutch day six days before today. */
+export function weekdayStart(now: Date) {
+  return startOfDay(now, daysWithWeekday - 1)
+}
+
+/** The start of the news the homepage shows: the first moment of the Dutch day thirteen days before today. */
 export function windowStart(now: Date) {
   return startOfDay(now, daysShown - 1)
 }

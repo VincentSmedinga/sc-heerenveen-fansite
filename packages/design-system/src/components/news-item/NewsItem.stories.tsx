@@ -10,8 +10,9 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een regel nieuws van een andere bron. Links staan de korte dag en de tijd in rood, zoals "wo 14:05".',
+          'Een regel nieuws van een andere bron. Links staan de dag en de tijd in rood, zoals "wo 14:05", of voor wat ouder is de datum en de tijd, zoals "14 okt 14:05".',
           'Daarnaast staat de kop als link naar het bericht bij de bron, en daaronder de naam van de bron met een klein pictogram voor een link naar buiten en, als het bericht achter een betaalmuur staat, "voor abonnees".',
+          'De kolom met de dag of de datum is op elke regel even breed, zodat de koppen op één lijn beginnen, ook als de ene regel een weekdag heeft en de andere een datum.',
           'Is de regel zelf smal, zoals op een telefoon of in de zijbalk, dan staan de dag en de tijd boven de kop, zodat de kop en de bron de hele breedte krijgen.',
           'Het component kiest dat met een container query op zijn eigen breedte, niet op die van het venster.',
           'De volgorde in de HTML en voor een schermlezer blijft gelijk: eerst de dag en de tijd, dan de kop.',
@@ -29,7 +30,7 @@ const meta = preview.meta({
           '- `href` is het adres van het bericht bij de bron.',
           '  De link opent in hetzelfde tabblad.',
           '- `source` is de naam van de bron, zoals de bron vermeld wil worden.',
-          '- `time` is de korte dag en de tijd zoals een bezoeker ze leest, zoals "wo 14:05".',
+          '- `time` is de korte dag en de tijd, of de datum en de tijd, zoals een bezoeker ze leest: "wo 14:05" of "14 okt 14:05".',
           '  `dateTime` is de volledige tijd voor het `time`-element, zoals `2026-10-21T12:05:00Z`.',
           '  Het component kent geen tijdzone en rekent niet: de pagina zegt welke dag en tijd de bezoeker ziet.',
           '- `paywalled` zet "voor abonnees" onder de kop, achter de naam van de bron.',
@@ -90,6 +91,15 @@ const renderIn = (maxInlineSize: string) => () => (
             href="#contract"
             source="Voorbeeldkrant"
             time="di 19:45"
+          />
+        </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-14T12:05:00Z"
+            headline="Terugblik op de zege in Zwolle, met een nieuwe aanvaller en een geblesseerde captain"
+            href="#terugblik"
+            source="Testkrant"
+            time="14 okt 14:05"
           />
         </List.Item>
       </List>
@@ -176,6 +186,15 @@ const renderLong = () => (
             href="#kort"
             source="Testkrant"
             time="wo 10:30"
+          />
+        </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-09T06:10:00Z"
+            headline="Heerenveen na een wedstrijd vol wendingen, blessures en een doelpunt in de laatste minuut toch nog langs Testclub: ‘Dit is wat we nodig hadden’"
+            href="#lang-datum"
+            source="Testkrant"
+            time="9 okt 08:10"
           />
         </List.Item>
       </List>

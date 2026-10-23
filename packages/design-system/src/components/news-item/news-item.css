@@ -1,7 +1,7 @@
 /*
- * A line of news: the short day and the time in red on the left, and next to it the headline as a link, with the source
- * and the paywall under it. The headline is underlined under the mouse and with the focus of the keyboard, not otherwise.
- * A line narrower than 24rem puts the day and the time above the headline instead. A List of lines has a thin line between
+ * A line of news: the short day and the time, or the date and the time, in red on the left, and next to it the headline
+ * as a link, with the source and the paywall under it. The headline is underlined under the mouse and with the focus of
+ * the keyboard, not otherwise. A line narrower than 24rem puts the day and the time above the headline instead. A List of lines has a thin line between
  * the lines.
  */
 
@@ -21,16 +21,17 @@
 
   /*
    * The columns of every line are the same width, so the headlines start at the same place down the list. The first
-   * baselines of the time and the headline are on one line. The column of the time is as wide as the widest time, "ma
-   * 20:08" (61 pixels at the size of Meta), with a little to spare, so there is not much air between the time and the
-   * headline. It grows when a time is wider, with the text spacing of WCAG 1.4.12 or a wider fallback font: then the
-   * headlines of the lines may start in different places, which is better than a time that touches its headline.
+   * baselines of the time and the headline are on one line. The column of the time is as wide as the widest date and
+   * time, "28 mei 20:08" (87 pixels at the size of Meta), with a little to spare, so a line with a weekday and a line
+   * with a date start their headline in the same place. It grows when a time is wider, with the text spacing of WCAG
+   * 1.4.12 or a wider fallback font: then the headlines of the lines may start in different places, which is better
+   * than a time that touches its headline.
    */
   .hf-news-item-layout {
     align-items: baseline;
     column-gap: 0.75rem;
     display: grid;
-    grid-template-columns: minmax(4rem, max-content) minmax(0, 1fr);
+    grid-template-columns: minmax(5.75rem, max-content) minmax(0, 1fr);
   }
 
   /*

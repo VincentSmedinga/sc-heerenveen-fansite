@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu vier pagina's: de homepage met de koppen van de afgelopen week, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, met de privacyverklaring, en `/wat-is-er-nieuw` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu vier pagina's: de homepage met de koppen van de afgelopen twee weken, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, met de privacyverklaring, en `/wat-is-er-nieuw` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -47,7 +47,7 @@ Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de
 
 De homepage toont koppen uit de database, en de seed heeft er geen.
 Daarom zet `e2e/global-setup.ts` vóór de eerste test verzonnen koppen op de testbronnen in de database, en haalt ze er na de laatste test weer uit (`e2e/headlines.ts`).
-Of de homepage een bericht van ouder dan een week en een van een uitgezette bron weglaat, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
+Of de homepage een bericht van veertien dagen oud of ouder en een van een uitgezette bron weglaat, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
 Hier gaat het om axe op de pagina met nieuws.
 Draait de database van de controle ook echte berichten, door `pnpm run import`, dan staan die er gewoon tussen.
 Playwright wacht tot `/robots.txt` antwoordt en niet tot de homepage, want die bewaart haar koppen vijf minuten in het geheugen.
@@ -94,7 +94,7 @@ De importer bewaart de discussies (zie de [README van de importer](../importer/R
 De server bewaart ze vijf minuten (`src/discussions.ts`).
 
 `listRecentItems` in `@fansite/db/queries` haalt de berichten op, met alleen die velden.
-`src/news.ts` rekent de week uit in Nederlandse tijd (`Europe/Amsterdam`), en schrijft de dag en de tijd.
+`src/news.ts` rekent de twee weken uit in Nederlandse tijd (`Europe/Amsterdam`), en schrijft de dag of de datum en de tijd.
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
