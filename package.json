@@ -18,6 +18,7 @@
     "format": "prettier --write .",
     "import": "pnpm --filter @fansite/importer run import",
     "import:status": "pnpm --filter @fansite/importer run import:status",
+    "iterations": "node scripts/iterations.js",
     "lint": "pnpm run lint:js && pnpm run lint:css && pnpm run lint:format",
     "lint:css": "stylelint --allow-empty-input '**/*.css'",
     "lint:format": "prettier --check .",
