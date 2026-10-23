@@ -1744,3 +1744,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dag en tijd blijven kloppen in een pagina uit de cache.
 - **Alternatieven:** de kop per dag houden, zoals #73 deed.
   Of zoals op de artboard: dag en tijd voor vandaag en dag en datum voor oudere berichten, zoals "za 17/10"; dan toont een pagina uit de cache rond middernacht even een tijd zonder datum.
+
+### De footer staat op een eigen vlak, met links in donker zand
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de footer heeft een eigen vlak van rand tot rand: in licht `grey-200`, in donker `blue-900`.
+  Bovenaan staat een lijn in `grey-300` en `blue-700`.
+  De twee zinnen staan onder elkaar, met de links rechts ervan; op een smal scherm staan de links eronder.
+  De links zijn donker zand: `sand-700` in licht, `sand-300` in donker.
+- **Waarom:** het vlak sluit de pagina af, zoals de header hem opent.
+  Een stap donkerder dan de pagina is rustig en houdt de tekst goed leesbaar.
+  Met de zinnen onder elkaar en de links rechts is de footer lager en sneller te overzien.
+  Donker zand past bij het vlak en maakt de footer rustiger dan de rest van de pagina; de onderstreping laat zien dat het links zijn.
+- **Hoe:** twee nieuwe rollen geven het vlak en de lijn hun kleur: `--hf-colour-background-footer` en `--hf-colour-border-footer`.
+  De reeks zand krijgt een stap `sand-700` (`#52462d`): zo licht als `grey-700`, met 0,042 chroma en tint 85°.
+  Ook de links hebben twee rollen: `--hf-colour-text-link-on-footer` en, onder de muis, `--hf-colour-text-link-hover-on-footer` (`grey-900` in licht, `sand-100` in donker).
+  De `Page.Footer` zet daarmee de kleuren van links voor alles wat erin staat, zoals de `Page.Header` dat doet; een bezochte link krijgt de kleur van een gewone link.
+  De twee zinnen zijn elk een eigen `Text`, want de sjablonen van de site bevatten geen HTML, dus ook geen `br` (zie _Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem_).
+  Daarom is de `Page.Footer` een raster.
+  Op een smal scherm heeft het één kolom, met de links onder de tekst.
+  Vanaf 40 rem, net als bij de kaart, staan de links in een tweede kolom rechts, over de twee regels en in het midden.
+  De tekst haalt 4,85:1 in licht en 10,65:1 in donker, de links 6,95:1 en 9,47:1, en de focusrand 3,52:1 en 7,90:1.
+  Het contrast staat bij Tokens › Kleur in Storybook.
+- **Alternatieven:** de footer op de achtergrond van de pagina met alleen een lijn erboven, zoals eerst.
+  Of het vlak alleen in de kolom; dan ziet het eruit als een losse kaart.
+  Of blauwe links, zoals op de rest van de site; dat vraagt geen nieuwe tokens, maar de footer valt dan meer op.
+  Of één alinea met een `br` tussen de zinnen, zodat de links naar de volgende regel gaan zodra ze niet meer passen, zoals in de header.
+  Dan moet de ESLint-regel `br` toestaan, of krijgt het designsysteem een component voor een regeleinde.

@@ -10,7 +10,7 @@ const meta = preview.meta({
         component: [
           'De pagina: zo breed als het venster, met de inhoud in een gecentreerde kolom met een maximale breedte, en een marge aan beide kanten.',
           'Een `Page` bevat een `Page.Header`, een `Page.Body` en een `Page.Footer`, in die volgorde.',
-          'De achtergrond van de `Page.Header` loopt van rand tot rand; het logo en de navigatie, de `Page.Body` en de `Page.Footer` staan in de kolom.',
+          'De achtergronden van de `Page.Header` en de `Page.Footer` lopen van rand tot rand; wat erin staat en de `Page.Body` staan in de kolom.',
           '',
           'De breedte en de marge komen uit twee tokens: `--hf-page-max-width` (75 rem) en `--hf-page-margin` (1 rem).',
           'De `Page.Body` is het raster tussen de header en de footer, met een `Page.Main` en, als de pagina er een heeft, een `Page.Sidebar`.',
@@ -70,7 +70,7 @@ const screens = { tags: ['!autodocs'] }
 const narrowDescription = 'Op een smal scherm gebruikt de inhoud de hele breedte, tussen de marges van 1 rem.'
 
 const wideDescription =
-  'Op een breed scherm staat de hoofdkolom in lijn met het logo, met plek voor een zijbalk ernaast. De header en de footer lopen over de hele kolom.'
+  'Op een breed scherm staat de hoofdkolom in lijn met het logo, met plek voor een zijbalk ernaast. Wat in de header en de footer staat, loopt over de hele kolom.'
 
 export const NarrowLight = meta.story({
   ...screens,

@@ -42,6 +42,10 @@ Op de header en de wedstrijdband gelden eigen tokens: `--hf-colour-text-on-heade
 Gewone links, koppen, secundaire tekst en de gewone focusrand zijn daar niet leesbaar of niet zichtbaar genoeg, dus componenten op die achtergronden zetten hun kleuren zelf.
 De `Page.Header` doet dat voor alles wat erin staat.
 
+De footer heeft een eigen vlak, `--hf-colour-background-footer`, met een lijn erboven: `--hf-colour-border-footer`.
+Links in de footer zijn donker zand: `--hf-colour-text-link-on-footer`, en onder de muis `--hf-colour-text-link-hover-on-footer`.
+De `Page.Footer` zet die kleuren voor alle links die erin staan.
+
 Oudere browsers zonder `light-dark()` (van vóór 2024) krijgen alleen het lichte thema.
 
 Waarden met het label _voorlopig_ stonden niet in het afgesproken palet en wachten nog op een besluit.
