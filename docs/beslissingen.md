@@ -1256,6 +1256,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een cel die de volle breedte neemt, is er nog niet; of dat nodig is, beslissen we na de proef op Onze bronnen.
 - **Later:** zie _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_.
   De hoofdkolom is nu 36 rem, met 4 rem ertussen, en de kolommen staan naast elkaar vanaf 56 rem; de zijbalk staat tussen 40 rem en 56 rem onder de hoofdkolom.
+  De ruimte tussen de kolommen en onder de kolommen is nu 4 rem, ook onder elkaar, en de 3 rem is vervallen.
 
 ### Een regel met padding of een rand zet zelf `box-sizing: border-box`
 
@@ -1351,7 +1352,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** `--hf-page-max-width` is 64 rem en `--hf-content-max-width` 36 rem.
   Vanaf 56 rem heeft `Page.Body` twee sporen, `minmax(24rem, 36rem)` en `minmax(16rem, 24rem)`.
   Tot 66 rem (64 rem plus een marge van 1 rem aan beide kanten) krimpen ze mee met het venster.
-  De ruimte ertussen is 4 rem naast elkaar, een eigen custom property op `Page.Body`; onder elkaar en onder de kolommen blijft het 3 rem, en tussen de cellen 2 rem.
+  De ruimte tussen de kolommen is 4 rem, naast elkaar en onder elkaar, en ook onder de kolommen; tussen de cellen en boven de kolommen is het 2 rem.
+  Dat zijn twee maten, in de custom properties `--hf-page-body-column-gap` en `--hf-page-body-cell-gap` op `Page.Body`: 3 rem is vervallen.
+  2 en 4 zijn machten van 2, en een eerste aanzet voor de tokens voor ruimte (#19).
   Onder 56 rem staat de zijbalk onder de hoofdkolom, met de cellen in twee kolommen vanaf 40 rem.
   De zijbalk staat nog steeds na de hoofdkolom in de bron, zonder `order`.
   De hang van het schild is `--hf-logo-hang` in `layout.css`: de maat van het schild (`--hf-logo-mark-size`, 1,55 keer de lettergrootte van het woordmerk) plus de ruimte ernaast (`--hf-logo-gap`, 0,75 rem).

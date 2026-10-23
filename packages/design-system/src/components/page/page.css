@@ -71,14 +71,13 @@
    * The sidebar is second in the source and so in the grid. There is no `order`, which would split the reading order from
    * what is on the screen.
    *
-   * There are three sizes of space. The columns are 3rem apart when they are under each other, and the padding under them
-   * is 3rem. Side by side they are 4rem apart. The cells in a column are 2rem apart, and that is also the padding above the
-   * columns. A column gets the space between its cells through a custom property.
+   * There are two sizes of space: 4rem and 2rem. The columns are 4rem apart, side by side and under each other, and the
+   * padding under them is 4rem. The cells in a column are 2rem apart, and that is also the padding above the columns. A
+   * column gets the space between its cells through a custom property.
    */
   .hf-page-body {
     --hf-page-body-cell-gap: 2rem;
-    --hf-page-body-column-gap: 3rem;
-    --hf-page-body-gutter: 4rem;
+    --hf-page-body-column-gap: 4rem;
 
     align-content: start;
     align-items: start;
@@ -91,7 +90,6 @@
     padding-block: var(--hf-page-body-cell-gap) var(--hf-page-body-column-gap);
 
     @media (width >= 56rem) {
-      column-gap: var(--hf-page-body-gutter);
       grid-template-columns: minmax(24rem, var(--hf-content-max-width)) minmax(16rem, 24rem);
     }
   }
