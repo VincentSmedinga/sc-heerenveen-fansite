@@ -1214,6 +1214,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _Page.Body is het raster, met een hoofdkolom en een zijbalk_.
   De hoofdkolom is nu 48 rem, en de grens van 80 tekens per regel is vervallen.
   Het token `--hf-content-max-width` zet nu de breedte van het eerste spoor in het raster van `Page.Body`, en niet meer een `max-inline-size` op de `main`; de zijbalk is er, 24 rem breed.
+- **Later:** zie _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_.
+  De hoofdkolom is weer 36 rem, en de kolom van de pagina 64 rem.
 
 ### Page.Body is het raster, met een hoofdkolom en een zijbalk
 
@@ -1252,6 +1254,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Onder 40 rem staan de cellen onder elkaar, en vanaf 77 rem staat de zijbalk naast de hoofdkolom.
   Dat is een tweede raster op `Page.Sidebar` in `page.css`; de volgorde in de bron blijft gelijk en er is geen `order`.
   Een cel die de volle breedte neemt, is er nog niet; of dat nodig is, beslissen we na de proef op Onze bronnen.
+- **Later:** zie _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_.
+  De hoofdkolom is nu 36 rem, met 4 rem ertussen, en de kolommen staan naast elkaar vanaf 56 rem; de zijbalk staat tussen 40 rem en 56 rem onder de hoofdkolom.
+  De ruimte tussen de kolommen en onder de kolommen is nu 4 rem, ook onder elkaar, en de 3 rem is vervallen.
 
 ### Een regel met padding of een rand zet zelf `box-sizing: border-box`
 
@@ -1332,6 +1337,39 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Kop 4 in Atkinson laten; dan staat één kop in een ander lettertype dan de rest.
   Tekst laten meeschalen van 16 naar 18 pixels; dat maakt de tekst op een brede pagina te groot.
   Tekst op 17 of 18 pixels laten staan; de projecteigenaar vond 18 pixels te groot voor een gewone alinea.
+
+### Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de kolom van de pagina is 64 rem: de hoofdkolom 36 rem, 4 rem ertussen en de zijbalk 24 rem.
+  De kolommen staan naast elkaar vanaf 56 rem.
+  Op een breed scherm (vanaf zo'n 74 rem) hangt het schild van het logo in de marge, zodat de tekst in lijn staat met het woordmerk.
+  Op een smaller scherm staat alles in lijn met het schild, zoals voorheen.
+- **Waarom:** de maten komen uit de leeslengte van een regel: in 36 rem telt een regel Tekst van 16 pixels zo'n 70 tot 80 tekens, de maat die we al eerder kozen, toen met 17 pixels.
+  Een zijbalk van 24 rem is 37,5% van de pagina, dus breed genoeg om iets in te zetten.
+  64 is een macht van 2, zoals de maten van het logo (192 is 128 + 64), en 36, 4 en 24 zijn sommen van twee machten (32 + 4, en 16 + 8).
+  In lijn met het woordmerk heeft de tekst één linkerkant, en het schild is een versiering in de marge.
+- **Hoe:** `--hf-page-max-width` is 64 rem en `--hf-content-max-width` 36 rem.
+  Vanaf 56 rem heeft `Page.Body` twee sporen, `minmax(24rem, 36rem)` en `minmax(16rem, 24rem)`.
+  Tot 66 rem (64 rem plus een marge van 1 rem aan beide kanten) krimpen ze mee met het venster.
+  De ruimte tussen de kolommen is 4 rem, naast elkaar en onder elkaar, en ook onder de kolommen; tussen de cellen en boven de kolommen is het 2 rem.
+  Dat zijn twee maten, in de custom properties `--hf-page-body-column-gap` en `--hf-page-body-cell-gap` op `Page.Body`: 3 rem is vervallen.
+  2 en 4 zijn machten van 2, en een eerste aanzet voor de tokens voor ruimte (#19).
+  Onder 56 rem staat de zijbalk onder de hoofdkolom, met de cellen in twee kolommen vanaf 40 rem.
+  De zijbalk staat nog steeds na de hoofdkolom in de bron, zonder `order`.
+  De hang van het schild is `--hf-logo-hang` in `layout.css`: de maat van het schild (`--hf-logo-mark-size`, 1,55 keer de lettergrootte van het woordmerk) plus de ruimte ernaast (`--hf-logo-gap`, 0,75 rem).
+  Die twee komen nu uit de tokens van het logo, in plaats van uit `logo.css`.
+  Vanaf 74,5 rem breed krijgt het logo in `Page.Header` een negatieve marge van die maat: 64 rem voor de kolom, twee keer 4,2375 rem voor de hang en twee keer 1 rem tot de rand van het venster is 74,475 rem, naar boven afgerond.
+  De navigatie blijft in lijn met de rechterkant van de kolom en de footer met de linkerkant, want de header en de footer houden hun `padding-inline` uit `--hf-page-inset`.
+  Een media query kan geen custom property gebruiken, dus de maten staan erin zelf.
+- **Gemeten:** in Atkinson Hyperlegible Next op 16 pixels telt een regel Tekst op Over ons, in de hoofdkolom op een scherm van 1440 pixels, hoogstens 81 tekens en gemiddeld 76,4 (alleen de volle regels, zonder de laatste regel van een alinea) of 65,0 (alle regels).
+  In de kolom van 48 rem was dat hoogstens 109 en gemiddeld 102,8 of 79,6.
+  De homepage heeft één regel Tekst, "Welke media we volgen, lees je bij Onze bronnen.", van 48 tekens; de koppen van de berichten zijn Nieuwskop en tellen niet mee.
+- **Alternatieven:** 40 + 4 + 20 rem; de zijbalk is dan een derde van de twee kolommen, maar een regel telt tot 85 tekens.
+  Een pagina van 56 rem met 32 + 4 + 20; regels van hoogstens 68 tekens, maar een smalle pagina met veel lege ruimte op een groot scherm.
+  De pagina van 75 rem laten, met 48 + 3 + 24; regels van zo'n 108 tekens.
+  Het schild altijd laten hangen of de tekst altijd inspringen; op een telefoon kost dat zo'n 4 rem breedte.
+- **Later:** de projecteigenaar beslist na de screenshots in de pull request of de hang blijft; zo niet, dan haalt de review die eruit.
 
 ## Site
 

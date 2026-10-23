@@ -92,9 +92,11 @@ export default definePreview({
       },
     },
     viewport: {
-      // The standard screens, and one wider than the page column, to see what is outside it.
+      // The standard screens, one between the width where the columns sit side by side and the full width of the page
+      // column, to see them shrink, and one wider than the page column, to see what is outside it.
       options: {
         ...MINIMAL_VIEWPORTS,
+        middle: { name: 'Middelgroot scherm', styles: { height: '800px', width: '976px' }, type: 'desktop' },
         wide: { name: 'Breed scherm', styles: { height: '1080px', width: '1920px' }, type: 'desktop' },
       },
     },

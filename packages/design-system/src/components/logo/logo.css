@@ -19,11 +19,9 @@
 
 @layer hf.components {
   .hf-logo {
-    --hf-logo-mark-size: calc(var(--hf-wordmark-font-size) * 1.55);
-
     align-items: center;
     display: inline-flex;
-    gap: 0.75rem;
+    gap: var(--hf-logo-gap);
   }
 
   .hf-logo-mark {
@@ -32,21 +30,25 @@
     inline-size: var(--hf-logo-mark-size);
   }
 
-  /* On a narrow screen the tagline wraps under the wordmark. */
+  /*
+   * The wordmark and the tagline run on in one line of text, so on a narrow screen, where the wordmark wraps, the tagline
+   * stays behind its last word if it fits and goes to a line of its own if not. The space between them is a space in the
+   * text, made as wide as 0.25rem more; the wordmark and the tagline set their own word spacing back.
+   */
   .hf-logo-text {
-    align-items: baseline;
-    column-gap: 0.5rem;
-    display: flex;
-    flex-wrap: wrap;
+    word-spacing: 0.25rem;
   }
 
   .hf-logo-wordmark {
     color: var(--hf-colour-text-heading);
+    word-spacing: normal;
   }
 
   .hf-logo-tagline {
     color: var(--hf-colour-text-secondary);
     font-size: var(--hf-label-font-size);
     line-height: var(--hf-label-line-height);
+    white-space: nowrap;
+    word-spacing: normal;
   }
 }

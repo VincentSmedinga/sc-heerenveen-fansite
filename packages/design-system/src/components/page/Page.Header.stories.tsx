@@ -11,6 +11,7 @@ const meta = preview.meta({
           'De bovenkant van de pagina: een `header`, dus de banner van de pagina.',
           'De achtergrond loopt van de linker- tot de rechterrand van het venster, op elke breedte.',
           'Wat erin staat, blijft in de kolom van de pagina, in lijn met de inhoud eronder.',
+          'Op een breed scherm hangt het schild van het logo in de marge links van de kolom, en staat het woordmerk in lijn met de inhoud.',
           'De verhalen voor een smal en een breed scherm staan alleen in het canvas, met de instelling Viewport van de werkbalk.',
           'De header is in licht en donker donkerblauw.',
           'Daarom krijgt alles erin andere kleuren voor tekst, links en de focusrand: licht op donker.',
@@ -90,5 +91,37 @@ export const FocusDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Focus in donker',
   parameters: focusParameters,
+  render,
+})
+
+export const FocusWideLight = meta.story({
+  ...screens,
+  globals: { theme: 'light', viewport: { value: 'wide' } },
+  name: 'Focus op breed scherm, licht',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Als het schild in de marge hangt, staat de focusrand om de link van het logo ook in de marge, in het venster.',
+      },
+    },
+    pseudo: focusParameters.pseudo,
+  },
+  render,
+})
+
+export const FocusWideDark = meta.story({
+  ...screens,
+  globals: { theme: 'dark', viewport: { value: 'wide' } },
+  name: 'Focus op breed scherm, donker',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Als het schild in de marge hangt, staat de focusrand om de link van het logo ook in de marge, in het venster.',
+      },
+    },
+    pseudo: focusParameters.pseudo,
+  },
   render,
 })

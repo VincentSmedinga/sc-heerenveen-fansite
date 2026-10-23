@@ -1,13 +1,13 @@
 /*
  * Layout tokens: the maximum width of a page, the margin on either side of it on a narrow screen, the space that
- * puts content in that column, and the maximum width of the content in it. The Page component uses them; a page that
- * isn't built with it can use them too.
+ * puts content in that column, the maximum width of the content in it, and how far the shield of the logo hangs outside
+ * the column. The Page component uses them; a page that isn't built with it can use them too.
  */
 
 @layer hf.tokens {
   :root {
     --hf-page-margin: 1rem;
-    --hf-page-max-width: 75rem;
+    --hf-page-max-width: 64rem;
 
     /*
      * The space on either side of the column, for something that is as wide as its parent, such as the header.
@@ -17,11 +17,19 @@
     --hf-page-inset: max(var(--hf-page-margin), calc((100% - var(--hf-page-max-width)) / 2));
 
     /*
-     * The widest the main column of a page gets. With the sidebar (24rem) and the space between them (3rem) it fills the
-     * column of the page, 75rem. A line of running text can hold more than the 80 characters of WCAG 1.4.8 (level AAA) at
-     * the current font size; the decision _Page.Body is het raster, met een hoofdkolom en een zijbalk_ in
-     * docs/beslissingen.md says why the limit is gone.
+     * The widest the main column of a page gets. With the sidebar (24rem) and the space between them (4rem) it fills the
+     * column of the page, 64rem. These sizes come from the length of a line of running text, not from a limit on
+     * characters; the decision _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_ in docs/beslissingen.md says why.
      */
-    --hf-content-max-width: 48rem;
+    --hf-content-max-width: 36rem;
+
+    /*
+     * The logo: the gap between the shield and the wordmark, the size of the shield, and how far the shield hangs outside
+     * the column when the text of the page lines up with the wordmark (see .hf-page-header in page.css). The shield is
+     * 1.55 times the font size of the wordmark.
+     */
+    --hf-logo-gap: 0.75rem;
+    --hf-logo-mark-size: calc(var(--hf-wordmark-font-size) * 1.55);
+    --hf-logo-hang: calc(var(--hf-logo-mark-size) + var(--hf-logo-gap));
   }
 }

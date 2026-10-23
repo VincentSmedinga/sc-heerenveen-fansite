@@ -53,7 +53,7 @@ export const Logo = ({ className, ...props }: LogoProps) => {
         </g>
       </svg>
       <span className="hf-logo-text">
-        <span className="hf-logo-wordmark hf-wordmark">sc Heerenveen Fansite</span>
+        <span className="hf-logo-wordmark hf-wordmark">sc Heerenveen Fansite</span>{' '}
         <span className="hf-logo-tagline">sinds 1997</span>
       </span>
     </span>
