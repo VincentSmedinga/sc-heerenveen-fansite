@@ -558,7 +558,7 @@ function checkReviewFolder(reviewFolder, worktrees) {
 /** What Storybook lists, or nothing when it doesn't tell. */
 async function fetchStorybookEntries() {
   try {
-    const response = await fetch(addressOf(storybookServer, '/index.json'), { signal: AbortSignal.timeout(10_000) })
+    const response = await fetch(addressOf(storybookServer, '/index.json'), { signal: AbortSignal.timeout(60_000) })
     const { entries } = await response.json()
 
     return Object.values(entries ?? {})
