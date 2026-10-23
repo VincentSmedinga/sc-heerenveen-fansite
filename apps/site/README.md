@@ -57,6 +57,7 @@ Dit moet eerst draaien, vanuit de root:
    De gebouwde site draait de migraties en zet de bronnen uit de seed er zelf in, want de controle start hem met `SITE_ENV=acceptance`.
 2. `pnpm build`.
 3. Eenmalig Chromium: `pnpm --filter site exec playwright install chromium`.
+   CI installeert niets: die gebruikt de Google Chrome die op de runner staat.
 
 De opdracht zet de build zelf klaar in `.next/a11y`, zoals `assemble` dat doet, en start die.
 Hij start de site een tweede keer, zonder bereikbare database, voor de foutpagina (`e2e/error-page.spec.ts`): in licht en donker, en zonder JavaScript.

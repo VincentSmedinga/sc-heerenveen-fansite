@@ -77,10 +77,9 @@ jobs:
           pnpm --filter site assemble "$RUNNER_TEMP/site"
           pnpm --filter site smoke "$RUNNER_TEMP/site"
 
-      # Chromium only; the checks below don't use another browser.
-      - run: pnpm --filter site exec playwright install --with-deps chromium
-
       # axe and a few checks of our own on every page, in light and dark, on the folder the smoke test just checked and
-      # against the database with the seed.
+      # against the database with the seed. Playwright uses the Google Chrome that the runner already has (see
+      # playwright.config.ts), so there is no browser to install: `playwright install --with-deps` fetched packages from an
+      # Ubuntu mirror that is sometimes so slow it took ten minutes.
       - name: Check accessibility
         run: SITE_FOLDER="$RUNNER_TEMP/site" pnpm test:a11y
