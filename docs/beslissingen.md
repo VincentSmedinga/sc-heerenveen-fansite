@@ -782,6 +782,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Stylelint controleert dit.
 - **Waarom:** kort, herkenbaar als Heerenveen Fansite, en het botst niet met klassen van anderen.
 - **Alternatieven:** `fs-` (fansite), dat we eerst voorlopig gebruikten, `shf-` (sc Heerenveen Fansite) en `hv-` (Heerenveen).
+- **Later:** er is een vijfde laag, `hf.utilities`; zie _Hulpklassen zitten in de sterkste laag_.
 
 ### Lagen in de CSS
 
