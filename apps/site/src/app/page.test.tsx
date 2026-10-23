@@ -45,7 +45,7 @@ afterEach(() => {
 })
 
 describe('the homepage', () => {
-  it('has one h1, an h2 for the news and an h3 for each day with news, so no level is skipped', async () => {
+  it('has one h1 and an h2 for the news, and no heading for a day', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
@@ -53,8 +53,6 @@ describe('the homepage', () => {
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">sc Heerenveen Fansite</h1>',
       '<h2 class="hf-heading-2" id="media-heading">sc Heerenveen in de media</h2>',
-      '<h3 class="hf-heading-3">donderdag 22 oktober</h3>',
-      '<h3 class="hf-heading-3">woensdag 21 oktober</h3>',
     ])
   })
 
@@ -69,7 +67,7 @@ describe('the homepage', () => {
     )
   })
 
-  it('puts the h2, the days and the headlines in the card, which takes its name from the h2', async () => {
+  it('puts the h2 and the headlines in the card, which takes its name from the h2', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
@@ -77,31 +75,37 @@ describe('the homepage', () => {
 
     expect(cards).toHaveLength(1)
     expect(cards[0]).toContain('<h2 class="hf-heading-2" id="media-heading">sc Heerenveen in de media</h2>')
-    expect(cards[0]?.match(/<h3/g)).toHaveLength(2)
     expect(cards[0]?.match(/<li>/g)).toHaveLength(3)
     // The h1 and the link to Onze bronnen are cells of their own, outside the card.
     expect(cards[0]).not.toContain('<h1')
     expect(cards[0]).not.toContain('Onze bronnen')
   })
 
-  it('shows each headline as a link to the item at the source, with the source and the time', async () => {
+  it('shows each headline as a link to the item at the source, with the day and the time before it and the source under it', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
+
+    const html = await render()
+
+    expect(html).toMatch(
+      new RegExp(
+        '<li><div class="hf-news-item"><time class="hf-meta hf-news-item-time" dateTime="2026-10-22T08:15:00.000Z">do 10:15</time>' +
+          '<div class="hf-news-item-body"><a class="hf-headline hf-news-item-headline" href="https://testkrant.test/heerenveen-testclub">Heerenveen houdt Testclub op afstand</a>' +
+          '<p class="hf-meta hf-news-item-meta"><span>Testkrant</span><svg [^>]*aria-hidden="true"[^>]*>.*?</svg></p></div></div></li>',
+      ),
+    )
+  })
+
+  it('shows the short day and the time in Dutch time, with the full time in the time element', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
     expect(html).toContain(
-      '<li><div class="hf-news-item"><a class="hf-headline hf-news-item-headline" href="https://testkrant.test/heerenveen-testclub">Heerenveen houdt Testclub op afstand</a>' +
-        '<p class="hf-meta hf-news-item-meta"><span>Testkrant</span> <span aria-hidden="true">·</span> <time dateTime="2026-10-22T08:15:00.000Z">10:15</time></p></div></li>',
+      '<time class="hf-meta hf-news-item-time" dateTime="2026-10-21T12:05:00.000Z">wo 14:05</time>',
     )
-  })
-
-  it('shows the time in Dutch time, with the full time in the time element', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue(headlines)
-
-    const html = await render()
-
-    expect(html).toContain('<time dateTime="2026-10-21T12:05:00.000Z">14:05</time>')
-    expect(html).toContain('<time dateTime="2026-10-21T09:00:00.000Z">11:00</time>')
+    expect(html).toContain(
+      '<time class="hf-meta hf-news-item-time" dateTime="2026-10-21T09:00:00.000Z">wo 11:00</time>',
+    )
   })
 
   it('puts "voor abonnees" in text with an item behind the paywall, and with no other item', async () => {
@@ -132,24 +136,29 @@ describe('the homepage', () => {
     expect(await render()).not.toContain('target=')
   })
 
-  it('shows an item per list, in the order the query gives them, a list for each day', async () => {
+  it('shows the items in one list, in the order the query gives them, with no heading for a day', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
-    expect(html.match(/<ul/g)).toHaveLength(2)
+    expect(html.match(/<ul/g)).toHaveLength(1)
+    expect(html).toContain('<ul role="list">')
     expect(html.match(/<li>/g)).toHaveLength(3)
+    expect(html).not.toContain('<h3')
     expect(html.indexOf('Heerenveen houdt Testclub')).toBeLessThan(html.indexOf('jonge garde'))
     expect(html.indexOf('jonge garde')).toBeLessThan(html.indexOf('Trainer verwacht'))
   })
 
-  it('shows nothing of a source but the headline, the link, the name, the time and the paywall', async () => {
+  it('shows nothing of a source but the headline, the link, the name, the day and time and the paywall', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
-    expect(html).not.toMatch(/<(img|picture|svg|iframe|video|audio|script)/)
+    expect(html).not.toMatch(/<(img|picture|iframe|video|audio|script|image|use)/)
     expect(html).not.toMatch(/(src|srcset|poster)=/)
+    // The only svg is our own icon for a link to another site, hidden from assistive technology, one for each item.
+    expect(html.match(/<svg /g)).toHaveLength(3)
+    expect(html.match(/<svg [^>]*aria-hidden="true"/g)).toHaveLength(3)
     // The only addresses are the links of the items and the link to the page with the sources.
     expect([...html.matchAll(/href="([^"]*)"/g)].map(([, href]) => href)).toEqual([
       'https://testkrant.test/heerenveen-testclub',

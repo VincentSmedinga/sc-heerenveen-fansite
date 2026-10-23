@@ -1,15 +1,17 @@
-import type { PublicItem } from '@fansite/db/queries'
-
-/* How the site shows the news to visitors: by day, in Dutch time. The database holds UTC. */
+/* How the site shows the news to visitors: the week it covers and the day and time of an item, in Dutch time. The database holds UTC. */
 
 const timeZone = 'Europe/Amsterdam'
 
 /** The week the homepage shows: today and the six days before it. */
 const daysShown = 7
 
-const dayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', timeZone, weekday: 'long' })
-
-const timeFormat = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', hourCycle: 'h23', minute: '2-digit', timeZone })
+const dayAndTimeFormat = new Intl.DateTimeFormat('nl-NL', {
+  hour: '2-digit',
+  hourCycle: 'h23',
+  minute: '2-digit',
+  timeZone,
+  weekday: 'short',
+})
 
 const clockFormat = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
@@ -27,33 +29,14 @@ export function dateTimeOf(moment: Date) {
   return moment.toISOString()
 }
 
-/** The day by the Dutch calendar, such as "woensdag 21 oktober". */
-export function formatDay(moment: Date) {
-  return dayFormat.format(moment)
-}
-
-/** The time of day in the Netherlands, such as "14:05". */
-export function formatTime(moment: Date) {
-  return timeFormat.format(moment)
-}
-
 /**
- * The items grouped by the Dutch calendar day on which they were published, in the order the days first appear. Within
- * a day the items keep their order. Pass them newest first, and the days come newest first too.
+ * The short weekday and the time of day in the Netherlands, such as "wo 14:05". The week is seven days, so a weekday
+ * never appears twice in it, and the time stays right in a page from the cache.
  */
-export function groupByDay<Item extends Pick<PublicItem, 'publishedAt'>>(items: readonly Item[]) {
-  const days = new Map<string, { day: string; items: Item[] }>()
+export function formatDayAndTime(moment: Date) {
+  const parts = Object.fromEntries(dayAndTimeFormat.formatToParts(moment).map(({ type, value }) => [type, value]))
 
-  for (const item of items) {
-    const { day, month, year } = clockAt(item.publishedAt)
-    const key = `${year}-${month}-${day}`
-    const group = days.get(key) ?? { day: formatDay(item.publishedAt), items: [] }
-
-    group.items.push(item)
-    days.set(key, group)
-  }
-
-  return [...days.entries()].map(([key, { day, items }]) => ({ day, items, key }))
+  return `${parts['weekday']} ${parts['hour']}:${parts['minute']}`
 }
 
 /** The start of the week the homepage shows: the first moment of the Dutch day six days before today. */

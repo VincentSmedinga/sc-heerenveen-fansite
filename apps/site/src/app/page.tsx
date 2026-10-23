@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 
 import { Card, Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
-import { cache, Fragment } from 'react'
+import { cache } from 'react'
 
 import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
 import { getHeadlines } from '../headlines'
-import { dateTimeOf, formatTime, groupByDay } from '../news'
+import { dateTimeOf, formatDayAndTime } from '../news'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
 
@@ -43,8 +43,6 @@ export default async function HomePage() {
     return <ServerError retryHref="/" />
   }
 
-  const days = groupByDay(headlines)
-
   return (
     <Page.Main>
       <Heading level={1}>sc Heerenveen Fansite</Heading>
@@ -52,28 +50,23 @@ export default async function HomePage() {
         <Heading id="media-heading" level={2}>
           sc Heerenveen in de media
         </Heading>
-        {days.length === 0 ? (
+        {headlines.length === 0 ? (
           <Text>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</Text>
         ) : (
-          days.map(({ day, items, key }) => (
-            <Fragment key={key}>
-              <Heading level={3}>{day}</Heading>
-              <List loose>
-                {items.map((item, index) => (
-                  <List.Item key={index}>
-                    <NewsItem
-                      dateTime={dateTimeOf(item.publishedAt)}
-                      headline={item.title}
-                      href={item.url}
-                      paywalled={item.paywalled}
-                      source={item.sourceName}
-                      time={formatTime(item.publishedAt)}
-                    />
-                  </List.Item>
-                ))}
-              </List>
-            </Fragment>
-          ))
+          <List role="list">
+            {headlines.map((item, index) => (
+              <List.Item key={index}>
+                <NewsItem
+                  dateTime={dateTimeOf(item.publishedAt)}
+                  headline={item.title}
+                  href={item.url}
+                  paywalled={item.paywalled}
+                  source={item.sourceName}
+                  time={formatDayAndTime(item.publishedAt)}
+                />
+              </List.Item>
+            ))}
+          </List>
         )}
       </Card>
       <Text>
