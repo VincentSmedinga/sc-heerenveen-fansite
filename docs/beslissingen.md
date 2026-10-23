@@ -2131,6 +2131,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De beschrijving is "Wat er nieuw is op de sc Heerenveen Fansite, per versie: wat je er nu kunt vinden en doen."
 - **Waarom:** het voorstel ("Wat er nieuw is op de sc Heerenveen Fansite, per versie.") heeft 56 tekens, en het criterium vraagt 70 tot 160.
   Next.js kopieert de Open Graph-tags naar `twitter:`-tags zodra een pagina Open Graph-tags heeft, en heeft geen manier om dat uit te zetten (`postProcessMetadata` in Next.js).
-  We zetten zelf geen enkele `twitter:`-tag, en een test controleert dat.
+  We zetten zelf geen `twitter`-sleutel in de metadata, en een test controleert dat; de tags in de HTML komen van Next.js.
 - **Alternatieven:** de beschrijving van 56 tekens laten staan en de test versoepelen.
   Of de Open Graph-tags als losse `<meta>`-elementen in elke pagina zetten, buiten de metadata van Next.js om; dat zijn extra regels in elke pagina en de tags staan dan niet meer bij de rest van de metadata.
