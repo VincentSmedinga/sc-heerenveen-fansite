@@ -45,10 +45,10 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm test:a11y`         | axe op de pagina's van de gebouwde site, na `pnpm build`   |
 | `pnpm run import`        | Haalt de feeds van de bronnen op en bewaart de koppen      |
 | `pnpm run import:status` | Toont per feed of hij gezond is, en de laatste fout        |
-| `pnpm iterations`        | Schuift het bord naar de nieuwe week (vraagt `gh`)         |
 | `pnpm release`           | Opent of werkt de release-pull request bij (vraagt `gh`)   |
 | `pnpm review <branch>`   | Start de site en Storybook voor een branch of pull request |
 | `pnpm review:stop`       | Stopt ze weer                                              |
+| `pnpm rollover`          | Schuift het bord naar de nieuwe week (vraagt `gh`)         |
 
 Na `pnpm release` en vóór je de release-pull request samenvoegt, schrijft de Coordinator de Nederlandse zinnen voor de pagina Wat is er nieuw.
 Een kleine pull request zet ze in [`apps/site/src/release-notes.ts`](apps/site/src/release-notes.ts).
@@ -83,8 +83,8 @@ Het veld Iteratie van het projectbord loopt niet vanzelf door.
 Draai elke maandag vanuit de map van de repository:
 
 ```sh
-pnpm iterations
-pnpm iterations --apply
+pnpm rollover
+pnpm rollover --apply
 ```
 
 Zonder `--apply` is het een dry run: de opdracht laat zien wat hij zou veranderen en verandert niets.

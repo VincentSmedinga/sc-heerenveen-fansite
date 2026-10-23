@@ -1,7 +1,7 @@
 // Gets the project board ready for a new week, with one command. It shows what it would change; with --apply it does it.
 //
-//   pnpm iterations            shows the plan and changes nothing
-//   pnpm iterations --apply    carries the plan out
+//   pnpm rollover            shows the plan and changes nothing
+//   pnpm rollover --apply    carries the plan out
 //
 // The rules:
 // 1. A closed issue on the board without an iteration gets the iteration that holds the day it was closed.
@@ -17,7 +17,7 @@ import { spawnSync } from 'node:child_process'
 import { realpathSync } from 'node:fs'
 
 /** A problem we expect: it is shown as a message, without a stack. */
-export class IterationsError extends Error {
+export class RolloverError extends Error {
   constructor(message, exitCode = 1) {
     super(message)
     this.exitCode = exitCode
@@ -175,7 +175,7 @@ export function formatReport({ applied, moves, previous, skipped, summary }) {
   }
 
   if (!applied && moves.length > 0) {
-    lines.push('', 'This was a dry run. Run `pnpm iterations --apply` to carry it out.')
+    lines.push('', 'This was a dry run. Run `pnpm rollover --apply` to carry it out.')
   }
 
   return lines.join('\n')
@@ -193,7 +193,7 @@ export function parseArguments(args) {
   const unknown = args.filter((argument) => argument !== '--apply')
 
   if (unknown.length > 0) {
-    throw new IterationsError(`Unknown argument: ${unknown.join(' ')}\nUsage: pnpm iterations [--apply]`)
+    throw new RolloverError(`Unknown argument: ${unknown.join(' ')}\nUsage: pnpm rollover [--apply]`)
   }
 
   return { apply: args.includes('--apply') }
@@ -234,7 +234,7 @@ export function run({ apply, issues, items, iterations, move, today }) {
   const { missing, moves } = planMoves({ items, iterations, today })
 
   if (missing.length > 0) {
-    throw new IterationsError(missingMessage(missing))
+    throw new RolloverError(missingMessage(missing))
   }
 
   if (apply) {
@@ -283,7 +283,7 @@ function graphql(query, variables = {}) {
   const { error, status, stderr, stdout } = spawnSync('gh', args, { encoding: 'utf8' })
 
   if (error !== undefined || status !== 0) {
-    throw new IterationsError(
+    throw new RolloverError(
       ['Could not reach GitHub with gh.', (error?.message ?? stderr).trim()].filter(Boolean).join('\n'),
     )
   }
@@ -349,7 +349,7 @@ function main(args) {
   const project = graphql(projectQuery, { number: projectNumber, owner }).user.projectV2
 
   if (project === null || project.field?.configuration === undefined) {
-    throw new IterationsError(
+    throw new RolloverError(
       `Could not find project ${projectNumber} of ${owner} with an iteration field called ${iterationFieldName}.`,
     )
   }
@@ -380,7 +380,7 @@ function repository() {
   })
 
   if (error !== undefined || status !== 0) {
-    throw new IterationsError(
+    throw new RolloverError(
       ['Could not find the repository with gh.', (error?.message ?? stderr).trim()].filter(Boolean).join('\n'),
     )
   }
@@ -395,7 +395,7 @@ if (process.argv[1] !== undefined && realpathSync(process.argv[1]) === import.me
   try {
     main(process.argv.slice(2))
   } catch (error) {
-    if (!(error instanceof IterationsError)) {
+    if (!(error instanceof RolloverError)) {
       throw error
     }
 

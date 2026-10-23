@@ -18,7 +18,6 @@
     "format": "prettier --write .",
     "import": "pnpm --filter @fansite/importer run import",
     "import:status": "pnpm --filter @fansite/importer run import:status",
-    "iterations": "node scripts/iterations.js",
     "lint": "pnpm run lint:js && pnpm run lint:css && pnpm run lint:format",
     "lint:css": "stylelint --allow-empty-input '**/*.css'",
     "lint:format": "prettier --check .",
@@ -27,6 +26,7 @@
     "release": "gh workflow run release.yml --ref main",
     "review": "node scripts/review.js",
     "review:stop": "node scripts/review.js --stop",
+    "rollover": "node scripts/rollover.js",
     "test": "pnpm -r --if-present run test && node --test '.claude/hooks/*.test.js' 'baseline.test.js' 'scripts/*.test.js' 'templates.test.js'",
     "test:a11y": "pnpm --filter site test:a11y",
     "typecheck": "tsc -b"

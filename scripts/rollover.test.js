@@ -1,4 +1,4 @@
-// Tests the parts of `pnpm iterations` that decide something and have no side effects. What talks to GitHub is tried
+// Tests the parts of `pnpm rollover` that decide something and have no side effects. What talks to GitHub is tried
 // against the board in a dry run (see the pull request).
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
@@ -8,16 +8,16 @@ import {
   endOf,
   findIteration,
   formatReport,
-  IterationsError,
   missingMessage,
   notOnBoard,
   parseArguments,
   planMoves,
   previousIteration,
   readItem,
+  RolloverError,
   run,
   summariseClosed,
-} from './iterations.js'
+} from './rollover.js'
 
 const week = (number, startDate) => ({ duration: 7, id: `id-${number}`, startDate, title: `Week ${number}` })
 const iterations = [week(43, '2026-10-19'), week(44, '2026-10-26'), week(45, '2026-11-02')]
@@ -177,7 +177,7 @@ test('notOnBoard gives the issues that the board does not have', () => {
 test('parseArguments only knows --apply', () => {
   assert.deepEqual(parseArguments([]), { apply: false })
   assert.deepEqual(parseArguments(['--apply']), { apply: true })
-  assert.throws(() => parseArguments(['--aply']), IterationsError)
+  assert.throws(() => parseArguments(['--aply']), RolloverError)
 })
 
 test('readItem reads an issue and skips what is not an issue', () => {
@@ -265,7 +265,7 @@ test('run changes nothing when an iteration is missing', () => {
         move: (moving) => moved.push(moving.number),
         today: '2026-10-26',
       }),
-    IterationsError,
+    RolloverError,
   )
   assert.deepEqual(moved, [])
 })
