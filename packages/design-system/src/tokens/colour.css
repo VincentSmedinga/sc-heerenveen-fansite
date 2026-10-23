@@ -123,6 +123,12 @@
     --hf-colour-focus-on-band: var(--hf-colour-blue-300);
 
     /*
+     * The bar under the current page in the menu of the header. Red-400 reaches 5,34:1 on the header in light and 4,20:1
+     * in dark, and a graphic part needs 3:1.
+     */
+    --hf-colour-accent-on-header: var(--hf-colour-red-400);
+
+    /*
      * Markers: what numbers, separates or points, such as list markers and positions in a table.
      * Quieter than the text, in steel. Text markers reach 4.5:1; graphic ones (bullets, lines, icons) 3:1.
      */

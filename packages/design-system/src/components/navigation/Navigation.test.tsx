@@ -1,6 +1,8 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
+import { exampleMenuAt } from '../../docs/ExamplePage'
+import { Page } from '../page/Page'
 import { Navigation } from './Navigation'
 
 const items = [
@@ -48,6 +50,25 @@ describe('Navigation', () => {
     expect(screen.getByRole('link', { name: 'Forum' }).hasAttribute('aria-current')).toBe(false)
     expect(screen.getByRole('link', { name: 'Uitslagen' }).hasAttribute('aria-current')).toBe(false)
     expect(document.querySelectorAll('[aria-current]')).toHaveLength(1)
+  })
+
+  it.each(['Nieuws', 'Onze bronnen', 'Forum'] as const)('marks only %s when that is the current page', (page) => {
+    render(<Navigation items={exampleMenuAt(page)} label="Hoofdmenu" />)
+
+    expect(screen.getByRole('link', { current: 'page' }).textContent).toBe(page)
+    expect(document.querySelectorAll('[aria-current]')).toHaveLength(1)
+  })
+
+  it('gives every link the class that the look of the menu in the header hangs on, under the header', () => {
+    render(
+      <Page.Header>
+        <Navigation items={items} label="Hoofdmenu" />
+      </Page.Header>,
+    )
+    const links = within(screen.getByRole('banner')).getAllByRole('link')
+
+    expect(links.map((link) => link.className)).toEqual(Array(3).fill('hf-navigation-link'))
+    expect(screen.getByRole('link', { current: 'page' }).className).toBe('hf-navigation-link')
   })
 
   it('marks no link when the visitor is on none of them', () => {

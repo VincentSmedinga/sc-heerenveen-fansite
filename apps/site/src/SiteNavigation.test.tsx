@@ -18,13 +18,14 @@ function render(pathname: string) {
 }
 
 describe('SiteNavigation', () => {
-  it('links to Onze bronnen and the forum, in a navigation named Hoofdmenu', () => {
+  it('links to the news, Onze bronnen and the forum, in a navigation named Hoofdmenu', () => {
     const html = render('/')
 
     expect(html).toContain('<nav aria-label="Hoofdmenu"')
     expect(
       [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
+      ['/', 'Nieuws'],
       ['/bronnen', 'Onze bronnen'],
       ['https://forum.heerenveen.org', 'Forum'],
     ])
@@ -34,7 +35,11 @@ describe('SiteNavigation', () => {
     expect(currentLinks(render('/bronnen'))).toEqual(['Onze bronnen'])
   })
 
-  it.each(['/', '/bestaat-niet'])('marks no link on %s', (pathname) => {
-    expect(currentLinks(render(pathname))).toEqual([])
+  it('marks Nieuws as the current page on the home page, and nothing else', () => {
+    expect(currentLinks(render('/'))).toEqual(['Nieuws'])
+  })
+
+  it('marks no link on a page that is not in the menu', () => {
+    expect(currentLinks(render('/bestaat-niet'))).toEqual([])
   })
 })
