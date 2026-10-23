@@ -102,6 +102,8 @@ cpSync(standalone, target, { recursive: true, verbatimSymlinks: true })
 flattenModules(target)
 mkdirSync(path.join(siteFolder, '.next'), { recursive: true })
 cpSync(path.resolve(import.meta.dirname, '../.next/static'), path.join(siteFolder, '.next/static'), { recursive: true })
+// The standalone folder leaves out public as well: the picture for shared links is in it.
+cpSync(path.resolve(import.meta.dirname, '../public'), path.join(siteFolder, 'public'), { recursive: true })
 // The server runs the migrations when it starts. It looks for them in packages/db/drizzle, two folders above apps/site, as in
 // the repository (see migrationsFolder in src/instrumentation-node.ts).
 cpSync(path.resolve(import.meta.dirname, '../../../packages/db/drizzle'), path.join(target, 'packages/db/drizzle'), {

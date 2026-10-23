@@ -3,10 +3,12 @@ import type { Metadata } from 'next'
 import { Heading, Link, List, Page, Text } from '@fansite/design-system'
 
 import { email } from '../../contact'
+import { pageMetadata } from '../../metadata'
 
-export const metadata: Metadata = {
-  title: 'Over ons',
-}
+// Render on each request: the canonical URL and the Open Graph address come from SITE_ENV, which the build doesn't know.
+export const dynamic = 'force-dynamic'
+
+export const generateMetadata = (): Metadata => pageMetadata('/over-ons', 'Over ons')
 
 const EmailLink = () => <Link href={`mailto:${email}`}>{email}</Link>
 

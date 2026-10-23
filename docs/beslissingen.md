@@ -2095,3 +2095,42 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of blauwe links, zoals op de rest van de site; dat vraagt geen nieuwe tokens, maar de footer valt dan meer op.
   Of één alinea met een `br` tussen de zinnen, zodat de links naar de volgende regel gaan zodra ze niet meer passen, zoals in de header.
   Dan moet de ESLint-regel `br` toestaan, of krijgt het designsysteem een component voor een regeleinde.
+
+### Metadata, sitemap en canonieke URL's gebruiken het adres van de eigen omgeving
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de canonieke URL's, `og:url`, `og:image` en `/sitemap.xml` beginnen met het adres van de omgeving waar de site draait (`originOf()`), niet alleen met dat van productie.
+  `robots.txt` verwijst alleen op productie naar de sitemap.
+  Op acceptatie en lokaal blijft hij alles weigeren, zonder verwijzing.
+- **Waarom:** de rooktest kan het dan op acceptatie controleren, en de code is op productie dezelfde.
+- **Alternatieven:** alleen op productie een sitemap en canonieke URL's; dat laat de code ongetest tot de lancering.
+- **Hoe:** de pagina's staan in `apps/site/src/pages.ts`, met hun beschrijving.
+  De sitemap, de metadata en de rooktest lezen die lijst.
+  `sitemap.test.ts` faalt als er een `page.tsx` in `src/app` staat die niet in de lijst staat en niet in de lijst met uitzonderingen in die test.
+  Alle vier de pagina's zijn nu `force-dynamic`: `originOf()` leest `SITE_ENV` als de server draait, en Next.js zou het adres van de build in een statische pagina zetten.
+  Voor Over ons en Wat is er nieuw maakt dat niets uit voor bezoekers, want de pagina's zijn klein en de versies komen nog steeds uit de build.
+  De sitemap bevat alleen `loc`: geen `lastmod`, `changefreq` of `priority`.
+
+### Het schild van de site, als PNG van ons eigen domein, is de afbeelding bij het delen van links
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het schild van de site, als PNG van ons eigen domein, is de afbeelding bij het delen van links.
+- **Waarom:** een gedeelde link toont dan meer dan tekst, zonder foto van een ander of een verzoek naar een derde.
+  Veel diensten voor het tonen van links accepteren geen SVG, dus het wordt een PNG.
+- **Alternatieven:** geen afbeelding (alleen tekst bij het delen); de SVG zelf (wordt vaak niet getoond).
+- **Hoe:** `pnpm --filter site share-image` maakt `apps/site/public/share-image.png` (1200 bij 630 pixels) met het Chromium van Playwright: het schild uit `packages/design-system/src/assets/logo.svg`, in het midden op het donkerblauw van de header.
+  We maken de PNG één keer en zetten hem in de repository; het script is er alleen voor als het logo verandert.
+  Het officiële clublogo staat er niet op.
+  `assemble` kopieert `public` mee naar de map voor de host, want Next.js laat die weg uit de standalone build.
+  De Content Security Policy staat de afbeelding toe: `img-src 'self'`.
+
+### Twee kleine afwijkingen van het issue bij de metadata
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de beschrijving van Wat is er nieuw is langer dan het voorstel in het issue, en de pagina's hebben `twitter:`-tags die we niet zelf zetten.
+  De beschrijving is "Wat er nieuw is op de sc Heerenveen Fansite, per versie: wat je er nu kunt vinden en doen."
+- **Waarom:** het voorstel ("Wat er nieuw is op de sc Heerenveen Fansite, per versie.") heeft 56 tekens, en het criterium vraagt 70 tot 160.
+  Next.js kopieert de Open Graph-tags naar `twitter:`-tags zodra een pagina Open Graph-tags heeft, en heeft geen manier om dat uit te zetten (`postProcessMetadata` in Next.js).
+  We zetten zelf geen `twitter`-sleutel in de metadata, en een test controleert dat; de tags in de HTML komen van Next.js.
+- **Alternatieven:** de beschrijving van 56 tekens laten staan en de test versoepelen.
+  Of de Open Graph-tags als losse `<meta>`-elementen in elke pagina zetten, buiten de metadata van Next.js om; dat zijn extra regels in elke pagina en de tags staan dan niet meer bij de rest van de metadata.
