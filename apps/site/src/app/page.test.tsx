@@ -42,6 +42,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.unstubAllEnvs()
 })
 
 describe('the homepage', () => {
@@ -192,10 +193,19 @@ describe('the homepage', () => {
     expect(html).toContain('<a href="/bronnen">Onze bronnen</a>')
   })
 
-  it('titles the page with the name of the site, and lets search engines in', async () => {
+  it('titles the page with the name of the site, describes it and lets search engines in', async () => {
+    vi.stubEnv('SITE_ENV', 'acceptance')
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
-    expect(await generateMetadata()).toEqual({})
+    const metadata = await generateMetadata()
+
+    expect(metadata).toMatchObject({
+      alternates: { canonical: 'https://acc.sc.heerenveen.org/' },
+      description: expect.stringMatching(/^Alle koppen en links over sc Heerenveen/),
+      openGraph: { title: 'sc Heerenveen Fansite', url: 'https://acc.sc.heerenveen.org/' },
+    })
+    expect(metadata).not.toHaveProperty('title')
+    expect(metadata).not.toHaveProperty('robots')
   })
 })
 

@@ -14,6 +14,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
+import { pages, shareImage } from '../src/pages.ts'
 import { releaseNotes } from '../src/release-notes.ts'
 import { dateOf, releasesOf } from '../src/whats-new.ts'
 
@@ -85,6 +86,62 @@ async function checkLayerOrder(pageUrl, html) {
   )
 }
 
+/**
+ * Checks the tags of a page for search engines and for shared links: the description, the canonical URL and the Open
+ * Graph tags with the address of `siteOrigin`, and a picture that comes from that same domain and that the site serves.
+ */
+async function checkMetaTags(path, html, siteOrigin) {
+  const url = `${siteOrigin}${path}`
+  const description = pages.find((page) => page.path === path)?.description
+  const content = (attribute, name) =>
+    [...html.matchAll(new RegExp(`<meta ${attribute}="${name}" content="([^"]*)"`, 'g'))].map(([, value]) => value)
+
+  assert.deepEqual(html.match(/<link rel="canonical" href="[^"]*"/g), [`<link rel="canonical" href="${url}"`], path)
+  assert.deepEqual(content('name', 'description'), [description], path)
+  assert.deepEqual(content('property', 'og:url'), [url], path)
+  assert.deepEqual(content('property', 'og:description'), [description], path)
+  assert.deepEqual(content('property', 'og:type'), ['website'], path)
+  assert.deepEqual(content('property', 'og:site_name'), ['sc Heerenveen Fansite'], path)
+  assert.deepEqual(content('property', 'og:locale'), ['nl_NL'], path)
+  assert.equal(content('property', 'og:title').length, 1, path)
+  assert.deepEqual(content('property', 'og:image'), [`${siteOrigin}${shareImage.path}`], path)
+  assert.deepEqual(content('property', 'og:image:width'), [String(shareImage.width)], path)
+  assert.deepEqual(content('property', 'og:image:height'), [String(shareImage.height)], path)
+  assert.deepEqual(content('property', 'og:image:alt'), [shareImage.alt], path)
+}
+
+/** Checks that the site serves the picture for shared links itself, as a PNG. */
+async function checkShareImage() {
+  const image = await fetch(origin + shareImage.path)
+  const bytes = new Uint8Array(await image.arrayBuffer())
+  assert.equal(image.status, 200)
+  assert.equal(image.headers.get('content-type'), 'image/png')
+  // The PNG signature, then the width and height in the first chunk.
+  assert.deepEqual([...bytes.slice(0, 8)], [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+  const view = new DataView(bytes.buffer)
+  assert.deepEqual([view.getUint32(16), view.getUint32(20)], [shareImage.width, shareImage.height])
+
+  return image
+}
+
+/**
+ * Fetches the sitemap and checks it: the pages of the site, each with the address of `siteOrigin`, and nothing but the
+ * addresses (no lastmod, changefreq or priority). The feed of Wat is er nieuw is not a page, so it is not in it.
+ */
+async function checkSitemap(siteOrigin) {
+  const sitemap = await fetch(`${origin}/sitemap.xml`)
+  const xml = await sitemap.text()
+  assert.equal(sitemap.status, 200)
+  assert.match(sitemap.headers.get('content-type') ?? '', /^application\/xml/)
+  assert.deepEqual(
+    [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map(([, location]) => location),
+    pages.map(({ path }) => `${siteOrigin}${path}`),
+  )
+  assert.doesNotMatch(xml, /lastmod|changefreq|priority|feed\.xml/)
+
+  return sitemap
+}
+
 /** Lists the names of the cascade layers in some CSS, in the order they first appear in a statement or a block. */
 function layersIn(css) {
   const layers = []
@@ -106,7 +163,10 @@ function layersIn(css) {
  * one of them.
  */
 async function loadedUrls(pageUrl, html) {
-  const tags = html.match(/<(?:audio|embed|iframe|img|link|object|script|source|track|video)\b[^>]*>/gi) ?? []
+  // The canonical URL names the page itself, with the address of the environment. A browser doesn't load it.
+  const tags = (html.match(/<(?:audio|embed|iframe|img|link|object|script|source|track|video)\b[^>]*>/gi) ?? []).filter(
+    (tag) => !/\srel="canonical"/i.test(tag),
+  )
   const urls = tags.flatMap((tag) =>
     [...tag.matchAll(/\s(?:data|href|poster|src|srcset)="([^"]*)"/gi)].flatMap(([, value]) =>
       value.split(',').map((candidate) => new URL(candidate.trim().split(/\s+/)[0], pageUrl)),
@@ -218,7 +278,20 @@ await withEmptyDatabase((database) =>
     assert.ok(asset, 'the page links to no static file')
 
     const robots = await fetch(`${origin}/robots.txt`)
-    assert.match(await robots.text(), /^Disallow: \/$/m)
+    const robotsText = await robots.text()
+    assert.match(robotsText, /^Disallow: \/$/m)
+    assert.doesNotMatch(robotsText, /^Sitemap:/im, 'acceptance refuses everything, so it points to no sitemap')
+
+    // Each page has its description, canonical URL and Open Graph tags with the address of acceptance, and the picture for
+    // shared links is a file of the site itself.
+    for (const { path } of pages) {
+      const response = await fetch(origin + path)
+      assert.equal(response.status, 200, path)
+      await checkMetaTags(path, await response.text(), 'https://acc.sc.heerenveen.org')
+    }
+
+    const sitemap = await checkSitemap('https://acc.sc.heerenveen.org')
+    const shareImageResponse = await checkShareImage()
 
     // The sources page reads the register, so the database driver must be in the folder too, and the test sources must
     // be in it. The source that is switched off isn't on the page.
@@ -252,6 +325,8 @@ await withEmptyDatabase((database) =>
       home,
       sources,
       robots,
+      sitemap,
+      shareImageResponse,
       feed,
       await fetch(origin + asset),
       await fetch(`${origin}/bestaat-niet`),
@@ -299,7 +374,17 @@ await withEmptyDatabase((database) =>
     const home = await fetch(origin)
     assert.equal(home.headers.get('x-robots-tag'), null, 'production must be indexable')
     assert.match(await home.text(), /We hebben deze week nog geen nieuws gevonden\./)
-    assert.doesNotMatch(await (await fetch(`${origin}/robots.txt`)).text(), /^Disallow: \/$/m)
+    const robots = await (await fetch(`${origin}/robots.txt`)).text()
+    assert.doesNotMatch(robots, /^Disallow: \/$/m)
+    assert.match(robots, /^Sitemap: https:\/\/sc\.heerenveen\.org\/sitemap\.xml$/m)
+
+    for (const { path } of pages) {
+      const response = await fetch(origin + path)
+      assert.equal(response.status, 200, path)
+      await checkMetaTags(path, await response.text(), 'https://sc.heerenveen.org')
+    }
+
+    await checkSitemap('https://sc.heerenveen.org')
 
     const sources = await fetch(`${origin}/bronnen`)
     const sourcesHtml = await sources.text()

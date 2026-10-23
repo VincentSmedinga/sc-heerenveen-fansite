@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import AboutPage, { metadata } from './page'
+import AboutPage, { generateMetadata } from './page'
 
 const html = renderToStaticMarkup(<AboutPage />)
 
@@ -9,8 +9,19 @@ const html = renderToStaticMarkup(<AboutPage />)
 const links = [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label])
 
 describe('the page Over ons', () => {
-  it('is titled Over ons', () => {
-    expect(metadata).toEqual({ title: 'Over ons' })
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('is titled Over ons, with a description and a canonical URL of its own', () => {
+    vi.stubEnv('SITE_ENV', 'acceptance')
+
+    expect(generateMetadata()).toMatchObject({
+      alternates: { canonical: 'https://acc.sc.heerenveen.org/over-ons' },
+      description: expect.stringMatching(/^Wie we zijn/),
+      openGraph: { title: 'Over ons', url: 'https://acc.sc.heerenveen.org/over-ons' },
+      title: 'Over ons',
+    })
   })
 
   it('is the one main of the page, with all its content in one cell', () => {

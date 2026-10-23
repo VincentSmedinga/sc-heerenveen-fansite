@@ -6,6 +6,7 @@ import { cache } from 'react'
 import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
 import { getHeadlines } from '../headlines'
+import { pageMetadata } from '../metadata'
 import { dateTimeOf, formatDayAndTime } from '../news'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
@@ -33,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
   // doesn't apply to the page in its own segment, so the title of the error page is the title alone.
   return (await loadHeadlines()) === undefined
     ? { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
-    : {}
+    : pageMetadata('/')
 }
 
 export default async function HomePage() {

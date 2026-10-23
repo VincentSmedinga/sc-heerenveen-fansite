@@ -10,12 +10,15 @@ describe('robots', () => {
   it.each(['local', 'acceptance'])('refuses everything on %s', (siteEnv) => {
     vi.stubEnv('SITE_ENV', siteEnv)
 
-    expect(robots().rules).toEqual({ disallow: '/', userAgent: '*' })
+    expect(robots()).toEqual({ rules: { disallow: '/', userAgent: '*' } })
   })
 
-  it('allows everything on production', () => {
+  it('allows everything on production, and points to the sitemap of production', () => {
     vi.stubEnv('SITE_ENV', 'production')
 
-    expect(robots().rules).toEqual({ allow: '/', userAgent: '*' })
+    expect(robots()).toEqual({
+      rules: { allow: '/', userAgent: '*' },
+      sitemap: 'https://sc.heerenveen.org/sitemap.xml',
+    })
   })
 })
