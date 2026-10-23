@@ -46,7 +46,8 @@ Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de
 
 De homepage toont koppen uit de database, en de seed heeft er geen.
 Daarom zet `e2e/global-setup.ts` vóór de eerste test verzonnen koppen op de testbronnen in de database, en haalt ze er na de laatste test weer uit (`e2e/headlines.ts`).
-Daarbij staan een bericht van ouder dan een week en een van een uitgezette bron, die de pagina moet weglaten.
+Of de homepage een bericht van ouder dan een week en een van een uitgezette bron weglaat, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
+Hier gaat het om axe op de pagina met nieuws.
 Draait de database van de controle ook echte berichten, door `pnpm run import`, dan staan die er gewoon tussen.
 Playwright wacht tot `/robots.txt` antwoordt en niet tot de homepage, want die bewaart haar koppen vijf minuten in het geheugen.
 

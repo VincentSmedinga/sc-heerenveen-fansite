@@ -1,6 +1,7 @@
-import type { Page } from '@playwright/test'
+import type { Page, Request } from '@playwright/test'
 
 import AxeBuilder from '@axe-core/playwright'
+import { expect } from '@playwright/test'
 
 // WCAG 2.0, 2.1 and 2.2 at levels A and AA, and the best practices of axe. axe has no separate tag for the level A
 // criteria of 2.2. No rule is switched off: a violation fails the check.
@@ -34,20 +35,39 @@ export async function checkPage(page: Page) {
     problems.push(`html-lang-nl (the lang of the html element is ${JSON.stringify(lang)}, not "nl")`)
   }
 
-  // Everything the page has loaded, as the browser lists it, also what failed. The first check runs after the page has loaded.
+  // The resize can make the page load something new, such as a picture for a narrow screen. Keep track of the requests
+  // that start from here. Waiting for 'networkidle' doesn't work: it fires only once, and it has often fired by now.
+  const open = new Set<Request>()
+  const opened = (request: Request) => open.add(request)
+  const closed = (request: Request) => open.delete(request)
+  page.on('request', opened)
+  page.on('requestfinished', closed)
+  page.on('requestfailed', closed)
+
+  await page.setViewportSize({ height: 800, width: 320 })
+  // Two frames, so the page has reacted to the new size before anything is measured or waited for.
+  const tooWide = await page.evaluate(async () => {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+
+    return document.documentElement.scrollWidth - document.documentElement.clientWidth
+  })
+
+  if (tooWide > 0) {
+    problems.push(`no-horizontal-scroll (at 320 px wide the page scrolls sideways, it is ${tooWide} px too wide)`)
+  }
+
+  // Everything the page has loaded, as the browser lists it, also what failed. It is read last, after the resize and
+  // after what the resize started has finished, so something that only loads on a narrow screen counts too.
+  await expect.poll(() => open.size, { message: 'the page is still loading after the resize' }).toBe(0)
+  page.off('request', opened)
+  page.off('requestfinished', closed)
+  page.off('requestfailed', closed)
   const loaded = await page.evaluate(() => performance.getEntriesByType('resource').map((entry) => entry.name))
   const { origin } = new URL(page.url())
   const foreign = new Set(loaded.map((url) => new URL(url).origin).filter((other) => other !== origin))
 
   for (const other of foreign) {
     problems.push(`no-third-party-requests (the page loads something from ${other}, another domain than ${origin})`)
-  }
-
-  await page.setViewportSize({ height: 800, width: 320 })
-  const tooWide = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
-
-  if (tooWide > 0) {
-    problems.push(`no-horizontal-scroll (at 320 px wide the page scrolls sideways, it is ${tooWide} px too wide)`)
   }
 
   return problems

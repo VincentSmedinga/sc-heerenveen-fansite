@@ -12,15 +12,9 @@ type Row = { domain: string; hoursAgo: number; paywalled?: boolean; source: stri
  * test and takes them out after the last one.
  *
  * They are in the form of real headlines, on the made-up test sources of the seed. The times are counted back from the
- * moment the check starts, so they are always in the week the homepage shows (or, for two of them, never).
+ * moment the check starts, so they are always in the week the homepage shows.
  */
-export const headlines: { disabledSource: Row; insideTheWeek: Row[]; outsideTheWeek: Row } = {
-  disabledSource: {
-    domain: 'uitgezet.test',
-    hoursAgo: 1,
-    source: 'Uitgezette testbron',
-    title: 'Bericht van een bron die uitstaat',
-  },
+export const headlines: { insideTheWeek: Row[] } = {
   insideTheWeek: [
     {
       domain: 'testkrant.test',
@@ -68,18 +62,12 @@ export const headlines: { disabledSource: Row; insideTheWeek: Row[]; outsideTheW
       title: 'Wedstrijdbespreking: ‘OnvoorstelbaarbijzonderevoetbalprestatiesvandejongeverdedigingsliniebijTestclub’',
     },
   ],
-  outsideTheWeek: {
-    domain: 'testkrant.test',
-    hoursAgo: 24 * 8,
-    source: 'Testkrant',
-    title: 'Oud nieuws dat niet meer op de homepage hoort',
-  },
 }
 
 /** The feeds of the made-up items. A feed that the importer would read must not outlast the check, so it is easy to recognise. */
 const feedPath = '/e2e-a11y/rss/'
 
-const rows: Row[] = [...headlines.insideTheWeek, headlines.outsideTheWeek, headlines.disabledSource]
+const rows: Row[] = headlines.insideTheWeek
 
 /**
  * Puts the made-up headlines in the database and returns the function that takes them out again. The site must have

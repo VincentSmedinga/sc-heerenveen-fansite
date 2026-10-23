@@ -28,6 +28,15 @@ const mistakes = [
     rule: 'no-third-party-requests',
   },
   {
+    // The same, but only on a narrow screen, where the picture changes.
+    html: good.replace(
+      '</main>',
+      '<picture><source media="(max-width: 400px)" srcset="https://derde-partij.test/smal.gif"><img src="/favicon.ico" alt=""></picture></main>',
+    ),
+    name: 'a request to another domain that only a narrow screen makes',
+    rule: 'no-third-party-requests',
+  },
+  {
     html: good.replace('<h1>', '<div style="width: 400px">Breed</div><h1>'),
     name: 'sideways scrolling at 320 px',
     rule: 'no-horizontal-scroll',
