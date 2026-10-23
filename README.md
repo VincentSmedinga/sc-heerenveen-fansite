@@ -48,6 +48,7 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm release`           | Opent of werkt de release-pull request bij (vraagt `gh`)   |
 | `pnpm review <branch>`   | Start de site en Storybook voor een branch of pull request |
 | `pnpm review:stop`       | Stopt ze weer                                              |
+| `pnpm rollover`          | Schuift het bord naar de nieuwe week (vraagt `gh`)         |
 
 Na `pnpm release` en vóór je de release-pull request samenvoegt, schrijft de Coordinator de Nederlandse zinnen voor de pagina Wat is er nieuw.
 Een kleine pull request zet ze in [`apps/site/src/release-notes.ts`](apps/site/src/release-notes.ts).
@@ -75,6 +76,30 @@ Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvo
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): hoe je meedoet, en de afspraken voor issues, branches, pull requests en taal
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): de gedragscode
 - [`AGENTS.md`](AGENTS.md): werkafspraken voor AI-agents, in het Engels
+
+## Het bord klaarzetten voor een nieuwe week
+
+Het veld Iteratie van het projectbord loopt niet vanzelf door.
+Draai elke maandag vanuit de map van de repository:
+
+```sh
+pnpm rollover
+pnpm rollover --apply
+```
+
+Zonder `--apply` is het een dry run: de opdracht laat zien wat hij zou veranderen en verandert niets.
+Met `--apply` voert hij het uit.
+Hij gebruikt alleen `gh` en de GraphQL-API van GitHub, en leest de iteraties uit het veld zelf.
+
+- Een gesloten issue op het bord zonder iteratie krijgt de iteratie van de dag waarop het dicht ging.
+- Een open issue met status Bezig in een voorbije iteratie gaat naar de iteratie van vandaag.
+- Open issues met status Te doen blijven zoals ze zijn.
+- Daarna drukt hij af wat in de vorige iteratie klaar kwam, per mijlpaal.
+- Issues die niet op het bord staan, slaat hij over.
+  Hij telt ze en noemt hun nummers.
+
+Past een datum in geen enkele iteratie, dan stopt hij met een melding en verandert hij niets.
+Voeg dan iteraties toe in de instellingen van het project, bij het veld Iteratie, en draai de opdracht opnieuw.
 
 ## Een branch bekijken
 
