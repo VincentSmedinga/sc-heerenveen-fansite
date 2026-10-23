@@ -6,8 +6,7 @@ const read = (path: string) => readFileSync(join(import.meta.dirname, path), 'ut
 
 /**
  * The declarations of the class, as the browser parses the CSS file. jsdom doesn't apply rules in a cascade layer to
- * an element, so the test reads the rule instead of a computed style. The site checks it on the homepage in Chromium
- * (apps/site/e2e/home.spec.ts).
+ * an element, so the test reads the rule instead of a computed style.
  */
 function declarationsOf(selector: string) {
   const sheet = new CSSStyleSheet()

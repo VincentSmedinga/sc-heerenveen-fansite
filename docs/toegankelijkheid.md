@@ -22,7 +22,7 @@ Controleer daarom op de gerenderde pagina, in licht en donker:
 - **De pagina's:** CI start de gebouwde site en toetst elke pagina uit de lijst in `apps/site/e2e/pages.spec.ts` met axe, in Chromium, in licht en donker.
   axe toetst op WCAG 2.0, 2.1 en 2.2, niveau A en AA, en op de best practices van axe.
   Elke schending laat de controle falen.
-  Per pagina controleert de test ook precies één `h1`, `lang="nl"` en geen horizontale scrollbalk in een venster van 320 pixels breed.
+  Per pagina controleert de test ook precies één `h1`, `lang="nl"`, geen verzoek naar een ander domein en geen horizontale scrollbalk in een venster van 320 pixels breed.
   De homepage toetst hij met verzonnen koppen, die de test zelf in de database zet en daarna weghaalt.
   Lokaal draai je dit met `pnpm test:a11y`; wat eerst moet draaien, staat in de [README van de site](../apps/site/README.md).
 - **De stories:** CI bouwt Storybook, maar toetst de stories niet met axe.

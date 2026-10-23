@@ -139,6 +139,8 @@ Wie een pull request maakt, doet dat zelf al voordat hij hem opent.
 - Nieuw gedrag heeft tests.
   Wat bezoekers zien, heeft een story, nagekeken in licht en donker.
   Een nieuwe pagina staat in de lijst van `apps/site/e2e/pages.spec.ts`.
+  Een e2e-test in de browser is er alleen voor wat axe en de unit-tests niet zien en wat zonder test ongemerkt kapotgaat, zoals de foutpagina zonder database of een verzoek naar een ander domein.
+  Maten, breedtes en uitlijning krijgen geen e2e-test: die kijk je na in Storybook en in de review.
 - CI slaagt: lint, typecheck, tests, build, de toegankelijkheidscontrole, de Storybook-build en de controle van de titel.
 - De code volgt de afspraken hierboven en die in [`packages/design-system/README.md`](packages/design-system/README.md).
 - Er staan geen geheimen of persoonsgegevens in code, tests, testgegevens of logs.
