@@ -10,7 +10,7 @@ import type { Fetcher, RobotsStore } from './fetcher.ts'
 import type { FeedItem, SkippedItem } from './read-feed.ts'
 
 import { createFetcher } from './fetcher.ts'
-import { readFeed } from './read-feed.ts'
+import { paywallCategoryFor, readFeed } from './read-feed.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { finishRun, reasonOf, recordLockTaken, recordReport, removeOldRuns, startRun } from './run-log.ts'
 
@@ -123,7 +123,13 @@ export async function importFeed(
       return { kind: 'wait', retryAfterSeconds: outcome.retryAfterSeconds, url }
   }
 
-  const read = readFeed(outcome.body, { contentType: outcome.contentType, now })
+  const [source] = await db.select({ domain: sources.domain }).from(sources).where(eq(sources.id, feed.sourceId))
+  const domain = source?.domain ?? ''
+  const read = readFeed(outcome.body, {
+    contentType: outcome.contentType,
+    now,
+    paywallCategory: paywallCategoryFor(domain),
+  })
 
   if (read.kind === 'error') {
     return { kind: 'error', message: read.message, url }

@@ -94,6 +94,14 @@ export const realSources = [
     kind: 'news',
     name: 'Leeuwarder Courant',
   },
+  {
+    description:
+      'Landelijk voetbaltijdschrift en nieuwssite over het betaalde voetbal. De feed bevat de berichten, analyses en video’s over sc Heerenveen; een deel daarvan staat achter een betaalmuur.',
+    domain: 'www.vi.nl',
+    feeds: ['https://www.vi.nl/feed/news.xml?tag=sc-heerenveen'],
+    kind: 'news',
+    name: 'Voetbal International',
+  },
 ] satisfies (NewSource & { feeds: string[] })[]
 
 /**

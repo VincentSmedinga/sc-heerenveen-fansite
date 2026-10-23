@@ -3,9 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { FeedItem } from './read-feed.ts'
 
-import { cleanHeadline, readFeed } from './read-feed.ts'
+import { cleanHeadline, paywallCategoryFor, readFeed } from './read-feed.ts'
 
 const now = new Date('2026-10-22T12:00:00Z')
+
+/** The `domain` of the category that Voetbal International gives to an item behind its paywall. */
+const pro = 'https://www.vi.nl/pro'
 
 const encode = (text: string) => new TextEncoder().encode(text)
 
@@ -127,6 +130,63 @@ describe('the recording of the Leeuwarder Courant', () => {
     )
 
     expect(JSON.stringify(readFeed(encode(generous), { now }))).not.toContain('GEHEIME')
+  })
+})
+
+describe('the recording of Voetbal International', () => {
+  const recording = readFileSync(new URL('./fixtures/vi-sc-heerenveen.xml', import.meta.url))
+  const result = readFeed(recording, { contentType: 'application/rss+xml; charset=utf-8', now, paywallCategory: pro })
+  const items = result.kind === 'read' ? result.items : []
+
+  it('gives its 24 items, none skipped', () => {
+    expect(result).toMatchObject({ kind: 'read', skipped: [] })
+    expect(items).toHaveLength(24)
+  })
+
+  it('gives the headline, the link, the GUID as key and the time in UTC of the first item', () => {
+    expect(items[0]).toEqual({
+      key: 'www.vi.nl-news-2149501',
+      paywalled: true,
+      publishedAt: new Date('2026-10-21T13:00:00Z'),
+      title: 'Een extra toevoeging aan het spel van een jonge ervaren rot bij SC Heerenveen',
+      url: 'https://www.vi.nl/pro/een-extra-toevoeging-aan-het-spel-van-een-jonge-ervaren-rot-bij-sc-heerenveen',
+    })
+  })
+
+  it('marks the items with the pro category, and those are the items under /pro/', () => {
+    expect(items.filter((item) => item.paywalled)).toHaveLength(5)
+    expect(items.filter((item) => item.paywalled).every((item) => item.url.startsWith('https://www.vi.nl/pro/'))).toBe(
+      true,
+    )
+    expect(items.filter((item) => item.url.startsWith('https://www.vi.nl/pro/'))).toHaveLength(5)
+  })
+
+  it('has items under /nieuws/ and /video/ that are not paywalled', () => {
+    for (const section of ['/nieuws/', '/video/']) {
+      const inSection = items.filter((item) => item.url.includes(`vi.nl${section}`))
+
+      expect(inSection.length, section).toBeGreaterThan(0)
+      expect(inSection.some((item) => item.paywalled)).toBe(false)
+    }
+  })
+
+  it('gives items with these five fields only: no intro, image, author or category', () => {
+    for (const item of items) {
+      expect(Object.keys(item).sort()).toEqual(['key', 'paywalled', 'publishedAt', 'title', 'url'])
+    }
+  })
+
+  it('does not look for the premium element, and the Leeuwarder Courant does not look for the category', () => {
+    const premium = rss(rssItem({ premium: 'true' }))
+    const category = rss(rssItem().replace('</item>', `<category domain="${pro}"><![CDATA[PRO]]></category></item>`))
+
+    expect(readFeed(encode(premium), { now, paywallCategory: pro })).toMatchObject({ items: [{ paywalled: false }] })
+    expect(readFeed(encode(category), { now })).toMatchObject({ items: [{ paywalled: false }] })
+  })
+
+  it('knows the category by the domain of the source and by nothing else', () => {
+    expect(paywallCategoryFor('www.vi.nl')).toBe(pro)
+    expect(paywallCategoryFor('www.lc.nl')).toBeUndefined()
   })
 })
 

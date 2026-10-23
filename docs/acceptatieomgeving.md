@@ -49,7 +49,7 @@ Dat gebeurt in `register()` in `apps/site/src/instrumentation.ts`, en de site be
 
 1. Hij draait de migraties die de database nog niet had.
    `assemble` zet ze in `packages/db/drizzle` van de map, twee mappen boven `apps/site`, want Next.js neemt de SQL-bestanden zelf niet mee.
-2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen en de Leeuwarder Courant met haar feed.
+2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen en de Leeuwarder Courant en Voetbal International met hun feeds.
    Met `local` en `production` doet hij dat niet.
    Een bron die er al staat, werkt hij bij op haar domein, dus er komen geen dubbele.
 
