@@ -1,7 +1,8 @@
 # @fansite/importer
 
 De importer haalt koppen en links op bij de bronnen.
-Hij bevat de fetcher, de ene HTTP-client voor alle adapters, en de adapter voor RSS- en Atom-feeds, met de Leeuwarder Courant als eerste bron en Voetbal International als tweede.
+Hij bevat de fetcher, de ene HTTP-client voor alle adapters, en de adapter voor RSS- en Atom-feeds.
+Welke bronnen we lezen en waarom, staat in [`docs/bronnen.md`](../../docs/bronnen.md).
 Op acceptatie start cron de import elke 15 minuten (zie _De import op acceptatie_).
 Een run neemt een lock, schrijft een logboek, houdt de gezondheid van elke feed bij en wacht als een bron daarom vraagt (zie _Het logboek en de gezondheid_).
 Een rooster per soort bron komt met de adapters (#14 en #15).
@@ -175,7 +176,7 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   Een tijd zonder zone, in een vorm die we niet kennen, van vóór 1990 of meer dan een dag in de toekomst is niet geldig.
   Dan geldt de tijd waarop we het bericht voor het eerst zagen, en een bekend bericht houdt de tijd die het had.
 - **Betaalmuur:** elke bron zegt het op een eigen manier, en de adapter kiest aan de hand van het domein van de bron (`paywallCategories` in [`src/read-feed.ts`](src/read-feed.ts)).
-  Bij de Leeuwarder Courant is het het element `<premium>true</premium>`.
+  Bij de Leeuwarder Courant en De Telegraaf is het het element `<premium>true</premium>`.
   `feedsmith` leest elementen die het niet kent niet, dus een tweede lezing met `fast-xml-parser` zoekt dit ene element.
   Bij Voetbal International is het de categorie met `domain="https://www.vi.nl/pro"` (tekst `PRO`), die `feedsmith` wel leest.
   De categorie zelf bewaren we niet; de adapter gebruikt haar alleen voor `items.paywalled`.

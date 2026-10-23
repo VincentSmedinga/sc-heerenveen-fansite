@@ -83,7 +83,8 @@ export const testSources = [
 
 /**
  * The real sources, with the feeds we read. They get the strictest policy, because none has given permission yet: only
- * the headline, the link and the name. The descriptions are in our own words. More real sources come with #10.
+ * the headline, the link and the name. The descriptions are in our own words. `docs/bronnen.md` says which sources
+ * belong here and why.
  */
 export const realSources = [
   {
@@ -101,6 +102,14 @@ export const realSources = [
     feeds: ['https://www.vi.nl/feed/news.xml?tag=sc-heerenveen'],
     kind: 'news',
     name: 'Voetbal International',
+  },
+  {
+    description:
+      'Landelijk dagblad uit Amsterdam. Onder het onderwerp sc Heerenveen staan verslagen, nieuws over transfers en interviews; een deel daarvan staat achter een betaalmuur.',
+    domain: 'www.telegraaf.nl',
+    feeds: ['https://www.telegraaf.nl/tag/sc-heerenveen/rss/'],
+    kind: 'news',
+    name: 'De Telegraaf',
   },
 ] satisfies (NewSource & { feeds: string[] })[]
 

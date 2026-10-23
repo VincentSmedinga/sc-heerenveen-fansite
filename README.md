@@ -72,6 +72,7 @@ Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvo
 - [`packages/shared`](packages/shared/README.md): hulpfuncties voor de site en de importer, zoals de controle van omgevingsvariabelen
 - [`docs/beslissingen.md`](docs/beslissingen.md): welke keuzes we hebben gemaakt, en waarom
 - [`docs/acceptatieomgeving.md`](docs/acceptatieomgeving.md): hoe de acceptatieomgeving op de hosting staat, en wat de eigenaar daarvoor instelt
+- [`docs/bronnen.md`](docs/bronnen.md): welke bronnen we hebben beoordeeld, en wat we over elke bron besloten
 - [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md): wat een mens of de reviewer nakijkt op toegankelijkheid, naast de automatische controles
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): hoe je meedoet, en de afspraken voor issues, branches, pull requests en taal
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): de gedragscode

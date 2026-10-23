@@ -49,7 +49,7 @@ Dat gebeurt in `register()` in `apps/site/src/instrumentation.ts`, en de site be
 
 1. Hij draait de migraties die de database nog niet had.
    `assemble` zet ze in `packages/db/drizzle` van de map, twee mappen boven `apps/site`, want Next.js neemt de SQL-bestanden zelf niet mee.
-2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen, de Leeuwarder Courant en Voetbal International met hun feeds.
+2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen en de echte bronnen met hun feeds (zie [`bronnen.md`](bronnen.md)).
    Met `local` en `production` doet hij dat niet.
    Een bron die er al staat, werkt hij bij op haar domein, dus er komen geen dubbele.
 
@@ -68,7 +68,7 @@ Lees het in _Setup Node.js App_ of in `stderr.log` in de map van de app.
 ## De import
 
 Cron start op de host elke 15 minuten de importer, `apps/importer/import.mjs` in de map van de app.
-Hij leest de feeds van de bronnen die aanstaan, nu de Leeuwarder Courant uit de seed, en zet de koppen in de tabel `items`.
+Hij leest de feeds van de bronnen die aanstaan, die uit de seed (zie [`bronnen.md`](bronnen.md)), en zet de koppen in de tabel `items`.
 Wat hij per feed schrijft, staat in de [README van de importer](../apps/importer/README.md).
 
 - Cron start hem op minuut 7, 22, 37 en 52 van elk uur, niet op het hele kwartier: dan starten veel andere cronjobs.
@@ -210,13 +210,13 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 
 - De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, en het blok "Laatste nieuws".
   Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens."
-  Daarna staan er de koppen van de Leeuwarder Courant van de afgelopen week.
+  Daarna staan er de koppen van de echte bronnen uit de seed van de afgelopen week.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - `curl -I https://acc.sc.heerenveen.org` toont `x-robots-tag: noindex, nofollow`.
   Die header staat ook bij `/robots.txt` en bij een pagina die niet bestaat.
 - <https://acc.sc.heerenveen.org/robots.txt> toont `Disallow: /`.
 - <https://acc.sc.heerenveen.org/bestaat-niet> toont de Nederlandse 404-pagina "Pagina niet gevonden".
-- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, en de Leeuwarder Courant.
+- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, en de echte bronnen uit de seed.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - De import werkt als `tail -n 20 ~/fansite-import.log` na een kwartier een tijd toont, met een regel voor de feed eronder:
 

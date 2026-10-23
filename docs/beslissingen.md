@@ -2070,6 +2070,28 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of uitstel dat steeds langer wordt; dat is meer code voor weinig winst bij één feed.
   Of `robots.txt` in een bestand op de host bewaren.
 
+### Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** we nemen een bron in het register als zijn feed (bijna) alleen over sc Heerenveen gaat en `robots.txt` ons de feed laat lezen.
+  Een voorbehoud tegen datamining, in `robots.txt` of de voorwaarden, stopt ons niet voor de kop, de link, de bronnaam en de tijd.
+  Vraagt een bron ons te stoppen, dan zetten we hem meteen uit.
+- **Waarom:** een kop en een link sturen de lezer naar de journalist (principe 1 van de Redactie), en de fetcher houdt zich aan `robots.txt`.
+  Zo laten we meer bronnen zien dan met toestemming vooraf, en een bron die bezwaar heeft, kan het ons zeggen.
+  Het risico: een voorbehoud tegen datamining kan ook voor het automatisch lezen van een kop gelden, en geen jurist heeft die afweging getoetst.
+  Daarom staat elk voorbehoud in [`bronnen.md`](bronnen.md), en zetten we een bron direct uit als hij erom vraagt.
+- **Gevolg:** De Telegraaf staat met zijn tagfeed in het register, ondanks het voorbehoud in zijn `robots.txt`.
+  Bij de keuze voor Voetbal International (#142) was dat voorbehoud nog een reden om De Telegraaf niet te kiezen.
+- **Alternatieven:** bij een voorbehoud eerst schriftelijke toestemming vragen; dat is voorzichtiger, maar we missen dan bronnen die zelden antwoorden.
+
+### De feeds van andere clubs nemen we niet
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de officiële feeds van FC Groningen en PEC Zwolle nemen we niet over.
+- **Waarom:** de site gaat over sc Heerenveen.
+  Het eerdere prototype had drie clubs; wij hebben er één.
+- **Alternatieven:** ze toch opnemen voor wedstrijden tegen die clubs; dat vraagt een manier om berichten aan een wedstrijd te koppelen, en die is er niet.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
