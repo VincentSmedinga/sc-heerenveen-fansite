@@ -1304,7 +1304,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het woordmerk is de grootste letter van de site; de koppen komen daaronder.
   De eerste stap (32 en 24 pixels, nog op gewicht 900) was de projecteigenaar nog te groot en te zwaar.
 - **Alternatieven:** kop 1 op de maat van het woordmerk (36 pixels); dat is nog steeds groot in kapitalen.
-  Alleen de gewichten of de breedte van de koppen verlagen en de maten laten staan; dat verandert het karakter van de letter.
+  Alleen de maten verkleinen en het gewicht op 900 laten, zoals de eerste stap; dat vond de projecteigenaar nog te zwaar.
+  Of de breedte van de koppen verlagen en de maten laten staan; dat verandert het karakter van de letter.
   Of ook kop 3 kleiner maken; die is al 20 pixels, gelijk aan kop 4 en nieuwskop.
 
 ## Site
