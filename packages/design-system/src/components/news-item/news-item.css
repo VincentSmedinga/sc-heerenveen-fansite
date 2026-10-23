@@ -1,7 +1,8 @@
 /*
  * A line of news: the short day and the time in red on the left, and next to it the headline as a link, with the source
- * and the paywall under it. A line narrower than 24rem puts the day and the time above the headline instead. A List of
- * lines has a thin line between the lines.
+ * and the paywall under it. The headline is underlined under the mouse and with the focus of the keyboard, not otherwise.
+ * A line narrower than 24rem puts the day and the time above the headline instead. A List of lines has a thin line between
+ * the lines.
  */
 
 @layer hf.components {
@@ -20,13 +21,15 @@
 
   /*
    * The columns of every line are the same width, so the headlines start at the same place down the list. The first
-   * baselines of the time and the headline are on one line.
+   * baselines of the time and the headline are on one line. The column of the time is as wide as the widest time, "ma
+   * 20:08" (61 pixels at the size of Meta), with a little to spare, so there is not much air between the time and the
+   * headline.
    */
   .hf-news-item-layout {
     align-items: baseline;
-    column-gap: 1rem;
+    column-gap: 0.75rem;
     display: grid;
-    grid-template-columns: 4.75rem minmax(0, 1fr);
+    grid-template-columns: 4rem minmax(0, 1fr);
   }
 
   /*
@@ -41,10 +44,14 @@
     }
   }
 
-  /* Red, with digits of the same width, so the times line up. */
+  /*
+   * Red, with digits of the same width, so the times line up. The day and the time stay on one line: the column is no
+   * wider than the widest of them.
+   */
   .hf-news-item-time {
     color: var(--hf-colour-text-accent);
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
   .hf-news-item-body {
@@ -54,9 +61,29 @@
     gap: 0.125rem;
   }
 
-  /* A target of at least 24 pixels high (WCAG 2.5.8). One line of the smallest headline is 26 pixels. */
+  /*
+   * A target of at least 24 pixels high (WCAG 2.5.8): one line of the headline is 22 pixels, so the height is set here.
+   * The size and the weight of the text are set at the bottom of this file.
+   *
+   * Not underlined, except under the mouse and with the focus of the keyboard: a list of headlines with a line under each
+   * is busy. The headline is on a line of its own, heavier than the text and in the colour of links, so it is a link
+   * without the line (WCAG 1.4.1 asks for more than colour mostly for a link in a sentence). The line is 1.5 pixels
+   * thick, between the 1 pixel of a link that is not under the mouse and the 2 of the base styles under the mouse, to go
+   * with the weight of the text. It sits closer to the text than for other links. Both are set for the two states, so the focus gets the same
+   * line as hover. The line skips the descenders of letters, such as the g and the p. Only the line is set here: the
+   * colours of a visited link and of hover, and the focus ring, stay as the base styles make them.
+   */
   .hf-news-item-headline {
     min-block-size: 1.5rem;
+    text-decoration-line: none;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.1em;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration-line: underline;
+    }
   }
 
   .hf-news-item-meta {
@@ -97,5 +124,18 @@
 
   li:last-child > .hf-news-item {
     padding-block-end: 0;
+  }
+}
+
+/*
+ * The headline has the size of the text and the weight Medium, with the line height of a Nieuwskop. This is in the
+ * typography layer, with the .hf-headline rule that it overrides, and comes after it: in the built site the layers of the
+ * design system end up in another order than index.css gives, with typography above components, so a rule in the
+ * components layer would lose to .hf-headline there.
+ */
+@layer hf.typography {
+  .hf-news-item-headline {
+    font-size: var(--hf-body-font-size);
+    font-weight: 500;
   }
 }
