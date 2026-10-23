@@ -80,7 +80,7 @@ De header, met het logo en het hoofdmenu, en de footer staan in `src/app/layout.
 De `h1` van de homepage is "sc Heerenveen Fansite", maar die zie je niet: het logo erboven zegt het al.
 Hij heeft de klasse `hf-visually-hidden` uit het designsysteem, dus een schermlezer leest hem wel voor.
 Daaronder staat het blok "Laatste nieuws": de berichten van de bronnen die aanstaan, van vandaag en de zes dagen ervoor, het nieuwste eerst, in één lijst zonder kop per dag.
-Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05", dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
+Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
 Onder het blok staat de link naar Onze bronnen.
 
