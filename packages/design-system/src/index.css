@@ -5,10 +5,12 @@
  * components, utilities (classes that do one thing, such as hf-visually-hidden).
  * Styles outside a layer, such as an app's own, always win over these.
  * Class prefix: hf- (Heerenveen Fansite).
+ *
+ * The order of the layers is in layers.css, and that import comes first. It must not be an @layer statement in this
+ * file: Next.js puts that after the rules of every import, and the layers then get the order of their first block.
  */
 
-@layer hf.tokens, hf.base, hf.typography, hf.components, hf.utilities;
-
+@import url('./layers.css');
 @import url('./fonts.css');
 @import url('./tokens/colour.css');
 @import url('./tokens/typography.css');

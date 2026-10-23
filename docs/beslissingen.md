@@ -888,6 +888,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** geen lagen, en dan specificiteit en volgorde bewaken.
   Dat wordt lastiger naarmate er meer componenten zijn.
 - **Later:** er is een vijfde laag, `hf.utilities`, na `hf.components`; zie _Hulpklassen zitten in de sterkste laag_.
+- **Later:** de volgorde van de lagen staat in een eigen bestand; zie _De volgorde van de lagen staat in een eigen bestand_.
 
 ### Typestijl los van het HTML-niveau
 
@@ -1464,12 +1465,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of het blijft, volgt als we het gezien hebben.
 - **Hoe:** alleen de CSS van de nieuwsregel verandert: `.hf-news-item-headline` krijgt `font-size: var(--hf-body-font-size)` en `font-weight: 500`.
   De klasse `hf-headline` blijft, voor de regelafstand en het lettertype.
-  De regel staat in de laag `hf.typography`, achter `.hf-headline`, en niet in `hf.components`: in de gebouwde site komen de lagen van het designsysteem in een andere volgorde dan `index.css` ze geeft, met typografie boven componenten, en dan wint `.hf-headline` van een regel in `hf.components`.
+  De regel staat in de laag `hf.components`, bij de rest van de kop, en wint daar van `.hf-headline` in `hf.typography`.
+  Eerst stond hij in `hf.typography`, achter `.hf-headline`: in de gebouwde site kwamen de lagen toen in een andere volgorde dan `index.css` ze geeft, met typografie boven componenten.
   Eén regel van de kop is nu zo'n 22 pixels hoog, dus de minimale hoogte van 24 pixels voor het doel (WCAG 2.5.8) komt nu van `min-block-size`.
 - **Alternatieven:** de Nieuwskop van 18 pixels en gewicht 600 houden, zoals voor dit besluit.
   Of de maat en het gewicht van de Nieuwskop zelf veranderen, in `--hf-headline-font-size` en `--hf-headline-font-weight`; alleen de nieuwsregel gebruikt ze, maar dan verandert ook wat Storybook bij Typografie over de Nieuwskop zegt.
 - **Later:** de grens van 24 rem in _Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query_ ging uit van de Nieuwskop.
   Met een kop van 16 pixels past er bij 24 rem iets meer dan dertig tekens op een regel, zo'n vierendertig, en de grens blijft staan.
+- **Later:** de regel staat weer in `hf.components`, nu de lagen op de site in de goede volgorde staan; zie _De volgorde van de lagen staat in een eigen bestand_.
 
 ### De kolom met dag en tijd in een nieuwsregel is zo breed als de breedste tijd
 
@@ -1491,6 +1494,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de kolom altijd door de inhoud laten bepalen (`max-content`); dan begint de kop per regel op een andere plek, want "ma" is breder dan "di".
   Of de tijd laten afbreken in plaats van `nowrap`; dan staat "ma" boven "08:14" zodra het lettertype breder is, en springt de regel in hoogte.
   Of de kolom of de tussenruimte nog smaller; dan staat de breedste tijd bijna tegen de kop.
+
+### De volgorde van de lagen staat in een eigen bestand
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de regel met de volgorde van de lagen staat in `src/layers.css`, en `index.css` importeert dat bestand als eerste.
+  `index.css` heeft zelf geen `@layer`-regel meer.
+  De rooktest controleert op de pagina's die hij toetst dat de lagen in de CSS van de gebouwde site die volgorde hebben.
+- **Waarom:** Next.js (Turbopack) voegt de bestanden samen die `index.css` importeert en zet de eigen regels van `index.css` erachter.
+  Daardoor stond de `@layer`-regel op de site aan het eind van de CSS, in dev en in productie: op acceptatie op byte 27.113 van 27.180.
+  De lagen kregen de volgorde van hun eerste blok: tokens, base, components, typography, utilities.
+  Een regel in `hf.components` die een typestijl aanpast, verloor dan op de site, terwijl hij in Storybook won.
+  Een geïmporteerd bestand komt op de plek van zijn import, dus nu staat de regel vooraan.
+  Storybook (Vite) had de goede volgorde al, en zijn gebouwde CSS is niet veranderd.
+- **Hoe:** de rooktest haalt de stylesheets op van de pagina's die hij toetst, in de volgorde van de links.
+  Hij zet de lagen in de volgorde waarin ze voor het eerst voorkomen, in een regel of in een blok: de volgorde die een browser kiest.
+  Die volgorde vergelijkt hij met `layers.css`, dus de volgorde staat nergens twee keer.
+  Op de CSS van vóór deze wijziging faalt de test.
+  Een test van het designsysteem controleert dat `layers.css` de eerste import van `index.css` is.
+- **Gevolg:** op de site wint een regel in `hf.components` nu van een regel in `hf.typography`, zoals in Storybook.
+  Een regel die alleen om deze fout in een andere laag stond, gaat terug naar `hf.components`: de grootte en het gewicht van de kop van een nieuwsregel (zie _Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500_).
+- **Alternatieven:** de regel in een bestand dat `layout.tsx` vóór `index.css` importeert; dan moet elke app die het designsysteem gebruikt dat zelf onthouden.
+  Of de regel ook in `index.css` laten staan; dat is een tweede plek die kan afwijken, en de eerste import doet het werk al.
+  Of een instelling van Next.js of Turbopack zoeken; dat hebben we niet onderzocht, omdat één import genoeg is.
 
 ## Site
 

@@ -64,7 +64,8 @@
 
   /*
    * A target of at least 24 pixels high (WCAG 2.5.8): one line of the headline is 22 pixels, so the height is set here.
-   * The size and the weight of the text are set at the bottom of this file.
+   * The headline has the size of the text and the weight Medium, with the line height of a Nieuwskop. The components
+   * layer comes after the typography layer, so this wins over the .hf-headline rule.
    *
    * Not underlined, except under the mouse and with the focus of the keyboard: a list of headlines with a line under
    * each is busy. The headline is on a line of its own, heavier than the text and in the colour of links, so it is a
@@ -76,6 +77,8 @@
    * styles make them.
    */
   .hf-news-item-headline {
+    font-size: var(--hf-body-font-size);
+    font-weight: 500;
     min-block-size: 1.5rem;
     text-decoration-line: none;
     text-decoration-skip-ink: auto;
@@ -126,18 +129,5 @@
 
   li:last-child > .hf-news-item {
     padding-block-end: 0;
-  }
-}
-
-/*
- * The headline has the size of the text and the weight Medium, with the line height of a Nieuwskop. This is in the
- * typography layer, with the .hf-headline rule that it overrides, and comes after it: in the built site the layers of the
- * design system end up in another order than index.css gives, with typography above components, so a rule in the
- * components layer would lose to .hf-headline there.
- */
-@layer hf.typography {
-  .hf-news-item-headline {
-    font-size: var(--hf-body-font-size);
-    font-weight: 500;
   }
 }
