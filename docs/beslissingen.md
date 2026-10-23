@@ -1497,7 +1497,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de kolom altijd door de inhoud laten bepalen (`max-content`); dan begint de kop per regel op een andere plek, want "ma" is breder dan "di".
   Of de tijd laten afbreken in plaats van `nowrap`; dan staat "ma" boven "08:14" zodra het lettertype breder is, en springt de regel in hoogte.
   Of de kolom of de tussenruimte nog smaller; dan staat de breedste tijd bijna tegen de kop.
-- **Later:** de kolom is nu 5,75 rem breed; zie _De kolom met dag of datum in een nieuwsregel is zo breed als de breedste datum_.
+- **Later:** zie _Een datum in een nieuwsregel breekt in de kolom van de weekdag_.
+  De kolom blijft 4 rem, maar de tijd mag breken: de dag en de tijd staan niet meer altijd op één regel.
 
 ### De volgorde van de lagen staat in een eigen bestand
 
@@ -2404,16 +2405,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** `news.ts` kent twee vensters: `windowStart` voor de twee weken van de homepage en `weekdayStart` voor de zeven dagen met een weekdag.
   De tijd van een discussie gebruikt `weekdayStart`, dus die regel verandert niet.
 
-### De kolom met dag of datum in een nieuwsregel is zo breed als de breedste datum
+### Een datum in een nieuwsregel breekt in de kolom van de weekdag
 
 - **Datum:** 24 oktober 2026
-- **Besluit:** de kolom met de dag of de datum en de tijd is 5,75 rem breed in plaats van 4 rem, met 0,75 rem ertussen en de kop.
-  De koppen beginnen op elke regel op dezelfde plek, ook als de ene regel een weekdag heeft en de andere een datum.
-- **Waarom:** de breedste datum en tijd, zoals "28 mei 20:08", is 87 pixels (5,4 rem) op de maat van Meta, tegen 61 pixels voor "ma 20:08".
-  Met een kolom van 4 rem zou elke regel zijn eigen kolom uitrekken, en begonnen de koppen met een datum verder naar rechts dan die met een weekdag.
-  De kolom heeft er een klein beetje ruimte bij, zoals eerder.
-- **Alternatieven:** de datum boven de tijd zetten in de kolom; dan wijkt een regel met een datum in hoogte af van een regel met een weekdag.
-  Of de component de tijd in twee delen laten krijgen; dat is een grotere wijziging van het component, die dit issue niet vraagt.
+- **Besluit:** de kolom met de dag of de datum en de tijd blijft 4 rem breed.
+  Een datum met een tijd, zoals "14 okt 14:05", past niet naast elkaar in die kolom: de tijd komt op een tweede regel, onder de datum.
+- **Waarom:** een kolom die breed genoeg is voor "28 mei 20:08" (87 pixels op de maat van Meta) geeft de weekdagen veel lucht naast de kop, terwijl de meeste regels een weekdag hebben.
+  Nu beginnen de koppen op elke regel op dezelfde plek, ook als de ene regel een weekdag heeft en de andere een datum, en het breken gaat vanzelf, zonder extra opmaak in de tekst.
+- **Hoe:** in `news-item.css` is `grid-template-columns` nu `4rem minmax(0, 1fr)`, en de tijd heeft geen `white-space: nowrap` meer.
+  Een breder lettertype of de tekstafstand van WCAG 1.4.12 kan nu ook "ma 20:08" over twee regels verdelen; de koppen blijven dan wel op één plek beginnen.
+- **Alternatieven:** een bredere kolom, 5,75 rem, voor de breedste datum op één regel; dat kost elke weekdagregel ruimte.
   Of de kolom door de inhoud laten bepalen (`max-content`); dan beginnen de koppen niet op dezelfde plek.
-- **Later:** zie _De kolom met dag en tijd in een nieuwsregel is zo breed als de breedste tijd_; de kolom van 4 rem was alleen voor weekdagen genoeg.
-  De grens van 24 rem blijft staan; de kop houdt daar nu 17,5 rem in plaats van 19,25 rem.
+  Of de datum en de tijd los doorgeven en onder elkaar zetten in het component; dat is een grotere wijziging van het component.

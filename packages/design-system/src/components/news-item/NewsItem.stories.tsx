@@ -12,7 +12,8 @@ const meta = preview.meta({
         component: [
           'Een regel nieuws van een andere bron. Links staan de dag en de tijd in rood, zoals "wo 14:05", of voor wat ouder is de datum en de tijd, zoals "14 okt 14:05".',
           'Daarnaast staat de kop als link naar het bericht bij de bron, en daaronder de naam van de bron met een klein pictogram voor een link naar buiten en, als het bericht achter een betaalmuur staat, "voor abonnees".',
-          'De kolom met de dag of de datum is op elke regel even breed, zodat de koppen op één lijn beginnen, ook als de ene regel een weekdag heeft en de andere een datum.',
+          'De kolom is op elke regel even breed, zodat de koppen op één lijn beginnen.',
+          'Een datum en een tijd passen niet naast elkaar in de kolom: de tijd komt op een tweede regel, onder de datum.',
           'Is de regel zelf smal, zoals op een telefoon of in de zijbalk, dan staan de dag en de tijd boven de kop, zodat de kop en de bron de hele breedte krijgen.',
           'Het component kiest dat met een container query op zijn eigen breedte, niet op die van het venster.',
           'De volgorde in de HTML en voor een schermlezer blijft gelijk: eerst de dag en de tijd, dan de kop.',

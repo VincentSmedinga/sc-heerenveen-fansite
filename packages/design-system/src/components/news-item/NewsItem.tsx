@@ -52,7 +52,8 @@ const externalLinkIcon = (
 
 /**
  * A line of news from another source. On the left the short day and the time, or the date and the time, in red. The
- * column is as wide as the longest of them, so the headlines start in the same place on every line. Next to it the
+ * column has one width, so the headlines start in the same place on every line, and a date and a time break onto two
+ * lines in it. Next to it the
  * headline as a link to the item at the source, and under it the name of the source with an icon for a link to another
  * site and, if the item is behind a paywall, "voor abonnees". The headline is not underlined, except under the mouse and
  * with the focus of the keyboard. There is no intro and no image: we only show those with the permission of the source
