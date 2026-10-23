@@ -121,13 +121,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** zelf een Nederlandse vertaling van 2.1 maken; die zou onofficieel zijn.
   Of de Engelse tekst van 2.1 nemen, terwijl de vrijwilligers Nederlands lezen.
 
+### Reviewer op Sonnet, en niet bij verhalen of documentatie
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de Reviewer draait standaard op Sonnet.
+  Voor een pull request die de database, de importer, beveiliging, workflows of dependencies raakt, vraagt de Builder de projecteigenaar om Fable.
+  Een pull request krijgt geen Reviewer als hij alleen Markdown of MDX in `docs/` of `packages/design-system/src/docs/` wijzigt, of verhalen (`*.stories.tsx`) zonder visuele wijziging, zoals een titel, een beschrijving of commentaar.
+  Een verhaal dat iets visueels verandert, houdt zijn Reviewer.
+  Twee bestanden zijn een uitzondering, omdat het de checklists van de Reviewer zelf zijn: `docs/toegankelijkheid.md` en `packages/design-system/src/docs/editorial.mdx`.
+  Al het andere houdt zijn Reviewer, ook de bestanden voor agents en beveiliging: `.claude/`, `.github/`, `AGENTS.md`, `CONTRIBUTING.md` en `SECURITY.md`.
+  Zonder Reviewer loopt de Builder de drie checklists zelf door en schrijft in de beschrijving "Geen reviewer: de pull request wijzigt alleen verhalen of documentatie." in plaats van de vakjes voor de review.
+  De projecteigenaar kan altijd om een Reviewer vragen.
+- **Waarom:** de limiet van het abonnement was weer bijna op.
+  Een Fable-review van een wijziging van drie regels in een verhaal kostte ongeveer 72.000 tokens en 31 toolaanroepen.
+  Bij documentatie en verhalen zonder visuele wijziging toetst CI de opmaak, de types en de build van Storybook, en dat is alles wat er te controleren valt.
+  Bij een visuele wijziging in een verhaal ontbreekt die controle: `pnpm test:a11y` toetst alleen de pagina's van de site, en de tests van het designsysteem draaien de verhalen niet met axe.
+  Daarom houdt zo'n verhaal zijn Reviewer.
+- **Gevolg:** dit herziet het deel over de Reviewer in _Een model per rol_.
+  De Reviewer deelt weer het model van de Builder, en dus ook diens blinde vlekken.
+  Daarom blijft Fable voor wijzigingen waar een fout veel kost.
+- **Alternatieven:** de Reviewer altijd op Fable laten, zoals voorheen.
+  Of Opus voor de Reviewer; dat kost minder dan Fable en deelt de blinde vlekken van de Builder niet.
+- **Herzien:** als Sonnet in de praktijk te veel mist, of de limiet niet meer knelt.
+
 ### Een model per rol
 
 - **Datum:** 22 oktober 2026
 - **Besluit:** elke rol heeft een standaardmodel:
   - de Coordinator: een sterker model dan de Builders (Opus of Fable), in een verse sessie per taak;
   - een Builder: Sonnet, en voor een issue dat veel oordeel vraagt over ontwerp of beveiliging een sterker model, dat de Coordinator in de opdracht noemt;
-  - de Reviewer: Fable, via de regel `model` in `.claude/agents/reviewer.md` en op de aanroep die hem start, zodat hij een ander model gebruikt dan de Builder;
+  - de Reviewer: Fable, via de regel `model` in `.claude/agents/reviewer.md` en op de aanroep die hem start, zodat hij een ander model gebruikt dan de Builder (herzien op 23 oktober 2026, zie _Reviewer op Sonnet, en niet bij verhalen of documentatie_);
   - sessies voor routinewerk, zoals het bijwerken van het bord: Haiku of Sonnet.
 - **Waarom:** specificeren en plannen vragen oordeel: afwegingen, onduidelijkheden en samenhang tussen issues.
   Dat zijn weinig, korte sessies, dus het sterkere model kost weinig.

@@ -122,6 +122,13 @@ De toon van de site zelf, van supporter tot supporter, volgt in de stijlgids (#1
   Zegt het tweede verslag nog dat de pull request niet klaar is, dan beslist een mens: samenvoegen zoals hij is, met de hand verbeteren, of de rest in een nieuw issue zetten.
 - De reviewer schrijft een verslag met drie onderdelen: code en beveiliging, toegankelijkheid, en redactie en bronbeleid.
   Het verslag staat als reactie bij de pull request.
+- Een pull request krijgt geen reviewer als hij alleen Markdown of MDX in `docs/` of `packages/design-system/src/docs/` wijzigt, of verhalen (`*.stories.tsx`) zonder visuele wijziging, zoals een titel, een beschrijving of commentaar.
+  Voor die wijzigingen toetst CI de opmaak, de types en de build van Storybook, en dat is alles wat er te controleren valt.
+  Een verhaal dat iets visueels verandert, houdt zijn reviewer: geen enkele machine toetst het in licht en donker, op toegankelijkheid of aan de redactieregels.
+  Twee bestanden zijn een uitzondering, omdat het de checklists van de reviewer zelf zijn: `docs/toegankelijkheid.md` en `packages/design-system/src/docs/editorial.mdx`.
+  Al het andere houdt zijn reviewer, ook de bestanden voor agents en beveiliging: `.claude/`, `.github/`, `AGENTS.md`, `CONTRIBUTING.md` en `SECURITY.md`.
+  Zonder reviewer loopt de maker de drie checklists zelf door en schrijft in de beschrijving "Geen reviewer: de pull request wijzigt alleen verhalen of documentatie." in plaats van de vakjes voor de review.
+  De projecteigenaar kan altijd om een reviewer vragen.
 - We gebruiken geen reviews van Copilot en vragen ze ook niet aan.
 
 Wat de reviewer bij elk onderdeel nakijkt:
