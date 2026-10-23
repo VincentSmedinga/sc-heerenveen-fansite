@@ -1399,6 +1399,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De cellen van de zijbalk staan naast elkaar zodra er twee van 16 rem met 2 rem ertussen passen (`repeat(auto-fit, minmax(min(16rem, 100%), 1fr))`), en anders onder elkaar.
   Daarmee vervalt de grens van 40 rem voor de zijbalk; alleen de grens van 56 rem blijft.
 
+### Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** is de nieuwsregel smaller dan 24 rem, dan staan de dag en de tijd boven de kop.
+  Het component bepaalt dat met een container query op zijn eigen breedte.
+- **Waarom:** bij 24 rem heeft de kop naast de kolom van 5,75 rem nog zo'n 18 rem, ongeveer dertig tekens van de Nieuwskop per regel; smaller wordt de kop een toren van korte regels.
+  Op een telefoon is de regel smaller dan 24 rem, op een tablet en groter breder.
+  Een container query kijkt naar de ruimte die de regel echt heeft, ook in een kaart met binnenruimte of in de zijbalk; een media query kent alleen het venster.
+  Container queries zijn Baseline 'widely available'.
+- **Hoe:** een element kan niet naar zijn eigen breedte vragen, dus de `NewsItem` heeft twee elementen.
+  Het buitenste, `hf-news-item`, is de container (`container-name: hf-news-item`, `container-type: inline-size`) en houdt de binnenruimte boven en onder en de lijn ervoor.
+  Het heeft geen binnenruimte of rand links en rechts, dus zijn breedte is de breedte van de regel.
+  Daarbinnen staat `hf-news-item-layout`, het raster.
+  Zo werkt het ook voor een `NewsItem` buiten een `List`.
+  Onder de 24 rem krijgt het raster één kolom, met 0,125 rem tussen de dag en de tijd en de kop: dezelfde ruimte als tussen de kop en de bron, en veel minder dan de 1,5 rem tussen twee regels.
+  Er is geen `order`, dus de volgorde in de HTML en voor een schermlezer is dezelfde.
+- **Alternatieven:** een media query, bijvoorbeeld op 40 rem zoals de binnenruimte van de kaart; dan klopt het niet in de zijbalk.
+  Of de dag en de tijd altijd boven de kop; dan lijnen de koppen op een breed scherm niet meer uit en wordt de lijst langer.
+  Of de kolom smaller maken; "wo 14:05" past niet in minder ruimte.
+  Of het `li` als container nemen, zonder extra element; dan klopt het niet voor een `NewsItem` buiten een `List`.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

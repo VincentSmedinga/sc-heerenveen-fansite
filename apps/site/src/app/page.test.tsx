@@ -89,9 +89,9 @@ describe('the homepage', () => {
 
     expect(html).toMatch(
       new RegExp(
-        '<li><div class="hf-news-item"><time class="hf-meta hf-news-item-time" dateTime="2026-10-22T08:15:00.000Z">do 10:15</time>' +
+        '<li><div class="hf-news-item"><div class="hf-news-item-layout"><time class="hf-meta hf-news-item-time" dateTime="2026-10-22T08:15:00.000Z">do 10:15</time>' +
           '<div class="hf-news-item-body"><a class="hf-headline hf-news-item-headline" href="https://testkrant.test/heerenveen-testclub">Heerenveen houdt Testclub op afstand</a>' +
-          '<p class="hf-meta hf-news-item-meta"><span>Testkrant</span><svg [^>]*aria-hidden="true"[^>]*>.*?</svg></p></div></div></li>',
+          '<p class="hf-meta hf-news-item-meta"><span>Testkrant</span><svg [^>]*aria-hidden="true"[^>]*>.*?</svg></p></div></div></div></li>',
       ),
     )
   })

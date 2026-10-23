@@ -54,13 +54,22 @@ describe('NewsItem', () => {
 
   it('puts the time before the headline, as it is on the screen', () => {
     const { container } = render(<NewsItem {...props} />)
-    const item = container.firstElementChild
+    const layout = container.querySelector('.hf-news-item-layout')
 
-    expect([...(item?.children ?? [])].map((child) => child.className)).toEqual([
+    // The container query only changes the layout, so the order stays the same when the time is above the headline.
+    expect([...(layout?.children ?? [])].map((child) => child.className)).toEqual([
       'hf-meta hf-news-item-time',
       'hf-news-item-body',
     ])
-    expect(item?.querySelector('.hf-news-item-body')?.firstElementChild?.tagName).toBe('A')
+    expect(layout?.querySelector('.hf-news-item-body')?.firstElementChild?.tagName).toBe('A')
+  })
+
+  it('has the layout inside the container, so the query can look at the width of the line', () => {
+    const { container } = render(<NewsItem {...props} />)
+
+    expect(container.firstElementChild?.className).toBe('hf-news-item')
+    expect(container.firstElementChild?.children).toHaveLength(1)
+    expect(container.firstElementChild?.firstElementChild?.className).toBe('hf-news-item-layout')
   })
 
   it('keeps the time out of the name of the link', () => {
@@ -151,7 +160,21 @@ describe('NewsItem', () => {
     const { container } = render(<NewsItem {...props} paywalled />)
     const names = [...container.querySelectorAll('*')].map((element) => element.tagName)
 
-    expect(names).toEqual(['DIV', 'TIME', 'DIV', 'A', 'P', 'SPAN', 'svg', 'path', 'path', 'path', 'SPAN', 'SPAN'])
+    expect(names).toEqual([
+      'DIV',
+      'DIV',
+      'TIME',
+      'DIV',
+      'A',
+      'P',
+      'SPAN',
+      'svg',
+      'path',
+      'path',
+      'path',
+      'SPAN',
+      'SPAN',
+    ])
     expect(container.querySelector('img, picture, iframe, video, audio, image, use')).toBeNull()
   })
 

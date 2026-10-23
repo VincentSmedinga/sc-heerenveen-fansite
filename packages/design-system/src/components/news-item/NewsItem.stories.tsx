@@ -12,6 +12,9 @@ const meta = preview.meta({
         component: [
           'Een regel nieuws van een andere bron. Links staan de korte dag en de tijd in rood, zoals "wo 14:05".',
           'Daarnaast staat de kop als link naar het bericht bij de bron, en daaronder de naam van de bron met een klein pictogram voor een link naar buiten en, als het bericht achter een betaalmuur staat, "voor abonnees".',
+          'Is de regel zelf smal, zoals op een telefoon of in de zijbalk, dan staan de dag en de tijd boven de kop, zodat de kop en de bron de hele breedte krijgen.',
+          'Het component kiest dat met een container query op zijn eigen breedte, niet op die van het venster.',
+          'De volgorde in de HTML en voor een schermlezer blijft gelijk: eerst de dag en de tijd, dan de kop.',
           '',
           '- `headline` is de kop, zoals de bron hem publiceerde.',
           '  Het component past hem niet aan.',
@@ -44,47 +47,75 @@ const meta = preview.meta({
   title: 'Componenten/NewsItem',
 })
 
-const render = () => (
-  <Card aria-labelledby="nieuws-kop">
-    <Heading id="nieuws-kop" level={2}>
-      Laatste nieuws
-    </Heading>
-    <List role="list">
-      <List.Item>
-        <NewsItem
-          dateTime="2026-10-21T12:05:00Z"
-          headline="Heerenveen wint in blessuretijd van Testclub"
-          href="#heerenveen-wint"
-          source="Testkrant"
-          time="wo 14:05"
-        />
-      </List.Item>
-      <List.Item>
-        <NewsItem
-          dateTime="2026-10-21T08:30:00Z"
-          headline="Trainer over de blessures: ‘Er komt niemand terug voor zondag’"
-          href="#blessures"
-          paywalled
-          source="Testkrant"
-          time="wo 10:30"
-        />
-      </List.Item>
-      <List.Item>
-        <NewsItem
-          dateTime="2026-10-20T17:45:00Z"
-          headline="Jeugdspeler tekent zijn eerste contract"
-          href="#contract"
-          source="Voorbeeldkrant"
-          time="di 19:45"
-        />
-      </List.Item>
-    </List>
-  </Card>
+// The width of the container, not of the window, decides how a line looks: a wide column such as the main column of a
+// page, and a narrow one such as a phone or the sidebar.
+const renderIn = (maxInlineSize: string) => () => (
+  <div style={{ maxInlineSize }}>
+    <Card aria-labelledby="nieuws-kop">
+      <Heading id="nieuws-kop" level={2}>
+        Laatste nieuws
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-21T12:05:00Z"
+            headline="Heerenveen wint in blessuretijd van Testclub"
+            href="#heerenveen-wint"
+            source="Testkrant"
+            time="wo 14:05"
+          />
+        </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-21T08:30:00Z"
+            headline="Trainer over de blessures: ‘Er komt niemand terug voor zondag’"
+            href="#blessures"
+            paywalled
+            source="Testkrant"
+            time="wo 10:30"
+          />
+        </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-20T17:45:00Z"
+            headline="Jeugdspeler tekent zijn eerste contract"
+            href="#contract"
+            source="Voorbeeldkrant"
+            time="di 19:45"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
 )
 
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Zonder en met betaalmuur, licht', render })
+const renderWide = renderIn('36rem')
 
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Zonder en met betaalmuur, donker', render })
+const renderNarrow = renderIn('20rem')
+
+export const Light = meta.story({
+  globals: { theme: 'light' },
+  name: 'Brede container, zonder en met betaalmuur, licht',
+  render: renderWide,
+})
+
+export const Dark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Brede container, zonder en met betaalmuur, donker',
+  render: renderWide,
+})
+
+export const NarrowLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Smalle container, dag en tijd boven de kop, licht',
+  render: renderNarrow,
+})
+
+export const NarrowDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Smalle container, dag en tijd boven de kop, donker',
+  render: renderNarrow,
+})
 
 const renderLong = () => (
   <div style={{ maxInlineSize: '24rem' }}>
