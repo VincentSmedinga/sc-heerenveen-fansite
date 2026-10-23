@@ -8,11 +8,14 @@ import {
   buildServerCommand,
   buildSteps,
   cleanEnv,
+  describeSource,
   foreignMessage,
   isFansiteServer,
   mainFolderOf,
   openCommand,
+  parseAheadBehind,
   parseCwd,
+  parseFileList,
   parseOpenPullRequest,
   parsePids,
   parsePullRequest,
@@ -21,6 +24,9 @@ import {
   ReviewError,
   reviewFolderOf,
   servers,
+  sitePathFor,
+  storybookEntryFor,
+  storybookPathFor,
   summarise,
 } from './review.js'
 
@@ -267,38 +273,169 @@ test('starts the site on port 3000 and Storybook on port 6006, in the review fol
   }
 })
 
-test('summarises the branch, the pull request, the commit, both addresses, the log and how to stop', () => {
+test('summarises the branch, the source, the pull request, the commit, the pages, the log and how to stop', () => {
   const summary = summarise({
+    addresses: [
+      ['Site', 'http://localhost:3000/bronnen'],
+      ['Storybook', 'http://localhost:6006/?path=/docs/components-card--docs'],
+    ],
     branch: 'feat/120-bigger-type',
     commit: 'c9a3896 feat(design-system): make the type bigger',
     logFile: `${reviewFolder}/review.log`,
     pullRequest: { number: 124, url: 'https://github.com/o/r/pull/124' },
+    source: 'local branch (same as origin)',
   })
 
   assert.match(summary, /^Branch +feat\/120-bigger-type$/m)
+  assert.match(summary, /^Source +local branch \(same as origin\)$/m)
   assert.match(summary, /^Pull request +#124 https:\/\/github.com\/o\/r\/pull\/124$/m)
   assert.match(summary, /^Commit +c9a3896 feat\(design-system\): make the type bigger$/m)
-  assert.match(summary, /^Site +http:\/\/localhost:3000$/m)
-  assert.match(summary, /^Storybook +http:\/\/localhost:6006$/m)
+  assert.match(summary, /^Site +http:\/\/localhost:3000\/bronnen$/m)
+  assert.match(summary, /^Storybook +http:\/\/localhost:6006\/\?path=\/docs\/components-card--docs$/m)
   assert.match(summary, new RegExp(`^Log +${reviewFolder}/review.log$`, 'm'))
   assert.match(summary, /pnpm review:stop/)
 })
 
 test('leaves out the pull request when the branch has none', () => {
   const summary = summarise({
+    addresses: [],
     branch: 'spike',
     commit: 'abc1234 wip',
     logFile: `${reviewFolder}/review.log`,
     pullRequest: undefined,
+    source: 'origin (GitHub)',
   })
 
   assert.doesNotMatch(summary, /Pull request/)
+})
+
+test('says where the commit comes from: GitHub, or a local branch and how it compares with origin', () => {
+  assert.equal(describeSource({ comparison: undefined, local: false }), 'origin (GitHub)')
+  assert.equal(
+    describeSource({ comparison: undefined, local: true }),
+    'local branch (not on origin, or origin not reachable)',
+  )
+  assert.equal(describeSource({ comparison: { ahead: 0, behind: 0 }, local: true }), 'local branch (same as origin)')
+  assert.equal(
+    describeSource({ comparison: { ahead: 2, behind: 0 }, local: true }),
+    'local branch (2 commits ahead of origin)',
+  )
+  assert.equal(
+    describeSource({ comparison: { ahead: 1, behind: 3 }, local: true }),
+    'local branch (1 commit ahead of origin, 3 commits behind origin)',
+  )
+})
+
+test('reads the commits ahead and behind, and the lines of a list of files', () => {
+  assert.deepEqual(parseAheadBehind('2\t0\n'), { ahead: 2, behind: 0 })
+  assert.deepEqual(parseFileList('a/b.ts\n\n  c.css \n'), ['a/b.ts', 'c.css'])
+  assert.deepEqual(parseFileList(''), [])
+})
+
+const appFiles = [
+  'apps/site/src/app/layout.tsx',
+  'apps/site/src/app/page.tsx',
+  'apps/site/src/app/bronnen/page.tsx',
+  'apps/site/src/app/bronnen/page.test.tsx',
+  'apps/site/src/app/over-ons/page.tsx',
+  'apps/site/src/app/wat-is-er-nieuw/page.tsx',
+  'apps/site/src/app/wat-is-er-nieuw/feed.xml/route.ts',
+  'apps/site/src/app/(legal)/privacy/page.tsx',
+  'apps/site/src/app/nieuws/[slug]/page.tsx',
+]
+
+test('opens the page of the site that the branch changes, and the home page when none is', () => {
+  assert.equal(sitePathFor(['apps/site/src/app/bronnen/page.tsx'], appFiles), '/bronnen')
+  assert.equal(sitePathFor(['apps/site/src/app/bronnen/page.test.tsx'], appFiles), '/bronnen')
+  // A route has no page of its own: the page of the folder above it.
+  assert.equal(sitePathFor(['apps/site/src/app/wat-is-er-nieuw/feed.xml/route.ts'], appFiles), '/wat-is-er-nieuw')
+  // A route group is not in the address.
+  assert.equal(sitePathFor(['apps/site/src/app/(legal)/privacy/page.tsx'], appFiles), '/privacy')
+  assert.equal(sitePathFor(['apps/site/src/app/layout.tsx'], appFiles), '/')
+  // No page changes, a page we can't open without a value, or nothing at all.
+  assert.equal(sitePathFor(['packages/shared/src/x.ts', 'README.md'], appFiles), '/')
+  assert.equal(sitePathFor(['apps/site/src/app/nieuws/[slug]/page.tsx'], appFiles), '/')
+  assert.equal(sitePathFor([], []), '/')
+})
+
+test('takes the page with most changed files, and the first when they tie', () => {
+  const changed = [
+    'apps/site/src/app/over-ons/page.tsx',
+    'apps/site/src/app/bronnen/page.tsx',
+    'apps/site/src/app/bronnen/page.test.tsx',
+  ]
+
+  assert.equal(sitePathFor(changed, appFiles), '/bronnen')
+  assert.equal(sitePathFor(changed.slice(0, 2), appFiles), '/over-ons')
+})
+
+const entries = [
+  { id: 'components-card--docs', importPath: './src/components/card/Card.stories.tsx', type: 'docs' },
+  { id: 'components-card--default', importPath: './src/components/card/Card.stories.tsx', type: 'story' },
+  { id: 'components-link--default', importPath: './src/components/link/Link.stories.tsx', type: 'story' },
+  { id: 'components-link--docs', importPath: './src/components/link/Link.stories.tsx', type: 'docs' },
+  { id: 'redactie--documentatie', importPath: './src/docs/editorial.mdx', type: 'docs' },
+  { id: 'merk--documentatie', importPath: './src/docs/brand.mdx', type: 'docs' },
+]
+
+test('opens the component or document in Storybook that the branch changes', () => {
+  const idOf = (changed) => storybookEntryFor(changed, entries)?.id
+
+  // A changed story, its component or its styles all lead to the documentation page of that story file.
+  assert.equal(idOf(['packages/design-system/src/components/card/Card.stories.tsx']), 'components-card--docs')
+  assert.equal(idOf(['packages/design-system/src/components/card/card.css']), 'components-card--docs')
+  assert.equal(idOf(['packages/design-system/src/components/link/Link.tsx']), 'components-link--docs')
+  assert.equal(idOf(['packages/design-system/src/docs/editorial.mdx']), 'redactie--documentatie')
+  // A story file wins over a file that only sits next to a story, and the component with most files over the other.
+  assert.equal(
+    idOf([
+      'packages/design-system/src/components/card/card.css',
+      'packages/design-system/src/components/link/Link.stories.tsx',
+    ]),
+    'components-link--docs',
+  )
+})
+
+test('falls back to the first story of a file without a documentation page, and to the start page without a match', () => {
+  const onlyStories = entries.filter(({ type }) => type === 'story')
+
+  assert.equal(
+    storybookEntryFor(['packages/design-system/src/components/card/Card.tsx'], onlyStories)?.id,
+    'components-card--default',
+  )
+  assert.equal(storybookEntryFor(['packages/design-system/src/tokens/colour.css'], entries), undefined)
+  assert.equal(storybookEntryFor(['apps/site/src/app/page.tsx'], entries), undefined)
+  assert.equal(storybookEntryFor([], []), undefined)
+})
+
+test('finds the documentation page that is attached to a changed story file', () => {
+  const attached = [
+    { id: 'tokens-kleur--primitives', importPath: './src/tokens/colour.stories.tsx', type: 'story' },
+    {
+      id: 'tokens-kleur--documentatie',
+      importPath: './src/tokens/colour.mdx',
+      storiesImports: ['./src/tokens/colour.stories.tsx'],
+      type: 'docs',
+    },
+  ]
+
+  assert.equal(
+    storybookEntryFor(['packages/design-system/src/tokens/colour.stories.tsx'], attached)?.id,
+    'tokens-kleur--documentatie',
+  )
+})
+
+test('gives the address in Storybook of an entry', () => {
+  assert.equal(storybookPathFor(entries[0]), '/?path=/docs/components-card--docs')
+  assert.equal(storybookPathFor(entries[1]), '/?path=/story/components-card--default')
+  assert.equal(storybookPathFor(undefined), '')
 })
 
 test('opens an address in the default browser on macOS and Linux, and nowhere else', () => {
   const address = addressOf(site)
 
   assert.equal(address, 'http://localhost:3000')
+  assert.equal(addressOf(site, '/bronnen'), 'http://localhost:3000/bronnen')
   assert.deepEqual(openCommand('darwin', address), { args: [address], command: 'open' })
   assert.deepEqual(openCommand('linux', address), { args: [address], command: 'xdg-open' })
   assert.equal(openCommand('win32', address), undefined)

@@ -194,6 +194,8 @@ It lists the components of the design system with their props and types, the doc
 
 `pnpm review <pull request or branch>` is for the project owner.
 It puts a branch in `../sc-heerenveen-fansite-review`, next to the repository, and starts the site and Storybook from there on ports 3000 and 6006.
+A branch that exists on the owner's computer is shown as it is there, with commits that aren't pushed; changes that aren't committed are not.
+Each server opens on the page the branch changes, found from the files that differ from `main`.
 Agents don't use that command and don't work in the review folder.
 The Coordinator's clean-up of worktrees leaves it alone.
 

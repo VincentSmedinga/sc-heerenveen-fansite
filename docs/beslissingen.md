@@ -281,6 +281,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of een eigen paar poorten per branch, zodat je branches naast elkaar ziet.
   Of bij elke start ook importeren.
 
+### pnpm review neemt ook lokale branches en opent de pagina die de branch verandert
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** `pnpm review <branch>` neemt een branch die op je computer staat zoals hij daar is, dus ook met commits die nog niet gepusht zijn.
+  Bestaat de branch alleen op GitHub, of geef je het nummer van een pull request, dan neemt hij de laatste commit van GitHub.
+  De site en Storybook openen op de pagina die de branch verandert.
+  Die zoekt de opdracht uit de bestanden die van `main` verschillen: een pagina in `apps/site/src/app` voor de site, en de documentatie van het onderdeel of document in `packages/design-system` voor Storybook.
+  Verandert de branch geen pagina, dan opent hij de beginpagina.
+- **Waarom:** de projecteigenaar wil werk bekijken dat nog niet is gepusht, en niet elke keer zelf naar de goede pagina zoeken.
+- **Gevolg:** een lokale branch wint van de branch op GitHub, ook als die achterloopt.
+  De samenvatting zegt hoeveel commits de lokale branch voor of achter loopt.
+  Wijzigingen die niet zijn gecommit, ziet de review-map niet.
+  De opdracht vraagt Storybook zelf naar zijn lijst met pagina's (`/index.json`), dus een nieuw onderdeel vindt hij zonder aanpassing.
+- **Alternatieven:** altijd de branch van GitHub nemen.
+  Of een vlag om te kiezen tussen lokaal en GitHub.
+  Of altijd de beginpagina openen.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host

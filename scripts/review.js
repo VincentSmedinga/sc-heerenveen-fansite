@@ -1,6 +1,8 @@
 // Puts a pull request or a branch where you can look at it, in one folder next to the repository, and starts the site and
 // Storybook for it in the background: the site on port 3000 and Storybook on port 6006, both opened in your browser.
-// `pnpm review:stop` stops them.
+// A branch that exists on your computer is taken as it is there, with commits that aren't pushed; otherwise it comes from
+// GitHub. Each server opens on the page that the branch changes: the page of the site, and the component or document of
+// Storybook, found from the files that differ from main. `pnpm review:stop` stops them.
 // The decision "Een branch bekijk je met pnpm review, in één vaste map" in docs/beslissingen.md says why.
 //
 //   pnpm review <number of a pull request, or name of a branch>
@@ -25,6 +27,9 @@ export class ReviewError extends Error {
 export const reviewFolderName = 'sc-heerenveen-fansite-review'
 export const logName = 'review.log'
 
+const siteAppFolder = 'apps/site/src/app'
+const designSystemFolder = 'packages/design-system/'
+
 /**
  * The two servers. `args` is what pnpm runs in the review folder, and `owner` recognises in a command line the process
  * that listens on the port when it is a dev server of the fansite.
@@ -45,6 +50,8 @@ export const servers = [
     port: 6006,
   },
 ]
+
+const [siteServer, storybookServer] = servers
 
 const branchPattern = /^\w[\w./-]*$/
 
@@ -99,6 +106,126 @@ export function parseTarget(argument) {
 
   return { kind: 'branch', name: argument }
 }
+
+/** The lines of what `git diff --name-only` or `git ls-tree --name-only` printed. */
+export const parseFileList = (output) =>
+  output
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line !== '')
+
+/**
+ * Says where the commit comes from, for the summary: GitHub, or a branch on this computer and how it compares with
+ * the branch on GitHub. `comparison` is undefined when there was nothing to compare with.
+ */
+export function describeSource({ comparison, local }) {
+  if (!local) {
+    return 'origin (GitHub)'
+  }
+
+  if (comparison === undefined) {
+    return 'local branch (not on origin, or origin not reachable)'
+  }
+
+  const { ahead, behind } = comparison
+
+  if (ahead === 0 && behind === 0) {
+    return 'local branch (same as origin)'
+  }
+
+  const plural = (count) => `${count} commit${count === 1 ? '' : 's'}`
+
+  return `local branch (${[ahead > 0 ? `${plural(ahead)} ahead of origin` : '', behind > 0 ? `${plural(behind)} behind origin` : ''].filter(Boolean).join(', ')})`
+}
+
+/** Reads what `git rev-list --left-right --count <local>...<remote>` printed: the commits only the local branch has, and only the remote one. */
+export function parseAheadBehind(output) {
+  const [ahead, behind] = output.trim().split(/\s+/).map(Number)
+
+  return { ahead, behind }
+}
+
+const pageFile = /^page\.(?:[jt]sx?|mdx)$/
+
+/**
+ * The page of the site that shows a change best. `changed` is what differs from main and `tracked` every file in the
+ * app folder at the commit. A changed file leads to the page of its own folder, or the nearest folder above it that
+ * has one; the page with most changed files wins. Without a page to show, it is the home page.
+ */
+export function sitePathFor(changed, tracked) {
+  const pages = new Set(
+    tracked.filter((file) => pageFile.test(path.posix.basename(file))).map((file) => path.posix.dirname(file)),
+  )
+  const counts = new Map()
+
+  for (const file of changed) {
+    if (!file.startsWith(`${siteAppFolder}/`)) {
+      continue
+    }
+
+    let folder = path.posix.dirname(file)
+
+    while (!pages.has(folder) && folder !== siteAppFolder) {
+      folder = path.posix.dirname(folder)
+    }
+
+    const route = pages.has(folder) ? routeOf(folder) : undefined
+
+    if (route !== undefined) {
+      counts.set(route, (counts.get(route) ?? 0) + 1)
+    }
+  }
+
+  return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '/'
+}
+
+/**
+ * The entry of Storybook that shows a change best, from `entries` (what /index.json lists). A changed story or document
+ * leads to its own entries, any other changed file in the design system to those next to it, and the file with the
+ * most of them wins. Its documentation page comes before its first story, because that shows all its stories.
+ */
+export function storybookEntryFor(changed, entries) {
+  const scores = new Map()
+
+  for (const file of changed) {
+    if (!file.startsWith(designSystemFolder)) {
+      continue
+    }
+
+    const importPath = `./${file.slice(designSystemFolder.length)}`
+    const own = entries.filter((entry) => entry.importPath === importPath)
+    const found =
+      own.length > 0
+        ? own
+        : entries.filter((entry) => path.posix.dirname(entry.importPath) === path.posix.dirname(importPath))
+
+    for (const foundPath of new Set(found.map((entry) => entry.importPath))) {
+      scores.set(foundPath, (scores.get(foundPath) ?? 0) + (own.length > 0 ? 2 : 1))
+    }
+  }
+
+  const best = [...scores].sort((a, b) => b[1] - a[1])[0]?.[0]
+  // A documentation page can sit in an .mdx file of its own and list the story file in `storiesImports`.
+  const ofBest = entries.filter((entry) => entry.importPath === best || entry.storiesImports?.includes(best))
+
+  return ofBest.find(({ type }) => type === 'docs') ?? ofBest[0]
+}
+
+/** The address on the site of a folder in `apps/site/src/app`, or nothing for one that no address leads to. */
+function routeOf(folder) {
+  const segments = folder.slice(siteAppFolder.length).split('/').filter(Boolean)
+
+  // A dynamic segment needs a value we can't guess, and `@slot` and `_private` folders have no address of their own.
+  if (segments.some((segment) => /^[[@_]/.test(segment))) {
+    return undefined
+  }
+
+  return `/${segments.filter((segment) => !/^\(.*\)$/.test(segment)).join('/')}`
+}
+
+/** The address in Storybook of an entry, or its start page without one. */
+export const storybookPathFor = (entry) =>
+  entry === undefined ? '' : `/?path=/${entry.type === 'docs' ? 'docs' : 'story'}/${encodeURIComponent(entry.id)}`
 
 /** The review folder: the same one for every branch, next to the repository. */
 export const reviewFolderOf = (mainFolder) => path.join(path.dirname(mainFolder), reviewFolderName)
@@ -236,8 +363,8 @@ export function foreignMessage(foreign) {
   ].join('\n')
 }
 
-/** The address of a server, on this computer. */
-export const addressOf = ({ port }) => `http://localhost:${port}`
+/** The address of a server, on this computer, with the path of a page on it. */
+export const addressOf = ({ port }, pathname = '') => `http://localhost:${port}${pathname}`
 
 /** The command that opens an address in the default browser, or nothing on a system we don't know. */
 export function openCommand(platform, address) {
@@ -248,13 +375,14 @@ export function openCommand(platform, address) {
   return platform === 'linux' ? { args: [address], command: 'xdg-open' } : undefined
 }
 
-/** What `pnpm review` prints once both servers answer. */
-export function summarise({ branch, commit, logFile, pullRequest }) {
+/** What `pnpm review` prints once both servers answer. `addresses` are the pages it opens, as [label, address]. */
+export function summarise({ addresses, branch, commit, logFile, pullRequest, source }) {
   const rows = [
     ['Branch', branch],
+    ['Source', source],
     ...(pullRequest === undefined ? [] : [['Pull request', `#${pullRequest.number} ${pullRequest.url}`]]),
     ['Commit', commit],
-    ...servers.map((server) => [server.label, addressOf(server)]),
+    ...addresses,
     ['Log', logFile],
   ]
 
@@ -289,6 +417,15 @@ function pidsOnPort(port) {
   }
 
   return parsePids(found.stdout)
+}
+
+/** Like capture, but gives nothing when the command fails. */
+function tryCapture(command, args, cwd) {
+  try {
+    return capture(command, args, { cwd, failure: '' })
+  } catch {
+    return undefined
+  }
 }
 
 const holderOf = (pid) => ({
@@ -418,7 +555,22 @@ function checkReviewFolder(reviewFolder, worktrees) {
   return true
 }
 
-/** Looks up the branch of a pull request, then fetches that branch and gives its latest commit on GitHub. */
+/** What Storybook lists, or nothing when it doesn't tell. */
+async function fetchStorybookEntries() {
+  try {
+    const response = await fetch(addressOf(storybookServer, '/index.json'), { signal: AbortSignal.timeout(60_000) })
+    const { entries } = await response.json()
+
+    return Object.values(entries ?? {})
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Looks up the branch of a pull request, then gives the commit to show: for a pull request the latest on GitHub, for a
+ * branch name the one on this computer when there is one (so commits that aren't pushed show too), else the one on GitHub.
+ */
 function findBranch(target, mainFolder) {
   let pullRequest
   let branch
@@ -434,14 +586,43 @@ function findBranch(target, mainFolder) {
     branch = target.name
   }
 
-  // The refspec names a branch, so a tag of the same name can't win, and it fills in no local branch.
-  capture('git', ['fetch', '--quiet', 'origin', `+refs/heads/${branch}:refs/remotes/origin/${branch}`], {
-    cwd: mainFolder,
-    failure: `Could not fetch the branch ${branch} from GitHub. Is it pushed, and not deleted after a merge?`,
-  })
-  const commit = capture('git', ['rev-parse', '--verify', `refs/remotes/origin/${branch}^{commit}`], {
-    cwd: mainFolder,
-    failure: `Could not read the commit of ${branch}.`,
+  const localCommit =
+    target.kind === 'branch'
+      ? tryCapture('git', ['rev-parse', '--verify', '--quiet', `refs/heads/${branch}^{commit}`], mainFolder)
+      : undefined
+  let fetched = true
+
+  try {
+    // The refspec names a branch, so a tag of the same name can't win, and it fills in no local branch.
+    capture('git', ['fetch', '--quiet', 'origin', `+refs/heads/${branch}:refs/remotes/origin/${branch}`], {
+      cwd: mainFolder,
+      failure: `Could not fetch the branch ${branch} from GitHub. Is it pushed, and not deleted after a merge?`,
+    })
+  } catch (error) {
+    // A branch that only exists here, or no network, is fine for a local branch.
+    if (localCommit === undefined) {
+      throw error
+    }
+
+    fetched = false
+  }
+
+  const remoteCommit = fetched
+    ? tryCapture('git', ['rev-parse', '--verify', '--quiet', `refs/remotes/origin/${branch}^{commit}`], mainFolder)
+    : undefined
+  const commit =
+    localCommit ??
+    capture('git', ['rev-parse', '--verify', `refs/remotes/origin/${branch}^{commit}`], {
+      cwd: mainFolder,
+      failure: `Could not read the commit of ${branch}.`,
+    })
+  const counts =
+    localCommit !== undefined && remoteCommit !== undefined
+      ? tryCapture('git', ['rev-list', '--left-right', '--count', `${localCommit}...${remoteCommit}`], mainFolder)
+      : undefined
+  const source = describeSource({
+    comparison: counts === undefined ? undefined : parseAheadBehind(counts),
+    local: localCommit !== undefined,
   })
 
   if (pullRequest === undefined) {
@@ -458,7 +639,25 @@ function findBranch(target, mainFolder) {
     }
   }
 
-  return { branch, commit, pullRequest }
+  return { branch, commit, pullRequest, source }
+}
+
+/** The files the commit changes compared with main, and every file of the site's app folder at the commit. */
+function findChanges(commit, mainFolder) {
+  // Best effort: offline, the main we have is good enough, and without any the pages just start at the top.
+  tryCapture('git', ['fetch', '--quiet', 'origin', '+refs/heads/main:refs/remotes/origin/main'], mainFolder)
+
+  for (const base of ['refs/remotes/origin/main', 'refs/heads/main']) {
+    const diff = tryCapture('git', ['diff', '--name-only', `${base}...${commit}`], mainFolder)
+
+    if (diff !== undefined) {
+      const tracked = tryCapture('git', ['ls-tree', '-r', '--name-only', commit, '--', siteAppFolder], mainFolder)
+
+      return { changed: parseFileList(diff), tracked: parseFileList(tracked ?? '') }
+    }
+  }
+
+  return { changed: [], tracked: [] }
 }
 
 async function review(argument) {
@@ -470,7 +669,8 @@ async function review(argument) {
     throw new ReviewError(`This is the review folder. Run pnpm review from the repository: ${mainFolder}`)
   }
 
-  const { branch, commit, pullRequest } = findBranch(target, mainFolder)
+  const { branch, commit, pullRequest, source } = findBranch(target, mainFolder)
+  const { changed, tracked } = findChanges(commit, mainFolder)
   const worktrees = worktreesOf(mainFolder)
   const worktreeExists = checkReviewFolder(reviewFolder, worktrees)
   const hasEnv = existsSync(path.join(reviewFolder, '.env'))
@@ -510,12 +710,19 @@ async function review(argument) {
     cwd: reviewFolder,
     failure: 'Could not read the commit.',
   })
-  console.log(`\n${summarise({ branch, commit: subject, logFile, pullRequest })}`)
+  const addresses = [
+    [siteServer.label, addressOf(siteServer, sitePathFor(changed, tracked))],
+    [
+      storybookServer.label,
+      addressOf(storybookServer, storybookPathFor(storybookEntryFor(changed, await fetchStorybookEntries()))),
+    ],
+  ]
+  console.log(`\n${summarise({ addresses, branch, commit: subject, logFile, pullRequest, source })}`)
 
   // The browser is a convenience: when it doesn't open, the addresses above still work. The opener runs on its own, so
   // an xdg-open that stays until the browser closes doesn't hold up this command, and a missing opener isn't an error.
-  for (const server of servers) {
-    const opener = openCommand(process.platform, addressOf(server))
+  for (const [, address] of addresses) {
+    const opener = openCommand(process.platform, address)
 
     if (opener !== undefined) {
       const child = spawn(opener.command, opener.args, { detached: true, stdio: 'ignore' })

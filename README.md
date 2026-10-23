@@ -87,7 +87,10 @@ pnpm review feat/120-bigger-type
 
 Je geeft het nummer van een pull request of de naam van een branch.
 Bij een nummer zoekt de opdracht de branch met `gh`.
-Hij zet de laatste commit van die branch op GitHub klaar in `../sc-heerenveen-fansite-review`, naast de repository.
+Een branch die op je computer staat, neemt hij zoals hij daar is, ook met commits die nog niet gepusht zijn.
+Wijzigingen die niet zijn gecommit, ziet hij niet.
+Een branch die alleen op GitHub staat, en een pull request, neemt hij van GitHub.
+Hij zet de commit klaar in `../sc-heerenveen-fansite-review`, naast de repository.
 Dat is een git-worktree zonder lokale branch.
 Hij kopieert `.env` uit de repository als de reviewmap er nog geen heeft, installeert de dependencies, start de database en draait de migraties en de seed van die branch.
 De import draait hij niet: de koppen zijn die van de laatste `pnpm run import`.
@@ -96,6 +99,9 @@ Daarna stopt hij de site en Storybook van de fansite die al op poort 3000 en 600
 Houdt iets anders een van die poorten bezet, dan stopt hij met een melding en verandert hij niets.
 Heeft de reviewmap wijzigingen die niet gecommit zijn, dan stopt hij ook, en verandert hij niets.
 Hij start de site op <http://localhost:3000> en Storybook op <http://localhost:6006>, allebei op de achtergrond, en opent ze in je browser.
+Ze openen op de pagina die de branch verandert, gevonden in de bestanden die van `main` verschillen: een pagina van de site, en de documentatie van een onderdeel of document in Storybook.
+Verandert de branch geen pagina, dan openen ze op de beginpagina.
+De samenvatting in de terminal zegt waar de commit vandaan komt (rij `Source`) en welke pagina's hij opent.
 De uitvoer van beide staat in `review.log` in de reviewmap.
 In het tabblad van de site en in de zijbalk van Storybook staat de naam van de branch, zodat je ziet wat er draait.
 Dat gebeurt alleen in ontwikkeling: acceptatie, productie en de Storybook op GitHub Pages tonen hem nooit.
