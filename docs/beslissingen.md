@@ -1426,14 +1426,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 23 oktober 2026
 - **Besluit:** de regel met de volgorde van de lagen staat in `src/layers.css`, en `index.css` importeert dat bestand als eerste.
   `index.css` heeft zelf geen `@layer`-regel meer.
-  De rooktest controleert op elke pagina dat de lagen in de CSS van de gebouwde site die volgorde hebben.
+  De rooktest controleert op de pagina's die hij toetst dat de lagen in de CSS van de gebouwde site die volgorde hebben.
 - **Waarom:** Next.js (Turbopack) voegt de bestanden samen die `index.css` importeert en zet de eigen regels van `index.css` erachter.
   Daardoor stond de `@layer`-regel op de site aan het eind van de CSS, in dev en in productie: op acceptatie op byte 27.113 van 27.180.
   De lagen kregen de volgorde van hun eerste blok: tokens, base, components, typography, utilities.
   Een regel in `hf.components` die een typestijl aanpast, verloor dan op de site, terwijl hij in Storybook won.
   Een geïmporteerd bestand komt op de plek van zijn import, dus nu staat de regel vooraan.
   Storybook (Vite) had de goede volgorde al, en zijn gebouwde CSS is niet veranderd.
-- **Hoe:** de rooktest haalt de stylesheets van elke pagina op, in de volgorde van de links.
+- **Hoe:** de rooktest haalt de stylesheets op van de pagina's die hij toetst, in de volgorde van de links.
   Hij zet de lagen in de volgorde waarin ze voor het eerst voorkomen, in een regel of in een blok: de volgorde die een browser kiest.
   Die volgorde vergelijkt hij met `layers.css`, dus de volgorde staat nergens twee keer.
   Op de CSS van vóór deze wijziging faalt de test.
