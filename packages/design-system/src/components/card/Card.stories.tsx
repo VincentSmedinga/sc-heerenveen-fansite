@@ -44,14 +44,14 @@ const meta = preview.meta({
 })
 
 const newsItems = (
-  <List loose>
+  <List role="list">
     <List.Item>
       <NewsItem
         dateTime="2026-10-21T12:05:00Z"
         headline="Heerenveen wint in blessuretijd van Testclub"
         href="#heerenveen-wint"
         source="Testkrant"
-        time="14:05"
+        time="wo 14:05"
       />
     </List.Item>
     <List.Item>
@@ -61,7 +61,7 @@ const newsItems = (
         href="#blessures"
         paywalled
         source="Testkrant"
-        time="10:30"
+        time="wo 10:30"
       />
     </List.Item>
   </List>
@@ -115,7 +115,6 @@ const renderPage = () => (
         <Heading id="page-media" level={2}>
           Laatste nieuws
         </Heading>
-        <Heading level={3}>donderdag 22 oktober</Heading>
         {newsItems}
       </Card>
       <Text>
