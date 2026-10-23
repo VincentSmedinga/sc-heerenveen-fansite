@@ -3,14 +3,16 @@ import type { Feed } from '@fansite/db/schema'
 
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
-import { feeds, items, sources } from '@fansite/db/schema'
+import { discussions, feeds, items, sources } from '@fansite/db/schema'
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
 import type { Fetcher, RobotsStore } from './fetcher.ts'
 import type { FeedItem, SkippedItem } from './read-feed.ts'
+import type { ForumDiscussion } from './read-forum.ts'
 
 import { createFetcher } from './fetcher.ts'
 import { paywallCategoryFor, readFeed } from './read-feed.ts'
+import { readForum } from './read-forum.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { finishRun, reasonOf, recordLockTaken, recordReport, removeOldRuns, startRun } from './run-log.ts'
 
@@ -64,7 +66,7 @@ export type ImportOptions = {
 export type StoredFeed = Pick<Feed, 'etag' | 'failuresInARow' | 'id' | 'lastModified' | 'retryAt' | 'sourceId' | 'url'>
 
 /** The queries below also run inside a transaction, which has these methods but is not a `Database`. */
-type Executor = Pick<Database, 'insert' | 'select' | 'update'>
+type Executor = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 
 /** How many items one query handles, so a very large feed stays under the limit on the number of parameters. */
 const batchSize = 500
@@ -99,6 +101,9 @@ export function formatReport(report: FeedReport): string {
  * The new `ETag` and `Last-Modified` are saved in the same transaction as the items. If the items fail, the next run
  * asks for the whole feed again instead of being told that nothing changed.
  *
+ * The feed of a forum is the list of discussions of its API. It is read as a guest and always in full, without an `ETag`:
+ * a database that is empty must get its discussions back, and a forum that changed would only say so by asking again.
+ *
  * It throws when the database fails; `importFeeds` turns that into a report.
  */
 export async function importFeed(
@@ -107,7 +112,12 @@ export async function importFeed(
   feed: StoredFeed,
   now: Date = new Date(),
 ): Promise<FeedReport> {
-  const outcome = await fetcher.fetch(feed.url, { etag: feed.etag, lastModified: feed.lastModified })
+  const [source] = await db
+    .select({ domain: sources.domain, kind: sources.kind })
+    .from(sources)
+    .where(eq(sources.id, feed.sourceId))
+  const isForum = source?.kind === 'forum'
+  const outcome = await fetcher.fetch(feed.url, isForum ? {} : { etag: feed.etag, lastModified: feed.lastModified })
   const { url } = feed
 
   switch (outcome.kind) {
@@ -123,7 +133,10 @@ export async function importFeed(
       return { kind: 'wait', retryAfterSeconds: outcome.retryAfterSeconds, url }
   }
 
-  const [source] = await db.select({ domain: sources.domain }).from(sources).where(eq(sources.id, feed.sourceId))
+  if (isForum) {
+    return importForum(db, feed, readForum(outcome.body, new URL(feed.url).origin))
+  }
+
   const domain = source?.domain ?? ''
   const read = readFeed(outcome.body, {
     contentType: outcome.contentType,
@@ -277,6 +290,54 @@ async function importDueFeed(db: Database, fetcher: Fetcher, feed: StoredFeed, n
   } catch (error) {
     return { kind: 'error', message: describeError(error), url: feed.url }
   }
+}
+
+/** Stores what `readForum` found, or reports why it could not. */
+async function importForum(db: Database, feed: StoredFeed, read: ReturnType<typeof readForum>): Promise<FeedReport> {
+  if (read.kind === 'error') {
+    return { kind: 'error', message: read.message, url: feed.url }
+  }
+
+  const counts = await db.transaction((transaction) => storeDiscussions(transaction, feed, read.discussions))
+
+  return { ...counts, kind: 'imported', skipped: read.skipped, url: feed.url }
+}
+
+/**
+ * Makes the discussions of a forum in the database the ones we found, and nothing else: no discussion, title or screen
+ * name stays that the forum no longer has among the newest. A discussion is new when we had no row with its address, and
+ * changed when its row differs.
+ */
+async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDiscussion[]) {
+  const counts = { added: 0, unchanged: 0, updated: 0 }
+  const known = new Map(
+    (await db.select().from(discussions).where(eq(discussions.sourceId, feed.sourceId))).map((row) => [row.url, row]),
+  )
+
+  for (const discussion of found) {
+    const before = known.get(discussion.url)
+
+    if (before === undefined) {
+      counts.added++
+    } else if (
+      before.title === discussion.title &&
+      before.replyCount === discussion.replyCount &&
+      before.lastPostedBy === discussion.lastPostedBy &&
+      before.lastPostedAt.getTime() === discussion.lastPostedAt.getTime()
+    ) {
+      counts.unchanged++
+    } else {
+      counts.updated++
+    }
+  }
+
+  await db.delete(discussions).where(eq(discussions.sourceId, feed.sourceId))
+
+  if (found.length > 0) {
+    await db.insert(discussions).values(found.map((discussion) => ({ ...discussion, sourceId: feed.sourceId })))
+  }
+
+  return counts
 }
 
 /**

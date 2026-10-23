@@ -13,6 +13,22 @@ const dayAndTimeFormat = new Intl.DateTimeFormat('nl-NL', {
   weekday: 'short',
 })
 
+const timeFormat = new Intl.DateTimeFormat('nl-NL', {
+  hour: '2-digit',
+  hourCycle: 'h23',
+  minute: '2-digit',
+  timeZone,
+})
+
+const dateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone })
+
+const dateWithYearFormat = new Intl.DateTimeFormat('nl-NL', {
+  day: 'numeric',
+  month: 'short',
+  timeZone,
+  year: 'numeric',
+})
+
 const clockFormat = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
   hour: 'numeric',
@@ -37,6 +53,23 @@ export function formatDayAndTime(moment: Date) {
   const parts = Object.fromEntries(dayAndTimeFormat.formatToParts(moment).map(({ type, value }) => [type, value]))
 
   return `${parts['weekday']} ${parts['hour']}:${parts['minute']}`
+}
+
+/**
+ * The time of the last post of a discussion as a visitor reads it, in Dutch time. Of today it is the time alone, such as
+ * "13:28". Of the six days before it is the short weekday and the time, as for the news: "wo 14:05". Anything older is the
+ * date, such as "16 okt", with the year when it is not this year. A moment after now, from a clock that is ahead, counts as
+ * today.
+ */
+export function formatDiscussionTime(moment: Date, now: Date) {
+  if (moment >= startOfDay(now, 0)) {
+    return timeFormat.format(moment)
+  }
+  if (moment >= windowStart(now)) {
+    return formatDayAndTime(moment)
+  }
+
+  return (clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)
 }
 
 /** The start of the week the homepage shows: the first moment of the Dutch day six days before today. */

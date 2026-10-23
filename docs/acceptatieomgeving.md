@@ -49,7 +49,7 @@ Dat gebeurt in `register()` in `apps/site/src/instrumentation.ts`, en de site be
 
 1. Hij draait de migraties die de database nog niet had.
    `assemble` zet ze in `packages/db/drizzle` van de map, twee mappen boven `apps/site`, want Next.js neemt de SQL-bestanden zelf niet mee.
-2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen, de Leeuwarder Courant en Voetbal International met hun feeds.
+2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen, de Leeuwarder Courant, Voetbal International en ons eigen forum, de laatste drie met hun feeds.
    Met `local` en `production` doet hij dat niet.
    Een bron die er al staat, werkt hij bij op haar domein, dus er komen geen dubbele.
 
@@ -68,7 +68,11 @@ Lees het in _Setup Node.js App_ of in `stderr.log` in de map van de app.
 ## De import
 
 Cron start op de host elke 15 minuten de importer, `apps/importer/import.mjs` in de map van de app.
-Hij leest de feeds van de bronnen die aanstaan, nu de Leeuwarder Courant uit de seed, en zet de koppen in de tabel `items`.
+Hij leest de feeds van de bronnen die aanstaan, nu de Leeuwarder Courant, Voetbal International en ons forum uit de seed.
+De koppen komen in de tabel `items`.
+Van het forum leest hij als gast de API, en de vier nieuwste discussies komen in de tabel `discussions`.
+Die vervangt hij bij elke run, dus de tabel houdt geen geschiedenis.
+De host moet `https://forum.heerenveen.org` kunnen bereiken; dat is het openbare adres, ook al staat het forum op dezelfde hosting.
 Wat hij per feed schrijft, staat in de [README van de importer](../apps/importer/README.md).
 
 - Cron start hem op minuut 7, 22, 37 en 52 van elk uur, niet op het hele kwartier: dan starten veel andere cronjobs.
@@ -208,21 +212,24 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 
 ## Controleren
 
-- De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, en het blok "Laatste nieuws".
-  Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens."
-  Daarna staan er de koppen van de Leeuwarder Courant van de afgelopen week.
+- De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, het blok "Laatste nieuws" en in de zijbalk het blok "Nieuwste discussies".
+  Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens." en "We hebben nog geen discussies van het forum."
+  Daarna staan er de koppen van de Leeuwarder Courant en Voetbal International van de afgelopen week.
+  In het blok "Nieuwste discussies" staan dan de vier discussies waar het laatst op is gereageerd, elk met het aantal reacties, de laatste reageerder en de tijd, en onderaan de link "Naar het forum".
+  Controleer dat er geen discussie van Offtopics of Sport overig bij staat.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - `curl -I https://acc.sc.heerenveen.org` toont `x-robots-tag: noindex, nofollow`.
   Die header staat ook bij `/robots.txt` en bij een pagina die niet bestaat.
 - <https://acc.sc.heerenveen.org/robots.txt> toont `Disallow: /`.
 - <https://acc.sc.heerenveen.org/bestaat-niet> toont de Nederlandse 404-pagina "Pagina niet gevonden".
-- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, en de Leeuwarder Courant.
+- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, de Leeuwarder Courant, Voetbal International en onder Forum sc Heerenveen Forum.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - De import werkt als `tail -n 20 ~/fansite-import.log` na een kwartier een tijd toont, met een regel voor de feed eronder:
 
   ```text
   Thu Oct 22 14:07:01 CEST 2026
   https://www.lc.nl/sport/sc-heerenveen/rss/: 3 new, 0 updated, 47 unchanged, 0 skipped
+  https://forum.heerenveen.org/api/discussions?sort=-lastPostedAt&page[limit]=30&include=lastPostedUser,tags: 1 new, 0 updated, 3 unchanged, 0 skipped
   ```
 
   Wil je niet wachten, draai dan de opdracht van de cronjob met SSH, zonder het deel vanaf `>>`.
@@ -242,6 +249,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
   De README van de importer laat zien hoe het eruitziet.
 
 - In de database staan de koppen in de tabel `items`: `SELECT COUNT(*) FROM items` in phpMyAdmin telt ze.
+  De discussies van het forum staan in de tabel `discussions`: dat zijn er na een run vier.
 
 ## Als het niet werkt
 

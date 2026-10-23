@@ -85,12 +85,20 @@ Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de ti
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
 Onder het blok staat de link naar Onze bronnen.
 
+In de zijbalk naast het nieuws staat het blok "Nieuwste discussies": de vier discussies van het forum waar het laatst op is gereageerd.
+Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1, 13:28".
+Van vandaag staat alleen de tijd, van de zes dagen ervoor de korte dag en de tijd, en daarvoor de datum.
+Onder de discussies staat de link "Naar het forum"; zijn er geen discussies, dan staat er een tekst voor bezoekers boven die link.
+De pagina laadt niets van het forum: alleen de links gaan erheen.
+De importer bewaart de discussies (zie de [README van de importer](../importer/README.md)), en `listNewestDiscussions` in `@fansite/db/queries` haalt ze op, met alleen de velden die de pagina toont, van forums die aanstaan.
+De server bewaart ze vijf minuten (`src/discussions.ts`).
+
 `listRecentItems` in `@fansite/db/queries` haalt de berichten op, met alleen die velden.
 `src/news.ts` rekent de week uit in Nederlandse tijd (`Europe/Amsterdam`), en schrijft de dag en de tijd.
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
-Lokaal staan er berichten na `pnpm run import` (zie de [README van de importer](../importer/README.md)).
+Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van de importer](../importer/README.md)).
 
 ## De bronnen
 
