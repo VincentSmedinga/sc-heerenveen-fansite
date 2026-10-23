@@ -27,7 +27,7 @@ const meta = preview.meta({
 })
 
 const render = () => (
-  <Field id="onderwerp" label="Onderwerp" required>
+  <Field id="onderwerp" label="Onderwerp">
     <Select defaultValue="verwijderen" name="onderwerp">
       <Select.Option value="verwijderen">Een bericht laten verwijderen</Select.Option>
       <Select.Option value="fout">Een fout in een bericht</Select.Option>

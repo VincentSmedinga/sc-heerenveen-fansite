@@ -50,12 +50,11 @@ const renderForm = (withErrors: boolean) => (
       hint="Hier mailen we naartoe als we vragen hebben."
       id="e-mail"
       label="E-mailadres"
-      required
     >
       <Input autoComplete="email" name="e-mail" type="email" />
     </Field>
 
-    <Field id="onderwerp" label="Onderwerp" required>
+    <Field id="onderwerp" label="Onderwerp">
       <Select defaultValue="verwijderen" name="onderwerp">
         <Select.Option value="verwijderen">Een bericht laten verwijderen</Select.Option>
         <Select.Option value="fout">Een fout in een bericht</Select.Option>
@@ -68,7 +67,6 @@ const renderForm = (withErrors: boolean) => (
       error={withErrors ? 'Vul de link in naar het bericht dat weg moet.' : undefined}
       id="link"
       label="Link naar het bericht"
-      required
     >
       <Input name="link" type="url" />
     </Field>
@@ -106,7 +104,7 @@ export const RemovalRequest = meta.story({
     docs: {
       description: {
         story:
-          'Een formulier van componenten. Elk `Field` heeft zijn label en zegt of het verplicht is. De `Honeypot` zie je niet.',
+          'Een formulier van componenten. Elk `Field` heeft zijn label, en een veld dat niet verplicht is, zegt dat. De `Honeypot` zie je niet.',
       },
     },
   },

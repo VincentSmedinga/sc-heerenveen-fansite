@@ -1536,19 +1536,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 23 oktober 2026
 - **Besluit:** je geeft `Field` de `id` van het veld, en het zet op zijn kind (een `Input`, `Textarea` of `Select`) de `id`, `aria-describedby`, `aria-invalid` en `required`.
   De hulptekst krijgt de id `<id>-hint` en de foutmelding `<id>-error`.
-  Het label zegt in woorden "(verplicht)" of "(niet verplicht)".
-  De prop `required` is verplicht, zodat de maker van het formulier altijd kiest.
+  Een veld is verplicht tenzij `required={false}`, en alleen een veld dat niet verplicht is, zegt dat in het label: "(niet verplicht)".
 - **Waarom:** de `id` hoort bij het veld en is ook het doel van een link in de `ErrorSummary`, dus hij moet voorspelbaar zijn en niet gegenereerd.
   Een kind dat `Field` aanpast met `cloneElement` houdt het sjabloon kort: `<Field …><Input name="naam" /></Field>`.
-  Een woord als "verplicht" kan iedereen lezen, en een veld dat niet verplicht is, zegt dat ook.
-  Zo hoeft niemand te raden wat een sterretje betekent (3.3.2).
+  We vragen alleen wat we echt nodig hebben, dus verplicht is de gewone staat en hoeft geen label.
+  Een woord als "niet verplicht" kan iedereen lezen, en een sterretje hoeft niemand te raden (3.3.2).
+  Een schermlezer zegt dat een veld verplicht is, want het veld heeft het attribuut `required`.
 - **Alternatieven:** een render-prop (`{(veld) => <Input {...veld} />}`), die explicieter is maar elk veld langer maakt; of een context, die in een servercomponent niet werkt zonder dat `Field` een clientcomponent wordt.
   Of een `id` die `useId` maakt: de `ErrorSummary` kent die niet, tenzij de pagina hem doorgeeft.
 
 ### De foutmelding is tekst, met een dikkere rand in de kleur van fouten
 
 - **Datum:** 23 oktober 2026
-- **Besluit:** een foutmelding bij een veld staat in tekst, vet en in `--hf-colour-text-accent`, en begint voor een schermlezer met "Fout:" (verborgen met `hf-visually-hidden`).
+- **Besluit:** een foutmelding bij een veld staat in tekst, in gewicht 500 en in `--hf-colour-text-accent`, en begint voor een schermlezer met "Fout:" (verborgen met `hf-visually-hidden`).
   Een veld met een fout heeft een dikkere rand in dezelfde kleur.
   We maken geen apart kleurtoken voor fouten.
 - **Waarom:** kleur is nooit het enige teken (1.4.1), en de tekst zegt wat er mis is en hoe het wel moet (3.3.1, 3.3.3).

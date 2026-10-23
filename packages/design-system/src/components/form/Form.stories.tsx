@@ -31,7 +31,7 @@ const meta = preview.meta({
 
 const render = () => (
   <Form onSubmit={(event) => event.preventDefault()}>
-    <Field id="naam" label="Naam" required>
+    <Field id="naam" label="Naam">
       <Input autoComplete="name" name="naam" />
     </Field>
     <Button type="submit">Versturen</Button>

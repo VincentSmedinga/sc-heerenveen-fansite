@@ -14,8 +14,11 @@ export type FieldProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'id'
   id: string
   /** The visible label. A placeholder is not a label. */
   label: ReactNode
-  /** Whether the field has to be filled in. The label says it in words: "verplicht" or "niet verplicht". */
-  required: boolean
+  /**
+   * Whether the field has to be filled in. A field is required unless you say otherwise: we only ask what we need.
+   * The label only says it when a field is not required, in words: "niet verplicht".
+   */
+  required?: boolean
 }
 
 /** What Field gives its field. */
@@ -31,7 +34,7 @@ type FieldControlProps = {
  * hint and the error with `aria-describedby`. A field with an error also gets `aria-invalid`. The error is text and starts
  * with "Fout:" for a screen reader, so a red border is never the only sign. field.css gives it its look.
  */
-export const Field = ({ children, className, error, hint, id, label, required, ...props }: FieldProps) => {
+export const Field = ({ children, className, error, hint, id, label, required = true, ...props }: FieldProps) => {
   const hintId = `${id}-hint`
   const errorId = `${id}-error`
   const describedBy = [hint ? hintId : undefined, error ? errorId : undefined].filter(Boolean).join(' ')
@@ -39,7 +42,13 @@ export const Field = ({ children, className, error, hint, id, label, required, .
   return (
     <div className={classNames('hf-field', className)} {...props}>
       <label className="hf-field-label" htmlFor={id}>
-        {label} <span className="hf-field-status">({required ? 'verplicht' : 'niet verplicht'})</span>
+        {label}
+        {required ? null : (
+          <>
+            {' '}
+            <span className="hf-field-status">(niet verplicht)</span>
+          </>
+        )}
       </label>
       {hint ? (
         <Text appearance="meta" className="hf-field-hint" id={hintId}>

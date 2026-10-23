@@ -16,7 +16,8 @@ const meta = preview.meta({
           '- De hulptekst en de foutmelding horen bij het veld met `aria-describedby`. Een schermlezer leest ze voor bij het veld.',
           '- Heeft het veld een fout, dan krijgt het ook `aria-invalid`, en een dikkere rand in de kleur van fouten.',
           '  De fout staat in tekst en begint voor een schermlezer met "Fout:". Een rode rand is nooit het enige teken.',
-          '- Het label zegt in woorden of het veld verplicht is: "(verplicht)" of "(niet verplicht)". Je kiest dat met `required`, en het veld krijgt het attribuut ook.',
+          '- Een veld is verplicht, tenzij je `required={false}` zet. We vragen alleen wat we echt nodig hebben, dus verplicht is de gewone staat.',
+          '  Alleen een veld dat niet verplicht is, zegt dat in het label: "(niet verplicht)". Het veld zelf krijgt het attribuut `required`, dus een schermlezer zegt het ook.',
           '',
           'Een placeholder is geen label: een veld zonder label bestaat niet.',
           'Zet voor een veld met persoonsgegevens `autoComplete` op het veld, zoals `name` of `email`, zodat de browser het kan invullen.',
@@ -30,13 +31,13 @@ const meta = preview.meta({
 })
 
 const renderEmpty = () => (
-  <Field id="naam" label="Naam" required>
+  <Field id="naam" label="Naam">
     <Input autoComplete="name" name="naam" />
   </Field>
 )
 
 const renderFilled = () => (
-  <Field id="naam" label="Naam" required>
+  <Field id="naam" label="Naam">
     <Input autoComplete="name" defaultValue="Jelle de Vries" name="naam" />
   </Field>
 )
@@ -53,7 +54,7 @@ const renderHint = () => (
 )
 
 const renderError = () => (
-  <Field error="Vul een e-mailadres in, zoals naam@voorbeeld.nl." id="e-mail" label="E-mailadres" required>
+  <Field error="Vul een e-mailadres in, zoals naam@voorbeeld.nl." id="e-mail" label="E-mailadres">
     <Input autoComplete="email" defaultValue="jelle" name="e-mail" type="email" />
   </Field>
 )

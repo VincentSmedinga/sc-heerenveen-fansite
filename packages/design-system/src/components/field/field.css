@@ -1,6 +1,6 @@
 /*
  * A field with its label, hint and error. The label, the hint and the error sit above the field, close to each other; the
- * space under the field comes from the field itself (base/forms.css). The status "(verplicht)" or "(niet verplicht)" is
+ * space under the field comes from the field itself (base/forms.css). The status "(niet verplicht)", only on a field that is not required, is
  * in the weight and colour of secondary text, so the name of the field stands out.
  */
 
@@ -19,9 +19,9 @@
     margin-block: 0.125rem 0;
   }
 
-  /* Bold and in the colour of errors; the text itself says "Fout:", so the colour is not the only sign. */
+  /* In the colour of errors, in weight 500; the text itself says "Fout:", so the colour is not the only sign. */
   .hf-field-error {
     color: var(--hf-colour-text-accent);
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: 500;
   }
 }

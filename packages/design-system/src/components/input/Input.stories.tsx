@@ -31,10 +31,10 @@ const meta = preview.meta({
 
 const render = () => (
   <>
-    <Field id="naam" label="Naam" required>
+    <Field id="naam" label="Naam">
       <Input autoComplete="name" name="naam" />
     </Field>
-    <Field id="e-mail" label="E-mailadres" required>
+    <Field id="e-mail" label="E-mailadres">
       <Input autoComplete="email" name="e-mail" type="email" />
     </Field>
     <Field id="link" label="Link naar het bericht" required={false}>

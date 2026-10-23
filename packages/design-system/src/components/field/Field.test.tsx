@@ -9,7 +9,7 @@ import { Field } from './Field'
 describe('Field', () => {
   it('ties the label to the field with for and id', () => {
     render(
-      <Field id="naam" label="Naam" required>
+      <Field id="naam" label="Naam">
         <Input name="naam" />
       </Field>,
     )
@@ -20,17 +20,17 @@ describe('Field', () => {
     expect(screen.getByText('Naam', { exact: false, selector: 'label' }).getAttribute('for')).toBe('naam')
   })
 
-  it('says in words that a field is required', () => {
+  it('is required by default, and does not say so in its label', () => {
     render(
-      <Field id="naam" label="Naam" required>
+      <Field id="naam" label="Naam">
         <Input />
       </Field>,
     )
 
-    expect(screen.getByRole('textbox', { name: 'Naam (verplicht)' }).hasAttribute('required')).toBe(true)
+    expect(screen.getByRole('textbox', { name: 'Naam' }).hasAttribute('required')).toBe(true)
   })
 
-  it('says in words that a field is not required', () => {
+  it('says in words that a field is not required, and does not make it required', () => {
     render(
       <Field id="link" label="Link naar het bericht" required={false}>
         <Input />
@@ -44,7 +44,7 @@ describe('Field', () => {
 
   it('has no description and is not invalid when there is no hint and no error', () => {
     render(
-      <Field id="naam" label="Naam" required>
+      <Field id="naam" label="Naam">
         <Input />
       </Field>,
     )
@@ -58,7 +58,7 @@ describe('Field', () => {
 
   it('ties the hint to the field with aria-describedby', () => {
     render(
-      <Field hint="Dit staat niet op de site." id="e-mail" label="E-mailadres" required>
+      <Field hint="Dit staat niet op de site." id="e-mail" label="E-mailadres">
         <Input type="email" />
       </Field>,
     )
@@ -74,7 +74,7 @@ describe('Field', () => {
 
   it('ties the error to the field with aria-describedby and marks the field invalid', () => {
     render(
-      <Field error="Vul je e-mailadres in." id="e-mail" label="E-mailadres" required>
+      <Field error="Vul je e-mailadres in." id="e-mail" label="E-mailadres">
         <Input type="email" />
       </Field>,
     )
@@ -89,7 +89,7 @@ describe('Field', () => {
 
   it('ties both the hint and the error to the field, the hint first', () => {
     render(
-      <Field error="Dat is geen e-mailadres." hint="Zoals naam@voorbeeld.nl" id="e-mail" label="E-mailadres" required>
+      <Field error="Dat is geen e-mailadres." hint="Zoals naam@voorbeeld.nl" id="e-mail" label="E-mailadres">
         <Input type="email" />
       </Field>,
     )
@@ -102,7 +102,7 @@ describe('Field', () => {
 
   it('puts the error in text, so a colour is not the only sign', () => {
     render(
-      <Field error="Vul je naam in." id="naam" label="Naam" required>
+      <Field error="Vul je naam in." id="naam" label="Naam">
         <Input />
       </Field>,
     )
@@ -123,12 +123,12 @@ describe('Field', () => {
     ],
   ] as const)('works with %s', (_name, control, role) => {
     render(
-      <Field error="Kies iets." id="veld" label="Veld" required>
+      <Field error="Kies iets." id="veld" label="Veld">
         {control}
       </Field>,
     )
 
-    const field = screen.getByRole(role, { name: 'Veld (verplicht)' })
+    const field = screen.getByRole(role, { name: 'Veld' })
 
     expect(field.id).toBe('veld')
     expect(field.getAttribute('aria-invalid')).toBe('true')
@@ -138,7 +138,7 @@ describe('Field', () => {
 
   it('keeps the attributes of the field', () => {
     render(
-      <Field id="naam" label="Naam" required>
+      <Field id="naam" label="Naam">
         <Input autoComplete="name" name="naam" />
       </Field>,
     )
@@ -149,7 +149,7 @@ describe('Field', () => {
 
   it('keeps its own class next to the other attributes', () => {
     const { container } = render(
-      <Field className="extra" id="naam" label="Naam" required>
+      <Field className="extra" id="naam" label="Naam">
         <Input />
       </Field>,
     )
@@ -161,7 +161,7 @@ describe('Field', () => {
     expect(() =>
       render(
         // @ts-expect-error A Field has one field.
-        <Field id="naam" label="Naam" required>
+        <Field id="naam" label="Naam">
           <Input />
           <Input />
         </Field>,
