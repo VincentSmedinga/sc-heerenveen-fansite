@@ -867,7 +867,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat breekpunt is voorlopig.
 - **Waarom:** bij de grote koppen is het verschil groot genoeg om geleidelijk te schalen; bij de kleine is het 1 pixel.
 - **Alternatieven:** alles met `clamp()`.
-- **Later:** zie _Elke tekststijl een stap groter_ en _Kleinere koppen_.
+- **Later:** zie _Elke tekststijl een stap groter_ en _Kleinere koppen en vaste tekstmaten_.
   De maten zijn een stap groter; de nieuwskop springt op een smal scherm nu naar 19 pixels.
 
 ### Voorlopige kleurtokens
@@ -1292,21 +1292,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de klasse in `hf.components`, als laatste import; dan wint een specifiekere regel van een component, en moeten we specificiteit en volgorde weer bewaken.
   Of `!important` op elke eigenschap, zoals veel CSS-bibliotheken doen; dan wint de klasse ook van de CSS van de site, en die moet altijd kunnen winnen.
 
-### Kleinere koppen
+### Kleinere koppen en vaste tekstmaten
 
 - **Datum:** 23 oktober 2026
-- **Besluit:** kop 1 is 28 pixels (op een smal scherm 24) en kop 2 is 22 (op een smal scherm 20).
-  Beide hebben gewicht 800, niet 900.
-  Kop 1 blijft kleiner dan het woordmerk.
-  De andere stijlen blijven gelijk.
-- **Waarom:** koppen in kapitalen op breedte 125 en gewicht 900 vallen op, ook als ze kleiner zijn.
-  Op 52 pixels schreeuwen ze en nemen ze de aandacht van het woordmerk en het nieuws.
+- **Besluit:** alle koppen, `h1` tot en met `h6`, staan in het lettertype van de koppen.
+  Kop 1 is 24 tot 28 pixels, Kop 2 21 tot 23,25 en Kop 3 18,25 tot 19,25, allemaal met `clamp()` tussen 360 en 1280 pixels breed.
+  Kop 4 is 16 pixels en schaalt niet mee.
+  Kop 5 en Kop 6 zijn dezelfde 16 pixels, als reserve, en verschillen van Kop 4 in gewicht en kleur.
+  Kop 1 en Kop 2 krijgen gewicht 800 in plaats van 900.
+  Tekst is 16 pixels, Nieuwskop 18, Meta 14 en Label 14, op elke breedte.
+  Het woordmerk blijft gelijk.
+- **Waarom:** koppen in kapitalen op breedte 125 en gewicht 900 vallen op, ook als ze kleiner zijn; op 52 pixels schreeuwen ze en nemen ze de aandacht van het woordmerk en het nieuws.
   Het woordmerk is de grootste letter van de site; de koppen komen daaronder.
-  De eerste stap (32 en 24 pixels, nog op gewicht 900) was de projecteigenaar nog te groot en te zwaar.
-- **Alternatieven:** kop 1 op de maat van het woordmerk (36 pixels); dat is nog steeds groot in kapitalen.
-  Alleen de maten verkleinen en het gewicht op 900 laten, zoals de eerste stap; dat vond de projecteigenaar nog te zwaar.
-  Of de breedte van de koppen verlagen en de maten laten staan; dat verandert het karakter van de letter.
-  Of ook kop 3 kleiner maken; die is al 20 pixels, gelijk aan kop 4 en nieuwskop.
+  Een kleine kop in kapitalen en een zwaarder gewicht oogt groter dan tekst van dezelfde maat, dus Kop 4 mag even groot zijn als de tekst.
+  Eén schaal tussen Kop 4 en Kop 1 geeft vaste verhoudingen tussen de koppen.
+  Tekst van 18 pixels was in de middelste breedte te groot, en met één vaste maat per stijl is er geen schaling meer om te controleren.
+- **Alternatieven:** Kop 1 op de maat van het woordmerk (36 pixels), of de maten laten staan en alleen het gewicht verlagen; beide blijven te zwaar.
+  Kop 4 in Atkinson laten; dan staat één kop in een ander lettertype dan de rest.
+  Tekst laten meeschalen van 16 naar 18 pixels; dat maakt de tekst op een brede pagina te groot.
+  Tekst op 17 of 18 pixels laten staan; de projecteigenaar vond 18 pixels te groot voor een gewone alinea.
 
 ## Site
 
@@ -1823,8 +1827,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Eén stap houdt de verhoudingen tussen de stijlen, en de koppen zijn al groot genoeg.
 - **Alternatieven:** twee stappen, met Tekst op 19 pixels; dan passen er nog minder woorden in een kaart.
   Of alles, de koppen en het woordmerk inbegrepen, 12,5% groter.
-- **Later:** zie _Kleinere koppen_.
-  Kop 1 en kop 2 worden daar kleiner.
+- **Later:** zie _Kleinere koppen en vaste tekstmaten_.
+  Daar worden de koppen kleiner en krijgt de tekst vaste maten.
 
 ### Het nieuws staat in één lijst, met dag en tijd in een eigen kolom
 
