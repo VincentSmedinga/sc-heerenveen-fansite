@@ -23,17 +23,17 @@
     --hf-wordmark-letter-spacing: 0.02em;
     --hf-wordmark-line-height: 1;
 
-    /* Kop 1: 34px at 360px, 52px from 1280px */
-    --hf-heading-1-font-size: clamp(2.125rem, 1.685rem + 1.957vw, 3.25rem);
+    /* Kop 1: 24px at 360px, 28px from 1280px, under the wordmark */
+    --hf-heading-1-font-size: clamp(1.5rem, 1.402rem + 0.435vw, 1.75rem);
     --hf-heading-1-font-stretch: 125%;
-    --hf-heading-1-font-weight: 900;
+    --hf-heading-1-font-weight: 800;
     --hf-heading-1-letter-spacing: 0.01em;
     --hf-heading-1-line-height: 1;
 
-    /* Kop 2: 26px at 360px, 32px from 1280px */
-    --hf-heading-2-font-size: clamp(1.625rem, 1.478rem + 0.652vw, 2rem);
+    /* Kop 2: 20px at 360px, 22px from 1280px */
+    --hf-heading-2-font-size: clamp(1.25rem, 1.201rem + 0.217vw, 1.375rem);
     --hf-heading-2-font-stretch: 125%;
-    --hf-heading-2-font-weight: 900;
+    --hf-heading-2-font-weight: 800;
     --hf-heading-2-letter-spacing: 0.02em;
     --hf-heading-2-line-height: 1.05;
 

@@ -23,7 +23,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 1',
     sample: 'ADO Den Haag – sc Heerenveen',
-    spec: 'Truculenta 900 · breedte 125 · 52 px (mobiel 34, met clamp) · 1,0 · +0,01 em · kapitalen',
+    spec: 'Truculenta 800 · breedte 125 · schaalt mee met de breedte · 1,0 · +0,01 em · kapitalen',
     use: 'Paginatitel, titel op de wedstrijdband.',
   },
   {
@@ -31,7 +31,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Kop 2',
     sample: 'Laatste nieuws',
-    spec: 'Truculenta 900 · breedte 125 · 32 px (mobiel 26, met clamp) · 1,05 · +0,02 em · kapitalen',
+    spec: 'Truculenta 800 · breedte 125 · schaalt mee met de breedte · 1,05 · +0,02 em · kapitalen',
     use: 'Secties op een pagina.',
   },
   {

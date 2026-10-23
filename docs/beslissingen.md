@@ -867,7 +867,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat breekpunt is voorlopig.
 - **Waarom:** bij de grote koppen is het verschil groot genoeg om geleidelijk te schalen; bij de kleine is het 1 pixel.
 - **Alternatieven:** alles met `clamp()`.
-- **Later:** zie _Elke tekststijl een stap groter_.
+- **Later:** zie _Elke tekststijl een stap groter_ en _Kleinere koppen_.
   De maten zijn een stap groter; de nieuwskop springt op een smal scherm nu naar 19 pixels.
 
 ### Voorlopige kleurtokens
@@ -1291,6 +1291,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   CSS van de site zelf, buiten een laag, wint nog steeds.
 - **Alternatieven:** de klasse in `hf.components`, als laatste import; dan wint een specifiekere regel van een component, en moeten we specificiteit en volgorde weer bewaken.
   Of `!important` op elke eigenschap, zoals veel CSS-bibliotheken doen; dan wint de klasse ook van de CSS van de site, en die moet altijd kunnen winnen.
+
+### Kleinere koppen
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** kop 1 is 28 pixels (op een smal scherm 24) en kop 2 is 22 (op een smal scherm 20).
+  Beide hebben gewicht 800, niet 900.
+  Kop 1 blijft kleiner dan het woordmerk.
+  De andere stijlen blijven gelijk.
+- **Waarom:** koppen in kapitalen op breedte 125 en gewicht 900 vallen op, ook als ze kleiner zijn.
+  Op 52 pixels schreeuwen ze en nemen ze de aandacht van het woordmerk en het nieuws.
+  Het woordmerk is de grootste letter van de site; de koppen komen daaronder.
+  De eerste stap (32 en 24 pixels, nog op gewicht 900) was de projecteigenaar nog te groot en te zwaar.
+- **Alternatieven:** kop 1 op de maat van het woordmerk (36 pixels); dat is nog steeds groot in kapitalen.
+  Alleen de gewichten of de breedte van de koppen verlagen en de maten laten staan; dat verandert het karakter van de letter.
+  Of ook kop 3 kleiner maken; die is al 20 pixels, gelijk aan kop 4 en nieuwskop.
 
 ## Site
 
@@ -1807,6 +1822,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Eén stap houdt de verhoudingen tussen de stijlen, en de koppen zijn al groot genoeg.
 - **Alternatieven:** twee stappen, met Tekst op 19 pixels; dan passen er nog minder woorden in een kaart.
   Of alles, de koppen en het woordmerk inbegrepen, 12,5% groter.
+- **Later:** zie _Kleinere koppen_.
+  Kop 1 en kop 2 worden daar kleiner.
 
 ### Het nieuws staat in één lijst, met dag en tijd in een eigen kolom
 
