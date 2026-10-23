@@ -17,7 +17,7 @@ const meta = preview.meta({
           'Het schild houdt in elk thema dezelfde kleuren.',
           '',
           'Zet het logo in een `Link` naar de homepage; de naam van het logo is dan de naam van de link.',
-          'Op een smal scherm loopt "sinds 1997" door onder het woordmerk.',
+          '"sinds 1997" staat achter het woordmerk, en gaat op een smal scherm naar een regel eronder als het er niet meer achter past.',
           'De SVG-bestanden in `src/assets` zijn voor plekken buiten de site, zoals een social-afbeelding.',
         ].join('\n'),
       },
