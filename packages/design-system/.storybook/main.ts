@@ -42,4 +42,13 @@ export default defineMain({
   // The logo in the sidebar is served from here.
   staticDirs: [{ from: '../src/assets', to: '/assets' }],
   stories: ['../src/**/*.mdx', '../src/**/*.stories.tsx'],
+  // The build minifies the CSS with lightningcss, for Vite's default target (Chrome 111, Safari 16.4 and so on).
+  // That is older than light-dark(), so lightningcss rewrites it to variables that only work on :root, and a story
+  // with its own data-theme keeps the light tokens. The first versions with light-dark() (see the decision 'Licht en
+  // donker met light-dark()') as target leave it alone. It has to be set here: Storybook's Vite builder takes only
+  // `build.target` from vite.config.ts.
+  viteFinal: (config) => ({
+    ...config,
+    build: { ...config.build, cssTarget: ['chrome123', 'edge123', 'firefox120', 'safari17.5'] },
+  }),
 })
