@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { anchorOf, dateOf, parseChangelog, releasesOf } from './whats-new'
+import { anchorOf, dateOf, parseChangelog, releasesOf } from './updates'
 
 // As release-please writes the first release, and the later ones with a link to the changes since the version before.
 const changelog = `# Changelog

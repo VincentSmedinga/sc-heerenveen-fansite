@@ -31,7 +31,7 @@ export const pages = [
   },
   {
     description: 'Wat er nieuw is op de sc Heerenveen Fansite, per versie: wat je er nu kunt vinden en doen.',
-    path: '/wat-is-er-nieuw',
+    path: '/updates',
   },
 ] as const
 

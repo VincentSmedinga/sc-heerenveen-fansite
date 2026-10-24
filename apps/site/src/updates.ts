@@ -1,5 +1,5 @@
 /*
- * The page Wat is er nieuw: which versions it shows and how. This module imports nothing, so the smoke test can use it
+ * The page Updates: which versions it shows and how. This module imports nothing, so the smoke test can use it
  * too, to check the page against the CHANGELOG.md of the build.
  */
 
@@ -14,13 +14,13 @@ export type Release = {
 export type ReleaseNotes = Readonly<Record<string, readonly string[]>>
 
 /** The title of the page, and of its feed with the name of the site after it. */
-export const whatsNewTitle = 'Wat is er nieuw'
+export const updatesTitle = 'Updates'
 
 /** The address of the page. */
-export const whatsNewPath = '/wat-is-er-nieuw'
+export const updatesPath = '/updates'
 
 /** The address of its RSS feed. */
-export const feedPath = `${whatsNewPath}/feed.xml`
+export const feedPath = `${updatesPath}/feed.xml`
 
 // The heading release-please writes above a version: "## 0.1.0 (2026-10-21)" for the first, and later ones with a link to
 // the changes since the version before: "## [0.2.0](https://github.com/...) (2026-11-03)". Older versions of

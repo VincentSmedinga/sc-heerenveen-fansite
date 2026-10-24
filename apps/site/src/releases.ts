@@ -1,5 +1,5 @@
 import { releaseNotes } from './release-notes'
-import { releasesOf } from './whats-new'
+import { releasesOf } from './updates'
 
 /**
  * The text of CHANGELOG.md, which release-please writes in the root of the repository. The bundler puts it into the code

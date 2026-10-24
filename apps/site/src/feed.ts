@@ -1,12 +1,12 @@
-import { anchorOf, feedPath, type Release, whatsNewPath, whatsNewTitle } from './whats-new'
+import { anchorOf, feedPath, type Release, updatesPath, updatesTitle } from './updates'
 
 /**
- * The RSS 2.0 feed of the page Wat is er nieuw: an item per version, newest first, with the number as its title, the date,
+ * The RSS 2.0 feed of the page Updates: an item per version, newest first, with the number as its title, the date,
  * the lines as a list and a link to the version on the page. A feed reader needs full addresses, so every link starts
  * with the address of the site the feed comes from.
  */
 export function feedOf(releases: readonly Release[], origin: string) {
-  const page = `${origin}${whatsNewPath}`
+  const page = `${origin}${updatesPath}`
   const items = releases.map((release) => {
     const link = `${page}#${anchorOf(release)}`
     // The description is HTML, written as text in the XML, so the lines are escaped twice.
@@ -27,7 +27,7 @@ export function feedOf(releases: readonly Release[], origin: string) {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
     '<channel>',
-    `<title>${whatsNewTitle} – sc Heerenveen Fansite</title>`,
+    `<title>${updatesTitle} – sc Heerenveen Fansite</title>`,
     `<link>${escape(page)}</link>`,
     `<atom:link href="${escape(`${origin}${feedPath}`)}" rel="self" type="application/rss+xml"/>`,
     '<description>Wat er op de sc Heerenveen Fansite veranderd is, per versie.</description>',
