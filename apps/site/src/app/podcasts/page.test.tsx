@@ -290,6 +290,23 @@ describe('the metadata', () => {
     expect(metadata.robots).toBeUndefined()
   })
 
+  it('gives each page and each podcast its own canonical address, so search engines keep them apart', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+
+    const canonical = async (query: Query) => (await generateMetadata(props(query))).alternates?.canonical
+
+    expect(await canonical({})).toBe('https://sc.heerenveen.org/podcasts')
+    expect(await canonical({ pagina: '1' })).toBe('https://sc.heerenveen.org/podcasts')
+    expect(await canonical({ pagina: '2' })).toBe('https://sc.heerenveen.org/podcasts?pagina=2')
+    expect(await canonical({ podcast: 'omroep-abe' })).toBe('https://sc.heerenveen.org/podcasts?podcast=omroep-abe')
+    expect(await canonical({ pagina: '2', podcast: 'omroep-abe' })).toBe(
+      'https://sc.heerenveen.org/podcasts?podcast=omroep-abe&pagina=2',
+    )
+    expect((await generateMetadata(props({ pagina: '2' }))).openGraph?.url).toBe(
+      'https://sc.heerenveen.org/podcasts?pagina=2',
+    )
+  })
+
   it('titles a later page with its number', async () => {
     vi.stubEnv('SITE_ENV', 'production')
 

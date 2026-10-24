@@ -36,6 +36,13 @@ function parseQuery(searchParams: SearchParams) {
 
 /** The address of /podcasts for a podcast (its slug) and a page. The first page and all podcasts have no parameter. */
 function podcastsHref(podcast: string | undefined, page: number) {
+  const query = podcastsQuery(podcast, page)
+
+  return query === '' ? '/podcasts' : `/podcasts?${query}`
+}
+
+/** The query of /podcasts for a podcast (its slug) and a page, without the question mark. It is empty for the first page of all podcasts. */
+function podcastsQuery(podcast: string | undefined, page: number) {
   const parameters = new URLSearchParams()
 
   if (podcast !== undefined) {
@@ -45,9 +52,7 @@ function podcastsHref(podcast: string | undefined, page: number) {
     parameters.set('pagina', String(page))
   }
 
-  const query = parameters.toString()
-
-  return query === '' ? '/podcasts' : `/podcasts?${query}`
+  return parameters.toString()
 }
 
 /**
@@ -67,12 +72,12 @@ const loadPage = cache(async (podcast: string | undefined, page: number) => {
 })
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
-  const { content, page } = await loadFor(searchParams)
+  const { content, page, podcast } = await loadFor(searchParams)
 
   // A page that failed answers 200, so noindex keeps search engines from keeping it.
   return content === undefined
     ? { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
-    : pageMetadata('/podcasts', page > 1 ? `Podcasts, pagina ${page}` : 'Podcasts')
+    : pageMetadata('/podcasts', page > 1 ? `Podcasts, pagina ${page}` : 'Podcasts', podcastsQuery(podcast, page))
 }
 
 export default async function PodcastsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {

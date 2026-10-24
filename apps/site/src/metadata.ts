@@ -8,11 +8,12 @@ import { type PagePath, pages, shareImage, siteName } from './pages'
  * layout, which is the name of the site. The addresses come from originOf, which reads SITE_ENV when the server runs, so
  * a page that uses this must render on each request (`dynamic = 'force-dynamic'`), or Next.js puts the address of the
  * build into it. The page sets no Twitter tags itself, but Next.js copies the Open Graph tags into `twitter:` tags whenever
- * a page has Open Graph tags, and has no way to turn that off.
+ * a page has Open Graph tags, and has no way to turn that off. A page whose content depends on its query, such as a page
+ * of a list, gives the query as `search`, without the question mark, so each page is its own canonical URL.
  */
-export function pageMetadata(path: PagePath, title?: string): Metadata {
+export function pageMetadata(path: PagePath, title?: string, search?: string): Metadata {
   const { description } = pages.find((page) => page.path === path) ?? { description: undefined }
-  const url = urlOf(path)
+  const url = search === undefined || search === '' ? urlOf(path) : `${urlOf(path)}?${search}`
 
   return {
     alternates: { canonical: url },
