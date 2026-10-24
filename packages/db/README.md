@@ -169,7 +169,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
   `listRecentItems(db, since, until)` geeft de berichten van die bronnen van `since` tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam), en geen afleveringen van bronnen van het soort podcast;
   `listPodcastEpisodes(db, { limit, offset, podcast, until })` geeft juist de afleveringen van de podcasts die aanstaan, het nieuwste eerst, met alleen de titel, de link, de tijd en de naam van de podcast, en `countPodcastEpisodes` geeft het totaal; `podcast` is de `slug` van één podcast;
-  `listPodcasts(db)` geeft de podcasts met een `slug` en minstens één aflevering, voor het filter, en `findPodcast(db, slug)` geeft de naam en de adressen bij Apple Podcasts en Spotify van één podcast;
+  `listPodcasts(db)` geeft de podcasts met een `slug` en minstens één aflevering, voor het filter, en `findPodcast(db, slug)` geeft de naam, de beschrijving en de adressen bij Apple Podcasts en Spotify van één podcast;
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;
 - `@fansite/db/lock`: `withLock(pool, name, waitSeconds, task)` doet een taak terwijl het een slot in de database houdt (`GET_LOCK`), en `lockNameFor(url, task)` geeft de naam daarvan, met de taak en de naam van de database erin.

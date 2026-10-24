@@ -599,11 +599,28 @@ describe('the podcasts', () => {
 
       expect(both).toEqual({
         applePodcastsUrl: 'https://apple.test/podcast/testpodcast',
+        description: 'Een verzonnen podcast waarin supporters na elke wedstrijd napraten.',
         name: 'Testpodcast',
         slug: 'testpodcast',
         spotifyUrl: 'https://spotify.test/show/testpodcast',
       })
       expect(apple).toMatchObject({ applePodcastsUrl: 'https://apple.test/podcast/proefpodcast', spotifyUrl: null })
+    })
+
+    it('gives a description of null for a podcast that has none, and no other columns', async () => {
+      await database.db
+        .insert(sources)
+        .values({ domain: 'zonder.test', kind: 'podcast', name: 'Zonder', slug: 'zonder' })
+
+      const podcast = await findPodcast(database.db, 'zonder')
+
+      expect(podcast).toEqual({
+        applePodcastsUrl: null,
+        description: null,
+        name: 'Zonder',
+        slug: 'zonder',
+        spotifyUrl: null,
+      })
     })
 
     it('gives nothing for an unknown slug, a source that is no podcast, or a podcast that is switched off', async () => {

@@ -26,14 +26,15 @@ export async function countPodcastEpisodes(db: Database, { podcast, until }: { p
 }
 
 /**
- * The podcast with this slug, when it is switched on: its name and the addresses where it can be found on Apple
- * Podcasts and Spotify, which are null when it has none. It gives nothing for another source, so a slug of a news
- * source is unknown here.
+ * The podcast with this slug, when it is switched on: its name, its description in our own words, which is null when
+ * it has none, and the addresses where it can be found on Apple Podcasts and Spotify, which are null when it has none.
+ * It gives nothing for another source, so a slug of a news source is unknown here.
  */
 export async function findPodcast(db: Database, slug: string) {
   const [row] = await db
     .select({
       applePodcastsUrl: sources.applePodcastsUrl,
+      description: sources.description,
       name: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('podcast_name'),
       slug: sql<string>`${sources.slug}`.as('slug'),
       spotifyUrl: sources.spotifyUrl,
