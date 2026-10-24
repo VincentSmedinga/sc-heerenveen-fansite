@@ -59,7 +59,8 @@ describe('the page Toegankelijkheid', () => {
   it('says that accessibility matters and what we already do, in a sentence and not a list', () => {
     expect(html).toContain('We vinden toegankelijkheid belangrijk.')
     expect(html).toContain('Alles wat we toevoegen, maken we vanaf het begin toegankelijk.')
-    expect(html).toContain('een mens heeft de site nagekeken.')
+    expect(html).toContain('We lopen een checklist langs.')
+    expect(html).not.toMatch(/een mens/)
     expect(html).not.toMatch(/<[ou]l/)
   })
 

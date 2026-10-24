@@ -98,7 +98,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Ze zegt niet dat de site voldoet.
   Pas na de ronde van een mens (#25) zeggen we meer, met de datum en wat is nagekeken.
 - **Waarom:** de automatische controle van axe vindt een deel van de problemen, en de checklist loopt per wijziging langs wat we zelf kunnen zien.
-  De projecteigenaar heeft de site met de hand nagekeken, maar de ronde van #25 is nog niet gedaan.
+  De ronde van een mens (#25) is nog niet gedaan, dus de pagina zegt niet dat een mens de site heeft nagekeken.
   Een lijst met wat nog niet is nagekeken, zoals het eerste ontwerp had, vond de projecteigenaar te negatief voor wat er al is.
   Zeggen dat de site voldoet, terwijl dat niemand nakeek, is een belofte die we niet kunnen waarmaken.
 - **Alternatieven:** "de site voldoet" vanaf de lancering; dan moet #187 op #25 wachten en kan het niet nu.

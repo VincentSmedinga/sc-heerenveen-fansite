@@ -29,9 +29,9 @@ export default function AccessibilityPage() {
         <Heading level={2}>Wat we al doen</Heading>
         <Text>
           We vinden toegankelijkheid belangrijk. Alles wat we toevoegen, maken we vanaf het begin toegankelijk. Een
-          programma controleert elke pagina, in licht en donker. We lopen een checklist langs, en een mens heeft de site
-          nagekeken. Lopende tekst haalt een contrast van 7:1, je ziet altijd waar de focus staat en knoppen zijn
-          minstens 44 pixels hoog. De pagina's lopen door zonder zijwaarts scrollen, ook op 320 pixels breed.
+          programma controleert elke pagina, in licht en donker. We lopen een checklist langs. Lopende tekst haalt een
+          contrast van 7:1, je ziet altijd waar de focus staat en knoppen zijn minstens 44 pixels hoog. De pagina's
+          lopen door zonder zijwaarts scrollen, ook op 320 pixels breed.
         </Text>
         <Heading level={2}>Hoe je ons bereikt</Heading>
         <Text>
