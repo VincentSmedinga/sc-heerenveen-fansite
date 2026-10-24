@@ -34,6 +34,12 @@ describe('the page Privacy', () => {
     expect(html).not.toContain(' id=')
   })
 
+  it('shows the first paragraph under the h1 as the intro, in a b, and no other paragraph', () => {
+    expect(html).toContain('</h1><p class="hf-intro"><b>De site zet geen cookies, volgt niemand')
+    expect(html.match(/class="hf-intro"/g)).toHaveLength(1)
+    expect(html.match(/<b>/g)).toHaveLength(1)
+  })
+
   it('says that the site sets no cookies, follows nobody and loads nothing from another domain', () => {
     expect(html).toContain('De site zet geen cookies, volgt niemand en laadt niets van een ander domein.')
   })

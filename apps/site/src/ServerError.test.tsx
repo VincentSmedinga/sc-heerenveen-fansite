@@ -16,7 +16,9 @@ describe('ServerError', () => {
   })
 
   it('says that it is our fault, and what to do', () => {
-    expect(html).toContain('<p>Deze pagina lukt nu even niet. Dat ligt aan ons, niet aan jou.</p>')
+    expect(html).toContain(
+      '<p class="hf-intro"><b>Deze pagina lukt nu even niet. Dat ligt aan ons, niet aan jou.</b></p>',
+    )
     expect(html).toContain(
       '<p>Probeer het over een paar minuten opnieuw. Lukt het dan nog niet, meld het dan op <a href="https://forum.heerenveen.org">het forum</a>.</p>',
     )

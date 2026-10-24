@@ -20,6 +20,12 @@ export function generateMetadata(): Metadata {
   }
 }
 
+const feedLine = (
+  <>
+    Volg nieuwe versies met de <Link href={feedPath}>RSS-feed van Wat is er nieuw</Link>.
+  </>
+)
+
 export default function WhatsNewPage() {
   const releases = getReleases()
 
@@ -27,12 +33,15 @@ export default function WhatsNewPage() {
     <Page.Main>
       <Page.Cell>
         <Heading level={1}>{whatsNewTitle}</Heading>
-        {releases.length === 0 && (
-          <Text>We hebben nog geen versie uitgebracht. Hier lees je straks wat er nieuw is.</Text>
+        {/* The first paragraph under the h1 is the intro: the text without releases, or else the line about the feed. */}
+        {releases.length === 0 ? (
+          <>
+            <Text appearance="intro">We hebben nog geen versie uitgebracht. Hier lees je straks wat er nieuw is.</Text>
+            <Text>{feedLine}</Text>
+          </>
+        ) : (
+          <Text appearance="intro">{feedLine}</Text>
         )}
-        <Text>
-          Volg nieuwe versies met de <Link href={feedPath}>RSS-feed van Wat is er nieuw</Link>.
-        </Text>
         {releases.map((release) => (
           <Fragment key={release.version}>
             {/* The date, with the number of the version small after it, like "sinds 1997" in the logo. */}

@@ -75,6 +75,13 @@ export const typeStyles: TypeStyle[] = [
     use: 'Lopende tekst.',
   },
   {
+    className: 'hf-intro',
+    name: 'Inleiding',
+    sample: 'We zetten de koppen van de media over sc Heerenveen op één plek, met een link naar het hele verhaal.',
+    spec: 'Atkinson Hyperlegible Next 400 · één maat · 1,4',
+    use: 'De eerste alinea onder de paginatitel. In de HTML staat een b in de p: zonder CSS toont de browser hem vet.',
+  },
+  {
     className: 'hf-meta',
     name: 'Meta',
     sample: 'Leeuwarder Courant · 83 reacties · laatst 13:28',

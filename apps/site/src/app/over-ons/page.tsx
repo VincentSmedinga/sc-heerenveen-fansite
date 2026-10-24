@@ -19,7 +19,7 @@ export default function AboutPage() {
       <Page.Cell>
         <Heading level={1}>Over ons</Heading>
         <Heading level={2}>Wie we zijn</Heading>
-        <Text>
+        <Text appearance="intro">
           De sc Heerenveen Fansite is een site van supporters, voor supporters. We zetten de koppen van de media over sc
           Heerenveen op één plek, met een link naar het hele verhaal. We schrijven niks over en we passen niks aan. We
           hebben geen advertenties, geen abonnementen en geen winstoogmerk. Bij de site hoort ook{' '}

@@ -12,7 +12,7 @@ export default function NotFound() {
     <Page.Main>
       <Page.Cell>
         <Heading level={1}>Pagina niet gevonden</Heading>
-        <Text>Deze pagina bestaat niet.</Text>
+        <Text appearance="intro">Deze pagina bestaat niet.</Text>
       </Page.Cell>
     </Page.Main>
   )

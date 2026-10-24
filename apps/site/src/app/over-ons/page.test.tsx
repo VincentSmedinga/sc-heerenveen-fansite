@@ -29,6 +29,14 @@ describe('the page Over ons', () => {
     expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
   })
 
+  it('shows the first paragraph under the h1, below the h2 Wie we zijn, as the intro, and no other paragraph', () => {
+    expect(html).toContain(
+      '<h2 class="hf-heading-2">Wie we zijn</h2><p class="hf-intro"><b>De sc Heerenveen Fansite is een site',
+    )
+    expect(html.match(/class="hf-intro"/g)).toHaveLength(1)
+    expect(html.match(/<b>/g)).toHaveLength(1)
+  })
+
   it('has one h1 and an h2 per section, and no section or anchor for privacy', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Over ons</h1>'])
     expect(html).not.toContain('id="privacy"')
