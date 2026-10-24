@@ -24,6 +24,22 @@ describe('Text', () => {
     expect(container.firstElementChild?.className).toBe(`hf-${appearance}`)
   })
 
+  it('puts the content of an intro in one b, also when it holds a link, so it stands out without the stylesheet', () => {
+    const { container } = render(
+      <Text appearance="intro">
+        Een zin met <a href="/bronnen">een link</a>.
+      </Text>,
+    )
+
+    expect(container.innerHTML).toBe('<p class="hf-intro"><b>Een zin met <a href="/bronnen">een link</a>.</b></p>')
+  })
+
+  it.each(['body', 'meta'] as const)('does not put the content of %s in a b', (appearance) => {
+    const { container } = render(<Text appearance={appearance}>Een zin.</Text>)
+
+    expect(container.querySelector('b')).toBeNull()
+  })
+
   it('has no class of its own without a type style, so it takes the style of its surroundings', () => {
     const { container } = render(<Text as="span">Een zin.</Text>)
 
@@ -48,8 +64,10 @@ describe('Text', () => {
       <Text as="div" />,
       // @ts-expect-error Kop 1 is not a style of running text.
       <Text appearance="heading-1" />,
+      // @ts-expect-error An intro is a paragraph, not a span.
+      <Text appearance="intro" as="span" />,
     ]
 
-    expect(elements).toHaveLength(2)
+    expect(elements).toHaveLength(3)
   })
 })

@@ -39,7 +39,9 @@ describe('the page Onze bronnen', () => {
     const html = await render()
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Onze bronnen</h1>'])
-    expect(html).toContain('<p>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.</p>')
+    expect(html).toContain(
+      '<p class="hf-intro"><b>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.</b></p>',
+    )
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
       '<h2 class="hf-heading-2" id="news-heading">Nieuws</h2>',
       '<h2 class="hf-heading-2" id="podcast-heading">Podcasts</h2>',
@@ -59,7 +61,7 @@ describe('the page Onze bronnen', () => {
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><p>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/p><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="news-heading">.*<\/section><section class="hf-card" aria-labelledby="podcast-heading">.*<\/section><\/div><\/main><aside class="hf-page-sidebar" aria-label="Contact over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="suggest-heading">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="inquiry-heading">.*<\/section><\/aside>$/,
+      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><p class="hf-intro"><b>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/b><\/p><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="news-heading">.*<\/section><section class="hf-card" aria-labelledby="podcast-heading">.*<\/section><\/div><\/main><aside class="hf-page-sidebar" aria-label="Contact over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="suggest-heading">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="inquiry-heading">.*<\/section><\/aside>$/,
     )
   })
 

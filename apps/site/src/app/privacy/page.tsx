@@ -18,7 +18,7 @@ export default function PrivacyPage() {
     <Page.Main>
       <Page.Cell>
         <Heading level={1}>Privacy</Heading>
-        <Text>
+        <Text appearance="intro">
           De site zet geen cookies, volgt niemand en laadt niets van een ander domein. Toch moeten we een paar dingen
           even noemen.
         </Text>

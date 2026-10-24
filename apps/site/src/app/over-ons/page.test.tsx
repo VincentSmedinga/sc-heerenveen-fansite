@@ -29,6 +29,14 @@ describe('the page Over ons', () => {
     expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
   })
 
+  it('shows the first paragraph under the h1, below the h2 Wie we zijn, as the intro, and no other paragraph', () => {
+    expect(html).toContain(
+      '<h2 class="hf-heading-2">Wie we zijn</h2><p class="hf-intro"><b>De sc Heerenveen Fansite is een site',
+    )
+    expect(html.match(/class="hf-intro"/g)).toHaveLength(1)
+    expect(html.match(/<b>/g)).toHaveLength(1)
+  })
+
   it('has one h1 and an h2 per section, and no section or anchor for privacy', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Over ons</h1>'])
     expect(html).not.toContain('id="privacy"')
@@ -47,8 +55,15 @@ describe('the page Over ons', () => {
     ])
   })
 
-  it('names the founder and the old name, and writes the club as sc Heerenveen', () => {
-    expect(html).toContain('Vincent Smedinga begon de site in 1997, als SC Heerenveen Online.')
-    expect(html.replaceAll('SC Heerenveen Online', '')).not.toMatch(/SC Heerenveen/)
+  it('starts a paragraph of its own at "We schrijven niks over", after the intro', () => {
+    expect(html).toContain(
+      'met een link naar het hele verhaal.</b></p><p>We schrijven niks over en we passen niks aan.',
+    )
+  })
+
+  it('names the founder without the old name of the site, and writes the club as sc Heerenveen', () => {
+    expect(html).toContain('Vincent Smedinga begon de site in 1997. In die jaren hielpen veel mensen mee')
+    expect(html).not.toContain('Online')
+    expect(html).not.toMatch(/SC Heerenveen/)
   })
 })

@@ -48,9 +48,31 @@ describe('the page Wat is er nieuw', () => {
 
     const html = renderToStaticMarkup(WhatsNewPage())
 
-    expect(html).toContain('<p>We hebben nog geen versie uitgebracht. Hier lees je straks wat er nieuw is.</p>')
+    expect(html).toContain(
+      '<p class="hf-intro"><b>We hebben nog geen versie uitgebracht. Hier lees je straks wat er nieuw is.</b></p>',
+    )
     expect(html).not.toContain('<h2')
     expect(html).not.toContain('<ul')
+  })
+
+  it('shows the line about the feed as the intro when there are versions, and no other paragraph', () => {
+    vi.mocked(getReleases).mockReturnValue(releases)
+
+    const html = renderToStaticMarkup(WhatsNewPage())
+
+    expect(html).toContain(
+      '</h1><p class="hf-intro"><b>Volg nieuwe versies met de <a href="/wat-is-er-nieuw/feed.xml">',
+    )
+    expect(html.match(/class="hf-intro"/g)).toHaveLength(1)
+  })
+
+  it('keeps the line about the feed as an ordinary paragraph under the intro when there is no version', () => {
+    vi.mocked(getReleases).mockReturnValue([])
+
+    const html = renderToStaticMarkup(WhatsNewPage())
+
+    expect(html).toContain('</b></p><p>Volg nieuwe versies met de <a href="/wat-is-er-nieuw/feed.xml">')
+    expect(html.match(/class="hf-intro"/g)).toHaveLength(1)
   })
 
   it.each([[releases], [[]]])('links to the feed in the text', (shown) => {

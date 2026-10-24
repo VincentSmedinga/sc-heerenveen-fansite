@@ -13,7 +13,7 @@ export function ServerError({ retryHref }: { retryHref: string }) {
     <Page.Main>
       <Page.Cell>
         <Heading level={1}>{serverErrorTitle}</Heading>
-        <Text>Deze pagina lukt nu even niet. Dat ligt aan ons, niet aan jou.</Text>
+        <Text appearance="intro">Deze pagina lukt nu even niet. Dat ligt aan ons, niet aan jou.</Text>
         <Text>
           Probeer het over een paar minuten opnieuw. Lukt het dan nog niet, meld het dan op{' '}
           <Link href="https://forum.heerenveen.org">het forum</Link>.

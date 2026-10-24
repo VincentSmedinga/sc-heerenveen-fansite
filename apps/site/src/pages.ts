@@ -9,7 +9,7 @@ export const siteName = 'sc Heerenveen Fansite'
 export const pages = [
   {
     description:
-      'Alle koppen en links over sc Heerenveen op één plek, uit de media waar je ze al kent. Voor supporters, door supporters.',
+      'Alle koppen en links over sc Heerenveen op één plek, uit de media waar je ze al kent. Voor supporters door supporters.',
     path: '/',
   },
   {

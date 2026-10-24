@@ -1366,6 +1366,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Tekst laten meeschalen van 16 naar 18 pixels; dat maakt de tekst op een brede pagina te groot.
   Tekst op 17 of 18 pixels laten staan; de projecteigenaar vond 18 pixels te groot voor een gewone alinea.
 
+### Een inleidende alinea heeft een eigen typestijl, met een `b` erin
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** het designsysteem heeft een typestijl Inleiding voor de eerste alinea onder de `h1` van een pagina: 20 pixels, op elke breedte, met regelhoogte 1,4 en het gewicht van Tekst.
+  `Text` krijgt daarvoor `appearance="intro"`, alleen voor een `p`, en zet de inhoud in één `b`: `<p class="hf-intro"><b>…</b></p>`.
+  Met CSS heeft de `b` het gewicht van gewone tekst; een `b` of `strong` elders blijft vet.
+  De eerste alinea na de `h1` gebruikt de stijl op Onze bronnen, Over ons, Privacy, Wat is er nieuw, de foutpagina en Pagina niet gevonden.
+  Op Over ons staat de `h2` "Wie we zijn" tussen de `h1` en die alinea.
+  De homepage heeft onder zijn verborgen `h1` geen alinea en verandert niet.
+- **Waarom:** een inleiding vertelt in een paar zinnen waar de pagina over gaat, en mag opvallen.
+  Met CSS valt hij op door de grootte, want vet op grote lopende tekst leest zwaarder.
+  Zonder CSS toont de browser de `b` vet, dus de inleiding valt ook dan op, zonder dat we iets hoeven te doen.
+  Een `b` zegt niets over betekenis, anders dan `strong`, dus een schermlezer leest hem niet met nadruk.
+  20 pixels is groter dan Tekst (16) en Nieuwskop (18), en kleiner dan de kleinste Kop 2 (21); de regelhoogte van 1,4 ligt tussen die van de Nieuwskop (1,35) en die van Tekst (1,5), omdat grotere letters minder ruimte tussen de regels nodig hebben.
+- **Alternatieven:** alleen een klasse op de `p`; dan is de inleiding zonder CSS niet te onderscheiden.
+  Of een `strong`; dat zegt dat de tekst belangrijk is, en een schermlezer kan er nadruk aan geven.
+  Of een eigen component naast `Text`; dat is meer, voor een stijl van lopende tekst.
+  Of een maat die met de breedte meeschaalt, zoals de koppen; één maat past bij de andere stijlen van lopende tekst.
+
 ### Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem
 
 - **Datum:** 23 oktober 2026

@@ -313,7 +313,7 @@ describe('Page.Footer', () => {
     expect(Array.from(footer.children).map((child) => child.tagName.toLowerCase())).toEqual(['p', 'p', 'nav'])
     expect(Array.from(footer.querySelectorAll('p')).map((paragraph) => paragraph.textContent)).toEqual([
       'Alle koppen en links op één plek.',
-      'Voor supporters, door supporters.',
+      'Voor supporters door supporters.',
     ])
     expect(within(footer).getByRole('navigation', { name: 'Over de site' })).toBe(footer.lastElementChild)
   })
