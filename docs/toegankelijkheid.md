@@ -29,6 +29,8 @@ Controleer daarom op de gerenderde pagina, in licht en donker:
   In Storybook toont het paneel Toegankelijkheid voor elk verhaal wat axe vindt.
   Een component toetst CI dus alleen op de pagina's waar hij staat.
 - **Een mens, straks:** de bediening met het toetsenbord, de volgorde van de focus, schermlezers en de laatste ronde WCAG-controle (#25).
+  De verklaring op `/toegankelijkheid` belooft alleen wat is nagekeken.
+  Bij elke ronde van een mens en bij elk gevonden of opgelost probleem werkt de maker van die wijziging de verklaring bij, in dezelfde pull request.
 
 axe vindt onder meer: afbeeldingen zonder alt-tekst, velden zonder label, links en knoppen zonder naam, een pagina zonder `lang`, te weinig contrast bij tekst op een effen achtergrond, en ongeldige ARIA.
 
@@ -126,6 +128,12 @@ Zo test je het: zoek in de HTML naar `lang`, en luister of je schermlezer van ui
 - [ ] Een foto of afbeelding met inhoud heeft een alt-tekst die zegt wat erop staat.
       Een versiering heeft `alt=""` (1.1.1).
       axe ziet of er een alt-tekst is, niet of hij klopt.
+
+### De toegankelijkheidsverklaring
+
+- [ ] Verandert de pull request wat we over de toegankelijkheid weten of beloven, zoals een gevonden of opgelost probleem of een ronde van een mens (#25)?
+      Dan staat de bijgewerkte tekst en datum van `/toegankelijkheid` in dezelfde pull request.
+- [ ] De verklaring belooft niet meer dan is nagekeken.
 
 ## In de review
 

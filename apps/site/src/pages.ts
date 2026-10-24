@@ -30,6 +30,10 @@ export const pages = [
     path: '/privacy',
   },
   {
+    description: 'Wat we beloven over toegankelijkheid, wat we er al voor doen en hoe je een probleem meldt.',
+    path: '/toegankelijkheid',
+  },
+  {
     description: 'Wat er nieuw is op de sc Heerenveen Fansite, per versie: wat je er nu kunt vinden en doen.',
     path: '/updates',
   },

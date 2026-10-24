@@ -11,12 +11,13 @@ import { SiteNavigation } from '../SiteNavigation'
 import { withBranch } from '../title'
 import { updatesPath, updatesTitle } from '../updates'
 
-// The links in the footer, about the site itself: the page about us, the sources, the privacy page and what is new. The
-// main menu does not have them.
+// The links in the footer, about the site itself: the page about us, the sources, the privacy page, the accessibility
+// statement and the updates. The main menu does not have them.
 const footerItems = [
   { href: '/over-ons', label: 'Over ons' },
   { href: '/bronnen', label: 'Bronnen' },
   { href: '/privacy', label: 'Privacy' },
+  { href: '/toegankelijkheid', label: 'Toegankelijkheid' },
   { href: updatesPath, label: updatesTitle },
 ]
 

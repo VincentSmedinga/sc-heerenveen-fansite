@@ -22,7 +22,7 @@ describe('RootLayout', () => {
     )
   })
 
-  it('links to Over ons, Bronnen, Privacy and Updates in the footer, in a navigation named Over de site', () => {
+  it('links to Over ons, Bronnen, Privacy, Toegankelijkheid and Updates in the footer, in a navigation named Over de site', () => {
     const html = renderToStaticMarkup(<RootLayout>Inhoud</RootLayout>)
     const footer = html.match(/<footer[^>]*>.*<\/footer>/s)?.[0] ?? ''
 
@@ -33,6 +33,7 @@ describe('RootLayout', () => {
       ['/over-ons', 'Over ons'],
       ['/bronnen', 'Bronnen'],
       ['/privacy', 'Privacy'],
+      ['/toegankelijkheid', 'Toegankelijkheid'],
       ['/updates', 'Updates'],
     ])
   })
