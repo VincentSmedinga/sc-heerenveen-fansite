@@ -13,7 +13,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('the feed of Wat is er nieuw', () => {
+describe('the feed of Updates', () => {
   it('is RSS', () => {
     vi.stubEnv('SITE_ENV', 'production')
 
@@ -28,7 +28,7 @@ describe('the feed of Wat is er nieuw', () => {
 
     const feed = await GET().text()
 
-    expect(feed).toContain(`<link>${origin}/wat-is-er-nieuw</link>`)
-    expect(feed).toContain(`<link>${origin}/wat-is-er-nieuw#versie-0.1.0</link>`)
+    expect(feed).toContain(`<link>${origin}/updates</link>`)
+    expect(feed).toContain(`<link>${origin}/updates#versie-0.1.0</link>`)
   })
 })

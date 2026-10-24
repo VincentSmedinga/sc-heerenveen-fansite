@@ -779,6 +779,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een Nederlandse onderwerpregel met een Engels type, zoals `feat(site): nieuwsarchief toevoegen`.
   Dan wordt de changelog Nederlands, en kan #29 met de regels daaruit beginnen.
   Maar de commits op een branch zijn Engels, en de titels op `main` dan niet.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
 
 ### Eén versie voor de hele site, met release-please
 
@@ -1385,6 +1386,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of een `strong`; dat zegt dat de tekst belangrijk is, en een schermlezer kan er nadruk aan geven.
   Of een eigen component naast `Text`; dat is meer, voor een stijl van lopende tekst.
   Of een maat die met de breedte meeschaalt, zoals de koppen; één maat past bij de andere stijlen van lopende tekst.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
 
 ### Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem
 
@@ -1814,6 +1816,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de pagina pas laten beginnen bij 1.0.0, de lancering.
 - **Later:** sinds 0.1.0 zijn het korte regels in plaats van hele zinnen.
   Hoe je ze schrijft, staat in `AGENTS.md`.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
 
 ### Wat is er nieuw leest `CHANGELOG.md` bij de build
 
@@ -1829,6 +1832,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de zinnen in JSON, zonder commentaar en zonder controle van de vorm, of in Markdown, waar een parser bij hoort.
   Of `CHANGELOG.md` lezen als de server draait, en het bestand met `assemble.js` meekopiëren, zoals de migraties; dan zoekt de server een bestand, en een vergeten kopie geeft ook een lege pagina.
   Of een script dat vóór de build een TypeScript-bestand maakt; dat is een stap en een bestand meer.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
 
 ### De feed van Wat is er nieuw kiest zijn adres met `SITE_ENV`
 
@@ -1841,6 +1845,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De adressen liggen vast (zie _Adressen_), en `SITE_ENV` kan een bezoeker niet veranderen.
 - **Alternatieven:** het adres uit de `Host`-header van het verzoek; die kiest de bezoeker zelf, en een cache bewaart dan zijn adres.
   Of een variabele met het adres; die moet dan op elke omgeving kloppen met `SITE_ENV`.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
 
 ### Eén korte pagina Over ons, met het bronnenbeleid en de privacyverklaring
 
@@ -1856,6 +1861,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** drie of vier pagina's (Over ons, Bronnenbeleid, Verwijderverzoeken en Privacy), zoals #24 eerst noemde.
   Of één uitgebreide pagina, met de hele geschiedenis, de importer en `robots.txt`, en een privacyverklaring met een vaste bewaartermijn.
 - **Later:** privacy staat niet meer op deze pagina maar op een eigen pagina; zie _Privacy staat op een eigen pagina_.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
 
 ### De homepage verbergt zijn `h1` voor het oog, en het blok heet Laatste nieuws
 
@@ -2490,6 +2496,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alle vier de pagina's zijn nu `force-dynamic`: `originOf()` leest `SITE_ENV` als de server draait, en Next.js zou het adres van de build in een statische pagina zetten.
   Voor Over ons en Wat is er nieuw maakt dat niets uit voor bezoekers, want de pagina's zijn klein en de versies komen nog steeds uit de build.
   De sitemap bevat alleen `loc`: geen `lastmod`, `changefreq` of `priority`.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
 
 ### Het schild van de site, als PNG van ons eigen domein, is de afbeelding bij het delen van links
 
@@ -2514,6 +2521,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   We zetten zelf geen `twitter`-sleutel in de metadata, en een test controleert dat; de tags in de HTML komen van Next.js.
 - **Alternatieven:** de beschrijving van 56 tekens laten staan en de test versoepelen.
   Of de Open Graph-tags als losse `<meta>`-elementen in elke pagina zetten, buiten de metadata van Next.js om; dat zijn extra regels in elke pagina en de tags staan dan niet meer bij de rest van de metadata.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
 
 ### De zijbalk kan onder een inleiding beginnen, met benoemde gebieden en een subgrid
 
@@ -2729,3 +2737,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De contrasttabel bij Tokens › Kleur toetst die twee op het vlak van de footer.
   De stap `sand-700` blijft in de reeks, ook al gebruikt nu niets hem.
   Een bezochte link ziet er in de footer hetzelfde uit als een andere, zoals overal behalve bij koppen en discussietitels.
+  \=======
+
+### De pagina Wat is er nieuw heet Updates, op `/updates`
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de pagina Wat is er nieuw heet Updates, in de kop, de titel, de link in de footer en de titel van de feed.
+  Het adres wordt `/updates` en dat van de feed `/updates/feed.xml`.
+  `next.config.ts` verwijst `/wat-is-er-nieuw` en `/wat-is-er-nieuw/feed.xml` blijvend door (308) naar de nieuwe adressen.
+  In de code heet het onderdeel nu ook `updates`.
+- **Waarom:** de projecteigenaar wil de kortere naam.
+  Een adres dat bij de naam past, is makkelijker te onthouden en te delen.
+  De site is nog jong, dus een doorverwijzing kost weinig en geen oude link of feedlezer breekt.
+- **Alternatieven:** alleen de naam veranderen en het adres laten staan; dan past het adres niet bij de naam.
+  Of de oude adressen zonder doorverwijzing weghalen; dan breken links en feedlezers.
+- **Let op:** de link van elke versie in de feed is ook de `guid`, en die verandert mee (`/updates#versie-0.1.0`).
+  Een feedlezer die de oude feed volgt, kan de versies daarom één keer als nieuw tonen.
+  De regel voor versie 0.1.0 in `release-notes.ts` noemt de pagina nu Updates.
+  De oude naam blijft staan in de eerdere beslissingen hierboven en in de geschiedenis van `CHANGELOG.md`.
+
+> > > > > > > 294b8327550a074b03905a3961113e84cae14f8d

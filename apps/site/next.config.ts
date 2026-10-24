@@ -22,10 +22,17 @@ const config: NextConfig = {
   // In a workspace the trace of used files must start at the root, or the files of the other packages are left out.
   outputFileTracingRoot: root,
   poweredByHeader: false,
+  // The page Updates used to be called Wat is er nieuw, at /wat-is-er-nieuw. Links and feed readers may still use the
+  // old addresses, so they forward to the new ones for good (308).
+  redirects: () =>
+    Promise.resolve([
+      { destination: '/updates', permanent: true, source: '/wat-is-er-nieuw' },
+      { destination: '/updates/feed.xml', permanent: true, source: '/wat-is-er-nieuw/feed.xml' },
+    ]),
   // The packages in this workspace are TypeScript source.
   transpilePackages: ['@fansite/db', '@fansite/design-system', '@fansite/shared'],
   // `import.meta.glob(..., { query: '?raw' })` gives the text of a Markdown file, put into the code when the site is built.
-  // The page Wat is er nieuw reads CHANGELOG.md this way (see src/releases.ts). Vitest knows `?raw` by itself.
+  // The page Updates reads CHANGELOG.md this way (see src/releases.ts). Vitest knows `?raw` by itself.
   turbopack: { rules: { '*.md': { condition: { query: '?raw' }, type: 'raw' } } },
 }
 
