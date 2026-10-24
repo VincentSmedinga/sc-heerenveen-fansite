@@ -1,5 +1,6 @@
-// Makes the icons in public from the vector of the design system, packages/design-system/src/assets/icon.svg:
-// - icon.svg, a copy for the tab;
+// Makes the icons in public from the logo of the design system, packages/design-system/src/assets/logo.svg, exactly as
+// it is:
+// - icon.svg, a copy of the logo for the tab;
 // - favicon.ico, with PNGs of 16, 32 and 48 pixels, for browsers and search engines that ask for it themselves;
 // - icon-192.png and icon-512.png, transparent, for the manifest (`any`);
 // - apple-touch-icon.png (180 by 180) and icon-maskable-512.png, the shield on a solid tile of the dark blue of the
@@ -18,11 +19,12 @@ import { headerColourOf } from '../src/header-colour.ts'
 const designSystem = path.resolve(import.meta.dirname, '../../../packages/design-system/src')
 const publicFolder = path.resolve(import.meta.dirname, '../public')
 
-const icon = readFileSync(path.join(designSystem, 'assets/icon.svg'), 'utf8')
+const icon = readFileSync(path.join(designSystem, 'assets/logo.svg'), 'utf8')
 const tile = headerColourOf(readFileSync(path.join(designSystem, 'tokens/colour.css'), 'utf8')).light
-// The shield on a tile fills this much of it. A maskable icon keeps its content inside a circle of 80% of the width, and
-// the corners of the shield are the farthest points: at 75% they reach 79.4%.
-const shieldOnTile = 0.75
+// The logo on a tile is this much of its width. A maskable icon keeps its content inside a circle of 80% of the width,
+// and the corners of the shield are the farthest points from the middle: at 88% the shield is 76% of the height and
+// its corners reach 79.4%.
+const shieldOnTile = 0.88
 
 /** Draws the icon at `size` pixels square, on a tile of the given colour or on nothing, and returns the PNG. */
 async function draw(page, size, background) {

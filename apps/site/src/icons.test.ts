@@ -111,12 +111,7 @@ describe('favicon.ico', () => {
 })
 
 describe('icon.svg', () => {
-  it('is the vector of the design system, which scripts/make-icons.js copies', () => {
-    expect(publicFile('icon.svg').toString('utf8')).toBe(tokens('assets/icon.svg'))
-  })
-
-  it('has no background: outside the shield the picture is transparent', () => {
-    expect(tokens('assets/icon.svg')).not.toMatch(/<rect[^>]*fill="(?!#fff")/)
-    expect(tokens('assets/icon.svg')).toContain('<clipPath id="hf-icon-field">')
+  it('is the logo of the design system, exactly, which scripts/make-icons.js copies', () => {
+    expect(publicFile('icon.svg').toString('utf8')).toBe(tokens('assets/logo.svg'))
   })
 })

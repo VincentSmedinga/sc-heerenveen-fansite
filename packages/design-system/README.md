@@ -107,6 +107,6 @@ Zo blijft een uitzondering niet hangen.
 | `src/base`       | Stijlen voor elementen zonder component, en alle verhalen van HTML-elementen     |
 | `src/components` | De componenten, elk met stories, tests en CSS                                    |
 | `src/utilities`  | Hulpklassen die één ding doen, zoals `hf-visually-hidden`, met stories en tests  |
-| `src/assets`     | Het logo en het icoon als SVG                                                    |
+| `src/assets`     | Logo's als SVG                                                                   |
 | `src/docs`       | Huisstijl, lege hoofdstukken en hulpcomponenten voor de documentatie             |
 | `.storybook`     | Instellingen van Storybook: themaknop, documentatie en toegankelijkheidscontrole |

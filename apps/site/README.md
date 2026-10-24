@@ -158,7 +158,7 @@ Er is geen service worker, dus de site werkt niet offline (zie `docs/beslissinge
 Het manifest is `src/app/manifest.ts`, dat Next.js op `/manifest.webmanifest` zet.
 De iconen en de `theme-color` staan in `src/app/layout.tsx`.
 
-De bron van het icoon is `packages/design-system/src/assets/icon.svg`: het schild met een groot pompeblêd, gemaakt voor kleine formaten.
+Het icoon is het logo zelf, `packages/design-system/src/assets/logo.svg`, zonder aanpassing.
 `pnpm --filter site icons` maakt er de bestanden in `public` van, met het Chromium van Playwright en zonder dependency van zichzelf:
 
 - `icon.svg`, een kopie voor het tabblad;

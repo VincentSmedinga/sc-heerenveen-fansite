@@ -2443,21 +2443,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een service worker die de homepage bewaart voor offline gebruik; daarover besluiten we later.
   Of pushmeldingen; die doen we niet.
 
-### Het icoon is het schild met een groot pompeblêd, transparant, en op donkerblauw waar het moet
+### Het icoon is het logo zelf, transparant, en op donkerblauw waar het moet
 
 - **Datum:** 24 oktober 2026
-- **Besluit:** de bron van het icoon is een vector: het schild met een groter pompeblêd, dat er ook op 16 pixels in staat, op een transparante achtergrond.
+- **Besluit:** de bron van het icoon is het logo, `logo.svg`, zonder aanpassing: het schild met het pompeblêd van het logo, op een transparante achtergrond.
   Voor de iPhone en voor het afgesneden icoon van Android staat het schild op een vlak van het donkere blauw van de kop.
-- **Waarom:** het pompeblêd is wat herkenbaar blijft op een klein formaat; in het volledige logo is het op 16 pixels vier pixels breed.
+- **Waarom:** de projecteigenaar wil dat de iconen precies lijken op het logo.
+  Een eigen tekening met een groter pompeblêd, die we eerst maakten, vond hij te groot en misvormd.
   Een iPhone vult een transparant icoon met zwart, en een afgesneden icoon van Android heeft een vlak nodig; de witte rand van het schild is gemaakt voor een donkere achtergrond, dus het blauw past.
   Eén icoon voor licht en donker volstaat door de witte en de blauwe rand.
-- **Alternatieven:** het volledige logo verkleinen; dan is het op 16 pixels een vlek.
+- **Alternatieven:** een eigen tekening voor kleine formaten, met een groter pompeblêd dat op 16 pixels herkenbaar blijft.
+  Die hadden we gebouwd en is laten vallen.
   Of een wit vlak; dan verdwijnt de witte rand van het schild.
   Of overal transparant; dan hangt de kleur af van de telefoon.
-- **Hoe:** `packages/design-system/src/assets/icon.svg` is een eigen tekening op een raster van 64 bij 64, en geen verkleind logo.
-  Het pompeblêd is 54% van de breedte van het schild (in het logo 42%), de banen zijn breder en er zijn er minder, en de witte tussenruimte tussen de rand en het veld is weggelaten.
-  `pnpm --filter site icons` maakt de bestanden in `apps/site/public` met het Chromium van Playwright: `icon.svg` (een kopie), `favicon.ico` met PNG's van 16, 32 en 48 pixels, `icon-192.png` en `icon-512.png` (transparant), `apple-touch-icon.png` (180 bij 180) en `icon-maskable-512.png`.
-  Op het vlak vult het schild 75% van de hoogte: het afgesneden icoon van Android houdt zijn inhoud binnen een cirkel van 80% van de breedte, en de hoeken van het schild liggen het verst van het midden.
+- **Hoe:** `pnpm --filter site icons` maakt de bestanden in `apps/site/public` met het Chromium van Playwright: `icon.svg` (een kopie van het logo), `favicon.ico` met PNG's van 16, 32 en 48 pixels, `icon-192.png` en `icon-512.png` (transparant), `apple-touch-icon.png` (180 bij 180) en `icon-maskable-512.png`.
+  Op het vlak is het logo 88% van de breedte, dus het schild 76% van de hoogte: het afgesneden icoon van Android houdt zijn inhoud binnen een cirkel van 80% van de breedte, en de hoeken van het schild liggen het verst van het midden.
   De bestanden staan in de repository, zoals de afbeelding bij het delen van links.
 
 ### Het donkerblauw van het icoon en het manifest komt uit het token van de kop
