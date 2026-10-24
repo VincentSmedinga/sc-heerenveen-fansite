@@ -37,7 +37,7 @@ export const exampleFooterMenu = [
   { href: '#over-ons', label: 'Over ons' },
   { href: '#bronnen', label: 'Bronnen' },
   { href: '#privacy', label: 'Privacy' },
-  { href: '#wat-is-er-nieuw', label: 'Wat is er nieuw' },
+  { href: '#updates', label: 'Updates' },
 ]
 
 /**

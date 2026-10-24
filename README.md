@@ -50,7 +50,7 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm review:stop`       | Stopt ze weer                                              |
 | `pnpm rollover`          | Schuift het bord naar de nieuwe week (vraagt `gh`)         |
 
-Na `pnpm release` en vóór je de release-pull request samenvoegt, schrijft de Coordinator de Nederlandse zinnen voor de pagina Wat is er nieuw.
+Na `pnpm release` en vóór je de release-pull request samenvoegt, schrijft de Coordinator de Nederlandse zinnen voor de pagina Updates.
 Een kleine pull request zet ze in [`apps/site/src/release-notes.ts`](apps/site/src/release-notes.ts).
 Zonder zinnen toont de pagina de nieuwe versie niet.
 
