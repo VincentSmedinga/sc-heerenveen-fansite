@@ -3,7 +3,7 @@ import '@fansite/design-system/index.css'
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
-import { Body, Link, Logo, Navigation, Page, Root, Text } from '@fansite/design-system'
+import { Body, Link, Logo, Navigation, Page, PullToRefresh, Root, Text } from '@fansite/design-system'
 
 import { headerColour } from '../colours'
 import { reviewBranch } from '../env'
@@ -57,6 +57,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <Root>
       <Body>
+        <PullToRefresh />
         <Page>
           <Page.Header>
             <Link href="/">
