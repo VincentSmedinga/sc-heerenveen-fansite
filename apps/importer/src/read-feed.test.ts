@@ -77,9 +77,12 @@ describe('the recording of the Leeuwarder Courant', () => {
 
   it('gives the headline, the link, the GUID as key, the time and the paywall of the first item', () => {
     expect(result.kind === 'read' && result.items[0]).toEqual({
+      durationSeconds: null,
+      episodeNumber: null,
       key: 'ece-auto-gen-e4f92d18-606d-4257-a39d-2aa94fc86481',
       paywalled: false,
       publishedAt: new Date('2026-10-20T11:58:00Z'),
+      seasonNumber: null,
       // The source has a space after the headline and an ampersand in CDATA; the headline is otherwise as published.
       title: 'Timo Zaal verkast naar Zweedse club & nieuwe aflevering van Omroep Abe',
       url: 'https://www.lc.nl/sport/sc-heerenveen/timo-zaal-verkast-naar-zweedse-club-nieuwe-aflevering-van-omroep-abe/160235181.html',
@@ -113,11 +116,21 @@ describe('the recording of the Leeuwarder Courant', () => {
     }
   })
 
-  it('gives items with these five fields only: no intro, image, author or category', () => {
+  it('gives items with these eight fields only: no intro, image, author or category, and no duration or number for news', () => {
     const items = result.kind === 'read' ? result.items : []
 
     for (const item of items) {
-      expect(Object.keys(item).sort()).toEqual(['key', 'paywalled', 'publishedAt', 'title', 'url'])
+      expect(Object.keys(item).sort()).toEqual([
+        'durationSeconds',
+        'episodeNumber',
+        'key',
+        'paywalled',
+        'publishedAt',
+        'seasonNumber',
+        'title',
+        'url',
+      ])
+      expect([item.durationSeconds, item.episodeNumber, item.seasonNumber]).toEqual([null, null, null])
     }
   })
 
@@ -145,9 +158,12 @@ describe('the recording of Voetbal International', () => {
 
   it('gives the headline, the link, the GUID as key and the time in UTC of the first item', () => {
     expect(items[0]).toEqual({
+      durationSeconds: null,
+      episodeNumber: null,
       key: 'www.vi.nl-news-2149501',
       paywalled: true,
       publishedAt: new Date('2026-10-21T13:00:00Z'),
+      seasonNumber: null,
       title: 'Een extra toevoeging aan het spel van een jonge ervaren rot bij SC Heerenveen',
       url: 'https://www.vi.nl/pro/een-extra-toevoeging-aan-het-spel-van-een-jonge-ervaren-rot-bij-sc-heerenveen',
     })
@@ -170,9 +186,19 @@ describe('the recording of Voetbal International', () => {
     }
   })
 
-  it('gives items with these five fields only: no intro, image, author or category', () => {
+  it('gives items with these eight fields only: no intro, image, author or category, and no duration or number for news', () => {
     for (const item of items) {
-      expect(Object.keys(item).sort()).toEqual(['key', 'paywalled', 'publishedAt', 'title', 'url'])
+      expect(Object.keys(item).sort()).toEqual([
+        'durationSeconds',
+        'episodeNumber',
+        'key',
+        'paywalled',
+        'publishedAt',
+        'seasonNumber',
+        'title',
+        'url',
+      ])
+      expect([item.durationSeconds, item.episodeNumber, item.seasonNumber]).toEqual([null, null, null])
     }
   })
 
@@ -476,9 +502,12 @@ describe('an Atom feed', () => {
 
   it('gives the headline, the link to the page, the id as key and the publication time', () => {
     expect(itemsOf(atom)[0]).toEqual({
+      durationSeconds: null,
+      episodeNumber: null,
       key: 'urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a',
       paywalled: false,
       publishedAt: new Date('2026-10-20T11:58:00Z'),
+      seasonNumber: null,
       title: 'Een vette kop & meer',
       url: 'https://krant.test/een',
     })
@@ -508,7 +537,14 @@ describe('an Atom feed', () => {
  * A podcast feed in the shape of the real ones, with made-up titles and addresses: the iTunes and Podcast namespaces,
  * an enclosure with the MP3 file, a description, an image and a duration.
  */
-const podcastItem = (parts: { guid: string; link: null | string; title: string }) =>
+const podcastItem = (parts: {
+  duration?: null | string
+  episode?: null | string
+  guid: string
+  link: null | string
+  season?: null | string
+  title: string
+}) =>
   '<item>' +
   `<title>${parts.title}</title><itunes:title>${parts.title}</itunes:title>` +
   (parts.link === null ? '' : `<link>${parts.link}</link>`) +
@@ -516,7 +552,10 @@ const podcastItem = (parts: { guid: string; link: null | string; title: string }
   '<pubDate>Tue, 20 Oct 2026 00:31:00 +0200</pubDate>' +
   '<description>Een verzonnen beschrijving met shownotes.</description>' +
   `<enclosure url="https://mcdn.podcast.test/${parts.guid}.mp3" length="53188902" type="audio/mpeg"/>` +
-  '<itunes:duration>2216</itunes:duration><itunes:image href="https://podcast.test/plaatje.jpg"/>' +
+  (parts.duration === null ? '' : `<itunes:duration>${parts.duration ?? '2216'}</itunes:duration>`) +
+  (parts.episode === undefined || parts.episode === null ? '' : `<itunes:episode>${parts.episode}</itunes:episode>`) +
+  (parts.season === undefined || parts.season === null ? '' : `<itunes:season>${parts.season}</itunes:season>`) +
+  '<itunes:episodeType>full</itunes:episodeType><itunes:image href="https://podcast.test/plaatje.jpg"/>' +
   '</item>'
 
 const podcastFeed = (...entries: string[]) =>
@@ -525,7 +564,7 @@ const podcastFeed = (...entries: string[]) =>
   `<channel><title>Een verzonnen podcast</title><link>https://podcast.test</link>${entries.join('')}</channel></rss>`
 
 describe('a podcast feed', () => {
-  it('gives the title, the page of the episode as link, the GUID as key and the time', () => {
+  it('gives the title, the page of the episode as link, the GUID as key, the time and the duration', () => {
     const [episode] = itemsOf(
       podcastFeed(
         podcastItem({ guid: 'a-1', link: 'https://podcast.test/e/aflevering-een/', title: 'Aflevering één' }),
@@ -533,9 +572,12 @@ describe('a podcast feed', () => {
     )
 
     expect(episode).toEqual({
+      durationSeconds: 2216,
+      episodeNumber: null,
       key: 'a-1',
       paywalled: false,
       publishedAt: new Date('2026-10-19T22:31:00Z'),
+      seasonNumber: null,
       title: 'Aflevering één',
       url: 'https://podcast.test/e/aflevering-een/',
     })
@@ -566,13 +608,74 @@ describe('a podcast feed', () => {
     expect(skippedOf(feed)).toEqual([{ position: 2, reason: 'an earlier item in the feed has the same key' }])
   })
 
-  it('gives items with these five fields only: no description, image, duration or MP3 file', () => {
+  it('gives the duration, the season and the number of an episode', () => {
+    const [episode] = itemsOf(
+      podcastFeed(
+        podcastItem({
+          duration: '2944',
+          episode: '120',
+          guid: 'a-1',
+          link: 'https://podcast.test/e/een/',
+          season: '9',
+          title: 'Aflevering één',
+        }),
+      ),
+    )
+
+    expect(episode).toMatchObject({ durationSeconds: 2944, episodeNumber: 120, seasonNumber: 9 })
+  })
+
+  it.each([
+    ['seconds', '2944', 2944],
+    ['minutes and seconds', '49:04', 2944],
+    ['hours, minutes and seconds', '1:02:03', 3723],
+    ['more than a day', '90000', null],
+    ['exactly a day', '86400', 86_400],
+    ['zero', '0', null],
+    ['no number', 'lang', null],
+    ['nothing', null, null],
+  ])('reads a duration given as %s', (_, duration, seconds) => {
+    const [episode] = itemsOf(
+      podcastFeed(podcastItem({ duration, guid: 'a-1', link: 'https://podcast.test/e/een/', title: 'Een' })),
+    )
+
+    expect(episode?.durationSeconds).toBe(seconds)
+  })
+
+  it.each([
+    ['a whole number', '16', 16],
+    ['zero', '0', null],
+    ['a negative number', '-3', null],
+    ['a fraction', '2.5', null],
+    ['text', 'S9E16', null],
+    ['a number that is too large', '100000', null],
+    ['nothing', null, null],
+  ])('reads an episode and a season given as %s, and keeps the item either way', (_, value, number) => {
+    const [episode] = itemsOf(
+      podcastFeed(
+        podcastItem({ episode: value, guid: 'a-1', link: 'https://podcast.test/e/een/', season: value, title: 'Een' }),
+      ),
+    )
+
+    expect(episode).toMatchObject({ episodeNumber: number, seasonNumber: number })
+  })
+
+  it('leaves the episode type, the description, the image and the MP3 file out', () => {
     const [episode] = itemsOf(
       podcastFeed(podcastItem({ guid: 'a-1', link: 'https://podcast.test/e/een/', title: 'Aflevering één' })),
     )
 
-    expect(Object.keys(episode ?? {}).sort()).toEqual(['key', 'paywalled', 'publishedAt', 'title', 'url'])
-    expect(JSON.stringify(episode)).not.toMatch(/mp3|shownotes|plaatje|2216/u)
+    expect(Object.keys(episode ?? {}).sort()).toEqual([
+      'durationSeconds',
+      'episodeNumber',
+      'key',
+      'paywalled',
+      'publishedAt',
+      'seasonNumber',
+      'title',
+      'url',
+    ])
+    expect(JSON.stringify(episode)).not.toMatch(/mp3|shownotes|plaatje|full/u)
   })
 })
 

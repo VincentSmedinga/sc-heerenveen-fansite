@@ -7,7 +7,7 @@ import { cache } from 'react'
 import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
 import { pageMetadata } from '../../metadata'
-import { dateTimeOf, formatEpisodeTime } from '../../news'
+import { dateTimeOf, episodeDetails, formatEpisodeTime } from '../../news'
 import { getPodcastPage } from '../../podcasts'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
@@ -125,6 +125,7 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
                 <List.Item key={index}>
                   <NewsItem
                     dateTime={dateTimeOf(episode.publishedAt)}
+                    details={episodeDetails(episode)}
                     headline={episode.title}
                     href={episode.url}
                     source={episode.sourceName}

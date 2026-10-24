@@ -96,6 +96,7 @@ Een bron kan meer feeds hebben.
 Wat als geslaagd of mislukt telt, en hoe lang de importer wacht, staat in de [README van de importer](../../apps/importer/README.md).
 
 `items` legt per bericht vast wat de bron publiceert en we mogen bewaren: de kop, de link en de tijd.
+Van een aflevering van een podcast staan er drie feiten bij die geen inhoud zijn: de duur, het seizoen en het nummer.
 Een intro, een afbeelding, een auteur of een categorie heeft geen kolom, want geen bron heeft daar nu toestemming voor (principe 2 van de Redactie).
 Een kolom daarvoor komt met de eerste bron die het wel mag; een test houdt de lijst met kolommen vast.
 
@@ -107,6 +108,9 @@ Een kolom daarvoor komt met de eerste bron die het wel mag; een test houdt de li
 | `url`                           | De link, altijd `http` of `https` (hoogstens 2048 tekens)                                       |
 | `published_at`                  | De tijd van publicatie, in UTC; zonder geldige tijd de tijd van de eerste keer dat we het zagen |
 | `paywalled`                     | Of het bericht achter de betaalmuur staat; een kenmerk van het bericht en geen inhoud           |
+| `duration_seconds`              | De duur van een aflevering in hele seconden; leeg als de feed hem niet geeft, en bij nieuws     |
+| `season_number`                 | Het seizoen van een aflevering; leeg als de feed het niet geeft                                 |
+| `episode_number`                | Het nummer van een aflevering; leeg als de feed het niet geeft                                  |
 | `first_seen_at`, `last_seen_at` | Wanneer we het bericht voor het eerst en het laatst zagen, in UTC                               |
 
 `item_key` is uniek per bron (`source_id` en `item_key` samen) en hoofdlettergevoelig: de kolom heeft de collatie `utf8mb4_bin`, want een `guid` en het pad van een URL kennen hoofdletters.
@@ -168,7 +172,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
   `listRecentItems(db, since, until)` geeft de berichten van die bronnen van `since` tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam), en geen afleveringen van bronnen van het soort podcast;
-  `listPodcastEpisodes(db, { limit, offset, podcast, until })` geeft juist de afleveringen van de podcasts die aanstaan, het nieuwste eerst, met alleen de titel, de link, de tijd en de naam van de podcast, en `countPodcastEpisodes` geeft het totaal; `podcast` is de `slug` van één podcast;
+  `listPodcastEpisodes(db, { limit, offset, podcast, until })` geeft juist de afleveringen van de podcasts die aanstaan, het nieuwste eerst, met alleen de titel, de link, de tijd, de naam van de podcast en de duur, het seizoen en het nummer van de aflevering, en `countPodcastEpisodes` geeft het totaal; `podcast` is de `slug` van één podcast;
   `listPodcasts(db)` geeft de podcasts met een `slug` en minstens één aflevering, voor het filter, en `findPodcast(db, slug)` geeft de naam, de beschrijving en de adressen bij Apple Podcasts en Spotify van één podcast;
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;

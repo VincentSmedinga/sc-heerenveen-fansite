@@ -340,14 +340,26 @@ describe('an item that cannot be stored', () => {
 
 describe('importing a podcast', () => {
   /** An episode as a podcast feed writes it: with a page, an MP3 file, a description and a duration. */
-  function episode(key: string, { link = `https://podcast.test/e/${key}/`, title = `Aflevering ${key}` } = {}) {
+  function episode(
+    key: string,
+    {
+      duration = '2216',
+      link = `https://podcast.test/e/${key}/`,
+      number,
+      season,
+      title = `Aflevering ${key}`,
+    }: { duration?: string; link?: string; number?: string; season?: string; title?: string } = {},
+  ) {
     return (
       `<item><title>${title}</title>` +
       (link === '' ? '' : `<link>${link}</link>`) +
       `<guid isPermaLink="false">${key}</guid><pubDate>Tue, 20 Oct 2026 00:31:00 +0200</pubDate>` +
       '<description>Een verzonnen beschrijving met shownotes.</description>' +
       `<enclosure url="https://mcdn.podcast.test/${key}.mp3" length="53188902" type="audio/mpeg"/>` +
-      '<itunes:duration>2216</itunes:duration></item>'
+      `<itunes:duration>${duration}</itunes:duration>` +
+      (number === undefined ? '' : `<itunes:episode>${number}</itunes:episode>`) +
+      (season === undefined ? '' : `<itunes:season>${season}</itunes:season>`) +
+      '</item>'
     )
   }
 
@@ -355,9 +367,13 @@ describe('importing a podcast', () => {
     '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">' +
     `<channel><title>Een verzonnen podcast</title>${entries.join('')}</channel></rss>`
 
-  it('stores the title, the page of the episode and the time, and skips an episode without a page', async () => {
+  it('stores the title, the page of the episode, the time and the facts, and skips an episode without a page', async () => {
     const server = await serve(
-      podcastFeed(episode('een'), episode('zonder-pagina', { link: '' }), episode('twee', { title: 'Tweede' })),
+      podcastFeed(
+        episode('een', { number: '16', season: '9' }),
+        episode('zonder-pagina', { link: '' }),
+        episode('twee', { duration: 'lang', title: 'Tweede' }),
+      ),
     )
     const feed = await addFeed(`${server.origin}/rss/`, { domain: 'podcast.test', kind: 'podcast' })
 
@@ -367,14 +383,24 @@ describe('importing a podcast', () => {
     expect(formatReport(report)).toContain('item 2 skipped: there is no link')
     expect(await itemsInDatabase()).toMatchObject([
       {
+        durationSeconds: 2216,
+        episodeNumber: 16,
         key: 'een',
         publishedAt: new Date('2026-10-19T22:31:00Z'),
+        seasonNumber: 9,
         title: 'Aflevering een',
         url: 'https://podcast.test/e/een/',
       },
-      { key: 'twee', title: 'Tweede', url: 'https://podcast.test/e/twee/' },
+      {
+        durationSeconds: null,
+        episodeNumber: null,
+        key: 'twee',
+        seasonNumber: null,
+        title: 'Tweede',
+        url: 'https://podcast.test/e/twee/',
+      },
     ])
-    expect(JSON.stringify(await itemsInDatabase())).not.toMatch(/mp3|shownotes|2216/u)
+    expect(JSON.stringify(await itemsInDatabase())).not.toMatch(/mp3|shownotes/u)
   })
 
   it('makes no duplicates when it runs twice, and updates a title that changed', async () => {
@@ -393,6 +419,26 @@ describe('importing a podcast', () => {
 
     expect(report).toMatchObject({ added: 0, unchanged: 1, updated: 1 })
     expect((await itemsInDatabase()).map((row) => row.title)).toEqual(['Nieuwe titel', 'Aflevering twee'])
+  })
+
+  it('fills in the facts of an episode that was stored without them, and counts it as updated', async () => {
+    const before = await serve(podcastFeed(episode('een', { duration: '0' })))
+    const feed = await addFeed(`${before.origin}/rss/`, { domain: 'podcast.test', kind: 'podcast' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect((await itemsInDatabase())[0]).toMatchObject({ durationSeconds: null, episodeNumber: null })
+
+    const after = await serve(podcastFeed(episode('een', { number: '16', season: '9' })))
+    const report = await importFeed(
+      database.db,
+      fetcherFor(servers),
+      { ...feed, url: `${after.origin}/rss/` },
+      secondRun,
+    )
+
+    expect(report).toMatchObject({ added: 0, unchanged: 0, updated: 1 })
+    expect((await itemsInDatabase())[0]).toMatchObject({ durationSeconds: 2216, episodeNumber: 16, seasonNumber: 9 })
   })
 
   it('keeps an episode and an item of another source with the same GUID apart', async () => {

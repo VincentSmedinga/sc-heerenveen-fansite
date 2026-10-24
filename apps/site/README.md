@@ -101,12 +101,14 @@ De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
 Onder de discussies staat het blok "Nieuwste podcasts": de vier nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/podcasts` eronder.
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
+De afleveringen hebben dezelfde feiten als op `/podcasts`.
 
 Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van de importer](../importer/README.md)).
 
 ## De podcasts
 
 `/podcasts` toont de afleveringen van de podcasts die aanstaan, nieuwste eerst, 25 per pagina, elk als `NewsItem`: de titel als link naar de pagina van de aflevering bij de maker, de naam van de podcast en de tijd.
+Achter de naam staan de feiten die de feed geeft, als `details` van de `NewsItem`: het seizoen en het nummer, zoals "seizoen 9, aflevering 16" of "aflevering 120", en de duur, zoals "37 min" of "1 uur 12 min" (`episodeDetails` in `src/news.ts`).
 Een aflevering van deze week heeft de korte dag en de tijd, zoals "wo 14:05"; een oudere heeft de datum, met het jaar als dat niet dit jaar is, want de lijst gaat jaren terug.
 Boven de lijst staat het filter (`Filter` uit het designsysteem): "Alle podcasts" en een link per podcast met afleveringen, als `/podcasts?podcast=omroep-abe`.
 De slug komt uit de kolom `slug` van `sources`, dus een andere naam verandert het adres niet.

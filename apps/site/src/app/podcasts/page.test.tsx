@@ -20,13 +20,19 @@ const podcasts: PublicPodcast[] = [
 
 const episodes: PublicEpisode[] = [
   {
+    durationSeconds: 2944,
+    episodeNumber: 120,
     publishedAt: new Date('2026-10-22T10:00:00Z'),
+    seasonNumber: null,
     sourceName: 'Omroep Abe',
     title: 'Aflevering 12 & <b>de winterstop</b>',
     url: 'https://omny.test/shows/abe/12',
   },
   {
+    durationSeconds: null,
+    episodeNumber: null,
     publishedAt: new Date('2021-10-06T10:00:00Z'),
+    seasonNumber: null,
     sourceName: 'Radio Camataru',
     title: 'Aflevering 1',
     url: 'https://camataru.test/e/1/',
@@ -92,6 +98,14 @@ describe('the page Podcasts', () => {
     expect(html).toContain('do 12:00')
     expect(html).toContain('6 okt 2021')
     expect(html).not.toContain('target=')
+  })
+
+  it('shows the number and the duration of an episode after the name, and nothing for what the feed did not give', async () => {
+    const html = await render()
+
+    expect(html).toContain('<span>aflevering 120</span>')
+    expect(html).toContain('<span>49 min</span>')
+    expect(html.match(/aflevering \d+/g)).toHaveLength(1)
   })
 
   it('shows a title as text, escaped, and nothing of an episode but the title, the link, the name and the time', async () => {

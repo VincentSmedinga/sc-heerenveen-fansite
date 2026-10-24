@@ -286,19 +286,28 @@ describe('the homepage', () => {
 
 const episodes: PublicEpisode[] = [
   {
+    durationSeconds: 2944,
+    episodeNumber: 16,
     publishedAt: new Date('2026-10-22T10:00:00Z'),
+    seasonNumber: 9,
     sourceName: 'Testpodcast',
     title: 'Aflevering 12 & <b>de winterstop</b>',
     url: 'https://testpodcast.test/e/12',
   },
   {
+    durationSeconds: 4320,
+    episodeNumber: null,
     publishedAt: new Date('2026-10-12T10:00:00Z'),
+    seasonNumber: null,
     sourceName: 'Proefpodcast',
     title: 'Aflevering 11',
     url: 'https://proefpodcast.test/e/11',
   },
   {
+    durationSeconds: null,
+    episodeNumber: null,
     publishedAt: new Date('2025-12-30T10:00:00Z'),
+    seasonNumber: null,
     sourceName: 'Testpodcast',
     title: 'Aflevering 1',
     url: 'https://testpodcast.test/e/1',
@@ -347,6 +356,18 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
     expect(html).toContain('do 12:00')
     expect(html).toContain('12 okt')
     expect(html).toContain('30 dec 2025')
+  })
+
+  it('shows the season, the number and the duration of an episode after the name, for what the feed gave', async () => {
+    vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
+
+    const html = await renderEpisodes()
+
+    expect(html).toContain('<span>seizoen 9, aflevering 16</span>')
+    expect(html).toContain('<span>49 min</span>')
+    expect(html).toContain('<span>1 uur 12 min</span>')
+    expect(html.match(/aflevering \d+/g)).toHaveLength(1)
+    expect(html.match(/ min<|uur<\/span>/g)).toHaveLength(2)
   })
 
   it('shows a title as text, escaped', async () => {

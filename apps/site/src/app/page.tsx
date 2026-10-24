@@ -9,7 +9,7 @@ import { reasonOf } from '../errors'
 import { forumUrl } from '../forum'
 import { getHeadlines } from '../headlines'
 import { pageMetadata } from '../metadata'
-import { dateTimeOf, formatDiscussionTime, formatEpisodeTime, formatNewsTime } from '../news'
+import { dateTimeOf, episodeDetails, formatDiscussionTime, formatEpisodeTime, formatNewsTime } from '../news'
 import { getLatestEpisodes } from '../podcasts'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
@@ -130,6 +130,7 @@ export default async function HomePage() {
                 <List.Item key={index}>
                   <NewsItem
                     dateTime={dateTimeOf(episode.publishedAt)}
+                    details={episodeDetails(episode)}
                     headline={episode.title}
                     href={episode.url}
                     source={episode.sourceName}

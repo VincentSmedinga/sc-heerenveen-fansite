@@ -43,6 +43,13 @@
       "when": 1792802730035,
       "tag": "0005_add_source_slug_and_podcast_links",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1792836450506,
+      "tag": "0006_add_episode_duration_season_and_number",
+      "breakpoints": true
     }
   ]
 }

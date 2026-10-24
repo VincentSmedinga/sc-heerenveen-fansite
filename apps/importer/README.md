@@ -343,7 +343,10 @@ Een eigen adapter of eigen tabellen zijn er niet.
   De `enclosure`, het MP3-bestand, lezen we niet.
   Een aflevering zonder bruikbare `link` slaat de import over en meldt dat in het logboek; hij valt niet terug op de `enclosure`.
 - **Sleutel:** de `guid`, per bron.
-- **Niets extra:** geen artwork, beschrijving of shownotes van een aflevering, geen duur en geen adres van het MP3-bestand.
+- **Feiten:** van een aflevering bewaart de import ook de duur in hele seconden, het seizoen en het nummer (`itunes:duration`, `itunes:season` en `itunes:episode`), als de feed ze geeft.
+  Een duur van meer dan een dag, een nummer of seizoen van 0 of boven 99999, en een waarde die geen geheel getal is, telt als "niet gegeven": de aflevering blijft staan, zonder dat feit.
+  De import leest dit uit elke feed, ook uit een nieuwsfeed, die ze niet heeft.
+- **Niets extra:** geen artwork, beschrijving of shownotes van een aflevering, geen soort aflevering (`episodeType`) en geen adres van het MP3-bestand.
   De beschrijving van de podcast zelf staat in de seed, als tekst van de maker (zie _De beschrijving van een podcast is die van de maker_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)); de import leest hem niet.
 - **Rooster:** podcasts hebben geen rooster van zichzelf.
   Ze gaan mee in de run van elke 15 minuten, met de `ETag` die beide bronnen sturen, dus `pnpm run import:status` toont ze zoals de andere feeds.
