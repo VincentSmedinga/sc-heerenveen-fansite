@@ -2474,6 +2474,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of blauwe links, zoals op de rest van de site; dat vraagt geen nieuwe tokens, maar de footer valt dan meer op.
   Of één alinea met een `br` tussen de zinnen, zodat de links naar de volgende regel gaan zodra ze niet meer passen, zoals in de header.
   Dan moet de ESLint-regel `br` toestaan, of krijgt het designsysteem een component voor een regeleinde.
+- **Later:** zie _De links in de footer zijn blauw, zoals de andere links_; de kleur van de links is daarmee vervangen.
 
 ### Metadata, sitemap en canonieke URL's gebruiken het adres van de eigen omgeving
 
@@ -2712,3 +2713,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** "Onze bronnen" ook in de footer, zodat de link en de kop hetzelfde heten.
   Of Bronnen in beide menu's.
 - **Let op:** de footer markeert de huidige pagina niet, dus op `/bronnen` heeft geen enkele link in een menu de streep van de huidige pagina.
+
+### De links in de footer zijn blauw, zoals de andere links
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de links in de footer hebben de kleur van gewone links: `blue-700` in licht en `blue-300` in donker, en onder de muis `blue-800` en `blue-200`.
+  Dit vervangt het donkere zand van de links uit _De footer staat op een eigen vlak, met links in donker zand_; het vlak, de lijn en de indeling blijven.
+- **Waarom:** de footer valt zo minder uit de toon.
+  Een link heeft overal op de site dezelfde kleur, dus een bezoeker herkent hem zonder erbij na te denken.
+  De blauwe links halen het contrast ook op het vlak van de footer: de link 7,02:1 in licht en 7,90:1 in donker, onder de muis 9,34:1 en 10,65:1.
+  De focusrand blijft 3,52:1 in licht en 7,90:1 in donker.
+- **Alternatieven:** het donkere zand houden; dat is rustiger, maar het geeft de site een tweede linkkleur.
+- **Hoe:** de tokens `--hf-colour-text-link-on-footer` en `--hf-colour-text-link-hover-on-footer` zijn weg, en `page.css` zet de kleuren van links in de footer niet meer.
+  De footer erft `--hf-colour-text-link` en `--hf-colour-text-link-hover`.
+  De contrasttabel bij Tokens › Kleur toetst die twee op het vlak van de footer.
+  De stap `sand-700` blijft in de reeks, ook al gebruikt nu niets hem.
+  Een bezochte link ziet er in de footer hetzelfde uit als een andere, zoals overal behalve bij koppen en discussietitels.

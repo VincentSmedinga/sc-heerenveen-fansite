@@ -16,7 +16,7 @@ const meta = preview.meta({
           'De verhalen voor een smal en een breed scherm staan alleen in het canvas, met de instelling Viewport van de werkbalk.',
           '',
           'De tekst heeft de kleur van secundaire tekst.',
-          'Links in de footer zijn donker zand, en onder de muis donkerder in licht en lichter in donker.',
+          'Links in de footer hebben de kleur van gewone links: blauw, en onder de muis donkerder in licht en lichter in donker.',
           'Een bezochte link heeft dezelfde kleur als een gewone link, en de onderstreping blijft.',
           'Een link in de footer hoeft daar niets voor te doen.',
           'De kleuren en hun contrast staan bij [Tokens › Kleur](?path=/docs/tokens-kleur--documentatie).',
@@ -40,6 +40,34 @@ const render = () => <ExampleFooter />
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
+
+const statesParameters = {
+  docs: {
+    description: {
+      story:
+        'De tweede link is bezocht, de derde staat onder de muis en de vierde heeft focus, nagebootst met de add-on Pseudo States. Een bezochte link ziet er hetzelfde uit als een andere. Met de Tab-toets zie je de echte focusrand.',
+    },
+  },
+  pseudo: {
+    focusVisible: ['.hf-page-footer li:nth-child(4) a'],
+    hover: ['.hf-page-footer li:nth-child(3) a'],
+    visited: ['.hf-page-footer li:nth-child(2) a'],
+  },
+}
+
+export const StatesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Bezocht, onder de muis en focus in licht',
+  parameters: statesParameters,
+  render,
+})
+
+export const StatesDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Bezocht, onder de muis en focus in donker',
+  parameters: statesParameters,
+  render,
+})
 
 // Only on the canvas, with Storybook's viewport setting: on the docs page they would show the same as the stories above.
 const screens = { tags: ['!autodocs'] }
