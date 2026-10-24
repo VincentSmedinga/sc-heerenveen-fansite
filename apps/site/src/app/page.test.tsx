@@ -1,14 +1,16 @@
-import type { PublicDiscussion, PublicItem } from '@fansite/db/queries'
+import type { PublicDiscussion, PublicEpisode, PublicItem } from '@fansite/db/queries'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getDiscussions } from '../discussions'
 import { getHeadlines } from '../headlines'
+import { getLatestEpisodes } from '../podcasts'
 import HomePage, { generateMetadata } from './page'
 
 vi.mock('../headlines', () => ({ getHeadlines: vi.fn() }))
 vi.mock('../discussions', () => ({ getDiscussions: vi.fn() }))
+vi.mock('../podcasts', () => ({ getLatestEpisodes: vi.fn() }))
 
 const headlines: PublicItem[] = [
   {
@@ -65,6 +67,13 @@ async function render() {
   return renderToStaticMarkup(await HomePage())
 }
 
+/** The first card of the sidebar alone: the discussions of the forum. */
+async function renderDiscussions() {
+  const html = await renderSidebar()
+
+  return html.slice(0, html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'))
+}
+
 /** The main column alone: the news and the link to Onze bronnen, without the sidebar. */
 async function renderMain() {
   const html = await render()
@@ -72,7 +81,7 @@ async function renderMain() {
   return html.slice(0, html.indexOf('</main>') + '</main>'.length)
 }
 
-/** The sidebar alone: the discussions of the forum. */
+/** The sidebar alone: the discussions of the forum and the podcast episodes. */
 async function renderSidebar() {
   const html = await render()
 
@@ -85,6 +94,8 @@ beforeEach(() => {
   vi.mocked(getHeadlines).mockReset()
   vi.mocked(getDiscussions).mockReset()
   vi.mocked(getDiscussions).mockResolvedValue([])
+  vi.mocked(getLatestEpisodes).mockReset()
+  vi.mocked(getLatestEpisodes).mockResolvedValue([])
 })
 
 afterEach(() => {
@@ -104,6 +115,7 @@ describe('the homepage', () => {
       '<h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite</h1>',
       '<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>',
       '<h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies</h2>',
+      '<h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts</h2>',
     ])
   })
 
@@ -272,6 +284,129 @@ describe('the homepage', () => {
   })
 })
 
+const episodes: PublicEpisode[] = [
+  {
+    durationSeconds: 2944,
+    episodeNumber: 16,
+    publishedAt: new Date('2026-10-22T10:00:00Z'),
+    seasonNumber: 9,
+    sourceName: 'Testpodcast',
+    title: 'Aflevering 12 & <b>de winterstop</b>',
+    url: 'https://testpodcast.test/e/12',
+  },
+  {
+    durationSeconds: 4320,
+    episodeNumber: null,
+    publishedAt: new Date('2026-10-12T10:00:00Z'),
+    seasonNumber: null,
+    sourceName: 'Proefpodcast',
+    title: 'Aflevering 11',
+    url: 'https://proefpodcast.test/e/11',
+  },
+  {
+    durationSeconds: null,
+    episodeNumber: null,
+    publishedAt: new Date('2025-12-30T10:00:00Z'),
+    seasonNumber: null,
+    sourceName: 'Testpodcast',
+    title: 'Aflevering 1',
+    url: 'https://testpodcast.test/e/1',
+  },
+]
+
+/** The block of podcasts alone: the second card of the sidebar. */
+async function renderEpisodes() {
+  const html = await renderSidebar()
+
+  return html.slice(html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'))
+}
+
+describe('the podcast episodes in the sidebar of the homepage', () => {
+  beforeEach(() => {
+    vi.mocked(getHeadlines).mockResolvedValue([])
+  })
+
+  it('puts the block under the forum, named by its h2, with the link to all podcasts under the list', async () => {
+    vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
+
+    const html = await renderSidebar()
+
+    expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('episodes-heading'))
+    expect(await renderEpisodes()).toMatch(
+      /^<section class="hf-card" aria-labelledby="episodes-heading"><h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts<\/h2><ul role="list">.*<\/ul><p><a href="\/podcasts">Alle podcasts<\/a><\/p><\/section><\/aside>$/,
+    )
+  })
+
+  it('shows each episode as a link to its page at the maker, with the name of the podcast', async () => {
+    vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
+
+    const html = await renderEpisodes()
+
+    expect(html.match(/<li>/g)).toHaveLength(3)
+    expect(html).toContain('href="https://testpodcast.test/e/12"')
+    expect(html).toContain('Testpodcast')
+    expect(html).toContain('Proefpodcast')
+  })
+
+  it('shows a weekday and the time for this week, and the date, with the year when it is not this year, before that', async () => {
+    vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
+
+    const html = await renderEpisodes()
+
+    expect(html).toContain('do 12:00')
+    expect(html).toContain('12 okt')
+    expect(html).toContain('30 dec 2025')
+  })
+
+  it('shows the season, the number and the duration of an episode after the name, for what the feed gave', async () => {
+    vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
+
+    const html = await renderEpisodes()
+
+    expect(html).toContain('<span>seizoen 9, aflevering 16</span>')
+    expect(html).toContain('<span>49 min</span>')
+    expect(html).toContain('<span>1 uur 12 min</span>')
+    expect(html.match(/aflevering \d+/g)).toHaveLength(1)
+    expect(html.match(/ min<|uur<\/span>/g)).toHaveLength(2)
+  })
+
+  it('shows a title as text, escaped', async () => {
+    vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
+
+    const html = await renderEpisodes()
+
+    expect(html).toContain('Aflevering 12 &amp; &lt;b&gt;de winterstop&lt;/b&gt;')
+    expect(html).not.toContain('<b>de winterstop')
+  })
+
+  it('shows nothing of an episode but the title, the link, the name and the time', async () => {
+    vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
+
+    const html = await renderEpisodes()
+
+    expect(html).not.toMatch(/<img|<audio|<iframe|\.mp3/)
+  })
+
+  it('says there are no episodes yet, with the link to all podcasts under it', async () => {
+    const html = await renderEpisodes()
+
+    expect(html).toContain(
+      '<p>We hebben nog geen podcastafleveringen gevonden.</p><p><a href="/podcasts">Alle podcasts</a></p>',
+    )
+  })
+
+  it('shows the error page when only the episodes can not be read', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
+    vi.mocked(getLatestEpisodes).mockRejectedValue(new Error('Failed query'))
+
+    const html = await render()
+
+    expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
+    expect(html).not.toContain('Nieuwste podcasts')
+  })
+})
+
 describe('the discussions in the sidebar of the homepage', () => {
   beforeEach(() => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
@@ -284,12 +419,12 @@ describe('the discussions in the sidebar of the homepage', () => {
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(await renderSidebar()).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="Van het forum"><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><\/aside>$/,
+      /^<aside class="hf-page-sidebar" aria-label="Van het forum en de podcasts"><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/aside>$/,
     )
   })
 
   it('shows each discussion as a link to the forum with the replies, the last poster and the time', async () => {
-    const html = await renderSidebar()
+    const html = await renderDiscussions()
 
     expect(html.match(/<li>/g)).toHaveLength(3)
     expect(html).toContain(
@@ -302,7 +437,7 @@ describe('the discussions in the sidebar of the homepage', () => {
   })
 
   it('shows today as the time alone, the days before as the weekday and the time, and older ones as the date', async () => {
-    const html = await renderSidebar()
+    const html = await renderDiscussions()
 
     expect(html).toContain('<time dateTime="2026-10-23T11:28:21.000Z">13:28</time>')
     expect(html).toContain('<time dateTime="2026-10-21T19:45:00.000Z">wo 21:45</time>')
@@ -310,7 +445,7 @@ describe('the discussions in the sidebar of the homepage', () => {
   })
 
   it('writes "1 reactie" and "0 reacties", and only the time when the last poster is not known', async () => {
-    const html = await renderSidebar()
+    const html = await renderDiscussions()
 
     expect(html).toContain('<span>1 reactie</span>')
     expect(html).toContain('<span>0 reacties</span>')
@@ -318,7 +453,7 @@ describe('the discussions in the sidebar of the homepage', () => {
   })
 
   it('shows a title as text, escaped, and the addresses as our database has them', async () => {
-    const html = await renderSidebar()
+    const html = await renderDiscussions()
 
     expect(html).toContain('Nieuwe spits &amp; &lt;b&gt;gezocht&lt;/b&gt;')
     expect(html).not.toContain('<b>')
@@ -332,14 +467,14 @@ describe('the discussions in the sidebar of the homepage', () => {
   })
 
   it('loads nothing from the forum: no image, avatar, frame or script, and only links', async () => {
-    const html = await renderSidebar()
+    const html = await renderDiscussions()
 
     expect(html).not.toMatch(/<(img|picture|iframe|video|audio|script|image|use|svg|link|source)/)
     expect(html).not.toMatch(/(src|srcset|poster)=/)
   })
 
   it('shows the screen name as text, with no link', async () => {
-    const html = await renderSidebar()
+    const html = await renderDiscussions()
 
     expect(html).not.toMatch(/<a [^>]*>[^<]*(Buffon1|Tribunetijger)/)
     expect(html.match(/<a /g)).toHaveLength(discussions.length + 1)
@@ -348,7 +483,7 @@ describe('the discussions in the sidebar of the homepage', () => {
   it('says there are no discussions yet, with the link to the forum under it', async () => {
     vi.mocked(getDiscussions).mockResolvedValue([])
 
-    const html = await renderSidebar()
+    const html = await renderDiscussions()
 
     expect(html).toContain('<h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies</h2>')
     expect(html).toContain('<p>We hebben nog geen discussies van het forum.</p>')
@@ -405,7 +540,7 @@ describe('the homepage when the database can not be read', () => {
     await render()
 
     expect(console.error).toHaveBeenCalledExactlyOnceWith(
-      'Could not read the headlines and discussions for the homepage: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
+      'Could not read the headlines, discussions and episodes for the homepage: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
     )
   })
 })

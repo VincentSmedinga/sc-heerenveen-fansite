@@ -2180,6 +2180,179 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een eigen opdracht voor het forum, met een eigen lock en logboek; dat zijn twee plekken om te bewaken.
   Of de discussies bijwerken en oude weghalen op id; dat is meer code, en een titel die het forum wijzigt zou dan niet vanzelf vervangen worden.
 
+### Een podcast is een bron, en een aflevering is een rij in `items`
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** een podcast staat in het register als bron van het soort podcast, en zijn afleveringen staan in `items`.
+  De lezer van RSS leest de feed; een eigen adapter komt er niet.
+  De link van een aflevering is het element `link`, de pagina van de aflevering, en nooit de `enclosure`.
+- **Waarom:** `feedsmith` leest podcastfeeds al (zie _Feeds lezen we met feedsmith_), en een aflevering heeft dezelfde velden als een bericht: een titel, een link, een GUID en een tijd.
+  We hergebruiken zo de sleutel per bron, de ontdubbeling, de lock en de gezondheid.
+  Een link naar het MP3-bestand stuurt de luisteraar langs de pagina van de maker, en die pagina is waar we naartoe willen verwijzen (principe 1).
+- **Alternatieven:** eigen tabellen `podcasts` en `episodes`, zoals het prototype; dat is dubbele machinerie voor dezelfde velden.
+  Of een eigen adapter voor podcasts; die zou niets lezen wat de huidige lezer niet leest.
+
+### Twee van de vier podcasts uit het prototype nemen we
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** we nemen Omroep Abe en Radio Camataru.
+  De Sportcast van Omrop Fryslân en de NOS Voetbalpodcast nemen we nu niet.
+- **Waarom:** we volgen _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_.
+  Omroep Abe (205 van 224 afleveringen noemen Heerenveen in de titel of beschrijving) en Radio Camataru (95 van 100) gaan bijna helemaal over de club, hebben een pagina per aflevering en laten ons de feed lezen.
+  De Sportcast gaat over Friese sport (8 van 390), zijn `robots.txt` sluit alles voor iedereen (`Disallow: /`), zijn adres uit het prototype werkt niet meer (nu `tydlik.omropfryslan.nl`), en elke aflevering heeft dezelfde link, de pagina van het programma.
+  De NOS Voetbalpodcast gaat over het hele betaalde voetbal (5 van 664), en zijn `link` is het MP3-bestand zonder pagina van de aflevering.
+- **Alternatieven:** alle vier, zoals het issue vroeg; twee daarvan kunnen we niet lezen of niet goed koppelen.
+  Of Omrop Fryslân om toestemming en een feed met alleen clubafleveringen vragen; dat kan later, buiten dit issue.
+
+### Geen artwork van een podcast
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** we bewaren en tonen geen artwork.
+  De naam van de podcast is genoeg.
+  Een plaatje komt met #10, als lokaal bestand of als initialen.
+- **Waarom:** een afbeelding van een ander tonen mag alleen met toestemming (principe 2) en van onze eigen server (principe 3).
+  Het prototype laadde het artwork rechtstreeks van de bron.
+  Wat we niet mogen tonen, slaan we ook niet op.
+- **Alternatieven:** toestemming vragen aan beide podcasts en het plaatje op onze server zetten; dat wacht op hun antwoord en op een plek voor bestanden.
+
+### Podcasts volgen het rooster van de rest
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** er komt geen rooster per soort bron.
+  De podcastfeeds worden bij elke run van 15 minuten gevraagd, met `ETag`.
+- **Waarom:** beide bronnen sturen een `ETag`, dus een run zonder nieuwe aflevering kost een antwoord "niet gewijzigd" en niet de feed van bijna 1 MB.
+  Een rooster per soort is extra code voor weinig winst.
+  Omroep Abe plaatst ongeveer één aflevering per week, dus de lijst loopt hooguit een kwartier achter.
+- **Alternatieven:** podcasts één keer per uur of per dag lezen; dat bespaart een verzoek per run, maar vraagt een manier om per soort te plannen.
+
+### Een podcast komt niet in de nieuwslijst
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de query voor het nieuws slaat bronnen van het soort podcast over.
+  Podcasts krijgen een eigen blok en een eigen pagina (zie het issue over het tonen, #188).
+- **Waarom:** een aflevering is geen bericht, en het blok heet "Laatste nieuws".
+  Het nieuwsarchief (#26) hergebruikt dezelfde query.
+- **Alternatieven:** de afleveringen tussen het nieuws tonen, met "podcast" erbij; dat maakt één lijst die twee soorten mengt.
+
+### De beschrijving van een podcast is die van de maker
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de beschrijving van een podcast in het register (`sources.description`) is de tekst die de maker zelf in zijn feed zet, letterlijk en zonder de HTML eromheen, met zijn eigen spelling.
+  Zo staat hij in de seed, en zo tonen Onze bronnen en de zijbalk van `/podcasts` hem.
+  - Omroep Abe: "Omroep Abe is de podcast over SC Heerenveen van de Leeuwarder Courant. Clubwatcher Sander de Vries bespreekt met oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost wekelijks de actualiteiten en achtergronden bij de club."
+  - Radio Camataru: "Wekelijkse supporterspodcast over sc Heerenveen!"
+
+  Beschrijvingen van bronnen van een ander soort blijven in eigen woorden (zie _De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen_).
+
+- **Waarom:** de maker publiceert deze tekst in de feed die wij lezen, dus zijn tekst gaat voor onze omschrijving.
+  Het is één alinea over de podcast zelf, geen intro bij een aflevering.
+- **Risico:** het is de tekst van de maker en we hebben er geen aparte toestemming voor gevraagd.
+  Vraagt een maker ons de tekst te veranderen of weg te halen, dan doen we dat zo snel mogelijk.
+  De seed bewaart de tekst; de importer leest hem niet bij elke run, dus een wijziging van de maker komt er pas als iemand de seed bijwerkt.
+- **Alternatieven:** de beschrijving in eigen woorden, zoals eerder bedacht; dat staat verder van wat de maker over zichzelf zegt.
+  Of de beschrijving uit de feed bij elke run overnemen; dat vraagt een lezer voor het kanaal van de feed en overschrijft wat in het register staat.
+
+### `/podcasts` is één lijst met een filter, en de URL's hebben een slug
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `/podcasts` toont alle afleveringen met 25 per pagina, en een filter per podcast via `?podcast=<slug>`.
+  De slug staat in een kolom van `sources`, zodat het adres niet verandert als de naam verandert.
+- **Waarom:** met twee podcasts is een pagina per podcast overbodig, en een filter past bij het filter per bron van het nieuwsarchief.
+  Een adres als `/podcasts?podcast=omroep-abe` blijft werken als we de naam van de podcast aanpassen of er een podcast bijkomt.
+  Een pagina die buiten het bereik valt, geeft 404 en niet een lege lijst.
+- **Alternatieven:** een pagina per podcast, `/podcasts/omroep-abe`.
+  Of de slug uit de naam afleiden in de code; dan verandert het adres mee met de naam.
+
+### Een aflevering linkt naar de maker, een podcast ook naar Apple en Spotify
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de titel van een aflevering linkt naar de pagina van de aflevering bij de maker.
+  Bij een gekozen podcast staan tekstlinks naar de podcast op Apple Podcasts en Spotify, uit het register.
+  Links per aflevering naar die platforms komen er niet.
+- **Waarom:** de feeds geven alleen adressen van de show, niet van afleveringen.
+  Per aflevering zoeken kan alleen bij hun diensten: Apple geeft de laatste 200 afleveringen, en Spotify vraagt een account met sleutel.
+  Elke aflevering zou naar hen gaan.
+  Een adres van de show schrijven we één keer op, en het werkt zonder app.
+  De pagina van de maker blijft de standaard omdat die de maker zelf is (principe 1).
+- **Alternatieven:** alleen de pagina van de maker, zonder platformlinks.
+  Of links per aflevering, met opzoeken bij Apple en Spotify.
+
+### Een slug vergelijken we letter voor letter
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de queries zoeken een podcast op zijn slug zonder de hoofdletters en accenten te negeren (`collate utf8mb4_bin`).
+  De kolom zelf blijft hoofdletterongevoelig en uniek.
+- **Waarom:** de kolom houdt twee slugs die alleen in hoofdletters of accenten verschillen buiten het register.
+  Een adres moet één podcast noemen, dus `?podcast=Omroep-Abe` is een onbekende podcast en geen tweede adres voor Omroep Abe.
+- **Alternatieven:** de collatie van de kolom veranderen in `utf8mb4_bin`; dan staan `omroep-abe` en `Omroep-Abe` allebei in het register.
+  Of de pagina de slug laten toetsen; dan kan een andere query dezelfde fout maken.
+
+### Een aflevering is een nieuwsregel
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** een aflevering wordt getoond met `NewsItem`, met de naam van de podcast als bron.
+  Er komt geen apart component voor een podcastregel.
+- **Waarom:** een aflevering heeft dezelfde onderdelen als een bericht: een titel als link, een bron en een tijd.
+  Een tweede component met dezelfde regel is code die hetzelfde doet.
+  Komt er ooit iets bij dat alleen voor afleveringen geldt, zoals een duur, dan kan er een component bij.
+- **Alternatieven:** een eigen component voor de podcastregel, zoals #20 voorstelde.
+
+### Het blok op de homepage staat in de zijbalk onder het forum
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** het blok "Nieuwste podcasts" toont de vier nieuwste afleveringen van alle podcasts samen, in de zijbalk onder "Nieuwste discussies", met een link naar `/podcasts`.
+- **Waarom:** de hoofdkolom is voor het nieuws, en de zijbalk heeft plaats voor meer blokken naast elkaar.
+  Vier regels past bij het forumblok.
+- **Alternatieven:** het blok boven het forum, of in de hoofdkolom onder het nieuws.
+
+### Het filter is een Navigation, en de paginering verdwijnt bij één pagina
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `Filter` in het designsysteem is een `Navigation` met een klasse van zichzelf, dus een `nav` met een naam, een lijst met links en `aria-current="page"` op de keuze.
+  `Pagination` heeft "Vorige", "Pagina 2 van 9" en "Volgende", en laat een link weg waar geen pagina is.
+  De pagina `/podcasts` toont de paginering alleen als er meer dan één pagina is.
+- **Waarom:** een filter van links heeft dezelfde onderdelen als een menu: dezelfde 44 pixels hoge links, hetzelfde teken voor de huidige keuze en dezelfde naam voor schermlezers.
+  Een tweede component zou dat nabouwen.
+  "Pagina 1 van 1" zonder een link zegt een bezoeker niets.
+- **Alternatieven:** een eigen component met een eigen lijst; dat is dubbel werk.
+  Of een `Select` voor de podcasts; dat vraagt JavaScript of een knop om te verzenden.
+
+### De tijd van een aflevering: de dag in de week, daarna de datum
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** een aflevering van de zeven dagen tot en met vandaag toont de korte dag en de tijd, zoals bij het nieuws: "wo 14:05".
+  Een oudere toont alleen de datum, zoals "16 okt", met het jaar als het niet dit jaar is: "6 okt 2021".
+- **Waarom:** de lijst gaat jaren terug, dus een datum zonder jaar is onduidelijk.
+  Zonder tijd past de datum met het jaar in de smalle kolom van een nieuwsregel; een tijd erbij zou over drie regels breken.
+- **Alternatieven:** de datum en de tijd, zoals bij het nieuws; dat past niet in de kolom met het jaar erbij.
+  Of altijd het jaar; dat is in de week overbodig.
+
+### Een lijst per podcast en pagina staat vijf minuten in het geheugen, na de controle van het adres
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de server bewaart de lijst van elke combinatie van podcast en pagina vijf minuten, met `cacheForKey`.
+  Hij controleert de slug en het paginanummer eerst tegen de lijst van podcasts en het aantal pagina's, en bewaart pas daarna iets.
+- **Waarom:** een bezoeker kan elk adres bedenken, en een bewaarde lijst per adres zou het geheugen van de server vullen.
+  Met de controle vooraf zijn er hooguit zoveel lijsten als er podcasts en pagina's zijn.
+- **Alternatieven:** niet bewaren; dat is een query per bezoek.
+  Of een grens aan het aantal bewaarde lijsten; dat is meer code en laat een bezoeker de goede lijsten uit het geheugen duwen.
+
+### De duur, het seizoen en het nummer van een aflevering tonen we wel
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de import bewaart van een aflevering de duur in hele seconden, het seizoen en het nummer, als de feed ze geeft, en de pagina's tonen ze achter de naam van de podcast: "seizoen 9, aflevering 16 · 37 min".
+  Een seizoen zonder nummer tonen we niet.
+  Het soort aflevering (`itunes:episodeType`: `full`, `trailer` of `bonus`) bewaren we niet.
+  De tabel `items` krijgt drie kolommen die leeg mogen zijn, `duration_seconds`, `season_number` en `episode_number`, met een migratie die de `ETag` en `Last-Modified` van de feeds vergeet, zodat de volgende run elke feed één keer helemaal leest en de bestaande afleveringen de feiten krijgen.
+- **Waarom:** de projecteigenaar vroeg erom: een duur en een nummer zijn feiten over een aflevering en geen inhoud ervan, zoals een datum of een bronnaam, en ze helpen een luisteraar kiezen.
+  Principe 2 gaat over inhoud van een ander, zoals een intro of een foto, en dat blijft weg.
+  Beide feeds geven de duur bij elke aflevering; het nummer staat bij alle 100 van Radio Camataru en bij 151 van de 224 van Omroep Abe.
+  Alle afleveringen in beide feeds zijn `full`, dus dat gegeven zegt niets.
+- **Alternatieven:** niets tonen, zoals #14 besloot; dat laat een nuttig feit liggen.
+  Het soort aflevering ook bewaren; dat zegt pas iets als een podcast een trailer of een extra aflevering plaatst.
+- **Gevolg:** dit gaat tegen een regel uit #14 in ("geen duur"), met goedkeuring van de projecteigenaar.
+  De kolommen komen niet in `items` voor nieuws: een nieuwsfeed geeft ze niet, dus ze blijven leeg.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
@@ -2219,6 +2392,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Wat we van een bron tonen, en de toestemming, staan er niet.
 - **Hoe:** de beschrijving staat in het register, in de kolom `description` van `sources` (hoogstens 300 tekens).
   We schrijven haar zelf, in eigen woorden.
+  Later: de beschrijving van een podcast is de tekst van de maker uit zijn feed (zie _De beschrijving van een podcast is die van de maker_).
   `listEnabledSources` in `@fansite/db/queries` haalt alleen de naam, het domein, de soort en de beschrijving op, dus het beleid en de toestemming komen niet bij een pagina.
 - **Waarom:** bezoekers hoeven niet te lezen wat we wel of niet van een bron tonen; dat zien ze zelf.
   Een korte beschrijving zegt wat de bron is, en dat helpt bij het kiezen.

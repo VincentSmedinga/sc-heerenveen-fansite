@@ -18,7 +18,7 @@ function render(pathname: string) {
 }
 
 describe('SiteNavigation', () => {
-  it('links to the news and the forum, in a navigation named Hoofdmenu', () => {
+  it('links to the news, the podcasts and the forum, in a navigation named Hoofdmenu', () => {
     const html = render('/')
 
     expect(html).toContain('<nav aria-label="Hoofdmenu"')
@@ -26,8 +26,13 @@ describe('SiteNavigation', () => {
       [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
       ['/', 'Nieuws'],
+      ['/podcasts', 'Podcasts'],
       ['https://forum.heerenveen.org', 'Forum'],
     ])
+  })
+
+  it('marks Podcasts as the current page on /podcasts, and nothing else', () => {
+    expect(currentLinks(render('/podcasts'))).toEqual(['Podcasts'])
   })
 
   it('has no link to Onze bronnen: that is in the footer', () => {

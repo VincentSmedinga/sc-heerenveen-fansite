@@ -98,6 +98,31 @@ describe('NewsItem', () => {
     expect(screen.getByText('voor abonnees').closest('p')?.textContent).toBe('Testkrant · voor abonnees')
   })
 
+  it('says nothing more than the source when there are no details, or an empty list of them', () => {
+    const { rerender } = render(<NewsItem {...props} />)
+
+    expect(screen.getByText('Testkrant').closest('p')?.textContent).toBe('Testkrant')
+
+    rerender(<NewsItem {...props} details={[]} />)
+
+    expect(screen.getByText('Testkrant').closest('p')?.textContent).toBe('Testkrant')
+  })
+
+  it('puts each detail after the source, each after a dot that a screen reader skips', () => {
+    const { container } = render(<NewsItem {...props} details={['aflevering 120', '49 min']} />)
+    const meta = container.querySelector('p')
+
+    expect(meta?.textContent).toBe('Testkrant · aflevering 120 · 49 min')
+    expect(meta?.querySelectorAll('[aria-hidden="true"]')).toHaveLength(3)
+    expect(screen.getByText('49 min').tagName).toBe('SPAN')
+  })
+
+  it('puts the details after "voor abonnees"', () => {
+    render(<NewsItem {...props} details={['49 min']} paywalled />)
+
+    expect(screen.getByText('49 min').closest('p')?.textContent).toBe('Testkrant · voor abonnees · 49 min')
+  })
+
   it('puts the source and the paywall in one paragraph under the headline', () => {
     const { container } = render(<NewsItem {...props} paywalled />)
     const body = container.querySelector('.hf-news-item-body')

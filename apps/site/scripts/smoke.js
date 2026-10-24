@@ -382,6 +382,16 @@ await withEmptyDatabase((database) =>
     assert.match(sourcesHtml, /Testkrant/)
     assert.doesNotMatch(sourcesHtml, /Uitgezette testbron/)
 
+    // The podcast page reads the episodes, and the seed has none. A podcast or a page that doesn't exist is a 404.
+    const podcastPage = await fetch(`${origin}/podcasts`)
+    const podcastHtml = await podcastPage.text()
+    assert.equal(podcastPage.status, 200)
+    assert.match(podcastHtml, /<h1[^>]*>Podcasts<\/h1>/)
+    assert.match(podcastHtml, /We hebben nog geen podcastafleveringen gevonden\./)
+    assert.equal((await fetch(`${origin}/podcasts?podcast=bestaat-niet`)).status, 404)
+    assert.equal((await fetch(`${origin}/podcasts?pagina=2`)).status, 404)
+    assert.equal((await fetch(`${origin}/podcasts?pagina=0`)).status, 404)
+
     // Wat is er nieuw shows the versions of the build, newest first, and points feed readers to its feed.
     const whatsNew = await fetch(`${origin}/wat-is-er-nieuw`)
     const whatsNewHtml = await whatsNew.text()
@@ -499,7 +509,15 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   assert.match(homeHtml, /<meta name="robots" content="noindex"\/>/)
   assert.match(homeHtml, /<a href="\/">Probeer het opnieuw<\/a>/)
   assert.doesNotMatch(homeHtml, /Laatste nieuws|Binnenkort meer/)
-  assert.match(log(), /Could not read the headlines and discussions for the homepage: .*ECONNREFUSED/)
+  assert.match(log(), /Could not read the headlines, discussions and episodes for the homepage: .*ECONNREFUSED/)
+
+  const podcasts = await fetch(`${origin}/podcasts?podcast=omroep-abe&pagina=2`)
+  const podcastsHtml = await podcasts.text()
+  assert.equal(podcasts.status, 200)
+  assert.match(podcastsHtml, /<h1[^>]*>Er ging iets mis<\/h1>/)
+  assert.match(podcastsHtml, /<meta name="robots" content="noindex"\/>/)
+  assert.match(podcastsHtml, /<a href="\/podcasts\?podcast=omroep-abe&amp;pagina=2">Probeer het opnieuw<\/a>/)
+  assert.match(log(), /Could not read the episodes for \/podcasts: .*ECONNREFUSED/)
 
   const sources = await fetch(`${origin}/bronnen`)
   const sourcesHtml = await sources.text()

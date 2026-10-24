@@ -9,7 +9,8 @@ import { reasonOf } from '../errors'
 import { forumUrl } from '../forum'
 import { getHeadlines } from '../headlines'
 import { pageMetadata } from '../metadata'
-import { dateTimeOf, formatDiscussionTime, formatNewsTime } from '../news'
+import { dateTimeOf, episodeDetails, formatDiscussionTime, formatEpisodeTime, formatNewsTime } from '../news'
+import { getLatestEpisodes } from '../podcasts'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
 
@@ -17,18 +18,22 @@ import { withBranch } from '../title'
 export const dynamic = 'force-dynamic'
 
 /**
- * The headlines of the last two weeks and the newest discussions of the forum, or undefined when the database can't give them. A
+ * The headlines of the last two weeks, the newest discussions of the forum and the newest podcast episodes, or undefined when the database can't give them. A
  * page that throws gets an empty page with a 500 from Next.js, and the text only after JavaScript runs. So this page
  * catches the error and shows the error page itself, in the HTML. `cache` makes the page and its metadata share one call
  * per request.
  */
 const loadContent = cache(async () => {
   try {
-    const [headlines, discussions] = await Promise.all([getHeadlines(), getDiscussions()])
+    const [headlines, discussions, episodes] = await Promise.all([
+      getHeadlines(),
+      getDiscussions(),
+      getLatestEpisodes(),
+    ])
 
-    return { discussions, headlines }
+    return { discussions, episodes, headlines }
   } catch (error) {
-    console.error(`Could not read the headlines and discussions for the homepage: ${reasonOf(error)}`)
+    console.error(`Could not read the headlines, discussions and episodes for the homepage: ${reasonOf(error)}`)
 
     return undefined
   }
@@ -49,7 +54,7 @@ export default async function HomePage() {
     return <ServerError retryHref="/" />
   }
 
-  const { discussions, headlines } = content
+  const { discussions, episodes, headlines } = content
   const now = new Date()
 
   return (
@@ -86,7 +91,7 @@ export default async function HomePage() {
           Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
         </Text>
       </Page.Main>
-      <Page.Sidebar aria-label="Van het forum">
+      <Page.Sidebar aria-label="Van het forum en de podcasts">
         <Card aria-labelledby="discussions-heading">
           <Heading id="discussions-heading" level={2}>
             Nieuwste discussies
@@ -111,6 +116,32 @@ export default async function HomePage() {
           )}
           <Text>
             <Link href={forumUrl}>Naar het forum</Link>
+          </Text>
+        </Card>
+        <Card aria-labelledby="episodes-heading">
+          <Heading id="episodes-heading" level={2}>
+            Nieuwste podcasts
+          </Heading>
+          {episodes.length === 0 ? (
+            <Text>We hebben nog geen podcastafleveringen gevonden.</Text>
+          ) : (
+            <List role="list">
+              {episodes.map((episode, index) => (
+                <List.Item key={index}>
+                  <NewsItem
+                    dateTime={dateTimeOf(episode.publishedAt)}
+                    details={episodeDetails(episode)}
+                    headline={episode.title}
+                    href={episode.url}
+                    source={episode.sourceName}
+                    time={formatEpisodeTime(episode.publishedAt, now)}
+                  />
+                </List.Item>
+              ))}
+            </List>
+          )}
+          <Text>
+            <Link href="/podcasts">Alle podcasts</Link>
           </Text>
         </Card>
       </Page.Sidebar>

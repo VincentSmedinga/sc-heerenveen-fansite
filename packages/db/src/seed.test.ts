@@ -151,6 +151,71 @@ describe('the seed', () => {
     ])
   })
 
+  it.each([
+    {
+      apple: 'https://podcasts.apple.com/nl/podcast/omroep-abe/id1589027848',
+      description:
+        'Omroep Abe is de podcast over SC Heerenveen van de Leeuwarder Courant. Clubwatcher Sander de Vries bespreekt met oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost wekelijks de actualiteiten en achtergronden bij de club.',
+      domain: 'omny.fm',
+      feed: 'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
+      name: 'Omroep Abe',
+      slug: 'omroep-abe',
+      spotify: 'https://open.spotify.com/show/6agzU3xVFCZIHm4hrvnoHD',
+    },
+    {
+      apple: 'https://podcasts.apple.com/nl/podcast/radio-camataru/id1436580634',
+      description: 'Wekelijkse supporterspodcast over sc Heerenveen!',
+      domain: 'radiocamataru.podbean.com',
+      feed: 'https://feed.podbean.com/radiocamataru/feed.xml',
+      name: 'Radio Camataru',
+      slug: 'radio-camataru',
+      spotify: 'https://open.spotify.com/show/51W3UP2B4H2kBK9Ukyv8et',
+    },
+  ])(
+    'puts $name in the register as a podcast, with its feed and the strictest policy',
+    async ({ apple, description, domain, feed, name, slug, spotify }) => {
+      await seedSources(database.db)
+
+      const [podcast] = await database.db.select().from(sources).where(eq(sources.domain, domain))
+      const podcastFeeds = await database.db
+        .select()
+        .from(feeds)
+        .where(eq(feeds.sourceId, podcast?.id ?? 0))
+
+      expect(podcast).toMatchObject({
+        allowEmbed: false,
+        allowImage: false,
+        applePodcastsUrl: apple,
+        enabled: true,
+        introMaxLength: 0,
+        kind: 'podcast',
+        name,
+        slug,
+        spotifyUrl: spotify,
+      })
+      expect(podcast?.consentStatus).not.toBe('given')
+      // The text of the maker from the channel of the feed, as it is written but without the HTML.
+      expect(podcast?.description).toBe(description)
+      expect(podcast?.description?.length).toBeLessThanOrEqual(300)
+      expect(podcast?.description).not.toMatch(/[<>]/u)
+      expect(podcastFeeds.map((row) => row.url)).toEqual([feed])
+    },
+  )
+
+  it('gives every podcast a slug of its own, in capitals-free words with hyphens, and https addresses', () => {
+    const podcasts = [...testSources, ...realSources].filter((source) => source.kind === 'podcast')
+    const slugs = podcasts.map((source) => source.slug)
+
+    expect(podcasts.length).toBeGreaterThanOrEqual(4)
+    expect(new Set(slugs).size).toBe(slugs.length)
+    for (const podcast of podcasts) {
+      expect(podcast.slug, podcast.name).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u)
+      for (const address of [podcast.applePodcastsUrl, podcast.spotifyUrl]) {
+        expect(address ?? 'https://', podcast.name).toMatch(/^https:\/\//u)
+      }
+    }
+  })
+
   it('holds made-up test sources only, and real sources that are not made up', () => {
     for (const source of testSources) {
       expect(source.domain, source.name).toMatch(/\.test$/)

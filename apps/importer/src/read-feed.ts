@@ -7,15 +7,22 @@ import { parseFeed } from 'feedsmith'
 
 /**
  * What the importer keeps of a news item, and nothing more. An intro, an image, an author or a category is not here:
- * no source has given permission for it yet (editorial principle 2), so we do not even read it.
+ * no source has given permission for it yet (editorial principle 2), so we do not even read it. A podcast episode also
+ * gets three facts that are no content: its duration, its season and its number, which are null when the feed has none.
  */
 export type FeedItem = {
+  /** The duration of a podcast episode in whole seconds, from 1 second to 24 hours, or null. */
+  durationSeconds: null | number
+  /** The number of a podcast episode, a positive whole number up to 99999, or null. */
+  episodeNumber: null | number
   /** The GUID of the item, or its link when it has none. Unique within a source. */
   key: string
   /** Whether the source marks the item as behind a paywall. */
   paywalled: boolean
   /** The time of publication, or null when the feed gives no valid one. */
   publishedAt: Date | null
+  /** The season of a podcast episode, a positive whole number up to 99999, or null. */
+  seasonNumber: null | number
   /** The headline as text. */
   title: string
   /** The link, always `http` or `https`. */
@@ -42,14 +49,23 @@ export type SkippedItem = {
 
 /** An item as the feed gives it, before we clean it. Every field can be missing. */
 type RawItem = {
+  duration?: number | undefined
+  episode?: number | undefined
   guid?: string | undefined
   link?: string | undefined
   paywalled?: boolean | undefined
+  season?: number | undefined
   time?: string | undefined
   title?: string | undefined
 }
 
 const dayInMs = 24 * 60 * 60 * 1000
+
+/** An episode longer than this is a mistake in the feed. */
+const maxDurationSeconds = dayInMs / 1000
+
+/** The highest season or episode number we keep. Above it, the feed has made a mistake. */
+const maxNumber = 99_999
 
 /** Nothing we import is older than this. A time before it is a mistake in the feed. */
 const earliestTime = Date.UTC(1990, 0, 1)
@@ -208,7 +224,16 @@ function cleanItem(raw: RawItem, now: Date): FeedItem | { reason: string } {
     return { reason: `the key is longer than ${itemLimits.key} characters` }
   }
 
-  return { key, paywalled: raw.paywalled === true, publishedAt: parseTime(raw.time, now), title, url: link.href }
+  return {
+    durationSeconds: wholeNumber(raw.duration, maxDurationSeconds),
+    episodeNumber: wholeNumber(raw.episode, maxNumber),
+    key,
+    paywalled: raw.paywalled === true,
+    publishedAt: parseTime(raw.time, now),
+    seasonNumber: wholeNumber(raw.season, maxNumber),
+    title,
+    url: link.href,
+  }
 }
 
 /** Gets the text of a response as the response says it is encoded; UTF-8 when it says nothing we know. */
@@ -324,7 +349,15 @@ function rssItems(feed: Rss.Feed<string>, text: string, paywallCategory: string 
   const paywalled = paywallCategory === undefined ? paywalledKeys(text) : new Set<string>()
 
   return (feed.items ?? []).map((item) => {
-    const candidate = { guid: item.guid?.value, link: item.link, time: item.pubDate, title: item.title }
+    const candidate = {
+      duration: item.itunes?.duration,
+      episode: item.itunes?.episode,
+      guid: item.guid?.value,
+      link: item.link,
+      season: item.itunes?.season,
+      time: item.pubDate,
+      title: item.title,
+    }
 
     return {
       ...candidate,
@@ -338,4 +371,12 @@ function rssItems(feed: Rss.Feed<string>, text: string, paywallCategory: string 
 
 function stringOrUndefined(value: unknown) {
   return typeof value === 'string' ? value : undefined
+}
+
+/**
+ * A fact about an episode, as a positive whole number up to `max`, or null for anything else: a missing value, zero, a
+ * fraction, a negative number or a number that is too large. feedsmith has already turned `HH:MM:SS` into seconds.
+ */
+function wholeNumber(value: number | undefined, max: number): null | number {
+  return Number.isInteger(value) && value !== undefined && value >= 1 && value <= max ? value : null
 }
