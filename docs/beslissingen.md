@@ -77,6 +77,41 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een andere copyleft-licentie, zoals de AGPL-3.0; die is vergelijkbaar, maar heeft geen officiële Nederlandse tekst.
   Voor de teksten CC BY-SA 4.0; dat zijn twee licenties in plaats van één.
 
+### De toegankelijkheidsverklaring is vrijwillig
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** we publiceren een toegankelijkheidsverklaring op `/toegankelijkheid` en zeggen er in één zin bij dat ze vrijwillig is.
+- **Waarom:** voor overheden is ze verplicht.
+  Voor bedrijven geldt de Europese toegankelijkheidswet (EAA, sinds 28 juni 2025) alleen voor bepaalde diensten aan consumenten, en een microbedrijf is voor diensten uitgezonderd.
+  Wij zijn een vrijwilligersproject zonder winst, zonder verkoop en zonder een van die diensten, dus nemen we aan dat ze voor ons niet verplicht is.
+  Een jurist heeft dat niet getoetst; het is onze inschatting van 24 oktober 2026.
+  De verklaring laat bezoekers zien wat we doen en wat nog niet goed is, en past bij hoe we met hen omgaan.
+- **Alternatieven:** het laten toetsen door een jurist voordat de pagina live gaat; dat is zekerder, maar voegt een stap toe aan de poort voor de lancering (#34).
+  Of geen verklaring, zoals #25 nog zei; dan weet een bezoeker niet wat hij kan verwachten of bij wie hij terecht kan.
+
+### We beloven alleen wat een mens heeft nagekeken: "we streven naar"
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de verklaring zegt dat we streven naar WCAG 2.2, niveau AA, en noemt wat nog niet door een mens is nagekeken.
+  Pas na de ronde van een mens (#25) zeggen we meer, met de datum en wat is nagekeken.
+- **Waarom:** de automatische controle van axe vindt een deel van de problemen, en de checklist loopt per wijziging langs wat we zelf kunnen zien.
+  Het toetsenbord, de schermlezer, inzoomen en tekstafstand beoordeelt pas de ronde van #25.
+  Zeggen dat de site voldoet, terwijl dat niemand nakeek, is een belofte die we niet kunnen waarmaken.
+- **Alternatieven:** "de site voldoet" vanaf de lancering; dan moet #187 op #25 wachten en kan het niet nu.
+  Of een belofte van volledige naleving met een plan van aanpak, zoals het model van de overheid; dat vraagt een volledig onderzoek, en dat doen we niet voor een vrijwillige verklaring.
+
+### Een korte pagina met vier delen, een eigen pagina en een reactie "zo snel mogelijk"
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de verklaring is een eigen pagina van hoogstens 200 woorden, met vier delen: wat we beloven, wat nog niet goed is, hoe je ons bereikt en wanneer we het nakeken.
+  De footer linkt ernaar.
+  Een melding pakken we zo snel mogelijk op, naar hetzelfde mailadres als een verwijderverzoek (#24), zonder instantie voor klachten.
+- **Waarom:** een lange verklaring leest niemand, en juist voor wie hulpmiddelen gebruikt, is een korte tekst met koppen het prettigst.
+  Een eigen pagina met een link in de footer is overal te vinden en past bij wat we met Over ons en privacy doen.
+  "Zo snel mogelijk" is een belofte die vrijwilligers kunnen houden; een termijn in dagen niet zonder redacteuren (#40).
+- **Alternatieven:** een onderdeel van Over ons, met een vast anker zoals privacy; dat maakt die pagina langer.
+  Of een reactie binnen twee weken; dat is duidelijker voor de bezoeker, maar iemand moet het waarmaken.
+
 ## Werkwijze
 
 ### Drie rollen voor AI-agents
