@@ -128,7 +128,7 @@ export const realSources = [
   },
   {
     description:
-      'Wekelijkse podcast van de Leeuwarder Courant over sc Heerenveen. Een clubwatcher bespreekt met oud-spelers de actualiteit en de achtergronden bij de club.',
+      'De podcast van de Leeuwarder Courant over sc Heerenveen. Elke week praat clubwatcher Sander de Vries met de oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost over wat er speelt bij de club.',
     domain: 'omny.fm',
     feeds: [
       'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
