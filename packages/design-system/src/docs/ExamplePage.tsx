@@ -6,6 +6,7 @@ import { List } from '../components/list/List'
 import { Logo } from '../components/logo/Logo'
 import { Navigation } from '../components/navigation/Navigation'
 import { Page } from '../components/page/Page'
+import { SegmentedControl } from '../components/segmented-control/SegmentedControl'
 import { Text } from '../components/text/Text'
 
 const menuItems = [
@@ -41,13 +42,22 @@ export const exampleFooterMenu = [
 ]
 
 /**
- * The footer with "Alle koppen en links op één plek." and "Voor supporters door supporters.", a paragraph each, and the
- * links about the site, as on the site.
+ * The footer with "Alle koppen en links op één plek." and "Voor supporters door supporters.", a paragraph each, the theme
+ * toggle (here a static one) and the links about the site, as on the site.
  */
 export const ExampleFooter = () => (
   <Page.Footer>
     <Text appearance="meta">Alle koppen en links op één plek.</Text>
     <Text appearance="meta">Voor supporters door supporters.</Text>
+    <SegmentedControl
+      label="Thema"
+      onChange={() => undefined}
+      options={[
+        { label: 'Licht', value: 'light' },
+        { label: 'Donker', value: 'dark' },
+      ]}
+      value="light"
+    />
     <Navigation items={exampleFooterMenu} label="Over de site" />
   </Page.Footer>
 )

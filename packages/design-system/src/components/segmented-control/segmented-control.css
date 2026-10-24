@@ -1,0 +1,42 @@
+/*
+ * A segmented control: buttons side by side, one of them pressed. It builds on the base button, which is at least 44px
+ * high and filled. Here a button is an outline, in the colour of the text around it, and the pressed one is filled like
+ * a button, so it shows without colour. In forced-colours mode the system colours replace the fill, so the pressed button
+ * is underlined as well.
+ */
+
+@layer hf.components {
+  .hf-segmented-control {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    > button {
+      background-color: transparent;
+      border-color: currentcolor;
+      color: inherit;
+
+      &:hover {
+        background-color: transparent;
+        border-color: currentcolor;
+        color: var(--hf-colour-text-default);
+      }
+
+      &[aria-pressed='true'] {
+        background-color: var(--hf-colour-background-button);
+        border-color: var(--hf-colour-background-button);
+        color: var(--hf-colour-text-on-button);
+
+        &:hover {
+          background-color: var(--hf-colour-background-button-hover);
+          border-color: var(--hf-colour-background-button-hover);
+          color: var(--hf-colour-text-on-button);
+        }
+
+        @media (forced-colors: active) {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

@@ -35,4 +35,4 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 - **Andere attributen:** die gaan door naar de `html`, zoals `data-theme="dark"` om een thema te kiezen.
 - **De `head`:** `Root` heeft er geen plek voor.
   Next.js beheert de `head`, met de Metadata API.
-  Een `Head`-component naast `Body` komt pas als er extra inhoud in de `head` nodig is.
+  Is er een script nodig dat vóór de eerste weergave draait, zoals dat van het thema, dan zet je `Head` naast `Body`.

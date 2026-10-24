@@ -1674,6 +1674,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de gedeelde regel in elk van de drie bestanden herhalen; of klassen (`hf-input`) en de regels naar `hf.components` verplaatsen.
   Dan is de ruwe `input` zonder component niet meer opgemaakt, en dat is de bedoeling van `base/` niet.
 
+### Een SegmentedControl bewaart niets, en de ingedrukte knop is gevuld
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `SegmentedControl` is een groep knoppen met een naam, waarvan er één `aria-pressed` is. De ingedrukte knop is gevuld als een gewone knop, de andere is een omlijning in de kleur van de tekst eromheen. Het component bewaart niets: de pagina geeft de waarde en handelt `onChange` af, ook als de ingedrukte knop wordt gekozen.
+- **Waarom:** een schakelaar voor licht en donker (#208) is een keuze uit twee opties die meteen werkt. De groep en `aria-pressed` zeggen een schermlezer welke is gekozen, en het verschil tussen gevuld en omlijnd zegt het de ogen zonder kleur. Wat er met de keuze gebeurt, zoals bewaren, is aan de pagina, dus het component blijft klein en bruikbaar voor andere keuzes. In de footer staat de omlijning in de kleur van de footertekst, dus het contrast is dat van de tekst (4,5:1) in licht en donker.
+- **Alternatieven:** een eigen component voor alleen het thema, met de opslag erin; dat bindt een knoppenrij aan één functie. Of keuzerondjes (`radio`) in een `fieldset`; dat is meer opmaak voor twee opties en leest een schermlezer minder kort voor. Of één knop die naar het andere thema schakelt; dan zegt de knop niet welk thema je ziet.
+
+### Head zet één script vóór de eerste weergave in de head
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** het designsysteem heeft een component `Head` met één eigenschap, `script`: het adres van een script van de site dat als gewoon script in de `head` staat, zonder `async` of `defer`. `Root` blijft de `html`. Alle andere inhoud van de `head` komt van Next.js, uit de Metadata API.
+- **Waarom:** het script dat het gekozen thema op de pagina zet (#208) moet klaar zijn voordat de pagina getekend wordt, anders flitst ze in het verkeerde thema. De sjablonen van de site mogen geen HTML bevatten (_Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem_), en _De namen van de paginacomponenten volgen NL Design System_ zegt dat een `Head` komt als er extra inhoud in de `head` nodig is.
+- **Alternatieven:** `next/script` met `strategy="beforeInteractive"`. Dat zet alleen een `preload` in de `head`, en het script zelf start Next.js pas als de app laadt (we lazen het in de gebouwde HTML), dus de pagina flitst al. Of een inline script; dat past in de CSP, maar de code staat dan in een tekst in een component en niet in een bestand dat een test kan lezen. Of een eigenschap `head` op `Root`; dat maakt `Root` groter terwijl `Head` er al naast hoort te staan.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -1930,6 +1944,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de footerlink weghalen en alleen in Over ons verwijzen; dan is de privacytekst minder vindbaar.
   Of een omleiding voor `#privacy`; dat kan niet, want een server ziet het deel na de `#` niet.
 - **Later:** zie _Eén korte pagina Over ons, met het bronnenbeleid en de privacyverklaring_ (22 oktober 2026): daarvan blijven Over ons en het bronnenbeleid, en vervalt het onderdeel privacy op die pagina.
+
+### Licht of donker: twee knoppen, drie toestanden, en een keuze gelijk aan het systeem wordt vergeten
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de footer heeft een schakelaar met twee knoppen, Licht en Donker, in een groep met de naam "Thema". De knop van het thema dat je ziet is ingedrukt. Achter de knoppen staan drie toestanden: `system`, `light` en `dark`. Is het ingedrukte thema wat het systeem al geeft, dan vergeet de pagina de keuze en volgt hij het systeem. Dat gebeurt alleen als een knop wordt ingedrukt, nooit als het systeem verandert. Zonder JavaScript staat de schakelaar er niet.
+- **Waarom:** twee van de drie knoppen van "Systeem, Licht, Donker" zien er meestal hetzelfde uit, en een knop die niets lijkt te doen, is verwarrend. Zo is het systeem nooit buiten bereik, en blijft een keuze die toevallig gelijk wordt aan het systeem (een telefoon die donker wordt) staan. We volgen de aanpak van Lea Verou, [Dark mode toggles: two states are enough](https://lea.verou.me/blog/2026/dark-mode-toggles-two-states-are-enough/), en die van een eerder project van de projecteigenaar. Een knop die zonder JavaScript niets doet, is erger dan geen knop.
+- **Alternatieven:** drie knoppen, zoals dat eerdere project eerst had. Of één knop die naar het tegenovergestelde schakelt; die zegt minder duidelijk welk thema je ziet. Of geen schakelaar, want het systeem beslist al; dat laat wie de site donker wil op een licht apparaat in de kou staan.
+
+### De keuze staat in `localStorage`, en `data-theme` staat alleen op `html` als er een keuze is
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de keuze staat in `localStorage` onder de sleutel `fansite-theme`, alleen als de bezoeker iets anders koos dan het systeem. `public/theme.js`, een script in de `head` (via `Head`), zet `data-theme` op `html` vóór de eerste weergave, en alleen als er een keuze is. Zonder keuze en zonder JavaScript volgt de CSS het systeem. `src/theme.ts` neemt het over zodra de pagina geladen is. De sleutel en de regel in het script en in de module moeten gelijk blijven; de tests lezen ze allebei.
+- **Hoe:** `html` heeft `suppressHydrationWarning`, omdat het script het attribuut zet voordat React start. De schakelaar toont niets op de server en tijdens het hydrateren, dus de HTML is voor iedereen gelijk en de pagina's blijven cachebaar. De `theme-color` van de browser volgt het thema dat de bezoeker ziet: bij een keuze krijgen beide tags de kleur van de header, en bij het systeem komen de tags van de server terug. De privacyverklaring noemt de opslag.
+- **Waarom:** geen cookie, dus geen toestemming en niets naar de server, en een pagina die voor iedereen gelijk is, blijft te cachen. Het attribuut alleen zetten bij een keuze laat het gedrag voor wie niets koos gelijk aan dat van nu, en laat het script weinig beslissen.
+- **Gecontroleerd:** een e2e-test blokkeert de scripts van de app en ziet dat `public/theme.js` alleen al `data-theme` zet, en dat de keuze na vernieuwen blijft. axe slaagt met een keuze die afwijkt van het systeem, in beide richtingen.
+- **Alternatieven:** een functioneel cookie; dat laat de server het goede thema meteen tonen zonder script, maar maakt elke pagina per bezoeker anders en vraagt de privacyverklaring bij te werken (een vraag van #149). Of `data-theme` altijd zetten; dat laat het script meer beslissen en vraagt dat het script en de pagina's elkaar overal gelijk houden.
+
+### De site test componenten met jsdom en Testing Library
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `apps/site` heeft `jsdom`, `@testing-library/dom` en `@testing-library/react` als devDependencies, in dezelfde exacte versies als het designsysteem. Een test die een DOM nodig heeft, zet bovenaan `// @vitest-environment jsdom`; de andere tests blijven in Node.
+- **Waarom:** de schakelaar werkt met `localStorage`, `matchMedia` en `document`, en alleen een DOM laat zien dat een knop de keuze bewaart en dat de pagina het volgt. Het zijn geen nieuwe pakketten in de werkruimte, dus de lockfile kreeg alleen regels voor de site erbij.
+- **Alternatieven:** de logica van de schakelaar in het designsysteem testen, waar jsdom al staat; dan staat de opslag in een component dat niets mag bewaren. Of alleen `renderToStaticMarkup`, zoals de andere tests van de site; dat ziet geen klik.
 
 ## Importer
 

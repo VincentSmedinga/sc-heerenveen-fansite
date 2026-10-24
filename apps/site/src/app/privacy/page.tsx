@@ -27,6 +27,11 @@ export default function PrivacyPage() {
           daarvoor, bewaren ze niet langer dan nodig en geven ze aan niemand.
         </Text>
         <Text>
+          Kies je Licht of Donker in de footer, dan bewaart je browser die keuze, alleen op dit apparaat. Wij zien hem
+          niet. Je haalt hem weg door de knop te kiezen die je systeem al geeft, of door de gegevens van de site in je
+          browser te wissen.
+        </Text>
+        <Text>
           Klik je door naar een medium of naar ons forum, dan verlaat je deze site. Voor wat die sites met je gegevens
           doen, gelden hun eigen regels.
         </Text>
