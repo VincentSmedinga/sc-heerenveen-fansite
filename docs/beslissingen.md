@@ -927,6 +927,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de HTML-elementen hebben deze kleuren nodig.
   Alle tekst haalt ermee AA, lopende tekst AAA.
 - **Uit het canvas overgenomen:** tekst in de header blauw-50 en het menu blauw-200, tekst op de wedstrijdband blauw-100, en de gemarkeerde rij in blauw-100 met blauw-800 (licht) en blauw-800 met blauw-50 (donker).
+- **Later:** zie _Alleen koppen laten zien dat je ze al hebt geopend_ (24 oktober 2026): de kleur voor bezocht staat hier voor elke link; nu geldt hij alleen voor de koppen.
 
 ### Staal voor markeringen
 
@@ -2507,6 +2508,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de CSS als tekst in de code zetten, zoals `CHANGELOG.md`: Turbopack geeft dat voor CSS-bestanden een foutmelding.
 - **Hoe:** `next.config.ts` leest `colour.css` bij de bouw (`src/header-colour.ts` zoekt de rol en de twee schalen) en zet de twee kleuren in de code met `env`, want de server heeft dat bestand niet.
   Het script voor de iconen en `vitest.config.ts` lezen hetzelfde bestand op dezelfde manier.
+
+### Alleen koppen laten zien dat je ze al hebt geopend
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** alleen de kop van een nieuwsbericht en de titel van een discussie krijgen het grijs voor bezocht.
+  Elke andere link ziet er bezocht hetzelfde uit als onbezocht.
+- **Waarom:** de berichten en de discussies veranderen de hele dag, en een bezoeker wil zien wat hij al heeft geopend.
+  Links naar vaste pagina's, zoals "Naar het forum", "Alle podcasts", het menu en de links in tekst, gaan naar pagina's die je vaker bezoekt, en "je was hier al" zegt daar weinig.
+  Een link blijft verschillen van lopende tekst door de onderstreping.
+- **Alternatieven:** het grijs voor alle links laten staan, zoals nu.
+  Of alleen de kop van een nieuwsbericht; dan krijgen de titels in "Nieuwste discussies" het niet.
+- **Hoe:** `link.css` zet geen kleur meer voor `:visited`.
+  `news-item.css` en `discussion-item.css` zetten die wel, als `&:visited:not(:hover)`.
+  Die regel staat in de laag voor componenten en wint daarmee van de hover in de basisstijl, dus de `:not(:hover)` laat de kop onder de muis de kleur voor hover houden, ook als hij bezocht is.
+  De overschrijvingen van het token in `page.css` (de header en de footer) zijn weg.
+  Het token `--hf-colour-text-link-visited` blijft, met een nieuwe omschrijving.
+  Titels van podcastafleveringen krijgen het grijs bij hun eigen component, zodra dat er is.
 
 ### Onze bronnen staat in de footer, als Bronnen
 
