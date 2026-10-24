@@ -1,0 +1,50 @@
+/*
+ * The label that comes down while a visitor pulls the page to refresh it. The page stops the browser's own pull to
+ * refresh while the site runs as an app, so there is only one.
+ */
+
+@layer hf.components {
+  /* Not Baseline widely available yet. Without it, a browser with a pull to refresh of its own may fire both. */
+  @supports (overscroll-behavior-y: contain) {
+    :root[data-pull-to-refresh] {
+      overscroll-behavior-y: contain;
+    }
+  }
+
+  /*
+   * Fixed to the top of the screen, below the status bar of an app. It comes down with the finger: the further the pull,
+   * the lower and the clearer it is. The border keeps it apart from the header, which is as dark as the button in light. It never takes a touch, so it can't get in the way of the pull.
+   */
+  .hf-pull-indicator {
+    background-color: var(--hf-colour-background-button);
+    border: 2px solid var(--hf-colour-text-on-button);
+    border-radius: 1.5rem;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-on-button);
+    font-size: var(--hf-meta-font-size);
+    inline-size: max-content;
+    inset-block-start: calc(env(safe-area-inset-top, 0px) + 0.5rem);
+    inset-inline-start: 50%;
+    line-height: var(--hf-meta-line-height);
+    max-inline-size: calc(100% - 2rem);
+    opacity: var(--hf-pull-progress);
+    padding: 0.5rem 1rem;
+    pointer-events: none;
+    position: fixed;
+    text-align: center;
+    transform: translate(-50%, calc(var(--hf-pull-progress) * 1.5rem - 1.5rem));
+    z-index: 1;
+  }
+
+  /* With less motion the label stays in place and appears once letting go will refresh. */
+  @media (prefers-reduced-motion: reduce) {
+    .hf-pull-indicator {
+      opacity: 0;
+      transform: translate(-50%, 0);
+    }
+
+    .hf-pull-indicator[data-ready] {
+      opacity: 1;
+    }
+  }
+}

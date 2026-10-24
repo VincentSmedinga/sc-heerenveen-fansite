@@ -2795,3 +2795,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De oude naam blijft staan in de eerdere beslissingen hierboven en in de geschiedenis van `CHANGELOG.md`.
 
 > > > > > > > 294b8327550a074b03905a3961113e84cae14f8d
+
+### Omlaag trekken ververst de pagina, alleen in de app op het beginscherm
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** als de site draait als app op het beginscherm (`display-mode: standalone`, of `navigator.standalone` op een iPhone), laadt omlaag trekken bovenaan de pagina de pagina opnieuw (`location.reload()`).
+  Een klein label bovenaan het scherm (`PullIndicator`) zegt "Trek omlaag om te verversen", dan "Loslaten om te verversen" na 80 pixels, en "Bezig met verversen" na het loslaten.
+  `PullToRefresh` in het designsysteem doet het, en staat in de layout.
+  In een browsertabblad, met het toetsenbord en zonder JavaScript verandert er niets.
+- **Waarom:** in een app op het beginscherm is er geen verversknop in de browser, en een iPhone kent daar ook geen pull to refresh.
+  De bezoeker kon het nieuws dus niet verversen zonder de app te sluiten.
+  In een tabblad heeft de browser een eigen knop, dus daar voegt het niets toe.
+- **Alternatieven:** een zichtbare verversknop in de pagina; dat verandert wat bezoekers zien en past niet bij een kleine wijziging.
+  `router.refresh()` in plaats van een volledige herlading; dat voelt zachter, maar de bezoeker ziet dan niet of er iets gebeurt, en een herlading is zeker.
+  Ook in een tabblad werken; daar botst het met de eigen verversing van Chrome en Safari.
+- **Hoe:** de beweging is een touch-gebaar op `document` met alleen passieve luisteraars, dus de pagina scrolt en veert zoals altijd.
+  Het begint niet als de pagina niet bovenaan staat, bij een tweede vinger, in een veld, in een element dat opzij scrolt of omlaag gescrold is (een brede tabel), en als de vinger eerst omhoog of opzij gaat.
+  Touch-events zijn niet Baseline en worden dat niet (desktop-Safari heeft ze niet); pointer-events zijn het wel, maar een browser breekt die af (`pointercancel`) zodra hij gaat scrollen, en het trekken begint als scrollen.
+  Daarom staat bovenaan `pullGesture.ts` een `eslint-disable` met die reden.
+  In de app zet het component ook `overscroll-behavior-y: contain` op `html` (via het attribuut `data-pull-to-refresh`, binnen `@supports` omdat de eigenschap nog niet 'widely available' is).
+  Chrome op Android heeft in een geïnstalleerde app een eigen pull to refresh; die gaat zo niet óók af.
+  Zonder JavaScript zet niets dat attribuut, dus dan houdt de browser zijn eigen gedrag.
+- **Toegankelijkheid:** het label is `aria-hidden`.
+  Het is een hint voor een vinger op het scherm; een schermlezer ziet het gebaar niet, en leest de pagina die daarna laadt zelf voor.
+  Met minder beweging komt het label niet omlaag: het blijft staan en verschijnt zodra loslaten ververst.
+- **Open:** wie de app met een schermlezer of een toetsenbord bedient, heeft in de app nog geen manier om te verversen.
+  Een knop die pas bij focus verschijnt, zoals de link naar de inhoud, lost dat op; die vraagt een besluit van de projecteigenaar, want hij verandert wat bezoekers zien.
