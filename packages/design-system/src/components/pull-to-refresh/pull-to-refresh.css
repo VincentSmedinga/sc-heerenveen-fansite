@@ -47,4 +47,34 @@
       opacity: 1;
     }
   }
+
+  /*
+   * The button for a visitor who can't pull. Without focus it is hidden from the eye, as a skip link is, but not from a
+   * screen reader. With focus it sits fixed in the top corner, below the status bar of an app. Nothing else has focus
+   * then, so it covers no element with focus. The border keeps it apart from the header, which is as dark as the button
+   * in light.
+   */
+  .hf-refresh-button {
+    border: 2px solid var(--hf-colour-text-on-button);
+    inset-block-start: calc(env(safe-area-inset-top, 0px) + 0.5rem);
+    inset-inline-start: 0.5rem;
+    position: fixed;
+    z-index: 2;
+
+    &:not(:focus) {
+      block-size: 1px;
+      border: 0;
+      clip-path: inset(50%);
+      inline-size: 1px;
+      min-block-size: 0;
+      min-inline-size: 0;
+      overflow: hidden;
+      padding: 0;
+      white-space: nowrap;
+    }
+
+    &:focus-visible {
+      outline-color: var(--hf-colour-focus-on-header);
+    }
+  }
 }

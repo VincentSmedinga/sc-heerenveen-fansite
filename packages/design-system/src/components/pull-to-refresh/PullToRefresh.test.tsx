@@ -1,9 +1,14 @@
-import { act, render } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { pullDistance } from './pullGesture'
 import { PullIndicator } from './PullIndicator'
 import { PullToRefresh } from './PullToRefresh'
+
+/** The text of the indicator, or null when there is none. */
+function indicator(container: HTMLElement) {
+  return container.querySelector('.hf-pull-indicator')?.textContent ?? null
+}
 
 function standalone(matches: boolean) {
   vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches }))
@@ -60,11 +65,22 @@ describe('PullToRefresh', () => {
     reload.mockReset()
   })
 
-  it('shows nothing until a visitor pulls', () => {
+  it('shows no indicator until a visitor pulls', () => {
     standalone(true)
     const { container } = render(<PullToRefresh />)
 
-    expect(container.innerHTML).toBe('')
+    expect(container.querySelector('.hf-pull-indicator')).toBeNull()
+  })
+
+  it('has a button that reloads the page, for a visitor who can not pull, as the first thing in the app', () => {
+    standalone(true)
+    const { container } = render(<PullToRefresh />)
+
+    expect(container.firstElementChild).toBe(screen.getByRole('button', { name: 'Pagina verversen' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Pagina verversen' }))
+
+    expect(reload).toHaveBeenCalledTimes(1)
   })
 
   it('shows the indicator while pulling and reloads the page on letting go past the distance', () => {
@@ -73,14 +89,14 @@ describe('PullToRefresh', () => {
 
     touch('touchstart', 100)
     touch('touchmove', 100 + pullDistance / 2)
-    expect(container.textContent).toBe('Trek omlaag om te verversen')
+    expect(indicator(container)).toBe('Trek omlaag om te verversen')
 
     touch('touchmove', 100 + pullDistance)
-    expect(container.textContent).toBe('Loslaten om te verversen')
+    expect(indicator(container)).toBe('Loslaten om te verversen')
 
     touch('touchend', 0)
     expect(reload).toHaveBeenCalledTimes(1)
-    expect(container.textContent).toBe('Bezig met verversen')
+    expect(indicator(container)).toBe('Bezig met verversen')
   })
 
   it('takes the indicator away when the pull ends too early', () => {
@@ -89,10 +105,10 @@ describe('PullToRefresh', () => {
 
     touch('touchstart', 100)
     touch('touchmove', 130)
-    expect(container.textContent).not.toBe('')
+    expect(indicator(container)).not.toBeNull()
 
     touch('touchend', 0)
-    expect(container.innerHTML).toBe('')
+    expect(indicator(container)).toBeNull()
     expect(reload).not.toHaveBeenCalled()
   })
 
@@ -115,6 +131,7 @@ describe('PullToRefresh', () => {
     touch('touchend', 0)
 
     expect(container.innerHTML).toBe('')
+    expect(screen.queryByRole('button', { name: 'Pagina verversen' })).toBeNull()
     expect(reload).not.toHaveBeenCalled()
     expect(document.documentElement.hasAttribute('data-pull-to-refresh')).toBe(false)
   })

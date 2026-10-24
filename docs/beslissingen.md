@@ -2802,11 +2802,11 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** als de site draait als app op het beginscherm (`display-mode: standalone`, of `navigator.standalone` op een iPhone), laadt omlaag trekken bovenaan de pagina de pagina opnieuw (`location.reload()`).
   Een klein label bovenaan het scherm (`PullIndicator`) zegt "Trek omlaag om te verversen", dan "Loslaten om te verversen" na 80 pixels, en "Bezig met verversen" na het loslaten.
   `PullToRefresh` in het designsysteem doet het, en staat in de layout.
-  In een browsertabblad, met het toetsenbord en zonder JavaScript verandert er niets.
+  In een browsertabblad en zonder JavaScript verandert er niets.
 - **Waarom:** in een app op het beginscherm is er geen verversknop in de browser, en een iPhone kent daar ook geen pull to refresh.
   De bezoeker kon het nieuws dus niet verversen zonder de app te sluiten.
   In een tabblad heeft de browser een eigen knop, dus daar voegt het niets toe.
-- **Alternatieven:** een zichtbare verversknop in de pagina; dat verandert wat bezoekers zien en past niet bij een kleine wijziging.
+- **Alternatieven:** een verversknop die altijd zichtbaar is; dat verandert wat alle bezoekers zien.
   `router.refresh()` in plaats van een volledige herlading; dat voelt zachter, maar de bezoeker ziet dan niet of er iets gebeurt, en een herlading is zeker.
   Ook in een tabblad werken; daar botst het met de eigen verversing van Chrome en Safari.
 - **Hoe:** de beweging is een touch-gebaar op `document` met alleen passieve luisteraars, dus de pagina scrolt en veert zoals altijd.
@@ -2819,5 +2819,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Toegankelijkheid:** het label is `aria-hidden`.
   Het is een hint voor een vinger op het scherm; een schermlezer ziet het gebaar niet, en leest de pagina die daarna laadt zelf voor.
   Met minder beweging komt het label niet omlaag: het blijft staan en verschijnt zodra loslaten ververst.
-- **Open:** wie de app met een schermlezer of een toetsenbord bedient, heeft in de app nog geen manier om te verversen.
-  Een knop die pas bij focus verschijnt, zoals de link naar de inhoud, lost dat op; die vraagt een besluit van de projecteigenaar, want hij verandert wat bezoekers zien.
+- **Een knop voor wie niet kan trekken:** in de app staat ook een knop "Pagina verversen" (`RefreshButton`), die hetzelfde doet als het gebaar.
+  Een gebaar mag nooit de enige manier zijn (WCAG 2.1.1 en 2.5.1), en in de app is er geen verversknop van de browser.
+  De knop komt als eerste in de volgorde van Tab, vóór de kop.
+  Hij is onzichtbaar tot hij focus heeft, zoals een link om naar de inhoud te springen, en blijft voor een schermlezer te vinden.
+  Met focus staat hij vast bovenaan het scherm, onder de statusbalk van de app.
+  Dan heeft niets anders focus, dus hij bedekt geen element met focus (2.4.11).
+  Hij staat alleen in de app: in een tabblad heeft de browser een eigen knop, en zonder JavaScript is er niets.
+  De site heeft nog geen link om naar de inhoud te springen; als die komt, staat de knop erna.
+  Dit was een open punt van de eerste versie; de projecteigenaar koos de knop boven een regel in de toegankelijkheidsverklaring.
+  De verklaring zegt niets over verversen en blijft daarom zoals ze is.
+- **Gecontroleerd en niet gecontroleerd:** in Chromium met de emulatie van een Pixel 7, met echte aanraakinvoer en toetsenbordinvoer, en de modus 'app' nagebootst.
+  Niet op een iPhone, in de iOS Simulator of in een echte app op het beginscherm; of VoiceOver de knop als eerste leest, moet de projecteigenaar daar nakijken.
