@@ -51,7 +51,7 @@ describe('the page Toegankelijkheid', () => {
   })
 
   it('aims for WCAG 2.2 AA and leaves out the sites of others', () => {
-    expect(html).toContain('We streven naar WCAG 2.2, niveau AA.')
+    expect(html).toContain('<p class="hf-intro"><b>We streven naar WCAG 2.2, niveau AA.')
     expect(html).toContain('niet van ons')
     expect(html).not.toMatch(/voldoet/)
   })

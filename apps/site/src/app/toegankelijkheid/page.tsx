@@ -22,7 +22,7 @@ export default function AccessibilityPage() {
       <Page.Cell>
         <Heading level={1}>Toegankelijkheid</Heading>
         <Heading level={2}>Wat we beloven</Heading>
-        <Text>
+        <Text appearance="intro">
           We streven naar WCAG 2.2, niveau AA. De sites waar onze koppen naartoe linken, de artikelen van de bronnen en
           het forum zijn niet van ons. Ze vallen niet onder deze verklaring.
         </Text>
