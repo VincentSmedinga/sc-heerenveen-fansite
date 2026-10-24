@@ -87,7 +87,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Voor bedrijven geldt de Europese toegankelijkheidswet (EAA, sinds 28 juni 2025) alleen voor bepaalde diensten aan consumenten, en een microbedrijf is voor diensten uitgezonderd.
   Wij zijn een vrijwilligersproject zonder winst, zonder verkoop en zonder een van die diensten, dus nemen we aan dat ze voor ons niet verplicht is.
   Een jurist heeft dat niet getoetst; het is onze inschatting van 24 oktober 2026.
-  De verklaring laat bezoekers zien wat we doen en wat nog niet goed is, en past bij hoe we met hen omgaan.
+  De verklaring laat bezoekers zien wat we doen voor toegankelijkheid en hoe ze ons een probleem melden, en past bij hoe we met hen omgaan.
 - **Alternatieven:** het laten toetsen door een jurist voordat de pagina live gaat; dat is zekerder, maar voegt een stap toe aan de poort voor de lancering (#34).
   Of geen verklaring, zoals #25 nog zei; dan weet een bezoeker niet wat hij kan verwachten of bij wie hij terecht kan.
 
