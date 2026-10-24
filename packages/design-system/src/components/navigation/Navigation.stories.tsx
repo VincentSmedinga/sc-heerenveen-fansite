@@ -61,18 +61,6 @@ export const NewsInHeaderDark = meta.story({
   render: inHeader('Nieuws'),
 })
 
-export const SourcesInHeaderLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'In de header: Onze bronnen, licht',
-  render: inHeader('Onze bronnen'),
-})
-
-export const SourcesInHeaderDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'In de header: Onze bronnen, donker',
-  render: inHeader('Onze bronnen'),
-})
-
 export const ForumInHeaderLight = meta.story({
   globals: { theme: 'light' },
   name: 'In de header: Forum, licht',

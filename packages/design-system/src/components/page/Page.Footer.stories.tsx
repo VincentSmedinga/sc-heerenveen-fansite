@@ -23,7 +23,7 @@ const meta = preview.meta({
           '',
           'De inhoud zet je zelf neer: twee regels tekst, elk in een eigen `Text`, en dan de links over de site.',
           'Op de site zijn dat "Alle koppen en links op één plek." en "Voor supporters door supporters.".',
-          'De links, zoals Over ons, Privacy en Wat is er nieuw, staan in een `Navigation` met de naam "Over de site".',
+          'De links, zoals Over ons, Bronnen, Privacy en Wat is er nieuw, staan in een `Navigation` met de naam "Over de site".',
           'Op een breed scherm staan ze rechts naast de twee regels, in het midden; op een smal scherm staan ze eronder.',
         ].join('\n'),
       },
