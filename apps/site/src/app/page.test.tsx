@@ -159,6 +159,20 @@ describe('the homepage', () => {
     )
   })
 
+  it('shows the date and the time for an item from before the last seven days, and the weekday for the six days before today', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue([
+      { ...headlines[0]!, publishedAt: new Date('2026-10-17T07:30:00Z') },
+      { ...headlines[1]!, publishedAt: new Date('2026-10-16T12:05:00Z') },
+      { ...headlines[2]!, publishedAt: new Date('2026-10-10T21:59:00Z') },
+    ])
+
+    const html = await render()
+
+    expect(html).toContain('dateTime="2026-10-17T07:30:00.000Z">za 09:30</time>')
+    expect(html).toContain('dateTime="2026-10-16T12:05:00.000Z">16 okt 14:05</time>')
+    expect(html).toContain('dateTime="2026-10-10T21:59:00.000Z">10 okt 23:59</time>')
+  })
+
   it('puts "voor abonnees" in text with an item behind the paywall, and with no other item', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
@@ -229,13 +243,13 @@ describe('the homepage', () => {
     expect(html).not.toContain('Binnenkort meer')
   })
 
-  it('tells visitors there is no news this week, without a heading for a day', async () => {
+  it('tells visitors there is no news in the two weeks, without a heading for a day', async () => {
     vi.mocked(getHeadlines).mockResolvedValue([])
 
     const html = await renderMain()
 
     expect(html).toContain('<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>')
-    expect(html).toContain('<p>We hebben deze week nog geen nieuws gevonden. Kijk straks nog eens.</p>')
+    expect(html).toContain('<p>We hebben de afgelopen twee weken nog geen nieuws gevonden. Kijk straks nog eens.</p>')
     expect(html.match(/<section/g)).toHaveLength(1)
     expect(html).not.toContain('<h3')
     expect(html).not.toContain('<ul')
@@ -348,7 +362,7 @@ describe('the discussions in the sidebar of the homepage', () => {
 
     const html = await render()
 
-    expect(html).toContain('We hebben deze week nog geen nieuws gevonden.')
+    expect(html).toContain('We hebben de afgelopen twee weken nog geen nieuws gevonden.')
     expect(html).toContain('Wie wint er zondag?')
   })
 })
@@ -369,7 +383,7 @@ describe('the homepage when the database can not be read', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
     expect(html).toContain('<a href="/">Probeer het opnieuw</a>')
     expect(html).not.toContain('Laatste nieuws')
-    expect(html).not.toContain('We hebben deze week nog geen nieuws gevonden')
+    expect(html).not.toContain('We hebben de afgelopen twee weken nog geen nieuws gevonden')
   })
 
   it('titles the page Er ging iets mis and keeps it out of the search engines', async () => {

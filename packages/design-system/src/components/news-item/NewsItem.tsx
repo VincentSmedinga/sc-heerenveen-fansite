@@ -17,7 +17,7 @@ export type NewsItemProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
   paywalled?: boolean
   /** The name of the source, as it wants to be credited. */
   source: string
-  /** The short day and the time as a visitor reads them, such as `wo 14:05`. */
+  /** The short day and the time, or the date and the time, as a visitor reads them: `wo 14:05` or `14 okt 14:05`. */
   time: string
 }
 
@@ -51,13 +51,15 @@ const externalLinkIcon = (
 )
 
 /**
- * A line of news from another source. On the left the short day and the time, in red. Next to it the headline as a link
- * to the item at the source, and under it the name of the source with an icon for a link to another site and, if the item
- * is behind a paywall, "voor abonnees". The headline is not underlined, except under the mouse and with the focus of the
- * keyboard. There is no intro and no image: we only show those with the permission of the source (editorial principles
- * 1 and 2). In a line narrower than 24rem the day and the time are above the headline, chosen with a container query in
- * news-item.css; the order in the HTML is the same. The outer div is the container, and the layout div inside it is the
- * grid. news-item.css gives it its look, and draws the lines between the lines of a List.
+ * A line of news from another source. On the left the short day and the time, or the date and the time, in red. The
+ * column has one width, so the headlines start in the same place on every line, and a date and a time break onto two
+ * lines in it. Next to it the headline as a link to the item at the source, and under it the name of the source with an
+ * icon for a link to another site and, if the item is behind a paywall, "voor abonnees". The headline is not
+ * underlined, except under the mouse and with the focus of the keyboard. There is no intro and no image: we only show
+ * those with the permission of the source (editorial principles 1 and 2). In a line narrower than 24rem the day and the
+ * time are above the headline, chosen with a container query in news-item.css; the order in the HTML is the same. The
+ * outer div is the container, and the layout div inside it is the grid. news-item.css gives it its look, and draws the
+ * lines between the lines of a List.
  */
 export const NewsItem = ({ className, dateTime, headline, href, paywalled, source, time, ...props }: NewsItemProps) => (
   <div {...props} className={classNames('hf-news-item', className)}>

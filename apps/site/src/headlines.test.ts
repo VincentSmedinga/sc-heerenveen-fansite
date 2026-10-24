@@ -26,14 +26,14 @@ afterEach(() => {
 })
 
 describe('getHeadlines', () => {
-  it('asks the query for the week that starts at the first moment of the Dutch day six days ago, up to now', async () => {
+  it('asks the query for the news that starts at the first moment of the Dutch day thirteen days ago, up to now', async () => {
     await (
       await loadHeadlines()
     )()
 
     expect(listRecentItems).toHaveBeenCalledExactlyOnceWith(
       db,
-      new Date('2026-10-15T22:00:00.000Z'),
+      new Date('2026-10-08T22:00:00.000Z'),
       new Date('2026-10-22T12:30:00.000Z'),
     )
   })
@@ -56,13 +56,13 @@ describe('getHeadlines', () => {
     expect(listRecentItems).toHaveBeenCalledTimes(1)
   })
 
-  it('asks again after five minutes, for the week as it is by then', async () => {
+  it('asks again after five minutes, for the two weeks as they are by then', async () => {
     // 23:58 on Thursday 22 October in the Netherlands.
     vi.setSystemTime(new Date('2026-10-22T21:58:00Z'))
     const getHeadlines = await loadHeadlines()
 
     await getHeadlines()
-    // Six minutes later it is just after midnight: a new day, so a new start of the week.
+    // Six minutes later it is just after midnight: a new day, so a new start of the two weeks.
     vi.advanceTimersByTime(6 * minute)
     await getHeadlines()
 
@@ -70,13 +70,13 @@ describe('getHeadlines', () => {
     expect(listRecentItems).toHaveBeenNthCalledWith(
       1,
       db,
-      new Date('2026-10-15T22:00:00.000Z'),
+      new Date('2026-10-08T22:00:00.000Z'),
       new Date('2026-10-22T21:58:00.000Z'),
     )
     expect(listRecentItems).toHaveBeenNthCalledWith(
       2,
       db,
-      new Date('2026-10-16T22:00:00.000Z'),
+      new Date('2026-10-09T22:00:00.000Z'),
       new Date('2026-10-22T22:04:00.000Z'),
     )
   })

@@ -25,6 +25,15 @@
     > :last-child {
       margin-block-end: 0;
     }
+
+    /*
+     * A list straight under the heading of the card gets more room than text does: its items are lines of their own, and
+     * with the space of a paragraph the first one sits too close to the heading. The margins of the heading and the list
+     * collapse, so the larger of the two is the space.
+     */
+    > :is(h1, h2, h3, h4, h5, h6) + :is(ul, ol, dl) {
+      margin-block-start: 1.25rem;
+    }
   }
 
   .hf-card-strong {

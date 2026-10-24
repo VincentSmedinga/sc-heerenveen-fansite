@@ -12,10 +12,11 @@ type Row = { domain: string; hoursAgo: number; paywalled?: boolean; source: stri
  * test and takes them out after the last one.
  *
  * They are in the form of real headlines, on the made-up test sources of the seed. The times are counted back from the
- * moment the check starts, so they are always in the week the homepage shows.
+ * moment the check starts, so they are always in the two weeks the homepage shows. The first seven are from the last
+ * six days and show a weekday; the last three are older and show a date.
  */
-export const headlines: { insideTheWeek: Row[] } = {
-  insideTheWeek: [
+export const headlines: { insideTheTwoWeeks: Row[] } = {
+  insideTheTwoWeeks: [
     {
       domain: 'testkrant.test',
       hoursAgo: 1,
@@ -61,13 +62,33 @@ export const headlines: { insideTheWeek: Row[] } = {
       source: 'Voorbeeldkrant, met dank aan de redactie',
       title: 'Wedstrijdbespreking: ‘OnvoorstelbaarbijzonderevoetbalprestatiesvandejongeverdedigingsliniebijTestclub’',
     },
+    {
+      domain: 'proefnieuws.test',
+      hoursAgo: 192,
+      source: 'Proefnieuws',
+      title: 'Voorbeschouwing: dit moet Heerenveen op bezoek bij Testclub laten zien',
+    },
+    {
+      domain: 'testkrant.test',
+      hoursAgo: 264,
+      paywalled: true,
+      source: 'Testkrant',
+      title: 'Nieuwe keeper tekent tot 2029: ‘Ik wil hier iets moois neerzetten’',
+    },
+    {
+      domain: 'voorbeeldkrant.test',
+      hoursAgo: 300,
+      source: 'Voorbeeldkrant, met dank aan de redactie',
+      title:
+        'Terugblik op een bewogen week bij Heerenveen, met een nieuwe aanvaller, een geblesseerde captain en een stadion dat uitverkocht raakt',
+    },
   ],
 }
 
 /** The feeds of the made-up items. A feed that the importer would read must not outlast the check, so it is easy to recognise. */
 const feedPath = '/e2e-a11y/rss/'
 
-const rows: Row[] = headlines.insideTheWeek
+const rows: Row[] = headlines.insideTheTwoWeeks
 
 /**
  * Puts the made-up headlines in the database and returns the function that takes them out again. The site must have

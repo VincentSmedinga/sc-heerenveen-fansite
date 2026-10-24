@@ -34,6 +34,7 @@ const meta = preview.meta({
         component: [
           'Een kaart zet een blok van de pagina op een eigen vlak, met een rand en ronde hoeken.',
           'Zo staat elk blok los op de pagina, en dat geeft de pagina rust en richting.',
+          'Staat er direct onder de kop een lijst, dan is de ruimte daartussen groter dan bij tekst, zodat de eerste regel van de lijst niet tegen de kop zit.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
