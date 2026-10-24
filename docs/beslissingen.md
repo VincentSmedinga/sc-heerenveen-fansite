@@ -2339,7 +2339,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 ### De duur, het seizoen en het nummer van een aflevering tonen we wel
 
-- **Datum:** 25 oktober 2026
+- **Datum:** 24 oktober 2026
 - **Besluit:** de import bewaart van een aflevering de duur in hele seconden, het seizoen en het nummer, als de feed ze geeft, en de pagina's tonen ze achter de naam van de podcast: "seizoen 9, aflevering 16 · 37 min".
   Een seizoen zonder nummer tonen we niet.
   Het soort aflevering (`itunes:episodeType`: `full`, `trailer` of `bonus`) bewaren we niet.
