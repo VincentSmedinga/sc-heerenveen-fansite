@@ -1,7 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import RootLayout from './layout'
+import { headerColour } from '../colours'
+import RootLayout, { metadata, viewport } from './layout'
 
 vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
 
@@ -51,7 +52,7 @@ describe('the title of the layout', () => {
   }
 
   it('shows the branch of pnpm review in the dev server, in the title and in a meta tag for the error page', async () => {
-    expect(await metadataWith('development')).toEqual({
+    expect(await metadataWith('development')).toMatchObject({
       other: { 'review-branch': 'feat/125-pnpm-review' },
       title: {
         default: 'feat/125-pnpm-review · sc Heerenveen Fansite',
@@ -61,8 +62,35 @@ describe('the title of the layout', () => {
   })
 
   it('never shows it in a build, whatever REVIEW_BRANCH holds', async () => {
-    expect(await metadataWith('production')).toEqual({
+    const metadata = await metadataWith('production')
+
+    expect(metadata).toMatchObject({
       title: { default: 'sc Heerenveen Fansite', template: '%s – sc Heerenveen Fansite' },
     })
+    expect(metadata).not.toHaveProperty('other')
+  })
+})
+
+describe('the icons of the layout', () => {
+  it('points to the icon as an SVG, to favicon.ico, and to the icon for the home screen of an iPhone, all on our own server', () => {
+    expect(metadata.icons).toEqual({
+      apple: { sizes: '180x180', type: 'image/png', url: '/apple-touch-icon.png' },
+      icon: [
+        { type: 'image/svg+xml', url: '/icon.svg' },
+        { sizes: '16x16 32x32 48x48', type: 'image/x-icon', url: '/favicon.ico' },
+      ],
+    })
+  })
+
+  it('names the site Fansite under the icon on an iPhone', () => {
+    expect(metadata.appleWebApp).toEqual({ title: 'Fansite' })
+  })
+
+  it('colours the bars of the browser with the header of the site, in light and in dark', () => {
+    expect(viewport.themeColor).toEqual([
+      { color: headerColour.light, media: '(prefers-color-scheme: light)' },
+      { color: headerColour.dark, media: '(prefers-color-scheme: dark)' },
+    ])
+    expect(headerColour.dark).not.toBe(headerColour.light)
   })
 })

@@ -25,6 +25,7 @@ Next.js leest alleen een `.env` in deze map, dus `next.config.ts` laadt de `.env
 | `pnpm --filter site assemble <nieuwe map>` | Zet de standalone build en de statische bestanden in één map, zonder symbolische links |
 | `pnpm --filter site smoke <map>`           | Start die map en controleert wat een bezoeker en een zoekmachine krijgen               |
 | `pnpm --filter site share-image`           | Maakt `public/share-image.png` opnieuw, de afbeelding bij het delen van links          |
+| `pnpm --filter site icons`                 | Maakt de iconen in `public` opnieuw uit de vector van het designsysteem                |
 | `pnpm test:a11y`                           | Toetst de pagina's van de gebouwde site met axe (zie _Toegankelijkheid controleren_)   |
 
 De rooktest heeft een MariaDB nodig, zoals de tests van `@fansite/db`: `docker compose up -d --wait`.
@@ -149,3 +150,23 @@ De afbeelding bij het delen van links is `public/share-image.png`, het schild va
 `pnpm --filter site share-image` maakt hem opnieuw met Playwright; we doen dat alleen als het logo verandert.
 
 Hoe de acceptatieomgeving op de hosting staat, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
+
+## Icoon en manifest
+
+De site is installeerbaar: een bezoeker kan hem als app op een computer zetten of op het beginscherm van een telefoon.
+Er is geen service worker, dus de site werkt niet offline (zie `docs/beslissingen.md`).
+Het manifest is `src/app/manifest.ts`, dat Next.js op `/manifest.webmanifest` zet.
+De iconen en de `theme-color` staan in `src/app/layout.tsx`.
+
+De bron van het icoon is `packages/design-system/src/assets/icon.svg`: het schild met een groot pompeblêd, gemaakt voor kleine formaten.
+`pnpm --filter site icons` maakt er de bestanden in `public` van, met het Chromium van Playwright en zonder dependency van zichzelf:
+
+- `icon.svg`, een kopie voor het tabblad;
+- `favicon.ico`, met PNG's van 16, 32 en 48 pixels, voor browsers en zoekmachines die er zelf om vragen;
+- `icon-192.png` en `icon-512.png`, transparant, voor het manifest;
+- `apple-touch-icon.png` (180 bij 180 pixels) en `icon-maskable-512.png`, het schild op een vlak van het donkerblauw van de kop.
+
+Het donkerblauw komt uit het token `--hf-colour-background-header` in `colour.css` van het designsysteem.
+`next.config.ts` leest het bij de bouw (zie `src/header-colour.ts`), en het script voor de iconen leest hetzelfde bestand.
+Draai het script alleen opnieuw als de vector of dat token verandert, en zet de nieuwe bestanden in de repository.
+`src/icons.test.ts` controleert de afmetingen en de transparantie, en dat het vlak de kleur van het token heeft.
