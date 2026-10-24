@@ -31,7 +31,7 @@ function onlyPodcast(slug: string) {
 /** The podcasts for the filter: those that are switched on and have an episode. */
 const getPodcasts = cacheFor(fiveMinutes, () => listPodcasts(getDatabase().db))
 
-/** The addresses of a podcast at Apple Podcasts and Spotify. The key is the slug of a podcast in the filter. */
+/** The description and the addresses of a podcast at Apple Podcasts and Spotify. The key is the slug of a podcast in the filter. */
 const getLinks = cacheForKey(fiveMinutes, (slug) => findPodcast(getDatabase().db, slug))
 
 /** The number of episodes of all podcasts, or of one. The key is the slug, or an empty text for all. */
@@ -57,8 +57,9 @@ export type PodcastPage = {
   pageCount: number
   /** The podcasts for the filter. */
   podcasts: PublicPodcast[]
-  /** The podcast that is chosen, with its addresses, or undefined for all podcasts. */
-  selected: undefined | { applePodcastsUrl: null | string; name: string; spotifyUrl: null | string }
+  /** The podcast that is chosen, with its description and its addresses, or undefined for all podcasts. */
+  selected:
+    undefined | { applePodcastsUrl: null | string; description: null | string; name: string; spotifyUrl: null | string }
 }
 
 /**

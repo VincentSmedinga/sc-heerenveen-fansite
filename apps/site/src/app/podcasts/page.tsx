@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { Card, Filter, Heading, Link, List, NewsItem, Page, Pagination, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
-import { cache, Fragment } from 'react'
+import { cache } from 'react'
 
 import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
@@ -107,59 +107,72 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
         ].filter((platform): platform is { href: string; name: string } => platform.href !== null)
 
   return (
-    <Page.Main
-      intro={
-        <>
-          <Heading level={1}>Podcasts</Heading>
-          <Filter items={filter} label="Podcasts filteren" />
-          {selected !== undefined && platforms.length > 0 && (
-            <Text>
-              Luister ook op{' '}
-              {platforms.map((platform, index) => (
-                <Fragment key={platform.name}>
-                  {index > 0 && ' of '}
-                  <Link href={platform.href}>
-                    <Text as="span" className="hf-visually-hidden">
-                      {selected.name} op{' '}
-                    </Text>
-                    {platform.name}
-                  </Link>
-                </Fragment>
+    <>
+      <Page.Main
+        intro={
+          <>
+            <Heading level={1}>Podcasts</Heading>
+            <Filter items={filter} label="Podcasts filteren" />
+          </>
+        }
+      >
+        <Card as="div">
+          {episodes.length === 0 ? (
+            <Text>We hebben nog geen podcastafleveringen gevonden.</Text>
+          ) : (
+            <List role="list">
+              {episodes.map((episode, index) => (
+                <List.Item key={index}>
+                  <NewsItem
+                    dateTime={dateTimeOf(episode.publishedAt)}
+                    headline={episode.title}
+                    href={episode.url}
+                    source={episode.sourceName}
+                    time={formatEpisodeTime(episode.publishedAt, now)}
+                  />
+                </List.Item>
               ))}
-            </Text>
+            </List>
           )}
-        </>
-      }
-    >
-      <Card as="div">
-        {episodes.length === 0 ? (
-          <Text>We hebben nog geen podcastafleveringen gevonden.</Text>
-        ) : (
-          <List role="list">
-            {episodes.map((episode, index) => (
-              <List.Item key={index}>
-                <NewsItem
-                  dateTime={dateTimeOf(episode.publishedAt)}
-                  headline={episode.title}
-                  href={episode.url}
-                  source={episode.sourceName}
-                  time={formatEpisodeTime(episode.publishedAt, now)}
-                />
-              </List.Item>
-            ))}
-          </List>
-        )}
-        {pageCount > 1 && (
-          <Pagination
-            current={page}
-            label="Paginering"
-            nextHref={page < pageCount ? podcastsHref(podcast, page + 1) : undefined}
-            previousHref={page > 1 ? podcastsHref(podcast, page - 1) : undefined}
-            total={pageCount}
-          />
-        )}
-      </Card>
-    </Page.Main>
+          {pageCount > 1 && (
+            <Pagination
+              current={page}
+              label="Paginering"
+              nextHref={page < pageCount ? podcastsHref(podcast, page + 1) : undefined}
+              previousHref={page > 1 ? podcastsHref(podcast, page - 1) : undefined}
+              total={pageCount}
+            />
+          )}
+        </Card>
+      </Page.Main>
+      {selected !== undefined && (
+        <Page.Sidebar aria-label={`Over ${selected.name}`}>
+          <Card aria-labelledby="about-heading" surface="soft">
+            <Heading id="about-heading" level={2}>
+              Over {selected.name}
+            </Heading>
+            {selected.description !== null && selected.description !== '' && <Text>{selected.description}</Text>}
+            {platforms.length > 0 && (
+              <>
+                <Text>Luister ook op</Text>
+                <List role="list">
+                  {platforms.map((platform) => (
+                    <List.Item key={platform.name}>
+                      <Link href={platform.href}>
+                        <Text as="span" className="hf-visually-hidden">
+                          {selected.name} op{' '}
+                        </Text>
+                        {platform.name}
+                      </Link>
+                    </List.Item>
+                  ))}
+                </List>
+              </>
+            )}
+          </Card>
+        </Page.Sidebar>
+      )}
+    </>
   )
 }
 

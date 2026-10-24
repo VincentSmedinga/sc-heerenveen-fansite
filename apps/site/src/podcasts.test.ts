@@ -20,6 +20,7 @@ const podcasts = [
 
 const links = {
   applePodcastsUrl: 'https://podcasts.apple.com/nl/podcast/omroep-abe/id1',
+  description: 'De podcast van de Leeuwarder Courant over sc Heerenveen.',
   name: 'Omroep Abe',
   slug: 'omroep-abe',
   spotifyUrl: null,

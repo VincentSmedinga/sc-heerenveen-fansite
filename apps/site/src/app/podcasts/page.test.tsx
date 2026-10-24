@@ -37,6 +37,7 @@ const everything: Content = { episodes, pageCount: 1, podcasts, selected: undefi
 
 const bothAddresses = {
   applePodcastsUrl: 'https://podcasts.apple.com/nl/podcast/omroep-abe/id1',
+  description: 'De podcast van de Leeuwarder Courant over sc Heerenveen.',
   name: 'Omroep Abe',
   spotifyUrl: 'https://open.spotify.com/show/abc',
 }
@@ -134,42 +135,114 @@ describe('the page Podcasts', () => {
   })
 })
 
-describe('the line with the addresses of the podcast', () => {
-  it('has a text link for each address of the chosen podcast, named after the podcast', async () => {
+describe('the card about the podcast in the sidebar', () => {
+  /** The sidebar alone, or an empty text when the page has none. */
+  const sidebarOf = (html: string) => (html.includes('<aside') ? html.slice(html.indexOf('<aside')) : '')
+
+  it('is a card on a tonal surface in the sidebar, named by its h2 "Over" and the name of the podcast', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
 
     const html = await render({ podcast: 'omroep-abe' })
 
-    expect(html).toContain(
-      '<p>Luister ook op <a href="https://podcasts.apple.com/nl/podcast/omroep-abe/id1"><span class="hf-visually-hidden">Omroep Abe op </span>Apple Podcasts</a> of <a href="https://open.spotify.com/show/abc"><span class="hf-visually-hidden">Omroep Abe op </span>Spotify</a></p>',
+    expect(html.match(/<aside/g)).toHaveLength(1)
+    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(sidebarOf(html)).toMatch(
+      /^<aside class="hf-page-sidebar" aria-label="Over Omroep Abe"><section class="hf-card hf-card-soft" aria-labelledby="about-heading"><h2 class="hf-heading-2" id="about-heading">Over Omroep Abe<\/h2>/,
     )
-    expect(html).not.toContain('target=')
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
+      '<h1 class="hf-heading-1">Podcasts</h1>',
+      '<h2 class="hf-heading-2" id="about-heading">Over Omroep Abe</h2>',
+    ])
   })
 
-  it('has one link and no "of" when the podcast has one address', async () => {
+  it('has the description of the podcast from the register, as text, before the links', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({
+      ...everything,
+      selected: { ...bothAddresses, description: 'Elke week & <b>vet</b> gepraat.' },
+    })
+
+    const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
+
+    expect(sidebar).toContain('<p>Elke week &amp; &lt;b&gt;vet&lt;/b&gt; gepraat.</p>')
+    expect(sidebar).not.toContain('<b>')
+    expect(sidebar.indexOf('gepraat')).toBeLessThan(sidebar.indexOf('Luister ook op'))
+  })
+
+  it('has "Luister ook op" and a list with a text link for each address, named after the podcast', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
+
+    const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
+
+    expect(sidebar).toContain(
+      '<p>Luister ook op</p><ul role="list"><li><a href="https://podcasts.apple.com/nl/podcast/omroep-abe/id1"><span class="hf-visually-hidden">Omroep Abe op </span>Apple Podcasts</a></li><li><a href="https://open.spotify.com/show/abc"><span class="hf-visually-hidden">Omroep Abe op </span>Spotify</a></li></ul>',
+    )
+    expect(sidebar).not.toContain('target=')
+  })
+
+  it('has one item when the podcast has one address', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({
       ...everything,
       selected: { ...bothAddresses, spotifyUrl: null },
     })
 
-    const html = await render({ podcast: 'omroep-abe' })
+    const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
 
-    expect(html).toContain('Luister ook op <a href="https://podcasts.apple.com/nl/podcast/omroep-abe/id1">')
-    expect(html).not.toContain('Spotify')
-    expect(html).not.toContain(' of ')
+    expect(sidebar.match(/<li>/g)).toHaveLength(1)
+    expect(sidebar).toContain('Apple Podcasts')
+    expect(sidebar).not.toContain('Spotify')
   })
 
-  it('is not there when the podcast has no address', async () => {
+  it('has the description alone when the podcast has no address: no line and no list', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({
       ...everything,
-      selected: { applePodcastsUrl: null, name: 'Omroep Abe', spotifyUrl: null },
+      selected: { ...bothAddresses, applePodcastsUrl: null, spotifyUrl: null },
     })
 
-    expect(await render({ podcast: 'omroep-abe' })).not.toContain('Luister ook')
+    const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
+
+    expect(sidebar).toContain('De podcast van de Leeuwarder Courant over sc Heerenveen.')
+    expect(sidebar).not.toContain('Luister ook op')
+    expect(sidebar).not.toContain('<ul')
   })
 
-  it('is not there for all podcasts', async () => {
-    expect(await render()).not.toContain('Luister ook')
+  it('has the addresses alone when the podcast has no description', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({
+      ...everything,
+      selected: { ...bothAddresses, description: null },
+    })
+
+    const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
+
+    expect(sidebar).toContain('Luister ook op')
+    expect(sidebar.match(/<p>/g)).toHaveLength(1)
+  })
+
+  it('has only the h2 when the podcast has no description and no address', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({
+      ...everything,
+      selected: { applePodcastsUrl: null, description: '', name: 'Omroep Abe', spotifyUrl: null },
+    })
+
+    const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
+
+    expect(sidebar).toContain('Over Omroep Abe')
+    expect(sidebar).not.toContain('<p>')
+  })
+
+  it('is not there for all podcasts, and the line "Luister ook op" is no longer under the h1', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('Luister ook')
+  })
+
+  it('does not put the line under the h1 either when a podcast is chosen', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
+
+    const html = await render({ podcast: 'omroep-abe' })
+    const main = html.slice(0, html.indexOf('</main>'))
+
+    expect(main).not.toContain('Luister ook')
   })
 })
 

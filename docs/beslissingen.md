@@ -2287,6 +2287,17 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de collatie van de kolom veranderen in `utf8mb4_bin`; dan staan `omroep-abe` en `Omroep-Abe` allebei in het register.
   Of de pagina de slug laten toetsen; dan kan een andere query dezelfde fout maken.
 
+### De beschrijving van een podcast komt uit het register, niet uit de feed
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de zijbalk van een gekozen podcast toont `sources.description`, die we zelf in eigen woorden schrijven en die ook op Onze bronnen staat.
+  We nemen de beschrijving uit de feed of van Apple Podcasts niet over en bewaren haar niet.
+- **Waarom:** die tekst is van de maker.
+  Een beschrijving of intro tonen we alleen met toestemming (principe 2), en de importer bewaart niets wat we niet mogen tonen (_De importer bewaart alleen wat we mogen tonen_).
+  Eén tekst in het register is genoeg voor beide pagina's en kan met het beheer (#31) worden aangepast.
+- **Alternatieven:** de `description` van de feed bewaren en tonen; dat vraagt toestemming en een kolom.
+  Of de tekst alleen op Onze bronnen houden.
+
 ### Een aflevering is een nieuwsregel
 
 - **Datum:** 24 oktober 2026

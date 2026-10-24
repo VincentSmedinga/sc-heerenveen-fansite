@@ -110,7 +110,10 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 Een aflevering van deze week heeft de korte dag en de tijd, zoals "wo 14:05"; een oudere heeft de datum, met het jaar als dat niet dit jaar is, want de lijst gaat jaren terug.
 Boven de lijst staat het filter (`Filter` uit het designsysteem): "Alle podcasts" en een link per podcast met afleveringen, als `/podcasts?podcast=omroep-abe`.
 De slug komt uit de kolom `slug` van `sources`, dus een andere naam verandert het adres niet.
-Bij een gekozen podcast staat eronder "Luister ook op Apple Podcasts of Spotify", met een tekstlink per adres dat de podcast in het register heeft.
+Bij een gekozen podcast staat in de zijbalk een kaart op een tonaal vlak (`Card` met `surface="soft"`) met de kop "Over Omroep Abe", de beschrijving van de podcast uit het register (`sources.description`, in onze eigen woorden, dezelfde tekst als op Onze bronnen), en daarna "Luister ook op" met een lijst met een tekstlink per adres dat de podcast heeft.
+Heeft de podcast geen adressen, dan staat de beschrijving er alleen.
+Bij "Alle podcasts" staat er geen kaart.
+Op een smal scherm staat de zijbalk onder de lijst, zoals bij de andere pagina's.
 Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/podcasts?pagina=2`, en met een filter `/podcasts?podcast=omroep-abe&pagina=2`.
 Een podcast die niet in het filter staat, en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
 Een parameter die de pagina niet kent, telt niet mee.
