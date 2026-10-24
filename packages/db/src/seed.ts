@@ -83,8 +83,12 @@ export const testSources = [
 
 /**
  * The real sources, with the feeds we read. They get the strictest policy, because none has given permission yet: only
- * the headline, the link and the name. The descriptions are in our own words. `docs/bronnen.md` says which news sources
+ * the headline, the link and the name. The descriptions of news sources are in our own words; the description of a podcast is the text its maker puts in the
+ * channel of its feed, as it is written but without the HTML (see `docs/beslissingen.md`). `docs/bronnen.md` says which sources
  * belong here and why.
+ *
+ * A podcast is a source of kind podcast: the importer reads its feed like a news feed, and an episode is an item whose
+ * link is the page of the episode. The enclosure, the MP3 file, is never read.
  *
  * The forum's "feed" is the list of discussions of its API, which the importer reads as a guest (see `read-forum.ts`).
  */
@@ -122,6 +126,23 @@ export const realSources = [
     ],
     kind: 'forum',
     name: 'sc Heerenveen Forum',
+  },
+  {
+    description:
+      'Omroep Abe is de podcast over SC Heerenveen van de Leeuwarder Courant. Clubwatcher Sander de Vries bespreekt met oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost wekelijks de actualiteiten en achtergronden bij de club.',
+    domain: 'omny.fm',
+    feeds: [
+      'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
+    ],
+    kind: 'podcast',
+    name: 'Omroep Abe',
+  },
+  {
+    description: 'Wekelijkse supporterspodcast over sc Heerenveen!',
+    domain: 'radiocamataru.podbean.com',
+    feeds: ['https://feed.podbean.com/radiocamataru/feed.xml'],
+    kind: 'podcast',
+    name: 'Radio Camataru',
   },
 ] satisfies (NewSource & { feeds: string[] })[]
 

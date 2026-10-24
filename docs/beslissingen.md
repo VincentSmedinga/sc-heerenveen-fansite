@@ -2180,6 +2180,78 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een eigen opdracht voor het forum, met een eigen lock en logboek; dat zijn twee plekken om te bewaken.
   Of de discussies bijwerken en oude weghalen op id; dat is meer code, en een titel die het forum wijzigt zou dan niet vanzelf vervangen worden.
 
+### Een podcast is een bron, en een aflevering is een rij in `items`
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** een podcast staat in het register als bron van het soort podcast, en zijn afleveringen staan in `items`.
+  De lezer van RSS leest de feed; een eigen adapter komt er niet.
+  De link van een aflevering is het element `link`, de pagina van de aflevering, en nooit de `enclosure`.
+- **Waarom:** `feedsmith` leest podcastfeeds al (zie _Feeds lezen we met feedsmith_), en een aflevering heeft dezelfde velden als een bericht: een titel, een link, een GUID en een tijd.
+  We hergebruiken zo de sleutel per bron, de ontdubbeling, de lock en de gezondheid.
+  Een link naar het MP3-bestand stuurt de luisteraar langs de pagina van de maker, en die pagina is waar we naartoe willen verwijzen (principe 1).
+- **Alternatieven:** eigen tabellen `podcasts` en `episodes`, zoals het prototype; dat is dubbele machinerie voor dezelfde velden.
+  Of een eigen adapter voor podcasts; die zou niets lezen wat de huidige lezer niet leest.
+
+### Twee van de vier podcasts uit het prototype nemen we
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** we nemen Omroep Abe en Radio Camataru.
+  De Sportcast van Omrop Fryslân en de NOS Voetbalpodcast nemen we nu niet.
+- **Waarom:** we volgen _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_.
+  Omroep Abe (205 van 224 afleveringen noemen Heerenveen in de titel of beschrijving) en Radio Camataru (95 van 100) gaan bijna helemaal over de club, hebben een pagina per aflevering en laten ons de feed lezen.
+  De Sportcast gaat over Friese sport (8 van 390), zijn `robots.txt` sluit alles voor iedereen (`Disallow: /`), zijn adres uit het prototype werkt niet meer (nu `tydlik.omropfryslan.nl`), en elke aflevering heeft dezelfde link, de pagina van het programma.
+  De NOS Voetbalpodcast gaat over het hele betaalde voetbal (5 van 664), en zijn `link` is het MP3-bestand zonder pagina van de aflevering.
+- **Alternatieven:** alle vier, zoals het issue vroeg; twee daarvan kunnen we niet lezen of niet goed koppelen.
+  Of Omrop Fryslân om toestemming en een feed met alleen clubafleveringen vragen; dat kan later, buiten dit issue.
+
+### Geen artwork van een podcast
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** we bewaren en tonen geen artwork.
+  De naam van de podcast is genoeg.
+  Een plaatje komt met #10, als lokaal bestand of als initialen.
+- **Waarom:** een afbeelding van een ander tonen mag alleen met toestemming (principe 2) en van onze eigen server (principe 3).
+  Het prototype laadde het artwork rechtstreeks van de bron.
+  Wat we niet mogen tonen, slaan we ook niet op.
+- **Alternatieven:** toestemming vragen aan beide podcasts en het plaatje op onze server zetten; dat wacht op hun antwoord en op een plek voor bestanden.
+
+### Podcasts volgen het rooster van de rest
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** er komt geen rooster per soort bron.
+  De podcastfeeds worden bij elke run van 15 minuten gevraagd, met `ETag`.
+- **Waarom:** beide bronnen sturen een `ETag`, dus een run zonder nieuwe aflevering kost een antwoord "niet gewijzigd" en niet de feed van bijna 1 MB.
+  Een rooster per soort is extra code voor weinig winst.
+  Omroep Abe plaatst ongeveer één aflevering per week, dus de lijst loopt hooguit een kwartier achter.
+- **Alternatieven:** podcasts één keer per uur of per dag lezen; dat bespaart een verzoek per run, maar vraagt een manier om per soort te plannen.
+
+### Een podcast komt niet in de nieuwslijst
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de query voor het nieuws slaat bronnen van het soort podcast over.
+  Podcasts krijgen een eigen blok en een eigen pagina (zie het issue over het tonen, #188).
+- **Waarom:** een aflevering is geen bericht, en het blok heet "Laatste nieuws".
+  Het nieuwsarchief (#26) hergebruikt dezelfde query.
+- **Alternatieven:** de afleveringen tussen het nieuws tonen, met "podcast" erbij; dat maakt één lijst die twee soorten mengt.
+
+### De beschrijving van een podcast is die van de maker
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de beschrijving van een podcast in het register (`sources.description`) is de tekst die de maker zelf in zijn feed zet, letterlijk en zonder de HTML eromheen, met zijn eigen spelling.
+  Zo staat hij in de seed, en zo tonen Onze bronnen en de zijbalk van `/podcasts` hem.
+  - Omroep Abe: "Omroep Abe is de podcast over SC Heerenveen van de Leeuwarder Courant. Clubwatcher Sander de Vries bespreekt met oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost wekelijks de actualiteiten en achtergronden bij de club."
+  - Radio Camataru: "Wekelijkse supporterspodcast over sc Heerenveen!"
+
+  Beschrijvingen van bronnen van een ander soort blijven in eigen woorden (zie _De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen_).
+
+- **Waarom:** de maker publiceert deze tekst in de feed die wij lezen, dus zijn tekst gaat voor onze omschrijving.
+  Het is één alinea over de podcast zelf, geen intro bij een aflevering.
+- **Risico:** het is de tekst van de maker en we hebben er geen aparte toestemming voor gevraagd.
+  Vraagt een maker ons de tekst te veranderen of weg te halen, dan doen we dat zo snel mogelijk.
+  De seed bewaart de tekst; de importer leest hem niet bij elke run, dus een wijziging van de maker komt er pas als iemand de seed bijwerkt.
+- **Alternatieven:** de beschrijving in eigen woorden, zoals eerder bedacht; dat staat verder van wat de maker over zichzelf zegt.
+  Of de beschrijving uit de feed bij elke run overnemen; dat vraagt een lezer voor het kanaal van de feed en overschrijft wat in het register staat.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
@@ -2219,6 +2291,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Wat we van een bron tonen, en de toestemming, staan er niet.
 - **Hoe:** de beschrijving staat in het register, in de kolom `description` van `sources` (hoogstens 300 tekens).
   We schrijven haar zelf, in eigen woorden.
+  Later: de beschrijving van een podcast is de tekst van de maker uit zijn feed (zie _De beschrijving van een podcast is die van de maker_).
   `listEnabledSources` in `@fansite/db/queries` haalt alleen de naam, het domein, de soort en de beschrijving op, dus het beleid en de toestemming komen niet bij een pagina.
 - **Waarom:** bezoekers hoeven niet te lezen wat we wel of niet van een bron tonen; dat zien ze zelf.
   Een korte beschrijving zegt wat de bron is, en dat helpt bij het kiezen.

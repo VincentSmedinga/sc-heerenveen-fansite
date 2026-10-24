@@ -178,6 +178,30 @@ describe('listRecentItems', () => {
     expect((await listRecentItems(database.db, thirteenDaysAgo, now)).map((item) => item.title)).toEqual(['Kop aan'])
   })
 
+  it('gives no episodes of a podcast that is switched on, and the items of the others', async () => {
+    await seedSources(database.db)
+
+    // The seed holds the made-up Testpodcast, which is switched on, and the Testkrant, which is news.
+    const idsOf = async (domain: string) => {
+      const [source] = await database.db.select().from(sources).where(eq(sources.domain, domain))
+      const [feed] = await database.db
+        .insert(feeds)
+        .values({ sourceId: source?.id ?? 0, url: `https://${domain}/rss/` })
+        .$returningId()
+
+      return { feedId: feed?.id ?? 0, sourceId: source?.id ?? 0 }
+    }
+    const podcast = await idsOf('testpodcast.test')
+
+    await addItem(podcast, 'aflevering', new Date('2026-10-21T12:05:00Z'))
+    await addItem(await idsOf('testkrant.test'), 'bericht', new Date('2026-10-21T12:00:00Z'))
+
+    expect(await database.db.select().from(items)).toHaveLength(2)
+    expect((await listRecentItems(database.db, thirteenDaysAgo, now)).map((item) => item.title)).toEqual([
+      'Kop bericht',
+    ])
+  })
+
   it('gives the items of every source mixed, by time', async () => {
     const first = await addSource()
     const second = await addSource({ domain: 'proefnieuws.test', name: 'Proefnieuws' })

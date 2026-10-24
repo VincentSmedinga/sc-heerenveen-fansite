@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, lte, ne, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
@@ -56,6 +56,8 @@ export function listNewestDiscussions(db: Database, limit = 4) {
  * name of the source. That name is the way the source wants to be credited, or else its own name. The policy and the
  * permission stay internal, and so does every other column, so none of them can reach a page.
  *
+ * The episodes of a podcast are items too, but they are not news, so a source of kind podcast gives none.
+ *
  * Pass the moment of now as `until`: the importer keeps a time up to a day ahead, because feeds are sometimes wrong
  * about their clock, and such an item doesn't belong under a day that hasn't begun.
  */
@@ -70,6 +72,13 @@ export function listRecentItems(db: Database, since: Date, until: Date) {
     })
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(and(eq(sources.enabled, true), gte(items.publishedAt, since), lte(items.publishedAt, until)))
+    .where(
+      and(
+        eq(sources.enabled, true),
+        ne(sources.kind, 'podcast'),
+        gte(items.publishedAt, since),
+        lte(items.publishedAt, until),
+      ),
+    )
     .orderBy(desc(items.publishedAt), desc(items.id))
 }
