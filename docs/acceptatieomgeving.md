@@ -279,8 +279,15 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
   ```
 
   Gebruik dezelfde paden als in de cronjob (stap 9 en 10).
-  Hij zegt "The mail server took the test mail", en binnen een paar minuten staat er een mail "Proefmail van de sc Heerenveen Fansite" in je brievenbus, bekijk ook de map met ongewenste mail.
-  Vindt hij de server niet of wijst die het wachtwoord af, dan zegt hij `Could not send the mail` met een code: `ESOCKET` of `ECONNECTION` (de server is niet bereikbaar, controleer `SMTP_HOST` en `SMTP_PORT`), `EAUTH` (het wachtwoord of de gebruiker klopt niet), `ETLS` (de server kent geen TLS op die poort) of `EENVELOPE` (de server weigerde de afzender of de ontvanger).
+  Hij zegt "The mail server took the test mail".
+  Binnen een paar minuten staat er een mail "Proefmail van de sc Heerenveen Fansite" in je brievenbus.
+  Kijk ook in de map met ongewenste mail.
+  Lukt het niet, dan zegt hij `Could not send the mail` met een code:
+  - `ESOCKET` of `ECONNECTION`: de server is niet bereikbaar. Controleer `SMTP_HOST` en `SMTP_PORT`.
+  - `EAUTH`: het wachtwoord of de gebruiker klopt niet.
+  - `ETLS`: de server kent geen TLS op die poort.
+  - `EENVELOPE`: de server weigerde de afzender of de ontvanger.
+
   Het logboek en de melding bevatten nooit het wachtwoord of het adres.
 
 - In de database staan de koppen in de tabel `items`: `SELECT COUNT(*) FROM items` in phpMyAdmin telt ze.

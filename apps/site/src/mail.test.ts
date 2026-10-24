@@ -279,6 +279,8 @@ describe('sendMail', () => {
     'a@example.net;b@example.net',
     'geen adres',
     '<a@example.net> <b@example.net>',
+    'a@example.net\n',
+    ' a@example.net',
   ])('refuses %j as the address of the visitor, because it is not exactly one email address', async (replyTo) => {
     const { env, received } = await startFakeServer()
 

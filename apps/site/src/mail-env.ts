@@ -9,7 +9,7 @@ const mailbox = new RegExp(String.raw`^(?:${address}|[^<>,;:"\\\r\n]*<${address}
  * or start a second header.
  */
 export function isMailbox(value: string) {
-  return mailbox.test(value.trim())
+  return mailbox.test(value)
 }
 
 /** The settings of the mail server, and the address that mail comes from. See `requireSmtpOutsideLocal` for which are needed. */

@@ -304,8 +304,9 @@ async function withEmptyDatabase(checks) {
 }
 
 /**
- * Starts the server with the given SITE_ENV (or none), database and, unless `smtp` is false, made-up mail settings, runs the checks and always stops the server again.
- * The checks get the server and a function that returns what the server has written to its log so far.
+ * Starts the server with the given SITE_ENV (or none), database and, unless `smtp` is false, made-up mail settings, runs
+ * the checks and always stops the server again. The checks get the server and a function that returns what the server has
+ * written to its log so far.
  */
 async function withServer({ database, siteEnv, smtp = true }, checks) {
   const env = { ...process.env, DATABASE_URL: database, HOSTNAME: '127.0.0.1', PORT: port }
