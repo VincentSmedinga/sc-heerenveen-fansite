@@ -18,7 +18,7 @@ describe('the page Over ons', () => {
 
     expect(generateMetadata()).toMatchObject({
       alternates: { canonical: 'https://acc.sc.heerenveen.org/over-ons' },
-      description: expect.stringMatching(/^Wie we zijn/),
+      description: expect.stringMatching(/^Wie we zijn en hoe we werken/),
       openGraph: { title: 'Over ons', url: 'https://acc.sc.heerenveen.org/over-ons' },
       title: 'Over ons',
     })
@@ -29,22 +29,21 @@ describe('the page Over ons', () => {
     expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
   })
 
-  it('has one h1 and an h2 per section, with a fixed anchor on the privacy section', () => {
+  it('has one h1 and an h2 per section, and no section or anchor for privacy', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Over ons</h1>'])
+    expect(html).not.toContain('id="privacy"')
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
       '<h2 class="hf-heading-2">Wie we zijn</h2>',
       '<h2 class="hf-heading-2">Hoe we werken</h2>',
-      '<h2 class="hf-heading-2" id="privacy">Privacy</h2>',
     ])
   })
 
-  it('links to the forum, the sources, the editors by email and the Autoriteit Persoonsgegevens', () => {
+  it('links to the forum, the sources, the editors by email and the page Privacy', () => {
     expect(links).toEqual([
       ['https://forum.heerenveen.org', 'ons forum'],
       ['/bronnen', 'Onze bronnen'],
       ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
-      ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
-      ['https://www.autoriteitpersoonsgegevens.nl', 'Autoriteit Persoonsgegevens'],
+      ['/privacy', 'Privacy'],
     ])
   })
 
