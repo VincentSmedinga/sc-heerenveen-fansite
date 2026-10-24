@@ -50,22 +50,17 @@ describe('the page Toegankelijkheid', () => {
     expect(words.length).toBeLessThanOrEqual(200)
   })
 
-  it('aims for WCAG 2.2 AA, says the statement is voluntary and leaves out the sites of others', () => {
+  it('aims for WCAG 2.2 AA and leaves out the sites of others', () => {
     expect(html).toContain('We streven naar WCAG 2.2, niveau AA.')
-    expect(html).toContain('Deze verklaring is vrijwillig.')
     expect(html).toContain('niet van ons')
     expect(html).not.toMatch(/voldoet/)
   })
 
-  it('lists what we already do as a real list', () => {
-    expect(html.match(/<li[^>]*>.*?<\/li>/g)?.map((item) => item.replaceAll(/<[^>]*>/g, ''))).toEqual([
-      'een programma controleert elke pagina, in licht en donker;',
-      'we lopen een checklist langs, en een mens heeft de site nagekeken;',
-      'lopende tekst haalt een contrast van 7:1;',
-      'je ziet altijd waar de focus staat;',
-      'knoppen zijn minstens 44 pixels hoog;',
-      'de pagina&#x27;s lopen door zonder zijwaarts scrollen, ook op 320 pixels breed.',
-    ])
+  it('says that accessibility matters and what we already do, in a sentence and not a list', () => {
+    expect(html).toContain('We vinden toegankelijkheid belangrijk.')
+    expect(html).toContain('Alles wat we toevoegen, maken we vanaf het begin toegankelijk.')
+    expect(html).toContain('een mens heeft de site nagekeken.')
+    expect(html).not.toMatch(/<[ou]l/)
   })
 
   it('links only to the editors by email', () => {

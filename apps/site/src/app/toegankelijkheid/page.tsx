@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Heading, Link, List, Page, Text, Time } from '@fansite/design-system'
+import { Heading, Link, Page, Text, Time } from '@fansite/design-system'
 
 import { email } from '../../contact'
 import { pageMetadata } from '../../metadata'
@@ -14,7 +14,7 @@ export const generateMetadata = (): Metadata => pageMetadata('/toegankelijkheid'
 // The day the statement was drawn up or last updated, as YYYY-MM-DD. Change it here whenever the text changes.
 const statementDate = '2026-10-24'
 
-// A short, voluntary statement that promises only what has been checked. When what we check or find changes, this text
+// A short statement that promises only what has been checked. When what we check or find changes, this text
 // changes with it, in the same pull request.
 export default function AccessibilityPage() {
   return (
@@ -23,19 +23,16 @@ export default function AccessibilityPage() {
         <Heading level={1}>Toegankelijkheid</Heading>
         <Heading level={2}>Wat we beloven</Heading>
         <Text>
-          We streven naar WCAG 2.2, niveau AA. Deze verklaring is vrijwillig. De sites waar onze koppen naartoe linken,
-          de artikelen van de bronnen en het forum zijn niet van ons. Ze vallen niet onder deze verklaring.
+          We streven naar WCAG 2.2, niveau AA. De sites waar onze koppen naartoe linken, de artikelen van de bronnen en
+          het forum zijn niet van ons. Ze vallen niet onder deze verklaring.
         </Text>
         <Heading level={2}>Wat we al doen</Heading>
-        <Text>Toegankelijkheid hoort bij elke wijziging:</Text>
-        <List>
-          <List.Item>een programma controleert elke pagina, in licht en donker;</List.Item>
-          <List.Item>we lopen een checklist langs, en een mens heeft de site nagekeken;</List.Item>
-          <List.Item>lopende tekst haalt een contrast van 7:1;</List.Item>
-          <List.Item>je ziet altijd waar de focus staat;</List.Item>
-          <List.Item>knoppen zijn minstens 44 pixels hoog;</List.Item>
-          <List.Item>de pagina's lopen door zonder zijwaarts scrollen, ook op 320 pixels breed.</List.Item>
-        </List>
+        <Text>
+          We vinden toegankelijkheid belangrijk. Alles wat we toevoegen, maken we vanaf het begin toegankelijk. Een
+          programma controleert elke pagina, in licht en donker. We lopen een checklist langs, en een mens heeft de site
+          nagekeken. Lopende tekst haalt een contrast van 7:1, je ziet altijd waar de focus staat en knoppen zijn
+          minstens 44 pixels hoog. De pagina's lopen door zonder zijwaarts scrollen, ook op 320 pixels breed.
+        </Text>
         <Heading level={2}>Hoe je ons bereikt</Heading>
         <Text>
           Heb je last van iets op de site? Mail naar <Link href={`mailto:${email}`}>{email}</Link>. Zeg erbij om welke

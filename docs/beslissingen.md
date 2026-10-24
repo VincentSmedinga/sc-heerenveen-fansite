@@ -80,7 +80,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 ### De toegankelijkheidsverklaring is vrijwillig
 
 - **Datum:** 24 oktober 2026
-- **Besluit:** we publiceren een toegankelijkheidsverklaring op `/toegankelijkheid` en zeggen er in één zin bij dat ze vrijwillig is.
+- **Besluit:** we publiceren een toegankelijkheidsverklaring op `/toegankelijkheid`.
+  Ze is vrijwillig.
+  De pagina zegt dat niet, omdat de projecteigenaar de zin overbodig vond; ze belooft alleen "we streven naar".
 - **Waarom:** voor overheden is ze verplicht.
   Voor bedrijven geldt de Europese toegankelijkheidswet (EAA, sinds 28 juni 2025) alleen voor bepaalde diensten aan consumenten, en een microbedrijf is voor diensten uitgezonderd.
   Wij zijn een vrijwilligersproject zonder winst, zonder verkoop en zonder een van die diensten, dus nemen we aan dat ze voor ons niet verplicht is.
