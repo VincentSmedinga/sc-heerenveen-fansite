@@ -39,7 +39,7 @@ describe('the page Toegankelijkheid', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Toegankelijkheid</h1>'])
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
       '<h2 class="hf-heading-2">Wat we beloven</h2>',
-      '<h2 class="hf-heading-2">Wat nog niet goed is</h2>',
+      '<h2 class="hf-heading-2">Wat we al doen</h2>',
       '<h2 class="hf-heading-2">Hoe je ons bereikt</h2>',
       '<h2 class="hf-heading-2">Wanneer we het nakeken</h2>',
     ])
@@ -57,12 +57,14 @@ describe('the page Toegankelijkheid', () => {
     expect(html).not.toMatch(/voldoet/)
   })
 
-  it('lists what a person has not yet checked as a real list', () => {
+  it('lists what we already do as a real list', () => {
     expect(html.match(/<li[^>]*>.*?<\/li>/g)?.map((item) => item.replaceAll(/<[^>]*>/g, ''))).toEqual([
-      'het toetsenbord en de focus;',
-      'de schermlezer;',
-      'inzoomen tot 400%;',
-      'de afstand tussen tekst.',
+      'een programma controleert elke pagina, in licht en donker;',
+      'we lopen een checklist langs, en een mens heeft de site nagekeken;',
+      'lopende tekst haalt een contrast van 7:1;',
+      'je ziet altijd waar de focus staat;',
+      'knoppen zijn minstens 44 pixels hoog;',
+      'de pagina&#x27;s lopen door zonder zijwaarts scrollen, ook op 320 pixels breed.',
     ])
   })
 

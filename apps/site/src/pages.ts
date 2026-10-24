@@ -30,8 +30,7 @@ export const pages = [
     path: '/privacy',
   },
   {
-    description:
-      'Wat we beloven over toegankelijkheid, wat een mens nog niet heeft nagekeken en hoe je een probleem meldt.',
+    description: 'Wat we beloven over toegankelijkheid, wat we er al voor doen en hoe je een probleem meldt.',
     path: '/toegankelijkheid',
   },
   {

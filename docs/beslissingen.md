@@ -89,13 +89,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het laten toetsen door een jurist voordat de pagina live gaat; dat is zekerder, maar voegt een stap toe aan de poort voor de lancering (#34).
   Of geen verklaring, zoals #25 nog zei; dan weet een bezoeker niet wat hij kan verwachten of bij wie hij terecht kan.
 
-### We beloven alleen wat een mens heeft nagekeken: "we streven naar"
+### We beloven alleen wat we hebben nagekeken: "we streven naar"
 
 - **Datum:** 24 oktober 2026
-- **Besluit:** de verklaring zegt dat we streven naar WCAG 2.2, niveau AA, en noemt wat nog niet door een mens is nagekeken.
+- **Besluit:** de verklaring zegt dat we streven naar WCAG 2.2, niveau AA, en noemt positief wat we al doen.
+  Ze zegt niet dat de site voldoet.
   Pas na de ronde van een mens (#25) zeggen we meer, met de datum en wat is nagekeken.
 - **Waarom:** de automatische controle van axe vindt een deel van de problemen, en de checklist loopt per wijziging langs wat we zelf kunnen zien.
-  Het toetsenbord, de schermlezer, inzoomen en tekstafstand beoordeelt pas de ronde van #25.
+  De projecteigenaar heeft de site met de hand nagekeken, maar de ronde van #25 is nog niet gedaan.
+  Een lijst met wat nog niet is nagekeken, zoals het eerste ontwerp had, vond de projecteigenaar te negatief voor wat er al is.
   Zeggen dat de site voldoet, terwijl dat niemand nakeek, is een belofte die we niet kunnen waarmaken.
 - **Alternatieven:** "de site voldoet" vanaf de lancering; dan moet #187 op #25 wachten en kan het niet nu.
   Of een belofte van volledige naleving met een plan van aanpak, zoals het model van de overheid; dat vraagt een volledig onderzoek, en dat doen we niet voor een vrijwillige verklaring.
@@ -103,7 +105,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 ### Een korte pagina met vier delen, een eigen pagina en een reactie "zo snel mogelijk"
 
 - **Datum:** 24 oktober 2026
-- **Besluit:** de verklaring is een eigen pagina van hoogstens 200 woorden, met vier delen: wat we beloven, wat nog niet goed is, hoe je ons bereikt en wanneer we het nakeken.
+- **Besluit:** de verklaring is een eigen pagina van hoogstens 200 woorden, met vier delen: wat we beloven, wat we al doen, hoe je ons bereikt en wanneer we het nakeken.
   De footer linkt ernaar.
   Een melding pakken we zo snel mogelijk op, naar hetzelfde mailadres als een verwijderverzoek (#24), zonder instantie voor klachten.
 - **Waarom:** een lange verklaring leest niemand, en juist voor wie hulpmiddelen gebruikt, is een korte tekst met koppen het prettigst.
