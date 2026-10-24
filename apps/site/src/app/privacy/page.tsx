@@ -27,6 +27,10 @@ export default function PrivacyPage() {
           daarvoor, bewaren ze niet langer dan nodig en geven ze aan niemand.
         </Text>
         <Text>
+          Klik je door naar een medium of naar ons forum, dan verlaat je deze site. Voor wat die sites met je gegevens
+          doen, gelden hun eigen regels.
+        </Text>
+        <Text>
           Een mail aan ons gebruiken we alleen om te antwoorden. Vragen over je gegevens stel je aan de redactie:{' '}
           <EmailLink />. Maar ons antwoord zal zijn: we hebben geen gegevens van je.
         </Text>

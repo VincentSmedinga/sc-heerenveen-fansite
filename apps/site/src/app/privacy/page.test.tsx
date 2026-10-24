@@ -38,15 +38,16 @@ describe('the page Privacy', () => {
     expect(html).toContain('De site zet geen cookies, volgt niemand en laadt niets van een ander domein.')
   })
 
-  it('says in paragraphs, not a list, what the logs, email, questions and complaints are about', () => {
+  it('says in paragraphs, not a list, what the logs, other sites, email, questions and complaints are about', () => {
     const paragraphs = [...html.matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 
     expect(html).not.toMatch(/<(ul|ol|li)[ >]/)
-    expect(paragraphs).toHaveLength(4)
+    expect(paragraphs).toHaveLength(5)
     expect(paragraphs[1]).toContain('logbestanden bij, met onder meer IP-adressen')
-    expect(paragraphs[2]).toContain('Een mail aan ons gebruiken we alleen om te antwoorden.')
-    expect(paragraphs[2]).toContain('we hebben geen gegevens van je.')
-    expect(paragraphs[3]).toContain('Autoriteit Persoonsgegevens')
+    expect(paragraphs[2]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
+    expect(paragraphs[3]).toContain('Een mail aan ons gebruiken we alleen om te antwoorden.')
+    expect(paragraphs[3]).toContain('we hebben geen gegevens van je.')
+    expect(paragraphs[4]).toContain('Autoriteit Persoonsgegevens')
   })
 
   it('links to the editors by email and to the Autoriteit Persoonsgegevens, and to nothing else', () => {
