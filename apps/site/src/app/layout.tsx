@@ -3,11 +3,12 @@ import '@fansite/design-system/index.css'
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
-import { Body, Link, Logo, Navigation, Page, PullToRefresh, Root, Text } from '@fansite/design-system'
+import { Body, Head, Link, Logo, Navigation, Page, PullToRefresh, Root, Text } from '@fansite/design-system'
 
 import { headerColour } from '../colours'
 import { reviewBranch } from '../env'
 import { SiteNavigation } from '../SiteNavigation'
+import { ThemeToggle } from '../ThemeToggle'
 import { withBranch } from '../title'
 import { updatesPath, updatesTitle } from '../updates'
 
@@ -52,10 +53,13 @@ export const viewport: Viewport = {
 }
 
 // Every page has the same header and footer, and puts its content in a Page.Main in the Page.Body, so a page with a
-// sidebar can add a Page.Sidebar beside it. Without data-theme on Root, light and dark follow the system setting.
+// sidebar can add a Page.Sidebar beside it. Without data-theme on Root, light and dark follow the system setting. A visitor
+// who pressed Licht or Donker in the footer gets data-theme on it from public/theme.js, which runs before the first paint,
+// so React must not mind the attribute it did not render (suppressHydrationWarning).
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <Root>
+    <Root suppressHydrationWarning>
+      <Head script="/theme.js" />
       <Body>
         <PullToRefresh />
         <Page>
@@ -69,6 +73,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Page.Footer>
             <Text appearance="meta">Alle koppen en links op één plek.</Text>
             <Text appearance="meta">Voor supporters door supporters.</Text>
+            <ThemeToggle />
             <Navigation items={footerItems} label="Over de site" />
           </Page.Footer>
         </Page>

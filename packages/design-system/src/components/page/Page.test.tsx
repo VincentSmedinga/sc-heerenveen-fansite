@@ -306,11 +306,12 @@ describe('Page.Footer', () => {
     expect(screen.getByRole('contentinfo').id).toBe('voet')
   })
 
-  it('holds the two lines of text and then the links as its own children, which its grid places', () => {
+  it('holds the two lines of text, a control and then the links as its own children, which its grid places', () => {
     render(<ExampleFooter />)
     const footer = screen.getByRole('contentinfo')
 
-    expect(Array.from(footer.children).map((child) => child.tagName.toLowerCase())).toEqual(['p', 'p', 'nav'])
+    expect(Array.from(footer.children).map((child) => child.tagName.toLowerCase())).toEqual(['p', 'p', 'div', 'nav'])
+    expect(within(footer).getByRole('group', { name: 'Thema' })).toBe(footer.children[2])
     expect(Array.from(footer.querySelectorAll('p')).map((paragraph) => paragraph.textContent)).toEqual([
       'Alle koppen en links op één plek.',
       'Voor supporters door supporters.',

@@ -216,6 +216,33 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
       </tr>
       <tr>
         <th scope="row">
+          <code>Head</code>
+        </th>
+        <td>
+          de <code>head</code>, met hoogstens één script dat vóór de eerste weergave draait
+        </td>
+        <td>
+          <code>script</code>
+        </td>
+        <td>
+          geen kinderen: de rest van de <code>head</code> komt van Next.js
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>SegmentedControl</code>
+        </th>
+        <td>
+          een groep met een naam, met een knop per optie, waarvan er één <code>aria-pressed</code> is
+        </td>
+        <td>
+          <code>label</code> (verplicht), <code>options</code> (verplicht), <code>value</code> (verplicht),{' '}
+          <code>onChange</code> (verplicht)
+        </td>
+        <td>het component bewaart niets: de pagina geeft de waarde en handelt de wijziging af</td>
+      </tr>
+      <tr>
+        <th scope="row">
           <code>Pagination</code>
         </th>
         <td>

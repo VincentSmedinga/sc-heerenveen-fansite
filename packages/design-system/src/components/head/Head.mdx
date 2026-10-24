@@ -1,0 +1,37 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Componenten/Head" />
+
+# Head
+
+De `head` van een pagina, voor één ding dat Next.js zelf niet kan: een script dat draait vóór de eerste weergave.
+
+`Head` heeft geen voorbeeld in Storybook, want het maakt de `head` zelf, en die past niet in een pagina die er al een heeft.
+De tests van `Head` controleren het wel, in een eigen document.
+
+## Gebruik
+
+Zet `Head` in `Root`, vóór `Body`, met het adres van het script:
+
+```tsx
+import { Body, Head, Root } from '@fansite/design-system'
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <Root suppressHydrationWarning>
+      <Head script="/theme.js" />
+      <Body>{children}</Body>
+    </Root>
+  )
+}
+```
+
+## Wat het doet
+
+- **Het script:** `Head` zet het als gewoon script in de `head`, zonder `async` of `defer`, dus het wacht de eerste weergave op.
+  Dat is de bedoeling: het script van het thema moet klaar zijn voordat de pagina getekend wordt, anders flitst de pagina in het verkeerde thema.
+  Met `next/script` gebeurt dat te laat, want Next.js start dat script pas als de app laadt.
+- **Het adres:** het script staat in `public/` van de site, op dezelfde oorsprong als de pagina.
+  Een script van een ander domein is er niet (principe 3 van de Redactie).
+- **De rest van de `head`:** die komt van Next.js, uit de Metadata API.
+  `Head` heeft geen kinderen.

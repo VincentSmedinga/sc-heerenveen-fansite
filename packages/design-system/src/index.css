@@ -31,6 +31,7 @@
 @import url('./components/filter/filter.css');
 @import url('./components/pagination/pagination.css');
 @import url('./components/pull-to-refresh/pull-to-refresh.css');
+@import url('./components/segmented-control/segmented-control.css');
 @import url('./components/logo/logo.css');
 @import url('./components/heading/heading.css');
 @import url('./components/text/text.css');

@@ -71,8 +71,8 @@ const Cell = ({ className, ...props }: PageCellProps) => (
 
 /**
  * The bottom of the page, on a band of its own with a line on top: a `footer` element, which is the page's contentinfo
- * landmark. It holds two lines of text, a Text each, and the links last: beside the text on a wide screen, under it on a
- * narrow one. Links in it are dark sand.
+ * landmark. It holds two lines of text, a Text each, then if the page has one a control such as the theme toggle, and the
+ * links last: beside the text on a wide screen, under it on a narrow one. Links in it are dark sand.
  */
 const Footer = ({ className, ...props }: PageFooterProps) => (
   <footer className={classNames('hf-page-footer', className)} {...props} />

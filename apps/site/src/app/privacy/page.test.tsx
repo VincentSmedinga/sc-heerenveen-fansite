@@ -44,16 +44,26 @@ describe('the page Privacy', () => {
     expect(html).toContain('De site zet geen cookies, volgt niemand en laadt niets van een ander domein.')
   })
 
-  it('says in paragraphs, not a list, what the logs, other sites, email, questions and complaints are about', () => {
+  it('says that the browser keeps the choice for Licht or Donker on the device, that we do not see it, and how to remove it', () => {
+    const paragraph = html.match(/<p[^>]*>(Kies je Licht of Donker.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('bewaart je browser die keuze, alleen op dit apparaat')
+    expect(paragraph).toContain('Wij zien hem niet')
+    expect(paragraph).toContain('de knop te kiezen die je systeem al geeft')
+    expect(paragraph).toContain('de gegevens van de site in je browser te wissen')
+  })
+
+  it('says in paragraphs, not a list, what the logs, the theme, other sites, email, questions and complaints are about', () => {
     const paragraphs = [...html.matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 
     expect(html).not.toMatch(/<(ul|ol|li)[ >]/)
-    expect(paragraphs).toHaveLength(5)
+    expect(paragraphs).toHaveLength(6)
     expect(paragraphs[1]).toContain('logbestanden bij, met onder meer IP-adressen')
-    expect(paragraphs[2]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
-    expect(paragraphs[3]).toContain('Een mail aan ons gebruiken we alleen om te antwoorden.')
-    expect(paragraphs[3]).toContain('we hebben geen gegevens van je.')
-    expect(paragraphs[4]).toContain('Autoriteit Persoonsgegevens')
+    expect(paragraphs[2]).toContain('Kies je Licht of Donker in de footer')
+    expect(paragraphs[3]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
+    expect(paragraphs[4]).toContain('Een mail aan ons gebruiken we alleen om te antwoorden.')
+    expect(paragraphs[4]).toContain('we hebben geen gegevens van je.')
+    expect(paragraphs[5]).toContain('Autoriteit Persoonsgegevens')
   })
 
   it('links to the editors by email and to the Autoriteit Persoonsgegevens, and to nothing else', () => {

@@ -193,9 +193,10 @@
    * The links are the blue of links elsewhere, which reaches 4,5:1 on this surface in light and in dark, so they need no
    * colours of their own.
    *
-   * It holds two lines of text, a paragraph each, and the links last. What is in it has no margin, so the lines of text sit
-   * right under each other. On a narrow screen everything is in one column, with the links under the text. From 40rem,
-   * as in the card, the links are in a second column on the right, over both lines of text and centred on them.
+   * It holds two lines of text, a paragraph each, an optional control after them (the theme toggle) and the links last.
+   * What is in it has no margin, so the lines of text sit right under each other, and the control has a little space above
+   * it. On a narrow screen everything is in one column, with the links under the rest. From 40rem, as in the card, the
+   * links are in a second column on the right, over both lines of text and centred on them; a control sits under the text.
    */
   .hf-page-footer {
     background-color: var(--hf-colour-background-footer);
@@ -215,6 +216,11 @@
 
     > :last-child {
       margin-block-start: 0.5rem;
+    }
+
+    /* A control after the two lines of text, such as the theme toggle. The links are the last child. */
+    > :nth-child(3):not(:last-child) {
+      margin-block-start: 0.75rem;
     }
 
     @media (width >= 40rem) {
