@@ -12,7 +12,7 @@ Het beleid erachter staat in _Een bron nemen we als zijn feed over de club gaat 
 ## De controle van 24 oktober 2026
 
 Op 24 oktober 2026 hebben we elke feed en elke `robots.txt` één keer opgehaald.
-Alleen bij De Telegraaf draaiden we daarna de importer lokaal, om te zien dat hij de feed zonder aanpassing leest.
+Bij De Telegraaf en bij de twee podcasten die we nemen draaiden we daarna de importer lokaal, om te zien dat hij de feed zonder aanpassing leest.
 We deden dat met de user agent van de importer, `scHeerenveenFansite/0.1.0 (+https://github.com/VincentSmedinga/sc-heerenveen-fansite)`.
 Een pad dat `robots.txt` voor ons weigert, hebben we niet opgehaald.
 Een feed die doorverwees, hebben we op het nieuwe adres één keer opgehaald.
@@ -53,7 +53,7 @@ Bij elke bron staat of de voorwaarden daar iets over zeggen.
 - **Afwijzen:** de feed werkt niet, gaat niet over sc Heerenveen, of `robots.txt` weigert ons.
   De feeds van andere clubs vallen hieronder, want de site gaat over sc Heerenveen.
 
-De podcasts staan samen in het deel _Podcasts_, met hetzelfde besluit per bron.
+De podcasts staan samen in het deel _Podcasts_, met dezelfde besluiten als de andere bronnen.
 
 Een voorbehoud tegen datamining in `robots.txt` of de voorwaarden staat bij de bron.
 Het houdt het besluit "nemen" niet tegen zolang de feed voor ons openstaat.
@@ -562,7 +562,7 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
   - Over sc Heerenveen: 8 van de 390 noemen Heerenveen in de titel of de beschrijving.
   - Link: elke aflevering heeft dezelfde link, de pagina van het programma (`https://www.omropfryslan.nl/fy/podcast/sportcast`), dus geen pagina per aflevering.
 - **`robots.txt`:** op `tydlik.omropfryslan.nl` staat `Disallow: /` voor iedereen, dus de fetcher mag de feed niet lezen.
-- **Besluit: nu niet nemen.**
+- **Besluit: afwijzen, voor nu.**
   De feed is voor ons gesloten, gaat over Friese sport in het algemeen en heeft geen pagina per aflevering.
   We kunnen Omrop Fryslân later om toestemming en een feed met alleen clubafleveringen vragen.
 
@@ -575,7 +575,7 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
   - Over sc Heerenveen: 5 van de 664 noemen Heerenveen in de titel of de beschrijving.
   - Link: het element `link` is het MP3-bestand, dus geen pagina van de aflevering.
 - **`robots.txt`:** laat ons de feed toe.
-- **Besluit: nu niet nemen.**
+- **Besluit: afwijzen, voor nu.**
   De podcast gaat zelden over de club, en zonder pagina van de aflevering verwijzen we alleen naar een bestand.
 
 ## Wat de importer nog mist
