@@ -2037,6 +2037,89 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** `smtp-server` als devDependency; dat brengt een tweede versie van nodemailer mee, en `assemble` weigert twee versies van één pakket.
   Of een certificaat in de repository.
 
+### Het contactformulier mailt de redactie en slaat niets op
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** een bericht via het formulier gaat alleen als mail naar de redactie, en komt niet in de database.
+  We bewaren het tot de zaak is afgehandeld, hoogstens een jaar.
+- **Waarom:** de redactie leest mail al, en het formulier hoeft dan niet te wachten op het beheer (#30).
+  Er staan geen persoonsgegevens op de site zelf; de mailbox ruimt de redactie zelf op.
+  Een belofte van "hoogstens een jaar" kunnen vrijwilligers houden.
+- **Alternatieven:** opslaan in de database en lezen in het beheer (we zien dan ook wat er binnenkwam als mail verloren gaat, maar het hangt af van #30 en voegt een tabel met persoonsgegevens toe); of allebei.
+
+### Spam weren met een val-veld en een limiet voor het hele formulier
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** spam weren met een val-veld en een limiet voor het hele formulier, zonder diensten van derden en zonder IP-adressen te bewaren.
+- **Waarom:** reCAPTCHA en dergelijke sturen bezoekers naar een derde (principe 3 van de Redactie).
+  Een limiet per IP-adres vraagt om IP-adressen te bewaren.
+  Dit is eenvoudig en dekt de meeste robots; komt er toch veel spam, dan bekijken we het opnieuw.
+- **Alternatieven:** een rekensom of puzzel (kost toegankelijkheid, WCAG 3.3.8); een limiet per IP-adres; een tijdcontrole met een getekend tijdstip.
+
+### Het formulier is een server action met een eigen bevestigingspagina
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `/contact` heeft een formulier dat een server action aanroept (`useActionState`, in `app/contact/actions.ts`).
+  Zonder JavaScript is dat een gewone POST naar dezelfde pagina; met een fout komt de pagina terug met de fouten en het ingevulde, met succes stuurt de actie door (`redirect`, status 303) naar `/contact/verstuurd`.
+  Die pagina staat niet in de sitemap en krijgt `noindex`.
+  De actie controleert zelf dat de `Origin` bij de host hoort (`x-forwarded-host`, anders `host`) en weigert een verzoek zonder `Origin`; Next.js doet dezelfde controle ook al.
+  Een verzoek van een andere site krijgt dezelfde melding als een mislukte verzending.
+- **Waarom:** een server action werkt zonder JavaScript en geeft de pagina met de fouten terug, met de layout van de site eromheen.
+  Een route handler kan geen pagina met fouten tonen zonder de ingevulde gegevens in een cookie of in de URL te zetten, en persoonsgegevens horen niet in een URL.
+  Na het versturen stuurt de actie door naar een eigen adres, dus vernieuwen haalt alleen die pagina opnieuw op en verstuurt het formulier niet nog eens.
+- **Alternatieven:** een route handler die bij een fout terugstuurt met de gegevens in een cookie of de URL; een bevestiging op dezelfde pagina na de POST, waarbij vernieuwen het formulier opnieuw verstuurt; of alleen controleren zoals Next.js dat doet, zonder eigen controle van `Origin`.
+
+### Het val-veld heet `website`, en een robot krijgt dezelfde bevestiging als een bezoeker
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** het `Honeypot` heeft de naam `website`.
+  Is het ingevuld, dan stuurt de actie door naar de bevestiging en verstuurt niets.
+  Zo'n bericht telt niet mee voor de limiet.
+- **Waarom:** robots vullen een veld met zo'n naam graag in.
+  Een foutmelding zou de robot leren dat hij is herkend.
+- **Alternatieven:** een foutmelding of een lege pagina voor een robot.
+
+### De limiet is tien berichten per uur in het geheugen van de server
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `createLimit` (`apps/site/src/rate-limit.ts`) onthoudt de tijden van de laatste berichten, voor het hele formulier samen.
+  Een bericht met fouten, een robot en een geweigerde poging tellen niet mee; een bericht dat wel wordt verstuurd, ook als de mail mislukt, telt wel.
+  De limiet begint opnieuw als de server herstart.
+- **Waarom:** de eis is een bescherming tegen een stortvloed, geen exacte telling.
+  Een bezoeker die een typefout herstelt, hoort niet tegen de limiet aan te lopen.
+  Op gedeelde hosting kan er meer dan één proces zijn, dan telt elk proces apart; dat is hier acceptabel, omdat het alleen een bovengrens per proces is.
+- **Alternatieven:** de tijden in de database of in een bestand (bewaart gegevens, voor weinig winst).
+
+### Een leeg eerste antwoord bij het onderwerp, en de naam en link in de tekst van de mail
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de keuzelijst Onderwerp begint met "Kies een onderwerp" (waarde leeg), en de server weigert die keuze.
+  De mail heeft het antwoord-adres van de bezoeker als `Reply-To` (alleen het adres, zonder naam), de onderwerpregel "Contact: <onderwerp>" met de woorden uit de lijst, en naam, adres, onderwerp en link in de tekst.
+- **Waarom:** een lijst met een voorgekozen antwoord laat bezoekers het onderwerp verkeerd laten staan zonder dat ze het merken.
+  Een naam in de kop `Reply-To` kan tekens bevatten die `sendMail` weigert (een komma, aanhalingstekens), dus de naam staat in de tekst.
+- **Alternatieven:** "Een bericht laten verwijderen" als voorgekozen antwoord; de naam in de kop `Reply-To`.
+
+### Bij een fout gaat de focus naar het blok met fouten
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** na een verzending met fouten, of een mislukte verzending, krijgt het blok bovenaan de focus (`tabIndex={-1}`, `focus()` in een effect van `ContactForm`).
+  Mislukt het versturen of is de limiet bereikt, dan staat dat in een `Card` met een kop, met een link `mailto:` naar de redactie, en geen `ErrorSummary`: er is geen veld om naartoe te linken.
+- **Waarom:** met JavaScript laadt de pagina niet opnieuw, dus een schermlezer begint niet bovenaan en hoort anders niets (zie _Een formulier laat de controle aan de site_).
+  Zonder JavaScript laadt de pagina opnieuw en staat het blok bovenaan; het effect doet dan na het laden hetzelfde.
+- **Alternatieven:** `role="alert"` op het blok; dat leest op een pagina die opnieuw laadt niet betrouwbaar voor.
+
+### De browsertest mailt naar een eigen nepserver die de mails in een map zet
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `e2e/contact.spec.ts` verstuurt het formulier naar `scripts/fake-smtp.js`, een kleine SMTP-server met STARTTLS die Playwright start en die elke mail als bestand in `.next/fake-smtp` zet.
+  De test leest die map.
+  De server maakt zelf een certificaat met `openssl`, en de sites in de test vertrouwen het via `NODE_EXTRA_CA_CERTS`.
+- **Waarom:** de site draait in een ander proces dan de test, dus de test kan een mail alleen zien als de server die opslaat.
+  Geen echte mail en geen verzoek aan een derde.
+  `NODE_TLS_REJECT_UNAUTHORIZED=0` zou de controle van het certificaat voor het hele proces uitzetten.
+- **Alternatieven:** de nepserver van `mail.test.ts` hergebruiken; die draait in het testproces zelf en kan de site niet bedienen.
+  Of de verzending stubben; dan test de e2e-test de mail niet.
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt

@@ -12,10 +12,11 @@ import { ThemeToggle } from '../ThemeToggle'
 import { withBranch } from '../title'
 import { updatesPath, updatesTitle } from '../updates'
 
-// The links in the footer, about the site itself: the page about us, the sources, the privacy page, the accessibility
+// The links in the footer, about the site itself: the page about us, the contact form, the sources, the privacy page, the accessibility
 // statement and the updates. The main menu does not have them.
 const footerItems = [
   { href: '/over-ons', label: 'Over ons' },
+  { href: '/contact', label: 'Contact' },
   { href: '/bronnen', label: 'Bronnen' },
   { href: '/privacy', label: 'Privacy' },
   { href: '/toegankelijkheid', label: 'Toegankelijkheid' },

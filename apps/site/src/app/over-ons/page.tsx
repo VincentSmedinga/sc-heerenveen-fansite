@@ -38,8 +38,8 @@ export default function AboutPage() {
           daar toestemming voor geeft. Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
         </Text>
         <Text>
-          Ben je uitgever en wil je dat we iets veranderen of weghalen? Mail dan naar <EmailLink />. We pakken je
-          verzoek zo snel mogelijk op.
+          Ben je uitgever en wil je dat we iets veranderen of weghalen? Vul het formulier bij{' '}
+          <Link href="/contact">Contact</Link> in, of mail naar <EmailLink />. We pakken je verzoek zo snel mogelijk op.
         </Text>
         <Text>
           Wat we met je gegevens doen, lees je bij <Link href="/privacy">Privacy</Link>.

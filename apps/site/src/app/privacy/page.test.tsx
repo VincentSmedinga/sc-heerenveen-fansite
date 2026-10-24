@@ -57,17 +57,24 @@ describe('the page Privacy', () => {
     const paragraphs = [...html.matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 
     expect(html).not.toMatch(/<(ul|ol|li)[ >]/)
-    expect(paragraphs).toHaveLength(6)
+    expect(paragraphs).toHaveLength(7)
     expect(paragraphs[1]).toContain('logbestanden bij, met onder meer IP-adressen')
     expect(paragraphs[2]).toContain('Kies je Licht of Donker in de footer')
     expect(paragraphs[3]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
-    expect(paragraphs[4]).toContain('Een mail aan ons gebruiken we alleen om te antwoorden.')
-    expect(paragraphs[4]).toContain('we hebben geen gegevens van je.')
-    expect(paragraphs[5]).toContain('Autoriteit Persoonsgegevens')
+    expect(paragraphs[4]).toContain('dan komt het in de mailbox van de redactie')
+    expect(paragraphs[4]).toContain('bewaren het tot de zaak is afgehandeld, hoogstens een jaar')
+    expect(paragraphs[4]).toContain('Het formulier slaat niets op de site zelf op.')
+    expect(paragraphs[5]).toContain('Vragen over je gegevens stel je aan de redactie')
+    expect(paragraphs[6]).toContain('Autoriteit Persoonsgegevens')
   })
 
-  it('links to the editors by email and to the Autoriteit Persoonsgegevens, and to nothing else', () => {
+  it('no longer says that we have no data of the visitor', () => {
+    expect(html).not.toContain('we hebben geen gegevens van je')
+  })
+
+  it('links to the contact form, the editors by email and the Autoriteit Persoonsgegevens, and to nothing else', () => {
     expect(links).toEqual([
+      ['/contact', 'Contact'],
       ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
       ['https://www.autoriteitpersoonsgegevens.nl', 'Autoriteit Persoonsgegevens'],
     ])
