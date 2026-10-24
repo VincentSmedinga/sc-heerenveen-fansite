@@ -2737,7 +2737,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De contrasttabel bij Tokens › Kleur toetst die twee op het vlak van de footer.
   De stap `sand-700` blijft in de reeks, ook al gebruikt nu niets hem.
   Een bezochte link ziet er in de footer hetzelfde uit als een andere, zoals overal behalve bij koppen en discussietitels.
-  \=======
 
 ### De pagina Wat is er nieuw heet Updates, op `/updates`
 
