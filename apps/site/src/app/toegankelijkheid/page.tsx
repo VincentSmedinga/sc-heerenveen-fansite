@@ -4,7 +4,7 @@ import { Heading, Link, Page, Text, Time } from '@fansite/design-system'
 
 import { email } from '../../contact'
 import { pageMetadata } from '../../metadata'
-import { dateOf } from '../../whats-new'
+import { dateOf } from '../../updates'
 
 // Render on each request: the canonical URL and the Open Graph address come from SITE_ENV, which the build doesn't know.
 export const dynamic = 'force-dynamic'

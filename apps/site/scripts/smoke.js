@@ -16,7 +16,7 @@ import { setTimeout as sleep } from 'node:timers/promises'
 
 import { pages, shareImage } from '../src/pages.ts'
 import { releaseNotes } from '../src/release-notes.ts'
-import { dateOf, releasesOf } from '../src/whats-new.ts'
+import { dateOf, releasesOf } from '../src/updates.ts'
 
 const [folder] = process.argv.slice(2)
 
@@ -36,7 +36,7 @@ const port = process.env['SMOKE_PORT'] ?? '3123'
 const origin = `http://127.0.0.1:${port}`
 const serverFile = path.resolve(folder, 'apps/site/server.js')
 
-// The versions Wat is er nieuw must show: those in the CHANGELOG.md of this checkout that have Dutch sentences. The bundler
+// The versions Updates must show: those in the CHANGELOG.md of this checkout that have Dutch sentences. The bundler
 // puts the file into the build, and the page shows nothing when that fails, so the smoke test compares the two. Before
 // the first release there is no file and no version.
 const changelogFile = path.resolve(import.meta.dirname, '../../../CHANGELOG.md')
@@ -47,18 +47,18 @@ const layersFile = path.resolve(import.meta.dirname, '../../../packages/design-s
 const declaredLayers = layersIn(readFileSync(layersFile, 'utf8'))
 assert.ok(declaredLayers.length > 0, 'layers.css declares no layers')
 
-/** Fetches the feed of Wat is er nieuw and checks it: RSS, an item per version, and links to the site in `siteOrigin`. */
+/** Fetches the feed of Updates and checks it: RSS, an item per version, and links to the site in `siteOrigin`. */
 async function checkFeed(siteOrigin) {
-  const feed = await fetch(`${origin}/wat-is-er-nieuw/feed.xml`)
+  const feed = await fetch(`${origin}/updates/feed.xml`)
   const xml = await feed.text()
   assert.equal(feed.status, 200)
   assert.equal(feed.headers.get('content-type'), 'application/rss+xml; charset=utf-8')
   assert.match(xml, /^<\?xml version="1\.0" encoding="UTF-8"\?>\n<rss version="2\.0"/)
-  assert.ok(xml.includes(`<link>${siteOrigin}/wat-is-er-nieuw</link>`), `the feed doesn't link to ${siteOrigin}`)
+  assert.ok(xml.includes(`<link>${siteOrigin}/updates</link>`), `the feed doesn't link to ${siteOrigin}`)
   assert.equal(xml.match(/<item>/g)?.length ?? 0, releases.length)
 
   for (const { version } of releases) {
-    assert.ok(xml.includes(`<link>${siteOrigin}/wat-is-er-nieuw#versie-${version}</link>`), `no link to ${version}`)
+    assert.ok(xml.includes(`<link>${siteOrigin}/updates#versie-${version}</link>`), `no link to ${version}`)
   }
 
   return feed
@@ -199,7 +199,7 @@ async function checkShareImage() {
 
 /**
  * Fetches the sitemap and checks it: the pages of the site, each with the address of `siteOrigin`, and nothing but the
- * addresses (no lastmod, changefreq or priority). The feed of Wat is er nieuw is not a page, so it is not in it.
+ * addresses (no lastmod, changefreq or priority). The feed of Updates is not a page, so it is not in it.
  */
 async function checkSitemap(siteOrigin) {
   const sitemap = await fetch(`${origin}/sitemap.xml`)
@@ -345,7 +345,7 @@ await withEmptyDatabase((database) =>
     assert.match(html, /We hebben de afgelopen twee weken nog geen nieuws gevonden\. Kijk straks nog eens\./)
     assert.match(html, /<a href="\/bronnen">Onze bronnen<\/a>/)
     assert.doesNotMatch(html, /Binnenkort meer/)
-    assert.match(html, /<footer[^>]*>.*href="\/wat-is-er-nieuw">Wat is er nieuw<\/a>.*<\/footer>/s)
+    assert.match(html, /<footer[^>]*>.*href="\/updates">Updates<\/a>.*<\/footer>/s)
 
     const asset = html.match(/\/_next\/static\/[^"'\\]+\.(?:css|js)/)?.[0]
     assert.ok(asset, 'the page links to no static file')
@@ -392,19 +392,30 @@ await withEmptyDatabase((database) =>
     assert.equal((await fetch(`${origin}/podcasts?pagina=2`)).status, 404)
     assert.equal((await fetch(`${origin}/podcasts?pagina=0`)).status, 404)
 
-    // Wat is er nieuw shows the versions of the build, newest first, and points feed readers to its feed.
-    const whatsNew = await fetch(`${origin}/wat-is-er-nieuw`)
-    const whatsNewHtml = await whatsNew.text()
-    assert.equal(whatsNew.status, 200)
-    assert.match(whatsNewHtml, /<h1[^>]*>Wat is er nieuw<\/h1>/)
-    assert.match(whatsNewHtml, /<link rel="alternate" type="application\/rss\+xml" href="\/wat-is-er-nieuw\/feed\.xml"/)
+    // Updates shows the versions of the build, newest first, and points feed readers to its feed.
+    const updatesResponse = await fetch(`${origin}/updates`)
+    const updatesHtml = await updatesResponse.text()
+    assert.equal(updatesResponse.status, 200)
+    assert.match(updatesHtml, /<h1[^>]*>Updates<\/h1>/)
+    assert.match(updatesHtml, /<link rel="alternate" type="application\/rss\+xml" href="\/updates\/feed\.xml"/)
     assert.deepEqual(
-      [...whatsNewHtml.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map(([, heading]) => heading.replaceAll(/<[^>]*>/g, '')),
+      [...updatesHtml.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map(([, heading]) => heading.replaceAll(/<[^>]*>/g, '')),
       releases.map((release) => `${dateOf(release)} versie ${release.version}`),
     )
 
     if (releases.length === 0) {
-      assert.match(whatsNewHtml, /We hebben nog geen versie uitgebracht\./)
+      assert.match(updatesHtml, /We hebben nog geen versie uitgebracht\./)
+    }
+
+    // The old addresses of Updates and its feed forward for good, so old links and feed readers keep working.
+    for (const [from, to] of [
+      ['/wat-is-er-nieuw', '/updates'],
+      ['/wat-is-er-nieuw/feed.xml', '/updates/feed.xml'],
+    ]) {
+      const moved = await fetch(origin + from, { redirect: 'manual' })
+
+      assert.equal(moved.status, 308, from)
+      assert.equal(new URL(moved.headers.get('location') ?? '', origin).pathname, to)
     }
 
     const feed = await checkFeed('https://acc.sc.heerenveen.org')
@@ -430,7 +441,7 @@ await withEmptyDatabase((database) =>
     for (const [page, pageHtml] of [
       [origin, html],
       [`${origin}/bronnen`, sourcesHtml],
-      [`${origin}/wat-is-er-nieuw`, whatsNewHtml],
+      [`${origin}/updates`, updatesHtml],
     ]) {
       const urls = await loadedUrls(page, pageHtml)
       assert.ok(

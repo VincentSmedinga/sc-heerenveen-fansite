@@ -50,7 +50,7 @@ Building, reviewing, design and research for their own sake, and help with the o
 - At each release, writes what is new for visitors, in Dutch, from `CHANGELOG.md` and the release pull request.
   They are short lines, not full sentences: _Nederlands schrijven_ in `CONTRIBUTING.md` applies to the words, not to the sentence length.
   The owner approves them, and a small pull request puts them in `apps/site/src/release-notes.ts` before the owner merges the release.
-  The page Wat is er nieuw shows a version only once `CHANGELOG.md` has it, so the lines can wait in the file.
+  The page Updates shows a version only once `CHANGELOG.md` has it, so the lines can wait in the file.
   The lines follow these rules:
   - One line per thing a visitor can find or do, with related facts on one line, about five to eight lines per version.
   - The place first, then a colon, when a line is about one page or part of the site: "Op home: het nieuws over onze club van de afgelopen week."

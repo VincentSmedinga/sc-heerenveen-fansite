@@ -338,8 +338,8 @@ const appFiles = [
   'apps/site/src/app/bronnen/page.tsx',
   'apps/site/src/app/bronnen/page.test.tsx',
   'apps/site/src/app/over-ons/page.tsx',
-  'apps/site/src/app/wat-is-er-nieuw/page.tsx',
-  'apps/site/src/app/wat-is-er-nieuw/feed.xml/route.ts',
+  'apps/site/src/app/updates/page.tsx',
+  'apps/site/src/app/updates/feed.xml/route.ts',
   'apps/site/src/app/(legal)/privacy/page.tsx',
   'apps/site/src/app/nieuws/[slug]/page.tsx',
 ]
@@ -348,7 +348,7 @@ test('opens the page of the site that the branch changes, and the home page when
   assert.equal(sitePathFor(['apps/site/src/app/bronnen/page.tsx'], appFiles), '/bronnen')
   assert.equal(sitePathFor(['apps/site/src/app/bronnen/page.test.tsx'], appFiles), '/bronnen')
   // A route has no page of its own: the page of the folder above it.
-  assert.equal(sitePathFor(['apps/site/src/app/wat-is-er-nieuw/feed.xml/route.ts'], appFiles), '/wat-is-er-nieuw')
+  assert.equal(sitePathFor(['apps/site/src/app/updates/feed.xml/route.ts'], appFiles), '/updates')
   // A route group is not in the address.
   assert.equal(sitePathFor(['apps/site/src/app/(legal)/privacy/page.tsx'], appFiles), '/privacy')
   assert.equal(sitePathFor(['apps/site/src/app/layout.tsx'], appFiles), '/')

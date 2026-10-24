@@ -9,16 +9,16 @@ import { headerColour } from '../colours'
 import { reviewBranch } from '../env'
 import { SiteNavigation } from '../SiteNavigation'
 import { withBranch } from '../title'
-import { whatsNewPath, whatsNewTitle } from '../whats-new'
+import { updatesPath, updatesTitle } from '../updates'
 
 // The links in the footer, about the site itself: the page about us, the sources, the privacy page, the accessibility
-// statement and what is new. The main menu does not have them.
+// statement and the updates. The main menu does not have them.
 const footerItems = [
   { href: '/over-ons', label: 'Over ons' },
   { href: '/bronnen', label: 'Bronnen' },
   { href: '/privacy', label: 'Privacy' },
   { href: '/toegankelijkheid', label: 'Toegankelijkheid' },
-  { href: whatsNewPath, label: whatsNewTitle },
+  { href: updatesPath, label: updatesTitle },
 ]
 
 const branch = reviewBranch()

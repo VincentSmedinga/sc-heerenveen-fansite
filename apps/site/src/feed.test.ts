@@ -12,9 +12,9 @@ describe('feedOf', () => {
     const feed = feedOf(releases, 'https://acc.sc.heerenveen.org')
 
     expect(feed).toMatch(/^<\?xml version="1\.0" encoding="UTF-8"\?>\n<rss version="2\.0"/)
-    expect(feed).toContain('<title>Wat is er nieuw – sc Heerenveen Fansite</title>')
-    expect(feed).toContain('<link>https://acc.sc.heerenveen.org/wat-is-er-nieuw</link>')
-    expect(feed).toContain('<atom:link href="https://acc.sc.heerenveen.org/wat-is-er-nieuw/feed.xml" rel="self"')
+    expect(feed).toContain('<title>Updates – sc Heerenveen Fansite</title>')
+    expect(feed).toContain('<link>https://acc.sc.heerenveen.org/updates</link>')
+    expect(feed).toContain('<atom:link href="https://acc.sc.heerenveen.org/updates/feed.xml" rel="self"')
     expect(feed).toContain('<language>nl</language>')
   })
 
@@ -27,8 +27,8 @@ describe('feedOf', () => {
       [
         '<item>',
         '<title>Versie 0.1.0</title>',
-        '<link>https://sc.heerenveen.org/wat-is-er-nieuw#versie-0.1.0</link>',
-        '<guid isPermaLink="true">https://sc.heerenveen.org/wat-is-er-nieuw#versie-0.1.0</guid>',
+        '<link>https://sc.heerenveen.org/updates#versie-0.1.0</link>',
+        '<guid isPermaLink="true">https://sc.heerenveen.org/updates#versie-0.1.0</guid>',
         '<pubDate>Wed, 21 Oct 2026 00:00:00 GMT</pubDate>',
         '<description>&lt;ul&gt;&lt;li&gt;De eerste versie.&lt;/li&gt;&lt;li&gt;Met een tweede zin.&lt;/li&gt;&lt;/ul&gt;</description>',
         '</item>',

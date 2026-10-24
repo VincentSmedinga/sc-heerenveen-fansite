@@ -16,7 +16,7 @@ const pages = [
   { path: '/over-ons', status: 200 },
   { path: '/privacy', status: 200 },
   { path: '/toegankelijkheid', status: 200 },
-  { path: '/wat-is-er-nieuw', status: 200 },
+  { path: '/updates', status: 200 },
   { path: '/bestaat-niet', status: 404 },
 ]
 
