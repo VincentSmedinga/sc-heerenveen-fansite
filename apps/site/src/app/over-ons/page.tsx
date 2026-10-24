@@ -21,13 +21,16 @@ export default function AboutPage() {
         <Heading level={2}>Wie we zijn</Heading>
         <Text appearance="intro">
           De sc Heerenveen Fansite is een site van supporters, voor supporters. We zetten de koppen van de media over sc
-          Heerenveen op één plek, met een link naar het hele verhaal. We schrijven niks over en we passen niks aan. We
-          hebben geen advertenties, geen abonnementen en geen winstoogmerk. Bij de site hoort ook{' '}
-          <Link href="https://forum.heerenveen.org">ons forum</Link>, waar supporters met elkaar praten.
+          Heerenveen op één plek, met een link naar het hele verhaal.
         </Text>
         <Text>
-          Vincent Smedinga begon de site in 1997, als SC Heerenveen Online. In die jaren hielpen veel mensen mee, aan de
-          site en aan het forum, en ook nu weer. De laatste versie liep tot 2006, en in 2026 is de site terug.
+          We schrijven niks over en we passen niks aan. We hebben geen advertenties, geen abonnementen en geen
+          winstoogmerk. Bij de site hoort ook <Link href="https://forum.heerenveen.org">ons forum</Link>, waar
+          supporters met elkaar praten.
+        </Text>
+        <Text>
+          Vincent Smedinga begon de site in 1997. In die jaren hielpen veel mensen mee, aan de site en aan het forum, en
+          ook nu weer. De laatste versie liep tot 2006, en in 2026 is de site terug.
         </Text>
         <Heading level={2}>Hoe we werken</Heading>
         <Text>

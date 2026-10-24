@@ -55,8 +55,15 @@ describe('the page Over ons', () => {
     ])
   })
 
-  it('names the founder and the old name, and writes the club as sc Heerenveen', () => {
-    expect(html).toContain('Vincent Smedinga begon de site in 1997, als SC Heerenveen Online.')
-    expect(html.replaceAll('SC Heerenveen Online', '')).not.toMatch(/SC Heerenveen/)
+  it('starts a paragraph of its own at "We schrijven niks over", after the intro', () => {
+    expect(html).toContain(
+      'met een link naar het hele verhaal.</b></p><p>We schrijven niks over en we passen niks aan.',
+    )
+  })
+
+  it('names the founder without the old name of the site, and writes the club as sc Heerenveen', () => {
+    expect(html).toContain('Vincent Smedinga begon de site in 1997. In die jaren hielpen veel mensen mee')
+    expect(html).not.toContain('Online')
+    expect(html).not.toMatch(/SC Heerenveen/)
   })
 })

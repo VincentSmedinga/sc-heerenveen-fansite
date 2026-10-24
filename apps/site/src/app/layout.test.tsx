@@ -18,7 +18,7 @@ describe('RootLayout', () => {
     const html = renderToStaticMarkup(<RootLayout>Inhoud</RootLayout>)
 
     expect(html).toContain(
-      '<footer class="hf-page-footer"><p class="hf-meta">Alle koppen en links op één plek.</p><p class="hf-meta">Voor supporters, door supporters.</p><nav',
+      '<footer class="hf-page-footer"><p class="hf-meta">Alle koppen en links op één plek.</p><p class="hf-meta">Voor supporters door supporters.</p><nav',
     )
   })
 
