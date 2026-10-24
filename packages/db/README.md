@@ -57,16 +57,18 @@ Het bronnenregister legt per bron vast wat we mogen tonen.
 Een kop, de link en de naam van de bron mogen altijd, dus daar zit geen kolom voor.
 Al het andere staat uit tot de bron toestemming geeft (principe 1 en 2 in het hoofdstuk Redactie van Storybook).
 
-| Kolom                                            | Betekenis                                                                            | Standaard |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------ | --------- |
-| `name`, `domain`, `kind`                         | De naam, het domein (uniek) en de soort: `news`, `podcast`, `forum`, `club`, `video` | geen      |
-| `description`                                    | Wat de bron is, in een of twee zinnen van onszelf, voor de pagina 'Onze bronnen'     | leeg      |
-| `intro_max_length`                               | Hoeveel tekens van een intro we tonen; 0 is geen intro                               | 0         |
-| `allow_image`, `allow_embed`                     | Of we een afbeelding tonen, en of we de bron insluiten                               | onwaar    |
-| `attribution`                                    | De bronvermelding zoals de bron die wil; leeg betekent de naam van de bron           | leeg      |
-| `consent_status`, `consent_date`, `consent_note` | De toestemming: `none`, `asked` of `given`, sinds welke dag, en wat is afgesproken   | `none`    |
-| `enabled`                                        | Zet de bron uit zonder hem te verwijderen                                            | waar      |
-| `created_at`                                     | Wanneer de bron is toegevoegd, in UTC                                                | nu        |
+| Kolom                                            | Betekenis                                                                                          | Standaard |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------- | --------- |
+| `name`, `domain`, `kind`                         | De naam, het domein (uniek) en de soort: `news`, `podcast`, `forum`, `club`, `video`               | geen      |
+| `description`                                    | Wat de bron is, in een of twee zinnen van onszelf, voor de pagina 'Onze bronnen'                   | leeg      |
+| `intro_max_length`                               | Hoeveel tekens van een intro we tonen; 0 is geen intro                                             | 0         |
+| `allow_image`, `allow_embed`                     | Of we een afbeelding tonen, en of we de bron insluiten                                             | onwaar    |
+| `attribution`                                    | De bronvermelding zoals de bron die wil; leeg betekent de naam van de bron                         | leeg      |
+| `slug`                                           | De vaste naam in een adres, zoals `omroep-abe`; uniek, en een andere naam verandert het adres niet | leeg      |
+| `apple_podcasts_url`, `spotify_url`              | Waar een podcast staat op Apple Podcasts en Spotify; alleen `https`, hoogstens 300 tekens          | leeg      |
+| `consent_status`, `consent_date`, `consent_note` | De toestemming: `none`, `asked` of `given`, sinds welke dag, en wat is afgesproken                 | `none`    |
+| `enabled`                                        | Zet de bron uit zonder hem te verwijderen                                                          | waar      |
+| `created_at`                                     | Wanneer de bron is toegevoegd, in UTC                                                              | nu        |
 
 Een bron met alleen een naam, een domein en een soort krijgt dus de strengste waarden.
 De CHECK-constraint `sources_display_needs_consent` weigert een bron met een intro, een afbeelding of insluiten zolang `consent_status` niet `given` is.
@@ -166,6 +168,8 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
   `listRecentItems(db, since, until)` geeft de berichten van die bronnen van `since` tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam), en geen afleveringen van bronnen van het soort podcast;
+  `listPodcastEpisodes(db, { limit, offset, podcast, until })` geeft juist de afleveringen van de podcasts die aanstaan, het nieuwste eerst, met alleen de titel, de link, de tijd en de naam van de podcast, en `countPodcastEpisodes` geeft het totaal; `podcast` is de `slug` van één podcast;
+  `listPodcasts(db)` geeft de podcasts met een `slug` en minstens één aflevering, voor het filter, en `findPodcast(db, slug)` geeft de naam, de beschrijving en de adressen bij Apple Podcasts en Spotify van één podcast;
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;
 - `@fansite/db/lock`: `withLock(pool, name, waitSeconds, task)` doet een taak terwijl het een slot in de database houdt (`GET_LOCK`), en `lockNameFor(url, task)` geeft de naam daarvan, met de taak en de naam van de database erin.

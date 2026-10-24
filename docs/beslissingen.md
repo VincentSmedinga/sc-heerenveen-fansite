@@ -2252,6 +2252,41 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de beschrijving in eigen woorden, zoals eerder bedacht; dat staat verder van wat de maker over zichzelf zegt.
   Of de beschrijving uit de feed bij elke run overnemen; dat vraagt een lezer voor het kanaal van de feed en overschrijft wat in het register staat.
 
+### `/podcasts` is één lijst met een filter, en de URL's hebben een slug
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `/podcasts` toont alle afleveringen met 25 per pagina, en een filter per podcast via `?podcast=<slug>`.
+  De slug staat in een kolom van `sources`, zodat het adres niet verandert als de naam verandert.
+- **Waarom:** met twee podcasts is een pagina per podcast overbodig, en een filter past bij het filter per bron van het nieuwsarchief.
+  Een adres als `/podcasts?podcast=omroep-abe` blijft werken als we de naam van de podcast aanpassen of er een podcast bijkomt.
+  Een pagina die buiten het bereik valt, geeft 404 en niet een lege lijst.
+- **Alternatieven:** een pagina per podcast, `/podcasts/omroep-abe`.
+  Of de slug uit de naam afleiden in de code; dan verandert het adres mee met de naam.
+
+### Een aflevering linkt naar de maker, een podcast ook naar Apple en Spotify
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de titel van een aflevering linkt naar de pagina van de aflevering bij de maker.
+  Bij een gekozen podcast staan tekstlinks naar de podcast op Apple Podcasts en Spotify, uit het register.
+  Links per aflevering naar die platforms komen er niet.
+- **Waarom:** de feeds geven alleen adressen van de show, niet van afleveringen.
+  Per aflevering zoeken kan alleen bij hun diensten: Apple geeft de laatste 200 afleveringen, en Spotify vraagt een account met sleutel.
+  Elke aflevering zou naar hen gaan.
+  Een adres van de show schrijven we één keer op, en het werkt zonder app.
+  De pagina van de maker blijft de standaard omdat die de maker zelf is (principe 1).
+- **Alternatieven:** alleen de pagina van de maker, zonder platformlinks.
+  Of links per aflevering, met opzoeken bij Apple en Spotify.
+
+### Een slug vergelijken we letter voor letter
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de queries zoeken een podcast op zijn slug zonder de hoofdletters en accenten te negeren (`collate utf8mb4_bin`).
+  De kolom zelf blijft hoofdletterongevoelig en uniek.
+- **Waarom:** de kolom houdt twee slugs die alleen in hoofdletters of accenten verschillen buiten het register.
+  Een adres moet één podcast noemen, dus `?podcast=Omroep-Abe` is een onbekende podcast en geen tweede adres voor Omroep Abe.
+- **Alternatieven:** de collatie van de kolom veranderen in `utf8mb4_bin`; dan staan `omroep-abe` en `Omroep-Abe` allebei in het register.
+  Of de pagina de slug laten toetsen; dan kan een andere query dezelfde fout maken.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters

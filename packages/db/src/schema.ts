@@ -38,6 +38,12 @@ export const sources = mysqlTable(
     kind: mysqlEnum('kind', sourceKinds).notNull(),
     // What the source is, in one or two sentences of our own, for the page 'Onze bronnen'. Empty means no description.
     description: varchar('description', { length: 300 }),
+    // The fixed name of the source in an address, such as `omroep-abe`, so that a renamed source keeps its address.
+    // Empty means the source has none. Unique.
+    slug: varchar('slug', { length: 100 }).unique(),
+    // Where the podcast can be found on Apple Podcasts and on Spotify. Empty means it has no such address.
+    applePodcastsUrl: varchar('apple_podcasts_url', { length: 300 }),
+    spotifyUrl: varchar('spotify_url', { length: 300 }),
 
     // The display policy. An intro is shown up to this many characters; 0 means no intro.
     introMaxLength: int('intro_max_length', { unsigned: true }).notNull().default(0),
@@ -62,6 +68,8 @@ export const sources = mysqlTable(
       'sources_display_needs_consent',
       sql`${table.consentStatus} = 'given' or (${table.introMaxLength} = 0 and ${table.allowImage} = false and ${table.allowEmbed} = false)`,
     ),
+    check('sources_apple_podcasts_url_https', sql`${table.applePodcastsUrl} like 'https://%'`),
+    check('sources_spotify_url_https', sql`${table.spotifyUrl} like 'https://%'`),
   ],
 )
 

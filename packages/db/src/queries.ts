@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, lte, ne, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, exists, gte, isNotNull, lte, ne, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
@@ -6,9 +6,44 @@ import { discussions, items, sources } from './schema.ts'
 
 export type PublicDiscussion = Awaited<ReturnType<typeof listNewestDiscussions>>[number]
 
+export type PublicEpisode = Awaited<ReturnType<typeof listPodcastEpisodes>>[number]
+
 export type PublicItem = Awaited<ReturnType<typeof listRecentItems>>[number]
 
+export type PublicPodcast = Awaited<ReturnType<typeof listPodcasts>>[number]
+
 export type PublicSource = Awaited<ReturnType<typeof listEnabledSources>>[number]
+
+/** How many episodes `listPodcastEpisodes` gives in all, with the same `until` and `podcast`. */
+export async function countPodcastEpisodes(db: Database, { podcast, until }: { podcast?: string; until: Date }) {
+  const [row] = await db
+    .select({ total: count() })
+    .from(items)
+    .innerJoin(sources, eq(items.sourceId, sources.id))
+    .where(episodeFilter(until, podcast))
+
+  return row?.total ?? 0
+}
+
+/**
+ * The podcast with this slug, when it is switched on: its name, its description in our own words, which is null when
+ * it has none, and the addresses where it can be found on Apple Podcasts and Spotify, which are null when it has none.
+ * It gives nothing for another source, so a slug of a news source is unknown here.
+ */
+export async function findPodcast(db: Database, slug: string) {
+  const [row] = await db
+    .select({
+      applePodcastsUrl: sources.applePodcastsUrl,
+      description: sources.description,
+      name: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('podcast_name'),
+      slug: sql<string>`${sources.slug}`.as('slug'),
+      spotifyUrl: sources.spotifyUrl,
+    })
+    .from(sources)
+    .where(and(eq(sources.enabled, true), eq(sources.kind, 'podcast'), hasSlug(slug)))
+
+  return row
+}
 
 /**
  * The sources that are switched on, by name, with what the page 'Onze bronnen' shows of them: the name, the domain, the
@@ -51,6 +86,60 @@ export function listNewestDiscussions(db: Database, limit = 4) {
 }
 
 /**
+ * The episodes of the podcasts that are switched on, newest first, from `offset`, at most `limit`, with what the pages
+ * show of them: the title, the link to the page of the episode, the time and the name of the podcast. That name is the
+ * way the podcast wants to be credited, or else its own name. Every other column stays internal, so none can reach a
+ * page. Give the `slug` of a podcast as `podcast` to get the episodes of that podcast only.
+ *
+ * Pass the moment of now as `until`, as with `listRecentItems`: an episode a feed dated later doesn't belong on top.
+ */
+export function listPodcastEpisodes(
+  db: Database,
+  { limit, offset = 0, podcast, until }: { limit: number; offset?: number; podcast?: string; until: Date },
+) {
+  return db
+    .select({
+      publishedAt: items.publishedAt,
+      sourceName: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('source_name'),
+      title: items.title,
+      url: items.url,
+    })
+    .from(items)
+    .innerJoin(sources, eq(items.sourceId, sources.id))
+    .where(episodeFilter(until, podcast))
+    .orderBy(desc(items.publishedAt), desc(items.id))
+    .limit(limit)
+    .offset(offset)
+}
+
+/**
+ * The podcasts that are switched on and have a slug and at least one episode, by name, with what the filter shows of
+ * them: the name, the way the podcast wants to be credited, and the slug for the address.
+ */
+export function listPodcasts(db: Database) {
+  return db
+    .select({
+      name: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('podcast_name'),
+      slug: sql<string>`${sources.slug}`.as('slug'),
+    })
+    .from(sources)
+    .where(
+      and(
+        eq(sources.enabled, true),
+        eq(sources.kind, 'podcast'),
+        isNotNull(sources.slug),
+        exists(
+          db
+            .select({ one: sql`1` })
+            .from(items)
+            .where(eq(items.sourceId, sources.id)),
+        ),
+      ),
+    )
+    .orderBy(asc(sources.name))
+}
+
+/**
  * The news items published from `since` up to and including `until`, newest first, from the sources that are switched
  * on, with what the homepage shows of them: the headline, the link, the time, whether it is behind a paywall, and the
  * name of the source. That name is the way the source wants to be credited, or else its own name. The policy and the
@@ -81,4 +170,22 @@ export function listRecentItems(db: Database, since: Date, until: Date) {
       ),
     )
     .orderBy(desc(items.publishedAt), desc(items.id))
+}
+
+/** The conditions that make an item an episode to show: of a podcast that is switched on, not later than `until`, and of the podcast with this slug when `podcast` is given. */
+function episodeFilter(until: Date, podcast: string | undefined) {
+  return and(
+    eq(sources.enabled, true),
+    eq(sources.kind, 'podcast'),
+    lte(items.publishedAt, until),
+    podcast === undefined ? undefined : hasSlug(podcast),
+  )
+}
+
+/**
+ * Whether the source has exactly this slug. The column ignores case and accents, which keeps two slugs that differ only
+ * in those from both being in the register, but an address must name one podcast only, so this compares byte for byte.
+ */
+function hasSlug(slug: string) {
+  return sql`${sources.slug} = ${slug} collate utf8mb4_bin`
 }

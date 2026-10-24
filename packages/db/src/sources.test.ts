@@ -128,6 +128,33 @@ describe('the domain', () => {
   })
 })
 
+describe('the slug and the addresses of a podcast', () => {
+  it('may be left out, and a slug is unique', async () => {
+    await insert(minimal)
+    await insert({ ...minimal, domain: 'andere.test', name: 'Andere' })
+    await insert({ ...minimal, domain: 'een.test', name: 'Een', slug: 'een' })
+
+    await expect(insert({ ...minimal, domain: 'twee.test', name: 'Twee', slug: 'een' })).rejects.toThrow(
+      /Duplicate entry/,
+    )
+  })
+
+  it('accepts https addresses, and refuses any other', async () => {
+    await insert({
+      ...minimal,
+      apple_podcasts_url: 'https://podcasts.apple.com/nl/podcast/x/id1',
+      spotify_url: 'https://open.spotify.com/show/x',
+    })
+
+    await expect(
+      insert({ ...minimal, apple_podcasts_url: 'http://podcasts.apple.com/nl/podcast/x/id1', domain: 'twee.test' }),
+    ).rejects.toThrow(/sources_apple_podcasts_url_https/)
+    await expect(insert({ ...minimal, domain: 'drie.test', spotify_url: 'javascript:alert(1)' })).rejects.toThrow(
+      /sources_spotify_url_https/,
+    )
+  })
+})
+
 describe('times', () => {
   it('are UTC when the database fills them in, whatever the time zone of the session', async () => {
     const connection = await database.pool.getConnection()

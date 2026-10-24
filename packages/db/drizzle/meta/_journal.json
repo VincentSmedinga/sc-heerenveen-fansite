@@ -36,6 +36,13 @@
       "when": 1792792836624,
       "tag": "0004_add_discussions",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1792802730035,
+      "tag": "0005_add_source_slug_and_podcast_links",
+      "breakpoints": true
     }
   ]
 }
