@@ -2,11 +2,11 @@ import { expect, test } from '@playwright/test'
 
 import { checkPage } from './check-page'
 
-// The second copy of the site in playwright.config.ts, which has no database. The pages that read the database, the homepage
-// and the sources page, are the error page.
+// The second copy of the site in playwright.config.ts, which has no database. The pages that read the database, the homepage,
+// the sources page and the podcasts page, are the error page.
 const withoutDatabase = 'http://127.0.0.1:3125'
 
-for (const path of ['/', '/bronnen']) {
+for (const path of ['/', '/bronnen', '/podcasts']) {
   for (const colorScheme of ['light', 'dark'] as const) {
     test(`the error page on ${path} in ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme })

@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { dateTimeOf, formatDayAndTime, formatDiscussionTime, formatNewsTime, weekdayStart, windowStart } from './news'
+import {
+  dateTimeOf,
+  formatDayAndTime,
+  formatDiscussionTime,
+  formatEpisodeTime,
+  formatNewsTime,
+  weekdayStart,
+  windowStart,
+} from './news'
 
 describe('windowStart', () => {
   it('is the first moment of the Dutch day thirteen days before today, in summer time', () => {
@@ -262,5 +270,40 @@ describe('formatDiscussionTime', () => {
 
     expect(formatDiscussionTime(new Date('2026-10-26T07:15:00Z'), monday)).toBe('08:15')
     expect(formatDiscussionTime(new Date('2026-10-24T20:15:00Z'), monday)).toBe('za 22:15')
+  })
+})
+
+describe('formatEpisodeTime', () => {
+  // Friday 23 October 2026, 15:40 in the Netherlands.
+  const now = new Date('2026-10-23T13:40:00Z')
+
+  it('is the short weekday and the time within the last seven days, as for the news', () => {
+    expect(formatEpisodeTime(new Date('2026-10-22T12:05:00Z'), now)).toBe(
+      formatNewsTime(new Date('2026-10-22T12:05:00Z'), now),
+    )
+    expect(formatEpisodeTime(new Date('2026-10-22T12:05:00Z'), now)).toBe('do 14:05')
+    expect(formatEpisodeTime(new Date('2026-10-17T22:30:00Z'), now)).toBe('zo 00:30')
+  })
+
+  it('is the date alone, without the time, for an episode from before the last seven days', () => {
+    expect(formatEpisodeTime(new Date('2026-10-16T12:05:00Z'), now)).toBe('16 okt')
+    expect(formatEpisodeTime(new Date('2026-01-05T12:05:00Z'), now)).toBe('5 jan')
+  })
+
+  it('has the year when the episode is from another year, because the list goes back years', () => {
+    expect(formatEpisodeTime(new Date('2025-12-31T12:05:00Z'), now)).toBe('31 dec 2025')
+    expect(formatEpisodeTime(new Date('2021-10-06T12:05:00Z'), now)).toBe('6 okt 2021')
+  })
+
+  it('counts the Dutch year, not the UTC year, at New Year', () => {
+    const later = new Date('2027-01-20T12:00:00Z')
+
+    // 00:30 on 1 January 2027 in the Netherlands is still 31 December 2026 in UTC, so this one is from this year.
+    expect(formatEpisodeTime(new Date('2026-12-31T23:30:00Z'), later)).toBe('1 jan')
+    expect(formatEpisodeTime(new Date('2026-12-31T22:30:00Z'), later)).toBe('31 dec 2026')
+  })
+
+  it('writes a moment after now, from a clock that is ahead, as today', () => {
+    expect(formatEpisodeTime(new Date('2026-10-23T20:00:00Z'), now)).toBe('vr 22:00')
   })
 })

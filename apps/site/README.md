@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu vijf pagina's: de homepage met de koppen van de afgelopen twee weken, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, en `/wat-is-er-nieuw` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu zes pagina's: de homepage met de koppen van de afgelopen twee weken, `/podcasts` met de afleveringen van de podcasts, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, en `/wat-is-er-nieuw` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -99,7 +99,29 @@ De server bewaart ze vijf minuten (`src/discussions.ts`).
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
+Onder de discussies staat het blok "Nieuwste podcasts": de vier nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/podcasts` eronder.
+De server bewaart ze vijf minuten (`src/podcasts.ts`).
+
 Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van de importer](../importer/README.md)).
+
+## De podcasts
+
+`/podcasts` toont de afleveringen van de podcasts die aanstaan, nieuwste eerst, 25 per pagina, elk als `NewsItem`: de titel als link naar de pagina van de aflevering bij de maker, de naam van de podcast en de tijd.
+Een aflevering van deze week heeft de korte dag en de tijd, zoals "wo 14:05"; een oudere heeft de datum, met het jaar als dat niet dit jaar is, want de lijst gaat jaren terug.
+Boven de lijst staat het filter (`Filter` uit het designsysteem): "Alle podcasts" en een link per podcast met afleveringen, als `/podcasts?podcast=omroep-abe`.
+De slug komt uit de kolom `slug` van `sources`, dus een andere naam verandert het adres niet.
+Bij een gekozen podcast staat in de zijbalk een kaart op een tonaal vlak (`Card` met `surface="soft"`) met de kop "Over Omroep Abe", de beschrijving van de podcast uit het register (`sources.description`, de tekst van de maker uit zijn feed, dezelfde als op Onze bronnen), en daarna "Luister ook op" met een lijst met een tekstlink per adres dat de podcast heeft.
+Heeft de podcast geen adressen, dan staat de beschrijving er alleen.
+Bij "Alle podcasts" staat er geen kaart.
+Op een smal scherm staat de zijbalk onder de lijst, zoals bij de andere pagina's.
+Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/podcasts?pagina=2`, en met een filter `/podcasts?podcast=omroep-abe&pagina=2`.
+Een podcast die niet in het filter staat, en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
+Een parameter die de pagina niet kent, telt niet mee.
+De server bewaart elke combinatie van podcast en pagina vijf minuten, maar alleen na de controle van het adres, zodat een bezoeker de cache niet kan vullen met adressen van zichzelf (`src/podcasts.ts`).
+Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
+De pagina laadt niets van een podcastplatform: alleen de links gaan erheen.
+
+`pnpm test:a11y` zet verzonnen afleveringen op de testpodcasts van de seed, genoeg voor een tweede pagina (`e2e/episodes.ts`).
 
 ## De bronnen
 

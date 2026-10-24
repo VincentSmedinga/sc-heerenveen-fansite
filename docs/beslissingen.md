@@ -2287,6 +2287,56 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de collatie van de kolom veranderen in `utf8mb4_bin`; dan staan `omroep-abe` en `Omroep-Abe` allebei in het register.
   Of de pagina de slug laten toetsen; dan kan een andere query dezelfde fout maken.
 
+### Een aflevering is een nieuwsregel
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** een aflevering wordt getoond met `NewsItem`, met de naam van de podcast als bron.
+  Er komt geen apart component voor een podcastregel.
+- **Waarom:** een aflevering heeft dezelfde onderdelen als een bericht: een titel als link, een bron en een tijd.
+  Een tweede component met dezelfde regel is code die hetzelfde doet.
+  Komt er ooit iets bij dat alleen voor afleveringen geldt, zoals een duur, dan kan er een component bij.
+- **Alternatieven:** een eigen component voor de podcastregel, zoals #20 voorstelde.
+
+### Het blok op de homepage staat in de zijbalk onder het forum
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** het blok "Nieuwste podcasts" toont de vier nieuwste afleveringen van alle podcasts samen, in de zijbalk onder "Nieuwste discussies", met een link naar `/podcasts`.
+- **Waarom:** de hoofdkolom is voor het nieuws, en de zijbalk heeft plaats voor meer blokken naast elkaar.
+  Vier regels past bij het forumblok.
+- **Alternatieven:** het blok boven het forum, of in de hoofdkolom onder het nieuws.
+
+### Het filter is een Navigation, en de paginering verdwijnt bij één pagina
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `Filter` in het designsysteem is een `Navigation` met een klasse van zichzelf, dus een `nav` met een naam, een lijst met links en `aria-current="page"` op de keuze.
+  `Pagination` heeft "Vorige", "Pagina 2 van 9" en "Volgende", en laat een link weg waar geen pagina is.
+  De pagina `/podcasts` toont de paginering alleen als er meer dan één pagina is.
+- **Waarom:** een filter van links heeft dezelfde onderdelen als een menu: dezelfde 44 pixels hoge links, hetzelfde teken voor de huidige keuze en dezelfde naam voor schermlezers.
+  Een tweede component zou dat nabouwen.
+  "Pagina 1 van 1" zonder een link zegt een bezoeker niets.
+- **Alternatieven:** een eigen component met een eigen lijst; dat is dubbel werk.
+  Of een `Select` voor de podcasts; dat vraagt JavaScript of een knop om te verzenden.
+
+### De tijd van een aflevering: de dag in de week, daarna de datum
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** een aflevering van de zeven dagen tot en met vandaag toont de korte dag en de tijd, zoals bij het nieuws: "wo 14:05".
+  Een oudere toont alleen de datum, zoals "16 okt", met het jaar als het niet dit jaar is: "6 okt 2021".
+- **Waarom:** de lijst gaat jaren terug, dus een datum zonder jaar is onduidelijk.
+  Zonder tijd past de datum met het jaar in de smalle kolom van een nieuwsregel; een tijd erbij zou over drie regels breken.
+- **Alternatieven:** de datum en de tijd, zoals bij het nieuws; dat past niet in de kolom met het jaar erbij.
+  Of altijd het jaar; dat is in de week overbodig.
+
+### Een lijst per podcast en pagina staat vijf minuten in het geheugen, na de controle van het adres
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de server bewaart de lijst van elke combinatie van podcast en pagina vijf minuten, met `cacheForKey`.
+  Hij controleert de slug en het paginanummer eerst tegen de lijst van podcasts en het aantal pagina's, en bewaart pas daarna iets.
+- **Waarom:** een bezoeker kan elk adres bedenken, en een bewaarde lijst per adres zou het geheugen van de server vullen.
+  Met de controle vooraf zijn er hooguit zoveel lijsten als er podcasts en pagina's zijn.
+- **Alternatieven:** niet bewaren; dat is een query per bezoek.
+  Of een grens aan het aantal bewaarde lijsten; dat is meer code en laat een bezoeker de goede lijsten uit het geheugen duwen.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
