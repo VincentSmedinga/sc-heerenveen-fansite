@@ -534,7 +534,8 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
   - Link: de pagina van de aflevering op `omny.fm`, zoals `https://omny.fm/shows/omroep-abe/<aflevering>`.
   - Verzoeken: de feed stuurt een `ETag`, dus een run zonder nieuwe aflevering krijgt "niet gewijzigd" in plaats van de feed van bijna 1 MB.
 - **`robots.txt`:** op `www.omnycontent.com` staat `Allow: /` voor iedereen.
-- **Meer tonen:** alleen met toestemming van de Leeuwarder Courant; het artwork en de beschrijving bewaren we niet.
+- **Beschrijving:** in het register staat de tekst van de maker uit het kanaal van de feed, zonder de HTML (zie _De beschrijving van een podcast is die van de maker_ in [`beslissingen.md`](beslissingen.md)).
+- **Meer tonen:** alleen met toestemming van de Leeuwarder Courant; het artwork en de beschrijving of shownotes van een aflevering bewaren we niet.
 - **Besluit: nemen.**
   De podcast gaat bijna helemaal over de club, heeft een pagina per aflevering en laat ons de feed lezen.
 
@@ -548,7 +549,8 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
   - Link: de pagina van de aflevering op Podbean, zoals `https://radiocamataru.podbean.com/e/<aflevering>/`.
   - Verzoeken: de feed stuurt een `ETag`.
 - **`robots.txt`:** op `feed.podbean.com` sluit alleen een paar paden van Podbean zelf, zoals het zoeken en de profielen; de feed is open.
-- **Meer tonen:** alleen met toestemming van de makers; het artwork en de beschrijving bewaren we niet.
+- **Beschrijving:** in het register staat de tekst van de maker uit het kanaal van de feed.
+- **Meer tonen:** alleen met toestemming van de makers; het artwork en de beschrijving of shownotes van een aflevering bewaren we niet.
 - **Besluit: nemen.**
   De podcast gaat bijna helemaal over de club, heeft een pagina per aflevering en laat ons de feed lezen.
 

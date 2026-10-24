@@ -153,18 +153,21 @@ describe('the seed', () => {
 
   it.each([
     {
+      description:
+        'Omroep Abe is de podcast over SC Heerenveen van de Leeuwarder Courant. Clubwatcher Sander de Vries bespreekt met oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost wekelijks de actualiteiten en achtergronden bij de club.',
       domain: 'omny.fm',
       feed: 'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
       name: 'Omroep Abe',
     },
     {
+      description: 'Wekelijkse supporterspodcast over sc Heerenveen!',
       domain: 'radiocamataru.podbean.com',
       feed: 'https://feed.podbean.com/radiocamataru/feed.xml',
       name: 'Radio Camataru',
     },
   ])(
     'puts $name in the register as a podcast, with its feed and the strictest policy',
-    async ({ domain, feed, name }) => {
+    async ({ description, domain, feed, name }) => {
       await seedSources(database.db)
 
       const [podcast] = await database.db.select().from(sources).where(eq(sources.domain, domain))
@@ -182,8 +185,10 @@ describe('the seed', () => {
         name,
       })
       expect(podcast?.consentStatus).not.toBe('given')
-      expect(podcast?.description).toBeTruthy()
+      // The text of the maker from the channel of the feed, as it is written but without the HTML.
+      expect(podcast?.description).toBe(description)
       expect(podcast?.description?.length).toBeLessThanOrEqual(300)
+      expect(podcast?.description).not.toMatch(/[<>]/u)
       expect(podcastFeeds.map((row) => row.url)).toEqual([feed])
     },
   )

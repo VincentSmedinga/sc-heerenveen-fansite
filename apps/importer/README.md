@@ -343,7 +343,8 @@ Een eigen adapter of eigen tabellen zijn er niet.
   De `enclosure`, het MP3-bestand, lezen we niet.
   Een aflevering zonder bruikbare `link` slaat de import over en meldt dat in het logboek; hij valt niet terug op de `enclosure`.
 - **Sleutel:** de `guid`, per bron.
-- **Niets extra:** geen artwork, beschrijving, shownotes, duur of adres van het MP3-bestand.
+- **Niets extra:** geen artwork, beschrijving of shownotes van een aflevering, geen duur en geen adres van het MP3-bestand.
+  De beschrijving van de podcast zelf staat in de seed, als tekst van de maker (zie _De beschrijving van een podcast is die van de maker_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)); de import leest hem niet.
 - **Rooster:** podcasts hebben geen rooster van zichzelf.
   Ze gaan mee in de run van elke 15 minuten, met de `ETag` die beide bronnen sturen, dus `pnpm run import:status` toont ze zoals de andere feeds.
 - **Niet in het nieuws:** `listRecentItems` in `@fansite/db` slaat bronnen van het soort podcast over, dus afleveringen komen niet in "Laatste nieuws".

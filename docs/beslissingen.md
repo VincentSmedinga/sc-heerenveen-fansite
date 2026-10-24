@@ -2234,6 +2234,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het nieuwsarchief (#26) hergebruikt dezelfde query.
 - **Alternatieven:** de afleveringen tussen het nieuws tonen, met "podcast" erbij; dat maakt één lijst die twee soorten mengt.
 
+### De beschrijving van een podcast is die van de maker
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de beschrijving van een podcast in het register (`sources.description`) is de tekst die de maker zelf in zijn feed zet, letterlijk en zonder de HTML eromheen, met zijn eigen spelling.
+  Zo staat hij in de seed, en zo tonen Onze bronnen en de zijbalk van `/podcasts` hem.
+  - Omroep Abe: "Omroep Abe is de podcast over SC Heerenveen van de Leeuwarder Courant. Clubwatcher Sander de Vries bespreekt met oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost wekelijks de actualiteiten en achtergronden bij de club."
+  - Radio Camataru: "Wekelijkse supporterspodcast over sc Heerenveen!"
+
+  Beschrijvingen van bronnen van een ander soort blijven in eigen woorden (zie _De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen_).
+
+- **Waarom:** de maker publiceert deze tekst in de feed die wij lezen, dus zijn tekst gaat voor onze omschrijving.
+  Het is één alinea over de podcast zelf, geen intro bij een aflevering.
+- **Risico:** het is de tekst van de maker en we hebben er geen aparte toestemming voor gevraagd.
+  Vraagt een maker ons de tekst te veranderen of weg te halen, dan doen we dat zo snel mogelijk.
+  De seed bewaart de tekst; de importer leest hem niet bij elke run, dus een wijziging van de maker komt er pas als iemand de seed bijwerkt.
+- **Alternatieven:** de beschrijving in eigen woorden, zoals eerder bedacht; dat staat verder van wat de maker over zichzelf zegt.
+  Of de beschrijving uit de feed bij elke run overnemen; dat vraagt een lezer voor het kanaal van de feed en overschrijft wat in het register staat.
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
@@ -2273,6 +2291,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Wat we van een bron tonen, en de toestemming, staan er niet.
 - **Hoe:** de beschrijving staat in het register, in de kolom `description` van `sources` (hoogstens 300 tekens).
   We schrijven haar zelf, in eigen woorden.
+  Later: de beschrijving van een podcast is de tekst van de maker uit zijn feed (zie _De beschrijving van een podcast is die van de maker_).
   `listEnabledSources` in `@fansite/db/queries` haalt alleen de naam, het domein, de soort en de beschrijving op, dus het beleid en de toestemming komen niet bij een pagina.
 - **Waarom:** bezoekers hoeven niet te lezen wat we wel of niet van een bron tonen; dat zien ze zelf.
   Een korte beschrijving zegt wat de bron is, en dat helpt bij het kiezen.
