@@ -11,11 +11,11 @@ import { SiteNavigation } from '../SiteNavigation'
 import { withBranch } from '../title'
 import { whatsNewPath, whatsNewTitle } from '../whats-new'
 
-// The links in the footer, about the site itself: the page about us, its privacy section and what is new. The main menu
+// The links in the footer, about the site itself: the page about us, the privacy page and what is new. The main menu
 // does not have them.
 const footerItems = [
   { href: '/over-ons', label: 'Over ons' },
-  { href: '/over-ons#privacy', label: 'Privacy' },
+  { href: '/privacy', label: 'Privacy' },
   { href: whatsNewPath, label: whatsNewTitle },
 ]
 

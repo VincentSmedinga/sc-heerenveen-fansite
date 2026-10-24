@@ -17,8 +17,12 @@ export const pages = [
     path: '/bronnen',
   },
   {
-    description: 'Wie we zijn, hoe we werken en wat we met gegevens doen. Een site van supporters, voor supporters.',
+    description: 'Wie we zijn en hoe we werken. Een site van supporters, voor supporters.',
     path: '/over-ons',
+  },
+  {
+    description: 'Wat we met gegevens doen: geen cookies, niemand volgen en niets van een ander domein.',
+    path: '/privacy',
   },
   {
     description: 'Wat er nieuw is op de sc Heerenveen Fansite, per versie: wat je er nu kunt vinden en doen.',

@@ -1835,6 +1835,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De AVG vraagt een privacyverklaring die makkelijk te vinden en te begrijpen is, geen lange of aparte pagina.
 - **Alternatieven:** drie of vier pagina's (Over ons, Bronnenbeleid, Verwijderverzoeken en Privacy), zoals #24 eerst noemde.
   Of één uitgebreide pagina, met de hele geschiedenis, de importer en `robots.txt`, en een privacyverklaring met een vaste bewaartermijn.
+- **Later:** privacy staat niet meer op deze pagina maar op een eigen pagina; zie _Privacy staat op een eigen pagina_.
 
 ### De homepage verbergt zijn `h1` voor het oog, en het blok heet Laatste nieuws
 
@@ -1849,6 +1850,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of "sc Heerenveen in de media" de `h1` maken; dan vallen latere blokken, zoals het forum of podcasts, onder die kop.
   Of een andere zichtbare `h1`, zoals "Nieuws over sc Heerenveen".
   Voor het blok: "In de media", of "sc Heerenveen in de media", zoals het eerst heette.
+
+### Privacy staat op een eigen pagina
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de privacytekst staat op een eigen pagina, `/privacy`, en niet meer als onderdeel van Over ons.
+  De footer linkt ernaar, en Over ons verwijst er met één zin naar.
+- **Waarom:** een link "Privacy" naar een onderdeel van de pagina waar je al op staat, verwart: er verandert niets zichtbaars.
+  Een eigen pagina met een link in de footer is makkelijk te vinden, en korter dan Over ons met alles erin.
+  De AVG vraagt een privacyverklaring die makkelijk te vinden en te begrijpen is.
+  Dat blijft zo, want de tekst wordt niet langer.
+  Er zijn geen oude links, want de site staat nog niet op productie.
+- **Alternatieven:** het onderdeel met anker op Over ons houden, zoals op 22 oktober besloten; dat verwart een bezoeker die al op die pagina is.
+  Of de footerlink weghalen en alleen in Over ons verwijzen; dan is de privacytekst minder vindbaar.
+  Of een omleiding voor `#privacy`; dat kan niet, want een server ziet het deel na de `#` niet.
+- **Later:** zie _Eén korte pagina Over ons, met het bronnenbeleid en de privacyverklaring_ (22 oktober 2026): daarvan blijven Over ons en het bronnenbeleid, en vervalt het onderdeel privacy op die pagina.
 
 ## Importer
 

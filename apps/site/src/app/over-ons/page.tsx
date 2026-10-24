@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Heading, Link, List, Page, Text } from '@fansite/design-system'
+import { Heading, Link, Page, Text } from '@fansite/design-system'
 
 import { email } from '../../contact'
 import { pageMetadata } from '../../metadata'
@@ -12,8 +12,7 @@ export const generateMetadata = (): Metadata => pageMetadata('/over-ons', 'Over 
 
 const EmailLink = () => <Link href={`mailto:${email}`}>{email}</Link>
 
-// Who we are, how we work and what we do with data, each in a few sentences. The footer links to the privacy section by
-// its id, so the id stays the same.
+// Who we are and how we work, each in a few sentences. What we do with data is on its own page, Privacy.
 export default function AboutPage() {
   return (
     <Page.Main>
@@ -39,28 +38,9 @@ export default function AboutPage() {
           Ben je uitgever en wil je dat we iets veranderen of weghalen? Mail dan naar <EmailLink />. We pakken je
           verzoek zo snel mogelijk op.
         </Text>
-        <Heading id="privacy" level={2}>
-          Privacy
-        </Heading>
         <Text>
-          De site zet geen cookies, volgt niemand en laadt niets van een ander domein. Toch moeten we de volgende dingen
-          even noemen.
+          Wat we met je gegevens doen, lees je bij <Link href="/privacy">Privacy</Link>.
         </Text>
-        <List>
-          <List.Item>
-            Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. We gebruiken ze alleen
-            daarvoor, bewaren ze niet langer dan nodig en geven ze aan niemand.
-          </List.Item>
-          <List.Item>Een mail aan ons gebruiken we alleen om te antwoorden.</List.Item>
-          <List.Item>
-            Vragen over je gegevens stel je aan de redactie: <EmailLink />. Maar ons antwoord zal zijn: we hebben geen
-            gegevens van je.
-          </List.Item>
-          <List.Item>
-            Voor een klacht kun je terecht bij de{' '}
-            <Link href="https://www.autoriteitpersoonsgegevens.nl">Autoriteit Persoonsgegevens</Link>.
-          </List.Item>
-        </List>
       </Page.Cell>
     </Page.Main>
   )
