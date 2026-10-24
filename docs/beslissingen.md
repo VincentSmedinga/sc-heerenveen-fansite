@@ -2251,6 +2251,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De seed bewaart de tekst; de importer leest hem niet bij elke run, dus een wijziging van de maker komt er pas als iemand de seed bijwerkt.
 - **Alternatieven:** de beschrijving in eigen woorden, zoals eerder bedacht; dat staat verder van wat de maker over zichzelf zegt.
   Of de beschrijving uit de feed bij elke run overnemen; dat vraagt een lezer voor het kanaal van de feed en overschrijft wat in het register staat.
+
 ### `/podcasts` is één lijst met een filter, en de URL's hebben een slug
 
 - **Datum:** 24 oktober 2026
