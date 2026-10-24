@@ -3,7 +3,15 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { listEnabledSources, listNewestDiscussions, listRecentItems } from './queries.ts'
+import {
+  countPodcastEpisodes,
+  findPodcast,
+  listEnabledSources,
+  listNewestDiscussions,
+  listPodcastEpisodes,
+  listPodcasts,
+  listRecentItems,
+} from './queries.ts'
 import { discussions, feeds, items, sources } from './schema.ts'
 import { realSources, seedSources, testSources } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
@@ -402,5 +410,210 @@ describe('listNewestDiscussions', () => {
     await database.db.delete(sources).where(eq(sources.id, forum))
 
     expect(await database.db.select().from(discussions)).toEqual([])
+  })
+})
+
+describe('the podcasts', () => {
+  const now = new Date('2026-10-22T10:00:00Z')
+
+  /** Puts a source with a feed in the register and returns the ids that an item needs. */
+  async function addSource(overrides: Partial<typeof sources.$inferInsert>) {
+    const domain = overrides.domain ?? 'testpodcast.test'
+    const [source] = await database.db
+      .insert(sources)
+      .values({ domain, kind: 'podcast', name: 'Testpodcast', ...overrides })
+      .$returningId()
+    const sourceId = source?.id ?? 0
+    const [feed] = await database.db
+      .insert(feeds)
+      .values({ sourceId, url: `https://${domain}/rss/` })
+      .$returningId()
+
+    return { feedId: feed?.id ?? 0, sourceId }
+  }
+
+  async function addItem(ids: { feedId: number; sourceId: number }, key: string, publishedAt: Date) {
+    await database.db
+      .insert(items)
+      .values({ ...ids, key, publishedAt, title: `Aflevering ${key}`, url: `https://testpodcast.test/e/${key}` })
+  }
+
+  /** The made-up podcasts of the seed, with an episode each, a news source and a podcast that is switched off. */
+  async function fill() {
+    await seedSources(database.db)
+
+    const idsOf = async (domain: string) => {
+      const [source] = await database.db.select().from(sources).where(eq(sources.domain, domain))
+      const [feed] = await database.db
+        .insert(feeds)
+        .values({ sourceId: source?.id ?? 0, url: `https://${domain}/rss/` })
+        .$returningId()
+
+      return { feedId: feed?.id ?? 0, sourceId: source?.id ?? 0 }
+    }
+
+    return {
+      news: await idsOf('testkrant.test'),
+      proef: await idsOf('proefpodcast.test'),
+      test: await idsOf('testpodcast.test'),
+    }
+  }
+
+  describe('listPodcastEpisodes', () => {
+    it('gives the episodes of the podcasts and no news, newest first, with the name of the podcast', async () => {
+      const ids = await fill()
+
+      await addItem(ids.test, 'oud', new Date('2026-10-01T08:00:00Z'))
+      await addItem(ids.proef, 'nieuw', new Date('2026-10-20T08:00:00Z'))
+      await addItem(ids.news, 'bericht', new Date('2026-10-21T08:00:00Z'))
+
+      const result = await listPodcastEpisodes(database.db, { limit: 25, until: now })
+
+      expect(result.map((episode) => [episode.title, episode.sourceName])).toEqual([
+        ['Aflevering nieuw', 'Proefpodcast'],
+        ['Aflevering oud', 'Testpodcast'],
+      ])
+    })
+
+    it('gives only the title, the link, the time and the name', async () => {
+      const ids = await fill()
+
+      await addItem(ids.test, 'een', new Date('2026-10-20T08:00:00Z'))
+
+      const [episode] = await listPodcastEpisodes(database.db, { limit: 25, until: now })
+
+      expect(Object.keys(episode ?? {}).sort()).toEqual(['publishedAt', 'sourceName', 'title', 'url'])
+    })
+
+    it('credits the podcast the way it wants to be credited', async () => {
+      const ids = await addSource({ attribution: 'Abe, met dank aan de LC', name: 'Omroep Abe', slug: 'abe' })
+
+      await addItem(ids, 'een', new Date('2026-10-20T08:00:00Z'))
+
+      expect((await listPodcastEpisodes(database.db, { limit: 25, until: now })).map((e) => e.sourceName)).toEqual([
+        'Abe, met dank aan de LC',
+      ])
+    })
+
+    it('gives no episodes of a podcast that is switched off', async () => {
+      const on = await addSource({ domain: 'aan.test', name: 'Aan', slug: 'aan' })
+      const off = await addSource({ domain: 'uit.test', enabled: false, name: 'Uit', slug: 'uit' })
+
+      await addItem(on, 'aan', new Date('2026-10-20T08:00:00Z'))
+      await addItem(off, 'uit', new Date('2026-10-21T08:00:00Z'))
+
+      expect((await listPodcastEpisodes(database.db, { limit: 25, until: now })).map((e) => e.title)).toEqual([
+        'Aflevering aan',
+      ])
+      expect(await countPodcastEpisodes(database.db, { until: now })).toBe(1)
+    })
+
+    it('gives the episodes of one podcast, by slug, and none for a slug that no podcast has', async () => {
+      const ids = await fill()
+
+      await addItem(ids.test, 'test', new Date('2026-10-01T08:00:00Z'))
+      await addItem(ids.proef, 'proef', new Date('2026-10-20T08:00:00Z'))
+
+      expect(
+        (await listPodcastEpisodes(database.db, { limit: 25, podcast: 'testpodcast', until: now })).map((e) => e.title),
+      ).toEqual(['Aflevering test'])
+      expect(await countPodcastEpisodes(database.db, { podcast: 'testpodcast', until: now })).toBe(1)
+      expect(await listPodcastEpisodes(database.db, { limit: 25, podcast: 'testkrant', until: now })).toEqual([])
+      expect(await countPodcastEpisodes(database.db, { podcast: 'nergens', until: now })).toBe(0)
+    })
+
+    it('gives a page, and the total of all pages', async () => {
+      const ids = await fill()
+
+      for (let day = 1; day <= 7; day++) {
+        await addItem(ids.test, `dag-${day}`, new Date(Date.UTC(2026, 9, day, 8)))
+      }
+
+      const page = (offset: number) =>
+        listPodcastEpisodes(database.db, { limit: 3, offset, until: now }).then((rows) => rows.map((e) => e.title))
+
+      expect(await page(0)).toEqual(['Aflevering dag-7', 'Aflevering dag-6', 'Aflevering dag-5'])
+      expect(await page(3)).toEqual(['Aflevering dag-4', 'Aflevering dag-3', 'Aflevering dag-2'])
+      expect(await page(6)).toEqual(['Aflevering dag-1'])
+      expect(await page(9)).toEqual([])
+      expect(await countPodcastEpisodes(database.db, { until: now })).toBe(7)
+    })
+
+    it('gives no episode from the future, and the episode at exactly the end time', async () => {
+      const ids = await fill()
+
+      await addItem(ids.test, 'nu', now)
+      await addItem(ids.test, 'later', new Date(now.getTime() + 1000))
+
+      expect((await listPodcastEpisodes(database.db, { limit: 25, until: now })).map((e) => e.title)).toEqual([
+        'Aflevering nu',
+      ])
+      expect(await countPodcastEpisodes(database.db, { until: now })).toBe(1)
+    })
+
+    it('puts the newest stored episode first when two were published in the same second', async () => {
+      const ids = await fill()
+      const time = new Date('2026-10-20T08:00:00Z')
+
+      await addItem(ids.test, 'eerst', time)
+      await addItem(ids.test, 'daarna', time)
+
+      expect((await listPodcastEpisodes(database.db, { limit: 25, until: now })).map((e) => e.title)).toEqual([
+        'Aflevering daarna',
+        'Aflevering eerst',
+      ])
+    })
+  })
+
+  describe('listPodcasts', () => {
+    it('gives the podcasts that are switched on and have an episode, by name, with their slug', async () => {
+      const ids = await fill()
+      const off = await addSource({ domain: 'uit.test', enabled: false, name: 'Uit', slug: 'uit' })
+      const withoutSlug = await addSource({ domain: 'zonder.test', name: 'Zonder slug' })
+
+      await addItem(ids.test, 'test', new Date('2026-10-01T08:00:00Z'))
+      await addItem(ids.proef, 'proef', new Date('2026-10-20T08:00:00Z'))
+      await addItem(off, 'uit', new Date('2026-10-20T08:00:00Z'))
+      await addItem(withoutSlug, 'zonder', new Date('2026-10-20T08:00:00Z'))
+      await addItem(ids.news, 'bericht', new Date('2026-10-20T08:00:00Z'))
+
+      expect(await listPodcasts(database.db)).toEqual([
+        { name: 'Proefpodcast', slug: 'proefpodcast' },
+        { name: 'Testpodcast', slug: 'testpodcast' },
+      ])
+    })
+
+    it('leaves out a podcast without episodes', async () => {
+      await seedSources(database.db)
+
+      expect(await listPodcasts(database.db)).toEqual([])
+    })
+  })
+
+  describe('findPodcast', () => {
+    it('gives the name and the addresses of a podcast, null for an address it does not have, and nothing else', async () => {
+      await seedSources(database.db)
+
+      const both = await findPodcast(database.db, 'testpodcast')
+      const apple = await findPodcast(database.db, 'proefpodcast')
+
+      expect(both).toEqual({
+        applePodcastsUrl: 'https://apple.test/podcast/testpodcast',
+        name: 'Testpodcast',
+        slug: 'testpodcast',
+        spotifyUrl: 'https://spotify.test/show/testpodcast',
+      })
+      expect(apple).toMatchObject({ applePodcastsUrl: 'https://apple.test/podcast/proefpodcast', spotifyUrl: null })
+    })
+
+    it('gives nothing for an unknown slug, a source that is no podcast, or a podcast that is switched off', async () => {
+      await seedSources(database.db)
+      await database.db.update(sources).set({ slug: 'testkrant' }).where(eq(sources.domain, 'testkrant.test'))
+      await database.db.update(sources).set({ enabled: false }).where(eq(sources.domain, 'proefpodcast.test'))
+
+      expect(await findPodcast(database.db, 'bestaat-niet')).toBeUndefined()
+      expect(await findPodcast(database.db, 'testkrant')).toBeUndefined()
+      expect(await findPodcast(database.db, 'proefpodcast')).toBeUndefined()
+    })
   })
 })

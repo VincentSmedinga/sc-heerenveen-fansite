@@ -41,6 +41,7 @@ export const testSources = [
   },
   {
     allowEmbed: true,
+    applePodcastsUrl: 'https://apple.test/podcast/testpodcast',
     consentDate: '2026-02-03',
     consentNote: 'Verzonnen: alleen insluiten van afleveringen.',
     consentStatus: 'given',
@@ -48,6 +49,16 @@ export const testSources = [
     domain: 'testpodcast.test',
     kind: 'podcast',
     name: 'Testpodcast',
+    slug: 'testpodcast',
+    spotifyUrl: 'https://spotify.test/show/testpodcast',
+  },
+  {
+    applePodcastsUrl: 'https://apple.test/podcast/proefpodcast',
+    description: 'Een verzonnen podcast over de jeugd van de club, met alleen een link naar Apple Podcasts.',
+    domain: 'proefpodcast.test',
+    kind: 'podcast',
+    name: 'Proefpodcast',
+    slug: 'proefpodcast',
   },
   {
     domain: 'proefforum.test',
@@ -128,6 +139,7 @@ export const realSources = [
     name: 'sc Heerenveen Forum',
   },
   {
+    applePodcastsUrl: 'https://podcasts.apple.com/nl/podcast/omroep-abe/id1589027848',
     description:
       'Omroep Abe is de podcast over SC Heerenveen van de Leeuwarder Courant. Clubwatcher Sander de Vries bespreekt met oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost wekelijks de actualiteiten en achtergronden bij de club.',
     domain: 'omny.fm',
@@ -136,13 +148,18 @@ export const realSources = [
     ],
     kind: 'podcast',
     name: 'Omroep Abe',
+    slug: 'omroep-abe',
+    spotifyUrl: 'https://open.spotify.com/show/6agzU3xVFCZIHm4hrvnoHD',
   },
   {
+    applePodcastsUrl: 'https://podcasts.apple.com/nl/podcast/radio-camataru/id1436580634',
     description: 'Wekelijkse supporterspodcast over sc Heerenveen!',
     domain: 'radiocamataru.podbean.com',
     feeds: ['https://feed.podbean.com/radiocamataru/feed.xml'],
     kind: 'podcast',
     name: 'Radio Camataru',
+    slug: 'radio-camataru',
+    spotifyUrl: 'https://open.spotify.com/show/51W3UP2B4H2kBK9Ukyv8et',
   },
 ] satisfies (NewSource & { feeds: string[] })[]
 
