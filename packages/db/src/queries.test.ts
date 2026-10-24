@@ -615,5 +615,14 @@ describe('the podcasts', () => {
       expect(await findPodcast(database.db, 'testkrant')).toBeUndefined()
       expect(await findPodcast(database.db, 'proefpodcast')).toBeUndefined()
     })
+
+    it('finds a podcast by its slug exactly, and not by the same letters in another case or with accents', async () => {
+      await seedSources(database.db)
+
+      expect(await findPodcast(database.db, 'testpodcast')).toBeDefined()
+      expect(await findPodcast(database.db, 'Testpodcast')).toBeUndefined()
+      expect(await findPodcast(database.db, 'testpodcást')).toBeUndefined()
+      expect(await countPodcastEpisodes(database.db, { podcast: 'TESTPODCAST', until: now })).toBe(0)
+    })
   })
 })

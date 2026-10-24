@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, exists, gte, lte, ne, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, exists, gte, isNotNull, lte, ne, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
@@ -39,7 +39,7 @@ export async function findPodcast(db: Database, slug: string) {
       spotifyUrl: sources.spotifyUrl,
     })
     .from(sources)
-    .where(and(eq(sources.enabled, true), eq(sources.kind, 'podcast'), eq(sources.slug, slug)))
+    .where(and(eq(sources.enabled, true), eq(sources.kind, 'podcast'), hasSlug(slug)))
 
   return row
 }
@@ -126,7 +126,7 @@ export function listPodcasts(db: Database) {
       and(
         eq(sources.enabled, true),
         eq(sources.kind, 'podcast'),
-        sql`${sources.slug} is not null`,
+        isNotNull(sources.slug),
         exists(
           db
             .select({ one: sql`1` })
@@ -177,6 +177,14 @@ function episodeFilter(until: Date, podcast: string | undefined) {
     eq(sources.enabled, true),
     eq(sources.kind, 'podcast'),
     lte(items.publishedAt, until),
-    podcast === undefined ? undefined : eq(sources.slug, podcast),
+    podcast === undefined ? undefined : hasSlug(podcast),
   )
+}
+
+/**
+ * Whether the source has exactly this slug. The column ignores case and accents, which keeps two slugs that differ only
+ * in those from both being in the register, but an address must name one podcast only, so this compares byte for byte.
+ */
+function hasSlug(slug: string) {
+  return sql`${sources.slug} = ${slug} collate utf8mb4_bin`
 }
