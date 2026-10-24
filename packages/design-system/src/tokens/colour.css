@@ -109,13 +109,6 @@
     --hf-colour-text-on-button: light-dark(var(--hf-colour-white), var(--hf-colour-blue-950));
 
     /*
-     * Links in the footer: dark sand, quieter than the blue links on the page. Sand-700 reaches 6.95:1 on the footer in
-     * light and sand-300 9.47:1 in dark. Under the mouse they are grey-900 and sand-100.
-     */
-    --hf-colour-text-link-on-footer: light-dark(var(--hf-colour-sand-700), var(--hf-colour-sand-300));
-    --hf-colour-text-link-hover-on-footer: light-dark(var(--hf-colour-grey-900), var(--hf-colour-sand-100));
-
-    /*
      * The focus ring on the dark blue of the header and the match band. The ring of the page (blue-500 in light) is
      * too dark there: it reaches 2,65:1 on the band. Blue-300 reaches 3:1 and more on both, in both themes.
      */
@@ -198,8 +191,6 @@
       --hf-colour-text-accent: var(--hf-colour-red-700);
       --hf-colour-text-highlight: var(--hf-colour-blue-800);
       --hf-colour-text-on-button: var(--hf-colour-white);
-      --hf-colour-text-link-on-footer: var(--hf-colour-sand-700);
-      --hf-colour-text-link-hover-on-footer: var(--hf-colour-grey-900);
       --hf-colour-marker-text: var(--hf-colour-steel-600);
       --hf-colour-marker-graphic: var(--hf-colour-steel-500);
       --hf-colour-border-surface: var(--hf-colour-grey-200);

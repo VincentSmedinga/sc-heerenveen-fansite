@@ -34,4 +34,11 @@ describe('the colour of a visited link', () => {
   it('is not set again for the header and the footer, where it is no longer needed', () => {
     expect(withoutComments(read('../page/page.css'))).not.toContain('--hf-colour-text-link-visited')
   })
+
+  it('leaves the colour of links in the footer alone, so they are as blue as links elsewhere', () => {
+    const footer = /\.hf-page-footer\s*\{[^}]*\}/.exec(withoutComments(read('../page/page.css')))?.[0] ?? ''
+
+    expect(footer).toContain('background-color')
+    expect(footer).not.toContain('--hf-colour-text-link')
+  })
 })
