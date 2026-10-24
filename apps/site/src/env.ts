@@ -2,11 +2,20 @@ import { databaseEnvSchema } from '@fansite/db/env'
 import { parseEnv } from '@fansite/shared/env'
 import * as z from 'zod'
 
+import { mailEnvSchema, requireSmtpOutsideLocal } from './mail-env'
+
 const siteEnvSchema = z.object({
   SITE_ENV: z.enum(['local', 'acceptance', 'production']),
 })
 
-const schema = databaseEnvSchema.extend(siteEnvSchema.shape)
+const schema = databaseEnvSchema
+  .extend(siteEnvSchema.shape)
+  .extend(mailEnvSchema.shape)
+  .superRefine(requireSmtpOutsideLocal)
+
+// What sendMail needs: the settings of the mail server, and SITE_ENV to know whether they may be missing. It doesn't need
+// the database, so the command that sends a test mail on the host runs without DATABASE_URL.
+const mailSchema = siteEnvSchema.extend(mailEnvSchema.shape).superRefine(requireSmtpOutsideLocal)
 
 // Set by `pnpm review` (see scripts/review.js), and nowhere else. Optional, and not part of the schema above: only the
 // dev server reads it, and the site must start without it.
@@ -46,6 +55,14 @@ export function originOf(source: Record<string, string | undefined> = process.en
  */
 export function readEnv(source: Record<string, string | undefined> = process.env) {
   return parseEnv(schema, source)
+}
+
+/**
+ * Reads the settings for sending mail (see sendMail) and checks them. Like isIndexable, it reads them when the server
+ * runs, and only them and SITE_ENV.
+ */
+export function readMailEnv(source: Record<string, string | undefined> = process.env) {
+  return parseEnv(mailSchema, source)
 }
 
 /**

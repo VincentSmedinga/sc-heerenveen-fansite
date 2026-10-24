@@ -1,6 +1,6 @@
 // Copies the standalone build to a new folder, with the static files next to the server, the way the host needs them.
 // Next.js leaves those files out of the standalone folder, and the SQL files of the migrations too: it only follows what the
-// code imports. The importer goes in the same folder, as one file. CI copies the result to the host, and runs smoke.js and
+// code imports. The importer and the command that sends a test mail go in the same folder, as one file each. CI copies the result to the host, and runs smoke.js and
 // the importer on it first.
 // The folder has no symbolic links: pnpm's node_modules is flattened into real folders (see flattenModules).
 //
@@ -8,7 +8,7 @@
 import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
 import path from 'node:path'
 
-import { bundleImporter } from '../../importer/src/bundle.ts'
+import { bundleCommand, bundleImporter } from '../../importer/src/bundle.ts'
 
 /** Lists the folders and files inside a folder, without following links. */
 function entries(folder) {
@@ -113,3 +113,9 @@ cpSync(path.resolve(import.meta.dirname, '../../../packages/db/drizzle'), path.j
 // everything it needs, so it uses no node_modules. Deployed together, the importer keeps in step with the schema, which
 // the site brings up to date when it starts.
 await bundleImporter(path.join(target, 'apps/importer/import.mjs'))
+// The owner runs this once on the host, to see that mail leaves the site (see docs/acceptatieomgeving.md). It is one file too,
+// because the standalone build only holds the packages that a page imports, and no page sends mail yet.
+await bundleCommand(
+  path.resolve(import.meta.dirname, '../src/send-test-mail.ts'),
+  path.join(siteFolder, 'send-test-mail.mjs'),
+)

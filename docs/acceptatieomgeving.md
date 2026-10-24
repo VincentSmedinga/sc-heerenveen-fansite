@@ -36,11 +36,11 @@ Ontbreekt een van de geheimen hieronder, dan doet de workflow alleen stap 1 tot 
 Stap 6 vervalt dan ook.
 `main` wordt er niet rood van.
 
-De site leest bij het opstarten de variabelen `SITE_ENV` en `DATABASE_URL`.
+De site leest bij het opstarten de variabelen `SITE_ENV` en `DATABASE_URL`, en de vijf van de mail: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` en `MAIL_FROM`.
 Op acceptatie is `SITE_ENV` `acceptance`.
 Dan krijgt elk antwoord de header `X-Robots-Tag: noindex, nofollow`, en weigert `/robots.txt` alles.
-`DATABASE_URL` wijst naar de database van acceptatie (stap 3 hieronder).
-Zonder een van de twee start de site niet.
+`DATABASE_URL` wijst naar de database van acceptatie (stap 3 hieronder), en de mailvariabelen naar de brievenbus van de redactie (stap 11).
+Zonder een van deze start de site niet.
 
 ## Het schema en de testbronnen
 
@@ -113,7 +113,7 @@ Een agent heeft daar geen toegang.
      Het pad van deze map is straks `DEPLOY_PATH`.
    - Adres van de app (_Application URL_): `acc.sc.heerenveen.org`.
    - Startbestand (_Application startup file_): `apps/site/server.js`.
-   - Omgevingsvariabelen: `SITE_ENV` met de waarde `acceptance`, en `DATABASE_URL` met de database uit stap 3, als `mysql://gebruiker:wachtwoord@localhost:3306/database`.
+   - Omgevingsvariabelen: `SITE_ENV` met de waarde `acceptance`, `DATABASE_URL` met de database uit stap 3, als `mysql://gebruiker:wachtwoord@localhost:3306/database`, en de vijf variabelen voor de mail uit stap 11.
    - Kies **niet** _Run NPM Install_: de build brengt zijn eigen `node_modules` mee.
      Staat er in de map van de app al een `node_modules` die een symbolische link is, verwijder die link dan.
 
@@ -210,6 +210,24 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
     Laat het e-mailadres voor de uitvoer van cron leeg.
     De opdracht schrijft alles in het logbestand, dus er is ook niets om te mailen.
 
+11. **Mail.**
+    De site mailt via de mailserver van de hosting, vanaf de brievenbus `fansite@heerenveen.org` (zie `sendMail` in `apps/site/src/mail.ts`).
+    Het contactformulier en het inloggen voor het beheer gebruiken dat later.
+    Zet bij de omgevingsvariabelen van de Node.js-app (stap 2) deze vijf, **voordat** je de versie met `sendMail` samenvoegt: zonder deze vijf start de site niet, en de workflow wordt rood bij stap 6.
+
+    | Variabele       | Wat erin staat                                                                                                                                       |
+    | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `SMTP_HOST`     | De naam van de mailserver, zoals DirectAdmin die toont bij het e-mailaccount, zonder `smtps://` of poort. Vaak `mail.heerenveen.org`                 |
+    | `SMTP_PORT`     | `465` (TLS vanaf het begin). Een andere poort, zoals `587`, werkt ook, als de server daar STARTTLS kent: de site mailt nooit zonder TLS              |
+    | `SMTP_USER`     | De naam om in te loggen: het hele adres, `fansite@heerenveen.org`                                                                                    |
+    | `SMTP_PASSWORD` | Het wachtwoord van de brievenbus                                                                                                                     |
+    | `MAIL_FROM`     | De afzender, bijvoorbeeld `sc Heerenveen Fansite <fansite@heerenveen.org>`. Veel hostingservers weigeren een afzender die niet bij `SMTP_USER` hoort |
+
+    Het wachtwoord is dat van de brievenbus die de redactie ook leest.
+    Kan mijn.host een apart SMTP-wachtwoord of een tweede brievenbus maken, dan is dat veiliger; de code verandert daar niet door.
+    Het wachtwoord staat nooit in GitHub of in de repository.
+    Draai daarna de proefmail onder _Controleren_.
+
 ## Controleren
 
 - De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, het blok "Laatste nieuws" en in de zijbalk het blok "Nieuwste discussies".
@@ -248,6 +266,23 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
   `echo $?` direct daarna toont 0 als elke feed gezond is, en 1 als een feed ongezond is.
   De README van de importer laat zien hoe het eruitziet.
 
+- De proefmail laat zien dat de site kan mailen.
+  Het bestand `apps/site/send-test-mail.mjs` staat sinds de deploy op de host, naast de importer.
+  Het leest de variabelen uit een bestand, net als de importer, en een cronjob of SSH-sessie krijgt die van de Node.js-app niet.
+  Zet daarom, met een editor en niet met `echo` (zie stap 8), in `~/fansite-acceptatie.env` de regel `SITE_ENV=acceptance` en de vijf variabelen van stap 11, elk als `NAAM=waarde`.
+  Het bestand mag alleen jouw account lezen (`chmod 600`).
+  Het wachtwoord staat dan op drie plekken op de host; verander je het, pas het dan overal aan.
+  Draai op één regel, met je eigen adres erachter:
+
+  ```sh
+  /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/site/send-test-mail.mjs <jouw adres>
+  ```
+
+  Gebruik dezelfde paden als in de cronjob (stap 9 en 10).
+  Hij zegt "The mail server took the test mail", en binnen een paar minuten staat er een mail "Proefmail van de sc Heerenveen Fansite" in je brievenbus, bekijk ook de map met ongewenste mail.
+  Vindt hij de server niet of wijst die het wachtwoord af, dan zegt hij `Could not send the mail` met een code: `ESOCKET` of `ECONNECTION` (de server is niet bereikbaar, controleer `SMTP_HOST` en `SMTP_PORT`), `EAUTH` (het wachtwoord of de gebruiker klopt niet), `ETLS` (de server kent geen TLS op die poort) of `EENVELOPE` (de server weigerde de afzender of de ontvanger).
+  Het logboek en de melding bevatten nooit het wachtwoord of het adres.
+
 - In de database staan de koppen in de tabel `items`: `SELECT COUNT(*) FROM items` in phpMyAdmin telt ze.
   De discussies van het forum staan in de tabel `discussions`: dat zijn er na een run vier.
 
@@ -256,7 +291,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 - De workflow meldt "Deploy skipped": een geheim ontbreekt.
   De melding noemt welk.
 - De site start niet: kijk in het logboek van de app (_Setup Node.js App_ of het bestand `stderr.log` in de map van de app).
-  Een ontbrekende of verkeerde `SITE_ENV` of `DATABASE_URL` staat daar met naam bij.
+  Een ontbrekende of verkeerde `SITE_ENV`, `DATABASE_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` of `MAIL_FROM` staat daar met naam bij.
 - De workflow is rood bij _Check the sources page on acceptance_, of `/bronnen` toont "Er ging iets mis": de database is niet klaar.
   Het logboek heeft dan een regel die begint met `Could not bring the database up to date`, met de reden erachter:
 
