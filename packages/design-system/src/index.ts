@@ -15,6 +15,8 @@ export { ErrorSummary } from './components/error-summary/ErrorSummary'
 export type { ErrorSummaryError, ErrorSummaryProps } from './components/error-summary/ErrorSummary'
 export { Field } from './components/field/Field'
 export type { FieldProps } from './components/field/Field'
+export { Filter } from './components/filter/Filter'
+export type { FilterProps } from './components/filter/Filter'
 export { Form } from './components/form/Form'
 export type { FormProps } from './components/form/Form'
 export { Heading, headingLevels } from './components/heading/Heading'
@@ -43,6 +45,8 @@ export type {
   PageProps,
   PageSidebarProps,
 } from './components/page/Page'
+export { Pagination } from './components/pagination/Pagination'
+export type { PaginationProps } from './components/pagination/Pagination'
 export { Root } from './components/root/Root'
 export type { RootProps } from './components/root/Root'
 export { Select } from './components/select/Select'

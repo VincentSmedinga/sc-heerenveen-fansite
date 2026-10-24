@@ -202,6 +202,35 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
       </tr>
       <tr>
         <th scope="row">
+          <code>Filter</code>
+        </th>
+        <td>
+          <code>nav</code> met een rij links, elk een keuze voor dezelfde lijst
+        </td>
+        <td>
+          <code>label</code> (verplicht), <code>items</code>
+        </td>
+        <td>
+          een <code>Navigation</code> met een klasse van zichzelf
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Pagination</code>
+        </th>
+        <td>
+          <code>nav</code> met "Vorige", "Pagina 2 van 9" en "Volgende"
+        </td>
+        <td>
+          <code>label</code> (verplicht), <code>current</code>, <code>total</code>, <code>previousHref</code>,{' '}
+          <code>nextHref</code>
+        </td>
+        <td>
+          zonder <code>previousHref</code> of <code>nextHref</code> staat die link er niet
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">
           <code>Heading</code>
         </th>
         <td>

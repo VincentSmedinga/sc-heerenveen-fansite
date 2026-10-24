@@ -1,0 +1,7 @@
+/* A filter is a row of links, as a menu is. The rows of a list are under it, so it has air below. */
+
+@layer hf.components {
+  .hf-filter {
+    margin-block-end: 0.5rem;
+  }
+}
