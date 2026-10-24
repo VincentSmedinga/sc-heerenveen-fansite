@@ -87,7 +87,8 @@ export function listNewestDiscussions(db: Database, limit = 4) {
 
 /**
  * The episodes of the podcasts that are switched on, newest first, from `offset`, at most `limit`, with what the pages
- * show of them: the title, the link to the page of the episode, the time and the name of the podcast. That name is the
+ * show of them: the title, the link to the page of the episode, the time, the name of the podcast, and the duration, the
+ * season and the number of the episode, which are null when the feed gives none. That name is the
  * way the podcast wants to be credited, or else its own name. Every other column stays internal, so none can reach a
  * page. Give the `slug` of a podcast as `podcast` to get the episodes of that podcast only.
  *
@@ -99,7 +100,10 @@ export function listPodcastEpisodes(
 ) {
   return db
     .select({
+      durationSeconds: items.durationSeconds,
+      episodeNumber: items.episodeNumber,
       publishedAt: items.publishedAt,
+      seasonNumber: items.seasonNumber,
       sourceName: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('source_name'),
       title: items.title,
       url: items.url,

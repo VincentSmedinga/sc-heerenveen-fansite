@@ -388,6 +388,9 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
         before.title === item.title &&
         before.url === item.url &&
         before.paywalled === item.paywalled &&
+        before.durationSeconds === item.durationSeconds &&
+        before.seasonNumber === item.seasonNumber &&
+        before.episodeNumber === item.episodeNumber &&
         before.publishedAt.getTime() === publishedAt.getTime()
       ) {
         counts.unchanged++
@@ -396,12 +399,15 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
       }
 
       return {
+        durationSeconds: item.durationSeconds,
+        episodeNumber: item.episodeNumber,
         feedId: feed.id,
         firstSeenAt: now,
         key: item.key,
         lastSeenAt: now,
         paywalled: item.paywalled,
         publishedAt,
+        seasonNumber: item.seasonNumber,
         sourceId: feed.sourceId,
         title: item.title,
         url: item.url,
@@ -414,10 +420,13 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
       .values(rows)
       .onDuplicateKeyUpdate({
         set: {
+          durationSeconds: sql`values(${items.durationSeconds})`,
+          episodeNumber: sql`values(${items.episodeNumber})`,
           feedId: sql`values(${items.feedId})`,
           lastSeenAt: sql`values(${items.lastSeenAt})`,
           paywalled: sql`values(${items.paywalled})`,
           publishedAt: sql`values(${items.publishedAt})`,
+          seasonNumber: sql`values(${items.seasonNumber})`,
           title: sql`values(${items.title})`,
           url: sql`values(${items.url})`,
         },

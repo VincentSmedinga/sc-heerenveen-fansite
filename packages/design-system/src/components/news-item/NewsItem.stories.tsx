@@ -36,6 +36,10 @@ const meta = preview.meta({
           '  Het component kent geen tijdzone en rekent niet: de pagina zegt welke dag en tijd de bezoeker ziet.',
           '- `paywalled` zet "voor abonnees" onder de kop, achter de naam van de bron.',
           '  Dat staat in tekst, zodat het ook werkt voor een schermlezer en zonder kleur.',
+          '- `details` is een lijst met korte feiten als tekst, zoals "49 min" of "seizoen 9, aflevering 16".',
+          '  Ze staan achter de naam van de bron en achter "voor abonnees", elk na een puntje.',
+          '  Het zijn feiten over het item en geen inhoud ervan, dus ze mogen zonder toestemming van de bron.',
+          '  De pagina schrijft de feiten uit in woorden, want het component rekent en vertaalt niet.',
           '',
           'Het component heeft geen props voor een intro of een foto.',
           'Die tonen we alleen met toestemming van de bron (principe 1 en 2 van de Redactie).',
@@ -164,6 +168,58 @@ export const StatesDark = meta.story({
   name: 'Kop onder de muis, met focus en bezocht, donker',
   parameters: stateParameters,
   render: renderWide,
+})
+
+const renderEpisodes = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="podcast-kop">
+      <Heading id="podcast-kop" level={2}>
+        Nieuwste podcasts
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-21T12:05:00Z"
+            details={['seizoen 9, aflevering 16', '37 min']}
+            headline="S9E16 | De 1e, 10e, 100e en 1000e"
+            href="#aflevering-16"
+            source="Testpodcast"
+            time="wo 14:05"
+          />
+        </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-14T12:05:00Z"
+            details={['1 uur 12 min']}
+            headline="Een aflevering met een lange kop over een wedstrijd vol wendingen en een doelpunt in de laatste minuut"
+            href="#aflevering-lang"
+            source="Proefpodcast"
+            time="14 okt"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const EpisodesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Afleveringen met feiten, licht',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een aflevering van een podcast heeft achter de naam van de bron de duur en, als de podcast ze geeft, het seizoen en het nummer.',
+      },
+    },
+  },
+  render: renderEpisodes,
+})
+
+export const EpisodesDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Afleveringen met feiten, donker',
+  render: renderEpisodes,
 })
 
 const renderLong = () => (

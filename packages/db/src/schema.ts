@@ -125,8 +125,10 @@ export type NewFeed = typeof feeds.$inferInsert
 
 /**
  * What the importer stores of a news item: the headline, the link, the time of publication and whether it is behind a
- * paywall, which is no content of the source. An intro, an image, an author or a category has no column, because no
- * source has given permission for it yet (editorial principle 2): what we may not show, we do not store.
+ * paywall, which is no content of the source. Of a podcast episode it also keeps three facts about it, which are no
+ * content either: the duration, the season and the number of the episode. An intro, an image, an author or a category
+ * has no column, because no source has given permission for it yet (editorial principle 2): what we may not show, we do
+ * not store.
  *
  * Times are UTC. `item_key` is the GUID of the item, or its link when it has none, and is unique per source.
  */
@@ -145,6 +147,10 @@ export const items = mysqlTable(
     url: varchar('url', { length: itemLimits.url }).notNull(),
     publishedAt: datetime('published_at').notNull(),
     paywalled: boolean('paywalled').notNull().default(false),
+    // Facts about a podcast episode, as its feed gives them. Empty when the feed has none, and for news.
+    durationSeconds: int('duration_seconds', { unsigned: true }),
+    seasonNumber: int('season_number', { unsigned: true }),
+    episodeNumber: int('episode_number', { unsigned: true }),
     firstSeenAt: datetime('first_seen_at')
       .notNull()
       .default(sql`(UTC_TIMESTAMP())`),

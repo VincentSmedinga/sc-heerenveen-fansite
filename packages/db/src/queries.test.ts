@@ -475,14 +475,55 @@ describe('the podcasts', () => {
       ])
     })
 
-    it('gives only the title, the link, the time and the name', async () => {
+    it('gives only the title, the link, the time, the name, and the duration, the season and the number', async () => {
       const ids = await fill()
 
       await addItem(ids.test, 'een', new Date('2026-10-20T08:00:00Z'))
 
       const [episode] = await listPodcastEpisodes(database.db, { limit: 25, until: now })
 
-      expect(Object.keys(episode ?? {}).sort()).toEqual(['publishedAt', 'sourceName', 'title', 'url'])
+      expect(Object.keys(episode ?? {}).sort()).toEqual([
+        'durationSeconds',
+        'episodeNumber',
+        'publishedAt',
+        'seasonNumber',
+        'sourceName',
+        'title',
+        'url',
+      ])
+    })
+
+    it('gives the duration, the season and the number of an episode, and null for what the feed did not give', async () => {
+      const ids = await fill()
+
+      await database.db.insert(items).values([
+        {
+          ...ids.test,
+          durationSeconds: 2944,
+          episodeNumber: 16,
+          key: 'met',
+          publishedAt: new Date('2026-10-20T08:00:00Z'),
+          seasonNumber: 9,
+          title: 'Met alles',
+          url: 'https://testpodcast.test/e/met',
+        },
+        {
+          ...ids.test,
+          key: 'zonder',
+          publishedAt: new Date('2026-10-19T08:00:00Z'),
+          title: 'Zonder',
+          url: 'https://testpodcast.test/e/zonder',
+        },
+      ])
+
+      expect(
+        (await listPodcastEpisodes(database.db, { limit: 25, until: now })).map(
+          ({ durationSeconds, episodeNumber, seasonNumber }) => [durationSeconds, seasonNumber, episodeNumber],
+        ),
+      ).toEqual([
+        [2944, 9, 16],
+        [null, null, null],
+      ])
     })
 
     it('credits the podcast the way it wants to be credited', async () => {

@@ -55,10 +55,14 @@ export async function addEpisodes() {
 
       await db.insert(items).values(
         Array.from({ length: count }, (_, index) => ({
+          // Every third has a season and a number, the rest only a duration, and one has neither.
+          durationSeconds: index === 5 ? null : 600 + index * 137,
+          episodeNumber: index % 3 === 0 ? count - index : null,
           feedId: feed?.id ?? 0,
           key: `e2e-${index}`,
           // The first is an hour old, and each next one is a few days older: this week, this year and years ago.
           publishedAt: new Date(now - (index === 0 ? 1 / 24 : index * 11) * day),
+          seasonNumber: index % 6 === 0 ? 2 : null,
           sourceId,
           title: index === 1 ? episodeTitles.long : index === 2 ? episodeTitles.html : `Aflevering ${count - index}`,
           url: `https://${domain}/e/e2e-${index}`,

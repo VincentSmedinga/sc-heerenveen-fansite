@@ -52,6 +52,28 @@ export function dateTimeOf(moment: Date) {
 }
 
 /**
+ * The facts about an episode as short texts for a `NewsItem`: the season and the number, such as "seizoen 9, aflevering
+ * 16" or "aflevering 120", and the duration, such as "37 min". A fact the feed did not give is left out, and so is a
+ * season without an episode number, because a season alone says little.
+ */
+export function episodeDetails({
+  durationSeconds,
+  episodeNumber,
+  seasonNumber,
+}: {
+  durationSeconds: null | number
+  episodeNumber: null | number
+  seasonNumber: null | number
+}) {
+  return [
+    episodeNumber === null
+      ? undefined
+      : `${seasonNumber === null ? '' : `seizoen ${seasonNumber}, `}aflevering ${episodeNumber}`,
+    durationSeconds === null ? undefined : formatDuration(durationSeconds),
+  ].filter((detail) => detail !== undefined)
+}
+
+/**
  * The short weekday and the time of day in the Netherlands, such as "wo 14:05". Within seven days a weekday never
  * appears twice, and the time stays right in a page from the cache.
  */
@@ -76,6 +98,22 @@ export function formatDiscussionTime(moment: Date, now: Date) {
   }
 
   return (clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)
+}
+
+/**
+ * How long an episode lasts as a visitor reads it, in whole minutes: "37 min", "1 uur" or "1 uur 12 min". A duration
+ * under half a minute still counts as "1 min", because "0 min" says nothing.
+ */
+export function formatDuration(seconds: number) {
+  const minutes = Math.max(1, Math.round(seconds / 60))
+  const hours = Math.floor(minutes / 60)
+  const rest = minutes % 60
+
+  if (hours === 0) {
+    return `${rest} min`
+  }
+
+  return rest === 0 ? `${hours} uur` : `${hours} uur ${rest} min`
 }
 
 /**

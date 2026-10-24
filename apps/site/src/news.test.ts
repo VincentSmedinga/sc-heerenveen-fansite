@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import {
   dateTimeOf,
+  episodeDetails,
   formatDayAndTime,
   formatDiscussionTime,
+  formatDuration,
   formatEpisodeTime,
   formatNewsTime,
   weekdayStart,
@@ -305,5 +307,48 @@ describe('formatEpisodeTime', () => {
 
   it('writes a moment after now, from a clock that is ahead, as today', () => {
     expect(formatEpisodeTime(new Date('2026-10-23T20:00:00Z'), now)).toBe('vr 22:00')
+  })
+})
+
+describe('formatDuration', () => {
+  it.each([
+    [2944, '49 min'],
+    [2216, '37 min'],
+    [60, '1 min'],
+    [3600, '1 uur'],
+    [4320, '1 uur 12 min'],
+    [7230, '2 uur 1 min'],
+    [86_400, '24 uur'],
+  ])('writes %i seconds as %s', (seconds, text) => {
+    expect(formatDuration(seconds)).toBe(text)
+  })
+
+  it('rounds to the nearest minute, and never writes 0 min', () => {
+    expect(formatDuration(89)).toBe('1 min')
+    expect(formatDuration(90)).toBe('2 min')
+    expect(formatDuration(5)).toBe('1 min')
+    expect(formatDuration(3599)).toBe('1 uur')
+  })
+})
+
+describe('episodeDetails', () => {
+  it('gives the season and the number, then the duration', () => {
+    expect(episodeDetails({ durationSeconds: 2216, episodeNumber: 16, seasonNumber: 9 })).toEqual([
+      'seizoen 9, aflevering 16',
+      '37 min',
+    ])
+  })
+
+  it('leaves out the season when the feed gave none', () => {
+    expect(episodeDetails({ durationSeconds: 2216, episodeNumber: 120, seasonNumber: null })).toEqual([
+      'aflevering 120',
+      '37 min',
+    ])
+  })
+
+  it('leaves out a season without an episode number, and gives nothing when the feed gave nothing', () => {
+    expect(episodeDetails({ durationSeconds: 2216, episodeNumber: null, seasonNumber: 9 })).toEqual(['37 min'])
+    expect(episodeDetails({ durationSeconds: null, episodeNumber: null, seasonNumber: null })).toEqual([])
+    expect(episodeDetails({ durationSeconds: null, episodeNumber: 3, seasonNumber: null })).toEqual(['aflevering 3'])
   })
 })
