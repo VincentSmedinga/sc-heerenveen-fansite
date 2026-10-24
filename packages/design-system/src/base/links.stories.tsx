@@ -5,7 +5,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          'Links zijn altijd onderstreept. Onder de muis wordt de lijn dikker en de kleur donkerder (licht) of lichter (donker). Een bezochte link krijgt een getint grijs, zodat je ziet wat je al hebt gelezen.',
+          'Links zijn altijd onderstreept. Onder de muis wordt de lijn dikker en de kleur donkerder (licht) of lichter (donker). Een bezochte link ziet er hetzelfde uit als een link die je nog niet hebt geopend. Alleen de kop van een nieuwsbericht en de titel van een discussie worden grijs als je ze hebt geopend.',
       },
     },
   },
@@ -29,7 +29,7 @@ export const States = meta.story({
     docs: {
       description: {
         story:
-          'Bezocht, muis en focus zijn nagebootst met de add-on Pseudo States. Met de Tab-toets zie je de echte focusrand.',
+          'Bezocht, muis en focus zijn nagebootst met de add-on Pseudo States. De bezochte link heeft dezelfde kleur als de gewone link. Met de Tab-toets zie je de echte focusrand.',
       },
     },
     pseudo: {
@@ -60,4 +60,38 @@ export const States = meta.story({
       </li>
     </ul>
   ),
+})
+
+const visitedParameters = {
+  docs: {
+    description: {
+      story:
+        'De eerste link is nog niet geopend en de tweede is bezocht, nagebootst met de add-on Pseudo States. Ze hebben dezelfde kleur en allebei een onderstreping.',
+    },
+  },
+  pseudo: { visited: ['[data-example="visited"]'] },
+}
+
+const renderVisited = () => (
+  <p style={{ maxInlineSize: '40rem' }}>
+    Lees het verslag bij <a href="#nog-niet-bezocht">Omrop Fryslân</a> of bij{' '}
+    <a data-example="visited" href="#al-bezocht">
+      de eredivisie
+    </a>
+    .
+  </p>
+)
+
+export const VisitedLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Bezocht en onbezocht, licht',
+  parameters: visitedParameters,
+  render: renderVisited,
+})
+
+export const VisitedDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Bezocht en onbezocht, donker',
+  parameters: visitedParameters,
+  render: renderVisited,
 })

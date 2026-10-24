@@ -1,14 +1,13 @@
-/* Links: underlined, with a colour for a visited link and for hover. */
+/*
+ * Links: underlined, with a colour for hover. A visited link looks the same as one that is not: only the headline of a
+ * news item and the title of a discussion show that you have opened them, and they do so in their own CSS.
+ */
 
 @layer hf.base {
   a {
     color: var(--hf-colour-text-link);
     text-decoration-thickness: 0.0625em;
     text-underline-offset: 0.15em;
-
-    &:visited {
-      color: var(--hf-colour-text-link-visited);
-    }
 
     &:hover {
       color: var(--hf-colour-text-link-hover);

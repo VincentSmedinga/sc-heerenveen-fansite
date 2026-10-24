@@ -19,8 +19,10 @@
    * The title is on a line of its own, heavier than the text and in the colour of links, so it is a link without the
    * line to the eye (WCAG 1.4.1 asks for more than colour mostly for a link in a sentence). The line is 1.5 pixels thick
    * and sits close to the text, and skips the descenders of letters. Both are set for the two states, so the focus gets
-   * the same line as hover. The colours of a visited link and of hover, and the focus ring, stay as the base styles make
-   * them.
+   * the same line as hover. The colour of hover and the focus ring stay as the base styles make them. The title is one of
+   * the two links that show you have opened them (the other is the headline of a news item), so it keeps the colour for
+   * a visited link. That rule is in this layer, which wins over the hover of the base styles, so it leaves out the title
+   * under the mouse: that one gets the colour for hover, visited or not.
    */
   .hf-discussion-item-title {
     display: inline-block;
@@ -35,6 +37,10 @@
     &:hover,
     &:focus-visible {
       text-decoration-line: underline;
+    }
+
+    &:visited:not(:hover) {
+      color: var(--hf-colour-text-link-visited);
     }
   }
 

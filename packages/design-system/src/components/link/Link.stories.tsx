@@ -10,7 +10,7 @@ const meta = preview.meta({
         component: [
           'Een link.',
           'Een link is altijd onderstreept; onder de muis wordt de lijn dikker.',
-          'Een bezochte link krijgt een getint grijs, zodat je ziet wat je al hebt gelezen.',
+          'Een bezochte link ziet er hetzelfde uit als een link die je nog niet hebt geopend; alleen de kop van een nieuwsbericht en de titel van een discussie worden grijs.',
           '',
           '`href` is verplicht: een link zonder bestemming is geen link.',
           'De tekst zegt waar de link heen gaat, ook los van de zin eromheen; dus geen "lees meer" of "klik hier".',

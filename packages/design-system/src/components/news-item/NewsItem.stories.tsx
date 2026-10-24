@@ -21,7 +21,7 @@ const meta = preview.meta({
           'De kop is niet onderstreept, want een lijst met veel onderstreepte koppen is druk.',
           'Onder de muis en met de focus van het toetsenbord krijgt hij de onderstreping, naast de focusrand.',
           'De onderstreping is iets dunner dan bij andere links onder de muis, passend bij het gewicht van de kop, staat iets dichter bij de tekst, en loopt niet door de staarten van letters als de g en de p.',
-          'De kleuren veranderen niet: een bezochte kop houdt de kleur voor bezocht, en onder de muis krijgt hij de kleur voor hover.',
+          'De kop is een van de twee links die grijs worden als je ze hebt geopend (de andere is de titel van een discussie); onder de muis krijgt hij de kleur voor hover, ook als hij bezocht is.',
           'Een kop staat op een eigen regel, iets zwaarder dan gewone tekst en in de kleur voor links, dus je herkent hem ook zonder onderstreping als link.',
           'Andere links blijven onderstreept.',
           'De kop heeft de maat van gewone tekst en een iets zwaarder gewicht, Medium.',
