@@ -1,4 +1,5 @@
 import { addDiscussions } from './discussions'
+import { addEpisodes } from './episodes'
 import { addHeadlines } from './headlines'
 
 // Runs after the site has started and before the first test. The homepage keeps its headlines and discussions in memory
@@ -7,9 +8,11 @@ import { addHeadlines } from './headlines'
 export default async function globalSetup() {
   const removeHeadlines = await addHeadlines()
   const removeDiscussions = await addDiscussions()
+  const removeEpisodes = await addEpisodes()
 
   return async () => {
     await removeHeadlines()
     await removeDiscussions()
+    await removeEpisodes()
   }
 }

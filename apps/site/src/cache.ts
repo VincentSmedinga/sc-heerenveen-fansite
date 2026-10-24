@@ -9,18 +9,31 @@
  * keeps a promise that has taken over the result, and never the thenable itself.
  */
 export function cacheFor<T>(milliseconds: number, load: () => PromiseLike<T>) {
-  let entry: undefined | { result: Promise<T>; since: number }
+  const get = cacheForKey(milliseconds, () => load())
 
-  return () => {
+  return () => get('')
+}
+
+/**
+ * Like `cacheFor`, for a load that depends on a key, such as a page number: each key has its own result and its own
+ * period. The cache keeps an entry for every key it has been asked for, so the caller must only ask for keys that it
+ * has checked: a visitor can make up any address, and a key per address would fill the memory of the server.
+ */
+export function cacheForKey<T>(milliseconds: number, load: (key: string) => PromiseLike<T>) {
+  const entries = new Map<string, { result: Promise<T>; since: number }>()
+
+  return (key: string) => {
     const now = Date.now()
+    let entry = entries.get(key)
 
     if (entry === undefined || now - entry.since >= milliseconds) {
-      const current = { result: Promise.resolve(load()), since: now }
+      const current = { result: Promise.resolve(load(key)), since: now }
 
       entry = current
+      entries.set(key, current)
       current.result.catch(() => {
-        if (entry === current) {
-          entry = undefined
+        if (entries.get(key) === current) {
+          entries.delete(key)
         }
       })
     }

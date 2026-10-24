@@ -13,6 +13,11 @@ export const pages = [
     path: '/',
   },
   {
+    description:
+      'Alle afleveringen van de podcasts over sc Heerenveen op één plek, met een link naar de pagina van de aflevering bij de maker.',
+    path: '/podcasts',
+  },
+  {
     description: 'De media waar we het nieuws over sc Heerenveen vandaan halen, met een korte beschrijving van elk.',
     path: '/bronnen',
   },

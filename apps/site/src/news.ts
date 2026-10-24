@@ -79,6 +79,19 @@ export function formatDiscussionTime(moment: Date, now: Date) {
 }
 
 /**
+ * The time of a podcast episode as a visitor reads it, in Dutch time. Within seven days it is the short weekday and the
+ * time, such as "wo 14:05", as for the news. Anything older is the date, such as "14 okt", with the year when it is not
+ * this year: the list of episodes goes back years, so a date without a year would be unclear.
+ */
+export function formatEpisodeTime(moment: Date, now: Date) {
+  if (moment >= weekdayStart(now)) {
+    return formatDayAndTime(moment)
+  }
+
+  return (clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)
+}
+
+/**
  * The time of a news item as a visitor reads it, in Dutch time. Of today and the six days before it is the short weekday
  * and the time, such as "wo 14:05". Anything older is the date and the time, such as "14 okt 14:05". A moment after now,
  * from a clock that is ahead, counts as today. The news covers fourteen days, so the year is never needed.
