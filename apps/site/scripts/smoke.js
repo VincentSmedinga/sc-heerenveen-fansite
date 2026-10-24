@@ -65,6 +65,79 @@ async function checkFeed(siteOrigin) {
 }
 
 /**
+ * Checks that the site serves the manifest and the icons itself, with the right type, and that they are what the manifest
+ * says: PNGs of the sizes in the manifest, and an icon file that starts with an icon header. Returns the responses, so the
+ * caller can check their headers.
+ */
+async function checkIcons() {
+  const manifestResponse = await fetch(`${origin}/manifest.webmanifest`)
+  const manifest = await manifestResponse.json()
+  assert.equal(manifestResponse.status, 200)
+  assert.match(manifestResponse.headers.get('content-type') ?? '', /^application\/manifest\+json/)
+  assert.equal(manifest.name, 'sc Heerenveen Fansite')
+  assert.equal(manifest.short_name, 'Fansite')
+  assert.equal(manifest.start_url, '/')
+  assert.equal(manifest.lang, 'nl')
+  assert.equal(manifest.display, 'standalone')
+  assert.equal(manifest.icons.length, 3)
+
+  const responses = [manifestResponse]
+
+  for (const { sizes, src, type } of manifest.icons) {
+    const icon = await fetch(origin + src)
+    const bytes = new Uint8Array(await icon.arrayBuffer())
+    const view = new DataView(bytes.buffer)
+    assert.equal(icon.status, 200, src)
+    assert.equal(icon.headers.get('content-type'), type, src)
+    assert.deepEqual([...bytes.slice(0, 8)], [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], src)
+    assert.equal(`${view.getUint32(16)}x${view.getUint32(20)}`, sizes, src)
+    responses.push(icon)
+  }
+
+  const appleIcon = await fetch(`${origin}/apple-touch-icon.png`)
+  const appleBytes = new Uint8Array(await appleIcon.arrayBuffer())
+  assert.equal(appleIcon.status, 200)
+  assert.equal(appleIcon.headers.get('content-type'), 'image/png')
+  assert.deepEqual(
+    [new DataView(appleBytes.buffer).getUint32(16), new DataView(appleBytes.buffer).getUint32(20)],
+    [180, 180],
+  )
+
+  const favicon = await fetch(`${origin}/favicon.ico`)
+  const faviconBytes = new Uint8Array(await favicon.arrayBuffer())
+  assert.equal(favicon.status, 200)
+  assert.match(favicon.headers.get('content-type') ?? '', /^image\/(?:x-icon|vnd\.microsoft\.icon)$/)
+  // An icon file starts with two zero bytes, the type 1 for an icon and the number of images.
+  assert.deepEqual([...faviconBytes.slice(0, 4)], [0, 0, 1, 0])
+  assert.ok(faviconBytes[4] > 0, '/favicon.ico holds no image')
+
+  const svg = await fetch(`${origin}/icon.svg`)
+  assert.equal(svg.status, 200)
+  assert.equal(svg.headers.get('content-type'), 'image/svg+xml')
+  assert.match(await svg.text(), /^<svg /)
+
+  return [...responses, appleIcon, favicon, svg]
+}
+
+/**
+ * Checks that the page links to the manifest and the icons, which come from our own server, and that the browser gets the
+ * colours of the header and the short name for the home screen of an iPhone.
+ */
+function checkIconTags(path, html) {
+  assert.match(html, /<link rel="manifest" href="\/manifest\.webmanifest"/, path)
+  assert.match(html, /<link rel="icon" href="\/icon\.svg" type="image\/svg\+xml"/, path)
+  assert.match(html, /<link rel="icon" href="\/favicon\.ico" sizes="16x16 32x32 48x48" type="image\/x-icon"/, path)
+  assert.match(
+    html,
+    /<link rel="apple-touch-icon" href="\/apple-touch-icon\.png" sizes="180x180" type="image\/png"/,
+    path,
+  )
+  assert.match(html, /<meta name="apple-mobile-web-app-title" content="Fansite"/, path)
+  assert.match(html, /<meta name="theme-color" content="#[0-9a-f]{6}" media="\(prefers-color-scheme: light\)"/, path)
+  assert.match(html, /<meta name="theme-color" content="#[0-9a-f]{6}" media="\(prefers-color-scheme: dark\)"/, path)
+}
+
+/**
  * Checks that a page gives the layers of the design system their declared order. A browser orders the layers by their
  * first appearance, across all the stylesheets of the page in the order of the links. So the statement with the order
  * must come before the first block of any layer. The bundler once put it at the end, and typography beat the components.
@@ -293,6 +366,13 @@ await withEmptyDatabase((database) =>
     const sitemap = await checkSitemap('https://acc.sc.heerenveen.org')
     const shareImageResponse = await checkShareImage()
 
+    // Every page points to the manifest and the icons, and the site serves them itself.
+    for (const { path } of pages) {
+      checkIconTags(path, await (await fetch(origin + path)).text())
+    }
+
+    const iconResponses = await checkIcons()
+
     // The sources page reads the register, so the database driver must be in the folder too, and the test sources must
     // be in it. The source that is switched off isn't on the page.
     const sources = await fetch(`${origin}/bronnen`)
@@ -319,14 +399,15 @@ await withEmptyDatabase((database) =>
 
     const feed = await checkFeed('https://acc.sc.heerenveen.org')
 
-    // Every kind of response carries the headers: a page, a page from the database, robots.txt, a static file, a feed
-    // and a 404.
+    // Every kind of response carries the headers: a page, a page from the database, robots.txt, a static file, a feed,
+    // the manifest, the icons and a 404.
     for (const response of [
       home,
       sources,
       robots,
       sitemap,
       shareImageResponse,
+      ...iconResponses,
       feed,
       await fetch(origin + asset),
       await fetch(`${origin}/bestaat-niet`),
