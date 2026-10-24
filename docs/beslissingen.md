@@ -2507,3 +2507,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de CSS als tekst in de code zetten, zoals `CHANGELOG.md`: Turbopack geeft dat voor CSS-bestanden een foutmelding.
 - **Hoe:** `next.config.ts` leest `colour.css` bij de bouw (`src/header-colour.ts` zoekt de rol en de twee schalen) en zet de twee kleuren in de code met `env`, want de server heeft dat bestand niet.
   Het script voor de iconen en `vitest.config.ts` lezen hetzelfde bestand op dezelfde manier.
+
+### Onze bronnen staat in de footer, als Bronnen
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de link naar `/bronnen` staat niet meer in het hoofdmenu maar in de footer, tussen Over ons en Privacy, met de tekst "Bronnen".
+  De pagina zelf blijft Onze bronnen heten, in de kop, de titel en de link op de homepage.
+  Dit past de beslissing _Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep_ aan, die Onze bronnen in het hoofdmenu zette.
+- **Waarom:** het hoofdmenu houdt de inhoud over, Nieuws en het Forum.
+  Bronnen hoort bij wat de site over zichzelf zegt, net als Over ons en Privacy.
+  In de footer past het korte woord beter naast de andere links; de pagina zegt zelf "Onze bronnen".
+- **Alternatieven:** "Onze bronnen" ook in de footer, zodat de link en de kop hetzelfde heten.
+  Of Bronnen in beide menu's.
+- **Let op:** de footer markeert de huidige pagina niet, dus op `/bronnen` heeft geen enkele link in een menu de streep van de huidige pagina.

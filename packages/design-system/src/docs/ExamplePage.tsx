@@ -10,7 +10,6 @@ import { Text } from '../components/text/Text'
 
 const menuItems = [
   { href: '#nieuws', label: 'Nieuws' },
-  { href: '#bronnen', label: 'Onze bronnen' },
   { href: '#forum', label: 'Forum' },
 ] as const
 
@@ -36,6 +35,7 @@ export const ExampleHeader = ({ current = 'Nieuws' }: { current?: ExampleMenuPag
 /** The links about the site itself, in the footer of the example pages, as on the site. */
 export const exampleFooterMenu = [
   { href: '#over-ons', label: 'Over ons' },
+  { href: '#bronnen', label: 'Bronnen' },
   { href: '#privacy', label: 'Privacy' },
   { href: '#wat-is-er-nieuw', label: 'Wat is er nieuw' },
 ]

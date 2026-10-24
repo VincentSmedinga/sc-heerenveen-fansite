@@ -52,7 +52,7 @@ describe('Navigation', () => {
     expect(document.querySelectorAll('[aria-current]')).toHaveLength(1)
   })
 
-  it.each(['Nieuws', 'Onze bronnen', 'Forum'] as const)('marks only %s when that is the current page', (page) => {
+  it.each(['Nieuws', 'Forum'] as const)('marks only %s when that is the current page', (page) => {
     render(<Navigation items={exampleMenuAt(page)} label="Hoofdmenu" />)
 
     expect(screen.getByRole('link', { current: 'page' }).textContent).toBe(page)
