@@ -151,6 +151,43 @@ describe('the seed', () => {
     ])
   })
 
+  it.each([
+    {
+      domain: 'omny.fm',
+      feed: 'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
+      name: 'Omroep Abe',
+    },
+    {
+      domain: 'radiocamataru.podbean.com',
+      feed: 'https://feed.podbean.com/radiocamataru/feed.xml',
+      name: 'Radio Camataru',
+    },
+  ])(
+    'puts $name in the register as a podcast, with its feed and the strictest policy',
+    async ({ domain, feed, name }) => {
+      await seedSources(database.db)
+
+      const [podcast] = await database.db.select().from(sources).where(eq(sources.domain, domain))
+      const podcastFeeds = await database.db
+        .select()
+        .from(feeds)
+        .where(eq(feeds.sourceId, podcast?.id ?? 0))
+
+      expect(podcast).toMatchObject({
+        allowEmbed: false,
+        allowImage: false,
+        enabled: true,
+        introMaxLength: 0,
+        kind: 'podcast',
+        name,
+      })
+      expect(podcast?.consentStatus).not.toBe('given')
+      expect(podcast?.description).toBeTruthy()
+      expect(podcast?.description?.length).toBeLessThanOrEqual(300)
+      expect(podcastFeeds.map((row) => row.url)).toEqual([feed])
+    },
+  )
+
   it('holds made-up test sources only, and real sources that are not made up', () => {
     for (const source of testSources) {
       expect(source.domain, source.name).toMatch(/\.test$/)

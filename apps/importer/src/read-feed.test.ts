@@ -504,6 +504,78 @@ describe('an Atom feed', () => {
   })
 })
 
+/**
+ * A podcast feed in the shape of the real ones, with made-up titles and addresses: the iTunes and Podcast namespaces,
+ * an enclosure with the MP3 file, a description, an image and a duration.
+ */
+const podcastItem = (parts: { guid: string; link: null | string; title: string }) =>
+  '<item>' +
+  `<title>${parts.title}</title><itunes:title>${parts.title}</itunes:title>` +
+  (parts.link === null ? '' : `<link>${parts.link}</link>`) +
+  `<guid isPermaLink="false">${parts.guid}</guid>` +
+  '<pubDate>Tue, 20 Oct 2026 00:31:00 +0200</pubDate>' +
+  '<description>Een verzonnen beschrijving met shownotes.</description>' +
+  `<enclosure url="https://mcdn.podcast.test/${parts.guid}.mp3" length="53188902" type="audio/mpeg"/>` +
+  '<itunes:duration>2216</itunes:duration><itunes:image href="https://podcast.test/plaatje.jpg"/>' +
+  '</item>'
+
+const podcastFeed = (...entries: string[]) =>
+  '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" ' +
+  'xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">' +
+  `<channel><title>Een verzonnen podcast</title><link>https://podcast.test</link>${entries.join('')}</channel></rss>`
+
+describe('a podcast feed', () => {
+  it('gives the title, the page of the episode as link, the GUID as key and the time', () => {
+    const [episode] = itemsOf(
+      podcastFeed(
+        podcastItem({ guid: 'a-1', link: 'https://podcast.test/e/aflevering-een/', title: 'Aflevering één' }),
+      ),
+    )
+
+    expect(episode).toEqual({
+      key: 'a-1',
+      paywalled: false,
+      publishedAt: new Date('2026-10-19T22:31:00Z'),
+      title: 'Aflevering één',
+      url: 'https://podcast.test/e/aflevering-een/',
+    })
+  })
+
+  it('never takes the enclosure as the link, not even in an item without a link, which is skipped and reported', () => {
+    const feed = podcastFeed(
+      podcastItem({ guid: 'a-1', link: 'https://podcast.test/e/een/', title: 'Met link' }),
+      podcastItem({ guid: 'a-2', link: null, title: 'Zonder link' }),
+      podcastItem({ guid: 'a-3', link: '', title: 'Met een lege link' }),
+    )
+
+    expect(itemsOf(feed).map((item) => item.url)).toEqual(['https://podcast.test/e/een/'])
+    expect(skippedOf(feed)).toEqual([
+      { position: 2, reason: 'there is no link' },
+      { position: 3, reason: 'there is no link' },
+    ])
+    expect(JSON.stringify(readFeed(encode(feed), { now }))).not.toContain('.mp3')
+  })
+
+  it('skips an item with the same GUID as an earlier one, and the first one counts', () => {
+    const feed = podcastFeed(
+      podcastItem({ guid: 'dubbel', link: 'https://podcast.test/e/een/', title: 'Eerste' }),
+      podcastItem({ guid: 'dubbel', link: 'https://podcast.test/e/twee/', title: 'Tweede' }),
+    )
+
+    expect(itemsOf(feed).map((item) => item.title)).toEqual(['Eerste'])
+    expect(skippedOf(feed)).toEqual([{ position: 2, reason: 'an earlier item in the feed has the same key' }])
+  })
+
+  it('gives items with these five fields only: no description, image, duration or MP3 file', () => {
+    const [episode] = itemsOf(
+      podcastFeed(podcastItem({ guid: 'a-1', link: 'https://podcast.test/e/een/', title: 'Aflevering één' })),
+    )
+
+    expect(Object.keys(episode ?? {}).sort()).toEqual(['key', 'paywalled', 'publishedAt', 'title', 'url'])
+    expect(JSON.stringify(episode)).not.toMatch(/mp3|shownotes|plaatje|2216/u)
+  })
+})
+
 describe('a response that is no usable feed', () => {
   it.each([
     ['text that is no XML', 'Dit is geen feed.'],

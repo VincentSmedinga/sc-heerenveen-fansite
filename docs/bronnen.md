@@ -1,6 +1,6 @@
 # Bronnen
 
-Dit document beoordeelt de bronnen die we voor de site hebben overwogen: 24 bronnen met hun feeds.
+Dit document beoordeelt de bronnen die we voor de site hebben overwogen: 28 bronnen met hun feeds, waaronder vier podcasts.
 Elke bron krijgt één besluit, met een reden.
 De bronnen met het besluit "nemen" staan in het register (`realSources` in `packages/db/src/seed.ts`) en draaien mee in de import.
 Dit document is de enige plek met de lijst; de andere documenten verwijzen hiernaartoe.
@@ -53,18 +53,20 @@ Bij elke bron staat of de voorwaarden daar iets over zeggen.
 - **Afwijzen:** de feed werkt niet, gaat niet over sc Heerenveen, of `robots.txt` weigert ons.
   De feeds van andere clubs vallen hieronder, want de site gaat over sc Heerenveen.
 
+De podcasts staan samen in het deel _Podcasts_, met hetzelfde besluit per bron.
+
 Een voorbehoud tegen datamining in `robots.txt` of de voorwaarden staat bij de bron.
 Het houdt het besluit "nemen" niet tegen zolang de feed voor ons openstaat.
 Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in het register) en schrijven we dat hier op.
 
 ### Overzicht
 
-| Besluit                             | Bronnen                                                                                                                                                                                                              |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf                                                                                                                                                    |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed), NOS, Algemeen Dagblad, ESPN NL, Omrop Fryslân                                                                                                                                    |
-| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                     |
-| Afwijzen                            | RTV Noord, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Rijnmond, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle |
+| Besluit                             | Bronnen                                                                                                                                                                                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omroep Abe (podcast), Radio Camataru (podcast)                                                                                                                                             |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed), NOS, Algemeen Dagblad, ESPN NL, Omrop Fryslân                                                                                                                                                                             |
+| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                              |
+| Afwijzen                            | RTV Noord, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Rijnmond, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast |
 
 ## Nemen
 
@@ -505,6 +507,76 @@ Hoort bij #16.
 - **Besluit: afwijzen.**
   Het is een andere club, en de site gaat over sc Heerenveen.
   De feed geeft ook een 404.
+
+## Podcasts
+
+Een podcast is een bron van het soort podcast, en een aflevering is een item (#14).
+De importer leest de feed met dezelfde lezer als een nieuwsfeed.
+De link van een aflevering is het element `link`, de pagina van de aflevering, en nooit de `enclosure`, het MP3-bestand.
+Zo sturen we de luisteraar naar de pagina van de maker.
+Een aflevering zonder bruikbare `link` slaat de importer over.
+Wat we tonen, staat in het issue over het tonen van de afleveringen (#188).
+
+Op 24 oktober 2026 hebben we de vier feeds en hun `robots.txt` één keer opgehaald, met de user agent van de importer.
+We telden de afleveringen, de datum van de eerste en de nieuwste (in UTC), en hoeveel afleveringen Heerenveen in de titel of de beschrijving noemen.
+Dat is een andere telling dan bij het nieuws, dat de categorieën meetelt, want een podcastfeed heeft die niet.
+Voor Omroep Abe en Radio Camataru draaiden we daarna de importer lokaal, en die zette alle afleveringen in de database, zonder een aflevering over te slaan.
+De pagina's met voorwaarden van de makers hebben we niet gelezen.
+
+### Omroep Abe
+
+- **Domein:** `omny.fm`
+- **Soort:** podcast van de Leeuwarder Courant, wekelijks
+- **Feed:** `https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss`
+  - Werkt: ja, RSS 2.0 met 224 afleveringen; de nieuwste is van 19 oktober 2026, de oudste van 6 oktober 2021.
+    Dat is ongeveer één aflevering per week.
+  - Over sc Heerenveen: 205 van de 224 noemen Heerenveen in de titel of de beschrijving.
+  - Link: de pagina van de aflevering op `omny.fm`, zoals `https://omny.fm/shows/omroep-abe/<aflevering>`.
+  - Verzoeken: de feed stuurt een `ETag`, dus een run zonder nieuwe aflevering krijgt "niet gewijzigd" in plaats van de feed van bijna 1 MB.
+- **`robots.txt`:** op `www.omnycontent.com` staat `Allow: /` voor iedereen.
+- **Meer tonen:** alleen met toestemming van de Leeuwarder Courant; het artwork en de beschrijving bewaren we niet.
+- **Besluit: nemen.**
+  De podcast gaat bijna helemaal over de club, heeft een pagina per aflevering en laat ons de feed lezen.
+
+### Radio Camataru
+
+- **Domein:** `radiocamataru.podbean.com`
+- **Soort:** podcast van supporters, wekelijks
+- **Feed:** `https://feed.podbean.com/radiocamataru/feed.xml`
+  - Werkt: ja, RSS 2.0 met 100 afleveringen; de nieuwste is van 19 oktober 2026, de oudste van 5 maart 2024.
+  - Over sc Heerenveen: 95 van de 100 noemen Heerenveen in de titel of de beschrijving.
+  - Link: de pagina van de aflevering op Podbean, zoals `https://radiocamataru.podbean.com/e/<aflevering>/`.
+  - Verzoeken: de feed stuurt een `ETag`.
+- **`robots.txt`:** op `feed.podbean.com` sluit alleen een paar paden van Podbean zelf, zoals het zoeken en de profielen; de feed is open.
+- **Meer tonen:** alleen met toestemming van de makers; het artwork en de beschrijving bewaren we niet.
+- **Besluit: nemen.**
+  De podcast gaat bijna helemaal over de club, heeft een pagina per aflevering en laat ons de feed lezen.
+
+### Sportcast, van Omrop Fryslân
+
+- **Domein:** `www.omropfryslan.nl`
+- **Soort:** podcast over Friese sport
+- **Feed:** `https://tydlik.omropfryslan.nl/xml/podcast/788619`
+  - Het adres uit het prototype, `argyf2.omropfryslan.nl`, werkt niet meer; de feed staat nu op `tydlik.omropfryslan.nl`.
+  - Werkt: ja, RSS 2.0 met 390 afleveringen; de nieuwste is van 19 oktober 2026, de oudste van 31 juli 2018.
+  - Over sc Heerenveen: 8 van de 390 noemen Heerenveen in de titel of de beschrijving.
+  - Link: elke aflevering heeft dezelfde link, de pagina van het programma (`https://www.omropfryslan.nl/fy/podcast/sportcast`), dus geen pagina per aflevering.
+- **`robots.txt`:** op `tydlik.omropfryslan.nl` staat `Disallow: /` voor iedereen, dus de fetcher mag de feed niet lezen.
+- **Besluit: nu niet nemen.**
+  De feed is voor ons gesloten, gaat over Friese sport in het algemeen en heeft geen pagina per aflevering.
+  We kunnen Omrop Fryslân later om toestemming en een feed met alleen clubafleveringen vragen.
+
+### NOS Voetbalpodcast
+
+- **Domein:** `podcast.npo.nl`
+- **Soort:** podcast over het hele betaalde voetbal
+- **Feed:** `https://podcast.npo.nl/feed/nos-voetbalpodcast.xml`
+  - Werkt: ja, RSS 2.0 met 664 afleveringen; de nieuwste is van 23 oktober 2026, de oudste van 13 augustus 2018.
+  - Over sc Heerenveen: 5 van de 664 noemen Heerenveen in de titel of de beschrijving.
+  - Link: het element `link` is het MP3-bestand, dus geen pagina van de aflevering.
+- **`robots.txt`:** laat ons de feed toe.
+- **Besluit: nu niet nemen.**
+  De podcast gaat zelden over de club, en zonder pagina van de aflevering verwijzen we alleen naar een bestand.
 
 ## Wat de importer nog mist
 

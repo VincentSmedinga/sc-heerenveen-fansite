@@ -86,6 +86,9 @@ export const testSources = [
  * the headline, the link and the name. The descriptions are in our own words. `docs/bronnen.md` says which news sources
  * belong here and why.
  *
+ * A podcast is a source of kind podcast: the importer reads its feed like a news feed, and an episode is an item whose
+ * link is the page of the episode. The enclosure, the MP3 file, is never read.
+ *
  * The forum's "feed" is the list of discussions of its API, which the importer reads as a guest (see `read-forum.ts`).
  */
 export const realSources = [
@@ -122,6 +125,23 @@ export const realSources = [
     ],
     kind: 'forum',
     name: 'sc Heerenveen Forum',
+  },
+  {
+    description:
+      'Wekelijkse podcast van de Leeuwarder Courant over sc Heerenveen. Een clubwatcher bespreekt met oud-spelers de actualiteit en de achtergronden bij de club.',
+    domain: 'omny.fm',
+    feeds: [
+      'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
+    ],
+    kind: 'podcast',
+    name: 'Omroep Abe',
+  },
+  {
+    description: 'Wekelijkse podcast van supporters voor supporters, over sc Heerenveen.',
+    domain: 'radiocamataru.podbean.com',
+    feeds: ['https://feed.podbean.com/radiocamataru/feed.xml'],
+    kind: 'podcast',
+    name: 'Radio Camataru',
   },
 ] satisfies (NewSource & { feeds: string[] })[]
 

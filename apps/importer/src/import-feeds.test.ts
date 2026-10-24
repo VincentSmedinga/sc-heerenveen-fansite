@@ -1,3 +1,4 @@
+import type { SourceKind } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { feeds, items, sources } from '@fansite/db/schema'
@@ -40,11 +41,8 @@ afterEach(async () => {
 })
 
 /** Puts a source with a feed in the register and gives the feed as the importer reads it. */
-async function addFeed(url: string, { domain = 'krant.test', enabled = true } = {}) {
-  const [source] = await database.db
-    .insert(sources)
-    .values({ domain, enabled, kind: 'news', name: domain })
-    .$returningId()
+async function addFeed(url: string, { domain = 'krant.test', enabled = true, kind = 'news' as SourceKind } = {}) {
+  const [source] = await database.db.insert(sources).values({ domain, enabled, kind, name: domain }).$returningId()
   const [feed] = await database.db
     .insert(feeds)
     .values({ sourceId: source?.id ?? 0, url })
@@ -337,6 +335,76 @@ describe('an item that cannot be stored', () => {
 
     expect(report).toMatchObject({ added: 0, skipped: [{ position: 1 }], unchanged: 0, updated: 0 })
     expect((await itemsInDatabase())[0]).toMatchObject({ lastSeenAt: firstRun, title: 'Kop g1' })
+  })
+})
+
+describe('importing a podcast', () => {
+  /** An episode as a podcast feed writes it: with a page, an MP3 file, a description and a duration. */
+  function episode(key: string, { link = `https://podcast.test/e/${key}/`, title = `Aflevering ${key}` } = {}) {
+    return (
+      `<item><title>${title}</title>` +
+      (link === '' ? '' : `<link>${link}</link>`) +
+      `<guid isPermaLink="false">${key}</guid><pubDate>Tue, 20 Oct 2026 00:31:00 +0200</pubDate>` +
+      '<description>Een verzonnen beschrijving met shownotes.</description>' +
+      `<enclosure url="https://mcdn.podcast.test/${key}.mp3" length="53188902" type="audio/mpeg"/>` +
+      '<itunes:duration>2216</itunes:duration></item>'
+    )
+  }
+
+  const podcastFeed = (...entries: string[]) =>
+    '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">' +
+    `<channel><title>Een verzonnen podcast</title>${entries.join('')}</channel></rss>`
+
+  it('stores the title, the page of the episode and the time, and skips an episode without a page', async () => {
+    const server = await serve(
+      podcastFeed(episode('een'), episode('zonder-pagina', { link: '' }), episode('twee', { title: 'Tweede' })),
+    )
+    const feed = await addFeed(`${server.origin}/rss/`, { domain: 'podcast.test', kind: 'podcast' })
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect(report).toMatchObject({ added: 2, skipped: [{ position: 2, reason: 'there is no link' }] })
+    expect(formatReport(report)).toContain('item 2 skipped: there is no link')
+    expect(await itemsInDatabase()).toMatchObject([
+      {
+        key: 'een',
+        publishedAt: new Date('2026-10-19T22:31:00Z'),
+        title: 'Aflevering een',
+        url: 'https://podcast.test/e/een/',
+      },
+      { key: 'twee', title: 'Tweede', url: 'https://podcast.test/e/twee/' },
+    ])
+    expect(JSON.stringify(await itemsInDatabase())).not.toMatch(/mp3|shownotes|2216/u)
+  })
+
+  it('makes no duplicates when it runs twice, and updates a title that changed', async () => {
+    const server = await serve(podcastFeed(episode('een'), episode('twee')))
+    const feed = await addFeed(`${server.origin}/rss/`, { domain: 'podcast.test', kind: 'podcast' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    const changed = await serve(podcastFeed(episode('een', { title: 'Nieuwe titel' }), episode('twee')))
+    const report = await importFeed(
+      database.db,
+      fetcherFor(servers),
+      { ...feed, url: `${changed.origin}/rss/` },
+      secondRun,
+    )
+
+    expect(report).toMatchObject({ added: 0, unchanged: 1, updated: 1 })
+    expect((await itemsInDatabase()).map((row) => row.title)).toEqual(['Nieuwe titel', 'Aflevering twee'])
+  })
+
+  it('keeps an episode and an item of another source with the same GUID apart', async () => {
+    const server = await serve(podcastFeed(episode('gelijk')))
+    const other = await serve(feedWith(entry('gelijk')))
+    const podcast = await addFeed(`${server.origin}/rss/`, { domain: 'podcast.test', kind: 'podcast' })
+    const news = await addFeed(`${other.origin}/rss/`)
+
+    await importFeed(database.db, fetcherFor(servers), podcast, firstRun)
+    await importFeed(database.db, fetcherFor(servers), news, firstRun)
+
+    expect(await itemsInDatabase()).toHaveLength(2)
   })
 })
 

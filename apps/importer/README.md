@@ -1,11 +1,10 @@
 # @fansite/importer
 
 De importer haalt koppen en links op bij de bronnen.
-Hij bevat de fetcher, de ene HTTP-client voor alle adapters, de adapter voor RSS- en Atom-feeds en de lezer van de forumdiscussies van ons eigen forum (zie _Het forum_).
-Welke nieuwsbronnen we lezen en waarom, staat in [`docs/bronnen.md`](../../docs/bronnen.md).
+Hij bevat de fetcher, de ene HTTP-client voor alle adapters, de adapter voor RSS- en Atom-feeds, die ook de podcasts leest (zie _De podcasts_), en de lezer van de forumdiscussies van ons eigen forum (zie _Het forum_).
+Welke nieuwsbronnen en podcasts we lezen en waarom, staat in [`docs/bronnen.md`](../../docs/bronnen.md).
 Op acceptatie start cron de import elke 15 minuten (zie _De import op acceptatie_).
 Een run neemt een lock, schrijft een logboek, houdt de gezondheid van elke feed bij en wacht als een bron daarom vraagt (zie _Het logboek en de gezondheid_).
-Een rooster per soort bron komt met de adapters (#14).
 
 ## De import draaien
 
@@ -333,6 +332,21 @@ Twee dingen voor wie een adapter schrijft:
   Krijgt de adapter een scherm in plaats van een feed, dan meldt zij dat als fout.
   Kijk daarvoor naar `contentType` en `url`.
 - De import beslist hoe lang we echt wachten na een `wait` (zie _Wachten_).
+
+## De podcasts
+
+Omroep Abe en Radio Camataru zijn bronnen van het soort podcast.
+Hun feeds lezen we met dezelfde adapter als een nieuwsfeed, dus een aflevering is een item, met dezelfde velden als een bericht (zie _Wat de adapter bewaart_).
+Een eigen adapter of eigen tabellen zijn er niet.
+
+- **Link:** de link van een aflevering is het element `link`, de pagina van de aflevering.
+  De `enclosure`, het MP3-bestand, lezen we niet.
+  Een aflevering zonder bruikbare `link` slaat de import over en meldt dat in het logboek; hij valt niet terug op de `enclosure`.
+- **Sleutel:** de `guid`, per bron.
+- **Niets extra:** geen artwork, beschrijving, shownotes, duur of adres van het MP3-bestand.
+- **Rooster:** podcasts hebben geen rooster van zichzelf.
+  Ze gaan mee in de run van elke 15 minuten, met de `ETag` die beide bronnen sturen, dus `pnpm run import:status` toont ze zoals de andere feeds.
+- **Niet in het nieuws:** `listRecentItems` in `@fansite/db` slaat bronnen van het soort podcast over, dus afleveringen komen niet in "Laatste nieuws".
 
 ## Het forum
 
