@@ -25,7 +25,7 @@ const meta = preview.meta({
           '',
           'De titel is niet onderstreept, zoals de kop van een nieuwsregel, want een lijst met veel onderstreepte titels is druk.',
           'Onder de muis en met de focus van het toetsenbord krijgt hij de onderstreping, naast de focusrand.',
-          'De kleuren veranderen niet: een bezochte titel houdt de kleur voor bezocht, en onder de muis krijgt hij de kleur voor hover.',
+          'De titel is een van de twee links die grijs worden als je ze hebt geopend (de andere is de kop van een nieuwsbericht); onder de muis krijgt hij de kleur voor hover, ook als hij bezocht is.',
           'De titel staat op een eigen regel, iets zwaarder dan gewone tekst en in de kleur voor links, dus je herkent hem ook zonder onderstreping als link.',
           'De titel is groot genoeg om goed te raken, en een lange titel loopt door op de volgende regel.',
           '',

@@ -31,7 +31,6 @@
     --hf-colour-text-heading: var(--hf-colour-text-on-header);
     --hf-colour-text-link: var(--hf-colour-text-on-header-secondary);
     --hf-colour-text-link-hover: var(--hf-colour-text-on-header);
-    --hf-colour-text-link-visited: var(--hf-colour-text-on-header-secondary);
     --hf-colour-text-secondary: var(--hf-colour-text-on-header-secondary);
 
     align-items: center;
@@ -191,8 +190,7 @@
   /*
    * The footer closes the page as the header opens it: a band as wide as the page, a step off the page, with a line on
    * top. The padding on the sides keeps what is in it in the column, as in the header.
-   * The links are dark sand, so the roles that links use are set again for everything inside it. A visited link has the
-   * colour of a normal one, and the underline stays.
+   * The links are dark sand, so the roles that links use are set again for everything inside it. The underline stays.
    *
    * It holds two lines of text, a paragraph each, and the links last. What is in it has no margin, so the lines of text sit
    * right under each other. On a narrow screen everything is in one column, with the links under the text. From 40rem,
@@ -201,7 +199,6 @@
   .hf-page-footer {
     --hf-colour-text-link: var(--hf-colour-text-link-on-footer);
     --hf-colour-text-link-hover: var(--hf-colour-text-link-hover-on-footer);
-    --hf-colour-text-link-visited: var(--hf-colour-text-link-on-footer);
 
     background-color: var(--hf-colour-background-footer);
     border-block-start: 1px solid;
