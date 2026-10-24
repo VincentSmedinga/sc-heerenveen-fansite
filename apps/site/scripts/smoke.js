@@ -34,6 +34,14 @@ if (databaseUrl === undefined) {
 
 const port = process.env['SMOKE_PORT'] ?? '3123'
 const origin = `http://127.0.0.1:${port}`
+// Made-up settings of the mail server, for the servers that need them to start. Nothing here sends mail.
+const smtpSettings = {
+  MAIL_FROM: 'Smoke <smoke@example.org>',
+  SMTP_HOST: 'localhost',
+  SMTP_PASSWORD: 'smoke',
+  SMTP_PORT: '465',
+  SMTP_USER: 'smoke@example.org',
+}
 const serverFile = path.resolve(folder, 'apps/site/server.js')
 
 // The versions Updates must show: those in the CHANGELOG.md of this checkout that have Dutch sentences. The bundler
@@ -296,12 +304,22 @@ async function withEmptyDatabase(checks) {
 }
 
 /**
- * Starts the server with the given SITE_ENV (or none) and database, runs the checks and always stops the server again.
- * The checks get the server and a function that returns what the server has written to its log so far.
+ * Starts the server with the given SITE_ENV (or none), database and, unless `smtp` is false, made-up mail settings, runs
+ * the checks and always stops the server again. The checks get the server and a function that returns what the server has
+ * written to its log so far.
  */
-async function withServer({ database, siteEnv }, checks) {
+async function withServer({ database, siteEnv, smtp = true }, checks) {
   const env = { ...process.env, DATABASE_URL: database, HOSTNAME: '127.0.0.1', PORT: port }
   delete env['SITE_ENV']
+
+  // Acceptance and production don't start without the settings of the mail server.
+  for (const name of Object.keys(smtpSettings)) {
+    delete env[name]
+  }
+
+  if (smtp) {
+    Object.assign(env, smtpSettings)
+  }
 
   if (siteEnv !== undefined) {
     env['SITE_ENV'] = siteEnv
@@ -549,6 +567,12 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
 await withServer({ database: databaseUrl, siteEnv: undefined }, async (server) => {
   const [code] = await Promise.race([once(server, 'exit'), sleep(30_000).then(() => [undefined])])
   assert.ok(code !== undefined && code !== 0, 'the server must refuse to start without SITE_ENV')
+})
+
+await withServer({ database: databaseUrl, siteEnv: 'acceptance', smtp: false }, async (server, log) => {
+  const [code] = await Promise.race([once(server, 'exit'), sleep(30_000).then(() => [undefined])])
+  assert.ok(code !== undefined && code !== 0, 'the server must refuse to start on acceptance without the mail settings')
+  assert.match(log(), /SMTP_HOST is missing/)
 })
 
 console.log('Smoke test passed.')
