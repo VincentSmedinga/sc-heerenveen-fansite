@@ -5,8 +5,8 @@
 
 export { Body } from './components/body/Body'
 export type { BodyProps } from './components/body/Body'
-export { Button, buttonTypes } from './components/button/Button'
-export type { ButtonProps, ButtonType } from './components/button/Button'
+export { Button, buttonAppearances, buttonTypes } from './components/button/Button'
+export type { ButtonAppearance, ButtonProps, ButtonType } from './components/button/Button'
 export { Card, cardElements, cardSurfaces } from './components/card/Card'
 export type { CardElement, CardProps, CardSurface } from './components/card/Card'
 export { DiscussionItem } from './components/discussion-item/DiscussionItem'

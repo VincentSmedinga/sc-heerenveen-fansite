@@ -1,6 +1,9 @@
 /*
  * Buttons. At least 44px high. The border matches the background, so it doesn't show. In forced-colours mode it becomes
  * the system's button border, so the button keeps an outline there.
+ *
+ * The soft button (.hf-button-soft) is for an action next to the main one. It has the same size and the same border
+ * width, so it is as easy to hit. Its fill is pale, so its border has a colour of its own that stands out from the card.
  */
 
 @layer hf.base {
@@ -22,6 +25,19 @@
     &:hover {
       background-color: var(--hf-colour-background-button-hover);
       border-color: var(--hf-colour-background-button-hover);
+    }
+  }
+}
+
+@layer hf.components {
+  .hf-button-soft {
+    background-color: var(--hf-colour-background-button-soft);
+    border-color: var(--hf-colour-border-button-soft);
+    color: var(--hf-colour-text-on-button-soft);
+
+    &:hover {
+      background-color: var(--hf-colour-background-button-soft-hover);
+      border-color: var(--hf-colour-border-button-soft);
     }
   }
 }
