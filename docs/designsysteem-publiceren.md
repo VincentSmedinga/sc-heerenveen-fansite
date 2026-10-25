@@ -28,7 +28,7 @@ Een wijziging aan alleen de MCP-server zet ook Storybook opnieuw neer; die kopie
 Met de hand starten kan altijd: _Actions → Storybook → Run workflow_, op `main`.
 
 Op de server bouwen we niets.
-Storybook zijn statische bestanden, en de MCP-server is één JavaScript-bestand zonder `node_modules`.
+Storybook bestaat uit statische bestanden, en de MCP-server is één JavaScript-bestand zonder `node_modules`.
 Er is geen database.
 
 De twee kopieën raken elkaars bestanden niet:
