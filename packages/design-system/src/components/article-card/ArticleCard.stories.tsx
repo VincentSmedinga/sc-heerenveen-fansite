@@ -14,7 +14,7 @@ const meta = preview.meta({
       description: {
         component: [
           'De kaart op de homepage met het nieuwste artikel van onze eigen redactie.',
-          'Hij staat bovenaan de hoofdkolom, boven het nieuws van de media.',
+          'Hij staat bovenaan de hoofdkolom, boven het nieuws van de media, op het zachte vlak, zodat hij zich van het nieuws onderscheidt.',
           'Is er geen artikel, dan laat de pagina de kaart weg.',
           '',
           'Onder de kop "Van de redactie" staan de titel als link naar het artikel, de datum, de inleiding en de link "Lees verder".',

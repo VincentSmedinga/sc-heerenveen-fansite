@@ -660,7 +660,7 @@ describe('the card with the newest article of the editors', () => {
     const html = await renderMain()
 
     expect(html).toMatch(
-      /^<main class="hf-page-main"><h1 [^>]*>sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="[^"]+">.*?<\/section><section class="hf-card" aria-labelledby="media-heading">/,
+      /^<main class="hf-page-main"><h1 [^>]*>sc Heerenveen Fansite<\/h1><section class="hf-card hf-card-soft hf-article-card" aria-labelledby="[^"]+">.*?<\/section><section class="hf-card" aria-labelledby="media-heading">/,
     )
     expect(html.indexOf('Van de redactie')).toBeLessThan(html.indexOf('Laatste nieuws'))
   })

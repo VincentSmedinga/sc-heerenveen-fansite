@@ -27,7 +27,8 @@ export type ArticleCardProps = Omit<ComponentPropsWithoutRef<'section'>, 'childr
 /**
  * The newest article of our own editors, as a card on the homepage: the heading "Van de
  * redactie", under it the title as a link to the article, the date, the introduction and the
- * link "Lees verder". The card is a `section` named by its heading. The title and "Lees verder"
+ * link "Lees verder". The card is a `section` named by its heading, on the soft surface, so it
+ * stands apart from the news under it. The title and "Lees verder"
  * go to the same page; the name of the second link says which article it is for, which starts
  * with its text, so a speech control that says "Lees verder" finds it. article-card.css gives
  * it its look.
@@ -36,7 +37,7 @@ export const ArticleCard = ({ className, date, dateTime, href, intro, title, ...
   const headingId = useId()
 
   return (
-    <Card aria-labelledby={headingId} {...props} className={classNames('hf-article-card', className)}>
+    <Card aria-labelledby={headingId} surface="soft" {...props} className={classNames('hf-article-card', className)}>
       <Heading id={headingId} level={2}>
         Van de redactie
       </Heading>
