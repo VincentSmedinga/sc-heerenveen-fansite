@@ -100,6 +100,7 @@ describe('the admin', () => {
         'app/beheer/artikelen/page.tsx',
         'app/beheer/artikelen/nieuw/page.tsx',
         'app/beheer/artikelen/[id]/page.tsx',
+        'app/beheer/artikelen/[id]/versies/[nummer]/page.tsx',
         'app/beheer/artikelen/[id]/voorbeeld/page.tsx',
       ]),
     )

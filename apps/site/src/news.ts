@@ -38,6 +38,16 @@ const dateWithYearFormat = new Intl.DateTimeFormat('nl-NL', {
 
 const articleDateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', timeZone, year: 'numeric' })
 
+const versionTimeFormat = new Intl.DateTimeFormat('nl-NL', {
+  day: 'numeric',
+  hour: '2-digit',
+  hourCycle: 'h23',
+  minute: '2-digit',
+  month: 'long',
+  timeZone,
+  year: 'numeric',
+})
+
 const clockFormat = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
   hour: 'numeric',
@@ -166,6 +176,14 @@ export function formatNewsTime(moment: Date, now: Date) {
   }
 
   return `${(clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)} ${timeFormat.format(moment)}`
+}
+
+/**
+ * The date and the time of day of a saved version in Dutch time, such as "25 oktober 2026 om
+ * 14:05". An editor wants the minute: two versions are often saved on one day.
+ */
+export function formatVersionTime(moment: Date) {
+  return versionTimeFormat.format(moment)
 }
 
 /**

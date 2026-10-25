@@ -1,7 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { findPublishedArticle } from '@fansite/db/queries'
-import { adminUsers, articles, auditLog } from '@fansite/db/schema'
+import { adminUsers, articles, articleVersions, auditLog } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -10,6 +10,7 @@ import type { ArticleValues } from './article-fields'
 
 import { createAccount } from './accounts'
 import { cleanBody } from './article-form'
+import { listVersions } from './article-versions'
 import { createArticle, findArticle, listArticles, saveArticle, withdrawArticle } from './articles'
 
 let database: TestDatabase
@@ -25,6 +26,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
+  await database.pool.query('DELETE FROM article_versions')
   await database.pool.query('DELETE FROM articles')
   await database.db.delete(adminUsers)
   await createAccount(database.db, 'sanne@example.org', 'beheerder')
@@ -369,5 +371,219 @@ describe('listArticles and findArticle', () => {
 
     expect(await findArticle(database.db, id)).toMatchObject({ id, slug: 'welkom', title: 'Welkom' })
     expect(await findArticle(database.db, 99_999)).toBeUndefined()
+  })
+})
+
+describe('the versions and updated_by of an article', () => {
+  let otherId: number
+
+  beforeEach(async () => {
+    await createAccount(database.db, 'jelle@example.org', 'beheerder')
+    otherId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
+  })
+
+  const versions = (id: number) =>
+    database.db.select().from(articleVersions).where(eq(articleVersions.articleId, id)).orderBy(articleVersions.version)
+
+  /** The newest version must say what the article says. */
+  async function expectNewestVersionEqualsArticle(id: number) {
+    const article = await stored(id)
+    const newest = (await versions(id)).at(-1)
+
+    expect(newest).toMatchObject({
+      author: article?.author,
+      body: article?.body,
+      intro: article?.intro,
+      slug: article?.slug,
+      title: article?.title,
+    })
+  }
+
+  it('gives a new draft version 1 and updated_by of its maker, saved at the time of the draft', async () => {
+    const id = await draft()
+
+    expect(await stored(id)).toMatchObject({ createdBy: userId, updatedBy: userId })
+    expect(await versions(id)).toEqual([
+      {
+        articleId: id,
+        author: 'de redactie',
+        body: 'Een alinea.',
+        id: expect.any(Number),
+        intro: 'We stellen ons voor.',
+        savedAt: t0,
+        savedBy: userId,
+        slug: 'welkom',
+        title: 'Welkom',
+        version: 1,
+      },
+    ])
+  })
+
+  it('adds a version for each save that changes something, by the account that saved, and keeps the older ones', async () => {
+    const id = await draft()
+
+    await saveArticle(database.db, otherId, id, values({ titel: 'Tweede titel' }), false, t1)
+    await saveArticle(database.db, userId, id, values({ tekst: 'Derde tekst', titel: 'Tweede titel' }), false, t2)
+
+    expect(await versions(id)).toMatchObject([
+      { body: 'Een alinea.', savedAt: t0, savedBy: userId, title: 'Welkom', version: 1 },
+      { body: 'Een alinea.', savedAt: t1, savedBy: otherId, title: 'Tweede titel', version: 2 },
+      { body: 'Derde tekst', savedAt: t2, savedBy: userId, title: 'Tweede titel', version: 3 },
+    ])
+    expect(await stored(id)).toMatchObject({ createdBy: userId, updatedBy: userId })
+    await expectNewestVersionEqualsArticle(id)
+  })
+
+  it('makes no version for a save that changes nothing, and does not move updated_by or updated_at', async () => {
+    const id = await draft()
+
+    await saveArticle(database.db, otherId, id, values(), false, t1)
+
+    expect(await versions(id)).toHaveLength(1)
+    expect(await stored(id)).toMatchObject({ updatedAt: t0, updatedBy: userId })
+  })
+
+  it('makes no version when publishing or withdrawing, but sets updated_by and updated_at', async () => {
+    const id = await draft()
+
+    await saveArticle(database.db, otherId, id, values(), true, t1)
+
+    expect(await versions(id)).toHaveLength(1)
+    expect(await stored(id)).toMatchObject({ publishedAt: t1, updatedAt: t1, updatedBy: otherId })
+
+    await withdrawArticle(database.db, userId, id, t2)
+
+    expect(await versions(id)).toHaveLength(1)
+    expect(await stored(id)).toMatchObject({ publishedAt: null, updatedAt: t2, updatedBy: userId })
+  })
+
+  it('makes one version, and sets updated_by once, when a save changes the text and publishes', async () => {
+    const id = await draft()
+
+    await saveArticle(database.db, otherId, id, values({ tekst: 'Nieuw' }), true, t1)
+
+    expect(await versions(id)).toHaveLength(2)
+    expect(await stored(id)).toMatchObject({ body: 'Nieuw', updatedBy: otherId })
+    await expectNewestVersionEqualsArticle(id)
+  })
+
+  it('makes no version for a save that is refused, or for an article that is missing', async () => {
+    const id = await draft()
+
+    await saveArticle(database.db, userId, id, values(), true, t1)
+    await saveArticle(database.db, userId, id, values({ adres: 'ander', tekst: 'Anders' }), false, t2)
+    await saveArticle(database.db, userId, 99_999, values(), false, t2)
+
+    expect(await versions(id)).toHaveLength(1)
+    expect(await database.db.select().from(articleVersions)).toHaveLength(1)
+  })
+
+  it('gives no version to a draft with an address another article has, and none to the article it did not make', async () => {
+    await draft()
+    await createArticle(database.db, userId, values({ titel: 'Anders' }), t1)
+
+    expect(await database.db.select().from(articleVersions)).toHaveLength(1)
+  })
+
+  it('keeps no version when the log fails: the change, the version and the log are one transaction', async () => {
+    const id = await draft()
+
+    await expect(saveArticle(database.db, 99_999, id, values({ titel: 'Anders' }), true, t1)).rejects.toBeDefined()
+    expect(await versions(id)).toHaveLength(1)
+    await expectNewestVersionEqualsArticle(id)
+  })
+
+  it('numbers two edits at the same time 2 and 3, with no gap and no repeat', async () => {
+    const id = await draft()
+
+    const outcomes = await Promise.all([
+      saveArticle(database.db, userId, id, values({ tekst: 'Van een' }), false, t1),
+      saveArticle(database.db, otherId, id, values({ tekst: 'Van twee' }), false, t2),
+    ])
+
+    expect(outcomes).toMatchObject([{ saved: true }, { saved: true }])
+    expect((await versions(id)).map((row) => row.version)).toEqual([1, 2, 3])
+    await expectNewestVersionEqualsArticle(id)
+  })
+
+  it('numbers many edits at the same time without a gap or a repeat, and the newest is the article', async () => {
+    const id = await draft()
+    const texts = Array.from({ length: 8 }, (_, index) => `Tekst ${index}`)
+
+    await Promise.all(
+      texts.map((tekst, index) =>
+        saveArticle(database.db, index % 2 === 0 ? userId : otherId, id, values({ tekst }), false, t1),
+      ),
+    )
+
+    expect((await versions(id)).map((row) => row.version)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9])
+    expect(new Set((await versions(id)).map((row) => row.body)).size).toBe(9)
+    await expectNewestVersionEqualsArticle(id)
+  })
+
+  it('numbers the versions of each article by itself', async () => {
+    const first = await draft()
+    const second = await draft({ adres: 'tweede', titel: 'Tweede' })
+
+    await saveArticle(database.db, userId, first, values({ tekst: 'Anders' }), false, t1)
+
+    expect((await versions(first)).map((row) => row.version)).toEqual([1, 2])
+    expect((await versions(second)).map((row) => row.version)).toEqual([1])
+  })
+
+  it('has a newest version that equals the article after any sequence of actions', async () => {
+    const id = await draft()
+
+    const steps: (() => Promise<unknown>)[] = [
+      () => saveArticle(database.db, otherId, id, values({ intro: 'Tweede intro' }), false, t1),
+      () => saveArticle(database.db, userId, id, values({ intro: 'Tweede intro' }), true, t1),
+      () => saveArticle(database.db, otherId, id, values({ intro: 'Tweede intro', tekst: 'Live tekst' }), false, t2),
+      () => withdrawArticle(database.db, userId, id, t2),
+      () =>
+        saveArticle(
+          database.db,
+          userId,
+          id,
+          values({ adres: 'nieuw', auteur: 'Jelle', tekst: 'Live tekst' }),
+          false,
+          t2,
+        ),
+      () =>
+        saveArticle(
+          database.db,
+          userId,
+          id,
+          values({ adres: 'nieuw', auteur: 'Jelle', tekst: 'Live tekst' }),
+          true,
+          t2,
+        ),
+    ]
+
+    for (const step of steps) {
+      await step()
+      await expectNewestVersionEqualsArticle(id)
+    }
+
+    expect((await versions(id)).map((row) => row.version)).toEqual([1, 2, 3, 4])
+    expect(await stored(id)).toMatchObject({ slug: 'nieuw', updatedBy: userId })
+  })
+
+  it('keeps the addresses of the versions, even the ones the article no longer has', async () => {
+    const id = await draft()
+
+    await saveArticle(database.db, userId, id, values({ adres: 'nieuw-adres' }), false, t1)
+
+    expect((await versions(id)).map((row) => row.slug)).toEqual(['welkom', 'nieuw-adres'])
+  })
+
+  it('lists the versions with the address of the account, the newest first', async () => {
+    const id = await draft()
+
+    await saveArticle(database.db, otherId, id, values({ tekst: 'Anders' }), false, t1)
+
+    expect(await listVersions(database.db, id)).toEqual([
+      { savedAt: t1, savedBy: 'jelle@example.org', version: 2 },
+      { savedAt: t0, savedBy: 'sanne@example.org', version: 1 },
+    ])
   })
 })

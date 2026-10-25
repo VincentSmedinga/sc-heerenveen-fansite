@@ -1,6 +1,6 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
-import { adminUsers, articles } from '@fansite/db/schema'
+import { adminUsers, articles, articleVersions } from '@fansite/db/schema'
 import { eq } from 'drizzle-orm'
 import path from 'node:path'
 
@@ -37,6 +37,20 @@ export const testArticles = {
   },
 } as const
 
+/** The first two versions of the published article: the text as it was before the edits. */
+export const earlierVersions = [
+  {
+    body: 'Dit is de eerste tekst van het verzonnen artikel.',
+    intro: 'Een eerste verzonnen inleiding.',
+    title: 'Verzonnen artikel (eerste tekst)',
+  },
+  {
+    body: 'Dit is de tweede tekst van het verzonnen artikel, met **vet** erin.',
+    intro: 'Een tweede verzonnen inleiding.',
+    title: 'Verzonnen artikel (tweede tekst)',
+  },
+] as const
+
 const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])
 
 /**
@@ -62,27 +76,67 @@ export async function addArticles() {
 
     const [user] = await db.insert(adminUsers).values({ email: authorEmail, role: 'beheerder' }).$returningId()
     const createdBy = user?.id ?? 0
+    const updatedBy = createdBy
     const day = 24 * 60 * 60 * 1000
     const now = Date.now()
     const { draft, later, published } = testArticles
 
-    await db.insert(articles).values([
-      { ...published, createdBy, publishedAt: new Date(now - day) },
+    const [first] = await db
+      .insert(articles)
+      .values([
+        { ...published, createdBy, publishedAt: new Date(now - day), updatedBy },
+        {
+          author: 'de testredactie',
+          body: 'Dit concept staat nergens.',
+          createdBy,
+          intro: 'Een verzonnen concept.',
+          publishedAt: null,
+          updatedBy,
+          ...draft,
+        },
+        {
+          author: 'de testredactie',
+          body: 'Dit artikel staat nog nergens.',
+          createdBy,
+          intro: 'Een verzonnen artikel voor later.',
+          publishedAt: new Date(now + 365 * day),
+          updatedBy,
+          ...later,
+        },
+      ])
+      .$returningId()
+
+    // The published article has been edited twice since it was first saved, so the pages of
+    // the versions have more than one to show. The newest equals the article itself.
+    await db.insert(articleVersions).values([
       {
-        author: 'de testredactie',
-        body: 'Dit concept staat nergens.',
-        createdBy,
-        intro: 'Een verzonnen concept.',
-        publishedAt: null,
-        ...draft,
+        ...earlierVersions[0],
+        articleId: first?.id ?? 0,
+        author: published.author,
+        savedAt: new Date(now - 3 * day),
+        savedBy: updatedBy,
+        slug: published.slug,
+        version: 1,
       },
       {
-        author: 'de testredactie',
-        body: 'Dit artikel staat nog nergens.',
-        createdBy,
-        intro: 'Een verzonnen artikel voor later.',
-        publishedAt: new Date(now + 365 * day),
-        ...later,
+        ...earlierVersions[1],
+        articleId: first?.id ?? 0,
+        author: published.author,
+        savedAt: new Date(now - 2 * day),
+        savedBy: updatedBy,
+        slug: published.slug,
+        version: 2,
+      },
+      {
+        articleId: first?.id ?? 0,
+        author: published.author,
+        body: published.body,
+        intro: published.intro,
+        savedAt: new Date(now - day),
+        savedBy: updatedBy,
+        slug: published.slug,
+        title: published.title,
+        version: 3,
       },
     ])
   } finally {
@@ -140,8 +194,11 @@ function databaseEnv() {
   return readDatabaseEnv()
 }
 
-/** Takes the made-up articles out, then their account. */
+/** Takes the made-up articles out with their versions, then their account. */
 async function remove(pool: ReturnType<typeof connect>['pool']) {
+  await pool.query('DELETE FROM article_versions WHERE article_id IN (SELECT id FROM articles WHERE slug LIKE ?)', [
+    `${slugPrefix}%`,
+  ])
   await pool.query('DELETE FROM articles WHERE slug LIKE ?', [`${slugPrefix}%`])
   await pool.query('DELETE FROM admin_users WHERE email = ?', [authorEmail])
 }

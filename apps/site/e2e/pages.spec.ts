@@ -44,8 +44,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'moderator', path: '/beheer/berichten?fout=weg', status: 200 },
   { admin: 'beheerder', path: '/beheer', status: 200 },
   // The articles are for a beheerder: the list, the form for a new one, the form of a draft and
-  // of an article that is published, the notice after an action, and the preview of both. A
-  // moderator and a number that is no article get "niet gevonden".
+  // of an article that is published (with its versions), the notice after an action, and the
+  // preview of both. A moderator and a number that is no article get "niet gevonden".
   { admin: 'beheerder', path: '/beheer/artikelen', status: 200 },
   { admin: 'beheerder', path: '/beheer/artikelen?fout=weg', status: 200 },
   { admin: 'beheerder', path: '/beheer/artikelen/nieuw', status: 200 },
@@ -54,9 +54,17 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'beheerder', path: '/beheer/artikelen/{published}', status: 200 },
   { admin: 'beheerder', path: '/beheer/artikelen/{draft}/voorbeeld', status: 200 },
   { admin: 'beheerder', path: '/beheer/artikelen/{published}/voorbeeld', status: 200 },
+  // The versions: the published article has three, the newest equal to the article. A draft
+  // made without the admin has none, and a number the article never had is "niet gevonden".
+  { admin: 'beheerder', path: '/beheer/artikelen/{published}/versies/1', status: 200 },
+  { admin: 'beheerder', path: '/beheer/artikelen/{published}/versies/2', status: 200 },
+  { admin: 'beheerder', path: '/beheer/artikelen/{published}/versies/3', status: 200 },
+  { admin: 'beheerder', path: '/beheer/artikelen/{published}/versies/4', status: 404 },
+  { admin: 'beheerder', path: '/beheer/artikelen/{draft}/versies/1', status: 404 },
   { admin: 'beheerder', path: '/beheer/artikelen/999999', status: 404 },
   { admin: 'moderator', path: '/beheer/artikelen', status: 404 },
   { admin: 'moderator', path: '/beheer/artikelen/nieuw', status: 404 },
+  { admin: 'moderator', path: '/beheer/artikelen/{published}/versies/1', status: 404 },
   // An article of the editors, and the addresses that must say "niet gevonden": a draft, an
   // article for later, an address that isn't an article and one in capitals.
   { path: `/redactie/${testArticles.published.slug}`, status: 200 },

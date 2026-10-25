@@ -165,19 +165,45 @@ Er is nog geen scherm om het logboek te lezen; zie `docs/acceptatieomgeving.md` 
 De artikelen van onze eigen redactie (zie [`docs/artikelen.md`](../../docs/artikelen.md)).
 Een artikel staat op `/redactie/<slug>` en het nieuwste als kaart op de homepage, zodra `published_at` een tijd heeft die niet na het moment van nu ligt.
 
-| Kolom                      | Betekenis                                                                                             |
-| -------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `slug`                     | Het adres: kleine letters, cijfers en enkele streepjes, hoogstens 80 tekens; uniek                    |
-| `title`, `intro`, `author` | De titel (120 tekens), de intro (300) en de naam bij het artikel (100)                                |
-| `body`                     | De tekst, in de opmaak van `apps/site/src/article-text.ts`; een `mediumtext`                          |
-| `published_at`             | Leeg is een concept; een tijd in de toekomst telt als concept tot die tijd, in UTC                    |
-| `created_at`, `updated_at` | Wanneer het artikel is gemaakt en veranderd, in UTC; wie een artikel verandert, zet `updated_at` zelf |
-| `created_by`               | Het nummer van het account (`admin_users`), geen e-mailadres; een foreign key zonder cascade          |
+| Kolom                      | Betekenis                                                                                                             |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `slug`                     | Het adres: kleine letters, cijfers en enkele streepjes, hoogstens 80 tekens; uniek                                    |
+| `title`, `intro`, `author` | De titel (120 tekens), de intro (300) en de naam bij het artikel (100)                                                |
+| `body`                     | De tekst, in de opmaak van `apps/site/src/article-text.ts`; een `mediumtext`                                          |
+| `published_at`             | Leeg is een concept; een tijd in de toekomst telt als concept tot die tijd, in UTC                                    |
+| `created_at`, `updated_at` | Wanneer het artikel is gemaakt en veranderd, in UTC; wie een artikel verandert, zet `updated_at` en `updated_by` zelf |
+| `created_by`               | Het nummer van het account (`admin_users`), geen e-mailadres; een foreign key zonder cascade                          |
+| `updated_by`               | Het account dat het artikel het laatst veranderde, ook bij publiceren en intrekken; verplicht                         |
 
 De CHECK-constraint `articles_slug_format` weigert een adres met hoofdletters, een underscore of twee streepjes achter elkaar, in elke tool.
 Is een tekst te lang voor een kolom, dan faalt de opdracht, zolang MariaDB op zijn standaardinstelling staat (strikt).
 Een artikel verwijderen we niet: we trekken het in, door `published_at` leeg te maken.
 `findPublishedArticle`, `findNewestArticle` en `listPublishedArticles` in `queries.ts` geven alleen wat gepubliceerd is.
+
+## De tabel `article_versions`
+
+Elke versie van de tekst van een artikel (zie [`docs/artikelen.md`](../../docs/artikelen.md), _Wat het beheer bewaart_).
+Het beheer voegt een rij toe bij elke keer dat het een artikel maakt of de tekst verandert, in dezelfde transactie als de wijziging.
+
+| Kolom                                      | Betekenis                                                                                    |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `article_id`                               | Het artikel; een foreign key zonder cascade                                                  |
+| `version`                                  | 1, 2, 3 per artikel, aaneengesloten; de sleutel `(article_id, version)` is uniek             |
+| `title`, `slug`, `intro`, `body`, `author` | De inhoud zoals hij toen was opgeslagen; de nieuwste versie is gelijk aan het artikel zelf   |
+| `saved_at`                                 | Wanneer, in UTC                                                                              |
+| `saved_by`                                 | Het nummer van het account (`admin_users`), geen e-mailadres; een foreign key zonder cascade |
+
+Wat de tabel bewaart: de inhoud van elke opgeslagen versie, wie hem opsloeg en wanneer.
+Wat ze niet bewaart: de publicatiestand (`published_at`), want publiceren en intrekken veranderen de tekst niet; die staan in het logboek (`article.publish` en `article.unpublish`).
+Een artikel dat alleen met SQL is veranderd, heeft van die wijziging geen versie.
+
+Alleen `recordVersion` in `apps/site/src/beheer/article-versions.ts` schrijft erin, en alleen met `INSERT`.
+Geen enkele code wijzigt of verwijdert een rij, en `article-versions.test.ts` toetst dat in de broncode.
+Het nummer van een nieuwe versie komt uit dezelfde opdracht die de rij toevoegt (het hoogste nummer plus één), terwijl de rij van het artikel vergrendeld is.
+De unieke sleutel weigert een dubbel nummer als dat toch gebeurt.
+
+Migratie `0012_add_article_versions` voegt `updated_by` toe (eerst leeg, gevuld uit `created_by`, dan verplicht) en zet voor elk artikel dat er al was een versie 1.
+Elke opdracht ervan kan opnieuw draaien, want MariaDB kan een `ALTER TABLE` niet terugdraaien: stopt de migratie halverwege, dan maakt de volgende start hem af.
 
 ## Het logboek van de import en `robots_txt`
 

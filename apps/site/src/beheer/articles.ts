@@ -6,13 +6,15 @@ import { desc, eq } from 'drizzle-orm'
 import type { ArticleErrors, ArticleValues } from './article-fields'
 
 import { databaseErrors } from './article-form'
+import { recordVersion } from './article-versions'
 import { recordAction } from './audit-log'
 
 // Writing articles in the admin: the list, the one article an editor edits, and the four
 // changes. A change and its row in the log of the admin are one transaction, so there is no
-// change without a row and no row without a change. The clock is the `now` argument of each
-// function, which the caller leaves out: `published_at` and `updated_at` come from one place
-// each.
+// change without a row and no row without a change; a change of the text adds a version in the
+// same transaction, and every change sets `updated_by` along with `updated_at`. The clock is
+// the `now` argument of each function, which the caller leaves out: `published_at` and
+// `updated_at` come from one place each.
 
 /** How many articles the list shows. Far more than the editors will write. */
 export const listLength = 200
@@ -43,6 +45,7 @@ export async function findArticle(db: Pick<Database, 'select'>, id: number) {
       slug: articles.slug,
       title: articles.title,
       updatedAt: articles.updatedAt,
+      updatedBy: articles.updatedBy,
     })
     .from(articles)
     .where(eq(articles.id, id))
@@ -69,6 +72,11 @@ export function listArticles(db: Pick<Database, 'select'>) {
     .limit(listLength)
 }
 
+/** The fields of a form that a version keeps. */
+function contentOf(values: ArticleValues) {
+  return { author: values.auteur, body: values.tekst, intro: values.intro, slug: values.adres, title: values.titel }
+}
+
 /** Whether the error is the database refusing a second article with the same address. */
 function isDuplicateAddress(error: unknown): boolean {
   if (typeof error !== 'object' || error === null) {
@@ -86,9 +94,9 @@ const taken: SaveOutcome = { errors: { adres: databaseErrors.taken }, status: 'i
 export type WithdrawOutcome = 'done' | 'missing' | 'unchanged'
 
 /**
- * Makes a draft and writes `article.create` with its number in the log. The address must be
- * free: the unique key of the table decides, so two editors who save the same address at the
- * same time don't both succeed.
+ * Makes a draft with its version 1 and writes `article.create` with its number in the log. The
+ * address must be free: the unique key of the table decides, so two editors who save the same
+ * address at the same time don't both succeed.
  */
 export async function createArticle(
   db: Database,
@@ -108,8 +116,10 @@ export async function createArticle(
         slug: values.adres,
         title: values.titel,
         updatedAt: now,
+        updatedBy: userId,
       })
 
+      await recordVersion(transaction, { articleId: result.insertId, content: contentOf(values), userId }, now)
       await recordAction(transaction, { action: 'article.create', itemId: result.insertId, userId }, now)
 
       return { id: result.insertId, status: 'created' } as const
@@ -125,12 +135,12 @@ export async function createArticle(
 
 /**
  * Saves the fields of an article, and publishes it when `publish` is set. Saving writes
- * `article.update` only when a field changed, publishing writes `article.publish` only when the
- * article was not live yet: a second click, or a second tab, saves nothing again and publishes
- * nothing again, and the log says what happened. The address of an article that has a time of
- * publication is not changed (a link that was shared must not break); the answer is an error at
- * the field. An article for later, which only SQL can make, is left as it is: withdraw it first
- * to publish it now.
+ * `article.update` and a new version only when a field changed, publishing writes
+ * `article.publish` only when the article was not live yet: a second click, or a second tab,
+ * saves nothing again and publishes nothing again, and the log says what happened. The address
+ * of an article that has a time of publication is not changed (a link that was shared must not
+ * break); the answer is an error at the field. An article for later, which only SQL can make,
+ * is left as it is: withdraw it first to publish it now.
  */
 export async function saveArticle(
   db: Database,
@@ -169,8 +179,10 @@ export async function saveArticle(
             slug: values.adres,
             title: values.titel,
             updatedAt: now,
+            updatedBy: userId,
           })
           .where(eq(articles.id, id))
+        await recordVersion(transaction, { articleId: id, content: contentOf(values), userId }, now)
         await recordAction(transaction, { action: 'article.update', itemId: id, userId }, now)
       }
 
@@ -180,7 +192,10 @@ export async function saveArticle(
       const goesLive = publish && row.publishedAt === null
 
       if (goesLive) {
-        await transaction.update(articles).set({ publishedAt: now, updatedAt: now }).where(eq(articles.id, id))
+        await transaction
+          .update(articles)
+          .set({ publishedAt: now, updatedAt: now, updatedBy: userId })
+          .where(eq(articles.id, id))
         await recordAction(transaction, { action: 'article.publish', itemId: id, userId }, now)
       }
 
@@ -221,7 +236,10 @@ export async function withdrawArticle(
       return 'unchanged'
     }
 
-    await transaction.update(articles).set({ publishedAt: null, updatedAt: now }).where(eq(articles.id, id))
+    await transaction
+      .update(articles)
+      .set({ publishedAt: null, updatedAt: now, updatedBy: userId })
+      .where(eq(articles.id, id))
     await recordAction(transaction, { action: 'article.unpublish', itemId: id, userId }, now)
 
     return 'done'

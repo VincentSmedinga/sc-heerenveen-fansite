@@ -420,12 +420,13 @@ export const articleLimits = { author: 100, intro: 300, slug: 80, title: 120 }
  * headings, `- ` lists, bold, italic and links. A `mediumtext` holds 16 MB, far more than an
  * article needs; the admin sets the real limit. `author` is the name next to the article, such
  * as "de redactie". `created_by` is the account that put the article in, as a number, never an
- * address. Accounts are turned off and never deleted, so the foreign key keeps the author of
- * every article known.
+ * address. `updated_by` is the account that changed the article last, whatever the change was
+ * (an edit, publishing or withdrawing), and is set together with `updated_at`. Accounts are
+ * turned off and never deleted, so the foreign keys keep the people behind every article known.
  *
  * `slug` has lowercase letters, digits and single hyphens (the check ignores the collation,
  * which would let capitals through) and is unique, so an address never goes to two articles.
- * Times are UTC; whoever updates an article sets `updated_at` as well.
+ * Times are UTC; whoever updates an article sets `updated_at` and `updated_by` as well.
  */
 export const articles = mysqlTable(
   'articles',
@@ -446,6 +447,9 @@ export const articles = mysqlTable(
     createdBy: int('created_by', { unsigned: true })
       .notNull()
       .references(() => adminUsers.id),
+    updatedBy: int('updated_by', { unsigned: true })
+      .notNull()
+      .references(() => adminUsers.id),
   },
   (table) => [
     check('articles_slug_format', sql`${table.slug} regexp '(?-i)^[a-z0-9]+(-[a-z0-9]+)*$'`),
@@ -456,3 +460,39 @@ export const articles = mysqlTable(
 export type Article = typeof articles.$inferSelect
 
 export type NewArticle = typeof articles.$inferInsert
+
+/**
+ * Every version of the text of an article: a snapshot of `title`, `slug`, `intro`, `body` and
+ * `author` each time an editor creates or edits the article, and nothing else. Version 1 is the
+ * article as first saved, and the newest version equals the article itself. Publishing and
+ * withdrawing change no text and make no version (the log of the admin has them), and neither
+ * does a save that changed nothing. The numbers run 1, 2, 3 per article without gaps, and the
+ * unique key keeps two versions from sharing one.
+ *
+ * `saved_at` is UTC and `saved_by` is the account, as a number. The one function
+ * `recordVersion` in the site writes it, in the same transaction as the change, and nothing
+ * updates or deletes a row: a test keeps it so. An article that is only changed with SQL keeps
+ * no versions.
+ */
+export const articleVersions = mysqlTable(
+  'article_versions',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    articleId: int('article_id', { unsigned: true })
+      .notNull()
+      .references(() => articles.id),
+    version: int('version', { unsigned: true }).notNull(),
+    title: varchar('title', { length: articleLimits.title }).notNull(),
+    slug: varchar('slug', { length: articleLimits.slug }).notNull(),
+    intro: varchar('intro', { length: articleLimits.intro }).notNull(),
+    body: mediumtext('body').notNull(),
+    author: varchar('author', { length: articleLimits.author }).notNull(),
+    savedAt: datetime('saved_at').notNull(),
+    savedBy: int('saved_by', { unsigned: true })
+      .notNull()
+      .references(() => adminUsers.id),
+  },
+  (table) => [unique('article_versions_article_id_version_unique').on(table.articleId, table.version)],
+)
+
+export type ArticleVersion = typeof articleVersions.$inferSelect

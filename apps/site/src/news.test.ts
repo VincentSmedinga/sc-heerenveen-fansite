@@ -10,6 +10,7 @@ import {
   formatDuration,
   formatEpisodeTime,
   formatNewsTime,
+  formatVersionTime,
   weekdayStart,
 } from './news'
 
@@ -328,5 +329,12 @@ describe('formatArticleDate and dayOf', () => {
     expect(dayOf(new Date('2026-12-31T22:30:00Z'))).toBe('2026-12-31')
     expect(dayOf(new Date('2026-12-31T23:30:00Z'))).toBe('2027-01-01')
     expect(formatArticleDate(new Date('2026-12-31T23:30:00Z'))).toBe('1 januari 2027')
+  })
+})
+
+describe('formatVersionTime', () => {
+  it('gives the date and the time in Dutch time, in summer and in winter time', () => {
+    expect(formatVersionTime(new Date('2026-10-24T08:05:00Z'))).toBe('24 oktober 2026 om 10:05')
+    expect(formatVersionTime(new Date('2026-12-31T23:30:00Z'))).toBe('1 januari 2027 om 00:30')
   })
 })

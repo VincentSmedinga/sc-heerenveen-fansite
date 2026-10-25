@@ -15,6 +15,7 @@ const notInSitemap: string[] = [
   '/beheer',
   '/beheer/artikelen',
   '/beheer/artikelen/[id]',
+  '/beheer/artikelen/[id]/versies/[nummer]',
   '/beheer/artikelen/[id]/voorbeeld',
   '/beheer/artikelen/nieuw',
   '/beheer/berichten',

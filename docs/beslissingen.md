@@ -4145,6 +4145,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     De sitemap gebruikt hem niet.
 - **Waarom:** het schema dwingt af wat een pagina nodig heeft, ook als iemand rechtstreeks met SQL werkt, zoals de eigenaar tot #264 klaar is.
 - **Alternatieven:** een `text` voor `body` (kleiner, maar het scheelt niets en 64 kB is vlug bereikt); de opmaak van het adres alleen in de code controleren (de SQL-opdrachten van de eigenaar komen er dan omheen); `ON DELETE CASCADE` of `SET NULL` voor `created_by` (een artikel mag niet stil verdwijnen of zijn schrijver kwijtraken).
+- **Later:** de tabel heeft ook `updated_by`, verplicht en met dezelfde foreign key, en wie een artikel verandert zet hem samen met `updated_at`; zie _Een artikel bewaart wie het veranderde en elke versie van de tekst_.
 - **Gecontroleerd:** `articles.test.ts` en `articles-migration.test.ts` van `@fansite/db`, op een echte MariaDB: het adres, de lengtes, de unieke sleutel (ook met een spatie erachter), de foreign key, accenten en een emoji in de tekst, een tekst van een miljoen tekens, en dat de migratie de rijen van andere tabellen met rust laat.
 
 ### Het eerste artikel gaat met SQL de database in, en de seed zet geen artikel
@@ -4157,6 +4158,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een voorbeeldartikel daar zou na het echte artikel nog steeds staan, of het echte artikel verdringen als het nieuwste.
   Een artikel is bovendien tekst van onszelf en geen testbron: er is niets om op te testen dat de eigenaar niet met dezelfde opdracht zet.
 - **Alternatieven:** een verzonnen artikel in de seed, alleen op acceptatie (laat de functie meteen zien, maar het mengt zich met het echte artikel en de eigenaar moet het weghalen).
+- **Later:** de opdracht in `docs/artikelen.md` zet nu ook `updated_by`, want die kolom is verplicht, en een artikel dat met SQL is gemaakt heeft geen versie; zie _Een artikel bewaart wie het veranderde en elke versie van de tekst_.
 
 ### De sjablonen kennen `Strong` en `Emphasis`
 
@@ -4285,3 +4287,75 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat klopt, want geen kop had een Friese schrijfwijze of een Fries voetbalwoord.
   De verandering werkt dus pas als de bron een Friestalige kop over de club schrijft, zoals Sportcast.
 - **Alternatieven:** niets doen (de Friese koppen verdwijnen stil); het Fries volledig laten vertalen door een taalmodel (traag, duur, niet te testen, tegen _Het relevantiefilter kijkt alleen naar de kop, en bewaart wat het niet toont_); alleen de naam van de club toevoegen en geen voetbalwoorden (eenvoudiger, maar "Hearrenfean wint" blijft dan `doubtful`, en "Hearrenfean wûn" ook).
+
+### Een artikel bewaart wie het veranderde en elke versie van de tekst
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een artikel bewaart elke opgeslagen versie van zijn inhoud in een eigen tabel, `article_versions`, en een kolom `updated_by` zegt wie het artikel het laatst veranderde (#274).
+  - `updated_by` is het nummer van een account, met een foreign key naar `admin_users` zonder `cascade`.
+    Elke wijziging van het artikel zet hem samen met `updated_at`: een bewerking, het publiceren en het intrekken.
+  - Een versie bewaart de titel, het adres, de intro, de tekst en de auteur, met `saved_at` (UTC) en `saved_by` (het nummer van het account).
+    Versie 1 is het artikel zoals het voor het eerst is opgeslagen.
+  - Een versie komt in dezelfde transactie als de wijziging, via de ene functie `recordVersion` in `apps/site/src/beheer/article-versions.ts`.
+    Alleen maken en bewerken geven een versie.
+    Publiceren, intrekken en opslaan zonder verschil geven er geen.
+  - Niets in de site wijzigt of verwijdert een versie, en `article-versions.test.ts` houdt dat zo, zoals `audit-log.test.ts` voor het logboek.
+- **Waarom:** het logboek van beheeracties zegt wie wat deed, maar niet wat er stond.
+  Een artikel staat onder onze naam, dus een fout of een omstreden wijziging moet na te gaan en terug te halen zijn.
+  De tekst voor elke bewerking weggooien is het enige wat we niet kunnen herstellen.
+- **Alternatieven:** alleen het logboek (zoals voorheen: wie en wanneer, niet wat); de oude tekst in het logboek zelf bewaren (dan staat tekst in een tabel die voor feiten is bedoeld, en het logboek wordt groot); een volledige geschiedenis met terugzetten en vergelijken (meer scherm, nog niet nodig).
+
+### Een versie is een momentopname van de nieuwe inhoud, niet het verschil of de oude tekst
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de tabel bewaart bij elke keer opslaan een momentopname van de nieuwe inhoud (#274).
+- **Waarom:** zo is de nieuwste versie altijd gelijk aan het artikel, begint de geschiedenis bij versie 1 en is er geen speciaal geval voor de eerste keer.
+  Een artikel is kort, dus de opslag doet er niet toe, en een versie is één rij die je zo kunt lezen.
+- **Alternatieven:** de oude tekst bewaren vlak voor een bewerking (kleiner, maar de huidige versie staat dan niet in de tabel en de eerste versie is een uitzondering); alleen het verschil bewaren (compact, maar niet leesbaar zonder de rest).
+- **Wat de tabel niet bewaart:** de publicatiestand (`published_at`).
+  Die verandert zonder dat de tekst verandert, en het logboek heeft `article.publish` en `article.unpublish` al.
+  Een versie zegt dus welke tekst er stond, niet of hij toen op de site stond.
+
+### De versies van een artikel krijgen aaneengesloten nummers, en de rij van het artikel regelt de volgorde
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het nummer van een nieuwe versie is één meer dan het hoogste nummer van dat artikel (1 voor de eerste), en komt uit dezelfde opdracht die de rij toevoegt (`INSERT ... SELECT COALESCE(MAX(version), 0) + 1`).
+  Twee dingen houden dat recht.
+  - Wie een versie schrijft, heeft de rij van het artikel al vergrendeld met `SELECT ... FOR UPDATE`, zoals bij het publiceren, dus twee bewerkingen tegelijk gaan om de beurt.
+  - De unieke sleutel op `(article_id, version)` weigert een tweede versie met hetzelfde nummer, ook als een aanroeper de vergrendeling vergeet: de transactie mislukt dan, en er komt geen dubbel nummer.
+- **Waarom:** een nummer dat in de code wordt uitgerekend en dan wordt ingevoegd, kan met twee gelijktijdige bewerkingen twee keer hetzelfde worden.
+  Het testen daarvan gebeurt met acht bewerkingen tegelijk, die de nummers 1 tot en met 9 zonder gat geven.
+- **Alternatieven:** een teller in de tabel `articles` (nog een kolom die bij elke wijziging in de pas moet blijven); het nummer uit het `id` van de versie halen (niet aaneengesloten per artikel); alleen op de unieke sleutel vertrouwen (de tweede bewerking krijgt dan een fout in plaats van te wachten).
+- **Kolommen:** de tabel heeft een eigen `id` en een unieke sleutel op `(article_id, version)`, zoals `items` dat doet met `(source_id, item_key)`.
+  Beide foreign keys (het artikel en het account) hebben geen `cascade`: een artikel en een account verdwijnen niet, dus een versie ook niet.
+
+### De migratie van de versies kan opnieuw draaien, want MariaDB maakt DDL niet ongedaan
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** migratie `0012_add_article_versions` is zo geschreven dat elke opdracht opnieuw kan draaien (`CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`, `FOREIGN KEY IF NOT EXISTS`, `UPDATE ... WHERE updated_by IS NULL` en een `INSERT ... WHERE NOT EXISTS` voor versie 1).
+  De volgorde is: de tabel `article_versions`, de kolom `updated_by` leeg, die vullen uit `created_by`, de kolom verplicht maken, de foreign key, en dan versie 1 voor elk artikel zonder versie.
+  Versie 1 krijgt de huidige inhoud, `saved_at` gelijk aan `updated_at` en `saved_by` gelijk aan `updated_by`.
+- **Waarom:** de site draait de migraties als hij start (zie _De site draait de migraties als ze start_), en MariaDB kan `CREATE TABLE` en `ALTER TABLE` niet in een transactie terugdraaien.
+  Een migratie die halverwege stopt, laat het schema half veranderd achter, en `drizzle` schrijft de migratie dan niet op als klaar.
+  Zonder deze opzet zou de volgende start stranden op "kolom bestaat al", en moest de eigenaar met de hand herstellen.
+  Nu is herstellen: de oorzaak oplossen (een volle schijf, een verbroken verbinding) en de site opnieuw starten.
+- **Hoe een half uitgevoerde migratie eruitziet:** na opdracht 1 bestaat de lege tabel `article_versions`; na 2 heeft `articles` de kolom `updated_by` zonder waarden; na 3 en 4 is die gevuld en verplicht; na 5 heeft hij zijn foreign key; en na 6 zijn de versies er, alleen is de migratie niet als klaar opgeschreven.
+  Een test (`article-versions-migration.test.ts`) zet de database op elk van die punten en draait de migratie dan, op artikelen die er al zijn.
+  Zolang de migratie niet klaar is, blijven de pagina's voor bezoekers werken, want hun queries noemen de kolommen die ze nodig hebben; alleen het beheer van artikelen geeft een fout.
+- **Wat de test niet bewijst:** de migratie is niet op de echte gegevens van acceptatie of productie gedraaid.
+  Het back-up vóór een migratie op productie (#33) blijft het vangnet.
+- **Alternatieven:** de kolom meteen verplicht toevoegen met een standaardwaarde (MariaDB vult bestaande rijen dan met 0, en de foreign key faalt); een migratie in twee stappen, een release met de kolom leeg en een met de eis (twee releases voor iets wat in één opdrachtenrij past); alleen een tabel zonder `updated_by` (de kolom is een eis van het issue).
+
+### De versies staan als lijst onder het formulier, zonder knop om terug te zetten
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** onder het formulier van een artikel staat "Eerdere versies" als lijst, nieuwste bovenaan, met het nummer, de tijd en het e-mailadres van het account; de nieuwste staat erbij als "Huidige versie".
+  `/beheer/artikelen/<nummer>/versies/<versienummer>` toont de versie met dezelfde `Article` en `ArticleText` als het voorbeeld, met de gegevens van de versie erboven.
+  Beide zijn alleen voor een beheerder, krijgen `noindex` en `no-store` van de proxy, en geven "niet gevonden" voor een artikel of een versie die er niet is.
+  Er is geen knop om terug te zetten, geen vergelijking en geen manier om een versie te verwijderen.
+- **Waarom:** een lijst met een kop per versie leest op een telefoon beter dan een tabel van drie kolommen met een e-mailadres, en de lijst met artikelen heeft al dezelfde vorm.
+  Wie een oude tekst wil hebben, kopieert hem uit de pagina van de versie; dat is genoeg zolang we er nog niet om vragen.
+  Een versie toont de datum van het artikel zelf, of de dag van vandaag bij een concept, zoals het voorbeeld.
+- **Alternatieven:** een tabel (past bij gegevens in kolommen, maar scrolt op een telefoon opzij); een terugzetknop (meer scherm en meer regels voor wat er met de publicatie gebeurt, nog niet nodig); de versies op een eigen pagina (een klik meer voor wie net iets heeft overschreven).
+- **Een artikel dat alleen met SQL is gemaakt of veranderd** heeft geen versie van die wijziging, want SQL gaat om de site heen (zie `docs/artikelen.md`).
+  De pagina zegt dat er nog geen versie is, en de eerstvolgende wijziging in het beheer geeft de eerste.

@@ -8,6 +8,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { createAccount } from '../../../beheer/accounts'
 import { createArticle, saveArticle, withdrawArticle } from '../../../beheer/articles'
 import ArticlePage, { metadata as articleMetadata } from './[id]/page'
+import VersionPage, { metadata as versionMetadata } from './[id]/versies/[nummer]/page'
 import PreviewPage, { metadata as previewMetadata } from './[id]/voorbeeld/page'
 import NewArticlePage, { metadata as newMetadata } from './nieuw/page'
 import ArticlesPage, { metadata as listMetadata } from './page'
@@ -39,6 +40,7 @@ afterAll(async () => {
 beforeEach(async () => {
   requireRole.mockReset()
   await database.pool.query('DELETE FROM audit_log')
+  await database.pool.query('DELETE FROM article_versions')
   await database.pool.query('DELETE FROM articles')
   await database.db.delete(adminUsers)
   await createAccount(database.db, 'sanne@example.org', 'beheerder')
@@ -80,6 +82,8 @@ const edit = async (id: number | string, searchParams: Record<string, string> = 
   )
 const preview = async (id: number | string) =>
   renderToStaticMarkup(await PreviewPage({ params: Promise.resolve({ id: String(id) }) }))
+const version = async (id: number | string, number: number | string) =>
+  renderToStaticMarkup(await VersionPage({ params: Promise.resolve({ id: String(id), nummer: String(number) }) }))
 
 describe('every page of the articles', () => {
   it.each([
@@ -87,6 +91,7 @@ describe('every page of the articles', () => {
     ['the new article', newMetadata],
     ['the article', articleMetadata],
     ['the preview', previewMetadata],
+    ['a version', versionMetadata],
   ])('tells search engines to stay away from %s', (_name, metadata) => {
     expect(metadata.robots).toEqual({ follow: false, index: false })
   })
@@ -96,6 +101,7 @@ describe('every page of the articles', () => {
     ['the new article', async () => renderToStaticMarkup(await NewArticlePage())],
     ['the article', () => edit(1)],
     ['the preview', () => preview(1)],
+    ['a version', () => version(1, 1)],
   ])('is for the beheerder and not for the moderator: %s', async (_name, render) => {
     requireRole.mockImplementation((...roles: string[]) => {
       if (!roles.includes('moderator')) {
@@ -114,6 +120,7 @@ describe('every page of the articles', () => {
     ['the new article', async () => renderToStaticMarkup(await NewArticlePage())],
     ['the article', () => edit(1)],
     ['the preview', () => preview(1)],
+    ['a version', () => version(1, 1)],
   ])('shows nothing to somebody without a session: %s', async (_name, render) => {
     requireRole.mockRejectedValue(new Error('redirect to /beheer/inloggen'))
 
@@ -219,7 +226,12 @@ describe('the article', () => {
     const id = await addArticle()
     const html = await edit(id)
 
-    expect(headings(html)).toEqual(['h1 Artikel bewerken', 'h2 Zo schrijf je de tekst'])
+    expect(headings(html)).toEqual([
+      'h1 Artikel bewerken',
+      'h2 Zo schrijf je de tekst',
+      'h2 Eerdere versies',
+      `h3 <a href="/beheer/artikelen/${id}/versies/1">Versie 1</a>`,
+    ])
     expect(html).toContain('Dit artikel is een concept. Het staat nergens op de site.')
     expect(html).toContain(`<a href="/beheer/artikelen/${id}/voorbeeld">Voorbeeld</a>`)
     expect(html).toMatch(/<input[^>]*name="titel"[^>]*value="Welkom"|<input[^>]*value="Welkom"[^>]*name="titel"/u)
@@ -235,7 +247,13 @@ describe('the article', () => {
     const id = await addArticle({}, new Date('2026-10-21T09:00:00Z'))
     const html = await edit(id)
 
-    expect(headings(html)).toEqual(['h1 Artikel bewerken', 'h2 Zo schrijf je de tekst', 'h2 Van de site halen'])
+    expect(headings(html)).toEqual([
+      'h1 Artikel bewerken',
+      'h2 Zo schrijf je de tekst',
+      'h2 Van de site halen',
+      'h2 Eerdere versies',
+      `h3 <a href="/beheer/artikelen/${id}/versies/1">Versie 1</a>`,
+    ])
     expect(html).toContain('staat sinds 21 oktober 2026 op de site')
     expect(html).toMatch(/<input[^>]*name="adres"[^>]*readOnly=""|<input[^>]*readOnly=""[^>]*name="adres"/u)
     expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
@@ -353,5 +371,160 @@ describe('the preview', () => {
   it('says "niet gevonden" for a number that is no article', async () => {
     await expect(preview(99_999)).rejects.toThrow('not found')
     await expect(preview('abc')).rejects.toThrow('not found')
+  })
+})
+
+describe('the earlier versions on the page of the article', () => {
+  async function editedArticle() {
+    const id = await addArticle()
+
+    await createAccount(database.db, 'jelle@example.org', 'beheerder')
+
+    const other = (await database.db.select().from(adminUsers)).find((user) => user.email === 'jelle@example.org')
+
+    await saveArticle(
+      database.db,
+      other?.id ?? 0,
+      id,
+      values({ tekst: 'Tweede tekst' }),
+      false,
+      new Date('2026-10-24T08:05:00Z'),
+    )
+    await saveArticle(
+      database.db,
+      userId,
+      id,
+      values({ tekst: 'Derde tekst' }),
+      false,
+      new Date('2026-10-25T10:30:00Z'),
+    )
+
+    return id
+  }
+
+  it('lists every version under the form, the newest first and marked as current, with time and account', async () => {
+    const id = await editedArticle()
+    const html = await edit(id)
+
+    expect(headings(html).slice(-4)).toEqual([
+      'h2 Eerdere versies',
+      `h3 <a href="/beheer/artikelen/${id}/versies/3">Versie 3</a>`,
+      `h3 <a href="/beheer/artikelen/${id}/versies/2">Versie 2</a>`,
+      `h3 <a href="/beheer/artikelen/${id}/versies/1">Versie 1</a>`,
+    ])
+    expect(html.indexOf('Eerdere versies')).toBeGreaterThan(html.indexOf('<form'))
+    expect(html).toContain('Huidige versie · 25 oktober 2026 om 11:30 · sanne@example.org')
+    expect(html).toContain('24 oktober 2026 om 10:05 · jelle@example.org')
+    expect(html).toContain('20 oktober 2026 om 11:00 · sanne@example.org')
+    expect(html.match(/Huidige versie/gu)).toHaveLength(1)
+  })
+
+  it('shows no button to put a version back or to delete one', async () => {
+    const html = await edit(await editedArticle())
+
+    expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
+      '<button type="submit">Opslaan</button>',
+      '<button class="hf-button-soft" type="submit" value="publiceren" name="knop">Publiceren</button>',
+    ])
+    expect(html).not.toMatch(/terugzetten|verwijder/iu)
+  })
+
+  it('says there is no version for an article that only SQL made, instead of showing an empty list', async () => {
+    const id = await addArticle()
+
+    await database.pool.query('DELETE FROM article_versions')
+
+    const html = await edit(id)
+
+    expect(html).toContain('Van dit artikel is nog geen versie bewaard.')
+    expect(html).not.toContain('Huidige versie')
+  })
+
+  it('escapes the address of the account', async () => {
+    const id = await addArticle()
+
+    await database.pool.query("UPDATE admin_users SET email = '<b>x</b>@example.org'")
+
+    const html = await edit(id)
+
+    expect(html).not.toContain('<b>x</b>')
+    expect(html).toContain('&lt;b&gt;x&lt;/b&gt;@example.org')
+  })
+})
+
+describe('the page of a version', () => {
+  async function editedArticle() {
+    const id = await addArticle({ tekst: 'Eerste tekst met **vet**.', titel: 'Eerste titel' })
+
+    await saveArticle(
+      database.db,
+      userId,
+      id,
+      values({ tekst: 'Tweede tekst.', titel: 'Tweede titel' }),
+      false,
+      new Date('2026-10-25T10:30:00Z'),
+    )
+
+    return id
+  }
+
+  it('shows an earlier version the way a visitor would see it, with its facts above it', async () => {
+    const id = await editedArticle()
+    const html = await version(id, 1)
+
+    expect(headings(html)).toEqual(['h2 Versie 1', 'h1 Eerste titel'])
+    expect(html).toContain('Bewaard op 20 oktober 2026 om 11:00 door sanne@example.org.')
+    expect(html).toContain('Dit is een eerdere versie. Het artikel is daarna veranderd.')
+    expect(html).toContain('Het adres van deze versie was /redactie/welkom.')
+    expect(html).toContain('<strong>vet</strong>')
+    expect(html).toContain('We stellen ons voor.')
+    expect(html).toContain('Door de redactie')
+    expect(html).toContain(`<a href="/beheer/artikelen/${id}">Terug naar het formulier</a>`)
+    expect(html).toMatch(/<article/u)
+    expect(html).not.toContain('Tweede tekst.')
+  })
+
+  it('says the newest version is the current one, and shows the text of the article', async () => {
+    const id = await editedArticle()
+    const html = await version(id, 2)
+
+    expect(headings(html)).toEqual(['h2 Versie 2', 'h1 Tweede titel'])
+    expect(html).toContain('Bewaard op 25 oktober 2026 om 11:30 door sanne@example.org.')
+    expect(html).toContain('Dit is de huidige versie')
+    expect(html).toContain('Tweede tekst.')
+  })
+
+  it('shows the date of publication of the article, or today for a draft', async () => {
+    const draftId = await editedArticle()
+    expect(await version(draftId, 1)).toMatch(/<time dateTime="\d{4}-\d{2}-\d{2}">/u)
+
+    const liveId = await addArticle({ adres: 'live', titel: 'Live' }, new Date('2026-10-21T09:00:00Z'))
+
+    expect(await version(liveId, 1)).toContain('<time dateTime="2026-10-21">21 oktober 2026</time>')
+  })
+
+  it('turns the text into elements and shows HTML and a script address as text', async () => {
+    const id = await addArticle({
+      tekst: '<script>alert(1)</script>\n\n[boos](javascript:alert(2)) [goed](https://www.lc.nl/sport)',
+    })
+    const html = await version(id, 1)
+
+    expect(html).not.toContain('<script>')
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
+    expect(html).not.toContain('href="javascript:')
+    expect(html).toContain('href="https://www.lc.nl/sport"')
+  })
+
+  it('says "niet gevonden" for an article that is none, a number the article never had, and what is no number', async () => {
+    const id = await editedArticle()
+    const other = await addArticle({ adres: 'andere', titel: 'Andere' })
+
+    await expect(version(99_999, 1)).rejects.toThrow('not found')
+    await expect(version(id, 3)).rejects.toThrow('not found')
+    await expect(version(id, 0)).rejects.toThrow('not found')
+    await expect(version(id, 'abc')).rejects.toThrow('not found')
+    await expect(version(id, '1e3')).rejects.toThrow('not found')
+    await expect(version('abc', 1)).rejects.toThrow('not found')
+    await expect(version(other, 2)).rejects.toThrow('not found')
   })
 })
