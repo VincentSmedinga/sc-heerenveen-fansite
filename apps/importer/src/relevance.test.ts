@@ -342,7 +342,11 @@ const frisianClub: Case[] = [
   ['Ajax wûn fan Feyenoord', 'irrelevant'],
   ['sc Cambuur wûn yn Ljouwert', 'irrelevant'],
   ['Cambuur - Willem II: de opstellingen', 'irrelevant'],
-  // Real headlines of the feed of Omrop Fryslân, with Frisian words but not about the club.
+  // A real Frisian headline: the title of Sportcast #360 of 19 October 2026, from the lookup of
+  // Apple Podcasts. The full name of someone from the club is enough.
+  ['#360: Foeke Booy bijna naar WK 1990, Cambuur lilk op skiedsrjochter en is Dylan Vente no echt los?', 'relevant'],
+  // Real headlines of the feed of Omrop Fryslân, with Frisian words but not about the club:
+  // the filter leaves them alone.
   ['Eropuit dit weekend? Dit is er te doen in Fryslân', 'irrelevant'],
   ['Liwwadder Gerard Roorda vond in Marokko de tweede grote liefde van zijn leven', 'irrelevant'],
   // Words that are an ordinary word as much as football are not on the list, so these stay

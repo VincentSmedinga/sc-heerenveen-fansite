@@ -313,10 +313,11 @@ export const footballWords = [
  * `footballWords`. Accents do not count, so "thúswedstriden" is written "thuswedstriden".
  *
  * Every word was found on the Frisian Wikipedia (fy.wikipedia.org) on 25 October 2026, on the
- * pages "SC Hearrenfean", "Fuotbal", "Earedifyzje" and "KNVB-beker". The feed of Omrop Fryslân
- * had no Frisian football headline that day, so no word comes from there. Only the form found
- * is on the list, and the plural or the singular next to it when the form is regular;
- * "skoarden" is the only form of "skoarje" (to score) that is on the list.
+ * pages "SC Hearrenfean", "Fuotbal", "Earedifyzje" and "KNVB-beker"; the page is after each
+ * word. The feed of Omrop Fryslân had no Frisian football headline that day, so no word comes
+ * from there. Only the form found is on the list, and the plural or the singular next to it
+ * when the form is regular; "skoarden" is the only form of "skoarje" (to score) that is on
+ * the list.
  *
  * Left out on purpose, because the word is as common outside football (the same lesson as
  * "wint"): "ploech" (a team, but also any crew or group), "spiler" (a player of anything),
@@ -332,27 +333,27 @@ export const footballWords = [
  * voetbalwoorden_).
  */
 export const frisianFootballWords = [
-  'alvetal',
-  'earedifyzje',
-  'ferdigener',
-  'ferdigeners',
-  'ferlear',
-  'fuotbal',
-  'fuotballer',
-  'fuotballers',
-  'haadtrainer',
-  'kompetysje',
-  'middenfjilder',
-  'middenfjilders',
-  'oerwinning',
-  'seleksje',
-  'skoarden',
-  'thusoerwinning',
-  'thuswedstriden',
-  'trener',
-  'utoerwinning',
-  'utwedstriid',
-  'wedstriden',
-  'wedstriid',
-  'wun',
+  'alvetal', // SC Hearrenfean
+  'earedifyzje', // SC Hearrenfean, Earedifyzje, KNVB-beker
+  'ferdigener', // SC Hearrenfean, Fuotbal (plural; singular made from it)
+  'ferdigeners', // SC Hearrenfean, Fuotbal
+  'ferlear', // SC Hearrenfean
+  'fuotbal', // all four pages
+  'fuotballer', // SC Hearrenfean
+  'fuotballers', // SC Hearrenfean
+  'haadtrainer', // SC Hearrenfean
+  'kompetysje', // SC Hearrenfean, Fuotbal
+  'middenfjilder', // SC Hearrenfean (plural; singular made from it)
+  'middenfjilders', // SC Hearrenfean
+  'oerwinning', // SC Hearrenfean, KNVB-beker
+  'seleksje', // SC Hearrenfean
+  'skoarden', // SC Hearrenfean
+  'thusoerwinning', // SC Hearrenfean
+  'thuswedstriden', // SC Hearrenfean
+  'trener', // SC Hearrenfean
+  'utoerwinning', // SC Hearrenfean
+  'utwedstriid', // SC Hearrenfean
+  'wedstriden', // SC Hearrenfean
+  'wedstriid', // SC Hearrenfean
+  'wun', // SC Hearrenfean, KNVB-beker ("wûn")
 ] as const
