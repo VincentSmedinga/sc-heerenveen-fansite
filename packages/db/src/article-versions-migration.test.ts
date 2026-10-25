@@ -131,7 +131,9 @@ describe(`the migration ${migration}`, () => {
     await expect(insert('NULL')).rejects.toBeDefined()
     await expect(insert('99999')).rejects.toBeDefined()
     expect(
-      await rows("SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_NAME = 'article_versions'"),
+      await rows(
+        "SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'article_versions'",
+      ),
     ).toMatchObject([{ TABLE_COLLATION: 'utf8mb4_unicode_ci' }])
   })
 
