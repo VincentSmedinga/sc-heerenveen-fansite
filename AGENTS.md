@@ -330,10 +330,10 @@ Each point is an action, not a reminder.
   For a list of repeated controls, check that each name says which item it belongs to.
   For a form, check that every field that can fail shows its own error, and that a failure without a field still gets the focus.
 - **Width and sentences:** these two commands print nothing when the change is fine.
-  Break what the first one prints at 120 characters, and put each sentence the second one prints on its own line.
+  Break the comment lines of more than 125 characters that the first one prints at 120, and put each sentence the second one prints on its own line.
 
   ```sh
-  git diff -U0 origin/main...HEAD -- . ':!*.md' ':!*.mdx' ':!*.json' ':!pnpm-lock.yaml' | grep -E '^\+[[:space:]]*(//|/\*|\*).{125,}'
+  git diff -U0 origin/main...HEAD -- . ':!*.md' ':!*.mdx' ':!*.json' ':!pnpm-lock.yaml' | grep -E '^\+[[:space:]]*(//|/\*|\*)' | grep -E '^.{127,}'
   git diff -U0 origin/main...HEAD -- '*.md' '*.mdx' | grep -E '^\+.*[a-z0-9)`][.!?] [A-Z]' | grep -vE '^\+[[:space:]]*\|'
   ```
 
