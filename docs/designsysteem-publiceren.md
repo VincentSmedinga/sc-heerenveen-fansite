@@ -11,7 +11,7 @@ De keuzes erachter staan in [`beslissingen.md`](beslissingen.md), onder _Storybo
 De workflow [`storybook.yml`](../.github/workflows/storybook.yml) heeft twee taken:
 
 1. **Build Storybook** draait bij elke pull request en bij elke run op `main`.
-   Hij bouwt Storybook (`pnpm --filter design-system build-storybook`), controleert dat er geen `--lightningcss` in de CSS staat en bewaart de build als artifact `storybook`.
+   Hij bouwt Storybook (`pnpm --filter design-system build-storybook`), controleert dat er geen `--lightningcss` in de CSS staat en dat `index.html` en `iframe.html` `noindex` hebben, en bewaart de build als artifact `storybook`.
    Daarna bouwt hij de MCP-server tot één bestand, `server.mjs`, en bewaart dat als artifact `design-system-mcp`.
    Voor het bewaren start hij de server twee keer, naast de Storybook die hij net maakte, en vraagt beide wat een agent vraagt (zie _De MCP-server_).
    Bij een pull request kun je de artifacts downloaden om de build te bekijken.
