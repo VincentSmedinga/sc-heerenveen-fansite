@@ -12,8 +12,8 @@ type Row = { domain: string; hoursAgo: number; paywalled?: boolean; source: stri
  * test and takes them out after the last one.
  *
  * They are in the form of real headlines, on the made-up test sources of the seed. The times are counted back from the
- * moment the check starts. The homepage shows the first five, and the button under them; `/?nieuws=10` shows all ten and
- * no button. The first seven are from the last six days and show a weekday; the last three are older and show a date.
+ * moment the check starts. The homepage shows the first ten, and the button under them; `/?nieuws=15` shows all eleven and
+ * no button. The first seven are from the last six days and show a weekday; the last four are older and show a date.
  */
 export const headlines: { madeUp: Row[] } = {
   madeUp: [
@@ -81,6 +81,12 @@ export const headlines: { madeUp: Row[] } = {
       source: 'Voorbeeldkrant, met dank aan de redactie',
       title:
         'Terugblik op een bewogen week bij Heerenveen, met een nieuwe aanvaller, een geblesseerde captain en een stadion dat uitverkocht raakt',
+    },
+    {
+      domain: 'proefnieuws.test',
+      hoursAgo: 340,
+      source: 'Proefnieuws',
+      title: 'Heerenveen en Testclub openen het seizoen in een uitverkocht stadion',
     },
   ],
 }

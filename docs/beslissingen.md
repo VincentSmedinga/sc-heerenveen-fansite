@@ -3305,6 +3305,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Eén waarde houdt ze gelijk.
 - **Hoe:** het aantal van de importer, `discussionsToKeep` in `apps/importer/src/read-forum.ts`, is een eigen waarde: de importer en de site delen geen code, en de importer mag niet minder bewaren dan de site toont.
 - **Alternatieven:** per kaart een eigen aantal, zoals nu; ook `/podcasts` op vijf zetten (meer pagina's voor dezelfde afleveringen).
+- **Later:** het nieuws begint sinds 25 oktober 2026 met tien koppen en laadt er vijf bij; de kaarten met discussies en podcasts blijven op vijf.
+  Zie _De nieuwskaart begint met tien koppen_.
 
 ### "Laad 5 meer" werkt zonder JavaScript
 
@@ -3338,3 +3340,17 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een bezoeker kan het geheugen van de server dus niet vullen met adressen van zichzelf.
   Een bericht van een ander jaar toont het jaar bij de datum ("30 dec 2025 11:00"), want zonder grens in de tijd is "30 dec" niet meer duidelijk.
 - **Alternatieven:** de twee weken houden als grens van de knop; geen grens, ook niet van aantal (een pagina die onbeperkt kan groeien).
+- **Later:** het aantal in het adres is een geheel getal vanaf 10, in stappen van 5; een ander getal geeft de eerste tien, en er zijn hoogstens negentien lijsten (10 tot en met 100).
+  Zie _De nieuwskaart begint met tien koppen_.
+
+### De nieuwskaart begint met tien koppen
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de nieuwskaart op de homepage begint met tien koppen en laadt er steeds vijf bij.
+  De kaarten met discussies en podcasts blijven op vijf.
+  Het nieuws heeft zo twee eigen waarden naast `itemsPerCard`, alle drie in `apps/site/src/items-per-card.ts`: `firstHeadlines` (10) en `moreHeadlines` (5).
+  Het aantal in het adres (`?nieuws=`) is een geheel getal vanaf 10, in stappen van 5, en nooit meer dan 100; een ander getal, ook 5, geeft de eerste tien.
+  Zijn er tien koppen of minder, dan is er geen knop.
+- **Waarom:** het nieuws is de hoofdkaart van de pagina.
+  Met tien koppen ziet een bezoeker meer zonder te klikken, terwijl de kaarten naast het nieuws kort blijven.
+- **Alternatieven:** alle kaarten op vijf, zoals _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_ besloot; alle kaarten op tien, wat de kaarten met discussies en podcasts langer maakt dan nodig.

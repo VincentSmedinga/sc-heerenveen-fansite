@@ -52,7 +52,7 @@ Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de
 De homepage toont koppen uit de database, en de seed heeft er geen.
 Daarom zet `e2e/global-setup.ts` vóór de eerste test verzonnen koppen op de testbronnen in de database, en haalt ze er na de laatste test weer uit (`e2e/headlines.ts`).
 Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
-De controle toetst de homepage ook met `?nieuws=10`, zodat de oudere koppen die de knop laadt ook langs axe komen.
+De controle toetst de homepage ook met `?nieuws=15`, zodat de oudere koppen die de knop laadt ook langs axe komen.
 Hier gaat het om axe op de pagina met nieuws.
 Draait de database van de controle ook echte berichten, door `pnpm run import`, dan staan die er gewoon tussen.
 Playwright wacht tot `/robots.txt` antwoordt en niet tot de homepage, want die bewaart haar koppen vijf minuten in het geheugen.
@@ -136,20 +136,21 @@ De header, met het logo en het hoofdmenu, en de footer staan in `src/app/layout.
 
 De `h1` van de homepage is "sc Heerenveen Fansite", maar die zie je niet: het logo erboven zegt het al.
 Hij heeft de klasse `hf-visually-hidden` uit het designsysteem, dus een schermlezer leest hem wel voor.
-Daaronder staat het blok "Laatste nieuws": de vijf nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
+Daaronder staat het blok "Laatste nieuws": de tien nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
 Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
 Zijn er oudere berichten, dan staat onder de lijst de knop "Laad 5 meer".
-De knop zit in een formulier met `method="get"` dat de homepage opnieuw laadt met het aantal in het adres, zoals `/?nieuws=10#nieuws-6`.
-Elke kop in de lijst heeft een `id` met zijn nummer (`nieuws-6`), en het formulier gaat naar de eerste nieuwe kop, dus de bezoeker blijft op dezelfde plek.
+De knop zit in een formulier met `method="get"` dat de homepage opnieuw laadt met het aantal in het adres, zoals `/?nieuws=15#nieuws-11`.
+Elke kop in de lijst heeft een `id` met zijn nummer (`nieuws-11`), en het formulier gaat naar de eerste nieuwe kop, dus de bezoeker blijft op dezelfde plek.
 Dat werkt zonder JavaScript en zonder API.
-`parseHeadlineCount` in `src/headlines.ts` controleert het getal: een geheel getal vanaf 5, in stappen van 5, en niet meer dan 100.
-Elk ander getal geeft de eerste vijf.
-Bij 100 koppen verdwijnt de knop; ouder nieuws is voor het archief (#26).
+`parseHeadlineCount` in `src/headlines.ts` controleert het getal: een geheel getal vanaf 10, in stappen van 5, en niet meer dan 100.
+Elk ander getal geeft de eerste tien.
+De getallen staan op één plek, in `src/items-per-card.ts`: `firstHeadlines` (10) en `moreHeadlines` (5).
+Bij tien koppen of minder is er geen knop, en bij 100 koppen verdwijnt hij; ouder nieuws is voor het archief (#26).
 Een pagina met `?nieuws=` heeft de homepage zelf als canoniek adres, en staat niet in de sitemap.
 Onder het blok staat de link naar Onze bronnen.
 
-Elke kaart met een lijst toont vijf items: het aantal staat op één plek, `itemsPerCard` in `src/items-per-card.ts`.
+De kaarten met discussies en podcasts tonen vijf items: het aantal staat op één plek, `itemsPerCard` in `src/items-per-card.ts`.
 
 In de zijbalk naast het nieuws staat het blok "Nieuwste discussies": de vijf discussies van het forum waar het laatst op is gereageerd.
 Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar het laatste bericht van de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1 · 13:28".
