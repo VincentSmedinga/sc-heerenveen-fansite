@@ -100,7 +100,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             // Works without JavaScript: the form loads the page again with five more headlines in the address, and the
             // part after the hash brings the visitor to the first of the new ones, so they stay in place.
             <Form action={`/#nieuws-${headlines.length + 1}`} method="get">
-              <Button name="nieuws" type="submit" value={String(count + itemsPerCard)}>
+              <Button appearance="soft" name="nieuws" type="submit" value={String(count + itemsPerCard)}>
                 {`Laad ${itemsPerCard} meer`}
               </Button>
             </Form>

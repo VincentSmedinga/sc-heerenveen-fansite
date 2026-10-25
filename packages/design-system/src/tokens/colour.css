@@ -150,7 +150,7 @@
 
     /*
      * The border of the soft button. Its fill is too pale to reach 3:1 against a card (blue-100 on white reaches 1,21:1),
-     * so the border carries that: it reaches 3,85:1 on the four surfaces in light and 4,16:1 in dark.
+     * so the border carries that: it reaches 3,84:1 on the four surfaces in light and 4,16:1 in dark.
      */
     --hf-colour-border-button-soft: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-400));
     --hf-colour-focus: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-300));

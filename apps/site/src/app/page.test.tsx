@@ -329,7 +329,7 @@ describe('the button that loads five more headlines', () => {
     const card = html.match(/<section.*?<\/section>/)?.[0] ?? ''
 
     expect(card).toMatch(
-      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button type="submit" value="10" name="nieuws">Laad 5 meer<\/button><\/form><\/section>$/,
+      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="10" name="nieuws">Laad 5 meer<\/button><\/form><\/section>$/,
     )
   })
 
