@@ -1,7 +1,10 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 export type TimeProps = ComponentPropsWithoutRef<'time'> & {
-  /** The date or time in a form a machine reads, such as `2026-10-24`. The text shows it the Dutch way. */
+  /**
+   * The date or time in a form a machine reads, such as `2026-10-24`. The text shows it the
+   * Dutch way.
+   */
   dateTime: string
 }
 

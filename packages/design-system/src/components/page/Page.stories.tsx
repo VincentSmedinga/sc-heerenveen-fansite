@@ -38,7 +38,8 @@ const render = () => <ExamplePage />
 
 const renderWithSidebar = () => <ExamplePageWithSidebar />
 
-// Storybook's viewport setting: the width of the window is what the page follows, not the width of a container.
+// Storybook's viewport setting: the width of the window is what the page follows, not the width
+// of a container.
 const narrow = { value: 'mobile1' }
 const middle = { value: 'middle' }
 const wide = { value: 'wide' }
@@ -67,7 +68,8 @@ export const WithSidebarDark = meta.story({
   render: renderWithSidebar,
 })
 
-// Only on the canvas: on the docs page they would show the same as the stories above, because the docs page can't resize the window.
+// Only on the canvas: on the docs page they would show the same as the stories above, because
+// the docs page can't resize the window.
 const screens = { tags: ['!autodocs'] }
 
 const narrowDescription =

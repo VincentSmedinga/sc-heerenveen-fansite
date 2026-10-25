@@ -21,11 +21,17 @@ export type ListProps =
       })
 
 type LooseProps = {
-  /** A loose list, as Markdown calls it: every item has space below it, with or without a paragraph in it. */
+  /**
+   * A loose list, as Markdown calls it: every item has space below it, with or without a
+   * paragraph in it.
+   */
   loose?: boolean
 }
 
-/** An item of a List: an `li` element. It only works inside a List, so it is written as List.Item. */
+/**
+ * An item of a List: an `li` element. It only works inside a List, so it is written as
+ * List.Item.
+ */
 const Item = (props: ListItemProps) => <li {...props} />
 
 // The name in React's developer tools and in the code examples in Storybook.

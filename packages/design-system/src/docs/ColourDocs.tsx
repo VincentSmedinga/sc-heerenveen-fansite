@@ -27,8 +27,8 @@ const readRootProperties = (names: string[]): Record<string, string> => {
 }
 
 /**
- * A number that changes whenever the page's styles change, such as after a hot update of the CSS,
- * so the docs read the tokens and measure the contrast again.
+ * A number that changes whenever the page's styles change, such as after a hot update of the
+ * CSS, so the docs read the tokens and measure the contrast again.
  */
 const useStyleVersion = () => {
   const [version, setVersion] = useState(0)
@@ -258,7 +258,10 @@ const consecutiveRuns = (steps: readonly number[]) =>
     return runs
   }, [])
 
-/** A compact view of the scales, for the brand page. A partial scale sits under the steps it shares. */
+/**
+ * A compact view of the scales, for the brand page. A partial scale sits under the steps it
+ * shares.
+ */
 export const PaletteStrip = () => (
   <div className="_hf-docs-stack">
     {scales.map(({ label, name, steps }) => {

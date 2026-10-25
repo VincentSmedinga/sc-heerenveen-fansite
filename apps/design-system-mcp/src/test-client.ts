@@ -9,8 +9,8 @@ export async function listen(server: Server): Promise<string> {
 }
 
 /**
- * Sends one JSON-RPC request, the way an MCP client does, and returns the message from the answer. The server answers
- * with an event stream, so the message is the `data:` line.
+ * Sends one JSON-RPC request, the way an MCP client does, and returns the message from the
+ * answer. The server answers with an event stream, so the message is the `data:` line.
  */
 export async function rpc(url: string, method: string, params: Record<string, unknown> = {}, id = 1) {
   const response = await fetch(url, {

@@ -11,8 +11,9 @@ import { hashOf, linkLifetime, newToken, removeEnded } from './sessions'
 export const loginLimits = { perAddress: 5, perSite: 30, windowMilliseconds: 15 * 60 * 1000 }
 
 /**
- * The answer to a request for a login link takes at least this long, so an address with an account (a row to write, a mail
- * to hand over) can't be told from one without by how long the answer takes.
+ * The answer to a request for a login link takes at least this long, so an address with an
+ * account (a row to write, a mail to hand over) can't be told from one without by how long the
+ * answer takes.
  */
 export const minimumAnswerMilliseconds = 400
 
@@ -31,13 +32,17 @@ export type LoginRequestDeps = {
   wait?: (milliseconds: number) => Promise<unknown>
 }
 
-/** What a request for a login link leads to: the same page for every address with a good form, whether it has an account or not. */
+/**
+ * What a request for a login link leads to: the same page for every address with a good form,
+ * whether it has an account or not.
+ */
 export type LoginRequestResult = 'invalid' | 'limited' | 'sent'
 
 /**
- * Handles a request for a login link: checks the address, the rate limit, and whether the address has an account that is
- * on. Only then it makes a link and hands it to `defer`, to mail after the answer. The answer is `sent` for an address
- * without an account too, takes at least `minimumAnswerMilliseconds`, and nothing in it tells the two apart.
+ * Handles a request for a login link: checks the address, the rate limit, and whether the
+ * address has an account that is on. Only then it makes a link and hands it to `defer`, to mail
+ * after the answer. The answer is `sent` for an address without an account too, takes at least
+ * `minimumAnswerMilliseconds`, and nothing in it tells the two apart.
  */
 export async function handleLoginRequest(
   db: Database,
@@ -67,10 +72,11 @@ export async function handleLoginRequest(
 }
 
 /**
- * Notes one request for a login link in the rate limit, and says whether it is within the limits: `limited` when this
- * address has had 5 links in the last 15 minutes, or the whole site 30. The request counts for every address, with an
- * account or not. A request over the limit is not kept, so a flood doesn't keep the window shut. It writes the row
- * first and counts after, so two requests at the same time can't both slip under the limit.
+ * Notes one request for a login link in the rate limit, and says whether it is within the
+ * limits: `limited` when this address has had 5 links in the last 15 minutes, or the whole site
+ * 30. The request counts for every address, with an account or not. A request over the limit is
+ * not kept, so a flood doesn't keep the window shut. It writes the row first and counts after,
+ * so two requests at the same time can't both slip under the limit.
  */
 export async function noteAttempt(db: Database, email: string, now: Date) {
   const since = new Date(now.getTime() - loginLimits.windowMilliseconds)

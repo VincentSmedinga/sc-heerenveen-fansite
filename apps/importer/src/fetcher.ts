@@ -15,7 +15,10 @@ export const productToken = 'scHeerenveenFansite'
 /** Sent with every request. The link goes to an about page once there is one (#24). */
 export const userAgent = `${productToken}/${rootPackage.version} (+https://github.com/VincentSmedinga/sc-heerenveen-fansite)`
 
-/** What the fetcher allows a request. A fetcher can be given a shorter timeout, which keeps tests fast. */
+/**
+ * What the fetcher allows a request. A fetcher can be given a shorter timeout, which keeps
+ * tests fast.
+ */
 export const defaultLimits = {
   /** The most bytes of a response we read, after any decompression. */
   maxBytes: 5 * 1024 * 1024,
@@ -42,27 +45,35 @@ export type Fetcher = {
 
 export type FetcherOptions = {
   /**
-   * Finds the addresses of a host name, as `lookup` of `node:dns` does with `all: true`. A test gives its own, so it
-   * asks no real DNS server. The fetcher checks the addresses it gets either way.
+   * Finds the addresses of a host name, as `lookup` of `node:dns` does with `all: true`. A test
+   * gives its own, so it asks no real DNS server. The fetcher checks the addresses it gets
+   * either way.
    */
   resolve?: Resolve
-  /** Keeps the rules of robots.txt between runs. Without it, the fetcher reads robots.txt once for as long as it lives. */
+  /**
+   * Keeps the rules of robots.txt between runs. Without it, the fetcher reads robots.txt once
+   * for as long as it lives.
+   */
   robots?: RobotsStore
   /**
    * Origins the fetcher may reach although they are not on the public internet, such as `http://127.0.0.1:41234`.
-   * Only for tests with a web server of their own on this computer: the import command never sets this.
+   * Only for tests with a web server of their own on this computer: the import command never
+   * sets this.
    */
   testOrigins?: string[]
   timeoutMs?: number
 }
 
 /**
- * What came of a request. A fetcher reports every outcome as a value instead of throwing, so an adapter can't
- * forget one. `url` is the last URL the fetcher asked for, which differs from the one you gave after a redirect.
+ * What came of a request. A fetcher reports every outcome as a value instead of throwing, so an
+ * adapter can't forget one. `url` is the last URL the fetcher asked for, which differs from the
+ * one you gave after a redirect.
  */
 export type FetchOutcome =
   | {
-      /** The bytes of the response, because the adapter knows what the encoding of its feed is. */
+      /**
+       * The bytes of the response, because the adapter knows what the encoding of its feed is.
+       */
       body: Uint8Array
       contentType: null | string
       etag: null | string
@@ -88,7 +99,10 @@ export type FetchOutcome =
     }
   | {
       kind: 'wait'
-      /** How long the source wants us to wait, from `Retry-After`. Null when the source didn't say. */
+      /**
+       * How long the source wants us to wait, from `Retry-After`. Null when the source didn't
+       * say.
+       */
       retryAfterSeconds: null | number
       status: 429 | 503
       url: string
@@ -102,8 +116,8 @@ export type PreviousVersion = {
 
 /**
  * Keeps the rules of the robots.txt of an origin, such as `https://www.lc.nl`, between runs. `get` gives undefined when it
- * has none, or none that are young enough. The fetcher only keeps rules it could read: a robots.txt that failed is read
- * again next time.
+ * has none, or none that are young enough. The fetcher only keeps rules it could read: a
+ * robots.txt that failed is read again next time.
  */
 export type RobotsStore = {
   get: (origin: string) => Promise<RobotsRule[] | undefined>
@@ -116,17 +130,24 @@ type Failure = ErrorOutcome | Extract<FetchOutcome, { kind: 'blocked-by-robots' 
 
 type Robots = { kind: 'rules'; rules: RobotsRule[] } | { kind: 'unreadable'; message: string; reason: RobotsFailure }
 
-/** Why a robots.txt could not be read: the host failed to give it, or the fetcher refused the address. */
+/**
+ * Why a robots.txt could not be read: the host failed to give it, or the fetcher refused the
+ * address.
+ */
 type RobotsFailure = Extract<ErrorReason, 'private-address' | 'robots-unreadable'>
 
 const redirectStatuses = new Set([301, 302, 303, 307, 308])
 
-/** Asks for a URL once, without following a redirect, through the agent that checks each address. */
+/**
+ * Asks for a URL once, without following a redirect, through the agent that checks each
+ * address.
+ */
 type Get = (url: URL, headers: Record<string, string>) => Promise<Response>
 
 /**
- * Makes a fetcher. One fetcher reads the robots.txt of each host once, so make one per run of a command and share it
- * between adapters. With a store, it asks the store before the host, and keeps what it read there.
+ * Makes a fetcher. One fetcher reads the robots.txt of each host once, so make one per run of a
+ * command and share it between adapters. With a store, it asks the store before the host, and
+ * keeps what it read there.
  */
 export function createFetcher({
   resolve = resolveInDns,
@@ -148,8 +169,8 @@ export function createFetcher({
     return robots
   }
 
-  // The store saves requests and decides nothing: when it fails, the fetcher reads robots.txt from the host, as it would
-  // without a store.
+  // The store saves requests and decides nothing: when it fails, the fetcher reads robots.txt
+  // from the host, as it would without a store.
   async function loadKeptRobots(origin: string, store: RobotsStore): Promise<Robots> {
     const kept = await store.get(origin).catch(() => undefined)
     if (kept !== undefined) {
@@ -247,7 +268,8 @@ export function parseRetryAfter(value: null | string, now: number = Date.now()):
     const seconds = Number(trimmed)
     return Number.isSafeInteger(seconds) ? seconds : null
   }
-  // Every format of an HTTP date starts with the name of a day. `Date.parse` takes more than that, such as `-5`.
+  // Every format of an HTTP date starts with the name of a day. `Date.parse` takes more than
+  // that, such as `-5`.
   const date = /^[a-z]/iu.test(trimmed) ? Date.parse(trimmed) : Number.NaN
   return Number.isNaN(date) ? null : Math.max(0, Math.ceil((date - now) / 1000))
 }
@@ -285,9 +307,9 @@ function failure(url: string | URL, reason: ErrorReason, message: string, status
 }
 
 /**
- * Asks for a URL and follows redirects by hand, one at a time, so every step is ours to check. `check` runs before
- * each request, the first one included, and can stop the whole thing. Returns the first response that isn't a
- * redirect.
+ * Asks for a URL and follows redirects by hand, one at a time, so every step is ours to check.
+ * `check` runs before each request, the first one included, and can stop the whole thing.
+ * Returns the first response that isn't a redirect.
  */
 async function follow(
   start: URL,
@@ -306,8 +328,8 @@ async function follow(
 
     let response: Response
     try {
-      // `get` asks with `redirect: 'manual'`, which hands us the redirect itself. No cookies are stored or sent:
-      // undici's `fetch` has no cookie jar, and we set no `Cookie` header.
+      // `get` asks with `redirect: 'manual'`, which hands us the redirect itself. No cookies
+      // are stored or sent: undici's `fetch` has no cookie jar, and we set no `Cookie` header.
       response = await get(url, headers)
     } catch (error) {
       return describeError(url, error, timeoutMs)
@@ -371,8 +393,8 @@ async function loadRobots(origin: string, get: Get, timeoutMs: number): Promise<
     }
 
     await discard(response)
-    // A 4xx means there is no robots.txt, and anything goes. A 429 is no 404: the host asks us to slow down, and we
-    // can't tell what it would have said.
+    // A 4xx means there is no robots.txt, and anything goes. A 429 is no 404: the host asks us
+    // to slow down, and we can't tell what it would have said.
     if (response.status >= 400 && response.status < 500 && response.status !== 429) {
       return { kind: 'rules', rules: [] }
     }
@@ -424,7 +446,10 @@ async function readBody(response: Response, maxBytes: number): Promise<Uint8Arra
   return body
 }
 
-/** A URL as it goes into an outcome: without a username or password, which don't belong in a log. */
+/**
+ * A URL as it goes into an outcome: without a username or password, which don't belong in a
+ * log.
+ */
 function withoutCredentials(url: string | URL): string {
   try {
     const clean = new URL(url)

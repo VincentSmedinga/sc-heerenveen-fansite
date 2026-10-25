@@ -26,7 +26,9 @@ const links = {
   spotifyUrl: null,
 }
 
-/** The caches live in the module, so every test loads a module of its own, with empty caches. */
+/**
+ * The caches live in the module, so every test loads a module of its own, with empty caches.
+ */
 async function load() {
   vi.resetModules()
 

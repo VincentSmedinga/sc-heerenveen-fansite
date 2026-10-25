@@ -17,8 +17,8 @@ export function loginMailText(url: string) {
 }
 
 /**
- * Mails the login link. Locally, without the settings of a mail server, sendMail writes the mail in the log of `pnpm dev`
- * and sends nothing, which is how a developer gets the link.
+ * Mails the login link. Locally, without the settings of a mail server, sendMail writes the
+ * mail in the log of `pnpm dev` and sends nothing, which is how a developer gets the link.
  */
 export async function sendLoginMail({ to, url }: LoginMail) {
   await sendMail({ subject: 'Inloggen bij het beheer van de sc Heerenveen Fansite', text: loginMailText(url), to })

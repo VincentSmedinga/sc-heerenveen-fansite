@@ -1,6 +1,6 @@
 /*
- * The components of the design system, as TypeScript source: the site compiles them along. The styles are in
- * index.css, which the site imports as well.
+ * The components of the design system, as TypeScript source: the site compiles them along. The
+ * styles are in index.css, which the site imports as well.
  */
 
 export { Body } from './components/body/Body'

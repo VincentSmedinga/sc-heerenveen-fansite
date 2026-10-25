@@ -85,12 +85,16 @@ async function addForum(server: TestServer, { enabled = true } = {}) {
   return stored
 }
 
-/** Starts a web server on this computer that answers the request for the discussions, as the API does. */
+/**
+ * Starts a web server on this computer that answers the request for the discussions, as the API
+ * does.
+ */
 async function serve(answer: Handler | string) {
   const handler =
     typeof answer === 'string'
       ? (request: Parameters<Handler>[0], response: Parameters<Handler>[1]) => {
-          // The real API sets a session cookie, and we must ignore it. It also sends nothing we could ask about again.
+          // The real API sets a session cookie, and we must ignore it. It also sends nothing we
+          // could ask about again.
           response.setHeader('Set-Cookie', 'flarum_session=verzonnen; Path=/; HttpOnly')
           response.setHeader('ETag', '"verzonnen"')
           reply(200, answer, jsonApi)(request, response)

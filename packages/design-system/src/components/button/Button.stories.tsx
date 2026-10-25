@@ -4,7 +4,8 @@ import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card, cardSurfaces } from '../card/Card'
 import { Button, buttonAppearances, buttonIcons, buttonTypes } from './Button'
 
-// The type of the props as the table of controls shows it: the compiler gives `unknown[number]` for the lists.
+// The type of the props as the table of controls shows it: the compiler gives `unknown[number]`
+// for the lists.
 const union = (values: readonly string[]) => ({ type: { summary: values.map((value) => `'${value}'`).join(' | ') } })
 
 const meta = preview.meta({

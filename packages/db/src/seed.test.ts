@@ -194,7 +194,8 @@ describe('the seed', () => {
         spotifyUrl: spotify,
       })
       expect(podcast?.consentStatus).not.toBe('given')
-      // The text of the maker from the channel of the feed, as it is written but without the HTML.
+      // The text of the maker from the channel of the feed, as it is written but without the
+      // HTML.
       expect(podcast?.description).toBe(description)
       expect(podcast?.description?.length).toBeLessThanOrEqual(300)
       expect(podcast?.description).not.toMatch(/[<>]/u)

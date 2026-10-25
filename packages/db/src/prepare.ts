@@ -16,16 +16,18 @@ export type PrepareOptions = {
 }
 
 /**
- * Brings the database up to date: runs the migrations it hasn't had yet and, when asked, puts the test sources in the
- * register. The site calls this when it starts. A lock in the database (`GET_LOCK`) makes two processes that start at the
- * same moment take turns, so the second one finds nothing left to do.
+ * Brings the database up to date: runs the migrations it hasn't had yet and, when asked, puts
+ * the test sources in the register. The site calls this when it starts. A lock in the database
+ * (`GET_LOCK`) makes two processes that start at the same moment take turns, so the second one
+ * finds nothing left to do.
  *
- * It throws when the database can't be reached, when the lock stays taken, or when a migration or the seed fails. The
- * caller decides what that means. A migration that fails halfway can leave the schema half changed: MariaDB can't undo
- * `CREATE TABLE` or `ALTER TABLE` in a transaction.
+ * It throws when the database can't be reached, when the lock stays taken, or when a migration
+ * or the seed fails. The caller decides what that means. A migration that fails halfway can
+ * leave the schema half changed: MariaDB can't undo `CREATE TABLE` or `ALTER TABLE` in a
+ * transaction.
  *
- * It takes the folder with the migrations from the caller. A bundled build can't tell where the files are, so the site
- * says where it put them.
+ * It takes the folder with the migrations from the caller. A bundled build can't tell where the
+ * files are, so the site says where it put them.
  */
 export async function prepareDatabase({ lockSeconds = 30, migrationsFolder, seed, url }: PrepareOptions) {
   const { close, db, pool } = connect(url)

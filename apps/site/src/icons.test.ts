@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { iconSetsOf } from './icon-sets'
 import { hexOf, readPng } from './read-png'
 
-// The files that scripts/make-icons.js makes, in the folders of src/icon-sets.ts. The tests read them from there: the
-// ones of the fansite from public, where the site serves them.
+// The files that scripts/make-icons.js makes, in the folders of src/icon-sets.ts. The tests
+// read them from there: the ones of the fansite from public, where the site serves them.
 const root = new URL('../../../', import.meta.url)
 const tokens = (name: string) => readFileSync(new URL(`packages/design-system/src/${name}`, root), 'utf8')
 const sets = iconSetsOf(tokens('tokens/colour.css'))

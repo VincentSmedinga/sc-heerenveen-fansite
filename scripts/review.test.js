@@ -1,5 +1,5 @@
-// Tests the parts of `pnpm review` that decide something and have no side effects. What touches git, gh, docker, lsof and
-// the servers is tried by hand (see the pull request).
+// Tests the parts of `pnpm review` that decide something and have no side effects. What touches
+// git, gh, docker, lsof and the servers is tried by hand (see the pull request).
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
@@ -166,8 +166,8 @@ test('knows its own dev servers in the repository, in a worktree of Claude Code 
 test('leaves alone what is not a dev server of the fansite', () => {
   const worktrees = [mainFolder, reviewFolder]
 
-  // Another project's Next.js, a different tool in a folder of the fansite, a folder that only starts like ours, and a
-  // process whose folder can't be read.
+  // Another project's Next.js, a different tool in a folder of the fansite, a folder that only
+  // starts like ours, and a process whose folder can't be read.
   assert.equal(
     isFansiteServer({ command: 'next-server (v16.4.2)', cwd: '/Users/me/other-project/apps/web' }, site, worktrees),
     false,
@@ -381,12 +381,14 @@ const entries = [
 test('opens the component or document in Storybook that the branch changes', () => {
   const idOf = (changed) => storybookEntryFor(changed, entries)?.id
 
-  // A changed story, its component or its styles all lead to the documentation page of that story file.
+  // A changed story, its component or its styles all lead to the documentation page of that
+  // story file.
   assert.equal(idOf(['packages/design-system/src/components/card/Card.stories.tsx']), 'components-card--docs')
   assert.equal(idOf(['packages/design-system/src/components/card/card.css']), 'components-card--docs')
   assert.equal(idOf(['packages/design-system/src/components/link/Link.tsx']), 'components-link--docs')
   assert.equal(idOf(['packages/design-system/src/docs/editorial.mdx']), 'redactie--documentatie')
-  // A story file wins over a file that only sits next to a story, and the component with most files over the other.
+  // A story file wins over a file that only sits next to a story, and the component with most
+  // files over the other.
   assert.equal(
     idOf([
       'packages/design-system/src/components/card/card.css',

@@ -1,10 +1,14 @@
-/* How the site shows the news to visitors: the day or date and time of an item, in Dutch time. The database holds UTC. */
+/*
+ * How the site shows the news to visitors: the day or date and time of an item, in Dutch time.
+ * The database holds UTC.
+ */
 
 const timeZone = 'Europe/Amsterdam'
 
 /**
- * The days that get a weekday: today and the six days before it. A weekday is only clear within seven days; further
- * back "wo" could be either of two Wednesdays, so older news gets a date. The time of a discussion follows the same rule.
+ * The days that get a weekday: today and the six days before it. A weekday is only clear within
+ * seven days; further back "wo" could be either of two Wednesdays, so older news gets a date.
+ * The time of a discussion follows the same rule.
  */
 const daysWithWeekday = 7
 
@@ -49,9 +53,10 @@ export function dateTimeOf(moment: Date) {
 }
 
 /**
- * The facts about an episode as short texts for a `NewsItem`: the season and the number, such as "seizoen 9, aflevering
- * 16" or "aflevering 120", and the duration, such as "37 min". A fact the feed did not give is left out, and so is a
- * season without an episode number, because a season alone says little.
+ * The facts about an episode as short texts for a `NewsItem`: the season and the number, such
+ * as "seizoen 9, aflevering 16" or "aflevering 120", and the duration, such as "37 min". A fact
+ * the feed did not give is left out, and so is a season without an episode number, because a
+ * season alone says little.
  */
 export function episodeDetails({
   durationSeconds,
@@ -71,8 +76,8 @@ export function episodeDetails({
 }
 
 /**
- * The short weekday and the time of day in the Netherlands, such as "wo 14:05". Within seven days a weekday never
- * appears twice, and the time stays right in a page from the cache.
+ * The short weekday and the time of day in the Netherlands, such as "wo 14:05". Within seven
+ * days a weekday never appears twice, and the time stays right in a page from the cache.
  */
 export function formatDayAndTime(moment: Date) {
   const parts = Object.fromEntries(dayAndTimeFormat.formatToParts(moment).map(({ type, value }) => [type, value]))
@@ -81,9 +86,10 @@ export function formatDayAndTime(moment: Date) {
 }
 
 /**
- * The time of the last post of a discussion as a visitor reads it, in Dutch time. Of today it is the time alone, such as
- * "13:28". Of the six days before it is the short weekday and the time, as for the news: "wo 14:05". Anything older is the
- * date, such as "16 okt", with the year when it is not this year. A moment after now, from a clock that is ahead, counts as
+ * The time of the last post of a discussion as a visitor reads it, in Dutch time. Of today it
+ * is the time alone, such as "13:28". Of the six days before it is the short weekday and the
+ * time, as for the news: "wo 14:05". Anything older is the date, such as "16 okt", with the
+ * year when it is not this year. A moment after now, from a clock that is ahead, counts as
  * today.
  */
 export function formatDiscussionTime(moment: Date, now: Date) {
@@ -98,8 +104,9 @@ export function formatDiscussionTime(moment: Date, now: Date) {
 }
 
 /**
- * How long an episode lasts as a visitor reads it, in whole minutes: "37 min", "1 uur" or "1 uur 12 min". A duration
- * under half a minute still counts as "1 min", because "0 min" says nothing.
+ * How long an episode lasts as a visitor reads it, in whole minutes: "37 min", "1 uur" or "1
+ * uur 12 min". A duration under half a minute still counts as "1 min", because "0 min" says
+ * nothing.
  */
 export function formatDuration(seconds: number) {
   const minutes = Math.max(1, Math.round(seconds / 60))
@@ -114,9 +121,10 @@ export function formatDuration(seconds: number) {
 }
 
 /**
- * The time of a podcast episode as a visitor reads it, in Dutch time. Within seven days it is the short weekday and the
- * time, such as "wo 14:05", as for the news. Anything older is the date, such as "14 okt", with the year when it is not
- * this year: the list of episodes goes back years, so a date without a year would be unclear.
+ * The time of a podcast episode as a visitor reads it, in Dutch time. Within seven days it is
+ * the short weekday and the time, such as "wo 14:05", as for the news. Anything older is the
+ * date, such as "14 okt", with the year when it is not this year: the list of episodes goes
+ * back years, so a date without a year would be unclear.
  */
 export function formatEpisodeTime(moment: Date, now: Date) {
   if (moment >= weekdayStart(now)) {
@@ -127,9 +135,10 @@ export function formatEpisodeTime(moment: Date, now: Date) {
 }
 
 /**
- * The time of a news item as a visitor reads it, in Dutch time. Of today and the six days before it is the short weekday
- * and the time, such as "wo 14:05". Anything older is the date and the time, such as "14 okt 14:05", with the year when
- * it is not this year: the news has no limit in time. A moment after now, from a clock that is ahead, counts as today.
+ * The time of a news item as a visitor reads it, in Dutch time. Of today and the six days
+ * before it is the short weekday and the time, such as "wo 14:05". Anything older is the date
+ * and the time, such as "14 okt 14:05", with the year when it is not this year: the news has no
+ * limit in time. A moment after now, from a clock that is ahead, counts as today.
  */
 export function formatNewsTime(moment: Date, now: Date) {
   if (moment >= weekdayStart(now)) {
@@ -139,7 +148,10 @@ export function formatNewsTime(moment: Date, now: Date) {
   return `${(clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)} ${timeFormat.format(moment)}`
 }
 
-/** The start of the days that get a weekday: the first moment of the Dutch day six days before today. */
+/**
+ * The start of the days that get a weekday: the first moment of the Dutch day six days before
+ * today.
+ */
 export function weekdayStart(now: Date) {
   return startOfDay(now, daysWithWeekday - 1)
 }
@@ -158,7 +170,9 @@ function clockAt(moment: Date) {
   }
 }
 
-/** How far the Dutch clock is ahead of UTC at this moment, in milliseconds: one or two hours. */
+/**
+ * How far the Dutch clock is ahead of UTC at this moment, in milliseconds: one or two hours.
+ */
 function offsetAt(moment: Date) {
   const { day, hour, minute, month, second, year } = clockAt(moment)
   const wholeSeconds = moment.getTime() - moment.getUTCMilliseconds()
@@ -166,12 +180,16 @@ function offsetAt(moment: Date) {
   return Date.UTC(year, month - 1, day, hour, minute, second) - wholeSeconds
 }
 
-/** The first moment of the Dutch day that is `daysBefore` days before the Dutch day of `now`. */
+/**
+ * The first moment of the Dutch day that is `daysBefore` days before the Dutch day of `now`.
+ */
 function startOfDay(now: Date, daysBefore: number) {
   const { day, month, year } = clockAt(now)
-  // Midnight on that day by the Dutch clock, written as if it were UTC. Date.UTC counts the days across months.
+  // Midnight on that day by the Dutch clock, written as if it were UTC. Date.UTC counts the
+  // days across months.
   const midnight = Date.UTC(year, month - 1, day - daysBefore)
-  // The clock may change between this guess and the real moment, so the offset is looked up again.
+  // The clock may change between this guess and the real moment, so the offset is looked up
+  // again.
   const guess = midnight - offsetAt(new Date(midnight))
 
   return new Date(midnight - offsetAt(new Date(guess)))

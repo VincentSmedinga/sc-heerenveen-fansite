@@ -24,7 +24,8 @@ afterAll(async () => {
   await database?.drop()
 })
 
-// A folder in the system's temporary folder has no node_modules above it, so the file must hold everything.
+// A folder in the system's temporary folder has no node_modules above it, so the file must hold
+// everything.
 it('bundles the import command into one file that runs on its own, without node_modules', async () => {
   const file = path.join(folder, 'import.mjs')
 

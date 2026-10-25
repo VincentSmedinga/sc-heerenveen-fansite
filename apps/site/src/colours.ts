@@ -1,7 +1,8 @@
 /**
- * The colour of the header in light and in dark, from the colour tokens of the design system. next.config.ts reads them
- * from the CSS (see header-colour-env.ts) and puts the two values into the code when the site is built, so the server
- * needs no file. These are not variables of the environment: nothing sets them at run time.
+ * The colour of the header in light and in dark, from the colour tokens of the design system.
+ * next.config.ts reads them from the CSS (see header-colour-env.ts) and puts the two values
+ * into the code when the site is built, so the server needs no file. These are not variables of
+ * the environment: nothing sets them at run time.
  */
 const colour = (value: string | undefined) => {
   if (value === undefined) {

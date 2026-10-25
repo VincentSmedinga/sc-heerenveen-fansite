@@ -4,8 +4,8 @@ import { expect, test } from '@playwright/test'
 
 import { checkPage } from './check-page'
 
-// The check must catch a mistake, or a green run says nothing. The pages below don't exist on the site: the test serves
-// them itself, one page without a mistake and the same page with one.
+// The check must catch a mistake, or a green run says nothing. The pages below don't exist on
+// the site: the test serves them itself, one page without a mistake and the same page with one.
 const good = `<!doctype html>
 <html lang="nl">
   <head><title>Test</title></head>
@@ -22,7 +22,8 @@ const mistakes = [
   { html: good.replace('</main>', '<h1>Nog een kop</h1></main>'), name: 'two h1', rule: 'one-h1' },
   { html: good.replace('lang="nl"', 'lang="en"'), name: 'lang="en"', rule: 'html-lang-nl' },
   {
-    // A request to another domain, such as a font or a script. It can't be answered here, so the test answers it itself.
+    // A request to another domain, such as a font or a script. It can't be answered here, so
+    // the test answers it itself.
     html: good.replace('</main>', '<img src="https://derde-partij.test/pixel.gif" alt=""></main>'),
     name: 'a request to another domain',
     rule: 'no-third-party-requests',

@@ -1,4 +1,5 @@
-// Runs the reviewer's Bash hook with sample commands. Exit code 0 lets a command through; 2 blocks it.
+// Runs the reviewer's Bash hook with sample commands. Exit code 0 lets a command through; 2
+// blocks it.
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'

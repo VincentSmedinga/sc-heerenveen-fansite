@@ -37,7 +37,8 @@ export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', re
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
 
-// Only on the canvas, with Storybook's viewport setting: the breakpoints follow the window, and the docs page can't resize it.
+// Only on the canvas, with Storybook's viewport setting: the breakpoints follow the window, and
+// the docs page can't resize it.
 const middle = {
   globals: { viewport: { value: 'tablet' } },
   parameters: { layout: 'fullscreen' as const },

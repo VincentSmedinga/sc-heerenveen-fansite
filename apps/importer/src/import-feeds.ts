@@ -17,7 +17,10 @@ import { readForum } from './read-forum.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { finishRun, reasonOf, recordLockTaken, recordReport, removeOldRuns, startRun } from './run-log.ts'
 
-/** What came of one feed. Like `FetchOutcome`, every result is a value, so a failing feed never stops the others. */
+/**
+ * What came of one feed. Like `FetchOutcome`, every result is a value, so a failing feed never
+ * stops the others.
+ */
 export type FeedReport =
   | {
       /** Items we saw that are new, that changed, and that were as we had them. */
@@ -58,7 +61,10 @@ export type FeedReport =
 export type ImportOptions = {
   /** Gives the time. A test gives its own, to run the import at a moment it chooses. */
   clock?: () => Date
-  /** Makes the fetcher of the run, with the store for robots.txt. A test gives one that may reach its own web servers. */
+  /**
+   * Makes the fetcher of the run, with the store for robots.txt. A test gives one that may
+   * reach its own web servers.
+   */
   makeFetcher?: (robots: RobotsStore) => Fetcher
   /** Writes a line of output. */
   write?: (line: string) => void
@@ -66,15 +72,22 @@ export type ImportOptions = {
 
 export type StoredFeed = Pick<Feed, 'etag' | 'failuresInARow' | 'id' | 'lastModified' | 'retryAt' | 'sourceId' | 'url'>
 
-/** The queries below also run inside a transaction, which has these methods but is not a `Database`. */
+/**
+ * The queries below also run inside a transaction, which has these methods but is not a
+ * `Database`.
+ */
 type Executor = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 
-/** How many items one query handles, so a very large feed stays under the limit on the number of parameters. */
+/**
+ * How many items one query handles, so a very large feed stays under the limit on the number of
+ * parameters.
+ */
 const batchSize = 500
 
 /**
- * Writes a report as lines of text: one for the feed, and one for each item we left out. Whatever came from the source
- * is cleaned of control characters and cut off, so a feed can't mess up the terminal or the log.
+ * Writes a report as lines of text: one for the feed, and one for each item we left out.
+ * Whatever came from the source is cleaned of control characters and cut off, so a feed can't
+ * mess up the terminal or the log.
  */
 export function formatReport(report: FeedReport): string {
   switch (report.kind) {
@@ -96,14 +109,17 @@ export function formatReport(report: FeedReport): string {
 }
 
 /**
- * Reads one feed and stores its items. The feed goes through the fetcher with the `ETag` and `Last-Modified` of the last
- * time, and nothing happens when the source says it hasn't changed. A feed we can't read leaves what we have alone.
+ * Reads one feed and stores its items. The feed goes through the fetcher with the `ETag` and
+ * `Last-Modified` of the last time, and nothing happens when the source says it hasn't changed.
+ * A feed we can't read leaves what we have alone.
  *
- * The new `ETag` and `Last-Modified` are saved in the same transaction as the items. If the items fail, the next run
- * asks for the whole feed again instead of being told that nothing changed.
+ * The new `ETag` and `Last-Modified` are saved in the same transaction as the items. If the
+ * items fail, the next run asks for the whole feed again instead of being told that nothing
+ * changed.
  *
- * The feed of a forum is the list of discussions of its API. It is read as a guest and always in full, without an `ETag`:
- * a database that is empty must get its discussions back, and a forum that changed would only say so by asking again.
+ * The feed of a forum is the list of discussions of its API. It is read as a guest and always
+ * in full, without an `ETag`: a database that is empty must get its discussions back, and a
+ * forum that changed would only say so by asking again.
  *
  * It throws when the database fails; `importFeeds` turns that into a report.
  */
@@ -164,9 +180,10 @@ export async function importFeed(
 }
 
 /**
- * Reads every feed of every source that is switched on, one after the other, and reports on each. A feed that fails,
- * because the source is down or the database refuses something, stops no other feed. A feed whose time to try again
- * has not come yet is not asked for. What came of each feed goes in the log of the run, and into its health.
+ * Reads every feed of every source that is switched on, one after the other, and reports on
+ * each. A feed that fails, because the source is down or the database refuses something, stops
+ * no other feed. A feed whose time to try again has not come yet is not asked for. What came of
+ * each feed goes in the log of the run, and into its health.
  */
 export async function importFeeds(
   db: Database,
@@ -205,13 +222,13 @@ export function listFeedsToImport(db: Database) {
 }
 
 /**
- * Reads every feed of every source that is switched on and writes a line for each. One fetcher serves all feeds, so a
- * host's robots.txt is read once, and the database keeps it for a day. Returns the exit code: 1 when a feed failed, so a
- * scheduler can tell.
+ * Reads every feed of every source that is switched on and writes a line for each. One fetcher
+ * serves all feeds, so a host's robots.txt is read once, and the database keeps it for a day.
+ * Returns the exit code: 1 when a feed failed, so a scheduler can tell.
  *
- * A run takes a lock in the database first. When another run holds it, this run writes that in the log and stops, with
- * exit code 0: nothing is broken, and the next run comes a quarter of an hour later. A run also removes the runs older
- * than 30 days from the log.
+ * A run takes a lock in the database first. When another run holds it, this run writes that in
+ * the log and stops, with exit code 0: nothing is broken, and the next run comes a quarter of
+ * an hour later. A run also removes the runs older than 30 days from the log.
  */
 export async function runImport(
   databaseUrl: string,
@@ -269,7 +286,10 @@ function chunks<T>(list: T[], size: number): T[][] {
   return pieces
 }
 
-/** A short text for a failure. A database error carries the whole query with its values, which don't belong in a log. */
+/**
+ * A short text for a failure. A database error carries the whole query with its values, which
+ * don't belong in a log.
+ */
 function describeError(error: unknown): string {
   const cause = error instanceof Error && error.cause instanceof Error ? error.cause : error
 
@@ -280,12 +300,18 @@ function describeError(error: unknown): string {
   return cause instanceof Error ? cause.message : String(cause)
 }
 
-/** The address of a forum discussion without the slug and the number of the last post, which change: `/d/2859`. */
+/**
+ * The address of a forum discussion without the slug and the number of the last post, which
+ * change: `/d/2859`.
+ */
 function discussionKey(url: string): string {
   return new URL(url).pathname.replace(/^(\/d\/\d+).*$/u, '$1')
 }
 
-/** Reads a feed whose time has come, or reports that it waits. A failure of the database becomes an error report. */
+/**
+ * Reads a feed whose time has come, or reports that it waits. A failure of the database becomes
+ * an error report.
+ */
 async function importDueFeed(db: Database, fetcher: Fetcher, feed: StoredFeed, now: Date): Promise<FeedReport> {
   if (feed.retryAt !== null && feed.retryAt > now) {
     return { failuresInARow: feed.failuresInARow, kind: 'postponed', retryAt: feed.retryAt, url: feed.url }
@@ -310,9 +336,10 @@ async function importForum(db: Database, feed: StoredFeed, read: ReturnType<type
 }
 
 /**
- * Makes the discussions of a forum in the database the ones we found, and nothing else: no discussion, title or screen
- * name stays that the forum no longer has among the newest. A discussion is new when we had no row with its id, and
- * changed when its row differs. The address ends in the number of the last post, so it changes with every new post.
+ * Makes the discussions of a forum in the database the ones we found, and nothing else: no
+ * discussion, title or screen name stays that the forum no longer has among the newest. A
+ * discussion is new when we had no row with its id, and changed when its row differs. The
+ * address ends in the number of the last post, so it changes with every new post.
  */
 async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDiscussion[]) {
   const counts = { added: 0, unchanged: 0, updated: 0 }
@@ -351,13 +378,13 @@ async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDisc
 }
 
 /**
- * Stores the items of a feed and counts which are new, which changed and which were as we had them. An item is new when
- * the source has no item with its key yet. The key is unique per source, so an item that moves to another feed of the
- * same source is the same item.
+ * Stores the items of a feed and counts which are new, which changed and which were as we had
+ * them. An item is new when the source has no item with its key yet. The key is unique per
+ * source, so an item that moves to another feed of the same source is the same item.
  *
- * A known item keeps its time of publication when the feed gives none this time. An item without a valid time gets
- * the time we first saw it. An item that a moderator hid is never changed, whatever the source offers, and counts as
- * unchanged.
+ * A known item keeps its time of publication when the feed gives none this time. An item
+ * without a valid time gets the time we first saw it. An item that a moderator hid is never
+ * changed, whatever the source offers, and counts as unchanged.
  */
 async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now: Date) {
   const counts = { added: 0, unchanged: 0, updated: 0 }
@@ -417,9 +444,10 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
       }
     })
 
-    // The key is unique, so an item that another run added in the meantime is updated instead of added twice. A hidden item
-    // keeps every column: the condition is in the statement, so an item that a moderator hides while this run is busy is
-    // left alone too, which a check on the row read above would miss.
+    // The key is unique, so an item that another run added in the meantime is updated instead
+    // of added twice. A hidden item keeps every column: the condition is in the statement, so
+    // an item that a moderator hides while this run is busy is left alone too, which a check on
+    // the row read above would miss.
     await db
       .insert(items)
       .values(rows)
@@ -441,7 +469,10 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
   return counts
 }
 
-/** What an item column becomes when the source offers the item again: the new value, unless a moderator hid the item, then it stays as it is. */
+/**
+ * What an item column becomes when the source offers the item again: the new value, unless a
+ * moderator hid the item, then it stays as it is.
+ */
 function unlessHidden(column: AnyMySqlColumn) {
   return sql`if(${items.hiddenAt} is null, values(${column}), ${column})`
 }

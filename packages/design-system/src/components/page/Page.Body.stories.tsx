@@ -79,8 +79,9 @@ const withIntro = () => (
   </Page.Body>
 )
 
-// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the same as the stories above,
-// because the docs page can't resize the window. The window is what the breakpoint follows, so the story fills it.
+// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the
+// same as the stories above, because the docs page can't resize the window. The window is what
+// the breakpoint follows, so the story fills it.
 const screens = { parameters: { layout: 'fullscreen' as const }, tags: ['!autodocs'] }
 
 const narrow = { value: 'mobile1' }

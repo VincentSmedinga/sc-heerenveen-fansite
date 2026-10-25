@@ -10,10 +10,11 @@ export function colourOf(css: string, name: string) {
 }
 
 /**
- * The colour of the header of the site, read from the CSS of the colour tokens in the design system, so the icons and
- * the manifest never hold a second copy of it. The role `--hf-colour-background-header` is a `light-dark()` of two
- * scale colours, and each scale colour is a hex value in the same file. This module imports nothing, so the script
- * that makes the icons can use it too.
+ * The colour of the header of the site, read from the CSS of the colour tokens in the design
+ * system, so the icons and the manifest never hold a second copy of it. The role
+ * `--hf-colour-background-header` is a `light-dark()` of two scale colours, and each scale
+ * colour is a hex value in the same file. This module imports nothing, so the script that makes
+ * the icons can use it too.
  */
 export function headerColourOf(css: string) {
   const role = css.match(

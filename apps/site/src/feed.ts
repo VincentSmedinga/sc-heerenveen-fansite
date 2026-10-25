@@ -1,9 +1,9 @@
 import { anchorOf, feedPath, type Release, updatesPath, updatesTitle } from './updates'
 
 /**
- * The RSS 2.0 feed of the page Updates: an item per version, newest first, with the number as its title, the date,
- * the lines as a list and a link to the version on the page. A feed reader needs full addresses, so every link starts
- * with the address of the site the feed comes from.
+ * The RSS 2.0 feed of the page Updates: an item per version, newest first, with the number as
+ * its title, the date, the lines as a list and a link to the version on the page. A feed reader
+ * needs full addresses, so every link starts with the address of the site the feed comes from.
  */
 export function feedOf(releases: readonly Release[], origin: string) {
   const page = `${origin}${updatesPath}`
@@ -39,7 +39,10 @@ export function feedOf(releases: readonly Release[], origin: string) {
   ].join('\n')
 }
 
-/** Makes text safe inside XML, and inside HTML too: the characters that mean markup become entities. */
+/**
+ * Makes text safe inside XML, and inside HTML too: the characters that mean markup become
+ * entities.
+ */
 function escape(text: string) {
   return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 }

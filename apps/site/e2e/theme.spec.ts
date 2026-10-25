@@ -2,9 +2,9 @@ import { expect, test } from '@playwright/test'
 
 import { checkPage } from './check-page'
 
-// The choice for Licht or Donker is on the html element before React starts, and it survives a reload. A unit test can't
-// see either, and a page that flashes the wrong theme goes unnoticed without a test. The address doesn't matter, so the
-// page without a database is enough.
+// The choice for Licht or Donker is on the html element before React starts, and it survives a
+// reload. A unit test can't see either, and a page that flashes the wrong theme goes unnoticed
+// without a test. The address doesn't matter, so the page without a database is enough.
 const path = '/over-ons'
 const key = 'fansite-theme'
 

@@ -3,14 +3,15 @@ import type { Page, Request } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { expect } from '@playwright/test'
 
-// WCAG 2.0, 2.1 and 2.2 at levels A and AA, and the best practices of axe. axe has no separate tag for the level A
-// criteria of 2.2. No rule is switched off: a violation fails the check.
+// WCAG 2.0, 2.1 and 2.2 at levels A and AA, and the best practices of axe. axe has no separate
+// tag for the level A criteria of 2.2. No rule is switched off: a violation fails the check.
 const tags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']
 
 /**
- * Checks the page that is open with axe, and for what axe doesn't see or sees only half: exactly one h1, lang="nl" on the
- * html element, nothing loaded from another domain (principle 3 of the Redactie), and no sideways scrolling in a window of
- * 320 pixels wide. Returns one line per problem, with the rule and the element, or an empty list. It resizes the window.
+ * Checks the page that is open with axe, and for what axe doesn't see or sees only half:
+ * exactly one h1, lang="nl" on the html element, nothing loaded from another domain (principle
+ * 3 of the Redactie), and no sideways scrolling in a window of 320 pixels wide. Returns one
+ * line per problem, with the rule and the element, or an empty list. It resizes the window.
  */
 export async function checkPage(page: Page) {
   const problems: string[] = []
@@ -35,8 +36,9 @@ export async function checkPage(page: Page) {
     problems.push(`html-lang-nl (the lang of the html element is ${JSON.stringify(lang)}, not "nl")`)
   }
 
-  // The resize can make the page load something new, such as a picture for a narrow screen. Keep track of the requests
-  // that start from here. Waiting for 'networkidle' doesn't work: it fires only once, and it has often fired by now.
+  // The resize can make the page load something new, such as a picture for a narrow screen.
+  // Keep track of the requests that start from here. Waiting for 'networkidle' doesn't work: it
+  // fires only once, and it has often fired by now.
   const open = new Set<Request>()
   const opened = (request: Request) => open.add(request)
   const closed = (request: Request) => open.delete(request)
@@ -45,7 +47,8 @@ export async function checkPage(page: Page) {
   page.on('requestfailed', closed)
 
   await page.setViewportSize({ height: 800, width: 320 })
-  // Two frames, so the page has reacted to the new size before anything is measured or waited for.
+  // Two frames, so the page has reacted to the new size before anything is measured or waited
+  // for.
   const tooWide = await page.evaluate(async () => {
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
 
@@ -56,8 +59,9 @@ export async function checkPage(page: Page) {
     problems.push(`no-horizontal-scroll (at 320 px wide the page scrolls sideways, it is ${tooWide} px too wide)`)
   }
 
-  // Everything the page has loaded, as the browser lists it, also what failed. It is read last, after the resize and
-  // after what the resize started has finished, so something that only loads on a narrow screen counts too.
+  // Everything the page has loaded, as the browser lists it, also what failed. It is read last,
+  // after the resize and after what the resize started has finished, so something that only
+  // loads on a narrow screen counts too.
   await expect.poll(() => open.size, { message: 'the page is still loading after the resize' }).toBe(0)
   page.off('request', opened)
   page.off('requestfinished', closed)

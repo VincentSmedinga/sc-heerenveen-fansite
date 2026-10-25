@@ -5,7 +5,10 @@ import { expect, test } from '@playwright/test'
 import { checkPage } from './check-page'
 import { sentMails } from './fake-mail'
 
-/** Fills in the form with a valid message, with the marker in the text so the test can find its own mail. */
+/**
+ * Fills in the form with a valid message, with the marker in the text so the test can find its
+ * own mail.
+ */
 async function fillIn(page: Page, marker: string) {
   await page.getByLabel('Naam').fill('Jan de Vries')
   await page.getByLabel('E-mailadres').fill('jan@example.org')
@@ -17,7 +20,8 @@ async function fillIn(page: Page, marker: string) {
 const mailsWith = (marker: string) => sentMails().filter((mail) => mail.includes(marker))
 
 test.describe('without JavaScript', () => {
-  // The form is a plain POST with a confirmation on its own address. Nothing else would notice if a change broke that.
+  // The form is a plain POST with a confirmation on its own address. Nothing else would notice
+  // if a change broke that.
   test.use({ javaScriptEnabled: false })
 
   test('sends the message, shows the confirmation on its own address, and sends nothing again on reload', async ({

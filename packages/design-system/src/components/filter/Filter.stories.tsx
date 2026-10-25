@@ -61,7 +61,8 @@ export const AllDark = meta.story({
   render: () => <Filter items={withChoice('Alle podcasts')} label="Podcasts filteren" />,
 })
 
-// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the same as the stories above.
+// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the
+// same as the stories above.
 const screens = { tags: ['!autodocs'] }
 
 export const NarrowLight = meta.story({

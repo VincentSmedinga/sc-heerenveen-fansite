@@ -14,7 +14,10 @@ import {
 import { endSession } from '../../beheer/sessions'
 import { getDatabase } from '../../database'
 
-/** Logs out: the session is removed on the server, so the token stops working, and the cookie goes. */
+/**
+ * Logs out: the session is removed on the server, so the token stops working, and the cookie
+ * goes.
+ */
 export async function logOut() {
   await requireRole(...adminRoles)
 

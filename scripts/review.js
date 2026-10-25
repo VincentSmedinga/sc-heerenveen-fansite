@@ -1,15 +1,18 @@
-// Puts a pull request or a branch where you can look at it, in one folder next to the repository, and starts the site and
-// Storybook for it in the background: the site on port 3000 and Storybook on port 6006, both opened in your browser.
-// A branch that exists on your computer is taken as it is there, with commits that aren't pushed; otherwise it comes from
-// GitHub. Each server opens on the page that the branch changes: the page of the site, and the component or document of
-// Storybook, found from the files that differ from main. `pnpm review:stop` stops them.
-// The decision "Een branch bekijk je met pnpm review, in één vaste map" in docs/beslissingen.md says why.
+// Puts a pull request or a branch where you can look at it, in one folder next to the
+// repository, and starts the site and Storybook for it in the background: the site on port 3000
+// and Storybook on port 6006, both opened in your browser. A branch that exists on your
+// computer is taken as it is there, with commits that aren't pushed; otherwise it comes from
+// GitHub. Each server opens on the page that the branch changes: the page of the site, and the
+// component or document of Storybook, found from the files that differ from main. `pnpm
+// review:stop` stops them. The decision "Een branch bekijk je met pnpm review, in één vaste
+// map" in docs/beslissingen.md says why.
 //
 //   pnpm review <number of a pull request, or name of a branch>
 //   pnpm review:stop
 //
-// What decides something is a function without side effects, exported for the tests. What touches the computer (git, gh,
-// docker, lsof, files and processes) is below that, and only runs when this file is started directly.
+// What decides something is a function without side effects, exported for the tests. What
+// touches the computer (git, gh, docker, lsof, files and processes) is below that, and only
+// runs when this file is started directly.
 import { spawn, spawnSync } from 'node:child_process'
 import { closeSync, existsSync, openSync, readFileSync, realpathSync } from 'node:fs'
 import net from 'node:net'
@@ -31,8 +34,8 @@ const siteAppFolder = 'apps/site/src/app'
 const designSystemFolder = 'packages/design-system/'
 
 /**
- * The two servers. `args` is what pnpm runs in the review folder, and `owner` recognises in a command line the process
- * that listens on the port when it is a dev server of the fansite.
+ * The two servers. `args` is what pnpm runs in the review folder, and `owner` recognises in a
+ * command line the process that listens on the port when it is a dev server of the fansite.
  */
 export const servers = [
   {
@@ -66,7 +69,10 @@ export function mainFolderOf(commonGitDir) {
   return path.dirname(commonGitDir)
 }
 
-/** Reads what `gh pr list --json number,url,isCrossRepository` printed, and gives the first pull request of this repository. */
+/**
+ * Reads what `gh pr list --json number,url,isCrossRepository` printed, and gives the first pull
+ * request of this repository.
+ */
 export function parseOpenPullRequest(json) {
   const found = JSON.parse(json).find(({ isCrossRepository }) => isCrossRepository !== true)
 
@@ -90,7 +96,9 @@ export function parsePullRequest(json, number) {
   return { branch: headRefName, number, url }
 }
 
-/** Tells a pull request number from a branch name. A name that is only digits is a pull request. */
+/**
+ * Tells a pull request number from a branch name. A name that is only digits is a pull request.
+ */
 export function parseTarget(argument) {
   if (argument === undefined || argument === '') {
     throw new ReviewError('Say which pull request or branch to look at: pnpm review <number or branch>', 2)
@@ -115,8 +123,9 @@ export const parseFileList = (output) =>
     .filter((line) => line !== '')
 
 /**
- * Says where the commit comes from, for the summary: GitHub, or a branch on this computer and how it compares with
- * the branch on GitHub. `comparison` is undefined when there was nothing to compare with.
+ * Says where the commit comes from, for the summary: GitHub, or a branch on this computer and
+ * how it compares with the branch on GitHub. `comparison` is undefined when there was nothing
+ * to compare with.
  */
 export function describeSource({ comparison, local }) {
   if (!local) {
@@ -138,7 +147,10 @@ export function describeSource({ comparison, local }) {
   return `local branch (${[ahead > 0 ? `${plural(ahead)} ahead of origin` : '', behind > 0 ? `${plural(behind)} behind origin` : ''].filter(Boolean).join(', ')})`
 }
 
-/** Reads what `git rev-list --left-right --count <local>...<remote>` printed: the commits only the local branch has, and only the remote one. */
+/**
+ * Reads what `git rev-list --left-right --count <local>...<remote>` printed: the commits only
+ * the local branch has, and only the remote one.
+ */
 export function parseAheadBehind(output) {
   const [ahead, behind] = output.trim().split(/\s+/).map(Number)
 
@@ -148,9 +160,10 @@ export function parseAheadBehind(output) {
 const pageFile = /^page\.(?:[jt]sx?|mdx)$/
 
 /**
- * The page of the site that shows a change best. `changed` is what differs from main and `tracked` every file in the
- * app folder at the commit. A changed file leads to the page of its own folder, or the nearest folder above it that
- * has one; the page with most changed files wins. Without a page to show, it is the home page.
+ * The page of the site that shows a change best. `changed` is what differs from main and
+ * `tracked` every file in the app folder at the commit. A changed file leads to the page of its
+ * own folder, or the nearest folder above it that has one; the page with most changed files
+ * wins. Without a page to show, it is the home page.
  */
 export function sitePathFor(changed, tracked) {
   const pages = new Set(
@@ -180,9 +193,10 @@ export function sitePathFor(changed, tracked) {
 }
 
 /**
- * The entry of Storybook that shows a change best, from `entries` (what /index.json lists). A changed story or document
- * leads to its own entries, any other changed file in the design system to those next to it, and the file with the
- * most of them wins. Its documentation page comes before its first story, because that shows all its stories.
+ * The entry of Storybook that shows a change best, from `entries` (what /index.json lists). A
+ * changed story or document leads to its own entries, any other changed file in the design
+ * system to those next to it, and the file with the most of them wins. Its documentation page
+ * comes before its first story, because that shows all its stories.
  */
 export function storybookEntryFor(changed, entries) {
   const scores = new Map()
@@ -205,17 +219,22 @@ export function storybookEntryFor(changed, entries) {
   }
 
   const best = [...scores].sort((a, b) => b[1] - a[1])[0]?.[0]
-  // A documentation page can sit in an .mdx file of its own and list the story file in `storiesImports`.
+  // A documentation page can sit in an .mdx file of its own and list the story file in
+  // `storiesImports`.
   const ofBest = entries.filter((entry) => entry.importPath === best || entry.storiesImports?.includes(best))
 
   return ofBest.find(({ type }) => type === 'docs') ?? ofBest[0]
 }
 
-/** The address on the site of a folder in `apps/site/src/app`, or nothing for one that no address leads to. */
+/**
+ * The address on the site of a folder in `apps/site/src/app`, or nothing for one that no
+ * address leads to.
+ */
 function routeOf(folder) {
   const segments = folder.slice(siteAppFolder.length).split('/').filter(Boolean)
 
-  // A dynamic segment needs a value we can't guess, and `@slot` and `_private` folders have no address of their own.
+  // A dynamic segment needs a value we can't guess, and `@slot` and `_private` folders have no
+  // address of their own.
   if (segments.some((segment) => /^[[@_]/.test(segment))) {
     return undefined
   }
@@ -231,8 +250,9 @@ export const storybookPathFor = (entry) =>
 export const reviewFolderOf = (mainFolder) => path.join(path.dirname(mainFolder), reviewFolderName)
 
 /**
- * Whether a process that listens on the port of `server` is a dev server of the fansite, from any checkout of this
- * repository: its command line is the one of that server, and it works in the folder of one of the worktrees.
+ * Whether a process that listens on the port of `server` is a dev server of the fansite, from
+ * any checkout of this repository: its command line is the one of that server, and it works in
+ * the folder of one of the worktrees.
  */
 export function isFansiteServer({ command, cwd }, server, worktrees) {
   return (
@@ -258,7 +278,10 @@ export function parsePids(output) {
     .map(Number)
 }
 
-/** The folders of the worktrees, from `git worktree list --porcelain`. The repository itself is the first. */
+/**
+ * The folders of the worktrees, from `git worktree list --porcelain`. The repository itself is
+ * the first.
+ */
 export function parseWorktrees(porcelain) {
   return porcelain
     .split('\n')
@@ -272,7 +295,10 @@ const shorten = (text, length = 80) => (text.length > length ? `${text.slice(0, 
 export const describeHolder = ({ command, cwd, pid }) =>
   `"${shorten(command)}" (pid ${pid}${cwd === undefined ? '' : `, in ${cwd}`})`
 
-/** What it takes to start a server: the command, where, and the environment that shows the branch. */
+/**
+ * What it takes to start a server: the command, where, and the environment that shows the
+ * branch.
+ */
 export function buildServerCommand(server, { branch, reviewFolder }, env) {
   return {
     args: server.args,
@@ -283,9 +309,10 @@ export function buildServerCommand(server, { branch, reviewFolder }, env) {
 }
 
 /**
- * The steps that make the review folder ready, in order. Each is a command; none runs the import, because the headlines
- * come from the last `pnpm run import`. The first step puts the folder on the commit: a new worktree without a branch,
- * or the existing one moved to the commit.
+ * The steps that make the review folder ready, in order. Each is a command; none runs the
+ * import, because the headlines come from the last `pnpm run import`. The first step puts the
+ * folder on the commit: a new worktree without a branch, or the existing one moved to the
+ * commit.
  */
 export function buildSteps({ commit, hasEnv, mainFolder, reviewFolder, worktreeExists }) {
   const short = commit.slice(0, 7)
@@ -325,14 +352,18 @@ export function buildSteps({ commit, hasEnv, mainFolder, reviewFolder, worktreeE
           },
         ]),
     { args: ['install', '--frozen-lockfile'], command: 'pnpm', cwd: reviewFolder, label: 'Install the dependencies' },
-    // From the repository, so every branch gets the same database, also one from before compose.yaml existed.
+    // From the repository, so every branch gets the same database, also one from before
+    // compose.yaml existed.
     { args: ['compose', 'up', '-d', '--wait'], command: 'docker', cwd: mainFolder, label: 'Start the database' },
     { args: ['db:migrate'], command: 'pnpm', cwd: reviewFolder, label: 'Run the migrations' },
     { args: ['db:seed'], command: 'pnpm', cwd: reviewFolder, label: 'Run the seed' },
   ]
 }
 
-/** The environment for the commands in the review folder, without what pnpm set for this script in the repository. */
+/**
+ * The environment for the commands in the review folder, without what pnpm set for this script
+ * in the repository.
+ */
 export function cleanEnv(env) {
   const inFolder = (folder) => folder.split(path.sep).includes('node_modules')
 
@@ -366,7 +397,10 @@ export function foreignMessage(foreign) {
 /** The address of a server, on this computer, with the path of a page on it. */
 export const addressOf = ({ port }, pathname = '') => `http://localhost:${port}${pathname}`
 
-/** The command that opens an address in the default browser, or nothing on a system we don't know. */
+/**
+ * The command that opens an address in the default browser, or nothing on a system we don't
+ * know.
+ */
 export function openCommand(platform, address) {
   if (platform === 'darwin') {
     return { args: [address], command: 'open' }
@@ -375,7 +409,10 @@ export function openCommand(platform, address) {
   return platform === 'linux' ? { args: [address], command: 'xdg-open' } : undefined
 }
 
-/** What `pnpm review` prints once both servers answer. `addresses` are the pages it opens, as [label, address]. */
+/**
+ * What `pnpm review` prints once both servers answer. `addresses` are the pages it opens, as
+ * [label, address].
+ */
 export function summarise({ addresses, branch, commit, logFile, pullRequest, source }) {
   const rows = [
     ['Branch', branch],
@@ -397,7 +434,10 @@ const sameFolder = (a, b) => existsSync(a) && existsSync(b) && realpathSync(a) =
 
 const repositoryFolder = path.resolve(import.meta.dirname, '..')
 
-/** Runs a command and gives what it printed. When it fails, it throws a ReviewError that says `failure` and why. */
+/**
+ * Runs a command and gives what it printed. When it fails, it throws a ReviewError that says
+ * `failure` and why.
+ */
 function capture(command, args, { cwd, failure }) {
   const { error, status, stderr, stdout } = spawnSync(command, args, { cwd, encoding: 'utf8' })
 
@@ -439,7 +479,10 @@ const worktreesOf = (mainFolder) =>
     capture('git', ['worktree', 'list', '--porcelain'], { cwd: mainFolder, failure: 'Could not list the worktrees.' }),
   ).map((folder) => (existsSync(folder) ? realpathSync(folder) : folder))
 
-/** Who holds the ports: per server, the processes that are the fansite's own and those that are not. */
+/**
+ * Who holds the ports: per server, the processes that are the fansite's own and those that are
+ * not.
+ */
 function inspectPorts(worktrees) {
   return servers.map((server) => {
     const holders = pidsOnPort(server.port).map(holderOf)
@@ -475,7 +518,10 @@ function run(step) {
   }
 }
 
-/** Stops one of our own servers. Next.js and Storybook take their wrappers (pnpm, sh) with them when they end. */
+/**
+ * Stops one of our own servers. Next.js and Storybook take their wrappers (pnpm, sh) with them
+ * when they end.
+ */
 async function stopHolder({ pid }, { port }) {
   process.kill(pid, 'SIGTERM')
 
@@ -525,7 +571,9 @@ const findMainFolder = () =>
     }),
   )
 
-/** Checks the review folder before anything changes. It gives whether the folder exists already. */
+/**
+ * Checks the review folder before anything changes. It gives whether the folder exists already.
+ */
 function checkReviewFolder(reviewFolder, worktrees) {
   if (!existsSync(reviewFolder)) {
     return false
@@ -568,8 +616,9 @@ async function fetchStorybookEntries() {
 }
 
 /**
- * Looks up the branch of a pull request, then gives the commit to show: for a pull request the latest on GitHub, for a
- * branch name the one on this computer when there is one (so commits that aren't pushed show too), else the one on GitHub.
+ * Looks up the branch of a pull request, then gives the commit to show: for a pull request the
+ * latest on GitHub, for a branch name the one on this computer when there is one (so commits
+ * that aren't pushed show too), else the one on GitHub.
  */
 function findBranch(target, mainFolder) {
   let pullRequest
@@ -593,7 +642,8 @@ function findBranch(target, mainFolder) {
   let fetched = true
 
   try {
-    // The refspec names a branch, so a tag of the same name can't win, and it fills in no local branch.
+    // The refspec names a branch, so a tag of the same name can't win, and it fills in no local
+    // branch.
     capture('git', ['fetch', '--quiet', 'origin', `+refs/heads/${branch}:refs/remotes/origin/${branch}`], {
       cwd: mainFolder,
       failure: `Could not fetch the branch ${branch} from GitHub. Is it pushed, and not deleted after a merge?`,
@@ -626,7 +676,8 @@ function findBranch(target, mainFolder) {
   })
 
   if (pullRequest === undefined) {
-    // The pull request is a bonus here. Without gh, or without a pull request, we show the branch alone.
+    // The pull request is a bonus here. Without gh, or without a pull request, we show the
+    // branch alone.
     try {
       const json = capture(
         'gh',
@@ -642,9 +693,13 @@ function findBranch(target, mainFolder) {
   return { branch, commit, pullRequest, source }
 }
 
-/** The files the commit changes compared with main, and every file of the site's app folder at the commit. */
+/**
+ * The files the commit changes compared with main, and every file of the site's app folder at
+ * the commit.
+ */
 function findChanges(commit, mainFolder) {
-  // Best effort: offline, the main we have is good enough, and without any the pages just start at the top.
+  // Best effort: offline, the main we have is good enough, and without any the pages just start
+  // at the top.
   tryCapture('git', ['fetch', '--quiet', 'origin', '+refs/heads/main:refs/remotes/origin/main'], mainFolder)
 
   for (const base of ['refs/remotes/origin/main', 'refs/heads/main']) {
@@ -699,7 +754,8 @@ async function review(argument) {
   const failure = await startServers({ branch, logFile, reviewFolder })
 
   if (failure !== undefined) {
-    // The review folder is a worktree now, so the servers that did start are found by their folder.
+    // The review folder is a worktree now, so the servers that did start are found by their
+    // folder.
     await stopOwn(inspectPorts(worktreesOf(mainFolder)))
     const end = readFileSync(logFile, 'utf8').trimEnd().split('\n').slice(-15).join('\n')
 
@@ -719,8 +775,9 @@ async function review(argument) {
   ]
   console.log(`\n${summarise({ addresses, branch, commit: subject, logFile, pullRequest, source })}`)
 
-  // The browser is a convenience: when it doesn't open, the addresses above still work. The opener runs on its own, so
-  // an xdg-open that stays until the browser closes doesn't hold up this command, and a missing opener isn't an error.
+  // The browser is a convenience: when it doesn't open, the addresses above still work. The
+  // opener runs on its own, so an xdg-open that stays until the browser closes doesn't hold up
+  // this command, and a missing opener isn't an error.
   for (const [, address] of addresses) {
     const opener = openCommand(process.platform, address)
 
@@ -733,7 +790,10 @@ async function review(argument) {
   }
 }
 
-/** Starts both servers in the background and waits until they answer. It gives a message when one doesn't. */
+/**
+ * Starts both servers in the background and waits until they answer. It gives a message when
+ * one doesn't.
+ */
 async function startServers({ branch, logFile, reviewFolder }) {
   const logFd = openSync(logFile, 'w')
   const started = servers.map((server) => {
@@ -793,7 +853,8 @@ async function stop() {
   }
 }
 
-// `import.meta.main` only exists from Node 24.2, and engines allows 24.0 and 24.1 too, so compare the paths ourselves.
+// `import.meta.main` only exists from Node 24.2, and engines allows 24.0 and 24.1 too, so
+// compare the paths ourselves.
 if (process.argv[1] !== undefined && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     await (process.argv[2] === '--stop' ? stop() : review(process.argv[2]))

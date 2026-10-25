@@ -8,7 +8,10 @@ import { buildConnector } from 'undici'
 /** Finds the addresses of a host name, as `lookup` of `node:dns` does with `all: true`. */
 export type Resolve = (hostname: string, options: LookupOptions) => Promise<LookupAddress[]>
 
-/** Raised while connecting to an address that is not on the public internet, so the fetcher can say so. */
+/**
+ * Raised while connecting to an address that is not on the public internet, so the fetcher can
+ * say so.
+ */
 export class PrivateAddressError extends Error {
   override name = 'PrivateAddressError'
 }
@@ -17,8 +20,8 @@ export class PrivateAddressError extends Error {
 export const resolveInDns: Resolve = (hostname, options) => lookup(hostname, { ...options, all: true })
 
 /**
- * The IPv4 addresses that are not on the public internet, from the IANA registry of special-purpose addresses
- * (RFC 6890).
+ * The IPv4 addresses that are not on the public internet, from the IANA registry of
+ * special-purpose addresses (RFC 6890).
  */
 const notPublicIpv4 = new BlockList()
 
@@ -43,11 +46,13 @@ for (const [network, prefix] of [
 }
 
 /**
- * The IPv6 addresses that are not on the public internet. Only global unicast, `2000::/3`, is public, so the first
- * three ranges are everything else: unspecified, loopback, an IPv4 address in IPv6 form (`::ffff:0:0/96` and NAT64),
- * unique local, link-local, multicast and what is reserved. The others are the special ranges inside `2000::/3`.
+ * The IPv6 addresses that are not on the public internet. Only global unicast, `2000::/3`, is
+ * public, so the first three ranges are everything else: unspecified, loopback, an IPv4 address
+ * in IPv6 form (`::ffff:0:0/96` and NAT64), unique local, link-local, multicast and what is
+ * reserved. The others are the special ranges inside `2000::/3`.
  *
- * A list of its own, because a `BlockList` also checks an IPv4 address against the IPv6 ranges, in its IPv6 form.
+ * A list of its own, because a `BlockList` also checks an IPv4 address against the IPv6 ranges,
+ * in its IPv6 form.
  */
 const notPublicIpv6 = new BlockList()
 
@@ -64,11 +69,13 @@ for (const [network, prefix] of [
 }
 
 /**
- * Makes the connections of a fetcher, and refuses an address that is not on the public internet. It checks the address
- * it really connects to: the address in the URL, or each address of the name at the moment of connecting. A check of
- * the name before the request would miss a name that points elsewhere by the time we connect.
+ * Makes the connections of a fetcher, and refuses an address that is not on the public
+ * internet. It checks the address it really connects to: the address in the URL, or each
+ * address of the name at the moment of connecting. A check of the name before the request would
+ * miss a name that points elsewhere by the time we connect.
  *
- * `testOrigins` are origins it connects to without a check, for a test with a web server of its own on this computer.
+ * `testOrigins` are origins it connects to without a check, for a test with a web server of its
+ * own on this computer.
  */
 export function checkedConnector(resolve: Resolve, testOrigins: string[]): buildConnector.connector {
   // HTTP/1.1, as the `fetch` of Node itself. undici would also offer HTTP/2.
@@ -81,8 +88,8 @@ export function checkedConnector(resolve: Resolve, testOrigins: string[]): build
       connectUnchecked(options, callback)
       return
     }
-    // `net.connect` asks no lookup for an address, so an address in the URL is checked here. undici gives an IPv6
-    // address without its brackets.
+    // `net.connect` asks no lookup for an address, so an address in the URL is checked here.
+    // undici gives an IPv6 address without its brackets.
     if (isIP(options.hostname) !== 0 && !isPublicAddress(options.hostname)) {
       callback(new PrivateAddressError(`${options.hostname} is not on the public internet`), null)
       return
@@ -92,8 +99,9 @@ export function checkedConnector(resolve: Resolve, testOrigins: string[]): build
 }
 
 /**
- * A lookup for `net.connect` that refuses a name with an address that is not on the public internet. One such address
- * is enough: we don't pick the good ones from a name that also points into a network of its own.
+ * A lookup for `net.connect` that refuses a name with an address that is not on the public
+ * internet. One such address is enough: we don't pick the good ones from a name that also
+ * points into a network of its own.
  */
 export function checkedLookup(resolve: Resolve): LookupFunction {
   return (hostname, options, callback) => {
@@ -121,8 +129,9 @@ export function checkedLookup(resolve: Resolve): LookupFunction {
 }
 
 /**
- * Whether an address is on the public internet. Anything else, such as `127.0.0.1`, `10.0.0.1`, `169.254.169.254`,
- * `::1` or `::ffff:127.0.0.1`, is on a network of its own, and so is text that is not an address.
+ * Whether an address is on the public internet. Anything else, such as `127.0.0.1`, `10.0.0.1`,
+ * `169.254.169.254`, `::1` or `::ffff:127.0.0.1`, is on a network of its own, and so is text
+ * that is not an address.
  */
 export function isPublicAddress(address: string): boolean {
   switch (isIP(address)) {

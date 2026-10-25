@@ -61,8 +61,8 @@ const meta = preview.meta({
   title: 'Componenten/NewsItem',
 })
 
-// The width of the container, not of the window, decides how a line looks: a wide column such as the main column of a
-// page, and a narrow one such as a phone or the sidebar.
+// The width of the container, not of the window, decides how a line looks: a wide column such
+// as the main column of a page, and a narrow one such as a phone or the sidebar.
 const renderIn = (maxInlineSize: string) => () => (
   <div style={{ maxInlineSize }}>
     <Card aria-labelledby="nieuws-kop">
@@ -140,8 +140,9 @@ export const NarrowDark = meta.story({
   render: renderNarrow,
 })
 
-// A headline is only underlined under the mouse and with the focus of the keyboard, so those states are imitated: the
-// first headline is under the mouse, the second has the focus and the third has been visited.
+// A headline is only underlined under the mouse and with the focus of the keyboard, so those
+// states are imitated: the first headline is under the mouse, the second has the focus and the
+// third has been visited.
 const stateParameters = {
   docs: {
     description: {

@@ -27,7 +27,8 @@ const defaultCertificates = tls.getCACertificates('default')
 const servers: net.Server[] = []
 
 beforeAll(() => {
-  // A certificate for 127.0.0.1 that only this test trusts, made here so no private key sits in the repository.
+  // A certificate for 127.0.0.1 that only this test trusts, made here so no private key sits in
+  // the repository.
   folder = mkdtempSync(path.join(tmpdir(), 'fansite-mail-'))
   execFileSync(
     'openssl',
@@ -82,8 +83,8 @@ function headerOf(data: string, name: string) {
 }
 
 /**
- * A mail server on this computer that keeps what it is sent, so no real mail leaves the test. It speaks just enough SMTP
- * for sendMail: STARTTLS, AUTH PLAIN and one mail per connection.
+ * A mail server on this computer that keeps what it is sent, so no real mail leaves the test.
+ * It speaks just enough SMTP for sendMail: STARTTLS, AUTH PLAIN and one mail per connection.
  */
 async function startFakeServer({ recipientReply = '250 OK', startTls = true }: FakeServerOptions = {}) {
   const received: Received[] = []

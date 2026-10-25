@@ -8,10 +8,12 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
-// Code that runs in a visitor's browser: the design system, and the site. Next.js server components are included on
-// purpose: until the site has a way to tell client files apart, we check too much rather than too little.
+// Code that runs in a visitor's browser: the design system, and the site. Next.js server
+// components are included on purpose: until the site has a way to tell client files apart, we
+// check too much rather than too little.
 const browserFiles = ['packages/design-system/**/*.{ts,tsx}', 'apps/site/src/**/*.{ts,tsx}']
-// Code that only runs on the server, during the build or in a test. Add a file here when it never reaches the browser.
+// Code that only runs on the server, during the build or in a test. Add a file here when it
+// never reaches the browser.
 const notBrowserFiles = [
   '**/*.config.{js,ts}',
   '**/*.test.{ts,tsx}',
@@ -63,8 +65,9 @@ export default defineConfig([
     name: 'fansite/node',
   },
   {
-    // Only Baseline widely available features (see packages/design-system/README.md). The type-aware preset also
-    // checks methods on objects, such as screen.orientation.lock(), and needs the project's types for that.
+    // Only Baseline widely available features (see packages/design-system/README.md). The
+    // type-aware preset also checks methods on objects, such as screen.orientation.lock(), and
+    // needs the project's types for that.
     files: browserFiles,
     ignores: notBrowserFiles,
     languageOptions: {
@@ -87,7 +90,8 @@ export default defineConfig([
     },
   },
   {
-    // The order of the columns is the order of the table, and it reads best grouped by what a column is for.
+    // The order of the columns is the order of the table, and it reads best grouped by what a
+    // column is for.
     files: ['packages/db/src/schema.ts'],
     name: 'fansite/database-schema',
     rules: {
@@ -95,9 +99,10 @@ export default defineConfig([
     },
   },
   {
-    // The site's templates hold no HTML, only components from the design system (see docs/beslissingen.md). In JSX a
-    // lowercase name is an HTML or SVG element, and a capitalised one a component. This covers every component in the
-    // site, so a page can't move its HTML into a component of its own.
+    // The site's templates hold no HTML, only components from the design system (see
+    // docs/beslissingen.md). In JSX a lowercase name is an HTML or SVG element, and a
+    // capitalised one a component. This covers every component in the site, so a page can't
+    // move its HTML into a component of its own.
     files: ['apps/site/src/**/*.tsx'],
     ignores: ['**/*.test.tsx'],
     name: 'fansite/site-templates',
@@ -119,4 +124,15 @@ export default defineConfig([
   storybook.configs['flat/recommended'],
   // Last, so Prettier owns formatting.
   prettier,
+  {
+    // Prettier wraps code but never comments, so comments stop at 96 characters, the
+    // indentation and the comment marker included. After Prettier because
+    // eslint-config-prettier turns max-len off; code lines are Prettier's, so they get a limit
+    // that only a runaway line reaches.
+    files: ['**/*.{js,ts,tsx}'],
+    name: 'fansite/comment-width',
+    rules: {
+      'max-len': ['error', { code: 1000, comments: 96, ignoreUrls: true }],
+    },
+  },
 ])

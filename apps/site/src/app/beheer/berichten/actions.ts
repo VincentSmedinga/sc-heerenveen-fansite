@@ -8,13 +8,15 @@ import { requireRole } from '../../../beheer/require-role'
 import { getDatabase } from '../../../database'
 import { itemsPath } from './paths'
 
-// The actions of the list of items. The page binds the number of the item and the search to the action
-// (`submitHide.bind(null, id, search)`), which Next.js keeps encrypted in the form. They are input from outside all the same,
-// so each is checked again. A form that sends nothing wrong ends on the list, with a notice: it works without JavaScript.
+// The actions of the list of items. The page binds the number of the item and the search to the
+// action (`submitHide.bind(null, id, search)`), which Next.js keeps encrypted in the form. They
+// are input from outside all the same, so each is checked again. A form that sends nothing
+// wrong ends on the list, with a notice: it works without JavaScript.
 
 /**
- * Hides an item with the reason from the form. Without a reason, or with one that is too long, nothing happens and the list
- * shows the error at the item. The item is gone from the site within five minutes (see `src/headlines.ts` and `src/podcasts.ts`).
+ * Hides an item with the reason from the form. Without a reason, or with one that is too long,
+ * nothing happens and the list shows the error at the item. The item is gone from the site
+ * within five minutes (see `src/headlines.ts` and `src/podcasts.ts`).
  */
 export async function submitHide(itemId: number, search: string, formData: FormData) {
   const { userId } = await requireRole(...adminRoles)

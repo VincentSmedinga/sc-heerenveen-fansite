@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest'
 // Without the comments, which mention env() in words.
 const css = readFileSync(join(import.meta.dirname, 'page.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
-// jsdom doesn't apply rules in a cascade layer to an element and has no safe area, so the test reads the text of the file.
+// jsdom doesn't apply rules in a cascade layer to an element and has no safe area, so the test
+// reads the text of the file.
 describe('the safe area insets in page.css', () => {
   const uses = [...css.matchAll(/env\(\s*safe-area-inset-[a-z]+[^)]*\)/g)].map(([use]) => use)
 
@@ -24,7 +25,8 @@ describe('the safe area insets in page.css', () => {
   })
 
   it('puts every inset that adds to a margin inside max(), so it can only add room and never take any away', () => {
-    // Remove each max(…) that holds an env(). What is left is the strip, which is as tall as the inset and no more.
+    // Remove each max(…) that holds an env(). What is left is the strip, which is as tall as
+    // the inset and no more.
     const rest = css.replace(/max\([^;{}]*?env\(safe-area-inset-[a-z]+, 0px\)\)/g, '')
 
     expect([...rest.matchAll(/([a-z-]+):[^;]*env\(/g)].map(([, property]) => property)).toEqual(['block-size'])

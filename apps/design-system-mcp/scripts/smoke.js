@@ -1,7 +1,9 @@
-// Starts the bundle the way the host does, twice, in a folder laid out like domains/ds.heerenveen.org/ with the Storybook
-// build as public_html next to the app, and checks the answers against that build. Two processes, because the host may
-// start more than one: a client that starts on one and carries on on the other must not notice. CI runs this on the build
-// it is about to deploy, so an app that doesn't start or can't read the manifests never leaves the runner.
+// Starts the bundle the way the host does, twice, in a folder laid out like
+// domains/ds.heerenveen.org/ with the Storybook build as public_html next to the app, and
+// checks the answers against that build. Two processes, because the host may start more than
+// one: a client that starts on one and carries on on the other must not notice. CI runs this on
+// the build it is about to deploy, so an app that doesn't start or can't read the manifests
+// never leaves the runner.
 //
 //   pnpm --filter @fansite/design-system-mcp build
 //   node scripts/smoke.js <folder of the Storybook build>
@@ -31,7 +33,8 @@ try {
   await cp(path.resolve(import.meta.dirname, '../dist/server.mjs'), path.join(site, 'mcp/server.mjs'))
   await cp(path.resolve(storybookDir), path.join(site, 'public_html'), { recursive: true })
 
-  // No STORYBOOK_DIR: the app finds the document root next to its own folder, as it must on the host.
+  // No STORYBOOK_DIR: the app finds the document root next to its own folder, as it must on the
+  // host.
   const env = { ...process.env }
   delete env['STORYBOOK_DIR']
 

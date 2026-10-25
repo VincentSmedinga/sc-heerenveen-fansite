@@ -3,17 +3,20 @@ import { readDatabaseEnv } from '@fansite/db/env'
 import { feeds, items, sources } from '@fansite/db/schema'
 import path from 'node:path'
 
-/** A made-up item: on which test source, how long before the check started, and what it says. */
+/**
+ * A made-up item: on which test source, how long before the check started, and what it says.
+ */
 type Row = { domain: string; hoursAgo: number; paywalled?: boolean; source: string; title: string }
 
 /**
- * Made-up headlines for the checks of the homepage. They are not in the seed: the seed also runs on acceptance, where
- * they would mix with the real items of the Leeuwarder Courant. The check puts them in the database before the first
- * test and takes them out after the last one.
+ * Made-up headlines for the checks of the homepage. They are not in the seed: the seed also
+ * runs on acceptance, where they would mix with the real items of the Leeuwarder Courant. The
+ * check puts them in the database before the first test and takes them out after the last one.
  *
- * They are in the form of real headlines, on the made-up test sources of the seed. The times are counted back from the
- * moment the check starts. The homepage shows the first ten, and the button under them; `/?nieuws=15` shows all eleven and
- * no button. The first seven are from the last six days and show a weekday; the last four are older and show a date.
+ * They are in the form of real headlines, on the made-up test sources of the seed. The times
+ * are counted back from the moment the check starts. The homepage shows the first ten, and the
+ * button under them; `/?nieuws=15` shows all eleven and no button. The first seven are from the
+ * last six days and show a weekday; the last four are older and show a date.
  */
 export const headlines: { madeUp: Row[] } = {
   madeUp: [
@@ -91,14 +94,18 @@ export const headlines: { madeUp: Row[] } = {
   ],
 }
 
-/** The feeds of the made-up items. A feed that the importer would read must not outlast the check, so it is easy to recognise. */
+/**
+ * The feeds of the made-up items. A feed that the importer would read must not outlast the
+ * check, so it is easy to recognise.
+ */
 const feedPath = '/e2e-a11y/rss/'
 
 const rows: Row[] = headlines.madeUp
 
 /**
- * Puts the made-up headlines in the database and returns the function that takes them out again. The site must have
- * started already: it makes the tables and puts the test sources in (SITE_ENV=acceptance).
+ * Puts the made-up headlines in the database and returns the function that takes them out
+ * again. The site must have started already: it makes the tables and puts the test sources in
+ * (SITE_ENV=acceptance).
  */
 export async function addHeadlines() {
   const { close, db, pool } = connectToDatabase()
@@ -153,7 +160,10 @@ export async function addHeadlines() {
   }
 }
 
-/** Connects with the DATABASE_URL of the environment or the .env in the root, like the server of the check does. */
+/**
+ * Connects with the DATABASE_URL of the environment or the .env in the root, like the server of
+ * the check does.
+ */
 function connectToDatabase() {
   try {
     process.loadEnvFile(path.resolve(import.meta.dirname, '../../../.env'))

@@ -37,7 +37,10 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()))
 })
 
-/** Starts a web server on this computer with a feed at `/rss/`, and puts the feed in the register. */
+/**
+ * Starts a web server on this computer with a feed at `/rss/`, and puts the feed in the
+ * register.
+ */
 async function addFeed(domain: string, answer: ReturnType<typeof reply>) {
   const server = await startServer({ '/rss/': answer })
 
@@ -51,8 +54,9 @@ async function addFeed(domain: string, answer: ReturnType<typeof reply>) {
 }
 
 /**
- * Runs the import as the command does, with a fetcher that may reach the test servers. The command itself refuses them:
- * they are on this computer. Returns the exit code and what the command would print.
+ * Runs the import as the command does, with a fetcher that may reach the test servers. The
+ * command itself refuses them: they are on this computer. Returns the exit code and what the
+ * command would print.
  */
 async function importFromTestServers() {
   const lines: string[] = []
@@ -64,7 +68,10 @@ async function importFromTestServers() {
   return { code, stdout: `${lines.join('\n')}\n` }
 }
 
-/** Runs `pnpm run import` the way it starts: as its own process, with the database from the environment. */
+/**
+ * Runs `pnpm run import` the way it starts: as its own process, with the database from the
+ * environment.
+ */
 async function runCommand(
   env: Record<string, string | undefined> = { DATABASE_URL: database.url },
   args: string[] = [],

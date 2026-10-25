@@ -1,7 +1,8 @@
-// Makes public/share-image.png, the picture that a shared link shows (see shareImage in src/pages.ts): the shield of the
-// site, from the logo of the design system, in the middle of a 1200 by 630 picture on the dark blue of the header. It
-// draws the SVG in the Chromium of Playwright and takes a screenshot, so it needs no dependency of its own. Run it again
-// only when the logo changes, and commit the new PNG.
+// Makes public/share-image.png, the picture that a shared link shows (see shareImage in
+// src/pages.ts): the shield of the site, from the logo of the design system, in the middle of a
+// 1200 by 630 picture on the dark blue of the header. It draws the SVG in the Chromium of
+// Playwright and takes a screenshot, so it needs no dependency of its own. Run it again only
+// when the logo changes, and commit the new PNG.
 //
 //   pnpm --filter site share-image
 import { chromium } from '@playwright/test'

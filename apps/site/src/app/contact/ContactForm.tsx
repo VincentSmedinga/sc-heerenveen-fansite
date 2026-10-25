@@ -23,7 +23,9 @@ import { sendContactMessage } from './actions'
 const summaryId = 'fouten'
 const failureId = 'mislukt'
 
-/** The failure that is not about one field: the mail did not go, or too many messages came in. */
+/**
+ * The failure that is not about one field: the mail did not go, or too many messages came in.
+ */
 const Failure = ({ failure }: { failure: 'limit' | 'send' }) => (
   <Card aria-labelledby={`${failureId}-kop`} id={failureId} surface="soft" tabIndex={-1}>
     <Heading id={`${failureId}-kop`} level={2}>
@@ -36,8 +38,9 @@ const Failure = ({ failure }: { failure: 'limit' | 'send' }) => (
   </Card>
 )
 
-// The form of the page Contact. It is a client component only to show what the server says: the form is a plain POST that
-// works without JavaScript, and with JavaScript the page doesn't reload.
+// The form of the page Contact. It is a client component only to show what the server says: the
+// form is a plain POST that works without JavaScript, and with JavaScript the page doesn't
+// reload.
 export function ContactForm() {
   const [state, action] = useActionState<ContactState, FormData>(sendContactMessage, emptyState)
   const { errors, failure, values } = state
@@ -47,8 +50,9 @@ export function ContactForm() {
     return message === undefined ? [] : [{ id: name, message }]
   })
 
-  // After a submit the visitor must hear what is wrong. Without JavaScript the page loads again and the screen reader
-  // starts at the top, with JavaScript the focus goes to the block, because the page doesn't change.
+  // After a submit the visitor must hear what is wrong. Without JavaScript the page loads again
+  // and the screen reader starts at the top, with JavaScript the focus goes to the block,
+  // because the page doesn't change.
   useEffect(() => {
     const hasErrors = fieldNames.some((name) => state.errors[name] !== undefined)
 

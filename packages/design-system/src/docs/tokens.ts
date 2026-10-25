@@ -1,6 +1,7 @@
 /*
  * Metadata for the token docs: Dutch names, intended use and the pairs whose contrast we check.
- * The values themselves are read from the CSS at runtime, so the docs can't drift from the tokens.
+ * The values themselves are read from the CSS at runtime, so the docs can't drift from the
+ * tokens.
  */
 
 export const scaleSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const

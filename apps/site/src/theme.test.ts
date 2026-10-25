@@ -117,7 +117,8 @@ describe('chooseTheme', () => {
 
 describe('applyPreference', () => {
   const page = (colour = '') => {
-    // The document of the test itself: only a document with a window can work out the colour of the header.
+    // The document of the test itself: only a document with a window can work out the colour of
+    // the header.
     const doc = document
 
     doc.documentElement.removeAttribute('data-theme')

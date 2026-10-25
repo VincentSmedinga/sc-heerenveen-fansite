@@ -1,8 +1,10 @@
-// Starts the built site the way the host does and checks what a visitor and a search engine get. CI runs it on the
-// folder it is about to deploy, so a broken copy never leaves the runner.
+// Starts the built site the way the host does and checks what a visitor and a search engine
+// get. CI runs it on the folder it is about to deploy, so a broken copy never leaves the
+// runner.
 //
-// The site makes its own tables when it starts, so each run that needs a database gets an empty one, made on the server
-// in DATABASE_URL and dropped afterwards. That also proves that the folder holds the migrations.
+// The site makes its own tables when it starts, so each run that needs a database gets an empty
+// one, made on the server in DATABASE_URL and dropped afterwards. That also proves that the
+// folder holds the migrations.
 //
 //   node scripts/smoke.js <folder with apps/site/server.js>
 import { connect } from '@fansite/db/client'
@@ -34,7 +36,8 @@ if (databaseUrl === undefined) {
 
 const port = process.env['SMOKE_PORT'] ?? '3123'
 const origin = `http://127.0.0.1:${port}`
-// Made-up settings of the mail server, for the servers that need them to start. Nothing here sends mail.
+// Made-up settings of the mail server, for the servers that need them to start. Nothing here
+// sends mail.
 const smtpSettings = {
   MAIL_FROM: 'Smoke <smoke@example.org>',
   SMTP_HOST: 'localhost',
@@ -44,21 +47,24 @@ const smtpSettings = {
 }
 const serverFile = path.resolve(folder, 'apps/site/server.js')
 
-// The versions Updates must show: those in the CHANGELOG.md of this checkout that have Dutch sentences. The bundler
-// puts the file into the build, and the page shows nothing when that fails, so the smoke test compares the two. Before
-// the first release there is no file and no version.
+// The versions Updates must show: those in the CHANGELOG.md of this checkout that have Dutch
+// sentences. The bundler puts the file into the build, and the page shows nothing when that
+// fails, so the smoke test compares the two. Before the first release there is no file and no
+// version.
 const changelogFile = path.resolve(import.meta.dirname, '../../../CHANGELOG.md')
 const releases = releasesOf(existsSync(changelogFile) ? readFileSync(changelogFile, 'utf8') : '', releaseNotes)
 
-// The layers of the design system, from weak to strong, as layers.css declares them. The build must keep that order.
+// The layers of the design system, from weak to strong, as layers.css declares them. The build
+// must keep that order.
 const layersFile = path.resolve(import.meta.dirname, '../../../packages/design-system/src/layers.css')
 const declaredLayers = layersIn(readFileSync(layersFile, 'utf8'))
 assert.ok(declaredLayers.length > 0, 'layers.css declares no layers')
 
 /**
- * Checks what the admin sends on this environment, whichever it is: a visitor without a session goes to the login page, and
- * every response under /beheer, a redirect too, keeps search engines and caches away and sends no referrer. Returns the
- * responses of the login pages, so the caller can look at more.
+ * Checks what the admin sends on this environment, whichever it is: a visitor without a session
+ * goes to the login page, and every response under /beheer, a redirect too, keeps search
+ * engines and caches away and sends no referrer. Returns the responses of the login pages, so
+ * the caller can look at more.
  */
 async function checkAdmin() {
   const admin = await fetch(`${origin}/beheer`, { redirect: 'manual' })
@@ -83,7 +89,8 @@ async function checkAdmin() {
 
   for (const response of [...responses, await fetch(`${origin}/beheer/bestaat-niet`)]) {
     assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow', response.url)
-    // Next.js sends a longer value of its own for a page it renders on each request (`private, no-cache, no-store, ...`).
+    // Next.js sends a longer value of its own for a page it renders on each request (`private,
+    // no-cache, no-store, ...`).
     assert.match(response.headers.get('cache-control') ?? '', /(?:^|,\s*)no-store(?:,|$)/, response.url)
     assert.equal(response.headers.get('referrer-policy'), 'same-origin', response.url)
     assert.equal(response.headers.get('set-cookie'), null, `${response.url} sets a cookie without a login`)
@@ -95,7 +102,10 @@ async function checkAdmin() {
   return responses
 }
 
-/** Fetches the feed of Updates and checks it: RSS, an item per version, and links to the site in `siteOrigin`. */
+/**
+ * Fetches the feed of Updates and checks it: RSS, an item per version, and links to the site in
+ * `siteOrigin`.
+ */
 async function checkFeed(siteOrigin) {
   const feed = await fetch(`${origin}/updates/feed.xml`)
   const xml = await feed.text()
@@ -113,9 +123,9 @@ async function checkFeed(siteOrigin) {
 }
 
 /**
- * Checks that the site serves the manifest and the icons itself, with the right type, and that they are what the manifest
- * says: PNGs of the sizes in the manifest, and an icon file that starts with an icon header. Returns the responses, so the
- * caller can check their headers.
+ * Checks that the site serves the manifest and the icons itself, with the right type, and that
+ * they are what the manifest says: PNGs of the sizes in the manifest, and an icon file that
+ * starts with an icon header. Returns the responses, so the caller can check their headers.
  */
 async function checkIcons() {
   const manifestResponse = await fetch(`${origin}/manifest.webmanifest`)
@@ -168,8 +178,9 @@ async function checkIcons() {
 }
 
 /**
- * Checks that the page links to the manifest and the icons, which come from our own server, and that the browser gets the
- * colours of the header and the short name for the home screen of an iPhone.
+ * Checks that the page links to the manifest and the icons, which come from our own server, and
+ * that the browser gets the colours of the header and the short name for the home screen of an
+ * iPhone.
  */
 function checkIconTags(path, html) {
   assert.match(html, /<link rel="manifest" href="\/manifest\.webmanifest"/, path)
@@ -186,9 +197,10 @@ function checkIconTags(path, html) {
 }
 
 /**
- * Checks that a page gives the layers of the design system their declared order. A browser orders the layers by their
- * first appearance, across all the stylesheets of the page in the order of the links. So the statement with the order
- * must come before the first block of any layer. The bundler once put it at the end, and typography beat the components.
+ * Checks that a page gives the layers of the design system their declared order. A browser
+ * orders the layers by their first appearance, across all the stylesheets of the page in the
+ * order of the links. So the statement with the order must come before the first block of any
+ * layer. The bundler once put it at the end, and typography beat the components.
  */
 async function checkLayerOrder(pageUrl, html) {
   const links = html.match(/<link\b[^>]*>/gi) ?? []
@@ -208,8 +220,9 @@ async function checkLayerOrder(pageUrl, html) {
 }
 
 /**
- * Checks the tags of a page for search engines and for shared links: the description, the canonical URL and the Open
- * Graph tags with the address of `siteOrigin`, and a picture that comes from that same domain and that the site serves.
+ * Checks the tags of a page for search engines and for shared links: the description, the
+ * canonical URL and the Open Graph tags with the address of `siteOrigin`, and a picture that
+ * comes from that same domain and that the site serves.
  */
 async function checkMetaTags(path, html, siteOrigin) {
   const url = `${siteOrigin}${path}`
@@ -246,8 +259,9 @@ async function checkShareImage() {
 }
 
 /**
- * Fetches the sitemap and checks it: the pages of the site, each with the address of `siteOrigin`, and nothing but the
- * addresses (no lastmod, changefreq or priority). The feed of Updates is not a page, so it is not in it.
+ * Fetches the sitemap and checks it: the pages of the site, each with the address of
+ * `siteOrigin`, and nothing but the addresses (no lastmod, changefreq or priority). The feed of
+ * Updates is not a page, so it is not in it.
  */
 async function checkSitemap(siteOrigin) {
   const sitemap = await fetch(`${origin}/sitemap.xml`)
@@ -263,7 +277,10 @@ async function checkSitemap(siteOrigin) {
   return sitemap
 }
 
-/** Lists the names of the cascade layers in some CSS, in the order they first appear in a statement or a block. */
+/**
+ * Lists the names of the cascade layers in some CSS, in the order they first appear in a
+ * statement or a block.
+ */
 function layersIn(css) {
   const layers = []
 
@@ -279,12 +296,13 @@ function layersIn(css) {
 }
 
 /**
- * Finds every address a page loads by itself: scripts, stylesheets, fonts, images, media and frames, in the HTML and in
- * the stylesheets it links. A link to another site (`<a href>`) isn't loaded until a visitor follows it, so it isn't
- * one of them.
+ * Finds every address a page loads by itself: scripts, stylesheets, fonts, images, media and
+ * frames, in the HTML and in the stylesheets it links. A link to another site (`<a href>`)
+ * isn't loaded until a visitor follows it, so it isn't one of them.
  */
 async function loadedUrls(pageUrl, html) {
-  // The canonical URL names the page itself, with the address of the environment. A browser doesn't load it.
+  // The canonical URL names the page itself, with the address of the environment. A browser
+  // doesn't load it.
   const tags = (html.match(/<(?:audio|embed|iframe|img|link|object|script|source|track|video)\b[^>]*>/gi) ?? []).filter(
     (tag) => !/\srel="canonical"/i.test(tag),
   )
@@ -321,7 +339,10 @@ async function waitUntilUp(server) {
   assert.fail('the server did not answer within 30 seconds')
 }
 
-/** Makes an empty database on the server in DATABASE_URL, runs the checks with its address and always drops it again. */
+/**
+ * Makes an empty database on the server in DATABASE_URL, runs the checks with its address and
+ * always drops it again.
+ */
 async function withEmptyDatabase(checks) {
   const server = new URL(databaseUrl)
   server.pathname = ''
@@ -344,9 +365,9 @@ async function withEmptyDatabase(checks) {
 }
 
 /**
- * Starts the server with the given SITE_ENV (or none), database and, unless `smtp` is false, made-up mail settings, runs
- * the checks and always stops the server again. The checks get the server and a function that returns what the server has
- * written to its log so far.
+ * Starts the server with the given SITE_ENV (or none), database and, unless `smtp` is false,
+ * made-up mail settings, runs the checks and always stops the server again. The checks get the
+ * server and a function that returns what the server has written to its log so far.
  */
 async function withServer({ database, siteEnv, smtp = true }, checks) {
   const env = { ...process.env, DATABASE_URL: database, HOSTNAME: '127.0.0.1', PORT: port }
@@ -384,8 +405,8 @@ async function withServer({ database, siteEnv, smtp = true }, checks) {
   }
 }
 
-// On acceptance the site makes the tables in an empty database and puts the sources from the seed in them, before it
-// answers.
+// On acceptance the site makes the tables in an empty database and puts the sources from the
+// seed in them, before it answers.
 await withEmptyDatabase((database) =>
   withServer({ database, siteEnv: 'acceptance' }, async (server, log) => {
     await waitUntilUp(server)
@@ -397,7 +418,8 @@ await withEmptyDatabase((database) =>
     assert.match(html, /<html data-scroll-behavior="smooth" lang="nl"/)
     assert.equal(home.headers.get('x-powered-by'), null)
 
-    // The homepage reads the items from the database, and the seed has none. So it says there is no news yet.
+    // The homepage reads the items from the database, and the seed has none. So it says there
+    // is no news yet.
     assert.match(html, /<h1[^>]*>sc Heerenveen Fansite<\/h1>/)
     assert.match(html, /<h2[^>]*>Laatste nieuws<\/h2>/)
     assert.match(html, /We hebben nog geen nieuws gevonden\. Kijk straks nog eens\./)
@@ -414,8 +436,8 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(robotsText, /^Sitemap:/im, 'acceptance refuses everything, so it points to no sitemap')
     await checkAdmin()
 
-    // Each page has its description, canonical URL and Open Graph tags with the address of acceptance, and the picture for
-    // shared links is a file of the site itself.
+    // Each page has its description, canonical URL and Open Graph tags with the address of
+    // acceptance, and the picture for shared links is a file of the site itself.
     for (const { path } of pages) {
       const response = await fetch(origin + path)
       assert.equal(response.status, 200, path)
@@ -432,8 +454,8 @@ await withEmptyDatabase((database) =>
 
     const iconResponses = await checkIcons()
 
-    // The sources page reads the register, so the database driver must be in the folder too, and the test sources must
-    // be in it. The source that is switched off isn't on the page.
+    // The sources page reads the register, so the database driver must be in the folder too,
+    // and the test sources must be in it. The source that is switched off isn't on the page.
     const sources = await fetch(`${origin}/bronnen`)
     const sourcesHtml = await sources.text()
     assert.equal(sources.status, 200)
@@ -441,7 +463,8 @@ await withEmptyDatabase((database) =>
     assert.match(sourcesHtml, /Testkrant/)
     assert.doesNotMatch(sourcesHtml, /Uitgezette testbron/)
 
-    // The podcast page reads the episodes, and the seed has none. A podcast or a page that doesn't exist is a 404.
+    // The podcast page reads the episodes, and the seed has none. A podcast or a page that
+    // doesn't exist is a 404.
     const podcastPage = await fetch(`${origin}/podcasts`)
     const podcastHtml = await podcastPage.text()
     assert.equal(podcastPage.status, 200)
@@ -451,7 +474,8 @@ await withEmptyDatabase((database) =>
     assert.equal((await fetch(`${origin}/podcasts?pagina=2`)).status, 404)
     assert.equal((await fetch(`${origin}/podcasts?pagina=0`)).status, 404)
 
-    // Updates shows the versions of the build, newest first, and points feed readers to its feed.
+    // Updates shows the versions of the build, newest first, and points feed readers to its
+    // feed.
     const updatesResponse = await fetch(`${origin}/updates`)
     const updatesHtml = await updatesResponse.text()
     assert.equal(updatesResponse.status, 200)
@@ -466,7 +490,8 @@ await withEmptyDatabase((database) =>
       assert.match(updatesHtml, /We hebben nog geen versie uitgebracht\./)
     }
 
-    // The old addresses of Updates and its feed forward for good, so old links and feed readers keep working.
+    // The old addresses of Updates and its feed forward for good, so old links and feed readers
+    // keep working.
     for (const [from, to] of [
       ['/wat-is-er-nieuw', '/updates'],
       ['/wat-is-er-nieuw/feed.xml', '/updates/feed.xml'],
@@ -479,8 +504,8 @@ await withEmptyDatabase((database) =>
 
     const feed = await checkFeed('https://acc.sc.heerenveen.org')
 
-    // Every kind of response carries the headers: a page, a page from the database, robots.txt, a static file, a feed,
-    // the manifest, the icons and a 404.
+    // Every kind of response carries the headers: a page, a page from the database, robots.txt,
+    // a static file, a feed, the manifest, the icons and a 404.
     for (const response of [
       home,
       sources,
@@ -496,7 +521,8 @@ await withEmptyDatabase((database) =>
       assert.match(response.headers.get('content-security-policy') ?? '', /^default-src 'self';/, response.url)
     }
 
-    // A page loads nothing from another domain: no script, stylesheet, font or image (editorial principle 3).
+    // A page loads nothing from another domain: no script, stylesheet, font or image (editorial
+    // principle 3).
     for (const [page, pageHtml] of [
       [origin, html],
       [`${origin}/bronnen`, sourcesHtml],
@@ -560,10 +586,11 @@ await withEmptyDatabase((database) =>
   }),
 )
 
-// A database that isn't there doesn't stop the site. The log says what is wrong, and the pages that read the database, the
-// homepage and the sources page, are the error page. The error page is in the HTML, so it works without JavaScript. The
-// status is 200: Next.js can't send a page that failed with a 5xx and the page in the HTML, so the page asks search
-// engines to leave it out.
+// A database that isn't there doesn't stop the site. The log says what is wrong, and the pages
+// that read the database, the homepage and the sources page, are the error page. The error page
+// is in the HTML, so it works without JavaScript. The status is 200: Next.js can't send a page
+// that failed with a 5xx and the page in the HTML, so the page asks search engines to leave it
+// out.
 const unreachable = new URL(databaseUrl)
 unreachable.hostname = '127.0.0.1'
 unreachable.port = '1'
@@ -576,7 +603,8 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   const homeHtml = await home.text()
   assert.equal(home.status, 200)
   assert.match(homeHtml, /<h1[^>]*>Er ging iets mis<\/h1>/)
-  // The title template of the layout doesn't reach the page in its own segment, so the title is the error title alone.
+  // The title template of the layout doesn't reach the page in its own segment, so the title is
+  // the error title alone.
   assert.match(homeHtml, /<title>Er ging iets mis<\/title>/)
   assert.match(homeHtml, /<meta name="robots" content="noindex"\/>/)
   assert.match(homeHtml, /<a href="\/">Probeer het opnieuw<\/a>/)
@@ -597,7 +625,8 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   assert.match(sourcesHtml, /<h1[^>]*>Er ging iets mis<\/h1>/)
   assert.match(sourcesHtml, /<title>Er ging iets mis – sc Heerenveen Fansite<\/title>/)
   assert.match(sourcesHtml, /<meta name="robots" content="noindex"\/>/)
-  // The link to another site has the icon for it, behind the last word and hidden from assistive technology.
+  // The link to another site has the icon for it, behind the last word and hidden from
+  // assistive technology.
   assert.match(
     sourcesHtml,
     /<a href="https:\/\/forum\.heerenveen\.org">het <span class="hf-icon-tail">forum<svg aria-hidden="true" class="hf-icon"/,

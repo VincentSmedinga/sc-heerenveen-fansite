@@ -1,9 +1,10 @@
 import type { ReleaseNotes } from './updates'
 
 /**
- * What changed for visitors in each version, in Dutch: one short line per change, as a visitor notices it. The page
- * Updates and its feed show a version once CHANGELOG.md has it, so lines may be written before the release. A version
- * without lines isn't shown. AGENTS.md says how to write them, and who writes them and when.
+ * What changed for visitors in each version, in Dutch: one short line per change, as a visitor
+ * notices it. The page Updates and its feed show a version once CHANGELOG.md has it, so lines
+ * may be written before the release. A version without lines isn't shown. AGENTS.md says how to
+ * write them, and who writes them and when.
  */
 export const releaseNotes: ReleaseNotes = {
   '0.1.0': [

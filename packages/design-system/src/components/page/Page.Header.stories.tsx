@@ -39,7 +39,8 @@ export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', re
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
 
-// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the same as the stories above.
+// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the
+// same as the stories above.
 const screens = { tags: ['!autodocs'] }
 
 export const NarrowLight = meta.story({

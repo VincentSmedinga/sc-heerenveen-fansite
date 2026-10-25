@@ -2,8 +2,8 @@ import { expect, test } from '@playwright/test'
 
 import { checkPage } from './check-page'
 
-// The second copy of the site in playwright.config.ts, which has no database. The pages that read the database, the homepage,
-// the sources page and the podcasts page, are the error page.
+// The second copy of the site in playwright.config.ts, which has no database. The pages that
+// read the database, the homepage, the sources page and the podcasts page, are the error page.
 const withoutDatabase = 'http://127.0.0.1:3125'
 
 for (const path of ['/', '/bronnen', '/podcasts']) {
@@ -13,7 +13,8 @@ for (const path of ['/', '/bronnen', '/podcasts']) {
 
       const response = await page.goto(`${withoutDatabase}${path}`)
 
-      // Next.js can't send a page that failed with a 5xx and the page in the HTML. The page asks search engines to leave it out.
+      // Next.js can't send a page that failed with a 5xx and the page in the HTML. The page
+      // asks search engines to leave it out.
       expect(response?.status()).toBe(200)
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex')
       await expect(page.getByRole('heading', { level: 1 })).toHaveText('Er ging iets mis')

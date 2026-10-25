@@ -38,7 +38,8 @@ const headlines: PublicItem[] = [
   },
 ]
 
-// Made up, like the screen names. The moment of now is the afternoon of Friday 23 October 2026 in the Netherlands.
+// Made up, like the screen names. The moment of now is the afternoon of Friday 23 October 2026
+// in the Netherlands.
 const now = new Date('2026-10-23T13:40:00Z')
 
 const discussions: PublicDiscussion[] = [
@@ -112,7 +113,8 @@ describe('the homepage', () => {
 
     const html = await render()
 
-    // The logo in the header shows the name of the site, so the h1 is hidden from the eye, not from a screen reader.
+    // The logo in the header shows the name of the site, so the h1 is hidden from the eye, not
+    // from a screen reader.
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite</h1>',
       '<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>',
@@ -238,7 +240,8 @@ describe('the homepage', () => {
 
     expect(html).not.toMatch(/<(img|picture|iframe|video|audio|script|image|use)/)
     expect(html).not.toMatch(/(src|srcset|poster)=/)
-    // The only svg is our own icon for a link to another site, hidden from assistive technology, one for each item.
+    // The only svg is our own icon for a link to another site, hidden from assistive
+    // technology, one for each item.
     expect(html.match(/<svg /g)).toHaveLength(3)
     expect(html.match(/<svg [^>]*aria-hidden="true"/g)).toHaveLength(3)
     // The only addresses are the links of the items and the link to the page with the sources.
@@ -352,7 +355,8 @@ describe('the button that loads five more headlines', () => {
       '<li id="nieuws-2">',
       '<li id="nieuws-3">',
     ])
-    // With three headlines on the page, the first new one is the fourth: the page that loads again has it.
+    // With three headlines on the page, the first new one is the fourth: the page that loads
+    // again has it.
     expect(html).toContain('action="/#nieuws-4"')
   })
 

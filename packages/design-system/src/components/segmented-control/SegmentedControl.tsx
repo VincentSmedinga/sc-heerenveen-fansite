@@ -7,8 +7,8 @@ import { type FilledIconName, Icon } from '../icon/Icon'
 
 export type SegmentedControlOption<Value extends string> = {
   /**
-   * An icon in front of the text. The pressed button has its filled drawing and the others the line, so the icon is a
-   * second sign of what is pressed, never the only one.
+   * An icon in front of the text. The pressed button has its filled drawing and the others the
+   * line, so the icon is a second sign of what is pressed, never the only one.
    */
   icon?: FilledIconName
   /** What the button says. */
@@ -25,7 +25,10 @@ export type SegmentedControlProps<Value extends string> = Omit<
   children?: never
   /** The name of the group, for a screen reader, such as "Thema". */
   label: string
-  /** Called with the value of the button that is pressed, also when it is the one that is already pressed. */
+  /**
+   * Called with the value of the button that is pressed, also when it is the one that is
+   * already pressed.
+   */
   onChange: (value: Value) => void
   /** The buttons, in order. */
   options: readonly SegmentedControlOption<Value>[]
@@ -34,10 +37,11 @@ export type SegmentedControlProps<Value extends string> = Omit<
 }
 
 /**
- * A few buttons side by side, of which exactly one is pressed, such as Licht and Donker. It is a group with a name, and
- * each button says whether it is pressed with `aria-pressed`. The pressed button is filled and the others are an outline,
- * so it shows without colour. An option can have an icon, filled on the pressed button. It holds no state: the page
- * gives it the value and handles the change.
+ * A few buttons side by side, of which exactly one is pressed, such as Licht and Donker. It is
+ * a group with a name, and each button says whether it is pressed with `aria-pressed`. The
+ * pressed button is filled and the others are an outline, so it shows without colour. An option
+ * can have an icon, filled on the pressed button. It holds no state: the page gives it the
+ * value and handles the change.
  */
 export const SegmentedControl = <Value extends string>({
   className,

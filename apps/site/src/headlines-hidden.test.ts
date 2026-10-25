@@ -8,9 +8,10 @@ import { createAccount } from './beheer/accounts'
 import { hideItem, showItem } from './beheer/items'
 import { addItem, addSource } from './beheer/test-items'
 
-// The page of the admin tells the moderator that a hidden item "staat binnen vijf minuten niet meer op de site". This test
-// reads the headlines of the homepage the way the homepage does, from a real database and its cache, and shows that
-// it is true: the headlines are kept for five minutes, so the item is gone when the five minutes are over, and not a moment later.
+// The page of the admin tells the moderator that a hidden item "staat binnen vijf minuten niet
+// meer op de site". This test reads the headlines of the homepage the way the homepage does,
+// from a real database and its cache, and shows that it is true: the headlines are kept for
+// five minutes, so the item is gone when the five minutes are over, and not a moment later.
 
 vi.mock('./database', () => ({ getDatabase: () => database }))
 
@@ -61,7 +62,8 @@ describe('the headlines of the homepage', () => {
 
     await hideItem(database.db, userId, itemId, 'Fout in het bericht')
 
-    // The list is in the memory of the server for five minutes, so the first moments it is still the old one.
+    // The list is in the memory of the server for five minutes, so the first moments it is
+    // still the old one.
     vi.setSystemTime(new Date(start.getTime() + 4 * minute + 59_000))
     expect(await titles(getHeadlines)).toEqual(['Kop een', 'Kop twee'])
 

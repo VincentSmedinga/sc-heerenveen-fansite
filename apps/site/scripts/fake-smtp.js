@@ -1,7 +1,8 @@
-// A mail server for the browser tests (e2e/contact.spec.ts): it takes any mail over STARTTLS and writes each one to a file
-// in the folder, so a test, which runs in another process than the site, can read what the site sent. Nothing leaves this
-// computer. It makes a certificate of its own for 127.0.0.1 in that folder, which the site trusts through
-// NODE_EXTRA_CA_CERTS (see playwright.config.ts).
+// A mail server for the browser tests (e2e/contact.spec.ts): it takes any mail over STARTTLS
+// and writes each one to a file in the folder, so a test, which runs in another process than
+// the site, can read what the site sent. Nothing leaves this computer. It makes a certificate
+// of its own for 127.0.0.1 in that folder, which the site trusts through NODE_EXTRA_CA_CERTS
+// (see playwright.config.ts).
 //
 //   node scripts/fake-smtp.js <folder> <port>
 import { execFileSync } from 'node:child_process'

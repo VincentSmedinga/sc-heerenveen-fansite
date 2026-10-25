@@ -4,9 +4,10 @@ import { Heading, Link, List, Page, Text } from '@fansite/design-system'
 export const serverErrorTitle = 'Er ging iets mis'
 
 /**
- * What a visitor sees when a page fails because of an error on our side. The text says that it's our fault and what to
- * do, and not what went wrong: in production Next.js keeps the details of an error from the page, so it doesn't know
- * whether it was the database. It is the main of the page; the layout puts the header and the footer around it.
+ * What a visitor sees when a page fails because of an error on our side. The text says that
+ * it's our fault and what to do, and not what went wrong: in production Next.js keeps the
+ * details of an error from the page, so it doesn't know whether it was the database. It is the
+ * main of the page; the layout puts the header and the footer around it.
  */
 export function ServerError({ retryHref }: { retryHref: string }) {
   return (

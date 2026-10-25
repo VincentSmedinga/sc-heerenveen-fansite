@@ -23,7 +23,8 @@ import { getDatabase } from '../../../database'
 import { dateTimeOf, formatNewsTime } from '../../../news'
 import { submitHide, submitShow } from './actions'
 
-// Render on each request: who is logged in and which items are hidden are not known when the site is built.
+// Render on each request: who is logged in and which items are hidden are not known when the
+// site is built.
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Berichten' }
@@ -41,9 +42,10 @@ const isFieldError = (value: string | string[] | undefined): value is keyof type
 
 const summaryId = 'fouten'
 
-// The list of the items that a moderator hides and shows. The search is a form with method GET, and each action a form that
-// posts, so the page works without JavaScript. An action ends on this page again: an error is in the address, and the
-// notice that it worked is written from what the database says now, so a made-up address can't claim an action that never happened.
+// The list of the items that a moderator hides and shows. The search is a form with method GET,
+// and each action a form that posts, so the page works without JavaScript. An action ends on
+// this page again: an error is in the address, and the notice that it worked is written from
+// what the database says now, so a made-up address can't claim an action that never happened.
 export default async function ItemsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole(...adminRoles)
 
@@ -56,7 +58,8 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
   const failedId = parseItemId(bericht)
   const fieldError = isFieldError(fout) ? fieldErrors[fout] : undefined
   const failedItem = found.find((item) => item.id === failedId && item.hiddenAt === null)
-  // An error about a field that the list doesn't show, such as one the new items pushed out, is still told, without a link.
+  // An error about a field that the list doesn't show, such as one the new items pushed out, is
+  // still told, without a link.
   const loneError = fieldError !== undefined && failedItem === undefined ? fieldError : undefined
   const gone = fout === 'weg'
 
@@ -199,9 +202,9 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
 }
 
 /**
- * The notice for an item, when the item is in the state the notice says: hidden for `verborgen`, shown for `getoond`.
- * Undefined for no number, for a number that is no item, and for an item that is not in that state, so the page tells
- * only what is true.
+ * The notice for an item, when the item is in the state the notice says: hidden for
+ * `verborgen`, shown for `getoond`. Undefined for no number, for a number that is no item, and
+ * for an item that is not in that state, so the page tells only what is true.
  */
 async function noticeFor(db: Database, value: string | string[] | undefined, hidden: boolean) {
   const id = parseItemId(value)

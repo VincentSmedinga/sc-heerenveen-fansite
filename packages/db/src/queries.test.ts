@@ -223,7 +223,8 @@ describe('listRecentItems', () => {
   it('gives no episodes of a podcast that is switched on, and the items of the others', async () => {
     await seedSources(database.db)
 
-    // The seed holds the made-up Testpodcast, which is switched on, and the Testkrant, which is news.
+    // The seed holds the made-up Testpodcast, which is switched on, and the Testkrant, which is
+    // news.
     const idsOf = async (domain: string) => {
       const [source] = await database.db.select().from(sources).where(eq(sources.domain, domain))
       const [feed] = await database.db
@@ -472,7 +473,10 @@ describe('the podcasts', () => {
       .values({ ...ids, key, publishedAt, title: `Aflevering ${key}`, url: `https://testpodcast.test/e/${key}` })
   }
 
-  /** The made-up podcasts of the seed, with an episode each, a news source and a podcast that is switched off. */
+  /**
+   * The made-up podcasts of the seed, with an episode each, a news source and a podcast that is
+   * switched off.
+   */
   async function fill() {
     await seedSources(database.db)
 

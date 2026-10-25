@@ -13,12 +13,13 @@ const schema = databaseEnvSchema
   .extend(mailEnvSchema.shape)
   .superRefine(requireSmtpOutsideLocal)
 
-// What sendMail needs: the settings of the mail server, and SITE_ENV to know whether they may be missing. It doesn't need
-// the database, so the command that sends a test mail on the host runs without DATABASE_URL.
+// What sendMail needs: the settings of the mail server, and SITE_ENV to know whether they may
+// be missing. It doesn't need the database, so the command that sends a test mail on the host
+// runs without DATABASE_URL.
 const mailSchema = siteEnvSchema.extend(mailEnvSchema.shape).superRefine(requireSmtpOutsideLocal)
 
-// Set by `pnpm review` (see scripts/review.js), and nowhere else. Optional, and not part of the schema above: only the
-// dev server reads it, and the site must start without it.
+// Set by `pnpm review` (see scripts/review.js), and nowhere else. Optional, and not part of the
+// schema above: only the dev server reads it, and the site must start without it.
 const reviewEnvSchema = z.object({
   REVIEW_BRANCH: z
     .string()
@@ -26,7 +27,8 @@ const reviewEnvSchema = z.object({
     .optional(),
 })
 
-// The address of each environment (see the decision Adressen in docs/beslissingen.md). Locally it is `next dev`.
+// The address of each environment (see the decision Adressen in docs/beslissingen.md). Locally
+// it is `next dev`.
 const origins = {
   acceptance: 'https://acc.sc.heerenveen.org',
   local: 'http://localhost:3000',
@@ -34,8 +36,9 @@ const origins = {
 } as const
 
 /**
- * Whether search engines may index this environment. Only production may be found. The same build runs on acceptance and
- * later on production, so this reads the environment when the server runs, not when it's built. It reads only SITE_ENV.
+ * Whether search engines may index this environment. Only production may be found. The same
+ * build runs on acceptance and later on production, so this reads the environment when the
+ * server runs, not when it's built. It reads only SITE_ENV.
  */
 export function isIndexable(source: Record<string, string | undefined> = process.env) {
   return parseEnv(siteEnvSchema, source).SITE_ENV === 'production'
@@ -50,24 +53,26 @@ export function originOf(source: Record<string, string | undefined> = process.en
 }
 
 /**
- * Reads the environment variables of the site and checks them. `instrumentation.ts` calls it when the server starts, so
- * a missing or invalid variable stops the site with one clear message.
+ * Reads the environment variables of the site and checks them. `instrumentation.ts` calls it
+ * when the server starts, so a missing or invalid variable stops the site with one clear
+ * message.
  */
 export function readEnv(source: Record<string, string | undefined> = process.env) {
   return parseEnv(schema, source)
 }
 
 /**
- * Reads the settings for sending mail (see sendMail) and checks them. Like isIndexable, it reads them when the server
- * runs, and only them and SITE_ENV.
+ * Reads the settings for sending mail (see sendMail) and checks them. Like isIndexable, it
+ * reads them when the server runs, and only them and SITE_ENV.
  */
 export function readMailEnv(source: Record<string, string | undefined> = process.env) {
   return parseEnv(mailSchema, source)
 }
 
 /**
- * The name of the branch that `pnpm review` is showing, for the title of the tab. Only `next dev` has one: a build, and so
- * acceptance and production, never shows a branch, whatever REVIEW_BRANCH holds. It reads only that variable and NODE_ENV.
+ * The name of the branch that `pnpm review` is showing, for the title of the tab. Only `next
+ * dev` has one: a build, and so acceptance and production, never shows a branch, whatever
+ * REVIEW_BRANCH holds. It reads only that variable and NODE_ENV.
  */
 export function reviewBranch(source: Record<string, string | undefined> = process.env) {
   return source['NODE_ENV'] === 'development' ? parseEnv(reviewEnvSchema, source).REVIEW_BRANCH : undefined

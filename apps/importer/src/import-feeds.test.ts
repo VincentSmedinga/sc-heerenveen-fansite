@@ -71,7 +71,10 @@ function feedWith(...entries: string[]) {
   return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Een feed</title>${entries.join('')}</channel></rss>`
 }
 
-/** Starts a web server on this computer that serves the feed at `/rss/`. The tests ask no real site. */
+/**
+ * Starts a web server on this computer that serves the feed at `/rss/`. The tests ask no real
+ * site.
+ */
 async function serve(body: Handler | string, routes: Record<string, Handler> = {}) {
   const handler = typeof body === 'string' ? reply(200, body, xml) : body
   const server = await startServer({ '/rss/': handler, ...routes })
@@ -301,7 +304,10 @@ describe('an item that is already known', () => {
 describe('an item that a moderator hid', () => {
   const hiddenAt = new Date('2026-10-22T10:30:00Z')
 
-  /** Imports a feed, hides its item g1 the way the admin does, and imports a feed with `after` in its place. */
+  /**
+   * Imports a feed, hides its item g1 the way the admin does, and imports a feed with `after`
+   * in its place.
+   */
   async function hideThenImport(before: string, after: string) {
     const first = await serve(before)
     const feed = await addFeed(`${first.origin}/rss/`)
@@ -444,7 +450,10 @@ describe('an item that cannot be stored', () => {
 })
 
 describe('importing a podcast', () => {
-  /** An episode as a podcast feed writes it: with a page, an MP3 file, a description and a duration. */
+  /**
+   * An episode as a podcast feed writes it: with a page, an MP3 file, a description and a
+   * duration.
+   */
   function episode(
     key: string,
     {
@@ -640,7 +649,8 @@ describe('the ETag and Last-Modified', () => {
     const server = await serve(conditional)
     const feed = await addFeed(`${server.origin}/rss/`)
 
-    // A feed that is not in the register: the database refuses the items, and the transaction takes everything back.
+    // A feed that is not in the register: the database refuses the items, and the transaction
+    // takes everything back.
     await expect(
       importFeed(database.db, fetcherFor(servers), { ...feed, sourceId: feed.sourceId + 1000 }, firstRun),
     ).rejects.toThrow()

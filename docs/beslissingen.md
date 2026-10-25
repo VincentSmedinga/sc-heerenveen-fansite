@@ -1032,6 +1032,26 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de oude ruleset houden en het vinkje blijven zetten.
   Of wie schrijfrechten heeft de regels laten omzeilen; dan kan ook een pull request met een fout erdoor.
 
+### ESLint houdt commentaar op 96 tekens
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de regel `max-len` van ESLint staat aan voor commentaar in JavaScript en TypeScript, op 96 tekens per regel, met `ignoreUrls`.
+  De inspringing en het teken voor commentaar tellen mee.
+  Voor code zet hij de grens op 1000 tekens: Prettier breekt code af, en een regel in een tekst tussen aanhalingstekens blijft zoals hij is.
+  De regel staat na `eslint-config-prettier`, want dat zet `max-len` uit.
+  CSS valt erbuiten: stylelint heeft sinds versie 15 geen regel voor de breedte van een regel.
+  De 1246 commentaarregels die er al boven zaten, in 250 bestanden, zijn afgebroken.
+  Er is geen woord van het commentaar veranderd, behalve de reden achter twee `eslint-disable`-regels die korter moest.
+- **Waarom:** Prettier breekt code af op 120 tekens en laat commentaar staan.
+  De reviewer vond in zes pull requests commentaarregels van 130 tekens of breder.
+  De projecteigenaar koos 96.
+  Een deel van het commentaar brak al op die breedte af, zoals de uitleg bovenaan `pullGesture.ts`.
+- **Alternatieven:** 125 tekens; dat laat het commentaar van nu bijna zoals het is (55 regels in 43 bestanden).
+  120 tekens; dat past bij Prettier, maar vraagt 317 regels in 135 bestanden.
+  `@stylistic/max-len`; dat is een nieuwe dependency voor een regel die ESLint zelf nog heeft.
+- **Let op:** ESLint heeft `max-len` als verouderd gemarkeerd, en hij kan in een volgende hoofdversie verdwijnen.
+  Dan kiezen we opnieuw.
+
 ## Designsysteem
 
 ### Werkruimte met één package

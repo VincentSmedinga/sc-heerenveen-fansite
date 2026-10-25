@@ -1,6 +1,7 @@
 /**
- * The first line of an error's message, with the message of its cause, such as `connect ECONNREFUSED 127.0.0.1:3306`.
- * Drizzle's message goes on with the values of the query, which the log doesn't need.
+ * The first line of an error's message, with the message of its cause, such as `connect
+ * ECONNREFUSED 127.0.0.1:3306`. Drizzle's message goes on with the values of the query, which
+ * the log doesn't need.
  */
 export function reasonOf(error: unknown) {
   if (!(error instanceof Error)) {

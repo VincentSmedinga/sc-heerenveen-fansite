@@ -1,4 +1,5 @@
-// The command that sends a test mail is the second command that `bundleCommand` bundles (see apps/site/src/send-test-mail.ts).
+// The command that sends a test mail is the second command that `bundleCommand` bundles (see
+// apps/site/src/send-test-mail.ts).
 import { execFile } from 'node:child_process'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -21,7 +22,8 @@ afterAll(() => {
   rmSync(folder, { force: true, recursive: true })
 })
 
-// A folder in the system's temporary folder has no node_modules above it, so the file must hold everything.
+// A folder in the system's temporary folder has no node_modules above it, so the file must hold
+// everything.
 const run = (env: Record<string, string>, ...args: string[]) =>
   promisify(execFile)(process.execPath, [file, ...args], {
     cwd: folder,

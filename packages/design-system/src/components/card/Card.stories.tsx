@@ -11,7 +11,8 @@ import { Page } from '../page/Page'
 import { Text } from '../text/Text'
 import { Card, cardElements, type CardSurface, cardSurfaces } from './Card'
 
-// The type of the props as the table of controls shows it: the compiler gives `unknown[number]` for the lists.
+// The type of the props as the table of controls shows it: the compiler gives `unknown[number]`
+// for the lists.
 const union = (values: readonly string[]) => ({ type: { summary: values.map((value) => `'${value}'`).join(' | ') } })
 
 const meta = preview.meta({
@@ -75,7 +76,8 @@ export const Default = meta.story({
   args: { as: 'section', surface: 'default' },
   name: 'Kaart',
   render: ({ as = 'section', ...args }) => (
-    // A name from the heading is only allowed on elements that have a role to name: not on a div.
+    // A name from the heading is only allowed on elements that have a role to name: not on a
+    // div.
     <Card {...args} aria-labelledby={as === 'div' ? undefined : 'card-heading'} as={as}>
       <Heading appearance={3} id="card-heading" level={2}>
         Nieuws

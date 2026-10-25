@@ -11,10 +11,11 @@ const usage = [
 ].join('\n')
 
 /**
- * Runs one of the commands that manage the accounts of the admin, and returns the exit code: 0 when it did what was
- * asked, 1 when it did nothing because of the state of the accounts, and 2 when the command is wrong. It tells the
- * owner what happened. `pnpm admin:create` and `pnpm admin:revoke` run it locally, and the file that `assemble` makes
- * runs it on the host (see docs/acceptatieomgeving.md).
+ * Runs one of the commands that manage the accounts of the admin, and returns the exit code: 0
+ * when it did what was asked, 1 when it did nothing because of the state of the accounts, and 2
+ * when the command is wrong. It tells the owner what happened. `pnpm admin:create` and `pnpm
+ * admin:revoke` run it locally, and the file that `assemble` makes runs it on the host (see
+ * docs/acceptatieomgeving.md).
  */
 export async function runAdminCommand(db: Database, args: readonly string[], now = new Date()) {
   const [command, address, role, ...rest] = args

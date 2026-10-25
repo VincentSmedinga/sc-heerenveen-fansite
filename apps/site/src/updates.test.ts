@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import { anchorOf, dateOf, parseChangelog, releasesOf } from './updates'
 
-// As release-please writes the first release, and the later ones with a link to the changes since the version before.
+// As release-please writes the first release, and the later ones with a link to the changes
+// since the version before.
 const changelog = `# Changelog
 
 ## [0.3.0](https://github.com/VincentSmedinga/sc-heerenveen-fansite/compare/v0.2.0...v0.3.0) (2026-12-01)

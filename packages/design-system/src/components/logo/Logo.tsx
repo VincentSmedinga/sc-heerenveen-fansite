@@ -6,9 +6,9 @@ import { classNames } from '../classNames'
 import { Pompebled } from './Pompebled'
 
 /*
- * The artwork keeps its own colours in both themes, like the SVG files in src/assets, which the shield is
- * copied from: blue-500, blue-700 and red-600 of the palette, and white. The text beside it takes its colour
- * from the tokens, so it follows the theme, and the header.
+ * The artwork keeps its own colours in both themes, like the SVG files in src/assets, which the
+ * shield is copied from: blue-500, blue-700 and red-600 of the palette, and white. The text
+ * beside it takes its colour from the tokens, so it follows the theme, and the header.
  */
 const shieldPath =
   'M96,24A160,160 0 0,0 39.58,45.52A16,16 0 0,0 32,59.12A124.61,124.61 0 0,0 96,168A124.61,124.61 0 0,0 160,59.12A16,16 0 0,0 152.42,45.52A160,160 0 0,0 96,24Z'
@@ -16,9 +16,10 @@ const shieldPath =
 export type LogoProps = Omit<ComponentPropsWithoutRef<'span'>, 'aria-label' | 'children' | 'role'>
 
 /**
- * The logo of the Fansite: the shield with the Frisian bands and a pompeblêd, the wordmark and "sinds 1997".
- * The wordmark is text in the Truculenta of the type style, so it takes the colour of the theme.
- * The whole logo is one image with the name "sc Heerenveen Fansite, sinds 1997".
+ * The logo of the Fansite: the shield with the Frisian bands and a pompeblêd, the wordmark and
+ * "sinds 1997". The wordmark is text in the Truculenta of the type style, so it takes the
+ * colour of the theme. The whole logo is one image with the name "sc Heerenveen Fansite, sinds
+ * 1997".
  */
 export const Logo = ({ className, ...props }: LogoProps) => {
   // Every logo on a page needs ids of its own for the shield and the clipping path.

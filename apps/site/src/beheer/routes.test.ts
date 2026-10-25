@@ -2,9 +2,10 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 
-// Goes through every page, route and server action of the admin and shows that a call without a session is refused. The
-// files are found by looking in the folders, so nobody has to remember to add a new action to a list: a new page, route
-// or action that does not start with requireRole fails here, as a call without a session that is not sent to the login page.
+// Goes through every page, route and server action of the admin and shows that a call without a
+// session is refused. The files are found by looking in the folders, so nobody has to remember
+// to add a new action to a list: a new page, route or action that does not start with
+// requireRole fails here, as a call without a session that is not sent to the login page.
 
 class Redirect extends Error {
   readonly url: string
@@ -15,7 +16,8 @@ class Redirect extends Error {
   }
 }
 
-// Nobody has a cookie, and the database must stay untouched: a call without a session is refused before it asks anything.
+// Nobody has a cookie, and the database must stay untouched: a call without a session is
+// refused before it asks anything.
 vi.mock('next/headers', () => ({
   cookies: () => Promise.resolve({ get: () => undefined, set: () => undefined }),
   headers: () => Promise.resolve(new Headers()),
@@ -39,8 +41,9 @@ const src = path.resolve(import.meta.dirname, '..')
 const admin = path.join(src, 'app/beheer')
 
 /**
- * The pages and actions that anybody may call: the way in to the admin, and the contact form of the site. Every other page,
- * route and action needs requireRole, wherever it is: a new action outside /beheer must be named here, on purpose.
+ * The pages and actions that anybody may call: the way in to the admin, and the contact form of
+ * the site. Every other page, route and action needs requireRole, wherever it is: a new action
+ * outside /beheer must be named here, on purpose.
  */
 const open = [
   'app/beheer/inloggen/actions.ts',
@@ -64,10 +67,16 @@ const text = (file: string) => readFileSync(path.join(src, file), 'utf8')
 /** The pages and routes under /beheer. */
 const routes = filesUnder(admin).filter((file) => /(^|\/)(page\.tsx|route\.ts)$/.test(file))
 
-/** The files with server actions, anywhere in the site: a `'use server'` at the start of the file or of a function. */
+/**
+ * The files with server actions, anywhere in the site: a `'use server'` at the start of the
+ * file or of a function.
+ */
 const actionFiles = sourceFiles.filter((file) => /^\s*(?:'use server'|"use server")/m.test(text(file)))
 
-/** The functions a module exports: an action, the default export of a page, or the handler of a route. */
+/**
+ * The functions a module exports: an action, the default export of a page, or the handler of a
+ * route.
+ */
 async function exportedFunctions(file: string) {
   const module = (await import(/* @vite-ignore */ path.join(src, file))) as Record<string, unknown>
 
@@ -80,7 +89,8 @@ describe('the admin', () => {
   it('has pages, routes and actions to go through', () => {
     expect(routes.length).toBeGreaterThanOrEqual(4)
     expect(actionFiles).toContain('app/beheer/actions.ts')
-    // The actions that change items: they are the ones that must never be open (see the next tests).
+    // The actions that change items: they are the ones that must never be open (see the next
+    // tests).
     expect(actionFiles).toContain('app/beheer/berichten/actions.ts')
     expect(routes).toContain('app/beheer/berichten/page.tsx')
   })
@@ -126,7 +136,8 @@ describe('the admin', () => {
 
       expect(actions.length, `${file} exports no action`).toBeGreaterThan(0)
 
-      // No arguments: a refusal comes before the arguments are read, so an action that reads them first fails here too.
+      // No arguments: a refusal comes before the arguments are read, so an action that reads
+      // them first fails here too.
       for (const [name, action] of actions) {
         await expect(
           Promise.resolve().then(() => action()),

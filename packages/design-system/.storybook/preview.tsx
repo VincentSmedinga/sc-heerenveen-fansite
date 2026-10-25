@@ -48,14 +48,16 @@ export default definePreview({
       container: ThemedDocsContainer,
       page: DocsPage,
       source: {
-        // Show the JSX the story renders, not the `meta.story({ ... })` call around it, so one `render` can serve
-        // the light and the dark story. The theme wrapper is a decorator and doesn't belong in the example.
+        // Show the JSX the story renders, not the `meta.story({ ... })` call around it, so one
+        // `render` can serve the light and the dark story. The theme wrapper is a decorator and
+        // doesn't belong in the example.
         excludeDecorators: true,
         type: 'dynamic',
       },
     },
     options: {
-      // Only Card has controls so far, and the accessibility check is what every story needs; show that panel first.
+      // Only Card has controls so far, and the accessibility check is what every story needs;
+      // show that panel first.
       selectedPanel: 'storybook/a11y/panel',
       storySort: {
         order: [
@@ -101,8 +103,9 @@ export default definePreview({
       },
     },
     viewport: {
-      // The standard screens, one between the width where the columns sit side by side and the full width of the page
-      // column, to see them shrink, and one wider than the page column, to see what is outside it.
+      // The standard screens, one between the width where the columns sit side by side and the
+      // full width of the page column, to see them shrink, and one wider than the page column,
+      // to see what is outside it.
       options: {
         ...MINIMAL_VIEWPORTS,
         middle: { name: 'Middelgroot scherm', styles: { height: '800px', width: '976px' }, type: 'desktop' },

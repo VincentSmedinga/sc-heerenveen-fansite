@@ -57,7 +57,10 @@ async function render(query: Query = {}) {
   return renderToStaticMarkup(await PodcastsPage(props(query)))
 }
 
-/** The page that the visitor sees: Next.js stops at a notFound() with an error that has this digest. */
+/**
+ * The page that the visitor sees: Next.js stops at a notFound() with an error that has this
+ * digest.
+ */
 const notFound = expect.objectContaining({ digest: 'NEXT_HTTP_ERROR_FALLBACK;404' }) as unknown
 
 beforeEach(() => {

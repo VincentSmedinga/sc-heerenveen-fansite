@@ -84,7 +84,8 @@ export const ExternalDark = meta.story({
   render: external,
 })
 
-// Only on the canvas: a link that breaks over two lines at 320 pixels, where the icon must stay with the last word.
+// Only on the canvas: a link that breaks over two lines at 320 pixels, where the icon must stay
+// with the last word.
 const breaking = () => (
   <Text style={{ fontSize: '1.5rem' }}>
     <Link href="https://www.autoriteitpersoonsgegevens.nl" icon="external-link">

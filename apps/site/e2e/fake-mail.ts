@@ -2,13 +2,17 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-/** Where scripts/fake-smtp.js writes the mails the site sends, and the port it listens on (see playwright.config.ts). */
+/**
+ * Where scripts/fake-smtp.js writes the mails the site sends, and the port it listens on (see
+ * playwright.config.ts).
+ */
 export const fakeMailFolder = fileURLToPath(new URL('../.next/fake-smtp', import.meta.url))
 export const fakeMailPort = '2525'
 
 /**
- * The mails the site has sent to the fake mail server so far, as the server received them: headers and body. A body that
- * the mail library encoded (quoted-printable or base64) is decoded, so a test can search for the words in it.
+ * The mails the site has sent to the fake mail server so far, as the server received them:
+ * headers and body. A body that the mail library encoded (quoted-printable or base64) is
+ * decoded, so a test can search for the words in it.
  */
 export function sentMails() {
   return readdirSync(fakeMailFolder)

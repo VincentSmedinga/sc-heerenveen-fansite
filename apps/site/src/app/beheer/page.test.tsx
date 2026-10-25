@@ -155,7 +155,8 @@ describe('the page of the link', () => {
     const html = await render('abc')
 
     expect(headings(html)).toEqual(['h1 Inloggen'])
-    // The page says that the link is right and what to do now, above the button, so the extra click is no surprise.
+    // The page says that the link is right and what to do now, above the button, so the extra
+    // click is no surprise.
     expect(html).toContain('Deze link klopt. Kies hieronder Inloggen om binnen te komen.')
     expect(html.indexOf('Deze link klopt.')).toBeLessThan(html.indexOf('<button'))
     expect(html).not.toContain('Deze link werkt niet')

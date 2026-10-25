@@ -15,7 +15,9 @@ export type TextAppearance = (typeof textAppearances)[number]
 export type TextProps = ComponentPropsWithoutRef<'p'> &
   (
     | {
-        /** Inleiding: the first paragraph under the heading of the page. Only for a paragraph. */
+        /**
+         * Inleiding: the first paragraph under the heading of the page. Only for a paragraph.
+         */
         appearance: 'intro'
         as?: 'p'
       }
@@ -30,10 +32,11 @@ export type TextProps = ComponentPropsWithoutRef<'p'> &
 /**
  * Running text: a paragraph, or a span inside a line.
  *
- * An intro puts all its content in one `b`, so `<p class="hf-intro"><b>…</b></p>`. With the stylesheet the `b` has the
- * weight of the text around it and the larger type makes the intro stand out. Without it the browser shows the `b` in
- * bold, so the intro stands out then too. A `b` says nothing about meaning, unlike a `strong`, so a screen reader reads
- * it without emphasis.
+ * An intro puts all its content in one `b`, so `<p class="hf-intro"><b>…</b></p>`. With the
+ * stylesheet the `b` has the weight of the text around it and the larger type makes the intro
+ * stand out. Without it the browser shows the `b` in bold, so the intro stands out then too. A
+ * `b` says nothing about meaning, unlike a `strong`, so a screen reader reads it without
+ * emphasis.
  */
 export const Text = ({ appearance, as: Element = 'p', children, className, ...props }: TextProps) => (
   <Element className={classNames(appearance && `hf-${appearance}`, className)} {...props}>

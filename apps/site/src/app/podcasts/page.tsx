@@ -12,14 +12,16 @@ import { getPodcastPage } from '../../podcasts'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
 
-// Render on each request, so the build never reads the database. getPodcastPage caches the lists itself.
+// Render on each request, so the build never reads the database. getPodcastPage caches the
+// lists itself.
 export const dynamic = 'force-dynamic'
 
 type SearchParams = Record<string, string | string[] | undefined>
 
 /**
- * The podcast and the page that the address asks for, or undefined when the address is wrong: a parameter that is given
- * twice, or a `pagina` that is not a positive whole number written without anything else, such as `0`, `-1`, `2.5` or `abc`.
+ * The podcast and the page that the address asks for, or undefined when the address is wrong: a
+ * parameter that is given twice, or a `pagina` that is not a positive whole number written
+ * without anything else, such as `0`, `-1`, `2.5` or `abc`.
  */
 function parseQuery(searchParams: SearchParams) {
   const { pagina, podcast } = searchParams
@@ -34,14 +36,20 @@ function parseQuery(searchParams: SearchParams) {
   return { page: pagina === undefined ? 1 : Number(pagina), podcast }
 }
 
-/** The address of /podcasts for a podcast (its slug) and a page. The first page and all podcasts have no parameter. */
+/**
+ * The address of /podcasts for a podcast (its slug) and a page. The first page and all podcasts
+ * have no parameter.
+ */
 function podcastsHref(podcast: string | undefined, page: number) {
   const query = podcastsQuery(podcast, page)
 
   return query === '' ? '/podcasts' : `/podcasts?${query}`
 }
 
-/** The query of /podcasts for a podcast (its slug) and a page, without the question mark. It is empty for the first page of all podcasts. */
+/**
+ * The query of /podcasts for a podcast (its slug) and a page, without the question mark. It is
+ * empty for the first page of all podcasts.
+ */
 function podcastsQuery(podcast: string | undefined, page: number) {
   const parameters = new URLSearchParams()
 
@@ -56,10 +64,11 @@ function podcastsQuery(podcast: string | undefined, page: number) {
 }
 
 /**
- * The page that the address asks for, undefined when the database can't give it, or 'unknown' when there is no such
- * page. A page that throws gets an empty page with a 500 from Next.js, and the text only after JavaScript runs. So this
- * page catches the error and shows the error page itself, in the HTML. `cache` makes the page and its metadata share one
- * call per request; its arguments are plain values, because `cache` compares objects by identity.
+ * The page that the address asks for, undefined when the database can't give it, or 'unknown'
+ * when there is no such page. A page that throws gets an empty page with a 500 from Next.js,
+ * and the text only after JavaScript runs. So this page catches the error and shows the error
+ * page itself, in the HTML. `cache` makes the page and its metadata share one call per request;
+ * its arguments are plain values, because `cache` compares objects by identity.
  */
 const loadPage = cache(async (podcast: string | undefined, page: number) => {
   try {
@@ -97,7 +106,8 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
       label: item.name,
     })),
   ]
-  // The addresses of the chosen podcast, as links in words. Each has the name of the podcast in its name for a screen reader.
+  // The addresses of the chosen podcast, as links in words. Each has the name of the podcast in
+  // its name for a screen reader.
   const platforms =
     selected === undefined
       ? []
@@ -177,7 +187,9 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
   )
 }
 
-/** The page for the address in the props, or the page "niet gevonden" when the address is wrong. */
+/**
+ * The page for the address in the props, or the page "niet gevonden" when the address is wrong.
+ */
 async function loadFor(searchParams: Promise<SearchParams>) {
   const query = parseQuery(await searchParams)
 

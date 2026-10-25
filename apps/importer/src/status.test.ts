@@ -37,7 +37,10 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()))
 })
 
-/** Starts a web server with a feed at `/rss/`, and puts it in the register under a source with this name. */
+/**
+ * Starts a web server with a feed at `/rss/`, and puts it in the register under a source with
+ * this name.
+ */
 async function addFeed(name: string, handler: Handler, { enabled = true } = {}) {
   const server = await startServer({ '/rss/': handler })
 
