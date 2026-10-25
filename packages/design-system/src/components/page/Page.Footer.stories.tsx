@@ -169,7 +169,7 @@ export const WideDark = meta.story({
 
 export const MediumLight = meta.story({
   ...screens,
-  globals: { theme: 'light', viewport: { value: 'tablet' } },
+  globals: { theme: 'light', viewport: { value: 'medium' } },
   name: 'Middelbaar scherm, licht',
   parameters: { docs: { description: { story: mediumDescription } } },
   render,
@@ -177,7 +177,7 @@ export const MediumLight = meta.story({
 
 export const MediumDark = meta.story({
   ...screens,
-  globals: { theme: 'dark', viewport: { value: 'tablet' } },
+  globals: { theme: 'dark', viewport: { value: 'medium' } },
   name: 'Middelbaar scherm, donker',
   parameters: { docs: { description: { story: mediumDescription } } },
   render,

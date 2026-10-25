@@ -252,12 +252,13 @@
    * left over (1fr). One row of links is as tall as the two lines of text, so it sits level
    * with them as before.
    *
-   * The text and the control are 14,1rem wide at the most, and with the margins on either
-   * side (2rem) that is 16,1rem. Under 17rem there is no room for them on one line, and a
-   * line that does not break there would make the page scroll sideways (WCAG 1.4.10
-   * Reflow). So under 17rem everything may wrap again, as a last resort. The rem follows
-   * the size of the text, so the limit keeps up with a larger text size, and a screen of
-   * 320px, also at 400% zoom, is far above it.
+   * The text and the control are 14,1rem wide at the most, and 17rem with the text spacing
+   * that WCAG 1.4.12 asks to support (letters 0,12em and words 0,16em apart). With the
+   * margins on either side (2rem) that is 19rem. Under 19,5rem there is no room for them on
+   * one line, and a line that does not break there would make the page scroll sideways
+   * (WCAG 1.4.10 Reflow). So under 19,5rem everything may wrap again, as a last resort. The
+   * rem follows the size of the text, so the limit keeps up with a larger text size, and a
+   * screen of 320px (20rem), also at 400% zoom, is above it.
    *
    * The stripes of the Frisian flag run over the footer and above it, slanting from the top left to the bottom right (the
    * diagonal of the flag is 34,695°). They are one picture, as tall as the footer and 2,5 times its height above it, in two
@@ -356,7 +357,7 @@
       margin-block-start: 0.75rem;
     }
 
-    @media (width >= 17rem) {
+    @media (width >= 19.5rem) {
       > :not(:last-child) {
         white-space: nowrap;
       }

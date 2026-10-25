@@ -112,7 +112,7 @@ describe('the text and the control in the footer in page.css', () => {
   const media = (query: string) =>
     footer.match(new RegExp(String.raw`@media \(${query}\) \{(.*?\n    \})\n`, 's'))?.[1] ?? ''
 
-  const nowrap = media('width >= 17rem')
+  const nowrap = media('width >= 19\\.5rem')
   const columns = media('width >= 40rem')
 
   it('keeps every line of text, button label and control of the footer on one line, but not the links', () => {
@@ -121,7 +121,7 @@ describe('the text and the control in the footer in page.css', () => {
   })
 
   it('does so only above a width where it fits, so a line that does not break cannot make the page scroll sideways', () => {
-    // 14,1rem of text and 2rem of margin is 16,1rem, so 17rem is the least that fits.
+    // 17rem of text with the spacing of WCAG 1.4.12 and 2rem of margin is 19rem, under 320px.
     expect(footer.match(/^\.hf-page-footer \{[^@]*/)?.[0]).not.toContain('nowrap')
     expect(footer.match(/white-space: nowrap;/g)).toHaveLength(1)
     expect(nowrap).toContain('white-space: nowrap;')
