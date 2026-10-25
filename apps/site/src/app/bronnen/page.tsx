@@ -10,13 +10,15 @@ import { groupByKind, websiteOf } from '../../register'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { getSources } from '../../sources'
 
-// Render on each request, so the build never reads the database. getSources caches the list itself.
+// Render on each request, so the build never reads the database. getSources caches the list
+// itself.
 export const dynamic = 'force-dynamic'
 
 /**
- * The sources, or undefined when the register can't give them. A page that throws gets an empty page with a 500 from
- * Next.js, and the text only after JavaScript runs. So this page catches the error and shows the error page itself, in
- * the HTML. `cache` makes the page and its metadata share one call per request.
+ * The sources, or undefined when the register can't give them. A page that throws gets an empty
+ * page with a 500 from Next.js, and the text only after JavaScript runs. So this page catches
+ * the error and shows the error page itself, in the HTML. `cache` makes the page and its
+ * metadata share one call per request.
  */
 const loadSources = cache(async () => {
   try {

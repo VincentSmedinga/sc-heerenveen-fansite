@@ -27,12 +27,14 @@ const subscribeToSystem = (onChange: () => void) => {
 const systemIsDark = () => matchMedia(darkQuery).matches
 
 /**
- * The two buttons Licht and Donker for the footer, of which the one a visitor sees is pressed. Pressing the other one
- * switches the page and keeps the choice on the device; if that is what the system gives anyway, the choice is forgotten
- * and the page follows the system again (chooseTheme), so there is no button for "Systeem".
+ * The two buttons Licht and Donker for the footer, of which the one a visitor sees is pressed.
+ * Pressing the other one switches the page and keeps the choice on the device; if that is what
+ * the system gives anyway, the choice is forgotten and the page follows the system again
+ * (chooseTheme), so there is no button for "Systeem".
  *
- * There is nothing on the server and while hydrating, so without JavaScript the page has no buttons that do nothing, and
- * the server's HTML is the same for everyone. The server knows nothing of the choice: public/theme.js puts it on the page.
+ * There is nothing on the server and while hydrating, so without JavaScript the page has no
+ * buttons that do nothing, and the server's HTML is the same for everyone. The server knows
+ * nothing of the choice: public/theme.js puts it on the page.
  */
 export const ThemeToggle = () => {
   const mounted = useSyncExternalStore(
@@ -57,7 +59,8 @@ export const ThemeToggle = () => {
       return
     }
 
-    // The system is read now, not from the state: a choice is judged when it is made, never afterwards.
+    // The system is read now, not from the state: a choice is judged when it is made, never
+    // afterwards.
     const next = chooseTheme(wanted, systemIsDark())
 
     savePreference(next)

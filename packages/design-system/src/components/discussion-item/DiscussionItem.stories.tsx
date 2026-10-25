@@ -51,7 +51,8 @@ const meta = preview.meta({
   title: 'Componenten/DiscussionItem',
 })
 
-// The block as the homepage has it, in the width of the sidebar. The discussions are made up, as are the screen names.
+// The block as the homepage has it, in the width of the sidebar. The discussions are made up,
+// as are the screen names.
 const renderBlock = (maxInlineSize: string) => () => (
   <div style={{ maxInlineSize }}>
     <Card aria-labelledby="discussies-kop">
@@ -134,8 +135,9 @@ export const NarrowDark = meta.story({
   render: renderNarrow,
 })
 
-// A title is only underlined under the mouse and with the focus of the keyboard, so those states are imitated: the first
-// title is under the mouse, the second has the focus and the third has been visited.
+// A title is only underlined under the mouse and with the focus of the keyboard, so those
+// states are imitated: the first title is under the mouse, the second has the focus and the
+// third has been visited.
 const stateParameters = {
   docs: {
     description: {

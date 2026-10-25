@@ -8,9 +8,10 @@ import { unhealthyAfter } from './run-log.ts'
 import { formatTime } from './text.ts'
 
 /**
- * Shows the health of each feed of the sources that are switched on: the source, the address, the last run that
- * succeeded, the failed runs in a row, the last error and whether the feed is healthy. Above it is the last run, so you
- * can see that cron starts the import. It only reads, and changes nothing in the database.
+ * Shows the health of each feed of the sources that are switched on: the source, the address,
+ * the last run that succeeded, the failed runs in a row, the last error and whether the feed is
+ * healthy. Above it is the last run, so you can see that cron starts the import. It only reads,
+ * and changes nothing in the database.
  *
  * Returns the exit code: 1 when a feed is unhealthy, so a check can tell.
  */

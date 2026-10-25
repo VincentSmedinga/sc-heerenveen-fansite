@@ -22,7 +22,8 @@ afterAll(() => {
   rmSync(folder, { force: true, recursive: true })
 })
 
-// A folder in the system's temporary folder has no node_modules above it, so the file must hold everything.
+// A folder in the system's temporary folder has no node_modules above it, so the file must hold
+// everything.
 const run = (env: Record<string, string>, ...args: string[]) =>
   promisify(execFile)(process.execPath, [file, ...args], {
     cwd: folder,

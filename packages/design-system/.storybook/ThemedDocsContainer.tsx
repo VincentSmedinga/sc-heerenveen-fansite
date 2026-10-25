@@ -43,8 +43,8 @@ export const ThemedDocsContainer = ({ children, context }: PropsWithChildren<Doc
 }
 
 /*
- * The store isn't part of the public docs context type, so read it defensively. If a Storybook update
- * changes it, the theme in the URL still works.
+ * The store isn't part of the public docs context type, so read it defensively. If a Storybook
+ * update changes it, the theme in the URL still works.
  */
 const initialChoice = (context: DocsContainerProps['context']): ThemeChoice => {
   const { store } = context as { store?: { userGlobals?: { globals?: Record<string, unknown> } } }

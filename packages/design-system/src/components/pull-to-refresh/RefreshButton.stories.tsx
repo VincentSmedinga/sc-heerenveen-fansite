@@ -32,7 +32,8 @@ const meta = preview.meta({
   title: 'Componenten/RefreshButton',
 })
 
-// The button is fixed to the top corner of the screen. A transform on the frame makes it the box the button is fixed to.
+// The button is fixed to the top corner of the screen. A transform on the frame makes it the
+// box the button is fixed to.
 const frame = () => (
   <div style={{ blockSize: '6rem', transform: 'translateZ(0)' }}>
     <RefreshButton onClick={() => undefined} />

@@ -69,7 +69,8 @@ export const StatesDark = meta.story({
   render,
 })
 
-// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the same as the stories above.
+// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the
+// same as the stories above.
 const screens = { tags: ['!autodocs'] }
 
 const narrowDescription = 'Op een smal scherm staan de links onder de tekst, links uitgelijnd.'

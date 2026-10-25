@@ -29,7 +29,8 @@ const meta = preview.meta({
   title: 'HTML-elementen/Formulier',
 })
 
-// The two answers of the radio buttons and the checkbox have no component yet, so they are bare elements here.
+// The two answers of the radio buttons and the checkbox have no component yet, so they are bare
+// elements here.
 const renderForm = (withErrors: boolean) => (
   <>
     {withErrors ? (

@@ -1,11 +1,14 @@
-// Asks an MCP server of the design system what an agent asks first, and checks the answers against the manifests of the
-// Storybook that it should show. Dependency-free, so the workflow runs it right after a deploy, on the real address.
+// Asks an MCP server of the design system what an agent asks first, and checks the answers
+// against the manifests of the Storybook that it should show. Dependency-free, so the workflow
+// runs it right after a deploy, on the real address.
 //
-//   node scripts/check.js <address of the server> <folder of the Storybook build> [seconds to try]
+//   node scripts/check.js <address of the server> <folder of the Storybook build>
+//     [seconds to try]
 //
-// Fails (exit code 1) if the server doesn't answer, offers other tools than the three for the documentation, or leaves a
-// component of the build out of the overview. With a number of seconds it tries again until the server answers, because
-// the host starts the app on the first request after a restart.
+// Fails (exit code 1) if the server doesn't answer, offers other tools than the three for the
+// documentation, or leaves a component of the build out of the overview. With a number of
+// seconds it tries again until the server answers, because the host starts the app on the first
+// request after a restart.
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -46,7 +49,8 @@ export async function check(url, storybookDir) {
 
   assert.deepEqual(missing, [], `docs-list leaves out ${missing.length} of ${ids.length} components of the build`)
 
-  // One component with props, to show that docs-show reads the manifest and not only the overview.
+  // One component with props, to show that docs-show reads the manifest and not only the
+  // overview.
   const withProps = ids.find((id) => Object.keys(components[id].reactComponentMeta?.props ?? {}).length > 0)
 
   if (withProps !== undefined) {

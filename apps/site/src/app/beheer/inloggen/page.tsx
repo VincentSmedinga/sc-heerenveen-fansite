@@ -22,7 +22,8 @@ const messages = {
 const isMessage = (value: string | string[] | undefined): value is keyof typeof messages =>
   typeof value === 'string' && Object.hasOwn(messages, value)
 
-// A public page of the admin: the one place to ask for a login link. It has no password and no puzzle (WCAG 3.3.8).
+// A public page of the admin: the one place to ask for a login link. It has no password and no
+// puzzle (WCAG 3.3.8).
 export default async function LoginPage({
   searchParams,
 }: {
@@ -36,8 +37,8 @@ export default async function LoginPage({
 
   const { fout } = await searchParams
   const message = isMessage(fout) ? messages[fout] : undefined
-  // Only a wrong address is an error of the field. A link that no longer works, or the rate limit, is not about what is
-  // typed.
+  // Only a wrong address is an error of the field. A link that no longer works, or the rate
+  // limit, is not about what is typed.
   const error = fout === 'ongeldig' ? message : undefined
   const notice = fout === 'ongeldig' ? undefined : message
 

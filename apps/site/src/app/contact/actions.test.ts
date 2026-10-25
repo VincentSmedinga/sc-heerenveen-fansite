@@ -132,7 +132,8 @@ describe('sendContactMessage', () => {
   it('lets ten messages through in an hour and then says so, without sending an eleventh', async () => {
     vi.setSystemTime(new Date('2026-10-24T10:00:00Z'))
 
-    // The limit is in the memory of the module, so every test before this one has used some of it already.
+    // The limit is in the memory of the module, so every test before this one has used some of
+    // it already.
     vi.resetModules()
     const { sendContactMessage: fresh } = await import('./actions')
 

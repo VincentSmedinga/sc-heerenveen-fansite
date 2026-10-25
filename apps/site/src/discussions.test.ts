@@ -7,7 +7,9 @@ vi.mock('./database', () => ({ getDatabase: () => ({ db }) }))
 
 const minute = 60 * 1000
 
-/** The cache lives in the module, so every test loads a module of its own, with an empty cache. */
+/**
+ * The cache lives in the module, so every test loads a module of its own, with an empty cache.
+ */
 async function loadDiscussions() {
   vi.resetModules()
 

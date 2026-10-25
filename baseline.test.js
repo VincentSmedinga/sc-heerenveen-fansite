@@ -1,6 +1,7 @@
-// Runs Stylelint and ESLint with the configuration of this repository on code that uses a feature that is not Baseline
-// widely available, and checks that both report it. The features are far from widely available (Chrome has them, and
-// Safari doesn't or won't), so these tests don't start failing when the linters' data moves on.
+// Runs Stylelint and ESLint with the configuration of this repository on code that uses a
+// feature that is not Baseline widely available, and checks that both report it. The features
+// are far from widely available (Chrome has them, and Safari doesn't or won't), so these tests
+// don't start failing when the linters' data moves on.
 import { ESLint } from 'eslint'
 import assert from 'node:assert/strict'
 import { join } from 'node:path'
@@ -18,8 +19,8 @@ const lintCss = async (code) => {
   return results[0].warnings.map(({ rule, severity }) => `${severity} ${rule}`)
 }
 
-// The probe files below don't exist, so TypeScript's project service gets them as default project files, with the
-// compiler options of the design system.
+// The probe files below don't exist, so TypeScript's project service gets them as default
+// project files, with the compiler options of the design system.
 const eslint = new ESLint({
   cwd: root,
   overrideConfig: {
@@ -62,7 +63,8 @@ test('Stylelint reports a temporary exception that is no longer needed', async (
   )
 })
 
-// Not about Baseline, but the same way to show that a rule catches what it is for: 100vw includes the scrollbar.
+// Not about Baseline, but the same way to show that a rule catches what it is for: 100vw
+// includes the scrollbar.
 test('Stylelint reports a width of 100vw, also inside calc(), as a maximum and as svw, lvw or dvw', async () => {
   for (const declaration of [
     'inline-size: 100vw',

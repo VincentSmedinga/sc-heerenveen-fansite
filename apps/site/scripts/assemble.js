@@ -1,8 +1,9 @@
-// Copies the standalone build to a new folder, with the static files next to the server, the way the host needs them.
-// Next.js leaves those files out of the standalone folder, and the SQL files of the migrations too: it only follows what the
-// code imports. The importer and the command that sends a test mail go in the same folder, as one file each. CI copies
-// the result to the host, and runs smoke.js and the importer on it first.
-// The folder has no symbolic links: pnpm's node_modules is flattened into real folders (see flattenModules).
+// Copies the standalone build to a new folder, with the static files next to the server, the
+// way the host needs them. Next.js leaves those files out of the standalone folder, and the SQL
+// files of the migrations too: it only follows what the code imports. The importer and the
+// command that sends a test mail go in the same folder, as one file each. CI copies the result
+// to the host, and runs smoke.js and the importer on it first. The folder has no symbolic
+// links: pnpm's node_modules is flattened into real folders (see flattenModules).
 //
 //   node scripts/assemble.js <new folder>
 import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
@@ -27,10 +28,11 @@ function findLinks(folder) {
 }
 
 /**
- * Replaces pnpm's node_modules, a store of folders that point at each other with links, by one flat node_modules of real
- * folders. On mijn.host Node keeps the path through a link when it loads a module of Next.js. It then looks for the
- * packages next to Next.js in the wrong place, and the first request ends in "Cannot find module '@swc/helpers/...'". The
- * smoke test can't see that, because it runs on another machine. Without links there is nothing to follow.
+ * Replaces pnpm's node_modules, a store of folders that point at each other with links, by one
+ * flat node_modules of real folders. On mijn.host Node keeps the path through a link when it
+ * loads a module of Next.js. It then looks for the packages next to Next.js in the wrong place,
+ * and the first request ends in "Cannot find module '@swc/helpers/...'". The smoke test can't
+ * see that, because it runs on another machine. Without links there is nothing to follow.
  */
 function flattenModules(root) {
   const store = path.join(root, 'node_modules/.pnpm')
@@ -55,7 +57,8 @@ function flattenModules(root) {
 
   rmSync(store, { recursive: true })
 
-  // The links that pointed into the store, such as apps/site/node_modules/next, now point nowhere.
+  // The links that pointed into the store, such as apps/site/node_modules/next, now point
+  // nowhere.
   for (const link of findLinks(root)) {
     if (!existsSync(link)) rmSync(link)
   }
@@ -67,7 +70,10 @@ function flattenModules(root) {
   }
 }
 
-/** The packages that sit in a folder of pnpm's store as real folders, as opposed to the links to their dependencies. */
+/**
+ * The packages that sit in a folder of pnpm's store as real folders, as opposed to the links to
+ * their dependencies.
+ */
 function ownPackages(modules) {
   return entries(modules).flatMap(({ full, name, stat }) => {
     if (stat.isSymbolicLink()) return []
@@ -97,30 +103,34 @@ const standalone = path.resolve(import.meta.dirname, '../.next/standalone')
 const siteFolder = path.join(target, 'apps/site')
 
 mkdirSync(target, { recursive: true })
-// The links inside node_modules are relative. Copy them as they are, or they'd point back into the build.
+// The links inside node_modules are relative. Copy them as they are, or they'd point back into
+// the build.
 cpSync(standalone, target, { recursive: true, verbatimSymlinks: true })
 flattenModules(target)
 mkdirSync(path.join(siteFolder, '.next'), { recursive: true })
 cpSync(path.resolve(import.meta.dirname, '../.next/static'), path.join(siteFolder, '.next/static'), { recursive: true })
 // The standalone folder leaves out public as well: the picture for shared links is in it.
 cpSync(path.resolve(import.meta.dirname, '../public'), path.join(siteFolder, 'public'), { recursive: true })
-// The server runs the migrations when it starts. It looks for them in packages/db/drizzle, two folders above apps/site,
-// as in the repository (see migrationsFolder in src/instrumentation-node.ts).
+// The server runs the migrations when it starts. It looks for them in packages/db/drizzle, two
+// folders above apps/site, as in the repository (see migrationsFolder in
+// src/instrumentation-node.ts).
 cpSync(path.resolve(import.meta.dirname, '../../../packages/db/drizzle'), path.join(target, 'packages/db/drizzle'), {
   recursive: true,
 })
-// Cron starts the importer on the host, from apps/importer/import.mjs (see docs/acceptatieomgeving.md). It is one file with
-// everything it needs, so it uses no node_modules. Deployed together, the importer keeps in step with the schema, which
-// the site brings up to date when it starts.
+// Cron starts the importer on the host, from apps/importer/import.mjs (see
+// docs/acceptatieomgeving.md). It is one file with everything it needs, so it uses no
+// node_modules. Deployed together, the importer keeps in step with the schema, which the site
+// brings up to date when it starts.
 await bundleImporter(path.join(target, 'apps/importer/import.mjs'))
-// The owner runs this once on the host, to see that mail leaves the site (see docs/acceptatieomgeving.md). It is one file
-// too, because the standalone build only holds the packages that a page imports, and no page sends mail yet.
+// The owner runs this once on the host, to see that mail leaves the site (see
+// docs/acceptatieomgeving.md). It is one file too, because the standalone build only holds the
+// packages that a page imports, and no page sends mail yet.
 await bundleCommand(
   path.resolve(import.meta.dirname, '../src/send-test-mail.ts'),
   path.join(siteFolder, 'send-test-mail.mjs'),
 )
-// The commands that make and turn off the accounts of the admin (`pnpm admin:create` and `pnpm admin:revoke` on a computer
-// with pnpm). The host has no pnpm, so the owner runs this file with Node over SSH (see docs/acceptatieomgeving.md). It
-// needs only DATABASE_URL, which an SSH session doesn't get from the Node.js app: it comes from the same file as for
-// the importer.
+// The commands that make and turn off the accounts of the admin (`pnpm admin:create` and `pnpm
+// admin:revoke` on a computer with pnpm). The host has no pnpm, so the owner runs this file
+// with Node over SSH (see docs/acceptatieomgeving.md). It needs only DATABASE_URL, which an SSH
+// session doesn't get from the Node.js app: it comes from the same file as for the importer.
 await bundleCommand(path.resolve(import.meta.dirname, '../src/admin.ts'), path.join(siteFolder, 'admin.mjs'))

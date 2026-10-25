@@ -26,8 +26,8 @@ export type TestServer = {
 }
 
 /**
- * Makes a fetcher that may reach these test servers on this computer. It refuses every other address that is not on
- * the public internet, as the fetcher of the import command does.
+ * Makes a fetcher that may reach these test servers on this computer. It refuses every other
+ * address that is not on the public internet, as the fetcher of the import command does.
  */
 export function fetcherFor(servers: TestServer[], options: FetcherOptions = {}) {
   return createFetcher({ ...options, testOrigins: servers.map((server) => server.origin) })
@@ -42,9 +42,10 @@ export function reply(status: number, body: Buffer | string = '', headers: Recor
 }
 
 /**
- * Starts a web server on a free port of this computer, for tests that must not ask a real site. `routes` maps a path
- * and query to a handler; any other path is a 404. `host` is what the server listens on: give two servers different
- * names, such as `127.0.0.1` and `localhost`, to get two hosts.
+ * Starts a web server on a free port of this computer, for tests that must not ask a real site.
+ * `routes` maps a path and query to a handler; any other path is a 404. `host` is what the
+ * server listens on: give two servers different names, such as `127.0.0.1` and `localhost`, to
+ * get two hosts.
  */
 export async function startServer(routes: Record<string, Handler>, host = '127.0.0.1'): Promise<TestServer> {
   const requests: RecordedRequest[] = []
@@ -64,7 +65,8 @@ export async function startServer(routes: Record<string, Handler>, host = '127.0
     close: () =>
       new Promise<void>((resolve) => {
         server.close(() => resolve())
-        // The fetcher keeps connections open, and a test that stalls on purpose leaves one hanging.
+        // The fetcher keeps connections open, and a test that stalls on purpose leaves one
+        // hanging.
         server.closeAllConnections()
       }),
     origin: `http://${host}:${port}`,

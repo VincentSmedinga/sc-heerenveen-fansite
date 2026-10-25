@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 
 import { Heading, Link, Page, Text } from '@fansite/design-system'
 
-// The confirmation has an address of its own, so reloading it sends nothing again. A search engine has no use for it.
+// The confirmation has an address of its own, so reloading it sends nothing again. A search
+// engine has no use for it.
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Bericht verstuurd' }
 
 export default function SentPage() {

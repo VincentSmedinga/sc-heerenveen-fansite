@@ -4,9 +4,10 @@ import { adminLoginLinks, adminSessions, adminUsers } from '@fansite/db/schema'
 import { and, eq, gt, isNull, lte, or } from 'drizzle-orm'
 import { createHash, randomBytes } from 'node:crypto'
 
-// The sessions of the admin, on the server. The cookie holds a random token and nothing else (see require-role.ts), and the
-// database keeps the SHA-256 of the token, so a copy of the database logs nobody in. A token is 256 random bits, so a hash
-// without salt is enough: there is nothing to guess.
+// The sessions of the admin, on the server. The cookie holds a random token and nothing else
+// (see require-role.ts), and the database keeps the SHA-256 of the token, so a copy of the
+// database logs nobody in. A token is 256 random bits, so a hash without salt is enough: there
+// is nothing to guess.
 
 const minute = 60 * 1000
 
@@ -19,15 +20,19 @@ export const idleLifetime = 12 * 60 * minute
 /** A session ends this long after it began, however often it was used. */
 export const absoluteLifetime = 7 * 24 * 60 * minute
 
-/** Ends a session on the server: the token stops working at once, whatever the browser still holds. */
+/**
+ * Ends a session on the server: the token stops working at once, whatever the browser still
+ * holds.
+ */
 export async function endSession(db: Database, token: string) {
   await db.delete(adminSessions).where(eq(adminSessions.tokenHash, hashOf(token)))
 }
 
 /**
- * The account behind a session token, or `undefined` when the token is unknown, the session has ended (12 hours without
- * a request, or 7 days since it began) or the account is turned off. A valid session counts as a request, so it stays open
- * another 12 hours. An ended session is removed.
+ * The account behind a session token, or `undefined` when the token is unknown, the session has
+ * ended (12 hours without a request, or 7 days since it began) or the account is turned off. A
+ * valid session counts as a request, so it stays open another 12 hours. An ended session is
+ * removed.
  */
 export async function findSession(db: Database, token: string, now = new Date()) {
   const tokenHash = hashOf(token)
@@ -67,8 +72,9 @@ export function hashOf(value: string) {
 }
 
 /**
- * Whether a login link would work now, without using it up. A mail scanner or a link preview opens the link before the
- * person does, so the link only shows a button, and the button uses the link up (see `redeemLoginLink`).
+ * Whether a login link would work now, without using it up. A mail scanner or a link preview
+ * opens the link before the person does, so the link only shows a button, and the button uses
+ * the link up (see `redeemLoginLink`).
  */
 export async function loginLinkWorks(db: Database, token: string, now = new Date()) {
   const [row] = await db
@@ -92,9 +98,10 @@ export function newToken() {
 }
 
 /**
- * Uses a login link up and starts a session for its account: the token for the cookie, or `undefined` when the link is
- * unknown, has expired, was used before or belongs to an account that is turned off. It deletes the row first and only goes
- * on when it deleted exactly one, so two requests with the same link can't both log in.
+ * Uses a login link up and starts a session for its account: the token for the cookie, or
+ * `undefined` when the link is unknown, has expired, was used before or belongs to an account
+ * that is turned off. It deletes the row first and only goes on when it deleted exactly one, so
+ * two requests with the same link can't both log in.
  */
 export async function redeemLoginLink(db: Database, token: string, now = new Date()) {
   const tokenHash = hashOf(token)
@@ -117,7 +124,9 @@ export async function redeemLoginLink(db: Database, token: string, now = new Dat
   return startSession(db, link.user.id, now)
 }
 
-/** Removes the sessions and the login links that have ended, so the tables don't collect them. */
+/**
+ * Removes the sessions and the login links that have ended, so the tables don't collect them.
+ */
 export async function removeEnded(db: Database, now = new Date()) {
   await db.delete(adminLoginLinks).where(lte(adminLoginLinks.expiresAt, now))
   await db

@@ -597,8 +597,8 @@ describe('redirects', () => {
 })
 
 describe('addresses that are not on the public internet', () => {
-  // The fetcher checks the address it connects to. A server on this computer shows that it never gets that far: the
-  // server gets no request.
+  // The fetcher checks the address it connects to. A server on this computer shows that it
+  // never gets that far: the server gets no request.
   const named = ['localhost', '127.0.0.1', '[::1]', '10.0.0.1', '169.254.169.254']
 
   it.each([...named, '0.0.0.0', '[::ffff:127.0.0.1]'])('refuses %s in the URL, and asks it nothing', async (host) => {

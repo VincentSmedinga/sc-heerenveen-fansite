@@ -2,7 +2,8 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { feeds, items, sources } from '@fansite/db/schema'
 
-// Made-up sources and items for the tests of the admin, in a database from `createTestDatabase`.
+// Made-up sources and items for the tests of the admin, in a database from
+// `createTestDatabase`.
 
 /** An item of that source. Returns its id. */
 export async function addItem(

@@ -1,7 +1,9 @@
-// The command that sends one test mail, for the owner to see that mail leaves the site (see docs/acceptatieomgeving.md).
-// `pnpm --filter site assemble` bundles it into apps/site/send-test-mail.mjs, which runs on the host with the settings of
-// the mail server in the environment, as `node --env-file=<file> send-test-mail.mjs <address>`. It runs as soon as it
-// loads, like the import command, and says nothing about the settings or the address except what is wrong with them.
+// The command that sends one test mail, for the owner to see that mail leaves the site (see
+// docs/acceptatieomgeving.md). `pnpm --filter site assemble` bundles it into
+// apps/site/send-test-mail.mjs, which runs on the host with the settings of the mail server in
+// the environment, as `node --env-file=<file> send-test-mail.mjs <address>`. It runs as soon as
+// it loads, like the import command, and says nothing about the settings or the address except
+// what is wrong with them.
 import { readMailEnv } from './env'
 import { MailError, sendMail } from './mail'
 
@@ -14,7 +16,8 @@ async function sendTestMail(to: string) {
       to,
     })
 
-    // Without settings, which only the local environment allows, sendMail has logged the mail instead.
+    // Without settings, which only the local environment allows, sendMail has logged the mail
+    // instead.
     if (readMailEnv().SMTP_HOST !== undefined) {
       console.log('The mail server took the test mail. Look in the mailbox of the address.')
     }

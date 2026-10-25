@@ -1,5 +1,5 @@
-// Tests the parts of `pnpm screenshots` that decide something and need no browser. The browser and the files are tried by
-// hand (see the pull request).
+// Tests the parts of `pnpm screenshots` that decide something and need no browser. The browser
+// and the files are tried by hand (see the pull request).
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 

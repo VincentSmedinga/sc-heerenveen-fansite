@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest'
 const read = (path: string) => readFileSync(join(import.meta.dirname, path), 'utf8')
 
 /**
- * The declarations of the class, as the browser parses the CSS file. jsdom doesn't apply rules in a cascade layer to
- * an element, so the test reads the rule instead of a computed style.
+ * The declarations of the class, as the browser parses the CSS file. jsdom doesn't apply rules
+ * in a cascade layer to an element, so the test reads the rule instead of a computed style.
  */
 function declarationsOf(selector: string) {
   const sheet = new CSSStyleSheet()

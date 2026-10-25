@@ -3,7 +3,10 @@ import type { Mail } from './mail'
 import { email } from './contact'
 import { isMailbox } from './mail-env'
 
-/** The answers of the Onderwerp list, with the value the form sends and the words the visitor and the editors read. */
+/**
+ * The answers of the Onderwerp list, with the value the form sends and the words the visitor
+ * and the editors read.
+ */
 export const subjects = [
   { label: 'Een bericht laten verwijderen', value: 'verwijderen' },
   { label: 'Een fout in een bericht', value: 'fout' },
@@ -23,7 +26,10 @@ export type FieldName = (typeof fieldNames)[number]
 
 export const maxLengths = { bericht: 2000, 'e-mail': 254, link: 2000, naam: 100 } as const
 
-/** The values of a form, as the form sends them: text, or nothing if a field is missing or is not text. */
+/**
+ * The values of a form, as the form sends them: text, or nothing if a field is missing or is
+ * not text.
+ */
 export function readValues(formData: FormData): ContactValues {
   const text = (name: string) => {
     const value = formData.get(name)
@@ -44,8 +50,8 @@ const newLine = /[\r\n\u2028\u2029]/
 const lengthOf = (value: string) => [...value].length
 
 /**
- * The mail for the editors: the visitor's address as the reply address, and their answers in the text. Values must be
- * valid.
+ * The mail for the editors: the visitor's address as the reply address, and their answers in
+ * the text. Values must be valid.
  */
 export function toMail(values: ContactValues): Mail {
   const subject = subjects.find(({ value }) => value === values.onderwerp)?.label ?? ''
@@ -68,8 +74,9 @@ export function toMail(values: ContactValues): Mail {
 }
 
 /**
- * Checks what the visitor filled in, and returns an error in words for each field that is wrong: what is wrong and how to
- * put it right. No errors means the values are fine to send. The values must be as readValues gives them.
+ * Checks what the visitor filled in, and returns an error in words for each field that is
+ * wrong: what is wrong and how to put it right. No errors means the values are fine to send.
+ * The values must be as readValues gives them.
  */
 export function validate(values: ContactValues): ContactErrors {
   const errors: ContactErrors = {}
@@ -104,7 +111,10 @@ export function validate(values: ContactValues): ContactErrors {
   return errors
 }
 
-/** An address, without a name in front of it: the visitor gives their address, and nobody else's. */
+/**
+ * An address, without a name in front of it: the visitor gives their address, and nobody
+ * else's.
+ */
 function isAddress(value: string) {
   return isMailbox(value) && !/[<>]/.test(value)
 }
@@ -126,10 +136,15 @@ function isLink(value: string) {
 /** The name of the Honeypot in the form. A robot fills it in, a visitor never sees it. */
 export const honeypotName = 'website'
 
-/** The state of the form after a submit: what the visitor filled in, and what went wrong, in words. */
+/**
+ * The state of the form after a submit: what the visitor filled in, and what went wrong, in
+ * words.
+ */
 export type ContactState = {
   errors: ContactErrors
-  /** `send` when the mail could not be sent, `limit` when too many messages came in this hour. */
+  /**
+   * `send` when the mail could not be sent, `limit` when too many messages came in this hour.
+   */
   failure?: 'limit' | 'send'
   values: ContactValues
 }
@@ -140,8 +155,9 @@ export const emptyState: ContactState = {
 }
 
 /**
- * Whether a request comes from our own site: the host of its `Origin` is the host it was sent to. A request without an
- * Origin is refused, because a browser always sends one when it posts a form.
+ * Whether a request comes from our own site: the host of its `Origin` is the host it was sent
+ * to. A request without an Origin is refused, because a browser always sends one when it posts
+ * a form.
  */
 export function isOwnOrigin(origin: null | string, host: null | string) {
   if (origin === null || host === null) {

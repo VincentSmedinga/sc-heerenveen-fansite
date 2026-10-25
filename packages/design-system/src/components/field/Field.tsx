@@ -5,24 +5,31 @@ import { Text } from '../text/Text'
 
 export type FieldProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'id'> & {
   /**
-   * The field: an Input, a Textarea or a Select. Field gives it the `id`, `aria-describedby`, `aria-invalid` and
-   * `required` it needs.
+   * The field: an Input, a Textarea or a Select. Field gives it the `id`, `aria-describedby`,
+   * `aria-invalid` and `required` it needs.
    */
   children: ReactElement<FieldControlProps>
-  /** What is wrong with the answer, and how to put it right. Without it, the field has no error. */
+  /**
+   * What is wrong with the answer, and how to put it right. Without it, the field has no error.
+   */
   error?: string | undefined
   /**
-   * Extra help under the label, such as the format of the answer. Plain text only: some screen readers, such as VoiceOver,
-   * skip a link or a list in a description, so the reader would not hear it.
+   * Extra help under the label, such as the format of the answer. Plain text only: some screen
+   * readers, such as VoiceOver, skip a link or a list in a description, so the reader would not
+   * hear it.
    */
   hint?: string
-  /** The `id` of the field. The label, the hint and the error are tied to it, and an ErrorSummary links to it. */
+  /**
+   * The `id` of the field. The label, the hint and the error are tied to it, and an
+   * ErrorSummary links to it.
+   */
   id: string
   /** The visible label. A placeholder is not a label. */
   label: ReactNode
   /**
-   * Whether the field has to be filled in. A field is required unless you say otherwise: we only ask what we need.
-   * The label only says it when a field is not required, in words: "niet verplicht".
+   * Whether the field has to be filled in. A field is required unless you say otherwise: we
+   * only ask what we need. The label only says it when a field is not required, in words: "niet
+   * verplicht".
    */
   required?: boolean
 }
@@ -36,9 +43,10 @@ type FieldControlProps = {
 }
 
 /**
- * A label with a field and, when there are any, a hint and an error, tied together: the label with `for` and `id`, and the
- * hint and the error with `aria-describedby`. A field with an error also gets `aria-invalid`. The error is text and starts
- * with "Fout:" for a screen reader, so a red border is never the only sign. field.css gives it its look.
+ * A label with a field and, when there are any, a hint and an error, tied together: the label
+ * with `for` and `id`, and the hint and the error with `aria-describedby`. A field with an
+ * error also gets `aria-invalid`. The error is text and starts with "Fout:" for a screen
+ * reader, so a red border is never the only sign. field.css gives it its look.
  */
 export const Field = ({ children, className, error, hint, id, label, required = true, ...props }: FieldProps) => {
   const hintId = `${id}-hint`

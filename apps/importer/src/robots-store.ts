@@ -10,9 +10,9 @@ import type { RobotsRule } from './robots.ts'
 export const robotsMaxAgeMs = 24 * 60 * 60 * 1000
 
 /**
- * Keeps the rules of robots.txt in the database, in the table `robots_txt`, so the next runs need not ask the host again
- * for a day. The database is the only place that stays between runs: a deploy replaces the folder of the app. `clock`
- * gives the time, which a test can set.
+ * Keeps the rules of robots.txt in the database, in the table `robots_txt`, so the next runs
+ * need not ask the host again for a day. The database is the only place that stays between
+ * runs: a deploy replaces the folder of the app. `clock` gives the time, which a test can set.
  */
 export function robotsStoreFor(db: Database, clock: () => Date = () => new Date()): RobotsStore {
   return {
@@ -36,7 +36,10 @@ export function robotsStoreFor(db: Database, clock: () => Date = () => new Date(
   }
 }
 
-/** Reads the rules back from JSON, or gives undefined when they are not what we wrote, so the fetcher reads them again. */
+/**
+ * Reads the rules back from JSON, or gives undefined when they are not what we wrote, so the
+ * fetcher reads them again.
+ */
 function parseRules(json: string): RobotsRule[] | undefined {
   try {
     const rules: unknown = JSON.parse(json)

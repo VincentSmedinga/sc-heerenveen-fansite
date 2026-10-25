@@ -1,7 +1,8 @@
 /*
- * The pages of the site that a search engine may find, with the description that goes in the `meta description` and in
- * the Open Graph tags. This module imports nothing, so the smoke test can use it too. The sitemap lists these pages. A
- * new page is a line here, and sitemap.test.ts fails until it is (or until it is named as an exception there).
+ * The pages of the site that a search engine may find, with the description that goes in the
+ * `meta description` and in the Open Graph tags. This module imports nothing, so the smoke test
+ * can use it too. The sitemap lists these pages. A new page is a line here, and sitemap.test.ts
+ * fails until it is (or until it is named as an exception there).
  */
 
 export const siteName = 'sc Heerenveen Fansite'
@@ -46,7 +47,10 @@ export const pages = [
 
 export type PagePath = (typeof pages)[number]['path']
 
-/** The picture that a shared link shows. It is a file of our own, made by scripts/make-share-image.js. */
+/**
+ * The picture that a shared link shows. It is a file of our own, made by
+ * scripts/make-share-image.js.
+ */
 export const shareImage = {
   alt: 'Het schild van de sc Heerenveen Fansite: blauwe en witte Friese banen met een rood pompeblêd.',
   height: 630,

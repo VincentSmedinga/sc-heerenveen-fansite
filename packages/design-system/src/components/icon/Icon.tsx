@@ -17,7 +17,10 @@ export type IconName = (typeof iconNames)[number]
 
 export type IconProps =
   | {
-      /** `line` (default) is only the line, `filled` fills the shape. The filled one has the colour of the text as well. */
+      /**
+       * `line` (default) is only the line, `filled` fills the shape. The filled one has the
+       * colour of the text as well.
+       */
       appearance?: IconAppearance
       /** The icon that has a filled drawing as well: `appearance` chooses between them. */
       name: FilledIconName
@@ -27,9 +30,10 @@ export type IconProps =
       name: Exclude<IconName, FilledIconName>
     }
 
-// The drawings share one style: a line of the same width with round ends and round corners, no fill, and nothing that
-// reaches the edge of the square they are drawn in. The filled drawing of the sun and the moon is the same paths with a
-// fill. The rays of the sun are lines without an area, so the fill only shows in the disc and the crescent.
+// The drawings share one style: a line of the same width with round ends and round corners, no
+// fill, and nothing that reaches the edge of the square they are drawn in. The filled drawing
+// of the sun and the moon is the same paths with a fill. The rays of the sun are lines without
+// an area, so the fill only shows in the disc and the crescent.
 const drawings: Record<IconName, ReactNode> = {
   'arrow-left': (
     <>
@@ -79,11 +83,12 @@ const drawings: Record<IconName, ReactNode> = {
 }
 
 /**
- * A small icon, drawn here as an SVG: nothing loads from elsewhere, and it takes the colour of the text around it, also
- * under the mouse, with the focus and in forced colours. A link or a button is named by its own text alone, so the icon is
- * hidden from assistive technology and is never the only sign of something. The size, the space beside it and its place
- * in the line are in icon.css. It is not exported from the package: Link, Button, SegmentedControl, NewsItem and
- * Navigation draw it for the visitor.
+ * A small icon, drawn here as an SVG: nothing loads from elsewhere, and it takes the colour of
+ * the text around it, also under the mouse, with the focus and in forced colours. A link or a
+ * button is named by its own text alone, so the icon is hidden from assistive technology and is
+ * never the only sign of something. The size, the space beside it and its place in the line are
+ * in icon.css. It is not exported from the package: Link, Button, SegmentedControl, NewsItem
+ * and Navigation draw it for the visitor.
  */
 export const Icon = ({ appearance = 'line', name }: IconProps) => (
   <svg

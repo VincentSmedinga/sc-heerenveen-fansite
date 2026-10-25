@@ -4,7 +4,8 @@ import { applyTheme, isThemeChoice } from './theme'
 
 /*
  * Sets data-theme on the root element from the toolbar choice. A story that sets its own theme
- * (globals: { theme }) gets a wrapper instead, so on a docs page it doesn't change the other stories.
+ * (globals: { theme }) gets a wrapper instead, so on a docs page it doesn't change the other
+ * stories.
  */
 export const withTheme: Decorator = (Story, context) => {
   // Not in the typed context, so read it defensively.

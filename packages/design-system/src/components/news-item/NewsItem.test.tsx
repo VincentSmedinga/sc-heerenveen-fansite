@@ -56,7 +56,8 @@ describe('NewsItem', () => {
     const { container } = render(<NewsItem {...props} />)
     const layout = container.querySelector('.hf-news-item-layout')
 
-    // The container query only changes the layout, so the order stays the same when the time is above the headline.
+    // The container query only changes the layout, so the order stays the same when the time is
+    // above the headline.
     expect([...(layout?.children ?? [])].map((child) => child.className)).toEqual([
       'hf-meta hf-news-item-time',
       'hf-news-item-body',
@@ -237,7 +238,10 @@ describe('NewsItem', () => {
   })
 
   it('needs a headline, a link, a source, a time and the full time', () => {
-    /** The props without one of them. The type is wider than NewsItem allows, so every use below is an error. */
+    /**
+     * The props without one of them. The type is wider than NewsItem allows, so every use below
+     * is an error.
+     */
     const without = (name: keyof typeof props): Partial<typeof props> => ({ ...props, [name]: undefined })
     const elements = [
       // @ts-expect-error A news line without a headline says nothing.

@@ -1,7 +1,8 @@
 /**
- * Made-up answers of the Flarum API, in the shape of the real one: JSON:API, with the tags and the last poster in
- * `included`, and fields of the forum that we must not store. The titles and screen names are invented, and so are the
- * ids. No real content or members of the forum are in here.
+ * Made-up answers of the Flarum API, in the shape of the real one: JSON:API, with the tags and
+ * the last poster in `included`, and fields of the forum that we must not store. The titles and
+ * screen names are invented, and so are the ids. No real content or members of the forum are in
+ * here.
  */
 
 export type MadeUpDiscussion = {
@@ -10,15 +11,23 @@ export type MadeUpDiscussion = {
   lastPostedAt?: string
   /** The id of a user in `madeUpUsers`, or null for a discussion without a last poster. */
   lastPostedUser?: null | number
-  /** The number of the last post. The real API gives a higher number than `commentCount` when a post was deleted. */
+  /**
+   * The number of the last post. The real API gives a higher number than `commentCount` when a
+   * post was deleted.
+   */
   lastPostNumber?: number
-  /** As the API gives it: the id, a dash and the title in lower case, such as `2859-wie-wint-zondag`. */
+  /**
+   * As the API gives it: the id, a dash and the title in lower case, such as
+   * `2859-wie-wint-zondag`.
+   */
   slug?: string
   tags?: number[]
   title?: string
 }
 
-/** The tags a guest sees, with the ids and slugs of the real forum. De Pronkkeamer is hidden. */
+/**
+ * The tags a guest sees, with the ids and slugs of the real forum. De Pronkkeamer is hidden.
+ */
 export const madeUpTags = [
   { id: 2, isHidden: false, name: 'Algemeen', slug: 'algemeen' },
   { id: 3, isHidden: false, name: 'Wedstrijden', slug: 'wedstrijden' },
@@ -36,7 +45,9 @@ export const madeUpUsers = [
 /** The address of the API for a forum on this origin, as the seed has it. */
 export const discussionsPath = '/api/discussions?sort=-lastPostedAt&page[limit]=30&include=lastPostedUser,tags'
 
-/** The answer of the API to the request of the importer, with these discussions in this order. */
+/**
+ * The answer of the API to the request of the importer, with these discussions in this order.
+ */
 export function forumAnswer(discussions: MadeUpDiscussion[]): string {
   return JSON.stringify({
     data: discussions.map(resource),

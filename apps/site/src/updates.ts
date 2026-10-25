@@ -1,9 +1,12 @@
 /*
- * The page Updates: which versions it shows and how. This module imports nothing, so the smoke test can use it
- * too, to check the page against the CHANGELOG.md of the build.
+ * The page Updates: which versions it shows and how. This module imports nothing, so the smoke
+ * test can use it too, to check the page against the CHANGELOG.md of the build.
  */
 
-/** A released version as visitors see it: its number, its date as `2026-11-03`, and what changed, in Dutch. */
+/**
+ * A released version as visitors see it: its number, its date as `2026-11-03`, and what
+ * changed, in Dutch.
+ */
 export type Release = {
   date: string
   sentences: readonly string[]
@@ -22,15 +25,18 @@ export const updatesPath = '/updates'
 /** The address of its RSS feed. */
 export const feedPath = `${updatesPath}/feed.xml`
 
-// The heading release-please writes above a version: "## 0.1.0 (2026-10-21)" for the first, and later ones with a link to
-// the changes since the version before: "## [0.2.0](https://github.com/...) (2026-11-03)". Older versions of
-// release-please wrote a patch version with three #.
+// The heading release-please writes above a version: "## 0.1.0 (2026-10-21)" for the first, and
+// later ones with a link to the changes since the version before: "##
+// [0.2.0](https://github.com/...) (2026-11-03)". Older versions of release-please wrote a patch
+// version with three #.
 const versionHeading =
   /^#{2,3} (?:\[(?<linked>\d+\.\d+\.\d+)\]\([^)\s]*\)|(?<plain>\d+\.\d+\.\d+)) \((?<date>\d{4}-\d{2}-\d{2})\)$/gm
 
 const dateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', timeZone: 'UTC', year: 'numeric' })
 
-/** The id of the heading of a version on the page, such as `versie-0.2.0`. The feed links to it. */
+/**
+ * The id of the heading of a version on the page, such as `versie-0.2.0`. The feed links to it.
+ */
 export function anchorOf({ version }: Pick<Release, 'version'>) {
   return `versie-${version}`
 }
@@ -49,8 +55,9 @@ export function parseChangelog(changelog: string) {
 }
 
 /**
- * The versions in the changelog that have lines, in the order of the changelog. A version shows only once it is
- * released, so lines written ahead wait for it. A version without lines is left out.
+ * The versions in the changelog that have lines, in the order of the changelog. A version shows
+ * only once it is released, so lines written ahead wait for it. A version without lines is left
+ * out.
  */
 export function releasesOf(changelog: string, notes: ReleaseNotes): Release[] {
   return parseChangelog(changelog).flatMap(({ date, version }) => {

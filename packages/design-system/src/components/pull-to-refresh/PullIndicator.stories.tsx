@@ -36,7 +36,8 @@ const meta = preview.meta({
   title: 'Componenten/PullIndicator',
 })
 
-// The label is fixed to the top of the screen. A transform on the frame makes it the box the label is fixed to.
+// The label is fixed to the top of the screen. A transform on the frame makes it the box the
+// label is fixed to.
 const frame = (progress: number, refreshing = false) => (
   <div style={{ blockSize: '6rem', transform: 'translateZ(0)' }}>
     <PullIndicator progress={progress} refreshing={refreshing} />

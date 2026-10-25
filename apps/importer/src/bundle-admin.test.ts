@@ -1,6 +1,7 @@
-// The command that makes and turns off the accounts of the admin is the third command that `bundleCommand` bundles (see
-// apps/site/src/admin.ts). On the host there is no pnpm and an SSH session has no environment variables, so it runs with
-// Node and a file that holds DATABASE_URL, like the importer.
+// The command that makes and turns off the accounts of the admin is the third command that
+// `bundleCommand` bundles (see apps/site/src/admin.ts). On the host there is no pnpm and an SSH
+// session has no environment variables, so it runs with Node and a file that holds
+// DATABASE_URL, like the importer.
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { adminSessions, adminUsers } from '@fansite/db/schema'
@@ -33,8 +34,9 @@ afterAll(async () => {
   await database?.drop()
 })
 
-// A folder in the system's temporary folder has no node_modules above it, so the file must hold everything. The process
-// has no DATABASE_URL of its own: it reads the file, as `node --env-file=<file> admin.mjs` does on the host.
+// A folder in the system's temporary folder has no node_modules above it, so the file must hold
+// everything. The process has no DATABASE_URL of its own: it reads the file, as `node
+// --env-file=<file> admin.mjs` does on the host.
 const run = (...args: string[]) =>
   promisify(execFile)(process.execPath, [`--env-file=${envFile}`, file, ...args], {
     cwd: folder,

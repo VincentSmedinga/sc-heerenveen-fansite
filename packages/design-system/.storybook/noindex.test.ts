@@ -9,7 +9,8 @@ describe('addNoindexTo', () => {
   })
 })
 
-// main.ts sets both heads as functions; the type also allows a string, and the options hold more than configType.
+// main.ts sets both heads as functions; the type also allows a string, and the options hold
+// more than configType.
 type HeadFunction = (head: string, options: { configType: string }) => Promise<string | undefined> | string | undefined
 const managerHead = main.managerHead as HeadFunction
 const previewHead = main.previewHead as HeadFunction

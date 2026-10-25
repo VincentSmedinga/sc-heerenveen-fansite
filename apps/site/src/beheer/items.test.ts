@@ -182,8 +182,8 @@ describe('hideItem', () => {
   it('does not hide the item when the log refuses its row, so there is no change without a row', async () => {
     const id = await addItem(database, ids, 'een')
 
-    // A reason of 301 characters passes the column of items only if it fits; both columns are 300, so make the log
-    // refuse the row.
+    // A reason of 301 characters passes the column of items only if it fits; both columns are
+    // 300, so make the log refuse the row.
     await database.pool.query('ALTER TABLE audit_log MODIFY reason varchar(5)')
 
     try {

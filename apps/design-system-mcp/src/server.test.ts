@@ -8,8 +8,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMcpServer } from './server.ts'
 import { initializeParams, listen, rpc } from './test-client.ts'
 
-// A small copy of the manifests that Storybook builds: the same shape, with two components and one page, because the
-// manifests of the whole build are 200 kB. scripts/smoke.js runs the same checks against the manifests of a real build.
+// A small copy of the manifests that Storybook builds: the same shape, with two components and
+// one page, because the manifests of the whole build are 200 kB. scripts/smoke.js runs the same
+// checks against the manifests of a real build.
 const fixtureDir = path.resolve(import.meta.dirname, 'fixtures')
 
 describe('the MCP server of the design system', () => {
@@ -81,7 +82,8 @@ describe('the MCP server of the design system', () => {
     const [first, second] = [await start(), await start()]
     const { response } = await rpc(first, 'initialize', initializeParams)
 
-    // The client has no session to send: the server gives none. A client that sends one anyway is answered all the same.
+    // The client has no session to send: the server gives none. A client that sends one anyway
+    // is answered all the same.
     expect(response.headers.get('mcp-session-id')).toBeNull()
 
     const sessionId = 'a-session-another-process-started'
@@ -146,8 +148,9 @@ describe('the MCP server of the design system', () => {
     const requested: string[] = []
     const realFetch = globalThis.fetch
 
-    // Everything the server would fetch goes through the global fetch of this process, the library's default provider
-    // included. The only requests allowed are the ones of the test client, to the server itself.
+    // Everything the server would fetch goes through the global fetch of this process, the
+    // library's default provider included. The only requests allowed are the ones of the test
+    // client, to the server itself.
     vi.stubGlobal('fetch', (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
       requested.push(String(input instanceof Request ? input.url : input))
 

@@ -17,14 +17,18 @@ export const episodesPerPage = 25
 const fiveMinutes = 5 * 60 * 1000
 
 /**
- * The newest episodes of all podcasts together, for the block on the homepage. The list is cached for five minutes, so
- * a visit doesn't cost a query and a new episode shows within five minutes of the import.
+ * The newest episodes of all podcasts together, for the block on the homepage. The list is
+ * cached for five minutes, so a visit doesn't cost a query and a new episode shows within five
+ * minutes of the import.
  */
 export const getLatestEpisodes = cacheFor(fiveMinutes, () =>
   listPodcastEpisodes(getDatabase().db, { limit: itemsPerCard, until: new Date() }),
 )
 
-/** The part of the options of a query that limits it to a podcast, or nothing for all podcasts (an empty slug). */
+/**
+ * The part of the options of a query that limits it to a podcast, or nothing for all podcasts
+ * (an empty slug).
+ */
 function onlyPodcast(slug: string) {
   return slug === '' ? {} : { podcast: slug }
 }
@@ -33,17 +37,23 @@ function onlyPodcast(slug: string) {
 const getPodcasts = cacheFor(fiveMinutes, () => listPodcasts(getDatabase().db))
 
 /**
- * The description and the addresses of a podcast at Apple Podcasts and Spotify. The key is the slug of a podcast in the
- * filter.
+ * The description and the addresses of a podcast at Apple Podcasts and Spotify. The key is the
+ * slug of a podcast in the filter.
  */
 const getLinks = cacheForKey(fiveMinutes, (slug) => findPodcast(getDatabase().db, slug))
 
-/** The number of episodes of all podcasts, or of one. The key is the slug, or an empty text for all. */
+/**
+ * The number of episodes of all podcasts, or of one. The key is the slug, or an empty text for
+ * all.
+ */
 const getTotal = cacheForKey(fiveMinutes, (slug) =>
   countPodcastEpisodes(getDatabase().db, { ...onlyPodcast(slug), until: new Date() }),
 )
 
-/** One page of episodes. The key is the slug (empty for all), a line feed and the number of the page. */
+/**
+ * One page of episodes. The key is the slug (empty for all), a line feed and the number of the
+ * page.
+ */
 const getPage = cacheForKey(fiveMinutes, (key) => {
   const [slug = '', page = '1'] = key.split('\n')
 
@@ -61,16 +71,20 @@ export type PodcastPage = {
   pageCount: number
   /** The podcasts for the filter. */
   podcasts: PublicPodcast[]
-  /** The podcast that is chosen, with its description and its addresses, or undefined for all podcasts. */
+  /**
+   * The podcast that is chosen, with its description and its addresses, or undefined for all
+   * podcasts.
+   */
   selected:
     undefined | { applePodcastsUrl: null | string; description: null | string; name: string; spotifyUrl: null | string }
 }
 
 /**
- * What /podcasts shows for a podcast (its slug, or undefined for all) and a page, counting from 1. It gives undefined
- * when there is no such page: a podcast that isn't in the filter, or a page after the last. The slug is checked against
- * the list of podcasts, and the page against the number of pages, before anything is cached under them, so a visitor
- * can't fill the cache with addresses of their own.
+ * What /podcasts shows for a podcast (its slug, or undefined for all) and a page, counting from
+ * 1. It gives undefined when there is no such page: a podcast that isn't in the filter, or a
+ * page after the last. The slug is checked against the list of podcasts, and the page against
+ * the number of pages, before anything is cached under them, so a visitor can't fill the cache
+ * with addresses of their own.
  */
 export async function getPodcastPage(podcast: string | undefined, page: number): Promise<PodcastPage | undefined> {
   const podcasts = await getPodcasts()

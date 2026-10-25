@@ -5,7 +5,8 @@ import { Heading, Link, Page, Text } from '@fansite/design-system'
 import { email } from '../../contact'
 import { pageMetadata } from '../../metadata'
 
-// Render on each request: the canonical URL and the Open Graph address come from SITE_ENV, which the build doesn't know.
+// Render on each request: the canonical URL and the Open Graph address come from SITE_ENV,
+// which the build doesn't know.
 export const dynamic = 'force-dynamic'
 
 export const generateMetadata = (): Metadata => pageMetadata('/privacy', 'Privacy')

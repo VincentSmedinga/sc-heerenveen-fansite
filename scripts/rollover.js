@@ -1,18 +1,23 @@
-// Gets the project board ready for a new week, with one command. It shows what it would change; with --apply it does it.
+// Gets the project board ready for a new week, with one command. It shows what it would change;
+// with --apply it does it.
 //
 //   pnpm rollover            shows the plan and changes nothing
 //   pnpm rollover --apply    carries the plan out
 //
 // The rules:
-// 1. A closed issue on the board without an iteration gets the iteration that holds the day it was closed.
-// 2. An open issue with status Bezig, in an iteration that is over, moves to the iteration that holds today.
+// 1. A closed issue on the board without an iteration gets the iteration that holds the day it
+//    was closed.
+// 2. An open issue with status Bezig, in an iteration that is over, moves to the iteration that
+//    holds today.
 // 3. Open issues with any other status (Te doen) are never touched.
 // 4. It prints what was closed in the previous iteration, per milestone.
-// 5. If no iteration holds a day that is needed, it stops and changes nothing: the iterations have to be added first.
+// 5. If no iteration holds a day that is needed, it stops and changes nothing: the iterations
+//    have to be added first.
 // 6. Issues that aren't on the board are skipped, and counted.
 //
-// What decides something is a function without side effects, exported for the tests. What touches GitHub (gh and its
-// GraphQL API) is below that, and only runs when this file is started directly.
+// What decides something is a function without side effects, exported for the tests. What
+// touches GitHub (gh and its GraphQL API) is below that, and only runs when this file is
+// started directly.
 import { spawnSync } from 'node:child_process'
 import { realpathSync } from 'node:fs'
 
@@ -30,7 +35,8 @@ export const iterationFieldName = 'Iteratie'
 export const statusFieldName = 'Status'
 export const busyStatus = 'Bezig'
 
-// The weeks of the board are Dutch weeks, so a moment close to midnight belongs to the Dutch day, not the UTC one.
+// The weeks of the board are Dutch weeks, so a moment close to midnight belongs to the Dutch
+// day, not the UTC one.
 const dayFormat = new Intl.DateTimeFormat('en-CA', {
   day: '2-digit',
   month: '2-digit',
@@ -70,9 +76,10 @@ export function missingMessage(missing) {
 }
 
 /**
- * Decides which item moves to which iteration. An item is `{ closedAt, iteration, number, state, status, title }`, where
- * `iteration` is `{ duration, startDate, ... }` or null. It gives `moves` (the item, the iteration and why) and
- * `missing`: the items that need a day that no iteration holds. When `missing` isn't empty, nothing may be moved.
+ * Decides which item moves to which iteration. An item is `{ closedAt, iteration, number,
+ * state, status, title }`, where `iteration` is `{ duration, startDate, ... }` or null. It
+ * gives `moves` (the item, the iteration and why) and `missing`: the items that need a day that
+ * no iteration holds. When `missing` isn't empty, nothing may be moved.
  */
 export function planMoves({ items, iterations, today }) {
   const moves = []
@@ -115,7 +122,10 @@ export function previousIteration(iterations, today) {
     .at(-1)
 }
 
-/** The items closed during an iteration, grouped by milestone. Items without a milestone come last. */
+/**
+ * The items closed during an iteration, grouped by milestone. Items without a milestone come
+ * last.
+ */
 export function summariseClosed({ items, iteration }) {
   const groups = new Map()
 
@@ -199,7 +209,10 @@ export function parseArguments(args) {
   return { apply: args.includes('--apply') }
 }
 
-/** Turns an item of the GraphQL answer into the shape of `planMoves`, or gives undefined when it isn't an issue. */
+/**
+ * Turns an item of the GraphQL answer into the shape of `planMoves`, or gives undefined when it
+ * isn't an issue.
+ */
 export function readItem(node) {
   if (node.content?.__typename !== 'Issue') {
     return undefined
@@ -222,14 +235,20 @@ export function readItem(node) {
   }
 }
 
-/** The iterations of the field, the active ones and the completed ones, as `{ duration, id, startDate, title }`. */
+/**
+ * The iterations of the field, the active ones and the completed ones, as `{ duration, id,
+ * startDate, title }`.
+ */
 export function readIterations(configuration) {
   return [...configuration.completedIterations, ...configuration.iterations].toSorted((a, b) =>
     a.startDate.localeCompare(b.startDate),
   )
 }
 
-/** Runs the whole plan with the board's data. `move` is called per item when applying; it has the side effect. */
+/**
+ * Runs the whole plan with the board's data. `move` is called per item when applying; it has
+ * the side effect.
+ */
 export function run({ apply, issues, items, iterations, move, today }) {
   const { missing, moves } = planMoves({ items, iterations, today })
 
@@ -254,7 +273,10 @@ export function run({ apply, issues, items, iterations, move, today }) {
   })
 }
 
-/** Every page of a connection: `read(data)` gives `{ nodes, pageInfo }` of a page, `query` takes `$after`. */
+/**
+ * Every page of a connection: `read(data)` gives `{ nodes, pageInfo }` of a page, `query` takes
+ * `$after`.
+ */
 function allPages(query, variables, read) {
   const nodes = []
   let after
@@ -390,7 +412,8 @@ function repository() {
   return { name, owner: owner.login }
 }
 
-// `import.meta.main` only exists from Node 24.2, and engines allows 24.0 and 24.1 too, so compare the paths ourselves.
+// `import.meta.main` only exists from Node 24.2, and engines allows 24.0 and 24.1 too, so
+// compare the paths ourselves.
 if (process.argv[1] !== undefined && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     main(process.argv.slice(2))

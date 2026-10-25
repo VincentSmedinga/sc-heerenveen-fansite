@@ -22,9 +22,10 @@ export type ErrorSummaryProps = Omit<ComponentPropsWithoutRef<'section'>, 'child
 }
 
 /**
- * A block at the top of a form with a heading and a link to every field with an error, so a person finds them at once.
- * It is a region with the heading as its name. Without errors, it renders nothing. Put it above the form, outside the Form:
- * a screen reader may skip it inside the form in its forms mode, and the width of the form does not apply to it.
+ * A block at the top of a form with a heading and a link to every field with an error, so a
+ * person finds them at once. It is a region with the heading as its name. Without errors, it
+ * renders nothing. Put it above the form, outside the Form: a screen reader may skip it inside
+ * the form in its forms mode, and the width of the form does not apply to it.
  */
 export const ErrorSummary = ({ className, errors, level, title = 'Er is iets mis', ...props }: ErrorSummaryProps) => {
   const headingId = useId()

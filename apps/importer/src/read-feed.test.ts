@@ -7,7 +7,9 @@ import { cleanHeadline, paywallCategoryFor, readFeed } from './read-feed.ts'
 
 const now = new Date('2026-10-22T12:00:00Z')
 
-/** The `domain` of the category that Voetbal International gives to an item behind its paywall. */
+/**
+ * The `domain` of the category that Voetbal International gives to an item behind its paywall.
+ */
 const pro = 'https://www.vi.nl/pro'
 
 const encode = (text: string) => new TextEncoder().encode(text)
@@ -83,7 +85,8 @@ describe('the recording of the Leeuwarder Courant', () => {
       paywalled: false,
       publishedAt: new Date('2026-10-20T11:58:00Z'),
       seasonNumber: null,
-      // The source has a space after the headline and an ampersand in CDATA; the headline is otherwise as published.
+      // The source has a space after the headline and an ampersand in CDATA; the headline is
+      // otherwise as published.
       title: 'Timo Zaal verkast naar Zweedse club & nieuwe aflevering van Omroep Abe',
       url: 'https://www.lc.nl/sport/sc-heerenveen/timo-zaal-verkast-naar-zweedse-club-nieuwe-aflevering-van-omroep-abe/160235181.html',
     })
@@ -534,8 +537,9 @@ describe('an Atom feed', () => {
 })
 
 /**
- * A podcast feed in the shape of the real ones, with made-up titles and addresses: the iTunes and Podcast namespaces,
- * an enclosure with the MP3 file, a description, an image and a duration.
+ * A podcast feed in the shape of the real ones, with made-up titles and addresses: the iTunes
+ * and Podcast namespaces, an enclosure with the MP3 file, a description, an image and a
+ * duration.
  */
 const podcastItem = (parts: {
   duration?: null | string

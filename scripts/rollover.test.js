@@ -1,5 +1,5 @@
-// Tests the parts of `pnpm rollover` that decide something and have no side effects. What talks to GitHub is tried
-// against the board in a dry run (see the pull request).
+// Tests the parts of `pnpm rollover` that decide something and have no side effects. What talks
+// to GitHub is tried against the board in a dry run (see the pull request).
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 

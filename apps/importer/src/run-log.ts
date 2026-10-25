@@ -8,15 +8,22 @@ import type { FeedReport } from './import-feeds.ts'
 
 import { formatTime, printable } from './text.ts'
 
-/** After this many failed runs in a row, a feed is unhealthy, and the import tries it once an hour. */
+/**
+ * After this many failed runs in a row, a feed is unhealthy, and the import tries it once an
+ * hour.
+ */
 export const unhealthyAfter = 3
 
-/** How long the import waits when a source answers 429 or 503: what `Retry-After` says, but no more than a day. */
+/**
+ * How long the import waits when a source answers 429 or 503: what `Retry-After` says, but no
+ * more than a day.
+ */
 export const waitLimits = { longestSeconds: 24 * 60 * 60, withoutRetryAfterSeconds: 60 * 60 }
 
 /**
- * How long an unhealthy feed waits for its next try: once an hour. Cron starts each run a moment earlier or later, so a
- * minute less makes sure the run an hour later tries it, and not the one after that.
+ * How long an unhealthy feed waits for its next try: once an hour. Cron starts each run a
+ * moment earlier or later, so a minute less makes sure the run an hour later tries it, and not
+ * the one after that.
  */
 export const retryUnhealthyAfterMs = 59 * 60 * 1000
 
@@ -29,8 +36,9 @@ export async function finishRun(db: Database, runId: number, finishedAt: Date) {
 }
 
 /**
- * What a report changes in the health of a feed, or undefined when it changes nothing. Read and stored, or not changed,
- * is a success. An error is a failure. Waiting and a refusal by robots.txt are no fault of ours, and count as neither.
+ * What a report changes in the health of a feed, or undefined when it changes nothing. Read and
+ * stored, or not changed, is a success. An error is a failure. Waiting and a refusal by
+ * robots.txt are no fault of ours, and count as neither.
  */
 export function healthAfter(
   feed: Pick<Feed, 'failuresInARow'>,
@@ -66,8 +74,9 @@ export function healthAfter(
 }
 
 /**
- * Why a feed failed or was not read, as the log and the output say it, or null when there is nothing to explain. Text
- * from the source or the database is cleaned and cut off, and a database error is only its code (see `describeError`).
+ * Why a feed failed or was not read, as the log and the output say it, or null when there is
+ * nothing to explain. Text from the source or the database is cleaned and cut off, and a
+ * database error is only its code (see `describeError`).
  */
 export function reasonOf(report: FeedReport): null | string {
   switch (report.kind) {

@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest'
 
 const read = (path: string) => readFileSync(join(import.meta.dirname, path), 'utf8')
 
-// The CSS is read as text: jsdom doesn't apply rules in a cascade layer, and a browser hides the colour of a visited link.
+// The CSS is read as text: jsdom doesn't apply rules in a cascade layer, and a browser hides
+// the colour of a visited link.
 const withoutComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, '')
 
 const visitedColour = /:visited[^{]*\{[^}]*--hf-colour-text-link-visited/

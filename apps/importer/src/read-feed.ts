@@ -6,9 +6,10 @@ import { XMLParser, XMLValidator } from 'fast-xml-parser'
 import { parseFeed } from 'feedsmith'
 
 /**
- * What the importer keeps of a news item, and nothing more. An intro, an image, an author or a category is not here:
- * no source has given permission for it yet (editorial principle 2), so we do not even read it. A podcast episode also
- * gets three facts that are no content: its duration, its season and its number, which are null when the feed has none.
+ * What the importer keeps of a news item, and nothing more. An intro, an image, an author or a
+ * category is not here: no source has given permission for it yet (editorial principle 2), so
+ * we do not even read it. A podcast episode also gets three facts that are no content: its
+ * duration, its season and its number, which are null when the feed has none.
  */
 export type FeedItem = {
   /** The duration of a podcast episode in whole seconds, from 1 second to 24 hours, or null. */
@@ -71,8 +72,8 @@ const maxNumber = 99_999
 const earliestTime = Date.UTC(1990, 0, 1)
 
 /**
- * RFC 822 and 2822, as RSS has it: with a zone, because a time without one would count as local time. The year is
- * 19xx or 20xx, because `Date.parse` reads `0001` as 2001.
+ * RFC 822 and 2822, as RSS has it: with a zone, because a time without one would count as local
+ * time. The year is 19xx or 20xx, because `Date.parse` reads `0001` as 2001.
  */
 const rfc822Time =
   /^(?:[a-z]{3},\s*)?\d{1,2}\s+[a-z]{3}\s+(?:19|20)\d{2}\s+\d{2}:\d{2}(?::\d{2})?\s+(?:gmt|utc?|z|[+-]\d{4})$/iu
@@ -81,9 +82,10 @@ const rfc822Time =
 export const rfc3339Time = /^(?:19|20)\d{2}-\d{2}-\d{2}t\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:z|[+-]\d{2}:\d{2})$/iu
 
 /**
- * Reads the paywall flag. feedsmith leaves out elements it doesn't know, such as the `<premium>` of the Leeuwarder
- * Courant, so this is a second pass over the same text. Like feedsmith it expands no entities, so a hostile feed can't
- * make it allocate more than the feed holds.
+ * Reads the paywall flag. feedsmith leaves out elements it doesn't know, such as the
+ * `<premium>` of the Leeuwarder Courant, so this is a second pass over the same text. Like
+ * feedsmith it expands no entities, so a hostile feed can't make it allocate more than the feed
+ * holds.
  */
 const extensionParser = new XMLParser({
   htmlEntities: false,
@@ -95,13 +97,13 @@ const extensionParser = new XMLParser({
 })
 
 /**
- * Turns a headline from a feed into text: tags go, HTML entities become characters, and white space becomes one space.
- * A feed may give a headline as HTML, with or without CDATA, so it always passes through here. The text is stored as it
- * is and escaped when a page shows it.
+ * Turns a headline from a feed into text: tags go, HTML entities become characters, and white
+ * space becomes one space. A feed may give a headline as HTML, with or without CDATA, so it
+ * always passes through here. The text is stored as it is and escaped when a page shows it.
  */
 export function cleanHeadline(raw: string): string {
-  // A tag starts with a letter, a slash or an exclamation mark: `5 < 6` is no tag. The pattern can't run past the next
-  // `<`, so it takes time in proportion to the text, however hostile.
+  // A tag starts with a letter, a slash or an exclamation mark: `5 < 6` is no tag. The pattern
+  // can't run past the next `<`, so it takes time in proportion to the text, however hostile.
   const text = decodeHTMLStrict(raw.replace(/<[/!a-z][^<>]*>/giu, ''))
 
   // A lone surrogate is no text and would not survive the trip to the database.
@@ -112,22 +114,26 @@ export function cleanHeadline(raw: string): string {
 }
 
 /**
- * How a source says an item is behind a paywall, by the domain of the source. Voetbal International gives such an item
- * a category with this `domain`; every other source uses the `<premium>` element of the Leeuwarder Courant. A feed
- * without either sign has no paywall.
+ * How a source says an item is behind a paywall, by the domain of the source. Voetbal
+ * International gives such an item a category with this `domain`; every other source uses the
+ * `<premium>` element of the Leeuwarder Courant. A feed without either sign has no paywall.
  */
 const paywallCategories: Record<string, string> = {
   'www.vi.nl': 'https://www.vi.nl/pro',
 }
 
-/** The category `domain` that marks a paywalled item for this source, or undefined when the feed uses `<premium>`. */
+/**
+ * The category `domain` that marks a paywalled item for this source, or undefined when the feed
+ * uses `<premium>`.
+ */
 export function paywallCategoryFor(sourceDomain: string): string | undefined {
   return paywallCategories[sourceDomain]
 }
 
 /**
- * Reads the items of a feed: RSS or Atom, in the encoding the response names. An item without a headline or a usable
- * link, or that doesn't fit its columns, is left out and reported in `skipped`. The rest of the feed goes on.
+ * Reads the items of a feed: RSS or Atom, in the encoding the response names. An item without a
+ * headline or a usable link, or that doesn't fit its columns, is left out and reported in
+ * `skipped`. The rest of the feed goes on.
  */
 export function readFeed(
   body: Uint8Array,
@@ -148,8 +154,8 @@ export function readFeed(
       return { kind: 'error', message: `Feeds in the format ${parsed.format} are not supported, only RSS and Atom` }
     }
 
-    // feedsmith forgives a lot, such as a feed that stops halfway, and reads what it can. A feed that is not well-formed
-    // XML may be cut off or mangled, so we take nothing from it.
+    // feedsmith forgives a lot, such as a feed that stops halfway, and reads what it can. A
+    // feed that is not well-formed XML may be cut off or mangled, so we take nothing from it.
     const validation = XMLValidator.validate(text)
 
     if (validation !== true) {
@@ -188,7 +194,10 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
     : undefined
 }
 
-/** The items of an Atom feed. The link to the page is the one without a `rel`, or with `rel="alternate"`. */
+/**
+ * The items of an Atom feed. The link to the page is the one without a `rel`, or with
+ * `rel="alternate"`.
+ */
 function atomItems(feed: Atom.Feed<string>): RawItem[] {
   return (feed.entries ?? []).map((entry) => ({
     guid: entry.id,
@@ -236,7 +245,10 @@ function cleanItem(raw: RawItem, now: Date): FeedItem | { reason: string } {
   }
 }
 
-/** Gets the text of a response as the response says it is encoded; UTF-8 when it says nothing we know. */
+/**
+ * Gets the text of a response as the response says it is encoded; UTF-8 when it says nothing we
+ * know.
+ */
 function decode(body: Uint8Array, contentType: null | string): string {
   const declaration = /^\s*<\?xml[^>]*\sencoding\s*=\s*["']([^"']+)["']/iu.exec(
     new TextDecoder('latin1').decode(body.subarray(0, 200)),
@@ -272,7 +284,10 @@ function keyOf({ guid, link }: Pick<RawItem, 'guid' | 'link'>): string {
   return 'href' in parsed ? parsed.href : ''
 }
 
-/** The address of a link, or the reason we can't use it. Only `http` and `https`, and without a username or password. */
+/**
+ * The address of a link, or the reason we can't use it. Only `http` and `https`, and without a
+ * username or password.
+ */
 function parseLink(raw: string | undefined): { href: string } | { reason: string } {
   const text = raw?.trim() ?? ''
 
@@ -299,9 +314,10 @@ function parseLink(raw: string | undefined): { href: string } | { reason: string
 }
 
 /**
- * Reads a time in UTC. It is null when the text is not an RFC 822 or RFC 3339 time with a zone, when the time is
- * before 1990, or when it is more than a day ahead of `now`: a news item that is not yet published would stay on top of
- * the list for days. `Date.parse` alone is too forgiving, so the shape is checked first.
+ * Reads a time in UTC. It is null when the text is not an RFC 822 or RFC 3339 time with a zone,
+ * when the time is before 1990, or when it is more than a day ahead of `now`: a news item that
+ * is not yet published would stay on top of the list for days. `Date.parse` alone is too
+ * forgiving, so the shape is checked first.
  */
 function parseTime(raw: string | undefined, now: Date): Date | null {
   const text = raw?.trim() ?? ''
@@ -312,7 +328,8 @@ function parseTime(raw: string | undefined, now: Date): Date | null {
 
   const time = Date.parse(text)
 
-  // The database keeps whole seconds, so we do too: a time with milliseconds would never equal what we stored.
+  // The database keeps whole seconds, so we do too: a time with milliseconds would never equal
+  // what we stored.
   return Number.isNaN(time) || time < earliestTime || time > now.getTime() + dayInMs
     ? null
     : new Date(Math.floor(time / 1000) * 1000)
@@ -331,8 +348,9 @@ function paywalledKeys(text: string): Set<string> {
       const guid = stringOrUndefined(fields['guid'])
       const link = stringOrUndefined(fields['link'])
 
-      // feedsmith turns an entity such as `&amp;` into a character, except inside CDATA. This pass can't tell the two
-      // apart, so it adds the key both ways and the one feedsmith made is among them.
+      // feedsmith turns an entity such as `&amp;` into a character, except inside CDATA. This
+      // pass can't tell the two apart, so it adds the key both ways and the one feedsmith made
+      // is among them.
       keys.add(keyOf({ guid, link }))
       keys.add(keyOf({ guid: decodeEntities(guid), link: decodeEntities(link) }))
     }
@@ -342,8 +360,9 @@ function paywalledKeys(text: string): Set<string> {
 }
 
 /**
- * The items of an RSS feed, with the paywall flag. With a `paywallCategory` an item is paywalled when it has that
- * category, and the category is not kept. Without one, feedsmith doesn't give the flag, so a second pass finds it.
+ * The items of an RSS feed, with the paywall flag. With a `paywallCategory` an item is
+ * paywalled when it has that category, and the category is not kept. Without one, feedsmith
+ * doesn't give the flag, so a second pass finds it.
  */
 function rssItems(feed: Rss.Feed<string>, text: string, paywallCategory: string | undefined): RawItem[] {
   const paywalled = paywallCategory === undefined ? paywalledKeys(text) : new Set<string>()
@@ -374,8 +393,9 @@ function stringOrUndefined(value: unknown) {
 }
 
 /**
- * A fact about an episode, as a positive whole number up to `max`, or null for anything else: a missing value, zero, a
- * fraction, a negative number or a number that is too large. feedsmith has already turned `HH:MM:SS` into seconds.
+ * A fact about an episode, as a positive whole number up to `max`, or null for anything else: a
+ * missing value, zero, a fraction, a negative number or a number that is too large. feedsmith
+ * has already turned `HH:MM:SS` into seconds.
  */
 function wholeNumber(value: number | undefined, max: number): null | number {
   return Number.isInteger(value) && value !== undefined && value >= 1 && value <= max ? value : null

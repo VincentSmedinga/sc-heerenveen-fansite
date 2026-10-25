@@ -10,8 +10,8 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Inloggen' }
 
-// The page the link in the mail opens. It does not log in by itself: a mail scanner or a preview opens the link before the
-// person does and would use it up. The button logs in.
+// The page the link in the mail opens. It does not log in by itself: a mail scanner or a
+// preview opens the link before the person does and would use it up. The button logs in.
 export default async function ConfirmPage({
   searchParams,
 }: {

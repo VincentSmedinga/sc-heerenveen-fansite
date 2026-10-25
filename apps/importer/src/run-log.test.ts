@@ -38,8 +38,9 @@ afterEach(async () => {
 })
 
 /**
- * Starts a web server on this computer with a feed at `/rss/`, and puts the feed in the register under its own source.
- * The handler can be changed later, to make a feed break or recover.
+ * Starts a web server on this computer with a feed at `/rss/`, and puts the feed in the
+ * register under its own source. The handler can be changed later, to make a feed break or
+ * recover.
  */
 async function addFeed(name: string, handler: Handler, routes: Record<string, Handler> = {}) {
   const feed = { handler }
@@ -85,7 +86,9 @@ async function healthOf(id: number) {
   return feed
 }
 
-/** Runs the import at a moment, as cron does, with a fetcher that may reach the test servers. */
+/**
+ * Runs the import at a moment, as cron does, with a fetcher that may reach the test servers.
+ */
 async function importAt(now: Date) {
   const lines: string[] = []
   const code = await runImport(database.url, {
@@ -191,7 +194,8 @@ describe('the log', () => {
 
     try {
       const { code, lines } = await importAt(start)
-      // Only the code of the error, whose name mysql2 takes from MySQL. The query had the headline and the link.
+      // Only the code of the error, whose name mysql2 takes from MySQL. The query had the
+      // headline and the link.
       const reason = expect.stringMatching(/^database error [A-Z_\d]+$/u) as string
 
       expect(code).toBe(1)

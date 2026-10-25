@@ -1,5 +1,6 @@
-// Runs ESLint with the configuration of this repository on templates of the site, and checks that it reports an HTML
-// element and accepts the components of the design system (see docs/beslissingen.md).
+// Runs ESLint with the configuration of this repository on templates of the site, and checks
+// that it reports an HTML element and accepts the components of the design system (see
+// docs/beslissingen.md).
 import { ESLint } from 'eslint'
 import assert from 'node:assert/strict'
 import { join } from 'node:path'

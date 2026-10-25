@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { Root } from '../root/Root'
 import { Body } from './Body'
 
-// A body element can't be rendered into a div, so this renders to a string and reads that back as a document.
+// A body element can't be rendered into a div, so this renders to a string and reads that back
+// as a document.
 const parse = (markup: string) => new DOMParser().parseFromString(markup, 'text/html')
 
 describe('Body', () => {

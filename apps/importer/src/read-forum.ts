@@ -5,9 +5,10 @@ import type { SkippedItem } from './read-feed.ts'
 import { rfc3339Time } from './read-feed.ts'
 
 /**
- * What the importer keeps of a forum discussion, and nothing more: the address, the title, the number of replies, the
- * time of the last post and the screen name of whoever wrote it. The text of a post, avatars and every other detail of a
- * member are not here, so they are never stored.
+ * What the importer keeps of a forum discussion, and nothing more: the address, the title, the
+ * number of replies, the time of the last post and the screen name of whoever wrote it. The
+ * text of a post, avatars and every other detail of a member are not here, so they are never
+ * stored.
  */
 export type ForumDiscussion = {
   lastPostedAt: Date
@@ -32,12 +33,16 @@ export type ReadForum =
       message: string
     }
 
-/** A resource of the JSON:API response, with its `attributes` and `relationships` as far as we read them. */
+/**
+ * A resource of the JSON:API response, with its `attributes` and `relationships` as far as we
+ * read them.
+ */
 type Resource = Record<string, unknown>
 
 /**
- * The tags whose discussions the block "Nieuwste discussies" leaves out, by slug. Offtopics is mostly about other things
- * than the club, and so is Sport overig (decision of 23 October 2026). This is the one place that lists them.
+ * The tags whose discussions the block "Nieuwste discussies" leaves out, by slug. Offtopics is
+ * mostly about other things than the club, and so is Sport overig (decision of 23 October
+ * 2026). This is the one place that lists them.
  */
 export const leftOutTags: readonly string[] = ['offtopics', 'sport-overig']
 
@@ -45,14 +50,16 @@ export const leftOutTags: readonly string[] = ['offtopics', 'sport-overig']
 export const discussionsToKeep = 5
 
 /**
- * Reads the answer of the Flarum API to a request for the discussions, sorted by the time of the last post and with
- * `include=lastPostedUser,tags`, as a guest gets it. Flarum only lists what a guest may see, so the importer makes no
- * rules about that. It leaves out the discussions in the tags of `leftOutTags`, keeps the newest `discussionsToKeep` of
- * the rest, and builds their addresses from `origin` (the address of the forum we asked), the id, the slug and the number
- * of the last post.
+ * Reads the answer of the Flarum API to a request for the discussions, sorted by the time of
+ * the last post and with `include=lastPostedUser,tags`, as a guest gets it. Flarum only lists
+ * what a guest may see, so the importer makes no rules about that. It leaves out the
+ * discussions in the tags of `leftOutTags`, keeps the newest `discussionsToKeep` of the rest,
+ * and builds their addresses from `origin` (the address of the forum we asked), the id, the
+ * slug and the number of the last post.
  *
- * It gives an error when the answer is not what we expect, or when it holds discussions and none could be read: that is
- * more likely a change in the API than an empty forum, and the discussions we have are better than none.
+ * It gives an error when the answer is not what we expect, or when it holds discussions and
+ * none could be read: that is more likely a change in the API than an empty forum, and the
+ * discussions we have are better than none.
  */
 export function readForum(body: Uint8Array, origin: string): ReadForum {
   let parsed: unknown
@@ -92,7 +99,8 @@ export function readForum(body: Uint8Array, origin: string): ReadForum {
     return { kind: 'error', message: `None of the ${skipped.length} discussions could be read: ${skipped[0]?.reason}` }
   }
 
-  // The sort is the forum's, but stickied discussions can come first. Array.sort is stable, so equal times keep the order.
+  // The sort is the forum's, but stickied discussions can come first. Array.sort is stable, so
+  // equal times keep the order.
   discussions.sort((a, b) => b.lastPostedAt.getTime() - a.lastPostedAt.getTime())
 
   return { discussions: discussions.slice(0, discussionsToKeep), kind: 'read', skipped }
@@ -105,8 +113,8 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 }
 
 /**
- * Turns a discussion of the answer into what we keep, 'left-out' for one in a tag we leave out, or the reason to skip
- * it.
+ * Turns a discussion of the answer into what we keep, 'left-out' for one in a tag we leave out,
+ * or the reason to skip it.
  */
 function cleanDiscussion(
   raw: unknown,
@@ -162,13 +170,14 @@ function cleanDiscussion(
     return { reason: 'there is no valid time of the last post' }
   }
 
-  // The `slug` of the API already starts with the id, as in "2859-24-10-2026-ado-den-haag", so the id comes off before it
-  // goes in front again. Flarum answers `/d/<id>` with or without the rest, which is only there for people, and it may hold
-  // any character.
+  // The `slug` of the API already starts with the id, as in "2859-24-10-2026-ado-den-haag", so
+  // the id comes off before it goes in front again. Flarum answers `/d/<id>` with or without
+  // the rest, which is only there for people, and it may hold any character.
   const rawSlug = typeof attributes['slug'] === 'string' ? attributes['slug'] : ''
   const slug = rawSlug.startsWith(`${id}-`) ? rawSlug.slice(id.length + 1) : rawSlug === id ? '' : rawSlug
-  // The address ends in the number of the last post, so a visitor lands on the post that the line is about, as the
-  // forum does for a member who has read up to there. The number is not the number of posts: a deleted post leaves a gap.
+  // The address ends in the number of the last post, so a visitor lands on the post that the
+  // line is about, as the forum does for a member who has read up to there. The number is not
+  // the number of posts: a deleted post leaves a gap.
   const lastPostNumber = attributes['lastPostNumber']
   const jump =
     typeof lastPostNumber === 'number' && Number.isSafeInteger(lastPostNumber) && lastPostNumber > 0
@@ -191,7 +200,10 @@ function cleanDiscussion(
   return { lastPostedAt, lastPostedBy, replyCount: Math.max(0, commentCount - 1), title, url }
 }
 
-/** The tags and users of `included`, by `type:id`, which is also how a relationship points at them. */
+/**
+ * The tags and users of `included`, by `type:id`, which is also how a relationship points at
+ * them.
+ */
 function includedResources(value: unknown): Map<string, Resource> {
   const resources = new Map<string, Resource>()
 

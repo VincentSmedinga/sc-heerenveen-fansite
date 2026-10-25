@@ -12,8 +12,9 @@ import { ThemeToggle } from '../ThemeToggle'
 import { withBranch } from '../title'
 import { updatesPath, updatesTitle } from '../updates'
 
-// The links in the footer, about the site itself: the page about us, the contact form, the sources, the privacy page,
-// the accessibility statement and the updates. The main menu does not have them.
+// The links in the footer, about the site itself: the page about us, the contact form, the
+// sources, the privacy page, the accessibility statement and the updates. The main menu does
+// not have them.
 const footerItems = [
   { href: '/over-ons', label: 'Over ons' },
   { href: '/contact', label: 'Contact' },
@@ -26,10 +27,10 @@ const footerItems = [
 const branch = reviewBranch()
 
 export const metadata: Metadata = {
-  // The icon for the tab is the SVG, and browsers that don't read SVG or ask for /favicon.ico themselves get the ICO.
-  // The PNGs for the home screen of an iPhone and for the manifest are in app/manifest.ts. All are made by
-  // scripts/make-icons.js.
-  // The status bar of the app is see-through, so the header runs under it (see the decision in docs/beslissingen.md).
+  // The icon for the tab is the SVG, and browsers that don't read SVG or ask for /favicon.ico
+  // themselves get the ICO. The PNGs for the home screen of an iPhone and for the manifest are
+  // in app/manifest.ts. All are made by scripts/make-icons.js. The status bar of the app is
+  // see-through, so the header runs under it (see the decision in docs/beslissingen.md).
   appleWebApp: { statusBarStyle: 'black-translucent', title: 'Fansite' },
   icons: {
     apple: { sizes: '180x180', type: 'image/png', url: '/apple-touch-icon.png' },
@@ -38,7 +39,8 @@ export const metadata: Metadata = {
       { sizes: '16x16 32x32 48x48', type: 'image/x-icon', url: '/favicon.ico' },
     ],
   },
-  // The error page sets its own title in the browser, and reads the branch from this tag (see app/error.tsx).
+  // The error page sets its own title in the browser, and reads the branch from this tag (see
+  // app/error.tsx).
   ...(branch === undefined ? {} : { other: { 'review-branch': branch } }),
   title: {
     default: withBranch('sc Heerenveen Fansite', branch),
@@ -46,8 +48,9 @@ export const metadata: Metadata = {
   },
 }
 
-// The browser colours its own bars with the header of the site, which is a step lighter in dark. The page uses the whole
-// screen, also behind a notch, and keeps its content clear of it with the insets in page.css (viewport-fit=cover).
+// The browser colours its own bars with the header of the site, which is a step lighter in
+// dark. The page uses the whole screen, also behind a notch, and keeps its content clear of it
+// with the insets in page.css (viewport-fit=cover).
 export const viewport: Viewport = {
   themeColor: [
     { color: headerColour.light, media: '(prefers-color-scheme: light)' },
@@ -56,10 +59,11 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-// Every page has the same header and footer, and puts its content in a Page.Main in the Page.Body, so a page with a
-// sidebar can add a Page.Sidebar beside it. Without data-theme on Root, light and dark follow the system setting. A visitor
-// who pressed Licht or Donker in the footer gets data-theme on it from public/theme.js, which runs before the first paint,
-// so React must not mind the attribute it did not render (suppressHydrationWarning).
+// Every page has the same header and footer, and puts its content in a Page.Main in the
+// Page.Body, so a page with a sidebar can add a Page.Sidebar beside it. Without data-theme on
+// Root, light and dark follow the system setting. A visitor who pressed Licht or Donker in the
+// footer gets data-theme on it from public/theme.js, which runs before the first paint, so
+// React must not mind the attribute it did not render (suppressHydrationWarning).
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <Root suppressHydrationWarning>

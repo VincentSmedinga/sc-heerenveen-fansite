@@ -3,8 +3,9 @@ import type { Database } from '@fansite/db/client'
 import { adminLoginLinks, type AdminRole, adminRoles, adminSessions, adminUsers } from '@fansite/db/schema'
 import { eq } from 'drizzle-orm'
 
-// The accounts of the admin, and the two commands that manage them on the host (see admin-command.ts). This file and what
-// it imports have to run under plain Node without a build, so the imports name their `.ts` files.
+// The accounts of the admin, and the two commands that manage them on the host (see
+// admin-command.ts). This file and what it imports have to run under plain Node without a
+// build, so the imports name their `.ts` files.
 
 /** The longest an email address can be (RFC 5321). */
 const maxAddressLength = 254
@@ -12,8 +13,9 @@ const maxAddressLength = 254
 const address = /^[^\s@<>,;:"\\]+@[^\s@<>,;:"\\]+\.[^\s@<>,;:"\\]+$/
 
 /**
- * Makes the account for an address, or turns a disabled one on again with the role given. An account that is on already
- * is not changed: the result says so. The sessions of an account that was turned off are gone, so it logs in again.
+ * Makes the account for an address, or turns a disabled one on again with the role given. An
+ * account that is on already is not changed: the result says so. The sessions of an account
+ * that was turned off are gone, so it logs in again.
  */
 export async function createAccount(db: Database, email: string, role: AdminRole, now = new Date()) {
   const [existing] = await db.select().from(adminUsers).where(eq(adminUsers.email, email))
@@ -39,8 +41,9 @@ export function isAdminRole(value: string): value is AdminRole {
 }
 
 /**
- * The address as the accounts keep it: without spaces around it and in lowercase, or `undefined` when it isn't exactly one
- * email address. A comma, a semicolon or a new line never passes, so one value can't name two recipients.
+ * The address as the accounts keep it: without spaces around it and in lowercase, or
+ * `undefined` when it isn't exactly one email address. A comma, a semicolon or a new line never
+ * passes, so one value can't name two recipients.
  */
 export function normaliseEmail(value: string) {
   const email = value.trim().toLowerCase()
@@ -49,8 +52,9 @@ export function normaliseEmail(value: string) {
 }
 
 /**
- * Turns an account off and removes its sessions and unused login links, so a session that is open stops working at once.
- * The row stays, so the address can't log in and nobody confuses it with an address that never had an account.
+ * Turns an account off and removes its sessions and unused login links, so a session that is
+ * open stops working at once. The row stays, so the address can't log in and nobody confuses it
+ * with an address that never had an account.
  */
 export async function revokeAccount(db: Database, email: string, now = new Date()) {
   const [account] = await db.select().from(adminUsers).where(eq(adminUsers.email, email))

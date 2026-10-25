@@ -12,7 +12,9 @@ function itemsOf(number: number) {
   return Array.from({ length: number }, (_, index) => ({ title: `Kop ${index + 1}` }))
 }
 
-/** The cache lives in the module, so every test loads a module of its own, with an empty cache. */
+/**
+ * The cache lives in the module, so every test loads a module of its own, with an empty cache.
+ */
 async function loadHeadlines() {
   vi.resetModules()
 

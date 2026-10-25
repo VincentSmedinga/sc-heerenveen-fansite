@@ -6,8 +6,8 @@ export function formatTime(time: Date): string {
 }
 
 /**
- * Text from outside that is safe to print on one line and fits a reason in the database: no control characters, and no
- * more than 300 characters.
+ * Text from outside that is safe to print on one line and fits a reason in the database: no
+ * control characters, and no more than 300 characters.
  */
 export function printable(text: string): string {
   const clean = text.replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ').trim()

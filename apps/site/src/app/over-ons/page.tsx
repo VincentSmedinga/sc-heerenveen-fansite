@@ -5,14 +5,16 @@ import { Heading, Link, Page, Text } from '@fansite/design-system'
 import { email } from '../../contact'
 import { pageMetadata } from '../../metadata'
 
-// Render on each request: the canonical URL and the Open Graph address come from SITE_ENV, which the build doesn't know.
+// Render on each request: the canonical URL and the Open Graph address come from SITE_ENV,
+// which the build doesn't know.
 export const dynamic = 'force-dynamic'
 
 export const generateMetadata = (): Metadata => pageMetadata('/over-ons', 'Over ons')
 
 const EmailLink = () => <Link href={`mailto:${email}`}>{email}</Link>
 
-// Who we are and how we work, each in a few sentences. What we do with data is on its own page, Privacy.
+// Who we are and how we work, each in a few sentences. What we do with data is on its own page,
+// Privacy.
 export default function AboutPage() {
   return (
     <Page.Main>

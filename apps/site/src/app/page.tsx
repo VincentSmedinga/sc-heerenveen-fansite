@@ -15,17 +15,19 @@ import { getLatestEpisodes } from '../podcasts'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
 
-// Render on each request, so the build never reads the database. getHeadlines caches the list itself.
+// Render on each request, so the build never reads the database. getHeadlines caches the list
+// itself.
 export const dynamic = 'force-dynamic'
 
 type SearchParams = Record<string, string | string[] | undefined>
 
 /**
- * The newest `count` headlines, the newest discussions of the forum and the newest podcast episodes, or undefined when
- * the database can't give them. A page that throws gets an empty page with a 500 from Next.js, and the text only after
- * JavaScript runs. So this page catches the error and shows the error page itself, in the HTML. `cache` makes the page
- * and its metadata share one call per request; its argument is a plain value, because `cache` compares objects by
- * identity.
+ * The newest `count` headlines, the newest discussions of the forum and the newest podcast
+ * episodes, or undefined when the database can't give them. A page that throws gets an empty
+ * page with a 500 from Next.js, and the text only after JavaScript runs. So this page catches
+ * the error and shows the error page itself, in the HTML. `cache` makes the page and its
+ * metadata share one call per request; its argument is a plain value, because `cache` compares
+ * objects by identity.
  */
 const loadContent = cache(async (count: number) => {
   try {
@@ -44,10 +46,10 @@ const loadContent = cache(async (count: number) => {
 })
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
-  // A page that failed answers 200, so noindex keeps search engines from keeping it. The title template of the layout
-  // doesn't apply to the page in its own segment, so the title of the error page is the title alone. A page with
-  // `?nieuws=` is the homepage with more headlines: it has the homepage as its canonical address, so no search query is
-  // given.
+  // A page that failed answers 200, so noindex keeps search engines from keeping it. The title
+  // template of the layout doesn't apply to the page in its own segment, so the title of the
+  // error page is the title alone. A page with `?nieuws=` is the homepage with more headlines:
+  // it has the homepage as its canonical address, so no search query is given.
   const { nieuws } = await searchParams
 
   return (await loadContent(parseHeadlineCount(nieuws))) === undefined
@@ -70,7 +72,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   return (
     <>
       <Page.Main>
-        {/* The logo just above already shows the name, so the h1 is for screen readers only. Every page has one h1. */}
+        {/* The logo just above already shows the name, so the h1 is for screen readers only.
+                Every page has one h1. */}
         <Heading className="hf-visually-hidden" level={1}>
           sc Heerenveen Fansite
         </Heading>
@@ -83,8 +86,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           ) : (
             <List role="list">
               {headlines.map((item, index) => (
-                // The number of a headline in the address of the button, so the page that loads again can start at the
-                // first new one.
+                // The number of a headline in the address of the button, so the page that loads
+                // again can start at the first new one.
                 <List.Item id={`nieuws-${index + 1}`} key={index}>
                   <NewsItem
                     dateTime={dateTimeOf(item.publishedAt)}
@@ -99,8 +102,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </List>
           )}
           {more && (
-            // Works without JavaScript: the form loads the page again with more headlines in the address, and the
-            // part after the hash brings the visitor to the first of the new ones, so they stay in place.
+            // Works without JavaScript: the form loads the page again with more headlines in
+            // the address, and the part after the hash brings the visitor to the first of the
+            // new ones, so they stay in place.
             <Form action={`/#nieuws-${headlines.length + 1}`} method="get">
               <Button appearance="soft" icon="plus" name="nieuws" type="submit" value={String(count + moreHeadlines)}>
                 {`Laad ${moreHeadlines} meer`}

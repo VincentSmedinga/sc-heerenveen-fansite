@@ -58,10 +58,11 @@ function item(key: string, overrides: Partial<typeof items.$inferInsert> = {}): 
 
 describe('the table items', () => {
   it('has columns for the headline, the link, the key, the time, the paywall, three facts about an episode and the hiding by a moderator, and for nothing else of the source', async () => {
-    // An intro, an image, an author or a category has no column: no source has given permission for it (principle 2).
-    // Adding a column here is a decision for the issue that brings the first source that allows it. The duration, the
-    // season and the number of an episode are facts and no content, which the owner allowed (see beslissingen.md). When,
-    // by whom and why a moderator hid an item is our own record and no content of the source either.
+    // An intro, an image, an author or a category has no column: no source has given permission
+    // for it (principle 2). Adding a column here is a decision for the issue that brings the
+    // first source that allows it. The duration, the season and the number of an episode are
+    // facts and no content, which the owner allowed (see beslissingen.md). When, by whom and
+    // why a moderator hid an item is our own record and no content of the source either.
     expect(await columnsOf('items')).toEqual([
       'id',
       'source_id',

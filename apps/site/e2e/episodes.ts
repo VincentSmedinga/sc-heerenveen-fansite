@@ -10,10 +10,11 @@ const podcasts = [
 ]
 
 /**
- * Made-up episodes for the checks of /podcasts and of the homepage. They are not in the seed: the seed also runs on
- * acceptance, where they would mix with the real episodes. The check puts them in the database before the first test and
- * takes them out after the last one. There are more than 25 in all, so /podcasts has a second page, and they go back
- * far enough to show a weekday, a date and a date with a year. The first has a title with a very long word, and one
+ * Made-up episodes for the checks of /podcasts and of the homepage. They are not in the seed:
+ * the seed also runs on acceptance, where they would mix with the real episodes. The check puts
+ * them in the database before the first test and takes them out after the last one. There are
+ * more than 25 in all, so /podcasts has a second page, and they go back far enough to show a
+ * weekday, a date and a date with a year. The first has a title with a very long word, and one
  * has a title that is HTML: it is shown as text.
  */
 export const episodeTitles = {
@@ -26,8 +27,9 @@ const feedPath = '/e2e-a11y/podcast.rss'
 const day = 24 * 60 * 60 * 1000
 
 /**
- * Puts the made-up episodes in the database and returns the function that takes them out again. The site must have
- * started already: it makes the tables and puts the test sources in (SITE_ENV=acceptance).
+ * Puts the made-up episodes in the database and returns the function that takes them out again.
+ * The site must have started already: it makes the tables and puts the test sources in
+ * (SITE_ENV=acceptance).
  */
 export async function addEpisodes() {
   const { close, db, pool } = connectToDatabase()
@@ -55,12 +57,14 @@ export async function addEpisodes() {
 
       await db.insert(items).values(
         Array.from({ length: count }, (_, index) => ({
-          // Every third has a season and a number, the rest only a duration, and one has neither.
+          // Every third has a season and a number, the rest only a duration, and one has
+          // neither.
           durationSeconds: index === 5 ? null : 600 + index * 137,
           episodeNumber: index % 3 === 0 ? count - index : null,
           feedId: feed?.id ?? 0,
           key: `e2e-${index}`,
-          // The first is an hour old, and each next one is a few days older: this week, this year and years ago.
+          // The first is an hour old, and each next one is a few days older: this week, this
+          // year and years ago.
           publishedAt: new Date(now - (index === 0 ? 1 / 24 : index * 11) * day),
           seasonNumber: index % 6 === 0 ? 2 : null,
           sourceId,
@@ -84,7 +88,10 @@ export async function addEpisodes() {
   }
 }
 
-/** Connects with the DATABASE_URL of the environment or the .env in the root, like the server of the check does. */
+/**
+ * Connects with the DATABASE_URL of the environment or the .env in the root, like the server of
+ * the check does.
+ */
 function connectToDatabase() {
   try {
     process.loadEnvFile(path.resolve(import.meta.dirname, '../../../.env'))

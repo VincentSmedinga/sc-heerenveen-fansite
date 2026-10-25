@@ -6,8 +6,9 @@ export function hexOf({ blue, green, red }: { blue: number; green: number; red: 
 }
 
 /**
- * Reads a PNG of 8 bits per channel, in RGB or RGBA and without interlacing, which is what Chromium writes. The tests
- * of the icons use it to look at sizes and at single pixels, so the site needs no image library for that.
+ * Reads a PNG of 8 bits per channel, in RGB or RGBA and without interlacing, which is what
+ * Chromium writes. The tests of the icons use it to look at sizes and at single pixels, so the
+ * site needs no image library for that.
  */
 export function readPng(bytes: Uint8Array) {
   const buffer = Buffer.from(bytes)
@@ -41,7 +42,8 @@ export function readPng(bytes: Uint8Array) {
   const stride = width * channels
   const pixels = Buffer.alloc(height * stride)
 
-  // Each row starts with a filter type; undo it with the bytes to the left, above and above left.
+  // Each row starts with a filter type; undo it with the bytes to the left, above and above
+  // left.
   for (let y = 0; y < height; y++) {
     const filter = raw[y * (stride + 1)]
 

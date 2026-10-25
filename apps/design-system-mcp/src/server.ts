@@ -4,9 +4,15 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { createManifestProvider } from './manifests.ts'
 
 export type McpServerOptions = {
-  /** Writes one line to the log. It never gets the content of a request or an address of a visitor. */
+  /**
+   * Writes one line to the log. It never gets the content of a request or an address of a
+   * visitor.
+   */
   log?: (line: string) => void
-  /** The biggest request body we read. MCP requests for the documentation are a few hundred bytes. */
+  /**
+   * The biggest request body we read. MCP requests for the documentation are a few hundred
+   * bytes.
+   */
   maxBodyBytes?: number
   /** The folder of the published Storybook: the one that holds `manifests/`. */
   storybookDir: string
@@ -16,8 +22,8 @@ export type McpServerOptions = {
 
 // The paths one request may have. The host may or may not strip the /mcp it mounts the app on.
 const mcpPaths = new Set(['/', '/mcp', '/mcp/'])
-// What the handler needs of the request. Nothing else is passed on, and above all not the session of the client: every
-// request is answered on its own.
+// What the handler needs of the request. Nothing else is passed on, and above all not the
+// session of the client: every request is answered on its own.
 const forwardedHeaders = ['accept', 'content-type', 'mcp-protocol-version']
 const textHeaders = {
   'cache-control': 'no-store',
@@ -30,10 +36,12 @@ class TooLargeError extends Error {}
 /**
  * The MCP server of the design system: `@storybook/mcp` over HTTP, read-only, without sessions.
  *
- * The library keeps sessions in memory and opens a stream for every `GET`. A host that starts more than one process, or
- * restarts one, would break a client that holds a session, and a public server would have to bound that memory. So
- * every request gets a handler of its own, which is gone when the request ends, `GET` and `DELETE` are refused, and the
- * session id of the client is neither read nor given. The protocol allows this: a server may answer without a session.
+ * The library keeps sessions in memory and opens a stream for every `GET`. A host that starts
+ * more than one process, or restarts one, would break a client that holds a session, and a
+ * public server would have to bound that memory. So every request gets a handler of its own,
+ * which is gone when the request ends, `GET` and `DELETE` are refused, and the session id of
+ * the client is neither read nor given. The protocol allows this: a server may answer without a
+ * session.
  */
 export function createMcpServer({
   log = () => {},
@@ -82,7 +90,8 @@ export function createMcpServer({
       }
     }
 
-    // The address is made up on purpose: the provider reads from disk and never from the address of the request.
+    // The address is made up on purpose: the provider reads from disk and never from the
+    // address of the request.
     const mcpRequest = new Request('http://localhost/mcp', { body: new Uint8Array(body), headers, method: 'POST' })
     const timeout = AbortSignal.timeout(timeoutMs)
     const result = await Promise.race([

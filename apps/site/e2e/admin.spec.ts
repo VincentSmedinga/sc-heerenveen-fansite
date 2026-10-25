@@ -5,9 +5,10 @@ import { expect, test } from '@playwright/test'
 import { adminCookie, adminItems } from './admin'
 import { checkPage } from './check-page'
 
-// Hides and shows a made-up item in the admin, as the moderator of the global setup, once with JavaScript and once
-// without. The forms are plain posts, so both have to work. The items sit on the source that is switched off (see admin.ts),
-// so no other check reads them, and the checks here run one after the other because they change what they read.
+// Hides and shows a made-up item in the admin, as the moderator of the global setup, once with
+// JavaScript and once without. The forms are plain posts, so both have to work. The items sit
+// on the source that is switched off (see admin.ts), so no other check reads them, and the
+// checks here run one after the other because they change what they read.
 
 test.describe.configure({ mode: 'serial' })
 
@@ -30,7 +31,8 @@ for (const [name, javaScriptEnabled, title] of [
       await page.goto(`/beheer/berichten?q=${encodeURIComponent(title)}`)
       await expect(page.getByRole('link', { name: title })).toBeVisible()
 
-      // No reason: the item stays, and the error is at the field, in the summary and in the text.
+      // No reason: the item stays, and the error is at the field, in the summary and in the
+      // text.
       await itemOf(page, title)
         .getByRole('button', { name: `Verberg: ${title}` })
         .click()
@@ -42,7 +44,8 @@ for (const [name, javaScriptEnabled, title] of [
         expect(await checkPage(page)).toEqual([])
       }
 
-      // With a reason: the item is hidden, the page says when it is gone from the site, and the search is kept.
+      // With a reason: the item is hidden, the page says when it is gone from the site, and the
+      // search is kept.
       await itemOf(page, title).getByLabel('Reden').fill('Fout in het bericht')
       await itemOf(page, title)
         .getByRole('button', { name: `Verberg: ${title}` })

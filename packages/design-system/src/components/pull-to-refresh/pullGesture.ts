@@ -1,9 +1,10 @@
 /*
- * Touch events are not Baseline widely available and never will be: desktop Safari doesn't have them. Pointer events
- * are, but a browser cancels those (pointercancel) as soon as it starts to scroll, and the pull starts as a scroll
- * (that the page bounces). Touch events keep coming, and a visitor on a home screen app always has a touch screen.
+ * Touch events are not Baseline widely available and never will be: desktop Safari doesn't have
+ * them. Pointer events are, but a browser cancels those (pointercancel) as soon as it starts to
+ * scroll, and the pull starts as a scroll (that the page bounces). Touch events keep coming,
+ * and a visitor on a home screen app always has a touch screen.
  */
-/* eslint-disable baseline-js/use-baseline -- touch events are not Baseline, see above; not a date but a permanent gap */
+/* eslint-disable baseline-js/use-baseline -- touch events are not Baseline, see above */
 /** How far a finger has to travel down, in pixels, before letting go reloads the page. */
 export const pullDistance = 80
 
@@ -11,25 +12,29 @@ export const pullDistance = 80
 const deadZone = 10
 
 export type PullOptions = {
-  /** Called with how far the pull has come, from 0 to 1, whenever that changes. 0 means the pull is over. */
+  /**
+   * Called with how far the pull has come, from 0 to 1, whenever that changes. 0 means the pull
+   * is over.
+   */
   onChange: (progress: number) => void
   /** Called when the finger lets go after 1 was reached. */
   onRefresh: () => void
 }
 
 /**
- * True when the site runs as an app from the home screen: Chrome and others say so in a media query, iOS Safari in a
- * property.
+ * True when the site runs as an app from the home screen: Chrome and others say so in a media
+ * query, iOS Safari in a property.
  */
 export function isStandalone(): boolean {
   return window.matchMedia('(display-mode: standalone)').matches || Reflect.get(navigator, 'standalone') === true
 }
 
 /**
- * Watches the touches on a document for a pull down from the top of the page, with one finger. It never stops the
- * touch, so the page scrolls and bounces as it always does. It starts nothing when the page is not at the top, when
- * the touch starts in a field or an element that scrolls, when a second finger joins, and when the finger first goes
- * up or sideways. Returns a function that stops watching.
+ * Watches the touches on a document for a pull down from the top of the page, with one finger.
+ * It never stops the touch, so the page scrolls and bounces as it always does. It starts
+ * nothing when the page is not at the top, when the touch starts in a field or an element that
+ * scrolls, when a second finger joins, and when the finger first goes up or sideways. Returns a
+ * function that stops watching.
  */
 export function watchPull(root: Document, { onChange, onRefresh }: PullOptions): () => void {
   let start: undefined | { x: number; y: number }
@@ -107,8 +112,9 @@ export function watchPull(root: Document, { onChange, onRefresh }: PullOptions):
 }
 
 /**
- * True when a touch that starts on `target` is meant for something else than pulling the page down: a field to type
- * in, or an element that scrolls sideways or is scrolled down, which the finger would move instead of the page.
+ * True when a touch that starts on `target` is meant for something else than pulling the page
+ * down: a field to type in, or an element that scrolls sideways or is scrolled down, which the
+ * finger would move instead of the page.
  */
 function isForSomethingElse(target: EventTarget | null, root: Document): boolean {
   for (let element = target instanceof Element ? target : null; element; element = element.parentElement) {

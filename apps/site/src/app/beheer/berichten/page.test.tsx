@@ -115,7 +115,8 @@ describe('the list', () => {
     const html = await render()
 
     expect(html).toMatch(new RegExp(`<label[^>]*for="reden-${id}"[^>]*>Reden`))
-    // The hidden part of the label says which item the field is for, so a screen reader hears it between 50 fields.
+    // The hidden part of the label says which item the field is for, so a screen reader hears
+    // it between 50 fields.
     expect(html).toMatch(new RegExp(`for="reden-${id}"[^>]*>Reden.*om “Kop een” te verbergen`))
     expect(html).toMatch(new RegExp(`<input[^>]*id="reden-${id}"`))
     expect(html).toMatch(/<input[^>]*name="reden"/)

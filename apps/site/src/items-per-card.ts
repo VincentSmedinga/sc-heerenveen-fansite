@@ -1,6 +1,7 @@
 /**
- * How many items a card with a list shows on the homepage: the discussions and the podcast episodes. A card that comes
- * later uses it too, so the cards stay level. The news card is the main card of the page, so it has its own numbers.
+ * How many items a card with a list shows on the homepage: the discussions and the podcast
+ * episodes. A card that comes later uses it too, so the cards stay level. The news card is the
+ * main card of the page, so it has its own numbers.
  */
 export const itemsPerCard = 5
 

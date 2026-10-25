@@ -6,7 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { themeStorageKey } from './theme'
 import { ThemeToggle } from './ThemeToggle'
 
-/** Makes matchMedia answer for the system: dark or light. It also lets a test change the system later. */
+/**
+ * Makes matchMedia answer for the system: dark or light. It also lets a test change the system
+ * later.
+ */
 function stubSystem(isDark: boolean) {
   let listener: (() => void) | undefined
   let dark = isDark

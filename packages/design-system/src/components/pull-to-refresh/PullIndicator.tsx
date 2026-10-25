@@ -8,12 +8,13 @@ export type PullIndicatorProps = {
 }
 
 /**
- * What the visitor sees while pulling a page down to refresh it: a small label at the top of the screen that says what
- * to do, and what letting go will do. It comes down with the finger, except with less motion: then it stays where it
- * is and appears when letting go will refresh.
+ * What the visitor sees while pulling a page down to refresh it: a small label at the top of
+ * the screen that says what to do, and what letting go will do. It comes down with the finger,
+ * except with less motion: then it stays where it is and appears when letting go will refresh.
  *
- * It is hidden from screen readers (`aria-hidden`). It is a hint for a finger on the screen; a screen reader never
- * sees the gesture, and the page that loads after it is announced by the screen reader itself.
+ * It is hidden from screen readers (`aria-hidden`). It is a hint for a finger on the screen; a
+ * screen reader never sees the gesture, and the page that loads after it is announced by the
+ * screen reader itself.
  */
 export const PullIndicator = ({ progress, refreshing = false }: PullIndicatorProps) => (
   <div

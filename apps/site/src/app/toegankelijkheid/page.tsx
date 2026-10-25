@@ -6,16 +6,18 @@ import { email } from '../../contact'
 import { pageMetadata } from '../../metadata'
 import { dateOf } from '../../updates'
 
-// Render on each request: the canonical URL and the Open Graph address come from SITE_ENV, which the build doesn't know.
+// Render on each request: the canonical URL and the Open Graph address come from SITE_ENV,
+// which the build doesn't know.
 export const dynamic = 'force-dynamic'
 
 export const generateMetadata = (): Metadata => pageMetadata('/toegankelijkheid', 'Toegankelijkheid')
 
-// The day the statement was drawn up or last updated, as YYYY-MM-DD. Change it here whenever the text changes.
+// The day the statement was drawn up or last updated, as YYYY-MM-DD. Change it here whenever
+// the text changes.
 const statementDate = '2026-10-24'
 
-// A short statement that promises only what has been checked. When what we check or find changes, this text
-// changes with it, in the same pull request.
+// A short statement that promises only what has been checked. When what we check or find
+// changes, this text changes with it, in the same pull request.
 export default function AccessibilityPage() {
   return (
     <Page.Main>

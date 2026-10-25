@@ -5,7 +5,8 @@ import { Body } from '../body/Body'
 import { Root } from '../root/Root'
 import { Head } from './Head'
 
-// A head element can't be rendered into a div, so these tests render to a string and read that back as a document.
+// A head element can't be rendered into a div, so these tests render to a string and read that
+// back as a document.
 const parse = (markup: string) => new DOMParser().parseFromString(markup, 'text/html')
 
 describe('Head', () => {

@@ -23,7 +23,9 @@ export const exampleMenuAt = (current: ExampleMenuPage) =>
 /** The menu of the example pages in the docs: the news is the current page. */
 export const exampleMenu = exampleMenuAt('Nieuws')
 
-/** The logo as a link to the home page, with the menu beside it. This is what a header holds. */
+/**
+ * The logo as a link to the home page, with the menu beside it. This is what a header holds.
+ */
 export const ExampleHeader = ({ current = 'Nieuws' }: { current?: ExampleMenuPage }) => (
   <Page.Header>
     <Link href="#home">
@@ -42,8 +44,9 @@ export const exampleFooterMenu = [
 ]
 
 /**
- * The footer with "Alle koppen en links op één plek." and "Voor supporters door supporters.", a paragraph each, the theme
- * toggle (here a static one) and the links about the site, as on the site.
+ * The footer with "Alle koppen en links op één plek." and "Voor supporters door supporters.", a
+ * paragraph each, the theme toggle (here a static one) and the links about the site, as on the
+ * site.
  */
 export const ExampleFooter = () => (
   <Page.Footer>
@@ -62,7 +65,10 @@ export const ExampleFooter = () => (
   </Page.Footer>
 )
 
-/** Content for the main column of an example page, as the pages of the site have it: all in one cell. */
+/**
+ * Content for the main column of an example page, as the pages of the site have it: all in one
+ * cell.
+ */
 export const ExampleContent = (): ReactNode => (
   <>
     <Heading level={1}>Nieuws over sc Heerenveen</Heading>
@@ -83,7 +89,10 @@ export const ExampleContent = (): ReactNode => (
   </>
 )
 
-/** The main column with three cells: a heading with its introduction in one cell, a text, and a list under a heading. */
+/**
+ * The main column with three cells: a heading with its introduction in one cell, a text, and a
+ * list under a heading.
+ */
 export const ExampleMain = () => (
   <Page.Main>
     <Page.Cell>
@@ -109,8 +118,9 @@ export const ExampleMain = () => (
 )
 
 /**
- * The main column with an introduction: the heading with its text is the `intro`, and a text and a list under a heading are
- * the cells under it. On a wide screen a sidebar starts under the intro, level with the first cell.
+ * The main column with an introduction: the heading with its text is the `intro`, and a text
+ * and a list under a heading are the cells under it. On a wide screen a sidebar starts under
+ * the intro, level with the first cell.
  */
 export const ExampleMainWithIntro = () => (
   <Page.Main
@@ -142,7 +152,10 @@ export const ExampleMainWithIntro = () => (
   </Page.Main>
 )
 
-/** The sidebar with two cells of different heights. They stack on their own, not on the rows of the main column. */
+/**
+ * The sidebar with two cells of different heights. They stack on their own, not on the rows of
+ * the main column.
+ */
 export const ExampleSidebar = () => (
   <Page.Sidebar aria-label="Naast het nieuws">
     <Page.Cell>

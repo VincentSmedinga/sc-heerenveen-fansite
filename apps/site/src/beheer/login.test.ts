@@ -29,7 +29,10 @@ beforeEach(async () => {
   vi.restoreAllMocks()
 })
 
-/** Handles a request the way the action does, with the mails and the waiting recorded instead of done. */
+/**
+ * Handles a request the way the action does, with the mails and the waiting recorded instead of
+ * done.
+ */
 async function request(value: string, now = start) {
   const mails: { to: string; url: string }[] = []
   const waits: number[] = []
@@ -97,7 +100,8 @@ describe('a request for a login link', () => {
     const known = await request('jelle@example.org')
     const unknown = await request('niemand@example.org')
 
-    // The work takes a few milliseconds, so what is left to wait is the minimum minus that, for both.
+    // The work takes a few milliseconds, so what is left to wait is the minimum minus that, for
+    // both.
     for (const { waits } of [known, unknown]) {
       expect(waits).toHaveLength(1)
       expect(waits[0]).toBeGreaterThan(minimumAnswerMilliseconds - 300)
@@ -218,7 +222,8 @@ describe('the rate limit', () => {
       await request('jelle@example.org')
     }
 
-    // Another process has its own connection to the same database and no memory of the first one.
+    // Another process has its own connection to the same database and no memory of the first
+    // one.
     expect(await noteAttempt(database.db, 'jelle@example.org', start)).toBe(false)
   })
 
