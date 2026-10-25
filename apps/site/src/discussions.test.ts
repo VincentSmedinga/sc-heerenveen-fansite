@@ -26,12 +26,12 @@ afterEach(() => {
 })
 
 describe('getDiscussions', () => {
-  it('asks the query for the newest discussions in the database', async () => {
+  it('asks the query for the newest five discussions in the database', async () => {
     await (
       await loadDiscussions()
     )()
 
-    expect(listNewestDiscussions).toHaveBeenCalledExactlyOnceWith(db)
+    expect(listNewestDiscussions).toHaveBeenCalledExactlyOnceWith(db, 5)
   })
 
   it('gives what the query gives', async () => {

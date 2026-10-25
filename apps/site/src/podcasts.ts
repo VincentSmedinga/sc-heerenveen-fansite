@@ -9,6 +9,7 @@ import {
 
 import { cacheFor, cacheForKey } from './cache'
 import { getDatabase } from './database'
+import { itemsPerCard } from './items-per-card'
 
 /** The number of episodes on a page of /podcasts. */
 export const episodesPerPage = 25
@@ -20,7 +21,7 @@ const fiveMinutes = 5 * 60 * 1000
  * a visit doesn't cost a query and a new episode shows within five minutes of the import.
  */
 export const getLatestEpisodes = cacheFor(fiveMinutes, () =>
-  listPodcastEpisodes(getDatabase().db, { limit: 4, until: new Date() }),
+  listPodcastEpisodes(getDatabase().db, { limit: itemsPerCard, until: new Date() }),
 )
 
 /** The part of the options of a query that limits it to a podcast, or nothing for all podcasts (an empty slug). */

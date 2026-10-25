@@ -1,9 +1,6 @@
-/* How the site shows the news to visitors: the two weeks it covers and the day or date and time of an item, in Dutch time. The database holds UTC. */
+/* How the site shows the news to visitors: the day or date and time of an item, in Dutch time. The database holds UTC. */
 
 const timeZone = 'Europe/Amsterdam'
-
-/** The days the homepage shows news from: today and the thirteen days before it. */
-const daysShown = 14
 
 /**
  * The days that get a weekday: today and the six days before it. A weekday is only clear within seven days; further
@@ -131,25 +128,20 @@ export function formatEpisodeTime(moment: Date, now: Date) {
 
 /**
  * The time of a news item as a visitor reads it, in Dutch time. Of today and the six days before it is the short weekday
- * and the time, such as "wo 14:05". Anything older is the date and the time, such as "14 okt 14:05". A moment after now,
- * from a clock that is ahead, counts as today. The news covers fourteen days, so the year is never needed.
+ * and the time, such as "wo 14:05". Anything older is the date and the time, such as "14 okt 14:05", with the year when
+ * it is not this year: the news has no limit in time. A moment after now, from a clock that is ahead, counts as today.
  */
 export function formatNewsTime(moment: Date, now: Date) {
   if (moment >= weekdayStart(now)) {
     return formatDayAndTime(moment)
   }
 
-  return `${dateFormat.format(moment)} ${timeFormat.format(moment)}`
+  return `${(clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)} ${timeFormat.format(moment)}`
 }
 
 /** The start of the days that get a weekday: the first moment of the Dutch day six days before today. */
 export function weekdayStart(now: Date) {
   return startOfDay(now, daysWithWeekday - 1)
-}
-
-/** The start of the news the homepage shows: the first moment of the Dutch day thirteen days before today. */
-export function windowStart(now: Date) {
-  return startOfDay(now, daysShown - 1)
 }
 
 /** What the clock and the calendar in the Netherlands show at this moment. */

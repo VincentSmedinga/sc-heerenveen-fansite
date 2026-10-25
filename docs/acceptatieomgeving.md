@@ -70,7 +70,7 @@ Lees het in _Setup Node.js App_ of in `stderr.log` in de map van de app.
 Cron start op de host elke 15 minuten de importer, `apps/importer/import.mjs` in de map van de app.
 Hij leest de feeds van de bronnen die aanstaan, die uit de seed (zie [`bronnen.md`](bronnen.md)), en ons forum.
 De koppen komen in de tabel `items`.
-Van het forum leest hij als gast de API, en de vier nieuwste discussies komen in de tabel `discussions`.
+Van het forum leest hij als gast de API, en de vijf nieuwste discussies komen in de tabel `discussions`.
 Die vervangt hij bij elke run, dus de tabel houdt geen geschiedenis.
 De host moet `https://forum.heerenveen.org` kunnen bereiken; dat is het openbare adres, ook al staat het forum op dezelfde hosting.
 Wat hij per feed schrijft, staat in de [README van de importer](../apps/importer/README.md).
@@ -284,9 +284,9 @@ Zo kan niemand nagaan wie een account heeft.
 ## Controleren
 
 - De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, het blok "Laatste nieuws" en in de zijbalk het blok "Nieuwste discussies".
-  Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben de afgelopen twee weken nog geen nieuws gevonden. Kijk straks nog eens." en "We hebben nog geen discussies van het forum."
-  Daarna staan er de koppen van de echte nieuwsbronnen uit de seed van de afgelopen twee weken.
-  In het blok "Nieuwste discussies" staan dan de vier discussies waar het laatst op is gereageerd, elk met het aantal reacties, de laatste reageerder en de tijd, en onderaan de link "Naar het forum".
+  Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben nog geen nieuws gevonden. Kijk straks nog eens." en "We hebben nog geen discussies van het forum."
+  Daarna staan er de vijf nieuwste koppen van de echte nieuwsbronnen uit de seed, met onder de lijst de knop "Laad 5 meer".
+  In het blok "Nieuwste discussies" staan dan de vijf discussies waar het laatst op is gereageerd, elk met het aantal reacties, de laatste reageerder en de tijd, en onderaan de link "Naar het forum".
   Controleer dat er geen discussie van Offtopics of Sport overig bij staat.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - `curl -I https://acc.sc.heerenveen.org` toont `x-robots-tag: noindex, nofollow`.
@@ -351,7 +351,7 @@ Zo kan niemand nagaan wie een account heeft.
   Het logboek en de melding bevatten nooit het wachtwoord of het adres.
 
 - In de database staan de koppen in de tabel `items`: `SELECT COUNT(*) FROM items` in phpMyAdmin telt ze.
-  De discussies van het forum staan in de tabel `discussions`: dat zijn er na een run vier.
+  De discussies van het forum staan in de tabel `discussions`: dat zijn er na een run vijf.
 
 ## Als het niet werkt
 

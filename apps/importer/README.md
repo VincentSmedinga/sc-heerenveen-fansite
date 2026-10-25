@@ -381,7 +381,7 @@ Zo kiest de lezer de discussies:
   De importer maakt geen eigen regels voor wie wat mag zien.
 - Discussies in de tags Offtopics en Sport overig laat de lezer weg.
   De lijst staat op één plek, `leftOutTags` in `src/read-forum.ts`, op slug.
-- Van de rest houdt hij de vier waarop het laatst is gereageerd.
+- Van de rest houdt hij de vijf waarop het laatst is gereageerd.
   De lijst vraagt 30 discussies, zodat er na het weglaten van die tags genoeg overblijven.
   De lezer sorteert zelf op het laatste bericht, want een vastgezette discussie kan vooraan staan.
 - Een discussie waar iets mis mee is, slaat hij over, met de reden in de uitvoer.
@@ -389,10 +389,10 @@ Zo kiest de lezer de discussies:
 - Is het antwoord geen JSON, of staan er discussies in en kan er geen enkele worden gelezen, dan is dat een fout.
   De vorige discussies blijven dan staan.
 
-Na elke run staan er precies de vier nieuwste discussies die aan de regels voldoen in `discussions`, in één transactie.
-Een discussie die niet meer bij de vier hoort, die het forum heeft verwijderd of die een gast niet meer ziet, is dus na de volgende run weg.
+Na elke run staan er precies de vijf nieuwste discussies die aan de regels voldoen in `discussions`, in één transactie.
+Een discussie die niet meer bij de vijf hoort, die het forum heeft verwijderd of die een gast niet meer ziet, is dus na de volgende run weg.
 We bewaren geen geschiedenis van titels of schermnamen.
-De regel in de uitvoer telt de nieuwe, de gewijzigde en de ongewijzigde discussies van de vier die blijven.
+De regel in de uitvoer telt de nieuwe, de gewijzigde en de ongewijzigde discussies van de vijf die blijven.
 Een discussie is dezelfde als het id gelijk is: het adres verandert met elk nieuw bericht, want het eindigt op het nummer van het laatste bericht.
 Het forum vraagt de import nooit "is het veranderd?" (geen `ETag` of `Last-Modified`): een lege database moet na één run discussies hebben.
 

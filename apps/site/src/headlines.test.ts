@@ -7,11 +7,16 @@ vi.mock('./database', () => ({ getDatabase: () => ({ db }) }))
 
 const minute = 60 * 1000
 
+/** `number` items, newest first, made up. */
+function itemsOf(number: number) {
+  return Array.from({ length: number }, (_, index) => ({ title: `Kop ${index + 1}` }))
+}
+
 /** The cache lives in the module, so every test loads a module of its own, with an empty cache. */
 async function loadHeadlines() {
   vi.resetModules()
 
-  return (await import('./headlines')).getHeadlines
+  return import('./headlines')
 }
 
 beforeEach(() => {
@@ -25,68 +30,143 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
+describe('parseHeadlineCount', () => {
+  it('gives five without a number', async () => {
+    expect((await loadHeadlines()).parseHeadlineCount(undefined)).toBe(5)
+  })
+
+  it.each(['5', '10', '15', '50', '95', '100'])(
+    'gives %s for a whole number from 5 in steps of 5, up to 100',
+    async (value) => {
+      expect((await loadHeadlines()).parseHeadlineCount(value)).toBe(Number(value))
+    },
+  )
+
+  it.each([
+    '',
+    '0',
+    '1',
+    '4',
+    '7',
+    '12',
+    '-5',
+    '+5',
+    '5.0',
+    '7.5',
+    '1e1',
+    '0x0a',
+    '010',
+    '05',
+    ' 10',
+    '10 ',
+    '105',
+    '110',
+    '1000',
+    '100000000000000000000',
+    'abc',
+    'tien',
+    'NaN',
+    'Infinity',
+    '%31%30',
+  ])('gives five for %j, which is not such a number', async (value) => {
+    expect((await loadHeadlines()).parseHeadlineCount(value)).toBe(5)
+  })
+
+  it('gives five for a number that is given twice', async () => {
+    expect((await loadHeadlines()).parseHeadlineCount(['10', '15'])).toBe(5)
+  })
+})
+
 describe('getHeadlines', () => {
-  it('asks the query for the news that starts at the first moment of the Dutch day thirteen days ago, up to now', async () => {
-    await (
-      await loadHeadlines()
-    )()
+  it('asks the query for one more than the number, up to now, with no start in time', async () => {
+    const { getHeadlines } = await loadHeadlines()
 
-    expect(listRecentItems).toHaveBeenCalledExactlyOnceWith(
-      db,
-      new Date('2026-10-08T22:00:00.000Z'),
-      new Date('2026-10-22T12:30:00.000Z'),
-    )
+    await getHeadlines(10)
+
+    expect(listRecentItems).toHaveBeenCalledExactlyOnceWith(db, {
+      limit: 11,
+      until: new Date('2026-10-22T12:30:00.000Z'),
+    })
   })
 
-  it('gives what the query gives', async () => {
-    const items = [{ title: 'Kop' }]
-    listRecentItems.mockResolvedValue(items)
+  it('gives the number of headlines asked for, and says there are more when the extra one came back', async () => {
+    const found = itemsOf(6)
+    listRecentItems.mockResolvedValue(found)
 
-    expect(await (await loadHeadlines())()).toBe(items)
+    expect(await (await loadHeadlines()).getHeadlines(5)).toEqual({ headlines: found.slice(0, 5), more: true })
   })
 
-  it('asks the database once in five minutes, however many visits', async () => {
-    const getHeadlines = await loadHeadlines()
+  it('says there are no more when the query gave no more than the number', async () => {
+    const found = itemsOf(5)
+    listRecentItems.mockResolvedValue(found)
 
-    await getHeadlines()
+    expect(await (await loadHeadlines()).getHeadlines(5)).toEqual({ headlines: found, more: false })
+  })
+
+  it('gives fewer when the sources have fewer, and none when they have none', async () => {
+    const { getHeadlines } = await loadHeadlines()
+
+    listRecentItems.mockResolvedValueOnce(itemsOf(3))
+    expect(await getHeadlines(5)).toEqual({ headlines: itemsOf(3), more: false })
+
+    listRecentItems.mockResolvedValueOnce([])
+    expect(await getHeadlines(10)).toEqual({ headlines: [], more: false })
+  })
+
+  it('asks for exactly a hundred at a hundred, and says there are no more: older news is for the archive', async () => {
+    listRecentItems.mockResolvedValue(itemsOf(100))
+
+    expect(await (await loadHeadlines()).getHeadlines(100)).toEqual({ headlines: itemsOf(100), more: false })
+    expect(listRecentItems).toHaveBeenCalledExactlyOnceWith(db, {
+      limit: 100,
+      until: new Date('2026-10-22T12:30:00.000Z'),
+    })
+  })
+
+  it('asks the database once in five minutes for each number, however many visits', async () => {
+    const { getHeadlines } = await loadHeadlines()
+
+    await getHeadlines(5)
     vi.advanceTimersByTime(4 * minute + 59_000)
-    await getHeadlines()
-    await getHeadlines()
-
-    expect(listRecentItems).toHaveBeenCalledTimes(1)
-  })
-
-  it('asks again after five minutes, for the two weeks as they are by then', async () => {
-    // 23:58 on Thursday 22 October in the Netherlands.
-    vi.setSystemTime(new Date('2026-10-22T21:58:00Z'))
-    const getHeadlines = await loadHeadlines()
-
-    await getHeadlines()
-    // Six minutes later it is just after midnight: a new day, so a new start of the two weeks.
-    vi.advanceTimersByTime(6 * minute)
-    await getHeadlines()
+    await getHeadlines(5)
+    await getHeadlines(5)
+    await getHeadlines(10)
+    await getHeadlines(10)
 
     expect(listRecentItems).toHaveBeenCalledTimes(2)
-    expect(listRecentItems).toHaveBeenNthCalledWith(
-      1,
-      db,
-      new Date('2026-10-08T22:00:00.000Z'),
-      new Date('2026-10-22T21:58:00.000Z'),
-    )
-    expect(listRecentItems).toHaveBeenNthCalledWith(
-      2,
-      db,
-      new Date('2026-10-09T22:00:00.000Z'),
-      new Date('2026-10-22T22:04:00.000Z'),
-    )
+  })
+
+  it('asks again after five minutes, up to the moment of then', async () => {
+    const { getHeadlines } = await loadHeadlines()
+
+    await getHeadlines(5)
+    vi.advanceTimersByTime(5 * minute)
+    await getHeadlines(5)
+
+    expect(listRecentItems).toHaveBeenCalledTimes(2)
+    expect(listRecentItems).toHaveBeenNthCalledWith(2, db, {
+      limit: 6,
+      until: new Date('2026-10-22T12:35:00.000Z'),
+    })
+  })
+
+  it('keeps at most twenty lists, because a number that is not valid shares the list of five', async () => {
+    const { getHeadlines } = await loadHeadlines()
+
+    for (const count of [5, 7, 0, -5, 105, 1e21, Number.NaN, 5.5, 5]) {
+      await getHeadlines(count)
+    }
+
+    expect(listRecentItems).toHaveBeenCalledTimes(1)
+    expect(listRecentItems).toHaveBeenCalledWith(db, expect.objectContaining({ limit: 6 }))
   })
 
   it('does not keep a load that fails, so the next visit tries again', async () => {
-    const getHeadlines = await loadHeadlines()
+    const { getHeadlines } = await loadHeadlines()
     listRecentItems.mockRejectedValueOnce(new Error('connect ECONNREFUSED'))
 
-    await expect(getHeadlines()).rejects.toThrow('connect ECONNREFUSED')
-    await getHeadlines()
+    await expect(getHeadlines(5)).rejects.toThrow('connect ECONNREFUSED')
+    await getHeadlines(5)
 
     expect(listRecentItems).toHaveBeenCalledTimes(2)
   })

@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, exists, gte, isNotNull, lte, ne, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, exists, isNotNull, lte, ne, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
@@ -67,9 +67,9 @@ export function listEnabledSources(db: Database) {
  * homepage shows of them: the title, the address, the number of replies, the time of the last post and the screen name of
  * whoever wrote it, which is null when the forum doesn't say. Every other column stays internal, so none can reach a page.
  *
- * The importer keeps the newest four, so `limit` only matters when there is more than one forum.
+ * The importer keeps the newest five, so `limit` only matters when there is more than one forum.
  */
-export function listNewestDiscussions(db: Database, limit = 4) {
+export function listNewestDiscussions(db: Database, limit = 5) {
   return db
     .select({
       lastPostedAt: discussions.lastPostedAt,
@@ -144,7 +144,7 @@ export function listPodcasts(db: Database) {
 }
 
 /**
- * The news items published from `since` up to and including `until`, newest first, from the sources that are switched
+ * The newest `limit` news items published up to and including `until`, newest first, from the sources that are switched
  * on, with what the homepage shows of them: the headline, the link, the time, whether it is behind a paywall, and the
  * name of the source. That name is the way the source wants to be credited, or else its own name. The policy and the
  * permission stay internal, and so does every other column, so none of them can reach a page.
@@ -152,9 +152,9 @@ export function listPodcasts(db: Database) {
  * The episodes of a podcast are items too, but they are not news, so a source of kind podcast gives none.
  *
  * Pass the moment of now as `until`: the importer keeps a time up to a day ahead, because feeds are sometimes wrong
- * about their clock, and such an item doesn't belong under a day that hasn't begun.
+ * about their clock, and such an item doesn't belong on top.
  */
-export function listRecentItems(db: Database, since: Date, until: Date) {
+export function listRecentItems(db: Database, { limit, until }: { limit: number; until: Date }) {
   return db
     .select({
       paywalled: items.paywalled,
@@ -165,15 +165,9 @@ export function listRecentItems(db: Database, since: Date, until: Date) {
     })
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(
-      and(
-        eq(sources.enabled, true),
-        ne(sources.kind, 'podcast'),
-        gte(items.publishedAt, since),
-        lte(items.publishedAt, until),
-      ),
-    )
+    .where(and(eq(sources.enabled, true), ne(sources.kind, 'podcast'), lte(items.publishedAt, until)))
     .orderBy(desc(items.publishedAt), desc(items.id))
+    .limit(limit)
 }
 
 /** The conditions that make an item an episode to show: of a podcast that is switched on, not later than `until`, and of the podcast with this slug when `podcast` is given. */

@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu zeven pagina's: de homepage met de koppen van de afgelopen twee weken, `/podcasts` met de afleveringen van de podcasts, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu zeven pagina's: de homepage met de nieuwste koppen, `/podcasts` met de afleveringen van de podcasts, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -51,7 +51,8 @@ Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de
 
 De homepage toont koppen uit de database, en de seed heeft er geen.
 Daarom zet `e2e/global-setup.ts` vóór de eerste test verzonnen koppen op de testbronnen in de database, en haalt ze er na de laatste test weer uit (`e2e/headlines.ts`).
-Of de homepage een bericht van veertien dagen oud of ouder en een van een uitgezette bron weglaat, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
+Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
+De controle toetst de homepage ook met `?nieuws=10`, zodat de oudere koppen die de knop laadt ook langs axe komen.
 Hier gaat het om axe op de pagina met nieuws.
 Draait de database van de controle ook echte berichten, door `pnpm run import`, dan staan die er gewoon tussen.
 Playwright wacht tot `/robots.txt` antwoordt en niet tot de homepage, want die bewaart haar koppen vijf minuten in het geheugen.
@@ -135,12 +136,22 @@ De header, met het logo en het hoofdmenu, en de footer staan in `src/app/layout.
 
 De `h1` van de homepage is "sc Heerenveen Fansite", maar die zie je niet: het logo erboven zegt het al.
 Hij heeft de klasse `hf-visually-hidden` uit het designsysteem, dus een schermlezer leest hem wel voor.
-Daaronder staat het blok "Laatste nieuws": de berichten van de bronnen die aanstaan, van vandaag en de zes dagen ervoor, het nieuwste eerst, in één lijst zonder kop per dag.
+Daaronder staat het blok "Laatste nieuws": de vijf nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
 Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
+Zijn er oudere berichten, dan staat onder de lijst de knop "Laad 5 meer".
+De knop zit in een formulier met `method="get"` dat de homepage opnieuw laadt met het aantal in het adres, zoals `/?nieuws=10#nieuws-6`.
+Elke kop in de lijst heeft een `id` met zijn nummer (`nieuws-6`), en het formulier gaat naar de eerste nieuwe kop, dus de bezoeker blijft op dezelfde plek.
+Dat werkt zonder JavaScript en zonder API.
+`parseHeadlineCount` in `src/headlines.ts` controleert het getal: een geheel getal vanaf 5, in stappen van 5, en niet meer dan 100.
+Elk ander getal geeft de eerste vijf.
+Bij 100 koppen verdwijnt de knop; ouder nieuws is voor het archief (#26).
+Een pagina met `?nieuws=` heeft de homepage zelf als canoniek adres, en staat niet in de sitemap.
 Onder het blok staat de link naar Onze bronnen.
 
-In de zijbalk naast het nieuws staat het blok "Nieuwste discussies": de vier discussies van het forum waar het laatst op is gereageerd.
+Elke kaart met een lijst toont vijf items: het aantal staat op één plek, `itemsPerCard` in `src/items-per-card.ts`.
+
+In de zijbalk naast het nieuws staat het blok "Nieuwste discussies": de vijf discussies van het forum waar het laatst op is gereageerd.
 Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar het laatste bericht van de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1 · 13:28".
 Van vandaag staat alleen de tijd, van de zes dagen ervoor de korte dag en de tijd, en daarvoor de datum.
 Onder de discussies staat de link "Naar het forum"; zijn er geen discussies, dan staat er een tekst voor bezoekers boven die link.
@@ -149,11 +160,11 @@ De importer bewaart de discussies (zie de [README van de importer](../importer/R
 De server bewaart ze vijf minuten (`src/discussions.ts`).
 
 `listRecentItems` in `@fansite/db/queries` haalt de berichten op, met alleen die velden.
-`src/news.ts` rekent de twee weken uit in Nederlandse tijd (`Europe/Amsterdam`), en schrijft de dag of de datum en de tijd.
+`src/news.ts` schrijft de dag of de datum en de tijd, in Nederlandse tijd (`Europe/Amsterdam`).
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
-Onder de discussies staat het blok "Nieuwste podcasts": de vier nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/podcasts` eronder.
+Onder de discussies staat het blok "Nieuwste podcasts": de vijf nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/podcasts` eronder.
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/podcasts`.
 

@@ -55,7 +55,7 @@ describe('readForum', () => {
     expect(discussions.map((discussion) => discussion.replyCount)).toEqual([0, 1, 0])
   })
 
-  it('keeps the newest four, by the time of the last post, whatever order the forum gives', () => {
+  it('keeps the newest five, by the time of the last post, whatever order the forum gives', () => {
     const { discussions } = read([
       { id: 1, lastPostedAt: '2026-10-20T10:00:00+00:00' },
       { id: 2, lastPostedAt: '2026-10-23T10:00:00+00:00' },
@@ -63,6 +63,7 @@ describe('readForum', () => {
       { id: 4, lastPostedAt: '2026-10-21T10:00:00+00:00' },
       { id: 5, lastPostedAt: '2026-10-19T10:00:00+00:00' },
       { id: 6, lastPostedAt: '2026-10-23T12:00:00+00:00' },
+      { id: 7, lastPostedAt: '2026-10-18T10:00:00+00:00' },
     ])
 
     expect(discussions).toHaveLength(discussionsToKeep)
@@ -71,6 +72,7 @@ describe('readForum', () => {
       'https://forum.test/d/2-discussie-2/5',
       'https://forum.test/d/3-discussie-3/5',
       'https://forum.test/d/4-discussie-4/5',
+      'https://forum.test/d/1-discussie-1/5',
     ])
   })
 
@@ -86,6 +88,7 @@ describe('readForum', () => {
       { id: 6, tags: [2, 3] },
       { id: 7, tags: [] },
       { id: 8, tags: [12] },
+      { id: 9, tags: [] },
     ])
 
     expect(skipped).toEqual([])
@@ -94,6 +97,7 @@ describe('readForum', () => {
       'https://forum.test/d/5-discussie-5/5',
       'https://forum.test/d/6-discussie-6/5',
       'https://forum.test/d/7-discussie-7/5',
+      'https://forum.test/d/8-discussie-8/5',
     ])
   })
 

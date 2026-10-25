@@ -41,8 +41,8 @@ type Resource = Record<string, unknown>
  */
 export const leftOutTags: readonly string[] = ['offtopics', 'sport-overig']
 
-/** How many discussions the importer keeps: the block shows four. */
-export const discussionsToKeep = 4
+/** How many discussions the importer keeps: the block shows five. */
+export const discussionsToKeep = 5
 
 /**
  * Reads the answer of the Flarum API to a request for the discussions, sorted by the time of the last post and with

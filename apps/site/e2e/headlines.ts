@@ -12,11 +12,11 @@ type Row = { domain: string; hoursAgo: number; paywalled?: boolean; source: stri
  * test and takes them out after the last one.
  *
  * They are in the form of real headlines, on the made-up test sources of the seed. The times are counted back from the
- * moment the check starts, so they are always in the two weeks the homepage shows. The first seven are from the last
- * six days and show a weekday; the last three are older and show a date.
+ * moment the check starts. The homepage shows the first five, and the button under them; `/?nieuws=10` shows all ten and
+ * no button. The first seven are from the last six days and show a weekday; the last three are older and show a date.
  */
-export const headlines: { insideTheTwoWeeks: Row[] } = {
-  insideTheTwoWeeks: [
+export const headlines: { madeUp: Row[] } = {
+  madeUp: [
     {
       domain: 'testkrant.test',
       hoursAgo: 1,
@@ -88,7 +88,7 @@ export const headlines: { insideTheTwoWeeks: Row[] } = {
 /** The feeds of the made-up items. A feed that the importer would read must not outlast the check, so it is easy to recognise. */
 const feedPath = '/e2e-a11y/rss/'
 
-const rows: Row[] = headlines.insideTheTwoWeeks
+const rows: Row[] = headlines.madeUp
 
 /**
  * Puts the made-up headlines in the database and returns the function that takes them out again. The site must have
