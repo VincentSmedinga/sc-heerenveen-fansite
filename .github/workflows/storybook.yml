@@ -58,6 +58,15 @@ jobs:
       - name: Check that light-dark() is kept
         run: "! grep -rq -e '--lightningcss' packages/design-system/storybook-static/assets --include='*.css'"
 
+      # The pages keep out of search results with this tag (see noindex.ts). The deploy copies this build, so a build
+      # without it must not go live.
+      - name: Check that the pages have noindex
+        run: |
+          for file in index.html iframe.html; do
+            grep -q '<meta name="robots" content="noindex">' "packages/design-system/storybook-static/$file" \
+              || { echo "::error title=Storybook check failed::$file has no robots noindex tag."; exit 1; }
+          done
+
       # The deploy job copies this build, so what goes live is what was checked here. On a pull request it is the
       # build to download and look at.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

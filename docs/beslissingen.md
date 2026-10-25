@@ -752,6 +752,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `docs/designsysteem-publiceren.md` zet die stap daarom voor het samenvoegen.
 - **Alternatieven:** een eigen workflow voor de app (twee workflows die elkaars bestanden kunnen raken, en twee omgevingen met dezelfde geheimen); een eigen geheim voor het pad van de app (een tweede pad om te controleren); de controle overslaan als de app er nog niet is (de run blijft dan groen terwijl er niets werkt).
 
+### Storybook op ds.heerenveen.org krijgt `noindex`, en geen `robots.txt` die blokkeert
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** Storybook op ds.heerenveen.org krijgt `<meta name="robots" content="noindex">` in `index.html` en `iframe.html`, via `managerHead` en `previewHead` in `.storybook/main.ts`.
+  Er komt geen `robots.txt` die blokkeert.
+  De taak `Build Storybook` controleert bij elke build dat beide bestanden de tag hebben.
+- **Waarom:** de pagina's zijn voor bijdragers en agents.
+  `noindex` houdt ze uit de zoekresultaten en laat het lezen toe, terwijl `Disallow` ook agents en gereedschap tegenhoudt die zich aan robots houden.
+- **Alternatieven:** indexeerbaar laten, zoals nu (zonder nut en met een nietszeggende titel); een `robots.txt` met `Disallow: /` (blokkeert ook de gereedschappen die zich aan robots houden).
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft
