@@ -56,7 +56,8 @@ Een agent heeft daar geen toegang.
    Controleer dat inloggen werkt: `ssh -p 26 -i ~/.ssh/fansite-designsystem <gebruiker>@<host>`.
    Op de gedeelde hosting heeft elke sleutel de rechten van het hele account.
    Beperken tot één map kan met `rrsync` en een regel `command="rrsync <map>",restrict` voor de sleutel in `~/.ssh/authorized_keys`, als `rrsync` op de host staat (`ls /usr/bin/rrsync`).
-   Het pad in `DEPLOY_PATH` moet dan anders: rrsync leest het pad van rsync vanaf die map.
+   De workflow past daar nu niet bij: rrsync leest het pad van rsync vanaf die map, en de controle van `DEPLOY_PATH` in `storybook.yml` weigert zo'n pad.
+   Voor die beperking moet dus ook de workflow veranderen.
    Dat is niet uitgeprobeerd, dus laat het weg tenzij je het wilt uitzoeken.
 
 3. **Hostsleutel.**
@@ -80,7 +81,7 @@ Een agent heeft daar geen toegang.
    De deploy vervangt de plaatsvervangende pagina `index.html` van mijn.host.
 6. **GitHub Pages uitzetten.**
    Doe dit pas als de eerste deploy slaagt en <https://ds.heerenveen.org> Storybook toont.
-   Kies onder _Settings → Pages_ bij _Source_ voor _None_ (of haal de site daar weg), zodat <https://vincentsmedinga.github.io/sc-heerenveen-fansite/> verdwijnt.
+   Kies onder _Settings → Pages_ bij _Source_ voor _None_ (of haal de site daar weg), zodat de oude Storybook op GitHub Pages verdwijnt.
    De omgeving `github-pages` onder _Settings → Environments_ kun je daarna verwijderen.
 
 ## Controleren
