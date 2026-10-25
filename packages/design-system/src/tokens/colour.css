@@ -90,6 +90,8 @@
     --hf-colour-background-band: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-900));
     --hf-colour-background-button: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-300));
     --hf-colour-background-button-hover: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-200));
+    --hf-colour-background-button-soft: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-700));
+    --hf-colour-background-button-soft-hover: light-dark(var(--hf-colour-blue-200), var(--hf-colour-blue-600));
     --hf-colour-background-hover: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
     --hf-colour-background-zebra: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
     --hf-colour-background-highlight: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
@@ -107,6 +109,7 @@
     --hf-colour-text-on-header-secondary: var(--hf-colour-blue-200);
     --hf-colour-text-on-band: var(--hf-colour-blue-100);
     --hf-colour-text-on-button: light-dark(var(--hf-colour-white), var(--hf-colour-blue-950));
+    --hf-colour-text-on-button-soft: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
 
     /*
      * The focus ring on the dark blue of the header and the match band. The ring of the page (blue-500 in light) is
@@ -144,6 +147,12 @@
     /* The line on top of the footer, between the page and the footer. */
     --hf-colour-border-footer: light-dark(var(--hf-colour-grey-300), var(--hf-colour-blue-700));
     --hf-colour-border-input: light-dark(var(--hf-colour-grey-500), var(--hf-colour-blue-400));
+
+    /*
+     * The border of the soft button. Its fill is too pale to reach 3:1 against a card (blue-100 on white reaches 1,21:1),
+     * so the border carries that: it reaches 3,85:1 on the four surfaces in light and 4,16:1 in dark.
+     */
+    --hf-colour-border-button-soft: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-400));
     --hf-colour-focus: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-300));
     /* stylelint-enable plugin/use-baseline */
   }
@@ -179,6 +188,8 @@
       --hf-colour-background-band: var(--hf-colour-blue-800);
       --hf-colour-background-button: var(--hf-colour-blue-800);
       --hf-colour-background-button-hover: var(--hf-colour-blue-900);
+      --hf-colour-background-button-soft: var(--hf-colour-blue-100);
+      --hf-colour-background-button-soft-hover: var(--hf-colour-blue-200);
       --hf-colour-background-hover: var(--hf-colour-grey-50);
       --hf-colour-background-zebra: var(--hf-colour-grey-50);
       --hf-colour-background-highlight: var(--hf-colour-blue-100);
@@ -191,6 +202,7 @@
       --hf-colour-text-accent: var(--hf-colour-red-700);
       --hf-colour-text-highlight: var(--hf-colour-blue-800);
       --hf-colour-text-on-button: var(--hf-colour-white);
+      --hf-colour-text-on-button-soft: var(--hf-colour-blue-800);
       --hf-colour-marker-text: var(--hf-colour-steel-600);
       --hf-colour-marker-graphic: var(--hf-colour-steel-500);
       --hf-colour-border-surface: var(--hf-colour-grey-200);
@@ -200,6 +212,7 @@
       --hf-colour-border-default: var(--hf-colour-grey-200);
       --hf-colour-border-footer: var(--hf-colour-grey-300);
       --hf-colour-border-input: var(--hf-colour-grey-500);
+      --hf-colour-border-button-soft: var(--hf-colour-blue-500);
       --hf-colour-focus: var(--hf-colour-blue-500);
     }
   }
