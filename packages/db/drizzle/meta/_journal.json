@@ -50,6 +50,13 @@
       "when": 1792836450506,
       "tag": "0006_add_episode_duration_season_and_number",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1792915120394,
+      "tag": "0007_add_admin_login",
+      "breakpoints": true
     }
   ]
 }

@@ -6,8 +6,9 @@ import { isIndexable, originOf } from '../env'
 export const dynamic = 'force-dynamic'
 
 export default function robots(): MetadataRoute.Robots {
-  // Only production points to the sitemap: the other environments refuse everything, so there is nothing to find.
+  // Only production points to the sitemap: the other environments refuse everything, so there is nothing to find. The admin
+  // is refused everywhere, production too (the page itself says noindex as well, see proxy.ts).
   return isIndexable()
-    ? { rules: { allow: '/', userAgent: '*' }, sitemap: `${originOf()}/sitemap.xml` }
-    : { rules: { disallow: '/', userAgent: '*' } }
+    ? { rules: { allow: '/', disallow: '/beheer', userAgent: '*' }, sitemap: `${originOf()}/sitemap.xml` }
+    : { rules: { disallow: ['/', '/beheer'], userAgent: '*' } }
 }

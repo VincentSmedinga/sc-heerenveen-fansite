@@ -6,6 +6,7 @@
   "license": "EUPL-1.2",
   "type": "module",
   "scripts": {
+    "admin": "node --env-file-if-exists=../../.env src/admin.ts",
     "assemble": "node scripts/assemble.js",
     "build": "tsc -b && next build",
     "dev": "next dev",
@@ -21,6 +22,7 @@
     "@fansite/design-system": "workspace:*",
     "@fansite/shared": "workspace:*",
     "@next/env": "16.4.2",
+    "drizzle-orm": "0.45.4",
     "next": "16.4.2",
     "nodemailer": "10.0.16",
     "react": "19.3.1",

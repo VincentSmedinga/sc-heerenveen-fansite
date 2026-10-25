@@ -6,7 +6,13 @@ import sitemap from './sitemap'
 
 // The pages that are not in the sitemap on purpose, as paths such as '/beheer'. A new page.tsx that isn't in the list of
 // pages in pages.ts must be named here, so a new page doesn't forget the sitemap.
-const notInSitemap: string[] = ['/contact/verstuurd']
+const notInSitemap: string[] = [
+  '/beheer',
+  '/beheer/inloggen',
+  '/beheer/inloggen/bevestigen',
+  '/beheer/inloggen/verstuurd',
+  '/contact/verstuurd',
+]
 
 /** The path of every page.tsx under src/app, such as '/bronnen'. The homepage is '/'. */
 function pagePaths() {

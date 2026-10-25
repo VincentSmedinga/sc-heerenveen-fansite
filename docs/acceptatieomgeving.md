@@ -228,6 +228,59 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
     Het wachtwoord staat nooit in GitHub of in de repository.
     Draai daarna de proefmail onder _Controleren_.
 
+12. **Accounts voor het beheer.**
+    Wie het beheer in mag, heeft een persoonlijk account met een e-mailadres en een rol: `beheerder` of `moderator`.
+    Er is geen aanmeldpagina en geen wachtwoord.
+    Je maakt een account met een opdracht op de host, en de persoon logt in met een link die de site mailt (zie _Het beheer_ hieronder).
+    De tabellen komen vanzelf: de site maakt ze als de host hem start, net als de rest van het schema.
+    Het bestand `apps/site/admin.mjs` staat sinds de deploy op de host, naast de importer.
+    Het is één bestand, en het leest alleen `DATABASE_URL`, uit hetzelfde bestand als de importer (`~/fansite-acceptatie.env`, stap 8).
+    Log in met SSH (`ssh -p 26 <gebruiker>@<host>`) en draai op één regel, met het adres en de rol erachter:
+
+    ```sh
+    /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/site/admin.mjs create <e-mailadres> beheerder
+    ```
+
+    Gebruik dezelfde paden als in de cronjob (stap 9 en 10).
+    Hij zegt `Made the account for <adres>, as beheerder.` en stopt met 0.
+    Het adres wordt in kleine letters bewaard.
+    Heeft het adres al een account dat aanstaat, dan zegt hij dat en verandert hij niets (stopt met 1).
+    Staat het account uit, dan zet dezelfde opdracht het weer aan, met de rol die je noemt.
+
+    Een account uitzetten, en zijn sessies meteen beëindigen, doe je met `revoke`:
+
+    ```sh
+    /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/site/admin.mjs revoke <e-mailadres>
+    ```
+
+    Hij zegt `Turned off the account for <adres> and ended <n> sessions.`
+    De persoon is dan meteen uitgelogd en krijgt geen nieuwe link meer.
+    Een adres zonder account geeft `There is no account for <adres>.` en code 1.
+    Een fout in de opdracht, zoals een rol die niet bestaat, toont het gebruik en stopt met 2.
+
+    Op je eigen computer, met pnpm, doe je hetzelfde met `pnpm admin:create <e-mailadres> <rol>` en `pnpm admin:revoke <e-mailadres>`.
+    Dat leest `DATABASE_URL` uit de `.env` in de root.
+
+## Het beheer
+
+De pagina's onder `/beheer` zijn voor de redactie.
+`/beheer/inloggen` vraagt een e-mailadres.
+Heeft het adres een account dat aanstaat, dan mailt de site (met `sendMail`, stap 11) een link naar `/beheer/inloggen/bevestigen`.
+Het antwoord op het scherm is voor elk adres hetzelfde: "Als dit adres een account heeft, hebben we een link gemaild."
+Zo kan niemand nagaan wie een account heeft.
+
+- De link werkt 15 minuten en één keer.
+  De pagina erachter logt niet zelf in, maar toont de knop Inloggen: een virusscanner of voorbeeldweergave die de link opent, gebruikt hem dan niet op.
+- Per e-mailadres kun je 5 links per kwartier vragen, en de hele site 30.
+  Daarna zegt de pagina dat er te veel links zijn gevraagd.
+  De teller staat in de database en bewaart geen IP-adressen.
+- Na het inloggen staat de sessie in de database, en de browser krijgt één cookie met alleen een nummer erin: `beheer-sessie`, met `HttpOnly`, `Secure` en `SameSite=Lax`, alleen voor de pagina's onder `/beheer`.
+  Een sessie eindigt na 12 uur zonder gebruik, en na 7 dagen hoe dan ook.
+  Uitloggen verwijdert de sessie op de server.
+- Alles onder `/beheer` krijgt `X-Robots-Tag: noindex, nofollow` en `Cache-Control: no-store`, ook op productie, en `robots.txt` weigert `/beheer` op elke omgeving.
+- Het beheer zelf is voorlopig leeg: de pagina zegt wie is ingelogd en heeft een knop om uit te loggen.
+  Beheerschermen komen met latere issues.
+
 ## Controleren
 
 - De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, het blok "Laatste nieuws" en in de zijbalk het blok "Nieuwste discussies".
@@ -238,7 +291,8 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - `curl -I https://acc.sc.heerenveen.org` toont `x-robots-tag: noindex, nofollow`.
   Die header staat ook bij `/robots.txt` en bij een pagina die niet bestaat.
-- <https://acc.sc.heerenveen.org/robots.txt> toont `Disallow: /`.
+- <https://acc.sc.heerenveen.org/robots.txt> toont `Disallow: /` en `Disallow: /beheer`.
+  Op productie toont hij alleen `Disallow: /beheer`, met de sitemap.
 - <https://acc.sc.heerenveen.org/bestaat-niet> toont de Nederlandse 404-pagina "Pagina niet gevonden".
 - <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, de echte nieuwsbronnen uit de seed en onder Forum sc Heerenveen Forum.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
@@ -266,6 +320,12 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
   `echo $?` direct daarna toont 0 als elke feed gezond is, en 1 als een feed ongezond is.
   De README van de importer laat zien hoe het eruitziet.
 
+- `curl -I https://acc.sc.heerenveen.org/beheer/inloggen` toont `x-robots-tag: noindex, nofollow`, `cache-control` met `no-store` erin en `referrer-policy: no-referrer`.
+  Een bezoeker zonder sessie die `/beheer` opvraagt, krijgt een doorverwijzing (307) naar `/beheer/inloggen`, met dezelfde headers.
+- Het inloggen werkt als je na stap 12 (en na de proefmail) een account maakt voor je eigen adres, naar <https://acc.sc.heerenveen.org/beheer/inloggen> gaat, je adres invult, binnen een paar minuten de mail "Inloggen bij het beheer van de sc Heerenveen Fansite" krijgt en na de link en de knop Inloggen "Je bent ingelogd als <je adres>." ziet.
+  De link werkt maar één keer: opnieuw openen zegt "Deze link werkt niet".
+  Uitloggen brengt je terug bij het formulier, en met de terugknop kom je niet meer in het beheer.
+  Het cookie `beheer-sessie` zie je in de ontwikkelaarstools van je browser, onder Application → Cookies; het is `HttpOnly` en `Secure`.
 - De proefmail laat zien dat de site kan mailen.
   Het bestand `apps/site/send-test-mail.mjs` staat sinds de deploy op de host, naast de importer.
   Het leest de variabelen uit een bestand, net als de importer, en een cronjob of SSH-sessie krijgt die van de Node.js-app niet.
@@ -319,6 +379,20 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
 - De site geeft een 500 en `stderr.log` zegt `Cannot find module '@swc/helpers/...'`: de map op de host bevat symbolische links.
   `pnpm --filter site assemble` haalt ze weg en stopt als er een overblijft.
   Controleer de map op de host met `find <map van de app> -type l`; die opdracht mag niets tonen.
+- De opdracht voor de accounts (`admin.mjs`) werkt niet: de fout staat op het scherm.
+
+  | Wat er op het scherm staat                                  | Wat je doet                                                                                                                          |
+  | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+  | `node: /home/<gebruiker>/fansite-acceptatie.env: not found` | Het bestand met `DATABASE_URL` ontbreekt of heet anders. Maak het zoals in stap 8.                                                   |
+  | `DATABASE_URL is missing` of `DATABASE_URL: Invalid URL`    | Het bestand heeft geen regel `DATABASE_URL=…`, of de waarde klopt niet. Kopieer de waarde van de Node.js-app.                        |
+  | `Access denied for user` of `connect ECONNREFUSED`          | De gebruiker, het wachtwoord of de host in het bestand klopt niet. Kopieer de waarde van de Node.js-app.                             |
+  | `Table '…admin_users' doesn't exist`                        | De database heeft de tabellen van het beheer nog niet. De site maakt ze als de host haar start: open de site en probeer het opnieuw. |
+  | Het gebruik (`Usage:`)                                      | De opdracht klopt niet: `create <e-mailadres> beheerder` (of `moderator`), of `revoke <e-mailadres>`.                                |
+
+- Iemand krijgt geen mail met een link: de pagina antwoordt voor elk adres hetzelfde, dus kijk eerst of het adres een account heeft dat aanstaat (stap 12, in phpMyAdmin: `SELECT email, role, disabled_at FROM admin_users`).
+  Staat het er goed, kijk dan in het logboek van de app naar een regel `Could not mail a login link`.
+  De proefmail (zie _Controleren_) laat zien of de site kan mailen.
+  Het adres staat niet in het logboek, dus de regel noemt alleen de soort fout.
 - De import werkt niet: kijk in `~/fansite-import.log`.
   Elke run begint met de tijd.
   Komen er geen nieuwe tijden bij, dan start cron de opdracht niet: controleer de cronjob in DirectAdmin.
