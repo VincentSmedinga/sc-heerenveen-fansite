@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
-import { ExternalLinkIcon } from '../external-link-icon/ExternalLinkIcon'
+import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
 
 export type NavigationItem = {
@@ -31,7 +31,7 @@ export const Navigation = ({ className, items, label, ...props }: NavigationProp
         <li key={item.href}>
           <Link aria-current={item.current ? 'page' : undefined} className="hf-navigation-link" href={item.href}>
             {item.label}
-            {item.external && <ExternalLinkIcon />}
+            {item.external && <Icon name="external-link" />}
           </Link>
         </li>
       ))}

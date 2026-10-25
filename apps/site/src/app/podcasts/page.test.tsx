@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { PodcastPage as Content } from '../../podcasts'
 
 import { getPodcastPage } from '../../podcasts'
+import { withoutIcons } from '../../without-icons'
 import PodcastsPage, { generateMetadata } from './page'
 
 vi.mock('../../podcasts', () => ({ getPodcastPage: vi.fn() }))
@@ -185,12 +186,31 @@ describe('the card about the podcast in the sidebar', () => {
   it('has "Luister ook op" and a list with a text link for each address, named after the podcast', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
 
-    const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
+    const sidebar = withoutIcons(sidebarOf(await render({ podcast: 'omroep-abe' })))
 
     expect(sidebar).toContain(
       '<p>Luister ook op</p><ul role="list"><li><a href="https://podcasts.apple.com/nl/podcast/omroep-abe/id1"><span class="hf-visually-hidden">Omroep Abe op </span>Apple Podcasts</a></li><li><a href="https://open.spotify.com/show/abc"><span class="hf-visually-hidden">Omroep Abe op </span>Spotify</a></li></ul>',
     )
     expect(sidebar).not.toContain('target=')
+  })
+
+  it('draws the icon for a link to another site behind each address, hidden from screen readers, and the link is still named after the podcast', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
+
+    const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
+    const links = [...sidebar.matchAll(/<a href="[^"]*">(.*?)<\/a>/g)].map(([, content]) => content ?? '')
+
+    expect(links).toHaveLength(2)
+    expect(links[0]).toMatch(
+      /Omroep Abe op <\/span>Apple <span class="hf-icon-tail">Podcasts<svg aria-hidden="true" class="hf-icon"/,
+    )
+    expect(links[1]).toMatch(
+      /Omroep Abe op <\/span><span class="hf-icon-tail">Spotify<svg aria-hidden="true" class="hf-icon"/,
+    )
+    expect(links.map((content) => content.replace(/<svg.*?<\/svg>/, '').replace(/<[^>]*>/g, ''))).toEqual([
+      'Omroep Abe op Apple Podcasts',
+      'Omroep Abe op Spotify',
+    ])
   })
 
   it('has one item when the podcast has one address', async () => {
@@ -199,7 +219,7 @@ describe('the card about the podcast in the sidebar', () => {
       selected: { ...bothAddresses, spotifyUrl: null },
     })
 
-    const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
+    const sidebar = withoutIcons(sidebarOf(await render({ podcast: 'omroep-abe' })))
 
     expect(sidebar.match(/<li>/g)).toHaveLength(1)
     expect(sidebar).toContain('Apple Podcasts')
@@ -274,7 +294,7 @@ describe('the pagination', () => {
 
     expect(html).toContain('<nav aria-label="Paginering"')
     expect(html).toContain('Pagina 1 van 9')
-    expect(html).toContain(
+    expect(withoutIcons(html)).toContain(
       '<a class="hf-pagination-link hf-pagination-next" href="/podcasts?pagina=2" rel="next">Volgende</a>',
     )
     expect(html).not.toContain('Vorige')
@@ -283,7 +303,7 @@ describe('the pagination', () => {
   it('has both links in the middle, and the link back to the first page has no parameter', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue(many)
 
-    const second = await render({ pagina: '2' })
+    const second = withoutIcons(await render({ pagina: '2' }))
 
     expect(second).toContain('Pagina 2 van 9')
     expect(second).toContain('href="/podcasts" rel="prev">Vorige')
@@ -294,16 +314,31 @@ describe('the pagination', () => {
   it('has a link to the previous page and none to a next page on the last page', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue(many)
 
-    const html = await render({ pagina: '9' })
+    const html = withoutIcons(await render({ pagina: '9' }))
 
     expect(html).toContain('href="/podcasts?pagina=8" rel="prev">Vorige')
     expect(html).not.toContain('Volgende')
   })
 
+  it('draws an arrow to the left in front of "Vorige" and an arrow to the right behind "Volgende", hidden from screen readers', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue(many)
+
+    const html = await render({ pagina: '2' })
+    const previous = html.match(/<a class="hf-pagination-link hf-pagination-previous".*?<\/a>/)?.[0] ?? ''
+    const next = html.match(/<a class="hf-pagination-link hf-pagination-next".*?<\/a>/)?.[0] ?? ''
+
+    expect(previous).toMatch(
+      /rel="prev"><span class="hf-icon-head"><svg aria-hidden="true" class="hf-icon"[^>]*><path d="M13.5 8h-11"><\/path>.*<\/svg>Vorige<\/span><\/a>$/,
+    )
+    expect(next).toMatch(
+      /rel="next"><span class="hf-icon-tail">Volgende<svg aria-hidden="true" class="hf-icon"[^>]*><path d="M2.5 8h11"><\/path>.*<\/svg><\/span><\/a>$/,
+    )
+  })
+
   it('keeps the podcast in the addresses of the pages', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({ ...many, selected: bothAddresses })
 
-    const html = await render({ pagina: '2', podcast: 'omroep-abe' })
+    const html = withoutIcons(await render({ pagina: '2', podcast: 'omroep-abe' }))
 
     expect(html).toContain('href="/podcasts?podcast=omroep-abe" rel="prev">Vorige')
     expect(html).toContain('href="/podcasts?podcast=omroep-abe&amp;pagina=3" rel="next">Volgende')

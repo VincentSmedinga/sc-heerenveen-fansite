@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getSources } from '../../sources'
+import { withoutIcons } from '../../without-icons'
 import SourcesPage, { generateMetadata } from './page'
 
 vi.mock('../../sources', () => ({ getSources: vi.fn() }))
@@ -48,10 +49,26 @@ describe('the page Onze bronnen', () => {
       '<h2 class="hf-heading-2" id="suggest-heading">Mis je een bron?</h2>',
       '<h2 class="hf-heading-2" id="inquiry-heading">Ben je zelf een bron?</h2>',
     ])
-    expect(html).toContain(
+    expect(withoutIcons(html)).toContain(
       '<li><a href="https://testkrant.test">Testkrant</a><p>Een dagblad. Het schrijft over sc Heerenveen.</p></li>',
     )
-    expect(html).toContain('<li><a href="https://testpodcast.test">Testpodcast</a><p>Een podcast.</p></li>')
+    expect(withoutIcons(html)).toContain(
+      '<li><a href="https://testpodcast.test">Testpodcast</a><p>Een podcast.</p></li>',
+    )
+  })
+
+  it('draws the icon for a link to another site behind the name of every source, hidden from screen readers, and nowhere else', async () => {
+    vi.mocked(getSources).mockResolvedValue(sources)
+
+    const html = await render()
+    const links = [...html.matchAll(/<a href="https:\/\/[^"]*">(.*?)<\/a>/g)].map(([, content]) => content ?? '')
+
+    expect(links).toHaveLength(3)
+    for (const content of links) {
+      expect(content).toMatch(/<span class="hf-icon-tail">[^<]*<svg aria-hidden="true" class="hf-icon"/)
+      expect(content).toContain('<path d="M9.5 2.5h4v4"></path>')
+    }
+    expect(html.match(/<svg /g)).toHaveLength(3)
   })
 
   it('is the one main of the page, with the h1 and the introduction as its intro and a card for each kind under it, and a sidebar with two coloured cards', async () => {
@@ -94,7 +111,7 @@ describe('the page Onze bronnen', () => {
   it('shows a source without a description with its link only', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
-    expect(await render()).toContain('<li><a href="https://proefnieuws.test">Proefnieuws</a></li>')
+    expect(withoutIcons(await render())).toContain('<li><a href="https://proefnieuws.test">Proefnieuws</a></li>')
   })
 
   it('shows visitors an empty state when there are no sources', async () => {

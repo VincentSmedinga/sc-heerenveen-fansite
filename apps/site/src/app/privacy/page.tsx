@@ -50,7 +50,10 @@ export default function PrivacyPage() {
         </Text>
         <Text>
           Voor een klacht kun je terecht bij de{' '}
-          <Link href="https://www.autoriteitpersoonsgegevens.nl">Autoriteit Persoonsgegevens</Link>.
+          <Link href="https://www.autoriteitpersoonsgegevens.nl" icon="external-link">
+            Autoriteit Persoonsgegevens
+          </Link>
+          .
         </Text>
       </Page.Cell>
     </Page.Main>

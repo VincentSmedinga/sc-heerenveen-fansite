@@ -66,7 +66,9 @@ export default async function SourcesPage() {
             <List loose>
               {sources.map((source) => (
                 <List.Item key={source.domain}>
-                  <Link href={websiteOf(source)}>{source.name}</Link>
+                  <Link href={websiteOf(source)} icon="external-link">
+                    {source.name}
+                  </Link>
                   {source.description && <Text>{source.description}</Text>}
                 </List.Item>
               ))}

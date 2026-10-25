@@ -3509,6 +3509,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dit volgt `Pompebled` in de map van het logo, dat ook een intern onderdeel zonder eigen story is.
 - **Alternatieven:** het pictogram exporteren uit het package; dat maakt er een deel van de interface van, terwijl niets op de site het los gebruikt.
   Of de tekening in beide componenten laten staan; dan lopen ze uit elkaar.
+- **Later:** zie _Pictogrammen zijn zelf getekend, bij een link erachter en bij een knop ervoor_; `ExternalLinkIcon` is daarin opgegaan in `Icon`.
 
 ### Elke kaart op de homepage toont vijf items, uit één gedeelde waarde
 
@@ -3570,3 +3571,65 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** het nieuws is de hoofdkaart van de pagina.
   Met tien koppen ziet een bezoeker meer zonder te klikken, terwijl de kaarten naast het nieuws kort blijven.
 - **Alternatieven:** alle kaarten op vijf, zoals _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_ besloot; alle kaarten op tien, wat de kaarten met discussies en podcasts langer maakt dan nodig.
+
+### Pictogrammen zijn zelf getekend, bij een link erachter en bij een knop ervoor
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** pictogrammen zijn een kleine set die het designsysteem zelf tekent (SVG in de code), zonder pictogrammenbibliotheek als dependency.
+  De set is een pijl naar rechts, een pijl naar links, een envelop, een plus, een zon, een maan en het pictogram voor een externe link.
+  Bij een link staat het pictogram achter de tekst, bij een knop ervoor.
+  "Vorige" is de uitzondering, omdat zijn pijl naar links wijst.
+- **Waarom:** een pictogram achter een link wijst vooruit, naar waar de link heen gaat.
+  Een pictogram voor een knop zegt wat hij doet: versturen, meer laden.
+  Eén regel voor alle plaatsen houdt het rustig.
+  Zelf tekenen houdt de site vrij van verzoeken naar derden en van een dependency met honderden pictogrammen waarvan we er zeven gebruiken, en geeft de site één eigen stijl.
+- **Alternatieven:** alle pictogrammen achter de tekst, ook bij knoppen (consistenter op papier, maar de envelop staat dan op een ongebruikelijke plek).
+  Een pictogrammenset of lettertype van een derde partij, of losse tekeningen uit zo'n bibliotheek (een verzoek naar buiten of een dependency, en de stijl is van een ander).
+
+### Elke link naar een andere site toont het pictogram voor een externe link
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** elke link naar een andere site toont het pictogram voor een externe link, ook in een zin of een lijst.
+  Een `mailto:`-link en een link binnen de site niet.
+  Op de site zijn dat "Naar het forum" op de homepage, de bronnen op `/bronnen`, de links naar de platforms op `/podcasts`, "ons forum" op `/over-ons`, de Autoriteit Persoonsgegevens op `/privacy` en "het forum" op de foutpagina.
+  "Alle podcasts" op de homepage is een link naar meer van de eigen site en krijgt een pijl naar rechts.
+- **Waarom:** het nieuws en het menu doen het al.
+  Een bezoeker moet overal kunnen zien dat een link de site verlaat.
+- **Alternatieven:** alleen in het nieuws en het menu (zoals daarvoor, maar een link naar een bron of een platform verlaat de site dan zonder waarschuwing).
+  Het afleiden uit het adres (`https://`); dat is minder expliciet dan een optie, en `Link` kiest zijn pictogram dus met de prop `icon`, net als `Navigation` met `external`.
+
+### Eén component Icon, gekozen met een naam, en de plaats volgt uit het component dat het tekent
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** alle pictogrammen zitten in één intern component, `Icon`, met een verplichte `name` uit een vaste lijst (`iconNames`).
+  De zon en de maan hebben daarnaast `appearance` (`line` of `filled`); de typen laten `filled` bij een ander pictogram niet toe, zoals `Text` een inleiding alleen bij een `p` toelaat.
+  Dat vervangt `ExternalLinkIcon`, dat nu `Icon name="external-link"` is: de grootte, de ruimte en de plaats in de regel staan in `icon/icon.css`, voor alle zeven.
+  `Icon` staat niet in de uitvoer van het package.
+  De lijn is even dik als de stam van de letters van gewone tekst (0,084 em in Atkinson Hyperlegible Next, gemeten aan de l), ook als het pictogram groter is: de dikte staat in em in `icon.css` en de tekening rekent die om naar zijn eigen maat.
+  Het pictogram staat zo dat zijn middelste lijn op de hoogte van de dwarsbalk van de e staat, halverwege de kleine letters, en niet op de grondlijn.
+  In een knop is het pictogram iets groter dan in een link (`button .hf-icon`), omdat de vette tekst van een knop een kleine tekening zwak laat lijken; we zagen dat in Storybook op de envelop, de plus, de zon en de maan.
+  De lijn wordt daar niet dikker: de pictogrammen blijven in één stijl.
+  Een bezoeker of een pagina kiest het pictogram met een prop van het component dat het tekent: `Link` heeft `icon` (`arrow-right`, `external-link`, `arrow-left`), `Button` heeft `icon` (`envelope`, `plus`) en een optie van `SegmentedControl` heeft `icon` (`sun`, `moon`).
+  Het component weet waar het pictogram staat: bij een link achter de tekst, behalve `arrow-left` dat ervoor staat, en bij een knop ervoor.
+  De gevulde tekening van de zon en de maan is dezelfde tekening met een vulling (`fill="currentColor"`), dus de lijn en de vulling blijven één stijl; de stralen van de zon zijn lijnen zonder oppervlak, dus de vulling verschijnt alleen in de schijf en de sikkel.
+  `SegmentedControl` tekent de gevulde tekening op de ingedrukte knop en de lijn op de andere.
+  Dat is een tweede aanwijzing naast het gevulde vlak en `aria-pressed`; wie het pictogram niet ziet, mist niets.
+- **Waarom:** het is de eenvoudigste vorm die past bij hoe `Text` en `Card` hun uiterlijk kiezen: een lijst met namen en een getypeerde prop.
+  Eén bestand met zeven tekeningen en één CSS-bestand houdt de stijl bij elkaar, en een volgend pictogram is een regel erbij.
+  Een eigen component per pictogram geeft zeven bestanden met dezelfde kolom code.
+  Het pictogram heeft altijd `currentColor`, dus het heeft de kleur en het contrast van de tekst eromheen, ook onder de muis, met de focus en in geforceerde kleuren.
+- **Alternatieven:** een component per pictogram (`ArrowRightIcon` en zo verder); meer bestanden en dezelfde regels in elk.
+  `Icon` exporteren zodat de site het los kan zetten; dat opent de weg naar een pictogram dat de enige aanwijzing is, terwijl `Link`, `Button` en `SegmentedControl` het pictogram altijd als tweede aanwijzing tekenen.
+  Een `filled` als aparte naam (`sun-filled`); dat maakt de lijst langer en laat de twee tekeningen uit elkaar lopen.
+
+### Het pictogram blijft aan zijn woord vast met een groep die niet afbreekt
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `Link` en `Button` zetten het pictogram met het laatste woord van de tekst (bij een link) of het eerste woord (bij een knop) in een groep met `white-space: nowrap`: `hf-icon-tail` en `hf-icon-head`.
+  Dat doet de functie `attachIcon` in `icon/attachIcon.tsx`, die de tekst bij het laatste of eerste woord splitst.
+  Eindigt de inhoud van een link niet met tekst (of begint die van een knop er niet mee), dan krijgt het pictogram een groep voor zichzelf en kan het alleen op een regel komen; de documentatie van `Link` zegt dat de inhoud met tekst moet eindigen.
+- **Waarom:** een pictogram dat alleen op een regel staat, hoort bij niets en is niet te begrijpen.
+  Een groep zonder afbreking houdt het bij zijn woord, bij 320 pixels breed en bij grote letters.
+  Het pictogram heeft geen eigen kleur en geen beweging, dus er is niets anders te regelen.
+- **Alternatieven:** een onzichtbaar teken ertussen (een woordverbinder); dat komt in de naam van de link, in een kopie van de tekst en in de test van de naam.
+  Het hele label niet laten afbreken; dat laat een lange link over de rand van een smal scherm lopen.

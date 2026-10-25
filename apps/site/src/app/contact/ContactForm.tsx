@@ -93,7 +93,9 @@ export function ContactForm() {
           <Textarea defaultValue={values.bericht} name="bericht" rows={8} />
         </Field>
         <Honeypot name={honeypotName} />
-        <Button type="submit">Versturen</Button>
+        <Button icon="envelope" type="submit">
+          Versturen
+        </Button>
       </Form>
     </>
   )

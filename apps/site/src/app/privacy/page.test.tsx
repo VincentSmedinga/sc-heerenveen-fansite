@@ -1,12 +1,16 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { withoutIcons } from '../../without-icons'
 import PrivacyPage, { generateMetadata } from './page'
 
 const html = renderToStaticMarkup(<PrivacyPage />)
 
 /** The href and the text of each link, in the order of the page. */
-const links = [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label])
+const links = [...withoutIcons(html).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
+  href,
+  label,
+])
 
 describe('the page Privacy', () => {
   afterEach(() => {
@@ -64,7 +68,7 @@ describe('the page Privacy', () => {
   })
 
   it('says in paragraphs, not a list, what the logs, the theme, the cookie of the admin, other sites, email, questions and complaints are about', () => {
-    const paragraphs = [...html.matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
+    const paragraphs = [...withoutIcons(html).matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 
     expect(html).not.toMatch(/<(ul|ol|li)[ >]/)
     expect(paragraphs).toHaveLength(8)
@@ -81,6 +85,15 @@ describe('the page Privacy', () => {
 
   it('no longer says that we have no data of the visitor', () => {
     expect(html).not.toContain('we hebben geen gegevens van je')
+  })
+
+  it('draws the icon for a link to another site behind the Autoriteit Persoonsgegevens only, hidden from screen readers', () => {
+    const iconLinks = [
+      ...html.matchAll(/<a href="([^"]*)">(?:[^<]*)<span class="hf-icon-tail">[^<]*<svg aria-hidden="true"/g),
+    ]
+
+    expect(iconLinks.map(([, href]) => href)).toEqual(['https://www.autoriteitpersoonsgegevens.nl'])
+    expect(html.match(/<svg /g)).toHaveLength(1)
   })
 
   it('links to the contact form, the editors by email and the Autoriteit Persoonsgegevens, and to nothing else', () => {

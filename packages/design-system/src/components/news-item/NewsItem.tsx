@@ -1,7 +1,7 @@
 import { type ComponentPropsWithoutRef, Fragment } from 'react'
 
 import { classNames } from '../classNames'
-import { ExternalLinkIcon } from '../external-link-icon/ExternalLinkIcon'
+import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
 import { Text } from '../text/Text'
 
@@ -70,7 +70,7 @@ export const NewsItem = ({
         </Link>
         <Text appearance="meta" className="hf-news-item-meta">
           <span>{source}</span>
-          <ExternalLinkIcon />
+          <Icon name="external-link" />
           {paywalled && (
             <>
               {separator}

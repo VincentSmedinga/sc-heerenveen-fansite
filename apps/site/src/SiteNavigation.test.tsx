@@ -41,7 +41,7 @@ describe('SiteNavigation', () => {
     const links = [...html.matchAll(/<a [^>]*>(.*?)<\/a>/g)].map(([, content]) => content ?? '')
 
     expect(links.map((content) => content.includes('<svg'))).toEqual([false, false, true])
-    expect(links[2]).toMatch(/^Forum<svg aria-hidden="true" class="hf-external-link-icon"/)
+    expect(links[2]).toMatch(/^Forum<svg aria-hidden="true" class="hf-icon"/)
     expect(html.match(/<svg/g)).toHaveLength(1)
   })
 
