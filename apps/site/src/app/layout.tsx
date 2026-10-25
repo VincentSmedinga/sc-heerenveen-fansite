@@ -10,6 +10,7 @@ import { reviewBranch } from '../env'
 import { SiteNavigation } from '../SiteNavigation'
 import { ThemeToggle } from '../ThemeToggle'
 import { withBranch } from '../title'
+import { TopEdge } from '../TopEdge'
 import { updatesPath, updatesTitle } from '../updates'
 
 // The links in the footer, about the site itself: the page about us, the contact form, the
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <Head script="/theme.js" />
       <Body>
         <PullToRefresh />
+        <TopEdge />
         <Page>
           <Page.Header>
             <Link href="/">
