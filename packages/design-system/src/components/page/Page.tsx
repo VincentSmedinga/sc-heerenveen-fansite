@@ -101,10 +101,15 @@ Footer.displayName = 'Page.Footer'
  * width, with a margin on either side on a narrow screen. It holds a Page.Header, a Page.Body
  * and a Page.Footer, in that order. The Page.Body holds a Page.Main and, if the page has one, a
  * Page.Sidebar, and in them the cells, some of them a Page.Cell. They only work inside a Page,
- * so they are written as properties of it.
+ * so they are written as properties of it. Before them the page has an empty `div` that is
+ * fixed to the top of the screen in the colour of the header, for the status bar of a phone
+ * (see page.css).
  */
-export const Page = ({ className, ...props }: PageProps) => (
-  <div className={classNames('hf-page', className)} {...props} />
+export const Page = ({ children, className, ...props }: PageProps) => (
+  <div className={classNames('hf-page', className)} {...props}>
+    <div aria-hidden="true" className="hf-page-top-edge" />
+    {children}
+  </div>
 )
 
 Page.Header = Header

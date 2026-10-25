@@ -4,8 +4,20 @@
   html {
     background-color: var(--hf-colour-background-page);
 
-    /* Keeps an element with focus from scrolling in behind the strip over the top inset (see .hf-page in page.css). */
-    scroll-padding-block-start: env(safe-area-inset-top, 0);
+    /*
+     * The height of the strip fixed to the top of the screen (see .hf-page in page.css): the
+     * top inset, and in Safari on an iPhone or iPad (the only browsers that know
+     * -webkit-touch-callout) at least 8px, which is what Safari needs to tint the status bar
+     * with it. The scroll padding keeps an element with focus from scrolling in behind the
+     * strip.
+     */
+    --hf-top-edge: env(safe-area-inset-top, 0px);
+
+    scroll-padding-block-start: var(--hf-top-edge);
+
+    @supports (-webkit-touch-callout: none) {
+      --hf-top-edge: max(env(safe-area-inset-top, 0px), 8px);
+    }
   }
 
   /*

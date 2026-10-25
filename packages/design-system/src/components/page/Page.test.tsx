@@ -24,10 +24,20 @@ describe('Page', () => {
 
     expect(page?.className).toBe('hf-page')
     expect(Array.from(page?.children ?? []).map((child) => child.tagName.toLowerCase())).toEqual([
+      'div',
       'header',
       'div',
       'footer',
     ])
+  })
+
+  it('starts with an empty strip for the top edge, hidden from a screen reader, that is not a landmark', () => {
+    const { container } = renderPage()
+    const edge = container.firstElementChild?.firstElementChild
+
+    expect(edge?.className).toBe('hf-page-top-edge')
+    expect(edge?.getAttribute('aria-hidden')).toBe('true')
+    expect(edge?.childNodes).toHaveLength(0)
   })
 
   it('gives the page its landmarks: banner, main and contentinfo, once each', () => {

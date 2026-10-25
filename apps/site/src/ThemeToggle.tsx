@@ -5,7 +5,15 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 
 import type { Theme, ThemePreference } from './theme'
 
-import { applyPreference, chooseTheme, darkQuery, readPreference, resolveTheme, savePreference } from './theme'
+import {
+  applyPreference,
+  chooseTheme,
+  darkQuery,
+  readPreference,
+  refreshTopEdge,
+  resolveTheme,
+  savePreference,
+} from './theme'
 
 const options = [
   { icon: 'sun', label: 'Licht', value: 'light' },
@@ -14,13 +22,19 @@ const options = [
 
 const subscribeToNothing = () => () => undefined
 
+// The colours of the page change with the system, so Safari is told to look at the colour of
+// the top of the page again (see refreshTopEdge()).
 const subscribeToSystem = (onChange: () => void) => {
   const query = matchMedia(darkQuery)
+  const onSystemChange = () => {
+    refreshTopEdge()
+    onChange()
+  }
 
-  query.addEventListener('change', onChange)
+  query.addEventListener('change', onSystemChange)
 
   return () => {
-    query.removeEventListener('change', onChange)
+    query.removeEventListener('change', onSystemChange)
   }
 }
 

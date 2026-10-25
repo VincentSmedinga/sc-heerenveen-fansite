@@ -3587,6 +3587,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de statusbalk op de standaardstijl laten (`default`); dan blijft de statusbalk een eigen balk boven de header.
   Of een afbeelding of een verloop achter de uitsparing; dat is meer werk en meer om te onderhouden dan een effen kleur.
   Of de strook weglaten; dan wisselt de statusbalk bij scrollen van kleur, en schuift lichte inhoud onder de witte tekst ervan.
+- **Later:** de strook is nu een echt element en in Safari op een iPhone minstens 8 pixels hoog, en niet langer een pseudo-element zonder hoogte; zie _De rand bovenaan in Safari heeft de kleur van de kop, door een echte strook van minstens 8 pixels_.
 - **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator, in Safari, in staande en liggende stand.
   De statusbalk van een app op het beginscherm en de strook eronder laat de simulator niet zien, want Safari heeft bovenin geen inset; de projecteigenaar kijkt dat na op een echte telefoon.
 
@@ -3757,3 +3758,40 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het pictogram heeft geen eigen kleur en geen beweging, dus er is niets anders te regelen.
 - **Alternatieven:** een onzichtbaar teken ertussen (een woordverbinder); dat komt in de naam van de link, in een kopie van de tekst en in de test van de naam.
   Het hele label niet laten afbreken; dat laat een lange link over de rand van een smal scherm lopen.
+
+### De rand bovenaan in Safari heeft de kleur van de kop, door een echte strook van minstens 8 pixels
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de rand bovenaan de pagina, achter de statusbalk van Safari op een iPhone of iPad, heeft in licht en in donker de kleur van de kop (`blue-900` en `blue-800`, uit het token van de kop), zonder verloop of schaduw.
+  Daarvoor is de strook bovenaan, die voor de app op het beginscherm al bestond, een echt element geworden in plaats van `.hf-page::before`: de lege `div` `hf-page-top-edge`, die `Page` als eerste kind zet, met `aria-hidden`.
+  De hoogte is `--hf-top-edge`, die `root.css` op `html` zet: de inset bovenin, en in een browser die `-webkit-touch-callout` kent (Safari op iOS en iPadOS, ook in een app op het beginscherm) minstens 8 pixels: `max(env(safe-area-inset-top, 0px), 8px)`.
+  `scroll-padding-block-start` gebruikt dezelfde maat, zodat een element met focus ook niet achter de smalle strook komt.
+  Op een computer en in Android is de hoogte nog steeds de inset, dus 0.
+  In de app op het beginscherm is de inset ruim groter dan 8 pixels, dus daar verandert niets.
+  `theme-color` blijft gelijk aan de kop (zie _Het donkerblauw van het icoon en het manifest komt uit het token van de kop_), voor Chrome en Android.
+  Drukt een bezoeker op Licht of Donker, of wisselt het systeem van thema terwijl de pagina open staat, dan haalt `theme.ts` de strook twee frames van de pagina (`refreshTopEdge`, `display: none`) en zet hem terug.
+- **Oorzaak:** Safari in de iOS Simulator (iOS 27.0, iPhone 18 Pro) gebruikt `theme-color` niet meer voor de balk bovenin.
+  De rand krijgt de kleur van een ondoorzichtig element dat vastzit aan de bovenkant van de pagina en hoog genoeg is, en anders de kleur van de pagina (`grey-100` in licht, `blue-950` in donker), met een zachte overgang naar de inhoud.
+  Dat is het lichtgrijs en bijna zwart met het verloop dat de projecteigenaar zag.
+  Onze strook deed niet mee, om twee redenen: in Safari is de inset bovenin 0, dus de strook had geen hoogte, en Safari kijkt niet naar een pseudo-element.
+- **Gemeten in de simulator:** een vaste strook van 4 pixels in de kleur van de kop telt niet mee; een van 6, 8, 12 en 60 pixels wel.
+  Een strook van 8 pixels waarvan het grootste deel boven het scherm staat (`top: -52px`, 60 pixels hoog) telt ook mee.
+  Een strook met `opacity: 0.01` telt niet mee; hij moet dus echt getekend zijn.
+  Een achtergrond voor `html` in de kleur van de kop verandert niets zolang `body` de kleur van de pagina heeft.
+  `.hf-page::before` met 8 pixels deed niets; hetzelfde element als `div` wel.
+  Na het scrollen is de rand één egaal blauw vlak, zonder verloop, in licht en in donker.
+  Een nieuwe kleur van de strook wordt niet gelezen door alleen de kleur te veranderen, door de hoogte met 1 pixel te veranderen of door het element weg te halen en meteen terug te zetten.
+  Wel door `display: none` te zetten en er twee frames later weer af te halen; dat is wat `refreshTopEdge` doet.
+  De strook ligt over de bovenste 8 pixels van het scherm.
+  Boven aan de pagina valt dat weg tegen de kop, die dezelfde kleur heeft; na het scrollen loopt de egale rand 8 pixels door onder de statusbalk.
+- **Waarom:** het is de kleinste aanpassing die Safari de gewenste kleur laat nemen, uit het token van de kop, zonder dat de achtergrond van de pagina, de footer of het gebied bij uitrekken (overscroll) blauw wordt.
+  Een blauwe `html` zou dat wel doen.
+  Het onderzoek in een andere sessie, dat naar dezelfde kant wees, vond dat ook in de WebKit-bugs 301756 en 305546 en bij de Apple-ontwikkelaarsforums (thread 801239); wij hebben die bronnen niet zelf nagelopen.
+- **Alternatieven:** de rand laten zoals hij was, met het verloop, of in de kleur van de pagina met een scherpe overgang.
+  `html` blauw maken; dat kleurt ook de ruimte onder de footer bij uitrekken.
+  De strook alleen op een iPhone met uitsparing tonen; daar is in CSS geen vraag voor, want de inset is in Safari 0.
+  Een strook van 4 pixels of minder, of een bijna doorzichtige; Safari negeert die.
+- **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, in licht en in donker, boven aan de pagina en na het scrollen, met Licht en Donker en met het systeemthema gewisseld terwijl de pagina open stond.
+  Niet in iOS 26 (geen simulator beschikbaar), niet op een echte telefoon, niet op een iPad en niet in een app op het beginscherm; de projecteigenaar kijkt dat na.
+  Een test in Chromium (`e2e/safe-area.spec.ts`) controleert dat de strook het eerste element van de pagina is, vastzit, geen aanraking aanneemt, dezelfde kleur heeft als de kop en `theme-color` in licht en donker, en na Licht of Donker terugkomt.
+  De 8 pixels en de kleur van de statusbalk zelf zijn alleen op een telefoon te zien.
