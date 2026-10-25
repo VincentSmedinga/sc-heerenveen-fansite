@@ -33,7 +33,11 @@ const meta = preview.meta({
           'De inhoud zet je zelf neer: twee regels tekst, elk in een eigen `Text`, en dan de links over de site.',
           'Op de site zijn dat "Alle koppen en links op één plek." en "Voor supporters door supporters.".',
           'De links, zoals Over ons, Bronnen, Privacy en Updates, staan in een `Navigation` met de naam "Over de site".',
-          'Op een breed scherm staan ze rechts naast de twee regels, in het midden; op een smal scherm staan ze eronder.',
+          'Op een breed scherm staan ze rechts naast de twee regels, ter hoogte van de bovenkant van de tekst; op een smal scherm staan ze eronder.',
+          '',
+          'De twee regels tekst en de knoppen breken niet af: een zin blijft op één regel, een knop houdt zijn pictogram en tekst bij elkaar en de knoppen staan naast elkaar.',
+          'Alleen de links geven mee. Het zijn losse links, dus tussen de links mag een regel afbreken, en op een middelbaar scherm komen ze in twee rijen van ongeveer even lang naast de tekst.',
+          'Op een scherm dat zo smal is dat de tekst nergens meer past, mag alles weer afbreken, als noodgreep: anders scrolt de pagina zijwaarts.',
         ].join('\n'),
       },
       source: exampleSource,
@@ -125,7 +129,11 @@ const screens = { tags: ['!autodocs'] }
 
 const narrowDescription = 'Op een smal scherm staan de links onder de tekst, links uitgelijnd.'
 
-const wideDescription = 'Op een breed scherm staan de links rechts naast de twee regels tekst, in het midden.'
+const wideDescription =
+  'Op een breed scherm staan de links rechts naast de twee regels tekst, ter hoogte van de bovenkant.'
+
+const mediumDescription =
+  'Op een middelbaar scherm staan de links in twee even lange rijen naast de tekst. De zinnen en de knoppen breken niet af.'
 
 export const NarrowLight = meta.story({
   ...screens,
@@ -156,5 +164,21 @@ export const WideDark = meta.story({
   globals: { theme: 'dark', viewport: { value: 'wide' } },
   name: 'Breed scherm, donker',
   parameters: { docs: { description: { story: wideDescription } } },
+  render,
+})
+
+export const MediumLight = meta.story({
+  ...screens,
+  globals: { theme: 'light', viewport: { value: 'medium' } },
+  name: 'Middelbaar scherm, licht',
+  parameters: { docs: { description: { story: mediumDescription } } },
+  render,
+})
+
+export const MediumDark = meta.story({
+  ...screens,
+  globals: { theme: 'dark', viewport: { value: 'medium' } },
+  name: 'Middelbaar scherm, donker',
+  parameters: { docs: { description: { story: mediumDescription } } },
   render,
 })

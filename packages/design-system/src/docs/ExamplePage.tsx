@@ -38,8 +38,10 @@ export const ExampleHeader = ({ current = 'Nieuws' }: { current?: ExampleMenuPag
 /** The links about the site itself, in the footer of the example pages, as on the site. */
 export const exampleFooterMenu = [
   { href: '#over-ons', label: 'Over ons' },
+  { href: '#contact', label: 'Contact' },
   { href: '#bronnen', label: 'Bronnen' },
   { href: '#privacy', label: 'Privacy' },
+  { href: '#toegankelijkheid', label: 'Toegankelijkheid' },
   { href: '#updates', label: 'Updates' },
 ]
 
@@ -56,8 +58,8 @@ export const ExampleFooter = () => (
       label="Thema"
       onChange={() => undefined}
       options={[
-        { label: 'Licht', value: 'light' },
-        { label: 'Donker', value: 'dark' },
+        { icon: 'sun', label: 'Licht', value: 'light' },
+        { icon: 'moon', label: 'Donker', value: 'dark' },
       ]}
       value="light"
     />

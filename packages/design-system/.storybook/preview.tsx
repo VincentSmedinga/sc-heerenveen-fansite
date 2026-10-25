@@ -105,9 +105,11 @@ export default definePreview({
     viewport: {
       // The standard screens, one between the width where the columns sit side by side and the
       // full width of the page column, to see them shrink, and one wider than the page column,
-      // to see what is outside it.
+      // to see what is outside it. A small tablet, 720px, is in the range where a footer with
+      // many links first has to give way.
       options: {
         ...MINIMAL_VIEWPORTS,
+        medium: { name: 'Klein tablet', styles: { height: '800px', width: '720px' }, type: 'tablet' },
         middle: { name: 'Middelgroot scherm', styles: { height: '800px', width: '976px' }, type: 'desktop' },
         wide: { name: 'Breed scherm', styles: { height: '1080px', width: '1920px' }, type: 'desktop' },
       },
