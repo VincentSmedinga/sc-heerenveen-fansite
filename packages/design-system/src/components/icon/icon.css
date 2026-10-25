@@ -8,12 +8,17 @@
    * back in the line here. In a flex container, such as a link in a menu, it is a flex item, and it keeps its size there.
    */
   .hf-icon {
-    block-size: 0.875em;
+    /* The size in em, and the thickness of the line in em: that of the letters of regular text. */
+    --hf-icon-line: 0.084;
+    --hf-icon-size: 0.875;
+
+    block-size: calc(var(--hf-icon-size) * 1em);
     display: inline-block;
     flex-shrink: 0;
-    inline-size: 0.875em;
+    inline-size: calc(var(--hf-icon-size) * 1em);
     margin-inline-start: 0.25em;
-    vertical-align: -0.18em;
+    stroke-width: calc(var(--hf-icon-line) / var(--hf-icon-size) * 16);
+    vertical-align: -0.17em;
   }
 
   /*
@@ -25,12 +30,11 @@
     white-space: nowrap;
   }
 
-  /* The text of a button is bold, so its icon is a little larger and has a heavier line to stand next to it. */
+  /* The text of a button is bold, so its icon is a little larger to stand next to it. The line stays as thick. */
   button .hf-icon {
-    block-size: 1em;
-    inline-size: 1em;
-    stroke-width: 2;
-    vertical-align: -0.24em;
+    --hf-icon-size: 1;
+
+    vertical-align: -0.23em;
   }
 
   .hf-icon-head > .hf-icon {

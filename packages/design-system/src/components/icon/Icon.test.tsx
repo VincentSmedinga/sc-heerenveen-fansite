@@ -76,12 +76,15 @@ describe('the CSS of the icons', () => {
     expect(css).not.toMatch(/transition|animation|transform|:hover/)
   })
 
-  it('makes the icon in a button larger and heavier, in the same unit, because the text of a button is bold', () => {
-    expect(css).toMatch(/button \.hf-icon\s*\{[^}]*inline-size: 1em[^}]*stroke-width: 2/)
+  it('makes the icon in a button larger and not heavier: the line has the same thickness in em as in a link', () => {
+    expect(css).toMatch(/button \.hf-icon\s*\{[^}]*--hf-icon-size: 1;/)
+    expect(css).not.toMatch(/button \.hf-icon\s*\{[^}]*(stroke-width|--hf-icon-line)/)
+    expect(css).toMatch(/stroke-width: calc\(var\(--hf-icon-line\) \/ var\(--hf-icon-size\) \* 16\)/)
   })
 
   it('sizes the icon relative to the text, and keeps the icon with its word on one line', () => {
-    expect(css).toMatch(/inline-size: 0\.875em/)
+    expect(css).toMatch(/--hf-icon-size: 0\.875;/)
+    expect(css).toMatch(/inline-size: calc\(var\(--hf-icon-size\) \* 1em\)/)
     expect(css).toMatch(/\.hf-icon-head,\s*\.hf-icon-tail\s*\{\s*white-space: nowrap/)
   })
 })

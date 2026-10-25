@@ -3605,7 +3605,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De zon en de maan hebben daarnaast `appearance` (`line` of `filled`); de typen laten `filled` bij een ander pictogram niet toe, zoals `Text` een inleiding alleen bij een `p` toelaat.
   Dat vervangt `ExternalLinkIcon`, dat nu `Icon name="external-link"` is: de grootte, de ruimte en de plaats in de regel staan in `icon/icon.css`, voor alle zeven.
   `Icon` staat niet in de uitvoer van het package.
-  In een knop is het pictogram iets groter dan in een link en de lijn is zwaarder (`button .hf-icon` in `icon.css`), omdat de vette tekst van een knop een lichte tekening van dezelfde maat zwak laat lijken; we zagen dat in Storybook op de envelop, de plus, de zon en de maan.
+  De lijn is even dik als de stam van de letters van gewone tekst (0,084 em in Atkinson Hyperlegible Next, gemeten aan de l), ook als het pictogram groter is: de dikte staat in em in `icon.css` en de tekening rekent die om naar zijn eigen maat.
+  Het pictogram staat zo dat zijn middelste lijn op de hoogte van de dwarsbalk van de e staat, halverwege de kleine letters, en niet op de grondlijn.
+  In een knop is het pictogram iets groter dan in een link (`button .hf-icon`), omdat de vette tekst van een knop een kleine tekening zwak laat lijken; we zagen dat in Storybook op de envelop, de plus, de zon en de maan.
+  De lijn wordt daar niet dikker: de pictogrammen blijven in één stijl.
   Een bezoeker of een pagina kiest het pictogram met een prop van het component dat het tekent: `Link` heeft `icon` (`arrow-right`, `external-link`, `arrow-left`), `Button` heeft `icon` (`envelope`, `plus`) en een optie van `SegmentedControl` heeft `icon` (`sun`, `moon`).
   Het component weet waar het pictogram staat: bij een link achter de tekst, behalve `arrow-left` dat ervoor staat, en bij een knop ervoor.
   De gevulde tekening van de zon en de maan is dezelfde tekening met een vulling (`fill="currentColor"`), dus de lijn en de vulling blijven één stijl; de stralen van de zon zijn lijnen zonder oppervlak, dus de vulling verschijnt alleen in de schijf en de sikkel.
