@@ -95,6 +95,23 @@ describe('parseArticleText', () => {
     ])
   })
 
+  it('lets italic end at the end of bold, with three stars in a row', () => {
+    expect(parseArticleText('**vet en *cursief***')).toEqual([
+      {
+        children: [
+          {
+            children: [
+              { text: 'vet en ', type: 'text' },
+              { children: [{ text: 'cursief', type: 'text' }], type: 'italic' },
+            ],
+            type: 'bold',
+          },
+        ],
+        type: 'paragraph',
+      },
+    ])
+  })
+
   it('makes a link to another site external, and a link to a page of ours not', () => {
     const [block] = parseArticleText('[LC](https://www.lc.nl/sport) en [bronnen](/bronnen)') as [Block]
 

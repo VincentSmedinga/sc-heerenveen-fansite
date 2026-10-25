@@ -3422,6 +3422,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Voor Over ons en Wat is er nieuw maakt dat niets uit voor bezoekers, want de pagina's zijn klein en de versies komen nog steeds uit de build.
   De sitemap bevat alleen `loc`: geen `lastmod`, `changefreq` of `priority`.
 - **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
+- **Later:** de sitemap heeft ook een regel voor elk gepubliceerd artikel van de redactie, uit de database; zie _Een artikel is gepubliceerd als `published_at` gevuld is en niet na nu ligt_.
+  Alleen de lijst met pagina's in `pages.ts` blijft de lijst van vaste pagina's.
 
 ### Het schild van de site, als PNG van ons eigen domein, is de afbeelding bij het delen van links
 
@@ -4008,3 +4010,111 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het vlak van de footer is al te zien aan zijn kleur, en de lijn voegt daar niets aan toe.
   Zonder rand heeft de footer geen strook van 1 pixel meer buiten het vlak waar de strepen van de Friese vlag hun maat van nemen, dus de twee delen van de strepen sluiten precies op elkaar aan.
 - **Alternatieven:** de lijn houden zoals hij is; een zachtere lijn (dichter bij de kleur van de footer, maar nog steeds een lijn die het vlak omlijst).
+
+### Artikelen van de redactie staan in de database
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** artikelen van de redactie staan in de database, in een eigen tabel `articles`, en niet als bestanden in de code.
+- **Waarom:** de redactie bestaat uit vrijwilligers die het beheer gebruiken.
+  Een artikel in de code vraagt voor elk woord een release.
+  In de database kan het beheer het schrijven, en blijft er een logboek van wie wat deed.
+- **Alternatieven:** een pagina in de code (sneller te bouwen, maar elke wijziging is een release en een vrijwilliger kan het niet zelf); een bericht in de tabel `items` met onze eigen naam als bron (hergebruikt veel, maar het filter, het verbergen en de vijf kaarten gaan er dan over, en een artikel is geen kop met een link).
+
+### Het nieuwste artikel is een kaart bovenaan de homepage, en elk artikel heeft een eigen pagina
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het nieuwste artikel staat als kaart "Van de redactie" bovenaan de hoofdkolom van de homepage, en elk artikel heeft een eigen pagina op `/redactie/<slug>`.
+- **Waarom:** bij de lancering stelt de redactie zich zo voor, en een eigen adres is te delen.
+  De kaart staat boven het nieuws omdat het eerste artikel een aankondiging is; zonder artikel verdwijnt hij.
+- **Alternatieven:** een kaart in de zijbalk (rustiger, maar een aankondiging valt dan minder op); alleen een pagina met een link in de footer en bij Over ons (de homepage blijft puur nieuws, maar niemand vindt het artikel).
+- **Hoe:** de kaart is het component `ArticleCard` van het designsysteem, de pagina gebruikt `Article`.
+  De titel en "Lees verder" in de kaart gaan naar dezelfde pagina; de naam van "Lees verder" noemt het artikel, zodat de link ook los begrijpelijk is.
+  De kaart telt niet mee voor de tien koppen van "Laatste nieuws".
+  Een artikel krijgt geen eigen afbeelding bij een gedeelde link; het heeft het schild van de site, zoals elke pagina (zie _Het schild van de site, als PNG van ons eigen domein, is de afbeelding bij het delen van links_).
+  Een eigen afbeelding per artikel kan later.
+
+### Artikeltekst heeft een kleine eigen opmaak, die een eigen functie omzet
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de tekst van een artikel heeft een kleine eigen opmaak (alinea's, een kop, een lijst, vet, cursief en een link) en wordt met een eigen functie omgezet, zonder HTML en zonder dependency.
+- **Waarom:** een artikel is tekst met een paar kopjes en links.
+  Wie het schrijft, hoeft geen HTML te kennen, en wie het account van een schrijver overneemt, kan er geen scripts mee inspuiten.
+- **Alternatieven:** Markdown met een bibliotheek (volledig, maar een dependency en veel meer dan we nodig hebben); HTML (gevaarlijk); platte tekst zonder opmaak (te weinig voor een artikel met koppen en links).
+- **Hoe:** `parseArticleText` in `apps/site/src/article-text.ts` leest de tekst tot gewone gegevens, en `ArticleText` maakt er elementen van die React escapet.
+  Er is geen `dangerouslySetInnerHTML` en geen reguliere expressie die over de hele tekst loopt.
+  Elke zoektocht naar een sluitteken stopt bij het eerste teken dat een partner uitsluit, dus de tijd groeit met de lengte van de tekst.
+  De tests proberen een regel van een miljoen tekens, een miljoen openende tekens zonder partner en vijftigduizend regels.
+  - Een alinea is een stuk tussen lege regels; de regels erin lopen in elkaar over.
+  - Een kop is een stuk van één regel dat met `## ` begint, en is een kop van niveau 2.
+    Een lijst is een stuk waarvan elke regel met `- ` begint.
+    Alles anders is een alinea, ook `# Kop`, `### Kop` en `1. punt`.
+  - Vet en cursief staan binnen één alinea of lijstpunt.
+    Cursief staat in vet (ook aan het einde: `**vet *cursief***`), niet andersom.
+    Een teken met een spatie ertegenaan (`2 * 3 * 4`) en een teken zonder partner blijven staan zoals ze zijn.
+    Een kop en de tekst van een link bevatten geen opmaak.
+  - Een link gaat naar `https://` met een adres zonder spatie, haakjes, backslash, aanhalingsteken of inlog (`https://www.lc.nl@evil.example`), of naar een pagina van ons die met één `/` begint.
+    `//evil.example` en `/\evil.example` weigert de functie, want een browser leest ze als een andere site, net als een adres met een tab of nieuwe regel.
+    `http:`, `javascript:`, `data:`, `mailto:` en een adres zonder `https://` blijven gewone tekst, met de tekens erbij.
+    Een afbeelding (`![](…)`) is geen opmaak: het uitroepteken blijft staan, en de rest wordt een link.
+  - Een link naar een andere site krijgt het pictogram voor een externe link en `rel="noopener"`.
+    Er komt geen `nofollow` en geen `noreferrer` bij: de tekst schrijven wij, en een bron mag zien dat bezoekers van ons komen.
+    De link opent in hetzelfde tabblad, zoals elke link van de site.
+
+### Een artikel is gepubliceerd als `published_at` gevuld is en niet na nu ligt
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een artikel staat op de site als `published_at` een tijd heeft die niet na het moment van nu ligt.
+  Een artikel met een lege `published_at` is een concept, en met een tijd in de toekomst staat het er pas als die tijd komt.
+  Intrekken is `published_at` weer leeg maken.
+- **Waarom:** één kolom zegt alles, ook voor de SQL-opdrachten van de eigenaar zolang het beheer ontbreekt (#264), en een gepland artikel kost niets extra.
+- **Alternatieven:** een aparte kolom `status` (twee kolommen die elkaar kunnen tegenspreken, en een concept met een tijd zou raadselachtig zijn); een tijd in de toekomst weigeren (kan niet in een kolom, en de eigenaar kan een artikel dan niet vooruit zetten).
+- **Hoe:** de queries krijgen het moment van nu mee, zoals `listRecentItems`, en vergelijken met `lte`.
+  Een concept en een adres dat geen artikel is geven dezelfde pagina "niet gevonden" met een 404, zodat niets verraadt dat een concept bestaat.
+  Het adres moet precies kloppen: de collatie van de tabel negeert hoofdletters en een spatie erachter, en dat zou één artikel twee adressen geven, dus de query vergelijkt de `slug` daarna nog eens exact.
+
+### De pagina's met artikelen komen niet uit een cache
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de kaart op de homepage en de pagina van een artikel lezen de database bij elk bezoek, zonder de cache van vijf minuten die de koppen hebben.
+  Een artikel dat verschijnt of wordt ingetrokken, staat er dus meteen.
+- **Waarom:** een fout in een artikel moet meteen weg kunnen, en de vraag is één opzoeking in een index (`articles_published_at_idx` voor de kaart, de unieke `slug` voor de pagina).
+  Met een cache zou de eigenaar vijf minuten lang een artikel zien dat hij al introk.
+- **Alternatieven:** vijf minuten cachen zoals de koppen (minder vragen, maar het artikel is niet meteen weg); de kaart wel en de pagina niet cachen (een ingetrokken artikel blijft dan bereikbaar via zijn adres).
+- **Hoe:** een fout bij het lezen van het nieuwste artikel laat alleen de kaart weg en komt in het logboek; de homepage toont het nieuws gewoon.
+  Een fout bij het lezen van de pagina van een artikel geeft de foutpagina, zoals bij `/podcasts`.
+
+### De tabel `articles`: een mediumtext, een sleutel naar het account en een controle op het adres
+
+- **Datum:** 25 oktober 2026
+- **Besluit:**
+  - `body` is een `mediumtext` (16 MB): een artikel past ruim in een `text` (64 kB), maar de grens van het beheer staat dan niet in het schema, en een `mediumtext` heeft geen nadeel.
+    `title`, `slug`, `intro` en `author` zijn `varchar` van 120, 80, 300 en 100 tekens, en een tekst die te lang is wordt niet afgekapt: de opdracht faalt.
+  - `slug` is uniek en heeft een CHECK-regel die alleen kleine letters, cijfers en enkele streepjes toestaat.
+    De regel begint met `(?-i)`, want de collatie `utf8mb4_unicode_ci` negeert hoofdletters en `[a-z]` zou ze anders doorlaten.
+  - `created_by` heeft een foreign key naar `admin_users`, zonder cascade.
+    Een account wordt uitgezet (`admin:revoke`) en nooit verwijderd, dus de schrijver van elk artikel blijft bekend, en het verwijderen van een account met artikelen faalt, net als bij het logboek.
+  - `published_at` heeft een index voor de vraag naar het nieuwste artikel.
+  - `updated_at` krijgt bij een wijziging geen waarde van de database: wie een artikel verandert, zet het zelf, zoals de SQL-opdrachten in `docs/artikelen.md` doen.
+    De sitemap gebruikt hem niet.
+- **Waarom:** het schema dwingt af wat een pagina nodig heeft, ook als iemand rechtstreeks met SQL werkt, zoals de eigenaar tot #264 klaar is.
+- **Alternatieven:** een `text` voor `body` (kleiner, maar het scheelt niets en 64 kB is vlug bereikt); de opmaak van het adres alleen in de code controleren (de SQL-opdrachten van de eigenaar komen er dan omheen); `ON DELETE CASCADE` of `SET NULL` voor `created_by` (een artikel mag niet stil verdwijnen of zijn schrijver kwijtraken).
+- **Gecontroleerd:** `articles.test.ts` en `articles-migration.test.ts` van `@fansite/db`, op een echte MariaDB: het adres, de lengtes, de unieke sleutel (ook met een spatie erachter), de foreign key, accenten en een emoji in de tekst, een tekst van een miljoen tekens, en dat de migratie de rijen van andere tabellen met rust laat.
+
+### Het eerste artikel gaat met SQL de database in, en de seed zet geen artikel
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de seed zet geen artikel op acceptatie.
+  De eigenaar zet het eerste artikel met de opdrachten uit `docs/artikelen.md`, eerst op acceptatie en dan op productie.
+  Voor de controles en voor de screenshots staat een verzonnen artikel in `apps/site/e2e/articles.ts`, dat `pnpm --filter site test-data` ook in je eigen database zet.
+- **Waarom:** de seed draait op acceptatie bij elke start.
+  Een voorbeeldartikel daar zou na het echte artikel nog steeds staan, of het echte artikel verdringen als het nieuwste.
+  Een artikel is bovendien tekst van onszelf en geen testbron: er is niets om op te testen dat de eigenaar niet met dezelfde opdracht zet.
+- **Alternatieven:** een verzonnen artikel in de seed, alleen op acceptatie (laat de functie meteen zien, maar het mengt zich met het echte artikel en de eigenaar moet het weghalen).
+
+### De sjablonen kennen `Strong` en `Emphasis`
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het designsysteem heeft de componenten `Strong` en `Emphasis`, voor een `strong` en een `em` in een tekst.
+  Ze hebben geen eigen klasse: de stijl komt van de elementen zelf, zoals bij `Time`.
+- **Waarom:** de sjablonen van de site bevatten geen HTML (zie _Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem_), en de opmaak van een artikel heeft vet en cursief nodig.
+- **Alternatieven:** de regel van ESLint voor één bestand uitzetten (dat maakt van een regel zonder uitzonderingen er een met); vet en cursief met `Text` maken (`Text` zet het gewicht van de tekst en maakt vet dus weg).

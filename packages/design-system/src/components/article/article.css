@@ -1,7 +1,8 @@
 /*
- * An article of our own editors: a title, a line with the author and the date, an introduction and the text. The line
- * with the author and the date sits close under the title and has room before the introduction. What is in the article
- * has no margin to the outside, so the page decides the space around it.
+ * An article of our own editors: a title, a line with the author and the date, an introduction
+ * and the text. The line with the author and the date sits close under the title and has room
+ * before the introduction. What is in the article has no margin to the outside, so the page
+ * decides the space around it.
  */
 
 @layer hf.components {

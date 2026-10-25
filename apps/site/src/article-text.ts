@@ -54,11 +54,12 @@ export function parseArticleText(text: string): Block[] {
 
 /**
  * Whether an address may be the target of a link: `'external'` for a full address that starts
- * with `https://`, `'internal'` for a page of ours (`/bronnen`), and undefined for anything else.
+ * with `https://`, `'internal'` for a page of ours (`/bronnen`), and undefined for the rest.
  * That is `http:`, `javascript:`, `data:`, an address without a scheme, a relative one, and one
  * that starts with `//` or `/\`, which a browser takes for another site. An address with white
  * space, a control character, a backslash, a quote, an angle bracket or a bracket is refused,
- * and so is one with a login in it (`https://www.lc.nl@evil.example`), which hides the real host.
+ * and so is one with a login in it (`https://www.lc.nl@evil.example`), which hides the real
+ * host.
  */
 export function safeAddress(address: string): 'external' | 'internal' | undefined {
   if (address.length > maxAddressLength || !/^[^\s\\()[\]"'<>]+$/u.test(address) || /\p{Cc}/u.test(address)) {
@@ -96,6 +97,21 @@ function blockOf(lines: string[]): Block {
   }
 
   return { children: parseInline(lines.join(' '), true), type: 'paragraph' }
+}
+
+/**
+ * Where the `**` that closes bold starts, searching from `from`, or -1. At the end of
+ * `**bold and *italic***` three stars follow each other, and the last two close the bold, so
+ * the first one stays with the italic.
+ */
+function closerOfBold(text: string, from: number) {
+  let end = text.indexOf('**', from)
+
+  while (end !== -1 && text.charAt(end + 2) === '*') {
+    end += 1
+  }
+
+  return end
 }
 
 /** Whether the text starts and ends with something that is not white space, and is not empty.
@@ -169,7 +185,7 @@ function parseInline(text: string, allowBold: boolean): Inline[] {
 
     if (char === '*') {
       if (text.charAt(position + 1) === '*') {
-        const end = allowBold ? text.indexOf('**', position + 2) : -1
+        const end = allowBold ? closerOfBold(text, position + 2) : -1
         const content = end === -1 ? '' : text.slice(position + 2, end)
 
         if (isTight(content)) {
