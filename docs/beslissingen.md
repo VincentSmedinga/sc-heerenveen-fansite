@@ -3827,7 +3827,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Safari tekent de rand alleen blauw zolang er een vast element in die kleur bovenaan staat, dus meeschuiven kan alleen door dat element weg te halen.
   In de app op het beginscherm is de statusbalk doorzichtig met witte tekst, dus daar moet de strook blijven (zie _De pagina gebruikt het hele scherm en houdt de inhoud uit de uitsparing_).
   `hidden` en niet `display` via de stijl, zodat `refreshTopEdge` (dat `display` gebruikt voor Licht en Donker) de strook niet terugzet terwijl de kop weg is.
-- **Alternatieven:** de strook laten meeschuiven met `position: absolute` in plaats van `fixed`.
+- **Alternatieven:** de strook altijd laten staan, zoals na de vorige beslissing; dan blijft er een blauwe balk bovenaan staan die bij niets hoort als de kop uit beeld is.
+  De strook laten meeschuiven met `position: absolute` in plaats van `fixed`.
   Safari ziet dan waarschijnlijk geen vast element meer en neemt de kleur van de pagina, ook bovenaan, zodat het grijs met het verloop terugkomt.
   Een animatie op basis van de scrollpositie in CSS (`animation-timeline: scroll()`); of Safari de kleur van de strook tijdens zo'n animatie bijhoudt, weten we niet.
   Beide hebben we niet uitgeprobeerd.
