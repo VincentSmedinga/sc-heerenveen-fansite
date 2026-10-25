@@ -681,6 +681,77 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De sleutel is wel eigen aan deze deploy en los in te trekken; de beperking is de controle van het pad hierboven.
 - **Alternatieven:** de deploy opnieuw laten bouwen (twee builds die kunnen verschillen); alleen controleren of `index.json` antwoordt.
 
+### De MCP-server van het designsysteem staat op ds.heerenveen.org/mcp
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de losse MCP-server `@storybook/mcp` staat openbaar en alleen-lezen op ds.heerenveen.org/mcp, naast de lokale server voor agents in deze repository.
+  Hij geeft `docs-list`, `docs-show` en `docs-show-story` uit de gepubliceerde Storybook, en niets om te ontwikkelen of te testen.
+  Een agent in een andere repository voegt hem toe met `claude mcp add --transport http ds https://ds.heerenveen.org/mcp`.
+- **Waarom:** agents buiten deze repository en sessies zonder draaiende Storybook kunnen zo dezelfde documentatie raadplegen.
+  Storybook zelf is al openbaar en de server geeft daar alleen de documentatie uit, dus er valt niets te beschermen en er is geen login nodig.
+- **Let op:** Storybook noemt de manifests en deze server nog een voorbeeldversie ("preview"), en de API kan veranderen.
+  De versie staat daarom vast op 10.6.3, die van Storybook zelf, en gaat pas omhoog als iemand dat bewust doet en de test van `apps/design-system-mcp` nog slaagt.
+  De licentie is MIT, net als die van wat het pakket meebrengt (`tmcp`, `valibot`), en het pakket heeft geen installatiescript.
+  Dat het pakket geen telemetrie stuurt en geen verzoeken naar derden doet, is gecontroleerd in de broncode: de enige `fetch` zit in de standaardbron voor manifests, en die gebruiken we niet (zie _De server leest de manifests van schijf_).
+  Het veld `telemetry` in de antwoorden van de gereedschappen is gegevens die de aanroeper krijgt; het pakket stuurt ze nergens heen.
+- **Alternatieven:** een token (meer code en een geheim om uit te delen); de MCP-server van Chromatic (een derde partij, met kosten); niets publiceren en agents buiten de repository laten werken zonder.
+
+### De MCP-server is een eigen kleine app zonder sessies
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de server is `apps/design-system-mcp`, een Node.js-app met alleen het pad `/mcp`, die `esbuild` tot één bestand bundelt (`server.mjs`, zonder `node_modules`).
+  Hij beantwoordt alleen `POST`, met een body van hoogstens 64 kB.
+  Elk ander adres geeft `404 Not found`, elke andere methode `405`, en de server houdt geen sessie bij.
+  Hij draait op de hosting als app in _Setup Node.js App_, in `domains/ds.heerenveen.org/mcp` met het pad `mcp` als adres.
+  Dat de host een pad als adres toelaat, is niet uitgeprobeerd.
+- **Waarom:** `@storybook/mcp` is een bibliotheek, dus we moeten er zelf een server omheen zetten.
+  Een eigen app laat de statische bestanden van Storybook zoals ze zijn.
+  De bibliotheek bewaart sessies in het geheugen van één proces en opent voor elke `GET` een stream.
+  Een host die meer dan één proces kan starten, of er een herstart, breekt dan een client die een sessie vasthoudt.
+  Een openbare server moet dat geheugen ook begrenzen: elke `initialize` laat iets achter, en elke `GET` houdt een verbinding open.
+  Elk verzoek krijgt daarom een nieuwe handler, die weg is als het verzoek klaar is, en `GET` en `DELETE` worden geweigerd.
+  De server geeft geen sessie-id en leest de sessie van een client niet.
+  Het protocol staat dat toe.
+  Een handler maken kost enkele milliseconden.
+  De gereedschappen hebben geen stream of melding nodig.
+  De test laat zien dat een tweede proces een client beantwoordt die op het eerste begon, met `initialize` op de een en `docs-list` op de ander.
+- **Let op:** het logboek bevat alleen de start van de app en de naam van een fout, zonder adressen van bezoekers en zonder inhoud van verzoeken.
+  De server zet geen cookies en geen CORS-headers: hij is voor agents, niet voor een pagina in een browser.
+  Een limiet op het aantal verzoeken of een token valt buiten dit issue; komt er misbruik, dan volgt een nieuw issue.
+- **Alternatieven:** de bibliotheek ongewijzigd gebruiken, met sessies in het geheugen (simpeler, maar breekt bij een tweede proces en laat geheugen volgroeien); de server op een eigen subdomein, als de host geen pad als adres toelaat; de app het hele subdomein laten beantwoorden en de statische bestanden zelf laten geven (een app die niets wijzigt aan Storybook is veiliger).
+
+### De server leest de manifests van schijf
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de server leest `manifests/components.json`, `manifests/docs.json` en de bestanden waar die naar verwijzen uit de document root van het subdomein, bij elk verzoek opnieuw.
+  Hij vindt die map zelf: `../public_html`, vanaf de map met `server.mjs`.
+  Hij leest alleen `.json` onder `manifests/`, en `STORYBOOK_DIR` kan de map vervangen.
+- **Waarom:** de standaardbron van de bibliotheek haalt de manifests op van het adres van het verzoek zelf.
+  Een verzoek met een andere `Host` laat de server dan bij een andere host ophalen, en elk verzoek zou een verzoek van de server aan zichzelf kosten.
+  Van schijf lezen kost niets, doet geen verzoek, en kan niet verouderen: rsync vervangt de bestanden, en het volgende verzoek leest de nieuwe.
+  De map is `../public_html` omdat de workflow de app naast de document root zet, vanuit hetzelfde pad (`DEPLOY_PATH`), dus er is geen tweede pad dat gelijk moet blijven.
+  Zonder cache is er niets dat langer duurt dan een deploy.
+  Lezen en parsen van de manifests kost enkele milliseconden.
+- **Alternatieven:** de manifests via HTTPS ophalen van `https://ds.heerenveen.org/manifests/…` (een verzoek aan zichzelf, en de server moet dan een vast adres kennen); een cache op de wijzigingstijd van de bestanden (sneller, maar meer code voor iets wat enkele milliseconden kost).
+
+### De deploy van de MCP-server deelt de omgeving en het pad van Storybook
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** dezelfde workflow, `storybook.yml`, deployt de app met dezelfde omgeving (`designsystem`), dezelfde geheimen en dezelfde sleutel.
+  Het pad van de app is `DEPLOY_PATH` zonder `/public_html`, plus `/mcp`.
+  De stap die kopieert controleert dat pad opnieuw: het moet eindigen op `/domains/ds.heerenveen.org/mcp`, zonder `..`, anders stopt de run.
+  Het filter voor een push naar `main` krijgt `apps/design-system-mcp/**`.
+  Na de kopie raakt de workflow `tmp/restart.txt` aan en voert `check.js` uit: `initialize`, de lijst met gereedschappen en `docs-list` op `https://ds.heerenveen.org/mcp`, tot anderhalve minuut lang.
+  De run wordt rood als de server niet antwoordt, andere gereedschappen geeft dan de drie, of een component van de build mist.
+- **Waarom:** de controle van `DEPLOY_PATH` blijft zo de enige poort naar de host, en er is geen tweede geheim dat verkeerd kan staan.
+  De twee kopieën raken elkaars bestanden niet.
+  Storybook gaat naar `public_html` en slaat `/mcp/` over; de app gaat naast `public_html`, en slaat `tmp/`, `stderr.log`, `.htaccess` en `node_modules` over, die van de host zijn.
+  Dat de build de server al start tegen de Storybook die hij net maakte, voordat iets gekopieerd wordt, houdt een kapotte app van de host.
+  De controle erna vergelijkt met de build van deze run, dus ze bewijst dat de nieuwe versie live staat.
+- **Let op:** de eerste deploy wordt rood als de eigenaar de app in _Setup Node.js App_ nog niet maakte.
+  `docs/designsysteem-publiceren.md` zet die stap daarom voor het samenvoegen.
+- **Alternatieven:** een eigen workflow voor de app (twee workflows die elkaars bestanden kunnen raken, en twee omgevingen met dezelfde geheimen); een eigen geheim voor het pad van de app (een tweede pad om te controleren); de controle overslaan als de app er nog niet is (de run blijft dan groen terwijl er niets werkt).
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft
@@ -1333,6 +1404,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zet je dat aan, dan gaan er gebeurtenissen van de add-on naar storybook.js.org, met de naam van de client die de server gebruikt.
 - **Alternatieven:** de losse server `@storybook/mcp`, die de gegevens uit een gebouwde Storybook leest.
   Of geen MCP-server; dan zoeken agents alles zelf in de code, zoals nu.
+- **Later:** de losse server en het publiceren bleven buiten dit besluit.
+  Ze staan er nu wel, naast deze lokale server: zie _De MCP-server van het designsysteem staat op ds.heerenveen.org/mcp_.
 
 ### Storybook haalt de props uit react-component-meta
 

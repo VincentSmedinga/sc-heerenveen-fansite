@@ -1,0 +1,147 @@
+{
+  "v": 0,
+  "components": {
+    "componenten-heading": {
+      "id": "componenten-heading",
+      "name": "Heading",
+      "path": "./src/components/heading/Heading.stories.tsx",
+      "jsDocTags": {},
+      "description": "A heading. The level (`h1` to `h4`) is separate from the style, so a card title can be an `h2` that looks like Kop 3.",
+      "reactComponentMeta": {
+        "displayName": "Heading",
+        "exportName": "Heading",
+        "filePath": "/work/packages/design-system/src/components/heading/Heading.tsx",
+        "description": "A heading. The level (`h1` to `h4`) is separate from the style, so a card title can be an `h2` that looks like Kop 3.",
+        "jsDocTags": {},
+        "props": {
+          "appearance": {
+            "name": "appearance",
+            "required": false,
+            "type": {
+              "name": "enum",
+              "raw": "1 | 4 | 2 | 3",
+              "value": [
+                {
+                  "value": "1"
+                },
+                {
+                  "value": "4"
+                },
+                {
+                  "value": "2"
+                },
+                {
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "The style, as the number of the type style: 2 looks like Kop 2. Without it, the style follows the level.",
+            "defaultValue": null
+          },
+          "level": {
+            "name": "level",
+            "required": true,
+            "type": {
+              "name": "enum",
+              "raw": "1 | 4 | 2 | 3",
+              "value": [
+                {
+                  "value": "1"
+                },
+                {
+                  "value": "4"
+                },
+                {
+                  "value": "2"
+                },
+                {
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "The level in the structure of the page. It follows the content, not the look.",
+            "defaultValue": null
+          }
+        }
+      },
+      "stories": [
+        {
+          "id": "componenten-heading--light",
+          "name": "Licht",
+          "snippet": "const Light = () => (\n  <>\n    <Heading level={1}>Nieuws over sc Heerenveen</Heading>\n    <Heading level={2}>Wedstrijden</Heading>\n    <Heading level={3}>Volgende wedstrijd</Heading>\n    <Heading level={4}>Hoe we bronnen kiezen</Heading>\n  </>\n);"
+        },
+        {
+          "id": "componenten-heading--dark",
+          "name": "Donker",
+          "snippet": "const Dark = () => (\n  <>\n    <Heading level={1}>Nieuws over sc Heerenveen</Heading>\n    <Heading level={2}>Wedstrijden</Heading>\n    <Heading level={3}>Volgende wedstrijd</Heading>\n    <Heading level={4}>Hoe we bronnen kiezen</Heading>\n  </>\n);"
+        }
+      ],
+      "import": "import { Heading, Text } from '@fansite/design-system';"
+    },
+    "componenten-button": {
+      "id": "componenten-button",
+      "name": "Button",
+      "path": "./src/components/button/Button.stories.tsx",
+      "jsDocTags": {},
+      "description": "A button. Its text says what it does (\"Versturen\"), also on its own. button.css gives it its look; the filled button\nhas no class of its own, the soft one has `hf-button-soft`.",
+      "reactComponentMeta": {
+        "displayName": "Button",
+        "exportName": "Button",
+        "filePath": "/work/packages/design-system/src/components/button/Button.tsx",
+        "description": "A button. Its text says what it does (\"Versturen\"), also on its own. button.css gives it its look; the filled button\nhas no class of its own, the soft one has `hf-button-soft`.",
+        "jsDocTags": {},
+        "props": {
+          "appearance": {
+            "name": "appearance",
+            "required": false,
+            "type": {
+              "name": "enum",
+              "raw": "\"default\" | \"soft\"",
+              "value": [
+                {
+                  "value": "\"default\""
+                },
+                {
+                  "value": "\"soft\""
+                }
+              ]
+            },
+            "description": "`default` is the filled button, for the main action. `soft` is quieter, for an action next to the main one.",
+            "defaultValue": {
+              "value": "'default'"
+            }
+          },
+          "type": {
+            "name": "type",
+            "required": true,
+            "type": {
+              "name": "enum",
+              "raw": "\"button\" | \"reset\" | \"submit\"",
+              "value": [
+                {
+                  "value": "\"button\""
+                },
+                {
+                  "value": "\"reset\""
+                },
+                {
+                  "value": "\"submit\""
+                }
+              ]
+            },
+            "description": "What the button does. It is required: a button in a form sends the form unless it says otherwise.",
+            "defaultValue": null
+          }
+        }
+      },
+      "stories": [
+        {
+          "id": "componenten-button--default",
+          "name": "Knop",
+          "snippet": "const Default = () => <Button appearance=\"default\" type=\"button\">Versturen</Button>;"
+        }
+      ],
+      "import": "import { Button, Card } from '@fansite/design-system';"
+    }
+  }
+}

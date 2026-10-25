@@ -19,6 +19,7 @@ AI agents write most of the code; the project owner directs.
 - `packages/design-system` holds the house style, the tokens and Storybook; `packages/shared` holds helpers for the site and the importer; `packages/db` holds the database (Drizzle on MariaDB 10.11): the schema, the migrations and the seed.
   `apps/site` is the Next.js site, admin included.
   `apps/importer` is the importer: the fetcher, the RSS and Atom adapter, and the import command that cron runs on acceptance, with a lock, a run log and feed health.
+  `apps/design-system-mcp` is the public MCP server of the design system, at `https://ds.heerenveen.org/mcp`.
 - The site will run on shared web hosting at mijn.host, so there is no preview per pull request.
 - [`docs/beslissingen.md`](docs/beslissingen.md) records what we decided and why.
   Read the parts that touch your issue.
@@ -240,6 +241,11 @@ It lists the components of the design system with their props and types, the doc
   Don't dig the props out of the code.
 - Our conventions win where Storybook's instructions differ.
   The instructions are generic and still show CSF 3 (`Meta`, `StoryObj`); we write CSF Next (`preview.meta()` and `meta.story()`), and `packages/design-system/README.md` holds the rest.
+- A second server, public and read-only, runs on the published Storybook at `https://ds.heerenveen.org/mcp`: the same `docs-list`, `docs-show` and `docs-show-story`, without the development tools.
+  It is for agents in other repositories, such as the forum, and for sessions without Storybook; they add it with `claude mcp add --transport http ds https://ds.heerenveen.org/mcp`.
+  Agents in this repository keep using the local server, which also has the development tools and shows your own worktree.
+  `.mcp.json` doesn't change.
+  It is the app in `apps/design-system-mcp`; `docs/designsysteem-publiceren.md` says how it runs.
 - The server shows the Storybook of the worktree where it runs, which isn't always yours, and two worktrees can't both use port 6006.
   Read your own changes in your own code, not through the server.
   To see whose Storybook holds the port: `lsof -a -d cwd -p $(lsof -tiTCP:6006 -sTCP:LISTEN)`.
