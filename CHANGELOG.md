@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.2.0](https://github.com/VincentSmedinga/sc-heerenveen-fansite/compare/v0.1.0...v0.2.0) (2026-10-25)
+
+
+### Features
+
+* **db:** add a slug and platform links to sources and a query for podcast episodes ([#190](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/190)) ([728847c](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/728847c12892af81c187352e25bff392c3abe5b2))
+* **design-system:** add a filter and a pagination ([#192](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/192)) ([5f73c36](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/5f73c36a80104ebd7edd3aa4606dd51798ecbeb2))
+* **design-system:** add an intro style and use it under every page heading ([#196](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/196)) ([250ee7f](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/250ee7f97e049bdf587e4dd9427d51523f9c426e))
+* **design-system:** add form components ([#175](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/175)) ([dbb2fea](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/dbb2fea49d01e0cc7f2a3056ce5dec04cf7fb20a))
+* **design-system:** make the links in the footer blue like the other links ([#203](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/203)) ([9716ba9](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/9716ba9fb63ad4044bb57440cf35a54bdc30fe37))
+* **design-system:** put the day and time above the headline in a narrow news line ([#162](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/162)) ([d07bd70](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/d07bd70127ecf346803d7679cab2578eeaba80a8))
+* **design-system:** show visited only on headlines and discussion titles ([#198](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/198)) ([791e546](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/791e5469a1f23afd1b51a0dfb585445f7b950d3a))
+* **design-system:** start the sidebar below the intro of the main column ([#176](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/176)) ([397d158](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/397d158e7d8031dba6ff32f634a7c3bf2998fc9d))
+* **design-system:** underline news headlines only on hover, in the text size and weight 500 ([#166](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/166)) ([2eb8290](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/2eb8290f58ebaf9bf4260ed2fc439f8d43899a0f))
+* **design-system:** use the full screen behind a notch ([#218](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/218)) ([08013a7](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/08013a78dce7f4094ad0331ad8a35f3df66c9d88))
+* **importer:** assess the sources and add De Telegraaf to the register ([#182](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/182)) ([42079c9](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/42079c9c98d6b437cd8dd81f74cb021c4255372b))
+* **importer:** import the podcasts Omroep Abe and Radio Camataru ([#189](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/189)) ([e1b6d3e](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/e1b6d3ec7a4648c819fe3786c5e04b3393d0a976))
+* refresh the page by pulling it down in the home screen app ([#205](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/205)) ([44fce19](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/44fce191f67da7c609ef11d3d5a4b7d8c5a1c9b1))
+* **scripts:** add pnpm rollover to move the board iterations along ([#158](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/158)) ([e8c6d95](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/e8c6d952ead602f67bfce1b9b363cadbc65a3f1d))
+* show the duration, season and number of a podcast episode ([#199](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/199)) ([3223600](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/322360037e645855e4bd2dc3edda504f83c67601))
+* **site:** add a contact form that mails the editors ([#214](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/214)) ([38aec8f](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/38aec8f18ad659b52004aaf4534e9bf0e87b9b07))
+* **site:** add a favicon and a web app manifest ([#186](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/186)) ([4490132](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/44901322ca21538ae0588e0177de596ce7196723))
+* **site:** add a switch for light and dark in the footer ([#209](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/209)) ([b98ce8e](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/b98ce8ed426c6a4e57d844c4d23da14a57589eb0))
+* **site:** add an accessibility statement ([#202](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/202)) ([1e90251](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/1e90251126c5277fdbca496871b13435a8deeec1))
+* **site:** add metadata, sitemap and canonical URLs ([#174](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/174)) ([bdf2ad9](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/bdf2ad98f29662c4f3436c6024834a97b7f2cb4b))
+* **site:** add the podcasts page and the latest podcasts to the homepage ([#193](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/193)) ([694c6cb](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/694c6cba75438d5c2a6eb256acafab98a29082a4))
+* **site:** move privacy to its own page ([#194](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/194)) ([1b2f9b1](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/1b2f9b11b5710d36fd9560caa1d44e95cbd0da7d))
+* **site:** move the sources link from the header to the footer ([#200](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/200)) ([682b279](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/682b279b3e9ee03ef4c4d7be54bcfd0707560e16))
+* **site:** rename the page Wat is er nieuw to Updates ([#204](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/204)) ([294b832](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/294b8327550a074b03905a3961113e84cae14f8d))
+* **site:** send mail through the mail server of the hosting ([#210](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/210)) ([57a2712](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/57a27124fb087d8fc0b1a685ee373a5f562e977c))
+* **site:** show the newest forum discussions on the homepage ([#181](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/181)) ([8fac4fb](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/8fac4fbb0c1287e055398378e4dd347f8fecff70))
+* **site:** show two weeks of news on the homepage ([#184](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/184)) ([2428820](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/2428820ac0c2f98aa4c87f22002c94c46fd9eb70))
+
+
+### Bug Fixes
+
+* **design-system:** keep light-dark() in the Storybook build ([#211](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/211)) ([0685b11](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/0685b11dd39378b1fc6479f6f4c039289149fcfe))
+* **design-system:** keep the order of the layers first in the CSS of the site ([#167](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/167)) ([f0e1b98](https://github.com/VincentSmedinga/sc-heerenveen-fansite/commit/f0e1b983c77a3db661ed1f6216cc3c255e7d3d26))
+
 ## 0.1.0 (2026-10-23)
 
 
