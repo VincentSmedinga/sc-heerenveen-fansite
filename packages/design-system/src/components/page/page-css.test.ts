@@ -26,19 +26,33 @@ describe('the safe area insets in page.css', () => {
 
   it('puts every inset that adds to a margin inside max(), so it can only add room and never take any away', () => {
     // Remove each max(…) that holds an env(). What is left is the strip, which is as tall as
-    // the inset and no more.
+    // the inset (or the top edge, which is no less) and no more.
     const rest = css.replace(/max\([^;{}]*?env\(safe-area-inset-[a-z]+, 0px\)\)/g, '')
 
     expect([...rest.matchAll(/([a-z-]+):[^;]*env\(/g)].map(([, property]) => property)).toEqual(['block-size'])
   })
+})
 
-  it('has a strip over the top inset in the colour of the header, fixed, that takes no touch and has no height without an inset', () => {
-    const strip = css.match(/&::before \{([^}]*)\}/)?.[1] ?? ''
+describe('the strip over the top edge in page.css', () => {
+  const strip = css.match(/\.hf-page-top-edge \{([^}]*)\}/)?.[1] ?? ''
 
+  it('is in the colour of the header, fixed, and takes no touch', () => {
     expect(strip).toContain('background-color: var(--hf-colour-background-header);')
-    expect(strip).toContain('block-size: env(safe-area-inset-top, 0);')
     expect(strip).toContain('position: fixed;')
     expect(strip).toContain('pointer-events: none;')
+  })
+
+  it('is as tall as the top edge, which is the inset or no height without one', () => {
+    expect(strip).toContain('block-size: var(--hf-top-edge, env(safe-area-inset-top, 0));')
+  })
+
+  it('is a real element and not a pseudo-element of the page, which Safari does not take the colour of the status bar from', () => {
+    expect(css).not.toMatch(/\.hf-page(?![-\w])[^{]*::(before|after)/)
+    expect(css.match(/\.hf-page \{([^{}]*)\}/)?.[1]).not.toContain('::')
+  })
+
+  it('has no opacity, which Safari does not count either', () => {
+    expect(strip).not.toContain('opacity')
   })
 })
 
@@ -64,7 +78,7 @@ describe('the stripes of the Frisian flag in page.css', () => {
   it('has the part above the footer behind the content, in a page that isolates its stacking', () => {
     expect(above).toContain('z-index: -1;')
     expect(over).not.toContain('z-index')
-    expect(css.match(/\.hf-page \{([^{}]*)&::before/s)?.[1]).toContain('isolation: isolate;')
+    expect(css.match(/\.hf-page \{([^{}]*)\}/)?.[1]).toContain('isolation: isolate;')
   })
 
   it('keeps what is in the footer above the part over it', () => {

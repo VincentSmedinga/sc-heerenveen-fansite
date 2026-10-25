@@ -132,6 +132,21 @@ describe('ThemeToggle', () => {
     expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('true')
   })
 
+  it('takes the strip at the top of the page off for a moment when the system changes, so Safari reads its colour again', () => {
+    const system = stubSystem(false)
+    const edge = document.createElement('div')
+
+    edge.className = 'hf-page-top-edge'
+    document.body.append(edge)
+    render(<ThemeToggle />)
+    expect(edge.style.display).toBe('')
+
+    system.change(true)
+
+    expect(edge.style.display).toBe('none')
+    edge.remove()
+  })
+
   it('follows the system when it changes and there is no choice', () => {
     const system = stubSystem(false)
     render(<ThemeToggle />)

@@ -31,9 +31,85 @@ const originalAttribute = 'data-original-content'
  * Puts the preference on the page. With a choice, `data-theme` is on the html element, and the
  * browser's own bars get the colour of the header, which a media query on the tags can't give
  * when the choice differs from the system. Following the system, there is no `data-theme` and
- * the tags are as the server wrote them.
+ * the tags are as the server wrote them. When the theme changes, Safari is told to look at the
+ * colour of the top of the page again (refreshTopEdge()).
  */
 export function applyPreference(preference: ThemePreference, doc: Document = document) {
+  const before = doc.documentElement.dataset['theme']
+
+  setPreference(preference, doc)
+
+  if (doc.documentElement.dataset['theme'] !== before) {
+    refreshTopEdge(doc)
+  }
+}
+
+/**
+ * What to keep when a visitor presses a button: the theme they wanted, unless it is what the
+ * system gives anyway, which goes back to following the system. So a kept choice is always a
+ * deliberate difference from the system, and the system is never out of reach. Only the buttons
+ * call this: a kept choice that happens to match the system later on (the system changed, not
+ * the visitor) stays.
+ */
+export function chooseTheme(wanted: Theme, systemIsDark: boolean): ThemePreference {
+  return wanted === (systemIsDark ? 'dark' : 'light') ? 'system' : wanted
+}
+
+export function readPreference(storage?: Storage): ThemePreference {
+  try {
+    const value = (storage ?? localStorage).getItem(themeStorageKey)
+
+    return value === 'light' || value === 'dark' ? value : 'system'
+  } catch {
+    return 'system'
+  }
+}
+
+/**
+ * Safari on an iPhone colours its status bar from the strip fixed to the top of the page (see
+ * .hf-page-top-edge in page.css), and only looks at the strip again when it comes back on the
+ * page: a new colour alone, a changed height or taking it out and putting it back at once don't
+ * make it look. So the strip is taken off for two frames, which Safari does notice.
+ */
+export function refreshTopEdge(doc: Document = document) {
+  const edge = doc.querySelector<HTMLElement>('.hf-page-top-edge')
+  const view = doc.defaultView
+
+  if (edge === null || view === null) {
+    return
+  }
+
+  edge.style.display = 'none'
+  view.requestAnimationFrame(() => {
+    view.requestAnimationFrame(() => {
+      edge.style.removeProperty('display')
+    })
+  })
+}
+
+export function resolveTheme(preference: ThemePreference, systemIsDark: boolean): Theme {
+  if (preference === 'system') {
+    return systemIsDark ? 'dark' : 'light'
+  }
+
+  return preference
+}
+
+export function savePreference(preference: ThemePreference, storage?: Storage) {
+  try {
+    const store = storage ?? localStorage
+
+    if (preference === 'system') {
+      store.removeItem(themeStorageKey)
+    } else {
+      store.setItem(themeStorageKey, preference)
+    }
+  } catch {
+    // Storage can be blocked: the choice then lasts until the page loads again.
+  }
+}
+
+function setPreference(preference: ThemePreference, doc: Document) {
   const root = doc.documentElement
   const metas = doc.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
 
@@ -68,48 +144,5 @@ export function applyPreference(preference: ThemePreference, doc: Document = doc
       meta.setAttribute(originalAttribute, meta.content)
     }
     meta.content = colour
-  }
-}
-
-/**
- * What to keep when a visitor presses a button: the theme they wanted, unless it is what the
- * system gives anyway, which goes back to following the system. So a kept choice is always a
- * deliberate difference from the system, and the system is never out of reach. Only the buttons
- * call this: a kept choice that happens to match the system later on (the system changed, not
- * the visitor) stays.
- */
-export function chooseTheme(wanted: Theme, systemIsDark: boolean): ThemePreference {
-  return wanted === (systemIsDark ? 'dark' : 'light') ? 'system' : wanted
-}
-
-export function readPreference(storage?: Storage): ThemePreference {
-  try {
-    const value = (storage ?? localStorage).getItem(themeStorageKey)
-
-    return value === 'light' || value === 'dark' ? value : 'system'
-  } catch {
-    return 'system'
-  }
-}
-
-export function resolveTheme(preference: ThemePreference, systemIsDark: boolean): Theme {
-  if (preference === 'system') {
-    return systemIsDark ? 'dark' : 'light'
-  }
-
-  return preference
-}
-
-export function savePreference(preference: ThemePreference, storage?: Storage) {
-  try {
-    const store = storage ?? localStorage
-
-    if (preference === 'system') {
-      store.removeItem(themeStorageKey)
-    } else {
-      store.setItem(themeStorageKey, preference)
-    }
-  } catch {
-    // Storage can be blocked: the choice then lasts until the page loads again.
   }
 }

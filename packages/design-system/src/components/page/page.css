@@ -14,27 +14,38 @@
    *
    * In an app on the home screen of an iPhone the status bar is see-through (black-translucent), so it is only the colour of
    * the header while the header is behind it. A strip fixed to the top of the screen, as tall as the top inset and in the
-   * colour of the header, keeps it that colour when the page scrolls: what scrolls under it is hidden behind it. Without an
-   * inset the strip has no height, so there is none. It takes no touch, so a click or the pull to refresh goes through it.
-   * The scroll padding on the html element (see root.css) keeps an element with focus from scrolling in behind the strip.
+   * colour of the header, keeps it that colour when the page scrolls: what scrolls under it is
+   * hidden behind it. It is the first element of the page (.hf-page-top-edge). It takes no
+   * touch, so a click or the pull to refresh goes through it. The scroll padding on the html
+   * element (see root.css) keeps an element with focus from scrolling in behind the strip.
+   *
+   * Safari on an iPhone has no top inset: the page starts under the status bar, and Safari
+   * colours that bar itself. In the simulator (iOS 27) it ignores theme-color for that and
+   * takes the colour of an opaque element fixed to the top edge of the page, if it is tall
+   * enough (4px was not, 6px was), and otherwise the colour of the page, with a soft fade into
+   * the content. It doesn't see a pseudo-element, and an element that is nearly see-through
+   * (opacity 0.01) doesn't count, so the strip is a real element, drawn in full. There it is
+   * never less than 8px (--hf-top-edge, set in root.css): the status bar is then the colour of
+   * the header, with no fade. The strip lies over the top of the header, which has the same
+   * colour, and over what scrolls under it. Without an inset, and outside Safari on an iPhone
+   * or iPad, the strip has no height, so there is none.
    */
   .hf-page {
     display: flex;
     flex-direction: column;
     isolation: isolate;
     min-block-size: 100dvh;
+  }
 
-    &::before {
-      background-color: var(--hf-colour-background-header);
-      block-size: env(safe-area-inset-top, 0);
-      content: '';
-      inline-size: 100%;
-      inset-block-start: 0;
-      inset-inline-start: 0;
-      pointer-events: none;
-      position: fixed;
-      z-index: 1;
-    }
+  .hf-page-top-edge {
+    background-color: var(--hf-colour-background-header);
+    block-size: var(--hf-top-edge, env(safe-area-inset-top, 0));
+    inline-size: 100%;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    pointer-events: none;
+    position: fixed;
+    z-index: 1;
   }
 
   /*

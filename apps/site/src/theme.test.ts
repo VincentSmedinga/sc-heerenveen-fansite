@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { applyPreference, chooseTheme, readPreference, resolveTheme, savePreference, themeStorageKey } from './theme'
 
@@ -154,6 +154,78 @@ describe('applyPreference', () => {
 
     applyPreference('system', doc)
     expect(contents(doc)).toEqual(['#111', '#222'])
+  })
+
+  describe('the strip at the top of the page', () => {
+    const withEdge = () => {
+      const doc = page()
+      const edge = doc.createElement('div')
+
+      edge.className = 'hf-page-top-edge'
+      doc.body.append(edge)
+
+      return { doc, edge }
+    }
+    // Runs the frames by hand, so the test sees the strip while it is off the page.
+    const frames: FrameRequestCallback[] = []
+    const runFrames = () => {
+      for (const frame of frames.splice(0)) {
+        frame(0)
+      }
+    }
+
+    beforeEach(() => {
+      frames.length = 0
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((frame) => frames.push(frame))
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('goes off the page for two frames when the theme changes, so Safari reads its colour again', () => {
+      const { doc, edge } = withEdge()
+
+      applyPreference('dark', doc)
+      expect(edge.style.display).toBe('none')
+
+      runFrames()
+      expect(edge.style.display).toBe('none')
+
+      runFrames()
+      expect(edge.style.display).toBe('')
+    })
+
+    it('goes off the page when a choice goes back to the system', () => {
+      const { doc, edge } = withEdge()
+
+      applyPreference('dark', doc)
+      runFrames()
+      runFrames()
+      applyPreference('system', doc)
+
+      expect(edge.style.display).toBe('none')
+    })
+
+    it('stays on the page when the theme is the same, as when the page loads with a choice that is already there', () => {
+      const { doc, edge } = withEdge()
+
+      applyPreference('dark', doc)
+      runFrames()
+      runFrames()
+      applyPreference('dark', doc)
+
+      expect(edge.style.display).toBe('')
+      expect(frames).toHaveLength(0)
+    })
+
+    it('does nothing on a page without the strip', () => {
+      const doc = page()
+
+      applyPreference('dark', doc)
+
+      expect(frames).toHaveLength(0)
+    })
   })
 
   it('leaves the tags alone when the header has no colour yet', () => {

@@ -49,8 +49,10 @@ export const metadata: Metadata = {
 }
 
 // The browser colours its own bars with the header of the site, which is a step lighter in
-// dark. The page uses the whole screen, also behind a notch, and keeps its content clear of it
-// with the insets in page.css (viewport-fit=cover).
+// dark. Safari on an iPhone doesn't use this for its status bar: it takes the colour of the
+// strip at the top of the page (see .hf-page-top-edge in page.css). The page uses the whole
+// screen, also behind a notch, and keeps its content clear of it with the insets in page.css
+// (viewport-fit=cover).
 export const viewport: Viewport = {
   themeColor: [
     { color: headerColour.light, media: '(prefers-color-scheme: light)' },
