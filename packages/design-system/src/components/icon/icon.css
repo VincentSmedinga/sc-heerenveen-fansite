@@ -13,7 +13,7 @@
     flex-shrink: 0;
     inline-size: 0.875em;
     margin-inline-start: 0.25em;
-    vertical-align: -0.1em;
+    vertical-align: -0.18em;
   }
 
   /*
@@ -23,6 +23,14 @@
   .hf-icon-head,
   .hf-icon-tail {
     white-space: nowrap;
+  }
+
+  /* The text of a button is bold, so its icon is a little larger and has a heavier line to stand next to it. */
+  button .hf-icon {
+    block-size: 1em;
+    inline-size: 1em;
+    stroke-width: 2;
+    vertical-align: -0.24em;
   }
 
   .hf-icon-head > .hf-icon {

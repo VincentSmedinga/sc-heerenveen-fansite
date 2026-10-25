@@ -76,6 +76,10 @@ describe('the CSS of the icons', () => {
     expect(css).not.toMatch(/transition|animation|transform|:hover/)
   })
 
+  it('makes the icon in a button larger and heavier, in the same unit, because the text of a button is bold', () => {
+    expect(css).toMatch(/button \.hf-icon\s*\{[^}]*inline-size: 1em[^}]*stroke-width: 2/)
+  })
+
   it('sizes the icon relative to the text, and keeps the icon with its word on one line', () => {
     expect(css).toMatch(/inline-size: 0\.875em/)
     expect(css).toMatch(/\.hf-icon-head,\s*\.hf-icon-tail\s*\{\s*white-space: nowrap/)

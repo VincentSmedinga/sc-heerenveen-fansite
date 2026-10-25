@@ -21,6 +21,7 @@ const meta = preview.meta({
           '**Kleur en grootte.**',
           'Een pictogram heeft altijd de kleur van de tekst eromheen, ook onder de muis, met de focus en in geforceerde kleuren, dus het heeft hetzelfde contrast als die tekst.',
           'Het is iets kleiner dan de tekst en groeit en krimpt met die tekst.',
+          'In een knop is het iets groter en de lijn is zwaarder, omdat de tekst van een knop vet is.',
           'Het beweegt niet.',
           '',
           '**Voor of achter de tekst.**',
