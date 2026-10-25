@@ -1,6 +1,10 @@
+import { NextRequest } from 'next/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { config, contentSecurityPolicy, proxy } from './proxy'
+import { config, contentSecurityPolicy, isAdminPath, proxy as proxyOf } from './proxy'
+
+/** The proxy's answer to a request for a path of the site. */
+const proxy = (path = '/') => proxyOf(new NextRequest(new URL(path, 'http://localhost:3000')))
 
 afterEach(() => {
   vi.unstubAllEnvs()
@@ -45,6 +49,51 @@ describe('proxy', () => {
       'script-src': "'self' 'unsafe-inline'",
       'style-src': "'self' 'unsafe-inline'",
     })
+  })
+
+  it.each(['local', 'acceptance', 'production'])(
+    'keeps the admin out of search engines and caches on %s',
+    (siteEnv) => {
+      vi.stubEnv('SITE_ENV', siteEnv)
+
+      for (const path of [
+        '/beheer',
+        '/beheer/',
+        '/beheer/inloggen',
+        '/beheer/inloggen/bevestigen?token=abc',
+        '/beheer/ergens/diep',
+      ]) {
+        const { headers } = proxy(path)
+
+        expect(headers.get('X-Robots-Tag'), path).toBe('noindex, nofollow')
+        expect(headers.get('Cache-Control'), path).toBe('no-store')
+        expect(headers.get('Referrer-Policy'), path).toBe('no-referrer')
+        expect(headers.get('Content-Security-Policy'), path).toBe(contentSecurityPolicy)
+      }
+    },
+  )
+
+  it('leaves the rest of the site on production without those headers', () => {
+    vi.stubEnv('SITE_ENV', 'production')
+
+    for (const path of ['/', '/beheerder', '/bronnen', '/over-ons/beheer']) {
+      const { headers } = proxy(path)
+
+      expect(headers.get('X-Robots-Tag'), path).toBeNull()
+      expect(headers.get('Cache-Control'), path).toBeNull()
+      expect(headers.get('Referrer-Policy'), path).toBeNull()
+    }
+  })
+
+  it('knows the admin by its path, and /beheerder is not under it', () => {
+    expect(['/beheer', '/beheer/', '/beheer/x', '/beheerder', '/', '/x/beheer'].map(isAdminPath)).toEqual([
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+    ])
   })
 
   it('runs for every path', () => {

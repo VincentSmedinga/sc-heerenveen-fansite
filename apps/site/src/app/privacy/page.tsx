@@ -32,6 +32,11 @@ export default function PrivacyPage() {
           browser te wissen.
         </Text>
         <Text>
+          Wie inlogt in het beheer krijgt één cookie. Dat geldt alleen voor de paar mensen van de redactie, nooit voor
+          een bezoeker. Het cookie bevat alleen een nummer voor die sessie, niets over jou. Je browser stuurt het alleen
+          naar de pagina&apos;s van het beheer. Het werkt hooguit 7 dagen.
+        </Text>
+        <Text>
           Klik je door naar een medium of naar ons forum, dan verlaat je deze site. Voor wat die sites met je gegevens
           doen, gelden hun eigen regels.
         </Text>

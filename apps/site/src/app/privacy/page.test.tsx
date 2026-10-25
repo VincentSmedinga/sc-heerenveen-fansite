@@ -53,17 +53,28 @@ describe('the page Privacy', () => {
     expect(paragraph).toContain('de gegevens van de site in je browser te wissen')
   })
 
-  it('says in paragraphs, not a list, what the logs, the theme, other sites, email, questions and complaints are about', () => {
+  it('says that whoever logs in to the admin gets one cookie, and that a visitor never does', () => {
+    const paragraph = html.match(/<p[^>]*>(Wie inlogt in het beheer.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('Wie inlogt in het beheer krijgt één cookie.')
+    expect(paragraph).toContain('nooit voor een bezoeker')
+    expect(paragraph).toContain('alleen een nummer voor die sessie, niets over jou')
+    expect(paragraph).toContain('alleen naar de pagina&#x27;s van het beheer')
+    expect(paragraph).toContain('hooguit 7 dagen')
+  })
+
+  it('says in paragraphs, not a list, what the logs, the theme, the cookie of the admin, other sites, email, questions and complaints are about', () => {
     const paragraphs = [...html.matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 
     expect(html).not.toMatch(/<(ul|ol|li)[ >]/)
-    expect(paragraphs).toHaveLength(6)
+    expect(paragraphs).toHaveLength(7)
     expect(paragraphs[1]).toContain('logbestanden bij, met onder meer IP-adressen')
     expect(paragraphs[2]).toContain('Kies je Licht of Donker in de footer')
-    expect(paragraphs[3]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
-    expect(paragraphs[4]).toContain('Een mail aan ons gebruiken we alleen om te antwoorden.')
-    expect(paragraphs[4]).toContain('we hebben geen gegevens van je.')
-    expect(paragraphs[5]).toContain('Autoriteit Persoonsgegevens')
+    expect(paragraphs[3]).toContain('Wie inlogt in het beheer krijgt één cookie.')
+    expect(paragraphs[4]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
+    expect(paragraphs[5]).toContain('Een mail aan ons gebruiken we alleen om te antwoorden.')
+    expect(paragraphs[5]).toContain('we hebben geen gegevens van je.')
+    expect(paragraphs[6]).toContain('Autoriteit Persoonsgegevens')
   })
 
   it('links to the editors by email and to the Autoriteit Persoonsgegevens, and to nothing else', () => {

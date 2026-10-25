@@ -162,6 +162,42 @@ Op acceptatie en productie zijn ze verplicht.
 Zonder ze, alleen lokaal, schrijft `sendMail` de mail in het logboek van `pnpm dev`, met de tekst dat er niets is verstuurd.
 `docs/acceptatieomgeving.md` zegt hoe de eigenaar de instellingen zet en met `send-test-mail.mjs` een proefmail verstuurt.
 
+## Het beheer
+
+Wie het beheer in mag, logt in met een link die de site per e-mail stuurt, zonder wachtwoord (zie `src/beheer` en `src/app/beheer`).
+Een account maak je met een opdracht, want er is geen aanmeldpagina:
+
+```sh
+pnpm admin:create <e-mailadres> <rol>
+pnpm admin:revoke <e-mailadres>
+```
+
+De rol is `beheerder` of `moderator`.
+`admin:revoke` zet het account uit en beëindigt zijn sessies meteen.
+Beide lezen `DATABASE_URL` uit de `.env` in de root.
+Op de host is er geen pnpm: daar draait `apps/site/admin.mjs`, dat `assemble` maakt (zie `docs/acceptatieomgeving.md`, stap 12).
+
+Lokaal log je zo in:
+
+1. Maak een account, zoals hierboven.
+2. Ga naar <http://localhost:3000/beheer/inloggen> en vul het adres in.
+3. Zonder instellingen voor de mail schrijft `sendMail` de mail in het logboek van `pnpm dev`.
+   Open de link daaruit, en kies Inloggen.
+
+Het cookie van het beheer is `Secure`, ook lokaal.
+Chrome en Firefox nemen dat aan op `localhost`; Safari niet, dus log lokaal in met Chrome of Firefox.
+
+- `requireRole` in `src/beheer/require-role.ts` is de ene controle van het beheer.
+  Elke pagina, route en serveractie onder `/beheer` roept hem als eerste aan, behalve de pagina's en acties om in te loggen.
+  `src/beheer/routes.test.ts` zoekt ze zelf op in de mappen (en elk bestand met `'use server'`, waar ook), en laat zien dat een aanroep zonder sessie naar de inlogpagina gaat.
+  Een nieuwe pagina of actie die `requireRole` niet aanroept, laat die test falen.
+  Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
+- De proxy (`src/proxy.ts`) geeft elk antwoord onder `/beheer` de headers `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: no-referrer`, op elke omgeving.
+  De proxy is geen toegangscontrole.
+- Een inloglink, een sessie en een teller van pogingen staan in de database (`admin_login_links`, `admin_sessions`, `admin_login_attempts`).
+  Van een link en een sessie bewaart de tabel alleen de SHA-256 van de token.
+  De teller bewaart de SHA-256 van het adres en de tijd, en geen IP-adres.
+
 ## De foutpagina
 
 Een pagina die door een fout op de server niet lukt, toont `Er ging iets mis` in de paginaopbouw (`src/ServerError.tsx`).
@@ -183,6 +219,7 @@ Inline scripts en stijlen mogen wel, omdat Next.js ze nodig heeft.
 De omgevingsvariabele `SITE_ENV` bepaalt of zoekmachines de site mogen indexeren.
 Alleen `production` mag.
 Bij `local` en `acceptance` krijgt elk antwoord de header `X-Robots-Tag: noindex, nofollow`, en `/robots.txt` weigert alles.
+Het beheer (`/beheer`) krijgt die header op elke omgeving, ook op `production`, en `/robots.txt` weigert `/beheer` overal.
 De site leest `SITE_ENV` als de server draait, dus dezelfde build kan naar elke omgeving.
 Zonder geldige `SITE_ENV` start de server niet.
 

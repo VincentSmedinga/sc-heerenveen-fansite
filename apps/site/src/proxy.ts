@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { isIndexable } from './env'
 
@@ -19,13 +19,24 @@ export const contentSecurityPolicy = [
   "base-uri 'self'",
 ].join('; ')
 
-// Runs for every request, including the files in /_next/static, so every response carries the headers.
-export function proxy() {
+/** Whether a path is the admin or under it. `/beheerder` is not. */
+export function isAdminPath(pathname: string) {
+  return pathname === '/beheer' || pathname.startsWith('/beheer/')
+}
+
+// Runs for every request, including the files in /_next/static, so every response carries the headers. The admin gets
+// two more on every environment, production too: no search engine may index it, and nothing of it is kept in a cache of
+// the browser or of anything on the way. It also sends no referrer, so the login link in the address bar goes nowhere.
+export function proxy(request: NextRequest) {
   const response = NextResponse.next()
 
   response.headers.set('Content-Security-Policy', contentSecurityPolicy)
 
-  if (!isIndexable()) {
+  if (isAdminPath(request.nextUrl.pathname)) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    response.headers.set('Cache-Control', 'no-store')
+    response.headers.set('Referrer-Policy', 'no-referrer')
+  } else if (!isIndexable()) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
   }
 

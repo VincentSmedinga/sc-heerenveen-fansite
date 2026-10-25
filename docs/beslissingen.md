@@ -2008,7 +2008,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een mailserver die geen TLS spreekt, zou het wachtwoord en de berichten van bezoekers in het openbaar sturen.
   Een site die zonder instellingen start, merkt pas bij het eerste contactbericht dat er niets verstuurd wordt.
   Alles of niets lokaal, omdat een half ingevulde set een vergissing is die de ontwikkelaar anders pas bij het versturen ziet.
-- **Gevolg:** de rooktest en de toegankelijkheidscontrole starten de site met `SITE_ENV=acceptance`; ze krijgen verzonnen instellingen mee, want geen pagina mailt.
+- **Gevolg:** de rooktest en de toegankelijkheidscontrole starten de site met `SITE_ENV=acceptance`; ze krijgen verzonnen instellingen mee, want ze vragen geen mail aan (de inlogpagina mailt alleen voor een account, en de testdatabase heeft er geen).
 - **Alternatieven:** ongecodeerd mailen als de server geen TLS kent (onveilig); de instellingen op acceptatie optioneel laten (de site start dan, maar mailt niet).
 
 ### Een foutmelding van `sendMail` bevat alleen een code, en een adres is precies één adres
@@ -2036,6 +2036,137 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Niet getest:** poort 465 (TLS vanaf het begin) en een echte mailserver; de test dekt STARTTLS, en de eigenaar controleert de rest met de proefmail op acceptatie.
 - **Alternatieven:** `smtp-server` als devDependency; dat brengt een tweede versie van nodemailer mee, en `assemble` weigert twee versies van één pakket.
   Of een certificaat in de repository.
+
+### Inloggen voor het beheer is eigen code, geen Better Auth
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het inloggen (`apps/site/src/beheer`) is eigen code op `node:crypto` en Drizzle, zonder bibliotheek.
+  Het issue stelde Better Auth voor met de Drizzle-adapter, de plug-in voor inloglinks en zijn rate limiting.
+  Dat hebben we eerst op MariaDB 10.11 geprobeerd (versie 1.7.12, MIT).
+- **Wat werkte:** de Drizzle-adapter schrijft naar MariaDB, de plug-in maakt een link die één keer werkt (een tweede keer geeft `INVALID_TOKEN`), en het cookie is `HttpOnly`, `Secure` en `SameSite=Lax`.
+  Het pakket heeft geen installatiescript, dus `allowBuilds` bleef gelijk.
+- **Waarom toch niet:** vier eisen van het issue moesten we er alsnog omheen bouwen, en de rest is weinig code.
+  - De rate limiting telt per IP-adres en route, en bewaart dat adres in de database.
+    Het issue wil een telling per e-mailadres en voor de hele site, zonder IP-adressen.
+  - De plug-in maakt een token, schrijft het in de database en roept `sendMagicLink` ook aan voor een adres zonder account.
+    Dat een adres geen account heeft, blijkt pas bij het gebruik van de link.
+    De controle op het account, het gelijk houden van de mail en de tijd van het antwoord zijn dan ons werk.
+  - Een sessie loopt bij Better Auth op bij gebruik, met één `expiresIn`.
+    "12 uur zonder activiteit én 7 dagen hoe dan ook" kent hij niet; we hadden een eigen controle bij elke aanroep nodig.
+  - Standaard schrijft hij het IP-adres en de user agent van het verzoek in elke sessie; dat kan uit, maar het is een instelling die we moeten kennen en bewaken.
+  - Het pakket brengt tientallen pakketten mee, waaronder adapters voor Prisma en MongoDB die we niet gebruiken, en een module die telemetrie kan versturen (uit, tenzij je haar aanzet).
+    Wat overblijft is een willekeurige token, een hash ervan in de database, drie tabellen en een cookie: ongeveer 250 regels die we kunnen lezen en testen.
+    Het project houdt het licht, en voegt geen dependency toe als een paar regels genoeg zijn (zie `CONTRIBUTING.md`).
+- **Gevolg:** een nieuwe dependency is er niet: alleen `drizzle-orm` (dezelfde versie als het andere pakket) staat nu ook in `apps/site`.
+  Een geheim voor het inloggen is er ook niet: een link en een sessie zijn 256 willekeurige bits, die we als SHA-256 bewaren, en niets wordt ondertekend.
+  Er is dus geen nieuwe omgevingsvariabele.
+- **Alternatieven:** Better Auth met veel eigen code eromheen, die de plug-in vooral overschrijft.
+  Auth.js of Lucia: ook een bibliotheek voor een handvol accounts, en een rate limiting per e-mailadres is daar ook eigen werk.
+
+### Een link en een sessie bewaren we als SHA-256, in de database
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een inloglink en een sessie zijn 32 willekeurige bytes (base64url).
+  De tabellen `admin_login_links` en `admin_sessions` bewaren alleen de SHA-256 ervan.
+  Een link werkt 15 minuten en één keer: de site verwijdert de rij en gaat alleen door als er precies één rij weg was, dus twee verzoeken tegelijk loggen niet allebei in.
+  Een sessie is geldig zolang het minder dan 12 uur geleden is dat hij is gebruikt én minder dan 7 dagen geleden dat hij begon; `findSession` rekent dat bij elk verzoek na met `created_at` en `last_seen_at`, dus de 7 dagen zijn echt absoluut, ook voor een sessie die elk uur wordt gebruikt.
+  Een sessie die is afgelopen, wordt weggehaald.
+  `admin:revoke` zet het account uit en verwijdert zijn sessies en links; elk volgend verzoek vindt geen sessie meer.
+  Uitloggen verwijdert de rij.
+- **Waarom:** een kopie van de database logt dan niemand in, en 256 willekeurige bits raad je niet, dus een hash zonder zout is genoeg.
+  Op de server bewaren maakt intrekken meteen werkzaam; een token met een einddatum erin (JWT) kan dat niet.
+- **Het cookie:** `beheer-sessie`, `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/beheer`, `Max-Age` 7 dagen, met alleen de token erin.
+  `Path=/beheer` houdt het uit verzoeken naar de rest van de site, en het is nog steeds het enige cookie dat de site zet.
+  `Secure` geldt ook lokaal: Chrome en Firefox nemen het aan op `localhost`, Safari niet.
+- **Alternatieven:** de token zelf bewaren (een gelekte database logt dan in); een ondertekend cookie met een einddatum (niet in te trekken zonder lijst op de server).
+
+### Het antwoord op een verzoek om een link is voor elk adres hetzelfde
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `requestLoginLink` stuurt elk goed gevormd adres naar `/beheer/inloggen/verstuurd`, met of zonder account, en mailt alleen voor een account dat aanstaat.
+  De mail gaat na het antwoord weg (`after` van Next.js), en het antwoord duurt minstens 400 milliseconden, voor elk adres.
+  Een adres zonder account krijgt geen mail en geen rij in `admin_login_links`.
+  Een adres dat geen adres is, en de rate limit, sturen terug naar het formulier met een melding.
+- **Waarom:** wie de pagina bekijkt, kan zo niet nagaan wie een account heeft: niet aan de tekst, niet aan de doorverwijzing, niet aan de tijd.
+  Een mail versturen duurt seconden, dus een bekend adres zou anders trager antwoorden.
+  De limiet geldt voor elk adres, ook een onbekend, dus de melding "te veel links gevraagd" verraadt ook niets.
+- **Beperking:** wie de mailbox van een adres leest, ziet wel of er een mail kwam.
+  Dat is de eigenaar van het adres, en geen aanvaller.
+  Een mailserver die uitvalt, geeft de bezoeker geen fout: de site schrijft `Could not mail a login link` in het logboek, zonder het adres.
+- **Alternatieven:** de mail vóór het antwoord versturen en de tijd gelijktrekken met een vaste wachttijd (de mailserver is dan te traag en te wisselvallig); een mail "er is geen account voor dit adres" sturen naar een onbekend adres (meer mail, en het adres is van een derde).
+
+### De rate limit van het inloggen staat in een eigen tabel
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `admin_login_attempts` houdt per verzoek de SHA-256 van het adres (in kleine letters, zonder spaties) en de tijd bij, voor bekende en onbekende adressen.
+  Een verzoek mag als er in de laatste 15 minuten minder dan 5 verzoeken voor dat adres waren, en minder dan 30 voor de hele site.
+  De site schrijft de rij eerst en telt daarna; staat het verzoek boven de limiet, dan verwijdert hij zijn eigen rij weer.
+  Zo glippen twee verzoeken tegelijk niet allebei onder de limiet door, en houdt een stroom verzoeken het venster niet dicht.
+  Rijen ouder dan 15 minuten gaan weg bij het volgende verzoek.
+  Er is geen IP-adres in de tabel.
+- **Waarom:** de limiet moet werken als de host meer processen start, dus hij staat in de database.
+  Een IP-adres is een persoonsgegeven en zegt weinig: achter één router zitten veel mensen, en een aanvaller wisselt van adres.
+  De hash van het adres is geen geheim (een adres is te raden), maar de rijen bestaan 15 minuten en de adressen van het beheer staan toch al in `admin_users`.
+- **Gevolg:** wie 30 verzoeken in een kwartier stuurt, sluit het inloggen voor iedereen voor een kwartier.
+  Dat is wat "30 voor de hele site" betekent; bij een handvol beheerders is het acceptabel, en tegen raden helpt het.
+- **Alternatieven:** de limiet per IP-adres (bewaart IP-adressen, en een aanvaller omzeilt hem); een teller in het geheugen (werkt niet bij meer processen).
+
+### De link in de mail toont een knop; de knop logt in
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `/beheer/inloggen/bevestigen?token=…` logt niet in als je hem opent, maar toont de knop Inloggen; de knop gebruikt de link op en begint de sessie.
+  De pagina controleert of de link nog werkt, zonder hem te gebruiken, en zegt anders "Deze link werkt niet".
+- **Waarom:** een virusscanner of voorbeeldweergave opent een link in een mail voordat de persoon dat doet (Microsoft 365 heeft dat), en zou een link die maar één keer werkt opgebruiken.
+  Dat is één klik meer voor wie inlogt.
+- **Alternatieven:** inloggen bij het openen van de link (kortste weg, maar breekbaar bij mailscanners).
+
+### `requireRole` is de ene controle, en een test loopt het beheer zelf na
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `requireRole(...rollen)` in `apps/site/src/beheer/require-role.ts` leest het cookie, zoekt de sessie en stuurt een bezoeker zonder sessie naar `/beheer/inloggen`.
+  Een sessie met een rol die niet mag, krijgt "niet gevonden".
+  Elke pagina, route en serveractie onder `/beheer` roept hem als eerste aan, behalve drie pagina's en twee acties om in te loggen, die een lijst in de test met naam noemt.
+  `routes.test.ts` zoekt de bestanden zelf op: elke `page.tsx` en `route.ts` onder `app/beheer`, en elk bestand in de hele site met `'use server'`.
+  Voor elk bestand dat niet open staat, controleert hij twee dingen: de tekst roept `requireRole(` aan, en de bestanden worden echt aangeroepen zonder cookie en zonder database en moeten naar de inlogpagina sturen.
+  Een nieuwe pagina, route of actie die `requireRole` niet als eerste aanroept, laat de test falen, ook als niemand haar in een lijst heeft gezet.
+- **Waarom:** de proxy ziet een pad, niet welke actie een verzoek aanroept, en een pad dat de matcher mist, staat open.
+  De test hoeft niet te weten welke acties er zijn.
+  Dat de database onaangeroerd blijft, bewijst dat de weigering vóór alles komt.
+- **Beperking:** de test roept een actie zonder argumenten aan; een actie die haar argumenten leest vóór `requireRole`, faalt dus ook.
+  Dat is bedoeld.
+- **Alternatieven:** de controle in de proxy (te makkelijk te omzeilen); een lijst van acties in de test (vergeet iemand).
+
+### Het beheer krijgt zijn eigen headers, en `robots.txt` weigert het overal
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de proxy geeft elk antwoord onder `/beheer` (en `/beheer` zelf) `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: no-referrer`, op elke omgeving, productie ook.
+  `/robots.txt` heeft `Disallow: /beheer` op elke omgeving.
+  Next.js stuurt voor een pagina die het per verzoek rendert een eigen, langere waarde (`private, no-cache, no-store, max-age=0, must-revalidate`); die bevat `no-store` ook, en de rooktest controleert dat.
+  De pagina's zeggen ook `noindex, nofollow` in de HTML, en staan niet in de sitemap.
+- **Waarom:** de inloglink staat in het adres van een pagina; zonder `Referrer-Policy` zou hij als referrer naar een andere site kunnen gaan, en een cache mag niets van het beheer bewaren.
+- **Alternatieven:** alleen `noindex` in de HTML (een zoekmachine ziet dat pas na het ophalen); de headers in `next.config.ts` (dezelfde plek als de andere headers is de proxy).
+
+### De opdrachten voor accounts zijn één bestand in de build, dat alleen `DATABASE_URL` leest
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `apps/site/src/admin.ts` is de opdracht (`create` en `revoke`).
+  Lokaal draaien `pnpm admin:create <e-mailadres> <rol>` en `pnpm admin:revoke <e-mailadres>` hem met Node en de `.env` in de root.
+  `assemble` bundelt hem met esbuild in `apps/site/admin.mjs`, naast de proefmail, en de host draait hem met het volledige pad van Node en `--env-file=~/fansite-acceptatie.env`, zoals de importer.
+  Hij leest alleen `DATABASE_URL` (met `readDatabaseEnv`, net als de importer) en heeft geen `SITE_ENV` of mailinstellingen nodig.
+  `create` voor een adres dat al aanstaat, verandert niets en stopt met 1; voor een uitgezet account zet hij het weer aan met de nieuwe rol.
+  `revoke` zet het account uit (`disabled_at`) en verwijdert zijn sessies en links; de rij blijft, zodat het account niet verdwijnt uit het zicht.
+  Een test (`apps/importer/src/bundle-admin.test.ts`) bundelt hem zoals `assemble` doet, draait hem buiten de repository met `--env-file` en zonder `node_modules` of `DATABASE_URL` in de omgeving, en controleert beide opdrachten tegen de testdatabase.
+- **Waarom:** de host heeft alleen de standalone build en Node, geen pnpm, en een SSH-sessie krijgt de variabelen van de Node.js-app niet (zie _De site draait de migraties als ze start_ en `docs/acceptatieomgeving.md`, stap 8 tot en met 10).
+  Eén bestand en één bestand met `DATABASE_URL` is wat de importer al gebruikt, dus de eigenaar leert niets nieuws.
+- **Alternatieven:** een beheerpagina om accounts te maken (een aanvalsvlak, en buiten dit issue); de opdracht in `apps/site/server.js` laten draaien (dat vraagt de variabelen van de site, en meer van de host).
+
+### De privacyverklaring noemt het cookie van het beheer
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `/privacy` zegt nog steeds "De site zet geen cookies" bovenaan, en heeft een alinea dat wie inlogt in het beheer één cookie krijgt: alleen een nummer voor de sessie, alleen naar de pagina's van het beheer, hooguit 7 dagen, en nooit voor een bezoeker.
+- **Waarom:** de eerste zin klopt voor bezoekers, en de rest zegt wat voor de redactie anders is.
+  De alinea staat bij de andere dingen die we moeten noemen, en het cookie is geen tracking.
+- **Alternatieven:** de eerste zin veranderen in "De site zet geen cookies voor bezoekers"; die zin is al waar, en de intro hoeft niet te veranderen.
 
 ## Importer
 

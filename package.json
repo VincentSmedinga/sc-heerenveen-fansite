@@ -11,6 +11,8 @@
     "pnpm": "^12"
   },
   "scripts": {
+    "admin:create": "pnpm --filter site run admin create",
+    "admin:revoke": "pnpm --filter site run admin revoke",
     "build": "pnpm -r --if-present run build",
     "db:generate": "pnpm --filter @fansite/db db:generate",
     "db:migrate": "pnpm --filter @fansite/db db:migrate",

@@ -119,3 +119,7 @@ await bundleCommand(
   path.resolve(import.meta.dirname, '../src/send-test-mail.ts'),
   path.join(siteFolder, 'send-test-mail.mjs'),
 )
+// The commands that make and turn off the accounts of the admin (`pnpm admin:create` and `pnpm admin:revoke` on a computer
+// with pnpm). The host has no pnpm, so the owner runs this file with Node over SSH (see docs/acceptatieomgeving.md). It needs
+// only DATABASE_URL, which an SSH session doesn't get from the Node.js app: it comes from the same file as for the importer.
+await bundleCommand(path.resolve(import.meta.dirname, '../src/admin.ts'), path.join(siteFolder, 'admin.mjs'))
