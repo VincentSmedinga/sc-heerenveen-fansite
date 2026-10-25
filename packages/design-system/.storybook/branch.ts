@@ -9,7 +9,10 @@ const branchName = /^[\w./-]+$/
 
 export const branchMetaName = 'review-branch'
 
-/** Adds the branch to the head of the manager. Only `storybook dev` shows it: a build, such as the one on ds.heerenveen.org, never does. */
+/**
+ * Adds the branch to the head of the manager. Only `storybook dev` shows it: a build, such as the one on
+ * ds.heerenveen.org, never does.
+ */
 export const addBranchTo = (head: string, branch: string | undefined, configType: string) =>
   configType === 'DEVELOPMENT' && branch !== undefined && branchName.test(branch)
     ? `${head}<meta name="${branchMetaName}" content="${branch}">`

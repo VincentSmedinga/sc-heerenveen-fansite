@@ -91,7 +91,10 @@ export const headlines: { madeUp: Row[] } = {
   ],
 }
 
-/** The feeds of the made-up items. A feed that the importer would read must not outlast the check, so it is easy to recognise. */
+/**
+ * The feeds of the made-up items. A feed that the importer would read must not outlast the check, so it is easy to
+ * recognise.
+ */
 const feedPath = '/e2e-a11y/rss/'
 
 const rows: Row[] = headlines.madeUp

@@ -20,7 +20,10 @@ export async function bundleCommand(entryPoint: string, outfile: string) {
   })
 }
 
-/** Bundles the import command, which cron starts on the host. `pnpm --filter site assemble` puts it in the folder for the host. */
+/**
+ * Bundles the import command, which cron starts on the host. `pnpm --filter site assemble` puts it in the folder for
+ * the host.
+ */
 export async function bundleImporter(outfile: string) {
   await bundleCommand(fileURLToPath(new URL('./import.ts', import.meta.url)), outfile)
 }

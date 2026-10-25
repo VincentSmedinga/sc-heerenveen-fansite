@@ -11,7 +11,10 @@ export type CardElement = (typeof cardElements)[number]
 export const cardSurfaces = ['default', 'strong', 'soft', 'warm'] as const
 
 export type CardProps = ComponentPropsWithoutRef<'section'> & {
-  /** `section` (default), `div`, `article` or `aside`. A `section` takes its name from its heading with `aria-labelledby`. */
+  /**
+   * `section` (default), `div`, `article` or `aside`. A `section` takes its name from its heading with
+   * `aria-labelledby`.
+   */
   as?: CardElement
   /** The surface: `default` is the white one. Its background and border come from the colour tokens of that surface. */
   surface?: CardSurface

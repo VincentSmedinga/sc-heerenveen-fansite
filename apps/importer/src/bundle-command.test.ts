@@ -1,4 +1,5 @@
-// The command that sends a test mail is the second command that `bundleCommand` bundles (see apps/site/src/send-test-mail.ts).
+// The command that sends a test mail is the second command that `bundleCommand` bundles (see
+// apps/site/src/send-test-mail.ts).
 import { execFile } from 'node:child_process'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'

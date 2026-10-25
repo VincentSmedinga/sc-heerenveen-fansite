@@ -104,7 +104,10 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
     : undefined
 }
 
-/** Turns a discussion of the answer into what we keep, 'left-out' for one in a tag we leave out, or the reason to skip it. */
+/**
+ * Turns a discussion of the answer into what we keep, 'left-out' for one in a tag we leave out, or the reason to skip
+ * it.
+ */
 function cleanDiscussion(
   raw: unknown,
   included: Map<string, Resource>,

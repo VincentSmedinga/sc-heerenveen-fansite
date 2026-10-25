@@ -12,7 +12,10 @@ export function isMailbox(value: string) {
   return mailbox.test(value)
 }
 
-/** The settings of the mail server, and the address that mail comes from. See `requireSmtpOutsideLocal` for which are needed. */
+/**
+ * The settings of the mail server, and the address that mail comes from. See `requireSmtpOutsideLocal` for which are
+ * needed.
+ */
 export const mailEnvSchema = z.object({
   MAIL_FROM: z
     .string()

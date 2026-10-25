@@ -66,7 +66,10 @@ export function mainFolderOf(commonGitDir) {
   return path.dirname(commonGitDir)
 }
 
-/** Reads what `gh pr list --json number,url,isCrossRepository` printed, and gives the first pull request of this repository. */
+/**
+ * Reads what `gh pr list --json number,url,isCrossRepository` printed, and gives the first pull request of this
+ * repository.
+ */
 export function parseOpenPullRequest(json) {
   const found = JSON.parse(json).find(({ isCrossRepository }) => isCrossRepository !== true)
 
@@ -138,7 +141,10 @@ export function describeSource({ comparison, local }) {
   return `local branch (${[ahead > 0 ? `${plural(ahead)} ahead of origin` : '', behind > 0 ? `${plural(behind)} behind origin` : ''].filter(Boolean).join(', ')})`
 }
 
-/** Reads what `git rev-list --left-right --count <local>...<remote>` printed: the commits only the local branch has, and only the remote one. */
+/**
+ * Reads what `git rev-list --left-right --count <local>...<remote>` printed: the commits only the local branch has, and
+ * only the remote one.
+ */
 export function parseAheadBehind(output) {
   const [ahead, behind] = output.trim().split(/\s+/).map(Number)
 

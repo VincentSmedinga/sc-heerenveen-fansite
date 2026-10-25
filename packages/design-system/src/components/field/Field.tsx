@@ -4,7 +4,10 @@ import { classNames } from '../classNames'
 import { Text } from '../text/Text'
 
 export type FieldProps = Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'id'> & {
-  /** The field: an Input, a Textarea or a Select. Field gives it the `id`, `aria-describedby`, `aria-invalid` and `required` it needs. */
+  /**
+   * The field: an Input, a Textarea or a Select. Field gives it the `id`, `aria-describedby`, `aria-invalid` and
+   * `required` it needs.
+   */
   children: ReactElement<FieldControlProps>
   /** What is wrong with the answer, and how to put it right. Without it, the field has no error. */
   error?: string | undefined

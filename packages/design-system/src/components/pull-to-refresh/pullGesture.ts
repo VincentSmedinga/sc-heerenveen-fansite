@@ -17,7 +17,10 @@ export type PullOptions = {
   onRefresh: () => void
 }
 
-/** True when the site runs as an app from the home screen: Chrome and others say so in a media query, iOS Safari in a property. */
+/**
+ * True when the site runs as an app from the home screen: Chrome and others say so in a media query, iOS Safari in a
+ * property.
+ */
 export function isStandalone(): boolean {
   return window.matchMedia('(display-mode: standalone)').matches || Reflect.get(navigator, 'standalone') === true
 }

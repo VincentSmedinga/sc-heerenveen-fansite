@@ -9,16 +9,23 @@ import { hashOf, newToken } from '../src/beheer/sessions'
 // A moderator with a session for the checks of the admin. The login of the admin is a link in a mail, which a browser test
 // can't follow without a mailbox, so the check puts the account and the session in the database itself, as `startSession`
 // does, and gives the browser the cookie. Nothing in the site can do this: there is no route, no environment variable and no
-// token in the code that logs in, and this file is not part of the build. The token is made anew for every run, it is only in
-// the memory of the check (and in the environment of its workers), and the account and the session are removed afterwards.
+// token in the code that logs in, and this file is not part of the build. The token is made anew for every run, it is
+// only in the memory of the check (and in the environment of its workers), and the account and the session are removed
+// afterwards.
 
 /** The account of the check. `.test` is a domain that can't exist, so a mail to it goes nowhere. */
 export const adminEmail = 'e2e-moderator@example.test'
 
-/** The name of the cookie of the admin (`sessionCookieName` in src/beheer/require-role.ts, which the build of Next.js owns). */
+/**
+ * The name of the cookie of the admin (`sessionCookieName` in src/beheer/require-role.ts, which the build of Next.js
+ * owns).
+ */
 export const sessionCookieName = 'beheer-sessie'
 
-/** The environment variable that hands the token of the session from the setup to the tests, which run in other processes. */
+/**
+ * The environment variable that hands the token of the session from the setup to the tests, which run in other
+ * processes.
+ */
 const tokenVariable = 'E2E_ADMIN_TOKEN'
 
 /**

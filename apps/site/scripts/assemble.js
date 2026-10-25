@@ -104,8 +104,8 @@ mkdirSync(path.join(siteFolder, '.next'), { recursive: true })
 cpSync(path.resolve(import.meta.dirname, '../.next/static'), path.join(siteFolder, '.next/static'), { recursive: true })
 // The standalone folder leaves out public as well: the picture for shared links is in it.
 cpSync(path.resolve(import.meta.dirname, '../public'), path.join(siteFolder, 'public'), { recursive: true })
-// The server runs the migrations when it starts. It looks for them in packages/db/drizzle, two folders above apps/site, as in
-// the repository (see migrationsFolder in src/instrumentation-node.ts).
+// The server runs the migrations when it starts. It looks for them in packages/db/drizzle, two folders above apps/site,
+// as in the repository (see migrationsFolder in src/instrumentation-node.ts).
 cpSync(path.resolve(import.meta.dirname, '../../../packages/db/drizzle'), path.join(target, 'packages/db/drizzle'), {
   recursive: true,
 })
@@ -120,6 +120,7 @@ await bundleCommand(
   path.join(siteFolder, 'send-test-mail.mjs'),
 )
 // The commands that make and turn off the accounts of the admin (`pnpm admin:create` and `pnpm admin:revoke` on a computer
-// with pnpm). The host has no pnpm, so the owner runs this file with Node over SSH (see docs/acceptatieomgeving.md). It needs
-// only DATABASE_URL, which an SSH session doesn't get from the Node.js app: it comes from the same file as for the importer.
+// with pnpm). The host has no pnpm, so the owner runs this file with Node over SSH (see docs/acceptatieomgeving.md). It
+// needs only DATABASE_URL, which an SSH session doesn't get from the Node.js app: it comes from the same file as for
+// the importer.
 await bundleCommand(path.resolve(import.meta.dirname, '../src/admin.ts'), path.join(siteFolder, 'admin.mjs'))

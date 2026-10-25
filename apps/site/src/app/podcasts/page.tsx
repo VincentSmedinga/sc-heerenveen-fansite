@@ -41,7 +41,10 @@ function podcastsHref(podcast: string | undefined, page: number) {
   return query === '' ? '/podcasts' : `/podcasts?${query}`
 }
 
-/** The query of /podcasts for a podcast (its slug) and a page, without the question mark. It is empty for the first page of all podcasts. */
+/**
+ * The query of /podcasts for a podcast (its slug) and a page, without the question mark. It is empty for the first page
+ * of all podcasts.
+ */
 function podcastsQuery(podcast: string | undefined, page: number) {
   const parameters = new URLSearchParams()
 
@@ -97,7 +100,8 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
       label: item.name,
     })),
   ]
-  // The addresses of the chosen podcast, as links in words. Each has the name of the podcast in its name for a screen reader.
+  // The addresses of the chosen podcast, as links in words. Each has the name of the podcast in its name for a screen
+  // reader.
   const platforms =
     selected === undefined
       ? []

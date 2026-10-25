@@ -30,13 +30,14 @@ describe('weekdayStart', () => {
   })
 
   it('starts on the Sunday that summer time ends, a day of 25 hours that begins in summer time', () => {
-    // Summer time ends on Sunday 25 October 2026 at 03:00 (01:00 UTC). On Saturday 31 October the weekdays start on that Sunday.
+    // Summer time ends on Sunday 25 October 2026 at 03:00 (01:00 UTC). On Saturday 31 October the weekdays start on
+    // that Sunday.
     expect(weekdayStart(new Date('2026-10-31T12:00:00Z')).toISOString()).toBe('2026-10-24T22:00:00.000Z')
   })
 
   it('starts on the first day in winter time', () => {
-    // Monday 26 October 2026 is the first day wholly in winter time and starts at 23:00 UTC the day before. The weekdays that
-    // start there end on Sunday 1 November.
+    // Monday 26 October 2026 is the first day wholly in winter time and starts at 23:00 UTC the day before. The
+    // weekdays that start there end on Sunday 1 November.
     expect(weekdayStart(new Date('2026-11-01T11:00:00Z')).toISOString()).toBe('2026-10-25T23:00:00.000Z')
   })
 

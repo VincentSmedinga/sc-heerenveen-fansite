@@ -32,7 +32,10 @@ function onlyPodcast(slug: string) {
 /** The podcasts for the filter: those that are switched on and have an episode. */
 const getPodcasts = cacheFor(fiveMinutes, () => listPodcasts(getDatabase().db))
 
-/** The description and the addresses of a podcast at Apple Podcasts and Spotify. The key is the slug of a podcast in the filter. */
+/**
+ * The description and the addresses of a podcast at Apple Podcasts and Spotify. The key is the slug of a podcast in the
+ * filter.
+ */
 const getLinks = cacheForKey(fiveMinutes, (slug) => findPodcast(getDatabase().db, slug))
 
 /** The number of episodes of all podcasts, or of one. The key is the slug, or an empty text for all. */

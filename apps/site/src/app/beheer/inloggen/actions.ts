@@ -32,7 +32,8 @@ export async function logIn(token: string) {
 
 /**
  * Asks for a login link. Every address with a good form leads to the same page, "verstuurd", whether it has an account or
- * not (see handleLoginRequest). Only a form that is not an address, or the rate limit, leads back to the form with a message.
+ * not (see handleLoginRequest). Only a form that is not an address, or the rate limit, leads back to the form with a
+ * message.
  */
 export async function requestLoginLink(formData: FormData) {
   const email = formData.get('email')

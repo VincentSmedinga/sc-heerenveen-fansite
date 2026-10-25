@@ -10,7 +10,8 @@ import { addItem, addSource } from './beheer/test-items'
 
 // The page of the admin tells the moderator that a hidden item "staat binnen vijf minuten niet meer op de site". This test
 // reads the headlines of the homepage the way the homepage does, from a real database and its cache, and shows that
-// it is true: the headlines are kept for five minutes, so the item is gone when the five minutes are over, and not a moment later.
+// it is true: the headlines are kept for five minutes, so the item is gone when the five minutes are over, and not a
+// moment later.
 
 vi.mock('./database', () => ({ getDatabase: () => database }))
 

@@ -43,7 +43,8 @@ const summaryId = 'fouten'
 
 // The list of the items that a moderator hides and shows. The search is a form with method GET, and each action a form that
 // posts, so the page works without JavaScript. An action ends on this page again: an error is in the address, and the
-// notice that it worked is written from what the database says now, so a made-up address can't claim an action that never happened.
+// notice that it worked is written from what the database says now, so a made-up address can't claim an action that
+// never happened.
 export default async function ItemsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole(...adminRoles)
 

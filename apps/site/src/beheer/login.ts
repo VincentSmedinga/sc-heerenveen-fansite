@@ -31,7 +31,10 @@ export type LoginRequestDeps = {
   wait?: (milliseconds: number) => Promise<unknown>
 }
 
-/** What a request for a login link leads to: the same page for every address with a good form, whether it has an account or not. */
+/**
+ * What a request for a login link leads to: the same page for every address with a good form, whether it has an account
+ * or not.
+ */
 export type LoginRequestResult = 'invalid' | 'limited' | 'sent'
 
 /**

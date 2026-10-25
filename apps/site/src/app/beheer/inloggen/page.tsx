@@ -36,7 +36,8 @@ export default async function LoginPage({
 
   const { fout } = await searchParams
   const message = isMessage(fout) ? messages[fout] : undefined
-  // Only a wrong address is an error of the field. A link that no longer works, or the rate limit, is not about what is typed.
+  // Only a wrong address is an error of the field. A link that no longer works, or the rate limit, is not about what is
+  // typed.
   const error = fout === 'ongeldig' ? message : undefined
   const notice = fout === 'ongeldig' ? undefined : message
 

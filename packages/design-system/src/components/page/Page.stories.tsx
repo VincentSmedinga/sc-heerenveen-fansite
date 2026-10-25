@@ -67,7 +67,8 @@ export const WithSidebarDark = meta.story({
   render: renderWithSidebar,
 })
 
-// Only on the canvas: on the docs page they would show the same as the stories above, because the docs page can't resize the window.
+// Only on the canvas: on the docs page they would show the same as the stories above, because the docs page can't
+// resize the window.
 const screens = { tags: ['!autodocs'] }
 
 const narrowDescription =

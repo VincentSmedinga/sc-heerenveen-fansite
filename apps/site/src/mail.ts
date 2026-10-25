@@ -91,7 +91,8 @@ export async function sendMail(mail: Mail, source: Record<string, string | undef
   try {
     await transport.sendMail({ from, replyTo: mail.replyTo, subject: mail.subject, text: mail.text, to: mail.to })
   } catch (error) {
-    // Not the error itself, and not as a cause: its message can quote the address of the recipient and the reply of the server.
+    // Not the error itself, and not as a cause: its message can quote the address of the recipient and the reply of the
+    // server.
     const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : undefined
 
     throw new MailError('Could not send the mail', typeof code === 'string' && /^[A-Z]+$/.test(code) ? code : undefined)

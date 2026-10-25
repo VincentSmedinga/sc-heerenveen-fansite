@@ -119,4 +119,14 @@ export default defineConfig([
   storybook.configs['flat/recommended'],
   // Last, so Prettier owns formatting.
   prettier,
+  {
+    // Prettier wraps code but never comments. We write comments to 120 characters of text, which with the indentation
+    // and the comment marker can reach a few more, so this stops at 125. After Prettier because eslint-config-prettier
+    // turns max-len off; code lines are Prettier's, so they get a limit that only a runaway line reaches.
+    files: ['**/*.{js,ts,tsx}'],
+    name: 'fansite/comment-width',
+    rules: {
+      'max-len': ['error', { code: 1000, comments: 125, ignoreUrls: true }],
+    },
+  },
 ])

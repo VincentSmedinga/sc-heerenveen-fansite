@@ -13,7 +13,8 @@ const limit = createLimit({ max: 10, perMilliseconds: 60 * 60 * 1000 })
 /**
  * Handles the contact form: it checks that the request comes from our own site, drops a robot's message without a word,
  * checks every answer again, and mails what is left to the editors. It returns the state the form shows when something is
- * wrong, and sends the visitor to the page with the confirmation when the mail is sent, so reloading that page sends nothing.
+ * wrong, and sends the visitor to the page with the confirmation when the mail is sent, so reloading that page sends
+ * nothing.
  *
  * It never logs a visitor's answers, not even when something fails, and never throws what the visitor wrote.
  */

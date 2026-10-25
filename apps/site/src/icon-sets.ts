@@ -6,8 +6,8 @@ export type IconSet = { folder: string; name: string; tile: string }
 /**
  * The sets that scripts/make-icons.js makes, and that icons.test.ts checks. The folders are relative to the root of the
  * repository. The tile of the fansite is the dark blue of its header. Storybook has its own pink, so its tab or bookmark
- * is not taken for the fansite; the Forum has a lighter blue tile (blue-600), which the white rim of the shield stands out on. Only the tile
- * differs: the shield is the logo of the design system, as it is.
+ * is not taken for the fansite; the Forum has a lighter blue tile (blue-600), which the white rim of the shield stands
+ * out on. Only the tile differs: the shield is the logo of the design system, as it is.
  */
 export function iconSetsOf(colourCss: string): IconSet[] {
   return [

@@ -94,9 +94,9 @@ export const testSources = [
 
 /**
  * The real sources, with the feeds we read. They get the strictest policy, because none has given permission yet: only
- * the headline, the link and the name. The descriptions of news sources are in our own words; the description of a podcast is the text its maker puts in the
- * channel of its feed, as it is written but without the HTML (see `docs/beslissingen.md`). `docs/bronnen.md` says which sources
- * belong here and why.
+ * the headline, the link and the name. The descriptions of news sources are in our own words; the description of a
+ * podcast is the text its maker puts in the channel of its feed, as it is written but without the HTML (see
+ * `docs/beslissingen.md`). `docs/bronnen.md` says which sources belong here and why.
  *
  * A podcast is a source of kind podcast: the importer reads its feed like a news feed, and an episode is an item whose
  * link is the page of the episode. The enclosure, the MP3 file, is never read.

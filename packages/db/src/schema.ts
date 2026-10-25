@@ -286,7 +286,8 @@ export const adminLoginLinks = mysqlTable('admin_login_links', {
 
 /**
  * The sessions of the admin, on the server. The cookie holds a random token and nothing else; the table keeps its SHA-256.
- * A session is valid for 12 hours after `last_seen_at` and for 7 days after `created_at`, whichever ends first. Times are UTC.
+ * A session is valid for 12 hours after `last_seen_at` and for 7 days after `created_at`, whichever ends first. Times
+ * are UTC.
  */
 export const adminSessions = mysqlTable('admin_sessions', {
   id: int('id', { unsigned: true }).autoincrement().primaryKey(),

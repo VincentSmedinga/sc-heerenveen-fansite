@@ -43,7 +43,10 @@ export function readValues(formData: FormData): ContactValues {
 const newLine = /[\r\n\u2028\u2029]/
 const lengthOf = (value: string) => [...value].length
 
-/** The mail for the editors: the visitor's address as the reply address, and their answers in the text. Values must be valid. */
+/**
+ * The mail for the editors: the visitor's address as the reply address, and their answers in the text. Values must be
+ * valid.
+ */
 export function toMail(values: ContactValues): Mail {
   const subject = subjects.find(({ value }) => value === values.onderwerp)?.label ?? ''
   const naam = values.naam.trim()

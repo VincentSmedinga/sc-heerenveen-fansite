@@ -441,7 +441,10 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
   return counts
 }
 
-/** What an item column becomes when the source offers the item again: the new value, unless a moderator hid the item, then it stays as it is. */
+/**
+ * What an item column becomes when the source offers the item again: the new value, unless a moderator hid the item,
+ * then it stays as it is.
+ */
 function unlessHidden(column: AnyMySqlColumn) {
   return sql`if(${items.hiddenAt} is null, values(${column}), ${column})`
 }

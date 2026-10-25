@@ -150,8 +150,8 @@ export function listPodcasts(db: Database) {
  * permission stay internal, and so does every other column, so none of them can reach a page.
  *
  * The episodes of a podcast are items too, but they are not news, so a source of kind podcast gives none. An item that a
- * moderator hid (`hidden_at`) is never given, by this query or by any other that shows items: a new query on `items` for a page
- * must skip hidden items too.
+ * moderator hid (`hidden_at`) is never given, by this query or by any other that shows items: a new query on `items`
+ * for a page must skip hidden items too.
  *
  * Pass the moment of now as `until`: the importer keeps a time up to a day ahead, because feeds are sometimes wrong
  * about their clock, and such an item doesn't belong on top.
@@ -179,7 +179,10 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
     .limit(limit)
 }
 
-/** The conditions that make an item an episode to show: of a podcast that is switched on, not hidden, not later than `until`, and of the podcast with this slug when `podcast` is given. */
+/**
+ * The conditions that make an item an episode to show: of a podcast that is switched on, not hidden, not later than
+ * `until`, and of the podcast with this slug when `podcast` is given.
+ */
 function episodeFilter(until: Date, podcast: string | undefined) {
   return and(
     eq(sources.enabled, true),

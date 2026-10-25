@@ -46,7 +46,8 @@ const loadContent = cache(async (count: number) => {
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
   // A page that failed answers 200, so noindex keeps search engines from keeping it. The title template of the layout
   // doesn't apply to the page in its own segment, so the title of the error page is the title alone. A page with
-  // `?nieuws=` is the homepage with more headlines: it has the homepage as its canonical address, so no search query is given.
+  // `?nieuws=` is the homepage with more headlines: it has the homepage as its canonical address, so no search query is
+  // given.
   const { nieuws } = await searchParams
 
   return (await loadContent(parseHeadlineCount(nieuws))) === undefined
@@ -82,7 +83,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           ) : (
             <List role="list">
               {headlines.map((item, index) => (
-                // The number of a headline in the address of the button, so the page that loads again can start at the first new one.
+                // The number of a headline in the address of the button, so the page that loads again can start at the
+                // first new one.
                 <List.Item id={`nieuws-${index + 1}`} key={index}>
                   <NewsItem
                     dateTime={dateTimeOf(item.publishedAt)}
