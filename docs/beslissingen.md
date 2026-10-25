@@ -3280,7 +3280,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gevolg:** een kop die alleen "Utrecht" of "Groningen" schrijft voor de club, heeft nog een voetbalwoord nodig.
   De 50 koppen van Omrop Fryslân geven nog steeds 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
 - **Verandert de regels van #254:** ja, dit is een derde aanvulling op de regels van het filter uit #254 (na de volledige naam en de twee werkwoorden).
-  De projecteigenaar beslist in de pull request.
+  De projecteigenaar hield de regel en de lijst zoals ze zijn (25 oktober 2026), ook "Sparta" en "Excelsior", die ook namen van amateurclubs zijn.
 - **Alternatieven:** alle korte namen toelaten (de A7 en de trein worden dan `relevant`); een regel voor een uitslag als "3-2" in de kop (nieuwe code); de clubs elke dag bij een bron ophalen (een verzoek aan een derde voor een lijst die één keer per seizoen verandert).
 
 ## Redactie
