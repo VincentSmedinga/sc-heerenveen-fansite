@@ -2900,8 +2900,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De regel voor versie 0.1.0 in `release-notes.ts` noemt de pagina nu Updates.
   De oude naam blijft staan in de eerdere beslissingen hierboven en in de geschiedenis van `CHANGELOG.md`.
 
-> > > > > > > 294b8327550a074b03905a3961113e84cae14f8d
-
 ### Omlaag trekken ververst de pagina, alleen in de app op het beginscherm
 
 - **Datum:** 24 oktober 2026
