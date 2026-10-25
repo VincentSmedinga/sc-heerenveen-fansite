@@ -104,6 +104,10 @@ export function parseArguments(argv) {
     throw new ScreenshotsError(`"${duplicate}" is in the list twice.`, 2)
   }
 
+  for (const target of targets) {
+    addressOf(base.origin, target)
+  }
+
   return {
     base: base.origin,
     dark: parsed.values.dark === true,
