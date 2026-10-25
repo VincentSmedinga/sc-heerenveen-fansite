@@ -101,7 +101,7 @@ Lokaal werkt `docker compose exec mariadb mariadb fansite`, en dan eerst `SET NA
 
 ### 1. Zoek het nummer van je account
 
-Het artikel hoort bij een account van het beheer (zie _De inlog van het beheer_ in `beslissingen.md`).
+Het artikel hoort bij een account van het beheer (zie _Inloggen voor het beheer met een link per e-mail, zonder wachtwoord_ en _Accounts voor het beheer maken we met een opdracht op de host_ in `beslissingen.md`).
 Zoek het nummer op:
 
 ```sql

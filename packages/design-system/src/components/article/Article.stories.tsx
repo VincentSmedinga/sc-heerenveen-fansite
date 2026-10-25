@@ -1,9 +1,11 @@
 import preview from '#.storybook/preview'
 
+import { Emphasis } from '../emphasis/Emphasis'
 import { Heading } from '../heading/Heading'
 import { Link } from '../link/Link'
 import { List } from '../list/List'
 import { Page } from '../page/Page'
+import { Strong } from '../strong/Strong'
 import { Text } from '../text/Text'
 import { Article } from './Article'
 
@@ -21,7 +23,7 @@ const meta = preview.meta({
           '- `author` is de naam bij het artikel, zoals "de redactie". Het component schrijft er "Door" voor.',
           '- `date` is de datum zoals een lezer hem leest, en `dateTime` dezelfde dag voor het `time`-element, zoals `2026-10-25`.',
           '- `intro` is de inleiding in een of twee zinnen.',
-          "- De tekst geef je als kinderen: alinea's met `Text`, koppen van niveau 2 met `Heading`, lijsten met `List` en links met `Link`. Een link naar een andere site krijgt het pictogram voor een externe link.",
+          "- De tekst geef je als kinderen: alinea's met `Text`, koppen van niveau 2 met `Heading`, lijsten met `List`, vet met `Strong`, cursief met `Emphasis` en links met `Link`. Een link naar een andere site krijgt het pictogram voor een externe link.",
           '',
           'Zet het artikel in een `Page.Main`, zodat de `article` in de `main` staat.',
           'De tekst van een artikel komt uit de database en wordt op de site omgezet naar deze onderdelen; er is geen HTML bij.',
@@ -45,8 +47,8 @@ const render = () => (
         title="Dit zijn wij"
       >
         <Text>
-          We zijn supporters, geen journalisten. We schrijven <strong>niet</strong> over wat anderen al schreven, maar
-          we <em>wijzen</em> je de weg naar hun verhaal.
+          We zijn supporters, geen journalisten. We schrijven <Strong>niet</Strong> over wat anderen al schreven, maar
+          we <Emphasis>wijzen</Emphasis> je de weg naar hun verhaal.
         </Text>
         <Heading level={2}>Wat we doen</Heading>
         <Text>

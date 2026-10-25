@@ -21,6 +21,16 @@ export type ArticleProps = Omit<ComponentPropsWithoutRef<'article'>, 'title'> & 
   title: string
 }
 
+// Between the author and the date. The dot is only for the eye and is hidden from a screen
+// reader. The spaces stay outside the hidden span, so the parts don't run together in the
+// accessibility tree.
+const separator = (
+  <>
+    {' '}
+    <span aria-hidden="true">·</span>{' '}
+  </>
+)
+
 /**
  * An article of our own editors: the title as the `h1` of the page, under it the author and the
  * date, then the introduction, and then the text, which the page passes as children. The text
@@ -31,7 +41,9 @@ export const Article = ({ author, children, className, date, dateTime, intro, ti
   <article {...props} className={classNames('hf-article', className)}>
     <Heading level={1}>{title}</Heading>
     <Text appearance="meta" className="hf-article-meta">
-      Door {author} · <Time dateTime={dateTime}>{date}</Time>
+      Door {author}
+      {separator}
+      <Time dateTime={dateTime}>{date}</Time>
     </Text>
     <Text appearance="intro">{intro}</Text>
     {children}

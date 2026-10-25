@@ -65,7 +65,9 @@ describe('the page of an article', () => {
   it('shows the author and the date, in Dutch, in a time element', async () => {
     const html = await render()
 
-    expect(html).toContain('Door de redactie · <time dateTime="2026-10-25">25 oktober 2026</time>')
+    expect(html).toContain(
+      'Door de redactie <span aria-hidden="true">·</span> <time dateTime="2026-10-25">25 oktober 2026</time>',
+    )
   })
 
   it('shows the intro and then the text, with its format turned into elements', async () => {
