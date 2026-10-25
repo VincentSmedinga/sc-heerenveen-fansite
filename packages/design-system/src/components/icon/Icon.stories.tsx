@@ -29,7 +29,7 @@ const meta = preview.meta({
           '**Voor of achter de tekst.**',
           'Bij een link staat het pictogram achter de tekst, omdat het vooruit wijst: naar waar de link heen gaat.',
           'Bij een knop staat het ervoor, omdat het zegt wat de knop doet.',
-          '"Vorige" is de uitzondering: zijn pijl wijst naar links, dus die staat ervoor.',
+          'Er zijn twee uitzonderingen bij een link, en die staan ervoor: "Vorige", omdat zijn pijl naar links wijst, en de envelop bij een e-mailadres, omdat hij zegt wat de link doet: een mail openen.',
           'Het pictogram blijft aan het eerste of laatste woord vast als de regel afbreekt, zodat het niet alleen op een regel komt.',
           '',
           '**Toegankelijkheid.**',

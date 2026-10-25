@@ -66,15 +66,34 @@ describe('Link', () => {
     )
   })
 
-  it('knows where each icon stands: behind the text, except the one that points back', () => {
-    expect(linkIcons).toEqual({ 'arrow-left': 'before', 'arrow-right': 'after', 'external-link': 'after' })
+  it('puts the envelope in front of an address, with its first letter, because it says what the link does', () => {
+    render(
+      <Link href="mailto:fansite@heerenveen.org" icon="envelope">
+        fansite@heerenveen.org
+      </Link>,
+    )
+    const link = screen.getByRole('link', { name: 'fansite@heerenveen.org' })
+
+    expect(link.innerHTML).toMatch(
+      /^<span class="hf-icon-head"><svg [^>]*class="hf-icon"[^>]*>.*<\/svg>f<\/span>ansite@heerenveen\.org$/,
+    )
+    expect(link.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('knows where each icon stands: behind the text, except the ones that stand in front', () => {
+    expect(linkIcons).toEqual({
+      'arrow-left': 'before',
+      'arrow-right': 'after',
+      envelope: 'before',
+      'external-link': 'after',
+    })
   })
 
   it('only takes the icons of the list', () => {
     const elements = [
-      // @ts-expect-error A link has no envelope.
-      <Link href="/" icon="envelope">
-        Mail
+      // @ts-expect-error A link has no plus.
+      <Link href="/" icon="plus">
+        Meer
       </Link>,
     ]
 

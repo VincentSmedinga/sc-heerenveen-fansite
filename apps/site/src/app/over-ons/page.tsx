@@ -11,7 +11,11 @@ export const dynamic = 'force-dynamic'
 
 export const generateMetadata = (): Metadata => pageMetadata('/over-ons', 'Over ons')
 
-const EmailLink = () => <Link href={`mailto:${email}`}>{email}</Link>
+const EmailLink = () => (
+  <Link href={`mailto:${email}`} icon="envelope">
+    {email}
+  </Link>
+)
 
 // Who we are and how we work, each in a few sentences. What we do with data is on its own page,
 // Privacy.

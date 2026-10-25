@@ -11,7 +11,11 @@ export const dynamic = 'force-dynamic'
 
 export const generateMetadata = (): Metadata => pageMetadata('/privacy', 'Privacy')
 
-const EmailLink = () => <Link href={`mailto:${email}`}>{email}</Link>
+const EmailLink = () => (
+  <Link href={`mailto:${email}`} icon="envelope">
+    {email}
+  </Link>
+)
 
 // What we do with data, in a few sentences. The footer and Over ons link here.
 export default function PrivacyPage() {

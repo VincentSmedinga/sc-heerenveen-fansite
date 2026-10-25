@@ -93,7 +93,14 @@ describe('the page Privacy', () => {
     ]
 
     expect(iconLinks.map(([, href]) => href)).toEqual(['https://www.autoriteitpersoonsgegevens.nl'])
-    expect(html.match(/<svg /g)).toHaveLength(1)
+    // The other icon is the envelope before the address.
+    expect(html.match(/<svg /g)).toHaveLength(2)
+  })
+
+  it('draws the envelope in front of the address, hidden from screen readers', () => {
+    expect(html).toMatch(
+      /<a href="mailto:fansite@heerenveen\.org"><span class="hf-icon-head"><svg aria-hidden="true" class="hf-icon"[^>]*>.*?<\/svg>f<\/span>ansite@heerenveen\.org<\/a>/,
+    )
   })
 
   it('links to the contact form, the editors by email and the Autoriteit Persoonsgegevens, and to nothing else', () => {
