@@ -4194,12 +4194,12 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** het logboek heeft vier acties erbij: `article.create`, `article.update`, `article.publish` en `article.unpublish` (migratie `0011_add_article_audit_actions`).
   `item_id` bevat bij deze acties het nummer van het artikel; de actie zegt of het een bericht of een artikel is.
   Er staat niets van de tekst in, ook geen titel.
+  "Publiceren" slaat wat op het scherm staat op en publiceert het in één transactie, dus het geeft een `article.update` (als er iets veranderde) en een `article.publish`.
+  Een artikel dat met SQL een `published_at` in de toekomst kreeg, wordt niet opnieuw gepubliceerd: de beheerder trekt het eerst in.
   Zoals bij het verbergen is een wijziging en haar regel één transactie, en een actie die niets verandert schrijft niets:
   - opslaan zonder verschil schrijft geen `article.update` en laat `updated_at` staan;
   - publiceren van wat al een `published_at` heeft, doet niets en schrijft geen tweede `article.publish`;
   - intrekken van een concept doet niets.
-    "Publiceren" slaat wat op het scherm staat op en publiceert het in één transactie, dus het geeft een `article.update` (als er iets veranderde) en een `article.publish`.
-    Een artikel dat met SQL een `published_at` in de toekomst kreeg, wordt niet opnieuw gepubliceerd: de beheerder trekt het eerst in.
 - **Waarom:** een tweede klik of een tweede tabblad mag het logboek niet laten liegen, en twee verzoeken tegelijk mogen niet allebei publiceren.
   Dat laatste is vergrendeld met `SELECT ... FOR UPDATE` in de transactie.
   Een artikel met een `published_at` in de toekomst opnieuw publiceren zou dat vergrendelen breken: twee verzoeken tegelijk vinden dan elk de tijd van de ander "later".
