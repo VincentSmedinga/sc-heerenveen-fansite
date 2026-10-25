@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // TypeScript 6 loads no @types package by itself. This is a Node program, and its tests start a server.
+    "types": ["node"]
+  },
+  "include": ["src", "vitest.config.ts"]
+}

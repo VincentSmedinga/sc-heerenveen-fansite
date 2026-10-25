@@ -52,6 +52,7 @@ export default defineConfig([
       '**/*.config.{js,ts}',
       '**/.storybook/main.ts',
       '.claude/hooks/*.js',
+      'apps/design-system-mcp/scripts/*.js',
       'apps/site/scripts/*.js',
       'baseline.test.js',
       'scripts/*.js',

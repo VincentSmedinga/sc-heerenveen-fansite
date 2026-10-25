@@ -1,7 +1,9 @@
-# Builds Storybook on every pull request, and puts it on https://ds.heerenveen.org from main, over SSH like acceptance.yml
-# does. A push to main only starts this workflow when it changes something Storybook is made of (the paths below), so a
-# merge that only touches apps/ or docs/ deploys nothing. docs/designsysteem-publiceren.md says what the owner sets up on
-# the host and in GitHub. Until the secrets are there, the build still runs and the copy is skipped with a notice.
+# Builds Storybook and the MCP server of the design system on every pull request, and puts both on
+# https://ds.heerenveen.org from main, over SSH like acceptance.yml does: the static files in the document root, and the
+# server as a small Node.js app next to it that answers https://ds.heerenveen.org/mcp. A push to main only starts this
+# workflow when it changes something they are made of (the paths below), so a merge that only touches apps/site or docs/
+# deploys nothing. docs/designsysteem-publiceren.md says what the owner sets up on the host and in GitHub. Until the
+# secrets are there, the build still runs and the copy is skipped with a notice.
 
 name: Storybook
 
@@ -13,6 +15,7 @@ on:
     branches: [main]
     paths:
       - packages/design-system/**
+      - apps/design-system-mcp/**
       - package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
@@ -73,6 +76,21 @@ jobs:
           path: packages/design-system/storybook-static
           retention-days: 7
 
+      # The MCP server is one file. The smoke test starts it twice, next to the Storybook build we just made and laid out
+      # like the host, and asks both what an agent asks: initialize, the tools, docs-list for every component of the
+      # build, and docs-show for one. An app that doesn't start or can't read these manifests never gets copied.
+      - name: Build the MCP server and check it against the Storybook build
+        run: |
+          pnpm --filter @fansite/design-system-mcp build
+          pnpm --filter @fansite/design-system-mcp smoke "$GITHUB_WORKSPACE/packages/design-system/storybook-static"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: error
+          name: design-system-mcp
+          path: apps/design-system-mcp/dist
+          retention-days: 7
+
   deploy:
     # Only main and a manual run on main publish; pull requests stop after the build.
     if: github.ref == 'refs/heads/main'
@@ -87,6 +105,11 @@ jobs:
         with:
           name: storybook
           path: ${{ runner.temp }}/storybook
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: design-system-mcp
+          path: ${{ runner.temp }}/design-system-mcp
 
       - id: secrets
         name: Check the secrets
@@ -127,6 +150,10 @@ jobs:
           done
           jq -e '.entries | length > 0' "$BUILD/index.json" > /dev/null
           jq -e '.components | length > 0' "$BUILD/manifests/components.json" > /dev/null
+          if [ ! -s "$RUNNER_TEMP/design-system-mcp/server.mjs" ]; then
+            echo "::error title=Deploy stopped::The build of the MCP server has no server.mjs, so nothing is copied."
+            exit 1
+          fi
 
       - name: Set up SSH
         if: steps.secrets.outputs.ready == 'true'
@@ -140,8 +167,10 @@ jobs:
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
       # --delete removes files that are gone from the build. .well-known/ holds the files that renew the certificate, and
-      # .htaccess and cgi-bin/ are the host's own, so they stay.
-      - name: Copy the build to the host
+      # .htaccess and cgi-bin/ are the host's own, so they stay. So does /mcp/, in case the host makes a folder in the
+      # document root for the app that answers that address: Storybook has no file there, and the app's own folder is not
+      # in the document root, so this copy never touches the app.
+      - name: Copy the Storybook build to the host
         if: steps.secrets.outputs.ready == 'true'
         env:
           BUILD: ${{ runner.temp }}/storybook
@@ -149,11 +178,11 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
         run: |
-          rsync -rltz --delete --chmod=D755,F644 --exclude=/.well-known/ --exclude=/.htaccess --exclude=/cgi-bin/ \
+          rsync -rltz --delete --chmod=D755,F644 --exclude=/.well-known/ --exclude=/.htaccess --exclude=/cgi-bin/ --exclude=/mcp/ \
             -e "ssh -p 26 -i $HOME/.ssh/designsystem_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
             "$BUILD/" "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
 
-      # The two files the next issue's MCP server and every link rely on. Each must answer 200 and be the file of this
+      # The two files the MCP server and every link rely on. Each must answer 200 and be the file of this
       # build. The check tries for a minute, in case the host serves an old copy for a moment.
       - name: Check ds.heerenveen.org
         if: steps.secrets.outputs.ready == 'true'
@@ -180,3 +209,52 @@ jobs:
             done
             echo "https://ds.heerenveen.org/$file is the file of this build."
           done
+
+      # The app lives in domains/ds.heerenveen.org/mcp, next to the document root and not in it, so this copy and the one
+      # above never touch each other's files. There is no secret for it: the folder is made from DEPLOY_PATH, which
+      # "Check the secrets" has limited to the document root of ds.heerenveen.org, and it is checked again here against
+      # the one folder it may be, because --delete empties the folder it copies to. tmp/ holds the restart file of the
+      # host, stderr.log its log of the app, and the host may put a .htaccess or a node_modules link there.
+      - name: Copy the MCP server to the host
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          app_path="${DEPLOY_PATH%/public_html}/mcp"
+          if ! printf '%s\n' "$app_path" | grep -Eq '^/[A-Za-z0-9._/-]+/domains/ds\.heerenveen\.org/mcp$' \
+            || printf '%s\n' "$app_path" | grep -Fq '..'; then
+            echo "::error title=Deploy stopped::The folder of the MCP server is not domains/ds.heerenveen.org/mcp. See docs/designsysteem-publiceren.md."
+            exit 1
+          fi
+          rsync -rltz --delete --chmod=D755,F644 --exclude=/tmp/ --exclude=/stderr.log --exclude=/.htaccess --exclude=/node_modules \
+            -e "ssh -p 26 -i $HOME/.ssh/designsystem_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            "$RUNNER_TEMP/design-system-mcp/" "$SSH_USER@$SSH_HOST:$app_path/"
+          # The host starts the app again when tmp/restart.txt changes.
+          ssh -p 26 -i "$HOME/.ssh/designsystem_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" "mkdir -p $(printf '%q' "$app_path")/tmp && touch $(printf '%q' "$app_path")/tmp/restart.txt"
+
+      # The check is a script of the repository: it asks https://ds.heerenveen.org/mcp what an agent asks, and compares the
+      # answers with the manifests of this build. It needs no secret and no dependency, so it runs without them.
+      - name: Get the check
+        if: steps.secrets.outputs.ready == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .nvmrc
+            apps/design-system-mcp/scripts
+
+      - if: steps.secrets.outputs.ready == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      # initialize, the list of tools, and docs-list must answer, and docs-list must name every component of this build.
+      # The host starts the app on the first request after the restart, so the check tries for 90 seconds.
+      - name: Check ds.heerenveen.org/mcp
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          BUILD: ${{ runner.temp }}/storybook
+        run: node apps/design-system-mcp/scripts/check.js https://ds.heerenveen.org/mcp "$BUILD" 90
