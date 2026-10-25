@@ -2953,5 +2953,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de pagina laten zoals hij is: een balk in de kleur van de pagina naast de header.
   Of de statusbalk op de standaardstijl laten (`default`); dan blijft de statusbalk een eigen balk boven de header.
   Of een afbeelding of een verloop achter de uitsparing; dat is meer werk en meer om te onderhouden dan een effen kleur.
+  Of de strook weglaten; dan wisselt de statusbalk bij scrollen van kleur, en schuift lichte inhoud onder de witte tekst ervan.
 - **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator, in Safari, in staande en liggende stand.
   De statusbalk van een app op het beginscherm en de strook eronder laat de simulator niet zien, want Safari heeft bovenin geen inset; de projecteigenaar kijkt dat na op een echte telefoon.
