@@ -1,6 +1,7 @@
 import { defineMain } from '@storybook/react-vite/node'
 
 import { addBranchTo } from './branch.ts'
+import { addNoindexTo } from './noindex.ts'
 
 export default defineMain({
   addons: [
@@ -37,8 +38,12 @@ export default defineMain({
   },
   framework: '@storybook/react-vite',
   // `pnpm review` sets REVIEW_BRANCH for the dev server it starts. The sidebar shows it only there (see branch.ts).
+  // Both heads get `noindex` (see noindex.ts). There is deliberately no robots.txt: a Disallow would also keep out the
+  // agents and tools that respect it, and the documentation is there for them to read (the links in the repository
+  // and the MCP server).
   managerHead: (head, { configType }) =>
-    addBranchTo(head ?? '', process.env['REVIEW_BRANCH'], configType ?? 'PRODUCTION'),
+    addNoindexTo(addBranchTo(head ?? '', process.env['REVIEW_BRANCH'], configType ?? 'PRODUCTION')),
+  previewHead: (head) => addNoindexTo(head ?? ''),
   // The logo in the sidebar is served from here.
   staticDirs: [{ from: '../src/assets', to: '/assets' }],
   stories: ['../src/**/*.mdx', '../src/**/*.stories.tsx'],

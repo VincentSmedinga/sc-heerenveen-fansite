@@ -681,6 +681,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De sleutel is wel eigen aan deze deploy en los in te trekken; de beperking is de controle van het pad hierboven.
 - **Alternatieven:** de deploy opnieuw laten bouwen (twee builds die kunnen verschillen); alleen controleren of `index.json` antwoordt.
 
+### Storybook op ds.heerenveen.org krijgt `noindex`, en geen `robots.txt` die blokkeert
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** Storybook op ds.heerenveen.org krijgt `<meta name="robots" content="noindex">` in `index.html` en `iframe.html`, via `managerHead` en `previewHead` in `.storybook/main.ts`.
+  Er komt geen `robots.txt` die blokkeert.
+  De taak `Build Storybook` controleert bij elke build dat beide bestanden de tag hebben.
+- **Waarom:** de pagina's zijn voor bijdragers en agents.
+  `noindex` houdt ze uit de zoekresultaten en laat het lezen toe, terwijl `Disallow` ook agents en gereedschap tegenhoudt die zich aan robots houden.
+- **Alternatieven:** indexeerbaar laten, zoals nu (zonder nut en met een nietszeggende titel); een `robots.txt` met `Disallow: /` (blokkeert ook de gereedschappen die zich aan robots houden).
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft

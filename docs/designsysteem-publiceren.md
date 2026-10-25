@@ -91,6 +91,9 @@ Een agent heeft daar geen toegang.
   Zo wijzen de links in `CONTRIBUTING.md` en in het sjabloon van de pull request.
 - `curl -s https://ds.heerenveen.org/index.json | head -c 200` toont JSON die begint met `{"v":5,"entries":`.
 - `curl -s https://ds.heerenveen.org/manifests/components.json | head -c 200` toont JSON met `"components"`.
+- `curl -s https://ds.heerenveen.org/ | grep -io '<meta name="robots"[^>]*>'` en hetzelfde voor `https://ds.heerenveen.org/iframe.html` tonen elk één keer `<meta name="robots" content="noindex">`.
+  Zo blijft Storybook uit de zoekresultaten.
+  Er is bewust geen `robots.txt`: een `Disallow` houdt ook agents en leesgereedschap tegen die zich eraan houden, en die moeten de documentatie kunnen lezen.
 - In de run van de workflow staat bij _Check ds.heerenveen.org_ twee keer "is the file of this build".
 - Een samenvoeging die alleen `apps/site` of `docs/` wijzigt, start de workflow niet: onder _Actions → Storybook_ staat er geen nieuwe run.
 - Controleer in de ontwikkelaarstools van je browser, onder Network, dat de pagina's alleen verzoeken doen naar `ds.heerenveen.org`.
