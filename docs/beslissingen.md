@@ -3413,6 +3413,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** de import leest de drie pagina's van het seizoen, controleert alles en schrijft dan de wedstrijden, de stand en de gelezen pagina's in één transactie.
   Is een pagina niet te lezen, of faalt een controle, dan verandert er niets.
   Ook een ontbrekende pagina van de beker houdt de hele import tegen.
+  Een bekerpagina die er wel is maar nog geen wedstrijdsjabloon heeft, zoals vroeg in een seizoen, telt als "nog geen bekerwedstrijd".
+  Heeft de import eerder bekerwedstrijden van die pagina gelezen, dan is zo'n pagina veranderd en houdt ze de import tegen.
   Een wedstrijd van sc Heerenveen die de import niet kent of niet kan lezen (een datum, een tijd of een score), is dezelfde fout.
   De import van de wedstrijden en de import van de feeds lopen in dezelfde run, maar een fout in de ene stopt de andere niet.
   Een mislukte import van de wedstrijden is een waarschuwing en geen fout van de run: de exitcode blijft 0.
@@ -3426,6 +3428,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** per pagina schrijven (de stand en de uitslagen kunnen dan elkaar tegenspreken).
   Elke 15 minuten lezen (vier keer zoveel verzoeken aan Wikipedia voor weinig winst).
   Een ontbrekende bekerpagina overslaan (een hernoemde pagina laat dan stil onze bekerwedstrijden verdwijnen).
+  Een bekerpagina zonder sjablonen altijd tegenhouden (vroeg in het seizoen blokkeert dat de competitie wekenlang).
 
 ### Een uitslag die verandert, nemen we over, en na drie dagen met een waarschuwing
 

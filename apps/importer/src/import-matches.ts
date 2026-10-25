@@ -3,7 +3,7 @@ import type { Match, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
 
 import { matches, matchImports, standings, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
@@ -84,7 +84,7 @@ export function formatMatchReport(report: MatchReport): string {
     case 'imported':
       return [
         `${head}: ${report.matches.added} new, ${report.matches.updated} updated, ${report.matches.unchanged} unchanged, ${report.matches.removed} removed; table of ${report.standings} clubs for ${report.validOn}`,
-        ...report.warnings.map((warning) => `${head}: warning, ${warning}`),
+        ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
       ].join('\n')
     case 'postponed':
       return `${head}: not read, the next time is from ${formatTime(report.retryAt)}`
@@ -199,6 +199,28 @@ export function isUnhealthy(health: Pick<MatchImport, 'failuresInARow'>): boolea
   return health.failuresInARow >= unhealthyAfter
 }
 
+/**
+ * A cup page without a template is no cup matches yet, early in a season. It is the page we
+ * know only if the cup matches we have did not come from that page: when we read cup matches
+ * from it before, a page that has none now has changed shape, and the import keeps what it has.
+ * The made-up matches of the seed are not from the page, because the page was never read.
+ */
+async function checkEmptyCupPage(db: Database, season: string, title: string): Promise<string | undefined> {
+  const [cupMatch] = await db
+    .select({ id: matches.id })
+    .from(matches)
+    .where(and(eq(matches.season, season), eq(matches.competition, 'KNVB Beker')))
+    .limit(1)
+  const [page] = await db
+    .select({ title: wikipediaPages.title })
+    .from(wikipediaPages)
+    .where(eq(wikipediaPages.title, title))
+
+  return cupMatch !== undefined && page !== undefined
+    ? 'the cup page has no Footballbox2 templates, and we have cup matches from it'
+    : undefined
+}
+
 /** The text of a result as a warning has it, from the side of the home team. */
 function describeResult(match: Pick<Match, 'goalsAgainst' | 'goalsFor' | 'home' | 'opponent' | 'status'>): string {
   if (match.status !== 'played') {
@@ -295,6 +317,14 @@ async function readAndStore(
   }
 
   const found = [...league.matches, ...cup.matches]
+
+  if (!cup.hasTemplates) {
+    const problem = await checkEmptyCupPage(db, season, pageTitles(season).cup)
+
+    if (problem !== undefined) {
+      problems.push(problem)
+    }
+  }
 
   problems.push(...checkMatches(found), ...checkStandings(table.rows, found))
 

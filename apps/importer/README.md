@@ -22,7 +22,7 @@ Schrijf `pnpm run import` en niet `pnpm import`: `import` is een opdracht van pn
 
 De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), één voor één, met één fetcher.
 Een feed die nog moet wachten, slaat hij over.
-Daarna leest hij de wedstrijden en de stand van het lopende seizoen van de Nederlandse Wikipedia, hoogstens één keer per uur (zie _De wedstrijden en de stand_).
+Tegelijk leest hij de wedstrijden en de stand van het lopende seizoen van de Nederlandse Wikipedia, hoogstens één keer per uur (zie _De wedstrijden en de stand_).
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
 
 ```text
@@ -578,6 +578,8 @@ De controles kloppen op elk moment.
 De import van de wedstrijden slaagt of mislukt als geheel, in één transactie.
 Is een pagina niet te lezen (ook de pagina van de beker), is de opbouw veranderd (een sjabloon dat ontbreekt of niets oplevert, een datum, tijd of score van sc Heerenveen die we niet kennen) of faalt een controle, dan verandert er niets in de database.
 De laatste goede versie blijft staan.
+Een pagina van de beker die er wel is maar nog geen wedstrijdsjabloon heeft, zoals vroeg in een seizoen, telt als nog geen bekerwedstrijd.
+Heeft de import eerder bekerwedstrijden van die pagina gelezen, dan is zo'n pagina veranderd en houdt ze de import tegen.
 De import schrijft een regel met de reden:
 
 ```text

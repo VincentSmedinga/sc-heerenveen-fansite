@@ -74,8 +74,8 @@ function route(season: string, kind: keyof Pages, handler: Handler) {
  * Starts a web server on this computer that serves the three pages of the seasons as Wikipedia
  * does, from `pages`, which a test can change between runs. The tests ask no real site.
  */
-async function serve(pages: Partial<Pages> = {}, { robots = '' } = {}) {
-  const current: Pages = { ...original, ...pages }
+async function serve(pages: { [Kind in keyof Pages]?: null | string } = {}, { robots = '' } = {}) {
+  const current = { ...original, ...pages } as Pages
   const routes: Record<string, Handler> = { '/robots.txt': reply(200, robots, { 'Content-Type': 'text/plain' }) }
 
   for (const season of ['2026/27', '2027/28']) {
@@ -83,8 +83,10 @@ async function serve(pages: Partial<Pages> = {}, { robots = '' } = {}) {
       Object.assign(
         routes,
         route(season, kind, (_request, response) => {
-          response.writeHead(200, wiki)
-          response.end(current[kind])
+          const text: null | string = current[kind]
+
+          response.writeHead(text === null ? 404 : 200, wiki)
+          response.end(text ?? 'Niet gevonden')
         }),
       )
     }
@@ -304,6 +306,27 @@ describe('reading again', () => {
   })
 })
 
+describe('the lines of a report', () => {
+  it('cleans text from Wikipedia of control characters, in a warning as in an error', () => {
+    const counts = { added: 0, removed: 0, unchanged: 1, updated: 1 }
+    const warning = 'the result of Speelronde 1 (Eredivisie) changed\u001b[31m from x\nto y'
+    const imported = formatMatchReport({
+      kind: 'imported',
+      matches: counts,
+      season,
+      standings: 18,
+      validOn: '2026-10-24',
+      warnings: [warning],
+    })
+    const failed = formatMatchReport({ kind: 'error', message: 'a\u001bb\nc', season })
+
+    expect(imported.split('\n')).toHaveLength(2)
+    expect(imported).not.toContain('\u001b')
+    expect(failed.split('\n')).toHaveLength(1)
+    expect(failed).not.toContain('\u001b')
+  })
+})
+
 describe('a result that changes', () => {
   /** The match of round 1 ends 1-1 instead of 1-0, and the table agrees. */
   function drawn(pages: Pages) {
@@ -415,7 +438,7 @@ describe('a read that fails a check or a page that has changed', () => {
     [
       'a template that is gone from the cup page',
       (pages) => ({ cup: pages.cup.replaceAll('Footballbox2', 'Wedstrijd') }),
-      'the cup page has no Footballbox2 templates',
+      'the cup page has no Footballbox2 templates, and we have cup matches from it',
     ],
     [
       'a date we do not know',
@@ -451,6 +474,28 @@ describe('a read that fails a check or a page that has changed', () => {
     },
   )
 
+  it('reads a cup page without templates as no cup matches, and replaces a made-up cup tie of the seed', async () => {
+    const { server } = await serve({ cup: 'Het schema volgt na de loting.' })
+
+    await database.db.insert(matches).values({
+      competition: 'KNVB Beker',
+      home: false,
+      kickoffAt: first,
+      matchDate: '2026-10-25',
+      opponent: 'SV Proefdorp',
+      round: 'Tweede ronde',
+      season,
+      status: 'scheduled',
+    })
+
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 34, removed: 1 } })
+    expect(await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))).toEqual([])
+    // Still no template an hour later: that is the page we know, and the import carries on.
+    expect(await importAt(server, new Date(first.getTime() + hours(1)))).toMatchObject({ kind: 'imported' })
+  })
+
   it('leaves the last good copy when a page cannot be read', async () => {
     const { server } = await serve()
 
@@ -482,10 +527,11 @@ describe('a read that fails a check or a page that has changed', () => {
   })
 
   it('writes nothing of the first page when the last one fails: all or nothing', async () => {
-    const { server } = await serve({ cup: 'Een kale pagina' })
+    const { server } = await serve({ cup: null })
 
-    await importAt(server, first)
+    const report = await importAt(server, first)
 
+    expect(report).toMatchObject({ kind: 'error', message: expect.stringContaining('HTTP 404') })
     expect(await snapshot()).toEqual({ matches: [], pages: [], standings: [] })
   })
 

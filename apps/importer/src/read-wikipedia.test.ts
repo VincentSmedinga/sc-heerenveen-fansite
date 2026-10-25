@@ -199,6 +199,7 @@ describe('the programme and the results', () => {
 describe('the cup', () => {
   it('reads our tie, with the round from the heading, in the layout of the cup page', () => {
     expect(readCup(cupPage)).toEqual({
+      hasTemplates: true,
       kind: 'read',
       lastPlayedOn: null,
       matches: [
@@ -229,11 +230,15 @@ describe('the cup', () => {
   })
 
   it('has no match of ours before the draw or after we are out, and that is fine', () => {
-    expect(readCup(cupPage.replace('[[sc Heerenveen]]', '[[FC Volendam]]'))).toMatchObject({ matches: [] })
+    expect(readCup(cupPage.replace('[[sc Heerenveen]]', '[[FC Volendam]]'))).toMatchObject({
+      hasTemplates: true,
+      matches: [],
+    })
   })
 
-  it('gives an error when the page has no Footballbox2 template', () => {
-    expect(readCup('Een kale pagina').kind).toBe('error')
+  it('reads a page without any Footballbox2 template as no matches, and says so', () => {
+    expect(readCup('Een kale pagina')).toEqual({ hasTemplates: false, kind: 'read', lastPlayedOn: null, matches: [] })
+    expect(readCup(cupPage)).toMatchObject({ hasTemplates: true })
   })
 })
 

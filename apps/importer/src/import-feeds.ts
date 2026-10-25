@@ -242,17 +242,19 @@ export function listFeedsToImport(db: Database) {
 }
 
 /**
- * Reads every feed of every source that is switched on and writes a line for each. One fetcher
- * serves all feeds, so a host's robots.txt is read once, and the database keeps it for a day.
- * After the feeds it reads the matches and the table of the season from Wikipedia, at most once
- * an hour (see `importMatches`). The two do not depend on each other: a failure of one stops
- * neither the other nor its report. Returns the exit code: 1 when a feed failed, so a scheduler
- * can tell. A match import that finds a check failing or a page changed is a warning in the
- * output and in the health (`pnpm run import:status`), and no failure of the run.
+ * Reads every feed of every source that is switched on and writes a line for each. One
+ * fetcher serves all feeds, so a host's robots.txt is read once, and the database keeps
+ * it for a day. In the same run it reads the matches and the table of the season from
+ * Wikipedia, at most once an hour (see `importMatches`). The two start together and do
+ * not depend on each other: a failure of one stops neither the other nor its report.
+ * Returns the exit code: 1 when a feed failed, so a scheduler can tell. A match import
+ * that finds a check failing or a page changed is a warning in the output and in the
+ * health (`pnpm run import:status`), and no failure of the run.
  *
- * A run takes a lock in the database first. When another run holds it, this run writes that in
- * the log and stops, with exit code 0: nothing is broken, and the next run comes a quarter of
- * an hour later. A run also removes the runs older than 30 days from the log.
+ * A run takes a lock in the database first. When another run holds it, this run writes
+ * that in the log and stops, with exit code 0: nothing is broken, and the next run comes
+ * a quarter of an hour later. A run also removes the runs older than 30 days from the
+ * log.
  */
 export async function runImport(
   databaseUrl: string,

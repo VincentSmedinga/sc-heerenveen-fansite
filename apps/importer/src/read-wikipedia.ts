@@ -28,13 +28,15 @@ export type ReadMatch = {
 }
 
 export type ReadProgramme =
-  | { kind: 'error'; message: string }
   | {
+      /** Whether the page has any Footballbox2 template at all. */
+      hasTemplates: boolean
       kind: 'read'
       /** The day of the last match anyone played in the league, or null before the first. */
       lastPlayedOn: null | string
       matches: ReadMatch[]
     }
+  | { kind: 'error'; message: string }
 
 export type ReadStandings = { kind: 'error'; message: string } | { kind: 'read'; rows: ReadStandingsRow[] }
 
@@ -96,13 +98,15 @@ export function pageUrl(origin: string, title: string): string {
 /**
  * Reads the KNVB Beker page for the matches of sc Heerenveen. The round is the heading above
  * the match, so a new round needs no code. There may be no match of ours yet (before the draw,
- * or after we are out), but a page without any match is not the page we know.
+ * or after we are out). A page without any template is read as no matches, with `hasTemplates`
+ * false: early in a season the page can exist for weeks before the first round is on it. The
+ * import decides whether that is the page we know (see `readAndStore`).
  */
 export function readCup(text: string): ReadProgramme {
   const boxes = matchBoxes(text)
 
   if (boxes.length === 0) {
-    return { kind: 'error', message: 'the cup page has no Footballbox2 templates' }
+    return { hasTemplates: false, kind: 'read', lastPlayedOn: null, matches: [] }
   }
 
   const matches: ReadMatch[] = []
@@ -120,7 +124,7 @@ export function readCup(text: string): ReadProgramme {
 
   return problems.length > 0
     ? { kind: 'error', message: problems.join('; ') }
-    : { kind: 'read', lastPlayedOn: null, matches }
+    : { hasTemplates: true, kind: 'read', lastPlayedOn: null, matches }
 }
 
 /**
@@ -164,7 +168,9 @@ export function readLeague(text: string): ReadProgramme {
     }
   }
 
-  return problems.length > 0 ? { kind: 'error', message: problems.join('; ') } : { kind: 'read', lastPlayedOn, matches }
+  return problems.length > 0
+    ? { kind: 'error', message: problems.join('; ') }
+    : { hasTemplates: true, kind: 'read', lastPlayedOn, matches }
 }
 
 /**
