@@ -94,6 +94,13 @@ describe('the stripes of the Frisian flag in page.css', () => {
     expect(css.match(/\.hf-page \{([^{}]*)\}/)?.[1]).toContain('isolation: isolate;')
   })
 
+  it('has no border on the footer, so the padding box is the whole box and the two parts meet exactly at its top edge', () => {
+    const own = footer.match(/^\.hf-page-footer \{([^{}]*)/)?.[1] ?? ''
+
+    expect(own).not.toMatch(/(^|\s)border(-[a-z-]+)?:/)
+    expect(css).not.toContain('--hf-colour-border-footer')
+  })
+
   it('keeps what is in the footer above the part over it', () => {
     expect(footer.match(/> \* \{([^{}]*)\}/)?.[1]).toContain('position: relative;')
     expect(footer.match(/^\.hf-page-footer \{([^{}]*)/)?.[1]).toContain('position: relative;')

@@ -3258,6 +3258,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of één alinea met een `br` tussen de zinnen, zodat de links naar de volgende regel gaan zodra ze niet meer passen, zoals in de header.
   Dan moet de ESLint-regel `br` toestaan, of krijgt het designsysteem een component voor een regeleinde.
 - **Later:** zie _De links in de footer zijn blauw, zoals de andere links_; de kleur van de links is daarmee vervangen.
+  De lijn bovenaan en de rol `--hf-colour-border-footer` zijn daarna weggehaald; zie _De footer heeft geen lijn bovenaan_.
 
 ### Metadata, sitemap en canonieke URL's gebruiken het adres van de eigen omgeving
 
@@ -3862,3 +3863,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Ook met Licht ingedrukt in een donker systeem terwijl de kop ver uit beeld was, en daarna terug naar boven.
   Niet op een echte telefoon, niet in iOS 26 en niet in de app op het beginscherm.
   Een e2e-test (`e2e/safe-area.spec.ts`) controleert in Chromium dat de kop het attribuut krijgt en weer kwijtraakt, dat de kinderen `opacity: 0` hebben terwijl de kop `visibility: visible` houdt, en dat er één banner blijft.
+
+### De footer heeft geen lijn bovenaan
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de footer heeft geen lijn bovenaan.
+  Het kleurverschil met de body is genoeg: de footer is een vlak van rand tot rand dat alleen door zijn kleur van de body verschilt.
+  De rol `--hf-colour-border-footer` is weggehaald, met zijn regel in de tabel Tokens › Kleur en zijn contrastpaar.
+- **Waarom:** een lijn bovenaan de footer maakt hem glazig.
+  Het vlak van de footer is al te zien aan zijn kleur, en de lijn voegt daar niets aan toe.
+  Zonder rand heeft de footer geen strook van 1 pixel meer buiten het vlak waar de strepen van de Friese vlag hun maat van nemen, dus de twee delen van de strepen sluiten precies op elkaar aan.
+- **Alternatieven:** de lijn houden zoals hij is; een zachtere lijn (dichter bij de kleur van de footer, maar nog steeds een lijn die het vlak omlijst).

@@ -159,9 +159,6 @@
 
     /* Lines between rows and the horizontal rule. The same values as the surface border, for now. */
     --hf-colour-border-default: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-700));
-
-    /* The line on top of the footer, between the page and the footer. */
-    --hf-colour-border-footer: light-dark(var(--hf-colour-grey-300), var(--hf-colour-blue-700));
     --hf-colour-border-input: light-dark(var(--hf-colour-grey-500), var(--hf-colour-blue-400));
 
     /*
@@ -228,7 +225,6 @@
       --hf-colour-border-surface-soft: var(--hf-colour-steel-200);
       --hf-colour-border-surface-warm: var(--hf-colour-sand-300);
       --hf-colour-border-default: var(--hf-colour-grey-200);
-      --hf-colour-border-footer: var(--hf-colour-grey-300);
       --hf-colour-border-input: var(--hf-colour-grey-500);
       --hf-colour-border-button-soft: var(--hf-colour-blue-500);
       --hf-colour-focus: var(--hf-colour-blue-500);
