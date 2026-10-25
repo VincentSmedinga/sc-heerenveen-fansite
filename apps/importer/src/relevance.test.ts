@@ -82,8 +82,6 @@ const recordings: Case[] = [
   ["Veldman kritisch op kansen missende Rivera: 'Moet streng voor zichzelf zijn'", 'doubtful'],
   // Missed: the club is only "Heerenveen" and the headline has no word from football.
   ["Bosz onder de indruk van Heerenveen: 'Dit is al jaren'", 'doubtful'],
-  // Heerenveen without "sc" is the club in many headlines, and a verb of winning is enough.
-  ['Lees terug: Heerenveen overleeft kwartiertje onder druk en wint met 3-2 van Utrecht', 'relevant'],
   // Missed: not a word of the club in it.
   ['Elftal van de Week: geen spelers van topdrie, Friesland goed vertegenwoordigd', 'irrelevant'],
 ]
@@ -105,6 +103,8 @@ const heerenveenWithFootball: Case[] = [
   ['Heerenveen-keeper Andries Noppert blijft', 'relevant'],
   ['Noppert blijft bij Heerenveen', 'relevant'],
   ['HEERENVEEN WINT DE WEDSTRIJD', 'relevant'],
+  // Heerenveen without "sc" is the club in many headlines, and a verb of winning is enough.
+  ['Lees terug: Heerenveen overleeft kwartiertje onder druk en wint met 3-2 van Utrecht', 'relevant'],
   // A verb of winning or losing is a football word: these are headlines about a match.
   ['Heerenveen wint', 'relevant'],
   ['Heerenveen verliest in Zwolle', 'relevant'],
@@ -122,6 +122,9 @@ const otherClubCases: Case[] = [
   ['Heerenveen bij N.E.C. en NEC Nijmegen', 'relevant'],
   ['Heerenveen kijkt naar Jong Ajax', 'relevant'],
   ['Heerenveen - Almere City: de uitslag', 'relevant'],
+  ['Heerenveen - VVV-Venlo: de opstellingen', 'relevant'],
+  // The tourist office is a VVV too: a club counts with its place only.
+  ['Nieuw VVV-kantoor in Heerenveen', 'doubtful'],
   // A club without Heerenveen says nothing.
   ['Ajax - Feyenoord: de opstellingen', 'irrelevant'],
   // A club whose short name is also a place counts only with its full name.

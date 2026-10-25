@@ -216,7 +216,6 @@ export const otherClubs = [
   'fc volendam',
   'volendam',
   'vvv venlo',
-  'vvv',
 ] as const
 
 /**

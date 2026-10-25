@@ -3276,6 +3276,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom korte namen niet altijd:** een club waarvan de korte naam een plaats is, staat er alleen met zijn volledige naam (FC Groningen, FC Utrecht, FC Twente, PEC Zwolle, FC Emmen).
   Koppen met "Heerenveen en Groningen" of "Heerenveen en Zwolle" gaan vaak over de A7 of de trein, en zouden anders allemaal `relevant` worden.
   Een club waarvan de korte naam in bijna elke kop de club is (Ajax, PSV, Cambuur, Volendam) staat er met die naam.
+  VVV staat er alleen als VVV-Venlo, want de VVV is ook het toeristenbureau.
 - **Gevolg:** een kop die alleen "Utrecht" of "Groningen" schrijft voor de club, heeft nog een voetbalwoord nodig.
   De 50 koppen van Omrop Fryslân geven nog steeds 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
 - **Verandert de regels van #254:** ja, dit is een derde aanvulling op de regels van het filter uit #254 (na de volledige naam en de twee werkwoorden).
