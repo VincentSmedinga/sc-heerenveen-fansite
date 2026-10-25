@@ -9,7 +9,7 @@ describe('addBranchTo', () => {
     )
   })
 
-  it('never adds it to a build, such as the one on GitHub Pages', () => {
+  it('never adds it to a build, such as the one on ds.heerenveen.org', () => {
     expect(addBranchTo('<title>x</title>', 'feat/120-bigger-type', 'PRODUCTION')).toBe('<title>x</title>')
   })
 

@@ -24,4 +24,4 @@ De reviewer meldt per onderdeel: gecontroleerd, of niet van toepassing, met een 
 
 - [ ] Code en beveiliging ([checklist](https://github.com/VincentSmedinga/sc-heerenveen-fansite/blob/main/CONTRIBUTING.md#checklist-voor-code-en-beveiliging))
 - [ ] Toegankelijkheid ([checklist](https://github.com/VincentSmedinga/sc-heerenveen-fansite/blob/main/docs/toegankelijkheid.md))
-- [ ] Redactie en bronbeleid ([checklist](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/redactie--documentatie), onderaan het hoofdstuk Redactie)
+- [ ] Redactie en bronbeleid ([checklist](https://ds.heerenveen.org/?path=/docs/redactie--documentatie), onderaan het hoofdstuk Redactie)
