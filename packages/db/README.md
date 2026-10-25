@@ -175,7 +175,7 @@ Een artikel staat op `/redactie/<slug>` en het nieuwste als kaart op de homepage
 | `created_by`               | Het nummer van het account (`admin_users`), geen e-mailadres; een foreign key zonder cascade          |
 
 De CHECK-constraint `articles_slug_format` weigert een adres met hoofdletters, een underscore of twee streepjes achter elkaar, in elke tool.
-Een tekst die te lang is voor een kolom wordt niet afgekapt: de opdracht faalt.
+Is een tekst te lang voor een kolom, dan faalt de opdracht, zolang MariaDB op zijn standaardinstelling staat (strikt).
 Een artikel verwijderen we niet: we trekken het in, door `published_at` leeg te maken.
 `findPublishedArticle`, `findNewestArticle` en `listPublishedArticles` in `queries.ts` geven alleen wat gepubliceerd is.
 

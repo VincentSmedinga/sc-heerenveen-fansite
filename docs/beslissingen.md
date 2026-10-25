@@ -4088,7 +4088,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 25 oktober 2026
 - **Besluit:**
   - `body` is een `mediumtext` (16 MB): een artikel past ruim in een `text` (64 kB), maar de grens van het beheer staat dan niet in het schema, en een `mediumtext` heeft geen nadeel.
-    `title`, `slug`, `intro` en `author` zijn `varchar` van 120, 80, 300 en 100 tekens, en een tekst die te lang is wordt niet afgekapt: de opdracht faalt.
+    `title`, `slug`, `intro` en `author` zijn `varchar` van 120, 80, 300 en 100 tekens, en een tekst die te lang is, laat de opdracht falen in plaats van hem af te kappen, zolang MariaDB op zijn standaardinstelling staat (strikt).
   - `slug` is uniek en heeft een CHECK-regel die alleen kleine letters, cijfers en enkele streepjes toestaat.
     De regel begint met `(?-i)`, want de collatie `utf8mb4_unicode_ci` negeert hoofdletters en `[a-z]` zou ze anders doorlaten.
   - `created_by` heeft een foreign key naar `admin_users`, zonder cascade.

@@ -133,7 +133,9 @@ VALUES (
 
 Het adres moet uniek zijn en mag alleen kleine letters, cijfers en enkele streepjes hebben.
 Wijst de database een deel af, dan zegt ze welk.
-Een tekst die te lang is voor `title`, `intro`, `slug` of `author` wordt niet stil afgekapt: de opdracht faalt.
+Is een tekst te lang voor `title`, `intro`, `slug` of `author`, dan faalt de opdracht met een foutmelding.
+Dat is de standaardinstelling van MariaDB 10.11.
+Kijk na of er niets is afgekapt: `SELECT CHAR_LENGTH(intro) FROM articles WHERE slug = '<adres>';`.
 
 ### 3. Kijk het na en publiceer
 
