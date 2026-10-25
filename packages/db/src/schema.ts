@@ -78,6 +78,9 @@ export type NewSource = typeof sources.$inferInsert
 
 export type Source = typeof sources.$inferSelect
 
+/** The most characters of the reason for hiding an item, in `items` and in `audit_log`. */
+export const hiddenReasonMaxLength = 300
+
 /**
  * The most characters a column of `items` holds. The importer skips an item that doesn't fit, instead of cutting it off.
  * A key can be 700 characters at most: that is the longest a unique index over it and `source_id` allows (3072 bytes).
@@ -158,6 +161,11 @@ export const items = mysqlTable(
     lastSeenAt: datetime('last_seen_at')
       .notNull()
       .default(sql`(UTC_TIMESTAMP())`),
+    // Set when a moderator hides the item: when, by whom and why. All three are empty for an item that is shown. A hidden
+    // item is on no page of the site, and the importer leaves it as it is (see `audit_log` for the history).
+    hiddenAt: datetime('hidden_at'),
+    hiddenBy: int('hidden_by', { unsigned: true }).references(() => adminUsers.id),
+    hiddenReason: varchar('hidden_reason', { length: hiddenReasonMaxLength }),
   },
   (table) => [unique('items_source_id_item_key_unique').on(table.sourceId, table.key)],
 )
@@ -307,3 +315,30 @@ export const adminLoginAttempts = mysqlTable(
     index('admin_login_attempts_attempted_at_idx').on(table.attemptedAt),
   ],
 )
+
+export const auditActions = ['item.hide', 'item.show'] as const
+
+export type AuditAction = (typeof auditActions)[number]
+
+/**
+ * What the admin did, one row per action, written by the one function `recordAction` in the site and never changed or
+ * removed: no code updates or deletes a row, and a test keeps it so. It keeps who (the id of the account, not the address),
+ * when (UTC), what, which item and the reason. `item_id` has no foreign key, so the row stays when an item is deleted.
+ * `reason` is empty for an action that has none, such as showing an item again. It holds nothing else of the request.
+ */
+export const auditLog = mysqlTable(
+  'audit_log',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    createdAt: datetime('created_at').notNull(),
+    userId: int('user_id', { unsigned: true })
+      .notNull()
+      .references(() => adminUsers.id),
+    action: mysqlEnum('action', auditActions).notNull(),
+    itemId: int('item_id', { unsigned: true }).notNull(),
+    reason: varchar('reason', { length: hiddenReasonMaxLength }),
+  },
+  (table) => [index('audit_log_item_id_idx').on(table.itemId)],
+)
+
+export type AuditLogRow = typeof auditLog.$inferSelect

@@ -184,6 +184,8 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
 - **Bijwerken:** een nieuw bericht komt erbij.
   Een bekend bericht krijgt de nieuwe kop, link, tijd en betaalmuur als de bron die veranderde.
   We bewaren geen eerdere koppen.
+  Een bericht dat een moderator in het beheer verborg (`items.hidden_at`), blijft zoals het is: de kop, de link, de tijd, de betaalmuur en `last_seen_at` veranderen niet, ook niet als de bron het bericht opnieuw aanbiedt of verandert, en het telt als ongewijzigd.
+  De voorwaarde staat in de query zelf (`unlessHidden` in [`src/import-feeds.ts`](src/import-feeds.ts)), dus ook een bericht dat tijdens een run wordt verborgen, blijft ongemoeid.
 - **ETag en Last-Modified:** de adapter bewaart ze in dezelfde transactie als de berichten.
   Lukt het bewaren of lezen niet, dan blijven de oude waarden staan en vraagt de volgende run de hele feed opnieuw.
   Is de feed niet gewijzigd, dan doet de adapter verder niets.

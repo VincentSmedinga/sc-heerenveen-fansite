@@ -80,6 +80,9 @@ describe('the admin', () => {
   it('has pages, routes and actions to go through', () => {
     expect(routes.length).toBeGreaterThanOrEqual(4)
     expect(actionFiles).toContain('app/beheer/actions.ts')
+    // The actions that change items: they are the ones that must never be open (see the next tests).
+    expect(actionFiles).toContain('app/beheer/berichten/actions.ts')
+    expect(routes).toContain('app/beheer/berichten/page.tsx')
   })
 
   it('names as open only files that exist, and no file that a visitor without a session should not reach', () => {

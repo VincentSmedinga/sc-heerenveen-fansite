@@ -195,6 +195,31 @@ describe('listRecentItems', () => {
     ])
   })
 
+  it('gives no item that is hidden, and the items around it, so the limit is filled with visible items', async () => {
+    const ids = await addSource()
+    const hiddenAt = new Date('2026-10-22T09:00:00Z')
+
+    await addItem(ids, 'nieuwste', new Date('2026-10-22T08:00:00Z'), { hiddenAt })
+    await addItem(ids, 'tweede', new Date('2026-10-22T07:00:00Z'))
+    await addItem(ids, 'derde', new Date('2026-10-22T06:00:00Z'))
+
+    expect((await listRecentItems(database.db, { limit: 2, until: now })).map((item) => item.title)).toEqual([
+      'Kop tweede',
+      'Kop derde',
+    ])
+  })
+
+  it('gives an item again once it is shown', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'bericht', new Date('2026-10-22T08:00:00Z'), { hiddenAt: new Date('2026-10-22T09:00:00Z') })
+    await database.db.update(items).set({ hiddenAt: null })
+
+    expect((await listRecentItems(database.db, { limit: 10, until: now })).map((item) => item.title)).toEqual([
+      'Kop bericht',
+    ])
+  })
+
   it('gives no episodes of a podcast that is switched on, and the items of the others', async () => {
     await seedSources(database.db)
 
@@ -543,6 +568,43 @@ describe('the podcasts', () => {
       expect((await listPodcastEpisodes(database.db, { limit: 25, until: now })).map((e) => e.sourceName)).toEqual([
         'Abe, met dank aan de LC',
       ])
+    })
+
+    it('gives no episode that is hidden, and does not count it', async () => {
+      const ids = await addSource({ slug: 'abe' })
+      const hiddenAt = new Date('2026-10-21T12:00:00Z')
+
+      await addItem(ids, 'zichtbaar', new Date('2026-10-20T08:00:00Z'))
+      await database.db.insert(items).values({
+        ...ids,
+        hiddenAt,
+        key: 'verborgen',
+        publishedAt: new Date('2026-10-21T08:00:00Z'),
+        title: 'Aflevering verborgen',
+        url: 'https://testpodcast.test/e/verborgen',
+      })
+
+      expect((await listPodcastEpisodes(database.db, { limit: 25, until: now })).map((e) => e.title)).toEqual([
+        'Aflevering zichtbaar',
+      ])
+      expect((await listPodcastEpisodes(database.db, { limit: 25, podcast: 'abe', until: now })).length).toBe(1)
+      expect(await countPodcastEpisodes(database.db, { until: now })).toBe(1)
+      expect(await countPodcastEpisodes(database.db, { podcast: 'abe', until: now })).toBe(1)
+    })
+
+    it('leaves a podcast out of the filter when all its episodes are hidden', async () => {
+      const ids = await addSource({ slug: 'abe' })
+
+      await database.db.insert(items).values({
+        ...ids,
+        hiddenAt: new Date('2026-10-21T12:00:00Z'),
+        key: 'verborgen',
+        publishedAt: new Date('2026-10-21T08:00:00Z'),
+        title: 'Aflevering verborgen',
+        url: 'https://testpodcast.test/e/verborgen',
+      })
+
+      expect(await listPodcasts(database.db)).toEqual([])
     })
 
     it('gives no episodes of a podcast that is switched off', async () => {

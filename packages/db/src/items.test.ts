@@ -4,7 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { feeds, items, sources } from './schema.ts'
+import { adminUsers, feeds, hiddenReasonMaxLength, items, sources } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -22,6 +22,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
+  await database.pool.query('DELETE FROM admin_users')
 
   const [source] = await database.db
     .insert(sources)
@@ -56,10 +57,11 @@ function item(key: string, overrides: Partial<typeof items.$inferInsert> = {}): 
 }
 
 describe('the table items', () => {
-  it('has columns for the headline, the link, the key, the time, the paywall and three facts about an episode, and for nothing else of the source', async () => {
+  it('has columns for the headline, the link, the key, the time, the paywall, three facts about an episode and the hiding by a moderator, and for nothing else of the source', async () => {
     // An intro, an image, an author or a category has no column: no source has given permission for it (principle 2).
     // Adding a column here is a decision for the issue that brings the first source that allows it. The duration, the
-    // season and the number of an episode are facts and no content, which the owner allowed (see beslissingen.md).
+    // season and the number of an episode are facts and no content, which the owner allowed (see beslissingen.md). When,
+    // by whom and why a moderator hid an item is our own record and no content of the source either.
     expect(await columnsOf('items')).toEqual([
       'id',
       'source_id',
@@ -74,7 +76,43 @@ describe('the table items', () => {
       'duration_seconds',
       'season_number',
       'episode_number',
+      'hidden_at',
+      'hidden_by',
+      'hidden_reason',
     ])
+  })
+
+  it('does not hide a new item', async () => {
+    await database.db.insert(items).values(item('een'))
+
+    const [row] = await database.db.select().from(items)
+
+    expect(row?.hiddenAt).toBeNull()
+    expect(row?.hiddenBy).toBeNull()
+    expect(row?.hiddenReason).toBeNull()
+  })
+
+  it('holds a reason of 300 characters and refuses one of 301', async () => {
+    const [user] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .$returningId()
+    const hidden = { hiddenAt: new Date('2026-10-22T10:00:00Z'), hiddenBy: user?.id ?? 0 }
+
+    await database.db.insert(items).values(item('een', { ...hidden, hiddenReason: 'x'.repeat(hiddenReasonMaxLength) }))
+
+    await expect(
+      database.db
+        .insert(items)
+        .values(item('twee', { ...hidden, hiddenReason: 'x'.repeat(hiddenReasonMaxLength + 1) })),
+    ).rejects.toMatchObject({ cause: { code: 'ER_DATA_TOO_LONG' } })
+    expect(hiddenReasonMaxLength).toBe(300)
+  })
+
+  it('refuses a moderator that does not exist', async () => {
+    await expect(
+      database.db.insert(items).values(item('een', { hiddenAt: new Date(), hiddenBy: 99_999 })),
+    ).rejects.toMatchObject({ cause: { code: 'ER_NO_REFERENCED_ROW_2' } })
   })
 
   it('gets the paywall off and the first and last time we saw it from the database', async () => {

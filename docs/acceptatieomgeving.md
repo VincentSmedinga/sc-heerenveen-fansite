@@ -278,8 +278,16 @@ Zo kan niemand nagaan wie een account heeft.
   Een sessie eindigt na 12 uur zonder gebruik, en na 7 dagen hoe dan ook.
   Uitloggen verwijdert de sessie op de server.
 - Alles onder `/beheer` krijgt `X-Robots-Tag: noindex, nofollow` en `Cache-Control: no-store`, ook op productie, en `robots.txt` weigert `/beheer` op elke omgeving.
-- Het beheer zelf is voorlopig leeg: de pagina zegt wie is ingelogd en heeft een knop om uit te loggen.
-  Beheerschermen komen met latere issues.
+- Het beheer heeft nu één scherm: `/beheer/berichten`, waar een beheerder of moderator een bericht verbergt, met een reden, en het weer toont.
+  Een verborgen bericht staat binnen vijf minuten niet meer op de homepage en op `/podcasts`, en de import zet het niet terug.
+  Elke actie komt in het logboek, de tabel `audit_log`.
+  Er is nog geen scherm om het logboek te lezen; lees het in phpMyAdmin:
+
+  ```sql
+  SELECT l.created_at, u.email, l.action, l.item_id, l.reason
+  FROM audit_log l JOIN admin_users u ON u.id = l.user_id
+  ORDER BY l.id DESC LIMIT 20
+  ```
 
 ## Controleren
 
@@ -320,12 +328,20 @@ Zo kan niemand nagaan wie een account heeft.
   `echo $?` direct daarna toont 0 als elke feed gezond is, en 1 als een feed ongezond is.
   De README van de importer laat zien hoe het eruitziet.
 
-- `curl -I https://acc.sc.heerenveen.org/beheer/inloggen` toont `x-robots-tag: noindex, nofollow`, `cache-control` met `no-store` erin en `referrer-policy: no-referrer`.
+- `curl -I https://acc.sc.heerenveen.org/beheer/inloggen` toont `x-robots-tag: noindex, nofollow`, `cache-control` met `no-store` erin en `referrer-policy: same-origin`.
   Een bezoeker zonder sessie die `/beheer` opvraagt, krijgt een doorverwijzing (307) naar `/beheer/inloggen`, met dezelfde headers.
 - Het inloggen werkt als je na stap 12 (en na de proefmail) een account maakt voor je eigen adres, naar <https://acc.sc.heerenveen.org/beheer/inloggen> gaat, je adres invult, binnen een paar minuten de mail "Inloggen bij het beheer van de sc Heerenveen Fansite" krijgt en na de link en de knop Inloggen "Je bent ingelogd als <je adres>." ziet.
   De link werkt maar één keer: opnieuw openen zegt "Deze link werkt niet".
   Uitloggen brengt je terug bij het formulier, en met de terugknop kom je niet meer in het beheer.
   Het cookie `beheer-sessie` zie je in de ontwikkelaarstools van je browser, onder Application → Cookies; het is `HttpOnly` en `Secure`.
+  De pagina met de knop Inloggen zegt eerst "Deze link klopt." en wat je nu doet.
+- Een bericht verbergen werkt als je ingelogd bent en naar <https://acc.sc.heerenveen.org/beheer/berichten> gaat.
+  Zoek een bericht op een deel van de kop of de link (`?q=`), vul bij "Reden" bijvoorbeeld "Fout in het bericht" in en kies Verberg.
+  Zonder reden blijft het bericht staan en zegt de pagina wat er mis is.
+  De pagina zegt "Staat binnen vijf minuten niet meer op de site"; na hoogstens vijf minuten staat het bericht niet meer op de homepage.
+  Na de volgende import (hoogstens een kwartier later) is het nog steeds weg, ook als de bron het bericht opnieuw aanbiedt.
+  "Toon weer" zet het terug, binnen vijf minuten.
+  De vraag onder _Het beheer_ toont voor elke actie een regel in het logboek, met jouw adres, de tijd, `item.hide` of `item.show`, het nummer van het bericht en de reden.
 - De proefmail laat zien dat de site kan mailen.
   Het bestand `apps/site/send-test-mail.mjs` staat sinds de deploy op de host, naast de importer.
   Het leest de variabelen uit een bestand, net als de importer, en een cronjob of SSH-sessie krijgt die van de Node.js-app niet.

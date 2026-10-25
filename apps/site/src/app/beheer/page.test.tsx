@@ -46,7 +46,7 @@ describe('every page of the admin', () => {
 })
 
 describe('the admin', () => {
-  it('says who is logged in and has a button to log out, and nothing else', async () => {
+  it('says who is logged in, links to the list of items and has a button to log out', async () => {
     requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
 
     const html = renderToStaticMarkup(await AdminPage())
@@ -55,7 +55,9 @@ describe('the admin', () => {
     expect(headings(html)).toEqual(['h1 Beheer'])
     expect(html).toContain('Je bent ingelogd als jelle@example.org.')
     expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual(['<button type="submit">Uitloggen</button>'])
-    expect(html).not.toContain('<a ')
+    expect(html.match(/<a [^>]*>(.*?)<\/a>/g)).toEqual([
+      '<a href="/beheer/berichten">Berichten verbergen of weer tonen</a>',
+    ])
   })
 
   it('shows nothing to somebody without a session', async () => {
@@ -153,6 +155,10 @@ describe('the page of the link', () => {
     const html = await render('abc')
 
     expect(headings(html)).toEqual(['h1 Inloggen'])
+    // The page says that the link is right and what to do now, above the button, so the extra click is no surprise.
+    expect(html).toContain('Deze link klopt. Kies hieronder Inloggen om binnen te komen.')
+    expect(html.indexOf('Deze link klopt.')).toBeLessThan(html.indexOf('<button'))
+    expect(html).not.toContain('Deze link werkt niet')
     expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual(['<button type="submit">Inloggen</button>'])
     expect(html).not.toContain('abc')
     expect(loginLinkWorks).toHaveBeenCalledExactlyOnceWith({}, 'abc')
@@ -167,6 +173,7 @@ describe('the page of the link', () => {
 
       expect(headings(html)).toEqual(['h1 Deze link werkt niet'])
       expect(html).toContain('De link is verlopen of al gebruikt.')
+      expect(html).not.toContain('Deze link klopt')
       expect(html).toContain('<a href="/beheer/inloggen">Vraag een nieuwe link aan</a>')
       expect(html).not.toContain('<button')
     },

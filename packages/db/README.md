@@ -112,11 +112,41 @@ Een kolom daarvoor komt met de eerste bron die het wel mag; een test houdt de li
 | `season_number`                 | Het seizoen van een aflevering; leeg als de feed het niet geeft                                 |
 | `episode_number`                | Het nummer van een aflevering; leeg als de feed het niet geeft                                  |
 | `first_seen_at`, `last_seen_at` | Wanneer we het bericht voor het eerst en het laatst zagen, in UTC                               |
+| `hidden_at`                     | Wanneer een moderator het bericht verborg, in UTC; leeg voor een bericht dat te zien is         |
+| `hidden_by`                     | Het account dat het verborg (`admin_users`); leeg als het bericht niet verborgen is             |
+| `hidden_reason`                 | Waarom, hoogstens 300 tekens; leeg als het bericht niet verborgen is                            |
 
 `item_key` is uniek per bron (`source_id` en `item_key` samen) en hoofdlettergevoelig: de kolom heeft de collatie `utf8mb4_bin`, want een `guid` en het pad van een URL kennen hoofdletters.
 Een lengte die niet past, geeft een fout in plaats van dat de database de tekst afkapt; de importer slaat zo'n bericht eerder al over.
 `itemLimits` in `@fansite/db/schema` heeft de lengtes, voor schema en importer samen.
 De importer verwijdert geen berichten.
+Een bericht met `hidden_at` laat hij ongemoeid, ook als de bron het opnieuw aanbiedt of verandert (zie _Een bericht verbergen_).
+
+### Een bericht verbergen
+
+Een moderator verbergt een bericht in het beheer (`/beheer/berichten`); dat zet `hidden_at`, `hidden_by` en `hidden_reason`.
+Een bericht dat verborgen is, staat op geen enkele pagina van de site: elke query in `queries.ts` die berichten toont, sluit het uit met `hidden_at IS NULL`.
+Een nieuwe query op `items` voor een pagina doet dat ook, en een test per query houdt het vast.
+Het bericht blijft in de tabel, zodat de importer het niet opnieuw als nieuw ziet.
+De importer overschrijft het niet: de voorwaarde staat in het `INSERT … ON DUPLICATE KEY UPDATE` zelf, dus een bericht dat een moderator verbergt terwijl een run bezig is, blijft ook ongemoeid.
+"Toon weer" maakt de drie kolommen leeg.
+
+## De tabel `audit_log`
+
+Het logboek van het beheer: één rij per beheeractie, voor wie later wil weten wat er gebeurde.
+
+| Kolom        | Betekenis                                                                       |
+| ------------ | ------------------------------------------------------------------------------- |
+| `created_at` | Wanneer, in UTC                                                                 |
+| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres               |
+| `action`     | Wat: `item.hide` of `item.show`                                                 |
+| `item_id`    | Welk bericht; zonder foreign key, zodat de rij blijft als het bericht verdwijnt |
+| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide`; leeg bij `item.show`           |
+
+Alleen `recordAction` in `apps/site/src/beheer/audit-log.ts` schrijft erin, en alleen met `INSERT`.
+Geen enkele code wijzigt of verwijdert een rij, en `audit-log.test.ts` toetst dat in de broncode.
+Een account dat in het logboek staat, kan niet uit `admin_users` verdwijnen (een foreign key): `admin:revoke` zet het uit.
+Er is nog geen scherm om het logboek te lezen; zie `docs/acceptatieomgeving.md` voor de vraag die het toont.
 
 ## Het logboek van de import en `robots_txt`
 
@@ -168,7 +198,7 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `import_runs`, `import_results`, `robots_txt`), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `import_runs`, `import_results`, `robots_txt`, `audit_log` en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
   `listRecentItems(db, { limit, until })` geeft de nieuwste `limit` berichten van die bronnen tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam), en geen afleveringen van bronnen van het soort podcast;
