@@ -17,6 +17,7 @@
     color: var(--hf-colour-text-default);
   }
 
+  /* Root sets data-scroll-behavior="smooth" on html, so Next.js can switch this off during a page change. Keep both. */
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;

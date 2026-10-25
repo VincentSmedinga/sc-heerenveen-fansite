@@ -1688,6 +1688,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** het script dat het gekozen thema op de pagina zet (#208) moet klaar zijn voordat de pagina getekend wordt, anders flitst ze in het verkeerde thema. De sjablonen van de site mogen geen HTML bevatten (_Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem_), en _De namen van de paginacomponenten volgen NL Design System_ zegt dat een `Head` komt als er extra inhoud in de `head` nodig is.
 - **Alternatieven:** `next/script` met `strategy="beforeInteractive"`. Dat zet alleen een `preload` in de `head`, en het script zelf start Next.js pas als de app laadt (we lazen het in de gebouwde HTML), dus de pagina flitst al. Of een inline script; dat past in de CSP, maar de code staat dan in een tekst in een component en niet in een bestand dat een test kan lezen. Of een eigenschap `head` op `Root`; dat maakt `Root` groter terwijl `Head` er al naast hoort te staan.
 
+### Root zet data-scroll-behavior op de html, naast de CSS voor soepel scrollen
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het attribuut `data-scroll-behavior="smooth"` hoort bij `Root`, naast de CSS die het soepel scrollen aanzet. Het staat in `Root` achter de meegegeven eigenschappen, zoals `lang`, dus een pagina kan het niet veranderen. Het commentaar in `Root.tsx` en dat in `root.css` verwijzen naar elkaar.
+- **Waarom:** sinds Next.js 16 zet Next.js `scroll-behavior: smooth` niet meer uit tijdens het wisselen van pagina, tenzij `html` dit attribuut heeft. Zonder het attribuut meldt de dev-server een waarschuwing, en schuift een pagina die zonder herladen opent (nu na een formulier, later met links) vanaf de oude plek soepel omhoog in plaats van meteen bovenaan te staan. Het attribuut en de regel `scroll-behavior: smooth` horen bij elkaar, en `Root` is het onderdeel dat `html` maakt. Zo kan geen pagina het ene zonder het andere hebben.
+- **Alternatieven:** het attribuut in `apps/site/src/app/layout.tsx` zetten; dan staat het los van de CSS. De waarschuwing negeren; de pagina's laden nu bijna altijd helemaal opnieuw, maar de waarschuwing blijft elke ontwikkelaar storen en het effect komt terug zodra er links met `next/link` komen.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

@@ -31,6 +31,6 @@ describe('Body', () => {
     )
 
     // React makes the empty head element itself.
-    expect(markup).toBe('<html lang="nl"><head></head><body>Inhoud</body></html>')
+    expect(markup).toBe('<html data-scroll-behavior="smooth" lang="nl"><head></head><body>Inhoud</body></html>')
   })
 })

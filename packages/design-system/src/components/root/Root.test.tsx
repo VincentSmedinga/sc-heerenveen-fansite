@@ -15,7 +15,7 @@ describe('Root', () => {
       </Root>,
     )
 
-    expect(markup).toMatch(/^<html lang="nl">/)
+    expect(markup).toMatch(/^<html data-scroll-behavior="smooth" lang="nl">/)
     expect(parse(markup).documentElement.getAttribute('lang')).toBe('nl')
   })
 
@@ -50,6 +50,17 @@ describe('Root', () => {
     )
 
     expect(parse(markup).documentElement.getAttribute('lang')).toBe('nl')
+  })
+
+  it('tells Next.js that html scrolls smoothly, and stays that way when another value is passed in', () => {
+    const props = { 'data-scroll-behavior': 'auto' }
+    const markup = renderToStaticMarkup(
+      <Root {...props}>
+        <Body>Inhoud</Body>
+      </Root>,
+    )
+
+    expect(parse(markup).documentElement.dataset['scrollBehavior']).toBe('smooth')
   })
 
   it('does not accept a lang', () => {
