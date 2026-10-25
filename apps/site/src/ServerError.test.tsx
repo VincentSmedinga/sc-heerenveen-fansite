@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { ServerError } from './ServerError'
+import { withoutIcons } from './without-icons'
 
 describe('ServerError', () => {
   const html = renderToStaticMarkup(<ServerError retryHref="/bronnen" />)
@@ -19,9 +20,16 @@ describe('ServerError', () => {
     expect(html).toContain(
       '<p class="hf-intro"><b>Deze pagina lukt nu even niet. Dat ligt aan ons, niet aan jou.</b></p>',
     )
-    expect(html).toContain(
+    expect(withoutIcons(html)).toContain(
       '<p>Probeer het over een paar minuten opnieuw. Lukt het dan nog niet, meld het dan op <a href="https://forum.heerenveen.org">het forum</a>.</p>',
     )
+  })
+
+  it('draws the icon for a link to another site behind the link to the forum, and at no other link', () => {
+    expect(html).toMatch(
+      /<a href="https:\/\/forum\.heerenveen\.org">het <span class="hf-icon-tail">forum<svg [^>]*class="hf-icon"/,
+    )
+    expect(html.match(/<svg /g)).toHaveLength(1)
   })
 
   it('links to the page itself and to the homepage', () => {

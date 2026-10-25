@@ -16,7 +16,10 @@ export function ServerError({ retryHref }: { retryHref: string }) {
         <Text appearance="intro">Deze pagina lukt nu even niet. Dat ligt aan ons, niet aan jou.</Text>
         <Text>
           Probeer het over een paar minuten opnieuw. Lukt het dan nog niet, meld het dan op{' '}
-          <Link href="https://forum.heerenveen.org">het forum</Link>.
+          <Link href="https://forum.heerenveen.org" icon="external-link">
+            het forum
+          </Link>
+          .
         </Text>
         <List>
           <List.Item>

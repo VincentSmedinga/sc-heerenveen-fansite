@@ -1,0 +1,31 @@
+/* The icons: beside a link or a button, in a news line and in a menu. */
+
+@layer hf.components {
+  /*
+   * A little smaller than the text and in line with it. It has the colour of the text, so it keeps that colour under the
+   * mouse, with the focus and in forced colours, and it has the contrast of the text. It does not move. Behind the text is
+   * where it stands unless it is in front of the text (see .hf-icon-head). The base styles make an svg a block, so it is put
+   * back in the line here. In a flex container, such as a link in a menu, it is a flex item, and it keeps its size there.
+   */
+  .hf-icon {
+    block-size: 0.875em;
+    display: inline-block;
+    flex-shrink: 0;
+    inline-size: 0.875em;
+    margin-inline-start: 0.25em;
+    vertical-align: -0.1em;
+  }
+
+  /*
+   * The icon with the last word of a link, or the first word of a button, so a line never breaks between them and the icon
+   * never stands alone on a line. See attachIcon.
+   */
+  .hf-icon-head,
+  .hf-icon-tail {
+    white-space: nowrap;
+  }
+
+  .hf-icon-head > .hf-icon {
+    margin-inline: 0 0.375em;
+  }
+}

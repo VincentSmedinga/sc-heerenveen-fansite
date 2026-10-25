@@ -100,7 +100,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             // Works without JavaScript: the form loads the page again with more headlines in the address, and the
             // part after the hash brings the visitor to the first of the new ones, so they stay in place.
             <Form action={`/#nieuws-${headlines.length + 1}`} method="get">
-              <Button appearance="soft" name="nieuws" type="submit" value={String(count + moreHeadlines)}>
+              <Button appearance="soft" icon="plus" name="nieuws" type="submit" value={String(count + moreHeadlines)}>
                 {`Laad ${moreHeadlines} meer`}
               </Button>
             </Form>
@@ -134,7 +134,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </List>
           )}
           <Text>
-            <Link href={forumUrl}>Naar het forum</Link>
+            <Link href={forumUrl} icon="external-link">
+              Naar het forum
+            </Link>
           </Text>
         </Card>
         <Card aria-labelledby="episodes-heading">
@@ -160,7 +162,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </List>
           )}
           <Text>
-            <Link href="/podcasts">Alle podcasts</Link>
+            <Link href="/podcasts" icon="arrow-right">
+              Alle podcasts
+            </Link>
           </Text>
         </Card>
       </Page.Sidebar>

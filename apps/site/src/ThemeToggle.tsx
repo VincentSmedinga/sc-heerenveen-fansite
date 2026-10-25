@@ -8,8 +8,8 @@ import type { Theme, ThemePreference } from './theme'
 import { applyPreference, chooseTheme, darkQuery, readPreference, resolveTheme, savePreference } from './theme'
 
 const options = [
-  { label: 'Licht', value: 'light' },
-  { label: 'Donker', value: 'dark' },
+  { icon: 'sun', label: 'Licht', value: 'light' },
+  { icon: 'moon', label: 'Donker', value: 'dark' },
 ] as const
 
 const subscribeToNothing = () => () => undefined

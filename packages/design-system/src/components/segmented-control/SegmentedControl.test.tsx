@@ -18,6 +18,51 @@ describe('SegmentedControl', () => {
     expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual(['Licht', 'Donker'])
   })
 
+  it('has no icons unless an option asks for one', () => {
+    render(<SegmentedControl label="Thema" onChange={vi.fn()} options={options} value="light" />)
+
+    expect(document.querySelector('svg')).toBeNull()
+  })
+
+  it('puts the icon of an option in front of its text, filled on the pressed button and a line on the others', () => {
+    render(
+      <SegmentedControl
+        label="Thema"
+        onChange={vi.fn()}
+        options={[
+          { icon: 'sun', label: 'Licht', value: 'light' },
+          { icon: 'moon', label: 'Donker', value: 'dark' },
+        ]}
+        value="dark"
+      />,
+    )
+    const light = screen.getByRole('button', { name: 'Licht' })
+    const dark = screen.getByRole('button', { name: 'Donker' })
+
+    expect(light.querySelector('svg')?.getAttribute('fill')).toBe('none')
+    expect(dark.querySelector('svg')?.getAttribute('fill')).toBe('currentColor')
+    expect(light.firstElementChild?.className).toBe('hf-icon-head')
+    expect(light.textContent).toBe('Licht')
+    expect(dark.textContent).toBe('Donker')
+  })
+
+  it('keeps the pressed state in aria-pressed whatever the icon shows', () => {
+    render(
+      <SegmentedControl
+        label="Thema"
+        onChange={vi.fn()}
+        options={[
+          { icon: 'sun', label: 'Licht', value: 'light' },
+          { icon: 'moon', label: 'Donker', value: 'dark' },
+        ]}
+        value="light"
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Licht' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('false')
+  })
+
   it('presses only the button of the value, and none of them sends a form', () => {
     render(<SegmentedControl label="Thema" onChange={vi.fn()} options={options} value="dark" />)
 

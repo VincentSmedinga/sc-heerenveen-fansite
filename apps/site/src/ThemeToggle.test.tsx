@@ -62,6 +62,34 @@ describe('ThemeToggle', () => {
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
   })
 
+  it('draws a sun in front of Licht and a moon in front of Donker, filled on the pressed button and a line on the other', () => {
+    stubSystem(true)
+    render(<ThemeToggle />)
+
+    const light = screen.getByRole('button', { name: 'Licht' })
+    const dark = screen.getByRole('button', { name: 'Donker' })
+
+    expect(light.querySelector('svg')?.getAttribute('fill')).toBe('none')
+    expect(dark.querySelector('svg')?.getAttribute('fill')).toBe('currentColor')
+    expect(light.querySelectorAll('circle')).toHaveLength(1)
+    expect(dark.querySelectorAll('circle')).toHaveLength(0)
+    expect(light.firstElementChild?.firstElementChild?.getAttribute('aria-hidden')).toBe('true')
+    expect(light.textContent).toBe('Licht')
+    expect(dark.textContent).toBe('Donker')
+  })
+
+  it('switches the filled drawing to the button that is pressed, next to aria-pressed', () => {
+    stubSystem(false)
+    render(<ThemeToggle />)
+    fireEvent.click(screen.getByRole('button', { name: 'Donker' }))
+
+    expect(screen.getByRole('button', { name: 'Licht' }).querySelector('svg')?.getAttribute('fill')).toBe('none')
+    expect(screen.getByRole('button', { name: 'Donker' }).querySelector('svg')?.getAttribute('fill')).toBe(
+      'currentColor',
+    )
+    expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('true')
+  })
+
   it('keeps a choice that differs from the system, and puts it on the page', () => {
     stubSystem(false)
     render(<ThemeToggle />)

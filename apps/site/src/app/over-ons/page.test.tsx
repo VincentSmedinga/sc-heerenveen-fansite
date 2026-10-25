@@ -1,12 +1,16 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { withoutIcons } from '../../without-icons'
 import AboutPage, { generateMetadata } from './page'
 
 const html = renderToStaticMarkup(<AboutPage />)
 
 /** The href and the text of each link, in the order of the page. */
-const links = [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label])
+const links = [...withoutIcons(html).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
+  href,
+  label,
+])
 
 describe('the page Over ons', () => {
   afterEach(() => {
@@ -54,6 +58,15 @@ describe('the page Over ons', () => {
       ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
       ['/privacy', 'Privacy'],
     ])
+  })
+
+  it('draws the icon for a link to another site behind "ons forum" only, hidden from screen readers', () => {
+    const iconLinks = [
+      ...html.matchAll(/<a href="([^"]*)">(?:[^<]*)<span class="hf-icon-tail">[^<]*<svg aria-hidden="true"/g),
+    ]
+
+    expect(iconLinks.map(([, href]) => href)).toEqual(['https://forum.heerenveen.org'])
+    expect(html.match(/<svg /g)).toHaveLength(1)
   })
 
   it('starts a paragraph of its own at "We schrijven niks over", after the intro', () => {

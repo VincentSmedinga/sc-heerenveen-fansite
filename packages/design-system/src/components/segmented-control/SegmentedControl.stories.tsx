@@ -6,8 +6,8 @@ import preview from '#.storybook/preview'
 import { SegmentedControl } from './SegmentedControl'
 
 const options = [
-  { label: 'Licht', value: 'light' },
-  { label: 'Donker', value: 'dark' },
+  { icon: 'sun', label: 'Licht', value: 'light' },
+  { icon: 'moon', label: 'Donker', value: 'dark' },
 ] as const
 
 type Choice = (typeof options)[number]['value']
@@ -23,6 +23,10 @@ const meta = preview.meta({
           '',
           'De groep heeft een naam voor een schermlezer, en elke knop zegt met `aria-pressed` of hij is ingedrukt.',
           'De ingedrukte knop is gevuld en de andere zijn een omlijning, dus je ziet het ook zonder kleur.',
+          'Een optie kan een `icon` hebben, vóór de tekst: een zon of een maan.',
+          'Op de ingedrukte knop is het pictogram gevuld en op de andere alleen een lijn.',
+          'Dat is een tweede aanwijzing; de ingedrukte knop is ook gevuld en heeft `aria-pressed`, dus wie het pictogram niet ziet, mist niets.',
+          'Het pictogram heeft de kleur van de tekst, ook in geforceerde kleuren.',
           'Het component bewaart niets: de pagina geeft de waarde en handelt de wijziging af.',
         ].join('\n'),
       },

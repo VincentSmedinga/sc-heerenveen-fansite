@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { Link } from './Link'
+import { Link, linkIcons } from './Link'
 
 describe('Link', () => {
   it('is a link, named by its text, that goes to its href', () => {
@@ -22,6 +22,63 @@ describe('Link', () => {
 
     expect(link.className).toBe('extra')
     expect(link.getAttribute('rel')).toBe('noopener')
+  })
+
+  it('has no icon and no extra markup without the prop icon', () => {
+    render(<Link href="/bronnen">Onze bronnen</Link>)
+
+    expect(screen.getByRole('link').innerHTML).toBe('Onze bronnen')
+  })
+
+  it.each(['arrow-right', 'external-link'] as const)('puts the icon %s behind the text, with the last word', (icon) => {
+    render(
+      <Link href="/podcasts" icon={icon}>
+        Alle podcasts
+      </Link>,
+    )
+    const link = screen.getByRole('link')
+
+    expect(link.innerHTML).toMatch(/^Alle <span class="hf-icon-tail">podcasts<svg [^>]*class="hf-icon"/)
+    expect(link.lastElementChild?.lastElementChild?.tagName).toBe('svg')
+  })
+
+  it('puts the arrow to the left in front of the text, because it points back', () => {
+    render(
+      <Link href="/podcasts" icon="arrow-left">
+        Vorige
+      </Link>,
+    )
+
+    expect(screen.getByRole('link').innerHTML).toMatch(
+      /^<span class="hf-icon-head"><svg [^>]*class="hf-icon"[^>]*>.*<\/svg>Vorige<\/span>$/,
+    )
+  })
+
+  it('is named by its text alone: the icon is hidden from assistive technology', () => {
+    render(
+      <Link href="https://forum.heerenveen.org" icon="external-link">
+        Naar het forum
+      </Link>,
+    )
+
+    expect(screen.getByRole('link', { name: 'Naar het forum' }).querySelector('svg')?.getAttribute('aria-hidden')).toBe(
+      'true',
+    )
+  })
+
+  it('knows where each icon stands: behind the text, except the one that points back', () => {
+    expect(linkIcons).toEqual({ 'arrow-left': 'before', 'arrow-right': 'after', 'external-link': 'after' })
+  })
+
+  it('only takes the icons of the list', () => {
+    const elements = [
+      // @ts-expect-error A link has no envelope.
+      <Link href="/" icon="envelope">
+        Mail
+      </Link>,
+    ]
+
+    expect(elements).toHaveLength(1)
   })
 
   it('needs an href', () => {

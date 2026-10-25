@@ -27,6 +27,19 @@ describe('Pagination', () => {
     expect(next.getAttribute('rel')).toBe('next')
   })
 
+  it('puts an arrow to the left in front of "Vorige" and an arrow to the right behind "Volgende"', () => {
+    render(<Pagination current={2} label="Pagina's" nextHref="/podcasts?pagina=3" previousHref="/podcasts" total={9} />)
+    const previous = screen.getByRole('link', { name: 'Vorige' })
+    const next = screen.getByRole('link', { name: 'Volgende' })
+
+    expect(previous.firstElementChild?.className).toBe('hf-icon-head')
+    expect(previous.firstElementChild?.firstElementChild?.tagName).toBe('svg')
+    expect(next.firstElementChild?.className).toBe('hf-icon-tail')
+    expect(next.firstElementChild?.lastElementChild?.tagName).toBe('svg')
+    expect(previous.textContent).toBe('Vorige')
+    expect(next.textContent).toBe('Volgende')
+  })
+
   it('has no link to a previous page on the first page', () => {
     render(<Pagination current={1} label="Pagina's" nextHref="/podcasts?pagina=2" total={9} />)
 

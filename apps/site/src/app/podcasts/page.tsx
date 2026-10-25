@@ -159,7 +159,7 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
                 <List role="list">
                   {platforms.map((platform) => (
                     <List.Item key={platform.name}>
-                      <Link href={platform.href}>
+                      <Link href={platform.href} icon="external-link">
                         <Text as="span" className="hf-visually-hidden">
                           {selected.name} op{' '}
                         </Text>
