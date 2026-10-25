@@ -1,7 +1,9 @@
 import type { FeedFilter, SourceKind } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { listRecentItems } from '@fansite/db/queries'
 import { adminUsers, feeds, importResults, items, sources } from '@fansite/db/schema'
+import { seedSources } from '@fansite/db/seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -531,6 +533,79 @@ describe('the relevance filter', () => {
     const [result] = await database.db.select().from(importResults)
 
     expect(result).toMatchObject({ doubtful: 2, irrelevant: 1, relevant: 1 })
+  })
+})
+
+describe('importing a regional feed, the way the register has it', () => {
+  const sample = readFileSync(new URL('./fixtures/regional-sample.xml', import.meta.url), 'utf8')
+
+  /** The feed of Omrop Fryslân as the seed registers it, pointed at the test server. */
+  async function omropFeed(origin: string) {
+    await seedSources(database.db)
+
+    const [row] = await database.db
+      .select({ id: feeds.id })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, 'www.omropfryslan.nl'))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  it('reads the feed, gives every item its value and counts them', async () => {
+    const server = await serve(sample)
+    const feed = await omropFeed(server.origin)
+
+    expect(feed.filter).toBe('club')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect(report).toMatchObject({ added: 8, relevance: { doubtful: 2, irrelevant: 4, relevant: 2 }, skipped: [] })
+    expect(Object.fromEntries((await itemsInDatabase()).map((row) => [row.title, row.relevance]))).toEqual({
+      'Code geel voor Fryslân: zware windstoten verwacht': 'irrelevant',
+      'Friese ijshockeyers winnen spannende wedstrijd': 'irrelevant',
+      'Heerenveen wint topper van Cambuur': 'relevant',
+      'Museum in Leeuwarden toont verzonnen kunst': 'irrelevant',
+      'Nieuwe fietsbrug bij Dokkum geopend': 'irrelevant',
+      'Robin Veldman wil nog niet praten over zijn toekomst': 'doubtful',
+      'sc Heerenveen speelt gelijk bij Emmen': 'relevant',
+      'Schuur in Heerenveen volledig verwoest door brand': 'doubtful',
+    })
+  })
+
+  it('keeps the time of publication in UTC, and the link, and nothing of the intro, the category or the photo', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await omropFeed(server.origin), firstRun)
+
+    const [first] = await database.db.select().from(items).where(eq(items.key, 'regio-1'))
+
+    expect(first).toMatchObject({
+      paywalled: false,
+      publishedAt: new Date('2026-10-21T12:06:08Z'),
+      url: 'https://regio.test/nijs/1',
+    })
+    expect(JSON.stringify(first)).not.toContain('verzonnen intro')
+    expect(JSON.stringify(first)).not.toContain('foto')
+  })
+
+  it('shows only the relevant items to a visitor, however new the others are', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await omropFeed(server.origin), firstRun)
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-10-23T00:00:00Z') })
+
+    expect(shown.map((item) => item.title)).toEqual([
+      'sc Heerenveen speelt gelijk bij Emmen',
+      'Heerenveen wint topper van Cambuur',
+    ])
+    expect(shown.every((item) => item.sourceName === 'Omrop Fryslân')).toBe(true)
   })
 })
 

@@ -2905,6 +2905,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gevolg:** De Telegraaf staat met zijn tagfeed in het register, ondanks het voorbehoud in zijn `robots.txt`.
   Bij de keuze voor Voetbal International (#142) was dat voorbehoud nog een reden om De Telegraaf niet te kiezen.
 - **Alternatieven:** bij een voorbehoud eerst schriftelijke toestemming vragen; dat is voorzichtiger, maar we missen dan bronnen die zelden antwoorden.
+- **Later:** zie _Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed_; ook een brede feed nemen we, als het relevantiefilter (`club`) erop staat.
 
 ### De feeds van andere clubs nemen we niet
 
@@ -3206,6 +3207,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een nieuwe feed wordt zo een regel in de database, en zonder filter verandert er voor de twee bronnen van nu niets.
   De waarde bij elke run opnieuw bepalen maakt van het filter een regel en geen stempel: wie een naam toevoegt, ziet het resultaat bij de volgende run, zonder een aparte opdracht.
 - **Alternatieven:** het filter in de configuratie van de importer of op de bron (een feed van dezelfde bron kan anders zijn); alleen bij een nieuw bericht beoordelen (een betere regel werkt dan nooit op wat er al is); `relevance` overschrijven voor een verborgen bericht (dat gaat tegen #75 in).
+- **Later:** zie _Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed_; voor een nieuwe feed in `realSources` stelt de seed het filter in, bij het toevoegen van de feed.
 
 ### De site toont alleen `relevant`, en het beheer toont alles met een woord erbij
 
@@ -3218,6 +3220,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** één plek voor de voorwaarde voorkomt dat een nieuwe query er een vergeet.
   De moderator moet een bericht kunnen vinden dat het filter ten onrechte weghoudt.
 - **Alternatieven:** de voorwaarde in elke query zelf (zoals bij `hidden_at` tot nu toe); een apart scherm voor twijfelgevallen (een eigen issue).
+
+### Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** Omrop Fryslân (`https://www.omropfryslan.nl/rss/index.xml`) staat in `realSources` in `packages/db/src/seed.ts`, met het filter `club`.
+  Een feed in `realSources` is een adres of een object met `filter` en `url`; een feed zonder object begint op `none`, zoals tot nu toe.
+  De seed zet het filter alleen als hij de feed in het register zet, en verandert het daarna nooit meer (zie _Een feed heeft een filter, `none` of `club`, en de importer beoordeelt elk bericht opnieuw_).
+  Van de bron tonen we alleen de kop, de link, de bronnaam en de tijd, zoals bij elke bron.
+  Het register in [`bronnen.md`](bronnen.md) zegt nu "nemen" voor deze bron, met het filter.
+  Voor de tests heeft `@fansite/db` een export `./seed`, zodat de test van de importer de bron neemt zoals de seed hem in het register zet.
+- **Gemeten op de echte feed** (25 oktober 2026, één run van de importer): 50 berichten bewaard, waarvan 2 `relevant`, 4 `doubtful` en 44 `irrelevant`.
+  Geen bericht stond achter een betaalmuur, geen tijd was ongeldig en de importer sloeg niets over.
+  De importer leest de feed dus zonder aanpassing.
+- **Waarom:** een regionale feed gaat over alles in de provincie, en de club is een klein deel (6 van de 50 op 24 oktober).
+  Begint de feed op `none`, dan toont een nieuwe omgeving alle 50 berichten tot iemand het filter met SQL aanzet.
+  Op acceptatie zet de site de bronnen met de seed in een lege database, dus daar zouden brand en storm op de homepage komen.
+  Met `club` vanaf de seed gebeurt dat niet.
+- **Alternatieven:** de feed op `none` beginnen en het filter met SQL aanzetten (een venster waarin alles zichtbaar is); het filter in elke seed opnieuw zetten (dat maakt een keuze in de database ongedaan); een filter op de bron in plaats van op de feed (een tweede feed van dezelfde bron kan anders zijn).
+- **Open:** of de lijst met namen en woorden verandert, besluit de projecteigenaar; de pull request noemt de koppen die verkeerd lijken.
 
 ## Redactie
 

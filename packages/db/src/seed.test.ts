@@ -69,6 +69,52 @@ describe('the seed', () => {
     expect(rows.every((feed) => feed.filter === 'club')).toBe(true)
   })
 
+  it('does not put a feed back on the filter it started with when it runs again', async () => {
+    await seedSources(database.db)
+    await database.pool.query("UPDATE feeds SET filter = 'none'")
+    await seedSources(database.db)
+
+    const rows = await database.db.select().from(feeds)
+
+    expect(rows).not.toHaveLength(0)
+    expect(rows.every((feed) => feed.filter === 'none')).toBe(true)
+  })
+
+  it('starts every feed on none, except the feeds of the register that are about more than the club', async () => {
+    await seedSources(database.db)
+
+    const rows = await database.db.select({ filter: feeds.filter, url: feeds.url }).from(feeds)
+
+    expect(rows.filter((feed) => feed.filter === 'club').map((feed) => feed.url)).toEqual([
+      'https://www.omropfryslan.nl/rss/index.xml',
+    ])
+  })
+
+  it('puts Omrop Fryslân in the register with its feed on the club filter and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [omrop] = await database.db.select().from(sources).where(eq(sources.domain, 'www.omropfryslan.nl'))
+    const omropFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, omrop?.id ?? 0))
+
+    expect(omrop).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'Omrop Fryslân',
+    })
+    expect(omrop?.consentStatus).not.toBe('given')
+    expect(omrop?.description).toBeTruthy()
+    expect(omrop?.description?.length).toBeLessThanOrEqual(300)
+    expect(omropFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
+      ['https://www.omropfryslan.nl/rss/index.xml', 'club'],
+    ])
+  })
+
   it('puts the Leeuwarder Courant in the register with its feed and the strictest policy', async () => {
     await seedSources(database.db)
 
@@ -246,7 +292,7 @@ describe('the seed', () => {
       expect(source.description.length, source.name).toBeLessThanOrEqual(300)
       expect(source.feeds, source.name).not.toHaveLength(0)
       for (const feed of source.feeds) {
-        expect(feed, source.name).toMatch(/^https:\/\//)
+        expect(typeof feed === 'string' ? feed : feed.url, source.name).toMatch(/^https:\/\//)
       }
     }
   })

@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
-import type { NewSource } from './schema.ts'
+import type { FeedFilter, NewSource } from './schema.ts'
 
 import { connect } from './client.ts'
 import { readDatabaseEnv } from './env.ts'
@@ -105,6 +105,11 @@ export const testSources = [
  *
  * The forum's "feed" is the list of discussions of its API, which the importer reads as a guest
  * (see `read-forum.ts`).
+ *
+ * A feed is its address, or an object when it needs a filter: a feed that is about more than
+ * the club starts with `club`, so the importer judges each headline (see `docs/bronnen.md`).
+ * The seed sets the filter only when it puts the feed in the register; it never changes it
+ * later.
  */
 export const realSources = [
   {
@@ -164,12 +169,20 @@ export const realSources = [
     slug: 'radio-camataru',
     spotifyUrl: 'https://open.spotify.com/show/51W3UP2B4H2kBK9Ukyv8et',
   },
-] satisfies (NewSource & { feeds: string[] })[]
+  {
+    description:
+      'Regionale publieke omroep van Friesland. Het regionieuws van de provincie van de club; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
+    domain: 'www.omropfryslan.nl',
+    feeds: [{ filter: 'club', url: 'https://www.omropfryslan.nl/rss/index.xml' }],
+    kind: 'news',
+    name: 'Omrop Fryslân',
+  },
+] satisfies (NewSource & { feeds: (string | { filter: FeedFilter; url: string })[] })[]
 
 /**
  * Puts the test sources and the real sources, with their feeds, in the register. Running it
  * again updates them by domain and by feed address and adds no duplicates. It leaves the
- * `ETag`, the `Last-Modified` and the health of a feed alone.
+ * `ETag`, the `Last-Modified`, the filter and the health of a feed alone.
  */
 export async function seedSources(db: Database) {
   for (const source of testSources) {
@@ -185,10 +198,12 @@ export async function seedSources(db: Database) {
       throw new Error(`The source ${source.domain} is not in the register after the seed put it there.`)
     }
 
-    for (const url of urls) {
+    for (const feed of urls) {
+      const { filter, url } = typeof feed === 'string' ? { filter: 'none' as const, url: feed } : feed
+
       await db
         .insert(feeds)
-        .values({ sourceId: row.id, url })
+        .values({ filter, sourceId: row.id, url })
         .onDuplicateKeyUpdate({ set: { sourceId: row.id } })
     }
   }

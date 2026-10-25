@@ -230,6 +230,8 @@ De volgende run beoordeelt alle berichten van de feed, ook die we al hadden, en 
 Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een moderator verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
+Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
+Dat is nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_).
 
 ### De uitkomst bekijken
 
@@ -264,6 +266,15 @@ De volgende run past de nieuwe lijst toe op alle berichten van feeds met `club`.
 [`src/relevance.test.ts`](src/relevance.test.ts) heeft verzonnen koppen per regel: de club, de gemeente, de plaats, een wedstrijd van een andere club in Heerenveen, hele woorden en namen die ook een gewoon woord zijn.
 De koppen uit de logs van het prototype, met erbij of ze erin hoorden, komen in de lijst `fromTheLogs` bovenin dat bestand: `['de kop', 'relevant' | 'doubtful' | 'irrelevant']`.
 Die lijst is nog leeg; de projecteigenaar levert ze aan (#74).
+
+## De regionale feed van Omrop Fryslân
+
+Omrop Fryslân is een bron met de feed `https://www.omropfryslan.nl/rss/index.xml`, het regionieuws van Friesland.
+De club is er een klein deel van, dus de feed staat in de seed op `club`.
+De adapter leest hem zonder aanpassing: RSS 2.0, tijden met een zone, geen teken voor een betaalmuur.
+Een run van 25 oktober 2026 bewaarde alle 50 berichten, en het filter vond er 2 `relevant`, 4 `doubtful` en 44 `irrelevant` (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
+De test in `src/import-feeds.test.ts` ("importing a regional feed, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/regional-sample.xml`](src/fixtures/regional-sample.xml), via de bron zoals de seed hem in het register zet.
+De fixture heeft per bericht ook een intro, een categorie en een foto, om te laten zien dat de adapter ze niet bewaart.
 
 ## De velden van de feed van de Leeuwarder Courant
 
