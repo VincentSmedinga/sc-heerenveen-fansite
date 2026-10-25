@@ -203,13 +203,14 @@ Het filter bepaalt voor elk bericht uit zo'n feed of het over sc Heerenveen gaat
 Het kijkt alleen naar de kop, want de importer bewaart geen intro of categorie.
 De functie is `judgeRelevance` in [`src/relevance.ts`](src/relevance.ts); ze is zuiver, dus dezelfde kop geeft altijd dezelfde waarde.
 
-| Waarde       | Wanneer                                                                                                                                                                                                                        | Wat de site doet          |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
-| `relevant`   | De kop noemt "sc Heerenveen" (ook "s.c." en "SC", en in "sc Heerenveen-fan"), Abe Lenstra of de volledige naam van iemand van de club, of "Heerenveen" met een voetbalwoord, een achternaam van de club of een andere profclub | Toont het bericht         |
-| `doubtful`   | De kop noemt alleen "Heerenveen" (de gemeente en de plaats schrijven ook veel nieuws), of alleen een achternaam van de club                                                                                                    | Toont het bericht nergens |
-| `irrelevant` | Verder                                                                                                                                                                                                                         | Toont het bericht nergens |
+| Waarde       | Wanneer                                                                                                                                                                                                                                                             | Wat de site doet          |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `relevant`   | De kop noemt "sc Heerenveen" of "sc Hearrenfean" (ook "s.c." en "SC", en in "sc Heerenveen-fan"), Abe Lenstra of de volledige naam van iemand van de club, of "Heerenveen" of "Hearrenfean" met een voetbalwoord, een achternaam van de club of een andere profclub | Toont het bericht         |
+| `doubtful`   | De kop noemt alleen "Heerenveen" of "Hearrenfean" (de gemeente en de plaats schrijven ook veel nieuws), of alleen een achternaam van de club                                                                                                                        | Toont het bericht nergens |
+| `irrelevant` | Verder                                                                                                                                                                                                                                                              | Toont het bericht nergens |
 
 Hoofdletters en accenten tellen niet, en alleen hele woorden: "Heerenveenseweg" is niet "Heerenveen" en "wandelwedstrijd" is geen "wedstrijd".
+Het filter kent ook de Friese schrijfwijze (zie _Friese woorden_).
 De keuzes staan in `docs/beslissingen.md`, onder _De regels van het filter_.
 De importer bewaart elk bericht, ook `doubtful` en `irrelevant`.
 Het beheer (`/beheer/berichten`) toont ze wel, met een woord erbij, zodat een moderator ze kan vinden en verbergen.
@@ -262,6 +263,25 @@ Zo voeg je er een toe:
 
 De volgende run past de nieuwe lijst toe op alle berichten van feeds met `club`.
 
+### Friese woorden
+
+Omrop Fryslân schrijft veel in het Fries, en daarin heet de club "Hearrenfean".
+`clubNames` in [`src/relevance-terms.ts`](src/relevance-terms.ts) heeft "heerenveen" en "hearrenfean", en ze tellen hetzelfde: na "sc", naast een voetbalwoord en alleen.
+Een kop mag allebei de schrijfwijzen hebben.
+Het bijvoeglijk naamwoord "Feanster" staat er niet in: het is de naam van de club niet, net als "Heerenveense", en maakt een kop dus niet `relevant`.
+De Friese voetbalwoorden staan in `frisianFootballWords`, na de Nederlandse in `footballWords`.
+Ze werken hetzelfde: een kop met "Heerenveen" of "Hearrenfean" en zo'n woord is `relevant`.
+Een woord dat Nederlands en Fries hetzelfde schrijven, zoals "wint", staat alleen in `footballWords`.
+
+Zo voeg je een Fries woord toe:
+
+1. Zoek het woord in een echte kop, of op de Friese Wikipedia (`fy.wikipedia.org/wiki/...`), en schrijf op waar je het vond.
+2. Schrijf het in kleine letters zonder accenten, in de Friese spelling: `'kompetysje'`, `'thuswedstriden'` voor "thúswedstriden", `'wun'` voor "wûn".
+   Het filter zet "y" en "ij" niet om, en een test controleert de vorm.
+3. Is het woord ook buiten het voetbal gewoon, zoals "ploech" of "útslach", zet het er dan niet op.
+   Een kop met zo'n woord en "Hearrenfean" is `doubtful`, en een moderator kan hem vinden.
+4. Zet in [`src/relevance.test.ts`](src/relevance.test.ts) een kop in `frisianClub`, en pas de datum van de controle aan in het commentaar bij `frisianFootballWords`.
+
 ### De profclubs bijhouden
 
 `otherClubs` in [`src/relevance-terms.ts`](src/relevance-terms.ts) heeft de namen van de andere profclubs van de Eredivisie en de Eerste Divisie.
@@ -297,6 +317,7 @@ De club is er een klein deel van, dus de feed staat in de seed op `club`.
 De adapter leest hem zonder aanpassing: RSS 2.0, tijden met een zone, geen teken voor een betaalmuur.
 Een run van 25 oktober 2026 bewaarde alle 50 berichten, en het filter vond er 2 `relevant`, 4 `doubtful` en 44 `irrelevant`.
 Na de run veranderden de regels (zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_ in `docs/beslissingen.md`), en dezelfde 50 koppen geven nu 4, 2 en 44 (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
+De Friese schrijfwijze en de Friese voetbalwoorden (#270) veranderden daar niets aan, want de feed had op die dag geen Friestalige kop over de club.
 De test in `src/import-feeds.test.ts` ("importing a regional feed, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/regional-sample.xml`](src/fixtures/regional-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft per bericht ook een intro, een categorie en een foto, om te laten zien dat de adapter ze niet bewaart.
 

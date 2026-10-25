@@ -23,6 +23,9 @@ Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, met een run van de
   Een bericht gaat over de club als "Heerenveen" in de kop of in de categorieën staat, zonder op hoofdletters te letten.
   Staat het woord alleen in de intro, dan zeggen we dat erbij.
   Heerenveen is ook een plaats, dus de telling kan iets te hoog zijn.
+  De tellingen zochten alleen het Nederlandse woord "Heerenveen".
+  In het Fries heet de club "Hearrenfean", en dat telden we niet mee (#270).
+  Alleen bij Omrop Fryslân en bij Sportcast hebben we het Friese woord nagekeken; bij de andere bronnen kende de telling alleen het Nederlandse woord.
 - **Of de feed werkt:** de feed is geldige RSS of Atom en de importer leest hem (dezelfde code als de import, `readFeed`).
 - **Betaalmuur:** de feed zegt zelf welke berichten achter de betaalmuur staan.
   De Leeuwarder Courant en De Telegraaf doen dat met het element `<premium>`, Voetbal International met een categorie `PRO`.
@@ -149,6 +152,7 @@ Al in het register (#258), met het filter `club`.
     Op 24 oktober 2026 was het nieuwste van 23 oktober en het oudste van 20 oktober.
     Op 25 oktober 2026 was het nieuwste van 25 oktober (16:23 UTC) en het oudste van 22 oktober (10:10 UTC).
   - Over sc Heerenveen: op 24 oktober 2026 noemden 6 van de 50 Heerenveen in de kop, 3 daarvan ook in de intro.
+    Het Friese "Hearrenfean" (en "Feanster") stond op 25 oktober 2026 in geen van de 50 koppen of intro's: de feed is bijna helemaal Nederlandstalig.
   - Betaalmuur: nee; de feed geeft er geen teken van, en de run van 25 oktober bewaarde geen bericht als betaalmuur.
   - Het filter, op 25 oktober 2026: van de 50 berichten kregen 2 de waarde `relevant`, 4 `doubtful` en 44 `irrelevant`.
     De twee `relevant` noemen "sc Heerenveen" in de kop.
@@ -158,6 +162,7 @@ Al in het register (#258), met het filter `club`.
     Dezelfde 50 koppen geven met de nieuwe regels 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
     De twee die `doubtful` blijven, gaan over de plaats.
     Geen bericht over de club staat bij de 44, en geen bericht over iets anders staat bij de `relevant`.
+    Met de Friese schrijfwijze en de Friese voetbalwoorden erbij (#270) geven dezelfde 50 koppen dezelfde uitkomst: geen kop veranderde.
     Wat het filter doet, staat in de README van de importer, onder _Het relevantiefilter_.
 - **`robots.txt`:** laat ons de feed toe.
   De importer haalde het op 25 oktober 2026 opnieuw op, met zijn eigen user agent.
@@ -586,7 +591,9 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
 - **Feed:** `https://tydlik.omropfryslan.nl/xml/podcast/788619`
   - Het adres uit het prototype, `argyf2.omropfryslan.nl`, werkt niet meer; de feed staat nu op `tydlik.omropfryslan.nl`.
   - Werkt: ja, RSS 2.0 met 390 afleveringen; de nieuwste is van 19 oktober 2026, de oudste van 31 juli 2018.
-  - Over sc Heerenveen: 8 van de 390 noemen Heerenveen in de titel of de beschrijving.
+  - Over sc Heerenveen: 53 van de nieuwste 200 afleveringen noemen de club in de titel: 2 keer "Heerenveen", 50 keer "Hearrenfean" en 1 keer "Feanster".
+    Dat telden we op 25 oktober 2026 met de lookup van Apple Podcasts, die alleen de nieuwste 200 geeft.
+    De telling van 24 oktober, 8 van de 390 met "Heerenveen" in de titel of de beschrijving, kende alleen de Nederlandse schrijfwijze; de titels zijn meestal Fries.
   - Link: elke aflevering heeft dezelfde link, de pagina van het programma (`https://www.omropfryslan.nl/fy/podcast/sportcast`), dus geen pagina per aflevering.
 - **`robots.txt`:** op `tydlik.omropfryslan.nl` staat `Disallow: /` voor iedereen, dus de fetcher mag de feed niet lezen.
 - **Besluit: afwijzen, voor nu.**

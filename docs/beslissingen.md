@@ -3176,6 +3176,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** zoeken op een deel van een woord (meer treffers, ook "Asc" en straatnamen); een lijst met andere clubs om een wedstrijd van een andere club in Heerenveen te weren (nog een lijst die iemand bijhoudt, zonder dat we weten of het nodig is).
 - **Later:** zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_; de naam van iemand van de club maakt een kop alleen `relevant` als het de volledige naam is, en "wint" en "verliest" zijn voetbalwoorden.
   Zie ook _De namen van de profclubs geven context: "Heerenveen" naast een club is een wedstrijd_: de naam van een andere profclub naast "Heerenveen" maakt een kop ook `relevant`.
+  Zie ook _Het relevantiefilter kent de Friese schrijfwijze van de club en Friese voetbalwoorden_: "Hearrenfean" telt als "Heerenveen".
 
 ### De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok
 
@@ -4254,3 +4255,33 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De teardown verwijdert ook de artikelen van die accounts, voor de logregels en de accounts.
 - **Waarom:** een gepubliceerd artikel is het nieuwste en wordt de kaart op de homepage, en dan zou de test van de kaart in `articles.spec.ts` falen, afhankelijk van wie eerst kwam.
 - **Alternatieven:** de test het artikel meteen laten intrekken (een korte tijd blijft het zichtbaar, en parallelle tests zien het dan soms); de test van de kaart minder streng maken (hij toetst dan minder).
+
+### Het relevantiefilter kent de Friese schrijfwijze van de club en Friese voetbalwoorden
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het filter kent de Friese schrijfwijze van de club, "Hearrenfean", en een lijst Friese voetbalwoorden, naast de Nederlandse (besluit van de projecteigenaar, #270).
+  - "sc Hearrenfean" (ook "s.c.", "SC" en in "sc Hearrenfean-fan") is `relevant`, zoals "sc Heerenveen".
+  - "Hearrenfean" met een voetbalwoord (Nederlands of Fries), de achternaam van iemand van de club of een andere profclub is `relevant`; "Hearrenfean" alleen is `doubtful`.
+    Een kop mag allebei de schrijfwijzen hebben.
+  - Het bijvoeglijk naamwoord "Feanster" is de naam van de club niet, net als "Heerenveense": een kop met alleen "Feanster" is `irrelevant`, ook met een voetbalwoord.
+    Staat "Hearrenfean" erbij, dan beslist die naam.
+  - `relevance-terms.ts` heeft `clubNames` voor de twee namen en `frisianFootballWords` voor de Friese woorden.
+    De regels uit #74 blijven: hoofdletters en accenten tellen niet (een "â", "û" of "ú" valt weg), alleen hele woorden, en het streepje splitst.
+    De Friese "y" en "ij" hoeven niets: de lijst schrijft de woorden zoals het Fries ze schrijft ("kompetysje"), en het filter zet er niets om.
+- **Waarom:** Omrop Fryslân, onze eerste regionale bron, schrijft veel in het Fries, en de grote meerderheid van de Friestalige koppen over de club (50 van de 53 bij Sportcast) noemt de club zo.
+  Zonder de Friese woorden mist het filter juist de berichten die een supporter uit Friesland wil zien.
+  Een gemist clubbericht is erger dan een bericht dat een moderator verbergt (zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_).
+- **De Friese woorden:** 23 woorden, elk gevonden op de Friese Wikipedia (fy.wikipedia.org) op 25 oktober 2026, op de pagina's "SC Hearrenfean", "Fuotbal", "Earedifyzje" en "KNVB-beker".
+  De feed van Omrop Fryslân had die dag geen enkele Friese voetbalkop (alle 50 koppen zijn Nederlands, op "Liwwadder" en "Fryslân" na), dus geen woord komt uit de feed.
+  Een woord dat het Nederlands en het Fries hetzelfde schrijven (wint, doelpunt, supporters, stadion, trainer, kampioen), staat alleen in de Nederlandse lijst.
+  De lijst is: alvetal, earedifyzje, ferdigener, ferdigeners, ferlear, fuotbal, fuotballer, fuotballers, haadtrainer, kompetysje, middenfjilder, middenfjilders, oerwinning, seleksje, skoarden, thusoerwinning, thuswedstriden, trener, utoerwinning, utwedstriid, wedstriden, wedstriid en wun ("wûn").
+- **Wat we niet opnamen:** woorden die ook buiten het voetbal gewoon zijn, naar de les van "wint": "ploech" (ook elke groep of ploeg), "spiler" (speler van alles), "útslach" (uitslag, maar ook huiduitslag), "kampioenskip" (ook bij fierljeppen en skûtsjesilen), "ferlies" (ook verlies in geld), "promoasje", "beker" en "oanhing".
+  Een kop met een van die woorden en "Hearrenfean" is `doubtful`.
+  "ferliest", "winne" en "skoarje" vonden we niet op de pagina's, dus ze staan er niet; "wint" staat al in de Nederlandse lijst.
+- **De afweging bij "wûn" en "ferlear":** zoals "wint" en "verliest" maken ze van "Frou wûn lotterij yn Hearrenfean" een `relevant` kop, die een moderator verbergt.
+  Dat nemen we aan, want een weggelaten "Hearrenfean wûn fan Cambuur" is erger.
+  De tests houden die twee valse treffers zichtbaar.
+- **De telling van Omrop Fryslân:** de 50 koppen van 25 oktober 2026 geven met de Friese woorden dezelfde uitkomst als zonder: 4 `relevant`, 2 `doubtful` en 44 `irrelevant`, en geen kop veranderde.
+  Dat klopt, want geen kop had een Friese schrijfwijze of een Fries voetbalwoord.
+  De verandering werkt dus pas als de bron een Friestalige kop over de club schrijft, zoals Sportcast.
+- **Alternatieven:** niets doen (de Friese koppen verdwijnen stil); het Fries volledig laten vertalen door een taalmodel (traag, duur, niet te testen, tegen _Het relevantiefilter kijkt alleen naar de kop, en bewaart wat het niet toont_); alleen de naam van de club toevoegen en geen voetbalwoorden (eenvoudiger, maar "Hearrenfean wint" blijft dan `doubtful`, en "Hearrenfean wûn" ook).

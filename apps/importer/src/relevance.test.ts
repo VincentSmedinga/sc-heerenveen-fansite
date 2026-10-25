@@ -2,7 +2,14 @@ import type { ItemRelevance } from '@fansite/db/schema'
 
 import { describe, expect, it } from 'vitest'
 
-import { clubPeople, clubSurnames, footballWords, otherClubs } from './relevance-terms.ts'
+import {
+  clubNames,
+  clubPeople,
+  clubSurnames,
+  footballWords,
+  frisianFootballWords,
+  otherClubs,
+} from './relevance-terms.ts'
 import { judgeRelevance, normaliseTitle } from './relevance.ts'
 
 type Case = [title: string, expected: ItemRelevance]
@@ -273,6 +280,99 @@ const namesLikeWords: Case[] = [
   ['Proper verslag van Heerenveen', 'doubtful'],
 ]
 
+/**
+ * Rule 1 to 3 in Frisian: the club is "Hearrenfean", the Frisian name of the town and the
+ * club. All made up (verzonnen) except the two real headlines of the feed of Omrop Fryslân that
+ * are marked: that feed is nearly all Dutch, and had no Frisian headline about the club on
+ * 25 October 2026 (see `docs/bronnen.md`).
+ */
+const frisianClub: Case[] = [
+  // "sc Hearrenfean", in every spelling of "sc".
+  ['sc Hearrenfean wint fan Ajax', 'relevant'],
+  ['SC Hearrenfean ferlear thús mei 0-2', 'relevant'],
+  ['S.C. Hearrenfean presintearret nije oanwinst', 'relevant'],
+  ['sc-Hearrenfean sjocht foarút', 'relevant'],
+  ['sc Hearrenfean-fan wint reis', 'relevant'],
+  ['SC HEARRENFEAN SLUT AF MEI OERWINNING', 'relevant'],
+  ['Jong sc Hearrenfean wûn', 'relevant'],
+  ['Nij seizoen foar sc Hearrenfean Froulju', 'relevant'],
+  // Accents do not matter.
+  ['sc Hearrenfeân wint', 'relevant'],
+  // The club in Dutch and Frisian in one headline.
+  ['Hearrenfean (Heerenveen) wint fan Ajax', 'relevant'],
+  ['sc Heerenveen en sc Hearrenfean yn ien kop', 'relevant'],
+  // "Hearrenfean" with a word from football, Dutch or Frisian.
+  ['Hearrenfean wint belangrike wedstriid', 'relevant'],
+  ['Hearrenfean wint belangrijke wedstrijd', 'relevant'],
+  ['Hearrenfean wûn mei 3-2 fan Utrecht', 'relevant'],
+  ['Hearrenfean-supporters meitsje har soargen', 'relevant'],
+  ['Nije trener foar Hearrenfean', 'relevant'],
+  ['Nije haadtrainer foar Hearrenfean', 'relevant'],
+  ['Thúswedstriden fan Hearrenfean útferkocht', 'relevant'],
+  ['Hearrenfean slút kompetysje ôf mei in oerwinning', 'relevant'],
+  ['Seleksje fan Hearrenfean bekend', 'relevant'],
+  ['Ferdigener sjocht nei Hearrenfean', 'relevant'],
+  ['Middenfjilder tekenet by Hearrenfean', 'relevant'],
+  ['Earedifyzje: Hearrenfean thús tsjin Twente', 'relevant'],
+  ['Hearrenfean en Volendam spylje in oefenwedstrijd', 'relevant'],
+  ['Hearrenfean wûn mei 2-0 fan Cambuur', 'relevant'],
+  // "Hearrenfean" with a surname from the club or with another professional club.
+  ['Vente skoarde twa kear foar Hearrenfean', 'relevant'],
+  ['Robin Veldman: "Hearrenfean moat skerper wêze"', 'relevant'],
+  ['Ajax - Hearrenfean: de opstellingen', 'relevant'],
+  ['Hearrenfean tsjin Go Ahead Eagles', 'relevant'],
+  ['Hearrenfean - FC Groningen', 'relevant'],
+  // Only "Hearrenfean", only a surname: someone looks at it.
+  ['Gemeente Hearrenfean sykjt nije wethâlder', 'doubtful'],
+  ['Brân yn wenning yn Hearrenfean', 'doubtful'],
+  ['Treinen tusken Hearrenfean en Ljouwert reitsje net', 'doubtful'],
+  ['Hearrenfean en Ljouwert wurkje gear oan nij swimbad', 'doubtful'],
+  ['De plak It Hearrenfean krijt in nij swimbad', 'doubtful'],
+  ['Hearrenfean-Eaost: bewenners lilk oer ferkearsplan', 'doubtful'],
+  ['Veldman is der klear foar', 'doubtful'],
+  ['Hearrenfean en Heerenveen wurkje gear', 'doubtful'],
+  // Whole words only.
+  ['Asc Hearrenfean iepenet filiaal', 'doubtful'],
+  ['Hearrenfeanwei dicht troch wurkseamheden', 'irrelevant'],
+  ['Scheerenfean is gjin plak', 'irrelevant'],
+  // The Frisian football words are not enough without the name.
+  ['Wedstriid yn Dokkum ôfset', 'irrelevant'],
+  ['Trener fan FC Emmen ûntslein', 'irrelevant'],
+  ['Cambuur ferlear thús fan Willem II', 'irrelevant'],
+  ['Ajax wûn fan Feyenoord', 'irrelevant'],
+  ['sc Cambuur wûn yn Ljouwert', 'irrelevant'],
+  ['Cambuur - Willem II: de opstellingen', 'irrelevant'],
+  // Real headlines of the feed of Omrop Fryslân, with Frisian words but not about the club.
+  ['Eropuit dit weekend? Dit is er te doen in Fryslân', 'irrelevant'],
+  ['Liwwadder Gerard Roorda vond in Marokko de tweede grote liefde van zijn leven', 'irrelevant'],
+  // Words that are an ordinary word as much as football are not on the list, so these stay
+  // `doubtful`: "ploech" (a crew), "spiler" (a player of anything), "útslach" (a result or a
+  // rash), "kampioenskip" (fierljeppen and skûtsjesilen have one too) and "ferlies" (a loss).
+  ['Ploech frijwilligers helpt yn Hearrenfean', 'doubtful'],
+  ['Spiler fan kaartklup yn Hearrenfean ûnderskieden', 'doubtful'],
+  ['Útslach fan de ferkiezings yn Hearrenfean', 'doubtful'],
+  ['Kampioenskip fierljeppen yn Hearrenfean', 'doubtful'],
+  ['Ferlies foar bedriuw yn Hearrenfean', 'doubtful'],
+  // Known false positives, like "Man wint loterij in Heerenveen": the verbs of winning and
+  // losing are football words on purpose. A moderator hides such an item.
+  ['Frou wûn lotterij yn Hearrenfean', 'relevant'],
+  ['Frou ferlear har tas yn Hearrenfean', 'relevant'],
+]
+
+/** "Feanster" is the adjective ("of Heerenveen"): it is not the name of the club. */
+const frisianAdjective: Case[] = [
+  ['Feanster boer wint priis', 'irrelevant'],
+  ['Feanster wedstriid útsteld', 'irrelevant'],
+  ['Feanster supporter helle yn Ljouwert', 'irrelevant'],
+  ['Feanster trener fan it jier', 'irrelevant'],
+  ['Feanster winkelsintrum iepen', 'irrelevant'],
+  // With the name of the club the name decides, and the adjective adds nothing.
+  ['Feanster boer hat nije skuorre yn Hearrenfean', 'doubtful'],
+  ['Feanster boer yn Heerenveen', 'doubtful'],
+  ['Feanster trener by Hearrenfean', 'relevant'],
+  ['Feanster supporter fan sc Hearrenfean', 'relevant'],
+]
+
 describe('judgeRelevance', () => {
   describe.each([
     ['names the club', namesTheClub],
@@ -286,6 +386,8 @@ describe('judgeRelevance', () => {
     ['names a legend', legends],
     ['names someone who left the club', leftTheClub],
     ['the recordings of the club feeds', recordings],
+    ['names the club in Frisian', frisianClub],
+    ['does not take the Frisian adjective for the club', frisianAdjective],
   ] as [string, Case[]][])('%s', (_name, cases) => {
     it.each(cases)('%j is %s', (title, expected) => {
       expect(judgeRelevance(title)).toBe(expected)
@@ -328,6 +430,9 @@ describe('normaliseTitle', () => {
     ['sc Heerenveen-fan', ['sc', 'heerenveen', 'fan']],
     ['“Héérenveen!”', ['heerenveen']],
     ['Uldriķis', ['uldrikis']],
+    ['sc Hearrenfeân', ['sc', 'hearrenfean']],
+    ['Thúswedstriden fan Hearrenfean-fans', ['thuswedstriden', 'fan', 'hearrenfean', 'fans']],
+    ['Hy wûn yn Fryslân', ['hy', 'wun', 'yn', 'fryslan']],
     ["Abe Lenstra's stadion", ['abe', 'lenstra', 's', 'stadion']],
     ['', []],
   ])('%j gives %j', (title, tokens) => {
@@ -339,13 +444,20 @@ describe('the lists of names and words', () => {
   const normalised = (term: string) => normaliseTitle(term).join(' ')
 
   it('hold terms that are already normalised, so they match what a headline gives', () => {
-    for (const term of [...clubPeople, ...clubSurnames, ...footballWords, ...otherClubs]) {
+    for (const term of [
+      ...clubNames,
+      ...clubPeople,
+      ...clubSurnames,
+      ...footballWords,
+      ...frisianFootballWords,
+      ...otherClubs,
+    ]) {
       expect(term, `"${term}" is not normalised`).toBe(normalised(term))
     }
   })
 
   it('hold no term twice', () => {
-    const all = [...clubPeople, ...clubSurnames, ...footballWords, ...otherClubs]
+    const all = [...clubNames, ...clubPeople, ...clubSurnames, ...footballWords, ...frisianFootballWords, ...otherClubs]
 
     expect(new Set(all).size).toBe(all.length)
   })
@@ -365,6 +477,10 @@ describe('the lists of names and words', () => {
   it('keep the club and the town out of the football words', () => {
     expect(footballWords).not.toContain('heerenveen')
     expect(footballWords).not.toContain('sc')
+    expect(footballWords).not.toContain('hearrenfean')
+    expect(frisianFootballWords).not.toContain('heerenveen')
+    expect(frisianFootballWords).not.toContain('hearrenfean')
+    expect(frisianFootballWords).not.toContain('sc')
     expect(otherClubs).not.toContain('heerenveen')
     expect(otherClubs).not.toContain('sc heerenveen')
     expect(otherClubs).not.toContain('jong sc heerenveen')
