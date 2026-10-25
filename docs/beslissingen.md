@@ -3152,7 +3152,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 25 oktober 2026
 - **Besluit:** `judgeRelevance` in `apps/importer/src/relevance.ts` is één zuivere functie met de regels uit #74:
-  - de kop noemt "sc Heerenveen": `relevant`;
+  - de kop noemt "sc Heerenveen", of Abe Lenstra: `relevant`;
   - de kop noemt "Heerenveen" met een voetbalwoord of de naam van iemand van de club: `relevant`;
   - de kop noemt alleen "Heerenveen", of alleen de naam van iemand van de club: `doubtful`;
   - anders: `irrelevant`.
@@ -3160,28 +3160,34 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zo telt "sc Heerenveen-fan", "SC HEERENVEEN" en "sc. Heerenveen" als de club.
   "sc" moet direct voor "Heerenveen" staan.
   Alleen het hele woord telt: "Asc Heerenveen" noemt de club niet, "Heerenveenseweg" en het bijvoeglijk naamwoord "Heerenveense" zijn niet "Heerenveen" (dat wordt `irrelevant`, tenzij er een naam of club bij staat), en "wandelwedstrijd" is geen "wedstrijd".
-  Een term van meer woorden, zoals "Abe Lenstra Stadion" of een volledige naam, telt alleen als die woorden naast elkaar staan.
+  Een term van meer woorden, zoals "Europa League" of een volledige naam, telt alleen als die woorden naast elkaar staan.
 - **Wat de regels niet zien:** de wedstrijd van een andere club in Heerenveen, zoals een interland in het Abe Lenstra Stadion, heeft "Heerenveen" en een voetbalwoord en wordt dus `relevant`.
   De lijsten kennen geen andere clubs en spelers van andere clubs: een kop met "Heerenveen" en een speler van Ajax zonder voetbalwoord is `doubtful`.
   Dat is een fout-positief die de regel van de projecteigenaar toelaat, en die de koppen uit de logs van het prototype laten zien als hij ze aanlevert.
-  "Abe Lenstra" alleen telt niet als voetbalwoord, want zo heet ook een boulevard in Heerenveen.
+  Een kop over de Abe Lenstra Boulevard komt er ook in; een moderator verbergt zo'n bericht.
+- **Abe Lenstra:** een kop met "Abe Lenstra" is `relevant`, ook zonder de club.
+  Hij is onze grootste speler aller tijden, dus berichten over hem horen op de site (besluit van de projecteigenaar, 25 oktober 2026; dit is een aanvulling op de regels van #74).
+- **Niet te streng:** de projecteigenaar wil een filter dat niet te streng is, want een bericht dat doorkomt is zo verborgen, en een bericht dat wordt tegengehouden ziet niemand.
+  Daarom staan de voetbalwoorden ruim in de lijst, ook woorden als coach, competitie, kampioen en stadion, die er samen met "Heerenveen" bijna altijd een voetbalkop van maken.
 - **Waarom:** een Nederlandse kop heeft de club bijna altijd met naam erin, en een gemeentebericht heeft "Heerenveen" zonder voetbal.
   Hele woorden voorkomen de meeste valse treffers zonder een lijst met uitzonderingen.
 - **Alternatieven:** zoeken op een deel van een woord (meer treffers, ook "Asc" en straatnamen); een lijst met andere clubs om een wedstrijd van een andere club in Heerenveen te weren (nog een lijst die iemand bijhoudt, zonder dat we weten of het nodig is).
 
-### De lijst met namen en voetbalwoorden: de selectie van nu, volledige namen, geen oud-spelers
+### De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok
 
 - **Datum:** 25 oktober 2026
 - **Besluit:** `apps/importer/src/relevance-terms.ts` heeft twee lijsten: de selectie en staf van sc Heerenveen in 2026/27 (de spelers, de hoofdtrainer, de assistenten en de directeuren), en voetbalwoorden.
   De bovenkant van het bestand zegt wie ze bijhoudt (de projecteigenaar en de Coordinator) en wanneer ze zijn nagekeken (25 oktober 2026, naar de Nederlandse Wikipedia, bijgewerkt op 17 oktober 2026, en de selectie op vi.nl).
-  Van iemand staat de volledige naam op de lijst.
-  De achternaam alleen staat er als die geen gewoon woord is en geen veelvoorkomende achternaam (Klaverboer, Noppert, Hilgers, Meerveld), en niet bij namen als Kersten, Scholten, Veldman, Proper, Machine, Schaken en De Haan.
-  Staan de bronnen in een verschillende spelling (Hristiyan en Christijan Petrov), dan staan beide op de lijst.
-  Oud-spelers en spelers die net vertrokken zijn (Brouwers, Hopland), staan er niet op.
-- **Waarom:** een achternaam die ook een woord of een gewone achternaam is, laat koppen over iemand anders op de club lijken, en met "Heerenveen" erbij worden die `relevant`.
-  Een oud-speler staat bijna altijd met de club in de kop, en een lijst die jaren oud wordt, maakt ruis.
+  Van iemand staat de volledige naam op de lijst en de achternaam alleen, ook een veelvoorkomende zoals Kersten of Veldman.
+  Een achternaam alleen maakt een kop `relevant` met "Heerenveen" erbij, en zonder de club `doubtful`.
+  Een achternaam die ook een gewoon woord is, staat er niet alleen op (Proper, Machine, Schaken, De Haan, Zaal, Bakker, Brugge): die heeft de volledige naam nodig.
+  Hristiyan Petrov schrijven we zo, met een H (de projecteigenaar, 25 oktober 2026; Wikipedia schreef Christijan).
+  Spelers en staf die in 2026 vertrokken (onder anderen Brouwers, Hopland, Van Overeem, Bakker, Brugge en Zaal), staan er ook op.
+  Ouder vertrokken spelers staan er niet op; voeg er een toe als een kop laat zien dat we hem missen.
+- **Waarom:** de projecteigenaar wil het filter niet te streng en vindt nieuws over spelers die vertrokken zijn ook prettig om te lezen.
+  Een achternaam alleen is niet gevaarlijk: zonder "Heerenveen" is de kop `doubtful`, en een kop die doorkomt, is snel verborgen.
   Alleen namen, geen andere gegevens over een persoon.
-- **Alternatieven:** alle achternamen opnemen (meer treffers, meer fouten); ook oud-spelers (de lijst groeit nooit uit); de selectie elke dag ophalen bij een bron (een extra verzoek aan een derde en een extra stuk code voor een lijst die elke maand een regel wijzigt).
+- **Alternatieven:** alleen volledige namen (een kop als "Vente is los bij Heerenveen" valt dan weg, dat zagen we in de opname van Voetbal International); alle oud-spelers van de club (de lijst groeit nooit uit); de selectie elke dag ophalen bij een bron (een extra verzoek aan een derde en een extra stuk code voor een lijst die elke maand een regel wijzigt).
 
 ### Een feed heeft een filter, `none` of `club`, en de importer beoordeelt elk bericht opnieuw
 

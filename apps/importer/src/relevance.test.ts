@@ -39,6 +39,51 @@ const namesTheClub: Case[] = [
   ['sc Héérenveen wint', 'relevant'],
 ]
 
+/** Abe Lenstra is our greatest player of all time: a headline about him belongs on the site. */
+const legends: Case[] = [
+  ['Abe Lenstra, onze grootste speler aller tijden', 'relevant'],
+  ['Nieuw boek over Abe Lenstra verschijnt in december', 'relevant'],
+  ['ABE LENSTRA-stadion krijgt nieuwe tribune', 'relevant'],
+  // A known false positive: the boulevard has his name. A moderator hides such an item.
+  ['Wegwerkzaamheden op de Abe Lenstra Boulevard', 'relevant'],
+  ['Lenstra opent nieuwe garage in Drachten', 'irrelevant'],
+]
+
+/** Players and staff who left in 2026 are on the list, so news about them gets in. */
+const leftTheClub: Case[] = [
+  ['Luuk Brouwers tekent bij Omonia Nicosia', 'doubtful'],
+  ['Brouwers kijkt terug op zijn tijd bij Heerenveen', 'relevant'],
+  ['Henk Brugge nieuwe trainer van Telstar', 'doubtful'],
+  ['Brugge krijgt nieuw dorpshuis', 'irrelevant'],
+]
+
+/**
+ * Headlines of the recordings of the feeds of the Leeuwarder Courant and Voetbal International
+ * (`fixtures`), which only write about the club, so every one of them belongs on the site. The
+ * rules still miss some, which are marked: they are `doubtful`, or even `irrelevant`, because
+ * the headline names neither the club nor a word or a name from the lists.
+ */
+const recordings: Case[] = [
+  ["Vente is los bij Heerenveen: 'Er lag druk op zijn schouders'", 'relevant'],
+  ['Vente van de nul af bij ruime thuiszege Heerenveen op Excelsior', 'relevant'],
+  ['PSV overtuigt niet, maar wint wel van Heerenveen en legt extra druk op topper', 'relevant'],
+  ['Samenvatting: PSV boekt zakelijke zege op kansen missend Heerenveen', 'relevant'],
+  ['Hele persconferentie: Flamingo en Bosz over moeizame zege PSV op Heerenveen', 'relevant'],
+  ['SC Heerenveen verslaat Excelsior met ruime cijfers na mooie treffers in het Abe Lenstra-stadion', 'relevant'],
+  [
+    'Of Robin Veldman het nu wil of niet: de spitspositie van SC Heerenveen staat met Dylan Vente ter discussie',
+    'relevant',
+  ],
+  // Missed: only a name, no club.
+  ["Veldman kritisch op kansen missende Rivera: 'Moet streng voor zichzelf zijn'", 'doubtful'],
+  ['De comeback van Levi Smans: positief denken, positieve uitkomst', 'doubtful'],
+  ['Timo Zaal verkast naar Zweedse club & nieuwe aflevering van Omroep Abe', 'doubtful'],
+  // Missed: the club is only "Heerenveen" and the headline has no word from football.
+  ["Bosz onder de indruk van Heerenveen: 'Dit is al jaren'", 'doubtful'],
+  // Missed: not a word of the club in it.
+  ['Elftal van de Week: geen spelers van topdrie, Friesland goed vertegenwoordigd', 'irrelevant'],
+]
+
 /** Rule 2: "Heerenveen" with a word from football, or the name of someone from the club. */
 const heerenveenWithFootball: Case[] = [
   ['Heerenveen wint belangrijke wedstrijd', 'relevant'],
@@ -108,11 +153,15 @@ const namesLikeWords: Case[] = [
   ['Dirk Proper maakt indruk', 'doubtful'],
   ['Machine kapot op de markt in Heerenveen', 'doubtful'],
   ['Lanroy Machine scoort', 'doubtful'],
-  ['De Veldman is weer open', 'irrelevant'],
+  ['De Veldman is weer open', 'doubtful'],
   ['Smit wint ritje door Friesland', 'irrelevant'],
-  // The common surnames Kersten and Scholten count only with the first name.
-  ['Kersten bezoekt Heerenveen', 'doubtful'],
+  // A common surname counts with "Heerenveen", and is `doubtful` on its own.
+  ['Kersten bezoekt Heerenveen', 'relevant'],
+  ['Kersten bezoekt de markt', 'doubtful'],
   ['Sam Kersten bezoekt Heerenveen', 'relevant'],
+  // These need the full name, also with "Heerenveen".
+  ['Machine kapot bij Heerenveen', 'doubtful'],
+  ['Proper verslag van Heerenveen', 'doubtful'],
 ]
 
 describe('judgeRelevance', () => {
@@ -123,6 +172,9 @@ describe('judgeRelevance', () => {
     ['is irrelevant', irrelevant],
     ['looks at whole words only', wholeWordsOnly],
     ['treats names like words with care', namesLikeWords],
+    ['names a legend', legends],
+    ['names someone who left the club', leftTheClub],
+    ['the recordings of the club feeds', recordings],
   ] as [string, Case[]][])('%s', (_name, cases) => {
     it.each(cases)('%j is %s', (title, expected) => {
       expect(judgeRelevance(title)).toBe(expected)

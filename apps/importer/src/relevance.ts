@@ -1,14 +1,14 @@
 import type { ItemRelevance } from '@fansite/db/schema'
 
-import { clubPeople, footballWords } from './relevance-terms.ts'
+import { clubLegends, clubPeople, footballWords } from './relevance-terms.ts'
 
 /**
  * Decides from the headline alone whether an item is about sc Heerenveen. A pure function: the
  * same headline always gives the same answer, and nothing else is read (the importer keeps no
  * intro or category, see `docs/beslissingen.md`).
  *
- * - `relevant`: the headline names "sc Heerenveen", or it names "Heerenveen" together with a
- *   word from football or the name of someone from the club;
+ * - `relevant`: the headline names "sc Heerenveen" or a club legend (Abe Lenstra), or it names
+ *   "Heerenveen" together with a word from football or the name of someone from the club;
  * - `doubtful`: it names only "Heerenveen", the town and the municipality, or only someone from
  *   the club;
  * - `irrelevant`: neither.
@@ -21,7 +21,10 @@ import { clubPeople, footballWords } from './relevance-terms.ts'
 export function judgeRelevance(title: string): ItemRelevance {
   const words = normaliseTitle(title)
 
-  if (containsPhrase(words, ['sc', 'heerenveen'])) {
+  if (
+    containsPhrase(words, ['sc', 'heerenveen']) ||
+    clubPhrases.legends.some((phrase) => containsPhrase(words, phrase))
+  ) {
     return 'relevant'
   }
 
@@ -52,6 +55,7 @@ export function normaliseTitle(title: string): string[] {
 /** The terms of `relevance-terms.ts` as lists of words, made once. */
 const clubPhrases = {
   footballWords: footballWords.map(normaliseTitle),
+  legends: clubLegends.map(normaliseTitle),
   people: clubPeople.map(normaliseTitle),
 }
 
