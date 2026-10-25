@@ -36,7 +36,8 @@ export type SegmentedControlProps<Value extends string> = Omit<
 /**
  * A few buttons side by side, of which exactly one is pressed, such as Licht and Donker. It is a group with a name, and
  * each button says whether it is pressed with `aria-pressed`. The pressed button is filled and the others are an outline,
- * so it shows without colour. An option can have an icon, filled on the pressed button. It holds no state: the page gives it the value and handles the change.
+ * so it shows without colour. An option can have an icon, filled on the pressed button. It holds no state: the page
+ * gives it the value and handles the change.
  */
 export const SegmentedControl = <Value extends string>({
   className,

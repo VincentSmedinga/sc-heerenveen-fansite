@@ -21,8 +21,9 @@ export type PaginationProps = Omit<ComponentPropsWithoutRef<'nav'>, 'aria-label'
 
 /**
  * Pagination: a `nav` with a name, a link to the previous page, the text "Pagina 2 van 9", and a link to the next
- * page. The two links are words with an arrow, and not only arrows: the arrow to the left in front of "Vorige", the arrow to the right behind "Volgende". On the first page there is no previous link and on the last page
- * no next link; the text stays in the middle either way.
+ * page. The two links are words with an arrow, and not only arrows: the arrow to the left in front of "Vorige", the
+ * arrow to the right behind "Volgende". On the first page there is no previous link and on the last page no next link;
+ * the text stays in the middle either way.
  */
 export const Pagination = ({ className, current, label, nextHref, previousHref, total, ...props }: PaginationProps) => (
   <nav {...props} aria-label={label} className={classNames('hf-pagination', className)}>
