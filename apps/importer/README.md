@@ -203,11 +203,11 @@ Het filter bepaalt voor elk bericht uit zo'n feed of het over sc Heerenveen gaat
 Het kijkt alleen naar de kop, want de importer bewaart geen intro of categorie.
 De functie is `judgeRelevance` in [`src/relevance.ts`](src/relevance.ts); ze is zuiver, dus dezelfde kop geeft altijd dezelfde waarde.
 
-| Waarde       | Wanneer                                                                                                                                                                                                   | Wat de site doet          |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `relevant`   | De kop noemt "sc Heerenveen" (ook "s.c." en "SC", en in "sc Heerenveen-fan"), Abe Lenstra of de volledige naam van iemand van de club, of "Heerenveen" met een voetbalwoord of een achternaam van de club | Toont het bericht         |
-| `doubtful`   | De kop noemt alleen "Heerenveen" (de gemeente en de plaats schrijven ook veel nieuws), of alleen een achternaam van de club                                                                               | Toont het bericht nergens |
-| `irrelevant` | Verder                                                                                                                                                                                                    | Toont het bericht nergens |
+| Waarde       | Wanneer                                                                                                                                                                                                                        | Wat de site doet          |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| `relevant`   | De kop noemt "sc Heerenveen" (ook "s.c." en "SC", en in "sc Heerenveen-fan"), Abe Lenstra of de volledige naam van iemand van de club, of "Heerenveen" met een voetbalwoord, een achternaam van de club of een andere profclub | Toont het bericht         |
+| `doubtful`   | De kop noemt alleen "Heerenveen" (de gemeente en de plaats schrijven ook veel nieuws), of alleen een achternaam van de club                                                                                                    | Toont het bericht nergens |
+| `irrelevant` | Verder                                                                                                                                                                                                                         | Toont het bericht nergens |
 
 Hoofdletters en accenten tellen niet, en alleen hele woorden: "Heerenveenseweg" is niet "Heerenveen" en "wandelwedstrijd" is geen "wedstrijd".
 De keuzes staan in `docs/beslissingen.md`, onder _De regels van het filter_.
@@ -261,6 +261,14 @@ Zo voeg je er een toe:
 4. Voeg in [`src/relevance.test.ts`](src/relevance.test.ts) een kop toe die de uitkomst laat zien.
 
 De volgende run past de nieuwe lijst toe op alle berichten van feeds met `club`.
+
+### De profclubs bijhouden
+
+`otherClubs` in [`src/relevance-terms.ts`](src/relevance-terms.ts) heeft de namen van de andere profclubs van de Eredivisie en de Eerste Divisie.
+"Heerenveen" naast zo'n naam is een wedstrijd, dus de kop is `relevant`, ook zonder voetbalwoord.
+Een club zonder "Heerenveen" zegt niets.
+Een club waarvan de korte naam ook een plaats is (Groningen, Utrecht, Zwolle, Emmen), staat er alleen met zijn volledige naam: "Heerenveen en Groningen" staat net zo goed in een kop over de A7.
+Pas de lijst aan na de promotie en degradatie van elk seizoen (mei tot juli), en schrijf bovenaan de datum van de controle.
 
 ### De testkoppen
 

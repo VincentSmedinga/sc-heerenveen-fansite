@@ -23,7 +23,8 @@
  *   as a full name.
  * - Players and staff who left in 2026 are on the list too: news about them is nice to read.
  *   Older former players are not; add one when a headline shows that we miss him.
- * - No other clubs, and no players of other clubs.
+ * - The professional clubs of the Eredivisie and the Eerste Divisie are on the list
+ *   `otherClubs`: "Heerenveen" next to one of them is a match. No players of other clubs.
  */
 
 /**
@@ -138,6 +139,84 @@ export const clubSurnames = [
   'nordas',
   'brouwers',
   'hopland',
+] as const
+
+/**
+ * The other professional clubs of the Eredivisie and the Eerste Divisie in the season 2026/27,
+ * as headlines write them. "Heerenveen" next to one of them is a match: "Ajax - Heerenveen: de
+ * opstellingen" is `relevant`, with no football word. On their own they say nothing.
+ *
+ * Checked on 25 October 2026, against the page "2026-27 Eredivisie" on en.wikipedia.org (18
+ * clubs, as of 24 October 2026) and the page "Eerste divisie 2026/27" on nl.wikipedia.org (20
+ * clubs, last edited 24 October 2026). Update it after the promotion and relegation of each
+ * season (May to July).
+ *
+ * A club whose short name is also a place is on the list with its full name only: "Groningen",
+ * "Utrecht", "Twente", "Zwolle", "Emmen" and the like are in headlines about the A7 and the
+ * trains as much as about football, and those would all become `relevant`. A headline that
+ * writes only "Utrecht" for the club can still get in with a word from football. A club whose
+ * short name is the club in nearly every headline (Ajax, PSV, Cambuur, Volendam) is on the
+ * list with it.
+ */
+export const otherClubs = [
+  // Eredivisie
+  'ado den haag',
+  'ado',
+  'ajax',
+  'afc ajax',
+  'az alkmaar',
+  'az',
+  'cambuur',
+  'sc cambuur',
+  'excelsior',
+  'feyenoord',
+  'fortuna sittard',
+  'go ahead eagles',
+  'fc groningen',
+  'nec nijmegen',
+  'nec',
+  'n e c',
+  'pec zwolle',
+  'pec',
+  'psv',
+  'psv eindhoven',
+  'sparta rotterdam',
+  'sparta',
+  'telstar',
+  'sc telstar',
+  'fc twente',
+  'fc utrecht',
+  'willem ii',
+  // Eerste Divisie
+  'almere city',
+  'fc den bosch',
+  'fc dordrecht',
+  'fc eindhoven',
+  'fc emmen',
+  'de graafschap',
+  'graafschap',
+  'helmond sport',
+  'heracles almelo',
+  'heracles',
+  'jong ajax',
+  'jong az',
+  'jong fc utrecht',
+  'jong psv',
+  'mvv maastricht',
+  'mvv',
+  'nac breda',
+  'nac',
+  'rkc waalwijk',
+  'rkc',
+  'roda jc kerkrade',
+  'roda jc',
+  'roda',
+  'top oss',
+  'vitesse',
+  'fc volendam',
+  'volendam',
+  'vvv venlo',
+  'vvv',
 ] as const
 
 /**

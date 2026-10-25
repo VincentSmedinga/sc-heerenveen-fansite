@@ -2,7 +2,7 @@ import type { ItemRelevance } from '@fansite/db/schema'
 
 import { describe, expect, it } from 'vitest'
 
-import { clubPeople, clubSurnames, footballWords } from './relevance-terms.ts'
+import { clubPeople, clubSurnames, footballWords, otherClubs } from './relevance-terms.ts'
 import { judgeRelevance, normaliseTitle } from './relevance.ts'
 
 type Case = [title: string, expected: ItemRelevance]
@@ -113,6 +113,25 @@ const heerenveenWithFootball: Case[] = [
   ['Man wint loterij in Heerenveen', 'relevant'],
 ]
 
+/** "Heerenveen" next to another professional club is a match, without a word from football. */
+const otherClubCases: Case[] = [
+  ['Ajax - Heerenveen: de opstellingen', 'relevant'],
+  ['Heerenveen - Go Ahead Eagles', 'relevant'],
+  ['Telstar en Heerenveen: de opstelling', 'relevant'],
+  ['PSV tegen Heerenveen: dit zijn de kaarten', 'relevant'],
+  ['Heerenveen bij N.E.C. en NEC Nijmegen', 'relevant'],
+  ['Heerenveen kijkt naar Jong Ajax', 'relevant'],
+  ['Heerenveen - Almere City: de uitslag', 'relevant'],
+  // A club without Heerenveen says nothing.
+  ['Ajax - Feyenoord: de opstellingen', 'irrelevant'],
+  // A club whose short name is also a place counts only with its full name.
+  ['Ongeluk op de A7 tussen Heerenveen en Groningen', 'doubtful'],
+  ['Treinen tussen Heerenveen en Zwolle rijden niet', 'doubtful'],
+  ['Heerenveen en Emmen kijken naar Utrecht', 'doubtful'],
+  ['Groningen - Heerenveen: de opstellingen', 'doubtful'],
+  ['FC Groningen - Heerenveen: de opstellingen', 'relevant'],
+]
+
 /** The full name of someone from the club is enough, with or without the club. */
 const fullNames: Case[] = [
   ['Ringo Meerveld baalt van zijn reserverol', 'relevant'],
@@ -192,6 +211,7 @@ describe('judgeRelevance', () => {
     ['is irrelevant', irrelevant],
     ['looks at whole words only', wholeWordsOnly],
     ['treats names like words with care', namesLikeWords],
+    ['names another professional club', otherClubCases],
     ['names a full name', fullNames],
     ['names a legend', legends],
     ['names someone who left the club', leftTheClub],
@@ -243,13 +263,13 @@ describe('the lists of names and words', () => {
   const normalised = (term: string) => normaliseTitle(term).join(' ')
 
   it('hold terms that are already normalised, so they match what a headline gives', () => {
-    for (const term of [...clubPeople, ...clubSurnames, ...footballWords]) {
+    for (const term of [...clubPeople, ...clubSurnames, ...footballWords, ...otherClubs]) {
       expect(term, `"${term}" is not normalised`).toBe(normalised(term))
     }
   })
 
   it('hold no term twice', () => {
-    const all = [...clubPeople, ...clubSurnames, ...footballWords]
+    const all = [...clubPeople, ...clubSurnames, ...footballWords, ...otherClubs]
 
     expect(new Set(all).size).toBe(all.length)
   })
@@ -269,5 +289,8 @@ describe('the lists of names and words', () => {
   it('keep the club and the town out of the football words', () => {
     expect(footballWords).not.toContain('heerenveen')
     expect(footballWords).not.toContain('sc')
+    expect(otherClubs).not.toContain('heerenveen')
+    expect(otherClubs).not.toContain('sc heerenveen')
+    expect(otherClubs).not.toContain('jong sc heerenveen')
   })
 })

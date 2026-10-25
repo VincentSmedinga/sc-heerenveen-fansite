@@ -3174,6 +3174,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Hele woorden voorkomen de meeste valse treffers zonder een lijst met uitzonderingen.
 - **Alternatieven:** zoeken op een deel van een woord (meer treffers, ook "Asc" en straatnamen); een lijst met andere clubs om een wedstrijd van een andere club in Heerenveen te weren (nog een lijst die iemand bijhoudt, zonder dat we weten of het nodig is).
 - **Later:** zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_; de naam van iemand van de club maakt een kop alleen `relevant` als het de volledige naam is, en "wint" en "verliest" zijn voetbalwoorden.
+  Zie ook _De namen van de profclubs geven context: "Heerenveen" naast een club is een wedstrijd_: de naam van een andere profclub naast "Heerenveen" maakt een kop ook `relevant`.
 
 ### De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok
 
@@ -3259,6 +3260,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Ook de volledige naam van iemand die in 2026 vertrok, maakt een kop `relevant`.
 - **Alternatieven:** een lijst met andere clubs, zodat "ADO Den Haag" in een kop de wedstrijd verraadt (nog een lijst om bij te houden); een regel voor een uitslag als "3-2" in de kop (nieuwe code, en alleen voor koppen met een uitslag).
 - **Later:** zie _De regels van het filter: hele woorden, zonder hoofdletters en accenten_ en _De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok_ voor de regels die hier veranderden.
+
+### De namen van de profclubs geven context: "Heerenveen" naast een club is een wedstrijd
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `relevance-terms.ts` krijgt een lijst `otherClubs` met de profclubs van de Eredivisie en de Eerste Divisie in 2026/27 (18 en 20 clubs, met de Jong-teams), zonder sc Heerenveen zelf.
+  Een kop met "Heerenveen" en een van die clubs is `relevant`, zoals een kop met "Heerenveen" en een voetbalwoord.
+  De projecteigenaar vroeg erom, na de kop met ADO Den Haag.
+  Een club zonder "Heerenveen" telt niet.
+- **Hoe de lijst is gemaakt:** naar de pagina "2026-27 Eredivisie" op en.wikipedia.org (18 clubs, stand van 24 oktober 2026) en "Eerste divisie 2026/27" op nl.wikipedia.org (20 clubs, laatst bewerkt op 24 oktober 2026).
+  De Nederlandse pagina over de Eredivisie van dit seizoen konden we niet lezen (404).
+  De 20 clubs van de Eerste Divisie staan in de tekst van het deel "Teams" van die pagina, en we hebben ze een tweede keer met die tekst vergeleken; de datum van de laatste bewerking komt uit een samenvatting van de pagina.
+  De 18 clubs van de Eredivisie komen uit de tabel "Stadiums and locations" van de Engelse pagina, via een leesdienst; die lijst is niet met de paginatekst zelf vergeleken.
+  De lijst moet na de promotie en degradatie van elk seizoen worden nagekeken.
+- **Waarom korte namen niet altijd:** een club waarvan de korte naam een plaats is, staat er alleen met zijn volledige naam (FC Groningen, FC Utrecht, FC Twente, PEC Zwolle, FC Emmen).
+  Koppen met "Heerenveen en Groningen" of "Heerenveen en Zwolle" gaan vaak over de A7 of de trein, en zouden anders allemaal `relevant` worden.
+  Een club waarvan de korte naam in bijna elke kop de club is (Ajax, PSV, Cambuur, Volendam) staat er met die naam.
+- **Gevolg:** een kop die alleen "Utrecht" of "Groningen" schrijft voor de club, heeft nog een voetbalwoord nodig.
+  De 50 koppen van Omrop Fryslân geven nog steeds 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
+- **Verandert de regels van #254:** ja, dit is een derde aanvulling op de regels van het filter uit #254 (na de volledige naam en de twee werkwoorden).
+  De projecteigenaar beslist in de pull request.
+- **Alternatieven:** alle korte namen toelaten (de A7 en de trein worden dan `relevant`); een regel voor een uitslag als "3-2" in de kop (nieuwe code); de clubs elke dag bij een bron ophalen (een verzoek aan een derde voor een lijst die één keer per seizoen verandert).
 
 ## Redactie
 
