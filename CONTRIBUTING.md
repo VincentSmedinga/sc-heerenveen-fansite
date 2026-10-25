@@ -30,7 +30,7 @@ Wil je dat we een bron toevoegen, open dan een issue en vermeld:
 - de feed of de podcast, als die er is;
 - waarom de bron past: schrijft hij over sc Heerenveen, en hoe vaak?
 
-Wat we van een bron laten zien, hangt af van de regels in het hoofdstuk [Redactie](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/redactie--documentatie) van Storybook.
+Wat we van een bron laten zien, hangt af van de regels in het hoofdstuk [Redactie](https://ds.heerenveen.org/?path=/docs/redactie--documentatie) van Storybook.
 Van elk item tonen we standaard alleen de kop, de link en de naam van de bron.
 Een intro of een foto tonen we alleen met toestemming van de bron.
 Een voorstel verandert daar niets aan.
@@ -135,7 +135,7 @@ Wat de reviewer bij elk onderdeel nakijkt:
 
 - code en beveiliging: de checklist hieronder;
 - toegankelijkheid: [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md);
-- redactie en bronbeleid: de checklist onderaan het hoofdstuk [Redactie](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/redactie--documentatie) van Storybook.
+- redactie en bronbeleid: de checklist onderaan het hoofdstuk [Redactie](https://ds.heerenveen.org/?path=/docs/redactie--documentatie) van Storybook.
 
 ### Checklist voor code en beveiliging
 

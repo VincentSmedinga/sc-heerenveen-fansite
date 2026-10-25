@@ -1,18 +1,29 @@
-# Builds Storybook on every pull request, and publishes it to GitHub Pages from main.
+# Builds Storybook on every pull request, and puts it on https://ds.heerenveen.org from main, over SSH like acceptance.yml
+# does. A push to main only starts this workflow when it changes something Storybook is made of (the paths below), so a
+# merge that only touches apps/ or docs/ deploys nothing. docs/designsysteem-publiceren.md says what the owner sets up on
+# the host and in GitHub. Until the secrets are there, the build still runs and the copy is skipped with a notice.
 
 name: Storybook
 
 on:
   pull_request:
+  # The paths filter is on the push trigger only. On the workflow as a whole it would also stop the pull request build,
+  # and the rule for main requires the check Build Storybook on every pull request.
   push:
     branches: [main]
+    paths:
+      - packages/design-system/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .github/workflows/storybook.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
 # One run per branch at a time, so an older build can't deploy over a newer one.
-# Pull requests cancel their older run; main lets a running deployment finish.
+# Pull requests cancel their older run; main lets a running deployment finish: a half-copied folder would break the site.
 concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -44,21 +55,119 @@ jobs:
       - name: Check that light-dark() is kept
         run: "! grep -rq -e '--lightningcss' packages/design-system/storybook-static/assets --include='*.css'"
 
-      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+      # The deploy job copies this build, so what goes live is what was checked here. On a pull request it is the
+      # build to download and look at.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
+          if-no-files-found: error
+          name: storybook
           path: packages/design-system/storybook-static
+          retention-days: 7
 
   deploy:
-    # Only main publishes; pull requests stop after the build.
+    # Only main and a manual run on main publish; pull requests stop after the build.
     if: github.ref == 'refs/heads/main'
+    name: Deploy to ds.heerenveen.org
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      pages: write
     environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      name: designsystem
+      url: https://ds.heerenveen.org
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: storybook
+          path: ${{ runner.temp }}/storybook
+
+      - id: secrets
+        name: Check the secrets
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          for name in DEPLOY_PATH SSH_HOST SSH_KNOWN_HOSTS SSH_PRIVATE_KEY SSH_USER; do
+            if [ -z "${!name}" ]; then
+              echo "::notice title=Deploy skipped::$name is not set in the environment designsystem. See docs/designsysteem-publiceren.md."
+              echo "ready=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          # rsync --delete empties the folder it copies to, so a wrong path must stop the run, not copy. Only the document
+          # root of this subdomain is allowed: absolute, without .., and ending in /domains/ds.heerenveen.org/public_html.
+          if ! printf '%s\n' "$DEPLOY_PATH" | grep -Eq '^/[A-Za-z0-9._/-]+/domains/ds\.heerenveen\.org/public_html$' \
+            || printf '%s\n' "$DEPLOY_PATH" | grep -Fq '..'; then
+            echo "::error title=Deploy stopped::DEPLOY_PATH in the environment designsystem is not the document root of ds.heerenveen.org (an absolute path that ends in /domains/ds.heerenveen.org/public_html). See docs/designsysteem-publiceren.md."
+            exit 1
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      # An empty or half-downloaded build would make --delete empty the document root.
+      - name: Check that the build is there
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          BUILD: ${{ runner.temp }}/storybook
+        run: |
+          for file in index.html iframe.html index.json manifests/components.json; do
+            if [ ! -s "$BUILD/$file" ]; then
+              echo "::error title=Deploy stopped::The build has no $file, so nothing is copied."
+              exit 1
+            fi
+          done
+          jq -e '.entries | length > 0' "$BUILD/index.json" > /dev/null
+          jq -e '.components | length > 0' "$BUILD/manifests/components.json" > /dev/null
+
+      - name: Set up SSH
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/designsystem_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # --delete removes files that are gone from the build. .well-known/ holds the files that renew the certificate, and
+      # .htaccess and cgi-bin/ are the host's own, so they stay.
+      - name: Copy the build to the host
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          BUILD: ${{ runner.temp }}/storybook
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          rsync -rltz --delete --chmod=D755,F644 --exclude=/.well-known/ --exclude=/.htaccess --exclude=/cgi-bin/ \
+            -e "ssh -p 26 -i $HOME/.ssh/designsystem_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            "$BUILD/" "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+
+      # The two files the next issue's MCP server and every link rely on. Each must answer 200 and be the file of this
+      # build. The check tries for a minute, in case the host serves an old copy for a moment.
+      - name: Check ds.heerenveen.org
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          BUILD: ${{ runner.temp }}/storybook
+        run: |
+          check() {
+            local file="$1" status
+            status=$(curl --silent --max-time 10 --output "$RUNNER_TEMP/served.json" --write-out '%{http_code}' "https://ds.heerenveen.org/$file" || true)
+            [ "$status" = 200 ] \
+              && jq -S . "$RUNNER_TEMP/served.json" > "$RUNNER_TEMP/served.sorted.json" \
+              && jq -S . "$BUILD/$file" > "$RUNNER_TEMP/built.sorted.json" \
+              && cmp -s "$RUNNER_TEMP/served.sorted.json" "$RUNNER_TEMP/built.sorted.json"
+          }
+          for file in index.json manifests/components.json; do
+            deadline=$((SECONDS + 60))
+            until check "$file"; do
+              if [ "$SECONDS" -ge "$deadline" ]; then
+                echo "::error title=Storybook check failed::https://ds.heerenveen.org/$file does not answer 200 with the file of this build. See docs/designsysteem-publiceren.md."
+                exit 1
+              fi
+              echo "https://ds.heerenveen.org/$file is not the file of this build yet."
+              sleep 5
+            done
+            echo "https://ds.heerenveen.org/$file is the file of this build."
+          done

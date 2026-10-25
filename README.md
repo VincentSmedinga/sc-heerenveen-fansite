@@ -72,6 +72,7 @@ Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvo
 - [`packages/design-system`](packages/design-system/README.md): huisstijl, tokens, componenten en Storybook
 - [`packages/shared`](packages/shared/README.md): hulpfuncties voor de site en de importer, zoals de controle van omgevingsvariabelen
 - [`docs/beslissingen.md`](docs/beslissingen.md): welke keuzes we hebben gemaakt, en waarom
+- [`docs/designsysteem-publiceren.md`](docs/designsysteem-publiceren.md): hoe Storybook op ds.heerenveen.org staat, en wat de eigenaar daarvoor instelt
 - [`docs/acceptatieomgeving.md`](docs/acceptatieomgeving.md): hoe de acceptatieomgeving op de hosting staat, en wat de eigenaar daarvoor instelt
 - [`docs/bronnen.md`](docs/bronnen.md): welke bronnen we hebben beoordeeld, en wat we over elke bron besloten
 - [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md): wat een mens of de reviewer nakijkt op toegankelijkheid, naast de automatische controles
@@ -131,7 +132,7 @@ Verandert de branch geen pagina, dan openen ze op de beginpagina.
 De samenvatting in de terminal zegt waar de commit vandaan komt (rij `Source`) en welke pagina's hij opent.
 De uitvoer van beide staat in `review.log` in de reviewmap.
 In het tabblad van de site en in de zijbalk van Storybook staat de naam van de branch, zodat je ziet wat er draait.
-Dat gebeurt alleen in ontwikkeling: acceptatie, productie en de Storybook op GitHub Pages tonen hem nooit.
+Dat gebeurt alleen in ontwikkeling: acceptatie, productie en de Storybook op ds.heerenveen.org tonen hem nooit.
 
 Stop ze met:
 

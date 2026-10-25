@@ -642,6 +642,45 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** elke 30 minuten; de Leeuwarder Courant stuurt geen `ETag`, dus elke run haalt de hele feed, maar het nieuws komt dan tot een half uur later.
   Of nu al een lock met `GET_LOCK`, zoals bij de migraties.
 
+### Storybook staat op ds.heerenveen.org
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** Storybook staat op ds.heerenveen.org op de hosting van mijn.host, en niet meer op GitHub Pages.
+  De workflow `storybook.yml` zet het neer met rsync over SSH, zoals `acceptance.yml` de site neerzet, met een eigen omgeving in GitHub (`designsystem`) en eigen geheimen.
+  `docs/designsysteem-publiceren.md` zegt wat de eigenaar eenmalig instelt.
+- **Waarom:** één plek en één adres voor het designsysteem, ook voor de MCP-server die er in een volgend issue bij komt.
+  GitHub Pages kan alleen bestanden tonen, dus daar kan geen `/mcp` op hetzelfde adres.
+  We deployen al over SSH, dus er komt geen nieuw soort werk bij.
+- **Alternatieven:** GitHub Pages met ds.heerenveen.org als eigen domein (geen werk op de host, maar de MCP-server moet dan op een ander adres); Chromatic (een derde partij die onze bestanden bewaart, en kosten).
+
+### Storybook wordt alleen neergezet als een samenvoeging Storybook wijzigt
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** Storybook wordt alleen opnieuw neergezet als een samenvoeging bestanden raakt waar Storybook uit bestaat: iets in `packages/design-system/`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` of de workflow zelf.
+  Met de hand starten (`workflow_dispatch`) zet het altijd neer.
+- **Waarom:** een wijziging aan de site of aan documentatie in `docs/` verandert Storybook niet.
+  Zo blijft de host rustig en laat een run in GitHub zien wat er echt veranderde.
+- **Hoe:** het filter `paths` staat alleen op de trigger `push`, niet op de hele workflow.
+  Op de hele workflow zou het ook de build bij een pull request stoppen, en een regel voor `main` eist de taak `Build Storybook` bij elke pull request.
+  Een push naar `main` die geen van de bestanden raakt, start de workflow niet.
+- **Alternatieven:** na elke samenvoeging deployen (simpeler, maar elke run zet dezelfde bestanden neer).
+
+### De deploy van Storybook kopieert de geteste build en weigert een verkeerd pad
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de taak `Build Storybook` bewaart de build als artifact `storybook`, en de taak die deployt kopieert dat artifact in plaats van opnieuw te bouwen.
+  Die taak stopt (rood) als `DEPLOY_PATH` niet de document root van het subdomein is, een absoluut pad dat eindigt op `/domains/ds.heerenveen.org/public_html`.
+  Ze stopt ook als de build leeg is of `index.json` of `manifests/components.json` mist.
+  rsync laat `.well-known/`, `.htaccess` en `cgi-bin/` van de host staan.
+  Na het kopiëren moeten `https://ds.heerenveen.org/index.json` en `https://ds.heerenveen.org/manifests/components.json` met 200 antwoorden en hetzelfde zijn als in de build.
+- **Waarom:** `rsync --delete` maakt de doelmap leeg.
+  Een geheim met een verkeerd of leeg pad mag daarom nooit tot een kopie leiden.
+  Wat live gaat, is precies wat de controle op `--lightningcss` goedkeurde.
+  Het vergelijken met de build bewijst dat de nieuwe versie live staat, niet alleen dat er iets antwoordt.
+- **Let op:** op de gedeelde hosting kan de sleutel van deze deploy niet tot één map beperkt worden zonder `rrsync` en een aangepast `authorized_keys`.
+  De sleutel is wel eigen aan deze deploy en los in te trekken; de beperking is de controle van het pad hierboven.
+- **Alternatieven:** de deploy opnieuw laten bouwen (twee builds die kunnen verschillen); alleen controleren of `index.json` antwoordt.
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft

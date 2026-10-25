@@ -11,7 +11,7 @@ Er is geen preview per pull request, want de gedeelde hosting heeft daar geen ru
 Controleer daarom op de gerenderde pagina, in licht en donker:
 
 - **In Storybook:** lokaal met `pnpm --filter design-system storybook`, of in de statische build van `pnpm --filter design-system build-storybook`.
-  CI maakt die build ook bij elke pull request; hij staat als artifact `github-pages` bij de run van de workflow Storybook.
+  CI maakt die build ook bij elke pull request; hij staat als artifact `storybook` bij de run van de workflow Storybook.
   De themaknop wisselt tussen licht en donker.
 - **Op de site:** lokaal met `pnpm --filter site dev`.
   Zet `SITE_ENV=local` in de `.env` in de root.
@@ -146,11 +146,11 @@ Wat alleen een mens kan beoordelen, zoals het gedrag met een schermlezer, staat 
 Het designsysteem lost veel van deze punten al op.
 Gebruik wat er is, in plaats van het opnieuw te bouwen (#19):
 
-- [Tokens/Kleur](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/tokens-kleur--documentatie): elk kleurpaar met zijn contrast, in licht en donker.
-- [HTML-elementen/Koppen](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/html-elementen-koppen--documentatie): de stijl van een kop staat los van het niveau.
-- [HTML-elementen/Links](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/html-elementen-links--documentatie): onderstreepte links, met hover, focus en bezocht.
-- [HTML-elementen/Formulier](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/html-elementen-formulier--documentatie): labels, velden en knoppen van 44 pixels hoog, en randen van 3:1.
-- [Componenten](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/componenten-overzicht--documentatie): de componenten voor de paginaopbouw, met de landmarks `header`, `nav`, `main` en `footer`, een navigatie met een naam en een kop met een niveau los van zijn stijl.
-- [Hulpklassen/Alleen voor schermlezers](https://vincentsmedinga.github.io/sc-heerenveen-fansite/?path=/docs/hulpklassen-alleen-voor-schermlezers--documentatie): de klasse `hf-visually-hidden`, voor tekst die je niet ziet maar die een schermlezer wel voorleest.
+- [Tokens/Kleur](https://ds.heerenveen.org/?path=/docs/tokens-kleur--documentatie): elk kleurpaar met zijn contrast, in licht en donker.
+- [HTML-elementen/Koppen](https://ds.heerenveen.org/?path=/docs/html-elementen-koppen--documentatie): de stijl van een kop staat los van het niveau.
+- [HTML-elementen/Links](https://ds.heerenveen.org/?path=/docs/html-elementen-links--documentatie): onderstreepte links, met hover, focus en bezocht.
+- [HTML-elementen/Formulier](https://ds.heerenveen.org/?path=/docs/html-elementen-formulier--documentatie): labels, velden en knoppen van 44 pixels hoog, en randen van 3:1.
+- [Componenten](https://ds.heerenveen.org/?path=/docs/componenten-overzicht--documentatie): de componenten voor de paginaopbouw, met de landmarks `header`, `nav`, `main` en `footer`, een navigatie met een naam en een kop met een niveau los van zijn stijl.
+- [Hulpklassen/Alleen voor schermlezers](https://ds.heerenveen.org/?path=/docs/hulpklassen-alleen-voor-schermlezers--documentatie): de klasse `hf-visually-hidden`, voor tekst die je niet ziet maar die een schermlezer wel voorleest.
 
 De patronen volgen met de pagina's die ze nodig hebben.
