@@ -2943,11 +2943,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De header krijgt bovenin minstens de inset bovenin en de footer onderin minstens de inset onderin.
   Daarmee lopen de header en de footer onder de uitsparingen door in een effen kleur, terwijl tekst en knoppen er naast staan.
   Op een iPhone op het beginscherm is de statusbalk doorzichtig (`black-translucent`), zodat de header eronder doorloopt.
+  Een vaste strook in de kleur van de header, zo hoog als de inset bovenin, houdt de statusbalk donkerblauw als de pagina scrolt (de projecteigenaar wilde de statusbalk ook donkerblauw).
+  De strook neemt geen aanraking aan, en `scroll-padding-block-start` op het html-element houdt een element met focus uit de strook (WCAG 2.4.11).
+  Zonder inset heeft de strook geen hoogte, dus er is dan geen.
 - **Waarom:** met een standaardpagina laat de browser een balk in de kleur van de pagina over bij een uitsparing, en dat ziet er onaf uit naast een header van rand tot rand.
   Bij `black-translucent` is de tekst van de statusbalk wit, en de header is in licht en donker donkerblauw, dus de tekst blijft leesbaar.
+  Met alleen een doorzichtige statusbalk is hij alleen donkerblauw zolang de header erachter staat; scrolt de pagina, dan schuift lichte inhoud onder de witte tekst van de statusbalk.
   De waarden hebben een terugvalwaarde van 0, dus op schermen zonder uitsparing verandert er niets.
 - **Alternatieven:** de pagina laten zoals hij is: een balk in de kleur van de pagina naast de header.
   Of de statusbalk op de standaardstijl laten (`default`); dan blijft de statusbalk een eigen balk boven de header.
   Of een afbeelding of een verloop achter de uitsparing; dat is meer werk en meer om te onderhouden dan een effen kleur.
 - **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator, in Safari, in staande en liggende stand.
-  De statusbalk van een app op het beginscherm laat de simulator niet zien; de projecteigenaar kijkt dat na op een echte telefoon.
+  De statusbalk van een app op het beginscherm en de strook eronder laat de simulator niet zien, want Safari heeft bovenin geen inset; de projecteigenaar kijkt dat na op een echte telefoon.

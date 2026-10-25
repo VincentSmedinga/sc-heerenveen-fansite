@@ -11,11 +11,29 @@
    * margin it has and the inset the device asks for (env(safe-area-inset-*)). Without an inset the value is 0 and nothing
    * changes. The header and the footer keep their background behind the cutout, and the body sits on the colour of the
    * page. The top inset is in the header and the bottom inset in the footer, which are the first and last thing on the page.
+   *
+   * In an app on the home screen of an iPhone the status bar is see-through (black-translucent), so it is only the colour of
+   * the header while the header is behind it. A strip fixed to the top of the screen, as tall as the top inset and in the
+   * colour of the header, keeps it that colour when the page scrolls: what scrolls under it is hidden behind it. Without an
+   * inset the strip has no height, so there is none. It takes no touch, so a click or the pull to refresh goes through it.
+   * The scroll padding on the html element (see root.css) keeps an element with focus from scrolling in behind the strip.
    */
   .hf-page {
     display: flex;
     flex-direction: column;
     min-block-size: 100dvh;
+
+    &::before {
+      background-color: var(--hf-colour-background-header);
+      block-size: env(safe-area-inset-top, 0);
+      content: '';
+      inline-size: 100%;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      pointer-events: none;
+      position: fixed;
+      z-index: 1;
+    }
   }
 
   /*

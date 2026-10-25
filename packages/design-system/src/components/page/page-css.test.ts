@@ -15,18 +15,27 @@ describe('the safe area insets in page.css', () => {
     )
   })
 
-  it('gives every inset a fallback of 0px, so a browser without insets keeps today’s sizes', () => {
+  it('gives every inset a fallback of 0, so a browser without insets keeps today’s sizes', () => {
     expect(uses.length).toBeGreaterThan(0)
 
     for (const use of uses) {
-      expect(use).toMatch(/^env\(safe-area-inset-[a-z]+, 0px\)$/)
+      expect(use).toMatch(/^env\(safe-area-inset-[a-z]+, 0(px)?\)$/)
     }
   })
 
-  it('puts every inset inside max(), so it can only add room and never take any away', () => {
-    // Remove each max(…) that holds an env(), and nothing may be left of an env().
+  it('puts every inset that adds to a margin inside max(), so it can only add room and never take any away', () => {
+    // Remove each max(…) that holds an env(). What is left is the strip, which is as tall as the inset and no more.
     const rest = css.replace(/max\([^;{}]*?env\(safe-area-inset-[a-z]+, 0px\)\)/g, '')
 
-    expect(rest).not.toContain('env(')
+    expect([...rest.matchAll(/([a-z-]+):[^;]*env\(/g)].map(([, property]) => property)).toEqual(['block-size'])
+  })
+
+  it('has a strip over the top inset in the colour of the header, fixed, that takes no touch and has no height without an inset', () => {
+    const strip = css.match(/&::before \{([^}]*)\}/)?.[1] ?? ''
+
+    expect(strip).toContain('background-color: var(--hf-colour-background-header);')
+    expect(strip).toContain('block-size: env(safe-area-inset-top, 0);')
+    expect(strip).toContain('position: fixed;')
+    expect(strip).toContain('pointer-events: none;')
   })
 })
