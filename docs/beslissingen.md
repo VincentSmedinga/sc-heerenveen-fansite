@@ -2632,6 +2632,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Geen geschiedenis van titels of namen bewaren was een eis, en vervangen is de eenvoudigste manier.
 - **Alternatieven:** een eigen opdracht voor het forum, met een eigen lock en logboek; dat zijn twee plekken om te bewaken.
   Of de discussies bijwerken en oude weghalen op id; dat is meer code, en een titel die het forum wijzigt zou dan niet vanzelf vervangen worden.
+- **Later:** zie _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_: de lezer houdt nu de nieuwste vijf in plaats van vier.
 
 ### Een podcast is een bron, en een aflevering is een rij in `items`
 
@@ -2757,6 +2758,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de hoofdkolom is voor het nieuws, en de zijbalk heeft plaats voor meer blokken naast elkaar.
   Vier regels past bij het forumblok.
 - **Alternatieven:** het blok boven het forum, of in de hoofdkolom onder het nieuws.
+- **Later:** zie _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_: het blok toont nu vijf afleveringen.
 
 ### Het filter is een Navigation, en de paginering verdwijnt bij één pagina
 
@@ -3058,6 +3060,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een week houden en een pagina met meer nieuws bouwen (#26); dat is groter en komt later.
   Of een vast aantal, zoals de nieuwste 20 of 50, wat we eerder al afwezen.
 - **Later:** zie _De homepage toont het nieuws van de afgelopen week, per dag_ en _Het nieuws staat in één lijst, met dag en tijd in een eigen kolom_; van die twee blijft de lijst en vervalt de week.
+- **Later:** zie _Het nieuws heeft geen grens in de tijd, en een grens van 100 koppen_; de twee weken vervallen.
 
 ### De tijd van een bericht: een weekdag in de week, daarna de datum
 
@@ -3283,3 +3286,45 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dit volgt `Pompebled` in de map van het logo, dat ook een intern onderdeel zonder eigen story is.
 - **Alternatieven:** het pictogram exporteren uit het package; dat maakt er een deel van de interface van, terwijl niets op de site het los gebruikt.
   Of de tekening in beide componenten laten staan; dan lopen ze uit elkaar.
+
+### Elke kaart op de homepage toont vijf items, uit één gedeelde waarde
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** elke kaart met een lijst op de homepage toont standaard vijf items, uit één gedeelde waarde, `itemsPerCard` in `apps/site/src/items-per-card.ts`.
+  De kaarten met nieuws, discussies en podcasts gebruiken die, en een kaart met een lijst die later bijkomt ook.
+  De importer bewaart de vijf nieuwste discussies in plaats van vier.
+  De pagina `/podcasts` houdt zijn eigen paginering (25 per pagina) en filter.
+- **Waarom:** de kaarten wisselden (twee weken, vier, vier) en horen op een rij gelijk te zijn.
+  Eén waarde houdt ze gelijk.
+- **Hoe:** het aantal van de importer, `discussionsToKeep` in `apps/importer/src/read-forum.ts`, is een eigen waarde: de importer en de site delen geen code, en de importer mag niet minder bewaren dan de site toont.
+- **Alternatieven:** per kaart een eigen aantal, zoals nu; ook `/podcasts` op vijf zetten (meer pagina's voor dezelfde afleveringen).
+
+### "Laad 5 meer" werkt zonder JavaScript
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** onder de lijst van de nieuwskaart staat de knop "Laad 5 meer" als er oudere koppen zijn.
+  De knop zit in een `Form` met `method="get"`: hij heeft `name="nieuws"` en als `value` het aantal na de volgende vijf, en het formulier gaat naar `/#nieuws`.
+  De pagina laadt zo opnieuw met `?nieuws=10` in het adres, en `#nieuws` is de kaart zelf.
+  Er komt geen script bij en geen API, en geen component in het designsysteem: het is een `Button` in een `Form`.
+- **Waarom:** de site werkt voor iedereen, ook zonder script, en we hebben dan geen API en geen client-component nodig.
+  Het aantal is geen persoonsgegeven en er komt geen cookie bij.
+- **Hoe:** de pagina vraagt de database om één kop meer dan ze toont, om te weten of de knop nodig is.
+  Het adres van een pagina met `?nieuws=` is de homepage zelf als canoniek adres, en zo'n pagina staat niet in de sitemap.
+- **Gecontroleerd:** in Chromium, op een telefoon van 390 en een bureaublad van 900 pixels breed.
+  Na de klik staat de kaart bovenaan het scherm en staan de nieuwe koppen erin; de focus staat bovenaan de pagina, en Tab gaat naar de eerste kop in de kaart.
+  Het scherm springt dus naar de bovenkant van de kaart, niet naar de eerste nieuwe kop.
+  Wij hebben dit niet met een schermlezer geprobeerd.
+- **Alternatieven:** de koppen met JavaScript ophalen en toevoegen (vloeiender, maar een API en niets voor wie geen script heeft); dat kan later als aanvulling.
+
+### Het nieuws heeft geen grens in de tijd, en een grens van 100 koppen
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het nieuws op de homepage heeft geen grens in de tijd meer (de twee weken van _De homepage toont het nieuws van twee weken_ vervallen), met een grens van 100 koppen.
+  Het aantal in het adres is een geheel getal vanaf 5, in stappen van 5, en nooit meer dan 100; een ander getal, of een getal dat twee keer in het adres staat, geeft de eerste vijf.
+  Bij 100 koppen verdwijnt de knop ook; ouder nieuws is voor het archief (#26).
+- **Waarom:** met vijf koppen eerst is de lengte van de pagina geen reden meer voor een tijdgrens.
+  De grens van 100 houdt een adres met een groot getal niet tot een zware vraag aan de database; het archief (#26) is voor ouder nieuws.
+- **Hoe:** de server bewaart de lijst per getal vijf minuten, en omdat een getal dat niet klopt de lijst van vijf deelt, zijn er hoogstens twintig lijsten (5 tot en met 100).
+  Een bezoeker kan het geheugen van de server dus niet vullen met adressen van zichzelf.
+  Een bericht van een ander jaar toont het jaar bij de datum ("30 dec 2025 11:00"), want zonder grens in de tijd is "30 dec" niet meer duidelijk.
+- **Alternatieven:** de twee weken houden als grens van de knop; geen grens, ook niet van aantal (een pagina die onbeperkt kan groeien).

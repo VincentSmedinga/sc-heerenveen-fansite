@@ -1,6 +1,8 @@
 import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
+import { Button } from '../button/Button'
+import { Form } from '../form/Form'
 import { Heading } from '../heading/Heading'
 import { Link } from '../link/Link'
 import { List } from '../list/List'
@@ -35,6 +37,7 @@ const meta = preview.meta({
           'Een kaart zet een blok van de pagina op een eigen vlak, met een rand en ronde hoeken.',
           'Zo staat elk blok los op de pagina, en dat geeft de pagina rust en richting.',
           'Staat er direct onder de kop een lijst, dan is de ruimte daartussen groter dan bij tekst, zodat de eerste regel van de lijst niet tegen de kop zit.',
+          'Onder de lijst kan een formulier met een knop staan, zoals "Laad 5 meer" in de kaart met nieuws.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -107,6 +110,36 @@ const renderSurfaces = () => (
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Vier vlakken, licht', render: renderSurfaces })
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Vier vlakken, donker', render: renderSurfaces })
+
+const renderWithButton = () => (
+  <Page.Body>
+    <Page.Main>
+      <Card aria-labelledby="button-heading" id="nieuws">
+        <Heading id="button-heading" level={2}>
+          Laatste nieuws
+        </Heading>
+        {newsItems}
+        <Form action="/#nieuws" method="get">
+          <Button name="nieuws" type="submit" value="10">
+            Laad 5 meer
+          </Button>
+        </Form>
+      </Card>
+    </Page.Main>
+  </Page.Body>
+)
+
+export const WithButtonLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Met een knop onder de lijst, licht',
+  render: renderWithButton,
+})
+
+export const WithButtonDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Met een knop onder de lijst, donker',
+  render: renderWithButton,
+})
 
 const renderPage = () => (
   <Page.Body>

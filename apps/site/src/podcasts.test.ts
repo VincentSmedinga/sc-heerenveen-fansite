@@ -50,7 +50,7 @@ afterEach(() => {
 })
 
 describe('getLatestEpisodes', () => {
-  it('asks the query for the four newest episodes of all podcasts, up to now, and caches them for five minutes', async () => {
+  it('asks the query for the five newest episodes of all podcasts, up to now, and caches them for five minutes', async () => {
     const { getLatestEpisodes } = await load()
 
     await getLatestEpisodes()
@@ -58,7 +58,7 @@ describe('getLatestEpisodes', () => {
     await getLatestEpisodes()
 
     expect(listPodcastEpisodes).toHaveBeenCalledExactlyOnceWith(db, {
-      limit: 4,
+      limit: 5,
       until: new Date('2026-10-23T12:30:00Z'),
     })
 

@@ -19,8 +19,8 @@ const secondRun = new Date('2026-10-23T12:15:00Z')
 
 const jsonApi = { 'Content-Type': 'application/vnd.api+json' }
 
-/** Six discussions, three of them in the tags we leave out. */
-const sixDiscussions: MadeUpDiscussion[] = [
+/** Seven discussions, two of them in the tags we leave out. */
+const sevenDiscussions: MadeUpDiscussion[] = [
   {
     commentCount: 84,
     id: 1,
@@ -40,6 +40,7 @@ const sixDiscussions: MadeUpDiscussion[] = [
   { id: 4, lastPostedAt: '2026-10-22T20:00:00+00:00', tags: [9], title: 'Een andere club' },
   { id: 5, lastPostedAt: '2026-10-22T10:00:00+00:00', title: 'Nieuwe spits gezocht' },
   { id: 6, lastPostedAt: '2026-10-21T10:00:00+00:00', title: 'Het stadion in de winter' },
+  { id: 7, lastPostedAt: '2026-10-20T10:00:00+00:00', title: 'Vorige week op de tribune' },
 ]
 
 let database: TestDatabase
@@ -105,13 +106,13 @@ async function serve(answer: Handler | string) {
 const discussionsInDatabase = () => database.db.select().from(discussions).orderBy(desc(discussions.lastPostedAt))
 
 describe('importing the discussions of a forum', () => {
-  it('stores the newest four outside Offtopics and Sport overig, with the five fields and nothing else', async () => {
-    const server = await serve(forumAnswer(sixDiscussions))
+  it('stores the newest five outside Offtopics and Sport overig, with the five fields and nothing else', async () => {
+    const server = await serve(forumAnswer(sevenDiscussions))
     const feed = await addForum(server)
 
     const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
-    expect(report).toMatchObject({ added: 4, kind: 'imported', skipped: [], unchanged: 0, updated: 0 })
+    expect(report).toMatchObject({ added: 5, kind: 'imported', skipped: [], unchanged: 0, updated: 0 })
 
     const rows = await discussionsInDatabase()
 
@@ -134,6 +135,7 @@ describe('importing the discussions of a forum', () => {
       },
       expect.objectContaining({ title: 'Nieuwe spits gezocht' }),
       expect.objectContaining({ title: 'Het stadion in de winter' }),
+      expect.objectContaining({ title: 'Vorige week op de tribune' }),
     ])
   })
 
@@ -147,7 +149,7 @@ describe('importing the discussions of a forum', () => {
   })
 
   it('stores nothing of the forum that it was not asked to keep', async () => {
-    const server = await serve(forumAnswer(sixDiscussions))
+    const server = await serve(forumAnswer(sevenDiscussions))
     const feed = await addForum(server)
 
     await importFeed(database.db, fetcherFor(servers), feed, firstRun)
@@ -162,7 +164,7 @@ describe('importing the discussions of a forum', () => {
   })
 
   it('asks as a guest: no cookie, no key, and no question whether anything changed', async () => {
-    const server = await serve(forumAnswer(sixDiscussions))
+    const server = await serve(forumAnswer(sevenDiscussions))
     const feed = await addForum(server)
     const fetcher = fetcherFor(servers)
 
@@ -181,7 +183,7 @@ describe('importing the discussions of a forum', () => {
   })
 
   it('gives an empty database its discussions, although the forum sent an ETag the time before', async () => {
-    const server = await serve(forumAnswer(sixDiscussions))
+    const server = await serve(forumAnswer(sevenDiscussions))
     const feed = await addForum(server)
     const fetcher = fetcherFor(servers)
 
@@ -189,12 +191,12 @@ describe('importing the discussions of a forum', () => {
     await database.pool.query('DELETE FROM discussions')
     await importFeed(database.db, fetcher, await addedFeed(feed.id), secondRun)
 
-    expect(await discussionsInDatabase()).toHaveLength(4)
+    expect(await discussionsInDatabase()).toHaveLength(5)
     expect((await addedFeed(feed.id)).etag).toBeNull()
   })
 
-  it('replaces the discussions each run: a discussion that left the four is gone, and so is an old title', async () => {
-    let answer = forumAnswer(sixDiscussions)
+  it('replaces the discussions each run: a discussion that left the five is gone, and so is an old title', async () => {
+    let answer = forumAnswer(sevenDiscussions)
     const server = await serve((request, response) => reply(200, answer, jsonApi)(request, response))
     const feed = await addForum(server)
     const fetcher = fetcherFor(servers)
@@ -219,22 +221,24 @@ describe('importing the discussions of a forum', () => {
         title: 'Opstelling',
       },
       { id: 5, lastPostedAt: '2026-10-22T10:00:00+00:00', title: 'Nieuwe spits gezocht' },
+      { id: 6, lastPostedAt: '2026-10-21T10:00:00+00:00', title: 'Het stadion in de winter' },
     ])
 
     const report = await importFeed(database.db, fetcher, feed, secondRun)
 
-    expect(report).toMatchObject({ added: 1, kind: 'imported', unchanged: 2, updated: 1 })
+    expect(report).toMatchObject({ added: 1, kind: 'imported', unchanged: 3, updated: 1 })
     expect((await discussionsInDatabase()).map((row) => row.title)).toEqual([
       'Net erbij',
       'Wie wint er zondag, denk je?',
       'Opstelling',
       'Nieuwe spits gezocht',
+      'Het stadion in de winter',
     ])
     expect((await discussionsInDatabase())[1]).toMatchObject({ lastPostedBy: 'Friesche Pompebled', replyCount: 89 })
   })
 
   it('removes all discussions when the forum has none that we show', async () => {
-    let answer = forumAnswer(sixDiscussions)
+    let answer = forumAnswer(sevenDiscussions)
     const server = await serve((request, response) => reply(200, answer, jsonApi)(request, response))
     const feed = await addForum(server)
     const fetcher = fetcherFor(servers)
@@ -254,7 +258,7 @@ describe('importing the discussions of a forum', () => {
     ['the answer holds no list of discussions', reply(200, '{"errors":[{"status":"403"}]}', jsonApi)],
     ['no discussion in the answer can be read', reply(200, '{"data":[{"id":"1","type":"discussions"}]}', jsonApi)],
   ])('keeps the discussions it has when %s', async (_name, broken) => {
-    let handler: Handler = (request, response) => reply(200, forumAnswer(sixDiscussions), jsonApi)(request, response)
+    let handler: Handler = (request, response) => reply(200, forumAnswer(sevenDiscussions), jsonApi)(request, response)
     const server = await serve((request, response) => handler(request, response))
     const feed = await addForum(server)
     const fetcher = fetcherFor(servers)
@@ -270,7 +274,7 @@ describe('importing the discussions of a forum', () => {
   })
 
   it('reports a discussion it skips, and keeps the others', async () => {
-    const answer = JSON.parse(forumAnswer(sixDiscussions))
+    const answer = JSON.parse(forumAnswer(sevenDiscussions))
 
     answer.data[4].attributes.title = ''
 
@@ -280,7 +284,7 @@ describe('importing the discussions of a forum', () => {
     const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
     expect(report).toMatchObject({
-      added: 3,
+      added: 4,
       kind: 'imported',
       skipped: [{ position: 5, reason: 'there is no title' }],
     })
@@ -289,7 +293,7 @@ describe('importing the discussions of a forum', () => {
 
 describe('the import of a forum in the log and the health of the feeds', () => {
   it('writes the outcome in the log of the run and the health of the feed, like any other feed', async () => {
-    const server = await serve(forumAnswer(sixDiscussions))
+    const server = await serve(forumAnswer(sevenDiscussions))
     const feed = await addForum(server)
     const runId = await startRun(database.db, firstRun)
 
@@ -298,7 +302,7 @@ describe('the import of a forum in the log and the health of the feeds', () => {
     const [result] = await database.db.select().from(importResults).where(eq(importResults.feedId, feed.id))
     const [health] = await database.db.select().from(feeds).where(eq(feeds.id, feed.id))
 
-    expect(result).toMatchObject({ added: 4, feedId: feed.id, outcome: 'imported', runId, skipped: 0 })
+    expect(result).toMatchObject({ added: 5, feedId: feed.id, outcome: 'imported', runId, skipped: 0 })
     expect(health).toMatchObject({ failuresInARow: 0, lastSuccessAt: firstRun })
   })
 
@@ -320,7 +324,7 @@ describe('the import of a forum in the log and the health of the feeds', () => {
   })
 
   it('does not read a forum that is switched off, and the command takes its lock like for every feed', async () => {
-    const server = await serve(forumAnswer(sixDiscussions))
+    const server = await serve(forumAnswer(sevenDiscussions))
 
     await addForum(server, { enabled: false })
 
@@ -337,7 +341,7 @@ describe('the import of a forum in the log and the health of the feeds', () => {
   })
 
   it('runs as part of the import command: robots.txt first, then the discussions, in the lines of the output', async () => {
-    const server = await serve(forumAnswer(sixDiscussions))
+    const server = await serve(forumAnswer(sevenDiscussions))
 
     await addForum(server)
 
@@ -349,9 +353,9 @@ describe('the import of a forum in the log and the health of the feeds', () => {
     })
 
     expect(code).toBe(0)
-    expect(lines).toEqual([`${server.origin}${discussionsPath}: 4 new, 0 updated, 0 unchanged, 0 skipped`])
+    expect(lines).toEqual([`${server.origin}${discussionsPath}: 5 new, 0 updated, 0 unchanged, 0 skipped`])
     expect(server.paths()).toEqual(['/robots.txt', discussionsPath])
-    expect(await discussionsInDatabase()).toHaveLength(4)
+    expect(await discussionsInDatabase()).toHaveLength(5)
   })
 })
 

@@ -40,6 +40,12 @@ describe('sitemap', () => {
     expect(sitemap()).toEqual(pages.map(({ path }) => ({ url: `${origin}${path}` })))
   })
 
+  it('has no address with a query, such as the homepage with ?nieuws=10', () => {
+    vi.stubEnv('SITE_ENV', 'local')
+
+    expect(sitemap().filter(({ url }) => url.includes('?'))).toEqual([])
+  })
+
   it('has every page.tsx of the app, or names it as an exception', () => {
     const listed = pages.map(({ path }) => String(path))
     const missing = pagePaths().filter((path) => !listed.includes(path) && !notInSitemap.includes(path))
