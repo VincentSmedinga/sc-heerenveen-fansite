@@ -115,12 +115,20 @@ describe('the list', () => {
     const html = await render()
 
     expect(html).toMatch(new RegExp(`<label[^>]*for="reden-${id}"[^>]*>Reden`))
+    // The hidden part of the label says which item the field is for, so a screen reader hears it between 50 fields.
+    expect(html).toMatch(new RegExp(`for="reden-${id}"[^>]*>Reden.*om “Kop een” te verbergen`))
     expect(html).toMatch(new RegExp(`<input[^>]*id="reden-${id}"`))
     expect(html).toMatch(/<input[^>]*name="reden"/)
     expect(html).toMatch(/<input[^>]*maxLength="300"/)
     expect(html).toMatch(/<input[^>]*required/)
     expect(hasButton(html, 'Verberg: Kop een', 'Verberg')).toBe(true)
     expect(buttons(html)).toHaveLength(1)
+  })
+
+  it('gives the time of an old item with its time of day, not the date alone', async () => {
+    await addItem(database, ids, 'oud', { publishedAt: new Date('2025-01-02T08:05:00Z') })
+
+    expect(await render()).toMatch(/2 jan 2025 09:05/)
   })
 
   it('says of a hidden item that it is hidden, since when and why, and has a button Toon weer instead', async () => {

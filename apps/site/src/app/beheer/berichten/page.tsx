@@ -20,7 +20,7 @@ import {
 import { findItem, listItems, listLength, parseItemId, parseSearch, searchMaxLength } from '../../../beheer/items'
 import { requireRole } from '../../../beheer/require-role'
 import { getDatabase } from '../../../database'
-import { dateTimeOf, formatEpisodeTime } from '../../../news'
+import { dateTimeOf, formatNewsTime } from '../../../news'
 import { submitHide, submitShow } from './actions'
 
 // Render on each request: who is logged in and which items are hidden are not known when the site is built.
@@ -151,7 +151,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                     href={item.url}
                     paywalled={item.paywalled}
                     source={item.sourceName}
-                    time={formatEpisodeTime(item.publishedAt, now)}
+                    time={formatNewsTime(item.publishedAt, now)}
                   />
                   {item.hiddenAt === null ? (
                     <Form action={submitHide.bind(null, item.id, search)}>
@@ -162,7 +162,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                           <>
                             Reden{' '}
                             <Text as="span" className="hf-visually-hidden">
-                              om dit bericht te verbergen
+                              om “{item.title}” te verbergen
                             </Text>
                           </>
                         }
@@ -176,7 +176,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                   ) : (
                     <>
                       <Text>
-                        Verborgen op {formatEpisodeTime(item.hiddenAt, now)}. Reden: {item.hiddenReason}
+                        Verborgen op {formatNewsTime(item.hiddenAt, now)}. Reden: {item.hiddenReason}
                       </Text>
                       <Form action={submitShow.bind(null, item.id, search)}>
                         <Button appearance="soft" aria-label={`Toon weer: ${item.title}`} type="submit">

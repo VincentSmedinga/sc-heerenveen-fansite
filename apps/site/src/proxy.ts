@@ -26,7 +26,9 @@ export function isAdminPath(pathname: string) {
 
 // Runs for every request, including the files in /_next/static, so every response carries the headers. The admin gets
 // two more on every environment, production too: no search engine may index it, and nothing of it is kept in a cache of
-// the browser or of anything on the way. It sends a referrer only to our own pages (`same-origin`), so the login link in the address bar goes to no other site. `no-referrer` would do that too, but Chromium then sends `Origin: null` with a form that posts, and Next.js refuses a server action with it, so no form of the admin would work without JavaScript.
+// the browser or of anything on the way. It sends a referrer only to our own pages (`same-origin`), so the login link in
+// the address bar goes to no other site. `no-referrer` would do that too, but Chromium then sends `Origin: null` with a
+// form that posts, and Next.js refuses a server action with it, so no form of the admin would work without JavaScript.
 export function proxy(request: NextRequest) {
   const response = NextResponse.next()
 
