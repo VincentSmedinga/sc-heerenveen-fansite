@@ -10,7 +10,7 @@ De keuzes erachter staan in [`beslissingen.md`](beslissingen.md), onder _Storybo
 De workflow [`storybook.yml`](../.github/workflows/storybook.yml) heeft twee taken:
 
 1. **Build Storybook** draait bij elke pull request en bij elke run op `main`.
-   Hij bouwt Storybook (`pnpm --filter design-system build-storybook`), controleert dat er geen `--lightningcss` in de CSS staat en bewaart de build als artifact `storybook`.
+   Hij bouwt Storybook (`pnpm --filter design-system build-storybook`), controleert dat er geen `--lightningcss` in de CSS staat en dat `index.html` en `iframe.html` `noindex` hebben, en bewaart de build als artifact `storybook`.
    Bij een pull request kun je dat artifact downloaden om de build te bekijken.
 2. **Deploy to ds.heerenveen.org** draait alleen op `main`.
    Hij haalt het artifact van de taak ervoor op en kopieert het met rsync over SSH, op poort 26, naar de map van het subdomein.
