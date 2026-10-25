@@ -16,8 +16,8 @@
   }
 
   /*
-   * An address is one long word. It stays whole on a line of its own, and only when it is longer than the line does it
-   * break, so it never pushes a card or the page wider than the screen.
+   * An address is one long word. It stays whole on a line of its own, and only when it is longer
+   * than the line does it break, so it never pushes a card or the page wider than the screen.
    */
   a[href^='mailto:' i] {
     overflow-wrap: anywhere;
