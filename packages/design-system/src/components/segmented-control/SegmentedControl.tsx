@@ -2,8 +2,15 @@ import type { ComponentPropsWithoutRef } from 'react'
 
 import { Button } from '../button/Button'
 import { classNames } from '../classNames'
+import { attachIcon } from '../icon/attachIcon'
+import { type FilledIconName, Icon } from '../icon/Icon'
 
 export type SegmentedControlOption<Value extends string> = {
+  /**
+   * An icon in front of the text. The pressed button has its filled drawing and the others the line, so the icon is a
+   * second sign of what is pressed, never the only one.
+   */
+  icon?: FilledIconName
   /** What the button says. */
   label: string
   /** What `onChange` gets when the button is pressed. */
@@ -29,7 +36,8 @@ export type SegmentedControlProps<Value extends string> = Omit<
 /**
  * A few buttons side by side, of which exactly one is pressed, such as Licht and Donker. It is a group with a name, and
  * each button says whether it is pressed with `aria-pressed`. The pressed button is filled and the others are an outline,
- * so it shows without colour. It holds no state: the page gives it the value and handles the change.
+ * so it shows without colour. An option can have an icon, filled on the pressed button. It holds no state: the page
+ * gives it the value and handles the change.
  */
 export const SegmentedControl = <Value extends string>({
   className,
@@ -49,7 +57,13 @@ export const SegmentedControl = <Value extends string>({
         }}
         type="button"
       >
-        {option.label}
+        {option.icon === undefined
+          ? option.label
+          : attachIcon(
+              option.label,
+              <Icon appearance={option.value === value ? 'filled' : 'line'} name={option.icon} />,
+              'before',
+            )}
       </Button>
     ))}
   </div>

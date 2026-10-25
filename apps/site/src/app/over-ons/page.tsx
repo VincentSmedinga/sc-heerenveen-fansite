@@ -25,8 +25,11 @@ export default function AboutPage() {
         </Text>
         <Text>
           We schrijven niks over en we passen niks aan. We hebben geen advertenties, geen abonnementen en geen
-          winstoogmerk. Bij de site hoort ook <Link href="https://forum.heerenveen.org">ons forum</Link>, waar
-          supporters met elkaar praten.
+          winstoogmerk. Bij de site hoort ook{' '}
+          <Link href="https://forum.heerenveen.org" icon="external-link">
+            ons forum
+          </Link>
+          , waar supporters met elkaar praten.
         </Text>
         <Text>
           Vincent Smedinga begon de site in 1997. In die jaren hielpen veel mensen mee, aan de site en aan het forum, en

@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { withoutIcons } from '../../without-icons'
 import ContactPage, { generateMetadata } from './page'
 import SentPage, { metadata as sentMetadata } from './verstuurd/page'
 
@@ -63,7 +64,17 @@ describe('the page Contact', () => {
     expect(html).toMatch(
       /<div aria-hidden="true" class="hf-visually-hidden"[^>]*inert[^>]*><label>[^<]*<input [^>]*name="website"/,
     )
-    expect(html).toMatch(/<button [^>]*type="submit"[^>]*>Versturen<\/button>/)
+    expect(withoutIcons(html)).toMatch(/<button [^>]*type="submit"[^>]*>Versturen<\/button>/)
+  })
+
+  it('draws an envelope in front of the text of the button that sends, hidden from screen readers', () => {
+    const button = html.match(/<button [^>]*type="submit".*?<\/button>/)?.[0] ?? ''
+
+    expect(button).toMatch(
+      /^<button [^>]*><span class="hf-icon-head"><svg aria-hidden="true" class="hf-icon"[^>]*>.*<\/svg>Versturen<\/span><\/button>$/,
+    )
+    expect(button).toContain('<path d="m2.5 5 5.5 4 5.5-4"></path>')
+    expect(html.match(/<svg /g)).toHaveLength(1)
   })
 
   it('shows no error summary and no failure before anything is sent', () => {

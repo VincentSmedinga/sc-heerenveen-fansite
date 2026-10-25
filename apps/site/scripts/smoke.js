@@ -597,7 +597,11 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   assert.match(sourcesHtml, /<h1[^>]*>Er ging iets mis<\/h1>/)
   assert.match(sourcesHtml, /<title>Er ging iets mis – sc Heerenveen Fansite<\/title>/)
   assert.match(sourcesHtml, /<meta name="robots" content="noindex"\/>/)
-  assert.match(sourcesHtml, /<a href="https:\/\/forum\.heerenveen\.org">het forum<\/a>/)
+  // The link to another site has the icon for it, behind the last word and hidden from assistive technology.
+  assert.match(
+    sourcesHtml,
+    /<a href="https:\/\/forum\.heerenveen\.org">het <span class="hf-icon-tail">forum<svg aria-hidden="true" class="hf-icon"/,
+  )
   assert.match(sourcesHtml, /<a href="\/bronnen">Probeer het opnieuw<\/a>/)
   assert.match(sourcesHtml, /<a href="\/">Naar de homepage<\/a>/)
   // In the page layout, with the header and the footer.

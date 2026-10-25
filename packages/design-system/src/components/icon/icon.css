@@ -1,0 +1,43 @@
+/* The icons: beside a link or a button, in a news line and in a menu. */
+
+@layer hf.components {
+  /*
+   * A little smaller than the text and in line with it. It has the colour of the text, so it keeps that colour under the
+   * mouse, with the focus and in forced colours, and it has the contrast of the text. It does not move. Behind the text is
+   * where it stands unless it is in front of the text (see .hf-icon-head). The base styles make an svg a block, so it is put
+   * back in the line here. In a flex container, such as a link in a menu, it is a flex item, and it keeps its size there.
+   */
+  .hf-icon {
+    /* The size in em, and the thickness of the line in em: that of the letters of regular text. */
+    --hf-icon-line: 0.084;
+    --hf-icon-size: 0.875;
+
+    block-size: calc(var(--hf-icon-size) * 1em);
+    display: inline-block;
+    flex-shrink: 0;
+    inline-size: calc(var(--hf-icon-size) * 1em);
+    margin-inline-start: 0.25em;
+    stroke-width: calc(var(--hf-icon-line) / var(--hf-icon-size) * 16);
+    vertical-align: -0.17em;
+  }
+
+  /*
+   * The icon with the last word of a link, or the first word of a button, so a line never breaks between them and the icon
+   * never stands alone on a line. See attachIcon.
+   */
+  .hf-icon-head,
+  .hf-icon-tail {
+    white-space: nowrap;
+  }
+
+  /* The text of a button is bold, so its icon is a little larger to stand next to it. The line stays as thick. */
+  button .hf-icon {
+    --hf-icon-size: 1;
+
+    vertical-align: -0.23em;
+  }
+
+  .hf-icon-head > .hf-icon {
+    margin-inline: 0 0.375em;
+  }
+}

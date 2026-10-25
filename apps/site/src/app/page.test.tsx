@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDiscussions } from '../discussions'
 import { getHeadlines } from '../headlines'
 import { getLatestEpisodes } from '../podcasts'
+import { withoutIcons } from '../without-icons'
 import HomePage, { generateMetadata } from './page'
 
 // Only the query is replaced: the check of the number in the address is the real one.
@@ -330,8 +331,17 @@ describe('the button that loads five more headlines', () => {
     const card = html.match(/<section.*?<\/section>/)?.[0] ?? ''
 
     expect(card).toMatch(
-      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="15" name="nieuws">Laad 5 meer<\/button><\/form><\/section>$/,
+      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="15" name="nieuws"><span class="hf-icon-head"><svg [^>]*class="hf-icon"[^>]*>.*?<\/svg>Laad<\/span> 5 meer<\/button><\/form><\/section>$/,
     )
+  })
+
+  it('draws a plus in front of the text of the button, hidden from screen readers, and the button is still named "Laad 5 meer"', async () => {
+    const html = await renderMain()
+    const button = html.match(/<button.*?<\/button>/)?.[0] ?? ''
+
+    expect(button).toMatch(/^<button [^>]*><span class="hf-icon-head"><svg aria-hidden="true"/)
+    expect(button.match(/<svg /g)).toHaveLength(1)
+    expect(button.replace(/<svg.*?<\/svg>/, '').replace(/<[^>]*>/g, '')).toBe('Laad 5 meer')
   })
 
   it('gives each headline an id with its number, and sends the button to the first new headline', async () => {
@@ -434,8 +444,17 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
 
     expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('episodes-heading'))
     expect(await renderEpisodes()).toMatch(
-      /^<section class="hf-card" aria-labelledby="episodes-heading"><h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts<\/h2><ul role="list">.*<\/ul><p><a href="\/podcasts">Alle podcasts<\/a><\/p><\/section><\/aside>$/,
+      /^<section class="hf-card" aria-labelledby="episodes-heading"><h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts<\/h2><ul role="list">.*<\/ul><p><a href="\/podcasts">Alle <span class="hf-icon-tail">podcasts<svg [^>]*class="hf-icon"[^>]*>.*?<\/svg><\/span><\/a><\/p><\/section><\/aside>$/,
     )
+  })
+
+  it('draws an arrow to the right behind "Alle podcasts", hidden from screen readers, and no icon for the external link', async () => {
+    const html = await renderEpisodes()
+    const link = html.match(/<a href="\/podcasts">.*?<\/a>/)?.[0] ?? ''
+
+    expect(link).toContain('<path d="M2.5 8h11"></path><path d="M9 3.5 13.5 8 9 12.5"></path>')
+    expect(link).toContain('aria-hidden="true"')
+    expect(link.replace(/<[^>]*>/g, '')).toBe('Alle podcasts')
   })
 
   it('shows each episode as a link to its page at the maker, with the name of the podcast', async () => {
@@ -491,7 +510,7 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
   it('says there are no episodes yet, with the link to all podcasts under it', async () => {
     const html = await renderEpisodes()
 
-    expect(html).toContain(
+    expect(withoutIcons(html)).toContain(
       '<p>We hebben nog geen podcastafleveringen gevonden.</p><p><a href="/podcasts">Alle podcasts</a></p>',
     )
   })
@@ -519,7 +538,7 @@ describe('the discussions in the sidebar of the homepage', () => {
 
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(await renderSidebar()).toMatch(
+    expect(withoutIcons(await renderSidebar())).toMatch(
       /^<aside class="hf-page-sidebar" aria-label="Van het forum en de podcasts"><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/aside>$/,
     )
   })
@@ -567,8 +586,20 @@ describe('the discussions in the sidebar of the homepage', () => {
     expect(html).not.toContain('target=')
   })
 
-  it('loads nothing from the forum: no image, avatar, frame or script, and only links', async () => {
+  it('draws the icon for a link to another site behind "Naar het forum", hidden from screen readers', async () => {
     const html = await renderDiscussions()
+    const link = html.match(/<a href="https:\/\/forum\.heerenveen\.org">.*?<\/a>/)?.[0] ?? ''
+
+    expect(link).toMatch(
+      /^<a href="[^"]*">Naar het <span class="hf-icon-tail">forum<svg aria-hidden="true" class="hf-icon"/,
+    )
+    expect(link).toContain('<path d="M9.5 2.5h4v4"></path>')
+    expect(link.replace(/<[^>]*>/g, '')).toBe('Naar het forum')
+    expect(html.match(/<svg /g)).toHaveLength(1)
+  })
+
+  it('loads nothing from the forum: no image, avatar, frame or script, and only links', async () => {
+    const html = withoutIcons(await renderDiscussions())
 
     expect(html).not.toMatch(/<(img|picture|iframe|video|audio|script|image|use|svg|link|source)/)
     expect(html).not.toMatch(/(src|srcset|poster)=/)
@@ -584,7 +615,7 @@ describe('the discussions in the sidebar of the homepage', () => {
   it('says there are no discussions yet, with the link to the forum under it', async () => {
     vi.mocked(getDiscussions).mockResolvedValue([])
 
-    const html = await renderDiscussions()
+    const html = withoutIcons(await renderDiscussions())
 
     expect(html).toContain('<h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies</h2>')
     expect(html).toContain('<p>We hebben nog geen discussies van het forum.</p>')

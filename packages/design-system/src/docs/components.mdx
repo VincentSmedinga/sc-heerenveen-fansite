@@ -9,7 +9,7 @@ Elk onderdeel heeft hieronder een eigen pagina, met voorbeelden in licht en donk
 Een sjabloon voor een pagina bevat geen HTML, alleen deze componenten.
 
 Dit zijn de eerste componenten, met de onderdelen van `Page`: wat een pagina minimaal nodig heeft, de kaart, de regel nieuws van de homepage en de onderdelen van een formulier.
-Pictogrammen, een vinkje, een keuzerondje en de overige componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
+Een vinkje, een keuzerondje en de overige componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
 
 ## Gebruiken
 
@@ -239,7 +239,10 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
           <code>label</code> (verplicht), <code>options</code> (verplicht), <code>value</code> (verplicht),{' '}
           <code>onChange</code> (verplicht)
         </td>
-        <td>het component bewaart niets: de pagina geeft de waarde en handelt de wijziging af</td>
+        <td>
+          het component bewaart niets: de pagina geeft de waarde en handelt de wijziging af; een optie kan een{' '}
+          <code>icon</code> hebben, <code>sun</code> of <code>moon</code>, gevuld op de ingedrukte knop
+        </td>
       </tr>
       <tr>
         <th scope="row">
@@ -305,9 +308,12 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
           <code>a</code>
         </td>
         <td>
-          <code>href</code> (verplicht)
+          <code>href</code> (verplicht), <code>icon</code>
         </td>
-        <td></td>
+        <td>
+          <code>icon</code> is <code>arrow-right</code>, <code>external-link</code> (achter de tekst) of{' '}
+          <code>arrow-left</code> (vóór de tekst)
+        </td>
       </tr>
       <tr>
         <th scope="row">
@@ -429,11 +435,12 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
           <code>button</code>
         </td>
         <td>
-          <code>type</code> (verplicht), <code>appearance</code>
+          <code>type</code> (verplicht), <code>appearance</code>, <code>icon</code>
         </td>
         <td>
           <code>type</code> is <code>submit</code>, <code>button</code> of <code>reset</code>; <code>appearance</code>{' '}
-          is <code>default</code> (gevuld) of <code>soft</code>
+          is <code>default</code> (gevuld) of <code>soft</code>; <code>icon</code> is <code>envelope</code> of{' '}
+          <code>plus</code>, vóór de tekst
         </td>
       </tr>
       <tr>
