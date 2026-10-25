@@ -293,15 +293,16 @@ describe('the button that loads five more headlines', () => {
     vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: true })
   })
 
-  it('asks for the first five headlines without a number in the address', async () => {
+  it('asks for the first ten headlines without a number in the address', async () => {
     await render()
 
-    expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(5)
+    expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(10)
   })
 
   it.each([
     ['10', 10],
     ['15', 15],
+    ['20', 20],
     ['100', 100],
   ])('asks for %s headlines for ?nieuws=%s', async (value, count) => {
     await render({ nieuws: value })
@@ -309,19 +310,19 @@ describe('the button that loads five more headlines', () => {
     expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(count)
   })
 
-  it.each(['0', '4', '7', '12', '-5', '5.5', '1e1', '010', '105', '1000', 'abc', ''])(
-    'asks for the first five headlines for ?nieuws=%j, which is not a valid number',
+  it.each(['0', '4', '5', '7', '12', '-5', '5.5', '1e1', '010', '105', '1000', 'abc', ''])(
+    'asks for the first ten headlines for ?nieuws=%j, which is not a valid number',
     async (value) => {
       await render({ nieuws: value })
 
-      expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(5)
+      expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(10)
     },
   )
 
-  it('asks for the first five headlines when the number is given twice', async () => {
+  it('asks for the first ten headlines when the number is given twice', async () => {
     await render({ nieuws: ['10', '15'] })
 
-    expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(5)
+    expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(10)
   })
 
   it('shows a real button "Laad 5 meer" under the list, in the card, when there are older headlines', async () => {
@@ -329,7 +330,7 @@ describe('the button that loads five more headlines', () => {
     const card = html.match(/<section.*?<\/section>/)?.[0] ?? ''
 
     expect(card).toMatch(
-      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="10" name="nieuws">Laad 5 meer<\/button><\/form><\/section>$/,
+      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="15" name="nieuws">Laad 5 meer<\/button><\/form><\/section>$/,
     )
   })
 
@@ -346,7 +347,8 @@ describe('the button that loads five more headlines', () => {
   })
 
   it('has the button ask for the number after the one in the address', async () => {
-    expect(await render({ nieuws: '10' })).toContain('value="15" name="nieuws"')
+    expect(await render()).toContain('value="15" name="nieuws"')
+    expect(await render({ nieuws: '15' })).toContain('value="20" name="nieuws"')
     expect(await render({ nieuws: '95' })).toContain('value="100" name="nieuws"')
   })
 

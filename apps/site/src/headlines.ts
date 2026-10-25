@@ -2,7 +2,7 @@ import { listRecentItems, type PublicItem } from '@fansite/db/queries'
 
 import { cacheForKey } from './cache'
 import { getDatabase } from './database'
-import { itemsPerCard } from './items-per-card'
+import { firstHeadlines, moreHeadlines } from './items-per-card'
 
 /** The most headlines the homepage shows. Older news is for the archive (#26). */
 export const maxHeadlines = 100
@@ -21,26 +21,28 @@ export type Headlines = {
  * so a visit doesn't cost a query and a new item shows within five minutes.
  *
  * The cache has an entry for every `count` it is asked for, so a `count` that isn't one that `parseHeadlineCount` gives
- * becomes the first card of headlines: a visitor can't fill the memory of the server with numbers of their own. That
- * leaves twenty entries at most.
+ * becomes the first headlines: a visitor can't fill the memory of the server with numbers of their own. That leaves
+ * nineteen entries at most.
  */
 export function getHeadlines(count: number): Promise<Headlines> {
   return getHeadlinesFor(String(parseHeadlineCount(String(count))))
 }
 
 /**
- * The number of headlines that the address asks for with `?nieuws=`: a whole number from the number per card, in steps
- * of that number, and no more than `maxHeadlines`. Anything else, such as no number, a number twice, `7`, `0`, `-5`,
- * `1e1`, `010`, `105` or `abc`, gives the first card of headlines.
+ * The number of headlines that the address asks for with `?nieuws=`: a whole number from `firstHeadlines`, in steps of
+ * `moreHeadlines`, and no more than `maxHeadlines`. Anything else, such as no number, a number twice, `5`, `12`, `0`,
+ * `-5`, `1e1`, `010`, `105` or `abc`, gives the first headlines.
  */
 export function parseHeadlineCount(value: string | string[] | undefined) {
   if (typeof value !== 'string' || !/^[1-9]\d{0,2}$/u.test(value)) {
-    return itemsPerCard
+    return firstHeadlines
   }
 
   const count = Number(value)
 
-  return count % itemsPerCard === 0 && count <= maxHeadlines ? count : itemsPerCard
+  return count >= firstHeadlines && (count - firstHeadlines) % moreHeadlines === 0 && count <= maxHeadlines
+    ? count
+    : firstHeadlines
 }
 
 const getHeadlinesFor = cacheForKey(5 * 60 * 1000, async (key) => {
