@@ -346,4 +346,17 @@
       }
     }
   }
+
+  /*
+   * While the header is leaving the top of the screen, the site gives it data-scrolled-away
+   * (watchTopEdge.ts in the site) once its bottom edge is within the height of the status bar,
+   * and what is in it is see-through. Safari on an iPhone draws what scrolls under its status
+   * bar blurred, and so shows the menu of the header in the bar. It is opacity and not
+   * visibility: a header with visibility: hidden has no banner landmark and no links for a
+   * screen reader or the keyboard until it is back in view. What is in it keeps its place, so
+   * nothing moves, and the blue band of the header stays until it has scrolled away.
+   */
+  .hf-page-header[data-scrolled-away] > * {
+    opacity: 0;
+  }
 }

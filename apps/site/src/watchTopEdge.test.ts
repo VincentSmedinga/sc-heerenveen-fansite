@@ -32,8 +32,9 @@ function stubObserver() {
   Object.defineProperty(window, 'IntersectionObserver', { configurable: true, value: globalThis.IntersectionObserver })
 
   return {
-    see: (isIntersecting: boolean) => {
-      seen[0]?.callback([{ isIntersecting }])
+    // Tells the observer with the given margin that the header is on the screen or not.
+    see: (isIntersecting: boolean, rootMargin = '-8px 0px 0px 0px') => {
+      seen.find((record) => record.options?.rootMargin === rootMargin)?.callback([{ isIntersecting }])
     },
     seen,
   }
@@ -49,10 +50,12 @@ const stubDisplayMode = (standalone: boolean) => {
 
 describe('watchTopEdge', () => {
   let edge: HTMLElement
+  let header: HTMLElement
 
   beforeEach(() => {
     document.body.innerHTML = '<div class="hf-page-top-edge"></div><header class="hf-page-header"></header>'
     edge = document.querySelector<HTMLElement>('.hf-page-top-edge')!
+    header = document.querySelector<HTMLElement>('.hf-page-header')!
     stubDisplayMode(false)
   })
 
@@ -61,13 +64,35 @@ describe('watchTopEdge', () => {
     Reflect.deleteProperty(window, 'IntersectionObserver')
   })
 
-  it('watches the header, which counts as on the screen while it reaches below the strip', () => {
+  it('watches the header twice: for the strip it is on the screen while it reaches below the strip', () => {
     const observer = stubObserver()
 
     watchTopEdge(document)
 
-    expect(observer.seen[0]?.target).toBe(document.querySelector('.hf-page-header'))
-    expect(observer.seen[0]?.options?.rootMargin).toBe('-8px 0px 0px 0px')
+    expect(observer.seen).toHaveLength(2)
+    expect(observer.seen.map((record) => record.target)).toEqual([header, header])
+    expect(observer.seen.map((record) => record.options?.rootMargin)).toEqual(['-8px 0px 0px 0px', '-64px 0px 0px 0px'])
+  })
+
+  it('makes what is in the header see-through as it leaves, before the strip goes, and back with it', () => {
+    const observer = stubObserver()
+
+    watchTopEdge(document)
+    expect(header.hasAttribute('data-scrolled-away')).toBe(false)
+
+    observer.see(false, '-64px 0px 0px 0px')
+    expect(header.hasAttribute('data-scrolled-away')).toBe(true)
+    expect(edge.hidden).toBe(false)
+
+    observer.see(false)
+    expect(edge.hidden).toBe(true)
+
+    observer.see(true, '-64px 0px 0px 0px')
+    expect(header.hasAttribute('data-scrolled-away')).toBe(false)
+    expect(edge.hidden).toBe(true)
+
+    observer.see(true)
+    expect(edge.hidden).toBe(false)
   })
 
   it('takes the strip off when the header has scrolled away and puts it back when the header is back', () => {
@@ -83,15 +108,17 @@ describe('watchTopEdge', () => {
     expect(edge.hidden).toBe(false)
   })
 
-  it('stops watching and shows the strip again when it is told to stop', () => {
+  it('stops watching and shows the strip and the header again when it is told to stop', () => {
     const observer = stubObserver()
     const stop = watchTopEdge(document)
 
     observer.see(false)
+    observer.see(false, '-64px 0px 0px 0px')
     stop()
 
-    expect(observer.seen[0]?.disconnected).toBe(true)
+    expect(observer.seen.map((record) => record.disconnected)).toEqual([true, true])
     expect(edge.hidden).toBe(false)
+    expect(header.hasAttribute('data-scrolled-away')).toBe(false)
   })
 
   it('keeps the strip in an app on the home screen, where the status bar is see-through', () => {

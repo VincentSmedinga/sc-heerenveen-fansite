@@ -110,12 +110,24 @@ test.describe('the page on a screen with a notch', () => {
 
     const edge = page.locator('.hf-page-top-edge')
 
+    const header = page.locator('header')
+
     await expect(edge).not.toHaveAttribute('hidden')
+    await expect(header).not.toHaveAttribute('data-scrolled-away')
 
     await page.evaluate(() => window.scrollTo(0, document.querySelector('header')!.offsetHeight + 100))
     await expect(edge).toHaveAttribute('hidden', '')
+    await expect(header).toHaveAttribute('data-scrolled-away', '')
+
+    // What is in the header is see-through, but it keeps its place and stays in the page for a
+    // screen reader and the keyboard: opacity and not visibility.
+    await expect(header.locator('> *').first()).toHaveCSS('opacity', '0')
+    await expect(header).toHaveCSS('visibility', 'visible')
+    await expect(page.getByRole('banner')).toHaveCount(1)
 
     await page.evaluate(() => window.scrollTo(0, 0))
     await expect(edge).not.toHaveAttribute('hidden')
+    await expect(header).not.toHaveAttribute('data-scrolled-away')
+    await expect(header.locator('> *').first()).toHaveCSS('opacity', '1')
   })
 })
