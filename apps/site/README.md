@@ -27,6 +27,8 @@ Next.js leest alleen een `.env` in deze map, dus `next.config.ts` laadt de `.env
 | `pnpm --filter site share-image`           | Maakt `public/share-image.png` opnieuw, de afbeelding bij het delen van links          |
 | `pnpm --filter site icons`                 | Maakt de iconen in `public` opnieuw uit de vector van het designsysteem                |
 | `pnpm test:a11y`                           | Toetst de pagina's van de gebouwde site met axe (zie _Toegankelijkheid controleren_)   |
+| `pnpm screenshots <adres> <pad>...`        | Maakt plaatjes van een draaiende build (zie _Screenshots maken_)                       |
+| `pnpm --filter site test-data`             | Zet de verzonnen gegevens van de controle in de database, voor die plaatjes            |
 
 De rooktest heeft een MariaDB nodig, zoals de tests van `@fansite/db`: `docker compose up -d --wait`.
 Hij leest `DATABASE_URL` uit de `.env` in de root, als die er is.
@@ -72,6 +74,55 @@ Faalt een pagina, dan noemt de log de pagina en het thema (in de naam van de tes
 `e2e/check-page.spec.ts` laat zien dat de controle een fout vangt: een link zonder naam, een tweede `h1`, een verkeerde `lang`, een verzoek naar een ander domein en een pagina die op 320 pixels opzij scrolt.
 De test serveert die pagina's zelf; ze staan niet op de site.
 De stories in Storybook toetst axe niet in CI; dat doet het paneel Toegankelijkheid.
+
+## Screenshots maken
+
+`pnpm screenshots` maakt van een draaiende build de plaatjes voor de beschrijving van een pull request (zie _Screenshots_ in [`AGENTS.md`](../../AGENTS.md)).
+Het start zelf geen server en neemt alleen een build op deze computer aan.
+Per pagina of story schrijft het een PNG voor een telefoon (390 pixels breed) en een bureaublad (900 pixels breed), licht tenzij je `--dark` meegeeft, met één schermpixel per CSS-pixel.
+Chromium schrijft een PNG zonder overbodige gegevens, dus er is geen verkleiner nodig.
+De bestanden heten naar het pad of de story en de breedte, zoals `podcasts-390.png` en `home-900-dark.png`, en komen in `screenshots/` in de map waar je het draait.
+Kies een andere map met `--out <map>`.
+`--full-page` neemt de hele pagina in plaats van het eerste scherm.
+
+De homepage en `/podcasts` hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
+`pnpm --filter site test-data` zet ze in de database van je `.env`, en `pnpm --filter site test-data --remove` haalt ze er weer uit.
+Gebruik daarvoor de database waarmee je ontwikkelt, niet die van de controle of van de hosting.
+Vanuit de root:
+
+```sh
+docker compose up -d --wait
+pnpm build
+pnpm db:migrate
+pnpm db:seed
+pnpm --filter site test-data
+pnpm --filter site assemble .next/screenshots
+HOSTNAME=127.0.0.1 pnpm --filter site exec node --env-file-if-exists=../../.env .next/screenshots/apps/site/server.js
+```
+
+Zet de gegevens erin vóór je de site start: de homepage bewaart haar koppen vijf minuten.
+`HOSTNAME` staat erbij omdat het in veel shells de naam van je computer is, en de site daar dan op luistert.
+De site luistert op <http://127.0.0.1:3000>.
+Maak de plaatjes in een tweede terminal:
+
+```sh
+pnpm screenshots http://127.0.0.1:3000 / /podcasts
+pnpm screenshots http://127.0.0.1:3000 /over-ons --dark
+```
+
+Voor een component bouw je Storybook, serveer je de map met de build, en geef je het id van een story:
+
+```sh
+pnpm --filter design-system build-storybook
+python3 -m http.server 6006 --bind 127.0.0.1 --directory packages/design-system/storybook-static
+pnpm screenshots http://127.0.0.1:6006 componenten-page-footer--light
+```
+
+De tweede opdracht blijft draaien, dus geef de derde in een tweede terminal.
+
+Een pad begint met een schuine streep, al het andere is het id van een story.
+Het script volgt de kleurkeuze van de browser (`prefers-color-scheme`), dus het werkt voor de site en voor Storybook.
+Een pagina die niet met 200 antwoordt, laat het commando falen, zodat een tikfout in het adres geen plaatje van een foutpagina geeft.
 
 ## Sjablonen
 

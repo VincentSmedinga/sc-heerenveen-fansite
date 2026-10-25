@@ -361,6 +361,60 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Kanban met een grens aan het werk in uitvoering, zonder tijdvak.
   Een maximum van vier issues per iteratie, dat bij werken in vlagen alleen in de weg zit.
 
+### Screenshots staan op een eigen branch, niet in de repository
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de screenshots bij een pull request staan op de branch `pr-screenshots`, één map per pull request (`pr-<nummer>/`), en worden in de beschrijving ingesloten.
+  De branch is een orphan-branch met alleen een `README.md` en die mappen, en wordt nooit samengevoegd of verwijderd.
+  De Builder zet de plaatjes er zelf op, zonder tweede toestemming: dat is een uitzondering op het punt Go-ahead in `AGENTS.md`.
+  Een wijziging die bezoekers zien, krijgt één tot drie screenshots; een wijziging die niemand ziet, zegt dat in de beschrijving.
+- **Waarom:** GitHub kan vanaf de opdrachtregel geen plaatjes aan een beschrijving hangen, en een agent moet het zelf kunnen.
+  Op `main` horen ze niet: elk plaatje zou de repository voor altijd groter maken en komt in het commitbericht van de squash.
+  Een eigen branch laat de geschiedenis van `main` schoon en laat de plaatjes in de beschrijvingen werken.
+- **Alternatieven:** de plaatjes in `docs/` of `apps/site`; die vervuilen `main`.
+  Een commentaar waar de eigenaar de plaatjes zelf in sleept; dat is niet te automatiseren.
+  Bijlagen van een workflow; die verlopen en staan niet in de beschrijving.
+
+### Alleen verzonnen gegevens in een screenshot
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een screenshot toont de gebouwde site met de verzonnen testgegevens van de e2e-tests of een story, nooit een echte forumdiscussie, een schermnaam of gegevens van de hosting.
+  `pnpm screenshots` neemt daarom alleen een build op deze computer aan.
+- **Waarom:** de repository is openbaar, en een plaatje blijft staan, ook als de pull request gesloten wordt.
+  Wat we niet openbaar maken, zetten we niet in een plaatje (_geen persoonsgegevens in code, tests, testgegevens of logs_).
+- **Alternatieven:** echte koppen en discussies tonen; die zijn herkenbaarder, maar bevatten namen van leden en kunnen later aanleiding geven tot een verwijderverzoek.
+
+### Licht is genoeg, donker alleen met een reden
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een screenshot is standaard licht.
+  Donker komt erbij als de wijziging over het thema of de kleuren gaat, of als iets in donker te zien is wat in licht niet te zien is.
+  Er komen geen kopieën van hetzelfde plaatje waar alleen het thema verschilt.
+- **Waarom:** in de meeste wijzigingen, zoals een nieuwe pagina, een lijst of een knop, is het thema niet wat verandert.
+  Een tweede plaatje vertelt de eigenaar dan niets en kost bytes in de repository voor altijd.
+  Wie het donkere thema wil nakijken, kan dat in Storybook en met axe, die beide thema's controleren.
+- **Alternatieven:** altijd licht en donker, zoals het andere project vaak doet; dat verdubbelt de plaatjes.
+  Nooit donker; dan mist een wijziging aan het thema precies wat ze wil laten zien.
+
+### Een telefoon en een smal bureaublad, zo klein als kan
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de standaardbreedtes zijn 390 pixels (telefoon) en 900 pixels (bureaublad), zonder dubbele resolutie, als PNG zonder overbodige gegevens.
+  Mappen van samengevoegde pull requests blijven op `pr-screenshots` staan, want ze staan in de beschrijvingen van gesloten pull requests.
+  Is de branch groter dan 100 MB, dan kijken we opnieuw.
+- **Waarom:** een kleinere breedte bespaart bytes, en wat in 900 pixels past, past in elke breedte daarboven.
+  Een tablet voegt voor een eerste blik weinig toe; wie de opbouw tussen telefoon en bureaublad wil zien, vraagt er een.
+- **Alternatieven:** 1200 pixels voor een bureaublad, zoals eerst voorgesteld; dat is een derde groter in elke richting.
+  Een tablet erbij.
+
+### Een klein script in plaats van een wegwerptest per Builder
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `pnpm screenshots` maakt de plaatjes met de Playwright die er al staat, voor een lijst met paden of stories.
+  Het start geen server en voegt geen dependency toe.
+- **Waarom:** anders schrijft elke Builder zijn eigen wegwerptest, met elk eigen breedtes en bestandsnamen, en vergeet hij de breedte of kiest hij donker zonder reden.
+- **Alternatieven:** alleen beschrijven in `AGENTS.md`, zoals het andere project; dat is minder code, maar elke Builder bedenkt de test opnieuw.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host
