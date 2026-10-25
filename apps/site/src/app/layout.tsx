@@ -28,7 +28,8 @@ export const metadata: Metadata = {
   // The icon for the tab is the SVG, and browsers that don't read SVG or ask for /favicon.ico themselves get the ICO.
   // The PNGs for the home screen of an iPhone and for the manifest are in app/manifest.ts. All are made by
   // scripts/make-icons.js.
-  appleWebApp: { title: 'Fansite' },
+  // The status bar of the app is see-through, so the header runs under it (see the decision in docs/beslissingen.md).
+  appleWebApp: { statusBarStyle: 'black-translucent', title: 'Fansite' },
   icons: {
     apple: { sizes: '180x180', type: 'image/png', url: '/apple-touch-icon.png' },
     icon: [
@@ -44,12 +45,14 @@ export const metadata: Metadata = {
   },
 }
 
-// The browser colours its own bars with the header of the site, which is a step lighter in dark.
+// The browser colours its own bars with the header of the site, which is a step lighter in dark. The page uses the whole
+// screen, also behind a notch, and keeps its content clear of it with the insets in page.css (viewport-fit=cover).
 export const viewport: Viewport = {
   themeColor: [
     { color: headerColour.light, media: '(prefers-color-scheme: light)' },
     { color: headerColour.dark, media: '(prefers-color-scheme: dark)' },
   ],
+  viewportFit: 'cover',
 }
 
 // Every page has the same header and footer, and puts its content in a Page.Main in the Page.Body, so a page with a

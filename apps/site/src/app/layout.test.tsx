@@ -85,7 +85,15 @@ describe('the icons of the layout', () => {
   })
 
   it('names the site Fansite under the icon on an iPhone', () => {
-    expect(metadata.appleWebApp).toEqual({ title: 'Fansite' })
+    expect(metadata.appleWebApp).toMatchObject({ title: 'Fansite' })
+  })
+
+  it('makes the status bar of the home screen app see-through, so the header runs under it', () => {
+    expect(metadata.appleWebApp).toMatchObject({ statusBarStyle: 'black-translucent' })
+  })
+
+  it('lets the page use the whole screen, also behind a notch', () => {
+    expect(viewport.viewportFit).toBe('cover')
   })
 
   it('colours the bars of the browser with the header of the site, in light and in dark', () => {

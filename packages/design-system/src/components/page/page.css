@@ -5,6 +5,12 @@
    * As wide as the window, so the header and the footer can run from edge to edge. They pad their content into a centred
    * column, and the body sits in that column. On a screen narrower than the maximum width, the margin keeps the content
    * off the edges.
+   *
+   * The page runs under a notch, a camera island and the bars of the phone (viewport-fit=cover, see the viewport of the
+   * site), and what is in it keeps clear of them: every margin that meets the edge of the screen is the larger of the
+   * margin it has and the inset the device asks for (env(safe-area-inset-*)). Without an inset the value is 0 and nothing
+   * changes. The header and the footer keep their background behind the cutout, and the body sits on the colour of the
+   * page. The top inset is in the header and the bottom inset in the footer, which are the first and last thing on the page.
    */
   .hf-page {
     display: flex;
@@ -41,8 +47,9 @@
     flex-wrap: wrap;
     gap: 0.5rem 2rem;
     justify-content: space-between;
-    padding-block: 1rem;
-    padding-inline: var(--hf-page-inset);
+    padding-block: max(1rem, env(safe-area-inset-top, 0px)) 1rem;
+    padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
+      max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
 
     @media (width >= 74.5rem) {
       > :is(.hf-logo, :has(> .hf-logo)):first-child {
@@ -88,7 +95,8 @@
     flex: 1 0 auto;
     gap: var(--hf-page-body-cell-gap);
     grid-template-columns: minmax(0, var(--hf-content-max-width));
-    margin-inline: var(--hf-page-inset);
+    margin-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
+      max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
     padding-block: var(--hf-page-body-cell-gap) var(--hf-page-body-column-gap);
 
     @media (width >= 56rem) {
@@ -207,8 +215,9 @@
     column-gap: 2rem;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    padding-block: 1.5rem;
-    padding-inline: var(--hf-page-inset);
+    padding-block: 1.5rem max(1.5rem, env(safe-area-inset-bottom, 0px));
+    padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
+      max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
 
     > * {
       margin: 0;
