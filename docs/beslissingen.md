@@ -4018,6 +4018,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De links breken dan af in een tweede rij naast de tekst, en de tekst en de knoppen blijven heel.
   Het menu staat ter hoogte van de bovenkant van de tekst en beslaat alle rijen, zodat een tweede rij links de twee zinnen niet uit elkaar duwt.
   Onder 19,5rem breken de tekst en de knoppen weer af, als noodgreep.
+  De links in de footer breken af in rijen die ongeveer even lang zijn (`text-wrap: balance`), zodat een tweede rij niet maar één link telt terwijl de eerste vol is.
+  Een rij van een flexbox is niet te verdelen, dus in de footer is de lijst een regel van `inline-block`-elementen, met 1,5rem tussen de links, net als in de andere menu's.
+  Een browser die `text-wrap: balance` niet kent (het staat in `@supports`) houdt de flexbox, zoals het was.
 - **Waarom:** een zin of een knop die midden in de regel afbreekt, ziet er onhandig uit bij een middelbare breedte.
   Het menu bestaat uit losse links die makkelijk onder elkaar passen.
   De tekst en de knoppen zijn hoogstens 14,1rem breed, en 17rem met de tekstafstand van WCAG 1.4.12 (letters 0,12em en woorden 0,16em uit elkaar, gemeten in Chromium); met 2rem marge aan de zijkanten past dat vanaf 19rem op één regel.
@@ -4027,6 +4030,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alles laten afbreken zoals nu.
   Het menu ook niet laten afbreken en het onder het blok zetten tot de links op één regel passen (vanaf 51rem met de zes links van nu); dan hangt de breedte van de footer af van het aantal links, dat het designsysteem niet kent, en op veel meer breedtes staat het menu onder de tekst.
   Een flexbox in plaats van het raster, waarin het menu als geheel naar een volgende rij verhuist; dat kan niet zonder de twee zinnen en de knoppen in een eigen element te zetten.
+  De links laten afbreken zoals voorheen, met de eerste rij vol en een kort stuk in de tweede; de projecteigenaar wilde rijen van gelijke lengte.
 - **Gecontroleerd en niet gecontroleerd:** de footer op de site, met de zes links van nu, in een breedte van 240 tot 1200 pixels, ook met een groter lettertype en in donker: de zinnen staan op één regel, de knoppen naast elkaar en de pagina scrolt niet zijwaarts, vanaf 19,5rem.
+  De links staan bij 640 tot 800 pixels in twee rijen van drie (223 en 274 pixels breed, voorheen vier en twee), en bij 240 tot 300 pixels in drie rijen van twee, ook zonder zijwaarts scrollen.
   Voor de wijziging braken de zinnen en de knoppen af tussen 640 en ongeveer 790 pixels: bij 640 pixels viel de eerste zin in vijf regels uiteen en de knoppen stonden onder elkaar.
   Niet gecontroleerd: een echte instelling van het lettertype in de browser, want de grens in rem volgt die instelling en een test in een iframe kan hem niet zetten.

@@ -36,7 +36,7 @@ const meta = preview.meta({
           'Op een breed scherm staan ze rechts naast de twee regels, ter hoogte van de bovenkant van de tekst; op een smal scherm staan ze eronder.',
           '',
           'De twee regels tekst en de knoppen breken niet af: een zin blijft op één regel, een knop houdt zijn pictogram en tekst bij elkaar en de knoppen staan naast elkaar.',
-          'Alleen de links geven mee. Het zijn losse links, dus tussen de links mag een regel afbreken, en op een middelbaar scherm komen ze in twee rijen naast de tekst.',
+          'Alleen de links geven mee. Het zijn losse links, dus tussen de links mag een regel afbreken, en op een middelbaar scherm komen ze in twee rijen van ongeveer even lang naast de tekst.',
           'Op een scherm dat zo smal is dat de tekst nergens meer past, mag alles weer afbreken, als noodgreep: anders scrolt de pagina zijwaarts.',
         ].join('\n'),
       },
@@ -133,7 +133,7 @@ const wideDescription =
   'Op een breed scherm staan de links rechts naast de twee regels tekst, ter hoogte van de bovenkant.'
 
 const mediumDescription =
-  'Op een middelbaar scherm staan de links in twee rijen naast de tekst. De zinnen en de knoppen breken niet af.'
+  'Op een middelbaar scherm staan de links in twee even lange rijen naast de tekst. De zinnen en de knoppen breken niet af.'
 
 export const NarrowLight = meta.story({
   ...screens,

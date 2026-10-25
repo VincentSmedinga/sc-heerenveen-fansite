@@ -136,4 +136,14 @@ describe('the text and the control in the footer in page.css', () => {
     expect(columns).toContain('grid-template-rows: auto auto 1fr;')
     expect(columns).toContain('grid-row: 1 / -1;')
   })
+
+  it('balances the rows of links, in a list of inline blocks because a flex row cannot be balanced', () => {
+    const list = footer.match(/@supports \(text-wrap: balance\) \{(.*?\n {4}\})\n/s)?.[1] ?? ''
+
+    expect(list).toContain('display: block;')
+    expect(list).toContain('text-wrap: balance;')
+    expect(list).toMatch(/> li \{[^}]*display: inline-block;[^}]*margin-inline-start: 1\.5rem;/)
+    // The margin before a link, taken back at the list's start, keeps links 1,5rem apart.
+    expect(list).toContain('margin-inline-start: -1.5rem;')
+  })
 })

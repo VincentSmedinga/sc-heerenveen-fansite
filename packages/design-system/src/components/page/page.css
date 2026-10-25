@@ -260,6 +260,13 @@
    * rem follows the size of the text, so the limit keeps up with a larger text size, and a
    * screen of 320px (20rem), also at 400% zoom, is above it.
    *
+   * The links wrap in rows of about equal length (text-wrap: balance), so a second row is
+   * not one link short and the other full. A flex row can't be balanced, so in the footer
+   * the list is a line of inline blocks, one for each link, 1,5rem apart as in the other
+   * menus: the space is the margin before each link, and the list takes the first one back
+   * (a negative margin), so no row starts or ends with a gap. A browser that doesn't know
+   * text-wrap: balance fills a row before it starts the next, as it did.
+   *
    * The stripes of the Frisian flag run over the footer and above it, slanting from the top left to the bottom right (the
    * diagonal of the flag is 34,695°). They are one picture, as tall as the footer and 2,5 times its height above it, in two
    * parts. The footer is positioned, so a percentage in its pseudo-elements is a part of its own height: the picture is
@@ -364,6 +371,20 @@
 
       .hf-segmented-control {
         flex-wrap: nowrap;
+      }
+    }
+
+    @supports (text-wrap: balance) {
+      .hf-navigation-list {
+        display: block;
+        margin-inline-start: -1.5rem;
+        text-wrap: balance;
+
+        > li {
+          display: inline-block;
+          margin-inline-start: 1.5rem;
+          vertical-align: top;
+        }
       }
     }
 
