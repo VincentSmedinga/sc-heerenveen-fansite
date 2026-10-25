@@ -1,0 +1,646 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)/Wedstrijden?action=raw, read on 25 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: most matches of other clubs, the text around the templates, and the goal scorers,
+  referees and reports of every match (emptied). See the tests.
+-->
+* De speeldata en -tijden van speelronde 22 tot en met 32 worden op 22 december 2026 bekendgemaakt door de KNVB.
+
+== Speelronde 1 ==
+{{Footballbox2
+|date = 9 augustus 2026
+|time = 16:45 uur
+|team1 = [[sc Heerenveen]]
+|score = 1 – 0
+|team2 = [[FC Twente]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 21.022
+|referee =
+|videoreferee =
+|report =
+}}
+{{Footballbox2
+|date = 7 augustus 2026
+|time = 20:00 uur
+|team1 = [[SC Cambuur]]
+|score = 0 – 4
+|team2 = [[Excelsior Rotterdam]]
+|goals1 =
+|goals2 =
+|location = [[Leeuwarden (stad)|Leeuwarden]]
+|stadium = [[Kooi Stadion]]
+|attendance = 14.105
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 2 ==
+{{Footballbox2
+|date = 16 augustus 2026
+|time = 16:45 uur
+|team1 = [[AFC Ajax|Ajax]]
+|score = 2 – 2
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Amsterdam]]
+|stadium = [[Johan Cruijff ArenA]]
+|attendance = 54.239
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 3 ==
+{{Footballbox2
+|date = 22 augustus 2026
+|time = 21:00 uur
+|team1 = [[sc Heerenveen]]
+|score = 0 – 2
+|team2 = [[PEC Zwolle]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 21.900
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 4 ==
+{{Footballbox2
+|date = 30 augustus 2026
+|time = 14:30 uur
+|team1 = [[Willem II (voetbalclub)|Willem II]]
+|score = 2 – 2
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Tilburg]]
+|stadium = [[Koning Willem II Stadion]]
+|attendance = 15.000
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 5 ==
+{{Footballbox2
+|date = 6 september 2026
+|time = 14:30 uur
+|team1 = [[sc Heerenveen]]
+|score = 2 – 3
+|team2 = [[AZ (voetbalclub)|AZ]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 22.164
+|referee =
+|videoreferee =
+|report =
+}}
+{{Footballbox2
+|date = 4 september 2026
+|time = 20:00 uur
+|team1 = [[Sparta Rotterdam]]
+|score = 2 – 2
+|team2 = [[PEC Zwolle]]
+|goals1 =
+|goals2 =
+|location = [[Rotterdam]]
+|stadium = [[Spartastadion Het Kasteel]]
+|attendance = 10.232
+|referee =
+|videoreferee =
+|report =
+}}
+
+{{Footballbox2
+|date = 5 september 2026
+|time = 18:45 uur
+|team1 = [[FC Utrecht]]
+|score = Gestaakt 64' (1 – 3)
+|team2 = [[Go Ahead Eagles]]
+|goals1 =
+|goals2 =
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance = 22.490
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 6 ==
+{{Footballbox2
+|date = 13 september 2026
+|time = 14:30 uur
+|team1 = [[sc Heerenveen]]
+|score = 0 – 0
+|team2 = [[Telstar (voetbalclub)|Telstar]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 21.764
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 7 ==
+{{Footballbox2
+|date = 19 september 2026
+|time = 18:45 uur
+|team1 = [[Sparta Rotterdam]]
+|score = 0 – 4
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Rotterdam]]
+|stadium = [[Spartastadion Het Kasteel]]
+|attendance = 10.317
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 8 ==
+{{Footballbox2
+|date = 9 oktober 2026
+|time = 20:00 uur
+|team1 = [[PSV (voetbalclub)|PSV]]
+|score = 2 – 0
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Eindhoven]]
+|stadium = [[Philips Stadion]]
+|attendance = 33.300
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 9 ==
+{{Footballbox2
+|date = 16 oktober 2026
+|time = 20:00 uur
+|team1 = [[sc Heerenveen]]
+|score = 4 – 0
+|team2 = [[Excelsior Rotterdam]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 23.068
+|referee =
+|videoreferee =
+|report =
+}}
+{{Footballbox2
+|date = 17 oktober 2026
+|time = 16:30 uur
+|team1 = [[ADO Den Haag]]
+|score = 2 – 1
+|team2 = [[PSV (voetbalclub)|PSV]]
+|goals1 =
+|goals2 =
+|location = [[Den Haag]]
+|stadium = [[WerkTalent Stadion]]
+|attendance = 14.565
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 10 ==
+{{Footballbox2
+|date = 24 oktober 2026
+|time = 21:00 uur
+|team1 = [[ADO Den Haag]]
+|score = 2 – 3
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Den Haag]]
+|stadium = [[WerkTalent Stadion]]
+|attendance = 13.276
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 11 ==
+{{Footballbox2
+|date = 31 oktober 2026
+|time = 18:45 uur
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[N.E.C.]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 12 ==
+{{Footballbox2
+|date = 8 november 2026
+|time = 12:15 uur
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[Feyenoord]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 13 ==
+{{Footballbox2
+|date = 21 november 2026
+|time = 21:00 uur
+|team1 = [[FC Groningen]]
+|score = [[Derby van het Noorden| – ]]
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Groningen (stad)|Groningen]]
+|stadium = [[Euroborg]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 14 ==
+{{Footballbox2
+|date = 29 november 2026
+|time = 14:30 uur
+|team1 = [[Fortuna Sittard]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Sittard]]
+|stadium = [[Fortuna Sittard Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 15 ==
+{{Footballbox2
+|date = 6 december 2026
+|time = 12:15 uur
+|team1 = [[sc Heerenveen]]
+|score = [[Friese derby| – ]]
+|team2 = [[SC Cambuur]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 16 ==
+{{Footballbox2
+|date = 12 december 2026
+|time = 18:45 uur
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[Go Ahead Eagles]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 17 ==
+{{Footballbox2
+|date = 19 december 2026
+|time = 21:00 uur
+|team1 = [[FC Utrecht]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 18 ==
+{{Footballbox2
+|date = 9 januari 2027
+|time = 21:00 uur
+|team1 = [[AZ (voetbalclub)|AZ]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Alkmaar]]
+|stadium = [[AFAS Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 19 ==
+{{Footballbox2
+|date = 15 januari 2027
+|time = 20:00 uur
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[Sparta Rotterdam]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 20 ==
+{{Footballbox2
+|date = 23 januari 2027
+|time = 20:00 uur**
+|team1 = [[FC Twente]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Enschede]]
+|stadium = [[De Grolsch Veste]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 21 ==
+{{Footballbox2
+|date = 31 januari 2027
+|time = 12:15 uur
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[AFC Ajax|Ajax]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 22 ==
+{{Footballbox2
+|date = 12-14 februari 2027
+|time = 
+|team1 = [[Telstar (voetbalclub)|Telstar]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Velsen-Zuid]]
+|stadium = [[BUKO Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 23 ==
+{{Footballbox2
+|date = 19-21 februari 2027
+|time = 
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[Willem II (voetbalclub)|Willem II]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 24 ==
+{{Footballbox2
+|date = 26-28 februari 2027
+|time = 
+|team1 = [[Excelsior Rotterdam]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Rotterdam]]
+|stadium = [[Stadion Woudestein]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 25 ==
+{{Footballbox2
+|date = 5-7 maart 2027
+|time = 
+|team1 = [[Feyenoord]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Rotterdam]]
+|stadium = [[Stadion Feijenoord]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 26 ==
+{{Footballbox2
+|date = 12-14 maart 2027
+|time = 
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[Fortuna Sittard]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 27 ==
+{{Footballbox2
+|date = 19-21 maart 2027
+|time = 
+|team1 = [[PEC Zwolle]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Zwolle]]
+|stadium = [[MAC³PARK stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 28 ==
+{{Footballbox2
+|date = 3-4 april 2027
+|time = 
+|team1 = [[sc Heerenveen]]
+|score = [[Derby van het Noorden| – ]]
+|team2 = [[FC Groningen]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 29 ==
+{{Footballbox2
+|date = 9-11 april 2027
+|time = 
+|team1 = [[N.E.C.]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Nijmegen]]
+|stadium = [[Goffertstadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 30 ==
+{{Footballbox2
+|date = 23-25 april 2027
+|time = 
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[ADO Den Haag]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 31 ==
+{{Footballbox2
+|date = 30 april-2 mei 2027
+|time = 
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[FC Utrecht]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 32 ==
+{{Footballbox2
+|date = 8-9 mei 2027
+|time = 
+|team1 = [[SC Cambuur]]
+|score = [[Friese derby| – ]]
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Leeuwarden (stad)|Leeuwarden]]
+|stadium = [[Kooi Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 33 ==
+{{Footballbox2
+|date = 16 mei 2027
+|time = 14:30 uur
+|team1 = [[Go Ahead Eagles]]
+|score =  – 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Deventer]]
+|stadium = [[De Adelaarshorst]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 34 ==
+{{Footballbox2
+|date = 23 mei 2027
+|time = 14:30 uur
+|team1 = [[sc Heerenveen]]
+|score =  – 
+|team2 = [[PSV (voetbalclub)|PSV]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee =
+|videoreferee =
+|report =
+}}

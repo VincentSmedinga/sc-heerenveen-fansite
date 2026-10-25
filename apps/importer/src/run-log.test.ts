@@ -94,6 +94,7 @@ async function importAt(now: Date) {
   const code = await runImport(database.url, {
     clock: () => now,
     makeFetcher: (robots) => fetcherFor(servers, { robots }),
+    wikipediaOrigin: null,
     write: (line) => lines.push(line),
   })
 

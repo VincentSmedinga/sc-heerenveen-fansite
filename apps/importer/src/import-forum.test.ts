@@ -336,6 +336,7 @@ describe('the import of a forum in the log and the health of the feeds', () => {
     const code = await runImport(database.url, {
       clock: () => firstRun,
       makeFetcher: (robots) => fetcherFor(servers, { robots }),
+      wikipediaOrigin: null,
       write: (line) => lines.push(line),
     })
 
@@ -353,6 +354,7 @@ describe('the import of a forum in the log and the health of the feeds', () => {
     const code = await runImport(database.url, {
       clock: () => firstRun,
       makeFetcher: (robots) => fetcherFor(servers, { robots }),
+      wikipediaOrigin: null,
       write: (line) => lines.push(line),
     })
 

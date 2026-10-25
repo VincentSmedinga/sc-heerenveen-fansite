@@ -12,6 +12,7 @@
     "./prepare": "./src/prepare.ts",
     "./queries": "./src/queries.ts",
     "./schema": "./src/schema.ts",
+    "./season": "./src/season.ts",
     "./seed": "./src/seed.ts",
     "./test-database": "./src/test-database.ts"
   },
