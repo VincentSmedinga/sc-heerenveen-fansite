@@ -105,3 +105,35 @@ describe('the stripes of the Frisian flag in page.css', () => {
     expect(media).toContain('display: none;')
   })
 })
+
+describe('the text and the control in the footer in page.css', () => {
+  const footer = css.slice(css.indexOf('.hf-page-footer {'))
+  // A nested media query of the footer, up to the closing brace at the depth of the query.
+  const media = (query: string) =>
+    footer.match(new RegExp(String.raw`@media \(${query}\) \{(.*?\n    \})\n`, 's'))?.[1] ?? ''
+
+  const nowrap = media('width >= 17rem')
+  const columns = media('width >= 40rem')
+
+  it('keeps every line of text, button label and control of the footer on one line, but not the links', () => {
+    expect(nowrap).toMatch(/> :not\(:last-child\) \{\s*white-space: nowrap;\s*\}/)
+    expect(nowrap).toMatch(/\.hf-segmented-control \{\s*flex-wrap: nowrap;\s*\}/)
+  })
+
+  it('does so only above a width where it fits, so a line that does not break cannot make the page scroll sideways', () => {
+    // 14,1rem of text and 2rem of margin is 16,1rem, so 17rem is the least that fits.
+    expect(footer.match(/^\.hf-page-footer \{[^@]*/)?.[0]).not.toContain('nowrap')
+    expect(footer.match(/white-space: nowrap;/g)).toHaveLength(1)
+    expect(nowrap).toContain('white-space: nowrap;')
+  })
+
+  it('lets the column of the links take what is left, so the links wrap before the text does', () => {
+    expect(columns).toContain('grid-template-columns: auto minmax(0, 1fr);')
+    expect(columns).toContain('justify-self: end;')
+  })
+
+  it('has the links span all rows, so a second row of links does not push the lines of text apart', () => {
+    expect(columns).toContain('grid-template-rows: auto auto 1fr;')
+    expect(columns).toContain('grid-row: 1 / -1;')
+  })
+})

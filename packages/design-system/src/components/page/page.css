@@ -239,7 +239,25 @@
    * It holds two lines of text, a paragraph each, an optional control after them (the theme toggle) and the links last.
    * What is in it has no margin, so the lines of text sit right under each other, and the control has a little space above
    * it. On a narrow screen everything is in one column, with the links under the rest. From 40rem, as in the card, the
-   * links are in a second column on the right, over both lines of text and centred on them; a control sits under the text.
+   * links are in a second column on the right, level with the top of the text; a control
+   * sits under the text.
+   *
+   * The lines of text and the control never break inside themselves: a sentence stays on
+   * one line, a button keeps its icon and its text together and the buttons of the control
+   * stay side by side. The links are the part that gives way. They are loose links, so they
+   * may wrap between links. The column of the links takes what is left (1fr) and the column
+   * of the text is as wide as its content (auto), so beside the text the links wrap to a
+   * second row before the text has to. The links span all three rows (1 / -1), so a second
+   * row of links does not push the two lines of text apart: the third row takes what is
+   * left over (1fr). One row of links is as tall as the two lines of text, so it sits level
+   * with them as before.
+   *
+   * The text and the control are 14,1rem wide at the most, and with the margins on either
+   * side (2rem) that is 16,1rem. Under 17rem there is no room for them on one line, and a
+   * line that does not break there would make the page scroll sideways (WCAG 1.4.10
+   * Reflow). So under 17rem everything may wrap again, as a last resort. The rem follows
+   * the size of the text, so the limit keeps up with a larger text size, and a screen of
+   * 320px, also at 400% zoom, is far above it.
    *
    * The stripes of the Frisian flag run over the footer and above it, slanting from the top left to the bottom right (the
    * diagonal of the flag is 34,695°). They are one picture, as tall as the footer and 2,5 times its height above it, in two
@@ -338,13 +356,28 @@
       margin-block-start: 0.75rem;
     }
 
+    @media (width >= 17rem) {
+      > :not(:last-child) {
+        white-space: nowrap;
+      }
+
+      .hf-segmented-control {
+        flex-wrap: nowrap;
+      }
+    }
+
     @media (width >= 40rem) {
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr;
+
+      > :nth-child(3):not(:last-child) {
+        align-self: start;
+      }
 
       > :last-child {
-        align-self: center;
+        place-self: start end;
         grid-column: 2;
-        grid-row: 1 / span 2;
+        grid-row: 1 / -1;
         margin-block-start: 0;
       }
     }

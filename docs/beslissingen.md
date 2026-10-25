@@ -4008,3 +4008,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het vlak van de footer is al te zien aan zijn kleur, en de lijn voegt daar niets aan toe.
   Zonder rand heeft de footer geen strook van 1 pixel meer buiten het vlak waar de strepen van de Friese vlag hun maat van nemen, dus de twee delen van de strepen sluiten precies op elkaar aan.
 - **Alternatieven:** de lijn houden zoals hij is; een zachtere lijn (dichter bij de kleur van de footer, maar nog steeds een lijn die het vlak omlijst).
+
+### De zinnen en de knoppen in de footer breken niet af
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de twee zinnen en de knoppen Licht en Donker in de footer breken niet af binnen een regel; het menu met de links mag dat wel.
+  Een zin blijft op één regel (`white-space: nowrap`), een knop houdt zijn pictogram en tekst bij elkaar, en de twee knoppen staan naast elkaar (`flex-wrap: nowrap`).
+  Op een middelbaar scherm geeft het menu mee: vanaf 40rem is de kolom met de tekst zo breed als de tekst zelf (`auto`) en neemt de kolom met de links de rest (`1fr`), rechts uitgelijnd.
+  De links breken dan af in een tweede rij naast de tekst, en de tekst en de knoppen blijven heel.
+  Het menu staat ter hoogte van de bovenkant van de tekst en beslaat alle rijen, zodat een tweede rij links de twee zinnen niet uit elkaar duwt.
+  Onder 17rem breken de tekst en de knoppen weer af, als noodgreep.
+- **Waarom:** een zin of een knop die midden in de regel afbreekt, ziet er onhandig uit bij een middelbare breedte.
+  Het menu bestaat uit losse links die makkelijk onder elkaar passen.
+  De tekst en de knoppen zijn hoogstens 14,1rem breed; met 2rem marge aan de zijkanten past dat vanaf 16,1rem op één regel.
+  De grens 17rem ligt daar een stukje boven, en ver onder 320 pixels (20rem), dus een scherm van 320 pixels breed en 400% zoom (dat is ook 320 CSS-pixels) scrolt niet zijwaarts (WCAG 1.4.10).
+  De grens staat in rem, dus hij volgt een groter lettertype: bij tekst op 200% ligt hij op 34rem aan pixels, en daar zijn de tekst en de knoppen ook twee keer zo breed.
+  Een grens in pixels zou dat niet doen.
+- **Alternatieven:** alles laten afbreken zoals nu.
+  Het menu ook niet laten afbreken en het onder het blok zetten tot de links op één regel passen (vanaf 51rem met de zes links van nu); dan hangt de breedte van de footer af van het aantal links, dat het designsysteem niet kent, en op veel meer breedtes staat het menu onder de tekst.
+  Een flexbox in plaats van het raster, waarin het menu als geheel naar een volgende rij verhuist; dat kan niet zonder de twee zinnen en de knoppen in een eigen element te zetten.
+- **Gecontroleerd en niet gecontroleerd:** de footer op de site, met de zes links van nu, in een breedte van 240 tot 1200 pixels, ook met een groter lettertype en in donker: de zinnen staan op één regel, de knoppen naast elkaar en de pagina scrolt niet zijwaarts, vanaf 17rem.
+  Voor de wijziging braken de zinnen en de knoppen af tussen 640 en ongeveer 790 pixels: bij 640 pixels viel de eerste zin in vijf regels uiteen en de knoppen stonden onder elkaar.
+  Niet gecontroleerd: een echte instelling van het lettertype in de browser, want de grens in rem volgt die instelling en een test in een iframe kan hem niet zetten.
