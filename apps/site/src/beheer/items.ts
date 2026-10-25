@@ -59,7 +59,9 @@ export async function hideItem(
 }
 
 /**
- * The newest `listLength` items, from every source, hidden or not, newest first. With a search,
+ * The newest `listLength` items, from every source, hidden or not and of every relevance (the
+ * importer keeps `doubtful` and `irrelevant` items too, which the site does not show), newest
+ * first. With a search,
  * only the items whose headline or link contains the text, in any case. The text is a plain
  * text and no pattern: `%` and `_` stand for themselves.
  */
@@ -73,6 +75,7 @@ export function listItems(db: Pick<Database, 'select'>, search: string) {
       id: items.id,
       paywalled: items.paywalled,
       publishedAt: items.publishedAt,
+      relevance: items.relevance,
       sourceName: sources.name,
       title: items.title,
       url: items.url,

@@ -83,15 +83,16 @@ De importer (`apps/importer`) schrijft in deze twee tabellen.
 `feeds` legt per feed vast welke feeds we lezen, en hoe gezond ze zijn.
 Een bron kan meer feeds hebben.
 
-| Kolom                         | Betekenis                                                                                 |
-| ----------------------------- | ----------------------------------------------------------------------------------------- |
-| `source_id`                   | De bron van de feed; een feed gaat weg als zijn bron wordt verwijderd                     |
-| `url`                         | Het adres van de feed (hoogstens 500 tekens), uniek                                       |
-| `etag`, `last_modified`       | De waarden van de vorige keer dat de importer de feed las en de berichten bewaarde        |
-| `last_success_at`             | De laatste run die de feed las en bewaarde, of hoorde dat hij niet gewijzigd was, in UTC  |
-| `failures_in_a_row`           | Het aantal mislukte runs op rij; vanaf 3 is de feed ongezond                              |
-| `last_error`, `last_error_at` | De reden van de laatste fout (hoogstens 300 tekens) en wanneer die was, in UTC            |
-| `retry_at`                    | Tot wanneer de importer de feed overslaat: de bron vroeg om te wachten, of hij faalt vaak |
+| Kolom                         | Betekenis                                                                                                                                                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source_id`                   | De bron van de feed; een feed gaat weg als zijn bron wordt verwijderd                                                                                                         |
+| `url`                         | Het adres van de feed (hoogstens 500 tekens), uniek                                                                                                                           |
+| `etag`, `last_modified`       | De waarden van de vorige keer dat de importer de feed las en de berichten bewaarde                                                                                            |
+| `last_success_at`             | De laatste run die de feed las en bewaarde, of hoorde dat hij niet gewijzigd was, in UTC                                                                                      |
+| `failures_in_a_row`           | Het aantal mislukte runs op rij; vanaf 3 is de feed ongezond                                                                                                                  |
+| `last_error`, `last_error_at` | De reden van de laatste fout (hoogstens 300 tekens) en wanneer die was, in UTC                                                                                                |
+| `retry_at`                    | Tot wanneer de importer de feed overslaat: de bron vroeg om te wachten, of hij faalt vaak                                                                                     |
+| `filter`                      | `none` voor een feed die alleen over de club gaat (de beginwaarde), `club` voor een feed die over meer gaat; de importer beoordeelt dan elke kop (zie _Het relevantiefilter_) |
 
 Wat als geslaagd of mislukt telt, en hoe lang de importer wacht, staat in de [README van de importer](../../apps/importer/README.md).
 
@@ -115,12 +116,22 @@ Een kolom daarvoor komt met de eerste bron die het wel mag; een test houdt de li
 | `hidden_at`                     | Wanneer een moderator het bericht verborg, in UTC; leeg voor een bericht dat te zien is         |
 | `hidden_by`                     | Het account dat het verborg (`admin_users`); leeg als het bericht niet verborgen is             |
 | `hidden_reason`                 | Waarom, hoogstens 300 tekens; leeg als het bericht niet verborgen is                            |
+| `relevance`                     | Wat de importer van de kop vond: `relevant` (de beginwaarde), `doubtful` of `irrelevant`        |
 
 `item_key` is uniek per bron (`source_id` en `item_key` samen) en hoofdlettergevoelig: de kolom heeft de collatie `utf8mb4_bin`, want een `guid` en het pad van een URL kennen hoofdletters.
 Een lengte die niet past, geeft een fout in plaats van dat de database de tekst afkapt; de importer slaat zo'n bericht eerder al over.
 `itemLimits` in `@fansite/db/schema` heeft de lengtes, voor schema en importer samen.
 De importer verwijdert geen berichten.
 Een bericht met `hidden_at` laat hij ongemoeid, ook als de bron het opnieuw aanbiedt of verandert (zie _Een bericht verbergen_).
+
+### Het relevantiefilter
+
+`items.relevance` is wat de importer van de kop vindt, voor een feed met `feeds.filter` gelijk aan `club`: `relevant` is over sc Heerenveen, `doubtful` wacht op iemand die ernaar kijkt, `irrelevant` is niet over de club.
+Bij een feed met `none` is elk bericht `relevant`.
+De importer bewaart elk bericht, ook `doubtful` en `irrelevant`; de regels en de lijst met namen staan in de [README van de importer](../../apps/importer/README.md).
+De site toont alleen `relevant`: elke query in `queries.ts` die berichten toont, gaat door `isShown`, samen met `hidden_at IS NULL`.
+Een nieuwe query op `items` voor een pagina gebruikt `isShown` ook; het beheer zelf (`listItems`) is de enige die elke waarde toont.
+Een migratie zet elk bericht dat er al was op `relevant` en elke feed op `none`.
 
 ### Een bericht verbergen
 
@@ -162,12 +173,13 @@ Ook deze drie tabellen vult de importer.
 
 `import_results` heeft per run een rij per feed.
 
-| Kolom                                      | Betekenis                                                                                           |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| `run_id`, `feed_id`                        | De run en de feed; de rij gaat weg met de run of de feed                                            |
-| `outcome`                                  | `imported`, `not-modified`, `blocked-by-robots`, `wait`, `postponed` of `error`                     |
-| `added`, `updated`, `unchanged`, `skipped` | Het aantal nieuwe, bijgewerkte, ongewijzigde en overgeslagen berichten                              |
-| `reason`                                   | Waarom de feed faalde of wachtte (hoogstens 300 tekens); van de database alleen de code van de fout |
+| Kolom                                      | Betekenis                                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `run_id`, `feed_id`                        | De run en de feed; de rij gaat weg met de run of de feed                                                      |
+| `outcome`                                  | `imported`, `not-modified`, `blocked-by-robots`, `wait`, `postponed` of `error`                               |
+| `added`, `updated`, `unchanged`, `skipped` | Het aantal nieuwe, bijgewerkte, ongewijzigde en overgeslagen berichten                                        |
+| `relevant`, `doubtful`, `irrelevant`       | Hoeveel berichten van de feed het filter bij elke waarde vond; bij een feed zonder filter allemaal `relevant` |
+| `reason`                                   | Waarom de feed faalde of wachtte (hoogstens 300 tekens); van de database alleen de code van de fout           |
 
 De importer haalt runs weg die ouder zijn dan 30 dagen.
 

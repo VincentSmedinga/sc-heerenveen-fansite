@@ -1,12 +1,19 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
-import { feeds, items, sources } from '@fansite/db/schema'
+import { feeds, type ItemRelevance, items, sources } from '@fansite/db/schema'
 import path from 'node:path'
 
 /**
  * A made-up item: on which test source, how long before the check started, and what it says.
  */
-type Row = { domain: string; hoursAgo: number; paywalled?: boolean; source: string; title: string }
+type Row = {
+  domain: string
+  hoursAgo: number
+  paywalled?: boolean
+  relevance?: ItemRelevance
+  source: string
+  title: string
+}
 
 /**
  * Made-up headlines for the checks of the homepage. They are not in the seed: the seed also
@@ -18,7 +25,7 @@ type Row = { domain: string; hoursAgo: number; paywalled?: boolean; source: stri
  * button under them; `/?nieuws=15` shows all eleven and no button. The first seven are from the
  * last six days and show a weekday; the last four are older and show a date.
  */
-export const headlines: { madeUp: Row[] } = {
+export const headlines: { madeUp: Row[]; notForVisitors: Row[] } = {
   madeUp: [
     {
       domain: 'testkrant.test',
@@ -92,6 +99,24 @@ export const headlines: { madeUp: Row[] } = {
       title: 'Heerenveen en Testclub openen het seizoen in een uitverkocht stadion',
     },
   ],
+  // The importer keeps these, but no page may show them, however new they are (#74). The check
+  // `relevance.spec.ts` looks for them on every page.
+  notForVisitors: [
+    {
+      domain: 'testkrant.test',
+      hoursAgo: 0.5,
+      relevance: 'doubtful',
+      source: 'Testkrant',
+      title: 'Gemeente Verzonnen zoekt een nieuwe wethouder, twijfelgeval',
+    },
+    {
+      domain: 'proefnieuws.test',
+      hoursAgo: 0.7,
+      relevance: 'irrelevant',
+      source: 'Proefnieuws',
+      title: 'Verzonnen museum opent de deuren, afgewezen bericht',
+    },
+  ],
 }
 
 /**
@@ -100,7 +125,7 @@ export const headlines: { madeUp: Row[] } = {
  */
 const feedPath = '/e2e-a11y/rss/'
 
-const rows: Row[] = headlines.madeUp
+const rows: Row[] = [...headlines.madeUp, ...headlines.notForVisitors]
 
 /**
  * Puts the made-up headlines in the database and returns the function that takes them out
@@ -139,6 +164,7 @@ export async function addHeadlines() {
             key: `e2e-${index}`,
             paywalled: row.paywalled ?? false,
             publishedAt: new Date(now - row.hoursAgo * 60 * 60 * 1000),
+            relevance: row.relevance ?? 'relevant',
             sourceId,
             title: row.title,
             url: `https://${domain}/e2e-${index}`,

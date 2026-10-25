@@ -161,6 +161,7 @@ De importer bewaart de discussies (zie de [README van de importer](../importer/R
 De server bewaart ze vijf minuten (`src/discussions.ts`).
 
 `listRecentItems` in `@fansite/db/queries` haalt de berichten op, met alleen die velden.
+Het haalt alleen berichten op die `relevant` zijn en niet verborgen (`isShown`); berichten die de importer een twijfelgeval vond of niet over de club, staan op geen enkele pagina (zie _Het relevantiefilter_ in de [README van de importer](../importer/README.md)).
 `src/news.ts` schrijft de dag of de datum en de tijd, in Nederlandse tijd (`Europe/Amsterdam`).
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.

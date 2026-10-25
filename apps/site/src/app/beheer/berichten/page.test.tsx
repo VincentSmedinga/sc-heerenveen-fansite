@@ -126,6 +126,19 @@ describe('the list', () => {
     expect(buttons(html)).toHaveLength(1)
   })
 
+  it('says of an item the importer did not find about the club that it is not on the site', async () => {
+    await addItem(database, ids, 'club', { publishedAt: new Date('2026-10-21T08:00:00Z') })
+    await addItem(database, ids, 'twijfel', { publishedAt: new Date('2026-10-20T08:00:00Z'), relevance: 'doubtful' })
+    await addItem(database, ids, 'elders', { publishedAt: new Date('2026-10-19T08:00:00Z'), relevance: 'irrelevant' })
+
+    const html = await render()
+
+    expect(html).toContain('Kop twijfel')
+    expect(html).toContain('Kop elders')
+    expect(html.match(/twijfelgeval, niet op de site/g)).toHaveLength(1)
+    expect(html.match(/niet over de club, niet op de site/g)).toHaveLength(1)
+  })
+
   it('gives the time of an old item with its time of day, not the date alone', async () => {
     await addItem(database, ids, 'oud', { publishedAt: new Date('2025-01-02T08:05:00Z') })
 

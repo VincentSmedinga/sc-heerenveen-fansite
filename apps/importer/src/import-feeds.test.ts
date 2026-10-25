@@ -1,7 +1,7 @@
-import type { SourceKind } from '@fansite/db/schema'
+import type { FeedFilter, SourceKind } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { adminUsers, feeds, items, sources } from '@fansite/db/schema'
+import { adminUsers, feeds, importResults, items, sources } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -43,11 +43,14 @@ afterEach(async () => {
 })
 
 /** Puts a source with a feed in the register and gives the feed as the importer reads it. */
-async function addFeed(url: string, { domain = 'krant.test', enabled = true, kind = 'news' as SourceKind } = {}) {
+async function addFeed(
+  url: string,
+  { domain = 'krant.test', enabled = true, filter = 'none' as FeedFilter, kind = 'news' as SourceKind } = {},
+) {
   const [source] = await database.db.insert(sources).values({ domain, enabled, kind, name: domain }).$returningId()
   const [feed] = await database.db
     .insert(feeds)
-    .values({ sourceId: source?.id ?? 0, url })
+    .values({ filter, sourceId: source?.id ?? 0, url })
     .$returningId()
 
   return storedFeed(feed?.id ?? 0)
@@ -407,6 +410,130 @@ describe('an item that a moderator hid', () => {
   })
 })
 
+describe('the relevance filter', () => {
+  const mixed = () =>
+    feedWith(
+      entry('club', { title: 'sc Heerenveen wint van Twente' }),
+      entry('stad', { title: 'Brand in woning in Heerenveen' }),
+      entry('elders', { title: 'Leeuwarden krijgt nieuw museum' }),
+      entry('speler', { title: 'Robin Veldman verlengt' }),
+    )
+
+  const relevanceByKey = async () =>
+    Object.fromEntries((await itemsInDatabase()).map((row) => [row.key, row.relevance]))
+
+  it('keeps every item of a feed with the filter club, with its relevance, and counts them', async () => {
+    const server = await serve(mixed())
+    const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect(report).toMatchObject({
+      added: 4,
+      relevance: { doubtful: 2, irrelevant: 1, relevant: 1 },
+      skipped: [],
+    })
+    expect(await relevanceByKey()).toEqual({
+      club: 'relevant',
+      elders: 'irrelevant',
+      speler: 'doubtful',
+      stad: 'doubtful',
+    })
+  })
+
+  it('makes every item of a feed with the filter none relevant, whatever the headline says', async () => {
+    const server = await serve(mixed())
+    const feed = await addFeed(`${server.origin}/rss/`, { filter: 'none' })
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect(report).toMatchObject({ added: 4, relevance: { doubtful: 0, irrelevant: 0, relevant: 4 } })
+    expect((await itemsInDatabase()).every((row) => row.relevance === 'relevant')).toBe(true)
+  })
+
+  it('leaves the value alone when the item comes by again as it was', async () => {
+    const server = await serve(mixed())
+    const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect(await importFeed(database.db, fetcherFor(servers), feed, secondRun)).toMatchObject({
+      added: 0,
+      unchanged: 4,
+      updated: 0,
+    })
+  })
+
+  it('judges an item it already has again, so a better rule works on old items', async () => {
+    const server = await serve(mixed())
+    const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+    // The rules were different when these were stored.
+    await database.db.update(items).set({ relevance: 'relevant' })
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, secondRun)
+
+    expect(report).toMatchObject({ added: 0, unchanged: 1, updated: 3 })
+    expect(await relevanceByKey()).toEqual({
+      club: 'relevant',
+      elders: 'irrelevant',
+      speler: 'doubtful',
+      stad: 'doubtful',
+    })
+  })
+
+  it('follows a feed that is switched to club, and back to none', async () => {
+    const server = await serve(mixed())
+    const feed = await addFeed(`${server.origin}/rss/`)
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+    await database.db.update(feeds).set({ filter: 'club' }).where(eq(feeds.id, feed.id))
+    await importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), secondRun)
+
+    expect((await relevanceByKey())['elders']).toBe('irrelevant')
+
+    await database.db.update(feeds).set({ filter: 'none' }).where(eq(feeds.id, feed.id))
+    await importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), secondRun)
+
+    expect((await relevanceByKey())['elders']).toBe('relevant')
+  })
+
+  it('does not change the value of an item that a moderator hid', async () => {
+    const server = await serve(mixed())
+    const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    const [user] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .$returningId()
+
+    await database.db
+      .update(items)
+      .set({ hiddenAt: firstRun, hiddenBy: user?.id ?? 0, hiddenReason: 'Fout in het bericht', relevance: 'relevant' })
+      .where(eq(items.key, 'elders'))
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, secondRun)
+
+    // It is not updated, but the filter's decision is counted, and the log shows it.
+    expect(report).toMatchObject({ relevance: { doubtful: 2, irrelevant: 1, relevant: 1 }, updated: 0 })
+    expect((await relevanceByKey())['elders']).toBe('relevant')
+  })
+
+  it('writes the counts per value in the log of the run', async () => {
+    const server = await serve(mixed())
+
+    await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+    await importAll()
+
+    const [result] = await database.db.select().from(importResults)
+
+    expect(result).toMatchObject({ doubtful: 2, irrelevant: 1, relevant: 1 })
+  })
+})
+
 describe('an item that cannot be stored', () => {
   it('is skipped and reported, and the rest of the feed is stored', async () => {
     const server = await serve(
@@ -424,6 +551,7 @@ describe('an item that cannot be stored', () => {
     expect(report).toEqual({
       added: 2,
       kind: 'imported',
+      relevance: { doubtful: 0, irrelevant: 0, relevant: 2 },
       skipped: [
         { position: 2, reason: 'the link does not start with http or https' },
         { position: 3, reason: 'there is no headline' },
@@ -768,12 +896,22 @@ describe('importing all feeds', () => {
   })
 })
 
+const noRelevance = { doubtful: 0, irrelevant: 0, relevant: 0 }
+
 describe('the report', () => {
   const url = 'https://krant.test/rss/'
 
   it('has a line for each feed with the counts', () => {
-    expect(formatReport({ added: 3, kind: 'imported', skipped: [], unchanged: 40, updated: 2, url })).toBe(
-      'https://krant.test/rss/: 3 new, 2 updated, 40 unchanged, 0 skipped',
+    expect(
+      formatReport({ added: 3, kind: 'imported', relevance: noRelevance, skipped: [], unchanged: 40, updated: 2, url }),
+    ).toBe('https://krant.test/rss/: 3 new, 2 updated, 40 unchanged, 0 skipped')
+  })
+
+  it('says how many items fell in each relevance', () => {
+    const relevance = { doubtful: 4, irrelevant: 11, relevant: 30 }
+
+    expect(formatReport({ added: 3, kind: 'imported', relevance, skipped: [], unchanged: 40, updated: 2, url })).toBe(
+      'https://krant.test/rss/: 3 new, 2 updated, 40 unchanged, 0 skipped; 30 relevant, 4 doubtful, 11 irrelevant',
     )
   })
 
@@ -783,7 +921,17 @@ describe('the report', () => {
       { position: 9, reason: 'there is no headline' },
     ]
 
-    expect(formatReport({ added: 1, kind: 'imported', skipped, unchanged: 0, updated: 0, url }).split('\n')).toEqual([
+    expect(
+      formatReport({
+        added: 1,
+        kind: 'imported',
+        relevance: noRelevance,
+        skipped,
+        unchanged: 0,
+        updated: 0,
+        url,
+      }).split('\n'),
+    ).toEqual([
       'https://krant.test/rss/: 1 new, 0 updated, 0 unchanged, 2 skipped',
       '  item 2 skipped: there is no link',
       '  item 9 skipped: there is no headline',

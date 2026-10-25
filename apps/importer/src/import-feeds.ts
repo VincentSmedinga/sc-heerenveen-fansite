@@ -1,5 +1,5 @@
 import type { Database } from '@fansite/db/client'
-import type { Feed } from '@fansite/db/schema'
+import type { Feed, ItemRelevance } from '@fansite/db/schema'
 import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 
 import { connect } from '@fansite/db/client'
@@ -14,6 +14,7 @@ import type { ForumDiscussion } from './read-forum.ts'
 import { createFetcher } from './fetcher.ts'
 import { paywallCategoryFor, readFeed } from './read-feed.ts'
 import { readForum } from './read-forum.ts'
+import { judgeRelevance } from './relevance.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { finishRun, reasonOf, recordLockTaken, recordReport, removeOldRuns, startRun } from './run-log.ts'
 
@@ -26,6 +27,11 @@ export type FeedReport =
       /** Items we saw that are new, that changed, and that were as we had them. */
       added: number
       kind: 'imported'
+      /**
+       * How many items of the feed the filter judged to be of each kind, hidden ones included.
+       * All zero for a forum, which has discussions and no items.
+       */
+      relevance: RelevanceCounts
       /** The items we left out, with the reason. */
       skipped: SkippedItem[]
       unchanged: number
@@ -70,7 +76,13 @@ export type ImportOptions = {
   write?: (line: string) => void
 }
 
-export type StoredFeed = Pick<Feed, 'etag' | 'failuresInARow' | 'id' | 'lastModified' | 'retryAt' | 'sourceId' | 'url'>
+/** How many items fell in each value of `items.relevance`. */
+export type RelevanceCounts = Record<ItemRelevance, number>
+
+export type StoredFeed = Pick<
+  Feed,
+  'etag' | 'failuresInARow' | 'filter' | 'id' | 'lastModified' | 'retryAt' | 'sourceId' | 'url'
+>
 
 /**
  * The queries below also run inside a transaction, which has these methods but is not a
@@ -97,7 +109,7 @@ export function formatReport(report: FeedReport): string {
       return `${report.url}: failed, ${reasonOf(report)}`
     case 'imported':
       return [
-        `${report.url}: ${report.added} new, ${report.updated} updated, ${report.unchanged} unchanged, ${report.skipped.length} skipped`,
+        `${report.url}: ${report.added} new, ${report.updated} updated, ${report.unchanged} unchanged, ${report.skipped.length} skipped${formatRelevance(report.relevance)}`,
         ...report.skipped.map((item) => `  item ${item.position} skipped: ${item.reason}`),
       ].join('\n')
     case 'not-modified':
@@ -209,6 +221,7 @@ export function listFeedsToImport(db: Database) {
     .select({
       etag: feeds.etag,
       failuresInARow: feeds.failuresInARow,
+      filter: feeds.filter,
       id: feeds.id,
       lastModified: feeds.lastModified,
       retryAt: feeds.retryAt,
@@ -309,6 +322,16 @@ function discussionKey(url: string): string {
 }
 
 /**
+ * The part of a report line about the relevance, or nothing for a feed without items. A feed
+ * without a filter has `relevant` only.
+ */
+function formatRelevance({ doubtful, irrelevant, relevant }: RelevanceCounts): string {
+  return relevant + doubtful + irrelevant === 0
+    ? ''
+    : `; ${relevant} relevant, ${doubtful} doubtful, ${irrelevant} irrelevant`
+}
+
+/**
  * Reads a feed whose time has come, or reports that it waits. A failure of the database becomes
  * an error report.
  */
@@ -332,7 +355,13 @@ async function importForum(db: Database, feed: StoredFeed, read: ReturnType<type
 
   const counts = await db.transaction((transaction) => storeDiscussions(transaction, feed, read.discussions))
 
-  return { ...counts, kind: 'imported', skipped: read.skipped, url: feed.url }
+  return {
+    ...counts,
+    kind: 'imported',
+    relevance: { doubtful: 0, irrelevant: 0, relevant: 0 },
+    skipped: read.skipped,
+    url: feed.url,
+  }
 }
 
 /**
@@ -385,9 +414,16 @@ async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDisc
  * A known item keeps its time of publication when the feed gives none this time. An item
  * without a valid time gets the time we first saw it. An item that a moderator hid is never
  * changed, whatever the source offers, and counts as unchanged.
+ *
+ * Every item gets its relevance: `relevant` for a feed without a filter, and for a feed with
+ * the filter `club` what `judgeRelevance` says about the headline, each time the item comes
+ * by, so an improved rule works on items we already have. A different value counts as a
+ * change. The items are all stored, whatever the value. The counts of the values hold the
+ * decision for every item of the feed, also for a hidden item, whose own value stays as it is.
  */
 async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now: Date) {
   const counts = { added: 0, unchanged: 0, updated: 0 }
+  const relevance: RelevanceCounts = { doubtful: 0, irrelevant: 0, relevant: 0 }
 
   for (const batch of chunks(found, batchSize)) {
     const known = new Map(
@@ -410,6 +446,9 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
     const rows = batch.map((item) => {
       const before = known.get(item.key)
       const publishedAt = item.publishedAt ?? before?.publishedAt ?? now
+      const itemRelevance = feed.filter === 'club' ? judgeRelevance(item.title) : 'relevant'
+
+      relevance[itemRelevance]++
 
       if (before === undefined) {
         counts.added++
@@ -418,6 +457,7 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
         (before.title === item.title &&
           before.url === item.url &&
           before.paywalled === item.paywalled &&
+          before.relevance === itemRelevance &&
           before.durationSeconds === item.durationSeconds &&
           before.seasonNumber === item.seasonNumber &&
           before.episodeNumber === item.episodeNumber &&
@@ -437,6 +477,7 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
         lastSeenAt: now,
         paywalled: item.paywalled,
         publishedAt,
+        relevance: itemRelevance,
         seasonNumber: item.seasonNumber,
         sourceId: feed.sourceId,
         title: item.title,
@@ -459,6 +500,7 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
           lastSeenAt: unlessHidden(items.lastSeenAt),
           paywalled: unlessHidden(items.paywalled),
           publishedAt: unlessHidden(items.publishedAt),
+          relevance: unlessHidden(items.relevance),
           seasonNumber: unlessHidden(items.seasonNumber),
           title: unlessHidden(items.title),
           url: unlessHidden(items.url),
@@ -466,7 +508,7 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
       })
   }
 
-  return counts
+  return { ...counts, relevance }
 }
 
 /**

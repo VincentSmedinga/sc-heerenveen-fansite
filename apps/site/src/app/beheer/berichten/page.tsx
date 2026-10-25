@@ -1,4 +1,5 @@
 import type { Database } from '@fansite/db/client'
+import type { ItemRelevance } from '@fansite/db/schema'
 import type { Metadata } from 'next'
 
 import { adminRoles, hiddenReasonMaxLength } from '@fansite/db/schema'
@@ -41,6 +42,16 @@ const isFieldError = (value: string | string[] | undefined): value is keyof type
   typeof value === 'string' && Object.hasOwn(fieldErrors, value)
 
 const summaryId = 'fouten'
+
+/**
+ * What the list says of an item the importer did not find about the club. A `relevant` item
+ * has nothing to say. These are not on the site, whatever the moderator does.
+ */
+const relevanceDetails = {
+  doubtful: ['twijfelgeval, niet op de site'],
+  irrelevant: ['niet over de club, niet op de site'],
+  relevant: [],
+} as const satisfies Record<ItemRelevance, readonly string[]>
 
 // The list of the items that a moderator hides and shows. The search is a form with method GET,
 // and each action a form that posts, so the page works without JavaScript. An action ends on
@@ -149,7 +160,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                 <List.Item key={item.id}>
                   <NewsItem
                     dateTime={dateTimeOf(item.publishedAt)}
-                    details={hidden ? ['verborgen'] : []}
+                    details={[...(hidden ? ['verborgen'] : []), ...relevanceDetails[item.relevance]]}
                     headline={item.title}
                     href={item.url}
                     paywalled={item.paywalled}

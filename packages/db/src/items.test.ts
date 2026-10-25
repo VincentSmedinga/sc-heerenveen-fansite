@@ -80,7 +80,21 @@ describe('the table items', () => {
       'hidden_at',
       'hidden_by',
       'hidden_reason',
+      'relevance',
     ])
+  })
+
+  it('has the relevance relevant for a new item, and refuses a value that is not one', async () => {
+    await database.db.insert(items).values(item('een'))
+
+    expect((await database.db.select().from(items))[0]?.relevance).toBe('relevant')
+
+    await expect(
+      database.pool.query(
+        "INSERT INTO items (source_id, feed_id, item_key, title, url, published_at, relevance) VALUES (?, ?, 'twee', 'Kop', 'https://testkrant.test/twee', NOW(), 'misschien')",
+        [sourceId, feedId],
+      ),
+    ).rejects.toMatchObject({ code: expect.stringMatching(/^(ER_WARN_DATA_OUT_OF_RANGE|WARN_DATA_TRUNCATED|1265)$/u) })
   })
 
   it('does not hide a new item', async () => {
@@ -223,7 +237,14 @@ describe('the table feeds', () => {
       'last_error',
       'last_error_at',
       'retry_at',
+      'filter',
     ])
+  })
+
+  it('starts without a filter: every item of the feed is about the club', async () => {
+    const [feed] = await database.db.select().from(feeds)
+
+    expect(feed?.filter).toBe('none')
   })
 
   it('starts healthy: no failures, no error and nothing to wait for', async () => {
