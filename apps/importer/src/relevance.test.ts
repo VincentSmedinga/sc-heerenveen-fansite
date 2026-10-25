@@ -282,9 +282,10 @@ const namesLikeWords: Case[] = [
 
 /**
  * Rule 1 to 3 in Frisian: the club is "Hearrenfean", the Frisian name of the town and the
- * club. All made up (verzonnen) except the two real headlines of the feed of Omrop Fryslân that
- * are marked: that feed is nearly all Dutch, and had no Frisian headline about the club on
- * 25 October 2026 (see `docs/bronnen.md`).
+ * club. All made up (verzonnen) except three real headlines, which are marked: two from the
+ * feed of Omrop Fryslân, which is nearly all Dutch and had no Frisian headline about the club
+ * on 25 October 2026 (see `docs/bronnen.md`), and the title of Sportcast #360 from the lookup
+ * of Apple Podcasts.
  */
 const frisianClub: Case[] = [
   // "sc Hearrenfean", in every spelling of "sc".

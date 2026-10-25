@@ -335,7 +335,7 @@ export const footballWords = [
 export const frisianFootballWords = [
   'alvetal', // SC Hearrenfean
   'earedifyzje', // SC Hearrenfean, Earedifyzje, KNVB-beker
-  'ferdigener', // SC Hearrenfean, Fuotbal (plural; singular made from it)
+  'ferdigener', // SC Hearrenfean, Fuotbal (singular, made from the plural found there)
   'ferdigeners', // SC Hearrenfean, Fuotbal
   'ferlear', // SC Hearrenfean
   'fuotbal', // all four pages
@@ -343,7 +343,7 @@ export const frisianFootballWords = [
   'fuotballers', // SC Hearrenfean
   'haadtrainer', // SC Hearrenfean
   'kompetysje', // SC Hearrenfean, Fuotbal
-  'middenfjilder', // SC Hearrenfean (plural; singular made from it)
+  'middenfjilder', // SC Hearrenfean (singular, made from the plural found there)
   'middenfjilders', // SC Hearrenfean
   'oerwinning', // SC Hearrenfean, KNVB-beker
   'seleksje', // SC Hearrenfean
