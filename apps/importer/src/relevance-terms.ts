@@ -23,9 +23,21 @@
  *   as a full name.
  * - Players and staff who left in 2026 are on the list too: news about them is nice to read.
  *   Older former players are not; add one when a headline shows that we miss him.
+ * - The Frisian football words are in a list of their own, `frisianFootballWords`, after the
+ *   Dutch ones. Same rules: whole words, and none that is as common outside football.
  * - The professional clubs of the Eredivisie and the Eerste Divisie are on the list
  *   `otherClubs`: "Heerenveen" next to one of them is a match. No players of other clubs.
  */
+
+/**
+ * The names of the club and the town, as a headline writes them: "Heerenveen" in Dutch and
+ * "Hearrenfean" in Frisian (the spelling of Omrop Fryslân and of the Frisian Wikipedia). They
+ * count the same, alone and after "sc", and a headline may use both. The adjective "Feanster"
+ * is not on the list on purpose: it says "of Heerenveen", it is no name, and so it never
+ * makes a headline `relevant` (the same as "Heerenveense"). "It Hearrenfean" is the same name
+ * with the Frisian article, which the rules ignore.
+ */
+export const clubNames = ['heerenveen', 'hearrenfean'] as const
 
 /**
  * Someone so much part of the club that a headline about them belongs on the site without the
@@ -291,4 +303,56 @@ export const footballWords = [
   'wedstrijden',
   'wint',
   'zege',
+] as const
+
+/**
+ * Frisian words from football, for headlines of Omrop Fryslân and others that write in Frisian
+ * (see #270). They count like the Dutch ones above, with "Heerenveen" or "Hearrenfean" in the
+ * headline, and are not in `footballWords` because those are Dutch. A word that Dutch and
+ * Frisian write the same (wint, doelpunt, supporters, stadion, trainer, kampioen) is only in
+ * `footballWords`. Accents do not count, so "thúswedstriden" is written "thuswedstriden".
+ *
+ * Every word was found on the Frisian Wikipedia (fy.wikipedia.org) on 25 October 2026, on the
+ * pages "SC Hearrenfean", "Fuotbal", "Earedifyzje" and "KNVB-beker". The feed of Omrop Fryslân
+ * had no Frisian football headline that day, so no word comes from there. Only the form found
+ * is on the list, and the plural or the singular next to it when the form is regular;
+ * "skoarden" is the only form of "skoarje" (to score) that is on the list.
+ *
+ * Left out on purpose, because the word is as common outside football (the same lesson as
+ * "wint"): "ploech" (a team, but also any crew or group), "spiler" (a player of anything),
+ * "útslach" (a result, but also a rash), "kampioenskip" (fierljeppen and skûtsjesilen have
+ * one too), "ferlies" (a loss in money too), "promoasje", "beker" (a mug) and "oanhing" (any
+ * followers). A headline with one of them and "Hearrenfean" is `doubtful`, which a moderator
+ * can look at. Add one when a missed headline shows that we need it.
+ *
+ * The words of winning and losing are on the list, like "wint" and "verliest" for Dutch: "wûn"
+ * (won) and "ferlear" (lost). A headline such as "Frou wûn lotterij yn Hearrenfean" becomes
+ * `relevant`, which a moderator hides. A club headline we miss is worse (see
+ * `docs/beslissingen.md`, _Een volledige naam is genoeg, en "wint" en "verliest" zijn
+ * voetbalwoorden_).
+ */
+export const frisianFootballWords = [
+  'alvetal',
+  'earedifyzje',
+  'ferdigener',
+  'ferdigeners',
+  'ferlear',
+  'fuotbal',
+  'fuotballer',
+  'fuotballers',
+  'haadtrainer',
+  'kompetysje',
+  'middenfjilder',
+  'middenfjilders',
+  'oerwinning',
+  'seleksje',
+  'skoarden',
+  'thusoerwinning',
+  'thuswedstriden',
+  'trener',
+  'utoerwinning',
+  'utwedstriid',
+  'wedstriden',
+  'wedstriid',
+  'wun',
 ] as const
