@@ -1,17 +1,21 @@
 import { defineConfig, devices } from '@playwright/test'
 
+import { fakeMailFolder, fakeMailPort } from './e2e/fake-mail'
+
 // Not the port of smoke.js (3123), so the two can't get in each other's way.
 const port = '3124'
 const origin = `http://127.0.0.1:${port}`
 // A second copy of the site, without a database, for the error page (e2e/error-page.spec.ts). Nothing listens on port 1 of
 // this computer, so the connection is refused at once.
 const withoutDatabasePort = '3125'
-// Acceptance doesn't start without the settings of the mail server. No page sends mail, so these made-up ones do.
+// Acceptance doesn't start without the settings of the mail server. The contact form sends mail, so they point at a mail
+// server of our own that keeps the mails in a folder (scripts/fake-smtp.js), and the sites trust its certificate.
 const smtp = {
   MAIL_FROM: 'Test <test@example.org>',
-  SMTP_HOST: 'localhost',
+  NODE_EXTRA_CA_CERTS: `${fakeMailFolder}/cert.pem`,
+  SMTP_HOST: '127.0.0.1',
   SMTP_PASSWORD: 'test',
-  SMTP_PORT: '465',
+  SMTP_PORT: fakeMailPort,
   SMTP_USER: 'test@example.org',
 }
 
@@ -46,6 +50,12 @@ export default defineConfig({
   testDir: 'e2e',
   use: { baseURL: origin },
   webServer: [
+    {
+      // First, because it makes the certificate that the sites trust when they start.
+      command: `node scripts/fake-smtp.js "${fakeMailFolder}" ${fakeMailPort}`,
+      port: Number(fakeMailPort),
+      timeout: 60_000,
+    },
     {
       command: assembleAndStartServer,
       // HOSTNAME is the name of the machine in many shells, and the server would listen on that.

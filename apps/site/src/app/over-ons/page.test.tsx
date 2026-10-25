@@ -46,10 +46,11 @@ describe('the page Over ons', () => {
     ])
   })
 
-  it('links to the forum, the sources, the editors by email and the page Privacy', () => {
+  it('links to the forum, the sources, the contact form, the editors by email and the page Privacy', () => {
     expect(links).toEqual([
       ['https://forum.heerenveen.org', 'ons forum'],
       ['/bronnen', 'Onze bronnen'],
+      ['/contact', 'Contact'],
       ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
       ['/privacy', 'Privacy'],
     ])

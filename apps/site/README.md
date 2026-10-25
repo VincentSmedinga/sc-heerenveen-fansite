@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu zes pagina's: de homepage met de koppen van de afgelopen twee weken, `/podcasts` met de afleveringen van de podcasts, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu zeven pagina's: de homepage met de koppen van de afgelopen twee weken, `/podcasts` met de afleveringen van de podcasts, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -64,6 +64,8 @@ Dit moet eerst draaien, vanuit de root:
 
 De opdracht zet de build zelf klaar in `.next/a11y`, zoals `assemble` dat doet, en start die.
 Hij start de site een tweede keer, zonder bereikbare database, voor de foutpagina (`e2e/error-page.spec.ts`): in licht en donker, en zonder JavaScript.
+Eerst start hij `scripts/fake-smtp.js`, een nepmailserver voor `e2e/contact.spec.ts`.
+Die zet elke mail in `.next/fake-smtp`, en maakt zijn certificaat met `openssl`, dat dus op je computer moet staan (op macOS en op de runner van CI staat het er al).
 CI geeft de map van de rooktest mee in `SITE_FOLDER`, zodat dezelfde map wordt getoetst.
 Faalt een pagina, dan noemt de log de pagina en het thema (in de naam van de test), de regel van axe en het element.
 
