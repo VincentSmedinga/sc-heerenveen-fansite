@@ -12,7 +12,7 @@ const meta = preview.meta({
       description: {
         component: [
           'De onderkant van de pagina: een `footer`, dus de contentinfo van de pagina.',
-          'De footer sluit de pagina af zoals de header hem opent: met een eigen vlak en een dunne lijn erboven.',
+          'De footer sluit de pagina af zoals de header hem opent: met een eigen vlak, dat alleen door zijn kleur van de pagina verschilt.',
           'Het vlak loopt van de linker- tot de rechterrand van het venster, op elke breedte.',
           'In licht is het een stap donkerder dan de pagina, in donker een stap lichter.',
           'Wat erin staat, blijft in de kolom van de pagina, in lijn met de inhoud erboven.',
