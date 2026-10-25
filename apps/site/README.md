@@ -268,6 +268,7 @@ Chrome en Firefox nemen dat aan op `localhost`; Safari niet, dus log lokaal in m
   Een nieuwe pagina of actie die `requireRole` niet aanroept, laat die test falen.
   Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
 - `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen, met bron, kop als link, tijd en of ze verborgen zijn (zie _Berichten verbergen_).
+- `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
 - De proxy (`src/proxy.ts`) geeft elk antwoord onder `/beheer` de headers `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: same-origin`, op elke omgeving.
   De proxy is geen toegangscontrole.
 - Een inloglink, een sessie en een teller van pogingen staan in de database (`admin_login_links`, `admin_sessions`, `admin_login_attempts`).
@@ -292,14 +293,32 @@ Alle formulieren zijn gewone posts van een serveractie (`actions.ts`), dus ze we
 
 Lokaal zie je de pagina na `pnpm run import` (of met `pnpm --filter site test-data`) en een login, zoals hierboven.
 
+### Artikelen schrijven
+
+`/beheer/artikelen` (`src/app/beheer/artikelen`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
+De lijst toont alle artikelen, het laatst geschreven bovenaan, met "Nieuw artikel" als formulier met `method="get"`.
+Het formulier (`ArticleForm.tsx`) is een client-component met `useActionState`: een gewone post die zonder JavaScript werkt, en die een fout met de ingevulde waarden terugstuurt.
+Dat kan niet via het adres zoals bij de berichten, want een tekst van 20.000 tekens past er niet in.
+De fouten staan in een `ErrorSummary` en bij het veld, en met JavaScript krijgt het blok de focus.
+"Opslaan" is de eerste knop, dus Enter bewaart; "Publiceren" slaat op wat op het scherm staat en publiceert het in dezelfde transactie.
+
+- `src/beheer/article-form.ts` leest en controleert wat het formulier stuurt, altijd opnieuw op de server.
+  `src/beheer/articles.ts` maakt, bewaart, publiceert en trekt in, elk in één transactie met de regel in het logboek (`article.create`, `article.update`, `article.publish`, `article.unpublish`).
+  Een wijziging zonder verschil en een tweede klik schrijven niets.
+- Het voorbeeld (`/beheer/artikelen/<nummer>/voorbeeld`) gebruikt `Article` en `ArticleText`, net als de pagina voor bezoekers.
+  Het valt onder `/beheer`, dus het krijgt `noindex` en `no-store` van de proxy.
+- De opmaak en de werkwijze voor wie schrijft, staan in [`docs/artikelen.md`](../../docs/artikelen.md).
+
 ### De beheertests in de browser
 
 De inloglink is een mail, en een browsertest heeft geen mailbox.
-`e2e/admin.ts` zet daarom vóór de eerste test een moderator en zijn sessie in de database van de controle, zoals `startSession` dat doet, en geeft de browser het cookie (`adminCookie`); `e2e/pages.spec.ts` en `e2e/admin.spec.ts` loggen zo in.
-De token is voor elke run nieuw, staat alleen in het geheugen van de controle en in de omgeving van haar processen, en het account, de sessie, de logregels en de verzonnen berichten gaan er na afloop weer uit.
+`e2e/admin.ts` zet daarom vóór de eerste test een moderator en een beheerder met elk een sessie in de database van de controle, zoals `startSession` dat doet, en geeft de browser het cookie (`adminCookie(host, rol)`); `e2e/pages.spec.ts`, `e2e/admin.spec.ts` en `e2e/writing.spec.ts` loggen zo in.
+De tokens zijn voor elke run nieuw, staan alleen in het geheugen van de controle en in de omgeving van haar processen, en de accounts, de sessies, de logregels, de artikelen die een test schreef en de verzonnen berichten gaan er na afloop weer uit.
 De opzet weigert elke database die niet op deze computer staat (`127.0.0.1`, `::1` of `localhost`), dus ze kan nooit schrijven in de database van acceptatie of productie.
 De site zelf kent geen route, omgevingsvariabele of token om zo in te loggen, en `e2e/` zit niet in de build.
 `admin.spec.ts` verbergt en toont een verzonnen bericht van de uitgezette testbron, met en zonder JavaScript, en toetst de staten met axe.
+`writing.spec.ts` schrijft, bekijkt, publiceert, wijzigt en trekt een verzonnen artikel in, met en zonder JavaScript.
+Omdat het een artikel publiceert dat de kaart op de homepage kan worden, draait het als eigen project (`chromium-writing`) nadat alle andere controles klaar zijn.
 
 ## De foutpagina
 

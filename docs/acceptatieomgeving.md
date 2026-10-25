@@ -278,7 +278,9 @@ Zo kan niemand nagaan wie een account heeft.
   Een sessie eindigt na 12 uur zonder gebruik, en na 7 dagen hoe dan ook.
   Uitloggen verwijdert de sessie op de server.
 - Alles onder `/beheer` krijgt `X-Robots-Tag: noindex, nofollow` en `Cache-Control: no-store`, ook op productie, en `robots.txt` weigert `/beheer` op elke omgeving.
-- Het beheer heeft nu één scherm: `/beheer/berichten`, waar een beheerder of moderator een bericht verbergt, met een reden, en het weer toont.
+- Het beheer heeft twee schermen.
+  `/beheer/artikelen` is voor een beheerder: daar schrijft, bekijkt, publiceert en trekt hij een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)).
+  `/beheer/berichten` is voor een beheerder of moderator, die er een bericht verbergt, met een reden, en het weer toont.
   Een verborgen bericht staat binnen vijf minuten niet meer op de homepage en op `/podcasts`, en de import zet het niet terug.
   De lijst toont ook de berichten die het relevantiefilter een twijfelgeval vond of niet over de club; die staan niet op de site (zie _Het relevantiefilter_ in de [README van de importer](../apps/importer/README.md)).
   Elke actie komt in het logboek, de tabel `audit_log`.
@@ -343,6 +345,7 @@ Zo kan niemand nagaan wie een account heeft.
   Na de volgende import (hoogstens een kwartier later) is het nog steeds weg, ook als de bron het bericht opnieuw aanbiedt.
   "Toon weer" zet het terug, binnen vijf minuten.
   De vraag onder _Het beheer_ toont voor elke actie een regel in het logboek, met jouw adres, de tijd, `item.hide` of `item.show`, het nummer van het bericht en de reden.
+  Een actie bij een artikel (`article.create`, `article.update`, `article.publish` of `article.unpublish`) heeft het nummer van het artikel en geen reden.
 - De proefmail laat zien dat de site kan mailen.
   Het bestand `apps/site/send-test-mail.mjs` staat sinds de deploy op de host, naast de importer.
   Het leest de variabelen uit een bestand, net als de importer, en een cronjob of SSH-sessie krijgt die van de Node.js-app niet.

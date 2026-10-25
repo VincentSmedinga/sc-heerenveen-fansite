@@ -1,0 +1,2 @@
+-- Makes room for the actions of the articles in the log of the admin. Rows that are there keep their action.
+ALTER TABLE `audit_log` MODIFY COLUMN `action` enum('item.hide','item.show','article.create','article.update','article.publish','article.unpublish') NOT NULL;

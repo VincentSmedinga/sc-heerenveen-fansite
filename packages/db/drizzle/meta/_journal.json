@@ -78,6 +78,13 @@
       "when": 1792960085493,
       "tag": "0010_add_articles",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1792963155324,
+      "tag": "0011_add_article_audit_actions",
+      "breakpoints": true
     }
   ]
 }

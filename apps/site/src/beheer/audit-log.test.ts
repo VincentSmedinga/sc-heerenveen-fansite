@@ -88,8 +88,15 @@ describe('recordAction', () => {
     ).rejects.toBeDefined()
   })
 
-  it('names the two actions of the admin so far', () => {
-    expect(auditActions).toEqual(['item.hide', 'item.show'])
+  it('names the actions of the admin so far', () => {
+    expect(auditActions).toEqual([
+      'item.hide',
+      'item.show',
+      'article.create',
+      'article.update',
+      'article.publish',
+      'article.unpublish',
+    ])
   })
 
   it('keeps a row when the account is turned off, and does not let the account be deleted', async () => {

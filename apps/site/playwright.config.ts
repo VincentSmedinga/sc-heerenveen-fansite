@@ -35,6 +35,12 @@ const assembleAndStartServer =
     ? `rm -rf "${folder}" && node scripts/assemble.js "${folder}" && ${startServer}`
     : startServer
 
+const browser = {
+  ...devices['Desktop Chrome'],
+  ...(process.env['CI'] === undefined ? {} : { channel: 'chrome' }),
+}
+const writingSpec = /writing\.spec\.ts$/
+
 export default defineConfig({
   forbidOnly: process.env['CI'] !== undefined,
   fullyParallel: true,
@@ -47,7 +53,17 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], ...(process.env['CI'] === undefined ? {} : { channel: 'chrome' }) },
+      testIgnore: writingSpec,
+      use: browser,
+    },
+    // Writing an article publishes it, and the card on the homepage shows the newest published
+    // article. So this check starts after all the others have finished, and no check that reads
+    // the homepage or the sitemap can see the article it writes.
+    {
+      dependencies: ['chromium'],
+      name: 'chromium-writing',
+      testMatch: writingSpec,
+      use: browser,
     },
   ],
   // Not the default HTML report, which opens a server after a failure.

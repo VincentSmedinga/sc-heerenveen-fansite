@@ -13,7 +13,7 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 
 // The start of the admin: who is logged in, the way to the screens, and the button to log out.
 export default async function AdminPage() {
-  const { email } = await requireRole(...adminRoles)
+  const { email, role } = await requireRole(...adminRoles)
 
   return (
     <Page.Main>
@@ -24,6 +24,11 @@ export default async function AdminPage() {
           <List.Item>
             <Link href="/beheer/berichten">Berichten verbergen of weer tonen</Link>
           </List.Item>
+          {role === 'beheerder' ? (
+            <List.Item>
+              <Link href="/beheer/artikelen">Artikelen schrijven en publiceren</Link>
+            </List.Item>
+          ) : null}
         </List>
         <Form action={logOut}>
           <Button type="submit">Uitloggen</Button>

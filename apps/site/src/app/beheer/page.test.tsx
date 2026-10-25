@@ -47,7 +47,7 @@ describe('every page of the admin', () => {
 
 describe('the admin', () => {
   it('says who is logged in, links to the list of items and has a button to log out', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'moderator', userId: 1 })
 
     const html = renderToStaticMarkup(await AdminPage())
 
@@ -56,6 +56,21 @@ describe('the admin', () => {
     expect(html).toContain('Je bent ingelogd als jelle@example.org.')
     expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual(['<button type="submit">Uitloggen</button>'])
     expect(html.match(/<a [^>]*>(.*?)<\/a>/g)).toEqual([
+      '<a href="/beheer/berichten">Berichten verbergen of weer tonen</a>',
+    ])
+  })
+
+  it('links a beheerder to the articles, and a moderator, who may not write them, only to the items', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+
+    expect(renderToStaticMarkup(await AdminPage()).match(/<a [^>]*>(.*?)<\/a>/g)).toEqual([
+      '<a href="/beheer/berichten">Berichten verbergen of weer tonen</a>',
+      '<a href="/beheer/artikelen">Artikelen schrijven en publiceren</a>',
+    ])
+
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
+
+    expect(renderToStaticMarkup(await AdminPage()).match(/<a [^>]*>(.*?)<\/a>/g)).toEqual([
       '<a href="/beheer/berichten">Berichten verbergen of weer tonen</a>',
     ])
   })

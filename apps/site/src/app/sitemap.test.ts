@@ -13,6 +13,10 @@ vi.mock('../articles', () => ({ getPublishedArticles }))
 // the sitemap.
 const notInSitemap: string[] = [
   '/beheer',
+  '/beheer/artikelen',
+  '/beheer/artikelen/[id]',
+  '/beheer/artikelen/[id]/voorbeeld',
+  '/beheer/artikelen/nieuw',
   '/beheer/berichten',
   '/beheer/inloggen',
   '/beheer/inloggen/bevestigen',

@@ -2616,6 +2616,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De databasegebruiker van de site kan een rij nog wijzigen met eigen SQL, en een trigger of een gebruiker zonder `UPDATE` en `DELETE` verandert dat.
   Dat kan later, als we het logboek tegen iemand met toegang tot de database moeten bewijzen.
 - **Alternatieven:** triggers die `UPDATE` en `DELETE` weigeren (de gebruiker met het recht `TRIGGER` kan ze weer weghalen, en het is meer om te onderhouden dan dit issue vraagt); het e-mailadres in het logboek zetten (persoonsgegevens, en een adres dat verandert).
+- **Later:** het logboek heeft ook de acties van de artikelen; zie _Een artikel schrijven geeft vier acties in het logboek, en schrijft alleen als er iets veranderde_.
 - **Lezen:** er is nog geen scherm voor.
   `docs/acceptatieomgeving.md` heeft de vraag voor phpMyAdmin.
 
@@ -4163,3 +4164,93 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Ze hebben geen eigen klasse: de stijl komt van de elementen zelf, zoals bij `Time`.
 - **Waarom:** de sjablonen van de site bevatten geen HTML (zie _Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem_), en de opmaak van een artikel heeft vet en cursief nodig.
 - **Alternatieven:** de regel van ESLint voor één bestand uitzetten (dat maakt van een regel zonder uitzonderingen er een met); vet en cursief met `Text` maken (`Text` zet het gewicht van de tekst en maakt vet dus weg).
+
+### Alleen een beheerder schrijft en publiceert artikelen
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** alleen een beheerder schrijft en publiceert artikelen, op `/beheer/artikelen`.
+  Een moderator verbergt berichten, maar schrijft niet.
+  Elke pagina en elke actie van de artikelen vraagt `requireRole('beheerder')`, en voor een moderator is de pagina "niet gevonden".
+  Het beheer verwijst een moderator ook niet naar de pagina: `/beheer` toont de link alleen aan een beheerder.
+- **Waarom:** de redactie is nog klein, en een artikel staat onder onze naam.
+  Een aparte rol voor vrijwilligers die schrijven, met een controlestap erbij, komt met #40.
+- **Alternatieven:** ook moderators laten schrijven (een grotere groep zonder controlestap); een nieuwe rol `redacteur` nu al (meer werk dan de lancering vraagt).
+
+### Een artikel wordt ingetrokken en niet verwijderd, en het adres van een gepubliceerd artikel staat vast
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een artikel wordt ingetrokken en niet verwijderd: er is geen knop om te verwijderen.
+  Intrekken maakt `published_at` leeg, dus het is weer een concept.
+  Het adres (`slug`) van een artikel dat een `published_at` heeft, verandert niet.
+  De server weigert het met een fout bij het veld, en het formulier toont het adres dan alleen-lezen.
+  Wie het adres toch wil veranderen, trekt het artikel eerst in.
+- **Waarom:** een gedeelde link mag niet kapotgaan, en "niets stil weggooien" geldt ook voor onze eigen teksten.
+  Intrekken is te herstellen.
+- **Alternatieven:** verwijderen met een bevestiging (permanent, geen spoor); het adres vrij laten bewerken (gedeelde links breken).
+
+### Een artikel schrijven geeft vier acties in het logboek, en schrijft alleen als er iets veranderde
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het logboek heeft vier acties erbij: `article.create`, `article.update`, `article.publish` en `article.unpublish` (migratie `0011_add_article_audit_actions`).
+  `item_id` bevat bij deze acties het nummer van het artikel; de actie zegt of het een bericht of een artikel is.
+  Er staat niets van de tekst in, ook geen titel.
+  Zoals bij het verbergen is een wijziging en haar regel één transactie, en een actie die niets verandert schrijft niets:
+  - opslaan zonder verschil schrijft geen `article.update` en laat `updated_at` staan;
+  - publiceren van wat al een `published_at` heeft, doet niets en schrijft geen tweede `article.publish`;
+  - intrekken van een concept doet niets.
+    "Publiceren" slaat wat op het scherm staat op en publiceert het in één transactie, dus het geeft een `article.update` (als er iets veranderde) en een `article.publish`.
+    Een artikel dat met SQL een `published_at` in de toekomst kreeg, wordt niet opnieuw gepubliceerd: de beheerder trekt het eerst in.
+- **Waarom:** een tweede klik of een tweede tabblad mag het logboek niet laten liegen, en twee verzoeken tegelijk mogen niet allebei publiceren.
+  Dat laatste is vergrendeld met `SELECT ... FOR UPDATE` in de transactie.
+  Een artikel met een `published_at` in de toekomst opnieuw publiceren zou dat vergrendelen breken: twee verzoeken tegelijk vinden dan elk de tijd van de ander "later".
+  De tijd van een publicatie komt uit één plek: het `now` van de functie, waar de actie niets in doorgeeft.
+- **Alternatieven:** een regel bij elke opslag, ook zonder verschil (het logboek vermeldt dan wijzigingen die er niet zijn); de titel in het logboek (tekst van een artikel hoort er niet in, en een titel verandert); het nummer van het artikel in een eigen kolom (een migratie voor iets wat `item_id` met de actie al zegt).
+
+### Het formulier voor een artikel stuurt een fout in een toestand terug, en niet via het adres
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het formulier van `/beheer/artikelen` is een client-component met `useActionState`, zoals het contactformulier (zie _Bij een fout gaat de focus naar het blok met fouten_).
+  Een serveractie die een veld fout vindt, geeft de fouten en de ingevulde waarden terug.
+  Het formulier toont ze in een `ErrorSummary` en bij het veld, en met JavaScript krijgt het blok de focus.
+  Zonder JavaScript laadt de pagina opnieuw met dezelfde fouten en waarden.
+  Een geslaagde actie stuurt door naar het formulier van het artikel, met `?gedaan=` en een melding uit de toestand van de database: die zegt alleen iets over wat waar is, net als `?verborgen=` bij de berichten.
+  "Opgeslagen" en "Concept gemaakt" gelden vijf minuten, naar de tijd van het artikel zelf.
+- **Waarom:** het verbergen van een bericht zet de fout in het adres, maar een tekst van 20.000 tekens past er niet in, en een beheerder mag niets kwijtraken wat hij schreef.
+  Met de waarden in de toestand blijft alles staan.
+- **Alternatieven:** de fout en de tekst in het adres of in een cookie (te groot, en de site zet maar één cookie, dat van de sessie); de tekst in `localStorage` bewaren (alleen met JavaScript, en een uitzondering op "geen opslag").
+- **Hoe:** "Opslaan" is de eerste knop van het formulier, dus Enter bewaart en publiceert niet.
+  Een knop met `pending` is uitgeschakeld, zodat een dubbele klik geen tweede verzoek geeft.
+  Met JavaScript volgt het adres de titel tot de schrijver er zelf in typt; zonder JavaScript maakt de server hetzelfde voorstel (`suggestSlug`) van een leeg adres.
+
+### De velden van een artikel worden altijd op de server gecontroleerd en schoongemaakt
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de server controleert alles wat het formulier stuurt (`apps/site/src/beheer/article-form.ts`), ook als de browser het al deed:
+  - titel (120), intro (300), auteur (100) en adres (80) zijn één regel: besturingstekens en dubbele spaties worden één spatie;
+  - de tekst (20.000 tekens, geteld in tekens zoals de kolom) houdt zijn regels en lege regels, krijgt `\n` als regeleinde en verliest besturingstekens en lege regels aan beide kanten, zodat opslaan en weer openen niets verandert;
+  - het adres heeft alleen kleine letters, cijfers en enkele streepjes, is uniek (de unieke sleutel beslist, dus twee gelijktijdige opslagen geven één artikel en één fout) en is niet de eerste naam van een pagina van de site (`reservedSlugs`, met een test die faalt bij een nieuwe pagina);
+  - een leeg adres wordt het voorstel uit de titel, en geeft een fout als de titel niets heeft om een adres van te maken.
+- **Waarom:** de tabel wijst een te lange tekst af (zie _De tabel `articles`: een mediumtext, een sleutel naar het account en een controle op het adres_), maar de schrijver moet weten welk veld en hoe.
+  De tekst is geen HTML en `ArticleText` maakt er elementen van, dus er is niets te escapen bij het opslaan.
+  Een artikel staat op `/redactie/<adres>`, dus een adres als `bronnen` botst nu niet; de lijst voorkomt verwarring en houdt de weg open om artikelen later bovenaan de site te zetten.
+- **Alternatieven:** de browser laten controleren met `maxLength` (die kapt een geplakte tekst stil af, en de schrijver ziet het niet); geen grens aan de tekst (de kolom houdt 16 MB, maar een tekst van die lengte is niet te lezen en niet te controleren).
+
+### Het voorbeeld van een artikel is een pagina van het beheer, met dezelfde componenten
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `/beheer/artikelen/<nummer>/voorbeeld` toont het artikel met `Article` en `ArticleText`, dezelfde als de pagina van een bezoeker.
+  Een concept heeft nog geen datum, dus het voorbeeld toont de dag van vandaag, met een kaart erboven die dat zegt.
+  De pagina valt onder `/beheer`: alleen een ingelogde beheerder opent haar, en de proxy geeft haar `noindex` en `no-store`.
+  De openbare pagina `/redactie/<adres>` zegt voor een concept "niet gevonden" en verraadt niets, ook niet via het nummer.
+- **Waarom:** dezelfde componenten zorgen dat het voorbeeld laat zien wat een bezoeker straks ziet.
+  Een voorbeeld op een openbaar adres zou een concept raadbaar maken.
+- **Alternatieven:** een voorbeeld op `/redactie/<adres>?voorbeeld=1` voor een ingelogde beheerder (het cookie hoort alleen bij `/beheer`, dus de pagina kan niet weten wie kijkt); een eigen opmaak voor het voorbeeld (het kan dan afwijken).
+
+### De browsertest die een artikel publiceert, draait als eigen project na de andere
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `e2e/writing.spec.ts` heeft een eigen Playwright-project, `chromium-writing`, dat pas begint als `chromium` helemaal klaar is.
+  `e2e/admin.ts` maakt een beheerder naast de moderator, elk met een sessie, en `adminCookie(host, rol)` geeft het cookie.
+  De teardown verwijdert ook de artikelen van die accounts, voor de logregels en de accounts.
+- **Waarom:** een gepubliceerd artikel is het nieuwste en wordt de kaart op de homepage, en dan zou de test van de kaart in `articles.spec.ts` falen, afhankelijk van wie eerst kwam.
+- **Alternatieven:** de test het artikel meteen laten intrekken (een korte tijd blijft het zichtbaar, en parallelle tests zien het dan soms); de test van de kaart minder streng maken (hij toetst dan minder).

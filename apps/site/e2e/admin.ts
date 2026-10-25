@@ -6,30 +6,35 @@ import path from 'node:path'
 
 import { hashOf, newToken } from '../src/beheer/sessions'
 
-// A moderator with a session for the checks of the admin. The login of the admin is a link in a
-// mail, which a browser test can't follow without a mailbox, so the check puts the account and
-// the session in the database itself, as `startSession` does, and gives the browser the cookie.
+// A moderator and a beheerder with a session for the checks of the admin. The login of the
+// admin is a link in a mail, which a browser test can't follow without a mailbox, so the check
+// puts the account and the session in the database itself, as `startSession` does, and gives
+// the browser the cookie.
 // Nothing in the site can do this: there is no route, no environment variable and no token in
-// the code that logs in, and this file is not part of the build. The token is made anew for
-// every run, it is only in the memory of the check (and in the environment of its workers), and
-// the account and the session are removed afterwards.
+// the code that logs in, and this file is not part of the build. The tokens are made anew for
+// every run, they are only in the memory of the check (and in the environment of its workers),
+// and the accounts and the sessions are removed afterwards. The moderator hides messages; the
+// beheerder also writes articles, which a moderator may not.
 
 /**
- * The account of the check. `.test` is a domain that can't exist, so a mail to it goes nowhere.
+ * The accounts of the check, by role. `.test` is a domain that can't exist, so a mail to it
+ * goes nowhere.
  */
-export const adminEmail = 'e2e-moderator@example.test'
+const accounts = {
+  beheerder: { email: 'e2e-beheerder@example.test', variable: 'E2E_BEHEERDER_TOKEN' },
+  moderator: { email: 'e2e-moderator@example.test', variable: 'E2E_ADMIN_TOKEN' },
+} as const
+
+export type E2eRole = keyof typeof accounts
+
+/** The account of the moderator. */
+export const adminEmail = accounts.moderator.email
 
 /**
  * The name of the cookie of the admin (`sessionCookieName` in src/beheer/require-role.ts, which
  * the build of Next.js owns).
  */
 export const sessionCookieName = 'beheer-sessie'
-
-/**
- * The environment variable that hands the token of the session from the setup to the tests,
- * which run in other processes.
- */
-const tokenVariable = 'E2E_ADMIN_TOKEN'
 
 /**
  * The made-up items the tests of the admin hide and show, on the source of the seed that is
@@ -52,11 +57,11 @@ const feedPath = '/e2e-admin/rss/'
 const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])
 
 /**
- * Puts the moderator, its session and the made-up items in the database and returns the
- * function that takes them out again. It only works on a database on this computer: it refuses
- * any other host, so it can never write to the database of acceptance or production, whatever
- * `DATABASE_URL` says by mistake. The site must have started already: it makes the tables and
- * puts the test sources in (SITE_ENV=acceptance).
+ * Puts the moderator, the beheerder, their sessions and the made-up items in the database and
+ * returns the function that takes them out again. It only works on a database on this
+ * computer: it refuses any other host, so it can never write to the database of acceptance or
+ * production, whatever `DATABASE_URL` says by mistake. The site must have started already: it
+ * makes the tables and puts the test sources in (SITE_ENV=acceptance).
  */
 export async function addAdmin() {
   const { DATABASE_URL } = databaseEnv()
@@ -75,14 +80,20 @@ export async function addAdmin() {
     // A run that was stopped halfway may have left its account and items.
     await remove(pool)
 
-    const [user] = await db.insert(adminUsers).values({ email: adminEmail, role: 'moderator' }).$returningId()
-    const token = newToken()
     const now = new Date()
 
-    await db
-      .insert(adminSessions)
-      .values({ createdAt: now, lastSeenAt: now, tokenHash: hashOf(token), userId: user?.id ?? 0 })
-    process.env[tokenVariable] = token
+    for (const [role, { email, variable }] of Object.entries(accounts)) {
+      const [user] = await db
+        .insert(adminUsers)
+        .values({ email, role: role as E2eRole })
+        .$returningId()
+      const token = newToken()
+
+      await db
+        .insert(adminSessions)
+        .values({ createdAt: now, lastSeenAt: now, tokenHash: hashOf(token), userId: user?.id ?? 0 })
+      process.env[variable] = token
+    }
 
     const [source] = await db.select({ id: sources.id }).from(sources).where(eq(sources.domain, sourceDomain))
 
@@ -116,7 +127,10 @@ export async function addAdmin() {
     const { close, pool } = connect(DATABASE_URL)
 
     try {
-      delete process.env[tokenVariable]
+      for (const { variable } of Object.values(accounts)) {
+        delete process.env[variable]
+      }
+
       await remove(pool)
     } finally {
       await close()
@@ -125,14 +139,15 @@ export async function addAdmin() {
 }
 
 /**
- * The cookie that logs the browser in as the moderator of the check. It has the attributes the
- * site sets, and `Secure` works on 127.0.0.1 in Chromium.
+ * The cookie that logs the browser in as the moderator of the check, or as the beheerder when
+ * the role says so. It has the attributes the site sets, and `Secure` works on 127.0.0.1 in
+ * Chromium.
  */
-export function adminCookie(host: string) {
-  const value = process.env[tokenVariable]
+export function adminCookie(host: string, role: E2eRole = 'moderator') {
+  const value = process.env[accounts[role].variable]
 
   if (value === undefined) {
-    throw new Error(`${tokenVariable} is not set: the global setup of the checks makes the session.`)
+    throw new Error(`${accounts[role].variable} is not set: the global setup of the checks makes the session.`)
   }
 
   return {
@@ -161,13 +176,19 @@ function databaseEnv() {
 }
 
 /**
- * Takes the made-up feeds out, and with them their items, then the account with its sessions.
- * The log of the admin has rows of the account when a test has hidden an item, and the rows
- * refuse to go with the account, so they go first. That is for this database on this computer
- * only (see `addAdmin`): the site has no way to remove a row of the log.
+ * Takes the made-up feeds out, and with them their items, then the articles that a test wrote,
+ * then the accounts with their sessions. The log of the admin has rows of the accounts when a
+ * test has hidden an item or written an article, and the rows refuse to go with the account,
+ * so they go first, and the articles too, which belong to the account that wrote them. That is
+ * for this database on this computer only (see `addAdmin`): the site has no way to remove a
+ * row of the log or an article.
  */
 async function remove(pool: ReturnType<typeof connect>['pool']) {
+  const emails = Object.values(accounts).map(({ email }) => email)
+  const users = 'SELECT id FROM admin_users WHERE email IN (?)'
+
   await pool.query('DELETE FROM feeds WHERE url LIKE ?', [`https://%${feedPath}`])
-  await pool.query('DELETE FROM audit_log WHERE user_id IN (SELECT id FROM admin_users WHERE email = ?)', [adminEmail])
-  await pool.query('DELETE FROM admin_users WHERE email = ?', [adminEmail])
+  await pool.query(`DELETE FROM articles WHERE created_by IN (${users})`, [emails])
+  await pool.query(`DELETE FROM audit_log WHERE user_id IN (${users})`, [emails])
+  await pool.query('DELETE FROM admin_users WHERE email IN (?)', [emails])
 }
