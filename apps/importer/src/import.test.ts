@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, items, sources } from '@fansite/db/schema'
+import { feeds, items, matchImports, sources } from '@fansite/db/schema'
+import { seasonOf } from '@fansite/db/season'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { execFile } from 'node:child_process'
 import { readFileSync } from 'node:fs'
@@ -31,6 +32,12 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
+  // The command reads the real clock and would ask the real Wikipedia for the matches. A match
+  // import that waits for its hour does not.
+  await database.db
+    .insert(matchImports)
+    .values({ lastOutcome: 'imported', retryAt: new Date('2099-01-01T00:00:00Z'), season: seasonOf(new Date()) })
+    .onDuplicateKeyUpdate({ set: { retryAt: new Date('2099-01-01T00:00:00Z') } })
 })
 
 afterEach(async () => {
@@ -62,6 +69,7 @@ async function importFromTestServers() {
   const lines: string[] = []
   const code = await runImport(database.url, {
     makeFetcher: (robots) => fetcherFor(servers, { robots }),
+    wikipediaOrigin: null,
     write: (line) => lines.push(line),
   })
 

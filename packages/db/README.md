@@ -211,6 +211,49 @@ De importer haalt runs weg die ouder zijn dan 30 dagen.
 | `rules`      | De regels voor `scHeerenveenFansite` of anders `*`, als JSON: `allow` en `pattern` |
 | `fetched_at` | Wanneer de fetcher `robots.txt` las, in UTC; na 24 uur leest hij het opnieuw       |
 
+## De wedstrijden en de stand
+
+De importer vult deze vier tabellen met de gegevens van de Nederlandse Wikipedia (zie de [README van de importer](../../apps/importer/README.md), _De wedstrijden en de stand_).
+Ze gelden voor sc Heerenveen 1 (mannen).
+Een seizoen begint op 1 juli en staat als `2026/27` in `season`; `seasonOf` en `seasonStart` in `@fansite/db/season` rekenen het uit.
+Een rij van een eerder seizoen verandert of verdwijnt nooit.
+
+`matches` heeft een rij per wedstrijd.
+
+| Kolom                         | Betekenis                                                                                                    |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `season`, `competition`       | Het seizoen en de competitie: `Eredivisie` of `KNVB Beker`                                                   |
+| `round`                       | De ronde zoals Wikipedia die noemt, zoals `Speelronde 12` of `Eerste ronde`; uniek per seizoen en competitie |
+| `opponent`, `home`, `stadium` | De tegenstander, of de wedstrijd thuis is, en het stadion (kan ontbreken)                                    |
+| `status`                      | `scheduled`, `played` of `postponed`                                                                         |
+| `goals_for`, `goals_against`  | De doelpunten van sc Heerenveen en van de tegenstander; alleen gevuld bij `played`                           |
+| `match_date`                  | De dag in Nederland, of de eerste dag als alleen een weekend bekend is                                       |
+| `kickoff_at`                  | De aftrap in UTC; leeg zolang de tijd niet bekend is                                                         |
+| `date_text`                   | De datum zoals Wikipedia die geeft, zoals `12-14 februari 2027`; gevuld als er geen aftrap is                |
+| `result_set_at`               | Sinds wanneer de uitslag zo staat, in UTC; de import vergelijkt dat met drie dagen                           |
+
+Twee CHECK-constraints houden de rijen heel: een uitslag hoort bij `played` en nergens anders (`matches_result_only_when_played`), en een wedstrijd heeft een aftrap of een tekst voor de datum (`matches_time_or_text`).
+
+`standings` heeft een rij per club van de Eredivisie.
+De sleutel is het seizoen met de plaats.
+
+| Kolom                                           | Betekenis                                                                        |
+| ----------------------------------------------- | -------------------------------------------------------------------------------- |
+| `position`, `club`                              | De plaats en de naam van de club                                                 |
+| `played`, `won`, `drawn`, `lost`                | Gespeeld, gewonnen, gelijk en verloren                                           |
+| `goals_for`, `goals_against`, `goal_difference` | Doelpunten voor en tegen, en het doelsaldo (kan negatief zijn)                   |
+| `points`                                        | De punten                                                                        |
+| `valid_on`                                      | De dag waarvoor de stand geldt: die van de laatste gespeelde competitiewedstrijd |
+
+`wikipedia_pages` bewaart per gelezen pagina de `title`, de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
+Een pagina kan daarmee de bron noemen.
+
+`match_imports` heeft per seizoen de gezondheid van de import: `last_success_at`, `last_outcome`, `failures_in_a_row`, `last_error`, `last_warning` en `retry_at`, de tijd waarvoor de import Wikipedia niet opnieuw vraagt.
+Het zijn dezelfde velden als bij een feed.
+
+De seed zet verzonnen wedstrijden en een verzonnen stand in het lopende seizoen (`madeUpMatches` en `madeUpTable` in `src/seed.ts`), maar alleen als dat seizoen er nog geen heeft.
+De eerste echte import vervangt ze, en een database met echte wedstrijden raakt de seed niet aan.
+
 ## Tijden
 
 Tijden staan in UTC, als `datetime`.
@@ -230,7 +273,8 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log` en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `standings`, `wikipedia_pages`, `match_imports` en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
   `listRecentItems(db, { limit, until })` geeft de nieuwste `limit` berichten van die bronnen tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam), en geen afleveringen van bronnen van het soort podcast;
@@ -241,7 +285,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;
 - `@fansite/db/lock`: `withLock(pool, name, waitSeconds, task)` doet een taak terwijl het een slot in de database houdt (`GET_LOCK`), en `lockNameFor(url, task)` geeft de naam daarvan, met de taak en de naam van de database erin.
   De migraties en de import gebruiken het, elk met een eigen naam;
-- `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de bronnen uit de seed erin.
+- `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de bronnen en de verzonnen wedstrijden uit de seed erin.
   Een slot in de database (`fansite_migrate_<database>`) laat twee processen die tegelijk starten, om de beurt werken.
   De site roept het aan als hij start.
   De functie gooit bij een fout en laat het aan de aanroeper wat dat betekent; de aanroeper geeft zelf de map met de migraties, want een gebundelde build weet niet waar die staat.

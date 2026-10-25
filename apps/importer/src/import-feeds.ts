@@ -12,11 +12,13 @@ import type { FeedItem, SkippedItem } from './read-feed.ts'
 import type { ForumDiscussion } from './read-forum.ts'
 
 import { createFetcher } from './fetcher.ts'
+import { formatMatchReport, importMatches, wikipediaOrigin } from './import-matches.ts'
 import { paywallCategoryFor, readFeed } from './read-feed.ts'
 import { readForum } from './read-forum.ts'
 import { judgeRelevance } from './relevance.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { finishRun, reasonOf, recordLockTaken, recordReport, removeOldRuns, startRun } from './run-log.ts'
+import { describeError } from './text.ts'
 
 /**
  * What came of one feed. Like `FetchOutcome`, every result is a value, so a failing feed never
@@ -72,6 +74,11 @@ export type ImportOptions = {
    * reach its own web servers.
    */
   makeFetcher?: (robots: RobotsStore) => Fetcher
+  /**
+   * The address of the Wikipedia the matches come from. A test gives the address of its own web
+   * server, or null when it is about something else and must not reach Wikipedia.
+   */
+  wikipediaOrigin?: null | string
   /** Writes a line of output. */
   write?: (line: string) => void
 }
@@ -237,7 +244,11 @@ export function listFeedsToImport(db: Database) {
 /**
  * Reads every feed of every source that is switched on and writes a line for each. One fetcher
  * serves all feeds, so a host's robots.txt is read once, and the database keeps it for a day.
- * Returns the exit code: 1 when a feed failed, so a scheduler can tell.
+ * After the feeds it reads the matches and the table of the season from Wikipedia, at most once
+ * an hour (see `importMatches`). The two do not depend on each other: a failure of one stops
+ * neither the other nor its report. Returns the exit code: 1 when a feed failed, so a scheduler
+ * can tell. A match import that finds a check failing or a page changed is a warning in the
+ * output and in the health (`pnpm run import:status`), and no failure of the run.
  *
  * A run takes a lock in the database first. When another run holds it, this run writes that in
  * the log and stops, with exit code 0: nothing is broken, and the next run comes a quarter of
@@ -248,6 +259,7 @@ export async function runImport(
   {
     clock = () => new Date(),
     makeFetcher = (robots) => createFetcher({ robots }),
+    wikipediaOrigin: origin = wikipediaOrigin,
     write = console.log,
   }: ImportOptions = {},
 ): Promise<number> {
@@ -259,11 +271,15 @@ export async function runImport(
 
       await removeOldRuns(db, clock())
 
-      const reports = await importFeeds(db, makeFetcher(robotsStoreFor(db, clock)), { clock, runId })
+      const fetcher = makeFetcher(robotsStoreFor(db, clock))
+      const [reports, matchReport] = await Promise.allSettled([
+        importFeeds(db, fetcher, { clock, runId }),
+        origin === null ? undefined : importMatches(db, fetcher, { clock, origin }),
+      ])
 
       await finishRun(db, runId, clock())
 
-      return reports
+      return { matchReport, reports }
     })
 
     if (!run.ran) {
@@ -273,16 +289,26 @@ export async function runImport(
       return 0
     }
 
-    const reports = run.result
+    const { matchReport, reports } = run.result
 
-    if (reports.length === 0) {
+    if (reports.status === 'fulfilled' && reports.value.length === 0) {
       write('There are no feeds to read: no source that is switched on has a feed. See `pnpm db:seed`.')
     }
-    for (const report of reports) {
+    for (const report of reports.status === 'fulfilled' ? reports.value : []) {
       write(formatReport(report))
     }
+    // A run that finds the hour not over yet is the usual case, three in four, and says
+    // nothing.
+    if (matchReport.status === 'rejected') {
+      write(`Matches: warning, not imported: ${describeError(matchReport.reason)}`)
+    } else if (matchReport.value !== undefined && matchReport.value.kind !== 'postponed') {
+      write(formatMatchReport(matchReport.value))
+    }
+    if (reports.status === 'rejected') {
+      throw reports.reason
+    }
 
-    return reports.some((report) => report.kind === 'error') ? 1 : 0
+    return reports.value.some((report) => report.kind === 'error') ? 1 : 0
   } finally {
     await close()
   }
@@ -297,20 +323,6 @@ function chunks<T>(list: T[], size: number): T[][] {
   }
 
   return pieces
-}
-
-/**
- * A short text for a failure. A database error carries the whole query with its values, which
- * don't belong in a log.
- */
-function describeError(error: unknown): string {
-  const cause = error instanceof Error && error.cause instanceof Error ? error.cause : error
-
-  if (cause instanceof Error && 'code' in cause && typeof cause.code === 'string') {
-    return `database error ${cause.code}`
-  }
-
-  return cause instanceof Error ? cause.message : String(cause)
 }
 
 /**

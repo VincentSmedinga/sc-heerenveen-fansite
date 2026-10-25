@@ -1,11 +1,12 @@
 import { eq } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
-import type { FeedFilter, NewSource } from './schema.ts'
+import type { FeedFilter, NewMatch, NewSource, NewStandingsRow } from './schema.ts'
 
 import { connect } from './client.ts'
 import { readDatabaseEnv } from './env.ts'
-import { feeds, sources } from './schema.ts'
+import { feeds, matches, sources, standings } from './schema.ts'
+import { seasonOf } from './season.ts'
 
 /**
  * Made-up sources for local development, with different policies and permissions. None is real:
@@ -209,6 +210,187 @@ export async function seedSources(db: Database) {
   }
 }
 
+const dutchMonths = [
+  'januari',
+  'februari',
+  'maart',
+  'april',
+  'mei',
+  'juni',
+  'juli',
+  'augustus',
+  'september',
+  'oktober',
+  'november',
+  'december',
+]
+
+const day = 24 * 60 * 60 * 1000
+
+/**
+ * Made-up matches for the current season, for the pages and the accessibility checks.
+ * Every date counts from the moment of the seed, so the season is always the current
+ * one: a made-up Eredivisie programme of five rounds with the clubs of `madeUpTable`,
+ * and one cup tie.
+ *
+ * It covers every case a page must show: played at home and away, still to be played
+ * with a kick-off, still to be played without one (the weekend as text), postponed, and
+ * a cup tie. `result_set_at` stays empty, so the import never warns about a made-up
+ * result it replaces.
+ */
+export function madeUpMatches(now: Date): NewMatch[] {
+  const season = seasonOf(now)
+  const at = (days: number, hours: number, minutes: number) => {
+    const moment = new Date(now.getTime() + days * day)
+
+    moment.setUTCHours(hours, minutes, 0, 0)
+
+    return moment
+  }
+  const dayOf = (moment: Date) => moment.toISOString().slice(0, 10)
+  const weekend = at(10, 0, 0)
+  const weekendEnd = new Date(weekend.getTime() + 2 * day)
+  const weekendText = `${weekend.getUTCDate()}-${weekendEnd.getUTCDate()} ${dutchMonths[weekendEnd.getUTCMonth()]} ${weekendEnd.getUTCFullYear()}`
+  const base = { resultSetAt: null, season, stadium: null } as const
+
+  return [
+    {
+      ...base,
+      competition: 'Eredivisie',
+      goalsAgainst: 0,
+      goalsFor: 2,
+      home: true,
+      kickoffAt: at(-14, 16, 45),
+      matchDate: dayOf(at(-14, 16, 45)),
+      opponent: 'Testdorp FC',
+      round: 'Speelronde 1',
+      stadium: 'Stadion Proeflaan',
+      status: 'played',
+    },
+    {
+      ...base,
+      competition: 'Eredivisie',
+      goalsAgainst: 0,
+      goalsFor: 1,
+      home: false,
+      kickoffAt: at(-7, 18, 45),
+      matchDate: dayOf(at(-7, 18, 45)),
+      opponent: 'Voorbeeld United',
+      round: 'Speelronde 2',
+      stadium: 'Voorbeeldpark',
+      status: 'played',
+    },
+    {
+      ...base,
+      competition: 'Eredivisie',
+      home: true,
+      kickoffAt: at(3, 18, 45),
+      matchDate: dayOf(at(3, 18, 45)),
+      opponent: 'Proefstad SV',
+      round: 'Speelronde 3',
+      stadium: 'Stadion Proeflaan',
+      status: 'scheduled',
+    },
+    {
+      ...base,
+      competition: 'Eredivisie',
+      dateText: weekendText,
+      home: false,
+      matchDate: dayOf(weekend),
+      opponent: 'Nepstad Rangers',
+      round: 'Speelronde 4',
+      stadium: 'Nepstadion',
+      status: 'scheduled',
+    },
+    {
+      ...base,
+      competition: 'Eredivisie',
+      home: true,
+      kickoffAt: at(-2, 14, 30),
+      matchDate: dayOf(at(-2, 14, 30)),
+      opponent: 'Demo Boys',
+      round: 'Speelronde 5',
+      stadium: 'Stadion Proeflaan',
+      status: 'postponed',
+    },
+    {
+      ...base,
+      competition: 'KNVB Beker',
+      home: false,
+      kickoffAt: at(5, 19, 0),
+      matchDate: dayOf(at(5, 19, 0)),
+      opponent: 'SV Proefdorp',
+      round: 'Tweede ronde',
+      stadium: 'Sportpark Proefdorp',
+      status: 'scheduled',
+    },
+  ]
+}
+
+/**
+ * A made-up league table that agrees with `madeUpMatches`: six made-up clubs and sc Heerenveen,
+ * two rounds played, and the day of the last match as the day it holds for.
+ */
+export function madeUpTable(now: Date): NewStandingsRow[] {
+  const season = seasonOf(now)
+  const validOn = new Date(now.getTime() - 7 * day).toISOString().slice(0, 10)
+  const rows: [string, number, number, number, number, number][] = [
+    ['sc Heerenveen', 2, 0, 0, 3, 0],
+    ['Demo Boys', 1, 1, 0, 5, 4],
+    ['Proefstad SV', 1, 1, 0, 2, 1],
+    ['Voorbeeld United', 0, 1, 1, 1, 2],
+    ['Testdorp FC', 0, 1, 1, 2, 4],
+    ['Nepstad Rangers', 0, 0, 2, 2, 4],
+  ]
+
+  return rows.map(([club, won, drawn, lost, goalsFor, goalsAgainst], index) => ({
+    club,
+    drawn,
+    goalDifference: goalsFor - goalsAgainst,
+    goalsAgainst,
+    goalsFor,
+    lost,
+    played: won + drawn + lost,
+    points: 3 * won + drawn,
+    position: index + 1,
+    season,
+    validOn,
+    won,
+  }))
+}
+
+/**
+ * Puts made-up matches and a made-up league table in the database, but only when the current
+ * season has none of either. The real import replaces them with Wikipedia's the first time it
+ * runs, and a database that already has the real ones is left alone, so a restart on acceptance
+ * never puts the made-up ones over the real ones. Returns whether it put them in.
+ */
+export async function seedMatches(db: Database, now: Date = new Date()): Promise<boolean> {
+  const season = seasonOf(now)
+
+  return db.transaction(async (transaction) => {
+    const [anyMatch] = await transaction
+      .select({ id: matches.id })
+      .from(matches)
+      .where(eq(matches.season, season))
+      .limit(1)
+    const [anyRow] = await transaction
+      .select({ club: standings.club })
+      .from(standings)
+      .where(eq(standings.season, season))
+      .limit(1)
+
+    if (anyMatch !== undefined || anyRow !== undefined) {
+      return false
+    }
+
+    await transaction.insert(matches).values(madeUpMatches(now))
+    await transaction.insert(standings).values(madeUpTable(now))
+
+    return true
+  })
+}
+
 if (import.meta.main) {
   // The made-up sources must never reach production. The site seeds only on acceptance; this
   // keeps `pnpm db:seed` from doing it by hand.
@@ -221,6 +403,7 @@ if (import.meta.main) {
 
   try {
     await seedSources(db)
+    await seedMatches(db)
     console.log(
       `The register holds ${testSources.length} test sources and the real sources: ${realSources.map((source) => source.name).join(', ')}.`,
     )

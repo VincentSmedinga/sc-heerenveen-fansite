@@ -2,14 +2,14 @@ import { migrate } from 'drizzle-orm/mysql2/migrator'
 
 import { connect } from './client.ts'
 import { lockNameFor, withLock } from './lock.ts'
-import { seedSources } from './seed.ts'
+import { seedMatches, seedSources } from './seed.ts'
 
 export type PrepareOptions = {
   /** How many seconds to wait for a process that is preparing the same database. */
   lockSeconds?: number
   /** The folder with the migrations: the SQL files and `meta/_journal.json`. */
   migrationsFolder: string
-  /** Whether to put the test sources in the register after the migrations. */
+  /** Whether to put the test sources and made-up matches in after the migrations. */
   seed: boolean
   /** The `DATABASE_URL`. */
   url: string
@@ -17,9 +17,9 @@ export type PrepareOptions = {
 
 /**
  * Brings the database up to date: runs the migrations it hasn't had yet and, when asked, puts
- * the test sources in the register. The site calls this when it starts. A lock in the database
- * (`GET_LOCK`) makes two processes that start at the same moment take turns, so the second one
- * finds nothing left to do.
+ * the test sources in the register and made-up matches in the database. The site calls this
+ * when it starts. A lock in the database (`GET_LOCK`) makes two processes that start at the
+ * same moment take turns, so the second one finds nothing left to do.
  *
  * It throws when the database can't be reached, when the lock stays taken, or when a migration
  * or the seed fails. The caller decides what that means. A migration that fails halfway can
@@ -39,6 +39,7 @@ export async function prepareDatabase({ lockSeconds = 30, migrationsFolder, seed
 
       if (seed) {
         await seedSources(db)
+        await seedMatches(db)
       }
     })
 

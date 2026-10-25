@@ -66,7 +66,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 21 oktober 2026
 - **Besluit:** de code en onze eigen teksten (documentatie, Storybook) vallen onder de EUPL-1.2.
   Dat vervangt de MIT-licentie waarmee de repository begon.
-  Niet onder de licentie vallen de lettertypes (OFL), de tekst van de gedragscode (Contributor Covenant), het clubwapen en ander materiaal van derden, en de wedstrijdgegevens (zie #39).
+  Niet onder de licentie vallen de lettertypes (OFL), de tekst van de gedragscode (Contributor Covenant), het clubwapen en ander materiaal van derden.
+  De wedstrijdgegevens vallen onder CC BY-SA 4.0 (zie _Onze wedstrijdgegevens zijn CC BY-SA 4.0_).
 - **Waarom:** de EUPL is een copyleft-licentie met een bepaling voor gebruik via het netwerk.
   Wie de code aanpast en als site laat draaien, moet de aangepaste broncode delen.
   Dat past bij een project zonder winst dat niemand wil zien verdwijnen in een gesloten kopie.
@@ -3299,6 +3300,166 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De tabel van het issue gaf de drie verzonnen koppen `irrelevant`, maar ze noemen alleen "Heerenveen".
   "Man wint loterij in Heerenveen" toont het filter, door het woord "wint" (zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_).
 - **Alternatieven:** de uitkomst van de projecteigenaar overnemen als verwachte waarde (dan falen drie tests tegen een bewuste keuze en moet de regel veranderen); alleen de koppen opnemen waar we het over eens zijn (dan verdwijnt het fout-positief uit beeld).
+
+### Wedstrijdgegevens komen van de Nederlandse Wikipedia, voor het eerste mannenelftal
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het programma, de uitslagen en de stand komen van de Nederlandse Wikipedia, alleen voor sc Heerenveen 1 (mannen).
+  Dat zijn de pagina's van het seizoen en de pagina van de KNVB Beker.
+  We halen ze op met de bestaande fetcher en alleen via `/wiki/<pagina>?action=raw`.
+- **Waarom:** het is gratis, zonder sleutel of account, ongeveer een kwartier na het laatste fluitsignaal bijgewerkt en met de beker erbij.
+  Onderzoek van 25 oktober: alle tien uitslagen en de stand kwamen overeen met de site van de club en met drie andere sites.
+  De licentie past bij ons open uitgangspunt.
+- **Alternatieven:** de site van de club (geen voorwaarden gevonden, een verkeerde tijdzone in de gegevens, een stand zonder alle kolommen).
+  football-data.org (geen beker, voorwaarden die ons binden nadat we stoppen).
+  Sportmonks (ongeveer €290 per jaar).
+  OpenFootball (verouderd).
+  Eredivisie.nl en andere sites (verbieden scrapen).
+
+### Onze wedstrijdgegevens zijn CC BY-SA 4.0
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de wedstrijdgegevens die we bewaren en tonen, publiceren we onder CC BY-SA 4.0, zoals de licentie van Wikipedia dat vraagt.
+  Dat regelt het deel van #39 over de wedstrijdgegevens.
+  De regel over de licentie in _Licentie: EUPL-1.2 voor de code en onze eigen teksten_ en het licentiedeel van de README zeggen dat nu ook.
+- **Waarom:** het is de veiligste lezing van de share-alike.
+  Of een tabel met feiten een bewerking is, is niet zeker, en deze keuze past bij ons open uitgangspunt.
+- **Alternatieven:** de gegevens onder de EUPL laten vallen (kan botsen met de licentie van Wikipedia).
+  Een jurist laten beoordelen of de share-alike geldt (kost tijd en geld voor weinig winst).
+
+### Controles in plaats van een tweede bron
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** Wikipedia is door vrijwilligers geschreven, dus de importer controleert elke lezing.
+  Faalt een controle, dan blijft de laatste goede versie staan en schrijft de importer een waarschuwing.
+  We zetten geen versie van de Wikipedia-pagina vast.
+- **Waarom:** de club als tweede bron is uitgesloten, en een vastgezette versie vraagt meer code en meer toestand voor een zeldzaam geval.
+  Het beheer (#272) is de uitweg als Wikipedia lang fout blijft.
+- **Alternatieven:** de laatste goede versie van Wikipedia zelf vastzetten tot een mens ingrijpt.
+  Elke wijziging eerst door iemand laten goedkeuren.
+
+### De controles gelden op elk moment, ook midden in een speelronde
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de importer controleert het programma en de stand met `apps/importer/src/check-wikipedia.ts`:
+  - sc Heerenveen speelt 34 competitiewedstrijden, elk in een eigen speelronde, 17 thuis en 17 uit;
+  - de stand heeft 18 clubs;
+  - per club is gespeeld gelijk aan gewonnen + gelijk + verloren, zijn de punten 3 × gewonnen + gelijk en is het doelsaldo gelijk aan voor min tegen;
+  - over de hele stand zijn de doelpunten voor gelijk aan de doelpunten tegen, en het aantal gewonnen gelijk aan het aantal verloren;
+  - de regel van sc Heerenveen in de stand komt overeen met onze eigen uitslagen: gespeeld, doelpunten en punten.
+- **Waarom:** een controle die alleen klopt als alle clubs even vaak speelden, zou elk speelweekend falen.
+  Midden in een speelronde hebben clubs een wedstrijd meer of minder gespeeld, maar elke gespeelde wedstrijd telt voor twee clubs, dus de sommen blijven kloppen.
+  Een stand die pas voor de helft bijgewerkt is, valt zo wel op en komt een uur later in orde.
+- **Alternatieven:** controleren dat alle clubs evenveel gespeeld hebben (faalt elk weekend).
+  Alleen de regel van sc Heerenveen controleren (mist een tikfout bij een andere club).
+- **Let op:** Wikipedia geeft in de pagina gewonnen, gelijk, verloren en doelpunten, niet gespeeld en punten.
+  De importer rekent die twee uit, dus voor die twee is de controle per club een zekerheid van de code en geen controle van de bron.
+  Een puntenaftrek zou de stand dan niet meer laten kloppen met de uitslagen.
+
+### De aftrap staat in UTC en mag ontbreken
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de aftrap is een tijdstip in UTC dat mag ontbreken.
+  Zonder tijd staat er het weekend of de datum zoals Wikipedia die geeft (`date_text`), en de eerste dag in `match_date`, zodat het programma op volgorde blijft.
+  Een bezoeker ziet altijd Nederlandse tijd.
+- **Waarom:** de KNVB maakt de data en tijden van speelronde 22 tot en met 32 pas op 22 december 2026 bekend.
+  Alle tijden slaan we in UTC op, zoals de rest van de database.
+- **Alternatieven:** een geschatte tijd tonen (geeft supporters een verkeerde tijd).
+  Die wedstrijden niet tonen tot de tijd er is.
+
+### Een seizoen heeft eigen rijen, en rijen van een eerder seizoen blijven bewaard
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** elke wedstrijd en elke regel van de stand hoort bij een seizoen, dat op 1 juli begint (`2026/27`).
+  De import leest alleen het lopende seizoen en laat rijen van eerdere seizoenen staan.
+  Pagina's en blokken tonen alleen het lopende seizoen.
+  `seasonOf` en `seasonStart` staan in `@fansite/db/season`, zodat de importer, de seed en de site hetzelfde seizoen kiezen.
+- **Waarom:** bewaren kost bijna niets, en #39 (de geschiedenis) en een mogelijk archief beginnen dan met gegevens die er al zijn.
+  Een nieuw seizoen hoeft niets te wissen.
+- **Alternatieven:** de rijen bij elk nieuw seizoen vervangen (eenvoudiger, maar de uitslagen van een afgelopen seizoen zijn dan weg).
+
+### Een uitgestelde wedstrijd blijft in het programma staan als "Uitgesteld"
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een uitgestelde wedstrijd blijft op zijn plek in het programma, zonder nieuwe datum, en telt niet als gespeeld.
+  Zodra Wikipedia een nieuwe datum heeft, nemen we die over.
+  De importer herkent een uitgestelde wedstrijd aan een score die "uitgesteld" of "afgelast" zegt.
+- **Waarom:** supporters zien dan waarom de wedstrijd niet doorging, en niemand zoekt hem tevergeefs.
+  We hebben nog geen uitgestelde wedstrijd op de pagina gezien, dus de herkenning is een aanname.
+  Schrijft Wikipedia het anders, dan geeft de import een fout en blijft de laatste goede versie staan.
+- **Alternatieven:** de wedstrijd verbergen tot er een nieuwe datum is.
+
+### Het weer valt buiten dit werk
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de optionele weersverwachting uit dit issue krijgt later een eigen issue.
+- **Waarom:** een weerdienst is een tweede bron met eigen voorwaarden, en de server zou die zelf moeten ophalen zonder dat bezoekers iets aan een derde vragen.
+  Dat werk past niet bij de import van de wedstrijden.
+- **Alternatieven:** het weer nu meenemen.
+  Dat maakt de import en de review groter.
+
+### Drie pull requests in plaats van één
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** #27 is gesplitst in de import (#27), de blokken en de pagina voor bezoekers (#271) en het aanpassen in het beheer (#272), in die volgorde.
+- **Waarom:** de import, de pagina's en het beheer kunnen elk apart naar acceptatie.
+  De import levert de gegevens, en de reviewer ziet per pull request één onderdeel.
+- **Alternatieven:** vier issues, met de blokken van de homepage en de pagina `/wedstrijden` apart.
+  Eén issue voor alles.
+
+### De import van de wedstrijden slaagt of mislukt als geheel, één keer per uur
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de import leest de drie pagina's van het seizoen, controleert alles en schrijft dan de wedstrijden, de stand en de gelezen pagina's in één transactie.
+  Is een pagina niet te lezen, of faalt een controle, dan verandert er niets.
+  Ook een ontbrekende pagina van de beker houdt de hele import tegen.
+  Een wedstrijd van sc Heerenveen die de import niet kent of niet kan lezen (een datum, een tijd of een score), is dezelfde fout.
+  De import van de wedstrijden en de import van de feeds lopen in dezelfde run, maar een fout in de ene stopt de andere niet.
+  Een mislukte import van de wedstrijden is een waarschuwing en geen fout van de run: de exitcode blijft 0.
+- **Hoe vaak:** hoogstens één keer per uur, bijgehouden in `match_imports.retry_at` (59 minuten na elke poging, bij een verzoek om te wachten zo lang als Wikipedia vraagt).
+  Een run die het uur nog niet vol vindt, schrijft niets.
+- **Waarom:** een stand zonder de bijbehorende uitslag, of een programma zonder de beker, zou een bezoeker iets verkeerds laten zien.
+  Een verkeerde wedstrijd die een uur te lang blijft staan, kost minder dan een half bijgewerkte pagina.
+  Elk uur is vaak genoeg: Wikipedia is binnen een kwartier na het fluitsignaal bijgewerkt, en een bezoeker merkt een uur verschil nauwelijks.
+  Een exitcode van 1 elk uur dat Wikipedia hapert, zou de cronmail vullen.
+  De gezondheid in `pnpm run import:status` houdt de mislukte runs bij en geeft exitcode 1 bij drie op rij, zoals bij de feeds.
+- **Alternatieven:** per pagina schrijven (de stand en de uitslagen kunnen dan elkaar tegenspreken).
+  Elke 15 minuten lezen (vier keer zoveel verzoeken aan Wikipedia voor weinig winst).
+  Een ontbrekende bekerpagina overslaan (een hernoemde pagina laat dan stil onze bekerwedstrijden verdwijnen).
+
+### Een uitslag die verandert, nemen we over, en na drie dagen met een waarschuwing
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** verandert Wikipedia een uitslag, dan neemt de import de nieuwe uitslag over.
+  Stond de oude uitslag drie dagen of langer vast, dan schrijft de import ook een waarschuwing met de oude en de nieuwe uitslag, in de uitvoer en in `match_imports.last_warning`.
+  `matches.result_set_at` houdt bij sinds wanneer de uitslag zo staat; het verandert alleen als de uitslag verandert.
+- **Waarom:** soms klopt de verbetering, en een tikfout herstellen is een gewone bewerking.
+  Een uitslag die na dagen nog verandert, is zeldzaam genoeg om een mens te laten kijken, en dan kan het beheer (#272) de uitslag zetten.
+- **Alternatieven:** een gewijzigde uitslag niet overnemen tot een mens hem goedkeurt (een goede verbetering blijft dan liggen).
+  Elke wijziging van een uitslag melden (te veel meldingen voor een tikfout van een uur oud).
+
+### De ronde is de kop boven de wedstrijd, en de versie van een pagina is de `Last-Modified`
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de speelronde van een wedstrijd is de kop boven het sjabloon op de pagina: `Speelronde 12` in de competitie, `Eerste ronde` in de beker.
+  Zo hoeft een nieuw bekerseizoen geen code, en een wedstrijd is uniek per seizoen, competitie en ronde.
+  `wikipedia_pages.version` bewaart de `Last-Modified` die Wikipedia bij de pagina stuurt.
+- **Waarom:** de ruwe tekst van een pagina (`?action=raw`) komt zonder versienummer, en de API met het nummer is voor ons gesloten door `robots.txt`.
+  De `Last-Modified` is het tijdstip van de versie die we lazen, en samen met de titel en het leestijdstip kan een bezoeker de geschiedenis van de pagina bekijken.
+- **Alternatieven:** de rondes van de beker per seizoen met de hand benoemen (code om bij te houden).
+  Een tweede verzoek om het versienummer uit de HTML te halen (ongeveer tien keer zo veel gegevens).
+
+### De verzonnen wedstrijden komen alleen in een leeg seizoen
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de seed zet verzonnen wedstrijden en een verzonnen stand in het lopende seizoen, maar alleen als dat seizoen nog geen wedstrijden of stand heeft.
+  De datums tellen vanaf het moment van de seed, dus het seizoen is altijd het lopende.
+  De verzonnen uitslagen hebben geen `result_set_at`, zodat de import niet waarschuwt als hij ze vervangt.
+- **Waarom:** de site zet de seed op acceptatie bij elke start (zie _De testbronnen staan alleen op acceptatie_).
+  Zonder deze regel zouden de verzonnen wedstrijden de echte van Wikipedia bij elke start overschrijven.
+  De eerste echte import vervangt de verzonnen wedstrijden en de verzonnen stand.
+- **Alternatieven:** de verzonnen wedstrijden in een eigen seizoen zetten (de pagina's tonen dan niets in het lopende seizoen).
+  De seed op acceptatie niet voor wedstrijden laten lopen (de toegankelijkheidscontrole heeft ze nodig).
 
 ## Redactie
 

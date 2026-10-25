@@ -1,0 +1,61 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)?action=raw, read on 25 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: most matches of other clubs, the text around the templates, and the goal scorers,
+  referees and reports of every match (emptied). See the tests.
+-->
+== Wedstrijden ==
+
+=== Kwalificatierondes ===
+==== Eerste kwalificatieronde ====
+{{Footballbox2
+|date = 1 september 2026
+|time = 20:00 uur
+|team1 = '''[[Sportlust '46]]'''
+|score = 3&nbsp;–&nbsp;1
+|half time score = 1&nbsp;–&nbsp;1
+|aet = 
+|team2 = [[Blauw Geel '38]]
+|goals1 =
+|goals2 =
+|location = [[Woerden]]
+|stadium = [[Sportpark Cromwijck]]
+|attendance = 
+|referee =
+|report =
+}}
+
+=== Hoofdtoernooi ===
+==== Eerste ronde ====
+{{Footballbox2
+|date = 1 september 2026
+|time = 20:00 uur
+|team1 = [[Harkemase Boys]]
+|score = 0&nbsp;–&nbsp;1
+|half time score = 0&nbsp;–&nbsp;0
+|aet = 
+|team2 = '''[[Excelsior '31]]'''
+|goals1 =
+|goals2 =
+|location = [[Harkema]]
+|stadium = [[Sportpark De Bosk]]
+|attendance = 
+|referee =
+|report =
+}}
+{{Footballbox2
+|date = 28 oktober 2026
+|time = 21:00 uur
+|team1 = [[Excelsior Maassluis]]
+|score = 
+|half time score = 
+|aet = 
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Maassluis]]
+|stadium = [[Sportpark Dijkpolder]]
+|attendance = 
+|referee =
+|report =
+}}

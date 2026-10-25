@@ -1,0 +1,82 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)?action=raw, read on 25 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: most matches of other clubs, the text around the templates, and the goal scorers,
+  referees and reports of every match (emptied). See the tests.
+-->
+== Standen ==
+=== Stand ===
+{{#invoke:Sports table|main|style=WDL
+|show_groups=yes <!-- De "groep" kolom wordt "misbruikt" voor de winst/verlies/stabiel indicator -->
+|group_header= {{abbr|Pw|Positiewijziging ten opzichte van vorige speelronde}} <!-- Wijzig de standaard naam voor de groep kolom -->
+|sortable_table=yes
+|section=Stand regulier
+|source=[https://www.transfermarkt.nl/eredivisie/tabelle/wettbewerb/NL1?saison_id=2026 transfermarkt.nl]
+
+<!--Hier de plaatsen van de teams bijwerken-->
+|team_order=FEY, AJA, PSV, TWE, AZ, FOR, HEE, GRO, GAE, CAM, UTR, NEC, EXC, SPA, PEC, TEL, ADO, WIL
+
+<!--De posities van de gekoppelde kwalificaties hier bijwerken-->
+|result1=CLCS |result2=CL3Q |result3=EL2Q |result4=POECL |result5=POECL |result6=POECL |result7=POECL |result16=POED |result17=ED |result18=ED
+
+<!--Resultaten van de teams hier bijwerken, de posities in de stand hoeven hier niet gewisseld te worden. Dat wordt hierboven automatisch gedaan.-->
+|update={{datum|25-10-2026}}
+|win_ADO=1 |draw_ADO=3 |loss_ADO=6 |gf_ADO=13 |ga_ADO=23
+|win_AJA=6 |draw_AJA=3 |loss_AJA=1 |gf_AJA=29 |ga_AJA=13
+|win_AZ= 6 |draw_AZ= 2 |loss_AZ= 2 |gf_AZ= 20 |ga_AZ= 12
+|win_CAM=3 |draw_CAM=3 |loss_CAM=4 |gf_CAM=19 |ga_CAM=22
+|win_EXC=3 |draw_EXC=2 |loss_EXC=5 |gf_EXC=16 |ga_EXC=19
+|win_FEY=7 |draw_FEY=3 |loss_FEY=0 |gf_FEY=32 |ga_FEY=11
+|win_FOR=5 |draw_FOR=3 |loss_FOR=2 |gf_FOR=17 |ga_FOR=17
+|win_GAE=3 |draw_GAE=5 |loss_GAE=2 |gf_GAE=23 |ga_GAE=23
+|win_GRO=4 |draw_GRO=3 |loss_GRO=3 |gf_GRO=24 |ga_GRO=21
+|win_HEE=4 |draw_HEE=3 |loss_HEE=3 |gf_HEE=18 |ga_HEE=13
+|win_NEC=2 |draw_NEC=5 |loss_NEC=3 |gf_NEC=17 |ga_NEC=18
+|win_PEC=2 |draw_PEC=2 |loss_PEC=6 |gf_PEC=11 |ga_PEC=23
+|win_PSV=6 |draw_PSV=2 |loss_PSV=2 |gf_PSV=28 |ga_PSV=13
+|win_SPA=2 |draw_SPA=3 |loss_SPA=5 |gf_SPA=17 |ga_SPA=24
+|win_TEL=1 |draw_TEL=3 |loss_TEL=6 |gf_TEL=12 |ga_TEL=21
+|win_TWE=6 |draw_TWE=2 |loss_TWE=2 |gf_TWE=19 |ga_TWE=10
+|win_UTR=3 |draw_UTR=3 |loss_UTR=4 |gf_UTR=17 |ga_UTR=27
+|win_WIL=0 |draw_WIL=2 |loss_WIL=8 |gf_WIL=10 |ga_WIL=32
+
+<!-- De groepsparameters worden "misbruikt" voor de winst/verlies/stabiel indicator -->
+|group_ADO={{stabiel}}
+|group_AJA={{winst}}
+|group_AZ ={{verlies}}
+|group_CAM={{winst}}
+|group_EXC={{verlies}}
+|group_FEY={{stabiel}}
+|group_FOR={{stabiel}}
+|group_GAE={{stabiel}}
+|group_GRO={{verlies}}
+|group_HEE={{winst}}
+|group_NEC={{stabiel}}
+|group_PEC={{stabiel}}
+|group_PSV={{stabiel}}
+|group_SPA={{verlies}}
+|group_TEL={{stabiel}}
+|group_TWE={{winst}}
+|group_UTR={{stabiel}}
+|group_WIL={{stabiel}}
+
+<!--Namen van de teams (wikilinks in de tabel)-->
+|name_ADO=[[ADO Den Haag]]
+|name_AJA=[[AFC Ajax|Ajax]]
+|name_AZ= [[AZ (voetbalclub)|AZ]]
+|name_CAM=[[SC Cambuur]]
+|name_EXC=[[Excelsior Rotterdam]]
+|name_FEY=[[Feyenoord]]
+|name_FOR=[[Fortuna Sittard]]
+|name_GAE=[[Go Ahead Eagles]]
+|name_GRO=[[FC Groningen]]
+|name_HEE=[[sc Heerenveen]]
+|name_NEC=[[N.E.C.]]
+|name_PEC=[[PEC Zwolle]]
+|name_PSV=[[PSV (voetbalclub)|PSV]]
+|name_SPA=[[Sparta Rotterdam]]
+|name_TEL=[[Telstar (voetbalclub)|Telstar]]
+|name_TWE=[[FC Twente]]
+|name_UTR=[[FC Utrecht]]
+|name_WIL=[[Willem II (voetbalclub)|Willem II]]
+}}

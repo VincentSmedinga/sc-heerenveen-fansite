@@ -64,6 +64,7 @@ async function importAt(now: Date) {
   await runImport(database.url, {
     clock: () => now,
     makeFetcher: (robots) => fetcherFor(servers, { robots }),
+    wikipediaOrigin: null,
     write: () => undefined,
   })
 }
@@ -103,6 +104,8 @@ describe('the overview', () => {
         '  next try from: 2026-10-22 11:36:00 UTC',
         '',
         'Unhealthy feeds: 1 of 2',
+        '',
+        'Matches 2026/27 (Wikipedia): not read yet',
       ],
     })
   })
@@ -128,6 +131,8 @@ describe('the overview', () => {
       lines: [
         'Last run: none yet',
         'There are no feeds: no source that is switched on has a feed. See `pnpm db:seed`.',
+        '',
+        'Matches 2026/27 (Wikipedia): not read yet',
       ],
     })
   })
@@ -146,9 +151,18 @@ describe('the overview', () => {
 
     const everything = async () =>
       Promise.all(
-        ['feeds', 'import_runs', 'import_results', 'items', 'robots_txt', 'sources'].map(
-          async (table) => (await database.pool.query(`SELECT * FROM ${table}`))[0],
-        ),
+        [
+          'feeds',
+          'import_runs',
+          'import_results',
+          'items',
+          'match_imports',
+          'matches',
+          'robots_txt',
+          'sources',
+          'standings',
+          'wikipedia_pages',
+        ].map(async (table) => (await database.pool.query(`SELECT * FROM ${table}`))[0]),
       )
     const before = await everything()
 
