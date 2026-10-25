@@ -3834,3 +3834,18 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Beide hebben we niet uitgeprobeerd.
 - **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, in licht en donker: blauw bovenaan, de kleur van de pagina met de zachte overgang na het scrollen langs de kop, weer blauw als de kop terugkomt, en na Licht of Donker terwijl de strook weg was.
   Niet op een echte telefoon, niet in iOS 26 en niet in de app op het beginscherm.
+
+### De inhoud van de kop blijft zichtbaar als hij onder de statusbalk wegscrolt
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de inhoud van de kop blijft zichtbaar tot de kop uit beeld is.
+  De pull request die hem doorzichtig maakte (#253, voor issue #252) is teruggedraaid.
+  De strook die met de kop wegscrolt (zie _De blauwe rand bovenaan scrolt weg met de kop_) blijft.
+- **Waarom:** de projecteigenaar vond het resultaat van de eerste aanpak (#251) goed genoeg.
+  Het menu dat even door de statusbalk schemert, neemt hij op de koop toe.
+- **Alternatieven:** de inhoud van de kop doorzichtig maken zodra hij binnen 64 pixels van de bovenkant komt, met `opacity: 0` en niet met `visibility: hidden`, zoals #253 deed.
+  Dat haalt het menu uit de statusbalk, maar kost een tweede `IntersectionObserver` en een attribuut op de kop.
+  Een drempel van 8 pixels, gelijk aan die van de strook, was te laag: het menu bleef in de simulator zichtbaar tot ongeveer 55 punten.
+  `visibility: hidden` haalt de kop uit de toegankelijkheidsboom en laat een element met focus verdwijnen.
+- **Gecontroleerd en niet gecontroleerd:** de code is gelijk aan die na #251.
+  Niet op een echte telefoon, niet in iOS 26 en niet in de app op het beginscherm.
