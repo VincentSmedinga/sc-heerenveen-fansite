@@ -48,6 +48,18 @@ describe('attachIcon', () => {
     )
   })
 
+  it('keeps only the letter next to the icon with `letter`, so the rest of the word can break', () => {
+    expect(html(attachIcon('fansite@heerenveen.org', icon, 'before', 'letter'))).toBe(
+      '<span class="hf-icon-head"><svg data-testid="icon"></svg>f</span>ansite@heerenveen.org',
+    )
+    expect(html(attachIcon('fansite@heerenveen.org', icon, 'after', 'letter'))).toBe(
+      'fansite@heerenveen.or<span class="hf-icon-tail">g<svg data-testid="icon"></svg></span>',
+    )
+    expect(html(attachIcon('  Mail ons  ', icon, 'before', 'letter'))).toBe(
+      '<span class="hf-icon-head"><svg data-testid="icon"></svg>M</span>ail ons  ',
+    )
+  })
+
   it('takes the icon alone in a group when the content does not end with text', () => {
     expect(html(attachIcon(<b>Apple</b>, icon, 'after'))).toBe(
       '<b>Apple</b><span class="hf-icon-tail"><svg data-testid="icon"></svg></span>',

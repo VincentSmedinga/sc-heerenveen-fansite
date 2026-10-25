@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { Card } from '../card/Card'
 import { Text } from '../text/Text'
 import { Link } from './Link'
 
@@ -20,10 +21,12 @@ const meta = preview.meta({
           '',
           '- `arrow-right`: een pijl achter de tekst, voor een link naar meer of naar alles, zoals "Alle podcasts".',
           '- `external-link`: het pictogram voor een externe link achter de tekst, voor elke link die de site verlaat, ook in een zin of een lijst.',
-          '  Een link naar een mailadres of naar een pagina van de site zelf krijgt het niet.',
+          '  Een link naar een pagina van de site zelf krijgt het niet, en een link naar een mailadres krijgt de envelop.',
           '- `arrow-left`: een pijl naar links vóór de tekst, voor de weg terug, zoals "Vorige". Hij staat vóór de tekst omdat hij achteruit wijst.',
+          '- `envelope`: een envelop vóór de tekst, voor een link die een mail opent (`mailto:`), zoals ons e-mailadres. Hij staat vóór de tekst omdat hij zegt wat de link doet en niet waar hij heen gaat.',
           '',
           'Een pictogram bij een link staat achter de tekst, omdat het vooruit wijst, naar waar de link heen gaat.',
+          'Er zijn twee uitzonderingen, en die staan vóór de tekst: de pijl naar links, omdat hij achteruit wijst, en de envelop, omdat hij zegt wat de link doet, zoals het pictogram bij een knop.',
           'De link heet voor een schermlezer zijn tekst alleen: het pictogram is verborgen.',
           'Het pictogram heeft de kleur van de tekst, ook onder de muis, en blijft bij het laatste woord als de regel afbreekt.',
           'Laat de inhoud van de link eindigen met tekst, anders kan het pictogram alleen op een regel komen.',
@@ -84,6 +87,20 @@ export const ExternalDark = meta.story({
   render: external,
 })
 
+const mail = () => (
+  <Text style={{ maxInlineSize: '40rem' }}>
+    Mis je een bron? Mail ons via{' '}
+    <Link href="mailto:fansite@heerenveen.org" icon="envelope">
+      fansite@heerenveen.org
+    </Link>
+    .
+  </Text>
+)
+
+export const MailLight = meta.story({ globals: { theme: 'light' }, name: 'Met een envelop, licht', render: mail })
+
+export const MailDark = meta.story({ globals: { theme: 'dark' }, name: 'Met een envelop, donker', render: mail })
+
 // Only on the canvas: a link that breaks over two lines at 320 pixels, where the icon must stay
 // with the last word.
 const breaking = () => (
@@ -105,5 +122,33 @@ export const BreakingDark = meta.story({
   globals: { theme: 'dark', viewport: { value: 'mobile1' } },
   name: 'Breekt af bij 320 pixels, donker',
   render: breaking,
+  tags: ['!autodocs'],
+})
+
+// Only on the canvas: an address longer than the line at 320 pixels. The envelope stays with
+// the first letter and the address breaks inside the card, not over its edge.
+const longAddress = () => (
+  <Card surface="soft">
+    <Text style={{ fontSize: '1.5rem' }}>
+      Mail ons via{' '}
+      <Link href="mailto:redactie-fansite@heerenveen.org" icon="envelope">
+        redactie-fansite@heerenveen.org
+      </Link>
+      .
+    </Text>
+  </Card>
+)
+
+export const LongMailLight = meta.story({
+  globals: { theme: 'light', viewport: { value: 'mobile1' } },
+  name: 'Lang adres bij 320 pixels, licht',
+  render: longAddress,
+  tags: ['!autodocs'],
+})
+
+export const LongMailDark = meta.story({
+  globals: { theme: 'dark', viewport: { value: 'mobile1' } },
+  name: 'Lang adres bij 320 pixels, donker',
+  render: longAddress,
   tags: ['!autodocs'],
 })

@@ -3710,6 +3710,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zelf tekenen houdt de site vrij van verzoeken naar derden en van een dependency met honderden pictogrammen waarvan we er zeven gebruiken, en geeft de site één eigen stijl.
 - **Alternatieven:** alle pictogrammen achter de tekst, ook bij knoppen (consistenter op papier, maar de envelop staat dan op een ongebruikelijke plek).
   Een pictogrammenset of lettertype van een derde partij, of losse tekeningen uit zo'n bibliotheek (een verzoek naar buiten of een dependency, en de stijl is van een ander).
+- **Later:** zie _Een link naar ons e-mailadres krijgt een envelop vóór de tekst_; bij een link staat de envelop ook vóór de tekst.
 
 ### Elke link naar een andere site toont het pictogram voor een externe link
 
@@ -3722,6 +3723,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een bezoeker moet overal kunnen zien dat een link de site verlaat.
 - **Alternatieven:** alleen in het nieuws en het menu (zoals daarvoor, maar een link naar een bron of een platform verlaat de site dan zonder waarschuwing).
   Het afleiden uit het adres (`https://`); dat is minder expliciet dan een optie, en `Link` kiest zijn pictogram dus met de prop `icon`, net als `Navigation` met `external`.
+- **Later:** zie _Een link naar ons e-mailadres krijgt een envelop vóór de tekst_; een `mailto:`-link krijgt wel een pictogram, de envelop, en dat is niet het pictogram voor een externe link.
 
 ### Eén component Icon, gekozen met een naam, en de plaats volgt uit het component dat het tekent
 
@@ -3746,6 +3748,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een component per pictogram (`ArrowRightIcon` en zo verder); meer bestanden en dezelfde regels in elk.
   `Icon` exporteren zodat de site het los kan zetten; dat opent de weg naar een pictogram dat de enige aanwijzing is, terwijl `Link`, `Button` en `SegmentedControl` het pictogram altijd als tweede aanwijzing tekenen.
   Een `filled` als aparte naam (`sun-filled`); dat maakt de lijst langer en laat de twee tekeningen uit elkaar lopen.
+- **Later:** zie _Een link naar ons e-mailadres krijgt een envelop vóór de tekst_; `Link` heeft daarnaast `icon="envelope"`, ook vóór de tekst.
 
 ### Het pictogram blijft aan zijn woord vast met een groep die niet afbreekt
 
@@ -3758,6 +3761,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het pictogram heeft geen eigen kleur en geen beweging, dus er is niets anders te regelen.
 - **Alternatieven:** een onzichtbaar teken ertussen (een woordverbinder); dat komt in de naam van de link, in een kopie van de tekst en in de test van de naam.
   Het hele label niet laten afbreken; dat laat een lange link over de rand van een smal scherm lopen.
+
+### Een link naar ons e-mailadres krijgt een envelop vóór de tekst
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een link naar ons e-mailadres (`mailto:`) krijgt een envelop vóór de tekst, met `icon="envelope"` van `Link`.
+  Dat is één naam meer in `linkIcons`, met de plaats `before`, zoals `arrow-left`; er is geen nieuwe prop.
+  Op de site zijn dat de twee kaarten op `/bronnen`, de melding bij een mislukte verzending op `/contact`, en de `EmailLink` van `/over-ons` en `/privacy` en de link op `/toegankelijkheid`.
+  Een adres dat als gewone tekst staat, zoals dat van de ingelogde beheerder, is geen link en krijgt geen envelop.
+- **Waarom:** de envelop zegt dat de link een mail opent, en dat is anders dan een link naar een pagina.
+  Hij zegt wat de link doet, en staat daarom vóór de tekst, zoals het pictogram bij een knop; een pijl wijst vooruit, een envelop niet.
+  Een regel in `Link` die uit het adres `mailto:` afleidt, is minder expliciet dan een optie, en de pagina kiest haar pictogram al overal met `icon`.
+- **Alternatieven:** geen pictogram bij `mailto:`-links (zoals na #239); de envelop achter het adres (volgens de regel voor links).
+- **Hoe:** een adres is één lang woord zonder spaties, dus de groep die niet afbreekt (`hf-icon-head`) zou het hele adres onbreekbaar maken en bij 320 pixels en grote letters over de rand van de kaart duwen.
+  `attachIcon` krijgt daarom `keep: 'letter'`: de envelop blijft alleen bij de eerste letter van het adres, en de rest mag afbreken.
+  `link.css` zet `overflow-wrap: anywhere` op een link naar `mailto:`, zodat het adres heel op een eigen regel staat en alleen afbreekt als het langer is dan de regel.
+  De naam van de link blijft het adres alleen, want de envelop is `aria-hidden`, en hij heeft de kleur van de tekst, dus ook bij de muis erover, bij de focus en in geforceerde kleuren.
 
 ### De rand bovenaan in Safari heeft de kleur van de kop, door een echte strook van minstens 8 pixels
 

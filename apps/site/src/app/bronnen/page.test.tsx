@@ -68,7 +68,26 @@ describe('the page Onze bronnen', () => {
       expect(content).toMatch(/<span class="hf-icon-tail">[^<]*<svg aria-hidden="true" class="hf-icon"/)
       expect(content).toContain('<path d="M9.5 2.5h4v4"></path>')
     }
-    expect(html.match(/<svg /g)).toHaveLength(3)
+    // The other two icons are the envelopes in the two cards.
+    expect(html.match(/<svg /g)).toHaveLength(5)
+  })
+
+  it('draws the envelope in front of the address in both cards, hidden from screen readers', async () => {
+    vi.mocked(getSources).mockResolvedValue(sources)
+
+    const html = await render()
+    const mailLinks = [...html.matchAll(/<a href="mailto:([^"]*)">(.*?)<\/a>/g)]
+
+    expect(mailLinks.map(([, address]) => address)).toEqual(['fansite@heerenveen.org', 'fansite@heerenveen.org'])
+    for (const [, , content] of mailLinks) {
+      expect(content).toMatch(
+        /^<span class="hf-icon-head"><svg aria-hidden="true" class="hf-icon"[^>]*>.*<\/svg>f<\/span>ansite@heerenveen\.org$/,
+      )
+      expect(content).toContain('<path d="m2.5 5 5.5 4 5.5-4"></path>')
+    }
+    expect(
+      withoutIcons(html).match(/<a href="mailto:fansite@heerenveen\.org">fansite@heerenveen\.org<\/a>/g),
+    ).toHaveLength(2)
   })
 
   it('is the one main of the page, with the h1 and the introduction as its intro and a card for each kind under it, and a sidebar with two coloured cards', async () => {

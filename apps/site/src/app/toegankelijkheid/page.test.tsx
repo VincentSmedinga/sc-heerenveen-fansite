@@ -1,12 +1,16 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { withoutIcons } from '../../without-icons'
 import AccessibilityPage, { generateMetadata } from './page'
 
 const html = renderToStaticMarkup(<AccessibilityPage />)
 
 /** The href and the text of each link, in the order of the page. */
-const links = [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label])
+const links = [...withoutIcons(html).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
+  href,
+  label,
+])
 
 /** The words of the visible text, without the tags. */
 const words = html
@@ -67,6 +71,13 @@ describe('the page Toegankelijkheid', () => {
   it('links only to the editors by email', () => {
     expect(links).toEqual([['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org']])
     expect(html).toContain('We pakken een melding zo snel mogelijk op.')
+  })
+
+  it('draws the envelope in front of the address, hidden from screen readers', () => {
+    expect(html).toMatch(
+      /<a href="mailto:fansite@heerenveen\.org"><span class="hf-icon-head"><svg aria-hidden="true" class="hf-icon"[^>]*>.*?<\/svg>f<\/span>ansite@heerenveen\.org<\/a>/,
+    )
+    expect(html.match(/<svg /g)).toHaveLength(1)
   })
 
   it('shows the date of the statement in a time element with the full date', () => {
