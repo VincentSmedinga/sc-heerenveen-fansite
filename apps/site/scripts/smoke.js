@@ -394,7 +394,7 @@ await withEmptyDatabase((database) =>
     const home = await fetch(origin)
     const html = await home.text()
     assert.equal(home.status, 200)
-    assert.match(html, /<html lang="nl"/)
+    assert.match(html, /<html data-scroll-behavior="smooth" lang="nl"/)
     assert.equal(home.headers.get('x-powered-by'), null)
 
     // The homepage reads the items from the database, and the seed has none. So it says there is no news in the last two weeks.
