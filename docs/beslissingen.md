@@ -3916,36 +3916,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Safari ziet dan waarschijnlijk geen vast element meer en neemt de kleur van de pagina, ook bovenaan, zodat het grijs met het verloop terugkomt.
   Een animatie op basis van de scrollpositie in CSS (`animation-timeline: scroll()`); of Safari de kleur van de strook tijdens zo'n animatie bijhoudt, weten we niet.
   Beide hebben we niet uitgeprobeerd.
-- **Later:** de inhoud van de kop gaat al voor de strook op doorzichtig staan; zie _De inhoud van de kop is doorzichtig als hij onder de statusbalk wegscrolt_.
 - **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, in licht en donker: blauw bovenaan, de kleur van de pagina met de zachte overgang na het scrollen langs de kop, weer blauw als de kop terugkomt, en na Licht of Donker terwijl de strook weg was.
   Niet op een echte telefoon, niet in iOS 26 en niet in de app op het beginscherm.
 
-### De inhoud van de kop is doorzichtig als hij onder de statusbalk wegscrolt
+### De inhoud van de kop blijft zichtbaar als hij onder de statusbalk wegscrolt
 
 - **Datum:** 25 oktober 2026
-- **Besluit:** zodra de onderkant van de kop binnen 64 pixels van de bovenkant van het scherm komt, zet `watchTopEdge` het attribuut `data-scrolled-away` op de kop, en dan is alles wat direct in de kop staat doorzichtig (`opacity: 0`, in `page.css`).
-  Het blauwe vlak van de kop blijft zichtbaar tot hij helemaal weg is.
-  Een tweede `IntersectionObserver` (bovenmarge 64 pixels) doet dit, naast die van de strook (bovenmarge 8 pixels).
-  Komt de kop terug, dan gaat het attribuut eraf.
-  In een app op het beginscherm doet dit niets, net als bij de strook.
-- **Waarom:** de projecteigenaar zag het menu van de kop door de statusbalk heen schemeren op het moment dat de strook verdween.
-  Safari tekent wat onder de statusbalk wegscrolt vervaagd in de balk.
-  Met de strook weg zag je het menu daar, terwijl de balk de kleur van de pagina krijgt.
-  In de simulator (iOS 27.0) was het menu zichtbaar zolang de onderkant van de kop nog tussen ongeveer 8 en 55 punten van de bovenkant stond, en met de regel verdween het.
-- **Waarom `opacity` en niet `visibility: hidden`:** de projecteigenaar vroeg om `visibility: hidden`.
-  Dat haalt de kop uit de toegankelijkheidsboom: een schermlezer en het toetsenbord zouden de banner en de links niet meer vinden zolang de kop uit beeld is, terwijl een bezoeker die met Tab naar boven gaat ze nodig heeft.
-  Met `opacity: 0` zien ogen niets, en blijven de kop, het menu en de links voor schermlezers en toetsenbord bestaan.
-  `visibility: hidden` zou ook een element met focus laten verdwijnen.
-  Een doorzichtig element kan focus houden.
-- **Alternatieven:** niets doen; dan schijnt het menu door de blauwe rand en ziet het eruit als een fout.
-  `visibility: hidden` op alles in de kop, zoals gevraagd; het oog ziet hetzelfde, maar de kop is dan niet meer te bereiken voor een schermlezer en het toetsenbord.
-  `opacity: 0` op de hele kop; dan verdwijnt ook het blauwe vlak vóór de strook, en ziet de balk bovenaan lichtgrijs boven blauw.
-  De kop zelf met een overgang verbergen; dat is meer code en het kan haperen tijdens het scrollen.
-  De drempel gelijk aan die van de strook (8 pixels); dat liet het menu in de simulator nog zien tussen 8 en ongeveer 55 punten.
-- **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, in licht en in donker: bovenaan het volle blauw met menu, bij het wegscrollen een egaal blauwe balk zonder doorschemerend menu, daarna de kleur van de pagina, en bij terugscrollen weer de kop met menu.
-  Ook met Licht ingedrukt in een donker systeem terwijl de kop ver uit beeld was, en daarna terug naar boven.
+- **Besluit:** de inhoud van de kop blijft zichtbaar tot de kop uit beeld is.
+  De pull request die hem doorzichtig maakte (#253, voor issue #252) is teruggedraaid.
+  De strook die met de kop wegscrolt (zie _De blauwe rand bovenaan scrolt weg met de kop_) blijft.
+- **Waarom:** de projecteigenaar vond het resultaat van de eerste aanpak (#251) goed genoeg.
+  Het menu dat even door de statusbalk schemert, neemt hij op de koop toe.
+- **Alternatieven:** de inhoud van de kop doorzichtig maken zodra hij binnen 64 pixels van de bovenkant komt, met `opacity: 0` en niet met `visibility: hidden`, zoals #253 deed.
+  Dat haalt het menu uit de statusbalk, maar kost een tweede `IntersectionObserver` en een attribuut op de kop.
+  Een drempel van 8 pixels, gelijk aan die van de strook, was te laag: het menu bleef in de simulator zichtbaar tot ongeveer 55 punten.
+  `visibility: hidden` haalt de kop uit de toegankelijkheidsboom en laat een element met focus verdwijnen.
+- **Gecontroleerd en niet gecontroleerd:** de code is gelijk aan die na #251.
   Niet op een echte telefoon, niet in iOS 26 en niet in de app op het beginscherm.
-  Een e2e-test (`e2e/safe-area.spec.ts`) controleert in Chromium dat de kop het attribuut krijgt en weer kwijtraakt, dat de kinderen `opacity: 0` hebben terwijl de kop `visibility: visible` houdt, en dat er één banner blijft.
 
 ### De footer heeft geen lijn bovenaan
 

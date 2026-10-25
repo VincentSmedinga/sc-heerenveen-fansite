@@ -56,19 +56,6 @@ describe('the strip over the top edge in page.css', () => {
   })
 })
 
-describe('the header while it scrolls away in page.css', () => {
-  const rule = css.match(/\.hf-page-header\[data-scrolled-away\] > \* \{([^}]*)\}/)?.[1] ?? ''
-
-  it('makes what is in the header see-through with opacity, and not with visibility or display', () => {
-    expect(rule).toContain('opacity: 0;')
-    expect(rule).not.toMatch(/visibility|display/)
-  })
-
-  it('leaves the blue band of the header alone, so only its children are see-through', () => {
-    expect(css).not.toMatch(/\.hf-page-header\[data-scrolled-away\]\s*\{/)
-  })
-})
-
 describe('the stripes of the Frisian flag in page.css', () => {
   const footer = css.slice(css.indexOf('.hf-page-footer {'))
   // The rule of a pseudo-element of the footer, without its nested media query.

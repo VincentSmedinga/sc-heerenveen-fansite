@@ -8,31 +8,20 @@
  *
  * The strip is taken off with the `hidden` attribute, so refreshTopEdge() in theme.ts, which
  * uses `display`, can't bring it back by itself.
- *
- * Safari also draws what scrolls under its status bar, blurred, and so shows the menu of the
- * header in the bar as the header leaves. Before that, once the header's bottom edge is within
- * the height of the bar, the header gets the attribute `data-scrolled-away`, and page.css makes
- * what is in it see-through. The blue band of the header itself stays until it is gone.
  */
 
 /** How much of the header must be left on the screen for the strip to stay: its own height. */
 const stripHeight = '8px'
-
-/** The same for what is in the header: about the height of the status bar of an iPhone. */
-const barHeight = '64px'
-
-/** The attribute on the header while its content is off. Keep it the same in page.css. */
-const scrolledAway = 'data-scrolled-away'
 
 /** The same check as the pull to refresh uses: is the page an app on the home screen? */
 const isApp = (win: Window) =>
   win.matchMedia('(display-mode: standalone)').matches || Reflect.get(win.navigator, 'standalone') === true
 
 /**
- * Hides the strip while the header is off the top of the screen, and what is in the header
- * while it is leaving, and shows them when the header is back. Returns a function that stops
- * watching and shows them again. Does nothing in an app on the home screen, without a strip or
- * a header, or in a browser without IntersectionObserver.
+ * Hides the strip while the header is off the top of the screen and shows it when the header is
+ * back. Returns a function that stops watching and shows the strip again. Does nothing in an
+ * app on the home screen, without a strip or a header, or in a browser without
+ * IntersectionObserver.
  */
 export function watchTopEdge(doc: Document = document): () => void {
   const win = doc.defaultView
@@ -43,35 +32,20 @@ export function watchTopEdge(doc: Document = document): () => void {
     return () => undefined
   }
 
-  // The header counts as on the screen as long as it reaches below the top margin.
-  const watch = (top: string, onChange: (onScreen: boolean) => void) => {
-    const observer = new win.IntersectionObserver(
-      ([entry]) => {
-        if (entry !== undefined) {
-          onChange(entry.isIntersecting)
-        }
-      },
-      { rootMargin: `-${top} 0px 0px 0px` },
-    )
+  const observer = new win.IntersectionObserver(
+    ([entry]) => {
+      if (entry !== undefined) {
+        edge.hidden = !entry.isIntersecting
+      }
+    },
+    // The header counts as on the screen as long as it reaches below the strip.
+    { rootMargin: `-${stripHeight} 0px 0px 0px` },
+  )
 
-    observer.observe(header)
-
-    return observer
-  }
-  const observers = [
-    watch(stripHeight, (onScreen) => {
-      edge.hidden = !onScreen
-    }),
-    watch(barHeight, (onScreen) => {
-      header.toggleAttribute(scrolledAway, !onScreen)
-    }),
-  ]
+  observer.observe(header)
 
   return () => {
-    for (const observer of observers) {
-      observer.disconnect()
-    }
+    observer.disconnect()
     edge.hidden = false
-    header.removeAttribute(scrolledAway)
   }
 }
