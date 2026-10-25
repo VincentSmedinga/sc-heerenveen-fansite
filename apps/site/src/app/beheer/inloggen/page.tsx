@@ -35,7 +35,10 @@ export default async function LoginPage({
   }
 
   const { fout } = await searchParams
-  const error = isMessage(fout) ? messages[fout] : undefined
+  const message = isMessage(fout) ? messages[fout] : undefined
+  // Only a wrong address is an error of the field. A link that no longer works, or the rate limit, is not about what is typed.
+  const error = fout === 'ongeldig' ? message : undefined
+  const notice = fout === 'ongeldig' ? undefined : message
 
   return (
     <Page.Main>
@@ -44,6 +47,7 @@ export default async function LoginPage({
         <Text appearance="intro">
           Vul het e-mailadres van je account in. We mailen je een link om in te loggen. Je hebt geen wachtwoord nodig.
         </Text>
+        {notice === undefined ? null : <Text role="alert">{notice}</Text>}
         <ErrorSummary errors={error === undefined ? [] : [{ id: 'e-mail', message: error }]} level={2} />
         <Form action={requestLoginLink}>
           <Field error={error} hint="De link werkt 15 minuten en één keer." id="e-mail" label="E-mailadres">

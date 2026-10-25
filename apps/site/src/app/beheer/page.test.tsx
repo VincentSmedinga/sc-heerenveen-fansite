@@ -88,17 +88,26 @@ describe('the login page', () => {
     expect(await render()).not.toContain('Er is iets mis')
   })
 
-  it.each([
-    ['ongeldig', 'Vul een e-mailadres in, zoals naam@voorbeeld.nl.'],
-    ['te-veel', 'Er zijn te veel links gevraagd. Probeer het over een kwartier opnieuw.'],
-    ['link', 'Die link werkt niet meer. Vraag hieronder een nieuwe aan.'],
-  ])('shows the message for %s in the summary and at the field', async (fout, message) => {
-    const html = await render(fout)
+  it('shows a wrong address in the summary and at the field', async () => {
+    const message = 'Vul een e-mailadres in, zoals naam@voorbeeld.nl.'
+    const html = await render('ongeldig')
 
     expect(html).toContain('Er is iets mis')
     expect(html).toContain(`<a href="#e-mail">${message}</a>`)
     expect(html).toContain('aria-invalid="true"')
     expect(html.split(message)).toHaveLength(3)
+  })
+
+  it.each([
+    ['te-veel', 'Er zijn te veel links gevraagd. Probeer het over een kwartier opnieuw.'],
+    ['link', 'Die link werkt niet meer. Vraag hieronder een nieuwe aan.'],
+  ])('says %s in a message above the form, and does not mark the field as wrong', async (fout, message) => {
+    const html = await render(fout)
+
+    expect(html).toContain(`<p role="alert">${message}</p>`)
+    expect(html).not.toContain('Er is iets mis')
+    expect(html).not.toContain('aria-invalid')
+    expect(html.split(message)).toHaveLength(2)
   })
 
   it('shows no message for an error it does not know, and does not repeat what the address says', async () => {

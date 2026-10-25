@@ -2037,6 +2037,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** `smtp-server` als devDependency; dat brengt een tweede versie van nodemailer mee, en `assemble` weigert twee versies van één pakket.
   Of een certificaat in de repository.
 
+### Inloggen voor het beheer met een link per e-mail, zonder wachtwoord
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het beheer logt in met een inloglink per e-mail, zonder wachtwoord.
+- **Waarom:** het beheer heeft een paar mensen.
+  Een wachtwoord moet bewaard, gereset en tegen raden beschermd worden; een link per e-mail laat de mailserver de identiteit bewijzen, en we kunnen sessies intrekken.
+- **Alternatieven:** wachtwoorden met een sterke hash en tweestapsverificatie (meer code en meer beveiligingsrisico); inloggen met het forum (#36, nog niet); een gedeeld wachtwoord zoals het prototype (geen persoonlijke verantwoording).
+
+### Accounts voor het beheer maken we met een opdracht op de host
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** accounts maken we met een opdracht op de host (`admin:create`), niet met een aanmeldpagina.
+  Hoe die opdracht draait, staat onder _De opdrachten voor accounts zijn één bestand in de build_.
+- **Waarom:** een aanmeldpagina is een aanvalsvlak en nog niet nodig voor een handvol mensen.
+- **Alternatieven:** uitnodigen vanuit het beheer; dat kan later, met #31.
+
+### Het logboek van beheeracties komt met de eerste beheeractie
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het logboek van beheeracties komt met de eerste beheeractie (#75), niet met het inloggen (#30).
+- **Waarom:** het inloggen heeft nog geen acties om te loggen, en een logboek zonder gebruik is ongetest.
+- **Alternatieven:** het logboek bij het inloggen bouwen, zoals het oorspronkelijke issue stond.
+
 ### Inloggen voor het beheer is eigen code, geen Better Auth
 
 - **Datum:** 25 oktober 2026

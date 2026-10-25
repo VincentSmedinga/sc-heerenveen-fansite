@@ -32,7 +32,7 @@ export type AdminContext = { email: string; role: AdminRole; userId: number }
  * The one check of the admin: who is logged in, and may this role do this? Every page, route and server action under
  * /beheer calls it first. The proxy is no guard: it sees a path, not which action a request calls, and a path it doesn't
  * match is open. Without a session it sends the visitor to the login page; with a session of another role it answers as
- * if the page isn't there. `require-role.test.ts` goes through all of them and fails for one that doesn't call it.
+ * if the page isn't there. `routes.test.ts` goes through all of them and fails for one that doesn't call it.
  */
 export async function requireRole(...allowed: readonly AdminRole[]): Promise<AdminContext> {
   const token = (await cookies()).get(sessionCookieName)?.value
