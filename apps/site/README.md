@@ -264,11 +264,39 @@ Chrome en Firefox nemen dat aan op `localhost`; Safari niet, dus log lokaal in m
   `src/beheer/routes.test.ts` zoekt ze zelf op in de mappen (en elk bestand met `'use server'`, waar ook), en laat zien dat een aanroep zonder sessie naar de inlogpagina gaat.
   Een nieuwe pagina of actie die `requireRole` niet aanroept, laat die test falen.
   Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
-- De proxy (`src/proxy.ts`) geeft elk antwoord onder `/beheer` de headers `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: no-referrer`, op elke omgeving.
+- `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen, met bron, kop als link, tijd en of ze verborgen zijn (zie _Berichten verbergen_).
+- De proxy (`src/proxy.ts`) geeft elk antwoord onder `/beheer` de headers `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: same-origin`, op elke omgeving.
   De proxy is geen toegangscontrole.
 - Een inloglink, een sessie en een teller van pogingen staan in de database (`admin_login_links`, `admin_sessions`, `admin_login_attempts`).
   Van een link en een sessie bewaart de tabel alleen de SHA-256 van de token.
   De teller bewaart de SHA-256 van het adres en de tijd, en geen IP-adres.
+
+### Berichten verbergen
+
+`/beheer/berichten` (`src/app/beheer/berichten`) is voor beheerders en moderators.
+Boven de lijst staat een zoekveld: een formulier met `method="get"` dat `?q=` vult en op een deel van de kop of van de link zoekt, zonder letters- of hoofdlettergevoeligheid en zonder dat `%` of `_` een patroon zijn (`listItems` in `src/beheer/items.ts`).
+Bij elk bericht dat te zien is staat een veld voor de reden en de knop "Verberg"; bij een verborgen bericht staat de reden en de knop "Toon weer".
+Alle formulieren zijn gewone posts van een serveractie (`actions.ts`), dus ze werken zonder JavaScript.
+
+- De reden is verplicht en hoogstens 300 tekens.
+  Een reden zonder tekst of te lang laat het bericht staan en brengt je terug op de lijst, met de fout in een `ErrorSummary` bovenaan en bij het veld (`?fout=reden-leeg&bericht=<nummer>`, zoals het inloggen met `?fout=` doet).
+- Na het verbergen of tonen staat bovenaan wat er gebeurde: "Staat binnen vijf minuten niet meer op de site" of "weer op de site".
+  Dat is waar, want de homepage en `/podcasts` bewaren hun lijsten vijf minuten in het geheugen van de server; `src/headlines-hidden.test.ts` bewijst het tegen een echte database.
+  De melding komt uit de database van dat moment, niet uit het adres: `?verborgen=<nummer>` zegt alleen iets over een bericht dat echt verborgen is.
+- Verbergen en tonen schrijven allebei één regel in het logboek `audit_log`, in dezelfde transactie, via `recordAction` (`src/beheer/audit-log.ts`).
+  Daar staat het nummer van het account, de tijd, de actie, het nummer van het bericht en de reden: geen e-mailadres en niets anders van het verzoek.
+- De pagina gebruikt `NewsItem`, `Form`, `Field` en de andere componenten van het designsysteem, en heeft geen eigen component.
+
+Lokaal zie je de pagina na `pnpm run import` (of met `pnpm --filter site test-data`) en een login, zoals hierboven.
+
+### De beheertests in de browser
+
+De inloglink is een mail, en een browsertest heeft geen mailbox.
+`e2e/admin.ts` zet daarom vóór de eerste test een moderator en zijn sessie in de database van de controle, zoals `startSession` dat doet, en geeft de browser het cookie (`adminCookie`); `e2e/pages.spec.ts` en `e2e/admin.spec.ts` loggen zo in.
+De token is voor elke run nieuw, staat alleen in het geheugen van de controle en in de omgeving van haar processen, en het account, de sessie, de logregels en de verzonnen berichten gaan er na afloop weer uit.
+De opzet weigert elke database die niet op deze computer staat (`127.0.0.1`, `::1` of `localhost`), dus ze kan nooit schrijven in de database van acceptatie of productie.
+De site zelf kent geen route, omgevingsvariabele of token om zo in te loggen, en `e2e/` zit niet in de build.
+`admin.spec.ts` verbergt en toont een verzonnen bericht van de uitgezette testbron, met en zonder JavaScript, en toetst de staten met axe.
 
 ## De foutpagina
 

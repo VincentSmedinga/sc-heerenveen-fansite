@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, exists, isNotNull, lte, ne, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, exists, isNotNull, isNull, lte, ne, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
@@ -136,7 +136,7 @@ export function listPodcasts(db: Database) {
           db
             .select({ one: sql`1` })
             .from(items)
-            .where(eq(items.sourceId, sources.id)),
+            .where(and(eq(items.sourceId, sources.id), isNull(items.hiddenAt))),
         ),
       ),
     )
@@ -149,7 +149,9 @@ export function listPodcasts(db: Database) {
  * name of the source. That name is the way the source wants to be credited, or else its own name. The policy and the
  * permission stay internal, and so does every other column, so none of them can reach a page.
  *
- * The episodes of a podcast are items too, but they are not news, so a source of kind podcast gives none.
+ * The episodes of a podcast are items too, but they are not news, so a source of kind podcast gives none. An item that a
+ * moderator hid (`hidden_at`) is never given, by this query or by any other that shows items: a new query on `items` for a page
+ * must skip hidden items too.
  *
  * Pass the moment of now as `until`: the importer keeps a time up to a day ahead, because feeds are sometimes wrong
  * about their clock, and such an item doesn't belong on top.
@@ -165,17 +167,25 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
     })
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(and(eq(sources.enabled, true), ne(sources.kind, 'podcast'), lte(items.publishedAt, until)))
+    .where(
+      and(
+        eq(sources.enabled, true),
+        ne(sources.kind, 'podcast'),
+        lte(items.publishedAt, until),
+        isNull(items.hiddenAt),
+      ),
+    )
     .orderBy(desc(items.publishedAt), desc(items.id))
     .limit(limit)
 }
 
-/** The conditions that make an item an episode to show: of a podcast that is switched on, not later than `until`, and of the podcast with this slug when `podcast` is given. */
+/** The conditions that make an item an episode to show: of a podcast that is switched on, not hidden, not later than `until`, and of the podcast with this slug when `podcast` is given. */
 function episodeFilter(until: Date, podcast: string | undefined) {
   return and(
     eq(sources.enabled, true),
     eq(sources.kind, 'podcast'),
     lte(items.publishedAt, until),
+    isNull(items.hiddenAt),
     podcast === undefined ? undefined : hasSlug(podcast),
   )
 }

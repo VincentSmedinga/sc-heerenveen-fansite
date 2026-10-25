@@ -1,7 +1,7 @@
 import type { SourceKind } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, items, sources } from '@fansite/db/schema'
+import { adminUsers, feeds, items, sources } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -34,6 +34,8 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
+  // After the sources: an item that is hidden refers to the account of the moderator.
+  await database.pool.query('DELETE FROM admin_users')
 })
 
 afterEach(async () => {
@@ -293,6 +295,109 @@ describe('an item that is already known', () => {
     await importTwice(feedWith(entry('Guid-A'), entry('guid-a')), feedWith(entry('Guid-A'), entry('guid-a')))
 
     expect((await itemsInDatabase()).map((row) => row.key)).toEqual(['Guid-A', 'guid-a'])
+  })
+})
+
+describe('an item that a moderator hid', () => {
+  const hiddenAt = new Date('2026-10-22T10:30:00Z')
+
+  /** Imports a feed, hides its item g1 the way the admin does, and imports a feed with `after` in its place. */
+  async function hideThenImport(before: string, after: string) {
+    const first = await serve(before)
+    const feed = await addFeed(`${first.origin}/rss/`)
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    const [user] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .$returningId()
+
+    await database.db
+      .update(items)
+      .set({ hiddenAt, hiddenBy: user?.id ?? 0, hiddenReason: 'Fout in het bericht' })
+      .where(eq(items.key, 'g1'))
+
+    const second = await serve(after)
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${second.origin}/rss/` })
+      .where(eq(feeds.id, feed.id))
+
+    return importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), secondRun)
+  }
+
+  it('stays hidden, with its reason, when the source offers it again as it was', async () => {
+    const report = await hideThenImport(feedWith(entry('g1'), entry('g2')), feedWith(entry('g1'), entry('g2')))
+
+    expect(report).toMatchObject({ added: 0, unchanged: 2, updated: 0 })
+
+    const [hidden] = await itemsInDatabase()
+
+    expect(hidden).toMatchObject({ hiddenAt, hiddenReason: 'Fout in het bericht', key: 'g1' })
+    expect(hidden?.hiddenBy).not.toBeNull()
+    expect(hidden?.lastSeenAt).toEqual(firstRun)
+  })
+
+  it('is not overwritten when the source changes its headline, link, paywall or time, and stays one item', async () => {
+    const report = await hideThenImport(
+      feedWith(entry('g1', { title: 'Oude kop' }), entry('g2')),
+      feedWith(
+        entry('g1', {
+          link: 'https://krant.test/nieuw',
+          premium: 'true',
+          pubDate: 'Wed, 21 Oct 2026 08:00:00 GMT',
+          title: 'Nieuwe kop',
+        }),
+        entry('g2'),
+      ),
+    )
+
+    expect(report).toMatchObject({ added: 0, unchanged: 2, updated: 0 })
+
+    const rows = await itemsInDatabase()
+
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toMatchObject({
+      hiddenAt,
+      key: 'g1',
+      paywalled: false,
+      publishedAt: new Date('2026-10-20T11:58:00Z'),
+      title: 'Oude kop',
+      url: 'https://krant.test/g1',
+    })
+  })
+
+  it('does not stop the other items of the feed from being updated', async () => {
+    const report = await hideThenImport(
+      feedWith(entry('g1'), entry('g2')),
+      feedWith(entry('g1', { title: 'Nieuwe kop' }), entry('g2', { title: 'Andere kop' }), entry('g3')),
+    )
+
+    expect(report).toMatchObject({ added: 1, unchanged: 1, updated: 1 })
+    expect((await itemsInDatabase()).map((row) => [row.title, row.hiddenAt])).toEqual([
+      ['Kop g1', hiddenAt],
+      ['Andere kop', null],
+      ['Kop g3', null],
+    ])
+  })
+
+  it('is updated again once a moderator shows it', async () => {
+    await hideThenImport(feedWith(entry('g1')), feedWith(entry('g1', { title: 'Nieuwe kop' })))
+    await database.db.update(items).set({ hiddenAt: null, hiddenBy: null, hiddenReason: null })
+
+    const third = await serve(feedWith(entry('g1', { title: 'Nieuwe kop' })))
+
+    await database.db.update(feeds).set({ url: `${third.origin}/rss/` })
+    await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await storedFeed((await database.db.select().from(feeds))[0]?.id ?? 0),
+      secondRun,
+    )
+
+    expect((await itemsInDatabase())[0]?.title).toBe('Nieuwe kop')
   })
 })
 

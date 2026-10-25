@@ -1,5 +1,6 @@
 import type { Database } from '@fansite/db/client'
 import type { Feed } from '@fansite/db/schema'
+import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
@@ -355,7 +356,8 @@ async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDisc
  * same source is the same item.
  *
  * A known item keeps its time of publication when the feed gives none this time. An item without a valid time gets
- * the time we first saw it.
+ * the time we first saw it. An item that a moderator hid is never changed, whatever the source offers, and counts as
+ * unchanged.
  */
 async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now: Date) {
   const counts = { added: 0, unchanged: 0, updated: 0 }
@@ -385,13 +387,14 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
       if (before === undefined) {
         counts.added++
       } else if (
-        before.title === item.title &&
-        before.url === item.url &&
-        before.paywalled === item.paywalled &&
-        before.durationSeconds === item.durationSeconds &&
-        before.seasonNumber === item.seasonNumber &&
-        before.episodeNumber === item.episodeNumber &&
-        before.publishedAt.getTime() === publishedAt.getTime()
+        before.hiddenAt !== null ||
+        (before.title === item.title &&
+          before.url === item.url &&
+          before.paywalled === item.paywalled &&
+          before.durationSeconds === item.durationSeconds &&
+          before.seasonNumber === item.seasonNumber &&
+          before.episodeNumber === item.episodeNumber &&
+          before.publishedAt.getTime() === publishedAt.getTime())
       ) {
         counts.unchanged++
       } else {
@@ -414,24 +417,31 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
       }
     })
 
-    // The key is unique, so an item that another run added in the meantime is updated instead of added twice.
+    // The key is unique, so an item that another run added in the meantime is updated instead of added twice. A hidden item
+    // keeps every column: the condition is in the statement, so an item that a moderator hides while this run is busy is
+    // left alone too, which a check on the row read above would miss.
     await db
       .insert(items)
       .values(rows)
       .onDuplicateKeyUpdate({
         set: {
-          durationSeconds: sql`values(${items.durationSeconds})`,
-          episodeNumber: sql`values(${items.episodeNumber})`,
-          feedId: sql`values(${items.feedId})`,
-          lastSeenAt: sql`values(${items.lastSeenAt})`,
-          paywalled: sql`values(${items.paywalled})`,
-          publishedAt: sql`values(${items.publishedAt})`,
-          seasonNumber: sql`values(${items.seasonNumber})`,
-          title: sql`values(${items.title})`,
-          url: sql`values(${items.url})`,
+          durationSeconds: unlessHidden(items.durationSeconds),
+          episodeNumber: unlessHidden(items.episodeNumber),
+          feedId: unlessHidden(items.feedId),
+          lastSeenAt: unlessHidden(items.lastSeenAt),
+          paywalled: unlessHidden(items.paywalled),
+          publishedAt: unlessHidden(items.publishedAt),
+          seasonNumber: unlessHidden(items.seasonNumber),
+          title: unlessHidden(items.title),
+          url: unlessHidden(items.url),
         },
       })
   }
 
   return counts
+}
+
+/** What an item column becomes when the source offers the item again: the new value, unless a moderator hid the item, then it stays as it is. */
+function unlessHidden(column: AnyMySqlColumn) {
+  return sql`if(${items.hiddenAt} is null, values(${column}), ${column})`
 }

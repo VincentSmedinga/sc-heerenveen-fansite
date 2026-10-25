@@ -85,7 +85,7 @@ async function checkAdmin() {
     assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow', response.url)
     // Next.js sends a longer value of its own for a page it renders on each request (`private, no-cache, no-store, ...`).
     assert.match(response.headers.get('cache-control') ?? '', /(?:^|,\s*)no-store(?:,|$)/, response.url)
-    assert.equal(response.headers.get('referrer-policy'), 'no-referrer', response.url)
+    assert.equal(response.headers.get('referrer-policy'), 'same-origin', response.url)
     assert.equal(response.headers.get('set-cookie'), null, `${response.url} sets a cookie without a login`)
   }
 

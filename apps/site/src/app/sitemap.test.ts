@@ -8,6 +8,7 @@ import sitemap from './sitemap'
 // pages in pages.ts must be named here, so a new page doesn't forget the sitemap.
 const notInSitemap: string[] = [
   '/beheer',
+  '/beheer/berichten',
   '/beheer/inloggen',
   '/beheer/inloggen/bevestigen',
   '/beheer/inloggen/verstuurd',

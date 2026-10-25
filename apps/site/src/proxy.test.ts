@@ -67,7 +67,7 @@ describe('proxy', () => {
 
         expect(headers.get('X-Robots-Tag'), path).toBe('noindex, nofollow')
         expect(headers.get('Cache-Control'), path).toBe('no-store')
-        expect(headers.get('Referrer-Policy'), path).toBe('no-referrer')
+        expect(headers.get('Referrer-Policy'), path).toBe('same-origin')
         expect(headers.get('Content-Security-Policy'), path).toBe(contentSecurityPolicy)
       }
     },

@@ -2440,6 +2440,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 25 oktober 2026
 - **Besluit:** de proxy geeft elk antwoord onder `/beheer` (en `/beheer` zelf) `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: no-referrer`, op elke omgeving, productie ook.
+  De `Referrer-Policy` is sinds #75 `same-origin`; zie _Het beheer stuurt een referrer naar de eigen site, zodat formulieren zonder JavaScript werken_.
   `/robots.txt` heeft `Disallow: /beheer` op elke omgeving.
   Next.js stuurt voor een pagina die het per verzoek rendert een eigen, langere waarde (`private, no-cache, no-store, max-age=0, must-revalidate`); die bevat `no-store` ook, en de rooktest controleert dat.
   De pagina's zeggen ook `noindex, nofollow` in de HTML, en staan niet in de sitemap.
@@ -2467,6 +2468,99 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de eerste zin klopt voor bezoekers, en de rest zegt wat voor de redactie anders is.
   De alinea staat bij de andere dingen die we moeten noemen, en het cookie is geen tracking.
 - **Alternatieven:** de eerste zin veranderen in "De site zet geen cookies voor bezoekers"; die zin is al waar, en de intro hoeft niet te veranderen.
+
+### Een bericht verbergen zet drie kolommen op `items`, en elke query die berichten toont sluit het uit
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `items` krijgt `hidden_at`, `hidden_by` (het account, een foreign key op `admin_users`) en `hidden_reason` (hoogstens 300 tekens), alle drie leeg voor een bericht dat te zien is.
+  Elke query die berichten toont sluit een verborgen bericht uit met `hidden_at IS NULL`: de koppen van de homepage, de afleveringen en hun aantal, en de podcasts die in het filter staan.
+  Een test per query bewijst het.
+  "Toon weer" maakt de drie kolommen leeg; wie het verborg en waarom, staat dan nog in het logboek.
+  De sitemap toont geen berichten, alleen pagina's, dus daar valt niets te verbergen.
+- **Waarom:** het bericht moet in de tabel blijven, zodat de importer het niet opnieuw als nieuw ziet en weer neerzet.
+  Een kolom op `items` houdt de query eenvoudig: een bericht is te zien of niet, en de koppen van de homepage hoeven geen tweede tabel te lezen.
+- **Let op:** een nieuwe query op `items` voor een pagina moet `hidden_at IS NULL` ook hebben.
+  De opmerking bij `listRecentItems` zegt het, en het beheer zelf (`listItems`) is de enige die verborgen berichten toont.
+- **Alternatieven:** een aparte tabel `hidden_items` (een join in elke query, en het bericht en zijn verbergen kunnen uit elkaar lopen); het bericht verwijderen (de importer zet het bij de volgende run terug).
+
+### De importer laat een verborgen bericht met rust, in de query zelf
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het `INSERT … ON DUPLICATE KEY UPDATE` van `storeItems` zet elke kolom op de nieuwe waarde alleen als `hidden_at` leeg is (`unlessHidden`).
+  Een verborgen bericht verandert dus niet: niet de kop, de link, de tijd of de betaalmuur, en ook `last_seen_at` niet.
+  Het telt als ongewijzigd in het verslag.
+- **Waarom:** de moderator verborg het om een reden, bijvoorbeeld een fout in de kop of een verzoek van de bron, en de bron biedt het bericht bij elke run opnieuw aan.
+  Een controle op de rij die de importer eerst las, mist een bericht dat een moderator tijdens de run verbergt; de voorwaarde in de query zelf mist dat niet.
+- **Alternatieven:** een bericht met `hidden_at` vooraf uit de lijst halen (snel, maar met die kleine kans op een bericht dat net verborgen is); een tabel met verborgen sleutels (een tweede plek om bij te houden).
+
+### Het logboek van het beheer krijgt één schrijffunctie, en alleen toevoegen
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `audit_log` heeft per actie één rij: `created_at`, `user_id`, `action` (`item.hide` of `item.show`), `item_id` en `reason`.
+  Alleen `recordAction` (`apps/site/src/beheer/audit-log.ts`) schrijft erin, binnen dezelfde transactie als de wijziging zelf, dus er is geen wijziging zonder regel en geen regel zonder wijziging.
+  Een actie die niets verandert, zoals een bericht verbergen dat al verborgen is, schrijft niets.
+  Er is geen code die een rij wijzigt of verwijdert, en `audit-log.test.ts` leest de broncode van de site, de importer en het databasepakket om dat vast te houden: alleen `schema.ts` en `audit-log.ts` noemen de tabel, en `audit-log.ts` doet alleen een `INSERT`.
+- **Wat erin staat, en wat niet:** het nummer van het account en niet het e-mailadres, want de rij blijft bewaard en het adres van een ander is niet nodig om te weten wie het was (`admin_users` heeft het adres).
+  De reden is tekst van een moderator, hoogstens 300 tekens, en de pagina toont haar als tekst.
+  `recordAction` kopieert alleen die vier velden, dus een verzoek of een token kan er niet per ongeluk in komen.
+  `item_id` heeft geen foreign key, zodat de rij blijft als het bericht verdwijnt (bijvoorbeeld als zijn bron wordt verwijderd).
+  `user_id` heeft er wel een, zonder `ON DELETE`: een account met regels in het logboek is niet te verwijderen, en `admin:revoke` zet het uit.
+- **Waarom:** het logboek moet bewijzen wat een moderator deed, ook als die het later anders zegt, en daarvoor mag de site het niet kunnen aanpassen.
+- **Beperking:** "alleen toevoegen" is een afspraak in de code met een test, geen recht in de database.
+  De databasegebruiker van de site kan een rij nog wijzigen met eigen SQL, en een trigger of een gebruiker zonder `UPDATE` en `DELETE` verandert dat.
+  Dat kan later, als we het logboek tegen iemand met toegang tot de database moeten bewijzen.
+- **Alternatieven:** triggers die `UPDATE` en `DELETE` weigeren (de gebruiker met het recht `TRIGGER` kan ze weer weghalen, en het is meer om te onderhouden dan dit issue vraagt); het e-mailadres in het logboek zetten (persoonsgegevens, en een adres dat verandert).
+- **Lezen:** er is nog geen scherm voor.
+  `docs/acceptatieomgeving.md` heeft de vraag voor phpMyAdmin.
+
+### `/beheer/berichten` is een lijst met gewone formulieren, en toont wat de database nu zegt
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `/beheer/berichten` toont de 50 nieuwste berichten van alle bronnen, verborgen ook, als `NewsItem` met eronder het formulier om te verbergen (een veld voor de reden en de knop Verberg) of de reden en de knop Toon weer.
+  Het zoeken is een formulier met `method="get"` (`?q=`): `LIKE` op de kop en de link, met `%`, `_` en `|` als gewone tekens, hoogstens 100 tekens.
+  Verbergen en tonen zijn serveracties met het nummer van het bericht en de zoekopdracht gebonden aan de actie (zoals `logIn` het token), en worden toch opnieuw gecontroleerd, want ze komen van buiten.
+  De reden wordt één regel (besturingstekens en dubbele spaties worden één spatie), is verplicht en is hoogstens 300 tekens, geteld in tekens zoals de kolom ze telt.
+  Na elke actie gaat de pagina terug naar de lijst, met dezelfde zoekopdracht: een fout in het adres (`?fout=reden-leeg&bericht=<nummer>`), zoals het inloggen doet, en een melding dat het gelukt is (`?verborgen=<nummer>`).
+  De fout staat in een `ErrorSummary` bovenaan en bij het veld van dat bericht, de melding in een kaart met een kop.
+  Die melding komt uit de database van dat moment: `?verborgen=` zegt alleen iets over een bericht dat echt verborgen is, en een gemaakt adres kan de pagina dus niets laten beweren wat niet gebeurde.
+- **Waarom:** het werkt zonder JavaScript, en een moderator die een bericht uit een verwijderverzoek zoekt, vindt het met een stukje van de kop of de link.
+  De lijst gebruikt alleen componenten die er al zijn, dus er is geen nieuw onderdeel in het designsysteem.
+  De zinnen "Staat binnen vijf minuten niet meer op de site" en "weer op de site" kloppen: de homepage en `/podcasts` bewaren hun lijsten vijf minuten (`src/headlines.ts`, `src/podcasts.ts`), en `src/headlines-hidden.test.ts` bewijst met een echte database en de klok van de cache dat een bericht na 4 minuten en 59 seconden nog staat en na 5 minuten weg is.
+- **Alternatieven:** de cache leeghalen bij het verbergen (alleen in het proces dat de actie draait, en op de host kunnen er meer zijn); een vertraging in de zin (we zouden iets beloven wat we niet kennen); een client-component met `useActionState` zoals het contactformulier (de fout blijft dan alleen bij het veld, en 50 formulieren met JavaScript erbij zijn zwaarder); de reden in een tekstvak (een reden is één regel).
+
+### Het beheer stuurt een referrer naar de eigen site, zodat formulieren zonder JavaScript werken
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de `Referrer-Policy` van alles onder `/beheer` is `same-origin` en niet `no-referrer`.
+- **Waarom:** met `no-referrer` stuurt Chromium bij een formulier dat post `Origin: null`, en Next.js weigert dan elke serveractie ("Invalid Server Actions request").
+  Elk formulier van het beheer, het inloggen ook, werkte daardoor niet zonder JavaScript; met JavaScript gebruikt de pagina `fetch`, en dat stuurt het goede `Origin`.
+  Een browsertest zonder JavaScript liet het zien.
+  `same-origin` doet voor de inloglink hetzelfde als `no-referrer`: naar een andere site gaat geen referrer, dus de link in het adres blijft van ons.
+- **Alternatieven:** bij `no-referrer` blijven en het beheer alleen met JavaScript laten werken (dan haperen de formulieren juist bij wie geen JavaScript kan gebruiken); `Origin: null` toestaan in `serverActions.allowedOrigins` (de controle tegen vervalste verzoeken wordt dan zwakker).
+
+### De browsertest van het beheer zet een moderator met een sessie in de testdatabase
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `e2e/admin.ts` maakt vóór de eerste test een moderator (`e2e-moderator@example.test`) en zijn sessie in de database van de controle, op dezelfde manier als `startSession`, en geeft de browser het cookie.
+  De token is voor elke run nieuw (`newToken`), staat in `E2E_ADMIN_TOKEN` voor de processen van de tests, en het account, de sessie, de logregels en de verzonnen berichten gaan er na de laatste test weer uit.
+  De opzet schrijft alleen naar een database op deze computer (`127.0.0.1`, `::1` of `localhost`) en stopt met een fout voor elke andere host.
+  `pages.spec.ts` kent een regel met `admin: true` voor een pagina van het beheer, en `admin.spec.ts` verbergt en toont een verzonnen bericht, met en zonder JavaScript.
+  De verzonnen berichten staan op de uitgezette testbron, zodat de homepage en `/podcasts` ze nooit tonen en een test die er een verbergt, niets verandert voor een andere.
+- **Waarom:** een inloglink is een mail, en een browsertest kan er geen volgen zonder mailbox.
+  De site krijgt er niets voor: geen route, geen omgevingsvariabele en geen vaste token, dus er is niets dat op acceptatie of productie een sessie kan maken.
+  `e2e/` zit niet in de build, en de weigering voor een andere host houdt een verkeerde `DATABASE_URL` tegen.
+  Een sessie die de controle zelf in de database zet, toetst wel `requireRole`, de cookie en de pagina, want de site leest de sessie net zo.
+- **Beperking:** de teardown verwijdert de logregels van het testaccount met een eigen `DELETE`, anders weigert de foreign key het account te verwijderen.
+  Dat mag alleen hier, op de database op deze computer; de site heeft geen manier om een regel te verwijderen.
+- **Alternatieven:** de inloglink uit de nepmailserver van het contactformulier halen en echt inloggen (dichter bij de werkelijkheid, maar elke test mailt dan en wacht, en de limiet van 5 links per kwartier raakt het); een route in de site die in testmodus inlogt (een deur die op acceptatie open kan staan); `SITE_ENV` als sleutel gebruiken (de controle draait met `acceptance`, dus dat zou juist die omgeving openzetten).
+
+### De pagina van de inloglink zegt dat de link klopt
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** boven de knop Inloggen staat "Deze link klopt. Kies hieronder Inloggen om binnen te komen." in plaats van "Je bent bijna binnen. Kies Inloggen om door te gaan."
+- **Waarom:** de extra klik na de link in de mail voelde als een fout (zie _De link in de mail toont een knop; de knop logt in_).
+  De pagina zegt eerst dat het goed gaat, en dan wat er nu moet gebeuren, in de woorden van de knop.
+- **Alternatieven:** de knop weghalen en bij het openen inloggen (breekt bij mailscanners, zie hetzelfde besluit).
 
 ## Importer
 

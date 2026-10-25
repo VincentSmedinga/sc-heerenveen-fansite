@@ -26,7 +26,7 @@ export default async function ConfirmPage({
         {works ? (
           <>
             <Heading level={1}>Inloggen</Heading>
-            <Text appearance="intro">Je bent bijna binnen. Kies Inloggen om door te gaan.</Text>
+            <Text appearance="intro">Deze link klopt. Kies hieronder Inloggen om binnen te komen.</Text>
             <Form action={logIn.bind(null, token)}>
               <Button type="submit">Inloggen</Button>
             </Form>

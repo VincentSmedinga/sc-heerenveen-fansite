@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { adminRoles } from '@fansite/db/schema'
-import { Button, Form, Heading, Page, Text } from '@fansite/design-system'
+import { Button, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
 import { requireRole } from '../../beheer/require-role'
 import { logOut } from './actions'
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Beheer' }
 
-// The admin has nothing to do yet. The page shows who is logged in, and the button to log out.
+// The start of the admin: who is logged in, the way to the screens, and the button to log out.
 export default async function AdminPage() {
   const { email } = await requireRole(...adminRoles)
 
@@ -20,6 +20,11 @@ export default async function AdminPage() {
       <Page.Cell>
         <Heading level={1}>Beheer</Heading>
         <Text>Je bent ingelogd als {email}.</Text>
+        <List role="list">
+          <List.Item>
+            <Link href="/beheer/berichten">Berichten verbergen of weer tonen</Link>
+          </List.Item>
+        </List>
         <Form action={logOut}>
           <Button type="submit">Uitloggen</Button>
         </Form>
