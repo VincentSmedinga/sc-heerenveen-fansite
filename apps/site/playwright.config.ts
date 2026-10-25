@@ -6,6 +6,14 @@ const origin = `http://127.0.0.1:${port}`
 // A second copy of the site, without a database, for the error page (e2e/error-page.spec.ts). Nothing listens on port 1 of
 // this computer, so the connection is refused at once.
 const withoutDatabasePort = '3125'
+// Acceptance doesn't start without the settings of the mail server. No page sends mail, so these made-up ones do.
+const smtp = {
+  MAIL_FROM: 'Test <test@example.org>',
+  SMTP_HOST: 'localhost',
+  SMTP_PASSWORD: 'test',
+  SMTP_PORT: '465',
+  SMTP_USER: 'test@example.org',
+}
 
 // CI passes the folder that `assemble` made and the smoke test checked. Without SITE_FOLDER, the last build is assembled
 // into .next/a11y first, so `pnpm build` is all you need before `pnpm test:a11y`. The server reads DATABASE_URL from the
@@ -41,7 +49,7 @@ export default defineConfig({
     {
       command: assembleAndStartServer,
       // HOSTNAME is the name of the machine in many shells, and the server would listen on that.
-      env: { HOSTNAME: '127.0.0.1', PORT: port, SITE_ENV: 'acceptance' },
+      env: { ...smtp, HOSTNAME: '127.0.0.1', PORT: port, SITE_ENV: 'acceptance' },
       timeout: 60_000,
       // Not the homepage: it keeps its headlines for five minutes, and a request before global-setup.ts has put the made-up
       // headlines in would keep an empty list for the whole run. robots.txt doesn't read the database.
@@ -50,6 +58,7 @@ export default defineConfig({
     {
       command: startServer,
       env: {
+        ...smtp,
         DATABASE_URL: 'mysql://root@127.0.0.1:1/fansite',
         HOSTNAME: '127.0.0.1',
         PORT: withoutDatabasePort,

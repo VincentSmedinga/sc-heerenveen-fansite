@@ -1968,6 +1968,75 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de schakelaar werkt met `localStorage`, `matchMedia` en `document`, en alleen een DOM laat zien dat een knop de keuze bewaart en dat de pagina het volgt. Het zijn geen nieuwe pakketten in de werkruimte, dus de lockfile kreeg alleen regels voor de site erbij.
 - **Alternatieven:** de logica van de schakelaar in het designsysteem testen, waar jsdom al staat; dan staat de opslag in een component dat niets mag bewaren. Of alleen `renderToStaticMarkup`, zoals de andere tests van de site; dat ziet geen klik.
 
+### De site mailt via SMTP van de hosting, vanaf de brievenbus van de redactie
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** `sendMail` in `apps/site/src/mail.ts` verstuurt platte tekst via SMTP van de hosting, vanaf `fansite@heerenveen.org`, en niet via een dienst van een derde.
+  Het contactformulier (#99) en de inloglink van het beheer (#30) gebruiken dezelfde functie.
+- **Waarom:** de mail bevat berichten van bezoekers en inloglinks.
+  Een mailbezorger zou die lezen en bewaren, en we sturen geen gegevens naar een derde.
+- **Let op:** dit is de brievenbus die de redactie ook leest, dus het wachtwoord ervan staat nu ook op de host, in de app.
+  Kan mijn.host een apart SMTP-wachtwoord of een tweede brievenbus maken, dan is dat veiliger.
+  Dat verandert de code niet.
+- **Alternatieven:** een mailbezorger zoals Postmark of Mailgun, die betrouwbaarder bezorgt maar een derde partij is en geld kost.
+  Of `sendmail` op de server: geen dependency, maar afhankelijk van hoe de hosting het instelt, en zonder foutmeldingen.
+
+### Voor SMTP gebruiken we nodemailer 10.0.16
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `apps/site` heeft `nodemailer` 10.0.16 als dependency.
+  Licentie MIT-0, past bij de EUPL-1.2 (een vrije licentie zonder voorwaarden).
+  Het pakket heeft zelf geen dependencies en geen installatiescript: `prepare` staat in zijn `package.json`, maar pnpm draait dat alleen voor pakketten uit een git-repository, niet voor die uit het register.
+  `allowBuilds` blijft dus ongewijzigd.
+- **Waarom:** een paar regels zijn niet genoeg.
+  SMTP vraagt om STARTTLS, inloggen, de juiste codering van accenten in onderwerp en tekst (`=?UTF-8?…?=`, quoted-printable), een regel die met een punt begint, regels van hoogstens 998 tekens, en antwoordcodes die goed of fout zijn.
+  Een eigen client daarvoor moeten we zelf bewaken, en de bezoekers schrijven in het Nederlands, dus accenten komen vaak voor.
+  Nodemailer wordt onderhouden, en de bibliotheek doet precies dit en niets meer.
+- **Versie:** 10.0.16 van 7 oktober 2026.
+  De nieuwste versies zijn van de afgelopen dagen: er komt elke paar dagen een versie uit, en een versie die al een paar weken oud is, heeft de tijd gehad om fouten te laten zien.
+- **Alternatieven:** een eigen SMTP-client op `node:tls`.
+  Dat is geen dependency, maar de coderingen en de randgevallen zijn dan van ons.
+  Of een andere bibliotheek; nodemailer is de gangbare keuze voor Node en heeft zelf geen dependencies.
+
+### Mail gaat altijd over TLS, en zonder instellingen alleen lokaal naar het logboek
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** poort 465 begint met TLS; elke andere poort moet naar TLS overschakelen (STARTTLS) voordat `sendMail` inlogt, en een server die dat niet kan, krijgt geen mail en geen wachtwoord.
+  Een mislukte poging wordt niet herhaald; de aanroeper vangt de `MailError` op.
+  De vijf variabelen `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` en `MAIL_FROM` zijn op `acceptance` en `production` verplicht, dus de site start er niet zonder.
+  Lokaal horen ze alle vijf te ontbreken of alle vijf te staan; dan schrijft `sendMail` de mail in het logboek van de ontwikkelaar en verstuurt niets.
+- **Waarom:** een mailserver die geen TLS spreekt, zou het wachtwoord en de berichten van bezoekers in het openbaar sturen.
+  Een site die zonder instellingen start, merkt pas bij het eerste contactbericht dat er niets verstuurd wordt.
+  Alles of niets lokaal, omdat een half ingevulde set een vergissing is die de ontwikkelaar anders pas bij het versturen ziet.
+- **Gevolg:** de rooktest en de toegankelijkheidscontrole starten de site met `SITE_ENV=acceptance`; ze krijgen verzonnen instellingen mee, want geen pagina mailt.
+- **Alternatieven:** ongecodeerd mailen als de server geen TLS kent (onveilig); de instellingen op acceptatie optioneel laten (de site start dan, maar mailt niet).
+
+### Een foutmelding van `sendMail` bevat alleen een code, en een adres is precies één adres
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `sendMail` weigert een nieuwe regel in de afzender, de ontvanger, het antwoordadres en het onderwerp, en elk van de drie adressen moet precies één adres zijn (zonder komma of puntkomma).
+  Een mislukte verzending geeft een `MailError` met een vast bericht en alleen de code van de bibliotheek, zoals `EAUTH` of `ESOCKET`, zonder de oorspronkelijke fout als `cause`.
+  `sendMail` zet niets van een verzonden mail in het logboek; alleen het logboek van de ontwikkelaar, zonder SMTP-instellingen, krijgt de hele mail.
+- **Waarom:** een nieuwe regel zou een kopregel inspuiten, bijvoorbeeld een `Bcc`.
+  Het antwoordadres komt van een bezoeker; met een komma zou hij een tweede ontvanger toevoegen.
+  De foutmelding van de bibliotheek noemt het adres van de ontvanger en het antwoord van de server, en de aanroeper zet de fout in het logboek.
+  Daar horen het wachtwoord, het adres en de tekst van een bezoeker niet te staan.
+- **Alternatieven:** de nieuwe regels weghalen in plaats van weigeren; dat verbergt een fout van de aanroeper.
+  Alleen een nieuwe regel weigeren, zoals het issue vraagt; dan blijven er meer ontvangers mogelijk via het antwoordadres.
+
+### De test mailt naar een nepserver op de computer van de test
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `mail.test.ts` start een kleine SMTP-server in de test zelf (`node:net` en `node:tls`) met STARTTLS en inloggen, en laat `sendMail` daar naartoe mailen.
+  Het certificaat maakt de test bij het starten met `openssl` en vertrouwt alleen de test (`tls.setDefaultCACertificates`).
+  De opdracht voor de eigenaar is `send-test-mail.mjs`, dat `pnpm --filter site assemble` naast de importer in `apps/site` zet.
+- **Waarom:** geen echte mail, geen echte gegevens en geen verzoek aan een derde.
+  Er staat geen privésleutel in de repository, en geen extra dependency voor een testserver.
+  De standalone build neemt alleen mee wat een pagina importeert, en geen pagina mailt nog; één bestand met alles erin werkt op de host zonder `node_modules`, zoals de importer.
+- **Niet getest:** poort 465 (TLS vanaf het begin) en een echte mailserver; de test dekt STARTTLS, en de eigenaar controleert de rest met de proefmail op acceptatie.
+- **Alternatieven:** `smtp-server` als devDependency; dat brengt een tweede versie van nodemailer mee, en `assemble` weigert twee versies van één pakket.
+  Of een certificaat in de repository.
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt

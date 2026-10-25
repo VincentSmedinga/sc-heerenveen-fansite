@@ -142,6 +142,26 @@ Een slot in de database (`GET_LOCK`) laat twee processen die tegelijk starten, o
 Lukt het niet, bijvoorbeeld omdat de database niet bereikbaar is, dan staat de reden in het logboek en blijft de server draaien.
 `docs/acceptatieomgeving.md` zegt wat je in het logboek ziet.
 
+## Mail versturen
+
+`sendMail` in `src/mail.ts` verstuurt een mail in platte tekst via de mailserver van de hosting, met TLS.
+De pagina's die het nodig hebben (het contactformulier en het inloggen voor het beheer) roepen het aan:
+
+```ts
+import { MailError, sendMail } from './mail'
+
+await sendMail({ replyTo: 'bezoeker@example.org', subject: 'Vraag', text: 'Hallo', to: 'fansite@example.org' })
+```
+
+`from` mag je weglaten; dan is het `MAIL_FROM`.
+De functie weigert een nieuwe regel in de adressen en het onderwerp, en elk adres moet precies één adres zijn.
+Gaat het mis, dan geeft ze een `MailError` met alleen een code, zonder het wachtwoord, het adres of de tekst.
+Zet die fout in het logboek en toon de bezoeker een eigen melding.
+De instellingen staan in `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` en `MAIL_FROM` (zie `.env.example`).
+Op acceptatie en productie zijn ze verplicht.
+Zonder ze, alleen lokaal, schrijft `sendMail` de mail in het logboek van `pnpm dev`, met de tekst dat er niets is verstuurd.
+`docs/acceptatieomgeving.md` zegt hoe de eigenaar de instellingen zet en met `send-test-mail.mjs` een proefmail verstuurt.
+
 ## De foutpagina
 
 Een pagina die door een fout op de server niet lukt, toont `Er ging iets mis` in de paginaopbouw (`src/ServerError.tsx`).
