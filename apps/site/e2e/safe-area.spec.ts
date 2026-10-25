@@ -94,9 +94,28 @@ test.describe('the page on a screen with a notch', () => {
     await page.getByRole('button', { name: 'Donker' }).click()
 
     // Safari only reads the colour of the strip again when it has been off the page for a
-    // moment, so it must come back: without this it would be gone for good.
-    await expect(edge).toHaveCSS('display', 'block')
+    // moment, so it must come back: without this it would be gone for good. (Pressing the
+    // button scrolls the footer into view, so the strip may also be off because the header is:
+    // that is the hidden attribute, not this.)
+    await expect.poll(() => edge.evaluate((node) => (node as HTMLElement).style.display)).toBe('')
     expect(await colourOf(edge)).toBe(await colourOf(header))
     expect(await colourOf(edge)).not.toBe(lightHeader)
+  })
+
+  // In Safari on an iPhone the status bar is blue while the strip is there, and takes the
+  // colour of the page when it is gone. The colour itself only shows on a phone.
+  test('goes off the page when the header has scrolled away, and comes back with the header', async ({ page }) => {
+    await page.setViewportSize({ height: 400, width: 390 })
+    await page.goto('/over-ons')
+
+    const edge = page.locator('.hf-page-top-edge')
+
+    await expect(edge).not.toHaveAttribute('hidden')
+
+    await page.evaluate(() => window.scrollTo(0, document.querySelector('header')!.offsetHeight + 100))
+    await expect(edge).toHaveAttribute('hidden', '')
+
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await expect(edge).not.toHaveAttribute('hidden')
   })
 })

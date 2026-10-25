@@ -27,8 +27,11 @@
    * (opacity 0.01) doesn't count, so the strip is a real element, drawn in full. There it is
    * never less than 8px (--hf-top-edge, set in root.css): the status bar is then the colour of
    * the header, with no fade. The strip lies over the top of the header, which has the same
-   * colour, and over what scrolls under it. Without an inset, and outside Safari on an iPhone
-   * or iPad, the strip has no height, so there is none.
+   * colour. Once the header has scrolled away, the site takes the strip off the page (the
+   * hidden attribute, set by watchTopEdge.ts in the site), so the status bar has the colour of
+   * the page again and the blue scrolls away with the header. An app on the home screen keeps
+   * the strip. Without an inset, and outside Safari on an iPhone or iPad, the strip has no
+   * height, so there is none.
    */
   .hf-page {
     display: flex;
