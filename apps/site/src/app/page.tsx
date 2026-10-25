@@ -73,7 +73,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     <>
       <Page.Main>
         {/* The logo just above already shows the name, so the h1 is for screen readers only.
-                Every page has one h1. */}
+            Every page has one h1. */}
         <Heading className="hf-visually-hidden" level={1}>
           sc Heerenveen Fansite
         </Heading>
