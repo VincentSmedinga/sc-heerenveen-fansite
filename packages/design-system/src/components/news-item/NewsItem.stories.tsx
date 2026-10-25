@@ -112,7 +112,7 @@ const renderIn = (maxInlineSize: string) => () => (
   </div>
 )
 
-const renderWide = renderIn('36rem')
+const renderWide = renderIn('38rem')
 
 const renderNarrow = renderIn('20rem')
 
