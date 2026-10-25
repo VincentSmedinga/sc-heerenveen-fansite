@@ -3163,7 +3163,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een term van meer woorden, zoals "Europa League" of een volledige naam, telt alleen als die woorden naast elkaar staan.
 - **Wat de regels niet zien:** de wedstrijd van een andere club in Heerenveen, zoals een interland in het Abe Lenstra Stadion, heeft "Heerenveen" en een voetbalwoord en wordt dus `relevant`.
   De lijsten kennen geen andere clubs en spelers van andere clubs: een kop met "Heerenveen" en een speler van Ajax zonder voetbalwoord is `doubtful`.
-  Dat is een fout-positief die de regel van de projecteigenaar toelaat, en die de koppen uit de logs van het prototype laten zien als hij ze aanlevert.
+  De koppen uit de logs van het prototype laten straks zien of dat vaak genoeg misgaat om een lijst met andere clubs te maken.
   Een kop over de Abe Lenstra Boulevard komt er ook in; een moderator verbergt zo'n bericht.
 - **Abe Lenstra:** een kop met "Abe Lenstra" is `relevant`, ook zonder de club.
   Hij is onze grootste speler aller tijden, dus berichten over hem horen op de site (besluit van de projecteigenaar, 25 oktober 2026; dit is een aanvulling op de regels van #74).
