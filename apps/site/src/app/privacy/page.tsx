@@ -41,8 +41,12 @@ export default function PrivacyPage() {
           doen, gelden hun eigen regels.
         </Text>
         <Text>
-          Een mail aan ons gebruiken we alleen om te antwoorden. Vragen over je gegevens stel je aan de redactie:{' '}
-          <EmailLink />. Maar ons antwoord zal zijn: we hebben geen gegevens van je.
+          Stuur je ons een bericht, met het formulier bij <Link href="/contact">Contact</Link> of per mail, dan komt het
+          in de mailbox van de redactie. We gebruiken het om te antwoorden en bewaren het tot de zaak is afgehandeld,
+          hoogstens een jaar. Het formulier slaat niets op de site zelf op.
+        </Text>
+        <Text>
+          Vragen over je gegevens stel je aan de redactie, via het formulier of op <EmailLink />.
         </Text>
         <Text>
           Voor een klacht kun je terecht bij de{' '}

@@ -11,6 +11,7 @@ const notInSitemap: string[] = [
   '/beheer/inloggen',
   '/beheer/inloggen/bevestigen',
   '/beheer/inloggen/verstuurd',
+  '/contact/verstuurd',
 ]
 
 /** The path of every page.tsx under src/app, such as '/bronnen'. The homepage is '/'. */

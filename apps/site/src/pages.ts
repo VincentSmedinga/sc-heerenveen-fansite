@@ -22,6 +22,11 @@ export const pages = [
     path: '/bronnen',
   },
   {
+    description:
+      'Schrijf de redactie van de sc Heerenveen Fansite: een vraag, een fout, een bron of een bericht dat weg moet.',
+    path: '/contact',
+  },
+  {
     description: 'Wie we zijn en hoe we werken. Een site van supporters, voor supporters.',
     path: '/over-ons',
   },

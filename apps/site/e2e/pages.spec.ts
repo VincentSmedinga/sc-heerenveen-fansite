@@ -14,6 +14,8 @@ const pages = [
   { path: '/podcasts?pagina=0', status: 404 },
   { path: '/bronnen', status: 200 },
   { path: '/over-ons', status: 200 },
+  { path: '/contact', status: 200 },
+  { path: '/contact/verstuurd', status: 200 },
   { path: '/privacy', status: 200 },
   { path: '/toegankelijkheid', status: 200 },
   { path: '/updates', status: 200 },
