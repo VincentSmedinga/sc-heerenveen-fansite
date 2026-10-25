@@ -28,7 +28,7 @@ export const testArticles = {
       '- Het eerste punt van de lijst',
       '- Het tweede punt, met **vet**',
       '## Een tweede kop',
-      'Het slot, met <b>HTML</b> dat gewone tekst blijft.',
+      'Het slot, met <b>HTML</b> dat gewone tekst blijft, en een lang adres dat de pagina niet breder maakt: https://www.voorbeeldkrant.test/een/heel/lang/adres/zonder/spaties/naar/het/verhaal/van/vandaag.',
     ].join('\n\n'),
     intro: 'Een verzonnen inleiding van twee zinnen. Ze laat zien hoe de kaart op de homepage eruit ziet.',
     slug: `${slugPrefix}artikel`,

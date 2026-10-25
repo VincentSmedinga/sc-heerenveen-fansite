@@ -7,6 +7,9 @@
 
 @layer hf.components {
   .hf-article {
+    /* A long word, such as an address in the text, breaks instead of making the page scroll. */
+    overflow-wrap: anywhere;
+
     > :first-child {
       margin-block-start: 0;
     }

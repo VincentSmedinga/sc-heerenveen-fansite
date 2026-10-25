@@ -18,7 +18,7 @@ describe('ArticleCard', () => {
     const region = screen.getByRole('region', { name: 'Van de redactie' })
 
     expect(region.tagName).toBe('SECTION')
-    expect(region.className).toBe('hf-card')
+    expect(region.className).toBe('hf-card hf-article-card')
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Van de redactie')
   })
 

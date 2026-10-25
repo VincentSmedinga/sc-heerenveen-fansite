@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { useId } from 'react'
 
 import { Card } from '../card/Card'
+import { classNames } from '../classNames'
 import { Heading } from '../heading/Heading'
 import { Link } from '../link/Link'
 import { Text } from '../text/Text'
@@ -31,11 +32,11 @@ export type ArticleCardProps = Omit<ComponentPropsWithoutRef<'section'>, 'childr
  * with its text, so a speech control that says "Lees verder" finds it. article-card.css gives
  * it its look.
  */
-export const ArticleCard = ({ date, dateTime, href, intro, title, ...props }: ArticleCardProps) => {
+export const ArticleCard = ({ className, date, dateTime, href, intro, title, ...props }: ArticleCardProps) => {
   const headingId = useId()
 
   return (
-    <Card aria-labelledby={headingId} {...props}>
+    <Card aria-labelledby={headingId} {...props} className={classNames('hf-article-card', className)}>
       <Heading id={headingId} level={2}>
         Van de redactie
       </Heading>
