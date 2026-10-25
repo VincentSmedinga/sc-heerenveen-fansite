@@ -1,11 +1,14 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
+import { ExternalLinkIcon } from '../external-link-icon/ExternalLinkIcon'
 import { Link } from '../link/Link'
 
 export type NavigationItem = {
   /** Whether this is the page the visitor is on. At most one item can be. */
   current?: boolean
+  /** Whether the link goes to another site. The link then gets an icon behind its text, the same as the headline of a news line. */
+  external?: boolean
   href: string
   /** The text of the link. It says where the link goes. */
   label: string
@@ -28,6 +31,7 @@ export const Navigation = ({ className, items, label, ...props }: NavigationProp
         <li key={item.href}>
           <Link aria-current={item.current ? 'page' : undefined} className="hf-navigation-link" href={item.href}>
             {item.label}
+            {item.external && <ExternalLinkIcon />}
           </Link>
         </li>
       ))}

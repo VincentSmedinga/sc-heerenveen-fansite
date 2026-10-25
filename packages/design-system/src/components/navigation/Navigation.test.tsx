@@ -7,7 +7,7 @@ import { Navigation } from './Navigation'
 
 const items = [
   { current: true, href: '/nieuws', label: 'Nieuws' },
-  { href: '/forum', label: 'Forum' },
+  { external: true, href: '/forum', label: 'Forum' },
   { href: '/uitslagen', label: 'Uitslagen' },
 ]
 
@@ -41,6 +41,45 @@ describe('Navigation', () => {
         .map((link) => link.textContent),
     ).toEqual(['Nieuws', 'Forum', 'Uitslagen'])
     expect(screen.getByRole('link', { name: 'Forum' }).getAttribute('href')).toBe('/forum')
+  })
+
+  it('draws the icon for a link to another site behind the text of an external item, and nowhere else', () => {
+    render(<Navigation items={items} label="Hoofdmenu" />)
+    const forum = screen.getByRole('link', { name: 'Forum' })
+    const icon = forum.querySelector('svg')
+
+    expect(document.querySelectorAll('svg')).toHaveLength(1)
+    expect(icon?.parentElement).toBe(forum)
+    expect(icon?.previousSibling?.textContent).toBe('Forum')
+    expect(icon?.nextSibling).toBeNull()
+    expect(screen.getByRole('link', { name: 'Nieuws' }).querySelector('svg')).toBeNull()
+    expect(screen.getByRole('link', { name: 'Uitslagen' }).querySelector('svg')).toBeNull()
+  })
+
+  it('hides the icon from assistive technology and takes the colour of the text', () => {
+    render(<Navigation items={items} label="Hoofdmenu" />)
+    const icon = screen.getByRole('link', { name: 'Forum' }).querySelector('svg')
+
+    expect(icon?.getAttribute('aria-hidden')).toBe('true')
+    expect(icon?.getAttribute('focusable')).toBe('false')
+    expect(icon?.getAttribute('stroke')).toBe('currentColor')
+    expect(icon?.textContent).toBe('')
+    // The icon is no tab stop of its own, and the link keeps its name.
+    expect(screen.getAllByRole('link')).toHaveLength(3)
+    expect(screen.getByRole('link', { name: 'Forum' }).textContent).toBe('Forum')
+  })
+
+  it('draws the icon itself: nothing in it points to another file or address', () => {
+    render(<Navigation items={items} label="Hoofdmenu" />)
+    const icon = document.querySelector('svg')
+
+    expect(icon?.outerHTML).not.toMatch(/(href|src)=|https?:|url\(/)
+  })
+
+  it('draws no icon when external is false', () => {
+    render(<Navigation items={[{ external: false, href: '/forum', label: 'Forum' }]} label="Hoofdmenu" />)
+
+    expect(document.querySelector('svg')).toBeNull()
   })
 
   it('marks only the link to the current page with aria-current="page"', () => {

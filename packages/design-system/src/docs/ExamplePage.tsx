@@ -11,7 +11,7 @@ import { Text } from '../components/text/Text'
 
 const menuItems = [
   { href: '#nieuws', label: 'Nieuws' },
-  { href: '#forum', label: 'Forum' },
+  { external: true, href: '#forum', label: 'Forum' },
 ] as const
 
 export type ExampleMenuPage = (typeof menuItems)[number]['label']

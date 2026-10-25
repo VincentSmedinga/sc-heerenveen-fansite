@@ -8,7 +8,9 @@ vi.mock('next/navigation', () => ({ usePathname: vi.fn() }))
 
 /** The text of the links marked as the current page. */
 function currentLinks(html: string) {
-  return [...html.matchAll(/<a [^>]*aria-current="page"[^>]*>([^<]*)<\/a>/g)].map(([, label]) => label)
+  return [...html.matchAll(/<a [^>]*aria-current="page"[^>]*>([^<]*)(?:<svg.*?<\/svg>)?<\/a>/g)].map(
+    ([, label]) => label,
+  )
 }
 
 function render(pathname: string) {
@@ -23,12 +25,24 @@ describe('SiteNavigation', () => {
 
     expect(html).toContain('<nav aria-label="Hoofdmenu"')
     expect(
-      [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
+      [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)(?:<svg.*?<\/svg>)?<\/a>/g)].map(([, href, label]) => [
+        href,
+        label,
+      ]),
     ).toEqual([
       ['/', 'Nieuws'],
       ['/podcasts', 'Podcasts'],
       ['https://forum.heerenveen.org', 'Forum'],
     ])
+  })
+
+  it('draws the icon for a link to another site at the forum only, hidden from screen readers', () => {
+    const html = render('/')
+    const links = [...html.matchAll(/<a [^>]*>(.*?)<\/a>/g)].map(([, content]) => content ?? '')
+
+    expect(links.map((content) => content.includes('<svg'))).toEqual([false, false, true])
+    expect(links[2]).toMatch(/^Forum<svg aria-hidden="true" class="hf-external-link-icon"/)
+    expect(html.match(/<svg/g)).toHaveLength(1)
   })
 
   it('marks Podcasts as the current page on /podcasts, and nothing else', () => {

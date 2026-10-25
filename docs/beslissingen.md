@@ -3197,3 +3197,28 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de strook weglaten; dan wisselt de statusbalk bij scrollen van kleur, en schuift lichte inhoud onder de witte tekst ervan.
 - **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator, in Safari, in staande en liggende stand.
   De statusbalk van een app op het beginscherm en de strook eronder laat de simulator niet zien, want Safari heeft bovenin geen inset; de projecteigenaar kijkt dat na op een echte telefoon.
+
+### Alleen een extern item in het hoofdmenu krijgt het pictogram
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een item van `Navigation` met `external` krijgt het pictogram voor een externe link, hetzelfde als bij de koppen van het nieuws.
+  In het hoofdmenu is dat alleen het Forum.
+- **Waarom:** het Forum is het enige item in het menu dat naar een ander adres gaat; de andere items zijn pagina's van de site.
+  Het pictogram zegt dat zonder woorden, en het is hetzelfde teken als bij de koppen, dus een bezoeker kent het al.
+  Een schermlezer hoort "Forum", zoals bij de koppen de naam van de kop; het pictogram is versiering voor het oog.
+- **Alternatieven:** het pictogram bij elke externe link op de site; dat is meer werk en raakt teksten die een eigen opmaak hebben.
+  Of het afleiden uit het adres (`https://`); dat is minder expliciet dan een optie.
+  Of een tekst "externe site" voor schermlezers; dat kan later voor alle externe links tegelijk.
+
+### De tekening van het pictogram staat in een eigen intern component
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de tekening van het pictogram voor een externe link staat in `ExternalLinkIcon`, in een eigen map met een eigen CSS-bestand (`external-link-icon.css`) en een eigen test.
+  `NewsItem` en `Navigation` gebruiken het.
+  Het component staat niet in de uitvoer van het package en heeft geen eigen story: het pictogram is een onderdeel van die twee, en hun stories tonen het in licht en donker.
+  De grootte, de ruimte ervoor en de plaats in de regel zijn voor de nieuwsregel en het menu gelijk.
+- **Waarom:** één tekening betekent één plek om aan te passen, en het pictogram ziet er overal hetzelfde uit.
+  Een bezoeker of een pagina heeft het niet los nodig; wie het nodig heeft, kan het later exporteren.
+  Dit volgt `Pompebled` in de map van het logo, dat ook een intern onderdeel zonder eigen story is.
+- **Alternatieven:** het pictogram exporteren uit het package; dat maakt er een deel van de interface van, terwijl niets op de site het los gebruikt.
+  Of de tekening in beide componenten laten staan; dan lopen ze uit elkaar.
