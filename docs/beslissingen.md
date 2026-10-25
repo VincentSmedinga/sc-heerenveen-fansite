@@ -4043,7 +4043,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** `parseArticleText` in `apps/site/src/article-text.ts` leest de tekst tot gewone gegevens, en `ArticleText` maakt er elementen van die React escapet.
   Er is geen `dangerouslySetInnerHTML` en geen reguliere expressie die over de hele tekst loopt.
   Elke zoektocht naar een sluitteken stopt bij het eerste teken dat een partner uitsluit, dus de tijd groeit met de lengte van de tekst.
-  De tests proberen een regel van een miljoen tekens, een miljoen openende tekens zonder partner en vijftigduizend regels.
+  De tests proberen een regel van een miljoen tekens, een miljoen openende tekens zonder partner en tienduizend regels met vijfduizend alinea's erachter.
   - Een alinea is een stuk tussen lege regels; de regels erin lopen in elkaar over.
   - Een kop is een stuk van één regel dat met `## ` begint, en is een kop van niveau 2.
     Een lijst is een stuk waarvan elke regel met `- ` begint.
