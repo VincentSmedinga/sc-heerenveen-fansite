@@ -181,8 +181,15 @@ Lokaal log je zo in:
 
 1. Maak een account, zoals hierboven.
 2. Ga naar <http://localhost:3000/beheer/inloggen> en vul het adres in.
-3. Zonder instellingen voor de mail schrijft `sendMail` de mail in het logboek van `pnpm dev`.
-   Open de link daaruit, en kies Inloggen.
+3. Zonder instellingen voor de mail schrijft `sendMail` de mail, met de link, in de uitvoer van de site.
+   Draait de site met `pnpm --filter site dev`, dan staat de link in die terminal.
+   Draait hij met `pnpm review`, dan staat de uitvoer niet in een terminal maar in `review.log` in de reviewmap, en toont dit de link:
+
+   ```sh
+   tail -n 20 ../sc-heerenveen-fansite-review/review.log
+   ```
+
+   Open de link, en kies Inloggen.
 
 Het cookie van het beheer is `Secure`, ook lokaal.
 Chrome en Firefox nemen dat aan op `localhost`; Safari niet, dus log lokaal in met Chrome of Firefox.
