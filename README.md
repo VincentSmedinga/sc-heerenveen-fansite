@@ -76,6 +76,7 @@ Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvo
 - [`docs/designsysteem-publiceren.md`](docs/designsysteem-publiceren.md): hoe Storybook op ds.heerenveen.org staat, en wat de eigenaar daarvoor instelt
 - [`docs/acceptatieomgeving.md`](docs/acceptatieomgeving.md): hoe de acceptatieomgeving op de hosting staat, en wat de eigenaar daarvoor instelt
 - [`docs/bronnen.md`](docs/bronnen.md): welke bronnen we hebben beoordeeld, en wat we over elke bron besloten
+- [`docs/artikelen.md`](docs/artikelen.md): hoe je een artikel van de redactie schrijft, welke opmaak het kent, en hoe de eigenaar het met SQL publiceert
 - [`docs/toegankelijkheid.md`](docs/toegankelijkheid.md): wat een mens of de reviewer nakijkt op toegankelijkheid, naast de automatische controles
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): hoe je meedoet, en de afspraken voor issues, branches, pull requests en taal
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): de gedragscode

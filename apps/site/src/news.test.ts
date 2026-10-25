@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import {
   dateTimeOf,
+  dayOf,
   episodeDetails,
+  formatArticleDate,
   formatDayAndTime,
   formatDiscussionTime,
   formatDuration,
@@ -306,5 +308,25 @@ describe('episodeDetails', () => {
     expect(episodeDetails({ durationSeconds: 2216, episodeNumber: null, seasonNumber: 9 })).toEqual(['37 min'])
     expect(episodeDetails({ durationSeconds: null, episodeNumber: null, seasonNumber: null })).toEqual([])
     expect(episodeDetails({ durationSeconds: null, episodeNumber: 3, seasonNumber: null })).toEqual(['aflevering 3'])
+  })
+})
+
+describe('formatArticleDate and dayOf', () => {
+  it('give the date with the month in full, and the same day for the time element', () => {
+    expect(formatArticleDate(new Date('2026-10-25T08:00:00Z'))).toBe('25 oktober 2026')
+    expect(dayOf(new Date('2026-10-25T08:00:00Z'))).toBe('2026-10-25')
+    expect(formatArticleDate(new Date('2027-03-01T12:00:00Z'))).toBe('1 maart 2027')
+    expect(dayOf(new Date('2027-03-01T12:00:00Z'))).toBe('2027-03-01')
+  })
+
+  it('count the Dutch day, so late in the evening is still that day and just after midnight is the next', () => {
+    // 22:30 UTC on 24 October is 00:30 on the 25th in the Netherlands (summer time ended that
+    // night: still +2).
+    expect(formatArticleDate(new Date('2026-10-24T22:30:00Z'))).toBe('25 oktober 2026')
+    expect(dayOf(new Date('2026-10-24T22:30:00Z'))).toBe('2026-10-25')
+    // 22:30 UTC on 31 December is 23:30 on the same day in winter time.
+    expect(dayOf(new Date('2026-12-31T22:30:00Z'))).toBe('2026-12-31')
+    expect(dayOf(new Date('2026-12-31T23:30:00Z'))).toBe('2027-01-01')
+    expect(formatArticleDate(new Date('2026-12-31T23:30:00Z'))).toBe('1 januari 2027')
   })
 })

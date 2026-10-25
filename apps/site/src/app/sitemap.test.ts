@@ -1,8 +1,12 @@
 import { readdirSync } from 'node:fs'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { pages } from '../pages'
 import sitemap from './sitemap'
+
+const { getPublishedArticles } = vi.hoisted(() => ({ getPublishedArticles: vi.fn() }))
+
+vi.mock('../articles', () => ({ getPublishedArticles }))
 
 // The pages that are not in the sitemap on purpose, as paths such as '/beheer'. A new page.tsx
 // that isn't in the list of pages in pages.ts must be named here, so a new page doesn't forget
@@ -14,6 +18,8 @@ const notInSitemap: string[] = [
   '/beheer/inloggen/bevestigen',
   '/beheer/inloggen/verstuurd',
   '/contact/verstuurd',
+  // One page for every published article: the sitemap lists them from the database.
+  '/redactie/[slug]',
 ]
 
 /** The path of every page.tsx under src/app, such as '/bronnen'. The homepage is '/'. */
@@ -27,8 +33,14 @@ function pagePaths() {
     })
 }
 
+beforeEach(() => {
+  getPublishedArticles.mockReset()
+  getPublishedArticles.mockResolvedValue([])
+})
+
 afterEach(() => {
   vi.unstubAllEnvs()
+  vi.restoreAllMocks()
 })
 
 describe('sitemap', () => {
@@ -36,16 +48,38 @@ describe('sitemap', () => {
     ['local', 'http://localhost:3000'],
     ['acceptance', 'https://acc.sc.heerenveen.org'],
     ['production', 'https://sc.heerenveen.org'],
-  ])('lists the pages with the address of %s, and nothing else', (siteEnv, origin) => {
+  ])('lists the pages with the address of %s, and nothing else', async (siteEnv, origin) => {
     vi.stubEnv('SITE_ENV', siteEnv)
 
-    expect(sitemap()).toEqual(pages.map(({ path }) => ({ url: `${origin}${path}` })))
+    expect(await sitemap()).toEqual(pages.map(({ path }) => ({ url: `${origin}${path}` })))
   })
 
-  it('has no address with a query, such as the homepage with ?nieuws=10', () => {
+  it('has no address with a query, such as the homepage with ?nieuws=10', async () => {
     vi.stubEnv('SITE_ENV', 'local')
 
-    expect(sitemap().filter(({ url }) => url.includes('?'))).toEqual([])
+    expect((await sitemap()).filter(({ url }) => url.includes('?'))).toEqual([])
+  })
+
+  it('lists a published article with its address and nothing else', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+    getPublishedArticles.mockResolvedValue([{ slug: 'dit-zijn-wij' }, { slug: 'eerder' }])
+
+    expect((await sitemap()).slice(pages.length)).toEqual([
+      { url: 'https://sc.heerenveen.org/redactie/dit-zijn-wij' },
+      { url: 'https://sc.heerenveen.org/redactie/eerder' },
+    ])
+  })
+
+  it('still lists the pages, and says why in the log, when the database cannot give the articles', async () => {
+    vi.stubEnv('SITE_ENV', 'local')
+    getPublishedArticles.mockRejectedValue(new Error('connect ECONNREFUSED 127.0.0.1:3306'))
+
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    expect(await sitemap()).toEqual(pages.map(({ path }) => ({ url: `http://localhost:3000${path}` })))
+    expect(error).toHaveBeenCalledWith(
+      'Could not read the articles for the sitemap: connect ECONNREFUSED 127.0.0.1:3306',
+    )
   })
 
   it('has every page.tsx of the app, or names it as an exception', () => {

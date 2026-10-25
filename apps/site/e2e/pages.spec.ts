@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { adminCookie } from './admin'
+import { testArticles } from './articles'
 import { checkPage } from './check-page'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
@@ -38,6 +39,13 @@ const pages: { admin?: true; path: string; status: number }[] = [
   { admin: true, path: '/beheer/berichten?q=Verzonnen', status: 200 },
   { admin: true, path: '/beheer/berichten?q=bestaat+niet', status: 200 },
   { admin: true, path: '/beheer/berichten?fout=weg', status: 200 },
+  // An article of the editors, and the addresses that must say "niet gevonden": a draft, an
+  // article for later, an address that isn't an article and one in capitals.
+  { path: `/redactie/${testArticles.published.slug}`, status: 200 },
+  { path: `/redactie/${testArticles.draft.slug}`, status: 404 },
+  { path: `/redactie/${testArticles.later.slug}`, status: 404 },
+  { path: '/redactie/bestaat-niet', status: 404 },
+  { path: `/redactie/${testArticles.published.slug.toUpperCase()}`, status: 404 },
   { path: '/bestaat-niet', status: 404 },
 ]
 

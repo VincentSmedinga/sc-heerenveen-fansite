@@ -160,6 +160,25 @@ Geen enkele code wijzigt of verwijdert een rij, en `audit-log.test.ts` toetst da
 Een account dat in het logboek staat, kan niet uit `admin_users` verdwijnen (een foreign key): `admin:revoke` zet het uit.
 Er is nog geen scherm om het logboek te lezen; zie `docs/acceptatieomgeving.md` voor de vraag die het toont.
 
+## De tabel `articles`
+
+De artikelen van onze eigen redactie (zie [`docs/artikelen.md`](../../docs/artikelen.md)).
+Een artikel staat op `/redactie/<slug>` en het nieuwste als kaart op de homepage, zodra `published_at` een tijd heeft die niet na het moment van nu ligt.
+
+| Kolom                      | Betekenis                                                                                             |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `slug`                     | Het adres: kleine letters, cijfers en enkele streepjes, hoogstens 80 tekens; uniek                    |
+| `title`, `intro`, `author` | De titel (120 tekens), de intro (300) en de naam bij het artikel (100)                                |
+| `body`                     | De tekst, in de opmaak van `apps/site/src/article-text.ts`; een `mediumtext`                          |
+| `published_at`             | Leeg is een concept; een tijd in de toekomst telt als concept tot die tijd, in UTC                    |
+| `created_at`, `updated_at` | Wanneer het artikel is gemaakt en veranderd, in UTC; wie een artikel verandert, zet `updated_at` zelf |
+| `created_by`               | Het nummer van het account (`admin_users`), geen e-mailadres; een foreign key zonder cascade          |
+
+De CHECK-constraint `articles_slug_format` weigert een adres met hoofdletters, een underscore of twee streepjes achter elkaar, in elke tool.
+Is een tekst te lang voor een kolom, dan faalt de opdracht, zolang MariaDB op zijn standaardinstelling staat (strikt).
+Een artikel verwijderen we niet: we trekken het in, door `published_at` leeg te maken.
+`findPublishedArticle`, `findNewestArticle` en `listPublishedArticles` in `queries.ts` geven alleen wat gepubliceerd is.
+
 ## Het logboek van de import en `robots_txt`
 
 Ook deze drie tabellen vult de importer.
@@ -211,11 +230,12 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `import_runs`, `import_results`, `robots_txt`, `audit_log` en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log` en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
   `listRecentItems(db, { limit, until })` geeft de nieuwste `limit` berichten van die bronnen tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam), en geen afleveringen van bronnen van het soort podcast;
   `listPodcastEpisodes(db, { limit, offset, podcast, until })` geeft juist de afleveringen van de podcasts die aanstaan, het nieuwste eerst, met alleen de titel, de link, de tijd, de naam van de podcast en de duur, het seizoen en het nummer van de aflevering, en `countPodcastEpisodes` geeft het totaal; `podcast` is de `slug` van één podcast;
+  `findPublishedArticle(db, slug, until)`, `findNewestArticle(db, until)` en `listPublishedArticles(db, until)` geven de gepubliceerde artikelen van de redactie (zie _De tabel `articles`_);
   `listPodcasts(db)` geeft de podcasts met een `slug` en minstens één aflevering, voor het filter, en `findPodcast(db, slug)` geeft de naam, de beschrijving en de adressen bij Apple Podcasts en Spotify van één podcast;
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;

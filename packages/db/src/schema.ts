@@ -398,3 +398,53 @@ export const auditLog = mysqlTable(
 )
 
 export type AuditLogRow = typeof auditLog.$inferSelect
+
+/** The most characters a column of `articles` holds. The admin checks them before it stores. */
+export const articleLimits = { author: 100, intro: 300, slug: 80, title: 120 }
+
+/**
+ * The articles of our own editors. A visitor sees an article on `/redactie/<slug>` and the
+ * newest one as a card on the homepage, once `published_at` is set and has passed. Empty
+ * `published_at` is a draft: it is on no page, and withdrawing an article empties it again.
+ * Nothing is deleted.
+ *
+ * `body` is the text in the format of `apps/site/src/article-text.ts`: paragraphs, `## `
+ * headings, `- ` lists, bold, italic and links. A `mediumtext` holds 16 MB, far more than an
+ * article needs; the admin sets the real limit. `author` is the name next to the article, such
+ * as "de redactie". `created_by` is the account that put the article in, as a number, never an
+ * address. Accounts are turned off and never deleted, so the foreign key keeps the author of
+ * every article known.
+ *
+ * `slug` has lowercase letters, digits and single hyphens (the check ignores the collation,
+ * which would let capitals through) and is unique, so an address never goes to two articles.
+ * Times are UTC; whoever updates an article sets `updated_at` as well.
+ */
+export const articles = mysqlTable(
+  'articles',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    slug: varchar('slug', { length: articleLimits.slug }).notNull().unique(),
+    title: varchar('title', { length: articleLimits.title }).notNull(),
+    intro: varchar('intro', { length: articleLimits.intro }).notNull(),
+    body: mediumtext('body').notNull(),
+    author: varchar('author', { length: articleLimits.author }).notNull(),
+    publishedAt: datetime('published_at'),
+    createdAt: datetime('created_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+    updatedAt: datetime('updated_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+    createdBy: int('created_by', { unsigned: true })
+      .notNull()
+      .references(() => adminUsers.id),
+  },
+  (table) => [
+    check('articles_slug_format', sql`${table.slug} regexp '(?-i)^[a-z0-9]+(-[a-z0-9]+)*$'`),
+    index('articles_published_at_idx').on(table.publishedAt),
+  ],
+)
+
+export type Article = typeof articles.$inferSelect
+
+export type NewArticle = typeof articles.$inferInsert

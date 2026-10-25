@@ -3,6 +3,10 @@
  * styles are in index.css, which the site imports as well.
  */
 
+export { ArticleCard } from './components/article-card/ArticleCard'
+export type { ArticleCardProps } from './components/article-card/ArticleCard'
+export { Article } from './components/article/Article'
+export type { ArticleProps } from './components/article/Article'
 export { Body } from './components/body/Body'
 export type { BodyProps } from './components/body/Body'
 export { Button, buttonAppearances, buttonIcons, buttonTypes } from './components/button/Button'
@@ -11,6 +15,7 @@ export { Card, cardElements, cardSurfaces } from './components/card/Card'
 export type { CardElement, CardProps, CardSurface } from './components/card/Card'
 export { DiscussionItem } from './components/discussion-item/DiscussionItem'
 export type { DiscussionItemProps } from './components/discussion-item/DiscussionItem'
+export { Emphasis } from './components/emphasis/Emphasis'
 export { ErrorSummary } from './components/error-summary/ErrorSummary'
 export type { ErrorSummaryError, ErrorSummaryProps } from './components/error-summary/ErrorSummary'
 export { Field } from './components/field/Field'
@@ -60,6 +65,7 @@ export { SegmentedControl } from './components/segmented-control/SegmentedContro
 export type { SegmentedControlOption, SegmentedControlProps } from './components/segmented-control/SegmentedControl'
 export { Select } from './components/select/Select'
 export type { SelectOptionProps, SelectProps } from './components/select/Select'
+export { Strong } from './components/strong/Strong'
 export { Text, textAppearances, textElements } from './components/text/Text'
 export type { TextAppearance, TextElement, TextProps } from './components/text/Text'
 export { Textarea } from './components/textarea/Textarea'

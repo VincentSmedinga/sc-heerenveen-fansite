@@ -1,0 +1,15 @@
+/*
+ * The card with the newest article of our own editors. The title is a link in a heading, with
+ * the colour and the underline of a link. The date sits close under it.
+ */
+
+@layer hf.components {
+  /* A long word, such as an address in the intro, breaks instead of making the page scroll. */
+  .hf-article-card {
+    overflow-wrap: anywhere;
+  }
+
+  .hf-article-card-title {
+    margin-block-end: 0.25rem;
+  }
+}
