@@ -4024,7 +4024,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een zin of een knop die midden in de regel afbreekt, ziet er onhandig uit bij een middelbare breedte.
   Het menu bestaat uit losse links die makkelijk onder elkaar passen.
   De tekst en de knoppen zijn hoogstens 14,1rem breed, en 17rem met de tekstafstand van WCAG 1.4.12 (letters 0,12em en woorden 0,16em uit elkaar, gemeten in Chromium); met 2rem marge aan de zijkanten past dat vanaf 19rem op één regel.
-  De grens 19,5rem ligt daar een stukje boven, en onder 320 pixels (20rem), dus een scherm van 320 pixels breed en 400% zoom (dat is ook 320 CSS-pixels) scrolt niet zijwaarts (WCAG 1.4.10), ook niet met die tekstafstand.
+  De grens 19,5rem ligt daar een stukje boven, en onder 320 pixels (20rem).
+  Een scherm van 320 pixels breed en 400% zoom (dat is ook 320 CSS-pixels) scrolt dus niet zijwaarts (WCAG 1.4.10), ook niet met die tekstafstand.
   De grens staat in rem, dus hij volgt een groter lettertype: bij tekst op 200% ligt hij op 624 pixels, en daar zijn de tekst en de knoppen ook twee keer zo breed.
   Een grens in pixels zou dat niet doen.
 - **Alternatieven:** alles laten afbreken zoals nu.
