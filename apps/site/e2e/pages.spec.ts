@@ -15,6 +15,7 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
   // The homepage with the older headlines, which the button under the first ten loads.
   { path: '/?nieuws=15', status: 200 },
+  { path: '/wedstrijden', status: 200 },
   { path: '/podcasts', status: 200 },
   { path: '/podcasts?podcast=testpodcast', status: 200 },
   { path: '/podcasts?pagina=2', status: 200 },

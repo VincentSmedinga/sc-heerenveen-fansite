@@ -11,9 +11,20 @@ import {
   listPodcastEpisodes,
   listPodcasts,
   listRecentItems,
+  listSeasonMatches,
+  listSeasonStandings,
+  listWikipediaPages,
 } from './queries.ts'
-import { discussions, feeds, items, sources } from './schema.ts'
-import { realSources, seedSources, testSources } from './seed.ts'
+import { discussions, feeds, items, matches, sources, standings, wikipediaPages } from './schema.ts'
+import {
+  madeUpMatches,
+  madeUpTable,
+  madeUpWikipediaPages,
+  realSources,
+  seedMatches,
+  seedSources,
+  testSources,
+} from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -808,6 +819,152 @@ describe('the podcasts', () => {
       expect(await findPodcast(database.db, 'Testpodcast')).toBeUndefined()
       expect(await findPodcast(database.db, 'testpodcást')).toBeUndefined()
       expect(await countPodcastEpisodes(database.db, { podcast: 'TESTPODCAST', until: now })).toBe(0)
+    })
+  })
+})
+
+describe('the matches and the table of a season', () => {
+  const now = new Date('2026-10-25T12:00:00Z')
+
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM matches')
+    await database.pool.query('DELETE FROM standings')
+    await database.pool.query('DELETE FROM wikipedia_pages')
+  })
+
+  describe('listSeasonMatches', () => {
+    it('gives the matches of the season in the order they are played, a match without a kick-off first on its day', async () => {
+      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(matches).values({
+        competition: 'KNVB Beker',
+        home: true,
+        kickoffAt: new Date('2026-10-28T19:30:00Z'),
+        matchDate: '2026-10-28',
+        opponent: 'Late Gast',
+        round: 'Derde ronde',
+        season: '2026/27',
+        status: 'scheduled',
+      })
+      await database.db.insert(matches).values({
+        competition: 'Eredivisie',
+        dateText: '28 oktober 2026',
+        home: false,
+        matchDate: '2026-10-28',
+        opponent: 'Vroege Gast',
+        round: 'Speelronde 9',
+        season: '2026/27',
+        status: 'scheduled',
+      })
+
+      const rows = await listSeasonMatches(database.db, '2026/27')
+      const days = rows.map((match) => match.matchDate)
+
+      expect(days).toEqual([...days].sort())
+      expect(rows.map((match) => match.opponent).filter((name) => name.endsWith('Gast'))).toEqual([
+        'Vroege Gast',
+        'Late Gast',
+      ])
+    })
+
+    it('gives a played match its goals and the others none, and keeps the kick-off in UTC', async () => {
+      await database.db.insert(matches).values(madeUpMatches(now))
+
+      const rows = await listSeasonMatches(database.db, '2026/27')
+      const played = rows.find((match) => match.round === 'Speelronde 1')
+      const planned = rows.find((match) => match.round === 'Speelronde 3')
+
+      expect(played).toMatchObject({ goalsAgainst: 0, goalsFor: 2, home: true, status: 'played' })
+      expect(planned).toMatchObject({ goalsAgainst: null, goalsFor: null, status: 'scheduled' })
+      expect(planned?.kickoffAt).toEqual(new Date('2026-10-28T18:45:00Z'))
+    })
+
+    it('gives only the season it is asked for', async () => {
+      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(matches).values(madeUpMatches(new Date('2027-08-01T12:00:00Z')))
+
+      const rows = await listSeasonMatches(database.db, '2026/27')
+
+      expect(rows).toHaveLength(madeUpMatches(now).length)
+      expect(await listSeasonMatches(database.db, '2025/26')).toEqual([])
+    })
+
+    it('leaves the columns that are internal out', async () => {
+      await database.db.insert(matches).values(madeUpMatches(now))
+
+      const [row] = await listSeasonMatches(database.db, '2026/27')
+
+      expect(Object.keys(row ?? {}).sort()).toEqual([
+        'competition',
+        'dateText',
+        'goalsAgainst',
+        'goalsFor',
+        'home',
+        'kickoffAt',
+        'matchDate',
+        'opponent',
+        'round',
+        'stadium',
+        'status',
+      ])
+    })
+  })
+
+  describe('listSeasonStandings', () => {
+    it('gives the table of the season from the first place down', async () => {
+      await database.db.insert(standings).values(madeUpTable(now).reverse())
+
+      const rows = await listSeasonStandings(database.db, '2026/27')
+
+      expect(rows.map((row) => row.position)).toEqual([1, 2, 3, 4, 5, 6])
+      expect(rows[0]).toMatchObject({ club: 'sc Heerenveen', goalDifference: 3, points: 6, validOn: '2026-10-18' })
+    })
+
+    it('gives only the season it is asked for, so a table of an earlier season is not shown', async () => {
+      await database.db.insert(standings).values(madeUpTable(now))
+      await database.db.insert(standings).values(madeUpTable(new Date('2025-10-25T12:00:00Z')))
+
+      expect(await listSeasonStandings(database.db, '2026/27')).toHaveLength(6)
+      expect(await listSeasonStandings(database.db, '2025/26')).toHaveLength(6)
+      expect(await listSeasonStandings(database.db, '2027/28')).toEqual([])
+    })
+
+    it('keeps a negative goal difference', async () => {
+      await database.db.insert(standings).values(madeUpTable(now))
+
+      const rows = await listSeasonStandings(database.db, '2026/27')
+
+      expect(rows.at(-1)?.goalDifference).toBe(-2)
+    })
+  })
+
+  describe('listWikipediaPages', () => {
+    it('gives the pages of the season, the standings first, with the moment they were read', async () => {
+      await database.db.insert(wikipediaPages).values(madeUpWikipediaPages(now).reverse())
+      await database.db.insert(wikipediaPages).values({
+        kind: 'standings',
+        readAt: new Date('2025-10-25T12:00:00Z'),
+        season: '2025/26',
+        title: 'Eredivisie 2025/26 (mannenvoetbal)',
+        version: null,
+      })
+
+      const rows = await listWikipediaPages(database.db, '2026/27')
+
+      expect(rows).toEqual([
+        { kind: 'standings', readAt: now, title: 'Eredivisie 2026/27 (mannenvoetbal)' },
+        { kind: 'programme', readAt: now, title: 'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden' },
+        { kind: 'cup', readAt: now, title: 'KNVB Beker 2026/27 (mannen)' },
+      ])
+    })
+
+    it('has the pages of the made-up matches once they are seeded', async () => {
+      await seedMatches(database.db, now)
+
+      expect((await listWikipediaPages(database.db, '2026/27')).map((page) => page.kind)).toEqual([
+        'standings',
+        'programme',
+        'cup',
+      ])
     })
   })
 })

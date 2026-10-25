@@ -1,7 +1,7 @@
 /*
- * Tables: tabular figures, a thin line between rows.
- * Provisional hooks until there is a table component: .hf-numeric aligns a cell to the end,
- * .hf-highlight marks a row, such as sc Heerenveen in the standings, and .hf-rank is a position in a ranking.
+ * Tables: tabular figures, a thin line between rows. Hooks for tables: .hf-numeric aligns a
+ * cell to the end, .hf-highlight marks a row, such as sc Heerenveen in the standings, and
+ * .hf-rank is a position in a ranking. The StandingsTable component uses all three.
  */
 
 @layer hf.base {

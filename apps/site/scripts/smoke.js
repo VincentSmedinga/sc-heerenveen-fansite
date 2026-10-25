@@ -488,6 +488,18 @@ await withEmptyDatabase((database) =>
     assert.equal((await fetch(`${origin}/podcasts?pagina=2`)).status, 404)
     assert.equal((await fetch(`${origin}/podcasts?pagina=0`)).status, 404)
 
+    // The matches page shows the made-up matches and table of the seed, with the credit for
+    // Wikipedia under them. The homepage has the two blocks, under the podcasts.
+    const matchesPage = await fetch(`${origin}/wedstrijden`)
+    const matchesHtml = await matchesPage.text()
+    assert.equal(matchesPage.status, 200)
+    assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
+    assert.match(matchesHtml, /Testdorp FC/)
+    assert.match(matchesHtml, /<caption>Stand op \d+ \w+ \d{4}<\/caption>/)
+    assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
+    assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
+
     // Updates shows the versions of the build, newest first, and points feed readers to its
     // feed.
     const updatesResponse = await fetch(`${origin}/updates`)

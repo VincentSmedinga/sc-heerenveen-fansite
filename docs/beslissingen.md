@@ -2695,6 +2695,89 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De pagina zegt eerst dat het goed gaat, en dan wat er nu moet gebeuren, in de woorden van de knop.
 - **Alternatieven:** de knop weghalen en bij het openen inloggen (breekt bij mailscanners, zie hetzelfde besluit).
 
+### Eén pagina `/wedstrijden` voor programma, uitslagen en stand
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** programma, uitslagen en stand staan samen op één pagina, `/wedstrijden`, onder drie kopjes.
+  De blokken op de homepage linken er direct naartoe, de stand naar `/wedstrijden#stand`.
+- **Waarom:** supporters zoeken ze samen en één pagina is minder om te bouwen en te onderhouden.
+- **Alternatieven:** een pagina `/stand` apart (kortere pagina's, maar twee menu-items en twee keer een bronvermelding).
+
+### Blokken onderaan de zijbalk
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de blokken "Wedstrijden" en "Stand" staan onderaan de zijbalk van de homepage, onder de discussies en de podcasts.
+  Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan dan onderaan de pagina.
+- **Waarom:** de projecteigenaar koos dit bij het bouwen van #271.
+  De specificatie van 25 oktober had ze bovenaan, boven de discussies en de podcasts, omdat de volgende wedstrijd het eerste is wat supporters willen weten.
+- **Alternatieven:** bovenaan de zijbalk, boven de discussies en de podcasts (de eerste specificatie van 25 oktober); in de hoofdkolom boven het nieuws (valt het meest op, maar verdringt het nieuws).
+
+### Het programma, de volgende wedstrijd en de uitslagen volgen uit de status
+
+- **Datum:** 26 oktober 2026
+- **Besluit:**
+  - het programma is elke wedstrijd van het lopende seizoen die niet gespeeld is (`scheduled` en `postponed`), op volgorde van de dag;
+  - een uitgestelde wedstrijd staat erin met "Uitgesteld" in plaats van een tijd, op haar oorspronkelijke dag;
+  - een wedstrijd blijft in het programma tot Wikipedia de uitslag heeft;
+  - de volgende wedstrijd van de homepage is de eerste wedstrijd van het programma met de status `scheduled`, dus niet een uitgestelde wedstrijd zonder nieuwe datum;
+  - de uitslagen zijn de gespeelde wedstrijden, de nieuwste bovenaan;
+  - het blok "Wedstrijden" op de homepage heeft alleen de vorige en de volgende wedstrijd, in één lijst van twee: de nieuwste uitslag en de volgende wedstrijd.
+    De projecteigenaar koos dit op 26 oktober 2026; de specificatie had de volgende wedstrijd en de laatste drie uitslagen.
+- **Waarom:** een uitgestelde wedstrijd zonder nieuwe datum is geen volgende wedstrijd, maar een supporter wil wel zien dat hij is uitgesteld.
+  Wie op de datum afgaat, laat een wedstrijd verdwijnen waarvan Wikipedia de uitslag nog niet heeft.
+- **Alternatieven:** een wedstrijd uit het programma halen zodra de dag voorbij is (de wedstrijd verdwijnt dan zonder uitslag); een uitgestelde wedstrijd als volgende wedstrijd tonen (staat dan weken bovenaan zonder datum).
+
+### Een wedstrijd is een regel zonder link en zonder clubwapen
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het component `Match` toont de competitie en de ronde, de twee clubs met de uitslag ertussen, en daaronder de aftrap, "Thuis" of "Uit" en het stadion.
+  De thuisclub staat eerst en de regel zegt ook "Thuis" of "Uit", zodat een bezoeker niet hoeft af te leiden uit de volgorde.
+  De uitslag is "2–0" vanaf de kant van de thuisclub, en een schermlezer hoort "2 tegen 0".
+  De aftrap is een `Time` in Nederlandse tijd, het weekend ("weekend 12–14 februari", met de eerste dag voor machines) zolang de tijd niet bekend is, en bij een uitslag alleen de dag.
+  De wedstrijd heeft geen link, want een pagina per wedstrijd is #108, en er zijn alleen namen, geen clubwapens.
+- **Waarom:** de namen dragen de regel voor iedereen, ook met een schermlezer, en een wapen is een afbeelding van een ander, met rechten die we niet hebben.
+- **Alternatieven:** alleen de volgorde van de clubs voor thuis en uit (niet te zien voor wie het niet weet); een kolommentabel voor de wedstrijden (breed, en op een telefoon moet hij zijwaarts scrollen).
+
+### De stand is een tabel met een scrollgebied en een korte vorm voor de zijbalk
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het component `StandingsTable` is een echte `table` met een bijschrift met de dag waarvoor de stand geldt, kolomkoppen met `scope` en een rijkop met de club.
+  - De kolommen zijn: positie, club, gespeeld, gewonnen, gelijk, verloren, doelpunten voor, doelpunten tegen, doelsaldo en punten.
+    De punten staan achteraan, zoals bij elke stand, en hebben gewicht 700, omdat de stand daarop is gesorteerd.
+    De projecteigenaar liet de kolom eerst na gespeeld zetten en zette haar op 26 oktober 2026 terug, omdat de eerste plaats tegen de gewoonte ingaat.
+  - De koppen zijn afkortingen met één letter waar dat kan: G, W, G, V en P, en DV, DT en DS voor de doelpunten en het doelsaldo.
+    G staat voor gespeeld en voor gelijk, en P is punten; de projecteigenaar koos dit op 26 oktober 2026, want supporters begrijpen twee keer G beter dan een andere letter voor gespeeld.
+    De volle woorden maken het verschil duidelijk: de `title` van elke kop en de regel onder de volledige tabel.
+    De volle woorden staan in de `title` en, bij de volledige tabel, in een regel eronder, want een `title` laat een telefoon niet zien.
+    De korte vorm in de zijbalk heeft die regel niet (de projecteigenaar, 26 oktober 2026).
+  - Het bijschrift is kort, "Stand op 18 oktober 2026", omdat het met de tabel meescrolt in het gebied en anders afgeknipt wordt op een telefoon.
+  - Met alle kolommen staat de tabel in een eigen gebied dat zijwaarts scrolt, met `role="region"`, een naam en `tabindex="0"`, zodat het toetsenbord erbij kan en de pagina zelf niet zijwaarts scrolt.
+  - De korte vorm (`columns="compact"`) laat gewonnen, gelijk, verloren en de doelpunten weg en past in de zijbalk zonder te scrollen.
+    Het blok "Stand" op de homepage toont maar drie clubs, met sc Heerenveen in het midden: de club erboven en de club eronder, met hun echte plaats.
+    Staat sc Heerenveen bovenaan of onderaan, dan zijn het de eerste of de laatste drie (`standingsAround` in `src/matches.ts`).
+    De projecteigenaar koos dit op 26 oktober 2026; de volledige stand staat op `/wedstrijden`.
+  - De rij van sc Heerenveen is vet, heeft een balk aan het begin en een schermlezer hoort "(onze club)" achter de naam.
+- **Waarom:** de volledige tabel is op een telefoon te breed voor de pagina, en het scrollgebied houdt hem bruikbaar tot 400% inzoomen (1.4.10).
+  De korte vorm laat op de homepage zien waar het om draait: positie, gespeeld, punten en doelsaldo.
+- **Alternatieven:** de tabel kolommen laten weglaten met CSS op een telefoon (de volle woorden en de kolommen zijn dan niet te bereiken); altijd de korte vorm (de volledige stand ontbreekt dan op de pagina).
+
+### De bronvermelding van Wikipedia is een component met een link per pagina
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `WikipediaCredit` zegt "Bron: Wikipedia (CC BY-SA 4.0)", linkt naar elke pagina waar het blok gegevens van heeft en naar de geschiedenis ervan, noemt de tijd van de laatste keer lezen in Nederlandse tijd en zegt dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
+  `/wedstrijden` heeft die volledige vorm, voor alle pagina's die de import las.
+  De tijd is de laatste `read_at` van die pagina's uit `wikipedia_pages`.
+  De twee kleine blokken op de homepage zeggen alleen "Bron: Wikipedia", zonder links (de projecteigenaar, 26 oktober 2026), want de volledige bronvermelding staat een klik verder, op `/wedstrijden`.
+  `WikipediaCredit` heeft daarvoor de korte vorm `compact`.
+  De link naar de geschiedenis zegt voor een schermlezer van welke pagina hij is.
+  "CC BY-SA 4.0" linkt naar de licentie.
+  Zijn er geen pagina's gelezen, zoals bij een lege database, dan staan er geen gegevens en dus ook geen bronvermelding.
+- **Waarom:** principe 4 van de Redactie vraagt altijd de bron, en de licentie vraagt de naam en een link.
+  Een component zorgt dat een pagina er niet omheen kan.
+  De geschiedenis van de pagina noemt de auteurs, zoals de licentie vraagt.
+- **Alternatieven:** de volledige vorm onder elk blok (de specificatie; lang voor een kaart in de zijbalk); één vaste link naar de pagina van het seizoen (de beker en het programma staan op andere pagina's); de licentie niet linken (dat vraagt de licentie wel).
+- **Hoe:** de seed zet ook de pagina's van de verzonnen wedstrijden in `wikipedia_pages` (`madeUpWikipediaPages`), zodat de bronvermelding er op acceptatie en in de toegankelijkheidscontrole ook is.
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
