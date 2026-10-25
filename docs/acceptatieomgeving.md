@@ -280,6 +280,7 @@ Zo kan niemand nagaan wie een account heeft.
 - Alles onder `/beheer` krijgt `X-Robots-Tag: noindex, nofollow` en `Cache-Control: no-store`, ook op productie, en `robots.txt` weigert `/beheer` op elke omgeving.
 - Het beheer heeft nu één scherm: `/beheer/berichten`, waar een beheerder of moderator een bericht verbergt, met een reden, en het weer toont.
   Een verborgen bericht staat binnen vijf minuten niet meer op de homepage en op `/podcasts`, en de import zet het niet terug.
+  De lijst toont ook de berichten die het relevantiefilter een twijfelgeval vond of niet over de club; die staan niet op de site (zie _Het relevantiefilter_ in de [README van de importer](../apps/importer/README.md)).
   Elke actie komt in het logboek, de tabel `audit_log`.
   Er is nog geen scherm om het logboek te lezen; lees het in phpMyAdmin:
 
@@ -308,7 +309,7 @@ Zo kan niemand nagaan wie een account heeft.
 
   ```text
   Thu Oct 22 14:07:01 CEST 2026
-  https://www.lc.nl/sport/sc-heerenveen/rss/: 3 new, 0 updated, 47 unchanged, 0 skipped
+  https://www.lc.nl/sport/sc-heerenveen/rss/: 3 new, 0 updated, 47 unchanged, 0 skipped; 50 relevant, 0 doubtful, 0 irrelevant
   https://forum.heerenveen.org/api/discussions?sort=-lastPostedAt&page[limit]=30&include=lastPostedUser,tags: 1 new, 0 updated, 3 unchanged, 0 skipped
   ```
 

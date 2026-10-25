@@ -229,8 +229,10 @@
   }
 
   /*
-   * The footer closes the page as the header opens it: a band as wide as the page, a step off the page, with a line on
-   * top. The padding on the sides keeps what is in it in the column, as in the header.
+   * The footer closes the page as the header opens it: a band as wide as the page, a step off
+   * the page. Only its colour sets it apart from the body: it has no border, so its box has no
+   * edge to draw a line on.
+   * The padding on the sides keeps what is in it in the column, as in the header.
    * The links are the blue of links elsewhere, which reaches 4,5:1 on this surface in light and in dark, so they need no
    * colours of their own.
    *
@@ -250,7 +252,10 @@
    *   element too. The page isolates its stacking (isolation: isolate), so the stripes are behind the content of the page
    *   and not behind a background an ancestor paints, such as the wrapper of a theme.
    * Both parts have the same gradient, size and position, so the stripes carry on over the edge of the footer without a
-   * seam. A stripe is 6rem wide, with a step of 1px at its edge so it doesn't look jagged.
+   * seam.
+   * The footer has no border, so its padding box is its whole box and the two parts meet
+   * exactly at its top edge.
+   * A stripe is 6rem wide, with a step of 1px at its edge so it doesn't look jagged.
    * The stripes take no touch or mouse and are in no way part of the layout: they are positioned, so they can't make a
    * scrollbar, and they have no content, so a screen reader doesn't see them. There are none in forced colours and in print.
    * A browser that doesn't know the colour (color-mix()) shows no stripes.
@@ -260,8 +265,6 @@
     --hf-stripe-above: 2.5;
 
     background-color: var(--hf-colour-background-footer);
-    border-block-start: 1px solid;
-    border-block-start-color: var(--hf-colour-border-footer);
     box-sizing: border-box;
     color: var(--hf-colour-text-secondary);
     column-gap: 2rem;

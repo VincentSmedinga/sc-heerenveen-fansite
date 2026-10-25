@@ -2587,6 +2587,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Let op:** een nieuwe query op `items` voor een pagina moet `hidden_at IS NULL` ook hebben.
   De opmerking bij `listRecentItems` zegt het, en het beheer zelf (`listItems`) is de enige die verborgen berichten toont.
 - **Alternatieven:** een aparte tabel `hidden_items` (een join in elke query, en het bericht en zijn verbergen kunnen uit elkaar lopen); het bericht verwijderen (de importer zet het bij de volgende run terug).
+- **Later:** de voorwaarde staat nu in `isShown`, samen met `relevance = 'relevant'`; zie _De site toont alleen `relevant`, en het beheer toont alles met een woord erbij_.
 
 ### De importer laat een verborgen bericht met rust, in de query zelf
 
@@ -3136,6 +3137,88 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gevolg:** dit gaat tegen een regel uit #14 in ("geen duur"), met goedkeuring van de projecteigenaar.
   De kolommen komen niet in `items` voor nieuws: een nieuwsfeed geeft ze niet, dus ze blijven leeg.
 
+### Het relevantiefilter kijkt alleen naar de kop, en bewaart wat het niet toont
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het filter kijkt alleen naar de kop.
+  Twijfelgevallen en afgewezen berichten bewaren we, maar tonen we niet, tot het beheer ze kan beoordelen.
+- **Waarom:** de importer bewaart geen intro of categorie, en we lezen ze niet om te beslissen.
+  Zo blijft duidelijk waar het filter op rust, en blijft het één zuivere functie die we met koppen kunnen testen.
+  "Niets stil weggooien" betekent dat een mens een fout kan zien en herstellen (#76), en dat we regels kunnen verbeteren aan echte gevallen.
+- **Alternatieven:** ook de intro en de categorie van de feed lezen en weer weggooien (nauwkeuriger, maar dan verwerken we meer van de bron dan we tonen); of een taalmodel laten beoordelen (traag, duur, niet te testen).
+  Twijfelgevallen tonen met een label (het lijkt dan onze keuze); of afgewezen berichten niet bewaren (geen spoor).
+
+### De regels van het filter: hele woorden, zonder hoofdletters en accenten
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `judgeRelevance` in `apps/importer/src/relevance.ts` is één zuivere functie met de regels uit #74:
+  - de kop noemt "sc Heerenveen", of Abe Lenstra: `relevant`;
+  - de kop noemt "Heerenveen" met een voetbalwoord of de naam van iemand van de club: `relevant`;
+  - de kop noemt alleen "Heerenveen", of alleen de naam van iemand van de club: `doubtful`;
+  - anders: `irrelevant`.
+- **Hoe ze lezen:** de kop wordt kleine letters zonder accenten, "s.c." en "S. C." worden "sc", en de kop valt in woorden bij alles wat geen letter of cijfer is.
+  Zo telt "sc Heerenveen-fan", "SC HEERENVEEN" en "sc. Heerenveen" als de club.
+  "sc" moet direct voor "Heerenveen" staan.
+  Alleen het hele woord telt: "Asc Heerenveen" noemt de club niet, "Heerenveenseweg" en het bijvoeglijk naamwoord "Heerenveense" zijn niet "Heerenveen" (dat wordt `irrelevant`, tenzij er een naam of club bij staat), en "wandelwedstrijd" is geen "wedstrijd".
+  Een term van meer woorden, zoals "Europa League" of een volledige naam, telt alleen als die woorden naast elkaar staan.
+- **Wat de regels niet zien:** de wedstrijd van een andere club in Heerenveen, zoals een interland in het Abe Lenstra Stadion, heeft "Heerenveen" en een voetbalwoord en wordt dus `relevant`.
+  De lijsten kennen geen andere clubs en spelers van andere clubs: een kop met "Heerenveen" en een speler van Ajax zonder voetbalwoord is `doubtful`.
+  De koppen uit de logs van het prototype laten straks zien of dat vaak genoeg misgaat om een lijst met andere clubs te maken.
+  Een kop over de Abe Lenstra Boulevard komt er ook in; een moderator verbergt zo'n bericht.
+- **Abe Lenstra:** een kop met "Abe Lenstra" is `relevant`, ook zonder de club.
+  Hij is onze grootste speler aller tijden, dus berichten over hem horen op de site (besluit van de projecteigenaar, 25 oktober 2026; dit is een aanvulling op de regels van #74).
+- **Niet te streng:** de projecteigenaar wil een filter dat niet te streng is, want een bericht dat doorkomt is zo verborgen, en een bericht dat wordt tegengehouden ziet niemand.
+  Daarom staan de voetbalwoorden ruim in de lijst, ook woorden als coach, competitie, kampioen en stadion, die er samen met "Heerenveen" bijna altijd een voetbalkop van maken.
+- **Waarom:** een Nederlandse kop heeft de club bijna altijd met naam erin, en een gemeentebericht heeft "Heerenveen" zonder voetbal.
+  Hele woorden voorkomen de meeste valse treffers zonder een lijst met uitzonderingen.
+- **Alternatieven:** zoeken op een deel van een woord (meer treffers, ook "Asc" en straatnamen); een lijst met andere clubs om een wedstrijd van een andere club in Heerenveen te weren (nog een lijst die iemand bijhoudt, zonder dat we weten of het nodig is).
+
+### De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `apps/importer/src/relevance-terms.ts` heeft twee lijsten: de selectie en staf van sc Heerenveen in 2026/27 (de spelers, de hoofdtrainer, de assistenten en de directeuren), en voetbalwoorden.
+  De bovenkant van het bestand zegt wie ze bijhoudt (de projecteigenaar en de Coordinator) en wanneer ze zijn nagekeken (25 oktober 2026, naar de Nederlandse Wikipedia, bijgewerkt op 17 oktober 2026, en de selectie op vi.nl).
+  Van iemand staat de volledige naam op de lijst en de achternaam alleen, ook een veelvoorkomende zoals Kersten of Veldman.
+  Een achternaam alleen maakt een kop `relevant` met "Heerenveen" erbij, en zonder de club `doubtful`.
+  Een achternaam die ook een gewoon woord is, staat er niet alleen op (Proper, Machine, Schaken, De Haan, Zaal, Bakker, Brugge): die heeft de volledige naam nodig.
+  Hristiyan Petrov schrijven we zo, met een H (de projecteigenaar, 25 oktober 2026; Wikipedia schreef Christijan).
+  Spelers en staf die in 2026 vertrokken (onder anderen Brouwers, Hopland, Van Overeem, Bakker, Brugge en Zaal), staan er ook op.
+  Ouder vertrokken spelers staan er niet op; voeg er een toe als een kop laat zien dat we hem missen.
+- **Waarom:** de projecteigenaar wil het filter niet te streng en vindt nieuws over spelers die vertrokken zijn ook prettig om te lezen.
+  Een achternaam alleen is niet gevaarlijk: zonder "Heerenveen" is de kop `doubtful`, en een kop die doorkomt, is snel verborgen.
+  Alleen namen, geen andere gegevens over een persoon.
+- **Alternatieven:** alleen volledige namen (een kop als "Vente is los bij Heerenveen" valt dan weg, dat zagen we in de opname van Voetbal International); alle oud-spelers van de club (de lijst groeit nooit uit); de selectie elke dag ophalen bij een bron (een extra verzoek aan een derde en een extra stuk code voor een lijst die elke maand een regel wijzigt).
+
+### Een feed heeft een filter, `none` of `club`, en de importer beoordeelt elk bericht opnieuw
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `feeds.filter` is `none` (de feed gaat alleen over de club; zo staat het nu) of `club`, en begint op `none`.
+  `items.relevance` is `relevant`, `doubtful` of `irrelevant` en begint op `relevant`.
+  De migratie laat daarom elk bestaand bericht `relevant` en elke bestaande feed `none`.
+  De waarde van een feed met `club` stellen we in met een SQL-opdracht, die in de README van de importer staat; de seed laat `filter` met rust, zodat een ingestelde waarde een nieuwe seed overleeft.
+  Een scherm daarvoor komt niet in dit issue.
+- **Hoe de importer het doet:** bij elke run beoordeelt hij elk bericht van een feed met `club`, ook een bericht dat hij al had, zodat een betere regel op oude berichten werkt.
+  Een andere waarde telt als bijgewerkt.
+  Bij een feed met `none` is de waarde altijd `relevant`.
+  Een verborgen bericht (`hidden_at`) houdt zijn waarde, in de query zelf, net als de andere kolommen (zie _De importer laat een verborgen bericht met rust, in de query zelf_).
+  Het logboek van een run (`import_results`) krijgt per feed drie tellers, `relevant`, `doubtful` en `irrelevant`: wat het filter van elk bericht in de feed vond, ook van een verborgen bericht.
+  Het verslag van de opdracht heeft ze erbij.
+- **Waarom:** een nieuwe feed wordt zo een regel in de database, en zonder filter verandert er voor de twee bronnen van nu niets.
+  De waarde bij elke run opnieuw bepalen maakt van het filter een regel en geen stempel: wie een naam toevoegt, ziet het resultaat bij de volgende run, zonder een aparte opdracht.
+- **Alternatieven:** het filter in de configuratie van de importer of op de bron (een feed van dezelfde bron kan anders zijn); alleen bij een nieuw bericht beoordelen (een betere regel werkt dan nooit op wat er al is); `relevance` overschrijven voor een verborgen bericht (dat gaat tegen #75 in).
+
+### De site toont alleen `relevant`, en het beheer toont alles met een woord erbij
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** elke query die berichten voor bezoekers toont, gaat door één functie, `isShown` in `packages/db/src/queries.ts`: `relevance = 'relevant'` en `hidden_at IS NULL`.
+  Dat zijn de koppen van de homepage, de afleveringen en hun aantal, en de podcasts in het filter.
+  `/beheer/berichten` blijft alles tonen, van elke waarde, zodat een moderator ook een twijfelgeval vindt, en zet bij een bericht "twijfelgeval, niet op de site" of "niet over de club, niet op de site".
+  Tests: de queries, de koppen en afleveringen in de site, en de controle in de browser (`e2e/relevance.spec.ts`) dat de twijfelgevallen op geen enkele pagina staan.
+  De sitemap en de RSS-feed van Updates tonen geen berichten.
+- **Waarom:** één plek voor de voorwaarde voorkomt dat een nieuwe query er een vergeet.
+  De moderator moet een bericht kunnen vinden dat het filter ten onrechte weghoudt.
+- **Alternatieven:** de voorwaarde in elke query zelf (zoals bij `hidden_at` tot nu toe); een apart scherm voor twijfelgevallen (een eigen issue).
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
@@ -3258,6 +3341,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of één alinea met een `br` tussen de zinnen, zodat de links naar de volgende regel gaan zodra ze niet meer passen, zoals in de header.
   Dan moet de ESLint-regel `br` toestaan, of krijgt het designsysteem een component voor een regeleinde.
 - **Later:** zie _De links in de footer zijn blauw, zoals de andere links_; de kleur van de links is daarmee vervangen.
+  De lijn bovenaan en de rol `--hf-colour-border-footer` zijn daarna weggehaald; zie _De footer heeft geen lijn bovenaan_.
 
 ### Metadata, sitemap en canonieke URL's gebruiken het adres van de eigen omgeving
 
@@ -3849,3 +3933,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `visibility: hidden` haalt de kop uit de toegankelijkheidsboom en laat een element met focus verdwijnen.
 - **Gecontroleerd en niet gecontroleerd:** de code is gelijk aan die na #251.
   Niet op een echte telefoon, niet in iOS 26 en niet in de app op het beginscherm.
+
+### De footer heeft geen lijn bovenaan
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de footer heeft geen lijn bovenaan.
+  Het kleurverschil met de body is genoeg: de footer is een vlak van rand tot rand dat alleen door zijn kleur van de body verschilt.
+  De rol `--hf-colour-border-footer` is weggehaald, met zijn regel in de tabel Tokens › Kleur en zijn contrastpaar.
+- **Waarom:** een lijn bovenaan de footer maakt hem glazig.
+  Het vlak van de footer is al te zien aan zijn kleur, en de lijn voegt daar niets aan toe.
+  Zonder rand heeft de footer geen strook van 1 pixel meer buiten het vlak waar de strepen van de Friese vlag hun maat van nemen, dus de twee delen van de strepen sluiten precies op elkaar aan.
+- **Alternatieven:** de lijn houden zoals hij is; een zachtere lijn (dichter bij de kleur van de footer, maar nog steeds een lijn die het vlak omlijst).

@@ -209,6 +209,22 @@ describe('listRecentItems', () => {
     ])
   })
 
+  it.each(['doubtful', 'irrelevant'] as const)(
+    'gives no %s item, and the items around it, so the limit is filled with relevant items',
+    async (relevance) => {
+      const ids = await addSource()
+
+      await addItem(ids, 'nieuwste', new Date('2026-10-22T08:00:00Z'), { relevance })
+      await addItem(ids, 'tweede', new Date('2026-10-22T07:00:00Z'))
+      await addItem(ids, 'derde', new Date('2026-10-22T06:00:00Z'))
+
+      expect((await listRecentItems(database.db, { limit: 2, until: now })).map((item) => item.title)).toEqual([
+        'Kop tweede',
+        'Kop derde',
+      ])
+    },
+  )
+
   it('gives an item again once it is shown', async () => {
     const ids = await addSource()
 
@@ -594,6 +610,42 @@ describe('the podcasts', () => {
       expect((await listPodcastEpisodes(database.db, { limit: 25, podcast: 'abe', until: now })).length).toBe(1)
       expect(await countPodcastEpisodes(database.db, { until: now })).toBe(1)
       expect(await countPodcastEpisodes(database.db, { podcast: 'abe', until: now })).toBe(1)
+    })
+
+    it.each(['doubtful', 'irrelevant'] as const)('gives no %s episode, and does not count it', async (relevance) => {
+      const ids = await addSource({ slug: 'abe' })
+
+      await addItem(ids, 'zichtbaar', new Date('2026-10-20T08:00:00Z'))
+      await database.db.insert(items).values({
+        ...ids,
+        key: 'twijfel',
+        publishedAt: new Date('2026-10-21T08:00:00Z'),
+        relevance,
+        title: 'Aflevering twijfel',
+        url: 'https://testpodcast.test/e/twijfel',
+      })
+
+      expect((await listPodcastEpisodes(database.db, { limit: 25, until: now })).map((e) => e.title)).toEqual([
+        'Aflevering zichtbaar',
+      ])
+      expect((await listPodcastEpisodes(database.db, { limit: 25, podcast: 'abe', until: now })).length).toBe(1)
+      expect(await countPodcastEpisodes(database.db, { until: now })).toBe(1)
+      expect(await countPodcastEpisodes(database.db, { podcast: 'abe', until: now })).toBe(1)
+    })
+
+    it('leaves a podcast out of the filter when none of its episodes is relevant', async () => {
+      const ids = await addSource({ slug: 'abe' })
+
+      await database.db.insert(items).values({
+        ...ids,
+        key: 'twijfel',
+        publishedAt: new Date('2026-10-21T08:00:00Z'),
+        relevance: 'doubtful',
+        title: 'Aflevering twijfel',
+        url: 'https://testpodcast.test/e/twijfel',
+      })
+
+      expect(await listPodcasts(database.db)).toEqual([])
     })
 
     it('leaves a podcast out of the filter when all its episodes are hidden', async () => {
