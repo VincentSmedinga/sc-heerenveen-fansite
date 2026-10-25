@@ -14,6 +14,10 @@ Closes #
 
 <!-- Wat heb je gedraaid of bekeken, en hoe doet een ander dat na? Bijvoorbeeld een verhaal in Storybook of een pagina in een lokale build. -->
 
+### Screenshots
+
+<!-- Verandert er iets wat bezoekers zien? Zet er een tot drie neer, twee naast elkaar in een tabel: telefoon (390 pixels) en bureaublad (900 pixels), voor en na als de wijziging een verschil is. Licht, tenzij het thema of de kleuren de wijziging zijn. Alleen verzonnen gegevens, en een Nederlandse alternatieve tekst per plaatje. Ziet niemand iets? Schrijf: "Geen screenshots: de wijziging is niet zichtbaar." Zie AGENTS.md, onder Screenshots. -->
+
 ## Review
 
 De reviewer meldt per onderdeel: gecontroleerd, of niet van toepassing, met een reden. Het verslag staat als reactie bij deze pull request.

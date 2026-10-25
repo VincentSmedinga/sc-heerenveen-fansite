@@ -64,6 +64,7 @@ Building, reviewing, design and research for their own sake, and help with the o
   It builds itself only when there is no other way, and says so.
 - Removes stale branches and worktrees without asking: the remote and local branches of merged or closed pull requests, and their worktrees.
   It first checks that nothing uncommitted or unpushed is lost.
+  It leaves the branch `pr-screenshots` alone, on the remote and locally: it is never merged and never deleted (see _Screenshots_).
 - Never merges.
 
 ### Builder
@@ -73,6 +74,7 @@ Picks up one issue, in its own branch and worktree.
 - Writes the code, with tests, and stories for anything visible.
 - Adds the decisions from the issue, and its own, to `docs/beslissingen.md`.
 - Runs the checks, commits on its own branch, and opens a pull request once the owner agrees.
+- Puts one to three screenshots in the description of a pull request that changes what visitors see, or says that nobody sees the change (see _Screenshots_).
 - Starts the Reviewer right after opening the pull request, except for a pull request that only changes documentation or stories without a visual change (see _Reviews_), and fixes what the Reviewer and CI find.
 - Stays within the issue.
   Anything else it notices goes to the Coordinator as a note or a proposal for an issue, not into the branch.
@@ -171,6 +173,62 @@ For agents:
 - The Builder posts the report on the pull request as a comment, unchanged, and ticks the three review checkboxes in the description to match.
 - Before opening a pull request, the Builder goes through the code and security checklist itself.
 
+## Screenshots
+
+A pull request that changes what visitors see shows it in its description, so the owner and the Reviewer see the change at a glance.
+They are one to three images, not a gallery.
+The Builder makes them right after the owner agrees to open the pull request.
+The decisions are in `docs/beslissingen.md`, under _Screenshots staan op een eigen branch, niet in de repository_ and the three decisions after it.
+
+- **What:** light, on a phone (390 pixels wide) and on a small desktop (900 pixels wide), at one device pixel per CSS pixel.
+  Take only the widths that show the change.
+  Before and after, side by side, only when the change is a difference.
+- **Dark:** only with a reason: the change is about the theme or the colours (the switch for light and dark, a token, contrast, a component that looks different in dark), or something shows in dark that doesn't in light.
+  Never two copies that differ only in the theme.
+- **Made-up data only:** a story, or the built site with the made-up data of the accessibility checks.
+  Never a real forum discussion, a screen name of a member, anything from the database of the host or a secret.
+- **Nobody sees it:** a change to a test, a migration, tooling or documentation has no screenshots, and the description says so ("Geen screenshots: de wijziging is niet zichtbaar.").
+- **Alt text:** Dutch, and it says what the image shows: "De footer op een telefoon, Donker gekozen".
+
+How to make them:
+
+1. For a page, build and start the site on your own computer with the made-up data, as the README of the site says under _Screenshots maken_.
+   For a component, build Storybook (`pnpm --filter design-system build-storybook`) and serve the folder `packages/design-system/storybook-static`.
+2. `pnpm screenshots <address of the build> <path or story id>...` writes the PNGs into `screenshots/` (git ignores it), and adds `--dark` when dark is needed.
+   It takes only a build on this computer.
+   A path starts with a slash (`/podcasts`); anything else is the id of a story (`componenten-page-footer--light`).
+   Look at the images before you use them.
+
+Where they go: the branch `pr-screenshots` holds only a `README.md` and one folder per pull request, `pr-<number>/`.
+It is never merged and never deleted, and the folders of merged pull requests stay, because closed descriptions point to them.
+With the pull request open, so with its number:
+
+```sh
+git fetch origin pr-screenshots
+git worktree add --detach ../pr-screenshots-<number> origin/pr-screenshots
+mkdir ../pr-screenshots-<number>/pr-<number>
+cp screenshots/*.png ../pr-screenshots-<number>/pr-<number>/
+cd ../pr-screenshots-<number>
+git add pr-<number> && git commit -m "docs: add screenshots for pull request <number>"
+git push origin HEAD:pr-screenshots
+cd - && git worktree remove ../pr-screenshots-<number>
+```
+
+Push the way you push other branches.
+If the push is rejected because another Builder pushed first, run `git pull --rebase origin pr-screenshots` in that worktree and push again.
+The first time, the branch didn't exist: it was made with `git worktree add --orphan -b pr-screenshots <path>`, a first commit of `README.md`, and a push.
+
+Then put the images in the description with `gh pr edit <number> --body-file <file>`, in the place under _Zo controleer je het_, two next to each other in a table.
+The address has `?raw=true` and `blob`, so that GitHub shows the image:
+
+```markdown
+| Telefoon                                                                                                                                       | Bureaublad                                                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ![De homepage op een telefoon](https://github.com/VincentSmedinga/sc-heerenveen-fansite/blob/pr-screenshots/pr-<number>/home-390.png?raw=true) | ![De homepage op een bureaublad](https://github.com/VincentSmedinga/sc-heerenveen-fansite/blob/pr-screenshots/pr-<number>/home-900.png?raw=true) |
+```
+
+The Reviewer can't render a page, so it can't check the images themselves: it reports screenshots that are missing from a visible change as a finding (not a blocker), and the owner looks at what is there.
+
 ## The Storybook server
 
 Storybook has an MCP server for agents, in the dev server at `http://localhost:6006/mcp`.
@@ -233,6 +291,7 @@ That is expected; carry on from the code.
    The git hooks fix the formatting and check the message.
 6. Ask the owner, then push and open a pull request with the template in `.github/pull_request_template.md`.
    Tick the boxes in the issue to match what the pull request delivers, and turn Auto-fix on (see _Reviews_).
+   If the change shows in the browser, add the screenshots to the description right after (see _Screenshots_).
 7. Right after opening the pull request, start the Reviewer and post its report (see _Reviews_), unless the pull request has no Reviewer.
    Fix its findings, for at most two rounds, and fix CI if Auto-fix reports a failed check.
 8. After the merge, remove the worktree (`git worktree remove`).
@@ -247,6 +306,7 @@ Agents also follow these:
 - **Go-ahead:** never push, open a pull request or merge without the owner's go-ahead.
   A go-ahead covers what you asked for, such as one push, or one push and the pull request it opens; a later push needs a new one, except for the fixes on an open pull request that _Reviews_ lists.
   Posting the Reviewer's report, ticking checkboxes and removing stale branches and worktrees need none.
+  Neither does pushing screenshots to `pr-screenshots` for a pull request that is open (see _Screenshots_): it holds nothing else, and `main` never sees it.
 - **Branch names:** the app starts a session on a `claude/` branch.
   Rename it with `git branch -m` to a name that follows `CONTRIBUTING.md` before the first commit, without asking.
 - **The prototype stays local.**

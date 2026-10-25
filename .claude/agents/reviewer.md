@@ -80,6 +80,11 @@ Go through each checklist point by point, for what the change touches.
 - **Accessibility:** every topic in `docs/toegankelijkheid.md` that the change touches.
 - **Editorial and source policy:** the checklist at the end of the Redactie chapter.
 
+A change that alters what visitors see (pages, components, styles, the text on the site) needs screenshots in the description, or a line that says nobody sees the change (`AGENTS.md`, under _Screenshots_).
+You can't render a page or look at an image, so you only check that they are there, that each has Dutch alt text that says what it shows, and that the file names and the alt text give no sign of real data, such as a member's screen name.
+A missing set is a **Klein** finding, in the code and security section: it doesn't change the verdict.
+Don't list the looking under Open punten; that is the owner's own check.
+
 Evidence is what you read or ran, and what came out: a command and its result, a file and line, a story or a page.
 "Looks fine" is not evidence.
 You need it for every point, but you only write it in the report for a finding or for something you couldn't check.
