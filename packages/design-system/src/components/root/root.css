@@ -3,6 +3,9 @@
 @layer hf.base {
   html {
     background-color: var(--hf-colour-background-page);
+
+    /* Keeps an element with focus from scrolling in behind the strip over the top inset (see .hf-page in page.css). */
+    scroll-padding-block-start: env(safe-area-inset-top, 0);
   }
 
   /*
