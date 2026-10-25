@@ -415,6 +415,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** anders schrijft elke Builder zijn eigen wegwerptest, met elk eigen breedtes en bestandsnamen, en vergeet hij de breedte of kiest hij donker zonder reden.
 - **Alternatieven:** alleen beschrijven in `AGENTS.md`, zoals het andere project; dat is minder code, maar elke Builder bedenkt de test opnieuw.
 
+### Een laatste controle van de Builder vóór de eerste push
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `AGENTS.md` heeft een stap _De laatste controle_ voor de Builder, vlak voordat hij om de go-ahead vraagt.
+  Elk punt is een opdracht of een blik van een minuut: alles gecommit, elk acceptatiecriterium naast de diff, zoeken naar de tekst die de wijziging verving, de rooktest, de beslissingen en hun regels "Later", de beweringen in tekst en commentaar, tests, toegankelijkheid, en twee zoekopdrachten voor te brede commentaarregels en twee zinnen op één regel.
+  `CONTRIBUTING.md` zet de rooktest bij _De controles_, want CI draait hem en `pnpm test` niet.
+  Een ESLint-regel of een nieuw script voor de breedte van commentaar komt er niet.
+- **Waarom:** de reviewer deed in 87 verslagen over de pull requests #103 tot en met #241 123 bevindingen, en 16 van de 68 eerste verslagen hadden er geen.
+  Het meeste daarvan is klein en komt steeds terug: tekst of een beslissing die niet meer klopt na de wijziging (46 keer), een wijziging die afwijkt van het issue zonder dat het issue is bijgewerkt (14 keer, 7 daarvan Blokkerend), een rooktest of testlijst die niet is aangepast (11 keer, 4 daarvan Blokkerend, vier keer rood in CI), commentaarregels die ruim breder zijn dan 120 tekens (6 keer) en Nederlands dat niet loopt, of twee zinnen op één regel (13 keer).
+  De rooktest staat niet bij _De controles_, dus de Builder draaide hem niet.
+  De eerste zoekopdracht vindt de te brede commentaarregels in alle zes de pull requests waar de reviewer ze vond (#166, #184, #198, #210, #238 en #240).
+  De tweede vindt de twee regels met twee zinnen van #150, maar niet de zin met een komma van #210: dat blijft aan de Builder en de reviewer.
+  Een ESLint-regel (`max-len`) vindt 313 regels in de code van nu, dus hij moet eerst alles opruimen, en kijkt niet naar CSS; stylelint heeft geen regel voor de breedte van commentaar.
+- **Alternatieven:** `max-len` voor commentaar in ESLint zetten; dat vraagt eerst een opruiming van de bestaande regels en laat CSS buiten beschouwing.
+  Een eigen script dat de diff controleert; dat is code om te onderhouden voor iets wat twee regels doen.
+  Niets doen en de reviewer deze dingen laten melden; dat kost een reviewronde per pull request, en de limiet is twee.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host

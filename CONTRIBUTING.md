@@ -65,6 +65,16 @@ Start die eerst met `docker compose up -d --wait` (zie de [README van het packag
 `pnpm test:a11y` toetst na de build de pagina's met axe.
 Het heeft die database ook nodig, en eenmalig Chromium (zie de [README van de site](apps/site/README.md)).
 De gebouwde site maakt zelf de tabellen en zet de testbronnen erin.
+Verandert je wijziging de opmaak of de tekst van een pagina, of een regel in het logboek van de site?
+Draai dan na `pnpm build` ook de rooktest, zoals CI dat doet:
+
+```sh
+site=$(mktemp -d)/site
+pnpm --filter site assemble "$site"
+pnpm --filter site smoke "$site"
+```
+
+`pnpm test` draait de rooktest niet, en hij heeft dezelfde database nodig.
 Na een wijziging in het designsysteem draai je ook `pnpm --filter design-system build-storybook`.
 Controleer de titel van de pull request met:
 

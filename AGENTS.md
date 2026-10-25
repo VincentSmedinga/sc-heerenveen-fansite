@@ -295,13 +295,49 @@ That is expected; carry on from the code.
 4. Run the checks listed in `CONTRIBUTING.md` under _De controles_, and check the pull request title.
 5. Commit.
    The git hooks fix the formatting and check the message.
-6. Ask the owner, then push and open a pull request with the template in `.github/pull_request_template.md`.
+6. Do the final check (see _The final check_), then ask the owner, push and open a pull request with the template in `.github/pull_request_template.md`.
    Tick the boxes in the issue to match what the pull request delivers, and turn Auto-fix on (see _Reviews_).
    If the change shows in the browser, add the screenshots to the description right after (see _Screenshots_).
 7. Right after opening the pull request, start the Reviewer and post its report (see _Reviews_), unless the pull request has no Reviewer.
    Fix its findings, for at most two rounds, and fix CI if Auto-fix reports a failed check.
 8. After the merge, remove the worktree (`git worktree remove`).
    If your next branch builds on the merged one, rebase it onto `main`.
+
+### The final check
+
+Do this after the last commit and before you ask for the go-ahead.
+It takes a few minutes.
+The Reviewer's reports on pull requests #103 to #241 kept finding these things, and most are cheaper to find yourself.
+Each point is an action, not a reminder.
+
+- **Committed:** `git status` shows nothing.
+  The Reviewer and CI read the head of the branch, so a fix that stays in your working copy is checked by nobody.
+- **Criteria:** for each acceptance criterion of the issue, find the line of the diff that meets it.
+  If the pull request differs from the issue (a size, a name, an extra change nobody asked for), or if you can't tick a box, tell the owner now, so the Coordinator can add an "Aangevuld" line to the issue before the review.
+  Tick only the boxes that are true.
+- **What you replaced:** search the whole repository for the text, name, number or log line that your change removed or renamed (`git grep`).
+  Look in `docs/`, the READMEs, MDX files and stories, comments, tests, `.env.example` and the page texts in `apps/site/scripts/smoke.js`.
+  Update every hit, or know why it stays.
+- **Smoke test:** if the change alters the markup or text of a page, or a line in the log, run the smoke test as `CONTRIBUTING.md` says under _De controles_.
+  `pnpm test` doesn't run it, and CI does.
+- **Decisions:** the decisions from the issue and your own are in `docs/beslissingen.md`, in the fixed format, with the date of the decision.
+  Read each older decision that your change touches.
+  Where it says something the code no longer does, add a **Later:** line.
+- **Claims:** check the file names, test names, numbers and words like "every" or "always" in the documentation, comments, stories and release notes you wrote against the code.
+- **Tests:** each new behaviour has a test that fails when the behaviour breaks.
+  A test you started with is still there.
+- **Accessibility:** open `docs/toegankelijkheid.md` and go through the topics that your change touches.
+  For a list of repeated controls, check that each name says which item it belongs to.
+  For a form, check that every field that can fail shows its own error, and that a failure without a field still gets the focus.
+- **Width and sentences:** these two commands print nothing when the change is fine.
+  Break what the first one prints at 120 characters, and put each sentence the second one prints on its own line.
+
+  ```sh
+  git diff -U0 origin/main...HEAD -- . ':!*.md' ':!*.mdx' ':!*.json' ':!pnpm-lock.yaml' | grep -E '^\+[[:space:]]*(//|/\*|\*).{125,}'
+  git diff -U0 origin/main...HEAD -- '*.md' '*.mdx' | grep -E '^\+.*[a-z0-9)`][.!?] [A-Z]' | grep -vE '^\+[[:space:]]*\|'
+  ```
+
+  Read the Dutch you wrote once more against _Nederlands schrijven_ in `CONTRIBUTING.md`: ordinary words, no two sentences joined by a comma, no sentence of more than about twenty words.
 
 ## Conventions
 
