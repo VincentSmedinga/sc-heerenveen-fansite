@@ -19,6 +19,12 @@ const pages = [
   { path: '/privacy', status: 200 },
   { path: '/toegankelijkheid', status: 200 },
   { path: '/updates', status: 200 },
+  // The way in to the admin. The admin itself is no page for a visitor without a session: it goes to the login page.
+  { path: '/beheer/inloggen', status: 200 },
+  { path: '/beheer/inloggen?fout=ongeldig', status: 200 },
+  { path: '/beheer/inloggen?fout=link', status: 200 },
+  { path: '/beheer/inloggen/verstuurd', status: 200 },
+  { path: '/beheer/inloggen/bevestigen?token=onbekend', status: 200 },
   { path: '/bestaat-niet', status: 404 },
 ]
 

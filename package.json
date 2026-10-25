@@ -1,6 +1,6 @@
 {
   "name": "sc-heerenveen-fansite",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "De fansite over sc Heerenveen, sinds 1997: koppen en links, zonder advertenties.",
   "license": "EUPL-1.2",
@@ -11,6 +11,8 @@
     "pnpm": "^12"
   },
   "scripts": {
+    "admin:create": "pnpm --filter site run admin create",
+    "admin:revoke": "pnpm --filter site run admin revoke",
     "build": "pnpm -r --if-present run build",
     "db:generate": "pnpm --filter @fansite/db db:generate",
     "db:migrate": "pnpm --filter @fansite/db db:migrate",

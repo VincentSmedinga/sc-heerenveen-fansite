@@ -55,6 +55,46 @@ const layersFile = path.resolve(import.meta.dirname, '../../../packages/design-s
 const declaredLayers = layersIn(readFileSync(layersFile, 'utf8'))
 assert.ok(declaredLayers.length > 0, 'layers.css declares no layers')
 
+/**
+ * Checks what the admin sends on this environment, whichever it is: a visitor without a session goes to the login page, and
+ * every response under /beheer, a redirect too, keeps search engines and caches away and sends no referrer. Returns the
+ * responses of the login pages, so the caller can look at more.
+ */
+async function checkAdmin() {
+  const admin = await fetch(`${origin}/beheer`, { redirect: 'manual' })
+  assert.equal(admin.status, 307)
+  assert.equal(new URL(admin.headers.get('location') ?? '', origin).pathname, '/beheer/inloggen')
+
+  const responses = [admin]
+
+  for (const path of ['/beheer/inloggen', '/beheer/inloggen/verstuurd', '/beheer/inloggen/bevestigen?token=onbekend']) {
+    const response = await fetch(origin + path)
+    const html = await response.text()
+    assert.equal(response.status, 200, path)
+    assert.match(html, /<meta name="robots" content="noindex, nofollow"\/>/, path)
+    assert.doesNotMatch(html, /<link rel="canonical"/, path)
+    responses.push(response)
+  }
+
+  const login = await (await fetch(`${origin}/beheer/inloggen`)).text()
+  assert.match(login, /<h1[^>]*>Inloggen voor beheer<\/h1>/)
+  assert.match(login, /<input[^>]*type="email"/)
+  assert.doesNotMatch(login, /type="password"/)
+
+  for (const response of [...responses, await fetch(`${origin}/beheer/bestaat-niet`)]) {
+    assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow', response.url)
+    // Next.js sends a longer value of its own for a page it renders on each request (`private, no-cache, no-store, ...`).
+    assert.match(response.headers.get('cache-control') ?? '', /(?:^|,\s*)no-store(?:,|$)/, response.url)
+    assert.equal(response.headers.get('referrer-policy'), 'no-referrer', response.url)
+    assert.equal(response.headers.get('set-cookie'), null, `${response.url} sets a cookie without a login`)
+  }
+
+  const robots = await (await fetch(`${origin}/robots.txt`)).text()
+  assert.match(robots, /^Disallow: \/beheer$/m, 'robots.txt must refuse /beheer')
+
+  return responses
+}
+
 /** Fetches the feed of Updates and checks it: RSS, an item per version, and links to the site in `siteOrigin`. */
 async function checkFeed(siteOrigin) {
   const feed = await fetch(`${origin}/updates/feed.xml`)
@@ -372,6 +412,7 @@ await withEmptyDatabase((database) =>
     const robotsText = await robots.text()
     assert.match(robotsText, /^Disallow: \/$/m)
     assert.doesNotMatch(robotsText, /^Sitemap:/im, 'acceptance refuses everything, so it points to no sitemap')
+    await checkAdmin()
 
     // Each page has its description, canonical URL and Open Graph tags with the address of acceptance, and the picture for
     // shared links is a file of the site itself.
@@ -497,6 +538,8 @@ await withEmptyDatabase((database) =>
     const robots = await (await fetch(`${origin}/robots.txt`)).text()
     assert.doesNotMatch(robots, /^Disallow: \/$/m)
     assert.match(robots, /^Sitemap: https:\/\/sc\.heerenveen\.org\/sitemap\.xml$/m)
+    // Production is indexable, but the admin is not, there too.
+    await checkAdmin()
 
     for (const { path } of pages) {
       const response = await fetch(origin + path)

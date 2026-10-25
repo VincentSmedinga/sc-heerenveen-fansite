@@ -5,6 +5,7 @@ import {
   customType,
   date,
   datetime,
+  index,
   int,
   mediumtext,
   mysqlEnum,
@@ -241,3 +242,68 @@ export const robotsTxt = mysqlTable('robots_txt', {
   rules: mediumtext('rules').notNull(),
   fetchedAt: datetime('fetched_at').notNull(),
 })
+
+export const adminRoles = ['beheerder', 'moderator'] as const
+
+export type AdminRole = (typeof adminRoles)[number]
+
+/**
+ * The accounts that may log in to the admin. There is no sign-up: the command `admin:create` makes one, and
+ * `admin:revoke` turns it off (`disabled_at`) and removes its sessions. `email` is lowercase. Times are UTC.
+ */
+export const adminUsers = mysqlTable('admin_users', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  email: varchar('email', { length: 254 }).notNull().unique(),
+  role: mysqlEnum('role', adminRoles).notNull(),
+  createdAt: datetime('created_at')
+    .notNull()
+    .default(sql`(UTC_TIMESTAMP())`),
+  disabledAt: datetime('disabled_at'),
+})
+
+export type AdminUser = typeof adminUsers.$inferSelect
+
+/**
+ * The links that were mailed to log in, until they are used or expire. Only an account that exists gets a row. The table
+ * keeps the SHA-256 of the token, never the token itself, so a copy of the database logs nobody in. Times are UTC.
+ */
+export const adminLoginLinks = mysqlTable('admin_login_links', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+  userId: int('user_id', { unsigned: true })
+    .notNull()
+    .references(() => adminUsers.id, { onDelete: 'cascade' }),
+  expiresAt: datetime('expires_at').notNull(),
+})
+
+/**
+ * The sessions of the admin, on the server. The cookie holds a random token and nothing else; the table keeps its SHA-256.
+ * A session is valid for 12 hours after `last_seen_at` and for 7 days after `created_at`, whichever ends first. Times are UTC.
+ */
+export const adminSessions = mysqlTable('admin_sessions', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+  userId: int('user_id', { unsigned: true })
+    .notNull()
+    .references(() => adminUsers.id, { onDelete: 'cascade' }),
+  createdAt: datetime('created_at').notNull(),
+  lastSeenAt: datetime('last_seen_at').notNull(),
+})
+
+/**
+ * The requests for a login link of the last 15 minutes, for the rate limit: how many for one address and how many for the
+ * whole site. It keeps the SHA-256 of the address and the time, for known and unknown addresses alike, and no IP address.
+ * Rows older than 15 minutes are removed with the next request. Times are UTC.
+ */
+export const adminLoginAttempts = mysqlTable(
+  'admin_login_attempts',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    addressHash: varchar('address_hash', { length: 64 }).notNull(),
+    attemptedAt: datetime('attempted_at').notNull(),
+  },
+  (table) => [
+    index('admin_login_attempts_address_hash_attempted_at_idx').on(table.addressHash, table.attemptedAt),
+    index('admin_login_attempts_attempted_at_idx').on(table.attemptedAt),
+  ],
+)
