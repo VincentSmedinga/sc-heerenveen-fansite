@@ -22,6 +22,6 @@ export const releaseNotes: ReleaseNotes = {
     'Menu bovenaan: Nieuws, Podcasts en Forum. Onderaan: Over ons, Contact, Bronnen, Privacy, Toegankelijkheid en Updates.',
     'Licht of donker: kies zelf, onderaan de pagina.',
     'Site op je beginscherm gezet? Trek de pagina omlaag om te verversen.',
-    'Toegankelijkheid: lees wat wel en niet werkt met een schermlezer of toetsenbord.',
+    'Toegankelijkheid: wat we beloven, wat we doen en hoe je een probleem meldt.',
   ],
 }
