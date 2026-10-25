@@ -4058,7 +4058,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** de kaart is het component `ArticleCard` van het designsysteem, de pagina gebruikt `Article`.
   De titel en "Lees verder" in de kaart gaan naar dezelfde pagina; de naam van "Lees verder" noemt het artikel, zodat de link ook los begrijpelijk is.
   De kaart telt niet mee voor de tien koppen van "Laatste nieuws".
-  Een artikel krijgt geen eigen afbeelding bij een gedeelde link; het heeft het schild van de site, zoals elke pagina (zie _Het schild van de site, als PNG van ons eigen domein, is de afbeelding bij het delen van links_).
+  Een artikel krijgt geen eigen afbeelding bij een gedeelde link; het heeft hetzelfde plaatje als elke pagina: het schild op het donkerblauw van de kop, zoals de app-iconen (zie _Het schild van de site, als PNG van ons eigen domein, is de afbeelding bij het delen van links_).
+  De projecteigenaar koos dit op 25 oktober 2026; het issue (#263) zegt dat "geen afbeelding bij de link" geen eigen afbeelding per artikel betekende.
   Een eigen afbeelding per artikel kan later.
 
 ### Artikeltekst heeft een kleine eigen opmaak, die een eigen functie omzet
