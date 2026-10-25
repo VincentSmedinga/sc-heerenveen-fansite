@@ -2010,6 +2010,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alles of niets lokaal, omdat een half ingevulde set een vergissing is die de ontwikkelaar anders pas bij het versturen ziet.
 - **Gevolg:** de rooktest en de toegankelijkheidscontrole starten de site met `SITE_ENV=acceptance`; ze krijgen verzonnen instellingen mee, want geen pagina mailt.
 - **Alternatieven:** ongecodeerd mailen als de server geen TLS kent (onveilig); de instellingen op acceptatie optioneel laten (de site start dan, maar mailt niet).
+- **Later:** het contactformulier (#99) mailt nu, en de toegankelijkheidscontrole stuurt die mail naar een nepserver; zie _De browsertest mailt naar een eigen nepserver die de mails in een map zet_.
+  De rooktest houdt de verzonnen instellingen, want hij laadt geen pagina die mailt.
 
 ### Een foutmelding van `sendMail` bevat alleen een code, en een adres is precies één adres
 
@@ -2036,6 +2038,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Niet getest:** poort 465 (TLS vanaf het begin) en een echte mailserver; de test dekt STARTTLS, en de eigenaar controleert de rest met de proefmail op acceptatie.
 - **Alternatieven:** `smtp-server` als devDependency; dat brengt een tweede versie van nodemailer mee, en `assemble` weigert twee versies van één pakket.
   Of een certificaat in de repository.
+- **Later:** het contactformulier (#99) importeert `sendMail`, dus de standalone build neemt nodemailer nu mee; zie _De browsertest mailt naar een eigen nepserver die de mails in een map zet_.
 
 ### Het contactformulier mailt de redactie en slaat niets op
 
@@ -2104,6 +2107,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 24 oktober 2026
 - **Besluit:** na een verzending met fouten, of een mislukte verzending, krijgt het blok bovenaan de focus (`tabIndex={-1}`, `focus()` in een effect van `ContactForm`).
   Mislukt het versturen of is de limiet bereikt, dan staat dat in een `Card` met een kop, met een link `mailto:` naar de redactie, en geen `ErrorSummary`: er is geen veld om naartoe te linken.
+  Die `Card` heeft ook `tabIndex={-1}`, en krijgt dan de focus.
 - **Waarom:** met JavaScript laadt de pagina niet opnieuw, dus een schermlezer begint niet bovenaan en hoort anders niets (zie _Een formulier laat de controle aan de site_).
   Zonder JavaScript laadt de pagina opnieuw en staat het blok bovenaan; het effect doet dan na het laden hetzelfde.
 - **Alternatieven:** `role="alert"` op het blok; dat leest op een pagina die opnieuw laadt niet betrouwbaar voor.

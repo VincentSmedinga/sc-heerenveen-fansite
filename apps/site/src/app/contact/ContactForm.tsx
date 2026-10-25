@@ -21,11 +21,12 @@ import { type ContactState, emptyState, fieldNames, honeypotName, maxLengths, su
 import { sendContactMessage } from './actions'
 
 const summaryId = 'fouten'
+const failureId = 'mislukt'
 
 /** The failure that is not about one field: the mail did not go, or too many messages came in. */
 const Failure = ({ failure }: { failure: 'limit' | 'send' }) => (
-  <Card aria-labelledby="mislukt" surface="soft">
-    <Heading id="mislukt" level={2}>
+  <Card aria-labelledby={`${failureId}-kop`} id={failureId} surface="soft" tabIndex={-1}>
+    <Heading id={`${failureId}-kop`} level={2}>
       {failure === 'send' ? 'Het versturen is niet gelukt.' : 'Er komen nu veel berichten binnen.'}
     </Heading>
     <Text>
@@ -49,17 +50,21 @@ export function ContactForm() {
   // After a submit the visitor must hear what is wrong. Without JavaScript the page loads again and the screen reader
   // starts at the top, with JavaScript the focus goes to the block, because the page doesn't change.
   useEffect(() => {
-    if (summary.length > 0 || failure !== undefined) {
+    const hasErrors = fieldNames.some((name) => state.errors[name] !== undefined)
+
+    if (hasErrors) {
       document.getElementById(summaryId)?.focus()
+    } else if (state.failure !== undefined) {
+      document.getElementById(failureId)?.focus()
     }
-  }, [state]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state])
 
   return (
     <>
       <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} />
       {failure === undefined ? null : <Failure failure={failure} />}
       <Form action={action}>
-        <Field id="naam" label="Naam" required={false}>
+        <Field error={errors.naam} id="naam" label="Naam" required={false}>
           <Input autoComplete="name" defaultValue={values.naam} name="naam" />
         </Field>
         <Field error={errors['e-mail']} hint="Hierop antwoorden we." id="e-mail" label="E-mailadres">

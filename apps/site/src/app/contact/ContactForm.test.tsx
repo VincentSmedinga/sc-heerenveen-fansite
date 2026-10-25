@@ -66,6 +66,37 @@ describe('ContactForm', () => {
     await waitFor(() => expect(document.activeElement).toBe(summary))
   })
 
+  it('shows the error of the name at the name field, and links to it from the summary', async () => {
+    send.mockResolvedValue({
+      errors: { naam: 'Schrijf je naam op één regel.' },
+      values: { ...values, 'e-mail': 'jan@example.org' },
+    })
+    render(<ContactForm />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Versturen' }))
+
+    const summary = await screen.findByRole('region', { name: 'Er is iets mis' })
+
+    expect([...summary.querySelectorAll('a')].map((link) => link.getAttribute('href'))).toEqual(['#naam'])
+
+    const name = screen.getByLabelText(/^Naam/)
+
+    expect(name.getAttribute('aria-invalid')).toBe('true')
+    expect(name.getAttribute('aria-describedby')).toContain('naam-error')
+    expect(document.getElementById('naam-error')?.textContent).toContain('Schrijf je naam op één regel.')
+  })
+
+  it('moves the focus to the failure block when sending failed or the limit is reached', async () => {
+    send.mockResolvedValue({ errors: {}, failure: 'send', values })
+    render(<ContactForm />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Versturen' }))
+
+    const failure = await screen.findByRole('region', { name: 'Het versturen is niet gelukt.' })
+
+    await waitFor(() => expect(document.activeElement).toBe(failure))
+  })
+
   it('says in text that sending failed, with the address to mail, and keeps what was filled in', async () => {
     send.mockResolvedValue({ errors: {}, failure: 'send', values })
     render(<ContactForm />)
