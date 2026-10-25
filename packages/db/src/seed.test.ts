@@ -58,6 +58,17 @@ describe('the seed', () => {
     )
   })
 
+  it('leaves the filter of a feed alone when it runs again, so a feed set to club stays so', async () => {
+    await seedSources(database.db)
+    await database.pool.query("UPDATE feeds SET filter = 'club'")
+    await seedSources(database.db)
+
+    const rows = await database.db.select().from(feeds)
+
+    expect(rows).not.toHaveLength(0)
+    expect(rows.every((feed) => feed.filter === 'club')).toBe(true)
+  })
+
   it('puts the Leeuwarder Courant in the register with its feed and the strictest policy', async () => {
     await seedSources(database.db)
 

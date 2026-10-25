@@ -17,6 +17,23 @@ import {
 
 export const sourceKinds = ['news', 'podcast', 'forum', 'club', 'video'] as const
 
+/**
+ * What the importer thinks of an item: `relevant` is about sc Heerenveen and is shown,
+ * `doubtful` waits for a person to look at it, `irrelevant` is not about the club. The site
+ * shows only `relevant`; the other two are kept, because nothing is thrown away.
+ */
+export const itemRelevances = ['relevant', 'doubtful', 'irrelevant'] as const
+
+export type ItemRelevance = (typeof itemRelevances)[number]
+
+/**
+ * Whether the importer filters the items of a feed: `none` for a feed that only writes about
+ * the club, `club` for a feed that writes about more, such as a regional newspaper.
+ */
+export const feedFilters = ['none', 'club'] as const
+
+export type FeedFilter = (typeof feedFilters)[number]
+
 export const consentStatuses = ['none', 'asked', 'given'] as const
 
 export type ConsentStatus = (typeof consentStatuses)[number]
@@ -121,6 +138,10 @@ export const feeds = mysqlTable('feeds', {
     .notNull()
     .references(() => sources.id, { onDelete: 'cascade' }),
   url: varchar('url', { length: 500 }).notNull().unique(),
+  // `none`: every item of the feed is `relevant`. `club`: the importer judges each headline
+  // (see `apps/importer/src/relevance.ts`). Change it with an SQL statement; the importer
+  // README says how.
+  filter: mysqlEnum('filter', feedFilters).notNull().default('none'),
   etag: text('etag'),
   lastModified: text('last_modified'),
   lastSuccessAt: datetime('last_success_at'),
@@ -162,6 +183,9 @@ export const items = mysqlTable(
     url: varchar('url', { length: itemLimits.url }).notNull(),
     publishedAt: datetime('published_at').notNull(),
     paywalled: boolean('paywalled').notNull().default(false),
+    // What the importer decided about the headline. The site shows only `relevant`. Items of a
+    // feed with filter `none` are always `relevant`.
+    relevance: mysqlEnum('relevance', itemRelevances).notNull().default('relevant'),
     // Facts about a podcast episode, as its feed gives them. Empty when the feed has none, and
     // for news.
     durationSeconds: int('duration_seconds', { unsigned: true }),
@@ -256,6 +280,11 @@ export const importResults = mysqlTable('import_results', {
   updated: int('updated', { unsigned: true }).notNull().default(0),
   unchanged: int('unchanged', { unsigned: true }).notNull().default(0),
   skipped: int('skipped', { unsigned: true }).notNull().default(0),
+  // How many items of the feed the filter judged to be of each kind in this run, hidden items
+  // included. All of them are `relevant` for a feed without a filter.
+  relevant: int('relevant', { unsigned: true }).notNull().default(0),
+  doubtful: int('doubtful', { unsigned: true }).notNull().default(0),
+  irrelevant: int('irrelevant', { unsigned: true }).notNull().default(0),
   reason: varchar('reason', { length: reasonMaxLength }),
 })
 

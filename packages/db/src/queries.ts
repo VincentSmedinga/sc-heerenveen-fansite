@@ -145,7 +145,7 @@ export function listPodcasts(db: Database) {
           db
             .select({ one: sql`1` })
             .from(items)
-            .where(and(eq(items.sourceId, sources.id), isNull(items.hiddenAt))),
+            .where(and(eq(items.sourceId, sources.id), isShown())),
         ),
       ),
     )
@@ -160,8 +160,9 @@ export function listPodcasts(db: Database) {
  * internal, and so does every other column, so none of them can reach a page.
  *
  * The episodes of a podcast are items too, but they are not news, so a source of kind podcast
- * gives none. An item that a moderator hid (`hidden_at`) is never given, by this query or by
- * any other that shows items: a new query on `items` for a page must skip hidden items too.
+ * gives none. An item that a moderator hid (`hidden_at`) or that the importer did not find
+ * `relevant` is never given, by this query or by any other that shows items: a new query on
+ * `items` for a page must use `isShown` too.
  *
  * Pass the moment of now as `until`: the importer keeps a time up to a day ahead, because feeds
  * are sometimes wrong about their clock, and such an item doesn't belong on top.
@@ -177,14 +178,7 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
     })
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(
-      and(
-        eq(sources.enabled, true),
-        ne(sources.kind, 'podcast'),
-        lte(items.publishedAt, until),
-        isNull(items.hiddenAt),
-      ),
-    )
+    .where(and(eq(sources.enabled, true), ne(sources.kind, 'podcast'), lte(items.publishedAt, until), isShown()))
     .orderBy(desc(items.publishedAt), desc(items.id))
     .limit(limit)
 }
@@ -198,7 +192,7 @@ function episodeFilter(until: Date, podcast: string | undefined) {
     eq(sources.enabled, true),
     eq(sources.kind, 'podcast'),
     lte(items.publishedAt, until),
-    isNull(items.hiddenAt),
+    isShown(),
     podcast === undefined ? undefined : hasSlug(podcast),
   )
 }
@@ -210,4 +204,13 @@ function episodeFilter(until: Date, podcast: string | undefined) {
  */
 function hasSlug(slug: string) {
   return sql`${sources.slug} = ${slug} collate utf8mb4_bin`
+}
+
+/**
+ * The condition that makes an item one to show to a visitor: the importer found it `relevant`
+ * (see `items.relevance`), and no moderator hid it. Every query that puts items on a page
+ * includes it. The admin's list is the one that doesn't, so a moderator finds every item.
+ */
+function isShown() {
+  return and(eq(items.relevance, 'relevant'), isNull(items.hiddenAt))
 }

@@ -45,6 +45,19 @@ describe('listItems', () => {
     expect(await titles()).toEqual(['Kop nieuw', 'Kop verborgen', 'Kop oud'])
   })
 
+  it('gives the items the importer found doubtful or not about the club too, so a moderator finds them', async () => {
+    await addItem(database, ids, 'club', { publishedAt: new Date('2026-10-21T08:00:00Z') })
+    await addItem(database, ids, 'twijfel', { publishedAt: new Date('2026-10-20T08:00:00Z'), relevance: 'doubtful' })
+    await addItem(database, ids, 'elders', { publishedAt: new Date('2026-10-19T08:00:00Z'), relevance: 'irrelevant' })
+
+    expect(await titles()).toEqual(['Kop club', 'Kop twijfel', 'Kop elders'])
+    expect((await listItems(database.db, '')).map((item) => item.relevance)).toEqual([
+      'relevant',
+      'doubtful',
+      'irrelevant',
+    ])
+  })
+
   it('gives the newest 50 and no more', async () => {
     for (let number = 0; number < listLength + 5; number++) {
       await addItem(database, ids, `k${number}`, { publishedAt: new Date(Date.UTC(2026, 9, 1, 0, number)) })
@@ -69,6 +82,7 @@ describe('listItems', () => {
       'id',
       'paywalled',
       'publishedAt',
+      'relevance',
       'sourceName',
       'title',
       'url',

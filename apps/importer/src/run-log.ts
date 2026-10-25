@@ -110,7 +110,13 @@ export async function recordReport(
 ) {
   const counts =
     report.kind === 'imported'
-      ? { added: report.added, skipped: report.skipped.length, unchanged: report.unchanged, updated: report.updated }
+      ? {
+          added: report.added,
+          skipped: report.skipped.length,
+          unchanged: report.unchanged,
+          updated: report.updated,
+          ...report.relevance,
+        }
       : {}
 
   await db.insert(importResults).values({

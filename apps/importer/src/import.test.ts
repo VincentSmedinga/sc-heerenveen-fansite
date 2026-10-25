@@ -96,7 +96,9 @@ describe('the import', () => {
     const { code, stdout } = await importFromTestServers()
 
     expect(code).toBe(0)
-    expect(stdout.trim().split('\n')).toEqual([`${server.origin}/rss/: 50 new, 0 updated, 0 unchanged, 0 skipped`])
+    expect(stdout.trim().split('\n')).toEqual([
+      `${server.origin}/rss/: 50 new, 0 updated, 0 unchanged, 0 skipped; 50 relevant, 0 doubtful, 0 irrelevant`,
+    ])
     expect(await database.db.select().from(items)).toHaveLength(50)
   })
 
@@ -108,7 +110,9 @@ describe('the import', () => {
     const { code, stdout } = await importFromTestServers()
 
     expect(code).toBe(0)
-    expect(stdout.trim()).toBe(`${server.origin}/rss/: 0 new, 0 updated, 50 unchanged, 0 skipped`)
+    expect(stdout.trim()).toBe(
+      `${server.origin}/rss/: 0 new, 0 updated, 50 unchanged, 0 skipped; 50 relevant, 0 doubtful, 0 irrelevant`,
+    )
     expect(await database.db.select().from(items)).toHaveLength(50)
   })
 
@@ -122,7 +126,7 @@ describe('the import', () => {
 
     expect(code).toBe(1)
     expect(lines[0]).toBe(`${down.origin}/rss/: failed, HTTP 500`)
-    expect(lines[1]).toMatch(/: 50 new, 0 updated, 0 unchanged, 0 skipped$/u)
+    expect(lines[1]).toMatch(/: 50 new, 0 updated, 0 unchanged, 0 skipped; 50 relevant, 0 doubtful, 0 irrelevant$/u)
     expect(await database.db.select().from(items)).toHaveLength(50)
   })
 

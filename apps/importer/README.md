@@ -25,14 +25,16 @@ Een feed die nog moet wachten, slaat hij over.
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
 
 ```text
-https://www.lc.nl/sport/sc-heerenveen/rss/: 3 new, 1 updated, 46 unchanged, 1 skipped
+https://www.lc.nl/sport/sc-heerenveen/rss/: 3 new, 1 updated, 46 unchanged, 1 skipped; 50 relevant, 0 doubtful, 0 irrelevant
   item 12 skipped: the link does not start with http or https
 ```
 
 - **new**: berichten die de bron nog niet had.
-- **updated**: berichten die we kenden en waarvan de kop, de link, de tijd of de betaalmuur veranderde.
+- **updated**: berichten die we kenden en waarvan de kop, de link, de tijd, de betaalmuur of de relevantie veranderde.
 - **unchanged**: berichten die we kenden en die hetzelfde waren.
 - **skipped**: berichten die we niet bewaren, met de reden.
+- **relevant**, **doubtful**, **irrelevant**: hoeveel berichten van de feed het relevantiefilter bij elke waarde vond (zie _Het relevantiefilter_).
+  Bij een feed zonder filter zijn ze allemaal `relevant`.
 
 Een feed die niet gelezen wordt, krijgt ook een regel:
 
@@ -69,7 +71,7 @@ Stopt een proces halverwege, dan laat de database de lock vanzelf los.
 
 De tabel `import_runs` heeft een rij per run, met het begin en het eind.
 Een run die de lock bezet vond, staat er ook in, met `lock_taken`.
-De tabel `import_results` heeft per run een rij per feed: de uitkomst, het aantal nieuwe, bijgewerkte, ongewijzigde en overgeslagen berichten, en waarom de feed faalde of wachtte.
+De tabel `import_results` heeft per run een rij per feed: de uitkomst, het aantal nieuwe, bijgewerkte, ongewijzigde en overgeslagen berichten, hoeveel berichten het filter bij elke waarde vond, en waarom de feed faalde of wachtte.
 
 | Uitkomst            | Wat het betekent                                      |
 | ------------------- | ----------------------------------------------------- |
@@ -182,7 +184,7 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   Een feed zonder het teken van zijn bron heeft geen betaalmuur.
 - **Te lang:** een kop van meer dan 500 tekens, een link van meer dan 2048 of een sleutel van meer dan 700 slaat de adapter over, in plaats van hem af te kappen.
 - **Bijwerken:** een nieuw bericht komt erbij.
-  Een bekend bericht krijgt de nieuwe kop, link, tijd en betaalmuur als de bron die veranderde.
+  Een bekend bericht krijgt de nieuwe kop, link, tijd en betaalmuur als de bron die veranderde, en de relevantie die het filter nu vindt (zie _Het relevantiefilter_).
   We bewaren geen eerdere koppen.
   Een bericht dat een moderator in het beheer verborg (`items.hidden_at`), blijft zoals het is: de kop, de link, de tijd, de betaalmuur en `last_seen_at` veranderen niet, ook niet als de bron het bericht opnieuw aanbiedt of verandert, en het telt als ongewijzigd.
   De voorwaarde staat in de query zelf (`unlessHidden` in [`src/import-feeds.ts`](src/import-feeds.ts)), dus ook een bericht dat tijdens een run wordt verborgen, blijft ongemoeid.
@@ -193,6 +195,74 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
 
 Een nieuwe feed komt in de tabel `feeds`, bij een bron.
 Er is nog geen beheer (#30), dus de seed zet ze erin (`packages/db/src/seed.ts`).
+
+## Het relevantiefilter
+
+Een regionale krant schrijft over meer dan de club.
+Het filter bepaalt voor elk bericht uit zo'n feed of het over sc Heerenveen gaat, zet twijfelgevallen apart en gooit niets weg.
+Het kijkt alleen naar de kop, want de importer bewaart geen intro of categorie.
+De functie is `judgeRelevance` in [`src/relevance.ts`](src/relevance.ts); ze is zuiver, dus dezelfde kop geeft altijd dezelfde waarde.
+
+| Waarde       | Wanneer                                                                                                                                              | Wat de site doet          |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `relevant`   | De kop noemt "sc Heerenveen" (ook "s.c." en "SC", en in "sc Heerenveen-fan"), of "Heerenveen" met een voetbalwoord of de naam van iemand van de club | Toont het bericht         |
+| `doubtful`   | De kop noemt alleen "Heerenveen" (de gemeente en de plaats schrijven ook veel nieuws), of alleen de naam van iemand van de club                      | Toont het bericht nergens |
+| `irrelevant` | Verder                                                                                                                                               | Toont het bericht nergens |
+
+Hoofdletters en accenten tellen niet, en alleen hele woorden: "Heerenveenseweg" is niet "Heerenveen" en "wandelwedstrijd" is geen "wedstrijd".
+De keuzes staan in `docs/beslissingen.md`, onder _De regels van het filter_.
+De importer bewaart elk bericht, ook `doubtful` en `irrelevant`.
+Het beheer (`/beheer/berichten`) toont ze wel, met een woord erbij, zodat een moderator ze kan vinden en verbergen.
+Een scherm om twijfelgevallen te beoordelen, en het met de hand corrigeren van een uitkomst (#76), komen later.
+
+### Een feed op `club` zetten
+
+De kolom `feeds.filter` is `none` of `club`.
+Een feed die alleen over de club gaat, zoals die van de Leeuwarder Courant en Voetbal International, blijft op `none`: elk bericht is dan `relevant`.
+Zet je een feed die over meer gaat op `club`, dan beoordeelt de importer elke kop.
+Er is geen scherm voor; gebruik phpMyAdmin op de host, of lokaal `docker compose exec mariadb mariadb fansite`:
+
+```sql
+UPDATE feeds SET filter = 'club' WHERE url = 'https://www.voorbeeld.nl/sport/rss/';
+```
+
+De volgende run beoordeelt alle berichten van de feed, ook die we al hadden, en schrijft de aantallen in het logboek.
+Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
+Een bericht dat een moderator verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
+De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
+
+### De uitkomst bekijken
+
+Het verslag van de run en het logboek hebben per feed de aantallen (zie _Het logboek_).
+Om de koppen zelf te zien:
+
+```sql
+SELECT relevance, COUNT(*) FROM items WHERE feed_id = (SELECT id FROM feeds WHERE url = '...') GROUP BY relevance;
+SELECT title, url FROM items WHERE relevance = 'doubtful' ORDER BY published_at DESC LIMIT 50;
+```
+
+Of kijk in `/beheer/berichten` (zoek op een deel van de kop).
+
+### Een naam toevoegen
+
+De lijst met namen van spelers en staf en de lijst met voetbalwoorden staan in één bestand, [`src/relevance-terms.ts`](src/relevance-terms.ts).
+Bovenaan staat wie ze bijhoudt, wanneer ze voor het laatst zijn nagekeken en wat erop hoort.
+Zo voeg je er een toe:
+
+1. Schrijf de term in kleine letters zonder accenten, met een spatie tussen de woorden: `'nolhan courtens'`, niet `'Nolhan Courtens'`.
+   Een test controleert dat.
+2. Zet van een persoon de volledige naam op de lijst.
+   Zet de achternaam alleen erbij als die geen gewoon woord en geen veelvoorkomende achternaam is.
+3. Pas bovenaan de datum van de laatste controle aan.
+4. Voeg in [`src/relevance.test.ts`](src/relevance.test.ts) een kop toe die de uitkomst laat zien.
+
+De volgende run past de nieuwe lijst toe op alle berichten van feeds met `club`.
+
+### De testkoppen
+
+[`src/relevance.test.ts`](src/relevance.test.ts) heeft verzonnen koppen per regel: de club, de gemeente, de plaats, een wedstrijd van een andere club in Heerenveen, hele woorden en namen die ook een gewoon woord zijn.
+De koppen uit de logs van het prototype, met erbij of ze erin hoorden, komen in de lijst `fromTheLogs` bovenin dat bestand: `['de kop', 'relevant' | 'doubtful' | 'irrelevant']`.
+Die lijst is nog leeg; de projecteigenaar levert ze aan (#74).
 
 ## De velden van de feed van de Leeuwarder Courant
 
