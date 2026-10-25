@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 const items = [
   { href: '/', label: 'Nieuws' },
   { href: '/podcasts', label: 'Podcasts' },
-  { href: 'https://forum.heerenveen.org', label: 'Forum' },
+  { external: true, href: 'https://forum.heerenveen.org', label: 'Forum' },
 ]
 
 /**

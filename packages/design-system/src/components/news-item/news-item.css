@@ -103,18 +103,6 @@
   }
 
   /*
-   * Next to the name of the source, a little smaller than the text and in line with it. It has the colour of the text.
-   * The base styles make an svg a block, so it is put back in the line here.
-   */
-  .hf-news-item-icon {
-    block-size: 0.875em;
-    display: inline-block;
-    inline-size: 0.875em;
-    margin-inline-start: 0.25em;
-    vertical-align: -0.1em;
-  }
-
-  /*
    * A List with lines in it: no bullets, no indent and no space between the items. The lines take care of that, with a thin
    * line between them. The first line has no space above it and the last none below it, so the list starts and ends
    * where the surface around it pads.
