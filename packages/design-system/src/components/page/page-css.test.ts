@@ -41,3 +41,46 @@ describe('the safe area insets in page.css', () => {
     expect(strip).toContain('pointer-events: none;')
   })
 })
+
+describe('the stripes of the Frisian flag in page.css', () => {
+  const footer = css.slice(css.indexOf('.hf-page-footer {'))
+  // The rule of a pseudo-element of the footer, without its nested media query.
+  const rule = (selector: string) => footer.match(new RegExp(String.raw`\}\s*${selector} \{([^{}]*)\}`))?.[1] ?? ''
+
+  const both = footer.match(/&::before,\s*&::after \{([^{}]*)\}/)?.[1] ?? ''
+  const over = rule('&::before')
+  const above = rule('&::after')
+
+  it('is made of a gradient and a mask, with no image, no url() and no request', () => {
+    expect(both).toContain('repeating-linear-gradient(')
+    expect(above).toContain('mask-image: linear-gradient(')
+    expect(css).not.toMatch(/url\(|@import|image-set\(/)
+  })
+
+  it('takes no touch or mouse on either part', () => {
+    expect(both).toContain('pointer-events: none;')
+  })
+
+  it('has the part above the footer behind the content, in a page that isolates its stacking', () => {
+    expect(above).toContain('z-index: -1;')
+    expect(over).not.toContain('z-index')
+    expect(css.match(/\.hf-page \{([^{}]*)&::before/s)?.[1]).toContain('isolation: isolate;')
+  })
+
+  it('keeps what is in the footer above the part over it', () => {
+    expect(footer.match(/> \* \{([^{}]*)\}/)?.[1]).toContain('position: relative;')
+    expect(footer.match(/^\.hf-page-footer \{([^{}]*)/)?.[1]).toContain('position: relative;')
+  })
+
+  it('draws both parts from the same gradient, in the colours of the two tokens', () => {
+    expect(both).toContain('var(--hf-stripe)')
+    expect(over).toContain('--hf-stripe: var(--hf-colour-background-stripe-footer);')
+    expect(above).toContain('--hf-stripe: var(--hf-colour-background-stripe);')
+  })
+
+  it('has neither part in forced colours or in print', () => {
+    const media = footer.match(/@media \(forced-colors: active\), print \{\s*&::before,\s*&::after \{([^{}]*)\}/)?.[1]
+
+    expect(media).toContain('display: none;')
+  })
+})

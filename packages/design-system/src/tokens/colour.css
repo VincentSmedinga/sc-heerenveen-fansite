@@ -96,6 +96,22 @@
     --hf-colour-background-zebra: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
     --hf-colour-background-highlight: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
 
+    /*
+     * The stripes at the end of the page, in the colour of the stripes of the Frisian flag. They are a tint of a scale colour,
+     * made with color-mix(), so no new step comes into a scale. The stripe above the footer lies on the page, and the stripe
+     * over the footer on the footer: in light a little darker than what is under it, in dark a little lighter and bluer.
+     * Two tokens, because the strength in dark differs between the parts and light-dark() picks colours, not numbers.
+     * A browser that can't read color-mix() shows no stripes.
+     */
+    --hf-colour-background-stripe: light-dark(
+      color-mix(in srgb, var(--hf-colour-grey-300) 30%, transparent),
+      color-mix(in srgb, var(--hf-colour-blue-800) 40%, transparent)
+    );
+    --hf-colour-background-stripe-footer: light-dark(
+      color-mix(in srgb, var(--hf-colour-grey-300) 30%, transparent),
+      color-mix(in srgb, var(--hf-colour-blue-800) 60%, transparent)
+    );
+
     /* Text */
     --hf-colour-text-default: light-dark(var(--hf-colour-grey-900), var(--hf-colour-grey-50));
     --hf-colour-text-heading: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-50));
@@ -193,6 +209,8 @@
       --hf-colour-background-hover: var(--hf-colour-grey-50);
       --hf-colour-background-zebra: var(--hf-colour-grey-50);
       --hf-colour-background-highlight: var(--hf-colour-blue-100);
+      --hf-colour-background-stripe: color-mix(in srgb, var(--hf-colour-grey-300) 30%, transparent);
+      --hf-colour-background-stripe-footer: color-mix(in srgb, var(--hf-colour-grey-300) 30%, transparent);
       --hf-colour-text-default: var(--hf-colour-grey-900);
       --hf-colour-text-heading: var(--hf-colour-blue-900);
       --hf-colour-text-secondary: var(--hf-colour-grey-600);

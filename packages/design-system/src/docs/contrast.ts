@@ -29,6 +29,26 @@ export const toRgb = (value: string): Rgb | undefined => {
   return alpha === 255 ? [red, green, blue] : undefined
 }
 
+/**
+ * A colour that isn't opaque, such as a stripe, as the opaque colour it makes on the surface
+ * below. The blend is worked out here, not by painting both on a canvas: a canvas blends in 8
+ * bits, and its rounding moved a ratio by 0,03, which is all the margin some pairs have.
+ */
+export const flatten = (colour: string, under: string): string | undefined => {
+  // The computed value of a translucent colour ends in its alpha:
+  // `color(srgb 0.8 0.8 0.7 / 0.3)` or `rgba(1, 2, 3, 0.3)`.
+  const [, alphaText = '1', percent = ''] =
+    /\/\s*([\d.]+)(%?)\s*\)$/.exec(colour) ?? /^rgba\(.*,\s*([\d.]+)(%?)\s*\)$/.exec(colour) ?? []
+  const alpha = Number(alphaText) / (percent ? 100 : 1)
+  const opaque = colour.replace(/\s*\/\s*[\d.]+%?\s*\)$/, ')').replace(/^rgba\((.*),[^,]*\)$/, 'rgb($1)')
+  const top = toRgb(opaque)
+  const bottom = toRgb(under)
+
+  if (!top || !bottom || Number.isNaN(alpha)) return undefined
+
+  return `rgb(${top.map((channel, index) => Math.round(channel * alpha + (bottom[index] ?? 0) * (1 - alpha))).join(' ')})`
+}
+
 const linear = (channel: number) => {
   const value = channel / 255
   return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
