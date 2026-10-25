@@ -3,6 +3,7 @@
 {
   "files": [],
   "references": [
+    { "path": "apps/design-system-mcp" },
     { "path": "apps/importer" },
     { "path": "apps/site" },
     { "path": "packages/db" },

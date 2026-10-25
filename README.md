@@ -66,6 +66,7 @@ Daarna controleert commitlint of het bericht [Conventional Commits](https://www.
 Schrijf het in het Engels.
 Dat geldt ook voor de titel van een pull request, want die wordt bij het samenvoegen de commit op `main`.
 
+- [`apps/design-system-mcp`](apps/design-system-mcp/README.md): de MCP-server van het designsysteem, op ds.heerenveen.org/mcp
 - [`apps/importer`](apps/importer/README.md): de importer, met de fetcher die bronnen ophaalt en de adapter voor RSS- en Atom-feeds
 - [`apps/site`](apps/site/README.md): de site
 - [`packages/db`](packages/db/README.md): de database, met het schema, de migraties en de seed
