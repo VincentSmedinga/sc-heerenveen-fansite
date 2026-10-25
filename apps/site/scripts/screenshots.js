@@ -43,7 +43,14 @@ const isLocalHost = (hostname) =>
 /** The address of the page or the story. */
 export function addressOf(base, target) {
   if (target.startsWith('/')) {
-    return new URL(target, base).href
+    const address = new URL(target, base)
+
+    // A path such as //example.org/x is an address on another site.
+    if (address.origin !== new URL(base).origin) {
+      throw new ScreenshotsError(`"${target}" is not a path on ${base}.`, 2)
+    }
+
+    return address.href
   }
 
   return `${base}/iframe.html?id=${encodeURIComponent(target)}&viewMode=story`

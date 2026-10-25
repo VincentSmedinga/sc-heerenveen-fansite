@@ -75,6 +75,11 @@ test('makes the address of a path on the site', () => {
   assert.equal(addressOf('http://localhost:3000', '/podcasts?page=2'), 'http://localhost:3000/podcasts?page=2')
 })
 
+test('refuses a path that leads to another site', () => {
+  assert.throws(() => addressOf('http://localhost:3000', '//example.org/x'), /not a path on/)
+  assert.throws(() => parseArguments(['http://localhost:3000', '/', '//example.org/x']), { exitCode: 2 })
+})
+
 test('makes the address of a story in Storybook', () => {
   assert.equal(
     addressOf('http://localhost:6006', 'components-footer--default'),
