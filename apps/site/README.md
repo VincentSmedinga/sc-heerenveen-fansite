@@ -18,17 +18,17 @@ pnpm --filter site dev
 De site luistert op <http://localhost:3000>.
 Next.js leest alleen een `.env` in deze map, dus `next.config.ts` laadt de `.env` uit de root zelf.
 
-| Opdracht                                   | Wat het doet                                                                           |
-| ------------------------------------------ | -------------------------------------------------------------------------------------- |
-| `pnpm --filter site dev`                   | De site met live herladen                                                              |
-| `pnpm --filter site build`                 | De build, als standalone map in `.next/standalone`                                     |
-| `pnpm --filter site assemble <nieuwe map>` | Zet de standalone build en de statische bestanden in één map, zonder symbolische links |
-| `pnpm --filter site smoke <map>`           | Start die map en controleert wat een bezoeker en een zoekmachine krijgen               |
-| `pnpm --filter site share-image`           | Maakt `public/share-image.png` opnieuw, de afbeelding bij het delen van links          |
-| `pnpm --filter site icons`                 | Maakt de iconen in `public` opnieuw uit de vector van het designsysteem                |
-| `pnpm test:a11y`                           | Toetst de pagina's van de gebouwde site met axe (zie _Toegankelijkheid controleren_)   |
-| `pnpm screenshots <adres> <pad>...`        | Maakt plaatjes van een draaiende build (zie _Screenshots maken_)                       |
-| `pnpm --filter site test-data`             | Zet de verzonnen gegevens van de controle in de database, voor die plaatjes            |
+| Opdracht                                   | Wat het doet                                                                                    |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `pnpm --filter site dev`                   | De site met live herladen                                                                       |
+| `pnpm --filter site build`                 | De build, als standalone map in `.next/standalone`                                              |
+| `pnpm --filter site assemble <nieuwe map>` | Zet de standalone build en de statische bestanden in één map, zonder symbolische links          |
+| `pnpm --filter site smoke <map>`           | Start die map en controleert wat een bezoeker en een zoekmachine krijgen                        |
+| `pnpm --filter site share-image`           | Maakt `public/share-image.png` opnieuw, de afbeelding bij het delen van links                   |
+| `pnpm --filter site icons`                 | Maakt de iconen van de site, Storybook en het Forum opnieuw uit de vector van het designsysteem |
+| `pnpm test:a11y`                           | Toetst de pagina's van de gebouwde site met axe (zie _Toegankelijkheid controleren_)            |
+| `pnpm screenshots <adres> <pad>...`        | Maakt plaatjes van een draaiende build (zie _Screenshots maken_)                                |
+| `pnpm --filter site test-data`             | Zet de verzonnen gegevens van de controle in de database, voor die plaatjes                     |
 
 De rooktest heeft een MariaDB nodig, zoals de tests van `@fansite/db`: `docker compose up -d --wait`.
 Hij leest `DATABASE_URL` uit de `.env` in de root, als die er is.
@@ -347,6 +347,9 @@ Het icoon is het logo zelf, `packages/design-system/src/assets/logo.svg`, zonder
 - `favicon.ico`, met PNG's van 16, 32 en 48 pixels, voor browsers en zoekmachines die er zelf om vragen;
 - `icon-192.png` en `icon-512.png`, transparant, voor het manifest;
 - `apple-touch-icon.png` (180 bij 180 pixels) en `icon-maskable-512.png`, het schild op een vlak van het donkerblauw van de kop.
+
+Het script maakt dezelfde bestanden ook voor Storybook en voor het Forum, in `packages/design-system/src/assets/icons/storybook` en `.../forum`, met een ander vlak (de sets staan in `src/icon-sets.ts`).
+Storybook serveert de zijne vanaf de root en verwijst ernaar in zijn kop (`packages/design-system/.storybook/icons.ts`); die van het Forum zijn voor later en hangen nergens aan.
 
 Het donkerblauw komt uit het token `--hf-colour-background-header` in `colour.css` van het designsysteem.
 `next.config.ts` leest het bij de bouw (zie `src/header-colour.ts`), en het script voor de iconen leest hetzelfde bestand.

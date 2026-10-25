@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <title>Schild met Friese banen en een pompeblêd</title>
+  <!--
+    Logo for the Fansite and the Forum, on a 192 by 192 grid: a nod to 1920, the year sc Heerenveen was founded,
+    and 128 + 64. Most measures are sums of powers of two.
+
+    Construction, with the axis at x = 96:
+    - Shield: the centre line of the border. Two top arcs (r = 160) meet in a point at (96, 24), each leaving
+      it at 10 degrees. Corner arcs (r = 16) turn into the sides at x = 32 and 160. Side arcs
+      (r = 124.61) meet in the tip at (96, 168). The centre line runs from y = 24 to 168, centred in the box.
+    - Border: a 12-wide stroke on that line (blue-700), with a 4-wide white edge outside it, so the shield
+      stands out on dark backgrounds. A white stroke inside the clip leaves a 4-wide gap before the field.
+    - Bands: slope 1:2. The white band is 64 wide, centred on (96, 92), 4 above the centre of the box.
+      Stripes in blue-500.
+    - Leaf: the pompeblêd from src/docs/Pompebled.tsx, scaled 1.92, centroid on (96, 92), in red-600.
+  -->
+  <defs>
+    <path id="hf-logo-shield" d="M96,24A160,160 0 0,0 39.58,45.52A16,16 0 0,0 32,59.12A124.61,124.61 0 0,0 96,168A124.61,124.61 0 0,0 160,59.12A16,16 0 0,0 152.42,45.52A160,160 0 0,0 96,24Z"/>
+    <clipPath id="hf-logo-field"><use href="#hf-logo-shield"/></clipPath>
+  </defs>
+  <use href="#hf-logo-shield" fill="none" stroke="#fff" stroke-width="20"/>
+  <g clip-path="url(#hf-logo-field)">
+    <rect width="192" height="192" fill="#fff"/>
+    <path d="M0,0H192V104.22L0,8.22Z" fill="#3575c4"/>
+    <path d="M0,79.78L192,175.78V192H0Z" fill="#3575c4"/>
+    <use href="#hf-logo-shield" fill="none" stroke="#fff" stroke-width="20"/>
+  </g>
+  <use href="#hf-logo-shield" fill="none" stroke="#07458e" stroke-width="12"/>
+  <path d="M-3.489,11.129A16.143,16.143 0 0,1 -14,-4A7,8 0 0,1 -7,-12A6,8 0 0,1 -1,-5A1,1 0 1,0 1,-5A6,8 0 0,1 7,-12A7,8 0 0,1 14,-4A16.143,16.143 0 0,1 3.489,11.129A10,10 0 0,1 -3.489,11.129Z" fill="#c22826" transform="translate(95.27 93.05) scale(1.92) rotate(34.695)"/>
+</svg>

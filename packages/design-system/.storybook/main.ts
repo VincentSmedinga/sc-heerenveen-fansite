@@ -1,6 +1,7 @@
 import { defineMain } from '@storybook/react-vite/node'
 
 import { addBranchTo } from './branch.ts'
+import { addIconsTo } from './icons.ts'
 import { addNoindexTo } from './noindex.ts'
 
 export default defineMain({
@@ -38,14 +39,18 @@ export default defineMain({
   },
   framework: '@storybook/react-vite',
   // `pnpm review` sets REVIEW_BRANCH for the dev server it starts. The sidebar shows it only there (see branch.ts).
-  // Both heads get `noindex` (see noindex.ts). There is deliberately no robots.txt: a Disallow would also keep out the
-  // agents and tools that respect it, and the documentation is there for them to read (the links in the repository
-  // and the MCP server).
+  // Both heads get the icons (see icons.ts) and `noindex` (see noindex.ts). There is deliberately no robots.txt: a
+  // Disallow would also keep out the agents and tools that respect it, and the documentation is there for them to
+  // read (the links in the repository and the MCP server).
   managerHead: (head, { configType }) =>
-    addNoindexTo(addBranchTo(head ?? '', process.env['REVIEW_BRANCH'], configType ?? 'PRODUCTION')),
-  previewHead: (head) => addNoindexTo(head ?? ''),
-  // The logo in the sidebar is served from here.
-  staticDirs: [{ from: '../src/assets', to: '/assets' }],
+    addNoindexTo(addIconsTo(addBranchTo(head ?? '', process.env['REVIEW_BRANCH'], configType ?? 'PRODUCTION'))),
+  previewHead: (head) => addNoindexTo(addIconsTo(head ?? '')),
+  // The logo in the sidebar is served from here, and the icons of Storybook from the root, where browsers look for
+  // /favicon.ico and Safari for /apple-touch-icon.png.
+  staticDirs: [
+    { from: '../src/assets', to: '/assets' },
+    { from: '../src/assets/icons/storybook', to: '/' },
+  ],
   stories: ['../src/**/*.mdx', '../src/**/*.stories.tsx'],
   // The build minifies the CSS with lightningcss, for Vite's default target (Chrome 111, Safari 16.4 and so on).
   // That is older than light-dark(), so lightningcss rewrites it to variables that only work on :root, and a story
