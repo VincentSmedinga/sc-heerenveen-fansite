@@ -1,16 +1,17 @@
 import type { ItemRelevance } from '@fansite/db/schema'
 
-import { clubLegends, clubPeople, footballWords } from './relevance-terms.ts'
+import { clubLegends, clubPeople, clubSurnames, footballWords } from './relevance-terms.ts'
 
 /**
  * Decides from the headline alone whether an item is about sc Heerenveen. A pure function: the
  * same headline always gives the same answer, and nothing else is read (the importer keeps no
  * intro or category, see `docs/beslissingen.md`).
  *
- * - `relevant`: the headline names "sc Heerenveen" or a club legend (Abe Lenstra), or it names
- *   "Heerenveen" together with a word from football or the name of someone from the club;
- * - `doubtful`: it names only "Heerenveen", the town and the municipality, or only someone from
- *   the club;
+ * - `relevant`: the headline names "sc Heerenveen", a club legend (Abe Lenstra) or the full
+ *   name of someone from the club, or it names "Heerenveen" together with a word from football
+ *   or the surname of someone from the club;
+ * - `doubtful`: it names only "Heerenveen", the town and the municipality, or only the surname
+ *   of someone from the club;
  * - `irrelevant`: neither.
  *
  * Capitals and accents do not count, and neither do the full stops in "s.c.". It looks at whole
@@ -23,19 +24,20 @@ export function judgeRelevance(title: string): ItemRelevance {
 
   if (
     containsPhrase(words, ['sc', 'heerenveen']) ||
-    clubPhrases.legends.some((phrase) => containsPhrase(words, phrase))
+    clubPhrases.legends.some((phrase) => containsPhrase(words, phrase)) ||
+    clubPhrases.people.some((phrase) => containsPhrase(words, phrase))
   ) {
     return 'relevant'
   }
 
   const named = words.includes('heerenveen')
-  const person = clubPhrases.people.some((phrase) => containsPhrase(words, phrase))
+  const surname = clubPhrases.surnames.some((phrase) => containsPhrase(words, phrase))
 
-  if (named && (person || clubPhrases.footballWords.some((phrase) => containsPhrase(words, phrase)))) {
+  if (named && (surname || clubPhrases.footballWords.some((phrase) => containsPhrase(words, phrase)))) {
     return 'relevant'
   }
 
-  return named || person ? 'doubtful' : 'irrelevant'
+  return named || surname ? 'doubtful' : 'irrelevant'
 }
 
 /**
@@ -57,6 +59,7 @@ const clubPhrases = {
   footballWords: footballWords.map(normaliseTitle),
   legends: clubLegends.map(normaliseTitle),
   people: clubPeople.map(normaliseTitle),
+  surnames: clubSurnames.map(normaliseTitle),
 }
 
 /** Whether `phrase` is in `words` as a run of words next to each other, in that order. */

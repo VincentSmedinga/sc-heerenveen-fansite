@@ -418,7 +418,7 @@ describe('the relevance filter', () => {
       entry('club', { title: 'sc Heerenveen wint van Twente' }),
       entry('stad', { title: 'Brand in woning in Heerenveen' }),
       entry('elders', { title: 'Leeuwarden krijgt nieuw museum' }),
-      entry('speler', { title: 'Robin Veldman verlengt' }),
+      entry('speler', { title: 'Veldman verlengt' }),
     )
 
   const relevanceByKey = async () =>
@@ -565,16 +565,17 @@ describe('importing a regional feed, the way the register has it', () => {
 
     const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun)
 
-    expect(report).toMatchObject({ added: 8, relevance: { doubtful: 2, irrelevant: 4, relevant: 2 }, skipped: [] })
+    expect(report).toMatchObject({ added: 9, relevance: { doubtful: 2, irrelevant: 4, relevant: 3 }, skipped: [] })
     expect(Object.fromEntries((await itemsInDatabase()).map((row) => [row.title, row.relevance]))).toEqual({
       'Code geel voor Fryslân: zware windstoten verwacht': 'irrelevant',
+      'Dylan Vente baalt van zijn reserverol': 'relevant',
       'Friese ijshockeyers winnen spannende wedstrijd': 'irrelevant',
       'Heerenveen wint topper van Cambuur': 'relevant',
       'Museum in Leeuwarden toont verzonnen kunst': 'irrelevant',
       'Nieuwe fietsbrug bij Dokkum geopend': 'irrelevant',
-      'Robin Veldman wil nog niet praten over zijn toekomst': 'doubtful',
       'sc Heerenveen speelt gelijk bij Emmen': 'relevant',
       'Schuur in Heerenveen volledig verwoest door brand': 'doubtful',
+      'Veldman wil nog niet praten over zijn toekomst': 'doubtful',
     })
   })
 
@@ -604,6 +605,7 @@ describe('importing a regional feed, the way the register has it', () => {
     expect(shown.map((item) => item.title)).toEqual([
       'sc Heerenveen speelt gelijk bij Emmen',
       'Heerenveen wint topper van Cambuur',
+      'Dylan Vente baalt van zijn reserverol',
     ])
     expect(shown.every((item) => item.sourceName === 'Omrop Fryslân')).toBe(true)
   })

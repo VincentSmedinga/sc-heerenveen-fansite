@@ -153,7 +153,11 @@ Al in het register (#258), met het filter `club`.
   - Het filter, op 25 oktober 2026: van de 50 berichten kregen 2 de waarde `relevant`, 4 `doubtful` en 44 `irrelevant`.
     De twee `relevant` noemen "sc Heerenveen" in de kop.
     Van de vier `doubtful` noemen er drie alleen "Heerenveen": twee gaan over de plaats, en een is een wedstrijdverslag van de club.
-    Het vierde noemt alleen een speler.
+    Het vierde noemt alleen een speler, met zijn volledige naam.
+    De projecteigenaar vond de twee clubberichten ten onrechte `doubtful`, en de regels veranderden: "wint" en "verliest" zijn voetbalwoorden, en een volledige naam is genoeg.
+    Dezelfde 50 koppen geven met de nieuwe regels 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
+    De twee die `doubtful` blijven, gaan over de plaats.
+    Geen bericht over de club staat bij de 44, en geen bericht over iets anders staat bij de `relevant`.
     Wat het filter doet, staat in de README van de importer, onder _Het relevantiefilter_.
 - **`robots.txt`:** laat ons de feed toe.
   De importer haalde het op 25 oktober 2026 opnieuw op, met zijn eigen user agent.

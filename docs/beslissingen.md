@@ -3173,6 +3173,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een Nederlandse kop heeft de club bijna altijd met naam erin, en een gemeentebericht heeft "Heerenveen" zonder voetbal.
   Hele woorden voorkomen de meeste valse treffers zonder een lijst met uitzonderingen.
 - **Alternatieven:** zoeken op een deel van een woord (meer treffers, ook "Asc" en straatnamen); een lijst met andere clubs om een wedstrijd van een andere club in Heerenveen te weren (nog een lijst die iemand bijhoudt, zonder dat we weten of het nodig is).
+- **Later:** zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_; de naam van iemand van de club maakt een kop alleen `relevant` als het de volledige naam is, en "wint" en "verliest" zijn voetbalwoorden.
 
 ### De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok
 
@@ -3189,6 +3190,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een achternaam alleen is niet gevaarlijk: zonder "Heerenveen" is de kop `doubtful`, en een kop die doorkomt, is snel verborgen.
   Alleen namen, geen andere gegevens over een persoon.
 - **Alternatieven:** alleen volledige namen (een kop als "Vente is los bij Heerenveen" valt dan weg, dat zagen we in de opname van Voetbal International); alle oud-spelers van de club (de lijst groeit nooit uit); de selectie elke dag ophalen bij een bron (een extra verzoek aan een derde en een extra stuk code voor een lijst die elke maand een regel wijzigt).
+- **Later:** zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_; een volledige naam maakt een kop nu `relevant`, en een achternaam alleen blijft `doubtful`.
 
 ### Een feed heeft een filter, `none` of `club`, en de importer beoordeelt elk bericht opnieuw
 
@@ -3238,7 +3240,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Op acceptatie zet de site de bronnen met de seed in een lege database, dus daar zouden brand en storm op de homepage komen.
   Met `club` vanaf de seed gebeurt dat niet.
 - **Alternatieven:** de feed op `none` beginnen en het filter met SQL aanzetten (een venster waarin alles zichtbaar is); het filter in elke seed opnieuw zetten (dat maakt een keuze in de database ongedaan); een filter op de bron in plaats van op de feed (een tweede feed van dezelfde bron kan anders zijn).
-- **Open:** of de lijst met namen en woorden verandert, besluit de projecteigenaar; de pull request noemt de koppen die verkeerd lijken.
+- **Daarna:** de projecteigenaar bekeek de koppen van de run en veranderde twee regels (zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_).
+  Dezelfde 50 koppen geven met de nieuwe regels 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
+
+### Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** twee veranderingen in de regels van het filter, op de koppen van de eerste run op de feed van Omrop Fryslân (besluit van de projecteigenaar):
+  - De volledige naam van iemand van de club maakt een kop `relevant`, ook zonder "Heerenveen".
+    `relevance-terms.ts` heeft daarom twee lijsten: `clubPeople` met de volledige namen, en `clubSurnames` met de achternamen.
+    Een achternaam alleen blijft `doubtful`, en is `relevant` met "Heerenveen" erbij, zoals voorheen.
+  - "wint" en "verliest" staan bij de voetbalwoorden, dus "Heerenveen wint met 3-2 van ADO Den Haag" is `relevant`.
+- **Waarom:** de eerste run vond twee koppen over de club `doubtful`: "Lees terug: Heerenveen overleeft Haags kwartiertje en wint met 3-2 van ADO Den Haag" en een kop over Ringo Meerveld.
+  In een kop is "Heerenveen" zonder "sc" vaak de club, en een werkwoord als "wint" hoort bij een wedstrijd.
+  Een volledige naam is niet dubbelzinnig, een achternaam wel (Kersten, Veldman).
+- **Gevolg:** een kop als "Man wint loterij in Heerenveen" wordt ook `relevant`.
+  Dat is een bekende valse treffer, die een moderator verbergt; de projecteigenaar wil het filter niet te streng (zie _De regels van het filter: hele woorden, zonder hoofdletters en accenten_).
+  Ook de volledige naam van iemand die in 2026 vertrok, maakt een kop `relevant`.
+- **Alternatieven:** een lijst met andere clubs, zodat "ADO Den Haag" in een kop de wedstrijd verraadt (nog een lijst om bij te houden); een regel voor een uitslag als "3-2" in de kop (nieuwe code, en alleen voor koppen met een uitslag).
+- **Later:** zie _De regels van het filter: hele woorden, zonder hoofdletters en accenten_ en _De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok_ voor de regels die hier veranderden.
 
 ## Redactie
 
