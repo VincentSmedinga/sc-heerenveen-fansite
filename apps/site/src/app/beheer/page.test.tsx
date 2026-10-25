@@ -104,7 +104,7 @@ describe('the login page', () => {
   ])('says %s in a message above the form, and does not mark the field as wrong', async (fout, message) => {
     const html = await render(fout)
 
-    expect(html).toContain(`<p role="alert">${message}</p>`)
+    expect(html).toContain(`<p>${message}</p>`)
     expect(html).not.toContain('Er is iets mis')
     expect(html).not.toContain('aria-invalid')
     expect(html.split(message)).toHaveLength(2)

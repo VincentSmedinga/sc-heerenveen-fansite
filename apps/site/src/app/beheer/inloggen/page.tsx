@@ -47,7 +47,7 @@ export default async function LoginPage({
         <Text appearance="intro">
           Vul het e-mailadres van je account in. We mailen je een link om in te loggen. Je hebt geen wachtwoord nodig.
         </Text>
-        {notice === undefined ? null : <Text role="alert">{notice}</Text>}
+        {notice === undefined ? null : <Text>{notice}</Text>}
         <ErrorSummary errors={error === undefined ? [] : [{ id: 'e-mail', message: error }]} level={2} />
         <Form action={requestLoginLink}>
           <Field error={error} hint="De link werkt 15 minuten en één keer." id="e-mail" label="E-mailadres">
