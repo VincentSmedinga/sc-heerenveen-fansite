@@ -3853,9 +3853,12 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Met `opacity: 0` zien ogen niets, en blijven de kop, het menu en de links voor schermlezers en toetsenbord bestaan.
   `visibility: hidden` zou ook een element met focus laten verdwijnen.
   Een doorzichtig element kan focus houden.
-- **Alternatieven:** `visibility: hidden` op alles in de kop, zoals gevraagd; zie hierboven.
-  `opacity: 0` op de hele kop; dan verdwijnt ook het blauwe vlak vóór de strook, en ziet de bar bovenaan lichtgrijs boven blauw.
+- **Alternatieven:** niets doen; dan schijnt het menu door de blauwe rand en ziet het eruit als een fout.
+  `visibility: hidden` op alles in de kop, zoals gevraagd; het oog ziet hetzelfde, maar de kop is dan niet meer te bereiken voor een schermlezer en het toetsenbord.
+  `opacity: 0` op de hele kop; dan verdwijnt ook het blauwe vlak vóór de strook, en ziet de balk bovenaan lichtgrijs boven blauw.
+  De kop zelf met een overgang verbergen; dat is meer code en het kan haperen tijdens het scrollen.
   De drempel gelijk aan die van de strook (8 pixels); dat liet het menu in de simulator nog zien tussen 8 en ongeveer 55 punten.
-- **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, in licht: bovenaan het volle blauw met menu, bij het wegscrollen een egaal blauwe balk zonder doorschemerend menu, daarna de kleur van de pagina, en bij terugscrollen weer de kop met menu.
-  Niet in donker, niet op een echte telefoon en niet in de app op het beginscherm.
+- **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, in licht en in donker: bovenaan het volle blauw met menu, bij het wegscrollen een egaal blauwe balk zonder doorschemerend menu, daarna de kleur van de pagina, en bij terugscrollen weer de kop met menu.
+  Ook met Licht ingedrukt in een donker systeem terwijl de kop ver uit beeld was, en daarna terug naar boven.
+  Niet op een echte telefoon, niet in iOS 26 en niet in de app op het beginscherm.
   Een e2e-test (`e2e/safe-area.spec.ts`) controleert in Chromium dat de kop het attribuut krijgt en weer kwijtraakt, dat de kinderen `opacity: 0` hebben terwijl de kop `visibility: visible` houdt, en dat er één banner blijft.
