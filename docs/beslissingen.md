@@ -2905,6 +2905,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gevolg:** De Telegraaf staat met zijn tagfeed in het register, ondanks het voorbehoud in zijn `robots.txt`.
   Bij de keuze voor Voetbal International (#142) was dat voorbehoud nog een reden om De Telegraaf niet te kiezen.
 - **Alternatieven:** bij een voorbehoud eerst schriftelijke toestemming vragen; dat is voorzichtiger, maar we missen dan bronnen die zelden antwoorden.
+- **Later:** zie _Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed_; ook een brede feed nemen we, als het relevantiefilter (`club`) erop staat.
 
 ### De feeds van andere clubs nemen we niet
 
@@ -3172,6 +3173,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een Nederlandse kop heeft de club bijna altijd met naam erin, en een gemeentebericht heeft "Heerenveen" zonder voetbal.
   Hele woorden voorkomen de meeste valse treffers zonder een lijst met uitzonderingen.
 - **Alternatieven:** zoeken op een deel van een woord (meer treffers, ook "Asc" en straatnamen); een lijst met andere clubs om een wedstrijd van een andere club in Heerenveen te weren (nog een lijst die iemand bijhoudt, zonder dat we weten of het nodig is).
+- **Later:** zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_; de naam van iemand van de club maakt een kop alleen `relevant` als het de volledige naam is, en "wint" en "verliest" zijn voetbalwoorden.
+  Zie ook _De namen van de profclubs geven context: "Heerenveen" naast een club is een wedstrijd_: de naam van een andere profclub naast "Heerenveen" maakt een kop ook `relevant`.
 
 ### De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok
 
@@ -3188,6 +3191,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een achternaam alleen is niet gevaarlijk: zonder "Heerenveen" is de kop `doubtful`, en een kop die doorkomt, is snel verborgen.
   Alleen namen, geen andere gegevens over een persoon.
 - **Alternatieven:** alleen volledige namen (een kop als "Vente is los bij Heerenveen" valt dan weg, dat zagen we in de opname van Voetbal International); alle oud-spelers van de club (de lijst groeit nooit uit); de selectie elke dag ophalen bij een bron (een extra verzoek aan een derde en een extra stuk code voor een lijst die elke maand een regel wijzigt).
+- **Later:** zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_; een volledige naam maakt een kop nu `relevant`, en een achternaam alleen blijft `doubtful`.
 
 ### Een feed heeft een filter, `none` of `club`, en de importer beoordeelt elk bericht opnieuw
 
@@ -3206,6 +3210,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een nieuwe feed wordt zo een regel in de database, en zonder filter verandert er voor de twee bronnen van nu niets.
   De waarde bij elke run opnieuw bepalen maakt van het filter een regel en geen stempel: wie een naam toevoegt, ziet het resultaat bij de volgende run, zonder een aparte opdracht.
 - **Alternatieven:** het filter in de configuratie van de importer of op de bron (een feed van dezelfde bron kan anders zijn); alleen bij een nieuw bericht beoordelen (een betere regel werkt dan nooit op wat er al is); `relevance` overschrijven voor een verborgen bericht (dat gaat tegen #75 in).
+- **Later:** zie _Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed_; voor een nieuwe feed in `realSources` stelt de seed het filter in, bij het toevoegen van de feed.
 
 ### De site toont alleen `relevant`, en het beheer toont alles met een woord erbij
 
@@ -3218,6 +3223,65 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** één plek voor de voorwaarde voorkomt dat een nieuwe query er een vergeet.
   De moderator moet een bericht kunnen vinden dat het filter ten onrechte weghoudt.
 - **Alternatieven:** de voorwaarde in elke query zelf (zoals bij `hidden_at` tot nu toe); een apart scherm voor twijfelgevallen (een eigen issue).
+
+### Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** Omrop Fryslân (`https://www.omropfryslan.nl/rss/index.xml`) staat in `realSources` in `packages/db/src/seed.ts`, met het filter `club`.
+  Een feed in `realSources` is een adres of een object met `filter` en `url`; een feed zonder object begint op `none`, zoals tot nu toe.
+  De seed zet het filter alleen als hij de feed in het register zet, en verandert het daarna nooit meer (zie _Een feed heeft een filter, `none` of `club`, en de importer beoordeelt elk bericht opnieuw_).
+  Van de bron tonen we alleen de kop, de link, de bronnaam en de tijd, zoals bij elke bron.
+  Het register in [`bronnen.md`](bronnen.md) zegt nu "nemen" voor deze bron, met het filter.
+  Voor de tests heeft `@fansite/db` een export `./seed`, zodat de test van de importer de bron neemt zoals de seed hem in het register zet.
+- **Gemeten op de echte feed** (25 oktober 2026, één run van de importer): 50 berichten bewaard, waarvan 2 `relevant`, 4 `doubtful` en 44 `irrelevant`.
+  Geen bericht stond achter een betaalmuur, geen tijd was ongeldig en de importer sloeg niets over.
+  De importer leest de feed dus zonder aanpassing.
+- **Waarom:** een regionale feed gaat over alles in de provincie, en de club is een klein deel (6 van de 50 op 24 oktober).
+  Begint de feed op `none`, dan toont een nieuwe omgeving alle 50 berichten tot iemand het filter met SQL aanzet.
+  Op acceptatie zet de site de bronnen met de seed in een lege database, dus daar zouden brand en storm op de homepage komen.
+  Met `club` vanaf de seed gebeurt dat niet.
+- **Alternatieven:** de feed op `none` beginnen en het filter met SQL aanzetten (een venster waarin alles zichtbaar is); het filter in elke seed opnieuw zetten (dat maakt een keuze in de database ongedaan); een filter op de bron in plaats van op de feed (een tweede feed van dezelfde bron kan anders zijn).
+- **Daarna:** de projecteigenaar bekeek de koppen van de run en veranderde twee regels (zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_).
+  Dezelfde 50 koppen geven met de nieuwe regels 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
+
+### Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** twee veranderingen in de regels van het filter, op de koppen van de eerste run op de feed van Omrop Fryslân (besluit van de projecteigenaar):
+  - De volledige naam van iemand van de club maakt een kop `relevant`, ook zonder "Heerenveen".
+    `relevance-terms.ts` heeft daarom twee lijsten: `clubPeople` met de volledige namen, en `clubSurnames` met de achternamen.
+    Een achternaam alleen blijft `doubtful`, en is `relevant` met "Heerenveen" erbij, zoals voorheen.
+  - "wint" en "verliest" staan bij de voetbalwoorden, dus "Heerenveen wint met 3-2 van ADO Den Haag" is `relevant`.
+- **Waarom:** de eerste run vond twee koppen over de club `doubtful`: "Lees terug: Heerenveen overleeft Haags kwartiertje en wint met 3-2 van ADO Den Haag" en een kop over Ringo Meerveld.
+  In een kop is "Heerenveen" zonder "sc" vaak de club, en een werkwoord als "wint" hoort bij een wedstrijd.
+  Een volledige naam is niet dubbelzinnig, een achternaam wel (Kersten, Veldman).
+- **Gevolg:** een kop als "Man wint loterij in Heerenveen" wordt ook `relevant`.
+  Dat is een bekende valse treffer, die een moderator verbergt; de projecteigenaar wil het filter niet te streng (zie _De regels van het filter: hele woorden, zonder hoofdletters en accenten_).
+  Ook de volledige naam van iemand die in 2026 vertrok, maakt een kop `relevant`.
+- **Alternatieven:** een lijst met andere clubs, zodat "ADO Den Haag" in een kop de wedstrijd verraadt (nog een lijst om bij te houden); een regel voor een uitslag als "3-2" in de kop (nieuwe code, en alleen voor koppen met een uitslag).
+- **Later:** zie _De regels van het filter: hele woorden, zonder hoofdletters en accenten_ en _De lijst met namen en voetbalwoorden: selectie, staf en wie in 2026 vertrok_ voor de regels die hier veranderden.
+
+### De namen van de profclubs geven context: "Heerenveen" naast een club is een wedstrijd
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `relevance-terms.ts` krijgt een lijst `otherClubs` met de profclubs van de Eredivisie en de Eerste Divisie in 2026/27 (18 en 20 clubs, met de Jong-teams), zonder sc Heerenveen zelf.
+  Een kop met "Heerenveen" en een van die clubs is `relevant`, zoals een kop met "Heerenveen" en een voetbalwoord.
+  De projecteigenaar vroeg erom, na de kop met ADO Den Haag.
+  Een club zonder "Heerenveen" telt niet.
+- **Hoe de lijst is gemaakt:** naar de pagina "2026-27 Eredivisie" op en.wikipedia.org (18 clubs, stand van 24 oktober 2026) en "Eerste divisie 2026/27" op nl.wikipedia.org (20 clubs, laatst bewerkt op 24 oktober 2026).
+  De Nederlandse pagina over de Eredivisie van dit seizoen konden we niet lezen (404).
+  De 20 clubs van de Eerste Divisie staan in de tekst van het deel "Teams" van die pagina, en we hebben ze een tweede keer met die tekst vergeleken; de datum van de laatste bewerking komt uit een samenvatting van de pagina.
+  De 18 clubs van de Eredivisie komen uit de tabel "Stadiums and locations" van de Engelse pagina, via een leesdienst; die lijst is niet met de paginatekst zelf vergeleken.
+  De lijst moet na de promotie en degradatie van elk seizoen worden nagekeken.
+- **Waarom korte namen niet altijd:** een club waarvan de korte naam een plaats is, staat er alleen met zijn volledige naam (FC Groningen, FC Utrecht, FC Twente, PEC Zwolle, FC Emmen).
+  Koppen met "Heerenveen en Groningen" of "Heerenveen en Zwolle" gaan vaak over de A7 of de trein, en zouden anders allemaal `relevant` worden.
+  Een club waarvan de korte naam in bijna elke kop de club is (Ajax, PSV, Cambuur, Volendam) staat er met die naam.
+  VVV staat er alleen als VVV-Venlo, want de VVV is ook het toeristenbureau.
+- **Gevolg:** een kop die alleen "Utrecht" of "Groningen" schrijft voor de club, heeft nog een voetbalwoord nodig.
+  De 50 koppen van Omrop Fryslân geven nog steeds 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
+- **Verandert de regels van #254:** ja, dit is een derde aanvulling op de regels van het filter uit #254 (na de volledige naam en de twee werkwoorden).
+  De projecteigenaar hield de regel en de lijst zoals ze zijn (25 oktober 2026), ook "Sparta" en "Excelsior", die ook namen van amateurclubs zijn.
+- **Alternatieven:** alle korte namen toelaten (de A7 en de trein worden dan `relevant`); een regel voor een uitslag als "3-2" in de kop (nieuwe code); de clubs elke dag bij een bron ophalen (een verzoek aan een derde voor een lijst die één keer per seizoen verandert).
 
 ## Redactie
 

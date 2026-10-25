@@ -17,6 +17,7 @@ We deden dat met de user agent van de importer, `scHeerenveenFansite/0.1.0 (+htt
 Een pad dat `robots.txt` voor ons weigert, hebben we niet opgehaald.
 Een feed die doorverwees, hebben we op het nieuwe adres één keer opgehaald.
 Wat we vonden, is een momentopname van die dag.
+Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, met een run van de importer (zie bij de bron).
 
 - **Wat we tellen:** het aantal berichten, de datum van het nieuwste (in UTC) en hoeveel berichten over sc Heerenveen gaan.
   Een bericht gaat over de club als "Heerenveen" in de kop of in de categorieën staat, zonder op hoofdletters te letten.
@@ -47,8 +48,11 @@ Bij elke bron staat of de voorwaarden daar iets over zeggen.
 ### De besluiten
 
 - **Nemen:** de berichten in de feed gaan (bijna) allemaal over sc Heerenveen en `robots.txt` laat ons de feed lezen.
+  Een feed die ook over andere onderwerpen gaat, nemen we met het relevantiefilter (`club`, #74): de import beoordeelt elke kop, en de site toont alleen wat over de club gaat.
+  Dat staat dan bij de bron.
 - **Nemen na het relevantiefilter (#74):** een brede feed met regelmatig berichten over de club, die ook over andere onderwerpen gaat.
-  Het filter is er nog niet, dus deze bronnen staan nog niet in het register.
+  Het filter is er nu.
+  Deze bronnen staan nog niet in het register: ze komen erin, met het filter `club`, zodra ze aan de beurt zijn.
 - **Eerst toestemming:** de bron moet eerst schriftelijk ja zeggen.
 - **Afwijzen:** de feed werkt niet, gaat niet over sc Heerenveen, of `robots.txt` weigert ons.
   De feeds van andere clubs vallen hieronder, want de site gaat over sc Heerenveen.
@@ -63,8 +67,8 @@ Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in 
 
 | Besluit                             | Bronnen                                                                                                                                                                                                                                                       |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omroep Abe (podcast), Radio Camataru (podcast)                                                                                                                                             |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed), NOS, Algemeen Dagblad, ESPN NL, Omrop Fryslân                                                                                                                                                                             |
+| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), Omroep Abe (podcast), Radio Camataru (podcast)                                                                                                             |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed), NOS, Algemeen Dagblad, ESPN NL                                                                                                                                                                                            |
 | Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                              |
 | Afwijzen                            | RTV Noord, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Rijnmond, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast |
 
@@ -134,11 +138,48 @@ Al in het register (#142).
 - **Importer:** leest de feed zonder aanpassing.
   Een lokale run op 24 oktober 2026 bewaarde 50 berichten, waarvan 8 achter de betaalmuur.
 
+### Omrop Fryslân
+
+Al in het register (#258), met het filter `club`.
+
+- **Domein:** `www.omropfryslan.nl`
+- **Soort:** nieuws, regionale publieke omroep
+- **Feed:** `https://www.omropfryslan.nl/rss/index.xml`
+  - Werkt: ja, RSS 2.0 met 50 berichten.
+    Op 24 oktober 2026 was het nieuwste van 23 oktober en het oudste van 20 oktober.
+    Op 25 oktober 2026 was het nieuwste van 25 oktober (16:23 UTC) en het oudste van 22 oktober (10:10 UTC).
+  - Over sc Heerenveen: op 24 oktober 2026 noemden 6 van de 50 Heerenveen in de kop, 3 daarvan ook in de intro.
+  - Betaalmuur: nee; de feed geeft er geen teken van, en de run van 25 oktober bewaarde geen bericht als betaalmuur.
+  - Het filter, op 25 oktober 2026: van de 50 berichten kregen 2 de waarde `relevant`, 4 `doubtful` en 44 `irrelevant`.
+    De twee `relevant` noemen "sc Heerenveen" in de kop.
+    Van de vier `doubtful` noemen er drie alleen "Heerenveen": twee gaan over de plaats, en een is een wedstrijdverslag van de club.
+    Het vierde noemt alleen een speler, met zijn volledige naam.
+    De projecteigenaar vond de twee clubberichten ten onrechte `doubtful`, en de regels veranderden: "wint" en "verliest" zijn voetbalwoorden, en een volledige naam is genoeg.
+    Dezelfde 50 koppen geven met de nieuwe regels 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
+    De twee die `doubtful` blijven, gaan over de plaats.
+    Geen bericht over de club staat bij de 44, en geen bericht over iets anders staat bij de `relevant`.
+    Wat het filter doet, staat in de README van de importer, onder _Het relevantiefilter_.
+- **`robots.txt`:** laat ons de feed toe.
+  De importer haalde het op 25 oktober 2026 opnieuw op, met zijn eigen user agent.
+  De regels voor ons sluiten alleen `/content/`, `/embedded/`, `/data/`, `/inc/`, de paden van de vorm `/*/-`, `/fy/nos/`, `/nl/nos/` en de zoekpagina's; de feed ligt daar niet in.
+  Op 24 oktober 2026 zagen we dat een lange lijst crawlers, ook van AI-bedrijven, bij naam is geweigerd en wij er niet bij staan.
+  De importer bewaart alleen de regels die voor ons gelden, dus die lijst hebben we op 25 oktober niet opnieuw bekeken.
+- **Voorwaarden:** een pagina met voorwaarden of een disclaimer is er niet; alleen een privacyverklaring van Stichting Omrop Fryslân (versie van januari 2019).
+  Over automatisch lezen, datamining of hergebruik staat niets.
+- **Meer tonen:** de bron zegt er niets over; we vragen toestemming voor meer dan de standaard.
+- **Besluit: nemen, met het filter `club`.**
+  De feed is het regionieuws van Friesland, de provincie van de club, en sc Heerenveen komt er regelmatig in voor.
+  Het filter houdt de rest van de berichten van de site; de twijfelgevallen blijven onzichtbaar en een moderator vindt ze in het beheer.
+  Controle van 25 oktober 2026, met een lokale run van de importer.
+- **Importer:** leest de feed zonder aanpassing.
+  Een run bewaarde alle 50 berichten, zonder er een over te slaan, en alle tijden waren geldig.
+
 ## Nemen na het relevantiefilter (#74)
 
 Deze feeds zijn breed.
-Ze staan niet in het register, want het filter dat de berichten over de club eruit haalt, is er nog niet.
-Een telling op één momentopname van een paar dagen zegt weinig over hoe vaak de club erin staat; dat meten we bij #74.
+Ze staan nog niet in het register.
+Het filter dat de berichten over de club eruit haalt, is er nu (#74), en Omrop Fryslân (hierboven) is de eerste feed die ermee draait.
+Een telling op één momentopname van een paar dagen zegt weinig over hoe vaak de club erin staat; dat meten we per bron, met een run van de importer, zoals bij Omrop Fryslân.
 
 ### Voetbal International, de brede feed
 
@@ -209,22 +250,6 @@ De bron staat al in het register (zie boven), maar deze feed niet.
   Wij lezen één feed, met hoogstens één verzoek per kwartier; of dat onder "een hoog volume" valt, zeggen de voorwaarden niet.
 - **Importer:** de adapter leest de tijd met zone `EST` niet.
   Zonder geldige tijd geldt het moment waarop we het bericht voor het eerst zagen (zie _Wat de importer nog mist_).
-
-### Omrop Fryslân
-
-- **Domein:** `www.omropfryslan.nl`
-- **Soort:** nieuws, regionale publieke omroep
-- **Feed:** `https://www.omropfryslan.nl/rss/index.xml`
-  - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 23 oktober 2026, het oudste van 20 oktober 2026.
-  - Over sc Heerenveen: 6 van de 50 noemen Heerenveen in de kop, 3 daarvan ook in de intro.
-  - Betaalmuur: nee; de feed geeft er geen teken van.
-- **`robots.txt`:** laat ons de feed toe.
-  Een lange lijst crawlers, ook van AI-bedrijven, is bij naam geweigerd; wij staan er niet bij.
-- **Voorwaarden:** een pagina met voorwaarden of een disclaimer is er niet; alleen een privacyverklaring van Stichting Omrop Fryslân (versie van januari 2019).
-  Over automatisch lezen, datamining of hergebruik staat niets.
-- **Meer tonen:** de bron zegt er niets over; we vragen toestemming voor meer dan de standaard.
-- **Besluit: nemen na het relevantiefilter (#74).**
-  De feed is het regionieuws van Friesland, de provincie van de club, waarin sc Heerenveen regelmatig voorkomt (6 van de 50).
 
 ## Eerst toestemming
 
@@ -582,7 +607,7 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
 
 ## Wat de importer nog mist
 
-Alle bronnen met het besluit "nemen" werken met de importer zoals hij is.
+Alle bronnen met het besluit "nemen" werken met de importer zoals hij is, ook Omrop Fryslân met het filter.
 Voor deze bronnen met "nemen na het relevantiefilter (#74)" moet er eerst iets bij, buiten het filter zelf:
 
 - **Algemeen Dagblad:** de adapter leest `<dpp:paid>` niet, dus een bericht achter de betaalmuur zou niet worden herkend.

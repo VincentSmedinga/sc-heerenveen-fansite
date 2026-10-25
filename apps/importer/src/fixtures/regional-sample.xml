@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A small, made-up feed in the shape of a regional broadcaster's RSS 2.0 feed (see
+  docs/bronnen.md, Omrop Fryslân). The headlines, links and texts are invented; none is copied
+  from a real feed. The description, the category and the enclosure are here to show that the
+  importer does not read them.
+-->
+<rss version="2.0">
+  <channel>
+    <title>Regionieuws (verzonnen)</title>
+    <link>https://regio.test/</link>
+    <description>Een verzonnen feed om de importer mee te testen.</description>
+    <item>
+      <title>sc Heerenveen speelt gelijk bij Emmen</title>
+      <link>https://regio.test/nijs/1</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <category>Sport</category>
+      <enclosure url="https://regio.test/foto/1.jpg" length="1000" type="image/jpeg"/>
+      <guid isPermaLink="false">regio-1</guid>
+      <pubDate>Wed, 21 Oct 2026 14:06:08 +0200</pubDate>
+    </item>
+    <item>
+      <title>Heerenveen wint topper van Cambuur</title>
+      <link>https://regio.test/nijs/2</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <category>Sport</category>
+      <guid isPermaLink="false">regio-2</guid>
+      <pubDate>Wed, 21 Oct 2026 10:15:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Schuur in Heerenveen volledig verwoest door brand</title>
+      <link>https://regio.test/nijs/3</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <category>Regio</category>
+      <guid isPermaLink="false">regio-3</guid>
+      <pubDate>Tue, 20 Oct 2026 21:40:12 +0200</pubDate>
+    </item>
+    <item>
+      <title>Veldman wil nog niet praten over zijn toekomst</title>
+      <link>https://regio.test/nijs/4</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <category>Sport</category>
+      <guid isPermaLink="false">regio-4</guid>
+      <pubDate>Tue, 20 Oct 2026 18:30:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Code geel voor Fryslân: zware windstoten verwacht</title>
+      <link>https://regio.test/nijs/5</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <category>Weer</category>
+      <guid isPermaLink="false">regio-5</guid>
+      <pubDate>Tue, 20 Oct 2026 12:00:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Friese ijshockeyers winnen spannende wedstrijd</title>
+      <link>https://regio.test/nijs/6</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <category>Sport</category>
+      <guid isPermaLink="false">regio-6</guid>
+      <pubDate>Mon, 19 Oct 2026 22:10:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Nieuwe fietsbrug bij Dokkum geopend</title>
+      <link>https://regio.test/nijs/7</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <category>Regio</category>
+      <guid isPermaLink="false">regio-7</guid>
+      <pubDate>Mon, 19 Oct 2026 09:00:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Museum in Leeuwarden toont verzonnen kunst</title>
+      <link>https://regio.test/nijs/8</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <category>Cultuur</category>
+      <guid isPermaLink="false">regio-8</guid>
+      <pubDate>Sun, 18 Oct 2026 16:45:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Dylan Vente baalt van zijn reserverol</title>
+      <link>https://regio.test/nijs/9</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <category>Sport</category>
+      <guid isPermaLink="false">regio-9</guid>
+      <pubDate>Tue, 20 Oct 2026 08:00:00 +0200</pubDate>
+    </item>
+  </channel>
+</rss>
