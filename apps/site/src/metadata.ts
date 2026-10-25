@@ -4,6 +4,44 @@ import { originOf } from './env'
 import { type PagePath, pages, shareImage, siteName } from './pages'
 
 /**
+ * The same for an article of our own editors: its title, the intro as the description, the
+ * address of its page as the canonical URL, and Open Graph tags of the type `article` with the
+ * time of publication. The picture is the shield of the site, as on every page; an article has
+ * none of its own yet. Like `pageMetadata`, it needs a page that renders on each request.
+ */
+export function articleMetadata({
+  intro,
+  publishedAt,
+  slug,
+  title,
+}: {
+  intro: string
+  publishedAt: Date
+  slug: string
+  title: string
+}): Metadata {
+  const url = urlOf(`/redactie/${slug}`)
+
+  return {
+    alternates: { canonical: url },
+    description: intro,
+    openGraph: {
+      description: intro,
+      images: [
+        { alt: shareImage.alt, height: shareImage.height, url: urlOf(shareImage.path), width: shareImage.width },
+      ],
+      locale: 'nl_NL',
+      publishedTime: publishedAt.toISOString(),
+      siteName,
+      title,
+      type: 'article',
+      url,
+    },
+    title,
+  }
+}
+
+/**
  * The description, the canonical URL and the Open Graph tags of a page. Without a title the
  * page has the title of the layout, which is the name of the site. The addresses come from
  * originOf, which reads SITE_ENV when the server runs, so a page that uses this must render on

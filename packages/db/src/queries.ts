@@ -2,7 +2,13 @@ import { and, asc, count, desc, eq, exists, isNotNull, isNull, lte, ne, sql } fr
 
 import type { Database } from './client.ts'
 
-import { discussions, items, sources } from './schema.ts'
+import { articles, discussions, items, sources } from './schema.ts'
+
+export type PublicArticle = NonNullable<Awaited<ReturnType<typeof findPublishedArticle>>>
+
+export type PublicArticleCard = NonNullable<Awaited<ReturnType<typeof findNewestArticle>>>
+
+export type PublicArticleLink = Awaited<ReturnType<typeof listPublishedArticles>>[number]
 
 export type PublicDiscussion = Awaited<ReturnType<typeof listNewestDiscussions>>[number]
 
@@ -28,6 +34,22 @@ export async function countPodcastEpisodes(db: Database, { podcast, until }: { p
 }
 
 /**
+ * The newest published article, with what the card on the homepage shows: the slug, the title,
+ * the intro and the time of publication. A draft, and an article whose time of publication is
+ * after `until`, don't count. Pass the moment of now.
+ */
+export async function findNewestArticle(db: Database, until: Date) {
+  const [row] = await db
+    .select({ intro: articles.intro, publishedAt: articles.publishedAt, slug: articles.slug, title: articles.title })
+    .from(articles)
+    .where(lte(articles.publishedAt, until))
+    .orderBy(desc(articles.publishedAt), desc(articles.id))
+    .limit(1)
+
+  return row === undefined || row.publishedAt === null ? undefined : { ...row, publishedAt: row.publishedAt }
+}
+
+/**
  * The podcast with this slug, when it is switched on: its name, its description in our own
  * words, which is null when it has none, and the addresses where it can be found on Apple
  * Podcasts and Spotify, which are null when it has none. It gives nothing for another source,
@@ -46,6 +68,33 @@ export async function findPodcast(db: Database, slug: string) {
     .where(and(eq(sources.enabled, true), eq(sources.kind, 'podcast'), hasSlug(slug)))
 
   return row
+}
+
+/**
+ * The article with this slug, with what its page shows: the title, the intro, the text, the
+ * author and the time of publication. It gives nothing for a draft (`published_at` empty) or
+ * for an article whose time of publication is after `until`: pass the moment of now, so a date
+ * in the future is a draft until then. The slug must match exactly: the collation of the table
+ * ignores case and trailing spaces, which would give one article two addresses. The creator and
+ * the times of the record stay internal, so none can reach a page.
+ */
+export async function findPublishedArticle(db: Database, slug: string, until: Date) {
+  const [row] = await db
+    .select({
+      author: articles.author,
+      body: articles.body,
+      intro: articles.intro,
+      publishedAt: articles.publishedAt,
+      slug: articles.slug,
+      title: articles.title,
+    })
+    .from(articles)
+    .where(and(eq(articles.slug, slug), lte(articles.publishedAt, until)))
+
+  // The condition leaves out an empty time of publication already; this tells the compiler.
+  return row !== undefined && row.publishedAt !== null && row.slug === slug
+    ? { ...row, publishedAt: row.publishedAt }
+    : undefined
 }
 
 /**
@@ -150,6 +199,20 @@ export function listPodcasts(db: Database) {
       ),
     )
     .orderBy(asc(sources.name))
+}
+
+/**
+ * The slugs of the published articles, newest first, for the sitemap. A draft and an article
+ * for later (`published_at` after `until`) are not in it. At most `limit`, 5000 by default,
+ * which is far more than the editors will write.
+ */
+export function listPublishedArticles(db: Database, until: Date, limit = 5000) {
+  return db
+    .select({ slug: articles.slug })
+    .from(articles)
+    .where(lte(articles.publishedAt, until))
+    .orderBy(desc(articles.publishedAt), desc(articles.id))
+    .limit(limit)
 }
 
 /**

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { pageMetadata, urlOf } from './metadata'
+import { articleMetadata, pageMetadata, urlOf } from './metadata'
 
 afterEach(() => {
   vi.unstubAllEnvs()
@@ -66,5 +66,47 @@ describe('pageMetadata', () => {
     expect(metadata).not.toHaveProperty('twitter')
     expect(metadata.openGraph).toMatchObject({ title: 'sc Heerenveen Fansite', url: 'http://localhost:3000/' })
     expect(metadata.alternates?.canonical).toBe('http://localhost:3000/')
+  })
+})
+
+describe('articleMetadata', () => {
+  const article = {
+    intro: 'Een verzonnen inleiding.',
+    publishedAt: new Date('2026-10-25T08:00:00Z'),
+    slug: 'dit-zijn-wij',
+    title: 'Dit zijn wij',
+  }
+
+  it('gives the article its title, the intro as description, its own canonical URL and Open Graph tags of the type article', () => {
+    vi.stubEnv('SITE_ENV', 'production')
+
+    expect(articleMetadata(article)).toEqual({
+      alternates: { canonical: 'https://sc.heerenveen.org/redactie/dit-zijn-wij' },
+      description: 'Een verzonnen inleiding.',
+      openGraph: {
+        description: 'Een verzonnen inleiding.',
+        images: [
+          {
+            alt: expect.any(String),
+            height: 630,
+            url: 'https://sc.heerenveen.org/share-image.png',
+            width: 1200,
+          },
+        ],
+        locale: 'nl_NL',
+        publishedTime: '2026-10-25T08:00:00.000Z',
+        siteName: 'sc Heerenveen Fansite',
+        title: 'Dit zijn wij',
+        type: 'article',
+        url: 'https://sc.heerenveen.org/redactie/dit-zijn-wij',
+      },
+      title: 'Dit zijn wij',
+    })
+  })
+
+  it('uses the address of the environment', () => {
+    vi.stubEnv('SITE_ENV', 'acceptance')
+
+    expect(articleMetadata(article).alternates?.canonical).toBe('https://acc.sc.heerenveen.org/redactie/dit-zijn-wij')
   })
 })

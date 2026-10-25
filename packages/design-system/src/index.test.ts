@@ -7,10 +7,13 @@ import * as designSystem from './index'
 const root = join(import.meta.dirname, '..')
 
 const components = [
+  'Article',
+  'ArticleCard',
   'Body',
   'Button',
   'Card',
   'DiscussionItem',
+  'Emphasis',
   'ErrorSummary',
   'Field',
   'Filter',
@@ -27,6 +30,7 @@ const components = [
   'Pagination',
   'Root',
   'Select',
+  'Strong',
   'Text',
   'Textarea',
 ]

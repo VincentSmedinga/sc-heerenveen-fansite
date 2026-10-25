@@ -21,14 +21,18 @@ let oldFolder: string
 beforeEach(async () => {
   database = await createTestDatabase({ migrate: false })
 
-  // The migrations as they were before this one: the same files, without it in the journal.
+  // The migrations as they were before this one: the same files, without it and the ones after
+  // it in the journal.
   oldFolder = await mkdtemp(join(tmpdir(), 'fansite-migrations-'))
   await cp(migrationsFolder, oldFolder, { recursive: true })
 
   const journalPath = join(oldFolder, 'meta', '_journal.json')
   const journal = JSON.parse(await readFile(journalPath, 'utf8')) as { entries: { tag: string }[] }
 
-  journal.entries = journal.entries.filter((entry) => entry.tag !== migration)
+  journal.entries = journal.entries.slice(
+    0,
+    journal.entries.findIndex((entry) => entry.tag === migration),
+  )
   await writeFile(journalPath, JSON.stringify(journal))
 })
 

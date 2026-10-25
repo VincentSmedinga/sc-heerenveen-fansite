@@ -36,6 +36,8 @@ const dateWithYearFormat = new Intl.DateTimeFormat('nl-NL', {
   year: 'numeric',
 })
 
+const articleDateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', timeZone, year: 'numeric' })
+
 const clockFormat = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
   hour: 'numeric',
@@ -50,6 +52,16 @@ const clockFormat = new Intl.DateTimeFormat('en-US', {
 /** The moment as the `datetime` of a `time` element. */
 export function dateTimeOf(moment: Date) {
   return moment.toISOString()
+}
+
+/**
+ * The Dutch calendar day of a moment as the `datetime` of a `time` element, such as
+ * `2026-10-25`: the day that the date of `formatArticleDate` names.
+ */
+export function dayOf(moment: Date) {
+  const { day, month, year } = clockAt(moment)
+
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
 /**
@@ -73,6 +85,14 @@ export function episodeDetails({
       : `${seasonNumber === null ? '' : `seizoen ${seasonNumber}, `}aflevering ${episodeNumber}`,
     durationSeconds === null ? undefined : formatDuration(durationSeconds),
   ].filter((detail) => detail !== undefined)
+}
+
+/**
+ * The date of an article as a visitor reads it, in Dutch time and with the year: "25 oktober
+ * 2026". An article is dated by the day, not by the hour.
+ */
+export function formatArticleDate(moment: Date) {
+  return articleDateFormat.format(moment)
 }
 
 /**

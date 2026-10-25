@@ -1,8 +1,21 @@
 import type { Metadata } from 'next'
 
-import { Button, Card, DiscussionItem, Form, Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
+import {
+  ArticleCard,
+  Button,
+  Card,
+  DiscussionItem,
+  Form,
+  Heading,
+  Link,
+  List,
+  NewsItem,
+  Page,
+  Text,
+} from '@fansite/design-system'
 import { cache } from 'react'
 
+import { getNewestArticle } from '../articles'
 import { getDiscussions } from '../discussions'
 import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
@@ -10,7 +23,15 @@ import { forumUrl } from '../forum'
 import { getHeadlines, parseHeadlineCount } from '../headlines'
 import { moreHeadlines } from '../items-per-card'
 import { pageMetadata } from '../metadata'
-import { dateTimeOf, episodeDetails, formatDiscussionTime, formatEpisodeTime, formatNewsTime } from '../news'
+import {
+  dateTimeOf,
+  dayOf,
+  episodeDetails,
+  formatArticleDate,
+  formatDiscussionTime,
+  formatEpisodeTime,
+  formatNewsTime,
+} from '../news'
 import { getLatestEpisodes } from '../podcasts'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
@@ -22,22 +43,38 @@ export const dynamic = 'force-dynamic'
 type SearchParams = Record<string, string | string[] | undefined>
 
 /**
+ * The newest article of our own editors, or undefined when there is none or the database can't
+ * give it. The card is an extra: the homepage shows the news without it, and the log says why
+ * it is missing.
+ */
+async function loadArticle() {
+  try {
+    return await getNewestArticle()
+  } catch (error) {
+    console.error(`Could not read the newest article for the homepage: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/**
  * The newest `count` headlines, the newest discussions of the forum and the newest podcast
- * episodes, or undefined when the database can't give them. A page that throws gets an empty
- * page with a 500 from Next.js, and the text only after JavaScript runs. So this page catches
- * the error and shows the error page itself, in the HTML. `cache` makes the page and its
- * metadata share one call per request; its argument is a plain value, because `cache` compares
- * objects by identity.
+ * episodes, and the newest article of the editors, or undefined when the database can't give
+ * them. A page that throws gets an empty page with a 500 from Next.js, and the text only after
+ * JavaScript runs. So this page catches the error and shows the error page itself, in the HTML.
+ * `cache` makes the page and its metadata share one call per request; its argument is a plain
+ * value, because `cache` compares objects by identity.
  */
 const loadContent = cache(async (count: number) => {
   try {
-    const [{ headlines, more }, discussions, episodes] = await Promise.all([
+    const [{ headlines, more }, discussions, episodes, article] = await Promise.all([
       getHeadlines(count),
       getDiscussions(),
       getLatestEpisodes(),
+      loadArticle(),
     ])
 
-    return { discussions, episodes, headlines, more }
+    return { article, discussions, episodes, headlines, more }
   } catch (error) {
     console.error(`Could not read the headlines, discussions and episodes for the homepage: ${reasonOf(error)}`)
 
@@ -66,7 +103,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     return <ServerError retryHref="/" />
   }
 
-  const { discussions, episodes, headlines, more } = content
+  const { article, discussions, episodes, headlines, more } = content
   const now = new Date()
 
   return (
@@ -77,6 +114,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <Heading className="hf-visually-hidden" level={1}>
           sc Heerenveen Fansite
         </Heading>
+        {article !== undefined && (
+          <ArticleCard
+            date={formatArticleDate(article.publishedAt)}
+            dateTime={dayOf(article.publishedAt)}
+            href={`/redactie/${article.slug}`}
+            intro={article.intro}
+            title={article.title}
+          />
+        )}
         <Card aria-labelledby="media-heading">
           <Heading id="media-heading" level={2}>
             Laatste nieuws

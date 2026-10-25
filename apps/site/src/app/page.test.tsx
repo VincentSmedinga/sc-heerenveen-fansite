@@ -3,6 +3,7 @@ import type { PublicDiscussion, PublicEpisode, PublicItem } from '@fansite/db/qu
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { getNewestArticle } from '../articles'
 import { getDiscussions } from '../discussions'
 import { getHeadlines } from '../headlines'
 import { getLatestEpisodes } from '../podcasts'
@@ -11,6 +12,7 @@ import HomePage, { generateMetadata } from './page'
 
 // Only the query is replaced: the check of the number in the address is the real one.
 vi.mock('../headlines', async (importOriginal) => ({ ...(await importOriginal<object>()), getHeadlines: vi.fn() }))
+vi.mock('../articles', () => ({ getNewestArticle: vi.fn() }))
 vi.mock('../discussions', () => ({ getDiscussions: vi.fn() }))
 vi.mock('../podcasts', () => ({ getLatestEpisodes: vi.fn() }))
 
@@ -95,6 +97,8 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.mocked(getHeadlines).mockReset()
+  vi.mocked(getNewestArticle).mockReset()
+  vi.mocked(getNewestArticle).mockResolvedValue(undefined)
   vi.mocked(getDiscussions).mockReset()
   vi.mocked(getDiscussions).mockResolvedValue([])
   vi.mocked(getLatestEpisodes).mockReset()
@@ -635,6 +639,85 @@ describe('the discussions in the sidebar of the homepage', () => {
 
     expect(html).toContain('We hebben nog geen nieuws gevonden.')
     expect(html).toContain('Wie wint er zondag?')
+  })
+})
+
+describe('the card with the newest article of the editors', () => {
+  const article = {
+    intro: 'Wij zijn de redactie van de Fansite & <b>dit</b> is wie we zijn.',
+    publishedAt: new Date('2026-10-25T08:00:00Z'),
+    slug: 'dit-zijn-wij',
+    title: 'Dit zijn wij <i>allemaal</i>',
+  }
+
+  beforeEach(() => {
+    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+  })
+
+  it('puts the card at the top of the main column, above the news, after the h1', async () => {
+    vi.mocked(getNewestArticle).mockResolvedValue(article)
+
+    const html = await renderMain()
+
+    expect(html).toMatch(
+      /^<main class="hf-page-main"><h1 [^>]*>sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="[^"]+">.*?<\/section><section class="hf-card" aria-labelledby="media-heading">/,
+    )
+    expect(html.indexOf('Van de redactie')).toBeLessThan(html.indexOf('Laatste nieuws'))
+  })
+
+  it('has the h2 "Van de redactie" and the title as an h3 with a link to the page of the article', async () => {
+    vi.mocked(getNewestArticle).mockResolvedValue(article)
+
+    const html = withoutIcons(await renderMain())
+
+    expect(html).toMatch(/<h2 class="hf-heading-2" id="[^"]+">Van de redactie<\/h2>/)
+    expect(html).toContain(
+      '<h3 class="hf-heading-3 hf-article-card-title"><a href="/redactie/dit-zijn-wij">Dit zijn wij &lt;i&gt;allemaal&lt;/i&gt;</a></h3>',
+    )
+  })
+
+  it('shows the date, the intro and the link "Lees verder", as text', async () => {
+    vi.mocked(getNewestArticle).mockResolvedValue(article)
+
+    const html = withoutIcons(await renderMain())
+
+    expect(html).toContain('<time dateTime="2026-10-25">25 oktober 2026</time>')
+    expect(html).toContain('Wij zijn de redactie van de Fansite &amp; &lt;b&gt;dit&lt;/b&gt; is wie we zijn.')
+    expect(html).toContain(
+      '<a aria-label="Lees verder over Dit zijn wij &lt;i&gt;allemaal&lt;/i&gt;" href="/redactie/dit-zijn-wij">Lees verder</a>',
+    )
+  })
+
+  it('leaves the card out when there is no published article', async () => {
+    vi.mocked(getNewestArticle).mockResolvedValue(undefined)
+
+    const html = await render()
+
+    expect(html).not.toContain('Van de redactie')
+    expect(html).not.toContain('/redactie/')
+  })
+
+  it('does not count in the headlines: the news is asked for and shown as before', async () => {
+    vi.mocked(getNewestArticle).mockResolvedValue(article)
+
+    const html = await render()
+
+    expect(getHeadlines).toHaveBeenCalledWith(10)
+    expect(html.match(/class="hf-news-item"/g)).toHaveLength(headlines.length)
+  })
+
+  it('shows the news without the card, and logs why, when only the article can not be read', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getNewestArticle).mockRejectedValue(new Error('Failed query: select 1', { cause: new Error('boom') }))
+
+    const html = await render()
+
+    expect(html).toContain('Laatste nieuws')
+    expect(html).not.toContain('Van de redactie')
+    expect(error).toHaveBeenCalledExactlyOnceWith(
+      'Could not read the newest article for the homepage: Failed query: select 1 (boom)',
+    )
   })
 })
 
