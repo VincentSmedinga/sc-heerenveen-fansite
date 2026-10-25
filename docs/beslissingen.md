@@ -3572,6 +3572,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Met tien koppen ziet een bezoeker meer zonder te klikken, terwijl de kaarten naast het nieuws kort blijven.
 - **Alternatieven:** alle kaarten op vijf, zoals _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_ besloot; alle kaarten op tien, wat de kaarten met discussies en podcasts langer maakt dan nodig.
 
+### Storybook en het Forum krijgen dezelfde iconen als de fansite, op een eigen vlak
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** Storybook (ds.heerenveen.org) heeft dezelfde iconen als de fansite, het schild van het logo, maar het vlak van het `apple-touch-icon` en het afgesneden icoon is het roze van Storybook, `#ff4785`.
+  Voor het Forum, voor later, maken we dezelfde iconen op `blue-600` (`#1559aa`) uit de kleurtokens van het designsysteem: een lichter blauw dan de kop van de fansite.
+  De iconen van Storybook staan in `packages/design-system/src/assets/icons/storybook`, die van het Forum in `.../forum`.
+  Het script `pnpm --filter site icons` maakt alle drie de sets, en `src/icons.test.ts` controleert ze.
+- **Waarom:** in de favorieten van Safari toonde ds.heerenveen.org een roze vlak met een S, omdat de pagina alleen de SVG van Storybook zelf aanwijst en `/favicon.ico` en `/apple-touch-icon.png` niet bestonden.
+  Het roze is de eigen kleur van Storybook (uit zijn `favicon.svg`), zodat Storybook en de fansite op een telefoon of in de favorieten niet voor elkaar worden aangezien.
+  Het Forum krijgt een lichter blauw: dat hoort bij de huisstijl en is te onderscheiden van het donkerblauw van de fansite.
+  Een icoon is geen tekst, maar het contrast met het vlak is er wel: de witte rand van het schild haalt op het roze 3,2:1 en op `blue-600` 6,9:1.
+- **Alternatieven:** zand (`sand-300`) voor het Forum; dat vond de projecteigenaar niet bij de huisstijl passen.
+  Of `blue-500`: daar verdwijnen de blauwe randen en de banen van het schild in het vlak.
+  Of `blue-700`, dat de blauwe rand van het schild bijna opslokt.
+  Of de iconen van Storybook zelf op het roze zetten, met een S; dat is het vlak dat we juist willen vervangen.
+- **Hoe:** het script krijgt een lijst sets (`src/icon-sets.ts`) in plaats van één map; alleen de tegel verschilt, dus de transparante iconen, de ICO en de SVG zijn in elke set dezelfde bytes.
+  Storybook neemt de map van zijn set op met `staticDirs` (op de root) en zet de links in `managerHead` en `previewHead` (`.storybook/icons.ts`); zodra de kop zelf een icoon heeft, laat Storybook zijn eigen weg.
+  De tabbladen van de fansite en van Storybook tonen hetzelfde transparante schild; het roze verschijnt in het `apple-touch-icon`, dus in de favorieten van Safari en op een beginscherm.
+
 ### Pictogrammen zijn zelf getekend, bij een link erachter en bij een knop ervoor
 
 - **Datum:** 25 oktober 2026
