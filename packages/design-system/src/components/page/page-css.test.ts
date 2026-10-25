@@ -129,7 +129,7 @@ describe('the text and the control in the footer in page.css', () => {
 
   it('lets the column of the links take what is left, so the links wrap before the text does', () => {
     expect(columns).toContain('grid-template-columns: auto minmax(0, 1fr);')
-    expect(columns).toContain('justify-self: end;')
+    expect(columns).toContain('place-self: start end;')
   })
 
   it('has the links span all rows, so a second row of links does not push the lines of text apart', () => {
