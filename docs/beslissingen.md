@@ -1937,6 +1937,52 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de zachte vulling is rustig genoeg naast de koppen en blijft toch herkenbaar als knop. Een prop past bij hoe `Text` en `Card` hun uitvoering kiezen. Gemeten in licht: blauw-100 op wit haalt 1,21:1 en blauw-200 1,48:1, dus een vulling alleen is te zwak. De rand blauw-500 haalt 3,84:1 of meer op de vier vlakken (wit, sterk, zacht en warm) en 3,86:1 tegen de vulling. In donker haalt blauw-700 op de donkere vlakken 1,69:1 en 1,33:1, de rand blauw-400 dan 5,28:1 en 4,16:1. De tekst haalt 10,25:1 op de vulling in licht en 8,38:1 onder de muis, in donker 8,57:1 en 6,34:1. Onder de muis wordt de vulling in licht donkerder (blauw-200) en in donker lichter (blauw-600), zoals de gevulde knop dat doet: de knop wordt dan sterker. De rand blijft bij de muis gelijk. De focusrand is die van `base/focus.css`, dus net zo zichtbaar als bij de gevulde knop. De rand houdt de knop in geforceerde kleuren zichtbaar, en een rand van 1 pixel maakt de knop even groot als de gevulde.
 - **Alternatieven:** de vulling zo donker maken dat ze 3:1 haalt; dan lijkt de knop weer op de gevulde en valt de zachte knop niet meer terug. Een uitvoering met alleen een rand, of alleen tekst; die lijkt op een link. Een apart onderdeel zoals `SecondaryButton`; dat geeft dubbel werk bij elke wijziging aan knoppen.
 
+### De strepen staan aan het einde van de pagina en scrollen mee
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de strepen van de Friese vlag staan aan het einde van de pagina en scrollen met de pagina mee, over de footer en erboven; ze staan niet vast aan de onderkant van het scherm.
+- **Waarom:** de projecteigenaar vindt het prettiger voor het oog als de strepen met de pagina meescrollen, in plaats van dat de kaarten er voorlangs scrollen, en het laat zien dat je het einde van de pagina bereikt.
+  Daarnaast is de hoogte zo een percentage van de footer ("2 tot 3 keer zo hoog") en volgt hij de footer op een telefoon, zonder JavaScript en zonder vaste maat.
+  Alleen de tekst bij de footer ligt over de strepen, niet elke tekst die voorbijscrolt, dus het contrast hoeft alleen daar te kloppen.
+- **Alternatieven:** vast aan de onderkant van het scherm (`position: fixed`; altijd zichtbaar, maar de hoogte is dan een vaste maat, tekst scrolt over de strepen heen en een vast element onderaan een iPhone gedraagt zich lastig met de werkbalk van Safari); strepen als achtergrond van de hele pagina (geen duidelijke "hoogte van de footer" en ze zijn dan overal te zien).
+
+### De strepen zijn alleen CSS: twee pseudo-elementen van de footer
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de strepen zijn alleen CSS: twee pseudo-elementen van de footer met een `repeating-linear-gradient` en een `mask-image`, onder een hoek van 35 graden.
+  Ze doen geen verzoek.
+  `::before` is het deel over de footer, onder de tekst en de knoppen erin (die krijgen `position: relative`); `::after` is het deel boven de footer, met `z-index: -1`.
+  Beide delen hebben dezelfde gradient en dezelfde `background-size` en `background-position`, zodat de strepen zonder naad over de bovenrand van de footer doorlopen.
+  `.hf-page` krijgt `isolation: isolate`.
+- **Waarom:** de site doet geen verzoeken naar derden en moet snel blijven.
+  Een gradient en een masker worden één keer getekend en scrollen mee met de pagina.
+  De richting is die van de vlag (van linksboven naar rechtsonder, 34,695 graden).
+  Er zijn twee pseudo-elementen nodig, omdat de achtergrond van de footer boven alles met een negatieve `z-index` wordt getekend: de strepen over de footer moeten boven die achtergrond en onder de tekst liggen, en de strepen erboven onder de kaarten.
+  Met `isolation: isolate` op `.hf-page` liggen de strepen boven de pagina en onder de inhoud, ook binnen een element dat zelf een achtergrond tekent, zoals de themawrapper in Storybook.
+- **Alternatieven:** een SVG of PNG als achtergrondafbeelding (een extra bestand en een verzoek, en het schaalt niet mee met de footer); één pseudo-element met ook de achtergrond van de footer erin (de footer wordt dan een tekening in plaats van een vlak, en de rand en de kleur van de footer hangen van het masker af); een laag in de kleur van de pagina over de strepen in plaats van een masker (zelfde uiterlijk, maar de laag moet de kleur van de pagina kennen; dit is de terugvaloptie als een masker ergens vreemd uitpakt).
+
+### Twee kleurtokens voor de strepen, uit grijs-300 en blauw-800
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** twee nieuwe kleurtokens, `--hf-colour-background-stripe` (boven de footer) en `--hf-colour-background-stripe-footer` (over de footer), gemaakt van grijs-300 in licht en blauw-800 in donker, met een dekking per deel (licht 30% en 30%, donker 40% en 60%).
+- **Waarom:** "iets donkerder" werkt in licht, maar in donker is de pagina al bijna het donkerste blauw, dus daar is de streep iets lichter en blauwer.
+  In licht is een warm grijs rustiger dan blauw en past bij de pagina en de footer, die zelf uit het grijs komen.
+  Beide kleuren staan al in het palet, dus er komt geen nieuwe stap bij.
+  Over de footer is de streep in licht donkerder dan de footer, dus de tekst in de footer heeft daar minder contrast dan op de footer zelf: bij 30% haalt secundaire tekst 4,53:1 tegen 4,5:1, bij het gekozen 50% niet (4,36:1).
+  In donker is de streep lichter dan de footer en het contrast ruim voldoende.
+  Twee tokens, omdat de dekking per deel en per thema verschilt en `light-dark()` geen getallen kiest, alleen kleuren.
+- **Alternatieven:** staal (steel-200 in licht, blauwer en frisser, even licht als de footer en dus zonder contrastprobleem); zand (zand-300 en zand-700, warmer, dezelfde krappe marge); één token voor beide delen (de dekking boven en over de footer is dan gelijk, wat in donker niet gewenst was); een streep die uit de pagina en een tint gemengd wordt (geeft kleuren die in geen enkele reeks staan).
+
+### De contrasttabellen meten een streep op het vlak eronder
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een paar in `pairGroups` kan een `under` hebben: het vlak waarop een doorzichtige achtergrond ligt.
+  De tabellen in Tokens/Kleur rekenen de streep over dat vlak heen uit (`flatten` in `docs/contrast.ts`) en meten het contrast op de uitkomst.
+  Voor de strepen boven de footer is dat de pagina, voor de strepen over de footer de footer.
+- **Waarom:** een streep is doorzichtig, en het contrast van een doorzichtige kleur is niet te meten zonder de kleur eronder.
+  De menging gebeurt in `flatten` zelf, niet op een canvas: een canvas mengt in 8 bits en verschoof het contrast van secundaire tekst in de footer van 4,53:1 naar 4,50:1, terwijl de marge daar maar 0,03 is.
+- **Alternatieven:** de tint met `color-mix()` vooraf in een eigen token mengen met de pagina of de footer (dat zijn extra tokens die alleen de tabel gebruikt); de streep zonder het vlak eronder meten (dat meet niets, want de streep is doorzichtig).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

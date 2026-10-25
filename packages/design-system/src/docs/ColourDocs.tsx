@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { Pair, ScaleName, Theme } from './tokens'
 
-import { contrastRatio, formatRatio, toRgb } from './contrast'
+import { contrastRatio, flatten, formatRatio, toRgb } from './contrast'
 import {
   pairGroups,
   requirementLabel,
@@ -174,14 +174,19 @@ const outcome = (ratio: number | undefined, minimum: number) => {
 
 const PairRow = ({ pair, text }: { pair: Pair; text: boolean }) => {
   const sample = useRef<HTMLSpanElement>(null)
+  const stripe = useRef<HTMLSpanElement>(null)
   const [ratio, setRatio] = useState<number>()
   const version = useStyleVersion()
 
   // Measure what the browser actually renders; again whenever the styles change.
+  // A background that isn't opaque, such as a stripe, is measured on the surface it lies on.
   useLayoutEffect(() => {
     if (!sample.current) return
     const style = getComputedStyle(sample.current)
-    setRatio(contrastRatio(style.color, style.backgroundColor))
+    const background = stripe.current
+      ? flatten(getComputedStyle(stripe.current).color, style.backgroundColor)
+      : style.backgroundColor
+    setRatio(background === undefined ? undefined : contrastRatio(style.color, background))
   }, [version])
 
   const minimum = requirementMinimum[pair.requirement]
@@ -193,10 +198,19 @@ const PairRow = ({ pair, text }: { pair: Pair; text: boolean }) => {
           aria-hidden={text ? undefined : true}
           className={text ? '_hf-docs-sample' : '_hf-docs-sample _hf-docs-sample-ring'}
           ref={sample}
-          style={{ backgroundColor: `var(${pair.background})`, color: `var(${pair.foreground})` }}
+          style={
+            pair.under
+              ? {
+                  backgroundColor: `var(${pair.under})`,
+                  backgroundImage: `linear-gradient(var(${pair.background}), var(${pair.background}))`,
+                  color: `var(${pair.foreground})`,
+                }
+              : { backgroundColor: `var(${pair.background})`, color: `var(${pair.foreground})` }
+          }
         >
           {text ? 'Heerenveen' : null}
         </span>
+        {pair.under && <span hidden ref={stripe} style={{ color: `var(${pair.background})` }} />}
       </td>
       <td>
         {pair.label}

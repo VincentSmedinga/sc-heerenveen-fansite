@@ -1,7 +1,10 @@
 import preview from '#.storybook/preview'
 
-import { ExampleFooter } from '../../docs/ExamplePage'
+import { ExampleFooter, ExampleHeader } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
+import { Heading } from '../heading/Heading'
+import { Text } from '../text/Text'
+import { Page } from './Page'
 
 const meta = preview.meta({
   parameters: {
@@ -21,6 +24,12 @@ const meta = preview.meta({
           'Een link in de footer hoeft daar niets voor te doen.',
           'De kleuren en hun contrast staan bij [Tokens › Kleur](?path=/docs/tokens-kleur--documentatie).',
           '',
+          'Bij de footer horen schuine strepen, zoals die van de Friese vlag.',
+          'Ze beginnen over de footer, onder de tekst en de knoppen, en lopen daarboven naar boven uit, achter de rest van de pagina, tot ze vervagen.',
+          'De hoogte volgt de footer, dus op een telefoon, waar de footer hoger is, zijn de strepen ook hoger.',
+          'Ze scrollen met de pagina mee, nemen geen aanraking of muis aan en zijn er niet in geforceerde kleuren en bij het afdrukken.',
+          'Je hoeft er niets voor te doen: ze zijn onderdeel van de footer, en de kleuren staan bij Tokens › Kleur.',
+          '',
           'De inhoud zet je zelf neer: twee regels tekst, elk in een eigen `Text`, en dan de links over de site.',
           'Op de site zijn dat "Alle koppen en links op één plek." en "Voor supporters door supporters.".',
           'De links, zoals Over ons, Bronnen, Privacy en Updates, staan in een `Navigation` met de naam "Over de site".',
@@ -37,9 +46,50 @@ const meta = preview.meta({
 
 const render = () => <ExampleFooter />
 
+// A short page, so the stripes above the footer are in view.
+// The footer alone would show only the part over it.
+const renderOnShortPage = () => (
+  <Page>
+    <ExampleHeader />
+    <Page.Body>
+      <Page.Main>
+        <Page.Cell>
+          <Heading level={1}>Een korte pagina</Heading>
+          <Text>Met weinig inhoud, zodat de strepen boven de footer helemaal te zien zijn.</Text>
+        </Page.Cell>
+      </Page.Main>
+    </Page.Body>
+    <ExampleFooter />
+  </Page>
+)
+
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
+
+const shortPageParameters = {
+  docs: {
+    description: {
+      story:
+        'Op een korte pagina zijn de strepen helemaal te zien: over de footer, en daarboven naar boven vervagend, achter de inhoud.',
+    },
+    story: { iframeHeight: '30rem', inline: false },
+  },
+}
+
+export const ShortPageLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Strepen op een korte pagina, licht',
+  parameters: shortPageParameters,
+  render: renderOnShortPage,
+})
+
+export const ShortPageDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Strepen op een korte pagina, donker',
+  parameters: shortPageParameters,
+  render: renderOnShortPage,
+})
 
 const statesParameters = {
   docs: {
