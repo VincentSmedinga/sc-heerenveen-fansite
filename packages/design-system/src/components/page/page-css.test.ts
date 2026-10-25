@@ -105,3 +105,45 @@ describe('the stripes of the Frisian flag in page.css', () => {
     expect(media).toContain('display: none;')
   })
 })
+
+describe('the text and the control in the footer in page.css', () => {
+  const footer = css.slice(css.indexOf('.hf-page-footer {'))
+  // A nested media query of the footer, up to the closing brace at the depth of the query.
+  const media = (query: string) =>
+    footer.match(new RegExp(String.raw`@media \(${query}\) \{(.*?\n    \})\n`, 's'))?.[1] ?? ''
+
+  const nowrap = media('width >= 19\\.5rem')
+  const columns = media('width >= 40rem')
+
+  it('keeps every line of text, button label and control of the footer on one line, but not the links', () => {
+    expect(nowrap).toMatch(/> :not\(:last-child\) \{\s*white-space: nowrap;\s*\}/)
+    expect(nowrap).toMatch(/\.hf-segmented-control \{\s*flex-wrap: nowrap;\s*\}/)
+  })
+
+  it('does so only above a width where it fits, so a line that does not break cannot make the page scroll sideways', () => {
+    // 17rem of text with the spacing of WCAG 1.4.12 and 2rem of margin is 19rem, under 320px.
+    expect(footer.match(/^\.hf-page-footer \{[^@]*/)?.[0]).not.toContain('nowrap')
+    expect(footer.match(/white-space: nowrap;/g)).toHaveLength(1)
+    expect(nowrap).toContain('white-space: nowrap;')
+  })
+
+  it('lets the column of the links take what is left, so the links wrap before the text does', () => {
+    expect(columns).toContain('grid-template-columns: auto minmax(0, 1fr);')
+    expect(columns).toContain('place-self: start end;')
+  })
+
+  it('has the links span all rows, so a second row of links does not push the lines of text apart', () => {
+    expect(columns).toContain('grid-template-rows: auto auto 1fr;')
+    expect(columns).toContain('grid-row: 1 / -1;')
+  })
+
+  it('balances the rows of links, in a list of inline blocks because a flex row cannot be balanced', () => {
+    const list = footer.match(/@supports \(text-wrap: balance\) \{(.*?\n {4}\})\n/s)?.[1] ?? ''
+
+    expect(list).toContain('display: block;')
+    expect(list).toContain('text-wrap: balance;')
+    expect(list).toMatch(/> li \{[^}]*display: inline-block;[^}]*margin-inline-start: 1\.5rem;/)
+    // The margin before a link, taken back at the list's start, keeps links 1,5rem apart.
+    expect(list).toContain('margin-inline-start: -1.5rem;')
+  })
+})
