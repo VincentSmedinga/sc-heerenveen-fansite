@@ -62,6 +62,8 @@ describe('proxy', () => {
         '/beheer/inloggen',
         '/beheer/inloggen/bevestigen?token=abc',
         '/beheer/ergens/diep',
+        '/beheer/artikelen',
+        '/beheer/artikelen/12/voorbeeld',
       ]) {
         const { headers } = proxy(path)
 

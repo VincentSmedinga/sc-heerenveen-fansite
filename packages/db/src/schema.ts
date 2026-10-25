@@ -370,17 +370,25 @@ export const adminLoginAttempts = mysqlTable(
   ],
 )
 
-export const auditActions = ['item.hide', 'item.show'] as const
+export const auditActions = [
+  'item.hide',
+  'item.show',
+  'article.create',
+  'article.update',
+  'article.publish',
+  'article.unpublish',
+] as const
 
 export type AuditAction = (typeof auditActions)[number]
 
 /**
  * What the admin did, one row per action, written by the one function `recordAction` in the
  * site and never changed or removed: no code updates or deletes a row, and a test keeps it so.
- * It keeps who (the id of the account, not the address), when (UTC), what, which item and the
- * reason. `item_id` has no foreign key, so the row stays when an item is deleted. `reason` is
- * empty for an action that has none, such as showing an item again. It holds nothing else of
- * the request.
+ * It keeps who (the id of the account, not the address), when (UTC), what, which item or
+ * article and the reason. `item_id` is the number of an item for an `item.` action and of an
+ * article for an `article.` action: the action says which. It has no foreign key, so the row
+ * stays when an item is deleted. `reason` is empty for an action that has none, such as
+ * showing an item again. It holds nothing else of the request.
  */
 export const auditLog = mysqlTable(
   'audit_log',

@@ -2,23 +2,25 @@
 
 Dit document is voor wie een artikel voor de sc Heerenveen Fansite schrijft.
 Een artikel van onze eigen redactie staat op `/redactie/<adres>`, en het nieuwste staat als kaart "Van de redactie" bovenaan de homepage.
-Een scherm om te schrijven en te publiceren komt met #264.
-Tot dat klaar is, zet de projecteigenaar een artikel met een SQL-opdracht in de database (zie _Een artikel in de database zetten_).
+Een beheerder schrijft, bekijkt, publiceert en trekt een artikel in op `/beheer/artikelen` (zie _Een artikel schrijven en publiceren in het beheer_).
+Zonder het beheer kan de projecteigenaar een artikel met een SQL-opdracht in de database zetten (zie _Een artikel in de database zetten_).
 
 ## Een artikel schrijven
 
 Een artikel heeft deze delen:
 
-| Deel   | Wat erin staat                                                                           | Hoogstens                     |
-| ------ | ---------------------------------------------------------------------------------------- | ----------------------------- |
-| Titel  | De titel boven het artikel                                                               | 120 tekens                    |
-| Adres  | Het stuk achter `/redactie/`: kleine letters, cijfers en streepjes, zoals `dit-zijn-wij` | 80 tekens                     |
-| Intro  | Een of twee zinnen onder de titel. Ze staan ook op de kaart en bij een gedeelde link     | 300 tekens                    |
-| Tekst  | Het artikel zelf, in de opmaak hieronder                                                 | geen grens, houd het leesbaar |
-| Auteur | De naam bij het artikel, zoals "de redactie" of een naam. De pagina zet er "Door" voor   | 100 tekens                    |
+| Deel   | Wat erin staat                                                                           | Hoogstens     |
+| ------ | ---------------------------------------------------------------------------------------- | ------------- |
+| Titel  | De titel boven het artikel                                                               | 120 tekens    |
+| Adres  | Het stuk achter `/redactie/`: kleine letters, cijfers en streepjes, zoals `dit-zijn-wij` | 80 tekens     |
+| Intro  | Een of twee zinnen onder de titel. Ze staan ook op de kaart en bij een gedeelde link     | 300 tekens    |
+| Tekst  | Het artikel zelf, in de opmaak hieronder                                                 | 20.000 tekens |
+| Auteur | De naam bij het artikel, zoals "de redactie" of een naam. De pagina zet er "Door" voor   | 100 tekens    |
 
 Het adres kies je één keer.
 Zodra het artikel gepubliceerd is en iemand de link heeft gedeeld, verander je het adres niet meer: de link werkt dan niet meer.
+Het beheer laat dat ook niet toe: het adres van een gepubliceerd artikel staat vast.
+Trek het artikel eerst in als het toch moet.
 
 De datum staat er niet bij: de pagina zet de dag van publicatie onder de titel.
 
@@ -93,9 +95,53 @@ Voor een artikel betekent het:
 Schrijf in gewone woorden, op taalniveau B1, zoals de rest van de site.
 Wie het artikel schrijft, leest het ook na: een tweede lezer is er nog niet (die komt met #40).
 
+## Een artikel schrijven en publiceren in het beheer
+
+Alleen een beheerder schrijft artikelen.
+Een moderator ziet deze pagina's niet: voor een moderator zijn ze "niet gevonden".
+Log in zoals bij elke beheerpagina en kies op `/beheer` de link "Artikelen schrijven en publiceren".
+
+1. Kies "Nieuw artikel" en vul de velden in.
+   De opmaak staat boven het formulier, met een voorbeeld van elk onderdeel.
+   Het adres vul je niet in: met JavaScript volgt het de titel, zonder JavaScript maakt de site er een voorstel van als je het leeg laat.
+   De auteur staat vooraf op "de redactie".
+2. Kies "Opslaan als concept".
+   Het artikel staat nergens op de site.
+   Is een veld fout, dan blijft alles staan wat je typte, en staat de fout bovenaan en bij het veld.
+3. Kies "Voorbeeld" om het artikel te zien zoals een bezoeker het ziet, op `/beheer/artikelen/<nummer>/voorbeeld`.
+   Een concept heeft nog geen datum: het voorbeeld toont de dag van vandaag.
+   Alleen een ingelogde beheerder opent het voorbeeld.
+   Browsers bewaren het niet en zoekmachines nemen het niet op.
+4. Kies "Publiceren".
+   Dat slaat op wat op het scherm staat en zet het artikel meteen op de site, met de tijd van dat moment.
+   Is het het nieuwste artikel, dan staat het ook als kaart op de homepage.
+5. Kies later "Opslaan" voor een wijziging.
+   Een gepubliceerd artikel is meteen bijgewerkt.
+   De datum van publicatie blijft, en het adres kan niet veranderen.
+6. Kies "Intrekken" om het artikel van de site te halen.
+   Het is dan weer een concept.
+   Er is geen knop om te verwijderen.
+   Publiceer je het later opnieuw, dan krijgt het de datum van dat moment.
+
+Wat verder goed is om te weten:
+
+- Een tweede klik, of een tweede tabblad, doet niets extra.
+  Publiceer je wat al gepubliceerd is, dan zegt de pagina "Al gepubliceerd" en verandert er niets.
+  Hetzelfde geldt voor intrekken.
+- Elke actie komt in het logboek, de tabel `audit_log`: `article.create`, `article.update`, `article.publish` en `article.unpublish`, met het nummer van het account en van het artikel.
+  Er staat niets van de tekst in.
+  `article.update` staat er alleen als er iets veranderde.
+  Lees het logboek in phpMyAdmin met `SELECT created_at, user_id, action, item_id FROM audit_log WHERE action LIKE 'article.%' ORDER BY id;`.
+- Een artikel met een datum in de toekomst, dat alleen met SQL kan, staat in de lijst als "Gepland voor …".
+  Wil je het nu publiceren, trek het dan eerst in.
+- De velden hebben deze grenzen: een titel van 120 tekens, een intro van 300, een auteur van 100, een adres van 80 en een tekst van 20.000.
+  Een adres heeft alleen kleine letters, cijfers en enkele streepjes, is niet van een ander artikel, en is niet de eerste naam van een pagina van de site, zoals `bronnen` of `beheer`.
+- Een regeleinde in de titel, de intro of de auteur wordt een spatie.
+  In de tekst blijven de regels zoals je ze typte; alleen besturingstekens gaan eruit, en lege regels aan het begin en het eind.
+
 ## Een artikel in de database zetten
 
-Dit is de weg tot #264 klaar is.
+Dit is een terugval voor als het beheer niet werkt.
 Open phpMyAdmin op de host, kies de database van de site en ga naar het tabblad SQL.
 Lokaal werkt `docker compose exec mariadb mariadb fansite`, en dan eerst `SET NAMES utf8mb4;`, zodat de accenten goed aankomen.
 
@@ -139,8 +185,8 @@ Kijk na of er niets is afgekapt: `SELECT CHAR_LENGTH(intro) FROM articles WHERE 
 
 ### 3. Kijk het na en publiceer
 
-Een concept kun je nog niet op de site bekijken: het voorbeeld komt met #264.
-Zet het artikel daarom eerst op acceptatie, publiceer het daar en lees het na.
+Een concept staat niet op de site, maar je bekijkt het in het beheer: het staat in de lijst op `/beheer/artikelen` en heeft een voorbeeld.
+Zet het artikel eerst op acceptatie, publiceer het daar en lees het na.
 Acceptatie heeft een eigen database en staat niet in de zoekmachines.
 Zet het artikel daarna met dezelfde opdrachten in de database van productie.
 
@@ -197,6 +243,10 @@ De pagina verraadt niet of het adres een concept is.
   Een artikel is gepubliceerd als `published_at` gevuld is en niet na het moment van nu ligt.
 - De opmaak leest `apps/site/src/article-text.ts`, en `apps/site/src/ArticleText.tsx` maakt er elementen van.
   Er is geen `dangerouslySetInnerHTML`, en de tests (`article-text.test.tsx`) proberen HTML, `javascript:`-adressen, `//evil.example` en teksten van een miljoen tekens.
+- Het beheer staat in `apps/site/src/app/beheer/artikelen` (de lijst, het formulier, de serveracties en het voorbeeld).
+  De queries en de wijzigingen staan in `apps/site/src/beheer/articles.ts`, de controle van het formulier in `article-form.ts`.
+  Elke serveractie begint met `requireRole('beheerder')`, en elke wijziging schrijft met `recordAction` in dezelfde transactie een regel in het logboek.
 - De pagina is `apps/site/src/app/redactie/[slug]/page.tsx`, de kaart staat in `apps/site/src/app/page.tsx`, en beide gebruiken de componenten `Article` en `ArticleCard` van het designsysteem.
 - De testgegevens staan in `apps/site/e2e/articles.ts`: een artikel, een concept en een artikel voor later.
+  `apps/site/e2e/writing.spec.ts` schrijft, bekijkt, publiceert en trekt een verzonnen artikel in, met en zonder JavaScript.
   Op acceptatie zet de seed geen artikel: de eigenaar zet het eerste artikel zelf, met de opdrachten hierboven.

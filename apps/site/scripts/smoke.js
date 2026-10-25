@@ -82,6 +82,20 @@ async function checkAdmin() {
     responses.push(response)
   }
 
+  // The pages of the articles, the preview of a draft among them, are no page for a visitor
+  // without a session either.
+  for (const path of [
+    '/beheer/artikelen',
+    '/beheer/artikelen/nieuw',
+    '/beheer/artikelen/1',
+    '/beheer/artikelen/1/voorbeeld',
+  ]) {
+    const response = await fetch(origin + path, { redirect: 'manual' })
+    assert.equal(response.status, 307, path)
+    assert.equal(new URL(response.headers.get('location') ?? '', origin).pathname, '/beheer/inloggen', path)
+    responses.push(response)
+  }
+
   const login = await (await fetch(`${origin}/beheer/inloggen`)).text()
   assert.match(login, /<h1[^>]*>Inloggen voor beheer<\/h1>/)
   assert.match(login, /<input[^>]*type="email"/)

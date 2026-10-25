@@ -147,13 +147,13 @@ De importer overschrijft het niet: de voorwaarde staat in het `INSERT … ON DUP
 
 Het logboek van het beheer: één rij per beheeractie, voor wie later wil weten wat er gebeurde.
 
-| Kolom        | Betekenis                                                                       |
-| ------------ | ------------------------------------------------------------------------------- |
-| `created_at` | Wanneer, in UTC                                                                 |
-| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres               |
-| `action`     | Wat: `item.hide` of `item.show`                                                 |
-| `item_id`    | Welk bericht; zonder foreign key, zodat de rij blijft als het bericht verdwijnt |
-| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide`; leeg bij `item.show`           |
+| Kolom        | Betekenis                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `created_at` | Wanneer, in UTC                                                                                                           |
+| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres                                                         |
+| `action`     | Wat: `item.hide`, `item.show`, `article.create`, `article.update`, `article.publish` of `article.unpublish`               |
+| `item_id`    | Welk bericht, of bij een `article.`-actie welk artikel; zonder foreign key, zodat de rij blijft als het bericht verdwijnt |
+| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide`; leeg bij `item.show`                                                     |
 
 Alleen `recordAction` in `apps/site/src/beheer/audit-log.ts` schrijft erin, en alleen met `INSERT`.
 Geen enkele code wijzigt of verwijdert een rij, en `audit-log.test.ts` toetst dat in de broncode.

@@ -93,6 +93,16 @@ describe('the admin', () => {
     // tests).
     expect(actionFiles).toContain('app/beheer/berichten/actions.ts')
     expect(routes).toContain('app/beheer/berichten/page.tsx')
+    // The articles: the actions that write them and the pages that show a draft.
+    expect(actionFiles).toContain('app/beheer/artikelen/actions.ts')
+    expect(routes).toEqual(
+      expect.arrayContaining([
+        'app/beheer/artikelen/page.tsx',
+        'app/beheer/artikelen/nieuw/page.tsx',
+        'app/beheer/artikelen/[id]/page.tsx',
+        'app/beheer/artikelen/[id]/voorbeeld/page.tsx',
+      ]),
+    )
   })
 
   it('names as open only files that exist, and no file that a visitor without a session should not reach', () => {
