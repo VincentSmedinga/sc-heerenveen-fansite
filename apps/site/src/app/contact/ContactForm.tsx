@@ -33,7 +33,9 @@ const Failure = ({ failure }: { failure: 'limit' | 'send' }) => (
     </Heading>
     <Text>
       {failure === 'send' ? 'Mail ons zelf: ' : 'Probeer het later nog eens, of mail ons zelf: '}
-      <Link href={`mailto:${email}`}>{email}</Link>
+      <Link href={`mailto:${email}`} icon="envelope">
+        {email}
+      </Link>
     </Text>
   </Card>
 )

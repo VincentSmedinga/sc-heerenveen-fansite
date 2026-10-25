@@ -107,6 +107,7 @@ describe('ContactForm', () => {
 
     expect(failure.textContent).toBe('Het versturen is niet gelukt.Mail ons zelf: fansite@heerenveen.org')
     expect(failure.querySelector('a')?.getAttribute('href')).toBe('mailto:fansite@heerenveen.org')
+    expect(failure.querySelector('a')?.querySelector('.hf-icon-head > svg[aria-hidden="true"]')).not.toBeNull()
     expect((screen.getByLabelText('Bericht') as HTMLTextAreaElement).value).toBe('Dit artikel moet weg.')
     expect(screen.queryByText('Bedankt, we hebben je bericht ontvangen.')).toBeNull()
   })

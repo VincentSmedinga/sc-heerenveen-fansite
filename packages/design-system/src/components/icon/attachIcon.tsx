@@ -9,13 +9,23 @@ import { Children, type ReactNode } from 'react'
  * That needs text at the edge: the last child behind, the first child in front. A string is
  * split at its last or first space. Other content, such as an element, takes the icon alone in
  * its group; it can then end up on a line of its own, so end a link with text.
+ *
+ * `keep` says how much of the text goes in the group: the whole word, or only its letter next
+ * to the icon, for a word that must be able to break when it is longer than a line, such as an
+ * email address. The rest of the word then breaks by the rules of its own element.
  */
-export const attachIcon = (children: ReactNode, icon: ReactNode, place: 'after' | 'before'): ReactNode => {
+export const attachIcon = (
+  children: ReactNode,
+  icon: ReactNode,
+  place: 'after' | 'before',
+  keep: 'letter' | 'word' = 'word',
+): ReactNode => {
   const nodes = Children.toArray(children)
 
   if (place === 'after') {
     const last = nodes.at(-1)
-    const split = typeof last === 'string' ? /^([\s\S]*\s)?(\S+)\s*$/.exec(last) : null
+    const split =
+      typeof last === 'string' ? (keep === 'word' ? /^([\s\S]*\s)?(\S+)\s*$/ : /^([\s\S]*?)(\S)\s*$/u).exec(last) : null
 
     return [
       ...nodes.slice(0, split ? -1 : undefined),
@@ -28,7 +38,8 @@ export const attachIcon = (children: ReactNode, icon: ReactNode, place: 'after' 
   }
 
   const first = nodes[0]
-  const split = typeof first === 'string' ? /^\s*(\S+)(\s[\s\S]*)?$/.exec(first) : null
+  const split =
+    typeof first === 'string' ? (keep === 'word' ? /^\s*(\S+)(\s[\s\S]*)?$/ : /^\s*(\S)([\s\S]*)$/u).exec(first) : null
 
   return [
     <span className="hf-icon-head" key="icon">

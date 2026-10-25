@@ -85,7 +85,10 @@ export default async function SourcesPage() {
           </Heading>
           <Text>
             Schrijft een medium over sc Heerenveen en staat het hier nog niet? Stuur ons de naam en de website via{' '}
-            <Link href={`mailto:${email}`}>{email}</Link>.
+            <Link href={`mailto:${email}`} icon="envelope">
+              {email}
+            </Link>
+            .
           </Text>
         </Card>
         <Card aria-labelledby="inquiry-heading" surface="warm">
@@ -94,7 +97,10 @@ export default async function SourcesPage() {
           </Heading>
           <Text>
             Heb je een vraag of een verzoek over hoe we jouw medium tonen? Mail ons via{' '}
-            <Link href={`mailto:${email}`}>{email}</Link>.
+            <Link href={`mailto:${email}`} icon="envelope">
+              {email}
+            </Link>
+            .
           </Text>
         </Card>
       </Page.Sidebar>

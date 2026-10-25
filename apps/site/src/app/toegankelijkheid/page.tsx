@@ -37,8 +37,12 @@ export default function AccessibilityPage() {
         </Text>
         <Heading level={2}>Hoe je ons bereikt</Heading>
         <Text>
-          Heb je last van iets op de site? Mail naar <Link href={`mailto:${email}`}>{email}</Link>. Zeg erbij om welke
-          pagina het gaat en welke browser of welk hulpmiddel je gebruikt. We pakken een melding zo snel mogelijk op.
+          Heb je last van iets op de site? Mail naar{' '}
+          <Link href={`mailto:${email}`} icon="envelope">
+            {email}
+          </Link>
+          . Zeg erbij om welke pagina het gaat en welke browser of welk hulpmiddel je gebruikt. We pakken een melding zo
+          snel mogelijk op.
         </Text>
         <Heading level={2}>Wanneer we het nakeken</Heading>
         <Text>
