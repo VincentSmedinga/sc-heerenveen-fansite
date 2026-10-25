@@ -3283,6 +3283,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De projecteigenaar hield de regel en de lijst zoals ze zijn (25 oktober 2026), ook "Sparta" en "Excelsior", die ook namen van amateurclubs zijn.
 - **Alternatieven:** alle korte namen toelaten (de A7 en de trein worden dan `relevant`); een regel voor een uitslag als "3-2" in de kop (nieuwe code); de clubs elke dag bij een bron ophalen (een verzoek aan een derde voor een lijst die één keer per seizoen verandert).
 
+### De beoordeelde koppen zijn testgevallen, met de waarde die het filter hoort te geven
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de quiz van de projecteigenaar komt als testgevallen in de tests van het filter: 26 koppen, 21 echte uit de feeds van Omrop Fryslân, NOS en Voetbal International en 5 verzonnen randgevallen.
+  Een kop die de projecteigenaar niet relevant vindt en die het filter `doubtful` geeft, staat met `doubtful`.
+  Een fout-positief dat we accepteren, staat in een eigen lijst, `knownFalsePositives`, met een commentaar.
+- **Waarom:** een testgeval beschrijft wat het filter hoort te doen, niet alleen wat de projecteigenaar vindt.
+  `doubtful` en `irrelevant` komen voor een bezoeker op hetzelfde neer, en de regel dat alleen "Heerenveen" `doubtful` is, is een bewuste keuze van #74.
+  Een bekend fout-positief blijft zo zichtbaar, en niemand repareert het per ongeluk met een regel die clubberichten mist.
+- **Uitkomst van de quiz:** de projecteigenaar en het filter zijn het eens over 19 van de 26 koppen.
+  Het filter verbergt geen clubbericht.
+  Zes koppen noemt de projecteigenaar niet relevant en geeft het filter `doubtful`: drie echte en drie verzonnen ("Nieuw VVV-kantoor in Heerenveen", "Ongeluk op de A7 tussen Heerenveen en Groningen" en "Heerenveen en Zwolle: wat de nieuwe treinverbinding betekent voor forenzen").
+  De tabel van het issue gaf de drie verzonnen koppen `irrelevant`, maar ze noemen alleen "Heerenveen".
+  "Man wint loterij in Heerenveen" toont het filter, door het woord "wint" (zie _Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden_).
+- **Alternatieven:** de uitkomst van de projecteigenaar overnemen als verwachte waarde (dan falen drie tests tegen een bewuste keuze en moet de regel veranderen); alleen de koppen opnemen waar we het over eens zijn (dan verdwijnt het fout-positief uit beeld).
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters
