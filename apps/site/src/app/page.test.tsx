@@ -127,7 +127,7 @@ describe('the homepage', () => {
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading" id="nieuws">.*<\/section><p>Welke media we volgen, lees je bij <a href="\/bronnen">Onze bronnen<\/a>\.<\/p><\/main><aside/,
+      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><p>Welke media we volgen, lees je bij <a href="\/bronnen">Onze bronnen<\/a>\.<\/p><\/main><aside/,
     )
   })
 
@@ -139,7 +139,7 @@ describe('the homepage', () => {
 
     expect(cards).toHaveLength(1)
     expect(cards[0]).toContain('<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>')
-    expect(cards[0]?.match(/<li>/g)).toHaveLength(3)
+    expect(cards[0]?.match(/<li id="nieuws-\d+">/g)).toHaveLength(3)
     // The h1 and the link to Onze bronnen are cells of their own, outside the card.
     expect(cards[0]).not.toContain('<h1')
     expect(cards[0]).not.toContain('Onze bronnen')
@@ -152,7 +152,7 @@ describe('the homepage', () => {
 
     expect(html).toMatch(
       new RegExp(
-        '<li><div class="hf-news-item"><div class="hf-news-item-layout"><time class="hf-meta hf-news-item-time" dateTime="2026-10-22T08:15:00.000Z">do 10:15</time>' +
+        '<li id="nieuws-1"><div class="hf-news-item"><div class="hf-news-item-layout"><time class="hf-meta hf-news-item-time" dateTime="2026-10-22T08:15:00.000Z">do 10:15</time>' +
           '<div class="hf-news-item-body"><a class="hf-headline hf-news-item-headline" href="https://testkrant.test/heerenveen-testclub">Heerenveen houdt Testclub op afstand</a>' +
           '<p class="hf-meta hf-news-item-meta"><span>Testkrant</span><svg [^>]*aria-hidden="true"[^>]*>.*?</svg></p></div></div></div></li>',
       ),
@@ -224,7 +224,7 @@ describe('the homepage', () => {
 
     expect(html.match(/<ul/g)).toHaveLength(1)
     expect(html).toContain('<ul role="list">')
-    expect(html.match(/<li>/g)).toHaveLength(3)
+    expect(html.match(/<li id="nieuws-\d+">/g)).toHaveLength(3)
     expect(html).not.toContain('<h3')
     expect(html.indexOf('Heerenveen houdt Testclub')).toBeLessThan(html.indexOf('jonge garde'))
     expect(html.indexOf('jonge garde')).toBeLessThan(html.indexOf('Trainer verwacht'))
@@ -328,10 +328,21 @@ describe('the button that loads five more headlines', () => {
     const html = await renderMain()
     const card = html.match(/<section.*?<\/section>/)?.[0] ?? ''
 
-    expect(card).toContain('id="nieuws"')
     expect(card).toMatch(
-      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws" method="get"><button type="submit" value="10" name="nieuws">Laad 5 meer<\/button><\/form><\/section>$/,
+      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button type="submit" value="10" name="nieuws">Laad 5 meer<\/button><\/form><\/section>$/,
     )
+  })
+
+  it('gives each headline an id with its number, and sends the button to the first new headline', async () => {
+    const html = await renderMain()
+
+    expect(html.match(/<li id="nieuws-\d+">/g)).toEqual([
+      '<li id="nieuws-1">',
+      '<li id="nieuws-2">',
+      '<li id="nieuws-3">',
+    ])
+    // With three headlines on the page, the first new one is the fourth: the page that loads again has it.
+    expect(html).toContain('action="/#nieuws-4"')
   })
 
   it('has the button ask for the number after the one in the address', async () => {

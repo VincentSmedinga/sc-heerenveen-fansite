@@ -3303,17 +3303,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 25 oktober 2026
 - **Besluit:** onder de lijst van de nieuwskaart staat de knop "Laad 5 meer" als er oudere koppen zijn.
-  De knop zit in een `Form` met `method="get"`: hij heeft `name="nieuws"` en als `value` het aantal na de volgende vijf, en het formulier gaat naar `/#nieuws`.
-  De pagina laadt zo opnieuw met `?nieuws=10` in het adres, en `#nieuws` is de kaart zelf.
+  De knop zit in een `Form` met `method="get"`: hij heeft `name="nieuws"` en als `value` het aantal na de volgende vijf.
+  Het formulier gaat naar de eerste nieuwe kop: elke kop in de lijst heeft een `id` met zijn nummer (`nieuws-6`), en het formulier gaat naar `/#nieuws-6` als er vijf koppen staan.
+  De pagina laadt zo opnieuw met `?nieuws=10#nieuws-6` in het adres, en de bezoeker blijft op dezelfde plek: de nieuwe koppen staan bovenaan het scherm.
   Er komt geen script bij en geen API, en geen component in het designsysteem: het is een `Button` in een `Form`.
 - **Waarom:** de site werkt voor iedereen, ook zonder script, en we hebben dan geen API en geen client-component nodig.
   Het aantal is geen persoonsgegeven en er komt geen cookie bij.
 - **Hoe:** de pagina vraagt de database om één kop meer dan ze toont, om te weten of de knop nodig is.
   Het adres van een pagina met `?nieuws=` is de homepage zelf als canoniek adres, en zo'n pagina staat niet in de sitemap.
-- **Gecontroleerd:** in Chromium, op een telefoon van 390 en een bureaublad van 900 pixels breed.
-  Na de klik staat de kaart bovenaan het scherm en staan de nieuwe koppen erin; de focus staat bovenaan de pagina, en Tab gaat naar de eerste kop in de kaart.
-  Het scherm springt dus naar de bovenkant van de kaart, niet naar de eerste nieuwe kop.
+- **Gecontroleerd:** in Chromium, op een telefoon van 390 en een bureaublad van 900 pixels breed, met en zonder JavaScript.
+  Na de klik staat de eerste nieuwe kop bovenaan het scherm (op de telefoon op 0 pixels, op het bureaublad op 85 pixels omdat de pagina niet verder scrollt), en de koppen eronder zijn de nieuwe.
+  De focus staat bovenaan de pagina, en Tab gaat naar de link van de eerste nieuwe kop.
   Wij hebben dit niet met een schermlezer geprobeerd.
+- **Eerst gekozen en weer losgelaten:** het formulier ging eerst naar de kaart zelf (`/#nieuws`).
+  Dan sprong de pagina na de klik naar de bovenkant van de kaart, en moest de bezoeker de nieuwe koppen zelf zoeken.
 - **Alternatieven:** de koppen met JavaScript ophalen en toevoegen (vloeiender, maar een API en niets voor wie geen script heeft); dat kan later als aanvulling.
 
 ### Het nieuws heeft geen grens in de tijd, en een grens van 100 koppen

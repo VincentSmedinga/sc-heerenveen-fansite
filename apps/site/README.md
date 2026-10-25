@@ -140,7 +140,8 @@ Daaronder staat het blok "Laatste nieuws": de vijf nieuwste berichten van de bro
 Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
 Zijn er oudere berichten, dan staat onder de lijst de knop "Laad 5 meer".
-De knop zit in een formulier met `method="get"` dat de homepage opnieuw laadt met het aantal in het adres, zoals `/?nieuws=10#nieuws`, en de kaart heeft `id="nieuws"`, dus de bezoeker blijft op dezelfde plek.
+De knop zit in een formulier met `method="get"` dat de homepage opnieuw laadt met het aantal in het adres, zoals `/?nieuws=10#nieuws-6`.
+Elke kop in de lijst heeft een `id` met zijn nummer (`nieuws-6`), en het formulier gaat naar de eerste nieuwe kop, dus de bezoeker blijft op dezelfde plek.
 Dat werkt zonder JavaScript en zonder API.
 `parseHeadlineCount` in `src/headlines.ts` controleert het getal: een geheel getal vanaf 5, in stappen van 5, en niet meer dan 100.
 Elk ander getal geeft de eerste vijf.

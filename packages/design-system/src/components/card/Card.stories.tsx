@@ -114,12 +114,12 @@ export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Vier vlakken
 const renderWithButton = () => (
   <Page.Body>
     <Page.Main>
-      <Card aria-labelledby="button-heading" id="nieuws">
+      <Card aria-labelledby="button-heading">
         <Heading id="button-heading" level={2}>
           Laatste nieuws
         </Heading>
         {newsItems}
-        <Form action="/#nieuws" method="get">
+        <Form action="/#nieuws-3" method="get">
           <Button name="nieuws" type="submit" value="10">
             Laad 5 meer
           </Button>

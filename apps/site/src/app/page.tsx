@@ -73,8 +73,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <Heading className="hf-visually-hidden" level={1}>
           sc Heerenveen Fansite
         </Heading>
-        {/* The id is where the button of this card brings the visitor back to after the page loads again. */}
-        <Card aria-labelledby="media-heading" id="nieuws">
+        <Card aria-labelledby="media-heading">
           <Heading id="media-heading" level={2}>
             Laatste nieuws
           </Heading>
@@ -83,7 +82,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           ) : (
             <List role="list">
               {headlines.map((item, index) => (
-                <List.Item key={index}>
+                // The number of a headline in the address of the button, so the page that loads again can start at the first new one.
+                <List.Item id={`nieuws-${index + 1}`} key={index}>
                   <NewsItem
                     dateTime={dateTimeOf(item.publishedAt)}
                     headline={item.title}
@@ -98,8 +98,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           )}
           {more && (
             // Works without JavaScript: the form loads the page again with five more headlines in the address, and the
-            // part after the hash brings the visitor back to this card.
-            <Form action="/#nieuws" method="get">
+            // part after the hash brings the visitor to the first of the new ones, so they stay in place.
+            <Form action={`/#nieuws-${headlines.length + 1}`} method="get">
               <Button name="nieuws" type="submit" value={String(count + itemsPerCard)}>
                 {`Laad ${itemsPerCard} meer`}
               </Button>
