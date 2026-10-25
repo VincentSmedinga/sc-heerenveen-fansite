@@ -273,8 +273,22 @@ Pas de lijst aan na de promotie en degradatie van elk seizoen (mei tot juli), en
 ### De testkoppen
 
 [`src/relevance.test.ts`](src/relevance.test.ts) heeft verzonnen koppen per regel: de club, de gemeente, de plaats, een wedstrijd van een andere club in Heerenveen, hele woorden en namen die ook een gewoon woord zijn.
-De koppen uit de logs van het prototype, met erbij of ze erin hoorden, komen in de lijst `fromTheLogs` bovenin dat bestand: `['de kop', 'relevant' | 'doubtful' | 'irrelevant']`.
-Die lijst is nog leeg; de projecteigenaar levert ze aan (#74).
+Bovenin staan de koppen die de projecteigenaar beoordeelde, in twee lijsten:
+
+- `fromTheLogs`: 25 koppen uit een quiz van 25 oktober 2026 (#267), echt uit de feeds van Omrop Fryslân, NOS en Voetbal International, of verzonnen (dat staat erbij).
+  De waarde is wat `judgeRelevance` hoort te geven, niet altijd wat de projecteigenaar zei.
+  Zes koppen noemt de projecteigenaar niet relevant en geeft het filter `doubtful`: een bezoeker ziet geen verschil, want beide worden verborgen.
+- `knownFalsePositives`: koppen die het filter toont en de projecteigenaar liever niet wil.
+  Nu is dat "Man wint loterij in Heerenveen", met de waarde `relevant`.
+  Verandert de regel, dan verandert deze test mee.
+
+Een kop erbij zetten gaat zo:
+
+1. Zet `['de kop', 'relevant' | 'doubtful' | 'irrelevant']` in `fromTheLogs`, met de kop zoals de bron hem schreef en de waarde die het filter hoort te geven.
+   Zet een kop in `knownFalsePositives` als het filter de kop toont en de projecteigenaar dat niet wil, en schrijf in een commentaar waarom we dat accepteren.
+2. Draai `pnpm --filter importer test`.
+   Geeft het filter een andere waarde, dan staat de kop in de melding van de test.
+3. Past de kop niet bij de regels of de lijsten, verander die dan niet in dezelfde pull request: leg het de projecteigenaar voor, en schrijf een besluit in `docs/beslissingen.md`.
 
 ## De regionale feed van Omrop Fryslân
 
