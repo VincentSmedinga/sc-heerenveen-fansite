@@ -1,0 +1,120 @@
+import { connect } from '@fansite/db/client'
+import { readDatabaseEnv } from '@fansite/db/env'
+import { adminUsers, articles } from '@fansite/db/schema'
+import path from 'node:path'
+
+/**
+ * The account that the made-up articles belong to. `.test` is a domain that can't exist.
+ */
+const authorEmail = 'e2e-redactie@example.test'
+
+/** Every made-up article has a slug that starts with this, so a leftover is easy to find. */
+const slugPrefix = 'e2e-'
+
+/**
+ * The made-up articles for the checks of the pages, in the text format of the editors. One is
+ * published and has every part of the format. The draft and the article for later must be on no
+ * page: the checks look for them everywhere.
+ */
+export const testArticles = {
+  draft: { slug: `${slugPrefix}concept`, title: 'Verzonnen concept dat nergens staat' },
+  later: { slug: `${slugPrefix}later`, title: 'Verzonnen artikel voor over een jaar' },
+  published: {
+    author: 'de testredactie',
+    body: [
+      'Dit is een **verzonnen** artikel om de pagina mee te testen. Het heeft *cursieve* tekst en een link naar [onze bronnen](/bronnen).',
+      '## Een kop in het artikel',
+      'Een alinea met een link naar [de Testkrant](https://testkrant.test/verhaal), een andere site.',
+      '- Het eerste punt van de lijst',
+      '- Het tweede punt, met **vet**',
+      '## Een tweede kop',
+      'Het slot, met <b>HTML</b> dat gewone tekst blijft.',
+    ].join('\n\n'),
+    intro: 'Een verzonnen inleiding van twee zinnen. Ze laat zien hoe de kaart op de homepage eruit ziet.',
+    slug: `${slugPrefix}artikel`,
+    title: 'Verzonnen artikel van de testredactie',
+  },
+} as const
+
+const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])
+
+/**
+ * Puts the made-up articles, and an account for them, in the database and returns the function
+ * that takes them out again. Like `addAdmin`, it only works on a database on this computer. The
+ * site must have started already: it makes the tables.
+ */
+export async function addArticles() {
+  const { DATABASE_URL } = databaseEnv()
+  const { hostname } = new URL(DATABASE_URL)
+
+  if (!loopback.has(hostname)) {
+    throw new Error(
+      `The checks of the articles only write to a database on this computer, and DATABASE_URL names ${hostname}.`,
+    )
+  }
+
+  const { close, db, pool } = connect(DATABASE_URL)
+
+  try {
+    // A run that was stopped halfway may have left its articles and its account.
+    await remove(pool)
+
+    const [user] = await db.insert(adminUsers).values({ email: authorEmail, role: 'beheerder' }).$returningId()
+    const createdBy = user?.id ?? 0
+    const day = 24 * 60 * 60 * 1000
+    const now = Date.now()
+    const { draft, later, published } = testArticles
+
+    await db.insert(articles).values([
+      { ...published, createdBy, publishedAt: new Date(now - day) },
+      {
+        author: 'de testredactie',
+        body: 'Dit concept staat nergens.',
+        createdBy,
+        intro: 'Een verzonnen concept.',
+        publishedAt: null,
+        ...draft,
+      },
+      {
+        author: 'de testredactie',
+        body: 'Dit artikel staat nog nergens.',
+        createdBy,
+        intro: 'Een verzonnen artikel voor later.',
+        publishedAt: new Date(now + 365 * day),
+        ...later,
+      },
+    ])
+  } finally {
+    await close()
+  }
+
+  return async () => {
+    const { close, pool } = connect(DATABASE_URL)
+
+    try {
+      await remove(pool)
+    } finally {
+      await close()
+    }
+  }
+}
+
+/**
+ * Connects with the DATABASE_URL of the environment or the .env in the root, like the server of
+ * the check does.
+ */
+function databaseEnv() {
+  try {
+    process.loadEnvFile(path.resolve(import.meta.dirname, '../../../.env'))
+  } catch {
+    // No .env: CI sets DATABASE_URL itself.
+  }
+
+  return readDatabaseEnv()
+}
+
+/** Takes the made-up articles out, then their account. */
+async function remove(pool: ReturnType<typeof connect>['pool']) {
+  await pool.query('DELETE FROM articles WHERE slug LIKE ?', [`${slugPrefix}%`])
+  await pool.query('DELETE FROM admin_users WHERE email = ?', [authorEmail])
+}
