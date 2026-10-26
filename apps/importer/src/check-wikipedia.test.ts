@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
 
-import { checkMatches, checkStandings } from './check-wikipedia.ts'
+import { checkGoals, checkMatches, checkStandings } from './check-wikipedia.ts'
 import { readCup, readLeague, readStandings } from './read-wikipedia.ts'
 
 function read<T extends { kind: string }>(result: T): Extract<T, { kind: 'read' }> {
@@ -132,5 +132,58 @@ describe('the checks of the league table', () => {
         league,
       ),
     ).toContain('the table has 0 rows for sc Heerenveen, not 1')
+  })
+})
+
+describe('the check of the scorers', () => {
+  const played = league.find((match) => match.round === 'Speelronde 2')!
+  const goal = (ours: boolean, minute: number) => ({
+    minute,
+    ours,
+    ownGoal: false,
+    penalty: false,
+    player: 'Speler',
+    stoppageMinutes: null,
+  })
+
+  it('passes when the goals of each club are as many as the club has in the result, an own goal counting for the club that benefits', () => {
+    // 2-2 against Ajax, of which one goal of ours is an own goal of Ajax: it is listed as ours.
+    expect(played.goals?.filter((entry) => entry.ownGoal)).toHaveLength(1)
+    expect(checkGoals(played)).toBeUndefined()
+    // The real fixtures pass as they are.
+    expect(
+      league
+        .concat(cup)
+        .map(checkGoals)
+        .filter((problem) => problem !== undefined),
+    ).toEqual([])
+  })
+
+  it('passes a 0-0 with no scorers, and a played match whose scorers are not on the page yet', () => {
+    expect(checkGoals({ ...played, goals: [], goalsAgainst: 0, goalsFor: 0 })).toBeUndefined()
+    expect(checkGoals({ ...played, goals: null })).toBeUndefined()
+  })
+
+  it.each([
+    ['one goal of ours too few', [goal(true, 10), goal(false, 20), goal(false, 30)], '1-2, the result is 2-2'],
+    [
+      'one goal of the opponent too many',
+      [goal(true, 10), goal(true, 15), goal(false, 20), goal(false, 30), goal(false, 40)],
+      '2-3, the result is 2-2',
+    ],
+    ['a list for one club only', [goal(true, 10), goal(true, 20)], '2-0, the result is 2-2'],
+    [
+      'goals in the wrong place: all for the other club',
+      [goal(false, 10), goal(false, 20), goal(false, 30), goal(false, 40)],
+      '0-4, the result is 2-2',
+    ],
+  ])('fails with %s, with the round and the two numbers', (_name, goals, text) => {
+    expect(checkGoals({ ...played, goals })).toBe(`Speelronde 2 (Eredivisie): the scorers are ${text}`)
+  })
+
+  it('fails with the reason when a line could not be read', () => {
+    expect(
+      checkGoals({ ...played, goals: null, goalsProblem: 'Speelronde 2 (Eredivisie): a goal has no usable name' }),
+    ).toBe('Speelronde 2 (Eredivisie): a goal has no usable name')
   })
 })

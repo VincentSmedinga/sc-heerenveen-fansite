@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
+import { checkGoals } from './check-wikipedia.ts'
 import { pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-wikipedia.ts'
 
 const programme = readFileSync(new URL('./fixtures/wikipedia-programme.wiki', import.meta.url), 'utf8')
 const standingsPage = readFileSync(new URL('./fixtures/wikipedia-standings.wiki', import.meta.url), 'utf8')
 const cupPage = readFileSync(new URL('./fixtures/wikipedia-cup.wiki', import.meta.url), 'utf8')
+const goalsCupPage = readFileSync(new URL('./fixtures/wikipedia-cup-goals.wiki', import.meta.url), 'utf8')
 const extraTimePage = readFileSync(new URL('./fixtures/wikipedia-cup-extra-time.wiki', import.meta.url), 'utf8')
 
 /** A match of ours in the shape of the programme, with these fields. */
@@ -69,8 +71,10 @@ describe('the programme and the results', () => {
       competition: 'Eredivisie',
       dateText: null,
       extraTime: false,
+      goals: [{ minute: 52, ours: true, ownGoal: false, penalty: false, player: 'Oyen', stoppageMinutes: null }],
       goalsAgainst: 0,
       goalsFor: 1,
+      goalsProblem: null,
       home: true,
       kickoffAt: new Date('2026-08-09T14:45:00Z'),
       matchDate: '2026-08-09',
@@ -211,8 +215,10 @@ describe('the cup', () => {
           competition: 'KNVB Beker',
           dateText: null,
           extraTime: false,
+          goals: null,
           goalsAgainst: null,
           goalsFor: null,
+          goalsProblem: null,
           home: false,
           kickoffAt: new Date('2026-10-28T20:00:00Z'),
           matchDate: '2026-10-28',
@@ -371,5 +377,187 @@ describe('the league table', () => {
     ['a name is gone', standingsPage.replace('|name_HEE=[[sc Heerenveen]]', '')],
   ])('gives an error when %s', (_name, text) => {
     expect(readStandings(text).kind).toBe('error')
+  })
+})
+
+describe('the goal scorers', () => {
+  /** A played match of ours at home with these scorers for the home and the away club. */
+  function goalsOf(goals1: string, goals2 = '', score = '2 – 1') {
+    const match = matchOf(leagueWith(box({ goals1, goals2, score })), 'Speelronde 12')
+
+    if (match === undefined) {
+      throw new Error('no match')
+    }
+
+    return match
+  }
+
+  it('reads the minute and the name from the link of the home club, and the minute before the name for the away club', () => {
+    const match = goalsOf('[[Luca Oyen|Oyen]] {{goal|52}}', '{{goal|45}} [[Jacob Trenskow|Trenskow]]', '1 – 1')
+
+    expect(match.goals).toEqual([
+      { minute: 45, ours: false, ownGoal: false, penalty: false, player: 'Trenskow', stoppageMinutes: null },
+      { minute: 52, ours: true, ownGoal: false, penalty: false, player: 'Oyen', stoppageMinutes: null },
+    ])
+    expect(match.goalsProblem).toBeNull()
+  })
+
+  it('turns the club into ours or the opponent from the side we play on', () => {
+    const away = matchOf(
+      `== Speelronde 12 ==\n${box({ goals1: '[[Ajax]] {{goal|7}}', goals2: '{{goal|9}} [[Trenskow]]', score: '1 – 1', team1: '[[AFC Ajax|Ajax]]', team2: '[[sc Heerenveen]]' })}\n`,
+      'Speelronde 12',
+    )
+
+    expect(away?.goals?.map((goal) => [goal.minute, goal.ours])).toEqual([
+      [7, false],
+      [9, true],
+    ])
+  })
+
+  it('reads the added time as its own number: 90+5 is minute 90 with 5 added', () => {
+    const match = goalsOf('[[A]] {{goal|90+5}}<br />[[B]] {{goal|45+1}}', '', '2 – 0')
+
+    expect(match.goals).toMatchObject([
+      { minute: 45, player: 'B', stoppageMinutes: 1 },
+      { minute: 90, player: 'A', stoppageMinutes: 5 },
+    ])
+  })
+
+  it('puts the goals of both clubs in the order of the clock, and added time before the next minute', () => {
+    const match = goalsOf(
+      '[[A]] {{goal|46}}<br />[[B]] {{goal|90+2}}',
+      '{{goal|45+3}} [[C]]<br />{{goal|91}} [[D]]<br />{{goal|46}} [[E]]',
+      '2 – 3',
+    )
+
+    expect(match.goals?.map((goal) => goal.player)).toEqual(['C', 'A', 'E', 'B', 'D'])
+  })
+
+  it('makes a goal for each minute of a template, in the template order', () => {
+    expect(goalsOf('[[Perišić]] {{goal|35||53}}', '', '2 – 0').goals).toMatchObject([
+      { minute: 35, player: 'Perišić' },
+      { minute: 53, player: 'Perišić' },
+    ])
+    expect(goalsOf('[[Krikke]] {{goal|1||33||38||49}}', '', '4 – 0').goals).toHaveLength(4)
+    expect(goalsOf('[[Chery]] {{goal|5|pen.|23|pen.}}', '', '2 – 0').goals).toMatchObject([
+      { minute: 5, penalty: true },
+      { minute: 23, penalty: true },
+    ])
+  })
+
+  it('marks an own goal and a penalty on the goal they follow, and no other', () => {
+    expect(
+      goalsOf(
+        '[[A]] {{goal|63|pen.|90+11|pen.}}<br />[[B]] {{goal|7||90+5|pen.}}<br />[[C]] {{goal|11|e.d.}}',
+        '',
+        '5 – 0',
+      ).goals,
+    ).toMatchObject([
+      { minute: 7, ownGoal: false, penalty: false },
+      { minute: 11, ownGoal: true, penalty: false, player: 'C' },
+      { minute: 63, ownGoal: false, penalty: true },
+      { minute: 90, ownGoal: false, penalty: true, player: 'B', stoppageMinutes: 5 },
+      { minute: 90, ownGoal: false, penalty: true, player: 'A', stoppageMinutes: 11 },
+    ])
+  })
+
+  it('leaves a red card and a missed penalty out: they are no goals', () => {
+    const match = goalsOf(
+      '[[Floranus]] {{rode kaart|0|57}}<br />[[Bajraktarević]] {{goal|23||32}}, {{penmis||68}}',
+      '{{rode kaart|0|13}} [[Hokke]]<br />{{goal|16}} [[Eduardo]]',
+      '2 – 1',
+    )
+
+    expect(match.goalsProblem).toBeNull()
+    expect(match.goals?.map((goal) => [goal.minute, goal.player])).toEqual([
+      [16, 'Eduardo'],
+      [23, 'Bajraktarević'],
+      [32, 'Bajraktarević'],
+    ])
+  })
+
+  it('has no scorers while both fields are empty, also for a match with goals', () => {
+    expect(goalsOf('', '', '2 – 1')).toMatchObject({ goals: null, goalsProblem: null })
+  })
+
+  it('reads a name without a link, and a name with an apostrophe or a dash', () => {
+    expect(
+      goalsOf(
+        "Gewone naam {{goal|3}}<br />[['t Zand]] {{goal|4}}<br />[[Eggens|Van den Berg-Eggens]] {{goal|5}}",
+        '',
+        '3 – 0',
+      ).goals?.map((goal) => goal.player),
+    ).toEqual(['Gewone naam', "'t Zand", 'Van den Berg-Eggens'])
+  })
+
+  it('ignores a goal field of a match that is not played', () => {
+    const planned = matchOf(leagueWith(box({ goals1: '[[A]] {{goal|1}}', score: '' })), 'Speelronde 12')
+
+    expect(planned).toMatchObject({ goals: null, goalsProblem: null, status: 'scheduled' })
+  })
+
+  it.each([
+    ['a goal without a name', '{{goal|52}}', 'a goal has no usable name'],
+    ['a template we do not know', '[[A]] {{goal|52}}<br />[[B]] {{geel-rood|0|60}}', 'a template we do not know'],
+    ['a part we do not know', '[[A]] {{goal|52|vermoedelijk}}', 'a part we do not know'],
+    ['a minute of 0', '[[A]] {{goal|0}}', 'a minute we do not know'],
+    ['an own goal without a minute', '[[A]] {{goal|e.d.|5}}', 'a part we do not know'],
+    ['a goal that is both an own goal and a penalty', '[[A]] {{goal|5|e.d.|pen.}}', 'both an own goal and a penalty'],
+    ['a name that is a link left open', '[[A {{goal|5}}', 'a goal has no usable name'],
+  ])('reads %s as no scorers, with the reason', (_name, goals1, reason) => {
+    const match = goalsOf(goals1, '', '1 – 0')
+
+    expect(match.goals).toBeNull()
+    expect(match.goalsProblem).toContain(reason)
+    expect(match.goalsProblem).toContain('Speelronde 12 (Eredivisie)')
+    expect(match.goalsFor).toBe(1)
+    expect(checkGoals(match)).toBe(match.goalsProblem)
+  })
+
+  it('reads the real scorers of the programme and the cup', () => {
+    const league = readLeague(programme)
+    const cup = readCup(goalsCupPage)
+
+    if (league.kind === 'error' || cup.kind === 'error') {
+      throw new Error('not read')
+    }
+
+    const round = (name: string) => [...league.matches, ...cup.matches].find((match) => match.round === name)
+
+    expect(round('Speelronde 2')?.goals).toEqual([
+      { minute: 7, ours: false, ownGoal: true, penalty: false, player: 'Klaverboer', stoppageMinutes: null },
+      { minute: 33, ours: false, ownGoal: false, penalty: false, player: 'Ouazane', stoppageMinutes: null },
+      { minute: 45, ours: true, ownGoal: false, penalty: false, player: 'Trenskow', stoppageMinutes: null },
+      { minute: 82, ours: true, ownGoal: false, penalty: false, player: 'Rivera', stoppageMinutes: null },
+    ])
+    expect(round('Speelronde 9')?.goals?.[0]).toMatchObject({ minute: 11, penalty: true, player: 'Vente' })
+    expect(round('Speelronde 10')?.goals).toHaveLength(5)
+    expect(round('Speelronde 6')?.goals).toBeNull()
+    expect(round('Achtste finales')?.goals).toMatchObject([
+      { minute: 20, ours: true, player: 'Trenskow' },
+      { minute: 65, ours: false, player: 'Uneken' },
+      { minute: 75, ours: true, player: 'Braude' },
+      { minute: 90, ours: true, player: 'Trenskow', stoppageMinutes: 1 },
+    ])
+    expect(round('Kwartfinales')?.goals?.map((goal) => goal.player)).toEqual([
+      'Bajraktarević',
+      'Bajraktarević',
+      'Perišić',
+      'Wanner',
+      'Oyen',
+    ])
+    expect(round('Kwartfinales')?.goals?.[0]?.minute).toBe(23)
+  })
+
+  it('has scorers that agree with the result for every played match of the real fixtures', () => {
+    const league = readLeague(programme)
+    const cup = readCup(goalsCupPage)
+
+    if (league.kind === 'error' || cup.kind === 'error') {
+      throw new Error('not read')
+    }
+    for (const match of [...league.matches, ...cup.matches].filter((match) => match.status === 'played')) {
+      expect(checkGoals(match)).toBeUndefined()
+    }
   })
 })

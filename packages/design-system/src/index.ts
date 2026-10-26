@@ -41,7 +41,7 @@ export type { ListElement, ListItemProps, ListProps } from './components/list/Li
 export { Logo } from './components/logo/Logo'
 export type { LogoProps } from './components/logo/Logo'
 export { Match, matchStatuses } from './components/match/Match'
-export type { MatchProps, MatchStatus } from './components/match/Match'
+export type { MatchGoal, MatchProps, MatchStatus } from './components/match/Match'
 export { Navigation } from './components/navigation/Navigation'
 export type { NavigationItem, NavigationProps } from './components/navigation/Navigation'
 export { NewsItem } from './components/news-item/NewsItem'

@@ -15,7 +15,7 @@ import {
   listSeasonStandings,
   listWikipediaPages,
 } from './queries.ts'
-import { discussions, feeds, items, matches, sources, standings, wikipediaPages } from './schema.ts'
+import { discussions, feeds, items, matches, matchGoals, sources, standings, wikipediaPages } from './schema.ts'
 import {
   madeUpMatches,
   madeUpTable,
@@ -891,6 +891,36 @@ describe('the matches and the table of a season', () => {
       expect(league).toMatchObject({ extraTime: false, penaltiesAgainst: null, penaltiesFor: null })
     })
 
+    it('gives a played match its scorers in the order of the clock, and the others none', async () => {
+      await database.db.insert(matches).values(madeUpMatches(now))
+
+      const [cupMatch] = await database.db
+        .select({ id: matches.id })
+        .from(matches)
+        .where(eq(matches.round, 'Kwartfinale'))
+      const id = cupMatch?.id ?? 0
+
+      await database.db.insert(matchGoals).values([
+        { matchId: id, minute: 88, ours: false, player: 'Late' },
+        { matchId: id, minute: 45, ours: false, player: 'Blessuretijd', stoppageMinutes: 2 },
+        { matchId: id, minute: 46, ours: true, player: 'Na rust' },
+        { matchId: id, minute: 45, ours: true, player: 'Voor rust' },
+        { matchId: id, minute: 18, ours: true, penalty: true, player: 'Vroeg' },
+      ])
+
+      const rows = await listSeasonMatches(database.db, '2026/27')
+      const cup = rows.find((match) => match.round === 'Kwartfinale')
+
+      expect(cup?.goals).toEqual([
+        { minute: 18, ours: true, ownGoal: false, penalty: true, player: 'Vroeg', stoppageMinutes: null },
+        { minute: 45, ours: true, ownGoal: false, penalty: false, player: 'Voor rust', stoppageMinutes: null },
+        { minute: 45, ours: false, ownGoal: false, penalty: false, player: 'Blessuretijd', stoppageMinutes: 2 },
+        { minute: 46, ours: true, ownGoal: false, penalty: false, player: 'Na rust', stoppageMinutes: null },
+        { minute: 88, ours: false, ownGoal: false, penalty: false, player: 'Late', stoppageMinutes: null },
+      ])
+      expect(rows.filter((match) => match !== cup).every((match) => match.goals.length === 0)).toBe(true)
+    })
+
     it('gives only the season it is asked for', async () => {
       await database.db.insert(matches).values(madeUpMatches(now))
       await database.db.insert(matches).values(madeUpMatches(new Date('2027-08-01T12:00:00Z')))
@@ -910,6 +940,7 @@ describe('the matches and the table of a season', () => {
         'competition',
         'dateText',
         'extraTime',
+        'goals',
         'goalsAgainst',
         'goalsFor',
         'home',

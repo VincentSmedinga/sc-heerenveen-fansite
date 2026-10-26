@@ -7,9 +7,12 @@ import type { MatchData } from './matches'
  * them. Read it with the afternoon of Friday 23 October 2026 (Dutch time) as now.
  */
 
+const noGoals: PublicMatch['goals'] = []
+
 const base = {
   dateText: null,
   extraTime: false,
+  goals: noGoals,
   goalsAgainst: null,
   goalsFor: null,
   kickoffAt: null,
@@ -35,6 +38,10 @@ export const matchData: MatchData = {
     {
       ...base,
       competition: 'Eredivisie',
+      goals: [
+        { minute: 34, ours: true, ownGoal: false, penalty: false, player: 'Proefman', stoppageMinutes: null },
+        { minute: 45, ours: true, ownGoal: false, penalty: false, player: 'Nepper', stoppageMinutes: 1 },
+      ],
       goalsAgainst: 0,
       goalsFor: 2,
       home: true,
@@ -48,6 +55,12 @@ export const matchData: MatchData = {
     {
       ...base,
       competition: 'Eredivisie',
+      goals: [
+        { minute: 12, ours: false, ownGoal: false, penalty: false, player: 'Teststraat', stoppageMinutes: null },
+        { minute: 40, ours: true, ownGoal: false, penalty: false, player: 'Proefman', stoppageMinutes: null },
+        { minute: 63, ours: true, ownGoal: false, penalty: false, player: 'Kopie', stoppageMinutes: null },
+        { minute: 90, ours: false, ownGoal: false, penalty: false, player: 'Nepper', stoppageMinutes: 3 },
+      ],
       goalsAgainst: 2,
       goalsFor: 2,
       home: false,

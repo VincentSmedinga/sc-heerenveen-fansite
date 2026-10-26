@@ -6,7 +6,16 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { consentStatuses, feeds, matches, sourceKinds, sources, standings, wikipediaPages } from './schema.ts'
+import {
+  consentStatuses,
+  feeds,
+  matches,
+  matchGoals,
+  sourceKinds,
+  sources,
+  standings,
+  wikipediaPages,
+} from './schema.ts'
 import { seasonOf } from './season.ts'
 import { madeUpMatches, realSources, seedMatches, seedSources, testSources } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
@@ -374,6 +383,33 @@ describe('the made-up matches', () => {
     expect(has((match) => match.penaltiesFor !== null && match.penaltiesFor < match.penaltiesAgainst!)).toBe(true)
     // The dates of the made-up matches count from the day of the seed: this one is 10 days on.
     expect(rows.find((match) => match.dateText !== null)?.dateText).toBe('4-6 november 2026')
+  })
+
+  it('gives every played match scorers that add up to its result, in the order of the clock', async () => {
+    await seedMatches(database.db, now)
+
+    const rows = await database.db.select().from(matches)
+    const goals = await database.db.select().from(matchGoals).orderBy(matchGoals.id)
+
+    for (const match of rows) {
+      const own = goals.filter((goal) => goal.matchId === match.id)
+
+      expect(own.filter((goal) => goal.ours)).toHaveLength(match.goalsFor ?? 0)
+      expect(own.filter((goal) => !goal.ours)).toHaveLength(match.goalsAgainst ?? 0)
+
+      const clock = own.map((goal) => goal.minute * 100 + (goal.stoppageMinutes ?? 0))
+
+      expect(clock).toEqual([...clock].sort((a, b) => a - b))
+    }
+    // The cases a page must show: both clubs, a penalty, an own goal, added time, a player with
+    // two goals, extra time and a long name.
+    expect(goals.some((goal) => !goal.ours)).toBe(true)
+    expect(goals.some((goal) => goal.penalty)).toBe(true)
+    expect(goals.some((goal) => goal.ownGoal)).toBe(true)
+    expect(goals.some((goal) => goal.stoppageMinutes !== null)).toBe(true)
+    expect(goals.some((goal) => goal.minute > 90)).toBe(true)
+    expect(goals.some((goal) => goal.player.length > 25)).toBe(true)
+    expect(goals.filter((goal) => goal.player === 'Proefman' && goal.matchId === goals[0]?.matchId).length).toBe(2)
   })
 
   it('puts the pages the made-up matches credit in too, and moves on when they are already there', async () => {

@@ -1,8 +1,9 @@
 <!--
   A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)/Wedstrijden?action=raw, read on 25 October 2026.
   Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
-  Left out: most matches of other clubs, the text around the templates, and the goal scorers,
-  referees and reports of every match (emptied). See the tests.
+  Left out: most matches of other clubs, the text around the templates, and the referees and reports
+  of every match (emptied) and the goal scorers of the matches of other clubs (emptied). The goal scorers of
+  sc Heerenveen are as the page has them. See the tests.
 -->
 * De speeldata en -tijden van speelronde 22 tot en met 32 worden op 22 december 2026 bekendgemaakt door de KNVB.
 
@@ -13,7 +14,7 @@
 |team1 = [[sc Heerenveen]]
 |score = 1 – 0
 |team2 = [[FC Twente]]
-|goals1 =
+|goals1 = [[Luca Oyen|Oyen]] {{goal|52}}
 |goals2 =
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
@@ -45,8 +46,8 @@
 |team1 = [[AFC Ajax|Ajax]]
 |score = 2 – 2
 |team2 = [[sc Heerenveen]]
-|goals1 =
-|goals2 =
+|goals1 = [[Bernt Klaverboer|Klaverboer]] {{goal|7|e.d.}}<br />[[Abdellah Ouazane|Ouazane]] {{goal|33}}
+|goals2 = {{goal|45}} [[Jacob Trenskow|Trenskow]]<br />{{goal|82}} [[Maxence Rivera|Rivera]]
 |location = [[Amsterdam]]
 |stadium = [[Johan Cruijff ArenA]]
 |attendance = 54.239
@@ -63,7 +64,7 @@
 |score = 0 – 2
 |team2 = [[PEC Zwolle]]
 |goals1 =
-|goals2 =
+|goals2 = {{goal|50}} [[Nick Viergever|Viergever]]<br />{{goal|61}} [[Koen Kostons|Kostons]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
 |attendance = 21.900
@@ -79,8 +80,8 @@
 |team1 = [[Willem II (voetbalclub)|Willem II]]
 |score = 2 – 2
 |team2 = [[sc Heerenveen]]
-|goals1 =
-|goals2 =
+|goals1 = [[Uriël van Aalst|Van Aalst]] {{goal|61}}<br />[[Devin Haen|Haen]] {{goal|82}}
+|goals2 = {{goal|64}} [[Jacob Trenskow|Trenskow]]<br />{{goal|77}} [[Oliver Braude|Braude]]
 |location = [[Tilburg]]
 |stadium = [[Koning Willem II Stadion]]
 |attendance = 15.000
@@ -96,8 +97,8 @@
 |team1 = [[sc Heerenveen]]
 |score = 2 – 3
 |team2 = [[AZ (voetbalclub)|AZ]]
-|goals1 =
-|goals2 =
+|goals1 = [[Nolhan Courtens|Courtens]] {{goal|21}}<br />[[Ringo Meerveld|Meerveld]] {{goal|30}}
+|goals2 = {{goal|7}} [[Ro-Zangelo Daal|Daal]]<br />{{goal|69}} [[Mexx Meerdink|Meerdink]]<br />{{goal|83}} [[Ayoub Oufkir|Oufkir]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
 |attendance = 22.164
@@ -162,7 +163,7 @@
 |score = 0 – 4
 |team2 = [[sc Heerenveen]]
 |goals1 =
-|goals2 =
+|goals2 = {{goal|28}} [[Nolhan Courtens|Courtens]]<br />{{goal|43}} [[Jacob Trenskow|Trenskow]]<br />{{goal|56}} [[Maxence Rivera|Rivera]]<br />{{goal|75}} [[Marko Farji|Farji]]
 |location = [[Rotterdam]]
 |stadium = [[Spartastadion Het Kasteel]]
 |attendance = 10.317
@@ -178,7 +179,7 @@
 |team1 = [[PSV (voetbalclub)|PSV]]
 |score = 2 – 0
 |team2 = [[sc Heerenveen]]
-|goals1 =
+|goals1 = [[Guus Til|Til]] {{goal|29}}<br />[[Marcus Linday|Linday]] {{goal|68|e.d.}}
 |goals2 =
 |location = [[Eindhoven]]
 |stadium = [[Philips Stadion]]
@@ -195,7 +196,7 @@
 |team1 = [[sc Heerenveen]]
 |score = 4 – 0
 |team2 = [[Excelsior Rotterdam]]
-|goals1 =
+|goals1 = [[Dylan Vente|Vente]] {{goal|11|pen.}}<br />[[Oliver Braude|Braude]] {{goal|54}}<br />[[Luca Oyen|Oyen]] {{goal|84}}<br />[[Jacob Trenskow|Trenskow]] {{goal|88}}
 |goals2 =
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
@@ -227,8 +228,8 @@
 |team1 = [[ADO Den Haag]]
 |score = 2 – 3
 |team2 = [[sc Heerenveen]]
-|goals1 =
-|goals2 =
+|goals1 = [[Nigel Thomas|Thomas]] {{goal|57||72}}
+|goals2 = {{goal|24||66}} [[Jacob Trenskow|Trenskow]]<br />{{goal|51}} [[Ringo Meerveld|Meerveld]]
 |location = [[Den Haag]]
 |stadium = [[WerkTalent Stadion]]
 |attendance = 13.276

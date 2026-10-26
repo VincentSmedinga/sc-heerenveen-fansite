@@ -1,14 +1,14 @@
 import type { Database } from '@fansite/db/client'
-import type { Match, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
+import type { Match, MatchGoal, MatchImport, NewMatchGoal, WikipediaPageKind } from '@fansite/db/schema'
 
-import { matches, matchImports, standings, wikipediaPages } from '@fansite/db/schema'
+import { matches, matchGoals, matchImports, standings, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
-import type { ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
+import type { ReadGoal, ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
 
-import { checkMatches, checkStandings } from './check-wikipedia.ts'
+import { checkGoals, checkMatches, checkStandings } from './check-wikipedia.ts'
 import { pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-wikipedia.ts'
 import { retryUnhealthyAfterMs, unhealthyAfter, waitLimits } from './run-log.ts'
 import { describeError, formatTime, printable } from './text.ts'
@@ -277,6 +277,17 @@ async function fetchPages(fetcher: Fetcher, season: string, origin: string): Pro
   return pages
 }
 
+/**
+ * The goals to keep for a match, and the warning when the page's scorers are not used. The
+ * scorers are an extra: a list that cannot be read or does not fit the result is left out, the
+ * match itself stays.
+ */
+function goalsOf(match: ReadMatch): { goals: ReadGoal[]; warning?: string } {
+  const problem = checkGoals(match)
+
+  return problem === undefined ? { goals: match.goals ?? [] } : { goals: [], warning: `no scorers: ${problem}` }
+}
+
 /** Whether a stored match is what Wikipedia says now, apart from `result_set_at`. */
 function isSame(before: Match, now: ReadMatch): boolean {
   return (
@@ -292,6 +303,22 @@ function isSame(before: Match, now: ReadMatch): boolean {
     before.matchDate === now.matchDate &&
     before.kickoffAt?.getTime() === now.kickoffAt?.getTime() &&
     before.dateText === now.dateText
+  )
+}
+
+/** Whether the stored goals of a match are the goals we found, in the same order. */
+function isSameGoals(before: MatchGoal[], now: ReadGoal[]): boolean {
+  return (
+    before.length === now.length &&
+    before.every(
+      (goal, index) =>
+        goal.ours === now[index]?.ours &&
+        goal.minute === now[index].minute &&
+        goal.stoppageMinutes === now[index].stoppageMinutes &&
+        goal.player === now[index].player &&
+        goal.ownGoal === now[index].ownGoal &&
+        goal.penalty === now[index].penalty,
+    )
   )
 }
 
@@ -383,6 +410,13 @@ function standingsRow(season: string, row: ReadStandingsRow, validOn: string) {
   return { ...row, season, validOn }
 }
 
+/** Writes the goals of a match in the order they are shown, so `id` keeps that order. */
+async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: ReadGoal[]) {
+  if (goals.length > 0) {
+    await db.insert(matchGoals).values(goals.map((goal): NewMatchGoal => ({ ...goal, matchId })))
+  }
+}
+
 /**
  * Makes the matches of the season in the database the ones we found: a match is added when the
  * season has no row for its round, changed when its row differs, and removed when Wikipedia no
@@ -398,18 +432,38 @@ async function storeMatches(
   const known = new Map(
     (await db.select().from(matches).where(eq(matches.season, season))).map((row) => [key(row), row]),
   )
+  const storedGoals = new Map<number, MatchGoal[]>()
+
+  for (const goal of await db
+    .select({ goal: matchGoals })
+    .from(matchGoals)
+    .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+    .where(eq(matches.season, season))
+    .orderBy(asc(matchGoals.id))) {
+    storedGoals.set(goal.goal.matchId, [...(storedGoals.get(goal.goal.matchId) ?? []), goal.goal])
+  }
+
   const counts = { added: 0, removed: 0, unchanged: 0, updated: 0 }
   const warnings: string[] = []
 
   for (const match of found) {
     const before = known.get(key(match))
+    const scorers = goalsOf(match)
 
     known.delete(key(match))
+    if (scorers.warning !== undefined) {
+      warnings.push(scorers.warning)
+    }
 
     if (before === undefined) {
       counts.added++
-      await db.insert(matches).values({ ...match, resultSetAt: match.status === 'played' ? now : null, season })
-    } else if (isSame(before, match)) {
+
+      const [{ insertId }] = await db
+        .insert(matches)
+        .values({ ...match, resultSetAt: match.status === 'played' ? now : null, season })
+
+      await storeGoals(db, insertId, scorers.goals)
+    } else if (isSame(before, match) && isSameGoals(storedGoals.get(before.id) ?? [], scorers.goals)) {
       counts.unchanged++
     } else {
       counts.updated++
@@ -437,6 +491,10 @@ async function storeMatches(
         .update(matches)
         .set({ ...match, resultSetAt: sameResult ? before.resultSetAt : match.status === 'played' ? now : null })
         .where(eq(matches.id, before.id))
+      if (!isSameGoals(storedGoals.get(before.id) ?? [], scorers.goals)) {
+        await db.delete(matchGoals).where(eq(matchGoals.matchId, before.id))
+        await storeGoals(db, before.id, scorers.goals)
+      }
     }
   }
 

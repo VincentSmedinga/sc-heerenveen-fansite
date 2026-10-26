@@ -580,6 +580,14 @@ Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wik
   Een wedstrijd van de competitie met `aet` of `penaltyscore` is een fout, zoals strafschoppen zonder verlenging, strafschoppen bij een stand die niet gelijk is, en een score van de strafschoppen die geen "N – N" is.
   Verlenging zonder strafschoppen mag, ook bij een gelijke stand: de strafschoppen komen er bij de volgende lezing bij.
   Zo'n nieuwe score van strafschoppen is geen verandering van de uitslag en geeft geen waarschuwing; een score die verandert wel.
+- De doelpuntenmakers van een gespeelde wedstrijd bewaart hij in `match_goals`, een rij per doelpunt.
+  Wikipedia heeft ze in `goals1` (het eerste team van het sjabloon) en `goals2`: `[[Luca Oyen|Oyen]] {{goal|52}}` voor het eerste team en `{{goal|45}} [[Jacob Trenskow|Trenskow]]` voor het tweede, een speler per regel en de regels gescheiden door `<br />`.
+  De import bewaart de naam zoals die op de pagina staat (de tekst achter de `|` in de link), de minuut, de blessuretijd en of het een eigen doelpunt of een penalty was.
+  Het sjabloon `goal` heeft de minuten achter elkaar: `{{goal|45+2}}` is minuut 45 met 2 minuten erbij, `{{goal|78||80}}` zijn twee doelpunten van dezelfde speler, en `e.d.` of `pen.` na een minuut hoort bij dat doelpunt, zoals in `{{goal|5|pen.|23|pen.}}`.
+  Een eigen doelpunt staat op de pagina bij de club die ervan profiteert (`{{goal|7|e.d.}}`), en zo bewaart de import het ook.
+  Een rode kaart (`{{rode kaart}}`) en een gemiste penalty (`{{penmis}}`) in deze velden zijn geen doelpunt en vallen weg.
+  De doelpunten staan op volgorde van de klok, beide clubs door elkaar, en bij dezelfde minuut eerst die van het eerste team.
+  Bij een wedstrijd die niet is gespeeld leest de import de velden niet.
 - De aftrap staat in UTC (`kickoff_at`), omgerekend uit de tijd in Nederland.
   Staat er geen tijd, zoals bij speelronde 22 tot en met 32 tot 22 december 2026, dan is `kickoff_at` leeg en staat de datum zoals Wikipedia die geeft in `date_text`, zoals `12-14 februari 2027`.
   `match_date` is dan de eerste dag.
@@ -598,6 +606,20 @@ De controles staan in [`src/check-wikipedia.ts`](src/check-wikipedia.ts):
 - Per club is gespeeld gelijk aan gewonnen + gelijk + verloren, zijn de punten 3 × gewonnen + gelijk en is het doelsaldo gelijk aan voor min tegen.
 - Over de hele stand zijn de doelpunten voor gelijk aan de doelpunten tegen, en het aantal gewonnen gelijk aan het aantal verloren.
 - De regel van sc Heerenveen in de stand komt overeen met onze eigen uitslagen: gespeeld, doelpunten en punten.
+
+De doelpuntenmakers hebben een eigen controle, die de import niet laat mislukken, want ze zijn een extra.
+Per gespeelde wedstrijd is het aantal doelpunten van elke club gelijk aan haar doelpunten in de uitslag, en een eigen doelpunt telt voor de club die ervan profiteert.
+Passen ze niet, of is een regel niet te lezen (een doelpunt zonder naam, een sjabloon dat we niet kennen), dan bewaart de import voor die wedstrijd geen doelpuntenmakers en schrijft hij een waarschuwing.
+De wedstrijd zelf blijft gewoon staan:
+
+```text
+Matches 2026/27: warning, no scorers: Speelronde 2 (Eredivisie): the scorers are 1-2, the result is 2-2
+```
+
+Zijn beide velden leeg, dan zijn de doelpuntenmakers nog niet ingevuld.
+Dat is gewoon, vlak na een wedstrijd, en geeft geen waarschuwing.
+Komen ze later op de pagina, dan neemt de volgende lezing ze over, en een naam die verandert ook.
+Een wedstrijd die van de pagina verdwijnt, neemt haar doelpuntenmakers mee.
 
 Het aantal gespeelde wedstrijden vergelijkt de import niet tussen clubs.
 Midden in een speelronde verschilt het per club, en dan zou elke controle falen.
@@ -647,7 +669,7 @@ De waarschuwing staat ook in `match_imports.last_warning`, en dus in het overzic
 - De schutters bij de strafschoppen en de uitslag na 90 minuten bewaart hij niet: alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging en de score van de strafschoppen.
 - Een puntenaftrek rekent hij niet mee.
   De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
-- Scheidsrechter, toeschouwers, opstellingen en doelpuntenmakers leest hij niet.
+- Scheidsrechter, toeschouwers en opstellingen leest hij niet, en ook geen kaarten, wissels of assists.
   Ook de fixtures hebben die velden leeg gemaakt.
 - Andere seizoenen leest hij niet, en wedstrijden van andere teams van de club ook niet.
 
@@ -691,7 +713,9 @@ De tests van het logboek, de gezondheid en het wachten geven de import een nageb
 
 De tests van de wedstrijden lezen verkleinde stukken van de drie pagina's van Wikipedia: [`src/fixtures/wikipedia-programme.wiki`](src/fixtures/wikipedia-programme.wiki), [`wikipedia-standings.wiki`](src/fixtures/wikipedia-standings.wiki) en [`wikipedia-cup.wiki`](src/fixtures/wikipedia-cup.wiki).
 Ze zijn gelezen op 25 oktober 2026, en bovenaan staat de herkomst en de licentie (CC BY-SA 4.0).
-Er staan alle 34 wedstrijden van sc Heerenveen in en een paar van andere clubs; de doelpuntenmakers, scheidsrechters en verslagen zijn leeggemaakt.
+Er staan alle 34 wedstrijden van sc Heerenveen in en een paar van andere clubs.
+De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs, de scheidsrechters en de verslagen zijn leeggemaakt.
+[`wikipedia-cup-goals.wiki`](src/fixtures/wikipedia-cup-goals.wiki) heeft de vier bekerwedstrijden van sc Heerenveen uit het seizoen 2025/26, gelezen op 26 oktober 2026, met een eigen doelpunt, twee doelpunten van één speler in één sjabloon, blessuretijd en een gemiste penalty.
 `src/read-wikipedia.test.ts` leest ze zonder database en `src/check-wikipedia.test.ts` toetst de controles.
 `src/import-matches.test.ts` draait op een echte MariaDB met een eigen webserver die de drie pagina's geeft, en laat zien dat een falende controle de database ongemoeid laat.
 Een test die `runImport` draait en niets met de wedstrijden te maken heeft, geeft de optie `wikipediaOrigin: null`.

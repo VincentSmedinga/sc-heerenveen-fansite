@@ -16,6 +16,27 @@ export const leagueMatches = 34
 const ourClub = 'sc Heerenveen'
 
 /**
+ * Checks the scorers of a played match against its result: the goals of a club are as many as
+ * the club has in the score (an own goal counts for the club that benefits). Returns what is
+ * wrong, or nothing. A match with no scorers on the page has nothing to check.
+ */
+export function checkGoals(match: ReadMatch): string | undefined {
+  if (match.goalsProblem !== null) {
+    return match.goalsProblem
+  }
+  if (match.goals === null) {
+    return undefined
+  }
+
+  const ours = match.goals.filter((goal) => goal.ours).length
+  const theirs = match.goals.length - ours
+
+  return ours === match.goalsFor && theirs === match.goalsAgainst
+    ? undefined
+    : `${match.round} (${match.competition}): the scorers are ${ours}-${theirs}, the result is ${match.goalsFor}-${match.goalsAgainst}`
+}
+
+/**
  * Checks the matches of sc Heerenveen: 34 in the league, one in each round, 17 at home and 17
  * away; and a cup round at most once. Returns what is wrong, or nothing.
  */

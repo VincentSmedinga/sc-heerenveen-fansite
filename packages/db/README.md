@@ -288,6 +288,23 @@ Vijf CHECK-constraints houden de rijen heel:
 
 `goals_for` en `goals_against` blijven de stand zoals Wikipedia die geeft, zonder de strafschoppen.
 
+`match_goals` heeft een rij per doelpunt van een gespeelde wedstrijd.
+De rijen horen bij hun wedstrijd (`match_id`) en verdwijnen met haar.
+
+| Kolom              | Betekenis                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------ |
+| `match_id`         | De wedstrijd                                                                                     |
+| `ours`             | Of het doelpunt voor sc Heerenveen is (`true`) of voor de tegenstander (`false`)                 |
+| `minute`           | De minuut op de klok: 45 bij "45+1"                                                              |
+| `stoppage_minutes` | De minuten blessuretijd erbij: 1 bij "45+1"; leeg in de gewone speeltijd                         |
+| `player`           | De naam zoals Wikipedia die toont, zoals `Van Bergen`                                            |
+| `own_goal`         | Of het een eigen doelpunt is; het telt voor de club die ervan profiteert, dus `ours` is die club |
+| `penalty`          | Of het een penalty was                                                                           |
+
+De goals van een club zijn even veel als haar `goals_for` of `goals_against`, maar de database dwingt dat niet af: de import controleert het en bewaart bij een verschil geen doelpuntenmakers (zie [de README van de importer](../../apps/importer/README.md)).
+Een CHECK-constraint (`match_goals_not_own_goal_and_penalty`) houdt een doelpunt dat beide is buiten de deur.
+De volgorde van `id` is de volgorde van de klok, want de import schrijft de rijen zo; `listSeasonMatches` sorteert op minuut, blessuretijd en `id`.
+
 `standings` heeft een rij per club van de Eredivisie.
 De sleutel is het seizoen met de plaats.
 
@@ -328,7 +345,7 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `standings`, `wikipedia_pages`, `match_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `standings`, `wikipedia_pages`, `match_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;

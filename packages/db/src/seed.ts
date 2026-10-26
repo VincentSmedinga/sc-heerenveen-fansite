@@ -1,11 +1,19 @@
 import { eq } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
-import type { FeedFilter, NewMatch, NewSource, NewStandingsRow, NewWikipediaPage, WikipediaPageKind } from './schema.ts'
+import type {
+  FeedFilter,
+  NewMatch,
+  NewMatchGoal,
+  NewSource,
+  NewStandingsRow,
+  NewWikipediaPage,
+  WikipediaPageKind,
+} from './schema.ts'
 
 import { connect } from './client.ts'
 import { readDatabaseEnv } from './env.ts'
-import { feeds, matches, sources, standings, wikipediaPages } from './schema.ts'
+import { feeds, matches, matchGoals, sources, standings, wikipediaPages } from './schema.ts'
 import { seasonOf } from './season.ts'
 
 /**
@@ -227,6 +235,9 @@ const dutchMonths = [
 
 const day = 24 * 60 * 60 * 1000
 
+/** The goals of one made-up match, without the match they belong to. */
+export type MadeUpGoal = Omit<NewMatchGoal, 'id' | 'matchId'>
+
 /**
  * Made-up matches for the current season, for the pages and the accessibility checks.
  * Every date counts from the moment of the seed, so the season is always the current
@@ -375,6 +386,36 @@ export function madeUpMatches(now: Date): NewMatch[] {
 }
 
 /**
+ * Made-up scorers for the played matches of `madeUpMatches`, by `<competition>|<round>`, in
+ * the order of the clock. The goals of each club add up to its result. Together they cover the
+ * cases a page must show: goals of one club only and of both, a penalty, an own goal, added
+ * time, a player with two goals, extra time and a long name. The players are made up, like the
+ * clubs.
+ */
+export const madeUpGoals: Record<string, MadeUpGoal[]> = {
+  'Eredivisie|Speelronde 1': [
+    { minute: 12, ours: true, player: 'Proefman', stoppageMinutes: null },
+    { minute: 77, ours: true, player: 'Proefman', stoppageMinutes: null },
+  ],
+  'Eredivisie|Speelronde 2': [{ minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4 }],
+  'KNVB Beker|Achtste finale': [
+    { minute: 30, ours: true, player: 'Van der Voorbeeldstraat-Proefmans', stoppageMinutes: null },
+    { minute: 90, ours: false, player: 'Oefenaar', stoppageMinutes: 3 },
+  ],
+  'KNVB Beker|Eerste ronde': [
+    { minute: 12, ours: true, player: 'Proefman', stoppageMinutes: null },
+    { minute: 55, ours: false, player: 'Teststraat', stoppageMinutes: null },
+    { minute: 105, ours: true, player: 'Proefman', stoppageMinutes: null },
+  ],
+  'KNVB Beker|Kwartfinale': [
+    { minute: 18, ours: true, penalty: true, player: 'Proefman', stoppageMinutes: null },
+    { minute: 45, ours: false, player: 'Teststraat', stoppageMinutes: 1 },
+    { minute: 70, ours: true, ownGoal: true, player: 'Kopie', stoppageMinutes: null },
+    { minute: 88, ours: false, player: 'Teststraat', stoppageMinutes: null },
+  ],
+}
+
+/**
  * A made-up league table that agrees with `madeUpMatches`: six made-up clubs and sc Heerenveen,
  * two rounds played, and the day of the last match as the day it holds for.
  */
@@ -455,6 +496,14 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
     }
 
     await transaction.insert(matches).values(madeUpMatches(now))
+
+    const goals = (await transaction.select().from(matches).where(eq(matches.season, season))).flatMap((match) =>
+      (madeUpGoals[`${match.competition}|${match.round}`] ?? []).map((goal) => ({ ...goal, matchId: match.id })),
+    )
+
+    if (goals.length > 0) {
+      await transaction.insert(matchGoals).values(goals)
+    }
     await transaction.insert(standings).values(madeUpTable(now))
 
     for (const page of madeUpWikipediaPages(now)) {

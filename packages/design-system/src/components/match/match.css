@@ -86,6 +86,32 @@
   }
 
   /*
+   * The scorers: one line between the clubs and the time, in the order of the clock. The minute
+   * has the colour of the result for the club that scored, and a goal of sc Heerenveen is also
+   * bold, so the colour is never the only sign; a forced colour replaces it and the weight
+   * stays. A screen reader hears the club in hidden text. The names are in the colour of the
+   * text around them.
+   */
+  .hf-match-goals {
+    font-size: var(--hf-meta-font-size);
+    margin-block: 0.125rem;
+  }
+
+  .hf-match-goal-ours {
+    color: var(--hf-colour-outcome-win);
+    font-weight: 700;
+  }
+
+  .hf-match-goal-theirs {
+    color: var(--hf-colour-outcome-loss);
+  }
+
+  /* The dotted line under an abbreviation has the colour of the text, not blue-grey. */
+  .hf-match-goal abbr {
+    text-decoration-color: currentcolor;
+  }
+
+  /*
    * "Uitgesteld" is the one fact a supporter looks for in the line, so it has the weight and
    * the accent colour of a time.
    */

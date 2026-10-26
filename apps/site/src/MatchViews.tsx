@@ -46,6 +46,13 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
 export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date }) {
   const shootOut = matches.some(hasShootOut)
   const extraTime = matches.some((match) => match.extraTime && !hasShootOut(match))
+  const goals = matches.flatMap((match) => match.goals)
+  const legend = [
+    extraTime && 'n.v. na verlenging',
+    shootOut && 'n.s. na strafschoppen',
+    goals.some((goal) => goal.ownGoal) && 'e.d. eigen doelpunt',
+    goals.some((goal) => goal.penalty) && 'pen. penalty',
+  ].filter((part) => part !== false)
 
   return (
     <>
@@ -57,13 +64,7 @@ export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date
         ))}
       </List>
       {/* The full words of the abbreviations in use: a title only shows under a mouse. */}
-      {(extraTime || shootOut) && (
-        <Text appearance="meta">
-          {extraTime && 'n.v. na verlenging'}
-          {extraTime && shootOut && ', '}
-          {shootOut && 'n.s. na strafschoppen'}
-        </Text>
-      )}
+      {legend.length > 0 && <Text appearance="meta">{legend.join(', ')}</Text>}
     </>
   )
 }
@@ -156,6 +157,7 @@ function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
       ...common,
       ...matchMoment(match, now),
       extraTime: match.extraTime,
+      goals: match.goals,
       goalsAgainst: match.goalsAgainst,
       goalsFor: match.goalsFor,
       status: 'played',
