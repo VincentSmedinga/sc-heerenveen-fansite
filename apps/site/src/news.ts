@@ -106,6 +106,14 @@ export function formatArticleDate(moment: Date) {
 }
 
 /**
+ * The day of an article for a line in a list, in Dutch time: "25 okt", with the year when it is
+ * not this year. An article is dated by the day, so it has no weekday and no time.
+ */
+export function formatArticleDay(moment: Date, now: Date) {
+  return (clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)
+}
+
+/**
  * The short weekday and the time of day in the Netherlands, such as "wo 14:05". Within seven
  * days a weekday never appears twice, and the time stays right in a page from the cache.
  */

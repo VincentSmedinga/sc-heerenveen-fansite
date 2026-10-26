@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu acht pagina's: de homepage met de nieuwste koppen, `/wedstrijden` met het programma, de uitslagen en de stand, `/podcasts` met de afleveringen van de podcasts, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu negen pagina's: de homepage met de nieuwste koppen, `/wedstrijden` met het programma, de uitslagen en de stand, `/podcasts` met de afleveringen van de podcasts, `/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -245,6 +245,40 @@ Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
 De pagina laadt niets van een podcastplatform: alleen de links gaan erheen.
 
 `pnpm test:a11y` zet verzonnen afleveringen op de testpodcasts van de seed, genoeg voor een tweede pagina (`e2e/episodes.ts`).
+
+## Zoeken
+
+`/zoeken` zoekt in wat we zelf bewaren: de titels van de berichten en de podcastafleveringen die de site toont (`relevance` is `relevant`, niet verborgen, van een bron die aanstaat) en de titel en de inleiding van de gepubliceerde artikelen van de redactie.
+Forumonderwerpen zitten er niet in, want we bewaren er maar de nieuwste.
+De zoekopdracht is `searchPublic` in `packages/db/src/queries.ts`: `LIKE`, dus zonder index, en geen FULLTEXT.
+Alle woorden moeten voorkomen, in elke volgorde, en een deel van een woord telt mee.
+Hoofdletters en accenten tellen niet: dat doet de collatie van de tabellen (`utf8mb4_unicode_ci`), en de test `packages/db/src/search.test.ts` controleert het.
+De tekens `%`, `_` en `\` zoeken zichzelf: `hasWords` zet er een escape-teken voor, en `escape '|'` maakt van `\` een gewoon teken.
+De pagina zoekt met de woorden als parameters van de vraag, nooit als stuk van de tekst van de vraag.
+
+Een vraag heeft hoogstens 60 tekens en bestaat uit hoogstens 5 woorden van minstens 2 tekens (`parseSearch` in `src/search.ts`).
+Is ze leeg, te lang of heeft ze te veel of te korte woorden, dan staat er bij het veld een korte uitleg en doet de pagina niets in de database.
+Zo beschermen de grenzen de gedeelde hosting.
+Een zoekopdracht kost op een database met 10.000 berichten ongeveer 7 tot 14 milliseconden.
+
+Het formulier staat in dezelfde kaart als de resultaten (`SearchCard`), blauw zolang er nog niet gezocht is en daarna wit.
+Het is een gewoon `GET`-formulier naar `/zoeken?q=…`, dus de pagina werkt zonder JavaScript en het adres is te delen.
+De resultaten staan met de nieuwste bovenaan, tien eerst, en de knop "Laad 5 meer" laadt de pagina opnieuw met `?aantal=15`, in stappen van vijf en tot 100.
+Daarna staat er een zin dat dit de nieuwste zijn.
+De site bewaart een zoekvraag zelf nergens: er staat geen cookie, geen lijst van gezochte woorden en geen adres van de bezoeker bij.
+De logbestanden van de hosting hebben wel het hele adres van een pagina, dus ook `?q=`, zoals van elke pagina.
+De teller van het bezoek telt `/zoeken` zonder de vraag (`src/visits.ts`), en een fout in het logboek noemt de reden en niet de vraag.
+De pagina is `noindex`, ook met een vraag, en staat niet in de sitemap.
+
+De lijst met spelers staat in de zijbalk, na de resultaten in de bron, dus op een smal scherm onder de resultaten en zonder vraag direct onder het formulier.
+Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam is een link naar `/zoeken?q=<achternaam>`.
+Zijn er geen spelers, dan laat de pagina de lijst weg.
+Onder de lijst staat de bronvermelding van de selectie (`WikipediaCredit`), met de pagina uit `wikipedia_pages` met `kind` `squad` (`findSquadPage`).
+`listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 komt als één voorwaarde in de `where` van die vraag.
+De server bewaart de lijst vijf minuten, een zoekopdracht niet.
+
+`pnpm test:a11y` toetst `/zoeken` zonder vraag, met een vraag, met meer dan tien resultaten, zonder resultaten en met een vraag die niet mag.
+De lijst met spelers staat er alleen op als de database de verzonnen selectie van `pnpm db:seed` heeft (`madeUpSquad`).
 
 ## De bronnen
 

@@ -160,6 +160,6 @@ Dit valt er niet onder:
 - de lettertypes, die hun eigen open licentie houden (OFL);
 - de tekst van de gedragscode, die van de Contributor Covenant komt;
 - het clubwapen en andere beelden en teksten van derden;
-- de wedstrijdgegevens, die we van de Nederlandse Wikipedia nemen en daarom onder [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.nl) publiceren.
+- de wedstrijdgegevens en de selectie, die we van de Nederlandse Wikipedia nemen en daarom onder [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.nl) publiceren.
 
 Wie de code al onder MIT heeft ontvangen, houdt die rechten voor die versies.

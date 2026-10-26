@@ -24,6 +24,13 @@ describe('WikipediaCredit', () => {
     )
   })
 
+  it('names our own data after the pages it is given, such as the squad', () => {
+    const { container } = render(<WikipediaCredit {...props} data="selectiegegevens" pages={[standings]} />)
+
+    expect(container.textContent).toContain('. Onze selectiegegevens zijn ook CC BY-SA 4.0.')
+    expect(container.textContent).not.toContain('wedstrijdgegevens')
+  })
+
   it('links to the licence and the page, and not to the history of the page', () => {
     render(<WikipediaCredit {...props} pages={[standings]} />)
 
@@ -79,6 +86,13 @@ describe('WikipediaCredit', () => {
     const withPages = <WikipediaCredit compact pages={[standings]} />
 
     expect(withPages).toBeTruthy()
+  })
+
+  it('has no name for our data in the short form', () => {
+    // @ts-expect-error The short form has no sentence about our data.
+    const withData = <WikipediaCredit compact data="selectiegegevens" />
+
+    expect(withData).toBeTruthy()
   })
 
   it('needs at least one page', () => {

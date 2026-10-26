@@ -18,13 +18,15 @@ export const notVisitors =
   /bot|crawl|spider|slurp|scrape|headless|lighthouse|preview|monitor|uptime|pingdom|statuscake|site24x7|facebookexternalhit|curl\/|wget|python|java\/|go-http-client|okhttp|libwww|node|axios|whatsapp|telegram|postman|litespeed|lsnode|cpanel|plesk|scheerenveenfansite/iu
 
 /**
- * The pages that are counted: those in `pages.ts` and the page after the contact form. An
+ * The pages that are counted: those in `pages.ts`, the page after the contact form and the
+ * search, which is no page for a search engine but is for a visitor. The path has no query, so
+ * what was searched for is not part of the count. An
  * article is counted by `articlePath`, once the database says it exists. The admin, the files,
  * `/_next` and the addresses for machines (feeds, robots.txt, sitemap.xml, the manifest) are
  * on no list, so they are not counted. A path that is on no list, such as one that doesn't
  * exist, is not counted either.
  */
-const countedPaths: ReadonlySet<string> = new Set([...pages.map(({ path }) => path), '/contact/verstuurd'])
+const countedPaths: ReadonlySet<string> = new Set([...pages.map(({ path }) => path), '/contact/verstuurd', '/zoeken'])
 
 const articlePath = /^\/redactie\/([^/]+)$/u
 

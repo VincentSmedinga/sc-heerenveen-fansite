@@ -18,12 +18,20 @@ export type WikipediaCreditProps =
   | (WikipediaCreditBaseProps & {
       /** The short form, "Bron: Wikipedia", for a small card. It has no other props. */
       compact: true
+      data?: never
       pages?: never
       readAt?: never
       readAtDateTime?: never
     })
   | (WikipediaCreditBaseProps & {
       compact?: false
+      /**
+       * What our own data from these pages is called in the last sentence, "Onze
+       * wedstrijdgegevens zijn ook CC BY-SA 4.0." Without it, it is `wedstrijdgegevens`. A
+       * page with other data, such as the squad, gives the plural of its own word,
+       * `selectiegegevens`.
+       */
+      data?: string
       /** The Wikipedia pages the data comes from, at least one. */
       pages: [WikipediaCreditPage, ...WikipediaCreditPage[]]
       /**
@@ -43,16 +51,17 @@ type WikipediaCreditBaseProps = Omit<ComponentPropsWithoutRef<'p'>, 'children'> 
 /**
  * The credit for data from Wikipedia. The full form says "Bron: Wikipedia (CC BY-SA 4.0)", with
  * a link to each page the data comes from, the time of the last reading, and a sentence that
- * our own match data are CC BY-SA 4.0 too. The short form (`compact`) says only
- * "Bron: Wikipedia", for a small card on a page that has the full form elsewhere. It is
- * principle 4 of the Redactie ("Altijd de bron vermelden"), and it is a component so that a
- * page with Wikipedia data can't leave it out. The link to a page names the page, which is
- * the credit to its authors: their names are one click away in the history of the article.
- * The links go to another site and are never fetched by the page.
+ * our own data from them are CC BY-SA 4.0 too: the match data, or what `data` names. The short
+ * form (`compact`) says only "Bron: Wikipedia", for a small card on a page that has the full
+ * form elsewhere. It is principle 4 of the Redactie ("Altijd de bron vermelden"), and it is a
+ * component so that a page with Wikipedia data can't leave it out. The link to a page names
+ * the page, which is the credit to its authors: their names are one click away in the history
+ * of the article. The links go to another site and are never fetched by the page.
  */
 export const WikipediaCredit = ({
   className,
   compact,
+  data = 'wedstrijdgegevens',
   pages,
   readAt,
   readAtDateTime,
@@ -70,8 +79,7 @@ export const WikipediaCredit = ({
             <Link href={page.href}>{page.name}</Link>
           </span>
         ))}
-        . Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze wedstrijdgegevens zijn ook CC BY-SA
-        4.0.
+        . Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook CC BY-SA 4.0.
       </>
     )}
   </p>

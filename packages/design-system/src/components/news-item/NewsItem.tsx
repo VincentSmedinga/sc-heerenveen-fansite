@@ -24,6 +24,11 @@ export type NewsItemProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
   /** Where the item is at the source. The link opens in the same tab. */
   href: string
   /**
+   * Whether the item is a page of our own site, such as an article of the editors. The icon for
+   * a link to another site is then left out.
+   */
+  internal?: boolean
+  /**
    * Whether the item is behind the paywall of the source. The component then says so in text.
    */
   paywalled?: boolean
@@ -66,6 +71,7 @@ export const NewsItem = ({
   details,
   headline,
   href,
+  internal = false,
   paywalled,
   source,
   time,
@@ -82,7 +88,7 @@ export const NewsItem = ({
         </Link>
         <Text appearance="meta" className="hf-news-item-meta">
           <span>{source}</span>
-          <Icon name="external-link" />
+          {!internal && <Icon name="external-link" />}
           {paywalled && (
             <>
               {separator}

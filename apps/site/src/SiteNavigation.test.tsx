@@ -59,6 +59,11 @@ describe('SiteNavigation', () => {
     expect(currentLinks(render('/bronnen'))).toEqual([])
   })
 
+  it('has no link to Zoeken: that is in the footer', () => {
+    expect(render('/zoeken')).not.toContain('/zoeken')
+    expect(currentLinks(render('/zoeken'))).toEqual([])
+  })
+
   it('marks Nieuws as the current page on the home page, and nothing else', () => {
     expect(currentLinks(render('/'))).toEqual(['Nieuws'])
   })

@@ -20,6 +20,8 @@ const meta = preview.meta({
           '',
           "- `pages` zijn de pagina's van Wikipedia waar de gegevens vandaan komen, minstens één.",
           '  Elke pagina heeft een `name` voor de link en een `href`.',
+          '- `data` is het woord voor onze eigen gegevens uit die pagina\'s in de laatste zin, "Onze wedstrijdgegevens zijn ook CC BY-SA 4.0".',
+          '  Een pagina met andere gegevens, zoals de selectie, geeft het eigen woord in het meervoud: `selectiegegevens`.',
           '- `readAt` is de tijd van de laatste keer lezen zoals een bezoeker hem leest, in Nederlandse tijd.',
           '  `readAtDateTime` is dezelfde tijd voor machines.',
         ].join('\n'),
@@ -94,4 +96,27 @@ export const TwoPagesDark = meta.story({
   globals: { theme: 'dark' },
   name: "Twee pagina's, donker",
   render: renderTwo,
+})
+
+const squad = {
+  href: 'https://nl.wikipedia.org/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)',
+  name: 'Selectie 2026/27',
+}
+
+const renderSquad = () => (
+  <div style={{ maxInlineSize: '20rem' }}>
+    <WikipediaCredit {...readAt} data="selectiegegevens" pages={[squad]} />
+  </div>
+)
+
+export const SquadLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'De selectie, met een eigen woord voor onze gegevens, licht',
+  render: renderSquad,
+})
+
+export const SquadDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'De selectie, met een eigen woord voor onze gegevens, donker',
+  render: renderSquad,
 })

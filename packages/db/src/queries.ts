@@ -1,4 +1,6 @@
-import { and, asc, count, desc, eq, exists, inArray, isNotNull, isNull, lte, ne, sql } from 'drizzle-orm'
+import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
+
+import { and, asc, count, desc, eq, exists, inArray, isNotNull, isNull, lte, ne, or, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { MatchPageKind } from './schema.ts'
@@ -10,6 +12,7 @@ import {
   matches,
   matchGoals,
   matchPageKinds,
+  players,
   sources,
   standings,
   wikipediaPages,
@@ -29,7 +32,11 @@ export type PublicItem = Awaited<ReturnType<typeof listRecentItems>>[number]
 
 export type PublicMatch = Awaited<ReturnType<typeof listSeasonMatches>>[number]
 
+export type PublicPlayer = Awaited<ReturnType<typeof listSquad>>[number]
+
 export type PublicPodcast = Awaited<ReturnType<typeof listPodcasts>>[number]
+
+export type PublicSearchHit = Awaited<ReturnType<typeof searchPublic>>['hits'][number]
 
 export type PublicSource = Awaited<ReturnType<typeof listEnabledSources>>[number]
 
@@ -112,6 +119,20 @@ export async function findPublishedArticle(db: Database, slug: string, until: Da
   return row !== undefined && row.publishedAt !== null && row.slug === slug
     ? { ...row, publishedAt: row.publishedAt }
     : undefined
+}
+
+/**
+ * The Wikipedia page the squad of a season, such as `2026/27`, was read from: the title and the
+ * moment it was last read, so the list of players can credit it. It gives nothing while no
+ * squad has been read. The `Last-Modified` of the page stays internal.
+ */
+export async function findSquadPage(db: Database, season: string) {
+  const [row] = await db
+    .select({ readAt: wikipediaPages.readAt, title: wikipediaPages.title })
+    .from(wikipediaPages)
+    .where(and(eq(wikipediaPages.season, season), eq(wikipediaPages.kind, 'squad')))
+
+  return row
 }
 
 /**
@@ -352,6 +373,21 @@ export function listSeasonStandings(db: Database, season: string) {
 }
 
 /**
+ * The players of the squad of a season, such as `2026/27`, for the list on the search page: the
+ * name, the position and the surname the search page looks for. The order is the shirt number,
+ * and players without one last, by name. Every other column stays internal. This is the one
+ * place that decides who is in the list: a condition on who is in the squad now (#333) comes
+ * here, in the `where`.
+ */
+export function listSquad(db: Database, season: string) {
+  return db
+    .select({ name: players.name, position: players.position, searchTerm: players.searchTerm })
+    .from(players)
+    .where(eq(players.season, season))
+    .orderBy(asc(sql`${players.shirtNumber} is null`), asc(players.shirtNumber), asc(players.name))
+}
+
+/**
  * The Wikipedia pages the match import read for a season, such as `2026/27`: the title of the
  * page, which kind it is and the moment it was last read, so a page can credit them. The
  * order is the standings, the programme and the cup. The page of the squad is not one of them.
@@ -366,6 +402,86 @@ export async function listWikipediaPages(db: Database, season: string) {
 
   // The condition leaves out the page of the squad, which the type of the column still allows.
   return rows.map((row) => ({ ...row, kind: row.kind as MatchPageKind }))
+}
+
+/**
+ * Searches what the site shows for words: the titles of the news items and the podcast
+ * episodes that the pages show (`isShown`, a source that is switched on, not later than
+ * `until`) and the title and the intro of the published articles. Every word must occur, in any
+ * order, in any case and with or without accents (the collation of the tables does that), and
+ * a part of a word counts. The words are plain text and no pattern: `%`, `_` and `\` stand for
+ * themselves. It gives the newest `limit` hits, newest first, however old, and how many there
+ * are in all. A hit is `kind` `news`, `podcast` or `article`; an item has the link to the
+ * source and its source name, an article has its slug. Pass at least one word; the page checks
+ * the words before it asks.
+ *
+ * It is `LIKE`, without an index: the table is scanned. That is fast for the thousands of items
+ * a year we keep, and it finds a word of two letters (LC, VI), which FULLTEXT does not on a
+ * host with a minimum length we don't know.
+ */
+export async function searchPublic(
+  db: Database,
+  { limit, until, words }: { limit: number; until: Date; words: string[] },
+) {
+  const [found, written] = await Promise.all([
+    db
+      .select({
+        durationSeconds: items.durationSeconds,
+        episodeNumber: items.episodeNumber,
+        kind: sources.kind,
+        paywalled: items.paywalled,
+        publishedAt: items.publishedAt,
+        seasonNumber: items.seasonNumber,
+        sourceName: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('source_name'),
+        title: items.title,
+        total: sql<number>`count(*) over ()`.as('total'),
+        url: items.url,
+      })
+      .from(items)
+      .innerJoin(sources, eq(items.sourceId, sources.id))
+      .where(and(eq(sources.enabled, true), lte(items.publishedAt, until), isShown(), hasWords(words, items.title)))
+      .orderBy(desc(items.publishedAt), desc(items.id))
+      .limit(limit),
+    db
+      .select({
+        publishedAt: articles.publishedAt,
+        slug: articles.slug,
+        title: articles.title,
+        total: sql<number>`count(*) over ()`.as('total'),
+      })
+      .from(articles)
+      .where(and(lte(articles.publishedAt, until), hasWords(words, articles.title, articles.intro)))
+      .orderBy(desc(articles.publishedAt), desc(articles.id))
+      .limit(limit),
+  ])
+
+  const hits = [
+    ...found.flatMap(
+      ({ durationSeconds, episodeNumber, kind, paywalled, publishedAt, seasonNumber, sourceName, title, url }) =>
+        // Like the homepage, every kind of source that is not a podcast is news.
+        [
+          {
+            durationSeconds,
+            episodeNumber,
+            kind: kind === 'podcast' ? ('podcast' as const) : ('news' as const),
+            paywalled,
+            publishedAt,
+            seasonNumber,
+            sourceName,
+            title,
+            url,
+          },
+        ],
+    ),
+    ...written.flatMap(({ publishedAt, slug, title }) =>
+      // The condition leaves out an empty time of publication already; this tells the compiler.
+      publishedAt === null ? [] : [{ kind: 'article' as const, publishedAt, slug, title }],
+    ),
+  ]
+    .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
+    .slice(0, limit)
+
+  return { hits, total: Number(found[0]?.total ?? 0) + Number(written[0]?.total ?? 0) }
 }
 
 /**
@@ -389,6 +505,22 @@ function episodeFilter(until: Date, podcast: string | undefined) {
  */
 function hasSlug(slug: string) {
   return sql`${sources.slug} = ${slug} collate utf8mb4_bin`
+}
+
+/**
+ * The condition that every word occurs in the column (or, with more columns, in one of them).
+ * The words are text and no pattern, so `%`, `_` and the escape character `|` itself get an
+ * escape character in front. `escape '|'` also makes `\` an ordinary character, which MariaDB
+ * would read as the escape character otherwise.
+ */
+function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColumn[]]) {
+  return and(
+    ...words.map((word) => {
+      const pattern = `%${word.replaceAll(/[%_|]/gu, '|$&')}%`
+
+      return or(...columns.map((column) => sql`${column} like ${pattern} escape '|'`))
+    }),
+  )
 }
 
 /**

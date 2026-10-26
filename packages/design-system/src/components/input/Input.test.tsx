@@ -16,6 +16,17 @@ describe('Input', () => {
     expect(container.querySelector('input')?.getAttribute('type')).toBe(type)
   })
 
+  it('can carry a value along with a form without being a field to see', () => {
+    const { container } = render(
+      <form>
+        <Input name="q" type="hidden" value="klaverboer" />
+      </form>,
+    )
+
+    expect(screen.queryByRole('textbox')).toBeNull()
+    expect(new FormData(container.querySelector('form') ?? undefined).get('q')).toBe('klaverboer')
+  })
+
   it('passes autocomplete and the other attributes on to the field', () => {
     render(<Input aria-label="E-mailadres" autoComplete="email" className="extra" name="e-mail" />)
 

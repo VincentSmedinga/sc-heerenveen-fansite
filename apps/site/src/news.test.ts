@@ -5,6 +5,7 @@ import {
   dayOf,
   episodeDetails,
   formatArticleDate,
+  formatArticleDay,
   formatDayAndTime,
   formatDiscussionTime,
   formatDuration,
@@ -329,6 +330,20 @@ describe('formatArticleDate and dayOf', () => {
     expect(dayOf(new Date('2026-12-31T22:30:00Z'))).toBe('2026-12-31')
     expect(dayOf(new Date('2026-12-31T23:30:00Z'))).toBe('2027-01-01')
     expect(formatArticleDate(new Date('2026-12-31T23:30:00Z'))).toBe('1 januari 2027')
+  })
+})
+
+describe('formatArticleDay', () => {
+  const now = new Date('2026-10-26T12:00:00Z')
+
+  it('gives the short date of the Dutch day, without the year in this year', () => {
+    expect(formatArticleDay(new Date('2026-10-25T08:00:00Z'), now)).toBe('25 okt')
+    expect(formatArticleDay(new Date('2026-10-24T22:30:00Z'), now)).toBe('25 okt')
+  })
+
+  it('adds the year when it is not this year', () => {
+    expect(formatArticleDay(new Date('2025-12-31T12:00:00Z'), now)).toBe('31 dec 2025')
+    expect(formatArticleDay(new Date('2026-12-31T23:30:00Z'), new Date('2026-12-31T12:00:00Z'))).toBe('1 jan 2027')
   })
 })
 

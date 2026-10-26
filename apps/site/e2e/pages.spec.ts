@@ -22,6 +22,14 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/podcasts?podcast=bestaat-niet', status: 404 },
   { path: '/podcasts?pagina=99', status: 404 },
   { path: '/podcasts?pagina=0', status: 404 },
+  // The search, without a search, with results (a headline, an episode and an article), with
+  // more results than the first ten, without results, and with a search that is not allowed.
+  { path: '/zoeken', status: 200 },
+  { path: '/zoeken?q=heerenveen', status: 200 },
+  { path: '/zoeken?q=de', status: 200 },
+  { path: '/zoeken?q=de&aantal=15', status: 200 },
+  { path: '/zoeken?q=bestaat+echt+niet', status: 200 },
+  { path: '/zoeken?q=a', status: 200 },
   { path: '/bronnen', status: 200 },
   { path: '/over-ons', status: 200 },
   { path: '/contact', status: 200 },

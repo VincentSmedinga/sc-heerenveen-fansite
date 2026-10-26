@@ -1,13 +1,15 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 /**
- * The types of a text field an Input can be. A checkbox, a radio button and a file field are
- * other components.
+ * The types of a text field an Input can be, and `hidden`, which is no field to see but carries
+ * a value along with a form, such as the search that a button to load more results repeats. A
+ * checkbox, a radio button and a file field are other components.
  */
 export const inputTypes = [
   'date',
   'datetime-local',
   'email',
+  'hidden',
   'month',
   'number',
   'password',

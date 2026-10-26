@@ -34,6 +34,8 @@ const meta = preview.meta({
           '- `time` is de korte dag en de tijd, of de datum en de tijd, zoals een bezoeker ze leest: "wo 14:05" of "14 okt 14:05".',
           '  `dateTime` is de volledige tijd voor het `time`-element, zoals `2026-10-21T12:05:00Z`.',
           '  Het component kent geen tijdzone en rekent niet: de pagina zegt welke dag en tijd de bezoeker ziet.',
+          '- `internal` is voor een pagina van onze eigen site, zoals een artikel van de redactie: het pictogram voor een link naar buiten blijft dan weg.',
+          '  De naam van de bron is dan "Van de redactie".',
           '- `paywalled` zet "voor abonnees" onder de kop, achter de naam van de bron.',
           '  Dat staat in tekst, zodat het ook werkt voor een schermlezer en zonder kleur.',
           '- `details` is een lijst met korte feiten als tekst, zoals "49 min" of "seizoen 9, aflevering 16".',
@@ -340,4 +342,47 @@ export const BalancedDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Koppen in balans over twee of drie regels, met een lang woord en een Friese kop, donker',
   render: renderBalanced,
+})
+
+const renderInternal = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="resultaten-kop">
+      <Heading id="resultaten-kop" level={2}>
+        2 resultaten voor selectie
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-25"
+            headline="De selectie van dit seizoen, bekeken"
+            href="#artikel"
+            internal
+            source="Van de redactie"
+            time="25 okt"
+          />
+        </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-21T12:05:00Z"
+            headline="Nieuwe selectie bekend bij Testclub"
+            href="#selectie"
+            source="Testkrant"
+            time="wo 14:05"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const InternalLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Een artikel van de redactie tussen de berichten, licht',
+  render: renderInternal,
+})
+
+export const InternalDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Een artikel van de redactie tussen de berichten, donker',
+  render: renderInternal,
 })
