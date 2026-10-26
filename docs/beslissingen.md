@@ -4678,3 +4678,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de projecteigenaar koos dit: de dag is bijna altijd vandaag, dus de regel zegt supporters niets.
   Een tabel heeft een naam nodig, en een schermlezer hoort de dag er zonder moeite bij.
 - **Alternatieven:** het bijschrift weglaten (de tabel heeft dan geen naam); de dag alleen tonen als hij niet vandaag is (extra logica en een tweede toestand om te testen).
+
+### Safari vergroot de tekst niet zelf in liggende stand
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `html` krijgt `text-size-adjust: 100%`, zodat Safari op iPhone en iPad de tekst niet vergroot als het toestel draait.
+  De regel staat één keer, in de basislaag van het designsysteem (`root.css`), bij de andere regels voor `html`.
+  Er staan twee vormen, elk binnen `@supports` (zie _Functies die nog niet zover zijn: `@supports`, of een tijdelijke uitzondering_):
+  - `-webkit-text-size-adjust: 100%` binnen `@supports (-webkit-touch-callout: none)`, voor Safari op iOS en iPadOS.
+    Stylelint meldt het voorvoegsel, dus er staat één `stylelint-disable-next-line property-no-vendor-prefix` met de reden bij.
+  - `text-size-adjust: 100%` binnen `@supports (text-size-adjust: 100%)`, voor browsers die de regel zonder voorvoegsel kennen.
+    `plugin/use-baseline` meldt de regel als niet 'widely available'; binnen `@supports` is dat goed.
+- **Waarom:** Safari vergroot in liggende stand de tekst die het voor lopende tekst houdt, maar laat tabellen en gebieden die zijwaarts scrollen met rust.
+  Daardoor staan op één pagina grote en kleine teksten naast elkaar.
+  Met 100% bepaalt de pagina de grootte, en de bezoeker kan nog altijd inzoomen: knijpen in de pagina en de paginazoom in het menu van Safari veranderen de tekst nog (WCAG 1.4.4 en 1.4.10).
+- **De vorm met voorvoegsel is nodig:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro, liggend) bleef de tekst in liggende stand vergroot met alleen `text-size-adjust: 100%`: de kaarten van `/wedstrijden` tot anderhalf keer zo groot, de koppen op de homepage ruim een zesde groter.
+  Met `-webkit-text-size-adjust: 100%` kwam de tekst terug op de grootte van staand, en de standtabel veranderde in geen van beide gevallen.
+  Een echte iPhone is niet getest.
+- **De bouw laat het voorvoegsel weg als het naast de vorm zonder voorvoegsel staat:** Next.js haalt `-webkit-text-size-adjust` uit dezelfde regel weg en zet er `-moz-text-size-adjust` voor in de plaats.
+  Daarom staat het voorvoegsel in een eigen `@supports`-blok; dat blijft in de gebouwde CSS staan.
+  Een test (`root-css.test.ts`) controleert dat beide vormen in de bron staan, maar niet wat de bouw ervan maakt; dat kijk je na in de gebouwde CSS.
+- **Alternatieven:** niets doen (de verschillen blijven in liggende stand); een vaste waarde als 90% of 110% (verkeerd voor wie het teken groot nodig heeft); de tabel ook laten vergroten (kan niet, het is de beslissing van Safari); alleen de vorm zonder voorvoegsel (werkt niet in Safari op iPhone).
