@@ -202,6 +202,14 @@ export const realSources = [
     kind: 'news',
     name: 'Algemeen Dagblad',
   },
+  {
+    description:
+      'Nederlandse nieuwssite van de sportzender ESPN. In de voetbalfeed staat het voetbalnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
+    domain: 'www.espn.nl',
+    feeds: [{ filter: 'club', url: 'https://www.espn.nl/espn/rss/soccer/news' }],
+    kind: 'news',
+    name: 'ESPN',
+  },
 ] satisfies (NewSource & { feeds: (string | { filter: FeedFilter; url: string })[] })[]
 
 /**

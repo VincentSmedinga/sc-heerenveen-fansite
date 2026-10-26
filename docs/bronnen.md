@@ -71,8 +71,8 @@ Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in 
 
 | Besluit                             | Bronnen                                                                                                                                                                                                                                                       |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), Omroep Abe (podcast), Radio Camataru (podcast)                                                    |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed), ESPN NL                                                                                                                                                                                                                   |
+| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), ESPN NL (met het filter), Omroep Abe (podcast), Radio Camataru (podcast)                          |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                            |
 | Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                              |
 | Afwijzen                            | RTV Noord, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Rijnmond, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast |
 
@@ -436,11 +436,87 @@ Al in het register (#310), met het filter `club`.
   Een run bewaarde alle 30 berichten, zonder er een over te slaan, en alle tijden waren geldig.
   Er bestaat geen kolom voor de beschrijving, de auteur of de afbeeldingen, dus de importer bewaart ze niet.
 
+### ESPN NL
+
+Al in het register (#311), met het filter `club`.
+
+- **Domein:** `www.espn.nl`
+- **Soort:** nieuws, voetbalsite van de sportzender ESPN, onderdeel van Disney
+- **Feed:** `https://www.espn.nl/espn/rss/soccer/news`
+  - Werkt: ja, RSS 2.0 met 25 berichten.
+    Op 26 oktober 2026 (10:34 UTC) was het nieuwste van die dag en het oudste van 24 oktober 2026.
+    Elk bericht heeft een kop, een beschrijving, een auteur, een link, een `guid` en een tijd.
+    De berichten hebben geen afbeelding; alleen de feed zelf heeft een logo.
+  - Over sc Heerenveen: 1 van de 25 koppen noemt Heerenveen, het verslag van ADO tegen sc Heerenveen.
+  - Betaalmuur: nee; de feed geeft er geen teken van.
+  - Het filter, op 26 oktober 2026: van de 25 berichten kreeg 1 de waarde `relevant`, 0 `doubtful` en 24 `irrelevant`.
+    Het `relevant` bericht is het wedstrijdverslag van de club.
+    Eén bericht gaat over dezelfde wedstrijd vanuit ADO ("ADO beleeft frustrerende avond"), maar noemt de club niet in de kop.
+    Het filter kijkt alleen naar de kop, dus dat bericht is `irrelevant`.
+    Geen ander bericht van de 24 gaat over de club.
+    De lijsten met namen en woorden blijven zoals ze zijn: een bericht over de tegenstander is geen bericht over de club.
+- **`robots.txt`** (opnieuw gelezen op 26 oktober 2026, met de user agent van de importer): laat ons de feed toe.
+  Voor alle crawlers zijn een aantal paden dicht, waaronder `/espn/now`, maar niet `/espn/rss/` en niet `/voetbal/artikel/`.
+  Tien crawlers zijn bij naam helemaal geweigerd, onder meer `GPTBot`, `CCBot` en `anthropic-ai`; wij staan er niet bij.
+- **Voorwaarden:** de twee teksten van Disney zeggen niet hetzelfde, en we weten niet welke voor `www.espn.nl` geldt.
+  Opnieuw gelezen op 26 oktober 2026.
+  - De Nederlandse gebruiksvoorwaarden (`disneytermsofuse.com/dutch-netherlands/`, gedateerd 16 juli 2012) zijn de tekst waar de onderkant van `www.espn.nl` naar linkt.
+    De sites zijn alleen voor persoonlijk gebruik, en niets uit de inhoud mag zonder uitdrukkelijke schriftelijke toestemming voor een ander doel worden gebruikt, gereproduceerd of verspreid.
+    Zakelijk gebruik en "geautomatiseerd gebruik met hoog volume" zijn verboden.
+    Over robots, spiders, scrapen, datamining en RSS staat niets.
+    Zo las dit document de voorwaarden tot nu toe.
+  - De Engelse _Disney Terms of Use_ voor de Verenigde Staten (`disneytermsofuse.com/english/`, bijgewerkt op 24 mei 2024) noemen ESPN als een van de merken.
+    Ze verbieden om de producten van Disney te benaderen, te kopiëren of te halen met een robot, spider, script of andere geautomatiseerde middelen, en noemen datamining en scrapen uitdrukkelijk.
+    Alleen openbare zoekmachines zijn uitgezonderd.
+    Dit komt overeen met de strengere lezing van de eerdere bronnenverkenning (de notities van 25 oktober 2026): geen robots, spiders of scrapers zonder schriftelijke toestemming.
+  - De Nederlandse tekst is van 2012 en de Engelse van 2024.
+    De site linkt naar de Nederlandse; de Engelse is voor de Verenigde Staten en noemt ESPN als merk.
+    Welke van de twee voor `www.espn.nl` geldt, kunnen we niet vaststellen.
+    Onder de strengste lezing doen we dus iets wat Disney niet toestaat.
+- **Meer tonen:** hergebruik vraagt schriftelijke toestemming van Disney; we tonen niet meer dan de standaard.
+  De beschrijving en de auteur in de feed bewaren we niet en tonen we niet.
+- **Besluit: nemen, met het filter `club`.**
+  De feed gaat over het voetbal in Nederland en daarbuiten, met de Eredivisie als een groot deel, en het filter laat alleen de berichten over de club door.
+  Het voorbehoud van Disney is een risico dat geen jurist heeft getoetst, in beide lezingen.
+  We nemen één feed, met hoogstens één verzoek per kwartier, alleen een kop en een link, en zetten de bron meteen uit als Disney erom vraagt.
+  De projecteigenaar nam het voorbehoud aan bij het goedkeuren van het issue (26 oktober 2026).
+  Schriftelijk toestemming vragen aan Disney hoort bij #35.
+  Controle van 26 oktober 2026, met een lokale run van de importer.
+  Op 24 oktober 2026 telden we nog 0 berichten over de club in de feed; die telling was een momentopname van twee dagen.
+- **De tijd in de feed:** de tijden staan met de zone `EST`, bijvoorbeeld `Mon, 26 Oct 2026 11:26:08 EST`, maar het is de Nederlandse tijd (zomertijd tot 25 oktober 2026 03:00, daarna wintertijd).
+  Dit hebben we vastgesteld met de pagina's van vijf berichten (de pagina geeft de tijd in UTC en in Nederlandse tijd) en met twee bekende momenten:
+
+  | Bericht                   | Feed (zone `EST`)       | Pagina, UTC         | Pagina, Nederlandse tijd |
+  | ------------------------- | ----------------------- | ------------------- | ------------------------ |
+  | Verslag ADO – Heerenveen  | za 24 okt 2026 22:52:27 | 2026-10-24 20:52:26 | 22:52 (zomertijd)        |
+  | Dijkhuizen over VVV-Venlo | za 24 okt 2026 19:27:02 | 2026-10-24 17:23:00 | 19:23 (zomertijd)        |
+  | FC Twente klopt AZ        | zo 25 okt 2026 22:44:35 | 2026-10-25 20:55:00 | 21:55 (wintertijd)       |
+  | Hadj Moussa, de data      | ma 26 okt 2026 07:14:06 | 2026-10-26 06:00:00 | 07:00 (wintertijd)       |
+  | Quiñones, Ballon d'Or     | ma 26 okt 2026 11:26:08 | 2026-10-26 08:24:00 | 09:24 (wintertijd)       |
+  - De feed loopt gelijk met de klok aan de muur in Nederland: bij het verslag van de wedstrijd zit 1 seconde tussen de feed en de pagina.
+    Bij de andere vier is de feed 4 minuten tot ruim 2 uur later dan de pagina, nooit eerder.
+    De tijd in de feed lijkt het laatste moment waarop ESPN het bericht aanpaste.
+    Het bericht over Quiñones stond enkele minuten later in de feed met 11:35 in plaats van 11:26.
+  - Het einde van de wedstrijd: ADO – sc Heerenveen begon op 24 oktober 2026 om 21:00 Nederlandse tijd.
+    Het verslag staat in de feed om 22:52, ruim twee uur na de aftrap: twee keer 45 minuten, de rust en de blessuretijd.
+  - Letterlijk gelezen is `EST` min vijf uur ten opzichte van UTC.
+    Het nieuwste bericht zou dan 16:26 UTC zijn, terwijl de feed om 10:34 UTC werd opgehaald en zelf `lastBuildDate: Mon, 26 Oct 2026 10:34:26 GMT` zegt.
+    Als UTC gelezen zou het nieuwste bericht 52 minuten na het ophalen van de feed staan, en het verslag van de wedstrijd om 00:52 Nederlandse tijd, ruim twee uur na het einde.
+  - De overgang naar wintertijd (25 oktober 2026, 03:00) zit in de feed: de berichten van zondag horen bij wintertijd.
+    Met zomertijd gelezen zou het bericht van FC Twente (feed 22:44) om 20:44 UTC staan, vóór de publicatie op de pagina (20:55 UTC).
+
+- **Importer:** leest de feed met één aanpassing, de tijd.
+  Voor het domein `www.espn.nl` geldt `EST` als `Europe/Amsterdam` (`timeRules` in `apps/importer/src/read-feed.ts`).
+  Voor andere feeds leest de importer `EST` nog steeds niet, dus daar geldt het moment waarop we het bericht voor het eerst zagen.
+  Een run bewaarde alle 25 berichten, zonder er een over te slaan, en alle 25 tijden waren geldig.
+  Er bestaat geen kolom voor de beschrijving, de auteur of het logo, dus de importer bewaart ze niet.
+  Verschuift ESPN de tijd van een bericht, dan verschuift hij op de site mee, zoals bij elke bron.
+
 ## Nemen na het relevantiefilter (#74)
 
 Deze feeds zijn breed.
 Ze staan nog niet in het register.
-Het filter dat de berichten over de club eruit haalt, is er nu (#74), en Omrop Fryslân, NOS en het Algemeen Dagblad (hierboven) draaien ermee.
+Het filter dat de berichten over de club eruit haalt, is er nu (#74), en Omrop Fryslân, NOS, het Algemeen Dagblad en ESPN NL (hierboven) draaien ermee.
 Een telling op één momentopname van een paar dagen zegt weinig over hoe vaak de club erin staat; dat meten we per bron, met een run van de importer, zoals bij Omrop Fryslân.
 
 ### Voetbal International, de brede feed
@@ -455,26 +531,6 @@ De bron staat al in het register (zie boven), maar deze feed niet.
 - **Besluit: nemen na het relevantiefilter (#74).**
   De feed bevat alle voetbalnieuws van het blad, en daar staat de club regelmatig tussen.
   De tagfeed hierboven bevat al wat over de club gaat.
-
-### ESPN NL
-
-- **Domein:** `www.espn.nl`
-- **Soort:** nieuws, voetbalsite
-- **Feed:** `https://www.espn.nl/espn/rss/soccer/news`
-  - Werkt: ja, RSS 2.0 met 25 berichten; het nieuwste is van 23 oktober 2026.
-    De tijden staan met de zone `EST`, die de importer niet kent.
-  - Over sc Heerenveen: geen enkel bericht in de kop, de categorieën of de intro.
-  - Betaalmuur: nee; de feed geeft er geen teken van.
-- **`robots.txt`:** laat ons de feed toe.
-  Veel crawlers, onder meer van AI-bedrijven, zijn bij naam geweigerd; wij staan er niet bij.
-- **Voorwaarden** (de gebruiksvoorwaarden van Disney, waar de onderkant van de site naar linkt, uit 2012): de site is alleen voor persoonlijk gebruik, hergebruik vraagt schriftelijke toestemming, en geautomatiseerd gebruik met een hoog volume is verboden.
-  Over datamining en RSS staat niets.
-- **Meer tonen:** hergebruik vraagt schriftelijke toestemming van Disney.
-- **Besluit: nemen na het relevantiefilter (#74).**
-  De feed gaat over het Nederlandse voetbal, met de Eredivisie als een groot deel.
-  Wij lezen één feed, met hoogstens één verzoek per kwartier; of dat onder "een hoog volume" valt, zeggen de voorwaarden niet.
-- **Importer:** de adapter leest de tijd met zone `EST` niet.
-  Zonder geldige tijd geldt het moment waarop we het bericht voor het eerst zagen (zie _Wat de importer nog mist_).
 
 ## Eerst toestemming
 
@@ -831,12 +887,3 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
 - **`robots.txt`:** laat ons de feed toe.
 - **Besluit: afwijzen, voor nu.**
   De podcast gaat zelden over de club, en zonder pagina van de aflevering verwijzen we alleen naar een bestand.
-
-## Wat de importer nog mist
-
-Alle bronnen met het besluit "nemen" werken met de importer zoals hij is, ook Omrop Fryslân, NOS en het Algemeen Dagblad met het filter.
-Voor deze bron met "nemen na het relevantiefilter (#74)" moet er eerst iets bij, buiten het filter zelf:
-
-- **ESPN NL:** de adapter leest een tijd met de zone `EST` niet.
-
-Dat vraagt een eigen issue (#311), zodra de bron aan de beurt is.

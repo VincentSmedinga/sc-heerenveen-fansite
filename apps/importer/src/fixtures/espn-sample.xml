@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A small, made-up feed in the shape of the football feed of ESPN NL (see docs/bronnen.md, ESPN NL):
+  RSS 2.0, headlines, descriptions, authors and links in CDATA, a guid that is no link, a logo
+  in the channel, and times that end in the zone EST though they are Dutch local time. The
+  headlines, links and texts are invented; none is copied from a real feed. The description and
+  the author are here to show that the importer does not read them. Two items stand just before
+  and just after the end of summer time on 25 October 2026. The last item has a time that is
+  no time. The item before it names the club only in its description.
+-->
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+  <title><![CDATA[www.espn.test - VOETBAL]]></title>
+  <description>Verzonnen voetbalnieuws</description>
+  <link>https://www.espn.test</link>
+  <ttl>30</ttl>
+  <language>nl</language>
+  <generator>Verzonnen</generator>
+  <copyright>Verzonnen</copyright>
+  <lastBuildDate>Mon, 26 Oct 2026 10:34:26 GMT</lastBuildDate>
+  <image>
+    <url>https://a.espn.test/logo.gif</url>
+    <title>www.espn.test - VOETBAL</title>
+    <link>https://www.espn.test</link>
+    <width>110</width>
+    <height>110</height>
+  </image>
+  <item>
+    <title><![CDATA[Mbappé opent de rij van genomineerden voor de Gouden Bal]]></title>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Door Een Verzonnen Auteur]]></dc:creator>
+    <link><![CDATA[https://www.espn.test/voetbal/artikel/_/id/9000001/gouden-bal]]></link>
+    <pubDate>Mon, 26 Oct 2026 11:26:08 EST</pubDate>
+    <guid isPermaLink="false"><![CDATA[NL-NL-9000001]]></guid>
+  </item>
+  <item>
+    <title><![CDATA[Heerenveen wint de wedstrijd bij Utrecht door een late treffer]]></title>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Door Een Verzonnen Auteur]]></dc:creator>
+    <link><![CDATA[https://www.espn.test/voetbal/artikel/_/id/9000002/heerenveen-utrecht]]></link>
+    <pubDate>Sun, 25 Oct 2026 03:00:01 EST</pubDate>
+    <guid isPermaLink="false"><![CDATA[NL-NL-9000002]]></guid>
+  </item>
+  <item>
+    <title><![CDATA[sc Heerenveen kijkt terug op een bewogen avond]]></title>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Door Een Verzonnen Auteur]]></dc:creator>
+    <link><![CDATA[https://www.espn.test/voetbal/artikel/_/id/9000003/bewogen-avond]]></link>
+    <pubDate>Sun, 25 Oct 2026 01:59:59 EST</pubDate>
+    <guid isPermaLink="false"><![CDATA[NL-NL-9000003]]></guid>
+  </item>
+  <item>
+    <title><![CDATA[Werkzaamheden aan de weg in Heerenveen duren langer]]></title>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Door Een Verzonnen Auteur]]></dc:creator>
+    <link><![CDATA[https://www.espn.test/voetbal/artikel/_/id/9000004/werkzaamheden]]></link>
+    <pubDate>Sat, 24 Oct 2026 19:27:02 EST</pubDate>
+    <guid isPermaLink="false"><![CDATA[NL-NL-9000004]]></guid>
+  </item>
+  <item>
+    <title><![CDATA[Het programma van de eredivisie: dit zijn de duels van het weekend]]></title>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Door Een Verzonnen Auteur]]></dc:creator>
+    <link><![CDATA[https://www.espn.test/voetbal/artikel/_/id/9000005/programma]]></link>
+    <pubDate>Fri, 23 Oct 2026 13:00:00 EST</pubDate>
+    <guid isPermaLink="false"><![CDATA[NL-NL-9000005]]></guid>
+  </item>
+  <item>
+    <title><![CDATA[De speelronde in een notendop: Twente wint en Utrecht verliest]]></title>
+    <description><![CDATA[Een verzonnen samenvatting waarin sc Heerenveen alleen in de beschrijving staat.]]></description>
+    <dc:creator><![CDATA[Door Een Verzonnen Auteur]]></dc:creator>
+    <link><![CDATA[https://www.espn.test/voetbal/artikel/_/id/9000006/speelronde]]></link>
+    <pubDate>Sun, 25 Oct 2026 22:56:00 EST</pubDate>
+    <guid isPermaLink="false"><![CDATA[NL-NL-9000006]]></guid>
+  </item>
+  <item>
+    <title><![CDATA[Heerenveen-supporters vullen de tribune voor de wedstrijd]]></title>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Door Een Verzonnen Auteur]]></dc:creator>
+    <link><![CDATA[https://www.espn.test/voetbal/artikel/_/id/9000007/tribune]]></link>
+    <pubDate>gisteravond laat</pubDate>
+    <guid isPermaLink="false"><![CDATA[NL-NL-9000007]]></guid>
+  </item>
+</channel>
+</rss>

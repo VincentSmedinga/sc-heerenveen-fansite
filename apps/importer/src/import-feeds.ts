@@ -14,7 +14,7 @@ import type { ForumDiscussion } from './read-forum.ts'
 
 import { createFetcher } from './fetcher.ts'
 import { formatMatchReport, importMatches, wikipediaOrigin } from './import-matches.ts'
-import { paywallCategoryFor, paywallNamespaceFor, readFeed } from './read-feed.ts'
+import { paywallCategoryFor, paywallNamespaceFor, readFeed, timeRuleFor } from './read-feed.ts'
 import { readForum } from './read-forum.ts'
 import { judgeRelevance } from './relevance.ts'
 import { robotsStoreFor } from './robots-store.ts'
@@ -180,6 +180,7 @@ export async function importFeed(
     now,
     paywallCategory: paywallCategoryFor(domain),
     paywallNamespace: paywallNamespaceFor(domain),
+    timeRule: timeRuleFor(domain),
   })
 
   if (read.kind === 'error') {

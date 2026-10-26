@@ -37,7 +37,7 @@ Daardoor kan dezelfde code op de hosting draaien, zonder ontwikkelgereedschap: d
 
 `db:seed` weigert als `SITE_ENV` `production` is, want de testbronnen zijn verzonnen en mogen daar nooit komen.
 De seed zet ook de echte nieuwsbronnen met hun feeds erin (de lijst staat in [`docs/bronnen.md`](../../docs/bronnen.md)) en ons eigen forum, sc Heerenveen Forum; zij staan dus lokaal en op acceptatie in het register, en nooit op productie.
-Een feed die over meer gaat dan de club, zoals die van Omrop Fryslân, NOS en het Algemeen Dagblad, staat in de seed met `{ filter: 'club', url }`; de seed zet het filter alleen als hij de feed toevoegt (zie de README van de importer, _Het relevantiefilter_).
+Een feed die over meer gaat dan de club, zoals die van Omrop Fryslân, NOS, het Algemeen Dagblad en ESPN, staat in de seed met `{ filter: 'club', url }`; de seed zet het filter alleen als hij de feed toevoegt (zie de README van de importer, _Het relevantiefilter_).
 Hoe echte bronnen op productie komen, beslissen we met het beheer (#30).
 
 ## Het schema wijzigen

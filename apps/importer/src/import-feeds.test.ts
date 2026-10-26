@@ -802,6 +802,113 @@ describe('importing the football feed of the Algemeen Dagblad, the way the regis
   })
 })
 
+describe('importing the football feed of ESPN NL, the way the register has it', () => {
+  const sample = readFileSync(new URL('./fixtures/espn-sample.xml', import.meta.url), 'utf8')
+  const espnRun = new Date('2026-10-26T12:00:00Z')
+
+  /** The football feed of ESPN NL as the seed registers it, pointed at the test server. */
+  async function espnFeed(origin: string) {
+    await seedSources(database.db)
+
+    const [row] = await database.db
+      .select({ id: feeds.id })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, 'www.espn.nl'))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  it('reads the feed, gives every item its value and counts them', async () => {
+    const server = await serve(sample)
+    const feed = await espnFeed(server.origin)
+
+    expect(feed.filter).toBe('club')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, espnRun)
+
+    expect(report).toMatchObject({ added: 7, relevance: { doubtful: 1, irrelevant: 3, relevant: 3 }, skipped: [] })
+    expect(Object.fromEntries((await itemsInDatabase()).map((row) => [row.title, row.relevance]))).toEqual({
+      'De speelronde in een notendop: Twente wint en Utrecht verliest': 'irrelevant',
+      'Heerenveen-supporters vullen de tribune voor de wedstrijd': 'relevant',
+      'Heerenveen wint de wedstrijd bij Utrecht door een late treffer': 'relevant',
+      'Het programma van de eredivisie: dit zijn de duels van het weekend': 'irrelevant',
+      'Mbappé opent de rij van genomineerden voor de Gouden Bal': 'irrelevant',
+      'sc Heerenveen kijkt terug op een bewogen avond': 'relevant',
+      'Werkzaamheden aan de weg in Heerenveen duren langer': 'doubtful',
+    })
+  })
+
+  it('reads the zone EST as Dutch time, in summer time, in winter time and across the switch', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await espnFeed(server.origin), espnRun)
+
+    const rows = await database.db.select().from(items)
+    const byLink = Object.fromEntries(rows.map((row) => [row.url, row.publishedAt]))
+    const link = (id: number) => `https://www.espn.test/voetbal/artikel/_/id/${id}/`
+
+    const at = (id: number) => Object.entries(byLink).find(([url]) => url.startsWith(link(id)))?.[1]
+
+    // Winter time, one hour ahead of UTC; 11:26 is before the moment the feed was built.
+    expect(at(9000001)).toEqual(new Date('2026-10-26T10:26:08Z'))
+    // Just after the end of summer time at 03:00, and just before it.
+    expect(at(9000002)).toEqual(new Date('2026-10-25T02:00:01Z'))
+    expect(at(9000003)).toEqual(new Date('2026-10-24T23:59:59Z'))
+    // Summer time, two hours ahead of UTC.
+    expect(at(9000004)).toEqual(new Date('2026-10-24T17:27:02Z'))
+    // A time that is no time falls back to the moment we first saw the item.
+    expect(at(9000007)).toEqual(espnRun)
+  })
+
+  it('keeps nothing of the description, the author or the logo', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await espnFeed(server.origin), espnRun)
+
+    const stored = JSON.stringify(await database.db.select().from(items))
+
+    expect(stored).not.toContain('verzonnen intro')
+    expect(stored).not.toContain('samenvatting')
+    expect(stored).not.toContain('Verzonnen Auteur')
+    expect(stored).not.toContain('logo.gif')
+  })
+
+  it('shows only the relevant items to a visitor, however new the others are', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await espnFeed(server.origin), espnRun)
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-10-27T00:00:00Z') })
+
+    expect(shown.map((item) => item.title)).toEqual([
+      'Heerenveen-supporters vullen de tribune voor de wedstrijd',
+      'Heerenveen wint de wedstrijd bij Utrecht door een late treffer',
+      'sc Heerenveen kijkt terug op een bewogen avond',
+    ])
+    expect(shown.every((item) => item.sourceName === 'ESPN')).toBe(true)
+  })
+
+  it('does not read EST as Dutch time for another source', async () => {
+    const server = await serve(sample)
+    const feed = await addFeed(`${server.origin}/rss/`, { domain: 'andere-krant.test' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, espnRun)
+
+    const times = (await database.db.select({ publishedAt: items.publishedAt }).from(items)).map(
+      (row) => row.publishedAt,
+    )
+
+    expect(times).toHaveLength(7)
+    expect(times.every((time) => time.getTime() === espnRun.getTime())).toBe(true)
+  })
+})
+
 describe('an item that cannot be stored', () => {
   it('is skipped and reported, and the rest of the feed is stored', async () => {
     const server = await serve(
