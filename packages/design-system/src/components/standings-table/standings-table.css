@@ -53,8 +53,8 @@
   /*
    * The bar for the points sits to the end of the number, in the same cell, so the numbers stay
    * in line. It is as long as the share of the leader's points, which the component gives as a
-   * number from 0 to 100 in --hf-points-share, so a club with half of the points has half of the
-   * bar. The fill is the green of a win, because points come from wins: a calm 70% of it, which
+   * number from 0 to 100 in --hf-points-share, so a club with half of the points has half of
+   * the bar. The fill is the green of a win, because points come from wins: a calm 70% of it, which
    * reaches 3:1 on the card in light and in dark, and the whole green for the row of sc
    * Heerenveen. The bar is decoration, so a screen reader skips it (aria-hidden).
    */
