@@ -7,7 +7,7 @@ argument-hint: <pull request number>
 # Screenshots for pull request $ARGUMENTS
 
 You are the Builder of the pull request.
-The rules and the decisions behind them are in _Screenshots_ in `AGENTS.md` and in `docs/beslissingen.md` (_Screenshots staan op een eigen branch_ and the two decisions after it); the commands for a build are in _Screenshots maken_ in `apps/site/README.md`.
+The rules and the decisions behind them are in _Screenshots_ in `AGENTS.md` and in `docs/beslissingen.md` (_Screenshots staan op een eigen branch_ and the decisions after it); the commands for a build are in _Screenshots maken_ in `apps/site/README.md`.
 This skill is the order and the choices.
 
 ## 1. Does anybody see the change?

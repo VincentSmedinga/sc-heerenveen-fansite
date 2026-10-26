@@ -32,15 +32,18 @@ Follow _Afspraken_ in the README of the design system:
 ## 3. The stories
 
 The format is CSF Next, not the CSF 3 of the generic instructions.
-Copy the shape of `src/components/card/Card.stories.tsx`:
+Copy the shape of the meta in `src/components/card/Card.stories.tsx`:
 
 - `import preview from '#.storybook/preview'`, then `preview.meta({ … })` with `title: 'Componenten/<Name>'`, `tags: ['autodocs']`, `component`, and `parameters.docs.page: ControlsDocsPage`;
-- `argTypes` with a short Dutch `description` per prop, and the union types in `table.type.summary` (the compiler gives `unknown[number]` for the lists; the `union()` helper in the Card stories shows how);
+- `argTypes` with a short Dutch `description` per prop;
 - stories with `meta.story({ name, render, … })`, with Dutch names;
 - made-up content only: `Testkrant`, `Testclub`, links as `#…`, no real headlines, names or addresses.
 
-What goes in them was decided on 23 October 2026 in the open issue #123 (_Wat staat er op een pagina in Storybook?_).
-The decisions aren't in `docs/beslissingen.md` yet, so check there first for a newer one; until then:
+Two things in that file are the older manner, and you don't copy them: a light and a dark story for each variant, and the `union()` helper that writes the union types into `table.type.summary` (the compiler gives `unknown[number]` for the lists).
+The owner decided on 23 October 2026, in the open issue #123 (_Wat staat er op een pagina in Storybook?_), to change both.
+Those decisions aren't in `docs/beslissingen.md` yet, and `CONTRIBUTING.md` and the README of the design system still say "light and dark" for stories.
+Check `docs/beslissingen.md` first for a newer decision, and tell the Coordinator if the documents still disagree when you build.
+Until the decisions are written down:
 
 - **Text:** one paragraph on why the component exists and when to choose it.
   No rem, px, breakpoints or margins: those belong in the code and in `docs/beslissingen.md`.
@@ -49,6 +52,7 @@ The decisions aren't in `docs/beslissingen.md` yet, so check there first for a n
   Light and dark come from the theme switch of Storybook; a component that changes with the theme itself, such as on a dark surface, gets its own dark story (`globals: { theme: 'dark' }`).
 - **Hover, focus and visited:** not in every component's stories; the stories for links and forms show them once.
 - **Controls:** once more than one prop changes the result.
+  The union types are fixed once in `ControlsDocsPage`, not in each story; if the table of controls still shows `unknown[number]` for a prop, say so in your report.
 - Don't clean the documentation of other components in this change; it has its own issues.
 
 ## 4. Tests and checks

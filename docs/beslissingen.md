@@ -455,7 +455,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een eigen script dat de diff controleert; dat is code om te onderhouden voor iets wat twee regels doen.
   Niets doen en de reviewer deze dingen laten melden; dat kost een reviewronde per pull request, en de limiet is twee.
 
-### Skills voor de stappen van de Builder, regels blijven in AGENTS.md
+### Skills voor de stappen van de rollen, regels blijven in AGENTS.md
 
 - **Datum:** 26 oktober 2026
 - **Besluit:** skills in `.claude/skills/` leggen de volgorde van de stappen vast.

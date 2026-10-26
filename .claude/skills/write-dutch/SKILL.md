@@ -14,7 +14,6 @@ This skill is the checklist and the places where it goes wrong.
 | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
 | Issues, pull request descriptions, comments on GitHub, documentation, Storybook texts, all text on the site, the Reviewer's report, release notes | Dutch           |
 | Code, comments, commit messages, pull request titles, `AGENTS.md`, agents and skills in `.claude/`                                                | British English |
-| Plans and notes for the owner alone, and your chat replies to the owner                                                                           | British English |
 
 - Ask whether a text will go public before you choose.
 - The label `good first issue` stays English: GitHub's newcomer features rely on that exact name.
