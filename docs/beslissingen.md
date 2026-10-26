@@ -3629,6 +3629,42 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de verzonnen wedstrijden in een eigen seizoen zetten (de pagina's tonen dan niets in het lopende seizoen).
   De seed op acceptatie niet voor wedstrijden laten lopen (de toegankelijkheidscontrole heeft ze nodig).
 
+### De selectie komt van de Nederlandse Wikipedia, zoals de wedstrijden
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de lijst met spelers voor de zoekpagina komt uit de tabel "Spelers" op de pagina van het seizoen van sc Heerenveen op de Nederlandse Wikipedia, via de importer, met dezelfde controles, bronvermelding en licentie (CC BY-SA 4.0) als de wedstrijden.
+  We bewaren alleen de naam, de positie en het rugnummer.
+- **Waarom:** het is dezelfde bron, hetzelfde besluit en dezelfde techniek als bij #27, dus er komt geen nieuwe afspraak bij.
+  Een transfer staat binnen dagen op Wikipedia, dus niemand houdt een lijst bij.
+- **Alternatieven:** een lijst in het beheer die een redacteur bijhoudt (er is geen redactieproces voor, en hij is na elke transfer verouderd).
+  De namen uit de doelpuntenmakers (#297) halen (alleen spelers die scoorden, dus onvolledig).
+  De site van de club (geen toestemming, zie #16).
+
+### De zoekterm is de achternaam, als eigen kolom
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** bij elke speler bewaren we een zoekterm: de naam zonder de eerste voornaam.
+  De lijst toont de volledige naam, een klik zoekt op de zoekterm.
+- **Waarom:** media schrijven "Klaverboer" of "Van der Flier", zelden de volledige naam.
+  Een zoekopdracht op de achternaam vindt ook de koppen met de volledige naam.
+- **Alternatieven:** zoeken op de volledige naam (mist de meeste koppen).
+  De zoekterm elke keer uit de naam afleiden (kan niet voor één speler worden gecorrigeerd, zoals een speler die onder één naam bekend is).
+
+### De selectie heeft een eigen gezondheidsrij, en een bekende speler houdt zijn zoekterm
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de import van de selectie heeft een eigen tabel voor de gezondheid, `squad_imports`, met dezelfde velden als `match_imports`, en een eigen uur: hij loopt in dezelfde run als de wedstrijden, na de wedstrijden, en een fout in de ene stopt de andere niet.
+  De pagina van de selectie staat in `wikipedia_pages` met `kind` `squad`, voor de bronvermelding op de zoekpagina (#107).
+  `listWikipediaPages` geeft alleen de pagina's van de wedstrijden, dus de selectie staat niet in de bronvermelding van `/wedstrijden`.
+  Een goede lezing vervangt de selectie van het lopende seizoen, maar zet de zoekterm alleen bij een nieuwe speler: een speler die er al is, houdt de zoekterm die hij heeft.
+  De naam geldt als dezelfde speler zoals de database namen vergelijkt, zonder accenten en hoofdletters.
+  Een naam die met een voorvoegsel begint, zoals "Van Bergen", heeft geen voornaam en blijft heel.
+  De seed zet een verzonnen selectie, maar alleen in een lopend seizoen zonder spelers, zoals bij de verzonnen wedstrijden (zie _De verzonnen wedstrijden komen alleen in een leeg seizoen_).
+- **Waarom:** een eigen rij houdt een mislukte selectie en een mislukte wedstrijdlezing uit elkaar, en de wedstrijden en de feeds gaan door als de tabel van de selectie verandert.
+  Een zoekterm die de import elk uur terugzet, maakt de eigen kolom zinloos: een verbetering voor één speler, zoals "Jan Paul van Hecke", blijft zo staan tot hij vertrekt.
+- **Alternatieven:** de gezondheid van de selectie in `match_imports` zetten (een kolom of rij erbij voor iets wat een eigen uur en een eigen uitkomst heeft).
+  De zoekterm bij elke lezing opnieuw afleiden (de eigen kolom heeft dan geen nut).
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters

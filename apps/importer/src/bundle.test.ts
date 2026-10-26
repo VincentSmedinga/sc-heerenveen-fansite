@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { matchImports } from '@fansite/db/schema'
+import { matchImports, squadImports } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { execFile } from 'node:child_process'
@@ -17,11 +17,16 @@ let folder: string
 
 beforeAll(async () => {
   database = await createTestDatabase()
-  // The command reads the real clock and would ask the real Wikipedia for the matches. A match
-  // import that waits for its hour does not.
-  await database.db
-    .insert(matchImports)
-    .values({ lastOutcome: 'imported', retryAt: new Date('2099-01-01T00:00:00Z'), season: seasonOf(new Date()) })
+  // The command reads the real clock and would ask the real Wikipedia for the matches and the
+  // squad. An import that waits for its hour does not.
+  const waiting = {
+    lastOutcome: 'imported',
+    retryAt: new Date('2099-01-01T00:00:00Z'),
+    season: seasonOf(new Date()),
+  } as const
+
+  await database.db.insert(matchImports).values(waiting)
+  await database.db.insert(squadImports).values(waiting)
   folder = mkdtempSync(path.join(tmpdir(), 'fansite-importer-'))
 })
 

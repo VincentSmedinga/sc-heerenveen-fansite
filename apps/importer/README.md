@@ -1,7 +1,7 @@
 # @fansite/importer
 
 De importer haalt koppen en links op bij de bronnen.
-Hij bevat de fetcher, de ene HTTP-client voor alle adapters, de adapter voor RSS- en Atom-feeds, die ook de podcasts leest (zie _De podcasts_), de lezer van de forumdiscussies van ons eigen forum (zie _Het forum_) en de lezer van de wedstrijden en de stand van de Nederlandse Wikipedia (zie _De wedstrijden en de stand_).
+Hij bevat de fetcher, de ene HTTP-client voor alle adapters, de adapter voor RSS- en Atom-feeds, die ook de podcasts leest (zie _De podcasts_), de lezer van de forumdiscussies van ons eigen forum (zie _Het forum_) en de lezer van de wedstrijden en de stand van de Nederlandse Wikipedia (zie _De wedstrijden en de stand_) en van de selectie van sc Heerenveen (zie _De selectie_).
 Welke nieuwsbronnen en podcasts we lezen en waarom, staat in [`docs/bronnen.md`](../../docs/bronnen.md).
 Op acceptatie start cron de import elke 15 minuten (zie _De import op acceptatie_).
 Een run neemt een lock, schrijft een logboek, houdt de gezondheid van elke feed bij en wacht als een bron daarom vraagt (zie _Het logboek en de gezondheid_).
@@ -22,7 +22,7 @@ Schrijf `pnpm run import` en niet `pnpm import`: `import` is een opdracht van pn
 
 De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), één voor één, met één fetcher.
 Een feed die nog moet wachten, slaat hij over.
-Tegelijk leest hij de wedstrijden en de stand van het lopende seizoen van de Nederlandse Wikipedia, hoogstens één keer per uur (zie _De wedstrijden en de stand_).
+Tegelijk leest hij de wedstrijden, de stand en de selectie van het lopende seizoen van de Nederlandse Wikipedia, elk hoogstens één keer per uur (zie _De wedstrijden en de stand_ en _De selectie_).
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
 
 ```text
@@ -157,13 +157,22 @@ Matches 2026/27 (Wikipedia): healthy
   last warning: none
   next try from: 2026-10-25 23:42:11 UTC
   page: Eredivisie 2026/27 (mannenvoetbal), version Sun, 25 Oct 2026 21:19:08 GMT, read 2026-10-25 22:43:11 UTC
+
+Squad 2026/27 (Wikipedia): healthy
+  last success: 2026-10-25 22:43:12 UTC
+  last outcome: imported
+  failed runs in a row: 0
+  last error: none
+  last warning: none
+  next try from: 2026-10-25 23:42:12 UTC
+  page: Sc Heerenveen in het seizoen 2026/27 (mannen), version Sat, 17 Oct 2026 07:23:24 GMT, read 2026-10-25 22:43:12 UTC
 ```
 
-Onder de feeds staat de gezondheid van de import van de wedstrijden voor het lopende seizoen, met de pagina's van Wikipedia die hij het laatst las (zie _De wedstrijden en de stand_).
+Onder de feeds staat de gezondheid van de import van de wedstrijden en van de selectie voor het lopende seizoen, elk met de pagina's van Wikipedia die hij het laatst las (zie _De wedstrijden en de stand_ en _De selectie_).
 
 Wacht een feed nog, dan staat er ook `next try from` met de tijd.
 Het overzicht verandert niets in de database, en neemt geen lock.
-Het stopt met exitcode 1 als een feed of de import van de wedstrijden ongezond is.
+Het stopt met exitcode 1 als een feed, de import van de wedstrijden of de import van de selectie ongezond is.
 Op de host doet het gebundelde bestand hetzelfde met de optie `--status` (zie _De import op acceptatie_).
 Een optie die de opdracht niet kent, laat hem stoppen voordat hij iets doet.
 
@@ -687,7 +696,7 @@ Matches 2026/27: warning, nothing changed and the last good copy stays: the row 
 De mislukte poging staat in `match_imports` (`failures_in_a_row`, `last_error`), en `pnpm run import:status` laat hem zien.
 Na drie mislukte runs op rij is de import ongezond, zoals een feed, en stopt het overzicht met exitcode 1.
 De run zelf stopt niet met exitcode 1: een tikfout op Wikipedia is geen fout van de importer.
-De feeds en de wedstrijden lopen in dezelfde run, maar een fout in de ene stopt de andere niet.
+De feeds, de wedstrijden en de selectie lopen in dezelfde run, maar een fout in de ene stopt de andere niet.
 Een pagina vastzetten op een oude versie doet de import niet.
 
 ### Hoogstens één keer per uur
@@ -718,6 +727,93 @@ De waarschuwing staat ook in `match_imports.last_warning`, en dus in het overzic
 - Scheidsrechter, toeschouwers en opstellingen leest hij niet, en ook geen kaarten, wissels of assists.
   Ook de fixtures hebben die velden leeg gemaakt.
 - Andere seizoenen leest hij niet, en wedstrijden van andere teams van de club ook niet.
+
+## De selectie
+
+De import leest ook de selectie van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, voor de lijst met spelers op de zoekpagina (#107).
+Hij bewaart haar in `players`, met de gezondheid in `squad_imports` en de pagina in `wikipedia_pages` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
+De bron, de licentie (CC BY-SA 4.0), de controles en het uur tussen twee lezingen zijn die van de wedstrijden.
+Waarom dezelfde bron en waarom de zoekterm een eigen kolom is, staat in [`docs/beslissingen.md`](../../docs/beslissingen.md).
+
+### Welke pagina
+
+Per seizoen leest de import één pagina, met de titel uit `squadPageTitle` in [`src/read-squad.ts`](src/read-squad.ts): `Sc Heerenveen in het seizoen 2026/27 (mannen)`.
+Ze gaat door dezelfde fetcher en alleen naar `/wiki/<pagina>?action=raw`.
+In de run komt de selectie na de wedstrijden: de pagina's worden na elkaar gelezen, en de selectie ook als de wedstrijden mislukken.
+De tabel staat onder `== Selectie 2026/27 ==` en `=== Spelers ===`, en `readSquad` zoekt de kop "Spelers" en de eerste tabel eronder.
+
+### Hoe de tabel is geschreven
+
+De tabel staat op dezelfde pagina op twee manieren geschreven, en de lezer neemt beide:
+
+- alle cellen van een rij op één regel, gescheiden door `||`: `|'''22'''||{{NL-VLAG}}|| align="left" |[[Bernt Klaverboer]]||2029||9||...`;
+- elke cel op een eigen regel, na een regel `|-`.
+
+Een rij met groepskop (`! colspan="13" align="left" |Doelmannen`) zet de positie voor de spelers eronder: doelman, verdediger, middenvelder of aanvaller.
+Een andere groepskop is een fout.
+Bij de eerste cel staat het rugnummer, vet gedrukt of niet.
+Een streepje (`| -`) of een lege cel is een speler zonder rugnummer.
+Een nummer buiten 1 tot en met 99 is een fout.
+De tweede cel is de nationaliteit en blijft weg, net als de cellen na de naam (contract en statistieken).
+De naam komt uit de derde cel, zonder attribuut als `align="left"`:
+
+- `[[Naam]]` geeft `Naam`, en `[[Pagina|Naam]]` ook;
+- komt de naam uit een paginatitel met een toevoeging, zoals `[[Dylan Vente (voetballer)]]`, dan laat de import die toevoeging weg;
+- een naam zonder link kan ook.
+
+### Wat de import bewaart
+
+Van een speler bewaart hij het seizoen, de naam zoals de tabel hem toont, de positie, het rugnummer (mag ontbreken) en de zoekterm.
+Nationaliteit, leeftijd, contract, statistieken en foto's bewaart hij niet, en vlaggen en links naar pagina's van spelers ook niet.
+De zoekterm is de naam zonder de eerste voornaam, uit `searchTerm` in `src/read-squad.ts`: `Bernt Klaverboer` geeft `Klaverboer` en `Joost van Aken` geeft `van Aken`.
+Een naam van één woord blijft zoals hij is.
+Een voornaam met een streepje, zoals `Jan-Willem`, is één woord.
+Een naam die met een voorvoegsel begint, zoals `Van Bergen`, heeft geen voornaam en blijft heel.
+Een speler met twee voornamen, zoals `Jan Paul van Hecke`, geeft `Paul van Hecke`: dat verbeter je in de database (`players.search_term`).
+De import zet de zoekterm alleen bij een nieuwe speler.
+Een speler die er al is, houdt zijn zoekterm, dus een verbetering met de hand blijft staan.
+
+Een goede lezing vervangt de selectie van het lopende seizoen helemaal: een speler die niet meer in de tabel staat, verdwijnt.
+Een nieuwe speler komt erbij, en een nieuw rugnummer of een andere positie wordt overgenomen.
+De import houdt namen uit elkaar zoals de database dat doet: zonder accenten en hoofdletters.
+Rijen van een eerder seizoen blijven bewaard en worden niet getoond.
+
+### De controles
+
+De import schrijft alleen als alles slaagt.
+De controles staan in `checkSquad` in [`src/check-wikipedia.ts`](src/check-wikipedia.ts), naast die van de wedstrijden:
+
+- de tabel is gevonden, onder de kop "Spelers", en elke rij is te lezen;
+- er staan 18 tot en met 45 spelers in;
+- er zijn minstens twee doelmannen;
+- elke positie heeft een speler;
+- geen naam komt twee keer voor.
+
+Faalt een controle, of is de opbouw veranderd, dan verandert er niets in de database en blijft de laatste goede selectie staan.
+De import schrijft een waarschuwing met de reden, en de wedstrijden en de feeds gaan gewoon door:
+
+```text
+Squad 2026/27: warning, nothing changed and the last good copy stays: Sc Heerenveen in het seizoen 2026/27 (mannen): the squad has 17 players, not 18 to 45
+```
+
+Een goede lezing schrijft één regel:
+
+```text
+Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 removed
+```
+
+### Hoogstens één keer per uur
+
+Net als bij de wedstrijden vraagt de import Wikipedia pas weer als `squad_imports.retry_at` voorbij is: 59 minuten na elke poging.
+Vraagt Wikipedia om te wachten, dan wacht hij zo lang als `Retry-After` zegt.
+Een mislukte poging staat in `squad_imports` (`failures_in_a_row`, `last_error`), en `pnpm run import:status` laat hem zien.
+Na drie mislukte runs op rij is de import ongezond.
+
+### De bronvermelding
+
+`wikipedia_pages` bewaart de titel van de pagina, het tijdstip van de laatste goede lezing (`read_at`) en de `Last-Modified` van Wikipedia (`version`), met `kind` `squad`.
+De zoekpagina (#107) kan daarmee de bronvermelding tonen, zoals `/wedstrijden` dat voor de wedstrijden doet.
+`listWikipediaPages` geeft alleen de pagina's van de wedstrijden, dus de selectie staat niet in die bronvermelding.
 
 ## Wat de fetcher niet doet
 
@@ -765,4 +861,9 @@ De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die v
 `src/read-wikipedia.test.ts` leest ze zonder database en `src/check-wikipedia.test.ts` toetst de controles.
 `src/import-matches.test.ts` draait op een echte MariaDB met een eigen webserver die de drie pagina's geeft, en laat zien dat een falende controle de database ongemoeid laat.
 Een test die `runImport` draait en niets met de wedstrijden te maken heeft, geeft de optie `wikipediaOrigin: null`.
-De tests van het commando zelf (`src/import.test.ts` en `src/bundle.test.ts`) zetten een gezondheidsrij met een `retry_at` ver weg, zodat het commando de echte Wikipedia niet vraagt.
+De tests van het commando zelf (`src/import.test.ts` en `src/bundle.test.ts`) zetten een gezondheidsrij voor de wedstrijden en voor de selectie met een `retry_at` ver weg, zodat het commando de echte Wikipedia niet vraagt.
+
+De tests van de selectie lezen [`src/fixtures/wikipedia-squad.wiki`](src/fixtures/wikipedia-squad.wiki): de tabel "Spelers" van de pagina van het seizoen 2026/27, gelezen op 26 oktober 2026, met bovenaan de herkomst en de licentie (CC BY-SA 4.0).
+De tabel staat er zoals de pagina haar heeft, in beide schrijfwijzen, met 25 spelers, onder wie een speler met een streepje in plaats van een rugnummer.
+`src/read-squad.test.ts` leest hem zonder database en toetst de zoekterm op voorbeelden met voorvoegsels, een streepje en een naam van één woord.
+`src/check-wikipedia.test.ts` toetst de controles, en `src/import-squad.test.ts` draait op een echte MariaDB met een eigen webserver en laat zien dat een falende controle de database ongemoeid laat.

@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, items, matchImports, sources } from '@fansite/db/schema'
+import { feeds, items, matchImports, sources, squadImports } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { execFile } from 'node:child_process'
@@ -32,12 +32,22 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
-  // The command reads the real clock and would ask the real Wikipedia for the matches. A match
-  // import that waits for its hour does not.
+  // The command reads the real clock and would ask the real Wikipedia for the matches and the
+  // squad. An import that waits for its hour does not.
+  const waiting = {
+    lastOutcome: 'imported',
+    retryAt: new Date('2099-01-01T00:00:00Z'),
+    season: seasonOf(new Date()),
+  } as const
+
   await database.db
     .insert(matchImports)
-    .values({ lastOutcome: 'imported', retryAt: new Date('2099-01-01T00:00:00Z'), season: seasonOf(new Date()) })
-    .onDuplicateKeyUpdate({ set: { retryAt: new Date('2099-01-01T00:00:00Z') } })
+    .values(waiting)
+    .onDuplicateKeyUpdate({ set: { retryAt: waiting.retryAt } })
+  await database.db
+    .insert(squadImports)
+    .values(waiting)
+    .onDuplicateKeyUpdate({ set: { retryAt: waiting.retryAt } })
 })
 
 afterEach(async () => {

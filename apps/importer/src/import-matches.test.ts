@@ -1,6 +1,16 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, items, matches, matchGoals, matchImports, sources, standings, wikipediaPages } from '@fansite/db/schema'
+import {
+  feeds,
+  items,
+  matches,
+  matchGoals,
+  matchImports,
+  sources,
+  squadImports,
+  standings,
+  wikipediaPages,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { and, asc, eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -44,7 +54,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  for (const table of ['matches', 'standings', 'wikipedia_pages', 'match_imports', 'sources']) {
+  for (const table of ['matches', 'standings', 'wikipedia_pages', 'match_imports', 'squad_imports', 'sources']) {
     await database.pool.query(`DELETE FROM ${table}`)
   }
 })
@@ -927,6 +937,12 @@ describe('the import command', () => {
 
   async function run(wikipedia: TestServer, feed: TestServer) {
     const lines: string[] = []
+
+    // These tests are about the matches: the squad waits for its hour and says nothing.
+    await database.db
+      .insert(squadImports)
+      .values({ lastOutcome: 'imported', retryAt: new Date('2099-01-01T00:00:00Z'), season })
+      .onDuplicateKeyUpdate({ set: { retryAt: new Date('2099-01-01T00:00:00Z') } })
     const code = await runImport(database.url, {
       clock: () => first,
       makeFetcher: (robots) => fetcherFor([feed, wikipedia], { robots }),

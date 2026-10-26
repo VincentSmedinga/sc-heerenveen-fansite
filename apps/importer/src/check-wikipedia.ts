@@ -4,13 +4,24 @@
 //
 // Each check holds at any moment, also in the middle of a round: the clubs have then played a
 // different number of matches, so the number of matches played is never compared between clubs.
+import { playerPositions } from '@fansite/db/schema'
+
+import type { ReadPlayer } from './read-squad.ts'
 import type { ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
+
+import { nameKey } from './read-squad.ts'
 
 /** The Eredivisie has 18 clubs, who play each other twice. */
 export const clubsInLeague = 18
 
 /** sc Heerenveen plays 34 league matches, 17 at home and 17 away. */
 export const leagueMatches = 34
+
+/** A squad has this many players at least and at most. */
+export const squadSize = { max: 45, min: 18 }
+
+/** A squad has at least this many goalkeepers. */
+export const squadGoalkeepers = 2
 
 /** The name Wikipedia gives our club in the table. */
 const ourClub = 'sc Heerenveen'
@@ -56,6 +67,42 @@ export function checkMatches(matches: ReadMatch[]): string[] {
   }
   if (new Set(matches.map((match) => `${match.competition}|${match.round}`)).size !== matches.length) {
     problems.push('two matches are in the same round of the same competition')
+  }
+
+  return problems
+}
+
+/**
+ * Checks the squad: 18 to 45 players, at least two goalkeepers, a player in every position and
+ * no name twice (the database keeps names apart as `nameKey` does). Returns what is wrong, or
+ * nothing.
+ */
+export function checkSquad(players: ReadPlayer[]): string[] {
+  const problems: string[] = []
+
+  if (players.length < squadSize.min || players.length > squadSize.max) {
+    problems.push(`the squad has ${players.length} players, not ${squadSize.min} to ${squadSize.max}`)
+  }
+
+  for (const position of playerPositions) {
+    const count = players.filter((player) => player.position === position).length
+
+    if (count === 0) {
+      problems.push(`the squad has no ${position}`)
+    } else if (position === 'doelman' && count < squadGoalkeepers) {
+      problems.push(`the squad has ${count} goalkeeper, not at least ${squadGoalkeepers}`)
+    }
+  }
+
+  const seen = new Set<string>()
+
+  for (const player of players) {
+    const key = nameKey(player.name)
+
+    if (seen.has(key)) {
+      problems.push(`the name ${player.name} is in the squad twice`)
+    }
+    seen.add(key)
   }
 
   return problems

@@ -106,6 +106,8 @@ describe('the overview', () => {
         'Unhealthy feeds: 1 of 2',
         '',
         'Matches 2026/27 (Wikipedia): not read yet',
+        '',
+        'Squad 2026/27 (Wikipedia): not read yet',
       ],
     })
   })
@@ -133,6 +135,8 @@ describe('the overview', () => {
         'There are no feeds: no source that is switched on has a feed. See `pnpm db:seed`.',
         '',
         'Matches 2026/27 (Wikipedia): not read yet',
+        '',
+        'Squad 2026/27 (Wikipedia): not read yet',
       ],
     })
   })
@@ -158,8 +162,10 @@ describe('the overview', () => {
           'items',
           'match_imports',
           'matches',
+          'players',
           'robots_txt',
           'sources',
+          'squad_imports',
           'standings',
           'wikipedia_pages',
         ].map(async (table) => (await database.pool.query(`SELECT * FROM ${table}`))[0]),

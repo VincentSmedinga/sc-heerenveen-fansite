@@ -667,16 +667,22 @@ export type NewStandingsRow = typeof standings.$inferInsert
 
 export type StandingsRow = typeof standings.$inferSelect
 
-export const wikipediaPageKinds = ['standings', 'programme', 'cup'] as const
+/** The pages that hold the matches and the table: what `/wedstrijden` credits. */
+export const matchPageKinds = ['standings', 'programme', 'cup'] as const
+
+export type MatchPageKind = (typeof matchPageKinds)[number]
+
+export const wikipediaPageKinds = [...matchPageKinds, 'squad'] as const
 
 export type WikipediaPageKind = (typeof wikipediaPageKinds)[number]
 
 /**
- * The Wikipedia pages the match import read the last time it succeeded, so a page can
- * credit its source. `title` is the title of the page, such as `KNVB Beker 2026/27
- * (mannen)`. `version` is the `Last-Modified` of the page as Wikipedia sent it: the raw
- * text of a page comes without a revision number, and this is the time of the revision
- * we read. `read_at` is the last time the page was read and every check passed, in UTC.
+ * The Wikipedia pages the importer read the last time it succeeded, so a page can credit its
+ * source: the three pages of the matches and the page of the squad. `title` is the title of the
+ * page, such as `KNVB Beker 2026/27 (mannen)`. `version` is the `Last-Modified` of the page as
+ * Wikipedia sent it: the raw text of a page comes without a revision number, and this is the
+ * time of the revision we read. `read_at` is the last time the page was read and every check
+ * passed, in UTC.
  */
 export const wikipediaPages = mysqlTable('wikipedia_pages', {
   title: varchar('title', { length: 200 }).primaryKey(),
@@ -765,3 +771,61 @@ export const visitorHashes = mysqlTable(
   },
   (table) => [primaryKey({ columns: [table.day, table.hash], name: 'visitor_hashes_day_hash' })],
 )
+
+/** The most characters the name and the search term of a player hold. */
+export const playerNameMaxLength = 100
+
+export const playerPositions = ['doelman', 'verdediger', 'middenvelder', 'aanvaller'] as const
+
+export type PlayerPosition = (typeof playerPositions)[number]
+
+/**
+ * The squad of sc Heerenveen 1 (men), from the Dutch Wikipedia, one row per player and season.
+ * The importer reads the current season only: a good read replaces the squad of the season
+ * entirely, and the rows of an earlier season are kept and never shown. Only what the search
+ * page needs is kept: no nationality, age, contract, statistics or photo.
+ *
+ * `name` is the name as the table shows it, such as `Joost van Aken`, and `position` the group
+ * it is under. `shirt_number` is empty for a player without one. `search_term` is the name
+ * without the first given name, the surname the search page looks for (`van Aken`). It is its
+ * own column so one player can be corrected: the importer fills it for a new player and leaves
+ * it alone for a known one.
+ */
+export const players = mysqlTable(
+  'players',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    name: varchar('name', { length: playerNameMaxLength }).notNull(),
+    position: mysqlEnum('position', playerPositions).notNull(),
+    shirtNumber: int('shirt_number', { unsigned: true }),
+    searchTerm: varchar('search_term', { length: playerNameMaxLength }).notNull(),
+  },
+  (table) => [
+    unique('players_season_name_unique').on(table.season, table.name),
+    check('players_shirt_number_range', sql`${table.shirtNumber} is null or ${table.shirtNumber} between 1 and 99`),
+  ],
+)
+
+export type NewPlayer = typeof players.$inferInsert
+
+export type Player = typeof players.$inferSelect
+
+/**
+ * The health of the squad import, one row per season, in the same words as `match_imports`:
+ * the last time it succeeded, the last outcome, the failed runs in a row, the last error and
+ * the last warning, and `retry_at`, when the import may ask Wikipedia again. Times are UTC.
+ */
+export const squadImports = mysqlTable('squad_imports', {
+  season: varchar('season', { length: matchLimits.season }).primaryKey(),
+  lastSuccessAt: datetime('last_success_at'),
+  lastOutcome: mysqlEnum('last_outcome', matchImportOutcomes).notNull(),
+  failuresInARow: int('failures_in_a_row', { unsigned: true }).notNull().default(0),
+  lastError: varchar('last_error', { length: reasonMaxLength }),
+  lastErrorAt: datetime('last_error_at'),
+  lastWarning: varchar('last_warning', { length: reasonMaxLength }),
+  lastWarningAt: datetime('last_warning_at'),
+  retryAt: datetime('retry_at'),
+})
+
+export type SquadImport = typeof squadImports.$inferSelect

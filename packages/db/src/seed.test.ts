@@ -12,6 +12,8 @@ import {
   items,
   matches,
   matchGoals,
+  playerPositions,
+  players,
   sourceKinds,
   sources,
   standings,
@@ -20,11 +22,13 @@ import {
 import { seasonOf } from './season.ts'
 import {
   madeUpMatches,
+  madeUpSquad,
   realSources,
   removeTestSources,
   seedMatches,
   seedRealSources,
   seedSources,
+  seedSquad,
   testSources,
 } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
@@ -658,5 +662,51 @@ describe('the made-up matches', () => {
 
     expect(rows.filter((match) => match.season === seasonOf(now))).toEqual(before)
     expect(rows.filter((match) => match.season === '2027/28')).toHaveLength(before.length)
+  })
+})
+
+describe('the made-up squad', () => {
+  const now = new Date('2026-10-25T12:00:00Z')
+
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM players')
+    await database.pool.query('DELETE FROM wikipedia_pages')
+  })
+
+  it('puts the squad in the current season, once, with the page it credits', async () => {
+    expect(await seedSquad(database.db, now)).toBe(true)
+    expect(await seedSquad(database.db, now)).toBe(false)
+
+    const rows = await database.db.select().from(players)
+
+    expect(rows).toHaveLength(madeUpSquad(now).length)
+    expect(rows.every((player) => player.season === '2026/27')).toBe(true)
+    expect((await database.db.select().from(wikipediaPages)).map((page) => [page.kind, page.title])).toEqual([
+      ['squad', 'Sc Heerenveen in het seizoen 2026/27 (mannen)'],
+    ])
+  })
+
+  it('leaves a squad that is there alone', async () => {
+    await database.db
+      .insert(players)
+      .values({ name: 'Echte Speler', position: 'doelman', searchTerm: 'Speler', season: '2026/27', shirtNumber: 1 })
+
+    expect(await seedSquad(database.db, now)).toBe(false)
+    expect(await database.db.select().from(players)).toHaveLength(1)
+  })
+
+  it('has every case a page must show and passes the checks of the importer', () => {
+    const squad = madeUpSquad(now)
+
+    expect(squad.length).toBeGreaterThanOrEqual(18)
+    expect(squad.length).toBeLessThanOrEqual(45)
+    for (const position of playerPositions) {
+      expect(squad.filter((player) => player.position === position).length).toBeGreaterThanOrEqual(
+        position === 'doelman' ? 2 : 1,
+      )
+    }
+    expect(squad.some((player) => player.shirtNumber === null)).toBe(true)
+    expect(squad.some((player) => !player.name.includes(' '))).toBe(true)
+    expect(new Set(squad.map((player) => player.name)).size).toBe(squad.length)
   })
 })
