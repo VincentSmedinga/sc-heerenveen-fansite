@@ -5055,6 +5055,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   In de stand van drie clubs helpt een balk weinig.
   Het verlies is het getal van gewonnen, gelijk, verloren en het doelsaldo, dat niet uit de rest van de tabel af te leiden is; de projecteigenaar vond dat het minder waard is dan de balk.
 - **Alternatieven:** de balk als achtergrond van de rij (kost geen kolom, maar de tint staat achter de getallen en is moeilijker te vergelijken); alle kolommen houden en de balk er breder bij zetten (de tabel scrolt dan zijwaarts); een staafgrafiek naast de tabel (neemt veel ruimte en herhaalt de tabel); een stippendiagram zoals Zeit Online (goed voor verschillen, maar je leest de namen er moeilijker uit); een schaal vanaf het minimum (maakt verschillen groter, maar dan zegt de balk niets meer over de verhouding tot nul).
+- **Later:** de balk, de container query en de opmaak van de tabel staan sinds 26 oktober 2026 in `bar/bar.css`, met de eigenschap `--hf-bar-share` en de klassen `hf-bar` en `hf-bar-place`, omdat de topscorers dezelfde balk gebruiken; zie _De topscorers komen uit onze eigen wedstrijdgegevens, met de balk van de stand_.
 
 ### We nemen NOS Voetbal, met het filter `club`
 
@@ -5154,3 +5155,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rooktest toetst acceptatie en productie met de echte bronnen.
 - **Alternatieven:** de testbronnen op acceptatie laten staan, maar verborgen via `enabled` (de rijen blijven, en de controle na de deploy leunt dan nog op iets wat niemand ziet); de testbronnen alleen van `/bronnen` filteren (de homepage en de importer zien ze dan nog).
   Voor de e2e-controles: de site met `SITE_ENV=local` starten en de seed er laten draaien; dat verandert ook het adres van de site en de eisen aan de mailinstellingen, en de controles toetsen de site zoals hij op acceptatie draait.
+
+### De topscorers komen uit onze eigen wedstrijdgegevens, met de balk van de stand
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `/wedstrijden` krijgt een kaart met de beste vijf (met gelijkstaanden) doelpuntenmakers van sc Heerenveen dit seizoen, uit `match_goals`, in alle wedstrijden, met dezelfde soort balk als in de stand.
+  De kaart staat in de zijbalk direct onder de kaart "Stand", en de zijbalk heet nu "De stand, de ranglijsten en de uitslagen".
+- **Waarom:** de gegevens staan al in de database, dus er is geen nieuwe bron en geen nieuw verzoek aan Wikipedia.
+  Een balk laat het verschil tussen twee spelers beter zien dan een getal, zoals bij de punten in de stand.
+  Alle wedstrijden in één lijst is eenvoudig en komt overeen met wat supporters bedoelen met "topscorer van het seizoen".
+- **Hoe:** de pagina telt de doelpunten uit de wedstrijden die ze al heeft (`listSeasonMatches` geeft de doelpuntenmakers mee), dus er komt geen vraag bij.
+  Een doelpunt telt voor een speler als `ours` waar is en `own_goal` niet: een penalty telt mee, een eigen doelpunt van een tegenstander niet, en een doelpunt van de tegenstander ook niet, ook niet bij een speler met dezelfde naam.
+  Een speler is de naam zoals `match_goals` hem bewaart, dus twee spelers met dezelfde naam tellen samen.
+  Gelijke aantallen delen een plaats (1, 2, 2, 4) en staan op alfabet; de kaart toont de eerste vijf en iedereen die met de vijfde gelijk staat, tot acht rijen.
+  Onder de tabel staat "Gebaseerd op de doelpuntenmakers van X van Y gespeelde wedstrijden" als een gespeelde wedstrijd met een doelpunt van ons geen doelpuntenmakers heeft; zonder doelpunten staat er een zin in plaats van de tabel.
+  De balk is een gedeeld stuk (`Bar` en `bar.css` in het designsysteem), gebruikt door de `StandingsTable` en de nieuwe `TopScorersTable`; de eigenschap heet `--hf-bar-share` en de container query staat op `hf-bar-place`, onder dezelfde 19 rem.
+  Dat ook de rij van sc Heerenveen het hele groen houdt, blijft in `standings-table.css`.
+- **Alternatieven:** de Eredivisie en de beker apart tonen (nauwkeuriger, maar twee lijsten en veel lege rijen in het begin); alleen de beste drie (te weinig voor een selectie); een nieuwe bron met statistieken van spelers (#39); de CSS van de balk kopiëren naar het nieuwe component (twee plekken om gelijk te houden).
