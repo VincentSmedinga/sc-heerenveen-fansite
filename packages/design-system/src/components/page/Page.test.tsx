@@ -278,6 +278,23 @@ describe('Page.Sidebar', () => {
     expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
   })
 
+  it('adds a class for splitting the cells only with `split`, and passes no `split` on to the element', () => {
+    const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" split />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-split extra')
+    expect(screen.getByRole('complementary').hasAttribute('split')).toBe(false)
+
+    rerender(<Page.Sidebar aria-label="Zijbalk" split wide />)
+
+    expect(screen.getByRole('complementary').className).toBe(
+      'hf-page-sidebar hf-page-sidebar-split hf-page-sidebar-wide',
+    )
+
+    rerender(<Page.Sidebar aria-label="Zijbalk" split={false} />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
+  })
+
   it('is called Page.Sidebar in the developer tools and the code examples', () => {
     expect(Page.Sidebar.displayName).toBe('Page.Sidebar')
   })
