@@ -874,7 +874,7 @@ describe('the matches and the table of a season', () => {
       const played = rows.find((match) => match.round === 'Speelronde 1')
       const planned = rows.find((match) => match.round === 'Speelronde 3')
 
-      expect(played).toMatchObject({ goalsAgainst: 0, goalsFor: 2, home: true, status: 'played' })
+      expect(played).toMatchObject({ goalsAgainst: 0, goalsFor: 6, home: true, status: 'played' })
       expect(planned).toMatchObject({ goalsAgainst: null, goalsFor: null, status: 'scheduled' })
       expect(planned?.kickoffAt).toEqual(new Date('2026-10-28T18:45:00Z'))
     })
@@ -964,7 +964,7 @@ describe('the matches and the table of a season', () => {
       const rows = await listSeasonStandings(database.db, '2026/27')
 
       expect(rows.map((row) => row.position)).toEqual([1, 2, 3, 4, 5, 6])
-      expect(rows[0]).toMatchObject({ club: 'sc Heerenveen', goalDifference: 3, points: 6, validOn: '2026-10-18' })
+      expect(rows[0]).toMatchObject({ club: 'sc Heerenveen', goalDifference: 12, points: 6, validOn: '2026-10-18' })
     })
 
     it('gives only the season it is asked for, so a table of an earlier season is not shown', async () => {

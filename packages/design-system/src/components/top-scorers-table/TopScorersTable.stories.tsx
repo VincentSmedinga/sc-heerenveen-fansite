@@ -10,7 +10,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De topscorers van sc Heerenveen in het seizoen, als echte `table`.',
+          'De doelpuntenmakers van sc Heerenveen in het seizoen, als echte `table`: iedereen die scoorde, van veel naar weinig doelpunten.',
           'De tabel heeft een bijschrift dat zegt voor welk seizoen en welke competities hij telt, maar alleen een schermlezer krijgt het: bezienden zien de kop van de kaart.',
           'Verder heeft de tabel kolomkoppen met `scope` en een rijkop met de naam van elke speler.',
           'De kolommen zijn de plaats, de speler en de doelpunten.',
@@ -53,6 +53,31 @@ const rows: TopScorersTableRow[] = [
   { goals: 1, player: 'Voorbeeld', position: 5 },
 ]
 
+// A long list, like a season with many scorers: one player with seven goals, then levels down
+// to the players with one goal, who share the last place.
+const longRows: TopScorersTableRow[] = [
+  { goals: 7, player: 'Proefman', position: 1 },
+  { goals: 5, player: 'Nepper', position: 2 },
+  { goals: 4, player: 'Demo', position: 3 },
+  { goals: 4, player: 'Testvoort', position: 3 },
+  { goals: 3, player: 'Voorbeeld', position: 5 },
+  { goals: 3, player: 'Van der Voorbeeldstraat-Proefmans', position: 5 },
+  { goals: 2, player: 'Dummy', position: 7 },
+  { goals: 2, player: 'Monster', position: 7 },
+  { goals: 2, player: 'Probeer', position: 7 },
+  { goals: 1, player: 'Kopie', position: 10 },
+  { goals: 1, player: 'Modelman', position: 10 },
+  { goals: 1, player: 'Oefenaar', position: 10 },
+  { goals: 1, player: 'Sjabloon', position: 10 },
+  { goals: 1, player: 'Steekproef', position: 10 },
+  { goals: 1, player: 'Teststraat', position: 10 },
+  { goals: 1, player: 'Voorproef', position: 10 },
+  { goals: 1, player: 'Voorstudie', position: 10 },
+  { goals: 1, player: 'Werkstuk', position: 10 },
+  { goals: 1, player: 'Zetproef', position: 10 },
+  { goals: 1, player: 'Zonnetje', position: 10 },
+]
+
 // Everybody scored once: the same goals, so the same bars and the same place.
 const equalRows: TopScorersTableRow[] = rows.map((row) => ({ ...row, goals: 1, position: 1 }))
 
@@ -90,6 +115,18 @@ export const Dark = meta.story({
   globals: { theme: 'dark' },
   name: 'Topscorers met balken, donker',
   render: render('32rem', rows),
+})
+
+export const LongLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Lange lijst, twintig spelers, licht',
+  render: render('32rem', longRows),
+})
+
+export const LongDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Lange lijst, twintig spelers, donker',
+  render: render('32rem', longRows),
 })
 
 export const EqualLight = meta.story({

@@ -19,7 +19,7 @@ import type { MatchData } from './matches'
 
 import { moreCleanSheets } from './items-per-card'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
-import { cleanSheetsOf, overviewOf, scorersCoverage, standingsAround, topScorersOf, topScorersShown } from './matches'
+import { cleanSheetsOf, overviewOf, scorersCoverage, standingsAround, topScorersOf } from './matches'
 
 /**
  * The card of the matches page with the matches in which sc Heerenveen kept a clean sheet, as
@@ -193,12 +193,13 @@ export function StandingsCard({ data }: { data: MatchData }) {
 }
 
 /**
- * The top scorers of the season in a table with a bar, with a line under it when not every
- * played match has its scorers, so nobody takes an incomplete list for a complete one. Without
- * a goal it is a sentence for visitors and no table.
+ * Everybody who scored this season in a table with a bar, with a line under it for how many
+ * players scored (the caption is for a screen reader only), and a line when not every played
+ * match has its scorers, so nobody takes an incomplete list for a complete one. Without a goal
+ * it is a sentence for visitors and no table.
  */
 export function TopScorers({ matches, season }: { matches: PublicMatch[]; season: string }) {
-  const scorers = topScorersShown(topScorersOf(matches))
+  const scorers = topScorersOf(matches)
   const { known, played } = scorersCoverage(matches)
 
   if (scorers.length === 0) {
@@ -211,6 +212,9 @@ export function TopScorers({ matches, season }: { matches: PublicMatch[]; season
         caption={`Topscorers van sc Heerenveen in het seizoen ${season}, in de Eredivisie en de KNVB Beker`}
         rows={scorers}
       />
+      <Text appearance="meta">
+        {scorers.length === 1 ? '1 speler heeft gescoord' : `${scorers.length} spelers hebben gescoord`}
+      </Text>
       {known < played && (
         <Text appearance="meta">
           Gebaseerd op de doelpuntenmakers van {known} van de {played} gespeelde wedstrijden

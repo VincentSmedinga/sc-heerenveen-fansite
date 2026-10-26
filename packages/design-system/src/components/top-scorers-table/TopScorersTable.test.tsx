@@ -54,6 +54,18 @@ describe('TopScorersTable', () => {
     expect(cells(/Demo/u)).toEqual(['4', '1'])
   })
 
+  it('shows a row for every player it gets, however long the list is', () => {
+    const many = Array.from({ length: 20 }, (_, index) => ({
+      goals: index === 0 ? 2 : 1,
+      player: `Speler ${index + 1}`,
+      position: index === 0 ? 1 : 2,
+    }))
+    const { container } = render(<TopScorersTable caption={props.caption} rows={many} />)
+
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(20)
+    expect(barLengths(container)).toHaveLength(20)
+  })
+
   it('abbreviates the goals to D, with the full word in the title and under the table', () => {
     const { container } = render(<TopScorersTable {...props} />)
 

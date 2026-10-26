@@ -9,7 +9,6 @@ import {
   scorersCoverage,
   standingsAround,
   topScorersOf,
-  topScorersShown,
 } from './matches'
 
 const match = (round: string, status: PublicMatch['status'], matchDate: string): PublicMatch => ({
@@ -197,38 +196,22 @@ describe('topScorersOf', () => {
     ])
   })
 
+  it('lists everybody who scored, however many players that is and however few goals they have', () => {
+    const names = Array.from({ length: 20 }, (_, index) => `Speler ${String(index + 1).padStart(2, '0')}`)
+    const goals = [goal(names[0]!), goal(names[0]!), ...names.slice(1).map((name) => goal(name))]
+
+    const scorers = topScorersOf([played(goals)])
+
+    expect(scorers).toHaveLength(20)
+    expect(scorers[0]).toEqual({ goals: 2, player: 'Speler 01', position: 1 })
+    expect(scorers.slice(1).every((item) => item.goals === 1 && item.position === 2)).toBe(true)
+    expect(scorers.slice(1).map((item) => item.player)).toEqual(names.slice(1))
+  })
+
   it('is empty without goals, for a match without scorers and for no matches', () => {
     expect(topScorersOf([])).toEqual([])
     expect(topScorersOf([played([])])).toEqual([])
     expect(topScorersOf([played([goal('Teststraat', { ours: false })])])).toEqual([])
-  })
-})
-
-describe('topScorersShown', () => {
-  const scorers = (goals: number[]) =>
-    goals.map((count, index) => ({ goals: count, player: `Speler ${index + 1}`, position: index + 1 }))
-
-  it('shows the best five', () => {
-    expect(topScorersShown(scorers([9, 8, 7, 6, 5, 4, 3])).map((item) => item.player)).toEqual([
-      'Speler 1',
-      'Speler 2',
-      'Speler 3',
-      'Speler 4',
-      'Speler 5',
-    ])
-  })
-
-  it('adds everybody level with the fifth, but not the sixth who has fewer', () => {
-    expect(topScorersShown(scorers([9, 8, 7, 5, 5, 5, 5, 4]))).toHaveLength(7)
-  })
-
-  it('stops at eight rows when more players are level with the fifth', () => {
-    expect(topScorersShown(scorers([9, 8, 7, 6, 2, 2, 2, 2, 2, 2]))).toHaveLength(8)
-  })
-
-  it('shows all of them with fewer than five, and nothing for nobody', () => {
-    expect(topScorersShown(scorers([3, 1]))).toHaveLength(2)
-    expect(topScorersShown([])).toEqual([])
   })
 })
 

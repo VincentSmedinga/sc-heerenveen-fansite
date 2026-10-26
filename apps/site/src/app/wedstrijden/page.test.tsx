@@ -457,6 +457,49 @@ describe('the page /wedstrijden', () => {
       expect(card.match(/aria-hidden="true" class="hf-bar"/g)).toHaveLength(3)
     })
 
+    it('says in a line under the table how many players scored', async () => {
+      const card = await topScorers()
+
+      expect(card.indexOf('</table>')).toBeLessThan(card.indexOf('3 spelers hebben gescoord'))
+      expect(card).toContain('<p class="hf-meta">3 spelers hebben gescoord</p>')
+    })
+
+    it('says "1 speler heeft gescoord" for one player', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((item) => ({
+          ...item,
+          goals: item.goals.filter((goal) => goal.player === 'Proefman'),
+        })),
+      })
+
+      expect(await topScorers()).toContain('<p class="hf-meta">1 speler heeft gescoord</p>')
+    })
+
+    it('shows everybody who scored, not only the best five, with level players on one place', async () => {
+      const scorers = Array.from({ length: 14 }, (_, index) => ({
+        minute: index + 1,
+        ours: true,
+        ownGoal: false,
+        penalty: false,
+        player: `Speler ${String.fromCharCode(65 + index)}`,
+        stoppageMinutes: null,
+      }))
+      const played = matchData.matches.find((item) => item.status === 'played')!
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [{ ...played, goals: scorers, goalsAgainst: 0, goalsFor: 14 }],
+      })
+
+      const card = await topScorers()
+      const rows = [...card.matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">([^<]+)<\/th>/g)]
+
+      expect(rows).toHaveLength(14)
+      expect(rows.every(([, position]) => position === '1')).toBe(true)
+      expect(card).toContain('14 spelers hebben gescoord')
+    })
+
     it('says which part of the played matches the list is based on, when scorers are missing', async () => {
       expect(await topScorers()).toContain('Gebaseerd op de doelpuntenmakers van 2 van de 4 gespeelde wedstrijden')
     })

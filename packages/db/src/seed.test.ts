@@ -598,6 +598,24 @@ describe('the made-up matches', () => {
     expect(goals.filter((goal) => goal.player === 'Proefman' && goal.matchId === goals[0]?.matchId).length).toBe(2)
   })
 
+  it('gives at least twelve players a goal for sc Heerenveen, with levels, for a long list of top scorers', async () => {
+    await seedMatches(database.db, now)
+
+    const goals = await database.db.select().from(matchGoals)
+    const perPlayer = new Map<string, number>()
+
+    for (const goal of goals.filter((item) => item.ours && !item.ownGoal)) {
+      perPlayer.set(goal.player, (perPlayer.get(goal.player) ?? 0) + 1)
+    }
+
+    const counts = [...perPlayer.values()]
+
+    expect(counts.length).toBeGreaterThanOrEqual(12)
+    expect(new Set(counts).size).toBeLessThan(counts.length)
+    expect(counts.filter((count) => count === Math.max(...counts))).toHaveLength(1)
+    expect(counts.filter((count) => count === 2).length).toBeGreaterThanOrEqual(2)
+  })
+
   it('puts the pages the made-up matches credit in too, and moves on when they are already there', async () => {
     await database.pool.query('DELETE FROM wikipedia_pages')
     await database.db.insert(wikipediaPages).values({
