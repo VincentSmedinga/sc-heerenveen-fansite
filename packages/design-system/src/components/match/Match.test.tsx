@@ -124,13 +124,13 @@ describe('Match', () => {
     it('says "n.s." and the shoot-out right after the result, in the order of the clubs', () => {
       const { container, rerender } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
 
-      expect(seen(container)?.textContent).toBe('1–1 n.s. (4–3)')
+      expect(seen(container)?.textContent).toBe('1–1 (4–3 n.s.)')
       expect(seen(container)?.querySelector('abbr')?.getAttribute('title')).toBe('Na strafschoppen')
       expect(heard(container)).toBe('1 tegen 1, na strafschoppen 4 tegen 3')
 
       rerender(<Match {...cup} extraTime home={false} penaltiesAgainst={3} penaltiesFor={4} />)
 
-      expect(seen(container)?.textContent).toBe('1–1 n.s. (3–4)')
+      expect(seen(container)?.textContent).toBe('1–1 (3–4 n.s.)')
       expect(heard(container)).toBe('1 tegen 1, na strafschoppen 3 tegen 4')
     })
 

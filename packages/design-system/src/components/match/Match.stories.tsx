@@ -21,7 +21,7 @@ const meta = preview.meta({
           'Een schermlezer hoort "2 tegen 0".',
           'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen: groen bij winst, rood bij verlies en neutraal bij gelijkspel, ook in de beker zolang er geen strafschoppen zijn.',
           'Dat volgt uit de doelpunten van sc Heerenveen en niet uit die van de thuisclub: 0–2 uit is een winst en 2–0 uit een verlies.',
-          'Een bekerwedstrijd na verlenging zegt "n.v." en na strafschoppen "n.s." met de score ervan, bijvoorbeeld "3–3 n.s. (5–3)", direct achter de uitslag en in de volgorde van de clubs.',
+          'Een bekerwedstrijd na verlenging zegt "n.v." en na strafschoppen "n.s." met de score ervan, bijvoorbeeld "3–3 (5–3 n.s.)", direct achter de uitslag en in de volgorde van de clubs.',
           'Elke afkorting heeft de volle woorden in een `title`, en een schermlezer hoort de volle woorden na de uitslag: "1 tegen 1, na strafschoppen 4 tegen 3".',
           'Onder een lijst met zulke wedstrijden staat wat de afkortingen betekenen, want een `title` toont alleen onder een muis.',
           'Bij strafschoppen volgt de kleur de strafschoppen: groen als sc Heerenveen ze won en rood als het ze verloor.',

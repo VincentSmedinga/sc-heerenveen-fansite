@@ -121,7 +121,7 @@ describe('the page /wedstrijden', () => {
 
       const results = section(await render(), 'uitslagen')
 
-      expect(results).toContain('<abbr title="Na strafschoppen">n.s.</abbr> (3–4)')
+      expect(results).toContain('(3–4 <abbr title="Na strafschoppen">n.s.</abbr>)')
       expect(results).toContain('1 tegen 1, na strafschoppen 3 tegen 4')
       expect(results).toContain('n.s. na strafschoppen')
       expect(results).not.toContain('n.v. na verlenging')

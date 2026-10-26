@@ -113,7 +113,7 @@ const separator = (
  * says "Thuis" or "Uit", so a visitor does not have to work it out. A played match has the
  * result between the names, as "2–0" seen from the home club's side, and a screen reader hears
  * "2 tegen 0". After extra time the result says "n.v." and after a shoot-out "n.s." with its
- * score, as "n.s. (4–2)" in the order of the clubs; a screen reader hears the full words after
+ * score, as "(4–2 n.s.)" in the order of the clubs; a screen reader hears the full words after
  * the result, as "1 tegen 1, na strafschoppen 4 tegen 2". The result has the colour of the
  * outcome for sc Heerenveen: green for a win, red for a loss and neutral for a draw, whichever
  * side it played on, and in a shoot-out the colour follows the shoot-out. The goals say the
@@ -179,7 +179,7 @@ export const Match = ({
             {shootOut ? (
               <span className="hf-match-extra">
                 {' '}
-                <abbr title="Na strafschoppen">n.s.</abbr> ({sides(home, penaltiesFor, penaltiesAgainst, '–')})
+                ({sides(home, penaltiesFor, penaltiesAgainst, '–')} <abbr title="Na strafschoppen">n.s.</abbr>)
               </span>
             ) : extraTime ? (
               <span className="hf-match-extra">
