@@ -16,6 +16,12 @@ const tags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-prac
 export async function checkPage(page: Page) {
   const problems: string[] = []
 
+  // After a form that redirects, the site changes pages without loading a new document. Next.js
+  // puts the new body in first and the <title> a moment later, so for a few milliseconds the
+  // document has no title, and axe reports document-title on a page that has one. Wait for the
+  // title to be back. A page that has none still fails: after the wait, axe reports it.
+  await page.waitForFunction(() => document.title.trim() !== '', undefined, { timeout: 2000 }).catch(() => undefined)
+
   const { violations } = await new AxeBuilder({ page }).withTags(tags).analyze()
 
   for (const { help, id, nodes } of violations) {

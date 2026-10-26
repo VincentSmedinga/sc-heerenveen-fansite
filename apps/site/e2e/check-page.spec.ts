@@ -21,6 +21,7 @@ const mistakes = [
   { html: good.replace('>Naar de voorpagina<', '><'), name: 'a link without a name', rule: 'link-name' },
   { html: good.replace('</main>', '<h1>Nog een kop</h1></main>'), name: 'two h1', rule: 'one-h1' },
   { html: good.replace('lang="nl"', 'lang="en"'), name: 'lang="en"', rule: 'html-lang-nl' },
+  { html: good.replace('<title>Test</title>', ''), name: 'a page without a title', rule: 'document-title' },
   {
     // A request to another domain, such as a font or a script. It can't be answered here, so
     // the test answers it itself.
@@ -56,6 +57,15 @@ async function checkServed(page: Page, html: string) {
 
 test('passes a page without a mistake', async ({ page }) => {
   expect(await checkServed(page, good)).toEqual([])
+})
+
+test('waits for a title that comes a moment later', async ({ page }) => {
+  // What the site does after a form that redirects: the page is there, and the title follows.
+  const late = good
+    .replace('<title>Test</title>', '')
+    .replace('</body>', '<script>setTimeout(() => (document.title = "Later"), 300)</script></body>')
+
+  expect(await checkServed(page, late)).toEqual([])
 })
 
 for (const { html, name, rule } of mistakes) {

@@ -74,8 +74,10 @@ Die zet elke mail in `.next/fake-smtp`, en maakt zijn certificaat met `openssl`,
 CI geeft de map van de rooktest mee in `SITE_FOLDER`, zodat dezelfde map wordt getoetst.
 Faalt een pagina, dan noemt de log de pagina en het thema (in de naam van de test), de regel van axe en het element.
 
-`e2e/check-page.spec.ts` laat zien dat de controle een fout vangt: een link zonder naam, een tweede `h1`, een verkeerde `lang`, een verzoek naar een ander domein en een pagina die op 320 pixels opzij scrolt.
+`e2e/check-page.spec.ts` laat zien dat de controle een fout vangt: een link zonder naam, een tweede `h1`, een verkeerde `lang`, een pagina zonder titel, een verzoek naar een ander domein en een pagina die op 320 pixels opzij scrolt.
 De test serveert die pagina's zelf; ze staan niet op de site.
+Na een formulier dat doorstuurt komt de titel soms een paar milliseconden na de rest van de pagina.
+`checkPage` wacht daarom hoogstens twee seconden op een titel, en een pagina zonder titel faalt nog steeds.
 De stories in Storybook toetst axe niet in CI; dat doet het paneel Toegankelijkheid.
 
 ## Screenshots maken

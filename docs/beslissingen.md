@@ -4723,6 +4723,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een test (`root-css.test.ts`) controleert dat beide vormen in de bron staan, maar niet wat de bouw ervan maakt; dat kijk je na in de gebouwde CSS.
 - **Alternatieven:** niets doen (de verschillen blijven in liggende stand); een vaste waarde als 90% of 110% (verkeerd voor wie het teken groot nodig heeft); de tabel ook laten vergroten (kan niet, het is de beslissing van Safari); alleen de vorm zonder voorvoegsel (werkt niet in Safari op iPhone).
 
+### Een onregelmatige test is een bug in de test of de pagina, geen reden om hem los te maken
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** een e2e-test die af en toe faalt, wordt onderzocht en hersteld bij de oorzaak.
+  We zetten hem niet uit, laten hem niet vaker proberen en maken hem niet losser.
+- **Waarom:** een test die soms faalt, leert de Builders dat rood niets betekent.
+  Hier was het niet zeker of het een wachtpunt in de test was of een echte pagina zonder titel.
+- **Wat het was:** na een formulier dat doorstuurt, wisselt de site van pagina zonder een nieuw document te laden.
+  Next.js zet dan eerst de nieuwe inhoud neer en een paar milliseconden later de `<title>`.
+  Axe, dat meteen na de kop draaide, meldde `document-title` op een pagina die een titel heeft.
+  Onder zware belasting op de eigen computer ging het één keer in twintig runs mis, in CI twee keer in twaalf runs.
+  Een bezoeker merkt het nauwelijks, en elke pagina heeft een titel zodra de wissel klaar is.
+- **De oplossing:** `checkPage` wacht, hoogstens twee seconden, tot de titel er is, en laat dan axe draaien.
+  Heeft een pagina echt geen titel, dan meldt axe het nog steeds (de test `fails on a page without a title`).
+  De wacht staat in `checkPage` en niet in elke test, omdat elke test die axe na een formulier laat draaien dit kan tegenkomen.
+- **Alternatieven:** `retries` in Playwright aanzetten (verbergt de fout en verlengt elke run); de test overslaan tot het later beter uitkomt (een gat in de toegankelijkheidscontrole van het beheer); in `writing.spec.ts` alleen na de drie plaatsen waar het gebeurde op de titel wachten (de volgende test die axe na een formulier laat draaien heeft hetzelfde probleem).
+
 ### Een uitslag toont de uitkomst in kleur, zonder letter
 
 - **Datum:** 26 oktober 2026
