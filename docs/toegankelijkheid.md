@@ -25,6 +25,8 @@ Controleer daarom op de gerenderde pagina, in licht en donker:
   Per pagina controleert de test ook precies één `h1`, `lang="nl"`, geen verzoek naar een ander domein en geen horizontale scrollbalk in een venster van 320 pixels breed.
   De homepage toetst hij met verzonnen koppen en een verzonnen artikel, die de test zelf in de database zet en daarna weghaalt.
   Lokaal draai je dit met `pnpm test:a11y`; wat eerst moet draaien, staat in de [README van de site](../apps/site/README.md).
+  CI slaat deze controle over bij een pull request die alleen documentatie, het gereedschap voor agents, de importer of de MCP-server van het designsysteem wijzigt (zie _De controles_ in de [bijdragegids](../CONTRIBUTING.md)).
+  Een wijziging in de site, het designsysteem, de database of de gedeelde code draait hem altijd, en `main` ook.
 - **De stories:** CI bouwt Storybook, maar toetst de stories niet met axe.
   In Storybook toont het paneel Toegankelijkheid voor elk verhaal wat axe vindt.
   Een component toetst CI dus alleen op de pagina's waar hij staat.

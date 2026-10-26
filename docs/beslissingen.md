@@ -473,6 +473,42 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alles in `AGENTS.md` laten staan; dat wordt een lang bestand dat elke sessie leest, ook als de Builder het niet nodig heeft.
   Of de stappen in de briefing van de Coordinator zetten; die moet ze dan elke keer opnieuw schrijven en vergeet er een.
 
+### CI slaat de controles van de site over bij wijzigingen die ze niet raken
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** bij een pull request die alleen `docs/`, `.claude/`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `apps/importer/` of `apps/design-system-mcp/` wijzigt, slaat CI de rooktest en de toegankelijkheidscontrole (de e2e-tests) over.
+  Alles anders draait alles, en `main` draait altijd alles.
+  Het script `scripts/ci-changes.js` beslist, en het log zegt in een regel wat en waarom.
+  De regels, van de veiligste naar de ruimste:
+  - Alleen een pull request kan overslaan.
+    Een push naar `main` en een handmatige run draaien alles.
+  - Een pull request met het label `volledige controle` draait alles.
+  - Zijn de gewijzigde bestanden niet te bepalen, of zijn er geen, dan draait alles.
+  - Overslaan mag alleen als elk gewijzigd bestand in de lijst hierboven staat.
+    Een bestand dat het script niet kent, draait alles.
+  - Een `package.json` of een `tsconfig`, ook binnen die mappen, draait alles.
+    Een dependency of een compileroptie verandert wat de site bouwt.
+- **Waarom:** de twee controles kosten ongeveer 150 van de 268 seconden van de opdracht en raken zulke wijzigingen niet.
+  Van de laatste 60 samengevoegde pull requests (26 oktober 2026) sloeg het script er 9 over: #326, #322, #319, #275, #273, #268, #242, #237 en #217.
+  Dat is 15%, gemiddeld ongeveer 25 seconden per pull request, en 2,5 minuut voor wie in die 15% zit.
+  De winst zit vooral in een reeks kleine wijzigingen achter elkaar.
+  Een standaard die alles draait, houdt de kans op een gemiste fout klein: wat het script niet kent, draait mee.
+  Lint, typecheck, `pnpm test` (ook de tests van de importer en de pakketten), de build en de controle van de titel draaien altijd.
+- **Importer:** `apps/importer/` is de enige map in de lijst die de site raakt, want `assemble` bundelt de importer in de map voor de host.
+  De test van die bundel staat in de tests van de importer (`bundle.test.ts`), die `pnpm test` altijd draait.
+  De workflow van de acceptatie draait de bundel bij elke samenvoeging naar `main`.
+- **Hoe:** de stap `Decide which checks of the site to run` zet `site=true` of `site=false` in de uitvoer.
+  De twee stappen hebben `if: steps.changes.outputs.site != 'false'`, dus een uitvoer die ontbreekt draait ze ook.
+  We hebben het label gekozen en niet een regel in de beschrijving: je ziet het op de pull request en je zet het zonder de beschrijving te wijzigen.
+  Het script vraagt de labels bij elke run aan GitHub, dus een label dat na het openen is gezet, telt bij een nieuwe run van de opdracht.
+- **Let op:** de opdracht "Lint, typecheck, test and build" blijft één opdracht die altijd meldt.
+  Een stap die met `if` wordt overgeslagen, telt voor de regels van `main` als geslaagd.
+  Een `paths`-filter op de workflow start de opdracht niet, en een vereiste controle die nooit meldt blokkeert het samenvoegen.
+- **Alternatieven:** per spec of per pagina kiezen; bijna elke wijziging raakt gedeelde code, dus de winst is klein en de regels zijn veel.
+  Kiezen op grond van de dekking van elke test; dat kan, maar het is zwaar en broos.
+  Een `paths`-filter; dat blokkeert het samenvoegen.
+  Niets doen; elke documentatiewijziging wacht dan ruim vier minuten.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host
@@ -869,6 +905,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een commit moet snel blijven; de typecontrole van de hele werkruimte past daar niet bij, en CI vangt die toch.
 - **Alternatieven:** ook de typecontrole in de pre-commit-hook.
   Grondiger, maar elke commit wordt trager.
+- **Later:** de controles van de site worden sinds 26 oktober 2026 bij sommige pull requests overgeslagen; zie _CI slaat de controles van de site over bij wijzigingen die ze niet raken_.
 
 ### De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job
 
@@ -888,6 +925,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Die staat apart in de lijst met controles, maar moet opnieuw bouwen of de build doorgeven, en moet als verplichte controle in de regels voor `main`.
   Of toetsen tegen `next dev`; dat is sneller, maar bezoekers krijgen een andere pagina.
   Of ook Firefox en WebKit; die kosten tijd, en axe vindt daar zelden iets anders.
+- **Later:** de controles van de site worden sinds 26 oktober 2026 bij sommige pull requests overgeslagen; zie _CI slaat de controles van de site over bij wijzigingen die ze niet raken_.
 
 ### CI gebruikt de Chrome van de runner
 

@@ -76,6 +76,15 @@ pnpm --filter site smoke "$site"
 
 `pnpm test` draait de rooktest niet, en hij heeft dezelfde database nodig.
 Na een wijziging in het designsysteem draai je ook `pnpm --filter design-system build-storybook`.
+
+CI slaat de rooktest en `pnpm test:a11y` over bij een pull request die alleen `docs/`, `.claude/`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `apps/importer/` of `apps/design-system-mcp/` wijzigt.
+Die controles raken zulke wijzigingen niet, en ze kosten ongeveer 150 seconden.
+Lint, typecheck, `pnpm test`, de build en de controle van de titel draaien altijd.
+Alles draait ook als de pull request een bestand wijzigt dat niet in die lijst staat, een `package.json` of een `tsconfig`, bij een push naar `main` en bij een handmatige run.
+Wil je ze toch, zet dan het label `volledige controle` op de pull request en start de opdracht opnieuw.
+Het log zegt in een regel wat CI besloot en waarom.
+De regels staan in `scripts/ci-changes.js`.
+De opdrachten hierboven veranderen niet: lokaal draai je alles.
 Controleer de titel van de pull request met:
 
 ```sh
