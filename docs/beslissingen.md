@@ -4678,8 +4678,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De punten staan voor het doelsaldo in de standtabel_.
   De volgorde van de kolommen is nu #, Club, G, W, G, V, P en D.
 - **Later:** zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_.
-  Het doelsaldo is er ook uit: de kolommen zijn nu #, Club, G en P.
-- **Later:** zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_.
   De kolommen W, G, V en D zijn vervallen: de kolommen zijn nu #, Club, G en P.
 
 ### De stand toont de dag niet
