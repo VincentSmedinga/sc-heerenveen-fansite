@@ -69,8 +69,8 @@ describe('StandingsTable', () => {
       'W',
       'G',
       'V',
-      'D',
       'P',
+      'D',
     ])
     expect(headers.every((header) => header.getAttribute('scope') === 'col')).toBe(true)
     expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual([
@@ -87,7 +87,7 @@ describe('StandingsTable', () => {
 
     expect(
       screen.getAllByRole('columnheader').map((header) => header.querySelector('.hf-visually-hidden')?.textContent),
-    ).toEqual(['positie', undefined, 'gespeeld', 'gewonnen', 'gelijk', 'verloren', 'doelsaldo', 'punten'])
+    ).toEqual(['positie', undefined, 'gespeeld', 'gewonnen', 'gelijk', 'verloren', 'punten', 'doelsaldo'])
     expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
     expect(screen.getByRole('columnheader', { name: 'gelijk' })).toBeTruthy()
   })
@@ -96,8 +96,8 @@ describe('StandingsTable', () => {
     render(<StandingsTable {...props} columns="compact" />)
 
     expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
-    expect(screen.getByRole('columnheader', { name: 'doelsaldo' })).toBeTruthy()
     expect(screen.getByRole('columnheader', { name: 'punten' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'doelsaldo' })).toBeTruthy()
   })
 
   it('gives every abbreviation its full word, in the title and under the table', () => {
@@ -109,31 +109,45 @@ describe('StandingsTable', () => {
       'Gewonnen',
       'Gelijk',
       'Verloren',
-      'Doelsaldo',
       'Punten',
+      'Doelsaldo',
     ])
     expect(container.querySelector('.hf-standings-legend')?.textContent).toBe(
-      'G gespeeld, W gewonnen, G gelijk, V verloren, D doelsaldo, P punten',
+      'G gespeeld, W gewonnen, G gelijk, V verloren, P punten, D doelsaldo',
     )
   })
 
-  it('writes the numbers of a club in the columns of the headers', () => {
+  it('writes the numbers of a club in the columns of the headers, the points before the goal difference', () => {
     render(<StandingsTable {...props} />)
     const row = screen.getByRole('row', { name: /sc Heerenveen/u })
 
+    // Position, played, won, drawn, lost, points, goal difference.
     expect(
       within(row)
         .getAllByRole('cell')
         .map((cell) => cell.textContent),
-    ).toEqual(['2', '2', '2', '0', '0', '+3', '6'])
+    ).toEqual(['2', '2', '2', '0', '0', '6', '+3'])
   })
 
-  it('puts the points in the last column, in a class of their own', () => {
+  it('does so in the short form too, with the points before the goal difference', () => {
+    render(<StandingsTable {...props} columns="compact" />)
+    const row = screen.getByRole('row', { name: /sc Heerenveen/u })
+
+    // Position, played, points, goal difference.
+    expect(
+      within(row)
+        .getAllByRole('cell')
+        .map((cell) => cell.textContent),
+    ).toEqual(['2', '2', '6', '+3'])
+  })
+
+  it('puts the points in the column before the last, in a class of their own', () => {
     const { container } = render(<StandingsTable {...props} />)
     const cells = [...container.querySelectorAll('tbody tr:nth-child(2) td')]
 
-    expect(cells.at(-1)?.textContent).toBe('6')
-    expect(cells.at(-1)?.className).toBe('hf-numeric hf-standings-points')
+    expect(cells.at(-2)?.textContent).toBe('6')
+    expect(cells.at(-2)?.className).toBe('hf-numeric hf-standings-points')
+    expect(cells.at(-1)?.className).toBe('hf-numeric')
     expect(container.querySelectorAll('.hf-standings-points')).toHaveLength(4)
   })
 
@@ -143,12 +157,12 @@ describe('StandingsTable', () => {
     expect(
       within(screen.getByRole('row', { name: /Testdorp/u }))
         .getAllByRole('cell')
-        .at(-2)?.textContent,
+        .at(-1)?.textContent,
     ).toBe('−2')
     expect(
       within(screen.getByRole('row', { name: /Nepstad/u }))
         .getAllByRole('cell')
-        .at(-2)?.textContent,
+        .at(-1)?.textContent,
     ).toBe('0')
   })
 
@@ -176,7 +190,7 @@ describe('StandingsTable', () => {
       screen
         .getAllByRole('columnheader')
         .map((header) => header.querySelector('[aria-hidden="true"]')?.textContent ?? 'Club'),
-    ).toEqual(['#', 'Club', 'G', 'D', 'P'])
+    ).toEqual(['#', 'Club', 'G', 'P', 'D'])
     expect(screen.queryByRole('region')).toBeNull()
     expect(document.querySelector('.hf-standings-legend')).toBeNull()
   })

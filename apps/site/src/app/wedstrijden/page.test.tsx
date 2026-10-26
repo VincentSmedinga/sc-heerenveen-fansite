@@ -161,6 +161,35 @@ describe('the page /wedstrijden', () => {
     expect(stand.match(/<tr[ >]/g)).toHaveLength(4)
   })
 
+  it('puts the points before the goal difference in the full table, in the headers and in the row of sc Heerenveen', async () => {
+    const stand = section(await render(), 'stand')
+    const head = stand.slice(stand.indexOf('<thead>'), stand.indexOf('</thead>'))
+    const ours = stand.slice(
+      stand.indexOf('hf-standings-table-own'),
+      stand.indexOf('</tr>', stand.indexOf('hf-standings-table-own')),
+    )
+
+    expect([...head.matchAll(/<span aria-hidden="true">([^<]*)<\/span>/g)].map((match) => match[1])).toEqual([
+      '#',
+      'G',
+      'W',
+      'G',
+      'V',
+      'P',
+      'D',
+    ])
+    expect([...ours.matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((match) => match[1])).toEqual([
+      '2',
+      '2',
+      '2',
+      '0',
+      '0',
+      '6',
+      '+3',
+    ])
+    expect(stand).toContain('<span>, <b>P</b> punten</span><span>, <b>D</b> doelsaldo</span>')
+  })
+
   it('has one credit under the page, for the three pages, with the time of the last reading', async () => {
     const html = await render()
 
