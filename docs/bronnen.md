@@ -230,7 +230,7 @@ Al in het register (#310), met het filter `club`.
     Op 26 oktober 2026 was het nieuwste van 26 oktober (08:50 UTC) en het oudste van 24 oktober (18:25 UTC).
     Elk bericht heeft een beschrijving, een auteur, een afbeelding (`media:content` met een `media:thumbnail`), een `guid` die de link is en een tijd in GMT.
   - Over sc Heerenveen: op 26 oktober 2026 noemde 1 van de 30 koppen "Heerenveen".
-    Op 23 oktober 2026 telden we er nog 0; die telling was een momentopname van een paar dagen.
+    Op 24 oktober 2026 telden we er nog 0; die telling was een momentopname van een paar dagen.
   - Betaalmuur: ja, 11 van de 30 berichten hebben `<dpp:paid>true</dpp:paid>` (op 24 oktober 2026 waren het 8).
     De rest heeft `false`.
     De importer herkende op 26 oktober 2026 dezelfde 11 berichten als betaalmuur.
@@ -239,8 +239,13 @@ Al in het register (#310), met het filter `club`.
     Geen bericht over de club staat bij de 29, en geen bericht over iets anders staat bij het `relevant`.
     Wat het filter doet, staat in de README van de importer, onder _Het relevantiefilter_.
 - **`robots.txt`:** laat ons de feed toe, ook op 26 oktober 2026 opnieuw gelezen met de user agent van de importer.
-  De regels voor alle crawlers (`User-agent: *`) sluiten alleen paden als `/auth`, `/zoeken?query=`, `/inloggen?*`, pagina's met `webview` of `widget` en adressen met parameters als `utm_source=` of `redirect_url=`; `/voetbal/rss.xml` ligt daar niet in.
-  Bovenaan staat een voorbehoud van DPG Media, in het Nederlands en het Engels: de auteurs-, naburige en databankrechten zijn voorbehouden, de inhoud van de websites en apps is voor persoonlijk, niet-commercieel gebruik, en gegevens zoals tekst, afbeeldingen, audio, video of code verzamelen met scraping of een andere geautomatiseerde werkwijze is niet toegestaan.
+  De regels voor alle crawlers (`User-agent: *`) sluiten alleen paden als `/auth`, `/zoeken?query=` en `/inloggen?*`.
+  Ook pagina's met `webview` of `widget` en adressen met parameters als `utm_source=` of `redirect_url=` zijn gesloten.
+  `/voetbal/rss.xml` ligt daar niet in.
+  Bovenaan staat een voorbehoud van DPG Media, in het Nederlands en het Engels.
+  De auteurs-, naburige en databankrechten zijn voorbehouden.
+  De inhoud van de websites en apps is voor persoonlijk, niet-commercieel gebruik.
+  Gegevens zoals tekst, afbeeldingen, audio, video of code verzamelen met scraping of een andere geautomatiseerde werkwijze is niet toegestaan.
   Het verwijst naar de gebruiksvoorwaarden van DPG Media (`www.dpgmedia.nl/gebruiksvoorwaarden`).
   Daarna weigert het bijna dertig crawlers van AI-bedrijven en zoekmachines bij naam (`GPTBot`, `CCBot`, `ClaudeBot` en andere), en wij staan er niet bij.
 - **Voorwaarden:** niet te lezen.
