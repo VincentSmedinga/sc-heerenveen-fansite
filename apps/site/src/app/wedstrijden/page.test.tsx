@@ -72,8 +72,8 @@ describe('the page /wedstrijden', () => {
     expect(sidebar).not.toContain('id="programma"')
   })
 
-  it('has no order or style attribute, so the order on a phone is the order in the source', async () => {
-    expect(await render()).not.toMatch(/ style=|order:/)
+  it('has no order or style attribute but the length of a bar, so the order on a phone is the order in the source', async () => {
+    expect(await render()).not.toMatch(/ style="(?!--hf-points-share:[\d.]+")|order:/)
   })
 
   it('names each card by its h2, so the links with a hash on the homepage have a target', async () => {
@@ -240,7 +240,7 @@ describe('the page /wedstrijden', () => {
     const stand = section(await render(), 'stand')
 
     expect(stand).toContain('<caption class="hf-visually-hidden">Stand op 18 oktober 2026</caption>')
-    expect(stand).toContain('aria-label="De volledige stand" class="hf-standings-scroll" role="region" tabindex="0"')
+    expect(stand).not.toContain('role="region"')
     expect(stand).toContain('class="hf-highlight hf-standings-table-own"')
     expect(stand).toContain('<b>G</b> gespeeld')
     expect(stand).toContain('<b>P</b> punten')
@@ -248,7 +248,7 @@ describe('the page /wedstrijden', () => {
     expect(stand.match(/<tr[ >]/g)).toHaveLength(4)
   })
 
-  it('puts the points before the goal difference in the full table, in the headers and in the row of sc Heerenveen', async () => {
+  it('has the columns position, played and points in the full table, in the headers and in the row of sc Heerenveen', async () => {
     const stand = section(await render(), 'stand')
     const head = stand.slice(stand.indexOf('<thead>'), stand.indexOf('</thead>'))
     const ours = stand.slice(
@@ -259,22 +259,24 @@ describe('the page /wedstrijden', () => {
     expect([...head.matchAll(/<span aria-hidden="true">([^<]*)<\/span>/g)].map((match) => match[1])).toEqual([
       '#',
       'G',
-      'W',
-      'G',
-      'V',
       'P',
-      'D',
     ])
-    expect([...ours.matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((match) => match[1])).toEqual([
+    // The bar is inside a cell, so the text of a cell is what is left without the tags.
+    expect([...ours.matchAll(/<td[^>]*>(.*?)<\/td>/g)].map((match) => match[1]?.replaceAll(/<[^>]*>/g, ''))).toEqual([
       '2',
       '2',
-      '2',
-      '0',
-      '0',
       '6',
-      '+3',
     ])
-    expect(stand).toContain('<span>, <b>P</b> punten</span><span>, <b>D</b> doelsaldo</span>')
+    expect(stand).toContain('<span>, <b>P</b> punten</span>')
+  })
+
+  it('shows a bar next to the points of every club in the full table, hidden from a screen reader', async () => {
+    const stand = section(await render(), 'stand')
+
+    // The leader (sc Heerenveen, with 6 points) has the full bar, a club with 1 point a sixth.
+    expect(stand.match(/class="hf-standings-bar" style="--hf-points-share:[\d.]+"/g)).toHaveLength(3)
+    expect(stand).toContain('style="--hf-points-share:100"')
+    expect(stand).toContain('style="--hf-points-share:16.67"')
   })
 
   it('has one credit under the page, for the three pages, with the time of the last reading', async () => {

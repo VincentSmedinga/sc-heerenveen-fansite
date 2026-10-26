@@ -2766,6 +2766,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de volledige tabel is op een telefoon te breed voor de pagina, en het scrollgebied houdt hem bruikbaar tot 400% inzoomen (1.4.10).
   De korte vorm laat op de homepage zien waar het om draait: positie, gespeeld, punten en doelsaldo.
 - **Alternatieven:** de tabel kolommen laten weglaten met CSS op een telefoon (de volle woorden en de kolommen zijn dan niet te bereiken); altijd de korte vorm (de volledige stand ontbreekt dan op de pagina).
+- **Later:** zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_.
+  De kolommen W, G, V en D zijn vervallen, het scrollgebied met `label` ook, en de korte vorm verschilt nog door de balk en de uitleg van de afkortingen.
 - **Later:** zie _De stand toont geen doelpunten voor en tegen_.
   De kolommen DV en DT zijn vervallen en DS heet nu D, en het bijschrift met de dag is niet meer te zien (zie _De stand toont de dag niet_); de tabel heeft nog positie, club, G, W, G, V, D en P, en de korte vorm laat alleen gewonnen, gelijk en verloren weg.
 - **Later:** zie _De punten staan voor het doelsaldo in de standtabel_.
@@ -4675,6 +4677,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de naam van de club laten afbreken (de rij van een lange naam wordt hoger); een bredere zijbalk (dan wordt de hoofdkolom smaller dan het programma nodig heeft); de scroll laten staan.
 - **Later:** zie _De punten staan voor het doelsaldo in de standtabel_.
   De volgorde van de kolommen is nu #, Club, G, W, G, V, P en D.
+- **Later:** zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_.
+  Het doelsaldo is er ook uit: de kolommen zijn nu #, Club, G en P.
+- **Later:** zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_.
+  De kolommen W, G, V en D zijn vervallen: de kolommen zijn nu #, Club, G en P.
 
 ### De stand toont de dag niet
 
@@ -4974,3 +4980,34 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de stand is op punten gesorteerd en het doelsaldo is alleen de tweede maatstaf.
   Wie de tabel van links naar rechts leest, komt dus eerst bij wat telt.
 - **Alternatieven:** de punten achteraan laten, zoals veel sites (de projecteigenaar wilde ze eerder); de punten direct na de club zetten (verbreekt de rij gespeeld, gewonnen, gelijk, verloren).
+- **Later:** zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_.
+  De kolommen W, G, V en D zijn vervallen: de kolommen zijn nu # Club G P.
+
+### De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de standtabel verliest de kolommen gewonnen, gelijk, verloren en doelsaldo, in elke uitvoering.
+  De kolommen zijn nu # Club G P, waarbij G de gespeelde wedstrijden zijn.
+  De volledige stand heeft naast de punten, in dezelfde cel, een balk; de stand van drie clubs op de homepage heeft geen balk.
+  De projecteigenaar koos dit op 26 oktober 2026.
+  Het doelsaldo ging er later die dag ook uit: gespeeld en punten zijn genoeg, de rest vind je overal elders, en zo hoort de balk bij de punten.
+  De balk is smal, ongeveer 3,5 rem.
+- **Hoe:** de lengte is het aandeel van de punten van de koploper (de club met de meeste punten), in procenten tussen 0 en 100, met een schaal vanaf nul.
+  Het component rekent dat uit de rijen en geeft het door als `--hf-points-share`, dus clubs met evenveel punten hebben even lange balken.
+  Heeft niemand punten, dan zijn er geen balken.
+  De balk is versiering: een `span` met `aria-hidden` in de cel van de punten, zonder eigen cel, kop, rol of naam, dus een schermlezer leest alleen de getallen.
+  De kop van de punten heeft aan het eind evenveel ruimte als de balk, zodat hij boven de getallen staat.
+  De balk is groen, het groen van een gewonnen wedstrijd (`--hf-colour-outcome-win`, #285), want punten komen uit winst.
+  Dat vervangt de eis van het issue dat groen en rood niet voor de balken zijn; de projecteigenaar koos groen op 26 oktober 2026, na een eerste versie in staalblauw en een tweede in blauw.
+  Bij de rij van sc Heerenveen is het hele groen, bij de andere rijen 70% ervan: 3,38:1 op wit in licht en 4,81:1 op de donkere kaart in donker (het hele groen haalt 6,45:1 en 8,43:1).
+  Rood komt niet voor.
+  In forced colours is de balk `CanvasText`.
+- **Hoe:** de balk verdwijnt met een container query op de breedte van de plek van de tabel (`.hf-standings`), niet van het scherm, onder 19 rem.
+  Zonder balk past de tabel op 320 pixels, ook bij 400% zoom, dus het gebied dat zijwaarts scrolt en de eigenschap `label` zijn vervallen.
+  `columns` blijft: `all` is de volledige stand met balken en uitleg van de afkortingen, `compact` de korte vorm zonder beide.
+  `won`, `drawn`, `lost` en `goalDifference` zijn geen eigenschappen van een rij meer; de database en de import houden die gegevens, want de controles gebruiken ze.
+- **Waarom:** "1 punt uit elkaar" of "10 punten uit elkaar" zie je niet aan het getal, wel aan de lengte van een balk.
+  De ruimte van drie smalle kolommen is genoeg voor een balk, en de stand past dan zonder scrollen in de zijbalk van 32 rem.
+  In de stand van drie clubs helpt een balk weinig.
+  Het verlies is het getal van gewonnen, gelijk, verloren en het doelsaldo, dat niet uit de rest van de tabel af te leiden is; de projecteigenaar vond dat het minder waard is dan de balk.
+- **Alternatieven:** de balk als achtergrond van de rij (kost geen kolom, maar de tint staat achter de getallen en is moeilijker te vergelijken); alle kolommen houden en de balk er breder bij zetten (de tabel scrolt dan zijwaarts); een staafgrafiek naast de tabel (neemt veel ruimte en herhaalt de tabel); een stippendiagram zoals Zeit Online (goed voor verschillen, maar je leest de namen er moeilijker uit); een schaal vanaf het minimum (maakt verschillen groter, maar dan zegt de balk niets meer over de verhouding tot nul).
