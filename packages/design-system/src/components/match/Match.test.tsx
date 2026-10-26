@@ -110,45 +110,46 @@ describe('Match', () => {
     const cup = { ...played, competition: 'KNVB Beker', goalsAgainst: 1, goalsFor: 1, round: 'Tweede ronde' } as const
     const label = (container: HTMLElement) => container.querySelector('.hf-match-label')
     const score = (container: HTMLElement) => container.querySelector('.hf-match-score')
+    const seen = (container: HTMLElement) => score(container)?.querySelector('[aria-hidden="true"]')
+    const heard = (container: HTMLElement) => score(container)?.querySelector('.hf-visually-hidden')?.textContent
 
-    it('says "n.v." after extra time, with the full words in the title and nothing more for a screen reader', () => {
+    it('says "n.v." right after the result, with the full words in the title and for a screen reader', () => {
       const { container } = render(<Match {...cup} extraTime goalsFor={2} />)
 
-      expect(label(container)?.textContent).toBe('KNVB Beker · Tweede ronde · n.v.')
-      expect(label(container)?.querySelector('abbr')?.getAttribute('title')).toBe('Na verlenging')
-      expect(label(container)?.querySelector('abbr')?.closest('[aria-hidden="true"]')).not.toBeNull()
-      expect(score(container)?.querySelector('.hf-visually-hidden')?.textContent).toBe('2 tegen 1, na verlenging')
+      expect(seen(container)?.textContent).toBe('2–1 n.v.')
+      expect(seen(container)?.querySelector('abbr')?.getAttribute('title')).toBe('Na verlenging')
+      expect(heard(container)).toBe('2 tegen 1, na verlenging')
     })
 
-    it('says "n.s." and the shoot-out in the order of the clubs, and a screen reader hears the full words', () => {
+    it('says "n.s." and the shoot-out right after the result, in the order of the clubs', () => {
       const { container, rerender } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
 
-      expect(label(container)?.textContent).toBe('KNVB Beker · Tweede ronde · n.s. 4–3')
-      expect(label(container)?.querySelector('abbr')?.getAttribute('title')).toBe('Na strafschoppen')
-      expect(score(container)?.querySelector('.hf-visually-hidden')?.textContent).toBe(
-        '1 tegen 1, na strafschoppen 4 tegen 3',
-      )
+      expect(seen(container)?.textContent).toBe('1–1 n.s. (4–3)')
+      expect(seen(container)?.querySelector('abbr')?.getAttribute('title')).toBe('Na strafschoppen')
+      expect(heard(container)).toBe('1 tegen 1, na strafschoppen 4 tegen 3')
 
       rerender(<Match {...cup} extraTime home={false} penaltiesAgainst={3} penaltiesFor={4} />)
 
-      expect(label(container)?.textContent).toBe('KNVB Beker · Tweede ronde · n.s. 3–4')
-      expect(score(container)?.querySelector('.hf-visually-hidden')?.textContent).toBe(
-        '1 tegen 1, na strafschoppen 3 tegen 4',
-      )
+      expect(seen(container)?.textContent).toBe('1–1 n.s. (3–4)')
+      expect(heard(container)).toBe('1 tegen 1, na strafschoppen 3 tegen 4')
     })
 
     it('says only "n.s." after a shoot-out, since a shoot-out comes after extra time', () => {
       const { container } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
 
-      expect(label(container)?.textContent).not.toContain('n.v.')
+      expect(seen(container)?.textContent).not.toContain('n.v.')
     })
 
-    it('adds nothing to a match without extra time', () => {
-      const { container } = render(<Match {...cup} />)
+    it('keeps the label to the competition and the round, and adds nothing to a match without extra time', () => {
+      const { container } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
 
       expect(label(container)?.textContent).toBe('KNVB Beker · Tweede ronde')
-      expect(label(container)?.querySelector('abbr')).toBeNull()
-      expect(score(container)?.querySelector('.hf-visually-hidden')?.textContent).toBe('1 tegen 1')
+
+      const plain = render(<Match {...cup} />)
+
+      expect(seen(plain.container)?.textContent).toBe('1–1')
+      expect(plain.container.querySelector('abbr')).toBeNull()
+      expect(heard(plain.container)).toBe('1 tegen 1')
     })
 
     it.each([

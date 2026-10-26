@@ -71,6 +71,11 @@
     color: var(--hf-colour-outcome-draw);
   }
 
+  /* "n.v." or "n.s. (4–3)" after the result: part of it, but lighter than the goals. */
+  .hf-match-extra {
+    font-weight: 400;
+  }
+
   .hf-match-versus {
     font-weight: 400;
   }

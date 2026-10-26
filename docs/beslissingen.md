@@ -4745,14 +4745,17 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 ### Verlenging en strafschoppen worden bewaard en getoond
 
 - **Datum:** 26 oktober 2026
-- **Besluit:** de import bewaart bij een bekerwedstrijd of er verlenging was en wat de strafschoppen waren, en `Match` toont dat met afkortingen ("n.v.", "n.s. 4–2"), met de volle woorden voor een schermlezer.
+- **Besluit:** de import bewaart bij een bekerwedstrijd of er verlenging was en wat de strafschoppen waren, en `Match` toont dat met afkortingen ("n.v.", "n.s. (4–2)"), met de volle woorden voor een schermlezer.
   De kleur van de uitkomst volgt de strafschoppen als die er zijn.
 - **Opslag:** `matches` krijgt `extra_time` (standaard `false`), `penalties_for` en `penalties_against`, met een migratie (`0014_add_extra_time_and_penalties`).
   Drie CHECK-constraints houden ze heel: verlenging alleen bij een gespeelde bekerwedstrijd, strafschoppen in een paar, en strafschoppen alleen na verlenging en bij een gelijke stand.
   `goals_for` en `goals_against` blijven de stand uit `score`, zonder de strafschoppen.
 - **Inlezen:** een gevuld `aet` is verlenging (op de pagina van de beker 2025/26 altijd `J`), en `penaltyscore` is "N – N" met team 1 eerst, omgezet naar de kant van sc Heerenveen.
   Een wedstrijd zonder score is nooit in verlenging, ook niet als `aet` er al staat.
-- **Toon:** "n.v." en "n.s. 4–3" staan naast de competitie en de ronde, in de volgorde van de clubs op de regel, als `abbr` met een `title` en met `aria-hidden`.
+- **Toon:** "n.v." en "n.s. (4–3)" staan direct achter de uitslag, op de regel met de clubs: "sc Heerenveen 3–3 n.s. (5–3) Proefstad SV".
+  Ze horen bij de uitslag en zijn geen bijzaak, dus ze staan niet bij de competitie.
+  De score van de strafschoppen staat in de volgorde van de clubs op de regel, tussen haakjes, en is lichter gedrukt dan de doelpunten.
+  Beide zijn een `abbr` met een `title`, en voor de ogen alleen (`aria-hidden`).
   Een schermlezer hoort de volle woorden achter de uitslag: "1 tegen 1, na strafschoppen 4 tegen 3".
   Bij strafschoppen staat alleen "n.s.", want strafschoppen komen na verlenging.
   Onder een lijst met zulke wedstrijden staat wat de afkortingen betekenen ("n.v. na verlenging, n.s. na strafschoppen"), alleen van de afkortingen die in de lijst staan, voor wie geen muis heeft (WCAG 3.1.4).

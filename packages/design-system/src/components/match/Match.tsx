@@ -112,8 +112,8 @@ const separator = (
  * The two clubs are in the order they are announced, the home club first, and the line also
  * says "Thuis" or "Uit", so a visitor does not have to work it out. A played match has the
  * result between the names, as "2–0" seen from the home club's side, and a screen reader hears
- * "2 tegen 0". After extra time the line says "n.v." and after a shoot-out "n.s." with its
- * score, as "n.s. 4–2" in the order of the clubs; a screen reader hears the full words after
+ * "2 tegen 0". After extra time the result says "n.v." and after a shoot-out "n.s." with its
+ * score, as "n.s. (4–2)" in the order of the clubs; a screen reader hears the full words after
  * the result, as "1 tegen 1, na strafschoppen 4 tegen 2". The result has the colour of the
  * outcome for sc Heerenveen: green for a win, red for a loss and neutral for a draw, whichever
  * side it played on, and in a shoot-out the colour follows the shoot-out. The goals say the
@@ -170,26 +170,24 @@ export const Match = ({
         {competition}
         {separator}
         {round}
-        {shootOut || extraTime ? (
-          <>
-            {separator}
-            {/* A screen reader gets the full words with the result, so this is for the eye. */}
-            <span aria-hidden="true">
-              {shootOut ? (
-                <>
-                  <abbr title="Na strafschoppen">n.s.</abbr> {sides(home, penaltiesFor, penaltiesAgainst, '–')}
-                </>
-              ) : (
-                <abbr title="Na verlenging">n.v.</abbr>
-              )}
-            </span>
-          </>
-        ) : null}
       </Text>
       <p className="hf-match-clubs">
         <span className={first === ourClub ? 'hf-match-own' : undefined}>{first}</span>{' '}
         <span className={classNames('hf-match-score', outcome ? `hf-match-${outcome}` : 'hf-match-versus')}>
-          <span aria-hidden="true">{score.shown}</span>
+          <span aria-hidden="true">
+            {score.shown}
+            {shootOut ? (
+              <span className="hf-match-extra">
+                {' '}
+                <abbr title="Na strafschoppen">n.s.</abbr> ({sides(home, penaltiesFor, penaltiesAgainst, '–')})
+              </span>
+            ) : extraTime ? (
+              <span className="hf-match-extra">
+                {' '}
+                <abbr title="Na verlenging">n.v.</abbr>
+              </span>
+            ) : null}
+          </span>
           <span className="hf-visually-hidden">{score.hidden}</span>
         </span>{' '}
         <span className={second === ourClub ? 'hf-match-own' : undefined}>{second}</span>
