@@ -1,11 +1,21 @@
 import type { PublicMatch, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
 
-import { Card, Heading, Link, List, Match, StandingsTable, Text, WikipediaCredit } from '@fansite/design-system'
+import {
+  Card,
+  Heading,
+  Link,
+  List,
+  Match,
+  StandingsTable,
+  Text,
+  TopScorersTable,
+  WikipediaCredit,
+} from '@fansite/design-system'
 
 import type { MatchData } from './matches'
 
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
-import { overviewOf, standingsAround } from './matches'
+import { overviewOf, scorersCoverage, standingsAround, topScorersOf, topScorersShown } from './matches'
 
 /**
  * The block of the homepage with the previous and the next match in one list, and a link to the
@@ -125,6 +135,34 @@ export function StandingsCard({ data }: { data: MatchData }) {
       </Text>
       {data.standings.length > 0 && <WikipediaCredit compact />}
     </Card>
+  )
+}
+
+/**
+ * The top scorers of the season in a table with a bar, with a line under it when not every
+ * played match has its scorers, so nobody takes an incomplete list for a complete one. Without
+ * a goal it is a sentence for visitors and no table.
+ */
+export function TopScorers({ matches, season }: { matches: PublicMatch[]; season: string }) {
+  const scorers = topScorersShown(topScorersOf(matches))
+  const { known, played } = scorersCoverage(matches)
+
+  if (scorers.length === 0) {
+    return <Text>We hebben nog geen doelpuntenmakers van dit seizoen. Kijk straks nog eens.</Text>
+  }
+
+  return (
+    <>
+      <TopScorersTable
+        caption={`Topscorers van sc Heerenveen in het seizoen ${season}, in de Eredivisie en de KNVB Beker`}
+        rows={scorers}
+      />
+      {known < played && (
+        <Text appearance="meta">
+          Gebaseerd op de doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
+        </Text>
+      )}
+    </>
   )
 }
 
