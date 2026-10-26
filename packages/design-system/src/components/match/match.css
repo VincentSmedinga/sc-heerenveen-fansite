@@ -33,6 +33,17 @@
   }
 
   /*
+   * A club name breaks at a space, so the two clubs split over two lines about evenly instead of
+   * a name being cut off with one word left, as in "Proefstad / SV". Not Baseline widely
+   * available yet. Without it, the line wraps as a paragraph does.
+   */
+  @supports (text-wrap: balance) {
+    .hf-match-clubs {
+      text-wrap: balance;
+    }
+  }
+
+  /*
    * The result keeps its digits the same width and stays on one line, so "2–0" is never split.
    * The dash of a match that is not played yet is lighter, since it says only "against".
    */

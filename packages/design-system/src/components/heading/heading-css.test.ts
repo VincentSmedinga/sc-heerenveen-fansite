@@ -49,6 +49,28 @@ describe('the balanced line breaks in heading.css', () => {
   })
 })
 
+// The other type styles and components that balance their lines, each once, in its own file.
+// The headline is not in this list: it is in heading.css, with the headings.
+const elsewhere = [
+  ['text/text.css', '.hf-intro'],
+  ['match/match.css', '.hf-match-clubs'],
+  ['field/field.css', '.hf-field-hint, .hf-field-error'],
+  ['error-summary/error-summary.css', '.hf-error-summary li'],
+] as const
+
+// The selector list of each @supports (text-wrap: balance) block of a file, on one line.
+const balancedIn = (file: string) =>
+  [...read(file).matchAll(/@supports \(text-wrap: balance\) \{\s*([^{}]*?)\s*\{\s*text-wrap: balance;\s*\}\s*\}/g)].map(
+    ([, selector]) => selector?.replace(/\s+/g, ' '),
+  )
+
+describe.each(elsewhere)('the balanced line breaks in %s', (file, selector) => {
+  it(`balance ${selector} once, inside @supports so another browser wraps as a paragraph does`, () => {
+    expect(balancedIn(file)).toEqual([selector])
+    expect(read(file).match(/text-wrap/g)).toHaveLength(2)
+  })
+})
+
 describe('the headline in the components', () => {
   it('is the type style of the news headline and of the title of a discussion', () => {
     expect(readFileSync(join(components, 'news-item/NewsItem.tsx'), 'utf8')).toContain(

@@ -4641,6 +4641,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zo krijgen de kop in `NewsItem` en de titel in `DiscussionItem` hem, en elk component dat de klasse later gebruikt.
   De titel in `ArticleCard` is een `h3` en had hem al.
   Geen component heeft een eigen regel.
+- **Aangevuld op 26 oktober 2026, op verzoek van de projecteigenaar:** ook de wedstrijdregel (`.hf-match-clubs`), de inleiding van een pagina (`.hf-intro`), de hulptekst en de foutmelding van een veld (`.hf-field-hint`, `.hf-field-error`) en de regels van `ErrorSummary` breken in balans.
+  Elk heeft de regel één keer, in het bestand van zijn eigen stijl of component, binnen dezelfde `@supports`.
+  Knoppen en de footer zijn niet aangepast.
+  `text-wrap: pretty` blijft buiten beeld: Firefox heeft het nog niet.
 - **Waarom:** een kop met één woord alleen op de tweede regel ziet er onrustig uit en leest slechter.
   Balance verdeelt de woorden over de regels van een korte tekst, zonder dat de kop breder of smaller wordt.
   Het hoort bij de koppen die we al zo zetten, ook al zijn ze geen `h`-element.

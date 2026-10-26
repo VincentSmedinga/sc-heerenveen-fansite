@@ -11,4 +11,15 @@
     padding-block: 1rem 0.5rem;
     padding-inline: 1rem;
   }
+
+  /*
+   * Each error is a line or two with a link. Its words are spread over the lines, as those of the
+   * error at the field. Not Baseline widely available yet. Without it, it wraps as a paragraph
+   * does.
+   */
+  @supports (text-wrap: balance) {
+    .hf-error-summary li {
+      text-wrap: balance;
+    }
+  }
 }
