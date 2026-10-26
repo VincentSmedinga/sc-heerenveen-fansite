@@ -455,6 +455,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een eigen script dat de diff controleert; dat is code om te onderhouden voor iets wat twee regels doen.
   Niets doen en de reviewer deze dingen laten melden; dat kost een reviewronde per pull request, en de limiet is twee.
 
+### Skills voor de stappen van de Builder, regels blijven in AGENTS.md
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** drie skills in `.claude/skills/` leggen de volgorde van de stappen vast: `builder-workflow` voor elk issue, `review-pr` voor de reviewer na het openen van de pull request en `add-source` voor een nieuwe bron.
+  Een skill verwijst naar `AGENTS.md` en `CONTRIBUTING.md` en herhaalt hun regels niet; hij voegt de stappen toe die eerder werden overgeslagen.
+  De regels zelf blijven in die twee bestanden.
+- **Waarom:** acht pull requests voegden een bron toe en raakten steeds dezelfde bestanden.
+  Elke Builder moest de lijst opnieuw samenstellen uit de bronnenlijst, de README van de importer en de beslissingen.
+  De stappen rond het openen van een pull request stonden verspreid over `AGENTS.md`, het sjabloon en de geheugens van de projecteigenaar, en Builders sloegen ze over: de vakjes in het issue, het openen als de GitHub-app en het plaatsen van het verslag van de reviewer vóór de herstellen.
+  Een skill laadt alleen als hij nodig is, zodat `AGENTS.md` niet langer wordt.
+- **Nadeel:** een stap staat nu in een skill en de regel erachter in `AGENTS.md`, en ze kunnen uit elkaar lopen.
+  Wie een regel wijzigt, zoekt daarom ook in `.claude/skills/`.
+- **Alternatieven:** alles in `AGENTS.md` laten staan; dat wordt een lang bestand dat elke sessie leest, ook als de Builder het niet nodig heeft.
+  Of de stappen in de briefing van de Coordinator zetten; die moet ze dan elke keer opnieuw schrijven en vergeet er een.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host
