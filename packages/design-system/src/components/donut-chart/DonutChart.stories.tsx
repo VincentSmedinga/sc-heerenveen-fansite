@@ -5,41 +5,43 @@ import { Card } from '../card/Card'
 import { DataTable } from '../data-table/DataTable'
 import { Heading } from '../heading/Heading'
 import { Text } from '../text/Text'
-import { DonutChart, donutChartOutcomes, type DonutChartSlice } from './DonutChart'
+import { DonutChart, type DonutChartSlice, donutChartTones } from './DonutChart'
 
 // The type of the props as the table of controls shows it: the compiler gives `unknown[number]`
 // for the lists.
 const union = (values: readonly string[]) => ({ type: { summary: values.map((value) => `'${value}'`).join(' | ') } })
 
-const labels = ['1–15', '16–30', '31–45', '46–60', '61–75', '76–90']
+const labels = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun']
 
 const slicesOf = (values: number[]): DonutChartSlice[] =>
   values.map((value, index) => ({ label: labels[index]!, value }))
 
 const meta = preview.meta({
   argTypes: {
-    outcome: {
-      control: 'radio',
-      description: 'De kleur: het groen van een winst of het rood van een verlies.',
-      options: donutChartOutcomes,
-      table: union(donutChartOutcomes),
-    },
     slices: { description: 'De plakken in de volgorde waarin ze rond gaan, met de klok mee vanaf boven.' },
     title: { description: 'De titel boven de ring.' },
+    tone: {
+      control: 'radio',
+      description:
+        'Wat de kleur zegt: het groen van iets goeds (`positive`) of het rood van iets slechts (`negative`).',
+      options: donutChartTones,
+      table: union(donutChartTones),
+    },
   },
   component: DonutChart,
   parameters: {
     docs: {
       description: {
         component: [
-          'Een donutdiagram laat zien hoe een totaal over een paar delen is verdeeld, zoals de doelpunten over de kwartieren van een wedstrijd.',
+          'Een donutdiagram laat zien hoe een totaal over een paar delen is verdeeld, zoals de aanmeldingen over de maanden van een half jaar.',
           'De ring is getekend als SVG in onze eigen code, zonder grafiekbibliotheek en zonder iets van buiten te laden.',
           'Elke plak is zo breed als zijn deel van het totaal, en het totaal staat in het gat.',
           'Bij elke plak staan de naam en de waarde als tekst, dus het diagram is te lezen zonder de kleuren.',
           'Staan twee plakken zo dicht bij elkaar dat hun tekst over elkaar zou vallen, dan schuiven de teksten op en loopt er een streepje naar hun plak.',
           'Een deel met waarde nul heeft geen plak en geen tekst, en een diagram zonder waarden toont een lege ring met een nul.',
           '',
-          'De plakken hebben het groen van een winst of het rood van een verlies, zoals in de uitslagen: voor en tegen.',
+          'De plakken hebben het groen van iets positiefs of het rood van iets negatiefs, in dezelfde kleuren als de uitkomst van een wedstrijd.',
+          'De pagina bepaalt welke getallen positief zijn en welke negatief: het onderdeel kent de betekenis niet.',
           'Ze lopen op van een zwakkere tint naar de volle kleur, in de volgorde van het diagram, en een rand in de kleur van het vlak houdt elke plak los van de volgende.',
           'Die rand is wat de plakken uit elkaar houdt, en niet het verschil in kleur.',
           'In een hoog-contrastweergave (forced colors) krijgen alle plakken dezelfde kleur, en doet de rand het werk.',
@@ -51,7 +53,7 @@ const meta = preview.meta({
           '',
           '- `title` is de titel boven de ring.',
           '- `slices` zijn de plakken met een `label` en een `value`.',
-          '- `outcome` kiest tussen groen (`win`) en rood (`loss`).',
+          '- `tone` kiest tussen groen (`positive`) en rood (`negative`).',
           '',
           'Meer diagrammen naast elkaar zet je in een `DonutChart.Group`.',
           'Is er niet genoeg ruimte voor ze naast elkaar, zoals op een telefoon, dan komen ze onder elkaar.',
@@ -64,77 +66,75 @@ const meta = preview.meta({
   title: 'Componenten/DonutChart',
 })
 
-const caption = 'Doelpunten van sc Heerenveen per kwartier van de wedstrijd, voor en tegen'
+const caption = 'Aanmeldingen en afmeldingen per maand, van januari tot en met juni'
 
-const card = (maxInlineSize: string, against: number[], scored: number[]) => () => (
+const card = (maxInlineSize: string, negative: number[], positive: number[]) => () => (
   <div style={{ maxInlineSize }}>
-    <Card aria-labelledby="kwartier-kop">
-      <Heading id="kwartier-kop" level={2}>
-        Doelpunten per kwartier
+    <Card aria-labelledby="maand-kop">
+      <Heading id="maand-kop" level={2}>
+        Aan- en afmeldingen per maand
       </Heading>
       <DonutChart.Group>
-        <DonutChart outcome="win" slices={slicesOf(scored)} title="Voor" />
-        <DonutChart outcome="loss" slices={slicesOf(against)} title="Tegen" />
+        <DonutChart slices={slicesOf(positive)} title="Aangemeld" tone="positive" />
+        <DonutChart slices={slicesOf(negative)} title="Afgemeld" tone="negative" />
       </DonutChart.Group>
       <DataTable
         caption={caption}
-        columns={['Kwartier', 'Voor', 'Tegen']}
-        rows={labels.map((label, index) => ({ cells: [scored[index]!, against[index]!], header: label }))}
+        columns={['Maand', 'Aangemeld', 'Afgemeld']}
+        rows={labels.map((label, index) => ({ cells: [positive[index]!, negative[index]!], header: label }))}
       />
-      <Text appearance="meta">
-        Gebaseerd op 8 van de 10 gespeelde wedstrijden. Doelpunten in de verlenging tellen niet mee.
-      </Text>
+      <Text appearance="meta">Gebaseerd op de meldingen van het eerste halfjaar.</Text>
     </Card>
   </div>
 )
 
-const scored = [3, 5, 4, 2, 6, 7]
-const against = [1, 2, 3, 2, 1, 4]
+const positive = [3, 5, 4, 2, 6, 7]
+const negative = [1, 2, 3, 2, 1, 4]
 
 export const Light = meta.story({
   globals: { theme: 'light' },
-  name: 'Voor en tegen met een tabel, licht',
-  render: card('31rem', against, scored),
+  name: 'Twee diagrammen met een tabel, licht',
+  render: card('31rem', negative, positive),
 })
 
 export const Dark = meta.story({
   globals: { theme: 'dark' },
-  name: 'Voor en tegen met een tabel, donker',
-  render: card('31rem', against, scored),
+  name: 'Twee diagrammen met een tabel, donker',
+  render: card('31rem', negative, positive),
 })
 
-export const NoGoalsLight = meta.story({
+export const EmptyLight = meta.story({
   globals: { theme: 'light' },
-  name: 'Zonder doelpunten, een lege ring met een nul, licht',
+  name: 'Zonder waarden, een lege ring met een nul, licht',
   render: card('31rem', [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]),
 })
 
-export const NoGoalsDark = meta.story({
+export const EmptyDark = meta.story({
   globals: { theme: 'dark' },
-  name: 'Zonder doelpunten, een lege ring met een nul, donker',
+  name: 'Zonder waarden, een lege ring met een nul, donker',
   render: card('31rem', [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]),
 })
 
-export const CleanSheetLight = meta.story({
+export const OneEmptyLight = meta.story({
   globals: { theme: 'light' },
-  name: 'Geen tegendoelpunt, alleen het diagram van voor heeft plakken, licht',
-  render: card('31rem', [0, 0, 0, 0, 0, 0], scored),
+  name: 'Eén diagram zonder waarden, het andere heeft plakken, licht',
+  render: card('31rem', [0, 0, 0, 0, 0, 0], positive),
 })
 
 export const NarrowLight = meta.story({
   globals: { theme: 'light' },
   name: 'Smalle plek, de diagrammen onder elkaar, licht',
-  render: card('20rem', against, scored),
+  render: card('20rem', negative, positive),
 })
 
 export const NarrowDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Smalle plek, de diagrammen onder elkaar, donker',
-  render: card('20rem', against, scored),
+  render: card('20rem', negative, positive),
 })
 
 export const Single = meta.story({
-  args: { outcome: 'win', slices: slicesOf(scored), title: 'Voor' },
+  args: { slices: slicesOf(positive), title: 'Aangemeld', tone: 'positive' },
   name: 'Eén diagram met besturing',
   render: (args) => (
     <div style={{ maxInlineSize: '20rem' }}>
@@ -144,7 +144,7 @@ export const Single = meta.story({
 })
 
 export const OneSlice = meta.story({
-  args: { outcome: 'loss', slices: slicesOf([0, 0, 0, 0, 0, 4]), title: 'Tegen' },
+  args: { slices: slicesOf([0, 0, 0, 0, 0, 4]), title: 'Afgemeld', tone: 'negative' },
   name: 'Alles in één plak, de ring is vol',
   render: (args) => (
     <div style={{ maxInlineSize: '20rem' }}>
@@ -154,7 +154,7 @@ export const OneSlice = meta.story({
 })
 
 export const CrowdedLight = meta.story({
-  args: { outcome: 'win', slices: slicesOf([1, 1, 12, 1, 1, 1]), title: 'Voor' },
+  args: { slices: slicesOf([1, 1, 12, 1, 1, 1]), title: 'Aangemeld', tone: 'positive' },
   globals: { theme: 'light' },
   name: 'Kleine plakken naast elkaar, de teksten schuiven op, licht',
   render: (args) => (
@@ -165,7 +165,7 @@ export const CrowdedLight = meta.story({
 })
 
 export const CrowdedDark = meta.story({
-  args: { outcome: 'win', slices: slicesOf([1, 1, 12, 1, 1, 1]), title: 'Voor' },
+  args: { slices: slicesOf([1, 1, 12, 1, 1, 1]), title: 'Aangemeld', tone: 'positive' },
   globals: { theme: 'dark' },
   name: 'Kleine plakken naast elkaar, de teksten schuiven op, donker',
   render: (args) => (

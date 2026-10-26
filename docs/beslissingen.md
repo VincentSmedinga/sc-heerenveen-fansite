@@ -2125,7 +2125,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De zijbalk staat nog na de hoofdkolom in de bron, zonder `order`, en de benoemde gebieden voor een pagina met een inleiding blijven gelden.
 - **Alternatieven:** de verdeling in twee kolommen helemaal weghalen (`/bronnen` verliest iets wat goed werkte); de verdeling als standaard laten en per pagina afzetten, zoals met `wide` (elke nieuwe pagina met lijsten moet eraan denken).
 
-### Een donutdiagram is een eigen onderdeel in SVG, met het groen en het rood van de uitkomst
+### Een donutdiagram is een eigen onderdeel in SVG, met een positieve en een negatieve kleur
 
 - **Datum:** 26 oktober 2026
 - **Besluit:** het designsysteem krijgt `DonutChart`: een ring van plakken, getekend als SVG in onze eigen code, met het totaal in het gat en bij elke plak de naam en de waarde als tekst.
@@ -2136,7 +2136,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De vorm is de keuze van de Builder, voorgelegd aan de projecteigenaar in Storybook; een taart zonder gat of een donut zonder getal is een kleine wijziging van `ring` in `geometry.ts` en de regel voor het totaal in `donut-chart.css`.
 - **Hoe:**
   - De plakken lopen met de klok mee vanaf boven, in de volgorde van de gegevens, zoals een wijzerplaat.
-  - De kleur komt uit de bestaande uitkomsttokens: `--hf-colour-outcome-win` voor het diagram van de doelpunten voor en `--hf-colour-outcome-loss` voor het diagram van de tegendoelpunten.
+  - De kleur komt uit de bestaande uitkomsttokens, gekozen met de eigenschap `tone`: `positive` is `--hf-colour-outcome-win` en `negative` is `--hf-colour-outcome-loss`.
+    Het onderdeel kent geen voetbal: de pagina bepaalt welke getallen positief zijn, en `/wedstrijden` kiest `positive` voor de doelpunten voor en `negative` voor de tegendoelpunten.
     Er komen geen nieuwe tokens bij.
   - De plakken lopen op van 70% van de kleur naar de volle kleur, in de volgorde van de plakken.
     70% is het zwakste dat nog 3:1 haalt op het vlak van de kaart: 3,39:1 voor het groen en 4,22:1 voor het rood in licht, 4,81:1 en 4,43:1 in donker.
@@ -5454,7 +5455,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
     De zin zegt dat we nog geen doelpunten met een minuut hebben, en vraagt de lezer later terug te komen.
   - De diagrammen zijn verborgen voor hulpsoftware en de tabel is het tekstalternatief, met een bijschrift dat alleen een schermlezer krijgt.
-    De diagrammen zelf zijn `DonutChart` (zie _Een donutdiagram is een eigen onderdeel in SVG, met het groen en het rood van de uitkomst_).
+    De diagrammen zelf zijn `DonutChart` (zie _Een donutdiagram is een eigen onderdeel in SVG, met een positieve en een negatieve kleur_).
   - De kop heeft het anker `doelpunten-per-kwartier`, dat in `src/anchors.ts` staat.
 - **Aangevuld op 26 oktober 2026, op verzoek van de projecteigenaar:** de zin "Doelpunten in de verlenging tellen niet mee." staat er alleen als ze iets zegt.
   `goalsPerQuarter` geeft daarvoor `extraTime`: waar als minstens één wedstrijd in de telling `extra_time` heeft.

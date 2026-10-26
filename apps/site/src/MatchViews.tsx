@@ -104,8 +104,8 @@ export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
       ) : (
         <>
           <DonutChart.Group>
-            <DonutChart outcome="win" slices={slices(scored)} title="Voor" />
-            <DonutChart outcome="loss" slices={slices(conceded)} title="Tegen" />
+            <DonutChart slices={slices(scored)} title="Voor" tone="positive" />
+            <DonutChart slices={slices(conceded)} title="Tegen" tone="negative" />
           </DonutChart.Group>
           <DataTable
             caption="Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd"

@@ -8,7 +8,7 @@ const labels = ['1–15', '16–30', '31–45', '46–60', '61–75', '76–90']
 const slicesOf = (values: number[]): DonutChartSlice[] =>
   values.map((value, index) => ({ label: labels[index]!, value }))
 
-const props = { outcome: 'win', slices: slicesOf([3, 5, 4, 2, 6, 7]), title: 'Voor' } as const
+const props = { slices: slicesOf([3, 5, 4, 2, 6, 7]), title: 'Aanmeldingen', tone: 'positive' } as const
 
 /** The names and values written next to the slices, in order. */
 const labelsOf = (container: HTMLElement) =>
@@ -44,7 +44,7 @@ describe('DonutChart', () => {
   it('writes the title above the ring and the total in the hole', () => {
     const { container } = render(<DonutChart {...props} />)
 
-    expect(container.querySelector('.hf-donut-chart-title')?.textContent).toBe('Voor')
+    expect(container.querySelector('.hf-donut-chart-title')?.textContent).toBe('Aanmeldingen')
     expect(container.querySelector('.hf-donut-chart-total')?.textContent).toBe('27')
   })
 
@@ -88,10 +88,10 @@ describe('DonutChart', () => {
     ).toEqual(['70%', '76%', '82%', '88%', '94%', '100%'])
   })
 
-  it('takes its colour from the outcome', () => {
-    const { container } = render(<DonutChart {...props} outcome="loss" />)
+  it('takes its colour from the tone', () => {
+    const { container } = render(<DonutChart {...props} tone="negative" />)
 
-    expect(container.firstElementChild?.className).toBe('hf-donut-chart hf-donut-chart-loss')
+    expect(container.firstElementChild?.className).toBe('hf-donut-chart hf-donut-chart-negative')
   })
 
   it('shows an empty ring with a zero when no slice has a value, and no text next to it', () => {
@@ -143,7 +143,7 @@ describe('DonutChart', () => {
   it('passes other props on and keeps its own classes', () => {
     const { container } = render(<DonutChart {...props} className="extra" id="voor" />)
 
-    expect(container.firstElementChild?.className).toBe('hf-donut-chart hf-donut-chart-win extra')
+    expect(container.firstElementChild?.className).toBe('hf-donut-chart hf-donut-chart-positive extra')
     expect(container.firstElementChild?.id).toBe('voor')
   })
 })

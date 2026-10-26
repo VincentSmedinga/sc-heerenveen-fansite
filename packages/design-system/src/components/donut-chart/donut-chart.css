@@ -17,8 +17,6 @@
   }
 
   .hf-donut-chart {
-    --hf-donut-colour: var(--hf-colour-outcome-win);
-
     inline-size: 100%;
     margin-inline: auto;
     max-inline-size: 20rem;
@@ -26,7 +24,12 @@
     text-align: center;
   }
 
-  .hf-donut-chart-loss {
+  /* The colours of the results of a match: the green of a win and the red of a loss. */
+  .hf-donut-chart-positive {
+    --hf-donut-colour: var(--hf-colour-outcome-win);
+  }
+
+  .hf-donut-chart-negative {
     --hf-donut-colour: var(--hf-colour-outcome-loss);
   }
 
@@ -51,7 +54,7 @@
   }
 
   /*
-   * A slice is a part of the colour of the outcome, from 70% (the weakest that still reaches
+   * A slice is a part of the colour of the tone, from 70% (the weakest that still reaches
    * 3:1 on the surface, in light and in dark) to the full colour in the last slice. The line
    * round it has the colour of the surface, so it is a gap between the slices, and each slice
    * stands out from the next without a contrast between their colours.

@@ -3,20 +3,21 @@ import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
 import { classNames } from '../classNames'
 import { drawing, labelDistance, labelGap, pointAt, ring, slicePath, slicesOf, spreadAngles } from './geometry'
 
-/** The outcomes a donut chart can take its colour from. */
-export const donutChartOutcomes = ['win', 'loss'] as const
-
-export type DonutChartOutcome = (typeof donutChartOutcomes)[number]
+/** The tones a donut chart can have: a positive one and a negative one. */
+export const donutChartTones = ['positive', 'negative'] as const
 
 export type DonutChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /** A donut chart has no children: everything it shows comes from the props below. */
   children?: never
-  /** The colour: the green of a win or the red of a loss, as in the results. */
-  outcome: DonutChartOutcome
   /** The slices in the order they go round, clockwise from the top. */
   slices: readonly DonutChartSlice[]
-  /** The title above the ring, such as `Voor`. */
+  /** The title above the ring, such as `Aanmeldingen`. */
   title: string
+  /**
+   * What the colour says: `positive` is the green of a good result, `negative` the red of a bad
+   * one, as in the results of a match. The page decides which of its numbers is which.
+   */
+  tone: DonutChartTone
 }
 
 export type DonutChartSlice = {
@@ -25,6 +26,8 @@ export type DonutChartSlice = {
   /** The size of the slice. A value of zero has no slice. */
   value: number
 }
+
+export type DonutChartTone = (typeof donutChartTones)[number]
 
 /** The lightest strength of the colour, in percent. It still reaches 3:1 on the surface. */
 const weakest = 70
@@ -40,7 +43,7 @@ const weakest = 70
  * screen reader (`aria-hidden`); give the same numbers in a `DataTable` next to it.
  * donut-chart.css gives the look. Several charts go in a `DonutChart.Group`.
  */
-export const DonutChart = ({ className, outcome, slices, title, ...props }: DonutChartProps) => {
+export const DonutChart = ({ className, slices, title, tone, ...props }: DonutChartProps) => {
   const total = slices.reduce((sum, slice) => sum + Math.max(0, slice.value), 0)
   const drawn = slicesOf(slices.map((slice) => slice.value))
   const angles = spreadAngles(
@@ -49,7 +52,7 @@ export const DonutChart = ({ className, outcome, slices, title, ...props }: Donu
   )
 
   return (
-    <div {...props} aria-hidden="true" className={classNames('hf-donut-chart', `hf-donut-chart-${outcome}`, className)}>
+    <div {...props} aria-hidden="true" className={classNames('hf-donut-chart', `hf-donut-chart-${tone}`, className)}>
       <p className="hf-donut-chart-title">{title}</p>
       <div className="hf-donut-chart-plot">
         <svg className="hf-donut-chart-drawing" focusable="false" viewBox={`0 0 ${drawing.width} ${drawing.height}`}>
