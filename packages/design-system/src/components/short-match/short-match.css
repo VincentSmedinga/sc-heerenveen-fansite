@@ -1,0 +1,64 @@
+/*
+ * A short match: the day, the opponent with where it was played, and the result, on one line
+ * that wraps when the place is narrow. It has no colour of its own for the outcome. A List of
+ * short matches has a thin line between the lines.
+ */
+
+@layer hf.components {
+  /*
+   * The three parts sit next to each other and wrap as a whole: on a narrow place the result
+   * goes to the next line before a name is cut. A long name breaks instead of making the page
+   * scroll sideways.
+   */
+  .hf-short-match {
+    column-gap: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: var(--hf-body-font-size);
+    overflow-wrap: anywhere;
+    padding-block: 0.5rem;
+  }
+
+  /* The day keeps its width, so the opponents of the lines start at the same place. */
+  .hf-short-match-when {
+    color: var(--hf-colour-text-secondary);
+    flex: none;
+    min-inline-size: 4.5rem;
+  }
+
+  .hf-short-match-opponent {
+    flex: 1 1 8rem;
+    font-weight: 500;
+  }
+
+  .hf-short-match-where {
+    color: var(--hf-colour-text-secondary);
+    font-weight: 400;
+  }
+
+  /* The result keeps its digits the same width and stays on one line: "3–0" is never split. */
+  .hf-short-match-score {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* A List with short matches in it: no bullets, no indent, and a thin line between lines. */
+  :is(ul, ol):has(> li > .hf-short-match) {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  li > .hf-short-match {
+    border-block-start: 1px solid var(--hf-colour-border-default);
+  }
+
+  li:first-child > .hf-short-match {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  li:last-child > .hf-short-match {
+    padding-block-end: 0;
+  }
+}

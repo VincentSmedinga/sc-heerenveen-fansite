@@ -5,12 +5,13 @@ import { cache } from 'react'
 
 import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
-import { getMatchData } from '../../matches'
-import { overviewOf } from '../../matches'
-import { MatchLines, SourceCredit, standingsCaption, TopScorers } from '../../MatchViews'
+import { getMatchData, overviewOf, parseCleanSheetCount } from '../../matches'
+import { CleanSheetsCard, MatchLines, SourceCredit, standingsCaption, TopScorers } from '../../MatchViews'
 import { pageMetadata } from '../../metadata'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
+
+type SearchParams = Record<string, string | string[] | undefined>
 
 // Render on each request, so the build never reads the database. getMatchData caches the data
 // itself.
@@ -39,7 +40,8 @@ export async function generateMetadata(): Promise<Metadata> {
     : pageMetadata('/wedstrijden', 'Wedstrijden')
 }
 
-export default async function MatchesPage() {
+export default async function MatchesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const { nul } = await searchParams
   const data = await loadData()
 
   if (data === undefined) {
@@ -93,6 +95,7 @@ export default async function MatchesPage() {
           </Heading>
           <TopScorers matches={data.matches} season={data.season} />
         </Card>
+        <CleanSheetsCard count={parseCleanSheetCount(nul)} matches={data.matches} now={now} />
         <Card aria-labelledby="uitslagen">
           <Heading id="uitslagen" level={2}>
             Uitslagen

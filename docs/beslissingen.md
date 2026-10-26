@@ -5173,3 +5173,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat ook de rij van sc Heerenveen het hele groen houdt, blijft in `standings-table.css`.
   De kop van de doelpunten is de afkorting D, op verzoek van de projecteigenaar op 26 oktober 2026, zoals G en P in de stand: een schermlezer hoort "doelpunten" en onder de tabel staat "D doelpunten", in een gedeelde legenda (`hf-bar-legend`, eerst `hf-standings-legend`).
 - **Alternatieven:** de Eredivisie en de beker apart tonen (nauwkeuriger, maar twee lijsten en veel lege rijen in het begin); alleen de beste drie (te weinig voor een selectie); een nieuwe bron met statistieken van spelers (#39); de CSS van de balk kopiëren naar het nieuwe component (twee plekken om gelijk te houden).
+
+### De lijst met gehouden nullen is een lijst van korte wedstrijdregels
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `/wedstrijden` krijgt een kaart met de wedstrijden waarin we geen tegendoelpunt kregen, als korte regels (datum, tegenstander en uitslag), met het aantal erbij.
+  Het zijn geen volledige wedstrijdregels.
+- **Waarom:** de supporter wil zien in welke wedstrijden de verdediging de nul hield, niet alle details die de uitslagen al geven.
+  Korte regels houden de zijbalk rustig, en de gegevens staan al in `matches`.
+- **Hoe:** de regel is een eigen onderdeel van het designsysteem, `ShortMatch`, en geen uitvoering van `Match`.
+  `Match` heeft een competitie, een ronde, een stadion, doelpuntenmakers en de kleur van de uitkomst, en heeft al veel props; een korte uitvoering zou die allemaal moeten uitzetten.
+  `ShortMatch` heeft zes props en geen kleur, want in deze lijst hebben alle regels dezelfde soort uitslag.
+  De selectie en het aantal komen uit dezelfde wedstrijden die de pagina al haalt (`cleanSheetsOf`), en de knop "Laad 5 meer" werkt zoals op de homepage, met `?nul=` in het adres.
+- **Alternatieven:** de volledige wedstrijdregels (veel dubbele informatie naast de uitslagen); alleen een getal zonder lijst (zegt niet welke wedstrijden); een markering in de lijst met uitslagen (de nullen verdwijnen dan tussen de rest); een korte uitvoering van `Match` (maakt `Match` groter).

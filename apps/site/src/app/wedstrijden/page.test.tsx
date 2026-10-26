@@ -14,8 +14,8 @@ vi.mock('../../matches', async (importOriginal) => ({ ...(await importOriginal<o
 // The afternoon of Friday 23 October 2026 in the Netherlands.
 const now = new Date('2026-10-23T13:40:00Z')
 
-async function render() {
-  return withoutIcons(renderToStaticMarkup(await MatchesPage()))
+async function render(searchParams: Record<string, string | string[] | undefined> = {}) {
+  return withoutIcons(renderToStaticMarkup(await MatchesPage({ searchParams: Promise.resolve(searchParams) })))
 }
 
 /** The part of the page under the h2 with this id, up to the next h2 or the end. */
@@ -41,7 +41,7 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden', () => {
-  it('has one h1 and four h2 headings in order: the programme, the table, the top scorers and the results', async () => {
+  it('has one h1 and five h2 headings in order: the programme, the table, the top scorers, the clean sheets and the results', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
@@ -49,11 +49,12 @@ describe('the page /wedstrijden', () => {
       '<h2 class="hf-heading-2" id="programma">Programma</h2>',
       '<h2 class="hf-heading-2" id="stand">Stand</h2>',
       '<h2 class="hf-heading-2" id="topscorers">Topscorers</h2>',
+      '<h2 class="hf-heading-2" id="nul-gehouden">De nul gehouden</h2>',
       '<h2 class="hf-heading-2" id="uitslagen">Uitslagen</h2>',
     ])
   })
 
-  it('has the programme in the main with the h1, and the table, the top scorers and the results in a named, wide sidebar after it', async () => {
+  it('has the programme in the main with the h1, and the table, the top scorers, the clean sheets and the results in a named, wide sidebar after it', async () => {
     const html = await render()
     const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
     const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
@@ -69,7 +70,8 @@ describe('the page /wedstrijden', () => {
     expect(main).not.toContain('id="stand"')
     expect(main).not.toContain('id="uitslagen"')
     expect(sidebar.indexOf('id="stand"')).toBeLessThan(sidebar.indexOf('id="topscorers"'))
-    expect(sidebar.indexOf('id="topscorers"')).toBeLessThan(sidebar.indexOf('id="uitslagen"'))
+    expect(sidebar.indexOf('id="topscorers"')).toBeLessThan(sidebar.indexOf('id="nul-gehouden"'))
+    expect(sidebar.indexOf('id="nul-gehouden"')).toBeLessThan(sidebar.indexOf('id="uitslagen"'))
     expect(main).not.toContain('id="topscorers"')
     expect(sidebar).not.toContain('<h1')
     expect(sidebar).not.toContain('id="programma"')
@@ -82,7 +84,7 @@ describe('the page /wedstrijden', () => {
   it('names each card by its h2, so the links with a hash on the homepage have a target', async () => {
     const html = await render()
 
-    for (const id of ['programma', 'uitslagen', 'stand', 'topscorers']) {
+    for (const id of ['programma', 'uitslagen', 'stand', 'topscorers', 'nul-gehouden']) {
       expect(html).toContain(`<section class="hf-card" aria-labelledby="${id}">`)
     }
   })
@@ -236,6 +238,142 @@ describe('the page /wedstrijden', () => {
 
       expect(results).toContain('&lt;img src=x onerror=alert(1)&gt;')
       expect(results).not.toContain('<img')
+    })
+  })
+
+  describe('the clean sheets', () => {
+    // Played matches that don't have a clean sheet are the rounds 7 and 9. The cup tie of the
+    // test data and the round 8 are the two with a clean sheet.
+    const manyMatches = (cleanSheets: number): PublicMatch[] =>
+      Array.from({ length: cleanSheets }, (_, index) => ({
+        ...matchData.matches[1]!,
+        goals: [],
+        goalsAgainst: 0,
+        matchDate: `2026-09-${String(index + 1).padStart(2, '0')}`,
+        opponent: `Proefclub ${index + 1}`,
+        round: `Speelronde ${100 + index}`,
+      }))
+
+    it('shows the matches with no goal against, the newest first, as short lines with the count above', async () => {
+      const sheets = section(await render(), 'nul-gehouden')
+
+      expect(sheets).toContain('2 keer de nul gehouden in 4 wedstrijden')
+      expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(2)
+      expect(sheets.indexOf('SV Proefdorp')).toBeLessThan(sheets.indexOf('Testdorp FC'))
+      expect(sheets).toContain('di 20 okt')
+      expect(sheets).toContain('<span class="hf-short-match-where">uit</span>')
+      expect(sheets).toContain('<span class="hf-short-match-where">thuis</span>')
+      expect(sheets).toContain('1–0')
+      expect(sheets).toContain('2–0')
+      expect(sheets).toContain('1 tegen 0')
+      expect(sheets).not.toContain('Oud Resultaat')
+      expect(sheets).not.toContain('Voorbeeld United')
+    })
+
+    it('has no competition, round, stadium, scorers or colour of the outcome', async () => {
+      const sheets = section(await render(), 'nul-gehouden')
+
+      expect(sheets).not.toContain('Eredivisie')
+      expect(sheets).not.toContain('KNVB Beker')
+      expect(sheets).not.toContain('Speelronde')
+      expect(sheets).not.toContain('Stadion Proeflaan')
+      expect(sheets).not.toContain('hf-match')
+      expect(sheets).not.toContain('Proefman')
+    })
+
+    it('is a list with an item for every line, and no button when there are ten or fewer', async () => {
+      const sheets = section(await render(), 'nul-gehouden')
+
+      expect(sheets.match(/<li/g)).toHaveLength(2)
+      expect(sheets).not.toContain('<button')
+    })
+
+    it('counts a 0–0 and a match that went to extra time, and not a match that is postponed or still to come', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [
+          ...matchData.matches,
+          { ...matchData.matches[1]!, extraTime: true, goalsFor: 0, opponent: 'Nul Nul FC', round: 'Derde ronde' },
+        ],
+      })
+
+      const sheets = section(await render(), 'nul-gehouden')
+
+      expect(sheets).toContain('3 keer de nul gehouden in 5 wedstrijden')
+      expect(sheets).toContain('Nul Nul FC')
+      expect(sheets).toContain('0–0')
+      expect(sheets).not.toContain('Demo Boys')
+      expect(sheets).not.toContain('Proefstad SV')
+    })
+
+    it('shows ten lines and the button "Laad 5 meer", and the count above counts all of them', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: manyMatches(11) })
+
+      const sheets = section(await render(), 'nul-gehouden')
+
+      expect(sheets).toContain('11 keer de nul gehouden in 11 wedstrijden')
+      expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(10)
+      expect(sheets).toContain('Laad 5 meer')
+      expect(sheets).toContain('action="/wedstrijden#nul-11"')
+      expect(sheets).toContain('name="nul"')
+      expect(sheets).toContain('value="15"')
+      expect(sheets).toContain('id="nul-10"')
+    })
+
+    it('shows ten lines and no button when there are exactly ten', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: manyMatches(10) })
+
+      const sheets = section(await render(), 'nul-gehouden')
+
+      expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(10)
+      expect(sheets).not.toContain('<button')
+    })
+
+    it('shows five more lines with ?nul=15, and the button again while there are more', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: manyMatches(21) })
+
+      const sheets = section(await render({ nul: '15' }), 'nul-gehouden')
+
+      expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(15)
+      expect(sheets).toContain('action="/wedstrijden#nul-16"')
+      expect(sheets).toContain('value="20"')
+    })
+
+    it('starts with ten lines for a number in the address that is none of the steps', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: manyMatches(21) })
+
+      expect(section(await render({ nul: '12' }), 'nul-gehouden').match(/class="hf-short-match"/g)).toHaveLength(10)
+    })
+
+    it('says so when no match is played yet', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.filter((match) => match.status !== 'played'),
+      })
+
+      const sheets = section(await render(), 'nul-gehouden')
+
+      expect(sheets).toContain('We hebben nog geen gespeelde wedstrijden van dit seizoen.')
+      expect(sheets).not.toContain('<ul')
+    })
+
+    it('says so when no clean sheet is kept yet', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.filter((match) => match.goalsAgainst !== 0),
+      })
+
+      const sheets = section(await render(), 'nul-gehouden')
+
+      expect(sheets).toContain('Nog niet de nul gehouden dit seizoen.')
+      expect(sheets).not.toContain('<ul')
+    })
+
+    it('is gone, with no card, when the database can not be read', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      vi.mocked(getMatchData).mockRejectedValue(new Error('down'))
+
+      expect(await render()).not.toContain('nul-gehouden')
     })
   })
 
