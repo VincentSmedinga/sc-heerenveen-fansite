@@ -50,8 +50,7 @@ export default function PrivacyPage() {
         <Heading level={2}>Wat de hosting bewaart</Heading>
         <Text>
           Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. Wij kunnen daar niet bij
-          en gebruiken ze niet. Ook het adres van elke pagina die je opent staat erin, dus ook de woorden die je zoekt
-          op de zoekpagina. Zelf bewaren wij die woorden niet.
+          en gebruiken ze niet.
         </Text>
         <Heading level={2}>Wat je browser bewaart</Heading>
         <Text>

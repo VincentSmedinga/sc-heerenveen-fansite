@@ -265,7 +265,7 @@ Het formulier is een gewoon `GET`-formulier naar `/zoeken?q=…`, dus de pagina 
 De resultaten staan met de nieuwste bovenaan, tien eerst, en de knop "Laad 5 meer" laadt de pagina opnieuw met `?aantal=15`, in stappen van vijf en tot 100.
 Daarna staat er een zin dat dit de nieuwste zijn.
 De site bewaart een zoekvraag zelf nergens: er staat geen cookie, geen lijst van gezochte woorden en geen adres van de bezoeker bij.
-De logbestanden van de hosting hebben wel het hele adres van een pagina, dus ook `?q=`, zoals van elke pagina; `/privacy` zegt dat.
+De logbestanden van de hosting hebben wel het hele adres van een pagina, dus ook `?q=`, zoals van elke pagina.
 De teller van het bezoek telt `/zoeken` zonder de vraag (`src/visits.ts`), en een fout in het logboek noemt de reden en niet de vraag.
 De pagina is `noindex`, ook met een vraag, en staat niet in de sitemap.
 
