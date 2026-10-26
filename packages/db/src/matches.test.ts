@@ -1,0 +1,94 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+
+import type { NewMatch } from './schema.ts'
+import type { TestDatabase } from './test-database.ts'
+
+import { matches } from './schema.ts'
+import { createTestDatabase } from './test-database.ts'
+
+let database: TestDatabase
+
+beforeAll(async () => {
+  database = await createTestDatabase()
+})
+
+afterAll(async () => {
+  // Undefined when the server wasn't there, which beforeAll has already reported.
+  await database?.drop()
+})
+
+beforeEach(async () => {
+  await database.pool.query('DELETE FROM matches')
+})
+
+const cupMatch: NewMatch = {
+  competition: 'KNVB Beker',
+  goalsAgainst: 1,
+  goalsFor: 1,
+  home: true,
+  kickoffAt: new Date('2026-10-28T18:45:00Z'),
+  matchDate: '2026-10-28',
+  opponent: 'Testdorp FC',
+  round: 'Tweede ronde',
+  season: '2026/27',
+  status: 'played',
+}
+
+describe('the extra time and the shoot-out of a match', () => {
+  it('has no extra time and no shoot-out unless it is said', async () => {
+    await database.db.insert(matches).values(cupMatch)
+
+    const [row] = await database.db.select().from(matches)
+
+    expect(row).toMatchObject({ extraTime: false, penaltiesAgainst: null, penaltiesFor: null })
+  })
+
+  it('keeps a win after extra time, and a shoot-out after a level score, from our side', async () => {
+    await database.db.insert(matches).values({ ...cupMatch, extraTime: true, goalsFor: 2 })
+    await database.db
+      .insert(matches)
+      .values({ ...cupMatch, extraTime: true, penaltiesAgainst: 3, penaltiesFor: 4, round: 'Derde ronde' })
+
+    const rows = await database.db.select().from(matches)
+
+    expect(rows.map((row) => [row.extraTime, row.penaltiesFor, row.penaltiesAgainst])).toEqual([
+      [true, null, null],
+      [true, 4, 3],
+    ])
+  })
+
+  it.each([
+    [
+      'extra time in the league',
+      'matches_extra_time_only_in_played_cup',
+      { competition: 'Eredivisie', extraTime: true, round: 'Speelronde 1' },
+    ],
+    [
+      'extra time before the match is played',
+      'matches_extra_time_only_in_played_cup',
+      { extraTime: true, goalsAgainst: null, goalsFor: null, status: 'scheduled' },
+    ],
+    [
+      'a shoot-out without extra time',
+      'matches_penalties_after_level_extra_time',
+      { penaltiesAgainst: 3, penaltiesFor: 4 },
+    ],
+    [
+      'a shoot-out after a score that is not level',
+      'matches_penalties_after_level_extra_time',
+      { extraTime: true, goalsFor: 2, penaltiesAgainst: 3, penaltiesFor: 4 },
+    ],
+    ['half a shoot-out', 'matches_penalties_in_a_pair', { extraTime: true, penaltiesFor: 4 }],
+  ] satisfies [string, string, Partial<NewMatch>][])('refuses %s', async (_name, constraint, change) => {
+    const failure = await database.db
+      .insert(matches)
+      .values({ ...cupMatch, ...change })
+      .then(
+        () => undefined,
+        (error: unknown) => error,
+      )
+
+    // Drizzle wraps the error of the database, which names the constraint.
+    expect(String((failure as Error | undefined)?.cause)).toContain(constraint)
+  })
+})

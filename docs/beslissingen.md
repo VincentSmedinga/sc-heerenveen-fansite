@@ -4756,6 +4756,44 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een letter erbij zou de regel drukker maken zonder iets te zeggen.
   De screenreader hoort wat hij hoorde ("2 tegen 0"), en in forced colours valt de kleur weg: de browser zet de eigen kleur van de gebruiker op de tekst.
 - **Alternatieven:** een letter (W, G, V) of een woord erbij, voor wie kleuren niet uit elkaar houdt (de projecteigenaar vond de cijfers voldoende); gele of blauwe kleur voor gelijkspel (geel is een waarschuwing en blauw is de kleur van links); de beker apart behandelen (niet nodig: neutraal zegt niets over wie doorging).
+- **Later:** zie _Verlenging en strafschoppen worden bewaard en getoond_.
+  Bij strafschoppen volgt de kleur de strafschoppen, en een gelijke stand zonder bekende strafschoppen blijft neutraal.
+
+### Verlenging en strafschoppen worden bewaard en getoond
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de import bewaart bij een bekerwedstrijd of er verlenging was en wat de strafschoppen waren, en `Match` toont dat met afkortingen ("n.v.", "(4–2 n.s.)"), met de volle woorden voor een schermlezer.
+  De kleur van de uitkomst volgt de strafschoppen als die er zijn.
+- **Opslag:** `matches` krijgt `extra_time` (standaard `false`), `penalties_for` en `penalties_against`, met een migratie (`0015_add_extra_time_and_penalties`).
+  Drie CHECK-constraints houden ze heel: verlenging alleen bij een gespeelde bekerwedstrijd, strafschoppen in een paar, en strafschoppen alleen na verlenging en bij een gelijke stand.
+  `goals_for` en `goals_against` blijven de stand uit `score`, zonder de strafschoppen.
+- **Inlezen:** een gevuld `aet` is verlenging (op de pagina van de beker 2025/26 altijd `J`), en `penaltyscore` is "N – N" met team 1 eerst, omgezet naar de kant van sc Heerenveen.
+  Een wedstrijd zonder score is nooit in verlenging, ook niet als `aet` er al staat.
+- **Toon:** "n.v." en "(4–3 n.s.)" staan direct achter de uitslag, op de regel met de clubs: "sc Heerenveen 3–3 (5–3 n.s.) Proefstad SV".
+  Ze horen bij de uitslag en zijn geen bijzaak, dus ze staan niet bij de competitie.
+  De score van de strafschoppen staat in de volgorde van de clubs op de regel, tussen haakjes, en is lichter gedrukt dan de doelpunten.
+  Beide zijn een `abbr` met een `title`, en voor de ogen alleen (`aria-hidden`).
+  Een schermlezer hoort de volle woorden achter de uitslag: "1 tegen 1, na strafschoppen 4 tegen 3".
+  Bij strafschoppen staat alleen "n.s.", want strafschoppen komen na verlenging.
+  Onder een lijst met zulke wedstrijden staat wat de afkortingen betekenen ("n.v. na verlenging, n.s. na strafschoppen"), alleen van de afkortingen die in de lijst staan, voor wie geen muis heeft (WCAG 3.1.4).
+- **Kleur:** bij strafschoppen is de uitkomst die van de strafschoppen, anders die van de stand.
+  Een gelijke stand zonder strafschoppen blijft neutraal, ook als de strafschoppen nog niet op de pagina staan.
+- **Waarom:** zonder dat staat een ronde die op strafschoppen is beslist, als een gelijkspel, en weet de supporter niet wie er doorging.
+  Het staat op de pagina van de beker in aparte velden (`aet`, `penaltyscore`), dus inlezen is geen gokwerk, en de gewone `score` blijft zoals ze was.
+- **Alternatieven:** het niet bewaren (dan blijft een gelijke stand in de beker vaag); de strafschoppen als gewone doelpunten bij de stand optellen (verkeerd: 1–1 wordt dan 5–3); de volle woorden "na verlenging" en "na strafschoppen" in beeld (de projecteigenaar koos op 26 oktober 2026 voor afkortingen, omdat de volle woorden de regel drukker maken).
+  Daarom staan de volle woorden wel voor een schermlezer en in de `title`, want een schermlezer leest een afkorting slecht.
+
+### Een strafschop die we niet kunnen lezen laat de import niet doorgaan
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** een score van strafschoppen die niet als "N – N" te lezen is, laat de controle van de pagina falen, zoals een andere onverwachte opbouw.
+  De laatste goede versie blijft staan en het logboek krijgt een waarschuwing.
+  Hetzelfde geldt voor verlenging of strafschoppen bij een competitiewedstrijd, voor strafschoppen zonder verlenging en voor strafschoppen bij een stand die niet gelijk is.
+- **Waarom:** de import hoort bij een onverwachte opbouw niets te raden.
+  Een beker die op strafschoppen is beslist, mag niet als een gelijkspel blijven staan door een fout in de vorm.
+- **Een nieuwe score van strafschoppen is geen verandering van de uitslag:** komen de strafschoppen er later bij, dan neemt de import ze over zonder waarschuwing.
+  Verandert een score van strafschoppen die er al was, nadat de uitslag drie dagen of langer vaststond, dan waarschuwt hij, met de strafschoppen in de tekst.
+- **Alternatieven:** de wedstrijd bewaren zonder strafschoppen en doorgaan (de fout gaat dan onopgemerkt).
 
 ### We tellen paginaweergaven en unieke bezoekers per dag, met een kenmerk dat elke dag wisselt
 

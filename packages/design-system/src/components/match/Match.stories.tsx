@@ -3,6 +3,7 @@ import preview from '#.storybook/preview'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { List } from '../list/List'
+import { Text } from '../text/Text'
 import { WikipediaCredit } from '../wikipedia-credit/WikipediaCredit'
 import { Match } from './Match'
 
@@ -18,8 +19,12 @@ const meta = preview.meta({
           'De regel zegt ook "Thuis" of "Uit", dus een bezoeker hoeft het niet af te leiden uit de volgorde.',
           'Een gespeelde wedstrijd heeft de uitslag tussen de namen, gezien vanaf de thuisclub: "2–0".',
           'Een schermlezer hoort "2 tegen 0".',
-          'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen: groen bij winst, rood bij verlies en neutraal bij gelijkspel, ook in de beker.',
+          'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen: groen bij winst, rood bij verlies en neutraal bij gelijkspel, ook in de beker zolang er geen strafschoppen zijn.',
           'Dat volgt uit de doelpunten van sc Heerenveen en niet uit die van de thuisclub: 0–2 uit is een winst en 2–0 uit een verlies.',
+          'Een bekerwedstrijd na verlenging zegt "n.v." en na strafschoppen "n.s." met de score ervan, bijvoorbeeld "3–3 (5–3 n.s.)", direct achter de uitslag en in de volgorde van de clubs.',
+          'Elke afkorting heeft de volle woorden in een `title`, en een schermlezer hoort de volle woorden na de uitslag: "1 tegen 1, na strafschoppen 4 tegen 3".',
+          'Onder een lijst met zulke wedstrijden staat wat de afkortingen betekenen, want een `title` toont alleen onder een muis.',
+          'Bij strafschoppen volgt de kleur de strafschoppen: groen als sc Heerenveen ze won en rood als het ze verloor.',
           'De kleur is een aanvulling en nooit het enige teken: wie hem niet ziet, leest de uitkomst in de doelpunten zelf, dus er komt geen letter of woord bij.',
           'Een wedstrijd die nog moet komen heeft een streepje tussen de namen, dat een schermlezer als "tegen" leest.',
           'De rij van sc Heerenveen zelf is het zwaarst gedrukt, zodat onze club opvalt zonder dat kleur het enige is.',
@@ -234,6 +239,70 @@ const renderResults = () => (
   </div>
 )
 
+// Cup ties decided after extra time: a win after extra time away, a win on penalties at
+// home, and a loss on penalties away. The legend under the list is what the site puts there.
+const renderCup = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="beker-kop">
+      <Heading id="beker-kop" level={2}>
+        Beker
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="KNVB Beker"
+            dateTime="2026-11-25"
+            extraTime
+            goalsAgainst={1}
+            goalsFor={2}
+            home={false}
+            opponent="Testdorp FC"
+            round="Eerste ronde"
+            stadium="Sportpark Proefdorp"
+            status="played"
+            time="wo 25 nov"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="KNVB Beker"
+            dateTime="2026-12-02"
+            extraTime
+            goalsAgainst={1}
+            goalsFor={1}
+            home
+            opponent="Voorbeeld United"
+            penaltiesAgainst={3}
+            penaltiesFor={4}
+            round="Tweede ronde"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="wo 2 dec"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="KNVB Beker"
+            dateTime="2027-01-20"
+            extraTime
+            goalsAgainst={2}
+            goalsFor={2}
+            home={false}
+            opponent="Proefstad SV"
+            penaltiesAgainst={5}
+            penaltiesFor={4}
+            round="Achtste finale"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="wo 20 jan"
+          />
+        </List.Item>
+      </List>
+      <Text appearance="meta">n.v. na verlenging, n.s. na strafschoppen</Text>
+    </Card>
+  </div>
+)
+
 export const Light = meta.story({
   globals: { theme: 'light' },
   name: 'Zijbalk, met de vorige en de volgende wedstrijd, licht',
@@ -280,4 +349,16 @@ export const ResultsDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Uitslagen: winst, verlies en gelijkspel, thuis en uit, donker',
   render: renderResults,
+})
+
+export const CupLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Beker: na verlenging en na strafschoppen, licht',
+  render: renderCup,
+})
+
+export const CupDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Beker: na verlenging en na strafschoppen, donker',
+  render: renderCup,
 })

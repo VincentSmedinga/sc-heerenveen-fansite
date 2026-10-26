@@ -71,6 +71,16 @@
     color: var(--hf-colour-outcome-draw);
   }
 
+  /* "n.v." or "(4–3 n.s.)" after the result: part of it, but lighter than the goals. */
+  .hf-match-extra {
+    font-weight: 400;
+  }
+
+  /* The dotted line under an abbreviation has the colour of the result, not blue-grey. */
+  .hf-match-extra abbr {
+    text-decoration-color: currentcolor;
+  }
+
   .hf-match-versus {
     font-weight: 400;
   }

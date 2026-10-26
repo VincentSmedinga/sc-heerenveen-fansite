@@ -44,14 +44,27 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
 
 /** A list of matches, each as a line with its own day or time. */
 export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date }) {
+  const shootOut = matches.some(hasShootOut)
+  const extraTime = matches.some((match) => match.extraTime && !hasShootOut(match))
+
   return (
-    <List role="list">
-      {matches.map((match) => (
-        <List.Item key={`${match.competition}-${match.round}`}>
-          <MatchLine match={match} now={now} />
-        </List.Item>
-      ))}
-    </List>
+    <>
+      <List role="list">
+        {matches.map((match) => (
+          <List.Item key={`${match.competition}-${match.round}`}>
+            <MatchLine match={match} now={now} />
+          </List.Item>
+        ))}
+      </List>
+      {/* The full words of the abbreviations in use: a title only shows under a mouse. */}
+      {(extraTime || shootOut) && (
+        <Text appearance="meta">
+          {extraTime && 'n.v. na verlenging'}
+          {extraTime && shootOut && ', '}
+          {shootOut && 'n.s. na strafschoppen'}
+        </Text>
+      )}
+    </>
   )
 }
 
@@ -120,6 +133,11 @@ export function StandingsCard({ data }: { data: MatchData }) {
   )
 }
 
+/** Whether a played match was decided in a shoot-out, which has both scores. */
+function hasShootOut(match: PublicMatch): boolean {
+  return match.penaltiesFor !== null && match.penaltiesAgainst !== null
+}
+
 /** A match as the design system shows it, with the time in Dutch time. */
 function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
   const common = {
@@ -134,14 +152,19 @@ function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
     return <Match {...common} status="postponed" />
   }
   if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
-    return (
-      <Match
-        {...common}
-        {...matchMoment(match, now)}
-        goalsAgainst={match.goalsAgainst}
-        goalsFor={match.goalsFor}
-        status="played"
-      />
+    const result = {
+      ...common,
+      ...matchMoment(match, now),
+      extraTime: match.extraTime,
+      goalsAgainst: match.goalsAgainst,
+      goalsFor: match.goalsFor,
+      status: 'played',
+    } as const
+
+    return match.penaltiesFor !== null && match.penaltiesAgainst !== null ? (
+      <Match {...result} penaltiesAgainst={match.penaltiesAgainst} penaltiesFor={match.penaltiesFor} />
+    ) : (
+      <Match {...result} />
     )
   }
 

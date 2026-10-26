@@ -6,6 +6,7 @@ import { pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-
 const programme = readFileSync(new URL('./fixtures/wikipedia-programme.wiki', import.meta.url), 'utf8')
 const standingsPage = readFileSync(new URL('./fixtures/wikipedia-standings.wiki', import.meta.url), 'utf8')
 const cupPage = readFileSync(new URL('./fixtures/wikipedia-cup.wiki', import.meta.url), 'utf8')
+const extraTimePage = readFileSync(new URL('./fixtures/wikipedia-cup-extra-time.wiki', import.meta.url), 'utf8')
 
 /** A match of ours in the shape of the programme, with these fields. */
 function box(fields: Record<string, string>) {
@@ -67,12 +68,15 @@ describe('the programme and the results', () => {
     expect(matchOf(programme, 'Speelronde 1')).toEqual({
       competition: 'Eredivisie',
       dateText: null,
+      extraTime: false,
       goalsAgainst: 0,
       goalsFor: 1,
       home: true,
       kickoffAt: new Date('2026-08-09T14:45:00Z'),
       matchDate: '2026-08-09',
       opponent: 'FC Twente',
+      penaltiesAgainst: null,
+      penaltiesFor: null,
       round: 'Speelronde 1',
       stadium: 'Abe Lenstra Stadion',
       status: 'played',
@@ -206,12 +210,15 @@ describe('the cup', () => {
         {
           competition: 'KNVB Beker',
           dateText: null,
+          extraTime: false,
           goalsAgainst: null,
           goalsFor: null,
           home: false,
           kickoffAt: new Date('2026-10-28T20:00:00Z'),
           matchDate: '2026-10-28',
           opponent: 'Excelsior Maassluis',
+          penaltiesAgainst: null,
+          penaltiesFor: null,
           round: 'Eerste ronde',
           stadium: 'Sportpark Dijkpolder',
           status: 'scheduled',
@@ -239,6 +246,97 @@ describe('the cup', () => {
   it('reads a page without any Footballbox2 template as no matches, and says so', () => {
     expect(readCup('Een kale pagina')).toEqual({ hasTemplates: false, kind: 'read', lastPlayedOn: null, matches: [] })
     expect(readCup(cupPage)).toMatchObject({ hasTemplates: true })
+  })
+})
+
+describe('extra time and a shoot-out in the cup', () => {
+  const tie = (fields: Record<string, string>, score = '1&nbsp;–&nbsp;1') =>
+    `==== Eerste ronde ====\n{{Footballbox2\n${Object.entries({
+      date: '28 oktober 2026',
+      score,
+      team1: '[[sc Heerenveen]]',
+      team2: '[[Testdorp FC]]',
+      time: '20:00 uur',
+      ...fields,
+    })
+      .map(([key, value]) => `|${key} = ${value}`)
+      .join('\n')}\n}}`
+
+  it('reads a win after extra time, a win on penalties and a loss on penalties, from our side', () => {
+    expect(readCup(extraTimePage)).toMatchObject({
+      matches: [
+        { extraTime: true, goalsAgainst: 1, goalsFor: 2, home: false, penaltiesAgainst: null, penaltiesFor: null },
+        { extraTime: true, goalsAgainst: 1, goalsFor: 1, home: true, penaltiesAgainst: 3, penaltiesFor: 4 },
+        { extraTime: true, goalsAgainst: 2, goalsFor: 2, home: false, penaltiesAgainst: 5, penaltiesFor: 4 },
+      ],
+    })
+  })
+
+  it('has no extra time and no shoot-out for a match that does not say so', () => {
+    expect(readCup(tie({ aet: '', penaltyscore: '' }))).toMatchObject({
+      matches: [{ extraTime: false, penaltiesAgainst: null, penaltiesFor: null }],
+    })
+    expect(readCup(tie({ score: '2&nbsp;–&nbsp;1' }))).toMatchObject({
+      matches: [{ extraTime: false, penaltiesAgainst: null, penaltiesFor: null }],
+    })
+  })
+
+  it('takes any text in the field for extra time as extra time', () => {
+    expect(readCup(tie({ aet: 'ja' }))).toMatchObject({ matches: [{ extraTime: true, penaltiesFor: null }] })
+  })
+
+  it('keeps a level score after extra time without a shoot-out as it is, until the shoot-out is on the page', () => {
+    expect(readCup(tie({ aet: 'J' }))).toMatchObject({
+      matches: [{ extraTime: true, goalsAgainst: 1, goalsFor: 1, penaltiesAgainst: null, penaltiesFor: null }],
+    })
+  })
+
+  it('does not call a match extra time before it has a score', () => {
+    expect(readCup(tie({ aet: 'J' }, ''))).toMatchObject({ matches: [{ extraTime: false, status: 'scheduled' }] })
+  })
+
+  it('turns the score of the shoot-out round when we play away', () => {
+    expect(
+      readCup(tie({ aet: 'J', penaltyscore: '2&nbsp;–&nbsp;4', team1: '[[Testdorp FC]]', team2: '[[sc Heerenveen]]' })),
+    ).toMatchObject({
+      matches: [{ penaltiesAgainst: 2, penaltiesFor: 4 }],
+    })
+  })
+
+  it.each([
+    [
+      'a score of the shoot-out we do not know',
+      { aet: 'J', penaltyscore: 'vier – drie' },
+      'a shoot-out score we do not know',
+    ],
+    ['a shoot-out with a note', { aet: 'J', penaltyscore: '4 – 3 (n.s.)' }, 'a shoot-out score we do not know'],
+    ['a shoot-out without extra time', { penaltyscore: '4 – 3' }, 'a shoot-out without extra time'],
+    [
+      'a shoot-out after a score that is not level',
+      { aet: 'J', penaltyscore: '4 – 3', score: '2 – 1' },
+      'no level score',
+    ],
+    ['a shoot-out before the match has a score', { aet: 'J', penaltyscore: '4 – 3', score: '' }, 'no level score'],
+  ])('fails on %s, so the import keeps what it has', (_name, fields, reason) => {
+    const read = readCup(tie(fields))
+
+    expect(read).toMatchObject({ kind: 'error' })
+    expect(JSON.stringify(read)).toContain(reason)
+  })
+
+  it('fails on a league match with extra time or a shoot-out, which only the cup has', () => {
+    for (const fields of [{ aet: 'J' }, { penaltyscore: '4 – 3' }, { aet: 'J', penaltyscore: '4 – 3' }]) {
+      const read = readLeague(leagueWith(box({ score: '1 – 1', ...fields })))
+
+      expect(read).toMatchObject({ kind: 'error' })
+      expect(JSON.stringify(read)).toContain('which only the cup has')
+    }
+  })
+
+  it('reads a league match with empty fields for them, as Wikipedia has it', () => {
+    expect(readLeague(leagueWith(box({ aet: '', penaltyscore: '', score: '1 – 1' })))).toMatchObject({
+      matches: [{ extraTime: false, penaltiesFor: null }],
+    })
   })
 })
 

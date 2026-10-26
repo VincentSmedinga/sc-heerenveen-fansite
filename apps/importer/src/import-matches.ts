@@ -222,14 +222,27 @@ async function checkEmptyCupPage(db: Database, season: string, title: string): P
 }
 
 /** The text of a result as a warning has it, from the side of the home team. */
-function describeResult(match: Pick<Match, 'goalsAgainst' | 'goalsFor' | 'home' | 'opponent' | 'status'>): string {
+function describeResult(
+  match: Pick<
+    Match,
+    'goalsAgainst' | 'goalsFor' | 'home' | 'opponent' | 'penaltiesAgainst' | 'penaltiesFor' | 'status'
+  >,
+): string {
   if (match.status !== 'played') {
     return 'no result'
   }
 
-  return match.home
+  const result = match.home
     ? `sc Heerenveen ${match.goalsFor}-${match.goalsAgainst} ${match.opponent}`
     : `${match.opponent} ${match.goalsAgainst}-${match.goalsFor} sc Heerenveen`
+
+  if (match.penaltiesFor === null || match.penaltiesAgainst === null) {
+    return result
+  }
+
+  return match.home
+    ? `${result} (penalties ${match.penaltiesFor}-${match.penaltiesAgainst})`
+    : `${result} (penalties ${match.penaltiesAgainst}-${match.penaltiesFor})`
 }
 
 /** Fetches the three pages one after the other, or says why one could not be read. */
@@ -273,6 +286,9 @@ function isSame(before: Match, now: ReadMatch): boolean {
     before.status === now.status &&
     before.goalsFor === now.goalsFor &&
     before.goalsAgainst === now.goalsAgainst &&
+    before.extraTime === now.extraTime &&
+    before.penaltiesFor === now.penaltiesFor &&
+    before.penaltiesAgainst === now.penaltiesAgainst &&
     before.matchDate === now.matchDate &&
     before.kickoffAt?.getTime() === now.kickoffAt?.getTime() &&
     before.dateText === now.dateText
@@ -402,12 +418,16 @@ async function storeMatches(
         before.status === match.status &&
         before.goalsFor === match.goalsFor &&
         before.goalsAgainst === match.goalsAgainst
+      // A shoot-out that arrives later is news, not a change; one that changes is a change.
+      const samePenalties =
+        before.penaltiesFor === null ||
+        (before.penaltiesFor === match.penaltiesFor && before.penaltiesAgainst === match.penaltiesAgainst)
       const stoodLong =
         before.status === 'played' &&
         before.resultSetAt !== null &&
         now.getTime() - before.resultSetAt.getTime() >= resultStandsAfterMs
 
-      if (!sameResult && stoodLong) {
+      if ((!sameResult || !samePenalties) && stoodLong) {
         warnings.push(
           `the result of ${match.round} (${match.competition}) changed after ${Math.floor((now.getTime() - (before.resultSetAt?.getTime() ?? 0)) / (24 * 60 * 60 * 1000))} days, from ${describeResult(before)} to ${describeResult(match)}`,
         )

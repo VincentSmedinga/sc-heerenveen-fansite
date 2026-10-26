@@ -235,8 +235,9 @@ const day = 24 * 60 * 60 * 1000
  *
  * It covers every case a page must show: played at home and away, still to be played
  * with a kick-off, still to be played without one (the weekend as text), postponed, and
- * a cup tie. `result_set_at` stays empty, so the import never warns about a made-up
- * result it replaces.
+ * a cup tie, and three played cup ties with extra time or a shoot-out: a win after extra time,
+ * a win on penalties and a loss on penalties. `result_set_at` stays empty, so the import never
+ * warns about a made-up result it replaces.
  */
 export function madeUpMatches(now: Date): NewMatch[] {
   const season = seasonOf(now)
@@ -254,6 +255,52 @@ export function madeUpMatches(now: Date): NewMatch[] {
   const base = { resultSetAt: null, season, stadium: null } as const
 
   return [
+    {
+      ...base,
+      competition: 'KNVB Beker',
+      extraTime: true,
+      goalsAgainst: 1,
+      goalsFor: 2,
+      home: false,
+      kickoffAt: at(-70, 18, 0),
+      matchDate: dayOf(at(-70, 18, 0)),
+      opponent: 'FC Maquette',
+      round: 'Eerste ronde',
+      stadium: 'Sportpark Maquette',
+      status: 'played',
+    },
+    {
+      ...base,
+      competition: 'KNVB Beker',
+      extraTime: true,
+      goalsAgainst: 1,
+      goalsFor: 1,
+      home: true,
+      kickoffAt: at(-60, 18, 45),
+      matchDate: dayOf(at(-60, 18, 45)),
+      opponent: 'Oefenstad FC',
+      penaltiesAgainst: 3,
+      penaltiesFor: 4,
+      round: 'Achtste finale',
+      stadium: 'Stadion Proeflaan',
+      status: 'played',
+    },
+    {
+      ...base,
+      competition: 'KNVB Beker',
+      extraTime: true,
+      goalsAgainst: 2,
+      goalsFor: 2,
+      home: false,
+      kickoffAt: at(-50, 19, 0),
+      matchDate: dayOf(at(-50, 19, 0)),
+      opponent: 'SV Voorbeelddorp',
+      penaltiesAgainst: 5,
+      penaltiesFor: 4,
+      round: 'Kwartfinale',
+      stadium: 'Sportpark Voorbeelddorp',
+      status: 'played',
+    },
     {
       ...base,
       competition: 'Eredivisie',

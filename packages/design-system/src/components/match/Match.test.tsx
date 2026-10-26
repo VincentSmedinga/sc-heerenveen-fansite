@@ -106,6 +106,122 @@ describe('Match', () => {
     expect(cls()).toBe('hf-match-score hf-match-versus')
   })
 
+  describe('extra time and a shoot-out', () => {
+    const cup = { ...played, competition: 'KNVB Beker', goalsAgainst: 1, goalsFor: 1, round: 'Tweede ronde' } as const
+    const label = (container: HTMLElement) => container.querySelector('.hf-match-label')
+    const score = (container: HTMLElement) => container.querySelector('.hf-match-score')
+    const seen = (container: HTMLElement) => score(container)?.querySelector('[aria-hidden="true"]')
+    const heard = (container: HTMLElement) => score(container)?.querySelector('.hf-visually-hidden')?.textContent
+
+    it('says "n.v." right after the result, with the full words in the title and for a screen reader', () => {
+      const { container } = render(<Match {...cup} extraTime goalsFor={2} />)
+
+      expect(seen(container)?.textContent).toBe('2–1 n.v.')
+      expect(seen(container)?.querySelector('abbr')?.getAttribute('title')).toBe('Na verlenging')
+      expect(heard(container)).toBe('2 tegen 1, na verlenging')
+    })
+
+    it('says "n.s." and the shoot-out right after the result, in the order of the clubs', () => {
+      const { container, rerender } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
+
+      expect(seen(container)?.textContent).toBe('1–1 (4–3 n.s.)')
+      expect(seen(container)?.querySelector('abbr')?.getAttribute('title')).toBe('Na strafschoppen')
+      expect(heard(container)).toBe('1 tegen 1, na strafschoppen 4 tegen 3')
+
+      rerender(<Match {...cup} extraTime home={false} penaltiesAgainst={3} penaltiesFor={4} />)
+
+      expect(seen(container)?.textContent).toBe('1–1 (3–4 n.s.)')
+      expect(heard(container)).toBe('1 tegen 1, na strafschoppen 3 tegen 4')
+    })
+
+    it('says only "n.s." after a shoot-out, since a shoot-out comes after extra time', () => {
+      const { container } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
+
+      expect(seen(container)?.textContent).not.toContain('n.v.')
+    })
+
+    it('keeps the label to the competition and the round, and adds nothing to a match without extra time', () => {
+      const { container } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
+
+      expect(label(container)?.textContent).toBe('KNVB Beker · Tweede ronde')
+
+      const plain = render(<Match {...cup} />)
+
+      expect(seen(plain.container)?.textContent).toBe('1–1')
+      expect(plain.container.querySelector('abbr')).toBeNull()
+      expect(heard(plain.container)).toBe('1 tegen 1')
+    })
+
+    it.each([
+      { against: 3, for: 4, home: true, outcome: 'win' },
+      { against: 5, for: 4, home: true, outcome: 'loss' },
+      { against: 3, for: 4, home: false, outcome: 'win' },
+      { against: 5, for: 4, home: false, outcome: 'loss' },
+      { against: 4, for: 4, home: true, outcome: 'draw' },
+    ])(
+      'colours a level score by the shoot-out, $for to $against for sc Heerenveen at home $home, as a $outcome',
+      ({ against, for: goals, home, outcome }) => {
+        const { container } = render(
+          <Match {...cup} extraTime home={home} penaltiesAgainst={against} penaltiesFor={goals} />,
+        )
+
+        expect(score(container)?.className).toBe(`hf-match-score hf-match-${outcome}`)
+      },
+    )
+
+    it('colours a win after extra time by the score, and a level score without a shoot-out neutral', () => {
+      const { container, rerender } = render(<Match {...cup} extraTime goalsAgainst={1} goalsFor={2} />)
+
+      expect(score(container)?.className).toBe('hf-match-score hf-match-win')
+
+      rerender(<Match {...cup} extraTime />)
+
+      expect(score(container)?.className).toBe('hf-match-score hf-match-draw')
+    })
+
+    it('does not pass extra time or the shoot-out on to the element', () => {
+      const { container } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
+
+      expect(container.firstElementChild?.hasAttribute('extratime')).toBe(false)
+      expect(container.firstElementChild?.hasAttribute('penaltiesfor')).toBe(false)
+    })
+
+    it('needs both scores of a shoot-out, and has none for a match that is not played', () => {
+      const half = (
+        // @ts-expect-error A shoot-out has two scores.
+        <Match
+          competition="KNVB Beker"
+          dateTime="2026-11-01"
+          extraTime
+          goalsAgainst={1}
+          goalsFor={1}
+          home
+          opponent="Testdorp FC"
+          penaltiesFor={4}
+          round="Tweede ronde"
+          status="played"
+          time="zo 1 nov"
+        />
+      )
+      const early = (
+        // @ts-expect-error A match that is not played has no extra time.
+        <Match
+          competition="KNVB Beker"
+          dateTime="2026-11-01"
+          extraTime
+          home
+          opponent="Testdorp FC"
+          round="Tweede ronde"
+          status="scheduled"
+          time="zo 1 nov"
+        />
+      )
+
+      expect(half).toBeTruthy()
+      expect(early).toBeTruthy()
+    })
+  })
+
   it('shows a goalless draw as 0–0', () => {
     const { container } = render(<Match {...played} goalsAgainst={0} goalsFor={0} />)
 

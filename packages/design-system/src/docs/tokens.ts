@@ -110,7 +110,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
     tokens: [
       { name: '--hf-colour-outcome-win', use: 'Uitslag van een gewonnen wedstrijd van sc Heerenveen' },
       { name: '--hf-colour-outcome-loss', use: 'Uitslag van een verloren wedstrijd van sc Heerenveen' },
-      { name: '--hf-colour-outcome-draw', use: 'Uitslag van een gelijkspel, ook in de beker' },
+      { name: '--hf-colour-outcome-draw', use: 'Uitslag van een gelijkspel, ook in de beker zonder strafschoppen' },
     ],
   },
   {

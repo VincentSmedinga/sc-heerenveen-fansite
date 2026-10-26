@@ -7,7 +7,16 @@ import type { MatchData } from './matches'
  * them. Read it with the afternoon of Friday 23 October 2026 (Dutch time) as now.
  */
 
-const base = { dateText: null, goalsAgainst: null, goalsFor: null, kickoffAt: null, stadium: null } as const
+const base = {
+  dateText: null,
+  extraTime: false,
+  goalsAgainst: null,
+  goalsFor: null,
+  kickoffAt: null,
+  penaltiesAgainst: null,
+  penaltiesFor: null,
+  stadium: null,
+} as const
 
 export const matchData: MatchData = {
   matches: [

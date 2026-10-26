@@ -527,6 +527,12 @@ export const matchLimits = { dateText: 60, opponent: 100, round: 60, season: 7, 
  * true for a match at the Abe Lenstra Stadion. `goals_for` and `goals_against` are the goals
  * of sc Heerenveen and of the opponent, and both are empty unless the match is `played`.
  *
+ * `extra_time` is true when a played cup match went to extra time. When the score was still
+ * level after that, a shoot-out decides it, and `penalties_for` and `penalties_against` hold
+ * its score from the side of sc Heerenveen and of the opponent: both or neither. Only the cup
+ * has them, and `goals_for` and `goals_against` stay the score as Wikipedia gives it, shoot-out
+ * not included.
+ *
  * `match_date` is the local day (Europe/Amsterdam), or the first day when Wikipedia only knows
  * a weekend. `kickoff_at` is the kick-off in UTC and is empty while the time is unknown: the
  * KNVB announces the times of rounds 22 to 32 on 22 December 2026. `date_text` then holds the
@@ -549,6 +555,9 @@ export const matches = mysqlTable(
     status: mysqlEnum('status', matchStatuses).notNull(),
     goalsFor: int('goals_for', { unsigned: true }),
     goalsAgainst: int('goals_against', { unsigned: true }),
+    extraTime: boolean('extra_time').notNull().default(false),
+    penaltiesFor: int('penalties_for', { unsigned: true }),
+    penaltiesAgainst: int('penalties_against', { unsigned: true }),
     matchDate: date('match_date', { mode: 'string' }).notNull(),
     kickoffAt: datetime('kickoff_at'),
     dateText: varchar('date_text', { length: matchLimits.dateText }),
@@ -562,6 +571,18 @@ export const matches = mysqlTable(
       sql`(${table.status} = 'played' and ${table.goalsFor} is not null and ${table.goalsAgainst} is not null) or (${table.status} <> 'played' and ${table.goalsFor} is null and ${table.goalsAgainst} is null)`,
     ),
     check('matches_time_or_text', sql`${table.kickoffAt} is not null or ${table.dateText} is not null`),
+    check(
+      'matches_extra_time_only_in_played_cup',
+      sql`${table.extraTime} = 0 or (${table.status} = 'played' and ${table.competition} = 'KNVB Beker')`,
+    ),
+    check(
+      'matches_penalties_in_a_pair',
+      sql`(${table.penaltiesFor} is null and ${table.penaltiesAgainst} is null) or (${table.penaltiesFor} is not null and ${table.penaltiesAgainst} is not null)`,
+    ),
+    check(
+      'matches_penalties_after_level_extra_time',
+      sql`${table.penaltiesFor} is null or (${table.extraTime} = 1 and ${table.goalsFor} = ${table.goalsAgainst})`,
+    ),
   ],
 )
 
