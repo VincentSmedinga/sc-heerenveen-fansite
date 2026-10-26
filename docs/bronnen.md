@@ -17,7 +17,7 @@ We deden dat met de user agent van de importer, `scHeerenveenFansite/0.1.0 (+htt
 Een pad dat `robots.txt` voor ons weigert, hebben we niet opgehaald.
 Een feed die doorverwees, hebben we op het nieuwe adres één keer opgehaald.
 Wat we vonden, is een momentopname van die dag.
-Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS en het Algemeen Dagblad op 26 oktober 2026, alle drie met een run van de importer (zie bij de bron).
+Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS, het Algemeen Dagblad en ESPN NL op 26 oktober 2026, alle vier met een run van de importer (zie bij de bron).
 
 - **Wat we tellen:** het aantal berichten, de datum van het nieuwste (in UTC) en hoeveel berichten over sc Heerenveen gaan.
   Een bericht gaat over de club als "Heerenveen" in de kop of in de categorieën staat, zonder op hoofdletters te letten.
