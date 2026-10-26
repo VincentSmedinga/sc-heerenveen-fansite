@@ -611,6 +611,91 @@ describe('importing a regional feed, the way the register has it', () => {
   })
 })
 
+describe('importing the football feed of NOS, the way the register has it', () => {
+  const sample = readFileSync(new URL('./fixtures/nos-sample.xml', import.meta.url), 'utf8')
+  const nosRun = new Date('2026-10-26T12:00:00Z')
+
+  /** The football feed of NOS as the seed registers it, pointed at the test server. */
+  async function nosFeed(origin: string) {
+    await seedSources(database.db)
+
+    const [row] = await database.db
+      .select({ id: feeds.id })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, 'nos.nl'))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  it('reads the feed, gives every item its value and counts them', async () => {
+    const server = await serve(sample)
+    const feed = await nosFeed(server.origin)
+
+    expect(feed.filter).toBe('club')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, nosRun)
+
+    expect(report).toMatchObject({ added: 8, relevance: { doubtful: 2, irrelevant: 4, relevant: 2 }, skipped: [] })
+    expect(Object.fromEntries((await itemsInDatabase()).map((row) => [row.title, row.relevance]))).toEqual({
+      'Ajax wint thuis van Fortuna Sittard': 'irrelevant',
+      'Brand in een schuur in Heerenveen is onder controle': 'doubtful',
+      'De speelronde in het kort: Twente wint en Utrecht verliest': 'irrelevant',
+      'Heerenveen wint van Volendam na een late treffer': 'relevant',
+      'Liverpool verliest bij een promovendus': 'irrelevant',
+      'sc Heerenveen speelt gelijk tegen Excelsior': 'relevant',
+      'Spanning bij de top: PSV en Feyenoord spelen gelijk': 'irrelevant',
+      'Veldman denkt na over zijn toekomst': 'doubtful',
+    })
+  })
+
+  it('keeps the time of publication in UTC, across the end of summer time, and the link', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await nosFeed(server.origin), nosRun)
+
+    const rows = await database.db.select().from(items)
+    const byLink = Object.fromEntries(rows.map((row) => [row.url, row.publishedAt]))
+
+    expect(byLink['https://nos.test/l/1000001']).toEqual(new Date('2026-10-24T20:53:01Z'))
+    expect(byLink['https://nos.test/l/1000003']).toEqual(new Date('2026-10-25T07:01:31Z'))
+    expect(rows.every((row) => !row.paywalled)).toBe(true)
+  })
+
+  it('keeps nothing of the description or the image', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await nosFeed(server.origin), nosRun)
+
+    const stored = JSON.stringify(await database.db.select().from(items))
+
+    expect(stored).not.toContain('verzonnen intro')
+    expect(stored).not.toContain('alinea')
+    expect(stored).not.toContain('samenvatting')
+    expect(stored).not.toContain('images.nos.test')
+    expect(stored).not.toContain('.webp')
+  })
+
+  it('shows only the relevant items to a visitor, however new the others are', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await nosFeed(server.origin), nosRun)
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-10-27T00:00:00Z') })
+
+    expect(shown.map((item) => item.title)).toEqual([
+      'sc Heerenveen speelt gelijk tegen Excelsior',
+      'Heerenveen wint van Volendam na een late treffer',
+    ])
+    expect(shown.every((item) => item.sourceName === 'NOS')).toBe(true)
+  })
+})
+
 describe('an item that cannot be stored', () => {
   it('is skipped and reported, and the rest of the feed is stored', async () => {
     const server = await serve(

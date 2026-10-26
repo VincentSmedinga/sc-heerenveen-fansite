@@ -17,7 +17,7 @@ We deden dat met de user agent van de importer, `scHeerenveenFansite/0.1.0 (+htt
 Een pad dat `robots.txt` voor ons weigert, hebben we niet opgehaald.
 Een feed die doorverwees, hebben we op het nieuwe adres één keer opgehaald.
 Wat we vonden, is een momentopname van die dag.
-Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, met een run van de importer (zie bij de bron).
+Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS op 26 oktober 2026, beide met een run van de importer (zie bij de bron).
 
 - **Wat we tellen:** het aantal berichten, de datum van het nieuwste (in UTC) en hoeveel berichten over sc Heerenveen gaan.
   Een bericht gaat over de club als "Heerenveen" in de kop of in de categorieën staat, zonder op hoofdletters te letten.
@@ -70,8 +70,8 @@ Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in 
 
 | Besluit                             | Bronnen                                                                                                                                                                                                                                                       |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), Omroep Abe (podcast), Radio Camataru (podcast)                                                                                                             |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed), NOS, Algemeen Dagblad, ESPN NL                                                                                                                                                                                            |
+| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Omroep Abe (podcast), Radio Camataru (podcast)                                                                                       |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed), Algemeen Dagblad, ESPN NL                                                                                                                                                                                                 |
 | Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                              |
 | Afwijzen                            | RTV Noord, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Rijnmond, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast |
 
@@ -179,11 +179,50 @@ Al in het register (#258), met het filter `club`.
 - **Importer:** leest de feed zonder aanpassing.
   Een run bewaarde alle 50 berichten, zonder er een over te slaan, en alle tijden waren geldig.
 
+### NOS
+
+Al in het register (#307), met het filter `club`.
+
+- **Domein:** `nos.nl` (de feeds staan op `feeds.nos.nl`)
+- **Soort:** nieuws, publieke omroep
+- **Feed:** `https://feeds.nos.nl/nosvoetbal`
+  - Werkt: ja, RSS 2.0 met 20 berichten.
+    Op 26 oktober 2026 was het nieuwste van 26 oktober (09:12 UTC) en het oudste van 24 oktober (17:45 UTC).
+    Elk bericht heeft een beschrijving met HTML, een afbeelding (`enclosure`), een `guid` en een tijd met zone.
+  - Over sc Heerenveen: op 26 oktober 2026 noemde 1 van de 20 koppen "Heerenveen".
+    Een tweede bericht, een samenvatting van de speelronde, noemt alleen in de tekst de voetbalsters van sc Heerenveen.
+  - Betaalmuur: nee; de feed geeft er geen teken van, en de run van 26 oktober bewaarde geen bericht als betaalmuur.
+  - Het filter, op 26 oktober 2026: van de 20 berichten kreeg 1 de waarde `relevant`, 0 `doubtful` en 19 `irrelevant`.
+    Het `relevant` bericht is het wedstrijdverslag van de club.
+    Geen bericht over de club staat bij de 19, en geen bericht over iets anders staat bij het `relevant`.
+    Het filter kijkt alleen naar de kop: de samenvatting van de speelronde noemt het vrouwenteam alleen in de tekst en valt dus af.
+    Dat is hier goed, want de site gaat over het eerste mannenelftal.
+    Wat het filter doet, staat in de README van de importer, onder _Het relevantiefilter_.
+- **`robots.txt`:** `feeds.nos.nl` heeft er geen (404, ook op 26 oktober 2026 opnieuw met de user agent van de importer), dus alles mag.
+  Op `nos.nl` zelf weigert `robots.txt` een lijst crawlers van AI-bedrijven bij naam, en wij staan er niet bij; de importer leest alleen de feed, geen pagina's van `nos.nl`.
+- **Voorwaarden** (`over.nos.nl/organisatie/regelgeving/`, sinds kort doorverwezen naar `over.nos.nl/organisatie/algemene-voorwaarden-nos/`), opnieuw gelezen op 26 oktober 2026: bots of AI-systemen mogen niet automatisch data verzamelen, tenzij NOS dat uitdrukkelijk toestaat.
+  Content kopiëren, bewerken of verspreiden mag niet zonder toestemming.
+  Over RSS-feeds staat er niets.
+  De pagina `nos.nl/feeds` somt de feeds op, noemt zelf geen voorwaarden en heeft er alleen een link naar in de voettekst.
+  Het voorbehoud tegen automatisch verzamelen is een risico dat geen jurist heeft getoetst.
+  Schriftelijk toestemming vragen aan NOS hoort bij #35.
+- **Meer tonen:** de voorwaarden vragen toestemming voor kopiëren en verspreiden; we tonen niet meer dan de standaard.
+  De beschrijving en de afbeelding in de feed bewaren we niet en tonen we niet.
+- **Besluit: nemen, met het filter `club`.**
+  De feed gaat over het voetbal in Nederland en daarbuiten, met de Eredivisie als een groot deel, en het filter laat alleen de berichten over de club door.
+  NOS biedt de feed zelf aan, en we nemen alleen de kop en de link.
+  Zegt NOS dat we moeten stoppen, dan zetten we de bron meteen uit (`enabled` in het register), zoals bij elke bron.
+  Controle van 26 oktober 2026, met een lokale run van de importer.
+  Op 24 oktober 2026 telden we nog 0 berichten over de club in de feed; die telling was een momentopname van twee dagen.
+- **Importer:** leest de feed zonder aanpassing.
+  Een run bewaarde alle 20 berichten, zonder er een over te slaan, en alle tijden waren geldig.
+  Er bestaat geen kolom voor de beschrijving of de afbeelding, dus de importer bewaart ze niet.
+
 ## Nemen na het relevantiefilter (#74)
 
 Deze feeds zijn breed.
 Ze staan nog niet in het register.
-Het filter dat de berichten over de club eruit haalt, is er nu (#74), en Omrop Fryslân (hierboven) is de eerste feed die ermee draait.
+Het filter dat de berichten over de club eruit haalt, is er nu (#74), en Omrop Fryslân en NOS (hierboven) draaien ermee.
 Een telling op één momentopname van een paar dagen zegt weinig over hoe vaak de club erin staat; dat meten we per bron, met een run van de importer, zoals bij Omrop Fryslân.
 
 ### Voetbal International, de brede feed
@@ -198,24 +237,6 @@ De bron staat al in het register (zie boven), maar deze feed niet.
 - **Besluit: nemen na het relevantiefilter (#74).**
   De feed bevat alle voetbalnieuws van het blad, en daar staat de club regelmatig tussen.
   De tagfeed hierboven bevat al wat over de club gaat.
-
-### NOS
-
-- **Domein:** `nos.nl` (de feeds staan op `feeds.nos.nl`)
-- **Soort:** nieuws, publieke omroep
-- **Feed:** `https://feeds.nos.nl/nosvoetbal`
-  - Werkt: ja, RSS 2.0 met 20 berichten; het nieuwste is van 23 oktober 2026, het oudste van 21 oktober 2026.
-  - Over sc Heerenveen: geen enkel bericht in de kop, de categorieën of de intro.
-  - Betaalmuur: nee; de feed geeft er geen teken van.
-- **`robots.txt`:** `feeds.nos.nl` heeft er geen (404), dus alles mag.
-- **Voorwaarden** (`over.nos.nl/organisatie/regelgeving/`): bots en AI-systemen mogen niet automatisch gegevens verzamelen, tenzij NOS dat uitdrukkelijk toestaat.
-  Anderen mogen NOS-inhoud delen voor persoonlijk, niet-commercieel gebruik, en linken naar NOS-pagina's mag.
-  Een voorbehoud op grond van artikel 4 staat er niet; over RSS-feeds staat er niets.
-  De pagina `nos.nl/feeds` somt de feeds op en noemt geen voorwaarden.
-- **Meer tonen:** de voorwaarden vragen toestemming voor kopiëren en verspreiden.
-- **Besluit: nemen na het relevantiefilter (#74).**
-  De feed gaat over het voetbal in Nederland en daarbuiten, met de Eredivisie als een groot deel.
-  De voorwaarden noemen automatisch verzamelen zonder toestemming; NOS biedt de feed zelf aan, maar dat leggen we bij #74 nog eens voor.
 
 ### Algemeen Dagblad
 
@@ -614,7 +635,7 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
 
 ## Wat de importer nog mist
 
-Alle bronnen met het besluit "nemen" werken met de importer zoals hij is, ook Omrop Fryslân met het filter.
+Alle bronnen met het besluit "nemen" werken met de importer zoals hij is, ook Omrop Fryslân en NOS met het filter.
 Voor deze bronnen met "nemen na het relevantiefilter (#74)" moet er eerst iets bij, buiten het filter zelf:
 
 - **Algemeen Dagblad:** de adapter leest `<dpp:paid>` niet, dus een bericht achter de betaalmuur zou niet worden herkend.

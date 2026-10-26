@@ -4974,3 +4974,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de stand is op punten gesorteerd en het doelsaldo is alleen de tweede maatstaf.
   Wie de tabel van links naar rechts leest, komt dus eerst bij wat telt.
 - **Alternatieven:** de punten achteraan laten, zoals veel sites (de projecteigenaar wilde ze eerder); de punten direct na de club zetten (verbreekt de rij gespeeld, gewonnen, gelijk, verloren).
+
+### We nemen NOS Voetbal, met het filter `club`
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het register krijgt de voetbalfeed van NOS (`https://feeds.nos.nl/nosvoetbal`) met het filter `club`.
+  De bron toont alleen de kop, de link, de bronnaam en de tijd.
+  De beschrijving en de afbeelding in de feed bewaart de importer niet en toont de site niet.
+- **Waarom:** NOS is de grootste nieuwsbron over de Eredivisie en publiceert de feed zelf.
+  De voetbalfeed gaat over precies ons onderwerp, en het filter laat alleen de berichten over sc Heerenveen door.
+  De sportfeed is breder en heeft minder berichten over voetbal.
+  Het voorbehoud van NOS tegen automatisch verzamelen is een risico, maar we nemen alleen een kop en een link en stoppen op verzoek, zoals bij #10 besloten.
+- **Gemeten op de echte feed** (26 oktober 2026, één run van de importer): 20 berichten bewaard, waarvan 1 `relevant`, 0 `doubtful` en 19 `irrelevant`.
+  Het ene `relevant` bericht is het wedstrijdverslag van de club, en geen bericht over de club staat bij de 19.
+  De importer leest de feed dus zonder aanpassing.
+- **Alternatieven:** de sportfeed van NOS (breder, met minder voetbal en een kortere periode); wachten op schriftelijke toestemming van NOS (voorzichtiger, maar NOS antwoordt zelden en we missen intussen de landelijke berichten over de club).
+- **Daarna:** schriftelijk toestemming vragen aan NOS hoort bij #35; de projecteigenaar nam het voorbehoud van NOS aan bij het goedkeuren van het issue.
