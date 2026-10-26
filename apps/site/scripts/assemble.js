@@ -134,3 +134,11 @@ await bundleCommand(
 // with Node over SSH (see docs/acceptatieomgeving.md). It needs only DATABASE_URL, which an SSH
 // session doesn't get from the Node.js app: it comes from the same file as for the importer.
 await bundleCommand(path.resolve(import.meta.dirname, '../src/admin.ts'), path.join(siteFolder, 'admin.mjs'))
+// The nightly dump, which cron starts on the host, and the restore command that the owner runs
+// over SSH (see docs/back-ups.md). One file for both, with everything it needs, next to the
+// migrations it belongs with. It needs DATABASE_URL and BACKUP_FOLDER, from the same file as
+// the importer.
+await bundleCommand(
+  path.resolve(import.meta.dirname, '../../../packages/db/src/backup-command.ts'),
+  path.join(target, 'packages/db/backup.mjs'),
+)

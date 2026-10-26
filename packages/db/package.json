@@ -18,8 +18,10 @@
     "./test-database": "./src/test-database.ts"
   },
   "scripts": {
+    "db:backup": "node --env-file-if-exists=../../.env src/backup-command.ts backup",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=../../.env src/migrate.ts",
+    "db:restore": "node --env-file-if-exists=../../.env src/backup-command.ts restore",
     "db:seed": "node --env-file-if-exists=../../.env src/seed.ts",
     "test": "vitest run",
     "typecheck": "tsc -b"

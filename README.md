@@ -58,7 +58,7 @@ Zonder zinnen toont de pagina de nieuwe versie niet.
 De database draait in Docker.
 Start hem met `docker compose up -d --wait`, en maak dan de tabellen met `pnpm db:migrate`.
 Zonder database slagen de tests van `packages/db` niet.
-[`packages/db`](packages/db/README.md) legt de opdrachten `pnpm db:generate`, `pnpm db:migrate` en `pnpm db:seed` uit.
+[`packages/db`](packages/db/README.md) legt de opdrachten `pnpm db:generate`, `pnpm db:migrate` en `pnpm db:seed` uit, en de opdrachten `pnpm db:backup` en `pnpm db:restore` voor een dump van de database.
 
 `pnpm install` zet ook twee git hooks klaar.
 Vóór elke commit herstellen ESLint, Stylelint en Prettier wat ze kunnen; een fout die overblijft, houdt de commit tegen.

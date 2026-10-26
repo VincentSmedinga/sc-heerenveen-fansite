@@ -30,6 +30,8 @@ Draai ze vanuit de root van de repository.
 | `pnpm db:generate` | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                                        |
 | `pnpm db:migrate`  | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had                                       |
 | `pnpm db:seed`     | Zet de testbronnen en de echte bronnen met hun feeds in het register; een tweede keer maakt het geen dubbele |
+| `pnpm db:backup`   | Maakt een gecomprimeerde dump van de database uit `DATABASE_URL` in `BACKUP_FOLDER` (zie _Back-ups_)         |
+| `pnpm db:restore`  | Zet een dump terug in een lege database (zie _Back-ups_)                                                     |
 | `pnpm test`        | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                                                  |
 
 `db:migrate` gebruikt de migrator van `drizzle-orm` en niet drizzle-kit.
@@ -232,6 +234,15 @@ De site roept de eerste aan, in de proxy.
 De tweede draait bij het eerste verzoek van een nieuwe dag in een proces en bij elke run van de import.
 Het IP-adres en de browsertekst staan in geen enkele tabel; `visits.test.ts` zoekt in alle tabellen naar beide.
 De klikken op links (#292) en de cijfers in het beheer (#293) bouwen hierop.
+
+## Back-ups
+
+`pnpm db:backup` en `pnpm db:restore <bestand>` maken een dump en zetten hem terug (`src/backup.ts`).
+Op de host draait cron elke nacht hetzelfde, als `packages/db/backup.mjs` dat `assemble` maakt.
+De dump bevat van `visitor_salts` en `visitor_hashes` alleen de structuur, want de site gooit hun rijen aan het eind van de dag weg.
+Hoe het werkt, hoe je het op de host instelt, hoe je terugzet en wat het aan opslag kost, staat in [`docs/back-ups.md`](../../docs/back-ups.md).
+`BACKUP_FOLDER`, `BACKUP_KEEP_DAYS`, `MYSQLDUMP_COMMAND` en `MYSQL_COMMAND` staan in `.env.example`.
+De tests (`src/backup.test.ts`) geven de opdrachten kleine programma's in plaats van `mysqldump` en `mysql`, en hebben voor het terugzetten een MariaDB nodig.
 
 ## Het logboek van de import en `robots_txt`
 
