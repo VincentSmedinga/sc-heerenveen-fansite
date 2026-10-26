@@ -1,9 +1,9 @@
 /*
  * Colour tokens, in three layers.
  *
- * Colours: blue (hue 255), red (hue 27) and sand (hue 85).
+ * Colours: blue (hue 255), red (hue 27), green (hue 150) and sand (hue 85).
  * Scales: a colour in one strength, made in OKLCH and numbered from light to dark. Only scales have numbers.
- * - Vivid: blue and red, 11 steps each.
+ * - Vivid: blue, red and green, 11 steps each.
  * - Muted: steel, a muted blue (chroma 0.030 to 0.075, steps 200 to 600), and sand (chroma 0.030 and 0.042,
  *   steps 100, 300 and 700). Steel, sand-300 and sand-700 are as light as the grey step with the same number;
  *   sand-100 is as light as blue-100.
@@ -45,6 +45,17 @@
     --hf-colour-red-800: #861116;
     --hf-colour-red-900: #641114;
     --hf-colour-red-950: #450c0e;
+    --hf-colour-green-50: #f0f7f1;
+    --hf-colour-green-100: #deeee1;
+    --hf-colour-green-200: #bfe0c4;
+    --hf-colour-green-300: #91cb9d;
+    --hf-colour-green-400: #5bb270;
+    --hf-colour-green-500: #21994c;
+    --hf-colour-green-600: #15813d;
+    --hf-colour-green-700: #106d33;
+    --hf-colour-green-800: #0a5627;
+    --hf-colour-green-900: #06411b;
+    --hf-colour-green-950: #032d11;
     --hf-colour-grey-50: #faf8f4;
     --hf-colour-grey-100: #f1eee7;
     --hf-colour-grey-200: #e3dfd7;
@@ -126,6 +137,15 @@
     --hf-colour-text-on-band: var(--hf-colour-blue-100);
     --hf-colour-text-on-button: light-dark(var(--hf-colour-white), var(--hf-colour-blue-950));
     --hf-colour-text-on-button-soft: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
+
+    /*
+     * The result of a match for sc Heerenveen, seen from our side: a win is green, a loss is red and a draw is the
+     * quiet colour of secondary text, because a draw is neither good nor bad. Colour only adds to the goals: whoever
+     * can't see it reads the result in the score itself. Text, so each reaches 4.5:1 on the surfaces.
+     */
+    --hf-colour-outcome-win: light-dark(var(--hf-colour-green-700), var(--hf-colour-green-300));
+    --hf-colour-outcome-loss: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
+    --hf-colour-outcome-draw: light-dark(var(--hf-colour-grey-600), var(--hf-colour-blue-200));
 
     /*
      * The focus ring on the dark blue of the header and the match band. The ring of the page (blue-500 in light) is
@@ -218,6 +238,9 @@
       --hf-colour-text-highlight: var(--hf-colour-blue-800);
       --hf-colour-text-on-button: var(--hf-colour-white);
       --hf-colour-text-on-button-soft: var(--hf-colour-blue-800);
+      --hf-colour-outcome-win: var(--hf-colour-green-700);
+      --hf-colour-outcome-loss: var(--hf-colour-red-700);
+      --hf-colour-outcome-draw: var(--hf-colour-grey-600);
       --hf-colour-marker-text: var(--hf-colour-steel-600);
       --hf-colour-marker-graphic: var(--hf-colour-steel-500);
       --hf-colour-border-surface: var(--hf-colour-grey-200);

@@ -63,6 +63,10 @@ type MatchWithTimeProps = MatchBaseProps & {
   time: string
 }
 
+/** How a played match went for sc Heerenveen, whichever side it played on. */
+const outcomeOf = (goalsFor: number, goalsAgainst: number) =>
+  goalsFor > goalsAgainst ? 'win' : goalsFor < goalsAgainst ? 'loss' : 'draw'
+
 // Between the parts of a line. The dot is only for the eye and is hidden from a screen reader.
 // The spaces stay outside the hidden span, so the parts don't run together in the accessibility
 // tree.
@@ -82,8 +86,10 @@ const separator = (
  * The two clubs are in the order they are announced, the home club first, and the line also
  * says "Thuis" or "Uit", so a visitor does not have to work it out. A played match has the
  * result between the names, as "2–0" seen from the home club's side, and a screen reader hears
- * "2 tegen 0". A match that is still to be played has a dash between the names, which is read
- * as "tegen".
+ * "2 tegen 0". The result has the colour of the outcome for sc Heerenveen: green for a win, red
+ * for a loss and neutral for a draw, also in the cup, whichever side it played on. The goals
+ * say the same, so a screen reader hears nothing extra. A match that is still to be played has
+ * a dash between the names, which is read as "tegen".
  * A postponed match says "Uitgesteld" where the time would be.
  */
 export const Match = ({
@@ -101,6 +107,7 @@ export const Match = ({
   ...props
 }: MatchProps) => {
   const [first, second] = home ? [ourClub, opponent] : [opponent, ourClub]
+  const outcome = status === 'played' ? outcomeOf(goalsFor, goalsAgainst) : undefined
   const score =
     status === 'played'
       ? {
@@ -118,7 +125,7 @@ export const Match = ({
       </Text>
       <p className="hf-match-clubs">
         <span className={first === ourClub ? 'hf-match-own' : undefined}>{first}</span>{' '}
-        <span className={classNames('hf-match-score', status !== 'played' && 'hf-match-versus')}>
+        <span className={classNames('hf-match-score', outcome ? `hf-match-${outcome}` : 'hf-match-versus')}>
           <span aria-hidden="true">{score.shown}</span>
           <span className="hf-visually-hidden">{score.hidden}</span>
         </span>{' '}
