@@ -491,6 +491,8 @@ describe('the page of a version', () => {
     expect(headings(html)).toEqual(['h2 Versie 2', 'h1 Tweede titel'])
     expect(html).toContain('Bewaard op 25 oktober 2026 om 11:30 door sanne@example.org.')
     expect(html).toContain('Dit is de huidige versie')
+    expect(html).toContain('Het adres van deze versie is /redactie/welkom.')
+    expect(html).not.toContain('was /redactie/')
     expect(html).toContain('Tweede tekst.')
   })
 

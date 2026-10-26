@@ -53,8 +53,8 @@ export default async function ArticleVersionPage({ params }: { params: Promise<{
             : 'Dit is een eerdere versie. Het artikel is daarna veranderd.'}
         </Text>
         <Text>
-          Het adres van deze versie was /redactie/{version.slug}. Zo ziet een bezoeker deze tekst.{' '}
-          <Link href={articlePath(article.id)}>Terug naar het formulier</Link>
+          {version.newest ? 'Het adres van deze versie is' : 'Het adres van deze versie was'} /redactie/{version.slug}.
+          Zo ziet een bezoeker deze tekst. <Link href={articlePath(article.id)}>Terug naar het formulier</Link>
         </Text>
       </Card>
       <Article
