@@ -8,8 +8,6 @@ import { Time } from '../time/Time'
 const licenceHref = 'https://creativecommons.org/licenses/by-sa/4.0/deed.nl'
 
 export type WikipediaCreditPage = {
-  /** The address of the history of the page on Wikipedia, which names the authors. */
-  historyHref: string
   /** The address of the page on Wikipedia. */
   href: string
   /** What the link says, such as `Eredivisie 2026/27`. */
@@ -44,13 +42,13 @@ type WikipediaCreditBaseProps = Omit<ComponentPropsWithoutRef<'p'>, 'children'> 
 
 /**
  * The credit for data from Wikipedia. The full form says "Bron: Wikipedia (CC BY-SA 4.0)", with
- * a link to each page the data comes from and to its history, the time of the last reading, and
- * a sentence that our own match data are CC BY-SA 4.0 too. The short form (`compact`) says only
+ * a link to each page the data comes from, the time of the last reading, and a sentence that
+ * our own match data are CC BY-SA 4.0 too. The short form (`compact`) says only
  * "Bron: Wikipedia", for a small card on a page that has the full form elsewhere. It is
  * principle 4 of the Redactie ("Altijd de bron vermelden"), and it is a component so that a
- * page with Wikipedia data can't leave it out. Every link has a name of its own: the history
- * link says which page it is the history of, for a screen reader. The links go to another site
- * and are never fetched by the page.
+ * page with Wikipedia data can't leave it out. The link to a page names the page, which is
+ * the credit to its authors: their names are one click away in the history of the article.
+ * The links go to another site and are never fetched by the page.
  */
 export const WikipediaCredit = ({
   className,
@@ -69,11 +67,7 @@ export const WikipediaCredit = ({
         {pages.map((page, index) => (
           <span key={page.href}>
             {index > 0 ? ', ' : ''}
-            <Link href={page.href}>{page.name}</Link> (
-            <Link aria-label={`geschiedenis van ${page.name}`} href={page.historyHref}>
-              geschiedenis
-            </Link>
-            )
+            <Link href={page.href}>{page.name}</Link>
           </span>
         ))}
         . Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze wedstrijdgegevens zijn ook CC BY-SA

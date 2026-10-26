@@ -73,7 +73,13 @@ export const Default = meta.story({
   name: 'Knop',
 })
 
-const surfaceLabels = { default: 'Vlak', soft: 'Zacht vlak', strong: 'Sterk vlak', warm: 'Warm vlak' } as const
+const surfaceLabels = {
+  default: 'Vlak',
+  soft: 'Zacht vlak',
+  strong: 'Sterk vlak',
+  transparent: 'Doorzichtig vlak',
+  warm: 'Warm vlak',
+} as const
 
 const render = () => (
   <div style={{ display: 'grid', gap: '1rem', maxInlineSize: '40rem' }}>

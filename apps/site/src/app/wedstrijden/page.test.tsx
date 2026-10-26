@@ -293,6 +293,14 @@ describe('the page /wedstrijden', () => {
     expect(html.match(/<aside.*<\/aside>/s)?.[0]).toContain('hf-wikipedia-credit')
   })
 
+  it('puts the credit in a card without a border or background to see, and links to no history', async () => {
+    const html = await render()
+
+    expect(html).toMatch(/<div class="hf-card hf-card-transparent"><p class="hf-meta hf-wikipedia-credit"/)
+    expect(html).not.toContain('action=history')
+    expect(html).not.toContain('geschiedenis')
+  })
+
   it('has no link to another site except in the credit, and loads nothing from another domain', async () => {
     const html = await render()
     const outside = html.replace(/<p class="hf-meta hf-wikipedia-credit".*?<\/p>/s, '')

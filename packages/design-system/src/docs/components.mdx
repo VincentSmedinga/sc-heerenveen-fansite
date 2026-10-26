@@ -37,7 +37,7 @@ Op een breed scherm begint de `Page.Sidebar` dan onder de inleiding, op dezelfde
 Een `Card` is zelf een cel: ze heeft geen marge naar buiten.
 De `Page.Body` regelt alle witruimte tussen de kolommen en de cellen.
 Op een middelbaar scherm staat de zijbalk onder de hoofdkolom, met haar cellen in twee gelijke kolommen.
-Heeft de zijbalk een tabel nodig, geef de `Page.Sidebar` dan de eigenschap `wide`: de zijbalk is breder dan de hoofdkolom, de kolommen blijven samen even breed en de cellen staan altijd onder elkaar.
+Heeft de zijbalk een tabel nodig, geef de `Page.Sidebar` dan de eigenschap `wide`: de zijbalk en de hoofdkolom zijn even breed, de kolommen samen blijven net zo breed als zonder, en de cellen staan altijd onder elkaar.
 
 ```tsx
 <Root>
@@ -185,8 +185,9 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
         </td>
         <td>
           <code>section</code> (standaard), <code>div</code>, <code>article</code>, <code>aside</code>;{' '}
-          <code>surface</code> is <code>default</code> (wit), <code>strong</code>, <code>soft</code> of{' '}
-          <code>warm</code>
+          <code>surface</code> is <code>default</code> (wit), <code>strong</code>, <code>soft</code>, <code>warm</code>{' '}
+          of <code>transparent</code> (zonder rand en achtergrond die te zien zijn, en zonder binnenruimte boven en
+          onder)
         </td>
       </tr>
       <tr>
@@ -420,8 +421,8 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
           <code>WikipediaCredit</code>
         </th>
         <td>
-          een <code>p</code> met de bronvermelding voor gegevens van Wikipedia: de licentie, de pagina's met hun
-          geschiedenis, de tijd van het laatste lezen en de licentie van onze eigen gegevens
+          een <code>p</code> met de bronvermelding voor gegevens van Wikipedia: de licentie, de pagina's, de tijd van
+          het laatste lezen en de licentie van onze eigen gegevens
         </td>
         <td>
           <code>pages</code>, <code>readAt</code> en <code>readAtDateTime</code> (alle verplicht, behalve met{' '}

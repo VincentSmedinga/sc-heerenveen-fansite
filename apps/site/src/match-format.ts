@@ -113,11 +113,6 @@ export function weekendText(dateText: string) {
   return day === null ? dateText : `${day[1]} ${day[2]}`
 }
 
-/** The address of the history of a page on the Dutch Wikipedia. */
-export function wikipediaHistoryUrl(title: string) {
-  return `https://nl.wikipedia.org/w/index.php?title=${encodeURIComponent(title.replaceAll(' ', '_'))}&action=history`
-}
-
 /** The address of a page on the Dutch Wikipedia. */
 export function wikipediaUrl(title: string) {
   return `https://nl.wikipedia.org/wiki/${encodeURI(title.replaceAll(' ', '_'))}`

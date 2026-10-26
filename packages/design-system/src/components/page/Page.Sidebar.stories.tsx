@@ -17,7 +17,7 @@ const meta = preview.meta({
           '- Op een middelbaar scherm staan zijn cellen in twee kolommen naast elkaar, onder de hoofdkolom.',
           '- Net als de hoofdkolom bestaat hij uit cellen die onder elkaar staan.',
           '- Geef hem een naam met `aria-label` of `aria-labelledby`.',
-          '- Met `wide` is hij breder dan de hoofdkolom, voor een zijbalk met een tabel. De hoofdkolom wordt er smaller van, zodat samen de kolommen even breed blijven. Zijn cellen staan dan altijd onder elkaar. De `Page.Body` hoef je er niets voor te geven: de zijbalk zegt het zelf.',
+          '- Met `wide` is hij even breed als de hoofdkolom, voor een zijbalk met een tabel. De hoofdkolom wordt er smaller van, zodat samen de kolommen even breed blijven als zonder. Zijn cellen staan dan altijd onder elkaar. De `Page.Body` hoef je er niets voor te geven: de zijbalk zegt het zelf.',
         ].join('\n'),
       },
       source: exampleSource,
@@ -86,7 +86,7 @@ export const WideLight = meta.story({
     ...screen.parameters,
     docs: {
       description: {
-        story: 'Met `wide` is de zijbalk breder dan de hoofdkolom, en samen vullen ze de pagina net als zonder.',
+        story: 'Met `wide` zijn de zijbalk en de hoofdkolom even breed, en samen vullen ze de pagina net als zonder.',
       },
     },
   },

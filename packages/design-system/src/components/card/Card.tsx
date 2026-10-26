@@ -8,10 +8,10 @@ export const cardElements = ['section', 'div', 'article', 'aside'] as const
 export type CardElement = (typeof cardElements)[number]
 
 /**
- * The four surfaces a Card can have, as the colour tokens name them: the surface (white),
- * strong, soft and warm.
+ * The surfaces a Card can have: the four the colour tokens name (the surface (white), strong,
+ * soft and warm) and `transparent`, which has no background or border to see.
  */
-export const cardSurfaces = ['default', 'strong', 'soft', 'warm'] as const
+export const cardSurfaces = ['default', 'strong', 'soft', 'warm', 'transparent'] as const
 
 export type CardProps = ComponentPropsWithoutRef<'section'> & {
   /**
@@ -21,7 +21,9 @@ export type CardProps = ComponentPropsWithoutRef<'section'> & {
   as?: CardElement
   /**
    * The surface: `default` is the white one. Its background and border come from the colour
-   * tokens of that surface.
+   * tokens of that surface. `transparent` keeps the padding at the sides and the space of the
+   * border, so the text sits where it does in the other cards, but shows no background or
+   * border and has no padding above and below.
    */
   surface?: CardSurface
 }

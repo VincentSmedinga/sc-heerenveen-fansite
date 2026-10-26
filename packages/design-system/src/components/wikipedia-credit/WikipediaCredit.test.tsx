@@ -4,13 +4,11 @@ import { describe, expect, it } from 'vitest'
 import { WikipediaCredit } from './WikipediaCredit'
 
 const standings = {
-  historyHref: 'https://nl.wikipedia.org/w/index.php?title=Eredivisie_2026/27_(mannenvoetbal)&action=history',
   href: 'https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)',
   name: 'Eredivisie 2026/27',
 }
 
 const cup = {
-  historyHref: 'https://nl.wikipedia.org/w/index.php?title=KNVB_Beker_2026/27_(mannen)&action=history',
   href: 'https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)',
   name: 'KNVB Beker 2026/27',
 }
@@ -22,40 +20,33 @@ describe('WikipediaCredit', () => {
     const { container } = render(<WikipediaCredit {...props} pages={[standings]} />)
 
     expect(container.textContent).toBe(
-      'Bron: Wikipedia (CC BY-SA 4.0), pagina: Eredivisie 2026/27 (geschiedenis). Laatst gelezen op 25 oktober 2026 om 14:05. Onze wedstrijdgegevens zijn ook CC BY-SA 4.0.',
+      'Bron: Wikipedia (CC BY-SA 4.0), pagina: Eredivisie 2026/27. Laatst gelezen op 25 oktober 2026 om 14:05. Onze wedstrijdgegevens zijn ook CC BY-SA 4.0.',
     )
   })
 
-  it('links to the licence, the page and the history of the page', () => {
+  it('links to the licence and the page, and not to the history of the page', () => {
     render(<WikipediaCredit {...props} pages={[standings]} />)
 
     expect(screen.getByRole('link', { name: 'CC BY-SA 4.0' }).getAttribute('href')).toBe(
       'https://creativecommons.org/licenses/by-sa/4.0/deed.nl',
     )
     expect(screen.getByRole('link', { name: 'Eredivisie 2026/27' }).getAttribute('href')).toBe(standings.href)
-    expect(screen.getByRole('link', { name: 'geschiedenis van Eredivisie 2026/27' }).getAttribute('href')).toBe(
-      standings.historyHref,
-    )
+    expect(screen.getAllByRole('link')).toHaveLength(2)
+    expect(screen.queryByText('geschiedenis')).toBeNull()
   })
 
   it('gives every link a name of its own, also with more than one page', () => {
     render(<WikipediaCredit {...props} pages={[standings, cup]} />)
     const names = screen.getAllByRole('link').map((link) => link.getAttribute('aria-label') ?? link.textContent)
 
-    expect(names).toEqual([
-      'CC BY-SA 4.0',
-      'Eredivisie 2026/27',
-      'geschiedenis van Eredivisie 2026/27',
-      'KNVB Beker 2026/27',
-      'geschiedenis van KNVB Beker 2026/27',
-    ])
+    expect(names).toEqual(['CC BY-SA 4.0', 'Eredivisie 2026/27', 'KNVB Beker 2026/27'])
     expect(new Set(names).size).toBe(names.length)
   })
 
   it('says "pagina’s" for more than one page', () => {
     const { container } = render(<WikipediaCredit {...props} pages={[standings, cup]} />)
 
-    expect(container.textContent).toContain('pagina’s: Eredivisie 2026/27 (geschiedenis), KNVB Beker 2026/27 (')
+    expect(container.textContent).toContain('pagina’s: Eredivisie 2026/27, KNVB Beker 2026/27. Laatst gelezen')
   })
 
   it('puts the time of reading in a time element with the machine value', () => {
@@ -64,14 +55,6 @@ describe('WikipediaCredit', () => {
 
     expect(time.tagName).toBe('TIME')
     expect(time.getAttribute('datetime')).toBe('2026-10-25T12:05:00Z')
-  })
-
-  it('shows the word "geschiedenis" and names the page in the label, which starts with the visible word', () => {
-    render(<WikipediaCredit {...props} pages={[standings]} />)
-    const link = screen.getByRole('link', { name: 'geschiedenis van Eredivisie 2026/27' })
-
-    expect(link.textContent).toBe('geschiedenis')
-    expect(link.getAttribute('aria-label')?.startsWith(link.textContent)).toBe(true)
   })
 
   it('is a paragraph in the style of small text, passes other props on and adds its class to a given one', () => {

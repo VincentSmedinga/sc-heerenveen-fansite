@@ -1,4 +1,4 @@
-/* A card: one of the four surfaces with its border, rounded corners and padding. */
+/* A card: one of the five surfaces with its border, rounded corners and padding. */
 
 @layer hf.components {
   /*
@@ -49,5 +49,23 @@
   .hf-card-warm {
     background-color: var(--hf-colour-background-surface-warm);
     border-color: var(--hf-colour-border-surface-warm);
+  }
+
+  /*
+   * No background and no border to see, but the border keeps its space and the padding at the
+   * sides is the same, so the text sits where it does in a card with a border. That is how text
+   * beside the other cards lines up with the text in them. There is no padding above and below:
+   * with nothing to frame, it would only add to the gap between the cells. In forced colours a
+   * transparent border would be drawn in the colour of the system, so it gets the colour of the
+   * background there.
+   */
+  .hf-card-transparent {
+    background-color: transparent;
+    border-color: transparent;
+    padding-block: 0;
+
+    @media (forced-colors: active) {
+      border-color: Canvas;
+    }
   }
 }

@@ -4,14 +4,7 @@ import { Card, Heading, Link, List, Match, StandingsTable, Text, WikipediaCredit
 
 import type { MatchData } from './matches'
 
-import {
-  creditName,
-  formatReadAt,
-  formatTableDay,
-  matchMoment,
-  wikipediaHistoryUrl,
-  wikipediaUrl,
-} from './match-format'
+import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import { overviewOf, standingsAround } from './matches'
 
 /**
@@ -71,12 +64,12 @@ export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date
 
 /**
  * The full credit for the page of the matches: the pages of Wikipedia the importer read, and
- * the last time it read them. It is nothing when the importer has read none, which can't be so
- * with data that came from the importer.
+ * the last time it read them, in a card without a border or background to see, so its text
+ * lines up with the text in the cards above. It is nothing when the importer has read none,
+ * which can't be so with data that came from the importer.
  */
 export function SourceCredit({ pages, season }: { pages: PublicWikipediaPage[]; season: string }) {
   const credited = pages.map((page) => ({
-    historyHref: wikipediaHistoryUrl(page.title),
     href: wikipediaUrl(page.title),
     name: creditName(page.kind, season),
     readAt: page.readAt,
@@ -90,7 +83,9 @@ export function SourceCredit({ pages, season }: { pages: PublicWikipediaPage[]; 
   const readAt = new Date(Math.max(...credited.map((page) => page.readAt.getTime())))
 
   return (
-    <WikipediaCredit pages={[first, ...rest]} readAt={formatReadAt(readAt)} readAtDateTime={readAt.toISOString()} />
+    <Card as="div" surface="transparent">
+      <WikipediaCredit pages={[first, ...rest]} readAt={formatReadAt(readAt)} readAtDateTime={readAt.toISOString()} />
+    </Card>
   )
 }
 

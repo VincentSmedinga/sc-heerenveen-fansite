@@ -37,6 +37,7 @@ const meta = preview.meta({
         component: [
           'Een kaart zet een blok van de pagina op een eigen vlak, met een rand en ronde hoeken.',
           'Zo staat elk blok los op de pagina, en dat geeft de pagina rust en richting.',
+          'Een kaart met het vlak `transparent` heeft geen rand en achtergrond die je ziet, en geen binnenruimte boven en onder: de tekst erin staat op één lijn met de tekst in de andere kaarten, zonder dat de ruimte tussen de kaarten groter wordt.',
           'Staat er direct onder de kop een lijst, dan is de ruimte daartussen groter dan bij tekst, zodat de eerste regel van de lijst niet tegen de kop zit.',
           'Onder de lijst kan een formulier met een knop staan, zoals "Laad 5 meer" in de kaart met nieuws.',
         ].join('\n'),
@@ -180,3 +181,33 @@ const renderPage = () => (
 export const OnPageLight = meta.story({ globals: { theme: 'light' }, name: 'Op een pagina, licht', render: renderPage })
 
 export const OnPageDark = meta.story({ globals: { theme: 'dark' }, name: 'Op een pagina, donker', render: renderPage })
+
+const renderTransparent = () => (
+  <Page.Body>
+    <Page.Main>
+      <Card aria-labelledby="transparent-card">
+        <Heading appearance={3} id="transparent-card" level={2}>
+          Gewone kaart
+        </Heading>
+        <Text>De tekst staat op dezelfde plek als in de kaart eronder.</Text>
+      </Card>
+      <Card as="div" surface="transparent">
+        <Text>
+          Een doorzichtige kaart heeft geen rand of achtergrond, en zijn tekst staat op één lijn met de tekst erboven.
+        </Text>
+      </Card>
+    </Page.Main>
+  </Page.Body>
+)
+
+export const TransparentLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Doorzichtig vlak naast een gewone kaart, licht',
+  render: renderTransparent,
+})
+
+export const TransparentDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Doorzichtig vlak naast een gewone kaart, donker',
+  render: renderTransparent,
+})

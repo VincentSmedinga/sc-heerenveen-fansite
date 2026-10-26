@@ -1,4 +1,6 @@
 import { render, screen } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { Heading } from '../heading/Heading'
@@ -113,5 +115,39 @@ describe('Card', () => {
     ]
 
     expect(elements).toHaveLength(2)
+  })
+})
+
+describe('the transparent surface in card.css', () => {
+  const css = readFileSync(join(import.meta.dirname, 'card.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+  const rule = (selector: string) =>
+    css.match(new RegExp(String.raw`${selector} \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}`))?.[1] ?? ''
+
+  it('has the class of its surface', () => {
+    const { container } = render(<Card surface="transparent">Inhoud</Card>)
+
+    expect(container.firstElementChild?.className).toBe('hf-card hf-card-transparent')
+  })
+
+  it('has no background and no border to see, and keeps the border, so the text sits where it does in the others', () => {
+    const transparent = rule(String.raw`\.hf-card-transparent`)
+
+    expect(transparent).toContain('background-color: transparent;')
+    expect(transparent).toContain('border-color: transparent;')
+    expect(transparent).not.toMatch(/(^|\s)(border:|border-width:|border-style:)/)
+    // .hf-card has the border (1px solid) and the side padding, which this surface keeps.
+    expect(rule(String.raw`\.hf-card`)).toContain('border: 1px solid')
+    expect(rule(String.raw`\.hf-card`)).toContain('padding: 1rem 1.25rem;')
+    expect(transparent).not.toMatch(/(^|\s)(padding|padding-inline|padding-inline-start|padding-inline-end):/)
+  })
+
+  it('has no padding above and below, which would only add to the gap between the cells', () => {
+    expect(rule(String.raw`\.hf-card-transparent`)).toContain('padding-block: 0;')
+  })
+
+  it('draws no border in forced colours either', () => {
+    expect(rule(String.raw`\.hf-card-transparent`)).toMatch(
+      /@media \(forced-colors: active\) \{\s*border-color: Canvas;/,
+    )
   })
 })
