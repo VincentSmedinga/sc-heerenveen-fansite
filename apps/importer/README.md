@@ -1,7 +1,7 @@
 # @fansite/importer
 
 De importer haalt koppen en links op bij de bronnen.
-Hij bevat de fetcher, de ene HTTP-client voor alle adapters, de adapter voor RSS- en Atom-feeds, die ook de podcasts leest (zie _De podcasts_), en de lezer van de forumdiscussies van ons eigen forum (zie _Het forum_).
+Hij bevat de fetcher, de ene HTTP-client voor alle adapters, de adapter voor RSS- en Atom-feeds, die ook de podcasts leest (zie _De podcasts_), de lezer van de forumdiscussies van ons eigen forum (zie _Het forum_) en de lezer van de wedstrijden en de stand van de Nederlandse Wikipedia (zie _De wedstrijden en de stand_).
 Welke nieuwsbronnen en podcasts we lezen en waarom, staat in [`docs/bronnen.md`](../../docs/bronnen.md).
 Op acceptatie start cron de import elke 15 minuten (zie _De import op acceptatie_).
 Een run neemt een lock, schrijft een logboek, houdt de gezondheid van elke feed bij en wacht als een bron daarom vraagt (zie _Het logboek en de gezondheid_).
@@ -22,6 +22,7 @@ Schrijf `pnpm run import` en niet `pnpm import`: `import` is een opdracht van pn
 
 De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), één voor één, met één fetcher.
 Een feed die nog moet wachten, slaat hij over.
+Tegelijk leest hij de wedstrijden en de stand van het lopende seizoen van de Nederlandse Wikipedia, hoogstens één keer per uur (zie _De wedstrijden en de stand_).
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
 
 ```text
@@ -47,6 +48,8 @@ Een feed die niet gelezen wordt, krijgt ook een regel:
 Een feed die faalt, stopt de andere feeds niet.
 De opdracht stopt met exitcode 1 als een feed een fout gaf: de bron geeft een foutstatus of iets wat geen feed is, of de database weigert iets.
 Een feed die niet gewijzigd is, die `robots.txt` weigert, die om wachten vraagt of die nog wacht, is geen fout van ons en geeft exitcode 0.
+De wedstrijden hebben één regel van zichzelf, of geen als het uur nog niet om is (zie _De wedstrijden en de stand_).
+Een fout daarbij is een waarschuwing en geeft geen exitcode 1.
 Gebruik `DATABASE_URL` uit `.env`; zonder die variabele stopt de opdracht met een melding.
 `pnpm run import:status` toont de gezondheid van de feeds (zie _Het overzicht_).
 
@@ -143,11 +146,22 @@ Leeuwarder Courant: healthy
   last error: none
 
 Unhealthy feeds: 0 of 1
+
+Matches 2026/27 (Wikipedia): healthy
+  last success: 2026-10-25 22:43:11 UTC
+  last outcome: imported
+  failed runs in a row: 0
+  last error: none
+  last warning: none
+  next try from: 2026-10-25 23:42:11 UTC
+  page: Eredivisie 2026/27 (mannenvoetbal), version Sun, 25 Oct 2026 21:19:08 GMT, read 2026-10-25 22:43:11 UTC
 ```
+
+Onder de feeds staat de gezondheid van de import van de wedstrijden voor het lopende seizoen, met de pagina's van Wikipedia die hij het laatst las (zie _De wedstrijden en de stand_).
 
 Wacht een feed nog, dan staat er ook `next try from` met de tijd.
 Het overzicht verandert niets in de database, en neemt geen lock.
-Het stopt met exitcode 1 als een feed ongezond is.
+Het stopt met exitcode 1 als een feed of de import van de wedstrijden ongezond is.
 Op de host doet het gebundelde bestand hetzelfde met de optie `--status` (zie _De import op acceptatie_).
 Een optie die de opdracht niet kent, laat hem stoppen voordat hij iets doet.
 
@@ -527,6 +541,107 @@ Het forum vraagt de import nooit "is het veranderd?" (geen `ETag` of `Last-Modif
 
 De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en slaat geen cookies op, dus ook de sessiecookie van de API niet.
 
+## De wedstrijden en de stand
+
+De import leest het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, en bewaart ze in `matches`, `standings`, `wikipedia_pages` en `match_imports` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
+Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/beslissingen.md`](../../docs/beslissingen.md).
+De gegevens vallen onder CC BY-SA 4.0.
+Het gaat om de Eredivisie en de KNVB Beker van het lopende seizoen.
+Een seizoen begint op 1 juli en heet `2026/27`.
+
+### Welke pagina's
+
+Per seizoen leest de import drie pagina's, met de titels uit `pageTitles` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts):
+
+| Pagina                                           | Wat erop staat                                                                     |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `Eredivisie 2026/27 (mannenvoetbal)`             | De stand, in het sjabloon `Sports table`                                           |
+| `Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden` | Het programma en de uitslagen van de hele competitie, in `Footballbox2`, per ronde |
+| `KNVB Beker 2026/27 (mannen)`                    | De bekerwedstrijden, ook in `Footballbox2`, met een kop per ronde                  |
+
+De titels volgen uit het seizoen, dus een nieuw seizoen kost geen code.
+Alles gaat door de fetcher en alleen naar `/wiki/<pagina>?action=raw`: `robots.txt` van Wikipedia sluit `/w/` en dus `api.php`.
+De fetcher stuurt dan de herkenbare user agent en houdt zich aan 429 en `Retry-After`.
+Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wikipedia.ts` daarin de sjablonen.
+
+### Wat de import bewaart
+
+- Van sc Heerenveen alleen: de wedstrijden waar de club als `[[sc Heerenveen]]` in staat.
+  Van een wedstrijd bewaart hij de ronde (de kop boven het sjabloon, zoals `Speelronde 12` of `Eerste ronde`), de tegenstander, thuis of uit, het stadion, de status en de uitslag.
+  Een speelronde van de competitie is een kop `Speelronde <nummer>`; wedstrijden onder andere koppen, zoals de play-offs, leest hij niet.
+- De status is `played` bij een score, `postponed` als de score "uitgesteld" of "afgelast" zegt, en anders `scheduled`.
+  Een score die we niet kennen, zoals een gestaakte wedstrijd van ons, is een fout.
+- De aftrap staat in UTC (`kickoff_at`), omgerekend uit de tijd in Nederland.
+  Staat er geen tijd, zoals bij speelronde 22 tot en met 32 tot 22 december 2026, dan is `kickoff_at` leeg en staat de datum zoals Wikipedia die geeft in `date_text`, zoals `12-14 februari 2027`.
+  `match_date` is dan de eerste dag.
+- De stand heeft alleen gewonnen, gelijk, verloren en de doelpunten; gespeeld en punten rekent de import uit.
+  `valid_on` is de dag van de laatste competitiewedstrijd die iemand speelde.
+- Een rij van een eerder seizoen verandert of verdwijnt nooit, en de import leest die seizoenen niet.
+  In het lopende seizoen vervangt hij de wedstrijden en de stand door wat Wikipedia nu heeft.
+
+### De controles
+
+De import schrijft alleen als alles slaagt.
+De controles staan in [`src/check-wikipedia.ts`](src/check-wikipedia.ts):
+
+- sc Heerenveen heeft 34 competitiewedstrijden, in 34 verschillende speelrondes, 17 thuis en 17 uit.
+- De stand heeft 18 clubs.
+- Per club is gespeeld gelijk aan gewonnen + gelijk + verloren, zijn de punten 3 × gewonnen + gelijk en is het doelsaldo gelijk aan voor min tegen.
+- Over de hele stand zijn de doelpunten voor gelijk aan de doelpunten tegen, en het aantal gewonnen gelijk aan het aantal verloren.
+- De regel van sc Heerenveen in de stand komt overeen met onze eigen uitslagen: gespeeld, doelpunten en punten.
+
+Het aantal gespeelde wedstrijden vergelijkt de import niet tussen clubs.
+Midden in een speelronde verschilt het per club, en dan zou elke controle falen.
+De controles kloppen op elk moment.
+
+### Slaagt of mislukt
+
+De import van de wedstrijden slaagt of mislukt als geheel, in één transactie.
+Is een pagina niet te lezen (ook de pagina van de beker), is de opbouw veranderd (een sjabloon dat ontbreekt of niets oplevert, een datum, tijd of score van sc Heerenveen die we niet kennen) of faalt een controle, dan verandert er niets in de database.
+De laatste goede versie blijft staan.
+Een pagina van de beker die er wel is maar nog geen wedstrijdsjabloon heeft, zoals vroeg in een seizoen, telt als nog geen bekerwedstrijd.
+Heeft de import eerder bekerwedstrijden van die pagina gelezen, dan is zo'n pagina veranderd en houdt ze de import tegen.
+De import schrijft een regel met de reden:
+
+```text
+Matches 2026/27: warning, nothing changed and the last good copy stays: the row of sc Heerenveen (11 played, 18-13, 18 points) is not what the matches say (10 played, 18-13, 15 points)
+```
+
+De mislukte poging staat in `match_imports` (`failures_in_a_row`, `last_error`), en `pnpm run import:status` laat hem zien.
+Na drie mislukte runs op rij is de import ongezond, zoals een feed, en stopt het overzicht met exitcode 1.
+De run zelf stopt niet met exitcode 1: een tikfout op Wikipedia is geen fout van de importer.
+De feeds en de wedstrijden lopen in dezelfde run, maar een fout in de ene stopt de andere niet.
+Een pagina vastzetten op een oude versie doet de import niet.
+
+### Hoogstens één keer per uur
+
+Cron start de import elke 15 minuten.
+De import van de wedstrijden vraagt Wikipedia pas weer als `match_imports.retry_at` voorbij is: 59 minuten na elke poging, ook na een mislukte.
+Vraagt Wikipedia met 429 of 503 om te wachten, dan wacht hij zo lang als `Retry-After` zegt, hoogstens een dag.
+Een run die moet wachten, schrijft niets.
+
+### Een uitslag die verandert
+
+Een nieuwe uitslag neemt de import altijd over.
+Stond de oude uitslag drie dagen of langer vast, dan schrijft hij erbij:
+
+```text
+Matches 2026/27: warning, the result of Speelronde 1 (Eredivisie) changed after 4 days, from sc Heerenveen 1-0 FC Twente to sc Heerenveen 1-1 FC Twente
+```
+
+De waarschuwing staat ook in `match_imports.last_warning`, en dus in het overzicht.
+`matches.result_set_at` houdt bij sinds wanneer de uitslag zo staat.
+
+### Wat de import niet doet
+
+- De versie van een pagina bewaart hij als de `Last-Modified` van Wikipedia (`wikipedia_pages.version`), want de ruwe tekst komt zonder versienummer.
+- Verlenging en strafschoppen van een bekerwedstrijd bewaart hij niet: alleen de score zoals Wikipedia die in het sjabloon heeft.
+- Een puntenaftrek rekent hij niet mee.
+  De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
+- Scheidsrechter, toeschouwers, opstellingen en doelpuntenmakers leest hij niet.
+  Ook de fixtures hebben die velden leeg gemaakt.
+- Andere seizoenen leest hij niet, en wedstrijden van andere teams van de club ook niet.
+
 ## Wat de fetcher niet doet
 
 - Een limiet per host.
@@ -564,3 +679,11 @@ Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in
 `src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
 De tests van het logboek, de gezondheid en het wachten geven de import een nagebootste klok (de optie `clock`), zodat een test een dag of een maand overslaat zonder te wachten.
 `src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.
+
+De tests van de wedstrijden lezen verkleinde stukken van de drie pagina's van Wikipedia: [`src/fixtures/wikipedia-programme.wiki`](src/fixtures/wikipedia-programme.wiki), [`wikipedia-standings.wiki`](src/fixtures/wikipedia-standings.wiki) en [`wikipedia-cup.wiki`](src/fixtures/wikipedia-cup.wiki).
+Ze zijn gelezen op 25 oktober 2026, en bovenaan staat de herkomst en de licentie (CC BY-SA 4.0).
+Er staan alle 34 wedstrijden van sc Heerenveen in en een paar van andere clubs; de doelpuntenmakers, scheidsrechters en verslagen zijn leeggemaakt.
+`src/read-wikipedia.test.ts` leest ze zonder database en `src/check-wikipedia.test.ts` toetst de controles.
+`src/import-matches.test.ts` draait op een echte MariaDB met een eigen webserver die de drie pagina's geeft, en laat zien dat een falende controle de database ongemoeid laat.
+Een test die `runImport` draait en niets met de wedstrijden te maken heeft, geeft de optie `wikipediaOrigin: null`.
+De tests van het commando zelf (`src/import.test.ts` en `src/bundle.test.ts`) zetten een gezondheidsrij met een `retry_at` ver weg, zodat het commando de echte Wikipedia niet vraagt.

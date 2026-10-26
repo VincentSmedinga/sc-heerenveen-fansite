@@ -10,6 +10,7 @@ import {
   mediumtext,
   mysqlEnum,
   mysqlTable,
+  primaryKey,
   text,
   unique,
   varchar,
@@ -496,3 +497,157 @@ export const articleVersions = mysqlTable(
 )
 
 export type ArticleVersion = typeof articleVersions.$inferSelect
+
+export const competitions = ['Eredivisie', 'KNVB Beker'] as const
+
+export type Competition = (typeof competitions)[number]
+
+/**
+ * Where a match stands: `scheduled` is still to be played (with or without a time), `played`
+ * has a result, `postponed` was called off and has no new date yet.
+ */
+export const matchStatuses = ['scheduled', 'played', 'postponed'] as const
+
+export type MatchStatus = (typeof matchStatuses)[number]
+
+/**
+ * The most characters a column of `matches` holds. The importer checks them before it
+ * stores.
+ */
+export const matchLimits = { dateText: 60, opponent: 100, round: 60, season: 7, stadium: 150 }
+
+/**
+ * The matches of sc Heerenveen 1 (men), from the Dutch Wikipedia: the Eredivisie and the KNVB
+ * Beker. A season starts on 1 July and is written `2026/27`. The importer reads the current
+ * season only and never changes or removes the rows of an earlier one.
+ *
+ * `round` is the label as Wikipedia has it, such as `Speelronde 12` or `Eerste ronde`; it is
+ * unique per season and competition, because sc Heerenveen plays one match in each. `home` is
+ * true for a match at the Abe Lenstra Stadion. `goals_for` and `goals_against` are the goals
+ * of sc Heerenveen and of the opponent, and both are empty unless the match is `played`.
+ *
+ * `match_date` is the local day (Europe/Amsterdam), or the first day when Wikipedia only knows
+ * a weekend. `kickoff_at` is the kick-off in UTC and is empty while the time is unknown: the
+ * KNVB announces the times of rounds 22 to 32 on 22 December 2026. `date_text` then holds the
+ * date as Wikipedia gives it, such as `12-14 februari 2027`, and is empty when the kick-off is
+ * known.
+ *
+ * `result_set_at` is the moment the importer first saw the current result, so it can tell that
+ * a result which stood for days has changed.
+ */
+export const matches = mysqlTable(
+  'matches',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    competition: mysqlEnum('competition', competitions).notNull(),
+    round: varchar('round', { length: matchLimits.round }).notNull(),
+    opponent: varchar('opponent', { length: matchLimits.opponent }).notNull(),
+    home: boolean('home').notNull(),
+    stadium: varchar('stadium', { length: matchLimits.stadium }),
+    status: mysqlEnum('status', matchStatuses).notNull(),
+    goalsFor: int('goals_for', { unsigned: true }),
+    goalsAgainst: int('goals_against', { unsigned: true }),
+    matchDate: date('match_date', { mode: 'string' }).notNull(),
+    kickoffAt: datetime('kickoff_at'),
+    dateText: varchar('date_text', { length: matchLimits.dateText }),
+    resultSetAt: datetime('result_set_at'),
+  },
+  (table) => [
+    unique('matches_season_competition_round_unique').on(table.season, table.competition, table.round),
+    index('matches_season_match_date_idx').on(table.season, table.matchDate),
+    check(
+      'matches_result_only_when_played',
+      sql`(${table.status} = 'played' and ${table.goalsFor} is not null and ${table.goalsAgainst} is not null) or (${table.status} <> 'played' and ${table.goalsFor} is null and ${table.goalsAgainst} is null)`,
+    ),
+    check('matches_time_or_text', sql`${table.kickoffAt} is not null or ${table.dateText} is not null`),
+  ],
+)
+
+export type Match = typeof matches.$inferSelect
+
+export type NewMatch = typeof matches.$inferInsert
+
+/** The most characters the club column of `standings` holds. */
+export const standingsClubMaxLength = 100
+
+/**
+ * The league table of the Eredivisie, one row per club, from the Dutch Wikipedia. `valid_on` is
+ * the day the table holds for: the day of the last match that has been played. Every row of a
+ * season has the same day, because the importer replaces the whole table at once. A table of
+ * an earlier season stays as it was.
+ *
+ * `played`, `points` and `goal_difference` are worked out from the rest when the importer reads
+ * the table (Wikipedia gives wins, draws, losses and goals); `goal_difference` can be negative.
+ */
+export const standings = mysqlTable(
+  'standings',
+  {
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    position: int('position', { unsigned: true }).notNull(),
+    club: varchar('club', { length: standingsClubMaxLength }).notNull(),
+    played: int('played', { unsigned: true }).notNull(),
+    won: int('won', { unsigned: true }).notNull(),
+    drawn: int('drawn', { unsigned: true }).notNull(),
+    lost: int('lost', { unsigned: true }).notNull(),
+    goalsFor: int('goals_for', { unsigned: true }).notNull(),
+    goalsAgainst: int('goals_against', { unsigned: true }).notNull(),
+    goalDifference: int('goal_difference').notNull(),
+    points: int('points', { unsigned: true }).notNull(),
+    validOn: date('valid_on', { mode: 'string' }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.season, table.position], name: 'standings_season_position' }),
+    unique('standings_season_club_unique').on(table.season, table.club),
+  ],
+)
+
+export type NewStandingsRow = typeof standings.$inferInsert
+
+export type StandingsRow = typeof standings.$inferSelect
+
+export const wikipediaPageKinds = ['standings', 'programme', 'cup'] as const
+
+export type WikipediaPageKind = (typeof wikipediaPageKinds)[number]
+
+/**
+ * The Wikipedia pages the match import read the last time it succeeded, so a page can
+ * credit its source. `title` is the title of the page, such as `KNVB Beker 2026/27
+ * (mannen)`. `version` is the `Last-Modified` of the page as Wikipedia sent it: the raw
+ * text of a page comes without a revision number, and this is the time of the revision
+ * we read. `read_at` is the last time the page was read and every check passed, in UTC.
+ */
+export const wikipediaPages = mysqlTable('wikipedia_pages', {
+  title: varchar('title', { length: 200 }).primaryKey(),
+  season: varchar('season', { length: matchLimits.season }).notNull(),
+  kind: mysqlEnum('kind', wikipediaPageKinds).notNull(),
+  version: varchar('version', { length: 100 }),
+  readAt: datetime('read_at').notNull(),
+})
+
+export type WikipediaPage = typeof wikipediaPages.$inferSelect
+
+export const matchImportOutcomes = ['imported', 'error', 'blocked-by-robots', 'wait'] as const
+
+export type MatchImportOutcome = (typeof matchImportOutcomes)[number]
+
+/**
+ * The health of the match import, one row per season, like the health a feed has: the
+ * last time it succeeded, the last outcome, the failed runs in a row, the last error and
+ * the last warning (a result that changed after it had stood for days). `retry_at` is
+ * when the import may ask Wikipedia again: an hour after each try, longer when Wikipedia
+ * asks us to wait. Times are UTC.
+ */
+export const matchImports = mysqlTable('match_imports', {
+  season: varchar('season', { length: matchLimits.season }).primaryKey(),
+  lastSuccessAt: datetime('last_success_at'),
+  lastOutcome: mysqlEnum('last_outcome', matchImportOutcomes).notNull(),
+  failuresInARow: int('failures_in_a_row', { unsigned: true }).notNull().default(0),
+  lastError: varchar('last_error', { length: reasonMaxLength }),
+  lastErrorAt: datetime('last_error_at'),
+  lastWarning: varchar('last_warning', { length: reasonMaxLength }),
+  lastWarningAt: datetime('last_warning_at'),
+  retryAt: datetime('retry_at'),
+})
+
+export type MatchImport = typeof matchImports.$inferSelect

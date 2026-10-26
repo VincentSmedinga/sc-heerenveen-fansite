@@ -6,8 +6,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { consentStatuses, feeds, sourceKinds, sources } from './schema.ts'
-import { realSources, seedSources, testSources } from './seed.ts'
+import { consentStatuses, feeds, matches, sourceKinds, sources, standings } from './schema.ts'
+import { seasonOf } from './season.ts'
+import { madeUpMatches, realSources, seedMatches, seedSources, testSources } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -329,5 +330,88 @@ describe('the seed', () => {
     })
     expect(await database.db.select().from(sources)).toHaveLength(0)
     expect(await database.db.select().from(feeds)).toHaveLength(0)
+  })
+})
+
+describe('the made-up matches', () => {
+  const now = new Date('2026-10-25T12:00:00Z')
+
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM matches')
+    await database.pool.query('DELETE FROM standings')
+  })
+
+  it('puts matches and a table in the current season, once', async () => {
+    expect(await seedMatches(database.db, now)).toBe(true)
+    expect(await seedMatches(database.db, now)).toBe(false)
+
+    const rows = await database.db.select().from(matches)
+
+    expect(rows).toHaveLength(madeUpMatches(now).length)
+    expect(rows.every((match) => match.season === '2026/27')).toBe(true)
+    expect(await database.db.select().from(standings)).toHaveLength(6)
+  })
+
+  it('has every case a page must show', async () => {
+    await seedMatches(database.db, now)
+
+    const rows = await database.db.select().from(matches)
+    const has = (test: (match: (typeof rows)[number]) => boolean) => rows.some(test)
+
+    expect(has((match) => match.status === 'played' && match.home)).toBe(true)
+    expect(has((match) => match.status === 'played' && !match.home)).toBe(true)
+    expect(has((match) => match.status === 'scheduled' && match.kickoffAt !== null)).toBe(true)
+    expect(has((match) => match.status === 'scheduled' && match.kickoffAt === null && match.dateText !== null)).toBe(
+      true,
+    )
+    expect(has((match) => match.status === 'postponed')).toBe(true)
+    expect(has((match) => match.competition === 'KNVB Beker')).toBe(true)
+    // The dates of the made-up matches count from the day of the seed: this one is 10 days on.
+    expect(rows.find((match) => match.dateText !== null)?.dateText).toBe('4-6 november 2026')
+  })
+
+  it('has a table that agrees with its own results', async () => {
+    await seedMatches(database.db, now)
+
+    const table = await database.db.select().from(standings)
+    const played = (await database.db.select().from(matches)).filter(
+      (match) => match.competition === 'Eredivisie' && match.status === 'played',
+    )
+    const ours = table.find((row) => row.club === 'sc Heerenveen')
+
+    expect(ours).toMatchObject({
+      goalsAgainst: played.reduce((total, match) => total + (match.goalsAgainst ?? 0), 0),
+      goalsFor: played.reduce((total, match) => total + (match.goalsFor ?? 0), 0),
+      played: played.length,
+    })
+    expect(table.reduce((total, row) => total + row.goalsFor, 0)).toBe(
+      table.reduce((total, row) => total + row.goalsAgainst, 0),
+    )
+    expect(table.reduce((total, row) => total + row.won, 0)).toBe(table.reduce((total, row) => total + row.lost, 0))
+    expect(table.every((row) => row.points === 3 * row.won + row.drawn)).toBe(true)
+    expect(new Set(table.map((row) => row.validOn))).toEqual(new Set(['2026-10-18']))
+  })
+
+  it('leaves the matches of the season alone when it already has some, such as the real ones', async () => {
+    await seedMatches(database.db, now)
+    await database.pool.query("UPDATE matches SET opponent = 'FC Echt' WHERE round = 'Speelronde 1'")
+
+    expect(await seedMatches(database.db, now)).toBe(false)
+    expect((await database.db.select().from(matches)).find((match) => match.round === 'Speelronde 1')?.opponent).toBe(
+      'FC Echt',
+    )
+  })
+
+  it('puts them in a new season too, and leaves the rows of the earlier season as they are', async () => {
+    await seedMatches(database.db, now)
+
+    const before = await database.db.select().from(matches)
+
+    expect(await seedMatches(database.db, new Date('2027-08-01T12:00:00Z'))).toBe(true)
+
+    const rows = await database.db.select().from(matches)
+
+    expect(rows.filter((match) => match.season === seasonOf(now))).toEqual(before)
+    expect(rows.filter((match) => match.season === '2027/28')).toHaveLength(before.length)
   })
 })

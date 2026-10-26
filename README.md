@@ -43,8 +43,8 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm test`              | De tests van alle packages, van de hooks en van de linters   |
 | `pnpm build`             | De build van alle packages                                   |
 | `pnpm test:a11y`         | axe op de pagina's van de gebouwde site, na `pnpm build`     |
-| `pnpm run import`        | Haalt de feeds van de bronnen op en bewaart de koppen        |
-| `pnpm run import:status` | Toont per feed of hij gezond is, en de laatste fout          |
+| `pnpm run import`        | Haalt de feeds en de wedstrijden op en bewaart ze            |
+| `pnpm run import:status` | Toont per feed en voor de wedstrijden of ze gezond zijn      |
 | `pnpm release`           | Opent of werkt de release-pull request bij (vraagt `gh`)     |
 | `pnpm review <branch>`   | Start de site en Storybook voor een branch of pull request   |
 | `pnpm review:stop`       | Stopt ze weer                                                |
@@ -160,6 +160,6 @@ Dit valt er niet onder:
 - de lettertypes, die hun eigen open licentie houden (OFL);
 - de tekst van de gedragscode, die van de Contributor Covenant komt;
 - het clubwapen en andere beelden en teksten van derden;
-- de wedstrijdgegevens, waarover een apart besluit volgt (#39).
+- de wedstrijdgegevens, die we van de Nederlandse Wikipedia nemen en daarom onder [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.nl) publiceren.
 
 Wie de code al onder MIT heeft ontvangen, houdt die rechten voor die versies.
