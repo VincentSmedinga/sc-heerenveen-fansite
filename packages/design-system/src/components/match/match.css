@@ -55,9 +55,9 @@
   }
 
   /*
-   * The outcome for sc Heerenveen, seen from its side and not the home club's. The colour adds to
-   * the goals and is the only thing that tells the three apart; a forced colour replaces it, and
-   * the result stays as readable as before.
+   * The outcome for sc Heerenveen, seen from its side and not the home club's. The colour adds
+   * to the goals and is the only thing that tells the three apart; a forced colour replaces it,
+   * and the result stays as readable as before.
    */
   .hf-match-win {
     color: var(--hf-colour-outcome-win);

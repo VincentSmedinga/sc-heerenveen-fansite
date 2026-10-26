@@ -139,10 +139,10 @@
     --hf-colour-text-on-button-soft: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
 
     /*
-     * The result of a match for sc Heerenveen, seen from our side: a win is green, a loss is red and a
-     * draw is the quiet colour of secondary text, because a draw is neither good nor bad. Colour only
-     * adds to the goals: whoever can't see it reads the result in the score itself. Text, so each
-     * reaches 4.5:1 on the surfaces.
+     * The result of a match for sc Heerenveen, seen from our side: a win is green, a loss is
+     * red and a draw is the quiet colour of secondary text, because a draw is neither good nor bad.
+     * Colour only adds to the goals: whoever can't see it reads the result in the score itself.
+     * Text, so each reaches 4.5:1 on the surfaces.
      */
     --hf-colour-outcome-win: light-dark(var(--hf-colour-green-700), var(--hf-colour-green-300));
     --hf-colour-outcome-loss: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
