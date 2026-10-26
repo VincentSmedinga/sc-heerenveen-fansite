@@ -33,8 +33,17 @@ describe('the page Privacy', () => {
     expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
   })
 
-  it('has one h1 and no other heading, and no anchor of its own', () => {
-    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual(['<h1 class="hf-heading-1">Privacy</h1>'])
+  it('has one h1, and an h2 for each part, in order, without an anchor of its own', () => {
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
+      '<h1 class="hf-heading-1">Privacy</h1>',
+      '<h2 class="hf-heading-2">Wat we tellen</h2>',
+      '<h2 class="hf-heading-2">Hoe een bezoeker één keer telt</h2>',
+      '<h2 class="hf-heading-2">Wat de hosting bewaart</h2>',
+      '<h2 class="hf-heading-2">Wat je browser bewaart</h2>',
+      '<h2 class="hf-heading-2">Als je ons een bericht stuurt</h2>',
+      '<h2 class="hf-heading-2">Andere sites</h2>',
+      '<h2 class="hf-heading-2">Vragen en klachten</h2>',
+    ])
     expect(html).not.toContain(' id=')
   })
 
@@ -44,8 +53,37 @@ describe('the page Privacy', () => {
     expect(html.match(/<b>/g)).toHaveLength(1)
   })
 
-  it('says that the site sets no cookies, follows nobody and loads nothing from another domain', () => {
-    expect(html).toContain('De site zet geen cookies, volgt niemand en laadt niets van een ander domein.')
+  it('says that the site sets no cookies, follows nobody and loads nothing from another domain, and nothing more in the intro', () => {
+    expect(html).toContain('<b>De site zet geen cookies, volgt niemand en laadt niets van een ander domein.</b></p><h2')
+    expect(html).not.toContain('Toch moeten we')
+  })
+
+  it('says what we count and for how long we keep it: counters, per day and per page, and nothing on the device', () => {
+    const paragraph = html.match(/<p[^>]*>(We tellen per dag.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('hoe vaak elke pagina is bekeken en hoeveel verschillende bezoekers er waren')
+    expect(paragraph).toContain('op onze eigen server')
+    expect(paragraph).toContain('Het zijn alleen getallen, en die bewaren we zolang de site bestaat.')
+    expect(paragraph).toContain('Er komt niets op je apparaat te staan.')
+  })
+
+  it('says who is not counted: bots, the checks of the hosting, our importer and whoever asks not to be followed', () => {
+    const paragraph = html.match(/<p[^>]*>(Bots, de controles.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('Bots, de controles van onze hosting en onze eigen importer tellen niet mee.')
+    expect(paragraph).toContain('Do Not Track of Global Privacy Control')
+  })
+
+  it('says how the code of the day works, what is not kept and what is thrown away when the day is over', () => {
+    const paragraph = html.match(/<p[^>]*>(De server maakt.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('van je IP-adres en je browser een code')
+    expect(paragraph).toContain('een willekeurig getal dat alleen voor die dag bestaat')
+    expect(paragraph).toContain('Het adres en de naam van je browser schrijft hij nergens op, ook niet in het logboek.')
+    expect(paragraph).toContain(
+      'Tot het einde van de dag staan het getal en de codes in onze database. Daarna gooien we ze weg.',
+    )
+    expect(paragraph).toContain('we herkennen je niet van dag tot dag')
   })
 
   it('says that the browser keeps the choice for Licht or Donker on the device, that we do not see it, and how to remove it', () => {
@@ -53,17 +91,15 @@ describe('the page Privacy', () => {
 
     expect(paragraph).toContain('bewaart je browser die keuze, alleen op dit apparaat')
     expect(paragraph).toContain('Wij zien hem niet')
-    expect(paragraph).toContain('de knop te kiezen die je systeem al geeft')
     expect(paragraph).toContain('de gegevens van de site in je browser te wissen')
   })
 
-  it('says that whoever logs in to the admin gets one cookie, and that a visitor never does', () => {
-    const paragraph = html.match(/<p[^>]*>(Wie inlogt in het beheer.*?)<\/p>/)?.[1] ?? ''
+  it('says that only whoever logs in to the admin gets a cookie, with a number and nothing about the visitor', () => {
+    const paragraph = html.match(/<p[^>]*>(Alleen wie inlogt in het beheer.*?)<\/p>/)?.[1] ?? ''
 
-    expect(paragraph).toContain('Wie inlogt in het beheer krijgt één cookie.')
-    expect(paragraph).toContain('nooit voor een bezoeker')
-    expect(paragraph).toContain('alleen een nummer voor die sessie, niets over jou')
-    expect(paragraph).toContain('alleen naar de pagina&#x27;s van het beheer')
+    expect(paragraph).toContain('krijgt een cookie')
+    expect(paragraph).toContain('de paar mensen van de redactie')
+    expect(paragraph).toContain('een nummer voor die sessie, niets over jou')
     expect(paragraph).toContain('hooguit 7 dagen')
   })
 
@@ -71,48 +107,19 @@ describe('the page Privacy', () => {
     const paragraphs = [...withoutIcons(html).matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 
     expect(html).not.toMatch(/<(ul|ol|li)[ >]/)
-    expect(paragraphs).toHaveLength(11)
-    expect(paragraphs[1]).toContain('logbestanden bij, met onder meer IP-adressen')
-    expect(paragraphs[2]).toContain('We tellen hoeveel mensen de site bezoeken')
-    expect(paragraphs[3]).toContain('maakt de server van je IP-adres en de naam van je browser een code')
-    expect(paragraphs[4]).toContain('Niet iedereen telt mee.')
+    expect(paragraphs).toHaveLength(10)
+    expect(paragraphs[1]).toContain('We tellen per dag')
+    expect(paragraphs[2]).toContain('Bots, de controles')
+    expect(paragraphs[3]).toContain('De server maakt')
+    expect(paragraphs[4]).toContain('logbestanden bij, met onder meer IP-adressen')
     expect(paragraphs[5]).toContain('Kies je Licht of Donker in de footer')
-    expect(paragraphs[6]).toContain('Wie inlogt in het beheer krijgt één cookie.')
-    expect(paragraphs[7]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
-    expect(paragraphs[8]).toContain('dan komt het in de mailbox van de redactie')
-    expect(paragraphs[8]).toContain('bewaren het tot de zaak is afgehandeld, hoogstens een jaar')
-    expect(paragraphs[8]).toContain('Het formulier slaat niets op de site zelf op.')
+    expect(paragraphs[6]).toContain('Alleen wie inlogt in het beheer')
+    expect(paragraphs[7]).toContain('dan komt het in de mailbox van de redactie')
+    expect(paragraphs[7]).toContain('bewaren het tot de zaak is afgehandeld, hoogstens een jaar')
+    expect(paragraphs[7]).toContain('Het formulier slaat niets op de site zelf op.')
+    expect(paragraphs[8]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
     expect(paragraphs[9]).toContain('Vragen over je gegevens stel je aan de redactie')
-    expect(paragraphs[10]).toContain('Autoriteit Persoonsgegevens')
-  })
-
-  it('says what we count and keep: counters, per day and per page, and nothing on the device', () => {
-    const paragraph = html.match(/<p[^>]*>(We tellen hoeveel mensen.*?)<\/p>/)?.[1] ?? ''
-
-    expect(paragraph).toContain('op onze eigen server, zonder dienst van een ander bedrijf')
-    expect(paragraph).toContain(
-      'Per dag houden we bij hoe vaak elke pagina is bekeken en hoeveel verschillende bezoekers er waren',
-    )
-    expect(paragraph).toContain('Dat zijn alleen getallen, en die bewaren we.')
-    expect(paragraph).toContain('geen cookie, geen opslag in je browser en geen script')
-  })
-
-  it('says how the code of the day works, what is not kept and what is thrown away when the day is over', () => {
-    const paragraph = html.match(/<p[^>]*>(Om een bezoeker maar één keer per dag.*?)<\/p>/)?.[1] ?? ''
-
-    expect(paragraph).toContain('een willekeurig getal doorheen dat alleen voor die dag bestaat: het zout')
-    expect(paragraph).toContain(
-      'Het adres en de naam van je browser schrijft de server nergens op, ook niet in het logboek.',
-    )
-    expect(paragraph).toContain('Is de dag voorbij, dan gooien we ze weg en blijven alleen de tellers over.')
-    expect(paragraph).toContain('we herkennen je niet van dag tot dag')
-  })
-
-  it('says who is not counted: bots, the checks of the hosting, our importer and whoever asks not to be followed', () => {
-    const paragraph = html.match(/<p[^>]*>(Niet iedereen telt mee\..*?)<\/p>/)?.[1] ?? ''
-
-    expect(paragraph).toContain('We slaan bots over, de controles van onze hosting en onze eigen importer.')
-    expect(paragraph).toContain('Do Not Track of Global Privacy Control')
+    expect(paragraphs[9]).toContain('Autoriteit Persoonsgegevens')
   })
 
   it('no longer says that we have no data of the visitor', () => {

@@ -4766,7 +4766,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Let op:** zolang de dag duurt, staan het zout en de kenmerken samen in de database.
   Wie de database kan lezen, kan met het zout alle IPv4-adressen proberen en zo een kenmerk terugrekenen naar een adres.
   Dat vraagt toegang tot de database, en na de dag is het zout weg.
-  De privacypagina zegt het zo: tot het einde van de dag staan het zout en de kenmerken in onze database.
+  De privacypagina zegt het ook: tot het einde van de dag staan het getal (het zout) en de codes (de kenmerken) in onze database.
 - **Rechtsgrond:** de Builder nam gerechtvaardigd belang aan (we willen weten of de site gelezen wordt, en we houden geen persoonsgegevens langer dan de dag).
   Toestemming is niet nodig, omdat er niets op het apparaat van de bezoeker staat.
   Een jurist heeft dit niet bekeken.

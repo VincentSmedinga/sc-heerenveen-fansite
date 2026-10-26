@@ -119,10 +119,6 @@ async function checkAdmin() {
 }
 
 /**
- * Lists the names of the cascade layers in some CSS, in the order they first appear in a
- * statement or a block.
- */
-/**
  * Checks the counting of the visits on a server that runs: a few visits of two visitors and
  * the requests that must not count. The counting runs after the response, so the numbers are
  * read once they are in. Nothing in the database may hold the address or the browser text.
@@ -394,6 +390,10 @@ async function checkSitemap(siteOrigin) {
   return sitemap
 }
 
+/**
+ * Lists the names of the cascade layers in some CSS, in the order they first appear in a
+ * statement or a block.
+ */
 function layersIn(css) {
   const layers = []
 
