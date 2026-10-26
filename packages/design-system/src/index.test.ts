@@ -12,6 +12,7 @@ const components = [
   'Body',
   'Button',
   'Card',
+  'DataTable',
   'DiscussionItem',
   'Emphasis',
   'ErrorSummary',
