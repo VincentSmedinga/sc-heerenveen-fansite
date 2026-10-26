@@ -38,6 +38,7 @@ The owner can talk to every session directly, and passes messages between them.
 The session the project owner plans with.
 Its work is coordination and specification, nothing else.
 Building, reviewing, design and research for their own sake, and help with the owner's setup go to a Builder, a Reviewer or a session of their own.
+The skills `specify`, `weekly-coordination` and `release-notes` hold its steps.
 
 - Keeps the board and the issues true to reality, without asking: it moves their status, assigns them, sets labels and milestones, posts status updates and closes what is done.
   It changes what an issue asks for only through a specification the owner approves.
@@ -72,6 +73,7 @@ Building, reviewing, design and research for their own sake, and help with the o
 
 Picks up one issue, in its own branch and worktree.
 The skills in `.claude/skills/` hold the order of the steps: `builder-workflow` for every issue, `review-pr` for the Reviewer after the pull request opens, and `add-source` for a new source.
+`pr-screenshots`, `write-story`, `record-decision` and `write-dutch` cover the screenshots, a component with its stories, a decision, and public text.
 The rules stay in this file and in `CONTRIBUTING.md`; a skill points to them and adds the steps that were missed before.
 
 - Writes the code, with tests, and stories for anything visible.
