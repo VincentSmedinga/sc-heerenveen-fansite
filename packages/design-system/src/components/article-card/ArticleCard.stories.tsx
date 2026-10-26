@@ -95,3 +95,51 @@ export const LongDark = meta.story({
   name: 'Lange titel en inleiding in een smalle kolom, donker',
   render: renderLong,
 })
+
+// The titles are made up. Each one breaks over two or three lines in a narrow column, so the
+// words are spread over the lines. The second has a long word and the third is Frisian.
+const renderBalanced = () => (
+  <div style={{ display: 'grid', gap: '1rem', maxInlineSize: '20rem' }}>
+    <ArticleCard
+      date="25 oktober 2026"
+      dateTime="2026-10-25"
+      href="#wie-zijn-wij"
+      intro="Een korte inleiding."
+      title="Wie wij zijn en wat je van ons mag verwachten"
+    />
+    <ArticleCard
+      date="24 oktober 2026"
+      dateTime="2026-10-24"
+      href="#lang-woord"
+      intro="Een korte inleiding."
+      title="Kampioenschapsfeestcommissievergaderingsverslag voor de leden"
+    />
+    <ArticleCard
+      date="23 oktober 2026"
+      dateTime="2026-10-23"
+      href="#frysk"
+      intro="Een korte inleiding."
+      title="Wy sykje mear fanwegen yn de redaksje fan de Fansite"
+    />
+  </div>
+)
+
+export const BalancedLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Titels in balans over twee of drie regels, met een lang woord en een Friese titel, licht',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De woorden van een titel zijn over de regels verdeeld, zodat geen regel met één woord alleen overblijft. Een heel lang woord breekt in plaats van dat de pagina opzij scrolt.',
+      },
+    },
+  },
+  render: renderBalanced,
+})
+
+export const BalancedDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Titels in balans over twee of drie regels, met een lang woord en een Friese titel, donker',
+  render: renderBalanced,
+})

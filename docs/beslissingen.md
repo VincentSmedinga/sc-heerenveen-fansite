@@ -4632,3 +4632,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een tabel (past bij gegevens in kolommen, maar scrolt op een telefoon opzij); een terugzetknop (meer scherm en meer regels voor wat er met de publicatie gebeurt, nog niet nodig); de versies op een eigen pagina (een klik meer voor wie net iets heeft overschreven).
 - **Een artikel dat alleen met SQL is gemaakt of veranderd** heeft geen versie van die wijziging, want SQL gaat om de site heen (zie `docs/artikelen.md`).
   De pagina zegt dat er nog geen versie is, en de eerstvolgende wijziging in het beheer geeft de eerste.
+
+### Alle koppen en titels breken in balans
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** niet alleen `h1` tot en met `h6`, maar ook de kop van een nieuwsbericht en andere titels die over meer regels kunnen lopen, krijgen `text-wrap: balance`.
+  De regel staat één keer, in `heading.css`, bij de klasse `.hf-headline` in de typografielaag, binnen `@supports (text-wrap: balance)` zoals de koppen.
+  Zo krijgen de kop in `NewsItem` en de titel in `DiscussionItem` hem, en elk component dat de klasse later gebruikt.
+  De titel in `ArticleCard` is een `h3` en had hem al.
+  Geen component heeft een eigen regel.
+- **Waarom:** een kop met één woord alleen op de tweede regel ziet er onrustig uit en leest slechter.
+  Balance verdeelt de woorden over de regels van een korte tekst, zonder dat de kop breder of smaller wordt.
+  Het hoort bij de koppen die we al zo zetten, ook al zijn ze geen `h`-element.
+  `overflow-wrap: anywhere` van de componenten blijft werken: een heel lang woord breekt, en de pagina scrolt niet opzij.
+- **Let op:** `text-wrap: balance` wordt op 13 november 2026 'widely available' (zie _Functies die nog niet zover zijn_).
+  Meldt Stylelint de `@supports` dan als overbodig, dan gaat hij weg, zowel bij `.hf-headline` als bij de koppen.
+  Een test (`heading-css.test.ts`) leest de CSS en controleert dat de regel er staat, op één plek, binnen die `@supports`.
+- **Alternatieven:** het alleen op de `h`-elementen laten (de koppen van het nieuws, het meest gelezen deel van de site, houden dan het probleem); `text-wrap: pretty` op alle tekst (werkt nog niet in alle browsers, en het is bedoeld voor lange tekst); een eigen regel per component (meer plaatsen om bij te houden).

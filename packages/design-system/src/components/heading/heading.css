@@ -111,4 +111,15 @@
     line-height: var(--hf-headline-line-height);
     text-transform: none;
   }
+
+  /*
+   * A headline of the news and a title of a discussion are not headings, but they break over more lines as a heading
+   * does, so they get the same balance. It is set once here and not in each component. Not Baseline widely available
+   * yet. Without it, they wrap as a paragraph does.
+   */
+  @supports (text-wrap: balance) {
+    .hf-headline {
+      text-wrap: balance;
+    }
+  }
 }

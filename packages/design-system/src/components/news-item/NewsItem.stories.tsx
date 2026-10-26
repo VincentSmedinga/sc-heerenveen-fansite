@@ -53,6 +53,7 @@ const meta = preview.meta({
           'De lijst krijgt dan geen opsommingstekens en geen inspringing, en tussen de regels staat een dunne lijn.',
           'Zet de lijst in een `Card` met het witte vlak: daarop haalt het rood 4,5:1, in licht en donker.',
           'De kop is minstens 24 pixels hoog, en een lange kop loopt door op de volgende regel.',
+          'De woorden van een kop die over meer regels loopt zijn over die regels verdeeld, zodat geen regel met één woord alleen overblijft.',
         ].join('\n'),
       },
     },
@@ -270,4 +271,72 @@ export const LongHeadlineDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Lange kop, donker',
   render: renderLong,
+})
+
+// The headlines are made up. Each one breaks over two or three lines in a narrow column, so the
+// words are spread over the lines and no line is left with one word. The third has a long word,
+// which breaks instead of making the page scroll sideways, and the last is Frisian.
+const renderBalanced = () => (
+  <div style={{ maxInlineSize: '20rem' }}>
+    <Card aria-label="Koppen in balans">
+      <List role="list">
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-21T12:05:00Z"
+            headline="Heerenveen blijft na een zware week ongeslagen in de competitie"
+            href="#ongeslagen"
+            source="Testkrant"
+            time="wo 14:05"
+          />
+        </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-21T08:30:00Z"
+            headline="Trainer tevreden over de voorbereiding op de uitwedstrijd bij Testclub van zondag"
+            href="#voorbereiding"
+            source="Voorbeeldkrant"
+            time="wo 10:30"
+          />
+        </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-20T17:45:00Z"
+            headline="Kampioenschapsfeestcommissievergaderingsverslag ligt klaar voor de leden"
+            href="#lang-woord"
+            source="Testkrant"
+            time="di 19:45"
+          />
+        </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2026-10-20T08:15:00Z"
+            headline="Hearrenfean wûn yn de lêste minút fan in spannende wedstriid tsjin Test Boys"
+            href="#frysk"
+            source="Testkrante"
+            time="di 10:15"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const BalancedLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Koppen in balans over twee of drie regels, met een lang woord en een Friese kop, licht',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De woorden van een kop zijn over de regels verdeeld, zodat geen regel met één woord alleen overblijft. Een heel lang woord breekt in plaats van dat de pagina opzij scrolt. Een browser die dit niet kent, breekt de kop zoals gewone tekst.',
+      },
+    },
+  },
+  render: renderBalanced,
+})
+
+export const BalancedDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Koppen in balans over twee of drie regels, met een lang woord en een Friese kop, donker',
+  render: renderBalanced,
 })

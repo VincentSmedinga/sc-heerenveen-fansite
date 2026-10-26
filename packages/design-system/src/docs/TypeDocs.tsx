@@ -64,7 +64,7 @@ export const typeStyles: TypeStyle[] = [
     name: 'Nieuwskop',
     sample: 'Samenvatting: SC Heerenveen bezorgt Excelsior opnieuw een grote nederlaag',
     spec: 'Atkinson Hyperlegible Next 600 · één maat · 1,35',
-    use: 'Koppen van berichten in lijsten. Nooit in kapitalen.',
+    use: 'Koppen van berichten in lijsten. Een kop over meer regels breekt in balans. Nooit in kapitalen.',
   },
   {
     className: 'hf-body',
