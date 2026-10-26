@@ -455,10 +455,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een eigen script dat de diff controleert; dat is code om te onderhouden voor iets wat twee regels doen.
   Niets doen en de reviewer deze dingen laten melden; dat kost een reviewronde per pull request, en de limiet is twee.
 
-### Skills voor de stappen van de Builder, regels blijven in AGENTS.md
+### Skills voor de stappen van de rollen, regels blijven in AGENTS.md
 
 - **Datum:** 26 oktober 2026
-- **Besluit:** drie skills in `.claude/skills/` leggen de volgorde van de stappen vast: `builder-workflow` voor elk issue, `review-pr` voor de reviewer na het openen van de pull request en `add-source` voor een nieuwe bron.
+- **Besluit:** skills in `.claude/skills/` leggen de volgorde van de stappen vast.
+  Voor de Builder: `builder-workflow` voor elk issue, `review-pr` voor de reviewer na het openen van de pull request, `add-source` voor een nieuwe bron, `pr-screenshots`, `write-story` voor een component met zijn stories en `record-decision`.
+  Voor de Coordinator: `specify`, `weekly-coordination` en `release-notes`.
+  `write-dutch` is voor iedereen die openbare tekst schrijft.
   Een skill verwijst naar `AGENTS.md` en `CONTRIBUTING.md` en herhaalt hun regels niet; hij voegt de stappen toe die eerder werden overgeslagen.
   De regels zelf blijven in die twee bestanden.
 - **Waarom:** acht pull requests voegden een bron toe en raakten steeds dezelfde bestanden.
