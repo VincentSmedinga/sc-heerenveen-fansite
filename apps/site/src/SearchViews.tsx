@@ -21,6 +21,28 @@ import { dateTimeOf, dayOf, episodeDetails, formatArticleDay, formatEpisodeTime,
 import { maxQueryLength, maxResults, searchHref, type Squad, squadGroups } from './search'
 
 /**
+ * The card of the page: the form and, under it, the results of the search. Before a search
+ * there are no results and the card is blue, so the form stands out; with results it is white,
+ * like the other cards. The players beside it start level with this card.
+ */
+export function SearchCard({
+  error,
+  formText,
+  results,
+}: {
+  error?: string | undefined
+  formText: string
+  results?: Parameters<typeof SearchResults>[0] | undefined
+}) {
+  return (
+    <Card as="div" surface={results === undefined ? 'soft' : 'default'}>
+      <SearchForm error={error} text={formText} />
+      {results !== undefined && <SearchResults {...results} />}
+    </Card>
+  )
+}
+
+/**
  * The form of the page: a label, the field and the button, which loads the page again with the
  * search in the address (method GET), so it works without JavaScript and the address can be
  * shared. Under a search that doesn't meet the limits the field says what is wrong. The text is
@@ -43,64 +65,6 @@ export function SearchForm({ error, text }: { error?: string | undefined; text: 
 }
 
 /**
- * The card with the results of a search: a heading that says how many there are, the newest
- * `hits` and, when there are more, the button that loads the next ones. It works without
- * JavaScript: the form loads the page again with a larger number in the address, and the part
- * after the hash brings the visitor to the first new result. Without results it says so, and
- * where else to look.
- */
-export function SearchResults({
-  count,
-  hasSquad,
-  hits,
-  now,
-  text,
-  total,
-}: {
-  count: number
-  hasSquad: boolean
-  hits: PublicSearchHit[]
-  now: Date
-  text: string
-  total: number
-}) {
-  return (
-    <Card aria-labelledby="resultaten">
-      <Heading id="resultaten" level={2}>
-        {total === 0 ? 'Geen resultaten' : `${total} ${total === 1 ? 'resultaat' : 'resultaten'}`} voor {text}
-      </Heading>
-      {total === 0 ? (
-        <Text>
-          Daar hebben we niets over gevonden. Probeer een ander woord
-          {hasSquad ? ', of kijk bij de spelers hiernaast.' : '.'}
-        </Text>
-      ) : (
-        <List role="list">
-          {hits.map((hit, index) => (
-            <List.Item id={`resultaat-${index + 1}`} key={`${hit.kind}-${index}`}>
-              <Hit hit={hit} now={now} />
-            </List.Item>
-          ))}
-        </List>
-      )}
-      {hits.length < total &&
-        (count < maxResults ? (
-          <Form action={`/zoeken#resultaat-${hits.length + 1}`} method="get">
-            <Input name="q" type="hidden" value={text} />
-            <Button appearance="soft" icon="plus" name="aantal" type="submit" value={String(count + moreResults)}>
-              {`Laad ${moreResults} meer`}
-            </Button>
-          </Form>
-        ) : (
-          <Text appearance="meta">
-            {`Dit zijn de ${maxResults} nieuwste resultaten. Zoek op meer woorden om er minder te krijgen.`}
-          </Text>
-        ))}
-    </Card>
-  )
-}
-
-/**
  * The card with the players of the squad under their position, each name a link that searches
  * for the surname, and the credit to Wikipedia under it. It is nothing without players.
  */
@@ -117,7 +81,7 @@ export function SquadCard({ squad }: { squad: Squad }) {
         <Heading id="spelers" level={2}>
           Spelers
         </Heading>
-        <Text>Kies een naam om op de achternaam te zoeken.</Text>
+        <Text>Zoek snel op een achternaam.</Text>
         {groups.map((group) => (
           <Fragment key={group.label}>
             <Heading level={3}>{group.label}</Heading>
@@ -169,6 +133,63 @@ function Hit({ hit, now }: { hit: PublicSearchHit; now: Date }) {
       source={hit.sourceName}
       time={formatNewsTime(hit.publishedAt, now)}
     />
+  )
+}
+
+/**
+ * The results of a search: a heading that says how many there are, the newest `hits` and, when
+ * there are more, the button that loads the next ones. It works without JavaScript: the form
+ * loads the page again with a larger number in the address, and the part after the hash brings
+ * the visitor to the first new result. Without results it says so, and where else to look.
+ */
+function SearchResults({
+  count,
+  hasSquad,
+  hits,
+  now,
+  text,
+  total,
+}: {
+  count: number
+  hasSquad: boolean
+  hits: PublicSearchHit[]
+  now: Date
+  text: string
+  total: number
+}) {
+  return (
+    <>
+      <Heading id="resultaten" level={2}>
+        {total === 0 ? 'Geen resultaten' : `${total} ${total === 1 ? 'resultaat' : 'resultaten'}`} voor {text}
+      </Heading>
+      {total === 0 ? (
+        <Text>
+          Daar hebben we niets over gevonden. Probeer een ander woord
+          {hasSquad ? ', of kijk bij de spelers hiernaast.' : '.'}
+        </Text>
+      ) : (
+        <List role="list">
+          {hits.map((hit, index) => (
+            <List.Item id={`resultaat-${index + 1}`} key={`${hit.kind}-${index}`}>
+              <Hit hit={hit} now={now} />
+            </List.Item>
+          ))}
+        </List>
+      )}
+      {hits.length < total &&
+        (count < maxResults ? (
+          <Form action={`/zoeken#resultaat-${hits.length + 1}`} method="get">
+            <Input name="q" type="hidden" value={text} />
+            <Button appearance="soft" icon="plus" name="aantal" type="submit" value={String(count + moreResults)}>
+              {`Laad ${moreResults} meer`}
+            </Button>
+          </Form>
+        ) : (
+          <Text appearance="meta">
+            {`Dit zijn de ${maxResults} nieuwste resultaten. Zoek op meer woorden om er minder te krijgen.`}
+          </Text>
+        ))}
+    </>
   )
 }
 

@@ -2944,7 +2944,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een gewone link werkt zonder JavaScript, en de footer heeft al de andere pagina's over de site zelf.
   De lijst helpt als je niet weet waar je naar zoekt, en zonder vraag staat ze direct onder het formulier.
 - **Nadeel:** de zoekpagina is minder zichtbaar dan in het hoofdmenu, en het menu in de footer wijst de huidige pagina niet aan.
-- **Hoe:** de lijst staat na de resultaten in de bron, dus onder de resultaten op een smal scherm, en ze is van `players` van het lopende seizoen (`listSquad`), per positie.
+- **Hoe:** het formulier en de resultaten staan samen in één kaart, zodat de zijbalk er op een breed scherm gelijk mee begint.
+  Voor een zoekvraag, als er nog geen resultaten zijn, heeft de kaart het blauwe vlak (`surface="soft"`); met resultaten is ze wit, zoals de andere kaarten.
+  Boven de lijst met spelers staat "Zoek snel op een achternaam."
+  De lijst staat na de resultaten in de bron, dus onder de resultaten op een smal scherm, en ze is van `players` van het lopende seizoen (`listSquad`), per positie.
   Elke naam is een gewone link naar `/zoeken?q=<achternaam>`, met de zoekterm uit de tabel.
   De bronvermelding onder de lijst is `WikipediaCredit`, met het woord `selectiegegevens` voor onze eigen gegevens (eigenschap `data`), want de standaardzin noemt de wedstrijdgegevens.
   `listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 komt als één voorwaarde in de `where` van die vraag.

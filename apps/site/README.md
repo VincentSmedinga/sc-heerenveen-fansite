@@ -261,7 +261,8 @@ Is ze leeg, te lang of heeft ze te veel of te korte woorden, dan staat er bij he
 Zo beschermen de grenzen de gedeelde hosting.
 Een zoekopdracht kost op een database met 10.000 berichten ongeveer 7 tot 14 milliseconden.
 
-Het formulier is een gewoon `GET`-formulier naar `/zoeken?q=…`, dus de pagina werkt zonder JavaScript en het adres is te delen.
+Het formulier staat in dezelfde kaart als de resultaten (`SearchCard`), blauw zolang er nog niet gezocht is en daarna wit.
+Het is een gewoon `GET`-formulier naar `/zoeken?q=…`, dus de pagina werkt zonder JavaScript en het adres is te delen.
 De resultaten staan met de nieuwste bovenaan, tien eerst, en de knop "Laad 5 meer" laadt de pagina opnieuw met `?aantal=15`, in stappen van vijf en tot 100.
 Daarna staat er een zin dat dit de nieuwste zijn.
 De site bewaart een zoekvraag zelf nergens: er staat geen cookie, geen lijst van gezochte woorden en geen adres van de bezoeker bij.

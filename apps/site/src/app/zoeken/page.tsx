@@ -6,7 +6,7 @@ import { cache } from 'react'
 import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
 import { getSquad, parseResultCount, parseSearch, searchHref, searchSite, type Squad } from '../../search'
-import { SearchForm, SearchResults, SquadCard } from '../../SearchViews'
+import { SearchCard, SquadCard } from '../../SearchViews'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
 
@@ -96,23 +96,18 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             <Text appearance="intro">
               Zoek in de koppen van het nieuws, de podcasts en de artikelen van de redactie.
             </Text>
-            <SearchForm
-              error={search.kind === 'invalid' ? search.message : undefined}
-              text={search.kind === 'none' ? '' : search.text}
-            />
           </>
         }
       >
-        {results !== undefined && search.kind === 'valid' && (
-          <SearchResults
-            count={count}
-            hasSquad={hasSquad}
-            hits={results.hits}
-            now={now}
-            text={search.text}
-            total={results.total}
-          />
-        )}
+        <SearchCard
+          error={search.kind === 'invalid' ? search.message : undefined}
+          formText={search.kind === 'none' ? '' : search.text}
+          results={
+            results !== undefined && search.kind === 'valid'
+              ? { count, hasSquad, hits: results.hits, now, text: search.text, total: results.total }
+              : undefined
+          }
+        />
       </Page.Main>
       {/* After the results in the source, so on a phone the players are under the results, and
           under the form on a first visit. */}

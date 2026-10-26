@@ -113,11 +113,14 @@ describe('the page Zoeken without a search', () => {
     expect(html).toMatch(/<form[^>]*role="search"/u)
   })
 
-  it('has the form in the introduction and the players in the sidebar, after the main in the source', async () => {
+  it('has the h1 and the sentence in the introduction, and the form in a blue card, so the players start level with it', async () => {
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html.indexOf('<form')).toBeLessThan(html.indexOf('</main>'))
+    expect(html).toMatch(
+      /<div class="hf-page-intro"><h1 class="hf-heading-1">Zoeken<\/h1><p class="hf-intro">.*?<\/p><\/div>/u,
+    )
+    expect(html).toMatch(/<div class="hf-page-cells"><div class="hf-card hf-card-soft"><form/u)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
   })
 })
@@ -129,6 +132,14 @@ describe('the page Zoeken with a search', () => {
     expect(searchSite).toHaveBeenCalledExactlyOnceWith(['klaverboer'], 10)
     expect(html).toContain('<h2 class="hf-heading-2" id="resultaten">3 resultaten voor klaverboer</h2>')
     expect(html).toMatch(/<input[^>]*value="klaverboer"/u)
+  })
+
+  it('has the form and the results in one white card', async () => {
+    const html = await render({ q: 'klaverboer' })
+
+    expect(html).toMatch(/<div class="hf-page-cells"><div class="hf-card"><form.*<\/form><h2[^>]*id="resultaten"/u)
+    expect(html).not.toContain('hf-card-soft')
+    expect(html.match(/<div class="hf-card">/g)).toHaveLength(1)
   })
 
   it('says "1 resultaat" for one', async () => {
@@ -307,6 +318,10 @@ describe('the list of players', () => {
       '<h3 class="hf-heading-3">Middenvelders</h3>',
       '<h3 class="hf-heading-3">Aanvallers</h3>',
     ])
+  })
+
+  it('says to search quickly on a surname above the players', async () => {
+    expect(sidebarOf(await render())).toContain('<p>Zoek snel op een achternaam.</p>')
   })
 
   it('has each name as a plain link to a search for the surname', async () => {
