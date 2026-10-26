@@ -6,7 +6,14 @@ import { cache } from 'react'
 import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
 import { getMatchData, overviewOf, parseCleanSheetCount } from '../../matches'
-import { CleanSheetsCard, MatchLines, SourceCredit, standingsCaption, TopScorers } from '../../MatchViews'
+import {
+  CleanSheetsCard,
+  GoalsPerQuarterCard,
+  MatchLines,
+  SourceCredit,
+  standingsCaption,
+  TopScorers,
+} from '../../MatchViews'
 import { pageMetadata } from '../../metadata'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
@@ -75,6 +82,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <MatchLines matches={programme} now={now} />
           )}
         </Card>
+        <GoalsPerQuarterCard matches={data.matches} />
       </Page.Main>
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme: the table,
           the top scorers, then the results. */}

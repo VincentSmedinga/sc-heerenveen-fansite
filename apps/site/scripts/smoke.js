@@ -649,6 +649,14 @@ await withEmptyDatabase((database) =>
       /<th scope="row">Nepper<\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
     )
     assert.doesNotMatch(matchesHtml, /<th scope="row">Kopie<\/th>/)
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="doelpunten-per-kwartier">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartie/,
+    )
+    assert.match(
+      matchesHtml,
+      /<caption class="hf-visually-hidden">Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd<\/caption>/,
+    )
     assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     assert.doesNotMatch(matchesHtml, /action=history/)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)

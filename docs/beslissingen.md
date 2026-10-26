@@ -2125,6 +2125,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De zijbalk staat nog na de hoofdkolom in de bron, zonder `order`, en de benoemde gebieden voor een pagina met een inleiding blijven gelden.
 - **Alternatieven:** de verdeling in twee kolommen helemaal weghalen (`/bronnen` verliest iets wat goed werkte); de verdeling als standaard laten en per pagina afzetten, zoals met `wide` (elke nieuwe pagina met lijsten moet eraan denken).
 
+### Een donutdiagram is een eigen onderdeel in SVG, met het groen en het rood van de uitkomst
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het designsysteem krijgt `DonutChart`: een ring van plakken, getekend als SVG in onze eigen code, met het totaal in het gat en bij elke plak de naam en de waarde als tekst.
+  Een waarde van nul krijgt geen plak en geen tekst; een diagram zonder waarden toont een lege ring met een nul.
+  Meer diagrammen naast elkaar staan in een `DonutChart.Group`.
+- **Waarom:** de kaart Doelpunten per kwartier (#344) vraagt twee taartdiagrammen, en een grafiekbibliotheek is een dependency en laadt of berekent meer dan twee ringen nodig hebben.
+  Een ring met een totaal in het gat leest beter dan een volle taart: het getal staat op de plek waar het oog heen gaat, en de plakken zijn dunner, dus de verschillen in hoek vallen beter op.
+  De vorm is de keuze van de Builder, voorgelegd aan de projecteigenaar in Storybook; een taart zonder gat of een donut zonder getal is een kleine wijziging van `ring` in `geometry.ts` en de regel voor het totaal in `donut-chart.css`.
+- **Hoe:**
+  - De plakken lopen met de klok mee vanaf boven, in de volgorde van de gegevens, zoals een wijzerplaat.
+  - De kleur komt uit de bestaande uitkomsttokens: `--hf-colour-outcome-win` voor het diagram van de doelpunten voor en `--hf-colour-outcome-loss` voor het diagram van de tegendoelpunten.
+    Er komen geen nieuwe tokens bij.
+  - De plakken lopen op van 70% van de kleur naar de volle kleur, in de volgorde van de plakken.
+    70% is het zwakste dat nog 3:1 haalt op het vlak van de kaart: 3,39:1 voor het groen en 4,22:1 voor het rood in licht, 4,81:1 en 4,43:1 in donker.
+  - Het verschil tussen twee buurplakken is kleiner dan 3:1.
+    Een rand in de kleur van het vlak, van 3 eenheden van de tekening, scheidt ze, en elke plak heeft zijn eigen tekst.
+    Niemand hoeft een kleur te zien om een plak te lezen.
+  - De tekening is 320 bij 300 eenheden en schaalt met de breedte van het diagram.
+    De teksten zijn HTML, met een vaste grootte in rem, en staan in procenten van de tekening om de ring.
+    Zo blijven ze op een telefoon even groot als de tekst van de pagina, en volgen ze het tekstformaat van de bezoeker.
+  - Staan twee teksten minder dan 40 graden van elkaar, dan schuiven ze uit elkaar en loopt er een streepje van de plak naar de tekst (`spreadAngles` in `geometry.ts`).
+  - Diagrammen staan naast elkaar zolang elk 10 rem breed kan zijn, en anders onder elkaar (`repeat(auto-fit, minmax(min(10rem, 100%), 1fr))`): de breedte van de plek telt, niet die van het scherm.
+  - Het diagram heeft `aria-hidden="true"` en geen eigen beschrijving: het is een plaatje van getallen, en dezelfde getallen staan in een `DataTable` ernaast.
+  - Er is geen beweging en geen hover.
+    In forced colors krijgen alle plakken één kleur en doet de rand het werk.
+- **Nadeel:** de teksten zijn geen onderdeel van de SVG, dus een diagram dat je als plaatje bewaart, heeft ze niet.
+  Zes plakken in een ring van een kolom van 31 rem zijn klein: de ring is ongeveer 110 pixels breed.
+- **Alternatieven:** een taart zonder gat (meer oppervlak, maar geen plek voor het totaal); het getal in de plak zelf (kleine plakken van één doelpunt zijn te smal); een legenda onder het diagram (de koppeling loopt dan alleen via de kleur); zes of twaalf nieuwe kleurtokens voor de plakken (veel om bij te houden, en toch geen 3:1 tussen buren); de teksten als SVG-tekst (die schaalt mee en wordt op een telefoon te klein); een grafiekbibliotheek (het issue sluit die uit).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -4907,6 +4937,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het programma staat in een hoofdkolom van 31 rem en de stand met de uitslagen in een zijbalk van 31 rem, met de bronvermelding als laatste.
 - **Later:** zie _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_.
   De cellen van een zijbalk staan nu standaard onder elkaar, dus `wide` hoeft ze niet meer onder elkaar te houden; het maakt alleen de zijbalk breder.
+- **Later:** zie _De kaart Doelpunten per kwartier telt de doelpunten van de wedstrijden met bekende minuten_.
+  De hoofdkolom heeft nu twee kaarten, het programma en daaronder de doelpunten per kwartier; op een telefoon is de volgorde het programma, de doelpunten per kwartier, de stand en de rest van de zijbalk.
 
 ### De stand toont geen doelpunten voor en tegen
 
@@ -5398,3 +5430,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het aantal spelers staat in een zichtbare regel onder de tabel ("11 spelers hebben gescoord"), en niet in het bijschrift, want alleen een schermlezer krijgt het bijschrift.
   De telling blijft op één plek, `topScorersOf`, want #333 laat haar later per speler in plaats van per naam tellen.
 - **Alternatieven:** de beste vijf houden, met gelijkstaanden (korter, maar de rest blijft onzichtbaar); de beste vijf met een knop voor de rest (extra stap en meer code, terwijl de lijst kort genoeg is).
+
+### De kaart Doelpunten per kwartier telt de doelpunten van de wedstrijden met bekende minuten
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `/wedstrijden` krijgt in de hoofdkolom, onder het programma, een kaart "Doelpunten per kwartier" met twee diagrammen, voor en tegen, elk in zes plakken: de kwartieren van een wedstrijd.
+  De cijfers staan ook als tabel, en onder de tabel staat op hoeveel van de gespeelde wedstrijden de telling is gebaseerd en dat de verlenging buiten de telling blijft.
+- **Waarom:** een taart toont maar één reeks, dus voor en tegen vragen twee taarten.
+  De verlenging komt alleen in bekerwedstrijden voor en zou een kwartier erbij maken dat de meeste wedstrijden niet hebben.
+  De tabel is er voor wie een diagram niet kan zien en voor wie liever getallen leest.
+- **Hoe:** `goalsPerQuarter` in `src/matches.ts` telt de doelpunten uit de wedstrijden die de pagina al heeft, dus er komt geen vraag bij.
+  - De kwartieren zijn de minuten 1 tot en met 15, 16 tot en met 30, 31 tot en met 45, 46 tot en met 60, 61 tot en met 75 en 76 tot en met 90.
+  - Een doelpunt in blessuretijd heeft de minuut van het laatste volle kwartier (45+1 is minuut 45, 90+3 is minuut 90) en telt dus bij het kwartier ervoor: `stoppage_minutes` doet niet mee.
+  - Een doelpunt na minuut 90 is een doelpunt in de verlenging en telt niet mee, ook niet in de blessuretijd van de verlenging.
+    Een doelpunt met minuut 0 bestaat niet in een wedstrijd en telt ook niet mee.
+  - Een doelpunt telt voor de club die ervan profiteert, zoals `ours` al regelt: een eigen doelpunt van een tegenstander is een doelpunt voor ons, en een eigen doelpunt van ons een tegendoelpunt.
+  - Een gespeelde wedstrijd met een uitslag telt mee als hij minstens één doelpunt in `match_goals` heeft, of als hij eindigde in 0–0.
+    Een wedstrijd met een uitslag en zonder doelpunten in de gegevens heeft geen minuten: de pagina noemde de doelpuntenmakers niet, of ze pasten niet bij de uitslag (zie _Een doelpunt dat niet bij de uitslag past, wordt niet getoond_).
+    Die wedstrijd blijft erbuiten, en de tekst onder de tabel zegt het: "Gebaseerd op 8 van de 10 gespeelde wedstrijden", of "alle 10 gespeelde wedstrijden", of "1 gespeelde wedstrijd".
+    Dat is dezelfde regel als de lijn onder de topscorers, met één verschil: de topscorers rekenen een wedstrijd zonder doelpunt van ons als compleet, maar een wedstrijd die we met 0–2 verloren heeft hier wel minuten nodig, want de tegendoelpunten zijn de helft van de kaart.
+  - De kaart telt de competitie en de beker samen.
+  - Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
+    De zin zegt dat we nog geen doelpunten met een minuut hebben, en vraagt de lezer later terug te komen.
+  - De diagrammen zijn verborgen voor hulpsoftware en de tabel is het tekstalternatief, met een bijschrift dat alleen een schermlezer krijgt.
+    De diagrammen zelf zijn `DonutChart` (zie _Een donutdiagram is een eigen onderdeel in SVG, met het groen en het rood van de uitkomst_).
+  - De kop heeft het anker `doelpunten-per-kwartier`, dat in `src/anchors.ts` staat.
+- **Alternatieven:** één diagram met twee ringen (compact, maar moeilijker te lezen); staafjes in plaats van een taart (leesbaarder, maar de projecteigenaar vroeg om een taart); de verlenging als aparte plakken; de wedstrijden zonder bekende doelpunten meetellen met nul doelpunten (de telling lijkt dan completer dan ze is).

@@ -1,0 +1,131 @@
+/*
+ * The donut chart: a ring drawn as SVG that scales with the width of the chart, with the labels
+ * around it as text that does not scale, so they keep the size of the text on the page. The
+ * labels are placed in percentages of the drawing, which is why the plot has its aspect ratio.
+ */
+
+@layer hf.components {
+  /*
+   * Charts side by side while each has room for its ring and labels, and under each other when
+   * it has not, as on a phone. They are as wide as the place they are in, not the screen.
+   */
+  .hf-donut-chart-group {
+    display: grid;
+    gap: 1.5rem 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
+    margin-block: 1rem;
+  }
+
+  .hf-donut-chart {
+    --hf-donut-colour: var(--hf-colour-outcome-win);
+
+    inline-size: 100%;
+    margin-inline: auto;
+    max-inline-size: 20rem;
+    min-inline-size: 0;
+    text-align: center;
+  }
+
+  .hf-donut-chart-loss {
+    --hf-donut-colour: var(--hf-colour-outcome-loss);
+  }
+
+  .hf-donut-chart-title {
+    color: var(--hf-colour-text-heading);
+    font-weight: var(--hf-strong-font-weight);
+    margin-block: 0 0.25rem;
+  }
+
+  .hf-donut-chart-plot {
+    aspect-ratio: 320 / 300;
+    position: relative;
+  }
+
+  .hf-donut-chart-drawing {
+    block-size: 100%;
+    inline-size: 100%;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    overflow: visible;
+    position: absolute;
+  }
+
+  /*
+   * A slice is a part of the colour of the outcome, from 70% (the weakest that still reaches
+   * 3:1 on the surface, in light and in dark) to the full colour in the last slice. The line
+   * round it has the colour of the surface, so it is a gap between the slices, and each slice
+   * stands out from the next without a contrast between their colours.
+   */
+  .hf-donut-chart-slice {
+    fill: color-mix(in srgb, var(--hf-donut-colour) var(--hf-donut-strength), transparent);
+    stroke: var(--hf-colour-background-surface);
+    stroke-linejoin: round;
+    stroke-width: 3;
+  }
+
+  /* The ring of a chart without values: nothing to show, so only the place of the ring. */
+  .hf-donut-chart-track {
+    fill: var(--hf-colour-border-default);
+  }
+
+  .hf-donut-chart-leader {
+    stroke: var(--hf-colour-marker-graphic);
+    stroke-width: 1;
+  }
+
+  /* The total, in the middle of the hole. */
+  .hf-donut-chart-total {
+    color: var(--hf-colour-text-heading);
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-strong-font-weight);
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    line-height: 1;
+    position: absolute;
+    transform: translate(-50%, -50%);
+  }
+
+  /*
+   * A label sits with the corner or the side that is nearest to the ring on its anchor point,
+   * which the component gives as a place in percentages. --hf-donut-sin and --hf-donut-cos are
+   * the direction of the anchor from the centre, so a label at the right grows to the right and
+   * a label at the top grows upwards.
+   */
+  .hf-donut-chart-label {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    position: absolute;
+    transform: translate(calc(-50% + var(--hf-donut-sin) * 50%), calc(-50% - var(--hf-donut-cos) * 50%));
+    white-space: nowrap;
+  }
+
+  .hf-donut-chart-name {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  .hf-donut-chart-value {
+    color: var(--hf-colour-text-default);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  /* In forced colours the fills are replaced, so the gaps between the slices do the work. */
+  @media (forced-colors: active) {
+    .hf-donut-chart-slice {
+      fill: CanvasText;
+      stroke: Canvas;
+    }
+
+    .hf-donut-chart-track {
+      fill: GrayText;
+    }
+
+    .hf-donut-chart-leader {
+      stroke: CanvasText;
+    }
+  }
+}

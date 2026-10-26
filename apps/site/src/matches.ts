@@ -82,6 +82,59 @@ export function cleanSheetsOf(matches: PublicMatch[]): CleanSheets {
 }
 
 /**
+ * The quarters of an hour of a match, as the card of the matches page and its table write them.
+ * The dash is an en dash.
+ */
+export const quarterLabels = ['1–15', '16–30', '31–45', '46–60', '61–75', '76–90'] as const
+
+/** The goals of a season per quarter of an hour, and the matches the count is based on. */
+export type GoalsPerQuarter = {
+  /** The goals against, in the order of `quarterLabels`. */
+  conceded: number[]
+  /** The played matches whose goals are known, so the ones in the count. */
+  known: number
+  /** The played matches, with or without known goals. */
+  played: number
+  /** The goals of sc Heerenveen, in the order of `quarterLabels`. */
+  scored: number[]
+}
+
+/**
+ * The goals of sc Heerenveen and of its opponents per quarter of an hour, in the played matches
+ * of the season whose goals are known, in the league and the cup. A goal in stoppage time
+ * counts in the quarter before it: 45+1 is minute 45 and 90+3 is minute 90. A goal after minute
+ * 90 is in extra time and is left out, and so is a minute that can't be played (0). A goal
+ * counts for the club that profits, as `ours` says, so an own goal is a goal of the other club.
+ * A match counts when it has at least one goal, or when it ended 0-0: a match with a score and
+ * no goals is one where the page named no scorers, or where they did not fit the result, and it
+ * is left out. A match that is not played, or has no score, is left out too.
+ */
+export function goalsPerQuarter(matches: PublicMatch[]): GoalsPerQuarter {
+  const played = matches.filter((match) => match.status === 'played')
+  const known = played.filter(
+    (match) =>
+      match.goalsFor !== null &&
+      match.goalsAgainst !== null &&
+      (match.goals.length > 0 || match.goalsFor + match.goalsAgainst === 0),
+  )
+  const scored = quarterLabels.map(() => 0)
+  const conceded = quarterLabels.map(() => 0)
+
+  for (const goal of known.flatMap((match) => match.goals)) {
+    if (goal.minute < 1 || goal.minute > 90) {
+      continue
+    }
+
+    const counts = goal.ours ? scored : conceded
+    const quarter = Math.ceil(goal.minute / 15) - 1
+
+    counts[quarter] = (counts[quarter] ?? 0) + 1
+  }
+
+  return { conceded, known: known.length, played: played.length, scored }
+}
+
+/**
  * Splits the matches of a season, in the order the query gives them, into the programme, the
  * results, and the previous and the next match the homepage shows.
  */

@@ -41,12 +41,13 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden', () => {
-  it('has one h1 and five h2 headings in order: the programme, the table, the top scorers, the clean sheets and the results', async () => {
+  it('has one h1 and six h2 headings in order: the programme, the goals per quarter, the table, the top scorers, the clean sheets and the results', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Wedstrijden</h1>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#programma">Programma</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpunten-per-kwartier"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartier</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#stand">Stand</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="topscorers"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#topscorers">Topscorers</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="de-nul-gehouden"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="nul-gehouden"></span><a class="hf-heading-link" href="#de-nul-gehouden">De nul gehouden</a></h2>',
@@ -54,7 +55,7 @@ describe('the page /wedstrijden', () => {
     ])
   })
 
-  it('has the programme in the main with the h1, and the table, the top scorers, the clean sheets and the results in a named, wide sidebar after it', async () => {
+  it('has the programme and the goals per quarter in the main with the h1, and the table, the top scorers, the clean sheets and the results in a named, wide sidebar after it', async () => {
     const html = await render()
     const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
     const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
@@ -67,6 +68,8 @@ describe('the page /wedstrijden', () => {
     )
     expect(main.match(/<h1/g)).toHaveLength(1)
     expect(main).toContain('id="programma"')
+    expect(main.indexOf('id="programma"')).toBeLessThan(main.indexOf('id="doelpunten-per-kwartier"'))
+    expect(sidebar).not.toContain('id="doelpunten-per-kwartier"')
     expect(main).not.toContain('id="stand"')
     expect(main).not.toContain('id="uitslagen"')
     expect(sidebar.indexOf('id="stand"')).toBeLessThan(sidebar.indexOf('id="topscorers"'))
@@ -77,14 +80,14 @@ describe('the page /wedstrijden', () => {
     expect(sidebar).not.toContain('id="programma"')
   })
 
-  it('has no order or style attribute but the length of a bar, so the order on a phone is the order in the source', async () => {
-    expect(await render()).not.toMatch(/ style="(?!--hf-bar-share:[\d.]+")|order:/)
+  it('has no order or style attribute but the length of a bar and the place of a label of a chart, so the order on a phone is the order in the source', async () => {
+    expect(await render()).not.toMatch(/ style="(?!--hf-bar-share:[\d.]+"|--hf-donut-cos:)|order:/)
   })
 
   it('names each card by its h2, so the links with a hash on the homepage have a target', async () => {
     const html = await render()
 
-    for (const id of ['programma', 'uitslagen', 'stand', 'topscorers', 'de-nul-gehouden']) {
+    for (const id of ['programma', 'doelpunten-per-kwartier', 'uitslagen', 'stand', 'topscorers', 'de-nul-gehouden']) {
       expect(html).toContain(`<section class="hf-card" aria-labelledby="${id}">`)
     }
   })
@@ -374,6 +377,97 @@ describe('the page /wedstrijden', () => {
       vi.mocked(getMatchData).mockRejectedValue(new Error('down'))
 
       expect(await render()).not.toContain('nul-gehouden')
+    })
+  })
+
+  describe('the goals per quarter', () => {
+    // The test data has two played matches with goals: round 8 (34' and 45+1' ours) and round 9
+    // (12' theirs, 40' and 63' ours, 90+3' theirs). The other two have a score and no goals.
+    const goalMatches = matchData.matches.filter((match) => match.goals.length > 0)
+
+    it('is a card in the main, under the programme, with two charts and a table', async () => {
+      const card = section(await render(), 'doelpunten-per-kwartier')
+
+      expect(card.match(/class="hf-donut-chart /g)).toHaveLength(2)
+      expect(card.match(/<table/g)).toHaveLength(1)
+      expect(card.indexOf('hf-donut-chart-group')).toBeLessThan(card.indexOf('<table'))
+    })
+
+    it('hides both charts from a screen reader and leaves the numbers to the table', async () => {
+      const card = section(await render(), 'doelpunten-per-kwartier')
+
+      expect(card.match(/<div aria-hidden="true" class="hf-donut-chart /g)).toHaveLength(2)
+      expect(card.match(/<table[^>]*>.*<\/table>/s)?.[0]).not.toContain('aria-hidden')
+    })
+
+    it('has the goals for and against per quarter in the table, the six quarters in order', async () => {
+      const table = section(await render(), 'doelpunten-per-kwartier').match(/<table.*<\/table>/s)?.[0] ?? ''
+      const rows = [
+        ...table.matchAll(/<tr><th scope="row">([^<]*)<\/th><td[^>]*>(\d+)<\/td><td[^>]*>(\d+)<\/td><\/tr>/g),
+      ]
+
+      expect(table).toContain(
+        '<th class="hf-numeric" scope="col">Voor</th><th class="hf-numeric" scope="col">Tegen</th>',
+      )
+      expect(rows.map(([, quarter, scored, conceded]) => [quarter, scored, conceded])).toEqual([
+        ['1–15', '0', '1'],
+        ['16–30', '0', '0'],
+        ['31–45', '3', '0'],
+        ['46–60', '0', '0'],
+        ['61–75', '1', '0'],
+        ['76–90', '0', '1'],
+      ])
+    })
+
+    it('gives the table a caption for a screen reader', async () => {
+      expect(section(await render(), 'doelpunten-per-kwartier')).toContain(
+        '<caption class="hf-visually-hidden">Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd</caption>',
+      )
+    })
+
+    it('says how many of the played matches the count is based on, and that extra time is left out', async () => {
+      const card = section(await render(), 'doelpunten-per-kwartier')
+
+      expect(card).toContain('Gebaseerd op 2 van de 4 gespeelde wedstrijden')
+      expect(card).toContain('Doelpunten in een verlenging tellen niet mee.')
+    })
+
+    it('says all the matches when every played match has its goals, and one match in the singular', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: goalMatches })
+
+      expect(section(await render(), 'doelpunten-per-kwartier')).toContain('Gebaseerd op alle 2 gespeelde wedstrijden')
+
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: goalMatches.slice(0, 1) })
+
+      expect(section(await render(), 'doelpunten-per-kwartier')).toContain('Gebaseerd op 1 gespeelde wedstrijd<')
+    })
+
+    it('says so in a sentence, with no chart or table, when there is no goal with a minute', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((match) => ({ ...match, goals: [] })),
+      })
+
+      const card = section(await render(), 'doelpunten-per-kwartier')
+
+      expect(card).toContain('We hebben nog geen doelpunten met een minuut van dit seizoen. Kijk straks nog eens.')
+      expect(card).not.toContain('hf-donut-chart')
+      expect(card).not.toContain('<table')
+    })
+
+    it('says so in a sentence for a season without matches', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+      expect(section(await render(), 'doelpunten-per-kwartier')).toContain(
+        'We hebben nog geen doelpunten met een minuut',
+      )
+    })
+
+    it('is gone, with no card, when the database can not be read', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      vi.mocked(getMatchData).mockRejectedValue(new Error('down'))
+
+      expect(await render()).not.toContain('doelpunten-per-kwartier')
     })
   })
 
