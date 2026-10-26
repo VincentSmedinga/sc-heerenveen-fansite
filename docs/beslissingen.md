@@ -2927,6 +2927,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een tijd zonder zone telt in JavaScript als lokale tijd, en een tijd ver in de toekomst zet een bericht dagenlang bovenaan.
 - **Alternatieven:** de kop afkappen met een beletselteken.
   Of een bericht zonder geldige tijd overslaan; dan verliezen we een kop die verder goed is.
+- **Later:** zie _We nemen ESPN NL, met het filter `club` en een eigen regel voor de zone EST_.
+  Voor het domein `www.espn.nl` geldt een tijd met de zone `EST` nu als Nederlandse tijd; voor elke andere bron is hij nog steeds ongeldig.
 
 ### Een bericht heeft een sleutel per bron, en die is hoofdlettergevoelig
 
@@ -5043,3 +5045,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** wachten op schriftelijke toestemming van DPG Media (voorzichtiger, maar DPG antwoordt zelden); de bron nemen zonder het teken voor de betaalmuur (een lezer klikt dan op een bericht dat hij niet kan lezen, tegen onze eigen regel).
 - **Daarna:** schriftelijk toestemming vragen aan DPG Media hoort bij #35; de projecteigenaar nam het voorbehoud van de bron aan bij het goedkeuren van het issue.
   De voorwaarden van DPG Media en van het AD zeggen niets over RSS-feeds, maar verbieden commercieel gebruik, het overnemen van content en het doorzoeken met robots (zie `docs/bronnen.md`).
+
+### We nemen ESPN NL, met het filter `club` en een eigen regel voor de zone EST
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het register krijgt de voetbalfeed van ESPN NL (`https://www.espn.nl/espn/rss/soccer/news`) met het filter `club`.
+  De bron toont alleen de kop, de link, de bronnaam en de tijd.
+  De beschrijving en de auteur in de feed bewaart de importer niet en toont de site niet.
+  Voor het domein `www.espn.nl` leest de importer de zone `EST` als `Europe/Amsterdam`; voor andere feeds verandert er niets.
+- **Waarom:** ESPN NL is een grote bron over het Nederlandse voetbal, en de feed geeft geen betaalmuur.
+  De tijden in de feed zijn de Nederlandse tijd met een verkeerd zonelabel.
+  Dat bleek uit de pagina's van vijf berichten, uit het einde van de wedstrijd ADO – sc Heerenveen en uit het moment waarop de feed werd opgehaald (zie `docs/bronnen.md`).
+  Letterlijk gelezen staat elk bericht vijf of zes uur te laat, en het nieuwste bericht zou dan uit de toekomst komen.
+  Een regel per bron laat de lezing van `EST` bij andere feeds, waar het echt een zone is, ongemoeid.
+  De regel leest de wandkloktijd van Nederland, dus ook de zomertijd en de overgangen.
+  Een tijd die vaak twee keer op de klok staat (de nacht van het einde van de zomertijd) is de eerste, en een tijd die niet bestaat (het begin ervan) is de tijd na de sprong.
+- **Voorwaarden:** de twee teksten van Disney zeggen niet hetzelfde.
+  De Nederlandse gebruiksvoorwaarden, waar `www.espn.nl` naar linkt (2012), verbieden "geautomatiseerd gebruik met hoog volume" en hergebruik zonder schriftelijke toestemming.
+  De Engelse voorwaarden voor de Verenigde Staten (2024) verbieden elke toegang met een robot, spider of script.
+  Het blijft een risico dat geen jurist heeft getoetst.
+  We nemen één feed, met hoogstens één verzoek per kwartier, alleen een kop en een link, en we stoppen op verzoek.
+- **Gemeten op de echte feed** (26 oktober 2026, één run van de importer): 25 berichten bewaard, waarvan 1 `relevant`, 0 `doubtful` en 24 `irrelevant`.
+  Het ene `relevant` bericht is het wedstrijdverslag van de club.
+  Een bericht over dezelfde wedstrijd vanuit ADO noemt de club niet in de kop en is `irrelevant`; de lijsten blijven zoals ze zijn.
+  Alle 25 tijden waren geldig.
+- **Alternatieven:** wachten op schriftelijke toestemming van Disney (voorzichtiger, maar Disney antwoordt zelden); `EST` voor alle feeds als Nederlandse tijd lezen (verkeerd voor een feed waar het echt EST is); de tijd van deze bron negeren en alleen het moment van eerste zien gebruiken (de berichten staan dan niet op hun echte tijd).
+- **Daarna:** schriftelijk toestemming vragen aan Disney hoort bij #35; de projecteigenaar nam het voorbehoud van Disney aan bij het goedkeuren van het issue.

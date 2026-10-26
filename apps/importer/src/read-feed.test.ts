@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { FeedItem } from './read-feed.ts'
 
-import { cleanHeadline, paywallCategoryFor, paywallNamespaceFor, readFeed } from './read-feed.ts'
+import { cleanHeadline, paywallCategoryFor, paywallNamespaceFor, readFeed, timeRuleFor } from './read-feed.ts'
 
 const now = new Date('2026-10-22T12:00:00Z')
 
@@ -411,6 +411,100 @@ describe('the time', () => {
 
   afterEach(() => {
     vi.unstubAllEnvs()
+  })
+})
+
+describe('the time of a source whose zone label is wrong', () => {
+  const espn = timeRuleFor('www.espn.nl')
+  const afterTheSwitch = new Date('2026-10-27T12:00:00Z')
+
+  /** The time of one item, read with the rule of ESPN NL unless `rule` says otherwise. */
+  const timeOf = (pubDate: string, { at = afterTheSwitch } = {}) => {
+    const result = readFeed(encode(rss(rssItem({ pubDate }))), { now: at, timeRule: espn })
+
+    if (result.kind === 'error') {
+      throw new Error(result.message)
+    }
+
+    return result.items[0]?.publishedAt
+  }
+
+  it('is ruled for ESPN NL only', () => {
+    expect(espn).toEqual({ label: 'EST', timeZone: 'Europe/Amsterdam' })
+    expect(timeRuleFor('www.lc.nl')).toBeUndefined()
+    expect(timeRuleFor('nos.nl')).toBeUndefined()
+  })
+
+  it('is Dutch summer time two hours ahead of UTC before the switch', () => {
+    // The report of the match at ADO, as ESPN wrote it: the page of the item says 22:52 too.
+    expect(timeOf('Sat, 24 Oct 2026 22:52:27 EST')).toEqual(new Date('2026-10-24T20:52:27Z'))
+    expect(timeOf('Sat, 11 Jul 2026 12:00:00 EST')).toEqual(new Date('2026-07-11T10:00:00Z'))
+  })
+
+  it('is Dutch winter time one hour ahead of UTC after the switch', () => {
+    expect(timeOf('Sun, 25 Oct 2026 21:55:00 EST')).toEqual(new Date('2026-10-25T20:55:00Z'))
+    expect(timeOf('Mon, 26 Oct 2026 07:00:00 EST')).toEqual(new Date('2026-10-26T06:00:00Z'))
+    expect(timeOf('Thu, 07 Jan 2027 12:00:00 EST', { at: new Date('2027-01-08T00:00:00Z') })).toEqual(
+      new Date('2027-01-07T11:00:00Z'),
+    )
+  })
+
+  it('changes offset at the switch of 25 October 2026, at 03:00 summer time', () => {
+    expect(timeOf('Sun, 25 Oct 2026 01:59:59 EST')).toEqual(new Date('2026-10-24T23:59:59Z'))
+    // 02:30 is shown twice that night; the first one counts.
+    expect(timeOf('Sun, 25 Oct 2026 02:30:00 EST')).toEqual(new Date('2026-10-25T00:30:00Z'))
+    expect(timeOf('Sun, 25 Oct 2026 03:00:00 EST')).toEqual(new Date('2026-10-25T02:00:00Z'))
+    expect(timeOf('Sun, 25 Oct 2026 03:00:01 EST')).toEqual(new Date('2026-10-25T02:00:01Z'))
+  })
+
+  it('changes offset at the start of summer time, when 02:30 is no time on the wall', () => {
+    const at = new Date('2026-03-30T00:00:00Z')
+
+    expect(timeOf('Sun, 29 Mar 2026 01:59:59 EST', { at })).toEqual(new Date('2026-03-29T00:59:59Z'))
+    expect(timeOf('Sun, 29 Mar 2026 02:30:00 EST', { at })).toEqual(new Date('2026-03-29T01:30:00Z'))
+    expect(timeOf('Sun, 29 Mar 2026 03:00:00 EST', { at })).toEqual(new Date('2026-03-29T01:00:00Z'))
+  })
+
+  it('is before the moment of the fetch, which the same time read as EST would not be', () => {
+    // The feed was fetched at 10:34 UTC and its newest item says 11:26, which as EST is 16:26.
+    const fetched = new Date('2026-10-26T10:34:26Z')
+
+    expect(timeOf('Mon, 26 Oct 2026 11:26:08 EST', { at: fetched })).toEqual(new Date('2026-10-26T10:26:08Z'))
+    expect(timeOf('Mon, 26 Oct 2026 11:26:08 -0500', { at: fetched })).toEqual(new Date('2026-10-26T16:26:08Z'))
+  })
+
+  it('reads the label in any case, and a time without a day of the week or seconds', () => {
+    expect(timeOf('26 Oct 2026 07:00 est')).toEqual(new Date('2026-10-26T06:00:00Z'))
+  })
+
+  it('leaves a time with a zone we read alone, so a source that mends its feed keeps working', () => {
+    expect(timeOf('Mon, 26 Oct 2026 07:00:00 GMT')).toEqual(new Date('2026-10-26T07:00:00Z'))
+    expect(timeOf('Mon, 26 Oct 2026 07:00:00 +0100')).toEqual(new Date('2026-10-26T06:00:00Z'))
+  })
+
+  it('is null for a label that is not the rule, a missing zone and a wall clock that is no time', () => {
+    for (const bad of [
+      'Mon, 26 Oct 2026 07:00:00 CET',
+      'Mon, 26 Oct 2026 07:00:00 PST',
+      'Mon, 26 Oct 2026 07:00:00',
+      'Sat, 31 Oct 2026 25:00:00 EST',
+      'Sat, 31 Oct 2026 10:61:00 EST',
+      'Sat, 31 Feb 2026 10:00:00 EST',
+      'Sat, 24 Foo 2026 10:00:00 EST',
+      'Sat, 24 Oct 1900 10:00:00 EST',
+    ]) {
+      expect(timeOf(bad), bad).toBeNull()
+    }
+  })
+
+  it('does not read EST for a source without the rule', () => {
+    const feed = encode(rss(rssItem({ pubDate: 'Sat, 24 Oct 2026 22:52:27 EST' })))
+
+    expect(readFeed(feed, { now: afterTheSwitch })).toMatchObject({ items: [{ publishedAt: null }] })
+  })
+
+  it('is a time in the future of more than a day when it is, whatever the rule says', () => {
+    expect(timeOf('Sat, 24 Oct 2026 22:52:27 EST', { at: new Date('2026-10-20T00:00:00Z') })).toBeNull()
   })
 })
 

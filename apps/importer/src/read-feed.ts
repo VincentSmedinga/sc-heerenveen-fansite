@@ -81,6 +81,14 @@ const rfc822Time =
 /** RFC 3339, as Atom has it. */
 export const rfc3339Time = /^(?:19|20)\d{2}-\d{2}-\d{2}t\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:z|[+-]\d{2}:\d{2})$/iu
 
+/** An RFC 822 time whose zone is a word: the shape of the times that a `TimeRule` reads. */
+const ruledShape =
+  /^(?:[a-z]{3},\s*)?(?<day>\d{1,2})\s+(?<month>[a-z]{3})\s+(?<year>(?:19|20)\d{2})\s+(?<hour>\d{2}):(?<minute>\d{2})(?::(?<second>\d{2}))?\s+(?<label>[a-z]+)$/iu
+
+const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+
+type WallClock = { day: number; hour: number; minute: number; month: number; second: number; year: number }
+
 /**
  * Reads the paywall flag. feedsmith leaves out elements it doesn't know, such as the
  * `<premium>` of the Leeuwarder Courant, so this is a second pass over the same text. Like
@@ -134,6 +142,12 @@ const paywallNamespaces: Record<string, string> = {
 }
 
 /**
+ * A zone label that a source puts on times that are in another zone: `label` is what the feed
+ * writes at the end of a time, `timeZone` is the zone the times are really in.
+ */
+export type TimeRule = { label: string; timeZone: string }
+
+/**
  * The category `domain` that marks a paywalled item for this source, or undefined when the feed
  * uses `<premium>`.
  */
@@ -150,6 +164,17 @@ export function paywallNamespaceFor(sourceDomain: string): string | undefined {
 }
 
 /**
+ * Sources whose times carry a wrong zone, by the domain of the source. ESPN NL writes
+ * `Mon, 26 Oct 2026 11:26:08 EST`, but the time is Dutch local time, summer and winter time
+ * included (see `docs/bronnen.md`, ESPN NL). Read as the zone it names it would be five or six
+ * hours late, and in the future. The rule is for this source only: in any other feed `EST` is
+ * not a zone we read, so the item gets the moment we first saw it.
+ */
+const timeRules: Record<string, TimeRule> = {
+  'www.espn.nl': { label: 'EST', timeZone: 'Europe/Amsterdam' },
+}
+
+/**
  * Reads the items of a feed: RSS or Atom, in the encoding the response names. An item without a
  * headline or a usable link, or that doesn't fit its columns, is left out and reported in
  * `skipped`. The rest of the feed goes on.
@@ -161,11 +186,13 @@ export function readFeed(
     now = new Date(),
     paywallCategory,
     paywallNamespace,
+    timeRule,
   }: {
     contentType?: null | string
     now?: Date
     paywallCategory?: string | undefined
     paywallNamespace?: string | undefined
+    timeRule?: TimeRule | undefined
   } = {},
 ): ReadFeed {
   const text = decode(body, contentType)
@@ -201,7 +228,7 @@ export function readFeed(
 
   raw.forEach((candidate, index) => {
     const position = index + 1
-    const item = cleanItem(candidate, now)
+    const item = cleanItem(candidate, now, timeRule)
 
     if ('reason' in item) {
       skipped.push({ position, reason: item.reason })
@@ -214,6 +241,11 @@ export function readFeed(
   })
 
   return { items, kind: 'read', skipped }
+}
+
+/** The rule for the times of this source, or undefined when its zones are right. */
+export function timeRuleFor(sourceDomain: string): TimeRule | undefined {
+  return timeRules[sourceDomain]
 }
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
@@ -236,7 +268,7 @@ function atomItems(feed: Atom.Feed<string>): RawItem[] {
 }
 
 /** Checks and cleans one item. */
-function cleanItem(raw: RawItem, now: Date): FeedItem | { reason: string } {
+function cleanItem(raw: RawItem, now: Date, timeRule: TimeRule | undefined): FeedItem | { reason: string } {
   const title = cleanHeadline(raw.title ?? '')
 
   if (title === '') {
@@ -266,7 +298,7 @@ function cleanItem(raw: RawItem, now: Date): FeedItem | { reason: string } {
     episodeNumber: wholeNumber(raw.episode, maxNumber),
     key,
     paywalled: raw.paywalled === true,
-    publishedAt: parseTime(raw.time, now),
+    publishedAt: parseTime(raw.time, now, timeRule),
     seasonNumber: wholeNumber(raw.season, maxNumber),
     title,
     url: link.href,
@@ -350,22 +382,112 @@ function parseLink(raw: string | undefined): { href: string } | { reason: string
  * Reads a time in UTC. It is null when the text is not an RFC 822 or RFC 3339 time with a zone,
  * when the time is before 1990, or when it is more than a day ahead of `now`: a news item that
  * is not yet published would stay on top of the list for days. `Date.parse` alone is too
- * forgiving, so the shape is checked first.
+ * forgiving, so the shape is checked first. A source with a `timeRule` that writes its label
+ * as the zone has its times read in the zone of the rule.
  */
-function parseTime(raw: string | undefined, now: Date): Date | null {
+function parseTime(raw: string | undefined, now: Date, timeRule: TimeRule | undefined): Date | null {
   const text = raw?.trim() ?? ''
+  const time = ruledTime(text, timeRule) ?? readableTime(text)
 
+  // The database keeps whole seconds, so we do too: a time with milliseconds would never equal
+  // what we stored.
+  return time === null || time < earliestTime || time > now.getTime() + dayInMs
+    ? null
+    : new Date(Math.floor(time / 1000) * 1000)
+}
+
+/** The time as milliseconds since 1970 when the text has a zone we read, or null. */
+function readableTime(text: string): null | number {
   if (!rfc822Time.test(text) && !rfc3339Time.test(text)) {
     return null
   }
 
   const time = Date.parse(text)
 
-  // The database keeps whole seconds, so we do too: a time with milliseconds would never equal
-  // what we stored.
-  return Number.isNaN(time) || time < earliestTime || time > now.getTime() + dayInMs
+  return Number.isNaN(time) ? null : time
+}
+
+/**
+ * An RFC 822 time that ends in the label of the rule, as milliseconds since 1970, or null when
+ * the text is something else, so that the normal reading goes on. The label is read as the
+ * wall clock of the zone of the rule.
+ */
+function ruledTime(text: string, timeRule: TimeRule | undefined): null | number {
+  const found = timeRule === undefined ? null : ruledShape.exec(text)?.groups
+
+  if (timeRule === undefined || found?.['label']?.toLowerCase() !== timeRule.label.toLowerCase()) {
+    return null
+  }
+
+  const month = months.indexOf((found['month'] ?? '').toLowerCase())
+
+  return month === -1
     ? null
-    : new Date(Math.floor(time / 1000) * 1000)
+    : wallClockToUtc(
+        {
+          day: Number(found['day']),
+          hour: Number(found['hour']),
+          minute: Number(found['minute']),
+          month,
+          second: Number(found['second'] ?? 0),
+          year: Number(found['year']),
+        },
+        timeRule.timeZone,
+      )
+}
+
+/**
+ * The instant at which a zone shows this wall clock, as milliseconds since 1970, or null when
+ * the wall clock is no time (31 February, 25:00). When the zone shows the wall clock twice, as
+ * at the end of summer time, it is the first time. When it never does, as at the start of
+ * summer time, it is the wall clock read with the offset from before the gap.
+ */
+function wallClockToUtc(wall: WallClock, timeZone: string): null | number {
+  const asUtc = Date.UTC(wall.year, wall.month, wall.day, wall.hour, wall.minute, wall.second)
+  const check = new Date(asUtc)
+
+  if (
+    check.getUTCFullYear() !== wall.year ||
+    check.getUTCMonth() !== wall.month ||
+    check.getUTCDate() !== wall.day ||
+    check.getUTCHours() !== wall.hour ||
+    check.getUTCMinutes() !== wall.minute ||
+    check.getUTCSeconds() !== wall.second
+  ) {
+    return null
+  }
+
+  // The offset can change within a day, but not twice, so the offsets of a day before and a day
+  // after hold the one that applies.
+  const before = offsetAt(asUtc - dayInMs, timeZone)
+  const after = offsetAt(asUtc + dayInMs, timeZone)
+  const instants = [...new Set([after, before])]
+    .map((offset) => asUtc - offset)
+    .filter((instant) => asUtc - offsetAt(instant, timeZone) === instant)
+
+  return instants.length > 0 ? Math.min(...instants) : asUtc - before
+}
+
+const zoneFormats = new Map<string, Intl.DateTimeFormat>()
+
+/** How far the wall clock of a zone is ahead of UTC at an instant, in milliseconds. */
+function offsetAt(instant: number, timeZone: string): number {
+  const parts = Object.fromEntries(
+    zoneFormat(timeZone)
+      .formatToParts(instant)
+      .map((part) => [part.type, Number(part.value)]),
+  ) as Record<string, number>
+
+  return (
+    Date.UTC(
+      parts['year'] ?? 0,
+      (parts['month'] ?? 1) - 1,
+      parts['day'],
+      parts['hour'],
+      parts['minute'],
+      parts['second'],
+    ) - instant
+  )
 }
 
 /** The keys of the items that the feed marks as `true` in one of these elements. */
@@ -450,4 +572,25 @@ function stringOrUndefined(value: unknown) {
  */
 function wholeNumber(value: number | undefined, max: number): null | number {
   return Number.isInteger(value) && value !== undefined && value >= 1 && value <= max ? value : null
+}
+
+/** A formatter that gives the wall clock of a zone with numbers, on a 24-hour clock. */
+function zoneFormat(timeZone: string): Intl.DateTimeFormat {
+  let format = zoneFormats.get(timeZone)
+
+  if (format === undefined) {
+    format = new Intl.DateTimeFormat('en-US', {
+      day: 'numeric',
+      hour: 'numeric',
+      hourCycle: 'h23',
+      minute: 'numeric',
+      month: 'numeric',
+      second: 'numeric',
+      timeZone,
+      year: 'numeric',
+    })
+    zoneFormats.set(timeZone, format)
+  }
+
+  return format
 }

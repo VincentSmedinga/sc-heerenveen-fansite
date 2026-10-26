@@ -191,6 +191,7 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   Een bericht dat al een sleutel heeft die eerder in dezelfde feed stond, slaat de adapter over.
 - **Tijd:** `pubDate` (RSS) of `published` (Atom, anders `updated`), omgezet naar UTC, op hele seconden.
   Een tijd zonder zone, in een vorm die we niet kennen, van vóór 1990 of meer dan een dag in de toekomst is niet geldig.
+  De zone `EST` kennen we niet, behalve bij ESPN NL (zie _De voetbalfeed van ESPN NL_).
   Dan geldt de tijd waarop we het bericht voor het eerst zagen, en een bekend bericht houdt de tijd die het had.
 - **Betaalmuur:** elke bron zegt het op een eigen manier, en de adapter kiest aan de hand van het domein van de bron (`paywallCategories` en `paywallNamespaces` in [`src/read-feed.ts`](src/read-feed.ts)).
   Bij de Leeuwarder Courant en De Telegraaf is het het element `<premium>true</premium>`.
@@ -251,7 +252,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een moderator verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_) en die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_).
+Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_) en die van ESPN (zie _De voetbalfeed van ESPN NL_).
 
 ### De uitkomst bekijken
 
@@ -364,6 +365,23 @@ De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden 
 De test in `src/import-feeds.test.ts` ("importing the football feed of the Algemeen Dagblad, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/ad-sample.xml`](src/fixtures/ad-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft ook een bericht zonder `dpp:paid` en een bericht dat de club alleen in de beschrijving noemt: het filter kijkt alleen naar de kop, dus dat is `irrelevant`.
 De test van de adapter zelf ("the paywall of the Algemeen Dagblad", in `src/read-feed.test.ts`) laat zien dat een ander voorvoegsel voor hetzelfde adres ook werkt.
+
+## De voetbalfeed van ESPN NL
+
+ESPN NL is een bron met de feed `https://www.espn.nl/espn/rss/soccer/news`, het voetbalnieuws van de sportzender ESPN.
+De club is er een klein deel van, dus de feed staat in de seed op `club`.
+De feed schrijft de tijden met de zone `EST`, bijvoorbeeld `Mon, 26 Oct 2026 11:26:08 EST`, maar het is de Nederlandse tijd, met zomer- en wintertijd (zie [`docs/bronnen.md`](../../docs/bronnen.md) voor hoe we dat hebben vastgesteld).
+De adapter heeft daarom per domein een regel, `timeRules` in [`src/read-feed.ts`](src/read-feed.ts): voor `www.espn.nl` geldt `EST` als `Europe/Amsterdam`.
+De regel geldt voor deze bron alleen.
+In elke andere feed is `EST` geen zone die we lezen, dus daar geldt het moment waarop we het bericht voor het eerst zagen.
+In de nacht van het einde van de zomertijd staat 02:00 tot 03:00 twee keer op de klok; de adapter neemt de eerste.
+In de nacht van het begin ervan bestaat 02:00 tot 03:00 niet; de adapter leest die tijd als de tijd na de sprong.
+Een run van 26 oktober 2026 bewaarde alle 25 berichten, en het filter vond er 1 `relevant`, 0 `doubtful` en 24 `irrelevant`.
+Elk bericht in de feed heeft een beschrijving en een auteur, en de feed heeft een logo.
+De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
+De test in `src/import-feeds.test.ts` ("importing the football feed of ESPN NL, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/espn-sample.xml`](src/fixtures/espn-sample.xml), via de bron zoals de seed hem in het register zet.
+De fixture heeft berichten van vlak vóór en vlak na het einde van de zomertijd op 25 oktober 2026, een bericht met een tijd die geen tijd is, en een samenvatting die de club alleen in de beschrijving noemt.
+De tests van de regel zelf staan in `src/read-feed.test.ts`.
 
 ## De velden van de feed van de Leeuwarder Courant
 

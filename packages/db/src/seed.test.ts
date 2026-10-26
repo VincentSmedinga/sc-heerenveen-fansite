@@ -99,6 +99,7 @@ describe('the seed', () => {
       'https://www.omropfryslan.nl/rss/index.xml',
       'https://feeds.nos.nl/nosvoetbal',
       'https://www.ad.nl/voetbal/rss.xml',
+      'https://www.espn.nl/espn/rss/soccer/news',
     ])
   })
 
@@ -171,6 +172,31 @@ describe('the seed', () => {
     expect(ad?.description).toBeTruthy()
     expect(ad?.description?.length).toBeLessThanOrEqual(300)
     expect(adFeeds.map((feed) => [feed.url, feed.filter])).toEqual([['https://www.ad.nl/voetbal/rss.xml', 'club']])
+  })
+
+  it('puts ESPN in the register with its football feed on the club filter and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [espn] = await database.db.select().from(sources).where(eq(sources.domain, 'www.espn.nl'))
+    const espnFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, espn?.id ?? 0))
+
+    expect(espn).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'ESPN',
+    })
+    expect(espn?.consentStatus).not.toBe('given')
+    expect(espn?.description).toBeTruthy()
+    expect(espn?.description?.length).toBeLessThanOrEqual(300)
+    expect(espnFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
+      ['https://www.espn.nl/espn/rss/soccer/news', 'club'],
+    ])
   })
 
   it('puts the Leeuwarder Courant in the register with its feed and the strictest policy', async () => {
