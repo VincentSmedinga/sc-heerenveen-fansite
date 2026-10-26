@@ -25,4 +25,14 @@ export const releaseNotes: ReleaseNotes = {
     'Site op je beginscherm gezet? Trek de pagina omlaag om te verversen.',
     'Toegankelijkheid: wat we beloven, wat we doen en hoe je een probleem meldt.',
   ],
+  '0.3.0': [
+    'Op home: de laatste wedstrijden en de stand in de Eredivisie.',
+    'Wedstrijden: het programma, de uitslagen met doelpuntenmakers, de stand met een balk voor de punten, alle topscorers en wie de nul hield.',
+    'Zoeken: vind koppen, podcastafleveringen en artikelen van de redactie.',
+    'Nieuwe bronnen: NOS Voetbal, Algemeen Dagblad, ESPN en Omrop Fryslân.',
+    'Van de redactie: eigen artikelen, op een eigen pagina en op home.',
+    'Onze bronnen: lees waarom we iets wel of niet tonen.',
+    'Bezoeken tellen we anoniem: zonder cookies en zonder je te volgen.',
+    'Diverse verbeteringen in de vormgeving.',
+  ],
 }
