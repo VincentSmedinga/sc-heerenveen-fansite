@@ -27,7 +27,7 @@ For a new source, also use the `add-source` skill.
 - The smallest change that meets the acceptance criteria.
   Something else you notice goes to the Coordinator as a note, not in the branch.
 - A scope change from the owner in your session ("do it this way instead"): tell the Coordinator, so the issue gets an "Aangevuld" line before the review.
-- Tests for new behaviour, a story for anything visible (light and dark), a new page in `apps/site/e2e/pages.spec.ts`.
+- Tests for new behaviour, a story for anything visible (the theme switch shows light and dark), a new page in `apps/site/e2e/pages.spec.ts`.
 - The decisions from the issue and your own go in `docs/beslissingen.md`, in the fixed format.
   Read each older decision you touch, and add a **Later:** line where it no longer holds.
 - Commit.

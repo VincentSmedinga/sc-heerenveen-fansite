@@ -96,6 +96,8 @@ Reviews each pull request in a fresh context, as the `reviewer` subagent in [`.c
 
 The Reviewer:
 
+- Looks at the pages of the site in light and dark, as the checklists say, and not at every story.
+  Every visual component has a story, and the Reviewer checks the pages that use it.
 - Reads and searches the code, looks at `git diff`, and runs the checks: lint, typecheck, tests and builds, and the accessibility checks on the pages, `pnpm test:a11y`.
   A hook, `.claude/hooks/reviewer-bash.js`, blocks every other command.
   Claude Code only runs that hook in a folder you have trusted; elsewhere it skips the hook without a warning.
@@ -245,6 +247,11 @@ It lists the components of the design system with their props and types, the doc
   Don't dig the props out of the code.
 - Our conventions win where Storybook's instructions differ.
   The instructions are generic and still show CSF 3 (`Meta`, `StoryObj`); we write CSF Next (`preview.meta()` and `meta.story()`), and `packages/design-system/README.md` holds the rest.
+- A component's page is short (see _Een pagina in Storybook_ in that README, and the decision of 23 October 2026):
+  one paragraph on why the component exists and when to choose it, with no margins, sizes, rem, pixels or breakpoints;
+  the example with controls, and one story for each variant that looks different, not for each prop.
+  Light and dark come from the theme switch, so only a component that changes with the theme itself, such as on a dark surface, gets its own dark story.
+  Hover, focus, visited and the widths are not in every component's stories.
 - A second server, public and read-only, runs on the published Storybook at `https://ds.heerenveen.org/mcp`: the same `docs-list`, `docs-show` and `docs-show-story`, without the development tools.
   It is for agents in other repositories, such as the forum, and for sessions without Storybook; they add it with `claude mcp add --transport http ds https://ds.heerenveen.org/mcp`.
   Agents in this repository keep using the local server, which also has the development tools and shows your own worktree.

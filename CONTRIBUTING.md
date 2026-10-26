@@ -169,7 +169,7 @@ Wie een pull request maakt, doet dat zelf al voordat hij hem opent.
 
 - De wijziging voldoet aan elk acceptatiecriterium en doet niets wat het issue niet vroeg.
 - Nieuw gedrag heeft tests.
-  Wat bezoekers zien, heeft een story, nagekeken in licht en donker.
+  Elk visueel component heeft een story, en de reviewer kijkt naar de pagina's.
   Een nieuwe pagina staat in de lijst van `apps/site/e2e/pages.spec.ts`.
   Een e2e-test in de browser is er alleen voor wat axe en de unit-tests niet zien en wat zonder test ongemerkt kapotgaat, zoals de foutpagina zonder database of een verzoek naar een ander domein.
   Maten, breedtes en uitlijning krijgen geen e2e-test: die kijk je na in Storybook en in de review.

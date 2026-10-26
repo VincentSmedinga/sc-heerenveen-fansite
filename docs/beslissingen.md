@@ -183,6 +183,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de Reviewer altijd op Fable laten, zoals voorheen.
   Of Opus voor de Reviewer; dat kost minder dan Fable en deelt de blinde vlekken van de Builder niet.
 - **Herzien:** als Sonnet in de praktijk te veel mist, of de limiet niet meer knelt.
+- **Later:** zie _Axe draait op elke story, in licht en donker_.
+  Zodra die controle draait, toetst axe ook de stories.
+  Een verhaal met een visuele wijziging houdt zijn Reviewer, want axe ziet geen hover, focus, alt-teksten of de redactieregels.
 
 ### Een model per rol
 
@@ -954,6 +957,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de Vitest-addon van Storybook, die elke story met axe toetst in een echte browser.
   Die vangt ook hover en focus per component, maar vraagt een tweede testopzet en maakt CI langer.
   We kijken opnieuw als een component op geen enkele pagina staat.
+- **Later:** zie _Axe draait op elke story, in licht en donker_.
+  De controle van de pagina's van de site blijft, en de checklist van de reviewer ook.
+  Alleen de stories toetst axe nu ook in CI.
 
 ### Naast axe drie eigen controles
 
@@ -1387,6 +1393,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de Vitest-addon van Storybook, die de stories zelf in een echte browser draait.
   Dat is sterker, maar zwaarder, het vraagt een browser in CI en het overlapt met #79.
   Of alleen stories; dat voldoet niet aan de regel dat nieuw gedrag tests heeft.
+- **Later:** zie _Axe draait op elke story, in licht en donker_.
+  De tests met Vitest en Testing Library blijven; alleen de Vitest-addon van Storybook, het alternatief hierboven, is nu aangenomen voor de controle met axe op de stories.
 
 ### Het logo is een schild met echte tekst
 
@@ -1429,6 +1437,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De themawrapper is een decorator en hoort niet in het voorbeeld.
 - **Alternatieven:** per story met de hand `source.code` schrijven; dat is dubbele code die achterloopt op het voorbeeld.
   Of de standaard laten staan, die de aanroep van `meta.story` toont.
+- **Later:** zie _Een pagina in Storybook is kort, met het voorbeeld en een story per variant_.
+  Een component krijgt geen lichte en donkere story meer; "Show code" toont nog steeds de JSX van het voorbeeld.
 
 ### Elk component heeft zijn eigen CSS
 
@@ -1535,6 +1545,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of geen MCP-server; dan zoeken agents alles zelf in de code, zoals nu.
 - **Later:** de losse server en het publiceren bleven buiten dit besluit.
   Ze staan er nu wel, naast deze lokale server: zie _De MCP-server van het designsysteem staat op ds.heerenveen.org/mcp_.
+- **Later:** zie _Axe draait op elke story, in licht en donker_.
+  `@storybook/addon-vitest` komt er dan toch, voor de controle met axe op de stories.
 
 ### Storybook haalt de props uit react-component-meta
 
@@ -2155,6 +2167,81 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** de teksten zijn geen onderdeel van de SVG, dus een diagram dat je als plaatje bewaart, heeft ze niet.
   Zes plakken in een ring van een kolom van 31 rem zijn klein: de ring is ongeveer 110 pixels breed.
 - **Alternatieven:** een taart zonder gat (meer oppervlak, maar geen plek voor het totaal); het getal in de plak zelf (kleine plakken van één doelpunt zijn te smal); een legenda onder het diagram (de koppeling loopt dan alleen via de kleur); zes of twaalf nieuwe kleurtokens voor de plakken (veel om bij te houden, en toch geen 3:1 tussen buren); de teksten als SVG-tekst (die schaalt mee en wordt op een telefoon te klein); een grafiekbibliotheek (het issue sluit die uit).
+
+### Een pagina in Storybook is kort, met het voorbeeld en een story per variant
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de pagina van een component in Storybook heeft een titel, een korte tekst, het voorbeeld met controls en de stories die nodig zijn.
+  - **Tekst per component:** één alinea over waarom het component er is en wanneer je het kiest.
+    Geen regels over marges, maten of afstanden: die staan in de code en in dit log.
+    Een regel voor het gebruik die een bezoeker of schrijver nodig heeft, mag er staan als één zin.
+  - **Stories:** per component het voorbeeld met controls, en een story per variant die er anders uitziet, niet per prop.
+    Licht en donker komt van de themaknop, niet van een tweede story per component.
+    Alleen een component dat zelf van thema verandert, zoals op een donker vlak, krijgt een eigen donkere story.
+  - **Hover, focus en bezocht en de breedtes:** die zitten niet in de stories van elk component.
+    De reviewer controleert ze op de pagina's (de checklist in `docs/toegankelijkheid.md`).
+    De stories voor links en formulieren tonen ze één keer.
+    Voor een smal en een breed scherm gebruiken we de werkbalk van Storybook, geen aparte stories.
+  - **Controls:** een component krijgt controls zodra meer dan één prop de uitkomst verandert.
+    De typen met `(typeof lijst)[number]` veranderen we niet.
+    De weergave lossen we op in `ControlsDocsPage`, zodat de MCP-server de typen blijft lezen uit de code.
+  - **Pagina:** `ControlsDocsPage` is de standaard voor een component (titel, beschrijving, voorbeeld, controls).
+    De gedeelde `DocsPage` blijft voor hoofdstukken zonder voorbeeld, zoals Huisstijl en Redactie.
+  - **Wat axe niet ziet:** de reviewer kijkt naar de pagina's van de site in licht en donker, volgens de checklist, en niet naar elke story.
+    De eis "nagekeken in licht en donker" in `CONTRIBUTING.md` wordt "elk visueel component heeft een story, en de reviewer kijkt naar de pagina's".
+    Dit blijft gelden voor wat axe niet ziet, ook na _Axe draait op elke story, in licht en donker_.
+  - **Tokens:** de tabellen met kleuren en contrast blijven staan, want de contrasttabel is het bewijs voor `docs/toegankelijkheid.md`.
+    De waarden in rem en pixels gaan uit de tekst, niet uit de tabellen die ze berekenen.
+- **Waarom:** een korte pagina wordt gelezen en blijft waar.
+  Wat de code of de beslissingen al zeggen, hoeft niet nog eens te staan en loopt anders uit de pas.
+  De themaknop en de pagina's van de site dekken licht en donker beter dan een story per component.
+- **Alternatieven:** uitgebreide pagina's met alle regels per component; dat geeft veel onderhoud en dubbel werk.
+  Een story in licht en een in donker per component; dat waren 26 bestanden aan stories om bij te houden.
+  Alles uit Storybook halen en alleen de code laten spreken; de MCP-server en nieuwe vrijwilligers verliezen dan hun handboek.
+
+### Storybook heeft de groepen Componenten en Patronen
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de zijbalk heeft de groepen Componenten en Patronen, en een verplaatste story mag een nieuw adres krijgen.
+  - **Indeling:** een component is één element of een algemeen onderdeel dat op elke site past.
+    Een patroon zet componenten samen voor één soort inhoud van deze site.
+    Componenten heeft vijf subgroepen:
+    - Pagina: Root, Body, Head, Page en de delen van Page.
+    - Tekst: Heading, Text, Link, List, Emphasis, Strong en Time.
+    - Formulier: Form, Field, Input, Textarea, Select, Button, SegmentedControl, ErrorSummary en Honeypot.
+    - Navigatie: Navigation, Pagination, Filter, RefreshButton en PullIndicator.
+    - Weergave: Card, DataTable, DonutChart, Pictogram en Logo.
+  - **Patronen:** NewsItem, ArticleCard, Article, DiscussionItem, WikipediaCredit, Match, ShortMatch, StandingsTable en TopScorersTable.
+    Navigation, Pagination, Filter, SegmentedControl en ErrorSummary bouwen op andere componenten, maar zijn algemeen en blijven componenten.
+    Het lege hoofdstuk Patronen en de pagina Componenten/Overzicht vervallen.
+    De volgorde in de zijbalk staat vast in `storySort`, binnen een groep alfabetisch.
+    Een pagina van een patroon is zoals die van een component, met één zin erbij waaruit het is gebouwd.
+  - **Nieuwe adressen:** een verplaatste story mag een nieuwe URL en een nieuw id in de MCP-server krijgen.
+    Huisstijl, Redactie, Tokens en HTML-elementen houden hun id, omdat het sjabloon van de pull request en `CONTRIBUTING.md` ernaar linken.
+- **Waarom:** de indeling laat iemand die de zijbalk opent zien wat algemeen is en wat bij deze site hoort, zoals het Amsterdam Design System dat met zijn subgroepen doet.
+  Dat kan zonder pagina's vol tekst.
+- **Gevolg:** de stories verhuizen met #350.
+- **Alternatieven:** de groep Composities of Pagina's noemen in plaats van Patronen.
+  Subgroepen op soort component in plaats van op functie.
+
+### Axe draait op elke story, in licht en donker
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de Vitest-addon van Storybook draait axe op elke story in een echte browser, één keer in licht en één keer in donker.
+  Dat wordt `pnpm test:stories` en een stap in CI.
+  Dit keert _axe toetst de pagina's, niet de stories_ om, en neemt het alternatief over dat bij _Componenten testen we met Vitest en Testing Library_ is afgewezen.
+  - **Wat blijft:** de controle van de pagina's van de site en de checklist van de reviewer.
+    Axe ziet geen hover, focus, toetsenbordvolgorde, schermlezers, alt-teksten, zoom of regels voor een hele pagina.
+    De regel _Wat axe niet ziet_ in _Een pagina in Storybook is kort, met het voorbeeld en een story per variant_ blijft daarom gelden.
+  - **Niet nu:** geen play-tests en geen visuele regressietests.
+    Er is één component met gedrag in de browser, en een dienst voor schermafbeeldingen kost meer onderhoud dan hij oplevert voor één lezer.
+    We kijken opnieuw bij het eerste component met echt gedrag.
+- **Waarom:** de Vitest-addon vraagt een kleine instelling, draaide alle 298 stories in ongeveer 6 seconden per thema en vangt wat de themaknop en de reviewer missen.
+  De drie redenen van de oude beslissing gelden niet meer: de instelling is klein, CI wordt minder dan een minuut langer, en twee componenten (PullIndicator en RefreshButton) staan op geen enkele pagina.
+- **Gevolg:** de oude beslissingen _axe toetst de pagina's, niet de stories_ en _Componenten testen we met Vitest en Testing Library_ hebben een **Later:**-regel.
+  De controle zelf komt met #351.
+- **Alternatieven:** een eigen script met Playwright en `@axe-core/playwright` over alle stories; dat is een script van veertig regels om te onderhouden, en het steunt geen play-tests.
+  De checks laten zoals ze zijn, met alleen het paneel in Storybook.
 
 ## Site
 
