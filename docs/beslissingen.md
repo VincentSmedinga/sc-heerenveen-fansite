@@ -2076,6 +2076,42 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De menging gebeurt in `flatten` zelf, niet op een canvas: een canvas mengt in 8 bits en verschoof het contrast van secundaire tekst in de footer van 4,53:1 naar 4,50:1, terwijl de marge daar maar 0,03 is.
 - **Alternatieven:** de tint met `color-mix()` vooraf in een eigen token mengen met de pagina of de footer (dat zijn extra tokens die alleen de tabel gebruikt); de streep zonder het vlak eronder meten (dat meet niets, want de streep is doorzichtig).
 
+### Een kop met een anker is zelf de link, met een ketting als pictogram
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** een kop met een anker is een link naar zichzelf, met de tekst van de kop als naam en een pictogram van een schakel erachter.
+  Het pictogram staat altijd op een aanraakscherm en verschijnt bij hover en focus waar een muis is.
+  Het doel krijgt een rustige markering.
+- **Waarom:** de naam van de link is de tekst van de kop, dus een schermlezer hoort waarheen hij gaat.
+  Een pictogram dat alleen op hover verschijnt, is er niet voor wie geen muis heeft.
+  De ketting is een teken dat ook niet-technische lezers kennen, anders dan een hekje.
+  De markering laat de bezoeker die via de link komt zien welk deel is bedoeld.
+- **Hoe:** `Heading` heeft de eigenschap `anchor` (alleen voor `h2` tot en met `h4`) en nieuwe pictogram `link`, zelf getekend zoals de andere.
+  Met een muis (`@media (hover: hover)`) is het pictogram er bij hover en bij focus van het toetsenbord, en het houdt zijn plaats, zodat er niets verschuift.
+  Op een aanraakscherm staat het altijd, in de kleur van secundaire tekst, en bij hover of focus in de kleur van links.
+  Het blijft bij de laatste letter van het laatste woord, zodat het niet alleen op een regel komt en een lang woord toch kan afbreken.
+  Het doel (`:target`) krijgt een pijl (`arrow-right`) aan de beginkant, in het midden van de opvulling van de kaart (zonder kaart in de marge van de pagina), in de kleur van de focus, zonder beweging; in forced colours heeft de pijl de kleur van het systeem.
+  De projecteigenaar koos de pijl in plaats van een balk in de kleur van de accenten (26 oktober 2026), en de kleur van de focus omdat die al zegt waar je bent.
+  `Card` zegt in `--hf-heading-gutter` hoe breed die opvulling is.
+  De pijl staat in de opmaak, niet in de stijl, want een stijl kan geen pictogram tekenen zonder een verzoek om een afbeelding, en de regels van de site staan dat niet toe.
+  Bij het afdrukken valt het pictogram weg.
+- **Alternatieven:** een hekje (`#`) achter de kop (bekend bij technische lezers, minder bij supporters); een pictogram in de marge links van de kop (past niet in een kaart met opvulling en komt buiten het scherm op een telefoon); een aparte link met de tekst "Link naar dit kopje" (extra tekst bij elke kop, die een schermlezer steeds opnieuw voorleest).
+
+### Een anker is een `id` in het Nederlands dat de pagina kiest, en blijft bestaan
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** een anker is een `id` in het Nederlands, van kleine letters, cijfers en streepjes, dat de schrijver van de pagina kiest en niet uit de tekst van de kop wordt gemaakt.
+  Een oud anker blijft werken met een leeg element met het oude `id` in de kop, en een controle faalt als een gepubliceerd anker verdwijnt.
+- **Waarom:** de tekst van een kop verandert vaker dan het onderwerp, en een link die ergens op staat (een andere site, een bericht in het forum) mag niet stuk gaan.
+  De server ziet het deel na het hekje nooit, dus een doorverwijzing van een oud anker op de server kan niet, en een script om oude ankers om te zetten werkt alleen met JavaScript.
+  Een leeg element met het oude `id` werkt overal.
+  Nederlandse ankers passen bij een site in het Nederlands, en bij links die supporters aan elkaar sturen.
+- **Hoe:** `Heading` weigert een `id` dat niet aan de regels voldoet, met een fout bij het renderen (`isAnchorId` in `anchor.ts`): kleine letters en cijfers in woorden met één streepje ertussen, niet langer dan 40 tekens.
+  Een oud anker (`aliases`) mag de regels overtreden, want het bestond al, zoals `versie-0.2.0`.
+  Een kop die naar een andere pagina verhuist, neemt zijn anker mee, en de oude pagina verwijst blijvend door in `next.config.ts`, waar elke doorverwijzing een reden heeft.
+  De browser houdt het deel na het hekje vast in zo'n doorverwijzing, als de doorverwijzing er zelf geen heeft.
+- **Alternatieven:** het anker automatisch uit de tekst van de kop maken (elke wijziging van de kop breekt de link); oude ankers met een script op de pagina omzetten (werkt niet zonder JavaScript); geen controle op verdwenen ankers (een link breekt dan pas als iemand het merkt).
+
 ### De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie
 
 - **Datum:** 26 oktober 2026
@@ -2882,6 +2918,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   In forced colours heeft hij de kleur van de achtergrond, zodat hij ook daar niet te zien is.
 - **Alternatieven:** de bronvermelding zonder kaart laten (de tekst staat dan aan de rand van de kolom, naast de tekst in de kaarten); de link naar de geschiedenis houden (volledig, maar twee links in een zin die voor het oog een bijzaak is).
   **Let op:** de CC BY-SA vraagt een aanduiding van de auteurs op een redelijke manier; een link naar het artikel voldoet volgens de uitleg van Wikipedia over hergebruik, maar geen jurist heeft dat getoetst.
+
+### Een gepubliceerd anker staat in `src/anchors.ts`, en de rooktest bewaakt het
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `apps/site/src/anchors.ts` bevat per pagina de ankers die we hebben gepubliceerd.
+  De rooktest (`checkAnchors`) faalt als een van die ankers niet meer op zijn pagina staat, als een kop met een anker er niet in staat, en als een `id` twee keer op een pagina voorkomt, ook als het botst met het `id` van iets anders, zoals `nieuws-3` op de homepage.
+  Een pagina die verhuisd is, moet blijvend doorverwijzen (301 of 308), en de rooktest zoekt het anker op de pagina waar de doorverwijzing eindigt.
+  Een anker weghalen is een keuze: je haalt het uit de lijst, of je laat het als oud anker (`aliases`) staan.
+  Op Updates hoort bij elke versie in `CHANGELOG.md` een anker, dus een nieuwe versie hoeft niet in de lijst.
+- **Waarom:** een anker is een belofte aan wie ernaar linkt.
+  Een lijst in de repository en één controle in de rooktest, die de gebouwde pagina's al ophaalt, is de lichtste vorm die een verdwenen anker vangt.
+  De lijst is ook de plek waar je ziet wat we beloven.
+- **Gevolg:** de kop van een versie op Updates heet nu `versie-0-1-0`, want een punt hoort niet in een anker.
+  Het oude `versie-0.1.0` blijft als oud anker, en de feed linkt er nog naar, omdat die link de `guid` is en een nieuwe `guid` elke versie als nieuw toont in een feedlezer.
+  De kop van `/wedstrijden` met de wedstrijden zonder tegendoelpunt heet nu `de-nul-gehouden`, met `nul-gehouden` als oud anker.
+  `/bronnen` heeft ankers voor elk soort bron (`nieuws`, `podcasts`, `forum`, `club`, `video`) en voor de twee kaarten in de zijbalk (`voorstellen`, `uitgever`).
+  De Engelse `id`'s die daar alleen voor `aria-labelledby` dienden (`news-heading`) zijn daarvoor vervangen, want een kop met een anker heeft een Nederlands `id`.
+  `/podcasts` heeft geen anker: de kop "Over" met de naam van de podcast staat er alleen bij een gekozen podcast, en niemand linkt naar dat deel.
+- **Alternatieven:** een controle op de bronbestanden in plaats van de gebouwde pagina's (ziet niet wat de bezoeker krijgt, en niet de ankers die uit gegevens komen); alle ankers uit de pagina's halen en bewaren in een bestand dat de build maakt (de lijst is dan geen keuze meer, maar een afspiegeling); een toets in de e2e-controle in de browser (trager, en axe toetst dit niet).
 
 ## Importer
 

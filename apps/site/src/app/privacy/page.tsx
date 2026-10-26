@@ -27,7 +27,9 @@ export default function PrivacyPage() {
           Je bent welkom en we willen zo weinig mogelijk van je weten. De site zet geen cookies, volgt niemand en laadt
           niets van een ander domein.
         </Text>
-        <Heading level={2}>Wat we tellen</Heading>
+        <Heading anchor id="tellen" level={2}>
+          Wat we tellen
+        </Heading>
         <Text>
           We tellen alleen per dag hoe vaak elke pagina is bekeken en hoeveel verschillende bezoekers er ongeveer waren.
           Dat doen we zelf, op onze eigen server.
@@ -47,12 +49,16 @@ export default function PrivacyPage() {
           niet, als je hebt ingesteld dat je niet gevolgd wilt worden (de instelling Do Not Track of Global Privacy
           Control).
         </Text>
-        <Heading level={2}>Wat de hosting bewaart</Heading>
+        <Heading anchor id="hosting" level={2}>
+          Wat de hosting bewaart
+        </Heading>
         <Text>
           Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. Wij kunnen daar niet bij
           en gebruiken ze niet.
         </Text>
-        <Heading level={2}>Wat je browser bewaart</Heading>
+        <Heading anchor id="cookies" level={2}>
+          Wat je browser bewaart
+        </Heading>
         <Text>
           Kies je Licht of Donker in de footer, dan bewaart je browser die keuze, alleen op dit apparaat. Wij zien dat
           niet. Wis de gegevens van de site in je browser om hem weg te halen.
@@ -61,18 +67,24 @@ export default function PrivacyPage() {
           Alleen een redacteur die inlogt in het beheer krijgt een cookie. Het bevat een nummer voor die sessie, niets
           over jou, en het werkt hooguit 7 dagen.
         </Text>
-        <Heading level={2}>Als je ons een bericht stuurt</Heading>
+        <Heading anchor id="berichten" level={2}>
+          Als je ons een bericht stuurt
+        </Heading>
         <Text>
           Stuur je ons een bericht, met het formulier bij <Link href="/contact">Contact</Link> of per mail, dan komt het
           in de mailbox van de redactie. We gebruiken het om te antwoorden en bewaren het tot de zaak is afgehandeld,
           hoogstens een jaar. Het formulier slaat niets op de site zelf op.
         </Text>
-        <Heading level={2}>Andere sites</Heading>
+        <Heading anchor id="andere-sites" level={2}>
+          Andere sites
+        </Heading>
         <Text>
           Klik je door naar een medium of naar ons forum, dan verlaat je deze site. Voor wat die sites met je gegevens
           doen, gelden hun eigen regels.
         </Text>
-        <Heading level={2}>Vragen en klachten</Heading>
+        <Heading anchor id="vragen" level={2}>
+          Vragen en klachten
+        </Heading>
         <Text>
           Vragen over je gegevens stel je aan de redactie, via het formulier of op <EmailLink />. Voor een klacht kun je
           terecht bij de{' '}

@@ -1,4 +1,4 @@
-import { anchorOf, feedPath, type Release, updatesPath, updatesTitle } from './updates'
+import { feedPath, oldAnchorOf, type Release, updatesPath, updatesTitle } from './updates'
 
 /**
  * The RSS 2.0 feed of the page Updates: an item per version, newest first, with the number as
@@ -8,7 +8,7 @@ import { anchorOf, feedPath, type Release, updatesPath, updatesTitle } from './u
 export function feedOf(releases: readonly Release[], origin: string) {
   const page = `${origin}${updatesPath}`
   const items = releases.map((release) => {
-    const link = `${page}#${anchorOf(release)}`
+    const link = `${page}#${oldAnchorOf(release)}`
     // The description is HTML, written as text in the XML, so the lines are escaped twice.
     const list = `<ul>${release.sentences.map((sentence) => `<li>${escape(sentence)}</li>`).join('')}</ul>`
 

@@ -34,16 +34,23 @@ const versionHeading =
 
 const dateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', timeZone: 'UTC', year: 'numeric' })
 
-/**
- * The id of the heading of a version on the page, such as `versie-0.2.0`. The feed links to it.
- */
+/** The anchor of the heading of a version on the page, such as `versie-0-2-0`. */
 export function anchorOf({ version }: Pick<Release, 'version'>) {
-  return `versie-${version}`
+  return `versie-${version.replaceAll('.', '-')}`
 }
 
 /** The date of a version the Dutch way, such as "3 november 2026". */
 export function dateOf({ date }: Pick<Release, 'date'>) {
   return dateFormat.format(new Date(`${date}T00:00:00Z`))
+}
+
+/**
+ * The id the heading of a version had before anchors had rules, such as `versie-0.2.0`. It
+ * stays as an old anchor on the heading. The feed still links to it: that link is the guid of
+ * the item, and a new guid would show every version as new in a feed reader.
+ */
+export function oldAnchorOf({ version }: Pick<Release, 'version'>) {
+  return `versie-${version}`
 }
 
 /** The versions in a CHANGELOG.md by release-please, in the order of the file: newest first. */

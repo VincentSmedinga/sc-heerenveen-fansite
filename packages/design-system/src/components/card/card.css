@@ -14,7 +14,12 @@
     box-sizing: border-box;
     padding: 1rem 1.25rem;
 
+    /* The space at the start side of a heading, where its arrow stands (see heading.css). */
+    --hf-heading-gutter: 1.25rem;
+
     @media (width >= 40rem) {
+      --hf-heading-gutter: 1.75rem;
+
       padding: 1.5rem 1.75rem;
     }
 

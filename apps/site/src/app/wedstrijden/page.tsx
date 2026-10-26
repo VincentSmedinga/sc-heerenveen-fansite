@@ -62,7 +62,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         }
       >
         <Card aria-labelledby="programma">
-          <Heading id="programma" level={2}>
+          <Heading anchor id="programma" level={2}>
             Programma
           </Heading>
           {programme.length === 0 ? (
@@ -80,7 +80,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           the top scorers, then the results. */}
       <Page.Sidebar aria-label="De stand, de ranglijsten en de uitslagen" wide>
         <Card aria-labelledby="stand">
-          <Heading id="stand" level={2}>
+          <Heading anchor id="stand" level={2}>
             Stand
           </Heading>
           {data.standings.length === 0 ? (
@@ -90,14 +90,14 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           )}
         </Card>
         <Card aria-labelledby="topscorers">
-          <Heading id="topscorers" level={2}>
+          <Heading anchor id="topscorers" level={2}>
             Topscorers
           </Heading>
           <TopScorers matches={data.matches} season={data.season} />
         </Card>
         <CleanSheetsCard count={parseCleanSheetCount(nul)} matches={data.matches} now={now} />
         <Card aria-labelledby="uitslagen">
-          <Heading id="uitslagen" level={2}>
+          <Heading anchor id="uitslagen" level={2}>
             Uitslagen
           </Heading>
           {results.length === 0 ? (

@@ -1,13 +1,16 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { withoutIcons } from '../../without-icons'
+import { headingAnchors, withoutHeadingLinks, withoutIcons } from '../../without-icons'
 import AboutPage, { generateMetadata } from './page'
 
 const html = renderToStaticMarkup(<AboutPage />)
 
+// Without the links that the headings are, for the tests about the other links and icons.
+const plain = withoutHeadingLinks(html)
+
 /** The href and the text of each link, in the order of the page. */
-const links = [...withoutIcons(html).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
+const links = [...withoutIcons(plain).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
   href,
   label,
 ])
@@ -34,8 +37,8 @@ describe('the page Over ons', () => {
   })
 
   it('shows the first paragraph under the h1, below the h2 Wie we zijn, as the intro, and no other paragraph', () => {
-    expect(html).toContain(
-      '<h2 class="hf-heading-2">Wie we zijn</h2><p class="hf-intro"><b>De sc Heerenveen Fansite is een site',
+    expect(plain).toContain(
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="wie-we-zijn">Wie we zijn</h2><p class="hf-intro"><b>De sc Heerenveen Fansite is een site',
     )
     expect(html.match(/class="hf-intro"/g)).toHaveLength(1)
     expect(html.match(/<b>/g)).toHaveLength(1)
@@ -44,9 +47,16 @@ describe('the page Over ons', () => {
   it('has one h1 and an h2 per section, and no section or anchor for privacy', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Over ons</h1>'])
     expect(html).not.toContain('id="privacy"')
-    expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
-      '<h2 class="hf-heading-2">Wie we zijn</h2>',
-      '<h2 class="hf-heading-2">Hoe we werken</h2>',
+    expect(plain.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="wie-we-zijn">Wie we zijn</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="hoe-we-werken">Hoe we werken</h2>',
+    ])
+  })
+
+  it('makes each h2 a link to itself, with a Dutch anchor that the page chose', () => {
+    expect(headingAnchors(html)).toEqual([
+      ['wie-we-zijn', 'Wie we zijn'],
+      ['hoe-we-werken', 'Hoe we werken'],
     ])
   })
 
@@ -62,12 +72,12 @@ describe('the page Over ons', () => {
 
   it('draws the icon for a link to another site behind "ons forum" only, hidden from screen readers', () => {
     const iconLinks = [
-      ...html.matchAll(/<a href="([^"]*)">(?:[^<]*)<span class="hf-icon-tail">[^<]*<svg aria-hidden="true"/g),
+      ...plain.matchAll(/<a href="([^"]*)">(?:[^<]*)<span class="hf-icon-tail">[^<]*<svg aria-hidden="true"/g),
     ]
 
     expect(iconLinks.map(([, href]) => href)).toEqual(['https://forum.heerenveen.org'])
     // The other icon is the envelope before the address.
-    expect(html.match(/<svg /g)).toHaveLength(2)
+    expect(plain.match(/<svg /g)).toHaveLength(2)
   })
 
   it('draws the envelope in front of the address, hidden from screen readers', () => {

@@ -33,8 +33,8 @@ export function CleanSheetsCard({ count, matches, now }: { count: number; matche
   const shown = sheets.slice(0, count)
 
   return (
-    <Card aria-labelledby="nul-gehouden">
-      <Heading id="nul-gehouden" level={2}>
+    <Card aria-labelledby="de-nul-gehouden">
+      <Heading aliases={['nul-gehouden']} anchor id="de-nul-gehouden" level={2}>
         De nul gehouden
       </Heading>
       {played === 0 ? (
