@@ -1,9 +1,18 @@
 import type { Database } from '@fansite/db/client'
+import type { MatchImport, WikipediaPage } from '@fansite/db/schema'
 
 import { connect } from '@fansite/db/client'
-import { feeds, importRuns, matchImports, sources, wikipediaPages } from '@fansite/db/schema'
+import {
+  feeds,
+  importRuns,
+  matchImports,
+  matchPageKinds,
+  sources,
+  squadImports,
+  wikipediaPages,
+} from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { asc, desc, eq } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 
 import type { ImportOptions } from './import-feeds.ts'
 
@@ -15,10 +24,12 @@ import { formatTime } from './text.ts'
  * Shows the health of each feed of the sources that are switched on: the source, the address,
  * the last run that succeeded, the failed runs in a row, the last error and whether the feed
  * is healthy. Above it is the last run, so you can see that cron starts the import. After the
- * feeds comes the health of the match import for the current season, in the same words, with
- * the Wikipedia pages it read. It only reads, and changes nothing in the database.
+ * feeds comes the health of the match import and of the squad import for the current season, in
+ * the same words, each with the Wikipedia pages it read. It only reads, and changes nothing in
+ * the database.
  *
- * Returns the exit code: 1 when a feed or the match import is unhealthy, so a check can tell.
+ * Returns the exit code: 1 when a feed or one of the two Wikipedia imports is unhealthy, so a
+ * check can tell.
  */
 export async function showStatus(
   databaseUrl: string,
@@ -87,36 +98,34 @@ export async function showStatus(
       write(`Unhealthy feeds: ${unhealthy} of ${rows.length}`)
     }
 
-    return (await showMatchStatus(db, now, write)) || unhealthy > 0 ? 1 : 0
+    const matchesUnhealthy = await showMatchStatus(db, now, write)
+    const squadUnhealthy = await showSquadStatus(db, now, write)
+
+    return matchesUnhealthy || squadUnhealthy || unhealthy > 0 ? 1 : 0
   } finally {
     await close()
   }
 }
 
-/**
- * Shows the health of the match import for the current season. Returns true when it is
- * unhealthy.
- */
-async function showMatchStatus(db: Database, now: Date, write: (line: string) => void): Promise<boolean> {
-  const season = seasonOf(now)
-  const [health] = await db.select().from(matchImports).where(eq(matchImports.season, season))
-  const pages = await db
-    .select()
-    .from(wikipediaPages)
-    .where(eq(wikipediaPages.season, season))
-    .orderBy(asc(wikipediaPages.title))
-
+/** The health of one import from Wikipedia, in the words of a feed. True when unhealthy. */
+function showImportStatus(
+  head: string,
+  health: MatchImport | undefined,
+  pages: WikipediaPage[],
+  now: Date,
+  write: (line: string) => void,
+): boolean {
   write('')
 
   if (health === undefined) {
-    write(`Matches ${season} (Wikipedia): not read yet`)
+    write(`${head}: not read yet`)
 
     return false
   }
 
   const unhealthy = isUnhealthy(health)
 
-  write(`Matches ${season} (Wikipedia): ${unhealthy ? 'unhealthy' : 'healthy'}`)
+  write(`${head}: ${unhealthy ? 'unhealthy' : 'healthy'}`)
   write(`  last success: ${health.lastSuccessAt === null ? 'never' : formatTime(health.lastSuccessAt)}`)
   write(`  last outcome: ${health.lastOutcome}`)
   write(`  failed runs in a row: ${health.failuresInARow}`)
@@ -135,4 +144,35 @@ async function showMatchStatus(db: Database, now: Date, write: (line: string) =>
   }
 
   return unhealthy
+}
+
+/**
+ * Shows the health of the match import for the current season. Returns true when it is
+ * unhealthy.
+ */
+async function showMatchStatus(db: Database, now: Date, write: (line: string) => void): Promise<boolean> {
+  const season = seasonOf(now)
+  const [health] = await db.select().from(matchImports).where(eq(matchImports.season, season))
+  const pages = await db
+    .select()
+    .from(wikipediaPages)
+    .where(and(eq(wikipediaPages.season, season), inArray(wikipediaPages.kind, matchPageKinds)))
+    .orderBy(asc(wikipediaPages.title))
+
+  return showImportStatus(`Matches ${season} (Wikipedia)`, health, pages, now, write)
+}
+
+/**
+ * Shows the health of the squad import for the current season. Returns true when it is
+ * unhealthy.
+ */
+async function showSquadStatus(db: Database, now: Date, write: (line: string) => void): Promise<boolean> {
+  const season = seasonOf(now)
+  const [health] = await db.select().from(squadImports).where(eq(squadImports.season, season))
+  const pages = await db
+    .select()
+    .from(wikipediaPages)
+    .where(and(eq(wikipediaPages.season, season), eq(wikipediaPages.kind, 'squad')))
+
+  return showImportStatus(`Squad ${season} (Wikipedia)`, health, pages, now, write)
 }

@@ -14,6 +14,7 @@ import type { ForumDiscussion } from './read-forum.ts'
 
 import { createFetcher } from './fetcher.ts'
 import { formatMatchReport, importMatches, wikipediaOrigin } from './import-matches.ts'
+import { formatSquadReport, importSquad } from './import-squad.ts'
 import { paywallCategoryFor, paywallNamespaceFor, readFeed, timeRuleFor } from './read-feed.ts'
 import { readForum } from './read-forum.ts'
 import { judgeRelevance } from './relevance.ts'
@@ -247,9 +248,11 @@ export function listFeedsToImport(db: Database) {
 /**
  * Reads every feed of every source that is switched on and writes a line for each. One
  * fetcher serves all feeds, so a host's robots.txt is read once, and the database keeps
- * it for a day. In the same run it reads the matches and the table of the season from
- * Wikipedia, at most once an hour (see `importMatches`). The two start together and do
- * not depend on each other: a failure of one stops neither the other nor its report.
+ * it for a day. In the same run it reads the matches, the table and the squad of the season
+ * from Wikipedia, at most once an hour each (see `importMatches` and `importSquad`). The feeds
+ * and Wikipedia start together and do not depend on each other: a failure of one stops neither
+ * the other nor its report. The pages of Wikipedia are read one after the other: the matches
+ * first, then the squad, and the squad is read also when the matches fail.
  * Returns the exit code: 1 when a feed failed, so a scheduler can tell. A match import
  * that finds a check failing or a page changed is a warning in the output and in the
  * health (`pnpm run import:status`), and no failure of the run.
@@ -283,14 +286,14 @@ export async function runImport(
       )
 
       const fetcher = makeFetcher(robotsStoreFor(db, clock))
-      const [reports, matchReport] = await Promise.allSettled([
+      const [reports, wikipedia] = await Promise.allSettled([
         importFeeds(db, fetcher, { clock, runId }),
-        origin === null ? undefined : importMatches(db, fetcher, { clock, origin }),
+        origin === null ? [] : importWikipedia(db, fetcher, clock, origin),
       ])
 
       await finishRun(db, runId, clock())
 
-      return { matchReport, reports }
+      return { reports, wikipedia }
     })
 
     if (!run.ran) {
@@ -300,7 +303,7 @@ export async function runImport(
       return 0
     }
 
-    const { matchReport, reports } = run.result
+    const { reports, wikipedia } = run.result
 
     if (reports.status === 'fulfilled' && reports.value.length === 0) {
       write('There are no feeds to read: no source that is switched on has a feed. See `pnpm db:seed`.')
@@ -310,10 +313,8 @@ export async function runImport(
     }
     // A run that finds the hour not over yet is the usual case, three in four, and says
     // nothing.
-    if (matchReport.status === 'rejected') {
-      write(`Matches: warning, not imported: ${describeError(matchReport.reason)}`)
-    } else if (matchReport.value !== undefined && matchReport.value.kind !== 'postponed') {
-      write(formatMatchReport(matchReport.value))
+    for (const line of wikipedia.status === 'fulfilled' ? wikipedia.value : []) {
+      write(line)
     }
     if (reports.status === 'rejected') {
       throw reports.reason
@@ -385,6 +386,35 @@ async function importForum(db: Database, feed: StoredFeed, read: ReturnType<type
     skipped: read.skipped,
     url: feed.url,
   }
+}
+
+/**
+ * Reads the matches and then the squad, and returns the lines to write. A failure of one does
+ * not stop the other, and an import that finds its hour not over yet says nothing.
+ */
+async function importWikipedia(db: Database, fetcher: Fetcher, clock: () => Date, origin: string): Promise<string[]> {
+  const lines: string[] = []
+
+  try {
+    const report = await importMatches(db, fetcher, { clock, origin })
+
+    if (report.kind !== 'postponed') {
+      lines.push(formatMatchReport(report))
+    }
+  } catch (error) {
+    lines.push(`Matches: warning, not imported: ${describeError(error)}`)
+  }
+  try {
+    const report = await importSquad(db, fetcher, { clock, origin })
+
+    if (report.kind !== 'postponed') {
+      lines.push(formatSquadReport(report))
+    }
+  } catch (error) {
+    lines.push(`Squad: warning, not imported: ${describeError(error)}`)
+  }
+
+  return lines
 }
 
 /**

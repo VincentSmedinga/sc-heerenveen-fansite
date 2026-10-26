@@ -1,0 +1,281 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)?action=raw, read on 26 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: the infobox, the text around the squad and the summary of the season.
+  The table is written both ways, as on the page: all cells of a row on one line, and one cell to a line.
+-->
+== Selectie 2026/27 ==
+=== Spelers ===
+{| class="wikitable" style="font-size:85%; text-align: center;"
+|-
+! rowspan="2" valign="bottom" | Nr.
+! rowspan="2" valign="bottom" | Nat.
+! rowspan="2" valign="bottom" | Naam
+! rowspan="2" valign="bottom" | Contract tot
+! colspan="3"| <small>Eredivisie</small>
+! colspan="3"| <small>KNVB Beker</small>
+! colspan="3"| <small>Totaal</small>
+|-bgcolor="#D7E5EF"
+! W
+! [[Bestand:Soccerball.svg|10px]]
+! [[Bestand:Assist.png|20px|Assist]]
+! W
+! [[Bestand:Soccerball.svg|10px]]
+! [[Bestand:Assist.png|20px|Assist]]
+! W
+! [[Bestand:Soccerball.svg|10px]]
+! [[Bestand:Assist.png|20px|Assist]]
+
+|-
+! colspan="13" align="left" |Doelmannen
+|-
+|'''22'''||{{NL-VLAG}}|| align="left" |[[Bernt Klaverboer]]||2029||9||0||0||0||0||0||'''9'''||'''0'''||'''0'''
+|-
+|'''30'''||{{NL-VLAG}}|| align="left" |[[Timo Schreuder]]||2026||0||0||0||0||0||0||'''0'''||'''0'''||'''0'''
+|-
+|'''44'''||{{NL-VLAG}}|| align="left" |[[Andries Noppert]]||2027||0||0||0||0||0||0||'''0'''||'''0'''||'''0'''
+|-
+| -
+|{{NL-VLAG}}
+| align="left" |[[Sten Kremers]]
+|2027
+|0
+|0
+|0
+|0
+|0
+|0
+|'''0'''
+|'''0'''
+|'''0'''
+|-
+! colspan="13" align="left" |Verdedigers
+|-
+|'''2''' ||{{ID-VLAG}}|| align="left" |[[Mees Hilgers]]||2028||0||0||0||0||0||0||'''0'''||'''0'''||'''0'''
+|-
+|'''3'''
+|{{NL-VLAG}}
+| align="left" |[[Maas Willemsen]]
+|2029
+|9
+|0
+|0
+|0
+|0
+|0
+|'''9'''
+|'''0'''
+|'''0'''
+|-
+|'''4'''||{{NL-VLAG}}|| align="left" |[[Sam Kersten]]||2027||9||0||1||0||0||0||'''9'''||'''0'''||'''1'''
+|-
+|'''13'''
+|{{NL-VLAG}}
+| align="left" |[[Mats Egbring]]
+|2028
+|2
+|0
+|0
+|0
+|0
+|0
+|'''2'''
+|'''0'''
+|'''0'''
+|-
+|'''19'''
+|{{GR-VLAG}}
+| align="left" |[[Vasilios Zagaritis]]
+|2028
+|9
+|0
+|0
+|0
+|0
+|0
+|'''9'''
+|'''0'''
+|'''0'''
+|-
+|'''23'''
+|{{FR-VLAG}}
+| align="left" |[[Darling Bladi]]
+|2029
+|1
+|0
+|0
+|0
+|0
+|0
+|'''1'''
+|'''0'''
+|'''0'''
+|-
+|'''28'''
+|{{BG-VLAG}}
+| align="left" |[[Christijan Petrov]]
+|2029
+|6
+|0
+|0
+|0
+|0
+|0
+|'''6'''
+|'''0'''
+|'''0'''
+|-
+|'''41'''
+|{{NL-VLAG}}
+| align="left" |[[Jimte Scholten]]
+|2027
+|0
+|0
+|0
+|0
+|0
+|0
+|'''0'''
+|'''0'''
+|'''0'''
+|-
+|'''45''' ||{{NO-VLAG}}|| align="left" |[[Oliver Braude]]||2027||8||2||0||0||0||0||'''8'''||'''2'''||'''0'''
+|-
+! colspan="13" align="left" |Middenvelders
+|-
+|'''6'''
+|{{NL-VLAG}}
+| align="left" |[[Dirk Proper]]
+|2030
+|5
+|0
+|1
+|0
+|0
+|0
+|'''5'''
+|'''0'''
+|'''1'''
+|-
+|'''10'''
+|{{NL-VLAG}}
+| align="left" |[[Ringo Meerveld]]
+|2029
+|9
+|1
+|1
+|0
+|0
+|0
+|'''9'''
+|'''1'''
+|'''1'''
+|-
+|'''14'''
+|{{NL-VLAG}}
+| align="left" |[[Levi Smans]]
+|2028
+|7
+|0
+|3
+|0
+|0
+|0
+|'''7'''
+|'''0'''
+|'''3'''
+|-
+|'''16'''||{{SE-VLAG}}|| align="left" |[[Marcus Linday]]||2029||6||0||0||0||0||0||'''6'''||'''0'''||'''0'''
+|-
+|'''36'''
+|{{CD-VLAG}}
+| align="left" |[[Nolhan Courtens]]
+|2030
+|7
+|2
+|0
+|0
+|0
+|0
+|'''7'''
+|'''2'''
+|'''0'''
+|-
+! colspan="13" align="left" |Aanvallers
+|-
+|'''7'''||{{FR-VLAG}}|| align="left" |[[Maxence Rivera]]||2028||8||2||1||0||0||0||'''8'''||'''2'''||'''1'''
+|-
+|'''9'''||{{SR-VLAG}}|| align="left" |[[Dylan Vente]]||2029||9||1||2||0||0||0||'''9'''||'''1'''||'''2'''
+|-
+|'''11'''
+|{{BE-VLAG}}
+| align="left" |[[Luca Oyen]]
+|2029
+|8
+|2
+|1
+|0
+|0
+|0
+|'''8'''
+|'''2'''
+|'''1'''
+|-
+|'''17'''
+|{{LV-VLAG}}
+| align="left" |[[Roberts Uldriķis|Roberts Uldrikis]]
+|2027
+|4
+|0
+|0
+|0
+|0
+|0
+|'''4'''
+|'''0'''
+|'''0'''
+|-
+|'''20'''
+|{{DK-VLAG}}
+| align="left" |[[Jacob Trenskow]]
+|2028
+|9
+|4
+|2
+|0
+|0
+|0
+|'''9'''
+|'''4'''
+|'''2'''
+|-
+|'''21'''
+|{{IQ-VLAG}}
+| align="left" |[[Marko Farji]]
+|2030
+|4
+|1
+|0
+|0
+|0
+|0
+|'''4'''
+|'''1'''
+|'''0'''
+|-
+|'''29'''
+|{{FR-VLAG}}
+| align="left" |[[Lanroy Machine]]
+|2027
+|4
+|0
+|0
+|0
+|0
+|0
+|'''4'''
+|'''0'''
+|'''0'''
+|}
+
+<small>Laatst bijgewerkt op 17 oktober 2026</small>

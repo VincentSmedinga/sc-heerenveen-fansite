@@ -326,14 +326,33 @@ De sleutel is het seizoen met de plaats.
 | `points`                                        | De punten                                                                        |
 | `valid_on`                                      | De dag waarvoor de stand geldt: die van de laatste gespeelde competitiewedstrijd |
 
-`wikipedia_pages` bewaart per gelezen pagina de `title`, de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
+`wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme` en `cup` voor de wedstrijden, `squad` voor de selectie), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
 Een pagina kan daarmee de bron noemen.
+`listWikipediaPages` geeft alleen de pagina's van de wedstrijden.
 
 `match_imports` heeft per seizoen de gezondheid van de import: `last_success_at`, `last_outcome`, `failures_in_a_row`, `last_error`, `last_warning` en `retry_at`, de tijd waarvoor de import Wikipedia niet opnieuw vraagt.
 Het zijn dezelfde velden als bij een feed.
 
+`players` heeft een rij per speler van de selectie van sc Heerenveen 1 (mannen) en seizoen, van de Nederlandse Wikipedia.
+De importer vervangt de selectie van het lopende seizoen bij elke goede lezing en laat die van een eerder seizoen staan.
+Een naam komt in een seizoen één keer voor.
+
+| Kolom          | Betekenis                                                                       |
+| -------------- | ------------------------------------------------------------------------------- |
+| `season`       | Het seizoen, zoals `2026/27`                                                    |
+| `name`         | De naam zoals de tabel hem toont, zoals `Joost van Aken`                        |
+| `position`     | `doelman`, `verdediger`, `middenvelder` of `aanvaller`                          |
+| `shirt_number` | Het rugnummer, 1 tot en met 99; leeg bij een speler zonder nummer               |
+| `search_term`  | De naam zonder de eerste voornaam, zoals `van Aken`: waarop de zoekpagina zoekt |
+
+Er staat niets anders in: geen nationaliteit, leeftijd, contract, statistieken of foto.
+De zoekterm is een eigen kolom, zodat je hem voor één speler kunt verbeteren: de importer zet hem alleen bij een nieuwe speler.
+
+`squad_imports` heeft per seizoen de gezondheid van de import van de selectie, met dezelfde velden als `match_imports`.
+
 De seed zet verzonnen wedstrijden, een verzonnen stand en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
 De pagina's staan erbij, zodat de site de bronvermelding laat zien zoals met echte gegevens.
+Ook een verzonnen selectie met verzonnen namen komt erin (`madeUpSquad` en `seedSquad`), alleen als het lopende seizoen nog geen spelers heeft: met alle posities, een naam met een voorvoegsel, een naam van één woord en een speler zonder rugnummer.
 De eerste echte import vervangt ze, en een database met echte wedstrijden raakt de seed niet aan.
 
 ## Tijden
@@ -355,7 +374,7 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `standings`, `wikipedia_pages`, `match_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `standings`, `wikipedia_pages`, `match_imports`, `players`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;

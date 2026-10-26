@@ -1,9 +1,11 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
+import type { ReadPlayer } from './read-squad.ts'
 import type { ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
 
-import { checkGoals, checkMatches, checkStandings } from './check-wikipedia.ts'
+import { checkGoals, checkMatches, checkSquad, checkStandings } from './check-wikipedia.ts'
+import { readSquad } from './read-squad.ts'
 import { readCup, readLeague, readStandings } from './read-wikipedia.ts'
 
 function read<T extends { kind: string }>(result: T): Extract<T, { kind: 'read' }> {
@@ -185,5 +187,64 @@ describe('the check of the scorers', () => {
     expect(
       checkGoals({ ...played, goals: null, goalsProblem: 'Speelronde 2 (Eredivisie): a goal has no usable name' }),
     ).toBe('Speelronde 2 (Eredivisie): a goal has no usable name')
+  })
+})
+
+describe('the checks of the squad', () => {
+  const squad = read(readSquad(fixture('wikipedia-squad.wiki'))).players
+
+  /** The squad with the players of one position replaced by this many, taken from the page. */
+  function withPosition(position: ReadPlayer['position'], count: number) {
+    return [
+      ...squad.filter((player) => player.position !== position),
+      ...squad.filter((p) => p.position === position).slice(0, count),
+    ]
+  }
+
+  /** 18 players, with every position and four goalkeepers. */
+  const smallest = [...squad.slice(0, 8), ...squad.slice(13, 23)]
+
+  it('pass for the squad on the page', () => {
+    expect(checkSquad(squad)).toEqual([])
+  })
+
+  it('pass at 18 players and at 45', () => {
+    expect(smallest).toHaveLength(18)
+    expect(checkSquad(smallest)).toEqual([])
+    expect(
+      checkSquad(Array.from({ length: 45 }, (_, index) => ({ ...squad[index % 25]!, name: `Speler ${index}` }))),
+    ).toEqual([])
+  })
+
+  it('fail below 18 players', () => {
+    expect(checkSquad(smallest.slice(1))).toContain('the squad has 17 players, not 18 to 45')
+  })
+
+  it('fail above 45 players', () => {
+    const many = Array.from({ length: 46 }, (_, index) => ({ ...squad[index % 25]!, name: `Speler ${index}` }))
+
+    expect(checkSquad(many)).toEqual(['the squad has 46 players, not 18 to 45'])
+  })
+
+  it('fail with one goalkeeper', () => {
+    expect(checkSquad(withPosition('doelman', 1))).toEqual(['the squad has 1 goalkeeper, not at least 2'])
+  })
+
+  it.each(['doelman', 'verdediger', 'middenvelder', 'aanvaller'] as const)(
+    'fail without a position: %s',
+    (position) => {
+      expect(checkSquad(withPosition(position, 0))).toContain(`the squad has no ${position}`)
+    },
+  )
+
+  it('fail when a name is there twice, also when only the accents or capitals differ', () => {
+    const [first] = squad as [ReadPlayer]
+
+    expect(checkSquad([...squad, { ...first, position: 'aanvaller' }])).toEqual([
+      'the name Bernt Klaverboer is in the squad twice',
+    ])
+    expect(checkSquad([...squad, { ...first, name: 'bérnt klaverboer' }])).toEqual([
+      'the name bérnt klaverboer is in the squad twice',
+    ])
   })
 })

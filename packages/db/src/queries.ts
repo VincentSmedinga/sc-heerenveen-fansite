@@ -1,8 +1,19 @@
-import { and, asc, count, desc, eq, exists, isNotNull, isNull, lte, ne, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, exists, inArray, isNotNull, isNull, lte, ne, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
+import type { MatchPageKind } from './schema.ts'
 
-import { articles, discussions, items, matches, matchGoals, sources, standings, wikipediaPages } from './schema.ts'
+import {
+  articles,
+  discussions,
+  items,
+  matches,
+  matchGoals,
+  matchPageKinds,
+  sources,
+  standings,
+  wikipediaPages,
+} from './schema.ts'
 
 export type PublicArticle = NonNullable<Awaited<ReturnType<typeof findPublishedArticle>>>
 
@@ -343,15 +354,18 @@ export function listSeasonStandings(db: Database, season: string) {
 /**
  * The Wikipedia pages the match import read for a season, such as `2026/27`: the title of the
  * page, which kind it is and the moment it was last read, so a page can credit them. The
- * order is the standings, the programme and the cup. The `Last-Modified` of a page stays
- * internal.
+ * order is the standings, the programme and the cup. The page of the squad is not one of them.
+ * The `Last-Modified` of a page stays internal.
  */
-export function listWikipediaPages(db: Database, season: string) {
-  return db
+export async function listWikipediaPages(db: Database, season: string) {
+  const rows = await db
     .select({ kind: wikipediaPages.kind, readAt: wikipediaPages.readAt, title: wikipediaPages.title })
     .from(wikipediaPages)
-    .where(eq(wikipediaPages.season, season))
+    .where(and(eq(wikipediaPages.season, season), inArray(wikipediaPages.kind, matchPageKinds)))
     .orderBy(asc(wikipediaPages.kind), asc(wikipediaPages.title))
+
+  // The condition leaves out the page of the squad, which the type of the column still allows.
+  return rows.map((row) => ({ ...row, kind: row.kind as MatchPageKind }))
 }
 
 /**

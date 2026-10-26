@@ -123,10 +123,12 @@ describe('prepareDatabase', () => {
     await prepareDatabase({ migrationsFolder, seed: 'production', url: database.url })
 
     expect(await count('matches')).toBe(0)
+    expect(await count('players')).toBe(0)
 
     await prepareDatabase({ migrationsFolder, seed: 'acceptance', url: database.url })
 
     expect(await count('matches')).toBeGreaterThan(0)
+    expect(await count('players')).toBeGreaterThan(0)
   })
 
   it('takes the test sources out on acceptance, with their feeds and items, and leaves the real ones alone', async () => {

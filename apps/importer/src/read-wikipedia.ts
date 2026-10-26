@@ -106,6 +106,11 @@ const months = [
   'december',
 ]
 
+/** Takes the comments out of the text, which can hold a `|` or a `}}` of their own. */
+export function clean(text: string): string {
+  return text.replace(/<!--[\s\S]*?-->/gu, '')
+}
+
 /** The titles of the three pages of a season, such as `2026/27`. */
 export function pageTitles(season: string): SeasonPages {
   return {
@@ -121,6 +126,21 @@ export function pageTitles(season: string): SeasonPages {
  */
 export function pageUrl(origin: string, title: string): string {
   return `${origin}/wiki/${encodeURI(title.replaceAll(' ', '_'))}?action=raw`
+}
+
+/**
+ * The text of a wikitext value as it reads: without comments, line breaks, bold and italics,
+ * and with a link replaced by what it shows.
+ */
+export function plain(value: string): string {
+  return value
+    .replace(/<[^>]*>/gu, ' ')
+    .replace(/'{2,}/gu, '')
+    .replace(/\[\[[^\]|]*\|([^\]]*)\]\]/gu, '$1')
+    .replace(/\[\[([^\]]*)\]\]/gu, '$1')
+    .replaceAll('&nbsp;', ' ')
+    .replace(/\s+/gu, ' ')
+    .trim()
 }
 
 /**
@@ -290,11 +310,6 @@ function amsterdamToUtc(day: { day: number; month: number; year: number }, time:
   moment = local - amsterdamOffsetMs(moment)
 
   return new Date(moment)
-}
-
-/** Takes the comments out of the text, which can hold a `|` or a `}}` of their own. */
-function clean(text: string): string {
-  return text.replace(/<!--[\s\S]*?-->/gu, '')
 }
 
 /** The index of the `}}` that closes the `{{` at `start`, or undefined when there is none. */
@@ -543,21 +558,6 @@ function parseTime(value: string): null | undefined | { hours: number; minutes: 
   const minutes = Number(time?.[2])
 
   return time === null || hours > 23 || minutes > 59 ? undefined : { hours, minutes }
-}
-
-/**
- * The text of a wikitext value as it reads: without comments, line breaks, bold and italics,
- * and with a link replaced by what it shows.
- */
-function plain(value: string): string {
-  return value
-    .replace(/<[^>]*>/gu, ' ')
-    .replace(/'{2,}/gu, '')
-    .replace(/\[\[[^\]|]*\|([^\]]*)\]\]/gu, '$1')
-    .replace(/\[\[([^\]]*)\]\]/gu, '$1')
-    .replaceAll('&nbsp;', ' ')
-    .replace(/\s+/gu, ' ')
-    .trim()
 }
 
 /**

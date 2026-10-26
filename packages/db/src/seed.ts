@@ -5,6 +5,7 @@ import type {
   FeedFilter,
   NewMatch,
   NewMatchGoal,
+  NewPlayer,
   NewSource,
   NewStandingsRow,
   NewWikipediaPage,
@@ -13,7 +14,7 @@ import type {
 
 import { connect } from './client.ts'
 import { readDatabaseEnv } from './env.ts'
-import { feeds, matches, matchGoals, sources, standings, wikipediaPages } from './schema.ts'
+import { feeds, matches, matchGoals, players, sources, standings, wikipediaPages } from './schema.ts'
 import { seasonOf } from './season.ts'
 
 /**
@@ -492,6 +493,48 @@ export const madeUpGoals: Record<string, MadeUpGoal[]> = {
 }
 
 /**
+ * A made-up squad for the current season, for the pages and the accessibility checks: invented
+ * names, all four positions, a name with a particle, a name of one word and a player without a
+ * shirt number. It passes the checks of the importer (18 to 45 players, two goalkeepers). The
+ * search terms are written out, as the importer would work them out.
+ */
+export function madeUpSquad(now: Date): NewPlayer[] {
+  const season = seasonOf(now)
+  const rows: [NewPlayer['position'], null | number, string, string][] = [
+    ['doelman', 1, 'Tjerk Brandsma', 'Brandsma'],
+    ['doelman', 16, 'Wessel Oosting', 'Oosting'],
+    ['doelman', null, 'Sander Veldkamp', 'Veldkamp'],
+    ['verdediger', 2, 'Daan Boerema', 'Boerema'],
+    ['verdediger', 3, 'Jurre van der Kooi', 'van der Kooi'],
+    ['verdediger', 4, 'Ruben ten Hove', 'ten Hove'],
+    ['verdediger', 5, 'Stijn de Haan', 'de Haan'],
+    ['verdediger', 15, 'Lars Wijbenga', 'Wijbenga'],
+    ['verdediger', 24, 'Koen Bakkeveld', 'Bakkeveld'],
+    ['middenvelder', 6, 'Milan Reitsma', 'Reitsma'],
+    ['middenvelder', 8, 'Thijs Idzenga', 'Idzenga'],
+    ['middenvelder', 10, 'Bram van Dijkhuizen', 'van Dijkhuizen'],
+    ['middenvelder', 14, 'Gerben Tuinstra', 'Tuinstra'],
+    ['middenvelder', 18, 'Joeri Haagsma', 'Haagsma'],
+    ['middenvelder', 25, 'Noud Zeinstra', 'Zeinstra'],
+    ['aanvaller', 7, 'Sjoerd Altena', 'Altena'],
+    ['aanvaller', 9, 'Jesse Postma', 'Postma'],
+    ['aanvaller', 11, 'Floris de Wal', 'de Wal'],
+    ['aanvaller', 17, 'Yannick Hettinga', 'Hettinga'],
+    ['aanvaller', 21, 'Mick van Wieren', 'van Wieren'],
+    ['aanvaller', 22, 'Dinho', 'Dinho'],
+  ]
+
+  return rows.map(([position, shirtNumber, name, searchTerm]) => ({ name, position, searchTerm, season, shirtNumber }))
+}
+
+/** The page that the made-up squad pretends to come from, with the title the importer reads. */
+export function madeUpSquadPage(now: Date): NewWikipediaPage {
+  const season = seasonOf(now)
+
+  return { kind: 'squad', readAt: now, season, title: `Sc Heerenveen in het seizoen ${season} (mannen)`, version: null }
+}
+
+/**
  * A made-up league table that agrees with `madeUpMatches`: six made-up clubs and sc Heerenveen,
  * two rounds played, and the day of the last match as the day it holds for.
  */
@@ -593,6 +636,38 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
   })
 }
 
+/**
+ * Puts a made-up squad and the page it credits in the database, but only when the current
+ * season has no player. The real import replaces it the first time it runs, and a database that
+ * already has the real squad is left alone. Returns whether it put them in.
+ */
+export async function seedSquad(db: Database, now: Date = new Date()): Promise<boolean> {
+  const season = seasonOf(now)
+
+  return db.transaction(async (transaction) => {
+    const [anyPlayer] = await transaction
+      .select({ id: players.id })
+      .from(players)
+      .where(eq(players.season, season))
+      .limit(1)
+
+    if (anyPlayer !== undefined) {
+      return false
+    }
+
+    await transaction.insert(players).values(madeUpSquad(now))
+
+    const page = madeUpSquadPage(now)
+
+    await transaction
+      .insert(wikipediaPages)
+      .values(page)
+      .onDuplicateKeyUpdate({ set: { readAt: page.readAt } })
+
+    return true
+  })
+}
+
 if (import.meta.main) {
   // The made-up sources must never reach production. The site puts the real sources in by
   // itself when it starts; this keeps `pnpm db:seed` from doing the rest by hand.
@@ -606,6 +681,7 @@ if (import.meta.main) {
   try {
     await seedSources(db)
     await seedMatches(db)
+    await seedSquad(db)
     console.log(
       `The register holds ${testSources.length} test sources and the real sources: ${realSources.map((source) => source.name).join(', ')}.`,
     )

@@ -221,7 +221,7 @@ Onderaan de zijbalk staat de bronvermelding (`WikipediaCredit`) in een doorzicht
 Ze noemt de licentie, linkt naar elke pagina van Wikipedia die de import las, noemt de tijd van de laatste keer lezen en zegt dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
 Ze linkt niet naar de geschiedenis van die pagina's: Wikipedia ziet een link naar het artikel als een goede bronvermelding, en de auteurs staan in de geschiedenis van het artikel.
 Onder de twee blokken op de homepage staat alleen "Bron: Wikipedia".
-De pagina's komen uit `wikipedia_pages`; zonder gegevens van de wedstrijden staat er ook geen bronvermelding.
+De pagina's komen uit `wikipedia_pages` (alleen die van de wedstrijden, niet de pagina van de selectie); zonder gegevens van de wedstrijden staat er ook geen bronvermelding.
 De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en er staan geen clubwapens, alleen de namen.
 
 `pnpm test:a11y` gebruikt de verzonnen wedstrijden en stand van de seed (`madeUpMatches` en `madeUpTable`), met de pagina's die ze bronnen (`madeUpWikipediaPages`).

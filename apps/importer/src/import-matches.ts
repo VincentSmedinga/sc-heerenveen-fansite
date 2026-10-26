@@ -13,6 +13,17 @@ import { pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-
 import { retryUnhealthyAfterMs, unhealthyAfter, waitLimits } from './run-log.ts'
 import { describeError, formatTime, printable } from './text.ts'
 
+/**
+ * What the health of an import needs from a report. The report of the matches and the report of
+ * the squad both have it.
+ */
+export type HealthReport =
+  | { kind: 'blocked-by-robots' }
+  | { kind: 'error'; message: string }
+  | { kind: 'imported'; warnings: string[] }
+  | { kind: 'postponed' }
+  | { kind: 'wait'; retryAfterSeconds: null | number }
+
 export type MatchImportOptions = {
   clock?: () => Date
   /** The address of Wikipedia. A test gives the address of its own web server. */
@@ -94,14 +105,14 @@ export function formatMatchReport(report: MatchReport): string {
 }
 
 /**
- * What a report makes of the health of its season: the last time it succeeded, the failed runs
- * in a row, the last error and warning, and when the import may ask Wikipedia again. A refusal
- * by robots.txt and a request to wait are no fault of ours, and count as no failure. Undefined
- * when the report changes nothing.
+ * What a report makes of the health of its season, for the matches and for the squad: the last
+ * time it succeeded, the failed runs in a row, the last error and warning, and when the import
+ * may ask Wikipedia again. A refusal by robots.txt and a request to wait are no fault of ours,
+ * and count as no failure. Undefined when the report changes nothing.
  */
 export function healthAfter(
   before: MatchImport | undefined,
-  report: MatchReport,
+  report: HealthReport,
   now: Date,
 ): Omit<MatchImport, 'season'> | undefined {
   const kept: Omit<MatchImport, 'season'> = {

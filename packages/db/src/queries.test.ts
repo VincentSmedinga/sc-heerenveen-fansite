@@ -18,6 +18,7 @@ import {
 import { discussions, feeds, items, matches, matchGoals, sources, standings, wikipediaPages } from './schema.ts'
 import {
   madeUpMatches,
+  madeUpSquadPage,
   madeUpTable,
   madeUpWikipediaPages,
   realSources,
@@ -1001,6 +1002,16 @@ describe('the matches and the table of a season', () => {
         { kind: 'standings', readAt: now, title: 'Eredivisie 2026/27 (mannenvoetbal)' },
         { kind: 'programme', readAt: now, title: 'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden' },
         { kind: 'cup', readAt: now, title: 'KNVB Beker 2026/27 (mannen)' },
+      ])
+    })
+
+    it('leaves out the page of the squad', async () => {
+      await database.db.insert(wikipediaPages).values([...madeUpWikipediaPages(now), madeUpSquadPage(now)])
+
+      expect((await listWikipediaPages(database.db, '2026/27')).map((page) => page.kind)).toEqual([
+        'standings',
+        'programme',
+        'cup',
       ])
     })
 

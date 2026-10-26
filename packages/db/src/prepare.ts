@@ -2,7 +2,7 @@ import { migrate } from 'drizzle-orm/mysql2/migrator'
 
 import { connect } from './client.ts'
 import { lockNameFor, withLock } from './lock.ts'
-import { removeTestSources, seedMatches, seedRealSources } from './seed.ts'
+import { removeTestSources, seedMatches, seedRealSources, seedSquad } from './seed.ts'
 
 export type PrepareOptions = {
   /** How many seconds to wait for a process that is preparing the same database. */
@@ -50,6 +50,7 @@ export async function prepareDatabase({ lockSeconds = 30, migrationsFolder, seed
       if (seed === 'acceptance') {
         await removeTestSources(db)
         await seedMatches(db)
+        await seedSquad(db)
       }
     })
 
