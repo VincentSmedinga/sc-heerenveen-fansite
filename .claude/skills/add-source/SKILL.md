@@ -59,7 +59,7 @@ It never keeps a description, an author, an image or a logo, and a test says so.
 
 Run the importer on your own database with the source and read the numbers: items stored, none skipped, filter counts (`pnpm run import`, not `pnpm import`; see the README of the importer).
 Put the counts and the date in the entry in `docs/bronnen.md`.
-One run, with the user agent of the importer, at most one request per feed.
+Do it once: a run reads every enabled feed in the register and the Wikipedia pages, not only the new source, so don't repeat it.
 
 ## 6. Document
 

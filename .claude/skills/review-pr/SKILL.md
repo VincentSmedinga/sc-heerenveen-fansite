@@ -43,7 +43,7 @@ If it isn't the model you asked for, tell the owner.
    It is in Dutch and has three sections: code and security, accessibility, editorial and source policy.
    Don't summarise it and don't leave a finding out.
 2. Tick the three review boxes in the description to match what the report says it checked (`gh pr edit` through `as-claude`, with the body as flowing paragraphs).
-   A section marked "niet van toepassing" stays honest: say so in the box's line, don't tick it as checked.
+   A section the report marks "niet van toepassing" is ticked too, with those words added to the box's line.
 3. **Post the report before you push the fixes.**
    Otherwise the report no longer matches the head it reviewed.
 

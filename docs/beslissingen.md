@@ -463,7 +463,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De regels zelf blijven in die twee bestanden.
 - **Waarom:** acht pull requests voegden een bron toe en raakten steeds dezelfde bestanden.
   Elke Builder moest de lijst opnieuw samenstellen uit de bronnenlijst, de README van de importer en de beslissingen.
-  De stappen rond het openen van een pull request stonden verspreid over `AGENTS.md`, het sjabloon en de geheugens van de projecteigenaar, en Builders sloegen ze over: de vakjes in het issue, het openen als de GitHub-app en het plaatsen van het verslag van de reviewer vóór de herstellen.
+  De stappen rond het openen van een pull request stonden verspreid over `AGENTS.md`, het sjabloon en de geheugens van de projecteigenaar, en Builders sloegen ze over: de vakjes in het issue, het openen als de GitHub-app en het plaatsen van het verslag van de reviewer vóór de verbeteringen.
   Een skill laadt alleen als hij nodig is, zodat `AGENTS.md` niet langer wordt.
 - **Nadeel:** een stap staat nu in een skill en de regel erachter in `AGENTS.md`, en ze kunnen uit elkaar lopen.
   Wie een regel wijzigt, zoekt daarom ook in `.claude/skills/`.

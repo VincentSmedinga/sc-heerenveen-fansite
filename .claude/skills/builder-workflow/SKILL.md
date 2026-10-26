@@ -49,8 +49,9 @@ For a new source, also use the `add-source` skill.
 ## Push and open the pull request
 
 Pull requests are opened by the Smedinga-Claude GitHub App, not under the owner's account, so the owner can review them.
-Never use a plain `git push`, `gh pr create`, `gh pr comment` or `gh pr edit` here.
-Use the owner's script (it only runs in this repository's folders, and it is not on your PATH):
+Every command that writes to GitHub as you, whether it is here or in `AGENTS.md` (such as the `gh pr edit` under _Screenshots_), runs through the owner's script: `git push`, `gh pr create`, `gh pr comment` and `gh pr edit`.
+Reading (`gh pr view`, `gh issue view`) needs no script.
+The script is the owner's local setup (it only runs in this repository's folders, and it is not on your PATH):
 
 ```sh
 /Volumes/Code/family/bin/as-claude git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push https://github.com/VincentSmedinga/sc-heerenveen-fansite.git <branch>:<branch>
