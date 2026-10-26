@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, exists, isNotNull, isNull, lte, ne, sql } fr
 
 import type { Database } from './client.ts'
 
-import { articles, discussions, items, matches, sources, standings, wikipediaPages } from './schema.ts'
+import { articles, discussions, items, matches, matchGoals, sources, standings, wikipediaPages } from './schema.ts'
 
 export type PublicArticle = NonNullable<Awaited<ReturnType<typeof findPublishedArticle>>>
 
@@ -259,11 +259,12 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * stadium, the status, the goals (null unless the match is played), whether it went to extra
  * time and the shoot-out (null unless there was one), the day, the kick-off in
  * UTC (null while it is unknown) and the date as Wikipedia has it (null when the kick-off is
- * known). The moment the importer saw a result stays internal. Only the season that is asked
- * for is read: the pages show the current season alone.
+ * known). `goals` are the scorers of a played match in the order of the clock, both clubs
+ * together, and empty when the page names none. The moment the importer saw a result stays
+ * internal. Only the season that is asked for is read: the pages show the current season alone.
  */
-export function listSeasonMatches(db: Database, season: string) {
-  return db
+export async function listSeasonMatches(db: Database, season: string) {
+  const rows = await db
     .select({
       competition: matches.competition,
       dateText: matches.dateText,
@@ -271,6 +272,7 @@ export function listSeasonMatches(db: Database, season: string) {
       goalsAgainst: matches.goalsAgainst,
       goalsFor: matches.goalsFor,
       home: matches.home,
+      id: matches.id,
       kickoffAt: matches.kickoffAt,
       matchDate: matches.matchDate,
       opponent: matches.opponent,
@@ -283,6 +285,34 @@ export function listSeasonMatches(db: Database, season: string) {
     .from(matches)
     .where(eq(matches.season, season))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
+  const scored = await db
+    .select({
+      matchId: matchGoals.matchId,
+      minute: matchGoals.minute,
+      ours: matchGoals.ours,
+      ownGoal: matchGoals.ownGoal,
+      penalty: matchGoals.penalty,
+      player: matchGoals.player,
+      stoppageMinutes: matchGoals.stoppageMinutes,
+    })
+    .from(matchGoals)
+    .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+    .where(eq(matches.season, season))
+    .orderBy(asc(matchGoals.minute), asc(sql`coalesce(${matchGoals.stoppageMinutes}, 0)`), asc(matchGoals.id))
+
+  return rows.map(({ id, ...match }) => ({
+    ...match,
+    goals: scored
+      .filter((goal) => goal.matchId === id)
+      .map((goal) => ({
+        minute: goal.minute,
+        ours: goal.ours,
+        ownGoal: goal.ownGoal,
+        penalty: goal.penalty,
+        player: goal.player,
+        stoppageMinutes: goal.stoppageMinutes,
+      })),
+  }))
 }
 
 /**

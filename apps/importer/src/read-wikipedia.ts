@@ -5,7 +5,22 @@
 // guess, so the import keeps what it has.
 import type { Competition, MatchStatus } from '@fansite/db/schema'
 
-import { matchLimits, standingsClubMaxLength } from '@fansite/db/schema'
+import { matchGoalPlayerMaxLength, matchLimits, standingsClubMaxLength } from '@fansite/db/schema'
+
+/** One goal of a played match, as the page names it. */
+export type ReadGoal = {
+  /** The minute on the clock: 45 for "45+1". */
+  minute: number
+  /** True for a goal of sc Heerenveen, false for a goal of the opponent. */
+  ours: boolean
+  /** An own goal, which is listed under the club that benefits from it. */
+  ownGoal: boolean
+  penalty: boolean
+  /** The name as the page shows it, such as `Van Bergen`. */
+  player: string
+  /** The minutes of added time: 1 for "45+1". Null in regular time. */
+  stoppageMinutes: null | number
+}
 
 /** What the import keeps of one match of sc Heerenveen. */
 export type ReadMatch = {
@@ -14,9 +29,17 @@ export type ReadMatch = {
   dateText: null | string
   /** Whether a played cup match went to extra time. Only the cup has it. */
   extraTime: boolean
+  /**
+   * The goals in the order of the clock, both clubs together. Null when the page names no
+   * scorers (yet), and for a match that is not played. They are not checked against the score
+   * yet: see `checkGoals`.
+   */
+  goals: null | ReadGoal[]
   /** Empty unless the match is played. */
   goalsAgainst: null | number
   goalsFor: null | number
+  /** Why the scorers of a played match could not be read, or null. Then `goals` is null. */
+  goalsProblem: null | string
   home: boolean
   /** Empty while the time is unknown. UTC. */
   kickoffAt: Date | null
@@ -400,6 +423,70 @@ function parseDate(
 }
 
 /**
+ * A name and the minutes of its goals: `[[Luca Oyen|Oyen]] {{goal|52}}` for the home club, and
+ * `{{goal|45}} [[Jacob Trenskow|Trenskow]]` for the away club, one player to a line and
+ * lines cut by `<br />`. The template takes every goal of the player: `{{goal|78||80}}` is
+ * two, and `e.d.` (own goal) or `pen.` (penalty) after a minute belongs to that goal. Red cards
+ * and missed penalties in the same field are not goals and are left out. Anything else, a goal
+ * without a name or a template we do not know, is a text we cannot read: the answer is then a
+ * reason and no goals at all, since half a list says something false.
+ */
+function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | { problem: string } {
+  const goals: ReadGoal[] = []
+
+  for (const line of value.replace(/\{\{\s*(?:rode kaart|penmis)\s*\|[^{}]*\}\}/giu, '').split(/<br\s*\/?>/iu)) {
+    const templates = [...line.matchAll(/\{\{\s*goal\s*\|([^{}]*)\}\}/giu)]
+    // What is left of a line besides its goals is the name; a comma between templates is not.
+    const name = plain(line.replace(/\{\{\s*goal\s*\|[^{}]*\}\}/giu, ' ')).replace(/^[\s,;]+|[\s,;]+$/gu, '')
+
+    if (templates.length === 0) {
+      if (/\{\{|\}\}/u.test(line)) {
+        return { problem: `a line of the scorers has a template we do not know: '${plain(line).slice(0, 40)}'` }
+      }
+      continue
+    }
+    if (name === '' || name.length > matchGoalPlayerMaxLength || /[{}[\]|]/u.test(name)) {
+      return { problem: `a goal has no usable name: '${plain(line).slice(0, 40)}'` }
+    }
+
+    for (const [, inner = ''] of templates) {
+      let last: ReadGoal | undefined
+
+      for (const token of inner.split('|').map((part) => part.trim())) {
+        const minute = /^(\d{1,3})(?:\+(\d{1,2}))?$/u.exec(token)
+
+        if (token === '') {
+          continue
+        }
+        if (minute !== null) {
+          last = {
+            minute: Number(minute[1]),
+            ours,
+            ownGoal: false,
+            penalty: false,
+            player: name,
+            stoppageMinutes: minute[2] === undefined ? null : Number(minute[2]),
+          }
+          if (last.minute < 1 || last.minute > 150 || last.stoppageMinutes === 0) {
+            return { problem: `a goal of ${name} has a minute we do not know: '${token}'` }
+          }
+          goals.push(last)
+        } else if ((token === 'e.d.' || token === 'pen.') && last !== undefined) {
+          last[token === 'e.d.' ? 'ownGoal' : 'penalty'] = true
+          if (last.ownGoal && last.penalty) {
+            return { problem: `a goal of ${name} is both an own goal and a penalty` }
+          }
+        } else {
+          return { problem: `a goal of ${name} has a part we do not know: '${token.slice(0, 40)}'` }
+        }
+      }
+    }
+  }
+
+  return { goals }
+}
+
+/**
  * The score of the shoot-out of a box, in the order of the template: team 1 first. Empty or
  * missing is no shoot-out; anything but two numbers is a text we do not know.
  */
@@ -474,6 +561,35 @@ function plain(value: string): string {
 }
 
 /**
+ * The goals of a played match from `goals1` (the home club) and `goals2` (the away club), in
+ * order of the clock; at the same minute the home club's goal comes first. Null goals mean the
+ * page names no scorers yet: both fields are empty.
+ */
+function readGoals(box: Template, home: boolean): { goals: null | ReadGoal[]; problem: null | string } {
+  const sides = [box.params.get('goals1') ?? '', box.params.get('goals2') ?? '']
+
+  if (sides.every((side) => plain(side) === '')) {
+    return { goals: null, problem: null }
+  }
+
+  const goals: ReadGoal[] = []
+
+  for (const [index, side] of sides.entries()) {
+    const read = parseGoalLines(side, (index === 0) === home)
+
+    if ('problem' in read) {
+      return { goals: null, problem: read.problem }
+    }
+    goals.push(...read.goals)
+  }
+
+  // A stable sort: two goals in the same minute keep the order of the page.
+  goals.sort((a, b) => a.minute - b.minute || (a.stoppageMinutes ?? 0) - (b.stoppageMinutes ?? 0))
+
+  return { goals, problem: null }
+}
+
+/**
  * Turns a `Footballbox2` of ours into a match, or says in a text what is wrong with it.
  * The round is what the caller found above it.
  */
@@ -526,13 +642,16 @@ function readMatch(box: Template, competition: Competition, round: null | string
   const status: MatchStatus = score.kind === 'score' ? 'played' : score.kind === 'postponed' ? 'postponed' : 'scheduled'
   const ours = score.kind === 'score' ? (home ? score.home : score.away) : null
   const theirs = score.kind === 'score' ? (home ? score.away : score.home) : null
+  const scorers = status === 'played' ? readGoals(box, home) : { goals: null, problem: null }
 
   return {
     competition,
     dateText: kickoffAt === null ? day.text.slice(0, matchLimits.dateText) : null,
     extraTime: extraTimeSaid && score.kind === 'score',
+    goals: scorers.goals,
     goalsAgainst: theirs,
     goalsFor: ours,
+    goalsProblem: scorers.problem === null ? null : `${name}: ${scorers.problem}`,
     home,
     kickoffAt,
     matchDate: day.isoDate,

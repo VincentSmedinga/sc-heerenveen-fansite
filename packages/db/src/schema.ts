@@ -590,6 +590,45 @@ export type Match = typeof matches.$inferSelect
 
 export type NewMatch = typeof matches.$inferInsert
 
+/** The most characters the player column of `match_goals` holds. */
+export const matchGoalPlayerMaxLength = 100
+
+/**
+ * The goals of a played match, one row for each, from the Dutch Wikipedia. `ours` is true for a
+ * goal of sc Heerenveen and false for a goal of the opponent; an own goal belongs to the club
+ * that benefits from it, so the goals of a club add up to its goals in `matches`. `minute` is
+ * the minute on the clock, and `stoppage_minutes` the minutes of added time after it: 45 and 1
+ * for "45+1". Added time is empty for a goal in regular time. `player` is the name as the page
+ * shows it, such as `Van Bergen`. A row belongs to its match and goes with it.
+ *
+ * The importer stores the rows in the order they are shown, so the order of `id` breaks a tie
+ * between two goals in the same minute. A match has none of them when the page did not name
+ * the scorers yet, or when they did not fit the result.
+ */
+export const matchGoals = mysqlTable(
+  'match_goals',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    ours: boolean('ours').notNull(),
+    minute: int('minute', { unsigned: true }).notNull(),
+    stoppageMinutes: int('stoppage_minutes', { unsigned: true }),
+    player: varchar('player', { length: matchGoalPlayerMaxLength }).notNull(),
+    ownGoal: boolean('own_goal').notNull().default(false),
+    penalty: boolean('penalty').notNull().default(false),
+  },
+  (table) => [
+    index('match_goals_match_id_idx').on(table.matchId),
+    check('match_goals_not_own_goal_and_penalty', sql`${table.ownGoal} = 0 or ${table.penalty} = 0`),
+  ],
+)
+
+export type MatchGoal = typeof matchGoals.$inferSelect
+
+export type NewMatchGoal = typeof matchGoals.$inferInsert
+
 /** The most characters the club column of `standings` holds. */
 export const standingsClubMaxLength = 100
 

@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
-import { matches } from './schema.ts'
+import { matches, matchGoals } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -90,5 +90,63 @@ describe('the extra time and the shoot-out of a match', () => {
 
     // Drizzle wraps the error of the database, which names the constraint.
     expect(String((failure as Error | undefined)?.cause)).toContain(constraint)
+  })
+})
+
+describe('the goals of a match', () => {
+  async function insertMatch() {
+    const [{ insertId }] = await database.db.insert(matches).values(cupMatch)
+
+    return insertId
+  }
+
+  it('keeps a goal with its minute, its added time and its scorer, and a goal in regular time has no added time', async () => {
+    const matchId = await insertMatch()
+
+    await database.db.insert(matchGoals).values([
+      { matchId, minute: 34, ours: true, player: 'Trenskow' },
+      { matchId, minute: 45, ours: false, penalty: true, player: 'Vente', stoppageMinutes: 1 },
+    ])
+
+    const rows = await database.db.select().from(matchGoals).orderBy(matchGoals.id)
+
+    expect(rows).toMatchObject([
+      { matchId, minute: 34, ours: true, ownGoal: false, penalty: false, player: 'Trenskow', stoppageMinutes: null },
+      { matchId, minute: 45, ours: false, ownGoal: false, penalty: true, player: 'Vente', stoppageMinutes: 1 },
+    ])
+  })
+
+  it('goes with its match', async () => {
+    const matchId = await insertMatch()
+
+    await database.db.insert(matchGoals).values({ matchId, minute: 34, ours: true, player: 'Trenskow' })
+    await database.db.delete(matches)
+
+    expect(await database.db.select().from(matchGoals)).toEqual([])
+  })
+
+  it('has no goal without a match', async () => {
+    const failure = await database.db
+      .insert(matchGoals)
+      .values({ matchId: 999_999, minute: 34, ours: true, player: 'Trenskow' })
+      .then(
+        () => undefined,
+        (error: unknown) => error,
+      )
+
+    expect(String((failure as Error | undefined)?.cause)).toContain('match_goals_match_id_matches_id_fk')
+  })
+
+  it('refuses a goal that is both an own goal and a penalty', async () => {
+    const matchId = await insertMatch()
+    const failure = await database.db
+      .insert(matchGoals)
+      .values({ matchId, minute: 34, ours: true, ownGoal: true, penalty: true, player: 'Trenskow' })
+      .then(
+        () => undefined,
+        (error: unknown) => error,
+      )
+
+    expect(String((failure as Error | undefined)?.cause)).toContain('match_goals_not_own_goal_and_penalty')
   })
 })

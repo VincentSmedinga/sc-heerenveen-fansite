@@ -323,3 +323,150 @@ describe('Match', () => {
     expect(withGoals).toBeTruthy()
   })
 })
+
+describe('the scorers', () => {
+  const away = { ...played, goalsAgainst: 1, goalsFor: 2, home: false, opponent: 'FC Twente' } as const
+  const goals = [
+    { minute: 34, ours: true, player: 'Trenskow' },
+    { minute: 45, ours: true, player: 'Vente', stoppageMinutes: 1 },
+    { minute: 80, ours: false, player: 'Vennegoor of Hesselink' },
+  ]
+
+  /** What a sighted visitor reads: the text without the words for a screen reader. */
+  const seen = (element: Element | null) => {
+    const copy = element?.cloneNode(true) as HTMLElement
+
+    copy.querySelectorAll('.hf-visually-hidden').forEach((hidden) => hidden.remove())
+
+    return textOf(copy)
+  }
+  /** What a screen reader reads: the text without what is hidden from it. */
+  const heard = (element: Element | null) => {
+    const copy = element?.cloneNode(true) as HTMLElement
+
+    copy.querySelectorAll('[aria-hidden="true"]').forEach((hidden) => hidden.remove())
+
+    return textOf(copy)
+  }
+
+  it('shows one line between the clubs and the time, in the order given, without the name of a club', () => {
+    const { container } = render(<Match {...away} goals={goals} />)
+    const line = container.querySelector('.hf-match-goals')
+
+    expect(container.querySelectorAll('.hf-match-goals')).toHaveLength(1)
+    expect(seen(line)).toBe('34’ Trenskow, 45’+1 Vente, 80’ Vennegoor of Hesselink')
+    expect(line?.previousElementSibling?.className).toBe('hf-match-clubs')
+    expect(line?.nextElementSibling?.className).toContain('hf-match-when')
+  })
+
+  it('keeps the minute with the name by a space that does not break', () => {
+    const { container } = render(<Match {...away} goals={goals} />)
+
+    expect(container.querySelector('.hf-match-goal')?.textContent).toContain(' Trenskow')
+  })
+
+  it('gives the minute the colour of the club: green for sc Heerenveen, red for the opponent', () => {
+    const { container } = render(<Match {...away} goals={goals} />)
+    const minutes = [...container.querySelectorAll('.hf-match-goal > span:first-child')]
+
+    expect(minutes.map((minute) => minute.className)).toEqual([
+      'hf-match-goal-ours',
+      'hf-match-goal-ours',
+      'hf-match-goal-theirs',
+    ])
+  })
+
+  it('has a screen reader hear each goal in full, with the club and without the apostrophe', () => {
+    const { container } = render(<Match {...away} goals={goals} />)
+
+    expect(heard(container.querySelector('.hf-match-goals'))).toBe(
+      'minuut 34, Trenskow, sc Heerenveen; minuut 45 plus 1, Vente, sc Heerenveen; minuut 80, Vennegoor of Hesselink, FC Twente',
+    )
+  })
+
+  it('writes e.d. and pen. after the name, as abbreviations with the full words', () => {
+    const { container } = render(
+      <Match
+        {...played}
+        goals={[
+          { minute: 7, ours: true, ownGoal: true, player: 'Klaverboer' },
+          { minute: 23, ours: false, penalty: true, player: 'Chery' },
+        ]}
+      />,
+    )
+    const line = container.querySelector('.hf-match-goals')
+
+    expect(seen(line)).toBe('7’ Klaverboer e.d., 23’ Chery pen.')
+    expect(
+      [...container.querySelectorAll('.hf-match-goals abbr')].map((abbr) => [
+        abbr.textContent,
+        abbr.getAttribute('title'),
+      ]),
+    ).toEqual([
+      ['e.d.', 'Eigen doelpunt'],
+      ['pen.', 'Penalty'],
+    ])
+    expect(heard(line)).toBe(
+      'minuut 7, Klaverboer, eigen doelpunt, sc Heerenveen; minuut 23, Chery, penalty, Testdorp FC',
+    )
+  })
+
+  it('shows two goals of one player as two', () => {
+    const { container } = render(
+      <Match
+        {...played}
+        goals={[
+          { minute: 12, ours: true, player: 'Proefman' },
+          { minute: 77, ours: true, player: 'Proefman' },
+        ]}
+      />,
+    )
+
+    expect(seen(container.querySelector('.hf-match-goals'))).toBe('12’ Proefman, 77’ Proefman')
+  })
+
+  it('shows a minute in extra time as it is', () => {
+    const { container } = render(
+      <Match {...played} extraTime goals={[{ minute: 105, ours: true, player: 'Proefman' }]} />,
+    )
+
+    expect(seen(container.querySelector('.hf-match-goals'))).toBe('105’ Proefman')
+  })
+
+  it.each([
+    ['no goals given', undefined],
+    ['an empty list', []],
+  ])('shows no line for scorers with %s', (_name, none) => {
+    const { container } = render(<Match {...played} goals={none} />)
+
+    expect(container.querySelector('.hf-match-goals')).toBeNull()
+  })
+
+  it('shows names as text, not as HTML', () => {
+    const { container } = render(
+      <Match {...played} goals={[{ minute: 3, ours: true, player: '<b>Speler</b> &amp; Co' }]} />,
+    )
+
+    expect(seen(container.querySelector('.hf-match-goals'))).toBe('3’ <b>Speler</b> &amp; Co')
+    expect(container.querySelector('.hf-match-goals b')).toBeNull()
+  })
+
+  it('has no link and no image in the line', () => {
+    const { container } = render(<Match {...played} goals={goals} />)
+
+    expect(container.querySelector('.hf-match-goals a, .hf-match-goals img')).toBeNull()
+  })
+
+  it('does not pass the goals on to the element', () => {
+    const { container } = render(<Match {...played} goals={goals} />)
+
+    expect(container.firstElementChild?.hasAttribute('goals')).toBe(false)
+  })
+
+  it('has scorers only for a played match', () => {
+    // @ts-expect-error A match that is not played has no goals.
+    const planned = <Match {...scheduled} goals={goals} />
+
+    expect(planned).toBeTruthy()
+  })
+})

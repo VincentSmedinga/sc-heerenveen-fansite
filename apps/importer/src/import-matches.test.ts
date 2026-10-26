@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, items, matches, matchImports, sources, standings, wikipediaPages } from '@fansite/db/schema'
+import { feeds, items, matches, matchGoals, matchImports, sources, standings, wikipediaPages } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { and, asc, eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -412,6 +412,164 @@ describe('extra time and a shoot-out in the cup', () => {
   })
 })
 
+describe('the goal scorers', () => {
+  const goalsCup = fixture('wikipedia-cup-goals.wiki')
+  const scorersOf = async (round: string) =>
+    (
+      await database.db
+        .select({ goal: matchGoals })
+        .from(matchGoals)
+        .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+        .where(eq(matches.round, round))
+        .orderBy(asc(matchGoals.id))
+    ).map(({ goal }) => [goal.minute, goal.stoppageMinutes, goal.player, goal.ours, goal.ownGoal, goal.penalty])
+  const goalIds = async () =>
+    (await database.db.select({ id: matchGoals.id }).from(matchGoals).orderBy(asc(matchGoals.id))).map((row) => row.id)
+  /** The scorers of the match against Ajax, as the page has them. */
+  const ajaxHome = '[[Bernt Klaverboer|Klaverboer]] {{goal|7|e.d.}}<br />[[Abdellah Ouazane|Ouazane]] {{goal|33}}'
+  const ajaxAway = '{{goal|45}} [[Jacob Trenskow|Trenskow]]<br />{{goal|82}} [[Maxence Rivera|Rivera]]'
+
+  it('stores the scorers of the played matches in the order of the clock, with the club, an own goal and a penalty', async () => {
+    const { server } = await serve()
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'imported', warnings: [] })
+    expect(await scorersOf('Speelronde 2')).toEqual([
+      [7, null, 'Klaverboer', false, true, false],
+      [33, null, 'Ouazane', false, false, false],
+      [45, null, 'Trenskow', true, false, false],
+      [82, null, 'Rivera', true, false, false],
+    ])
+    expect(await scorersOf('Speelronde 9')).toEqual([
+      [11, null, 'Vente', true, false, true],
+      [54, null, 'Braude', true, false, false],
+      [84, null, 'Oyen', true, false, false],
+      [88, null, 'Trenskow', true, false, false],
+    ])
+    expect(await scorersOf('Speelronde 6')).toEqual([])
+    expect(await scorersOf('Speelronde 11')).toEqual([])
+  })
+
+  it('stores the scorers of the cup, with the minute of added time and two goals of one player', async () => {
+    const { server } = await serve({ cup: goalsCup })
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'imported', warnings: [] })
+    expect(await scorersOf('Achtste finales')).toEqual([
+      [20, null, 'Trenskow', true, false, false],
+      [65, null, 'Uneken', false, false, false],
+      [75, null, 'Braude', true, false, false],
+      [90, 1, 'Trenskow', true, false, false],
+    ])
+    expect(await scorersOf('Eerste ronde')).toEqual([
+      [21, null, 'Sejk', true, false, false],
+      [47, null, 'Meerveld', true, false, false],
+      [73, null, 'Verheij', true, true, false],
+    ])
+  })
+
+  it('stores no scorers for a match whose scorers do not fit the result, keeps the match, and warns', async () => {
+    const { pages, server } = await serve()
+
+    // The goal of Trenskow in minute 45 falls off the page.
+    pages.programme = pages.programme.replace('{{goal|45}} [[Jacob Trenskow|Trenskow]]<br />', '')
+
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({
+      kind: 'imported',
+      matches: { added: 35 },
+      warnings: ['no scorers: Speelronde 2 (Eredivisie): the scorers are 1-2, the result is 2-2'],
+    })
+    expect(formatMatchReport(report)).toContain(
+      'Matches 2026/27: warning, no scorers: Speelronde 2 (Eredivisie): the scorers are 1-2, the result is 2-2',
+    )
+    expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 2'))).toMatchObject([
+      { goalsAgainst: 2, goalsFor: 2, status: 'played' },
+    ])
+    expect(await scorersOf('Speelronde 2')).toEqual([])
+    // The other matches keep theirs.
+    expect(await scorersOf('Speelronde 1')).toHaveLength(1)
+    expect((await database.db.select().from(matchImports))[0]).toMatchObject({
+      failuresInARow: 0,
+      lastOutcome: 'imported',
+      lastWarning: expect.stringContaining('no scorers: Speelronde 2'),
+    })
+  })
+
+  it('stores no scorers for a line it cannot read, keeps the match, and warns with the reason', async () => {
+    const { pages, server } = await serve()
+
+    pages.programme = pages.programme.replace('[[Jacob Trenskow|Trenskow]]', '{{vreemd|Trenskow}}')
+
+    expect(await importAt(server, first)).toMatchObject({
+      kind: 'imported',
+      matches: { added: 35 },
+      warnings: [
+        expect.stringMatching(
+          /^no scorers: Speelronde 2 \(Eredivisie\): a goal has no usable name: '\{\{goal\|45\}\}/u,
+        ),
+      ],
+    })
+    expect(await scorersOf('Speelronde 2')).toEqual([])
+    expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 2'))).toHaveLength(1)
+  })
+
+  it('does not warn about a played match whose scorers are not on the page yet', async () => {
+    const { pages, server } = await serve()
+
+    pages.programme = pages.programme.replace(ajaxAway, '').replace(ajaxHome, '')
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'imported', matches: { added: 35 }, warnings: [] })
+    expect(await scorersOf('Speelronde 2')).toEqual([])
+  })
+
+  it('takes the scorers over when they come on the page later, and a correction of a name, and writes nothing when nothing changed', async () => {
+    const { pages, server } = await serve()
+    const late = pages.programme
+
+    pages.programme = late.replace(ajaxAway, '').replace(ajaxHome, '')
+    await importAt(server, first)
+    expect(await scorersOf('Speelronde 2')).toEqual([])
+
+    pages.programme = late
+    expect(await importAt(server, new Date(first.getTime() + hours(1)))).toMatchObject({
+      matches: { added: 0, unchanged: 34, updated: 1 },
+      warnings: [],
+    })
+    expect(await scorersOf('Speelronde 2')).toHaveLength(4)
+
+    const ids = await goalIds()
+
+    expect(await importAt(server, new Date(first.getTime() + hours(2)))).toMatchObject({
+      matches: { added: 0, unchanged: 35, updated: 0 },
+    })
+    expect(await goalIds()).toEqual(ids)
+
+    pages.programme = late.replace('Trenskow]]', 'Trenskov]]')
+    expect(await importAt(server, new Date(first.getTime() + hours(3)))).toMatchObject({
+      matches: { unchanged: 34, updated: 1 },
+      warnings: [],
+    })
+    expect((await scorersOf('Speelronde 2')).map((goal) => goal[2])).toEqual([
+      'Klaverboer',
+      'Ouazane',
+      'Trenskov',
+      'Rivera',
+    ])
+  })
+
+  it('takes the scorers away with a match that leaves the page', async () => {
+    const { pages, server } = await serve({ cup: goalsCup })
+
+    await importAt(server, first)
+    expect(await scorersOf('Eerste ronde')).toHaveLength(3)
+
+    pages.cup = goalsCup.replaceAll('sc Heerenveen', 'FC Volendam')
+    await importAt(server, new Date(first.getTime() + hours(1)))
+    expect(await scorersOf('Eerste ronde')).toEqual([])
+    expect(await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))).toEqual([])
+  })
+})
+
 describe('the lines of a report', () => {
   it('cleans text from Wikipedia of control characters, in a warning as in an error', () => {
     const counts = { added: 0, removed: 0, unchanged: 1, updated: 1 }
@@ -434,10 +592,12 @@ describe('the lines of a report', () => {
 })
 
 describe('a result that changes', () => {
-  /** The match of round 1 ends 1-1 instead of 1-0, and the table agrees. */
+  /** The match of round 1 ends 1-1 instead of 1-0, and the scorers and the table agree. */
   function drawn(pages: Pages) {
     return {
-      programme: pages.programme.replace('|score = 1 – 0', '|score = 1 – 1'),
+      programme: pages.programme
+        .replace('|score = 1 – 0', '|score = 1 – 1')
+        .replace('{{goal|52}}\n|goals2 =', '{{goal|52}}\n|goals2 = {{goal|88}} [[Test Speler|Speler]]'),
       standings: pages.standings
         .replace(
           '|win_HEE=4 |draw_HEE=3 |loss_HEE=3 |gf_HEE=18 |ga_HEE=13',

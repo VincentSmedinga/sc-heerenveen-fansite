@@ -8,6 +8,7 @@ const match = (round: string, status: PublicMatch['status'], matchDate: string):
   competition: 'Eredivisie',
   dateText: null,
   extraTime: false,
+  goals: [],
   goalsAgainst: status === 'played' ? 0 : null,
   goalsFor: status === 'played' ? 1 : null,
   home: true,

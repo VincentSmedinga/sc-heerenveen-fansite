@@ -4877,3 +4877,61 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Stuurt de host de header niet, of een andere, dan telt de site de weergaven en geen bezoekers (`daily_visitors` blijft 0).
   `docs/acceptatieomgeving.md` (_Bezoekers tellen_) zegt hoe je dat op acceptatie ziet.
 - **Alternatieven:** het eerste adres in de header (een bezoeker kan het zelf zetten); een andere header zoals `X-Real-IP` (we weten niet of de host hem stuurt); alleen de browsertekst (alle bezoekers met dezelfde browser tellen als één).
+
+### Doelpuntenmakers staan in één regel op minuut, met groene en rode minuten
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `Match` toont onder de uitslag één regel met de doelpuntenmakers van beide clubs op volgorde van de minuut, zonder naam van de club ervoor, zoals "34’ Trenskow, 45’+1 Vente, 80’ Vennegoor of Hesselink".
+  De minuut is groen bij een doelpunt van sc Heerenveen en rood bij een doelpunt van de tegenstander.
+  Een schermlezer hoort de club erbij.
+- **Waarom:** de projecteigenaar vindt het korter en rustiger, en supporters weten welke spelers van ons zijn.
+  Kleur laat zien voor wie er werd gescoord, met dezelfde betekenis als de uitslag (_Een uitslag toont de uitkomst in kleur, zonder letter_: groen is goed voor ons, rood is slecht).
+  Kleur is voor het oog het enige teken, want de projecteigenaar wil de minuten niet vet (eerst was de minuut van sc Heerenveen vet, zoals de club op de uitslagregel).
+  Voor een schermlezer staat de naam van de club in de tekst (WCAG 1.4.1), en supporters kennen de spelers.
+- **Hoe:** de tekst is `<minuut>’<+blessuretijd>` en de naam, met een spatie die niet afbreekt ertussen.
+  De apostrof en de plus zijn voor de ogen alleen (`aria-hidden`); een schermlezer hoort "minuut 45 plus 1, Vente, sc Heerenveen", met "; " tussen de doelpunten.
+  De kleuren zijn de tokens `--hf-colour-outcome-win` en `--hf-colour-outcome-loss`, die al 4,5:1 halen op de vlakken (zie _Een uitslag toont de uitkomst in kleur, zonder letter_).
+  In forced colours valt de kleur weg, en dan is er voor het oog geen verschil meer tussen de clubs; de schermlezer hoort ze nog wel.
+- **Alternatieven:** per club een eigen regel met de naam van de club ervoor (duidelijker, maar langer; dit was het eerste besluit); één regel zonder enig onderscheid (wie een speler van de tegenstander niet kent, kan niet zien voor wie hij scoorde); twee kolommen naast elkaar (te breed voor een smalle kaart).
+
+### Eigen doelpunten staan bij de club die ervan profiteert
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** een eigen doelpunt staat bij de club die erdoor scoort, met "e.d." erachter, zoals de Nederlandse Wikipedia het schrijft.
+  Een penalty heeft "pen." erachter.
+  Beide zijn een `abbr` met de volle woorden in een `title` en voor een schermlezer ("eigen doelpunt", "penalty"), en onder een lijst staat wat ze betekenen, zoals bij "n.v." en "n.s.".
+- **Waarom:** de uitslag telt het zo, en de controle dat de doelpunten bij de uitslag passen, werkt dan zonder uitzonderingen.
+  De afkorting zegt dat het geen doelpunt van die club was.
+- **Opslag:** `match_goals` (migratie `0016_add_match_goals`) heeft een rij per doelpunt: `ours` (sc Heerenveen of de tegenstander), `minute`, `stoppage_minutes`, `player`, `own_goal` en `penalty`.
+  De rijen gaan weg met hun wedstrijd (`ON DELETE CASCADE`).
+  De import schrijft ze op volgorde van de klok, dus de volgorde van `id` is de volgorde in de regel.
+- **Alternatieven:** het bij de club van de speler zetten (klopt dan niet met de uitslag naast de regel).
+
+### Een doelpunt dat niet bij de uitslag past, wordt niet getoond
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** klopt het aantal doelpunten van een club niet met haar goals in de uitslag, of is een regel niet te lezen, dan toont de site voor die wedstrijd geen doelpuntenmakers en schrijft de import een waarschuwing.
+  De wedstrijd zelf blijft bewaard.
+- **Waarom:** de doelpuntenmakers zijn een extra, en een fout in de lijst mag de pagina niet kapotmaken.
+  Een lijst die niet bij de uitslag past, zegt iets onwaars, en dat is erger dan geen lijst.
+- **Alternatieven:** de hele pagina laten falen, zoals bij een fout in de uitslag zelf (te streng voor een extra); de lijst tonen zoals ze is (kan een speler als scorer noemen die niet scoorde).
+
+### Lege velden voor de doelpuntenmakers geven geen waarschuwing
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** staan `goals1` en `goals2` van een gespeelde wedstrijd allebei leeg, dan zijn de doelpuntenmakers nog niet ingevuld.
+  De import bewaart er dan geen en schrijft geen waarschuwing, ook als de uitslag doelpunten heeft.
+  Staat er in één veld iets, dan klopt het aantal met de uitslag of niet, en bij een verschil volgt de waarschuwing.
+- **Waarom:** Wikipedia vult de doelpuntenmakers vaak uren of dagen na de uitslag in.
+  Een waarschuwing elk uur over iets wat nog moet komen, maakt het logboek onleesbaar en de echte waarschuwingen onzichtbaar.
+- **Alternatieven:** altijd waarschuwen als de uitslag doelpunten heeft zonder doelpuntenmakers (te veel ruis); pas waarschuwen na een aantal dagen (meer code voor weinig winst).
+
+### Wat in de velden van de doelpuntenmakers geen doelpunt is, valt weg
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de import leest in `goals1` en `goals2` het sjabloon `goal`, met zijn minuten en `e.d.` of `pen.` erachter, en een naam per regel.
+  Een rode kaart (`{{rode kaart}}`) en een gemiste penalty (`{{penmis}}`) zijn bekend en geen doelpunt, dus ze vallen weg.
+  Elke andere onbekende opbouw (een ander sjabloon, een doelpunt zonder naam, een minuut van 0) is een regel die we niet kunnen lezen: de wedstrijd krijgt dan geen doelpuntenmakers en de import waarschuwt.
+- **Waarom:** de pagina's van de beker en de competitie van afgelopen seizoen hebben drie soorten sjablonen in deze velden (`goal`, `rode kaart` en `penmis`), en alleen `goal` is een doelpunt.
+  Een ander sjabloon, zoals een gele kaart, hebben we niet gezien en we kennen zijn naam niet, en dan is de waarschuwing beter dan een gok.
+- **Alternatieven:** elk onbekend sjabloon negeren (een doelpunt dat in een ander sjabloon staat, valt dan stil weg, en de controle met de uitslag vangt dat alleen als het aantal verschilt).

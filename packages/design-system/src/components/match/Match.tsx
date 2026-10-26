@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import { type ComponentPropsWithoutRef, Fragment } from 'react'
 
 import { classNames } from '../classNames'
 import { Text } from '../text/Text'
@@ -10,10 +10,27 @@ const ourClub = 'sc Heerenveen'
 /** Where a match stands: still to be played, played, or called off without a new date. */
 export const matchStatuses = ['scheduled', 'played', 'postponed'] as const
 
+/** One goal of a played match. */
+export type MatchGoal = {
+  /** The minute on the clock: 45 for "45+1". */
+  minute: number
+  /** Whether the goal is for sc Heerenveen. Otherwise it is for the opponent. */
+  ours: boolean
+  /** Whether it is an own goal. It counts for the club that benefits: that is `ours`. */
+  ownGoal?: boolean
+  /** Whether it was scored from the penalty spot. */
+  penalty?: boolean
+  /** The name of the scorer as plain text, such as `Van Bergen`. */
+  player: string
+  /** The minutes of added time after `minute`: 1 for "45+1". Leave it out in regular time. */
+  stoppageMinutes?: null | number
+}
+
 export type MatchProps =
   | (MatchBaseProps & {
       dateTime?: never
       extraTime?: never
+      goals?: never
       goalsAgainst?: never
       goalsFor?: never
       penaltiesAgainst?: never
@@ -28,6 +45,11 @@ export type MatchProps =
          * one after extra time, and the shoot-out, if there was one, is not in it.
          */
         extraTime?: boolean
+        /**
+         * The scorers, in the order of the clock, both clubs together. Without them, or with an
+         * empty list, the match shows no line for them.
+         */
+        goals?: MatchGoal[] | undefined
         /** The goals of the opponent. Only a played match has them, and then it has both. */
         goalsAgainst: number
         /** The goals of sc Heerenveen. */
@@ -36,6 +58,7 @@ export type MatchProps =
       })
   | (MatchWithTimeProps & {
       extraTime?: never
+      goals?: never
       goalsAgainst?: never
       goalsFor?: never
       penaltiesAgainst?: never
@@ -120,12 +143,20 @@ const separator = (
  * same, so a screen reader hears nothing extra. A match that is still to be played has a dash
  * between the names, which is read as "tegen".
  * A postponed match says "Uitgesteld" where the time would be.
+ *
+ * The scorers of a played match are one line between the clubs and the time, in the order of
+ * the clock with the goals of both clubs: "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen". The
+ * club is not named. The minute is green for a goal of sc Heerenveen and red for one of the
+ * opponent, the colours of the result. A screen reader hears each goal in full with its club:
+ * "minuut 45 plus 1, Vente, sc Heerenveen". An own goal says "e.d." and a penalty "pen." after
+ * the name, as abbreviations with the full words.
  */
 export const Match = ({
   className,
   competition,
   dateTime,
   extraTime,
+  goals,
   goalsAgainst,
   goalsFor,
   home,
@@ -192,6 +223,22 @@ export const Match = ({
         </span>{' '}
         <span className={second === ourClub ? 'hf-match-own' : undefined}>{second}</span>
       </p>
+      {goals !== undefined && goals.length > 0 ? (
+        <p className="hf-match-goals">
+          {goals.map((goal, index) => (
+            // Two goals can share a minute and a name, so the place in the list is the key.
+            <Fragment key={index}>
+              {index > 0 ? (
+                <>
+                  <span aria-hidden="true">, </span>
+                  <span className="hf-visually-hidden">; </span>
+                </>
+              ) : null}
+              <MatchGoalItem goal={goal} opponent={opponent} />
+            </Fragment>
+          ))}
+        </p>
+      ) : null}
       <Text appearance="meta" className="hf-match-when">
         {status === 'postponed' ? (
           <span className="hf-match-postponed">Uitgesteld</span>
@@ -208,5 +255,49 @@ export const Match = ({
         ) : null}
       </Text>
     </div>
+  )
+}
+
+/**
+ * One goal in the line of the scorers. The minute comes first and has the colour of the club;
+ * the club itself is hidden text, so the line is not busier for the eye. A non-breaking space
+ * keeps the minute with the name.
+ */
+function MatchGoalItem({ goal, opponent }: { goal: MatchGoal; opponent: string }) {
+  const added = goal.stoppageMinutes ?? null
+
+  return (
+    <span className="hf-match-goal">
+      <span className={goal.ours ? 'hf-match-goal-ours' : 'hf-match-goal-theirs'}>
+        <span aria-hidden="true">
+          {goal.minute}’{added === null ? '' : `+${added}`}
+        </span>
+        <span className="hf-visually-hidden">
+          minuut {goal.minute}
+          {added === null ? '' : ` plus ${added}`},{' '}
+        </span>
+      </span>
+      {'\u00a0'}
+      {goal.player}
+      {goal.ownGoal ? (
+        <>
+          <span aria-hidden="true">
+            {' '}
+            <abbr title="Eigen doelpunt">e.d.</abbr>
+          </span>
+          <span className="hf-visually-hidden">, eigen doelpunt</span>
+        </>
+      ) : null}
+      {goal.penalty ? (
+        <>
+          <span aria-hidden="true">
+            {' '}
+            <abbr title="Penalty">pen.</abbr>
+          </span>
+          <span className="hf-visually-hidden">, penalty</span>
+        </>
+      ) : null}
+      <span className="hf-visually-hidden">, {goal.ours ? ourClub : opponent}</span>
+    </span>
   )
 }

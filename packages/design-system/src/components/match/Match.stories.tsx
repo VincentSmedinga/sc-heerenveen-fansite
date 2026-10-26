@@ -25,6 +25,15 @@ const meta = preview.meta({
           'Elke afkorting heeft de volle woorden in een `title`, en een schermlezer hoort de volle woorden na de uitslag: "1 tegen 1, na strafschoppen 4 tegen 3".',
           'Onder een lijst met zulke wedstrijden staat wat de afkortingen betekenen, want een `title` toont alleen onder een muis.',
           'Bij strafschoppen volgt de kleur de strafschoppen: groen als sc Heerenveen ze won en rood als het ze verloor.',
+          '',
+          'Een gespeelde wedstrijd kan de doelpuntenmakers tonen, in `goals`: één regel tussen de clubs en de tijd, op volgorde van de minuut met de doelpunten van beide clubs, zoals "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen".',
+          'De naam van de club staat er niet.',
+          'De minuut is groen bij een doelpunt van sc Heerenveen en rood bij een doelpunt van de tegenstander, met dezelfde betekenis als de uitslag.',
+          'Een schermlezer hoort per doelpunt de club, want kleur alleen is geen teken: "minuut 45 plus 1, Vente, sc Heerenveen".',
+          'Een eigen doelpunt staat bij de club die ervan profiteert, met "e.d." erachter, en een penalty heeft "pen." erachter.',
+          'Beide zijn afkortingen met de volle woorden in een `title` en voor een schermlezer, en onder een lijst staat wat ze betekenen, want een `title` toont alleen onder een muis.',
+          'Zonder doelpunten, of met een lege lijst, komt er geen regel en geen lege ruimte.',
+          '',
           'De kleur is een aanvulling en nooit het enige teken: wie hem niet ziet, leest de uitkomst in de doelpunten zelf, dus er komt geen letter of woord bij.',
           'Een wedstrijd die nog moet komen heeft een streepje tussen de namen, dat een schermlezer als "tegen" leest.',
           'De rij van sc Heerenveen zelf is het zwaarst gedrukt, zodat onze club opvalt zonder dat kleur het enige is.',
@@ -303,6 +312,112 @@ const renderCup = () => (
   </div>
 )
 
+// Played matches with their scorers: goals of one club only, of both, a penalty, an own goal,
+// added time, a player with two goals, extra time and a very long name. The clubs and the
+// players are made up, like the data of the seed.
+const renderScorers = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="doelpunten-kop">
+      <Heading id="doelpunten-kop" level={2}>
+        Doelpuntenmakers
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-10-18"
+            goals={[
+              { minute: 34, ours: true, player: 'Proefman' },
+              { minute: 45, ours: true, player: 'Nepper', stoppageMinutes: 1 },
+              { minute: 80, ours: false, player: 'Teststraat' },
+            ]}
+            goalsAgainst={1}
+            goalsFor={2}
+            home
+            opponent="Testdorp FC"
+            round="Speelronde 1"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="zo 18 okt"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-10-25"
+            goals={[
+              { minute: 12, ours: true, player: 'Proefman' },
+              { minute: 77, ours: true, player: 'Proefman' },
+            ]}
+            goalsAgainst={0}
+            goalsFor={2}
+            home={false}
+            opponent="Voorbeeld United"
+            round="Speelronde 2"
+            stadium="Voorbeeldpark"
+            status="played"
+            time="zo 25 okt"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-11-01"
+            goals={[
+              { minute: 7, ours: false, ownGoal: true, player: 'Kopie' },
+              { minute: 23, ours: false, penalty: true, player: 'Teststraat' },
+              { minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4 },
+            ]}
+            goalsAgainst={2}
+            goalsFor={1}
+            home
+            opponent="Proefstad SV"
+            round="Speelronde 3"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="zo 1 nov"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="KNVB Beker"
+            dateTime="2026-11-25"
+            extraTime
+            goals={[
+              { minute: 18, ours: true, penalty: true, player: 'Proefman' },
+              { minute: 70, ours: false, player: 'Van der Voorbeeldstraat-Proefmans' },
+              { minute: 105, ours: true, ownGoal: true, player: 'Kopie' },
+            ]}
+            goalsAgainst={1}
+            goalsFor={2}
+            home={false}
+            opponent="Oefenstad FC"
+            round="Eerste ronde"
+            stadium="Sportpark Maquette"
+            status="played"
+            time="wo 25 nov"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-11-08"
+            goalsAgainst={0}
+            goalsFor={0}
+            home
+            opponent="Demo Boys"
+            round="Speelronde 4"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="zo 8 nov"
+          />
+        </List.Item>
+      </List>
+      <Text appearance="meta">e.d. eigen doelpunt, pen. penalty, n.v. na verlenging</Text>
+    </Card>
+  </div>
+)
+
 export const Light = meta.story({
   globals: { theme: 'light' },
   name: 'Zijbalk, met de vorige en de volgende wedstrijd, licht',
@@ -361,4 +476,16 @@ export const CupDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Beker: na verlenging en na strafschoppen, donker',
   render: renderCup,
+})
+
+export const ScorersLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Doelpuntenmakers: een of beide clubs, penalty, eigen doelpunt, blessuretijd, lange naam, licht',
+  render: renderScorers,
+})
+
+export const ScorersDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Doelpuntenmakers: een of beide clubs, penalty, eigen doelpunt, blessuretijd, lange naam, donker',
+  render: renderScorers,
 })

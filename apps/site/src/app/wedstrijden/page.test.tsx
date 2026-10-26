@@ -1,3 +1,5 @@
+import type { PublicMatch } from '@fansite/db/queries'
+
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -146,6 +148,91 @@ describe('the page /wedstrijden', () => {
       expect(results).not.toContain('<abbr')
       expect(results).not.toContain('na verlenging')
       expect(results).not.toContain('na strafschoppen')
+    })
+  })
+
+  describe('the goal scorers', () => {
+    const flagged: PublicMatch = {
+      ...matchData.matches[3]!,
+      goals: [
+        { minute: 7, ours: false, ownGoal: true, penalty: false, player: 'Klaverboer', stoppageMinutes: null },
+        { minute: 90, ours: true, ownGoal: false, penalty: true, player: 'Vente', stoppageMinutes: 5 },
+      ],
+      goalsAgainst: 1,
+      goalsFor: 1,
+      round: 'Derde ronde',
+    }
+
+    it('shows the scorers of a played match on one line, with the club for a screen reader', async () => {
+      const results = section(await render(), 'uitslagen')
+
+      expect(results.match(/class="hf-match-goals"/g)).toHaveLength(2)
+      expect(results).toContain('12’')
+      expect(results).toContain('Teststraat')
+      expect(results).toContain('minuut 90 plus 3, ')
+      expect(results).toContain(', Voorbeeld United')
+      expect(results).toContain(', sc Heerenveen')
+    })
+
+    it('shows no line for a match without scorers, and none for a match still to come', async () => {
+      const html = await render()
+
+      expect(html.match(/class="hf-match-goals"/g)).toHaveLength(2)
+      expect(section(html, 'programma')).not.toContain('hf-match-goals')
+    })
+
+    it('names the abbreviations of an own goal and a penalty under the results, and only those', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, flagged] })
+
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).toContain('<abbr title="Eigen doelpunt">e.d.</abbr>')
+      expect(results).toContain('<abbr title="Penalty">pen.</abbr>')
+      expect(results).toContain('e.d. eigen doelpunt, pen. penalty')
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [...matchData.matches, { ...flagged, goals: flagged.goals.slice(0, 1) }],
+      })
+
+      const own = section(await render(), 'uitslagen')
+
+      expect(own).toContain('e.d. eigen doelpunt')
+      expect(own).not.toContain('pen. penalty')
+    })
+
+    it('has no explanation of abbreviations when no line uses them', async () => {
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).not.toContain('eigen doelpunt')
+      expect(results).not.toContain('penalty')
+    })
+
+    it('shows names as text', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [
+          ...matchData.matches,
+          {
+            ...flagged,
+            goals: [
+              {
+                minute: 9,
+                ours: true,
+                ownGoal: false,
+                penalty: false,
+                player: '<img src=x onerror=alert(1)>',
+                stoppageMinutes: null,
+              },
+            ],
+          },
+        ],
+      })
+
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).toContain('&lt;img src=x onerror=alert(1)&gt;')
+      expect(results).not.toContain('<img')
     })
   })
 
