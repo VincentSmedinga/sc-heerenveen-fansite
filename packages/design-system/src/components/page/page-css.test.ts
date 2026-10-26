@@ -147,3 +147,42 @@ describe('the text and the control in the footer in page.css', () => {
     expect(list).toContain('margin-inline-start: -1.5rem;')
   })
 })
+
+describe('the columns of the body in page.css', () => {
+  const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+  const token = (name: string) => Number(layout.match(new RegExp(String.raw`${name}: (\d+(?:\.\d+)?)rem;`))?.[1])
+  const body = css.match(/\.hf-page-body \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1] ?? ''
+  const tracks = body.match(
+    /grid-template-columns: minmax\((\d+)rem, var\(--hf-content-max-width\)\) minmax\((\d+)rem, (\d+)rem\);/,
+  )
+
+  it('has a main of 38rem, a sidebar of 24rem and 2rem between them, which fill the page of 64rem', () => {
+    const [, , , sidebar] = tracks ?? []
+
+    expect(token('--hf-content-max-width')).toBe(38)
+    expect(Number(sidebar)).toBe(24)
+    expect(token('--hf-page-max-width')).toBe(64)
+    expect(body).toContain('--hf-page-body-cell-gap: 2rem;')
+    expect(token('--hf-content-max-width') + Number(sidebar) + 2).toBe(token('--hf-page-max-width'))
+  })
+
+  it('puts the same space between the columns as between the cells, with no gap of its own', () => {
+    expect(body).toContain('gap: var(--hf-page-body-cell-gap);')
+    expect(body).not.toMatch(/(^|\s)column-gap:/)
+    expect(css).not.toContain('--hf-page-body-column-gap')
+  })
+
+  it('keeps 4rem under the columns, and the main as wide with a sidebar as without', () => {
+    expect(body).toContain('--hf-page-body-end-space: 4rem;')
+    expect(body).toContain('padding-block: var(--hf-page-body-cell-gap) var(--hf-page-body-end-space);')
+    expect(body.match(/grid-template-columns:/g)).toHaveLength(2)
+  })
+
+  it('lets the tracks shrink only to a width that fits in 56rem, where the columns start side by side', () => {
+    const [, mainMinimum, sidebarMinimum] = tracks ?? []
+
+    // 56rem less 2rem of margin and 2rem between the columns.
+    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(56 - 2 - 2)
+    expect(body).toContain('@media (width >= 56rem)')
+  })
+})

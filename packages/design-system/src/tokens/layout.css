@@ -17,11 +17,14 @@
     --hf-page-inset: max(var(--hf-page-margin), calc((100% - var(--hf-page-max-width)) / 2));
 
     /*
-     * The widest the main column of a page gets. With the sidebar (24rem) and the space between them (4rem) it fills the
-     * column of the page, 64rem. These sizes come from the length of a line of running text, not from a limit on
-     * characters; the decision _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_ in docs/beslissingen.md says why.
+     * The widest the main column of a page gets. With the sidebar (24rem) and the space
+     * between them (2rem) it fills the column of the page, 64rem. These sizes come from
+     * the length of a line of running text, not from a limit on characters; the
+     * decisions _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_ and _De
+     * hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk_ in docs/beslissingen.md
+     * say why.
      */
-    --hf-content-max-width: 36rem;
+    --hf-content-max-width: 38rem;
 
     /*
      * The logo: the gap between the shield and the wordmark, the size of the shield, and how far the shield hangs outside

@@ -1699,6 +1699,31 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De ruimte tussen de hoofdkolom en de zijbalk is dan 2 rem, net als tussen de cellen; de 4 rem blijft tussen de kolommen naast elkaar en onder de kolommen.
   De cellen van de zijbalk staan naast elkaar zodra er twee van 16 rem met 2 rem ertussen passen (`repeat(auto-fit, minmax(min(16rem, 100%), 1fr))`), en anders onder elkaar.
   Daarmee vervalt de grens van 40 rem voor de zijbalk; alleen de grens van 56 rem blijft.
+- **Later:** zie _De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk_.
+  De hoofdkolom is nu 38 rem, met 2 rem ertussen; de zijbalk en de kolom van de pagina blijven 24 en 64 rem.
+  Ook onder 56 rem is de hoofdkolom 38 rem breed.
+
+### De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de hoofdkolom is 2 rem breder en de ruimte tussen de hoofdkolom en de zijbalk 2 rem smaller: 38, 2 en 24 rem, samen 64 rem.
+  Een pagina zonder zijbalk heeft dezelfde hoofdkolom van 38 rem.
+- **Waarom:** de ruimte naast elkaar was twee keer zo groot als de ruimte onder elkaar, en dat voelde scheef.
+  De ruimte gaat naar de inhoud.
+- **Hoe:** `--hf-content-max-width` is 38 rem, en de ruimte tussen de kolommen naast elkaar is de ruimte tussen de cellen (`--hf-page-body-cell-gap`, 2 rem).
+  De eigen maat voor de ruimte tussen de kolommen (`--hf-page-body-column-gap`) is vervallen.
+  De 4 rem onder de kolommen blijft, nu onder de naam `--hf-page-body-end-space`.
+  De sporen zijn `minmax(24rem, 38rem)` en `minmax(16rem, 24rem)`, vanaf 56 rem en tot 66 rem breed (64 rem plus 1 rem marge aan beide kanten) krimpen ze mee.
+  Bij 56 rem hebben ze 52 rem samen, na de ruimte ertussen, dus ze krimpen niet tot hun minimum en niets scrolt opzij.
+  Onder 56 rem staan de hoofdkolom en de zijbalk gecentreerd onder elkaar, hoogstens 38 rem breed.
+  De grens van 56 rem, de hang van het schild vanaf 74,5 rem en de strepen over de volle breedte veranderen niet, want de kolom van de pagina blijft 64 rem.
+- **Gemeten:** in Atkinson Hyperlegible Next op 16 pixels telt een regel Tekst in de hoofdkolom op een scherm van 1440 pixels, met de vier alinea's van Over ons, hoogstens 87 tekens en gemiddeld 82,4 (alleen de volle regels).
+  In 36 rem was dat met dezelfde tekst hoogstens 84 en gemiddeld 79,3.
+  De regels zijn dus 3 tekens langer geworden, en de gemiddelde volle regel zit net boven de 80.
+  De grens van 70 tot 80 tekens uit _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_ rekt daarmee een paar tekens op; verder niet.
+  Geen scrollen opzij van 280 tot 1200 pixels breed, dus ook niet op 320 pixels (400% zoom op 1280 pixels).
+- **Alternatieven:** de zijbalk 2 rem breder maken; de hoofdkolom blijft dan op de leeslengte van 36 rem, maar de zijbalk heeft zelden zoveel nodig.
+  De pagina breder maken; dat raakt de header, de footer en het logo.
 
 ### Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query
 
