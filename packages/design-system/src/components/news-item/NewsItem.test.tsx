@@ -28,6 +28,18 @@ describe('NewsItem', () => {
     expect(screen.getByRole('link').textContent).toBe(props.headline)
   })
 
+  it('draws the icon for a link to another site, and leaves it out for a page of our own site', () => {
+    const { container, rerender } = render(<NewsItem {...props} />)
+
+    expect(container.querySelectorAll('svg')).toHaveLength(1)
+
+    rerender(<NewsItem {...props} href="/redactie/dit-zijn-wij" internal />)
+
+    expect(container.querySelectorAll('svg')).toHaveLength(0)
+    expect(screen.getByRole('link').getAttribute('href')).toBe('/redactie/dit-zijn-wij')
+    expect(screen.getByText('Testkrant').textContent).toBe('Testkrant')
+  })
+
   it('shows the headline as the source published it', () => {
     // A string in braces: JSX would turn the &amp; in an attribute into a & itself.
     render(<NewsItem {...props} headline={'SC Heerenveen &amp; <b>Testclub</b>: 3-1!'} />)

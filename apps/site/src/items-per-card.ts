@@ -16,3 +16,9 @@ export const firstCleanSheets = 10
 
 /** How many more clean sheets the button of that card loads with each press. */
 export const moreCleanSheets = 5
+
+/** How many results /zoeken starts with. */
+export const firstResults = 10
+
+/** How many more results the button of /zoeken loads with each press. */
+export const moreResults = 5

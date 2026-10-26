@@ -348,6 +348,11 @@ Een naam komt in een seizoen één keer voor.
 Er staat niets anders in: geen nationaliteit, leeftijd, contract, statistieken of foto.
 De zoekterm is een eigen kolom, zodat je hem voor één speler kunt verbeteren: de importer zet hem alleen bij een nieuwe speler.
 
+De lijst met spelers op `/zoeken` komt uit `listSquad` in `queries.ts`, de ene plek die bepaalt wie erin staat.
+Alleen de rijen van het lopende seizoen horen erin.
+Komt er een vlag `in_squad` (#333), zodat spelers die de selectie verlieten in de tabel blijven, dan is dat één voorwaarde in de `where` van `listSquad`.
+De pagina van de selectie geeft `findSquadPage`, voor de bronvermelding onder de lijst.
+
 `squad_imports` heeft per seizoen de gezondheid van de import van de selectie, met dezelfde velden als `match_imports`.
 
 De seed zet verzonnen wedstrijden, een verzonnen stand en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.

@@ -7,14 +7,15 @@ const items = [
   { href: '/', label: 'Nieuws' },
   { href: '/wedstrijden', label: 'Wedstrijden' },
   { href: '/podcasts', label: 'Podcasts' },
+  { href: '/zoeken', label: 'Zoeken' },
   { external: true, href: 'https://forum.heerenveen.org', label: 'Forum' },
 ]
 
 /**
- * The main menu of the site: the news on the home page, the matches, the podcasts and the
- * forum. It marks the page the visitor is on. A layout gets no path, so this is a client
- * component: usePathname gives the path, also when the server renders the HTML. The home page
- * is the current page on / only, not on a page below it.
+ * The main menu of the site: the news on the home page, the matches, the podcasts, the search
+ * and the forum. It marks the page the visitor is on. A layout gets no path, so this is a
+ * client component: usePathname gives the path, also when the server renders the HTML. The
+ * home page is the current page on / only, not on a page below it.
  */
 export function SiteNavigation() {
   const pathname = usePathname()

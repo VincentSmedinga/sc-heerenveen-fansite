@@ -55,6 +55,12 @@ describe('visitOf', () => {
     expect(visitOf(request('/contact/verstuurd'))).toMatchObject({ path: '/contact/verstuurd' })
   })
 
+  it('counts the search as /zoeken, without what was searched for', () => {
+    expect(visitOf(request('/zoeken'))).toMatchObject({ path: '/zoeken' })
+    expect(JSON.stringify(visitOf(request('/zoeken?q=klaverboer&aantal=15')))).not.toContain('klaverboer')
+    expect(visitOf(request('/zoeken?q=klaverboer&aantal=15'))).toMatchObject({ path: '/zoeken' })
+  })
+
   it('takes the visitor from the end of X-Forwarded-For, where the host puts it', () => {
     expect(visitOf(request('/', { 'x-forwarded-for': `198.51.100.1, ${address}` }))?.address).toBe(address)
     expect(visitOf(request('/', { 'x-forwarded-for': '2001:db8::1' }))?.address).toBe('2001:db8::1')
@@ -205,7 +211,7 @@ describe('visitOf', () => {
       .map((entry) => entry.parentPath.slice(`${import.meta.dirname}/app`.length) || '/')
       .filter((path) => !path.startsWith('/beheer') && !withoutCount.includes(path))
 
-    expect(paths.toSorted()).toEqual([...pages.map(({ path }) => path), '/contact/verstuurd'].toSorted())
+    expect(paths.toSorted()).toEqual([...pages.map(({ path }) => path), '/contact/verstuurd', '/zoeken'].toSorted())
   })
 })
 

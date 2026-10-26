@@ -2164,6 +2164,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het menu laten zoals het is, met alleen Onze bronnen en Forum; dan heeft de homepage geen onderdeel.
   Of Over ons ook in het menu, zoals op de artboard.
   Of een prop op `Navigation` voor de opmaak van de header; dan moet elke plek die het menu in een header zet, eraan denken.
+- **Later:** zie _De zoekpagina staat in het hoofdmenu, met de lijst met spelers in de zijbalk_.
+  Het menu heeft er een onderdeel bij, Zoeken; de rest blijft zoals het was.
 
 ### Een eigen foutpagina bij een fout op de server
 
@@ -2865,6 +2867,51 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   In forced colours heeft hij de kleur van de achtergrond, zodat hij ook daar niet te zien is.
 - **Alternatieven:** de bronvermelding zonder kaart laten (de tekst staat dan aan de rand van de kolom, naast de tekst in de kaarten); de link naar de geschiedenis houden (volledig, maar twee links in een zin die voor het oog een bijzaak is).
   **Let op:** de CC BY-SA vraagt een aanduiding van de auteurs op een redelijke manier; een link naar het artikel voldoet volgens de uitleg van Wikipedia over hergebruik, maar geen jurist heeft dat getoetst.
+
+### Zoeken in koppen, afleveringen en artikelen, met LIKE
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de zoekpagina zoekt in de titels van berichten en podcastafleveringen die de site toont en in de titel en inleiding van de artikelen van de redactie, met `LIKE` waarbij alle woorden moeten voorkomen.
+  De resultaten staan met de nieuwste bovenaan.
+- **Waarom:** het zijn de teksten die we zelf bewaren en tonen.
+  Forumonderwerpen bewaren we maar een handvol van, dus de dekking zou slecht zijn.
+  `LIKE` vindt ook woorden van twee letters (LC, VI, AZ) en een deel van een woord, en hangt niet af van een instelling van de hosting.
+  Bij enkele duizenden berichten per jaar is een zoekopdracht zonder index snel genoeg: op een database met 10.000 berichten duurt ze 7 tot 14 milliseconden.
+- **Hoe:** `searchPublic` in `packages/db/src/queries.ts` doet twee vragen, een op `items` en een op `articles`, en voegt de nieuwste resultaten samen.
+  Het aantal resultaten komt uit dezelfde vraag, met `count(*) over ()`.
+  Elk woord is `LIKE '%woord%' escape '|'`: `%`, `_` en `|` krijgen een escape-teken, zodat `%`, `_` en `\` zichzelf zoeken.
+  Hoofdletters en accenten tellen niet door de collatie `utf8mb4_unicode_ci` van de kolommen, die `search.test.ts` van `@fansite/db` controleert.
+  Een bericht telt mee onder dezelfde voorwaarden als op de homepage (`isShown`, een bron die aanstaat, niet later dan nu), een artikel als het gepubliceerd is.
+- **Alternatieven:** FULLTEXT in MariaDB (rangschikt op passendheid, maar vindt woorden korter dan de minimale lengte niet en hangt af van een serverinstelling die we niet kennen); alleen koppen (podcasts en artikelen blijven onvindbaar); ook forumonderwerpen (onvolledig).
+
+### De zoekpagina staat in het hoofdmenu, met de lijst met spelers in de zijbalk
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** "Zoeken" is een item van het hoofdmenu en leidt naar `/zoeken`, met het formulier en de resultaten in de hoofdkolom en de lijst met spelers in de zijbalk (op een smal scherm eronder).
+- **Waarom:** een gewone link werkt zonder JavaScript en kost geen ruimte in de kop op een telefoon, waar het menu al afbreekt.
+  De lijst helpt als je niet weet waar je naar zoekt, en zonder vraag staat ze direct onder het formulier.
+- **Hoe:** het item staat na Podcasts en voor het Forum, dus de pagina's van de site staan bij elkaar en de link naar buiten staat achteraan.
+  De lijst staat na de resultaten in de bron, dus onder de resultaten op een smal scherm, en ze is van `players` van het lopende seizoen (`listSquad`), per positie.
+  Elke naam is een gewone link naar `/zoeken?q=<achternaam>`, met de zoekterm uit de tabel.
+  De bronvermelding onder de lijst is `WikipediaCredit`, met het woord `selectiegegevens` voor onze eigen gegevens (eigenschap `data`), want de standaardzin noemt de wedstrijdgegevens.
+  `listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 komt als één voorwaarde in de `where` van die vraag.
+- **Alternatieven:** een zoekveld in de kop op elke pagina (altijd een stap dichtbij, maar breed en het vraagt een ontwerp van de kop); de lijst altijd boven de resultaten (prominent, maar op een telefoon schuiven de resultaten naar beneden).
+
+### De zoekpagina laat woorden van één teken niet toe, toont hoogstens 100 resultaten en staat niet in de sitemap
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** een vraag met een woord van één teken, zoals "a" of een los streepje in "Heerenveen - Ajax", krijgt een uitleg bij het veld en doet niets in de database.
+  De pagina laadt in stappen van vijf tot hoogstens 100 resultaten, en zegt daarna dat dit de nieuwste zijn en dat meer woorden minder resultaten geven.
+  `/zoeken` staat niet in `pages.ts` en dus niet in de sitemap, maar de teller van het bezoek telt de pagina, zonder de vraag.
+- **Waarom:** het issue zegt "woorden van minstens 2 tekens", en een woord van één teken vindt vrijwel alles en kost de hosting het meeste.
+  Zwijgend weglaten zou een andere vraag stellen dan de bezoeker typte.
+  Zonder grens zou `?aantal=` de hosting op te veel rijen laten werken; 100 is ook wat de homepage toont.
+  Een pagina met resultaten is `noindex`, dus een zoekmachine heeft niets aan een regel in de sitemap.
+- **Nadeel:** "Heerenveen - Ajax" werkt niet; de bezoeker moet het streepje weglaten.
+  Er is geen archief voor wie verder terug wil zoeken (#26).
+- **Alternatieven:** woorden van één teken stilzwijgend negeren (de vraag verandert zonder dat de bezoeker het ziet); geen grens aan het aantal resultaten (een bezoeker kan de database zwaar belasten met een adres); de pagina in de sitemap (een zoekmachine zou pagina's overslaan die `noindex` zijn).
+- **Hoe:** `Input` van het designsysteem krijgt het type `hidden`, voor de knop "Laad 5 meer", die de vraag meeneemt in een `GET`-formulier.
+  `NewsItem` krijgt `internal` voor een artikel van de redactie, zodat het pictogram voor een link naar een andere site wegblijft.
 
 ## Importer
 

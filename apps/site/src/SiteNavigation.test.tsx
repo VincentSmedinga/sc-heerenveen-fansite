@@ -20,7 +20,7 @@ function render(pathname: string) {
 }
 
 describe('SiteNavigation', () => {
-  it('links to the news, the matches, the podcasts and the forum, in a navigation named Hoofdmenu', () => {
+  it('links to the news, the matches, the podcasts, the search and the forum, in a navigation named Hoofdmenu', () => {
     const html = render('/')
 
     expect(html).toContain('<nav aria-label="Hoofdmenu"')
@@ -33,6 +33,7 @@ describe('SiteNavigation', () => {
       ['/', 'Nieuws'],
       ['/wedstrijden', 'Wedstrijden'],
       ['/podcasts', 'Podcasts'],
+      ['/zoeken', 'Zoeken'],
       ['https://forum.heerenveen.org', 'Forum'],
     ])
   })
@@ -41,8 +42,8 @@ describe('SiteNavigation', () => {
     const html = render('/')
     const links = [...html.matchAll(/<a [^>]*>(.*?)<\/a>/g)].map(([, content]) => content ?? '')
 
-    expect(links.map((content) => content.includes('<svg'))).toEqual([false, false, false, true])
-    expect(links[3]).toMatch(/^Forum<svg aria-hidden="true" class="hf-icon"/)
+    expect(links.map((content) => content.includes('<svg'))).toEqual([false, false, false, false, true])
+    expect(links[4]).toMatch(/^Forum<svg aria-hidden="true" class="hf-icon"/)
     expect(html.match(/<svg/g)).toHaveLength(1)
   })
 
@@ -52,6 +53,10 @@ describe('SiteNavigation', () => {
 
   it('marks Wedstrijden as the current page on /wedstrijden, and nothing else', () => {
     expect(currentLinks(render('/wedstrijden'))).toEqual(['Wedstrijden'])
+  })
+
+  it('marks Zoeken as the current page on /zoeken, and nothing else', () => {
+    expect(currentLinks(render('/zoeken'))).toEqual(['Zoeken'])
   })
 
   it('has no link to Onze bronnen: that is in the footer', () => {
