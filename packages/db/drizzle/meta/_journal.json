@@ -92,6 +92,13 @@
       "when": 1792967509819,
       "tag": "0012_add_matches_and_standings",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1792973659403,
+      "tag": "0013_add_article_versions",
+      "breakpoints": true
     }
   ]
 }

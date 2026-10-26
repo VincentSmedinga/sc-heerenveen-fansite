@@ -148,10 +148,40 @@ for (const [name, javaScriptEnabled, slug] of [
       await page.goto(`/redactie/${slug}`)
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${title}, verbeterd`)
 
+      // The versions are the draft, the intro that Publiceren saved with it, and the new title:
+      // three, the newest on top and marked as current. Publishing made no version of its own.
+      await page.goto(editAddress)
+
+      const versions = page.getByRole('region', { name: 'Eerdere versies' })
+
+      await expect(versions.getByRole('listitem')).toHaveCount(3)
+      await expect(versions.getByRole('listitem').first()).toContainText('Huidige versie')
+      await expect(versions.getByRole('link')).toHaveText(['Versie 3', 'Versie 2', 'Versie 1'])
+      if (javaScriptEnabled) {
+        expect(await checkPage(page)).toEqual([])
+      }
+
+      // The first version is the text as it was first saved, shown as a visitor would see it.
+      await versions.getByRole('link', { name: 'Versie 1' }).click()
+      await expect(page).toHaveURL(/\/versies\/1$/u)
+      await expect(page.locator('article').getByRole('heading', { level: 1 })).toHaveText(title)
+      await expect(page.locator('article')).toContainText(
+        'Een verzonnen inleiding van twee zinnen. Zo stellen we ons voor.',
+      )
+      await expect(page.getByText('Dit is een eerdere versie.')).toBeVisible()
+      await expect(page.locator('article h2')).toHaveText(['Wie zijn wij?', 'Wat je van ons mag verwachten'])
+      if (javaScriptEnabled) {
+        expect(await checkPage(page)).toEqual([])
+      }
+
+      // A version that the article never had is "niet gevonden".
+      expect((await page.goto(`${editAddress}/versies/4`))?.status()).toBe(404)
+
       // Withdrawing takes it off the site and makes it a draft again.
       await page.goto(editAddress)
       await page.getByRole('button', { name: 'Intrekken' }).click()
       await expect(page.getByRole('heading', { name: 'Ingetrokken' })).toBeVisible()
+      await expect(page.getByRole('region', { name: 'Eerdere versies' }).getByRole('listitem')).toHaveCount(3)
       await expect(page.getByRole('button', { name: 'Publiceren' })).toBeVisible()
       expect((await request.get(`/redactie/${slug}`)).status()).toBe(404)
       expect(await (await request.get('/sitemap.xml')).text()).not.toContain(slug)

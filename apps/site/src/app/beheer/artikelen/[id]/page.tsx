@@ -1,18 +1,19 @@
 import type { Metadata } from 'next'
 
-import { Button, Card, Form, Heading, Link, Page, Text } from '@fansite/design-system'
+import { Button, Card, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { listVersions } from '../../../../beheer/article-versions'
 import { findArticle } from '../../../../beheer/articles'
 import { parseItemId } from '../../../../beheer/items'
 import { requireRole } from '../../../../beheer/require-role'
 import { getDatabase } from '../../../../database'
-import { formatArticleDate } from '../../../../news'
+import { formatArticleDate, formatVersionTime } from '../../../../news'
 import { submitArticle, submitWithdraw } from '../actions'
 import { ArticleForm } from '../ArticleForm'
 import { FormatHelp } from '../FormatHelp'
 import { formLimits } from '../limits'
-import { articlesPath, previewPath } from '../paths'
+import { articlesPath, previewPath, versionPath } from '../paths'
 
 // Render on each request: the article changes with every save.
 export const dynamic = 'force-dynamic'
@@ -28,8 +29,8 @@ type Props = {
 const freshFor = 5 * 60 * 1000
 
 // The form of one article, with where it stands, a link to the preview and, for a published
-// article, the button to withdraw it. The page tells the editor what the last action did from
-// what the database says now.
+// article, the button to withdraw it, and under them the earlier versions of the text. The page
+// tells the editor what the last action did from what the database says now.
 export default async function ArticlePage({ params, searchParams }: Props) {
   await requireRole('beheerder')
 
@@ -40,6 +41,7 @@ export default async function ArticlePage({ params, searchParams }: Props) {
     notFound()
   }
 
+  const versions = await listVersions(getDatabase().db, article.id)
   const now = new Date()
   const { gedaan } = await searchParams
   const notice = noticeFor(gedaan, article, now)
@@ -100,6 +102,38 @@ export default async function ArticlePage({ params, searchParams }: Props) {
           </Form>
         </Card>
       )}
+      <Card aria-labelledby="versies-kop">
+        <Heading id="versies-kop" level={2}>
+          Eerdere versies
+        </Heading>
+        {versions.length === 0 ? (
+          <Text>
+            Van dit artikel is nog geen versie bewaard. De eerste komt bij de eerstvolgende wijziging in dit scherm.
+          </Text>
+        ) : (
+          <>
+            <Text appearance="meta">
+              Elke keer dat je iets verandert en opslaat, bewaren we de tekst. Publiceren en intrekken bewaren geen
+              versie.
+            </Text>
+            <List role="list">
+              {versions.map((version, index) => (
+                <List.Item key={version.version}>
+                  <Heading appearance={4} level={3}>
+                    <Link href={versionPath(article.id, version.version)}>Versie {version.version}</Link>
+                  </Heading>
+                  <Text appearance="meta">
+                    {index === 0 ? 'Huidige versie · ' : ''}
+                    {formatVersionTime(version.savedAt)}
+                    {' · '}
+                    {version.savedBy}
+                  </Text>
+                </List.Item>
+              ))}
+            </List>
+          </>
+        )}
+      </Card>
       <Text>
         <Link href={articlesPath}>Terug naar de artikelen</Link>
       </Text>

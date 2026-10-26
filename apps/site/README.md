@@ -338,6 +338,9 @@ De fouten staan in een `ErrorSummary` en bij het veld, en met JavaScript krijgt 
   Een wijziging zonder verschil en een tweede klik schrijven niets.
 - Het voorbeeld (`/beheer/artikelen/<nummer>/voorbeeld`) gebruikt `Article` en `ArticleText`, net als de pagina voor bezoekers.
   Het valt onder `/beheer`, dus het krijgt `noindex` en `no-store` van de proxy.
+- Een wijziging van de tekst voegt in dezelfde transactie een versie toe (`src/beheer/article-versions.ts`), en elke wijziging zet `updated_by`.
+  Onder het formulier staat de lijst "Eerdere versies", en `/beheer/artikelen/<nummer>/versies/<versienummer>` toont een versie met dezelfde onderdelen als het voorbeeld.
+  Er is geen knop om terug te zetten of te verwijderen.
 - De opmaak en de werkwijze voor wie schrijft, staan in [`docs/artikelen.md`](../../docs/artikelen.md).
 
 ### De beheertests in de browser

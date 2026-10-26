@@ -179,16 +179,20 @@ function databaseEnv() {
  * Takes the made-up feeds out, and with them their items, then the articles that a test wrote,
  * then the accounts with their sessions. The log of the admin has rows of the accounts when a
  * test has hidden an item or written an article, and the rows refuse to go with the account,
- * so they go first, and the articles too, which belong to the account that wrote them. That is
- * for this database on this computer only (see `addAdmin`): the site has no way to remove a
- * row of the log or an article.
+ * so they go first, and the articles too, which belong to the account that wrote them, after
+ * their versions. That is for this database on this computer only (see `addAdmin`): the site
+ * has no way to remove a row of the log, an article or a version.
  */
 async function remove(pool: ReturnType<typeof connect>['pool']) {
   const emails = Object.values(accounts).map(({ email }) => email)
   const users = 'SELECT id FROM admin_users WHERE email IN (?)'
 
   await pool.query('DELETE FROM feeds WHERE url LIKE ?', [`https://%${feedPath}`])
-  await pool.query(`DELETE FROM articles WHERE created_by IN (${users})`, [emails])
+  await pool.query(
+    `DELETE FROM article_versions WHERE article_id IN (SELECT id FROM articles WHERE created_by IN (${users})) OR saved_by IN (${users})`,
+    [emails, emails],
+  )
+  await pool.query(`DELETE FROM articles WHERE created_by IN (${users}) OR updated_by IN (${users})`, [emails, emails])
   await pool.query(`DELETE FROM audit_log WHERE user_id IN (${users})`, [emails])
   await pool.query('DELETE FROM admin_users WHERE email IN (?)', [emails])
 }

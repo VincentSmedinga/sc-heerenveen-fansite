@@ -132,12 +132,37 @@ Wat verder goed is om te weten:
   Er staat niets van de tekst in.
   `article.update` staat er alleen als er iets veranderde.
   Lees het logboek in phpMyAdmin met `SELECT created_at, user_id, action, item_id FROM audit_log WHERE action LIKE 'article.%' ORDER BY id;`.
+- Onder het formulier staat "Eerdere versies" (zie _Wat het beheer bewaart_).
 - Een artikel met een datum in de toekomst, dat alleen met SQL kan, staat in de lijst als "Gepland voor …".
   Wil je het nu publiceren, trek het dan eerst in.
 - De velden hebben deze grenzen: een titel van 120 tekens, een intro van 300, een auteur van 100, een adres van 80 en een tekst van 20.000.
   Een adres heeft alleen kleine letters, cijfers en enkele streepjes, is niet van een ander artikel, en is niet de eerste naam van een pagina van de site, zoals `bronnen` of `beheer`.
 - Een regeleinde in de titel, de intro of de auteur wordt een spatie.
   In de tekst blijven de regels zoals je ze typte; alleen besturingstekens gaan eruit, en lege regels aan het begin en het eind.
+
+## Wat het beheer bewaart
+
+Het beheer bewaart elke versie van de tekst van een artikel, en wie het artikel het laatst veranderde.
+
+- **Wat een versie bewaart:** de titel, het adres, de intro, de tekst en de auteur, met het moment van opslaan en het account dat opsloeg.
+  Versie 1 is het artikel zoals het voor het eerst is opgeslagen.
+  De nieuwste versie is altijd gelijk aan het artikel zelf.
+- **Wanneer er een versie komt:** bij "Opslaan als concept" van een nieuw artikel, en bij elke wijziging die je opslaat of waarmee je publiceert.
+  Opslaan zonder dat je iets veranderde, publiceren en intrekken maken geen versie.
+  Dan verandert de tekst niet, en het logboek (`audit_log`) heeft de publicatie al.
+- **Wat een versie niet bewaart:** of het artikel toen op de site stond.
+  Dat staat in het logboek, bij `article.publish` en `article.unpublish`.
+- **Wie wat deed:** `updated_by` in `articles` is het account dat het artikel het laatst veranderde, ook bij publiceren en intrekken.
+  `saved_by` in `article_versions` is het account dat die versie opsloeg.
+- **Lezen:** onder het formulier staat de lijst "Eerdere versies", de nieuwste bovenaan, met het nummer, de tijd en het e-mailadres van het account.
+  Een versie opent op `/beheer/artikelen/<nummer>/versies/<versienummer>`, zoals een bezoeker de tekst zou zien.
+  Alleen een beheerder opent de lijst en die pagina's.
+- **Terugzetten:** daar is geen knop voor.
+  Wil je een oude tekst terug, kopieer hem dan uit de pagina van de versie en plak hem in het formulier.
+- **Weghalen:** niets in de site wijzigt of verwijdert een versie.
+- **SQL:** een wijziging met SQL (zie _Een artikel in de database zetten_) maakt geen versie.
+
+Lees de versies in phpMyAdmin met `SELECT version, saved_at, saved_by, title FROM article_versions WHERE article_id = <nummer> ORDER BY version;`.
 
 ## Een artikel in de database zetten
 
@@ -155,7 +180,7 @@ SELECT id, email, role, disabled_at FROM admin_users;
 ```
 
 Kies het account dat aanstaat (`disabled_at` is leeg) en schrijf de `id` op.
-Dat nummer komt in `created_by`.
+Dat nummer komt in `created_by` en in `updated_by`, de kolom die zegt wie het artikel het laatst veranderde.
 Er komt geen e-mailadres in het artikel.
 
 ### 2. Zet het artikel als concept
@@ -166,13 +191,14 @@ Een enkel aanhalingsteken in de tekst schrijf je dubbel (`l''ordre`), en een bac
 Een nieuwe regel mag gewoon in de tekst staan.
 
 ```sql
-INSERT INTO articles (slug, title, intro, body, author, created_by)
+INSERT INTO articles (slug, title, intro, body, author, created_by, updated_by)
 VALUES (
   '<adres>',
   '<titel>',
   '<intro>',
   '<tekst>',
   '<auteur>',
+  <nummer van het account>,
   <nummer van het account>
 );
 ```
@@ -182,6 +208,9 @@ Wijst de database een deel af, dan zegt ze welk.
 Is een tekst te lang voor `title`, `intro`, `slug` of `author`, dan faalt de opdracht met een foutmelding.
 Dat is de standaardinstelling van MariaDB 10.11.
 Kijk na of er niets is afgekapt: `SELECT CHAR_LENGTH(intro) FROM articles WHERE slug = '<adres>';`.
+
+Met SQL bewaar je geen versie van de tekst: alleen het beheer doet dat (zie _Wat het beheer bewaart_).
+Het artikel heeft dan geen versie tot de eerste wijziging in het beheer.
 
 ### 3. Kijk het na en publiceer
 
@@ -194,7 +223,7 @@ Publiceer met de tijd van nu:
 
 ```sql
 UPDATE articles
-SET published_at = UTC_TIMESTAMP(), updated_at = UTC_TIMESTAMP()
+SET published_at = UTC_TIMESTAMP(), updated_at = UTC_TIMESTAMP(), updated_by = <nummer van het account>
 WHERE slug = '<adres>';
 ```
 
@@ -207,11 +236,11 @@ De pagina en de kaart komen elke keer uit de database, dus er is geen wachttijd.
 
 ### 4. Verander of trek in
 
-Verander de tekst, en zet `updated_at` erbij:
+Verander de tekst, en zet `updated_at` en `updated_by` erbij:
 
 ```sql
 UPDATE articles
-SET body = '<nieuwe tekst>', updated_at = UTC_TIMESTAMP()
+SET body = '<nieuwe tekst>', updated_at = UTC_TIMESTAMP(), updated_by = <nummer van het account>
 WHERE slug = '<adres>';
 ```
 
@@ -221,7 +250,7 @@ Zet er later weer een tijd in om het terug te zetten.
 
 ```sql
 UPDATE articles
-SET published_at = NULL, updated_at = UTC_TIMESTAMP()
+SET published_at = NULL, updated_at = UTC_TIMESTAMP(), updated_by = <nummer van het account>
 WHERE slug = '<adres>';
 ```
 
@@ -239,14 +268,16 @@ De pagina verraadt niet of het adres een concept is.
 
 ## Voor wie de code leest
 
-- De tabel heet `articles` (zie `packages/db/src/schema.ts`), en de vragen ernaar staan in `packages/db/src/queries.ts`: `findPublishedArticle`, `findNewestArticle` en `listPublishedArticles`.
+- De tabellen heten `articles` en `article_versions` (zie `packages/db/src/schema.ts`), en de vragen naar de eerste staan in `packages/db/src/queries.ts`: `findPublishedArticle`, `findNewestArticle` en `listPublishedArticles`.
   Een artikel is gepubliceerd als `published_at` gevuld is en niet na het moment van nu ligt.
 - De opmaak leest `apps/site/src/article-text.ts`, en `apps/site/src/ArticleText.tsx` maakt er elementen van.
   Er is geen `dangerouslySetInnerHTML`, en de tests (`article-text.test.tsx`) proberen HTML, `javascript:`-adressen, `//evil.example` en teksten van een miljoen tekens.
 - Het beheer staat in `apps/site/src/app/beheer/artikelen` (de lijst, het formulier, de serveracties en het voorbeeld).
   De queries en de wijzigingen staan in `apps/site/src/beheer/articles.ts`, de controle van het formulier in `article-form.ts`.
   Elke serveractie begint met `requireRole('beheerder')`, en elke wijziging schrijft met `recordAction` in dezelfde transactie een regel in het logboek.
+  Een wijziging van de tekst voegt in diezelfde transactie met `recordVersion` (`apps/site/src/beheer/article-versions.ts`) een versie toe, en elke wijziging zet `updated_by`.
+  Alleen `article-versions.ts` raakt `article_versions`, alleen met `INSERT`, en `article-versions.test.ts` houdt dat zo.
 - De pagina is `apps/site/src/app/redactie/[slug]/page.tsx`, de kaart staat in `apps/site/src/app/page.tsx`, en beide gebruiken de componenten `Article` en `ArticleCard` van het designsysteem.
-- De testgegevens staan in `apps/site/e2e/articles.ts`: een artikel, een concept en een artikel voor later.
+- De testgegevens staan in `apps/site/e2e/articles.ts`: een artikel met drie versies, een concept en een artikel voor later.
   `apps/site/e2e/writing.spec.ts` schrijft, bekijkt, publiceert en trekt een verzonnen artikel in, met en zonder JavaScript.
   Op acceptatie zet de seed geen artikel: de eigenaar zet het eerste artikel zelf, met de opdrachten hierboven.

@@ -21,6 +21,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
+  await database.pool.query('DELETE FROM article_versions')
   await database.pool.query('DELETE FROM articles')
   await database.pool.query('DELETE FROM admin_users')
 
@@ -43,6 +44,7 @@ function article(slug: string, overrides: Partial<NewArticle> = {}): NewArticle 
     publishedAt: new Date('2026-10-25T08:00:00Z'),
     slug,
     title: `Titel van ${slug}`,
+    updatedBy: userId,
     ...overrides,
   }
 }

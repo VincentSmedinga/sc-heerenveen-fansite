@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { adminUsers, articles, auditLog } from '@fansite/db/schema'
+import { adminUsers, articles, articleVersions, auditLog } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -51,6 +51,7 @@ afterAll(async () => {
 beforeEach(async () => {
   jar.clear()
   await database.pool.query('DELETE FROM audit_log')
+  await database.pool.query('DELETE FROM article_versions')
   await database.pool.query('DELETE FROM articles')
   await database.db.delete(adminUsers)
   await createAccount(database.db, 'sanne@example.org', 'beheerder')
@@ -99,6 +100,7 @@ const withdraw = (id: unknown) => resultOf(() => submitWithdraw(id as number))
 
 const stored = async () => database.db.select().from(articles).orderBy(articles.id)
 const log = () => database.db.select().from(auditLog).orderBy(auditLog.id)
+const versions = () => database.db.select().from(articleVersions).orderBy(articleVersions.id)
 
 /** Makes a draft and returns its number. */
 async function draft(overrides?: Record<string, string>) {
@@ -117,9 +119,15 @@ describe('submitNewArticle', () => {
   })
 
   it('takes the account from the session and never from the form', async () => {
-    await create({ createdBy: String(moderatorId), userId: String(moderatorId) })
+    await create({
+      createdBy: String(moderatorId),
+      savedBy: String(moderatorId),
+      updatedBy: String(moderatorId),
+      userId: String(moderatorId),
+    })
 
-    expect((await stored())[0]?.createdBy).toBe(userId)
+    expect((await stored())[0]).toMatchObject({ createdBy: userId, updatedBy: userId })
+    expect(await versions()).toMatchObject([{ savedBy: userId, version: 1 }])
     expect((await log())[0]?.userId).toBe(userId)
   })
 
@@ -167,6 +175,10 @@ describe('submitArticle', () => {
     expect(await save(id, { tekst: 'Nieuwe tekst' })).toEqual({ redirect: `/beheer/artikelen/${id}?gedaan=opgeslagen` })
     expect((await stored())[0]).toMatchObject({ body: 'Nieuwe tekst', publishedAt: null })
     expect((await log()).map((row) => row.action)).toEqual(['article.create', 'article.update'])
+    expect(await versions()).toMatchObject([
+      { body: 'Een alinea.', version: 1 },
+      { body: 'Nieuwe tekst', savedBy: userId, version: 2 },
+    ])
   })
 
   it('says nothing was changed when nothing was, and writes nothing', async () => {
@@ -174,6 +186,7 @@ describe('submitArticle', () => {
 
     expect(await save(id)).toEqual({ redirect: `/beheer/artikelen/${id}?gedaan=ongewijzigd` })
     expect(await log()).toHaveLength(1)
+    expect(await versions()).toHaveLength(1)
   })
 
   it('publishes what is on the screen when the button Publiceren was pressed', async () => {
@@ -278,6 +291,7 @@ describe('who may call the actions', () => {
     await expect(withdraw(id)).rejects.toThrow('not found')
     expect(await stored()).toMatchObject([{ body: 'Een alinea.' }])
     expect(await log()).toHaveLength(1)
+    expect(await versions()).toHaveLength(1)
   })
 
   it('sends a call without a session, and one with a session that ended, to the login page', async () => {
