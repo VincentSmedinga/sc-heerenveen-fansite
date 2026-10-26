@@ -14,10 +14,10 @@ const meta = preview.meta({
           '',
           '- Hij staat in de `Page.Body`, na de `Page.Main`.',
           '- Op een breed scherm staat hij naast de hoofdkolom, op een smal scherm eronder.',
-          '- Op een middelbaar scherm staan zijn cellen in twee kolommen naast elkaar, onder de hoofdkolom.',
-          '- Net als de hoofdkolom bestaat hij uit cellen die onder elkaar staan.',
+          '- Net als de hoofdkolom bestaat hij uit cellen die onder elkaar staan, op elk scherm, ook onder de hoofdkolom.',
+          '- Met `split` staan de cellen naast elkaar, in twee kolommen, zodra er twee passen. Dat is onder de hoofdkolom op een middelbaar scherm. Kies het voor een zijbalk met kleine cellen, zoals een paar korte kaarten. Cellen met een lijst worden er smal en krap van.',
           '- Geef hem een naam met `aria-label` of `aria-labelledby`.',
-          '- Met `wide` is hij even breed als de hoofdkolom, voor een zijbalk met een tabel. De hoofdkolom wordt er smaller van, zodat samen de kolommen even breed blijven als zonder. Zijn cellen staan dan altijd onder elkaar. De `Page.Body` hoef je er niets voor te geven: de zijbalk zegt het zelf.',
+          '- Met `wide` is hij even breed als de hoofdkolom, voor een zijbalk met een tabel. De hoofdkolom wordt er smaller van, zodat samen de kolommen even breed blijven als zonder. De `Page.Body` hoef je er niets voor te geven: de zijbalk zegt het zelf.',
         ].join('\n'),
       },
       source: exampleSource,
@@ -54,7 +54,7 @@ export const MiddleLight = meta.story({
     ...middle.parameters,
     docs: {
       description: {
-        story: 'Op een middelbaar scherm staan de cellen van de zijbalk in twee gelijke kolommen onder de hoofdkolom.',
+        story: 'Op een middelbaar scherm staan de cellen van de zijbalk onder elkaar, onder de hoofdkolom.',
       },
     },
   },
@@ -107,8 +107,54 @@ export const WideMiddleLight = meta.story({
   parameters: {
     ...screen.parameters,
     docs: {
-      description: { story: 'Op een middelbaar scherm staan de cellen van een brede zijbalk toch onder elkaar.' },
+      description: { story: 'Op een middelbaar scherm staan de cellen van een brede zijbalk onder elkaar.' },
     },
   },
   render: wideRender,
+})
+
+const splitRender = () => (
+  <Page.Body>
+    <ExampleMain />
+    <ExampleSidebar split />
+  </Page.Body>
+)
+
+export const SplitMiddleLight = meta.story({
+  ...screen,
+  globals: { theme: 'light', viewport: { value: 'tablet' } },
+  name: 'Naast elkaar, middelbaar scherm, licht',
+  parameters: {
+    ...screen.parameters,
+    docs: {
+      description: {
+        story:
+          'Met `split` staan de cellen van de zijbalk op een middelbaar scherm in twee gelijke kolommen onder de hoofdkolom.',
+      },
+    },
+  },
+  render: splitRender,
+})
+
+export const SplitMiddleDark = meta.story({
+  ...screen,
+  globals: { theme: 'dark', viewport: { value: 'tablet' } },
+  name: 'Naast elkaar, middelbaar scherm, donker',
+  render: splitRender,
+})
+
+export const SplitWideLight = meta.story({
+  ...screen,
+  globals: { theme: 'light', viewport: { value: 'wide' } },
+  name: 'Naast elkaar, breed scherm, licht',
+  parameters: {
+    ...screen.parameters,
+    docs: {
+      description: {
+        story:
+          'Op een breed scherm is de zijbalk te smal voor twee kolommen, ook met `split`: de cellen staan onder elkaar.',
+      },
+    },
+  },
+  render: splitRender,
 })

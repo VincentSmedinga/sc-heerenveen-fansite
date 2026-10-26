@@ -36,8 +36,9 @@ Die staat als één cel bovenaan de `main`, en de kinderen van de `Page.Main` zi
 Op een breed scherm begint de `Page.Sidebar` dan onder de inleiding, op dezelfde hoogte als de eerste cel eronder.
 Een `Card` is zelf een cel: ze heeft geen marge naar buiten.
 De `Page.Body` regelt alle witruimte tussen de kolommen en de cellen.
-Op een middelbaar scherm staat de zijbalk onder de hoofdkolom, met haar cellen in twee gelijke kolommen.
-Heeft de zijbalk een tabel nodig, geef de `Page.Sidebar` dan de eigenschap `wide`: de zijbalk en de hoofdkolom zijn even breed, de kolommen samen blijven net zo breed als zonder, en de cellen staan altijd onder elkaar.
+De cellen van de zijbalk staan onder elkaar, op elk scherm.
+Heeft de zijbalk kleine cellen, geef de `Page.Sidebar` dan de eigenschap `split`: op een middelbaar scherm, onder de hoofdkolom, staan de cellen dan naast elkaar in twee gelijke kolommen.
+Heeft de zijbalk een tabel nodig, geef de `Page.Sidebar` dan de eigenschap `wide`: de zijbalk en de hoofdkolom zijn even breed en de kolommen samen blijven net zo breed als zonder.
 
 ```tsx
 <Root>

@@ -78,7 +78,7 @@ export default async function SourcesPage() {
           </Card>
         ))}
       </Page.Main>
-      <Page.Sidebar aria-label="Contact over bronnen">
+      <Page.Sidebar aria-label="Contact over bronnen" split>
         <Card aria-labelledby="suggest-heading" surface="soft">
           <Heading id="suggest-heading" level={2}>
             Mis je een bron?
