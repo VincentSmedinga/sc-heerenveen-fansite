@@ -24,11 +24,11 @@ export type PageProps = ComponentPropsWithoutRef<'div'>
 
 export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
   /**
-   * A wider sidebar and a narrower main column, as wide as each other, for a page whose sidebar
-   * holds a table or another cell that needs the width. The columns stay as wide together as
-   * without it. Its cells always sit under each other. It is the Page.Sidebar that tells the
-   * Page.Body, so a page can choose it without owning the Page.Body, which the layout of the
-   * site renders.
+   * A sidebar as wide as the main column, which is narrower than on other pages, for a page
+   * whose sidebar holds a table or another cell that needs the width. The columns stay as wide
+   * together as without it. Its cells always sit under each other. It is the Page.Sidebar that
+   * tells the Page.Body, so a page can choose it without owning the Page.Body, which the layout
+   * of the site renders.
    */
   wide?: boolean
 }
