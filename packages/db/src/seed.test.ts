@@ -97,6 +97,7 @@ describe('the seed', () => {
 
     expect(rows.filter((feed) => feed.filter === 'club').map((feed) => feed.url)).toEqual([
       'https://www.omropfryslan.nl/rss/index.xml',
+      'https://feeds.nos.nl/nosvoetbal',
     ])
   })
 
@@ -123,6 +124,29 @@ describe('the seed', () => {
     expect(omropFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
       ['https://www.omropfryslan.nl/rss/index.xml', 'club'],
     ])
+  })
+
+  it('puts NOS in the register with its football feed on the club filter and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [nos] = await database.db.select().from(sources).where(eq(sources.domain, 'nos.nl'))
+    const nosFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, nos?.id ?? 0))
+
+    expect(nos).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'NOS',
+    })
+    expect(nos?.consentStatus).not.toBe('given')
+    expect(nos?.description).toBeTruthy()
+    expect(nos?.description?.length).toBeLessThanOrEqual(300)
+    expect(nosFeeds.map((feed) => [feed.url, feed.filter])).toEqual([['https://feeds.nos.nl/nosvoetbal', 'club']])
   })
 
   it('puts the Leeuwarder Courant in the register with its feed and the strictest policy', async () => {

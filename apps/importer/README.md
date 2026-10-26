@@ -248,7 +248,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een moderator verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat is nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_).
+Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_) en de voetbalfeed van NOS (zie _De voetbalfeed van NOS_).
 
 ### De uitkomst bekijken
 
@@ -336,6 +336,17 @@ Na de run veranderden de regels (zie _Een volledige naam is genoeg, en "wint" en
 De Friese schrijfwijze en de Friese voetbalwoorden (#270) veranderden daar niets aan, want de feed had op die dag geen Friestalige kop over de club.
 De test in `src/import-feeds.test.ts` ("importing a regional feed, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/regional-sample.xml`](src/fixtures/regional-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft per bericht ook een intro, een categorie en een foto, om te laten zien dat de adapter ze niet bewaart.
+
+## De voetbalfeed van NOS
+
+NOS is een bron met de feed `https://feeds.nos.nl/nosvoetbal`, het voetbalnieuws van NOS.
+De club is er een klein deel van, dus de feed staat in de seed op `club`.
+De adapter leest hem zonder aanpassing: RSS 2.0, tijden met een zone, geen teken voor een betaalmuur.
+Een run van 26 oktober 2026 bewaarde alle 20 berichten, en het filter vond er 1 `relevant`, 0 `doubtful` en 19 `irrelevant` (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
+Elk bericht in de feed heeft een beschrijving met HTML en een afbeelding.
+De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
+De test in `src/import-feeds.test.ts` ("importing the football feed of NOS, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/nos-sample.xml`](src/fixtures/nos-sample.xml), via de bron zoals de seed hem in het register zet.
+De fixture heeft ook een samenvatting van de speelronde die de club alleen in de beschrijving noemt: het filter kijkt alleen naar de kop, dus die is `irrelevant`.
 
 ## De velden van de feed van de Leeuwarder Courant
 

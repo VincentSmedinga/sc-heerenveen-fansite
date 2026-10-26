@@ -186,6 +186,14 @@ export const realSources = [
     kind: 'news',
     name: 'Omrop Fryslân',
   },
+  {
+    description:
+      'Landelijke publieke nieuwsomroep. In de voetbalfeed staan de berichten over de hele Eredivisie; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
+    domain: 'nos.nl',
+    feeds: [{ filter: 'club', url: 'https://feeds.nos.nl/nosvoetbal' }],
+    kind: 'news',
+    name: 'NOS',
+  },
 ] satisfies (NewSource & { feeds: (string | { filter: FeedFilter; url: string })[] })[]
 
 /**
