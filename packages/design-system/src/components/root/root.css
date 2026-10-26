@@ -1,4 +1,4 @@
-/* The html element: the page background, the theme of a subtree and smooth scrolling. */
+/* The html element: page background, text size, the theme of a subtree and smooth scrolling. */
 
 @layer hf.base {
   html {
@@ -17,6 +17,20 @@
 
     @supports (-webkit-touch-callout: none) {
       --hf-top-edge: max(env(safe-area-inset-top, 0px), 8px);
+    }
+
+    /*
+     * A phone turned to landscape enlarges running text but not a table, so the text sizes on a
+     * page no longer match. 100% stops that and leaves zoom alone. Safari on an iPhone only
+     * honours the prefixed property.
+     */
+    @supports (-webkit-touch-callout: none) {
+      /* stylelint-disable-next-line property-no-vendor-prefix -- Safari on iOS needs it */
+      -webkit-text-size-adjust: 100%;
+    }
+
+    @supports (text-size-adjust: 100%) {
+      text-size-adjust: 100%;
     }
   }
 
