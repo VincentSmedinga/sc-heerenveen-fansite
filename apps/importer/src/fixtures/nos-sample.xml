@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet href="/public/style.xsl" type="text/xsl"?>
+<!--
+  A small, made-up feed in the shape of the football feed of NOS (see docs/bronnen.md, NOS):
+  RSS 2.0, headlines and descriptions in CDATA, a description with HTML, an enclosure with only a
+  type and an address, a guid that is the link, and times with a zone. The headlines, links and
+  texts are invented; none is copied from a real feed. The description and the enclosure are here
+  to show that the importer does not read them. The last item is a round-up that names the club
+  only in its description.
+-->
+<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:dcterms="http://purl.org/dc/terms/" version="2.0">
+  <channel>
+    <title><![CDATA[Voetbalnieuws (verzonnen)]]></title>
+    <link><![CDATA[https://nos.test]]></link>
+    <description><![CDATA[Een verzonnen feed om de importer mee te testen.]]></description>
+    <language>nl</language>
+    <copyright>Verzonnen</copyright>
+    <pubDate>Mon, 26 Oct 2026 10:38:11 +0100</pubDate>
+    <item>
+      <title><![CDATA[Heerenveen wint van Volendam na een late treffer]]></title>
+      <link>https://nos.test/l/1000001</link>
+      <description><![CDATA[
+        <p>Een verzonnen intro die we niet bewaren.</p>
+        <p>Een tweede alinea, ook verzonnen.</p>
+      ]]></description>
+      <enclosure type="image/webp" url="https://images.nos.test/foto/1000001.webp"/>
+      <pubDate>Sat, 24 Oct 2026 22:53:01 +0200</pubDate>
+      <guid isPermaLink="true">https://nos.test/l/1000001</guid>
+    </item>
+    <item>
+      <title><![CDATA[sc Heerenveen speelt gelijk tegen Excelsior]]></title>
+      <link>https://nos.test/l/1000002</link>
+      <description><![CDATA[<p>Een verzonnen intro die we niet bewaren.</p>]]></description>
+      <enclosure type="image/webp" url="https://images.nos.test/foto/1000002.webp"/>
+      <pubDate>Sun, 25 Oct 2026 00:37:13 +0200</pubDate>
+      <guid isPermaLink="true">https://nos.test/l/1000002</guid>
+    </item>
+    <item>
+      <title><![CDATA[Veldman denkt na over zijn toekomst]]></title>
+      <link>https://nos.test/l/1000003</link>
+      <description><![CDATA[<p>Een verzonnen intro die we niet bewaren.</p>]]></description>
+      <enclosure type="image/webp" url="https://images.nos.test/foto/1000003.webp"/>
+      <pubDate>Sun, 25 Oct 2026 08:01:31 +0100</pubDate>
+      <guid isPermaLink="true">https://nos.test/l/1000003</guid>
+    </item>
+    <item>
+      <title><![CDATA[Brand in een schuur in Heerenveen is onder controle]]></title>
+      <link>https://nos.test/l/1000004</link>
+      <description><![CDATA[<p>Een verzonnen intro die we niet bewaren.</p>]]></description>
+      <enclosure type="image/webp" url="https://images.nos.test/foto/1000004.webp"/>
+      <pubDate>Sun, 25 Oct 2026 09:31:21 +0100</pubDate>
+      <guid isPermaLink="true">https://nos.test/l/1000004</guid>
+    </item>
+    <item>
+      <title><![CDATA[Ajax wint thuis van Fortuna Sittard]]></title>
+      <link>https://nos.test/l/1000005</link>
+      <description><![CDATA[<p>Een verzonnen intro die we niet bewaren.</p>]]></description>
+      <enclosure type="image/webp" url="https://images.nos.test/foto/1000005.webp"/>
+      <pubDate>Sun, 25 Oct 2026 14:10:51 +0100</pubDate>
+      <guid isPermaLink="true">https://nos.test/l/1000005</guid>
+    </item>
+    <item>
+      <title><![CDATA[Spanning bij de top: PSV en Feyenoord spelen gelijk]]></title>
+      <link>https://nos.test/l/1000006</link>
+      <description><![CDATA[<p>Een verzonnen intro die we niet bewaren.</p>]]></description>
+      <enclosure type="image/webp" url="https://images.nos.test/foto/1000006.webp"/>
+      <pubDate>Sun, 25 Oct 2026 16:19:59 +0100</pubDate>
+      <guid isPermaLink="true">https://nos.test/l/1000006</guid>
+    </item>
+    <item>
+      <title><![CDATA[Liverpool verliest bij een promovendus]]></title>
+      <link>https://nos.test/l/1000007</link>
+      <description><![CDATA[<p>Een verzonnen intro die we niet bewaren.</p>]]></description>
+      <enclosure type="image/webp" url="https://images.nos.test/foto/1000007.webp"/>
+      <pubDate>Sun, 25 Oct 2026 17:46:15 +0100</pubDate>
+      <guid isPermaLink="true">https://nos.test/l/1000007</guid>
+    </item>
+    <item>
+      <title><![CDATA[De speelronde in het kort: Twente wint en Utrecht verliest]]></title>
+      <link>https://nos.test/l/1000008</link>
+      <description><![CDATA[<p>Een verzonnen samenvatting. Ook sc Heerenveen speelde, maar dat staat alleen in deze tekst.</p>]]></description>
+      <enclosure type="image/webp" url="https://images.nos.test/foto/1000008.webp"/>
+      <pubDate>Sun, 25 Oct 2026 18:13:39 +0100</pubDate>
+      <guid isPermaLink="true">https://nos.test/l/1000008</guid>
+    </item>
+  </channel>
+</rss>
