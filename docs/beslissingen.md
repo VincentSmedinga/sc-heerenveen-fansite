@@ -4882,16 +4882,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 26 oktober 2026
 - **Besluit:** `Match` toont onder de uitslag één regel met de doelpuntenmakers van beide clubs op volgorde van de minuut, zonder naam van de club ervoor, zoals "34’ Trenskow, 45’+1 Vente, 80’ Vennegoor of Hesselink".
-  De minuut is groen bij een doelpunt van sc Heerenveen en rood bij een doelpunt van de tegenstander.
+  De minuut is groen bij een doelpunt van sc Heerenveen en rood bij een doelpunt van de tegenstander, en bij sc Heerenveen ook vet.
   Een schermlezer hoort de club erbij.
 - **Waarom:** de projecteigenaar vindt het korter en rustiger, en supporters weten welke spelers van ons zijn.
   Kleur laat zien voor wie er werd gescoord, met dezelfde betekenis als de uitslag (_Een uitslag toont de uitkomst in kleur, zonder letter_: groen is goed voor ons, rood is slecht).
-  Kleur is voor het oog het enige teken, want de projecteigenaar wil de minuten niet vet (eerst was de minuut van sc Heerenveen vet, zoals de club op de uitslagregel).
-  Voor een schermlezer staat de naam van de club in de tekst (WCAG 1.4.1), en supporters kennen de spelers.
+  Kleur is niet het enige teken: het vet voor onze eigen doelpunten volgt de vette club op de uitslagregel, en de naam van de club staat voor een schermlezer in de tekst (WCAG 1.4.1).
+  De projecteigenaar wilde de minuten eerst niet vet en zette het vet op 26 oktober 2026 na de review weer terug, omdat kleur voor het oog anders het enige teken was.
 - **Hoe:** de tekst is `<minuut>’<+blessuretijd>` en de naam, met een spatie die niet afbreekt ertussen.
   De apostrof en de plus zijn voor de ogen alleen (`aria-hidden`); een schermlezer hoort "minuut 45 plus 1, Vente, sc Heerenveen", met "; " tussen de doelpunten.
   De kleuren zijn de tokens `--hf-colour-outcome-win` en `--hf-colour-outcome-loss`, die al 4,5:1 halen op de vlakken (zie _Een uitslag toont de uitkomst in kleur, zonder letter_).
-  In forced colours valt de kleur weg, en dan is er voor het oog geen verschil meer tussen de clubs; de schermlezer hoort ze nog wel.
+  In forced colours valt de kleur weg en blijft het vet over.
 - **Alternatieven:** per club een eigen regel met de naam van de club ervoor (duidelijker, maar langer; dit was het eerste besluit); één regel zonder enig onderscheid (wie een speler van de tegenstander niet kent, kan niet zien voor wie hij scoorde); twee kolommen naast elkaar (te breed voor een smalle kaart).
 
 ### Eigen doelpunten staan bij de club die ervan profiteert

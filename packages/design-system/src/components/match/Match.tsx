@@ -147,9 +147,10 @@ const separator = (
  * The scorers of a played match are one line between the clubs and the time, in the order of
  * the clock with the goals of both clubs: "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen". The
  * club is not named. The minute is green for a goal of sc Heerenveen and red for one of the
- * opponent, the colours of the result. A screen reader hears each goal in full with its club:
- * "minuut 45 plus 1, Vente, sc Heerenveen". An own goal says "e.d." and a penalty "pen." after
- * the name, as abbreviations with the full words.
+ * opponent, the colours of the result, and bold for sc Heerenveen like its name on the line of
+ * the clubs. A screen reader hears each goal in full with its club: "minuut 45 plus 1, Vente,
+ * sc Heerenveen". An own goal says "e.d." and a penalty "pen." after the name, as
+ * abbreviations with the full words.
  */
 export const Match = ({
   className,

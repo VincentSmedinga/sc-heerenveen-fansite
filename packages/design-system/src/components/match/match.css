@@ -87,10 +87,10 @@
 
   /*
    * The scorers: one line between the clubs and the time, in the order of the clock. The minute
-   * has the colour of the result for the club that scored: green for sc Heerenveen and red for
-   * the opponent. The weight is the same for both. A forced colour replaces the colours, and a
-   * screen reader hears the club in hidden text. The names are in the colour of the text around
-   * them.
+   * has the colour of the result for the club that scored, and a goal of sc Heerenveen is also
+   * bold, so the colour is never the only sign; a forced colour replaces it and the weight
+   * stays. A screen reader hears the club in hidden text. The names are in the colour of the
+   * text around them.
    */
   .hf-match-goals {
     font-size: var(--hf-meta-font-size);
@@ -99,6 +99,7 @@
 
   .hf-match-goal-ours {
     color: var(--hf-colour-outcome-win);
+    font-weight: 700;
   }
 
   .hf-match-goal-theirs {
