@@ -425,11 +425,34 @@ describe('the page /wedstrijden', () => {
       )
     })
 
-    it('says how many of the played matches the count is based on, and that extra time is left out', async () => {
-      const card = section(await render(), 'doelpunten-per-kwartier')
+    it('says how many of the played matches the count is based on', async () => {
+      expect(section(await render(), 'doelpunten-per-kwartier')).toContain(
+        'Gebaseerd op 2 van de 4 gespeelde wedstrijden',
+      )
+    })
 
-      expect(card).toContain('Gebaseerd op 2 van de 4 gespeelde wedstrijden')
-      expect(card).toContain('Doelpunten in een verlenging tellen niet mee.')
+    it('says that extra time is left out when a match in the count went to extra time', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((match) => (match.goals.length > 0 ? { ...match, extraTime: true } : match)),
+      })
+
+      expect(section(await render(), 'doelpunten-per-kwartier')).toContain(
+        '<p class="hf-meta">Doelpunten in de verlenging tellen niet mee.</p>',
+      )
+    })
+
+    it('leaves the sentence about extra time out when no match in the count had it', async () => {
+      expect(section(await render(), 'doelpunten-per-kwartier')).not.toContain('verlenging')
+    })
+
+    it('leaves the sentence out when only a match that is not in the count went to extra time', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((match) => (match.goals.length === 0 ? { ...match, extraTime: true } : match)),
+      })
+
+      expect(section(await render(), 'doelpunten-per-kwartier')).not.toContain('verlenging')
     })
 
     it('says all the matches when every played match has its goals, and one match in the singular', async () => {

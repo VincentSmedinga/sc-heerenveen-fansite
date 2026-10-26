@@ -91,6 +91,8 @@ export const quarterLabels = ['1–15', '16–30', '31–45', '46–60', '61–7
 export type GoalsPerQuarter = {
   /** The goals against, in the order of `quarterLabels`. */
   conceded: number[]
+  /** Whether one of the matches in the count went to extra time, whose goals are left out. */
+  extraTime: boolean
   /** The played matches whose goals are known, so the ones in the count. */
   known: number
   /** The played matches, with or without known goals. */
@@ -131,7 +133,13 @@ export function goalsPerQuarter(matches: PublicMatch[]): GoalsPerQuarter {
     counts[quarter] = (counts[quarter] ?? 0) + 1
   }
 
-  return { conceded, known: known.length, played: played.length, scored }
+  return {
+    conceded,
+    extraTime: known.some((match) => match.extraTime),
+    known: known.length,
+    played: played.length,
+    scored,
+  }
 }
 
 /**

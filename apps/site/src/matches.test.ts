@@ -384,6 +384,7 @@ describe('goalsPerQuarter', () => {
 
     expect(goalsPerQuarter([draw, minutes(10)])).toEqual({
       conceded: [0, 0, 0, 0, 0, 0],
+      extraTime: false,
       known: 2,
       played: 2,
       scored: [1, 0, 0, 0, 0, 0],
@@ -402,15 +403,40 @@ describe('goalsPerQuarter', () => {
 
     expect(goalsPerQuarter([noScore, scheduled, minutes(70)])).toEqual({
       conceded: [0, 0, 0, 0, 0, 0],
+      extraTime: false,
       known: 1,
       played: 2,
       scored: [0, 0, 0, 0, 1, 0],
     })
   })
 
+  it('says a match in the count went to extra time, and leaves out its goals after minute 90', () => {
+    const tie = { ...minutes(10, 100), competition: 'KNVB Beker' as const, extraTime: true }
+
+    expect(goalsPerQuarter([minutes(20), tie])).toMatchObject({ extraTime: true, scored: [1, 1, 0, 0, 0, 0] })
+  })
+
+  it('says no extra time when no match in the count had it', () => {
+    expect(goalsPerQuarter([minutes(10), minutes(20)]).extraTime).toBe(false)
+  })
+
+  it('does not say extra time for a match that is not in the count, such as one without goals or not played', () => {
+    const noGoals = {
+      ...match('Speelronde 2', 'played', '2026-08-08'),
+      competition: 'KNVB Beker' as const,
+      extraTime: true,
+      goalsAgainst: 1,
+      goalsFor: 2,
+    }
+    const scheduled = { ...minutes(10), extraTime: true, status: 'scheduled' as const }
+
+    expect(goalsPerQuarter([minutes(10), noGoals, scheduled]).extraTime).toBe(false)
+  })
+
   it('gives zeroes and no matches for a season without matches', () => {
     expect(goalsPerQuarter([])).toEqual({
       conceded: [0, 0, 0, 0, 0, 0],
+      extraTime: false,
       known: 0,
       played: 0,
       scored: [0, 0, 0, 0, 0, 0],

@@ -5435,7 +5435,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 26 oktober 2026
 - **Besluit:** `/wedstrijden` krijgt in de hoofdkolom, onder het programma, een kaart "Doelpunten per kwartier" met twee diagrammen, voor en tegen, elk in zes plakken: de kwartieren van een wedstrijd.
-  De cijfers staan ook als tabel, en onder de tabel staat op hoeveel van de gespeelde wedstrijden de telling is gebaseerd en dat de verlenging buiten de telling blijft.
+  De cijfers staan ook als tabel, en onder de tabel staat op hoeveel van de gespeelde wedstrijden de telling is gebaseerd.
+  Ging een wedstrijd in de telling naar de verlenging, dan staat daar ook dat de verlenging buiten de telling blijft; anders staat die zin er niet.
 - **Waarom:** een taart toont maar één reeks, dus voor en tegen vragen twee taarten.
   De verlenging komt alleen in bekerwedstrijden voor en zou een kwartier erbij maken dat de meeste wedstrijden niet hebben.
   De tabel is er voor wie een diagram niet kan zien en voor wie liever getallen leest.
@@ -5455,4 +5456,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - De diagrammen zijn verborgen voor hulpsoftware en de tabel is het tekstalternatief, met een bijschrift dat alleen een schermlezer krijgt.
     De diagrammen zelf zijn `DonutChart` (zie _Een donutdiagram is een eigen onderdeel in SVG, met het groen en het rood van de uitkomst_).
   - De kop heeft het anker `doelpunten-per-kwartier`, dat in `src/anchors.ts` staat.
+- **Aangevuld op 26 oktober 2026, op verzoek van de projecteigenaar:** de zin "Doelpunten in de verlenging tellen niet mee." staat er alleen als ze iets zegt.
+  `goalsPerQuarter` geeft daarvoor `extraTime`: waar als minstens één wedstrijd in de telling `extra_time` heeft.
+  Een wedstrijd buiten de telling, zonder doelpunten of niet gespeeld, telt daarvoor niet mee.
 - **Alternatieven:** één diagram met twee ringen (compact, maar moeilijker te lezen); staafjes in plaats van een taart (leesbaarder, maar de projecteigenaar vroeg om een taart); de verlenging als aparte plakken; de wedstrijden zonder bekende doelpunten meetellen met nul doelpunten (de telling lijkt dan completer dan ze is).

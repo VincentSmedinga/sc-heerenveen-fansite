@@ -86,11 +86,12 @@ export function CleanSheetsCard({ count, matches, now }: { count: number; matche
  * of an hour: two donut charts, for and against, with the same numbers in a table under them,
  * which is what a screen reader gets, because the charts are hidden from it. Under the table
  * stand how many matches the count is based on, because a match without known goals has no
- * minutes, and a line that extra time is left out. Without a goal in the matches we know, it is
- * a sentence for visitors and no empty charts.
+ * minutes, and, when one of those matches went to extra time, a line that extra time is left
+ * out. Without a goal in the matches we know, it is a sentence for visitors and no empty
+ * charts.
  */
 export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
-  const { conceded, known, played, scored } = goalsPerQuarter(matches)
+  const { conceded, extraTime, known, played, scored } = goalsPerQuarter(matches)
   const slices = (counts: number[]) => quarterLabels.map((label, index) => ({ label, value: counts[index] ?? 0 }))
 
   return (
@@ -119,7 +120,7 @@ export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
               ? `Gebaseerd op ${known === 1 ? '1 gespeelde wedstrijd' : `alle ${known} gespeelde wedstrijden`}`
               : `Gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}
           </Text>
-          <Text appearance="meta">Doelpunten in een verlenging tellen niet mee.</Text>
+          {extraTime && <Text appearance="meta">Doelpunten in de verlenging tellen niet mee.</Text>}
         </>
       )}
     </Card>
