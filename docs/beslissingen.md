@@ -4723,6 +4723,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een test (`root-css.test.ts`) controleert dat beide vormen in de bron staan, maar niet wat de bouw ervan maakt; dat kijk je na in de gebouwde CSS.
 - **Alternatieven:** niets doen (de verschillen blijven in liggende stand); een vaste waarde als 90% of 110% (verkeerd voor wie het teken groot nodig heeft); de tabel ook laten vergroten (kan niet, het is de beslissing van Safari); alleen de vorm zonder voorvoegsel (werkt niet in Safari op iPhone).
 
+### Een onregelmatige test is een bug in de test of de pagina, geen reden om hem los te maken
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** een e2e-test die af en toe faalt, wordt onderzocht en hersteld bij de oorzaak.
+  We zetten hem niet uit, laten hem niet vaker proberen en maken hem niet losser.
+- **Waarom:** een test die soms faalt, leert de Builders dat rood niets betekent.
+  Hier was het niet zeker of het een wachtpunt in de test was of een echte pagina zonder titel.
+- **Wat het was:** na een formulier dat doorstuurt, wisselt de site van pagina zonder een nieuw document te laden.
+  Next.js zet dan eerst de nieuwe inhoud neer en een paar milliseconden later de `<title>`.
+  Axe, dat meteen na de kop draaide, meldde `document-title` op een pagina die een titel heeft.
+  Onder zware belasting op de eigen computer ging het één keer in twintig runs mis, in CI twee keer in twaalf runs.
+  Een bezoeker merkt het nauwelijks, en elke pagina heeft een titel zodra de wissel klaar is.
+- **De oplossing:** `checkPage` wacht, hoogstens twee seconden, tot de titel er is, en laat dan axe draaien.
+  Heeft een pagina echt geen titel, dan meldt axe het nog steeds (de test `fails on a page without a title`).
+  De wacht staat in `checkPage` en niet in elke test, omdat elke test die axe na een formulier laat draaien dit kan tegenkomen.
+- **Alternatieven:** `retries` in Playwright aanzetten (verbergt de fout en verlengt elke run); de test overslaan tot het later beter uitkomt (een gat in de toegankelijkheidscontrole van het beheer); in `writing.spec.ts` alleen na de drie plaatsen waar het gebeurde op de titel wachten (de volgende test die axe na een formulier laat draaien heeft hetzelfde probleem).
+
 ### Een uitslag toont de uitkomst in kleur, zonder letter
 
 - **Datum:** 26 oktober 2026
@@ -4747,7 +4764,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 26 oktober 2026
 - **Besluit:** de import bewaart bij een bekerwedstrijd of er verlenging was en wat de strafschoppen waren, en `Match` toont dat met afkortingen ("n.v.", "(4–2 n.s.)"), met de volle woorden voor een schermlezer.
   De kleur van de uitkomst volgt de strafschoppen als die er zijn.
-- **Opslag:** `matches` krijgt `extra_time` (standaard `false`), `penalties_for` en `penalties_against`, met een migratie (`0014_add_extra_time_and_penalties`).
+- **Opslag:** `matches` krijgt `extra_time` (standaard `false`), `penalties_for` en `penalties_against`, met een migratie (`0015_add_extra_time_and_penalties`).
   Drie CHECK-constraints houden ze heel: verlenging alleen bij een gespeelde bekerwedstrijd, strafschoppen in een paar, en strafschoppen alleen na verlenging en bij een gelijke stand.
   `goals_for` en `goals_against` blijven de stand uit `score`, zonder de strafschoppen.
 - **Inlezen:** een gevuld `aet` is verlenging (op de pagina van de beker 2025/26 altijd `J`), en `penaltyscore` is "N – N" met team 1 eerst, omgezet naar de kant van sc Heerenveen.
@@ -4777,3 +4794,86 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Een nieuwe score van strafschoppen is geen verandering van de uitslag:** komen de strafschoppen er later bij, dan neemt de import ze over zonder waarschuwing.
   Verandert een score van strafschoppen die er al was, nadat de uitslag drie dagen of langer vaststond, dan waarschuwt hij, met de strafschoppen in de tekst.
 - **Alternatieven:** de wedstrijd bewaren zonder strafschoppen en doorgaan (de fout gaat dan onopgemerkt).
+
+### We tellen paginaweergaven en unieke bezoekers per dag, met een kenmerk dat elke dag wisselt
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de site telt zelf, op de eigen server, paginaweergaven per pagina en unieke bezoekers per dag.
+  Een unieke bezoeker is een kenmerk van IP-adres en browsertekst met een zout dat voor die dag willekeurig is.
+  Het zout en de kenmerken verdwijnen als de dag voorbij is; alleen de tellers blijven.
+- **Waarom:** het antwoord op "hoeveel bezoekers" vraagt dat je dezelfde bezoeker binnen een dag herkent, maar niet over dagen.
+  Een kenmerk dat elke dag verandert, doet dat.
+  Zo volgen we niemand, en een eigen teller vraagt niets van een derde.
+- **Alternatieven:** alleen paginaweergaven (nog privacyvriendelijker, maar "hoeveel bezoekers" blijft dan onbeantwoord); een dienst van derden zoals Google Analytics (breekt onze belofte); de logbestanden van de hosting lezen (we hebben ze niet in handen en ze bevatten IP-adressen).
+- **Hoe:**
+  - Vier tabellen (migratie `0014_add_visit_counters`): `page_views` (een teller per dag en pad), `daily_visitors` (een teller per dag), `visitor_salts` (het zout van de dag) en `visitor_hashes` (de kenmerken van de dag).
+    Alleen de eerste twee blijven.
+    De klikken op links (#292) en de cijfers in het beheer (#293) bouwen hierop: zij lezen de tellers en gebruiken het zout en de kenmerken van de dag opnieuw.
+  - Het kenmerk is de HMAC-SHA-256 (hex) van het adres en de browsertekst, met het zout van de dag als sleutel.
+    Het zout is 32 willekeurige bytes (hex) en staat in de database, omdat de host meer processen kan starten die hetzelfde zout moeten gebruiken.
+    Het eerste verzoek van een dag in een proces maakt het zout (`INSERT IGNORE`, dan lezen: wie eerst is wint) en gooit de gegevens van eerdere dagen weg.
+  - Een bezoeker telt als `INSERT IGNORE` in `visitor_hashes` een rij toevoegt; dan gaat `daily_visitors` met één omhoog.
+  - Een dag is een dag in Nederland (Europe/Amsterdam), zoals een bezoeker hem kent, en niet in UTC.
+  - Het weggooien van het zout en de kenmerken van alle dagen vóór vandaag gebeurt op twee plekken, door dezelfde functie (`removeVisitorData`): bij het eerste verzoek van een nieuwe dag, en bij elke run van de import, dus ook op een dag zonder bezoekers.
+    Een verzoek dat vlak voor middernacht begon kan zijn kenmerk nog na het weggooien schrijven; de volgende run van de import (hoogstens een kwartier later) haalt het weg.
+  - Het IP-adres en de browsertekst staan nergens: niet in een tabel, en niet in het logboek.
+    Een fout bij het tellen logt alleen de reden (`reasonOf`), nooit het verzoek.
+- **Let op:** zolang de dag duurt, staan het zout en de kenmerken samen in de database.
+  Wie de database kan lezen, kan met het zout alle IPv4-adressen proberen en zo een kenmerk terugrekenen naar een adres.
+  Dat vraagt toegang tot de database, en na de dag is het zout weg.
+  De privacypagina zegt het ook: tot het einde van de dag staan het getal (het zout) en de codes (de kenmerken) in onze database.
+- **Rechtsgrond:** de Builder nam gerechtvaardigd belang aan (we willen weten of de site gelezen wordt, en we houden geen persoonsgegevens langer dan de dag).
+  Toestemming is niet nodig, omdat er niets op het apparaat van de bezoeker staat.
+  Een jurist heeft dit niet bekeken.
+
+### Bots, DNT en GPC worden niet geteld
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** bekende bots, onze importer en de controles van de hosting tellen niet mee, en een verzoek met `DNT: 1` of `Sec-GPC: 1` ook niet.
+- **Waarom:** de cijfers moeten bezoekers zijn, geen crawlers.
+  Wie zegt niet gevolgd te willen worden, wordt niet geteld, ook al volgen we niemand.
+  Dat past bij onze belofte.
+- **Alternatieven:** alles tellen (opgeblazen cijfers); alleen bots uitsluiten (DNT en GPC kosten weinig en zeggen iets over ons).
+- **Hoe:** de lijst met patronen voor de browsertekst staat op één plek, `notVisitors` in `apps/site/src/visits.ts`.
+  Een verzoek zonder browsertekst telt ook niet.
+  Een bot die zich als browser voordoet, telt wel mee; de lijst groeit als er een opduikt.
+
+### De proxy telt, na het antwoord, alleen een aanvraag van een pagina
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het tellen draait in de proxy (`apps/site/src/proxy.ts`, het `proxy.ts` van Next.js 16, dat op Node.js draait), die al voor elk verzoek draait.
+  De proxy geeft het tellen aan `event.waitUntil` en wacht er niet op, dus de pagina wacht niet op de database.
+  Een fout bij het tellen komt in het logboek, hoogstens één keer per minuut, en de pagina merkt niets.
+  Wacht de database niet (te langzaam of weg), dan laat het tellen na 5 seconden los, en neemt het hoogstens 20 tellingen tegelijk aan; de rest valt weg.
+- **Wat telt:** een GET met `Accept: text/html` voor een pad uit `pages.ts`, `/contact/verstuurd` of `/redactie/<slug>` van een artikel dat de database kent.
+  De zoekvraag telt niet mee: `/?nieuws=15` en `/podcasts?podcast=…` tellen voor `/` en `/podcasts`.
+  Bestanden, `/_next`, `/beheer`, `robots.txt`, `sitemap.xml`, de feed en het manifest staan op geen lijst en tellen dus niet.
+  Een pad dat niet bestaat telt ook niet, en ook geen verzoek met een prefetch-header (`Sec-Purpose`, `Purpose` of `X-Moz`).
+  Een test loopt de `page.tsx`-bestanden na en laat falen als er een pagina bijkomt die op geen lijst staat.
+- **Waarom:** de proxy ziet elk verzoek voordat de cache en de pagina erbij komen, dus een pagina uit een cache telt ook.
+  Een teller in de pagina zelf telt niet als de pagina uit een cache komt, en vraagt dat elke pagina eraan denkt.
+  Een eigen route die de browser aanroept, zou een script vragen; we willen geen script.
+  Het kost per bezoek twee tot drie korte opdrachten voor de database, na het antwoord, en misschien een eigen verbinding naast die van de pagina's: de proxy is een eigen bundel van Next.js.
+- **Let op:**
+  - De proxy ziet de status van het antwoord niet.
+    Een pad dat bestaat telt dus ook als de pagina een 404 geeft (`/podcasts?pagina=99`) of de foutpagina toont (de database is weg).
+    Een artikel controleren we wel, met één opzoeking.
+  - Next.js haalt zijn eigen headers (`RSC`, `Next-Router-Prefetch`) weg voordat de proxy het verzoek ziet, en zo'n verzoek vraagt geen HTML.
+    Alleen een aanvraag van een hele pagina telt, en dat is elke klik, want de site heeft geen `next/link`.
+    Een test controleert dat er geen `next/link` in de code staat; komt hij er toch, dan telt een klik niet meer en moet dit besluit opnieuw.
+  - Een bezoeker die de pagina uit de cache van zijn browser haalt (terug in de geschiedenis), doet geen verzoek en telt niet.
+- **Alternatieven:** tellen in `layout.tsx` (telt niet bij een pagina uit een cache; de pagina's zijn nu `force-dynamic`, maar dat verandert misschien); een eigen route met een afbeelding of script (vraagt een script of een extra verzoek); de logbestanden van de hosting lezen (zie hierboven).
+
+### Het adres van de bezoeker is het laatste adres van `X-Forwarded-For`
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het adres komt uit de header `X-Forwarded-For`, het laatste adres erin, en alleen als het een openbaar IP-adres is.
+  Een adres van de computer zelf of van een privé-netwerk (`127.0.0.0/8`, `::1`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` en meer) telt niet als bezoeker; de paginaweergave telt wel.
+  `::ffff:203.0.113.7` is `203.0.113.7`.
+- **Waarom:** de host start de app met `lsnode.js` van LiteSpeed, en de verbinding komt van de host zelf.
+  Next.js vult zelf `X-Forwarded-For` met het adres van de verbinding als de header er niet is, dus zonder de controle zou elke bezoeker `127.0.0.1` zijn.
+  Wat een bezoeker zelf in de header zet, staat vóór het adres dat de host toevoegt; het laatste adres is dus het zijne, als de host toevoegt.
+- **Nog niet gecontroleerd op de host:** we hebben bij het bouwen geen toegang tot de hosting.
+  Stuurt de host de header niet, of een andere, dan telt de site de weergaven en geen bezoekers (`daily_visitors` blijft 0).
+  `docs/acceptatieomgeving.md` (_Bezoekers tellen_) zegt hoe je dat op acceptatie ziet.
+- **Alternatieven:** het eerste adres in de header (een bezoeker kan het zelf zetten); een andere header zoals `X-Real-IP` (we weten niet of de host hem stuurt); alleen de browsertekst (alle bezoekers met dezelfde browser tellen als één).

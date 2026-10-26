@@ -24,37 +24,58 @@ export default function PrivacyPage() {
       <Page.Cell>
         <Heading level={1}>Privacy</Heading>
         <Text appearance="intro">
-          De site zet geen cookies, volgt niemand en laadt niets van een ander domein. Toch moeten we een paar dingen
-          even noemen.
+          Je bent welkom en we willen zo weinig mogelijk van je weten. De site zet geen cookies, volgt niemand en laadt
+          niets van een ander domein.
+        </Text>
+        <Heading level={2}>Wat we tellen</Heading>
+        <Text>
+          We tellen alleen per dag hoe vaak elke pagina is bekeken en hoeveel verschillende bezoekers er ongeveer waren.
+          Dat doen we zelf, op onze eigen server.
         </Text>
         <Text>
-          Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. We gebruiken ze alleen
-          daarvoor, bewaren ze niet langer dan nodig en geven ze aan niemand.
+          Van je IP-adres en je browser maakt de server een code, met een willekeurig getal dat alleen voor die dag
+          bestaat. Zo tellen we jou maar één keer per dag. Het adres en de naam van je browser schrijven we nergens op,
+          ook niet in het logboek.
         </Text>
         <Text>
-          Kies je Licht of Donker in de footer, dan bewaart je browser die keuze, alleen op dit apparaat. Wij zien hem
-          niet. Je haalt hem weg door de knop te kiezen die je systeem al geeft, of door de gegevens van de site in je
-          browser te wissen.
+          Tot het einde van de dag staan het getal en de codes in onze database. Daarna gooien we ze weg. We bewaren
+          alleen de totalen, zolang de site bestaat. De volgende dag krijg je een andere code, dus we herkennen je niet
+          van dag tot dag. Het tellen zet niets op je apparaat.
         </Text>
         <Text>
-          Wie inlogt in het beheer krijgt één cookie. Dat geldt alleen voor de paar mensen van de redactie, nooit voor
-          een bezoeker. Het cookie bevat alleen een nummer voor die sessie, niets over jou. Je browser stuurt het alleen
-          naar de pagina&apos;s van het beheer. Het werkt hooguit 7 dagen.
+          Bots, de controles van onze hosting en ons eigen programma dat de koppen ophaalt tellen niet mee. Jij ook
+          niet, als je hebt ingesteld dat je niet gevolgd wilt worden (de instelling Do Not Track of Global Privacy
+          Control).
+        </Text>
+        <Heading level={2}>Wat de hosting bewaart</Heading>
+        <Text>
+          Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. Wij kunnen daar niet bij
+          en gebruiken ze niet.
+        </Text>
+        <Heading level={2}>Wat je browser bewaart</Heading>
+        <Text>
+          Kies je Licht of Donker in de footer, dan bewaart je browser die keuze, alleen op dit apparaat. Wij zien dat
+          niet. Wis de gegevens van de site in je browser om hem weg te halen.
         </Text>
         <Text>
-          Klik je door naar een medium of naar ons forum, dan verlaat je deze site. Voor wat die sites met je gegevens
-          doen, gelden hun eigen regels.
+          Alleen een redacteur die inlogt in het beheer krijgt een cookie. Het bevat een nummer voor die sessie, niets
+          over jou, en het werkt hooguit 7 dagen.
         </Text>
+        <Heading level={2}>Als je ons een bericht stuurt</Heading>
         <Text>
           Stuur je ons een bericht, met het formulier bij <Link href="/contact">Contact</Link> of per mail, dan komt het
           in de mailbox van de redactie. We gebruiken het om te antwoorden en bewaren het tot de zaak is afgehandeld,
           hoogstens een jaar. Het formulier slaat niets op de site zelf op.
         </Text>
+        <Heading level={2}>Andere sites</Heading>
         <Text>
-          Vragen over je gegevens stel je aan de redactie, via het formulier of op <EmailLink />.
+          Klik je door naar een medium of naar ons forum, dan verlaat je deze site. Voor wat die sites met je gegevens
+          doen, gelden hun eigen regels.
         </Text>
+        <Heading level={2}>Vragen en klachten</Heading>
         <Text>
-          Voor een klacht kun je terecht bij de{' '}
+          Vragen over je gegevens stel je aan de redactie, via het formulier of op <EmailLink />. Voor een klacht kun je
+          terecht bij de{' '}
           <Link href="https://www.autoriteitpersoonsgegevens.nl" icon="external-link">
             Autoriteit Persoonsgegevens
           </Link>

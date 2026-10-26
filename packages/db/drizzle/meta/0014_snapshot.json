@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "fb9aee8e-bf18-40ea-934f-f9b5ecd2f5b9",
+  "id": "b8363306-f270-462e-ac10-791886d37c2f",
   "prevId": "56a3a86d-47f5-42e3-8cd9-60654c7fc5c0",
   "tables": {
     "admin_login_attempts": {
@@ -597,6 +597,38 @@
           "name": "audit_log_id",
           "columns": [
             "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "daily_visitors": {
+      "name": "daily_visitors",
+      "columns": {
+        "day": {
+          "name": "day",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "visitors": {
+          "name": "visitors",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "daily_visitors_day": {
+          "name": "daily_visitors_day",
+          "columns": [
+            "day"
           ]
         }
       },
@@ -1323,28 +1355,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "extra_time": {
-          "name": "extra_time",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "penalties_for": {
-          "name": "penalties_for",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "penalties_against": {
-          "name": "penalties_against",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "match_date": {
           "name": "match_date",
           "type": "date",
@@ -1411,20 +1421,48 @@
         "matches_time_or_text": {
           "name": "matches_time_or_text",
           "value": "`matches`.`kickoff_at` is not null or `matches`.`date_text` is not null"
-        },
-        "matches_extra_time_only_in_played_cup": {
-          "name": "matches_extra_time_only_in_played_cup",
-          "value": "`matches`.`extra_time` = 0 or (`matches`.`status` = 'played' and `matches`.`competition` = 'KNVB Beker')"
-        },
-        "matches_penalties_in_a_pair": {
-          "name": "matches_penalties_in_a_pair",
-          "value": "(`matches`.`penalties_for` is null and `matches`.`penalties_against` is null) or (`matches`.`penalties_for` is not null and `matches`.`penalties_against` is not null)"
-        },
-        "matches_penalties_after_level_extra_time": {
-          "name": "matches_penalties_after_level_extra_time",
-          "value": "`matches`.`penalties_for` is null or (`matches`.`extra_time` = 1 and `matches`.`goals_for` = `matches`.`goals_against`)"
         }
       }
+    },
+    "page_views": {
+      "name": "page_views",
+      "columns": {
+        "day": {
+          "name": "day",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "path": {
+          "name": "path",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "views": {
+          "name": "views",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "page_views_day_path": {
+          "name": "page_views_day_path",
+          "columns": [
+            "day",
+            "path"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
     },
     "robots_txt": {
       "name": "robots_txt",
@@ -1740,6 +1778,69 @@
           ]
         }
       },
+      "checkConstraint": {}
+    },
+    "visitor_hashes": {
+      "name": "visitor_hashes",
+      "columns": {
+        "day": {
+          "name": "day",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "hash": {
+          "name": "hash",
+          "type": "char(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "visitor_hashes_day_hash": {
+          "name": "visitor_hashes_day_hash",
+          "columns": [
+            "day",
+            "hash"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "visitor_salts": {
+      "name": "visitor_salts",
+      "columns": {
+        "day": {
+          "name": "day",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "salt": {
+          "name": "salt",
+          "type": "char(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "visitor_salts_day": {
+          "name": "visitor_salts_day",
+          "columns": [
+            "day"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
       "checkConstraint": {}
     },
     "wikipedia_pages": {

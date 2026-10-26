@@ -1,6 +1,7 @@
-import { type NextRequest, NextResponse } from 'next/server'
+import { type NextFetchEvent, type NextRequest, NextResponse } from 'next/server'
 
 import { isIndexable } from './env'
+import { countVisit } from './visits'
 
 /**
  * Blocks requests to other domains: a page loads everything from our own server (editorial
@@ -32,8 +33,14 @@ export function isAdminPath(pathname: string) {
 // goes to no other site. `no-referrer` would do that too, but Chromium then sends `Origin:
 // null` with a form that posts, and Next.js refuses a server action with it, so no form of the
 // admin would work without JavaScript.
-export function proxy(request: NextRequest) {
+//
+// It counts the visit too (see visits.ts). The proxy sees every request before the cache and
+// the page do, so a page counts when it comes from a cache as well. It hands the counting to
+// the server to finish after the response, so the page doesn't wait for the database.
+export function proxy(request: NextRequest, event?: NextFetchEvent) {
   const response = NextResponse.next()
+
+  countVisit(request, (counted) => event?.waitUntil(counted))
 
   response.headers.set('Content-Security-Policy', contentSecurityPolicy)
 

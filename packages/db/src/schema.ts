@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   boolean,
+  char,
   check,
   customType,
   date,
@@ -674,3 +675,54 @@ export const matchImports = mysqlTable('match_imports', {
 })
 
 export type MatchImport = typeof matchImports.$inferSelect
+
+/** The longest path `page_views` keeps. A path of the site is far shorter. */
+export const pageViewPathMaxLength = 100
+
+/**
+ * The page views of the site, one row per day and per page: a counter and nothing about who
+ * looked. `path` is the path of the page without a query. The counters stay. `day` is a day in
+ * the Netherlands (Europe/Amsterdam), as the visitors know it.
+ */
+export const pageViews = mysqlTable(
+  'page_views',
+  {
+    day: date('day', { mode: 'string' }).notNull(),
+    path: varchar('path', { length: pageViewPathMaxLength }).notNull(),
+    views: int('views', { unsigned: true }).notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.day, table.path], name: 'page_views_day_path' })],
+)
+
+/**
+ * The number of different visitors of a day, one row per day: a counter. A visitor counts
+ * once a day, found by `visitor_hashes`. The counters stay.
+ */
+export const dailyVisitors = mysqlTable('daily_visitors', {
+  day: date('day', { mode: 'string' }).primaryKey(),
+  visitors: int('visitors', { unsigned: true }).notNull().default(0),
+})
+
+/**
+ * The salt of a day: 32 random bytes in hex, made with the first visit of that day. A hash of a
+ * visitor is only worth anything with the salt of its day. The row goes as soon as the day is
+ * over, with the hashes of that day (see `removeVisitorData`).
+ */
+export const visitorSalts = mysqlTable('visitor_salts', {
+  day: date('day', { mode: 'string' }).primaryKey(),
+  salt: char('salt', { length: 64 }).notNull(),
+})
+
+/**
+ * The visitors of a day, to count each of them once: the HMAC-SHA-256 (in hex) of the IP
+ * address and the browser text, with the salt of that day. It holds neither the address nor the
+ * text. The rows go as soon as the day is over, so nothing of a visitor survives the day.
+ */
+export const visitorHashes = mysqlTable(
+  'visitor_hashes',
+  {
+    day: date('day', { mode: 'string' }).notNull(),
+    hash: char('hash', { length: 64 }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.day, table.hash], name: 'visitor_hashes_day_hash' })],
+)

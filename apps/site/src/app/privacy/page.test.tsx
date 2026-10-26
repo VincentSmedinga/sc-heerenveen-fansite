@@ -33,54 +33,110 @@ describe('the page Privacy', () => {
     expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
   })
 
-  it('has one h1 and no other heading, and no anchor of its own', () => {
-    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual(['<h1 class="hf-heading-1">Privacy</h1>'])
+  it('has one h1, and an h2 for each part, in order, without an anchor of its own', () => {
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
+      '<h1 class="hf-heading-1">Privacy</h1>',
+      '<h2 class="hf-heading-2">Wat we tellen</h2>',
+      '<h2 class="hf-heading-2">Wat de hosting bewaart</h2>',
+      '<h2 class="hf-heading-2">Wat je browser bewaart</h2>',
+      '<h2 class="hf-heading-2">Als je ons een bericht stuurt</h2>',
+      '<h2 class="hf-heading-2">Andere sites</h2>',
+      '<h2 class="hf-heading-2">Vragen en klachten</h2>',
+    ])
     expect(html).not.toContain(' id=')
   })
 
   it('shows the first paragraph under the h1 as the intro, in a b, and no other paragraph', () => {
-    expect(html).toContain('</h1><p class="hf-intro"><b>De site zet geen cookies, volgt niemand')
+    expect(html).toContain('</h1><p class="hf-intro"><b>Je bent welkom')
     expect(html.match(/class="hf-intro"/g)).toHaveLength(1)
     expect(html.match(/<b>/g)).toHaveLength(1)
   })
 
-  it('says that the site sets no cookies, follows nobody and loads nothing from another domain', () => {
-    expect(html).toContain('De site zet geen cookies, volgt niemand en laadt niets van een ander domein.')
+  it('welcomes the visitor and says that the site sets no cookies, follows nobody and loads nothing from another domain', () => {
+    expect(html).toContain('<b>Je bent welkom en we willen zo weinig mogelijk van je weten.')
+    expect(html).toContain('De site zet geen cookies, volgt niemand en laadt niets van een ander domein.</b></p><h2')
+    expect(html).not.toContain('Toch moeten we')
+    expect(html).not.toContain('niks van je te weten')
+  })
+
+  it('says what we count: per day, how often a page was looked at and about how many visitors, on our own server', () => {
+    const paragraph = html.match(/<p[^>]*>(We tellen alleen per dag.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('hoe vaak elke pagina is bekeken en hoeveel verschillende bezoekers er ongeveer waren')
+    expect(paragraph).toContain('Dat doen we zelf, op onze eigen server.')
+  })
+
+  it('says how the code of the day works, and that the address and the browser text are written down nowhere', () => {
+    const paragraph = html.match(/<p[^>]*>(Van je IP-adres.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('Van je IP-adres en je browser maakt de server een code')
+    expect(paragraph).toContain('een willekeurig getal dat alleen voor die dag bestaat')
+    expect(paragraph).toContain('Zo tellen we jou maar één keer per dag.')
+    expect(paragraph).toContain('Het adres en de naam van je browser schrijven we nergens op, ook niet in het logboek.')
+  })
+
+  it('says, in the order of time, what stays until the end of the day, what is thrown away, what is kept and for how long', () => {
+    const paragraph = html.match(/<p[^>]*>(Tot het einde van de dag.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain(
+      'Tot het einde van de dag staan het getal en de codes in onze database. Daarna gooien we ze weg.',
+    )
+    expect(paragraph).toContain('We bewaren alleen de totalen, zolang de site bestaat.')
+    expect(paragraph).toContain('we herkennen je niet van dag tot dag')
+    expect(paragraph).toContain('Het tellen zet niets op je apparaat.')
+  })
+
+  it('says who is not counted: bots, the checks of the hosting, our own program and whoever asks not to be followed', () => {
+    const paragraph = html.match(/<p[^>]*>(Bots, de controles.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain(
+      'Bots, de controles van onze hosting en ons eigen programma dat de koppen ophaalt tellen niet mee.',
+    )
+    expect(paragraph).toContain('de instelling Do Not Track of Global Privacy Control')
+    expect(html).not.toContain('importer')
+  })
+
+  it('says that the hosting keeps logs with IP addresses, that we cannot read them and do not use them', () => {
+    const paragraph = html.match(/<p[^>]*>(Onze hosting.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('logbestanden bij, met onder meer IP-adressen')
+    expect(paragraph).toContain('Wij kunnen daar niet bij en gebruiken ze niet.')
   })
 
   it('says that the browser keeps the choice for Licht or Donker on the device, that we do not see it, and how to remove it', () => {
     const paragraph = html.match(/<p[^>]*>(Kies je Licht of Donker.*?)<\/p>/)?.[1] ?? ''
 
     expect(paragraph).toContain('bewaart je browser die keuze, alleen op dit apparaat')
-    expect(paragraph).toContain('Wij zien hem niet')
-    expect(paragraph).toContain('de knop te kiezen die je systeem al geeft')
-    expect(paragraph).toContain('de gegevens van de site in je browser te wissen')
+    expect(paragraph).toContain('Wij zien dat niet.')
+    expect(paragraph).toContain('Wis de gegevens van de site in je browser om hem weg te halen.')
   })
 
-  it('says that whoever logs in to the admin gets one cookie, and that a visitor never does', () => {
-    const paragraph = html.match(/<p[^>]*>(Wie inlogt in het beheer.*?)<\/p>/)?.[1] ?? ''
+  it('says that only an editor who logs in to the admin gets a cookie, with a number and nothing about the visitor', () => {
+    const paragraph = html.match(/<p[^>]*>(Alleen een redacteur.*?)<\/p>/)?.[1] ?? ''
 
-    expect(paragraph).toContain('Wie inlogt in het beheer krijgt één cookie.')
-    expect(paragraph).toContain('nooit voor een bezoeker')
-    expect(paragraph).toContain('alleen een nummer voor die sessie, niets over jou')
-    expect(paragraph).toContain('alleen naar de pagina&#x27;s van het beheer')
+    expect(paragraph).toContain('Alleen een redacteur die inlogt in het beheer krijgt een cookie.')
+    expect(paragraph).toContain('een nummer voor die sessie, niets over jou')
     expect(paragraph).toContain('hooguit 7 dagen')
   })
 
-  it('says in paragraphs, not a list, what the logs, the theme, the cookie of the admin, other sites, email, questions and complaints are about', () => {
+  it('says in paragraphs, not a list, what the counting, the logs, the theme, the cookie of the admin, email, other sites, questions and complaints are about', () => {
     const paragraphs = [...withoutIcons(html).matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 
     expect(html).not.toMatch(/<(ul|ol|li)[ >]/)
-    expect(paragraphs).toHaveLength(8)
-    expect(paragraphs[1]).toContain('logbestanden bij, met onder meer IP-adressen')
-    expect(paragraphs[2]).toContain('Kies je Licht of Donker in de footer')
-    expect(paragraphs[3]).toContain('Wie inlogt in het beheer krijgt één cookie.')
-    expect(paragraphs[4]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
-    expect(paragraphs[5]).toContain('dan komt het in de mailbox van de redactie')
-    expect(paragraphs[5]).toContain('bewaren het tot de zaak is afgehandeld, hoogstens een jaar')
-    expect(paragraphs[5]).toContain('Het formulier slaat niets op de site zelf op.')
-    expect(paragraphs[6]).toContain('Vragen over je gegevens stel je aan de redactie')
-    expect(paragraphs[7]).toContain('Autoriteit Persoonsgegevens')
+    expect(paragraphs).toHaveLength(11)
+    expect(paragraphs[1]).toContain('We tellen alleen per dag')
+    expect(paragraphs[2]).toContain('Van je IP-adres')
+    expect(paragraphs[3]).toContain('Tot het einde van de dag')
+    expect(paragraphs[4]).toContain('Bots, de controles')
+    expect(paragraphs[5]).toContain('logbestanden bij, met onder meer IP-adressen')
+    expect(paragraphs[6]).toContain('Kies je Licht of Donker in de footer')
+    expect(paragraphs[7]).toContain('Alleen een redacteur')
+    expect(paragraphs[8]).toContain('dan komt het in de mailbox van de redactie')
+    expect(paragraphs[8]).toContain('bewaren het tot de zaak is afgehandeld, hoogstens een jaar')
+    expect(paragraphs[8]).toContain('Het formulier slaat niets op de site zelf op.')
+    expect(paragraphs[9]).toContain('Klik je door naar een medium of naar ons forum, dan verlaat je deze site.')
+    expect(paragraphs[10]).toContain('Vragen over je gegevens stel je aan de redactie')
+    expect(paragraphs[10]).toContain('Autoriteit Persoonsgegevens')
   })
 
   it('no longer says that we have no data of the visitor', () => {

@@ -1,6 +1,15 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, importResults, importRuns, robotsTxt, sources } from '@fansite/db/schema'
+import {
+  dailyVisitors,
+  feeds,
+  importResults,
+  importRuns,
+  robotsTxt,
+  sources,
+  visitorHashes,
+  visitorSalts,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -223,6 +232,47 @@ describe('the log', () => {
 
     expect((await runs()).map((run) => run.startedAt)).toEqual([recent, start])
     expect(await resultsOf(feed.id)).toHaveLength(2)
+  })
+})
+
+describe('the data of the visitors', () => {
+  it('removes the salt and the hashes of the days that are over, and keeps the counters', async () => {
+    const yesterday = '2026-10-21'
+    const today = '2026-10-22'
+
+    for (const day of [yesterday, today]) {
+      await database.db.insert(visitorSalts).values({ day, salt: 'a'.repeat(64) })
+      await database.db.insert(visitorHashes).values({ day, hash: 'b'.repeat(64) })
+      await database.db.insert(dailyVisitors).values({ day, visitors: 7 })
+    }
+
+    try {
+      await importAt(start)
+
+      expect(await database.db.select().from(visitorSalts)).toMatchObject([{ day: today }])
+      expect(await database.db.select().from(visitorHashes)).toMatchObject([{ day: today }])
+      expect(await database.db.select().from(dailyVisitors)).toMatchObject([
+        { day: yesterday, visitors: 7 },
+        { day: today, visitors: 7 },
+      ])
+    } finally {
+      for (const table of [visitorSalts, visitorHashes, dailyVisitors]) {
+        await database.db.delete(table)
+      }
+    }
+  })
+
+  it('says so and still runs the import when the data cannot be removed', async () => {
+    await database.pool.query('ALTER TABLE visitor_hashes RENAME TO visitor_hashes_away')
+
+    try {
+      const { code, lines } = await importAt(start)
+
+      expect(code).toBe(0)
+      expect(lines[0]).toMatch(/^Visitor data: warning, not removed: /u)
+    } finally {
+      await database.pool.query('ALTER TABLE visitor_hashes_away RENAME TO visitor_hashes')
+    }
   })
 })
 

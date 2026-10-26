@@ -205,6 +205,24 @@ De unieke sleutel weigert een dubbel nummer als dat toch gebeurt.
 Migratie `0013_add_article_versions` voegt `updated_by` toe (eerst leeg, gevuld uit `created_by`, dan verplicht) en zet voor elk artikel dat er al was een versie 1.
 Elke opdracht ervan kan opnieuw draaien, want MariaDB kan een `ALTER TABLE` niet terugdraaien: stopt de migratie halverwege, dan maakt de volgende start hem af.
 
+## De tabellen voor het tellen van bezoeken
+
+De site telt paginaweergaven en unieke bezoekers per dag, zonder iemand te volgen (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)).
+Een dag is een dag in Nederland (Europe/Amsterdam).
+
+| Tabel            | Wat erin staat                                                                              | Blijft het?                |
+| ---------------- | ------------------------------------------------------------------------------------------- | -------------------------- |
+| `page_views`     | Een teller per dag en per pad (`views`); het pad heeft geen zoekvraag                       | Ja                         |
+| `daily_visitors` | Een teller per dag (`visitors`): het aantal verschillende bezoekers                         | Ja                         |
+| `visitor_salts`  | Het zout van de dag: 32 willekeurige bytes in hex                                           | Nee, tot de dag voorbij is |
+| `visitor_hashes` | De HMAC-SHA-256 (hex) van het IP-adres en de browsertekst, met het zout van de dag, per dag | Nee, tot de dag voorbij is |
+
+Alleen `createVisitCounter(db).record(...)` in `src/visits.ts` schrijft in de tabellen, en `removeVisitorData(db, now)` haalt het zout en de kenmerken weg van alle dagen vóór vandaag.
+De site roept de eerste aan, in de proxy.
+De tweede draait bij het eerste verzoek van een nieuwe dag in een proces en bij elke run van de import.
+Het IP-adres en de browsertekst staan in geen enkele tabel; `visits.test.ts` zoekt in alle tabellen naar beide.
+De klikken op links (#292) en de cijfers in het beheer (#293) bouwen hierop.
+
 ## Het logboek van de import en `robots_txt`
 
 Ook deze drie tabellen vult de importer.
@@ -310,7 +328,8 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `standings`, `wikipedia_pages`, `match_imports` en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `standings`, `wikipedia_pages`, `match_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
