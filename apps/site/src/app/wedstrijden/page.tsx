@@ -74,8 +74,8 @@ export default async function MatchesPage() {
           )}
         </Card>
       </Page.Main>
-      {/* The table is wide, so the sidebar is too. On a phone it follows the programme: the table, then the
-          results. */}
+      {/* The table is wide, so the sidebar is too. On a phone it follows the programme: the table,
+          then the results. */}
       <Page.Sidebar aria-label="De stand en de uitslagen" wide>
         <Card aria-labelledby="stand">
           <Heading id="stand" level={2}>
