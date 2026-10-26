@@ -80,7 +80,10 @@ export function SourceCredit({ pages, season }: { pages: PublicWikipediaPage[]; 
   )
 }
 
-/** The caption of the table: what it is, and the day it holds for. */
+/**
+ * The caption of the table, which only a screen reader gets: what it is, and the day it holds
+ * for.
+ */
 export function standingsCaption(rows: PublicStandingsRow[]) {
   const [first] = rows
 

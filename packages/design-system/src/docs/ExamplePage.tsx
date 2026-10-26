@@ -156,10 +156,10 @@ export const ExampleMainWithIntro = () => (
 
 /**
  * The sidebar with two cells of different heights. They stack on their own, not on the rows of
- * the main column.
+ * the main column. With `wide` it is the wide sidebar.
  */
-export const ExampleSidebar = () => (
-  <Page.Sidebar aria-label="Naast het nieuws">
+export const ExampleSidebar = ({ wide = false }: { wide?: boolean }) => (
+  <Page.Sidebar aria-label="Naast het nieuws" wide={wide}>
     <Page.Cell>
       <Heading appearance={3} level={2}>
         Volgende wedstrijd

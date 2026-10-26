@@ -186,3 +186,36 @@ describe('the columns of the body in page.css', () => {
     expect(body).toContain('@media (width >= 56rem)')
   })
 })
+
+describe('the wide sidebar in page.css', () => {
+  const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+  const pageWidth = Number(layout.match(/--hf-page-max-width: (\d+)rem;/)?.[1])
+  const rule = (selector: string) => css.match(new RegExp(String.raw`${selector} \{([^{}]*)\}`))?.[1] ?? ''
+  const wide = css.match(
+    /@media \(width >= 56rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-wide\) \{\s*grid-template-columns: minmax\((\d+)rem, (\d+)rem\) minmax\((\d+)rem, (\d+)rem\);/,
+  )
+
+  it('has a main of 30rem, a sidebar of 32rem and 2rem between them, which fill the page of 64rem', () => {
+    const [, , main, , sidebar] = wide ?? []
+
+    expect(Number(main)).toBe(30)
+    expect(Number(sidebar)).toBe(32)
+    expect(Number(main) + Number(sidebar) + 2).toBe(pageWidth)
+  })
+
+  it('lets the tracks shrink only to a width that fits in 56rem, where the columns start side by side', () => {
+    const [, mainMinimum, , sidebarMinimum] = wide ?? []
+
+    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(56 - 2 - 2)
+  })
+
+  it('is chosen by the sidebar, which the page renders, and leaves the other pages with 38, 2 and 24rem', () => {
+    expect(css.match(/\.hf-page-body:has\(> \.hf-page-sidebar-wide\)/g)).toHaveLength(1)
+    expect(css).toContain('grid-template-columns: minmax(24rem, var(--hf-content-max-width)) minmax(16rem, 24rem);')
+  })
+
+  it('keeps the cells of a wide sidebar under each other, also where two of 16rem fit under the main', () => {
+    expect(rule(String.raw`\.hf-page-sidebar-wide`)).toContain('grid-template-columns: minmax(0, 1fr);')
+    expect(css.indexOf('.hf-page-sidebar-wide {')).toBeGreaterThan(css.indexOf('.hf-page-sidebar {'))
+  })
+})

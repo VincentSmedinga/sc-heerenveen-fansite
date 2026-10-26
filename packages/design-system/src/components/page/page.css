@@ -108,6 +108,11 @@
    * nothing scrolls sideways.
    * The track of a column is a minmax() of fixed sizes, not fr: the space left over is shared out equally until a column is
    * as wide as its maximum.
+   * A page with a wide sidebar (Page.Sidebar with `wide`) divides the same 64rem differently: a
+   * main of 30rem, 2rem of space and a sidebar of 32rem, for a sidebar that holds a table. It
+   * follows the same rules: one track under 56rem, tracks that shrink up to 66rem, and the
+   * sidebar second in the grid. The tracks may shrink to 20rem and 24rem, which with the space
+   * between them (2rem) fit in the 56rem as well.
    * The text in the main lines up with the wordmark of the logo on a wide screen, where the shield hangs in the margin
    * (see .hf-page-header).
    * The sidebar is second in the source and so in the grid. There is no `order`, which would split the reading order from
@@ -141,6 +146,12 @@
     }
   }
 
+  @media (width >= 56rem) {
+    .hf-page-body:has(> .hf-page-sidebar-wide) {
+      grid-template-columns: minmax(20rem, 30rem) minmax(24rem, 32rem);
+    }
+  }
+
   /*
    * A column is a grid of one track, its own, so its cells stack under each other, each as tall as its content, and not
    * on the rows of the other column. That is why a plain grid is enough here: a subgrid would put the cells of both
@@ -167,6 +178,15 @@
 
   .hf-page-sidebar {
     grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  }
+
+  /*
+   * A wide sidebar holds cells that need the width of the column, such as a table, so its cells
+   * never sit side by side, also not under the main, where the track is wide enough for two of
+   * 16rem.
+   */
+  .hf-page-sidebar-wide {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   /*

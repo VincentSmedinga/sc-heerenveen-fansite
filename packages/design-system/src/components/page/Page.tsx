@@ -22,7 +22,15 @@ export type PageMainProps = ComponentPropsWithoutRef<'main'> & {
 
 export type PageProps = ComponentPropsWithoutRef<'div'>
 
-export type PageSidebarProps = ComponentPropsWithoutRef<'aside'>
+export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
+  /**
+   * A wider sidebar and a narrower main column, for a page whose sidebar holds a table or
+   * another cell that needs the width. The columns stay as wide together as without it. Its
+   * cells always sit under each other. It is the Page.Sidebar that tells the Page.Body, so a
+   * page can choose it without owning the Page.Body, which the layout of the site renders.
+   */
+  wide?: boolean
+}
 
 /**
  * The top of the page, on the blue of the header: a `header` element, which is the page's
@@ -63,10 +71,11 @@ const Main = ({ children, className, intro, ...props }: PageMainProps) => (
 
 /**
  * The sidebar, an `aside`: beside the Page.Main, or under it on a narrow screen. Each of its
- * children is a cell.
+ * children is a cell. With `wide` the sidebar is wider than the main column and its cells
+ * never sit side by side.
  */
-const Sidebar = ({ className, ...props }: PageSidebarProps) => (
-  <aside className={classNames('hf-page-sidebar', className)} {...props} />
+const Sidebar = ({ className, wide = false, ...props }: PageSidebarProps) => (
+  <aside className={classNames('hf-page-sidebar', wide && 'hf-page-sidebar-wide', className)} {...props} />
 )
 
 /**

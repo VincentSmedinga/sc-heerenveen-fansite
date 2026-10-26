@@ -864,7 +864,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
   it('shows three clubs of the table, sc Heerenveen in the middle, with the real positions and its row marked', async () => {
     const html = await renderStandingsCard()
 
-    expect(html).toContain('<caption>Stand op 18 oktober 2026</caption>')
+    expect(html).toContain('<caption class="hf-visually-hidden">Stand op 18 oktober 2026</caption>')
     expect(html.match(/<th scope="row">[^<]*/g)).toEqual([
       '<th scope="row">Demo Boys',
       '<th scope="row">sc Heerenveen',
