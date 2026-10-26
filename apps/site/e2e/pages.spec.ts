@@ -66,6 +66,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'moderator', path: '/beheer/artikelen', status: 404 },
   { admin: 'moderator', path: '/beheer/artikelen/nieuw', status: 404 },
   { admin: 'moderator', path: '/beheer/artikelen/{published}/versies/1', status: 404 },
+  // The numbers of the visit are for a beheerder. A moderator gets "niet gevonden".
+  { admin: 'beheerder', path: '/beheer/bezoek', status: 200 },
+  { admin: 'moderator', path: '/beheer/bezoek', status: 404 },
   // An article of the editors, and the addresses that must say "niet gevonden": a draft, an
   // article for later, an address that isn't an article and one in capitals.
   { path: `/redactie/${testArticles.published.slug}`, status: 200 },

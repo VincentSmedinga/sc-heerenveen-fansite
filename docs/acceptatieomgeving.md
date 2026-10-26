@@ -278,8 +278,9 @@ Zo kan niemand nagaan wie een account heeft.
   Een sessie eindigt na 12 uur zonder gebruik, en na 7 dagen hoe dan ook.
   Uitloggen verwijdert de sessie op de server.
 - Alles onder `/beheer` krijgt `X-Robots-Tag: noindex, nofollow` en `Cache-Control: no-store`, ook op productie, en `robots.txt` weigert `/beheer` op elke omgeving.
-- Het beheer heeft twee schermen.
+- Het beheer heeft drie schermen.
   `/beheer/artikelen` is voor een beheerder: daar schrijft, bekijkt, publiceert en trekt hij een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)).
+  `/beheer/bezoek` is voor een beheerder: de bezoekers en paginaweergaven van de laatste dagen en de meest bekeken pagina's (zie _Bezoekers tellen_ hieronder).
   `/beheer/berichten` is voor een beheerder of moderator, die er een bericht verbergt, met een reden, en het weer toont.
   Een verborgen bericht staat binnen vijf minuten niet meer op de homepage en op `/podcasts`, en de import zet het niet terug.
   De lijst toont ook de berichten die het relevantiefilter een twijfelgeval vond of niet over de club; die staan niet op de site (zie _Het relevantiefilter_ in de [README van de importer](../apps/importer/README.md)).
@@ -441,7 +442,7 @@ We weten nog niet of de host het adres van de bezoeker meestuurt in de header `X
 Controleer dat op acceptatie, in de eerste dagen na de deploy:
 
 1. Open in een gewone browser, zonder blokkeerder en zonder Do Not Track, een paar pagina's van <https://acc.sc.heerenveen.org>.
-2. Kijk in phpMyAdmin:
+2. Kijk op `/beheer/bezoek` (als beheerder), of in phpMyAdmin:
 
    ```sql
    SELECT * FROM page_views ORDER BY day DESC, views DESC;

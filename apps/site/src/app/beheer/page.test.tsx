@@ -60,12 +60,13 @@ describe('the admin', () => {
     ])
   })
 
-  it('links a beheerder to the articles, and a moderator, who may not write them, only to the items', async () => {
+  it('links a beheerder to the articles and the numbers, and a moderator, who may not see them, only to the items', async () => {
     requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
 
     expect(renderToStaticMarkup(await AdminPage()).match(/<a [^>]*>(.*?)<\/a>/g)).toEqual([
       '<a href="/beheer/berichten">Berichten verbergen of weer tonen</a>',
       '<a href="/beheer/artikelen">Artikelen schrijven en publiceren</a>',
+      '<a href="/beheer/bezoek">Cijfers over het bezoek</a>',
     ])
 
     requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
