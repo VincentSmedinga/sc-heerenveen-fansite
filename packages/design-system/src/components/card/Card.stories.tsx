@@ -37,7 +37,7 @@ const meta = preview.meta({
         component: [
           'Een kaart zet een blok van de pagina op een eigen vlak, met een rand en ronde hoeken.',
           'Zo staat elk blok los op de pagina, en dat geeft de pagina rust en richting.',
-          'Een kaart met het vlak `transparent` heeft dezelfde binnenruimte, maar geen rand en achtergrond die je ziet: de tekst erin staat op één lijn met de tekst in de andere kaarten.',
+          'Een kaart met het vlak `transparent` heeft geen rand en achtergrond die je ziet, en geen binnenruimte boven en onder: de tekst erin staat op één lijn met de tekst in de andere kaarten, zonder dat de ruimte tussen de kaarten groter wordt.',
           'Staat er direct onder de kop een lijst, dan is de ruimte daartussen groter dan bij tekst, zodat de eerste regel van de lijst niet tegen de kop zit.',
           'Onder de lijst kan een formulier met een knop staan, zoals "Laad 5 meer" in de kaart met nieuws.',
         ].join('\n'),

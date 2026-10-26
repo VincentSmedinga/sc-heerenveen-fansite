@@ -21,8 +21,9 @@ export type CardProps = ComponentPropsWithoutRef<'section'> & {
   as?: CardElement
   /**
    * The surface: `default` is the white one. Its background and border come from the colour
-   * tokens of that surface. `transparent` keeps the padding and the space of the border, so the
-   * text sits where it does in the other cards, but shows no background or border.
+   * tokens of that surface. `transparent` keeps the padding at the sides and the space of the
+   * border, so the text sits where it does in the other cards, but shows no background or
+   * border and has no padding above and below.
    */
   surface?: CardSurface
 }

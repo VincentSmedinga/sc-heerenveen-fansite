@@ -134,11 +134,15 @@ describe('the transparent surface in card.css', () => {
 
     expect(transparent).toContain('background-color: transparent;')
     expect(transparent).toContain('border-color: transparent;')
-    expect(transparent).not.toMatch(/(^|\s)(border|border-width|border-style|padding)[a-z-]*: (?!transparent|Canvas)/)
-    expect(transparent).not.toMatch(/(^|\s)(border:|border-width:|border-style:|padding)/)
-    // .hf-card has the border (1px solid) and the padding, which this surface does not change.
+    expect(transparent).not.toMatch(/(^|\s)(border:|border-width:|border-style:)/)
+    // .hf-card has the border (1px solid) and the side padding, which this surface keeps.
     expect(rule(String.raw`\.hf-card`)).toContain('border: 1px solid')
     expect(rule(String.raw`\.hf-card`)).toContain('padding: 1rem 1.25rem;')
+    expect(transparent).not.toMatch(/(^|\s)(padding|padding-inline|padding-inline-start|padding-inline-end):/)
+  })
+
+  it('has no padding above and below, which would only add to the gap between the cells', () => {
+    expect(rule(String.raw`\.hf-card-transparent`)).toContain('padding-block: 0;')
   })
 
   it('draws no border in forced colours either', () => {

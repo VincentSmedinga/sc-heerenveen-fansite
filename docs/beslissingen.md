@@ -2797,13 +2797,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 ### De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis
 
 - **Datum:** 26 oktober 2026
-- **Besluit:** de bronvermelding van Wikipedia staat in een kaart met dezelfde opvulling als de andere kaarten maar zonder zichtbare rand en achtergrond (`Card` met `surface="transparent"`), en linkt alleen naar de pagina van Wikipedia, niet naar zijn geschiedenis.
+- **Besluit:** de bronvermelding van Wikipedia staat in een kaart met dezelfde opvulling aan de zijkanten als de andere kaarten maar zonder zichtbare rand en achtergrond (`Card` met `surface="transparent"`), en linkt alleen naar de pagina van Wikipedia, niet naar zijn geschiedenis.
   Ze zegt dus "Bron: Wikipedia (CC BY-SA 4.0), pagina: Eredivisie 2026/27", de tijd van de laatste keer lezen en dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
   `WikipediaCredit` heeft de eigenschap `historyHref` niet meer.
 - **Waarom:** de tekst staat dan op één lijn met de tekst in de kaarten erboven.
   Eén link is rustiger, en Wikipedia aanvaardt een link naar het artikel als bronvermelding.
 - **Hoe:** de kaart zit in `SourceCredit` van de site, niet in `WikipediaCredit`, want de korte vorm onder de blokken op de homepage staat al in een kaart en die tekst staat al op één lijn met de rest.
   De rand van de doorzichtige kaart blijft in de lay-out, zodat de tekst op dezelfde plek staat als in een kaart met een rand.
+  Boven en onder heeft hij geen opvulling: die telde bij de ruimte van 2 rem tussen de cellen op en gaf bijna 3,5 rem tussen de laatste kaart en de tekst, wat de projecteigenaar te veel vond (26 oktober 2026).
   In forced colours heeft hij de kleur van de achtergrond, zodat hij ook daar niet te zien is.
 - **Alternatieven:** de bronvermelding zonder kaart laten (de tekst staat dan aan de rand van de kolom, naast de tekst in de kaarten); de link naar de geschiedenis houden (volledig, maar twee links in een zin die voor het oog een bijzaak is).
   **Let op:** de CC BY-SA vraagt een aanduiding van de auteurs op een redelijke manier; een link naar het artikel voldoet volgens de uitleg van Wikipedia over hergebruik, maar geen jurist heeft dat getoetst.
