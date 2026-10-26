@@ -636,7 +636,10 @@ await withEmptyDatabase((database) =>
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
     assert.match(matchesHtml, /Testdorp FC/)
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
-    assert.match(matchesHtml, /<h2[^>]*id="topscorers"><a class="hf-heading-link" href="#topscorers">Topscorer/)
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="topscorers">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#topscorers">Topscorer/,
+    )
     assert.match(
       matchesHtml,
       /<caption class="hf-visually-hidden">Topscorers van sc Heerenveen in het seizoen \d{4}\/\d{2}, /,

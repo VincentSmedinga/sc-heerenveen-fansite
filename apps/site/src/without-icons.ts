@@ -17,12 +17,14 @@ export const withoutIcons = (html: string) =>
  * it is.
  */
 export const withoutHeadingLinks = (html: string) =>
-  html.replace(/<a class="hf-heading-link" href="#[^"]*">(.*?)<\/a>/g, (_, inner: string) => withoutIcons(inner))
+  html
+    .replace(/<span class="hf-heading-target"><svg\b.*?<\/svg><\/span>/g, '')
+    .replace(/<a class="hf-heading-link" href="#[^"]*">(.*?)<\/a>/g, (_, inner: string) => withoutIcons(inner))
 
 /** The id and the text of each heading with an anchor, in the order of the page. */
 export const headingAnchors = (html: string) =>
   [
     ...html.matchAll(
-      /<h[2-4] [^>]*id="([^"]*)"[^>]*>(?:<span class="hf-heading-alias"[^>]*><\/span>)*<a class="hf-heading-link" href="#\1">(.*?)<\/a><\/h[2-4]>/g,
+      /<h[2-4] [^>]*id="([^"]*)"[^>]*>(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias"[^>]*><\/span>)*<a class="hf-heading-link" href="#\1">(.*?)<\/a><\/h[2-4]>/g,
     ),
   ].map(([, id, inner]) => [id, withoutIcons(inner ?? '')])

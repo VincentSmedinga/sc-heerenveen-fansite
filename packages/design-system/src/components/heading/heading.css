@@ -192,26 +192,39 @@
   }
 
   /*
-   * The heading that a link brings the visitor to is marked with a bar in the margin at the
-   * start side, in the colour of the accents: calm, without movement, also when the visitor
-   * prefers less. An old anchor (an empty element) brings the visitor to the same heading, so
-   * the heading counts as the target when it holds one. In forced colours a background is not
-   * drawn, so the heading gets an outline.
+   * The heading that a link brings the visitor to is marked with an arrow in the margin at the
+   * start side, pointing at it, in the colour of the focus: calm, without movement, also when
+   * the visitor prefers less. An old anchor (an empty element) brings the visitor to the same
+   * heading, so the heading counts as the target when it holds one. The arrow is drawn in the
+   * markup, because a style can't draw an icon without a request for it, and the icon takes the
+   * colour of the system in forced colours. It stands in the middle of the space at the start
+   * side of the heading: the padding of a card (the card says how wide it is in
+   * `--hf-heading-gutter`) or, without a card, the margin of the page.
    */
-  .hf-heading-anchored:is(:target, :has(:target))::before {
-    background-color: var(--hf-colour-text-accent);
-    border-radius: 0.125rem;
-    content: '';
-    inline-size: 0.25rem;
-    inset-block: 0.125em;
-    inset-inline-start: -0.75rem;
-    position: absolute;
+  .hf-heading-target {
+    display: none;
   }
 
-  @media (forced-colors: active) {
-    .hf-heading-anchored:is(:target, :has(:target)) {
-      outline: 0.1875rem solid Highlight;
-      outline-offset: 0.25rem;
+  .hf-heading-anchored:is(:target, :has(:target)) > .hf-heading-target {
+    color: var(--hf-colour-focus);
+    display: block;
+    inset-block-start: calc((1lh - 0.875rem) / 2);
+    inset-inline-start: calc(-0.5 * var(--hf-heading-gutter, 1rem) - 0.4375rem);
+    position: absolute;
+
+    .hf-icon {
+      block-size: 0.875rem;
+      display: block;
+      inline-size: 0.875rem;
+      margin: 0;
+    }
+
+    @media (forced-colors: active) {
+      color: Highlight;
+    }
+
+    @media print {
+      display: none;
     }
   }
 }

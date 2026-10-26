@@ -93,7 +93,8 @@ const checkAnchor = (level: number, id: string, aliases: readonly string[]) => {
  * With `anchor` the heading is a link to itself: its text is the link, in the colour of the
  * heading, with a chain link behind it that shows with the mouse over it, with the focus, and
  * always on a touch screen. The name of the link is the text of the heading. The page chooses
- * the `id` (see anchor.ts for the rules) and the heading that is the target gets a marker.
+ * the `id` (see anchor.ts for the rules) and the heading that is the target gets an arrow in
+ * front of it, in the colour of the focus.
  */
 export const Heading = ({
   aliases = [],
@@ -120,6 +121,9 @@ export const Heading = ({
 
   return (
     <Element className={classNames(style, 'hf-heading-anchored', className)} id={id} {...props}>
+      <span className="hf-heading-target">
+        <Icon name="arrow-right" />
+      </span>
       {aliases.map((alias) => (
         <span className="hf-heading-alias" id={alias} key={alias} />
       ))}

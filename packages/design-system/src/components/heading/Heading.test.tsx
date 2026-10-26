@@ -84,6 +84,21 @@ describe('Heading with an anchor', () => {
     expect(screen.getAllByRole('link')).toHaveLength(1)
   })
 
+  it('has an arrow for the target in front of the text, that assistive technology skips', () => {
+    render(
+      <Heading anchor id="stand" level={2}>
+        Stand
+      </Heading>,
+    )
+    const heading = screen.getByRole('heading')
+    const arrow = heading.querySelector('.hf-heading-target')
+
+    expect(heading.firstElementChild).toBe(arrow)
+    expect(arrow?.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+    expect(screen.getByRole('link', { name: 'Stand' }).contains(arrow)).toBe(false)
+    expect(screen.getByRole('heading', { name: 'Stand' })).toBe(heading)
+  })
+
   it('draws a chain link behind the text that assistive technology skips and that adds nothing to the name', () => {
     render(
       <Heading anchor id="cookies" level={3}>
@@ -149,7 +164,7 @@ describe('Heading with an anchor', () => {
 
     expect(old.map((element) => element.id)).toEqual(['wat-we-doen', 'versie-0.2.0'])
     expect(old.every((element) => element.childNodes.length === 0)).toBe(true)
-    expect(heading.firstElementChild?.id).toBe('wat-we-doen')
+    expect(heading.children[1]?.id).toBe('wat-we-doen')
     expect(container.querySelector('[id="versie-0.2.0"]')).toBe(old[1])
     // The old anchors add nothing to what a screen reader reads.
     expect(screen.getByRole('heading', { name: 'Hoe we werken' })).toBe(heading)

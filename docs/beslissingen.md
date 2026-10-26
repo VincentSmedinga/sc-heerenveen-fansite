@@ -2086,7 +2086,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Met een muis (`@media (hover: hover)`) is het pictogram er bij hover en bij focus van het toetsenbord, en het houdt zijn plaats, zodat er niets verschuift.
   Op een aanraakscherm staat het altijd, in de kleur van secundaire tekst, en bij hover of focus in de kleur van links.
   Het blijft bij de laatste letter van het laatste woord, zodat het niet alleen op een regel komt en een lang woord toch kan afbreken.
-  Het doel (`:target`) krijgt een balk aan de beginkant in de kleur van de accenten, zonder beweging; in forced colours is dat een omlijning.
+  Het doel (`:target`) krijgt een pijl (`arrow-right`) aan de beginkant, in het midden van de opvulling van de kaart (zonder kaart in de marge van de pagina), in de kleur van de focus, zonder beweging; in forced colours heeft de pijl de kleur van het systeem.
+  De projecteigenaar koos de pijl in plaats van een balk in de kleur van de accenten (26 oktober 2026), en de kleur van de focus omdat die al zegt waar je bent.
+  `Card` zegt in `--hf-heading-gutter` hoe breed die opvulling is.
+  De pijl staat in de opmaak, niet in de stijl, want een stijl kan geen pictogram tekenen zonder een verzoek om een afbeelding, en de regels van de site staan dat niet toe.
   Bij het afdrukken valt het pictogram weg.
 - **Alternatieven:** een hekje (`#`) achter de kop (bekend bij technische lezers, minder bij supporters); een pictogram in de marge links van de kop (past niet in een kaart met opvulling en komt buiten het scherm op een telefoon); een aparte link met de tekst "Link naar dit kopje" (extra tekst bij elke kop, die een schermlezer steeds opnieuw voorleest).
 
@@ -2913,6 +2916,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gevolg:** de kop van een versie op Updates heet nu `versie-0-1-0`, want een punt hoort niet in een anker.
   Het oude `versie-0.1.0` blijft als oud anker, en de feed linkt er nog naar, omdat die link de `guid` is en een nieuwe `guid` elke versie als nieuw toont in een feedlezer.
   De kop van `/wedstrijden` met de wedstrijden zonder tegendoelpunt heet nu `de-nul-gehouden`, met `nul-gehouden` als oud anker.
+  `/bronnen` heeft ankers voor elk soort bron (`nieuws`, `podcasts`, `forum`, `club`, `video`) en voor de twee kaarten in de zijbalk (`voorstellen`, `uitgever`).
+  De Engelse `id`'s die daar alleen voor `aria-labelledby` dienden (`news-heading`) zijn daarvoor vervangen, want een kop met een anker heeft een Nederlands `id`.
   `/podcasts` heeft geen anker: de kop "Over" met de naam van de podcast staat er alleen bij een gekozen podcast, en niemand linkt naar dat deel.
 - **Alternatieven:** een controle op de bronbestanden in plaats van de gebouwde pagina's (ziet niet wat de bezoeker krijgt, en niet de ankers die uit gegevens komen); alle ankers uit de pagina's halen en bewaren in een bestand dat de build maakt (de lijst is dan geen keuze meer, maar een afspiegeling); een toets in de e2e-controle in de browser (trager, en axe toetst dit niet).
 

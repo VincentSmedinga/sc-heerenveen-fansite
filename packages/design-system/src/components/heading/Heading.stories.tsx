@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { Card } from '../card/Card'
 import { Text } from '../text/Text'
 import { Heading } from './Heading'
 
@@ -20,7 +21,7 @@ const meta = preview.meta({
           'De tekst van de kop is de link, in de kleur van de kop en zonder streep eronder, met een ketting erachter.',
           'De naam van de link is dus de tekst van de kop, en het pictogram is verborgen voor een schermlezer.',
           'Met een muis verschijnt de ketting bij hover en bij focus van het toetsenbord; op een aanraakscherm staat hij altijd, rustig in de kleur van secundaire tekst.',
-          'De kop waar een link naartoe wijst krijgt een rustige markering aan de beginkant, zonder beweging.',
+          'De kop waar een link naartoe wijst krijgt een pijl aan de beginkant, in de kleur van de focus, zonder beweging.',
           '',
           '**Het anker is een `id` dat jij kiest.**',
           'Het wordt niet uit de tekst van de kop gemaakt, zodat de link gelijk blijft als de kop wordt aangepast.',
@@ -199,22 +200,22 @@ const aimAt = (id: string) => () => {
 }
 
 const target = () => (
-  <section className="_hf-docs-card" style={{ maxInlineSize: '32rem', paddingInlineStart: '1.5rem' }}>
+  <Card as="section" style={{ maxInlineSize: '32rem' }}>
     <Heading anchor id="de-stand" level={2}>
       De stand
     </Heading>
-    <Text>Deze kop is het doel van de link: er staat een balk aan de beginkant.</Text>
+    <Text>Deze kop is het doel van de link: er staat een pijl aan de beginkant.</Text>
     <Heading anchor id="de-uitslagen" level={2}>
       De uitslagen
     </Heading>
-  </section>
+  </Card>
 )
 
 const targetParameters = {
   docs: {
     description: {
       story:
-        'Wie via een link met `#de-stand` komt, ziet welk deel is bedoeld: een balk aan de beginkant in de kleur van de accenten, zonder beweging. In geforceerde kleuren is het een omlijning. Op deze pagina met alle voorbeelden is de markering alleen te zien in de losse story.',
+        'Wie via een link met `#de-stand` komt, ziet welk deel is bedoeld: een pijl aan de beginkant in de kleur van de focus, zonder beweging. In geforceerde kleuren heeft de pijl de kleur van het systeem. Op deze pagina met alle voorbeelden is de markering alleen te zien in de losse story.',
     },
   },
 }
@@ -309,7 +310,7 @@ export const LongWordDark = meta.story({
 })
 
 const withAliases = () => (
-  <section className="_hf-docs-card" style={{ maxInlineSize: '32rem', paddingInlineStart: '1.5rem' }}>
+  <Card as="section" style={{ maxInlineSize: '32rem' }}>
     <Heading aliases={['wat-we-doen', 'werkwijze']} anchor id="hoe-we-werken" level={2}>
       Hoe we werken
     </Heading>
@@ -317,7 +318,7 @@ const withAliases = () => (
       Deze kop heette eerst "Wat we doen". Een link naar <a href="#wat-we-doen">#wat-we-doen</a> of naar{' '}
       <a href="#werkwijze">#werkwijze</a> brengt je hier nog steeds.
     </Text>
-  </section>
+  </Card>
 )
 
 const withAliasesParameters = {

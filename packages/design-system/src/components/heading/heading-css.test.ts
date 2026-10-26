@@ -112,14 +112,19 @@ describe('the anchor in heading.css', () => {
     expect(css).toMatch(/@media \(forced-colors: active\) \{\s*\.hf-icon,[^}]*color: LinkText;/)
   })
 
-  it('marks the target with a bar at the start side in the accent colour, and with an outline in forced colours', () => {
+  it('marks the target with an arrow in the margin at the start side, in the focus colour', () => {
+    expect(css).toMatch(/\.hf-heading-target \{\s*display: none;\s*\}/)
     expect(css).toMatch(
-      /:is\(:target, :has\(:target\)\)::before \{[^}]*background-color: var\(--hf-colour-text-accent\);/,
+      /:is\(:target, :has\(:target\)\) > \.hf-heading-target \{[^}]*color: var\(--hf-colour-focus\);[^}]*display: block;/,
     )
-    expect(css).toMatch(/inset-inline-start: -0\.75rem;/)
-    expect(css).toMatch(
-      /@media \(forced-colors: active\) \{\s*\.hf-heading-anchored:is\(:target, :has\(:target\)\) \{\s*outline:/,
-    )
+    // Half the space at the start side of the heading, and half the width of the arrow.
+    expect(css).toMatch(/inset-inline-start: calc\(-0\.5 \* var\(--hf-heading-gutter, 1rem\) - 0\.4375rem\);/)
+    expect(css).not.toMatch(/--hf-colour-text-accent|background-color|::before/)
+  })
+
+  it('gives the arrow the colour of the system in forced colours, and does not print it', () => {
+    expect(css).toMatch(/@media \(forced-colors: active\) \{\s*color: Highlight;/)
+    expect(css).toMatch(/@media print \{\s*display: none;\s*\}/)
   })
 
   it('keeps room above the target and above an old anchor, and moves nothing', () => {

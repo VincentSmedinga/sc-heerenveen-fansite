@@ -5,7 +5,7 @@ import { anchorProblems, publishedAnchors } from './anchors'
 
 /** A heading with an anchor, as the Heading of the design system draws it. */
 const heading = (id: string, old: readonly string[] = []) =>
-  `<h2 class="hf-heading-2 hf-heading-anchored" id="${id}">${old
+  `<h2 class="hf-heading-2 hf-heading-anchored" id="${id}"><span class="hf-heading-target"><svg></svg></span>${old
     .map((alias) => `<span class="hf-heading-alias" id="${alias}"></span>`)
     .join('')}<a class="hf-heading-link" href="#${id}">Kop</a></h2>`
 

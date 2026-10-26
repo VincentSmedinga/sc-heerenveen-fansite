@@ -46,11 +46,11 @@ describe('the page /wedstrijden', () => {
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Wedstrijden</h1>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><a class="hf-heading-link" href="#programma">Programma</a></h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><a class="hf-heading-link" href="#stand">Stand</a></h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="topscorers"><a class="hf-heading-link" href="#topscorers">Topscorers</a></h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="de-nul-gehouden"><span class="hf-heading-alias" id="nul-gehouden"></span><a class="hf-heading-link" href="#de-nul-gehouden">De nul gehouden</a></h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><a class="hf-heading-link" href="#uitslagen">Uitslagen</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#programma">Programma</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#stand">Stand</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="topscorers"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#topscorers">Topscorers</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="de-nul-gehouden"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="nul-gehouden"></span><a class="hf-heading-link" href="#de-nul-gehouden">De nul gehouden</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen">Uitslagen</a></h2>',
     ])
   })
 

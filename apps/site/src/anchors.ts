@@ -17,6 +17,7 @@
 
 /** The anchors per page, as the address of the page without the part after the hash. */
 export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
+  '/bronnen': ['nieuws', 'podcasts', 'forum', 'voorstellen', 'uitgever'],
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
@@ -29,7 +30,7 @@ const idPattern = /\sid="([^"]*)"/g
 
 // The id of each heading that is a link to itself: the old anchors, empty elements, come first.
 const anchoredHeadingPattern =
-  /<h[2-4]\s[^>]*?\sid="([^"]*)"[^>]*>(?:<span class="hf-heading-alias"[^>]*><\/span>)*<a class="hf-heading-link"/g
+  /<h[2-4]\s[^>]*?\sid="([^"]*)"[^>]*>(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias"[^>]*><\/span>)*<a class="hf-heading-link"/g
 
 /**
  * What is wrong with the anchors on a page, as lines for a person to read; an empty list means

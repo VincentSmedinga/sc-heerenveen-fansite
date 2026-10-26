@@ -151,3 +151,17 @@ describe('the transparent surface in card.css', () => {
     )
   })
 })
+
+describe('the space for the arrow of a heading in card.css', () => {
+  const css = readFileSync(join(import.meta.dirname, 'card.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+
+  it('says how wide the padding at the start side is, so the arrow of a heading with an anchor stands in the middle of it', () => {
+    const narrow = /--hf-heading-gutter: ([\d.]+rem);\s*@media/.exec(css)?.[1]
+    const wide =
+      /@media \(width >= 40rem\) \{\s*--hf-heading-gutter: ([\d.]+rem);\s*padding: [\d.]+rem ([\d.]+rem);/.exec(css)
+
+    expect(narrow).toBe('1.25rem')
+    expect(css).toContain('padding: 1rem 1.25rem;')
+    expect(wide?.[1]).toBe(wide?.[2])
+  })
+})
