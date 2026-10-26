@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { type NextFetchEvent, NextRequest } from 'next/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { config, contentSecurityPolicy, isAdminPath, proxy as proxyOf } from './proxy'
@@ -7,6 +7,7 @@ import { config, contentSecurityPolicy, isAdminPath, proxy as proxyOf } from './
 const proxy = (path = '/') => proxyOf(new NextRequest(new URL(path, 'http://localhost:3000')))
 
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.unstubAllEnvs()
 })
 
@@ -97,6 +98,33 @@ describe('proxy', () => {
       false,
       false,
     ])
+  })
+
+  it('counts a visit in the background and answers like before, also when the database does not answer', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const waitUntil = vi.fn()
+    const request = new NextRequest(new URL('/privacy', 'http://localhost:3000'), {
+      headers: {
+        accept: 'text/html',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0',
+        'x-forwarded-for': '203.0.113.7',
+      },
+    })
+
+    // Nothing listens on port 1, so the connection is refused.
+    vi.stubEnv('SITE_ENV', 'production')
+    vi.stubEnv('DATABASE_URL', 'mysql://nobody:secret@127.0.0.1:1/fansite')
+
+    const response = proxyOf(request, { waitUntil } as unknown as NextFetchEvent)
+
+    expect(response.headers.get('Content-Security-Policy')).toBe(contentSecurityPolicy)
+    expect(waitUntil).toHaveBeenCalledOnce()
+    // The counting ends without an error, and the log says what went wrong, without the
+    // address of the visitor.
+    await expect(waitUntil.mock.calls[0]?.[0]).resolves.toBeUndefined()
+    expect(error).toHaveBeenCalledOnce()
+    expect(String(error.mock.calls[0]?.[0])).not.toContain('203.0.113.7')
+    error.mockRestore()
   })
 
   it('runs for every path', () => {

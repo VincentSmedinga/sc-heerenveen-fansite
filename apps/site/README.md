@@ -303,6 +303,11 @@ Chrome en Firefox nemen dat aan op `localhost`; Safari niet, dus log lokaal in m
 - `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
 - De proxy (`src/proxy.ts`) geeft elk antwoord onder `/beheer` de headers `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: same-origin`, op elke omgeving.
   De proxy is geen toegangscontrole.
+- De proxy telt ook de bezoeken (`src/visits.ts`): per dag de paginaweergaven per pagina en het aantal unieke bezoekers, zonder cookie, script of opslag in de browser.
+  Hij doet dat na het antwoord, dus een pagina wacht er niet op, en ook als de pagina uit een cache komt.
+  Zie _We tellen paginaweergaven en unieke bezoekers per dag_ in `docs/beslissingen.md`.
+  Kijk de tellers in phpMyAdmin na met `SELECT * FROM page_views ORDER BY day DESC, views DESC` en `SELECT * FROM daily_visitors`.
+  Lokaal stuurt `next dev` het adres van je eigen computer mee, dat niet telt als bezoeker: je ziet dan wel weergaven en geen bezoekers.
 - Een inloglink, een sessie en een teller van pogingen staan in de database (`admin_login_links`, `admin_sessions`, `admin_login_attempts`).
   Van een link en een sessie bewaart de tabel alleen de SHA-256 van de token.
   De teller bewaart de SHA-256 van het adres en de tijd, en geen IP-adres.

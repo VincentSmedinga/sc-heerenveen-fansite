@@ -14,6 +14,7 @@
     "./schema": "./src/schema.ts",
     "./season": "./src/season.ts",
     "./seed": "./src/seed.ts",
+    "./visits": "./src/visits.ts",
     "./test-database": "./src/test-database.ts"
   },
   "scripts": {

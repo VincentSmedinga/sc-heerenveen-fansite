@@ -5,6 +5,7 @@ import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { discussions, feeds, items, sources } from '@fansite/db/schema'
+import { removeVisitorData } from '@fansite/db/visits'
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
 import type { Fetcher, RobotsStore } from './fetcher.ts'
@@ -272,6 +273,12 @@ export async function runImport(
       const runId = await startRun(db, clock())
 
       await removeOldRuns(db, clock())
+      // The salt and the hashes of the visitors of a day go once the day is over, also on a day
+      // when nobody visits the site (see the privacy page). A failure is a warning, not a
+      // failed import.
+      await removeVisitorData(db, clock()).catch((error: unknown) =>
+        write(`Visitor data: warning, not removed: ${describeError(error)}`),
+      )
 
       const fetcher = makeFetcher(robotsStoreFor(db, clock))
       const [reports, matchReport] = await Promise.allSettled([

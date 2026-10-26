@@ -8,6 +8,7 @@
 //
 //   node scripts/smoke.js <folder with apps/site/server.js>
 import { connect } from '@fansite/db/client'
+import { visitDay } from '@fansite/db/visits'
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
@@ -115,6 +116,107 @@ async function checkAdmin() {
   assert.match(robots, /^Disallow: \/beheer$/m, 'robots.txt must refuse /beheer')
 
   return responses
+}
+
+/**
+ * Lists the names of the cascade layers in some CSS, in the order they first appear in a
+ * statement or a block.
+ */
+/**
+ * Checks the counting of the visits on a server that runs: a few visits of two visitors and
+ * the requests that must not count. The counting runs after the response, so the numbers are
+ * read once they are in. Nothing in the database may hold the address or the browser text.
+ */
+async function checkCounting(database) {
+  const browser = 'Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0'
+  const visitor = (address, headers = {}) => ({
+    accept: 'text/html',
+    'user-agent': browser,
+    'x-forwarded-for': address,
+    ...headers,
+  })
+  const get = async (path, headers) => {
+    const response = await fetch(origin + path, { headers, redirect: 'manual' })
+    await response.arrayBuffer()
+    assert.equal(response.headers.get('set-cookie'), null, `${path} sets a cookie`)
+
+    return response
+  }
+
+  for (let visit = 0; visit < 3; visit++) {
+    await get('/privacy?nieuws=1', visitor('203.0.113.7'))
+  }
+
+  await get('/', visitor('198.51.100.23'))
+
+  // None of these counts: a visitor who asks not to be counted, bots, a prefetch, the admin,
+  // files, the addresses for machines and pages that don't exist.
+  await get('/', visitor('203.0.113.9', { dnt: '1' }))
+  await get('/', visitor('203.0.113.9', { 'sec-gpc': '1' }))
+  await get('/', visitor('203.0.113.9', { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' }))
+  await get('/', visitor('203.0.113.9', { 'sec-purpose': 'prefetch' }))
+  await get('/', { 'x-forwarded-for': '203.0.113.9' })
+  await get('/beheer', visitor('203.0.113.9'))
+  await get('/beheer/inloggen', visitor('203.0.113.9'))
+  await get('/robots.txt', visitor('203.0.113.9'))
+  await get('/sitemap.xml', visitor('203.0.113.9'))
+  await get('/updates/feed.xml', visitor('203.0.113.9'))
+  await get('/manifest.webmanifest', visitor('203.0.113.9'))
+  await get('/bestaat-niet', visitor('203.0.113.9'))
+  await get('/redactie/bestaat-niet', visitor('203.0.113.9'))
+
+  const day = visitDay(new Date())
+  const { close, pool } = connect(database)
+
+  try {
+    let views = []
+
+    for (let attempt = 0; attempt < 40; attempt++) {
+      ;[views] = await pool.query('SELECT CAST(day AS CHAR) AS day, path, views FROM page_views ORDER BY path')
+
+      if (views.reduce((total, row) => total + row.views, 0) >= 4) {
+        break
+      }
+
+      await sleep(250)
+    }
+
+    // Wait a little more, so a view that wrongly counts has the time to show up.
+    await sleep(500)
+    ;[views] = await pool.query('SELECT CAST(day AS CHAR) AS day, path, views FROM page_views ORDER BY path')
+    assert.deepEqual(
+      views.map(({ day, path, views }) => ({ day, path, views })),
+      [
+        { day, path: '/', views: 1 },
+        { day, path: '/privacy', views: 3 },
+      ],
+    )
+
+    const [visitors] = await pool.query('SELECT CAST(day AS CHAR) AS day, visitors FROM daily_visitors')
+    assert.deepEqual(
+      visitors.map(({ day, visitors }) => ({ day, visitors })),
+      [{ day, visitors: 2 }],
+    )
+
+    const [[{ hashes }]] = await pool.query('SELECT COUNT(*) AS hashes FROM visitor_hashes')
+    assert.equal(hashes, 2)
+
+    // Neither the address nor the browser text is in any table.
+    const [tables] = await pool.query(
+      'SELECT table_name AS name FROM information_schema.tables WHERE table_schema = DATABASE()',
+    )
+
+    for (const { name } of tables) {
+      const [rows] = await pool.query('SELECT * FROM ??', [name])
+      const content = JSON.stringify(rows)
+
+      for (const secret of ['203.0.113', '198.51.100', 'Firefox', 'Mozilla']) {
+        assert.ok(!content.includes(secret), `the table ${name} holds "${secret}"`)
+      }
+    }
+  } finally {
+    await close()
+  }
 }
 
 /**
@@ -292,10 +394,6 @@ async function checkSitemap(siteOrigin) {
   return sitemap
 }
 
-/**
- * Lists the names of the cascade layers in some CSS, in the order they first appear in a
- * statement or a block.
- */
 function layersIn(css) {
   const layers = []
 
@@ -576,6 +674,8 @@ await withEmptyDatabase((database) =>
     assert.equal(missing.status, 404)
     assert.match(missingHtml, /Pagina niet gevonden/)
     assert.doesNotMatch(missingHtml, /could not be found/)
+
+    await checkCounting(database)
   }),
 )
 

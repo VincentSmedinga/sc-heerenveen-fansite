@@ -431,6 +431,31 @@ Zo kan niemand nagaan wie een account heeft.
   | Een regel met `runs in a row; next try from`                | De feed is ongezond, en de import probeert hem eens per uur. De reden van de fouten staat in het overzicht (`--status`) en in eerdere regels van het logbestand.     |
   | `Another import is still running` bij elke run              | Een run blijft hangen en houdt de lock vast. Zoek het proces met `ps -u <gebruiker> -f`, de regel met `import.mjs`, en stop het met `kill` en het nummer ervan.      |
 
+## Bezoekers tellen
+
+De site telt per dag de paginaweergaven per pagina en het aantal unieke bezoekers (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in [`beslissingen.md`](beslissingen.md)).
+Hij zet er geen cookie voor en laadt er geen script voor.
+Het IP-adres en de browsertekst staan nergens, ook niet in het logboek van de app.
+
+We weten nog niet of de host het adres van de bezoeker meestuurt in de header `X-Forwarded-For`.
+Controleer dat op acceptatie, in de eerste dagen na de deploy:
+
+1. Open in een gewone browser, zonder blokkeerder en zonder Do Not Track, een paar pagina's van <https://acc.sc.heerenveen.org>.
+2. Kijk in phpMyAdmin:
+
+   ```sql
+   SELECT * FROM page_views ORDER BY day DESC, views DESC;
+   SELECT * FROM daily_visitors ORDER BY day DESC;
+   ```
+
+3. Stijgen `page_views` én `daily_visitors`, dan werkt het.
+   Stijgt alleen `page_views` en blijft `daily_visitors` leeg of laag, dan stuurt de host het adres niet mee, of alleen het adres van de host zelf.
+   Meld dat bij de Coordinator: de bron van het adres moet dan anders.
+
+Het zout en de kenmerken van een dag verdwijnen als de dag voorbij is.
+Je ziet ze in `visitor_salts` en `visitor_hashes`, en daar staat alleen de dag van vandaag in (Nederlandse tijd).
+Staat er een kwartier na middernacht nog een eerdere dag in, dan is er iets mis; meld dat.
+
 ## Wat de eerste deploy ons leerde
 
 We hadden bij het bouwen geen toegang tot de hosting.
