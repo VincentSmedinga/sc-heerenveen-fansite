@@ -126,14 +126,16 @@
 }
 
 /*
- * A heading with an anchor (see Heading): its text is a link to the heading itself, with a chain link behind it. The link
- * has the colour of the heading and no underline, so the heading still reads as a heading.
+ * A heading with an anchor (see Heading): its text is a link to the heading itself, with a
+ * chain link behind it. The link has the colour of the heading and no underline, so the
+ * heading still reads as a heading.
  */
 @layer hf.components {
   /*
-   * A long word breaks instead of pushing the page wider, also with the icon behind it (only the last letter stays with
-   * the icon, see attachIcon). The heading that is the target of a link keeps room above it when the browser scrolls it
-   * into view, and the old anchors in it (empty elements) do too.
+   * A long word breaks instead of pushing the page wider, also with the icon behind it (only
+   * the last letter stays with the icon, see attachIcon). The heading that is the target of a
+   * link keeps room above it when the browser scrolls it into view, and the old anchors in it
+   * (empty elements) do too.
    */
   .hf-heading-anchored {
     overflow-wrap: anywhere;
@@ -154,17 +156,17 @@
       text-decoration: none;
     }
 
-    /* Quiet on a touch screen, where there is no hover to show it: the colour of secondary text. */
+    /* Quiet on a touch screen, where there is no hover: the colour of secondary text. */
     .hf-icon {
       color: var(--hf-colour-text-secondary);
     }
 
-    /* Under the mouse or with the focus the icon has the colour of links, the focus ring of the link is shown as well. */
+    /* Under the mouse or with the focus the icon has the colour of links. */
     &:is(:hover, :focus-visible) .hf-icon {
       color: var(--hf-colour-text-link);
     }
 
-    /* With a mouse the icon is there when the visitor points at the heading or tabs to it. It keeps its place, so nothing moves. */
+    /* With a mouse the icon shows on hover and focus. It keeps its place, so nothing moves. */
     @media (hover: hover) {
       .hf-icon {
         opacity: 0;
@@ -190,10 +192,11 @@
   }
 
   /*
-   * The heading that a link brings the visitor to is marked with a bar in the margin at the start side, in the colour of
-   * the accents: calm, without movement, also when the visitor prefers less. An old anchor (an empty element) brings the
-   * visitor to the same heading, so the heading counts as the target when it holds one. In forced colours a background is
-   * not drawn, so the heading gets an outline.
+   * The heading that a link brings the visitor to is marked with a bar in the margin at the
+   * start side, in the colour of the accents: calm, without movement, also when the visitor
+   * prefers less. An old anchor (an empty element) brings the visitor to the same heading, so
+   * the heading counts as the target when it holds one. In forced colours a background is not
+   * drawn, so the heading gets an outline.
    */
   .hf-heading-anchored:is(:target, :has(:target))::before {
     background-color: var(--hf-colour-text-accent);
