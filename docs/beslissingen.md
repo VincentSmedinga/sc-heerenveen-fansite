@@ -2754,6 +2754,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     De volledige tabel heeft ook een regel eronder met alle afkortingen en hun woorden, want een `title` laat een telefoon niet zien.
     De korte vorm in de zijbalk heeft die regel niet (de projecteigenaar, 26 oktober 2026).
   - Het bijschrift is kort, "Stand op 18 oktober 2026", omdat het met de tabel meescrolt in het gebied en anders afgeknipt wordt op een telefoon.
+    Het is nu niet meer te zien, zie _De stand toont de dag niet_.
   - Met alle kolommen staat de tabel in een eigen gebied dat zijwaarts scrolt, met `role="region"`, een naam en `tabindex="0"`, zodat het toetsenbord erbij kan en de pagina zelf niet zijwaarts scrolt.
   - De korte vorm (`columns="compact"`) laat gewonnen, gelijk, verloren en de doelpunten weg en past in de zijbalk zonder te scrollen.
     Het blok "Stand" op de homepage toont maar drie clubs, met sc Heerenveen in het midden: de club erboven en de club eronder, met hun echte plaats.
@@ -2764,7 +2765,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De korte vorm laat op de homepage zien waar het om draait: positie, gespeeld, punten en doelsaldo.
 - **Alternatieven:** de tabel kolommen laten weglaten met CSS op een telefoon (de volle woorden en de kolommen zijn dan niet te bereiken); altijd de korte vorm (de volledige stand ontbreekt dan op de pagina).
 - **Later:** zie _De stand toont geen doelpunten voor en tegen_.
-  De kolommen DV en DT zijn vervallen en DS heet nu D; de tabel heeft nog positie, club, G, W, G, V, D en P, en de korte vorm laat alleen gewonnen, gelijk en verloren weg.
+  De kolommen DV en DT zijn vervallen en DS heet nu D, en het bijschrift met de dag is niet meer te zien (zie _De stand toont de dag niet_); de tabel heeft nog positie, club, G, W, G, V, D en P, en de korte vorm laat alleen gewonnen, gelijk en verloren weg.
 
 ### De bronvermelding van Wikipedia is een component met een link per pagina
 
@@ -4668,3 +4669,12 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zo past de tabel in de zijbalk van 32 rem van `/wedstrijden`, waar ze met alle kolommen 23 pixels te breed was voor haar gebied, en scrolt ze op een telefoon minder ver.
   Het doelsaldo zegt wat supporters het eerst willen weten van de doelpunten.
 - **Alternatieven:** de naam van de club laten afbreken (de rij van een lange naam wordt hoger); een bredere zijbalk (dan wordt de hoofdkolom smaller dan het programma nodig heeft); de scroll laten staan.
+
+### De stand toont de dag niet
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de kaarten "Stand" op de homepage en op `/wedstrijden` tonen de regel "Stand op 18 oktober 2026" niet meer.
+  Het bijschrift van de tabel blijft in de HTML, met dezelfde tekst, maar is alleen voor een schermlezer (`hf-visually-hidden`).
+- **Waarom:** de projecteigenaar koos dit: de dag is bijna altijd vandaag, dus de regel zegt supporters niets.
+  Een tabel heeft een naam nodig, en een schermlezer hoort de dag er zonder moeite bij.
+- **Alternatieven:** het bijschrift weglaten (de tabel heeft dan geen naam); de dag alleen tonen als hij niet vandaag is (extra logica en een tweede toestand om te testen).

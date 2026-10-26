@@ -105,10 +105,10 @@ describe('the page /wedstrijden', () => {
     expect(results).toContain('2–0')
   })
 
-  it('shows the full table with a caption that says the day, and the row of sc Heerenveen marked', async () => {
+  it('shows the full table with a caption for a screen reader that says the day, and the row of sc Heerenveen marked', async () => {
     const stand = section(await render(), 'stand')
 
-    expect(stand).toContain('<caption>Stand op 18 oktober 2026</caption>')
+    expect(stand).toContain('<caption class="hf-visually-hidden">Stand op 18 oktober 2026</caption>')
     expect(stand).toContain('aria-label="De volledige stand" class="hf-standings-scroll" role="region" tabindex="0"')
     expect(stand).toContain('class="hf-highlight hf-standings-table-own"')
     expect(stand).toContain('<b>G</b> gespeeld')

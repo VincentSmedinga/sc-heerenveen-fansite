@@ -49,11 +49,12 @@ const rows: StandingsTableRow[] = [
 const props = { caption: 'Stand op 18 oktober 2026', label: 'De volledige stand', rows }
 
 describe('StandingsTable', () => {
-  it('is a real table with the caption that names it and says the day', () => {
+  it('is a real table with the caption that names it and says the day, for a screen reader only', () => {
     render(<StandingsTable {...props} />)
 
     expect(screen.getByRole('table', { name: 'Stand op 18 oktober 2026' })).toBeTruthy()
     expect(document.querySelector('caption')?.textContent).toBe('Stand op 18 oktober 2026')
+    expect(document.querySelector('caption')?.className).toBe('hf-visually-hidden')
   })
 
   it('has a column header with scope for every column and a row header for every club', () => {

@@ -496,7 +496,7 @@ await withEmptyDatabase((database) =>
     assert.equal(matchesPage.status, 200)
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
     assert.match(matchesHtml, /Testdorp FC/)
-    assert.match(matchesHtml, /<caption>Stand op \d+ \w+ \d{4}<\/caption>/)
+    assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
     assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)

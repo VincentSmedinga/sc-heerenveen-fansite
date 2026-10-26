@@ -8,7 +8,7 @@ const ourClub = 'sc Heerenveen'
 export type StandingsTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /**
    * The text of the table's caption, which names the table and says what day it holds for, such
-   * as `Stand op 18 oktober 2026`.
+   * as `Stand op 18 oktober 2026`. Only a screen reader gets it: the caption is not shown.
    */
   caption: string
   /** A standings table has no children: everything it shows comes from the props below. */
@@ -78,12 +78,12 @@ const columns: Column[] = [
 ]
 
 /**
- * The league table: a real `table` with a caption, column headers with `scope` and a row
- * header for each club. The headers are abbreviations. In the full table the full words stand
- * under it as well, as "G gespeeld, W gewonnen, …", because a title on an abbreviation only
- * shows under a mouse. A screen reader hears the full word, not the letter, so the two columns
- * that are a G are told apart. The row of sc Heerenveen is bold, has a bar on its start side
- * and says so for a screen reader, so it stands out by more than colour.
+ * The league table: a real `table` with a caption that is not shown, column headers with
+ * `scope` and a row header for each club. The headers are abbreviations. In the full table the
+ * full words stand under it as well, as "G gespeeld, W gewonnen, …", because a title on an
+ * abbreviation only shows under a mouse. A screen reader hears the full word, not the letter,
+ * so the two columns that are a G are told apart. The row of sc Heerenveen is bold, has a bar
+ * on its start side and says so for a screen reader, so it stands out by more than colour.
  *
  * With every column the table is wider than a phone. It then sits in an area of its own that
  * scrolls sideways, has the name `label` and can be reached with the keyboard, so the page
@@ -101,7 +101,7 @@ export const StandingsTable = ({
   const shown = columns.filter((column) => set === 'all' || column.compact)
   const table = (
     <table className="hf-standings-table">
-      <caption>{caption}</caption>
+      <caption className="hf-visually-hidden">{caption}</caption>
       <thead>
         <tr>
           <th className="hf-numeric" scope="col">

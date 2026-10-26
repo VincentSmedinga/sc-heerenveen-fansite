@@ -190,7 +190,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 
 - **Programma:** alle wedstrijden die nog niet zijn gespeeld, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
-- **Stand:** de volledige tabel, met een bijschrift met de dag waarvoor de stand geldt.
+- **Stand:** de volledige tabel, met een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.
 - **Uitslagen:** alle gespeelde wedstrijden, de nieuwste bovenaan.
 - **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de nieuwste uitslag) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
   Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder de kolommen voor gewonnen, gelijk en verloren.

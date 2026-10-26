@@ -10,7 +10,8 @@ const meta = preview.meta({
       description: {
         component: [
           'De stand van de competitie, als echte `table`.',
-          'De tabel heeft een bijschrift dat zegt voor welke dag de stand geldt, kolomkoppen met `scope` en een rijkop met de naam van elke club.',
+          'De tabel heeft een bijschrift dat zegt voor welke dag de stand geldt, maar alleen een schermlezer krijgt het: bezienden zien de kop van de kaart.',
+          'Verder heeft de tabel kolomkoppen met `scope` en een rijkop met de naam van elke club.',
           'De koppen zijn afkortingen.',
           'Onder de volledige tabel staan de volle woorden: "G gespeeld, W gewonnen, …".',
           'De korte vorm heeft die regel niet, want een smalle kolom heeft er geen plaats voor.',
@@ -21,7 +22,7 @@ const meta = preview.meta({
           'De afkortingen zijn G (gespeeld), W (gewonnen), G (gelijk), V (verloren), D (doelsaldo) en P (punten).',
           'De positie heeft de kleur van markeringen, de getallen staan rechts uitgelijnd en hebben tabelcijfers, zodat ze recht onder elkaar staan.',
           '',
-          '- `caption` is de tekst van het bijschrift.',
+          '- `caption` is de tekst van het bijschrift, dat niet te zien is.',
           '- `rows` zijn de clubs van boven naar beneden.',
           '  Het doelsaldo kan negatief zijn: het component schrijft een plus of een echte min.',
           '- `columns` is `all` (standaard) of `compact`.',
