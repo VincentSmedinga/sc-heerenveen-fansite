@@ -8,9 +8,9 @@ import * as ColourStories from './colour.stories'
 
 Het palet heeft drie lagen:
 
-- **Kleuren:** blauw (tint 255°), rood (27°) en zand (85°).
+- **Kleuren:** blauw (tint 255°), rood (27°), groen (150°) en zand (85°).
 - **Reeksen:** een kleur in één sterkte, gemaakt in OKLCH, met genummerde stappen van licht naar donker.
-  Helder: blauw en rood.
+  Helder: blauw, rood en groen.
   Gedempt: staal (een gedempt blauw) en zand.
   Neutraal: grijs (neutraal zand).
   Alleen reeksen hebben nummers.
@@ -50,6 +50,10 @@ De strepen van de Friese vlag aan het einde van de pagina hebben twee tokens: `-
 Het zijn doorzichtige tinten van een kleur uit de reeksen, dus er komt geen nieuwe stap bij; een browser die ze niet kent, toont geen strepen.
 Tekst op de strepen haalt dezelfde eisen als op de pagina of op de footer.
 Het contrast staat in de tabellen hieronder, gemeten op de sterkste streep.
+
+De uitkomst van een wedstrijd van sc Heerenveen heeft drie tokens: `--hf-colour-outcome-win` (groen), `--hf-colour-outcome-loss` (rood) en `--hf-colour-outcome-draw` (de rustige kleur van secundaire tekst, want gelijkspel is niet goed en niet slecht).
+De kleur is een aanvulling: wie hem niet ziet, leest de uitkomst in de doelpunten zelf.
+Alle drie halen 4,5:1 op de vlakken, in licht en donker.
 
 Oudere browsers zonder `light-dark()` (van vóór 2024) krijgen alleen het lichte thema.
 

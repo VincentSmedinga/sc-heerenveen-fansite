@@ -54,6 +54,23 @@
     white-space: nowrap;
   }
 
+  /*
+   * The outcome for sc Heerenveen, seen from its side and not the home club's. The colour adds
+   * to the goals and is the only thing that tells the three apart; a forced colour replaces it,
+   * and the result stays as readable as before.
+   */
+  .hf-match-win {
+    color: var(--hf-colour-outcome-win);
+  }
+
+  .hf-match-loss {
+    color: var(--hf-colour-outcome-loss);
+  }
+
+  .hf-match-draw {
+    color: var(--hf-colour-outcome-draw);
+  }
+
   .hf-match-versus {
     font-weight: 400;
   }
