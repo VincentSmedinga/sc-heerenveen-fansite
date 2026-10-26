@@ -195,11 +195,11 @@ describe('the wide sidebar in page.css', () => {
     /@media \(width >= 56rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-wide\) \{\s*grid-template-columns: minmax\((\d+)rem, (\d+)rem\) minmax\((\d+)rem, (\d+)rem\);/,
   )
 
-  it('has a main of 30rem, a sidebar of 32rem and 2rem between them, which fill the page of 64rem', () => {
+  it('has a main and a sidebar of 31rem each and 2rem between them, which fill the page of 64rem', () => {
     const [, , main, , sidebar] = wide ?? []
 
-    expect(Number(main)).toBe(30)
-    expect(Number(sidebar)).toBe(32)
+    expect(Number(main)).toBe(31)
+    expect(Number(sidebar)).toBe(31)
     expect(Number(main) + Number(sidebar) + 2).toBe(pageWidth)
   })
 
@@ -207,6 +207,12 @@ describe('the wide sidebar in page.css', () => {
     const [, mainMinimum, , sidebarMinimum] = wide ?? []
 
     expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(56 - 2 - 2)
+  })
+
+  it('shrinks both tracks to the same minimum, so they are equally wide at every width', () => {
+    const [, mainMinimum, , sidebarMinimum] = wide ?? []
+
+    expect(mainMinimum).toBe(sidebarMinimum)
   })
 
   it('is chosen by the sidebar, which the page renders, and leaves the other pages with 38, 2 and 24rem', () => {

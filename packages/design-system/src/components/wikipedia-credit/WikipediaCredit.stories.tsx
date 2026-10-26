@@ -8,8 +8,10 @@ const meta = preview.meta({
       description: {
         component: [
           'De bronvermelding voor gegevens van Wikipedia, in de vorm van principe 4 van de Redactie: altijd de bron vermelden.',
-          'Ze zegt "Bron: Wikipedia (CC BY-SA 4.0)", linkt naar elke pagina waar de gegevens vandaan komen en naar de geschiedenis van die pagina, noemt de tijd van de laatste keer lezen en zegt dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.',
-          'De link naar de geschiedenis zegt voor een schermlezer van welke pagina hij is: "geschiedenis van Eredivisie 2026/27".',
+          'Ze zegt "Bron: Wikipedia (CC BY-SA 4.0)", linkt naar elke pagina waar de gegevens vandaan komen, noemt de tijd van de laatste keer lezen en zegt dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.',
+          'Wikipedia noemt een link naar het artikel een goede bronvermelding: de auteurs staan in de geschiedenis van het artikel, die vanaf de pagina te bereiken is.',
+          'Daarom linkt de bronvermelding niet zelf naar die geschiedenis.',
+          'Op `/wedstrijden` staat hij in een kaart zonder zichtbare rand en achtergrond (`surface="transparent"`), zodat zijn tekst op één lijn staat met de tekst in de kaarten erboven.',
           '',
           'Een kleine kaart op een pagina die de volledige vorm elders heeft, gebruikt de korte vorm: `compact` zegt alleen "Bron: Wikipedia".',
           '',
@@ -17,7 +19,7 @@ const meta = preview.meta({
           'Zet het onder het blok of de pagina met de gegevens.',
           '',
           "- `pages` zijn de pagina's van Wikipedia waar de gegevens vandaan komen, minstens één.",
-          '  Elke pagina heeft een `name` voor de link, een `href` en een `historyHref`.',
+          '  Elke pagina heeft een `name` voor de link en een `href`.',
           '- `readAt` is de tijd van de laatste keer lezen zoals een bezoeker hem leest, in Nederlandse tijd.',
           '  `readAtDateTime` is dezelfde tijd voor machines.',
         ].join('\n'),
@@ -29,13 +31,11 @@ const meta = preview.meta({
 })
 
 const standings = {
-  historyHref: 'https://nl.wikipedia.org/w/index.php?title=Eredivisie_2026/27_(mannenvoetbal)&action=history',
   href: 'https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)',
   name: 'Eredivisie 2026/27',
 }
 
 const cup = {
-  historyHref: 'https://nl.wikipedia.org/w/index.php?title=KNVB_Beker_2026/27_(mannen)&action=history',
   href: 'https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)',
   name: 'KNVB Beker 2026/27',
 }

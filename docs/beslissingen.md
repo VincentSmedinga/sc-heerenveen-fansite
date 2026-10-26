@@ -1728,6 +1728,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De pagina breder maken; dat raakt de header, de footer en het logo.
 - **Later:** zie _/wedstrijden heeft een zijbalk van 32 rem met de stand en de uitslagen_.
   Een pagina kan met `wide` op de `Page.Sidebar` een hoofdkolom van 30 rem en een zijbalk van 32 rem kiezen; elke andere pagina houdt 38, 2 en 24 rem.
+- **Later:** zie _De kolommen van `/wedstrijden` zijn even breed_.
+  De hoofdkolom en de zijbalk met `wide` zijn allebei 31 rem breed, met 2 rem ertussen.
 
 ### Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query
 
@@ -2789,6 +2791,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De geschiedenis van de pagina noemt de auteurs, zoals de licentie vraagt.
 - **Alternatieven:** de volledige vorm onder elk blok (de specificatie; lang voor een kaart in de zijbalk); één vaste link naar de pagina van het seizoen (de beker en het programma staan op andere pagina's); de licentie niet linken (dat vraagt de licentie wel).
 - **Hoe:** de seed zet ook de pagina's van de verzonnen wedstrijden in `wikipedia_pages` (`madeUpWikipediaPages`), zodat de bronvermelding er op acceptatie en in de toegankelijkheidscontrole ook is.
+- **Later:** zie _De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis_.
+  De bronvermelding linkt niet meer naar de geschiedenis van de pagina's en staat op `/wedstrijden` in een kaart zonder zichtbare rand en achtergrond.
+
+### De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de bronvermelding van Wikipedia staat in een kaart met dezelfde opvulling als de andere kaarten maar zonder zichtbare rand en achtergrond (`Card` met `surface="transparent"`), en linkt alleen naar de pagina van Wikipedia, niet naar zijn geschiedenis.
+  Ze zegt dus "Bron: Wikipedia (CC BY-SA 4.0), pagina: Eredivisie 2026/27", de tijd van de laatste keer lezen en dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
+  `WikipediaCredit` heeft de eigenschap `historyHref` niet meer.
+- **Waarom:** de tekst staat dan op één lijn met de tekst in de kaarten erboven.
+  Eén link is rustiger, en Wikipedia aanvaardt een link naar het artikel als bronvermelding.
+- **Hoe:** de kaart zit in `SourceCredit` van de site, niet in `WikipediaCredit`, want de korte vorm onder de blokken op de homepage staat al in een kaart en die tekst staat al op één lijn met de rest.
+  De rand van de doorzichtige kaart blijft in de lay-out, zodat de tekst op dezelfde plek staat als in een kaart met een rand.
+  In forced colours heeft hij de kleur van de achtergrond, zodat hij ook daar niet te zien is.
+- **Alternatieven:** de bronvermelding zonder kaart laten (de tekst staat dan aan de rand van de kolom, naast de tekst in de kaarten); de link naar de geschiedenis houden (volledig, maar twee links in een zin die voor het oog een bijzaak is).
+  **Let op:** de CC BY-SA vraagt een aanduiding van de auteurs op een redelijke manier; een link naar het artikel voldoet volgens de uitleg van Wikipedia over hergebruik, maar geen jurist heeft dat getoetst.
 
 ## Importer
 
@@ -3572,6 +3590,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De `Last-Modified` is het tijdstip van de versie die we lazen, en samen met de titel en het leestijdstip kan een bezoeker de geschiedenis van de pagina bekijken.
 - **Alternatieven:** de rondes van de beker per seizoen met de hand benoemen (code om bij te houden).
   Een tweede verzoek om het versienummer uit de HTML te halen (ongeveer tien keer zo veel gegevens).
+- **Later:** zie _De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis_.
+  De bronvermelding linkt niet meer naar de geschiedenis van de pagina; de bezoeker bereikt haar vanaf het artikel zelf.
 
 ### De verzonnen wedstrijden komen alleen in een leeg seizoen
 
@@ -4663,6 +4683,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alles in één kolom laten, zoals nu (de stand staat onderaan, onder een lange lijst); de verdeling voor alle pagina's wijzigen (raakt de homepage en de artikelen, die een smalle zijbalk nodig hebben).
 - **Later:** zie _De stand toont geen doelpunten voor en tegen_.
   Zonder die twee kolommen past de tabel in de zijbalk van 32 rem; met ze was ze 23 pixels te breed.
+- **Later:** zie _De kolommen van `/wedstrijden` zijn even breed_.
+  Het programma staat in een hoofdkolom van 31 rem en de stand met de uitslagen in een zijbalk van 31 rem, met de bronvermelding als laatste.
 
 ### De stand toont geen doelpunten voor en tegen
 
@@ -5025,3 +5047,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De importer leest de feed dus zonder aanpassing.
 - **Alternatieven:** de sportfeed van NOS (breder, met minder voetbal en een kortere periode); wachten op schriftelijke toestemming van NOS (voorzichtiger, maar NOS antwoordt zelden en we missen intussen de landelijke berichten over de club).
 - **Daarna:** schriftelijk toestemming vragen aan NOS hoort bij #35; de projecteigenaar nam het voorbehoud van NOS aan bij het goedkeuren van het issue.
+
+### De kolommen van `/wedstrijden` zijn even breed
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de hoofdkolom en de zijbalk van `/wedstrijden` zijn allebei 31 rem breed, met 2 rem ertussen.
+- **Waarom:** de projecteigenaar vindt twee even brede kolommen rustiger dan 30 en 32 rem.
+  De stand in de zijbalk heeft sinds het wegvallen van de kolommen voor de doelpunten minder breedte nodig, en met de balk (zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_) ook de kolom met gewonnen, gelijk en verloren niet meer.
+- **Hoe:** `Page.Sidebar` met `wide` zet de sporen op twee keer `minmax(24rem, 31rem)`, zodat ze op elke breedte even breed zijn (eerst was het `minmax(20rem, 30rem)` en `minmax(24rem, 32rem)`); de rest van de regels uit _/wedstrijden heeft een zijbalk van 32 rem met de stand en de uitslagen_ blijft.
+  Andere pagina's houden 38, 2 en 24 rem.
+- **Alternatieven:** 30, 2 en 32 rem laten, zoals in #283 (de zijbalk is breder dan de hoofdkolom); 32 en 30 rem (de tabel past er met de balk beter in, maar het programma wordt breder dan nodig).

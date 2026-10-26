@@ -16,7 +16,7 @@ const meta = preview.meta({
           '- De `Page.Body` regelt alle witruimte: tussen de kolommen en tussen de cellen. Kolommen en cellen hebben zelf geen marge naar buiten.',
           '- Elke kolom stapelt haar eigen cellen. Een cel in de zijbalk staat dus niet op dezelfde hoogte als een cel in de hoofdkolom.',
           '- Heeft de `Page.Main` een `intro`, dan begint de zijbalk op een breed scherm onder die inleiding, op dezelfde hoogte als de eerste cel eronder. De inleiding is zo breed als de hoofdkolom.',
-          '- Een pagina kan een bredere zijbalk kiezen, met `wide` op de `Page.Sidebar`. De hoofdkolom wordt dan smaller, en de kolommen blijven samen even breed.',
+          '- Een pagina kan een bredere zijbalk kiezen, met `wide` op de `Page.Sidebar`. De hoofdkolom en de zijbalk zijn dan even breed, en samen net zo breed als zonder.',
           '- Het groeit mee met het scherm, zodat de footer onderaan blijft staan.',
         ].join('\n'),
       },

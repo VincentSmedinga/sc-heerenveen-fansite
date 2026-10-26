@@ -1,14 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  creditName,
-  formatReadAt,
-  formatTableDay,
-  matchMoment,
-  weekendText,
-  wikipediaHistoryUrl,
-  wikipediaUrl,
-} from './match-format'
+import { creditName, formatReadAt, formatTableDay, matchMoment, weekendText, wikipediaUrl } from './match-format'
 
 // The afternoon of Sunday 25 October 2026 in the Netherlands, when summer time has just ended.
 const now = new Date('2026-10-25T13:40:00Z')
@@ -87,12 +79,9 @@ describe('formatTableDay and formatReadAt', () => {
 })
 
 describe('the links to Wikipedia', () => {
-  it('links to the page and to its history, with an underscore for a space', () => {
+  it('links to the page, with an underscore for a space', () => {
     expect(wikipediaUrl('Eredivisie 2026/27 (mannenvoetbal)')).toBe(
       'https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)',
-    )
-    expect(wikipediaHistoryUrl('Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden')).toBe(
-      'https://nl.wikipedia.org/w/index.php?title=Eredivisie_2026%2F27_(mannenvoetbal)%2FWedstrijden&action=history',
     )
   })
 

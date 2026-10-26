@@ -68,7 +68,7 @@ describe('the JavaScript entry of the package', () => {
   it('gives the lists of allowed elements', () => {
     expect(designSystem.buttonTypes).toEqual(['submit', 'button', 'reset'])
     expect(designSystem.cardElements).toEqual(['section', 'div', 'article', 'aside'])
-    expect(designSystem.cardSurfaces).toEqual(['default', 'strong', 'soft', 'warm'])
+    expect(designSystem.cardSurfaces).toEqual(['default', 'strong', 'soft', 'warm', 'transparent'])
     expect(designSystem.inputTypes).toContain('email')
     expect(designSystem.listElements).toEqual(['ul', 'ol'])
     expect(designSystem.matchStatuses).toEqual(['scheduled', 'played', 'postponed'])
