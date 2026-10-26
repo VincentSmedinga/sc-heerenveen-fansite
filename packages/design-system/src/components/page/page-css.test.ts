@@ -190,7 +190,6 @@ describe('the columns of the body in page.css', () => {
 describe('the wide sidebar in page.css', () => {
   const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
   const pageWidth = Number(layout.match(/--hf-page-max-width: (\d+)rem;/)?.[1])
-  const rule = (selector: string) => css.match(new RegExp(String.raw`${selector} \{([^{}]*)\}`))?.[1] ?? ''
   const wide = css.match(
     /@media \(width >= 56rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-wide\) \{\s*grid-template-columns: minmax\((\d+)rem, (\d+)rem\) minmax\((\d+)rem, (\d+)rem\);/,
   )
@@ -220,8 +219,30 @@ describe('the wide sidebar in page.css', () => {
     expect(css).toContain('grid-template-columns: minmax(24rem, var(--hf-content-max-width)) minmax(16rem, 24rem);')
   })
 
-  it('keeps the cells of a wide sidebar under each other, also where two of 16rem fit under the main', () => {
-    expect(rule(String.raw`\.hf-page-sidebar-wide`)).toContain('grid-template-columns: minmax(0, 1fr);')
-    expect(css.indexOf('.hf-page-sidebar-wide {')).toBeGreaterThan(css.indexOf('.hf-page-sidebar {'))
+  it('needs no rule of its own to keep the cells under each other, because every sidebar does', () => {
+    expect(css).not.toMatch(/\.hf-page-sidebar-wide \{/)
+  })
+})
+
+describe('the cells of the sidebar in page.css', () => {
+  const rule = (selector: string) => css.match(new RegExp(String.raw`${selector} \{([^{}]*)\}`))?.[1] ?? ''
+  const columns = css.match(
+    /\.hf-page-main,\s*\.hf-page-cells,\s*\.hf-page-sidebar \{[^{}]*?grid-template-columns: ([^;]*);/,
+  )?.[1]
+
+  it('puts them under each other by default, at every width, also under the main where two of 16rem fit', () => {
+    expect(columns).toBe('minmax(0, 1fr)')
+    expect(rule(String.raw`\.hf-page-sidebar`)).not.toContain('grid-template-columns')
+  })
+
+  it('puts them side by side with `split`, as long as two of 16rem and 2rem between them fit', () => {
+    expect(rule(String.raw`\.hf-page-sidebar-split`)).toContain(
+      'grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));',
+    )
+    expect(css.indexOf('.hf-page-sidebar-split {')).toBeGreaterThan(css.indexOf('.hf-page-sidebar {'))
+  })
+
+  it('has one rule with auto-fit, so only `split` can put the cells side by side', () => {
+    expect(css.match(/auto-fit/g)).toHaveLength(1)
   })
 })

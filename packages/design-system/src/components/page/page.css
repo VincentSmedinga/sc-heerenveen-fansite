@@ -159,9 +159,10 @@
    * columns on the same rows. Only a main with an introduction is a subgrid, and then in two rows only (see below).
    * The track can shrink to 0, so a long word or address can't make the column wider than the screen.
    * A child of a column is a cell and has no margin to the outside: the gap is all the space between cells.
-   * The cells of the sidebar sit side by side as long as two of them fit, at 16rem each and 2rem apart (34rem), and
-   * otherwise under each other. That is the case under the main, in a track of up to
-   * 38rem, on a screen from 36rem wide.
+   * The cells of the sidebar sit under each other, at every width. A sidebar with `split` puts
+   * them side by side as long as two of them fit, at 16rem each and 2rem apart (34rem), and
+   * otherwise under each other. That is the case under the main, in a track of up to 38rem, on
+   * a screen from 36rem wide.
    * From 56rem the sidebar is a column of 24rem at most, in which two cells never fit, so no media query is needed.
    */
   .hf-page-main,
@@ -177,17 +178,8 @@
     }
   }
 
-  .hf-page-sidebar {
+  .hf-page-sidebar-split {
     grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
-  }
-
-  /*
-   * A wide sidebar holds cells that need the width of the column, such as a table, so its cells
-   * never sit side by side, also not under the main, where the track is wide enough for two of
-   * 16rem.
-   */
-  .hf-page-sidebar-wide {
-    grid-template-columns: minmax(0, 1fr);
   }
 
   /*

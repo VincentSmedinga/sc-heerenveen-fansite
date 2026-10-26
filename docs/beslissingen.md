@@ -1621,6 +1621,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De zijbalk kan onder een inleiding beginnen, met benoemde gebieden en een subgrid_.
   `Page.Main` heeft nu de eigenschap `intro`, en met een inleiding is `Page.Main` een subgrid in de rijen van `Page.Body`.
   Een kolom zonder inleiding blijft een eigen raster, zoals hierboven staat.
+- **Later:** zie _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_.
+  De cellen van de zijbalk staan nu standaard onder elkaar; alleen met `split` staan ze, onder de hoofdkolom, in twee gelijke kolommen.
 
 ### Een regel met padding of een rand zet zelf `box-sizing: border-box`
 
@@ -1761,6 +1763,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk_.
   De hoofdkolom is nu 38 rem, met 2 rem ertussen; de zijbalk en de kolom van de pagina blijven 24 en 64 rem.
   Ook onder 56 rem is de hoofdkolom 38 rem breed.
+- **Later:** zie _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_.
+  Het `repeat(auto-fit, …)` hierboven geldt nu alleen voor een zijbalk met `split`; zonder staan de cellen onder elkaar.
 
 ### De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk
 
@@ -2107,6 +2111,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een kop die naar een andere pagina verhuist, neemt zijn anker mee, en de oude pagina verwijst blijvend door in `next.config.ts`, waar elke doorverwijzing een reden heeft.
   De browser houdt het deel na het hekje vast in zo'n doorverwijzing, als de doorverwijzing er zelf geen heeft.
 - **Alternatieven:** het anker automatisch uit de tekst van de kop maken (elke wijziging van de kop breekt de link); oude ankers met een script op de pagina omzetten (werkt niet zonder JavaScript); geen controle op verdwenen ankers (een link breekt dan pas als iemand het merkt).
+
+### De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `Page.Sidebar` zet haar cellen standaard onder elkaar, op elke breedte.
+  De eigenschap `split` zet ze naast elkaar zodra er twee van 16 rem met 2 rem ertussen passen, zoals ze tot nu toe deden.
+  `/bronnen` kiest `split`.
+- **Waarom:** twee kaarten naast elkaar werken voor kleine kaarten, zoals op `/bronnen`, maar kaarten met lijsten, zoals de discussies en de podcasts op de homepage, worden er smal en krap van.
+  Een standaard die voor de meeste pagina's goed is, en een keuze voor de pagina die er baat bij heeft, is eenvoudiger dan een regel die op elke pagina moet worden afgezet.
+- **Hoe:** de regel met `repeat(auto-fit, minmax(min(16rem, 100%), 1fr))` is nu `.hf-page-sidebar-split`, en de zijbalk houdt één spoor.
+  De regel `.hf-page-sidebar-wide` voor de kolommen van de cellen is vervallen, want dat is nu de standaard; `wide` maakt de zijbalk alleen nog breder, met dezelfde sporen als eerst: 38, 2 en 24 rem voor een gewone zijbalk en 31, 2 en 31 rem voor een brede.
+  De zijbalk staat nog na de hoofdkolom in de bron, zonder `order`, en de benoemde gebieden voor een pagina met een inleiding blijven gelden.
+- **Alternatieven:** de verdeling in twee kolommen helemaal weghalen (`/bronnen` verliest iets wat goed werkte); de verdeling als standaard laten en per pagina afzetten, zoals met `wide` (elke nieuwe pagina met lijsten moet eraan denken).
 
 ## Site
 
@@ -4838,6 +4855,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zonder die twee kolommen past de tabel in de zijbalk van 32 rem; met ze was ze 23 pixels te breed.
 - **Later:** zie _De kolommen van `/wedstrijden` zijn even breed_.
   Het programma staat in een hoofdkolom van 31 rem en de stand met de uitslagen in een zijbalk van 31 rem, met de bronvermelding als laatste.
+- **Later:** zie _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_.
+  De cellen van een zijbalk staan nu standaard onder elkaar, dus `wide` hoeft ze niet meer onder elkaar te houden; het maakt alleen de zijbalk breder.
 
 ### De stand toont geen doelpunten voor en tegen
 
@@ -5211,6 +5230,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** `Page.Sidebar` met `wide` zet de sporen op twee keer `minmax(24rem, 31rem)`, zodat ze op elke breedte even breed zijn (eerst was het `minmax(20rem, 30rem)` en `minmax(24rem, 32rem)`); de rest van de regels uit _/wedstrijden heeft een zijbalk van 32 rem met de stand en de uitslagen_ blijft.
   Andere pagina's houden 38, 2 en 24 rem.
 - **Alternatieven:** 30, 2 en 32 rem laten, zoals in #283 (de zijbalk is breder dan de hoofdkolom); 32 en 30 rem (de tabel past er met de balk beter in, maar het programma wordt breder dan nodig).
+- **Later:** zie _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_.
+  `wide` zet alleen de sporen op twee keer 31 rem; de cellen onder elkaar zijn nu de standaard van elke zijbalk, en de regel `.hf-page-sidebar-wide` voor de kolommen van de cellen is vervallen.
 
 ### We nemen het AD, met het filter `club` en het teken voor de betaalmuur
 

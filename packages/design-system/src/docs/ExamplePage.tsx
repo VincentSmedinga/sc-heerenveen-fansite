@@ -156,10 +156,11 @@ export const ExampleMainWithIntro = () => (
 
 /**
  * The sidebar with two cells of different heights. They stack on their own, not on the rows of
- * the main column. With `wide` it is the wide sidebar.
+ * the main column. With `wide` it is the wide sidebar, and with `split` the cells sit side by
+ * side where two fit.
  */
-export const ExampleSidebar = ({ wide = false }: { wide?: boolean }) => (
-  <Page.Sidebar aria-label="Naast het nieuws" wide={wide}>
+export const ExampleSidebar = ({ split = false, wide = false }: { split?: boolean; wide?: boolean }) => (
+  <Page.Sidebar aria-label="Naast het nieuws" split={split} wide={wide}>
     <Page.Cell>
       <Heading appearance={3} level={2}>
         Volgende wedstrijd
