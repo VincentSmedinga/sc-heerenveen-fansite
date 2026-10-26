@@ -194,6 +194,14 @@ export const realSources = [
     kind: 'news',
     name: 'NOS',
   },
+  {
+    description:
+      'Landelijk dagblad. In de voetbalfeed staat het voetbalnieuws uit binnen- en buitenland, ook veel achter de betaalmuur; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
+    domain: 'www.ad.nl',
+    feeds: [{ filter: 'club', url: 'https://www.ad.nl/voetbal/rss.xml' }],
+    kind: 'news',
+    name: 'Algemeen Dagblad',
+  },
 ] satisfies (NewSource & { feeds: (string | { filter: FeedFilter; url: string })[] })[]
 
 /**
