@@ -120,7 +120,7 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
         </tbody>
       </table>
       {set === 'all' && (
-        <p className="hf-meta hf-standings-legend">
+        <p className="hf-meta hf-bar-legend">
           {columns.map((column, index) => (
             <span key={column.id}>
               {index > 0 ? ', ' : ''}

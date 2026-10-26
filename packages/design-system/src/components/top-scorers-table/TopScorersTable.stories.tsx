@@ -14,6 +14,8 @@ const meta = preview.meta({
           'De tabel heeft een bijschrift dat zegt voor welk seizoen en welke competities hij telt, maar alleen een schermlezer krijgt het: bezienden zien de kop van de kaart.',
           'Verder heeft de tabel kolomkoppen met `scope` en een rijkop met de naam van elke speler.',
           'De kolommen zijn de plaats, de speler en de doelpunten.',
+          'De kop van de doelpunten is de afkorting D, en onder de tabel staat het volle woord: "D doelpunten".',
+          'De afkorting zelf heeft ook een `title`, maar die verschijnt alleen onder een muis en een telefoon heeft er niets aan.',
           '',
           'Spelers met evenveel doelpunten hebben dezelfde plaats.',
           'Het aantal doelpunten is vet, zwaarder dan de andere getallen, want daarop is de lijst gesorteerd.',

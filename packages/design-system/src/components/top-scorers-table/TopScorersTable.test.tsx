@@ -28,9 +28,10 @@ describe('TopScorersTable', () => {
     render(<TopScorersTable {...props} />)
     const headers = screen.getAllByRole('columnheader')
 
-    expect(headers.map((header) => header.textContent)).toEqual(['#plaats', 'Speler', 'Doelpunten'])
+    expect(headers.map((header) => header.textContent)).toEqual(['#plaats', 'Speler', 'Ddoelpunten'])
     expect(headers.every((header) => header.getAttribute('scope') === 'col')).toBe(true)
     expect(screen.getByRole('columnheader', { name: 'plaats' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'doelpunten' })).toBeTruthy()
     expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual([
       'Proefman',
       'Nepper',
@@ -51,6 +52,16 @@ describe('TopScorersTable', () => {
     expect(cells(/Nepper/u)).toEqual(['2', '4'])
     expect(cells(/Testvoort/u)).toEqual(['2', '4'])
     expect(cells(/Demo/u)).toEqual(['4', '1'])
+  })
+
+  it('abbreviates the goals to D, with the full word in the title and under the table', () => {
+    const { container } = render(<TopScorersTable {...props} />)
+
+    expect([...container.querySelectorAll('thead abbr')].map((abbr) => abbr.getAttribute('title'))).toEqual([
+      'Plaats',
+      'Doelpunten',
+    ])
+    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('D doelpunten')
   })
 
   it('makes the goals bold with the class of the standings points, in the last column', () => {
@@ -87,7 +98,7 @@ describe('TopScorersTable', () => {
     it('gives the header of the goals the space of the bar, so it stays above the numbers', () => {
       const { container } = render(<TopScorersTable {...props} />)
 
-      expect(container.querySelector('th.hf-bar-head')?.textContent).toBe('Doelpunten')
+      expect(container.querySelector('th.hf-bar-head')?.textContent).toBe('Ddoelpunten')
     })
 
     it('makes equal goals equal bars', () => {

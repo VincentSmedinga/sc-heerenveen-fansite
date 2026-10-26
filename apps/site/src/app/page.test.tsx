@@ -879,7 +879,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html).toContain(
       '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
     )
-    expect(html).not.toContain('hf-standings-legend')
+    expect(html).not.toContain('hf-bar-legend')
   })
 
   it('has the columns position, played and points in the table, in the headers and in the row of sc Heerenveen', async () => {

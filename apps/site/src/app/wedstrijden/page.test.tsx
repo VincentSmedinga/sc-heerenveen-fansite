@@ -293,6 +293,8 @@ describe('the page /wedstrijden', () => {
       )
       expect(card.match(/<table/g)).toHaveLength(1)
       expect(card.match(/<th [^>]*scope="col"/g)).toHaveLength(3)
+      expect(card).toContain('<abbr title="Doelpunten"><span aria-hidden="true">D</span>')
+      expect(card).toContain('<p class="hf-meta hf-bar-legend"><b>D</b> doelpunten</p>')
     })
 
     it('counts the goals of our players over the matches, with the opponent with the same name left out', async () => {

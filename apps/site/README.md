@@ -200,8 +200,9 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
   Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
   Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet.
-  Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem), verdeeld over de topscorer.
+  Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
   Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "Gebaseerd op de doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
+  De kop van de doelpunten is de afkorting D, met het volle woord onder de tabel.
   Zonder doelpunten staat er een zin in plaats van een tabel.
 - **Uitslagen:** alle gespeelde wedstrijden, de nieuwste bovenaan.
 - **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de nieuwste uitslag) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).

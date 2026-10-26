@@ -30,7 +30,9 @@ export type TopScorersTableRow = {
  * and a row header for each player. The goals are bold, because the list is ordered by them,
  * and have a bar next to them that is as long as the share of the top scorer's goals. The bar
  * is the one of the standings: decoration that a screen reader skips, which goes when the place
- * of the table is too narrow. bar.css gives the look.
+ * of the table is too narrow. The header of the goals is the abbreviation D, so the full word
+ * stands under the table as well, because a title on an abbreviation only shows under a mouse.
+ * bar.css gives the look.
  */
 export const TopScorersTable = ({ caption, className, rows, ...props }: TopScorersTableProps) => {
   const shares = sharesOf(rows.map((row) => row.goals))
@@ -49,7 +51,10 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
             </th>
             <th scope="col">Speler</th>
             <th className={classNames('hf-numeric', shares !== null && 'hf-bar-head')} scope="col">
-              Doelpunten
+              <abbr title="Doelpunten">
+                <span aria-hidden="true">D</span>
+                <span className="hf-visually-hidden">doelpunten</span>
+              </abbr>
             </th>
           </tr>
         </thead>
@@ -66,6 +71,9 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
           ))}
         </tbody>
       </table>
+      <p className="hf-meta hf-bar-legend">
+        <b>D</b> doelpunten
+      </p>
     </div>
   )
 }

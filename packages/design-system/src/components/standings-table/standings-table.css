@@ -1,16 +1,11 @@
 /*
  * The league table. The table itself takes its look from base/table.css (tabular figures, a
  * thin line between rows, .hf-numeric, .hf-rank and .hf-highlight), and the bars next to the
- * points from bar/bar.css. This file adds the bar on the row of our own club, the whole green
- * of the bar on that row and the legend of the abbreviations.
+ * points and the legend of the abbreviations from bar/bar.css. This file adds the bar on the
+ * row of our own club and the whole green of the bar on that row.
  */
 
 @layer hf.components {
-  /* The table of a card has no space below it: the legend is under it. */
-  .hf-standings > table {
-    margin-block-end: 0.5rem;
-  }
-
   /*
    * The row of sc Heerenveen is marked by more than its colour: it is bold (base/table.css),
    * and its first cell has a bar on the start side, which also shows in forced colours.
@@ -21,18 +16,5 @@
 
   .hf-standings-table-own .hf-bar::before {
     background-color: var(--hf-colour-outcome-win);
-  }
-
-  /*
-   * The full words of the abbreviations. The letters are heavier, so they are easy to find in
-   * the sentence.
-   */
-  .hf-standings-legend {
-    color: var(--hf-colour-text-secondary);
-    margin-block: 0;
-
-    b {
-      font-weight: var(--hf-strong-font-weight);
-    }
   }
 }

@@ -136,7 +136,7 @@ describe('StandingsTable', () => {
       'Gespeeld',
       'Punten',
     ])
-    expect(container.querySelector('.hf-standings-legend')?.textContent).toBe('G gespeeld, P punten')
+    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('G gespeeld, P punten')
   })
 
   it('writes the numbers of a club in the columns of the headers', () => {
@@ -237,7 +237,7 @@ describe('StandingsTable', () => {
       expect(cells.map((cell) => cell.textContent)).toEqual(['2', '2', '6'])
       expect(screen.getAllByRole('columnheader')).toHaveLength(4)
       expect(container.querySelectorAll('tbody tr:nth-child(2) td')).toHaveLength(3)
-      expect(container.querySelector('.hf-standings-legend')?.textContent).not.toMatch(/balk/iu)
+      expect(container.querySelector('.hf-bar-legend')?.textContent).not.toMatch(/balk/iu)
     })
 
     it('makes equal points equal bars', () => {
@@ -270,11 +270,11 @@ describe('StandingsTable', () => {
   it('has a legend in the full table only', () => {
     const { container, rerender } = render(<StandingsTable {...props} />)
 
-    expect(container.querySelector('.hf-standings-legend')).not.toBeNull()
+    expect(container.querySelector('.hf-bar-legend')).not.toBeNull()
 
     rerender(<StandingsTable {...props} columns="compact" />)
 
-    expect(container.querySelector('.hf-standings-legend')).toBeNull()
+    expect(container.querySelector('.hf-bar-legend')).toBeNull()
   })
 
   it('shows the names of clubs as text, not as HTML', () => {
