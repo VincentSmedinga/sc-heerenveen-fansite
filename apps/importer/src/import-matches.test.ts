@@ -306,6 +306,112 @@ describe('reading again', () => {
   })
 })
 
+describe('extra time and a shoot-out in the cup', () => {
+  const extraTimeCup = fixture('wikipedia-cup-extra-time.wiki')
+  /** The shoot-out of the second round as it was before it was on the page. */
+  const withoutShootOut = (cup: string) => cup.replace('|penaltyscore = 4&nbsp;–&nbsp;3\n', '')
+
+  it('stores the extra time and the shoot-out of the three cup ties, from our side', async () => {
+    const { server } = await serve({ cup: extraTimeCup })
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'imported', matches: { added: 37 }, warnings: [] })
+
+    const cup = await database.db
+      .select()
+      .from(matches)
+      .where(eq(matches.competition, 'KNVB Beker'))
+      .orderBy(asc(matches.matchDate))
+
+    expect(
+      cup.map((match) => [
+        match.round,
+        match.extraTime,
+        match.goalsFor,
+        match.goalsAgainst,
+        match.penaltiesFor,
+        match.penaltiesAgainst,
+      ]),
+    ).toEqual([
+      ['Eerste ronde', true, 2, 1, null, null],
+      ['Tweede ronde', true, 1, 1, 4, 3],
+      ['Achtste finale', true, 2, 2, 4, 5],
+    ])
+  })
+
+  it('takes the shoot-out over when it comes on the page later, without a warning, and changes nothing else', async () => {
+    const { pages, server } = await serve({ cup: withoutShootOut(extraTimeCup) })
+
+    await importAt(server, first)
+    expect(await database.db.select().from(matches).where(eq(matches.round, 'Tweede ronde'))).toMatchObject([
+      { extraTime: true, penaltiesAgainst: null, penaltiesFor: null, resultSetAt: first },
+    ])
+
+    pages.cup = extraTimeCup
+
+    const report = await importAt(server, new Date(first.getTime() + 5 * 24 * hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { unchanged: 36, updated: 1 }, warnings: [] })
+    expect(await database.db.select().from(matches).where(eq(matches.round, 'Tweede ronde'))).toMatchObject([
+      { extraTime: true, penaltiesAgainst: 3, penaltiesFor: 4, resultSetAt: first },
+    ])
+  })
+
+  it('warns, with the shoot-out in it, when a shoot-out that had stood for days changes', async () => {
+    const { pages, server } = await serve({ cup: extraTimeCup })
+
+    await importAt(server, first)
+    pages.cup = extraTimeCup.replace('|penaltyscore = 4&nbsp;–&nbsp;3', '|penaltyscore = 3&nbsp;–&nbsp;4')
+
+    const report = await importAt(server, new Date(first.getTime() + 4 * 24 * hours(1)))
+
+    expect(report).toMatchObject({
+      kind: 'imported',
+      warnings: [
+        'the result of Tweede ronde (KNVB Beker) changed after 4 days, from sc Heerenveen 1-1 Voorbeeld United (penalties 4-3) to sc Heerenveen 1-1 Voorbeeld United (penalties 3-4)',
+      ],
+    })
+  })
+
+  const failures: [string, (pages: Pages) => Partial<Pages>, string][] = [
+    [
+      'a score of the shoot-out that cannot be read',
+      () => ({ cup: extraTimeCup.replace('|penaltyscore = 4&nbsp;–&nbsp;3', '|penaltyscore = vier – drie') }),
+      'a shoot-out score we do not know',
+    ],
+    [
+      'a shoot-out after a score that is not level',
+      () => ({
+        cup: extraTimeCup.replace(
+          '|score = 1&nbsp;–&nbsp;1\n|half time score = 0&nbsp;–&nbsp;0, 0',
+          '|score = 2&nbsp;–&nbsp;1\n|half time score = 0&nbsp;–&nbsp;0, 0',
+        ),
+      }),
+      'a shoot-out but no level score',
+    ],
+    [
+      'extra time in a league match',
+      (pages) => ({ programme: pages.programme.replace('|score = 1 – 0', '|score = 1 – 0\n|aet = J') }),
+      'which only the cup has',
+    ],
+  ]
+
+  it.each(failures)('leaves the last good copy and says why: %s', async (_name, change, reason) => {
+    const { pages, server } = await serve({ cup: extraTimeCup })
+
+    await importAt(server, first)
+
+    const before = await snapshot()
+
+    Object.assign(pages, change(pages))
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report.kind).toBe('error')
+    expect(formatMatchReport(report)).toContain(reason)
+    expect(await snapshot()).toEqual(before)
+  })
+})
+
 describe('the lines of a report', () => {
   it('cleans text from Wikipedia of control characters, in a warning as in an error', () => {
     const counts = { added: 0, removed: 0, unchanged: 1, updated: 1 }

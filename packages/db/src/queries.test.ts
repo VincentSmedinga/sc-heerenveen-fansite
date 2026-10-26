@@ -878,6 +878,19 @@ describe('the matches and the table of a season', () => {
       expect(planned?.kickoffAt).toEqual(new Date('2026-10-28T18:45:00Z'))
     })
 
+    it('gives a cup match its extra time and its shoot-out from the side of sc Heerenveen', async () => {
+      await database.db.insert(matches).values(madeUpMatches(now))
+
+      const rows = await listSeasonMatches(database.db, '2026/27')
+      const extra = rows.find((match) => match.round === 'Eerste ronde')
+      const shootOut = rows.find((match) => match.round === 'Kwartfinale')
+      const league = rows.find((match) => match.round === 'Speelronde 1')
+
+      expect(extra).toMatchObject({ extraTime: true, penaltiesAgainst: null, penaltiesFor: null })
+      expect(shootOut).toMatchObject({ extraTime: true, penaltiesAgainst: 5, penaltiesFor: 4 })
+      expect(league).toMatchObject({ extraTime: false, penaltiesAgainst: null, penaltiesFor: null })
+    })
+
     it('gives only the season it is asked for', async () => {
       await database.db.insert(matches).values(madeUpMatches(now))
       await database.db.insert(matches).values(madeUpMatches(new Date('2027-08-01T12:00:00Z')))
@@ -896,12 +909,15 @@ describe('the matches and the table of a season', () => {
       expect(Object.keys(row ?? {}).sort()).toEqual([
         'competition',
         'dateText',
+        'extraTime',
         'goalsAgainst',
         'goalsFor',
         'home',
         'kickoffAt',
         'matchDate',
         'opponent',
+        'penaltiesAgainst',
+        'penaltiesFor',
         'round',
         'stadium',
         'status',

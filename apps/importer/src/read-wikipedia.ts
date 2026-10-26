@@ -12,6 +12,8 @@ export type ReadMatch = {
   competition: Competition
   /** The date as Wikipedia writes it, only when the time is unknown. */
   dateText: null | string
+  /** Whether a played cup match went to extra time. Only the cup has it. */
+  extraTime: boolean
   /** Empty unless the match is played. */
   goalsAgainst: null | number
   goalsFor: null | number
@@ -21,6 +23,9 @@ export type ReadMatch = {
   /** The local day, or the first day when only a weekend is known: `2026-10-24`. */
   matchDate: string
   opponent: string
+  /** The shoot-out of a cup match level after extra time, from our side. Both or neither. */
+  penaltiesAgainst: null | number
+  penaltiesFor: null | number
   /** As Wikipedia has it: `Speelronde 12`, `Eerste ronde`. */
   round: string
   stadium: null | string
@@ -394,6 +399,24 @@ function parseDate(
   }
 }
 
+/**
+ * The score of the shoot-out of a box, in the order of the template: team 1 first. Empty or
+ * missing is no shoot-out; anything but two numbers is a text we do not know.
+ */
+function parsePenalties(
+  value: string,
+): { away: number; home: number; kind: 'score' } | { kind: 'none' } | { kind: 'unknown'; text: string } {
+  const text = plain(value)
+
+  if (text === '') {
+    return { kind: 'none' }
+  }
+
+  const score = /^(\d{1,2}) ?[–-] ?(\d{1,2})$/u.exec(text)
+
+  return score === null ? { kind: 'unknown', text } : { away: Number(score[2]), home: Number(score[1]), kind: 'score' }
+}
+
 /** The score of a box: none yet, a score, called off, or something we do not know. */
 function parseScore(
   value: string,
@@ -463,6 +486,8 @@ function readMatch(box: Template, competition: Competition, round: null | string
   const day = parseDate(box.params.get('date') ?? '')
   const time = parseTime(box.params.get('time') ?? '')
   const score = parseScore(box.params.get('score') ?? '')
+  const penalties = parsePenalties(box.params.get('penaltyscore') ?? '')
+  const extraTimeSaid = plain(box.params.get('aet') ?? '') !== ''
 
   if (round === null || round.length > matchLimits.round) {
     return `${name} has no usable round heading`
@@ -482,6 +507,20 @@ function readMatch(box: Template, competition: Competition, round: null | string
   if (score.kind === 'unknown') {
     return `${name} has a score we do not know: '${score.text.slice(0, 40)}'`
   }
+  if (competition !== 'KNVB Beker' && (extraTimeSaid || penalties.kind !== 'none')) {
+    return `${name} has extra time or a shoot-out, which only the cup has`
+  }
+  if (penalties.kind === 'unknown') {
+    return `${name} has a shoot-out score we do not know: '${penalties.text.slice(0, 40)}'`
+  }
+  if (penalties.kind === 'score') {
+    if (!extraTimeSaid) {
+      return `${name} has a shoot-out without extra time`
+    }
+    if (score.kind !== 'score' || score.home !== score.away) {
+      return `${name} has a shoot-out but no level score`
+    }
+  }
 
   const kickoffAt = time === null || !day.single ? null : amsterdamToUtc(day, time)
   const status: MatchStatus = score.kind === 'score' ? 'played' : score.kind === 'postponed' ? 'postponed' : 'scheduled'
@@ -491,12 +530,15 @@ function readMatch(box: Template, competition: Competition, round: null | string
   return {
     competition,
     dateText: kickoffAt === null ? day.text.slice(0, matchLimits.dateText) : null,
+    extraTime: extraTimeSaid && score.kind === 'score',
     goalsAgainst: theirs,
     goalsFor: ours,
     home,
     kickoffAt,
     matchDate: day.isoDate,
     opponent,
+    penaltiesAgainst: penalties.kind === 'score' ? (home ? penalties.away : penalties.home) : null,
+    penaltiesFor: penalties.kind === 'score' ? (home ? penalties.home : penalties.away) : null,
     round,
     stadium,
     status,

@@ -366,6 +366,12 @@ describe('the made-up matches', () => {
     )
     expect(has((match) => match.status === 'postponed')).toBe(true)
     expect(has((match) => match.competition === 'KNVB Beker')).toBe(true)
+    // The cup ties with extra time: a win, a win on penalties and a loss on penalties.
+    expect(
+      has((match) => match.extraTime && match.penaltiesFor === null && match.goalsFor! > match.goalsAgainst!),
+    ).toBe(true)
+    expect(has((match) => match.penaltiesFor !== null && match.penaltiesFor > match.penaltiesAgainst!)).toBe(true)
+    expect(has((match) => match.penaltiesFor !== null && match.penaltiesFor < match.penaltiesAgainst!)).toBe(true)
     // The dates of the made-up matches count from the day of the seed: this one is 10 days on.
     expect(rows.find((match) => match.dateText !== null)?.dateText).toBe('4-6 november 2026')
   })

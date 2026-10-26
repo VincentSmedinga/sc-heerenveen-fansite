@@ -571,6 +571,13 @@ Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wik
   Een speelronde van de competitie is een kop `Speelronde <nummer>`; wedstrijden onder andere koppen, zoals de play-offs, leest hij niet.
 - De status is `played` bij een score, `postponed` als de score "uitgesteld" of "afgelast" zegt, en anders `scheduled`.
   Een score die we niet kennen, zoals een gestaakte wedstrijd van ons, is een fout.
+- Een bekerwedstrijd na verlenging of strafschoppen bewaart hij ook (`extra_time`, `penalties_for` en `penalties_against`).
+  Wikipedia schrijft de uitslag in `score` als "N – N", ook na verlenging.
+  Een gevuld `aet` (meestal `J`) is verlenging, en `penaltyscore` is de score van de strafschoppen, als "4 – 3" met team 1 eerst.
+  De import zet die om naar die van sc Heerenveen en die van de tegenstander, thuis of uit.
+  Een wedstrijd van de competitie met `aet` of `penaltyscore` is een fout, zoals strafschoppen zonder verlenging, strafschoppen bij een stand die niet gelijk is, en een score van de strafschoppen die geen "N – N" is.
+  Verlenging zonder strafschoppen mag, ook bij een gelijke stand: de strafschoppen komen er bij de volgende lezing bij.
+  Zo'n nieuwe score van strafschoppen is geen verandering van de uitslag en geeft geen waarschuwing; een score die verandert wel.
 - De aftrap staat in UTC (`kickoff_at`), omgerekend uit de tijd in Nederland.
   Staat er geen tijd, zoals bij speelronde 22 tot en met 32 tot 22 december 2026, dan is `kickoff_at` leeg en staat de datum zoals Wikipedia die geeft in `date_text`, zoals `12-14 februari 2027`.
   `match_date` is dan de eerste dag.
@@ -635,7 +642,7 @@ De waarschuwing staat ook in `match_imports.last_warning`, en dus in het overzic
 ### Wat de import niet doet
 
 - De versie van een pagina bewaart hij als de `Last-Modified` van Wikipedia (`wikipedia_pages.version`), want de ruwe tekst komt zonder versienummer.
-- Verlenging en strafschoppen van een bekerwedstrijd bewaart hij niet: alleen de score zoals Wikipedia die in het sjabloon heeft.
+- De schutters bij de strafschoppen en de uitslag na 90 minuten bewaart hij niet: alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging en de score van de strafschoppen.
 - Een puntenaftrek rekent hij niet mee.
   De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
 - Scheidsrechter, toeschouwers, opstellingen en doelpuntenmakers leest hij niet.

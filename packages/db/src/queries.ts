@@ -256,7 +256,8 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * The matches of sc Heerenveen 1 in a season, such as `2026/27`, in the order they are played:
  * by day, then by kick-off, with a match without a kick-off before one with. It gives what the
  * pages show: the competition, the round, the opponent, whether the match is at home, the
- * stadium, the status, the goals (null unless the match is played), the day, the kick-off in
+ * stadium, the status, the goals (null unless the match is played), whether it went to extra
+ * time and the shoot-out (null unless there was one), the day, the kick-off in
  * UTC (null while it is unknown) and the date as Wikipedia has it (null when the kick-off is
  * known). The moment the importer saw a result stays internal. Only the season that is asked
  * for is read: the pages show the current season alone.
@@ -266,12 +267,15 @@ export function listSeasonMatches(db: Database, season: string) {
     .select({
       competition: matches.competition,
       dateText: matches.dateText,
+      extraTime: matches.extraTime,
       goalsAgainst: matches.goalsAgainst,
       goalsFor: matches.goalsFor,
       home: matches.home,
       kickoffAt: matches.kickoffAt,
       matchDate: matches.matchDate,
       opponent: matches.opponent,
+      penaltiesAgainst: matches.penaltiesAgainst,
+      penaltiesFor: matches.penaltiesFor,
       round: matches.round,
       stadium: matches.stadium,
       status: matches.status,

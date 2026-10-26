@@ -105,6 +105,50 @@ describe('the page /wedstrijden', () => {
     expect(results).toContain('2–0')
   })
 
+  describe('a cup tie after extra time or penalties', () => {
+    const tie = {
+      ...matchData.matches[3]!,
+      competition: 'KNVB Beker',
+      extraTime: true,
+      goalsAgainst: 1,
+      goalsFor: 1,
+      penaltiesAgainst: 3,
+      penaltiesFor: 4,
+    } as const
+
+    it('shows the shoot-out and says in words what the abbreviations are, under the results', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, tie] })
+
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).toContain('<abbr title="Na strafschoppen">n.s.</abbr> 3–4')
+      expect(results).toContain('1 tegen 1, na strafschoppen 3 tegen 4')
+      expect(results).toContain('n.s. na strafschoppen')
+      expect(results).not.toContain('n.v. na verlenging')
+    })
+
+    it('names only the abbreviations a line uses', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [...matchData.matches, { ...tie, penaltiesAgainst: null, penaltiesFor: null, round: 'Derde ronde' }],
+      })
+
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).toContain('<abbr title="Na verlenging">n.v.</abbr>')
+      expect(results).toContain('n.v. na verlenging')
+      expect(results).not.toContain('n.s.')
+    })
+
+    it('has no abbreviations and no explanation when no line needs them', async () => {
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).not.toContain('<abbr')
+      expect(results).not.toContain('na verlenging')
+      expect(results).not.toContain('na strafschoppen')
+    })
+  })
+
   it('shows the full table with a caption for a screen reader that says the day, and the row of sc Heerenveen marked', async () => {
     const stand = section(await render(), 'stand')
 

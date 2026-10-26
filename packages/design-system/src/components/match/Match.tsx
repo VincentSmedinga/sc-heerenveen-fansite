@@ -13,21 +13,33 @@ export const matchStatuses = ['scheduled', 'played', 'postponed'] as const
 export type MatchProps =
   | (MatchBaseProps & {
       dateTime?: never
+      extraTime?: never
       goalsAgainst?: never
       goalsFor?: never
+      penaltiesAgainst?: never
+      penaltiesFor?: never
       status: 'postponed'
       time?: never
     })
+  | (MatchShootOut &
+      MatchWithTimeProps & {
+        /**
+         * Whether the match went to extra time, which only a cup match does. The score is the
+         * one after extra time, and the shoot-out, if there was one, is not in it.
+         */
+        extraTime?: boolean
+        /** The goals of the opponent. Only a played match has them, and then it has both. */
+        goalsAgainst: number
+        /** The goals of sc Heerenveen. */
+        goalsFor: number
+        status: 'played'
+      })
   | (MatchWithTimeProps & {
-      /** The goals of the opponent. Only a played match has them, and then it has both. */
-      goalsAgainst: number
-      /** The goals of sc Heerenveen. */
-      goalsFor: number
-      status: 'played'
-    })
-  | (MatchWithTimeProps & {
+      extraTime?: never
       goalsAgainst?: never
       goalsFor?: never
+      penaltiesAgainst?: never
+      penaltiesFor?: never
       status: 'scheduled'
     })
 
@@ -48,6 +60,16 @@ type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   stadium?: null | string | undefined
 }
 
+/** The shoot-out of a cup match that was level after extra time: both scores, or none. */
+type MatchShootOut =
+  | {
+      /** The penalties scored by the opponent. */
+      penaltiesAgainst: number
+      /** The penalties scored by sc Heerenveen. */
+      penaltiesFor: number
+    }
+  | { penaltiesAgainst?: never; penaltiesFor?: never }
+
 type MatchWithTimeProps = MatchBaseProps & {
   /**
    * The day or the moment in a form a machine reads, such as `2026-11-01T13:30:00Z` for a
@@ -66,6 +88,10 @@ type MatchWithTimeProps = MatchBaseProps & {
 /** How a played match went for sc Heerenveen, whichever side it played on. */
 const outcomeOf = (goalsFor: number, goalsAgainst: number) =>
   goalsFor > goalsAgainst ? 'win' : goalsFor < goalsAgainst ? 'loss' : 'draw'
+
+/** The two numbers of a result from the home club's side, such as `2–0`, with this dash. */
+const sides = (home: boolean, ours: number, theirs: number, dash: string) =>
+  home ? `${ours}${dash}${theirs}` : `${theirs}${dash}${ours}`
 
 // Between the parts of a line. The dot is only for the eye and is hidden from a screen reader.
 // The spaces stay outside the hidden span, so the parts don't run together in the accessibility
@@ -86,20 +112,26 @@ const separator = (
  * The two clubs are in the order they are announced, the home club first, and the line also
  * says "Thuis" or "Uit", so a visitor does not have to work it out. A played match has the
  * result between the names, as "2–0" seen from the home club's side, and a screen reader hears
- * "2 tegen 0". The result has the colour of the outcome for sc Heerenveen: green for a win, red
- * for a loss and neutral for a draw, also in the cup, whichever side it played on. The goals
- * say the same, so a screen reader hears nothing extra. A match that is still to be played has
- * a dash between the names, which is read as "tegen".
+ * "2 tegen 0". After extra time the line says "n.v." and after a shoot-out "n.s." with its
+ * score, as "n.s. 4–2" in the order of the clubs; a screen reader hears the full words after
+ * the result, as "1 tegen 1, na strafschoppen 4 tegen 2". The result has the colour of the
+ * outcome for sc Heerenveen: green for a win, red for a loss and neutral for a draw, whichever
+ * side it played on, and in a shoot-out the colour follows the shoot-out. The goals say the
+ * same, so a screen reader hears nothing extra. A match that is still to be played has a dash
+ * between the names, which is read as "tegen".
  * A postponed match says "Uitgesteld" where the time would be.
  */
 export const Match = ({
   className,
   competition,
   dateTime,
+  extraTime,
   goalsAgainst,
   goalsFor,
   home,
   opponent,
+  penaltiesAgainst,
+  penaltiesFor,
   round,
   stadium,
   status,
@@ -107,12 +139,28 @@ export const Match = ({
   ...props
 }: MatchProps) => {
   const [first, second] = home ? [ourClub, opponent] : [opponent, ourClub]
-  const outcome = status === 'played' ? outcomeOf(goalsFor, goalsAgainst) : undefined
+  const shootOut = penaltiesFor !== undefined && penaltiesAgainst !== undefined
+  // A shoot-out decides a level score, so the colour follows it; a level one has no winner.
+  const outcome =
+    status !== 'played'
+      ? undefined
+      : shootOut
+        ? outcomeOf(penaltiesFor, penaltiesAgainst)
+        : outcomeOf(goalsFor, goalsAgainst)
   const score =
     status === 'played'
       ? {
-          hidden: `${home ? goalsFor : goalsAgainst} tegen ${home ? goalsAgainst : goalsFor}`,
-          shown: `${home ? goalsFor : goalsAgainst}–${home ? goalsAgainst : goalsFor}`,
+          hidden: [
+            sides(home, goalsFor, goalsAgainst, ' tegen '),
+            shootOut
+              ? `na strafschoppen ${sides(home, penaltiesFor, penaltiesAgainst, ' tegen ')}`
+              : extraTime
+                ? 'na verlenging'
+                : undefined,
+          ]
+            .filter((part) => part !== undefined)
+            .join(', '),
+          shown: sides(home, goalsFor, goalsAgainst, '–'),
         }
       : { hidden: 'tegen', shown: '–' }
 
@@ -122,6 +170,21 @@ export const Match = ({
         {competition}
         {separator}
         {round}
+        {shootOut || extraTime ? (
+          <>
+            {separator}
+            {/* A screen reader gets the full words with the result, so this is for the eye. */}
+            <span aria-hidden="true">
+              {shootOut ? (
+                <>
+                  <abbr title="Na strafschoppen">n.s.</abbr> {sides(home, penaltiesFor, penaltiesAgainst, '–')}
+                </>
+              ) : (
+                <abbr title="Na verlenging">n.v.</abbr>
+              )}
+            </span>
+          </>
+        ) : null}
       </Text>
       <p className="hf-match-clubs">
         <span className={first === ourClub ? 'hf-match-own' : undefined}>{first}</span>{' '}
