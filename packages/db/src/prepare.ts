@@ -2,22 +2,28 @@ import { migrate } from 'drizzle-orm/mysql2/migrator'
 
 import { connect } from './client.ts'
 import { lockNameFor, withLock } from './lock.ts'
-import { seedMatches, seedSources } from './seed.ts'
+import { removeTestSources, seedMatches, seedRealSources } from './seed.ts'
 
 export type PrepareOptions = {
   /** How many seconds to wait for a process that is preparing the same database. */
   lockSeconds?: number
   /** The folder with the migrations: the SQL files and `meta/_journal.json`. */
   migrationsFolder: string
-  /** Whether to put the test sources and made-up matches in after the migrations. */
-  seed: boolean
+  /**
+   * What to put in the database after the migrations. `acceptance` and `production` put the
+   * real sources in the register, and `acceptance` also takes out the test sources it had and
+   * puts made-up matches in. `local` and `false` put nothing in: locally `pnpm db:seed` does
+   * that.
+   */
+  seed: 'acceptance' | 'local' | 'production' | false
   /** The `DATABASE_URL`. */
   url: string
 }
 
 /**
  * Brings the database up to date: runs the migrations it hasn't had yet and, when asked, puts
- * the test sources in the register and made-up matches in the database. The site calls this
+ * the real sources in the register (see `PrepareOptions`). The test sources are for local
+ * development and the tests only; acceptance removes the ones it had. The site calls this
  * when it starts. A lock in the database (`GET_LOCK`) makes two processes that start at the
  * same moment take turns, so the second one finds nothing left to do.
  *
@@ -37,8 +43,12 @@ export async function prepareDatabase({ lockSeconds = 30, migrationsFolder, seed
     const { ran } = await withLock(pool, lockName, lockSeconds, async () => {
       await migrate(db, { migrationsFolder })
 
-      if (seed) {
-        await seedSources(db)
+      if (seed === 'acceptance' || seed === 'production') {
+        await seedRealSources(db)
+      }
+
+      if (seed === 'acceptance') {
+        await removeTestSources(db)
         await seedMatches(db)
       }
     })

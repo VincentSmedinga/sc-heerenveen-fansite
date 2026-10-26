@@ -519,12 +519,13 @@ async function withServer({ database, siteEnv, smtp = true }, checks) {
   }
 }
 
-// On acceptance the site makes the tables in an empty database and puts the sources from the
-// seed in them, before it answers.
+// On acceptance the site makes the tables in an empty database and puts the real sources from
+// the seed in them, before it answers. The test sources are only for local development and the
+// tests (see docs/acceptatieomgeving.md).
 await withEmptyDatabase((database) =>
   withServer({ database, siteEnv: 'acceptance' }, async (server, log) => {
     await waitUntilUp(server)
-    assert.match(log(), /The database is up to date, with the sources from the seed\./)
+    assert.match(log(), /The database is up to date, with the real sources from the seed\./)
 
     const home = await fetch(origin)
     const html = await home.text()
@@ -537,7 +538,9 @@ await withEmptyDatabase((database) =>
     assert.match(html, /<h1[^>]*>sc Heerenveen Fansite<\/h1>/)
     assert.match(html, /<h2[^>]*>Laatste nieuws<\/h2>/)
     assert.match(html, /We hebben nog geen nieuws gevonden\. Kijk straks nog eens\./)
-    assert.match(html, /<a href="\/bronnen">Onze bronnen<\/a>/)
+    // The homepage has no text about the sources; the footer links to them.
+    assert.doesNotMatch(html, /Welke media we volgen/)
+    assert.match(html, /<footer[^>]*>.*<a[^>]*href="\/bronnen"[^>]*>Bronnen<\/a>.*<\/footer>/s)
     assert.doesNotMatch(html, /Binnenkort meer/)
     assert.match(html, /<footer[^>]*>.*href="\/updates">Updates<\/a>.*<\/footer>/s)
 
@@ -569,13 +572,13 @@ await withEmptyDatabase((database) =>
     const iconResponses = await checkIcons()
 
     // The sources page reads the register, so the database driver must be in the folder too,
-    // and the test sources must be in it. The source that is switched off isn't on the page.
+    // and the real sources must be in it, without the test sources.
     const sources = await fetch(`${origin}/bronnen`)
     const sourcesHtml = await sources.text()
     assert.equal(sources.status, 200)
     assert.match(sourcesHtml, /<h1[^>]*>Onze bronnen<\/h1>/)
-    assert.match(sourcesHtml, /Testkrant/)
-    assert.doesNotMatch(sourcesHtml, /Uitgezette testbron/)
+    assert.match(sourcesHtml, /Leeuwarder Courant/)
+    assert.doesNotMatch(sourcesHtml, /Testkrant|Uitgezette testbron/)
 
     // The podcast page reads the episodes, and the seed has none. A podcast or a page that
     // doesn't exist is a 404.
@@ -681,11 +684,11 @@ await withEmptyDatabase((database) =>
   }),
 )
 
-// On production the tables come too, but never the test sources.
+// On production the tables come too, with the real sources and never the test sources.
 await withEmptyDatabase((database) =>
   withServer({ database, siteEnv: 'production' }, async (server, log) => {
     await waitUntilUp(server)
-    assert.match(log(), /The database is up to date\./)
+    assert.match(log(), /The database is up to date, with the real sources from the seed\./)
 
     const home = await fetch(origin)
     assert.equal(home.headers.get('x-robots-tag'), null, 'production must be indexable')
@@ -707,8 +710,8 @@ await withEmptyDatabase((database) =>
     const sources = await fetch(`${origin}/bronnen`)
     const sourcesHtml = await sources.text()
     assert.equal(sources.status, 200)
-    assert.match(sourcesHtml, /We hebben nog geen bronnen/)
-    assert.doesNotMatch(sourcesHtml, /Testkrant/)
+    assert.match(sourcesHtml, /Leeuwarder Courant/)
+    assert.doesNotMatch(sourcesHtml, /Testkrant|We hebben nog geen bronnen/)
 
     // The feed links to production, not to acceptance.
     await checkFeed('https://sc.heerenveen.org')

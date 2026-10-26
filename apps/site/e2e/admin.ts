@@ -61,7 +61,7 @@ const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])
  * returns the function that takes them out again. It only works on a database on this
  * computer: it refuses any other host, so it can never write to the database of acceptance or
  * production, whatever `DATABASE_URL` says by mistake. The site must have started already: it
- * makes the tables and puts the test sources in (SITE_ENV=acceptance).
+ * makes the tables, and global-setup.ts puts the test sources in (see test-sources.ts).
  */
 export async function addAdmin() {
   const { DATABASE_URL } = databaseEnv()
@@ -99,7 +99,7 @@ export async function addAdmin() {
 
     if (source === undefined) {
       throw new Error(
-        `The test source ${sourceDomain} is not in the register. Did the site start with SITE_ENV=acceptance?`,
+        `The test source ${sourceDomain} is not in the register. Did global-setup.ts put the test sources in (test-sources.ts)?`,
       )
     }
 

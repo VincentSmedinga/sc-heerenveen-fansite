@@ -1,5 +1,6 @@
 import type { PublicSource } from '@fansite/db/queries'
 
+import { realSources } from '@fansite/db/seed'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -131,6 +132,39 @@ describe('the page Onze bronnen', () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     expect(withoutIcons(await render())).toContain('<li><a href="https://proefnieuws.test">Proefnieuws</a></li>')
+  })
+
+  it('has cards for news, podcasts and the forum with the real sources of acceptance and production, and none for club and video', async () => {
+    vi.mocked(getSources).mockResolvedValue(
+      realSources.map(({ description, domain, kind, name }) => ({ description, domain, kind, name })),
+    )
+
+    const html = await render()
+
+    expect(html.match(/<h2[^>]*>.*?<\/h2>/g)?.slice(0, 3)).toEqual([
+      '<h2 class="hf-heading-2" id="news-heading">Nieuws</h2>',
+      '<h2 class="hf-heading-2" id="podcast-heading">Podcasts</h2>',
+      '<h2 class="hf-heading-2" id="forum-heading">Forum</h2>',
+    ])
+    expect(html).not.toContain('club-heading')
+    expect(html).not.toContain('video-heading')
+    expect(html).not.toContain('.test"')
+    expect(html).not.toContain('Testkrant')
+  })
+
+  it('is right with a single source in a kind: one card with one item', async () => {
+    vi.mocked(getSources).mockResolvedValue([
+      { description: 'Het forum.', domain: 'forum.heerenveen.org', kind: 'forum', name: 'sc Heerenveen Forum' },
+    ])
+
+    const html = await render()
+    const cards = html.match(/<section.*?<\/section>/g) ?? []
+
+    expect(cards).toHaveLength(3)
+    expect(cards[0]).toContain('<h2 class="hf-heading-2" id="forum-heading">Forum</h2>')
+    expect(cards[0]?.match(/<li>/g)).toHaveLength(1)
+    expect(html).toContain('Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.')
+    expect(html).not.toContain('We hebben nog geen bronnen')
   })
 
   it('shows visitors an empty state when there are no sources', async () => {

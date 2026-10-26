@@ -1,6 +1,6 @@
 # Puts every merge to main on the acceptance environment, https://acc.sc.heerenveen.org. It builds the site and the
 # importer, starts the build the way the host does to check it, runs the importer once, copies both over SSH and checks
-# the sources page. The site makes its own tables and puts the test sources in them when the host starts it, and cron
+# the sources page. The site makes its own tables and puts the real sources in them when the host starts it, and cron
 # starts the importer there. docs/acceptatieomgeving.md says what the owner sets up on the host and in GitHub. Until the
 # secrets are there, the job builds and checks, and skips the copy and the last check with a notice, so main stays green.
 
@@ -134,20 +134,20 @@ jobs:
           ssh -p 26 -i "$HOME/.ssh/acceptance_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
             "$SSH_USER@$SSH_HOST" "mkdir -p $(printf '%q' "$DEPLOY_PATH")/tmp && touch $(printf '%q' "$DEPLOY_PATH")/tmp/restart.txt"
 
-      # The site migrates the database and puts the test sources in it when the host starts the app, so a page that reads
-      # the register shows whether that worked. A migration that fails turns this run red. The host starts the app on the
-      # first request after the restart, so the check tries for a minute.
+      # The site migrates the database and puts the real sources in it when the host starts the app, and takes out the test
+      # sources it had, so a page that reads the register shows whether that worked. A migration that fails turns this
+      # run red. The host starts the app on the first request after the restart, so the check tries for a minute.
       - name: Check the sources page on acceptance
         if: steps.secrets.outputs.ready == 'true'
         run: |
           while [ "$SECONDS" -lt 60 ]; do
             status=$(curl --silent --max-time 10 --output "$RUNNER_TEMP/bronnen.html" --write-out '%{http_code}' https://acc.sc.heerenveen.org/bronnen || true)
-            if [ "$status" = 200 ] && grep -q Testkrant "$RUNNER_TEMP/bronnen.html"; then
-              echo "https://acc.sc.heerenveen.org/bronnen shows the test sources."
+            if [ "$status" = 200 ] && grep -q "Leeuwarder Courant" "$RUNNER_TEMP/bronnen.html" && ! grep -q Testkrant "$RUNNER_TEMP/bronnen.html"; then
+              echo "https://acc.sc.heerenveen.org/bronnen shows the real sources."
               exit 0
             fi
-            echo "Status $status, and no test source on the page yet."
+            echo "Status $status, and no real source, or still a test source, on the page."
             sleep 5
           done
-          echo "::error title=Acceptance check failed::https://acc.sc.heerenveen.org/bronnen does not answer 200 with the test sources. See docs/acceptatieomgeving.md."
+          echo "::error title=Acceptance check failed::https://acc.sc.heerenveen.org/bronnen does not answer 200 with the real sources. See docs/acceptatieomgeving.md."
           exit 1

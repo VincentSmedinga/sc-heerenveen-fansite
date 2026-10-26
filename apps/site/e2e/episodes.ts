@@ -28,8 +28,8 @@ const day = 24 * 60 * 60 * 1000
 
 /**
  * Puts the made-up episodes in the database and returns the function that takes them out again.
- * The site must have started already: it makes the tables and puts the test sources in
- * (SITE_ENV=acceptance).
+ * The site must have started already: it makes the tables, and global-setup.ts
+ * has put the test sources in (see test-sources.ts).
  */
 export async function addEpisodes() {
   const { close, db, pool } = connectToDatabase()
@@ -46,7 +46,7 @@ export async function addEpisodes() {
 
       if (sourceId === undefined) {
         throw new Error(
-          `The test podcast ${domain} is not in the register. Did the site start with SITE_ENV=acceptance?`,
+          `The test podcast ${domain} is not in the register. Did global-setup.ts put the test sources in (test-sources.ts)?`,
         )
       }
 

@@ -167,7 +167,7 @@ For agents:
   The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
 - The Reviewer's hook blocks `docker`, and the tests of `packages/db` need a MariaDB.
   Before starting the Reviewer, the Builder makes sure the database is running (`docker compose up -d --wait`).
-  `pnpm test:a11y` needs it too, but the built site migrates it and seeds the test sources itself.
+  `pnpm test:a11y` needs it too, but the built site migrates it and seeds the real sources itself, and the checks add the test sources.
 - The `model` line in the agent file isn't always picked up: three Reviewers ran on Sonnet although the file said Fable.
   Whoever starts a Reviewer on Fable sets `model: "fable"` on the call, next to `subagent_type: "reviewer"`.
   Afterwards, check the `model` field of the subagent's assistant messages in its output file, and tell the owner if it isn't the model asked for.

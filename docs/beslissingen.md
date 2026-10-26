@@ -643,6 +643,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de groep moet op acceptatie een gevulde pagina kunnen nakijken, en op productie mogen nooit testbronnen komen.
 - **Alternatieven:** acceptatie leeg laten en de bronnen met de hand invoeren.
   Dat kan pas met het beheer (#30), en dan vervangen de echte bronnen de testbronnen.
+- **Later:** de testbronnen staan sinds 26 oktober 2026 alleen nog lokaal en in de tests; zie _Testbronnen alleen lokaal; acceptatie en productie hebben alleen echte bronnen_.
 
 ### De importer gaat als één bestand mee in de map van de site
 
@@ -2890,6 +2891,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gevolg:** hoe echte bronnen op productie in het register komen, beslissen we met de bronnenlijst (#10) en het beheer (#30).
 - **Alternatieven:** een migratie die de bron invoegt; dan staan gegevens tussen het schema.
   Of wachten op het beheer.
+- **Later:** de echte bronnen komen sinds 26 oktober 2026 op productie via de lijst `realSources` in de seed; zie _De echte bronnen komen op productie via de seed_.
+  De Leeuwarder Courant staat sinds dezelfde dag ook niet meer naast de testbronnen op acceptatie.
 
 ### Voetbal International als tweede bron
 
@@ -5104,3 +5107,32 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alle 25 tijden waren geldig.
 - **Alternatieven:** wachten op schriftelijke toestemming van Disney (voorzichtiger, maar Disney antwoordt zelden); `EST` voor alle feeds als Nederlandse tijd lezen (verkeerd voor een feed waar het echt EST is); de tijd van deze bron negeren en alleen het moment van eerste zien gebruiken (de berichten staan dan niet op hun echte tijd).
 - **Daarna:** schriftelijk toestemming vragen aan Disney hoort bij #35; de projecteigenaar nam het voorbehoud van Disney aan bij het goedkeuren van het issue.
+
+### De echte bronnen komen op productie via de seed
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de echte bronnen komen op productie via een eigen lijst in de seed, `realSources`, die de site bij het opstarten toepast, tot het beheer (#31) bronnen kan toevoegen.
+  De site werkt een bron die er al staat bij op haar domein, maar niet wat het beheer straks wijzigt: `enabled`, de velden `consent_*`, `attribution` en het beleid voor intro, foto en insluiten.
+  `pnpm db:seed` blijft op productie weigeren.
+  Zodra het beheer bronnen kan toevoegen, verdwijnt de lijst `realSources` uit de seed.
+- **Waarom:** het is de kleinste wijziging die een gevulde site geeft, en het hergebruikt de weg die acceptatie al heeft.
+  De velden die het beheer straks wijzigt, blijven staan.
+- **Alternatieven:** een migratie die de bronnen invoegt (gegevens tussen het schema); een opdracht op de host via SSH (nog een stap die de eigenaar moet onthouden); wachten op het beheer (de site gaat leeg live).
+
+### Testbronnen alleen lokaal; acceptatie en productie hebben alleen echte bronnen
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de testbronnen bestaan alleen lokaal en in de tests.
+  Acceptatie en productie zetten alleen de echte bronnen in het register, en op acceptatie verdwijnen de testbronnen die er al staan.
+  De homepage heeft geen alinea meer die naar de bronnen verwijst; `/bronnen` staat nog in de footer en bij Over ons.
+- **Waarom:** acceptatie draait nu met echte bronnen en echte berichten, en de redactie bekijkt de site er.
+  Een pagina `/bronnen` met "Testkrant" en een testforum laat zien dat het nog een proefomgeving is, en de acceptatieomgeving moet laten zien wat de bezoeker straks ziet.
+- **Hoe:** de site haalt bij elke start op acceptatie de rijen weg met een domein uit `testSources`, met hun feeds en berichten (die gaan mee door `ON DELETE CASCADE`).
+  Een echte bron, ook met een eigen feed en berichten, blijft staan, en een tweede start verandert niets.
+  De controle na de deploy zoekt de Leeuwarder Courant op `/bronnen`, en faalt als er nog een testbron staat.
+  De toegankelijkheidscontrole en de e2e-controles hebben testbronnen nodig voor hun verzonnen koppen.
+  Zij draaien de site met `SITE_ENV=acceptance` en zetten de testbronnen zelf in het register, in `e2e/global-setup.ts` (`e2e/test-sources.ts`).
+  Dat werkt alleen in een database op deze computer.
+  De rooktest toetst acceptatie en productie met de echte bronnen.
+- **Alternatieven:** de testbronnen op acceptatie laten staan, maar verborgen via `enabled` (de rijen blijven, en de controle na de deploy leunt dan nog op iets wat niemand ziet); de testbronnen alleen van `/bronnen` filteren (de homepage en de importer zien ze dan nog).
+  Voor de e2e-controles: de site met `SITE_ENV=local` starten en de seed er laten draaien; dat verandert ook het adres van de site en de eisen aan de mailinstellingen, en de controles toetsen de site zoals hij op acceptatie draait.

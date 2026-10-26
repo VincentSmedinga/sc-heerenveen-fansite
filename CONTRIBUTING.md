@@ -64,7 +64,7 @@ De tests van `packages/db` draaien op een echte MariaDB.
 Start die eerst met `docker compose up -d --wait` (zie de [README van het package](packages/db/README.md)).
 `pnpm test:a11y` toetst na de build de pagina's met axe.
 Het heeft die database ook nodig, en eenmalig Chromium (zie de [README van de site](apps/site/README.md)).
-De gebouwde site maakt zelf de tabellen en zet de testbronnen erin.
+De gebouwde site maakt zelf de tabellen en zet de echte bronnen erin, en de controle zet de testbronnen erbij.
 Verandert je wijziging de opmaak of de tekst van een pagina, of een regel in het logboek van de site?
 Draai dan na `pnpm build` ook de rooktest, zoals CI dat doet:
 

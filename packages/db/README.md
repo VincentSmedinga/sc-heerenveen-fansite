@@ -1,6 +1,6 @@
 # @fansite/db
 
-De database van de site en de importer: het schema in TypeScript, de migraties en een seed met testbronnen en de eerste echte bron.
+De database van de site en de importer: het schema in TypeScript, de migraties en een seed met testbronnen voor lokaal gebruik en de echte bronnen.
 De database is MariaDB 10.11, met Drizzle.
 De naam is voorlopig.
 
@@ -25,20 +25,30 @@ Wil je opnieuw beginnen, voeg dan `--volumes` toe: dat wist de gegevens.
 
 Draai ze vanuit de root van de repository.
 
-| Opdracht           | Wat het doet                                                                         |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| `pnpm db:generate` | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                |
-| `pnpm db:migrate`  | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had               |
-| `pnpm db:seed`     | Zet de bronnen met hun feeds in het register; een tweede keer maakt het geen dubbele |
-| `pnpm test`        | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                          |
+| Opdracht           | Wat het doet                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `pnpm db:generate` | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                                        |
+| `pnpm db:migrate`  | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had                                       |
+| `pnpm db:seed`     | Zet de testbronnen en de echte bronnen met hun feeds in het register; een tweede keer maakt het geen dubbele |
+| `pnpm test`        | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                                                  |
 
 `db:migrate` gebruikt de migrator van `drizzle-orm` en niet drizzle-kit.
 Daardoor kan dezelfde code op de hosting draaien, zonder ontwikkelgereedschap: de site doet dat als hij start (zie _In andere packages_).
 
-`db:seed` weigert als `SITE_ENV` `production` is, want de testbronnen zijn verzonnen en mogen daar nooit komen.
-De seed zet ook de echte nieuwsbronnen met hun feeds erin (de lijst staat in [`docs/bronnen.md`](../../docs/bronnen.md)) en ons eigen forum, sc Heerenveen Forum; zij staan dus lokaal en op acceptatie in het register, en nooit op productie.
+De seed heeft twee lijsten in `src/seed.ts`:
+
+- `testSources` zijn de verzonnen bronnen met verschillende beleiden en toestemmingen, voor lokaal gebruik en de tests.
+  Ze staan alleen lokaal in het register, en niet op acceptatie of productie.
+- `realSources` zijn de echte bronnen met hun feeds, zoals de nieuwsbronnen (de lijst staat in [`docs/bronnen.md`](../../docs/bronnen.md)), de podcasts en ons eigen forum, sc Heerenveen Forum.
+  Ze staan op elke omgeving in het register.
+
+`db:seed` zet allebei erin en weigert als `SITE_ENV` `production` is: wat de site bij het opstarten doet, is daar de enige weg.
+Met `SITE_ENV=acceptance` of `production` zet de site alleen `realSources` in het register (`seedRealSources`).
+Een bron die er al staat, werkt hij bij op haar domein, behalve wat het beheer straks wijzigt: `enabled`, de velden `consent_*`, `attribution` en het beleid voor intro, foto en insluiten.
+Op acceptatie haalt de site ook de testbronnen weg die er voor 26 oktober 2026 stonden (`removeTestSources`).
+Hij herkent ze aan hun domein uit `testSources`, en verwijdert die rijen met hun feeds en berichten; een echte bron blijft ongemoeid.
+Zodra het beheer (#31) bronnen kan toevoegen, verdwijnt `realSources` uit de seed.
 Een feed die over meer gaat dan de club, zoals die van Omrop Fryslân, NOS, het Algemeen Dagblad en ESPN, staat in de seed met `{ filter: 'club', url }`; de seed zet het filter alleen als hij de feed toevoegt (zie de README van de importer, _Het relevantiefilter_).
-Hoe echte bronnen op productie komen, beslissen we met het beheer (#30).
 
 ## Het schema wijzigen
 
@@ -359,7 +369,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;
 - `@fansite/db/lock`: `withLock(pool, name, waitSeconds, task)` doet een taak terwijl het een slot in de database houdt (`GET_LOCK`), en `lockNameFor(url, task)` geeft de naam daarvan, met de taak en de naam van de database erin.
   De migraties en de import gebruiken het, elk met een eigen naam;
-- `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de bronnen en de verzonnen wedstrijden uit de seed erin.
+- `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de echte bronnen en de verzonnen wedstrijden uit de seed erin: `seed` is de omgeving (`acceptance`, `production` of `local`), want alleen `acceptance` krijgt ook de verzonnen wedstrijden en haalt de testbronnen weg, en `local` krijgt niets.
   Een slot in de database (`fansite_migrate_<database>`) laat twee processen die tegelijk starten, om de beurt werken.
   De site roept het aan als hij start.
   De functie gooit bij een fout en laat het aan de aanroeper wat dat betekent; de aanroeper geeft zelf de map met de migraties, want een gebundelde build weet niet waar die staat.
