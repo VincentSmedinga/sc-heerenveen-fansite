@@ -1,0 +1,14 @@
+/*
+ * A table of numbers. The table itself takes its look from base/table.css (tabular figures, a
+ * thin line between rows and .hf-numeric). This file only lets a long row header wrap.
+ */
+
+@layer hf.components {
+  /*
+   * A row header can be a path or another word without spaces. It breaks anywhere when it has
+   * to, so a narrow screen shows all of it and the page does not scroll sideways.
+   */
+  .hf-data-table tbody th {
+    overflow-wrap: anywhere;
+  }
+}

@@ -4877,3 +4877,28 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Stuurt de host de header niet, of een andere, dan telt de site de weergaven en geen bezoekers (`daily_visitors` blijft 0).
   `docs/acceptatieomgeving.md` (_Bezoekers tellen_) zegt hoe je dat op acceptatie ziet.
 - **Alternatieven:** het eerste adres in de header (een bezoeker kan het zelf zetten); een andere header zoals `X-Real-IP` (we weten niet of de host hem stuurt); alleen de browsertekst (alle bezoekers met dezelfde browser tellen als één).
+
+### De cijfers zijn alleen voor beheerders, en de tellers per dag blijven bewaard
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de cijfers over het bezoek staan in het beheer, alleen voor beheerders.
+  De tellers per dag worden niet weggehaald.
+- **Waarom:** de cijfers zijn voor het team, niet voor het publiek, en een teller per dag bevat geen persoonsgegevens en is klein.
+  Er is dus geen reden om ze te wissen, en een lange reeks is juist nuttig.
+- **Alternatieven:** de cijfers openbaar maken (past bij onze openheid, maar meer om te bouwen en onzorgvuldig als ze te ruw zijn); de tellers na een jaar weghalen (bespaart bijna niets).
+
+### De pagina Bezoek toont de laatste 30 dagen, en de tabel is een component van het designsysteem
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `/beheer/bezoek` is alleen voor een beheerder; een moderator krijgt "niet gevonden", zoals bij de artikelen.
+  De pagina toont de totalen van de laatste 7 en 30 dagen, elke dag van de laatste 30 dagen (een dag zonder teller als 0, de nieuwste bovenaan) en de 20 meest bekeken pagina's van die 30 dagen.
+  Een totaal van bezoekers is de som van de dagen, want de teller kent een bezoeker alleen binnen een dag; de pagina zegt dat.
+  Een dag is een dag in Nederland, zoals de teller hem bewaart.
+  Zonder één geteld bezoek staat er een zin in plaats van de tabellen.
+  De tabellen zijn een nieuw component, `DataTable`: een echte `table` met een bijschrift dat alleen een schermlezer krijgt, kolomkoppen en rijkoppen met `scope`, en getallen aan het eind uitgelijnd.
+  De kolom met paginaweergaven heet "Weergaven": "Paginaweergaven" breekt niet af en maakte de pagina op 320 pixels te breed.
+- **Waarom:** de sjablonen van de site hebben geen HTML (ESLint dwingt dat af), dus een tabel moet een component zijn.
+  Een component met `caption`, `columns` en `rows` is klein en past op meer pagina's van het beheer, zonder dat elke pagina zelf een tabel met koppen en `scope` bouwt.
+  Dagen zonder teller als 0 tonen houdt de tabel gelijk van lengte en laat zien dat er die dag niets was.
+  De som van de dagen is het enige totaal dat we eerlijk kunnen geven zonder bezoekers langer dan een dag te onthouden.
+- **Alternatieven:** een moderator de cijfers laten zien (de cijfers zijn voor wie de site beheert, en de issue vraagt om beheerders); een grafiek (staat buiten het issue, en een tabel werkt overal en met een schermlezer); alleen dagen met een teller tonen (de tabel verspringt en een gat valt niet op); `StandingsTable` hergebruiken (die is voor de stand, met afkortingen en een eigen gebied dat zijwaarts scrolt).

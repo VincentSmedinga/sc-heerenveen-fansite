@@ -83,14 +83,15 @@ async function checkAdmin() {
     responses.push(response)
   }
 
-  // The pages of the articles, the preview of a draft and the versions among them, are no page
-  // for a visitor without a session either.
+  // The pages of the articles, the preview of a draft and the versions among them, and the
+  // numbers of the visit, are no page for a visitor without a session either.
   for (const path of [
     '/beheer/artikelen',
     '/beheer/artikelen/nieuw',
     '/beheer/artikelen/1',
     '/beheer/artikelen/1/versies/1',
     '/beheer/artikelen/1/voorbeeld',
+    '/beheer/bezoek',
   ]) {
     const response = await fetch(origin + path, { redirect: 'manual' })
     assert.equal(response.status, 307, path)

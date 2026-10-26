@@ -303,6 +303,7 @@ Chrome en Firefox nemen dat aan op `localhost`; Safari niet, dus log lokaal in m
   Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
 - `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen, met bron, kop als link, tijd en of ze verborgen zijn (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
+- `/beheer/bezoek` is voor beheerders alleen: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
 - De proxy (`src/proxy.ts`) geeft elk antwoord onder `/beheer` de headers `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: same-origin`, op elke omgeving.
   De proxy is geen toegangscontrole.
 - De proxy telt ook de bezoeken (`src/visits.ts`): per dag de paginaweergaven per pagina en het aantal unieke bezoekers, zonder cookie, script of opslag in de browser.
@@ -350,6 +351,24 @@ De fouten staan in een `ErrorSummary` en bij het veld, en met JavaScript krijgt 
   Onder het formulier staat de lijst "Eerdere versies", en `/beheer/artikelen/<nummer>/versies/<versienummer>` toont een versie met dezelfde onderdelen als het voorbeeld.
   Er is geen knop om terug te zetten of te verwijderen.
 - De opmaak en de werkwijze voor wie schrijft, staan in [`docs/artikelen.md`](../../docs/artikelen.md).
+
+### Het bezoek bekijken
+
+`/beheer/bezoek` (`src/app/beheer/bezoek`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
+De pagina leest de tellers die de site per dag bewaart (zie _Bezoekers tellen_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)) en laat zien:
+
+- de totalen van de laatste 7 en 30 dagen;
+- elke dag van de laatste 30 dagen, de nieuwste bovenaan, met de unieke bezoekers en de paginaweergaven (een dag zonder teller staat als 0);
+- de 20 meest bekeken pagina's van die 30 dagen.
+
+`visitNumbers` in `src/beheer/visits.ts` stelt de cijfers samen.
+De totalen van bezoekers zijn de som van de dagen: een bezoeker die op twee dagen komt, telt twee keer.
+Een dag is een dag in Nederland, zoals de teller hem bewaart.
+De pagina zegt in gewone woorden wat de cijfers zijn en wat niet, en zonder cijfers staat er een zin in plaats van de tabellen.
+De tabellen zijn `DataTable` van het designsysteem.
+De klikken op berichten (#292) staan er nog niet op: die komen als dat issue klaar is.
+
+`e2e/visits.ts` zet verzonnen tellers voor twaalf dagen in de database van de controle en haalt ze er na afloop weer uit, zodat `pnpm test:a11y` de pagina toetst met cijfers erin.
 
 ### De beheertests in de browser
 
