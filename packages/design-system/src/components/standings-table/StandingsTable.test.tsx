@@ -69,7 +69,7 @@ describe('StandingsTable', () => {
 
     const headers = screen.getAllByRole('columnheader')
 
-    expect(headers.map((header) => header.textContent)).toEqual([
+    expect(headers.map((header) => header.querySelector('[aria-hidden="true"]')?.textContent ?? 'Club')).toEqual([
       '#',
       'Club',
       'G',
@@ -89,6 +89,35 @@ describe('StandingsTable', () => {
       'Nepstad Rangers',
     ])
     expect(document.querySelectorAll('tbody th[scope="row"]')).toHaveLength(4)
+  })
+
+  it('names every column header by its full word for a screen reader, so the two G columns differ', () => {
+    render(<StandingsTable {...props} />)
+
+    expect(
+      screen.getAllByRole('columnheader').map((header) => header.querySelector('.hf-visually-hidden')?.textContent),
+    ).toEqual([
+      'positie',
+      undefined,
+      'gespeeld',
+      'gewonnen',
+      'gelijk',
+      'verloren',
+      'doelpunten voor',
+      'doelpunten tegen',
+      'doelsaldo',
+      'punten',
+    ])
+    expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'gelijk' })).toBeTruthy()
+  })
+
+  it('does so in the short form too, where there is no legend', () => {
+    render(<StandingsTable {...props} columns="compact" />)
+
+    expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'doelsaldo' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'punten' })).toBeTruthy()
   })
 
   it('gives every abbreviation its full word, in the title and under the table', () => {
@@ -165,13 +194,11 @@ describe('StandingsTable', () => {
   it('leaves out the columns of won, drawn, lost and the goals in compact, with no scrolling area and no legend', () => {
     render(<StandingsTable {...props} columns="compact" />)
 
-    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
-      '#',
-      'Club',
-      'G',
-      'DS',
-      'P',
-    ])
+    expect(
+      screen
+        .getAllByRole('columnheader')
+        .map((header) => header.querySelector('[aria-hidden="true"]')?.textContent ?? 'Club'),
+    ).toEqual(['#', 'Club', 'G', 'DS', 'P'])
     expect(screen.queryByRole('region')).toBeNull()
     expect(document.querySelector('.hf-standings-legend')).toBeNull()
   })

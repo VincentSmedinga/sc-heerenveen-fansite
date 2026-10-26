@@ -9,7 +9,7 @@ Elk onderdeel heeft hieronder een eigen pagina, met voorbeelden in licht en donk
 Een sjabloon voor een pagina bevat geen HTML, alleen deze componenten.
 
 Dit zijn de eerste componenten, met de onderdelen van `Page`: wat een pagina minimaal nodig heeft, de kaart, de regel nieuws van de homepage en de onderdelen van een formulier.
-Een vinkje, een keuzerondje en de overige componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
+Een vinkje, een keuzerondje en de overige componenten voor nieuws, bronnen, podcasts en het forum komen met de eerste pagina die ze nodig heeft.
 
 ## Gebruiken
 
@@ -408,7 +408,8 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
           geschiedenis, de tijd van het laatste lezen en de licentie van onze eigen gegevens
         </td>
         <td>
-          <code>pages</code>, <code>readAt</code> en <code>readAtDateTime</code> (alle verplicht)
+          <code>pages</code>, <code>readAt</code> en <code>readAtDateTime</code> (alle verplicht, behalve met{' '}
+          <code>compact</code>), <code>compact</code> (alleen "Bron: Wikipedia")
         </td>
         <td></td>
       </tr>

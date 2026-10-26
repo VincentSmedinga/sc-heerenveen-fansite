@@ -93,8 +93,9 @@ const columns: Column[] = [
  * The league table: a real `table` with a caption, column headers with `scope` and a row
  * header for each club. The headers are abbreviations. In the full table the full words stand
  * under it as well, as "G gespeeld, W gewonnen, …", because a title on an abbreviation only
- * shows under a mouse. The row of sc Heerenveen is bold, has a bar on its start side and says
- * so for a screen reader, so it stands out by more than colour.
+ * shows under a mouse. A screen reader hears the full word, not the letter, so the two columns
+ * that are a G are told apart. The row of sc Heerenveen is bold, has a bar on its start side
+ * and says so for a screen reader, so it stands out by more than colour.
  *
  * With every column the table is wider than a phone. It then sits in an area of its own that
  * scrolls sideways, has the name `label` and can be reached with the keyboard, so the page
@@ -116,12 +117,18 @@ export const StandingsTable = ({
       <thead>
         <tr>
           <th className="hf-numeric" scope="col">
-            <abbr title="Positie">#</abbr>
+            <abbr title="Positie">
+              <span aria-hidden="true">#</span>
+              <span className="hf-visually-hidden">positie</span>
+            </abbr>
           </th>
           <th scope="col">Club</th>
           {shown.map((column) => (
             <th className="hf-numeric" key={column.id} scope="col">
-              <abbr title={capitalise(column.name)}>{column.abbreviation}</abbr>
+              <abbr title={capitalise(column.name)}>
+                <span aria-hidden="true">{column.abbreviation}</span>
+                <span className="hf-visually-hidden">{column.name}</span>
+              </abbr>
             </th>
           ))}
         </tr>

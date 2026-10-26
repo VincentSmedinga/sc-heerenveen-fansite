@@ -878,7 +878,9 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html.match(/<th class="hf-numeric" scope="col">/g)).toHaveLength(4)
     expect(html).not.toContain('role="region"')
     expect(html.match(/class="hf-highlight hf-standings-table-own"/g)).toHaveLength(1)
-    expect(html).toContain('<abbr title="Punten">P</abbr>')
+    expect(html).toContain(
+      '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
+    )
     expect(html).not.toContain('hf-standings-legend')
   })
 

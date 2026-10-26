@@ -11,10 +11,13 @@
    * needs to be, so a table that is too wide scrolls here and the page does not. The table does
    * not shrink below what its cells need, and its cells do not wrap, so a number never breaks.
    * The focus ring is drawn inside the area, with an offset of its own, so the overflow of the
-   * area does not cut it off.
+   * area does not cut it off. The area is positioned, so the hidden words in the column headers
+   * (hf-visually-hidden, which is absolute) stay in it and are scrolled with it; otherwise they
+   * sit where the headers have scrolled to and make the page itself wider.
    */
   .hf-standings-scroll {
     overflow-x: auto;
+    position: relative;
 
     &:focus-visible {
       outline-offset: -2px;
@@ -24,6 +27,11 @@
       inline-size: 100%;
       min-inline-size: max-content;
     }
+  }
+
+  /* In the short form there is no area, so the wrapper holds the hidden words of the headers. */
+  .hf-standings {
+    position: relative;
   }
 
   /* The table of a card has no space below it: the legend is its caption's other half. */

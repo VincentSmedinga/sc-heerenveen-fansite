@@ -2743,12 +2743,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 26 oktober 2026
 - **Besluit:** het component `StandingsTable` is een echte `table` met een bijschrift met de dag waarvoor de stand geldt, kolomkoppen met `scope` en een rijkop met de club.
   - De kolommen zijn: positie, club, gespeeld, gewonnen, gelijk, verloren, doelpunten voor, doelpunten tegen, doelsaldo en punten.
-    De punten staan achteraan, zoals bij elke stand, en hebben gewicht 700, omdat de stand daarop is gesorteerd.
-    De projecteigenaar liet de kolom eerst na gespeeld zetten en zette haar op 26 oktober 2026 terug, omdat de eerste plaats tegen de gewoonte ingaat.
-  - De koppen zijn afkortingen met één letter waar dat kan: G, W, G, V en P, en DV, DT en DS voor de doelpunten en het doelsaldo.
-    G staat voor gespeeld en voor gelijk, en P is punten; de projecteigenaar koos dit op 26 oktober 2026, want supporters begrijpen twee keer G beter dan een andere letter voor gespeeld.
-    De volle woorden maken het verschil duidelijk: de `title` van elke kop en de regel onder de volledige tabel.
-    De volle woorden staan in de `title` en, bij de volledige tabel, in een regel eronder, want een `title` laat een telefoon niet zien.
+    De punten staan achteraan, zoals bij elke stand, en zijn vet, omdat de stand daarop is gesorteerd.
+  - De koppen zijn afkortingen met één letter waar dat kan: G, W, G, V en P, en DV, DT en DS.
+    G staat voor gespeeld en voor gelijk.
+    De projecteigenaar koos dit op 26 oktober 2026, want supporters begrijpen twee keer G beter dan een andere letter voor gespeeld.
+  - Wie ziet, leest de afkorting; de `title` geeft het volle woord onder een muis.
+    Een schermlezer hoort in elke kop het volle woord (verborgen tekst naast de afkorting), dus de twee G's klinken verschillend.
+    De volledige tabel heeft ook een regel eronder met alle afkortingen en hun woorden, want een `title` laat een telefoon niet zien.
     De korte vorm in de zijbalk heeft die regel niet (de projecteigenaar, 26 oktober 2026).
   - Het bijschrift is kort, "Stand op 18 oktober 2026", omdat het met de tabel meescrolt in het gebied en anders afgeknipt wordt op een telefoon.
   - Met alle kolommen staat de tabel in een eigen gebied dat zijwaarts scrolt, met `role="region"`, een naam en `tabindex="0"`, zodat het toetsenbord erbij kan en de pagina zelf niet zijwaarts scrolt.
