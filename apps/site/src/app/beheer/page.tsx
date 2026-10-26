@@ -25,9 +25,14 @@ export default async function AdminPage() {
             <Link href="/beheer/berichten">Berichten verbergen of weer tonen</Link>
           </List.Item>
           {role === 'beheerder' ? (
-            <List.Item>
-              <Link href="/beheer/artikelen">Artikelen schrijven en publiceren</Link>
-            </List.Item>
+            <>
+              <List.Item>
+                <Link href="/beheer/artikelen">Artikelen schrijven en publiceren</Link>
+              </List.Item>
+              <List.Item>
+                <Link href="/beheer/bezoek">Cijfers over het bezoek</Link>
+              </List.Item>
+            </>
           ) : null}
         </List>
         <Form action={logOut}>

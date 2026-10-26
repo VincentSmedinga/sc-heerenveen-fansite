@@ -13,6 +13,8 @@ export { Button, buttonAppearances, buttonIcons, buttonTypes } from './component
 export type { ButtonAppearance, ButtonIcon, ButtonProps, ButtonType } from './components/button/Button'
 export { Card, cardElements, cardSurfaces } from './components/card/Card'
 export type { CardElement, CardProps, CardSurface } from './components/card/Card'
+export { DataTable } from './components/data-table/DataTable'
+export type { DataTableProps, DataTableRow } from './components/data-table/DataTable'
 export { DiscussionItem } from './components/discussion-item/DiscussionItem'
 export type { DiscussionItemProps } from './components/discussion-item/DiscussionItem'
 export { Emphasis } from './components/emphasis/Emphasis'

@@ -93,6 +93,7 @@ describe('the admin', () => {
     // tests).
     expect(actionFiles).toContain('app/beheer/berichten/actions.ts')
     expect(routes).toContain('app/beheer/berichten/page.tsx')
+    expect(routes).toContain('app/beheer/bezoek/page.tsx')
     // The articles: the actions that write them and the pages that show a draft.
     expect(actionFiles).toContain('app/beheer/artikelen/actions.ts')
     expect(routes).toEqual(
