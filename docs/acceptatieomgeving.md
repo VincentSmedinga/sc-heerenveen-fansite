@@ -16,7 +16,7 @@ De workflow [`acceptance.yml`](../.github/workflows/acceptance.yml) doet bij elk
    De importer is één JavaScript-bestand, `apps/importer/import.mjs`, dat `esbuild` maakt.
 2. Hij start die map zoals de host dat doet en controleert wat een bezoeker en een zoekmachine krijgen (`pnpm --filter site smoke`).
    Daarvoor start de workflow een eigen MariaDB die na de run weer weg is.
-   De rooktest maakt daarop lege databases, en de site maakt er zelf de tabellen en de testbronnen in.
+   De rooktest maakt daarop lege databases, en de site maakt er zelf de tabellen en de echte bronnen in.
    Ook als de database niet bereikbaar is, controleert hij dat de homepage en `/bronnen` de foutpagina tonen.
 3. Hij draait de importer één keer uit die map, op dezelfde MariaDB.
    De database krijgt de tabellen maar niet de seed, dus er zijn geen feeds en de importer vraagt geen echte site iets.
@@ -24,7 +24,7 @@ De workflow [`acceptance.yml`](../.github/workflows/acceptance.yml) doet bij elk
 4. Hij kopieert de map met rsync over SSH, op poort 26, naar de map van de app op de host.
 5. Hij raakt `tmp/restart.txt` aan, zodat de host de app opnieuw start.
 6. Hij vraagt <https://acc.sc.heerenveen.org/bronnen> op, tot een minuut lang.
-   Hij faalt als de pagina niet met 200 antwoordt of geen testbron toont.
+   Hij faalt als de pagina niet met 200 antwoordt, geen echte bron toont (de Leeuwarder Courant) of nog een testbron toont (Testkrant).
    Zo geeft een migratie die op de host mislukt, een rode run.
 
 Op de server bouwen we niets.
@@ -42,16 +42,23 @@ Dan krijgt elk antwoord de header `X-Robots-Tag: noindex, nofollow`, en weigert 
 `DATABASE_URL` wijst naar de database van acceptatie (stap 3 hieronder), en de mailvariabelen naar de brievenbus van de redactie (stap 11).
 Zonder een van deze start de site niet.
 
-## Het schema en de testbronnen
+## Het schema en de bronnen
 
 De site zet de database zelf klaar als de host hem start.
 Dat gebeurt in `register()` in `apps/site/src/instrumentation.ts`, en de site beantwoordt pas daarna verzoeken:
 
 1. Hij draait de migraties die de database nog niet had.
    `assemble` zet ze in `packages/db/drizzle` van de map, twee mappen boven `apps/site`, want Next.js neemt de SQL-bestanden zelf niet mee.
-2. Alleen met `SITE_ENV=acceptance` zet hij daarna de bronnen uit de seed in het register: de testbronnen, de echte nieuwsbronnen met hun feeds (zie [`bronnen.md`](bronnen.md)) en ons eigen forum.
-   Met `local` en `production` doet hij dat niet.
+2. Met `SITE_ENV=acceptance` of `production` zet hij daarna de echte bronnen uit de seed in het register: alle bronnen in `realSources` met hun feeds (zie [`bronnen.md`](bronnen.md)), zoals de nieuwsbronnen, de podcasts en ons eigen forum.
+   Met `local` doet hij dat niet: daar zet `pnpm db:seed` de bronnen erin.
    Een bron die er al staat, werkt hij bij op haar domein, dus er komen geen dubbele.
+   Wat het beheer straks wijzigt, laat hij staan: `enabled`, de velden `consent_*`, `attribution` en het beleid voor intro, foto en insluiten.
+3. Alleen met `SITE_ENV=acceptance` haalt hij daarna de testbronnen uit het register, als ze er nog staan.
+   De acceptatieomgeving had ze voor 26 oktober 2026 in de database.
+   Hij herkent ze aan hun domein, uit de lijst `testSources`, en verwijdert die rijen met hun feeds en berichten.
+   Een echte bron met een eigen feed en eigen berichten blijft ongemoeid, en een tweede start verandert niets meer.
+   Op `production` hebben de testbronnen nooit gestaan, en die omgeving verwijdert dus niets.
+   De testbronnen bestaan alleen lokaal en in de tests.
 
 Een slot in de database (`GET_LOCK`) zorgt dat twee processen die tegelijk starten, om de beurt migreren.
 Het proces dat wacht, geeft na 30 seconden op en schrijft dat in het logboek.
@@ -64,6 +71,8 @@ Het logboek zegt wat er misging (zie _Als het niet werkt_).
 Lees het in _Setup Node.js App_ of in `stderr.log` in de map van de app.
 
 `pnpm db:seed` op je eigen computer weigert als `SITE_ENV` `production` is.
+Dat het register op productie de bronnen uit de seed krijgt, gaat dus alleen via de start van de site.
+De lijst `realSources` verdwijnt uit de seed zodra het beheer (#31) bronnen kan toevoegen: het register is dan de enige waarheid.
 
 ## De import
 
@@ -126,7 +135,7 @@ Een agent heeft daar geen toegang.
    Bewaar de gegevens in je wachtwoordmanager.
    De site leest de bronnen voor `/bronnen` uit deze database.
    De gegevens komen nooit in GitHub of in de repository.
-   De tabellen en de testbronnen zet de site er zelf in als de host hem start (zie _Het schema en de testbronnen_).
+   De tabellen en de echte bronnen zet de site er zelf in als de host hem start (zie _Het schema en de bronnen_).
 4. **SSH-sleutel voor de deploys.**
    Maak een sleutel die alleen hiervoor dient, zonder wachtwoord (de workflow kan er geen invullen):
 
@@ -306,7 +315,8 @@ Zo kan niemand nagaan wie een account heeft.
 - <https://acc.sc.heerenveen.org/robots.txt> toont `Disallow: /` en `Disallow: /beheer`.
   Op productie toont hij alleen `Disallow: /beheer`, met de sitemap.
 - <https://acc.sc.heerenveen.org/bestaat-niet> toont de Nederlandse 404-pagina "Pagina niet gevonden".
-- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de testbronnen, zoals Testkrant, de echte nieuwsbronnen uit de seed en onder Forum sc Heerenveen Forum.
+- <https://acc.sc.heerenveen.org/bronnen> toont "Onze bronnen" met de echte bronnen uit de seed, zoals de Leeuwarder Courant, en onder Forum sc Heerenveen Forum.
+  Er staan geen testbronnen, zoals Testkrant.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.
 - De import werkt als `tail -n 20 ~/fansite-import.log` na een kwartier een tijd toont, met een regel voor de feed eronder:
 

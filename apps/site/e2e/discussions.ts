@@ -34,8 +34,8 @@ const domain = 'proefforum.test'
 
 /**
  * Puts the made-up discussions in the database and returns the function that takes them out
- * again. The site must have started already: it makes the tables and puts the test sources in
- * (SITE_ENV=acceptance).
+ * again. The site must have started already: it makes the tables, and global-setup.ts
+ * has put the test sources in (see test-sources.ts).
  */
 export async function addDiscussions() {
   const { close, db, pool } = connectToDatabase()
@@ -48,7 +48,9 @@ export async function addDiscussions() {
     const sourceId = registered.find((source) => source.domain === domain)?.id
 
     if (sourceId === undefined) {
-      throw new Error(`The test source ${domain} is not in the register. Did the site start with SITE_ENV=acceptance?`)
+      throw new Error(
+        `The test source ${domain} is not in the register. Did global-setup.ts put the test sources in (test-sources.ts)?`,
+      )
     }
 
     const now = Date.now()

@@ -129,8 +129,8 @@ const rows: Row[] = [...headlines.madeUp, ...headlines.notForVisitors]
 
 /**
  * Puts the made-up headlines in the database and returns the function that takes them out
- * again. The site must have started already: it makes the tables and puts the test sources in
- * (SITE_ENV=acceptance).
+ * again. The site must have started already: it makes the tables, and global-setup.ts
+ * has put the test sources in (see test-sources.ts).
  */
 export async function addHeadlines() {
   const { close, db, pool } = connectToDatabase()
@@ -147,7 +147,7 @@ export async function addHeadlines() {
 
       if (sourceId === undefined) {
         throw new Error(
-          `The test source ${domain} is not in the register. Did the site start with SITE_ENV=acceptance?`,
+          `The test source ${domain} is not in the register. Did global-setup.ts put the test sources in (test-sources.ts)?`,
         )
       }
 

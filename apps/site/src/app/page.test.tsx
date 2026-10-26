@@ -87,7 +87,7 @@ async function renderDiscussions() {
   return html.slice(start, html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'))
 }
 
-/** The main column alone: the news and the link to Onze bronnen, without the sidebar. */
+/** The main column alone: the news, without the sidebar. */
 async function renderMain() {
   const html = await render()
 
@@ -139,14 +139,14 @@ describe('the homepage', () => {
     ])
   })
 
-  it('is the one main of the page, with the h1, the news in a card and the link to Onze bronnen as cells', async () => {
+  it('is the one main of the page, with the h1 and the news in a card', async () => {
     vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
 
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><p>Welke media we volgen, lees je bij <a href="\/bronnen">Onze bronnen<\/a>\.<\/p><\/main><aside/,
+      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><\/main><aside/,
     )
   })
 
@@ -159,9 +159,8 @@ describe('the homepage', () => {
     expect(cards).toHaveLength(1)
     expect(cards[0]).toContain('<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>')
     expect(cards[0]?.match(/<li id="nieuws-\d+">/g)).toHaveLength(3)
-    // The h1 and the link to Onze bronnen are cells of their own, outside the card.
+    // The h1 is a cell of its own, outside the card.
     expect(cards[0]).not.toContain('<h1')
-    expect(cards[0]).not.toContain('Onze bronnen')
   })
 
   it('shows each headline as a link to the item at the source, with the day and the time before it and the source under it', async () => {
@@ -260,22 +259,22 @@ describe('the homepage', () => {
     // technology, one for each item.
     expect(html.match(/<svg /g)).toHaveLength(3)
     expect(html.match(/<svg [^>]*aria-hidden="true"/g)).toHaveLength(3)
-    // The only addresses are the links of the items and the link to the page with the sources.
+    // The only addresses are the links of the items.
     expect([...html.matchAll(/href="([^"]*)"/g)].map(([, href]) => href)).toEqual([
       'https://testkrant.test/heerenveen-testclub',
       'https://voorbeeldkrant.test/jonge-garde',
       'https://testkrant.test/basis',
-      '/bronnen',
     ])
   })
 
-  it('keeps the link to Onze bronnen under the news, and the old text is gone', async () => {
+  it('has no text under the news about the sources, nor a link to them, and the old text is gone', async () => {
     vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
 
     const html = await renderMain()
 
-    expect(html).toContain('<a href="/bronnen">Onze bronnen</a>')
-    expect(html.indexOf('Onze bronnen')).toBeGreaterThan(html.lastIndexOf('</ul>'))
+    expect(html).not.toContain('Welke media we volgen')
+    expect(html).not.toContain('Onze bronnen')
+    expect(html).not.toContain('href="/bronnen"')
     expect(html).not.toContain('Binnenkort meer')
   })
 
@@ -289,7 +288,6 @@ describe('the homepage', () => {
     expect(html.match(/<section/g)).toHaveLength(1)
     expect(html).not.toContain('<h3')
     expect(html).not.toContain('<ul')
-    expect(html).toContain('<a href="/bronnen">Onze bronnen</a>')
   })
 
   it('titles the page with the name of the site, describes it and lets search engines in', async () => {

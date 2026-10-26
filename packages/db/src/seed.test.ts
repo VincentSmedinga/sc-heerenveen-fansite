@@ -9,6 +9,7 @@ import type { TestDatabase } from './test-database.ts'
 import {
   consentStatuses,
   feeds,
+  items,
   matches,
   matchGoals,
   sourceKinds,
@@ -17,7 +18,15 @@ import {
   wikipediaPages,
 } from './schema.ts'
 import { seasonOf } from './season.ts'
-import { madeUpMatches, realSources, seedMatches, seedSources, testSources } from './seed.ts'
+import {
+  madeUpMatches,
+  realSources,
+  removeTestSources,
+  seedMatches,
+  seedRealSources,
+  seedSources,
+  testSources,
+} from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -413,6 +422,105 @@ describe('the seed', () => {
     })
     expect(await database.db.select().from(sources)).toHaveLength(0)
     expect(await database.db.select().from(feeds)).toHaveLength(0)
+  })
+})
+
+describe('the real sources', () => {
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM sources')
+  })
+
+  it('puts only the real sources in the register, with their feeds, and makes no duplicates', async () => {
+    await seedRealSources(database.db)
+    await seedRealSources(database.db)
+
+    const rows = await database.db.select({ domain: sources.domain }).from(sources)
+
+    expect(rows.map((row) => row.domain).sort()).toEqual(realSources.map((source) => source.domain).sort())
+    expect(await database.db.select().from(feeds)).toHaveLength(
+      realSources.reduce((count, source) => count + source.feeds.length, 0),
+    )
+  })
+
+  it('updates a source by its domain, but not the fields the admin changes', async () => {
+    await seedRealSources(database.db)
+    await database.pool.query(
+      `UPDATE sources SET name = 'Oude naam', description = 'Oude tekst', enabled = false,
+         consent_status = 'given', consent_date = '2026-10-01', consent_note = 'Per mail',
+         attribution = 'Met dank aan de redactie', allow_image = true, intro_max_length = 150
+       WHERE domain = 'www.lc.nl'`,
+    )
+    await seedRealSources(database.db)
+
+    const [row] = await database.db.select().from(sources).where(eq(sources.domain, 'www.lc.nl'))
+
+    expect(row).toMatchObject({
+      allowImage: true,
+      attribution: 'Met dank aan de redactie',
+      consentDate: '2026-10-01',
+      consentNote: 'Per mail',
+      consentStatus: 'given',
+      enabled: false,
+      introMaxLength: 150,
+      name: 'Leeuwarder Courant',
+    })
+    expect(row?.description).toBe(realSources[0]?.description)
+  })
+})
+
+describe('removing the test sources', () => {
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM sources')
+  })
+
+  async function addItemTo(domain: string) {
+    const [source] = await database.db.select().from(sources).where(eq(sources.domain, domain))
+    const [feed] = await database.db
+      .insert(feeds)
+      .values({ sourceId: source?.id ?? 0, url: `https://${domain}/eigen-feed/` })
+      .$returningId()
+
+    await database.db.insert(items).values({
+      feedId: feed?.id ?? 0,
+      key: 'eigen-bericht',
+      publishedAt: new Date(),
+      sourceId: source?.id ?? 0,
+      title: 'Een bericht',
+      url: `https://${domain}/bericht`,
+    })
+  }
+
+  it('removes the test sources with their feeds and items, and leaves a real source with its own feed and items', async () => {
+    await seedSources(database.db)
+    await addItemTo('testkrant.test')
+    await addItemTo('www.lc.nl')
+
+    expect(await removeTestSources(database.db)).toBe(testSources.length)
+
+    const rows = await database.db.select({ domain: sources.domain }).from(sources)
+    const remaining = await database.db.select({ title: items.title, url: items.url }).from(items)
+    const feedUrls = (await database.db.select({ url: feeds.url }).from(feeds)).map((feed) => feed.url)
+
+    expect(rows.map((row) => row.domain).sort()).toEqual(realSources.map((source) => source.domain).sort())
+    expect(remaining).toEqual([{ title: 'Een bericht', url: 'https://www.lc.nl/bericht' }])
+    expect(feedUrls).toContain('https://www.lc.nl/eigen-feed/')
+    expect(feedUrls.some((url) => url.includes('.test/'))).toBe(false)
+  })
+
+  it('changes nothing the second time', async () => {
+    await seedSources(database.db)
+    await removeTestSources(database.db)
+
+    expect(await removeTestSources(database.db)).toBe(0)
+    expect(await database.db.select().from(sources)).toHaveLength(realSources.length)
+  })
+
+  it('leaves a source alone that is not in the list, even when its domain ends in .test', async () => {
+    await seedRealSources(database.db)
+    await database.db.insert(sources).values({ domain: 'andere.test', kind: 'news', name: 'Andere bron' })
+
+    expect(await removeTestSources(database.db)).toBe(0)
+    expect(await database.db.select().from(sources)).toHaveLength(realSources.length + 1)
   })
 })
 

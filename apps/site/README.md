@@ -8,7 +8,8 @@ De andere pagina's komen met de volgende issues.
 
 Zet in de root eerst `.env` klaar (zie de [README](../../README.md)).
 Start de database en zet er de bronnen uit de seed in, zoals de [README van `@fansite/db`](../../packages/db/README.md) zegt.
-De site draait de migraties zelf als hij start (zie _De database bij het starten_), maar de bronnen uit de seed zet hij er alleen op acceptatie in.
+De site draait de migraties zelf als hij start (zie _De database bij het starten_), maar de testbronnen zet hij er nooit in: die zet alleen `pnpm db:seed` lokaal in het register.
+Op acceptatie en productie zet hij de echte bronnen erin.
 Start dan de site:
 
 ```sh
@@ -50,7 +51,8 @@ Een nieuwe pagina is één regel in de lijst, met het antwoord dat de pagina moe
 Kloppen die niet, dan faalt de test, zodat een tikfout in het adres niet stil de pagina 'niet gevonden' toetst.
 
 De homepage toont koppen uit de database, en de seed heeft er geen.
-Daarom zet `e2e/global-setup.ts` vóór de eerste test verzonnen koppen op de testbronnen in de database, en haalt ze er na de laatste test weer uit (`e2e/headlines.ts`).
+Daarom zet `e2e/global-setup.ts` eerst de testbronnen in het register (`e2e/test-sources.ts`, met `seedSources` van de seed), want de site heeft ze op acceptatie niet en haalt ze bij het opstarten weg.
+Daarna zet hij vóór de eerste test verzonnen koppen op die testbronnen in de database, en haalt ze er na de laatste test weer uit (`e2e/headlines.ts`).
 Hetzelfde doet het met een verzonnen artikel van de redactie, een concept en een artikel voor later, met een eigen account (`e2e/articles.ts`).
 Zo toetst axe de homepage met de kaart "Van de redactie" en de pagina `/redactie/e2e-artikel`, en toetst `e2e/articles.spec.ts` dat een concept en een artikel voor later nergens staan.
 Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
@@ -62,7 +64,8 @@ Playwright wacht tot `/robots.txt` antwoordt en niet tot de homepage, want die b
 Dit moet eerst draaien, vanuit de root:
 
 1. De database: `docker compose up -d --wait`.
-   De gebouwde site draait de migraties en zet de bronnen uit de seed er zelf in, want de controle start hem met `SITE_ENV=acceptance`.
+   De gebouwde site draait de migraties en zet de echte bronnen uit de seed er zelf in, want de controle start hem met `SITE_ENV=acceptance`.
+   De testbronnen zet de controle er zelf bij (`e2e/test-sources.ts`), alleen in een database op deze computer.
 2. `pnpm build`.
 3. Eenmalig Chromium: `pnpm --filter site exec playwright install chromium`.
    CI installeert niets: die gebruikt de Google Chrome die op de runner staat.
@@ -152,7 +155,6 @@ Elk ander getal geeft de eerste tien.
 De getallen staan op één plek, in `src/items-per-card.ts`: `firstHeadlines` (10) en `moreHeadlines` (5).
 Bij tien koppen of minder is er geen knop, en bij 100 koppen verdwijnt hij; ouder nieuws is voor het archief (#26).
 Een pagina met `?nieuws=` heeft de homepage zelf als canoniek adres, en staat niet in de sitemap.
-Onder het blok staat de link naar Onze bronnen.
 
 De kaarten met discussies en podcasts tonen vijf items: het aantal staat op één plek, `itemsPerCard` in `src/items-per-card.ts`.
 
@@ -241,7 +243,9 @@ De pagina's delen één verbinding met de database (`src/database.ts`).
 ## De database bij het starten
 
 Als de server start, zet hij de database klaar, en pas daarna beantwoordt hij verzoeken (`src/instrumentation.ts`).
-Hij draait de migraties die de database nog niet had, uit `packages/db/drizzle`, en alleen met `SITE_ENV=acceptance` zet hij de bronnen uit de seed in het register.
+Hij draait de migraties die de database nog niet had, uit `packages/db/drizzle`, en met `SITE_ENV=acceptance` of `production` zet hij de echte bronnen uit de seed in het register.
+Met `acceptance` haalt hij ook de testbronnen weg die er nog stonden, met hun feeds en berichten.
+Met `local` zet hij niets in het register.
 `assemble` zet de migraties in de map, op dezelfde plek ten opzichte van `apps/site` als in de repository.
 Een slot in de database (`GET_LOCK`) laat twee processen die tegelijk starten, om de beurt migreren.
 Lukt het niet, bijvoorbeeld omdat de database niet bereikbaar is, dan staat de reden in het logboek en blijft de server draaien.

@@ -28,8 +28,9 @@ export function migrationsFolder() {
 
 /**
  * Brings the database up to date when the server starts: it runs the migrations the database
- * hasn't had yet, and on acceptance it puts the sources from the seed in the register: the
- * made-up test sources and the real sources. Production and local never get them.
+ * hasn't had yet. On acceptance and production it puts the real sources from the seed in the
+ * register, and on acceptance it also takes out the made-up test sources that were there
+ * before. Local gets nothing: `pnpm db:seed` puts the test sources there.
  *
  * It never throws. A database that isn't there, or a migration that fails, is no reason to
  * stop: the homepage doesn't need the database, and a visitor to a page that does gets the
@@ -37,11 +38,11 @@ export function migrationsFolder() {
  * the host.
  */
 export async function prepareDatabaseOnStart({ DATABASE_URL, SITE_ENV }: ReturnType<typeof readEnv>) {
-  const seed = SITE_ENV === 'acceptance'
+  const seeded = SITE_ENV !== 'local'
 
   try {
-    await prepareDatabase({ migrationsFolder: migrationsFolder(), seed, url: DATABASE_URL })
-    console.log(`The database is up to date${seed ? ', with the sources from the seed' : ''}.`)
+    await prepareDatabase({ migrationsFolder: migrationsFolder(), seed: SITE_ENV, url: DATABASE_URL })
+    console.log(`The database is up to date${seeded ? ', with the real sources from the seed' : ''}.`)
   } catch (error) {
     console.error(
       `Could not bring the database up to date, so the site keeps running without it: ${reasonOf(error)}. ` +

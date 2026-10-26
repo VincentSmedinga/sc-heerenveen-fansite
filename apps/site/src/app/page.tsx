@@ -176,9 +176,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </Form>
           )}
         </Card>
-        <Text>
-          Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
-        </Text>
       </Page.Main>
       <Page.Sidebar aria-label="Het forum, de podcasts en de wedstrijden">
         <Card aria-labelledby="discussions-heading">

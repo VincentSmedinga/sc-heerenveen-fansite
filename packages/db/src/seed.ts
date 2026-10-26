@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type {
@@ -213,17 +213,54 @@ export const realSources = [
 ] satisfies (NewSource & { feeds: (string | { filter: FeedFilter; url: string })[] })[]
 
 /**
- * Puts the test sources and the real sources, with their feeds, in the register. Running it
- * again updates them by domain and by feed address and adds no duplicates. It leaves the
- * `ETag`, the `Last-Modified`, the filter and the health of a feed alone.
+ * The fields of a source that the admin changes (see #31), so a seed that finds the source
+ * already in the register never overwrites them: whether it is switched on, what permission it
+ * gave and how it wants to be credited.
  */
-export async function seedSources(db: Database) {
-  for (const source of testSources) {
-    await db.insert(sources).values(source).onDuplicateKeyUpdate({ set: source })
-  }
+const adminFields = [
+  'allowEmbed',
+  'allowImage',
+  'attribution',
+  'consentDate',
+  'consentNote',
+  'consentStatus',
+  'enabled',
+  'introMaxLength',
+] as const satisfies (keyof NewSource)[]
 
+/**
+ * Takes the test sources out of the register, with their feeds and items, for acceptance, which
+ * had them before it got only real sources. It recognises them by the domain in `testSources`
+ * and deletes nothing else. Returns how many sources it removed, which is none when it runs
+ * again.
+ */
+export async function removeTestSources(db: Database): Promise<number> {
+  const [result] = await db.delete(sources).where(
+    inArray(
+      sources.domain,
+      testSources.map((source) => source.domain),
+    ),
+  )
+
+  return result.affectedRows
+}
+
+/**
+ * Puts the real sources, with their feeds, in the register. Running it again updates a source
+ * by its domain and a feed by its address and adds no duplicates. It leaves what the admin
+ * changes alone (`enabled`, the permission and the credit of a source that is already there)
+ * and the `ETag`, the `Last-Modified`, the filter and the health of a feed.
+ *
+ * The site calls this when it starts on acceptance and on production. The list of real sources
+ * goes when the admin (#31) can add sources, because the register is then the only truth.
+ */
+export async function seedRealSources(db: Database) {
   for (const { feeds: urls, ...source } of realSources) {
-    await db.insert(sources).values(source).onDuplicateKeyUpdate({ set: source })
+    const update = Object.fromEntries(
+      Object.entries(source).filter(([field]) => !(adminFields as readonly string[]).includes(field)),
+    )
+
+    await db.insert(sources).values(source).onDuplicateKeyUpdate({ set: update })
 
     const [row] = await db.select({ id: sources.id }).from(sources).where(eq(sources.domain, source.domain))
 
@@ -240,6 +277,19 @@ export async function seedSources(db: Database) {
         .onDuplicateKeyUpdate({ set: { sourceId: row.id } })
     }
   }
+}
+
+/**
+ * Puts the test sources and the real sources in the register, for local development and the
+ * tests. Running it again updates them by domain and by feed address and adds no duplicates.
+ * Acceptance and production get only the real sources (`seedRealSources`).
+ */
+export async function seedSources(db: Database) {
+  for (const source of testSources) {
+    await db.insert(sources).values(source).onDuplicateKeyUpdate({ set: source })
+  }
+
+  await seedRealSources(db)
 }
 
 const dutchMonths = [
@@ -542,8 +592,8 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
 }
 
 if (import.meta.main) {
-  // The made-up sources must never reach production. The site seeds only on acceptance; this
-  // keeps `pnpm db:seed` from doing it by hand.
+  // The made-up sources must never reach production. The site puts the real sources in by
+  // itself when it starts; this keeps `pnpm db:seed` from doing the rest by hand.
   if (process.env['SITE_ENV'] === 'production') {
     console.error('The seed puts made-up test sources in the register, so it never runs with SITE_ENV=production.')
     process.exit(1)

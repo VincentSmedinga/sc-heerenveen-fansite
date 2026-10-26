@@ -28,21 +28,18 @@ describe('migrationsFolder', () => {
 })
 
 describe('prepareDatabaseOnStart', () => {
-  it('migrates and seeds on acceptance', async () => {
-    await prepareDatabaseOnStart({ DATABASE_URL, SITE_ENV: 'acceptance' })
+  it.each(['acceptance', 'production', 'local'] as const)(
+    'hands the environment to the seed on %s',
+    async (siteEnv) => {
+      await prepareDatabaseOnStart({ DATABASE_URL, SITE_ENV: siteEnv })
 
-    expect(prepareDatabase).toHaveBeenCalledExactlyOnceWith({
-      migrationsFolder: migrationsFolder(),
-      seed: true,
-      url: DATABASE_URL,
-    })
-  })
-
-  it.each(['local', 'production'] as const)('migrates without the seed on %s', async (siteEnv) => {
-    await prepareDatabaseOnStart({ DATABASE_URL, SITE_ENV: siteEnv })
-
-    expect(prepareDatabase).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ seed: false }))
-  })
+      expect(prepareDatabase).toHaveBeenCalledExactlyOnceWith({
+        migrationsFolder: migrationsFolder(),
+        seed: siteEnv,
+        url: DATABASE_URL,
+      })
+    },
+  )
 
   it('logs a failure and goes on, so the site keeps running', async () => {
     const cause = new Error('connect ECONNREFUSED 127.0.0.1:3306')
@@ -57,10 +54,16 @@ describe('prepareDatabaseOnStart', () => {
     expect(message).not.toContain('geheim')
   })
 
-  it('says it is done when the database is up to date', async () => {
+  it('says it is done when the database is up to date, and that the real sources are in', async () => {
     await prepareDatabaseOnStart({ DATABASE_URL, SITE_ENV: 'production' })
 
-    expect(console.log).toHaveBeenCalledWith('The database is up to date.')
+    expect(console.log).toHaveBeenCalledWith('The database is up to date, with the real sources from the seed.')
     expect(console.error).not.toHaveBeenCalled()
+  })
+
+  it('says only that the database is up to date on local, where nothing is seeded', async () => {
+    await prepareDatabaseOnStart({ DATABASE_URL, SITE_ENV: 'local' })
+
+    expect(console.log).toHaveBeenCalledWith('The database is up to date.')
   })
 })
