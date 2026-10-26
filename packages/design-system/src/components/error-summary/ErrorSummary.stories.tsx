@@ -12,6 +12,7 @@ const meta = preview.meta({
           'Zo ziet iemand meteen wat er mis is, en komt hij met één klik bij het veld.',
           'De link gaat naar de `id` van het veld, dezelfde als die van de `Field`.',
           'Elke fout staat ook bij het veld zelf, in dezelfde woorden.',
+          'Een fout die over meer regels loopt, breekt in balans, zoals bij het veld.',
           '',
           'Zet het blok boven het formulier, buiten het `Form`.',
           'Een schermlezer slaat een blok binnen het formulier soms over in de formuliermodus.',
