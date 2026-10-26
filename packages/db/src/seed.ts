@@ -464,12 +464,14 @@ export function madeUpMatches(now: Date): NewMatch[] {
  * the order of the clock. The goals of each club add up to its result. Together they cover the
  * cases a page must show: goals of one club only and of both, a penalty, an own goal, added
  * time, a player with two goals, extra time and a long name. The players are made up, like the
- * clubs.
+ * clubs. For the top scorers they make five players: two with two goals, who share the first
+ * place, and three with one goal, who share the third. The own goal of an opponent counts for
+ * nobody.
  */
 export const madeUpGoals: Record<string, MadeUpGoal[]> = {
   'Eredivisie|Speelronde 1': [
-    { minute: 12, ours: true, player: 'Proefman', stoppageMinutes: null },
-    { minute: 77, ours: true, player: 'Proefman', stoppageMinutes: null },
+    { minute: 12, ours: true, player: 'Demo', stoppageMinutes: null },
+    { minute: 77, ours: true, player: 'Nepper', stoppageMinutes: null },
   ],
   'Eredivisie|Speelronde 2': [{ minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4 }],
   'KNVB Beker|Achtste finale': [
@@ -482,7 +484,7 @@ export const madeUpGoals: Record<string, MadeUpGoal[]> = {
     { minute: 105, ours: true, player: 'Proefman', stoppageMinutes: null },
   ],
   'KNVB Beker|Kwartfinale': [
-    { minute: 18, ours: true, penalty: true, player: 'Proefman', stoppageMinutes: null },
+    { minute: 18, ours: true, penalty: true, player: 'Voorbeeld', stoppageMinutes: null },
     { minute: 45, ours: false, player: 'Teststraat', stoppageMinutes: 1 },
     { minute: 70, ours: true, ownGoal: true, player: 'Kopie', stoppageMinutes: null },
     { minute: 88, ours: false, player: 'Teststraat', stoppageMinutes: null },

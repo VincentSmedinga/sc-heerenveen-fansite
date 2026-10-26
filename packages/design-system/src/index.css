@@ -42,6 +42,7 @@
 @import url('./components/news-item/news-item.css');
 @import url('./components/discussion-item/discussion-item.css');
 @import url('./components/match/match.css');
+@import url('./components/bar/bar.css');
 @import url('./components/standings-table/standings-table.css');
 @import url('./components/data-table/data-table.css');
 @import url('./components/wikipedia-credit/wikipedia-credit.css');

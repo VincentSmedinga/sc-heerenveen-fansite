@@ -185,8 +185,8 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 
 ## De wedstrijden
 
-`/wedstrijden` toont onder drie kopjes het programma, de stand en de uitslagen van sc Heerenveen 1 (mannen) in het lopende seizoen.
-Het programma staat in de hoofdkolom en de stand met daaronder de uitslagen in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
+`/wedstrijden` toont onder vier kopjes het programma, de stand, de topscorers en de uitslagen van sc Heerenveen 1 (mannen) in het lopende seizoen.
+Het programma staat in de hoofdkolom en de stand met daaronder de topscorers en de uitslagen in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
 De gegevens komen van de importer (zie _De wedstrijden en de stand_ in de [README van de importer](../importer/README.md)) en `@fansite/db/queries` haalt ze op: `listSeasonMatches`, `listSeasonStandings` en `listWikipediaPages`, steeds voor één seizoen.
 `src/matches.ts` vraagt alleen het lopende seizoen (`seasonOf`) en bewaart het antwoord vijf minuten; eerdere seizoenen staan in de database en komen op geen enkele pagina.
@@ -196,6 +196,14 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
 - **Stand:** de volledige tabel met een balk naast de punten, en een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.
   De balk verdwijnt op een smalle plek.
+- **Topscorers:** de beste vijf spelers van sc Heerenveen van dit seizoen, met iedereen die met de vijfde gelijk staat, tot hoogstens acht rijen.
+  `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
+  Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
+  Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet.
+  Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
+  Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "Gebaseerd op de doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
+  De kop van de doelpunten is de afkorting D, met het volle woord onder de tabel.
+  Zonder doelpunten staat er een zin in plaats van een tabel.
 - **Uitslagen:** alle gespeelde wedstrijden, de nieuwste bovenaan.
 - **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de nieuwste uitslag) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
   Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten.

@@ -53,6 +53,13 @@ export const getMatchData = cacheFor(5 * 60 * 1000, async (): Promise<MatchData>
   return { matches, pages, season, standings }
 })
 
+/** A player in the list of top scorers: the goals this season and the place, from 1. */
+export type TopScorer = {
+  goals: number
+  player: string
+  position: number
+}
+
 /**
  * Splits the matches of a season, in the order the query gives them, into the programme, the
  * results, and the previous and the next match the homepage shows.
@@ -81,4 +88,64 @@ export function standingsAround(rows: PublicStandingsRow[]): PublicStandingsRow[
   const start = index === -1 ? 0 : Math.min(Math.max(index - 1, 0), Math.max(rows.length - 3, 0))
 
   return rows.slice(start, start + 3)
+}
+
+/** The most rows the list of top scorers has, even when more are level with the fifth. */
+const topScorersMaximum = 8
+
+/** The players the list has at least, and everybody level with the last one joins. */
+const topScorersMinimum = 5
+
+/**
+ * How many played matches have their scorers, for the line under the list of top scorers. A
+ * match is missing when its result has a goal of ours but the page named no scorers (the import
+ * leaves them out when they don't fit the result). A match we didn't score in has nothing to
+ * miss, so it is complete.
+ */
+export function scorersCoverage(matches: PublicMatch[]): { known: number; played: number } {
+  const played = matches.filter((match) => match.status === 'played')
+  const missing = played.filter((match) => match.goalsFor !== 0 && match.goals.length === 0)
+
+  return { known: played.length - missing.length, played: played.length }
+}
+
+/**
+ * The goals of sc Heerenveen per player in the matches of a season, from the most goals down
+ * and from A to Z when level. Level players share a place (1, 2, 2, 4). A penalty counts.
+ * An own goal does not: with `ours` it is the goal of an opponent who scored for us by mistake,
+ * and without `ours` it is a player of ours who scored for the opponent, so neither is a goal
+ * of the player. A goal of the opponent is not counted either, even for a player with the same
+ * name. The player is the name as `match_goals` keeps it, so two players with the same name
+ * count as one.
+ */
+export function topScorersOf(matches: PublicMatch[]): TopScorer[] {
+  const goals = new Map<string, number>()
+
+  for (const goal of matches.flatMap((match) => match.goals)) {
+    if (goal.ours && !goal.ownGoal) {
+      goals.set(goal.player, (goals.get(goal.player) ?? 0) + 1)
+    }
+  }
+
+  const sorted = [...goals]
+    .map(([player, count]) => ({ goals: count, player }))
+    .sort((a, b) => b.goals - a.goals || a.player.localeCompare(b.player, 'nl'))
+
+  return sorted.map((scorer) => ({
+    ...scorer,
+    position: sorted.findIndex((other) => other.goals === scorer.goals) + 1,
+  }))
+}
+
+/**
+ * The best five scorers, and everybody level with the fifth, up to eight rows. With fewer than
+ * five players all of them.
+ */
+export function topScorersShown(scorers: TopScorer[]): TopScorer[] {
+  const fifth = scorers[topScorersMinimum - 1]
+
+  return (fifth === undefined ? scorers : scorers.filter((scorer) => scorer.goals >= fifth.goals)).slice(
+    0,
+    topScorersMaximum,
+  )
 }

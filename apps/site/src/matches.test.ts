@@ -2,7 +2,7 @@ import type { PublicMatch, PublicStandingsRow } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { overviewOf, standingsAround } from './matches'
+import { overviewOf, scorersCoverage, standingsAround, topScorersOf, topScorersShown } from './matches'
 
 const match = (round: string, status: PublicMatch['status'], matchDate: string): PublicMatch => ({
   competition: 'Eredivisie',
@@ -122,5 +122,122 @@ describe('standingsAround', () => {
     ])
     expect(standingsAround(table.slice(0, 2))).toHaveLength(2)
     expect(standingsAround([])).toEqual([])
+  })
+})
+
+type Goal = PublicMatch['goals'][number]
+
+const goal = (player: string, options: Partial<Goal> = {}): Goal => ({
+  minute: 10,
+  ours: true,
+  ownGoal: false,
+  penalty: false,
+  player,
+  stoppageMinutes: null,
+  ...options,
+})
+
+/** A played match of ours with these goals, and the result they add up to. */
+const played = (goals: Goal[]): PublicMatch => ({
+  ...match('Speelronde 1', 'played', '2026-08-01'),
+  goals,
+  goalsAgainst: goals.filter((item) => !item.ours).length,
+  goalsFor: goals.filter((item) => item.ours).length,
+})
+
+describe('topScorersOf', () => {
+  it('counts the goals per player over all the matches, the most first', () => {
+    const matches = [played([goal('Proefman'), goal('Nepper')]), played([goal('Proefman')])]
+
+    expect(topScorersOf(matches)).toEqual([
+      { goals: 2, player: 'Proefman', position: 1 },
+      { goals: 1, player: 'Nepper', position: 2 },
+    ])
+  })
+
+  it('counts a penalty as a goal of the player', () => {
+    expect(topScorersOf([played([goal('Proefman', { penalty: true }), goal('Proefman')])])).toEqual([
+      { goals: 2, player: 'Proefman', position: 1 },
+    ])
+  })
+
+  it('does not count the own goal of an opponent for a player of ours, who has no goal from it', () => {
+    expect(topScorersOf([played([goal('Teststraat', { ownGoal: true }), goal('Proefman')])])).toEqual([
+      { goals: 1, player: 'Proefman', position: 1 },
+    ])
+  })
+
+  it('does not count an own goal of ours for anybody, or a goal of the opponent for a player with the same name', () => {
+    const own = goal('Proefman', { minute: 20, ours: false, ownGoal: true })
+    const against = goal('Proefman', { minute: 30, ours: false })
+
+    expect(topScorersOf([played([own, against, goal('Nepper')])])).toEqual([
+      { goals: 1, player: 'Nepper', position: 1 },
+    ])
+  })
+
+  it('puts level players on one place and in alphabetical order, and skips the places they take', () => {
+    const matches = [
+      played([goal('Zeta'), goal('Zeta'), goal('Beta'), goal('Beta'), goal('Alfa'), goal('Alfa'), goal('Gamma')]),
+    ]
+
+    expect(topScorersOf(matches).map((item) => [item.position, item.player, item.goals])).toEqual([
+      [1, 'Alfa', 2],
+      [1, 'Beta', 2],
+      [1, 'Zeta', 2],
+      [4, 'Gamma', 1],
+    ])
+  })
+
+  it('is empty without goals, for a match without scorers and for no matches', () => {
+    expect(topScorersOf([])).toEqual([])
+    expect(topScorersOf([played([])])).toEqual([])
+    expect(topScorersOf([played([goal('Teststraat', { ours: false })])])).toEqual([])
+  })
+})
+
+describe('topScorersShown', () => {
+  const scorers = (goals: number[]) =>
+    goals.map((count, index) => ({ goals: count, player: `Speler ${index + 1}`, position: index + 1 }))
+
+  it('shows the best five', () => {
+    expect(topScorersShown(scorers([9, 8, 7, 6, 5, 4, 3])).map((item) => item.player)).toEqual([
+      'Speler 1',
+      'Speler 2',
+      'Speler 3',
+      'Speler 4',
+      'Speler 5',
+    ])
+  })
+
+  it('adds everybody level with the fifth, but not the sixth who has fewer', () => {
+    expect(topScorersShown(scorers([9, 8, 7, 5, 5, 5, 5, 4]))).toHaveLength(7)
+  })
+
+  it('stops at eight rows when more players are level with the fifth', () => {
+    expect(topScorersShown(scorers([9, 8, 7, 6, 2, 2, 2, 2, 2, 2]))).toHaveLength(8)
+  })
+
+  it('shows all of them with fewer than five, and nothing for nobody', () => {
+    expect(topScorersShown(scorers([3, 1]))).toHaveLength(2)
+    expect(topScorersShown([])).toEqual([])
+  })
+})
+
+describe('scorersCoverage', () => {
+  it('counts the played matches that have their scorers, or nothing of ours to name', () => {
+    const noScorers = { ...played([]), goalsFor: 2 }
+    const goalless = { ...played([]), goalsAgainst: 0, goalsFor: 0 }
+    const lost = played([goal('Teststraat', { ours: false })])
+
+    expect(scorersCoverage([played([goal('Proefman')]), noScorers, goalless, lost])).toEqual({ known: 3, played: 4 })
+  })
+
+  it('does not count matches that are not played yet', () => {
+    expect(scorersCoverage([played([goal('Proefman')]), match('Speelronde 2', 'scheduled', '2026-08-08')])).toEqual({
+      known: 1,
+      played: 1,
+    })
+    expect(scorersCoverage([])).toEqual({ known: 0, played: 0 })
   })
 })

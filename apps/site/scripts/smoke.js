@@ -599,6 +599,16 @@ await withEmptyDatabase((database) =>
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
     assert.match(matchesHtml, /Testdorp FC/)
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
+    assert.match(matchesHtml, /<h2[^>]*id="topscorers">Topscorers<\/h2>/)
+    assert.match(
+      matchesHtml,
+      /<caption class="hf-visually-hidden">Topscorers van sc Heerenveen in het seizoen \d{4}\/\d{2}, /,
+    )
+    assert.match(
+      matchesHtml,
+      /<th scope="row">Nepper<\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
+    )
+    assert.doesNotMatch(matchesHtml, /<th scope="row">Kopie<\/th>/)
     assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     assert.doesNotMatch(matchesHtml, /action=history/)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)

@@ -7,7 +7,7 @@ import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
 import { getMatchData } from '../../matches'
 import { overviewOf } from '../../matches'
-import { MatchLines, SourceCredit, standingsCaption } from '../../MatchViews'
+import { MatchLines, SourceCredit, standingsCaption, TopScorers } from '../../MatchViews'
 import { pageMetadata } from '../../metadata'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
@@ -75,8 +75,8 @@ export default async function MatchesPage() {
         </Card>
       </Page.Main>
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme: the table,
-          then the results. */}
-      <Page.Sidebar aria-label="De stand en de uitslagen" wide>
+          the top scorers, then the results. */}
+      <Page.Sidebar aria-label="De stand, de ranglijsten en de uitslagen" wide>
         <Card aria-labelledby="stand">
           <Heading id="stand" level={2}>
             Stand
@@ -86,6 +86,12 @@ export default async function MatchesPage() {
           ) : (
             <StandingsTable caption={standingsCaption(data.standings)} rows={data.standings} />
           )}
+        </Card>
+        <Card aria-labelledby="topscorers">
+          <Heading id="topscorers" level={2}>
+            Topscorers
+          </Heading>
+          <TopScorers matches={data.matches} season={data.season} />
         </Card>
         <Card aria-labelledby="uitslagen">
           <Heading id="uitslagen" level={2}>
