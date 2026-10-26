@@ -391,7 +391,7 @@ export function madeUpMatches(now: Date): NewMatch[] {
       ...base,
       competition: 'Eredivisie',
       goalsAgainst: 0,
-      goalsFor: 2,
+      goalsFor: 6,
       home: true,
       kickoffAt: at(-14, 16, 45),
       matchDate: dayOf(at(-14, 16, 45)),
@@ -404,7 +404,7 @@ export function madeUpMatches(now: Date): NewMatch[] {
       ...base,
       competition: 'Eredivisie',
       goalsAgainst: 0,
-      goalsFor: 1,
+      goalsFor: 6,
       home: false,
       kickoffAt: at(-7, 18, 45),
       matchDate: dayOf(at(-7, 18, 45)),
@@ -465,16 +465,27 @@ export function madeUpMatches(now: Date): NewMatch[] {
  * the order of the clock. The goals of each club add up to its result. Together they cover the
  * cases a page must show: goals of one club only and of both, a penalty, an own goal, added
  * time, a player with two goals, extra time and a long name. The players are made up, like the
- * clubs. For the top scorers they make five players: two with two goals, who share the first
- * place, and three with one goal, who share the third. The own goal of an opponent counts for
- * nobody.
+ * clubs. For the top scorers they make twelve players: Proefman with three goals, two players
+ * with two goals who share the second place, and nine with one goal who share the fourth. The
+ * own goal of an opponent counts for nobody.
  */
 export const madeUpGoals: Record<string, MadeUpGoal[]> = {
   'Eredivisie|Speelronde 1': [
     { minute: 12, ours: true, player: 'Demo', stoppageMinutes: null },
+    { minute: 25, ours: true, player: 'Dummy', stoppageMinutes: null },
+    { minute: 41, ours: true, player: 'Monster', stoppageMinutes: null },
+    { minute: 58, ours: true, player: 'Probeer', stoppageMinutes: null },
     { minute: 77, ours: true, player: 'Nepper', stoppageMinutes: null },
+    { minute: 83, ours: true, player: 'Demo', stoppageMinutes: null },
   ],
-  'Eredivisie|Speelronde 2': [{ minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4 }],
+  'Eredivisie|Speelronde 2': [
+    { minute: 8, ours: true, player: 'Sjabloon', stoppageMinutes: null },
+    { minute: 23, ours: true, player: 'Proefman', stoppageMinutes: null },
+    { minute: 51, ours: true, player: 'Steekproef', stoppageMinutes: null },
+    { minute: 66, ours: true, player: 'Testvoort', stoppageMinutes: null },
+    { minute: 74, ours: true, player: 'Modelman', stoppageMinutes: null },
+    { minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4 },
+  ],
   'KNVB Beker|Achtste finale': [
     { minute: 30, ours: true, player: 'Van der Voorbeeldstraat-Proefmans', stoppageMinutes: null },
     { minute: 90, ours: false, player: 'Oefenaar', stoppageMinutes: 3 },
@@ -542,11 +553,11 @@ export function madeUpTable(now: Date): NewStandingsRow[] {
   const season = seasonOf(now)
   const validOn = new Date(now.getTime() - 7 * day).toISOString().slice(0, 10)
   const rows: [string, number, number, number, number, number][] = [
-    ['sc Heerenveen', 2, 0, 0, 3, 0],
+    ['sc Heerenveen', 2, 0, 0, 12, 0],
     ['Demo Boys', 1, 1, 0, 5, 4],
     ['Proefstad SV', 1, 1, 0, 2, 1],
-    ['Voorbeeld United', 0, 1, 1, 1, 2],
-    ['Testdorp FC', 0, 1, 1, 2, 4],
+    ['Voorbeeld United', 0, 1, 1, 1, 7],
+    ['Testdorp FC', 0, 1, 1, 2, 8],
     ['Nepstad Rangers', 0, 0, 2, 2, 4],
   ]
 

@@ -5323,6 +5323,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat ook de rij van sc Heerenveen het hele groen houdt, blijft in `standings-table.css`.
   De kop van de doelpunten is de afkorting D, op verzoek van de projecteigenaar op 26 oktober 2026, zoals G en P in de stand: een schermlezer hoort "doelpunten" en onder de tabel staat "D doelpunten", in een gedeelde legenda (`hf-bar-legend`, eerst `hf-standings-legend`).
 - **Alternatieven:** de Eredivisie en de beker apart tonen (nauwkeuriger, maar twee lijsten en veel lege rijen in het begin); alleen de beste drie (te weinig voor een selectie); een nieuwe bron met statistieken van spelers (#39); de CSS van de balk kopiëren naar het nieuwe component (twee plekken om gelijk te houden).
+- **Later:** de kaart toont sinds 26 oktober 2026 alle doelpuntenmakers van het seizoen en niet meer de beste vijf met gelijkstaanden; zie _De kaart met topscorers toont alle doelpuntenmakers_.
 
 ### De lijst met gehouden nullen is een lijst van korte wedstrijdregels
 
@@ -5336,3 +5337,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `ShortMatch` heeft zes props en geen kleur, want in deze lijst hebben alle regels dezelfde soort uitslag.
   De selectie en het aantal komen uit dezelfde wedstrijden die de pagina al haalt (`cleanSheetsOf`), en de knop "Laad 5 meer" werkt zoals op de homepage, met `?nul=` in het adres.
 - **Alternatieven:** de volledige wedstrijdregels (veel dubbele informatie naast de uitslagen); alleen een getal zonder lijst (zegt niet welke wedstrijden); een markering in de lijst met uitslagen (de nullen verdwijnen dan tussen de rest); een korte uitvoering van `Match` (maakt `Match` groter).
+
+### De kaart met topscorers toont alle doelpuntenmakers
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de kaart "Topscorers" toont iedereen die dit seizoen voor sc Heerenveen scoorde, niet alleen de beste vijf.
+- **Waarom:** een supporter wil zien wie er scoorde, ook als dat een speler met één doelpunt is.
+  De selectie scoort in een seizoen met een tiental spelers, dus de lijst blijft overzichtelijk, en de balken laten het verschil tussen de eerste en de rest zien.
+- **Hoe:** de grens van vijf rijen (met de gelijkstaanden tot hoogstens acht) en de code die haar toepast, `topScorersShown`, zijn vervallen: de kaart toont wat `topScorersOf` geeft.
+  Het aantal spelers staat in een zichtbare regel onder de tabel ("11 spelers hebben gescoord"), en niet in het bijschrift, want alleen een schermlezer krijgt het bijschrift.
+  De telling blijft op één plek, `topScorersOf`, want #333 laat haar later per speler in plaats van per naam tellen.
+- **Alternatieven:** de beste vijf houden, met gelijkstaanden (korter, maar de rest blijft onzichtbaar); de beste vijf met een knop voor de rest (extra stap en meer code, terwijl de lijst kort genoeg is).

@@ -196,11 +196,12 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
 - **Stand:** de volledige tabel met een balk naast de punten, en een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.
   De balk verdwijnt op een smalle plek.
-- **Topscorers:** de beste vijf spelers van sc Heerenveen van dit seizoen, met iedereen die met de vijfde gelijk staat, tot hoogstens acht rijen.
+- **Topscorers:** alle spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten.
   `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
   Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
   Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet.
   Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
+  Onder de tabel staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord".
   Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "Gebaseerd op de doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
   De kop van de doelpunten is de afkorting D, met het volle woord onder de tabel.
   Zonder doelpunten staat er een zin in plaats van een tabel.
