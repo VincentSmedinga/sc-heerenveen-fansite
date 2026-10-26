@@ -6,7 +6,7 @@
 
 export const scaleSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
 
-export type ScaleName = 'blue' | 'grey' | 'red' | 'sand' | 'steel'
+export type ScaleName = 'blue' | 'green' | 'grey' | 'red' | 'sand' | 'steel'
 
 /**
  * The scales: a colour in one strength (vivid, muted or neutral), numbered from light to dark.
@@ -15,6 +15,12 @@ export type ScaleName = 'blue' | 'grey' | 'red' | 'sand' | 'steel'
 export const scales: { description: string; label: string; name: ScaleName; steps?: readonly number[] }[] = [
   { description: 'Helder blauw, tint 255°: van sterk vlak tot nachtblauw.', label: 'Blauw', name: 'blue' },
   { description: 'Helder rood, tint 27°, spaarzaam: datums en accenten.', label: 'Rood', name: 'red' },
+  {
+    description:
+      'Helder groen, tint 150°, even licht als rood met hetzelfde nummer: voor de uitkomst van een wedstrijd.',
+    label: 'Groen',
+    name: 'green',
+  },
   {
     description:
       'Gedempt blauw, tint 255° met 0,030 tot 0,075 chroma, even licht als grijs met hetzelfde nummer. Voor markeringen en de randen van blauwe vlakken.',
@@ -38,6 +44,7 @@ export const scales: { description: string; label: string; name: ScaleName; step
 
 export const scaleLabels: Record<ScaleName, string> = {
   blue: 'blauw',
+  green: 'groen',
   grey: 'grijs',
   red: 'rood',
   sand: 'zand',
@@ -96,6 +103,14 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-text-on-band', use: 'Tekst op de wedstrijdband' },
       { name: '--hf-colour-text-on-button', provisional: ['dark'], use: 'Tekst op knoppen' },
       { name: '--hf-colour-text-on-button-soft', use: 'Tekst op de zachte knop' },
+    ],
+  },
+  {
+    label: 'Uitkomst van een wedstrijd',
+    tokens: [
+      { name: '--hf-colour-outcome-win', use: 'Uitslag van een gewonnen wedstrijd van sc Heerenveen' },
+      { name: '--hf-colour-outcome-loss', use: 'Uitslag van een verloren wedstrijd van sc Heerenveen' },
+      { name: '--hf-colour-outcome-draw', use: 'Uitslag van een gelijkspel, ook in de beker' },
     ],
   },
   {
@@ -216,6 +231,21 @@ export const pairGroups: { description: string; label: string; pairs: Pair[]; te
       pair('text-accent', 'surface-soft', 'Accent of datum op een zacht vlak', 'AA'),
       pair('text-accent', 'surface-warm', 'Accent of datum op een warm vlak', 'AA'),
       pair('text-accent', 'stripe', 'Accent of datum op de strepen boven de footer', 'AA', 'page'),
+      pair('outcome-win', 'surface', 'Gewonnen uitslag op een vlak', 'AA'),
+      pair('outcome-win', 'page', 'Gewonnen uitslag op de pagina', 'AA'),
+      pair('outcome-win', 'surface-strong', 'Gewonnen uitslag op een sterk vlak', 'AA'),
+      pair('outcome-win', 'surface-soft', 'Gewonnen uitslag op een zacht vlak', 'AA'),
+      pair('outcome-win', 'surface-warm', 'Gewonnen uitslag op een warm vlak', 'AA'),
+      pair('outcome-loss', 'surface', 'Verloren uitslag op een vlak', 'AA'),
+      pair('outcome-loss', 'page', 'Verloren uitslag op de pagina', 'AA'),
+      pair('outcome-loss', 'surface-strong', 'Verloren uitslag op een sterk vlak', 'AA'),
+      pair('outcome-loss', 'surface-soft', 'Verloren uitslag op een zacht vlak', 'AA'),
+      pair('outcome-loss', 'surface-warm', 'Verloren uitslag op een warm vlak', 'AA'),
+      pair('outcome-draw', 'surface', 'Uitslag van een gelijkspel op een vlak', 'AA'),
+      pair('outcome-draw', 'page', 'Uitslag van een gelijkspel op de pagina', 'AA'),
+      pair('outcome-draw', 'surface-strong', 'Uitslag van een gelijkspel op een sterk vlak', 'AA'),
+      pair('outcome-draw', 'surface-soft', 'Uitslag van een gelijkspel op een zacht vlak', 'AA'),
+      pair('outcome-draw', 'surface-warm', 'Uitslag van een gelijkspel op een warm vlak', 'AA'),
       pair('marker-text', 'page', 'Nummer of positie op de pagina', 'AA'),
       pair('marker-text', 'surface', 'Nummer of positie op een vlak', 'AA'),
       pair('marker-text', 'surface-strong', 'Nummer of positie op een sterk vlak', 'AA'),

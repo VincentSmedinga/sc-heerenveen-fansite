@@ -18,6 +18,9 @@ const meta = preview.meta({
           'De regel zegt ook "Thuis" of "Uit", dus een bezoeker hoeft het niet af te leiden uit de volgorde.',
           'Een gespeelde wedstrijd heeft de uitslag tussen de namen, gezien vanaf de thuisclub: "2–0".',
           'Een schermlezer hoort "2 tegen 0".',
+          'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen: groen bij winst, rood bij verlies en neutraal bij gelijkspel, ook in de beker.',
+          'Dat volgt uit de doelpunten van sc Heerenveen en niet uit die van de thuisclub: 0–2 uit is een winst en 2–0 uit een verlies.',
+          'De kleur is een aanvulling en nooit het enige teken: wie hem niet ziet, leest de uitkomst in de doelpunten zelf, dus er komt geen letter of woord bij.',
           'Een wedstrijd die nog moet komen heeft een streepje tussen de namen, dat een schermlezer als "tegen" leest.',
           'De rij van sc Heerenveen zelf is het zwaarst gedrukt, zodat onze club opvalt zonder dat kleur het enige is.',
           'Passen de twee clubs niet op één regel, dan breekt de regel in balans: de clubs komen ongeveer even lang over twee regels, en een naam blijft niet met één woord alleen over.',
@@ -180,6 +183,57 @@ const renderStates = () => (
   </div>
 )
 
+// The outcomes seen from the side of sc Heerenveen: a win, a loss and a draw, each at home and
+// away, and a level cup tie, which is neutral too. The clubs and the grounds are made up.
+const results = [
+  { away: [0, 2], competition: 'Eredivisie', home: [2, 0], round: 'Speelronde 1' },
+  { away: [3, 1], competition: 'Eredivisie', home: [1, 3], round: 'Speelronde 2' },
+  { away: [1, 1], competition: 'Eredivisie', home: [1, 1], round: 'Speelronde 3' },
+  { away: [2, 2], competition: 'KNVB Beker', home: [2, 2], round: 'Tweede ronde' },
+] as const
+
+const renderResults = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="uitslagen-kop">
+      <Heading id="uitslagen-kop" level={2}>
+        Uitslagen
+      </Heading>
+      <List role="list">
+        {results.flatMap(({ away, competition, home, round }) => [
+          <List.Item key={`${round}-thuis`}>
+            <Match
+              competition={competition}
+              dateTime="2026-10-18"
+              goalsAgainst={home[1]}
+              goalsFor={home[0]}
+              home
+              opponent="Proefstad SV"
+              round={round}
+              stadium="Stadion Proeflaan"
+              status="played"
+              time="zo 18 okt"
+            />
+          </List.Item>,
+          <List.Item key={`${round}-uit`}>
+            <Match
+              competition={competition}
+              dateTime="2026-10-25"
+              goalsAgainst={away[0]}
+              goalsFor={away[1]}
+              home={false}
+              opponent="Voorbeeld United"
+              round={round}
+              stadium="Voorbeeldpark"
+              status="played"
+              time="zo 25 okt"
+            />
+          </List.Item>,
+        ])}
+      </List>
+    </Card>
+  </div>
+)
+
 export const Light = meta.story({
   globals: { theme: 'light' },
   name: 'Zijbalk, met de vorige en de volgende wedstrijd, licht',
@@ -214,4 +268,16 @@ export const StatesDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Alle toestanden: gepland met en zonder aftrap, beker, uitgesteld, thuis en uit, gespeeld, donker',
   render: renderStates,
+})
+
+export const ResultsLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Uitslagen: winst, verlies en gelijkspel, thuis en uit, licht',
+  render: renderResults,
+})
+
+export const ResultsDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Uitslagen: winst, verlies en gelijkspel, thuis en uit, donker',
+  render: renderResults,
 })
