@@ -2164,8 +2164,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het menu laten zoals het is, met alleen Onze bronnen en Forum; dan heeft de homepage geen onderdeel.
   Of Over ons ook in het menu, zoals op de artboard.
   Of een prop op `Navigation` voor de opmaak van de header; dan moet elke plek die het menu in een header zet, eraan denken.
-- **Later:** zie _De zoekpagina staat in het hoofdmenu, met de lijst met spelers in de zijbalk_.
-  Het menu heeft er een onderdeel bij, Zoeken; de rest blijft zoals het was.
 
 ### Een eigen foutpagina bij een fout op de server
 
@@ -2884,18 +2882,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een bericht telt mee onder dezelfde voorwaarden als op de homepage (`isShown`, een bron die aanstaat, niet later dan nu), een artikel als het gepubliceerd is.
 - **Alternatieven:** FULLTEXT in MariaDB (rangschikt op passendheid, maar vindt woorden korter dan de minimale lengte niet en hangt af van een serverinstelling die we niet kennen); alleen koppen (podcasts en artikelen blijven onvindbaar); ook forumonderwerpen (onvolledig).
 
-### De zoekpagina staat in het hoofdmenu, met de lijst met spelers in de zijbalk
+### De zoekpagina staat in de footer, met de lijst met spelers in de zijbalk
 
 - **Datum:** 26 oktober 2026
-- **Besluit:** "Zoeken" is een item van het hoofdmenu en leidt naar `/zoeken`, met het formulier en de resultaten in de hoofdkolom en de lijst met spelers in de zijbalk (op een smal scherm eronder).
-- **Waarom:** een gewone link werkt zonder JavaScript en kost geen ruimte in de kop op een telefoon, waar het menu al afbreekt.
+- **Besluit:** "Zoeken" is een item van het menu in de footer, het eerste, en leidt naar `/zoeken`, met het formulier en de resultaten in de hoofdkolom en de lijst met spelers in de zijbalk (op een smal scherm eronder).
+  Het hoofdmenu verandert niet.
+- **Waarom:** er is nog weinig inhoud, en de header moet nog een nieuw ontwerp krijgen, zei de projecteigenaar op 26 oktober 2026.
+  Een gewone link werkt zonder JavaScript, en de footer heeft al de andere pagina's over de site zelf.
   De lijst helpt als je niet weet waar je naar zoekt, en zonder vraag staat ze direct onder het formulier.
-- **Hoe:** het item staat na Podcasts en voor het Forum, dus de pagina's van de site staan bij elkaar en de link naar buiten staat achteraan.
-  De lijst staat na de resultaten in de bron, dus onder de resultaten op een smal scherm, en ze is van `players` van het lopende seizoen (`listSquad`), per positie.
+- **Nadeel:** de zoekpagina is minder zichtbaar dan in het hoofdmenu, en het menu in de footer wijst de huidige pagina niet aan.
+- **Hoe:** de lijst staat na de resultaten in de bron, dus onder de resultaten op een smal scherm, en ze is van `players` van het lopende seizoen (`listSquad`), per positie.
   Elke naam is een gewone link naar `/zoeken?q=<achternaam>`, met de zoekterm uit de tabel.
   De bronvermelding onder de lijst is `WikipediaCredit`, met het woord `selectiegegevens` voor onze eigen gegevens (eigenschap `data`), want de standaardzin noemt de wedstrijdgegevens.
   `listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 komt als één voorwaarde in de `where` van die vraag.
-- **Alternatieven:** een zoekveld in de kop op elke pagina (altijd een stap dichtbij, maar breed en het vraagt een ontwerp van de kop); de lijst altijd boven de resultaten (prominent, maar op een telefoon schuiven de resultaten naar beneden).
+- **Alternatieven:** een item in het hoofdmenu (zoals het issue voorstelde: zichtbaarder, maar het menu breekt op een telefoon al af en de header krijgt een nieuw ontwerp); een zoekveld in de kop op elke pagina (altijd een stap dichtbij, maar breed en het vraagt een ontwerp van de kop); de lijst altijd boven de resultaten (prominent, maar op een telefoon schuiven de resultaten naar beneden).
 
 ### De zoekpagina laat woorden van één teken niet toe, toont hoogstens 100 resultaten en staat niet in de sitemap
 

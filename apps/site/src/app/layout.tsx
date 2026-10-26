@@ -13,10 +13,11 @@ import { withBranch } from '../title'
 import { TopEdge } from '../TopEdge'
 import { updatesPath, updatesTitle } from '../updates'
 
-// The links in the footer, about the site itself: the page about us, the contact form, the
-// sources, the privacy page, the accessibility statement and the updates. The main menu does
-// not have them.
+// The links in the footer, about the site itself: the search, the page about us, the contact
+// form, the sources, the privacy page, the accessibility statement and the updates. The main
+// menu does not have them.
 const footerItems = [
+  { href: '/zoeken', label: 'Zoeken' },
   { href: '/over-ons', label: 'Over ons' },
   { href: '/contact', label: 'Contact' },
   { href: '/bronnen', label: 'Bronnen' },
