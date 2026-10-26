@@ -15,7 +15,7 @@ export type StandingsTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childre
   children?: never
   /**
    * `all` (default) has every column and scrolls sideways inside its own area when it is wider
-   * than the space. `compact` leaves out the columns for won, drawn, lost and the goals, and
+   * than the space. `compact` leaves out the columns for won, drawn and lost, and
    * fits a narrow column without scrolling.
    */
   columns?: 'all' | 'compact'
@@ -33,12 +33,8 @@ export type StandingsTableRow = {
   club: string
   /** The matches drawn. */
   drawn: number
-  /** The goals for minus the goals against. It can be negative. */
+  /** The goals for minus the goals against, as one number. It can be negative. */
   goalDifference: number
-  /** The goals against. */
-  goalsAgainst: number
-  /** The goals for. */
-  goalsFor: number
   /** The matches lost. */
   lost: number
   /** The matches played. */
@@ -71,14 +67,6 @@ const columns: Column[] = [
   { abbreviation: 'W', compact: false, id: 'won', name: 'gewonnen', value: (row) => row.won },
   { abbreviation: 'G', compact: false, id: 'drawn', name: 'gelijk', value: (row) => row.drawn },
   { abbreviation: 'V', compact: false, id: 'lost', name: 'verloren', value: (row) => row.lost },
-  { abbreviation: 'DV', compact: false, id: 'goalsFor', name: 'doelpunten voor', value: (row) => row.goalsFor },
-  {
-    abbreviation: 'DT',
-    compact: false,
-    id: 'goalsAgainst',
-    name: 'doelpunten tegen',
-    value: (row) => row.goalsAgainst,
-  },
   {
     abbreviation: 'DS',
     compact: true,
@@ -99,7 +87,7 @@ const columns: Column[] = [
  *
  * With every column the table is wider than a phone. It then sits in an area of its own that
  * scrolls sideways, has the name `label` and can be reached with the keyboard, so the page
- * itself never scrolls sideways. In `compact` the columns of won, drawn, lost and the goals are
+ * itself never scrolls sideways. In `compact` the columns of won, drawn and lost are
  * left out, nothing scrolls and there is no legend. standings-table.css gives it its look.
  */
 export const StandingsTable = ({

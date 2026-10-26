@@ -2763,6 +2763,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de volledige tabel is op een telefoon te breed voor de pagina, en het scrollgebied houdt hem bruikbaar tot 400% inzoomen (1.4.10).
   De korte vorm laat op de homepage zien waar het om draait: positie, gespeeld, punten en doelsaldo.
 - **Alternatieven:** de tabel kolommen laten weglaten met CSS op een telefoon (de volle woorden en de kolommen zijn dan niet te bereiken); altijd de korte vorm (de volledige stand ontbreekt dan op de pagina).
+- **Later:** zie _De stand toont geen doelpunten voor en tegen_.
+  De kolommen DV en DT zijn vervallen; de tabel heeft nog positie, club, G, W, G, V, DS en P, en de korte vorm laat alleen gewonnen, gelijk en verloren weg.
 
 ### De bronvermelding van Wikipedia is een component met een link per pagina
 
@@ -4652,3 +4654,17 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De volgorde in de bron is die op een telefoon: het programma, de stand, de uitslagen, zonder `order`.
   De bronvermelding staat onderaan de zijbalk, zodat ze op een telefoon na de uitslagen komt en niet tussen het programma en de stand.
 - **Alternatieven:** alles in één kolom laten, zoals nu (de stand staat onderaan, onder een lange lijst); de verdeling voor alle pagina's wijzigen (raakt de homepage en de artikelen, die een smalle zijbalk nodig hebben).
+- **Later:** zie _De stand toont geen doelpunten voor en tegen_.
+  Zonder die twee kolommen past de tabel in de zijbalk van 32 rem; met ze was ze 23 pixels te breed.
+
+### De stand toont geen doelpunten voor en tegen
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de stand toont de kolommen DV (doelpunten voor) en DT (doelpunten tegen) niet meer, op elke pagina.
+  De tabel heeft positie, club, gespeeld, gewonnen, gelijk, verloren, doelsaldo en punten.
+  `StandingsTable` heeft de kolommen en de eigenschappen `goalsFor` en `goalsAgainst` van een rij niet meer; het doelsaldo (DS) blijft.
+  De database en de importer veranderen niet: de importcontroles gebruiken de doelpunten voor en tegen, dus ze blijven bewaard.
+- **Waarom:** de projecteigenaar koos dit.
+  Zo past de tabel in de zijbalk van 32 rem van `/wedstrijden`, waar ze met alle kolommen 23 pixels te breed was voor haar gebied, en scrolt ze op een telefoon minder ver.
+  Het doelsaldo zegt wat supporters het eerst willen weten van de doelpunten.
+- **Alternatieven:** de naam van de club laten afbreken (de rij van een lange naam wordt hoger); een bredere zijbalk (dan wordt de hoofdkolom smaller dan het programma nodig heeft); de scroll laten staan.

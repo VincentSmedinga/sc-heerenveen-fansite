@@ -8,8 +8,6 @@ const rows: StandingsTableRow[] = [
     club: 'Demo Boys',
     drawn: 1,
     goalDifference: 1,
-    goalsAgainst: 4,
-    goalsFor: 5,
     lost: 0,
     played: 2,
     points: 4,
@@ -20,8 +18,6 @@ const rows: StandingsTableRow[] = [
     club: 'sc Heerenveen',
     drawn: 0,
     goalDifference: 3,
-    goalsAgainst: 0,
-    goalsFor: 3,
     lost: 0,
     played: 2,
     points: 6,
@@ -32,8 +28,6 @@ const rows: StandingsTableRow[] = [
     club: 'Testdorp FC',
     drawn: 1,
     goalDifference: -2,
-    goalsAgainst: 4,
-    goalsFor: 2,
     lost: 1,
     played: 2,
     points: 1,
@@ -44,8 +38,6 @@ const rows: StandingsTableRow[] = [
     club: 'Nepstad Rangers',
     drawn: 0,
     goalDifference: 0,
-    goalsAgainst: 4,
-    goalsFor: 4,
     lost: 0,
     played: 2,
     points: 0,
@@ -76,8 +68,6 @@ describe('StandingsTable', () => {
       'W',
       'G',
       'V',
-      'DV',
-      'DT',
       'DS',
       'P',
     ])
@@ -96,18 +86,7 @@ describe('StandingsTable', () => {
 
     expect(
       screen.getAllByRole('columnheader').map((header) => header.querySelector('.hf-visually-hidden')?.textContent),
-    ).toEqual([
-      'positie',
-      undefined,
-      'gespeeld',
-      'gewonnen',
-      'gelijk',
-      'verloren',
-      'doelpunten voor',
-      'doelpunten tegen',
-      'doelsaldo',
-      'punten',
-    ])
+    ).toEqual(['positie', undefined, 'gespeeld', 'gewonnen', 'gelijk', 'verloren', 'doelsaldo', 'punten'])
     expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
     expect(screen.getByRole('columnheader', { name: 'gelijk' })).toBeTruthy()
   })
@@ -129,13 +108,11 @@ describe('StandingsTable', () => {
       'Gewonnen',
       'Gelijk',
       'Verloren',
-      'Doelpunten voor',
-      'Doelpunten tegen',
       'Doelsaldo',
       'Punten',
     ])
     expect(container.querySelector('.hf-standings-legend')?.textContent).toBe(
-      'G gespeeld, W gewonnen, G gelijk, V verloren, DV doelpunten voor, DT doelpunten tegen, DS doelsaldo, P punten',
+      'G gespeeld, W gewonnen, G gelijk, V verloren, DS doelsaldo, P punten',
     )
   })
 
@@ -147,7 +124,7 @@ describe('StandingsTable', () => {
       within(row)
         .getAllByRole('cell')
         .map((cell) => cell.textContent),
-    ).toEqual(['2', '2', '2', '0', '0', '3', '0', '+3', '6'])
+    ).toEqual(['2', '2', '2', '0', '0', '+3', '6'])
   })
 
   it('puts the points in the last column, in a class of their own', () => {
@@ -191,7 +168,7 @@ describe('StandingsTable', () => {
     expect(within(area).getByRole('table')).toBeTruthy()
   })
 
-  it('leaves out the columns of won, drawn, lost and the goals in compact, with no scrolling area and no legend', () => {
+  it('leaves out the columns of won, drawn and lost in compact, with no scrolling area and no legend', () => {
     render(<StandingsTable {...props} columns="compact" />)
 
     expect(
