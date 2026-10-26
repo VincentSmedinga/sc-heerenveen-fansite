@@ -63,6 +63,49 @@ describe('Match', () => {
     expect(score()?.querySelector('.hf-visually-hidden')?.textContent).toBe('3 tegen 1')
   })
 
+  it.each([
+    { goalsAgainst: 0, goalsFor: 2, home: true, outcome: 'win', shown: '2–0' },
+    { goalsAgainst: 2, goalsFor: 0, home: true, outcome: 'loss', shown: '0–2' },
+    { goalsAgainst: 1, goalsFor: 1, home: true, outcome: 'draw', shown: '1–1' },
+    { goalsAgainst: 0, goalsFor: 2, home: false, outcome: 'win', shown: '0–2' },
+    { goalsAgainst: 2, goalsFor: 0, home: false, outcome: 'loss', shown: '2–0' },
+    { goalsAgainst: 1, goalsFor: 1, home: false, outcome: 'draw', shown: '1–1' },
+  ])('colours a $shown result for $outcome when home is $home', ({ goalsAgainst, goalsFor, home, outcome, shown }) => {
+    const { container } = render(<Match {...played} goalsAgainst={goalsAgainst} goalsFor={goalsFor} home={home} />)
+    const score = container.querySelector('.hf-match-score')
+
+    // The outcome is for sc Heerenveen: it follows the goals of our club, not the home club's.
+    expect(score?.className).toBe(`hf-match-score hf-match-${outcome}`)
+    expect(score?.querySelector('[aria-hidden="true"]')?.textContent).toBe(shown)
+  })
+
+  it('gives a level cup tie the colour of a draw', () => {
+    const { container } = render(
+      <Match {...played} competition="KNVB Beker" goalsAgainst={2} goalsFor={2} round="Tweede ronde" />,
+    )
+
+    expect(container.querySelector('.hf-match-score')?.className).toBe('hf-match-score hf-match-draw')
+  })
+
+  it('adds no letter or word for the outcome, so a screen reader still hears only the goals', () => {
+    const { container } = render(<Match {...played} />)
+    const score = container.querySelector('.hf-match-score')
+
+    expect(score?.textContent).toBe('2–02 tegen 0')
+    expect(score?.hasAttribute('aria-label')).toBe(false)
+  })
+
+  it('gives a match that is not played no outcome', () => {
+    const { container, rerender } = render(<Match {...scheduled} />)
+    const cls = () => container.querySelector('.hf-match-score')?.className
+
+    expect(cls()).toBe('hf-match-score hf-match-versus')
+
+    rerender(<Match competition="Eredivisie" home opponent="Demo Boys" round="Speelronde 5" status="postponed" />)
+
+    expect(cls()).toBe('hf-match-score hf-match-versus')
+  })
+
   it('shows a goalless draw as 0–0', () => {
     const { container } = render(<Match {...played} goalsAgainst={0} goalsFor={0} />)
 

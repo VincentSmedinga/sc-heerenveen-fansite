@@ -1258,6 +1258,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de kleuren moeten makkelijk te begrijpen en uit te leggen zijn.
   Staal en grijs leken aparte kleuren, maar zijn blauw en zand in een andere sterkte.
 - **Alternatieven:** losse randkleuren per vlak, op een vaste afstand van het vlak (eerst #b8cce6, #cbd7e7 en #d7c9ac).
+- **Later:** zie _Een uitslag toont de uitkomst in kleur, zonder letter_.
+  Het palet heeft nu ook groen (150°), een heldere reeks zoals blauw en rood.
 
 ### Vier vlakken; een kaart is een vlak met een rand
 
@@ -4720,3 +4722,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Daarom staat het voorvoegsel in een eigen `@supports`-blok; dat blijft in de gebouwde CSS staan.
   Een test (`root-css.test.ts`) controleert dat beide vormen in de bron staan, maar niet wat de bouw ervan maakt; dat kijk je na in de gebouwde CSS.
 - **Alternatieven:** niets doen (de verschillen blijven in liggende stand); een vaste waarde als 90% of 110% (verkeerd voor wie het teken groot nodig heeft); de tabel ook laten vergroten (kan niet, het is de beslissing van Safari); alleen de vorm zonder voorvoegsel (werkt niet in Safari op iPhone).
+
+### Een uitslag toont de uitkomst in kleur, zonder letter
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de uitslag van sc Heerenveen in `Match` is groen bij winst, rood bij verlies en neutraal bij gelijkspel.
+  Er komt geen letter of woord bij: de doelpunten zelf zeggen genoeg.
+  De uitkomst volgt uit de doelpunten van sc Heerenveen en niet uit die van de thuisclub: 0–2 uit is een winst en 2–0 uit een verlies.
+  Een gelijke stand krijgt de kleur van gelijkspel, ook in de beker; die kleur zegt niets over wie er doorging, ook niet als een beker op strafschoppen is beslist.
+- **Palet:** er komt een reeks groen bij (tint 150°, elf stappen, even licht als rood met hetzelfde nummer) en drie rollen: `outcome-win`, `outcome-loss` en `outcome-draw`.
+  Winst is groen-700 in licht en groen-300 in donker.
+  Verlies is rood-700 en rood-300, dezelfde stappen als `text-accent`, maar een eigen rol, zodat de uitkomst kan veranderen zonder het accent mee te nemen.
+  Gelijkspel heeft de kleur van secundaire tekst, want gelijkspel is niet goed en niet slecht.
+- **Waarom:** supporters zien zo in één oogopslag hoe het ging.
+  Kleur is hier een aanvulling op de cijfers en niet het enige teken (WCAG 1.4.1), want wie kleuren niet ziet, leest de uitkomst in 2–0 of 0–2.
+  Een letter erbij zou de regel drukker maken zonder iets te zeggen.
+  De screenreader hoort wat hij hoorde ("2 tegen 0"), en in forced colours valt de kleur weg: de browser zet de eigen kleur van de gebruiker op de tekst.
+- **Alternatieven:** een letter (W, G, V) of een woord erbij, voor wie kleuren niet uit elkaar houdt (de projecteigenaar vond de cijfers voldoende); gele of blauwe kleur voor gelijkspel (geel is een waarschuwing en blauw is de kleur van links); de beker apart behandelen (niet nodig: neutraal zegt niets over wie doorging).
