@@ -14,6 +14,8 @@ const meta = preview.meta({
           '- `p` (standaard): een alinea.',
           '- `span`: tekst binnen een regel, zoals een bronnaam naast een tijd.',
           '',
+          'Een inleiding breekt in balans: de woorden zijn over de regels verdeeld, zodat de regels ongeveer even lang zijn.',
+          '',
           'Met `appearance` kies je de typestijl: `body` (Tekst), `intro` (Inleiding) of `meta` (Meta).',
           '',
           'Een inleiding is de eerste alinea onder de paginatitel en alleen voor een `p`.',

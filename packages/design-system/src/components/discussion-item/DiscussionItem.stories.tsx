@@ -28,6 +28,7 @@ const meta = preview.meta({
           'De titel is een van de twee links die grijs worden als je ze hebt geopend (de andere is de kop van een nieuwsbericht); onder de muis krijgt hij de kleur voor hover, ook als hij bezocht is.',
           'De titel staat op een eigen regel, iets zwaarder dan gewone tekst en in de kleur voor links, dus je herkent hem ook zonder onderstreping als link.',
           'De titel is groot genoeg om goed te raken, en een lange titel loopt door op de volgende regel.',
+          'De woorden van een titel die over meer regels loopt zijn over die regels verdeeld, zodat geen regel met één woord alleen overblijft.',
           '',
           '- `title` is de titel, zoals het forum hem heeft.',
           '  Het component past hem niet aan.',

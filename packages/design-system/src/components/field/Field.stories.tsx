@@ -17,6 +17,7 @@ const meta = preview.meta({
           '  Beide zijn gewone tekst, zonder links of lijsten: sommige schermlezers, zoals VoiceOver, slaan opgemaakte tekst in een beschrijving over, en dan hoort de lezer hem niet.',
           '- Heeft het veld een fout, dan krijgt het ook `aria-invalid`, en een dikkere rand in de kleur van fouten.',
           '  De fout staat in tekst en begint voor een schermlezer met "Fout:". Een rode rand is nooit het enige teken.',
+          '- Een hulptekst of foutmelding die over meer regels loopt, breekt in balans: de woorden zijn over de regels verdeeld.',
           '- Een veld is verplicht, tenzij je `required={false}` zet. We vragen alleen wat we echt nodig hebben, dus verplicht is de gewone staat.',
           '  Alleen een veld dat niet verplicht is, zegt dat in het label: "(niet verplicht)". Het veld zelf krijgt het attribuut `required`, dus een schermlezer zegt het ook.',
           '',

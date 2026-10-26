@@ -20,6 +20,7 @@ const meta = preview.meta({
           'Een schermlezer hoort "2 tegen 0".',
           'Een wedstrijd die nog moet komen heeft een streepje tussen de namen, dat een schermlezer als "tegen" leest.',
           'De rij van sc Heerenveen zelf is het zwaarst gedrukt, zodat onze club opvalt zonder dat kleur het enige is.',
+          'Passen de twee clubs niet op één regel, dan breekt de regel in balans: de clubs komen ongeveer even lang over twee regels, en een naam blijft niet met één woord alleen over.',
           '',
           'De tijd is een `Time`.',
           'Je geeft de tekst zoals een bezoeker hem leest, in Nederlandse tijd, en in `dateTime` de waarde voor machines.',

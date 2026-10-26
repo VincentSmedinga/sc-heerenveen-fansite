@@ -50,6 +50,17 @@
     font-weight: inherit;
   }
 
+  /*
+   * The intro is a short text of a few lines under the title of the page, so its lines are about
+   * as long as each other. Not Baseline widely available yet. Without it, it wraps as a
+   * paragraph does.
+   */
+  @supports (text-wrap: balance) {
+    .hf-intro {
+      text-wrap: balance;
+    }
+  }
+
   .hf-meta {
     font-family: var(--hf-font-family-text);
     font-size: var(--hf-meta-font-size);

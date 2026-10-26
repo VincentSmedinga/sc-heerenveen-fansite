@@ -24,4 +24,16 @@
     color: var(--hf-colour-text-accent);
     font-weight: 500;
   }
+
+  /*
+   * A hint or an error of a line or two, such as one that ends in an address, has its words
+   * spread over the lines. Not Baseline widely available yet. Without it, it wraps as a
+   * paragraph does.
+   */
+  @supports (text-wrap: balance) {
+    .hf-field-hint,
+    .hf-field-error {
+      text-wrap: balance;
+    }
+  }
 }
