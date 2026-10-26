@@ -27,8 +27,12 @@
       white-space: nowrap;
     }
 
-    /* The name may wrap, so a long name does not make a narrow table wider than its place. */
+    /*
+     * The name may wrap, also in the middle of a long word, so a long name does not make a
+     * narrow table wider than its place.
+     */
     tbody th {
+      overflow-wrap: anywhere;
       white-space: normal;
     }
   }

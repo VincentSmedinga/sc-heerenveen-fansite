@@ -21,6 +21,11 @@ describe('bar.css', () => {
     expect(declarationsOf('.hf-bar-table thead th:not(.hf-numeric)')).toMatch(/inline-size: 100%/u)
   })
 
+  it('lets a long name wrap, also inside a word, so it does not widen the table past its place', () => {
+    expect(declarationsOf('tbody th')).toMatch(/white-space: normal/u)
+    expect(declarationsOf('tbody th')).toMatch(/overflow-wrap: anywhere/u)
+  })
+
   it('makes the number with the bar bold', () => {
     expect(declarationsOf('.hf-bar-table td.hf-bar-value')).toMatch(/font-weight: 700/u)
   })
