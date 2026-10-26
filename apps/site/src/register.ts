@@ -17,6 +17,15 @@ export const kindHeadings = {
   video: 'Video',
 } as const satisfies Record<SourceKind, string>
 
+/** The anchor of the heading of each kind of source on the page Onze bronnen. */
+export const kindAnchors = {
+  club: 'club',
+  forum: 'forum',
+  news: 'nieuws',
+  podcast: 'podcasts',
+  video: 'video',
+} as const satisfies Record<SourceKind, string>
+
 /**
  * The sources grouped by kind, in the order of the kinds in the schema: news, podcasts, forum,
  * club and video. A kind without sources is left out.

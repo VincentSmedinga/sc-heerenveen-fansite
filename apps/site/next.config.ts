@@ -26,6 +26,12 @@ const config: NextConfig = {
   // packages are left out.
   outputFileTracingRoot: root,
   poweredByHeader: false,
+  // All redirects of pages live here, each with its reason. A page that moved forwards for
+  // good (308), and the browser keeps the part after the hash through it, so a link to an
+  // anchor still arrives. A heading that moves to another page takes its anchor along, and
+  // the old path keeps its anchors in src/anchors.ts: the smoke test follows the redirect to
+  // find them.
+  //
   // The page Updates used to be called Wat is er nieuw, at /wat-is-er-nieuw. Links and feed
   // readers may still use the old addresses, so they forward to the new ones for good (308).
   redirects: () =>

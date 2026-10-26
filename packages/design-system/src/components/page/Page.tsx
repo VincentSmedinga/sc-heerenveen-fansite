@@ -24,11 +24,16 @@ export type PageProps = ComponentPropsWithoutRef<'div'>
 
 export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
   /**
+   * Puts the cells next to each other, in two columns, where two of them fit, which is under
+   * the main column on a middle screen. For a sidebar of small cells. Without it the cells sit
+   * under each other at every width, which suits cells with a list.
+   */
+  split?: boolean
+  /**
    * A sidebar as wide as the main column, which is narrower than on other pages, for a page
    * whose sidebar holds a table or another cell that needs the width. The columns stay as wide
-   * together as without it. Its cells always sit under each other. It is the Page.Sidebar that
-   * tells the Page.Body, so a page can choose it without owning the Page.Body, which the layout
-   * of the site renders.
+   * together as without it. It is the Page.Sidebar that tells the Page.Body, so a page can
+   * choose it without owning the Page.Body, which the layout of the site renders.
    */
   wide?: boolean
 }
@@ -72,11 +77,19 @@ const Main = ({ children, className, intro, ...props }: PageMainProps) => (
 
 /**
  * The sidebar, an `aside`: beside the Page.Main, or under it on a narrow screen. Each of its
- * children is a cell. With `wide` the sidebar is as wide as the main column and its cells
- * never sit side by side.
+ * children is a cell, and the cells sit under each other. With `split` they sit side by side
+ * where two fit, and with `wide` the sidebar is as wide as the main column.
  */
-const Sidebar = ({ className, wide = false, ...props }: PageSidebarProps) => (
-  <aside className={classNames('hf-page-sidebar', wide && 'hf-page-sidebar-wide', className)} {...props} />
+const Sidebar = ({ className, split = false, wide = false, ...props }: PageSidebarProps) => (
+  <aside
+    className={classNames(
+      'hf-page-sidebar',
+      split && 'hf-page-sidebar-split',
+      wide && 'hf-page-sidebar-wide',
+      className,
+    )}
+    {...props}
+  />
 )
 
 /**

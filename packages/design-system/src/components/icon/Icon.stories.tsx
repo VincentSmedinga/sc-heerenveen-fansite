@@ -8,9 +8,9 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De pictogrammen van het designsysteem: een pijl naar rechts, een pijl naar links, een envelop, het pictogram voor een externe link, een plus, een zon en een maan.',
+          'De pictogrammen van het designsysteem: een pijl naar rechts, een pijl naar links, een envelop, het pictogram voor een externe link, een schakel van een ketting, een plus, een zon en een maan.',
           'We tekenen ze zelf, als SVG in de code. Er komt niets van buiten bij en er is geen pictogrammenbibliotheek.',
-          'Je zet een pictogram niet zelf op een pagina: een `Link`, een `Button` en een `SegmentedControl` tekenen het voor je.',
+          'Je zet een pictogram niet zelf op een pagina: een `Link`, een `Button`, een `SegmentedControl` en een `Heading` met een anker tekenen het voor je.',
           '',
           '**De stijl.**',
           'Een pictogram is een lijn met ronde uiteinden en ronde hoeken, zonder vulling, en het blijft binnen zijn vierkant.',
@@ -48,6 +48,7 @@ const labels: Record<IconName, string> = {
   'arrow-right': 'Pijl naar rechts',
   envelope: 'Envelop',
   'external-link': 'Externe link',
+  link: 'Schakel',
   moon: 'Maan',
   plus: 'Plus',
   sun: 'Zon',

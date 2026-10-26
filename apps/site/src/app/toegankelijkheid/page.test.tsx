@@ -1,13 +1,16 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { withoutIcons } from '../../without-icons'
+import { headingAnchors, withoutHeadingLinks, withoutIcons } from '../../without-icons'
 import AccessibilityPage, { generateMetadata } from './page'
 
 const html = renderToStaticMarkup(<AccessibilityPage />)
 
+// Without the links that the headings are, for the tests about the other links and icons.
+const plain = withoutHeadingLinks(html)
+
 /** The href and the text of each link, in the order of the page. */
-const links = [...withoutIcons(html).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
+const links = [...withoutIcons(plain).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
   href,
   label,
 ])
@@ -41,11 +44,20 @@ describe('the page Toegankelijkheid', () => {
 
   it('has one h1 and the four parts as h2, in order', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Toegankelijkheid</h1>'])
-    expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
-      '<h2 class="hf-heading-2">Wat we beloven</h2>',
-      '<h2 class="hf-heading-2">Wat we al doen</h2>',
-      '<h2 class="hf-heading-2">Hoe je ons bereikt</h2>',
-      '<h2 class="hf-heading-2">Wanneer we het nakeken</h2>',
+    expect(plain.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="belofte">Wat we beloven</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="wat-we-doen">Wat we al doen</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="contact">Hoe je ons bereikt</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="nagekeken">Wanneer we het nakeken</h2>',
+    ])
+  })
+
+  it('makes each h2 a link to itself, with a Dutch anchor that the page chose', () => {
+    expect(headingAnchors(html)).toEqual([
+      ['belofte', 'Wat we beloven'],
+      ['wat-we-doen', 'Wat we al doen'],
+      ['contact', 'Hoe je ons bereikt'],
+      ['nagekeken', 'Wanneer we het nakeken'],
     ])
   })
 
@@ -77,7 +89,7 @@ describe('the page Toegankelijkheid', () => {
     expect(html).toMatch(
       /<a href="mailto:fansite@heerenveen\.org"><span class="hf-icon-head"><svg aria-hidden="true" class="hf-icon"[^>]*>.*?<\/svg>f<\/span>ansite@heerenveen\.org<\/a>/,
     )
-    expect(html.match(/<svg /g)).toHaveLength(1)
+    expect(plain.match(/<svg /g)).toHaveLength(1)
   })
 
   it('shows the date of the statement in a time element with the full date', () => {

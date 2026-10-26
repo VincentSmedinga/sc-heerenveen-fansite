@@ -20,7 +20,7 @@ async function render(searchParams: Record<string, string | string[] | undefined
 
 /** The part of the page under the h2 with this id, up to the next h2 or the end. */
 function section(html: string, id: string) {
-  const start = html.indexOf(`<h2 class="hf-heading-2" id="${id}">`)
+  const start = html.indexOf(`<h2 class="hf-heading-2 hf-heading-anchored" id="${id}">`)
   const end = html.indexOf('<h2', start + 1)
 
   return html.slice(start, end === -1 ? undefined : end)
@@ -46,11 +46,11 @@ describe('the page /wedstrijden', () => {
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Wedstrijden</h1>',
-      '<h2 class="hf-heading-2" id="programma">Programma</h2>',
-      '<h2 class="hf-heading-2" id="stand">Stand</h2>',
-      '<h2 class="hf-heading-2" id="topscorers">Topscorers</h2>',
-      '<h2 class="hf-heading-2" id="nul-gehouden">De nul gehouden</h2>',
-      '<h2 class="hf-heading-2" id="uitslagen">Uitslagen</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#programma">Programma</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#stand">Stand</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="topscorers"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#topscorers">Topscorers</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="de-nul-gehouden"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="nul-gehouden"></span><a class="hf-heading-link" href="#de-nul-gehouden">De nul gehouden</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen">Uitslagen</a></h2>',
     ])
   })
 
@@ -70,8 +70,8 @@ describe('the page /wedstrijden', () => {
     expect(main).not.toContain('id="stand"')
     expect(main).not.toContain('id="uitslagen"')
     expect(sidebar.indexOf('id="stand"')).toBeLessThan(sidebar.indexOf('id="topscorers"'))
-    expect(sidebar.indexOf('id="topscorers"')).toBeLessThan(sidebar.indexOf('id="nul-gehouden"'))
-    expect(sidebar.indexOf('id="nul-gehouden"')).toBeLessThan(sidebar.indexOf('id="uitslagen"'))
+    expect(sidebar.indexOf('id="topscorers"')).toBeLessThan(sidebar.indexOf('id="de-nul-gehouden"'))
+    expect(sidebar.indexOf('id="de-nul-gehouden"')).toBeLessThan(sidebar.indexOf('id="uitslagen"'))
     expect(main).not.toContain('id="topscorers"')
     expect(sidebar).not.toContain('<h1')
     expect(sidebar).not.toContain('id="programma"')
@@ -84,7 +84,7 @@ describe('the page /wedstrijden', () => {
   it('names each card by its h2, so the links with a hash on the homepage have a target', async () => {
     const html = await render()
 
-    for (const id of ['programma', 'uitslagen', 'stand', 'topscorers', 'nul-gehouden']) {
+    for (const id of ['programma', 'uitslagen', 'stand', 'topscorers', 'de-nul-gehouden']) {
       expect(html).toContain(`<section class="hf-card" aria-labelledby="${id}">`)
     }
   })
@@ -255,7 +255,7 @@ describe('the page /wedstrijden', () => {
       }))
 
     it('shows the matches with no goal against, the newest first, as short lines with the count above', async () => {
-      const sheets = section(await render(), 'nul-gehouden')
+      const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets).toContain('2 keer de nul gehouden in 4 wedstrijden')
       expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(2)
@@ -271,7 +271,7 @@ describe('the page /wedstrijden', () => {
     })
 
     it('has no competition, round, stadium, scorers or colour of the outcome', async () => {
-      const sheets = section(await render(), 'nul-gehouden')
+      const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets).not.toContain('Eredivisie')
       expect(sheets).not.toContain('KNVB Beker')
@@ -282,7 +282,7 @@ describe('the page /wedstrijden', () => {
     })
 
     it('is a list with an item for every line, and no button when there are ten or fewer', async () => {
-      const sheets = section(await render(), 'nul-gehouden')
+      const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets.match(/<li/g)).toHaveLength(2)
       expect(sheets).not.toContain('<button')
@@ -297,7 +297,7 @@ describe('the page /wedstrijden', () => {
         ],
       })
 
-      const sheets = section(await render(), 'nul-gehouden')
+      const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets).toContain('3 keer de nul gehouden in 5 wedstrijden')
       expect(sheets).toContain('Nul Nul FC')
@@ -309,7 +309,7 @@ describe('the page /wedstrijden', () => {
     it('shows ten lines and the button "Laad 5 meer", and the count above counts all of them', async () => {
       vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: manyMatches(11) })
 
-      const sheets = section(await render(), 'nul-gehouden')
+      const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets).toContain('11 keer de nul gehouden in 11 wedstrijden')
       expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(10)
@@ -323,7 +323,7 @@ describe('the page /wedstrijden', () => {
     it('shows ten lines and no button when there are exactly ten', async () => {
       vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: manyMatches(10) })
 
-      const sheets = section(await render(), 'nul-gehouden')
+      const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(10)
       expect(sheets).not.toContain('<button')
@@ -332,7 +332,7 @@ describe('the page /wedstrijden', () => {
     it('shows five more lines with ?nul=15, and the button again while there are more', async () => {
       vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: manyMatches(21) })
 
-      const sheets = section(await render({ nul: '15' }), 'nul-gehouden')
+      const sheets = section(await render({ nul: '15' }), 'de-nul-gehouden')
 
       expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(15)
       expect(sheets).toContain('action="/wedstrijden#nul-16"')
@@ -342,7 +342,7 @@ describe('the page /wedstrijden', () => {
     it('starts with ten lines for a number in the address that is none of the steps', async () => {
       vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: manyMatches(21) })
 
-      expect(section(await render({ nul: '12' }), 'nul-gehouden').match(/class="hf-short-match"/g)).toHaveLength(10)
+      expect(section(await render({ nul: '12' }), 'de-nul-gehouden').match(/class="hf-short-match"/g)).toHaveLength(10)
     })
 
     it('says so when no match is played yet', async () => {
@@ -351,7 +351,7 @@ describe('the page /wedstrijden', () => {
         matches: matchData.matches.filter((match) => match.status !== 'played'),
       })
 
-      const sheets = section(await render(), 'nul-gehouden')
+      const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets).toContain('We hebben nog geen gespeelde wedstrijden van dit seizoen.')
       expect(sheets).not.toContain('<ul')
@@ -363,7 +363,7 @@ describe('the page /wedstrijden', () => {
         matches: matchData.matches.filter((match) => match.goalsAgainst !== 0),
       })
 
-      const sheets = section(await render(), 'nul-gehouden')
+      const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets).toContain('Nog niet de nul gehouden dit seizoen.')
       expect(sheets).not.toContain('<ul')
@@ -484,7 +484,10 @@ describe('the page /wedstrijden', () => {
     })
 
     it('has no link or request to another site', async () => {
-      expect(await topScorers()).not.toMatch(/https?:|<a |<img|src=/)
+      // The link of the heading to itself is not one of them.
+      const withoutAnchor = (await topScorers()).replace(/<a class="hf-heading-link" href="#topscorers">/, '')
+
+      expect(withoutAnchor).not.toMatch(/https?:|<a |<img|src=/)
     })
   })
 

@@ -1,7 +1,16 @@
 import type { ReactNode } from 'react'
 
 /** The icons of the design system, by name. */
-export const iconNames = ['arrow-left', 'arrow-right', 'envelope', 'external-link', 'moon', 'plus', 'sun'] as const
+export const iconNames = [
+  'arrow-left',
+  'arrow-right',
+  'envelope',
+  'external-link',
+  'link',
+  'moon',
+  'plus',
+  'sun',
+] as const
 
 /** The icons that have two drawings, a line and a filled one. */
 export const filledIconNames = ['moon', 'sun'] as const
@@ -60,6 +69,15 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3" />
     </>
   ),
+  // Two links of a chain on the diagonal, from the bottom left to the top right, joined by a
+  // short bar through the middle.
+  link: (
+    <>
+      <path d="M6.5 9.5 9.5 6.5" />
+      <path d="M7.4 5.1 8.2 4.3a2.75 2.75 0 0 1 3.9 3.9l-1.6 1.6" />
+      <path d="M8.6 10.9 7.8 11.7a2.75 2.75 0 0 1-3.9-3.9l1.6-1.6" />
+    </>
+  ),
   moon: <path d="M13.5 9.5a5.5 5.5 0 0 1-7-7 5.5 5.5 0 1 0 7 7Z" />,
   plus: (
     <>
@@ -87,8 +105,8 @@ const drawings: Record<IconName, ReactNode> = {
  * the text around it, also under the mouse, with the focus and in forced colours. A link or a
  * button is named by its own text alone, so the icon is hidden from assistive technology and is
  * never the only sign of something. The size, the space beside it and its place in the line are
- * in icon.css. It is not exported from the package: Link, Button, SegmentedControl, NewsItem
- * and Navigation draw it for the visitor.
+ * in icon.css. It is not exported from the package: Link, Button, SegmentedControl, NewsItem,
+ * Navigation and a Heading with an anchor draw it for the visitor.
  */
 export const Icon = ({ appearance = 'line', name }: IconProps) => (
   <svg

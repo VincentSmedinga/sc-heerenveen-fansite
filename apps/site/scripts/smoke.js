@@ -17,9 +17,10 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
+import { anchorProblems, publishedAnchors } from '../src/anchors.ts'
 import { pages, shareImage } from '../src/pages.ts'
 import { releaseNotes } from '../src/release-notes.ts'
-import { dateOf, releasesOf } from '../src/updates.ts'
+import { anchorOf, dateOf, oldAnchorOf, releasesOf } from '../src/updates.ts'
 
 const [folder] = process.argv.slice(2)
 
@@ -117,6 +118,42 @@ async function checkAdmin() {
   assert.match(robots, /^Disallow: \/beheer$/m, 'robots.txt must refuse /beheer')
 
   return responses
+}
+
+/**
+ * Checks the anchors of the pages (see src/anchors.ts): every anchor we published is still on
+ * its page, every heading with an anchor is among them, and no id comes twice on a page. A
+ * page that moved must redirect for good, and the anchor is looked for where it ends up: the
+ * browser keeps the part after the hash through a redirect that has none of its own.
+ */
+async function checkAnchors() {
+  // Each version on Updates is an anchor, with the id it had before anchors had rules as an old
+  // anchor, so a new version needs no line in src/anchors.ts.
+  const versions = releases.flatMap((release) => [anchorOf(release), oldAnchorOf(release)])
+  const published = {
+    ...Object.fromEntries(pages.map(({ path }) => [path, []])),
+    ...publishedAnchors,
+    '/updates': [...new Set([...(publishedAnchors['/updates'] ?? []), ...versions])],
+  }
+  const problems = []
+
+  for (const [page, anchors] of Object.entries(published)) {
+    let response = await fetch(origin + page, { redirect: 'manual' })
+
+    for (let hops = 0; response.status >= 300 && response.status < 400; hops += 1) {
+      assert.ok(
+        response.status === 301 || response.status === 308,
+        `${page} redirects, but not for good (${response.status}), so the links to its anchors keep going to the old address`,
+      )
+      assert.ok(hops < 3, `${page} redirects more than three times`)
+      response = await fetch(new URL(response.headers.get('location') ?? '', origin), { redirect: 'manual' })
+    }
+
+    assert.equal(response.status, 200, page)
+    problems.push(...anchorProblems(page, await response.text(), anchors))
+  }
+
+  assert.deepEqual(problems, [], `\n${problems.join('\n')}`)
 }
 
 /**
@@ -230,7 +267,7 @@ async function checkFeed(siteOrigin) {
   assert.equal(xml.match(/<item>/g)?.length ?? 0, releases.length)
 
   for (const { version } of releases) {
-    assert.ok(xml.includes(`<link>${siteOrigin}/updates#versie-${version}</link>`), `no link to ${version}`)
+    assert.ok(xml.includes(`<link>${siteOrigin}/updates#${oldAnchorOf({ version })}</link>`), `no link to ${version}`)
   }
 
   return feed
@@ -599,7 +636,10 @@ await withEmptyDatabase((database) =>
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
     assert.match(matchesHtml, /Testdorp FC/)
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
-    assert.match(matchesHtml, /<h2[^>]*id="topscorers">Topscorers<\/h2>/)
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="topscorers">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#topscorers">Topscorer/,
+    )
     assert.match(
       matchesHtml,
       /<caption class="hf-visually-hidden">Topscorers van sc Heerenveen in het seizoen \d{4}\/\d{2}, /,
@@ -622,7 +662,9 @@ await withEmptyDatabase((database) =>
     assert.match(updatesHtml, /<h1[^>]*>Updates<\/h1>/)
     assert.match(updatesHtml, /<link rel="alternate" type="application\/rss\+xml" href="\/updates\/feed\.xml"/)
     assert.deepEqual(
-      [...updatesHtml.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map(([, heading]) => heading.replaceAll(/<[^>]*>/g, '')),
+      [...updatesHtml.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map(([, heading]) =>
+        heading.replaceAll(/<[^>]*>|\u2060/g, ''),
+      ),
       releases.map((release) => `${dateOf(release)} versie ${release.version}`),
     )
 
@@ -641,6 +683,8 @@ await withEmptyDatabase((database) =>
       assert.equal(moved.status, 308, from)
       assert.equal(new URL(moved.headers.get('location') ?? '', origin).pathname, to)
     }
+
+    await checkAnchors()
 
     const feed = await checkFeed('https://acc.sc.heerenveen.org')
 

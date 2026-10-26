@@ -1,6 +1,7 @@
+import { isAnchorId } from '@fansite/design-system'
 import { describe, expect, it } from 'vitest'
 
-import { anchorOf, dateOf, parseChangelog, releasesOf } from './updates'
+import { anchorOf, dateOf, oldAnchorOf, parseChangelog, releasesOf } from './updates'
 
 // As release-please writes the first release, and the later ones with a link to the changes
 // since the version before.
@@ -95,7 +96,13 @@ describe('dateOf', () => {
 })
 
 describe('anchorOf', () => {
-  it('names the heading of a version after its number', () => {
-    expect(anchorOf({ version: '0.2.0' })).toBe('versie-0.2.0')
+  it('names the heading of a version after its number, with hyphens so it follows the rules for an anchor', () => {
+    expect(anchorOf({ version: '0.2.0' })).toBe('versie-0-2-0')
+    expect(isAnchorId(anchorOf({ version: '12.34.56' }))).toBe(true)
+  })
+
+  it('keeps the old id of the heading, which the feed links to', () => {
+    expect(oldAnchorOf({ version: '0.2.0' })).toBe('versie-0.2.0')
+    expect(oldAnchorOf({ version: '0.2.0' })).not.toBe(anchorOf({ version: '0.2.0' }))
   })
 })

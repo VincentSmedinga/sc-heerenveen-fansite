@@ -6,7 +6,7 @@ import { cache } from 'react'
 import { email } from '../../contact'
 import { reasonOf } from '../../errors'
 import { pageMetadata } from '../../metadata'
-import { groupByKind, websiteOf } from '../../register'
+import { groupByKind, kindAnchors, websiteOf } from '../../register'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { getSources } from '../../sources'
 
@@ -61,8 +61,8 @@ export default async function SourcesPage() {
         }
       >
         {groups.map(({ heading, kind, sources }) => (
-          <Card aria-labelledby={`${kind}-heading`} key={kind}>
-            <Heading id={`${kind}-heading`} level={2}>
+          <Card aria-labelledby={kindAnchors[kind]} key={kind}>
+            <Heading anchor id={kindAnchors[kind]} level={2}>
               {heading}
             </Heading>
             <List loose>
@@ -78,9 +78,9 @@ export default async function SourcesPage() {
           </Card>
         ))}
       </Page.Main>
-      <Page.Sidebar aria-label="Contact over bronnen">
-        <Card aria-labelledby="suggest-heading" surface="soft">
-          <Heading id="suggest-heading" level={2}>
+      <Page.Sidebar aria-label="Contact over bronnen" split>
+        <Card aria-labelledby="voorstellen" surface="soft">
+          <Heading anchor id="voorstellen" level={2}>
             Mis je een bron?
           </Heading>
           <Text>
@@ -91,8 +91,8 @@ export default async function SourcesPage() {
             .
           </Text>
         </Card>
-        <Card aria-labelledby="inquiry-heading" surface="warm">
-          <Heading id="inquiry-heading" level={2}>
+        <Card aria-labelledby="uitgever" surface="warm">
+          <Heading anchor id="uitgever" level={2}>
             Ben je zelf een bron?
           </Heading>
           <Text>
