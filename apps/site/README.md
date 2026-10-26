@@ -196,7 +196,9 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
 - **Doelpunten per kwartier:** een kaart in de hoofdkolom, onder het programma, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
   `goalsPerQuarter` in `src/matches.ts` telt ze uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), in de competitie en de beker.
-  De kwartieren zijn 1–15, 16–30, 31–45, 46–60, 61–75 en 76–90; een doelpunt in blessuretijd telt bij het kwartier ervoor (45+1 bij 31–45, 90+3 bij 76–90) en een doelpunt na minuut 90, in de verlenging, telt niet mee.
+  De kwartieren zijn 1–15, 16–30, 31–45, 46–60, 61–75 en 76–90.
+  Een doelpunt in blessuretijd telt bij het kwartier ervoor: 45+1 bij 31–45 en 90+3 bij 76–90.
+  Een doelpunt na minuut 90, in de verlenging, telt niet mee.
   Een eigen doelpunt telt voor de club die ervan profiteert, zoals `ours` al regelt.
   Een gespeelde wedstrijd telt mee als hij minstens één doelpunt heeft of eindigde in 0–0; een wedstrijd met een uitslag maar zonder doelpunten in `match_goals` heeft geen minuten en blijft erbuiten.
   Onder het diagram staat dezelfde informatie als tabel (`DataTable`), die de schermlezer krijgt, want de diagrammen zijn voor hulpsoftware verborgen.
