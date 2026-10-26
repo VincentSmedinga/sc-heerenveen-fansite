@@ -59,6 +59,12 @@ Zo test je het: leg de muis weg en loop de pagina door met Tab.
 - [ ] Het niveau volgt de inhoud, niet het uiterlijk.
       Een kaarttitel kan een `h2` zijn die eruitziet als kop 3.
 - [ ] Elke kop beschrijft wat eronder staat (2.4.6).
+- [ ] Een kop met een anker is een link naar zichzelf, en de naam van die link is de tekst van de kop (2.4.4, 4.1.2).
+      Het pictogram is verborgen voor een schermlezer en komt niet in de naam.
+- [ ] Het pictogram staat altijd op een aanraakscherm en verschijnt met een muis bij hover en bij focus van het toetsenbord (1.4.13).
+      Het haalt 3:1 in licht en donker, in elke toestand (1.4.11).
+- [ ] Het doel van de link heeft een markering die ook in forced colours zichtbaar is, en staat niet tegen de rand van het scherm.
+- [ ] Het anker is een Nederlands `id` dat de pagina kiest, en een oud anker blijft werken (zie `anchors.ts` van de site).
 
 Zo test je het: bekijk de lijst met koppen in de toegankelijkheidsboom van je browser, of met de rotor van je schermlezer.
 
