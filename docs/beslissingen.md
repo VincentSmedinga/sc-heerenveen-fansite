@@ -5058,3 +5058,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** `Page.Sidebar` met `wide` zet de sporen op twee keer `minmax(24rem, 31rem)`, zodat ze op elke breedte even breed zijn (eerst was het `minmax(20rem, 30rem)` en `minmax(24rem, 32rem)`); de rest van de regels uit _/wedstrijden heeft een zijbalk van 32 rem met de stand en de uitslagen_ blijft.
   Andere pagina's houden 38, 2 en 24 rem.
 - **Alternatieven:** 30, 2 en 32 rem laten, zoals in #283 (de zijbalk is breder dan de hoofdkolom); 32 en 30 rem (de tabel past er met de balk beter in, maar het programma wordt breder dan nodig).
+
+### We nemen het AD, met het filter `club` en het teken voor de betaalmuur
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het register krijgt de voetbalfeed van het Algemeen Dagblad (`https://www.ad.nl/voetbal/rss.xml`) met het filter `club`, en de importer leest `<dpp:paid>true</dpp:paid>` als de betaalmuur van die bron.
+  De bron toont alleen de kop, de link, de bronnaam en de tijd, met "voor abonnees" bij een bericht achter de betaalmuur.
+  De beschrijving, de auteur en de afbeeldingen in de feed bewaart de importer niet en toont de site niet.
+- **Waarom:** het AD is een grote bron over de Eredivisie.
+  De feed is door DPG zelf aangeboden, met een eigen merker voor de betaalmuur, en een lezer wil weten dat een bericht achter een betaalmuur staat voordat hij erop klikt.
+  Het voorbehoud van DPG tegen scrapen is een risico, maar we nemen alleen een kop en een link en stoppen op verzoek, zoals bij #10 besloten.
+- **Gemeten op de echte feed** (26 oktober 2026, één run van de importer): 30 berichten bewaard, waarvan 1 `relevant`, 0 `doubtful` en 29 `irrelevant`, en 11 herkend als betaalmuur.
+  Het ene `relevant` bericht is het wedstrijdverslag van de club, en geen bericht over de club staat bij de 29.
+- **Hoe de importer het teken leest:** per bron, op het domein, zoals bij Voetbal International en de Leeuwarder Courant (`paywallNamespaces` in `apps/importer/src/read-feed.ts`).
+  De naamruimte is het adres `https://www.dpgmedia.cloud/paidrss` en niet het voorvoegsel `dpp`: een voorvoegsel is een keuze van de feed en kan veranderen.
+  `feedsmith` kent het element niet, dus de tweede lezing met `fast-xml-parser` zoekt het, zoals het element `<premium>` van de Leeuwarder Courant.
+- **Alternatieven:** wachten op schriftelijke toestemming van DPG Media (voorzichtiger, maar DPG antwoordt zelden); de bron nemen zonder het teken voor de betaalmuur (een lezer klikt dan op een bericht dat hij niet kan lezen, tegen onze eigen regel).
+- **Daarna:** schriftelijk toestemming vragen aan DPG Media hoort bij #35; de projecteigenaar nam het voorbehoud van de bron aan bij het goedkeuren van het issue.
+  De voorwaarden van DPG Media en van het AD zeggen niets over RSS-feeds, maar verbieden commercieel gebruik, het overnemen van content en het doorzoeken met robots (zie `docs/bronnen.md`).

@@ -115,11 +115,22 @@ export function cleanHeadline(raw: string): string {
 
 /**
  * How a source says an item is behind a paywall, by the domain of the source. Voetbal
- * International gives such an item a category with this `domain`; every other source uses the
- * `<premium>` element of the Leeuwarder Courant. A feed without either sign has no paywall.
+ * International gives such an item a category with this `domain`, and the Algemeen Dagblad an
+ * element `paid` in a namespace with this address (see `paywallNamespaces`); every other source
+ * uses the `<premium>` element of the Leeuwarder Courant. A feed without any of these signs has
+ * no paywall.
  */
 const paywallCategories: Record<string, string> = {
   'www.vi.nl': 'https://www.vi.nl/pro',
+}
+
+/**
+ * The namespaces of the `<paid>` element, by the domain of the source. DPG Media, the publisher
+ * of the Algemeen Dagblad, puts `<dpp:paid>true</dpp:paid>` in an item behind the paywall. The
+ * namespace is known by its address, because the feed may choose another prefix than `dpp`.
+ */
+const paywallNamespaces: Record<string, string> = {
+  'www.ad.nl': 'https://www.dpgmedia.cloud/paidrss',
 }
 
 /**
@@ -128,6 +139,14 @@ const paywallCategories: Record<string, string> = {
  */
 export function paywallCategoryFor(sourceDomain: string): string | undefined {
   return paywallCategories[sourceDomain]
+}
+
+/**
+ * The namespace address of the `<paid>` element that marks a paywalled item for this source, or
+ * undefined when the source doesn't use one.
+ */
+export function paywallNamespaceFor(sourceDomain: string): string | undefined {
+  return paywallNamespaces[sourceDomain]
 }
 
 /**
@@ -141,7 +160,13 @@ export function readFeed(
     contentType = null,
     now = new Date(),
     paywallCategory,
-  }: { contentType?: null | string; now?: Date; paywallCategory?: string | undefined } = {},
+    paywallNamespace,
+  }: {
+    contentType?: null | string
+    now?: Date
+    paywallCategory?: string | undefined
+    paywallNamespace?: string | undefined
+  } = {},
 ): ReadFeed {
   const text = decode(body, contentType)
 
@@ -162,7 +187,10 @@ export function readFeed(
       return { kind: 'error', message: `The feed is not well-formed XML: ${validation.err.msg}` }
     }
 
-    raw = parsed.format === 'rss' ? rssItems(parsed.feed, text, paywallCategory) : atomItems(parsed.feed)
+    raw =
+      parsed.format === 'rss'
+        ? rssItems(parsed.feed, text, { category: paywallCategory, namespace: paywallNamespace })
+        : atomItems(parsed.feed)
   } catch (error) {
     return { kind: 'error', message: `The response is not an RSS or Atom feed: ${errorMessage(error)}` }
   }
@@ -271,6 +299,11 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
 }
 
+/** Whether the text of an element says `true`, in any case and with white space around it. */
+function isTrue(value: unknown): boolean {
+  return typeof value === 'string' && value.trim().toLowerCase() === 'true'
+}
+
 /** The key of an item: its GUID, or its link when it has no GUID. */
 function keyOf({ guid, link }: Pick<RawItem, 'guid' | 'link'>): string {
   const trimmed = guid?.trim() ?? ''
@@ -335,8 +368,8 @@ function parseTime(raw: string | undefined, now: Date): Date | null {
     : new Date(Math.floor(time / 1000) * 1000)
 }
 
-/** The keys of the items that the feed marks as `<premium>true</premium>`. */
-function paywalledKeys(text: string): Set<string> {
+/** The keys of the items that the feed marks as `true` in one of these elements. */
+function paywalledKeys(text: string, elements: string[]): Set<string> {
   const keys = new Set<string>()
   const channel = asRecord(asRecord(extensionParser.parse(text))?.['rss'])?.['channel']
   const items = asRecord(channel)?.['item']
@@ -344,7 +377,7 @@ function paywalledKeys(text: string): Set<string> {
   for (const item of Array.isArray(items) ? items : []) {
     const fields = asRecord(item)
 
-    if (typeof fields?.['premium'] === 'string' && fields['premium'].trim().toLowerCase() === 'true') {
+    if (fields !== undefined && elements.some((element) => isTrue(fields[element]))) {
       const guid = stringOrUndefined(fields['guid'])
       const link = stringOrUndefined(fields['link'])
 
@@ -360,12 +393,30 @@ function paywalledKeys(text: string): Set<string> {
 }
 
 /**
- * The items of an RSS feed, with the paywall flag. With a `paywallCategory` an item is
- * paywalled when it has that category, and the category is not kept. Without one, feedsmith
- * doesn't give the flag, so a second pass finds it.
+ * The prefixes that the feed gives a namespace, written in lower case as the parser has them.
+ * It reads every declaration in the feed, wherever it stands, so it also finds a prefix that
+ * isn't `dpp`.
  */
-function rssItems(feed: Rss.Feed<string>, text: string, paywallCategory: string | undefined): RawItem[] {
-  const paywalled = paywallCategory === undefined ? paywalledKeys(text) : new Set<string>()
+function prefixesOf(text: string, namespace: string): string[] {
+  const escaped = namespace.replace(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`)
+  const declaration = new RegExp(String.raw`xmlns:([\w.-]+)\s*=\s*(["'])${escaped}\2`, 'gu')
+
+  return [...text.matchAll(declaration)].map((match) => (match[1] ?? '').toLowerCase())
+}
+
+/**
+ * The items of an RSS feed, with the paywall flag. With a `category` an item is paywalled when
+ * it has that category, and the category is not kept. Otherwise feedsmith doesn't give the
+ * flag, so a second pass finds it: in the `<paid>` element of the `namespace`, or in the
+ * `<premium>` element when the source has neither.
+ */
+function rssItems(
+  feed: Rss.Feed<string>,
+  text: string,
+  { category: paywallCategory, namespace }: { category: string | undefined; namespace: string | undefined },
+): RawItem[] {
+  const elements = namespace === undefined ? ['premium'] : prefixesOf(text, namespace).map((prefix) => `${prefix}:paid`)
+  const paywalled = paywallCategory === undefined ? paywalledKeys(text, elements) : new Set<string>()
 
   return (feed.items ?? []).map((item) => {
     const candidate = {

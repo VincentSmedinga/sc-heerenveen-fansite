@@ -696,6 +696,112 @@ describe('importing the football feed of NOS, the way the register has it', () =
   })
 })
 
+describe('importing the football feed of the Algemeen Dagblad, the way the register has it', () => {
+  const sample = readFileSync(new URL('./fixtures/ad-sample.xml', import.meta.url), 'utf8')
+  const adRun = new Date('2026-10-26T12:00:00Z')
+
+  /** The football feed of the AD as the seed registers it, pointed at the test server. */
+  async function adFeed(origin: string) {
+    await seedSources(database.db)
+
+    const [row] = await database.db
+      .select({ id: feeds.id })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, 'www.ad.nl'))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  it('reads the feed, gives every item its value and counts them', async () => {
+    const server = await serve(sample)
+    const feed = await adFeed(server.origin)
+
+    expect(feed.filter).toBe('club')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, adRun)
+
+    expect(report).toMatchObject({ added: 8, relevance: { doubtful: 2, irrelevant: 4, relevant: 2 }, skipped: [] })
+    expect(Object.fromEntries((await itemsInDatabase()).map((row) => [row.title, row.relevance]))).toEqual({
+      'Ajax klopt Sparta in een zinderend duel': 'irrelevant',
+      'Bayern wint de topper van Dortmund': 'irrelevant',
+      'Brand in een schuur in Heerenveen is onder controle': 'doubtful',
+      'Column | Waarom de titelstrijd spannend blijft': 'irrelevant',
+      'Heerenveen wint met 2-0 van Utrecht na een rustige tweede helft': 'relevant',
+      'Jongste speler ooit scoort in de Premier League': 'irrelevant',
+      'sc Heerenveen versterkt zich met een verdediger': 'relevant',
+      'Veldman denkt na over zijn toekomst': 'doubtful',
+    })
+  })
+
+  it('knows the items behind the paywall by `dpp:paid`, and the items with false or without it as open', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await adFeed(server.origin), adRun)
+
+    const rows = await database.db.select().from(items)
+
+    expect(Object.fromEntries(rows.map((row) => [row.url.split('~')[1]?.replace('/', ''), row.paywalled]))).toEqual({
+      a1000001: true,
+      a1000002: false,
+      a1000003: true,
+      a1000004: false,
+      a1000005: true,
+      a1000006: false,
+      a1000007: true,
+      a1000008: false,
+    })
+  })
+
+  it('keeps the time of publication in UTC, and the link', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await adFeed(server.origin), adRun)
+
+    const rows = await database.db.select().from(items)
+    const byLink = Object.fromEntries(rows.map((row) => [row.url, row.publishedAt]))
+
+    expect(byLink['https://ad.test/voetbal/heerenveen-wint-van-utrecht~a1000001/']).toEqual(
+      new Date('2026-10-25T19:30:00Z'),
+    )
+    expect(byLink['https://ad.test/voetbal/jongste-speler-ooit~a1000008/']).toEqual(new Date('2026-10-25T10:15:00Z'))
+  })
+
+  it('keeps nothing of the description, the author or the images', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await adFeed(server.origin), adRun)
+
+    const stored = JSON.stringify(await database.db.select().from(items))
+
+    expect(stored).not.toContain('verzonnen intro')
+    expect(stored).not.toContain('alleen in deze tekst')
+    expect(stored).not.toContain('Verslaggever')
+    expect(stored).not.toContain('Columnist')
+    expect(stored).not.toContain('images.ad.test')
+    expect(stored).not.toContain('bijschrift')
+  })
+
+  it('shows only the relevant items to a visitor, with "voor abonnees" where the paywall is', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await adFeed(server.origin), adRun)
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-10-27T00:00:00Z') })
+
+    expect(shown.map((item) => [item.title, item.paywalled])).toEqual([
+      ['Heerenveen wint met 2-0 van Utrecht na een rustige tweede helft', true],
+      ['sc Heerenveen versterkt zich met een verdediger', false],
+    ])
+    expect(shown.every((item) => item.sourceName === 'Algemeen Dagblad')).toBe(true)
+  })
+})
+
 describe('an item that cannot be stored', () => {
   it('is skipped and reported, and the rest of the feed is stored', async () => {
     const server = await serve(
