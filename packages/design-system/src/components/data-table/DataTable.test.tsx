@@ -5,7 +5,7 @@ import { DataTable } from './DataTable'
 
 const props = {
   caption: 'Bezoekers per dag, de laatste twee dagen',
-  columns: ['Dag', 'Unieke bezoekers', 'Paginaweergaven'],
+  columns: ['Dag', 'Unieke bezoekers', 'Weergaven'],
   rows: [
     { cells: [1234, 5678], header: 'ma 26 okt 2026' },
     { cells: [0, 12], header: 'zo 25 okt 2026' },

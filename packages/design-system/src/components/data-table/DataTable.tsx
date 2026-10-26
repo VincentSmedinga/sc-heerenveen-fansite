@@ -13,7 +13,8 @@ export type DataTableProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'>
   children?: never
   /**
    * The column headers, in order. The first column holds the row headers (a day, a path), and
-   * the others hold numbers, aligned to the end.
+   * the others hold numbers, aligned to the end. Keep a header short: it only wraps at a space,
+   * so a long word makes the table wider than a phone.
    */
   columns: readonly string[]
   /** The rows of the table, from the first down. */

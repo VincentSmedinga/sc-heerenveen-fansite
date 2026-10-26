@@ -23,7 +23,8 @@ const meta = preview.meta({
           '  Een getal schrijft het component op zijn Nederlands, met een punt tussen de duizendtallen.',
           '  De `header` moet uniek zijn.',
           '',
-          'Een lange rijkop, zoals een pad zonder spaties, breekt af waar het moet, zodat de pagina nooit zijwaarts scrolt.',
+          'Een lange rijkop, zoals een pad zonder spaties, breekt af waar het moet.',
+          'Een kolomkop breekt alleen bij een spatie af, dus houd hem kort: een lang woord als kop maakt de tabel breder dan een telefoon.',
           'De tabel is voor een lijst van dingen met elk een paar getallen, niet voor samengevoegde cellen of cellen met meer dan tekst.',
           'De stand van de competitie heeft een eigen component, `StandingsTable`.',
         ].join('\n'),
@@ -56,7 +57,7 @@ const renderDays = (maxInlineSize: string) => () => (
       </Heading>
       <DataTable
         caption="Unieke bezoekers en paginaweergaven per dag, de nieuwste dag bovenaan"
-        columns={['Dag', 'Unieke bezoekers', 'Paginaweergaven']}
+        columns={['Dag', 'Unieke bezoekers', 'Weergaven']}
         rows={days}
       />
     </Card>
@@ -71,7 +72,7 @@ const renderPages = (maxInlineSize: string) => () => (
       </Heading>
       <DataTable
         caption="De meest bekeken pagina’s, met het aantal weergaven"
-        columns={['Pagina', 'Paginaweergaven']}
+        columns={['Pagina', 'Weergaven']}
         rows={pages}
       />
     </Card>
