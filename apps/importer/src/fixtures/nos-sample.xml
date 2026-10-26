@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet href="/public/style.xsl" type="text/xsl"?>
 <!--
-  A small, made-up feed in the shape of the football feed of NOS (see docs/bronnen.md, NOS): RSS 2.0,
-  headlines and descriptions in CDATA, a description with HTML, an enclosure with only a type and an
-  address, a guid that is the link, and times with a zone. The headlines, links and texts are invented;
-  none is copied from a real feed. The description and the enclosure are here to show that the importer
-  does not read them. The last item is a round-up that names the club only in its description.
+  A small, made-up feed in the shape of the football feed of NOS (see docs/bronnen.md, NOS):
+  RSS 2.0, headlines and descriptions in CDATA, a description with HTML, an enclosure with only a
+  type and an address, a guid that is the link, and times with a zone. The headlines, links and
+  texts are invented; none is copied from a real feed. The description and the enclosure are here
+  to show that the importer does not read them. The last item is a round-up that names the club
+  only in its description.
 -->
 <rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:dcterms="http://purl.org/dc/terms/" version="2.0">
   <channel>
