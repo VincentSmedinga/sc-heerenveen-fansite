@@ -18,7 +18,7 @@ const meta = preview.meta({
           '',
           'De rij van sc Heerenveen valt op met meer dan kleur: ze is vet, ze heeft een balk aan het begin van de rij en een schermlezer hoort "(onze club)" achter de naam.',
           'De kolom met punten staat achteraan en is vet, zwaarder dan de andere getallen, want daarop is de stand gesorteerd.',
-          'De afkortingen zijn G (gespeeld), W (gewonnen), G (gelijk), V (verloren), DS (doelsaldo) en P (punten).',
+          'De afkortingen zijn G (gespeeld), W (gewonnen), G (gelijk), V (verloren), D (doelsaldo) en P (punten).',
           'De positie heeft de kleur van markeringen, de getallen staan rechts uitgelijnd en hebben tabelcijfers, zodat ze recht onder elkaar staan.',
           '',
           '- `caption` is de tekst van het bijschrift.',

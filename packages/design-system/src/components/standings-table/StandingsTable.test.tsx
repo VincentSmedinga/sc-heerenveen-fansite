@@ -68,7 +68,7 @@ describe('StandingsTable', () => {
       'W',
       'G',
       'V',
-      'DS',
+      'D',
       'P',
     ])
     expect(headers.every((header) => header.getAttribute('scope') === 'col')).toBe(true)
@@ -112,7 +112,7 @@ describe('StandingsTable', () => {
       'Punten',
     ])
     expect(container.querySelector('.hf-standings-legend')?.textContent).toBe(
-      'G gespeeld, W gewonnen, G gelijk, V verloren, DS doelsaldo, P punten',
+      'G gespeeld, W gewonnen, G gelijk, V verloren, D doelsaldo, P punten',
     )
   })
 
@@ -175,7 +175,7 @@ describe('StandingsTable', () => {
       screen
         .getAllByRole('columnheader')
         .map((header) => header.querySelector('[aria-hidden="true"]')?.textContent ?? 'Club'),
-    ).toEqual(['#', 'Club', 'G', 'DS', 'P'])
+    ).toEqual(['#', 'Club', 'G', 'D', 'P'])
     expect(screen.queryByRole('region')).toBeNull()
     expect(document.querySelector('.hf-standings-legend')).toBeNull()
   })

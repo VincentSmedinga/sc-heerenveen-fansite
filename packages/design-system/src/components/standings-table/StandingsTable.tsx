@@ -68,7 +68,7 @@ const columns: Column[] = [
   { abbreviation: 'G', compact: false, id: 'drawn', name: 'gelijk', value: (row) => row.drawn },
   { abbreviation: 'V', compact: false, id: 'lost', name: 'verloren', value: (row) => row.lost },
   {
-    abbreviation: 'DS',
+    abbreviation: 'D',
     compact: true,
     id: 'goalDifference',
     name: 'doelsaldo',

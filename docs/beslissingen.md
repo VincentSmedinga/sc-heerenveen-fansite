@@ -2764,7 +2764,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De korte vorm laat op de homepage zien waar het om draait: positie, gespeeld, punten en doelsaldo.
 - **Alternatieven:** de tabel kolommen laten weglaten met CSS op een telefoon (de volle woorden en de kolommen zijn dan niet te bereiken); altijd de korte vorm (de volledige stand ontbreekt dan op de pagina).
 - **Later:** zie _De stand toont geen doelpunten voor en tegen_.
-  De kolommen DV en DT zijn vervallen; de tabel heeft nog positie, club, G, W, G, V, DS en P, en de korte vorm laat alleen gewonnen, gelijk en verloren weg.
+  De kolommen DV en DT zijn vervallen en DS heet nu D; de tabel heeft nog positie, club, G, W, G, V, D en P, en de korte vorm laat alleen gewonnen, gelijk en verloren weg.
 
 ### De bronvermelding van Wikipedia is een component met een link per pagina
 
@@ -4661,8 +4661,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 26 oktober 2026
 - **Besluit:** de stand toont de kolommen DV (doelpunten voor) en DT (doelpunten tegen) niet meer, op elke pagina.
-  De tabel heeft positie, club, gespeeld, gewonnen, gelijk, verloren, doelsaldo en punten.
-  `StandingsTable` heeft de kolommen en de eigenschappen `goalsFor` en `goalsAgainst` van een rij niet meer; het doelsaldo (DS) blijft.
+  De tabel heeft positie, club, gespeeld, gewonnen, gelijk, verloren, doelsaldo en punten, met de koppen #, Club, G, W, G, V, D en P.
+  `StandingsTable` heeft de kolommen en de eigenschappen `goalsFor` en `goalsAgainst` van een rij niet meer; het doelsaldo blijft, met de afkorting D in plaats van DS.
   De database en de importer veranderen niet: de importcontroles gebruiken de doelpunten voor en tegen, dus ze blijven bewaard.
 - **Waarom:** de projecteigenaar koos dit.
   Zo past de tabel in de zijbalk van 32 rem van `/wedstrijden`, waar ze met alle kolommen 23 pixels te breed was voor haar gebied, en scrolt ze op een telefoon minder ver.
