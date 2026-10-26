@@ -85,7 +85,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <GoalsPerQuarterCard matches={data.matches} />
       </Page.Main>
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme: the table,
-          the top scorers, then the results. */}
+          the goal scorers, then the results. */}
       <Page.Sidebar aria-label="De stand, de ranglijsten en de uitslagen" wide>
         <Card aria-labelledby="stand">
           <Heading anchor id="stand" level={2}>
@@ -97,9 +97,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <StandingsTable caption={standingsCaption(data.standings)} rows={data.standings} />
           )}
         </Card>
-        <Card aria-labelledby="topscorers">
-          <Heading anchor id="topscorers" level={2}>
-            Topscorers
+        <Card aria-labelledby="doelpuntenmakers">
+          <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
+            Doelpuntenmakers
           </Heading>
           <TopScorers matches={data.matches} season={data.season} />
         </Card>

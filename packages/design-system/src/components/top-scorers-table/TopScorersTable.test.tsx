@@ -10,7 +10,7 @@ const rows: TopScorersTableRow[] = [
   { goals: 1, player: 'Demo', position: 4 },
 ]
 
-const props = { caption: 'Topscorers van sc Heerenveen in het seizoen 2026/27', rows }
+const props = { caption: 'Doelpuntenmakers van sc Heerenveen in het seizoen 2026/27', rows }
 
 /** The length of the bars, in the order of the rows. */
 const barLengths = (container: HTMLElement) =>

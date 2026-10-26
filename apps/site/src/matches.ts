@@ -62,7 +62,7 @@ export type CleanSheets = {
   played: number
 }
 
-/** A player in the list of top scorers: the goals this season and the place, from 1. */
+/** A player in the list of goal scorers: the goals this season and the place, from 1. */
 export type TopScorer = {
   goals: number
   player: string
@@ -175,7 +175,7 @@ export function parseCleanSheetCount(value: string | string[] | undefined) {
 }
 
 /**
- * How many played matches have their scorers, for the line under the list of top scorers. A
+ * How many played matches have their scorers, for the line under the list of goal scorers. A
  * match is missing when its result has a goal of ours but the page named no scorers (the import
  * leaves them out when they don't fit the result). A match we didn't score in has nothing to
  * miss, so it is complete.

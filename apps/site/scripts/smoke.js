@@ -638,11 +638,11 @@ await withEmptyDatabase((database) =>
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
     assert.match(
       matchesHtml,
-      /<h2[^>]*id="topscorers">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#topscorers">Topscorer/,
+      /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
     )
     assert.match(
       matchesHtml,
-      /<caption class="hf-visually-hidden">Topscorers van sc Heerenveen in het seizoen \d{4}\/\d{2}, /,
+      /<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen in het seizoen \d{4}\/\d{2}, /,
     )
     assert.match(
       matchesHtml,

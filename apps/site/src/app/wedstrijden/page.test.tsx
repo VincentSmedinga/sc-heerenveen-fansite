@@ -41,7 +41,7 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden', () => {
-  it('has one h1 and six h2 headings in order: the programme, the goals per quarter, the table, the top scorers, the clean sheets and the results', async () => {
+  it('has one h1 and six h2 headings in order: the programme, the goals per quarter, the table, the goal scorers, the clean sheets and the results', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
@@ -49,13 +49,13 @@ describe('the page /wedstrijden', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#programma">Programma</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpunten-per-kwartier"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartier</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#stand">Stand</a></h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="topscorers"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#topscorers">Topscorers</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="de-nul-gehouden"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="nul-gehouden"></span><a class="hf-heading-link" href="#de-nul-gehouden">De nul gehouden</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen">Uitslagen</a></h2>',
     ])
   })
 
-  it('has the programme and the goals per quarter in the main with the h1, and the table, the top scorers, the clean sheets and the results in a named, wide sidebar after it', async () => {
+  it('has the programme and the goals per quarter in the main with the h1, and the table, the goal scorers, the clean sheets and the results in a named, wide sidebar after it', async () => {
     const html = await render()
     const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
     const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
@@ -72,10 +72,10 @@ describe('the page /wedstrijden', () => {
     expect(sidebar).not.toContain('id="doelpunten-per-kwartier"')
     expect(main).not.toContain('id="stand"')
     expect(main).not.toContain('id="uitslagen"')
-    expect(sidebar.indexOf('id="stand"')).toBeLessThan(sidebar.indexOf('id="topscorers"'))
-    expect(sidebar.indexOf('id="topscorers"')).toBeLessThan(sidebar.indexOf('id="de-nul-gehouden"'))
+    expect(sidebar.indexOf('id="stand"')).toBeLessThan(sidebar.indexOf('id="doelpuntenmakers"'))
+    expect(sidebar.indexOf('id="doelpuntenmakers"')).toBeLessThan(sidebar.indexOf('id="de-nul-gehouden"'))
     expect(sidebar.indexOf('id="de-nul-gehouden"')).toBeLessThan(sidebar.indexOf('id="uitslagen"'))
-    expect(main).not.toContain('id="topscorers"')
+    expect(main).not.toContain('id="doelpuntenmakers"')
     expect(sidebar).not.toContain('<h1')
     expect(sidebar).not.toContain('id="programma"')
   })
@@ -87,7 +87,14 @@ describe('the page /wedstrijden', () => {
   it('names each card by its h2, so the links with a hash on the homepage have a target', async () => {
     const html = await render()
 
-    for (const id of ['programma', 'doelpunten-per-kwartier', 'uitslagen', 'stand', 'topscorers', 'de-nul-gehouden']) {
+    for (const id of [
+      'programma',
+      'doelpunten-per-kwartier',
+      'uitslagen',
+      'stand',
+      'doelpuntenmakers',
+      'de-nul-gehouden',
+    ]) {
       expect(html).toContain(`<section class="hf-card" aria-labelledby="${id}">`)
     }
   })
@@ -537,14 +544,14 @@ describe('the page /wedstrijden', () => {
     expect(stand).toContain('style="--hf-bar-share:16.67"')
   })
 
-  describe('the top scorers', () => {
-    const topScorers = async () => section(await render(), 'topscorers')
+  describe('the goal scorers', () => {
+    const topScorers = async () => section(await render(), 'doelpuntenmakers')
 
     it('is a table with a caption for a screen reader, in the card under the table', async () => {
       const card = await topScorers()
 
       expect(card).toContain(
-        '<caption class="hf-visually-hidden">Topscorers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker</caption>',
+        '<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker</caption>',
       )
       expect(card.match(/<table/g)).toHaveLength(1)
       expect(card.match(/<th [^>]*scope="col"/g)).toHaveLength(3)
@@ -574,11 +581,21 @@ describe('the page /wedstrijden', () => {
       expect(card.match(/aria-hidden="true" class="hf-bar"/g)).toHaveLength(3)
     })
 
-    it('says in a line under the table how many players scored', async () => {
+    it('says in a line directly under the heading, above the table, how many players scored, as the clean sheets do', async () => {
       const card = await topScorers()
 
-      expect(card.indexOf('</table>')).toBeLessThan(card.indexOf('3 spelers hebben gescoord'))
-      expect(card).toContain('<p class="hf-meta">3 spelers hebben gescoord</p>')
+      expect(card).toContain('</h2><p>3 spelers hebben gescoord</p><div class="hf-top-scorers')
+      expect(card.indexOf('3 spelers hebben gescoord')).toBeLessThan(card.indexOf('<table'))
+      expect(card.split('</table>')[1]).not.toContain('spelers hebben gescoord')
+    })
+
+    it('has the heading "Doelpuntenmakers" with the old anchor "topscorers" on it, and nothing called Topscorers', async () => {
+      const card = await topScorers()
+
+      expect(card).toContain('<span class="hf-heading-alias" id="topscorers"></span>')
+      expect(card).toContain('href="#doelpuntenmakers">Doelpuntenmakers</a>')
+      expect(card).not.toContain('Topscorers')
+      expect((await render()).match(/id="topscorers"/g)).toHaveLength(1)
     })
 
     it('says "1 speler heeft gescoord" for one player', async () => {
@@ -590,7 +607,7 @@ describe('the page /wedstrijden', () => {
         })),
       })
 
-      expect(await topScorers()).toContain('<p class="hf-meta">1 speler heeft gescoord</p>')
+      expect(await topScorers()).toContain('<p>1 speler heeft gescoord</p>')
     })
 
     it('shows everybody who scored, not only the best five, with level players on one place', async () => {
@@ -645,7 +662,7 @@ describe('the page /wedstrijden', () => {
 
     it('has no link or request to another site', async () => {
       // The link of the heading to itself is not one of them.
-      const withoutAnchor = (await topScorers()).replace(/<a class="hf-heading-link" href="#topscorers">/, '')
+      const withoutAnchor = (await topScorers()).replace(/<a class="hf-heading-link" href="#doelpuntenmakers">/, '')
 
       expect(withoutAnchor).not.toMatch(/https?:|<a |<img|src=/)
     })

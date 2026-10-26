@@ -26,6 +26,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'programma',
     'doelpunten-per-kwartier',
     'stand',
+    'doelpuntenmakers',
     'topscorers',
     'de-nul-gehouden',
     'nul-gehouden',

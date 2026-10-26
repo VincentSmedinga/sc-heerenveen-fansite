@@ -81,13 +81,13 @@ const longRows: TopScorersTableRow[] = [
 // Everybody scored once: the same goals, so the same bars and the same place.
 const equalRows: TopScorersTableRow[] = rows.map((row) => ({ ...row, goals: 1, position: 1 }))
 
-const caption = 'Topscorers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker'
+const caption = 'Doelpuntenmakers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker'
 
 const render = (maxInlineSize: string, tableRows: TopScorersTableRow[]) => () => (
   <div style={{ maxInlineSize }}>
-    <Card aria-labelledby="topscorers-kop">
-      <Heading id="topscorers-kop" level={2}>
-        Topscorers
+    <Card aria-labelledby="doelpuntenmakers-kop">
+      <Heading id="doelpuntenmakers-kop" level={2}>
+        Doelpuntenmakers
       </Heading>
       <TopScorersTable caption={caption} rows={tableRows} />
     </Card>
@@ -96,9 +96,9 @@ const render = (maxInlineSize: string, tableRows: TopScorersTableRow[]) => () =>
 
 const renderEmpty = () => (
   <div style={{ maxInlineSize: '32rem' }}>
-    <Card aria-labelledby="topscorers-kop">
-      <Heading id="topscorers-kop" level={2}>
-        Topscorers
+    <Card aria-labelledby="doelpuntenmakers-kop">
+      <Heading id="doelpuntenmakers-kop" level={2}>
+        Doelpuntenmakers
       </Heading>
       <Text>We hebben nog geen doelpuntenmakers van dit seizoen. Kijk straks nog eens.</Text>
     </Card>
@@ -107,13 +107,13 @@ const renderEmpty = () => (
 
 export const Light = meta.story({
   globals: { theme: 'light' },
-  name: 'Topscorers met balken, licht',
+  name: 'Doelpuntenmakers met balken, licht',
   render: render('32rem', rows),
 })
 
 export const Dark = meta.story({
   globals: { theme: 'dark' },
-  name: 'Topscorers met balken, donker',
+  name: 'Doelpuntenmakers met balken, donker',
   render: render('32rem', rows),
 })
 
