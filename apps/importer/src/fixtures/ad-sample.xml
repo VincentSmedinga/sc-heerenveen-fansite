@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A small, made-up feed in the shape of the football feed of the Algemeen Dagblad (see
+  docs/bronnen.md, Algemeen Dagblad): RSS 2.0 with the namespaces `dpp` (the paywall) and `media`,
+  times in GMT, a guid that is the link, and per item a description, an author, a media:content and
+  a media:thumbnail. The headlines, links and texts are invented; none is copied from a real feed.
+  The description, the author and the images are here to show that the importer does not read them.
+  `dpp:paid` is true or false, and the last item has none: an item without it is open.
+-->
+<rss xmlns:dpp="https://www.dpgmedia.cloud/paidrss" xmlns:media="http://search.yahoo.com/mrss/" version="2.0">
+  <channel>
+    <title>Voetbal (verzonnen)</title>
+    <link>https://ad.test</link>
+    <description>Een verzonnen feed om de importer mee te testen.</description>
+    <language>nl-NL</language>
+    <copyright>Verzonnen</copyright>
+    <pubDate>Mon, 26 Oct 2026 10:15:02 GMT</pubDate>
+    <lastBuildDate>Mon, 26 Oct 2026 10:15:02 GMT</lastBuildDate>
+    <item>
+      <title>Heerenveen wint met 2-0 van Utrecht na een rustige tweede helft</title>
+      <link>https://ad.test/voetbal/heerenveen-wint-van-utrecht~a1000001/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 25 Oct 2026 19:30:00 GMT</pubDate>
+      <author>Verzonnen Verslaggever</author>
+      <guid>https://ad.test/voetbal/heerenveen-wint-van-utrecht~a1000001/</guid>
+      <media:content type="image/jpeg" url="https://images.ad.test/foto/1000001/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.ad.test/foto/1000001/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>sc Heerenveen versterkt zich met een verdediger</title>
+      <link>https://ad.test/voetbal/heerenveen-versterkt-zich~a1000002/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 25 Oct 2026 18:10:00 GMT</pubDate>
+      <author>Verzonnen Verslaggever</author>
+      <guid>https://ad.test/voetbal/heerenveen-versterkt-zich~a1000002/</guid>
+      <media:content type="image/jpeg" url="https://images.ad.test/foto/1000002/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.ad.test/foto/1000002/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>false</dpp:paid>
+    </item>
+    <item>
+      <title>Veldman denkt na over zijn toekomst</title>
+      <link>https://ad.test/voetbal/veldman-denkt-na~a1000003/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 25 Oct 2026 17:00:00 GMT</pubDate>
+      <author>Verzonnen Verslaggever</author>
+      <guid>https://ad.test/voetbal/veldman-denkt-na~a1000003/</guid>
+      <media:content type="image/jpeg" url="https://images.ad.test/foto/1000003/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.ad.test/foto/1000003/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>Brand in een schuur in Heerenveen is onder controle</title>
+      <link>https://ad.test/voetbal/brand-in-een-schuur~a1000004/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 25 Oct 2026 15:45:00 GMT</pubDate>
+      <author>Verzonnen Verslaggever</author>
+      <guid>https://ad.test/voetbal/brand-in-een-schuur~a1000004/</guid>
+      <media:content type="image/jpeg" url="https://images.ad.test/foto/1000004/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.ad.test/foto/1000004/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>false</dpp:paid>
+    </item>
+    <item>
+      <title>Ajax klopt Sparta in een zinderend duel</title>
+      <link>https://ad.test/voetbal/ajax-klopt-sparta~a1000005/</link>
+      <description>Een verzonnen intro. Ook sc Heerenveen speelde, maar dat staat alleen in deze tekst.</description>
+      <pubDate>Sun, 25 Oct 2026 14:20:00 GMT</pubDate>
+      <author>Verzonnen Verslaggever</author>
+      <guid>https://ad.test/voetbal/ajax-klopt-sparta~a1000005/</guid>
+      <media:content type="image/jpeg" url="https://images.ad.test/foto/1000005/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.ad.test/foto/1000005/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>Bayern wint de topper van Dortmund</title>
+      <link>https://ad.test/voetbal/bayern-wint-de-topper~a1000006/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 25 Oct 2026 13:05:00 GMT</pubDate>
+      <author>Verzonnen Verslaggever</author>
+      <guid>https://ad.test/voetbal/bayern-wint-de-topper~a1000006/</guid>
+      <media:content type="image/jpeg" url="https://images.ad.test/foto/1000006/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.ad.test/foto/1000006/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>false</dpp:paid>
+    </item>
+    <item>
+      <title>Column | Waarom de titelstrijd spannend blijft</title>
+      <link>https://ad.test/voetbal/column-titelstrijd~a1000007/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 25 Oct 2026 11:40:00 GMT</pubDate>
+      <author>Verzonnen Columnist</author>
+      <guid>https://ad.test/voetbal/column-titelstrijd~a1000007/</guid>
+      <media:content type="image/jpeg" url="https://images.ad.test/foto/1000007/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.ad.test/foto/1000007/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>Jongste speler ooit scoort in de Premier League</title>
+      <link>https://ad.test/voetbal/jongste-speler-ooit~a1000008/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 25 Oct 2026 10:15:00 GMT</pubDate>
+      <author>Verzonnen Verslaggever</author>
+      <guid>https://ad.test/voetbal/jongste-speler-ooit~a1000008/</guid>
+      <media:content type="image/jpeg" url="https://images.ad.test/foto/1000008/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.ad.test/foto/1000008/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+    </item>
+  </channel>
+</rss>

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { FeedItem } from './read-feed.ts'
 
-import { cleanHeadline, paywallCategoryFor, readFeed } from './read-feed.ts'
+import { cleanHeadline, paywallCategoryFor, paywallNamespaceFor, readFeed } from './read-feed.ts'
 
 const now = new Date('2026-10-22T12:00:00Z')
 
@@ -766,5 +766,93 @@ describe('the encoding', () => {
     const result = readFeed(encode(feed('<?xml version="1.0" encoding="geen-encoding"?>')), { now })
 
     expect(result.kind === 'read' && result.items[0]?.title).toBe('Fryslân & Ljouwert')
+  })
+})
+
+describe('the paywall of the Algemeen Dagblad', () => {
+  const dpp = 'https://www.dpgmedia.cloud/paidrss'
+
+  /** A feed with these items, and the namespaces on the `rss` element. */
+  const withNamespaces = (namespaces: string, ...entries: string[]) =>
+    `<?xml version="1.0" encoding="UTF-8"?><rss ${namespaces} version="2.0"><channel><title>t</title>${entries.join('')}</channel></rss>`
+
+  const paidItem = (paid: string, guid = 'g1', element = 'dpp:paid') =>
+    rssItem({ guid, link: `https://krant.test/${guid}` }).replace('</item>', `<${element}>${paid}</${element}></item>`)
+
+  const paywallsOf = (feed: string) => {
+    const result = readFeed(encode(feed), { now, paywallNamespace: dpp })
+
+    if (result.kind === 'error') {
+      throw new Error(result.message)
+    }
+
+    return result.items.map((item) => item.paywalled)
+  }
+
+  it('is on for paid true, in any case and with white space, and off for false, anything else or no element', () => {
+    const feed = withNamespaces(
+      `xmlns:dpp="${dpp}"`,
+      paidItem('true', 'a'),
+      paidItem(' TRUE ', 'b'),
+      paidItem('false', 'c'),
+      paidItem('1', 'd'),
+      paidItem('', 'e'),
+      rssItem({ guid: 'f', link: 'https://krant.test/f' }),
+    )
+
+    expect(paywallsOf(feed)).toEqual([true, true, false, false, false, false])
+  })
+
+  it('knows the namespace by its address, not by its prefix', () => {
+    const feed = withNamespaces(
+      `xmlns:betaald="${dpp}"`,
+      paidItem('true', 'a', 'betaald:paid'),
+      paidItem('false', 'b', 'betaald:paid'),
+    )
+
+    expect(paywallsOf(feed)).toEqual([true, false])
+  })
+
+  it('does not take a prefix that stands for another namespace', () => {
+    const feed = withNamespaces('xmlns:dpp="https://other.test/paid"', paidItem('true'))
+
+    expect(paywallsOf(feed)).toEqual([false])
+  })
+
+  it('does not take a `paid` element without the namespace', () => {
+    const feed = withNamespaces(`xmlns:dpp="${dpp}"`, paidItem('true', 'a', 'paid'))
+
+    expect(paywallsOf(feed)).toEqual([false])
+  })
+
+  it('goes with the right item when the feed is mixed, also when an item is skipped', () => {
+    const feed = withNamespaces(
+      `xmlns:dpp="${dpp}"`,
+      paidItem('true', 'a'),
+      paidItem('true', 'b').replace(/<title>[^<]*<\/title>/u, ''),
+      paidItem('false', 'c'),
+    )
+    const result = readFeed(encode(feed), { now, paywallNamespace: dpp })
+
+    expect(result).toMatchObject({
+      items: [
+        { key: 'a', paywalled: true },
+        { key: 'c', paywalled: false },
+      ],
+    })
+  })
+
+  it('does not look for the premium element, and a source without the namespace does not look for the element', () => {
+    const premium = withNamespaces(`xmlns:dpp="${dpp}"`, rssItem({ premium: 'true' }))
+    const paid = withNamespaces(`xmlns:dpp="${dpp}"`, paidItem('true'))
+
+    expect(paywallsOf(premium)).toEqual([false])
+    expect(readFeed(encode(paid), { now })).toMatchObject({ items: [{ paywalled: false }] })
+  })
+
+  it('knows the namespace by the domain of the source and by nothing else', () => {
+    expect(paywallNamespaceFor('www.ad.nl')).toBe(dpp)
+    expect(paywallNamespaceFor('www.lc.nl')).toBeUndefined()
+    expect(paywallNamespaceFor('www.vi.nl')).toBeUndefined()
   })
 })

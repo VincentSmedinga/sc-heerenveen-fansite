@@ -17,7 +17,7 @@ We deden dat met de user agent van de importer, `scHeerenveenFansite/0.1.0 (+htt
 Een pad dat `robots.txt` voor ons weigert, hebben we niet opgehaald.
 Een feed die doorverwees, hebben we op het nieuwe adres één keer opgehaald.
 Wat we vonden, is een momentopname van die dag.
-Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS op 26 oktober 2026, beide met een run van de importer (zie bij de bron).
+Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS en het Algemeen Dagblad op 26 oktober 2026, alle drie met een run van de importer (zie bij de bron).
 
 - **Wat we tellen:** het aantal berichten, de datum van het nieuwste (in UTC) en hoeveel berichten over sc Heerenveen gaan.
   Een bericht gaat over de club als "Heerenveen" in de kop of in de categorieën staat, zonder op hoofdletters te letten.
@@ -28,7 +28,7 @@ Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS op 26 oktob
   Alleen bij Omrop Fryslân en bij Sportcast hebben we het Friese woord nagekeken; bij de andere bronnen kende de telling alleen het Nederlandse woord.
 - **Of de feed werkt:** de feed is geldige RSS of Atom en de importer leest hem (dezelfde code als de import, `readFeed`).
 - **Betaalmuur:** de feed zegt zelf welke berichten achter de betaalmuur staan.
-  De Leeuwarder Courant en De Telegraaf doen dat met het element `<premium>`, Voetbal International met een categorie `PRO`.
+  De Leeuwarder Courant en De Telegraaf doen dat met het element `<premium>`, Voetbal International met een categorie `PRO` en het Algemeen Dagblad met het element `<dpp:paid>`.
   Staat er bij een bron niets over de betaalmuur, dan geeft de feed geen teken.
 - **`robots.txt`:** we lezen de regels voor onze user agent met dezelfde code als de fetcher.
   Een `robots.txt` die niet bestaat (404) laat alles toe.
@@ -36,6 +36,7 @@ Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS op 26 oktob
 - **De voorwaarden:** we lazen de pagina met voorwaarden van de bron, voor zover die openbaar en te vinden was.
   Van de Leeuwarder Courant, De Telegraaf, het Algemeen Dagblad en De Stentor konden we de voorwaarden niet lezen: onze leesdienst kreeg die sites niet te zien, en we hebben dat niet omzeild.
   Bij die vier gaat het alleen om wat hun `robots.txt` zegt, waarin de voorbehouden staan en dat naar de voorwaarden verwijst.
+  Het Algemeen Dagblad probeerden we op 26 oktober 2026 nog eens, zie bij de bron.
   Is er geen pagina met voorwaarden, dan staat dat erbij.
 
 ### Wat we standaard tonen
@@ -70,8 +71,8 @@ Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in 
 
 | Besluit                             | Bronnen                                                                                                                                                                                                                                                       |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Omroep Abe (podcast), Radio Camataru (podcast)                                                                                       |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed), Algemeen Dagblad, ESPN NL                                                                                                                                                                                                 |
+| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), Omroep Abe (podcast), Radio Camataru (podcast)                                                    |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed), ESPN NL                                                                                                                                                                                                                   |
 | Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                              |
 | Afwijzen                            | RTV Noord, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Rijnmond, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast |
 
@@ -218,11 +219,53 @@ Al in het register (#307), met het filter `club`.
   Een run bewaarde alle 20 berichten, zonder er een over te slaan, en alle tijden waren geldig.
   Er bestaat geen kolom voor de beschrijving of de afbeelding, dus de importer bewaart ze niet.
 
+### Algemeen Dagblad
+
+Al in het register (#310), met het filter `club`.
+
+- **Domein:** `www.ad.nl`
+- **Soort:** nieuws, landelijk dagblad
+- **Feed:** `https://www.ad.nl/voetbal/rss.xml`
+  - Werkt: ja, RSS 2.0 met 30 berichten.
+    Op 26 oktober 2026 was het nieuwste van 26 oktober (08:50 UTC) en het oudste van 24 oktober (18:25 UTC).
+    Elk bericht heeft een beschrijving, een auteur, een afbeelding (`media:content` met een `media:thumbnail`), een `guid` die de link is en een tijd in GMT.
+  - Over sc Heerenveen: op 26 oktober 2026 noemde 1 van de 30 koppen "Heerenveen".
+    Op 23 oktober 2026 telden we er nog 0; die telling was een momentopname van een paar dagen.
+  - Betaalmuur: ja, 11 van de 30 berichten hebben `<dpp:paid>true</dpp:paid>` (op 24 oktober 2026 waren het 8).
+    De rest heeft `false`.
+    De importer herkende op 26 oktober 2026 dezelfde 11 berichten als betaalmuur.
+  - Het filter, op 26 oktober 2026: van de 30 berichten kreeg 1 de waarde `relevant`, 0 `doubtful` en 29 `irrelevant`.
+    Het `relevant` bericht is het wedstrijdverslag van de club (ADO Den Haag tegen sc Heerenveen) en staat niet achter de betaalmuur.
+    Geen bericht over de club staat bij de 29, en geen bericht over iets anders staat bij het `relevant`.
+    Wat het filter doet, staat in de README van de importer, onder _Het relevantiefilter_.
+- **`robots.txt`:** laat ons de feed toe, ook op 26 oktober 2026 opnieuw gelezen met de user agent van de importer.
+  De regels voor alle crawlers (`User-agent: *`) sluiten alleen paden als `/auth`, `/zoeken?query=`, `/inloggen?*`, pagina's met `webview` of `widget` en adressen met parameters als `utm_source=` of `redirect_url=`; `/voetbal/rss.xml` ligt daar niet in.
+  Bovenaan staat een voorbehoud van DPG Media, in het Nederlands en het Engels: de auteurs-, naburige en databankrechten zijn voorbehouden, de inhoud van de websites en apps is voor persoonlijk, niet-commercieel gebruik, en gegevens zoals tekst, afbeeldingen, audio, video of code verzamelen met scraping of een andere geautomatiseerde werkwijze is niet toegestaan.
+  Het verwijst naar de gebruiksvoorwaarden van DPG Media (`www.dpgmedia.nl/gebruiksvoorwaarden`).
+  Daarna weigert het bijna dertig crawlers van AI-bedrijven en zoekmachines bij naam (`GPTBot`, `CCBot`, `ClaudeBot` en andere), en wij staan er niet bij.
+- **Voorwaarden:** niet te lezen.
+  `www.dpgmedia.nl/gebruiksvoorwaarden` stuurde ons op 26 oktober 2026 door naar een toestemmingspagina van DPG Media ("Privacy Gate", `myprivacy.dpgmediagroup.net`), die we niet hebben doorgeklikt.
+  Onze leesdienst kreeg `www.dpgmedia.nl` en `www.dpgmediagroup.com` helemaal niet te zien.
+  Wat de voorwaarden zeggen over automatisch lezen en RSS weten we dus niet; alleen het voorbehoud in `robots.txt` hebben we gelezen.
+  Wie de voorwaarden zelf kan openen, leest ze en vult dit aan.
+  Schriftelijk toestemming vragen aan DPG Media hoort bij #35.
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen niet meer dan de standaard.
+  De beschrijving, de auteur en de afbeeldingen in de feed bewaren we niet en tonen we niet.
+- **Besluit: nemen, met het filter `club`.**
+  De feed bevat het voetbalnieuws van de krant, met de Eredivisie als een groot deel, en het filter laat alleen de berichten over de club door.
+  DPG Media biedt de feed zelf aan, met een eigen teken voor de betaalmuur, en we nemen alleen de kop en de link.
+  Het voorbehoud tegen scrapen en geautomatiseerd verzamelen is een risico dat geen jurist heeft getoetst; de projecteigenaar nam het aan bij het goedkeuren van het issue.
+  Zegt DPG Media dat we moeten stoppen, dan zetten we de bron meteen uit (`enabled` in het register), zoals bij elke bron.
+  Controle van 26 oktober 2026, met een lokale run van de importer.
+- **Importer:** leest `<dpp:paid>true</dpp:paid>` als betaalmuur voor deze bron (#310), per domein zoals bij Voetbal International en de Leeuwarder Courant.
+  Een run bewaarde alle 30 berichten, zonder er een over te slaan, en alle tijden waren geldig.
+  Er bestaat geen kolom voor de beschrijving, de auteur of de afbeeldingen, dus de importer bewaart ze niet.
+
 ## Nemen na het relevantiefilter (#74)
 
 Deze feeds zijn breed.
 Ze staan nog niet in het register.
-Het filter dat de berichten over de club eruit haalt, is er nu (#74), en Omrop Fryslân en NOS (hierboven) draaien ermee.
+Het filter dat de berichten over de club eruit haalt, is er nu (#74), en Omrop Fryslân, NOS en het Algemeen Dagblad (hierboven) draaien ermee.
 Een telling op één momentopname van een paar dagen zegt weinig over hoe vaak de club erin staat; dat meten we per bron, met een run van de importer, zoals bij Omrop Fryslân.
 
 ### Voetbal International, de brede feed
@@ -237,25 +280,6 @@ De bron staat al in het register (zie boven), maar deze feed niet.
 - **Besluit: nemen na het relevantiefilter (#74).**
   De feed bevat alle voetbalnieuws van het blad, en daar staat de club regelmatig tussen.
   De tagfeed hierboven bevat al wat over de club gaat.
-
-### Algemeen Dagblad
-
-- **Domein:** `www.ad.nl`
-- **Soort:** nieuws, landelijk dagblad
-- **Feed:** `https://www.ad.nl/voetbal/rss.xml`
-  - Werkt: ja, RSS 2.0 met 30 berichten; het nieuwste is van 23 oktober 2026, het oudste van 22 oktober 2026.
-  - Over sc Heerenveen: geen enkel bericht in de kop, de categorieën of de intro.
-  - Betaalmuur: ja, 8 van de 30 berichten hebben `<dpp:paid>true</dpp:paid>`.
-- **`robots.txt`:** laat ons de feed toe.
-  Bovenaan staat een voorbehoud van DPG Media: de auteurs-, naburige en databankrechten zijn voorbehouden, de inhoud is voor persoonlijk, niet-commercieel gebruik, en gegevens verzamelen met scrapen of een andere geautomatiseerde werkwijze is niet toegestaan.
-  Het verwijst naar de gebruiksvoorwaarden van DPG Media.
-  Daarnaast weigert het een lijst AI-crawlers bij naam.
-- **Voorwaarden:** niet gelezen (zie _De controle_).
-- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; meer dan de standaard kan alleen met toestemming.
-- **Besluit: nemen na het relevantiefilter (#74).**
-  De feed bevat het voetbalnieuws van de krant, met de Eredivisie als een groot deel; het voorbehoud tegen datamining houdt dat niet tegen.
-- **Importer:** de adapter kent het teken `<dpp:paid>` niet, dus berichten achter de betaalmuur zouden niet als "voor abonnees" worden getoond.
-  Dat moet er eerst komen (zie _Wat de importer nog mist_).
 
 ### ESPN NL
 
@@ -635,10 +659,9 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
 
 ## Wat de importer nog mist
 
-Alle bronnen met het besluit "nemen" werken met de importer zoals hij is, ook Omrop Fryslân en NOS met het filter.
-Voor deze bronnen met "nemen na het relevantiefilter (#74)" moet er eerst iets bij, buiten het filter zelf:
+Alle bronnen met het besluit "nemen" werken met de importer zoals hij is, ook Omrop Fryslân, NOS en het Algemeen Dagblad met het filter.
+Voor deze bron met "nemen na het relevantiefilter (#74)" moet er eerst iets bij, buiten het filter zelf:
 
-- **Algemeen Dagblad:** de adapter leest `<dpp:paid>` niet, dus een bericht achter de betaalmuur zou niet worden herkend.
 - **ESPN NL:** de adapter leest een tijd met de zone `EST` niet.
 
-Elk daarvan vraagt een eigen issue, zodra de bron aan de beurt is.
+Dat vraagt een eigen issue (#311), zodra de bron aan de beurt is.

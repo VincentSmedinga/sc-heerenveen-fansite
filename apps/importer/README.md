@@ -192,11 +192,14 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
 - **Tijd:** `pubDate` (RSS) of `published` (Atom, anders `updated`), omgezet naar UTC, op hele seconden.
   Een tijd zonder zone, in een vorm die we niet kennen, van vóór 1990 of meer dan een dag in de toekomst is niet geldig.
   Dan geldt de tijd waarop we het bericht voor het eerst zagen, en een bekend bericht houdt de tijd die het had.
-- **Betaalmuur:** elke bron zegt het op een eigen manier, en de adapter kiest aan de hand van het domein van de bron (`paywallCategories` in [`src/read-feed.ts`](src/read-feed.ts)).
+- **Betaalmuur:** elke bron zegt het op een eigen manier, en de adapter kiest aan de hand van het domein van de bron (`paywallCategories` en `paywallNamespaces` in [`src/read-feed.ts`](src/read-feed.ts)).
   Bij de Leeuwarder Courant en De Telegraaf is het het element `<premium>true</premium>`.
   `feedsmith` leest elementen die het niet kent niet, dus een tweede lezing met `fast-xml-parser` zoekt dit ene element.
   Bij Voetbal International is het de categorie met `domain="https://www.vi.nl/pro"` (tekst `PRO`), die `feedsmith` wel leest.
   De categorie zelf bewaren we niet; de adapter gebruikt haar alleen voor `items.paywalled`.
+  Bij het Algemeen Dagblad is het het element `<dpp:paid>true</dpp:paid>`, met `false` of zonder het element is het bericht open.
+  De adapter herkent de naamruimte aan haar adres, `https://www.dpgmedia.cloud/paidrss`, en niet aan het voorvoegsel `dpp`: hij leest eerst welke voorvoegsels de feed voor dat adres kiest.
+  Ook dit element leest de tweede lezing, want `feedsmith` kent het niet.
   Een feed zonder het teken van zijn bron heeft geen betaalmuur.
 - **Te lang:** een kop van meer dan 500 tekens, een link van meer dan 2048 of een sleutel van meer dan 700 slaat de adapter over, in plaats van hem af te kappen.
 - **Bijwerken:** een nieuw bericht komt erbij.
@@ -248,7 +251,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een moderator verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_) en de voetbalfeed van NOS (zie _De voetbalfeed van NOS_).
+Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_) en die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_).
 
 ### De uitkomst bekijken
 
@@ -347,6 +350,20 @@ Elk bericht in de feed heeft een beschrijving met HTML en een afbeelding.
 De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
 De test in `src/import-feeds.test.ts` ("importing the football feed of NOS, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/nos-sample.xml`](src/fixtures/nos-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft ook een samenvatting van de speelronde die de club alleen in de beschrijving noemt: het filter kijkt alleen naar de kop, dus die is `irrelevant`.
+
+## De voetbalfeed van het Algemeen Dagblad
+
+Het Algemeen Dagblad is een bron met de feed `https://www.ad.nl/voetbal/rss.xml`, het voetbalnieuws van de krant.
+De club is er een klein deel van, dus de feed staat in de seed op `club`.
+De feed is RSS 2.0, met tijden in GMT en een `guid` die de link is.
+Een deel van de berichten staat achter de betaalmuur, en de feed zegt dat zelf met `<dpp:paid>` (zie _Wat de adapter bewaart_).
+Een run van 26 oktober 2026 bewaarde alle 30 berichten, en het filter vond er 1 `relevant`, 0 `doubtful` en 29 `irrelevant`.
+De adapter herkende 11 berichten als betaalmuur (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
+Elk bericht in de feed heeft een beschrijving, een auteur, een `media:content` en een `media:thumbnail`.
+De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
+De test in `src/import-feeds.test.ts` ("importing the football feed of the Algemeen Dagblad, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/ad-sample.xml`](src/fixtures/ad-sample.xml), via de bron zoals de seed hem in het register zet.
+De fixture heeft ook een bericht zonder `dpp:paid` en een bericht dat de club alleen in de beschrijving noemt: het filter kijkt alleen naar de kop, dus dat is `irrelevant`.
+De test van de adapter zelf ("the paywall of the Algemeen Dagblad", in `src/read-feed.test.ts`) laat zien dat een ander voorvoegsel voor hetzelfde adres ook werkt.
 
 ## De velden van de feed van de Leeuwarder Courant
 
