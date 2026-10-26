@@ -71,6 +71,8 @@ Building, reviewing, design and research for their own sake, and help with the o
 ### Builder
 
 Picks up one issue, in its own branch and worktree.
+The skills in `.claude/skills/` hold the order of the steps: `builder-workflow` for every issue, `review-pr` for the Reviewer after the pull request opens, and `add-source` for a new source.
+The rules stay in this file and in `CONTRIBUTING.md`; a skill points to them and adds the steps that were missed before.
 
 - Writes the code, with tests, and stories for anything visible.
 - Adds the decisions from the issue, and its own, to `docs/beslissingen.md`.
