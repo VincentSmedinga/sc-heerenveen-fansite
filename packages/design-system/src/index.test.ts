@@ -36,6 +36,7 @@ const components = [
   'Strong',
   'Text',
   'Textarea',
+  'TopScorersTable',
   'WikipediaCredit',
 ]
 

@@ -896,7 +896,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
       'P',
     ])
     expect([...ours.matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((match) => match[1])).toEqual(['2', '2', '6'])
-    expect(html).not.toContain('hf-standings-bar')
+    expect(html).not.toContain('hf-bar')
   })
 
   it('shows only three clubs of a longer table, with sc Heerenveen in the middle', async () => {

@@ -73,7 +73,7 @@ describe('the page /wedstrijden', () => {
   })
 
   it('has no order or style attribute but the length of a bar, so the order on a phone is the order in the source', async () => {
-    expect(await render()).not.toMatch(/ style="(?!--hf-points-share:[\d.]+")|order:/)
+    expect(await render()).not.toMatch(/ style="(?!--hf-bar-share:[\d.]+")|order:/)
   })
 
   it('names each card by its h2, so the links with a hash on the homepage have a target', async () => {
@@ -274,9 +274,9 @@ describe('the page /wedstrijden', () => {
     const stand = section(await render(), 'stand')
 
     // The leader (sc Heerenveen, with 6 points) has the full bar, a club with 1 point a sixth.
-    expect(stand.match(/class="hf-standings-bar" style="--hf-points-share:[\d.]+"/g)).toHaveLength(3)
-    expect(stand).toContain('style="--hf-points-share:100"')
-    expect(stand).toContain('style="--hf-points-share:16.67"')
+    expect(stand.match(/class="hf-bar" style="--hf-bar-share:[\d.]+"/g)).toHaveLength(3)
+    expect(stand).toContain('style="--hf-bar-share:100"')
+    expect(stand).toContain('style="--hf-bar-share:16.67"')
   })
 
   it('has one credit under the page, for the three pages, with the time of the last reading', async () => {

@@ -1,5 +1,6 @@
-import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
 
+import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
 
 /** The name of our own club, whose row stands out. */
@@ -53,11 +54,7 @@ const columns: Column[] = [
  * is not always the first row. Nobody has points: no share, so the table has no bars.
  */
 export function pointsShares(rows: StandingsTableRow[]): null | number[] {
-  const leader = Math.max(0, ...rows.map((row) => row.points))
-
-  return leader === 0
-    ? null
-    : rows.map((row) => Math.round(Math.min(100, Math.max(0, (row.points / leader) * 100)) * 100) / 100)
+  return sharesOf(rows.map((row) => row.points))
 }
 
 /**
@@ -71,14 +68,15 @@ export function pointsShares(rows: StandingsTableRow[]): null | number[] {
  * The full table has a bar at the end of each row, next to the points and in their
  * cell, as long as the points are compared to those of the leader. The bar is decoration: it
  * is hidden from a screen reader, which reads the numbers only. It goes when the place of the
- * table is too narrow, chosen with a container query. standings-table.css gives the look.
+ * table is too narrow, chosen with a container query. bar.css gives the bar, and
+ * standings-table.css the rest of the look.
  */
 export const StandingsTable = ({ caption, className, columns: set = 'all', rows, ...props }: StandingsTableProps) => {
   const shares = set === 'all' ? pointsShares(rows) : null
 
   return (
-    <div {...props} className={classNames('hf-standings', className)}>
-      <table className="hf-standings-table">
+    <div {...props} className={classNames('hf-standings hf-bar-place', className)}>
+      <table className="hf-standings-table hf-bar-table">
         <caption className="hf-visually-hidden">{caption}</caption>
         <thead>
           <tr>
@@ -91,7 +89,7 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
             <th scope="col">Club</th>
             {columns.map((column) => (
               <th
-                className={classNames('hf-numeric', column.id === 'points' && shares !== null && 'hf-standings-bars')}
+                className={classNames('hf-numeric', column.id === 'points' && shares !== null && 'hf-bar-head')}
                 key={column.id}
                 scope="col"
               >
@@ -112,18 +110,9 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
                 {row.club === ourClub ? <span className="hf-visually-hidden"> (onze club)</span> : null}
               </th>
               {columns.map((column) => (
-                <td
-                  className={classNames('hf-numeric', column.id === 'points' && 'hf-standings-points')}
-                  key={column.id}
-                >
+                <td className={classNames('hf-numeric', column.id === 'points' && 'hf-bar-value')} key={column.id}>
                   {column.value(row)}
-                  {column.id === 'points' && shares !== null ? (
-                    <span
-                      aria-hidden="true"
-                      className="hf-standings-bar"
-                      style={{ '--hf-points-share': shares[index] } as CSSProperties}
-                    />
-                  ) : null}
+                  {column.id === 'points' && shares !== null ? <Bar share={shares[index]!} /> : null}
                 </td>
               ))}
             </tr>

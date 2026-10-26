@@ -12,46 +12,17 @@ function declarationsOf(selector: string) {
 }
 
 describe('standings-table.css', () => {
-  it('makes the wrapper the container for the query, and positions it so the hidden words of the headers stay in it', () => {
-    expect(declarationsOf('.hf-standings')).toMatch(/container-type: inline-size/u)
-    expect(declarationsOf('.hf-standings')).toMatch(/position: relative/u)
+  it('marks the row of our own club with a bar on the start side, which also shows in forced colours', () => {
+    expect(declarationsOf('.hf-standings-table-own > :first-child')).toMatch(/border-inline-start: 0\.25rem solid/u)
   })
 
-  it('gives the space that is left to the club, so the columns of numbers sit close together', () => {
-    expect(declarationsOf('.hf-standings-table thead th:not(.hf-numeric)')).toMatch(/inline-size: 100%/u)
-  })
-
-  it('makes the points bold, like the row of our own club', () => {
-    expect(declarationsOf('.hf-standings-table td.hf-standings-points')).toMatch(/font-weight: 700/u)
-  })
-
-  it('draws the bar as long as the share the component gives, from the start side', () => {
-    expect(declarationsOf('&::before')).toMatch(/inline-size: calc\(var\(--hf-points-share\) \* 1%\)/u)
-  })
-
-  it('colours the bars with the green of a win, a calm part of it and the whole for our own row', () => {
-    expect(declarationsOf('&::before')).toMatch(
-      /background-color: color-mix\(in srgb, var\(--hf-colour-outcome-win\) 70%, transparent\)/u,
-    )
-    expect(declarationsOf('.hf-standings-table-own .hf-standings-bar::before')).toMatch(
+  it('gives the bars of our own row the whole green of a win', () => {
+    expect(declarationsOf('.hf-standings-table-own .hf-bar::before')).toMatch(
       /background-color: var\(--hf-colour-outcome-win\)/u,
     )
   })
 
-  it('keeps the bars visible in forced colours with a system colour', () => {
-    expect(css).toMatch(
-      /@media \(forced-colors: active\) \{\s*\.hf-standings-bar::before \{\s*background-color: CanvasText/u,
-    )
-  })
-
-  it('hides the bar with a container query on the place of the table, not the screen', () => {
-    expect(css).toMatch(
-      /@container hf-standings \(inline-size < [\d.]+rem\) \{\s*\.hf-standings-bar \{\s*display: none/u,
-    )
-    expect(css).not.toMatch(/@media \((?:min|max)-width/u)
-  })
-
-  it('has no area that scrolls sideways', () => {
-    expect(css).not.toMatch(/overflow-x|hf-standings-scroll/u)
+  it('leaves the look of the bar and its query to bar.css', () => {
+    expect(css).not.toMatch(/@container|@media|container-type|inline-size: calc/u)
   })
 })
