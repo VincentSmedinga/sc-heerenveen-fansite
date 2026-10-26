@@ -248,6 +248,176 @@ Al in het register (#310), met het filter `club`.
   Gegevens zoals tekst, afbeeldingen, audio, video of code verzamelen met scraping of een andere geautomatiseerde werkwijze is niet toegestaan.
   Het verwijst naar de gebruiksvoorwaarden van DPG Media (`www.dpgmedia.nl/gebruiksvoorwaarden`).
   Daarna weigert het bijna dertig crawlers van AI-bedrijven en zoekmachines bij naam (`GPTBot`, `CCBot`, `ClaudeBot` en andere), en wij staan er niet bij.
+- **Voorwaarden:** twee teksten, door de projecteigenaar op 26 oktober 2026 in een browser gelezen en aan ons doorgegeven.
+  Wij konden de pagina's van DPG Media zelf niet openen: `www.dpgmedia.nl/gebruiksvoorwaarden` stuurde ons door naar een toestemmingspagina ("Privacy Gate"), die we niet hebben doorgeklikt.
+  - De gebruiksvoorwaarden van DPG Media (`www.dpgmedia.nl/gebruiksvoorwaarden`) beginnen met de zin dat ze alleen gelden voor het gebruik van de websites in een professionele context en voor de zakelijke producten van DPG Media.
+    Ze gelden dus waarschijnlijk niet voor een lezer van het AD, en of ze voor de feed gelden, staat er niet.
+  - De voorwaarden voor het gebruik van de website van het AD zeggen dat lezers de websites en apps voor privédoeleinden mogen gebruiken.
+    Commercieel gebruik is verboden, en dat noemt ook het (gedeeltelijk) overnemen van content.
+    Middelen om de websites te doorzoeken of te indexeren, zoals robots en spiders, mogen niet; zoekmachines moeten zich aan `robots.txt` houden.
+    Bij overtreding kan DPG Media de toegang weigeren.
+  - Over RSS-feeds, koppen of links naar berichten staat in beide teksten niets.
+  - De pagina over copyright van het AD (`www.ad.nl/extra/copyright-auteursrechten-ad~a8dc0021`) is niet gelezen.
+  - Wij zijn geen bedrijf en verdienen niets, maar een importer is wel een robot, en we nemen een kop en een link over.
+    Of de regel over robots een feed bedoelt die DPG Media zelf aanbiedt, is niet duidelijk.
+    Dat is het risico dat geen jurist heeft getoetst.
+  - We vragen het AD om schriftelijke toestemming (#35).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; meer dan de standaard kan alleen met toestemming.
+- **Besluit: nemen.**
+  De feed gaat bijna helemaal over de club en `robots.txt` laat ons de feed lezen.
+  Het voorbehoud tegen datamining houdt dat niet tegen; we tonen alleen de kop, de link, de bronnaam en de tijd.
+
+### Voetbal International, de tagfeed over sc Heerenveen
+
+Al in het register (#142).
+
+- **Domein:** `www.vi.nl`
+- **Soort:** nieuws, landelijk voetbaltijdschrift
+- **Feed:** `https://www.vi.nl/feed/news.xml?tag=sc-heerenveen`
+  - Werkt: ja, RSS 2.0 met 24 berichten; het nieuwste is van 21 oktober 2026, het oudste van 8 oktober 2026.
+  - Over sc Heerenveen: alle 24 hebben Heerenveen in de categorieën, 13 ook in de kop.
+  - Betaalmuur: ja, 5 van de 24 berichten hebben de categorie `PRO` (het patroon `vi.nl/pro`).
+- **`robots.txt`:** laat ons de feed toe.
+  Alleen `/admin/`, `/requests/`, `/zoeken` en een paar andere paden zijn gesloten.
+  Er staat geen voorbehoud tegen datamining.
+- **Voorwaarden:** de pagina met de feeds zegt dat ze dienen om bezoekers van je eigen site het laatste nieuws te tonen, zonder voorwaarden.
+  Het colofon zegt dat overnemen, bewaren of verspreiden van inhoud schriftelijke toestemming van de uitgever vraagt, en houdt de auteurs- en databankrechten voorbehouden.
+  Over scrapen of datamining staat niets.
+  De twee teksten verschillen dus: de feedpagina nodigt uit om het nieuws te tonen, het colofon vraagt toestemming voor overnemen.
+  Wij lezen een kop met een link onder het eerste; geen jurist heeft die afweging getoetst.
+- **Meer tonen:** ja, de uitgever vraagt toestemming voor overnemen; we vragen die voor meer dan de standaard (#35).
+- **Besluit: nemen.**
+  Alle berichten in de feed hebben de club als categorie, en `robots.txt` laat ons de feed lezen.
+  De pagina met de feeds nodigt uit om het nieuws te tonen.
+
+### De Telegraaf
+
+- **Domein:** `www.telegraaf.nl`
+- **Soort:** nieuws, landelijk dagblad
+- **Feed:** `https://www.telegraaf.nl/tag/sc-heerenveen/rss/`
+  - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 19 oktober 2026, het oudste van 21 februari 2026.
+    Dat is ongeveer anderhalf bericht per week.
+  - Over sc Heerenveen: 31 van de 50 noemen Heerenveen in de kop, en 42 in de kop of de intro.
+    De categorieën noemen de club niet.
+    De andere acht gaan over andere clubs en spelers.
+  - Betaalmuur: ja, 8 van de 50 berichten staan erachter.
+- **`robots.txt`:** laat ons de feed toe.
+  Het heeft hetzelfde voorbehoud als dat van de Leeuwarder Courant: alle rechten voorbehouden, niet voor tekst- en datamining, scrapen of automatisch verzamelen van gegevens, met verwijzing naar artikel 4 van de richtlijn en naar de voorwaarden.
+  Daarnaast weigert het een lijst AI-crawlers bij naam.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; meer dan de standaard kan alleen met toestemming.
+- **Besluit: nemen.**
+  De feed is het onderwerp "sc Heerenveen" van de krant zelf en de grote meerderheid van de berichten noemt de club; `robots.txt` laat ons de feed lezen.
+  Het voorbehoud tegen datamining houdt dat niet tegen.
+- **Importer:** leest de feed zonder aanpassing.
+  Een lokale run op 24 oktober 2026 bewaarde 50 berichten, waarvan 8 achter de betaalmuur.
+
+### Omrop Fryslân
+
+Al in het register (#258), met het filter `club`.
+
+- **Domein:** `www.omropfryslan.nl`
+- **Soort:** nieuws, regionale publieke omroep
+- **Feed:** `https://www.omropfryslan.nl/rss/index.xml`
+  - Werkt: ja, RSS 2.0 met 50 berichten.
+    Op 24 oktober 2026 was het nieuwste van 23 oktober en het oudste van 20 oktober.
+    Op 25 oktober 2026 was het nieuwste van 25 oktober (16:23 UTC) en het oudste van 22 oktober (10:10 UTC).
+  - Over sc Heerenveen: op 24 oktober 2026 noemden 6 van de 50 Heerenveen in de kop, 3 daarvan ook in de intro.
+    Het Friese "Hearrenfean" (en "Feanster") stond op 25 oktober 2026 in geen van de 50 koppen of intro's: de feed is bijna helemaal Nederlandstalig.
+  - Betaalmuur: nee; de feed geeft er geen teken van, en de run van 25 oktober bewaarde geen bericht als betaalmuur.
+  - Het filter, op 25 oktober 2026: van de 50 berichten kregen 2 de waarde `relevant`, 4 `doubtful` en 44 `irrelevant`.
+    De twee `relevant` noemen "sc Heerenveen" in de kop.
+    Van de vier `doubtful` noemen er drie alleen "Heerenveen": twee gaan over de plaats, en een is een wedstrijdverslag van de club.
+    Het vierde noemt alleen een speler, met zijn volledige naam.
+    De projecteigenaar vond de twee clubberichten ten onrechte `doubtful`, en de regels veranderden: "wint" en "verliest" zijn voetbalwoorden, en een volledige naam is genoeg.
+    Dezelfde 50 koppen geven met de nieuwe regels 4 `relevant`, 2 `doubtful` en 44 `irrelevant`.
+    De twee die `doubtful` blijven, gaan over de plaats.
+    Geen bericht over de club staat bij de 44, en geen bericht over iets anders staat bij de `relevant`.
+    Met de Friese schrijfwijze en de Friese voetbalwoorden erbij (#270) geven dezelfde 50 koppen dezelfde uitkomst: geen kop veranderde.
+    Wat het filter doet, staat in de README van de importer, onder _Het relevantiefilter_.
+- **`robots.txt`:** laat ons de feed toe.
+  De importer haalde het op 25 oktober 2026 opnieuw op, met zijn eigen user agent.
+  De regels voor ons sluiten alleen `/content/`, `/embedded/`, `/data/`, `/inc/`, de paden van de vorm `/*/-`, `/fy/nos/`, `/nl/nos/` en de zoekpagina's; de feed ligt daar niet in.
+  Op 24 oktober 2026 zagen we dat een lange lijst crawlers, ook van AI-bedrijven, bij naam is geweigerd en wij er niet bij staan.
+  De importer bewaart alleen de regels die voor ons gelden, dus die lijst hebben we op 25 oktober niet opnieuw bekeken.
+- **Voorwaarden:** een pagina met voorwaarden of een disclaimer is er niet; alleen een privacyverklaring van Stichting Omrop Fryslân (versie van januari 2019).
+  Over automatisch lezen, datamining of hergebruik staat niets.
+- **Meer tonen:** de bron zegt er niets over; we vragen toestemming voor meer dan de standaard.
+- **Besluit: nemen, met het filter `club`.**
+  De feed is het regionieuws van Friesland, de provincie van de club, en sc Heerenveen komt er regelmatig in voor.
+  Het filter houdt de rest van de berichten van de site; de twijfelgevallen blijven onzichtbaar en een moderator vindt ze in het beheer.
+  Controle van 25 oktober 2026, met een lokale run van de importer.
+- **Importer:** leest de feed zonder aanpassing.
+  Een run bewaarde alle 50 berichten, zonder er een over te slaan, en alle tijden waren geldig.
+
+### NOS
+
+Al in het register (#307), met het filter `club`.
+
+- **Domein:** `nos.nl` (de feeds staan op `feeds.nos.nl`)
+- **Soort:** nieuws, publieke omroep
+- **Feed:** `https://feeds.nos.nl/nosvoetbal`
+  - Werkt: ja, RSS 2.0 met 20 berichten.
+    Op 26 oktober 2026 was het nieuwste van 26 oktober (09:12 UTC) en het oudste van 24 oktober (17:45 UTC).
+    Elk bericht heeft een beschrijving met HTML, een afbeelding (`enclosure`), een `guid` en een tijd met zone.
+  - Over sc Heerenveen: op 26 oktober 2026 noemde 1 van de 20 koppen "Heerenveen".
+    Een tweede bericht, een samenvatting van de speelronde, noemt alleen in de tekst de voetbalsters van sc Heerenveen.
+  - Betaalmuur: nee; de feed geeft er geen teken van, en de run van 26 oktober bewaarde geen bericht als betaalmuur.
+  - Het filter, op 26 oktober 2026: van de 20 berichten kreeg 1 de waarde `relevant`, 0 `doubtful` en 19 `irrelevant`.
+    Het `relevant` bericht is het wedstrijdverslag van de club.
+    Geen bericht over de club staat bij de 19, en geen bericht over iets anders staat bij het `relevant`.
+    Het filter kijkt alleen naar de kop: de samenvatting van de speelronde noemt het vrouwenteam alleen in de tekst en valt dus af.
+    Dat is hier goed, want de site gaat over het eerste mannenelftal.
+    Wat het filter doet, staat in de README van de importer, onder _Het relevantiefilter_.
+- **`robots.txt`:** `feeds.nos.nl` heeft er geen (404, ook op 26 oktober 2026 opnieuw met de user agent van de importer), dus alles mag.
+  Op `nos.nl` zelf weigert `robots.txt` een lijst crawlers van AI-bedrijven bij naam, en wij staan er niet bij; de importer leest alleen de feed, geen pagina's van `nos.nl`.
+- **Voorwaarden** (`over.nos.nl/organisatie/regelgeving/`, sinds kort doorverwezen naar `over.nos.nl/organisatie/algemene-voorwaarden-nos/`), opnieuw gelezen op 26 oktober 2026: bots of AI-systemen mogen niet automatisch data verzamelen, tenzij NOS dat uitdrukkelijk toestaat.
+  Content kopiëren, bewerken of verspreiden mag niet zonder toestemming.
+  Over RSS-feeds staat er niets.
+  De pagina `nos.nl/feeds` somt de feeds op, noemt zelf geen voorwaarden en heeft er alleen een link naar in de voettekst.
+  Het voorbehoud tegen automatisch verzamelen is een risico dat geen jurist heeft getoetst.
+  Schriftelijk toestemming vragen aan NOS hoort bij #35.
+- **Meer tonen:** de voorwaarden vragen toestemming voor kopiëren en verspreiden; we tonen niet meer dan de standaard.
+  De beschrijving en de afbeelding in de feed bewaren we niet en tonen we niet.
+- **Besluit: nemen, met het filter `club`.**
+  De feed gaat over het voetbal in Nederland en daarbuiten, met de Eredivisie als een groot deel, en het filter laat alleen de berichten over de club door.
+  NOS biedt de feed zelf aan, en we nemen alleen de kop en de link.
+  Zegt NOS dat we moeten stoppen, dan zetten we de bron meteen uit (`enabled` in het register), zoals bij elke bron.
+  Controle van 26 oktober 2026, met een lokale run van de importer.
+  Op 24 oktober 2026 telden we nog 0 berichten over de club in de feed; die telling was een momentopname van twee dagen.
+- **Importer:** leest de feed zonder aanpassing.
+  Een run bewaarde alle 20 berichten, zonder er een over te slaan, en alle tijden waren geldig.
+  Er bestaat geen kolom voor de beschrijving of de afbeelding, dus de importer bewaart ze niet.
+
+### Algemeen Dagblad
+
+Al in het register (#310), met het filter `club`.
+
+- **Domein:** `www.ad.nl`
+- **Soort:** nieuws, landelijk dagblad
+- **Feed:** `https://www.ad.nl/voetbal/rss.xml`
+  - Werkt: ja, RSS 2.0 met 30 berichten.
+    Op 26 oktober 2026 was het nieuwste van 26 oktober (08:50 UTC) en het oudste van 24 oktober (18:25 UTC).
+    Elk bericht heeft een beschrijving, een auteur, een afbeelding (`media:content` met een `media:thumbnail`), een `guid` die de link is en een tijd in GMT.
+  - Over sc Heerenveen: op 26 oktober 2026 noemde 1 van de 30 koppen "Heerenveen".
+    Op 24 oktober 2026 telden we er nog 0; die telling was een momentopname van een paar dagen.
+  - Betaalmuur: ja, 11 van de 30 berichten hebben `<dpp:paid>true</dpp:paid>` (op 24 oktober 2026 waren het 8).
+    De rest heeft `false`.
+    De importer herkende op 26 oktober 2026 dezelfde 11 berichten als betaalmuur.
+  - Het filter, op 26 oktober 2026: van de 30 berichten kreeg 1 de waarde `relevant`, 0 `doubtful` en 29 `irrelevant`.
+    Het `relevant` bericht is het wedstrijdverslag van de club (ADO Den Haag tegen sc Heerenveen) en staat niet achter de betaalmuur.
+    Geen bericht over de club staat bij de 29, en geen bericht over iets anders staat bij het `relevant`.
+    Wat het filter doet, staat in de README van de importer, onder _Het relevantiefilter_.
+- **`robots.txt`:** laat ons de feed toe, ook op 26 oktober 2026 opnieuw gelezen met de user agent van de importer.
+  De regels voor alle crawlers (`User-agent: *`) sluiten alleen paden als `/auth`, `/zoeken?query=` en `/inloggen?*`.
+  Ook pagina's met `webview` of `widget` en adressen met parameters als `utm_source=` of `redirect_url=` zijn gesloten.
+  `/voetbal/rss.xml` ligt daar niet in.
+  Bovenaan staat een voorbehoud van DPG Media, in het Nederlands en het Engels.
+  De auteurs-, naburige en databankrechten zijn voorbehouden.
+  De inhoud van de websites en apps is voor persoonlijk, niet-commercieel gebruik.
+  Gegevens zoals tekst, afbeeldingen, audio, video of code verzamelen met scraping of een andere geautomatiseerde werkwijze is niet toegestaan.
+  Het verwijst naar de gebruiksvoorwaarden van DPG Media (`www.dpgmedia.nl/gebruiksvoorwaarden`).
+  Daarna weigert het bijna dertig crawlers van AI-bedrijven en zoekmachines bij naam (`GPTBot`, `CCBot`, `ClaudeBot` en andere), en wij staan er niet bij.
 - **Voorwaarden:** niet te lezen.
   `www.dpgmedia.nl/gebruiksvoorwaarden` stuurde ons op 26 oktober 2026 door naar een toestemmingspagina van DPG Media ("Privacy Gate", `myprivacy.dpgmediagroup.net`), die we niet hebben doorgeklikt.
   Onze leesdienst kreeg `www.dpgmedia.nl` en `www.dpgmediagroup.com` helemaal niet te zien.

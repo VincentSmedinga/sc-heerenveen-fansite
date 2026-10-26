@@ -5007,4 +5007,4 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `feedsmith` kent het element niet, dus de tweede lezing met `fast-xml-parser` zoekt het, zoals het element `<premium>` van de Leeuwarder Courant.
 - **Alternatieven:** wachten op schriftelijke toestemming van DPG Media (voorzichtiger, maar DPG antwoordt zelden); de bron nemen zonder het teken voor de betaalmuur (een lezer klikt dan op een bericht dat hij niet kan lezen, tegen onze eigen regel).
 - **Daarna:** schriftelijk toestemming vragen aan DPG Media hoort bij #35; de projecteigenaar nam het voorbehoud van de bron aan bij het goedkeuren van het issue.
-  De gebruiksvoorwaarden van DPG Media konden we bij deze controle niet lezen (zie `docs/bronnen.md`).
+  De voorwaarden van DPG Media en van het AD zeggen niets over RSS-feeds, maar verbieden commercieel gebruik, het overnemen van content en het doorzoeken met robots (zie `docs/bronnen.md`).
