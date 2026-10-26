@@ -44,6 +44,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # Two commits. For a pull request that is the merge into main and main as it is now, which
+          # scripts/ci-changes.js compares to see what the pull request changes.
+          fetch-depth: 2
           persist-credentials: false
 
       # The pnpm version comes from packageManager in package.json.
@@ -53,6 +56,18 @@ jobs:
         with:
           cache: pnpm
           node-version-file: .nvmrc
+
+      # Decides whether the two checks of the site below have to run, and says why in one line. A pull request that only
+      # changes documentation, the tooling for agents, the importer or the MCP server of the design system skips them,
+      # and nothing else does. A push to main, a manual run, a pull request with the label "volledige controle" and
+      # anything the script doesn't know run everything. The other steps always run. The two steps are skipped with
+      # `if`, not the workflow with `paths`: a required check that never reports blocks the merge, and a skipped step
+      # doesn't. scripts/ci-changes.js has the rules.
+      - name: Decide which checks of the site to run
+        id: changes
+        run: node scripts/ci-changes.js
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - run: pnpm install --frozen-lockfile
 
@@ -73,6 +88,7 @@ jobs:
       # The site must also work the way the host runs it: from the standalone build, with its static files, and with
       # search engines kept out of acceptance.
       - name: Check the site the way the host runs it
+        if: steps.changes.outputs.site != 'false'
         run: |
           pnpm --filter site assemble "$RUNNER_TEMP/site"
           pnpm --filter site smoke "$RUNNER_TEMP/site"
@@ -82,4 +98,5 @@ jobs:
       # playwright.config.ts), so there is no browser to install: `playwright install --with-deps` fetched packages from an
       # Ubuntu mirror that is sometimes so slow it took ten minutes.
       - name: Check accessibility
+        if: steps.changes.outputs.site != 'false'
         run: SITE_FOLDER="$RUNNER_TEMP/site" pnpm test:a11y
