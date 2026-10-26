@@ -6,8 +6,8 @@ import { classNames } from '../classNames'
 export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /**
    * The text of the table's caption, which names the table and says which season and which
-   * competitions it counts, such as `Topscorers van sc Heerenveen in het seizoen 2026/27`.
-   * Only a screen reader gets it: the caption is not shown.
+   * competitions it counts, such as `Doelpuntenmakers van sc Heerenveen in het seizoen
+   * 2026/27`. Only a screen reader gets it: the caption is not shown.
    */
   caption: string
   /** A top scorers table has no children: everything it shows comes from the props below. */

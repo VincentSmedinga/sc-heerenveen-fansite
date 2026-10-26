@@ -185,8 +185,8 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 
 ## De wedstrijden
 
-`/wedstrijden` toont onder zes kopjes het programma, de doelpunten per kwartier, de stand, de topscorers, de wedstrijden waarin we de nul hielden en de uitslagen van sc Heerenveen 1 (mannen) in het lopende seizoen.
-Het programma met daaronder de doelpunten per kwartier staat in de hoofdkolom en de stand met daaronder de topscorers, de nul gehouden en de uitslagen in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
+`/wedstrijden` toont onder zes kopjes het programma, de doelpunten per kwartier, de stand, de doelpuntenmakers, de wedstrijden waarin we de nul hielden en de uitslagen van sc Heerenveen 1 (mannen) in het lopende seizoen.
+Het programma met daaronder de doelpunten per kwartier staat in de hoofdkolom en de stand met daaronder de doelpuntenmakers, de nul gehouden en de uitslagen in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
 De gegevens komen van de importer (zie _De wedstrijden en de stand_ in de [README van de importer](../importer/README.md)) en `@fansite/db/queries` haalt ze op: `listSeasonMatches`, `listSeasonStandings` en `listWikipediaPages`, steeds voor één seizoen.
 `src/matches.ts` vraagt alleen het lopende seizoen (`seasonOf`) en bewaart het antwoord vijf minuten; eerdere seizoenen staan in de database en komen op geen enkele pagina.
@@ -207,16 +207,17 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
 - **Stand:** de volledige tabel met een balk naast de punten, en een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.
   De balk verdwijnt op een smalle plek.
-- **Topscorers:** alle spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten.
+- **Doelpuntenmakers:** alle spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten.
   `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
   Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
   Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet.
   Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
-  Onder de tabel staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord".
+  Direct onder de kop, boven de tabel, staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord": dezelfde plek en stijl als bij de nul gehouden.
+  Het oude anker `#topscorers` blijft werken: het is een oud anker (`aliases`) op de kop.
   Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "Gebaseerd op de doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
   De kop van de doelpunten is de afkorting D, met het volle woord onder de tabel.
   Zonder doelpunten staat er een zin in plaats van een tabel.
-- **De nul gehouden:** een kaart in de zijbalk, onder de topscorers en boven de uitslagen, met de gespeelde wedstrijden van dit seizoen waarin `goals_against` 0 is, in de competitie en de beker, de nieuwste bovenaan.
+- **De nul gehouden:** een kaart in de zijbalk, onder de doelpuntenmakers en boven de uitslagen, met de gespeelde wedstrijden van dit seizoen waarin `goals_against` 0 is, in de competitie en de beker, de nieuwste bovenaan.
   Elke wedstrijd is een korte regel (`ShortMatch`): de dag, de tegenstander met "thuis" of "uit" en de uitslag vanuit onze kant.
   Boven de lijst staat "5 keer de nul gehouden in 11 wedstrijden".
   Er staan tien regels en daaronder de knop "Laad 5 meer", die zonder JavaScript werkt: het formulier laadt de pagina opnieuw met `?nul=15`, in stappen van vijf.

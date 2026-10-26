@@ -5407,6 +5407,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De kop van de doelpunten is de afkorting D, op verzoek van de projecteigenaar op 26 oktober 2026, zoals G en P in de stand: een schermlezer hoort "doelpunten" en onder de tabel staat "D doelpunten", in een gedeelde legenda (`hf-bar-legend`, eerst `hf-standings-legend`).
 - **Alternatieven:** de Eredivisie en de beker apart tonen (nauwkeuriger, maar twee lijsten en veel lege rijen in het begin); alleen de beste drie (te weinig voor een selectie); een nieuwe bron met statistieken van spelers (#39); de CSS van de balk kopiëren naar het nieuwe component (twee plekken om gelijk te houden).
 - **Later:** de kaart toont sinds 26 oktober 2026 alle doelpuntenmakers van het seizoen en niet meer de beste vijf met gelijkstaanden; zie _De kaart met topscorers toont alle doelpuntenmakers_.
+- **Later:** de kaart heet sinds 26 oktober 2026 "Doelpuntenmakers" en niet meer "Topscorers", en het aantal spelers staat onder de kop en niet meer onder de tabel; zie _De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop_.
 
 ### De lijst met gehouden nullen is een lijst van korte wedstrijdregels
 
@@ -5431,6 +5432,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het aantal spelers staat in een zichtbare regel onder de tabel ("11 spelers hebben gescoord"), en niet in het bijschrift, want alleen een schermlezer krijgt het bijschrift.
   De telling blijft op één plek, `topScorersOf`, want #333 laat haar later per speler in plaats van per naam tellen.
 - **Alternatieven:** de beste vijf houden, met gelijkstaanden (korter, maar de rest blijft onzichtbaar); de beste vijf met een knop voor de rest (extra stap en meer code, terwijl de lijst kort genoeg is).
+- **Later:** de kaart heet sinds 26 oktober 2026 "Doelpuntenmakers" en het aantal spelers staat sinds die dag onder de kop en niet meer onder de tabel; zie _De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop_.
 
 ### De kaart Doelpunten per kwartier telt de doelpunten van de wedstrijden met bekende minuten
 
@@ -5461,3 +5463,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `goalsPerQuarter` geeft daarvoor `extraTime`: waar als minstens één wedstrijd in de telling `extra_time` heeft.
   Een wedstrijd buiten de telling, zonder doelpunten of niet gespeeld, telt daarvoor niet mee.
 - **Alternatieven:** één diagram met twee ringen (compact, maar moeilijker te lezen); staafjes in plaats van een taart (leesbaarder, maar de projecteigenaar vroeg om een taart); de verlenging als aparte plakken; de wedstrijden zonder bekende doelpunten meetellen met nul doelpunten (de telling lijkt dan completer dan ze is).
+
+### De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de kaart "Topscorers" op `/wedstrijden` heet "Doelpuntenmakers", en het aantal spelers staat direct onder de kop, boven de tabel.
+- **Waarom:** de kaart toont alle spelers die scoorden, niet alleen de beste, en "Topscorers" belooft een top.
+  Het aantal onder de kop is dezelfde plek en stijl als bij "De nul gehouden", zodat de kaarten op elkaar lijken.
+- **Hoe:** de kop heeft het anker `doelpuntenmakers`, dat in `src/anchors.ts` staat.
+  Het oude anker `topscorers` blijft staan als oud anker (`aliases`) op de kop, zoals `nul-gehouden` bij de nul gehouden, en staat ook nog in `src/anchors.ts`, zodat de rooktest het blijft toetsen.
+  De regel met het aantal is gewone tekst en geen kleine tekst (`meta`) meer, net als bij de nul gehouden.
+  Het bijschrift van de tabel zegt "Doelpuntenmakers van sc Heerenveen in het seizoen …".
+  De namen in de code (`TopScorers`, `topScorersOf`, `TopScorersTable`) blijven, omdat bezoekers ze niet zien.
+- **Alternatieven:** "Topscorers" houden (kort en bekend, maar niet meer waar); "Wie scoorde" (dichter bij de spreektaal, maar minder netjes als kop).

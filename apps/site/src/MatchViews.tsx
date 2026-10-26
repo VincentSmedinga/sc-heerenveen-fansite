@@ -249,10 +249,10 @@ export function StandingsCard({ data }: { data: MatchData }) {
 }
 
 /**
- * Everybody who scored this season in a table with a bar, with a line under it for how many
- * players scored (the caption is for a screen reader only), and a line when not every played
- * match has its scorers, so nobody takes an incomplete list for a complete one. Without a goal
- * it is a sentence for visitors and no table.
+ * Everybody who scored this season: a line under the heading for how many players scored, as on
+ * the card of the clean sheets, then a table with a bar (its caption is for a screen reader
+ * only), and a line when not every played match has its scorers, so nobody takes an incomplete
+ * list for a complete one. Without a goal it is a sentence for visitors and no table.
  */
 export function TopScorers({ matches, season }: { matches: PublicMatch[]; season: string }) {
   const scorers = topScorersOf(matches)
@@ -264,13 +264,11 @@ export function TopScorers({ matches, season }: { matches: PublicMatch[]; season
 
   return (
     <>
+      <Text>{scorers.length === 1 ? '1 speler heeft gescoord' : `${scorers.length} spelers hebben gescoord`}</Text>
       <TopScorersTable
-        caption={`Topscorers van sc Heerenveen in het seizoen ${season}, in de Eredivisie en de KNVB Beker`}
+        caption={`Doelpuntenmakers van sc Heerenveen in het seizoen ${season}, in de Eredivisie en de KNVB Beker`}
         rows={scorers}
       />
-      <Text appearance="meta">
-        {scorers.length === 1 ? '1 speler heeft gescoord' : `${scorers.length} spelers hebben gescoord`}
-      </Text>
       {known < played && (
         <Text appearance="meta">
           Gebaseerd op de doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
