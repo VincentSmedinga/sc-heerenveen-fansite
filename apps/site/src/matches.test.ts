@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   cleanSheetsOf,
+  goalsPerQuarter,
   overviewOf,
   parseCleanSheetCount,
   scorersCoverage,
@@ -301,4 +302,153 @@ describe('parseCleanSheetCount', () => {
       expect(parseCleanSheetCount(value)).toBe(10)
     },
   )
+})
+
+describe('goalsPerQuarter', () => {
+  const minutes = (...list: number[]) => played(list.map((minute) => goal('Proefman', { minute })))
+
+  it('puts minutes 1 to 15, 16 to 30, 31 to 45, 46 to 60, 61 to 75 and 76 to 90 in the six quarters', () => {
+    const matches = [
+      minutes(1, 15),
+      minutes(16, 30),
+      minutes(31, 45),
+      minutes(46, 60),
+      minutes(61, 75),
+      minutes(76, 90),
+    ]
+
+    expect(goalsPerQuarter(matches).scored).toEqual([2, 2, 2, 2, 2, 2])
+  })
+
+  it('puts 15 in the first quarter and 16 in the second', () => {
+    expect(goalsPerQuarter([minutes(15)]).scored).toEqual([1, 0, 0, 0, 0, 0])
+    expect(goalsPerQuarter([minutes(16)]).scored).toEqual([0, 1, 0, 0, 0, 0])
+  })
+
+  it('counts a goal in stoppage time in the quarter before it: 45+1 in 31–45 and 90+3 in 76–90', () => {
+    const matches = [
+      played([
+        goal('Proefman', { minute: 45, stoppageMinutes: 1 }),
+        goal('Nepper', { minute: 90, stoppageMinutes: 3 }),
+      ]),
+    ]
+
+    expect(goalsPerQuarter(matches).scored).toEqual([0, 0, 1, 0, 0, 1])
+  })
+
+  it('counts minute 45 and minute 46 in different quarters', () => {
+    expect(goalsPerQuarter([minutes(45, 46)]).scored).toEqual([0, 0, 1, 1, 0, 0])
+  })
+
+  it('leaves out a goal in extra time, from minute 91', () => {
+    const matches = [minutes(90, 91, 105, 120)]
+
+    expect(goalsPerQuarter(matches).scored).toEqual([0, 0, 0, 0, 0, 1])
+  })
+
+  it('leaves out a goal in stoppage time of extra time', () => {
+    const matches = [played([goal('Proefman', { minute: 120, stoppageMinutes: 2 })])]
+
+    expect(goalsPerQuarter(matches)).toMatchObject({ known: 1, scored: [0, 0, 0, 0, 0, 0] })
+  })
+
+  it('leaves out a goal with minute 0, which no match has', () => {
+    expect(goalsPerQuarter([minutes(0)]).scored).toEqual([0, 0, 0, 0, 0, 0])
+  })
+
+  it('counts the goals of the opponents as goals against', () => {
+    const matches = [played([goal('Proefman', { minute: 10 }), goal('Teststraat', { minute: 80, ours: false })])]
+
+    expect(goalsPerQuarter(matches)).toMatchObject({ conceded: [0, 0, 0, 0, 0, 1], scored: [1, 0, 0, 0, 0, 0] })
+  })
+
+  it('counts an own goal for the club that profits: ours is a goal for us, not ours is a goal against', () => {
+    const matches = [
+      played([
+        goal('Teststraat', { minute: 20, ours: true, ownGoal: true }),
+        goal('Proefman', { minute: 50, ours: false, ownGoal: true }),
+      ]),
+    ]
+
+    expect(goalsPerQuarter(matches)).toMatchObject({ conceded: [0, 0, 0, 1, 0, 0], scored: [0, 1, 0, 0, 0, 0] })
+  })
+
+  it('counts the matches in the league and the cup alike', () => {
+    const cup = { ...minutes(10), competition: 'KNVB Beker' as const }
+
+    expect(goalsPerQuarter([minutes(10), cup]).scored).toEqual([2, 0, 0, 0, 0, 0])
+  })
+
+  it('counts a goalless draw as a match whose goals are known, without a goal', () => {
+    const draw = { ...match('Speelronde 2', 'played', '2026-08-08'), goalsAgainst: 0, goalsFor: 0 }
+
+    expect(goalsPerQuarter([draw, minutes(10)])).toEqual({
+      conceded: [0, 0, 0, 0, 0, 0],
+      extraTime: false,
+      known: 2,
+      played: 2,
+      scored: [1, 0, 0, 0, 0, 0],
+    })
+  })
+
+  it('leaves out a match with a score and no goals, because the page named none or they did not fit', () => {
+    const noGoals = { ...match('Speelronde 2', 'played', '2026-08-08'), goalsAgainst: 1, goalsFor: 2 }
+
+    expect(goalsPerQuarter([noGoals, minutes(10)])).toMatchObject({ known: 1, played: 2 })
+  })
+
+  it('leaves out a played match without a score, and a match that is not played, even with goals', () => {
+    const noScore = { ...minutes(10), goalsAgainst: null, goalsFor: null }
+    const scheduled = { ...minutes(10), status: 'scheduled' as const }
+
+    expect(goalsPerQuarter([noScore, scheduled, minutes(70)])).toEqual({
+      conceded: [0, 0, 0, 0, 0, 0],
+      extraTime: false,
+      known: 1,
+      played: 2,
+      scored: [0, 0, 0, 0, 1, 0],
+    })
+  })
+
+  it('says a match in the count went to extra time, and leaves out its goals after minute 90', () => {
+    const tie = { ...minutes(10, 100), competition: 'KNVB Beker' as const, extraTime: true }
+
+    expect(goalsPerQuarter([minutes(20), tie])).toMatchObject({ extraTime: true, scored: [1, 1, 0, 0, 0, 0] })
+  })
+
+  it('says no extra time when no match in the count had it', () => {
+    expect(goalsPerQuarter([minutes(10), minutes(20)]).extraTime).toBe(false)
+  })
+
+  it('does not say extra time for a match that is not in the count, such as one without goals or not played', () => {
+    const noGoals = {
+      ...match('Speelronde 2', 'played', '2026-08-08'),
+      competition: 'KNVB Beker' as const,
+      extraTime: true,
+      goalsAgainst: 1,
+      goalsFor: 2,
+    }
+    const scheduled = { ...minutes(10), extraTime: true, status: 'scheduled' as const }
+
+    expect(goalsPerQuarter([minutes(10), noGoals, scheduled]).extraTime).toBe(false)
+  })
+
+  it('gives zeroes and no matches for a season without matches', () => {
+    expect(goalsPerQuarter([])).toEqual({
+      conceded: [0, 0, 0, 0, 0, 0],
+      extraTime: false,
+      known: 0,
+      played: 0,
+      scored: [0, 0, 0, 0, 0, 0],
+    })
+  })
+
+  it('does not change the list it is given', () => {
+    const matches = [minutes(10, 50)]
+    const copy = structuredClone(matches)
+
+    goalsPerQuarter(matches)
+
+    expect(matches).toEqual(copy)
+  })
 })

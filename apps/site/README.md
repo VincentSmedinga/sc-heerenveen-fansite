@@ -185,8 +185,8 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 
 ## De wedstrijden
 
-`/wedstrijden` toont onder vijf kopjes het programma, de stand, de topscorers, de wedstrijden waarin we de nul hielden en de uitslagen van sc Heerenveen 1 (mannen) in het lopende seizoen.
-Het programma staat in de hoofdkolom en de stand met daaronder de topscorers, de nul gehouden en de uitslagen in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
+`/wedstrijden` toont onder zes kopjes het programma, de doelpunten per kwartier, de stand, de topscorers, de wedstrijden waarin we de nul hielden en de uitslagen van sc Heerenveen 1 (mannen) in het lopende seizoen.
+Het programma met daaronder de doelpunten per kwartier staat in de hoofdkolom en de stand met daaronder de topscorers, de nul gehouden en de uitslagen in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
 De gegevens komen van de importer (zie _De wedstrijden en de stand_ in de [README van de importer](../importer/README.md)) en `@fansite/db/queries` haalt ze op: `listSeasonMatches`, `listSeasonStandings` en `listWikipediaPages`, steeds voor één seizoen.
 `src/matches.ts` vraagt alleen het lopende seizoen (`seasonOf`) en bewaart het antwoord vijf minuten; eerdere seizoenen staan in de database en komen op geen enkele pagina.
@@ -194,6 +194,17 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 
 - **Programma:** alle wedstrijden die nog niet zijn gespeeld, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
+- **Doelpunten per kwartier:** een kaart in de hoofdkolom, onder het programma, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
+  `goalsPerQuarter` in `src/matches.ts` telt ze uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), in de competitie en de beker.
+  De kwartieren zijn 1–15, 16–30, 31–45, 46–60, 61–75 en 76–90.
+  Een doelpunt in blessuretijd telt bij het kwartier ervoor: 45+1 bij 31–45 en 90+3 bij 76–90.
+  Een doelpunt na minuut 90, in de verlenging, telt niet mee.
+  Een eigen doelpunt telt voor de club die ervan profiteert, zoals `ours` al regelt.
+  Een gespeelde wedstrijd telt mee als hij minstens één doelpunt heeft of eindigde in 0–0; een wedstrijd met een uitslag maar zonder doelpunten in `match_goals` heeft geen minuten en blijft erbuiten.
+  Onder het diagram staat dezelfde informatie als tabel (`DataTable`), die de schermlezer krijgt, want de diagrammen zijn voor hulpsoftware verborgen.
+  Daaronder staat "Gebaseerd op 8 van de 10 gespeelde wedstrijden".
+  Ging een wedstrijd in de telling naar de verlenging (`extra_time`), dan staat daaronder ook "Doelpunten in de verlenging tellen niet mee."; anders staat die zin er niet.
+  Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
 - **Stand:** de volledige tabel met een balk naast de punten, en een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.
   De balk verdwijnt op een smalle plek.
 - **Topscorers:** alle spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten.

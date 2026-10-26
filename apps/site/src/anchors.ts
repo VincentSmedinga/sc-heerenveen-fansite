@@ -22,7 +22,15 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
-  '/wedstrijden': ['programma', 'stand', 'topscorers', 'de-nul-gehouden', 'nul-gehouden', 'uitslagen'],
+  '/wedstrijden': [
+    'programma',
+    'doelpunten-per-kwartier',
+    'stand',
+    'topscorers',
+    'de-nul-gehouden',
+    'nul-gehouden',
+    'uitslagen',
+  ],
 }
 
 // Every id on the page, with the elements that carry it.

@@ -3,6 +3,8 @@ import type { PublicMatch, PublicStandingsRow, PublicWikipediaPage } from '@fans
 import {
   Button,
   Card,
+  DataTable,
+  DonutChart,
   Form,
   Heading,
   Link,
@@ -19,7 +21,15 @@ import type { MatchData } from './matches'
 
 import { moreCleanSheets } from './items-per-card'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
-import { cleanSheetsOf, overviewOf, scorersCoverage, standingsAround, topScorersOf } from './matches'
+import {
+  cleanSheetsOf,
+  goalsPerQuarter,
+  overviewOf,
+  quarterLabels,
+  scorersCoverage,
+  standingsAround,
+  topScorersOf,
+} from './matches'
 
 /**
  * The card of the matches page with the matches in which sc Heerenveen kept a clean sheet, as
@@ -65,6 +75,52 @@ export function CleanSheetsCard({ count, matches, now }: { count: number; matche
               </Button>
             </Form>
           )}
+        </>
+      )}
+    </Card>
+  )
+}
+
+/**
+ * The card of the matches page with the goals of sc Heerenveen and of its opponents per quarter
+ * of an hour: two donut charts, for and against, with the same numbers in a table under them,
+ * which is what a screen reader gets, because the charts are hidden from it. Under the table
+ * stand how many matches the count is based on, because a match without known goals has no
+ * minutes, and, when one of those matches went to extra time, a line that extra time is left
+ * out. Without a goal in the matches we know, it is a sentence for visitors and no empty
+ * charts.
+ */
+export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
+  const { conceded, extraTime, known, played, scored } = goalsPerQuarter(matches)
+  const slices = (counts: number[]) => quarterLabels.map((label, index) => ({ label, value: counts[index] ?? 0 }))
+
+  return (
+    <Card aria-labelledby="doelpunten-per-kwartier">
+      <Heading anchor id="doelpunten-per-kwartier" level={2}>
+        Doelpunten per kwartier
+      </Heading>
+      {[...scored, ...conceded].every((count) => count === 0) ? (
+        <Text>We hebben nog geen doelpunten met een minuut van dit seizoen. Kijk straks nog eens.</Text>
+      ) : (
+        <>
+          <DonutChart.Group>
+            <DonutChart slices={slices(scored)} title="Voor" tone="positive" />
+            <DonutChart slices={slices(conceded)} title="Tegen" tone="negative" />
+          </DonutChart.Group>
+          <DataTable
+            caption="Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd"
+            columns={['Kwartier', 'Voor', 'Tegen']}
+            rows={quarterLabels.map((label, index) => ({
+              cells: [scored[index] ?? 0, conceded[index] ?? 0],
+              header: label,
+            }))}
+          />
+          <Text appearance="meta">
+            {known === played
+              ? `Gebaseerd op ${known === 1 ? '1 gespeelde wedstrijd' : `alle ${known} gespeelde wedstrijden`}`
+              : `Gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}
+          </Text>
+          {extraTime && <Text appearance="meta">Doelpunten in de verlenging tellen niet mee.</Text>}
         </>
       )}
     </Card>
