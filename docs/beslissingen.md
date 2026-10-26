@@ -1724,6 +1724,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Geen scrollen opzij van 280 tot 1200 pixels breed, dus ook niet op 320 pixels (400% zoom op 1280 pixels).
 - **Alternatieven:** de zijbalk 2 rem breder maken; de hoofdkolom blijft dan op de leeslengte van 36 rem, maar de zijbalk heeft zelden zoveel nodig.
   De pagina breder maken; dat raakt de header, de footer en het logo.
+- **Later:** zie _/wedstrijden heeft een zijbalk van 32 rem met de stand en de uitslagen_.
+  Een pagina kan met `wide` op de `Page.Sidebar` een hoofdkolom van 30 rem en een zijbalk van 32 rem kiezen; elke andere pagina houdt 38, 2 en 24 rem.
 
 ### Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query
 
@@ -4632,3 +4634,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een tabel (past bij gegevens in kolommen, maar scrolt op een telefoon opzij); een terugzetknop (meer scherm en meer regels voor wat er met de publicatie gebeurt, nog niet nodig); de versies op een eigen pagina (een klik meer voor wie net iets heeft overschreven).
 - **Een artikel dat alleen met SQL is gemaakt of veranderd** heeft geen versie van die wijziging, want SQL gaat om de site heen (zie `docs/artikelen.md`).
   De pagina zegt dat er nog geen versie is, en de eerstvolgende wijziging in het beheer geeft de eerste.
+
+### /wedstrijden heeft een zijbalk van 32 rem met de stand en de uitslagen
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** op `/wedstrijden` staat het programma in de hoofdkolom van 30 rem, en in de zijbalk van 32 rem de stand met daaronder de uitslagen.
+  Alleen deze pagina wijkt af van de verdeling van 38, 2 en 24 rem.
+- **Waarom:** de stand is een brede tabel met negen kolommen en past in 32 rem zonder te scrollen.
+  Het programma is een lijst met korte regels en heeft aan 30 rem genoeg.
+  De stand staat bovenaan de zijbalk, omdat dat is waar supporters het eerst naar kijken.
+- **Hoe:** de pagina kiest de verdeling met `wide` op de `Page.Sidebar`, niet met een eigenschap van `Page.Body`, want de `Page.Body` staat in de layout van de site en is voor alle pagina's dezelfde.
+  `Page.Body` ziet de brede zijbalk met `:has()`, zoals het ook een inleiding ziet.
+  Vanaf 56 rem zijn de sporen `minmax(20rem, 30rem)` en `minmax(24rem, 32rem)`; samen met de 2 rem ertussen passen ze bij 56 rem in de 52 rem die er dan zijn.
+  Tot 66 rem breed krimpen ze mee, de zijbalk dus het eerst tot 24 rem, en scrollt de tabel zo nodig in zijn eigen gebied.
+  Onder 56 rem is er één spoor van hoogstens 38 rem, zoals op elke pagina.
+  De cellen van een brede zijbalk staan altijd onder elkaar, ook onder de hoofdkolom, waar twee cellen van 16 rem naast elkaar zouden passen: de stand heeft de breedte van de kolom nodig.
+  De volgorde in de bron is die op een telefoon: het programma, de stand, de uitslagen, zonder `order`.
+  De bronvermelding staat onderaan de zijbalk, zodat ze op een telefoon na de uitslagen komt en niet tussen het programma en de stand.
+- **Alternatieven:** alles in één kolom laten, zoals nu (de stand staat onderaan, onder een lange lijst); de verdeling voor alle pagina's wijzigen (raakt de homepage en de artikelen, die een smalle zijbalk nodig hebben).

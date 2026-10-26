@@ -267,6 +267,17 @@ describe('Page.Sidebar', () => {
     expect(screen.getByRole('complementary').id).toBe('zijbalk')
   })
 
+  it('adds a class for the wide sidebar only with `wide`, and passes no `wide` on to the element', () => {
+    const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" wide />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-wide extra')
+    expect(screen.getByRole('complementary').hasAttribute('wide')).toBe(false)
+
+    rerender(<Page.Sidebar aria-label="Zijbalk" wide={false} />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
+  })
+
   it('is called Page.Sidebar in the developer tools and the code examples', () => {
     expect(Page.Sidebar.displayName).toBe('Page.Sidebar')
   })

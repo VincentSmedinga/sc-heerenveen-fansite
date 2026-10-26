@@ -39,15 +39,39 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden', () => {
-  it('has one h1 and three h2 headings in order: the programme, the results and the table', async () => {
+  it('has one h1 and three h2 headings in order: the programme, the table and the results', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Wedstrijden</h1>',
       '<h2 class="hf-heading-2" id="programma">Programma</h2>',
-      '<h2 class="hf-heading-2" id="uitslagen">Uitslagen</h2>',
       '<h2 class="hf-heading-2" id="stand">Stand</h2>',
+      '<h2 class="hf-heading-2" id="uitslagen">Uitslagen</h2>',
     ])
+  })
+
+  it('has the programme in the main with the h1, and the table and the results in a named, wide sidebar after it', async () => {
+    const html = await render()
+    const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
+    const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
+
+    expect(html.match(/<main/g)).toHaveLength(1)
+    expect(html.match(/<aside/g)).toHaveLength(1)
+    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(sidebar).toMatch(
+      /^<aside class="hf-page-sidebar hf-page-sidebar-wide" aria-label="De stand en de uitslagen">/,
+    )
+    expect(main.match(/<h1/g)).toHaveLength(1)
+    expect(main).toContain('id="programma"')
+    expect(main).not.toContain('id="stand"')
+    expect(main).not.toContain('id="uitslagen"')
+    expect(sidebar.indexOf('id="stand"')).toBeLessThan(sidebar.indexOf('id="uitslagen"'))
+    expect(sidebar).not.toContain('<h1')
+    expect(sidebar).not.toContain('id="programma"')
+  })
+
+  it('has no order or style attribute, so the order on a phone is the order in the source', async () => {
+    expect(await render()).not.toMatch(/ style=|order:/)
   })
 
   it('names each card by its h2, so the links with a hash on the homepage have a target', async () => {
@@ -102,6 +126,9 @@ describe('the page /wedstrijden', () => {
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)"')
     expect(html).toContain('<time dateTime="2026-10-23T12:05:00.000Z">23 oktober 2026 om 14:05</time>')
     expect(html.lastIndexOf('hf-wikipedia-credit')).toBeGreaterThan(html.lastIndexOf('</table>'))
+    // Last in the sidebar, so on a phone it follows the results and not the programme.
+    expect(html.lastIndexOf('hf-wikipedia-credit')).toBeGreaterThan(html.indexOf('id="uitslagen"'))
+    expect(html.match(/<aside.*<\/aside>/s)?.[0]).toContain('hf-wikipedia-credit')
   })
 
   it('has no link to another site except in the credit, and loads nothing from another domain', async () => {

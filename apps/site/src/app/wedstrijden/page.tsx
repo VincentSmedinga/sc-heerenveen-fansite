@@ -50,51 +50,61 @@ export default async function MatchesPage() {
   const now = new Date()
 
   return (
-    <Page.Main
-      intro={
-        <>
-          <Heading level={1}>Wedstrijden</Heading>
-          <Text appearance="intro">Het programma, de uitslagen en de stand van sc Heerenveen 1 dit seizoen.</Text>
-        </>
-      }
-    >
-      <Card aria-labelledby="programma">
-        <Heading id="programma" level={2}>
-          Programma
-        </Heading>
-        {programme.length === 0 ? (
-          <Text>
-            {data.matches.length === 0
-              ? 'We hebben het programma nog niet gevonden. Kijk straks nog eens.'
-              : 'Er staan dit seizoen geen wedstrijden meer op het programma.'}
-          </Text>
-        ) : (
-          <MatchLines matches={programme} now={now} />
+    <>
+      <Page.Main
+        intro={
+          <>
+            <Heading level={1}>Wedstrijden</Heading>
+            <Text appearance="intro">Het programma, de uitslagen en de stand van sc Heerenveen 1 dit seizoen.</Text>
+          </>
+        }
+      >
+        <Card aria-labelledby="programma">
+          <Heading id="programma" level={2}>
+            Programma
+          </Heading>
+          {programme.length === 0 ? (
+            <Text>
+              {data.matches.length === 0
+                ? 'We hebben het programma nog niet gevonden. Kijk straks nog eens.'
+                : 'Er staan dit seizoen geen wedstrijden meer op het programma.'}
+            </Text>
+          ) : (
+            <MatchLines matches={programme} now={now} />
+          )}
+        </Card>
+      </Page.Main>
+      {/* The table is wide, so the sidebar is too. On a phone it follows the programme: the table, then the
+          results. */}
+      <Page.Sidebar aria-label="De stand en de uitslagen" wide>
+        <Card aria-labelledby="stand">
+          <Heading id="stand" level={2}>
+            Stand
+          </Heading>
+          {data.standings.length === 0 ? (
+            <Text>We hebben de stand nog niet gevonden. Kijk straks nog eens.</Text>
+          ) : (
+            <StandingsTable
+              caption={standingsCaption(data.standings)}
+              label="De volledige stand"
+              rows={data.standings}
+            />
+          )}
+        </Card>
+        <Card aria-labelledby="uitslagen">
+          <Heading id="uitslagen" level={2}>
+            Uitslagen
+          </Heading>
+          {results.length === 0 ? (
+            <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+          ) : (
+            <MatchLines matches={results} now={now} />
+          )}
+        </Card>
+        {(data.matches.length > 0 || data.standings.length > 0) && (
+          <SourceCredit pages={data.pages} season={data.season} />
         )}
-      </Card>
-      <Card aria-labelledby="uitslagen">
-        <Heading id="uitslagen" level={2}>
-          Uitslagen
-        </Heading>
-        {results.length === 0 ? (
-          <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
-        ) : (
-          <MatchLines matches={results} now={now} />
-        )}
-      </Card>
-      <Card aria-labelledby="stand">
-        <Heading id="stand" level={2}>
-          Stand
-        </Heading>
-        {data.standings.length === 0 ? (
-          <Text>We hebben de stand nog niet gevonden. Kijk straks nog eens.</Text>
-        ) : (
-          <StandingsTable caption={standingsCaption(data.standings)} label="De volledige stand" rows={data.standings} />
-        )}
-      </Card>
-      {(data.matches.length > 0 || data.standings.length > 0) && (
-        <SourceCredit pages={data.pages} season={data.season} />
-      )}
-    </Page.Main>
+      </Page.Sidebar>
+    </>
   )
 }
