@@ -119,6 +119,7 @@ const renderBalanced = () => (
       dateTime="2026-10-23"
       href="#frysk"
       intro="Een korte inleiding."
+      lang="fy"
       title="Wy sykje mear fanwegen yn de redaksje fan de Fansite"
     />
   </div>

@@ -312,6 +312,7 @@ const renderBalanced = () => (
             dateTime="2026-10-20T08:15:00Z"
             headline="Hearrenfean wûn yn de lêste minút fan in spannende wedstriid tsjin Test Boys"
             href="#frysk"
+            lang="fy"
             source="Testkrante"
             time="di 10:15"
           />
