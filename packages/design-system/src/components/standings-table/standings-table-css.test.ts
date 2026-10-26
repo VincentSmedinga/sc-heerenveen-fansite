@@ -17,6 +17,10 @@ describe('standings-table.css', () => {
     expect(declarationsOf('.hf-standings')).toMatch(/position: relative/u)
   })
 
+  it('gives the space that is left to the club, so the columns of numbers sit close together', () => {
+    expect(declarationsOf('.hf-standings-table thead th:not(.hf-numeric)')).toMatch(/inline-size: 100%/u)
+  })
+
   it('makes the points bold, like the row of our own club', () => {
     expect(declarationsOf('.hf-standings-table td.hf-standings-points')).toMatch(/font-weight: 700/u)
   })

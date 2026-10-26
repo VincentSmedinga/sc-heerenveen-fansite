@@ -38,6 +38,14 @@
   }
 
   /*
+   * The club takes the space that is left, so the columns of numbers sit close to each other, at
+   * the end of the row, and not spread over the width of the table.
+   */
+  .hf-standings-table thead th:not(.hf-numeric) {
+    inline-size: 100%;
+  }
+
+  /*
    * The row of sc Heerenveen is marked by more than its colour: it is bold (base/table.css),
    * and its first cell has a bar on the start side, which also shows in forced colours.
    */
