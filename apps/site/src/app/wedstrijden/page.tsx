@@ -84,11 +84,7 @@ export default async function MatchesPage() {
           {data.standings.length === 0 ? (
             <Text>We hebben de stand nog niet gevonden. Kijk straks nog eens.</Text>
           ) : (
-            <StandingsTable
-              caption={standingsCaption(data.standings)}
-              label="De volledige stand"
-              rows={data.standings}
-            />
+            <StandingsTable caption={standingsCaption(data.standings)} rows={data.standings} />
           )}
         </Card>
         <Card aria-labelledby="uitslagen">

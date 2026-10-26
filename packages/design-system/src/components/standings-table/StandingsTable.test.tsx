@@ -1,52 +1,74 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { StandingsTable, type StandingsTableRow } from './StandingsTable'
+import { pointsShares, StandingsTable, type StandingsTableRow } from './StandingsTable'
 
 const rows: StandingsTableRow[] = [
-  {
-    club: 'Demo Boys',
-    drawn: 1,
-    goalDifference: 1,
-    lost: 0,
-    played: 2,
-    points: 4,
-    position: 1,
-    won: 1,
-  },
-  {
-    club: 'sc Heerenveen',
-    drawn: 0,
-    goalDifference: 3,
-    lost: 0,
-    played: 2,
-    points: 6,
-    position: 2,
-    won: 2,
-  },
-  {
-    club: 'Testdorp FC',
-    drawn: 1,
-    goalDifference: -2,
-    lost: 1,
-    played: 2,
-    points: 1,
-    position: 3,
-    won: 0,
-  },
-  {
-    club: 'Nepstad Rangers',
-    drawn: 0,
-    goalDifference: 0,
-    lost: 0,
-    played: 2,
-    points: 0,
-    position: 4,
-    won: 0,
-  },
+  { club: 'Demo Boys', played: 2, points: 4, position: 1 },
+  { club: 'sc Heerenveen', played: 2, points: 6, position: 2 },
+  { club: 'Testdorp FC', played: 2, points: 1, position: 3 },
+  { club: 'Nepstad Rangers', played: 2, points: 0, position: 4 },
 ]
 
-const props = { caption: 'Stand op 18 oktober 2026', label: 'De volledige stand', rows }
+const props = { caption: 'Stand op 18 oktober 2026', rows }
+
+/** The length of the bars, in the order of the rows. */
+const barLengths = (container: HTMLElement) =>
+  [...container.querySelectorAll<HTMLElement>('.hf-standings-bar')].map((bar) =>
+    bar.style.getPropertyValue('--hf-points-share'),
+  )
+
+describe('pointsShares', () => {
+  it('gives the leader the whole bar and a club with half of the points half', () => {
+    expect(
+      pointsShares([
+        { ...rows[0]!, points: 20 },
+        { ...rows[1]!, points: 10 },
+      ]),
+    ).toEqual([100, 50])
+  })
+
+  it('gives a club without points an empty bar', () => {
+    expect(pointsShares(rows)).toEqual([66.67, 100, 16.67, 0])
+  })
+
+  it('gives clubs with the same points the same bar', () => {
+    expect(pointsShares(rows.map((row) => ({ ...row, points: 7 })))).toEqual([100, 100, 100, 100])
+  })
+
+  it('takes the leader from the points, not from the first row', () => {
+    expect(
+      pointsShares([
+        { ...rows[0]!, points: 3 },
+        { ...rows[1]!, points: 12 },
+      ]),
+    ).toEqual([25, 100])
+  })
+
+  it('shows 1 point behind a leader of 25 as 4% of the bar', () => {
+    expect(
+      pointsShares([
+        { ...rows[0]!, points: 25 },
+        { ...rows[1]!, points: 24 },
+        { ...rows[2]!, points: 1 },
+      ]),
+    ).toEqual([100, 96, 4])
+  })
+
+  it('has no bars when nobody has points, so no division by zero', () => {
+    expect(pointsShares(rows.map((row) => ({ ...row, points: 0 })))).toBeNull()
+    expect(pointsShares([])).toBeNull()
+  })
+
+  it('keeps a share between 0 and 100', () => {
+    expect(
+      pointsShares([
+        { ...rows[0]!, points: -3 },
+        { ...rows[1]!, points: 5 },
+      ]),
+    ).toEqual([0, 100])
+  })
+})
 
 describe('StandingsTable', () => {
   it('is a real table with the caption that names it and says the day, for a screen reader only', () => {
@@ -66,11 +88,7 @@ describe('StandingsTable', () => {
       '#',
       'Club',
       'G',
-      'W',
-      'G',
-      'V',
       'P',
-      'D',
     ])
     expect(headers.every((header) => header.getAttribute('scope') === 'col')).toBe(true)
     expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual([
@@ -82,14 +100,27 @@ describe('StandingsTable', () => {
     expect(document.querySelectorAll('tbody th[scope="row"]')).toHaveLength(4)
   })
 
-  it('names every column header by its full word for a screen reader, so the two G columns differ', () => {
+  it('has no column for won, drawn or lost, in the full table or the short one', () => {
+    const { rerender } = render(<StandingsTable {...props} />)
+
+    for (const name of ['gewonnen', 'gelijk', 'verloren']) {
+      expect(screen.queryByRole('columnheader', { name })).toBeNull()
+    }
+
+    rerender(<StandingsTable {...props} columns="compact" />)
+
+    for (const name of ['gewonnen', 'gelijk', 'verloren']) {
+      expect(screen.queryByRole('columnheader', { name })).toBeNull()
+    }
+  })
+
+  it('names every column header by its full word for a screen reader', () => {
     render(<StandingsTable {...props} />)
 
     expect(
       screen.getAllByRole('columnheader').map((header) => header.querySelector('.hf-visually-hidden')?.textContent),
-    ).toEqual(['positie', undefined, 'gespeeld', 'gewonnen', 'gelijk', 'verloren', 'punten', 'doelsaldo'])
+    ).toEqual(['positie', undefined, 'gespeeld', 'punten'])
     expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
-    expect(screen.getByRole('columnheader', { name: 'gelijk' })).toBeTruthy()
   })
 
   it('does so in the short form too, where there is no legend', () => {
@@ -97,7 +128,6 @@ describe('StandingsTable', () => {
 
     expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
     expect(screen.getByRole('columnheader', { name: 'punten' })).toBeTruthy()
-    expect(screen.getByRole('columnheader', { name: 'doelsaldo' })).toBeTruthy()
   })
 
   it('gives every abbreviation its full word, in the title and under the table', () => {
@@ -106,64 +136,67 @@ describe('StandingsTable', () => {
     expect([...container.querySelectorAll('thead abbr')].map((abbr) => abbr.getAttribute('title'))).toEqual([
       'Positie',
       'Gespeeld',
-      'Gewonnen',
-      'Gelijk',
-      'Verloren',
       'Punten',
-      'Doelsaldo',
     ])
-    expect(container.querySelector('.hf-standings-legend')?.textContent).toBe(
-      'G gespeeld, W gewonnen, G gelijk, V verloren, P punten, D doelsaldo',
-    )
+    expect(container.querySelector('.hf-standings-legend')?.textContent).toBe('G gespeeld, P punten')
   })
 
-  it('writes the numbers of a club in the columns of the headers, the points before the goal difference', () => {
+  it('writes the numbers of a club in the columns of the headers', () => {
     render(<StandingsTable {...props} />)
     const row = screen.getByRole('row', { name: /sc Heerenveen/u })
 
-    // Position, played, won, drawn, lost, points, goal difference.
+    // Position, played, points.
     expect(
       within(row)
         .getAllByRole('cell')
         .map((cell) => cell.textContent),
-    ).toEqual(['2', '2', '2', '0', '0', '6', '+3'])
+    ).toEqual(['2', '2', '6'])
   })
 
-  it('does so in the short form too, with the points before the goal difference', () => {
+  it('does so in the short form too', () => {
     render(<StandingsTable {...props} columns="compact" />)
     const row = screen.getByRole('row', { name: /sc Heerenveen/u })
 
-    // Position, played, points, goal difference.
     expect(
       within(row)
         .getAllByRole('cell')
         .map((cell) => cell.textContent),
-    ).toEqual(['2', '2', '6', '+3'])
+    ).toEqual(['2', '2', '6'])
   })
 
-  it('puts the points in the column before the last, in a class of their own', () => {
+  it('puts the points in the last column, in a class of their own', () => {
     const { container } = render(<StandingsTable {...props} />)
     const cells = [...container.querySelectorAll('tbody tr:nth-child(2) td')]
 
-    expect(cells.at(-2)?.textContent).toBe('6')
-    expect(cells.at(-2)?.className).toBe('hf-numeric hf-standings-points')
-    expect(cells.at(-1)?.className).toBe('hf-numeric')
+    expect(cells.at(-1)?.textContent).toBe('6')
+    expect(cells.at(-1)?.className).toBe('hf-numeric hf-standings-points')
+    expect(cells.at(-2)?.className).toBe('hf-numeric')
     expect(container.querySelectorAll('.hf-standings-points')).toHaveLength(4)
   })
 
-  it('writes a negative goal difference with a minus sign and a goalless one as 0', () => {
-    render(<StandingsTable {...props} />)
+  it('gives the header of the points the space of the bar, so it stays above the numbers, only with bars', () => {
+    const { container, rerender } = render(<StandingsTable {...props} />)
 
-    expect(
-      within(screen.getByRole('row', { name: /Testdorp/u }))
-        .getAllByRole('cell')
-        .at(-1)?.textContent,
-    ).toBe('−2')
-    expect(
-      within(screen.getByRole('row', { name: /Nepstad/u }))
-        .getAllByRole('cell')
-        .at(-1)?.textContent,
-    ).toBe('0')
+    expect(container.querySelectorAll('th.hf-standings-bars')).toHaveLength(1)
+    expect(container.querySelector('th.hf-standings-bars')?.textContent).toBe('Ppunten')
+
+    rerender(<StandingsTable {...props} columns="compact" />)
+
+    expect(container.querySelector('th.hf-standings-bars')).toBeNull()
+
+    rerender(<StandingsTable {...props} rows={rows.map((row) => ({ ...row, points: 0 }))} />)
+
+    expect(container.querySelector('th.hf-standings-bars')).toBeNull()
+  })
+
+  it('has no column for the goal difference, in the full table or the short one', () => {
+    const { rerender } = render(<StandingsTable {...props} />)
+
+    expect(screen.queryByRole('columnheader', { name: 'doelsaldo' })).toBeNull()
+
+    rerender(<StandingsTable {...props} columns="compact" />)
+
+    expect(screen.queryByRole('columnheader', { name: 'doelsaldo' })).toBeNull()
   })
 
   it('makes the row of sc Heerenveen stand out by more than colour, and no other row', () => {
@@ -175,24 +208,79 @@ describe('StandingsTable', () => {
     expect(marked[0]?.querySelector('.hf-visually-hidden')?.textContent).toBe(' (onze club)')
   })
 
-  it('puts the table in an area that scrolls sideways, has a name and can be reached with the keyboard', () => {
-    render(<StandingsTable {...props} />)
-    const area = screen.getByRole('region', { name: 'De volledige stand' })
+  describe('the bars', () => {
+    it('puts a bar in the cell of the points of every club, as long as the share of the leader', () => {
+      const { container } = render(<StandingsTable {...props} />)
 
-    expect(area.getAttribute('tabindex')).toBe('0')
-    expect(within(area).getByRole('table')).toBeTruthy()
+      expect(barLengths(container)).toEqual(['66.67', '100', '16.67', '0'])
+      expect(
+        [...container.querySelectorAll('.hf-standings-bar')].every((bar) =>
+          bar.parentElement?.matches('td.hf-standings-points'),
+        ),
+      ).toBe(true)
+    })
+
+    it('hides the bars from a screen reader and gives them no role, name or text', () => {
+      const { container } = render(<StandingsTable {...props} />)
+      const bars = [...container.querySelectorAll('.hf-standings-bar')]
+
+      expect(bars).toHaveLength(4)
+
+      for (const bar of bars) {
+        expect(bar.getAttribute('aria-hidden')).toBe('true')
+        expect(bar.getAttribute('role')).toBeNull()
+        expect(bar.getAttribute('aria-label')).toBeNull()
+        expect(bar.textContent).toBe('')
+      }
+    })
+
+    it('does not add a cell or a header for the bars, so the table has the same cells as without them', () => {
+      const { container } = render(<StandingsTable {...props} />)
+      const cells = within(screen.getByRole('row', { name: /sc Heerenveen/u })).getAllByRole('cell')
+
+      expect(cells.map((cell) => cell.textContent)).toEqual(['2', '2', '6'])
+      expect(screen.getAllByRole('columnheader')).toHaveLength(4)
+      expect(container.querySelectorAll('tbody tr:nth-child(2) td')).toHaveLength(3)
+      expect(container.querySelector('.hf-standings-legend')?.textContent).not.toMatch(/balk/iu)
+    })
+
+    it('makes equal points equal bars', () => {
+      const { container } = render(<StandingsTable {...props} rows={rows.map((row) => ({ ...row, points: 7 }))} />)
+
+      expect(barLengths(container)).toEqual(['100', '100', '100', '100'])
+    })
+
+    it('has no bars when nobody has points, and no bars for a leader with zero points', () => {
+      const { container } = render(<StandingsTable {...props} rows={rows.map((row) => ({ ...row, points: 0 }))} />)
+
+      expect(container.querySelector('.hf-standings-bar')).toBeNull()
+      expect(screen.getAllByRole('cell').filter((cell) => cell.classList.contains('hf-standings-points'))).toHaveLength(
+        4,
+      )
+    })
+
+    it('has no bars in the short form', () => {
+      const { container } = render(<StandingsTable {...props} columns="compact" />)
+
+      expect(container.querySelector('.hf-standings-bar')).toBeNull()
+    })
   })
 
-  it('leaves out the columns of won, drawn and lost in compact, with no scrolling area and no legend', () => {
-    render(<StandingsTable {...props} columns="compact" />)
+  it('has no area that scrolls sideways', () => {
+    const { container } = render(<StandingsTable {...props} />)
 
-    expect(
-      screen
-        .getAllByRole('columnheader')
-        .map((header) => header.querySelector('[aria-hidden="true"]')?.textContent ?? 'Club'),
-    ).toEqual(['#', 'Club', 'G', 'P', 'D'])
     expect(screen.queryByRole('region')).toBeNull()
-    expect(document.querySelector('.hf-standings-legend')).toBeNull()
+    expect(container.querySelector('[tabindex]')).toBeNull()
+  })
+
+  it('has a legend in the full table only', () => {
+    const { container, rerender } = render(<StandingsTable {...props} />)
+
+    expect(container.querySelector('.hf-standings-legend')).not.toBeNull()
+
+    rerender(<StandingsTable {...props} columns="compact" />)
+
+    expect(container.querySelector('.hf-standings-legend')).toBeNull()
   })
 
   it('shows the names of clubs as text, not as HTML', () => {

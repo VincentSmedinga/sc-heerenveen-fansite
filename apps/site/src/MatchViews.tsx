@@ -120,7 +120,6 @@ export function StandingsCard({ data }: { data: MatchData }) {
         <StandingsTable
           caption={standingsCaption(data.standings)}
           columns="compact"
-          label="De stand"
           rows={standingsAround(data.standings)}
         />
       )}

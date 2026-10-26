@@ -1,42 +1,27 @@
 /*
  * The league table. The table itself takes its look from base/table.css (tabular figures, a
- * thin line between rows, .hf-numeric, .hf-rank and .hf-highlight). This file adds the area
- * that scrolls sideways, the bar on the row of our own club and the legend of the
- * abbreviations.
+ * thin line between rows, .hf-numeric, .hf-rank and .hf-highlight). This file adds the bar on
+ * the row of our own club, the bars next to the points and the legend of the abbreviations.
  */
 
 @layer hf.components {
   /*
-   * The area that scrolls: as wide as the space it is in, and the table inside it as wide as it
-   * needs to be, so a table that is too wide scrolls here and the page does not. The table does
-   * not shrink below what its cells need, and its cells do not wrap, so a number never breaks.
-   * The focus ring is drawn inside the area, with an offset of its own, so the overflow of the
-   * area does not cut it off. The area is positioned, so the hidden words in the column headers
-   * (hf-visually-hidden, which is absolute) stay in it and are scrolled with it; otherwise they
-   * sit where the headers have scrolled to and make the page itself wider.
+   * The wrapper is the container for the query below: an element can't query its own size, so
+   * the bars inside it query the width of the place the table sits in, not the screen. It is
+   * positioned too, so the hidden words in the column headers (hf-visually-hidden, which is
+   * absolute) stay in it and the page does not get wider.
    */
-  .hf-standings-scroll {
-    overflow-x: auto;
-    position: relative;
-
-    &:focus-visible {
-      outline-offset: -2px;
-    }
-
-    > table {
-      inline-size: 100%;
-      min-inline-size: max-content;
-    }
-  }
-
-  /* In the short form there is no area, so the wrapper holds the hidden words of the headers. */
   .hf-standings {
+    --hf-standings-bar-gap: 1.25rem;
+    --hf-standings-bar-size: 3.5rem;
+
+    container-name: hf-standings;
+    container-type: inline-size;
     position: relative;
   }
 
   /* The table of a card has no space below it: the legend is under it. */
-  .hf-standings > table,
-  .hf-standings-scroll > table {
+  .hf-standings > table {
     margin-block-end: 0.5rem;
   }
 
@@ -46,10 +31,18 @@
       white-space: nowrap;
     }
 
-    /* The club may wrap, so a long name does not make a narrow table scroll. */
+    /* The club may wrap, so a long name does not make a narrow table wider than its place. */
     tbody th {
       white-space: normal;
     }
+  }
+
+  /*
+   * The club takes the space that is left, so the columns of numbers sit close to each other, at
+   * the end of the row, and not spread over the width of the table.
+   */
+  .hf-standings-table thead th:not(.hf-numeric) {
+    inline-size: 100%;
   }
 
   /*
@@ -63,6 +56,66 @@
   /* The points are what the table is ordered by, so they are bold, like our own row. */
   .hf-standings-table td.hf-standings-points {
     font-weight: 700;
+  }
+
+  /*
+   * The bar for the points sits to the end of the number, in the same cell, so the numbers stay
+   * in line. It is as long as the share of the leader's points, which the component gives as a
+   * number from 0 to 100 in --hf-points-share, so a club with half of the points has half of
+   * the bar. The fill is the green of a win, because points come from wins: a calm 70% of it,
+   * which reaches 3:1 on the card in light and in dark, and the whole green for the row of sc
+   * Heerenveen. The bar is decoration, so a screen reader skips it (aria-hidden).
+   */
+  .hf-standings-bar {
+    block-size: 0.75rem;
+    display: inline-block;
+    inline-size: var(--hf-standings-bar-size);
+    margin-inline-start: var(--hf-standings-bar-gap);
+    vertical-align: -0.0625rem;
+
+    &::before {
+      background-color: color-mix(in srgb, var(--hf-colour-outcome-win) 70%, transparent);
+      block-size: 100%;
+      border-end-end-radius: 0.125rem;
+      border-start-end-radius: 0.125rem;
+      content: '';
+      display: block;
+      inline-size: calc(var(--hf-points-share) * 1%);
+    }
+  }
+
+  /*
+   * The header of the points is above the numbers, not above the bars: it has the space
+   * of the bar at its end, like the cells have. Without bars there is no space to keep.
+   */
+  .hf-standings-table th.hf-standings-bars {
+    padding-inline-end: calc(0.5rem + var(--hf-standings-bar-gap) + var(--hf-standings-bar-size));
+  }
+
+  .hf-standings-table-own .hf-standings-bar::before {
+    background-color: var(--hf-colour-outcome-win);
+  }
+
+  /* In forced colours a background colour is replaced, unless it is a system colour. */
+  @media (forced-colors: active) {
+    .hf-standings-bar::before {
+      background-color: CanvasText;
+    }
+  }
+
+  /*
+   * Too narrow for the bar: the table keeps its columns without it. The width is that of the
+   * place the table sits in, such as a card, and not of the screen. It is chosen so that the
+   * table without a bar does not scroll sideways on a screen of 320 pixels at 400% zoom.
+   */
+  @container hf-standings (inline-size < 19rem) {
+    .hf-standings-bar {
+      display: none;
+    }
+
+    .hf-standings-table th.hf-standings-bars {
+      padding-inline-end: 0.5rem;
+    }
   }
 
   /*
