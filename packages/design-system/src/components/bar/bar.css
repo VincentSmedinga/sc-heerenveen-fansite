@@ -1,16 +1,16 @@
 /*
- * The bar next to a number in a table, shared by the tables that have one (the standings and the
- * top scorers). The table itself takes its look from base/table.css (tabular figures, a thin line
- * between rows, .hf-numeric and .hf-rank). This file adds the place of the bar, the bar itself
- * and the layout of a table whose last column holds a number with a bar.
+ * The bar next to a number in a table, shared by the tables that have one (the standings and
+ * the top scorers). The table itself takes its look from base/table.css (tabular figures, a
+ * thin line between rows, .hf-numeric and .hf-rank). This file adds the place of the bar, the
+ * bar itself and the layout of a table whose last column holds a number with a bar.
  */
 
 @layer hf.components {
   /*
    * The wrapper of the table is the container for the query below: an element can't query its
    * own size, so the bars inside it query the width of the place the table sits in, not the
-   * screen. It is positioned too, so the hidden words in the column headers (hf-visually-hidden,
-   * which is absolute) stay in it and the page does not get wider.
+   * screen. It is positioned too, so the hidden words in the column headers
+   * (hf-visually-hidden, which is absolute) stay in it and the page does not get wider.
    */
   .hf-bar-place {
     --hf-bar-gap: 1.25rem;
@@ -34,8 +34,8 @@
   }
 
   /*
-   * The name takes the space that is left, so the columns of numbers sit close to each other, at
-   * the end of the row, and not spread over the width of the table.
+   * The name takes the space that is left, so the columns of numbers sit close to each other,
+   * at the end of the row, and not spread over the width of the table.
    */
   .hf-bar-table thead th:not(.hf-numeric) {
     inline-size: 100%;
@@ -48,11 +48,11 @@
 
   /*
    * The bar sits to the end of the number, in the same cell, so the numbers stay in line. It is
-   * as long as the share of the largest number, which the component gives as a number from 0 to
-   * 100 in --hf-bar-share, so a number that is half of the largest has half of the bar. The fill
-   * is the green of a win: a calm 70% of it, which reaches 3:1 on the card in light and in dark.
-   * A table can use the whole green for a row that stands out. The bar is decoration, so a
-   * screen reader skips it (aria-hidden).
+   * as long as the share of the largest number, which the component gives as a number from 0
+   * to 100 in --hf-bar-share, so a number that is half of the largest has half of the bar. The
+   * fill is the green of a win: a calm 70% of it, which reaches 3:1 on the card in light and in
+   * dark. A table can use the whole green for a row that stands out. The bar is decoration, so
+   * a screen reader skips it (aria-hidden).
    */
   .hf-bar {
     block-size: 0.75rem;
