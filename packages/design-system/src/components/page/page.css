@@ -111,9 +111,9 @@
    * A page with a wide sidebar (Page.Sidebar with `wide`) divides the same 64rem differently: a
    * main of 31rem, 2rem of space and a sidebar of 31rem, two columns of equal width, for a
    * sidebar that holds a table. It follows the same rules: one track under 56rem, tracks that
-   * shrink up to 66rem, and the sidebar second in the grid. The tracks may shrink to 24rem each,
-   * so they stay equally wide, and with the space between them (2rem) they fit in the 56rem as
-   * well.
+   * shrink up to 66rem, and the sidebar second in the grid. The tracks may shrink to 24rem
+   * each, so they stay equally wide, and with the space between them (2rem) they fit in the
+   * 56rem as well.
    * The text in the main lines up with the wordmark of the logo on a wide screen, where the shield hangs in the margin
    * (see .hf-page-header).
    * The sidebar is second in the source and so in the grid. There is no `order`, which would split the reading order from

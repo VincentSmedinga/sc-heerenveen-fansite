@@ -52,10 +52,10 @@
   }
 
   /*
-   * No background and no border to see, but the border keeps its space and the padding is the same, so the text sits where
-   * it does in a card with a border. That is how text beside the other cards lines up with the text in them.
-   * In forced colours a transparent border would be drawn in the colour of the system, so it gets the colour of the
-   * background there.
+   * No background and no border to see, but the border keeps its space and the padding is the
+   * same, so the text sits where it does in a card with a border. That is how text beside the
+   * other cards lines up with the text in them. In forced colours a transparent border would be
+   * drawn in the colour of the system, so it gets the colour of the background there.
    */
   .hf-card-transparent {
     background-color: transparent;
