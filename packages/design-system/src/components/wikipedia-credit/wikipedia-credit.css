@@ -1,0 +1,13 @@
+/*
+ * The credit for data from Wikipedia: small type under a block or a page, in the colour of
+ * secondary text.
+ */
+
+@layer hf.components {
+  /* An address in a link breaks instead of making the page scroll sideways. */
+  .hf-wikipedia-credit {
+    color: var(--hf-colour-text-secondary);
+    margin-block: 1rem 0;
+    overflow-wrap: anywhere;
+  }
+}

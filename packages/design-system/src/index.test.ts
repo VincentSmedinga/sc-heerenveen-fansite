@@ -24,15 +24,18 @@ const components = [
   'Link',
   'List',
   'Logo',
+  'Match',
   'Navigation',
   'NewsItem',
   'Page',
   'Pagination',
   'Root',
   'Select',
+  'StandingsTable',
   'Strong',
   'Text',
   'Textarea',
+  'WikipediaCredit',
 ]
 
 describe('the JavaScript entry of the package', () => {
@@ -67,6 +70,7 @@ describe('the JavaScript entry of the package', () => {
     expect(designSystem.cardSurfaces).toEqual(['default', 'strong', 'soft', 'warm'])
     expect(designSystem.inputTypes).toContain('email')
     expect(designSystem.listElements).toEqual(['ul', 'ol'])
+    expect(designSystem.matchStatuses).toEqual(['scheduled', 'played', 'postponed'])
     expect(designSystem.textElements).toEqual(['p', 'span'])
   })
 

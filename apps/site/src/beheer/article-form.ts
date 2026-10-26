@@ -30,6 +30,7 @@ export const reservedSlugs: readonly string[] = [
   'sitemap',
   'toegankelijkheid',
   'updates',
+  'wedstrijden',
 ]
 
 const lengthOf = (value: string) => [...value].length

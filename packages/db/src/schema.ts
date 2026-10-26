@@ -585,6 +585,8 @@ export const wikipediaPages = mysqlTable('wikipedia_pages', {
   readAt: datetime('read_at').notNull(),
 })
 
+export type NewWikipediaPage = typeof wikipediaPages.$inferInsert
+
 export type WikipediaPage = typeof wikipediaPages.$inferSelect
 
 export const matchImportOutcomes = ['imported', 'error', 'blocked-by-robots', 'wait'] as const

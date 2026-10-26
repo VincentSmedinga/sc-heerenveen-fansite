@@ -22,6 +22,8 @@ import { reasonOf } from '../errors'
 import { forumUrl } from '../forum'
 import { getHeadlines, parseHeadlineCount } from '../headlines'
 import { moreHeadlines } from '../items-per-card'
+import { getMatchData, type MatchData } from '../matches'
+import { MatchesCard, StandingsCard } from '../MatchViews'
 import { pageMetadata } from '../metadata'
 import {
   dateTimeOf,
@@ -58,23 +60,39 @@ async function loadArticle() {
 }
 
 /**
+ * The matches and the league table of the current season, or undefined when the database can't
+ * give them. The two blocks are extras, like the card of the article: the homepage shows the
+ * news without them, and the log says why they are missing.
+ */
+async function loadMatches(): Promise<MatchData | undefined> {
+  try {
+    return await getMatchData()
+  } catch (error) {
+    console.error(`Could not read the matches and the table for the homepage: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/**
  * The newest `count` headlines, the newest discussions of the forum and the newest podcast
- * episodes, and the newest article of the editors, or undefined when the database can't give
- * them. A page that throws gets an empty page with a 500 from Next.js, and the text only after
- * JavaScript runs. So this page catches the error and shows the error page itself, in the HTML.
- * `cache` makes the page and its metadata share one call per request; its argument is a plain
- * value, because `cache` compares objects by identity.
+ * episodes, and the newest article of the editors and the matches, or undefined when the
+ * database can't give them. A page that throws gets an empty page with a 500 from Next.js, and
+ * the text only after JavaScript runs. So this page catches the error and shows the error page
+ * itself, in the HTML. `cache` makes the page and its metadata share one call per request; its
+ * argument is a plain value, because `cache` compares objects by identity.
  */
 const loadContent = cache(async (count: number) => {
   try {
-    const [{ headlines, more }, discussions, episodes, article] = await Promise.all([
+    const [{ headlines, more }, discussions, episodes, article, matches] = await Promise.all([
       getHeadlines(count),
       getDiscussions(),
       getLatestEpisodes(),
       loadArticle(),
+      loadMatches(),
     ])
 
-    return { article, discussions, episodes, headlines, more }
+    return { article, discussions, episodes, headlines, matches, more }
   } catch (error) {
     console.error(`Could not read the headlines, discussions and episodes for the homepage: ${reasonOf(error)}`)
 
@@ -103,7 +121,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     return <ServerError retryHref="/" />
   }
 
-  const { article, discussions, episodes, headlines, more } = content
+  const { article, discussions, episodes, headlines, matches, more } = content
   const now = new Date()
 
   return (
@@ -162,7 +180,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
         </Text>
       </Page.Main>
-      <Page.Sidebar aria-label="Van het forum en de podcasts">
+      <Page.Sidebar aria-label="Het forum, de podcasts en de wedstrijden">
         <Card aria-labelledby="discussions-heading">
           <Heading id="discussions-heading" level={2}>
             Nieuwste discussies
@@ -219,6 +237,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </Link>
           </Text>
         </Card>
+        {matches !== undefined && (
+          <>
+            <MatchesCard data={matches} now={now} />
+            <StandingsCard data={matches} />
+          </>
+        )}
       </Page.Sidebar>
     </>
   )

@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, exists, isNotNull, isNull, lte, ne, sql } fr
 
 import type { Database } from './client.ts'
 
-import { articles, discussions, items, sources } from './schema.ts'
+import { articles, discussions, items, matches, sources, standings, wikipediaPages } from './schema.ts'
 
 export type PublicArticle = NonNullable<Awaited<ReturnType<typeof findPublishedArticle>>>
 
@@ -16,9 +16,15 @@ export type PublicEpisode = Awaited<ReturnType<typeof listPodcastEpisodes>>[numb
 
 export type PublicItem = Awaited<ReturnType<typeof listRecentItems>>[number]
 
+export type PublicMatch = Awaited<ReturnType<typeof listSeasonMatches>>[number]
+
 export type PublicPodcast = Awaited<ReturnType<typeof listPodcasts>>[number]
 
 export type PublicSource = Awaited<ReturnType<typeof listEnabledSources>>[number]
+
+export type PublicStandingsRow = Awaited<ReturnType<typeof listSeasonStandings>>[number]
+
+export type PublicWikipediaPage = Awaited<ReturnType<typeof listWikipediaPages>>[number]
 
 /**
  * How many episodes `listPodcastEpisodes` gives in all, with the same `until` and `podcast`.
@@ -244,6 +250,74 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
     .where(and(eq(sources.enabled, true), ne(sources.kind, 'podcast'), lte(items.publishedAt, until), isShown()))
     .orderBy(desc(items.publishedAt), desc(items.id))
     .limit(limit)
+}
+
+/**
+ * The matches of sc Heerenveen 1 in a season, such as `2026/27`, in the order they are played:
+ * by day, then by kick-off, with a match without a kick-off before one with. It gives what the
+ * pages show: the competition, the round, the opponent, whether the match is at home, the
+ * stadium, the status, the goals (null unless the match is played), the day, the kick-off in
+ * UTC (null while it is unknown) and the date as Wikipedia has it (null when the kick-off is
+ * known). The moment the importer saw a result stays internal. Only the season that is asked
+ * for is read: the pages show the current season alone.
+ */
+export function listSeasonMatches(db: Database, season: string) {
+  return db
+    .select({
+      competition: matches.competition,
+      dateText: matches.dateText,
+      goalsAgainst: matches.goalsAgainst,
+      goalsFor: matches.goalsFor,
+      home: matches.home,
+      kickoffAt: matches.kickoffAt,
+      matchDate: matches.matchDate,
+      opponent: matches.opponent,
+      round: matches.round,
+      stadium: matches.stadium,
+      status: matches.status,
+    })
+    .from(matches)
+    .where(eq(matches.season, season))
+    .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
+}
+
+/**
+ * The league table of a season, such as `2026/27`, from the first place down, with what the
+ * pages show: the position, the club, the matches played, won, drawn and lost, the goals for
+ * and against, the goal difference, the points, and the day the table holds for.
+ */
+export function listSeasonStandings(db: Database, season: string) {
+  return db
+    .select({
+      club: standings.club,
+      drawn: standings.drawn,
+      goalDifference: standings.goalDifference,
+      goalsAgainst: standings.goalsAgainst,
+      goalsFor: standings.goalsFor,
+      lost: standings.lost,
+      played: standings.played,
+      points: standings.points,
+      position: standings.position,
+      validOn: standings.validOn,
+      won: standings.won,
+    })
+    .from(standings)
+    .where(eq(standings.season, season))
+    .orderBy(asc(standings.position))
+}
+
+/**
+ * The Wikipedia pages the match import read for a season, such as `2026/27`: the title of the
+ * page, which kind it is and the moment it was last read, so a page can credit them. The
+ * order is the standings, the programme and the cup. The `Last-Modified` of a page stays
+ * internal.
+ */
+export function listWikipediaPages(db: Database, season: string) {
+  return db
+    .select({ kind: wikipediaPages.kind, readAt: wikipediaPages.readAt, title: wikipediaPages.title })
+    .from(wikipediaPages)
+    .where(eq(wikipediaPages.season, season))
+    .orderBy(asc(wikipediaPages.kind), asc(wikipediaPages.title))
 }
 
 /**

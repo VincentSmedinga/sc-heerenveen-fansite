@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
-import type { FeedFilter, NewMatch, NewSource, NewStandingsRow } from './schema.ts'
+import type { FeedFilter, NewMatch, NewSource, NewStandingsRow, NewWikipediaPage, WikipediaPageKind } from './schema.ts'
 
 import { connect } from './client.ts'
 import { readDatabaseEnv } from './env.ts'
-import { feeds, matches, sources, standings } from './schema.ts'
+import { feeds, matches, sources, standings, wikipediaPages } from './schema.ts'
 import { seasonOf } from './season.ts'
 
 /**
@@ -360,10 +360,33 @@ export function madeUpTable(now: Date): NewStandingsRow[] {
 }
 
 /**
- * Puts made-up matches and a made-up league table in the database, but only when the current
- * season has none of either. The real import replaces them with Wikipedia's the first time it
- * runs, and a database that already has the real ones is left alone, so a restart on acceptance
- * never puts the made-up ones over the real ones. Returns whether it put them in.
+ * The Wikipedia pages that the made-up matches pretend to come from, with the titles the
+ * importer reads (`pageTitles` in the importer), so a page can credit its source like it will
+ * with the real data. They count as read at `now`.
+ */
+export function madeUpWikipediaPages(now: Date): NewWikipediaPage[] {
+  const season = seasonOf(now)
+  const page = (kind: WikipediaPageKind, title: string): NewWikipediaPage => ({
+    kind,
+    readAt: now,
+    season,
+    title,
+    version: null,
+  })
+
+  return [
+    page('standings', `Eredivisie ${season} (mannenvoetbal)`),
+    page('programme', `Eredivisie ${season} (mannenvoetbal)/Wedstrijden`),
+    page('cup', `KNVB Beker ${season} (mannen)`),
+  ]
+}
+
+/**
+ * Puts made-up matches, a made-up league table and the pages they credit in the database, but
+ * only when the current season has none of either. The real import replaces them with
+ * Wikipedia's the first time it runs, and a database that already has the real ones is left
+ * alone, so a restart on acceptance never puts the made-up ones over the real ones. Returns
+ * whether it put them in.
  */
 export async function seedMatches(db: Database, now: Date = new Date()): Promise<boolean> {
   const season = seasonOf(now)
@@ -386,6 +409,13 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
 
     await transaction.insert(matches).values(madeUpMatches(now))
     await transaction.insert(standings).values(madeUpTable(now))
+
+    for (const page of madeUpWikipediaPages(now)) {
+      await transaction
+        .insert(wikipediaPages)
+        .values(page)
+        .onDuplicateKeyUpdate({ set: { readAt: page.readAt } })
+    }
 
     return true
   })

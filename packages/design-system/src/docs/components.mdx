@@ -9,7 +9,7 @@ Elk onderdeel heeft hieronder een eigen pagina, met voorbeelden in licht en donk
 Een sjabloon voor een pagina bevat geen HTML, alleen deze componenten.
 
 Dit zijn de eerste componenten, met de onderdelen van `Page`: wat een pagina minimaal nodig heeft, de kaart, de regel nieuws van de homepage en de onderdelen van een formulier.
-Een vinkje, een keuzerondje en de overige componenten voor nieuws, bronnen, podcasts, het forum en wedstrijden komen met de eerste pagina die ze nodig heeft.
+Een vinkje, een keuzerondje en de overige componenten voor nieuws, bronnen, podcasts en het forum komen met de eerste pagina die ze nodig heeft.
 
 ## Gebruiken
 
@@ -366,6 +366,50 @@ De `head` hoort niet bij de componenten: die beheert Next.js, met de Metadata AP
         <td>
           <code>title</code>, <code>href</code>, <code>replies</code>, <code>time</code> en <code>dateTime</code> (alle
           verplicht), <code>lastPostedBy</code>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>Match</code>
+        </th>
+        <td>
+          een <code>div</code> met de competitie en de ronde, de twee clubs met de uitslag ertussen, en daaronder de
+          aftrap, thuis of uit en het stadion; zonder link
+        </td>
+        <td>
+          <code>competition</code>, <code>round</code>, <code>opponent</code>, <code>home</code> en <code>status</code>{' '}
+          (alle verplicht), <code>goalsFor</code> en <code>goalsAgainst</code> (bij een gespeelde wedstrijd),{' '}
+          <code>time</code> en <code>dateTime</code> (behalve bij een uitgestelde), <code>stadium</code>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>StandingsTable</code>
+        </th>
+        <td>
+          een <code>div</code> met de stand als echte <code>table</code> met een bijschrift, daaronder de afkortingen
+          met de volle woorden; met alle kolommen in een eigen gebied dat zijwaarts scrolt
+        </td>
+        <td>
+          <code>caption</code>, <code>label</code> en <code>rows</code> (alle verplicht), <code>columns</code>
+        </td>
+        <td>
+          <code>columns</code>: <code>all</code> (standaard), <code>compact</code>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">
+          <code>WikipediaCredit</code>
+        </th>
+        <td>
+          een <code>p</code> met de bronvermelding voor gegevens van Wikipedia: de licentie, de pagina's met hun
+          geschiedenis, de tijd van het laatste lezen en de licentie van onze eigen gegevens
+        </td>
+        <td>
+          <code>pages</code>, <code>readAt</code> en <code>readAtDateTime</code> (alle verplicht, behalve met{' '}
+          <code>compact</code>), <code>compact</code> (alleen "Bron: Wikipedia")
         </td>
         <td></td>
       </tr>

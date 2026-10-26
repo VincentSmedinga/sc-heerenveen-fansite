@@ -1,0 +1,80 @@
+/*
+ * The league table. The table itself takes its look from base/table.css (tabular figures, a
+ * thin line between rows, .hf-numeric, .hf-rank and .hf-highlight). This file adds the area
+ * that scrolls sideways, the bar on the row of our own club and the legend of the
+ * abbreviations.
+ */
+
+@layer hf.components {
+  /*
+   * The area that scrolls: as wide as the space it is in, and the table inside it as wide as it
+   * needs to be, so a table that is too wide scrolls here and the page does not. The table does
+   * not shrink below what its cells need, and its cells do not wrap, so a number never breaks.
+   * The focus ring is drawn inside the area, with an offset of its own, so the overflow of the
+   * area does not cut it off. The area is positioned, so the hidden words in the column headers
+   * (hf-visually-hidden, which is absolute) stay in it and are scrolled with it; otherwise they
+   * sit where the headers have scrolled to and make the page itself wider.
+   */
+  .hf-standings-scroll {
+    overflow-x: auto;
+    position: relative;
+
+    &:focus-visible {
+      outline-offset: -2px;
+    }
+
+    > table {
+      inline-size: 100%;
+      min-inline-size: max-content;
+    }
+  }
+
+  /* In the short form there is no area, so the wrapper holds the hidden words of the headers. */
+  .hf-standings {
+    position: relative;
+  }
+
+  /* The table of a card has no space below it: the legend is its caption's other half. */
+  .hf-standings > table,
+  .hf-standings-scroll > table {
+    margin-block-end: 0.5rem;
+  }
+
+  .hf-standings-table {
+    td,
+    th {
+      white-space: nowrap;
+    }
+
+    /* The club may wrap, so a long name does not make a narrow table scroll. */
+    tbody th {
+      white-space: normal;
+    }
+  }
+
+  /*
+   * The row of sc Heerenveen is marked by more than its colour: it is bold (base/table.css),
+   * and its first cell has a bar on the start side, which also shows in forced colours.
+   */
+  .hf-standings-table-own > :first-child {
+    border-inline-start: 0.25rem solid var(--hf-colour-text-highlight);
+  }
+
+  /* The points are what the table is ordered by, so they are bold, like our own row. */
+  .hf-standings-table td.hf-standings-points {
+    font-weight: 700;
+  }
+
+  /*
+   * The full words of the abbreviations. The letters are heavier, so they are easy to find in
+   * the sentence.
+   */
+  .hf-standings-legend {
+    color: var(--hf-colour-text-secondary);
+    margin-block: 0;
+
+    b {
+      font-weight: var(--hf-strong-font-weight);
+    }
+  }
+}

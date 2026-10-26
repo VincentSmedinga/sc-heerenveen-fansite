@@ -6,7 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
-import { consentStatuses, feeds, matches, sourceKinds, sources, standings } from './schema.ts'
+import { consentStatuses, feeds, matches, sourceKinds, sources, standings, wikipediaPages } from './schema.ts'
 import { seasonOf } from './season.ts'
 import { madeUpMatches, realSources, seedMatches, seedSources, testSources } from './seed.ts'
 import { createTestDatabase } from './test-database.ts'
@@ -368,6 +368,27 @@ describe('the made-up matches', () => {
     expect(has((match) => match.competition === 'KNVB Beker')).toBe(true)
     // The dates of the made-up matches count from the day of the seed: this one is 10 days on.
     expect(rows.find((match) => match.dateText !== null)?.dateText).toBe('4-6 november 2026')
+  })
+
+  it('puts the pages the made-up matches credit in too, and moves on when they are already there', async () => {
+    await database.pool.query('DELETE FROM wikipedia_pages')
+    await database.db.insert(wikipediaPages).values({
+      kind: 'cup',
+      readAt: new Date('2026-10-01T12:00:00Z'),
+      season: '2026/27',
+      title: 'KNVB Beker 2026/27 (mannen)',
+      version: null,
+    })
+    await seedMatches(database.db, now)
+
+    const pages = await database.db.select().from(wikipediaPages)
+
+    expect(pages.map((page) => page.title).sort()).toEqual([
+      'Eredivisie 2026/27 (mannenvoetbal)',
+      'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden',
+      'KNVB Beker 2026/27 (mannen)',
+    ])
+    expect(pages.every((page) => page.readAt.getTime() === now.getTime())).toBe(true)
   })
 
   it('has a table that agrees with its own results', async () => {

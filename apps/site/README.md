@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu zeven pagina's: de homepage met de nieuwste koppen, `/podcasts` met de afleveringen van de podcasts, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu acht pagina's: de homepage met de nieuwste koppen, `/wedstrijden` met het programma, de uitslagen en de stand, `/podcasts` met de afleveringen van de podcasts, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -172,7 +172,38 @@ Onder de discussies staat het blok "Nieuwste podcasts": de vijf nieuwste aflever
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/podcasts`.
 
+Onder de podcasts staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
+Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan onderaan de pagina.
+Zonder gegevens van de wedstrijden staat er een zin voor bezoekers.
+Lukt het lezen van de wedstrijden niet, dan verdwijnen de twee blokken en schrijft de site de reden in het logboek, zoals bij het artikel; de rest van de pagina blijft werken.
+
 Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van de importer](../importer/README.md)).
+
+## De wedstrijden
+
+`/wedstrijden` toont onder drie kopjes het programma, de uitslagen en de volledige stand van sc Heerenveen 1 (mannen) in het lopende seizoen.
+Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
+De gegevens komen van de importer (zie _De wedstrijden en de stand_ in de [README van de importer](../importer/README.md)) en `@fansite/db/queries` haalt ze op: `listSeasonMatches`, `listSeasonStandings` en `listWikipediaPages`, steeds voor één seizoen.
+`src/matches.ts` vraagt alleen het lopende seizoen (`seasonOf`) en bewaart het antwoord vijf minuten; eerdere seizoenen staan in de database en komen op geen enkele pagina.
+Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
+
+- **Programma:** alle wedstrijden die nog niet zijn gespeeld, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
+  Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
+- **Uitslagen:** alle gespeelde wedstrijden, de nieuwste bovenaan.
+- **Stand:** de volledige tabel, met een bijschrift met de dag waarvoor de stand geldt.
+- **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de nieuwste uitslag) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
+  Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder de kolommen voor gewonnen, gelijk, verloren en de doelpunten.
+  De blokken linken naar "Alle wedstrijden" en "De volledige stand" (`/wedstrijden#stand`).
+
+Een wedstrijd is een `Match` uit het designsysteem, de stand een `StandingsTable`.
+De aftrap staat in Nederlandse tijd (`src/match-format.ts`), zoals "zo 1 nov 14:30", met het jaar als dat niet dit jaar is.
+Is de aftrap nog niet bekend, dan staat er het weekend, zoals "weekend 12–14 februari", uit `date_text`; een uitslag heeft alleen de dag.
+Onder de pagina staat de bronvermelding (`WikipediaCredit`): de licentie, een link naar elke pagina van Wikipedia die de import las en naar de geschiedenis ervan, de tijd van de laatste keer lezen, en een zin dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
+Onder de twee blokken op de homepage staat alleen "Bron: Wikipedia".
+De pagina's komen uit `wikipedia_pages`; zonder gegevens van de wedstrijden staat er ook geen bronvermelding.
+De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en er staan geen clubwapens, alleen de namen.
+
+`pnpm test:a11y` gebruikt de verzonnen wedstrijden en stand van de seed (`madeUpMatches` en `madeUpTable`), met de pagina's die ze bronnen (`madeUpWikipediaPages`).
 
 ## De podcasts
 

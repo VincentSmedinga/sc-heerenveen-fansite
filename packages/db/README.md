@@ -251,7 +251,8 @@ Een pagina kan daarmee de bron noemen.
 `match_imports` heeft per seizoen de gezondheid van de import: `last_success_at`, `last_outcome`, `failures_in_a_row`, `last_error`, `last_warning` en `retry_at`, de tijd waarvoor de import Wikipedia niet opnieuw vraagt.
 Het zijn dezelfde velden als bij een feed.
 
-De seed zet verzonnen wedstrijden en een verzonnen stand in het lopende seizoen (`madeUpMatches` en `madeUpTable` in `src/seed.ts`), maar alleen als dat seizoen er nog geen heeft.
+De seed zet verzonnen wedstrijden, een verzonnen stand en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
+De pagina's staan erbij, zodat de site de bronvermelding laat zien zoals met echte gegevens.
 De eerste echte import vervangt ze, en een database met echte wedstrijden raakt de seed niet aan.
 
 ## Tijden
@@ -280,6 +281,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
   `listRecentItems(db, { limit, until })` geeft de nieuwste `limit` berichten van die bronnen tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam), en geen afleveringen van bronnen van het soort podcast;
   `listPodcastEpisodes(db, { limit, offset, podcast, until })` geeft juist de afleveringen van de podcasts die aanstaan, het nieuwste eerst, met alleen de titel, de link, de tijd, de naam van de podcast en de duur, het seizoen en het nummer van de aflevering, en `countPodcastEpisodes` geeft het totaal; `podcast` is de `slug` van één podcast;
   `findPublishedArticle(db, slug, until)`, `findNewestArticle(db, until)` en `listPublishedArticles(db, until)` geven de gepubliceerde artikelen van de redactie (zie _De tabel `articles`_);
+  `listSeasonMatches(db, season)`, `listSeasonStandings(db, season)` en `listWikipediaPages(db, season)` geven de wedstrijden op volgorde van spelen, de stand van boven naar beneden en de pagina's van Wikipedia die de import las, voor één seizoen, met alleen de velden die een pagina toont;
   `listPodcasts(db)` geeft de podcasts met een `slug` en minstens één aflevering, voor het filter, en `findPodcast(db, slug)` geeft de naam, de beschrijving en de adressen bij Apple Podcasts en Spotify van één podcast;
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;

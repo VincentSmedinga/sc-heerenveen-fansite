@@ -1,0 +1,77 @@
+/*
+ * A match: the competition and the round in small type, under that the two clubs with the
+ * result between them, and under that when and where. A club is not a link, so the line has no
+ * underline and no hover. A List of matches has a thin line between the lines.
+ */
+
+@layer hf.components {
+  /* A long club name or stadium breaks instead of making the page scroll sideways. */
+  .hf-match {
+    overflow-wrap: anywhere;
+    padding-block: 0.75rem;
+  }
+
+  .hf-match-label,
+  .hf-match-when {
+    color: var(--hf-colour-text-secondary);
+    margin-block: 0;
+  }
+
+  /*
+   * The two clubs have the size of the text, heavier than the lines around them. Our own club
+   * is heavier still, so it stands out in a list of results; a heavier weight and not a colour,
+   * which would say nothing in forced colours.
+   */
+  .hf-match-clubs {
+    font-size: var(--hf-body-font-size);
+    font-weight: 500;
+    margin-block: 0.125rem;
+  }
+
+  .hf-match-own {
+    font-weight: 700;
+  }
+
+  /*
+   * The result keeps its digits the same width and stays on one line, so "2–0" is never split.
+   * The dash of a match that is not played yet is lighter, since it says only "against".
+   */
+  .hf-match-score {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    padding-inline: 0.25rem;
+    white-space: nowrap;
+  }
+
+  .hf-match-versus {
+    font-weight: 400;
+  }
+
+  /*
+   * "Uitgesteld" is the one fact a supporter looks for in the line, so it has the weight and
+   * the accent colour of a time.
+   */
+  .hf-match-postponed {
+    color: var(--hf-colour-text-accent);
+    font-weight: 600;
+  }
+
+  /* A List with matches in it: no bullets, no indent, and a thin line between the lines. */
+  :is(ul, ol):has(> li > .hf-match) {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  li > .hf-match {
+    border-block-start: 1px solid var(--hf-colour-border-default);
+  }
+
+  li:first-child > .hf-match {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  li:last-child > .hf-match {
+    padding-block-end: 0;
+  }
+}

@@ -5,7 +5,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          'Tabellen gebruiken tabelcijfers, zodat getallen recht onder elkaar staan. De klasse `hf-numeric` lijnt een cel uit aan het eind, `hf-highlight` markeert een rij en `hf-rank` geeft een positie de kleur van markeringen. Alle drie zijn voorlopig, tot er een tabelcomponent is.',
+          'Tabellen gebruiken tabelcijfers, zodat getallen recht onder elkaar staan. De klasse `hf-numeric` lijnt een cel uit aan het eind, `hf-highlight` markeert een rij en `hf-rank` geeft een positie de kleur van markeringen. De stand van de competitie heeft een eigen component, `StandingsTable`, dat deze klassen gebruikt; de klassen blijven voor andere tabellen.',
       },
     },
   },
@@ -41,7 +41,7 @@ export const Standings = meta.story({
             <abbr title="Doelsaldo">DS</abbr>
           </th>
           <th className="hf-numeric" scope="col">
-            <abbr title="Punten">Ptn</abbr>
+            <abbr title="Punten">P</abbr>
           </th>
         </tr>
       </thead>

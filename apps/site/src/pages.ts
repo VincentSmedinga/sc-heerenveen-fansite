@@ -15,6 +15,11 @@ export const pages = [
   },
   {
     description:
+      'Het programma, de uitslagen en de stand van sc Heerenveen 1 dit seizoen, met de bron erbij: de Nederlandse Wikipedia.',
+    path: '/wedstrijden',
+  },
+  {
+    description:
       'Alle afleveringen van de podcasts over sc Heerenveen op één plek, met een link naar de pagina van de aflevering bij de maker.',
     path: '/podcasts',
   },
