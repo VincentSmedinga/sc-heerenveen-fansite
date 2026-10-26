@@ -67,6 +67,7 @@ const columns: Column[] = [
   { abbreviation: 'W', compact: false, id: 'won', name: 'gewonnen', value: (row) => row.won },
   { abbreviation: 'G', compact: false, id: 'drawn', name: 'gelijk', value: (row) => row.drawn },
   { abbreviation: 'V', compact: false, id: 'lost', name: 'verloren', value: (row) => row.lost },
+  { abbreviation: 'P', compact: true, id: 'points', name: 'punten', value: (row) => row.points },
   {
     abbreviation: 'D',
     compact: true,
@@ -74,7 +75,6 @@ const columns: Column[] = [
     name: 'doelsaldo',
     value: (row) => formatDifference(row.goalDifference),
   },
-  { abbreviation: 'P', compact: true, id: 'points', name: 'punten', value: (row) => row.points },
 ]
 
 /**

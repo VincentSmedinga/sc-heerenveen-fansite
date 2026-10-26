@@ -884,6 +884,23 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html).not.toContain('hf-standings-legend')
   })
 
+  it('puts the points before the goal difference in the table, in the headers and in the row of sc Heerenveen', async () => {
+    const html = await renderStandingsCard()
+    const head = html.slice(html.indexOf('<thead>'), html.indexOf('</thead>'))
+    const ours = html.slice(
+      html.indexOf('hf-standings-table-own'),
+      html.indexOf('</tr>', html.indexOf('hf-standings-table-own')),
+    )
+
+    expect([...head.matchAll(/<span aria-hidden="true">([^<]*)<\/span>/g)].map((match) => match[1])).toEqual([
+      '#',
+      'G',
+      'P',
+      'D',
+    ])
+    expect([...ours.matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((match) => match[1])).toEqual(['2', '2', '6', '+3'])
+  })
+
   it('shows only three clubs of a longer table, with sc Heerenveen in the middle', async () => {
     const [first, ours, other] = matchData.standings
 

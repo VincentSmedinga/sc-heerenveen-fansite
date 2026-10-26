@@ -38,10 +38,10 @@ export const Standings = meta.story({
             <abbr title="Gespeeld">G</abbr>
           </th>
           <th className="hf-numeric" scope="col">
-            <abbr title="Doelsaldo">D</abbr>
+            <abbr title="Punten">P</abbr>
           </th>
           <th className="hf-numeric" scope="col">
-            <abbr title="Punten">P</abbr>
+            <abbr title="Doelsaldo">D</abbr>
           </th>
         </tr>
       </thead>
@@ -51,8 +51,8 @@ export const Standings = meta.story({
             <td className="hf-numeric hf-rank">{position}</td>
             <th scope="row">{team}</th>
             <td className="hf-numeric">{played}</td>
-            <td className="hf-numeric">{goalDifference}</td>
             <td className="hf-numeric">{points}</td>
+            <td className="hf-numeric">{goalDifference}</td>
           </tr>
         ))}
       </tbody>
