@@ -1,11 +1,14 @@
 import type { PublicMatch, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
 
 import {
+  Button,
   Card,
+  Form,
   Heading,
   Link,
   List,
   Match,
+  ShortMatch,
   StandingsTable,
   Text,
   TopScorersTable,
@@ -14,8 +17,59 @@ import {
 
 import type { MatchData } from './matches'
 
+import { moreCleanSheets } from './items-per-card'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
-import { overviewOf, scorersCoverage, standingsAround, topScorersOf, topScorersShown } from './matches'
+import { cleanSheetsOf, overviewOf, scorersCoverage, standingsAround, topScorersOf, topScorersShown } from './matches'
+
+/**
+ * The card of the matches page with the matches in which sc Heerenveen kept a clean sheet, as
+ * short lines with the newest first, and above them how many there are in how many matches.
+ * It starts with `count` lines, and the button under them loads the next ones, as on the
+ * homepage: it works without JavaScript, because the form loads the page again with a larger
+ * number in the address, and the part after the hash brings the visitor to the first new line.
+ */
+export function CleanSheetsCard({ count, matches, now }: { count: number; matches: PublicMatch[]; now: Date }) {
+  const { matches: sheets, played } = cleanSheetsOf(matches)
+  const shown = sheets.slice(0, count)
+
+  return (
+    <Card aria-labelledby="nul-gehouden">
+      <Heading id="nul-gehouden" level={2}>
+        De nul gehouden
+      </Heading>
+      {played === 0 ? (
+        <Text>We hebben nog geen gespeelde wedstrijden van dit seizoen.</Text>
+      ) : sheets.length === 0 ? (
+        <Text>Nog niet de nul gehouden dit seizoen.</Text>
+      ) : (
+        <>
+          <Text>{`${sheets.length} keer de nul gehouden in ${played} ${played === 1 ? 'wedstrijd' : 'wedstrijden'}`}</Text>
+          <List role="list">
+            {shown.map((match, index) => (
+              <List.Item id={`nul-${index + 1}`} key={`${match.competition}-${match.round}`}>
+                <ShortMatch
+                  // Only played matches with both scores are in the list, so these are numbers.
+                  {...matchMoment(match, now)}
+                  goalsAgainst={match.goalsAgainst ?? 0}
+                  goalsFor={match.goalsFor ?? 0}
+                  home={match.home}
+                  opponent={match.opponent}
+                />
+              </List.Item>
+            ))}
+          </List>
+          {sheets.length > shown.length && (
+            <Form action={`/wedstrijden#nul-${shown.length + 1}`} method="get">
+              <Button appearance="soft" icon="plus" name="nul" type="submit" value={String(count + moreCleanSheets)}>
+                {`Laad ${moreCleanSheets} meer`}
+              </Button>
+            </Form>
+          )}
+        </>
+      )}
+    </Card>
+  )
+}
 
 /**
  * The block of the homepage with the previous and the next match in one list, and a link to the

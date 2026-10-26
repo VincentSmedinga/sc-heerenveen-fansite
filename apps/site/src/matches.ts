@@ -10,6 +10,7 @@ import { seasonOf } from '@fansite/db/season'
 
 import { cacheFor } from './cache'
 import { getDatabase } from './database'
+import { firstCleanSheets, moreCleanSheets } from './items-per-card'
 
 /** The name of our own club in the table. */
 const ourClub = 'sc Heerenveen'
@@ -53,11 +54,31 @@ export const getMatchData = cacheFor(5 * 60 * 1000, async (): Promise<MatchData>
   return { matches, pages, season, standings }
 })
 
+/** The played matches in which sc Heerenveen kept a clean sheet, and how many were played. */
+export type CleanSheets = {
+  /** The matches with no goal against, the newest first. */
+  matches: PublicMatch[]
+  /** How many matches were played, with a result. */
+  played: number
+}
+
 /** A player in the list of top scorers: the goals this season and the place, from 1. */
 export type TopScorer = {
   goals: number
   player: string
   position: number
+}
+
+/**
+ * The matches of the season in which sc Heerenveen conceded no goal, in the league and the cup,
+ * the newest first, and how many matches were played. A match counts on the result of the
+ * match, so after extra time on the score after it; a shoot-out is kept apart and never
+ * decides this. A match that isn't played, or has no result, counts for neither.
+ */
+export function cleanSheetsOf(matches: PublicMatch[]): CleanSheets {
+  const played = overviewOf(matches).results.filter((match) => match.goalsFor !== null && match.goalsAgainst !== null)
+
+  return { matches: played.filter((match) => match.goalsAgainst === 0), played: played.length }
 }
 
 /**
@@ -74,6 +95,22 @@ export function overviewOf(matches: PublicMatch[]): MatchOverview {
     programme,
     results,
   }
+}
+
+/**
+ * The number of clean sheets that the address asks for with `?nul=`: a whole number from
+ * `firstCleanSheets`, in steps of `moreCleanSheets`. Anything else, such as no number, a number
+ * twice, `5`, `12`, `0`, `-5`, `1e1`, `010` or `abc`, gives the first ones. A number that is
+ * more than there are shows them all, which costs nothing: the matches are already read.
+ */
+export function parseCleanSheetCount(value: string | string[] | undefined) {
+  if (typeof value !== 'string' || !/^[1-9]\d{0,2}$/u.test(value)) {
+    return firstCleanSheets
+  }
+
+  const count = Number(value)
+
+  return count >= firstCleanSheets && (count - firstCleanSheets) % moreCleanSheets === 0 ? count : firstCleanSheets
 }
 
 /**

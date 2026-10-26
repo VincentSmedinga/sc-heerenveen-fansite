@@ -2,7 +2,15 @@ import type { PublicMatch, PublicStandingsRow } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { overviewOf, scorersCoverage, standingsAround, topScorersOf, topScorersShown } from './matches'
+import {
+  cleanSheetsOf,
+  overviewOf,
+  parseCleanSheetCount,
+  scorersCoverage,
+  standingsAround,
+  topScorersOf,
+  topScorersShown,
+} from './matches'
 
 const match = (round: string, status: PublicMatch['status'], matchDate: string): PublicMatch => ({
   competition: 'Eredivisie',
@@ -240,4 +248,74 @@ describe('scorersCoverage', () => {
     })
     expect(scorersCoverage([])).toEqual({ known: 0, played: 0 })
   })
+})
+
+describe('cleanSheetsOf', () => {
+  const playedOn = (round: string, matchDate: string, goalsFor: number, goalsAgainst: number, home = true) => ({
+    ...match(round, 'played', matchDate),
+    goalsAgainst,
+    goalsFor,
+    home,
+  })
+
+  it('counts a 3–0 at home, a 1–0 away and a 0–0, and not a 0–1 away or a 2–1', () => {
+    const matches = [
+      playedOn('Speelronde 1', '2026-08-01', 3, 0),
+      playedOn('Speelronde 2', '2026-08-08', 0, 1, false),
+      playedOn('Speelronde 3', '2026-08-15', 1, 0, false),
+      playedOn('Speelronde 4', '2026-08-22', 0, 0),
+      playedOn('Speelronde 5', '2026-08-29', 2, 1),
+    ]
+
+    expect(cleanSheetsOf(matches).matches.map((item) => item.round)).toEqual([
+      'Speelronde 4',
+      'Speelronde 3',
+      'Speelronde 1',
+    ])
+    expect(cleanSheetsOf(matches).played).toBe(5)
+  })
+
+  it('counts a match after extra time on its score, and a shoot-out not at all', () => {
+    const afterExtraTime = { ...playedOn('Tweede ronde', '2026-09-23', 1, 0), extraTime: true }
+    const shootOut = {
+      ...playedOn('Derde ronde', '2026-10-28', 0, 0),
+      extraTime: true,
+      penaltiesAgainst: 5,
+      penaltiesFor: 4,
+    }
+
+    expect(cleanSheetsOf([afterExtraTime, shootOut]).matches).toEqual([shootOut, afterExtraTime])
+    expect(cleanSheetsOf([playedOn('Derde ronde', '2026-10-28', 1, 1)]).matches).toEqual([])
+  })
+
+  it('leaves out a match that is postponed or still to come, and a played match without a result', () => {
+    const noResult = { ...match('Speelronde 9', 'played', '2026-10-01'), goalsAgainst: null, goalsFor: null }
+    const matches = [
+      playedOn('Speelronde 1', '2026-08-01', 1, 0),
+      noResult,
+      match('Speelronde 5', 'postponed', '2026-08-29'),
+      match('Speelronde 6', 'scheduled', '2026-09-05'),
+    ]
+
+    expect(cleanSheetsOf(matches)).toEqual({ matches: [matches[0]], played: 1 })
+  })
+
+  it('gives nothing for a season without matches', () => {
+    expect(cleanSheetsOf([])).toEqual({ matches: [], played: 0 })
+  })
+})
+
+describe('parseCleanSheetCount', () => {
+  it('gives the number in the address when it is ten or more, in steps of five', () => {
+    expect(parseCleanSheetCount('10')).toBe(10)
+    expect(parseCleanSheetCount('15')).toBe(15)
+    expect(parseCleanSheetCount('40')).toBe(40)
+  })
+
+  it.each([undefined, ['15', '20'], '5', '12', '0', '-5', '1e1', '010', 'abc', '', '1000'])(
+    'gives ten for %j',
+    (value) => {
+      expect(parseCleanSheetCount(value)).toBe(10)
+    },
+  )
 })

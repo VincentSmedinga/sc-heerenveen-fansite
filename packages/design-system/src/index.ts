@@ -69,6 +69,8 @@ export { SegmentedControl } from './components/segmented-control/SegmentedContro
 export type { SegmentedControlOption, SegmentedControlProps } from './components/segmented-control/SegmentedControl'
 export { Select } from './components/select/Select'
 export type { SelectOptionProps, SelectProps } from './components/select/Select'
+export { ShortMatch } from './components/short-match/ShortMatch'
+export type { ShortMatchProps } from './components/short-match/ShortMatch'
 export { StandingsTable } from './components/standings-table/StandingsTable'
 export type { StandingsTableProps, StandingsTableRow } from './components/standings-table/StandingsTable'
 export { Strong } from './components/strong/Strong'
