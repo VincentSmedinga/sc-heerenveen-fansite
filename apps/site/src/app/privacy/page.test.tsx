@@ -103,6 +103,13 @@ describe('the page Privacy', () => {
     expect(paragraph).toContain('Wij kunnen daar niet bij en gebruiken ze niet.')
   })
 
+  it('says that the logs of the hosting hold the address of a page, so what is searched for, and that we keep it nowhere', () => {
+    const paragraph = html.match(/<p[^>]*>(Onze hosting.*?)<\/p>/)?.[1] ?? ''
+
+    expect(paragraph).toContain('de woorden die je zoekt op de zoekpagina')
+    expect(paragraph).toContain('Zelf bewaren wij die woorden niet.')
+  })
+
   it('says that the browser keeps the choice for Licht or Donker on the device, that we do not see it, and how to remove it', () => {
     const paragraph = html.match(/<p[^>]*>(Kies je Licht of Donker.*?)<\/p>/)?.[1] ?? ''
 

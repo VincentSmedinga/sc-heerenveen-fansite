@@ -458,10 +458,20 @@ export async function searchPublic(
   const hits = [
     ...found.flatMap(
       ({ durationSeconds, episodeNumber, kind, paywalled, publishedAt, seasonNumber, sourceName, title, url }) =>
-        // The sources of other kinds than news and podcasts have no items to show on a page.
-        kind === 'news' || kind === 'podcast'
-          ? [{ durationSeconds, episodeNumber, kind, paywalled, publishedAt, seasonNumber, sourceName, title, url }]
-          : [],
+        // Like the homepage, every kind of source that is not a podcast is news.
+        [
+          {
+            durationSeconds,
+            episodeNumber,
+            kind: kind === 'podcast' ? ('podcast' as const) : ('news' as const),
+            paywalled,
+            publishedAt,
+            seasonNumber,
+            sourceName,
+            title,
+            url,
+          },
+        ],
     ),
     ...written.flatMap(({ publishedAt, slug, title }) =>
       // The condition leaves out an empty time of publication already; this tells the compiler.

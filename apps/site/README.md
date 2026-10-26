@@ -264,7 +264,8 @@ Een zoekopdracht kost op een database met 10.000 berichten ongeveer 7 tot 14 mil
 Het formulier is een gewoon `GET`-formulier naar `/zoeken?q=…`, dus de pagina werkt zonder JavaScript en het adres is te delen.
 De resultaten staan met de nieuwste bovenaan, tien eerst, en de knop "Laad 5 meer" laadt de pagina opnieuw met `?aantal=15`, in stappen van vijf en tot 100.
 Daarna staat er een zin dat dit de nieuwste zijn.
-De pagina bewaart een zoekvraag nergens: er staat geen cookie, geen lijst van gezochte woorden en geen adres van de bezoeker bij.
+De site bewaart een zoekvraag zelf nergens: er staat geen cookie, geen lijst van gezochte woorden en geen adres van de bezoeker bij.
+De logbestanden van de hosting hebben wel het hele adres van een pagina, dus ook `?q=`, zoals van elke pagina; `/privacy` zegt dat.
 De teller van het bezoek telt `/zoeken` zonder de vraag (`src/visits.ts`), en een fout in het logboek noemt de reden en niet de vraag.
 De pagina is `noindex`, ook met een vraag, en staat niet in de sitemap.
 

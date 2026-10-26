@@ -201,6 +201,25 @@ describe('searchPublic', () => {
     expect(await titlesFor('kop')).toEqual(['Kop van gisteren'])
   })
 
+  it('counts and shows the items of every kind of source that is not a podcast as news, as the homepage does', async () => {
+    const club = await addSource({ domain: 'club.test', kind: 'club', name: 'Clubsite' })
+    const video = await addSource({ domain: 'video.test', kind: 'video', name: 'Videokanaal' })
+    const news = await addSource()
+
+    await addItem(club, 'Kop van de club', 1)
+    await addItem(video, 'Kop van een video', 2)
+    await addItem(news, 'Kop van de krant', 3)
+
+    const { hits, total } = await searchPublic(database.db, { limit: 2, until: now, words: ['kop'] })
+
+    expect(total).toBe(3)
+    expect(hits.map((hit) => [hit.kind, hit.title])).toEqual([
+      ['news', 'Kop van de club'],
+      ['news', 'Kop van een video'],
+    ])
+    expect(hits.map((hit) => hit.kind === 'news' && hit.sourceName)).toEqual(['Clubsite', 'Videokanaal'])
+  })
+
   it('gives podcast episodes as episodes, with their facts', async () => {
     const news = await addSource()
     const podcast = await addSource({ domain: 'podcast.test', kind: 'podcast', name: 'Testpodcast' })
