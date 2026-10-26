@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getReleases } from '../../releases'
+import { headingAnchors, withoutHeadingLinks } from '../../without-icons'
 import UpdatesPage, { generateMetadata } from './page'
 
 vi.mock('../../releases', () => ({ getReleases: vi.fn() }))
@@ -26,11 +27,14 @@ describe('the page Updates', () => {
     const html = renderToStaticMarkup(UpdatesPage())
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Updates</h1>'])
-    expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
-      '<h2 class="hf-heading-2" id="versie-0.2.0">3 november 2026 <span class="hf-meta">versie 0.2.0</span></h2>',
-      '<h2 class="hf-heading-2" id="versie-0.1.0">21 oktober 2026 <span class="hf-meta">versie 0.1.0</span></h2>',
+    expect(withoutHeadingLinks(html).match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="versie-0-2-0"><span class="hf-heading-alias" id="versie-0.2.0"></span>3 november 2026 <span class="hf-meta">versie 0.2.0</span></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="versie-0-1-0"><span class="hf-heading-alias" id="versie-0.1.0"></span>21 oktober 2026 <span class="hf-meta">versie 0.1.0</span></h2>',
     ])
-    expect(html).toContain('versie 0.2.0</span></h2><ul><li>Een verandering.</li><li>Nog een verandering.</li></ul>')
+    expect(headingAnchors(html).map(([id]) => id)).toEqual(['versie-0-2-0', 'versie-0-1-0'])
+    expect(withoutHeadingLinks(html)).toContain(
+      'versie 0.2.0</span></h2><ul><li>Een verandering.</li><li>Nog een verandering.</li></ul>',
+    )
     expect(html).not.toContain('nog geen versie')
   })
 

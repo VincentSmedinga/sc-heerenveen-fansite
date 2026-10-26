@@ -1,13 +1,16 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { withoutIcons } from '../../without-icons'
+import { headingAnchors, withoutHeadingLinks, withoutIcons } from '../../without-icons'
 import PrivacyPage, { generateMetadata } from './page'
 
 const html = renderToStaticMarkup(<PrivacyPage />)
 
+// Without the links that the headings are, for the tests about the other links and icons.
+const plain = withoutHeadingLinks(html)
+
 /** The href and the text of each link, in the order of the page. */
-const links = [...withoutIcons(html).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
+const links = [...withoutIcons(plain).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
   href,
   label,
 ])
@@ -33,17 +36,27 @@ describe('the page Privacy', () => {
     expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
   })
 
-  it('has one h1, and an h2 for each part, in order, without an anchor of its own', () => {
-    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
+  it('has one h1, and an h2 for each part, in order', () => {
+    expect(plain.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Privacy</h1>',
-      '<h2 class="hf-heading-2">Wat we tellen</h2>',
-      '<h2 class="hf-heading-2">Wat de hosting bewaart</h2>',
-      '<h2 class="hf-heading-2">Wat je browser bewaart</h2>',
-      '<h2 class="hf-heading-2">Als je ons een bericht stuurt</h2>',
-      '<h2 class="hf-heading-2">Andere sites</h2>',
-      '<h2 class="hf-heading-2">Vragen en klachten</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="tellen">Wat we tellen</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="hosting">Wat de hosting bewaart</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="cookies">Wat je browser bewaart</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="berichten">Als je ons een bericht stuurt</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="andere-sites">Andere sites</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="vragen">Vragen en klachten</h2>',
     ])
-    expect(html).not.toContain(' id=')
+  })
+
+  it('makes each h2 a link to itself, with a Dutch anchor that the page chose', () => {
+    expect(headingAnchors(html)).toEqual([
+      ['tellen', 'Wat we tellen'],
+      ['hosting', 'Wat de hosting bewaart'],
+      ['cookies', 'Wat je browser bewaart'],
+      ['berichten', 'Als je ons een bericht stuurt'],
+      ['andere-sites', 'Andere sites'],
+      ['vragen', 'Vragen en klachten'],
+    ])
   })
 
   it('shows the first paragraph under the h1 as the intro, in a b, and no other paragraph', () => {
@@ -120,7 +133,7 @@ describe('the page Privacy', () => {
   })
 
   it('says in paragraphs, not a list, what the counting, the logs, the theme, the cookie of the admin, email, other sites, questions and complaints are about', () => {
-    const paragraphs = [...withoutIcons(html).matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
+    const paragraphs = [...withoutIcons(plain).matchAll(/<p[^>]*>(.*?)<\/p>/g)].map(([, paragraph]) => paragraph)
 
     expect(html).not.toMatch(/<(ul|ol|li)[ >]/)
     expect(paragraphs).toHaveLength(11)
@@ -145,12 +158,12 @@ describe('the page Privacy', () => {
 
   it('draws the icon for a link to another site behind the Autoriteit Persoonsgegevens only, hidden from screen readers', () => {
     const iconLinks = [
-      ...html.matchAll(/<a href="([^"]*)">(?:[^<]*)<span class="hf-icon-tail">[^<]*<svg aria-hidden="true"/g),
+      ...plain.matchAll(/<a href="([^"]*)">(?:[^<]*)<span class="hf-icon-tail">[^<]*<svg aria-hidden="true"/g),
     ]
 
     expect(iconLinks.map(([, href]) => href)).toEqual(['https://www.autoriteitpersoonsgegevens.nl'])
     // The other icon is the envelope before the address.
-    expect(html.match(/<svg /g)).toHaveLength(2)
+    expect(plain.match(/<svg /g)).toHaveLength(2)
   })
 
   it('draws the envelope in front of the address, hidden from screen readers', () => {

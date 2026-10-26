@@ -5,7 +5,7 @@ import { Fragment } from 'react'
 
 import { pageMetadata } from '../../metadata'
 import { getReleases } from '../../releases'
-import { anchorOf, dateOf, feedPath, updatesPath, updatesTitle } from '../../updates'
+import { anchorOf, dateOf, feedPath, oldAnchorOf, updatesPath, updatesTitle } from '../../updates'
 
 // Render on each request: the canonical URL and the Open Graph address come from SITE_ENV,
 // which the build doesn't know. The versions are still those in the build (see releases.ts).
@@ -47,7 +47,7 @@ export default function UpdatesPage() {
           <Fragment key={release.version}>
             {/* The date, with the number of the version small after it, like "sinds 1997" in the
                 logo. */}
-            <Heading id={anchorOf(release)} level={2}>
+            <Heading aliases={[oldAnchorOf(release)]} anchor id={anchorOf(release)} level={2}>
               {`${dateOf(release)} `}
               <Text appearance="meta" as="span">{`versie ${release.version}`}</Text>
             </Heading>

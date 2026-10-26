@@ -24,7 +24,9 @@ export default function AboutPage() {
     <Page.Main>
       <Page.Cell>
         <Heading level={1}>Over ons</Heading>
-        <Heading level={2}>Wie we zijn</Heading>
+        <Heading anchor id="wie-we-zijn" level={2}>
+          Wie we zijn
+        </Heading>
         <Text appearance="intro">
           De sc Heerenveen Fansite is een site van supporters, voor supporters. We zetten de koppen van de media over sc
           Heerenveen op één plek, met een link naar het hele verhaal.
@@ -41,7 +43,9 @@ export default function AboutPage() {
           Vincent Smedinga begon de site in 1997. In die jaren hielpen veel mensen mee, aan de site en aan het forum, en
           ook nu weer. De laatste versie liep tot 2006, en in 2026 is de site terug.
         </Text>
-        <Heading level={2}>Hoe we werken</Heading>
+        <Heading anchor id="hoe-we-werken" level={2}>
+          Hoe we werken
+        </Heading>
         <Text>
           Van elk bericht tonen we de kop, de link en de naam van de bron. Een intro of een foto alleen als de bron ons
           daar toestemming voor geeft. Welke media we volgen, lees je bij <Link href="/bronnen">Onze bronnen</Link>.
