@@ -169,7 +169,8 @@ describe('the reserved addresses', () => {
 
   it('name every page and route at the top of the site, so a new one fails here until it is added', () => {
     const names = readdirSync(app, { withFileTypes: true })
-      .filter((entry) => !/^[_([]/u.test(entry.name))
+      // Not an address: a private folder (_), a route group, a dynamic segment or a slot (@).
+      .filter((entry) => !/^[_(@[]/u.test(entry.name))
       .map((entry) => entry.name.replace(/\.(?:test\.)?tsx?$/u, ''))
       .filter((name) => !['error', 'layout', 'not-found', 'page'].includes(name) && !name.includes('.'))
 

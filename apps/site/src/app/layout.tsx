@@ -70,7 +70,14 @@ export const viewport: Viewport = {
 // React must not mind the attribute it did not render (suppressHydrationWarning). The header
 // has the logo and the theme button in its first row and the main menu under them; the order in
 // the code is the order of the focus.
-export default function RootLayout({ children }: { children: ReactNode }) {
+//
+// A page can put a bar under the header, outside the Page.Body and so outside its main (see
+// Page.Shortcuts). The page's children sit in the Page.Body, so the page can't render the bar
+// there itself. The slot `@shortcuts` (a parallel route, see app/@shortcuts) lets a page add
+// it: the route of the same path in the slot renders the bar, in the HTML, before the
+// Page.Body, without JavaScript to move it. A page without a route in the slot gets an empty
+// one.
+export default function RootLayout({ children, shortcuts }: { children: ReactNode; shortcuts: ReactNode }) {
   return (
     <Root suppressHydrationWarning>
       <Head script="/theme.js" />
@@ -85,6 +92,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <ThemeToggle />
             <SiteNavigation />
           </Page.Header>
+          {shortcuts}
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
             <Text appearance="meta">Alle koppen en links op één plek.</Text>

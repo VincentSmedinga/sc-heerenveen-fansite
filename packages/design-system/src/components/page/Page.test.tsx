@@ -371,3 +371,84 @@ describe('Page.Footer', () => {
     expect(Page.Footer.displayName).toBe('Page.Footer')
   })
 })
+
+describe('Page.Shortcuts', () => {
+  const items = [
+    { href: '#programma', label: 'Programma' },
+    { href: '#stand', label: 'Stand' },
+  ]
+
+  it('is a navigation named by its label, which is a span and not a link', () => {
+    render(<Page.Shortcuts items={items} label="Op deze pagina:" />)
+    const nav = screen.getByRole('navigation', { name: 'Op deze pagina:' })
+    const label = nav.querySelector('.hf-page-shortcuts-label')
+
+    expect(nav.tagName).toBe('NAV')
+    expect(nav.className).toBe('hf-page-shortcuts')
+    expect(label?.tagName).toBe('SPAN')
+    expect(label?.textContent).toBe('Op deze pagina:')
+    expect(nav.getAttribute('aria-labelledby')).toBe(label?.id)
+    expect(within(nav).queryByRole('link', { name: 'Op deze pagina:' })).toBeNull()
+  })
+
+  it('holds a list with a link for each item, in the order given, named by its label', () => {
+    render(<Page.Shortcuts items={items} label="Op deze pagina:" />)
+    const links = within(screen.getByRole('navigation')).getAllByRole('link')
+
+    expect(within(screen.getByRole('list')).getAllByRole('listitem')).toHaveLength(2)
+    expect(links.map((link) => [link.textContent, link.getAttribute('href'), link.className])).toEqual([
+      ['Programma', '#programma', 'hf-page-shortcuts-link'],
+      ['Stand', '#stand', 'hf-page-shortcuts-link'],
+    ])
+  })
+
+  it('marks no link as the current page', () => {
+    const { container } = render(<Page.Shortcuts items={items} label="Op deze pagina:" />)
+
+    expect(container.querySelector('[aria-current]')).toBeNull()
+  })
+
+  it('gives each bar a label of its own, so two bars on a page have two names', () => {
+    render(
+      <>
+        <Page.Shortcuts items={items} label="Eerste:" />
+        <Page.Shortcuts items={items} label="Tweede:" />
+      </>,
+    )
+
+    expect(screen.getByRole('navigation', { name: 'Eerste:' })).toBeTruthy()
+    expect(screen.getByRole('navigation', { name: 'Tweede:' })).toBeTruthy()
+  })
+
+  it('sits between the header and the body, outside the main, so the reading order and the focus order are the page’s', () => {
+    const { container } = render(
+      <Page>
+        <Page.Header>Kop</Page.Header>
+        <Page.Shortcuts items={items} label="Op deze pagina:" />
+        <Page.Body>
+          <Page.Main>Inhoud</Page.Main>
+        </Page.Body>
+      </Page>,
+    )
+    const page = container.firstElementChild
+
+    expect(Array.from(page?.children ?? []).map((child) => child.tagName.toLowerCase())).toEqual([
+      'div',
+      'header',
+      'nav',
+      'div',
+    ])
+    expect(screen.getByRole('main').contains(screen.getByRole('navigation'))).toBe(false)
+  })
+
+  it('keeps the other attributes and adds a class to its own', () => {
+    render(<Page.Shortcuts className="extra" id="balk" items={items} label="Op deze pagina:" />)
+
+    expect(screen.getByRole('navigation').className).toBe('hf-page-shortcuts extra')
+    expect(screen.getByRole('navigation').id).toBe('balk')
+  })
+
+  it('is called Page.Shortcuts in the developer tools and the code examples', () => {
+    expect(Page.Shortcuts.displayName).toBe('Page.Shortcuts')
+  })
+})

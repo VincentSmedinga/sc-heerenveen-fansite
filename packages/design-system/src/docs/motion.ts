@@ -124,6 +124,20 @@ export const motionChanges: MotionChange[] = [
     why: 'Muis, focus',
   },
   {
+    component: 'Page.Shortcuts, link',
+    group: 'aanwijzen',
+    now: 'Kleur in 0,2 seconde, de streep verschijnt (#286).',
+    what: 'Kleur en streep',
+    why: 'Muis',
+  },
+  {
+    component: 'Page.Shortcuts, link',
+    group: 'selecteren',
+    now: 'Vulling in 0,1 seconde (#286).',
+    what: 'Vulling',
+    why: 'Ingedrukt (`:active`)',
+  },
+  {
     component: 'SegmentedControl',
     group: 'selecteren',
     now: jumps,

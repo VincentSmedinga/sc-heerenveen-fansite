@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchData } from '../../matches'
+import { matchShortcuts } from '../../matchShortcuts'
 import { matchData } from '../../test-matches'
 import { withoutIcons } from '../../without-icons'
 import MatchesPage, { generateMetadata } from './page'
@@ -53,6 +54,13 @@ describe('the page /wedstrijden', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="de-nul-gehouden"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="nul-gehouden"></span><a class="hf-heading-link" href="#de-nul-gehouden">De nul gehouden</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpunten-per-kwartier"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartier</a></h2>',
     ])
+  })
+
+  it('has a heading for every link of the bar under the header, with the id the link goes to, in the same order', async () => {
+    const html = await render()
+    const ids = [...html.matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => `#${id}`)
+
+    expect(matchShortcuts.map((item) => item.href)).toEqual(ids)
   })
 
   it('has the programme and the results in the main with the h1, and the table, the goal scorers, the clean sheets and the goals per quarter in a named, wide sidebar after it', async () => {

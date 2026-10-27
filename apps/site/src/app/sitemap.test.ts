@@ -30,15 +30,17 @@ const notInSitemap: string[] = [
   '/redactie/[slug]',
 ]
 
-/** The path of every page.tsx under src/app, such as '/bronnen'. The homepage is '/'. */
+/**
+ * The path of every page.tsx under src/app, such as '/bronnen'. The homepage is '/'. A folder
+ * that starts with @ is a slot of the layout (such as @shortcuts, the bar under the header),
+ * not a page of its own, so it is left out.
+ */
 function pagePaths() {
   return readdirSync(import.meta.dirname, { recursive: true, withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name === 'page.tsx')
-    .map((entry) => {
-      const folder = entry.parentPath.slice(import.meta.dirname.length).replaceAll('\\', '/')
-
-      return folder === '' ? '/' : folder
-    })
+    .map((entry) => entry.parentPath.slice(import.meta.dirname.length).replaceAll('\\', '/'))
+    .filter((folder) => !folder.split('/').some((part) => part.startsWith('@')))
+    .map((folder) => (folder === '' ? '/' : folder))
 }
 
 beforeEach(() => {

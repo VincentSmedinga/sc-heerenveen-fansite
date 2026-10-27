@@ -2376,6 +2376,65 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of helemaal geen overgangen behalve de themaknop; dat laat de site hard aanvoelen, en het besluit is dat beweging een bewuste keuze is, geen toeval.
 - **Later:** vult het besluit _Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat_ (27 oktober 2026) aan: de duren staan nu in de tokens van `motion.css`.
 
+### Het label van de balk blijft staan, de rij scrolt, en de vervaging is CSS
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** het label "Op deze pagina:" van `Page.Shortcuts` scrolt niet mee.
+  De rij scrolt zijwaarts zonder schuifbalk, met een half afgesneden laatste link en een vervaging aan de rand die er alleen is als er iets te scrollen valt.
+  Bij 20em of minder loopt de rij om.
+- **Waarom:** wie halverwege de rij is, ziet nog steeds wat de rij is.
+  Een afgesneden link en een vervaging zeggen dat er meer is, zonder schuifbalk.
+  Bij 400% zoom mag de pagina niet zijwaarts scrollen (WCAG 1.4.10), dus daar loopt de rij om.
+  20em volgt de lettergrootte van de bezoeker, dus wie grotere tekst heeft, krijgt de omlopende balk eerder dan bij 320 pixels.
+- **Hoe:** de vervaging is een `mask-image` met twee lengtes (`--hf-shortcuts-fade-start` en `--hf-shortcuts-fade-end`, geregistreerd met `@property`).
+  Een animatie met `animation-timeline: scroll(x self)` verandert ze met de afstand die de rij is gescrold: links komt de vervaging na 4% van de scrollafstand, rechts is ze weg bij 96%.
+  Zonder iets om te scrollen is de tijdlijn niet actief, dus er is geen vervaging.
+  Een browser zonder `animation-timeline` krijgt een vaste vervaging rechts en ruimte achter de laatste link.
+  De animatie volgt het scrollen en heeft geen tijd van zichzelf, dus ze hoort niet bij de tokens van Beweging en valt niet onder "minder beweging": er beweegt niets zolang de bezoeker niet scrolt.
+  De overgang van kleur en vulling van een link neemt wel de tokens: de korte duur voor de kleur (Aanwijzen) en de snelle voor de vulling bij indrukken (Ingedrukt en geselecteerd).
+  De rij heeft aan alle kanten 5 pixels ruimte, zodat het scrollgebied de focusrand niet afsnijdt.
+  De rij snapt ook (`scroll-snap-type: x proximity`, met `scroll-snap-align: start` op elk item en `scroll-padding-inline` gelijk aan de breedte van de vervaging plus de ruimte van de lijst, aan beide kanten): het begin van een link komt tot rust op het begin van de rij.
+  Het is `proximity` en niet `mandatory`, zodat de rij alleen snapt als ze bij een link stopt, en een langzame beweging of het toetsenbord niet wordt tegengehouden.
+  Een omlopende rij scrolt niet en snapt dus niet.
+  Een browser scrolt een link met de focus alleen in beeld als hij bijna onzichtbaar is: een link die half in beeld staat of onder de vervaging, blijft staan, met een focusrand die is afgesneden of vervaagd.
+  Daarom heeft de rij een klein onderdeel met JavaScript (`ShortcutsRow`, een `onFocus`): staat de link met de focus niet vrij van de vervaging, dan scrolt de rij hem naar het begin van de rij, achter de vervaging.
+  Dat is ook waar de rij snapt, dus het snappen scrolt hem niet terug.
+  Het doet dat alleen voor het toetsenbord (`:focus-visible`): bij een druk met een vinger of de muis zou de rij de link onder de vinger weg scrollen, en dan gaat de klik verloren.
+  De links zelf werken zonder JavaScript; zonder blijft alleen dit scrollen met het toetsenbord weg.
+  De balk blijft aan de bovenkant van het venster plakken als de pagina scrolt (`position: sticky`, onder de bovenrand van een telefoon met een inham), zodat de links bij de hand zijn langs de hele pagina.
+  Een omlopende balk plakt niet, want hij is te hoog (bij 320 pixels bijna 200 pixels) en zou een groot deel van een klein venster innemen.
+  De pagina houdt bij een link naar een kop ruimte voor de balk (`scroll-padding-block-start`, de hoogte in `--hf-shortcuts-height`), zodat de kop eronder staat en niet erachter.
+- **Alternatieven:** het label scrolt mee (de woorden verliezen hun uitleg); een balk die niet blijft plakken (na een stuk scrollen moet je terug naar boven voor de links); een schuifbalk (lelijk, en op een telefoon niet te zien); altijd omlopen op een smal scherm (de balk wordt twee of drie regels hoog); de vervaging met JavaScript (meer code, en het schuift pas na het laden op zijn plek).
+
+### De balk is in donker blauw-900, niet het warme vlak
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** in licht heeft de balk het warme vlak (zand) en zijn rand, in donker blauw-900, een trede donkerder dan de header.
+  De balk heeft eigen rollen in `colour.css`: `--hf-colour-background-shortcuts`, `--hf-colour-border-shortcuts`, `--hf-colour-text-shortcuts-label`, `--hf-colour-text-shortcuts-link`, `--hf-colour-text-shortcuts-link-hover` en `--hf-colour-background-shortcuts-pressed`.
+  De focusrand is de gewone (`--hf-colour-focus`).
+- **Waarom:** het warme vlak is in donker blauw-800, net als de header, dus de balk zou daar met de header één vlak lijken.
+  Blauw-900 houdt de balk als een aparte strook onder de header.
+  De projecteigenaar koos deze variant (B) boven het warme vlak zoals het is (A).
+- **Hoe:** het ontwerp rekende op blauw-800; op blauw-900 haalt het label (blauw-200) 10,65:1, een link (blauw-300) 7,9:1, een link onder de muis (blauw-200) 10,65:1, en de focusrand (blauw-300) 7,9:1 op de balk en 5,55:1 op de ingedrukte vulling.
+  De ingedrukte vulling is blauw-700 voor 70% over de balk, en een link (blauw-200) haalt daar 7,47:1.
+  In licht blijven de waarden van het ontwerp: label 7,61:1, link 7,68:1, link onder de muis 10,22:1, en de focusrand 3,85:1 op de balk en 3,20:1 op de ingedrukte vulling.
+  Geen waarde moest veranderen.
+  Alle paren staan in de contrasttabellen van Tokens/Kleur.
+- **Nadeel:** de gevulde achtergrond van een ingedrukte link haalt geen 3:1 tegen de balk zelf (ongeveer 1,2:1 in licht en in donker).
+  Dat is zo in het ontwerp, en het is bewust: de vulling is de reactie op een druk van een vinger en blijft niet staan, dus ze hoeft geen toestand te dragen.
+  Wat de link aanwijst, haalt de eis wel: de tekst op de vulling (8,49:1 in licht, 7,47:1 in donker) en de focusrand erop (3,2:1 in licht, 5,55:1 in donker).
+- **Alternatieven:** het warme vlak zoals het is, blauw-800 (A); dan lijkt de balk een verlengstuk van de header en is hij gelijk aan de warme kaart, maar hij valt minder op.
+
+### Een link in de balk is 36 pixels hoog
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** een link in de balk is 2,25 rem hoog (36 pixels bij de gewone lettergrootte), met minstens 24 bij 24 pixels voor de kleinste ("Stand" is 62 pixels breed), en dus lager dan de 44 pixels van het menu.
+  De balk is 46 pixels hoog plus een rand van 1 pixel.
+- **Waarom:** de balk is een tweede rij onder het menu en mag niet te veel ruimte kosten.
+  36 pixels haalt WCAG 2.5.8 (24 bij 24) ruim, en de links hebben ruimte boven en onder.
+  De hoogte staat in rem, zodat hij met de lettergrootte van de bezoeker meegroeit.
+- **Alternatieven:** 44 pixels, zoals het menu; dan is de balk 54 pixels hoog.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -3335,6 +3394,37 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of het pictogram niet laten veranderen en alleen een titel (tooltip) tonen; dat is traag, werkt niet met het toetsenbord en niet op touch.
   Of de vorm van de zon laten overgaan in die van de maan met de CSS-eigenschap `d`; Safari kent die niet, en dan is een tweede overgang nodig.
 - **Later:** vult het besluit _De themaschakelaar is één knop rechtsboven in de header_ (27 oktober 2026) aan: het pictogram toont het thema dat je ziet in rust, en het andere thema onder de muis en bij focus.
+
+### Een balk onder de kop voor de links naar de kaarten, alleen op een smal scherm
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** `/wedstrijden` krijgt op een smal scherm een zandkleurige balk direct onder de kop, buiten `main`, met het label "Op deze pagina:" en een rij links naar de kaarten die zijwaarts scrolt.
+  Op een breed scherm is ze er niet: vanaf 56 rem, de breedte waarop `Page.Body` twee kolommen heeft, is ze `display: none`, dus ook voor een schermlezer weg.
+  Dit vervangt de rij links als blok in de hoofdkolom, die de projecteigenaar te groot en een beetje kleurloos vond, en waarin de links verdwijnen in de ruimte.
+- **Waarom:** de balk staat bij het menu, en daarmee bij de andere navigatie, in een eigen `nav` buiten `main`.
+  Een navigatie na de kaart Programma helpt niet om langs het lange programma te komen.
+  Bovenaan staat de balk er meteen, met het label erbij.
+- **Hoe:** het onderdeel is `Page.Shortcuts`, een label en een lijst links, niet gebonden aan ankers.
+  Het getal 56 rem staat in `shortcuts.css`, en `shortcuts-css.test.ts` controleert dat het hetzelfde is als dat van de twee kolommen in `page.css`.
+  De zes links staan in `apps/site/src/matchShortcuts.ts`, en een test controleert dat elke link naar een kop op de pagina gaat.
+  Een link naar een kaart is het anker op de kop (`#stand`).
+  De browser scrolt de kop in beeld en zet het beginpunt voor Tab daar, dus de volgende Tab gaat naar de link in de kop.
+- **Alternatieven:** een rij links als blok in de hoofdkolom (het eerste ontwerp); een navigatie die altijd zichtbaar is (neemt ruimte op een breed scherm waar het niet nodig is); een samenvatting met openklappende kaarten (JavaScript en meer klikken); de kaarten opnieuw ordenen met de stand bovenaan (de stand is niet wat de meeste supporters het eerst zoeken).
+
+### De balk komt via een slot in de layout, een parallelle route
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** `layout.tsx` zet een slot `@shortcuts` tussen `Page.Header` en `Page.Body`, en `app/@shortcuts/wedstrijden/page.tsx` vult het met de balk.
+  Een pagina zonder eigen route in het slot krijgt een leeg slot (`@shortcuts/page.tsx` voor de homepage, `@shortcuts/[...rest]/page.tsx` voor de rest, en `default.tsx`).
+- **Waarom:** de layout zet de inhoud van elke pagina in `Page.Body`, en de balk moet erbuiten staan, over de hele breedte, tussen de kop en `main`.
+  Een slot doet dat in de HTML van de server, zonder JavaScript dat de balk verzet, met de leesvolgorde en de tabvolgorde van de pagina.
+  De route in het slot hoort bij het pad van de pagina, dus een pagina krijgt de balk door één bestand erbij te zetten.
+  Op een pagina waarvan de gegevens niet te lezen zijn, toont de balk niets, want de foutpagina heeft geen kaarten om naartoe te springen.
+- **Nadeel:** de lege routes zijn nodig, omdat een slot bij een klik op een link binnen de site anders de balk van de vorige pagina houdt.
+  De map `@shortcuts` is geen pagina en geen adres: de tests van het sitemap, de bezoekregels en de gereserveerde adressen slaan hem over.
+  Het slot is een segment onder de layout, dus de titelsjabloon van de layout bereikt nu ook de homepage.
+  De foutpagina van de homepage zet haar titel daarom met `absolute`, zodat die blijft zoals hij was.
+- **Alternatieven:** de balk in `Page.Body` zetten en met CSS naar buiten trekken (breedte, marges en de randen van het scherm moeten dan kloppen op elke breedte); de balk met JavaScript naar de goede plek verzetten (de balk springt na het laden, en zonder JavaScript staat hij verkeerd); `Page.Body` uit de layout halen en elke pagina de eigen laten zetten (elke pagina verandert voor één balk); een routegroep met een eigen layout voor `/wedstrijden` (alle pagina's verhuizen).
 
 ## Importer
 

@@ -634,6 +634,16 @@ await withEmptyDatabase((database) =>
     const matchesHtml = await matchesPage.text()
     assert.equal(matchesPage.status, 200)
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
+    // The bar under the header, outside the main, with a link to each card; none on the home.
+    assert.match(
+      matchesHtml,
+      /<\/header><nav aria-labelledby="([^"]+)" class="hf-page-shortcuts"><span class="hf-page-shortcuts-label" id="\1">Op deze pagina:<\/span>.*<\/nav><div class="hf-page-body"><main/s,
+    )
+    assert.deepEqual(
+      [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
+      ['#programma', '#uitslagen', '#stand', '#doelpuntenmakers', '#de-nul-gehouden', '#doelpunten-per-kwartier'],
+    )
+    assert.doesNotMatch(html, /hf-page-shortcuts/)
     assert.match(matchesHtml, /Testdorp FC/)
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
     assert.match(
