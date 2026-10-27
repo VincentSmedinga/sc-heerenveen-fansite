@@ -64,7 +64,7 @@ describe('ThemeButton', () => {
     expect(screen.getByRole('button').querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
   })
 
-  it('calls onClick when pressed, and keeps no state of its own', () => {
+  it('calls onClick when pressed, and keeps no theme of its own', () => {
     const onClick = vi.fn()
 
     render(<ThemeButton dark={false} label="Donker" onClick={onClick} />)
@@ -117,6 +117,13 @@ describe('ThemeButton', () => {
     expect(onClick).toHaveBeenCalledTimes(1)
     expect(onPointerLeave).toHaveBeenCalledTimes(1)
     expect(onBlur).toHaveBeenCalledTimes(1)
+  })
+
+  it('adds a class and passes other attributes on', () => {
+    render(<ThemeButton className="extra" dark={false} id="thema" label="Donker" />)
+
+    expect(screen.getByRole('button').className).toBe('hf-theme-button extra')
+    expect(screen.getByRole('button').id).toBe('thema')
   })
 
   describe('theme-button.css', () => {

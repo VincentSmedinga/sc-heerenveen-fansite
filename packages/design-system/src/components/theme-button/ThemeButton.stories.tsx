@@ -33,7 +33,7 @@ const meta = preview.meta({
           'Wat een schermlezer hoort, verandert niet: dat is de naam en of de knop is ingedrukt.',
           '',
           'De knop is gemaakt voor het donkerblauw van de header en staat daar in de eerste rij, rechts naast het logo.',
-          'Het component bewaart niets: de pagina geeft `dark` en handelt de klik af.',
+          'Het component bewaart het thema niet: de pagina geeft `dark` en handelt de klik af.',
         ].join('\n'),
       },
     },
