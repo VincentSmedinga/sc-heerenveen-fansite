@@ -8,7 +8,8 @@
  * browser in forced colours keeps an outline. The base styles of a button fill it; this comes later in the cascade, so
  * a button that is under the mouse on a touch screen (where the browser leaves it so after a tap) is not filled.
  * Hover is only for devices with a mouse (hover: hover), so nothing stays lit after a tap on a phone; pressing
- * (:active) counts on touch as well. The change takes 0,2 seconds, and none with reduced motion.
+ * (:active) counts on touch as well. The change takes the short motion duration (0,2 seconds),
+ * and none with reduced motion.
  *
  * Under the mouse and with the keyboard (:focus-visible) the icon turns into that of the
  * other theme, so the button shows what a click chooses: the sun becomes the moon, the
@@ -25,8 +26,8 @@
 
 @layer hf.components {
   .hf-theme-button {
-    /* How long the sun and the moon take to turn into each other. */
-    --hf-theme-button-morph: 0.4s;
+    /* How long the sun and the moon take to turn into each other (the medium duration). */
+    --hf-theme-button-morph: var(--hf-motion-duration-medium);
 
     /* The icon that is shown now: 0 is the sun and 1 is the moon. The states below set it. */
     --hf-theme-button-moon: 0;
@@ -103,10 +104,14 @@
       transform-box: fill-box;
       transform-origin: center;
       translate: calc(0.304px * var(--hf-theme-button-moon)) calc(-0.304px * var(--hf-theme-button-moon));
+      transition:
+        scale var(--hf-theme-button-morph) var(--hf-motion-ease-morph),
+        translate var(--hf-theme-button-morph) var(--hf-motion-ease-morph);
     }
 
     .hf-theme-button-dent {
       translate: calc(2.8px * (1 - var(--hf-theme-button-moon))) calc(-2.8px * (1 - var(--hf-theme-button-moon)));
+      transition: translate var(--hf-theme-button-morph) var(--hf-motion-ease-morph);
     }
 
     /*
@@ -122,32 +127,18 @@
       transform: scale(calc(1 - 0.5 * var(--hf-theme-button-moon)));
       transform-box: view-box;
       transform-origin: 50% 50%;
-    }
-
-    @media (prefers-reduced-motion: no-preference) {
       transition:
-        background-color 0.2s,
-        border-color 0.2s,
-        color 0.2s;
-
-      .hf-theme-button-body {
-        transition:
-          scale var(--hf-theme-button-morph) ease-in-out,
-          translate var(--hf-theme-button-morph) ease-in-out;
-      }
-
-      .hf-theme-button-dent {
-        transition: translate var(--hf-theme-button-morph) ease-in-out;
-      }
-
-      .hf-theme-button-rays {
-        transition:
-          opacity var(--hf-theme-button-morph) ease-in-out,
-          scale calc(var(--hf-theme-button-moon) * var(--hf-theme-button-morph)) ease-out,
-          transform calc((1 - var(--hf-theme-button-moon)) * var(--hf-theme-button-morph)) ease-out
-            calc(var(--hf-theme-button-moon) * var(--hf-theme-button-morph));
-      }
+        opacity var(--hf-theme-button-morph) var(--hf-motion-ease-morph),
+        scale calc(var(--hf-theme-button-moon) * var(--hf-theme-button-morph)) var(--hf-motion-ease-enter),
+        transform calc((1 - var(--hf-theme-button-moon)) * var(--hf-theme-button-morph)) var(--hf-motion-ease-enter)
+          calc(var(--hf-theme-button-moon) * var(--hf-theme-button-morph));
     }
+
+    /* The durations are motion tokens: 0s with reduced motion, so the icon changes at once. */
+    transition:
+      background-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      border-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
 
     @media (forced-colors: active) {
       border-color: ButtonText;

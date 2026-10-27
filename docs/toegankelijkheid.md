@@ -122,9 +122,16 @@ Zo test je het: zoom in de browser tot 400%, of zet de responsieve weergave in d
 ### Minder beweging
 
 - [ ] Met minder beweging aan (`prefers-reduced-motion: reduce`) staan animaties en vloeiend scrollen uit.
-      Het designsysteem doet dat al voor vloeiend scrollen.
+      Elke overgang van het designsysteem haalt zijn duur uit de tokens van `tokens/motion.css`, en die zijn dan 0 s.
+      De test `tokens/motion-css.test.ts` in het designsysteem faalt als een overgang of animatie een eigen tijd heeft.
+      Vloeiend scrollen heeft zijn eigen regel in `root.css`.
+      Zie het hoofdstuk Beweging in Storybook.
 - [ ] Niets beweegt, scrolt of ververst langer dan vijf seconden vanzelf zonder dat je het kunt pauzeren (2.2.2).
+      De langste overgang is de medium duur, en niets herhaalt zich.
 - [ ] Niets knippert vaker dan drie keer per seconde (2.3.1).
+- [ ] Beweging die niet nodig is, kan worden uitgezet (2.3.3): `prefers-reduced-motion: reduce` doet dat voor elke overgang uit de taal.
+- [ ] Het contrast blijft 3:1 voor het pictogram en 4,5:1 voor tekst halverwege een overgang, waar dat kan.
+      Waar een overgang dat even niet haalt, staat het erbij: de stralen van de zon in de themaknop worden doorzichtig terwijl ze oplossen.
 
 Zo test je het: zet minder beweging aan in je besturingssysteem, of boots het na in de ontwikkelhulpmiddelen van je browser.
 

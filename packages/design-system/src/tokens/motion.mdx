@@ -1,0 +1,85 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks'
+
+import * as MotionStories from './motion.stories'
+
+<Meta of={MotionStories} />
+
+# Beweging
+
+Beweging laat zien dat iets reageert, zonder dat de lezer iets kwijtraakt.
+Het designsysteem heeft één taal voor beweging: een kleine reeks duren en versnellingen, en vijf groepen waar elke toestandswisseling in past.
+Een onderdeel kiest een groep en neemt de tokens van die groep, en schrijft nooit zelf een tijd.
+
+## Tokens
+
+<Story of={MotionStories.Tokens} />
+
+Bij `prefers-reduced-motion: reduce` is elke duur nul.
+Dat staat op één plek, in `tokens/motion.css`, dus een onderdeel hoeft er niet aan te denken.
+Een test in het designsysteem faalt zodra ergens in de CSS een tijd staat die niet uit een token komt, en zodra een `transition` of `animation` er geen token voor gebruikt.
+
+## Groepen
+
+<Story of={MotionStories.Groups} />
+
+## Regels
+
+- **Wat beweegt:** kleur (ook van een rand of een streep), doorzichtigheid en transformatie (schalen en verschuiven).
+  Die kosten de pagina het minst.
+- **Wat nooit beweegt:** de maat of de plaats van iets dat de leespositie verschuift, zoals breedte, hoogte, marge, opvulling, lettergewicht en de dikte van een rand.
+  Wat opent of sluit, krijgt zijn ruimte meteen of laat de ruimte staan, en wisselt alleen van doorzichtigheid.
+- **De langste duur** is `--hf-motion-duration-medium`.
+  Dat is voor een vorm die in een andere overgaat.
+  Iets dat langer duurt of zich herhaalt, komt er niet in.
+- **Wanneer iets geen overgang krijgt:** als de bezoeker de toestand nodig heeft om te weten waar hij is of wat er fout is.
+  Dat zijn de focusrand, de huidige pagina, het doel van een anker en een fout.
+  Zulke toestanden staan in de groep Zonder overgang.
+- **Hoe een nieuw onderdeel zijn groep kiest:** vraag wat de wisseling de bezoeker zegt.
+  "Ik reageer op je muis" is Aanwijzen.
+  "Je hebt me ingedrukt of gekozen" is Ingedrukt en geselecteerd.
+  "Ik ben er nu, of ik ben weg" is Verschijnen en verdwijnen.
+  "De hele pagina verandert" is De hele pagina.
+  "Je moet dit meteen weten" is Zonder overgang.
+  Past geen enkele groep, bedenk dan geen eigen duur: leg het voor aan de projecteigenaar, want dan hoort er een groep bij.
+- **Een element dat verschijnt** met `display` of het attribuut `hidden` begint met `@starting-style` bij doorzichtig.
+  Dat is nog niet Baseline widely available, dus het staat binnen een controle van de browser en een browser zonder krijgt het element zonder overgang.
+  Een element dat er al staat en alleen van doorzichtigheid wisselt, heeft het niet nodig.
+- **Paginawisselingen** met de View Transitions API kunnen later.
+  We kiezen er nu niet voor: ze maken de overgang tussen pagina's, en dit hoofdstuk gaat over toestanden in een pagina.
+
+## Voorbeelden
+
+Elk voorbeeld is gemaakt met de tokens van zijn groep, zoals een onderdeel dat straks doet.
+Probeer ze met de muis, met Tab en op een telefoon, en in licht en donker met de themaknop van Storybook.
+De onderdelen zelf krijgen hun overgangen per groep, in eigen stappen.
+
+### Aanwijzen
+
+<Story of={MotionStories.Point} />
+
+### Ingedrukt en geselecteerd
+
+<Story of={MotionStories.Select} />
+
+### Verschijnen en verdwijnen
+
+<Story of={MotionStories.Appear} />
+
+### De hele pagina
+
+De themaknop heeft deze overgang al.
+Vloeiend scrollen hoort ook bij deze groep, en heeft een eigen regel voor minder beweging in `root.css`.
+Het label dat meekomt bij het naar beneden trekken volgt de vinger en heeft geen duur.
+
+<Story of={MotionStories.Page} />
+
+### Zonder overgang
+
+<Story of={MotionStories.Direct} />
+
+## Alle toestandswisselingen
+
+Elke wisseling in het designsysteem staat in één groep.
+De site heeft geen eigen CSS; zijn pagina's gebruiken wat hier staat.
+
+<Story of={MotionStories.List} />

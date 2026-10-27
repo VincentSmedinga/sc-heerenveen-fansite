@@ -68,7 +68,7 @@ export default definePreview({
         order: [
           'Huisstijl',
           'Tokens',
-          ['Kleur', 'Typografie'],
+          ['Kleur', 'Typografie', 'Beweging'],
           'Redactie',
           'HTML-elementen',
           ['Koppen', 'Tekst', 'Links', 'Lijsten', 'Citaat', 'Scheidingslijn', 'Figuur', 'Tabel', 'Code', 'Formulier'],

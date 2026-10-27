@@ -15,6 +15,7 @@
 @import url('./tokens/colour.css');
 @import url('./tokens/typography.css');
 @import url('./tokens/layout.css');
+@import url('./tokens/motion.css');
 
 /*
  * Every component has its own file, base/ holds the elements without a component, and utilities/ the utility classes.
