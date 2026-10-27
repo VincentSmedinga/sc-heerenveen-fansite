@@ -65,7 +65,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Button',
+  title: 'Componenten/Formulier/Button',
 })
 
 export const Default = meta.story({

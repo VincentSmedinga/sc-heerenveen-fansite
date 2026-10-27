@@ -61,7 +61,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/NewsItem',
+  title: 'Patronen/NewsItem',
 })
 
 // The width of the container, not of the window, decides how a line looks: a wide column such

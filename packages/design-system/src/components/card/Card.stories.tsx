@@ -46,7 +46,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Card',
+  title: 'Componenten/Weergave/Card',
 })
 
 const newsItems = (

@@ -26,7 +26,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Filter',
+  title: 'Componenten/Navigatie/Filter',
 })
 
 const choices = [

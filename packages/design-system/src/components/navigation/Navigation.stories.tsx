@@ -37,7 +37,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Navigation',
+  title: 'Componenten/Navigatie/Navigation',
 })
 
 const render = () => <Navigation items={exampleMenu} label="Hoofdmenu" />

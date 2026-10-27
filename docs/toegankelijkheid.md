@@ -158,7 +158,7 @@ Gebruik wat er is, in plaats van het opnieuw te bouwen (#19):
 - [HTML-elementen/Koppen](https://ds.heerenveen.org/?path=/docs/html-elementen-koppen--documentatie): de stijl van een kop staat los van het niveau.
 - [HTML-elementen/Links](https://ds.heerenveen.org/?path=/docs/html-elementen-links--documentatie): onderstreepte links, met hover, focus en bezocht.
 - [HTML-elementen/Formulier](https://ds.heerenveen.org/?path=/docs/html-elementen-formulier--documentatie): labels, velden en knoppen van 44 pixels hoog, en randen van 3:1.
-- [Componenten](https://ds.heerenveen.org/?path=/docs/componenten-overzicht--documentatie): de componenten voor de paginaopbouw, met de landmarks `header`, `nav`, `main` en `footer`, een navigatie met een naam en een kop met een niveau los van zijn stijl.
+- [Componenten/Pagina/Page](https://ds.heerenveen.org/?path=/docs/componenten-pagina-page--documentatie): de componenten voor de paginaopbouw, met de landmarks `header`, `nav`, `main` en `footer`, een navigatie met een naam en een kop met een niveau los van zijn stijl.
 - [Hulpklassen/Alleen voor schermlezers](https://ds.heerenveen.org/?path=/docs/hulpklassen-alleen-voor-schermlezers--documentatie): de klasse `hf-visually-hidden`, voor tekst die je niet ziet maar die een schermlezer wel voorleest.
 
 De patronen volgen met de pagina's die ze nodig hebben.

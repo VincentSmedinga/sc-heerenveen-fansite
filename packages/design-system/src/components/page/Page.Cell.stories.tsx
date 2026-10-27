@@ -23,7 +23,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Page.Cell',
+  title: 'Componenten/Pagina/Page.Cell',
 })
 
 // The dashed lines show the cells. They are only in these stories.

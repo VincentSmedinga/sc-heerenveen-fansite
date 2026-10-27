@@ -49,7 +49,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/DiscussionItem',
+  title: 'Patronen/DiscussionItem',
 })
 
 // The block as the homepage has it, in the width of the sidebar. The discussions are made up,

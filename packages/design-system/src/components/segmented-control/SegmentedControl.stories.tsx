@@ -33,7 +33,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/SegmentedControl',
+  title: 'Componenten/Formulier/SegmentedControl',
 })
 
 const Example = ({ start }: { start: Choice }) => {

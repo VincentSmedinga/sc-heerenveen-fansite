@@ -29,7 +29,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Honeypot',
+  title: 'Componenten/Formulier/Honeypot',
 })
 
 export const Default = meta.story({

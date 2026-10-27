@@ -33,7 +33,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/PullIndicator',
+  title: 'Componenten/Navigatie/PullIndicator',
 })
 
 // The label is fixed to the top of the screen. A transform on the frame makes it the box the

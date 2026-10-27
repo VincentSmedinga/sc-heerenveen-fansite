@@ -62,7 +62,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Match',
+  title: 'Patronen/Match',
 })
 
 // The block as the homepage has it, in the width of the sidebar: the previous and the next

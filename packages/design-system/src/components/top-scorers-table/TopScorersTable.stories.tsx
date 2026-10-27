@@ -40,7 +40,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/TopScorersTable',
+  title: 'Patronen/TopScorersTable',
 })
 
 // A made-up list: a top scorer with eight goals (so one goal is 12.5% of the bar), two players

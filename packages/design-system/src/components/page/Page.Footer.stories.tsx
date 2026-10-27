@@ -45,7 +45,7 @@ const meta = preview.meta({
     layout: 'fullscreen',
   },
   tags: ['autodocs'],
-  title: 'Componenten/Page.Footer',
+  title: 'Componenten/Pagina/Page.Footer',
 })
 
 const render = () => <ExampleFooter />

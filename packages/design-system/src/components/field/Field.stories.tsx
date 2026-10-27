@@ -29,7 +29,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Field',
+  title: 'Componenten/Formulier/Field',
 })
 
 const renderEmpty = () => (

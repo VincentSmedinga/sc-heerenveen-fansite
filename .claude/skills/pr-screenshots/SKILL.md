@@ -46,7 +46,7 @@ Put the test data in before you start the site: the homepage keeps its headlines
 Then in a second terminal: `pnpm screenshots http://127.0.0.1:3000 / /podcasts [--dark] [--full-page]`.
 
 For a component, `pnpm --filter design-system build-storybook`, serve `packages/design-system/storybook-static` on port 6006 (`python3 -m http.server 6006 --bind 127.0.0.1 --directory …`), and run `pnpm screenshots http://127.0.0.1:6006 <story id>`.
-A story id looks like `componenten-page-footer--light`.
+A story id looks like `componenten-pagina-page-footer--light`.
 
 The PNGs land in `screenshots/`, which Git ignores.
 **Open every image and look at it** before you use it: the right page, no error page, no real names, nothing cut off.

@@ -63,7 +63,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/DonutChart',
+  title: 'Componenten/Weergave/DonutChart',
 })
 
 const caption = 'Aanmeldingen en afmeldingen per maand, van januari tot en met juni'

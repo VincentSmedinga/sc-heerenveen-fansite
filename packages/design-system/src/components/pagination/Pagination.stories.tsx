@@ -26,7 +26,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Pagination',
+  title: 'Componenten/Navigatie/Pagination',
 })
 
 const first = () => <Pagination current={1} label="Pagina's" nextHref="/podcasts?pagina=2" total={9} />

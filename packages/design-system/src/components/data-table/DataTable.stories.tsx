@@ -32,7 +32,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/DataTable',
+  title: 'Componenten/Weergave/DataTable',
 })
 
 // Made-up numbers: a few days, and a path that is far too long for a phone.

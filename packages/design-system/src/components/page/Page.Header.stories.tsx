@@ -30,7 +30,7 @@ const meta = preview.meta({
     layout: 'fullscreen',
   },
   tags: ['autodocs'],
-  title: 'Componenten/Page.Header',
+  title: 'Componenten/Pagina/Page.Header',
 })
 
 const render = () => <ExampleHeader />

@@ -29,7 +29,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/RefreshButton',
+  title: 'Componenten/Navigatie/RefreshButton',
 })
 
 // The button is fixed to the top corner of the screen. A transform on the frame makes it the
