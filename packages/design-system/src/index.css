@@ -38,6 +38,7 @@
 @import url('./components/logo/logo.css');
 @import url('./components/heading/heading.css');
 @import url('./components/text/text.css');
+@import url('./components/player-name/player-name.css');
 @import url('./components/link/link.css');
 @import url('./base/elements.css');
 @import url('./components/list/list.css');

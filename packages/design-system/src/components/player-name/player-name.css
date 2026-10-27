@@ -1,0 +1,19 @@
+/*
+ * The name of a player: the given name in the normal weight and the surname in the stronger
+ * weight. Both weights are set here, on the parts, so the name looks the same whatever weight
+ * the place around it has, such as a bold row header or a link.
+ */
+
+@layer hf.components {
+  .hf-player-name {
+    overflow-wrap: anywhere;
+  }
+
+  .hf-player-name-given {
+    font-weight: var(--hf-body-font-weight);
+  }
+
+  .hf-player-name-surname {
+    font-weight: var(--hf-strong-font-weight);
+  }
+}

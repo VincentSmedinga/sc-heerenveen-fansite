@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import {
   cleanSheetsOf,
   goalsPerQuarter,
+  goalsWithInitials,
   overviewOf,
   parseCleanSheetCount,
   scorersCoverage,
@@ -161,20 +162,20 @@ describe('topScorersOf', () => {
     const matches = [played([goal('Proefman'), goal('Nepper')]), played([goal('Proefman')])]
 
     expect(topScorersOf(matches)).toEqual([
-      { goals: 2, player: 'Proefman', playerId: null, position: 1, searchTerm: null },
-      { goals: 1, player: 'Nepper', playerId: null, position: 2, searchTerm: null },
+      { goals: 2, id: 'Proefman', player: 'Proefman', position: 1, surname: 'Proefman' },
+      { goals: 1, id: 'Nepper', player: 'Nepper', position: 2, surname: 'Nepper' },
     ])
   })
 
   it('counts a penalty as a goal of the player', () => {
     expect(topScorersOf([played([goal('Proefman', { penalty: true }), goal('Proefman')])])).toEqual([
-      { goals: 2, player: 'Proefman', playerId: null, position: 1, searchTerm: null },
+      { goals: 2, id: 'Proefman', player: 'Proefman', position: 1, surname: 'Proefman' },
     ])
   })
 
   it('does not count the own goal of an opponent for a player of ours, who has no goal from it', () => {
     expect(topScorersOf([played([goal('Teststraat', { ownGoal: true }), goal('Proefman')])])).toEqual([
-      { goals: 1, player: 'Proefman', playerId: null, position: 1, searchTerm: null },
+      { goals: 1, id: 'Proefman', player: 'Proefman', position: 1, surname: 'Proefman' },
     ])
   })
 
@@ -183,7 +184,7 @@ describe('topScorersOf', () => {
     const against = goal('Proefman', { minute: 30, ours: false })
 
     expect(topScorersOf([played([own, against, goal('Nepper')])])).toEqual([
-      { goals: 1, player: 'Nepper', playerId: null, position: 1, searchTerm: null },
+      { goals: 1, id: 'Nepper', player: 'Nepper', position: 1, surname: 'Nepper' },
     ])
   })
 
@@ -207,7 +208,7 @@ describe('topScorersOf', () => {
     const scorers = topScorersOf([played(goals)])
 
     expect(scorers).toHaveLength(20)
-    expect(scorers[0]).toEqual({ goals: 2, player: 'Speler 01', playerId: null, position: 1, searchTerm: null })
+    expect(scorers[0]).toEqual({ goals: 2, id: 'Speler 01', player: 'Speler 01', position: 1, surname: 'Speler 01' })
     expect(scorers.slice(1).every((item) => item.goals === 1 && item.position === 2)).toBe(true)
     expect(scorers.slice(1).map((item) => item.player)).toEqual(names.slice(1))
   })
@@ -224,8 +225,8 @@ describe('topScorersOf', () => {
       ]
 
       expect(topScorersOf(matches)).toEqual([
-        { goals: 2, player: 'Luca Oyen', playerId: 7, position: 1, searchTerm: 'Oyen' },
-        { goals: 1, player: 'Jacob Trenskow', playerId: 8, position: 2, searchTerm: 'Trenskow' },
+        { givenName: 'Luca', goals: 2, id: 7, player: 'Luca Oyen', position: 1, surname: 'Oyen' },
+        { givenName: 'Jacob', goals: 1, id: 8, player: 'Jacob Trenskow', position: 2, surname: 'Trenskow' },
       ])
     })
 
@@ -238,7 +239,7 @@ describe('topScorersOf', () => {
         ]),
       ]
 
-      expect(topScorersOf(matches).map((item) => [item.position, item.player, item.playerId, item.goals])).toEqual([
+      expect(topScorersOf(matches).map((item) => [item.position, item.player, item.id, item.goals])).toEqual([
         [1, 'Kees Jansen', 2, 2],
         [2, 'Bram Jansen', 1, 1],
       ])
@@ -246,7 +247,7 @@ describe('topScorersOf', () => {
 
     it('keeps the goals of a player who has left the squad', () => {
       expect(topScorersOf([played([linked(9, 'Marko Farji', 'Farji', 'Farji')])])).toEqual([
-        { goals: 1, player: 'Marko Farji', playerId: 9, position: 1, searchTerm: 'Farji' },
+        { givenName: 'Marko', goals: 1, id: 9, player: 'Marko Farji', position: 1, surname: 'Farji' },
       ])
     })
 
@@ -256,9 +257,9 @@ describe('topScorersOf', () => {
       ]
 
       expect(topScorersOf(matches)).toEqual([
-        { goals: 2, player: 'Onbekend', playerId: null, position: 1, searchTerm: null },
-        { goals: 1, player: 'Luca Oyen', playerId: 7, position: 2, searchTerm: 'Oyen' },
-        { goals: 1, player: 'Oyen', playerId: null, position: 2, searchTerm: null },
+        { goals: 2, id: 'Onbekend', player: 'Onbekend', position: 1, surname: 'Onbekend' },
+        { goals: 1, id: 'Oyen', player: 'Oyen', position: 2, surname: 'Oyen' },
+        { givenName: 'Luca', goals: 1, id: 7, player: 'Luca Oyen', position: 2, surname: 'Oyen' },
       ])
     })
 
@@ -511,5 +512,61 @@ describe('goalsPerQuarter', () => {
     goalsPerQuarter(matches)
 
     expect(matches).toEqual(copy)
+  })
+})
+
+describe('goalsWithInitials', () => {
+  const trenskow = (id: number, given: string, minute: number) =>
+    goal('Trenskow', {
+      minute,
+      playerId: id,
+      playerName: `${given} Trenskow`,
+      playerSearchTerm: 'Trenskow',
+    })
+
+  it('puts the first letter of the given name before two different players with the same name in a match', () => {
+    const goals = [trenskow(1, 'Jakob', 10), trenskow(2, 'Jan', 20), trenskow(1, 'Jakob', 30)]
+
+    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual(['J. Trenskow', 'J. Trenskow', 'J. Trenskow'])
+  })
+
+  it('tells them apart when their given names start with different letters', () => {
+    const goals = [trenskow(1, 'Jakob', 10), trenskow(2, 'Bram', 20)]
+
+    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual(['J. Trenskow', 'B. Trenskow'])
+  })
+
+  it('leaves two goals of one player alone', () => {
+    const goals = [trenskow(1, 'Jakob', 10), trenskow(1, 'Jakob', 20)]
+
+    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual(['Trenskow', 'Trenskow'])
+  })
+
+  it('leaves players with different names alone, and goals without a player', () => {
+    const goals = [
+      trenskow(1, 'Jakob', 10),
+      goal('Oyen', { minute: 20, playerId: 3, playerName: 'Luca Oyen', playerSearchTerm: 'Oyen' }),
+      goal('Trenskow', { minute: 30, ours: false }),
+    ]
+
+    expect(goalsWithInitials(goals)).toEqual(goals)
+  })
+
+  it('leaves the other fields of a goal as they are', () => {
+    const [changed] = goalsWithInitials([
+      { ...trenskow(1, 'Jakob', 10), penalty: true },
+      { ...trenskow(2, 'Jan', 20), ownGoal: true },
+    ])
+
+    expect(changed).toMatchObject({ minute: 10, penalty: true, player: 'J. Trenskow', playerId: 1 })
+  })
+
+  it('does not shorten a name that has no given name to tell it from', () => {
+    const goals = [
+      goal('Dinho', { minute: 10, playerId: 1, playerName: 'Dinho', playerSearchTerm: 'Dinho' }),
+      goal('Dinho', { minute: 20, playerId: 2, playerName: 'Dinho', playerSearchTerm: 'Dinho' }),
+    ]
+
+    expect(goalsWithInitials(goals)).toEqual(goals)
   })
 })

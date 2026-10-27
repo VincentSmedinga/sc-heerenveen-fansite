@@ -4,10 +4,10 @@ import { describe, expect, it } from 'vitest'
 import { TopScorersTable, type TopScorersTableRow } from './TopScorersTable'
 
 const rows: TopScorersTableRow[] = [
-  { goals: 8, player: 'Proefman', position: 1 },
-  { goals: 4, player: 'Nepper', position: 2 },
-  { goals: 4, player: 'Testvoort', position: 2 },
-  { goals: 1, player: 'Demo', position: 4 },
+  { givenName: 'Wouter', goals: 8, id: 1, position: 1, surname: 'Proefman' },
+  { givenName: 'Gerrit', goals: 4, id: 2, position: 2, surname: 'Nepper' },
+  { goals: 4, id: 'naam:Testvoort', position: 2, surname: 'Testvoort' },
+  { givenName: 'Rick', goals: 1, id: 4, position: 4, surname: 'Demo' },
 ]
 
 const props = { caption: 'Doelpuntenmakers van sc Heerenveen in het seizoen 2026/27', rows }
@@ -33,10 +33,10 @@ describe('TopScorersTable', () => {
     expect(screen.getByRole('columnheader', { name: 'plaats' })).toBeTruthy()
     expect(screen.getByRole('columnheader', { name: 'doelpunten' })).toBeTruthy()
     expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual([
-      'Proefman',
-      'Nepper',
+      'Wouter Proefman',
+      'Gerrit Nepper',
       'Testvoort',
-      'Demo',
+      'Rick Demo',
     ])
     expect(document.querySelectorAll('tbody th[scope="row"]')).toHaveLength(4)
   })
@@ -57,13 +57,26 @@ describe('TopScorersTable', () => {
   it('shows a row for every player it gets, however long the list is', () => {
     const many = Array.from({ length: 20 }, (_, index) => ({
       goals: index === 0 ? 2 : 1,
-      player: `Speler ${index + 1}`,
+      id: index,
       position: index === 0 ? 1 : 2,
+      surname: `Speler ${index + 1}`,
     }))
     const { container } = render(<TopScorersTable caption={props.caption} rows={many} />)
 
     expect(container.querySelectorAll('tbody tr')).toHaveLength(20)
     expect(barLengths(container)).toHaveLength(20)
+  })
+
+  it('keeps two players with the same name apart by their key, and gives each name its weights', () => {
+    const twins = [
+      { givenName: 'Bram', goals: 2, id: 1, position: 1, surname: 'Jansen' },
+      { givenName: 'Kees', goals: 1, id: 2, position: 2, surname: 'Jansen' },
+    ]
+    const { container } = render(<TopScorersTable caption={props.caption} rows={twins} />)
+
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Bram Jansen', 'Kees Jansen'])
+    expect(container.querySelectorAll('tbody th .hf-player-name-given')).toHaveLength(2)
+    expect(container.querySelectorAll('tbody th .hf-player-name-surname')).toHaveLength(2)
   })
 
   it('abbreviates the goals to D, with the full word in the title and under the table', () => {

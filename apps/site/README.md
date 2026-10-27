@@ -196,6 +196,8 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 
 - **Programma:** alle wedstrijden die nog niet zijn gespeeld, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
+- **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
+  Hebben twee verschillende spelers in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow` (`goalsWithInitials` in `src/matches.ts`).
 - **Doelpunten per kwartier:** een kaart in de zijbalk, onder de nul gehouden en boven de bronvermelding, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
   `goalsPerQuarter` in `src/matches.ts` telt ze uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), in de competitie en de beker.
   De kwartieren zijn 1–15, 16–30, 31–45, 46–60, 61–75 en 76–90.
@@ -212,9 +214,9 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 - **Doelpuntenmakers:** alle spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten.
   `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
   Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
-  Een doelpunt dat de importer aan een speler koppelde (`player_id`) telt voor die speler en toont zijn volledige naam uit `players`, ook als hij de selectie verliet; twee spelers met dezelfde achternaam zijn dus twee rijen.
+  Een doelpunt dat de importer aan een speler koppelde (`player_id`) telt voor die speler en toont zijn volledige naam uit `players` (de voornaam gewoon en de achternaam vet, met `PlayerName`), ook als hij de selectie verliet; twee spelers met dezelfde achternaam zijn dus twee rijen.
   Een doelpunt zonder speler telt per naam zoals de pagina hem toont, als een rij van zichzelf, zodat er geen doelpunt verloren gaat.
-  Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet.
+  Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet van de achternaam.
   Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
   Direct onder de kop, boven de tabel, staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord": dezelfde plek en stijl als bij de nul gehouden.
   Het oude anker `#topscorers` blijft werken: het is een oud anker (`aliases`) op de kop.
@@ -288,7 +290,7 @@ De teller van het bezoek telt `/zoeken` zonder de vraag (`src/visits.ts`), en ee
 De pagina is `noindex`, ook met een vraag, en staat niet in de sitemap.
 
 De lijst met spelers staat in de zijbalk, na de resultaten in de bron, dus op een smal scherm onder de resultaten en zonder vraag direct onder het formulier.
-Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam is een link naar `/zoeken?q=<achternaam>`.
+Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam (`PlayerName`, met de achternaam vet) is een link naar `/zoeken?q=<achternaam>`.
 Zijn er geen spelers, dan laat de pagina de lijst weg.
 Onder de lijst staat de bronvermelding van de selectie (`WikipediaCredit`), met de pagina uit `wikipedia_pages` met `kind` `squad` (`findSquadPage`).
 `listSquad` is de ene plek die bepaalt wie in de lijst staat, en geeft alleen de spelers die in de selectie staan (`in_squad`): een speler die vertrok, blijft in `players` voor zijn doelpunten.
