@@ -1,11 +1,12 @@
 /* The bar under the header with a label and a row of links (Page.Shortcuts). */
 
 /*
- * The two fades at the edges of the row. They are lengths that the scroll animation below moves, so they have to be
- * registered: a custom property that is not can't be animated. Both start at 0 (no fade). A browser that can't
- * register them has no scroll animation either, and takes the fixed fade (see the row).
+ * The two fades at the edges of the row. They are lengths that the scroll animation below
+ * moves, so they have to be registered: a custom property that is not can't be animated. Both
+ * start at 0 (no fade). A browser that can't register them has no scroll animation either, and
+ * takes the fixed fade (see the row).
  */
-/* stylelint-disable plugin/use-baseline -- @property is not widely available yet, and it is behind @supports here */
+/* stylelint-disable plugin/use-baseline -- @property is new, and is behind @supports here */
 @supports (animation-timeline: scroll()) {
   @property --hf-shortcuts-fade-start {
     inherits: false;
@@ -23,14 +24,16 @@
 
 @layer hf.components {
   /*
-   * The bar is as wide as the page, on its own colour (see the roles in colour.css), with a line under it. It is a
-   * flex row of the label, which stays where it is, and the row of links, which scrolls. The padding is on the start
-   * side only: the row runs on to the edge of the screen, so the last link is cut off by it and the reader sees
-   * there is more. The padding clears a notch on the sides (see page.css).
+   * The bar is as wide as the page, on its own colour (see the roles in colour.css), with a
+   * line under it. It is a flex row of the label, which stays where it is, and the row of
+   * links, which scrolls. The padding is on the start side only: the row runs on to the edge of
+   * the screen, so the last link is cut off by it and the reader sees there is more. The
+   * padding clears a notch on the sides (see page.css).
    *
-   * It is for a narrow screen. From 56rem the Page.Body has two columns, so the cells are side by side and nothing
-   * hides behind a long cell: the bar is gone, with display: none, so a screen reader doesn't read it either. The
-   * number is the one of the two columns in page.css (a media query can't use a custom property).
+   * It is for a narrow screen. From 56rem the Page.Body has two columns, so the cells are side
+   * by side and nothing hides behind a long cell: the bar is gone, with display: none, so a
+   * screen reader doesn't read it either. The number is the one of the two columns in page.css
+   * (a media query can't use a custom property).
    */
   .hf-page-shortcuts {
     align-items: center;
@@ -47,8 +50,9 @@
   }
 
   /*
-   * The label is the type style of "sinds 1997" in the header: capitals in the display typeface. It does not scroll
-   * and does not wrap, so halfway along the row the reader still sees what the row is.
+   * The label has the label type style (the label tokens): capitals in the display typeface.
+   * It does not scroll and does not wrap, so halfway along the row the reader still sees what
+   * the row is.
    */
   .hf-page-shortcuts-label {
     color: var(--hf-colour-text-shortcuts-label);
@@ -64,18 +68,19 @@
   }
 
   /*
-   * The row scrolls sideways, with no scrollbar. Tab goes along the links and scrolls the one with the focus into view.
-   * The list has 5px of room all round, so the focus ring (3px, 2px away from the link) is not cut off by the scroll
-   * area; the row takes the 5px at the start back from the space between the label and the links, so the links
-   * stay where they were.
+   * The row scrolls sideways, with no scrollbar. Tab goes along the links and scrolls the one
+   * with the focus into view. The list has 5px of room all round, so the focus ring (3px, 2px
+   * away from the link) is not cut off by the scroll area; the row takes the 5px at the start
+   * back from the space between the label and the links, so the links stay where they were.
    *
-   * The fade: the row is masked at both edges by a gradient of two lengths (the two properties above). The scroll
-   * animation sets them from how far the row has scrolled: the fade on the left comes in after 4% and the fade on the
-   * right is gone at 96%. A row with nothing to scroll has an inactive timeline and so no fade. The animation has no
-   * duration and no time of its own: it follows the scrolling, so it needs no motion token and is no motion for
-   * someone who has asked for less.
-   * A browser without scroll-driven animations gets a fixed fade at the right edge, and room behind the last link, so
-   * the last link can scroll out from under the fade.
+   * The fade: the row is masked at both edges by a gradient of two lengths (the two properties
+   * above). The scroll animation sets them from how far the row has scrolled: the fade on the
+   * left comes in after 4% and the fade on the right is gone at 96%. A row with nothing to
+   * scroll has an inactive timeline and so no fade. The animation has no duration and no time
+   * of its own: it follows the scrolling, so it needs no motion token and is no motion for
+   * someone who has asked for less. A browser without scroll-driven animations gets a fixed
+   * fade at the right edge, and room behind the last link, so the last link can scroll out from
+   * under the fade.
    */
   .hf-page-shortcuts-row {
     --hf-shortcuts-fade-end: 0;
@@ -149,12 +154,13 @@
   }
 
   /*
-   * A link is a pill 36px high (2.25rem, so it grows with the text size), and so a target well over the 24px that WCAG
-   * asks for, but lower than the 44px of the menu: the bar is a second row under it and may not take much room.
-   * It is the colour of links, without an underline. Under the mouse (only where there is one, so nothing stays lit
-   * after a tap) it gets the darker colour and the underline. Pressed it gets a fill. The focus ring is the ordinary one.
-   * The change of colour takes the short motion duration (aanwijzen), the fill the quick one (ingedrukt); the underline
-   * can't fade, so it appears.
+   * A link is a pill 36px high (2.25rem, so it grows with the text size), and so a target well
+   * over the 24px that WCAG asks for, but lower than the 44px of the menu: the bar is a second
+   * row under it and may not take much room. It is the colour of links, without an underline.
+   * Under the mouse (only where there is one, so nothing stays lit after a tap) it gets the
+   * darker colour and the underline. Pressed it gets a fill. The focus ring is the ordinary
+   * one. The change of colour takes the short motion duration (aanwijzen), the fill the quick
+   * one (ingedrukt); the underline can't fade, so it appears.
    */
   .hf-page-shortcuts-link {
     align-items: center;
@@ -188,10 +194,11 @@
   }
 
   /*
-   * At 20em (320px at the usual size, and more with larger text, or at 400% zoom) the page may not scroll sideways
-   * (WCAG 1.4.10), so the label and the links wrap and nothing scrolls. The row takes the whole width under the
-   * label, without a mask, and the list is pulled back by the padding of a link, so the text of the first link is
-   * in line with the label. The links stay 36px high.
+   * At 20em (320px at the usual size, and more with larger text, or at 400% zoom) the page may
+   * not scroll sideways (WCAG 1.4.10), so the label and the links wrap and nothing scrolls. The
+   * row takes the whole width under the label, without a mask, and the list is pulled back by
+   * the padding of a link, so the text of the first link is in line with the label. The links
+   * stay 36px high.
    */
   @media (width <= 20em) {
     .hf-page-shortcuts {

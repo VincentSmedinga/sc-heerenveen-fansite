@@ -174,11 +174,13 @@
     --hf-colour-icon-on-header-quiet: var(--hf-colour-blue-400);
 
     /*
-     * The bar "Op deze pagina" under the header (Page.Shortcuts) has roles of its own: in light it is the warm surface,
-     * in dark blue-900, a step darker than the header, where the warm surface is blue-800 and would run into it.
-     * The label is quiet, the links are the colour of links with a pressed fill under a finger. The focus ring is the
-     * ordinary one (--hf-colour-focus), which reaches 3:1 on the bar and on the pressed fill in both themes.
-     * The pressed fill is the border of the warm surface over its background in light, and blue-700 over the bar in dark.
+     * The bar "Op deze pagina" under the header (Page.Shortcuts) has roles of its own: in light
+     * it is the warm surface, in dark blue-900, a step darker than the header, where the warm
+     * surface is blue-800 and would run into it. The label is quiet, the links are the colour
+     * of links with a pressed fill under a finger. The focus ring is the ordinary one
+     * (--hf-colour-focus), which reaches 3:1 on the bar and on the pressed fill in both themes.
+     * The pressed fill is the border of the warm surface over its background in light, and
+     * blue-700 over the bar in dark.
      */
     --hf-colour-background-shortcuts: light-dark(var(--hf-colour-sand-100), var(--hf-colour-blue-900));
     --hf-colour-border-shortcuts: light-dark(var(--hf-colour-sand-300), var(--hf-colour-blue-600));
