@@ -62,11 +62,18 @@ export type CleanSheets = {
   played: number
 }
 
-/** A player in the list of goal scorers: the goals this season and the place, from 1. */
+/**
+ * A player in the list of goal scorers: the goals this season and the place, from 1. `player`
+ * is the full name from the table `players` for a goal that is linked to a player, with his
+ * `id` and the `searchTerm` that is the end of his name; for a goal without a player it is the
+ * name as the page shows it, and the id and the search term are null.
+ */
 export type TopScorer = {
   goals: number
   player: string
+  playerId: null | number
   position: number
+  searchTerm: null | string
 }
 
 /**
@@ -207,21 +214,34 @@ export function standingsAround(rows: PublicStandingsRow[]): PublicStandingsRow[
  * 4). A penalty counts. An own goal does not: with `ours` it is the goal of an opponent who
  * scored for us by mistake, and without `ours` it is a player of ours who scored for the
  * opponent, so neither is a goal of the player. A goal of the opponent is not counted either,
- * even for a player with the same name. The player is the name as `match_goals` keeps it, so
- * two players with the same name count as one.
+ * even for a player with the same name.
+ *
+ * A goal that is linked to a player counts for that player, by his `id`, so two players with
+ * the same surname are two rows, and a player who has left the squad still has his goals.
+ * A goal with no player in the table counts for its name as the page shows it, as a row of its
+ * own, so no goal is lost: it can be a second row for a player whose other goals are linked.
  */
 export function topScorersOf(matches: PublicMatch[]): TopScorer[] {
-  const goals = new Map<string, number>()
+  const scorers = new Map<string, Omit<TopScorer, 'position'>>()
 
   for (const goal of matches.flatMap((match) => match.goals)) {
-    if (goal.ours && !goal.ownGoal) {
-      goals.set(goal.player, (goals.get(goal.player) ?? 0) + 1)
+    if (!goal.ours || goal.ownGoal) {
+      continue
     }
+
+    const linked = goal.playerId !== null
+    const key = linked ? `id:${goal.playerId}` : `name:${goal.player}`
+    const before = scorers.get(key)
+
+    scorers.set(key, {
+      goals: (before?.goals ?? 0) + 1,
+      player: (linked ? goal.playerName : null) ?? goal.player,
+      playerId: goal.playerId,
+      searchTerm: linked ? goal.playerSearchTerm : null,
+    })
   }
 
-  const sorted = [...goals]
-    .map(([player, count]) => ({ goals: count, player }))
-    .sort((a, b) => b.goals - a.goals || a.player.localeCompare(b.player, 'nl'))
+  const sorted = [...scorers.values()].sort((a, b) => b.goals - a.goals || a.player.localeCompare(b.player, 'nl'))
 
   return sorted.map((scorer) => ({
     ...scorer,

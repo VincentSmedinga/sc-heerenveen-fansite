@@ -328,12 +328,21 @@ describe('searchPublic', () => {
 })
 
 describe('listSquad', () => {
-  it('gives the players of the season by shirt number, and those without a number last', async () => {
+  it('gives the players of the season by shirt number, those without a number last, and nobody who left the squad', async () => {
     await database.db.insert(players).values([
       { name: 'Zonder Nummer', position: 'doelman', searchTerm: 'Nummer', season: '2026/27', shirtNumber: null },
       { name: 'Tien Speler', position: 'aanvaller', searchTerm: 'Speler', season: '2026/27', shirtNumber: 10 },
       { name: 'Een Keeper', position: 'doelman', searchTerm: 'Keeper', season: '2026/27', shirtNumber: 1 },
       { name: 'Oud Speler', position: 'aanvaller', searchTerm: 'Oud', season: '2025/26', shirtNumber: 9 },
+      {
+        inSquad: false,
+        leftSquadAt: new Date('2027-01-31T12:00:00Z'),
+        name: 'Vertrokken Speler',
+        position: 'aanvaller',
+        searchTerm: 'Speler',
+        season: '2026/27',
+        shirtNumber: 7,
+      },
     ])
 
     expect(await listSquad(database.db, '2026/27')).toEqual([

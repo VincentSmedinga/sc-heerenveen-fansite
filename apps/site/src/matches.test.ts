@@ -141,6 +141,9 @@ const goal = (player: string, options: Partial<Goal> = {}): Goal => ({
   ownGoal: false,
   penalty: false,
   player,
+  playerId: null,
+  playerName: null,
+  playerSearchTerm: null,
   stoppageMinutes: null,
   ...options,
 })
@@ -158,20 +161,20 @@ describe('topScorersOf', () => {
     const matches = [played([goal('Proefman'), goal('Nepper')]), played([goal('Proefman')])]
 
     expect(topScorersOf(matches)).toEqual([
-      { goals: 2, player: 'Proefman', position: 1 },
-      { goals: 1, player: 'Nepper', position: 2 },
+      { goals: 2, player: 'Proefman', playerId: null, position: 1, searchTerm: null },
+      { goals: 1, player: 'Nepper', playerId: null, position: 2, searchTerm: null },
     ])
   })
 
   it('counts a penalty as a goal of the player', () => {
     expect(topScorersOf([played([goal('Proefman', { penalty: true }), goal('Proefman')])])).toEqual([
-      { goals: 2, player: 'Proefman', position: 1 },
+      { goals: 2, player: 'Proefman', playerId: null, position: 1, searchTerm: null },
     ])
   })
 
   it('does not count the own goal of an opponent for a player of ours, who has no goal from it', () => {
     expect(topScorersOf([played([goal('Teststraat', { ownGoal: true }), goal('Proefman')])])).toEqual([
-      { goals: 1, player: 'Proefman', position: 1 },
+      { goals: 1, player: 'Proefman', playerId: null, position: 1, searchTerm: null },
     ])
   })
 
@@ -180,7 +183,7 @@ describe('topScorersOf', () => {
     const against = goal('Proefman', { minute: 30, ours: false })
 
     expect(topScorersOf([played([own, against, goal('Nepper')])])).toEqual([
-      { goals: 1, player: 'Nepper', position: 1 },
+      { goals: 1, player: 'Nepper', playerId: null, position: 1, searchTerm: null },
     ])
   })
 
@@ -204,9 +207,67 @@ describe('topScorersOf', () => {
     const scorers = topScorersOf([played(goals)])
 
     expect(scorers).toHaveLength(20)
-    expect(scorers[0]).toEqual({ goals: 2, player: 'Speler 01', position: 1 })
+    expect(scorers[0]).toEqual({ goals: 2, player: 'Speler 01', playerId: null, position: 1, searchTerm: null })
     expect(scorers.slice(1).every((item) => item.goals === 1 && item.position === 2)).toBe(true)
     expect(scorers.slice(1).map((item) => item.player)).toEqual(names.slice(1))
+  })
+
+  describe('with the goals linked to the players of the squad', () => {
+    /** A goal of a player of ours: the name in the match line, and the player behind it. */
+    const linked = (id: number, name: string, searchTerm: string, shown: string, options: Partial<Goal> = {}) =>
+      goal(shown, { playerId: id, playerName: name, playerSearchTerm: searchTerm, ...options })
+
+    it('counts per player and shows his full name, with his id and the end of his name', () => {
+      const matches = [
+        played([linked(7, 'Luca Oyen', 'Oyen', 'Oyen'), linked(8, 'Jacob Trenskow', 'Trenskow', 'Trenskow')]),
+        played([linked(7, 'Luca Oyen', 'Oyen', 'L. Oyen')]),
+      ]
+
+      expect(topScorersOf(matches)).toEqual([
+        { goals: 2, player: 'Luca Oyen', playerId: 7, position: 1, searchTerm: 'Oyen' },
+        { goals: 1, player: 'Jacob Trenskow', playerId: 8, position: 2, searchTerm: 'Trenskow' },
+      ])
+    })
+
+    it('makes two rows of two players with the same surname, who were not counted as one', () => {
+      const matches = [
+        played([
+          linked(1, 'Bram Jansen', 'Jansen', 'Jansen'),
+          linked(2, 'Kees Jansen', 'Jansen', 'Jansen'),
+          linked(2, 'Kees Jansen', 'Jansen', 'Jansen'),
+        ]),
+      ]
+
+      expect(topScorersOf(matches).map((item) => [item.position, item.player, item.playerId, item.goals])).toEqual([
+        [1, 'Kees Jansen', 2, 2],
+        [2, 'Bram Jansen', 1, 1],
+      ])
+    })
+
+    it('keeps the goals of a player who has left the squad', () => {
+      expect(topScorersOf([played([linked(9, 'Marko Farji', 'Farji', 'Farji')])])).toEqual([
+        { goals: 1, player: 'Marko Farji', playerId: 9, position: 1, searchTerm: 'Farji' },
+      ])
+    })
+
+    it('counts a goal without a player under its name, as a row of its own, so no goal is lost', () => {
+      const matches = [
+        played([goal('Onbekend'), goal('Onbekend'), linked(7, 'Luca Oyen', 'Oyen', 'Oyen'), goal('Oyen')]),
+      ]
+
+      expect(topScorersOf(matches)).toEqual([
+        { goals: 2, player: 'Onbekend', playerId: null, position: 1, searchTerm: null },
+        { goals: 1, player: 'Luca Oyen', playerId: 7, position: 2, searchTerm: 'Oyen' },
+        { goals: 1, player: 'Oyen', playerId: null, position: 2, searchTerm: null },
+      ])
+    })
+
+    it('does not count an own goal or a goal of the opponent for a linked player', () => {
+      const own = linked(7, 'Luca Oyen', 'Oyen', 'Oyen', { ours: false, ownGoal: true })
+      const opponent = linked(7, 'Luca Oyen', 'Oyen', 'Oyen', { ours: false })
+
+      expect(topScorersOf([played([own, opponent])])).toEqual([])
+    })
   })
 
   it('is empty without goals, for a match without scorers and for no matches', () => {

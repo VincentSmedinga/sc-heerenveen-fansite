@@ -15,7 +15,17 @@ import {
   listSeasonStandings,
   listWikipediaPages,
 } from './queries.ts'
-import { discussions, feeds, items, matches, matchGoals, sources, standings, wikipediaPages } from './schema.ts'
+import {
+  discussions,
+  feeds,
+  items,
+  matches,
+  matchGoals,
+  players,
+  sources,
+  standings,
+  wikipediaPages,
+} from './schema.ts'
 import {
   madeUpMatches,
   madeUpSquadPage,
@@ -829,6 +839,7 @@ describe('the matches and the table of a season', () => {
 
   beforeEach(async () => {
     await database.pool.query('DELETE FROM matches')
+    await database.pool.query('DELETE FROM players')
     await database.pool.query('DELETE FROM standings')
     await database.pool.query('DELETE FROM wikipedia_pages')
   })
@@ -913,13 +924,110 @@ describe('the matches and the table of a season', () => {
       const cup = rows.find((match) => match.round === 'Kwartfinale')
 
       expect(cup?.goals).toEqual([
-        { minute: 18, ours: true, ownGoal: false, penalty: true, player: 'Vroeg', stoppageMinutes: null },
-        { minute: 45, ours: true, ownGoal: false, penalty: false, player: 'Voor rust', stoppageMinutes: null },
-        { minute: 45, ours: false, ownGoal: false, penalty: false, player: 'Blessuretijd', stoppageMinutes: 2 },
-        { minute: 46, ours: true, ownGoal: false, penalty: false, player: 'Na rust', stoppageMinutes: null },
-        { minute: 88, ours: false, ownGoal: false, penalty: false, player: 'Late', stoppageMinutes: null },
+        {
+          minute: 18,
+          ours: true,
+          ownGoal: false,
+          penalty: true,
+          player: 'Vroeg',
+          playerId: null,
+          playerName: null,
+          playerSearchTerm: null,
+          stoppageMinutes: null,
+        },
+        {
+          minute: 45,
+          ours: true,
+          ownGoal: false,
+          penalty: false,
+          player: 'Voor rust',
+          playerId: null,
+          playerName: null,
+          playerSearchTerm: null,
+          stoppageMinutes: null,
+        },
+        {
+          minute: 45,
+          ours: false,
+          ownGoal: false,
+          penalty: false,
+          player: 'Blessuretijd',
+          playerId: null,
+          playerName: null,
+          playerSearchTerm: null,
+          stoppageMinutes: 2,
+        },
+        {
+          minute: 46,
+          ours: true,
+          ownGoal: false,
+          penalty: false,
+          player: 'Na rust',
+          playerId: null,
+          playerName: null,
+          playerSearchTerm: null,
+          stoppageMinutes: null,
+        },
+        {
+          minute: 88,
+          ours: false,
+          ownGoal: false,
+          penalty: false,
+          player: 'Late',
+          playerId: null,
+          playerName: null,
+          playerSearchTerm: null,
+          stoppageMinutes: null,
+        },
       ])
       expect(rows.filter((match) => match !== cup).every((match) => match.goals.length === 0)).toBe(true)
+    })
+
+    it('gives a goal of one of our players the player and his full name, also when he has left the squad', async () => {
+      await database.db.insert(matches).values(madeUpMatches(now))
+
+      const [cupMatch] = await database.db
+        .select({ id: matches.id })
+        .from(matches)
+        .where(eq(matches.round, 'Kwartfinale'))
+      const id = cupMatch?.id ?? 0
+      const [{ insertId: oyen }] = await database.db.insert(players).values({
+        name: 'Luca Oyen',
+        position: 'aanvaller',
+        searchTerm: 'Oyen',
+        season: '2026/27',
+        wikipediaPage: 'Luca Oyen',
+      })
+      const [{ insertId: farji }] = await database.db.insert(players).values({
+        inSquad: false,
+        leftSquadAt: now,
+        name: 'Marko Farji',
+        position: 'aanvaller',
+        searchTerm: 'Farji',
+        season: '2026/27',
+        wikipediaPage: 'Marko Farji',
+      })
+
+      await database.db.insert(matchGoals).values([
+        { matchId: id, minute: 10, ours: true, player: 'Oyen', playerId: oyen },
+        { matchId: id, minute: 20, ours: true, player: 'Farji', playerId: farji },
+        { matchId: id, minute: 30, ours: false, player: 'Teststraat' },
+      ])
+
+      const cup = (await listSeasonMatches(database.db, '2026/27')).find((match) => match.round === 'Kwartfinale')
+
+      expect(
+        cup?.goals.map(({ player, playerId, playerName, playerSearchTerm }) => [
+          player,
+          playerId,
+          playerName,
+          playerSearchTerm,
+        ]),
+      ).toEqual([
+        ['Oyen', oyen, 'Luca Oyen', 'Oyen'],
+        ['Farji', farji, 'Marko Farji', 'Farji'],
+        ['Teststraat', null, null, null],
+      ])
     })
 
     it('gives only the season it is asked for', async () => {

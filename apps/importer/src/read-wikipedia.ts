@@ -5,7 +5,12 @@
 // guess, so the import keeps what it has.
 import type { Competition, MatchStatus } from '@fansite/db/schema'
 
-import { matchGoalPlayerMaxLength, matchLimits, standingsClubMaxLength } from '@fansite/db/schema'
+import {
+  matchGoalPlayerMaxLength,
+  matchLimits,
+  standingsClubMaxLength,
+  wikipediaPageMaxLength,
+} from '@fansite/db/schema'
 
 /** One goal of a played match, as the page names it. */
 export type ReadGoal = {
@@ -18,6 +23,8 @@ export type ReadGoal = {
   penalty: boolean
   /** The name as the page shows it, such as `Van Bergen`. */
   player: string
+  /** The page of the link: `Luca Oyen` for `[[Luca Oyen|Oyen]]`, or null (`linkedPage`). */
+  playerPage: null | string
   /** The minutes of added time: 1 for "45+1". Null in regular time. */
   stoppageMinutes: null | number
 }
@@ -109,6 +116,24 @@ const months = [
 /** Takes the comments out of the text, which can hold a `|` or a `}}` of their own. */
 export function clean(text: string): string {
   return text.replace(/<!--[\s\S]*?-->/gu, '')
+}
+
+/**
+ * The page the first link in a wikitext value points to, written the way Wikipedia names a
+ * page: `Luca Oyen` for `[[Luca Oyen|Oyen]]` and `Pim Verbeek (voetballer)` for `[[pim_Verbeek
+ * (voetballer)]]`, with spaces for underscores and a capital first letter, and without a
+ * section (`#Carrière`). A value without a link, a link to a file or a category, and a title
+ * longer than the database keeps give null.
+ */
+export function linkedPage(value: string): null | string {
+  const target = /\[\[([^\]|]*)/u.exec(value)?.[1]
+  const title = target?.split('#')[0]?.replaceAll('_', ' ').replace(/\s+/gu, ' ').trim()
+
+  if (title === undefined || title === '' || title.length > wikipediaPageMaxLength || /^[^:]*:/u.test(title)) {
+    return null
+  }
+
+  return title.charAt(0).toUpperCase() + title.slice(1)
 }
 
 /** The titles of the three pages of a season, such as `2026/27`. */
@@ -464,6 +489,8 @@ function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | {
       return { problem: `a goal has no usable name: '${plain(line).slice(0, 40)}'` }
     }
 
+    const playerPage = linkedPage(line.replace(/\{\{\s*goal\s*\|[^{}]*\}\}/giu, ' '))
+
     for (const [, inner = ''] of templates) {
       let last: ReadGoal | undefined
 
@@ -480,6 +507,7 @@ function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | {
             ownGoal: false,
             penalty: false,
             player: name,
+            playerPage,
             stoppageMinutes: minute[2] === undefined ? null : Number(minute[2]),
           }
           if (last.minute < 1 || last.minute > 150 || last.stoppageMinutes === 0) {

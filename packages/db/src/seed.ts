@@ -1,4 +1,4 @@
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type {
@@ -461,42 +461,82 @@ export function madeUpMatches(now: Date): NewMatch[] {
 }
 
 /**
+ * The made-up players who score, with the page each is known by. A goal in `madeUpGoals` names
+ * the surname and this page, and the seed links it to the player (see `linkMadeUpGoals`). Two
+ * of them are called Testvoort, so the goals of those two can only be told apart by the page.
+ * Monster is no longer in the squad but has his goal. They are 12 players, and `madeUpSquad`
+ * has them next to the other players.
+ */
+const madeUpScorers: [name: string, shirtNumber: number, inSquad: boolean][] = [
+  ['Rick Demo', 30, true],
+  ['Teun Dummy', 31, true],
+  ['Sander Monster', 32, false],
+  ['Lennart Probeer', 33, true],
+  ['Gerrit Nepper', 34, true],
+  ['Marijn Sjabloon', 35, true],
+  ['Wouter Proefman', 36, true],
+  ['Niels Steekproef', 37, true],
+  ['Joris Testvoort', 38, true],
+  ['Bas Testvoort', 39, true],
+  ['Jan van der Voorbeeldstraat-Proefmans', 40, true],
+  ['Pieter Voorbeeld', 41, true],
+]
+
+/**
  * Made-up scorers for the played matches of `madeUpMatches`, by `<competition>|<round>`, in
  * the order of the clock. The goals of each club add up to its result. Together they cover the
  * cases a page must show: goals of one club only and of both, a penalty, an own goal, added
  * time, a player with two goals, extra time and a long name. The players are made up, like the
- * clubs. For the top scorers they make twelve players: Proefman with three goals, two players
- * with two goals who share the second place, and nine with one goal who share the fourth. The
- * own goal of an opponent counts for nobody.
+ * clubs. For the top scorers they make twelve players: Wouter Proefman with three goals, two
+ * players with two goals who share the second place, and nine with one goal who share the
+ * fourth. The own goal of an opponent counts for nobody.
+ *
+ * The goals of our players have the page of the player (`wikipedia_page`), as the importer
+ * stores it, and the seed links them to `players`: a goal of a player who left the squad
+ * (Monster), and the goals of two players with the same surname (Testvoort). A goal of the
+ * opponent has no page and no player.
  */
 export const madeUpGoals: Record<string, MadeUpGoal[]> = {
   'Eredivisie|Speelronde 1': [
-    { minute: 12, ours: true, player: 'Demo', stoppageMinutes: null },
-    { minute: 25, ours: true, player: 'Dummy', stoppageMinutes: null },
-    { minute: 41, ours: true, player: 'Monster', stoppageMinutes: null },
-    { minute: 58, ours: true, player: 'Probeer', stoppageMinutes: null },
-    { minute: 77, ours: true, player: 'Nepper', stoppageMinutes: null },
-    { minute: 83, ours: true, player: 'Demo', stoppageMinutes: null },
+    { minute: 12, ours: true, player: 'Demo', stoppageMinutes: null, wikipediaPage: 'Rick Demo' },
+    { minute: 25, ours: true, player: 'Dummy', stoppageMinutes: null, wikipediaPage: 'Teun Dummy' },
+    { minute: 41, ours: true, player: 'Monster', stoppageMinutes: null, wikipediaPage: 'Sander Monster' },
+    { minute: 58, ours: true, player: 'Probeer', stoppageMinutes: null, wikipediaPage: 'Lennart Probeer' },
+    { minute: 77, ours: true, player: 'Nepper', stoppageMinutes: null, wikipediaPage: 'Gerrit Nepper' },
+    { minute: 83, ours: true, player: 'Demo', stoppageMinutes: null, wikipediaPage: 'Rick Demo' },
   ],
   'Eredivisie|Speelronde 2': [
-    { minute: 8, ours: true, player: 'Sjabloon', stoppageMinutes: null },
-    { minute: 23, ours: true, player: 'Proefman', stoppageMinutes: null },
-    { minute: 51, ours: true, player: 'Steekproef', stoppageMinutes: null },
-    { minute: 66, ours: true, player: 'Testvoort', stoppageMinutes: null },
-    { minute: 74, ours: true, player: 'Modelman', stoppageMinutes: null },
-    { minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4 },
+    { minute: 8, ours: true, player: 'Sjabloon', stoppageMinutes: null, wikipediaPage: 'Marijn Sjabloon' },
+    { minute: 23, ours: true, player: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
+    { minute: 51, ours: true, player: 'Steekproef', stoppageMinutes: null, wikipediaPage: 'Niels Steekproef' },
+    { minute: 66, ours: true, player: 'Testvoort', stoppageMinutes: null, wikipediaPage: 'Joris Testvoort' },
+    { minute: 74, ours: true, player: 'Testvoort', stoppageMinutes: null, wikipediaPage: 'Bas Testvoort' },
+    { minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4, wikipediaPage: 'Gerrit Nepper' },
   ],
   'KNVB Beker|Achtste finale': [
-    { minute: 30, ours: true, player: 'Van der Voorbeeldstraat-Proefmans', stoppageMinutes: null },
+    {
+      minute: 30,
+      ours: true,
+      player: 'Van der Voorbeeldstraat-Proefmans',
+      stoppageMinutes: null,
+      wikipediaPage: 'Jan van der Voorbeeldstraat-Proefmans',
+    },
     { minute: 90, ours: false, player: 'Oefenaar', stoppageMinutes: 3 },
   ],
   'KNVB Beker|Eerste ronde': [
-    { minute: 12, ours: true, player: 'Proefman', stoppageMinutes: null },
+    { minute: 12, ours: true, player: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
     { minute: 55, ours: false, player: 'Teststraat', stoppageMinutes: null },
-    { minute: 105, ours: true, player: 'Proefman', stoppageMinutes: null },
+    { minute: 105, ours: true, player: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
   ],
   'KNVB Beker|Kwartfinale': [
-    { minute: 18, ours: true, penalty: true, player: 'Voorbeeld', stoppageMinutes: null },
+    {
+      minute: 18,
+      ours: true,
+      penalty: true,
+      player: 'Voorbeeld',
+      stoppageMinutes: null,
+      wikipediaPage: 'Pieter Voorbeeld',
+    },
     { minute: 45, ours: false, player: 'Teststraat', stoppageMinutes: 1 },
     { minute: 70, ours: true, ownGoal: true, player: 'Kopie', stoppageMinutes: null },
     { minute: 88, ours: false, player: 'Teststraat', stoppageMinutes: null },
@@ -507,7 +547,9 @@ export const madeUpGoals: Record<string, MadeUpGoal[]> = {
  * A made-up squad for the current season, for the pages and the accessibility checks: invented
  * names, all four positions, a name with a particle, a name of one word and a player without a
  * shirt number. It passes the checks of the importer (18 to 45 players, two goalkeepers). The
- * search terms are written out, as the importer would work them out.
+ * search terms are written out, as the importer would work them out, and every player has the
+ * page of his name. The players who score in `madeUpGoals` are in it too, with one who has left
+ * the squad (`in_squad` false), who is not in the list on the search page.
  */
 export function madeUpSquad(now: Date): NewPlayer[] {
   const season = seasonOf(now)
@@ -535,7 +577,26 @@ export function madeUpSquad(now: Date): NewPlayer[] {
     ['aanvaller', 22, 'Dinho', 'Dinho'],
   ]
 
-  return rows.map(([position, shirtNumber, name, searchTerm]) => ({ name, position, searchTerm, season, shirtNumber }))
+  const squad = rows.map(([position, shirtNumber, name, searchTerm]) => ({
+    name,
+    position,
+    searchTerm,
+    season,
+    shirtNumber,
+    wikipediaPage: name,
+  }))
+  const scorers = madeUpScorers.map(([name, shirtNumber, inSquad]): NewPlayer => ({
+    inSquad,
+    leftSquadAt: inSquad ? null : new Date(now.getTime() - 3 * day),
+    name,
+    position: 'aanvaller',
+    searchTerm: name.split(' ').slice(1).join(' '),
+    season,
+    shirtNumber,
+    wikipediaPage: name,
+  }))
+
+  return [...squad, ...scorers]
 }
 
 /** The page that the made-up squad pretends to come from, with the title the importer reads. */
@@ -634,6 +695,7 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
     if (goals.length > 0) {
       await transaction.insert(matchGoals).values(goals)
     }
+    await linkMadeUpGoals(transaction, season)
     await transaction.insert(standings).values(madeUpTable(now))
 
     for (const page of madeUpWikipediaPages(now)) {
@@ -667,6 +729,7 @@ export async function seedSquad(db: Database, now: Date = new Date()): Promise<b
     }
 
     await transaction.insert(players).values(madeUpSquad(now))
+    await linkMadeUpGoals(transaction, season)
 
     const page = madeUpSquadPage(now)
 
@@ -677,6 +740,33 @@ export async function seedSquad(db: Database, now: Date = new Date()): Promise<b
 
     return true
   })
+}
+
+/**
+ * Points the made-up goals of the season to the made-up players they name by page, for the
+ * goals that have none yet. The seed of the matches and the seed of the squad each call it when
+ * they are done, so the links are there whichever of the two runs last. A goal whose page no
+ * player has stays without a link.
+ */
+async function linkMadeUpGoals(db: Pick<Database, 'select' | 'update'>, season: string) {
+  const squad = await db
+    .select({ id: players.id, page: players.wikipediaPage })
+    .from(players)
+    .where(and(eq(players.season, season), isNotNull(players.wikipediaPage)))
+  const idOf = new Map(squad.map((player) => [player.page, player.id]))
+  const unlinked = await db
+    .select({ id: matchGoals.id, page: matchGoals.wikipediaPage })
+    .from(matchGoals)
+    .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+    .where(and(eq(matches.season, season), isNotNull(matchGoals.wikipediaPage), isNull(matchGoals.playerId)))
+
+  for (const goal of unlinked) {
+    const playerId = idOf.get(goal.page)
+
+    if (playerId !== undefined) {
+      await db.update(matchGoals).set({ playerId }).where(eq(matchGoals.id, goal.id))
+    }
+  }
 }
 
 if (import.meta.main) {

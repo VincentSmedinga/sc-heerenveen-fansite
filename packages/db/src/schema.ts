@@ -594,12 +594,26 @@ export type NewMatch = typeof matches.$inferInsert
 export const matchGoalPlayerMaxLength = 100
 
 /**
+ * The most characters the Wikipedia page of a player holds, in `players` and in `match_goals`.
+ * A title on Wikipedia is up to 255 bytes, so a longer one is not a page we keep.
+ */
+export const wikipediaPageMaxLength = 255
+
+/**
  * The goals of a played match, one row for each, from the Dutch Wikipedia. `ours` is true for a
  * goal of sc Heerenveen and false for a goal of the opponent; an own goal belongs to the club
  * that benefits from it, so the goals of a club add up to its goals in `matches`. `minute` is
  * the minute on the clock, and `stoppage_minutes` the minutes of added time after it: 45 and 1
  * for "45+1". Added time is empty for a goal in regular time. `player` is the name as the page
  * shows it, such as `Van Bergen`. A row belongs to its match and goes with it.
+ *
+ * `player_id` is the player of ours who scored, in `players`, and `wikipedia_page` the page the
+ * goal links to (`Luca Oyen` for `[[Luca Oyen|Oyen]]`), empty when the name has no link. Only
+ * the goals of a player of ours have a `player_id`: a goal of sc Heerenveen that is not an own
+ * goal, and an own goal of one of our players, which is listed under the opponent. The goal of
+ * a player of another club, and an own goal of an opponent, have none, and neither has a goal
+ * we could not link. The importer lays the links (see `link-players.ts`); a player that is
+ * deleted leaves his goals behind without a link.
  *
  * The importer stores the rows in the order they are shown, so the order of `id` breaks a tie
  * between two goals in the same minute. A match has none of them when the page did not name
@@ -616,11 +630,14 @@ export const matchGoals = mysqlTable(
     minute: int('minute', { unsigned: true }).notNull(),
     stoppageMinutes: int('stoppage_minutes', { unsigned: true }),
     player: varchar('player', { length: matchGoalPlayerMaxLength }).notNull(),
+    playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
+    wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
     ownGoal: boolean('own_goal').notNull().default(false),
     penalty: boolean('penalty').notNull().default(false),
   },
   (table) => [
     index('match_goals_match_id_idx').on(table.matchId),
+    index('match_goals_player_id_idx').on(table.playerId),
     check('match_goals_not_own_goal_and_penalty', sql`${table.ownGoal} = 0 or ${table.penalty} = 0`),
   ],
 )
@@ -781,15 +798,20 @@ export type PlayerPosition = (typeof playerPositions)[number]
 
 /**
  * The squad of sc Heerenveen 1 (men), from the Dutch Wikipedia, one row per player and season.
- * The importer reads the current season only: a good read replaces the squad of the season
- * entirely, and the rows of an earlier season are kept and never shown. Only what the search
- * page needs is kept: no nationality, age, contract, statistics or photo.
+ * The importer reads the current season only: a good read updates the squad of the season and
+ * never replaces it, so a player keeps his `id`, which the goals in `match_goals` point to. A
+ * player who is no longer in the table stays, with `in_squad` false and the moment he left in
+ * `left_squad_at` (UTC), and comes back into the squad when the table has him again. The rows
+ * of an earlier season are kept and never shown. Only what the search page needs is kept: no
+ * nationality, age, contract, statistics or photo.
  *
  * `name` is the name as the table shows it, such as `Joost van Aken`, and `position` the group
  * it is under. `shirt_number` is empty for a player without one. `search_term` is the name
  * without the first given name, the surname the search page looks for (`van Aken`). It is its
  * own column so one player can be corrected: the importer fills it for a new player and leaves
- * it alone for a known one.
+ * it alone for a known one. `wikipedia_page` is the page the table links to, such as `Luca
+ * Oyen` or `Pim Verbeek (voetballer, 1999)`, empty when the table does not link the name. It
+ * is the key that ties a goal to a player, and it is unique within a season.
  */
 export const players = mysqlTable(
   'players',
@@ -800,9 +822,14 @@ export const players = mysqlTable(
     position: mysqlEnum('position', playerPositions).notNull(),
     shirtNumber: int('shirt_number', { unsigned: true }),
     searchTerm: varchar('search_term', { length: playerNameMaxLength }).notNull(),
+    wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
+    inSquad: boolean('in_squad').notNull().default(true),
+    leftSquadAt: datetime('left_squad_at'),
   },
   (table) => [
     unique('players_season_name_unique').on(table.season, table.name),
+    unique('players_season_wikipedia_page_unique').on(table.season, table.wikipediaPage),
+    check('players_left_squad_at_only_when_gone', sql`${table.inSquad} = 0 or ${table.leftSquadAt} is null`),
     check('players_shirt_number_range', sql`${table.shirtNumber} is null or ${table.shirtNumber} between 1 and 99`),
   ],
 )

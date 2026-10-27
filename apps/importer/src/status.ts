@@ -5,6 +5,8 @@ import { connect } from '@fansite/db/client'
 import {
   feeds,
   importRuns,
+  matches,
+  matchGoals,
   matchImports,
   matchPageKinds,
   sources,
@@ -17,6 +19,7 @@ import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import type { ImportOptions } from './import-feeds.ts'
 
 import { isUnhealthy } from './import-matches.ts'
+import { isGoalOfOurPlayer } from './link-players.ts'
 import { unhealthyAfter } from './run-log.ts'
 import { formatTime } from './text.ts'
 
@@ -159,7 +162,13 @@ async function showMatchStatus(db: Database, now: Date, write: (line: string) =>
     .where(and(eq(wikipediaPages.season, season), inArray(wikipediaPages.kind, matchPageKinds)))
     .orderBy(asc(wikipediaPages.title))
 
-  return showImportStatus(`Matches ${season} (Wikipedia)`, health, pages, now, write)
+  const unhealthy = showImportStatus(`Matches ${season} (Wikipedia)`, health, pages, now, write)
+
+  if (health !== undefined) {
+    await showUnlinkedGoals(db, season, write)
+  }
+
+  return unhealthy
 }
 
 /**
@@ -175,4 +184,30 @@ async function showSquadStatus(db: Database, now: Date, write: (line: string) =>
     .where(and(eq(wikipediaPages.season, season), eq(wikipediaPages.kind, 'squad')))
 
   return showImportStatus(`Squad ${season} (Wikipedia)`, health, pages, now, write)
+}
+
+/**
+ * Shows how many goals of our players have no player in the table `players`, and whose they are
+ * as the pages name them. It is information and no fault: the import keeps such a goal, and
+ * links it when a later read of the squad or the matches allows.
+ */
+async function showUnlinkedGoals(db: Database, season: string, write: (line: string) => void): Promise<void> {
+  const ours = (
+    await db
+      .select({
+        ours: matchGoals.ours,
+        ownGoal: matchGoals.ownGoal,
+        player: matchGoals.player,
+        playerId: matchGoals.playerId,
+      })
+      .from(matchGoals)
+      .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+      .where(eq(matches.season, season))
+  ).filter((goal) => isGoalOfOurPlayer(goal))
+  const unlinked = ours.filter((goal) => goal.playerId === null)
+  const names = [...new Set(unlinked.map((goal) => goal.player))].sort((a, b) => a.localeCompare(b, 'nl'))
+
+  write(
+    `  goals of ours without a player: ${unlinked.length} of ${ours.length}${names.length === 0 ? '' : ` (${names.join(', ')})`}`,
+  )
 }

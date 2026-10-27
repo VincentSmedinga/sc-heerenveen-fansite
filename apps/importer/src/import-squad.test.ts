@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, matches, players, sources, squadImports, wikipediaPages } from '@fansite/db/schema'
+import { feeds, matches, matchGoals, players, sources, squadImports, wikipediaPages } from '@fansite/db/schema'
+import { madeUpSquad } from '@fansite/db/seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -122,11 +123,11 @@ describe('the first import, into an empty database', () => {
 
     expect(report).toEqual({
       kind: 'imported',
-      players: { added: 25, removed: 0, unchanged: 0, updated: 0 },
+      players: { added: 25, left: 0, unchanged: 0, updated: 0 },
       season,
       warnings: [],
     })
-    expect(formatSquadReport(report)).toBe('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 removed')
+    expect(formatSquadReport(report)).toBe('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad')
 
     const stored = await database.db.select().from(players).orderBy(asc(players.id))
 
@@ -137,7 +138,9 @@ describe('the first import, into an empty database', () => {
       position: 'doelman',
       searchTerm: 'Klaverboer',
       shirtNumber: 22,
+      wikipediaPage: 'Bernt Klaverboer',
     })
+    expect(stored.every((player) => player.inSquad && player.leftSquadAt === null)).toBe(true)
     expect(stored.find((player) => player.name === 'Sten Kremers')).toMatchObject({
       position: 'doelman',
       searchTerm: 'Kremers',
@@ -194,7 +197,7 @@ describe('the first import, into an empty database', () => {
     await importAt(server, first)
 
     expect(await database.db.select().from(players).where(eq(players.name, 'Dylan Vente'))).toMatchObject([
-      { searchTerm: 'Vente' },
+      { searchTerm: 'Vente', wikipediaPage: 'Dylan Vente (voetballer)' },
     ])
   })
 })
@@ -212,20 +215,14 @@ describe('reading again', () => {
 
     const later = await importAt(server, new Date(first.getTime() + hours(1)))
 
-    expect(later).toMatchObject({ kind: 'imported', players: { added: 0, removed: 0, unchanged: 25, updated: 0 } })
+    expect(later).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 25, updated: 0 } })
     expect(pageRequests(server)).toHaveLength(2)
     expect(await database.db.select().from(players)).toHaveLength(25)
   })
 
-  it('replaces the squad: a player who left disappears, a new one comes, a new number is taken over', async () => {
-    const { page, server } = await serve()
-
-    await importAt(server, first)
-
-    const before = await database.db.select().from(players).where(eq(players.name, 'Dirk Proper'))
-
-    // Marko Farji leaves, Pim Verbeek arrives and Dirk Proper changes his number.
-    page.squad = without(original, 'Marko Farji')
+  /** The page after Marko Farji left, Pim Verbeek came and Dirk Proper changed his number. */
+  const changed = () =>
+    without(original, 'Marko Farji')
       .replace(
         '\n|}',
         "\n|-\n|'''30'''||{{NL-VLAG}}|| align=\"left\" |[[Pim Verbeek]]||2028||0||0||0||0||0||0||'''0'''||'''0'''||'''0'''\n|}",
@@ -235,17 +232,170 @@ describe('reading again', () => {
         "|'''8'''\n|{{NL-VLAG}}\n| align=\"left\" |[[Dirk Proper]]",
       )
 
+  it('updates the squad: a player who left stays, marked as gone, a new one comes, a new number is taken over', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await database.db.select().from(players).orderBy(asc(players.id))
+
+    page.squad = changed()
+
+    const later = new Date(first.getTime() + hours(1))
+    const report = await importAt(server, later)
+
+    expect(report).toMatchObject({ kind: 'imported', players: { added: 1, left: 1, unchanged: 23, updated: 1 } })
+    expect(formatSquadReport(report)).toBe('Squad 2026/27: 1 new, 1 updated, 23 unchanged, 1 left the squad')
+
+    const after = await database.db.select().from(players).orderBy(asc(players.id))
+    const named = (name: string) => after.find((player) => player.name === name)
+
+    expect(after).toHaveLength(26)
+    expect(named('Marko Farji')).toMatchObject({ inSquad: false, leftSquadAt: later, wikipediaPage: 'Marko Farji' })
+    expect(named('Pim Verbeek')).toMatchObject({ inSquad: true, leftSquadAt: null })
+    expect(named('Dirk Proper')).toMatchObject({ shirtNumber: 8 })
+    // Nobody who is in the table or was in it before gets a new id.
+    expect(after.slice(0, 25).map((player) => [player.id, player.name])).toEqual(
+      before.map((player) => [player.id, player.name]),
+    )
+  })
+
+  it('keeps the id of a player when his number, position, name or page change', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+
+    const [klaverboer] = await database.db.select().from(players).where(eq(players.name, 'Bernt Klaverboer'))
+
+    // A new spelling of the name, on the same page.
+    page.squad = original.replace('[[Bernt Klaverboer]]', '[[Bernt Klaverboer|Bernt Klaverboer-Jansen]]')
+    await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(await database.db.select().from(players).where(eq(players.id, klaverboer!.id))).toMatchObject([
+      { name: 'Bernt Klaverboer-Jansen', wikipediaPage: 'Bernt Klaverboer' },
+    ])
+    expect(await database.db.select().from(players)).toHaveLength(25)
+  })
+
+  it('does not mark a player who is gone again, and does not move the moment he left', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+    page.squad = changed()
+
+    const left = new Date(first.getTime() + hours(1))
+
+    await importAt(server, left)
+
+    const report = await importAt(server, new Date(first.getTime() + hours(2)))
+
+    expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 25, updated: 0 } })
+    expect(await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))).toMatchObject([
+      { inSquad: false, leftSquadAt: left },
+    ])
+  })
+
+  it('puts a player who comes back in the squad again, with his old id', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+
+    const [farji] = await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))
+
+    page.squad = without(original, 'Marko Farji')
+    await importAt(server, new Date(first.getTime() + hours(1)))
+    page.squad = original
+
+    const report = await importAt(server, new Date(first.getTime() + hours(2)))
+
+    expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 24, updated: 1 } })
+    expect(await database.db.select().from(players)).toHaveLength(25)
+    expect(await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))).toMatchObject([
+      { id: farji!.id, inSquad: true, leftSquadAt: null },
+    ])
+  })
+
+  it('fills the page of a player from before the pages were kept, and keeps his id', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await database.db.update(players).set({ wikipediaPage: null })
+
+    const before = await database.db.select().from(players).orderBy(asc(players.id))
     const report = await importAt(server, new Date(first.getTime() + hours(1)))
 
-    expect(report).toMatchObject({ kind: 'imported', players: { added: 1, removed: 1, unchanged: 23, updated: 1 } })
+    expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 0, updated: 25 } })
 
-    const names = (await database.db.select().from(players)).map((player) => player.name)
+    const after = await database.db.select().from(players).orderBy(asc(players.id))
 
-    expect(names).not.toContain('Marko Farji')
-    expect(names).toContain('Pim Verbeek')
-    expect(await database.db.select().from(players).where(eq(players.name, 'Dirk Proper'))).toMatchObject([
-      { id: before[0]?.id, shirtNumber: 8 },
-    ])
+    expect(after.map((player) => [player.id, player.inSquad])).toEqual(before.map((player) => [player.id, true]))
+    expect(after.every((player) => player.wikipediaPage !== null)).toBe(true)
+    expect(after.find((player) => player.name === 'Roberts Uldrikis')?.wikipediaPage).toBe('Roberts Uldriķis')
+  })
+
+  it('replaces the made-up squad of the seed with the first good read, and nothing after it', async () => {
+    await database.db.insert(players).values(madeUpSquad(first))
+
+    const { page, server } = await serve()
+
+    expect(await database.db.select().from(players)).toHaveLength(madeUpSquad(first).length)
+    await importAt(server, first)
+
+    const read = await database.db.select().from(players).orderBy(asc(players.id))
+
+    expect(read).toHaveLength(25)
+    expect(read.map((player) => player.name)).not.toContain('Tjerk Brandsma')
+
+    // After that a player who is gone stays.
+    page.squad = without(original, 'Marko Farji')
+    await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(await database.db.select().from(players)).toHaveLength(25)
+  })
+
+  it('does not replace anything after a failed first read', async () => {
+    await database.db.insert(players).values(madeUpSquad(first))
+
+    const { server } = await serve(original.replace('=== Spelers ===', '=== Selectie ==='))
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'error' })
+    expect(await database.db.select().from(players)).toHaveLength(madeUpSquad(first).length)
+  })
+
+  it('keeps the goals of a player who left, and of every player in the squad, linked to the same id', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+
+    const [farji] = await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))
+    const [match] = await database.db
+      .insert(matches)
+      .values({
+        competition: 'Eredivisie',
+        goalsAgainst: 0,
+        goalsFor: 1,
+        home: true,
+        kickoffAt: first,
+        matchDate: '2026-10-25',
+        opponent: 'Testdorp FC',
+        round: 'Speelronde 1',
+        season,
+        status: 'played',
+      })
+      .$returningId()
+
+    await database.db.insert(matchGoals).values({
+      matchId: match!.id,
+      minute: 10,
+      ours: true,
+      player: 'Farji',
+      playerId: farji!.id,
+      wikipediaPage: 'Marko Farji',
+    })
+    page.squad = without(original, 'Marko Farji')
+    await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(await database.db.select().from(matchGoals)).toMatchObject([{ playerId: farji!.id }])
   })
 
   it('keeps the search term of a player that is known, so a correction survives', async () => {
@@ -268,7 +418,7 @@ describe('reading again', () => {
 
     const report = await importAt(server, new Date(first.getTime() + hours(1)))
 
-    expect(report).toMatchObject({ kind: 'imported', players: { added: 0, removed: 0, unchanged: 24, updated: 1 } })
+    expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 24, updated: 1 } })
     expect(await database.db.select().from(players)).toHaveLength(25)
     expect(await database.db.select().from(players).where(eq(players.shirtNumber, 11))).toMatchObject([
       { name: 'Luca Öyen', searchTerm: 'Oyen' },
@@ -500,7 +650,7 @@ describe('the import command', () => {
     expect(lines).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       expect.stringContaining('Matches 2026/27: 35 new'),
-      'Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 removed',
+      'Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad',
     ])
     expect(pageRequests(server).at(-1)).toBe('/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)?action=raw')
     expect(await database.db.select().from(players)).toHaveLength(25)
@@ -514,7 +664,7 @@ describe('the import command', () => {
 
     expect(code).toBe(0)
     expect(lines[1]).toContain('Matches 2026/27: warning, nothing changed and the last good copy stays')
-    expect(lines[2]).toBe('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 removed')
+    expect(lines[2]).toBe('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad')
     expect(await database.db.select().from(matches)).toEqual([])
   })
 

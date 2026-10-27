@@ -74,8 +74,8 @@ export function checkMatches(matches: ReadMatch[]): string[] {
 
 /**
  * Checks the squad: 18 to 45 players, at least two goalkeepers, a player in every position and
- * no name twice (the database keeps names apart as `nameKey` does). Returns what is wrong, or
- * nothing.
+ * no name or page twice (the database keeps names apart as `nameKey` does). Returns what is
+ * wrong, or nothing.
  */
 export function checkSquad(players: ReadPlayer[]): string[] {
   const problems: string[] = []
@@ -103,6 +103,20 @@ export function checkSquad(players: ReadPlayer[]): string[] {
       problems.push(`the name ${player.name} is in the squad twice`)
     }
     seen.add(key)
+  }
+
+  // Two players on one page would have the goals of the one linked to the other.
+  const pages = new Set<string>()
+
+  for (const player of players) {
+    const key = player.wikipediaPage === null ? null : nameKey(player.wikipediaPage)
+
+    if (key !== null && pages.has(key)) {
+      problems.push(`the page ${player.wikipediaPage} is the page of two players in the squad`)
+    }
+    if (key !== null) {
+      pages.add(key)
+    }
   }
 
   return problems
