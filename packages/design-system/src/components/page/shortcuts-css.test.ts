@@ -33,6 +33,19 @@ describe('the bar in shortcuts.css', () => {
     expect(css).not.toContain('visibility')
   })
 
+  it('sticks to the top of the window under the top inset, over the cells, but not when it wraps', () => {
+    expect(bar).toMatch(/@media \(width > 20em\) \{[^}]*inset-block-start: env\(safe-area-inset-top, 0\);/)
+    expect(bar).toMatch(/@media \(width > 20em\) \{[^}]*position: sticky;/)
+    expect(bar).toMatch(/@media \(width > 20em\) \{[^}]*z-index: 1;/)
+  })
+
+  it('keeps the heading of a link out from under the bar that sticks, as far as the bar shows and sticks', () => {
+    expect(css).toMatch(
+      /@media \(20em < width < 56rem\) \{\s*html:has\(\.hf-page-shortcuts\) \{\s*scroll-padding-block-start: calc\(env\(safe-area-inset-top, 0px\) \+ var\(--hf-shortcuts-height\)\);/,
+    )
+    expect(css).toContain('--hf-shortcuts-height: calc(2.25rem + 11px);')
+  })
+
   it('has no padding at the end, so the row runs to the edge, apart from the notch', () => {
     expect(bar).toContain(
       'padding-inline: max(var(--hf-page-margin), env(safe-area-inset-left, 0px)) env(safe-area-inset-right, 0);',
@@ -86,6 +99,13 @@ describe('the row in shortcuts.css', () => {
     )
   })
 
+  it('snaps to the start of a link, near one only, with the first link where it stands at rest', () => {
+    expect(row).toContain('scroll-snap-type: x proximity;')
+    expect(row).toContain('scroll-padding-inline-start: 5px;')
+    expect(css).toMatch(/\.hf-page-shortcuts-list > li \{\s*scroll-snap-align: start;/)
+    expect(css).not.toContain('mandatory')
+  })
+
   it('leaves room round the links for the focus ring, which the scroll area would cut off', () => {
     expect(rule('.hf-page-shortcuts-list')).toContain('padding: 5px;')
     expect(row).toContain('margin-inline-start: -5px;')
@@ -130,6 +150,7 @@ describe('the wrapped bar in shortcuts.css', () => {
     expect(narrow).toMatch(/\.hf-page-shortcuts-row \{[^}]*overflow: visible;/)
     expect(narrow).toMatch(/\.hf-page-shortcuts-row \{[^}]*mask-image: none;/)
     expect(narrow).toMatch(/\.hf-page-shortcuts-row \{[^}]*animation-name: none;/)
+    expect(narrow).toMatch(/\.hf-page-shortcuts-row \{[^}]*scroll-snap-type: none;/)
     expect(narrow).toMatch(/\.hf-page-shortcuts-list \{[^}]*flex-wrap: wrap;/)
   })
 

@@ -15,6 +15,8 @@ const meta = preview.meta({
           'Het label zegt wat de links zijn en is ook de naam van de navigatie.',
           'Het blijft staan als de rij scrolt.',
           'De laatste zichtbare link is half afgesneden en de rij vervaagt aan de rand, zodat je ziet dat er meer is.',
+          'De rij snapt op het begin van een link.',
+          'De balk blijft aan de bovenkant van het venster plakken als de pagina scrolt.',
           'Op een breed scherm, waar de cellen naast elkaar staan, is de balk er niet, ook niet voor een schermlezer.',
           'Een link is niet de huidige pagina: de balk markeert er geen.',
           '',

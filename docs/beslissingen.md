@@ -2393,7 +2393,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De animatie volgt het scrollen en heeft geen tijd van zichzelf, dus ze hoort niet bij de tokens van Beweging en valt niet onder "minder beweging": er beweegt niets zolang de bezoeker niet scrolt.
   De overgang van kleur en vulling van een link neemt wel de tokens: de korte duur voor de kleur (Aanwijzen) en de snelle voor de vulling bij indrukken (Ingedrukt en geselecteerd).
   De rij heeft aan alle kanten 5 pixels ruimte, zodat het scrollgebied de focusrand niet afsnijdt.
-- **Alternatieven:** het label scrolt mee (de woorden verliezen hun uitleg); een schuifbalk (lelijk, en op een telefoon niet te zien); altijd omlopen op een smal scherm (de balk wordt twee of drie regels hoog); de vervaging met JavaScript (meer code, en het schuift pas na het laden op zijn plek).
+  De rij snapt ook (`scroll-snap-type: x proximity`, met `scroll-snap-align: start` op elk item en `scroll-padding-inline-start` gelijk aan de ruimte van de lijst): het begin van een link komt tot rust op het begin van de rij.
+  Het is `proximity` en niet `mandatory`, zodat de rij alleen snapt als ze bij een link stopt, en een langzame beweging of het toetsenbord niet wordt tegengehouden.
+  Een omlopende rij scrolt niet en snapt dus niet.
+  De balk blijft aan de bovenkant van het venster plakken als de pagina scrolt (`position: sticky`, onder de bovenrand van een telefoon met een inham), zodat de links bij de hand zijn langs de hele pagina.
+  Een omlopende balk plakt niet, want hij is te hoog (bij 320 pixels bijna 200 pixels) en zou een groot deel van een klein venster innemen.
+  De pagina houdt bij een link naar een kop ruimte voor de balk (`scroll-padding-block-start`, de hoogte in `--hf-shortcuts-height`), zodat de kop eronder staat en niet erachter.
+- **Alternatieven:** het label scrolt mee (de woorden verliezen hun uitleg); een balk die niet blijft plakken (na een stuk scrollen moet je terug naar boven voor de links); een schuifbalk (lelijk, en op een telefoon niet te zien); altijd omlopen op een smal scherm (de balk wordt twee of drie regels hoog); de vervaging met JavaScript (meer code, en het schuift pas na het laden op zijn plek).
 
 ### De balk is in donker blauw-900, niet het warme vlak
 

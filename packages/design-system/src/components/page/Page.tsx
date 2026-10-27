@@ -73,9 +73,10 @@ const Header = ({ className, ...props }: PageHeaderProps) => (
  * `main`, as wide as the page. It is for a narrow screen, where the cells of a page sit under
  * each other and a long one hides the next: the links jump to the cells. From the width where
  * the Page.Body has two columns the bar is gone, also for a screen reader (`display: none`).
- * The label stays and the row scrolls sideways when it is too long, with the last link cut off
- * and a fade at the edge, so the reader sees there is more. Where the text is larger or the
- * screen narrower than 20em, the row wraps instead.
+ * The label stays and the row scrolls sideways when it is too long, snapping to the start of a
+ * link, with the last link cut off and a fade at the edge, so the reader sees there is more.
+ * The bar sticks to the top of the window when the page scrolls. Where the text is larger or
+ * the screen narrower than 20em, the row wraps instead, and the bar does not stick.
  *
  * It holds a label and a list of links and is not bound to anchors, so it can serve other rows
  * of links as well. It comes between the Page.Header and the Page.Body, so the reading order

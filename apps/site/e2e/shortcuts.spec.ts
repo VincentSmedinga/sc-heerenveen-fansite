@@ -57,6 +57,30 @@ test.describe('the bar under the header of /wedstrijden', () => {
     await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toBeVisible()
   })
 
+  test('sticks to the top of the window, and a link brings its heading under the bar, not behind it', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/wedstrijden')
+    const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
+
+    await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: 1500 }))
+    expect((await bar.boundingBox())?.y).toBe(0)
+
+    await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
+    await expect(page).toHaveURL(/#doelpuntenmakers$/)
+    await expect
+      .poll(async () => (await page.locator('#doelpuntenmakers').boundingBox())?.y ?? 0)
+      .toBeGreaterThanOrEqual(47)
+  })
+
+  test('does not stick when it wraps at 320 pixels, where it would take too much of the window', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 320 })
+    await page.goto('/wedstrijden')
+
+    await expect(page.locator('.hf-page-shortcuts')).toHaveCSS('position', 'static')
+  })
+
   test('brings the keyboard on to the card that a link points to', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/wedstrijden')
