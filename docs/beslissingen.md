@@ -3262,7 +3262,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** de header is een raster met twee kolommen, de eerste voor het logo en de tweede voor de themaknop, en het menu beslaat beide kolommen op een eigen rij.
   Zo staat het menu op elke breedte onder het logo, ook als er naast het logo plek over is, en blijft het in de kolom van de pagina, in lijn met de inhoud.
   Forum staat rechts doordat het laatste onderdeel van het menu in de header een automatische marge aan het begin heeft.
-  Tussen de lijn en het menu zit 0,375 rem, en onder het menu 0,3125 rem.
+  Tussen de lijn en het menu zit 0,25 rem, en onder het menu 0,4375 rem.
   Boven het logo zit 0,75 rem en tussen het logo en de lijn 0,25 rem, zodat de header ongeveer 128 pixels hoog is op een breed scherm.
   Het logo staat in de link om het logo bovenaan de regel (`vertical-align: top`), zodat de link zo hoog is als het logo en niet als een regel tekst: daarvoor zat er 7 pixels onder het logo.
   Een flexcontainer om het logo zou de onderstreping van de link op het logo doorgeven, dus het logo blijft een inline-element.

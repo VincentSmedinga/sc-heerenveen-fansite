@@ -123,8 +123,8 @@ describe('the two rows of the header in page.css', () => {
   })
 
   it('has a little room between the line and the menu, and less under the menu than above the logo', () => {
-    expect(header).toMatch(/> \.hf-navigation \{[^}]*padding-block-start: 0\.375rem;/)
-    expect(header).toContain('padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.3125rem;')
+    expect(header).toMatch(/> \.hf-navigation \{[^}]*padding-block-start: 0\.25rem;/)
+    expect(header).toContain('padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.4375rem;')
     expect(header).toContain('gap: 0.25rem 1rem;')
   })
 
