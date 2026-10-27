@@ -46,6 +46,12 @@ Een app compileert ze mee; in Next.js zet je `@fansite/design-system` bij `trans
 import { Body, Page, Root } from '@fansite/design-system'
 ```
 
+De teksteditor `RichTextEditor` komt niet uit dat bestand maar uit een eigen onderdeel, zodat Tiptap alleen laadt op een pagina die hem gebruikt:
+
+```tsx
+import { RichTextEditor } from '@fansite/design-system/rich-text-editor'
+```
+
 `Root` maakt het `html`-element met `lang="nl"`.
 Zonder `data-theme` volgt de site de systeeminstelling; `data-theme="light"` of `data-theme="dark"` op `Root` kiest een thema.
 Wat elk component doet, staat in de hoofdstukken Componenten en Patronen van Storybook.

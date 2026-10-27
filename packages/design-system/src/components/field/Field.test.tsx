@@ -20,6 +20,16 @@ describe('Field', () => {
     expect(screen.getByText('Naam', { exact: false, selector: 'label' }).getAttribute('for')).toBe('naam')
   })
 
+  it('gives the label an id, for a field that is named with aria-labelledby', () => {
+    render(
+      <Field id="naam" label="Naam">
+        <Input name="naam" />
+      </Field>,
+    )
+
+    expect(screen.getByText('Naam', { selector: 'label' }).id).toBe('naam-label')
+  })
+
   it('is required by default, and does not say so in its label', () => {
     render(
       <Field id="naam" label="Naam">

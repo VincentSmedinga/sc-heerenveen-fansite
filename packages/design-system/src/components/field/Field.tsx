@@ -55,7 +55,7 @@ export const Field = ({ children, className, error, hint, id, label, required = 
 
   return (
     <div className={classNames('hf-field', className)} {...props}>
-      <label className="hf-field-label" htmlFor={id}>
+      <label className="hf-field-label" htmlFor={id} id={`${id}-label`}>
         {label}
         {required ? null : (
           <>

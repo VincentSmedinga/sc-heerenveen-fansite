@@ -1,0 +1,95 @@
+/*
+ * The editor for the text of an article. The editable element is the field itself: it has the
+ * border, the background and the focus ring of a text field, so the ring goes round the whole
+ * field. The text in it looks like the text of an article, because it is the same elements. The
+ * toolbar buttons are an outline in the colour of the text around them, and a pressed one is
+ * filled like a button, so it shows without colour (as in a segmented control). In
+ * forced-colours mode the pressed button is underlined as well.
+ */
+
+@layer hf.components {
+  .hf-rich-text-editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-block: 0.25rem 0.5rem;
+
+    > button {
+      background-color: transparent;
+      border-color: currentcolor;
+      color: inherit;
+
+      &:hover {
+        background-color: transparent;
+        border-color: currentcolor;
+        color: var(--hf-colour-text-default);
+      }
+
+      &[aria-pressed='true'] {
+        background-color: var(--hf-colour-background-button);
+        border-color: var(--hf-colour-background-button);
+        color: var(--hf-colour-text-on-button);
+
+        &:hover {
+          background-color: var(--hf-colour-background-button-hover);
+          border-color: var(--hf-colour-background-button-hover);
+          color: var(--hf-colour-text-on-button);
+        }
+
+        @media (forced-colors: active) {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  /* The small form for a link: a block on a soft surface, between the toolbar and the text. */
+  .hf-rich-text-editor-link {
+    background-color: var(--hf-colour-background-surface-soft);
+    border: 1px solid;
+    border-color: var(--hf-colour-border-surface-soft);
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+    margin-block: 0 0.5rem;
+    max-inline-size: 40rem;
+    padding-block: 1rem 0.25rem;
+    padding-inline: 1rem;
+  }
+
+  .hf-rich-text-editor-link-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-block-end: 0.75rem;
+  }
+
+  .hf-rich-text-editor-content {
+    background-color: var(--hf-colour-background-surface);
+    border: 1px solid;
+    border-color: var(--hf-colour-border-input);
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-default);
+
+    /* A long word, such as an address, breaks instead of making the field scroll. */
+    overflow-wrap: anywhere;
+    max-inline-size: 40rem;
+    min-block-size: 12rem;
+    padding-block: 0.75rem;
+    padding-inline: 0.75rem;
+
+    /* The text has no margin to the outside: the field decides the space around it. */
+    > :first-child {
+      margin-block-start: 0;
+    }
+
+    > :last-child {
+      margin-block-end: 0;
+    }
+
+    &[aria-invalid='true'] {
+      border-color: var(--hf-colour-text-accent);
+      border-width: 0.125rem;
+    }
+  }
+}
