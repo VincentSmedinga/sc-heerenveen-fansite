@@ -36,8 +36,7 @@ const weakest = 70
  * A donut chart: a ring of slices, each as wide as its share of the total, with the total in
  * the hole. Every slice with a value has its name and its value as text beside it, so the chart
  * can be read without its colours. The slices go from the weakest to the full strength of the
- * colour, in the order they are given, and a gap in the colour of the surface keeps each one
- * apart from the next.
+ * colour, in the order they are given, and a light outline keeps each one apart from the next.
  *
  * The chart is a picture of numbers that a table should give as well, so it is hidden from a
  * screen reader (`aria-hidden`); give the same numbers in a `DataTable` next to it.

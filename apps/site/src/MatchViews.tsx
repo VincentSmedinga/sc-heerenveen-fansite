@@ -43,7 +43,7 @@ export function CleanSheetsCard({ count, matches, now }: { count: number; matche
   const shown = sheets.slice(0, count)
 
   return (
-    <Card aria-labelledby="de-nul-gehouden">
+    <Card aria-labelledby="de-nul-gehouden" surface="soft">
       <Heading aliases={['nul-gehouden']} anchor id="de-nul-gehouden" level={2}>
         De nul gehouden
       </Heading>
@@ -95,7 +95,7 @@ export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
   const slices = (counts: number[]) => quarterLabels.map((label, index) => ({ label, value: counts[index] ?? 0 }))
 
   return (
-    <Card aria-labelledby="doelpunten-per-kwartier">
+    <Card aria-labelledby="doelpunten-per-kwartier" surface="warm">
       <Heading anchor id="doelpunten-per-kwartier" level={2}>
         Doelpunten per kwartier
       </Heading>

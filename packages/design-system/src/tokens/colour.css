@@ -190,6 +190,14 @@
     --hf-colour-border-surface-soft: light-dark(var(--hf-colour-steel-200), var(--hf-colour-blue-700));
     --hf-colour-border-surface-warm: light-dark(var(--hf-colour-sand-300), var(--hf-colour-blue-600));
 
+    /*
+     * The line round the slices of a chart: a light outline on every surface, in light and in
+     * dark, and not the colour of the surface. A see-through line would draw nothing, so it
+     * would not part the slices. In dark it is blue-50, the colour of the headings and the
+     * total in the ring, so it is as light as the text and not a harder white.
+     */
+    --hf-colour-border-chart-slice: light-dark(var(--hf-colour-white), var(--hf-colour-blue-50));
+
     /* Lines between rows and the horizontal rule. The same values as the surface border, for now. */
     --hf-colour-border-default: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-700));
     --hf-colour-border-input: light-dark(var(--hf-colour-grey-500), var(--hf-colour-blue-400));
@@ -260,6 +268,7 @@
       --hf-colour-border-surface-strong: var(--hf-colour-steel-300);
       --hf-colour-border-surface-soft: var(--hf-colour-steel-200);
       --hf-colour-border-surface-warm: var(--hf-colour-sand-300);
+      --hf-colour-border-chart-slice: var(--hf-colour-white);
       --hf-colour-border-default: var(--hf-colour-grey-200);
       --hf-colour-border-input: var(--hf-colour-grey-500);
       --hf-colour-border-button-soft: var(--hf-colour-blue-500);

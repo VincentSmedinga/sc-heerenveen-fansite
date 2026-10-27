@@ -134,6 +134,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-border-surface-soft', use: 'Zachte rand' },
       { name: '--hf-colour-border-surface-warm', use: 'Warme rand' },
       { name: '--hf-colour-border-default', use: 'Lijn: tussen rijen en als scheidingslijn' },
+      { name: '--hf-colour-border-chart-slice', use: 'Lijn om de plakken van een donutdiagram, op elk vlak' },
       { name: '--hf-colour-border-input', provisional: ['light', 'dark'], use: 'Rand van invoervelden' },
       { name: '--hf-colour-border-button-soft', use: 'Rand van de zachte knop' },
       { name: '--hf-colour-focus', use: 'Focusrand' },

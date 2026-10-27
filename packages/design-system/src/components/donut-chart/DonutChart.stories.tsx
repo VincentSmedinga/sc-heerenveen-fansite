@@ -42,9 +42,10 @@ const meta = preview.meta({
           '',
           'De plakken hebben het groen van iets positiefs of het rood van iets negatiefs, in dezelfde kleuren als de uitkomst van een wedstrijd.',
           'De pagina bepaalt welke getallen positief zijn en welke negatief: het onderdeel kent de betekenis niet.',
-          'Ze lopen op van een zwakkere tint naar de volle kleur, in de volgorde van het diagram, en een rand in de kleur van het vlak houdt elke plak los van de volgende.',
-          'Die rand is wat de plakken uit elkaar houdt, en niet het verschil in kleur.',
-          'In een hoog-contrastweergave (forced colors) krijgen alle plakken dezelfde kleur, en doet de rand het werk.',
+          'Ze lopen op van een zwakkere tint naar de volle kleur, in de volgorde van het diagram, en een lichte lijn om elke plak houdt hem los van de volgende.',
+          'Die lijn is wit in licht en een lichte kleur in donker, op elk vlak, en is een omlijning van de plakken en geen gat in de kleur van het vlak.',
+          'Ze is wat de plakken uit elkaar houdt, en niet het verschil in kleur.',
+          'In een hoog-contrastweergave (forced colors) krijgen alle plakken dezelfde kleur, en doet de lijn het werk.',
           'Er is geen beweging.',
           '',
           'Het diagram is een plaatje van getallen en daarom verborgen voor een schermlezer.',
@@ -68,11 +69,25 @@ const meta = preview.meta({
 
 const caption = 'Aanmeldingen en afmeldingen per maand, van januari tot en met juni'
 
-const card = (maxInlineSize: string, negative: number[], positive: number[]) => () => (
+type Surface = 'default' | 'soft' | 'warm'
+
+const surfaceNames = { default: 'wit', soft: 'zacht', warm: 'warm' } as const
+
+const MonthCard = ({
+  maxInlineSize,
+  negative,
+  positive,
+  surface = 'default',
+}: {
+  maxInlineSize: string
+  negative: number[]
+  positive: number[]
+  surface?: Surface
+}) => (
   <div style={{ maxInlineSize }}>
-    <Card aria-labelledby="maand-kop">
-      <Heading id="maand-kop" level={2}>
-        Aan- en afmeldingen per maand
+    <Card aria-labelledby={`maand-kop-${surface}`} surface={surface}>
+      <Heading id={`maand-kop-${surface}`} level={2}>
+        {surface === 'default' ? 'Aan- en afmeldingen per maand' : `Aan- en afmeldingen, ${surfaceNames[surface]} vlak`}
       </Heading>
       <DonutChart.Group>
         <DonutChart slices={slicesOf(positive)} title="Aangemeld" tone="positive" />
@@ -88,6 +103,10 @@ const card = (maxInlineSize: string, negative: number[], positive: number[]) => 
   </div>
 )
 
+const card = (maxInlineSize: string, negative: number[], positive: number[]) => () => (
+  <MonthCard maxInlineSize={maxInlineSize} negative={negative} positive={positive} />
+)
+
 const positive = [3, 5, 4, 2, 6, 7]
 const negative = [1, 2, 3, 2, 1, 4]
 
@@ -101,6 +120,26 @@ export const Dark = meta.story({
   globals: { theme: 'dark' },
   name: 'Twee diagrammen met een tabel, donker',
   render: card('31rem', negative, positive),
+})
+
+const surfaces = () => (
+  <div style={{ display: 'grid', gap: '1.5rem' }}>
+    {(['default', 'soft', 'warm'] as const).map((surface) => (
+      <MonthCard key={surface} maxInlineSize="31rem" negative={negative} positive={positive} surface={surface} />
+    ))}
+  </div>
+)
+
+export const SurfacesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Op het witte, het zachte en het warme vlak, licht',
+  render: surfaces,
+})
+
+export const SurfacesDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Op het witte, het zachte en het warme vlak, donker',
+  render: surfaces,
 })
 
 export const EmptyLight = meta.story({
