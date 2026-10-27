@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { ExampleFooter } from '../../docs/ExamplePage'
+import { ExampleFooter, ExampleHeader } from '../../docs/ExamplePage'
 import { Page } from './Page'
 
 const renderPage = () =>
@@ -66,6 +66,15 @@ describe('Page', () => {
 })
 
 describe('Page.Header', () => {
+  it('holds the logo, the theme button and the main menu in that order, which its grid puts in two rows', () => {
+    render(<ExampleHeader />)
+    const banner = screen.getByRole('banner')
+
+    expect(Array.from(banner.children).map((child) => child.tagName.toLowerCase())).toEqual(['a', 'button', 'nav'])
+    expect(within(banner).getByRole('button', { name: 'Donker' })).toBe(banner.children[1])
+    expect(within(banner).getByRole('navigation', { name: 'Hoofdmenu' })).toBe(banner.children[2])
+  })
+
   it('is the banner of the page', () => {
     render(<Page.Header>Kop van de pagina</Page.Header>)
     const banner = screen.getByRole('banner')
@@ -344,12 +353,13 @@ describe('Page.Footer', () => {
     expect(screen.getByRole('contentinfo').id).toBe('voet')
   })
 
-  it('holds the two lines of text, a control and then the links as its own children, which its grid places', () => {
+  it('holds the two lines of text and then the links as its own children, which its grid places, and no theme switch', () => {
     render(<ExampleFooter />)
     const footer = screen.getByRole('contentinfo')
 
-    expect(Array.from(footer.children).map((child) => child.tagName.toLowerCase())).toEqual(['p', 'p', 'div', 'nav'])
-    expect(within(footer).getByRole('group', { name: 'Thema' })).toBe(footer.children[2])
+    expect(Array.from(footer.children).map((child) => child.tagName.toLowerCase())).toEqual(['p', 'p', 'nav'])
+    expect(within(footer).queryByRole('button')).toBeNull()
+    expect(within(footer).queryByRole('group', { name: 'Thema' })).toBeNull()
     expect(Array.from(footer.querySelectorAll('p')).map((paragraph) => paragraph.textContent)).toEqual([
       'Alle koppen en links op één plek.',
       'Voor supporters door supporters.',

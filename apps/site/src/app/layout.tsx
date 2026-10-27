@@ -65,9 +65,11 @@ export const viewport: Viewport = {
 
 // Every page has the same header and footer, and puts its content in a Page.Main in the
 // Page.Body, so a page with a sidebar can add a Page.Sidebar beside it. Without data-theme on
-// Root, light and dark follow the system setting. A visitor who pressed Licht or Donker in the
-// footer gets data-theme on it from public/theme.js, which runs before the first paint, so
-// React must not mind the attribute it did not render (suppressHydrationWarning).
+// Root, light and dark follow the system setting. A visitor who pressed the theme button in the
+// header gets data-theme on it from public/theme.js, which runs before the first paint, so
+// React must not mind the attribute it did not render (suppressHydrationWarning). The header
+// has the logo and the theme button in its first row and the main menu under them; the order in
+// the code is the order of the focus.
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <Root suppressHydrationWarning>
@@ -80,13 +82,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/">
               <Logo />
             </Link>
+            <ThemeToggle />
             <SiteNavigation />
           </Page.Header>
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
             <Text appearance="meta">Alle koppen en links op één plek.</Text>
             <Text appearance="meta">Voor supporters door supporters.</Text>
-            <ThemeToggle />
             <Navigation items={footerItems} label="Over de site" />
           </Page.Footer>
         </Page>

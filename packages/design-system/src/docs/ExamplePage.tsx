@@ -6,8 +6,8 @@ import { List } from '../components/list/List'
 import { Logo } from '../components/logo/Logo'
 import { Navigation } from '../components/navigation/Navigation'
 import { Page } from '../components/page/Page'
-import { SegmentedControl } from '../components/segmented-control/SegmentedControl'
 import { Text } from '../components/text/Text'
+import { ThemeButton } from '../components/theme-button/ThemeButton'
 
 const menuItems = [
   { href: '#nieuws', label: 'Nieuws' },
@@ -24,13 +24,15 @@ export const exampleMenuAt = (current: ExampleMenuPage) =>
 export const exampleMenu = exampleMenuAt('Nieuws')
 
 /**
- * The logo as a link to the home page, with the menu beside it. This is what a header holds.
+ * The logo as a link to the home page, the theme button beside it (here a static one, pressed
+ * when `dark`) and the menu in a row under them. This is what a header holds.
  */
-export const ExampleHeader = ({ current = 'Nieuws' }: { current?: ExampleMenuPage }) => (
+export const ExampleHeader = ({ current = 'Nieuws', dark = false }: { current?: ExampleMenuPage; dark?: boolean }) => (
   <Page.Header>
     <Link href="#home">
       <Logo />
     </Link>
+    <ThemeButton dark={dark} label="Donker" />
     <Navigation items={exampleMenuAt(current)} label="Hoofdmenu" />
   </Page.Header>
 )
@@ -47,22 +49,12 @@ export const exampleFooterMenu = [
 
 /**
  * The footer with "Alle koppen en links op één plek." and "Voor supporters door supporters.", a
- * paragraph each, the theme toggle (here a static one) and the links about the site, as on the
- * site.
+ * paragraph each, and the links about the site, as on the site.
  */
 export const ExampleFooter = () => (
   <Page.Footer>
     <Text appearance="meta">Alle koppen en links op één plek.</Text>
     <Text appearance="meta">Voor supporters door supporters.</Text>
-    <SegmentedControl
-      label="Thema"
-      onChange={() => undefined}
-      options={[
-        { icon: 'sun', label: 'Licht', value: 'light' },
-        { icon: 'moon', label: 'Donker', value: 'dark' },
-      ]}
-      value="light"
-    />
     <Navigation items={exampleFooterMenu} label="Over de site" />
   </Page.Footer>
 )

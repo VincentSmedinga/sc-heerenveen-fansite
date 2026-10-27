@@ -2100,6 +2100,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** `SegmentedControl` is een groep knoppen met een naam, waarvan er één `aria-pressed` is. De ingedrukte knop is gevuld als een gewone knop, de andere is een omlijning in de kleur van de tekst eromheen. Het component bewaart niets: de pagina geeft de waarde en handelt `onChange` af, ook als de ingedrukte knop wordt gekozen.
 - **Waarom:** een schakelaar voor licht en donker (#208) is een keuze uit twee opties die meteen werkt. De groep en `aria-pressed` zeggen een schermlezer welke is gekozen, en het verschil tussen gevuld en omlijnd zegt het de ogen zonder kleur. Wat er met de keuze gebeurt, zoals bewaren, is aan de pagina, dus het component blijft klein en bruikbaar voor andere keuzes. In de footer staat de omlijning in de kleur van de footertekst, dus het contrast is dat van de tekst (4,5:1) in licht en donker.
 - **Alternatieven:** een eigen component voor alleen het thema, met de opslag erin; dat bindt een knoppenrij aan één functie. Of keuzerondjes (`radio`) in een `fieldset`; dat is meer opmaak voor twee opties en leest een schermlezer minder kort voor. Of één knop die naar het andere thema schakelt; dan zegt de knop niet welk thema je ziet.
+- **Later:** zie _De themaschakelaar is één knop rechtsboven in de header_.
+  De site gebruikt `SegmentedControl` niet meer voor het thema, maar het component blijft in het designsysteem, en wat hier staat over de groep, `aria-pressed` en de gevulde knop blijft gelden.
 
 ### Head zet één script vóór de eerste weergave in de head
 
@@ -2439,6 +2441,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het menu laten zoals het is, met alleen Onze bronnen en Forum; dan heeft de homepage geen onderdeel.
   Of Over ons ook in het menu, zoals op de artboard.
   Of een prop op `Navigation` voor de opmaak van de header; dan moet elke plek die het menu in een header zet, eraan denken.
+- **Later:** zie _Het hoofdmenu staat in een eigen rij onder de sitenaam_ voor de opmaak van het menu: de onderdelen staan niet meer in halfvet en in de lichtblauwe kleur maar in gewoon gewicht en de lichtste kleur van de header, en de huidige pagina heeft alleen de rode streep.
+  De onderdelen van het menu zelf en de rode streep blijven.
 
 ### Een eigen foutpagina bij een fout op de server
 
@@ -2610,6 +2614,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** de footer heeft een schakelaar met twee knoppen, Licht en Donker, in een groep met de naam "Thema". De knop van het thema dat je ziet is ingedrukt. Achter de knoppen staan drie toestanden: `system`, `light` en `dark`. Is het ingedrukte thema wat het systeem al geeft, dan vergeet de pagina de keuze en volgt hij het systeem. Dat gebeurt alleen als een knop wordt ingedrukt, nooit als het systeem verandert. Zonder JavaScript staat de schakelaar er niet.
 - **Waarom:** twee van de drie knoppen van "Systeem, Licht, Donker" zien er meestal hetzelfde uit, en een knop die niets lijkt te doen, is verwarrend. Zo is het systeem nooit buiten bereik, en blijft een keuze die toevallig gelijk wordt aan het systeem (een telefoon die donker wordt) staan. We volgen de aanpak van Lea Verou, [Dark mode toggles: two states are enough](https://lea.verou.me/blog/2026/dark-mode-toggles-two-states-are-enough/), en die van een eerder project van de projecteigenaar. Een knop die zonder JavaScript niets doet, is erger dan geen knop.
 - **Alternatieven:** drie knoppen, zoals dat eerdere project eerst had. Of één knop die naar het tegenovergestelde schakelt; die zegt minder duidelijk welk thema je ziet. Of geen schakelaar, want het systeem beslist al; dat laat wie de site donker wil op een licht apparaat in de kou staan.
+- **Later:** zie _De themaschakelaar is één knop rechtsboven in de header_ voor de plek en het aantal knoppen: één knop in de header, niet twee in de footer.
+  De drie toestanden en het vergeten van een keuze gelijk aan het systeem blijven.
 
 ### De keuze staat in `localStorage`, en `data-theme` staat alleen op `html` als er een keuze is
 
@@ -3209,6 +3215,60 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De Engelse `id`'s die daar alleen voor `aria-labelledby` dienden (`news-heading`) zijn daarvoor vervangen, want een kop met een anker heeft een Nederlands `id`.
   `/podcasts` heeft geen anker: de kop "Over" met de naam van de podcast staat er alleen bij een gekozen podcast, en niemand linkt naar dat deel.
 - **Alternatieven:** een controle op de bronbestanden in plaats van de gebouwde pagina's (ziet niet wat de bezoeker krijgt, en niet de ankers die uit gegevens komen); alle ankers uit de pagina's halen en bewaren in een bestand dat de build maakt (de lijst is dan geen keuze meer, maar een afspiegeling); een toets in de e2e-controle in de browser (trager, en axe toetst dit niet).
+
+### De themaschakelaar is één knop rechtsboven in de header
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de header heeft rechtsboven één schakelknop zonder tekst, met een gevulde zon in het lichte thema en een gevulde maan in het donkere.
+  In rust is hij ingehouden: alleen het pictogram, zonder rand en vulling.
+  Onder de muis (alleen met een muis), ingedrukt en bij focus komen de rand en de vulling terug.
+  De footer heeft geen schakelaar meer.
+  De drie toestanden achter de knop blijven zoals ze waren.
+- **Hoe:** de knop is het nieuwe component `ThemeButton` van het designsysteem, want de sjablonen van de site bevatten geen HTML.
+  De naam is "Donker" en `aria-pressed` is waar in het donkere thema, dus een schermlezer hoort de naam en de stand.
+  Het pictogram is 26 pixels in een knop van 44 bij 44 pixels.
+  In rust is het pictogram blue-400 (5,3:1 in licht en 4,2:1 in donker op de header, boven de 3:1).
+  Onder de muis, ingedrukt en bij `:focus-visible` is het blue-50, met een rand van blue-200 op 55% en een vulling van blue-200 op 14%.
+  De overgang duurt 0,2 seconde en valt bij "minder beweging" weg.
+  Onder de muis geldt alleen met `hover: hover`, zodat er na een tik op een telefoon niets blijft oplichten.
+  Ingedrukt (`:active`) geldt ook op touch.
+  De focusrand is blue-300, 3 pixels, met 2 pixels ruimte.
+  Vier nieuwe tokens geven de kleuren: `--hf-colour-icon-on-header-quiet`, `--hf-colour-border-on-header-strong`, `--hf-colour-background-on-header-hover` en, voor de lijn boven het menu, `--hf-colour-border-on-header`.
+  `ThemeToggle` van de site houdt de logica (`theme.ts`, `public/theme.js` en de sleutel `fansite-theme` veranderen niet) en tekent nu een `ThemeButton`.
+  De knop is er pas na het hydrateren, dus zonder JavaScript heeft de eerste rij alleen het logo en is de HTML voor iedereen gelijk.
+  De focus gaat van het logo naar de themaknop en dan naar het menu.
+  Dat is ook de volgorde op het scherm: de knop staat in de eerste rij en het menu in de tweede.
+- **Waarom:** de knop staat op de eerste plek waar een bezoeker hem verwacht, en wie hem zoekt hoeft niet naar de footer.
+  Het menu krijgt de ruimte die de twee knoppen nodig hadden.
+  Het pictogram toont het thema dat je ziet en `aria-pressed` zegt het ook; zo is de stand niet alleen aan kleur te zien.
+  Het besluit van 24 oktober 2026 koos twee knoppen omdat een knop die naar het tegenovergestelde schakelt minder duidelijk zegt welk thema je ziet.
+  Een schakelknop met een pictogram voor de stand en `aria-pressed` lost dat op.
+- **Alternatieven:** twee knoppen in de header; die nemen de ruimte in die het menu nodig heeft.
+  Of één knop waarvan het pictogram het thema toont waar je naartoe gaat (een maan in het lichte thema); dat wordt vaak verkeerd gelezen als de stand.
+  Of de schakelaar ook in de footer houden; dat zijn twee plekken die gelijk moeten blijven.
+  Of de knop met `SegmentedControl` bouwen; dat component is voor een keuze uit een paar opties met tekst, en blijft in het designsysteem voor andere plekken.
+- **Later:** vervangt _Licht of donker: twee knoppen, drie toestanden, en een keuze gelijk aan het systeem wordt vergeten_ (24 oktober 2026) voor de plek en het aantal knoppen.
+  De drie toestanden en het vergeten van een keuze gelijk aan het systeem blijven.
+
+### Het hoofdmenu staat in een eigen rij onder de sitenaam
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** het hoofdmenu staat in een eigen rij onder het logo, met een dunne lijn erboven (1 pixel, blue-200 op 35%).
+  Alle onderdelen staan in blue-50 (14,5:1 in licht en 11,4:1 in donker op de header), 1,125 rem en gewicht 400, met 1 rem tussen de onderdelen en minstens 44 pixels hoog.
+  De huidige pagina heeft dezelfde tekstkleur en een rode streep van 3 pixels op 0,35em onder de tekst, zonder afbreking bij letters met een staart.
+  Forum staat rechts en houdt zijn pictogram; er staat geen scheidingslijn tussen de onderdelen.
+  Hoe een onderdeel eruitziet onder de muis, ingedrukt of bezocht, blijft zoals het was.
+- **Hoe:** de header is een raster met twee kolommen, de eerste voor het logo en de tweede voor de themaknop, en het menu beslaat beide kolommen op een eigen rij.
+  Zo staat het menu op elke breedte onder het logo, ook als er naast het logo plek over is, en blijft het in de kolom van de pagina, in lijn met de inhoud.
+  Forum staat rechts doordat het laatste onderdeel van het menu in de header een automatische marge aan het begin heeft.
+  Op 390 pixels staan de vier onderdelen op één rij; op 320 pixels gaat Forum naar een tweede rij en blijft rechts staan.
+- **Waarom:** naast het logo had het menu weinig ruimte, vooral op een smal scherm, waar het onder het logo ombrak.
+  Een eigen rij geeft elk onderdeel dezelfde plek op elke breedte.
+- **Alternatieven:** het menu naast het logo houden; dan blijft de ruimte krap.
+  Of de onderdelen in het halfvet houden (gewicht 600) of in een eigen, lichtere balk zetten; de eigenaar koos op het canvas voor gewicht 400 met een lijn erboven.
+  Of grotere afstanden tussen de onderdelen; dan valt Forum op 390 pixels op een tweede rij.
+  Of het menu inklappen achter een knop op een smal scherm; dat verbergt de belangrijkste links.
+- **Later:** vervangt de opmaak van _Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep_ (22 oktober 2026): halfvet en de lichtblauwe kleur zijn gewoon gewicht en de lichtste kleur geworden.
 
 ## Importer
 
@@ -4802,6 +4862,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De links staan bij 640 tot 800 pixels in twee rijen van drie (223 en 274 pixels breed, voorheen vier en twee), en bij 240 tot 300 pixels in drie rijen van twee, ook zonder zijwaarts scrollen.
   Voor de wijziging braken de zinnen en de knoppen af tussen 640 en ongeveer 790 pixels: bij 640 pixels viel de eerste zin in vijf regels uiteen en de knoppen stonden onder elkaar.
   Niet gecontroleerd: een echte instelling van het lettertype in de browser, want de grens in rem volgt die instelling en een test in een iframe kan hem niet zetten.
+- **Later:** zie _De themaschakelaar is één knop rechtsboven in de header_.
+  De footer heeft de knoppen Licht en Donker niet meer, dus de regels voor knoppen in de footer zijn weg.
+  De twee zinnen breken nog niet af, en de links blijven afbreken in rijen van gelijke lengte.
 
 ### Artikelen van de redactie staan in de database
 

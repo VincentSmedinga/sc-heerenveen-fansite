@@ -1,10 +1,10 @@
 /**
- * The theme follows the system unless a visitor presses Licht or Donker in the footer; that
+ * The theme follows the system unless a visitor presses the theme button in the header; that
  * choice is kept on the device, in localStorage, and never goes to the server. A script in the
  * head of every page, public/theme.js, puts it on the html element before the first paint; this
  * module keeps it up to date afterwards. Keep the key and the rule of the two the same.
  *
- * Behind the two buttons are three states, `system`, `light` and `dark`, and `system` is no key
+ * Behind the button are three states, `system`, `light` and `dark`, and `system` is no key
  * at all. See chooseTheme(). The idea is from
  * https://lea.verou.me/blog/2026/dark-mode-toggles-two-states-are-enough/.
  */
@@ -47,8 +47,8 @@ export function applyPreference(preference: ThemePreference, doc: Document = doc
 /**
  * What to keep when a visitor presses a button: the theme they wanted, unless it is what the
  * system gives anyway, which goes back to following the system. So a kept choice is always a
- * deliberate difference from the system, and the system is never out of reach. Only the buttons
- * call this: a kept choice that happens to match the system later on (the system changed, not
+ * deliberate difference from the system, and the system is never out of reach. Only the button
+ * calls this: a kept choice that happens to match the system later on (the system changed, not
  * the visitor) stays.
  */
 export function chooseTheme(wanted: Theme, systemIsDark: boolean): ThemePreference {

@@ -40,7 +40,8 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
 
 /**
  * The top of the page, on the blue of the header: a `header` element, which is the page's
- * banner landmark.
+ * banner landmark. It holds the logo and, if the page has one, the ThemeButton in the first
+ * row, and the main menu (a Navigation) in a row of its own under them.
  */
 const Header = ({ className, ...props }: PageHeaderProps) => (
   <header className={classNames('hf-page-header', className)} {...props} />
@@ -103,9 +104,8 @@ const Cell = ({ className, ...props }: PageCellProps) => (
 /**
  * The bottom of the page, on a band of its own that only its colour sets apart from the body: a
  * `footer` element, which is the page's contentinfo landmark. It holds two lines of text, a
- * Text each, then if the page has one a control such as the theme toggle, and the links last:
- * beside the text on a wide screen, under it on a narrow one. Links in it are the blue of links
- * elsewhere.
+ * Text each, and the links last: beside the text on a wide screen, under it on a narrow one.
+ * Links in it are the blue of links elsewhere.
  */
 const Footer = ({ className, ...props }: PageFooterProps) => (
   <footer className={classNames('hf-page-footer', className)} {...props} />

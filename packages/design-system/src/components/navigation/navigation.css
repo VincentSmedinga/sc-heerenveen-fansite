@@ -24,13 +24,26 @@
   }
 
   /*
-   * In the header, the menu is semibold and not underlined, except under the mouse. The current page is told by a red
-   * bar under its text, and its text has the lightest colour of the header. The colours of the other links come from
-   * the roles that the header sets (see page.css). A menu elsewhere, such as the one in the footer, keeps the look above.
+   * In the header, the menu is a row of its own under the logo (see page.css). Every link is in the lightest colour of
+   * the header, 1,125rem, in regular weight and not underlined, except under the mouse, with 1rem between the links.
+   * The current page is told by a red bar under its text, 3px thick, and not by colour or weight. A menu elsewhere,
+   * such as the one in the footer, keeps the look above.
+   * The last link, the forum, is on the right: a link to another site sits apart from the pages of this one. On a
+   * screen too narrow for all links in one row, it wraps to a second row and stays on the right.
    * The underline doesn't skip the descenders of letters, so the bar is one unbroken line.
    */
+  .hf-page-header .hf-navigation-list {
+    gap: 0 1rem;
+
+    > li:last-child {
+      margin-inline-start: auto;
+    }
+  }
+
   .hf-page-header .hf-navigation-link {
-    font-weight: 600;
+    color: var(--hf-colour-text-on-header);
+    font-size: 1.125rem;
+    font-weight: 400;
     text-decoration-line: none;
 
     &:hover {
@@ -38,8 +51,7 @@
     }
 
     &[aria-current='page'] {
-      color: var(--hf-colour-text-on-header);
-      font-weight: 600;
+      font-weight: 400;
       text-decoration-color: var(--hf-colour-accent-on-header);
       text-decoration-line: underline;
       text-decoration-skip-ink: none;

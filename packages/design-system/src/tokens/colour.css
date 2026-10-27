@@ -162,6 +162,18 @@
     --hf-colour-accent-on-header: var(--hf-colour-red-400);
 
     /*
+     * The line above the menu in the header, and the theme button in the header. The line is blue-200 at 35%, a
+     * quiet rule that needs no contrast. The button is quiet at rest: only its icon, in blue-400, which reaches 5,3:1
+     * on the header in light and 4,2:1 in dark (a graphic part needs 3:1). Under the mouse, pressed and with the
+     * focus it comes forward: the icon is blue-50 (--hf-colour-text-on-header), with a rim of blue-200 at 55% and a
+     * fill of blue-200 at 14%. They are see-through tints of a colour from the scale, so no new step comes in.
+     */
+    --hf-colour-border-on-header: color-mix(in srgb, var(--hf-colour-blue-200) 35%, transparent);
+    --hf-colour-border-on-header-strong: color-mix(in srgb, var(--hf-colour-blue-200) 55%, transparent);
+    --hf-colour-background-on-header-hover: color-mix(in srgb, var(--hf-colour-blue-200) 14%, transparent);
+    --hf-colour-icon-on-header-quiet: var(--hf-colour-blue-400);
+
+    /*
      * Markers: what numbers, separates or points, such as list markers and positions in a table.
      * Quieter than the text, in steel. Text markers reach 4.5:1; graphic ones (bullets, lines, icons) 3:1.
      */
