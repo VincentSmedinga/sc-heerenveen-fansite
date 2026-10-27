@@ -25,7 +25,7 @@ const meta = preview.meta({
           'Zo ziet het menu in de footer eruit.',
           '',
           'In de header staat het menu in een eigen rij onder het logo.',
-          'Alle links hebben de lichtste kleur van de header, in gewicht 500 en niet onderstreept, tot je er met de muis op staat.',
+          'Alle links hebben de lichtste kleur van de header en zijn niet onderstreept, tot je er met de muis op staat.',
           'De letters groeien mee met het venster.',
           'De huidige pagina heeft een rode streep eronder.',
           'Die streep heeft de kleur `--hf-colour-accent-on-header`.',
