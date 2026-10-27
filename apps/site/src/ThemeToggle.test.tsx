@@ -73,29 +73,27 @@ describe('ThemeToggle', () => {
     expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('false')
   })
 
-  it('draws a filled moon while the page is dark and a filled sun while it is light', () => {
+  it('follows the page with aria-pressed, and hides the icon from assistive technology', () => {
     stubSystem(true)
     render(<ThemeToggle />)
 
-    const icon = () => screen.getByRole('button', { name: 'Donker' }).querySelector('svg')
+    const button = () => screen.getByRole('button', { name: 'Donker' })
 
-    expect(icon()?.getAttribute('fill')).toBe('currentColor')
-    expect(icon()?.querySelectorAll('circle')).toHaveLength(0)
-    expect(icon()?.getAttribute('aria-hidden')).toBe('true')
+    expect(button().getAttribute('aria-pressed')).toBe('true')
+    expect(button().querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Donker' }))
+    fireEvent.click(button())
 
-    expect(icon()?.getAttribute('fill')).toBe('currentColor')
-    expect(icon()?.querySelectorAll('circle')).toHaveLength(1)
+    expect(button().getAttribute('aria-pressed')).toBe('false')
+    expect(button().querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
   })
 
-  it('switches the drawing and aria-pressed with the theme when it is pressed', () => {
+  it('switches aria-pressed with the theme when it is pressed', () => {
     stubSystem(false)
     render(<ThemeToggle />)
     fireEvent.click(screen.getByRole('button', { name: 'Donker' }))
 
     expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('true')
-    expect(screen.getByRole('button', { name: 'Donker' }).querySelectorAll('circle')).toHaveLength(0)
   })
 
   it('keeps a choice that differs from the system, and puts it on the page', () => {

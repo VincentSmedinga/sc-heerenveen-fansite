@@ -3251,6 +3251,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de knop met `SegmentedControl` bouwen; dat component is voor een keuze uit een paar opties met tekst, en blijft in het designsysteem voor andere plekken.
 - **Later:** vervangt _Licht of donker: twee knoppen, drie toestanden, en een keuze gelijk aan het systeem wordt vergeten_ (24 oktober 2026) voor de plek en het aantal knoppen.
   De drie toestanden en het vergeten van een keuze gelijk aan het systeem blijven.
+- **Later:** zie _Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat_ (27 oktober 2026).
+  Het pictogram in rust, de naam, `aria-pressed` en de kleuren blijven; alleen onder de muis en bij focus is het pictogram dat van het andere thema.
 
 ### Het hoofdmenu staat in een eigen rij onder de sitenaam
 
@@ -3277,6 +3279,35 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of grotere afstanden tussen de onderdelen; dan valt Forum op 390 pixels op een tweede rij.
   Of het menu inklappen achter een knop op een smal scherm; dat verbergt de belangrijkste links.
 - **Later:** vervangt de opmaak van _Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep_ (22 oktober 2026): halfvet en de lichtblauwe kleur zijn gewicht 500 en de lichtste kleur geworden.
+
+### Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** in rust toont de themaknop het thema dat je ziet.
+  Onder de muis (met een muis) en bij focus met het toetsenbord gaat het pictogram over in dat van het andere thema.
+  Na een klik blijft het pictogram van het nieuwe thema staan tot de aanwijzer of de focus weggaat.
+- **Hoe:** de zon wordt de maan en de maan wordt de zon in 0,4 seconde.
+  De duur staat op één plek, in de eigenschap `--hf-theme-button-morph` in `theme-button.css`.
+  De kleur, de rand en de vulling blijven 0,2 seconde.
+  De schijf van de zon groeit uit tot de maan, en een tweede schijf schuift er van rechtsboven in en drukt de deuk erin.
+  De stralen lossen naar buiten op, de knop in.
+  Van maan naar zon krimpt de schijf weer, en de stralen komen uit de schijf naar buiten en worden zichtbaar.
+  Dat zijn alleen verschuivingen en schalen van twee cirkels en acht lijnen, die allemaal volgen uit één getal (0 is de zon, 1 is de maan).
+  Daarom tekent elke browser hetzelfde: Chromium en WebKit, de engine van Safari, getest; Firefox niet getest.
+  Met "minder beweging" wisselt het pictogram zonder overgang.
+  Het voorbeeld onder de muis is dan nog steeds te zien, en dat is waar het om gaat; een knop die niet wisselt zou onder de muis niets zeggen.
+  De knop onthoudt een klik in `data-settled`, en haalt dat weg bij `pointerleave` en `blur`.
+  Ingedrukt (`:active`) laat het pictogram niet wisselen: op een apparaat zonder muis blijft het de toestand van het besluit van de themaknop.
+  De zon en de maan van de knop zijn eigen tekeningen in `ThemeButton`, want `Icon` tekent maar één pictogram tegelijk.
+  Wat een schermlezer hoort, verandert niet: de naam is "Donker", `aria-pressed` volgt het thema dat je ziet, en het pictogram blijft verborgen voor hulpsoftware.
+  De zon en de maan zelf blijven dekkend en hebben dezelfde kleur, dus ze halen ook halverwege 3:1 op de header; alleen de stralen worden doorzichtig terwijl ze oplossen.
+- **Waarom:** een knop zonder tekst moet laten zien wat er gebeurt als je erop drukt.
+  Het pictogram in rust zegt welk thema het is, het voorbeeld onder de muis zegt wat je kiest.
+  Zo gaat het niet fout met de vraag wat een zon bedoelt: "nu licht" of "naar licht".
+- **Alternatieven:** het pictogram altijd het thema laten tonen waar je naartoe gaat; dat wordt vaak gelezen als de stand, en dat was de reden voor het besluit over de themaknop.
+  Of het pictogram niet laten veranderen en alleen een titel (tooltip) tonen; dat is traag, werkt niet met het toetsenbord en niet op touch.
+  Of de vorm van de zon laten overgaan in die van de maan met de CSS-eigenschap `d`; Safari kent die niet, en dan is een tweede overgang nodig.
+- **Later:** vult het besluit _De themaschakelaar is één knop rechtsboven in de header_ (27 oktober 2026) aan: het pictogram toont het thema dat je ziet in rust, en het andere thema onder de muis en bij focus.
 
 ## Importer
 
