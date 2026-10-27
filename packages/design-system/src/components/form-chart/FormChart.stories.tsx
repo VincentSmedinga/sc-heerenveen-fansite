@@ -42,6 +42,14 @@ const meta = preview.meta({
 /** A made-up season of 34 matches, from the first round to the last. */
 const seasonResults = [...'WWGVWGGWVWWGWVGWWWGVWGWVWWGGWWVWGW'] as FormResult[]
 
+const surfaceNames = {
+  default: 'wit',
+  soft: 'zacht',
+  strong: 'sterk',
+  transparent: 'doorzichtig',
+  warm: 'warm',
+} as const
+
 const caption = 'Uitslagen van sc Heerenveen dit seizoen, met de punten'
 
 const SeasonCard = ({ results, surface = 'default' }: { results: readonly FormResult[]; surface?: CardSurface }) => {
@@ -51,7 +59,7 @@ const SeasonCard = ({ results, surface = 'default' }: { results: readonly FormRe
     <div style={{ maxInlineSize: '36rem' }}>
       <Card aria-labelledby={`seizoen-kop-${surface}`} surface={surface}>
         <Heading id={`seizoen-kop-${surface}`} level={2}>
-          Verloop van het seizoen
+          {surface === 'default' ? 'Verloop van het seizoen' : `Verloop van het seizoen, ${surfaceNames[surface]} vlak`}
         </Heading>
         <FormChart results={results} />
         <DataTable

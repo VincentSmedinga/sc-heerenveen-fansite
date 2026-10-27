@@ -1,6 +1,7 @@
 /*
- * A line of coloured signs with a title in front, such as the form of a team. The colours of the
- * signs come from the tones in chart.css; a sign uses the full colour, which reaches 4.5:1 as text.
+ * A line of coloured signs with a title in front, such as the form of a team. The colours
+ * of the signs come from the tones in chart.css; a sign uses the full colour, which reaches
+ * 4.5:1 as text.
  */
 
 @layer hf.components {

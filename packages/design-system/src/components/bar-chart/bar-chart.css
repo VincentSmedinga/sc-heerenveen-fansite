@@ -1,8 +1,8 @@
 /*
- * The bar chart: a row of bars with the ground under them, drawn with CSS, and a line over it
- * drawn as one SVG path. The sizes follow the width of the place the chart sits in (the chart is
- * its own container), not the width of the screen: a card of a narrow column and a card of a wide
- * one get what fits. The colours of the bars are in chart.css, as tones.
+ * The bar chart: a row of bars with the ground under them, drawn with CSS, and a line over
+ * it drawn as one SVG path. The sizes follow the width of the place the chart sits in (the
+ * chart is its own container), not the width of the screen: a card of a narrow column and a
+ * card of a wide one get what fits. The colours of the bars are in chart.css, as tones.
  */
 
 @layer hf.components {
@@ -17,9 +17,9 @@
   }
 
   /*
-   * One column on a narrow chart. A chart with room has a column for the numbers at the side as
-   * well. The row under the plot holds the numbers of the places and the caption, and it sits
-   * in the column of the plot, so the numbers line up with the places.
+   * One column on a narrow chart. A chart with room has a column for the numbers at the
+   * side as well. The row under the plot holds the numbers of the places and the caption,
+   * and it sits in the column of the plot, so the numbers line up with the places.
    */
   .hf-bar-chart-frame {
     column-gap: 0.5rem;
@@ -32,9 +32,9 @@
   }
 
   /*
-   * The plot is the chart without the numbers. Everything in it is placed in percentages of it,
-   * and the ground is a line under it. It has no overflow rule, so the end dot and the edge of
-   * the line can stick out over the border.
+   * The plot is the chart without the numbers. Everything in it is placed in percentages of
+   * it, and the ground is a line under it. It has no overflow rule, so the end dot and the
+   * edge of the line can stick out over the border.
    */
   .hf-bar-chart-plot {
     block-size: var(--hf-bar-chart-height);
@@ -53,9 +53,9 @@
   }
 
   /*
-   * One column for each place, all as wide as each other, with the room round a bar as padding of
-   * the place and not as a gap between places. So the middle of place i is exactly (i + 0.5) of
-   * the number of places, which is where the line puts its points.
+   * One column for each place, all as wide as each other, with the room round a bar as
+   * padding of the place and not as a gap between places. So the middle of place i is
+   * exactly (i + 0.5) of the number of places, which is where the line puts its points.
    */
   .hf-bar-chart-bars {
     display: grid;
@@ -71,10 +71,10 @@
   }
 
   /*
-   * A bar is as high as its share of the chart, which the component gives as a number from 0 to
-   * 100 in --hf-bar-chart-share. The colour is a part of the colour of the tone, as the bar of a
-   * table and the slices of a donut chart do it. The end is rounded a little and the ground side
-   * is straight.
+   * A bar is as high as its share of the chart, which the component gives as a number from
+   * 0 to 100 in --hf-bar-chart-share. The colour is a part of the colour of the tone, as
+   * the bar of a table and the slices of a donut chart do it. The end is rounded a little
+   * and the ground side is straight.
    */
   .hf-bar-chart-bar {
     background-color: color-mix(in srgb, var(--hf-chart-colour) var(--hf-chart-strength), transparent);
@@ -83,16 +83,16 @@
     border-start-start-radius: 0.125rem;
   }
 
-  /* A value of 0 is a small bar on the ground, so it is not mistaken for a place with no bar. */
+  /* A value of 0 is a small bar on the ground, so it is not taken for a place with no bar. */
   .hf-bar-chart-stub {
     block-size: 0.25rem;
   }
 
   /*
-   * The line is drawn in the units of the data, so it is stretched over the chart, and its stroke
-   * keeps its width in pixels (non-scaling-stroke). The edge is a wider line under it, in the
-   * colour of the surface the chart is on, which parts the line from the bars. It does not need
-   * to be seen against the surface, only between the line and a bar.
+   * The line is drawn in the units of the data, so it is stretched over the chart, and its
+   * stroke keeps its width in pixels (non-scaling-stroke). The edge is a wider line under
+   * it, in the colour of the surface the chart is on, which parts the line from the bars.
+   * It does not need to be seen against the surface, only between the line and a bar.
    */
   .hf-bar-chart-trend {
     block-size: 100%;
@@ -163,8 +163,9 @@
 
   /*
    * A chart with room has taller bars, the numbers of 0, 1 and 3 at the side, more numbers
-   * under the places and a wider gap round each bar. The width is that of the chart, which is a
-   * card of about 28rem or wider; a card of a narrow column stays with the small chart.
+   * under the places and a wider gap round each bar. The width is that of the chart, which
+   * is a card of about 28rem or wider; a card of a narrow column stays with the small
+   * chart.
    */
   @container hf-bar-chart (inline-size >= 24rem) {
     .hf-bar-chart-frame {
