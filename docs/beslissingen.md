@@ -3209,6 +3209,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De Engelse `id`'s die daar alleen voor `aria-labelledby` dienden (`news-heading`) zijn daarvoor vervangen, want een kop met een anker heeft een Nederlands `id`.
   `/podcasts` heeft geen anker: de kop "Over" met de naam van de podcast staat er alleen bij een gekozen podcast, en niemand linkt naar dat deel.
 - **Alternatieven:** een controle op de bronbestanden in plaats van de gebouwde pagina's (ziet niet wat de bezoeker krijgt, en niet de ankers die uit gegevens komen); alle ankers uit de pagina's halen en bewaren in een bestand dat de build maakt (de lijst is dan geen keuze meer, maar een afspiegeling); een toets in de e2e-controle in de browser (trager, en axe toetst dit niet).
+- **Later:** op `/bronnen` staat een derde kaart in de zijbalk, de nieuwsbrief van de LC, met het anker `nieuwsbrief`.
 
 ## Importer
 

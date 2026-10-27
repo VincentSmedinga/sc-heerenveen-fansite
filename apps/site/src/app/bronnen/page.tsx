@@ -91,7 +91,7 @@ export default async function SourcesPage() {
             .
           </Text>
         </Card>
-        <Card aria-labelledby="uitgever" surface="warm">
+        <Card aria-labelledby="uitgever" surface="strong">
           <Heading anchor id="uitgever" level={2}>
             Ben je zelf een bron?
           </Heading>
@@ -99,6 +99,18 @@ export default async function SourcesPage() {
             Heb je een vraag of een verzoek over hoe we jouw medium tonen? Mail ons via{' '}
             <Link href={`mailto:${email}`} icon="envelope">
               {email}
+            </Link>
+            .
+          </Text>
+        </Card>
+        <Card aria-labelledby="nieuwsbrief" surface="warm">
+          <Heading anchor id="nieuwsbrief" level={2}>
+            Abonneer je op de nieuwsbrief van de LC!
+          </Heading>
+          <Text>
+            Misschien vergat Sander de Vries het in Omroep Abe te noemen – dan helpen we graag een handje:{' '}
+            <Link href="https://www.lc.nl/sport/nieuwsbrief-sc-heerenveen/157167352.html" icon="external-link">
+              schrijf je snel in
             </Link>
             .
           </Text>
