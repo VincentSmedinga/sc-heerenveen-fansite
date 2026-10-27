@@ -500,7 +500,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Importer:** `apps/importer/` is de enige map in de lijst die de site raakt, want `assemble` bundelt de importer in de map voor de host.
   De test van die bundel staat in de tests van de importer (`bundle.test.ts`), die `pnpm test` altijd draait.
   De workflow van de acceptatie draait de bundel bij elke samenvoeging naar `main`.
-- **Hoe:** de stap `Decide which checks of the site to run` zet `site=true` of `site=false` in de uitvoer.
+- **Hoe:** de stap `Decide which checks of the site and the stories to run` zet `site=true` of `site=false` in de uitvoer.
   De twee stappen hebben `if: steps.changes.outputs.site != 'false'`, dus een uitvoer die ontbreekt draait ze ook.
   We hebben het label gekozen en niet een regel in de beschrijving: je ziet het op de pull request en je zet het zonder de beschrijving te wijzigen.
   Het script vraagt de labels bij elke run aan GitHub, dus een label dat na het openen is gezet, telt bij een nieuwe run van de opdracht.
