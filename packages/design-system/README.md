@@ -39,7 +39,7 @@ import { Body, Page, Root } from '@fansite/design-system'
 
 `Root` maakt het `html`-element met `lang="nl"`.
 Zonder `data-theme` volgt de site de systeeminstelling; `data-theme="light"` of `data-theme="dark"` op `Root` kiest een thema.
-Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
+Wat elk component doet, staat in de hoofdstukken Componenten en Patronen van Storybook.
 
 ## Afspraken
 
@@ -90,6 +90,9 @@ Wat de code en [`docs/beslissingen.md`](../../docs/beslissingen.md) al zeggen, s
 - **Tokens:** de tabellen met kleuren en contrast blijven, want de contrasttabel is het bewijs voor [`docs/toegankelijkheid.md`](../../docs/toegankelijkheid.md).
   De waarden in rem en pixels staan niet in de tekst eromheen.
 - **Reviewer:** elk visueel component heeft een story, en de reviewer kijkt naar de pagina's van de site in licht en donker.
+- **Indeling:** een component is één element of een algemeen onderdeel dat op elke site past, en een patroon zet componenten samen voor één soort inhoud van deze site.
+  De titel van een story is `Componenten/<Subgroep>/<Naam>` of `Patronen/<Naam>`, met de subgroep Pagina, Tekst, Formulier, Navigatie of Weergave.
+  `storySort` in `.storybook/preview.tsx` zet de groepen vast en sorteert binnen een groep op alfabet, zodat een nieuw component geen instelling aanraakt.
 
 ## Alleen Baseline 'widely available'
 
@@ -132,5 +135,5 @@ Zo blijft een uitzondering niet hangen.
 | `src/components` | De componenten, elk met stories, tests en CSS                                    |
 | `src/utilities`  | Hulpklassen die één ding doen, zoals `hf-visually-hidden`, met stories en tests  |
 | `src/assets`     | Logo's als SVG                                                                   |
-| `src/docs`       | Huisstijl, lege hoofdstukken en hulpcomponenten voor de documentatie             |
+| `src/docs`       | Huisstijl, Redactie en hulpcomponenten voor de documentatie                      |
 | `.storybook`     | Instellingen van Storybook: themaknop, documentatie en toegankelijkheidscontrole |

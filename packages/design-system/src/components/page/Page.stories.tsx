@@ -19,8 +19,19 @@ const meta = preview.meta({
           'Op een smaller scherm staat alles in lijn met het schild.',
           'De pagina is minstens zo hoog als het scherm, zodat de footer onderaan blijft staan als er weinig inhoud is.',
           '',
+          'Elk kind van een kolom is een cel; met `Page.Cell` zet je wat bij elkaar hoort in één cel.',
+          'De `Page.Main` heeft de eigenschap `intro` voor de inleiding van de pagina, zoals de kop met een tekst.',
+          'Die staat als één cel bovenaan de `main`, en de kinderen van de `Page.Main` zijn de cellen eronder.',
+          'Op een breed scherm begint de `Page.Sidebar` dan onder de inleiding, op dezelfde hoogte als de eerste cel eronder.',
+          'Een `Card` is zelf een cel: ze heeft geen marge naar buiten.',
+          'De `Page.Body` regelt alle witruimte tussen de kolommen en de cellen.',
+          'De cellen van de zijbalk staan onder elkaar, op elk scherm.',
+          'Heeft de zijbalk kleine cellen, geef de `Page.Sidebar` dan de eigenschap `split`: op een middelbaar scherm, onder de hoofdkolom, staan de cellen dan naast elkaar in twee gelijke kolommen.',
+          'Heeft de zijbalk een tabel nodig, geef de `Page.Sidebar` dan de eigenschap `wide`: de zijbalk en de hoofdkolom zijn even breed en de kolommen samen blijven net zo breed als zonder.',
+          '',
           'De `Page` heeft geen eigen element met een rol.',
           'De `main` is de `Page.Main`, in de `Page.Body`, nooit in de `Page` zelf.',
+          '`Root` en `Body` zijn de `html` en de `body`.',
           'Een `Page` hoort in een `Body`; de stories hieronder staan in een eigen venster, dat de hoogte van het scherm nabootst.',
           'De verhalen voor een smal, een middelgroot en een breed scherm staan alleen in het canvas, met de instelling Viewport van de werkbalk.',
         ].join('\n'),
@@ -31,7 +42,7 @@ const meta = preview.meta({
     layout: 'fullscreen',
   },
   tags: ['autodocs'],
-  title: 'Componenten/Page',
+  title: 'Componenten/Pagina/Page',
 })
 
 const render = () => <ExamplePage />

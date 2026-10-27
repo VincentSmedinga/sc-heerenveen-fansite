@@ -29,7 +29,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/WikipediaCredit',
+  title: 'Patronen/WikipediaCredit',
 })
 
 const standings = {

@@ -26,7 +26,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/List',
+  title: 'Componenten/Tekst/List',
 })
 
 const render = () => (

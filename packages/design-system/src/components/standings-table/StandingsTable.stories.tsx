@@ -44,7 +44,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/StandingsTable',
+  title: 'Patronen/StandingsTable',
 })
 
 // A made-up table after ten matches: seven clubs, sc Heerenveen in the middle, a leader with 25

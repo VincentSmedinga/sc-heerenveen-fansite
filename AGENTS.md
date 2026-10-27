@@ -203,7 +203,7 @@ How to make them:
    For a component, build Storybook (`pnpm --filter design-system build-storybook`) and serve the folder `packages/design-system/storybook-static`.
 2. `pnpm screenshots <address of the build> <path or story id>...` writes the PNGs into `screenshots/` (git ignores it), and adds `--dark` when dark is needed.
    It takes only a build on this computer.
-   A path starts with a slash (`/podcasts`); anything else is the id of a story (`componenten-page-footer--light`).
+   A path starts with a slash (`/podcasts`); anything else is the id of a story (`componenten-pagina-page-footer--light`).
    Look at the images before you use them.
 
 Where they go: the branch `pr-screenshots` holds only a `README.md` and one folder per pull request, `pr-<number>/`.

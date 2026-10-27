@@ -29,7 +29,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/ArticleCard',
+  title: 'Patronen/ArticleCard',
 })
 
 const news = (

@@ -24,7 +24,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Page.Body',
+  title: 'Componenten/Pagina/Page.Body',
 })
 
 const onlyMain = () => (

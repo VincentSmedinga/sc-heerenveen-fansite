@@ -24,7 +24,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Logo',
+  title: 'Componenten/Weergave/Logo',
 })
 
 const render = () => <Logo />

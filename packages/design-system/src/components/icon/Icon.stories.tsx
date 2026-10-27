@@ -40,7 +40,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Pictogram',
+  title: 'Componenten/Weergave/Pictogram',
 })
 
 const labels: Record<IconName, string> = {

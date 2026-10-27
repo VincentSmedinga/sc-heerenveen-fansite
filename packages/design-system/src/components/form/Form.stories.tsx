@@ -27,7 +27,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Form',
+  title: 'Componenten/Formulier/Form',
 })
 
 const render = () => (

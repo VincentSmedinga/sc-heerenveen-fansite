@@ -34,7 +34,7 @@ Follow _Afspraken_ in the README of the design system:
 The format is CSF Next, not the CSF 3 of the generic instructions.
 Copy the shape of the meta in `src/components/card/Card.stories.tsx`:
 
-- `import preview from '#.storybook/preview'`, then `preview.meta({ … })` with `title: 'Componenten/<Name>'`, `tags: ['autodocs']`, `component`, and `parameters.docs.page: ControlsDocsPage`;
+- `import preview from '#.storybook/preview'`, then `preview.meta({ … })` with `title: 'Componenten/<Subgroup>/<Name>'` or `'Patronen/<Name>'` (the groups are in `packages/design-system/README.md`), `tags: ['autodocs']`, `component`, and `parameters.docs.page: ControlsDocsPage`;
 - `argTypes` with a short Dutch `description` per prop;
 - stories with `meta.story({ name, render, … })`, with Dutch names;
 - made-up content only: `Testkrant`, `Testclub`, links as `#…`, no real headlines, names or addresses.

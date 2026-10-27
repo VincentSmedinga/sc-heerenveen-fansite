@@ -36,7 +36,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/ShortMatch',
+  title: 'Patronen/ShortMatch',
 })
 
 // Made-up clubs and days, like the data of the seed.

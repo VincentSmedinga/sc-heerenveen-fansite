@@ -51,14 +51,17 @@ describe('the MCP server of the design system', () => {
     const text: string = message.result.content[0].text
 
     expect(message.result.isError).not.toBe(true)
-    expect(text).toContain('componenten-heading')
-    expect(text).toContain('componenten-button')
+    expect(text).toContain('componenten-tekst-heading')
+    expect(text).toContain('componenten-formulier-button')
     expect(text).toContain('huisstijl--documentatie')
   })
 
   it('gives the props of Heading with their types with docs-show', async () => {
     const url = await start()
-    const { message } = await rpc(url, 'tools/call', { arguments: { id: 'componenten-heading' }, name: 'docs-show' })
+    const { message } = await rpc(url, 'tools/call', {
+      arguments: { id: 'componenten-tekst-heading' },
+      name: 'docs-show',
+    })
     const text: string = message.result.content[0].text
 
     expect(message.result.isError).not.toBe(true)
@@ -70,7 +73,7 @@ describe('the MCP server of the design system', () => {
   it('gives a story with docs-show-story', async () => {
     const url = await start()
     const { message } = await rpc(url, 'tools/call', {
-      arguments: { componentId: 'componenten-heading', storyName: 'Licht' },
+      arguments: { componentId: 'componenten-tekst-heading', storyName: 'Licht' },
       name: 'docs-show-story',
     })
 
@@ -103,7 +106,7 @@ describe('the MCP server of the design system', () => {
     })
 
     expect(answer.status).toBe(200)
-    expect(await answer.text()).toContain('componenten-heading')
+    expect(await answer.text()).toContain('componenten-tekst-heading')
     expect(answer.headers.get('mcp-session-id')).toBeNull()
   })
 
@@ -119,7 +122,7 @@ describe('the MCP server of the design system', () => {
 
       const components = JSON.parse(await readFile(path.join(dir, 'manifests/components.json'), 'utf8'))
       components.components['componenten-nieuw'] = {
-        ...components.components['componenten-button'],
+        ...components.components['componenten-formulier-button'],
         id: 'componenten-nieuw',
         name: 'Nieuw',
       }
@@ -159,7 +162,7 @@ describe('the MCP server of the design system', () => {
 
     try {
       await rpc(url, 'tools/call', { arguments: {}, name: 'docs-list' })
-      await rpc(url, 'tools/call', { arguments: { id: 'componenten-heading' }, name: 'docs-show' })
+      await rpc(url, 'tools/call', { arguments: { id: 'componenten-tekst-heading' }, name: 'docs-show' })
     } finally {
       vi.unstubAllGlobals()
     }

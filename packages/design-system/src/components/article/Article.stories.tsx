@@ -32,7 +32,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Article',
+  title: 'Patronen/Article',
 })
 
 // The text is made up, and so are the names.

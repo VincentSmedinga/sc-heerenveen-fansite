@@ -123,7 +123,7 @@ Voor een component bouw je Storybook, serveer je de map met de build, en geef je
 ```sh
 pnpm --filter design-system build-storybook
 python3 -m http.server 6006 --bind 127.0.0.1 --directory packages/design-system/storybook-static
-pnpm screenshots http://127.0.0.1:6006 componenten-page-footer--light
+pnpm screenshots http://127.0.0.1:6006 componenten-pagina-page-footer--light
 ```
 
 De tweede opdracht blijft draaien, dus geef de derde in een tweede terminal.

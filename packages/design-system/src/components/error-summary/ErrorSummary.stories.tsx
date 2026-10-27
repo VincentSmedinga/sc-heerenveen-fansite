@@ -26,7 +26,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/ErrorSummary',
+  title: 'Componenten/Formulier/ErrorSummary',
 })
 
 const errors = [
