@@ -2450,7 +2450,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Is de zoekterm geen einde van de naam, zoals een verbetering met de hand, dan staat de hele naam in het gewone gewicht, in plaats van een verkeerde splitsing.
   Een doelpunt zonder speler heeft alleen de naam uit de wedstrijdregel, en is een achternaam.
   De kaart Doelpuntenmakers en de selectie op de zoekpagina tonen de volledige naam, en de lijst staat op achternaam, dan op voornaam.
-  In de wedstrijdregel staat de achternaam zoals Wikipedia hem schrijft, met de beginletter van de voornaam erbij (`J. Trenskow`) als twee verschillende spelers in die regel dezelfde naam hebben.
+  In de wedstrijdregel staat de achternaam zoals Wikipedia hem schrijft, met de beginletter van de voornaam erbij (`J. Trenskow`) als twee verschillende spelers in die regel dezelfde naam hebben, en met de hele voornaam als ook die beginletter gelijk is.
   Waar de naam van de media komt, zoals in koppen, veranderen we niets.
 - **Alternatieven:** de hele naam vet laten, zoals nu in de kaart; dan valt het deel dat je zoekt niet op.
   Of `strong` om de achternaam; dat zegt een schermlezer iets wat niet nodig is.

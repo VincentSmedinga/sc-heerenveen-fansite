@@ -197,7 +197,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 - **Programma:** alle wedstrijden die nog niet zijn gespeeld, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
 - **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
-  Hebben twee verschillende spelers in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow` (`goalsWithInitials` in `src/matches.ts`).
+  Hebben twee verschillende spelers in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
 - **Doelpunten per kwartier:** een kaart in de zijbalk, onder de nul gehouden en boven de bronvermelding, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
   `goalsPerQuarter` in `src/matches.ts` telt ze uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), in de competitie en de beker.
   De kwartieren zijn 1–15, 16–30, 31–45, 46–60, 61–75 en 76–90.

@@ -524,10 +524,24 @@ describe('goalsWithInitials', () => {
       playerSearchTerm: 'Trenskow',
     })
 
-  it('puts the first letter of the given name before two different players with the same name in a match', () => {
+  it('gives the whole given name when two players with the same name have the same initial', () => {
     const goals = [trenskow(1, 'Jakob', 10), trenskow(2, 'Jan', 20), trenskow(1, 'Jakob', 30)]
 
-    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual(['J. Trenskow', 'J. Trenskow', 'J. Trenskow'])
+    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual([
+      'Jakob Trenskow',
+      'Jan Trenskow',
+      'Jakob Trenskow',
+    ])
+  })
+
+  it('puts only the initial before the player whose initial nobody shares', () => {
+    const goals = [trenskow(1, 'Jakob', 10), trenskow(2, 'Jan', 20), trenskow(3, 'Bram', 30)]
+
+    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual([
+      'Jakob Trenskow',
+      'Jan Trenskow',
+      'B. Trenskow',
+    ])
   })
 
   it('tells them apart when their given names start with different letters', () => {
@@ -555,7 +569,7 @@ describe('goalsWithInitials', () => {
   it('leaves the other fields of a goal as they are', () => {
     const [changed] = goalsWithInitials([
       { ...trenskow(1, 'Jakob', 10), penalty: true },
-      { ...trenskow(2, 'Jan', 20), ownGoal: true },
+      { ...trenskow(2, 'Bram', 20), ownGoal: true },
     ])
 
     expect(changed).toMatchObject({ minute: 10, penalty: true, player: 'J. Trenskow', playerId: 1 })

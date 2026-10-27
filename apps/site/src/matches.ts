@@ -158,28 +158,36 @@ export function goalsPerQuarter(matches: PublicMatch[]): GoalsPerQuarter {
  * The goals of one match for the line of the scorers, which shows the name as the page writes
  * it, mostly a surname. When two different players in the line have the same name, each gets
  * the first letter of his given name before it, as in `J. Trenskow`, so nobody sees one name
- * twice without a difference. Two goals of one player never change, and a goal without a player
- * in the table is left alone: there is nothing to tell it from.
+ * twice without a difference. When their initials are the same too, they get the whole given
+ * name (`Jakob Trenskow` and `Jan Trenskow`). Two goals of one player never change, and a goal
+ * without a player in the table is left alone: there is nothing to tell it from.
  */
 export function goalsWithInitials(goals: ScorerGoal[]): ScorerGoal[] {
-  const players = new Map<string, Set<number>>()
+  const players = new Map<string, Map<number, NameParts>>()
 
   for (const goal of goals) {
-    if (goal.playerId !== null) {
-      players.set(goal.player, (players.get(goal.player) ?? new Set()).add(goal.playerId))
+    if (goal.playerId !== null && goal.playerName !== null) {
+      const same = players.get(goal.player) ?? new Map<number, NameParts>()
+
+      players.set(goal.player, same.set(goal.playerId, splitPlayerName(goal.playerName, goal.playerSearchTerm ?? '')))
     }
   }
 
   return goals.map((goal) => {
-    const parts =
-      goal.playerId !== null && (players.get(goal.player)?.size ?? 0) > 1 && goal.playerName !== null
-        ? splitPlayerName(goal.playerName, goal.playerSearchTerm ?? '')
-        : undefined
-    const initial = parts?.givenName?.trim().charAt(0).toUpperCase()
+    const same = players.get(goal.player)
+    const parts = goal.playerId === null ? undefined : same?.get(goal.playerId)
+    const given = parts?.givenName?.trim() ?? ''
 
-    return parts === undefined || initial === undefined || initial === '' || parts.surname === ''
-      ? goal
-      : { ...goal, player: `${initial}. ${goal.player}` }
+    if (same === undefined || same.size < 2 || parts === undefined || parts.surname === '' || given === '') {
+      return goal
+    }
+
+    const initial = given.charAt(0).toUpperCase()
+    const sharesInitial = [...same.values()]
+      .filter((other) => other !== parts)
+      .some((other) => (other.givenName?.trim().charAt(0).toUpperCase() ?? '') === initial)
+
+    return { ...goal, player: sharesInitial ? `${given} ${goal.player}` : `${initial}. ${goal.player}` }
   })
 }
 
