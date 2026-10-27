@@ -19,6 +19,15 @@ Een agent in een andere repository voegt hem toe met `claude mcp add --transport
 Met `pnpm --filter design-system build-storybook` bouw je een statische versie in `storybook-static/`.
 
 De tests van de componenten draai je met `pnpm --filter design-system test`.
+Die draaien in jsdom, zonder browser.
+
+Axe op elke story draai je met `pnpm test:stories` (in de hoofdmap, of `pnpm --filter design-system test:stories`).
+De Vitest-addon van Storybook opent elke story in Chrome en toetst hem met axe, één keer in licht en één keer in donker.
+Het thema volgt uit de omgevingsvariabele `STORYBOOK_THEME`, die `.storybook/preview.tsx` leest; de opdracht zet hem zelf.
+Een overtreding laat de opdracht mislukken, met de regel van axe en het element erbij.
+Een story waarvan de staat een momentopname is, zoals `PullIndicator` halverwege het trekken, zet de regel uit met `parameters.a11y.config.rules`, met de reden in de story.
+Eenmalig heb je Chromium nodig: `pnpm --filter design-system exec playwright install chromium`.
+In CI gebruikt de controle het Google Chrome van de runner, zoals de controle van de site.
 
 ## Gebruiken
 

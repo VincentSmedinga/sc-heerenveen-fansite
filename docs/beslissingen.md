@@ -512,6 +512,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een `paths`-filter; dat blokkeert het samenvoegen.
   Niets doen; elke documentatiewijziging wacht dan ruim vier minuten.
 
+### CI toetst de stories alleen bij wijzigingen die ze raken
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de stap `pnpm test:stories` in CI (zie _Axe draait op elke story, in licht en donker_) draait bij een pull request alleen als een gewijzigd bestand in `packages/design-system/` staat, of `pnpm-lock.yaml`, `pnpm-workspace.yaml` of `.github/workflows/ci.yml` is.
+  Een push naar `main`, een handmatige run, het label `volledige controle`, een lege of onbekende lijst en een pad dat we niet vertrouwen draaien hem altijd.
+  Het script `scripts/ci-changes.js` beslist, naast de controles van de site, en het log zegt er een eigen regel over.
+  De regels van _CI slaat de controles van de site over bij wijzigingen die ze niet raken_ gelden voor de site en veranderen niet.
+- **Waarom:** de stories staan in het designsysteem en hangen af van de versies van Storybook, Vitest, axe en de browser.
+  Een wijziging in `apps/site/` of `docs/` raakt ze niet, en de stap kost lokaal ongeveer 16 seconden.
+  Het lockfile en de workflow staan erbij, omdat een nieuwe versie of een gewijzigde stap de controle zelf verandert.
+- **Chrome:** de controle gebruikt in CI het Google Chrome van de runner (`channel: 'chrome'`) en lokaal het Chromium van Playwright, zoals de controle van de site.
+  Zo hoeft CI geen browser te installeren.
+- **Alternatieven:** de stap altijd draaien (eenvoudiger, maar elke pull request betaalt ervoor); de regel van de site hergebruiken (dan draait hij ook bij elke wijziging in de site, die de stories niet raakt).
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host

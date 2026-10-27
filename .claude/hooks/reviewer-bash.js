@@ -11,7 +11,8 @@ const rules = [
   { allow: /^gh (issue view|pr checks|pr diff|pr view)(\s|$)/ },
   { allow: /^gh api\s/, unless: /\s(-[a-zA-Z]*[XfF]|--method|--field|--raw-field|--input)/ },
   // The checks, as the package scripts define them, without extra arguments. pnpm test:a11y
-  // runs Playwright with axe.
+  // runs Playwright with axe on the pages, and pnpm test:stories runs Vitest with axe on every
+  // story.
   { allow: /^pnpm (build|lint|test|test:[\w:-]+|typecheck)$/ },
   { allow: /^pnpm --filter [\w@/.-]+ (build|build-storybook|test|test:[\w:-]+|typecheck)$/ },
 ]

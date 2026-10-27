@@ -23,7 +23,8 @@ A hook limits Bash to these commands, one at a time:
 - `gh issue view`, `gh pr view`, `gh pr diff`, `gh pr checks`, and `gh api` without a method, fields or input;
 - `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` and other `pnpm test:*` scripts, all without extra arguments;
 - the same scripts except `lint` for one package, with `--filter <package>`, and `pnpm --filter design-system build-storybook`;
-- `pnpm test:a11y`, which checks the rendered pages with axe; it needs the database with the seed and Chromium (see below).
+- `pnpm test:a11y`, which checks the rendered pages with axe; it needs the database with the seed and Chromium (see below);
+- `pnpm test:stories`, which checks every story with axe in light and dark; it needs Chromium.
 
 If a command is blocked, don't look for a way around it.
 Say in the report what you couldn't check.
@@ -61,7 +62,8 @@ Your prompt doesn't contain them.
 ## 3. Run the checks
 
 Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`.
-If the change touches `packages/design-system`, also run `pnpm --filter design-system build-storybook`.
+If the change touches `packages/design-system`, also run `pnpm --filter design-system build-storybook` and `pnpm test:stories`.
+If `pnpm test:stories` fails because Chromium is missing, say so under Open punten instead of calling the check failed.
 Run every check, also when you have already found a blocking problem: the Builder needs the whole picture to fix everything in one round.
 Run `pnpm test:a11y` too, after `pnpm build`: it starts the built site and checks every page in `apps/site/e2e/pages.spec.ts` with axe, in light and dark.
 It needs the database with the seed, which the Builder starts.

@@ -98,9 +98,13 @@ export const LongDark = meta.story({
 
 // The titles are made up. Each one breaks over two or three lines in a narrow column, so the
 // words are spread over the lines. The second has a long word and the third is Frisian.
+// The site shows one card, named by its heading "Van de redactie". Three cards on one page
+// would be three landmarks with the same name, so each gets a name of its own here.
 const renderBalanced = () => (
   <div style={{ display: 'grid', gap: '1rem', maxInlineSize: '20rem' }}>
     <ArticleCard
+      aria-label="Van de redactie, bericht 1"
+      aria-labelledby={undefined}
       date="25 oktober 2026"
       dateTime="2026-10-25"
       href="#wie-zijn-wij"
@@ -108,6 +112,8 @@ const renderBalanced = () => (
       title="Wie wij zijn en wat je van ons mag verwachten"
     />
     <ArticleCard
+      aria-label="Van de redactie, bericht 2"
+      aria-labelledby={undefined}
       date="24 oktober 2026"
       dateTime="2026-10-24"
       href="#lang-woord"
@@ -115,6 +121,8 @@ const renderBalanced = () => (
       title="Kampioenschapsfeestcommissievergaderingsverslag voor de leden"
     />
     <ArticleCard
+      aria-label="Van de redactie, bericht 3"
+      aria-labelledby={undefined}
       date="23 oktober 2026"
       dateTime="2026-10-23"
       href="#frysk"

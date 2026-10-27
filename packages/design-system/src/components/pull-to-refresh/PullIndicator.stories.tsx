@@ -44,13 +44,28 @@ const frame = (progress: number, refreshing = false) => (
   </div>
 )
 
+// While the label is pulled down it fades in with the pull, so a snapshot at half way has
+// text at about 2.4:1. That is a moment of the movement, not a colour of the label: at 1 the
+// label has full contrast, as the stories "Klaar om los te laten" show. Only this rule is off.
+const halfwayParameters = { a11y: { config: { rules: [{ enabled: false, id: 'color-contrast' }] } } }
+
 const pulling = () => frame(0.5)
 const ready = () => frame(1)
 const refreshing = () => frame(1, true)
 
-export const PullingLight = meta.story({ globals: { theme: 'light' }, name: 'Trekken, licht', render: pulling })
+export const PullingLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Trekken, licht',
+  parameters: halfwayParameters,
+  render: pulling,
+})
 
-export const PullingDark = meta.story({ globals: { theme: 'dark' }, name: 'Trekken, donker', render: pulling })
+export const PullingDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Trekken, donker',
+  parameters: halfwayParameters,
+  render: pulling,
+})
 
 export const ReadyLight = meta.story({
   globals: { theme: 'light' },

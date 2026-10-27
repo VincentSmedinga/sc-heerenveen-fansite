@@ -24,10 +24,12 @@ test('lets the read-only commands through', () => {
     'pnpm typecheck',
     'pnpm test',
     'pnpm test:a11y',
+    'pnpm test:stories',
     'pnpm build',
     'pnpm --filter design-system build-storybook',
     'pnpm --filter @fansite/shared test',
     'pnpm --filter site test:a11y',
+    'pnpm --filter design-system test:stories',
   ]) {
     assert.equal(runCommand(command), 0, command)
   }
