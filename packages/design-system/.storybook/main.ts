@@ -11,8 +11,7 @@ export default defineMain({
     'storybook-addon-pseudo-states',
     {
       // The MCP server for agents, at /mcp on the dev server. The docs and dev toolsets are on.
-      // The test toolset needs @storybook/addon-vitest, which we don't use (we test components
-      // with Vitest and Testing Library).
+      // The test toolset is off: `pnpm test:stories` runs the stories (see vitest.config.ts).
       name: '@storybook/addon-mcp',
       options: { toolsets: { dev: true, docs: true, test: false } },
     },

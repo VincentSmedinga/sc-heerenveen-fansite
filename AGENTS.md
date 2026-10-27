@@ -96,9 +96,9 @@ Reviews each pull request in a fresh context, as the `reviewer` subagent in [`.c
 
 The Reviewer:
 
-- Checks the code of the pages that use a component and runs `pnpm test:a11y`, and does not go through every story.
+- Checks the code of the pages that use a component and runs `pnpm test:a11y` and `pnpm test:stories`, and does not go through every story by eye: `pnpm test:stories` checks every story with axe, in light and dark.
   Every visual component has a story; the owner looks at the pages in light and dark in a browser.
-- Reads and searches the code, looks at `git diff`, and runs the checks: lint, typecheck, tests and builds, and the accessibility checks on the pages, `pnpm test:a11y`.
+- Reads and searches the code, looks at `git diff`, and runs the checks: lint, typecheck, tests and builds, the accessibility checks on the pages, `pnpm test:a11y`, and the accessibility checks on the stories, `pnpm test:stories`.
   A hook, `.claude/hooks/reviewer-bash.js`, blocks every other command.
   Claude Code only runs that hook in a folder you have trusted; elsewhere it skips the hook without a warning.
 - Changes nothing: no edits, commits, pushes or approvals.

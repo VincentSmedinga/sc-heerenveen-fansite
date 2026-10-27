@@ -4,9 +4,10 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
-import { decide, forceLabel, parseNames } from './ci-changes.js'
+import { decide, decideStories, forceLabel, parseNames } from './ci-changes.js'
 
 const pullRequest = (files, forced = false) => decide({ event: 'pull_request', files, forced })
+const storiesFor = (files, forced = false) => decideStories({ event: 'pull_request', files, forced })
 
 test('skips the checks of the site for a pull request that only changes documentation', () => {
   assert.deepEqual(pullRequest(['docs/beslissingen.md', 'docs/bronnen.md']), {
@@ -115,6 +116,46 @@ test('parseNames splits on NUL, so names with spaces and quotes stay whole', () 
   assert.deepEqual(parseNames(''), [])
 })
 
+test('runs the check of the stories when the design system changes, and says which file', () => {
+  assert.deepEqual(storiesFor(['docs/a.md', 'packages/design-system/src/Button.stories.tsx']), {
+    reason: 'Controle van de stories gedraaid: packages/design-system/src/Button.stories.tsx kan ze raken',
+    stories: true,
+  })
+})
+
+test('runs it when the versions of the tools change, or the step itself', () => {
+  for (const file of ['pnpm-lock.yaml', 'pnpm-workspace.yaml', '.github/workflows/ci.yml']) {
+    assert.equal(storiesFor([file]).stories, true, file)
+  }
+})
+
+test('skips it for a change that cannot touch a story', () => {
+  assert.deepEqual(storiesFor(['apps/site/src/app/page.tsx', 'docs/a.md', 'apps/importer/src/import.ts']), {
+    reason: 'Controle van de stories overgeslagen: de bestanden raken ze niet',
+    stories: false,
+  })
+})
+
+test('does not take a look-alike for the design system', () => {
+  for (const file of ['packages/design-system-extra/a.ts', 'packages/design-systems/a.ts', 'packages/design-system']) {
+    assert.equal(storiesFor([file]).stories, false, file)
+  }
+})
+
+test('runs it for a path it does not trust, an empty list, the label and any other event', () => {
+  for (const file of ['/etc/passwd', 'docs/../packages/design-system/a.ts', 'docs\\a.md']) {
+    assert.equal(storiesFor([file]).stories, true, file)
+  }
+
+  assert.equal(storiesFor([]).stories, true)
+  assert.equal(storiesFor(null).stories, true)
+  assert.equal(storiesFor(['docs/a.md'], true).stories, true)
+
+  for (const event of ['push', 'workflow_dispatch', 'schedule', undefined]) {
+    assert.equal(decideStories({ event, files: ['docs/a.md'] }).stories, true, String(event))
+  }
+})
+
 test('the workflow gives only the two checks of the site an if, and has no paths filter', () => {
   const workflow = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8')
   const steps = workflow.split(/^ {6}- /m).slice(1)
@@ -125,6 +166,11 @@ test('the workflow gives only the two checks of the site an if, and has no paths
     ['Check the site the way the host runs it', 'Check accessibility'],
   )
   assert.ok(steps.some((step) => step.includes('id: changes') && step.includes('scripts/ci-changes.js')))
+
+  const stories = steps.filter((step) => step.includes('pnpm test:stories'))
+
+  assert.equal(stories.length, 1)
+  assert.match(stories[0], /if: steps\.changes\.outputs\.stories != 'false'/)
   // A required check that never reports blocks the merge. A skipped step doesn't.
   assert.doesNotMatch(workflow, /^ {2,4}paths(-ignore)?:/m)
 })

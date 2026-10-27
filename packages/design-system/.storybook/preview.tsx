@@ -33,7 +33,9 @@ export default definePreview({
     },
   },
   initialGlobals: {
-    theme: 'system',
+    // `pnpm test:stories` checks every story once in light and once in dark, by setting
+    // STORYBOOK_THEME.
+    theme: import.meta.env['STORYBOOK_THEME'] ?? 'system',
   },
   parameters: {
     a11y: {

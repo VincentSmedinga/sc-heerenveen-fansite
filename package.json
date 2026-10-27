@@ -32,6 +32,7 @@
     "screenshots": "pnpm --filter site screenshots",
     "test": "pnpm -r --if-present run test && node --test '.claude/hooks/*.test.js' 'baseline.test.js' 'scripts/*.test.js' 'templates.test.js'",
     "test:a11y": "pnpm --filter site test:a11y",
+    "test:stories": "pnpm --filter @fansite/design-system test:stories",
     "typecheck": "tsc -b"
   },
   "devDependencies": {

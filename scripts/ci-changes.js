@@ -18,6 +18,10 @@
 // 5. A package.json or a tsconfig, wherever it is, runs them too: a dependency or a compiler
 //    option can change what the site builds, also from inside a skippable folder.
 //
+// The axe check of the stories of the design system (`pnpm test:stories`, about 30 seconds) is
+// decided here too, by `decideStories`, as the output `stories`. It follows the same first
+// three rules, then runs only if a file that can change a story changed (see `storiesRules`).
+//
 // Lint, typecheck, `pnpm test` and the build are not decided here. They always run, and so do
 // the tests of the importer and the packages.
 //
@@ -50,6 +54,19 @@ export const skippable = [
   'README.md',
   'apps/importer/',
   'apps/design-system-mcp/',
+]
+
+/**
+ * What can change a story or the way it is tested. A name ending in a slash is a folder,
+ * anything else a file. The design system is where the stories are. The lockfile and the
+ * workspace file change the versions of Storybook, Vitest, axe and the browser driver, and the
+ * workflow holds the step itself.
+ */
+export const storiesRules = [
+  'packages/design-system/',
+  'pnpm-lock.yaml',
+  'pnpm-workspace.yaml',
+  '.github/workflows/ci.yml',
 ]
 
 /** Files that run the checks even inside a skippable folder: they change what is built. */
@@ -95,6 +112,46 @@ export function decide({ event, files, forced = false }) {
   }
 
   return { reason: `Controles van de site overgeslagen: alleen ${listRules(rules)} gewijzigd`, site: false }
+}
+
+/**
+ * Decides whether the axe check of the stories runs. It takes what `decide` takes and gives
+ * `stories` and the line for the log. Whatever it can't be sure about, it runs.
+ */
+export function decideStories({ event, files, forced = false }) {
+  if (event !== 'pull_request') {
+    return {
+      reason: `Controle van de stories gedraaid: ${event ?? 'onbekende gebeurtenis'}, geen pull request`,
+      stories: true,
+    }
+  }
+
+  if (forced) {
+    return {
+      reason: `Controle van de stories gedraaid: de pull request heeft het label "${forceLabel}"`,
+      stories: true,
+    }
+  }
+
+  if (files === null || files === undefined) {
+    return { reason: 'Controle van de stories gedraaid: de gewijzigde bestanden zijn niet te bepalen', stories: true }
+  }
+
+  if (files.length === 0) {
+    return { reason: 'Controle van de stories gedraaid: geen gewijzigde bestanden gevonden', stories: true }
+  }
+
+  for (const file of files) {
+    if (untrusted(file)) {
+      return { reason: `Controle van de stories gedraaid: ${file} is een onverwacht pad`, stories: true }
+    }
+
+    if (storiesRules.some((rule) => (rule.endsWith('/') ? file.startsWith(rule) : file === rule))) {
+      return { reason: `Controle van de stories gedraaid: ${file} kan ze raken`, stories: true }
+    }
+  }
+
+  return { reason: 'Controle van de stories overgeslagen: de bestanden raken ze niet', stories: false }
 }
 
 /** Gives the names that `git diff --name-only -z` printed. */
@@ -151,32 +208,39 @@ function listRules(rules) {
 
 async function main(env) {
   let decision
+  let storiesDecision
 
   try {
     const event = env.GITHUB_EVENT_NAME
     const isPullRequest = event === 'pull_request'
-
-    decision = decide({
+    const input = {
       event,
       files: isPullRequest ? changedFiles() : [],
       forced: isPullRequest ? await hasForceLabel(env) : false,
-    })
+    }
+
+    decision = decide(input)
+    storiesDecision = decideStories(input)
   } catch (error) {
     // Whatever goes wrong, the answer is the one that checks the most.
     decision = { reason: `Controles van de site gedraaid: de beslissing mislukte (${error.message})`, site: true }
+    storiesDecision = {
+      reason: `Controle van de stories gedraaid: de beslissing mislukte (${error.message})`,
+      stories: true,
+    }
   }
 
   console.log(decision.reason)
+  console.log(storiesDecision.reason)
 
   if (env.GITHUB_OUTPUT !== undefined) {
-    appendFileSync(env.GITHUB_OUTPUT, `site=${decision.site}\n`)
+    appendFileSync(env.GITHUB_OUTPUT, `site=${decision.site}\nstories=${storiesDecision.stories}\n`)
   }
 }
 
 /** Gives the rule that makes a file skippable, or undefined if the checks run for it. */
 function skippableRule(file) {
-  // Nothing from git looks like this. If it does, we don't know what it is, so the checks run.
-  if (file.startsWith('/') || file.includes('\\') || file.split('/').includes('..')) {
+  if (untrusted(file)) {
     return undefined
   }
 
@@ -185,6 +249,11 @@ function skippableRule(file) {
   }
 
   return skippable.find((rule) => (rule.endsWith('/') ? file.startsWith(rule) : file === rule))
+}
+
+/** Nothing from git looks like this. If it does, we don't know what it is: the checks run. */
+function untrusted(file) {
+  return file.startsWith('/') || file.includes('\\') || file.split('/').includes('..')
 }
 
 // `import.meta.main` only exists from Node 24.2, and engines allows 24.0 and 24.1 too, so

@@ -27,9 +27,14 @@ Controleer daarom op de gerenderde pagina, in licht en donker:
   Lokaal draai je dit met `pnpm test:a11y`; wat eerst moet draaien, staat in de [README van de site](../apps/site/README.md).
   CI slaat deze controle over bij een pull request die alleen documentatie, het gereedschap voor agents, de importer of de MCP-server van het designsysteem wijzigt (zie _De controles_ in de [bijdragegids](../CONTRIBUTING.md)).
   Een wijziging in de site, het designsysteem, de database of de gedeelde code draait hem altijd, en `main` ook.
-- **De stories:** CI bouwt Storybook, maar toetst de stories niet met axe.
+- **De stories:** CI draait `pnpm test:stories`: de Vitest-addon van Storybook opent elke story in Chrome en toetst hem met axe, één keer in licht en één keer in donker.
+  Elke schending laat de controle falen.
+  Een story waarvan de staat een momentopname is, zoals een label dat half vervaagd is, zet één regel uit, met de reden in de story.
+  Lokaal draai je dit met `pnpm test:stories`; wat eerst moet draaien, staat in de [README van het designsysteem](../packages/design-system/README.md).
+  CI slaat deze controle over bij een pull request die het designsysteem, het lockfile en de workflow niet raakt.
   In Storybook toont het paneel Toegankelijkheid voor elk verhaal wat axe vindt.
-  Een component toetst CI dus alleen op de pagina's waar hij staat.
+- **Wat axe niet ziet:** hover, focus en bezocht, de volgorde van het toetsenbord, schermlezers, alt-teksten, zoom tot 400% en regels voor een hele pagina.
+  Daarom blijven de controle van de pagina's en de checklist van de reviewer.
 - **Een mens, straks:** de bediening met het toetsenbord, de volgorde van de focus, schermlezers en de laatste ronde WCAG-controle (#25).
   De verklaring op `/toegankelijkheid` belooft alleen wat is nagekeken.
   Bij elke ronde van een mens en bij elk gevonden of opgelost probleem werkt de maker van die wijziging de verklaring bij, in dezelfde pull request.

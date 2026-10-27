@@ -83,6 +83,13 @@ jobs:
 
       - run: pnpm test
 
+      # Every story in Chrome with axe, once in light and once in dark. Playwright uses the Google Chrome that the runner
+      # already has, as for the accessibility check below. It runs when the design system or the tools that test it
+      # change; scripts/ci-changes.js decides.
+      - name: Check the stories with axe
+        if: steps.changes.outputs.stories != 'false'
+        run: pnpm test:stories
+
       - run: pnpm build
 
       # The site must also work the way the host runs it: from the standalone build, with its static files, and with

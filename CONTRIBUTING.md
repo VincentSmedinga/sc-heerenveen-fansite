@@ -58,6 +58,7 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm test:a11y
+pnpm test:stories
 ```
 
 De tests van `packages/db` draaien op een echte MariaDB.
@@ -65,6 +66,9 @@ Start die eerst met `docker compose up -d --wait` (zie de [README van het packag
 `pnpm test:a11y` toetst na de build de pagina's met axe.
 Het heeft die database ook nodig, en eenmalig Chromium (zie de [README van de site](apps/site/README.md)).
 De gebouwde site maakt zelf de tabellen en zet de echte bronnen erin, en de controle zet de testbronnen erbij.
+`pnpm test:stories` opent elke story van het designsysteem in Chrome en toetst hem met axe, één keer in licht en één keer in donker.
+Het heeft geen database nodig, en eenmalig Chromium (zie de [README van het designsysteem](packages/design-system/README.md)).
+`pnpm test` draait de tests van de componenten zonder browser.
 Verandert je wijziging de opmaak of de tekst van een pagina, of een regel in het logboek van de site?
 Draai dan na `pnpm build` ook de rooktest, zoals CI dat doet:
 
@@ -80,6 +84,8 @@ Na een wijziging in het designsysteem draai je ook `pnpm --filter design-system 
 CI slaat de rooktest en `pnpm test:a11y` over bij een pull request die alleen `docs/`, `.claude/`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `apps/importer/` of `apps/design-system-mcp/` wijzigt.
 Die controles raken zulke wijzigingen niet, en ze kosten ongeveer 150 seconden.
 Lint, typecheck, `pnpm test`, de build en de controle van de titel draaien altijd.
+`pnpm test:stories` draait alleen bij een wijziging die een story kan raken: in `packages/design-system/`, in het lockfile, in `pnpm-workspace.yaml` of in de workflow zelf.
+Een push naar `main`, een handmatige run en het label draaien hem ook.
 Alles draait ook in deze gevallen:
 
 - de pull request wijzigt een bestand dat niet in die lijst staat;
