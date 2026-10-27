@@ -656,8 +656,11 @@ await withEmptyDatabase((database) =>
     )
     assert.match(
       matchesHtml,
-      /<th scope="row">Nepper<\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
+      /<th scope="row">Gerrit Nepper<\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
     )
+    // Two players called Testvoort are two rows, each with his full name.
+    assert.match(matchesHtml, /<th scope="row">Joris Testvoort<\/th>/)
+    assert.match(matchesHtml, /<th scope="row">Bas Testvoort<\/th>/)
     assert.doesNotMatch(matchesHtml, /<th scope="row">Kopie<\/th>/)
     assert.match(
       matchesHtml,

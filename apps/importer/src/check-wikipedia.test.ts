@@ -145,6 +145,7 @@ describe('the check of the scorers', () => {
     ownGoal: false,
     penalty: false,
     player: 'Speler',
+    playerPage: null,
     stoppageMinutes: null,
   })
 
@@ -208,12 +209,18 @@ describe('the checks of the squad', () => {
     expect(checkSquad(squad)).toEqual([])
   })
 
+  /** `count` players, each with a name and a page of his own, in the positions of the page. */
+  const players = (count: number) =>
+    Array.from({ length: count }, (_, index) => ({
+      ...squad[index % 25]!,
+      name: `Speler ${index}`,
+      wikipediaPage: `Speler ${index}`,
+    }))
+
   it('pass at 18 players and at 45', () => {
     expect(smallest).toHaveLength(18)
     expect(checkSquad(smallest)).toEqual([])
-    expect(
-      checkSquad(Array.from({ length: 45 }, (_, index) => ({ ...squad[index % 25]!, name: `Speler ${index}` }))),
-    ).toEqual([])
+    expect(checkSquad(players(45))).toEqual([])
   })
 
   it('fail below 18 players', () => {
@@ -221,9 +228,7 @@ describe('the checks of the squad', () => {
   })
 
   it('fail above 45 players', () => {
-    const many = Array.from({ length: 46 }, (_, index) => ({ ...squad[index % 25]!, name: `Speler ${index}` }))
-
-    expect(checkSquad(many)).toEqual(['the squad has 46 players, not 18 to 45'])
+    expect(checkSquad(players(46))).toEqual(['the squad has 46 players, not 18 to 45'])
   })
 
   it('fail with one goalkeeper', () => {
@@ -240,11 +245,25 @@ describe('the checks of the squad', () => {
   it('fail when a name is there twice, also when only the accents or capitals differ', () => {
     const [first] = squad as [ReadPlayer]
 
-    expect(checkSquad([...squad, { ...first, position: 'aanvaller' }])).toEqual([
+    expect(checkSquad([...squad, { ...first, position: 'aanvaller', wikipediaPage: null }])).toEqual([
       'the name Bernt Klaverboer is in the squad twice',
     ])
-    expect(checkSquad([...squad, { ...first, name: 'bérnt klaverboer' }])).toEqual([
+    expect(checkSquad([...squad, { ...first, name: 'bérnt klaverboer', wikipediaPage: null }])).toEqual([
       'the name bérnt klaverboer is in the squad twice',
     ])
+  })
+
+  it('fail when two players have the same page, also when only the accents or capitals differ', () => {
+    const [first] = squad as [ReadPlayer]
+    const other = { ...first, name: 'Berend Klaverboer' }
+
+    expect(checkSquad([...squad, other])).toEqual(['the page Bernt Klaverboer is the page of two players in the squad'])
+    expect(checkSquad([...squad, { ...other, wikipediaPage: 'bérnt klaverboer' }])).toEqual([
+      'the page bérnt klaverboer is the page of two players in the squad',
+    ])
+  })
+
+  it('pass for players without a page, however many there are', () => {
+    expect(checkSquad(squad.map((player) => ({ ...player, wikipediaPage: null })))).toEqual([])
   })
 })

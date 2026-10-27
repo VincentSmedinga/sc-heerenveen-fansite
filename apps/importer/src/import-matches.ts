@@ -1,7 +1,7 @@
 import type { Database } from '@fansite/db/client'
 import type { Match, MatchGoal, MatchImport, NewMatchGoal, WikipediaPageKind } from '@fansite/db/schema'
 
-import { matches, matchGoals, matchImports, standings, wikipediaPages } from '@fansite/db/schema'
+import { matches, matchGoals, matchImports, players, standings, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
 import { and, asc, eq, inArray } from 'drizzle-orm'
 
@@ -9,6 +9,7 @@ import type { Fetcher } from './fetcher.ts'
 import type { ReadGoal, ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
 
 import { checkGoals, checkMatches, checkStandings } from './check-wikipedia.ts'
+import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
 import { pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-wikipedia.ts'
 import { retryUnhealthyAfterMs, unhealthyAfter, waitLimits } from './run-log.ts'
 import { describeError, formatTime, printable } from './text.ts'
@@ -82,6 +83,9 @@ export const wikipediaOrigin = 'https://nl.wikipedia.org'
 
 /** A result that stood this long and then changes is worth a warning. */
 export const resultStandsAfterMs = 3 * 24 * 60 * 60 * 1000
+
+/** A goal as it is kept: what the page says, and the player of ours it is linked to or null. */
+export type LinkedGoal = ReadGoal & { playerId: null | number }
 
 /** Writes a report as lines of text: one for the import, and one for each warning. */
 export function formatMatchReport(report: MatchReport): string {
@@ -288,15 +292,37 @@ async function fetchPages(fetcher: Fetcher, season: string, origin: string): Pro
   return pages
 }
 
+/** The most names of players the warning about goals without a player lists. */
+const mostUnlinkedNames = 8
+
+/**
+ * The warning for the goals of our players that have no player in the table: how many, and
+ * the names as the pages show them. Undefined when every goal of ours has one.
+ */
+export function unlinkedWarning(goals: LinkedGoal[]): string | undefined {
+  const unlinked = goals.filter((goal) => isGoalOfOurPlayer(goal) && goal.playerId === null)
+
+  if (unlinked.length === 0) {
+    return undefined
+  }
+
+  const names = [...new Set(unlinked.map((goal) => goal.player))].sort((a, b) => a.localeCompare(b, 'nl'))
+  const shown = names.slice(0, mostUnlinkedNames).join(', ')
+
+  return `${unlinked.length} ${unlinked.length === 1 ? 'goal' : 'goals'} of ours ${unlinked.length === 1 ? 'has' : 'have'} no player in the squad table: ${shown}${names.length > mostUnlinkedNames ? ', …' : ''}`
+}
+
 /**
  * The goals to keep for a match, and the warning when the page's scorers are not used. The
  * scorers are an extra: a list that cannot be read or does not fit the result is left out, the
- * match itself stays.
+ * match itself stays. Every goal gets its player from `link` (see `link-players.ts`).
  */
-function goalsOf(match: ReadMatch): { goals: ReadGoal[]; warning?: string } {
+function goalsOf(match: ReadMatch, link: (goal: ReadGoal) => null | number): { goals: LinkedGoal[]; warning?: string } {
   const problem = checkGoals(match)
 
-  return problem === undefined ? { goals: match.goals ?? [] } : { goals: [], warning: `no scorers: ${problem}` }
+  return problem === undefined
+    ? { goals: (match.goals ?? []).map((goal) => ({ ...goal, playerId: link(goal) })) }
+    : { goals: [], warning: `no scorers: ${problem}` }
 }
 
 /** Whether a stored match is what Wikipedia says now, apart from `result_set_at`. */
@@ -318,7 +344,7 @@ function isSame(before: Match, now: ReadMatch): boolean {
 }
 
 /** Whether the stored goals of a match are the goals we found, in the same order. */
-function isSameGoals(before: MatchGoal[], now: ReadGoal[]): boolean {
+function isSameGoals(before: MatchGoal[], now: LinkedGoal[]): boolean {
   return (
     before.length === now.length &&
     before.every(
@@ -327,6 +353,8 @@ function isSameGoals(before: MatchGoal[], now: ReadGoal[]): boolean {
         goal.minute === now[index].minute &&
         goal.stoppageMinutes === now[index].stoppageMinutes &&
         goal.player === now[index].player &&
+        goal.playerId === now[index].playerId &&
+        goal.wikipediaPage === now[index].playerPage &&
         goal.ownGoal === now[index].ownGoal &&
         goal.penalty === now[index].penalty,
     )
@@ -422,9 +450,15 @@ function standingsRow(season: string, row: ReadStandingsRow, validOn: string) {
 }
 
 /** Writes the goals of a match in the order they are shown, so `id` keeps that order. */
-async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: ReadGoal[]) {
+async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: LinkedGoal[]) {
   if (goals.length > 0) {
-    await db.insert(matchGoals).values(goals.map((goal): NewMatchGoal => ({ ...goal, matchId })))
+    await db.insert(matchGoals).values(
+      goals.map(({ playerPage, ...goal }): NewMatchGoal => ({
+        ...goal,
+        matchId,
+        wikipediaPage: playerPage,
+      })),
+    )
   }
 }
 
@@ -432,7 +466,11 @@ async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: 
  * Makes the matches of the season in the database the ones we found: a match is added when the
  * season has no row for its round, changed when its row differs, and removed when Wikipedia no
  * longer has it. Rows of another season are not touched. A result that changes after it stood
- * for three days gives a warning, and is taken over all the same.
+ * for three days gives a warning, and is taken over all the same. The goals are linked to the
+ * players of the season as they are in the table now, so a goal gets its player as soon as the
+ * squad has him, and a goal that is linked keeps its link until the table says otherwise. A
+ * goal of ours that has no player is a warning too (once the squad has been read), and no
+ * reason to keep the match out.
  */
 async function storeMatches(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
@@ -443,6 +481,8 @@ async function storeMatches(
   const known = new Map(
     (await db.select().from(matches).where(eq(matches.season, season))).map((row) => [key(row), row]),
   )
+  const squad = await db.select().from(players).where(eq(players.season, season))
+  const link = playerLinker(squad)
   const storedGoals = new Map<number, MatchGoal[]>()
 
   for (const goal of await db
@@ -456,10 +496,13 @@ async function storeMatches(
 
   const counts = { added: 0, removed: 0, unchanged: 0, updated: 0 }
   const warnings: string[] = []
+  const linkedGoals: LinkedGoal[] = []
 
   for (const match of found) {
     const before = known.get(key(match))
-    const scorers = goalsOf(match)
+    const scorers = goalsOf(match, link)
+
+    linkedGoals.push(...scorers.goals)
 
     known.delete(key(match))
     if (scorers.warning !== undefined) {
@@ -514,6 +557,13 @@ async function storeMatches(
   if (gone.length > 0) {
     counts.removed = gone.length
     await db.delete(matches).where(inArray(matches.id, gone))
+  }
+
+  // Before the first read of the squad nobody can be linked, which is no news.
+  const unlinked = squad.length === 0 ? undefined : unlinkedWarning(linkedGoals)
+
+  if (unlinked !== undefined) {
+    warnings.push(unlinked)
   }
 
   return { counts, warnings }

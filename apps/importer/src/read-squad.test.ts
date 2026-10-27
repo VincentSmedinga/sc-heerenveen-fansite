@@ -86,6 +86,7 @@ describe('the page of the squad', () => {
       position: 'doelman',
       searchTerm: 'Klaverboer',
       shirtNumber: 22,
+      wikipediaPage: 'Bernt Klaverboer',
     })
     expect(players.find((player) => player.name === 'Sam Kersten')).toMatchObject({ shirtNumber: 4 })
   })
@@ -96,6 +97,7 @@ describe('the page of the squad', () => {
       position: 'verdediger',
       searchTerm: 'Willemsen',
       shirtNumber: 3,
+      wikipediaPage: 'Maas Willemsen',
     })
   })
 
@@ -105,19 +107,21 @@ describe('the page of the squad', () => {
       position: 'doelman',
       searchTerm: 'Kremers',
       shirtNumber: null,
+      wikipediaPage: 'Sten Kremers',
     })
   })
 
-  it('takes the name a link shows, not the page it points to', () => {
+  it('takes the name a link shows, and keeps the page it points to', () => {
     expect(players.find((player) => player.shirtNumber === 17)).toMatchObject({
       name: 'Roberts Uldrikis',
       searchTerm: 'Uldrikis',
+      wikipediaPage: 'Roberts Uldriķis',
     })
   })
 
-  it('keeps nothing but the name, the position, the number and the search term', () => {
+  it('keeps nothing but the name, the position, the number, the search term and the page', () => {
     for (const player of players) {
-      expect(Object.keys(player).sort()).toEqual(['name', 'position', 'searchTerm', 'shirtNumber'])
+      expect(Object.keys(player).sort()).toEqual(['name', 'position', 'searchTerm', 'shirtNumber', 'wikipediaPage'])
     }
   })
 
@@ -138,22 +142,28 @@ describe('the ways a name is written', () => {
   const row = (name: string) => `${keeper}\n|-\n|'''1'''||{{NL-VLAG}}|| align="left" |${name}||2029`
 
   it('reads [[Naam]]', () => {
-    expect(playersOf(pageWith(row('[[Pim Verbeek]]')))).toMatchObject([{ name: 'Pim Verbeek', searchTerm: 'Verbeek' }])
-  })
-
-  it('reads [[Pagina|Naam]] as the name', () => {
-    expect(playersOf(pageWith(row('[[Pim Verbeek (voetballer, 1999)|Pim Verbeek]]')))).toMatchObject([
-      { name: 'Pim Verbeek' },
+    expect(playersOf(pageWith(row('[[Pim Verbeek]]')))).toMatchObject([
+      { name: 'Pim Verbeek', searchTerm: 'Verbeek', wikipediaPage: 'Pim Verbeek' },
     ])
   })
 
-  it('takes a disambiguation off the title when the name comes from it', () => {
-    expect(playersOf(pageWith(row('[[Pim Verbeek (voetballer)]]')))).toMatchObject([{ name: 'Pim Verbeek' }])
-    expect(playersOf(pageWith(row('[[Pim Verbeek (voetballer, 1999)]]')))).toMatchObject([{ name: 'Pim Verbeek' }])
+  it('reads [[Pagina|Naam]] as the name, and the page as the page', () => {
+    expect(playersOf(pageWith(row('[[Pim Verbeek (voetballer, 1999)|Pim Verbeek]]')))).toMatchObject([
+      { name: 'Pim Verbeek', wikipediaPage: 'Pim Verbeek (voetballer, 1999)' },
+    ])
   })
 
-  it('reads a name without a link', () => {
-    expect(playersOf(pageWith(row('Pim Verbeek')))).toMatchObject([{ name: 'Pim Verbeek' }])
+  it('takes a disambiguation off the title when the name comes from it, and keeps it in the page', () => {
+    expect(playersOf(pageWith(row('[[Pim Verbeek (voetballer)]]')))).toMatchObject([
+      { name: 'Pim Verbeek', wikipediaPage: 'Pim Verbeek (voetballer)' },
+    ])
+    expect(playersOf(pageWith(row('[[Pim Verbeek (voetballer, 1999)]]')))).toMatchObject([
+      { name: 'Pim Verbeek', wikipediaPage: 'Pim Verbeek (voetballer, 1999)' },
+    ])
+  })
+
+  it('reads a name without a link, and gives it no page', () => {
+    expect(playersOf(pageWith(row('Pim Verbeek')))).toMatchObject([{ name: 'Pim Verbeek', wikipediaPage: null }])
   })
 
   it('reads a cell without an attribute and with a comment', () => {

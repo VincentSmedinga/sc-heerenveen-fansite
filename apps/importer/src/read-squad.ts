@@ -7,7 +7,7 @@ import type { PlayerPosition } from '@fansite/db/schema'
 
 import { playerNameMaxLength } from '@fansite/db/schema'
 
-import { clean, plain } from './read-wikipedia.ts'
+import { clean, linkedPage, plain } from './read-wikipedia.ts'
 
 /** What the import keeps of one player. */
 export type ReadPlayer = {
@@ -18,6 +18,11 @@ export type ReadPlayer = {
   searchTerm: string
   /** Null for a player without a shirt number (`-` in the table). */
   shirtNumber: null | number
+  /**
+   * The page the name links to, such as `Pim Verbeek (voetballer, 1999)`, with the addition
+   * still on it. Null when the table does not link the name. Goals link to the same page.
+   */
+  wikipediaPage: null | string
 }
 
 export type ReadSquad = { kind: 'error'; message: string } | { kind: 'read'; players: ReadPlayer[] }
@@ -193,7 +198,7 @@ function readPlayer(cells: string[], position: PlayerPosition): ReadPlayer | str
     return `${name} has a shirt number we do not know: '${number}'`
   }
 
-  return { name, position, searchTerm: searchTerm(name), shirtNumber }
+  return { name, position, searchTerm: searchTerm(name), shirtNumber, wikipediaPage: linkedPage(nameCell) }
 }
 
 /** Takes the attributes off the front of a cell: `align="left" |[[Naam]]` is `[[Naam]]`. */

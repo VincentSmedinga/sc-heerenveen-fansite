@@ -3,7 +3,7 @@ import type { Player } from '@fansite/db/schema'
 
 import { players, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { and, eq, inArray } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
@@ -36,7 +36,7 @@ export type SquadReport =
     }
   | {
       kind: 'imported'
-      players: { added: number; removed: number; unchanged: number; updated: number }
+      players: { added: number; left: number; unchanged: number; updated: number }
       season: string
       warnings: string[]
     }
@@ -58,7 +58,7 @@ export function formatSquadReport(report: SquadReport): string {
       return `${head}: warning, nothing changed and the last good copy stays: ${printable(report.message)}`
     case 'imported':
       return [
-        `${head}: ${report.players.added} new, ${report.players.updated} updated, ${report.players.unchanged} unchanged, ${report.players.removed} removed`,
+        `${head}: ${report.players.added} new, ${report.players.updated} updated, ${report.players.unchanged} unchanged, ${report.players.left} left the squad`,
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
       ].join('\n')
     case 'postponed':
@@ -75,6 +75,9 @@ export function formatSquadReport(report: SquadReport): string {
  * changes: the last good squad stays, and the report says why.
  *
  * It reads the current season only. The rows of an earlier season are never changed or removed.
+ * A player who is no longer in the table is never removed either, since goals point to his row.
+ * The one exception is the first good read of a season, which replaces the made-up squad of the
+ * seed (see `readAndStore`).
  * It throws when the health in the database can't be written; the data itself fails into an
  * error report.
  */
@@ -93,7 +96,14 @@ export async function importSquad(
   let report: SquadReport
 
   try {
-    report = await readAndStore(db, fetcher, season, origin, clock)
+    report = await readAndStore(
+      db,
+      fetcher,
+      season,
+      origin,
+      clock,
+      before?.lastSuccessAt === null || before?.lastSuccessAt === undefined,
+    )
   } catch (error) {
     report = { kind: 'error', message: describeError(error), season }
   }
@@ -119,6 +129,7 @@ async function readAndStore(
   season: string,
   origin: string,
   clock: () => Date,
+  firstRead: boolean,
 ): Promise<SquadReport> {
   const title = squadPageTitle(season)
   const outcome = await fetcher.fetch(pageUrl(origin, title))
@@ -150,7 +161,13 @@ async function readAndStore(
 
   const now = clock()
   const counts = await db.transaction(async (transaction) => {
-    const result = await storePlayers(transaction, season, read.players)
+    // The first good read of a season replaces what the seed made up, and nothing else: a
+    // player from an earlier read stays. A goal of a made-up player loses its link.
+    if (firstRead) {
+      await transaction.delete(players).where(eq(players.season, season))
+    }
+
+    const result = await storePlayers(transaction, season, read.players, now)
     const values = { kind: 'squad' as const, readAt: now, season, version: outcome.lastModified }
 
     await transaction
@@ -165,51 +182,81 @@ async function readAndStore(
 }
 
 /**
- * Makes the squad of the season in the database the one we found: a player is added when the
- * season has no row with his name, changed when his name, position or number differ, and
- * removed when the table no longer has him. A player that is known keeps his search term, so a
- * correction by hand survives the import. Rows of another season are not touched.
+ * Brings the squad of the season in the database up to date with the one we found, and never
+ * replaces it, so a player keeps his `id` and the goals that point to it. A player is known by
+ * the page his name links to, or else by his name, the way the database keeps names apart
+ * (`nameKey`: a name that differs only in an accent is the same player). A player who is not
+ * known is added. A known player is changed when his name, page, position or number differ, and
+ * is put back in the squad if he had left. A player who is not in the table any more is marked
+ * as no longer in the squad, with the moment, and stays. A player who is known keeps his search
+ * term, so a correction by hand survives the import. Rows of another season are not touched.
+ *
+ * `left` counts the players who left the squad in this read, not those who were gone already.
  */
 async function storePlayers(
-  db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
+  db: Pick<Database, 'insert' | 'select' | 'update'>,
   season: string,
   found: ReadPlayer[],
+  now: Date,
 ) {
-  // The database keeps names apart as `nameKey` does, so a name that differs only in an accent
-  // is the same player.
-  const known = new Map<string, Player>(
-    (await db.select().from(players).where(eq(players.season, season))).map((row) => [nameKey(row.name), row]),
-  )
-  const counts = { added: 0, removed: 0, unchanged: 0, updated: 0 }
+  const rows = await db.select().from(players).where(eq(players.season, season))
+  const byPage = new Map<string, Player>()
+  const byName = new Map<string, Player>()
+
+  for (const row of rows) {
+    byName.set(nameKey(row.name), row)
+
+    if (row.wikipediaPage !== null) {
+      byPage.set(nameKey(row.wikipediaPage), row)
+    }
+  }
+
+  const counts = { added: 0, left: 0, unchanged: 0, updated: 0 }
+  const seen = new Set<number>()
 
   for (const player of found) {
-    const before = known.get(nameKey(player.name))
-
-    known.delete(nameKey(player.name))
+    const before =
+      (player.wikipediaPage === null ? undefined : byPage.get(nameKey(player.wikipediaPage))) ??
+      byName.get(nameKey(player.name))
 
     if (before === undefined) {
       counts.added++
       await db.insert(players).values({ ...player, season })
-    } else if (
+
+      continue
+    }
+
+    seen.add(before.id)
+
+    if (
+      before.inSquad &&
       before.name === player.name &&
       before.position === player.position &&
-      before.shirtNumber === player.shirtNumber
+      before.shirtNumber === player.shirtNumber &&
+      before.wikipediaPage === player.wikipediaPage
     ) {
       counts.unchanged++
     } else {
       counts.updated++
       await db
         .update(players)
-        .set({ name: player.name, position: player.position, shirtNumber: player.shirtNumber })
+        .set({
+          inSquad: true,
+          leftSquadAt: null,
+          name: player.name,
+          position: player.position,
+          shirtNumber: player.shirtNumber,
+          wikipediaPage: player.wikipediaPage,
+        })
         .where(eq(players.id, before.id))
     }
   }
 
-  const gone = [...known.values()].map((row) => row.id)
-
-  if (gone.length > 0) {
-    counts.removed = gone.length
-    await db.delete(players).where(and(eq(players.season, season), inArray(players.id, gone)))
+  for (const row of rows) {
+    if (row.inSquad && !seen.has(row.id)) {
+      counts.left++
+      await db.update(players).set({ inSquad: false, leftSquadAt: now }).where(eq(players.id, row.id))
+    }
   }
 
   return counts

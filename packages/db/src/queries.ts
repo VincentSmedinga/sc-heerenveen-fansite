@@ -292,7 +292,11 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * time and the shoot-out (null unless there was one), the day, the kick-off in
  * UTC (null while it is unknown) and the date as Wikipedia has it (null when the kick-off is
  * known). `goals` are the scorers of a played match in the order of the clock, both clubs
- * together, and empty when the page names none. The moment the importer saw a result stays
+ * together, and empty when the page names none. `player` is the name as the page shows it. A
+ * goal of one of our players also has `playerId`, and the full name and the search term of
+ * that player in `playerName` and `playerSearchTerm` (all three null for a goal that has no
+ * player in the table `players`: a goal of the opponent, or one that could not be linked). The
+ * player may have left the squad since. The moment the importer saw a result stays
  * internal. Only the season that is asked for is read: the pages show the current season alone.
  */
 export async function listSeasonMatches(db: Database, season: string) {
@@ -325,10 +329,14 @@ export async function listSeasonMatches(db: Database, season: string) {
       ownGoal: matchGoals.ownGoal,
       penalty: matchGoals.penalty,
       player: matchGoals.player,
+      playerId: matchGoals.playerId,
+      playerName: players.name,
+      playerSearchTerm: players.searchTerm,
       stoppageMinutes: matchGoals.stoppageMinutes,
     })
     .from(matchGoals)
     .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+    .leftJoin(players, eq(matchGoals.playerId, players.id))
     .where(eq(matches.season, season))
     .orderBy(asc(matchGoals.minute), asc(sql`coalesce(${matchGoals.stoppageMinutes}, 0)`), asc(matchGoals.id))
 
@@ -342,6 +350,9 @@ export async function listSeasonMatches(db: Database, season: string) {
         ownGoal: goal.ownGoal,
         penalty: goal.penalty,
         player: goal.player,
+        playerId: goal.playerId,
+        playerName: goal.playerName,
+        playerSearchTerm: goal.playerSearchTerm,
         stoppageMinutes: goal.stoppageMinutes,
       })),
   }))
@@ -376,14 +387,14 @@ export function listSeasonStandings(db: Database, season: string) {
  * The players of the squad of a season, such as `2026/27`, for the list on the search page: the
  * name, the position and the surname the search page looks for. The order is the shirt number,
  * and players without one last, by name. Every other column stays internal. This is the one
- * place that decides who is in the list: a condition on who is in the squad now (#333) comes
- * here, in the `where`.
+ * place that decides who is in the list: only the players who are in the squad now. A player
+ * who left stays in the table for his goals, and is not listed.
  */
 export function listSquad(db: Database, season: string) {
   return db
     .select({ name: players.name, position: players.position, searchTerm: players.searchTerm })
     .from(players)
-    .where(eq(players.season, season))
+    .where(and(eq(players.season, season), eq(players.inSquad, true)))
     .orderBy(asc(sql`${players.shirtNumber} is null`), asc(players.shirtNumber), asc(players.name))
 }
 

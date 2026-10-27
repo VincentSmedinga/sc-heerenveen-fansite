@@ -157,6 +157,7 @@ Matches 2026/27 (Wikipedia): healthy
   last warning: none
   next try from: 2026-10-25 23:42:11 UTC
   page: Eredivisie 2026/27 (mannenvoetbal), version Sun, 25 Oct 2026 21:19:08 GMT, read 2026-10-25 22:43:11 UTC
+  goals of ours without a player: 0 of 41
 
 Squad 2026/27 (Wikipedia): healthy
   last success: 2026-10-25 22:43:12 UTC
@@ -637,7 +638,8 @@ Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wik
   Zo'n nieuwe score van strafschoppen is geen verandering van de uitslag en geeft geen waarschuwing; een score die verandert wel.
 - De doelpuntenmakers van een gespeelde wedstrijd bewaart hij in `match_goals`, een rij per doelpunt.
   Wikipedia heeft ze in `goals1` (het eerste team van het sjabloon) en `goals2`: `[[Luca Oyen|Oyen]] {{goal|52}}` voor het eerste team en `{{goal|45}} [[Jacob Trenskow|Trenskow]]` voor het tweede, een speler per regel en de regels gescheiden door `<br />`.
-  De import bewaart de naam zoals die op de pagina staat (de tekst achter de `|` in de link), de minuut, de blessuretijd en of het een eigen doelpunt of een penalty was.
+  De import bewaart de naam zoals die op de pagina staat (de tekst achter de `|` in de link), de pagina waar de link naar wijst (`wikipedia_page`, zoals `Luca Oyen`), de minuut, de blessuretijd en of het een eigen doelpunt of een penalty was.
+  Een speler van ons krijgt daarbij zijn rij in `players` (`player_id`): zie _De doelpunten koppelen aan de spelers_.
   Het sjabloon `goal` heeft de minuten achter elkaar: `{{goal|45+2}}` is minuut 45 met 2 minuten erbij, `{{goal|78||80}}` zijn twee doelpunten van dezelfde speler, en `e.d.` of `pen.` na een minuut hoort bij dat doelpunt, zoals in `{{goal|5|pen.|23|pen.}}`.
   Een eigen doelpunt staat op de pagina bij de club die ervan profiteert (`{{goal|7|e.d.}}`), en zo bewaart de import het ook.
   Een rode kaart (`{{rode kaart}}`) en een gemiste penalty (`{{penmis}}`) in deze velden zijn geen doelpunt en vallen weg.
@@ -650,6 +652,31 @@ Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wik
   `valid_on` is de dag van de laatste competitiewedstrijd die iemand speelde.
 - Een rij van een eerder seizoen verandert of verdwijnt nooit, en de import leest die seizoenen niet.
   In het lopende seizoen vervangt hij de wedstrijden en de stand door wat Wikipedia nu heeft.
+
+### De doelpunten koppelen aan de spelers
+
+Een doelpunt van een speler van ons wijst met `player_id` naar zijn rij in `players`, zodat de topscorers per speler tellen en niet per tekst.
+De regels staan op één plek, `playerLinker` in [`src/link-players.ts`](src/link-players.ts), en de import van de wedstrijden past ze bij elke lezing toe op de spelers van het seizoen, ook op wie de selectie verliet:
+
+1. de pagina van de link van het doelpunt is gelijk aan de `wikipedia_page` van een speler;
+2. anders is de naam in de wedstrijdregel gelijk aan zijn volledige naam;
+3. anders eindigt zijn naam op de getoonde naam (meestal de achternaam, `Oyen` voor `Luca Oyen`), en maar één speler heeft zo'n naam;
+4. anders blijft `player_id` leeg.
+
+Hoofdletters en accenten tellen niet mee.
+Twee spelers met dezelfde achternaam koppelt de import dus alleen als de link van het doelpunt hun pagina noemt, of de volledige naam er staat: zonder link blijft het doelpunt leeg, in plaats van dat hij gokt.
+Alleen een doelpunt van een speler van ons wordt gekoppeld: een doelpunt van sc Heerenveen dat geen eigen doelpunt is, en een eigen doelpunt dat bij de tegenstander staat.
+Een doelpunt van de tegenstander en een eigen doelpunt van een tegenstander krijgen geen speler, want de spelers van andere clubs staan niet in `players`.
+
+Een doelpunt van ons zonder speler is geen fout: de wedstrijd en zijn doelpunten blijven bewaard.
+De import telt ze, en schrijft per lezing een waarschuwing met het aantal en de namen zoals de pagina's ze tonen, als de selectie al gelezen is:
+
+```text
+Matches 2026/27: warning, 3 goals of ours have no player in the squad table: Oyen, Vente
+```
+
+`pnpm run import:status` toont hetzelfde aantal onder de wedstrijden: `goals of ours without a player: 3 of 41 (Oyen, Vente)`.
+De import van de wedstrijden schrijft de doelpunten van een wedstrijd opnieuw als de koppeling verandert, dus een doelpunt krijgt zijn speler bij de eerstvolgende lezing nadat de selectie hem heeft.
 
 ### De controles
 
@@ -757,14 +784,17 @@ Een nummer buiten 1 tot en met 99 is een fout.
 De tweede cel is de nationaliteit en blijft weg, net als de cellen na de naam (contract en statistieken).
 De naam komt uit de derde cel, zonder attribuut als `align="left"`:
 
-- `[[Naam]]` geeft `Naam`, en `[[Pagina|Naam]]` ook;
+- `[[Naam]]` geeft `Naam`, en `[[Pagina|Naam]]` de tekst achter de `|`;
 - komt de naam uit een paginatitel met een toevoeging, zoals `[[Dylan Vente (voetballer)]]`, dan laat de import die toevoeging weg;
 - een naam zonder link kan ook.
 
+De pagina waar de link naar wijst, bewaart de import ook, met de toevoeging nog erbij (`Dylan Vente (voetballer)`): spaties voor streepjes, een hoofdletter vooraan en zonder `#kopje`.
+Een naam zonder link heeft geen pagina.
+
 ### Wat de import bewaart
 
-Van een speler bewaart hij het seizoen, de naam zoals de tabel hem toont, de positie, het rugnummer (mag ontbreken) en de zoekterm.
-Nationaliteit, leeftijd, contract, statistieken en foto's bewaart hij niet, en vlaggen en links naar pagina's van spelers ook niet.
+Van een speler bewaart hij het seizoen, de naam zoals de tabel hem toont, de positie, het rugnummer (mag ontbreken), de zoekterm en de pagina op Wikipedia (`wikipedia_page`, mag ontbreken).
+Nationaliteit, leeftijd, contract, statistieken en foto's bewaart hij niet, en vlaggen ook niet.
 De zoekterm is de naam zonder de eerste voornaam, uit `searchTerm` in `src/read-squad.ts`: `Bernt Klaverboer` geeft `Klaverboer` en `Joost van Aken` geeft `van Aken`.
 Een naam van één woord blijft zoals hij is.
 Een voornaam met een streepje, zoals `Jan-Willem`, is één woord.
@@ -773,10 +803,16 @@ Een speler met twee voornamen, zoals `Jan Paul van Hecke`, geeft `Paul van Hecke
 De import zet de zoekterm alleen bij een nieuwe speler.
 Een speler die er al is, houdt zijn zoekterm, dus een verbetering met de hand blijft staan.
 
-Een goede lezing vervangt de selectie van het lopende seizoen helemaal: een speler die niet meer in de tabel staat, verdwijnt.
-Een nieuwe speler komt erbij, en een nieuw rugnummer of een andere positie wordt overgenomen.
+Een goede lezing werkt de selectie van het lopende seizoen bij en vervangt haar niet, want de doelpunten verwijzen naar de `id` van een speler:
+
+- een speler uit de tabel houdt zijn rij en zijn `id`; de import zoekt hem op zijn pagina, en anders op zijn naam;
+- een nieuwe speler krijgt een rij, en een nieuw rugnummer, een andere positie, naam of pagina wordt overgenomen;
+- een speler die niet meer in de tabel staat, blijft staan met `in_squad` onwaar en het moment in `left_squad_at`, met zijn doelpunten, en staat niet meer in de lijst op de zoekpagina;
+- komt hij terug, dan staat hij weer in de selectie met dezelfde `id`.
+
 De import houdt namen uit elkaar zoals de database dat doet: zonder accenten en hoofdletters.
 Rijen van een eerder seizoen blijven bewaard en worden niet getoond.
+De eerste goede lezing van een seizoen haalt eerst de verzonnen selectie van de seed weg.
 
 ### De controles
 
@@ -787,7 +823,7 @@ De controles staan in `checkSquad` in [`src/check-wikipedia.ts`](src/check-wikip
 - er staan 18 tot en met 45 spelers in;
 - er zijn minstens twee doelmannen;
 - elke positie heeft een speler;
-- geen naam komt twee keer voor.
+- geen naam en geen pagina komt twee keer voor.
 
 Faalt een controle, of is de opbouw veranderd, dan verandert er niets in de database en blijft de laatste goede selectie staan.
 De import schrijft een waarschuwing met de reden, en de wedstrijden en de feeds gaan gewoon door:
@@ -799,7 +835,7 @@ Squad 2026/27: warning, nothing changed and the last good copy stays: Sc Heerenv
 Een goede lezing schrijft één regel:
 
 ```text
-Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 removed
+Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad
 ```
 
 ### Hoogstens één keer per uur
@@ -866,4 +902,5 @@ De tests van het commando zelf (`src/import.test.ts` en `src/bundle.test.ts`) ze
 De tests van de selectie lezen [`src/fixtures/wikipedia-squad.wiki`](src/fixtures/wikipedia-squad.wiki): de tabel "Spelers" van de pagina van het seizoen 2026/27, gelezen op 26 oktober 2026, met bovenaan de herkomst en de licentie (CC BY-SA 4.0).
 De tabel staat er zoals de pagina haar heeft, in beide schrijfwijzen, met 25 spelers, onder wie een speler met een streepje in plaats van een rugnummer.
 `src/read-squad.test.ts` leest hem zonder database en toetst de zoekterm op voorbeelden met voorvoegsels, een streepje en een naam van één woord.
-`src/check-wikipedia.test.ts` toetst de controles, en `src/import-squad.test.ts` draait op een echte MariaDB met een eigen webserver en laat zien dat een falende controle de database ongemoeid laat.
+`src/check-wikipedia.test.ts` toetst de controles, en `src/import-squad.test.ts` draait op een echte MariaDB met een eigen webserver en laat zien dat een falende controle de database ongemoeid laat, dat een speler zijn `id` houdt, dat een vertrokken speler blijft staan en dat een terugkerende speler weer in de selectie komt.
+`src/link-players.test.ts` toetst de regels van de koppeling zonder database, ook voor twee spelers met dezelfde achternaam, en `src/import-matches.test.ts` laat zien dat de doelpunten van een wedstrijd hun speler krijgen.

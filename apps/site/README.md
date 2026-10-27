@@ -212,6 +212,8 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 - **Doelpuntenmakers:** alle spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten.
   `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
   Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
+  Een doelpunt dat de importer aan een speler koppelde (`player_id`) telt voor die speler en toont zijn volledige naam uit `players`, ook als hij de selectie verliet; twee spelers met dezelfde achternaam zijn dus twee rijen.
+  Een doelpunt zonder speler telt per naam zoals de pagina hem toont, als een rij van zichzelf, zodat er geen doelpunt verloren gaat.
   Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet.
   Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
   Direct onder de kop, boven de tabel, staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord": dezelfde plek en stijl als bij de nul gehouden.
@@ -289,7 +291,7 @@ De lijst met spelers staat in de zijbalk, na de resultaten in de bron, dus op ee
 Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam is een link naar `/zoeken?q=<achternaam>`.
 Zijn er geen spelers, dan laat de pagina de lijst weg.
 Onder de lijst staat de bronvermelding van de selectie (`WikipediaCredit`), met de pagina uit `wikipedia_pages` met `kind` `squad` (`findSquadPage`).
-`listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 komt als één voorwaarde in de `where` van die vraag.
+`listSquad` is de ene plek die bepaalt wie in de lijst staat, en geeft alleen de spelers die in de selectie staan (`in_squad`): een speler die vertrok, blijft in `players` voor zijn doelpunten.
 De server bewaart de lijst vijf minuten, een zoekopdracht niet.
 
 `pnpm test:a11y` toetst `/zoeken` zonder vraag, met een vraag, met meer dan tien resultaten, zonder resultaten en met een vraag die niet mag.

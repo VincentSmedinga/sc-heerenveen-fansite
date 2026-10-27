@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { execFile } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
@@ -605,7 +605,10 @@ describe('the made-up matches', () => {
     const perPlayer = new Map<string, number>()
 
     for (const goal of goals.filter((item) => item.ours && !item.ownGoal)) {
-      perPlayer.set(goal.player, (perPlayer.get(goal.player) ?? 0) + 1)
+      // Two players can have the same surname: the page is what tells them apart.
+      const key = goal.wikipediaPage ?? goal.player
+
+      perPlayer.set(key, (perPlayer.get(key) ?? 0) + 1)
     }
 
     const counts = [...perPlayer.values()]
@@ -614,6 +617,92 @@ describe('the made-up matches', () => {
     expect(new Set(counts).size).toBeLessThan(counts.length)
     expect(counts.filter((count) => count === Math.max(...counts))).toHaveLength(1)
     expect(counts.filter((count) => count === 2).length).toBeGreaterThanOrEqual(2)
+  })
+
+  describe('the links between the made-up goals and the made-up players', () => {
+    const linked = async () =>
+      (
+        await database.db
+          .select({ goal: matchGoals, inSquad: players.inSquad, name: players.name })
+          .from(matchGoals)
+          .leftJoin(players, eq(matchGoals.playerId, players.id))
+          .orderBy(asc(matchGoals.id))
+      ).map(({ goal, inSquad, name }) => ({
+        inSquad,
+        name,
+        ours: goal.ours,
+        ownGoal: goal.ownGoal,
+        page: goal.wikipediaPage,
+        player: goal.player,
+      }))
+
+    const bothSeeds = async (first: 'matches' | 'squad') => {
+      await database.pool.query('DELETE FROM players')
+      await database.pool.query('DELETE FROM matches')
+      await database.pool.query('DELETE FROM standings')
+      await database.pool.query('DELETE FROM wikipedia_pages')
+
+      if (first === 'matches') {
+        await seedMatches(database.db, now)
+        await seedSquad(database.db, now)
+      } else {
+        await seedSquad(database.db, now)
+        await seedMatches(database.db, now)
+      }
+    }
+
+    it.each(['matches', 'squad'] as const)(
+      'links every goal of a player of ours when the %s are seeded first',
+      async (first) => {
+        await bothSeeds(first)
+
+        const goals = await linked()
+        const ofOurPlayers = goals.filter((goal) => goal.ours !== goal.ownGoal)
+
+        expect(ofOurPlayers.length).toBeGreaterThanOrEqual(12)
+        expect(ofOurPlayers.every((goal) => goal.name === goal.page)).toBe(true)
+        // The opponent's goals and the own goal of an opponent have no page and no player.
+        expect(
+          goals.filter((goal) => goal.ours === goal.ownGoal).every((goal) => goal.name === null && goal.page === null),
+        ).toBe(true)
+      },
+    )
+
+    it('has a goal of a player who has left the squad, who is no longer in the squad', async () => {
+      await bothSeeds('matches')
+
+      const left = (await linked()).filter((goal) => goal.inSquad === false)
+
+      expect(left).toEqual([
+        {
+          inSquad: false,
+          name: 'Sander Monster',
+          ours: true,
+          ownGoal: false,
+          page: 'Sander Monster',
+          player: 'Monster',
+        },
+      ])
+      expect(madeUpSquad(now).filter((player) => player.inSquad === false)).toMatchObject([
+        { leftSquadAt: new Date('2026-10-22T12:00:00Z'), name: 'Sander Monster' },
+      ])
+    })
+
+    it('has two players with the same surname, whose goals are told apart by the page', async () => {
+      await bothSeeds('matches')
+
+      const testvoort = (await linked()).filter((goal) => goal.player === 'Testvoort')
+
+      expect(testvoort.map((goal) => goal.name)).toEqual(['Joris Testvoort', 'Bas Testvoort'])
+    })
+
+    it('keeps every player of the squad with a page of his own, and the surname twice in it', () => {
+      const squad = madeUpSquad(now)
+
+      expect(new Set(squad.map((player) => player.wikipediaPage)).size).toBe(squad.length)
+      expect(squad.every((player) => player.wikipediaPage === player.name)).toBe(true)
+      expect(squad.filter((player) => player.searchTerm === 'Testvoort')).toHaveLength(2)
+    })
   })
 
   it('puts the pages the made-up matches credit in too, and moves on when they are already there', async () => {

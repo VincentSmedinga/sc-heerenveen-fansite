@@ -193,8 +193,28 @@ describe('the page /wedstrijden', () => {
     const flagged: PublicMatch = {
       ...matchData.matches[3]!,
       goals: [
-        { minute: 7, ours: false, ownGoal: true, penalty: false, player: 'Klaverboer', stoppageMinutes: null },
-        { minute: 90, ours: true, ownGoal: false, penalty: true, player: 'Vente', stoppageMinutes: 5 },
+        {
+          minute: 7,
+          ours: false,
+          ownGoal: true,
+          penalty: false,
+          player: 'Klaverboer',
+          playerId: null,
+          playerName: null,
+          playerSearchTerm: null,
+          stoppageMinutes: null,
+        },
+        {
+          minute: 90,
+          ours: true,
+          ownGoal: false,
+          penalty: true,
+          player: 'Vente',
+          playerId: null,
+          playerName: null,
+          playerSearchTerm: null,
+          stoppageMinutes: 5,
+        },
       ],
       goalsAgainst: 1,
       goalsFor: 1,
@@ -260,6 +280,9 @@ describe('the page /wedstrijden', () => {
                 ownGoal: false,
                 penalty: false,
                 player: '<img src=x onerror=alert(1)>',
+                playerId: null,
+                playerName: null,
+                playerSearchTerm: null,
                 stoppageMinutes: null,
               },
             ],
@@ -595,6 +618,42 @@ describe('the page /wedstrijden', () => {
       ])
     })
 
+    it('shows the full name of a player the goals are linked to, and two players with the same surname as two rows', async () => {
+      const played = matchData.matches.find((item) => item.status === 'played')!
+      const goal = (id: number, name: string, minute: number) => ({
+        minute,
+        ours: true,
+        ownGoal: false,
+        penalty: false,
+        player: 'Jansen',
+        playerId: id,
+        playerName: name,
+        playerSearchTerm: 'Jansen',
+        stoppageMinutes: null,
+      })
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [
+          {
+            ...played,
+            goals: [goal(1, 'Bram Jansen', 10), goal(2, 'Kees Jansen', 20), goal(2, 'Kees Jansen', 30)],
+            goalsAgainst: 0,
+            goalsFor: 3,
+          },
+        ],
+      })
+
+      const rows = [
+        ...(await topScorers()).matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">([^<]+)<\/th><td[^>]*>(\d+)/g),
+      ]
+
+      expect(rows.map(([, position, player, goals]) => [position, player, goals])).toEqual([
+        ['1', 'Kees Jansen', '2'],
+        ['2', 'Bram Jansen', '1'],
+      ])
+    })
+
     it('shows a bar next to the goals of every player, hidden from a screen reader, the top scorer filling it', async () => {
       const card = await topScorers()
 
@@ -640,6 +699,9 @@ describe('the page /wedstrijden', () => {
         ownGoal: false,
         penalty: false,
         player: `Speler ${String.fromCharCode(65 + index)}`,
+        playerId: null,
+        playerName: null,
+        playerSearchTerm: null,
         stoppageMinutes: null,
       }))
       const played = matchData.matches.find((item) => item.status === 'played')!

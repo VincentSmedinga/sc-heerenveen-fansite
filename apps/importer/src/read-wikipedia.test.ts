@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { checkGoals } from './check-wikipedia.ts'
-import { pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-wikipedia.ts'
+import { linkedPage, pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-wikipedia.ts'
 
 const programme = readFileSync(new URL('./fixtures/wikipedia-programme.wiki', import.meta.url), 'utf8')
 const standingsPage = readFileSync(new URL('./fixtures/wikipedia-standings.wiki', import.meta.url), 'utf8')
@@ -71,7 +71,17 @@ describe('the programme and the results', () => {
       competition: 'Eredivisie',
       dateText: null,
       extraTime: false,
-      goals: [{ minute: 52, ours: true, ownGoal: false, penalty: false, player: 'Oyen', stoppageMinutes: null }],
+      goals: [
+        {
+          minute: 52,
+          ours: true,
+          ownGoal: false,
+          penalty: false,
+          player: 'Oyen',
+          playerPage: 'Luca Oyen',
+          stoppageMinutes: null,
+        },
+      ],
       goalsAgainst: 0,
       goalsFor: 1,
       goalsProblem: null,
@@ -396,8 +406,24 @@ describe('the goal scorers', () => {
     const match = goalsOf('[[Luca Oyen|Oyen]] {{goal|52}}', '{{goal|45}} [[Jacob Trenskow|Trenskow]]', '1 – 1')
 
     expect(match.goals).toEqual([
-      { minute: 45, ours: false, ownGoal: false, penalty: false, player: 'Trenskow', stoppageMinutes: null },
-      { minute: 52, ours: true, ownGoal: false, penalty: false, player: 'Oyen', stoppageMinutes: null },
+      {
+        minute: 45,
+        ours: false,
+        ownGoal: false,
+        penalty: false,
+        player: 'Trenskow',
+        playerPage: 'Jacob Trenskow',
+        stoppageMinutes: null,
+      },
+      {
+        minute: 52,
+        ours: true,
+        ownGoal: false,
+        penalty: false,
+        player: 'Oyen',
+        playerPage: 'Luca Oyen',
+        stoppageMinutes: null,
+      },
     ])
     expect(match.goalsProblem).toBeNull()
   })
@@ -525,10 +551,42 @@ describe('the goal scorers', () => {
     const round = (name: string) => [...league.matches, ...cup.matches].find((match) => match.round === name)
 
     expect(round('Speelronde 2')?.goals).toEqual([
-      { minute: 7, ours: false, ownGoal: true, penalty: false, player: 'Klaverboer', stoppageMinutes: null },
-      { minute: 33, ours: false, ownGoal: false, penalty: false, player: 'Ouazane', stoppageMinutes: null },
-      { minute: 45, ours: true, ownGoal: false, penalty: false, player: 'Trenskow', stoppageMinutes: null },
-      { minute: 82, ours: true, ownGoal: false, penalty: false, player: 'Rivera', stoppageMinutes: null },
+      {
+        minute: 7,
+        ours: false,
+        ownGoal: true,
+        penalty: false,
+        player: 'Klaverboer',
+        playerPage: 'Bernt Klaverboer',
+        stoppageMinutes: null,
+      },
+      {
+        minute: 33,
+        ours: false,
+        ownGoal: false,
+        penalty: false,
+        player: 'Ouazane',
+        playerPage: 'Abdellah Ouazane',
+        stoppageMinutes: null,
+      },
+      {
+        minute: 45,
+        ours: true,
+        ownGoal: false,
+        penalty: false,
+        player: 'Trenskow',
+        playerPage: 'Jacob Trenskow',
+        stoppageMinutes: null,
+      },
+      {
+        minute: 82,
+        ours: true,
+        ownGoal: false,
+        penalty: false,
+        player: 'Rivera',
+        playerPage: 'Maxence Rivera',
+        stoppageMinutes: null,
+      },
     ])
     expect(round('Speelronde 9')?.goals?.[0]).toMatchObject({ minute: 11, penalty: true, player: 'Vente' })
     expect(round('Speelronde 10')?.goals).toHaveLength(5)
@@ -559,5 +617,44 @@ describe('the goal scorers', () => {
     for (const match of [...league.matches, ...cup.matches].filter((match) => match.status === 'played')) {
       expect(checkGoals(match)).toBeUndefined()
     }
+  })
+})
+
+describe('the page a link points to', () => {
+  it.each([
+    ['[[Luca Oyen|Oyen]]', 'Luca Oyen'],
+    ['[[Luca Oyen]]', 'Luca Oyen'],
+    ['  [[Pim Verbeek (voetballer, 1999)|Verbeek]]', 'Pim Verbeek (voetballer, 1999)'],
+    ['[[luca_Oyen|Oyen]]', 'Luca Oyen'],
+    ['[[Luca   Oyen#Carrière|Oyen]]', 'Luca Oyen'],
+    ['{{goal|52}} [[Luca Oyen|Oyen]]', 'Luca Oyen'],
+    ['[[Roberts Uldriķis|Roberts Uldrikis]]', 'Roberts Uldriķis'],
+  ])('is %s for %s', (value, page) => {
+    expect(linkedPage(value)).toBe(page)
+  })
+
+  it.each([
+    ['Oyen'],
+    [''],
+    ['[[|Oyen]]'],
+    ['[[#Kop|Oyen]]'],
+    ['[[Bestand:Soccerball.svg|10px]]'],
+    ['[[Categorie:Spelers]]'],
+  ])('is nothing for %j', (value) => {
+    expect(linkedPage(value)).toBeNull()
+  })
+
+  it('is nothing for a title longer than the database keeps', () => {
+    expect(linkedPage(`[[${'a'.repeat(256)}|b]]`)).toBeNull()
+    expect(linkedPage(`[[${'a'.repeat(255)}|b]]`)).toBe(`A${'a'.repeat(254)}`)
+  })
+
+  it('is on a goal when its name has a link, and nothing when it has none', () => {
+    const pageOf = (goals1: string) =>
+      matchOf(leagueWith(box({ goals1, goals2: '', score: '1 – 0' })), 'Speelronde 12')?.goals?.[0]?.playerPage
+
+    expect(pageOf('Oyen {{goal|52}}')).toBeNull()
+    expect(pageOf('[[Luca Oyen|Oyen]] {{goal|52}}')).toBe('Luca Oyen')
+    expect(pageOf('[[Pim Verbeek (voetballer, 1999)|Verbeek]] {{goal|52}}')).toBe('Pim Verbeek (voetballer, 1999)')
   })
 })

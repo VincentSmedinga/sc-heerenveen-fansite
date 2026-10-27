@@ -312,18 +312,24 @@ Vijf CHECK-constraints houden de rijen heel:
 `match_goals` heeft een rij per doelpunt van een gespeelde wedstrijd.
 De rijen horen bij hun wedstrijd (`match_id`) en verdwijnen met haar.
 
-| Kolom              | Betekenis                                                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------------ |
-| `match_id`         | De wedstrijd                                                                                     |
-| `ours`             | Of het doelpunt voor sc Heerenveen is (`true`) of voor de tegenstander (`false`)                 |
-| `minute`           | De minuut op de klok: 45 bij "45+1"                                                              |
-| `stoppage_minutes` | De minuten blessuretijd erbij: 1 bij "45+1"; leeg in de gewone speeltijd                         |
-| `player`           | De naam zoals Wikipedia die toont, zoals `Van Bergen`                                            |
-| `own_goal`         | Of het een eigen doelpunt is; het telt voor de club die ervan profiteert, dus `ours` is die club |
-| `penalty`          | Of het een penalty was                                                                           |
+| Kolom              | Betekenis                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| `match_id`         | De wedstrijd                                                                                      |
+| `ours`             | Of het doelpunt voor sc Heerenveen is (`true`) of voor de tegenstander (`false`)                  |
+| `minute`           | De minuut op de klok: 45 bij "45+1"                                                               |
+| `stoppage_minutes` | De minuten blessuretijd erbij: 1 bij "45+1"; leeg in de gewone speeltijd                          |
+| `player`           | De naam zoals Wikipedia die toont, zoals `Van Bergen`                                             |
+| `player_id`        | De speler van ons in `players` die het doelpunt maakte; leeg als er geen is (zie hieronder)       |
+| `wikipedia_page`   | De pagina waar de naam naar linkt, zoals `Luca Oyen` voor `[[Luca Oyen\|Oyen]]`; leeg zonder link |
+| `own_goal`         | Of het een eigen doelpunt is; het telt voor de club die ervan profiteert, dus `ours` is die club  |
+| `penalty`          | Of het een penalty was                                                                            |
 
 De goals van een club zijn even veel als haar `goals_for` of `goals_against`, maar de database dwingt dat niet af: de import controleert het en bewaart bij een verschil geen doelpuntenmakers (zie [de README van de importer](../../apps/importer/README.md)).
 Een CHECK-constraint (`match_goals_not_own_goal_and_penalty`) houdt een doelpunt dat beide is buiten de deur.
+`player_id` verwijst naar `players.id`, met `ON DELETE SET NULL`: wie een speler uit de tabel haalt, houdt zijn doelpunten, zonder koppeling.
+Alleen een doelpunt van een speler van ons heeft een `player_id`: een doelpunt van sc Heerenveen dat geen eigen doelpunt is, en een eigen doelpunt dat bij de tegenstander staat.
+Een doelpunt van een speler van de tegenstander, en een eigen doelpunt van een tegenstander, hebben er geen, en een doelpunt dat de importer niet kan koppelen ook niet.
+De importer legt de koppeling (zie [de README van de importer](../../apps/importer/README.md)).
 De volgorde van `id` is de volgorde van de klok, want de import schrijft de rijen zo; `listSeasonMatches` sorteert op minuut, blessuretijd en `id`.
 
 `standings` heeft een rij per club van de Eredivisie.
@@ -345,23 +351,27 @@ Een pagina kan daarmee de bron noemen.
 Het zijn dezelfde velden als bij een feed.
 
 `players` heeft een rij per speler van de selectie van sc Heerenveen 1 (mannen) en seizoen, van de Nederlandse Wikipedia.
-De importer vervangt de selectie van het lopende seizoen bij elke goede lezing en laat die van een eerder seizoen staan.
-Een naam komt in een seizoen één keer voor.
+De importer werkt de selectie van het lopende seizoen bij elke goede lezing bij en laat die van een eerder seizoen staan.
+Hij vervangt haar niet, want de doelpunten in `match_goals` verwijzen naar de `id` van een speler: die blijft gelijk, ook als de speler de selectie verlaat.
+Een naam komt in een seizoen één keer voor, en een pagina ook.
 
-| Kolom          | Betekenis                                                                       |
-| -------------- | ------------------------------------------------------------------------------- |
-| `season`       | Het seizoen, zoals `2026/27`                                                    |
-| `name`         | De naam zoals de tabel hem toont, zoals `Joost van Aken`                        |
-| `position`     | `doelman`, `verdediger`, `middenvelder` of `aanvaller`                          |
-| `shirt_number` | Het rugnummer, 1 tot en met 99; leeg bij een speler zonder nummer               |
-| `search_term`  | De naam zonder de eerste voornaam, zoals `van Aken`: waarop de zoekpagina zoekt |
+| Kolom            | Betekenis                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- |
+| `season`         | Het seizoen, zoals `2026/27`                                                                                |
+| `name`           | De naam zoals de tabel hem toont, zoals `Joost van Aken`                                                    |
+| `position`       | `doelman`, `verdediger`, `middenvelder` of `aanvaller`                                                      |
+| `shirt_number`   | Het rugnummer, 1 tot en met 99; leeg bij een speler zonder nummer                                           |
+| `search_term`    | De naam zonder de eerste voornaam, zoals `van Aken`: waarop de zoekpagina zoekt                             |
+| `wikipedia_page` | De pagina waar de tabel naar linkt, zoals `Luca Oyen` of `Pim Verbeek (voetballer, 1999)`; leeg zonder link |
+| `in_squad`       | Of de speler nu in de selectie staat; een speler die de tabel verliet, blijft staan met `false`             |
+| `left_squad_at`  | Het moment waarop hij de selectie verliet (UTC); leeg zolang hij erin staat                                 |
 
 Er staat niets anders in: geen nationaliteit, leeftijd, contract, statistieken of foto.
 De zoekterm is een eigen kolom, zodat je hem voor één speler kunt verbeteren: de importer zet hem alleen bij een nieuwe speler.
 
 De lijst met spelers op `/zoeken` komt uit `listSquad` in `queries.ts`, de ene plek die bepaalt wie erin staat.
-Alleen de rijen van het lopende seizoen horen erin.
-Komt er een vlag `in_squad` (#333), zodat spelers die de selectie verlieten in de tabel blijven, dan is dat één voorwaarde in de `where` van `listSquad`.
+Alleen de rijen van het lopende seizoen horen erin, en alleen de spelers die in de selectie staan (`in_squad`): een speler die vertrok, blijft in de tabel voor zijn doelpunten en staat niet in de lijst.
+De zoekpagina met de lijst van spelers (#107) moet dus `listSquad` gebruiken en geen eigen vraag naar `players` doen.
 De pagina van de selectie geeft `findSquadPage`, voor de bronvermelding onder de lijst.
 
 `squad_imports` heeft per seizoen de gezondheid van de import van de selectie, met dezelfde velden als `match_imports`.
@@ -369,7 +379,9 @@ De pagina van de selectie geeft `findSquadPage`, voor de bronvermelding onder de
 De seed zet verzonnen wedstrijden, een verzonnen stand en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
 De pagina's staan erbij, zodat de site de bronvermelding laat zien zoals met echte gegevens.
 Ook een verzonnen selectie met verzonnen namen komt erin (`madeUpSquad` en `seedSquad`), alleen als het lopende seizoen nog geen spelers heeft: met alle posities, een naam met een voorvoegsel, een naam van één woord en een speler zonder rugnummer.
-De eerste echte import vervangt ze, en een database met echte wedstrijden raakt de seed niet aan.
+De goede lezing van de selectie vervangt de verzonnen selectie bij de eerste keer dat hij slaagt, en de lezing van de wedstrijden vervangt de verzonnen wedstrijden.
+Een database met echte wedstrijden raakt de seed niet aan.
+De verzonnen doelpunten verwijzen naar verzonnen spelers (`madeUpGoals` en `madeUpSquad`), met een speler die de selectie verliet en twee spelers met dezelfde achternaam (Testvoort), zodat de pagina's en de controles de gevallen van de koppeling hebben.
 
 ## Tijden
 

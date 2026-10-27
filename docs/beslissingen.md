@@ -3264,7 +3264,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De lijst staat na de resultaten in de bron, dus onder de resultaten op een smal scherm, en ze is van `players` van het lopende seizoen (`listSquad`), per positie.
   Elke naam is een gewone link naar `/zoeken?q=<achternaam>`, met de zoekterm uit de tabel.
   De bronvermelding onder de lijst is `WikipediaCredit`, met het woord `selectiegegevens` voor onze eigen gegevens (eigenschap `data`), want de standaardzin noemt de wedstrijdgegevens.
-  `listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 komt als één voorwaarde in de `where` van die vraag.
+  `listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 is één voorwaarde in de `where` van die vraag (zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_).
 - **Alternatieven:** een item in het hoofdmenu (zoals het issue voorstelde: zichtbaarder, maar het menu breekt op een telefoon al af en de header krijgt een nieuw ontwerp); een zoekveld in de kop op elke pagina (altijd een stap dichtbij, maar breed en het vraagt een ontwerp van de kop); de lijst altijd boven de resultaten (prominent, maar op een telefoon schuiven de resultaten naar beneden).
 
 ### De zoekpagina laat woorden van één teken niet toe, toont hoogstens 100 resultaten en staat niet in de sitemap
@@ -4237,6 +4237,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een lijst in het beheer die een redacteur bijhoudt (er is geen redactieproces voor, en hij is na elke transfer verouderd).
   De namen uit de doelpuntenmakers (#297) halen (alleen spelers die scoorden, dus onvolledig).
   De site van de club (geen toestemming, zie #16).
+- **Later:** we bewaren sinds 27 oktober 2026 ook de pagina van de speler op Wikipedia en of hij nog in de selectie staat; zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_.
 
 ### De zoekterm is de achternaam, als eigen kolom
 
@@ -4262,6 +4263,48 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een zoekterm die de import elk uur terugzet, maakt de eigen kolom zinloos: een verbetering voor één speler, zoals "Jan Paul van Hecke", blijft zo staan tot hij vertrekt.
 - **Alternatieven:** de gezondheid van de selectie in `match_imports` zetten (een kolom of rij erbij voor iets wat een eigen uur en een eigen uitkomst heeft).
   De zoekterm bij elke lezing opnieuw afleiden (de eigen kolom heeft dan geen nut).
+- **Later:** een goede lezing vervangt de selectie sinds 26 oktober 2026 niet meer: een speler die niet meer in de tabel staat, verdwijnt niet maar blijft staan als "niet meer in de selectie", met zijn `id` en zijn doelpunten; zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_.
+
+### Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** een doelpunt van een speler van ons verwijst met `player_id` naar zijn rij in `players`.
+  De rij houdt zijn `id` bij elke import.
+  Een speler die uit de selectie verdwijnt, blijft staan als "niet meer in de selectie".
+- **Waarom:** een naam in tekst koppelt twee spelers met dezelfde achternaam aan elkaar, en een achternaam komt niet overeen met de volledige naam in de selectie.
+  Een verwijzing naar de rij maakt de topscorers juist, en geeft latere functies (een pagina per speler, statistieken) een vaste plek.
+  De selectie moet daarvoor worden bijgewerkt en niet vervangen, anders breekt elke nieuwe import de verwijzingen.
+- **Hoe:** `players` heeft `in_squad` en `left_squad_at`, en `match_goals` heeft `player_id` (`ON DELETE SET NULL`) en `wikipedia_page`.
+  De import van de selectie zoekt een speler op zijn pagina en anders op zijn naam, zonder accenten en hoofdletters, en past hem aan: een nieuwe speler komt erbij, naam, positie, rugnummer en pagina worden bijgewerkt, en wie terugkomt staat weer in de selectie.
+  Wie uit de tabel verdwijnt, krijgt `in_squad` onwaar en het moment in `left_squad_at`, en blijft staan met zijn doelpunten.
+  `listSquad` toont alleen de spelers die in de selectie staan, dus ook de lijst van #107.
+  De kaart met doelpuntenmakers telt een gekoppeld doelpunt per `id` en toont de volledige naam, een doelpunt zonder speler per naam als een eigen rij.
+- **Alternatieven:** doorgaan met namen in tekst en per naam tellen (twee spelers met dezelfde achternaam tellen samen); de verwijzing maken met de zoekterm of de achternaam (breekt bij dezelfde achternaam); de selectie bij elke lezing vervangen en de doelpunten opnieuw koppelen (de `id`'s veranderen, dus een link of een pagina per speler breekt later).
+
+### De Wikipedia-pagina van een speler is de sleutel, de naam is de reserve
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de importer koppelt eerst op de pagina van de link, dan op de volledige naam, dan op een achternaam die maar één speler heeft, en laat anders `player_id` leeg.
+- **Waarom:** de pagina is wat Wikipedia zelf in de selectie en in de doelpunten gebruikt, en is uniek per speler.
+  De volledige naam en de achternaam vangen schrijfwijzen op die de pagina niet geven, zonder een gok bij twee spelers met dezelfde achternaam.
+- **Hoe:** de regels staan op één plek, `playerLinker` in `apps/importer/src/link-players.ts`, en de import van de wedstrijden past ze toe bij elke lezing.
+  Alleen een doelpunt van een speler van ons krijgt een koppeling: een doelpunt van sc Heerenveen dat geen eigen doelpunt is, en een eigen doelpunt dat bij de tegenstander staat.
+  De spelers van andere clubs staan niet in `players`.
+  Bij de achternaam tellen ook spelers die niet meer in de selectie staan, zodat een vertrokken speler met dezelfde achternaam een gok niet verkeerd laat uitvallen.
+  Een doelpunt van ons dat niet te koppelen is, houdt de wedstrijd bewaard en geeft een waarschuwing met het aantal en de namen, zodra de selectie is gelezen.
+  `pnpm run import:status` toont hetzelfde aantal.
+  Zo'n doelpunt krijgt zijn speler bij een latere lezing, want de import van de wedstrijden schrijft de doelpunten van een wedstrijd opnieuw als een koppeling verandert.
+- **Alternatieven:** alleen op de achternaam koppelen (fout bij dezelfde achternaam); een koppeling met de hand in het beheer (er is geen redactieproces voor, en na elke transfer verouderd).
+
+### De eerste goede lezing van de selectie vervangt de verzonnen selectie
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de eerste goede lezing van de selectie van een seizoen haalt eerst de spelers van dat seizoen weg, en zet dan de spelers van Wikipedia erin.
+  Daarna werkt de import de selectie alleen nog bij.
+- **Waarom:** de seed zet een verzonnen selectie, zoals bij de verzonnen wedstrijden.
+  Zonder deze regel bleven die spelers voor altijd staan als "niet meer in de selectie", en kon een doelpunt van een echte speler op een verzonnen speler met dezelfde achternaam vallen.
+  De import herkent de eerste goede lezing eraan dat `squad_imports` nog geen geslaagde lezing heeft.
+- **Alternatieven:** de verzonnen spelers laten staan (rommel in de tabel en kans op een verkeerde koppeling); de verzonnen spelers een eigen seizoen geven (de pagina's tonen dan niets in het lopende seizoen, zoals bij de verzonnen wedstrijden).
 
 ## Redactie
 
@@ -5821,6 +5864,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de Eredivisie en de beker apart tonen (nauwkeuriger, maar twee lijsten en veel lege rijen in het begin); alleen de beste drie (te weinig voor een selectie); een nieuwe bron met statistieken van spelers (#39); de CSS van de balk kopiëren naar het nieuwe component (twee plekken om gelijk te houden).
 - **Later:** de kaart toont sinds 26 oktober 2026 alle doelpuntenmakers van het seizoen en niet meer de beste vijf met gelijkstaanden; zie _De kaart met topscorers toont alle doelpuntenmakers_.
 - **Later:** de kaart heet sinds 26 oktober 2026 "Doelpuntenmakers" en niet meer "Topscorers", en het aantal spelers staat onder de kop en niet meer onder de tabel; zie _De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop_.
+- **Later:** de kaart telt sinds 27 oktober 2026 per speler (`player_id`) en toont zijn volledige naam, dus twee spelers met dezelfde achternaam zijn twee rijen; een doelpunt zonder speler telt per naam als een eigen rij; zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_.
 
 ### De lijst met gehouden nullen is een lijst van korte wedstrijdregels
 

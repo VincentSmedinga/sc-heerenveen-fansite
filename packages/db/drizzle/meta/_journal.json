@@ -127,6 +127,13 @@
       "when": 1793019972870,
       "tag": "0017_add_players_and_squad_imports",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1793124806674,
+      "tag": "0018_add_player_links",
+      "breakpoints": true
     }
   ]
 }
