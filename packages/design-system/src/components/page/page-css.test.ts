@@ -125,7 +125,7 @@ describe('the two rows of the header in page.css', () => {
   it('has a little room between the line and the menu, and less under the menu than above the logo', () => {
     expect(header).toMatch(/> \.hf-navigation \{[^}]*padding-block-start: 0\.25rem;/)
     expect(header).toContain('padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.4375rem;')
-    expect(header).toContain('gap: 0.25rem 1rem;')
+    expect(header).toContain('gap: 0.25rem 0.5rem;')
   })
 
   it('aligns the logo in its link to the top, so the link is as tall as the logo and not as the line of text', () => {

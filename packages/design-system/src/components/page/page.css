@@ -84,7 +84,7 @@
     box-sizing: border-box;
     color: var(--hf-colour-text-default);
     display: grid;
-    gap: 0.25rem 1rem;
+    gap: 0.25rem 0.5rem;
     grid-template-columns: minmax(0, 1fr) auto;
     padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.4375rem;
     padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
