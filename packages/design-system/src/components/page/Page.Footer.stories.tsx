@@ -25,7 +25,7 @@ const meta = preview.meta({
           'De kleuren en hun contrast staan bij [Tokens › Kleur](?path=/docs/tokens-kleur--documentatie).',
           '',
           'Bij de footer horen schuine strepen, zoals die van de Friese vlag.',
-          'Ze beginnen over de footer, onder de tekst en de knoppen, en lopen daarboven naar boven uit, achter de rest van de pagina, tot ze vervagen.',
+          'Ze beginnen over de footer, onder de tekst, en lopen daarboven naar boven uit, achter de rest van de pagina, tot ze vervagen.',
           'De hoogte volgt de footer, dus op een telefoon, waar de footer hoger is, zijn de strepen ook hoger.',
           'Ze scrollen met de pagina mee, nemen geen aanraking of muis aan en zijn er niet in geforceerde kleuren en bij het afdrukken.',
           'Je hoeft er niets voor te doen: ze zijn onderdeel van de footer, en de kleuren staan bij Tokens › Kleur.',
@@ -35,7 +35,7 @@ const meta = preview.meta({
           'De links, zoals Over ons, Bronnen, Privacy en Updates, staan in een `Navigation` met de naam "Over de site".',
           'Op een breed scherm staan ze rechts naast de twee regels, ter hoogte van de bovenkant van de tekst; op een smal scherm staan ze eronder.',
           '',
-          'De twee regels tekst en de knoppen breken niet af: een zin blijft op één regel, een knop houdt zijn pictogram en tekst bij elkaar en de knoppen staan naast elkaar.',
+          'De twee regels tekst breken niet af: een zin blijft op één regel.',
           'Alleen de links geven mee. Het zijn losse links, dus tussen de links mag een regel afbreken, en op een middelbaar scherm komen ze in twee rijen van ongeveer even lang naast de tekst.',
           'Op een scherm dat zo smal is dat de tekst nergens meer past, mag alles weer afbreken, als noodgreep: anders scrolt de pagina zijwaarts.',
         ].join('\n'),
@@ -133,7 +133,7 @@ const wideDescription =
   'Op een breed scherm staan de links rechts naast de twee regels tekst, ter hoogte van de bovenkant.'
 
 const mediumDescription =
-  'Op een middelbaar scherm staan de links in twee even lange rijen naast de tekst. De zinnen en de knoppen breken niet af.'
+  'Op een middelbaar scherm staan de links in twee even lange rijen naast de tekst. De zinnen breken niet af.'
 
 export const NarrowLight = meta.story({
   ...screens,

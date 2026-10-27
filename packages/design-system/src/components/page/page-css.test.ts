@@ -106,7 +106,42 @@ describe('the stripes of the Frisian flag in page.css', () => {
   })
 })
 
-describe('the text and the control in the footer in page.css', () => {
+describe('the two rows of the header in page.css', () => {
+  const header = css.slice(css.indexOf('.hf-page-header {'), css.indexOf('.hf-page-body {'))
+
+  it('is a grid with the logo and the theme button in the first row, so the menu has a row of its own', () => {
+    expect(header).toContain('display: grid;')
+    expect(header).toContain('grid-template-columns: minmax(0, 1fr) auto;')
+    expect(header).not.toContain('flex-wrap')
+  })
+
+  it('puts the menu over the whole width, at every width, with a thin line above it', () => {
+    expect(header).toMatch(/> \.hf-navigation \{[^}]*grid-column: 1 \/ -1;/)
+    expect(header).toMatch(
+      /> \.hf-navigation \{[^}]*border-block-start: 1px solid var\(--hf-colour-border-on-header\);/,
+    )
+  })
+
+  it('has a little room between the line and the menu, and less under the menu than above the logo', () => {
+    expect(header).toMatch(/> \.hf-navigation \{[^}]*padding-block-start: 0\.25rem;/)
+    expect(header).toContain('padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.4375rem;')
+    expect(header).toContain('gap: 0.25rem 0.5rem;')
+  })
+
+  it('aligns the logo in its link to the top, so the link is as tall as the logo and not as the line of text', () => {
+    expect(header).toMatch(/> :has\(> \.hf-logo\) > \.hf-logo \{[^}]*vertical-align: top;/)
+  })
+
+  it('keeps the logo an inline box, because a flex container around it would pass the underline of the link on to it', () => {
+    expect(header).not.toMatch(/> :has\(> \.hf-logo\) \{[^}]*display: flex;/)
+  })
+
+  it('puts the theme button on the right', () => {
+    expect(header).toMatch(/> \.hf-theme-button \{[^}]*justify-self: end;/)
+  })
+})
+
+describe('the text in the footer in page.css', () => {
   const footer = css.slice(css.indexOf('.hf-page-footer {'))
   // A nested media query of the footer, up to the closing brace at the depth of the query.
   const media = (query: string) =>
@@ -115,9 +150,8 @@ describe('the text and the control in the footer in page.css', () => {
   const nowrap = media('width >= 19\\.5rem')
   const columns = media('width >= 40rem')
 
-  it('keeps every line of text, button label and control of the footer on one line, but not the links', () => {
+  it('keeps every line of text of the footer on one line, but not the links', () => {
     expect(nowrap).toMatch(/> :not\(:last-child\) \{\s*white-space: nowrap;\s*\}/)
-    expect(nowrap).toMatch(/\.hf-segmented-control \{\s*flex-wrap: nowrap;\s*\}/)
   })
 
   it('does so only above a width where it fits, so a line that does not break cannot make the page scroll sideways', () => {
@@ -130,6 +164,11 @@ describe('the text and the control in the footer in page.css', () => {
   it('lets the column of the links take what is left, so the links wrap before the text does', () => {
     expect(columns).toContain('grid-template-columns: auto minmax(0, 1fr);')
     expect(columns).toContain('place-self: start end;')
+  })
+
+  it('has no place for a control any more: the theme switch is in the header', () => {
+    expect(footer).not.toContain('nth-child(3)')
+    expect(footer).not.toContain('hf-segmented-control')
   })
 
   it('has the links span all rows, so a second row of links does not push the lines of text apart', () => {

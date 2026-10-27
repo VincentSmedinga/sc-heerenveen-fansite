@@ -37,6 +37,11 @@
    */
   .hf-logo-text {
     word-spacing: 0.25rem;
+
+    /* A browser that doesn't know it breaks the lines as it did. */
+    @supports (text-wrap: balance) {
+      text-wrap: balance;
+    }
   }
 
   .hf-logo-wordmark {

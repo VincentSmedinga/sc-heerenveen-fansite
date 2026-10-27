@@ -137,7 +137,7 @@ Een pagina die niet met 200 antwoordt, laat het commando falen, zodat een tikfou
 De layout, de pagina's en de pagina voor een onbekend adres bevatten geen HTML, alleen componenten uit `@fansite/design-system`.
 Dat geldt voor elk `.tsx`-bestand in `src`, behalve tests.
 `pnpm lint` faalt op een HTML-element, zoals `<p>` of `<li>`.
-De header, met het logo en het hoofdmenu, en de footer staan in `src/app/layout.tsx`, dus elke pagina heeft ze.
+De header, met het logo, de themaknop en het hoofdmenu, en de footer staan in `src/app/layout.tsx`, dus elke pagina heeft ze.
 
 ## De homepage
 

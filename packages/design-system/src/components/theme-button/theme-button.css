@@ -1,0 +1,64 @@
+/*
+ * The theme button of the header: round, 44 by 44 pixels, with a filled sun or moon of 26 pixels. At rest it is
+ * quiet, only the icon in a dim blue, without a rim or a fill. Under the mouse, pressed and with the keyboard
+ * (:focus-visible) it comes forward: the icon in the lightest blue of the header, with a rim and a fill. It is made
+ * for the dark blue of the header, so its colours are the tokens for the header and not the roles of the page.
+ *
+ * The rim is there at rest as well, but see-through, so the button does not change size when it comes forward, and a
+ * browser in forced colours keeps an outline. The base styles of a button fill it; this comes later in the cascade, so
+ * a button that is under the mouse on a touch screen (where the browser leaves it so after a tap) is not filled.
+ * Hover is only for devices with a mouse (hover: hover), so nothing stays lit after a tap on a phone; pressing
+ * (:active) counts on touch as well. The change takes 0,2 seconds, and none with reduced motion.
+ */
+
+@layer hf.components {
+  .hf-theme-button {
+    align-items: center;
+    background-color: transparent;
+    block-size: 2.75rem;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: var(--hf-colour-icon-on-header-quiet);
+    display: inline-flex;
+    inline-size: 2.75rem;
+    justify-content: center;
+    padding: 0;
+
+    /* The icon is 26 pixels, and has no space beside it, as in a button with text. */
+    .hf-icon {
+      --hf-icon-size: 1;
+
+      block-size: 26px;
+      inline-size: 26px;
+      margin: 0;
+      vertical-align: baseline;
+    }
+
+    &:active,
+    &:focus-visible {
+      background-color: var(--hf-colour-background-on-header-hover);
+      border-color: var(--hf-colour-border-on-header-strong);
+      color: var(--hf-colour-text-on-header);
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--hf-colour-background-on-header-hover);
+        border-color: var(--hf-colour-border-on-header-strong);
+        color: var(--hf-colour-text-on-header);
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        background-color 0.2s,
+        border-color 0.2s,
+        color 0.2s;
+    }
+
+    @media (forced-colors: active) {
+      border-color: ButtonText;
+    }
+  }
+}

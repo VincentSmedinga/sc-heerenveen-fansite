@@ -1,4 +1,6 @@
 import { render, screen } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { Link } from '../link/Link'
@@ -65,5 +67,11 @@ describe('Logo', () => {
 
     expect(screen.getByRole('img', { name: 'sc Heerenveen Fansite, sinds 1997' })).toBeTruthy()
     expect(screen.queryByRole('img', { name: 'Iets anders' })).toBeNull()
+  })
+
+  it('balances the lines of its text where the browser can, so the tagline stays next to the last word of the name', () => {
+    const css = readFileSync(join(import.meta.dirname, 'logo.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+
+    expect(css).toMatch(/\.hf-logo-text \{[^}]*@supports \(text-wrap: balance\) \{\s*text-wrap: balance;/s)
   })
 })

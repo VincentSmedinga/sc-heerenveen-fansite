@@ -116,8 +116,8 @@ describe('the page Privacy', () => {
     expect(paragraph).toContain('Wij kunnen daar niet bij en gebruiken ze niet.')
   })
 
-  it('says that the browser keeps the choice for Licht or Donker on the device, that we do not see it, and how to remove it', () => {
-    const paragraph = html.match(/<p[^>]*>(Kies je Licht of Donker.*?)<\/p>/)?.[1] ?? ''
+  it('says that the browser keeps the choice of the theme button on the device, that we do not see it, and how to remove it', () => {
+    const paragraph = html.match(/<p[^>]*>(Kies je met de knop.*?)<\/p>/)?.[1] ?? ''
 
     expect(paragraph).toContain('bewaart je browser die keuze, alleen op dit apparaat')
     expect(paragraph).toContain('Wij zien dat niet.')
@@ -142,7 +142,7 @@ describe('the page Privacy', () => {
     expect(paragraphs[3]).toContain('Tot het einde van de dag')
     expect(paragraphs[4]).toContain('Bots, de controles')
     expect(paragraphs[5]).toContain('logbestanden bij, met onder meer IP-adressen')
-    expect(paragraphs[6]).toContain('Kies je Licht of Donker in de footer')
+    expect(paragraphs[6]).toContain('Kies je met de knop bovenaan een licht of donker thema')
     expect(paragraphs[7]).toContain('Alleen een redacteur')
     expect(paragraphs[8]).toContain('dan komt het in de mailbox van de redactie')
     expect(paragraphs[8]).toContain('bewaren het tot de zaak is afgehandeld, hoogstens een jaar')

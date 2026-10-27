@@ -56,6 +56,13 @@
    * everything inside it. A component in the header then needs no styles of its own for the header.
    * The band is as wide as the page, and the padding on the sides keeps what is in it in the column, in line with the body.
    *
+   * It has two rows. In the first are the logo, on the left, and the theme button (.hf-theme-button) on the right; the
+   * main menu is in a row of its own under them, over the whole width of the column, at every width, with a thin line
+   * above it. Without the button, which only a browser with JavaScript draws, the first row holds the logo alone and
+   * the menu is where it was. A grid does that where a row that wraps could not: a menu that fits beside the logo would
+   * stay there. The menu is the one navigation in the header (.hf-navigation); a second one would need a row of its
+   * own as well.
+   *
    * The logo is in the column with its shield, so on a narrow screen the text of the page is in line with the shield. On a
    * wide screen the shield hangs in the margin to the left of the column, and the text of the page is in line with the
    * wordmark: the logo gets a negative margin as wide as the shield and the space beside it (--hf-logo-hang), which is
@@ -76,13 +83,31 @@
     background-color: var(--hf-colour-background-header);
     box-sizing: border-box;
     color: var(--hf-colour-text-default);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 2rem;
-    justify-content: space-between;
-    padding-block: max(1rem, env(safe-area-inset-top, 0px)) 1rem;
+    display: grid;
+    gap: 0.25rem 0.5rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.4375rem;
     padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
       max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
+
+    /*
+     * The logo is an inline-flex box in the line of text of the link around it. On the baseline of a line of 24px it
+     * would leave a strip under it, so the link would be taller than the logo. Aligned to the top, the line is as tall
+     * as the logo. The logo stays an inline box, which keeps the underline of the link off it (see logo.css).
+     */
+    > :has(> .hf-logo) > .hf-logo {
+      vertical-align: top;
+    }
+
+    > .hf-theme-button {
+      justify-self: end;
+    }
+
+    > .hf-navigation {
+      border-block-start: 1px solid var(--hf-colour-border-on-header);
+      grid-column: 1 / -1;
+      padding-block-start: 0.25rem;
+    }
 
     @media (width >= 74.5rem) {
       > :is(.hf-logo, :has(> .hf-logo)):first-child {
@@ -253,15 +278,13 @@
    * The links are the blue of links elsewhere, which reaches 4,5:1 on this surface in light and in dark, so they need no
    * colours of their own.
    *
-   * It holds two lines of text, a paragraph each, an optional control after them (the theme toggle) and the links last.
-   * What is in it has no margin, so the lines of text sit right under each other, and the control has a little space above
-   * it. On a narrow screen everything is in one column, with the links under the rest. From 40rem, as in the card, the
-   * links are in a second column on the right, level with the top of the text; a control
-   * sits under the text.
+   * It holds two lines of text, a paragraph each, and the links last.
+   * What is in it has no margin, so the lines of text sit right under each other. On a narrow screen everything is in
+   * one column, with the links under the text. From 40rem, as in the card, the links are in a second column on the
+   * right, level with the top of the text.
    *
-   * The lines of text and the control never break inside themselves: a sentence stays on
-   * one line, a button keeps its icon and its text together and the buttons of the control
-   * stay side by side. The links are the part that gives way. They are loose links, so they
+   * The lines of text never break inside themselves: a sentence stays on one line. The links are the part that gives
+   * way. They are loose links, so they
    * may wrap between links. The column of the links takes what is left (1fr) and the column
    * of the text is as wide as its content (auto), so beside the text the links wrap to a
    * second row before the text has to. The links span all three rows (1 / -1), so a second
@@ -269,7 +292,7 @@
    * left over (1fr). One row of links is as tall as the two lines of text, so it sits level
    * with them as before.
    *
-   * The text and the control are 14,1rem wide at the most, and 17rem with the text spacing
+   * The text is 14,1rem wide at the most, and 17rem with the text spacing
    * that WCAG 1.4.12 asks to support (letters 0,12em and words 0,16em apart). With the
    * margins on either side (2rem) that is 19rem. Under 19,5rem there is no room for them on
    * one line, and a line that does not break there would make the page scroll sideways
@@ -376,18 +399,9 @@
       margin-block-start: 0.5rem;
     }
 
-    /* A control after the two lines of text, such as the theme toggle. The links are the last child. */
-    > :nth-child(3):not(:last-child) {
-      margin-block-start: 0.75rem;
-    }
-
     @media (width >= 19.5rem) {
       > :not(:last-child) {
         white-space: nowrap;
-      }
-
-      .hf-segmented-control {
-        flex-wrap: nowrap;
       }
     }
 
@@ -408,10 +422,6 @@
     @media (width >= 40rem) {
       grid-template-columns: auto minmax(0, 1fr);
       grid-template-rows: auto auto 1fr;
-
-      > :nth-child(3):not(:last-child) {
-        align-self: start;
-      }
 
       > :last-child {
         place-self: start end;

@@ -60,8 +60,8 @@ export default function PrivacyPage() {
           Wat je browser bewaart
         </Heading>
         <Text>
-          Kies je Licht of Donker in de footer, dan bewaart je browser die keuze, alleen op dit apparaat. Wij zien dat
-          niet. Wis de gegevens van de site in je browser om hem weg te halen.
+          Kies je met de knop bovenaan een licht of donker thema, dan bewaart je browser die keuze, alleen op dit
+          apparaat. Wij zien dat niet. Wis de gegevens van de site in je browser om hem weg te halen.
         </Text>
         <Text>
           Alleen een redacteur die inlogt in het beheer krijgt een cookie. Het bevat een nummer voor die sessie, niets

@@ -80,9 +80,7 @@ test.describe('the page on a screen with a notch', () => {
     })
   }
 
-  test('follows the Licht and Donker buttons, and is back on the page a moment after pressing one', async ({
-    page,
-  }) => {
+  test('follows the theme button, and is back on the page a moment after pressing it', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/over-ons')
 
@@ -94,9 +92,7 @@ test.describe('the page on a screen with a notch', () => {
     await page.getByRole('button', { name: 'Donker' }).click()
 
     // Safari only reads the colour of the strip again when it has been off the page for a
-    // moment, so it must come back: without this it would be gone for good. (Pressing the
-    // button scrolls the footer into view, so the strip may also be off because the header is:
-    // that is the hidden attribute, not this.)
+    // moment, so it must come back: without this it would be gone for good.
     await expect.poll(() => edge.evaluate((node) => (node as HTMLElement).style.display)).toBe('')
     expect(await colourOf(edge)).toBe(await colourOf(header))
     expect(await colourOf(edge)).not.toBe(lightHeader)

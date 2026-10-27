@@ -105,8 +105,8 @@ const drawings: Record<IconName, ReactNode> = {
  * the text around it, also under the mouse, with the focus and in forced colours. A link or a
  * button is named by its own text alone, so the icon is hidden from assistive technology and is
  * never the only sign of something. The size, the space beside it and its place in the line are
- * in icon.css. It is not exported from the package: Link, Button, SegmentedControl, NewsItem,
- * Navigation and a Heading with an anchor draw it for the visitor.
+ * in icon.css. It is not exported from the package: Link, Button, SegmentedControl,
+ * ThemeButton, NewsItem, Navigation and a Heading with an anchor draw it for the visitor.
  */
 export const Icon = ({ appearance = 'line', name }: IconProps) => (
   <svg

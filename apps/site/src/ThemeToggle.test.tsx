@@ -51,46 +51,51 @@ describe('ThemeToggle', () => {
     vi.unstubAllGlobals()
   })
 
-  it('shows nothing on the server, so a page without JavaScript has no buttons that do nothing', () => {
+  it('shows nothing on the server, so a page without JavaScript has no button that does nothing', () => {
     expect(renderToStaticMarkup(<ThemeToggle />)).toBe('')
   })
 
-  it('is a group named Thema with Licht and Donker, and presses the theme of the system without a choice', () => {
+  it('is one button named Donker, with no visible text, and pressed on a dark system without a choice', () => {
     stubSystem(true)
     render(<ThemeToggle />)
 
-    expect(screen.getByRole('group', { name: 'Thema' })).toBeTruthy()
+    expect(screen.getAllByRole('button')).toHaveLength(1)
+    expect(screen.queryByRole('group')).toBeNull()
     expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('true')
-    expect(screen.getByRole('button', { name: 'Licht' }).getAttribute('aria-pressed')).toBe('false')
+    expect(screen.getByRole('button', { name: 'Donker' }).textContent).toBe('')
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
   })
 
-  it('draws a sun in front of Licht and a moon in front of Donker, filled on the pressed button and a line on the other', () => {
+  it('is not pressed on a light system without a choice', () => {
+    stubSystem(false)
+    render(<ThemeToggle />)
+
+    expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('false')
+  })
+
+  it('draws a filled moon while the page is dark and a filled sun while it is light', () => {
     stubSystem(true)
     render(<ThemeToggle />)
 
-    const light = screen.getByRole('button', { name: 'Licht' })
-    const dark = screen.getByRole('button', { name: 'Donker' })
+    const icon = () => screen.getByRole('button', { name: 'Donker' }).querySelector('svg')
 
-    expect(light.querySelector('svg')?.getAttribute('fill')).toBe('none')
-    expect(dark.querySelector('svg')?.getAttribute('fill')).toBe('currentColor')
-    expect(light.querySelectorAll('circle')).toHaveLength(1)
-    expect(dark.querySelectorAll('circle')).toHaveLength(0)
-    expect(light.firstElementChild?.firstElementChild?.getAttribute('aria-hidden')).toBe('true')
-    expect(light.textContent).toBe('Licht')
-    expect(dark.textContent).toBe('Donker')
+    expect(icon()?.getAttribute('fill')).toBe('currentColor')
+    expect(icon()?.querySelectorAll('circle')).toHaveLength(0)
+    expect(icon()?.getAttribute('aria-hidden')).toBe('true')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Donker' }))
+
+    expect(icon()?.getAttribute('fill')).toBe('currentColor')
+    expect(icon()?.querySelectorAll('circle')).toHaveLength(1)
   })
 
-  it('switches the filled drawing to the button that is pressed, next to aria-pressed', () => {
+  it('switches the drawing and aria-pressed with the theme when it is pressed', () => {
     stubSystem(false)
     render(<ThemeToggle />)
     fireEvent.click(screen.getByRole('button', { name: 'Donker' }))
 
-    expect(screen.getByRole('button', { name: 'Licht' }).querySelector('svg')?.getAttribute('fill')).toBe('none')
-    expect(screen.getByRole('button', { name: 'Donker' }).querySelector('svg')?.getAttribute('fill')).toBe(
-      'currentColor',
-    )
     expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Donker' }).querySelectorAll('circle')).toHaveLength(0)
   })
 
   it('keeps a choice that differs from the system, and puts it on the page', () => {
@@ -107,19 +112,26 @@ describe('ThemeToggle', () => {
     stubSystem(false)
     localStorage.setItem(themeStorageKey, 'dark')
     render(<ThemeToggle />)
-    fireEvent.click(screen.getByRole('button', { name: 'Licht' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Donker' }))
 
     expect(localStorage.getItem(themeStorageKey)).toBeNull()
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
-    expect(screen.getByRole('button', { name: 'Licht' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('false')
   })
 
-  it('does nothing when the pressed button is the one that is already pressed', () => {
-    stubSystem(false)
+  it('keeps a choice on a dark system when the page is light, and forgets it when pressed back to dark', () => {
+    stubSystem(true)
     render(<ThemeToggle />)
-    fireEvent.click(screen.getByRole('button', { name: 'Licht' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Donker' }))
+
+    expect(localStorage.getItem(themeStorageKey)).toBe('light')
+    expect(document.documentElement.dataset['theme']).toBe('light')
+    expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('false')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Donker' }))
 
     expect(localStorage.getItem(themeStorageKey)).toBeNull()
+    expect(screen.getByRole('button', { name: 'Donker' }).getAttribute('aria-pressed')).toBe('true')
   })
 
   it('keeps a choice when the system changes later, even if it then matches the system', () => {
