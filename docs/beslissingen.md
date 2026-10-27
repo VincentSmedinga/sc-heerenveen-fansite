@@ -3255,7 +3255,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 27 oktober 2026
 - **Besluit:** het hoofdmenu staat in een eigen rij onder het logo, met een dunne lijn erboven (1 pixel, blue-200 op 35%).
-  Alle onderdelen staan in blue-50 (14,5:1 in licht en 11,4:1 in donker op de header), 1,125 rem en gewicht 500, met 1 rem tussen de onderdelen en minstens 44 pixels hoog.
+  Alle onderdelen staan in blue-50 (14,5:1 in licht en 11,4:1 in donker op de header), gewicht 500 en een lettergrootte die meegroeit met het venster (`clamp(1rem, 0.86rem + 0.69vw, 1.25rem)`: 16 pixels op 320 pixels breed, 20 pixels vanaf 900 pixels), met 1 rem tussen de onderdelen en minstens 44 pixels hoog.
   De huidige pagina heeft dezelfde tekstkleur en een rode streep van 3 pixels op 0,35em onder de tekst, zonder afbreking bij letters met een staart.
   Forum staat rechts en houdt zijn pictogram; er staat geen scheidingslijn tussen de onderdelen.
   Hoe een onderdeel eruitziet onder de muis, ingedrukt of bezocht, blijft zoals het was, behalve dat de streep onder de muis nu op dezelfde plek staat als de rode streep van de huidige pagina (0,35em onder de tekst, zonder afbreking).
@@ -3263,7 +3263,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zo staat het menu op elke breedte onder het logo, ook als er naast het logo plek over is, en blijft het in de kolom van de pagina, in lijn met de inhoud.
   Forum staat rechts doordat het laatste onderdeel van het menu in de header een automatische marge aan het begin heeft.
   Tussen de lijn en het menu zit 0,25 rem, en onder het menu 0,4375 rem.
-  Boven het logo zit 0,75 rem en tussen het logo en de lijn 0,25 rem, zodat de header ongeveer 128 pixels hoog is op een breed scherm.
+  Boven het logo zit 0,75 rem, tussen het logo en de lijn 0,25 rem en tussen het logo en de knop 0,5 rem, zodat de header ongeveer 128 pixels hoog is op een breed scherm.
+  Op 320 pixels past "FANSITE sinds 1997" door die 0,5 rem net op één regel; met 1 rem miste het 2 pixels, en kwam "sinds 1997" op een eigen regel.
+  `text-wrap: balance` op de tekst van het logo verdeelt de regels over de breedte.
   Het logo staat in de link om het logo bovenaan de regel (`vertical-align: top`), zodat de link zo hoog is als het logo en niet als een regel tekst: daarvoor zat er 7 pixels onder het logo.
   Een flexcontainer om het logo zou de onderstreping van de link op het logo doorgeven, dus het logo blijft een inline-element.
   Op 390 pixels staan de vier onderdelen op één rij; op 320 pixels gaat Forum naar een tweede rij en blijft rechts staan.

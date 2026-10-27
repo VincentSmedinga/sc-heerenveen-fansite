@@ -26,6 +26,7 @@ const meta = preview.meta({
           '',
           'In de header staat het menu in een eigen rij onder het logo.',
           'Alle links hebben de lichtste kleur van de header, in gewicht 500 en niet onderstreept, tot je er met de muis op staat.',
+          'De letters groeien mee met het venster: 16 pixels op een scherm van 320 pixels breed, oplopend tot 20 pixels vanaf 900 pixels.',
           'De huidige pagina heeft een rode streep eronder.',
           'Die streep heeft de kleur `--hf-colour-accent-on-header`.',
           'Zo is de huidige pagina ook zonder kleur te herkennen.',

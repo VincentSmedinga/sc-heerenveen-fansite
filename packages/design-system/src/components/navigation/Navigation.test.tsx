@@ -1,4 +1,6 @@
 import { render, screen, within } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { exampleMenuAt } from '../../docs/ExamplePage'
@@ -134,5 +136,17 @@ describe('Navigation', () => {
 
     expect(elements).toHaveLength(1)
     expect(screen.getByRole('navigation', { name: 'Hoofdmenu' })).toBeTruthy()
+  })
+
+  it('sets the links in the header in a size that grows with the window, from 16px at 320px to 20px at 900px', () => {
+    const css = readFileSync(join(import.meta.dirname, 'navigation.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+    const [, minimum, offset, slope, maximum] =
+      css.match(/font-size: clamp\(([\d.]+)rem, ([\d.]+)rem \+ ([\d.]+)vw, ([\d.]+)rem\);/) ?? []
+    const at = (width: number) => Number(offset) * 16 + (Number(slope) / 100) * width
+
+    expect(Number(minimum) * 16).toBe(16)
+    expect(Number(maximum) * 16).toBe(20)
+    expect(Math.max(16, at(320))).toBeCloseTo(16, 0)
+    expect(at(900)).toBeCloseTo(20, 0)
   })
 })
