@@ -1,154 +1,126 @@
 import preview from '#.storybook/preview'
 
-import { Card } from '../card/Card'
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Text } from '../text/Text'
-import { Link } from './Link'
+import { Link, linkIcons } from './Link'
 
 const meta = preview.meta({
+  argTypes: {
+    href: {
+      control: 'text',
+      description: 'Waar de link heen gaat. Verplicht.',
+    },
+    icon: {
+      control: 'radio',
+      description: 'Een pictogram bij de tekst. De link heet voor een schermlezer zijn tekst alleen.',
+      options: Object.keys(linkIcons),
+    },
+  },
+  component: Link,
   parameters: {
     docs: {
       description: {
         component: [
-          'Een link.',
-          'Een link is altijd onderstreept; onder de muis wordt de lijn dikker.',
-          'Een bezochte link ziet er hetzelfde uit als een link die je nog niet hebt geopend; alleen de kop van een nieuwsbericht en de titel van een discussie worden grijs.',
-          '',
-          '`href` is verplicht: een link zonder bestemming is geen link.',
+          'Een link brengt de bezoeker naar een andere pagina, en is altijd onderstreept.',
           'De tekst zegt waar de link heen gaat, ook los van de zin eromheen; dus geen "lees meer" of "klik hier".',
-          'Bij een nieuwsbericht is de kop de link.',
-          '',
-          'Met `icon` zet je een pictogram bij de tekst:',
-          '',
-          '- `arrow-right`: een pijl achter de tekst, voor een link naar meer of naar alles, zoals "Alle podcasts".',
-          '- `external-link`: het pictogram voor een externe link achter de tekst, voor elke link die de site verlaat, ook in een zin of een lijst.',
-          '  Een link naar een pagina van de site zelf krijgt het niet, en een link naar een mailadres krijgt de envelop.',
-          '- `arrow-left`: een pijl naar links vóór de tekst, voor de weg terug, zoals "Vorige". Hij staat vóór de tekst omdat hij achteruit wijst.',
-          '- `envelope`: een envelop vóór de tekst, voor een link die een mail opent (`mailto:`), zoals ons e-mailadres. Hij staat vóór de tekst omdat hij zegt wat de link doet en niet waar hij heen gaat.',
-          '',
-          'Een pictogram bij een link staat achter de tekst, omdat het vooruit wijst, naar waar de link heen gaat.',
-          'Er zijn twee uitzonderingen, en die staan vóór de tekst: de pijl naar links, omdat hij achteruit wijst, en de envelop, omdat hij zegt wat de link doet, zoals het pictogram bij een knop.',
-          'De link heet voor een schermlezer zijn tekst alleen: het pictogram is verborgen.',
-          'Het pictogram heeft de kleur van de tekst, ook onder de muis, en blijft bij het laatste woord als de regel afbreekt.',
-          'Laat de inhoud van de link eindigen met tekst, anders kan het pictogram alleen op een regel komen.',
+          'Met `icon` zet je een pictogram bij de tekst, voor een link naar meer, naar buiten de site, naar een mail of terug.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
   title: 'Componenten/Tekst/Link',
 })
 
-const render = () => (
-  <Text style={{ maxInlineSize: '40rem' }}>
-    Lees het hele verslag bij <Link href="#verslag-omrop-fryslan">Omrop Fryslân</Link> of bekijk de samenvatting bij{' '}
-    <Link href="#samenvatting-eredivisie">de eredivisie</Link>.
-  </Text>
-)
-
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
-
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
-
-const arrow = () => (
-  <Text style={{ maxInlineSize: '40rem' }}>
-    <Link href="#alle-podcasts" icon="arrow-right">
-      Alle podcasts
-    </Link>
-  </Text>
-)
-
-export const ArrowLight = meta.story({ globals: { theme: 'light' }, name: 'Met een pijl, licht', render: arrow })
-
-export const ArrowDark = meta.story({ globals: { theme: 'dark' }, name: 'Met een pijl, donker', render: arrow })
-
-const external = () => (
-  <Text style={{ maxInlineSize: '40rem' }}>
-    Bij de site hoort ook{' '}
-    <Link href="https://forum.heerenveen.org" icon="external-link">
-      ons forum
-    </Link>
-    , waar supporters met elkaar praten. Of ga naar{' '}
-    <Link href="https://www.omropfryslan.nl" icon="external-link">
-      Omrop Fryslân
-    </Link>
-    .
-  </Text>
-)
-
-export const ExternalLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met het pictogram voor een externe link, licht',
-  render: external,
-})
-
-export const ExternalDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Met het pictogram voor een externe link, donker',
-  render: external,
-})
-
-const mail = () => (
-  <Text style={{ maxInlineSize: '40rem' }}>
-    Mis je een bron? Mail ons via{' '}
-    <Link href="mailto:fansite@heerenveen.org" icon="envelope">
-      fansite@heerenveen.org
-    </Link>
-    .
-  </Text>
-)
-
-export const MailLight = meta.story({ globals: { theme: 'light' }, name: 'Met een envelop, licht', render: mail })
-
-export const MailDark = meta.story({ globals: { theme: 'dark' }, name: 'Met een envelop, donker', render: mail })
-
-// Only on the canvas: a link that breaks over two lines at 320 pixels, where the icon must stay
-// with the last word.
-const breaking = () => (
-  <Text style={{ fontSize: '1.5rem' }}>
-    <Link href="https://www.autoriteitpersoonsgegevens.nl" icon="external-link">
-      Autoriteit Persoonsgegevens
-    </Link>
-  </Text>
-)
-
-export const BreakingLight = meta.story({
-  globals: { theme: 'light', viewport: { value: 'mobile1' } },
-  name: 'Breekt af bij 320 pixels, licht',
-  render: breaking,
-  tags: ['!autodocs'],
-})
-
-export const BreakingDark = meta.story({
-  globals: { theme: 'dark', viewport: { value: 'mobile1' } },
-  name: 'Breekt af bij 320 pixels, donker',
-  render: breaking,
-  tags: ['!autodocs'],
-})
-
-// Only on the canvas: an address longer than the line at 320 pixels. The envelope stays with
-// the first letter and the address breaks inside the card, not over its edge.
-const longAddress = () => (
-  <Card surface="soft">
-    <Text style={{ fontSize: '1.5rem' }}>
-      Mail ons via{' '}
-      <Link href="mailto:redactie-fansite@heerenveen.org" icon="envelope">
-        redactie-fansite@heerenveen.org
-      </Link>
-      .
+export const Default = meta.story({
+  args: { href: '#verslag-omrop-fryslan' },
+  name: 'Link',
+  render: (args) => (
+    <Text>
+      Lees het hele verslag bij <Link {...args}>Omrop Fryslân</Link> of bekijk de samenvatting bij{' '}
+      <Link href="#samenvatting-eredivisie">de eredivisie</Link>.
     </Text>
-  </Card>
-)
-
-export const LongMailLight = meta.story({
-  globals: { theme: 'light', viewport: { value: 'mobile1' } },
-  name: 'Lang adres bij 320 pixels, licht',
-  render: longAddress,
-  tags: ['!autodocs'],
+  ),
 })
 
-export const LongMailDark = meta.story({
-  globals: { theme: 'dark', viewport: { value: 'mobile1' } },
-  name: 'Lang adres bij 320 pixels, donker',
-  render: longAddress,
-  tags: ['!autodocs'],
+export const Icons = meta.story({
+  name: 'Met een pictogram',
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'Een pictogram staat achter de tekst, omdat het vooruit wijst, naar waar de link heen gaat: `arrow-right` voor meer of alles, `external-link` voor elke link die de site verlaat.',
+          'Er zijn twee uitzonderingen, die vóór de tekst staan: `arrow-left`, omdat hij achteruit wijst, en `envelope`, omdat hij zegt wat de link doet.',
+        ].join(' '),
+      },
+    },
+  },
+  render: () => (
+    <>
+      <Text>
+        <Link href="#alle-podcasts" icon="arrow-right">
+          Alle podcasts
+        </Link>
+      </Text>
+      <Text>
+        Bij de site hoort ook{' '}
+        <Link href="https://forum.heerenveen.org" icon="external-link">
+          ons forum
+        </Link>
+        , waar supporters met elkaar praten.
+      </Text>
+      <Text>
+        Mis je een bron? Mail ons via{' '}
+        <Link href="mailto:fansite@heerenveen.org" icon="envelope">
+          fansite@heerenveen.org
+        </Link>
+        .
+      </Text>
+      <Text>
+        <Link href="#vorige" icon="arrow-left">
+          Vorige
+        </Link>
+      </Text>
+    </>
+  ),
+})
+
+export const States = meta.story({
+  name: 'Toestanden',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Bezocht, muis en focus zijn nagebootst met de add-on Pseudo States. Een bezochte link ziet er hetzelfde uit als een link die je nog niet hebt geopend; alleen de kop van een nieuwsbericht en de titel van een discussie worden grijs. Onder de muis wordt de lijn dikker.',
+      },
+    },
+    pseudo: {
+      focusVisible: ['[data-example="focus"]'],
+      hover: ['[data-example="hover"]'],
+      visited: ['[data-example="visited"]'],
+    },
+  },
+  render: () => (
+    <>
+      <Text>
+        <Link href="#nog-niet-bezocht">Gewone link</Link>
+      </Text>
+      <Text>
+        <Link data-example="visited" href="#al-bezocht">
+          Bezochte link
+        </Link>
+      </Text>
+      <Text>
+        <Link data-example="hover" href="#onder-de-muis">
+          Link onder de muis
+        </Link>
+      </Text>
+      <Text>
+        <Link data-example="focus" href="#met-focus">
+          Link met focus
+        </Link>
+      </Text>
+    </>
+  ),
 })

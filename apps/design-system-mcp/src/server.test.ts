@@ -73,12 +73,12 @@ describe('the MCP server of the design system', () => {
   it('gives a story with docs-show-story', async () => {
     const url = await start()
     const { message } = await rpc(url, 'tools/call', {
-      arguments: { componentId: 'componenten-tekst-heading', storyName: 'Licht' },
+      arguments: { componentId: 'componenten-tekst-heading', storyName: 'Kop' },
       name: 'docs-show-story',
     })
 
     expect(message.result.isError).not.toBe(true)
-    expect(message.result.content[0].text).toContain('Nieuws over sc Heerenveen')
+    expect(message.result.content[0].text).toContain('Wedstrijden')
   })
 
   it('answers every request on its own, so another process can answer the next one', async () => {
