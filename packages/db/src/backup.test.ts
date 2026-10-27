@@ -17,12 +17,12 @@ import type { TestDatabase } from './test-database.ts'
 import {
   backUp,
   backupName,
-  dayTables,
   expiredBackups,
   optionFileText,
   readConnection,
   restore,
   runBackupCommand,
+  structureOnlyTables,
 } from './backup.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -209,19 +209,27 @@ describe('backUp', () => {
     expect(() => statSync(readFileSync(path.join(record, 'option-file-path'), 'utf8').trim())).toThrow(/ENOENT/)
   })
 
-  it('dumps the tables of the day without their rows, so the salt does not stay for 14 days', async () => {
+  it('dumps the tables that keep no data without their rows, so they do not stay for 14 days', async () => {
     await backUp(env(), now)
 
     const record = process.env['FAKE_RECORD'] ?? ''
     const rows = readFileSync(path.join(record, 'args-0'), 'utf8').trim().split('\n')
     const structure = readFileSync(path.join(record, 'args-1'), 'utf8').trim().split('\n')
 
-    expect(rows).toContain('--ignore-table=fansite_acc.visitor_hashes')
-    expect(rows).toContain('--ignore-table=fansite_acc.visitor_salts')
+    for (const table of ['admin_login_links', 'admin_sessions', 'discussions', 'visitor_hashes', 'visitor_salts']) {
+      expect(rows).toContain(`--ignore-table=fansite_acc.${table}`)
+    }
     expect(rows.at(-1)).toBe('fansite_acc')
     expect(rows).not.toContain('--no-data')
     expect(structure).toContain('--no-data')
-    expect(structure.slice(-3)).toEqual(['fansite_acc', 'visitor_hashes', 'visitor_salts'])
+    expect(structure.slice(-6)).toEqual([
+      'fansite_acc',
+      'admin_login_links',
+      'admin_sessions',
+      'discussions',
+      'visitor_hashes',
+      'visitor_salts',
+    ])
     expect(readdirSync(process.env['FAKE_RECORD'] ?? '').filter((name) => name.startsWith('args-'))).toHaveLength(2)
   })
 
@@ -312,6 +320,16 @@ describe('backUp', () => {
     await expect(backUp(env(), now)).rejects.toThrow()
     expect(readdirSync(folder)).toEqual([backupName('fansite_acc', now)])
   })
+
+  it('leaves the file of a run that is busy alone, and fails', async () => {
+    await backUp(env(), new Date(now.getTime() - 60_000))
+
+    const busy = path.join(folder, `${backupName('fansite_acc', now)}.partial`)
+
+    writeFileSync(busy, 'half a dump')
+    await expect(backUp(env(), now)).rejects.toThrow(/partial exists already/)
+    expect(readFileSync(busy, 'utf8')).toBe('half a dump')
+  })
 })
 
 describe('runBackupCommand', () => {
@@ -369,7 +387,7 @@ describe('runBackupCommand', () => {
   })
 })
 
-describe('dayTables', () => {
+describe('structureOnlyTables', () => {
   it('are tables of the database, so the second pass of the dump finds them', async () => {
     const database = await createTestDatabase()
 
@@ -379,7 +397,7 @@ describe('dayTables', () => {
       )
       const names = rows.map((row) => String(row['name']))
 
-      for (const table of dayTables) {
+      for (const table of structureOnlyTables) {
         expect(names).toContain(table)
       }
     } finally {

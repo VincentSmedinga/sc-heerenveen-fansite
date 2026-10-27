@@ -239,7 +239,7 @@ De klikken op links (#292) en de cijfers in het beheer (#293) bouwen hierop.
 
 `pnpm db:backup` en `pnpm db:restore <bestand>` maken een dump en zetten hem terug (`src/backup.ts`).
 Op de host draait cron elke nacht hetzelfde, als `packages/db/backup.mjs` dat `assemble` maakt.
-De dump bevat van `visitor_salts` en `visitor_hashes` alleen de structuur, want de site gooit hun rijen aan het eind van de dag weg.
+De dump bevat van `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions` en `admin_login_links` alleen de structuur, want die gegevens bewaren we niet 14 dagen (zie `docs/back-ups.md`).
 Hoe het werkt, hoe je het op de host instelt, hoe je terugzet en wat het aan opslag kost, staat in [`docs/back-ups.md`](../../docs/back-ups.md).
 `BACKUP_FOLDER`, `BACKUP_KEEP_DAYS`, `MYSQLDUMP_COMMAND` en `MYSQL_COMMAND` staan in `.env.example`.
 De tests (`src/backup.test.ts`) geven de opdrachten kleine programma's in plaats van `mysqldump` en `mysql`, en hebben voor het terugzetten een MariaDB nodig.

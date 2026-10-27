@@ -683,6 +683,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Let op:** MariaDB kan `CREATE TABLE` en `ALTER TABLE` niet terugdraaien.
   Een migratie die halverwege mislukt, kan een half veranderd schema achterlaten.
   Productie krijgt daarom een back-up vóór een migratie (#33).
+- **Later:** de back-up vóór een migratie op productie hoort sinds 26 oktober 2026 bij #347; zie _De dump bewaart 14 dagen, laat de nieuwste altijd staan, en laat tabellen zonder blijvende gegevens leeg_ en _Back-ups zijn een dagelijkse dump op de host, 14 dagen bewaard, en een terugzetting die we één keer echt testen_.
 - **Alternatieven:** na het kopiëren een opdracht op de host draaien via SSH.
   Een SSH-sessie krijgt de variabelen van de app niet, dus `DATABASE_URL` moet dan ook in een bestand op de host, en we moeten Node daar zelf vinden.
   Of vanuit GitHub migreren door een SSH-tunnel; dan komt `DATABASE_URL` in de geheimen van GitHub.
@@ -891,21 +892,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat is niet bevestigd: `docs/back-ups.md` zegt hoe de eigenaar het controleert, en `MYSQLDUMP_COMMAND` en `MYSQL_COMMAND` wijzen naar een ander pad.
 - **Alternatieven:** een dump in Node zelf schrijven; `MYSQL_PWD` of `-p` voor het wachtwoord; de dump aan de host overlaten met de back-up van mijn.host (die we niet kunnen testen); een eigen bestand met instellingen voor de back-up (een tweede plek voor het wachtwoord).
 
-### De dump bewaart 14 dagen, laat de nieuwste altijd staan, en laat de tabellen van de dag leeg
+### De dump bewaart 14 dagen, laat de nieuwste altijd staan, en laat tabellen zonder blijvende gegevens leeg
 
 - **Datum:** 26 oktober 2026
 - **Besluit:** het opruimen rekent met de datum in de naam van het bestand (`<database>-<datum>T<tijd>Z.sql.gz`, in UTC) en niet met de datum van het bestand.
   - Het gebeurt na een dump die lukte, en een mislukte dump laat de oude dumps staan.
   - Het raakt alleen bestanden met de naam van deze database, dus andere bestanden en de dumps van een andere database blijven.
   - De nieuwste dump gaat nooit weg, ook niet als hij oud is.
-  - De dump bevat van `visitor_salts` en `visitor_hashes` alleen de structuur, in een tweede aanroep van `mysqldump` met `--no-data`.
+  - De dump bevat van `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions` en `admin_login_links` alleen de structuur, in een tweede aanroep van `mysqldump` met `--no-data`.
   - De opdracht weigert een map in `public_html` en een bestaande map die andere accounts kunnen lezen, en verandert de rechten van een bestaande map niet.
   - Een dump krijgt eerst de naam `….partial` en wordt pas na de controle op de regel `-- Dump completed` omgenoemd.
 - **Waarom:** de naam blijft kloppen als iemand een bestand kopieert of aanraakt.
   Als cron stopt, mag het opruimen de laatste dump niet weghalen.
   Het zout en de kenmerken van de bezoekers van de dag gooit de site aan het eind van de dag weg (zie _We tellen paginaweergaven en unieke bezoekers per dag_); in de dumps zouden ze 14 dagen blijven, en met het zout zijn de kenmerken terug te rekenen naar adressen.
+  De schermnaam bij een discussie vervangt de importer bij elke run (zie _We tonen de schermnaam van de laatste reageerder, als gewone tekst_), en een teruggezette sessie of inloglink zou een toegang herstellen die na de dump is ingetrokken.
+  De importer vult de discussies binnen een kwartier opnieuw, en een sessie maak je door opnieuw in te loggen.
   Een map die we zelf niet maakten, zoals de thuismap, kan de site breken als we haar rechten wijzigen.
-- **Alternatieven:** `--ignore-table-data`, dat alleen de `mysqldump` van MariaDB kent; alles dumpen en de dagelijkse tabellen leeg laten bij het terugzetten (de gegevens zouden dan wel in het bestand staan); de rechten van een bestaande map zelf zetten.
+- **Alternatieven:** `--ignore-table-data`, dat alleen de `mysqldump` van MariaDB kent; alles dumpen en deze tabellen leeg laten bij het terugzetten (de gegevens zouden dan wel in het bestand staan); de rechten van een bestaande map zelf zetten.
 
 ### Een dump gaat alleen terug in een lege database
 
@@ -4931,6 +4934,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zolang de migratie niet klaar is, blijven de pagina's voor bezoekers werken, want hun queries noemen de kolommen die ze nodig hebben; alleen het beheer van artikelen geeft een fout.
 - **Wat de test niet bewijst:** de migratie is niet op de echte gegevens van acceptatie of productie gedraaid.
   Het back-up vóór een migratie op productie (#33) blijft het vangnet.
+- **Later:** die back-up vóór een migratie op productie hoort sinds 26 oktober 2026 bij #347; zie _Back-ups zijn een dagelijkse dump op de host, 14 dagen bewaard, en een terugzetting die we één keer echt testen_.
 - **Alternatieven:** de kolom meteen verplicht toevoegen met een standaardwaarde (MariaDB vult bestaande rijen dan met 0, en de foreign key faalt); een migratie in twee stappen, een release met de kolom leeg en een met de eis (twee releases voor iets wat in één opdrachtenrij past); alleen een tabel zonder `updated_by` (de kolom is een eis van het issue).
 
 ### De versies staan als lijst onder het formulier, zonder knop om terug te zetten

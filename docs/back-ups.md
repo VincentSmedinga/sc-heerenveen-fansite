@@ -33,10 +33,16 @@ De opdracht `backup`:
    Hij verandert de rechten van een bestaande map niet zelf: dat kan de thuismap zijn.
    Ligt de map in `public_html`, dan weigert hij ook.
 2. Draait `mysqldump` met `--single-transaction`, zodat de site tijdens de dump gewoon werkt en er niets vergrendeld wordt.
-   Hij draait het twee keer, achter elkaar in hetzelfde bestand: eerst alle tabellen met hun rijen, behalve `visitor_salts` en `visitor_hashes`, en dan alleen de structuur van die twee.
-   Het zout en de kenmerken van de bezoekers van de dag gooit de site aan het eind van de dag weg (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in `beslissingen.md`).
+   Hij draait het twee keer, achter elkaar in hetzelfde bestand: eerst alle tabellen met hun rijen, behalve de vijf hieronder, en dan alleen de structuur van die vijf.
+   - `visitor_salts` en `visitor_hashes`: het zout en de kenmerken van de bezoekers van de dag gooit de site aan het eind van de dag weg (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in `beslissingen.md`).
+     Met het zout reken je de kenmerken terug naar adressen.
+   - `discussions`: de schermnaam van de laatste reageerder vervangt de importer bij elke run (zie het hoofdstuk Redactie in Storybook).
+   - `admin_sessions` en `admin_login_links`: een teruggezette sessie of inloglink zou een toegang herstellen die na de dump is ingetrokken.
+
    Ze zouden anders 14 dagen in de dumps blijven staan.
-   Een teruggezette database krijgt de twee tabellen wel, maar leeg.
+   Een teruggezette database krijgt de vijf tabellen wel, maar leeg.
+   De importer vult de discussies binnen een kwartier opnieuw, en een sessie maak je door opnieuw in te loggen.
+
 3. Comprimeert de uitvoer met gzip en schrijft hem naar `<database>-<datum>T<tijd>Z.sql.gz`, in UTC, zoals `fansite_acc-2026-10-26T031507Z.sql.gz`.
    Het bestand heeft rechten voor alleen het account (`-rw-------`).
    Hij schrijft eerst naar een bestand dat op `.partial` eindigt, en noemt het pas om als de dump klaar is.
@@ -214,7 +220,7 @@ We hebben het terugzetten één keer echt gedaan, voordat we op de dumps vertrou
 2. `backup.mjs backup`, zoals de cronjob hem draait, maakte een dump van 11 kB, met rechten `-rw-------` in een map met `drwx------`.
 3. `backup.mjs restore` zette de dump terug in een lege database en meldde 26 tabellen.
    Een tweede restore in dezelfde database weigerde en stopte met code 1.
-4. `CHECKSUM TABLE` gaf voor alle 24 tabellen met rijen dezelfde uitkomst in beide databases, en beide hebben 15 foreign keys.
+4. `CHECKSUM TABLE` gaf voor alle tabellen met rijen dezelfde uitkomst in beide databases, behalve de vijf die de dump leeg laat (zie hieronder), en beide hebben 15 foreign keys.
    Ook `__drizzle_migrations` kwam mee, dus de site draait geen migratie opnieuw.
    In de bron stond een zout en een kenmerk van een bezoeker; in de dump en in de teruggezette database waren de twee tabellen leeg.
 5. De gebouwde site (`assemble`, zoals op de host) draaide op beide databases.
@@ -222,7 +228,11 @@ We hebben het terugzetten één keer echt gedaan, voordat we op de dumps vertrou
    Met `SITE_ENV=acceptance` op de teruggezette database startte de site, meldde dat de database klaar was met de echte bronnen, en toonde `/bronnen` met de Leeuwarder Courant en zonder testbronnen.
 6. Voor de schatting hierboven vulden we een derde kopie met 100.000 koppen en 43.200 regels logboek: de dump kostte 4,1 MB en het terugzetten ging ook goed.
 
-Mijn computer heeft geen `mysqldump`.
+**27 oktober 2026, na de review, opnieuw met de echte clients:** de bron had ook een discussie met een schermnaam.
+De dump had geen enkele rij van `discussions`, `admin_sessions`, `admin_login_links`, `visitor_salts` en `visitor_hashes`, maar wel hun `CREATE TABLE`.
+De terugzetting meldde 26 tabellen, en `sources`, `feeds` en `__drizzle_migrations` kregen dezelfde `CHECKSUM TABLE` als de bron.
+
+De computer van de proef had geen `mysqldump`.
 De proef gebruikte `mariadb-dump` en `mariadb` 10.11.19 uit de container van `docker compose`, via twee kleine scripts die het optiebestand de container in kopiëren en dan de client daar draaien.
 De opdrachten, de rechten, het optiebestand, de compressie en het opruimen zijn dezelfde als op de host.
 

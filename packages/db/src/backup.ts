@@ -1,10 +1,11 @@
 import { parseEnv } from '@fansite/shared/env'
 import { createConnection, type RowDataPacket } from 'mysql2/promise'
 import { spawn } from 'node:child_process'
-import { createReadStream, createWriteStream } from 'node:fs'
-import { mkdir, mkdtemp, readdir, rename, rm, stat, writeFile } from 'node:fs/promises'
+import { createReadStream } from 'node:fs'
+import { mkdir, mkdtemp, open, readdir, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { type Writable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import { createGunzip, createGzip } from 'node:zlib'
 import * as z from 'zod'
@@ -14,13 +15,27 @@ import { databaseEnvSchema } from './env.ts'
 const day = 24 * 60 * 60 * 1000
 
 /**
- * The tables that hold the tracking data of the day: the salt and the hashes of the visitors.
- * The visit counters throw them away at the end of the day (see _We tellen paginaweergaven en
- * unieke bezoekers per dag_ in docs/beslissingen.md), so a dump keeps their structure and not
- * their rows. The hashes of one night would otherwise stay on the host for 14 days, with the
- * salt that turns them back into addresses.
+ * The tables whose rows a dump leaves out, so it keeps their structure only. Each holds data
+ * that the site or the importer promises to throw away, and 14 days of dumps would keep it:
+ *
+ * - `visitor_hashes` and `visitor_salts`: the visit counters throw them away at the end of the
+ *   day (see _We tellen paginaweergaven en unieke bezoekers per dag_ in docs/beslissingen.md),
+ *   and the salt turns the hashes back into addresses;
+ * - `discussions`: the screen name of the last commenter, which the importer replaces at every
+ *   run (see the Redactie chapter in Storybook);
+ * - `admin_sessions` and `admin_login_links`: a restore would bring back a session or a link
+ *   that was revoked after the dump.
+ *
+ * The importer fills the discussions again within a quarter of an hour, and signing in again
+ * makes a session.
  */
-export const dayTables = ['visitor_hashes', 'visitor_salts'] as const
+export const structureOnlyTables = [
+  'admin_login_links',
+  'admin_sessions',
+  'discussions',
+  'visitor_hashes',
+  'visitor_salts',
+] as const
 
 /** The line `mysqldump` ends a complete dump with. A dump without it was cut short. */
 const completionMarker = '-- Dump completed'
@@ -64,6 +79,12 @@ export async function backUp(env: BackupEnv, now = new Date()) {
     throw new Error(`${target} exists already. Try again in a moment.`)
   }
   const bytes = await withOptionFile(connection, async (optionFile) => {
+    // `wx` fails when another run has the same `.partial` open. That run's file stays: only a
+    // file this run made is removed below.
+    const file = await open(partial, 'wx', 0o600).catch((error: NodeJS.ErrnoException) => {
+      throw error.code === 'EEXIST' ? new Error(`${partial} exists already. Try again in a moment.`) : error
+    })
+
     try {
       const common = [
         `--defaults-extra-file=${optionFile}`,
@@ -74,13 +95,18 @@ export async function backUp(env: BackupEnv, now = new Date()) {
         '--hex-blob',
       ]
 
-      // The first pass has the tables with their rows, except those of the day. The second has
-      // only the structure of those: a restored database needs the tables, not the salt.
-      await dumpTo(partial, env.MYSQLDUMP_COMMAND, [
-        [...common, ...dayTables.map((table) => `--ignore-table=${connection.database}.${table}`), connection.database],
-        [...common, '--no-data', connection.database, ...dayTables],
+      // The first pass has the tables with their rows, except those that keep no data. The
+      // second has only the structure of those: a restore needs the tables, not their rows.
+      await dumpTo(file.createWriteStream(), env.MYSQLDUMP_COMMAND, [
+        [
+          ...common,
+          ...structureOnlyTables.map((table) => `--ignore-table=${connection.database}.${table}`),
+          connection.database,
+        ],
+        [...common, '--no-data', connection.database, ...structureOnlyTables],
       ])
     } catch (error) {
+      await file.close().catch(() => {})
       await rm(partial, { force: true })
 
       throw error
@@ -301,7 +327,7 @@ async function countTables(url: string) {
  * program can't start, stops with a code other than 0, or ends without the line that closes a
  * complete dump.
  */
-async function dumpTo(file: string, command: string, passes: readonly (readonly string[])[]) {
+async function dumpTo(file: Writable, command: string, passes: readonly (readonly string[])[]) {
   async function* output() {
     for (const args of passes) {
       const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] })
@@ -325,7 +351,7 @@ async function dumpTo(file: string, command: string, passes: readonly (readonly 
     }
   }
 
-  await pipeline(output, createGzip(), createWriteStream(file, { flags: 'wx', mode: 0o600 }))
+  await pipeline(output, createGzip(), file)
 }
 
 function escapeRegExp(text: string) {
