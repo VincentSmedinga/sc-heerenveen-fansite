@@ -26,8 +26,8 @@
   /*
    * In the header, the menu is a row of its own under the logo (see page.css). Every link is in the lightest colour of
    * the header, 1,125rem, in medium weight (500) and not underlined, except under the mouse, with 1rem between the
-   * links. The current page is told by a red bar under its text, 3px thick, and not by colour or weight. A menu elsewhere,
-   * such as the one in the footer, keeps the look above.
+   * links. The current page is told by a red bar under its text, 3px thick, and not by colour or weight. A menu
+   * elsewhere, such as the one in the footer, keeps the look above.
    * The last link, the forum, is on the right: a link to another site sits apart from the pages of this one. On a
    * screen too narrow for all links in one row, it wraps to a second row and stays on the right.
    * The underline doesn't skip the descenders of letters, so the bar is one unbroken line.

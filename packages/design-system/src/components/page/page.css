@@ -84,11 +84,20 @@
     box-sizing: border-box;
     color: var(--hf-colour-text-default);
     display: grid;
-    gap: 0.5rem 1rem;
+    gap: 0.25rem 1rem;
     grid-template-columns: minmax(0, 1fr) auto;
-    padding-block: max(1rem, env(safe-area-inset-top, 0px)) 0.5rem;
+    padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.3125rem;
     padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
       max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
+
+    /*
+     * The logo is an inline-flex box in the line of text of the link around it. On the baseline of a line of 24px it
+     * would leave a strip under it, so the link would be taller than the logo. Aligned to the top, the line is as tall
+     * as the logo. The logo stays an inline box, which keeps the underline of the link off it (see logo.css).
+     */
+    > :has(> .hf-logo) > .hf-logo {
+      vertical-align: top;
+    }
 
     > .hf-theme-button {
       justify-self: end;
