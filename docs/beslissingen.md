@@ -2349,6 +2349,31 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     Het kleine formulier voor een link is geen `form`, want de editor staat zelf in een formulier, en zijn velden hebben geen naam en horen bij geen formulier, dus ze worden nooit verstuurd.
 - **Alternatieven:** de editor uit het hoofdbestand geven en `next/dynamic` gebruiken (de gebruiker van het package moet dan weten dat het moet, en een vergeten import voegt stilletjes 123 kB toe aan elke pagina); `"sideEffects": false` in het package (dat is een belofte over alle bestanden, ook de CSS, en geeft geen zekerheid voor een clientcomponent); de editor in `apps/site` zetten (dan is het geen component van het designsysteem, zonder stories en axe).
 
+### Beweging heeft vaste duren en curves, en valt bij minder beweging op één plek weg
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** het designsysteem heeft een kleine reeks tokens voor beweging (duren en curves) en een taal die elke toestandswisseling in een groep zet.
+  Alleen kleur, doorzichtigheid en transformatie bewegen.
+  Bij `prefers-reduced-motion: reduce` valt elke overgang uit de taal weg, en dat is geregeld bij de tokens, niet per onderdeel.
+  Een test bewaakt dat.
+- **Waarom:** zonder taal kiest elk onderdeel zijn eigen duur en versnelling, en voelt de site als een verzameling losse handelingen.
+  Een vaste reeks maakt het goedkoop om iets toe te voegen en maakt "minder beweging" een eigenschap van het systeem.
+  Beweging van kleur en doorzichtigheid belast de pagina het minst en verschuift niets onder de ogen van wie leest.
+- **Hoe:** `tokens/motion.css` heeft drie duren (`--hf-motion-duration-quick`, `-short` en `-medium`) en vier curves (`--hf-motion-ease-change`, `-morph`, `-enter` en `-exit`), in de laag `hf.tokens`.
+  Bij `prefers-reduced-motion: reduce` zijn de drie duren 0 s, in datzelfde bestand.
+  De vijf groepen zijn Aanwijzen, Ingedrukt en geselecteerd, Verschijnen en verdwijnen, De hele pagina en Zonder overgang.
+  Het hoofdstuk Beweging in Storybook (Tokens/Beweging) heeft de tokens, de groepen, de regels, een voorbeeld per groep en de lijst van alle toestandswisselingen.
+  De themaknop gebruikt de tokens: `--hf-theme-button-morph` is nu `var(--hf-motion-duration-medium)`, en kleur, rand en vulling nemen de korte duur.
+  Hij ziet en beweegt er hetzelfde uit; het `@media`-blok voor `no-preference` is weg, omdat de duur van de tokens met minder beweging 0 s is.
+  `tokens/motion-css.test.ts` faalt op een tijd in de CSS buiten `motion.css`, en op een `transition` of `animation` die haar duur niet uit een token haalt.
+  De enige uitzondering is vloeiend scrollen in `root.css`, dat zijn eigen `@media` heeft.
+  Het label van `PullToRefresh` volgt de vinger, heeft geen overgang en blijft zoals het is.
+  Dit besluit zet zelf geen overgang in een onderdeel; dat komt per groep in eigen issues.
+- **Alternatieven:** per onderdeel een eigen overgang laten kiezen; dat geeft geen samenhang.
+  Of een bibliotheek voor animaties; dat is een dependency voor iets wat CSS kan.
+  Of helemaal geen overgangen behalve de themaknop; dat laat de site hard aanvoelen, en het besluit is dat beweging een bewuste keuze is, geen toeval.
+- **Later:** vult het besluit _Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat_ (27 oktober 2026) aan: de duren staan nu in de tokens van `motion.css`.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

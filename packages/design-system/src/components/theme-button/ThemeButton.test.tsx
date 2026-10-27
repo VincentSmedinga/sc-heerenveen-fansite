@@ -148,9 +148,11 @@ describe('ThemeButton', () => {
       throw new Error(`No end of ${start} in theme-button.css`)
     }
 
-    it('keeps the duration of the morph in one value, and the colour change at 0,2 seconds', () => {
-      expect(css().match(/--hf-theme-button-morph: [^;]+;/g)).toEqual(['--hf-theme-button-morph: 0.4s;'])
-      expect(css()).toContain('background-color 0.2s,')
+    it('takes the duration of the morph and of the colour from the motion tokens', () => {
+      expect(css().match(/--hf-theme-button-morph: [^;]+;/g)).toEqual([
+        '--hf-theme-button-morph: var(--hf-motion-duration-medium);',
+      ])
+      expect(css()).toContain('background-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),')
     })
 
     it('shows the other icon only under hover: hover and with :focus-visible, and not when the button was clicked', () => {
@@ -168,17 +170,9 @@ describe('ThemeButton', () => {
       expect(css()).not.toMatch(/aria-pressed='(?:true|false)'\]:active/)
     })
 
-    it('has transitions only without reduced motion', () => {
-      let sheet = css()
-      let guarded = 0
-
-      while (sheet.includes('@media (prefers-reduced-motion: no-preference)')) {
-        sheet = sheet.replace(block('@media (prefers-reduced-motion: no-preference)', sheet), '')
-        guarded += 1
-      }
-
-      expect(guarded).toBe(1)
-      expect(sheet).not.toContain('transition')
+    it('has no time of its own, so the 0s of the tokens with reduced motion takes all motion away', () => {
+      expect(css()).not.toMatch(/\d(?:ms|s)\b/)
+      expect(css()).not.toContain('prefers-reduced-motion')
     })
 
     it('moves the icon with transforms only, from one number, so every browser draws the same', () => {

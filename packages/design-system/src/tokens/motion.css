@@ -1,0 +1,43 @@
+/*
+ * Motion tokens: how long a change takes and how it speeds up. A component takes them for every
+ * transition and never writes a time of its own; the chapter Beweging in Storybook says which
+ * group of changes takes which token.
+ *
+ * With reduced motion (prefers-reduced-motion: reduce) every duration is 0s, here and nowhere
+ * else, so a transition that uses the tokens has no motion left and a component does not
+ * have to think of it. The test in motion-css.test.ts keeps it that way: it fails on a
+ * time written outside this file.
+ */
+
+@layer hf.tokens {
+  :root {
+    /* Pressing: the answer to a finger or a key, which has to feel immediate. */
+    --hf-motion-duration-quick: 0.1s;
+
+    /* A change of colour, border or fill: under the mouse, selected, and fading in or out. */
+    --hf-motion-duration-short: 0.2s;
+
+    /* A change of shape, and the longest there is: the sun turning into the moon. */
+    --hf-motion-duration-medium: 0.4s;
+
+    /* One state turns into another: a colour or a fill. */
+    --hf-motion-ease-change: ease;
+
+    /* One shape turns into another, so both ends are slow. */
+    --hf-motion-ease-morph: ease-in-out;
+
+    /* Something comes in or appears: fast first, then it settles. */
+    --hf-motion-ease-enter: ease-out;
+
+    /* Something goes away: slow first, then it is gone. */
+    --hf-motion-ease-exit: ease-in;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --hf-motion-duration-quick: 0s;
+      --hf-motion-duration-short: 0s;
+      --hf-motion-duration-medium: 0s;
+    }
+  }
+}

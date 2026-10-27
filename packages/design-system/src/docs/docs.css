@@ -191,3 +191,87 @@
     padding-inline: 1.5rem;
   }
 }
+
+/*
+ * The examples of the chapter Beweging. Each one is made with the motion tokens, as a component
+ * will be, and not with a transition of a component: the components get theirs one group at a
+ * time, in issues of their own.
+ */
+@layer hf.components {
+  ._hf-docs-motion-tokens {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  ._hf-docs-motion-example {
+    margin-block-end: 1.5rem;
+  }
+
+  ._hf-docs-motion-stage {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  ._hf-docs-motion-point {
+    transition: color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+  }
+
+  ._hf-docs-motion-button {
+    transition:
+      background-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      border-color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+  }
+
+  ._hf-docs-motion-toggle {
+    background-color: transparent;
+    border-color: currentcolor;
+    color: inherit;
+    transition:
+      background-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      border-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+
+    /* Pressing answers at once; letting go takes the short duration again. */
+    &:active {
+      transition:
+        background-color var(--hf-motion-duration-quick) var(--hf-motion-ease-change),
+        border-color var(--hf-motion-duration-quick) var(--hf-motion-ease-change),
+        color var(--hf-motion-duration-quick) var(--hf-motion-ease-change);
+    }
+
+    &:hover {
+      background-color: transparent;
+      border-color: currentcolor;
+      color: var(--hf-colour-text-default);
+    }
+
+    &[aria-pressed='true'] {
+      background-color: var(--hf-colour-background-button);
+      border-color: var(--hf-colour-background-button);
+      color: var(--hf-colour-text-on-button);
+    }
+  }
+
+  ._hf-docs-motion-panel {
+    border: 1px solid var(--hf-colour-border-surface);
+    border-radius: 0.25rem;
+    margin: 0;
+    opacity: 0;
+    padding: 0.75rem 1rem;
+    transition: opacity var(--hf-motion-duration-short) var(--hf-motion-ease-exit);
+
+    &[data-open] {
+      opacity: 1;
+      transition: opacity var(--hf-motion-duration-short) var(--hf-motion-ease-enter);
+    }
+  }
+
+  ._hf-docs-motion-header {
+    background-color: var(--hf-colour-background-header);
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+  }
+}
