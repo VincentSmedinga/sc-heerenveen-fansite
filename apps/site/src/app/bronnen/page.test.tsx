@@ -54,6 +54,7 @@ describe('the page Onze bronnen', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="podcasts">Podcasts</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="voorstellen">Mis je een bron?</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitgever">Ben je zelf een bron?</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="nieuwsbrief-lc">Abonneer je op de nieuwsbrief van de LC!</h2>',
     ])
     expect(withoutIcons(html)).toContain(
       '<li><a href="https://testkrant.test">Testkrant</a><p>Een dagblad. Het schrijft over sc Heerenveen.</p></li>',
@@ -67,15 +68,33 @@ describe('the page Onze bronnen', () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     const html = await render()
-    const links = [...html.matchAll(/<a href="https:\/\/[^"]*">(.*?)<\/a>/g)].map(([, content]) => content ?? '')
+    const links = [...html.matchAll(/<a href="https:\/\/(?!www\.lc\.nl)[^"]*">(.*?)<\/a>/g)].map(
+      ([, content]) => content ?? '',
+    )
 
     expect(links).toHaveLength(3)
     for (const content of links) {
       expect(content).toMatch(/<span class="hf-icon-tail">[^<]*<svg aria-hidden="true" class="hf-icon"/)
       expect(content).toContain('<path d="M9.5 2.5h4v4"></path>')
     }
-    // The other two icons are the envelopes in the two cards.
-    expect(html.match(/<svg /g)).toHaveLength(5)
+    // The other three icons are the envelopes in two cards and the icon of the newsletter link.
+    expect(html.match(/<svg /g)).toHaveLength(6)
+  })
+
+  it('invites visitors to subscribe to the newsletter of the LC, with the icon for a link to another site behind the link', async () => {
+    vi.mocked(getSources).mockResolvedValue(sources)
+
+    const html = await render()
+    const [, content] =
+      html.match(/<a href="https:\/\/www\.lc\.nl\/sport\/nieuwsbrief-sc-heerenveen\/157167352\.html">(.*?)<\/a>/) ?? []
+
+    expect(html).toContain('hf-card-warm" aria-labelledby="nieuwsbrief-lc"')
+    expect(html).toContain(
+      'Misschien vergat Sander de Vries het in Omroep Abe te noemen – dan helpen we graag een handje:',
+    )
+    expect(content).toMatch(/<span class="hf-icon-tail">[^<]*<svg aria-hidden="true" class="hf-icon"/)
+    expect(content).toContain('<path d="M9.5 2.5h4v4"></path>')
+    expect(withoutIcons(content ?? '')).toBe('schrijf je snel in')
   })
 
   it('draws the envelope in front of the address in both cards, hidden from screen readers', async () => {
@@ -96,14 +115,14 @@ describe('the page Onze bronnen', () => {
     ).toHaveLength(2)
   })
 
-  it('is the one main of the page, with the h1 and the introduction as its intro and a card for each kind under it, and a sidebar with two coloured cards', async () => {
+  it('is the one main of the page, with the h1 and the introduction as its intro and a card for each kind under it, and a sidebar with three coloured cards', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><p class="hf-intro"><b>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/b><\/p><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><section class="hf-card" aria-labelledby="podcasts">.*<\/section><\/div><\/main><aside class="hf-page-sidebar hf-page-sidebar-split" aria-label="Contact over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="uitgever">.*<\/section><\/aside>$/,
+      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><p class="hf-intro"><b>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/b><\/p><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><section class="hf-card" aria-labelledby="podcasts">.*<\/section><\/div><\/main><aside class="hf-page-sidebar hf-page-sidebar-split" aria-label="Meer over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-strong" aria-labelledby="uitgever">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="nieuwsbrief-lc">.*<\/section><\/aside>$/,
     )
   })
 
@@ -113,7 +132,7 @@ describe('the page Onze bronnen', () => {
     const html = await render()
     const cards = html.match(/<section.*?<\/section>/g) ?? []
 
-    expect(cards).toHaveLength(4)
+    expect(cards).toHaveLength(5)
     expect(cards[0]).toContain('<h2 class="hf-heading-2 hf-heading-anchored" id="nieuws">Nieuws</h2>')
     expect(cards[0]?.match(/<li>/g)).toHaveLength(2)
     expect(cards[1]).toContain('<h2 class="hf-heading-2 hf-heading-anchored" id="podcasts">Podcasts</h2>')
@@ -129,11 +148,11 @@ describe('the page Onze bronnen', () => {
     const html = await render()
 
     expect(html).toContain('hf-card-soft" aria-labelledby="voorstellen"')
-    expect(html).toContain('hf-card-warm" aria-labelledby="uitgever"')
+    expect(html).toContain('hf-card-strong" aria-labelledby="uitgever"')
     expect(html.match(/href="mailto:fansite@heerenveen\.org"/g)).toHaveLength(2)
   })
 
-  it('makes each heading a link to itself, with a Dutch anchor for the kind and for the two cards', async () => {
+  it('makes each heading a link to itself, with a Dutch anchor for the kind and for the three cards', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     expect(headingAnchors(await renderRaw())).toEqual([
@@ -141,6 +160,7 @@ describe('the page Onze bronnen', () => {
       ['podcasts', 'Podcasts'],
       ['voorstellen', 'Mis je een bron?'],
       ['uitgever', 'Ben je zelf een bron?'],
+      ['nieuwsbrief-lc', 'Abonneer je op de nieuwsbrief van de LC!'],
     ])
   })
 
@@ -176,7 +196,7 @@ describe('the page Onze bronnen', () => {
     const html = await render()
     const cards = html.match(/<section.*?<\/section>/g) ?? []
 
-    expect(cards).toHaveLength(3)
+    expect(cards).toHaveLength(4)
     expect(cards[0]).toContain('<h2 class="hf-heading-2 hf-heading-anchored" id="forum">Forum</h2>')
     expect(cards[0]?.match(/<li>/g)).toHaveLength(1)
     expect(html).toContain('Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.')
