@@ -96,7 +96,7 @@ describe('the page Zoeken without a search', () => {
     const html = await render()
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Zoeken</h1>'])
-    expect(html).toContain('<label class="hf-field-label" for="zoek">Zoeken</label>')
+    expect(html).toContain('<label class="hf-field-label" for="zoek" id="zoek-label">Zoeken</label>')
     expect(html).toContain('<button')
     expect(html).toMatch(/>Zoek<\/button>/u)
     expect(html).not.toContain('resultaat')

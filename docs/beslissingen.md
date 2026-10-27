@@ -2323,6 +2323,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een eigen script met Playwright en `@axe-core/playwright` over alle stories; dat is een script van veertig regels om te onderhouden, en het steunt geen play-tests.
   De checks laten zoals ze zijn, met alleen het paneel in Storybook.
 
+### De teksteditor staat in een eigen onderdeel van het package, zodat Tiptap alleen laadt waar hij nodig is
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** `RichTextEditor` komt niet uit het hoofdbestand van het designsysteem, maar uit `@fansite/design-system/rich-text-editor`.
+  Alleen een pagina die dat bestand importeert, krijgt Tiptap in haar JavaScript.
+- **Waarom:** Tiptap is groot.
+  Een proefpagina met de editor kreeg één bestand van 391 kB (123 kB gezipt) erbij, en geen enkele andere route verwees ernaar.
+  Het hoofdbestand is een rij `export`s, en het package zegt niet dat de bestanden geen neveneffecten hebben, dus een bundelaar mag niet aannemen dat hij een ongebruikte export kan weglaten.
+  Een eigen onderdeel laat Tiptap buiten beeld zonder dat we op een bundelaar hoeven te vertrouwen.
+- **Hoe:** de editor is een clientcomponent (`'use client'`) in `src/components/rich-text-editor/`, met de stijlen in `rich-text-editor.css` in `index.css` (een paar regels die elke pagina krijgt).
+  `index.test.ts` controleert dat het hoofdbestand de editor niet geeft en dat de `exports` van het package naar een bestand wijzen.
+  - We nemen alleen de onderdelen die nodig zijn: `core`, `react`, `pm`, de extensies voor document, alinea, tekst, kop, lijst met bolletjes, lijstpunt, vet, cursief en link, en `extensions` voor ongedaan maken en opnieuw doen.
+    Het is geen `starter-kit`, want die brengt onderdelen mee die we niet gebruiken.
+    Alle pakketten zijn MIT, hebben geen installatiescript dat bij het installeren draait en doen zelf geen verzoeken naar buiten.
+    `allowBuilds` verandert niet.
+  - Een lijstpunt bevat één alinea, dus er is geen lijst in een lijst, en Tab en Shift+Tab verplaatsen geen lijstpunt maar verlaten de editor.
+    Zo zit er geen toetsenbordval in, en de opmaak blijft die van een artikel nu.
+  - Een link bewaart alleen het adres.
+    Een adres dat niet met `https://` of met een enkele `/` begint, geeft geen link, ook niet in geplakte tekst.
+    De editor maakt zelf geen link van een adres dat iemand typt of plakt.
+  - De editor bewaart de tekst als Tiptap's JSON in een verborgen veld, dat bij elke wijziging wordt bijgewerkt.
+    Het kleine formulier voor een link is geen `form`, want de editor staat zelf in een formulier, en zijn velden hebben geen naam en horen bij geen formulier, dus ze worden nooit verstuurd.
+- **Alternatieven:** de editor uit het hoofdbestand geven en `next/dynamic` gebruiken (de gebruiker van het package moet dan weten dat het moet, en een vergeten import voegt stilletjes 123 kB toe aan elke pagina); `"sideEffects": false` in het package (dat is een belofte over alle bestanden, ook de CSS, en geeft geen zekerheid voor een clientcomponent); de editor in `apps/site` zetten (dan is het geen component van het designsysteem, zonder stories en axe).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -5644,3 +5668,11 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het bijschrift van de tabel zegt "Doelpuntenmakers van sc Heerenveen in het seizoen …".
   De namen in de code (`TopScorers`, `topScorersOf`, `TopScorersTable`) blijven, omdat bezoekers ze niet zien.
 - **Alternatieven:** "Topscorers" houden (kort en bekend, maar niet meer waar); "Wie scoorde" (dichter bij de spreektaal, maar minder netjes als kop).
+
+### Tiptap is de teksteditor voor de artikelen van de redactie
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** Tiptap is de teksteditor voor de artikelen van de redactie, als component van het designsysteem met alleen de opmaak die een artikel nu heeft.
+- **Waarom:** wie een artikel schrijft, hoeft geen opmaaktekens te kennen.
+  Tiptap is open (MIT), onderhouden en heeft een kleine kern; de opmaak blijft klein omdat we alleen laden wat we gebruiken.
+- **Alternatieven:** de textarea met eigen opmaak houden (de schrijver moet de tekens leren kennen); een andere editor zoals Lexical of Slate (meer werk om toegankelijk te maken); `contenteditable` zelf bouwen (veel werk en veel fouten).

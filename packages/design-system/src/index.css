@@ -57,6 +57,7 @@
 @import url('./components/input/input.css');
 @import url('./components/textarea/textarea.css');
 @import url('./components/select/select.css');
+@import url('./components/rich-text-editor/rich-text-editor.css');
 @import url('./components/button/button.css');
 @import url('./components/error-summary/error-summary.css');
 @import url('./utilities/visually-hidden.css');

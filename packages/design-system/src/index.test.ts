@@ -76,6 +76,10 @@ describe('the JavaScript entry of the package', () => {
     expect(designSystem.textElements).toEqual(['p', 'span'])
   })
 
+  it('keeps the rich text editor out of the main entry, so Tiptap only loads on a page that imports it', () => {
+    expect(designSystem).not.toHaveProperty('RichTextEditor')
+  })
+
   it('has an exports entry for it that points at a file that exists, next to the CSS', () => {
     const { exports } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
       exports: Record<string, string>
@@ -83,6 +87,7 @@ describe('the JavaScript entry of the package', () => {
 
     expect(exports['.']).toBe('./src/index.ts')
     expect(exports['./index.css']).toBe('./src/index.css')
+    expect(exports['./rich-text-editor']).toBe('./src/rich-text-editor.ts')
     for (const target of Object.values(exports).filter((value) => !value.includes('*'))) {
       expect(existsSync(join(root, target))).toBe(true)
     }
