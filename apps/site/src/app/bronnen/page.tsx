@@ -103,8 +103,8 @@ export default async function SourcesPage() {
             .
           </Text>
         </Card>
-        <Card aria-labelledby="nieuwsbrief" surface="warm">
-          <Heading anchor id="nieuwsbrief" level={2}>
+        <Card aria-labelledby="nieuwsbrief-lc" surface="warm">
+          <Heading anchor id="nieuwsbrief-lc" level={2}>
             Abonneer je op de nieuwsbrief van de LC!
           </Heading>
           <Text>

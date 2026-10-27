@@ -54,7 +54,7 @@ describe('the page Onze bronnen', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="podcasts">Podcasts</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="voorstellen">Mis je een bron?</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitgever">Ben je zelf een bron?</h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="nieuwsbrief">Abonneer je op de nieuwsbrief van de LC!</h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="nieuwsbrief-lc">Abonneer je op de nieuwsbrief van de LC!</h2>',
     ])
     expect(withoutIcons(html)).toContain(
       '<li><a href="https://testkrant.test">Testkrant</a><p>Een dagblad. Het schrijft over sc Heerenveen.</p></li>',
@@ -88,7 +88,7 @@ describe('the page Onze bronnen', () => {
     const [, content] =
       html.match(/<a href="https:\/\/www\.lc\.nl\/sport\/nieuwsbrief-sc-heerenveen\/157167352\.html">(.*?)<\/a>/) ?? []
 
-    expect(html).toContain('hf-card-warm" aria-labelledby="nieuwsbrief"')
+    expect(html).toContain('hf-card-warm" aria-labelledby="nieuwsbrief-lc"')
     expect(html).toContain(
       'Misschien vergat Sander de Vries het in Omroep Abe te noemen – dan helpen we graag een handje:',
     )
@@ -122,7 +122,7 @@ describe('the page Onze bronnen', () => {
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><p class="hf-intro"><b>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/b><\/p><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><section class="hf-card" aria-labelledby="podcasts">.*<\/section><\/div><\/main><aside class="hf-page-sidebar hf-page-sidebar-split" aria-label="Meer over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-strong" aria-labelledby="uitgever">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="nieuwsbrief">.*<\/section><\/aside>$/,
+      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><p class="hf-intro"><b>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/b><\/p><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><section class="hf-card" aria-labelledby="podcasts">.*<\/section><\/div><\/main><aside class="hf-page-sidebar hf-page-sidebar-split" aria-label="Meer over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-strong" aria-labelledby="uitgever">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="nieuwsbrief-lc">.*<\/section><\/aside>$/,
     )
   })
 
@@ -160,7 +160,7 @@ describe('the page Onze bronnen', () => {
       ['podcasts', 'Podcasts'],
       ['voorstellen', 'Mis je een bron?'],
       ['uitgever', 'Ben je zelf een bron?'],
-      ['nieuwsbrief', 'Abonneer je op de nieuwsbrief van de LC!'],
+      ['nieuwsbrief-lc', 'Abonneer je op de nieuwsbrief van de LC!'],
     ])
   })
 
