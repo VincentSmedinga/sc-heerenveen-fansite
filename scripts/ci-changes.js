@@ -18,7 +18,7 @@
 // 5. A package.json or a tsconfig, wherever it is, runs them too: a dependency or a compiler
 //    option can change what the site builds, also from inside a skippable folder.
 //
-// The axe check of the stories of the design system (`pnpm test:stories`, about 30 seconds) is
+// The axe check of the stories of the design system (`pnpm test:stories`, 44 seconds in CI) is
 // decided here too, by `decideStories`, as the output `stories`. It follows the same first
 // three rules, then runs only if a file that can change a story changed (see `storiesRules`).
 //

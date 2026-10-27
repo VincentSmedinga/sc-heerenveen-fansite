@@ -156,7 +156,7 @@ test('runs it for a path it does not trust, an empty list, the label and any oth
   }
 })
 
-test('the workflow gives only the two checks of the site an if, and has no paths filter', () => {
+test('the workflow gives only the two checks of the site and the stories an if, and has no paths filter', () => {
   const workflow = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8')
   const steps = workflow.split(/^ {6}- /m).slice(1)
   const guarded = steps.filter((step) => step.includes("steps.changes.outputs.site != 'false'"))
