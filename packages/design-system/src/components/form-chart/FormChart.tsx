@@ -49,7 +49,7 @@ export const FormChart = ({ className, matches = 34, results, window: span = 5, 
         <BarChart.Trend values={Array.from({ length: matches }, (_, index) => line[index] ?? null)} />
       </BarChart>
       <Text appearance="meta" className="hf-form-chart-key">
-        <b>W</b> winst (3 punten), <b>G</b> gelijkspel (1), <b>V</b> verlies (0).
+        <b>W</b> winst (3 punten), <b>G</b> gelijk (1), <b>V</b> verlies (0).
       </Text>
       <Text appearance="meta" className="hf-form-chart-line">
         {latest === null

@@ -81,11 +81,22 @@ const GoalsCard = ({ trend = true }: { trend?: boolean }) => (
       <Text appearance="meta">
         De lijn laat zien hoeveel doelpunten sc Heerenveen per wedstrijd maakte in de laatste 5 wedstrijden: nu 1,8.
       </Text>
-      <DataTable
-        caption="Doelpunten van sc Heerenveen per speelronde"
-        columns={['Speelronde', 'Doelpunten']}
-        rows={goals.map((value, index) => ({ cells: [value], header: String(index + 1) }))}
-      />
+      <div
+        style={{
+          columnGap: '1.5rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(14rem, 100%), 1fr))',
+        }}
+      >
+        {[goals.slice(0, 6), goals.slice(6)].map((half, part) => (
+          <DataTable
+            caption={`Doelpunten van sc Heerenveen per speelronde, ronde ${part * 6 + 1} tot en met ${part * 6 + half.length}`}
+            columns={['Speelronde', 'Doelpunten']}
+            key={part}
+            rows={half.map((value, index) => ({ cells: [value], header: String(part * 6 + index + 1) }))}
+          />
+        ))}
+      </div>
     </Card>
   </div>
 )

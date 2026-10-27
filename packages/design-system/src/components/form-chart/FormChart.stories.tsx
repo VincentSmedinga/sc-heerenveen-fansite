@@ -11,7 +11,7 @@ const meta = preview.meta({
   argTypes: {
     matches: { description: 'Het aantal wedstrijden van het seizoen.' },
     results: {
-      description: 'De gespeelde wedstrijden, de oudste eerst: `W` (winst), `G` (gelijkspel) of `V` (verlies).',
+      description: 'De gespeelde wedstrijden, de oudste eerst: `W` (winst), `G` (gelijk) of `V` (verlies).',
     },
     window: { description: 'Het aantal wedstrijden waarover de lijn het gemiddelde neemt.' },
   },
@@ -67,7 +67,7 @@ const SeasonCard = ({ results, surface = 'default' }: { results: readonly FormRe
           columns={['Uitslag', 'Wedstrijden', 'Punten']}
           rows={[
             { cells: [count('W'), count('W') * pointsOf('W')], header: 'Winst' },
-            { cells: [count('G'), count('G') * pointsOf('G')], header: 'Gelijkspel' },
+            { cells: [count('G'), count('G') * pointsOf('G')], header: 'Gelijk' },
             { cells: [count('V'), 0], header: 'Verlies' },
             {
               cells: [results.length, results.reduce((sum, result) => sum + pointsOf(result), 0)],

@@ -6,7 +6,7 @@ import { MarkRow, type MarkRowMark } from './MarkRow'
 const marks: MarkRowMark[] = [
   { label: 'winst', mark: 'W', tone: 'positive' },
   { label: 'verlies', mark: 'V', tone: 'negative' },
-  { label: 'gelijkspel', mark: 'G', tone: 'neutral' },
+  { label: 'gelijk', mark: 'G', tone: 'neutral' },
 ]
 
 describe('MarkRow', () => {
@@ -28,7 +28,7 @@ describe('MarkRow', () => {
 
     expect(container.querySelector('.hf-mark-row-title')?.getAttribute('aria-hidden')).toBe('true')
     expect(container.querySelector('.hf-mark-row-marks')?.getAttribute('aria-hidden')).toBe('true')
-    expect(container.querySelector('.hf-visually-hidden')?.textContent).toBe('Vorm: winst, verlies, gelijkspel')
+    expect(container.querySelector('.hf-visually-hidden')?.textContent).toBe('Vorm: winst, verlies, gelijk')
   })
 
   it('shows the text for no marks, which a screen reader reads with the title', () => {

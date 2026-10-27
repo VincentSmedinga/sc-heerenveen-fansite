@@ -17,10 +17,10 @@ describe('toneOf', () => {
 describe('formOf', () => {
   it('gives the latest five results as marks, the oldest first, with a word for each', () => {
     expect(formOf(['V', 'W', 'G', 'V', 'W', 'G', 'W'])).toEqual([
-      { label: 'gelijkspel', mark: 'G', tone: 'neutral' },
+      { label: 'gelijk', mark: 'G', tone: 'neutral' },
       { label: 'verlies', mark: 'V', tone: 'negative' },
       { label: 'winst', mark: 'W', tone: 'positive' },
-      { label: 'gelijkspel', mark: 'G', tone: 'neutral' },
+      { label: 'gelijk', mark: 'G', tone: 'neutral' },
       { label: 'winst', mark: 'W', tone: 'positive' },
     ])
   })

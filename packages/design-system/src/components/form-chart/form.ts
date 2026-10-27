@@ -2,7 +2,7 @@ import type { BarChartBar } from '../bar-chart/BarChart'
 import type { ChartTone } from '../chart/tones'
 import type { MarkRowMark } from '../mark-row/MarkRow'
 
-/** The results of a match: `W` won (winst), `G` drawn (gelijkspel) and `V` lost (verlies). */
+/** The results of a match: `W` won (winst), `G` drawn (gelijk) and `V` lost (verlies). */
 export const formResults = ['W', 'G', 'V'] as const
 
 export type FormResult = (typeof formResults)[number]
@@ -14,7 +14,7 @@ export const pointsOf = (result: FormResult): number => (result === 'W' ? 3 : re
 export const toneOf = (result: FormResult): ChartTone =>
   result === 'W' ? 'positive' : result === 'G' ? 'neutral' : 'negative'
 
-const labels: Record<FormResult, string> = { G: 'gelijkspel', V: 'verlies', W: 'winst' }
+const labels: Record<FormResult, string> = { G: 'gelijk', V: 'verlies', W: 'winst' }
 
 /** The latest `count` results as marks, the oldest first, with the word for a screen reader. */
 export const formOf = (results: readonly FormResult[], count = 5): MarkRowMark[] =>

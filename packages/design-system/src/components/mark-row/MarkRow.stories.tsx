@@ -19,7 +19,7 @@ const meta = preview.meta({
         component: [
           'Een regel met een titel en een rij gekleurde tekens, zoals de vorm van een team: `Vorm W V G G W`.',
           'Het onderdeel weet niets van voetbal: de tekens, de tonen en de woorden komen van de pagina.',
-          'De tekens zijn verborgen voor een schermlezer, die een zin in woorden krijgt: "Vorm: winst, verlies, gelijkspel".',
+          'De tekens zijn verborgen voor een schermlezer, die een zin in woorden krijgt: "Vorm: winst, verlies, gelijk".',
           'De kleur is nooit het enige teken, want de letter zegt hetzelfde.',
           'Zonder tekens staat er de tekst van `empty`.',
         ].join('\n'),
@@ -36,8 +36,8 @@ export const Default = meta.story({
     marks: [
       { label: 'winst', mark: 'W', tone: 'positive' },
       { label: 'verlies', mark: 'V', tone: 'negative' },
-      { label: 'gelijkspel', mark: 'G', tone: 'neutral' },
-      { label: 'gelijkspel', mark: 'G', tone: 'neutral' },
+      { label: 'gelijk', mark: 'G', tone: 'neutral' },
+      { label: 'gelijk', mark: 'G', tone: 'neutral' },
       { label: 'winst', mark: 'W', tone: 'positive' },
     ],
     title: 'Vorm',

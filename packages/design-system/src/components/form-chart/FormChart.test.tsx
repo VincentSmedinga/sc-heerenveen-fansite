@@ -31,7 +31,7 @@ describe('FormChart', () => {
       'G',
     ])
     expect(container.querySelector('.hf-visually-hidden')?.textContent).toBe(
-      'Vorm: winst, verlies, winst, winst, gelijkspel',
+      'Vorm: winst, verlies, winst, winst, gelijk',
     )
   })
 
@@ -88,7 +88,7 @@ describe('FormChart', () => {
   it('writes the key to the letters, and puts the points in it', () => {
     const { container } = render(<FormChart results={season} />)
 
-    expect(textOf(container)).toContain('W winst (3 punten), G gelijkspel (1), V verlies (0).')
+    expect(textOf(container)).toContain('W winst (3 punten), G gelijk (1), V verlies (0).')
   })
 
   it('takes the number of matches and the size of the window from its props', () => {

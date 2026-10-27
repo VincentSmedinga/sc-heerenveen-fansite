@@ -27,7 +27,7 @@ export type MarkRowProps = Omit<ComponentPropsWithoutRef<'p'>, 'children'> & {
 /**
  * A line with a title and a few coloured signs, such as the form of a team: `Vorm  W V G G W`.
  * The signs are the short form that fans know. They are hidden from a screen reader
- * (`aria-hidden`), which gets a sentence in words instead (`Vorm: winst, verlies, gelijkspel`),
+ * (`aria-hidden`), which gets a sentence in words instead (`Vorm: winst, verlies, gelijk`),
  * and a colour is never the only sign: the letter says the same. Without marks it shows the
  * text of `empty`, or nothing if there is none. mark-row.css gives the look.
  */
