@@ -2393,7 +2393,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De animatie volgt het scrollen en heeft geen tijd van zichzelf, dus ze hoort niet bij de tokens van Beweging en valt niet onder "minder beweging": er beweegt niets zolang de bezoeker niet scrolt.
   De overgang van kleur en vulling van een link neemt wel de tokens: de korte duur voor de kleur (Aanwijzen) en de snelle voor de vulling bij indrukken (Ingedrukt en geselecteerd).
   De rij heeft aan alle kanten 5 pixels ruimte, zodat het scrollgebied de focusrand niet afsnijdt.
-  De rij snapt ook (`scroll-snap-type: x proximity`, met `scroll-snap-align: start` op elk item en `scroll-padding-inline-start` gelijk aan de ruimte van de lijst): het begin van een link komt tot rust op het begin van de rij.
+  De rij snapt ook (`scroll-snap-type: x proximity`, met `scroll-snap-align: start` op elk item en `scroll-padding-inline` gelijk aan de breedte van de vervaging plus de ruimte van de lijst, aan beide kanten): het begin van een link komt tot rust op het begin van de rij.
   Het is `proximity` en niet `mandatory`, zodat de rij alleen snapt als ze bij een link stopt, en een langzame beweging of het toetsenbord niet wordt tegengehouden.
   Een omlopende rij scrolt niet en snapt dus niet.
   Een browser scrolt een link met de focus alleen in beeld als hij bijna onzichtbaar is: een link die half in beeld staat of onder de vervaging, blijft staan, met een focusrand die is afgesneden of vervaagd.
