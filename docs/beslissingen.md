@@ -2249,6 +2249,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** de teksten zijn geen onderdeel van de SVG, dus een diagram dat je als plaatje bewaart, heeft ze niet.
   Zes plakken in een ring van een kolom van 31 rem zijn klein: de ring is ongeveer 110 pixels breed.
 - **Alternatieven:** een taart zonder gat (meer oppervlak, maar geen plek voor het totaal); het getal in de plak zelf (kleine plakken van één doelpunt zijn te smal); een legenda onder het diagram (de koppeling loopt dan alleen via de kleur); zes of twaalf nieuwe kleurtokens voor de plakken (veel om bij te houden, en toch geen 3:1 tussen buren); de teksten als SVG-tekst (die schaalt mee en wordt op een telefoon te klein); een grafiekbibliotheek (het issue sluit die uit).
+- **Later:** zie _De scheiding in een ring is een lichte omlijning, in licht en in donker_.
+  De lijn tussen de plakken is niet meer de kleur van het vlak maar een eigen rol, `--hf-colour-border-chart-slice`; de rest blijft.
 
 ### Een pagina in Storybook is kort, met het voorbeeld en een story per variant
 
@@ -5259,6 +5261,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De cellen van een zijbalk staan nu standaard onder elkaar, dus `wide` hoeft ze niet meer onder elkaar te houden; het maakt alleen de zijbalk breder.
 - **Later:** zie _De kaart Doelpunten per kwartier telt de doelpunten van de wedstrijden met bekende minuten_.
   De hoofdkolom heeft nu twee kaarten, het programma en daaronder de doelpunten per kwartier; op een telefoon is de volgorde het programma, de doelpunten per kwartier, de stand en de rest van de zijbalk.
+- **Later:** zie _Op /wedstrijden hebben de kaarten met cijfers een zacht en een warm vlak, en de uitslagen staan in de hoofdkolom_.
+  De uitslagen staan nu in de hoofdkolom na het programma, en de volgorde op een telefoon is Programma, Uitslagen, Stand, Doelpuntenmakers, De nul gehouden en Doelpunten per kwartier; de breedtes blijven.
 
 ### De stand toont geen doelpunten voor en tegen
 
@@ -5752,6 +5756,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De telling blijft op één plek, `topScorersOf`, want #333 laat haar later per speler in plaats van per naam tellen.
 - **Alternatieven:** de beste vijf houden, met gelijkstaanden (korter, maar de rest blijft onzichtbaar); de beste vijf met een knop voor de rest (extra stap en meer code, terwijl de lijst kort genoeg is).
 - **Later:** de kaart heet sinds 26 oktober 2026 "Doelpuntenmakers" en het aantal spelers staat sinds die dag onder de kop en niet meer onder de tabel; zie _De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop_.
+- **Later:** zie _Op /wedstrijden hebben de kaarten met cijfers een zacht en een warm vlak, en de uitslagen staan in de hoofdkolom_.
+  De zijbalk heet nu "De stand, de ranglijsten en de doelpunten per kwartier".
 
 ### De kaart Doelpunten per kwartier telt de doelpunten van de wedstrijden met bekende minuten
 
@@ -5782,6 +5788,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `goalsPerQuarter` geeft daarvoor `extraTime`: waar als minstens één wedstrijd in de telling `extra_time` heeft.
   Een wedstrijd buiten de telling, zonder doelpunten of niet gespeeld, telt daarvoor niet mee.
 - **Alternatieven:** één diagram met twee ringen (compact, maar moeilijker te lezen); staafjes in plaats van een taart (leesbaarder, maar de projecteigenaar vroeg om een taart); de verlenging als aparte plakken; de wedstrijden zonder bekende doelpunten meetellen met nul doelpunten (de telling lijkt dan completer dan ze is).
+- **Later:** zie _Op /wedstrijden hebben de kaarten met cijfers een zacht en een warm vlak, en de uitslagen staan in de hoofdkolom_.
+  De kaart staat in de zijbalk, na De nul gehouden, en heeft een warm vlak; de telling blijft.
 
 ### De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop
 
@@ -5795,6 +5803,39 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het bijschrift van de tabel zegt "Doelpuntenmakers van sc Heerenveen in het seizoen …".
   De namen in de code (`TopScorers`, `topScorersOf`, `TopScorersTable`) blijven, omdat bezoekers ze niet zien.
 - **Alternatieven:** "Topscorers" houden (kort en bekend, maar niet meer waar); "Wie scoorde" (dichter bij de spreektaal, maar minder netjes als kop).
+
+### De scheiding in een ring is een lichte omlijning, in licht en in donker
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de lijn tussen de plakken van een ring is wit in licht en `blue-50` in donker, en heeft een eigen rol in `colour.css`: `--hf-colour-border-chart-slice`, met een waarde voor licht en voor donker via `light-dark()`.
+  Ze is een omlijning van de plakken, geen gat in de kleur van het vlak.
+- **Waarom:** een doorzichtige lijn tekent niets en scheidt de plakken niet, en de plakken zijn zelf deels doorzichtig.
+  De witte lijn op het warme vlak ziet er goed uit (gezien op een scherm door de projecteigenaar).
+  In donker was de lijn de kleur van het blauwe vlak en zag er vreemd uit; een lichte lijn volgt hetzelfde beeld als in licht.
+  In donker is het `blue-50` en niet puur wit, omdat dat de kleur van de koppen en van het totaal in de ring is: de lijn is dan even licht als de tekst, zonder harder wit.
+  In donker heeft de lijn 14,5:1 tegen het vlak van de kaart, 1,7:1 (groen) en 1,9:1 (rood) tegen de volle plak, en 3,0:1 en 3,3:1 tegen de zwakste plak.
+- **Hoe:** `.hf-donut-chart-slice` gebruikt de nieuwe rol als `stroke`, en niet meer `--hf-colour-background-surface`.
+  In forced colors blijft de lijn `Canvas`.
+  De story van `DonutChart` toont de ring op het witte, het zachte en het warme vlak, in licht en in donker; de test van `donut-chart-css.test.ts` eist de nieuwe rol en weigert een kleur van een vlak.
+  De zwakste plak (70% van de kleur) haalt 3:1 tegen het warme vlak: in licht 3,05:1 (groen) en 3,75:1 (rood), in donker 4,02:1 en 3,68:1.
+  Het verschil met het witte vlak is klein: in licht 3,39:1 en 4,22:1, in donker 4,81:1 en 4,43:1.
+- **Alternatieven:** een doorzichtige lijn; die scheidt de plakken niet.
+  De kleur van de kaart doorgeven aan de ring met een custom property; dan is de lijn in donker donker, wat de projecteigenaar vreemd vond.
+  Een echte opening in de vorm van de ring; die is ingewikkelder (een gelijke breedte over de straal) en heeft nu geen voordeel.
+  Puur wit in donker (harder dan de tekst eromheen).
+
+### Op /wedstrijden hebben de kaarten met cijfers een zacht en een warm vlak, en de uitslagen staan in de hoofdkolom
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** op `/wedstrijden` hebben Stand, Doelpuntenmakers en De nul gehouden een zacht vlak (`surface="soft"`) en Doelpunten per kwartier een warm vlak (`surface="warm"`); Programma en Uitslagen blijven wit.
+  Uitslagen en Doelpunten per kwartier wisselen van plaats: de uitslagen staan in de hoofdkolom na het programma, en de kaart met de ringen in de zijbalk na De nul gehouden en voor de bronvermelding.
+  Op een telefoon is de volgorde dan Programma, Uitslagen, Stand, Doelpuntenmakers, De nul gehouden en Doelpunten per kwartier.
+  De homepage verandert niet.
+- **Waarom:** bijna alle kaarten waren wit, en de projecteigenaar wil dat de kaarten met cijfers meer opvallen en elkaar onderscheiden.
+  De kaarten met cijfers horen bij elkaar, dus ze staan nu bij elkaar in de zijbalk, en de lijst met uitslagen staat bij het programma, de andere lijst met wedstrijden.
+  Op de homepage zijn de prioriteiten anders, dus `StandingsCard` blijft zoals hij is.
+- **Hoe:** de ankers (`#uitslagen`, `#doelpunten-per-kwartier`) blijven, en de zijbalk heet nu "De stand, de ranglijsten en de doelpunten per kwartier".
+- **Alternatieven:** alle kaarten wit laten (de cijfers vallen dan niet op); de homepage dezelfde vlakken geven (de projecteigenaar wil die niet veranderen).
 
 ### Tiptap is de teksteditor voor de artikelen van de redactie
 

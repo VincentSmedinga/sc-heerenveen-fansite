@@ -56,12 +56,12 @@
   /*
    * A slice is a part of the colour of the tone, from 70% (the weakest that still reaches
    * 3:1 on the surface, in light and in dark) to the full colour in the last slice. The line
-   * round it has the colour of the surface, so it is a gap between the slices, and each slice
-   * stands out from the next without a contrast between their colours.
+   * round it is a light outline on every surface, and not a gap in the colour of the surface,
+   * so each slice stands out from the next without a contrast between their colours.
    */
   .hf-donut-chart-slice {
     fill: color-mix(in srgb, var(--hf-donut-colour) var(--hf-donut-strength), transparent);
-    stroke: var(--hf-colour-background-surface);
+    stroke: var(--hf-colour-border-chart-slice);
     stroke-linejoin: round;
     stroke-width: 3;
   }
@@ -116,7 +116,7 @@
     font-weight: var(--hf-strong-font-weight);
   }
 
-  /* In forced colours the fills are replaced, so the gaps between the slices do the work. */
+  /* In forced colours the fills are replaced, so the outlines do the work. */
   @media (forced-colors: active) {
     .hf-donut-chart-slice {
       fill: CanvasText;

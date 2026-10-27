@@ -82,28 +82,6 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <MatchLines matches={programme} now={now} />
           )}
         </Card>
-        <GoalsPerQuarterCard matches={data.matches} />
-      </Page.Main>
-      {/* The table is wide, so the sidebar is too. On a phone it follows the programme: the table,
-          the goal scorers, then the results. */}
-      <Page.Sidebar aria-label="De stand, de ranglijsten en de uitslagen" wide>
-        <Card aria-labelledby="stand">
-          <Heading anchor id="stand" level={2}>
-            Stand
-          </Heading>
-          {data.standings.length === 0 ? (
-            <Text>We hebben de stand nog niet gevonden. Kijk straks nog eens.</Text>
-          ) : (
-            <StandingsTable caption={standingsCaption(data.standings)} rows={data.standings} />
-          )}
-        </Card>
-        <Card aria-labelledby="doelpuntenmakers">
-          <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
-            Doelpuntenmakers
-          </Heading>
-          <TopScorers matches={data.matches} season={data.season} />
-        </Card>
-        <CleanSheetsCard count={parseCleanSheetCount(nul)} matches={data.matches} now={now} />
         <Card aria-labelledby="uitslagen">
           <Heading anchor id="uitslagen" level={2}>
             Uitslagen
@@ -114,6 +92,28 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <MatchLines matches={results} now={now} />
           )}
         </Card>
+      </Page.Main>
+      {/* The table is wide, so the sidebar is too. On a phone it follows the programme and the
+          results: the table, the goal scorers, the clean sheets, then the goals per quarter. */}
+      <Page.Sidebar aria-label="De stand, de ranglijsten en de doelpunten per kwartier" wide>
+        <Card aria-labelledby="stand" surface="soft">
+          <Heading anchor id="stand" level={2}>
+            Stand
+          </Heading>
+          {data.standings.length === 0 ? (
+            <Text>We hebben de stand nog niet gevonden. Kijk straks nog eens.</Text>
+          ) : (
+            <StandingsTable caption={standingsCaption(data.standings)} rows={data.standings} />
+          )}
+        </Card>
+        <Card aria-labelledby="doelpuntenmakers" surface="soft">
+          <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
+            Doelpuntenmakers
+          </Heading>
+          <TopScorers matches={data.matches} season={data.season} />
+        </Card>
+        <CleanSheetsCard count={parseCleanSheetCount(nul)} matches={data.matches} now={now} />
+        <GoalsPerQuarterCard matches={data.matches} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit pages={data.pages} season={data.season} />
         )}

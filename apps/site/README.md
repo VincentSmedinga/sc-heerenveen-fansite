@@ -185,8 +185,9 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 
 ## De wedstrijden
 
-`/wedstrijden` toont onder zes kopjes het programma, de doelpunten per kwartier, de stand, de doelpuntenmakers, de wedstrijden waarin we de nul hielden en de uitslagen van sc Heerenveen 1 (mannen) in het lopende seizoen.
-Het programma met daaronder de doelpunten per kwartier staat in de hoofdkolom en de stand met daaronder de doelpuntenmakers, de nul gehouden en de uitslagen in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
+`/wedstrijden` toont onder zes kopjes het programma, de uitslagen, de stand, de doelpuntenmakers, de wedstrijden waarin we de nul hielden en de doelpunten per kwartier van sc Heerenveen 1 (mannen) in het lopende seizoen.
+Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder de doelpuntenmakers, de nul gehouden en de doelpunten per kwartier in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
+De stand, de doelpuntenmakers en de nul gehouden hebben een zacht vlak (`surface="soft"`), de doelpunten per kwartier een warm vlak (`surface="warm"`), en het programma en de uitslagen blijven wit.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
 De gegevens komen van de importer (zie _De wedstrijden en de stand_ in de [README van de importer](../importer/README.md)) en `@fansite/db/queries` haalt ze op: `listSeasonMatches`, `listSeasonStandings` en `listWikipediaPages`, steeds voor één seizoen.
 `src/matches.ts` vraagt alleen het lopende seizoen (`seasonOf`) en bewaart het antwoord vijf minuten; eerdere seizoenen staan in de database en komen op geen enkele pagina.
@@ -194,7 +195,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 
 - **Programma:** alle wedstrijden die nog niet zijn gespeeld, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
-- **Doelpunten per kwartier:** een kaart in de hoofdkolom, onder het programma, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
+- **Doelpunten per kwartier:** een kaart in de zijbalk, onder de nul gehouden en boven de bronvermelding, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
   `goalsPerQuarter` in `src/matches.ts` telt ze uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), in de competitie en de beker.
   De kwartieren zijn 1–15, 16–30, 31–45, 46–60, 61–75 en 76–90.
   Een doelpunt in blessuretijd telt bij het kwartier ervoor: 45+1 bij 31–45 en 90+3 bij 76–90.
@@ -217,7 +218,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "Gebaseerd op de doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
   De kop van de doelpunten is de afkorting D, met het volle woord onder de tabel.
   Zonder doelpunten staat er een zin in plaats van een tabel.
-- **De nul gehouden:** een kaart in de zijbalk, onder de doelpuntenmakers en boven de uitslagen, met de gespeelde wedstrijden van dit seizoen waarin `goals_against` 0 is, in de competitie en de beker, de nieuwste bovenaan.
+- **De nul gehouden:** een kaart in de zijbalk, onder de doelpuntenmakers en boven de doelpunten per kwartier, met de gespeelde wedstrijden van dit seizoen waarin `goals_against` 0 is, in de competitie en de beker, de nieuwste bovenaan.
   Elke wedstrijd is een korte regel (`ShortMatch`): de dag, de tegenstander met "thuis" of "uit" en de uitslag vanuit onze kant.
   Boven de lijst staat "5 keer de nul gehouden in 11 wedstrijden".
   Er staan tien regels en daaronder de knop "Laad 5 meer", die zonder JavaScript werkt: het formulier laadt de pagina opnieuw met `?nul=15`, in stappen van vijf.

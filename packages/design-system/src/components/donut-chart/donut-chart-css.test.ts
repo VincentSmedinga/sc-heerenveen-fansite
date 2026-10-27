@@ -18,18 +18,19 @@ describe('donut-chart.css', () => {
     expect(css).not.toMatch(/--hf-colour-(?:blue|red|green|grey|steel|sand)-\d/u)
   })
 
-  it('makes a slice a part of the colour, with a gap in the colour of the surface round it', () => {
+  it('makes a slice a part of the colour, with a light outline round it and not the colour of the surface', () => {
     expect(declarationsOf('.hf-donut-chart-slice')).toMatch(
       /fill: color-mix\(in srgb, var\(--hf-donut-colour\) var\(--hf-donut-strength\), transparent\)/u,
     )
-    expect(declarationsOf('.hf-donut-chart-slice')).toMatch(/stroke: var\(--hf-colour-background-surface\)/u)
+    expect(declarationsOf('.hf-donut-chart-slice')).toMatch(/stroke: var\(--hf-colour-border-chart-slice\)/u)
+    expect(declarationsOf('.hf-donut-chart-slice')).not.toMatch(/--hf-colour-background-/u)
   })
 
   it('has no animation or transition, so nothing moves', () => {
     expect(css).not.toMatch(/animation|transition|@keyframes/u)
   })
 
-  it('gives the slices one colour with a gap in forced colours, and keeps the track and lines visible', () => {
+  it('gives the slices one colour with an outline in forced colours, and keeps the track and lines visible', () => {
     expect(css).toMatch(
       /@media \(forced-colors: active\) \{\s*\.hf-donut-chart-slice \{\s*fill: CanvasText;\s*stroke: Canvas/u,
     )
