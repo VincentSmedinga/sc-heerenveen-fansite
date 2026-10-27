@@ -47,7 +47,11 @@
 @import url('./components/discussion-item/discussion-item.css');
 @import url('./components/match/match.css');
 @import url('./components/bar/bar.css');
+@import url('./components/chart/chart.css');
 @import url('./components/donut-chart/donut-chart.css');
+@import url('./components/bar-chart/bar-chart.css');
+@import url('./components/mark-row/mark-row.css');
+@import url('./components/form-chart/form-chart.css');
 @import url('./components/short-match/short-match.css');
 @import url('./components/standings-table/standings-table.css');
 @import url('./components/data-table/data-table.css');

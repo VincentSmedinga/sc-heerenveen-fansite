@@ -1,0 +1,44 @@
+/*
+ * A line of coloured signs with a title in front, such as the form of a team. The colours
+ * of the signs come from the tones in chart.css; a sign uses the full colour, which reaches
+ * 4.5:1 as text.
+ */
+
+@layer hf.components {
+  .hf-mark-row {
+    align-items: baseline;
+    column-gap: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    margin-block: 0 0.5rem;
+  }
+
+  .hf-mark-row-title {
+    color: var(--hf-colour-text-heading);
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  .hf-mark-row-marks {
+    display: inline-flex;
+    gap: 0.5rem;
+  }
+
+  .hf-mark-row-mark {
+    color: var(--hf-chart-colour);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .hf-mark-row-empty {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  /* In forced colours the colours are replaced, and the letter still says what the mark is. */
+  @media (forced-colors: active) {
+    .hf-mark-row-mark {
+      color: CanvasText;
+    }
+  }
+}

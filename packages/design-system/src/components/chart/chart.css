@@ -1,0 +1,28 @@
+/*
+ * The tones of a chart, shared by the parts that draw one (the bars, the marks and the
+ * lines of the charts). A tone gives a colour and a strength: --hf-chart-colour is the full
+ * colour of the tone, and --hf-chart-strength is how much of it a filled part (a bar)
+ * takes. The text of a tone, such as a letter, uses the full colour.
+ */
+
+@layer hf.components {
+  /*
+   * The colours of the results of a match, whatever a chart shows. A win and a loss take
+   * 70% of their colour, the weakest that still reaches 3:1 on every surface, in light and
+   * in dark. The grey of a draw is lighter on the warm surface and takes 80% to reach it.
+   */
+  .hf-chart-tone-positive {
+    --hf-chart-colour: var(--hf-colour-outcome-win);
+    --hf-chart-strength: 70%;
+  }
+
+  .hf-chart-tone-neutral {
+    --hf-chart-colour: var(--hf-colour-outcome-draw);
+    --hf-chart-strength: 80%;
+  }
+
+  .hf-chart-tone-negative {
+    --hf-chart-colour: var(--hf-colour-outcome-loss);
+    --hf-chart-strength: 70%;
+  }
+}

@@ -217,6 +217,17 @@
      */
     --hf-colour-border-chart-slice: light-dark(var(--hf-colour-white), var(--hf-colour-blue-50));
 
+    /*
+     * The line through a bar chart, and the edge round it that parts it from the bars. In light
+     * the line is dark (blue-900) with a white edge. In dark it is light (blue-50) with an edge
+     * in the colour of the warm card (blue-800), the surface a chart sits on. The line itself
+     * reaches 3:1 on every surface. Against a bar of a draw in dark it reaches only 1.92:1, and
+     * the edge between them (4.02:1 or more against the bars) carries the separation, as the
+     * outline of a slice does in a donut chart.
+     */
+    --hf-colour-chart-line: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-50));
+    --hf-colour-chart-line-edge: light-dark(var(--hf-colour-white), var(--hf-colour-blue-800));
+
     /* Lines between rows and the horizontal rule. The same values as the surface border, for now. */
     --hf-colour-border-default: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-700));
     --hf-colour-border-input: light-dark(var(--hf-colour-grey-500), var(--hf-colour-blue-400));
@@ -298,6 +309,8 @@
       --hf-colour-border-surface-soft: var(--hf-colour-steel-200);
       --hf-colour-border-surface-warm: var(--hf-colour-sand-300);
       --hf-colour-border-chart-slice: var(--hf-colour-white);
+      --hf-colour-chart-line: var(--hf-colour-blue-900);
+      --hf-colour-chart-line-edge: var(--hf-colour-white);
       --hf-colour-border-default: var(--hf-colour-grey-200);
       --hf-colour-border-input: var(--hf-colour-grey-500);
       --hf-colour-border-button-soft: var(--hf-colour-blue-500);
