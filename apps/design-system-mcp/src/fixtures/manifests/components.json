@@ -66,14 +66,9 @@
       },
       "stories": [
         {
-          "id": "componenten-tekst-heading--light",
-          "name": "Licht",
-          "snippet": "const Light = () => (\n  <>\n    <Heading level={1}>Nieuws over sc Heerenveen</Heading>\n    <Heading level={2}>Wedstrijden</Heading>\n    <Heading level={3}>Volgende wedstrijd</Heading>\n    <Heading level={4}>Hoe we bronnen kiezen</Heading>\n  </>\n);"
-        },
-        {
-          "id": "componenten-tekst-heading--dark",
-          "name": "Donker",
-          "snippet": "const Dark = () => (\n  <>\n    <Heading level={1}>Nieuws over sc Heerenveen</Heading>\n    <Heading level={2}>Wedstrijden</Heading>\n    <Heading level={3}>Volgende wedstrijd</Heading>\n    <Heading level={4}>Hoe we bronnen kiezen</Heading>\n  </>\n);"
+          "id": "componenten-tekst-heading--default",
+          "name": "Kop",
+          "snippet": "const Default = () => <Heading level={2}>Wedstrijden</Heading>;"
         }
       ],
       "import": "import { Heading, Text } from '@fansite/design-system';"
