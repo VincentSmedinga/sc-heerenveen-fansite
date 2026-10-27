@@ -6082,6 +6082,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Op de homepage zijn de prioriteiten anders, dus `StandingsCard` blijft zoals hij is.
 - **Hoe:** de ankers (`#uitslagen`, `#doelpunten-per-kwartier`) blijven, en de zijbalk heet nu "De stand, de ranglijsten en de doelpunten per kwartier".
 - **Alternatieven:** alle kaarten wit laten (de cijfers vallen dan niet op); de homepage dezelfde vlakken geven (de projecteigenaar wil die niet veranderen).
+- **Later:** zie _Het verloop van het seizoen staat onder de stand, in een warme kaart_.
+  Er staat nu een kaart tussen Stand en Doelpuntenmakers, en op een telefoon is de volgorde Programma, Uitslagen, Stand, Verloop van het seizoen, Doelpuntenmakers, De nul gehouden en Doelpunten per kwartier.
+
+### Het verloop van het seizoen staat onder de stand, in een warme kaart
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** `/wedstrijden` krijgt in de zijbalk direct onder Stand de kaart "Verloop van het seizoen", in het warme vlak, met de grafiek en de tabel van de Eredivisie.
+  De bekerwedstrijden tellen niet mee.
+- **Waarom:** de grafiek ligt qua inhoud het dichtst bij de stand, en de uitslagen komen uit dezelfde gegevens.
+  Een warm vlak onder de zachte stand scheidt de twee.
+  De Eredivisie heeft 34 wedstrijden die de grafiek vullen, een beker niet.
+- **Alternatieven:** boven Doelpunten per kwartier in het zachte vlak (twee warme kaarten bij elkaar); op de homepage (de prioriteiten zijn daar anders); de bekerwedstrijden erbij (de plekken zijn dan niet meer de 34 van het seizoen).
+
+### De staafjes staan op volgorde van speeldatum, niet van speelronde
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** de wedstrijden staan in de grafiek op volgorde van speeldatum.
+  Een uitgestelde wedstrijd die nog niet gespeeld is, heeft geen staafje, en de wedstrijden erna schuiven een plek op tot hij gespeeld is.
+- **Waarom:** de component krijgt een lijst van gespeelde uitslagen en tekent ze naast elkaar.
+  De lijn is het gemiddelde over de laatste vijf wedstrijden die gespeeld zijn, en dat volgt de volgorde van het spelen.
+- **Alternatieven:** een lege plek op de plaats van de speelronde van een uitgestelde wedstrijd (vraagt een lijst met gaten in de component en laat de lijn een gat zien).
 
 ### Tiptap is de teksteditor voor de artikelen van de redactie
 

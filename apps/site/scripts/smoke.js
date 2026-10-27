@@ -641,10 +641,27 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#programma', '#uitslagen', '#stand', '#doelpuntenmakers', '#de-nul-gehouden', '#doelpunten-per-kwartier'],
+      [
+        '#programma',
+        '#uitslagen',
+        '#stand',
+        '#verloop-van-het-seizoen',
+        '#doelpuntenmakers',
+        '#de-nul-gehouden',
+        '#doelpunten-per-kwartier',
+      ],
     )
     assert.doesNotMatch(html, /hf-page-shortcuts/)
     assert.match(matchesHtml, /Testdorp FC/)
+    // The card of the season: the chart, and the table of the Eredivisie results under it.
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="verloop-van-het-seizoen">.*?href="#verloop-van-het-seizoen">Verloop van het /s,
+    )
+    assert.match(
+      matchesHtml,
+      /<caption class="hf-visually-hidden">Uitslagen van sc Heerenveen dit seizoen, met de punten<\/caption>/,
+    )
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
     assert.match(
       matchesHtml,
