@@ -91,7 +91,7 @@ export const Wrapped = meta.story({
     docs: {
       description: {
         story:
-          'Op een scherm van 20em of smaller, of bij 400% zoom, scrolt de rij niet meer maar loopt om. Zo valt er niets buiten beeld en scrolt de pagina niet zijwaarts. De maat volgt de lettergrootte van de bezoeker.',
+          'Op een heel smal scherm, of bij sterk inzoomen, scrolt de rij niet meer maar loopt om. Zo valt er niets buiten beeld en scrolt de pagina niet zijwaarts. De balk volgt de lettergrootte van de bezoeker: met grotere tekst loopt de rij eerder om.',
       },
     },
   },

@@ -2,6 +2,7 @@ import { type ComponentPropsWithoutRef, type ReactNode, useId } from 'react'
 
 import { classNames } from '../classNames'
 import { Link } from '../link/Link'
+import { ShortcutsRow } from './ShortcutsRow'
 
 export type PageBodyProps = ComponentPropsWithoutRef<'div'>
 
@@ -75,8 +76,8 @@ const Header = ({ className, ...props }: PageHeaderProps) => (
  * the Page.Body has two columns the bar is gone, also for a screen reader (`display: none`).
  * The label stays and the row scrolls sideways when it is too long, snapping to the start of a
  * link, with the last link cut off and a fade at the edge, so the reader sees there is more.
- * The bar sticks to the top of the window when the page scrolls. Where the text is larger or
- * the screen narrower than 20em, the row wraps instead, and the bar does not stick.
+ * The bar sticks to the top of the window when the page scrolls. On a very narrow screen, or
+ * where the text is much larger, the row wraps instead, and the bar does not stick.
  *
  * It holds a label and a list of links and is not bound to anchors, so it can serve other rows
  * of links as well. It comes between the Page.Header and the Page.Body, so the reading order
@@ -91,7 +92,7 @@ const Shortcuts = ({ className, items, label, ...props }: PageShortcutsProps) =>
       <span className="hf-page-shortcuts-label" id={labelId}>
         {label}
       </span>
-      <div className="hf-page-shortcuts-row">
+      <ShortcutsRow>
         <ul className="hf-page-shortcuts-list">
           {items.map((item) => (
             <li key={item.href}>
@@ -101,7 +102,7 @@ const Shortcuts = ({ className, items, label, ...props }: PageShortcutsProps) =>
             </li>
           ))}
         </ul>
-      </div>
+      </ShortcutsRow>
     </nav>
   )
 }

@@ -81,6 +81,60 @@ test.describe('the bar under the header of /wedstrijden', () => {
     await expect(page.locator('.hf-page-shortcuts')).toHaveCSS('position', 'static')
   })
 
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`keeps the link that Tab and Shift+Tab bring into view clear of the fade, in ${colorScheme}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await page.setViewportSize({ height: 800, width: 390 })
+      await page.goto('/wedstrijden')
+      const links = page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')
+
+      // Where the focused link stands against the row, and how wide the two fades are now.
+      const measure = () =>
+        page.evaluate(() => {
+          const link = document.activeElement
+          const row = document.querySelector('.hf-page-shortcuts-row')
+
+          if (!(link instanceof HTMLElement) || !row) {
+            return undefined
+          }
+
+          const style = getComputedStyle(row)
+          const box = link.getBoundingClientRect()
+          const edge = row.getBoundingClientRect()
+
+          return {
+            end: parseFloat(style.getPropertyValue('--hf-shortcuts-fade-end')),
+            // The focus ring is 3px wide, 2px away from the link.
+            fromEnd: edge.right - (box.right + 5),
+            fromStart: box.left - 5 - edge.left,
+            name: link.textContent,
+            start: parseFloat(style.getPropertyValue('--hf-shortcuts-fade-start')),
+          }
+        })
+
+      const walk = async (key: 'Shift+Tab' | 'Tab', names: string[]) => {
+        for (const name of names) {
+          await page.keyboard.press(key)
+          await expect(links.filter({ hasText: name })).toBeFocused()
+          // The scrolling and the fade follow the scroll position a frame later.
+          await expect
+            .poll(async () => {
+              const found = await measure()
+
+              return found !== undefined && found.fromStart >= found.start - 1 && found.fromEnd >= found.end - 1
+            })
+            .toBe(true)
+        }
+      }
+
+      await links.first().focus()
+      await walk('Tab', ['Uitslagen', 'Stand', 'Doelpuntenmakers', 'De nul gehouden', 'Doelpunten per kwartier'])
+      await walk('Shift+Tab', ['De nul gehouden', 'Doelpuntenmakers', 'Stand', 'Uitslagen', 'Programma'])
+    })
+  }
+
   test('brings the keyboard on to the card that a link points to', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/wedstrijden')

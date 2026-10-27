@@ -2396,6 +2396,11 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rij snapt ook (`scroll-snap-type: x proximity`, met `scroll-snap-align: start` op elk item en `scroll-padding-inline-start` gelijk aan de ruimte van de lijst): het begin van een link komt tot rust op het begin van de rij.
   Het is `proximity` en niet `mandatory`, zodat de rij alleen snapt als ze bij een link stopt, en een langzame beweging of het toetsenbord niet wordt tegengehouden.
   Een omlopende rij scrolt niet en snapt dus niet.
+  Een browser scrolt een link met de focus alleen in beeld als hij bijna onzichtbaar is: een link die half in beeld staat of onder de vervaging, blijft staan, met een focusrand die is afgesneden of vervaagd.
+  Daarom heeft de rij een klein onderdeel met JavaScript (`ShortcutsRow`, een `onFocus`): staat de link met de focus niet vrij van de vervaging, dan scrolt de rij hem naar het begin van de rij, achter de vervaging.
+  Dat is ook waar de rij snapt, dus het snappen scrolt hem niet terug.
+  Het doet dat alleen voor het toetsenbord (`:focus-visible`): bij een druk met een vinger of de muis zou de rij de link onder de vinger weg scrollen, en dan gaat de klik verloren.
+  De links zelf werken zonder JavaScript; zonder blijft alleen dit scrollen met het toetsenbord weg.
   De balk blijft aan de bovenkant van het venster plakken als de pagina scrolt (`position: sticky`, onder de bovenrand van een telefoon met een inham), zodat de links bij de hand zijn langs de hele pagina.
   Een omlopende balk plakt niet, want hij is te hoog (bij 320 pixels bijna 200 pixels) en zou een groot deel van een klein venster innemen.
   De pagina houdt bij een link naar een kop ruimte voor de balk (`scroll-padding-block-start`, de hoogte in `--hf-shortcuts-height`), zodat de kop eronder staat en niet erachter.
@@ -2415,6 +2420,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   In licht blijven de waarden van het ontwerp: label 7,61:1, link 7,68:1, link onder de muis 10,22:1, en de focusrand 3,85:1 op de balk en 3,20:1 op de ingedrukte vulling.
   Geen waarde moest veranderen.
   Alle paren staan in de contrasttabellen van Tokens/Kleur.
+- **Nadeel:** de gevulde achtergrond van een ingedrukte link haalt geen 3:1 tegen de balk zelf (ongeveer 1,2:1 in licht en in donker).
+  Dat is zo in het ontwerp, en het is bewust: de vulling is de reactie op een druk van een vinger en blijft niet staan, dus ze hoeft geen toestand te dragen.
+  Wat de link aanwijst, haalt de eis wel: de tekst op de vulling (8,49:1 in licht, 7,47:1 in donker) en de focusrand erop (3,2:1 in licht, 5,55:1 in donker).
 - **Alternatieven:** het warme vlak zoals het is, blauw-800 (A); dan lijkt de balk een verlengstuk van de header en is hij gelijk aan de warme kaart, maar hij valt minder op.
 
 ### Een link in de balk is 36 pixels hoog

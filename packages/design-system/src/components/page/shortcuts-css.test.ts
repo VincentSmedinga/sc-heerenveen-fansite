@@ -99,9 +99,9 @@ describe('the row in shortcuts.css', () => {
     )
   })
 
-  it('snaps to the start of a link, near one only, with the first link where it stands at rest', () => {
+  it('snaps to the start of a link, near one only, with room for the fade on both sides', () => {
     expect(row).toContain('scroll-snap-type: x proximity;')
-    expect(row).toContain('scroll-padding-inline-start: 5px;')
+    expect(row).toContain('scroll-padding-inline: calc(1.5rem + 5px);')
     expect(css).toMatch(/\.hf-page-shortcuts-list > li \{\s*scroll-snap-align: start;/)
     expect(css).not.toContain('mandatory')
   })

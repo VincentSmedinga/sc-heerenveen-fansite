@@ -101,10 +101,12 @@
    * away from the link) is not cut off by the scroll area; the row takes the 5px at the start
    * back from the space between the label and the links, so the links stay where they were.
    *
-   * The row snaps: the start of a link comes to rest at the start of the row, where the first
-   * link stands at rest (the scroll padding). It is `proximity`, so the row only snaps when it
-   * stops near a link, and a slow drag or a keyboard is never held back. A wrapped row does not
-   * scroll, so it does not snap.
+   * The row snaps: the start of a link comes to rest at the start of the row, after the fade
+   * (the scroll padding: the width of the fade and the 5px of room), on both sides. A browser
+   * does not scroll a link that gets the focus when it is half in view, or under the fade, so
+   * ShortcutsRow does it, to that same position (see ShortcutsRow.tsx). The snapping is
+   * `proximity`, so the row only snaps when it stops near a link, and a slow drag or a keyboard
+   * is never held back. A wrapped row does not scroll, so it does not snap.
    *
    * The fade: the row is masked at both edges by a gradient of two lengths (the two properties
    * above). The scroll animation sets them from how far the row has scrolled: the fade on the
@@ -130,7 +132,7 @@
     );
     min-inline-size: 0;
     overflow-x: auto;
-    scroll-padding-inline-start: 5px;
+    scroll-padding-inline: calc(1.5rem + 5px);
     scroll-snap-type: x proximity;
 
     &::-webkit-scrollbar {
