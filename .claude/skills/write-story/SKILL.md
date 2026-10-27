@@ -40,19 +40,20 @@ Copy the shape of the meta in `src/components/card/Card.stories.tsx`:
 - made-up content only: `Testkrant`, `Testclub`, links as `#…`, no real headlines, names or addresses.
 
 Two things in that file are the older manner, and you don't copy them: a light and a dark story for each variant, and the `union()` helper that writes the union types into `table.type.summary` (the compiler gives `unknown[number]` for the lists).
-The owner decided on 23 October 2026, in the open issue #123 (_Wat staat er op een pagina in Storybook?_), to change both.
-Those decisions aren't in `docs/beslissingen.md` yet, and `CONTRIBUTING.md` and the README of the design system still say "light and dark" for stories.
-Check `docs/beslissingen.md` first for a newer decision, and tell the Coordinator if the documents still disagree when you build.
-Until the decisions are written down:
+The owner decided on 23 October 2026 (_Een pagina in Storybook is kort, met het voorbeeld en een story per variant_ in `docs/beslissingen.md`, and _Een pagina in Storybook_ in the README of the design system) to change both.
+The page of a component is short:
 
 - **Text:** one paragraph on why the component exists and when to choose it.
   No rem, px, breakpoints or margins: those belong in the code and in `docs/beslissingen.md`.
   A usage rule a reader needs may be one sentence.
 - **Stories:** the example with controls, and one story for each variant that looks different (not for each prop).
   Light and dark come from the theme switch of Storybook; a component that changes with the theme itself, such as on a dark surface, gets its own dark story (`globals: { theme: 'dark' }`).
-- **Hover, focus and visited:** not in every component's stories; the stories for links and forms show them once.
+- **Hover, focus and visited, and the widths:** not in every component's stories; the stories for links and forms show them once.
+  A narrow and a wide screen come from the toolbar of Storybook, not from separate stories.
 - **Controls:** once more than one prop changes the result.
   The union types are fixed once in `ControlsDocsPage`, not in each story; if the table of controls still shows `unknown[number]` for a prop, say so in your report.
+- **Page:** `ControlsDocsPage` is the default for a component; the shared `DocsPage` is for chapters without an example, such as Huisstijl and Redactie.
+- **Tokens:** the tables of colours and contrast stay, and the values in rem and px stay out of the text around them.
 - Don't clean the documentation of other components in this change; it has its own issues.
 
 ## 4. Tests and checks

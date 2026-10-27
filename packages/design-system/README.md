@@ -64,10 +64,32 @@ Wat elk component doet, staat in het hoofdstuk Componenten van Storybook.
   Kan een component meer dan één element zijn, dan kiest een `as`-prop uit een vaste lijst die de typen afdwingen.
   Een onderdeel dat bij één oudercomponent hoort, is een eigenschap van die ouder, ook als het element buiten die ouder wel geldig is: `List.Item` voor het `li` in een `List`, `Page.Header`, `Page.Body`, `Page.Main`, `Page.Sidebar`, `Page.Cell` en `Page.Footer` voor de delen van een `Page`.
   Een component zonder hooks of toestand blijft een servercomponent.
-  Elk component heeft in zijn map een eigen CSS-bestand (`heading/heading.css`), stories in licht en donker, documentatie in Storybook en tests met Vitest en Testing Library.
+  Elk component heeft in zijn map een eigen CSS-bestand (`heading/heading.css`), stories, een pagina in Storybook en tests met Vitest en Testing Library.
 - **Taal:** code en commentaar in Brits Engels (`colour`, `initialise`); alles wat bezoekers en lezers van Storybook zien in het Nederlands.
 
 De keuzes en hun redenen staan in [`docs/beslissingen.md`](../../docs/beslissingen.md).
+
+## Een pagina in Storybook
+
+De pagina van een component is kort: een titel, een alinea, het voorbeeld met controls en de stories die nodig zijn.
+Wat de code en [`docs/beslissingen.md`](../../docs/beslissingen.md) al zeggen, staat er niet nog eens.
+
+- **Tekst:** één alinea over waarom het component er is en wanneer je het kiest.
+  Geen regels over marges, maten of afstanden, en geen waarden in rem, pixels of breakpoints: die horen in de code.
+  Een regel voor het gebruik die een bezoeker of schrijver nodig heeft, mag er staan als één zin.
+- **Stories:** het voorbeeld met controls, en een story per variant die er anders uitziet, niet per prop.
+  Licht en donker komt van de themaknop, niet van een tweede story per component.
+  Alleen een component dat zelf van thema verandert, zoals op een donker vlak, krijgt een eigen donkere story.
+- **Hover, focus en bezocht:** die zitten niet in de stories van elk component.
+  De stories voor links en formulieren tonen ze één keer; de reviewer controleert de rest op de pagina's van de site.
+  Een smal en een breed scherm tonen we met de werkbalk van Storybook, niet met aparte stories.
+- **Controls:** een component krijgt controls zodra meer dan één prop de uitkomst verandert.
+  De typen met `(typeof lijst)[number]` laten we staan; de weergave lossen we op in `ControlsDocsPage`, zodat de MCP-server de typen blijft lezen uit de code.
+- **Pagina:** `ControlsDocsPage` is de standaard voor een component.
+  De gedeelde `DocsPage` is voor hoofdstukken zonder voorbeeld, zoals Huisstijl en Redactie.
+- **Tokens:** de tabellen met kleuren en contrast blijven, want de contrasttabel is het bewijs voor [`docs/toegankelijkheid.md`](../../docs/toegankelijkheid.md).
+  De waarden in rem en pixels staan niet in de tekst eromheen.
+- **Reviewer:** elk visueel component heeft een story, en de reviewer kijkt naar de pagina's van de site in licht en donker.
 
 ## Alleen Baseline 'widely available'
 
