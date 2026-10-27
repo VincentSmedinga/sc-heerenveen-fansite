@@ -102,13 +102,14 @@ const loadContent = cache(async (count: number) => {
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
   // A page that failed answers 200, so noindex keeps search engines from keeping it. The title
-  // template of the layout doesn't apply to the page in its own segment, so the title of the
-  // error page is the title alone. A page with `?nieuws=` is the homepage with more headlines:
-  // it has the homepage as its canonical address, so no search query is given.
+  // of the error page is the title alone, without the template of the layout: the slot of the
+  // layout (@shortcuts) is a segment under it, which brings the template to this page too.
+  // A page with `?nieuws=` is the homepage with more headlines: it has the homepage as its
+  // canonical address, so no search query is given.
   const { nieuws } = await searchParams
 
   return (await loadContent(parseHeadlineCount(nieuws))) === undefined
-    ? { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
+    ? { robots: { index: false }, title: { absolute: withBranch(serverErrorTitle, reviewBranch()) } }
     : pageMetadata('/')
 }
 

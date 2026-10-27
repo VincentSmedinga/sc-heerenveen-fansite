@@ -1,6 +1,7 @@
-import type { ComponentPropsWithoutRef, ReactNode } from 'react'
+import { type ComponentPropsWithoutRef, type ReactNode, useId } from 'react'
 
 import { classNames } from '../classNames'
+import { Link } from '../link/Link'
 
 export type PageBodyProps = ComponentPropsWithoutRef<'div'>
 
@@ -21,6 +22,26 @@ export type PageMainProps = ComponentPropsWithoutRef<'main'> & {
 }
 
 export type PageProps = ComponentPropsWithoutRef<'div'>
+
+export type PageShortcutsItem = {
+  /** Where the link goes, such as `#stand` for a card on the page. */
+  href: string
+  /** The text of the link. It says where the link goes: for a card, the name of the card. */
+  label: string
+}
+
+export type PageShortcutsProps = Omit<
+  ComponentPropsWithoutRef<'nav'>,
+  'aria-label' | 'aria-labelledby' | 'children'
+> & {
+  /** The links, in the order they are shown. At least two make a row. */
+  items: readonly PageShortcutsItem[]
+  /**
+   * The label in front of the links. It is also the name of the navigation for screen readers,
+   * so it says what the links are: "Op deze pagina:" for links to the cards of the page.
+   */
+  label: string
+}
 
 export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
   /**
@@ -46,6 +67,43 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
 const Header = ({ className, ...props }: PageHeaderProps) => (
   <header className={classNames('hf-page-header', className)} {...props} />
 )
+
+/**
+ * A bar under the header with a label and a row of links, in a `nav` of its own, outside the
+ * `main`, as wide as the page. It is for a narrow screen, where the cells of a page sit under
+ * each other and a long one hides the next: the links jump to the cells. From the width where
+ * the Page.Body has two columns the bar is gone, also for a screen reader (`display: none`).
+ * The label stays and the row scrolls sideways when it is too long, with the last link cut off
+ * and a fade at the edge, so the reader sees there is more. Where the text is larger or the
+ * screen narrower than 20em, the row wraps instead.
+ *
+ * It holds a label and a list of links and is not bound to anchors, so it can serve other rows
+ * of links as well. It comes between the Page.Header and the Page.Body, so the reading order
+ * and the focus order are the page's: the menu, this bar, then the content. No link is marked
+ * as the current one.
+ */
+const Shortcuts = ({ className, items, label, ...props }: PageShortcutsProps) => {
+  const labelId = useId()
+
+  return (
+    <nav {...props} aria-labelledby={labelId} className={classNames('hf-page-shortcuts', className)}>
+      <span className="hf-page-shortcuts-label" id={labelId}>
+        {label}
+      </span>
+      <div className="hf-page-shortcuts-row">
+        <ul className="hf-page-shortcuts-list">
+          {items.map((item) => (
+            <li key={item.href}>
+              <Link className="hf-page-shortcuts-link" href={item.href}>
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
+  )
+}
 
 /**
  * The grid of the page between the header and the footer: a `div` with a Page.Main and, if the
@@ -113,6 +171,7 @@ const Footer = ({ className, ...props }: PageFooterProps) => (
 
 // The names in React's developer tools and in the code examples in Storybook.
 Header.displayName = 'Page.Header'
+Shortcuts.displayName = 'Page.Shortcuts'
 Body.displayName = 'Page.Body'
 Main.displayName = 'Page.Main'
 Sidebar.displayName = 'Page.Sidebar'
@@ -123,7 +182,8 @@ Footer.displayName = 'Page.Footer'
  * The page: as wide as the window. The backgrounds of the Page.Header and the Page.Footer run
  * from edge to edge, and what is in them and the Page.Body sit in a centred column of a maximum
  * width, with a margin on either side on a narrow screen. It holds a Page.Header, a Page.Body
- * and a Page.Footer, in that order. The Page.Body holds a Page.Main and, if the page has one, a
+ * and a Page.Footer, in that order, and a Page.Shortcuts between the first two if the page has
+ * one. The Page.Body holds a Page.Main and, if the page has one, a
  * Page.Sidebar, and in them the cells, some of them a Page.Cell. They only work inside a Page,
  * so they are written as properties of it. Before them the page has an empty `div` that is
  * fixed to the top of the screen in the colour of the header, for the status bar of a phone
@@ -137,6 +197,7 @@ export const Page = ({ children, className, ...props }: PageProps) => (
 )
 
 Page.Header = Header
+Page.Shortcuts = Shortcuts
 Page.Body = Body
 Page.Main = Main
 Page.Sidebar = Sidebar

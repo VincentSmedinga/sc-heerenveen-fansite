@@ -753,7 +753,7 @@ describe('the homepage when the database can not be read', () => {
   it('titles the page Er ging iets mis and keeps it out of the search engines', async () => {
     expect(await generateMetadata({ searchParams: Promise.resolve({}) })).toEqual({
       robots: { index: false },
-      title: 'Er ging iets mis',
+      title: { absolute: 'Er ging iets mis' },
     })
   })
 
@@ -767,7 +767,7 @@ describe('the homepage when the database can not be read', () => {
     expect(html).not.toContain('Nieuwste discussies')
     expect(await generateMetadata({ searchParams: Promise.resolve({}) })).toEqual({
       robots: { index: false },
-      title: 'Er ging iets mis',
+      title: { absolute: 'Er ging iets mis' },
     })
   })
 

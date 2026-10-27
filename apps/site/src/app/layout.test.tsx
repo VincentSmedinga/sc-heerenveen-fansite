@@ -8,14 +8,20 @@ vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
 
 describe('RootLayout', () => {
   it('puts the page in a Page.Body, which is a div, between the header and the footer, so the page brings the main', () => {
-    const html = renderToStaticMarkup(<RootLayout>Inhoud</RootLayout>)
+    const html = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
 
     expect(html).toMatch(/<\/header><div class="hf-page-body">Inhoud<\/div><footer/)
     expect(html).not.toContain('<main')
   })
 
+  it('puts the slot for a bar between the header and the Page.Body, outside the main, and nothing there without one', () => {
+    const html = renderToStaticMarkup(<RootLayout shortcuts={<nav aria-label="Balk">Links</nav>}>Inhoud</RootLayout>)
+
+    expect(html).toMatch(/<\/header><nav aria-label="Balk">Links<\/nav><div class="hf-page-body">Inhoud<\/div><footer/)
+  })
+
   it('puts the two sentences of the footer in a paragraph each, before the links', () => {
-    const html = renderToStaticMarkup(<RootLayout>Inhoud</RootLayout>)
+    const html = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
 
     expect(html).toContain(
       '<footer class="hf-page-footer"><p class="hf-meta">Alle koppen en links op één plek.</p><p class="hf-meta">Voor supporters door supporters.</p><nav',
@@ -23,7 +29,7 @@ describe('RootLayout', () => {
   })
 
   it('links to Zoeken, Over ons, Contact, Bronnen, Privacy, Toegankelijkheid and Updates in the footer, in a navigation named Over de site', () => {
-    const html = renderToStaticMarkup(<RootLayout>Inhoud</RootLayout>)
+    const html = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
     const footer = html.match(/<footer[^>]*>.*<\/footer>/s)?.[0] ?? ''
 
     expect(footer).toContain('<nav aria-label="Over de site"')

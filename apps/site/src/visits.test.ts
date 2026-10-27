@@ -204,12 +204,12 @@ describe('visitOf', () => {
 
   it('has a rule for every page of the site', () => {
     // The pages that are on no list on purpose: the admin, and the article, which the
-    // database confirms.
+    // database confirms. A slot of the layout (@shortcuts) is not a page of its own.
     const withoutCount = ['/beheer', '/beheer/[...]', '/redactie/[slug]']
     const paths = readdirSync(`${import.meta.dirname}/app`, { recursive: true, withFileTypes: true })
       .filter((entry) => entry.isFile() && entry.name === 'page.tsx')
       .map((entry) => entry.parentPath.slice(`${import.meta.dirname}/app`.length) || '/')
-      .filter((path) => !path.startsWith('/beheer') && !withoutCount.includes(path))
+      .filter((path) => !path.startsWith('/beheer') && !path.startsWith('/@') && !withoutCount.includes(path))
 
     expect(paths.toSorted()).toEqual([...pages.map(({ path }) => path), '/contact/verstuurd', '/zoeken'].toSorted())
   })

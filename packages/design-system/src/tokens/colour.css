@@ -174,6 +174,23 @@
     --hf-colour-icon-on-header-quiet: var(--hf-colour-blue-400);
 
     /*
+     * The bar "Op deze pagina" under the header (Page.Shortcuts) has roles of its own: in light it is the warm surface,
+     * in dark blue-900, a step darker than the header, where the warm surface is blue-800 and would run into it.
+     * The label is quiet, the links are the colour of links with a pressed fill under a finger. The focus ring is the
+     * ordinary one (--hf-colour-focus), which reaches 3:1 on the bar and on the pressed fill in both themes.
+     * The pressed fill is the border of the warm surface over its background in light, and blue-700 over the bar in dark.
+     */
+    --hf-colour-background-shortcuts: light-dark(var(--hf-colour-sand-100), var(--hf-colour-blue-900));
+    --hf-colour-border-shortcuts: light-dark(var(--hf-colour-sand-300), var(--hf-colour-blue-600));
+    --hf-colour-text-shortcuts-label: light-dark(var(--hf-colour-sand-700), var(--hf-colour-blue-200));
+    --hf-colour-text-shortcuts-link: light-dark(var(--hf-colour-blue-700), var(--hf-colour-blue-300));
+    --hf-colour-text-shortcuts-link-hover: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-200));
+    --hf-colour-background-shortcuts-pressed: light-dark(
+      color-mix(in srgb, var(--hf-colour-sand-300) 60%, var(--hf-colour-sand-100)),
+      color-mix(in srgb, var(--hf-colour-blue-700) 70%, var(--hf-colour-blue-900))
+    );
+
+    /*
      * Markers: what numbers, separates or points, such as list markers and positions in a table.
      * Quieter than the text, in steel. Text markers reach 4.5:1; graphic ones (bullets, lines, icons) 3:1.
      */
@@ -262,6 +279,16 @@
       --hf-colour-outcome-win: var(--hf-colour-green-700);
       --hf-colour-outcome-loss: var(--hf-colour-red-700);
       --hf-colour-outcome-draw: var(--hf-colour-grey-600);
+      --hf-colour-background-shortcuts: var(--hf-colour-sand-100);
+      --hf-colour-border-shortcuts: var(--hf-colour-sand-300);
+      --hf-colour-text-shortcuts-label: var(--hf-colour-sand-700);
+      --hf-colour-text-shortcuts-link: var(--hf-colour-blue-700);
+      --hf-colour-text-shortcuts-link-hover: var(--hf-colour-blue-800);
+      --hf-colour-background-shortcuts-pressed: color-mix(
+        in srgb,
+        var(--hf-colour-sand-300) 60%,
+        var(--hf-colour-sand-100)
+      );
       --hf-colour-marker-text: var(--hf-colour-steel-600);
       --hf-colour-marker-graphic: var(--hf-colour-steel-500);
       --hf-colour-border-surface: var(--hf-colour-grey-200);
