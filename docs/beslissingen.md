@@ -2435,6 +2435,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De hoogte staat in rem, zodat hij met de lettergrootte van de bezoeker meegroeit.
 - **Alternatieven:** 44 pixels, zoals het menu; dan is de balk 54 pixels hoog.
 
+### Een spelersnaam is één component, met de voornaam gewoon en de achternaam vet
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** het designsysteem heeft `PlayerName`.
+  De voornaam staat in het gewone gewicht en de achternaam in het zwaardere.
+  Volledige namen staan waar een rij één speler is en er ruimte is, alleen de achternaam waar de ruimte krap is, en bij twee gelijke achternamen komt de voornaam erbij.
+- **Waarom:** de achternaam is het deel dat je herkent en waarop de zoekpagina zoekt, dus die valt op.
+  In een lijst met ruimte maakt de voornaam het verschil tussen twee spelers duidelijk.
+  Eén component houdt het gewicht op één plek, in plaats van op de rijkop van elke tabel.
+- **Hoe:** het gewicht staat op de delen van de naam zelf, dus in een vette rijkop blijft de voornaam gewoon.
+  Voor een schermlezer en voor kopiëren is het één tekst, zonder `strong`.
+  De site splitst een speler uit `players` met `splitPlayerName`: de zoekterm is de achternaam als de naam erop eindigt.
+  Is de zoekterm geen einde van de naam, zoals een verbetering met de hand, dan staat de hele naam in het gewone gewicht, in plaats van een verkeerde splitsing.
+  Een doelpunt zonder speler heeft alleen de naam uit de wedstrijdregel, en is een achternaam.
+  De kaart Doelpuntenmakers en de selectie op de zoekpagina tonen de volledige naam, en de lijst staat op achternaam, dan op voornaam.
+  In de wedstrijdregel staat de achternaam zoals Wikipedia hem schrijft, met de beginletter van de voornaam erbij (`J. Trenskow`) als twee verschillende spelers in die regel dezelfde naam hebben, en met de hele voornaam als ook die beginletter gelijk is.
+  Waar de naam van de media komt, zoals in koppen, veranderen we niets.
+- **Alternatieven:** de hele naam vet laten, zoals nu in de kaart; dan valt het deel dat je zoekt niet op.
+  Of `strong` om de achternaam; dat zegt een schermlezer iets wat niet nodig is.
+  Of de volledige naam overal tonen; dat past niet in de wedstrijdregel op een smal scherm.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

@@ -10,6 +10,7 @@ import {
   Link,
   List,
   NewsItem,
+  PlayerName,
   Text,
   WikipediaCredit,
 } from '@fansite/design-system'
@@ -18,6 +19,7 @@ import { Fragment } from 'react'
 import { moreResults } from './items-per-card'
 import { formatReadAt, wikipediaUrl } from './match-format'
 import { dateTimeOf, dayOf, episodeDetails, formatArticleDay, formatEpisodeTime, formatNewsTime } from './news'
+import { splitPlayerName } from './player-name'
 import { maxQueryLength, maxResults, searchHref, type Squad, squadGroups } from './search'
 
 /**
@@ -88,7 +90,9 @@ export function SquadCard({ squad }: { squad: Squad }) {
             <List role="list">
               {group.players.map((player) => (
                 <List.Item key={player.name}>
-                  <Link href={searchHref(player.searchTerm)}>{player.name}</Link>
+                  <Link href={searchHref(player.searchTerm)}>
+                    <PlayerName {...splitPlayerName(player.name, player.searchTerm)} />
+                  </Link>
                 </List.Item>
               ))}
             </List>

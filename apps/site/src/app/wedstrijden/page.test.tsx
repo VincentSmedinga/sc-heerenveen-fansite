@@ -592,6 +592,8 @@ describe('the page /wedstrijden', () => {
 
   describe('the goal scorers', () => {
     const topScorers = async () => section(await render(), 'doelpuntenmakers')
+    /** The text of some HTML, as a screen reader and a copy have it. */
+    const plain = (html: string | undefined) => (html ?? '').replaceAll(/<[^>]*>/g, '')
 
     it('is a table with a caption for a screen reader, in the card under the table', async () => {
       const card = await topScorers()
@@ -607,11 +609,11 @@ describe('the page /wedstrijden', () => {
 
     it('counts the goals of our players over the matches, with the opponent with the same name left out', async () => {
       const rows = [
-        ...(await topScorers()).matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">([^<]+)<\/th><td[^>]*>(\d+)/g),
+        ...(await topScorers()).matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">(.+?)<\/th><td[^>]*>(\d+)/g),
       ]
 
       // Proefman scored in two matches. The Nepper of the opponent does not count for ours.
-      expect(rows.map(([, position, player, goals]) => [position, player, goals])).toEqual([
+      expect(rows.map(([, position, player, goals]) => [position, plain(player), goals])).toEqual([
         ['1', 'Proefman', '2'],
         ['2', 'Kopie', '1'],
         ['2', 'Nepper', '1'],
@@ -645,13 +647,17 @@ describe('the page /wedstrijden', () => {
       })
 
       const rows = [
-        ...(await topScorers()).matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">([^<]+)<\/th><td[^>]*>(\d+)/g),
+        ...(await topScorers()).matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">(.+?)<\/th><td[^>]*>(\d+)/g),
       ]
 
-      expect(rows.map(([, position, player, goals]) => [position, player, goals])).toEqual([
+      expect(rows.map(([, position, player, goals]) => [position, plain(player), goals])).toEqual([
         ['1', 'Kees Jansen', '2'],
         ['2', 'Bram Jansen', '1'],
       ])
+      // The given name is plain and the surname heavier, in one name.
+      expect(await topScorers()).toContain(
+        '<span class="hf-player-name"><span class="hf-player-name-given">Kees</span> <span class="hf-player-name-surname">Jansen</span></span>',
+      )
     })
 
     it('shows a bar next to the goals of every player, hidden from a screen reader, the top scorer filling it', async () => {
@@ -712,7 +718,7 @@ describe('the page /wedstrijden', () => {
       })
 
       const card = await topScorers()
-      const rows = [...card.matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">([^<]+)<\/th>/g)]
+      const rows = [...card.matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">(.+?)<\/th>/g)]
 
       expect(rows).toHaveLength(14)
       expect(rows.every(([, position]) => position === '1')).toBe(true)

@@ -24,6 +24,7 @@ import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } f
 import {
   cleanSheetsOf,
   goalsPerQuarter,
+  goalsWithInitials,
   overviewOf,
   quarterLabels,
   scorersCoverage,
@@ -301,7 +302,7 @@ function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
       ...common,
       ...matchMoment(match, now),
       extraTime: match.extraTime,
-      goals: match.goals,
+      goals: goalsWithInitials(match.goals),
       goalsAgainst: match.goalsAgainst,
       goalsFor: match.goalsFor,
       status: 'played',

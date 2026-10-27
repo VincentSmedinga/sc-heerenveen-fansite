@@ -63,6 +63,8 @@ export type {
 } from './components/page/Page'
 export { Pagination } from './components/pagination/Pagination'
 export type { PaginationProps } from './components/pagination/Pagination'
+export { PlayerName } from './components/player-name/PlayerName'
+export type { PlayerNameProps } from './components/player-name/PlayerName'
 export { PullIndicator } from './components/pull-to-refresh/PullIndicator'
 export type { PullIndicatorProps } from './components/pull-to-refresh/PullIndicator'
 export { PullToRefresh } from './components/pull-to-refresh/PullToRefresh'

@@ -656,11 +656,14 @@ await withEmptyDatabase((database) =>
     )
     assert.match(
       matchesHtml,
-      /<th scope="row">Gerrit Nepper<\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
+      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
     )
     // Two players called Testvoort are two rows, each with his full name.
-    assert.match(matchesHtml, /<th scope="row">Joris Testvoort<\/th>/)
-    assert.match(matchesHtml, /<th scope="row">Bas Testvoort<\/th>/)
+    assert.match(matchesHtml, /hf-player-name-given">Joris<\/span> <span class="hf-player-name-surname">Testvoort</)
+    assert.match(matchesHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
+    // In the line of the scorers of one match the two are told apart by an initial.
+    assert.match(matchesHtml, /J\. Testvoort/)
+    assert.match(matchesHtml, /B\. Testvoort/)
     assert.doesNotMatch(matchesHtml, /<th scope="row">Kopie<\/th>/)
     assert.match(
       matchesHtml,

@@ -11,6 +11,7 @@ import { seasonOf } from '@fansite/db/season'
 import { cacheFor } from './cache'
 import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
+import { type NameParts, splitPlayerName, surnameOnly } from './player-name'
 
 /** The name of our own club in the table. */
 const ourClub = 'sc Heerenveen'
@@ -64,16 +65,17 @@ export type CleanSheets = {
 
 /**
  * A player in the list of goal scorers: the goals this season and the place, from 1. `player`
- * is the full name from the table `players` for a goal that is linked to a player, with his
- * `id` and the `searchTerm` that is the end of his name; for a goal without a player it is the
- * name as the page shows it, and the id and the search term are null.
+ * is the full name from the table `players` for a goal that is linked to a player, and the name
+ * as the page shows it for a goal without one. `givenName` and `surname` are its parts for
+ * `PlayerName`: a linked player is split with his search term (see `splitPlayerName`), and a
+ * goal without a player is a surname only. `id` tells the rows apart: the id of the player, or
+ * the name for a goal without a player.
  */
-export type TopScorer = {
+export type TopScorer = NameParts & {
   goals: number
+  id: number | string
   player: string
-  playerId: null | number
   position: number
-  searchTerm: null | string
 }
 
 /**
@@ -107,6 +109,9 @@ export type GoalsPerQuarter = {
   /** The goals of sc Heerenveen, in the order of `quarterLabels`. */
   scored: number[]
 }
+
+/** A goal as the line of the scorers of a match shows it. */
+export type ScorerGoal = PublicMatch['goals'][number]
 
 /**
  * The goals of sc Heerenveen and of its opponents per quarter of an hour, in the played matches
@@ -147,6 +152,43 @@ export function goalsPerQuarter(matches: PublicMatch[]): GoalsPerQuarter {
     played: played.length,
     scored,
   }
+}
+
+/**
+ * The goals of one match for the line of the scorers, which shows the name as the page writes
+ * it, mostly a surname. When two different players in the line have the same name, each gets
+ * the first letter of his given name before it, as in `J. Trenskow`, so nobody sees one name
+ * twice without a difference. When their initials are the same too, they get the whole given
+ * name (`Jakob Trenskow` and `Jan Trenskow`). Two goals of one player never change, and a goal
+ * without a player in the table is left alone: there is nothing to tell it from.
+ */
+export function goalsWithInitials(goals: ScorerGoal[]): ScorerGoal[] {
+  const players = new Map<string, Map<number, NameParts>>()
+
+  for (const goal of goals) {
+    if (goal.playerId !== null && goal.playerName !== null) {
+      const same = players.get(goal.player) ?? new Map<number, NameParts>()
+
+      players.set(goal.player, same.set(goal.playerId, splitPlayerName(goal.playerName, goal.playerSearchTerm ?? '')))
+    }
+  }
+
+  return goals.map((goal) => {
+    const same = players.get(goal.player)
+    const parts = goal.playerId === null ? undefined : same?.get(goal.playerId)
+    const given = parts?.givenName?.trim() ?? ''
+
+    if (same === undefined || same.size < 2 || parts === undefined || parts.surname === '' || given === '') {
+      return goal
+    }
+
+    const initial = given.charAt(0).toUpperCase()
+    const sharesInitial = [...same.values()]
+      .filter((other) => other !== parts)
+      .some((other) => (other.givenName?.trim().charAt(0).toUpperCase() ?? '') === initial)
+
+    return { ...goal, player: sharesInitial ? `${given} ${goal.player}` : `${initial}. ${goal.player}` }
+  })
 }
 
 /**
@@ -210,11 +252,11 @@ export function standingsAround(rows: PublicStandingsRow[]): PublicStandingsRow[
 
 /**
  * The goals of sc Heerenveen per player in the matches of a season, for everybody who scored,
- * from the most goals down and from A to Z when level. Level players share a place (1, 2, 2,
- * 4). A penalty counts. An own goal does not: with `ours` it is the goal of an opponent who
- * scored for us by mistake, and without `ours` it is a player of ours who scored for the
- * opponent, so neither is a goal of the player. A goal of the opponent is not counted either,
- * even for a player with the same name.
+ * from the most goals down and from A to Z on the surname when level. Level players share a
+ * place (1, 2, 2, 4). A penalty counts. An own goal does not: with `ours` it is the goal of an
+ * opponent who scored for us by mistake, and without `ours` it is a player of ours who scored
+ * for the opponent, so neither is a goal of the player. A goal of the opponent is not counted
+ * either, even for a player with the same name.
  *
  * A goal that is linked to a player counts for that player, by his `id`, so two players with
  * the same surname are two rows, and a player who has left the squad still has his goals.
@@ -229,22 +271,37 @@ export function topScorersOf(matches: PublicMatch[]): TopScorer[] {
       continue
     }
 
-    const linked = goal.playerId !== null
-    const key = linked ? `id:${goal.playerId}` : `name:${goal.player}`
-    const before = scorers.get(key)
+    const before = scorers.get(keyOf(goal))
 
-    scorers.set(key, {
+    scorers.set(keyOf(goal), {
       goals: (before?.goals ?? 0) + 1,
-      player: (linked ? goal.playerName : null) ?? goal.player,
-      playerId: goal.playerId,
-      searchTerm: linked ? goal.playerSearchTerm : null,
+      id: goal.playerId ?? goal.player,
+      player: goal.playerName ?? goal.player,
+      ...(goal.playerName === null
+        ? surnameOnly(goal.player)
+        : splitPlayerName(goal.playerName, goal.playerSearchTerm ?? '')),
     })
   }
 
-  const sorted = [...scorers.values()].sort((a, b) => b.goals - a.goals || a.player.localeCompare(b.player, 'nl'))
+  const sorted = [...scorers.values()].sort(
+    (a, b) =>
+      b.goals - a.goals ||
+      sortName(a).localeCompare(sortName(b), 'nl') ||
+      (a.givenName ?? '').localeCompare(b.givenName ?? '', 'nl'),
+  )
 
   return sorted.map((scorer) => ({
     ...scorer,
     position: sorted.findIndex((other) => other.goals === scorer.goals) + 1,
   }))
+}
+
+/** What a goal counts for: the player it is linked to, or else the name the page shows. */
+function keyOf(goal: PublicMatch['goals'][number]): string {
+  return goal.playerId === null ? `name:${goal.player}` : `id:${goal.playerId}`
+}
+
+/** What a list of scorers is put in order by: the surname, or the whole name without one. */
+function sortName(scorer: NameParts): string {
+  return scorer.surname === '' ? (scorer.givenName ?? '') : scorer.surname
 }

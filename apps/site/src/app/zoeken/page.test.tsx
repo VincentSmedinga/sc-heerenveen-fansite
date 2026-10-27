@@ -328,15 +328,24 @@ describe('the list of players', () => {
     const html = await render()
 
     expect(
-      [...sidebarOf(html).matchAll(/<a href="([^"]*)">([^<]*)<\/a>/g)]
+      [...sidebarOf(html).matchAll(/<a href="([^"]*)">(.*?)<\/a>/g)]
         .filter(([, href]) => href?.startsWith('/zoeken'))
-        .map(([, href, name]) => [href, name]),
+        .map(([, href, name]) => [href, name?.replaceAll(/<[^>]*>/g, '')]),
     ).toEqual([
       ['/zoeken?q=Brandsma', 'Tjerk Brandsma'],
       ['/zoeken?q=van+der+Kooi', 'Jurre van der Kooi'],
       ['/zoeken?q=Klaverboer', 'Bernt Klaverboer'],
       ['/zoeken?q=Dinho', 'Dinho'],
     ])
+  })
+
+  it('shows the given name plain and the surname heavier, and a name of one word as a surname', async () => {
+    const sidebar = sidebarOf(await render())
+
+    expect(sidebar).toContain(
+      '<span class="hf-player-name"><span class="hf-player-name-given">Jurre</span> <span class="hf-player-name-surname">van der Kooi</span></span>',
+    )
+    expect(sidebar).toContain('<span class="hf-player-name"><span class="hf-player-name-surname">Dinho</span></span>')
   })
 
   it('credits Wikipedia under the list, with the page and the time of the last good read', async () => {
@@ -378,7 +387,7 @@ describe('the list of players', () => {
 
     const sidebar = sidebarOf(await render())
 
-    expect(sidebar).toContain('Tjerk Brandsma')
+    expect(sidebar.replaceAll(/<[^>]*>/g, '')).toContain('Tjerk Brandsma')
     expect(sidebar).not.toContain('Bron: Wikipedia')
   })
 })
