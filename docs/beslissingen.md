@@ -2441,7 +2441,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het menu laten zoals het is, met alleen Onze bronnen en Forum; dan heeft de homepage geen onderdeel.
   Of Over ons ook in het menu, zoals op de artboard.
   Of een prop op `Navigation` voor de opmaak van de header; dan moet elke plek die het menu in een header zet, eraan denken.
-- **Later:** zie _Het hoofdmenu staat in een eigen rij onder de sitenaam_ voor de opmaak van het menu: de onderdelen staan niet meer in halfvet en in de lichtblauwe kleur maar in gewoon gewicht en de lichtste kleur van de header, en de huidige pagina heeft alleen de rode streep.
+- **Later:** zie _Het hoofdmenu staat in een eigen rij onder de sitenaam_ voor de opmaak van het menu: de onderdelen staan niet meer in halfvet en in de lichtblauwe kleur maar in gewicht 500 en de lichtste kleur van de header, en de huidige pagina heeft alleen de rode streep.
   De onderdelen van het menu zelf en de rode streep blijven.
 
 ### Een eigen foutpagina bij een fout op de server
@@ -3220,6 +3220,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 27 oktober 2026
 - **Besluit:** de header heeft rechtsboven één schakelknop zonder tekst, met een gevulde zon in het lichte thema en een gevulde maan in het donkere.
+  De knop is rond.
   In rust is hij ingehouden: alleen het pictogram, zonder rand en vulling.
   Onder de muis (alleen met een muis), ingedrukt en bij focus komen de rand en de vulling terug.
   De footer heeft geen schakelaar meer.
@@ -3254,21 +3255,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 27 oktober 2026
 - **Besluit:** het hoofdmenu staat in een eigen rij onder het logo, met een dunne lijn erboven (1 pixel, blue-200 op 35%).
-  Alle onderdelen staan in blue-50 (14,5:1 in licht en 11,4:1 in donker op de header), 1,125 rem en gewicht 400, met 1 rem tussen de onderdelen en minstens 44 pixels hoog.
+  Alle onderdelen staan in blue-50 (14,5:1 in licht en 11,4:1 in donker op de header), 1,125 rem en gewicht 500, met 1 rem tussen de onderdelen en minstens 44 pixels hoog.
   De huidige pagina heeft dezelfde tekstkleur en een rode streep van 3 pixels op 0,35em onder de tekst, zonder afbreking bij letters met een staart.
   Forum staat rechts en houdt zijn pictogram; er staat geen scheidingslijn tussen de onderdelen.
-  Hoe een onderdeel eruitziet onder de muis, ingedrukt of bezocht, blijft zoals het was.
+  Hoe een onderdeel eruitziet onder de muis, ingedrukt of bezocht, blijft zoals het was, behalve dat de streep onder de muis nu op dezelfde plek staat als de rode streep van de huidige pagina (0,35em onder de tekst, zonder afbreking).
 - **Hoe:** de header is een raster met twee kolommen, de eerste voor het logo en de tweede voor de themaknop, en het menu beslaat beide kolommen op een eigen rij.
   Zo staat het menu op elke breedte onder het logo, ook als er naast het logo plek over is, en blijft het in de kolom van de pagina, in lijn met de inhoud.
   Forum staat rechts doordat het laatste onderdeel van het menu in de header een automatische marge aan het begin heeft.
+  Tussen de lijn en het menu zit 0,375 rem, en onder het menu 0,5 rem.
   Op 390 pixels staan de vier onderdelen op één rij; op 320 pixels gaat Forum naar een tweede rij en blijft rechts staan.
 - **Waarom:** naast het logo had het menu weinig ruimte, vooral op een smal scherm, waar het onder het logo ombrak.
   Een eigen rij geeft elk onderdeel dezelfde plek op elke breedte.
 - **Alternatieven:** het menu naast het logo houden; dan blijft de ruimte krap.
-  Of de onderdelen in het halfvet houden (gewicht 600) of in een eigen, lichtere balk zetten; de eigenaar koos op het canvas voor gewicht 400 met een lijn erboven.
+  Of de onderdelen in het halfvet houden (gewicht 600) of in een eigen, lichtere balk zetten; de eigenaar koos op het canvas voor een lijn erboven, en bij het bouwen voor gewicht 500 (eerst 400).
   Of grotere afstanden tussen de onderdelen; dan valt Forum op 390 pixels op een tweede rij.
   Of het menu inklappen achter een knop op een smal scherm; dat verbergt de belangrijkste links.
-- **Later:** vervangt de opmaak van _Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep_ (22 oktober 2026): halfvet en de lichtblauwe kleur zijn gewoon gewicht en de lichtste kleur geworden.
+- **Later:** vervangt de opmaak van _Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep_ (22 oktober 2026): halfvet en de lichtblauwe kleur zijn gewicht 500 en de lichtste kleur geworden.
 
 ## Importer
 

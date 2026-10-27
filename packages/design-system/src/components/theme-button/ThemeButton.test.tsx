@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ThemeButton } from './ThemeButton'
@@ -54,6 +56,12 @@ describe('ThemeButton', () => {
 
     expect(onClick).toHaveBeenCalledTimes(1)
     expect(screen.getByRole('button').getAttribute('aria-pressed')).toBe('false')
+  })
+
+  it('is round, in theme-button.css', () => {
+    const css = readFileSync(join(import.meta.dirname, 'theme-button.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+
+    expect(css).toContain('border-radius: 50%;')
   })
 
   it('adds a class and passes other attributes on', () => {

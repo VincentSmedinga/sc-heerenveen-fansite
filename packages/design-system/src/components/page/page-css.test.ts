@@ -122,6 +122,11 @@ describe('the two rows of the header in page.css', () => {
     )
   })
 
+  it('has a little room between the line and the menu, and less under the menu than above the logo', () => {
+    expect(header).toMatch(/> \.hf-navigation \{[^}]*padding-block-start: 0\.375rem;/)
+    expect(header).toContain('padding-block: max(1rem, env(safe-area-inset-top, 0px)) 0.5rem;')
+  })
+
   it('puts the theme button on the right', () => {
     expect(header).toMatch(/> \.hf-theme-button \{[^}]*justify-self: end;/)
   })
