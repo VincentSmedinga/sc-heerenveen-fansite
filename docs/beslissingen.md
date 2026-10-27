@@ -700,6 +700,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Let op:** MariaDB kan `CREATE TABLE` en `ALTER TABLE` niet terugdraaien.
   Een migratie die halverwege mislukt, kan een half veranderd schema achterlaten.
   Productie krijgt daarom een back-up vóór een migratie (#33).
+- **Later:** de back-up vóór een migratie op productie hoort sinds 26 oktober 2026 bij #347; zie _De dump bewaart 14 dagen, laat de nieuwste altijd staan, en laat tabellen zonder blijvende gegevens leeg_ en _Back-ups zijn een dagelijkse dump op de host, 14 dagen bewaard, en een terugzetting die we één keer echt testen_.
 - **Alternatieven:** na het kopiëren een opdracht op de host draaien via SSH.
   Een SSH-sessie krijgt de variabelen van de app niet, dus `DATABASE_URL` moet dan ook in een bestand op de host, en we moeten Node daar zelf vinden.
   Of vanuit GitHub migreren door een SSH-tunnel; dan komt `DATABASE_URL` in de geheimen van GitHub.
@@ -873,6 +874,71 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de pagina's zijn voor bijdragers en agents.
   `noindex` houdt ze uit de zoekresultaten en laat het lezen toe, terwijl `Disallow` ook agents en gereedschap tegenhoudt die zich aan robots houden.
 - **Alternatieven:** indexeerbaar laten, zoals nu (zonder nut en met een nietszeggende titel); een `robots.txt` met `Disallow: /` (blokkeert ook de gereedschappen die zich aan robots houden).
+
+### Back-ups zijn een dagelijkse dump op de host, 14 dagen bewaard, en een terugzetting die we één keer echt testen
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** een dagelijkse dump op de host, 14 dagen bewaard, plus één dump vlak voor elke deploy, en een terugzetting die we één keer echt testen.
+  Geen kopie buiten de host.
+  De projecteigenaar splitste het issue (#171) op 26 oktober 2026: de dagelijkse dump, het opruimen, de opdrachten voor een dump en het terugzetten, de documentatie en de proef lokaal kwamen eerst.
+  De dump vlak voor het kopiëren in `acceptance.yml` en `production.yml` en de proef op de host van acceptatie volgen in #347, omdat de deploy van productie (#33) nog niet in `main` staat.
+- **Waarom:** de gegevens zijn klein en voor het grootste deel opnieuw op te halen.
+  Wat niet opnieuw te maken is (het register, later de verborgen berichten en accounts), is klein genoeg voor een dump.
+  Een kopie elders vraagt een derde partij of werk van de eigenaar.
+  Een dump beschermt tegen een fout in een migratie of een verkeerde actie, niet tegen het verlies van de host zelf.
+- **Nadeel:** de dumps staan op dezelfde host als de database en delen de 10 GB met het forum.
+  Een dump van een database van 100.000 koppen met een volledig logboek woog 4,1 MB, dus 14 dagen kosten ongeveer 58 MB (zie `docs/back-ups.md`).
+- **Gevolg:** de back-up vóór een migratie op productie, die _De site draait de migraties als ze start_ en _De migratie van de versies kan opnieuw draaien, want MariaDB maakt DDL niet ongedaan_ noemen, komt met #347.
+- **Alternatieven:** een kopie buiten de host; alleen de back-ups van mijn.host, die we niet kunnen testen.
+  We bekijken het opnieuw als er accounts en berichten bijkomen.
+
+### De dump is `mysqldump` met het wachtwoord in een optiebestand, in één bestand dat cron en de eigenaar draaien
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `packages/db/backup.mjs` is één bestand zonder `node_modules` dat `assemble` maakt, zoals de importer en `admin.mjs`.
+  Het heeft twee opdrachten: `backup` (dump en opruimen) en `restore <bestand>`.
+  Het start `mysqldump` en `mysql` van de host, en krijgt `DATABASE_URL` uit hetzelfde bestand als de importer, met `BACKUP_FOLDER` erbij.
+  Het wachtwoord gaat in een optiebestand (`--defaults-extra-file`) met rechten voor alleen het account, in een eigen tijdelijke map die na afloop weggaat.
+  Een dump op aanvraag is dezelfde opdracht `backup`, die met code 1 stopt als de dump mislukt.
+- **Waarom:** `mysqldump` is het gereedschap dat MariaDB zelf voor een dump levert, en een dump die het niet maakt, zouden we moeten bewijzen.
+  Zelf een dump schrijven (`SHOW CREATE TABLE` en `INSERT`-regels in Node) heeft geen programma op de host nodig, maar moet binaire waarden, tekensets, `foreign keys` en tijden zelf goed krijgen.
+  Een opdrachtregel met het wachtwoord (`-p…`) laat het zien aan elk account op de host (`ps`).
+  De omgevingsvariabele `MYSQL_PWD` staat bij de MySQL-clients als verouderd.
+  Eén bestand voor beide opdrachten houdt het laden van de instellingen en het optiebestand op één plek, en een workflow roept het zonder pnpm aan.
+- **Nadeel:** de host moet `mysqldump` en `mysql` hebben.
+  Dat is niet bevestigd: `docs/back-ups.md` zegt hoe de eigenaar het controleert, en `MYSQLDUMP_COMMAND` en `MYSQL_COMMAND` wijzen naar een ander pad.
+- **Alternatieven:** een dump in Node zelf schrijven; `MYSQL_PWD` of `-p` voor het wachtwoord; de dump aan de host overlaten met de back-up van mijn.host (die we niet kunnen testen); een eigen bestand met instellingen voor de back-up (een tweede plek voor het wachtwoord).
+
+### De dump bewaart 14 dagen, laat de nieuwste altijd staan, en laat tabellen zonder blijvende gegevens leeg
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het opruimen rekent met de datum in de naam van het bestand (`<database>-<datum>T<tijd>Z.sql.gz`, in UTC) en niet met de datum van het bestand.
+  - Het gebeurt na een dump die lukte, en een mislukte dump laat de oude dumps staan.
+  - Het raakt alleen bestanden met de naam van deze database, dus andere bestanden en de dumps van een andere database blijven.
+  - De nieuwste dump gaat nooit weg, ook niet als hij oud is.
+  - De dump bevat van `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions` en `admin_login_links` alleen de structuur, in een tweede aanroep van `mysqldump` met `--no-data`.
+  - De opdracht weigert een map in `public_html` en een bestaande map die andere accounts kunnen lezen, en verandert de rechten van een bestaande map niet.
+  - Een dump krijgt eerst de naam `….partial` en wordt pas na de controle op de regel `-- Dump completed` omgenoemd.
+- **Waarom:** de naam blijft kloppen als iemand een bestand kopieert of aanraakt.
+  Als cron stopt, mag het opruimen de laatste dump niet weghalen.
+  Het zout en de kenmerken van de bezoekers van de dag gooit de site aan het eind van de dag weg (zie _We tellen paginaweergaven en unieke bezoekers per dag_); in de dumps zouden ze 14 dagen blijven, en met het zout zijn de kenmerken terug te rekenen naar adressen.
+  De schermnaam bij een discussie vervangt de importer bij elke run (zie _We tonen de schermnaam van de laatste reageerder, als gewone tekst_), en een teruggezette sessie of inloglink zou een toegang herstellen die na de dump is ingetrokken.
+  De importer vult de discussies binnen een kwartier opnieuw, en een sessie maak je door opnieuw in te loggen.
+  Een map die we zelf niet maakten, zoals de thuismap, kan de site breken als we haar rechten wijzigen.
+- **Alternatieven:** `--ignore-table-data`, dat alleen de `mysqldump` van MariaDB kent; alles dumpen en deze tabellen leeg laten bij het terugzetten (de gegevens zouden dan wel in het bestand staan); de rechten van een bestaande map zelf zetten.
+
+### Een dump gaat alleen terug in een lege database
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `restore` weigert een database met tabellen, voordat hij iets schrijft, en meldt na afloop hoeveel tabellen er staan.
+  De dump heeft geen `DROP TABLE` en geen `CREATE DATABASE` (`--skip-add-drop-table`, zonder `--databases`).
+  Wie terugzet, maakt eerst een nieuwe lege database en wijst `DATABASE_URL` van de app daarheen.
+- **Waarom:** terugzetten bovenop bestaande tabellen kan gegevens overschrijven of mengen zonder dat iemand het ziet.
+  In een nieuwe database blijft de oude, kapotte staan om in te kijken.
+  Zonder `CREATE DATABASE` kan de dump naar elke database, ook die met een andere naam van DirectAdmin.
+- **Nadeel:** de eigenaar maakt een database en past `DATABASE_URL` op twee plekken aan (DirectAdmin en het bestand voor de import).
+  Dat staat uitgeschreven in `docs/back-ups.md`.
+- **Alternatieven:** de tabellen vooraf laten wegvallen (`DROP TABLE`, een fout met grote gevolgen); terugzetten in een niet-lege database met `--force` (kan half werk achterlaten).
 
 ## Werkruimte
 
@@ -5000,6 +5066,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zolang de migratie niet klaar is, blijven de pagina's voor bezoekers werken, want hun queries noemen de kolommen die ze nodig hebben; alleen het beheer van artikelen geeft een fout.
 - **Wat de test niet bewijst:** de migratie is niet op de echte gegevens van acceptatie of productie gedraaid.
   Het back-up vóór een migratie op productie (#33) blijft het vangnet.
+- **Later:** die back-up vóór een migratie op productie hoort sinds 26 oktober 2026 bij #347; zie _Back-ups zijn een dagelijkse dump op de host, 14 dagen bewaard, en een terugzetting die we één keer echt testen_.
 - **Alternatieven:** de kolom meteen verplicht toevoegen met een standaardwaarde (MariaDB vult bestaande rijen dan met 0, en de foreign key faalt); een migratie in twee stappen, een release met de kolom leeg en een met de eis (twee releases voor iets wat in één opdrachtenrij past); alleen een tabel zonder `updated_by` (de kolom is een eis van het issue).
 
 ### De versies staan als lijst onder het formulier, zonder knop om terug te zetten

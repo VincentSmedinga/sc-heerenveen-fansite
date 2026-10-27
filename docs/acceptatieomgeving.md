@@ -7,6 +7,7 @@ Zo kijkt de groep een versie na voordat hij live gaat (productie komt met #33).
 
 Op de host haalt de importer elke 15 minuten de koppen op van de bronnen.
 Dit bestand zegt hoe dat werkt, wat de eigenaar eenmalig zelf instelt, en hoe je controleert dat het klopt.
+Elke nacht maakt cron ook een dump van de database, en [`back-ups.md`](back-ups.md) zegt hoe je die instelt en terugzet.
 
 ## Zo werkt het
 
@@ -491,3 +492,4 @@ De eerste deploy, op 21 oktober 2026, en de eerste run van de importer, op 23 ok
 
 Productie komt met #33, met een eigen omgeving in GitHub en een eigen app op de hosting.
 Die app krijgt `SITE_ENV=production`; zonder die waarde blijft de site uit de zoekmachines.
+De back-ups van productie gaan zoals in [`back-ups.md`](back-ups.md), met een eigen bestand met instellingen en een eigen map.
