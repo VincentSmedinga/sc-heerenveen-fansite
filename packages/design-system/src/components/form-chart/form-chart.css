@@ -1,0 +1,16 @@
+/*
+ * The chart of a season: the form, the bars and two lines of text. The look of the parts is in
+ * their own files; this file only gives the texts under the chart their spacing.
+ */
+
+@layer hf.components {
+  .hf-form-chart-key,
+  .hf-form-chart-line {
+    margin-block: 0.25rem 0;
+  }
+
+  /* The letters of the key are heavier than the words, so they are easy to find. */
+  .hf-form-chart-key b {
+    font-weight: var(--hf-strong-font-weight);
+  }
+}

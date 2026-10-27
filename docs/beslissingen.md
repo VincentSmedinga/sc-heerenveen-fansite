@@ -2456,6 +2456,82 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of `strong` om de achternaam; dat zegt een schermlezer iets wat niet nodig is.
   Of de volledige naam overal tonen; dat past niet in de wedstrijdregel op een smal scherm.
 
+### Staafjes en lijn zijn algemene onderdelen, de grafiek van het seizoen zet ze samen
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** `BarChart`, `BarChart.Trend` en `MarkRow` zijn algemeen en weten niets van voetbal.
+  `FormChart` is de voetbalversie en zet ze samen met hulpfuncties voor punten, tonen en het voortschrijdend gemiddelde.
+  De tonen `positive`, `neutral` en `negative` horen bij de groep van de grafieken.
+- **Waarom:** de eigenaar wil geleidelijk een samenhangende bibliotheek voor datavisualisatie.
+  Een staafje en een lijn komen terug bij doelpunten per wedstrijd en bij andere cijfers, en de kleuren en maten horen dan overal gelijk te zijn.
+- **Hoe:** de gedeelde delen staan in `components/chart/` (de tonen, `chart.css` met de kleur en de sterkte van een toon, en `movingAverage` en `monotonePath`).
+  `bar-chart/`, `mark-row/` en `form-chart/` hebben elk hun eigen map, naast `donut-chart/`.
+  De lijn krijgt de schaal van de grafiek van `BarChart`, die haar `max` doorgeeft aan een `BarChart.Trend` die als kind staat.
+  Een context kan niet, omdat de onderdelen servercomponenten blijven.
+- **Alternatieven:** één `FormChart` met alles erin (sneller, maar de volgende grafiek begint opnieuw).
+  Of de onderdelen eerst en `FormChart` later, wat de onderdelen alleen met losse verhalen test.
+
+### Een verlies is een streepje van 0,25 rem, geen lege plek
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** een verlies is een rood streepje van 0,25 rem op de grond.
+  Een plek die nog niet gespeeld is, is leeg (alleen de grond).
+- **Waarom:** een staafje van echt 0 hoog lijkt op een wedstrijd die nog niet gespeeld is.
+  Zonder kleur is een verlies een klein blok en een lege plek alleen de lijn.
+- **Alternatieven:** niets tekenen bij een verlies (lijkt op een lege plek).
+  Of een streepje onder de grond (leest als een negatief getal).
+
+### De lijn is het gemiddelde over de laatste 5 wedstrijden, als vloeiende kromme
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de lijn laat het gemiddelde aantal punten per wedstrijd over de laatste 5 zien, van wedstrijd 5 af.
+  Hij is een monotone kubische kromme: vloeiend, nooit onder 0 of boven het maximum en vlak tussen gelijke waarden.
+  De groottes van het venster (3, 5, 8) liggen in het canvas ter vergelijking.
+- **Waarom:** 5 is het aantal letters in de vorm, wie beide bekijkt, denkt in vijven.
+  Korter springt tussen 0 en 3, langer is rustig maar laat.
+  Een vloeiende lijn is rustiger dan rechte stukken.
+  Een gemiddelde sinds het begin wordt steeds trager en een lopend totaal stijgt altijd.
+- **Alternatieven:** rechte stukken (de eerste versie; schokkerig).
+  Een gemiddelde sinds wedstrijd 1.
+  Een lopend totaal aan punten (niet op de schaal van de staafjes).
+
+### De lijn is licht met een rand in de kleur van de kaart in donker, en donker met een witte rand in licht
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de lijn is 2 pixels, met een rand van 5 pixels.
+  In licht is de lijn donker (blue-900) met een witte rand.
+  In donker is hij licht (blue-50) met een rand in de kleur van de kaart (blue-800 op de warme kaart).
+  Twee nieuwe rollen: `--hf-colour-chart-line` en `--hf-colour-chart-line-edge`.
+  De lijn tegen een gelijkspelstaafje haalt in donker 1,92:1.
+  De rand ertussen haalt 4,02 tot 5,94:1 en draagt de scheiding, zoals de rand van de taartgrafiek zijn stukken scheidt.
+  De sterkte van de staafjes (70% en 80%) blijft.
+- **Waarom:** een lichte lijn zonder rand haalt in donker 1,99:1 tegen een gelijkspelstaafje.
+  Een donkere lijn in donker valt weg.
+  Zwakkere staafjes in donker (50 tot 65%) zouden afwijken van de tabelbalk en de taartgrafiek.
+- **Alternatieven:** een vaste rand van blue-950 (lijkt op een schaduw).
+  Geen rand (faalt tegen een gelijkspel).
+  Een rand die altijd de kleur van de kaart volgt, wat vraagt dat `Card` zijn kleur in een eigenschap zet.
+
+### Een winst en een verlies op 70%, een gelijkspel op 80%
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de staafjes gebruiken de kleur van de uitslag op 70% (winst en verlies) en 80% (gelijkspel).
+  De letters en de tekst gebruiken de volle kleur.
+- **Waarom:** 70% is de sterkte van de tabelbalk en van het zwakste stuk van de taartgrafiek.
+  Het grijs van een gelijkspel haalt op de warme kaart op 70% maar 2,93:1 en op 80% 3,51:1.
+- **Alternatieven:** overal 70% (het gelijkspel haalt dan 3:1 niet).
+  Overal 80% (de grafiek valt uit de familie).
+
+### De vorm staat als tekst boven de grafiek, zonder koppeling met de staafjes
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** boven de grafiek staat "Vorm" met de laatste vijf uitslagen als letters, het oudste links.
+  Er staat geen haak onder de laatste vijf staafjes en er staan geen letters onder de staafjes.
+- **Waarom:** de eigenaar zei dat bezoekers de haak niet zouden begrijpen.
+  De letters zijn de bekende afkorting en de grafiek legt de rest uit.
+- **Alternatieven:** een haak onder de laatste vijf staafjes.
+  Letters onder elk staafje (zwaar op een smalle kaart).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

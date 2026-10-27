@@ -9,6 +9,7 @@ const root = join(import.meta.dirname, '..')
 const components = [
   'Article',
   'ArticleCard',
+  'BarChart',
   'Body',
   'Button',
   'Card',
@@ -19,12 +20,14 @@ const components = [
   'Field',
   'Filter',
   'Form',
+  'FormChart',
   'Heading',
   'Honeypot',
   'Input',
   'Link',
   'List',
   'Logo',
+  'MarkRow',
   'Match',
   'Navigation',
   'NewsItem',
@@ -49,6 +52,11 @@ describe('the JavaScript entry of the package', () => {
   it('gives List.Item on List, because an item only works inside its list', () => {
     expect(typeof designSystem.List.Item).toBe('function')
     expect(designSystem).not.toHaveProperty('ListItem')
+  })
+
+  it('gives the trend on BarChart, because it only works inside its chart', () => {
+    expect(typeof designSystem.BarChart.Trend).toBe('function')
+    expect(designSystem).not.toHaveProperty('Trend')
   })
 
   it('gives Select.Option on Select, because an option only works inside its list', () => {

@@ -1,0 +1,235 @@
+/*
+ * The bar chart: a row of bars with the ground under them, drawn with CSS, and a line over it
+ * drawn as one SVG path. The sizes follow the width of the place the chart sits in (the chart is
+ * its own container), not the width of the screen: a card of a narrow column and a card of a wide
+ * one get what fits. The colours of the bars are in chart.css, as tones.
+ */
+
+@layer hf.components {
+  .hf-bar-chart {
+    --hf-bar-chart-height: 4.5rem;
+    --hf-bar-chart-line: 2px;
+    --hf-bar-chart-edge: 5px;
+
+    container-name: hf-bar-chart;
+    container-type: inline-size;
+    margin-block: 0.5rem;
+  }
+
+  /*
+   * One column on a narrow chart. A chart with room has a column for the numbers at the side as
+   * well. The row under the plot holds the numbers of the places and the caption, and it sits
+   * in the column of the plot, so the numbers line up with the places.
+   */
+  .hf-bar-chart-frame {
+    column-gap: 0.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hf-bar-chart-scale {
+    display: none;
+  }
+
+  /*
+   * The plot is the chart without the numbers. Everything in it is placed in percentages of it,
+   * and the ground is a line under it. It has no overflow rule, so the end dot and the edge of
+   * the line can stick out over the border.
+   */
+  .hf-bar-chart-plot {
+    block-size: var(--hf-bar-chart-height);
+    border-block-end: 0.125rem solid var(--hf-colour-marker-graphic);
+    grid-column: -2 / -1;
+    position: relative;
+  }
+
+  /* A line across the chart at a value, in the same line as between the rows of a table. */
+  .hf-bar-chart-guide {
+    border-block-start: 1px solid var(--hf-colour-border-default);
+    inline-size: 100%;
+    inset-block-end: calc(var(--hf-bar-chart-at) * 1%);
+    inset-inline-start: 0;
+    position: absolute;
+  }
+
+  /*
+   * One column for each place, all as wide as each other, with the room round a bar as padding of
+   * the place and not as a gap between places. So the middle of place i is exactly (i + 0.5) of
+   * the number of places, which is where the line puts its points.
+   */
+  .hf-bar-chart-bars {
+    display: grid;
+    grid-template-columns: repeat(var(--hf-bar-chart-slots), minmax(0, 1fr));
+    inset: 0;
+    position: absolute;
+  }
+
+  .hf-bar-chart-slot {
+    align-items: end;
+    display: grid;
+    padding-inline: 1px;
+  }
+
+  /*
+   * A bar is as high as its share of the chart, which the component gives as a number from 0 to
+   * 100 in --hf-bar-chart-share. The colour is a part of the colour of the tone, as the bar of a
+   * table and the slices of a donut chart do it. The end is rounded a little and the ground side
+   * is straight.
+   */
+  .hf-bar-chart-bar {
+    background-color: color-mix(in srgb, var(--hf-chart-colour) var(--hf-chart-strength), transparent);
+    block-size: calc(var(--hf-bar-chart-share) * 1%);
+    border-start-end-radius: 0.125rem;
+    border-start-start-radius: 0.125rem;
+  }
+
+  /* A value of 0 is a small bar on the ground, so it is not mistaken for a place with no bar. */
+  .hf-bar-chart-stub {
+    block-size: 0.25rem;
+  }
+
+  /*
+   * The line is drawn in the units of the data, so it is stretched over the chart, and its stroke
+   * keeps its width in pixels (non-scaling-stroke). The edge is a wider line under it, in the
+   * colour of the surface the chart is on, which parts the line from the bars. It does not need
+   * to be seen against the surface, only between the line and a bar.
+   */
+  .hf-bar-chart-trend {
+    block-size: 100%;
+    fill: none;
+    inline-size: 100%;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    overflow: visible;
+    position: absolute;
+  }
+
+  .hf-bar-chart-trend-line,
+  .hf-bar-chart-trend-edge {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .hf-bar-chart-trend-line {
+    stroke: var(--hf-colour-chart-line);
+    stroke-width: var(--hf-bar-chart-line);
+  }
+
+  .hf-bar-chart-trend-edge {
+    stroke: var(--hf-colour-chart-line-edge);
+    stroke-width: var(--hf-bar-chart-edge);
+  }
+
+  /* The dot at the end of the line, with a ring in the colour of the edge. */
+  .hf-bar-chart-trend-dot {
+    background-color: var(--hf-colour-chart-line);
+    block-size: 0.625rem;
+    border: 2px solid var(--hf-colour-chart-line-edge);
+    border-radius: 50%;
+    box-sizing: content-box;
+    inline-size: 0.625rem;
+    inset-block-end: calc(var(--hf-bar-chart-at) * 1%);
+    inset-inline-start: calc(var(--hf-bar-chart-across) * 1%);
+    position: absolute;
+    transform: translate(-50%, 50%);
+  }
+
+  .hf-bar-chart-axis {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    grid-column: -2 / -1;
+    line-height: 1.25rem;
+    text-align: center;
+  }
+
+  /* The numbers sit under the middle of their place. */
+  .hf-bar-chart-numbers {
+    block-size: 1.25rem;
+    font-variant-numeric: tabular-nums;
+    margin-block-start: 0.125rem;
+    position: relative;
+  }
+
+  .hf-bar-chart-number {
+    inset-inline-start: calc(var(--hf-bar-chart-across) * 1%);
+    position: absolute;
+    transform: translateX(-50%);
+  }
+
+  .hf-bar-chart-number-wide {
+    display: none;
+  }
+
+  /*
+   * A chart with room has taller bars, the numbers of 0, 1 and 3 at the side, more numbers
+   * under the places and a wider gap round each bar. The width is that of the chart, which is a
+   * card of about 28rem or wider; a card of a narrow column stays with the small chart.
+   */
+  @container hf-bar-chart (inline-size >= 24rem) {
+    .hf-bar-chart-frame {
+      grid-template-columns: 1.25rem minmax(0, 1fr);
+      padding-block-start: 0.5rem;
+    }
+
+    .hf-bar-chart-plot {
+      --hf-bar-chart-height: 6rem;
+    }
+
+    .hf-bar-chart-slot {
+      padding-inline: 2px;
+    }
+
+    .hf-bar-chart-scale {
+      color: var(--hf-colour-text-secondary);
+      display: block;
+      font-size: var(--hf-meta-font-size);
+      font-variant-numeric: tabular-nums;
+      grid-column: 1;
+      grid-row: 1;
+      margin-block-end: 0.125rem;
+      position: relative;
+    }
+
+    .hf-bar-chart-scale-number {
+      inline-size: 100%;
+      inset-block-end: calc(var(--hf-bar-chart-at) * 1%);
+      line-height: 1;
+      position: absolute;
+      text-align: end;
+      transform: translateY(50%);
+    }
+
+    .hf-bar-chart-number-wide {
+      display: block;
+    }
+  }
+
+  /* In forced colours a background colour is replaced, unless it is a system colour. */
+  @media (forced-colors: active) {
+    .hf-bar-chart-bar {
+      background-color: CanvasText;
+    }
+
+    .hf-bar-chart-plot {
+      border-block-end-color: CanvasText;
+    }
+
+    .hf-bar-chart-guide {
+      border-block-start-color: GrayText;
+    }
+
+    .hf-bar-chart-trend-line {
+      stroke: CanvasText;
+    }
+
+    .hf-bar-chart-trend-edge {
+      stroke: Canvas;
+    }
+
+    .hf-bar-chart-trend-dot {
+      background-color: CanvasText;
+      border-color: Canvas;
+    }
+  }
+}
