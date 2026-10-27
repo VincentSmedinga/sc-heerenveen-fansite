@@ -1,7 +1,7 @@
 # Back-ups
 
 De database heeft een back-up die we echt kunnen terugzetten.
-Elke nacht maakt cron op de host een dump van de database, een bestand met alle tabellen en alle rijen.
+Elke nacht maakt cron op de host een dump van de database, een bestand met alle tabellen en de rijen van alle tabellen op vijf na.
 Dit bestand zegt wat dat doet, hoe de eigenaar het instelt, hoe je een dump terugzet en wat de dumps aan opslag kosten.
 
 Een dump beschermt tegen een fout in een migratie of een verkeerde actie.
@@ -51,7 +51,7 @@ De opdracht `backup`:
    De nieuwste dump blijft altijd staan, ook als hij oud is: als cron stopte, is dat de enige die er is.
    Andere bestanden en de dumps van een andere database laat hij met rust.
 
-Mislukt de dump, dan schrijft de opdracht op stderr wat er misging, laat ze geen bestand achter, verwijdert ze niets en stopt ze met code 1.
+Mislukt de dump, dan schrijft de opdracht op stderr wat er misging, laat hij geen bestand achter, verwijdert hij niets en stopt hij met code 1.
 Een fout in de opdracht zelf geeft code 2.
 Het wachtwoord staat nooit in de opdrachtregel en niet in de uitvoer.
 `mysqldump` krijgt het in een optiebestand met rechten voor alleen het account (`--defaults-extra-file`), dat de opdracht in een eigen tijdelijke map maakt en na afloop weghaalt.
