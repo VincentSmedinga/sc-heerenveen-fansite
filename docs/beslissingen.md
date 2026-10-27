@@ -3312,7 +3312,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Onder de muis (met een muis) en bij focus met het toetsenbord gaat het pictogram over in dat van het andere thema.
   Na een klik blijft het pictogram van het nieuwe thema staan tot de aanwijzer of de focus weggaat.
 - **Hoe:** de zon wordt de maan en de maan wordt de zon in 0,4 seconde.
-  De duur staat op één plek, in de eigenschap `--hf-theme-button-morph` in `theme-button.css`. (zie _Beweging heeft vaste duren en curves, en valt bij minder beweging op één plek weg_, 27 oktober 2026: die eigenschap is nu de medium duur van de tokens).
+  De duur staat op één plek, in de eigenschap `--hf-theme-button-morph` in `theme-button.css`.
   De kleur, de rand en de vulling blijven 0,2 seconde.
   De schijf van de zon groeit uit tot de maan, en een tweede schijf schuift er van rechtsboven in en drukt de deuk erin.
   De stralen lossen naar buiten op, de knop in.
