@@ -3553,14 +3553,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het gewicht verandert niet, zodat de rij niet verspringt als de huidige link wisselt.
   `aria-current="location"` is voor een plek op een pagina, `page` voor een pagina in het menu.
 - **Hoe:** `followPage.ts` zoekt de koppen via de `href` van de links (`#stand` wijst naar het element met dat `id`) en zet er een `IntersectionObserver` op.
-  De lijn ligt waar een klik op de link de kop neerzet: de ruimte die de pagina onder de balk houdt (`scroll-padding-block-start`), de ruimte die de kop voor zichzelf houdt (`scroll-margin-block-start`) en één pixel erbij, zodat een kop na een klik meteen de huidige is.
-  De kop heeft zijn eigen ruimte, dus elke kop krijgt een eigen observer met zijn eigen lijn.
-  De browser meldt alleen wanneer een kop de lijn passeert, en de component meet de pagina niet tijdens het scrollen.
-  De lijn wordt opnieuw gemeten als het venster van maat verandert.
-  Onderaan de pagina kan de laatste kaart niet tot de lijn komen en passeert er geen kop meer.
-  Daarom kijkt een controle per beeld (`requestAnimationFrame`) of de pagina op de bodem is, en is de laatste link dan de huidige als zijn kop in beeld is.
-  Een klik op een link maakt die link de huidige tot de bezoeker zelf weer scrolt (`wheel`, `touchstart` of een toets), zodat de balk niet langs de kaarten loopt die een lange sprong passeert.
-  De streep is de onderstreping van de tekst, dus ze blijft in geforceerde kleuren, en ze heeft een eigen rol, `--hf-colour-accent-shortcuts`: rood-600 in licht (4,77:1 op de balk) en rood-400 in donker (5,34:1).
+  De lijn ligt waar een klik op de link de kop neerzet, plus één pixel, zodat een kop na een klik meteen de huidige is.
+  Dat is de ruimte die de pagina onder de balk houdt (`scroll-padding-block-start`) plus de ruimte die de kop voor zichzelf houdt (`scroll-margin-block-start`).
+  Die tweede ruimte verschilt per kop, dus elke kop krijgt een eigen observer met een eigen lijn.
+  Elke observer kijkt van de lijn tot het einde van de pagina.
+  Zo meldt de browser ook een kop die de pagina overslaat bij een sprong, en meldt hij alleen wanneer een kop de lijn passeert.
+  De component meet de pagina niet tijdens het scrollen.
+  Het venster krijgt een andere maat of de tekst wordt groter: dan meet de component de lijnen opnieuw.
+  Onderaan de pagina kan de laatste kaart niet tot de lijn komen, en dan passeert er geen kop meer.
+  Daarom kijkt één controle per beeld (`requestAnimationFrame`) of de pagina op de bodem is.
+  Staat de kop van de laatste kaart dan in beeld, dan is de laatste link de huidige.
+  Een klik op een link maakt die link de huidige, tot de bezoeker zelf weer scrolt (`wheel`, `touchstart` of een toets).
+  Zo loopt de balk niet langs de kaarten die een sprong passeert.
+  De streep is de onderstreping van de tekst, dus ze blijft in geforceerde kleuren.
+  Ze heeft een eigen rol, `--hf-colour-accent-shortcuts`: rood-600 in licht (4,77:1 op de balk) en rood-400 in donker (5,34:1).
   Het rood van de header, `--hf-colour-accent-on-header`, haalt op de zandkleurige balk maar 2,43:1.
   Vanaf 56 rem is de balk `display: none` en luistert de component niet naar het scrollen.
 - **Alternatieven:** de huidige link vet maken (de link wordt breder en de rij verspringt).
