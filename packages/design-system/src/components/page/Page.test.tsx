@@ -402,7 +402,7 @@ describe('Page.Shortcuts', () => {
     ])
   })
 
-  it('marks no link as the current page', () => {
+  it('marks no link as current in its markup: the current place comes from scrolling the page', () => {
     const { container } = render(<Page.Shortcuts items={items} label="Op deze pagina:" />)
 
     expect(container.querySelector('[aria-current]')).toBeNull()

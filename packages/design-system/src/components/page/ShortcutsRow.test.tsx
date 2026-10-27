@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import * as follow from './followPage'
 import { ShortcutsRow } from './ShortcutsRow'
 
 // jsdom has no layout, so the test gives the row and the link the boxes and sizes they have.
@@ -40,6 +41,33 @@ afterEach(() => {
 })
 
 describe('ShortcutsRow', () => {
+  it('makes the bar follow the page while it is on the page, and stops when it goes', () => {
+    const stop = vi.fn()
+    const followPage = vi.spyOn(follow, 'followPage').mockReturnValue(stop)
+    const { container, unmount } = render(
+      <ShortcutsRow>
+        <a href="#stand">Stand</a>
+      </ShortcutsRow>,
+    )
+
+    expect(followPage).toHaveBeenCalledWith(container.firstElementChild)
+    expect(stop).not.toHaveBeenCalled()
+
+    unmount()
+
+    expect(stop).toHaveBeenCalledTimes(1)
+  })
+
+  it('has no current link in its markup, as the server sends it, until the page is scrolled', () => {
+    const { container } = render(
+      <ShortcutsRow>
+        <a href="#stand">Stand</a>
+      </ShortcutsRow>,
+    )
+
+    expect(container.querySelector('[aria-current]')).toBeNull()
+  })
+
   it('is the row of the bar, around its list', () => {
     const { row } = renderRow({ link: box(150, 250) })
 

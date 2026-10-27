@@ -144,4 +144,140 @@ test.describe('the bar under the header of /wedstrijden', () => {
 
     await expect(page.locator('#stand .hf-heading-link')).toBeFocused()
   })
+
+  test('has no current link at the top of the page, and the link to the card that came past last when scrolling', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/wedstrijden')
+    const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
+    const current = bar.locator('[aria-current]')
+
+    await expect(bar.getByRole('link').first()).toBeVisible()
+    await expect(current).toHaveCount(0)
+
+    // As a click on its link brings the heading to the top, under the bar.
+    await page.evaluate(() => document.getElementById('stand')?.scrollIntoView({ behavior: 'instant', block: 'start' }))
+
+    await expect(current).toHaveCount(1)
+    await expect(current).toHaveText('Stand')
+    await expect(current).toHaveAttribute('aria-current', 'location')
+  })
+
+  test('puts the current link first in the row, and scrolls the row and not the page', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.goto('/wedstrijden')
+    const current = page.locator('.hf-page-shortcuts [aria-current="location"]')
+
+    await page.evaluate(() => document.getElementById('stand')?.scrollIntoView({ behavior: 'instant', block: 'start' }))
+    await expect(current).toHaveText('Stand')
+    const top = await page.evaluate(() => window.scrollY)
+
+    // The start of the row, after the room for the fade and the ring, is where it snaps to.
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const row = document.querySelector('.hf-page-shortcuts-row')
+          const link = document.querySelector('.hf-page-shortcuts [aria-current="location"]')
+
+          return row && link
+            ? link.getBoundingClientRect().left -
+                row.getBoundingClientRect().left -
+                parseFloat(getComputedStyle(row).scrollPaddingLeft)
+            : undefined
+        }),
+      )
+      .toBeCloseTo(0, 0)
+    expect(await page.evaluate(() => window.scrollY)).toBe(top)
+    expect(await page.evaluate(() => document.scrollingElement?.scrollLeft)).toBe(0)
+  })
+
+  test('follows the page on down and up again, and has one current link at a time', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/wedstrijden')
+    const current = page.locator('.hf-page-shortcuts [aria-current]')
+    const to = (id: string) =>
+      page.evaluate((target) => document.getElementById(target)?.scrollIntoView({ behavior: 'instant' }), id)
+
+    for (const [id, name] of [
+      ['uitslagen', 'Uitslagen'],
+      ['de-nul-gehouden', 'De nul gehouden'],
+      ['stand', 'Stand'],
+      ['programma', 'Programma'],
+    ] as const) {
+      await to(id)
+      await expect(current).toHaveText(name)
+      await expect(current).toHaveCount(1)
+    }
+
+    await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: 0 }))
+    await expect(current).toHaveCount(0)
+  })
+
+  test('is the last link at the bottom of the page, where the last card cannot scroll to the line', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/wedstrijden')
+
+    await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: document.documentElement.scrollHeight }))
+
+    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveText('Doelpunten per kwartier')
+  })
+
+  test('makes the link that is clicked the current one, and does not scroll the page from under the bar', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/wedstrijden')
+    const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
+
+    await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
+
+    await expect(page).toHaveURL(/#doelpuntenmakers$/)
+    await expect(bar.locator('[aria-current]')).toHaveText('Doelpuntenmakers')
+    await expect.poll(async () => (await bar.boundingBox())?.y).toBe(0)
+    await expect(bar.locator('[aria-current]')).toHaveText('Doelpuntenmakers')
+  })
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`passes axe with a current link, with a line of 3 pixels under it in ${colorScheme}`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme })
+      await page.setViewportSize({ height: 800, width: 390 })
+      await page.goto('/wedstrijden')
+      await page.evaluate(() => document.getElementById('stand')?.scrollIntoView({ behavior: 'instant' }))
+      const current = page.locator('.hf-page-shortcuts [aria-current="location"]')
+
+      await expect(current).toHaveText('Stand')
+      await expect(current).toHaveCSS('text-decoration-line', 'underline')
+      await expect(current).toHaveCSS('text-decoration-thickness', '3px')
+      await expect(current).toHaveCSS('font-weight', '500')
+      expect(await checkPage(page)).toEqual([])
+    })
+  }
+
+  test('keeps the line of the current link in forced colours, and under the mouse', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' })
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/wedstrijden')
+    await page.evaluate(() => document.getElementById('stand')?.scrollIntoView({ behavior: 'instant' }))
+    const current = page.locator('.hf-page-shortcuts [aria-current="location"]')
+
+    await expect(current).toHaveCSS('text-decoration-line', 'underline')
+    await expect(current).toHaveCSS('text-decoration-thickness', '3px')
+
+    await current.hover()
+
+    await expect(current).toHaveCSS('text-decoration-thickness', '3px')
+    await expect(current).toHaveCSS('text-underline-offset', /^5\.6/)
+  })
+
+  test('does not follow the page where the bar is gone', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 896 })
+    await page.goto('/wedstrijden')
+    await page.evaluate(() => document.getElementById('stand')?.scrollIntoView({ behavior: 'instant' }))
+
+    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveCount(0)
+  })
 })

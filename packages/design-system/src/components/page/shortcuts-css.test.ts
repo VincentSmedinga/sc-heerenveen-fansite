@@ -137,6 +137,27 @@ describe('a link in shortcuts.css', () => {
     expect(link).toContain('background-color var(--hf-motion-duration-quick) var(--hf-motion-ease-change)')
   })
 
+  it('has a red line under the text of the link to the place where the reader is, from a token, 3px thick', () => {
+    const current = link.match(/&\[aria-current='location'\] \{([^}]*)\}/)?.[1] ?? ''
+
+    expect(current).toContain('text-decoration-color: var(--hf-colour-accent-shortcuts);')
+    expect(current).toContain('text-decoration-line: underline;')
+    expect(current).toContain('text-decoration-thickness: 3px;')
+    expect(current).toContain('text-decoration-skip-ink: none;')
+  })
+
+  it('keeps the weight and the size of a link that is the current one, so the row does not jump', () => {
+    const current = link.match(/&\[aria-current='location'\] \{([^}]*)\}/)?.[1] ?? ''
+
+    expect(current).not.toMatch(/font-|padding|block-size|inline-size|border|margin/)
+  })
+
+  it('keeps its line under the mouse, because the rule of the current link comes after the one of the mouse', () => {
+    expect(link.indexOf('&:hover')).toBeGreaterThan(-1)
+    expect(link.indexOf("&[aria-current='location']")).toBeGreaterThan(link.indexOf('&:hover'))
+    expect(link.indexOf("&[aria-current='location']")).toBeGreaterThan(link.indexOf('&:active'))
+  })
+
   it('leaves the focus ring to the base styles', () => {
     expect(css).not.toMatch(/outline|:focus/)
   })

@@ -2,6 +2,8 @@ import preview from '#.storybook/preview'
 
 import { ExampleHeader, ExampleMain } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
+import { Heading } from '../heading/Heading'
+import { Text } from '../text/Text'
 import { Page } from './Page'
 
 const meta = preview.meta({
@@ -18,7 +20,11 @@ const meta = preview.meta({
           'De rij snapt op het begin van een link.',
           'De balk blijft aan de bovenkant van het venster plakken als de pagina scrolt.',
           'Op een breed scherm, waar de cellen naast elkaar staan, is de balk er niet, ook niet voor een schermlezer.',
-          'Een link is niet de huidige pagina: de balk markeert er geen.',
+          'Terwijl je scrolt, volgt de balk de pagina: de link naar de kaart waar je bent staat vooraan in de rij, met een rode streep eronder.',
+          'Dat is de kaart waarvan de kop als laatste boven de balk is gekomen.',
+          'Vóór de eerste kop is er geen huidige link, en zonder script ook niet.',
+          'De rij scrolt, nooit de pagina, en niet terwijl je de rij aanraakt of met het toetsenbord in de rij bent.',
+          'De streep betekent: je bent hier, en geldt voor een plek op de pagina, niet voor een pagina.',
           '',
           'De balk heeft alleen op een smal scherm iets te laten zien, dus de verhalen staan alleen in het canvas.',
           'Kies bij Viewport in de werkbalk een smal scherm.',
@@ -103,6 +109,77 @@ export const WrappedDark = meta.story({
   globals: { theme: 'dark', viewport: { value: 'mobile1' } },
   name: 'Smal scherm: de rij loopt om, donker',
   render,
+})
+
+const sections = [
+  { id: 'programma', title: 'Programma' },
+  { id: 'uitslagen', title: 'Uitslagen' },
+  { id: 'stand', title: 'Stand' },
+  { id: 'doelpuntenmakers', title: 'Doelpuntenmakers' },
+  { id: 'de-nul-gehouden', title: 'De nul gehouden' },
+  { id: 'doelpunten-per-kwartier', title: 'Doelpunten per kwartier' },
+]
+
+const followParameters = {
+  docs: {
+    description: {
+      story:
+        'Een lange pagina van zes kaarten. Scrol de pagina: de link naar de kaart waar je bent staat vooraan in de rij, met een rode streep eronder. Hier is de pagina al tot de kop van Stand gescrold.',
+    },
+  },
+}
+
+// The page scrolls to a heading, as after a click on its link, so the bar has a current link.
+const scrollToStand = () => {
+  document.getElementById('stand')?.scrollIntoView({ behavior: 'instant', block: 'start' })
+}
+
+const renderLongPage = (_args: unknown, { globals }: { globals: Record<string, unknown> }) => (
+  <>
+    <ExampleHeader dark={globals['theme'] === 'dark'} />
+    <Page.Shortcuts
+      items={sections.map(({ id, title }) => ({ href: `#${id}`, label: title }))}
+      label="Op deze pagina:"
+    />
+    <Page.Body>
+      <Page.Main>
+        {sections.map(({ id, title }) => (
+          <Page.Cell key={id}>
+            <Heading anchor id={id} level={2}>
+              {title}
+            </Heading>
+            <Text>Hier staat wat bij {title.toLowerCase()} hoort. De kaart is lang genoeg om langs te scrollen.</Text>
+            <Text>
+              De balk onder de header blijft staan en laat zien in welk deel van de pagina je bent. De link naar dit
+              deel staat dan vooraan in de rij.
+            </Text>
+            <Text>
+              Een kaart kan lang zijn, zodat de kop van de volgende kaart pas na een tijd langs de balk komt. Tot dan
+              blijft de link naar deze kaart de huidige.
+            </Text>
+          </Page.Cell>
+        ))}
+      </Page.Main>
+    </Page.Body>
+  </>
+)
+
+export const Follows = meta.story({
+  ...phone,
+  globals: { theme: 'light', viewport: { value: 'mobile2' } },
+  name: 'Volgt de pagina',
+  parameters: followParameters,
+  play: scrollToStand,
+  render: renderLongPage,
+})
+
+export const FollowsDark = meta.story({
+  ...phone,
+  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
+  name: 'Volgt de pagina, donker',
+  parameters: followParameters,
+  play: scrollToStand,
+  render: renderLongPage,
 })
 
 const statesParameters = {

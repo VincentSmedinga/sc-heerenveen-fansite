@@ -3508,6 +3508,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een link naar een kaart is het anker op de kop (`#stand`).
   De browser scrolt de kop in beeld en zet het beginpunt voor Tab daar, dus de volgende Tab gaat naar de link in de kop.
 - **Alternatieven:** een rij links als blok in de hoofdkolom (het eerste ontwerp); een navigatie die altijd zichtbaar is (neemt ruimte op een breed scherm waar het niet nodig is); een samenvatting met openklappende kaarten (JavaScript en meer klikken); de kaarten opnieuw ordenen met de stand bovenaan (de stand is niet wat de meeste supporters het eerst zoeken).
+- **Later:** de balk kent nu een huidige plek: de link naar de kaart waar de bezoeker is, heeft `aria-current="location"` en een rode streep (zie _De balk met links naar de kaarten volgt de pagina_, 28 oktober 2026).
+  #286 zei nog dat geen link is gemarkeerd.
 
 ### De balk komt via een slot in de layout, een parallelle route
 
@@ -3537,6 +3539,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Maat en gewicht tegelijk veranderen, wat het submenu op blauw te zwak maakt.
 - **Later:** vervangt de maat en het gewicht van _Het hoofdmenu staat in een eigen rij onder de sitenaam_ (27 oktober 2026): niet 500 en 16 tot 20 pixels, maar 600 en 16 tot 18 pixels, en de huidige pagina niet alleen met de rode streep maar ook op gewicht 800.
   De rij, de kleur, de streep en de ruimte blijven.
+
+### De balk met links naar de kaarten volgt de pagina
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** de link naar de kaart waar de bezoeker is, krijgt `aria-current="location"` en een rode streep van 3 pixels onder de tekst, en staat vooraan in de rij.
+  Welke kaart dat is, bepaalt de kop die als laatste langs een lijn net onder de plakkende balk is gekomen.
+  Vóór de eerste kop is er geen huidige link.
+  De rij scrolt zelf (nooit de pagina), vloeiend en zonder animatie bij "minder beweging", en niet terwijl de bezoeker de rij aanraakt of de focus erin heeft.
+  Het is een kleine clientcomponent in `ShortcutsRow`.
+- **Waarom:** op een telefoon staan de kaarten onder elkaar en is de pagina lang.
+  De bezoeker ziet zo welk deel hij leest en heeft de link naar het volgende deel bij de hand.
+  Het gewicht verandert niet, zodat de rij niet verspringt als de huidige link wisselt.
+  `aria-current="location"` is voor een plek op een pagina, `page` voor een pagina in het menu.
+- **Hoe:** `followPage.ts` zoekt de koppen via de `href` van de links (`#stand` wijst naar het element met dat `id`) en zet er een `IntersectionObserver` op.
+  De lijn ligt waar een klik op de link de kop neerzet: de ruimte die de pagina onder de balk houdt (`scroll-padding-block-start`), de ruimte die de kop voor zichzelf houdt (`scroll-margin-block-start`) en één pixel erbij, zodat een kop na een klik meteen de huidige is.
+  De kop heeft zijn eigen ruimte, dus elke kop krijgt een eigen observer met zijn eigen lijn.
+  De browser meldt alleen wanneer een kop de lijn passeert, en de component meet de pagina niet tijdens het scrollen.
+  De lijn wordt opnieuw gemeten als het venster van maat verandert.
+  Onderaan de pagina kan de laatste kaart niet tot de lijn komen en passeert er geen kop meer.
+  Daarom kijkt een controle per beeld (`requestAnimationFrame`) of de pagina op de bodem is, en is de laatste link dan de huidige als zijn kop in beeld is.
+  Een klik op een link maakt die link de huidige tot de bezoeker zelf weer scrolt (`wheel`, `touchstart` of een toets), zodat de balk niet langs de kaarten loopt die een lange sprong passeert.
+  De streep is de onderstreping van de tekst, dus ze blijft in geforceerde kleuren, en ze heeft een eigen rol, `--hf-colour-accent-shortcuts`: rood-600 in licht (4,77:1 op de balk) en rood-400 in donker (5,34:1).
+  Het rood van de header, `--hf-colour-accent-on-header`, haalt op de zandkleurige balk maar 2,43:1.
+  Vanaf 56 rem is de balk `display: none` en luistert de component niet naar het scrollen.
+- **Alternatieven:** de huidige link vet maken (de link wordt breder en de rij verspringt).
+  Een rij die niet meescrolt (de huidige link kan buiten beeld zijn).
+  CSS met `scroll-target-group` en `:target-current` (geen JavaScript, maar alleen Chrome kent het nu).
+  De rij die altijd op de uiterste plek scrolt, of op de dichtstbijzijnde rand: onvoorspelbaarder dan altijd vooraan.
+  Een `scroll`-handler die per beeld de koppen meet: dat kost meer dan een observer.
+- **Later:** vult het besluit _Een balk onder de kop voor de links naar de kaarten, alleen op een smal scherm_ (27 oktober 2026) aan: de balk kent nu een huidige plek.
 
 ## Importer
 
