@@ -21,7 +21,7 @@ import type { ImportOptions } from './import-feeds.ts'
 import { isUnhealthy } from './import-matches.ts'
 import { isGoalOfOurPlayer } from './link-players.ts'
 import { unhealthyAfter } from './run-log.ts'
-import { formatTime } from './text.ts'
+import { formatTime, printable } from './text.ts'
 
 /**
  * Shows the health of each feed of the sources that are switched on: the source, the address,
@@ -208,6 +208,6 @@ async function showUnlinkedGoals(db: Database, season: string, write: (line: str
   const names = [...new Set(unlinked.map((goal) => goal.player))].sort((a, b) => a.localeCompare(b, 'nl'))
 
   write(
-    `  goals of ours without a player: ${unlinked.length} of ${ours.length}${names.length === 0 ? '' : ` (${names.join(', ')})`}`,
+    `  goals of ours without a player: ${unlinked.length} of ${ours.length}${names.length === 0 ? '' : ` (${printable(names.join(', '))})`}`,
   )
 }

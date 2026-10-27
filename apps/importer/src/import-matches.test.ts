@@ -1066,6 +1066,18 @@ describe('the status', () => {
     ])
   })
 
+  it('shows the names of goals without a player on one line, without control characters', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await database.pool.query("UPDATE match_goals SET player = 'Oy\nen\u0007' WHERE player = 'Oyen'")
+
+    const line = (await status(first)).text.split('\n').find((item) => item.includes('goals of ours'))
+
+    expect(line).toContain('Oy en')
+    expect(line).not.toContain('\u0007')
+  })
+
   it('shows the last good read, the last outcome, the failed runs and the pages', async () => {
     const { pages, server } = await serve()
 
