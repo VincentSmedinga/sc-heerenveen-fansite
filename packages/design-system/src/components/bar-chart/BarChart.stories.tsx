@@ -69,6 +69,10 @@ const bars: (BarChartBar | null)[] = [
   ...Array.from({ length: 22 }, () => null),
 ]
 
+const latest = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(
+  movingAverage(goals, 5).at(-1) ?? 0,
+)
+
 const GoalsCard = ({ trend = true }: { trend?: boolean }) => (
   <div style={{ maxInlineSize: '36rem' }}>
     <Card aria-labelledby="doelpunten-kop">
@@ -79,7 +83,7 @@ const GoalsCard = ({ trend = true }: { trend?: boolean }) => (
         {trend && <BarChart.Trend values={movingAverage([...goals, ...Array.from({ length: 22 }, () => null)], 5)} />}
       </BarChart>
       <Text appearance="meta">
-        De lijn laat zien hoeveel doelpunten sc Heerenveen per wedstrijd maakte in de laatste 5 wedstrijden: nu 1,8.
+        {`De lijn laat zien hoeveel doelpunten sc Heerenveen per wedstrijd maakte in de laatste 5 wedstrijden: nu ${latest}.`}
       </Text>
       <div
         style={{
