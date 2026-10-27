@@ -86,7 +86,7 @@ Die controles raken zulke wijzigingen niet, en ze kosten ongeveer 150 seconden.
 Lint, typecheck, `pnpm test`, de build en de controle van de titel draaien altijd.
 `pnpm test:stories` draait alleen bij een wijziging die een story kan raken: in `packages/design-system/`, in het lockfile, in `pnpm-workspace.yaml` of in de workflow zelf.
 Een push naar `main`, een handmatige run en het label draaien hem ook.
-Alles draait ook in deze gevallen:
+De controles van de site draaien ook in deze gevallen:
 
 - de pull request wijzigt een bestand dat niet in die lijst staat;
 - de pull request wijzigt een `package.json` of een `tsconfig`;

@@ -520,7 +520,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het script `scripts/ci-changes.js` beslist, naast de controles van de site, en het log zegt er een eigen regel over.
   De regels van _CI slaat de controles van de site over bij wijzigingen die ze niet raken_ gelden voor de site en veranderen niet.
 - **Waarom:** de stories staan in het designsysteem en hangen af van de versies van Storybook, Vitest, axe en de browser.
-  Een wijziging in `apps/site/` of `docs/` raakt ze niet, en de stap kost lokaal ongeveer 16 seconden.
+  Een wijziging in `apps/site/` of `docs/` raakt ze niet, en de stap kost lokaal ongeveer 16 seconden en in CI 44 seconden (pull request #357).
   Het lockfile en de workflow staan erbij, omdat een nieuwe versie of een gewijzigde stap de controle zelf verandert.
 - **Chrome:** de controle gebruikt in CI het Google Chrome van de runner (`channel: 'chrome'`) en lokaal het Chromium van Playwright, zoals de controle van de site.
   Zo hoeft CI geen browser te installeren.
