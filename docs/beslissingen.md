@@ -3386,6 +3386,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of grotere afstanden tussen de onderdelen; dan valt Forum op 390 pixels op een tweede rij.
   Of het menu inklappen achter een knop op een smal scherm; dat verbergt de belangrijkste links.
 - **Later:** vervangt de opmaak van _Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep_ (22 oktober 2026): halfvet en de lichtblauwe kleur zijn gewicht 500 en de lichtste kleur geworden.
+- **Later:** zie _Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter_ (27 oktober 2026) voor de maat en het gewicht: nu 600 en 16 tot 18 pixels, en de huidige pagina op 800 met zijn rode streep.
 
 ### Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat
 
@@ -3446,6 +3447,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het slot is een segment onder de layout, dus de titelsjabloon van de layout bereikt nu ook de homepage.
   De foutpagina van de homepage zet haar titel daarom met `absolute`, zodat die blijft zoals hij was.
 - **Alternatieven:** de balk in `Page.Body` zetten en met CSS naar buiten trekken (breedte, marges en de randen van het scherm moeten dan kloppen op elke breedte); de balk met JavaScript naar de goede plek verzetten (de balk springt na het laden, en zonder JavaScript staat hij verkeerd); `Page.Body` uit de layout halen en elke pagina de eigen laten zetten (elke pagina verandert voor één balk); een routegroep met een eigen layout voor `/wedstrijden` (alle pagina's verhuizen).
+
+### Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de links in het hoofdmenu van de kop zijn 16 pixels op 320 pixels breed en 18 pixels vanaf 900 pixels (`clamp(1rem, 0.93rem + 0.34vw, 1.125rem)`), op gewicht 600.
+  De huidige pagina staat op gewicht 800 en heeft zijn rode streep.
+  Het menu in de footer en elders blijft zoals het was.
+- **Waarom:** 20 pixels is te groot.
+  Onder het menu komt een submenu (#363) en op een telefoon is de maat gelijk, dus het gewicht moet het niveau tonen.
+  Een zwaardere huidige pagina is beter te zien dan alleen een streep.
+- **Alternatieven:** een kleiner submenu (15 pixels) en gewicht 500 voor beide; dat is leesbaar maar laat het gewicht gelijk.
+  Maat en gewicht tegelijk veranderen, wat het submenu op blauw te zwak maakt.
+- **Later:** vervangt de maat en het gewicht van _Het hoofdmenu staat in een eigen rij onder de sitenaam_ (27 oktober 2026): niet 500 en 16 tot 20 pixels, maar 600 en 16 tot 18 pixels, en de huidige pagina niet alleen met de rode streep maar ook op gewicht 800.
+  De rij, de kleur, de streep en de ruimte blijven.
 
 ## Importer
 

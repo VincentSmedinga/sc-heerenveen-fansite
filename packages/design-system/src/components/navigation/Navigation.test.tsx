@@ -138,15 +138,25 @@ describe('Navigation', () => {
     expect(screen.getByRole('navigation', { name: 'Hoofdmenu' })).toBeTruthy()
   })
 
-  it('sets the links in the header in a size that grows with the window, from 16px at 320px to 20px at 900px', () => {
+  it('sets the links in the header in a size that grows with the window, from 16px at 320px to 18px at 900px', () => {
     const css = readFileSync(join(import.meta.dirname, 'navigation.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
     const [, minimum, offset, slope, maximum] =
       css.match(/font-size: clamp\(([\d.]+)rem, ([\d.]+)rem \+ ([\d.]+)vw, ([\d.]+)rem\);/) ?? []
     const at = (width: number) => Number(offset) * 16 + (Number(slope) / 100) * width
 
     expect(Number(minimum) * 16).toBe(16)
-    expect(Number(maximum) * 16).toBe(20)
+    expect(Number(maximum) * 16).toBe(18)
     expect(Math.max(16, at(320))).toBeCloseTo(16, 0)
-    expect(at(900)).toBeCloseTo(20, 0)
+    expect(at(900)).toBeCloseTo(18, 0)
+  })
+
+  it('sets the links in the header in weight 600 and the current page in weight 800', () => {
+    const css = readFileSync(join(import.meta.dirname, 'navigation.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+    const header = css.slice(css.indexOf('.hf-page-header .hf-navigation-link {'))
+    const [, link] = header.match(/font-weight: (\d+);/) ?? []
+    const [, current] = header.match(/\[aria-current='page'\] \{\s*font-weight: (\d+);/) ?? []
+
+    expect(link).toBe('600')
+    expect(current).toBe('800')
   })
 })
