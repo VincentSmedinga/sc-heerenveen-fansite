@@ -66,6 +66,7 @@ describe('the JavaScript entry of the package', () => {
 
   it('gives the parts of a page on Page, because they only work inside a page', () => {
     expect(typeof designSystem.Page.Header).toBe('function')
+    expect(typeof designSystem.Page.Submenu).toBe('function')
     expect(typeof designSystem.Page.Body).toBe('function')
     expect(typeof designSystem.Page.Main).toBe('function')
     expect(typeof designSystem.Page.Sidebar).toBe('function')

@@ -3512,6 +3512,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een rij links als blok in de hoofdkolom (het eerste ontwerp); een navigatie die altijd zichtbaar is (neemt ruimte op een breed scherm waar het niet nodig is); een samenvatting met openklappende kaarten (JavaScript en meer klikken); de kaarten opnieuw ordenen met de stand bovenaan (de stand is niet wat de meeste supporters het eerst zoeken).
 - **Later:** de balk kent nu een huidige plek: de link naar de kaart waar de bezoeker is, heeft `aria-current="location"` en een rode streep (zie _De balk met links naar de kaarten volgt de pagina_, 28 oktober 2026).
   #286 zei nog dat geen link is gemarkeerd.
+- **Later:** zie _Het submenu is een tweede balk in een tint van de kop, zonder label_ (27 oktober 2026).
+  Dit besluit zei dat dezelfde balk later de subpagina's kon tonen.
+  Dat wordt een eigen onderdeel, `Page.Submenu`, onder het menu en voor deze balk, in een tint van de kop.
+  Deze balk blijft zandkleurig in licht, blijft voor ankers, plakt als enige en is vanaf 56 rem nog steeds weg.
 
 ### De balk komt via een slot in de layout, een parallelle route
 
@@ -3577,6 +3581,41 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rij die altijd op de uiterste plek scrolt, of op de dichtstbijzijnde rand: onvoorspelbaarder dan altijd vooraan.
   Een `scroll`-handler die per beeld de koppen meet: dat kost meer dan een observer.
 - **Later:** vult het besluit _Een balk onder de kop voor de links naar de kaarten, alleen op een smal scherm_ (27 oktober 2026) aan: de balk kent nu een huidige plek.
+
+### Het submenu is een tweede balk in een tint van de kop, zonder label
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** subpagina's staan in een balk onder het hoofdmenu in een tint van de kop (licht blauw-800, donker blauw-700), op elk scherm, met een onzichtbare naam en zonder zichtbaar label.
+  De huidige pagina is vet met de rode streep van het menu.
+  Een pagina met ankers en subpagina's heeft drie balken en alleen de ankerbalk plakt.
+- **Waarom:** zo is het submenu zichtbaar verbonden met het menu en los van de zandkleurige ankerbalk, die bij de pagina hoort.
+  Een label zou "Wedstrijden" drie keer onder elkaar zetten (menu, label, paginatitel).
+  De eigenaar verbergt geen navigatie.
+- **Alternatieven:** de zandkleurige balk van de ankers (lijkt te veel op de ankerbalk).
+  Eén balk waarin de subpagina's winnen (de lezer mist dan de ankers).
+  Een knop "Meer" in het hoofdmenu (#378, uitgesteld).
+
+### De submenubalk is een eigen onderdeel, `Page.Submenu`, en hergebruikt de rij van `Page.Shortcuts`
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** de balk is een nieuw onderdeel, `Page.Submenu`, en geen variant van `Page.Shortcuts`.
+  Het is een `nav` met een `aria-label`, een lijst links (`href`, `label`, `current`) en geen label.
+  De rij, de lijst, de vervaging, het snappen en het omlopen zijn die van `Page.Shortcuts`: dezelfde klassen en dezelfde `ShortcutsRow`, met `follow={false}`.
+  Die rij begint dan zo gescrold dat de link met `aria-current="page"` op de plek staat waar de rij snapt, en volgt de pagina niet.
+- **Waarom:** de twee balken verschillen in bijna alles wat een variant zou zetten: de kleur, het label, het plakken, het verdwijnen vanaf 56 rem, het soort markering (`aria-current="page"` van de server tegen `aria-current="location"` van het scrollen) en de gewichten.
+  Een variant had een prop voor elk daarvan nodig, en `Page.Shortcuts` zou voor beide balken verdeeld hebben moeten worden over `display: none` en `position: sticky`.
+  Hergebruik van de rij houdt het scrollen, de vervaging en het toetsenbord op één plek.
+- **Hoe:** de kleuren hebben rollen in de tokens: `--hf-colour-background-submenu` (licht blauw-800, donker blauw-700), `--hf-colour-text-submenu-link-hover` (wit) en `--hf-colour-background-submenu-pressed` (blauw-200 op 18%).
+  De links zijn `--hf-colour-text-on-header` (blauw-50: 11,4:1 op het vlak in licht en 8,6:1 in donker), de focusring is `--hf-colour-focus-on-header` (blauw-300: 6,2:1 en 4,7:1) en de streep onder de huidige pagina is `--hf-colour-accent-on-header` (rood-400: 4,2:1 in licht en 3,2:1 in donker, en een grafisch deel heeft 3:1 nodig).
+  Het issue noemde voor licht `#c22826`; dat rood haalt op blauw-800 maar 2,1:1 en is de kleur voor de zandkleurige balk, dus de streep is in beide thema's het rood van het menu.
+  Op de vulling van een ingedrukte link haalt dat rood geen 3:1 (2,2:1 in donker), dus de huidige pagina krijgt geen vulling als je hem indrukt: een druk op de pagina waar je bent gaat nergens heen.
+  De balk is 46 pixels hoog en de links zijn 36 pixels hoog (`2.25rem`), zonder lijn tussen kop en balk.
+  De balk staat in de HTML na de kop en voor de ankerbalk, en plakt niet: de bestaande `scroll-padding-block-start` voor de ankerbalk blijft kloppen, want alleen die balk kan de focus bedekken.
+- **Nadeel:** de klassen van de rij heten `hf-page-shortcuts-row` en `hf-page-shortcuts-list`, ook in het submenu.
+  Een naam die voor beide balken past, kost een hernoeming van `Page.Shortcuts` die niets aan het gedrag verandert.
+- **Alternatieven:** een variant van `Page.Shortcuts` met een prop (zie hierboven).
+  De rij kopiëren in een eigen onderdeel (twee plekken die het scrollen en de vervaging gelijk moeten houden).
+  Een lijn tussen kop en balk (de stap van 1,27:1 in licht en 1,33:1 in donker is genoeg, en het menu heeft al een lijn boven zich).
 
 ### De CSP laat afbeeldingen van het type `data:` toe
 

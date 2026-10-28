@@ -115,3 +115,59 @@ describe('ShortcutsRow', () => {
     expect(scrollIntoView).not.toHaveBeenCalled()
   })
 })
+
+describe('ShortcutsRow in a submenu', () => {
+  const renderSubmenuRow = ({ current = true, scrolls = true }: { current?: boolean; scrolls?: boolean } = {}) => {
+    const followPage = vi.spyOn(follow, 'followPage')
+    const { container } = render(
+      <ShortcutsRow follow={false}>
+        <a href="/programma">Programma</a>
+        <a aria-current={current ? 'page' : undefined} href="/stand">
+          Stand
+        </a>
+      </ShortcutsRow>,
+    )
+    const row = container.firstElementChild as HTMLElement
+
+    return { followPage, row, scrolls }
+  }
+
+  // The row is laid out before the effect, so the boxes have to be there when it renders.
+  const layout = (scrolls: boolean) => {
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(scrolls ? 600 : 260)
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(260)
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      return this.getAttribute('aria-current') === 'page' ? box(400, 460) : box(100, 360)
+    })
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({ scrollPaddingLeft: '29px' } as CSSStyleDeclaration)
+  }
+
+  it('does not follow the page: the current page comes from the server', () => {
+    layout(true)
+    const { followPage } = renderSubmenuRow()
+
+    expect(followPage).not.toHaveBeenCalled()
+  })
+
+  it('starts scrolled so that the link to the current page is where the row snaps to', () => {
+    layout(true)
+    const { row } = renderSubmenuRow()
+
+    // The link starts 300px into the row, and the row keeps 29px of room at its start.
+    expect(row.scrollLeft).toBe(300 - 29)
+  })
+
+  it('stays at the start when no link is current', () => {
+    layout(true)
+    const { row } = renderSubmenuRow({ current: false })
+
+    expect(row.scrollLeft).toBe(0)
+  })
+
+  it('stays at the start in a row that does not scroll, as at the narrowest width, where it wraps', () => {
+    layout(false)
+    const { row } = renderSubmenuRow()
+
+    expect(row.scrollLeft).toBe(0)
+  })
+})

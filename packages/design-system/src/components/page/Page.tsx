@@ -60,6 +60,26 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
   wide?: boolean
 }
 
+export type PageSubmenuItem = {
+  /** Whether this is the page the visitor is on. At most one item can be. */
+  current?: boolean
+  /** Where the link goes: a sub-page of the section. */
+  href: string
+  /** The text of the link. It says where the link goes: the name of the sub-page. */
+  label: string
+}
+
+export type PageSubmenuProps = Omit<ComponentPropsWithoutRef<'nav'>, 'aria-label' | 'aria-labelledby' | 'children'> & {
+  /** The links, in the order they are shown. */
+  items: readonly PageSubmenuItem[]
+  /**
+   * The name of the navigation for screen readers, such as the name of the section
+   * ("Wedstrijden"). The bar has no visible label. A page with more than one navigation under
+   * the header gives each a different name.
+   */
+  label: string
+}
+
 /**
  * The top of the page, on the blue of the header: a `header` element, which is the page's
  * banner landmark. It holds the logo and, if the page has one, the ThemeButton in the first
@@ -67,6 +87,37 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
  */
 const Header = ({ className, ...props }: PageHeaderProps) => (
   <header className={classNames('hf-page-header', className)} {...props} />
+)
+
+/**
+ * A bar under the main menu with the sub-pages of a section, in a `nav` of its own, outside the
+ * `main`, as wide as the page. It is a tint of the header, so it is seen to belong to the menu,
+ * and it has no visible label: the page already names the section, in the menu and in its
+ * title. The name for screen readers is the `label`. It is there on every width and never
+ * sticks, so it scrolls away with the header. The row scrolls sideways when it is too long,
+ * with a fade at the edge and snapping, as the Page.Shortcuts bar does, and begins scrolled so
+ * that the link to the current page is in view. On a very narrow screen, or where the text is
+ * much larger, the row wraps instead.
+ *
+ * The link to the current page has `aria-current="page"`, a heavier weight and the red line of
+ * the menu. It comes between the Page.Header and the Page.Shortcuts, if the page has one, so
+ * the reading order and the focus order are the page's: the menu, the sub-pages, the anchors,
+ * then the content.
+ */
+const Submenu = ({ className, items, label, ...props }: PageSubmenuProps) => (
+  <nav {...props} aria-label={label} className={classNames('hf-page-submenu', className)}>
+    <ShortcutsRow follow={false}>
+      <ul className="hf-page-shortcuts-list">
+        {items.map((item) => (
+          <li key={item.href}>
+            <Link aria-current={item.current ? 'page' : undefined} className="hf-page-submenu-link" href={item.href}>
+              {item.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </ShortcutsRow>
+  </nav>
 )
 
 /**
@@ -178,6 +229,7 @@ const Footer = ({ className, ...props }: PageFooterProps) => (
 
 // The names in React's developer tools and in the code examples in Storybook.
 Header.displayName = 'Page.Header'
+Submenu.displayName = 'Page.Submenu'
 Shortcuts.displayName = 'Page.Shortcuts'
 Body.displayName = 'Page.Body'
 Main.displayName = 'Page.Main'
@@ -189,9 +241,10 @@ Footer.displayName = 'Page.Footer'
  * The page: as wide as the window. The backgrounds of the Page.Header and the Page.Footer run
  * from edge to edge, and what is in them and the Page.Body sit in a centred column of a maximum
  * width, with a margin on either side on a narrow screen. It holds a Page.Header, a Page.Body
- * and a Page.Footer, in that order, and a Page.Shortcuts between the first two if the page has
- * one. The Page.Body holds a Page.Main and, if the page has one, a
- * Page.Sidebar, and in them the cells, some of them a Page.Cell. They only work inside a Page,
+ * and a Page.Footer, in that order, and between the first two a Page.Submenu and a
+ * Page.Shortcuts, in that order, if the page has them. The Page.Body holds a Page.Main and, if
+ * the page has one, a Page.Sidebar, and in them the cells, some of them a Page.Cell. They only
+ * work inside a Page,
  * so they are written as properties of it. Before them the page has an empty `div` that is
  * fixed to the top of the screen in the colour of the header, for the status bar of a phone
  * (see page.css).
@@ -204,6 +257,7 @@ export const Page = ({ children, className, ...props }: PageProps) => (
 )
 
 Page.Header = Header
+Page.Submenu = Submenu
 Page.Shortcuts = Shortcuts
 Page.Body = Body
 Page.Main = Main

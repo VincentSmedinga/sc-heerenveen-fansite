@@ -4,7 +4,7 @@ import { Heading } from '../components/heading/Heading'
 import { Link } from '../components/link/Link'
 import { List } from '../components/list/List'
 import { Logo } from '../components/logo/Logo'
-import { Navigation } from '../components/navigation/Navigation'
+import { Navigation, type NavigationItem } from '../components/navigation/Navigation'
 import { Page } from '../components/page/Page'
 import { Text } from '../components/text/Text'
 import { ThemeButton } from '../components/theme-button/ThemeButton'
@@ -27,13 +27,22 @@ export const exampleMenu = exampleMenuAt('Nieuws')
  * The logo as a link to the home page, the theme button beside it (here a static one, pressed
  * when `dark`) and the menu in a row under them. This is what a header holds.
  */
-export const ExampleHeader = ({ current = 'Nieuws', dark = false }: { current?: ExampleMenuPage; dark?: boolean }) => (
+export const ExampleHeader = ({
+  current = 'Nieuws',
+  dark = false,
+  menu,
+}: {
+  current?: ExampleMenuPage
+  dark?: boolean
+  /** Another menu than the one of the example pages, such as one with sub-pages. */
+  menu?: readonly NavigationItem[]
+}) => (
   <Page.Header>
     <Link href="#home">
       <Logo />
     </Link>
     <ThemeButton dark={dark} label="Donker" />
-    <Navigation items={exampleMenuAt(current)} label="Hoofdmenu" />
+    <Navigation items={menu ?? exampleMenuAt(current)} label="Hoofdmenu" />
   </Page.Header>
 )
 
