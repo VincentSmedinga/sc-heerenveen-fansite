@@ -99,7 +99,7 @@
 
   h5,
   h6 {
-    font-weight: 600;
+    font-weight: var(--hf-name-font-weight);
   }
 
   .hf-headline {

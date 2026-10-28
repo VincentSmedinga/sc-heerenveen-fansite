@@ -27,7 +27,7 @@
   .hf-discussion-item-title {
     display: inline-block;
     font-size: var(--hf-body-font-size);
-    font-weight: 500;
+    font-weight: var(--hf-headline-font-weight);
     min-block-size: 1.5rem;
     text-decoration-line: none;
     text-decoration-skip-ink: auto;

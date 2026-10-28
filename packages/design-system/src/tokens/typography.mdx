@@ -28,6 +28,20 @@ Twee lettertypes, allebei open (OFL) en zelf gehost: er gaat geen verzoek naar e
 
 Elke stijl heeft zijn eigen tokens, zoals `--hf-heading-3-font-size`, `--hf-heading-3-font-stretch` en `--hf-heading-3-letter-spacing`.
 
+### Gewicht van letters
+
+- **Nadruk, rangorde en toestand:** nadruk in een zin is `strong` of `b`.
+  Rangorde laat eerst maat, kleur en lettertype werken en gebruikt gewicht alleen in stappen van één: gewoon, medium, halfvet.
+  Een toestand mag gewicht toevoegen, maar nooit als enig teken.
+- **De huidige plek is 200 zwaarder dan de rest:** in elke balk is het huidige item 200 zwaarder dan de andere items.
+  Dat geldt voor het menu in de kop, de balk met subpagina's, het menu in de footer en de balk "Op deze pagina".
+  Het geldt voor de huidige pagina, voor de huidige plek op de pagina en voor het bovenliggende item van een huidige subpagina.
+- **Gewicht beweegt niet bij aanraken:** hover, focus en indrukken veranderen het gewicht niet, en het gewicht wordt nooit geanimeerd.
+  Een wissel van de huidige plek mag het gewicht wel veranderen: een nieuwe pagina, of scrollen naar de volgende kaart.
+- **Alleen tokens:** een component zet het gewicht met een token en nooit met een getal.
+  De tokens noemen de bedoeling en mogen dezelfde waarde hebben: `--hf-strong-font-weight` voor nadruk, `--hf-figure-font-weight` voor cijfers die mensen opzoeken, `--hf-name-font-weight` voor de naam van iets, en een paar voor het menu, de subpagina's en de balk "Op deze pagina" met hun huidige plek.
+  Een test weigert een kaal getal.
+
 ## Stijlen
 
 <Story of={TypographyStories.Styles} />

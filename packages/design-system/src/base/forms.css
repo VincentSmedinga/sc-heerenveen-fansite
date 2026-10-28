@@ -14,7 +14,7 @@
   }
 
   label {
-    font-weight: 600;
+    font-weight: var(--hf-name-font-weight);
   }
 
   /* Text fields. An input without a type is a text field too. */
@@ -83,7 +83,7 @@
 
   legend {
     color: var(--hf-colour-text-heading);
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
     padding-inline: 0.25rem;
   }
 }

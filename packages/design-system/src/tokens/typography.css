@@ -60,9 +60,9 @@
     --hf-heading-4-letter-spacing: 0.03em;
     --hf-heading-4-line-height: 1.3;
 
-    /* Nieuwskop */
+    /* Nieuwskop: the line readers come for. Also the first line of a match. */
     --hf-headline-font-size: 1.125rem;
-    --hf-headline-font-weight: 600;
+    --hf-headline-font-weight: 500;
     --hf-headline-line-height: 1.35;
 
     /* Tekst */
@@ -80,8 +80,31 @@
     --hf-meta-font-weight: 400;
     --hf-meta-line-height: 1.4;
 
-    /* Weight for strong and b in body text */
+    /*
+     * Weights by intent. Tokens may share a value: the name says why a place has its weight, and no token adds a
+     * weight. A component uses a token and never a bare number (weight-css.test.ts checks that).
+     */
+
+    /* Emphasis: strong and b, buttons, our club, titles of charts, caption, and a status the reader must not miss */
     --hf-strong-font-weight: 700;
+
+    /* The figures people look up: a score, the value of a bar, a mark in a row, the total of a donut, our goals */
+    --hf-figure-font-weight: 700;
+
+    /* The name of something: the label and the legend of a form, th and dt */
+    --hf-name-font-weight: 600;
+
+    /* The menu in the header and its current item, 200 heavier */
+    --hf-menu-font-weight: 600;
+    --hf-menu-current-font-weight: 800;
+
+    /* The bar with sub-pages and the menu in the footer, and their current item, 200 heavier */
+    --hf-submenu-font-weight: 400;
+    --hf-submenu-current-font-weight: 600;
+
+    /* The bar "Op deze pagina" and its current link, 200 heavier */
+    --hf-anchor-font-weight: 500;
+    --hf-anchor-current-font-weight: 700;
   }
 
   @media (width < 40em) {

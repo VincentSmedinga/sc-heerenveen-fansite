@@ -24,12 +24,12 @@
    */
   .hf-match-clubs {
     font-size: var(--hf-body-font-size);
-    font-weight: 500;
+    font-weight: var(--hf-headline-font-weight);
     margin-block: 0.125rem;
   }
 
   .hf-match-own {
-    font-weight: 700;
+    font-weight: var(--hf-strong-font-weight);
   }
 
   /*
@@ -49,7 +49,7 @@
    */
   .hf-match-score {
     font-variant-numeric: tabular-nums;
-    font-weight: 700;
+    font-weight: var(--hf-figure-font-weight);
     padding-inline: 0.25rem;
     white-space: nowrap;
   }
@@ -73,7 +73,7 @@
 
   /* "n.v." or "(4–3 n.s.)" after the result: part of it, but lighter than the goals. */
   .hf-match-extra {
-    font-weight: 400;
+    font-weight: var(--hf-body-font-weight);
   }
 
   /* The dotted line under an abbreviation has the colour of the result, not blue-grey. */
@@ -82,7 +82,7 @@
   }
 
   .hf-match-versus {
-    font-weight: 400;
+    font-weight: var(--hf-body-font-weight);
   }
 
   /*
@@ -99,7 +99,7 @@
 
   .hf-match-goal-ours {
     color: var(--hf-colour-outcome-win);
-    font-weight: 700;
+    font-weight: var(--hf-figure-font-weight);
   }
 
   .hf-match-goal-theirs {
@@ -117,7 +117,7 @@
    */
   .hf-match-postponed {
     color: var(--hf-colour-text-accent);
-    font-weight: 600;
+    font-weight: var(--hf-strong-font-weight);
   }
 
   /* A List with matches in it: no bullets, no indent, and a thin line between the lines. */

@@ -225,7 +225,7 @@
     color: var(--hf-colour-text-shortcuts-link);
     display: inline-flex;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: var(--hf-anchor-font-weight);
     line-height: 1;
     padding-inline: 0.625rem;
     text-decoration-line: none;
@@ -250,12 +250,15 @@
     /*
      * The link to the place on the page where the reader is (ShortcutsRow sets aria-current,
      * see followPage.ts) has a red line under its text, 3px thick, like the current page in the
-     * menu. The weight and the size stay, so the row does not jump when the current link
-     * changes. The line is the underline of the text, so it stays in forced colours, where the
-     * browser sets its colour, and it comes after the mouse rule, so it stays under the mouse.
-     * It does not skip the descenders, so it is one unbroken line.
+     * menu, and 200 heavier than the other links, like the current item of every bar. The weight
+     * changes when the reader scrolls to the next card, without a transition: the link gets a
+     * few pixels wider and the row follows it. The line is the underline of the text, so it
+     * stays in forced colours, where the browser sets its colour, and it comes after the mouse
+     * rule, so it stays under the mouse. It does not skip the descenders, so it is one
+     * unbroken line.
      */
     &[aria-current='location'] {
+      font-weight: var(--hf-anchor-current-font-weight);
       text-decoration-color: var(--hf-colour-accent-shortcuts);
       text-decoration-line: underline;
       text-decoration-skip-ink: none;

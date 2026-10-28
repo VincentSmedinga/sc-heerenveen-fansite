@@ -158,14 +158,14 @@ describe('Navigation', () => {
     expect(at(900)).toBeCloseTo(18, 0)
   })
 
-  it('sets the links in the header in weight 600 and the current page in weight 800', () => {
+  it('sets the links in the header in the menu weight and the current page in the heavier one', () => {
     const css = readFileSync(join(import.meta.dirname, 'navigation.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
     const header = css.slice(css.indexOf('.hf-navigation-header .hf-navigation-link {'))
-    const [, link] = header.match(/font-weight: (\d+);/) ?? []
-    const [, current] = header.match(/\[aria-current='true'\]\) \{\s*font-weight: (\d+);/) ?? []
+    const [, link] = header.match(/font-weight: (var\([^)]+\));/) ?? []
+    const [, current] = header.match(/\[aria-current='true'\]\) \{\s*font-weight: (var\([^)]+\));/) ?? []
 
-    expect(link).toBe('600')
-    expect(current).toBe('800')
+    expect(link).toBe('var(--hf-menu-font-weight)')
+    expect(current).toBe('var(--hf-menu-current-font-weight)')
   })
 })
 

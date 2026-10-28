@@ -22,7 +22,7 @@
   /* In the colour of errors, in weight 500; the text itself says "Fout:", so the colour is not the only sign. */
   .hf-field-error {
     color: var(--hf-colour-text-accent);
-    font-weight: 500;
+    font-weight: var(--hf-strong-font-weight);
   }
 
   /*

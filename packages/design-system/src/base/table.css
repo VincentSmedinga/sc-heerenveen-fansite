@@ -28,7 +28,7 @@
   }
 
   th {
-    font-weight: 600;
+    font-weight: var(--hf-name-font-weight);
   }
 
   thead th {

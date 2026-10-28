@@ -1960,6 +1960,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** de grens van 24 rem in _Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query_ ging uit van de Nieuwskop.
   Met een kop van 16 pixels past er bij 24 rem iets meer dan dertig tekens op een regel, zo'n vierendertig, en de grens blijft staan.
 - **Later:** de regel staat weer in `hf.components`, nu de lagen op de site in de goede volgorde staan; zie _De volgorde van de lagen staat in een eigen bestand_.
+- **Later:** zie _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026): 500 blijft, "voorlopig" is bevestigd, en de Nieuwskop zelf heeft nu ook gewicht 500, zodat Storybook zegt wat de bezoeker ziet.
 
 ### De kolom met dag en tijd in een nieuwsregel is zo breed als de breedste tijd
 
@@ -2635,6 +2636,32 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De knop hoort bij het eind van de pagina, dus bij de laatste plek in de volgorde.
   De knop ligt over de strepen: de kinderen van de footer zijn gepositioneerd en liggen daarom boven het deel van de strepen over de footer.
 - **Alternatieven:** de kleuren van de themaknop (die zijn gemaakt voor het donkerblauw van de header); nieuwe rollen voor rand en vulling in de footer (meer tokens voor dezelfde tinten); de knop in een hoek van de footer met `position: absolute` (hij schuift dan over de tekst of de links); de knop vóór het menu in de code (de volgorde van het toetsenbord volgt dan het scherm, maar de bezoeker die onderaan komt, tabt eerst door de knop).
+
+### Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** het gewicht van letters volgt vier regels: nadruk is 700, rangorde gebruikt eerst maat, kleur en lettertype, de huidige plek in een balk is 200 zwaarder dan de rest, en gewicht beweegt niet bij aanraken.
+  Componenten gebruiken alleen tokens voor het gewicht, en een test weigert een kaal getal.
+  De tokens noemen de bedoeling en mogen dezelfde waarde hebben.
+  De nieuwskop blijft op 500.
+  Het gewicht van de huidige plek geldt ook voor de balk "Op deze pagina" (700 tegen 500), en voor de huidige pagina in het submenu en in het menu in de footer (600 tegen 400).
+- **Waarom:** er was geen regel, dus elke nieuwe plek koos een getal: 23 van de 53 regels waren een kaal getal.
+  De regel van 200 verschil volgt uit de metingen: een stap van 100 is op 16 pixels nauwelijks te zien.
+  Tokens met een bedoeling maken duidelijk waarom een waarde gekozen is, en een test voorkomt dat de getallen weer uit elkaar lopen.
+  De nieuwskop is de regel waarvoor mensen komen, dus iets meer gewicht helpt bij het scannen.
+- **Hoe:** `tokens/typography.css` heeft `--hf-figure-font-weight` (700), `--hf-name-font-weight` (600) en de paren `--hf-menu-…`, `--hf-submenu-…` en `--hf-anchor-…`, elk met een huidige plek.
+  `--hf-headline-font-weight` is 500.
+  Geen token voegt een nieuw gewicht toe; ongeveer 25 regels kregen een token met dezelfde waarde.
+  `weight-css.test.ts` leest de CSS van alle componenten en faalt bij een kaal getal bij `font-weight`, zoals `motion-css.test.ts` dat voor tijden doet.
+  `fonts.css`, de definities van de tokens en de CSS van de documentatie vallen erbuiten.
+  De zichtbare wijzigingen zijn: de huidige link van de balk "Op deze pagina" (500 naar 700), de huidige pagina in het submenu en in het menu in de footer (700 naar 600), `legend` en `dt` (700 naar 600), "Uitgesteld" (600 naar 700) en de foutmelding bij een veld (500 naar 700).
+  De huidige link van de balk "Op deze pagina" wisselt van gewicht terwijl de bezoeker scrolt, zonder overgang.
+  De regels staan op de pagina Typografie in Storybook, onder "Afspraken".
+- **Alternatieven:** alleen de regels opschrijven, zonder tokens (goedkoper, maar de getallen lopen weer uit elkaar).
+  Tokens naar waarde noemen, zoals `--hf-weight-600` (zeggen niet waarvoor).
+  De huidige plek in de balk "Op deze pagina" laten zoals hij is (de regel zou dan een uitzondering hebben).
+  Het gewicht van de huidige link verbergen met een onzichtbare dikke kopie, zodat de rij niet verspringt (extra opmaak bij elke link, en de site laadt bij elke klik toch een nieuwe pagina).
+- **Later:** vervangt delen van vier eerdere besluiten; zie de **Later:**-regels bij _Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500_, _Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter_, _De balk met links naar de kaarten volgt de pagina_ en _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_.
 
 ## Site
 
@@ -3653,6 +3680,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Maat en gewicht tegelijk veranderen, wat het submenu op blauw te zwak maakt.
 - **Later:** vervangt de maat en het gewicht van _Het hoofdmenu staat in een eigen rij onder de sitenaam_ (27 oktober 2026): niet 500 en 16 tot 20 pixels, maar 600 en 16 tot 18 pixels, en de huidige pagina niet alleen met de rode streep maar ook op gewicht 800.
   De rij, de kleur, de streep en de ruimte blijven.
+- **Later:** zie _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026): de gewichten 600 en 800 blijven, maar staan nu in `--hf-menu-font-weight` en `--hf-menu-current-font-weight`.
 
 ### De balk met links naar de kaarten volgt de pagina
 
@@ -3689,6 +3717,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rij die altijd op de uiterste plek scrolt, of op de dichtstbijzijnde rand: onvoorspelbaarder dan altijd vooraan.
   Een `scroll`-handler die per beeld de koppen meet: dat kost meer dan een observer.
 - **Later:** vult het besluit _Een balk onder de kop voor de links naar de kaarten, alleen op een smal scherm_ (27 oktober 2026) aan: de balk kent nu een huidige plek.
+- **Later:** zie _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026): het gewicht verandert nu wel.
+  De huidige link staat op 700 tegen 500 voor de andere links, en de rij scrolt daarna nog altijd zo dat hij vooraan staat.
 
 ### Het submenu is een tweede balk in een tint van de kop, zonder label
 
@@ -3780,6 +3810,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen het subitem `aria-current` geven (het hoofdmenu zegt dan niet meer in welk onderdeel de bezoeker is).
   De balk in het `li` met `position: absolute` onder de rij zetten (de hoogte van de balk is niet bekend zodra de rij omloopt, en de pagina eronder zou eronder schuiven).
   Een subgrid (de rij van het menu loopt om op de breedte van de inhoud, en een raster kan dat niet).
+- **Later:** zie _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026): de huidige pagina in de geneste lijst is nu 600 in plaats van 700, tegen 400 voor de andere links, en het menu in de footer heeft hetzelfde.
+  De gewichten van de kop blijven.
 
 ### Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen
 

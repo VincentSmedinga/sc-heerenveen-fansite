@@ -52,7 +52,7 @@
 
   /* The number with the bar is what the table is ordered by, so it is bold. */
   .hf-bar-table td.hf-bar-value {
-    font-weight: 700;
+    font-weight: var(--hf-figure-font-weight);
   }
 
   /*

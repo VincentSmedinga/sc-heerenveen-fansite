@@ -266,7 +266,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
       await expect(current).toHaveText('Stand')
       await expect(current).toHaveCSS('text-decoration-line', 'underline')
       await expect(current).toHaveCSS('text-decoration-thickness', '3px')
-      await expect(current).toHaveCSS('font-weight', '500')
+      await expect(current).toHaveCSS('font-weight', '700')
       expect(await checkPage(page)).toEqual([])
     })
   }
