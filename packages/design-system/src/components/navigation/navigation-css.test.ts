@@ -134,7 +134,7 @@ describe('a sub-page link in navigation.css', () => {
     expect(link).toContain('block-size: 2.25rem;')
     expect(link).toContain('border-radius: 999px;')
     expect(link).toContain('font-size: 1rem;')
-    expect(link).toContain('font-weight: 400;')
+    expect(link).toContain('font-weight: var(--hf-submenu-font-weight);')
     expect(link).toContain('white-space: nowrap;')
     expect(link).toContain('color: var(--hf-colour-text-on-header);')
   })
@@ -164,8 +164,8 @@ describe('a sub-page link in navigation.css', () => {
 
   const current = link.match(/&\[aria-current='page'\] \{(.*)\n {4}\}/s)?.[1] ?? ''
 
-  it('tells the current page by weight 700 and the red line of the menu, 3px thick, and not by colour alone', () => {
-    expect(current).toContain('font-weight: 700;')
+  it('tells the current page by the heavier submenu weight and the red line of the menu, 3px thick, and not by colour alone', () => {
+    expect(current).toContain('font-weight: var(--hf-submenu-current-font-weight);')
     expect(current).toContain('text-decoration-color: var(--hf-colour-accent-on-header);')
     expect(current).toContain('text-decoration-line: underline;')
     expect(current).toContain('text-decoration-thickness: 3px;')
@@ -247,15 +247,20 @@ describe('the main menu in navigation.css', () => {
     )
   })
 
-  it('puts the links in the lightest colour of the header, and the current one in red-underlined weight 800', () => {
+  it('puts the links in the lightest colour of the header, and the current one in red-underlined, heavier weight', () => {
     expect(link).toContain('color: var(--hf-colour-text-on-header);')
-    expect(link).toMatch(/&:is\(\[aria-current='page'\], \[aria-current='true'\]\) \{[^}]*font-weight: 800;/)
+    expect(link).toMatch(
+      /&:is\(\[aria-current='page'\], \[aria-current='true'\]\) \{[^}]*font-weight: var\(--hf-menu-current-font-weight\);/,
+    )
     expect(link).toMatch(/&:is\([^)]*\) \{[^}]*text-decoration-color: var\(--hf-colour-accent-on-header\);/)
     expect(link).toMatch(/&:is\([^)]*\) \{[^}]*text-decoration-thickness: 3px;/)
   })
 
   it('marks the item of the current sub-page like the current page in the footer too, in the plain row', () => {
     expect(css).toMatch(/\.hf-navigation-link \{[^}]*&:is\(\[aria-current='page'\], \[aria-current='true'\]\) \{/s)
+    expect(css).toMatch(
+      /\.hf-navigation-link \{[^}]*&:is\(\[aria-current='page'\], \[aria-current='true'\]\) \{[^}]*font-weight: var\(--hf-submenu-current-font-weight\);/s,
+    )
   })
 })
 
@@ -312,15 +317,15 @@ describe('the button Meer in navigation.css', () => {
     const narrowest = query('width < 20rem')
 
     expect(narrowest).toContain(':has(.hf-navigation-more-here) .hf-navigation-more-button')
-    expect(narrowest).toContain('font-weight: 800;')
+    expect(narrowest).toContain('font-weight: var(--hf-menu-current-font-weight);')
     expect(narrowest).toContain('text-decoration-color: var(--hf-colour-accent-on-header);')
     expect(narrowest).toContain('text-decoration-thickness: 3px;')
   })
 
-  it('takes its colours from tokens, and has the weights of the other links in the menu: 600, and 800 for the current page', () => {
+  it('takes its colours from tokens, and has the weights of the other links in the menu, and the heavier one for the current page', () => {
     expect(folded.match(/var\(--hf-colour-[a-z-]+\)/g)).toEqual(['var(--hf-colour-accent-on-header)'])
-    expect(folded).not.toMatch(/font-weight: (?!800)/)
-    expect(folded.match(/font-weight: \d+;/g)).toEqual(['font-weight: 800;'])
+    expect(folded).not.toMatch(/font-weight: (?!var\(--hf-menu-current-font-weight\))/)
+    expect(folded.match(/font-weight: [^;]+;/g)).toEqual(['font-weight: var(--hf-menu-current-font-weight);'])
   })
 
   it('turns the arrow with the motion tokens, down when closed and up when open', () => {

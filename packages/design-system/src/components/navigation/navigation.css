@@ -18,7 +18,7 @@
 
     /* The current page is not told by colour alone: it is bolder, with a thicker underline. */
     &:is([aria-current='page'], [aria-current='true']) {
-      font-weight: var(--hf-strong-font-weight);
+      font-weight: var(--hf-submenu-current-font-weight);
       text-decoration-thickness: 0.2em;
     }
   }
@@ -95,7 +95,7 @@
   .hf-navigation-header .hf-navigation-link {
     color: var(--hf-colour-text-on-header);
     font-size: clamp(1rem, 0.93rem + 0.34vw, 1.125rem);
-    font-weight: 600;
+    font-weight: var(--hf-menu-font-weight);
     text-decoration-line: none;
 
     /* The bar under the mouse sits where the bar of the current page does, and is just as unbroken. */
@@ -106,7 +106,7 @@
     }
 
     &:is([aria-current='page'], [aria-current='true']) {
-      font-weight: 800;
+      font-weight: var(--hf-menu-current-font-weight);
       text-decoration-color: var(--hf-colour-accent-on-header);
       text-decoration-line: underline;
       text-decoration-skip-ink: none;
@@ -224,7 +224,7 @@
 
     /* The button is the current page now, told as the links are. */
     .hf-navigation-header .hf-navigation-more:has(.hf-navigation-more-here) .hf-navigation-more-button {
-      font-weight: 800;
+      font-weight: var(--hf-menu-current-font-weight);
       text-decoration-color: var(--hf-colour-accent-on-header);
       text-decoration-line: underline;
       text-decoration-skip-ink: none;
@@ -297,7 +297,7 @@
     color: var(--hf-colour-text-on-header);
     display: inline-flex;
     font-size: 1rem;
-    font-weight: 400;
+    font-weight: var(--hf-submenu-font-weight);
     line-height: 1;
     padding-inline: 0.625rem;
     text-decoration-line: none;
@@ -321,15 +321,16 @@
     }
 
     /*
-     * The current page is told by weight (700) and by a red line under its text, 3px thick, as
-     * in the menu, and not by colour alone. The line is the underline of the text, so it stays
-     * in forced colours, where the browser sets its colour, and it comes after the mouse rule,
-     * so it stays under the mouse. It does not skip the descenders, so it is one unbroken line.
+     * The current page is told by weight (200 heavier than the rest) and by a red line under
+     * its text, 3px thick, as in the menu, and not by colour alone. The line is the underline
+     * of the text, so it stays in forced colours, where the browser sets its colour, and it
+     * comes after the mouse rule, so it stays under the mouse. It does not skip the descenders,
+     * so it is one unbroken line.
      * It has no pill when pressed: the red reaches 3,16:1 on the bar in dark but only 2,2:1 on
      * the pill, and a press on the page you are on goes nowhere.
      */
     &[aria-current='page'] {
-      font-weight: 700;
+      font-weight: var(--hf-submenu-current-font-weight);
       text-decoration-color: var(--hf-colour-accent-on-header);
       text-decoration-line: underline;
       text-decoration-skip-ink: none;

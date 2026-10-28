@@ -153,10 +153,13 @@ describe('a link in shortcuts.css', () => {
     expect(current).toContain('text-decoration-skip-ink: none;')
   })
 
-  it('keeps the weight and the size of a link that is the current one, so the row does not jump', () => {
+  it('makes the current link 200 heavier, without a transition of the weight, and keeps its size', () => {
     const current = link.match(/&\[aria-current='location'\] \{([^}]*)\}/)?.[1] ?? ''
 
-    expect(current).not.toMatch(/font-|padding|block-size|inline-size|border|margin/)
+    expect(link).toContain('font-weight: var(--hf-anchor-font-weight);')
+    expect(current).toContain('font-weight: var(--hf-anchor-current-font-weight);')
+    expect(current).not.toMatch(/font-size|padding|block-size|inline-size|border|margin|transition/)
+    expect(link).not.toMatch(/transition:[^;]*font-weight/)
   })
 
   it('keeps its line under the mouse, because the rule of the current link comes after the one of the mouse', () => {

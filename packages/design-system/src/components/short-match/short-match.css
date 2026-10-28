@@ -28,18 +28,18 @@
 
   .hf-short-match-opponent {
     flex: 1 1 8rem;
-    font-weight: 500;
+    font-weight: var(--hf-headline-font-weight);
   }
 
   .hf-short-match-where {
     color: var(--hf-colour-text-secondary);
-    font-weight: 400;
+    font-weight: var(--hf-body-font-weight);
   }
 
   /* The result keeps its digits the same width and stays on one line: "3–0" is never split. */
   .hf-short-match-score {
     font-variant-numeric: tabular-nums;
-    font-weight: 700;
+    font-weight: var(--hf-figure-font-weight);
     white-space: nowrap;
   }
 

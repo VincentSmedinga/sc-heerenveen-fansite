@@ -27,7 +27,7 @@ describe('bar.css', () => {
   })
 
   it('makes the number with the bar bold', () => {
-    expect(declarationsOf('.hf-bar-table td.hf-bar-value')).toMatch(/font-weight: 700/u)
+    expect(declarationsOf('.hf-bar-table td.hf-bar-value')).toMatch(/font-weight: var\(--hf-figure-font-weight\)/u)
   })
 
   it('draws the bar as long as the share the component gives, from the start side', () => {

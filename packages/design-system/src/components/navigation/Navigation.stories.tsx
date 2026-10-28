@@ -29,7 +29,7 @@ const meta = preview.meta({
           '  De link krijgt dan achter zijn tekst hetzelfde pictogram als de kop van een nieuwsregel.',
           '  Het pictogram is voor het oog: een schermlezer hoort alleen de tekst van de link.',
           '',
-          'Buiten de header is de huidige pagina ook te zien zonder kleur: de link is vetter, met een dikkere onderstreping.',
+          'Buiten de header is de huidige pagina ook te zien zonder kleur: de link is 200 zwaarder, met een dikkere onderstreping.',
           'Zo ziet het menu in de footer eruit.',
           '',
           'Het hoofdmenu van de site is een `Navigation` met `appearance="header"`.',
@@ -47,7 +47,7 @@ const meta = preview.meta({
           'Ze staan in een geneste lijst in het `li` van hun onderdeel, dus het menu is één `nav` met één naam, en een schermlezer leest de lijst met de lijst erin.',
           'De lijst is er alleen bij het onderdeel waar de bezoeker is, of waarvan hij een subpagina bekijkt.',
           'Andere onderdelen, en een pagina zonder subpagina’s, hebben geen geneste lijst.',
-          'Ze staat als een balk over de volle breedte onder de rij van het menu, in een tint van de header, in gewone letters, met de huidige subpagina vet en met de rode streep.',
+          'Ze staat als een balk over de volle breedte onder de rij van het menu, in een tint van de header, in gewone letters, met de huidige subpagina zwaarder en met de rode streep.',
           'Een lange rij scrolt zijwaarts, met een vervaging aan de rand, en begint zo gescrold dat de huidige subpagina in beeld is.',
           'Op een heel smal scherm, of bij sterk inzoomen, loopt de rij om.',
           '',
@@ -170,7 +170,7 @@ const onSubpageStory = {
   docs: {
     description: {
       story:
-        'De bezoeker is op de subpagina Uitslagen. Die is vet met een rode streep en heeft `aria-current="page"`; Wedstrijden in het menu heeft `aria-current="true"` en houdt zijn gewicht en zijn streep.',
+        'De bezoeker is op de subpagina Uitslagen. Die is zwaarder dan de andere subpagina’s, met een rode streep en heeft `aria-current="page"`; Wedstrijden in het menu heeft `aria-current="true"` en houdt zijn gewicht en zijn streep.',
     },
   },
 }

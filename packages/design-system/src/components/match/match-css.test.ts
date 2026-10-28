@@ -16,7 +16,7 @@ const rule = (selector: string) => {
 describe('match.css', () => {
   it('makes the minute of a goal of sc Heerenveen green and bold, so colour is not the only sign', () => {
     expect(rule('.hf-match-goal-ours')).toMatch(/color: var\(--hf-colour-outcome-win\)/u)
-    expect(rule('.hf-match-goal-ours')).toMatch(/font-weight: 700/u)
+    expect(rule('.hf-match-goal-ours')).toMatch(/font-weight: var\(--hf-figure-font-weight\)/u)
   })
 
   it('makes the minute of a goal of the opponent red and not bold', () => {

@@ -81,7 +81,7 @@
     color: var(--hf-colour-text-heading);
     font-size: 1.5rem;
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-figure-font-weight);
     inset-block-start: 50%;
     inset-inline-start: 50%;
     line-height: 1;
@@ -113,7 +113,7 @@
   .hf-donut-chart-value {
     color: var(--hf-colour-text-default);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-figure-font-weight);
   }
 
   /* In forced colours the fills are replaced, so the outlines do the work. */

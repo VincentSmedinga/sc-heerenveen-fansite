@@ -15,7 +15,7 @@ describe('mark-row.css', () => {
   it('writes a mark bold in the full colour of its tone, at 1.125rem', () => {
     expect(declarationsOf('.hf-mark-row-mark')).toMatch(/color: var\(--hf-chart-colour\)/u)
     expect(declarationsOf('.hf-mark-row-mark')).toMatch(/font-size: 1\.125rem/u)
-    expect(declarationsOf('.hf-mark-row-mark')).toMatch(/font-weight: 700/u)
+    expect(declarationsOf('.hf-mark-row-mark')).toMatch(/font-weight: var\(--hf-figure-font-weight\)/u)
   })
 
   it('takes no colour from the scales', () => {
