@@ -116,7 +116,8 @@ describe('the bar of sub-pages in navigation.css', () => {
 
   it('never sticks and is never gone, at any width', () => {
     expect(css).not.toMatch(/sticky|fixed|position:|inset-block-start|z-index/)
-    expect(css).not.toMatch(/display: none|visibility|@media \(width >=? 56rem\)/)
+    expect(sub).not.toMatch(/display: none|visibility|@media \(width >=? 56rem\)/)
+    expect(css).not.toMatch(/visibility|@media \(width >=? 56rem\)/)
     expect(css).not.toContain('scroll-padding-block-start')
   })
 
@@ -255,5 +256,85 @@ describe('the main menu in navigation.css', () => {
 
   it('marks the item of the current sub-page like the current page in the footer too, in the plain row', () => {
     expect(css).toMatch(/\.hf-navigation-link \{[^}]*&:is\(\[aria-current='page'\], \[aria-current='true'\]\) \{/s)
+  })
+})
+
+describe('the button Meer in navigation.css', () => {
+  const folded = css.slice(css.indexOf('  .hf-navigation-folded {'), css.indexOf('  .hf-navigation-bar {'))
+  const query = (condition: string) =>
+    folded.match(new RegExp(String.raw`@container hf-navigation \(${condition}\) \{(.*?)\n  \}`, 's'))?.[1] ?? ''
+
+  it('is in a container query of the nav, which is the container only when the menu is folded', () => {
+    expect(rule('.hf-navigation-folded')).toContain('container: hf-navigation / inline-size;')
+    expect(css.match(/container-type|container-name|container:/g)).toHaveLength(1)
+  })
+
+  it('has the two widths in the queries only, which a custom property can not be: 44rem for the row, 20rem for the page behind the button', () => {
+    expect(css.match(/44rem/g)).toHaveLength(1)
+    expect(query('width < 44rem')).not.toBe('')
+    expect(css.match(/20rem/g)).toHaveLength(2)
+    expect(query('width >= 20rem')).not.toBe('')
+    expect(query('width < 20rem')).not.toBe('')
+    expect(folded).not.toMatch(/@media/)
+  })
+
+  it('is gone with display: none above the 44rem query, so all items stand in the row', () => {
+    expect(css).toMatch(/\.hf-navigation-header \.hf-navigation-list > \.hf-navigation-more \{\s*display: none;/)
+    expect(query('width < 44rem')).toMatch(/\.hf-navigation-more \{\s*display: block;/)
+  })
+
+  it('is a grid of five columns in the narrow row: first, page behind the button, button, free room, forum', () => {
+    const narrow = query('width < 44rem')
+
+    expect(narrow).toContain('display: grid;')
+    expect(narrow).toContain('grid-template-columns: auto auto auto minmax(0, 1fr) auto;')
+    expect(narrow).toContain('gap: 0;')
+    expect(narrow).toMatch(/li:first-child > \.hf-navigation-link \{\s*grid-area: 1 \/ 1;/)
+    expect(narrow).toMatch(/\.hf-navigation-wide-here > \.hf-navigation-link \{\s*grid-area: 1 \/ 2;/)
+    expect(narrow).toMatch(/li:last-child > \.hf-navigation-link \{\s*grid-area: 1 \/ 5;/)
+  })
+
+  it('starts the list at the column of the button and goes to the edge, with the bar of sub-pages under it', () => {
+    const narrow = query('width < 44rem')
+
+    expect(narrow).toMatch(/\.hf-navigation-more \{[^}]*grid-area: 1 \/ 3 \/ auto \/ -1;/)
+    expect(narrow).toMatch(/\.hf-navigation-folded \.hf-navigation-bar \{\s*grid-area: 2 \/ 1 \/ auto \/ -1;/)
+  })
+
+  it('shows only the copy of the current page behind the button that fits: in the row, or in the list', () => {
+    expect(query('width < 44rem')).toMatch(/> \.hf-navigation-wide \{\s*display: none;/)
+    expect(query('width < 44rem')).toMatch(/> \.hf-navigation-wide-here \{\s*display: contents;/)
+    expect(query('width >= 20rem')).toMatch(/\.hf-navigation-more-here \{\s*display: none;/)
+    expect(query('width < 20rem')).toMatch(/\.hf-navigation-wide-here > \.hf-navigation-link \{\s*display: none;/)
+  })
+
+  it('gives the button the red bar and the weight of the current page where the page is only in the list', () => {
+    const narrowest = query('width < 20rem')
+
+    expect(narrowest).toContain(':has(.hf-navigation-more-here) .hf-navigation-more-button')
+    expect(narrowest).toContain('font-weight: 800;')
+    expect(narrowest).toContain('text-decoration-color: var(--hf-colour-accent-on-header);')
+    expect(narrowest).toContain('text-decoration-thickness: 3px;')
+  })
+
+  it('takes its colours from tokens, and has the weights of the other links in the menu: 600, and 800 for the current page', () => {
+    expect(folded.match(/var\(--hf-colour-[a-z-]+\)/g)).toEqual(['var(--hf-colour-accent-on-header)'])
+    expect(folded).not.toMatch(/font-weight: (?!800)/)
+    expect(folded.match(/font-weight: \d+;/g)).toEqual(['font-weight: 800;'])
+  })
+
+  it('turns the arrow with the motion tokens, down when closed and up when open', () => {
+    expect(folded).toMatch(/\.hf-icon \{\s*transform: rotate\(180deg\);/)
+    expect(folded).toContain('transition: transform var(--hf-motion-duration-short) var(--hf-motion-ease-change);')
+    expect(folded).toMatch(/\[open\] > \.hf-navigation-more-button \.hf-icon \{\s*transform: none;/)
+  })
+
+  it('stands the items under each other, with no lines, each at least as high as a link in the row', () => {
+    const list = rule('.hf-navigation-more-list')
+
+    expect(list).toContain('list-style: none;')
+    expect(list).not.toMatch(/border|outline|box-shadow/)
+    expect(list).toMatch(/\.hf-navigation-link \{\s*display: flex;/)
+    expect(rule('.hf-navigation-link')).toContain('min-block-size: 2.75rem;')
   })
 })

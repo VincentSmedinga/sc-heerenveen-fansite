@@ -1,9 +1,9 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import { exampleMenuAt } from '../../docs/ExamplePage'
+import { exampleLongMenu, exampleMenuAt } from '../../docs/ExamplePage'
 import { Navigation } from './Navigation'
 
 const items = [
@@ -340,5 +340,226 @@ describe('Navigation with sub-pages', () => {
 
     expect(last.parentElement?.lastElementChild).toBe(last)
     expect(last.firstElementChild?.className).toBe('hf-navigation-link')
+  })
+})
+
+describe('Navigation with the button Meer', () => {
+  const longMenu = (current: Parameters<typeof exampleLongMenu>[0] = 'Nieuws') => exampleLongMenu(current)
+
+  const renderMenu = (current?: Parameters<typeof exampleLongMenu>[0]) =>
+    render(<Navigation appearance="header" items={longMenu(current)} label="Hoofdmenu" moreLabel="Meer" />)
+
+  const button = () => screen.getByText('Meer').closest('summary')!
+  const details = () => button().closest('details')!
+  const open = async () => {
+    fireEvent.click(button())
+    await waitFor(() => expect(button().getAttribute('aria-expanded')).toBe('true'))
+  }
+
+  it('has no button with five items, and one with six or more', () => {
+    const items = longMenu()
+    const { rerender } = render(
+      <Navigation appearance="header" items={items.slice(0, 5)} label="Hoofdmenu" moreLabel="Meer" />,
+    )
+
+    expect(document.querySelector('summary')).toBeNull()
+    expect(screen.getByRole('navigation').className).toBe('hf-navigation hf-navigation-header')
+
+    rerender(<Navigation appearance="header" items={items.slice(0, 6)} label="Hoofdmenu" moreLabel="Meer" />)
+
+    expect(document.querySelectorAll('summary')).toHaveLength(1)
+    expect(screen.getByRole('navigation').className).toBe('hf-navigation hf-navigation-header hf-navigation-folded')
+
+    rerender(<Navigation appearance="header" items={items} label="Hoofdmenu" moreLabel="Meer" />)
+
+    expect(document.querySelectorAll('summary')).toHaveLength(1)
+  })
+
+  it('has no button without a moreLabel, nor outside the main menu', () => {
+    const { rerender } = render(<Navigation appearance="header" items={longMenu()} label="Hoofdmenu" />)
+
+    expect(document.querySelector('summary')).toBeNull()
+    expect(document.querySelectorAll('li')).toHaveLength(8)
+
+    rerender(<Navigation items={longMenu()} label="Onderaan de pagina" moreLabel="Meer" />)
+
+    expect(document.querySelector('summary')).toBeNull()
+    expect(document.querySelectorAll('li')).toHaveLength(8)
+  })
+
+  it('puts the items between the first and the last in the list under the button, in the order given', () => {
+    renderMenu()
+    const list = details().querySelector('ul')!
+
+    expect(Array.from(list.querySelectorAll('a')).map((link) => link.textContent)).toEqual([
+      'Wedstrijden',
+      'Spelers',
+      'Stadion',
+      'Club',
+      'Podcasts',
+      'Historie',
+    ])
+    expect(list.getAttribute('role')).toBe('list')
+    expect(Array.from(list.children).map((child) => child.getAttribute('role'))).toEqual(Array(6).fill('listitem'))
+  })
+
+  it('keeps the first and the last item in the row once, and the others there as well, for the wide screen', () => {
+    renderMenu()
+    const row = document.querySelector('.hf-navigation-list')!
+    const rowItems = Array.from(row.children).filter((child) => child.tagName === 'LI')
+
+    expect(rowItems.map((item) => item.querySelector('a, summary')?.textContent)).toEqual([
+      'Nieuws',
+      'Wedstrijden',
+      'Spelers',
+      'Stadion',
+      'Club',
+      'Podcasts',
+      'Historie',
+      'Meer',
+      'Forum',
+    ])
+    expect(rowItems.map((item) => item.className)).toEqual([
+      '',
+      ...Array(6).fill('hf-navigation-wide'),
+      'hf-navigation-more',
+      '',
+    ])
+    expect(screen.getAllByRole('link', { name: 'Nieuws' })).toHaveLength(1)
+    expect(screen.getAllByRole('link', { name: 'Forum' })).toHaveLength(1)
+  })
+
+  it('is one landmark, and its button is the only summary', () => {
+    renderMenu()
+
+    expect(screen.getAllByRole('navigation')).toHaveLength(1)
+    expect(document.querySelectorAll('summary')).toHaveLength(1)
+  })
+
+  it('names the button by its text, and gives it an arrow that is not read out', () => {
+    renderMenu()
+    const arrow = button().querySelector('svg')
+
+    expect(button().textContent).toBe('Meer')
+    expect(arrow?.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('is closed at first, with aria-expanded and aria-controls on the button for the list', async () => {
+    renderMenu()
+
+    expect(details().open).toBe(false)
+    await waitFor(() => expect(button().getAttribute('aria-expanded')).toBe('false'))
+    expect(button().getAttribute('aria-controls')).toBe(details().querySelector('ul')!.id)
+    expect(button().getAttribute('aria-controls')).not.toBe('')
+  })
+
+  it('opens and closes with the button, and aria-expanded follows', async () => {
+    renderMenu()
+    await open()
+
+    expect(details().open).toBe(true)
+
+    fireEvent.click(button())
+    await waitFor(() => expect(button().getAttribute('aria-expanded')).toBe('false'))
+
+    expect(details().open).toBe(false)
+  })
+
+  it('closes with Escape and puts the focus back on the button', async () => {
+    renderMenu()
+    await open()
+    const link = within(details()).getByRole('link', { name: 'Stadion' })
+
+    link.focus()
+    fireEvent.keyDown(link, { key: 'Escape' })
+
+    await waitFor(() => expect(button().getAttribute('aria-expanded')).toBe('false'))
+    expect(details().open).toBe(false)
+    expect(document.activeElement).toBe(button())
+  })
+
+  it('closes with a click on a link in the list', async () => {
+    renderMenu()
+    await open()
+    fireEvent.click(within(details()).getByRole('link', { name: 'Stadion' }))
+
+    await waitFor(() => expect(button().getAttribute('aria-expanded')).toBe('false'))
+  })
+
+  it('closes with a click outside the list, and not with a click inside it', async () => {
+    renderMenu()
+    await open()
+    fireEvent.click(details().querySelector('ul')!)
+
+    expect(details().open).toBe(true)
+
+    fireEvent.click(document.body)
+    await waitFor(() => expect(button().getAttribute('aria-expanded')).toBe('false'))
+  })
+
+  it('closes on another page', async () => {
+    const { rerender } = renderMenu('Nieuws')
+    await open()
+
+    rerender(<Navigation appearance="header" items={longMenu('Spelers')} label="Hoofdmenu" moreLabel="Meer" />)
+
+    expect(details().open).toBe(false)
+  })
+
+  it('marks the current page behind the button in the row and in the list, and nowhere else', () => {
+    renderMenu('Spelers')
+    const here = screen.getAllByRole('link', { current: 'page' })
+
+    expect(here.map((link) => link.textContent)).toEqual(['Spelers', 'Spelers'])
+    expect(here.map((link) => Boolean(link.closest('details')))).toEqual([false, true])
+    expect(document.querySelector('.hf-navigation-wide-here')?.textContent).toBe('Spelers')
+    expect(document.querySelector('.hf-navigation-more-here')?.textContent).toBe('Spelers')
+    expect(document.querySelectorAll('.hf-navigation-wide-here, .hf-navigation-more-here')).toHaveLength(2)
+  })
+
+  it('marks no copy when the visitor is on the first or the last item', () => {
+    const { rerender } = renderMenu('Nieuws')
+
+    expect(document.querySelectorAll('.hf-navigation-wide-here, .hf-navigation-more-here')).toHaveLength(0)
+    expect(screen.getAllByRole('link', { current: 'page' })).toHaveLength(1)
+
+    rerender(<Navigation appearance="header" items={longMenu('Forum')} label="Hoofdmenu" moreLabel="Meer" />)
+
+    expect(document.querySelectorAll('.hf-navigation-wide-here, .hf-navigation-more-here')).toHaveLength(0)
+    expect(screen.getAllByRole('link', { current: 'page' })).toHaveLength(1)
+  })
+
+  it('gives the sub-pages to the copy in the row, and not to the copy in the list', () => {
+    renderMenu('Uitslagen')
+    const inRow = document.querySelector('.hf-navigation-wide-here')!
+
+    expect(
+      within(inRow as HTMLElement)
+        .getAllByRole('link')
+        .map((link) => link.textContent),
+    ).toEqual(['Wedstrijden', 'Programma', 'Uitslagen', 'Stand'])
+    expect(inRow.querySelector('.hf-navigation-bar')).not.toBeNull()
+    expect(document.querySelectorAll('.hf-navigation-bar')).toHaveLength(1)
+    expect(details().querySelector('.hf-navigation-bar')).toBeNull()
+    expect(details().querySelectorAll('ul')).toHaveLength(1)
+    expect(screen.getAllByRole('link', { name: 'Uitslagen' })).toHaveLength(1)
+  })
+
+  it('has aria-current="true" on the item and "page" on the sub-page, in both copies of the item', () => {
+    renderMenu('Uitslagen')
+    const wedstrijden = screen.getAllByRole('link', { name: 'Wedstrijden' })
+
+    expect(wedstrijden.map((link) => link.getAttribute('aria-current'))).toEqual(['true', 'true'])
+    expect(screen.getByRole('link', { name: 'Uitslagen' }).getAttribute('aria-current')).toBe('page')
+    expect(document.querySelectorAll('[aria-current="page"]')).toHaveLength(1)
+  })
+
+  it('has aria-current="page" on both copies of an item that has sub-pages and is the current page itself', () => {
+    renderMenu('Wedstrijden')
+
+    expect(
+      screen.getAllByRole('link', { name: 'Wedstrijden' }).map((link) => link.getAttribute('aria-current')),
+    ).toEqual(['page', 'page'])
+    expect(document.querySelectorAll('.hf-navigation-bar')).toHaveLength(1)
   })
 })

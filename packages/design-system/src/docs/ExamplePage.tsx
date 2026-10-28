@@ -50,6 +50,36 @@ export const exampleMenuWithSubpages = (
   { external: true, href: '#forum', label: 'Forum' },
 ]
 
+const longMenuPages = [
+  { href: '#nieuws', label: 'Nieuws' },
+  { href: '#wedstrijden', label: 'Wedstrijden' },
+  { href: '#spelers', label: 'Spelers' },
+  { href: '#stadion', label: 'Stadion' },
+  { href: '#club', label: 'Club' },
+  { href: '#podcasts', label: 'Podcasts' },
+  { href: '#historie', label: 'Historie' },
+] as const
+
+export type ExampleLongMenuPage =
+  'Forum' | (typeof longMenuPages)[number]['label'] | (typeof matchPages)[number]['label']
+
+/**
+ * A main menu of eight items, so long that it needs the button "Meer": seven pages and the
+ * forum. Wedstrijden has sub-pages. The page the visitor is on is one of the items, or one of
+ * the sub-pages of Wedstrijden.
+ */
+export const exampleLongMenu = (current: ExampleLongMenuPage): NavigationItem[] => [
+  ...longMenuPages.map((page) => ({
+    current: page.label === current,
+    href: page.href,
+    label: page.label,
+    ...(page.label === 'Wedstrijden'
+      ? { subitems: matchPages.slice(0, 3).map((subpage) => ({ ...subpage, current: subpage.label === current })) }
+      : {}),
+  })),
+  { current: current === 'Forum', external: true, href: '#forum', label: 'Forum' },
+]
+
 /**
  * The logo as a link to the home page and the theme button beside it (here a static one,
  * pressed when `dark`), in a Page.Header: the banner alone, without the main menu.

@@ -3571,6 +3571,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter_ (27 oktober 2026) voor de maat en het gewicht: nu 600 en 16 tot 18 pixels, en de huidige pagina op 800 met zijn rode streep.
 - **Later:** zie _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_ (28 oktober 2026): het menu staat niet meer in de `header` maar in een `nav` direct erna, op hetzelfde blauw.
   De rij, de lijn erboven, de afstanden, het gewicht en de maten blijven zoals ze zijn.
+- **Later:** zie _Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen_ (28 oktober 2026): een menu met zes of meer onderdelen en een `moreLabel` heeft op een smal scherm de knop "Meer" in plaats van een rij die omloopt.
+  Bij vijf onderdelen of minder blijft de rij zoals hij was, en de knop "Meer" is een knop in de rij, geen menuknop die alles verbergt.
 
 ### Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat
 
@@ -3778,6 +3780,61 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen het subitem `aria-current` geven (het hoofdmenu zegt dan niet meer in welk onderdeel de bezoeker is).
   De balk in het `li` met `position: absolute` onder de rij zetten (de hoogte van de balk is niet bekend zodra de rij omloopt, en de pagina eronder zou eronder schuiven).
   Een subgrid (de rij van het menu loopt om op de breedte van de inhoud, en een raster kan dat niet).
+
+### Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** een hoofdmenu (`appearance="header"`) met zes of meer onderdelen en een `moreLabel` toont op een smal scherm het eerste onderdeel, de knop "Meer" en het laatste onderdeel (het forum).
+  De onderdelen ertussen staan in een lijst onder de knop.
+  Die lijst gaat open in de pagina en duwt de rest naar beneden.
+  Vanaf 44rem staan alle onderdelen op één rij en is de knop weg.
+  De huidige pagina komt naar voren in de rij, tussen het eerste onderdeel en "Meer", met de rode streep en zijn subpagina's eronder.
+  Past hij niet, dan blijft hij in de lijst en krijgt "Meer" de rode streep.
+  Bij vijf onderdelen of minder, of zonder `moreLabel`, verandert er niets.
+  De site gebruikt de knop nog niet: het hoofdmenu heeft nu vier onderdelen.
+- **Hoe:** de instelling heet `moreLabel`, de tekst van de knop, bijvoorbeeld "Meer".
+  Zonder tekst is er geen knop, zoals `label` ook van de aanroeper komt.
+  Het onderdeel kiest zelf het aantal: de constante `itemsFromMore` is 6.
+  De knop is een `details` met een `summary`, zodat hij zonder JavaScript opent en sluit.
+  `NavigationMore` is een clientcomponent en voegt toe: Escape sluit de lijst en zet de focus terug op de knop, een klik op een link of ernaast sluit hem, en een andere huidige pagina begint met een gesloten lijst (de `key` van de component is het adres van de huidige pagina).
+  De klik buiten de lijst is een `click` en geen `pointerdown`: de pagina schuift omhoog als de lijst sluit, en een druk die onder de vinger uit schuift, gaat verloren.
+  `aria-expanded` staat op de knop zodra de pagina geladen is, en volgt de lijst.
+  Voor het laden zegt de browser zelf of het `details` open is, en een attribuut dat de browser niet bijhoudt, zou bij de eerste klik zonder JavaScript verkeerd blijven staan.
+  `aria-controls` wijst naar de lijst.
+  De pijl is `arrow-up` van `Icon`, omgedraaid als de lijst dicht is, met de bewegingstokens.
+  Een nieuw pictogram was niet nodig.
+  De breedte is een container query op de `nav` (`container: hf-navigation / inline-size`), omdat het menu zo breed is als de pagina en niet als het venster.
+  De `nav` is die container alleen als het menu "Meer" heeft.
+  Een query kan geen custom property gebruiken, dus de twee getallen staan in `navigation.css`, in drie queries en nergens anders: 44rem voor de rij, en 20rem voor de huidige pagina achter de knop.
+  De acht voorbeeldonderdelen van de verhalen hebben ongeveer 41rem nodig op één rij bij de grootste letters, dus 44rem laat ruimte voor iets langere namen.
+  Met de namen van de site moet het getal opnieuw gemeten worden.
+  Op 20rem passen het eerste onderdeel, een huidige pagina, de knop en het forum niet meer naast elkaar (gemeten: 18,7rem met de langste voorbeeldnaam, Wedstrijden).
+  Onder 44rem is de lijst van het menu een raster van vijf kolommen: het eerste onderdeel, de huidige pagina achter de knop, de knop, vrije ruimte en het forum rechts.
+  De lijst staat in de cel van de knop en loopt door tot de rechterkant, dus hij begint onder de tekst van "Meer", op een eigen rij onder de andere.
+  De balk met subpagina's staat op de rij daaronder en gaat dus mee naar beneden.
+  De onderdelen achter de knop staan twee keer in de HTML: als link in de rij (`hf-navigation-wide`) en als link in de lijst.
+  De stijlen tonen één van de twee.
+  Het andere exemplaar is `display: none`, dus een schermlezer en het toetsenbord komen elk onderdeel één keer tegen, en niet twee keer `aria-current`.
+  Alleen het exemplaar in de rij heeft de subpagina's.
+  Past de huidige pagina niet in de rij (onder 20rem), dan verbergt de stijl alleen zijn link en niet zijn balk, zodat de subpagina's bereikbaar blijven.
+  Een verhaal met een play-functie controleert dat in de browser.
+- **Waarom:** zeven of acht links passen niet op één rij op een telefoon, en een menuknop die alles verbergt maakt de navigatie moeilijker te vinden.
+  Het forum blijft rechts, zoals nu, en de belangrijkste links blijven zichtbaar.
+  Het onderdeel is klaar voor het moment dat het menu groeit en kost de bezoeker nu niets.
+  Een `details` werkt zonder JavaScript, en de site draait op gedeelde hosting waar we geen werk voor de browser willen dat ook zonder die werkt.
+  De huidige pagina verdwijnt zo nooit achter een knop.
+- **Nadeel:** de onderdelen achter de knop staan twee keer in de HTML.
+  Wie de HTML leest zonder stijlen, ziet ze twee keer.
+  Past een langere naam niet naast de knop, dan loopt de rij over: de drempel van 20rem is gemeten met de voorbeeldnamen en kijkt niet naar de lengte van een naam.
+  Is de huidige pagina een onderdeel achter de knop dat niet past, dan staan zijn subpagina's op een andere plek dan zijn link: de balk staat in het `li` van de rij, de link in de lijst.
+  Het toetsenbord komt dan eerst langs de balk en daarna langs "Meer".
+- **Alternatieven:** een menuknop met alles erachter (verbergt de navigatie).
+  Het menu zijwaarts laten scrollen (de bezoeker ziet niet dat er meer is).
+  Alleen de balk voor subpagina's (#363), die het hoofdmenu klein houdt maar niet helpt als het menu zelf groeit.
+  Een `button` met een lijst die `hidden` is (werkt niet zonder JavaScript).
+  Het `details` zelf in de rij zetten met `::details-content { display: contents }` en geen tweede exemplaar (één keer in de HTML, maar de lijst en de rij hebben dan dezelfde nesting en de techniek is nog jong).
+  Een instelling die het aantal bepaalt, zoals `moreFrom={6}` (het issue wil dat het onderdeel zelf kiest).
+  Een tweede getal voor het aantal onderdelen in de rij: het is er één, het eerste.
 
 ## Importer
 

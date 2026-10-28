@@ -23,6 +23,18 @@
     }
   }
 
+  /* The items behind the button "Meer" (see below) stand under each other. */
+  .hf-navigation-more-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    .hf-navigation-link {
+      display: flex;
+      inline-size: fit-content;
+    }
+  }
+
   /*
    * The main menu (appearance="header") is a band of its own under the Page.Header, on the same
    * blue, so the two read as one. It is a flex row that wraps, with a thin line above it that
@@ -105,6 +117,120 @@
 
   .hf-navigation-header .hf-navigation-list > li:last-child > .hf-navigation-link {
     margin-inline-start: auto;
+  }
+
+  /*
+   * A long main menu (class hf-navigation-folded: six or more items and a moreLabel) has the
+   * button "Meer" on a narrow screen. Up to 44rem wide all items are in the row, as in any main
+   * menu, and the button and its list are gone (display: none, so a screen reader and the
+   * keyboard skip them). Below it the row is a grid of five columns: the first item, the page
+   * the visitor is on if that is one of the items behind the button, the button, free room and
+   * the last item, the forum, on the right. The list is in the cell of the button and spans to
+   * the right edge, so it starts under the text of the button, on its own rows under the
+   * others, with no lines between the items, and it pushes the page down. The bar with the
+   * sub-pages, which comes after in the grid, goes down with it.
+   *
+   * The width is that of the nav, without the inset of the page (a container query, because the
+   * menu is as wide as its page and not as wide as the window). It is measured with the eight
+   * example items of the stories: they need about 41rem in one row at the largest text size, so
+   * 44rem leaves room for names that are a little longer. A query can't use a custom property,
+   * so the numbers are here, in the three queries below, and nowhere else. With the names of
+   * the site the first has to be measured again. The second, 20rem, is the width at which the
+   * first item, a page behind the button, the button and the forum no longer fit in one row.
+   *
+   * The items behind the button are in the HTML twice, as a link in the row
+   * (hf-navigation-wide) and as a link in the list. Only one is shown: all in the row when
+   * there is room, and in a narrow row only the one of the current page, with its sub-pages.
+   * Where even that does not fit (20rem), the link stays in the list, the button gets the red
+   * bar of the current page, and the bar of sub-pages stays, in the cell of the link that is
+   * not shown. A hidden copy is display: none, so nobody meets an item twice.
+   */
+  .hf-navigation-folded {
+    container: hf-navigation / inline-size;
+  }
+
+  .hf-navigation-header .hf-navigation-list > .hf-navigation-more {
+    display: none;
+  }
+
+  .hf-navigation-more-button {
+    cursor: pointer;
+    list-style: none;
+
+    /* The arrow points down when the list is closed and up when it is open. */
+    .hf-icon {
+      transform: rotate(180deg);
+      transition: transform var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+    }
+  }
+
+  .hf-navigation-more-details[open] > .hf-navigation-more-button .hf-icon {
+    transform: none;
+  }
+
+  @container hf-navigation (width < 44rem) {
+    .hf-navigation-header .hf-navigation-list {
+      align-items: start;
+      display: grid;
+      flex: 0 0 100%;
+      gap: 0;
+      grid-template-columns: auto auto auto minmax(0, 1fr) auto;
+      min-inline-size: 0;
+    }
+
+    .hf-navigation-header .hf-navigation-list > .hf-navigation-wide {
+      display: none;
+    }
+
+    .hf-navigation-header .hf-navigation-list > .hf-navigation-wide-here {
+      display: contents;
+    }
+
+    .hf-navigation-header .hf-navigation-list > .hf-navigation-wide-here > .hf-navigation-link {
+      grid-area: 1 / 2;
+      margin-inline-end: 1rem;
+    }
+
+    .hf-navigation-header .hf-navigation-list > li:first-child > .hf-navigation-link {
+      grid-area: 1 / 1;
+      margin-inline-end: 1rem;
+    }
+
+    .hf-navigation-header .hf-navigation-list > .hf-navigation-more {
+      display: block;
+      grid-area: 1 / 3 / auto / -1;
+    }
+
+    .hf-navigation-header .hf-navigation-list > li:last-child > .hf-navigation-link {
+      grid-area: 1 / 5;
+    }
+
+    .hf-navigation-folded .hf-navigation-bar {
+      grid-area: 2 / 1 / auto / -1;
+    }
+  }
+
+  /* There is room for the page behind the button in the row, so it is not in the list too. */
+  @container hf-navigation (width >= 20rem) {
+    .hf-navigation-more-list > .hf-navigation-more-here {
+      display: none;
+    }
+  }
+
+  @container hf-navigation (width < 20rem) {
+    .hf-navigation-header .hf-navigation-list > .hf-navigation-wide-here > .hf-navigation-link {
+      display: none;
+    }
+
+    /* The button is the current page now, told as the links are. */
+    .hf-navigation-header .hf-navigation-more:has(.hf-navigation-more-here) .hf-navigation-more-button {
+      font-weight: 800;
+      text-decoration-color: var(--hf-colour-accent-on-header);
+      text-decoration-line: underline;
+      text-decoration-skip-ink: none;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 0.35em;
+    }
   }
 
   /*
