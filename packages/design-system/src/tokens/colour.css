@@ -193,6 +193,14 @@
     );
 
     /*
+     * The bar under the link to the place on the page where the reader is, in the bar "Op deze
+     * pagina". The accent of the header (red-400) is too light on the warm bar: it reaches
+     * 2,43:1 there. Red-600 reaches 4,77:1 on the bar in light, and red-400 reaches 5,34:1 on
+     * the bar in dark. A graphic part needs 3:1, also on the pressed fill.
+     */
+    --hf-colour-accent-shortcuts: light-dark(var(--hf-colour-red-600), var(--hf-colour-red-400));
+
+    /*
      * Markers: what numbers, separates or points, such as list markers and positions in a table.
      * Quieter than the text, in steel. Text markers reach 4.5:1; graphic ones (bullets, lines, icons) 3:1.
      */
@@ -302,6 +310,7 @@
         var(--hf-colour-sand-300) 60%,
         var(--hf-colour-sand-100)
       );
+      --hf-colour-accent-shortcuts: var(--hf-colour-red-600);
       --hf-colour-marker-text: var(--hf-colour-steel-600);
       --hf-colour-marker-graphic: var(--hf-colour-steel-500);
       --hf-colour-border-surface: var(--hf-colour-grey-200);

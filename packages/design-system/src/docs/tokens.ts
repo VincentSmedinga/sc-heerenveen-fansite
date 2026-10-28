@@ -158,6 +158,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-focus-on-header', use: 'Focusrand in de header' },
       { name: '--hf-colour-focus-on-band', use: 'Focusrand op de wedstrijdband' },
       { name: '--hf-colour-accent-on-header', use: 'Streep onder de huidige pagina in het menu van de header' },
+      { name: '--hf-colour-accent-shortcuts', use: 'Streep onder de huidige plek in de balk Op deze pagina' },
       { name: '--hf-colour-border-on-header', use: 'Lijn boven het menu in de header' },
       {
         name: '--hf-colour-border-on-header-strong',
@@ -320,6 +321,8 @@ export const pairGroups: { description: string; label: string; pairs: Pair[]; te
       pair('focus', 'stripe-footer', 'Focusrand in de footer, op de strepen', 'grafisch', 'footer'),
       pair('focus-on-band', 'band', 'Focusrand op de wedstrijdband', 'grafisch'),
       pair('accent-on-header', 'header', 'Streep onder de huidige pagina in de header', 'grafisch'),
+      pair('accent-shortcuts', 'shortcuts', 'Streep onder de huidige plek in de balk Op deze pagina', 'grafisch'),
+      pair('accent-shortcuts', 'shortcuts-pressed', 'Streep onder de huidige plek op een ingedrukte link', 'grafisch'),
       pair('icon-on-header-quiet', 'header', 'Pictogram van de themaknop in de header, in rust', 'grafisch'),
       pair('border-input', 'surface', 'Rand van een invoerveld op een vlak', 'grafisch'),
       pair('border-button-soft', 'surface', 'Rand van een zachte knop op een vlak', 'grafisch'),

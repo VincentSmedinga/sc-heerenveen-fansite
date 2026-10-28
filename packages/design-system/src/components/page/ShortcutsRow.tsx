@@ -1,6 +1,8 @@
 'use client'
 
-import type { FocusEvent, ReactNode } from 'react'
+import { type FocusEvent, type ReactNode, useEffect, useRef } from 'react'
+
+import { followPage } from './followPage'
 
 /**
  * The row of links in a Page.Shortcuts, which scrolls sideways. The links work without it; it
@@ -12,8 +14,16 @@ import type { FocusEvent, ReactNode } from 'react'
  * snapping does not scroll it back. It only does so for the keyboard: a link that is pressed
  * with a finger or a mouse gets the focus too, and a row that scrolls then would move the link
  * from under the finger before the press ends, so the click is lost.
+ *
+ * It also makes the bar follow the page: the link to the heading that came past last is marked
+ * as the current place and scrolled to the start of the row (see followPage.ts). The links come
+ * from the server as they are, so the mark is an attribute that the row sets on them.
  */
 export const ShortcutsRow = ({ children }: { children: ReactNode }) => {
+  const rowRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => (rowRef.current === null ? undefined : followPage(rowRef.current)), [])
+
   const reveal = (event: FocusEvent<HTMLDivElement>) => {
     const row = event.currentTarget
     const link = event.target as HTMLElement
@@ -34,7 +44,7 @@ export const ShortcutsRow = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <div className="hf-page-shortcuts-row" onFocus={reveal}>
+    <div className="hf-page-shortcuts-row" onFocus={reveal} ref={rowRef}>
       {children}
     </div>
   )

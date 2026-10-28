@@ -232,6 +232,22 @@
       background-color: var(--hf-colour-background-shortcuts-pressed);
       color: var(--hf-colour-text-shortcuts-link-hover);
     }
+
+    /*
+     * The link to the place on the page where the reader is (ShortcutsRow sets aria-current,
+     * see followPage.ts) has a red line under its text, 3px thick, like the current page in the
+     * menu. The weight and the size stay, so the row does not jump when the current link
+     * changes. The line is the underline of the text, so it stays in forced colours, where the
+     * browser sets its colour, and it comes after the mouse rule, so it stays under the mouse.
+     * It does not skip the descenders, so it is one unbroken line.
+     */
+    &[aria-current='location'] {
+      text-decoration-color: var(--hf-colour-accent-shortcuts);
+      text-decoration-line: underline;
+      text-decoration-skip-ink: none;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 0.35em;
+    }
   }
 
   /*

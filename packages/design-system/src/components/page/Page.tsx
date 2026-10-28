@@ -81,8 +81,13 @@ const Header = ({ className, ...props }: PageHeaderProps) => (
  *
  * It holds a label and a list of links and is not bound to anchors, so it can serve other rows
  * of links as well. It comes between the Page.Header and the Page.Body, so the reading order
- * and the focus order are the page's: the menu, this bar, then the content. No link is marked
- * as the current one.
+ * and the focus order are the page's: the menu, this bar, then the content.
+ *
+ * The bar follows the page. The link to the heading that came past a line under the bar last
+ * is the current place: it gets `aria-current="location"` and a red line, and the row scrolls
+ * it to the start, never the page. Before the first heading there is no current link, and
+ * without script there is none either. A link that points to no element is never the current
+ * one. A link goes to `#id`, so an item that is not an anchor does not take part.
  */
 const Shortcuts = ({ className, items, label, ...props }: PageShortcutsProps) => {
   const labelId = useId()
