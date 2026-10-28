@@ -321,11 +321,11 @@
     }
 
     /*
-     * The current page is told by weight (200 heavier than the rest) and by a red line under its
-     * text, 3px thick, as in the menu, and not by colour alone. The line is the underline of the
-     * text, so it stays in forced colours, where the browser sets its colour, and it comes after
-     * the mouse rule, so it stays under the mouse. It does not skip the descenders, so it is one
-     * unbroken line.
+     * The current page is told by weight (200 heavier than the rest) and by a red line under
+     * its text, 3px thick, as in the menu, and not by colour alone. The line is the underline
+     * of the text, so it stays in forced colours, where the browser sets its colour, and it
+     * comes after the mouse rule, so it stays under the mouse. It does not skip the descenders,
+     * so it is one unbroken line.
      * It has no pill when pressed: the red reaches 3,16:1 on the bar in dark but only 2,2:1 on
      * the pill, and a press on the page you are on goes nowhere.
      */

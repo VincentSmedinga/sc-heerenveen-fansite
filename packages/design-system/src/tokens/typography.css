@@ -81,14 +81,15 @@
     --hf-meta-line-height: 1.4;
 
     /*
-     * Weights by intent. Tokens may share a value: the name says why a place has its weight, and no token adds a
-     * weight. A component uses a token and never a bare number (weight-css.test.ts checks that).
+     * Weights by intent. Tokens may share a value: the name says why a place has its weight,
+     * and no token adds a weight. A component uses a token and never a bare number
+     * (weight-css.test.ts checks that).
      */
 
-    /* Emphasis: strong and b, buttons, our club, titles of charts, caption, and a status the reader must not miss */
+    /* Emphasis: strong, b, buttons, our club, chart titles, caption, a status not to miss */
     --hf-strong-font-weight: 700;
 
-    /* The figures people look up: a score, the value of a bar, a mark in a row, the total of a donut, our goals */
+    /* The figures people look up: a score, a bar value, a mark in a row, a donut, our goals */
     --hf-figure-font-weight: 700;
 
     /* The name of something: the label and the legend of a form, th and dt */
