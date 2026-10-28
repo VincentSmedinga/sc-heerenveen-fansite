@@ -1,6 +1,6 @@
 import preview from '#.storybook/preview'
 
-import { ExampleHeader, ExampleMain, exampleMenu, type ExampleMenuPage } from '../../docs/ExamplePage'
+import { ExampleMain, exampleMenu, exampleMenuAt, type ExampleMenuPage } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
 import { Heading } from '../heading/Heading'
 import { Page } from '../page/Page'
@@ -66,42 +66,39 @@ export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', re
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
 
-// The main menu with the header above it, as a page has it: this is the top of a page, so it
-// runs from edge to edge of the window.
+// The main menu is the top of a page, so it runs from edge to edge of the window.
 const fullscreen = { layout: 'fullscreen' } as const
 
-const inHeader =
-  (current: ExampleMenuPage) =>
-  (_args: unknown, { globals }: { globals: Record<string, unknown> }) => (
-    <ExampleHeader current={current} dark={globals['theme'] === 'dark'} />
-  )
+const mainMenu = (current: ExampleMenuPage) => () => (
+  <Navigation appearance="header" items={exampleMenuAt(current)} label="Hoofdmenu" />
+)
 
-export const NewsInHeaderLight = meta.story({
+export const NewsMainLight = meta.story({
   globals: { theme: 'light' },
-  name: 'In de header: Nieuws, licht',
+  name: 'Hoofdmenu: Nieuws, licht',
   parameters: fullscreen,
-  render: inHeader('Nieuws'),
+  render: mainMenu('Nieuws'),
 })
 
-export const NewsInHeaderDark = meta.story({
+export const NewsMainDark = meta.story({
   globals: { theme: 'dark' },
-  name: 'In de header: Nieuws, donker',
+  name: 'Hoofdmenu: Nieuws, donker',
   parameters: fullscreen,
-  render: inHeader('Nieuws'),
+  render: mainMenu('Nieuws'),
 })
 
-export const ForumInHeaderLight = meta.story({
+export const ForumMainLight = meta.story({
   globals: { theme: 'light' },
-  name: 'In de header: Forum, licht',
+  name: 'Hoofdmenu: Forum, licht',
   parameters: fullscreen,
-  render: inHeader('Forum'),
+  render: mainMenu('Forum'),
 })
 
-export const ForumInHeaderDark = meta.story({
+export const ForumMainDark = meta.story({
   globals: { theme: 'dark' },
-  name: 'In de header: Forum, donker',
+  name: 'Hoofdmenu: Forum, donker',
   parameters: fullscreen,
-  render: inHeader('Forum'),
+  render: mainMenu('Forum'),
 })
 
 const matchPages = [
@@ -125,16 +122,14 @@ const menuAt = (current: 'Nieuws' | 'Wedstrijden' | (typeof matchPages)[number][
   return items
 }
 
-const withSubpages =
-  (current: Parameters<typeof menuAt>[0], count?: number) =>
-  (_args: unknown, { globals }: { globals: Record<string, unknown> }) => (
-    <>
-      <ExampleHeader dark={globals['theme'] === 'dark'} menu={menuAt(current, count)} />
-      <Page.Body>
-        <ExampleMain />
-      </Page.Body>
-    </>
-  )
+const withSubpages = (current: Parameters<typeof menuAt>[0], count?: number) => () => (
+  <>
+    <Navigation appearance="header" items={menuAt(current, count)} label="Hoofdmenu" />
+    <Page.Body>
+      <ExampleMain />
+    </Page.Body>
+  </>
+)
 
 const noSubpagesStory = {
   docs: {
@@ -280,14 +275,14 @@ const threeBarsParameters = {
   docs: {
     description: {
       story:
-        'Een pagina met subpagina’s en ankers: de header, het hoofdmenu met zijn subpagina’s en de balk met ankers, in die volgorde in de code en op het scherm. Alleen de balk met ankers plakt.',
+        'Een pagina met subpagina’s en ankers: het hoofdmenu met zijn subpagina’s en de balk met ankers, in die volgorde in de code en op het scherm. Alleen de balk met ankers plakt.',
     },
   },
 }
 
-const renderThreeBars = (_args: unknown, { globals }: { globals: Record<string, unknown> }) => (
+const renderMenuAndAnchors = () => (
   <>
-    <ExampleHeader dark={globals['theme'] === 'dark'} menu={menuAt('Programma')} />
+    <Navigation appearance="header" items={menuAt('Programma')} label="Hoofdmenu" />
     <Page.Shortcuts
       items={sections.map(({ id, title }) => ({ href: `#${id}`, label: title }))}
       label="Op deze pagina:"
@@ -301,8 +296,8 @@ const renderThreeBars = (_args: unknown, { globals }: { globals: Record<string, 
             </Heading>
             <Text>Hier staat wat bij {title.toLowerCase()} hoort. De kaart is lang genoeg om langs te scrollen.</Text>
             <Text>
-              Boven deze kaart staan drie balken. Als je scrolt, gaan de header en het menu met de subpagina’s weg, en
-              blijft alleen de balk met ankers staan.
+              Boven deze kaart staan twee balken. Als je scrolt, gaat het menu met de subpagina’s weg, en blijft alleen
+              de balk met ankers staan.
             </Text>
             <Text>
               Een kaart kan lang zijn, zodat de kop van de volgende kaart pas na een tijd langs de balk komt. Tot dan
@@ -315,20 +310,20 @@ const renderThreeBars = (_args: unknown, { globals }: { globals: Record<string, 
   </>
 )
 
-export const ThreeBars = meta.story({
+export const MenuAndAnchors = meta.story({
   ...phone,
   globals: { theme: 'light', viewport: { value: 'mobile2' } },
   name: 'Menu, subpagina’s en ankers',
   parameters: threeBarsParameters,
-  render: renderThreeBars,
+  render: renderMenuAndAnchors,
 })
 
-export const ThreeBarsDark = meta.story({
+export const MenuAndAnchorsDark = meta.story({
   ...phone,
   globals: { theme: 'dark', viewport: { value: 'mobile2' } },
   name: 'Menu, subpagina’s en ankers, donker',
   parameters: threeBarsParameters,
-  render: renderThreeBars,
+  render: renderMenuAndAnchors,
 })
 
 // The page scrolls to a heading, as after a click on its link: only the anchors are left.
@@ -336,7 +331,7 @@ const scrollToStand = () => {
   document.getElementById('stand')?.scrollIntoView({ behavior: 'instant', block: 'start' })
 }
 
-export const ThreeBarsScrolled = meta.story({
+export const MenuAndAnchorsScrolled = meta.story({
   ...phone,
   globals: { theme: 'light', viewport: { value: 'mobile2' } },
   name: 'Menu, subpagina’s en ankers, gescrold',
@@ -345,10 +340,10 @@ export const ThreeBarsScrolled = meta.story({
     docs: {
       description: {
         story:
-          'De pagina is tot de kop van Stand gescrold. De header en het menu met de subpagina’s zijn weg, de balk met ankers blijft, en de kop komt er niet onder.',
+          'De pagina is tot de kop van Stand gescrold. Het menu met de subpagina’s is weg, de balk met ankers blijft, en de kop komt er niet onder.',
       },
     },
   },
   play: scrollToStand,
-  render: renderThreeBars,
+  render: renderMenuAndAnchors,
 })

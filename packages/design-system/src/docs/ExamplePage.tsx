@@ -4,7 +4,7 @@ import { Heading } from '../components/heading/Heading'
 import { Link } from '../components/link/Link'
 import { List } from '../components/list/List'
 import { Logo } from '../components/logo/Logo'
-import { Navigation, type NavigationItem } from '../components/navigation/Navigation'
+import { Navigation } from '../components/navigation/Navigation'
 import { Page } from '../components/page/Page'
 import { Text } from '../components/text/Text'
 import { ThemeButton } from '../components/theme-button/ThemeButton'
@@ -40,19 +40,10 @@ export const ExampleBanner = ({ dark = false }: { dark?: boolean }) => (
  * The banner and the main menu right after it, on the same blue. This is what the top of a
  * page holds.
  */
-export const ExampleHeader = ({
-  current = 'Nieuws',
-  dark = false,
-  menu,
-}: {
-  current?: ExampleMenuPage
-  dark?: boolean
-  /** Another menu than the one of the example pages, such as one with sub-pages. */
-  menu?: readonly NavigationItem[]
-}) => (
+export const ExampleHeader = ({ dark = false }: { dark?: boolean }) => (
   <>
     <ExampleBanner dark={dark} />
-    <Navigation appearance="header" items={menu ?? exampleMenuAt(current)} label="Hoofdmenu" />
+    <Navigation appearance="header" items={exampleMenu} label="Hoofdmenu" />
   </>
 )
 
