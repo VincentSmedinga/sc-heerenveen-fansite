@@ -119,14 +119,39 @@ describe('the page /wedstrijden', () => {
     for (const [id, surface] of [
       ['programma', 'hf-card'],
       ['uitslagen', 'hf-card'],
-      ['stand', 'hf-card hf-card-soft'],
-      ['doelpuntenmakers', 'hf-card hf-card-soft'],
-      ['de-nul-gehouden', 'hf-card hf-card-soft'],
-      ['verloop-van-het-seizoen', 'hf-card hf-card-warm'],
-      ['doelpunten-per-kwartier', 'hf-card hf-card-warm'],
+      ['stand', 'hf-card hf-card-soft hf-card-shareable'],
+      ['doelpuntenmakers', 'hf-card hf-card-soft hf-card-shareable'],
+      ['de-nul-gehouden', 'hf-card hf-card-soft hf-card-shareable'],
+      ['verloop-van-het-seizoen', 'hf-card hf-card-warm hf-card-shareable'],
+      ['doelpunten-per-kwartier', 'hf-card hf-card-warm hf-card-shareable'],
     ] as const) {
       expect(html).toContain(`<section class="${surface}" aria-labelledby="${id}">`)
     }
+  })
+
+  it('lets the visitor make an image of the five cards with statistics, and of no other card', async () => {
+    const html = await render()
+    const shareable = [...html.matchAll(/<section class="[^"]*hf-card-shareable[^"]*" aria-labelledby="([^"]+)"/g)].map(
+      ([, id]) => id,
+    )
+
+    expect(shareable).toEqual([
+      'stand',
+      'verloop-van-het-seizoen',
+      'doelpuntenmakers',
+      'de-nul-gehouden',
+      'doelpunten-per-kwartier',
+    ])
+    expect(html.match(/data-hf-card-share/g)).toHaveLength(5)
+    for (const id of ['programma', 'uitslagen']) {
+      expect(html).toContain(`<section class="hf-card" aria-labelledby="${id}">`)
+    }
+  })
+
+  it('has no button for an image on a card that has no facts yet', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [], standings: [] })
+
+    expect(await render()).not.toContain('hf-card-shareable')
   })
 
   it('shows every match still to come in the programme, in order, a postponed one and a weekend included', async () => {
@@ -792,7 +817,9 @@ describe('the page /wedstrijden', () => {
     it('says in a line directly under the heading, above the table, how many players scored, as the clean sheets do', async () => {
       const card = await topScorers()
 
-      expect(card).toContain('</h2><p>3 spelers hebben gescoord</p><div class="hf-top-scorers')
+      expect(card).toContain(
+        '</h2><div class="hf-card-share" data-hf-card-share=""></div><p>3 spelers hebben gescoord</p><div class="hf-top-scorers',
+      )
       expect(card.indexOf('3 spelers hebben gescoord')).toBeLessThan(card.indexOf('<table'))
       expect(card.split('</table>')[1]).not.toContain('spelers hebben gescoord')
     })

@@ -48,6 +48,7 @@ const labels: Record<IconName, string> = {
   'arrow-right': 'Pijl naar rechts',
   envelope: 'Envelop',
   'external-link': 'Externe link',
+  image: 'Afbeelding',
   link: 'Schakel',
   moon: 'Maan',
   plus: 'Plus',

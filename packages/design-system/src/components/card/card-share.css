@@ -1,0 +1,157 @@
+/*
+ * The button of a card that makes an image of it, and the stage where that image is drawn.
+ *
+ * The button is round, 44 by 44 pixels, at the top right of the card. At rest it is quiet: only the icon, in the colour
+ * of links, without a rim or a fill. Under the mouse, pressed, with the keyboard (:focus-visible) and while the image is
+ * made, it comes forward: a fill and a rim of the soft button, and the icon in the colour of its text. Those roles
+ * (--hf-colour-text-link, --hf-colour-background-button-soft and --hf-colour-border-button-soft) reach their contrast on
+ * the four surfaces in both themes, so the button needs no colour of its own. The rim is there at rest as well, but
+ * see-through, so the button does not change size when it comes forward and a browser in forced colours keeps an
+ * outline. Hover is only for devices with a mouse (hover: hover), so nothing stays lit after a tap on a phone; pressing
+ * (:active) counts on touch as well. The change takes the short motion duration, and none with reduced motion.
+ */
+
+@layer hf.components {
+  /* No box of its own: the button and the message place themselves by the card. */
+  .hf-card-share {
+    display: contents;
+
+    @media print {
+      display: none;
+    }
+  }
+
+  .hf-card-share-button {
+    align-items: center;
+    background-color: transparent;
+    block-size: 2.75rem;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-link);
+    cursor: pointer;
+    display: inline-flex;
+    inline-size: 2.75rem;
+    inset-block-start: calc(var(--hf-card-padding-block) - 0.5rem);
+    inset-inline-end: calc(var(--hf-card-padding-inline) - 0.5rem);
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    transition:
+      background-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      border-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+
+    /* The icon is 24 pixels, and has no space beside it, as in a button with text. */
+    .hf-icon {
+      --hf-icon-size: 1;
+
+      block-size: 1.5rem;
+      inline-size: 1.5rem;
+      margin: 0;
+      vertical-align: baseline;
+    }
+
+    &:active,
+    &:focus-visible,
+    &[aria-disabled='true'] {
+      background-color: var(--hf-colour-background-button-soft);
+      border-color: var(--hf-colour-border-button-soft);
+      color: var(--hf-colour-text-on-button-soft);
+    }
+
+    &[aria-disabled='true'] {
+      cursor: progress;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--hf-colour-background-button-soft-hover);
+        border-color: var(--hf-colour-border-button-soft);
+        color: var(--hf-colour-text-on-button-soft);
+      }
+
+      &[aria-disabled='true']:hover {
+        background-color: var(--hf-colour-background-button-soft);
+      }
+    }
+
+    @media (forced-colors: active) {
+      border-color: ButtonText;
+      color: ButtonText;
+    }
+  }
+
+  /* The message is for a screen reader, except when something went wrong: then it is a sentence for everyone. */
+  .hf-card-share-status:not(.hf-visually-hidden) {
+    color: var(--hf-colour-text-default);
+    margin-block: 0.75rem 0;
+  }
+
+  /*
+   * The stage is a frame of one and a half rem round a copy of the card, with the strip under it. It sits out of sight, in the page
+   * itself, so the browser works out the same styles for it as for the card, and is taken away when the image is done.
+   * The copy has a width that fits the sidebar of a wide screen and the padding the card has there, whatever the screen is, and not
+   * the button, which is left out of the copy.
+   */
+  .hf-card-share-offscreen {
+    inset-block-start: 0;
+    inset-inline-start: -200vw;
+    pointer-events: none;
+    position: fixed;
+  }
+
+  .hf-card-share-stage {
+    background-color: var(--hf-colour-background-page);
+    box-sizing: border-box;
+    color: var(--hf-colour-text-default);
+    display: grid;
+    gap: 0.75rem;
+    inline-size: 32rem;
+    padding: 1.5rem;
+  }
+
+  .hf-card-share-copy {
+    --hf-card-padding-block: 1.5rem;
+    --hf-card-padding-inline: 1.75rem;
+    --hf-heading-gutter: 1.75rem;
+
+    inline-size: 29rem;
+  }
+
+  /*
+   * The strip is a signature, not a title: the logo is smaller than in the header and has no "sinds 1997". As in the
+   * footer, the lines of text sit right under each other, in a column at the end side: the address and the day, then
+   * the source, in the quieter colour of secondary text. They share one box, so the height of the logo does
+   * not pull them apart. The logo is level with them.
+   */
+  .hf-card-share-strip {
+    --hf-logo-gap: 0.5rem;
+    --hf-wordmark-font-size: 0.9375rem;
+
+    align-items: center;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: auto minmax(0, 1fr);
+
+    .hf-logo-tagline {
+      display: none;
+    }
+
+    /* One box for both lines, so the height of the logo does not pull the lines apart. */
+    .hf-card-share-lines {
+      text-align: end;
+    }
+
+    .hf-card-share-address {
+      color: var(--hf-colour-text-default);
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    .hf-card-share-credit p {
+      line-height: 1.3;
+      margin: 0;
+    }
+  }
+}
