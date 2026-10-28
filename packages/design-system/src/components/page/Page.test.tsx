@@ -66,13 +66,15 @@ describe('Page', () => {
 })
 
 describe('Page.Header', () => {
-  it('holds the logo, the theme button and the main menu in that order, which its grid puts in two rows', () => {
-    render(<ExampleHeader />)
+  it('holds the logo and the theme button, and not the main menu, which follows it', () => {
+    const { container } = render(<ExampleHeader />)
     const banner = screen.getByRole('banner')
 
-    expect(Array.from(banner.children).map((child) => child.tagName.toLowerCase())).toEqual(['a', 'button', 'nav'])
+    expect(Array.from(banner.children).map((child) => child.tagName.toLowerCase())).toEqual(['a', 'button'])
     expect(within(banner).getByRole('button', { name: 'Donker' })).toBe(banner.children[1])
-    expect(within(banner).getByRole('navigation', { name: 'Hoofdmenu' })).toBe(banner.children[2])
+    expect(within(banner).queryByRole('navigation')).toBeNull()
+    expect(banner.nextElementSibling).toBe(screen.getByRole('navigation', { name: 'Hoofdmenu' }))
+    expect(container.children).toHaveLength(2)
   })
 
   it('is the banner of the page', () => {
@@ -453,79 +455,16 @@ describe('Page.Shortcuts', () => {
   })
 })
 
-describe('Page.Submenu', () => {
-  const items = [
-    { current: true, href: '/wedstrijden/programma', label: 'Programma' },
-    { href: '/wedstrijden/uitslagen', label: 'Uitslagen' },
-    { href: '/wedstrijden/stand', label: 'Stand' },
-  ]
-
-  it('is a navigation named by its label, and shows no label', () => {
-    const { container } = render(<Page.Submenu items={items} label="Wedstrijden" />)
-    const nav = screen.getByRole('navigation', { name: 'Wedstrijden' })
-
-    expect(nav.tagName).toBe('NAV')
-    expect(nav.className).toBe('hf-page-submenu')
-    expect(nav.getAttribute('aria-label')).toBe('Wedstrijden')
-    expect(nav.getAttribute('aria-labelledby')).toBeNull()
-    // The name is for screen readers only: the text of the bar is the text of the links.
-    expect(container.textContent).toBe('ProgrammaUitslagenStand')
-  })
-
-  it('holds a list with a link for each item, in the order given', () => {
-    render(<Page.Submenu items={items} label="Wedstrijden" />)
-    const links = within(screen.getByRole('navigation')).getAllByRole('link')
-
-    expect(within(screen.getByRole('list')).getAllByRole('listitem')).toHaveLength(3)
-    expect(links.map((link) => [link.textContent, link.getAttribute('href'), link.className])).toEqual([
-      ['Programma', '/wedstrijden/programma', 'hf-page-submenu-link'],
-      ['Uitslagen', '/wedstrijden/uitslagen', 'hf-page-submenu-link'],
-      ['Stand', '/wedstrijden/stand', 'hf-page-submenu-link'],
-    ])
-  })
-
-  it('marks exactly one link as the current page, the one that is current', () => {
-    const { container } = render(<Page.Submenu items={items} label="Wedstrijden" />)
-    const current = container.querySelectorAll('[aria-current]')
-
-    expect(current).toHaveLength(1)
-    expect(current[0]?.getAttribute('aria-current')).toBe('page')
-    expect(current[0]?.textContent).toBe('Programma')
-  })
-
-  it('marks no link when none is current, as on a page of the section that is not in the bar', () => {
-    const { container } = render(
-      <Page.Submenu items={items.map(({ href, label }) => ({ href, label }))} label="Wedstrijden" />,
-    )
-
-    expect(container.querySelector('[aria-current]')).toBeNull()
-  })
-
-  it('gives a page with a submenu and a bar of anchors a name for each, so the two can be told apart', () => {
-    render(
-      <>
-        <Page.Submenu items={items} label="Wedstrijden" />
-        <Page.Shortcuts items={items} label="Op deze pagina:" />
-      </>,
-    )
-
-    expect(screen.getAllByRole('navigation').map((nav) => nav.getAttribute('aria-label') ?? nav.textContent)).toEqual([
-      'Wedstrijden',
-      expect.stringContaining('Op deze pagina:'),
-    ])
-    expect(screen.getByRole('navigation', { name: 'Wedstrijden' })).toBeTruthy()
-    expect(screen.getByRole('navigation', { name: 'Op deze pagina:' })).toBeTruthy()
-  })
-
-  it('sits under the header and before the bar of anchors, outside the main, in the order of the HTML', () => {
+describe('the order of the top of a page', () => {
+  it('is the header, the main menu, the bar of anchors, the content and the footer, in the HTML', () => {
     const { container } = render(
       <Page>
-        <Page.Header>Kop</Page.Header>
-        <Page.Submenu items={items} label="Wedstrijden" />
-        <Page.Shortcuts items={items} label="Op deze pagina:" />
+        <ExampleHeader />
+        <Page.Shortcuts items={[{ href: '#stand', label: 'Stand' }]} label="Op deze pagina:" />
         <Page.Body>
           <Page.Main>Inhoud</Page.Main>
         </Page.Body>
+        <ExampleFooter />
       </Page>,
     )
     const page = container.firstElementChild
@@ -533,21 +472,27 @@ describe('Page.Submenu', () => {
     expect(Array.from(page?.children ?? []).map((child) => child.className)).toEqual([
       'hf-page-top-edge',
       'hf-page-header',
-      'hf-page-submenu',
+      'hf-navigation hf-navigation-header',
       'hf-page-shortcuts',
       'hf-page-body',
+      'hf-page-footer',
     ])
-    expect(screen.getByRole('main').contains(screen.getByRole('navigation', { name: 'Wedstrijden' }))).toBe(false)
   })
 
-  it('keeps the other attributes and adds a class to its own', () => {
-    render(<Page.Submenu className="extra" id="submenu" items={items} label="Wedstrijden" />)
+  it('has one banner and one landmark for the main menu, outside the banner and outside the main', () => {
+    render(
+      <Page>
+        <ExampleHeader />
+        <Page.Body>
+          <Page.Main>Inhoud</Page.Main>
+        </Page.Body>
+      </Page>,
+    )
+    const menu = screen.getByRole('navigation', { name: 'Hoofdmenu' })
 
-    expect(screen.getByRole('navigation').className).toBe('hf-page-submenu extra')
-    expect(screen.getByRole('navigation').id).toBe('submenu')
-  })
-
-  it('is called Page.Submenu in the developer tools and the code examples', () => {
-    expect(Page.Submenu.displayName).toBe('Page.Submenu')
+    expect(screen.getAllByRole('banner')).toHaveLength(1)
+    expect(screen.getAllByRole('navigation')).toHaveLength(1)
+    expect(screen.getByRole('banner').contains(menu)).toBe(false)
+    expect(screen.getByRole('main').contains(menu)).toBe(false)
   })
 })

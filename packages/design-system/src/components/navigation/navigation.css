@@ -17,34 +17,68 @@
     min-block-size: 2.75rem;
 
     /* The current page is not told by colour alone: it is bolder, with a thicker underline. */
-    &[aria-current='page'] {
+    &:is([aria-current='page'], [aria-current='true']) {
       font-weight: var(--hf-strong-font-weight);
       text-decoration-thickness: 0.2em;
     }
   }
 
   /*
-   * In the header, the menu is a row of its own under the logo (see page.css). Every link is in the lightest colour of
-   * the header, in semibold (600) and not underlined, except under the mouse, with 1rem between
-   * the links. The size grows with the window, from 16px at 320px wide to 18px at 900px and up.
-   * The weight, and not the size, sets the menu apart from a submenu under it, because on a
-   * phone the two are nearly the same size.
-   * The current page is told by a red bar under its text, 3px thick, and by the heaviest weight
-   * (800), not by colour. A menu elsewhere, such as the one in the footer, keeps the look
-   * above.
-   * The last link, the forum, is on the right: a link to another site sits apart from the pages of this one. On a
-   * screen too narrow for all links in one row, it wraps to a second row and stays on the right.
-   * The underline doesn't skip the descenders of letters, so the bar is one unbroken line.
+   * The main menu (appearance="header") is a band of its own under the Page.Header, on the same
+   * blue, so the two read as one. It is a flex row that wraps, with a thin line above it that
+   * stops at the inset of the page (the first item, ::before, as wide as the row), and with
+   * 1rem between the links. Every link is in the lightest colour of the header, in semibold
+   * (600) and not underlined, except under the mouse. The size grows with the window, from 16px
+   * at 320px wide to 18px at 900px and up. The weight, and not the size, sets the menu apart
+   * from the bar under it, because on a phone the two are nearly the same size. The current
+   * page is told by a red bar under its text, 3px thick, and by the heaviest weight (800), not
+   * by colour. So is the item whose sub-page is the current one (aria-current="true"). A menu
+   * elsewhere, such as the one in the footer, keeps the look above. The last link, the forum,
+   * is on the right: a link to another site sits apart from the pages of this one. On a screen
+   * too narrow for all links in one row, it wraps to a second row and stays on the right. The
+   * underline doesn't skip the descenders of letters, so the bar is one unbroken line.
+   *
+   * The list and its items take no box of their own (display: contents), so the links are items
+   * of the nav, and the bar with the sub-pages, which is inside the item of its link, is one
+   * too: it is last in the row (order), under all the links, over the whole width, wherever the
+   * link of its item has wrapped to. That is why the nav is the flex container and not the
+   * list. The Navigation gives the list and the items their roles, because Safari used to drop
+   * them from the accessibility tree otherwise. The order in the code is the order of the focus
+   * and of a screen reader: a link, then its sub-pages, then the next link. Only what is seen
+   * is under the links. The bottom of the band is the space the Page.Header used to keep under
+   * the menu. A bar is under that space, and comes to the bottom of the band.
    */
-  .hf-page-header .hf-navigation-list {
-    gap: 0 1rem;
+  .hf-navigation-header {
+    --hf-colour-focus: var(--hf-colour-focus-on-header);
+    --hf-navigation-end: 0.4375rem;
+    --hf-navigation-inset-end: max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
+    --hf-navigation-inset-start: max(var(--hf-page-inset), env(safe-area-inset-left, 0px));
 
-    > li:last-child {
-      margin-inline-start: auto;
+    background-color: var(--hf-colour-background-header);
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1rem;
+    padding-block-end: var(--hf-navigation-end);
+    padding-inline: var(--hf-navigation-inset-start) var(--hf-navigation-inset-end);
+
+    /* The line is a border, and so stays in forced colours. */
+    &::before {
+      block-size: 0;
+      border-block-start: 1px solid var(--hf-colour-border-on-header);
+      content: '';
+      flex: 0 0 100%;
+      margin-block-end: 0.25rem;
+      order: -1;
     }
   }
 
-  .hf-page-header .hf-navigation-link {
+  .hf-navigation-header .hf-navigation-list,
+  .hf-navigation-header .hf-navigation-list > li {
+    display: contents;
+  }
+
+  .hf-navigation-header .hf-navigation-link {
     color: var(--hf-colour-text-on-header);
     font-size: clamp(1rem, 0.93rem + 0.34vw, 1.125rem);
     font-weight: 600;
@@ -57,13 +91,128 @@
       text-underline-offset: 0.35em;
     }
 
-    &[aria-current='page'] {
+    &:is([aria-current='page'], [aria-current='true']) {
       font-weight: 800;
       text-decoration-color: var(--hf-colour-accent-on-header);
       text-decoration-line: underline;
       text-decoration-skip-ink: none;
       text-decoration-thickness: 3px;
       text-underline-offset: 0.35em;
+    }
+  }
+
+  .hf-navigation-header .hf-navigation-list > li:last-child > .hf-navigation-link {
+    margin-inline-start: auto;
+  }
+
+  /*
+   * The bar with the sub-pages of the item the visitor is on, under the row of the menu, as
+   * wide as the page, on a tint of the header (see the roles in colour.css), with no line
+   * between the two. The nav has the inset of the page as its padding, so the bar takes it back
+   * with a negative margin, and is as wide as the nav plus the two insets. It is a flex row of
+   * the row of links, which scrolls. The row, the list and the fade are the ones of the bar "Op
+   * deze pagina" (see shortcuts.css), so the two scroll, snap and fade alike. Unlike that bar
+   * it has no label, is never sticky and is not gone on a wide screen: sub-pages are
+   * navigation, and the bar holds the site together on every width.
+   *
+   * The padding on the start side puts the text of the first link on the inset of the page, in
+   * line with the logo and the menu, because the link has the padding of a pill (0.625rem) that
+   * the text sits inside. It is 46px high: the list has 5px of room all round for the ring (see
+   * shortcuts.css) and a link is 2.25rem high. The row runs on to the edge of the screen on the
+   * end side, apart from a notch, so the last link is cut off and the reader sees there is
+   * more. The space under the menu is above the bar, and the margin under it takes the padding
+   * of the nav back, so the bar is the bottom of the band. A flex item is not narrower than its
+   * content by default, and the row of links is long, so the bar may shrink to the width of the
+   * nav.
+   */
+  .hf-navigation-bar {
+    background-color: var(--hf-colour-background-submenu);
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 calc(100% + var(--hf-navigation-inset-start) + var(--hf-navigation-inset-end));
+    margin-block: var(--hf-navigation-end) calc(-1 * var(--hf-navigation-end));
+    margin-inline: calc(-1 * var(--hf-navigation-inset-start)) calc(-1 * var(--hf-navigation-inset-end));
+    min-inline-size: 0;
+    order: 1;
+    padding-inline: calc(var(--hf-navigation-inset-start) - 0.625rem) env(safe-area-inset-right, 0);
+  }
+
+  /*
+   * A link is a pill 36px high (2.25rem, so it grows with the text size), in the lightest
+   * colour of the header and without an underline, in regular weight (400): the menu above it
+   * is in 600, and on a phone the two are nearly the same size, so the weight tells the levels
+   * apart. Under the mouse (only where there is one, so nothing stays lit after a tap) it turns
+   * white and gets an underline. Pressed it gets a pill. The focus ring is the ordinary one, in
+   * the colour of the header. The change of colour takes the short motion duration, the fill
+   * the quick one.
+   */
+  .hf-navigation-sublink {
+    align-items: center;
+    block-size: 2.25rem;
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-on-header);
+    display: inline-flex;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1;
+    padding-inline: 0.625rem;
+    text-decoration-line: none;
+    transition:
+      color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      background-color var(--hf-motion-duration-quick) var(--hf-motion-ease-change);
+    white-space: nowrap;
+
+    @media (hover: hover) {
+      &:hover {
+        color: var(--hf-colour-text-submenu-link-hover);
+        text-decoration-line: underline;
+        text-decoration-skip-ink: none;
+        text-underline-offset: 0.2em;
+      }
+    }
+
+    &:active {
+      background-color: var(--hf-colour-background-submenu-pressed);
+      color: var(--hf-colour-text-submenu-link-hover);
+    }
+
+    /*
+     * The current page is told by weight (700) and by a red line under its text, 3px thick, as
+     * in the menu, and not by colour alone. The line is the underline of the text, so it stays
+     * in forced colours, where the browser sets its colour, and it comes after the mouse rule,
+     * so it stays under the mouse. It does not skip the descenders, so it is one unbroken line.
+     * It has no pill when pressed: the red reaches 3,16:1 on the bar in dark but only 2,2:1 on
+     * the pill, and a press on the page you are on goes nowhere.
+     */
+    &[aria-current='page'] {
+      font-weight: 700;
+      text-decoration-color: var(--hf-colour-accent-on-header);
+      text-decoration-line: underline;
+      text-decoration-skip-ink: none;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 0.35em;
+
+      &:active {
+        background-color: transparent;
+      }
+    }
+  }
+
+  /*
+   * At 20em (320px at the usual size, and more with larger text, or at 400% zoom) the page may
+   * not scroll sideways (WCAG 1.4.10), so the links wrap, as in the bar "Op deze pagina" (see
+   * shortcuts.css). With no label to line up with, the list is not pulled back: the bar's own
+   * padding already puts the text of the first link on the inset. The end side keeps the margin
+   * of the page, since the row no longer runs to the edge.
+   */
+  @media (width <= 20em) {
+    .hf-navigation-bar {
+      padding-inline-end: max(var(--hf-page-margin), env(safe-area-inset-right, 0px));
+    }
+
+    .hf-navigation-bar .hf-page-shortcuts-list {
+      margin-inline-start: 0;
     }
   }
 }

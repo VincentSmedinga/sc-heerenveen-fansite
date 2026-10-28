@@ -56,12 +56,12 @@
    * everything inside it. A component in the header then needs no styles of its own for the header.
    * The band is as wide as the page, and the padding on the sides keeps what is in it in the column, in line with the body.
    *
-   * It has two rows. In the first are the logo, on the left, and the theme button (.hf-theme-button) on the right; the
-   * main menu is in a row of its own under them, over the whole width of the column, at every width, with a thin line
-   * above it. Without the button, which only a browser with JavaScript draws, the first row holds the logo alone and
-   * the menu is where it was. A grid does that where a row that wraps could not: a menu that fits beside the logo would
-   * stay there. The menu is the one navigation in the header (.hf-navigation); a second one would need a row of its
-   * own as well.
+   * It is one row: the logo, on the left, and the theme button (.hf-theme-button) on the right.
+   * The main menu is not in it. The menu is a navigation of its own right after the header, on
+   * the same blue, with a thin line above it, so the two read as one band (see
+   * .hf-navigation-header in navigation.css). The space under the logo is 0.25rem, the space
+   * that was between the logo and the line. Without the button, which only a browser with
+   * JavaScript draws, the row holds the logo alone.
    *
    * The logo is in the column with its shield, so on a narrow screen the text of the page is in line with the shield. On a
    * wide screen the shield hangs in the margin to the left of the column, and the text of the page is in line with the
@@ -84,9 +84,9 @@
     box-sizing: border-box;
     color: var(--hf-colour-text-default);
     display: grid;
-    gap: 0.25rem 0.5rem;
+    gap: 0 0.5rem;
     grid-template-columns: minmax(0, 1fr) auto;
-    padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.4375rem;
+    padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.25rem;
     padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
       max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
 
@@ -101,12 +101,6 @@
 
     > .hf-theme-button {
       justify-self: end;
-    }
-
-    > .hf-navigation {
-      border-block-start: 1px solid var(--hf-colour-border-on-header);
-      grid-column: 1 / -1;
-      padding-block-start: 0.25rem;
     }
 
     @media (width >= 74.5rem) {

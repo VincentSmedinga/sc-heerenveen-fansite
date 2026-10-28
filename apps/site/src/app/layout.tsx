@@ -68,8 +68,8 @@ export const viewport: Viewport = {
 // Root, light and dark follow the system setting. A visitor who pressed the theme button in the
 // header gets data-theme on it from public/theme.js, which runs before the first paint, so
 // React must not mind the attribute it did not render (suppressHydrationWarning). The header
-// has the logo and the theme button in its first row and the main menu under them; the order in
-// the code is the order of the focus.
+// has the logo and the theme button, and the main menu comes right after it, on the same blue;
+// the order in the code is the order of the focus.
 //
 // A page can put a bar under the header, outside the Page.Body and so outside its main (see
 // Page.Shortcuts). The page's children sit in the Page.Body, so the page can't render the bar
@@ -90,8 +90,8 @@ export default function RootLayout({ children, shortcuts }: { children: ReactNod
               <Logo />
             </Link>
             <ThemeToggle />
-            <SiteNavigation />
           </Page.Header>
+          <SiteNavigation />
           {shortcuts}
           <Page.Body>{children}</Page.Body>
           <Page.Footer>

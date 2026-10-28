@@ -7,7 +7,8 @@ type Callback = (entries: Partial<IntersectionObserverEntry>[]) => void
 
 /** An IntersectionObserver that a test drives by hand. */
 function stubObserver() {
-  const seen: { callback: Callback; disconnected: boolean; options?: IntersectionObserverInit; target?: Element }[] = []
+  const seen: { callback: Callback; disconnected: boolean; options?: IntersectionObserverInit; targets: Element[] }[] =
+    []
 
   vi.stubGlobal(
     'IntersectionObserver',
@@ -15,7 +16,7 @@ function stubObserver() {
       private readonly record: (typeof seen)[number]
 
       constructor(callback: Callback, options?: IntersectionObserverInit) {
-        this.record = { callback, disconnected: false, ...(options === undefined ? {} : { options }) }
+        this.record = { callback, disconnected: false, targets: [], ...(options === undefined ? {} : { options }) }
         seen.push(this.record)
       }
 
@@ -24,7 +25,7 @@ function stubObserver() {
       }
 
       observe(target: Element) {
-        this.record.target = target
+        this.record.targets.push(target)
       }
     },
   )
@@ -32,8 +33,11 @@ function stubObserver() {
   Object.defineProperty(window, 'IntersectionObserver', { configurable: true, value: globalThis.IntersectionObserver })
 
   return {
-    see: (isIntersecting: boolean) => {
-      seen[0]?.callback([{ isIntersecting }])
+    // Without a target it is every element that is watched, one entry each.
+    see: (isIntersecting: boolean, target?: Element) => {
+      const targets = target === undefined ? (seen[0]?.targets ?? []) : [target]
+
+      seen[0]?.callback(targets.map((entry) => ({ isIntersecting, target: entry })))
     },
     seen,
   }
@@ -51,7 +55,8 @@ describe('watchTopEdge', () => {
   let edge: HTMLElement
 
   beforeEach(() => {
-    document.body.innerHTML = '<div class="hf-page-top-edge"></div><header class="hf-page-header"></header>'
+    document.body.innerHTML =
+      '<div class="hf-page-top-edge"></div><header class="hf-page-header"></header><nav class="hf-navigation hf-navigation-header"></nav>'
     edge = document.querySelector<HTMLElement>('.hf-page-top-edge')!
     stubDisplayMode(false)
   })
@@ -61,13 +66,31 @@ describe('watchTopEdge', () => {
     Reflect.deleteProperty(window, 'IntersectionObserver')
   })
 
-  it('watches the header, which counts as on the screen while it reaches below the strip', () => {
+  it('watches the header and the main menu, which count as on the screen while they reach below the strip', () => {
     const observer = stubObserver()
 
     watchTopEdge(document)
 
-    expect(observer.seen[0]?.target).toBe(document.querySelector('.hf-page-header'))
+    expect(observer.seen[0]?.targets).toEqual([
+      document.querySelector('.hf-page-header'),
+      document.querySelector('.hf-navigation-header'),
+    ])
     expect(observer.seen[0]?.options?.rootMargin).toBe('-8px 0px 0px 0px')
+  })
+
+  it('keeps the strip while the main menu is on the screen after the header has scrolled away', () => {
+    const observer = stubObserver()
+
+    watchTopEdge(document)
+    observer.see(true)
+    observer.see(false, document.querySelector('.hf-page-header')!)
+    expect(edge.hidden).toBe(false)
+
+    observer.see(false, document.querySelector('.hf-navigation-header')!)
+    expect(edge.hidden).toBe(true)
+
+    observer.see(true, document.querySelector('.hf-navigation-header')!)
+    expect(edge.hidden).toBe(false)
   })
 
   it('takes the strip off when the header has scrolled away and puts it back when the header is back', () => {

@@ -58,7 +58,7 @@ export type { MarkRowMark, MarkRowProps } from './components/mark-row/MarkRow'
 export { Match, matchStatuses } from './components/match/Match'
 export type { MatchGoal, MatchProps, MatchStatus } from './components/match/Match'
 export { Navigation } from './components/navigation/Navigation'
-export type { NavigationItem, NavigationProps } from './components/navigation/Navigation'
+export type { NavigationItem, NavigationProps, NavigationSubitem } from './components/navigation/Navigation'
 export { NewsItem } from './components/news-item/NewsItem'
 export type { NewsItemProps } from './components/news-item/NewsItem'
 export { Page } from './components/page/Page'
@@ -72,8 +72,6 @@ export type {
   PageShortcutsItem,
   PageShortcutsProps,
   PageSidebarProps,
-  PageSubmenuItem,
-  PageSubmenuProps,
 } from './components/page/Page'
 export { Pagination } from './components/pagination/Pagination'
 export type { PaginationProps } from './components/pagination/Pagination'

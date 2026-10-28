@@ -201,16 +201,17 @@
     --hf-colour-accent-shortcuts: light-dark(var(--hf-colour-red-600), var(--hf-colour-red-400));
 
     /*
-     * The bar of the sub-pages under the menu (Page.Submenu) is a tint of the header: one step
-     * lighter, blue-800 under the header of blue-900 in light and blue-700 under the header of
-     * blue-800 in dark, so it is seen to belong to the menu and apart from the bar "Op deze
-     * pagina". There is no line between them; the steps are 1,27:1 and 1,33:1. The links are
-     * the text of the header (blue-50, 11,4:1 on the bar in light and 8,6:1 in dark), white
-     * under the mouse, with a pill of blue-200 at 18% when pressed. The ring is the one of the
-     * header and the line under the current page the one of the menu
-     * (--hf-colour-focus-on-header and --hf-colour-accent-on-header). Red-400 reaches 4,21:1 on
-     * the bar in light and 3,16:1 in dark, and a graphic part needs 3:1; the pressed pill would
-     * take it under, so the current page gets none.
+     * The bar of the sub-pages under the menu (the nested list of the main menu, see
+     * navigation.css) is a tint of the header: one step lighter, blue-800 under the header of
+     * blue-900 in light and blue-700 under the header of blue-800 in dark, so it is seen to
+     * belong to the menu and apart from the bar "Op deze pagina". There is no line between
+     * them; the steps are 1,27:1 and 1,33:1. The links are the text of the header (blue-50,
+     * 11,4:1 on the bar in light and 8,6:1 in dark), white under the mouse, with a pill of
+     * blue-200 at 18% when pressed. The ring is the one of the header and the line under the
+     * current page the one of the menu (--hf-colour-focus-on-header and
+     * --hf-colour-accent-on-header). Red-400 reaches 4,21:1 on the bar in light and 3,16:1 in
+     * dark, and a graphic part needs 3:1; the pressed pill would take it under, so the current
+     * page gets none.
      */
     --hf-colour-background-submenu: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-700));
     --hf-colour-text-submenu-link-hover: var(--hf-colour-white);
