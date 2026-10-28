@@ -122,7 +122,8 @@
   /*
    * The strip is a signature, not a title: the logo is smaller than in the header and has no "sinds 1997". As in the
    * footer, the lines of text sit right under each other, in a column at the end side: the address and the day, then
-   * the source, in the quieter colour of secondary text, with tight lines. The logo is level with them.
+   * the source, in the quieter colour of secondary text. They share one box, so the height of the logo does
+   * not pull them apart. The logo is level with them.
    */
   .hf-card-share-strip {
     --hf-logo-gap: 0.5rem;
@@ -130,33 +131,27 @@
 
     align-items: center;
     display: grid;
-    gap: 0 1rem;
+    gap: 1rem;
     grid-template-columns: auto minmax(0, 1fr);
 
     .hf-logo-tagline {
       display: none;
     }
 
-    .hf-logo {
-      grid-row: 1 / span 2;
+    /* One box for both lines, so the height of the logo does not pull the lines apart. */
+    .hf-card-share-lines {
+      text-align: end;
     }
 
     .hf-card-share-address {
       color: var(--hf-colour-text-default);
-      grid-column: 2;
-      line-height: 1.2;
+      line-height: 1.3;
       margin: 0;
-      text-align: end;
     }
 
-    .hf-card-share-credit {
-      grid-column: 2;
-      text-align: end;
-
-      p {
-        line-height: 1.2;
-        margin: 0;
-      }
+    .hf-card-share-credit p {
+      line-height: 1.3;
+      margin: 0;
     }
   }
 }

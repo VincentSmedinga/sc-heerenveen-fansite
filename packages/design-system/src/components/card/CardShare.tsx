@@ -124,10 +124,12 @@ export const CardShare = ({ source }: CardShareProps) => {
               <div ref={slot} />
               <footer className="hf-card-share-strip">
                 <Logo />
-                <Text appearance="meta" className="hf-card-share-address">
-                  {window.location.host} · {imageDay(today)}
-                </Text>
-                <div className="hf-card-share-credit">{source}</div>
+                <div className="hf-card-share-lines">
+                  <Text appearance="meta" className="hf-card-share-address">
+                    {window.location.host} · {imageDay(today)}
+                  </Text>
+                  <div className="hf-card-share-credit">{source}</div>
+                </div>
               </footer>
             </div>
           </div>,
