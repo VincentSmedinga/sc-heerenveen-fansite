@@ -1505,6 +1505,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat is duidelijk, maar defensief.
 - **Later:** zie _De footer zegt wat je op de site vindt_.
   "sinds 1997" staat sindsdien alleen nog in het logo.
+  Het motto staat sinds 27 oktober 2026 zonder komma, zoals de site het al had: zie _De footer zegt waar de site over gaat, met het motto eronder_.
 
 ### Storybook toont de code van het voorbeeld
 
@@ -1607,6 +1608,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** "sc Heerenveen Fansite, sinds 1997.", zoals eerst.
   Of "Je startpagina voor nieuws over sc Heerenveen."
   Of "Koppen over sc Heerenveen uit de media, met een link naar het hele verhaal."
+- **Later:** zie _De footer zegt waar de site over gaat, met het motto eronder_.
+  Het motto staat daar zonder komma, zoals de site het al had.
 
 ### De MCP-server van Storybook draait als add-on in de dev-server
 
@@ -2531,6 +2534,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De letters zijn de bekende afkorting en de grafiek legt de rest uit.
 - **Alternatieven:** een haak onder de laatste vijf staafjes.
   Letters onder elk staafje (zwaar op een smalle kaart).
+
+### De footer zegt waar de site over gaat, met het motto eronder
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de footer van de Fansite en die van het Forum hebben dezelfde opzet: een eerste regel die zegt waar je op die plek voor komt, met "over onze club", en daaronder hetzelfde motto, "Voor supporters door supporters.", als eigen zin.
+  De Fansite zegt "Alles over onze club op één plek." en het Forum "Praat mee over onze club."
+  De beschrijving voor zoekresultaten is één zin met een gedachtestreepje: "Alles over sc Heerenveen op één plek – voor supporters door supporters."
+  Daar staat "sc Heerenveen" in plaats van "onze club", omdat wie het resultaat leest nog niet weet van wie "onze" is.
+  De beschrijving van de app in `manifest.ts` is dezelfde zin zonder het motto.
+  Dit vervangt _De footer zegt wat je op de site vindt_ (22 oktober 2026).
+- **Waarom:** "Alle koppen en links" past niet meer nu er ook wedstrijdgegevens, statistieken en spelletjes komen.
+  De Fansite en het Forum delen het logo en het motto.
+  De eerste regel zegt per plek waarvoor je er bent: lezen op de site, praten op het Forum.
+  Het motto op een eigen regel blijft herkenbaar, ook als de eerste regel later weer verandert.
+- **Alternatieven:** één zin met een streepje of een komma in de footer; dan staat het motto niet meer op zichzelf en hangt de regelafbreking af van de breedte van het scherm.
+  Alleen het motto; dat zegt niet wat je er vindt.
+  Een lijst van wat er te vinden is; die veroudert.
+  "Sinds 1997 …"; dat botst met de beslissing van 22 oktober 2026 dat "sinds 1997" alleen in het logo staat.
+  Een regel uit een supporterslied; de rechten, en sommige regels zijn van de club of van een andere club.
 
 ## Site
 

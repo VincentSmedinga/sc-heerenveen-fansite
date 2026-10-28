@@ -12,7 +12,7 @@ const colours = headerColourOf(
 describe('manifest', () => {
   it('names the site and starts it at the front page, in Dutch', () => {
     expect(manifest()).toMatchObject({
-      description: 'Alle koppen en links over sc Heerenveen op één plek.',
+      description: 'Alles over sc Heerenveen op één plek.',
       display: 'standalone',
       lang: 'nl',
       name: 'sc Heerenveen Fansite',

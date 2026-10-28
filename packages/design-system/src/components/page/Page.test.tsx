@@ -361,7 +361,7 @@ describe('Page.Footer', () => {
     expect(within(footer).queryByRole('button')).toBeNull()
     expect(within(footer).queryByRole('group', { name: 'Thema' })).toBeNull()
     expect(Array.from(footer.querySelectorAll('p')).map((paragraph) => paragraph.textContent)).toEqual([
-      'Alle koppen en links op één plek.',
+      'Alles over onze club op één plek.',
       'Voor supporters door supporters.',
     ])
     expect(within(footer).getByRole('navigation', { name: 'Over de site' })).toBe(footer.lastElementChild)
