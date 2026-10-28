@@ -2,7 +2,9 @@ import preview from '#.storybook/preview'
 
 import { ExampleHeader, ExampleMain, exampleMenu, type ExampleMenuPage } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
+import { Heading } from '../heading/Heading'
 import { Page } from '../page/Page'
+import { Text } from '../text/Text'
 import { Navigation, type NavigationItem } from './Navigation'
 
 const meta = preview.meta({
@@ -265,4 +267,88 @@ export const StatesDark = meta.story({
   name: 'Toestanden van de balk, donker',
   parameters: { ...fullscreen, ...statesParameters },
   render: withSubpages('Programma'),
+})
+
+const sections = [
+  { id: 'programma', title: 'Programma' },
+  { id: 'uitslagen', title: 'Uitslagen' },
+  { id: 'stand', title: 'Stand' },
+]
+
+const threeBarsParameters = {
+  ...fullscreen,
+  docs: {
+    description: {
+      story:
+        'Een pagina met subpagina’s en ankers: de header, het hoofdmenu met zijn subpagina’s en de balk met ankers, in die volgorde in de code en op het scherm. Alleen de balk met ankers plakt.',
+    },
+  },
+}
+
+const renderThreeBars = (_args: unknown, { globals }: { globals: Record<string, unknown> }) => (
+  <>
+    <ExampleHeader dark={globals['theme'] === 'dark'} menu={menuAt('Programma')} />
+    <Page.Shortcuts
+      items={sections.map(({ id, title }) => ({ href: `#${id}`, label: title }))}
+      label="Op deze pagina:"
+    />
+    <Page.Body>
+      <Page.Main>
+        {sections.map(({ id, title }) => (
+          <Page.Cell key={id}>
+            <Heading anchor id={id} level={2}>
+              {title}
+            </Heading>
+            <Text>Hier staat wat bij {title.toLowerCase()} hoort. De kaart is lang genoeg om langs te scrollen.</Text>
+            <Text>
+              Boven deze kaart staan drie balken. Als je scrolt, gaan de header en het menu met de subpagina’s weg, en
+              blijft alleen de balk met ankers staan.
+            </Text>
+            <Text>
+              Een kaart kan lang zijn, zodat de kop van de volgende kaart pas na een tijd langs de balk komt. Tot dan
+              blijft de link naar deze kaart de huidige.
+            </Text>
+          </Page.Cell>
+        ))}
+      </Page.Main>
+    </Page.Body>
+  </>
+)
+
+export const ThreeBars = meta.story({
+  ...phone,
+  globals: { theme: 'light', viewport: { value: 'mobile2' } },
+  name: 'Menu, subpagina’s en ankers',
+  parameters: threeBarsParameters,
+  render: renderThreeBars,
+})
+
+export const ThreeBarsDark = meta.story({
+  ...phone,
+  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
+  name: 'Menu, subpagina’s en ankers, donker',
+  parameters: threeBarsParameters,
+  render: renderThreeBars,
+})
+
+// The page scrolls to a heading, as after a click on its link: only the anchors are left.
+const scrollToStand = () => {
+  document.getElementById('stand')?.scrollIntoView({ behavior: 'instant', block: 'start' })
+}
+
+export const ThreeBarsScrolled = meta.story({
+  ...phone,
+  globals: { theme: 'light', viewport: { value: 'mobile2' } },
+  name: 'Menu, subpagina’s en ankers, gescrold',
+  parameters: {
+    ...fullscreen,
+    docs: {
+      description: {
+        story:
+          'De pagina is tot de kop van Stand gescrold. De header en het menu met de subpagina’s zijn weg, de balk met ankers blijft, en de kop komt er niet onder.',
+      },
+    },
+  },
+  play: scrollToStand,
+  render: renderThreeBars,
 })
