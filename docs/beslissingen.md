@@ -6192,11 +6192,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** de afbeelding heeft het thema dat de bezoeker nu heeft.
   De kaart is er 29 rem breed, een breedte die in de zijbalk van een breed scherm past, met een rand van 1,5 rem eromheen: de afbeelding is 32 rem breed, 1024 pixels op dubbele resolutie.
   Eronder staan het logo, het adres, de datum en de bronvermelding van de kaart.
+  De datum staat als dd-mm-jj met nullen ervoor (`28-10-26`) en de bron als "Gegevens van Wikipedia", op verzoek van de projecteigenaar.
   Alleen de vijf kaarten met statistiek op `/wedstrijden` hebben de knop.
 - **Waarom:** de bezoeker kiest zijn thema, en de afbeelding is zijn kaart.
   De vermelding van Wikipedia (CC BY-SA) moet meegaan zodra de gegevens het huis uit gaan.
   De nieuwskaarten bevatten werk van journalisten, en een afbeelding ervan gaat rond zonder de link naar hun werk.
-- **Alternatieven:** altijd licht (dezelfde kaart ziet er voor elke deler hetzelfde uit, maar bezoekers in donker krijgen een andere kaart dan ze zien).
+  Een korte datum houdt de strook klein.
+- **Alternatieven:** de datum voluit, "28 oktober 2026" (past minder goed in de strook, en de projecteigenaar koos de korte vorm).
+  Altijd licht (dezelfde kaart ziet er voor elke deler hetzelfde uit, maar bezoekers in donker krijgen een andere kaart dan ze zien).
   Alleen logo en adres (de vermelding gaat dan niet mee).
   Alle kaarten van `/wedstrijden`.
 

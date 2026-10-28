@@ -37,7 +37,6 @@ export type WikipediaCreditProps =
        * `selectiegegevens`.
        */
       data?: string
-      /** The same moment in a form a machine reads, such as `2026-10-25T12:05:00Z`. */
       lead?: never
       /** The Wikipedia pages the data comes from, at least one. */
       pages: [WikipediaCreditPage, ...WikipediaCreditPage[]]
@@ -46,6 +45,7 @@ export type WikipediaCreditProps =
        * oktober 2026 om 14:05`. The component knows no time zone.
        */
       readAt: string
+      /** The same moment in a form a machine reads, such as `2026-10-25T12:05:00Z`. */
       readAtDateTime: string
     })
 
