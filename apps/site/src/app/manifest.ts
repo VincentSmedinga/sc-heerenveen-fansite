@@ -10,7 +10,7 @@ import { siteName } from '../pages'
 export default function manifest(): MetadataRoute.Manifest {
   return {
     background_color: headerColour.light,
-    description: 'Alle koppen en links over sc Heerenveen op één plek.',
+    description: 'Alles over sc Heerenveen op één plek.',
     display: 'standalone',
     icons: [
       { purpose: 'any', sizes: '192x192', src: '/icon-192.png', type: 'image/png' },

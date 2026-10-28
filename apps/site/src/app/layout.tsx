@@ -95,7 +95,7 @@ export default function RootLayout({ children, shortcuts }: { children: ReactNod
           {shortcuts}
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
-            <Text appearance="meta">Alle koppen en links op één plek.</Text>
+            <Text appearance="meta">Alles over onze club op één plek.</Text>
             <Text appearance="meta">Voor supporters door supporters.</Text>
             <Navigation items={footerItems} label="Over de site" />
           </Page.Footer>
