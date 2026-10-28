@@ -77,7 +77,7 @@ Wat elk component doet, staat in de hoofdstukken Componenten en Patronen van Sto
   Kapitalen komen uit CSS.
 - **Componenten:** een React-component per HTML-element of onderdeel, met getypeerde props en de klassen met `hf-`.
   Kan een component meer dan één element zijn, dan kiest een `as`-prop uit een vaste lijst die de typen afdwingen.
-  Een onderdeel dat bij één oudercomponent hoort, is een eigenschap van die ouder, ook als het element buiten die ouder wel geldig is: `List.Item` voor het `li` in een `List`, `Page.Header`, `Page.Submenu`, `Page.Shortcuts`, `Page.Body`, `Page.Main`, `Page.Sidebar`, `Page.Cell` en `Page.Footer` voor de delen van een `Page`.
+  Een onderdeel dat bij één oudercomponent hoort, is een eigenschap van die ouder, ook als het element buiten die ouder wel geldig is: `List.Item` voor het `li` in een `List`, `Page.Header`, `Page.Submenu`, `Page.Shortcuts`, `Page.Body`, `Page.Main`, `Page.Sidebar`, `Page.Cell`, `Page.Footer` en `Page.TopLink` voor de delen van een `Page`.
   Een component zonder hooks of toestand blijft een servercomponent.
   Elk component heeft in zijn map een eigen CSS-bestand (`heading/heading.css`), stories, een pagina in Storybook en tests met Vitest en Testing Library.
 - **Taal:** code en commentaar in Brits Engels (`colour`, `initialise`); alles wat bezoekers en lezers van Storybook zien in het Nederlands.

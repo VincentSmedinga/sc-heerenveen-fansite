@@ -1,0 +1,111 @@
+/*
+ * The link to the top of the page (Page.TopLink), in the footer: round, 44 by 44 pixels, with
+ * an arrow of 26 pixels, the size and the line of the icon in the theme button of the header.
+ * At rest it is only the arrow. Under the mouse, pressed and with the keyboard (:focus-visible)
+ * it comes forward: the arrow gets the colour of a link under the mouse, with a rim and a fill.
+ * It is made for the footer, so its colours are those that links in the footer have: the blue
+ * of a link (--hf-colour-text-link) and under the mouse the darker or lighter blue of a link
+ * under the mouse (--hf-colour-text-link-hover). The rim and the fill are tints of the colour
+ * of the arrow (currentcolor), 55% and 14% as in the theme button, so no colour of their own
+ * comes in.
+ *
+ * The rim is there at rest as well, but see-through, so the link does not change size when it
+ * comes forward, and a browser in forced colours keeps an outline. Hover is only for devices
+ * with a mouse (hover: hover), so nothing stays lit after a tap on a phone. The base styles of
+ * a link colour it under the mouse too, and keep doing so on a touch screen after a tap; this
+ * comes later in the cascade and sets the colour at rest, so the link is not left lit. Pressing
+ * (:active) counts on touch as well. The change takes the short motion duration (0,2 seconds),
+ * and none with reduced motion. The focus ring is the one of the page, drawn around the rim.
+ *
+ * The link is only there when the page is more than twice as high as the window: that is when
+ * it can scroll further than the height of the window, and the footer is where the page ends.
+ * The scroll position of the page (scroll(root)) drives an animation that makes the link
+ * visible from the moment it has scrolled further than 100svh. The animation runs over 1 pixel,
+ * so the link changes at that point and not gradually, and it keeps the state of its first and
+ * last keyframe outside that range (fill-mode both). It has no duration: the scroll position
+ * sets how far the animation is, so reduced motion has nothing to stop. It sets `visibility`,
+ * not only the opacity, so a hidden link is not reached with Tab and a screen reader does not
+ * read it. There is no transition: the link changes far above the place where it stands.
+ *
+ * svh is the height of the window while the bars of the browser on a phone are out. It stays
+ * the same while the page scrolls, where dvh follows the bars and would move the point where
+ * the link appears, and lvh is the larger window without bars, which would make visitors on a
+ * phone scroll further than they saw. A browser that does not know scroll-driven animations
+ * always shows the link, which does no harm. In print the link is gone.
+ */
+
+@layer hf.components {
+  .hf-page-top-link {
+    align-items: center;
+    background-color: transparent;
+    block-size: 2.75rem;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-link);
+    display: inline-flex;
+    inline-size: 2.75rem;
+    justify-content: center;
+    text-decoration: none;
+    transition:
+      background-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      border-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+
+    /* The icon is 26 pixels, and has no space beside it, as in a link with text. */
+    .hf-icon {
+      --hf-icon-size: 1;
+
+      block-size: 26px;
+      inline-size: 26px;
+      margin: 0;
+      vertical-align: baseline;
+    }
+
+    &:active,
+    &:focus-visible {
+      background-color: color-mix(in srgb, currentcolor 14%, transparent);
+      border-color: color-mix(in srgb, currentcolor 55%, transparent);
+      color: var(--hf-colour-text-link-hover);
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: color-mix(in srgb, currentcolor 14%, transparent);
+        border-color: color-mix(in srgb, currentcolor 55%, transparent);
+        color: var(--hf-colour-text-link-hover);
+      }
+    }
+
+    @media (forced-colors: active) {
+      border-color: LinkText;
+    }
+
+    @media print {
+      display: none;
+    }
+
+    /*
+     * A browser that knows scroll-driven animations hides the link until the page has
+     * scrolled far enough. Any other browser never gets here, and shows the link always.
+     */
+    @supports (animation-timeline: scroll()) and (animation-range: 1px 2px) {
+      animation-fill-mode: both;
+      animation-name: hf-top-link-show;
+      animation-range: 100svh calc(100svh + 1px);
+      animation-timeline: scroll(root block);
+      animation-timing-function: linear;
+      visibility: hidden;
+    }
+  }
+
+  @keyframes hf-top-link-show {
+    from {
+      visibility: hidden;
+    }
+
+    to {
+      visibility: visible;
+    }
+  }
+}
