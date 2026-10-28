@@ -24,9 +24,21 @@ export const exampleMenuAt = (current: ExampleMenuPage) =>
 export const exampleMenu = exampleMenuAt('Nieuws')
 
 /**
- * The logo as a link to the home page, the theme button beside it (here a static one, pressed
- * when `dark`) in the Page.Header, and the main menu right after it, on the same blue. This is
- * what the top of a page holds.
+ * The logo as a link to the home page and the theme button beside it (here a static one,
+ * pressed when `dark`), in a Page.Header: the banner alone, without the main menu.
+ */
+export const ExampleBanner = ({ dark = false }: { dark?: boolean }) => (
+  <Page.Header>
+    <Link href="#home">
+      <Logo />
+    </Link>
+    <ThemeButton dark={dark} label="Donker" />
+  </Page.Header>
+)
+
+/**
+ * The banner and the main menu right after it, on the same blue. This is what the top of a
+ * page holds.
  */
 export const ExampleHeader = ({
   current = 'Nieuws',
@@ -39,12 +51,7 @@ export const ExampleHeader = ({
   menu?: readonly NavigationItem[]
 }) => (
   <>
-    <Page.Header>
-      <Link href="#home">
-        <Logo />
-      </Link>
-      <ThemeButton dark={dark} label="Donker" />
-    </Page.Header>
+    <ExampleBanner dark={dark} />
     <Navigation appearance="header" items={menu ?? exampleMenuAt(current)} label="Hoofdmenu" />
   </>
 )

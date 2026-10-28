@@ -1,6 +1,6 @@
 import preview from '#.storybook/preview'
 
-import { ExampleHeader } from '../../docs/ExamplePage'
+import { ExampleBanner } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
 
 const meta = preview.meta({
@@ -25,12 +25,7 @@ const meta = preview.meta({
           'Het logo staat links en de themaknop rechts.',
           'Zonder de knop, die er alleen is als JavaScript draait, heeft de header alleen het logo.',
           '',
-          'Het hoofdmenu staat niet in de header.',
-          'Het is een eigen `nav`, een `Navigation` met `appearance="header"`, direct na de `Page.Header`: een navigatie is geen deel van de banner, en zo kan het menu zijn subpagina’s in een geneste lijst hebben.',
-          'Het menu heeft hetzelfde blauw als de header en een dunne lijn erboven, in een eigen rij, over de breedte van de kolom, op elke breedte.',
-          'Header en menu zien eruit als één vlak, ook onder de statusbalk van een telefoon.',
-          'De verhalen hieronder tonen daarom de header met het menu eronder.',
-          'De volgorde in de code is ook die van de focus: het logo, de themaknop, het menu.',
+          'Het hoofdmenu staat niet in de header: het is een `Navigation` met `appearance="header"`, direct na de `Page.Header`.',
         ].join('\n'),
       },
       source: exampleSource,
@@ -42,7 +37,7 @@ const meta = preview.meta({
 })
 
 const render = (_args: unknown, { globals }: { globals: Record<string, unknown> }) => (
-  <ExampleHeader dark={globals['theme'] === 'dark'} />
+  <ExampleBanner dark={globals['theme'] === 'dark'} />
 )
 
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
@@ -85,11 +80,11 @@ const focusParameters = {
   docs: {
     description: {
       story:
-        'De focusrand op de link om het logo, op de themaknop en op de link naar de huidige pagina, nagebootst met de add-on Pseudo States. Met de Tab-toets zie je de echte focusrand.',
+        'De focusrand op de link om het logo en op de themaknop, nagebootst met de add-on Pseudo States. Met de Tab-toets zie je de echte focusrand.',
     },
   },
   pseudo: {
-    focusVisible: ['.hf-page-header > a', '.hf-theme-button', '.hf-navigation-link[aria-current="page"]'],
+    focusVisible: ['.hf-page-header > a', '.hf-theme-button'],
   },
 }
 
