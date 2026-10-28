@@ -3569,6 +3569,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of het menu inklappen achter een knop op een smal scherm; dat verbergt de belangrijkste links.
 - **Later:** vervangt de opmaak van _Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep_ (22 oktober 2026): halfvet en de lichtblauwe kleur zijn gewicht 500 en de lichtste kleur geworden.
 - **Later:** zie _Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter_ (27 oktober 2026) voor de maat en het gewicht: nu 600 en 16 tot 18 pixels, en de huidige pagina op 800 met zijn rode streep.
+- **Later:** zie _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_ (28 oktober 2026): het menu staat niet meer in de `header` maar in een `nav` direct erna, op hetzelfde blauw.
+  De rij, de lijn erboven, de afstanden, het gewicht en de maten blijven zoals ze zijn.
 
 ### Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat
 
@@ -3698,6 +3700,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de zandkleurige balk van de ankers (lijkt te veel op de ankerbalk).
   Eén balk waarin de subpagina's winnen (de lezer mist dan de ankers).
   Een knop "Meer" in het hoofdmenu (#378, uitgesteld).
+- **Later:** zie _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_ (28 oktober 2026): de balk is de geneste lijst van het hoofdmenu en geen eigen `nav` meer.
+  De tint, de maten, de gewichten en het ontbreken van een label blijven.
 
 ### De submenubalk is een eigen onderdeel, `Page.Submenu`, en hergebruikt de rij van `Page.Shortcuts`
 
@@ -3720,6 +3724,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een variant van `Page.Shortcuts` met een prop (zie hierboven).
   De rij kopiëren in een eigen onderdeel (twee plekken die het scrollen en de vervaging gelijk moeten houden).
   Een lijn tussen kop en balk (de stap van 1,27:1 in licht en 1,33:1 in donker is genoeg, en het menu heeft al een lijn boven zich).
+- **Later:** zie _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_ (28 oktober 2026): `Page.Submenu` is vervangen door de eigenschap `subitems` van `Navigation`.
+  De rij van `Page.Shortcuts` blijft hergebruikt, zonder kopie, en de kleuren, de maten en de rollen in de tokens blijven.
+  De balk staat niet meer in een eigen `nav` na de kop, maar in het `li` van zijn onderdeel.
 
 ### De CSP laat afbeeldingen van het type `data:` toe
 
@@ -3732,6 +3739,45 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het principe blijft: een pagina laadt niets van een ander domein.
   `blob:` is niet nodig: de bibliotheek werkt zonder web worker (`workerNumber: 0`), want een worker zou van een `blob:`-adres starten.
 - **Alternatieven:** `blob:` toelaten (alleen als de bibliotheek het echt nodig heeft, en dat is niet zo); `img-src *` (zou verzoeken naar elk domein toelaten, en dat doen we niet).
+
+### Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** het hoofdmenu verlaat de `header` en wordt één `nav` ("Hoofdmenu") direct na de `header`.
+  De subpagina's van het huidige onderdeel staan in een geneste lijst in zijn `li` en zien eruit als de balk van #363.
+  `Page.Submenu` verdwijnt.
+  Het bovenliggende item heeft `aria-current="true"` als een subpagina de huidige is, en het subitem heeft `aria-current="page"`.
+  De kop ziet er hetzelfde uit.
+- **Waarom:** de opmaak zegt zo dat het submenu bij een onderdeel van het menu hoort, en een schermlezer vindt één menu in plaats van twee.
+  De `header` is zo alleen nog het banner met het logo en de themaknop.
+  Het ontwerp van #363 en #380 blijft.
+- **Hoe:** `Navigation` krijgt de eigenschap `appearance="header"` voor het hoofdmenu van de kop, en `subitems` bij een item (`href`, `label`, `current`).
+  Alleen dat menu toont subitems; het menu in de footer negeert ze.
+  De geneste lijst is er alleen bij het item dat de huidige pagina is of een huidige subpagina heeft.
+  De kop is een raster met alleen het logo en de themaknop, met 0,25 rem eronder.
+  Het menu is een flexrij op dezelfde achtergrond, met de lijn erboven als eerste item (`::before`, een rand, dus ook zichtbaar in geforceerde kleuren) en 0,4375 rem eronder.
+  Zo is de som van de ruimtes gelijk aan die van de kop met het menu erin, en zijn de pixels gelijk (gemeten op 320, 390 en 900 pixels, licht en donker, ook met de insets van een iPhone nagebootst).
+  Alleen op de rand van de balk, op een plek met een halve pixel, verschilt één rij pixels een paar tinten door de schaduw.
+  De `ul` en de `li` van het menu hebben `display: contents`.
+  De links zijn dan items van de `nav`, en de balk, die in het `li` van zijn link staat, is er ook een.
+  De balk heeft `order: 1` en `flex-basis` over de hele rij, dus hij staat onder alle links, ook als de link van zijn item naar een tweede rij is omgelopen.
+  De inset van de pagina zit als padding op de `nav`.
+  Een percentage in de marge van een flex-item is van de breedte van de `nav` zonder die padding, dus de balk kan de inset niet met een negatieve marge terughalen: op een breed scherm stopte hij dan voor de rand.
+  De balk haalt daarom alleen de marge van de pagina terug (of de uitsparing, als die groter is), en zijn kleur loopt door tot de rand als een schaduw zonder vervaging die ver uitwaaiert (`box-shadow: 0 0 0 100vmax`), boven en onder afgesneden met `clip-path`.
+  Een schaduw telt niet mee voor wat scrolt, dus de pagina scrolt niet zijwaarts.
+  Vanaf 66 rem eindigt de rij op de rand van de kolom, in lijn met het menu.
+  `Navigation` geeft de `ul` en de `li` in dit menu `role="list"` en `role="listitem"`, want Safari liet lijsten met `display: contents` lang uit de toegankelijkheidsboom vallen.
+  De tint, de maten, de gewichten en de rij met vervaging en snappen (`ShortcutsRow`) zijn die van #363.
+  `watchTopEdge` kijkt naar de kop en naar het menu: de strook voor de statusbalk blijft zolang een van beide in beeld is, zoals voor deze wijziging de kop met het menu erin.
+- **Nadeel:** de volgorde van de focus is de volgorde van de code: een link, zijn subpagina's, dan de volgende link.
+  Staat het huidige onderdeel in het midden van het menu, dan springt de focus uit de balk terug naar de links die erboven staan.
+  Een schermlezer leest wel de nesting zoals bedoeld.
+  Het issue schreef voor dat het toetsenbord eerst door het menu loopt en dan door de geneste lijst; dat kan met een geneste lijst alleen als het huidige onderdeel het laatste is.
+- **Alternatieven:** alleen de balk uit de `header` halen en het hoofdmenu erin laten (twee navs, de nesting is dan verdeeld over twee landmarks).
+  `Page.Submenu` bewaren en in de `li` zetten (twee onderdelen voor één lijst, de stijlen blijven verdeeld).
+  Alleen het subitem `aria-current` geven (het hoofdmenu zegt dan niet meer in welk onderdeel de bezoeker is).
+  De balk in het `li` met `position: absolute` onder de rij zetten (de hoogte van de balk is niet bekend zodra de rij omloopt, en de pagina eronder zou eronder schuiven).
+  Een subgrid (de rij van het menu loopt om op de breedte van de inhoud, en een raster kan dat niet).
 
 ## Importer
 

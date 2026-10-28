@@ -7,17 +7,31 @@ import RootLayout, { metadata, viewport } from './layout'
 vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
 
 describe('RootLayout', () => {
-  it('puts the page in a Page.Body, which is a div, between the header and the footer, so the page brings the main', () => {
+  it('puts the page in a Page.Body, which is a div, between the main menu and the footer, so the page brings the main', () => {
     const html = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
 
-    expect(html).toMatch(/<\/header><div class="hf-page-body">Inhoud<\/div><footer/)
+    expect(html).toMatch(/<\/nav><div class="hf-page-body">Inhoud<\/div><footer/)
     expect(html).not.toContain('<main')
   })
 
-  it('puts the slot for a bar between the header and the Page.Body, outside the main, and nothing there without one', () => {
+  it('puts the main menu in its own nav right after the header, outside the banner, in the order of the focus', () => {
     const html = renderToStaticMarkup(<RootLayout shortcuts={<nav aria-label="Balk">Links</nav>}>Inhoud</RootLayout>)
+    const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
 
-    expect(html).toMatch(/<\/header><nav aria-label="Balk">Links<\/nav><div class="hf-page-body">Inhoud<\/div><footer/)
+    expect(header).not.toContain('<nav')
+    expect(header).toContain('class="hf-logo"')
+    expect(html).toMatch(/<\/header><nav aria-label="Hoofdmenu" class="hf-navigation hf-navigation-header">/)
+    expect(html.indexOf('</header>')).toBeLessThan(html.indexOf('aria-label="Hoofdmenu"'))
+    expect(html.indexOf('aria-label="Hoofdmenu"')).toBeLessThan(html.indexOf('aria-label="Balk"'))
+    expect(html.indexOf('aria-label="Balk"')).toBeLessThan(html.indexOf('hf-page-body'))
+  })
+
+  it('puts the slot for a bar between the main menu and the Page.Body, outside the main, and nothing there without one', () => {
+    const html = renderToStaticMarkup(<RootLayout shortcuts={<nav aria-label="Balk">Links</nav>}>Inhoud</RootLayout>)
+    const without = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
+
+    expect(html).toMatch(/<\/nav><nav aria-label="Balk">Links<\/nav><div class="hf-page-body">Inhoud<\/div><footer/)
+    expect(without).not.toContain('aria-label="Balk"')
   })
 
   it('puts the two sentences of the footer in a paragraph each, before the links', () => {

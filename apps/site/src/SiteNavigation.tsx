@@ -11,13 +11,19 @@ const items = [
 ]
 
 /**
- * The main menu of the site: the news on the home page, the matches, the podcasts and the
- * forum. It marks the page the visitor is on. A layout gets no path, so this is a client
- * component: usePathname gives the path, also when the server renders the HTML. The home page
- * is the current page on / only, not on a page below it.
+ * The main menu of the site, under the header: the news on the home page, the matches, the
+ * podcasts and the forum. It marks the page the visitor is on. A layout gets no path, so this
+ * is a client component: usePathname gives the path, also when the server renders the HTML. The
+ * home page is the current page on / only, not on a page below it.
  */
 export function SiteNavigation() {
   const pathname = usePathname()
 
-  return <Navigation items={items.map((item) => ({ ...item, current: item.href === pathname }))} label="Hoofdmenu" />
+  return (
+    <Navigation
+      appearance="header"
+      items={items.map((item) => ({ ...item, current: item.href === pathname }))}
+      label="Hoofdmenu"
+    />
+  )
 }

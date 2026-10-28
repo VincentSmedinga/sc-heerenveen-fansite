@@ -4,8 +4,10 @@ import { describe, expect, it } from 'vitest'
 
 // Without the comments, which mention the rules in words.
 const strip = (text: string) => text.replace(/\/\*.*?\*\//gs, '')
-const css = strip(readFileSync(join(import.meta.dirname, 'submenu.css'), 'utf8'))
-const shortcuts = strip(readFileSync(join(import.meta.dirname, 'shortcuts.css'), 'utf8'))
+const css = strip(readFileSync(join(import.meta.dirname, 'navigation.css'), 'utf8'))
+// The part of the file about the bar of sub-pages, which comes last.
+const sub = css.slice(css.indexOf('  .hf-navigation-bar {'))
+const shortcuts = strip(readFileSync(join(import.meta.dirname, '../page/shortcuts.css'), 'utf8'))
 const colours = strip(readFileSync(join(import.meta.dirname, '../../tokens/colour.css'), 'utf8'))
 
 // jsdom has no cascade layers, so the test reads the text of the file.
@@ -16,16 +18,16 @@ const rule = (selector: string, text = css) =>
     ),
   )?.[1] ?? ''
 
-describe('the colours of the submenu', () => {
+describe('the colours of the bar of sub-pages', () => {
   it('comes from the roles in the tokens, and no colour is written in the file', () => {
     expect(css).not.toMatch(/#[0-9a-f]{3,8}\b|rgb\(|hsl\(|oklch\(|color-mix\(/i)
     expect(css).not.toMatch(/--hf-colour-(blue|red|grey|sand|steel)-\d+/)
-    expect(css.match(/var\(--hf-colour-[a-z-]+\)/g)?.sort()).toEqual(
+    expect(sub.match(/var\(--hf-colour-[a-z-]+\)/g)?.sort()).toEqual(
       [
         'var(--hf-colour-accent-on-header)',
         'var(--hf-colour-background-submenu)',
+        'var(--hf-colour-background-submenu)',
         'var(--hf-colour-background-submenu-pressed)',
-        'var(--hf-colour-focus-on-header)',
         'var(--hf-colour-text-on-header)',
         'var(--hf-colour-text-submenu-link-hover)',
         'var(--hf-colour-text-submenu-link-hover)',
@@ -60,24 +62,56 @@ describe('the colours of the submenu', () => {
   })
 })
 
-describe('the bar in submenu.css', () => {
-  const bar = rule('.hf-page-submenu')
+describe('the bar of sub-pages in navigation.css', () => {
+  const bar = rule('.hf-navigation-bar')
 
   it('is on the colour of its own role, with no line under it or above it, and as wide as the page', () => {
     expect(bar).toContain('background-color: var(--hf-colour-background-submenu);')
     expect(bar).toContain('display: flex;')
-    expect(bar).not.toMatch(/border-(block|inline|top|bottom)|border:|box-shadow|outline/)
-    expect(bar).not.toMatch(/max-inline-size|max-width|inline-size:/)
+    expect(bar).not.toMatch(/border-(block|inline|top|bottom)|border:|outline/)
+    // The only shadow is the colour that carries on to the edge of the window.
+    expect(bar.match(/box-shadow:[^;]*;/g)).toEqual(['box-shadow: 0 0 0 100vmax var(--hf-colour-background-submenu);'])
+    expect(bar).not.toMatch(/max-inline-size|max-width|(?<![a-z-])inline-size:/)
   })
 
-  it('has the ring of the header', () => {
-    expect(bar).toContain('--hf-colour-focus: var(--hf-colour-focus-on-header);')
+  it('has the ring of the header, set on the band of the menu that the bar is in', () => {
+    expect(rule('.hf-navigation-header')).toContain('--hf-colour-focus: var(--hf-colour-focus-on-header);')
   })
 
   it('puts the text of the first link on the inset of the page, in line with the logo and the menu', () => {
-    expect(bar).toContain('padding-inline: calc(max(var(--hf-page-inset), env(safe-area-inset-left, 0px)) - 0.625rem)')
+    expect(rule('.hf-navigation-header')).toContain(
+      '--hf-navigation-inset-start: max(var(--hf-page-inset), env(safe-area-inset-left, 0px));',
+    )
+    expect(rule('.hf-navigation-header')).toContain(
+      '--hf-navigation-gutter-start: max(var(--hf-page-margin), env(safe-area-inset-left, 0px));',
+    )
+    expect(bar).toContain('padding-inline: calc(var(--hf-navigation-gutter-start) - 0.625rem)')
     expect(bar).toContain('env(safe-area-inset-right, 0);')
     expect(css).toContain('padding-inline: 0.625rem;')
+  })
+
+  it('is as wide as the window although the menu above it keeps to the inset, with no percentage in its margins', () => {
+    expect(bar).toContain('flex: 0 0 calc(100% + var(--hf-navigation-gutter-start) + var(--hf-navigation-gutter-end));')
+    expect(bar).toContain(
+      'margin-inline: calc(-1 * var(--hf-navigation-gutter-start)) calc(-1 * var(--hf-navigation-gutter-end));',
+    )
+    // A percentage in the margin of a flex item is of the nav without its padding.
+    expect(bar).not.toMatch(/margin-inline:[^;]*(--hf-page-inset|%)/)
+  })
+
+  it('colours the rest of the way to the edge with a shadow that spreads far and is cut off above and below', () => {
+    expect(bar).toContain('box-shadow: 0 0 0 100vmax var(--hf-colour-background-submenu);')
+    expect(bar).toContain('clip-path: inset(0 -100vmax);')
+  })
+
+  it('ends its row at the edge of the column where the page is wider than its column, as the bar of anchors does', () => {
+    expect(bar).toMatch(/@media \(width >= 66rem\) \{\s*padding-inline-end: var\(--hf-navigation-gutter-end\);/)
+  })
+
+  it('comes after all the links of the menu, whichever row the link of its item is on, with the space of the menu above it', () => {
+    expect(bar).toContain('order: 1;')
+    expect(bar).toContain('margin-block: var(--hf-navigation-end) calc(-1 * var(--hf-navigation-end));')
+    expect(rule('.hf-navigation-header')).toContain('padding-block-end: var(--hf-navigation-end);')
   })
 
   it('never sticks and is never gone, at any width', () => {
@@ -92,8 +126,8 @@ describe('the bar in submenu.css', () => {
   })
 })
 
-describe('a link in submenu.css', () => {
-  const link = rule('.hf-page-submenu-link')
+describe('a sub-page link in navigation.css', () => {
+  const link = rule('.hf-navigation-sublink')
 
   it('is a pill 36 pixels high at the usual text size, of 1rem in regular weight, on one line', () => {
     expect(link).toContain('block-size: 2.25rem;')
@@ -153,7 +187,7 @@ describe('a link in submenu.css', () => {
   })
 })
 
-describe('the row of the submenu', () => {
+describe('the row of the bar of sub-pages', () => {
   it('is the row and the list of the bar of anchors, so both scroll, snap and fade alike', () => {
     expect(shortcuts).toContain('overflow-x: auto;')
     expect(shortcuts).toContain('animation-timeline: scroll(x self);')
@@ -162,7 +196,7 @@ describe('the row of the submenu', () => {
   })
 })
 
-describe('the wrapped bar in submenu.css', () => {
+describe('the wrapped bar in navigation.css', () => {
   const narrow = css.match(/@media \(width <= 20em\) \{(.*)\n\s*\}\n\}/s)?.[1] ?? ''
 
   it('wraps at the same 20em as the bar of anchors, which wraps the row and the list', () => {
@@ -171,6 +205,55 @@ describe('the wrapped bar in submenu.css', () => {
   })
 
   it('does not pull the list back, since there is no label to line up with', () => {
-    expect(narrow).toMatch(/\.hf-page-submenu \.hf-page-shortcuts-list \{[^}]*margin-inline-start: 0;/)
+    expect(narrow).toMatch(/\.hf-navigation-bar \.hf-page-shortcuts-list \{[^}]*margin-inline-start: 0;/)
+  })
+})
+
+describe('the main menu in navigation.css', () => {
+  const band = rule('.hf-navigation-header')
+  const link = rule('.hf-navigation-header .hf-navigation-link')
+
+  it('is a band on the colour of the header, so it is one blue with the header above it', () => {
+    expect(band).toContain('background-color: var(--hf-colour-background-header);')
+    expect(band).toContain('display: flex;')
+    expect(band).toContain('flex-wrap: wrap;')
+    expect(band).toContain('gap: 0 1rem;')
+  })
+
+  it('has the inset of the page at both sides, and the same space under the links as the header used to keep', () => {
+    expect(band).toContain('padding-inline: var(--hf-navigation-inset-start) var(--hf-navigation-inset-end);')
+    expect(band).toContain('--hf-navigation-end: 0.4375rem;')
+    expect(band).toContain('--hf-navigation-inset-end: max(var(--hf-page-inset), env(safe-area-inset-right, 0px));')
+  })
+
+  it('has a thin line above the links that stops at the inset, and that stays in forced colours', () => {
+    expect(band).toMatch(/&::before \{[^}]*border-block-start: 1px solid var\(--hf-colour-border-on-header\);/)
+    expect(band).toMatch(/&::before \{[^}]*flex: 0 0 100%;/)
+    expect(band).toMatch(/&::before \{[^}]*margin-block-end: 0\.25rem;/)
+    expect(band).toMatch(/&::before \{[^}]*order: -1;/)
+    expect(band).not.toMatch(/&::before \{[^}]*background/)
+  })
+
+  it('takes no box for the list and its items, so the bar can go under the links', () => {
+    expect(css).toMatch(
+      /\.hf-navigation-header \.hf-navigation-list,\s*\.hf-navigation-header \.hf-navigation-list > li \{\s*display: contents;/,
+    )
+  })
+
+  it('keeps the last link, the forum, on the right', () => {
+    expect(css).toMatch(
+      /\.hf-navigation-header \.hf-navigation-list > li:last-child > \.hf-navigation-link \{\s*margin-inline-start: auto;/,
+    )
+  })
+
+  it('puts the links in the lightest colour of the header, and the current one in red-underlined weight 800', () => {
+    expect(link).toContain('color: var(--hf-colour-text-on-header);')
+    expect(link).toMatch(/&:is\(\[aria-current='page'\], \[aria-current='true'\]\) \{[^}]*font-weight: 800;/)
+    expect(link).toMatch(/&:is\([^)]*\) \{[^}]*text-decoration-color: var\(--hf-colour-accent-on-header\);/)
+    expect(link).toMatch(/&:is\([^)]*\) \{[^}]*text-decoration-thickness: 3px;/)
+  })
+
+  it('marks the item of the current sub-page like the current page in the footer too, in the plain row', () => {
+    expect(css).toMatch(/\.hf-navigation-link \{[^}]*&:is\(\[aria-current='page'\], \[aria-current='true'\]\) \{/s)
   })
 })

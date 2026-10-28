@@ -9,8 +9,8 @@ const meta = preview.meta({
       description: {
         component: [
           'De pagina: zo breed als het venster, met de inhoud in een gecentreerde kolom met een maximale breedte, en een marge aan beide kanten.',
-          'Een `Page` bevat een `Page.Header`, een `Page.Body` en een `Page.Footer`, in die volgorde.',
-          'De achtergronden van de `Page.Header` en de `Page.Footer` lopen van rand tot rand; wat erin staat en de `Page.Body` staan in de kolom.',
+          'Een `Page` bevat een `Page.Header`, het hoofdmenu (een `Navigation` met `appearance="header"`), een `Page.Body` en een `Page.Footer`, in die volgorde.',
+          'De achtergronden van de `Page.Header`, het hoofdmenu en de `Page.Footer` lopen van rand tot rand; wat erin staat en de `Page.Body` staan in de kolom.',
           '',
           'De breedte en de marge komen uit twee tokens: `--hf-page-max-width` en `--hf-page-margin`.',
           'De `Page.Body` is het raster tussen de header en de footer, met een `Page.Main` en, als de pagina er een heeft, een `Page.Sidebar`.',

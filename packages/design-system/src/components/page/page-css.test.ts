@@ -106,26 +106,20 @@ describe('the stripes of the Frisian flag in page.css', () => {
   })
 })
 
-describe('the two rows of the header in page.css', () => {
+describe('the row of the header in page.css', () => {
   const header = css.slice(css.indexOf('.hf-page-header {'), css.indexOf('.hf-page-body {'))
 
-  it('is a grid with the logo and the theme button in the first row, so the menu has a row of its own', () => {
+  it('is a grid with the logo and the theme button in one row, and has no place for the menu', () => {
     expect(header).toContain('display: grid;')
     expect(header).toContain('grid-template-columns: minmax(0, 1fr) auto;')
     expect(header).not.toContain('flex-wrap')
+    expect(header).not.toContain('.hf-navigation')
+    expect(header).not.toContain('grid-column')
   })
 
-  it('puts the menu over the whole width, at every width, with a thin line above it', () => {
-    expect(header).toMatch(/> \.hf-navigation \{[^}]*grid-column: 1 \/ -1;/)
-    expect(header).toMatch(
-      /> \.hf-navigation \{[^}]*border-block-start: 1px solid var\(--hf-colour-border-on-header\);/,
-    )
-  })
-
-  it('has a little room between the line and the menu, and less under the menu than above the logo', () => {
-    expect(header).toMatch(/> \.hf-navigation \{[^}]*padding-block-start: 0\.25rem;/)
-    expect(header).toContain('padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.4375rem;')
-    expect(header).toContain('gap: 0.25rem 0.5rem;')
+  it('keeps the space under the logo that was between the logo and the line of the menu', () => {
+    expect(header).toContain('padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.25rem;')
+    expect(header).toContain('gap: 0 0.5rem;')
   })
 
   it('aligns the logo in its link to the top, so the link is as tall as the logo and not as the line of text', () => {

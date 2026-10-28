@@ -634,10 +634,13 @@ await withEmptyDatabase((database) =>
     const matchesHtml = await matchesPage.text()
     assert.equal(matchesPage.status, 200)
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
-    // The bar under the header, outside the main, with a link to each card; none on the home.
+    // The main menu is its own nav right after the header, and the bar with a link to each card
+    // comes after it, outside the main; none on the home.
+    assert.match(matchesHtml, /<\/header><nav aria-label="Hoofdmenu" class="hf-navigation hf-navigation-header">/)
+    assert.doesNotMatch(matchesHtml.slice(0, matchesHtml.indexOf('</header>')), /<nav/)
     assert.match(
       matchesHtml,
-      /<\/header><nav aria-labelledby="([^"]+)" class="hf-page-shortcuts"><span class="hf-page-shortcuts-label" id="\1">Op deze pagina:<\/span>.*<\/nav><div class="hf-page-body"><main/s,
+      /<\/header><nav aria-label="Hoofdmenu".*?<\/nav><nav aria-labelledby="([^"]+)" class="hf-page-shortcuts"><span class="hf-page-shortcuts-label" id="\1">Op deze pagina:<\/span>.*<\/nav><div class="hf-page-body"><main/s,
     )
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),

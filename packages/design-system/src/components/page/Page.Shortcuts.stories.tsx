@@ -11,9 +11,9 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een balk direct onder de header, met een label en een rij links die zijwaarts scrolt.',
+          'Een balk direct onder het hoofdmenu, met een label en een rij links die zijwaarts scrolt.',
           'Hij is er voor een pagina waarvan de cellen op een smal scherm onder elkaar staan: een lange cel verbergt dan de cellen erna, en de balk springt ernaartoe.',
-          'Zet hem tussen de `Page.Header` en de `Page.Body`, buiten de `main`.',
+          'Zet hem tussen het hoofdmenu (de `Navigation` na de `Page.Header`) en de `Page.Body`, buiten de `main`.',
           'Het label zegt wat de links zijn en is ook de naam van de navigatie.',
           'Het blijft staan als de rij scrolt.',
           'De laatste zichtbare link is half afgesneden en de rij vervaagt aan de rand, zodat je ziet dat er meer is.',
