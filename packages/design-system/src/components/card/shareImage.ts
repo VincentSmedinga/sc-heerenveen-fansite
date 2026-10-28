@@ -3,14 +3,14 @@
 /** The time zone of the club, so a moment near midnight is on the day the visitor sees. */
 const timeZone = 'Europe/Amsterdam'
 
-const dayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', timeZone, year: 'numeric' })
+const dayFormat = new Intl.DateTimeFormat('nl-NL', { day: '2-digit', month: '2-digit', timeZone, year: '2-digit' })
 
 const isoDayFormat = new Intl.DateTimeFormat('en-CA', { day: '2-digit', month: '2-digit', timeZone, year: 'numeric' })
 
 /** What became of the image: it was shared, it was downloaded, or the visitor cancelled. */
 export type ImageDelivery = 'cancelled' | 'downloaded' | 'shared'
 
-/** The day as the strip under the card says it, such as `28 oktober 2026`. */
+/** The day as the strip under the card says it, in two digits each: `28-10-26`. */
 export const imageDay = (date: Date) => dayFormat.format(date)
 
 /** The name of the file: `sc-heerenveen-`, the title in small letters with hyphens, the day. */

@@ -81,6 +81,13 @@ describe('WikipediaCredit', () => {
     expect(container.firstElementChild?.className).toBe('hf-meta hf-wikipedia-credit')
   })
 
+  it('says what the short form puts before Wikipedia when it is told, and nothing else changes', () => {
+    const { container } = render(<WikipediaCredit compact lead="Gegevens van" />)
+
+    expect(container.textContent).toBe('Gegevens van Wikipedia')
+    expect(container.firstElementChild?.className).toBe('hf-meta hf-wikipedia-credit')
+  })
+
   it('needs pages in the full form and none in the short form', () => {
     // @ts-expect-error The short form has no pages.
     const withPages = <WikipediaCredit compact pages={[standings]} />

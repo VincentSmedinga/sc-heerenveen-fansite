@@ -16,9 +16,14 @@ export type WikipediaCreditPage = {
 
 export type WikipediaCreditProps =
   | (WikipediaCreditBaseProps & {
-      /** The short form, "Bron: Wikipedia", for a small card. It has no other props. */
+      /** The short form, "Bron: Wikipedia", for a small card. It takes only `lead` besides. */
       compact: true
       data?: never
+      /**
+       * What stands before "Wikipedia" instead of `Bron:`, such as `Gegevens van` in the strip
+       * under the image of a card.
+       */
+      lead?: string
       pages?: never
       readAt?: never
       readAtDateTime?: never
@@ -32,6 +37,8 @@ export type WikipediaCreditProps =
        * `selectiegegevens`.
        */
       data?: string
+      /** The same moment in a form a machine reads, such as `2026-10-25T12:05:00Z`. */
+      lead?: never
       /** The Wikipedia pages the data comes from, at least one. */
       pages: [WikipediaCreditPage, ...WikipediaCreditPage[]]
       /**
@@ -39,7 +46,6 @@ export type WikipediaCreditProps =
        * oktober 2026 om 14:05`. The component knows no time zone.
        */
       readAt: string
-      /** The same moment in a form a machine reads, such as `2026-10-25T12:05:00Z`. */
       readAtDateTime: string
     })
 
@@ -62,6 +68,7 @@ export const WikipediaCredit = ({
   className,
   compact,
   data = 'wedstrijdgegevens',
+  lead = 'Bron:',
   pages,
   readAt,
   readAtDateTime,
@@ -69,7 +76,7 @@ export const WikipediaCredit = ({
 }: WikipediaCreditProps) => (
   <p {...props} className={classNames('hf-meta', 'hf-wikipedia-credit', className)}>
     {compact ? (
-      'Bron: Wikipedia'
+      `${lead} Wikipedia`
     ) : (
       <>
         Bron: Wikipedia (<Link href={licenceHref}>CC BY-SA 4.0</Link>), {pages.length === 1 ? 'pagina' : 'pagina’s'}:{' '}

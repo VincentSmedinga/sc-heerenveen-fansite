@@ -158,7 +158,11 @@ export const WithButtonDark = meta.story({
 const renderShareable = () => (
   <Page.Body>
     <Page.Main>
-      <Card aria-labelledby="share-soft" shareable={{ source: <WikipediaCredit compact /> }} surface="soft">
+      <Card
+        aria-labelledby="share-soft"
+        shareable={{ source: <WikipediaCredit compact lead="Gegevens van" /> }}
+        surface="soft"
+      >
         <Heading anchor id="share-soft" level={2}>
           Stand
         </Heading>
@@ -171,7 +175,11 @@ const renderShareable = () => (
           ]}
         />
       </Card>
-      <Card aria-labelledby="share-warm" shareable={{ source: <WikipediaCredit compact /> }} surface="warm">
+      <Card
+        aria-labelledby="share-warm"
+        shareable={{ source: <WikipediaCredit compact lead="Gegevens van" /> }}
+        surface="warm"
+      >
         <Heading anchor id="share-warm" level={2}>
           Doelpunten per kwartier
         </Heading>

@@ -124,9 +124,7 @@ describe('a click on the button', () => {
     expect(stage?.querySelector('.hf-card-share-copy')?.className).not.toContain('hf-card-shareable')
     // The strip: the logo, the address of the site, the day, and the source of the card.
     expect(stage?.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe('sc Heerenveen Fansite, sinds 1997')
-    expect(stage?.querySelector('.hf-card-share-address')?.textContent).toBe(
-      `${window.location.host} · 28 oktober 2026`,
-    )
+    expect(stage?.querySelector('.hf-card-share-address')?.textContent).toBe(`${window.location.host} · 28-10-26`)
     expect(stage?.textContent).toContain('Bron: Testbron')
     // The card on the page is as it was.
     expect(container.querySelector('.hf-card-share-copy')).toBeNull()

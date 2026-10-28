@@ -38,9 +38,9 @@ describe('imageFileName', () => {
 })
 
 describe('imageDay', () => {
-  it('writes the day in Dutch', () => {
-    expect(imageDay(new Date('2026-10-28T12:00:00Z'))).toBe('28 oktober 2026')
-    expect(imageDay(new Date('2027-01-03T12:00:00Z'))).toBe('3 januari 2027')
+  it('writes the day as dd-mm-jj, with a leading zero', () => {
+    expect(imageDay(new Date('2026-10-28T12:00:00Z'))).toBe('28-10-26')
+    expect(imageDay(new Date('2027-01-03T12:00:00Z'))).toBe('03-01-27')
   })
 })
 

@@ -40,7 +40,8 @@ import {
  * Wikipedia, where the facts come from, as the cards of the homepage give it. It is a function,
  * so a card that has no facts yet has no button.
  */
-export const imageCredit = (hasFacts: boolean) => (hasFacts ? { source: <WikipediaCredit compact /> } : undefined)
+export const imageCredit = (hasFacts: boolean) =>
+  hasFacts ? { source: <WikipediaCredit compact lead="Gegevens van" /> } : undefined
 
 /**
  * The card of the matches page with the matches in which sc Heerenveen kept a clean sheet, as
