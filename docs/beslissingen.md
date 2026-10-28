@@ -6189,7 +6189,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 ### De afbeelding volgt het thema van de bezoeker en draagt de bron mee
 
 - **Datum:** 28 oktober 2026
-- **Besluit:** de afbeelding heeft het thema dat de bezoeker nu heeft, op de breedte van de kaart in de zijbalk van een breed scherm.
+- **Besluit:** de afbeelding heeft het thema dat de bezoeker nu heeft.
+  De kaart is er 29 rem breed, een breedte die in de zijbalk van een breed scherm past, met een rand van 1,5 rem eromheen: de afbeelding is 32 rem breed, 1024 pixels op dubbele resolutie.
   Eronder staan het logo, het adres, de datum en de bronvermelding van de kaart.
   Alleen de vijf kaarten met statistiek op `/wedstrijden` hebben de knop.
 - **Waarom:** de bezoeker kiest zijn thema, en de afbeelding is zijn kaart.

@@ -3,8 +3,9 @@ import { readFile } from 'node:fs/promises'
 
 import { hexOf, readPng } from '../src/read-png'
 
-// The card is drawn as it is in the sidebar of a wide screen, in a frame of half a rem, so the
-// image is 32 rem wide at twice the size: 32 x 16 x 2 pixels, whatever the window.
+// The card is drawn 29 rem wide, with the padding it has in the sidebar of a wide screen, in a
+// frame of one and a half rem. So the image is 32 rem wide, at twice the size 32 x 16 x 2
+// pixels, whatever the window.
 const imageWidth = 32 * 16 * 2
 
 const button = (page: Page) => page.getByRole('button', { name: 'Maak een afbeelding van Stand' })
