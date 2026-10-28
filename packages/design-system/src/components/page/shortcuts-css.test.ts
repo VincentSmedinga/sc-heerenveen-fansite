@@ -48,7 +48,14 @@ describe('the bar in shortcuts.css', () => {
 
   it('has no padding at the end, so the row runs to the edge, apart from the notch', () => {
     expect(bar).toContain(
-      'padding-inline: max(var(--hf-page-margin), env(safe-area-inset-left, 0px)) env(safe-area-inset-right, 0);',
+      'padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px)) env(safe-area-inset-right, 0);',
+    )
+  })
+
+  it('starts at the inset of the page, in line with the menu, and where the page is wider than its column it ends there too', () => {
+    expect(bar).not.toContain('padding-inline: max(var(--hf-page-margin)')
+    expect(bar).toMatch(
+      /@media \(width >= 66rem\) \{\s*padding-inline-end: max\(var\(--hf-page-inset\), env\(safe-area-inset-right, 0px\)\);/,
     )
   })
 })
