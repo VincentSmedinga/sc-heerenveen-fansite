@@ -1,11 +1,8 @@
 import preview from '#.storybook/preview'
 
-import { ExampleMain, exampleMenu, exampleMenuAt, type ExampleMenuPage } from '../../docs/ExamplePage'
+import { exampleMenu, exampleMenuAt, type ExampleMenuPage, exampleMenuWithSubpages } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
-import { Heading } from '../heading/Heading'
-import { Page } from '../page/Page'
-import { Text } from '../text/Text'
-import { Navigation, type NavigationItem } from './Navigation'
+import { Navigation } from './Navigation'
 
 const meta = preview.meta({
   parameters: {
@@ -101,34 +98,8 @@ export const ForumMainDark = meta.story({
   render: mainMenu('Forum'),
 })
 
-const matchPages = [
-  { href: '#programma', label: 'Programma' },
-  { href: '#uitslagen', label: 'Uitslagen' },
-  { href: '#stand', label: 'Stand' },
-  { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
-  { href: '#de-nul-gehouden', label: 'De nul gehouden' },
-  { href: '#doelpunten-per-kwartier', label: 'Doelpunten per kwartier' },
-]
-
-/** The menu with Wedstrijden as the item that has sub-pages, and the page the visitor is on. */
-const menuAt = (current: 'Nieuws' | 'Wedstrijden' | (typeof matchPages)[number]['label'], count = 3) => {
-  const subitems = matchPages.slice(0, count).map((page) => ({ ...page, current: page.label === current }))
-  const items: NavigationItem[] = [
-    { current: current === 'Nieuws', href: '#nieuws', label: 'Nieuws' },
-    { current: current === 'Wedstrijden', href: '#wedstrijden', label: 'Wedstrijden', subitems },
-    { external: true, href: '#forum', label: 'Forum' },
-  ]
-
-  return items
-}
-
-const withSubpages = (current: Parameters<typeof menuAt>[0], count?: number) => () => (
-  <>
-    <Navigation appearance="header" items={menuAt(current, count)} label="Hoofdmenu" />
-    <Page.Body>
-      <ExampleMain />
-    </Page.Body>
-  </>
+const withSubpages = (current: Parameters<typeof exampleMenuWithSubpages>[0], count?: number) => () => (
+  <Navigation appearance="header" items={exampleMenuWithSubpages(current, count)} label="Hoofdmenu" />
 )
 
 const noSubpagesStory = {
@@ -262,88 +233,4 @@ export const StatesDark = meta.story({
   name: 'Toestanden van de balk, donker',
   parameters: { ...fullscreen, ...statesParameters },
   render: withSubpages('Programma'),
-})
-
-const sections = [
-  { id: 'programma', title: 'Programma' },
-  { id: 'uitslagen', title: 'Uitslagen' },
-  { id: 'stand', title: 'Stand' },
-]
-
-const threeBarsParameters = {
-  ...fullscreen,
-  docs: {
-    description: {
-      story:
-        'Een pagina met subpagina’s en ankers: het hoofdmenu met zijn subpagina’s en de balk met ankers, in die volgorde in de code en op het scherm. Alleen de balk met ankers plakt.',
-    },
-  },
-}
-
-const renderMenuAndAnchors = () => (
-  <>
-    <Navigation appearance="header" items={menuAt('Programma')} label="Hoofdmenu" />
-    <Page.Shortcuts
-      items={sections.map(({ id, title }) => ({ href: `#${id}`, label: title }))}
-      label="Op deze pagina:"
-    />
-    <Page.Body>
-      <Page.Main>
-        {sections.map(({ id, title }) => (
-          <Page.Cell key={id}>
-            <Heading anchor id={id} level={2}>
-              {title}
-            </Heading>
-            <Text>Hier staat wat bij {title.toLowerCase()} hoort. De kaart is lang genoeg om langs te scrollen.</Text>
-            <Text>
-              Boven deze kaart staan twee balken. Als je scrolt, gaat het menu met de subpagina’s weg, en blijft alleen
-              de balk met ankers staan.
-            </Text>
-            <Text>
-              Een kaart kan lang zijn, zodat de kop van de volgende kaart pas na een tijd langs de balk komt. Tot dan
-              blijft de link naar deze kaart de huidige.
-            </Text>
-          </Page.Cell>
-        ))}
-      </Page.Main>
-    </Page.Body>
-  </>
-)
-
-export const MenuAndAnchors = meta.story({
-  ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile2' } },
-  name: 'Menu, subpagina’s en ankers',
-  parameters: threeBarsParameters,
-  render: renderMenuAndAnchors,
-})
-
-export const MenuAndAnchorsDark = meta.story({
-  ...phone,
-  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
-  name: 'Menu, subpagina’s en ankers, donker',
-  parameters: threeBarsParameters,
-  render: renderMenuAndAnchors,
-})
-
-// The page scrolls to a heading, as after a click on its link: only the anchors are left.
-const scrollToStand = () => {
-  document.getElementById('stand')?.scrollIntoView({ behavior: 'instant', block: 'start' })
-}
-
-export const MenuAndAnchorsScrolled = meta.story({
-  ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile2' } },
-  name: 'Menu, subpagina’s en ankers, gescrold',
-  parameters: {
-    ...fullscreen,
-    docs: {
-      description: {
-        story:
-          'De pagina is tot de kop van Stand gescrold. Het menu met de subpagina’s is weg, de balk met ankers blijft, en de kop komt er niet onder.',
-      },
-    },
-  },
-  play: scrollToStand,
-  render: renderMenuAndAnchors,
 })

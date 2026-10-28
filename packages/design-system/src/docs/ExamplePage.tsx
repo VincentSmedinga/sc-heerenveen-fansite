@@ -4,7 +4,7 @@ import { Heading } from '../components/heading/Heading'
 import { Link } from '../components/link/Link'
 import { List } from '../components/list/List'
 import { Logo } from '../components/logo/Logo'
-import { Navigation } from '../components/navigation/Navigation'
+import { Navigation, type NavigationItem } from '../components/navigation/Navigation'
 import { Page } from '../components/page/Page'
 import { Text } from '../components/text/Text'
 import { ThemeButton } from '../components/theme-button/ThemeButton'
@@ -23,6 +23,33 @@ export const exampleMenuAt = (current: ExampleMenuPage) =>
 /** The menu of the example pages in the docs: the news is the current page. */
 export const exampleMenu = exampleMenuAt('Nieuws')
 
+const matchPages = [
+  { href: '#programma', label: 'Programma' },
+  { href: '#uitslagen', label: 'Uitslagen' },
+  { href: '#stand', label: 'Stand' },
+  { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
+  { href: '#de-nul-gehouden', label: 'De nul gehouden' },
+  { href: '#doelpunten-per-kwartier', label: 'Doelpunten per kwartier' },
+] as const
+
+/**
+ * The main menu with Wedstrijden as the item that has sub-pages (the first `count` of six), and
+ * the page the visitor is on: Nieuws, Wedstrijden itself or one of its sub-pages.
+ */
+export const exampleMenuWithSubpages = (
+  current: 'Nieuws' | 'Wedstrijden' | (typeof matchPages)[number]['label'],
+  count = 3,
+): NavigationItem[] => [
+  { current: current === 'Nieuws', href: '#nieuws', label: 'Nieuws' },
+  {
+    current: current === 'Wedstrijden',
+    href: '#wedstrijden',
+    label: 'Wedstrijden',
+    subitems: matchPages.slice(0, count).map((page) => ({ ...page, current: page.label === current })),
+  },
+  { external: true, href: '#forum', label: 'Forum' },
+]
+
 /**
  * The logo as a link to the home page and the theme button beside it (here a static one,
  * pressed when `dark`), in a Page.Header: the banner alone, without the main menu.
@@ -40,10 +67,17 @@ export const ExampleBanner = ({ dark = false }: { dark?: boolean }) => (
  * The banner and the main menu right after it, on the same blue. This is what the top of a
  * page holds.
  */
-export const ExampleHeader = ({ dark = false }: { dark?: boolean }) => (
+export const ExampleHeader = ({
+  dark = false,
+  menu = exampleMenu,
+}: {
+  dark?: boolean
+  /** Another menu than the one of the example pages, such as one with sub-pages. */
+  menu?: readonly NavigationItem[]
+}) => (
   <>
     <ExampleBanner dark={dark} />
-    <Navigation appearance="header" items={exampleMenu} label="Hoofdmenu" />
+    <Navigation appearance="header" items={menu} label="Hoofdmenu" />
   </>
 )
 
