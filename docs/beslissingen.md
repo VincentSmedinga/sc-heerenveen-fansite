@@ -3827,7 +3827,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Wie de HTML leest zonder stijlen, ziet ze twee keer.
   Past een langere naam niet naast de knop, dan loopt de rij over: de drempel van 20rem is gemeten met de voorbeeldnamen en kijkt niet naar de lengte van een naam.
   Is de huidige pagina een onderdeel achter de knop dat niet past, dan staan zijn subpagina's op een andere plek dan zijn link: de balk staat in het `li` van de rij, de link in de lijst.
-  Het toetsenbord komt dan eerst langs de balk en daarna langs "Meer".
+  De balk staat in de HTML in het `li` van zijn onderdeel, vóór "Meer", dus het toetsenbord komt altijd eerst langs de balk en daarna langs "Meer".
+  Dat geldt ook als de huidige pagina wel in de rij past, en het is dezelfde volgorde als bij een menu zonder knop.
 - **Alternatieven:** een menuknop met alles erachter (verbergt de navigatie).
   Het menu zijwaarts laten scrollen (de bezoeker ziet niet dat er meer is).
   Alleen de balk voor subpagina's (#363), die het hoofdmenu klein houdt maar niet helpt als het menu zelf groeit.
