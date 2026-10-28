@@ -452,3 +452,102 @@ describe('Page.Shortcuts', () => {
     expect(Page.Shortcuts.displayName).toBe('Page.Shortcuts')
   })
 })
+
+describe('Page.Submenu', () => {
+  const items = [
+    { current: true, href: '/wedstrijden/programma', label: 'Programma' },
+    { href: '/wedstrijden/uitslagen', label: 'Uitslagen' },
+    { href: '/wedstrijden/stand', label: 'Stand' },
+  ]
+
+  it('is a navigation named by its label, and shows no label', () => {
+    const { container } = render(<Page.Submenu items={items} label="Wedstrijden" />)
+    const nav = screen.getByRole('navigation', { name: 'Wedstrijden' })
+
+    expect(nav.tagName).toBe('NAV')
+    expect(nav.className).toBe('hf-page-submenu')
+    expect(nav.getAttribute('aria-label')).toBe('Wedstrijden')
+    expect(nav.getAttribute('aria-labelledby')).toBeNull()
+    // The name is for screen readers only: the text of the bar is the text of the links.
+    expect(container.textContent).toBe('ProgrammaUitslagenStand')
+  })
+
+  it('holds a list with a link for each item, in the order given', () => {
+    render(<Page.Submenu items={items} label="Wedstrijden" />)
+    const links = within(screen.getByRole('navigation')).getAllByRole('link')
+
+    expect(within(screen.getByRole('list')).getAllByRole('listitem')).toHaveLength(3)
+    expect(links.map((link) => [link.textContent, link.getAttribute('href'), link.className])).toEqual([
+      ['Programma', '/wedstrijden/programma', 'hf-page-submenu-link'],
+      ['Uitslagen', '/wedstrijden/uitslagen', 'hf-page-submenu-link'],
+      ['Stand', '/wedstrijden/stand', 'hf-page-submenu-link'],
+    ])
+  })
+
+  it('marks exactly one link as the current page, the one that is current', () => {
+    const { container } = render(<Page.Submenu items={items} label="Wedstrijden" />)
+    const current = container.querySelectorAll('[aria-current]')
+
+    expect(current).toHaveLength(1)
+    expect(current[0]?.getAttribute('aria-current')).toBe('page')
+    expect(current[0]?.textContent).toBe('Programma')
+  })
+
+  it('marks no link when none is current, as on a page of the section that is not in the bar', () => {
+    const { container } = render(
+      <Page.Submenu items={items.map(({ href, label }) => ({ href, label }))} label="Wedstrijden" />,
+    )
+
+    expect(container.querySelector('[aria-current]')).toBeNull()
+  })
+
+  it('gives a page with a submenu and a bar of anchors a name for each, so the two can be told apart', () => {
+    render(
+      <>
+        <Page.Submenu items={items} label="Wedstrijden" />
+        <Page.Shortcuts items={items} label="Op deze pagina:" />
+      </>,
+    )
+
+    expect(screen.getAllByRole('navigation').map((nav) => nav.getAttribute('aria-label') ?? nav.textContent)).toEqual([
+      'Wedstrijden',
+      expect.stringContaining('Op deze pagina:'),
+    ])
+    expect(screen.getByRole('navigation', { name: 'Wedstrijden' })).toBeTruthy()
+    expect(screen.getByRole('navigation', { name: 'Op deze pagina:' })).toBeTruthy()
+  })
+
+  it('sits under the header and before the bar of anchors, outside the main, in the order of the HTML', () => {
+    const { container } = render(
+      <Page>
+        <Page.Header>Kop</Page.Header>
+        <Page.Submenu items={items} label="Wedstrijden" />
+        <Page.Shortcuts items={items} label="Op deze pagina:" />
+        <Page.Body>
+          <Page.Main>Inhoud</Page.Main>
+        </Page.Body>
+      </Page>,
+    )
+    const page = container.firstElementChild
+
+    expect(Array.from(page?.children ?? []).map((child) => child.className)).toEqual([
+      'hf-page-top-edge',
+      'hf-page-header',
+      'hf-page-submenu',
+      'hf-page-shortcuts',
+      'hf-page-body',
+    ])
+    expect(screen.getByRole('main').contains(screen.getByRole('navigation', { name: 'Wedstrijden' }))).toBe(false)
+  })
+
+  it('keeps the other attributes and adds a class to its own', () => {
+    render(<Page.Submenu className="extra" id="submenu" items={items} label="Wedstrijden" />)
+
+    expect(screen.getByRole('navigation').className).toBe('hf-page-submenu extra')
+    expect(screen.getByRole('navigation').id).toBe('submenu')
+  })
+
+  it('is called Page.Submenu in the developer tools and the code examples', () => {
+    expect(Page.Submenu.displayName).toBe('Page.Submenu')
+  })
+})
