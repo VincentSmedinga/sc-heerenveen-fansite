@@ -207,6 +207,10 @@ describe('Navigation with sub-pages', () => {
 
     expect(screen.getAllByRole('list')).toHaveLength(2)
     expect(within(item).getAllByRole('list')).toHaveLength(1)
+    const bar = item.querySelector('.hf-navigation-bar ul')!
+
+    expect(bar.getAttribute('role')).toBe('list')
+    expect(Array.from(bar.children).map((child) => child.getAttribute('role'))).toEqual(Array(3).fill('listitem'))
     expect(
       within(item)
         .getAllByRole('link')

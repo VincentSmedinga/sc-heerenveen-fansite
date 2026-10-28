@@ -70,7 +70,8 @@ export const Navigation = ({ appearance = 'default', className, items, label, ..
       {/*
        * In the header the list and its items take no box of their own (display: contents, see
        * navigation.css), so the bar can go under all the links, and a browser that drops the
-       * list from the accessibility tree for that gets the roles back.
+       * list from the accessibility tree for that gets the roles back. The list in the bar has
+       * the roles too: Safari also drops a list without bullets.
        */}
       <ul className="hf-navigation-list" role={header ? 'list' : undefined}>
         {items.map((item) => {
@@ -91,9 +92,9 @@ export const Navigation = ({ appearance = 'default', className, items, label, ..
               {showSubitems && (
                 <div className="hf-navigation-bar">
                   <ShortcutsRow follow={false}>
-                    <ul className="hf-page-shortcuts-list">
+                    <ul className="hf-page-shortcuts-list" role="list">
                       {subitems.map((subitem) => (
-                        <li key={subitem.href}>
+                        <li key={subitem.href} role="listitem">
                           <Link
                             aria-current={subitem.current ? 'page' : undefined}
                             className="hf-navigation-sublink"
