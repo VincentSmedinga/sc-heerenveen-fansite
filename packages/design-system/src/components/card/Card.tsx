@@ -1,6 +1,7 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import { Children, type ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
+import { CardShare, type CardShareProps } from './CardShare'
 
 /** The elements a Card can be. */
 export const cardElements = ['section', 'div', 'article', 'aside'] as const
@@ -20,6 +21,15 @@ export type CardProps = ComponentPropsWithoutRef<'section'> & {
    */
   as?: CardElement
   /**
+   * Gives the card a round button at the top right that makes an image of it, with the logo,
+   * the address of the site, the day and `source` under it, and shares or downloads it.
+   * `source` is the credit of the data in the card: it is required, so an image never leaves
+   * the card without the name of where its facts come from. The button is named after the
+   * first heading of the card and shows only with JavaScript. The card needs that heading as
+   * its first child. Without `shareable` the card is as it was.
+   */
+  shareable?: CardShareProps | undefined
+  /**
    * The surface: `default` is the white one. Its background and border come from the colour
    * tokens of that surface. `transparent` keeps the padding at the sides and the space of the
    * border, so the text sits where it does in the other cards, but shows no background or
@@ -35,6 +45,28 @@ export type CardSurface = (typeof cardSurfaces)[number]
  * outside: in a column of the page every card is a cell of its own, and the Page.Body sets the
  * space between the cells. card.css gives it its look.
  */
-export const Card = ({ as: Element = 'section', className, surface = 'default', ...props }: CardProps) => (
-  <Element className={classNames('hf-card', surface !== 'default' && `hf-card-${surface}`, className)} {...props} />
-)
+export const Card = ({
+  as: Element = 'section',
+  children,
+  className,
+  shareable,
+  surface = 'default',
+  ...props
+}: CardProps) => {
+  // The button comes straight after the heading, so the keyboard reaches it before the content.
+  const [heading, ...rest] = Children.toArray(children)
+
+  return (
+    <Element
+      className={classNames(
+        'hf-card',
+        surface !== 'default' && `hf-card-${surface}`,
+        shareable && 'hf-card-shareable',
+        className,
+      )}
+      {...props}
+    >
+      {shareable ? [heading, <CardShare key="share" source={shareable.source} />, ...rest] : children}
+    </Element>
+  )
+}

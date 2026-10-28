@@ -2,13 +2,16 @@ import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Button } from '../button/Button'
+import { DonutChart } from '../donut-chart/DonutChart'
 import { Form } from '../form/Form'
 import { Heading } from '../heading/Heading'
 import { Link } from '../link/Link'
 import { List } from '../list/List'
 import { NewsItem } from '../news-item/NewsItem'
 import { Page } from '../page/Page'
+import { StandingsTable } from '../standings-table/StandingsTable'
 import { Text } from '../text/Text'
+import { WikipediaCredit } from '../wikipedia-credit/WikipediaCredit'
 import { Card, cardElements, type CardSurface, cardSurfaces } from './Card'
 
 // The type of the props as the table of controls shows it: the compiler gives `unknown[number]`
@@ -22,6 +25,11 @@ const meta = preview.meta({
       description: 'Het element van de kaart.',
       options: cardElements,
       table: union(cardElements),
+    },
+    shareable: {
+      description:
+        'Zet rechtsboven een knop die een afbeelding van de kaart maakt. `source` is de bronvermelding die onder de afbeelding komt.',
+      table: { type: { summary: '{ source: ReactNode }' } },
     },
     surface: {
       control: 'radio',
@@ -40,6 +48,9 @@ const meta = preview.meta({
           'Een kaart met het vlak `transparent` heeft geen rand en achtergrond die je ziet, en geen binnenruimte boven en onder: de tekst erin staat op één lijn met de tekst in de andere kaarten, zonder dat de ruimte tussen de kaarten groter wordt.',
           'Staat er direct onder de kop een lijst, dan is de ruimte daartussen groter dan bij tekst, zodat de eerste regel van de lijst niet tegen de kop zit.',
           'Onder de lijst kan een formulier met een knop staan, zoals "Laad 5 meer" in de kaart met nieuws.',
+          'Met `shareable` krijgt de kaart rechtsboven een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron eronder.',
+          'De bezoeker deelt die afbeelding of bewaart hem, en er gaat niets naar een server.',
+          'Gebruik hem alleen voor een kaart met cijfers en feiten die we mogen laten rondgaan, nooit voor het werk van journalisten.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -142,6 +153,63 @@ export const WithButtonDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Met een knop onder de lijst, donker',
   render: renderWithButton,
+})
+
+const renderShareable = () => (
+  <Page.Body>
+    <Page.Main>
+      <Card aria-labelledby="share-soft" shareable={{ source: <WikipediaCredit compact /> }} surface="soft">
+        <Heading anchor id="share-soft" level={2}>
+          Stand
+        </Heading>
+        <StandingsTable
+          caption="Stand op 18 oktober 2026"
+          rows={[
+            { club: 'Demo Boys', played: 10, points: 25, position: 1 },
+            { club: 'sc Heerenveen', played: 10, points: 19, position: 2 },
+            { club: 'Voorbeeld United', played: 10, points: 15, position: 3 },
+          ]}
+        />
+      </Card>
+      <Card aria-labelledby="share-warm" shareable={{ source: <WikipediaCredit compact /> }} surface="warm">
+        <Heading anchor id="share-warm" level={2}>
+          Doelpunten per kwartier
+        </Heading>
+        <DonutChart.Group>
+          <DonutChart
+            slices={[
+              { label: '0-15', value: 3 },
+              { label: '16-30', value: 5 },
+              { label: '31-45', value: 2 },
+            ]}
+            title="Voor"
+            tone="positive"
+          />
+          <DonutChart
+            slices={[
+              { label: '0-15', value: 1 },
+              { label: '16-30', value: 2 },
+              { label: '31-45', value: 3 },
+            ]}
+            title="Tegen"
+            tone="negative"
+          />
+        </DonutChart.Group>
+      </Card>
+    </Page.Main>
+  </Page.Body>
+)
+
+export const ShareableLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Met een knop voor een afbeelding, licht',
+  render: renderShareable,
+})
+
+export const ShareableDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Met een knop voor een afbeelding, donker',
+  render: renderShareable,
 })
 
 const renderPage = () => (

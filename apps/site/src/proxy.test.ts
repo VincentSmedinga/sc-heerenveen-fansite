@@ -30,7 +30,7 @@ describe('proxy', () => {
     expect(proxy().headers.get('Content-Security-Policy')).toBe(contentSecurityPolicy)
   })
 
-  it('lets a page load from our own server only, with the inline scripts and styles of Next.js', () => {
+  it('lets a page load from our own server only, with the inline scripts and styles of Next.js and images as data', () => {
     const directives = new Map(
       contentSecurityPolicy.split('; ').map((directive) => {
         const [name, ...sources] = directive.split(' ')
@@ -46,7 +46,7 @@ describe('proxy', () => {
       'font-src': "'self'",
       'form-action': "'self'",
       'frame-src': "'self'",
-      'img-src': "'self'",
+      'img-src': "'self' data:",
       'script-src': "'self' 'unsafe-inline'",
       'style-src': "'self' 'unsafe-inline'",
     })
