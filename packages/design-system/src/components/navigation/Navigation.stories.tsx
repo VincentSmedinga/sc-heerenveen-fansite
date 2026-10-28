@@ -1,6 +1,15 @@
+import { expect, userEvent, waitFor } from 'storybook/test'
+
 import preview from '#.storybook/preview'
 
-import { exampleMenu, exampleMenuAt, type ExampleMenuPage, exampleMenuWithSubpages } from '../../docs/ExamplePage'
+import {
+  exampleLongMenu,
+  type ExampleLongMenuPage,
+  exampleMenu,
+  exampleMenuAt,
+  type ExampleMenuPage,
+  exampleMenuWithSubpages,
+} from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
 import { Navigation } from './Navigation'
 
@@ -48,6 +57,15 @@ const meta = preview.meta({
           '',
           'De volgorde in de code is de volgorde van de focus: een link, dan zijn subpagina’s, dan de volgende link.',
           'Een toetsenbordgebruiker komt dus uit de balk terug bij de links die erboven staan.',
+          '',
+          'Heeft het hoofdmenu zes of meer onderdelen, en krijgt `Navigation` een `moreLabel` zoals "Meer", dan passen ze niet op een telefoon.',
+          'Op een smal scherm staan dan het eerste onderdeel, de knop en het laatste onderdeel (het forum) in de rij.',
+          'De onderdelen ertussen staan in een lijst onder de knop, die opengaat in de pagina en de rest naar beneden duwt.',
+          'Op een breed scherm staat alles in de rij, en bij vijf onderdelen of minder verandert er niets.',
+          'De knop opent en sluit zonder JavaScript.',
+          'Met JavaScript sluit de lijst ook met Escape, met een klik op een link of ernaast, en bij een andere pagina.',
+          'Staat de huidige pagina achter de knop, dan komt hij naar voren in de rij, met zijn subpagina’s eronder.',
+          'Past hij daar niet, dan blijft hij in de lijst en krijgt de knop de rode streep.',
         ].join('\n'),
       },
       source: exampleSource,
@@ -233,4 +251,131 @@ export const StatesDark = meta.story({
   name: 'Toestanden van de balk, donker',
   parameters: { ...fullscreen, ...statesParameters },
   render: withSubpages('Programma'),
+})
+
+const longMenu = (current: ExampleLongMenuPage) => () => (
+  <Navigation appearance="header" items={exampleLongMenu(current)} label="Hoofdmenu" moreLabel="Meer" />
+)
+
+// The menu of eight items needs the button on a phone, so these are on the canvas only, with
+// Storybook's viewport setting; on the docs page they would show the same width as the others.
+const mobile = (viewport: 'mobile1' | 'mobile2') => ({
+  ...phone,
+  globals: { theme: 'light', viewport: { value: viewport } },
+})
+
+const closeStory = (story: string) => ({ ...fullscreen, docs: { description: { story } } })
+
+export const MoreWide = meta.story({
+  globals: { theme: 'light' },
+  name: 'Meer: breed scherm, alles in de rij',
+  parameters: closeStory('Acht onderdelen op een breed scherm staan alle in de rij, en de knop “Meer” is er niet.'),
+  render: longMenu('Nieuws'),
+})
+
+export const MoreClosed = meta.story({
+  ...mobile('mobile2'),
+  name: 'Meer: dicht',
+  parameters: closeStory(
+    'Op een telefoon: het eerste onderdeel, de knop “Meer” met een pijltje omlaag, en het forum rechts.',
+  ),
+  render: longMenu('Nieuws'),
+})
+
+export const MoreClosedDark = meta.story({
+  ...mobile('mobile2'),
+  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
+  name: 'Meer: dicht, donker',
+  parameters: closeStory('De knop in het donkere thema.'),
+  render: longMenu('Nieuws'),
+})
+
+const opened = async ({ canvas }: { canvas: { getByText: (text: string) => HTMLElement } }) => {
+  await userEvent.click(canvas.getByText('Meer'))
+}
+
+export const MoreOpen = meta.story({
+  ...mobile('mobile2'),
+  name: 'Meer: open',
+  parameters: closeStory(
+    'De lijst staat onder de rij, begint onder de tekst van “Meer” en duwt de pagina naar beneden. Het pijltje wijst omhoog.',
+  ),
+  play: opened,
+  render: longMenu('Nieuws'),
+})
+
+export const MoreOpenDark = meta.story({
+  ...mobile('mobile2'),
+  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
+  name: 'Meer: open, donker',
+  parameters: closeStory('De open lijst in het donkere thema.'),
+  play: opened,
+  render: longMenu('Nieuws'),
+})
+
+export const MoreCurrentInRow = meta.story({
+  ...mobile('mobile2'),
+  name: 'Meer: de huidige pagina staat in de rij',
+  parameters: closeStory(
+    'De bezoeker is op Spelers, dat achter “Meer” staat. Spelers komt naar voren in de rij, met de rode streep, en staat niet meer in de lijst.',
+  ),
+  play: opened,
+  render: longMenu('Spelers'),
+})
+
+export const MoreCurrentWithSubpages = meta.story({
+  ...mobile('mobile2'),
+  name: 'Meer: de huidige pagina heeft subpagina’s',
+  parameters: closeStory(
+    'De bezoeker is op de subpagina Uitslagen van Wedstrijden, dat achter “Meer” staat. Wedstrijden komt naar voren in de rij (aria-current="true") met zijn balk eronder, en Uitslagen heeft aria-current="page". Een schermlezer ziet de balk één keer.',
+  ),
+  // The stylesheet shows one copy of the page behind the button: a screen reader meets it once.
+  play: async ({ canvas }) => {
+    await expect(canvas.getAllByRole('link', { name: 'Wedstrijden' })).toHaveLength(1)
+    await expect(canvas.getAllByRole('link', { name: 'Uitslagen' })).toHaveLength(1)
+    await expect(canvas.getAllByRole('link', { current: 'page' })).toHaveLength(1)
+    await expect(canvas.getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('aria-current', 'true')
+  },
+  render: longMenu('Uitslagen'),
+})
+
+export const MoreCurrentWithSubpagesDark = meta.story({
+  ...mobile('mobile2'),
+  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
+  name: 'Meer: de huidige pagina heeft subpagina’s, donker',
+  parameters: closeStory('Hetzelfde in het donkere thema.'),
+  play: opened,
+  render: longMenu('Uitslagen'),
+})
+
+export const MoreCurrentInList = meta.story({
+  ...mobile('mobile1'),
+  name: 'Meer: de huidige pagina past niet in de rij',
+  parameters: closeStory(
+    'Op een heel smal scherm past de huidige pagina niet naast “Meer”. Hij blijft in de lijst en “Meer” krijgt de rode streep. De balk met subpagina’s blijft zichtbaar.',
+  ),
+  play: async (context) => {
+    await opened(context)
+    await expect(context.canvas.getAllByRole('link', { name: 'Wedstrijden' })).toHaveLength(1)
+    await expect(context.canvas.getAllByRole('link', { name: 'Uitslagen' })).toHaveLength(1)
+  },
+  render: longMenu('Uitslagen'),
+})
+
+export const MoreEscape = meta.story({
+  ...mobile('mobile2'),
+  name: 'Meer: Escape sluit de lijst',
+  parameters: closeStory(
+    'Escape sluit de open lijst, en de focus staat dan op de knop. Enter of spatie op de knop opent hem zonder JavaScript.',
+  ),
+  play: async ({ canvas }) => {
+    const button = canvas.getByText('Meer').closest('summary')!
+
+    await userEvent.click(button)
+    await waitFor(() => expect(button).toHaveAttribute('aria-expanded', 'true'))
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(button).toHaveAttribute('aria-expanded', 'false'))
+    await expect(button).toHaveFocus()
+  },
+  render: longMenu('Nieuws'),
 })
