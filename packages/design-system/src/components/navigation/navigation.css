@@ -224,7 +224,7 @@
 
     /* The button is the current page now, told as the links are. */
     .hf-navigation-header .hf-navigation-more:has(.hf-navigation-more-here) .hf-navigation-more-button {
-      font-weight: 800;
+      font-weight: var(--hf-menu-current-font-weight);
       text-decoration-color: var(--hf-colour-accent-on-header);
       text-decoration-line: underline;
       text-decoration-skip-ink: none;

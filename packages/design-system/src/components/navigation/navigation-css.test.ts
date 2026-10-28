@@ -317,15 +317,15 @@ describe('the button Meer in navigation.css', () => {
     const narrowest = query('width < 20rem')
 
     expect(narrowest).toContain(':has(.hf-navigation-more-here) .hf-navigation-more-button')
-    expect(narrowest).toContain('font-weight: 800;')
+    expect(narrowest).toContain('font-weight: var(--hf-menu-current-font-weight);')
     expect(narrowest).toContain('text-decoration-color: var(--hf-colour-accent-on-header);')
     expect(narrowest).toContain('text-decoration-thickness: 3px;')
   })
 
-  it('takes its colours from tokens, and has the weights of the other links in the menu: 600, and 800 for the current page', () => {
+  it('takes its colours from tokens, and has the weights of the other links in the menu, and the heavier one for the current page', () => {
     expect(folded.match(/var\(--hf-colour-[a-z-]+\)/g)).toEqual(['var(--hf-colour-accent-on-header)'])
-    expect(folded).not.toMatch(/font-weight: (?!800)/)
-    expect(folded.match(/font-weight: \d+;/g)).toEqual(['font-weight: 800;'])
+    expect(folded).not.toMatch(/font-weight: (?!var\(--hf-menu-current-font-weight\))/)
+    expect(folded.match(/font-weight: [^;]+;/g)).toEqual(['font-weight: var(--hf-menu-current-font-weight);'])
   })
 
   it('turns the arrow with the motion tokens, down when closed and up when open', () => {
