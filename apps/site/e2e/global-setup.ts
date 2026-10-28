@@ -3,6 +3,7 @@ import { addArticles } from './articles'
 import { addDiscussions } from './discussions'
 import { addEpisodes } from './episodes'
 import { addHeadlines } from './headlines'
+import { addStandings } from './standings'
 import { addTestSources } from './test-sources'
 import { addVisits } from './visits'
 
@@ -10,7 +11,8 @@ import { addVisits } from './visits'
 // register (see test-sources.ts), which acceptance no longer has. It also puts a made-up
 // article, a draft and an article for later in the database (see articles.ts), and makes the
 // moderator with a session that the checks of the admin log in as (see admin.ts), and the
-// made-up counters that the page Bezoek shows (see visits.ts). The homepage keeps its headlines
+// made-up counters that the page Bezoek shows (see visits.ts), and a made-up league table for
+// /wedstrijden (see standings.ts). The homepage keeps its headlines
 // and discussions in memory for five minutes, so nothing may ask for the homepage
 // before this has run: the site is started with robots.txt as its address to wait for (see
 // playwright.config.ts). The function it returns is the teardown.
@@ -24,6 +26,7 @@ export default async function globalSetup() {
   const removeArticles = await addArticles()
   const removeAdmin = await addAdmin()
   const removeVisits = await addVisits()
+  const removeStandings = await addStandings()
 
   return async () => {
     await removeHeadlines()
@@ -32,5 +35,6 @@ export default async function globalSetup() {
     await removeArticles()
     await removeAdmin()
     await removeVisits()
+    await removeStandings()
   }
 }

@@ -2575,6 +2575,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat is strenger tegen ingespoten scripts.
   We bewaren het voor de beheerpagina's, waar inloggen het de moeite waard maakt (#30).
   Voor de plek: `headers()` in `next.config.ts`; maar de headers staan nu al in de proxy, en zo blijven ze op één plek.
+- **Later:** zie _De CSP laat afbeeldingen van het type `data:` toe_ (28 oktober 2026): `img-src` is nu `'self' data:`.
+  De rest van de lijst blijft zoals hij was.
 
 ### De lijst met bronnen staat een uur in het geheugen van de server
 
@@ -3575,6 +3577,18 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rij die altijd op de uiterste plek scrolt, of op de dichtstbijzijnde rand: onvoorspelbaarder dan altijd vooraan.
   Een `scroll`-handler die per beeld de koppen meet: dat kost meer dan een observer.
 - **Later:** vult het besluit _Een balk onder de kop voor de links naar de kaarten, alleen op een smal scherm_ (27 oktober 2026) aan: de balk kent nu een huidige plek.
+
+### De CSP laat afbeeldingen van het type `data:` toe
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** `img-src` wordt `'self' data:`.
+  Een `data:`-afbeelding is een afbeelding in de pagina zelf en vraagt niets van een ander domein.
+  Dit vult _Een Content Security Policy die derden blokkeert, zonder nonces_ aan.
+- **Waarom:** de bibliotheek tekent de kaart als een SVG-afbeelding in een `data:`-adres (zie _De afbeelding van een kaart wordt in de browser gemaakt_).
+  Zonder dit staat de CSP dat niet toe.
+  Het principe blijft: een pagina laadt niets van een ander domein.
+  `blob:` is niet nodig: de bibliotheek werkt zonder web worker (`workerNumber: 0`), want een worker zou van een `blob:`-adres starten.
+- **Alternatieven:** `blob:` toelaten (alleen als de bibliotheek het echt nodig heeft, en dat is niet zo); `img-src *` (zou verzoeken naar elk domein toelaten, en dat doen we niet).
 
 ## Importer
 
@@ -6149,3 +6163,66 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** wie een artikel schrijft, hoeft geen opmaaktekens te kennen.
   Tiptap is open (MIT), onderhouden en heeft een kleine kern; de opmaak blijft klein omdat we alleen laden wat we gebruiken.
 - **Alternatieven:** de textarea met eigen opmaak houden (de schrijver moet de tekens leren kennen); een andere editor zoals Lexical of Slate (meer werk om toegankelijk te maken); `contenteditable` zelf bouwen (veel werk en veel fouten).
+
+### De afbeelding van een kaart wordt in de browser gemaakt, met een bibliotheek die pas bij een klik laadt
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** een kaart met de knop maakt zijn PNG in de browser van de bezoeker, met een kleine bibliotheek met een vrije licentie die pas bij de eerste klik wordt geladen (`import()`).
+  Er gaat niets naar een server en niets naar een ander domein.
+- **Waarom:** zo uploaden we niets en volgen we niemand, en de afbeelding is de kaart zoals de bezoeker hem ziet, in zijn thema.
+  Een server zou hem opnieuw moeten tekenen, en een gedeelde hosting heeft geen browser om een pagina te fotograferen.
+  Dynamisch laden houdt elke pagina even snel.
+- **Alternatieven:** de kaart op de server opnieuw tekenen met `ImageResponse` (een tweede ontwerp per kaart, met minder CSS).
+  Alles zelf op een canvas tekenen (de tabel, de donut en de staafjes opnieuw in code).
+  Een dienst van een derde partij (we sturen dan gegevens weg).
+
+### De bibliotheek is `modern-screenshot`, niet `html-to-image`
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** de afbeelding wordt gemaakt met `modern-screenshot` 4.7.0 (MIT, geen dependencies, geen installatiescript dat meeloopt), zonder web worker.
+- **Waarom:** we probeerden eerst `html-to-image` 1.11.13.
+  Die zet de berekende stijlen niet op de onderdelen van een `svg`, dus de plakken van de donut kwamen er zwart op, zonder scheidingslijn.
+  `modern-screenshot` tekent de donut, de staafjes, de kleuren (`light-dark()` en `color-mix()`), de lettertypes en het donkere thema goed.
+  Hij is groter dan `html-to-image`, maar laadt pas bij een klik.
+- **Alternatieven:** `html-to-image` (de donut klopt niet); `dom-to-image-more` (niet geprobeerd: bijna 1 MB uitgepakt); de donut als losse afbeelding tekenen (een omweg die de eigenaar zou moeten kiezen).
+
+### De afbeelding volgt het thema van de bezoeker en draagt de bron mee
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** de afbeelding heeft het thema dat de bezoeker nu heeft.
+  De kaart is er 29 rem breed, een breedte die in de zijbalk van een breed scherm past, met een rand van 1,5 rem eromheen: de afbeelding is 32 rem breed, 1024 pixels op dubbele resolutie.
+  Eronder staan het logo, het adres, de datum en de bronvermelding van de kaart.
+  De datum staat als dd-mm-jj met nullen ervoor (`28-10-26`) en de bron als "Gegevens van Wikipedia", op verzoek van de projecteigenaar.
+  Alleen de vijf kaarten met statistiek op `/wedstrijden` hebben de knop.
+- **Waarom:** de bezoeker kiest zijn thema, en de afbeelding is zijn kaart.
+  De vermelding van Wikipedia (CC BY-SA) moet meegaan zodra de gegevens het huis uit gaan.
+  De nieuwskaarten bevatten werk van journalisten, en een afbeelding ervan gaat rond zonder de link naar hun werk.
+  Een korte datum houdt de strook klein.
+- **Alternatieven:** de datum voluit, "28 oktober 2026" (past minder goed in de strook, en de projecteigenaar koos de korte vorm).
+  Altijd licht (dezelfde kaart ziet er voor elke deler hetzelfde uit, maar bezoekers in donker krijgen een andere kaart dan ze zien).
+  Alleen logo en adres (de vermelding gaat dan niet mee).
+  Alle kaarten van `/wedstrijden`.
+
+### Delen waar het kan, anders downloaden
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** de knop opent het deelmenu van het apparaat als de browser bestanden kan delen (`navigator.canShare`), en downloadt anders de PNG.
+  Kopiëren naar het klembord komt er niet.
+  Vraagt de browser om een nieuwe tik voor het deelmenu, omdat het maken te lang duurde, dan downloadt hij ook.
+- **Waarom:** op een telefoon wil de bezoeker de afbeelding naar een app sturen, en op een computer wil hij een bestand.
+  Het klembord kent minder browsers en laat niets over om later terug te vinden.
+- **Alternatieven:** altijd downloaden (op een telefoon staat de afbeelding dan in de bestanden, niet in het deelmenu).
+  Het klembord.
+
+### De knop komt van een eigenschap van `Card`, `shareable`, en staat er alleen met JavaScript
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** `Card` heeft de optionele eigenschap `shareable={{ source }}`.
+  `source` is de bronvermelding die onder de afbeelding komt, en is verplicht zodra de eigenschap er is.
+  De knop krijgt zijn naam van de eerste kop van de kaart ("Maak een afbeelding van Stand") en staat in de code direct na die kop.
+  De kaart doet pas na het laden in de browser mee: zonder JavaScript is er geen knop, en de kop houdt ruimte vrij zodat de pagina niet verspringt.
+  Een pagina geeft de eigenschap niet mee als de kaart nog geen gegevens heeft.
+- **Waarom:** een object dwingt af dat een kaart met een knop ook zijn bron noemt (principe 4 van de Redactie).
+  De naam uit de kop houdt de tekst op één plek.
+  Een knop zonder JavaScript doet niets, en een knop die er pas na het laden staat verschuift de kop niet.
+- **Alternatieven:** een boolean `shareable` met de bron als aparte eigenschap (een kaart kan dan zonder bron delen); een aparte component `ShareButton` die de pagina zelf in de kaart zet (de pagina moet dan zelf de kaart vinden en kiezen waar de knop komt).

@@ -36,6 +36,14 @@ import {
 } from './matches'
 
 /**
+ * What the button for an image of a statistics card puts under the image: the credit of
+ * Wikipedia, where the facts come from, as the cards of the homepage give it. It is a function,
+ * so a card that has no facts yet has no button.
+ */
+export const imageCredit = (hasFacts: boolean) =>
+  hasFacts ? { source: <WikipediaCredit compact lead="Gegevens van" /> } : undefined
+
+/**
  * The card of the matches page with the matches in which sc Heerenveen kept a clean sheet, as
  * short lines with the newest first, and above them how many there are in how many matches.
  * It starts with `count` lines, and the button under them loads the next ones, as on the
@@ -47,7 +55,7 @@ export function CleanSheetsCard({ count, matches, now }: { count: number; matche
   const shown = sheets.slice(0, count)
 
   return (
-    <Card aria-labelledby="de-nul-gehouden" surface="soft">
+    <Card aria-labelledby="de-nul-gehouden" shareable={imageCredit(played > 0)} surface="soft">
       <Heading aliases={['nul-gehouden']} anchor id="de-nul-gehouden" level={2}>
         De nul gehouden
       </Heading>
@@ -99,7 +107,11 @@ export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
   const slices = (counts: number[]) => quarterLabels.map((label, index) => ({ label, value: counts[index] ?? 0 }))
 
   return (
-    <Card aria-labelledby="doelpunten-per-kwartier" surface="warm">
+    <Card
+      aria-labelledby="doelpunten-per-kwartier"
+      shareable={imageCredit([...scored, ...conceded].some((count) => count > 0))}
+      surface="warm"
+    >
       <Heading anchor id="doelpunten-per-kwartier" level={2}>
         Doelpunten per kwartier
       </Heading>
@@ -198,7 +210,7 @@ export function SeasonCard({ matches }: { matches: PublicMatch[] }) {
   const [won, drawn, lost] = [count('W'), count('G'), count('V')]
 
   return (
-    <Card aria-labelledby="verloop-van-het-seizoen" surface="warm">
+    <Card aria-labelledby="verloop-van-het-seizoen" shareable={imageCredit(results.length > 0)} surface="warm">
       <Heading anchor id="verloop-van-het-seizoen" level={2}>
         Verloop van het seizoen
       </Heading>

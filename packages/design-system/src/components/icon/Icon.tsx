@@ -6,6 +6,7 @@ export const iconNames = [
   'arrow-right',
   'envelope',
   'external-link',
+  'image',
   'link',
   'moon',
   'plus',
@@ -69,6 +70,14 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3" />
     </>
   ),
+  // A picture: a frame with a sun in the top left corner and two hills in the bottom.
+  image: (
+    <>
+      <path d="M3.5 2.5h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z" />
+      <circle cx="6" cy="6" r="1" />
+      <path d="m2.5 11 3-3 2.5 2.5 1.5-1.5 4 4" />
+    </>
+  ),
   // Two links of a chain on the diagonal, from the bottom left to the top right, joined by a
   // short bar through the middle.
   link: (
@@ -106,7 +115,8 @@ const drawings: Record<IconName, ReactNode> = {
  * button is named by its own text alone, so the icon is hidden from assistive technology and is
  * never the only sign of something. The size, the space beside it and its place in the line are
  * in icon.css. It is not exported from the package: Link, Button, SegmentedControl,
- * NewsItem, Navigation and a Heading with an anchor draw it for the visitor. ThemeButton draws
+ * NewsItem, Navigation, a Heading with an anchor and the button for an image of a Card draw it
+ * for the visitor. ThemeButton draws
  * its own sun and moon, because they turn into each other.
  */
 export const Icon = ({ appearance = 'line', name }: IconProps) => (

@@ -16,9 +16,14 @@ export type WikipediaCreditPage = {
 
 export type WikipediaCreditProps =
   | (WikipediaCreditBaseProps & {
-      /** The short form, "Bron: Wikipedia", for a small card. It has no other props. */
+      /** The short form, "Bron: Wikipedia", for a small card. It takes only `lead` besides. */
       compact: true
       data?: never
+      /**
+       * What stands before "Wikipedia" instead of `Bron:`, such as `Gegevens van` in the strip
+       * under the image of a card.
+       */
+      lead?: string
       pages?: never
       readAt?: never
       readAtDateTime?: never
@@ -32,6 +37,7 @@ export type WikipediaCreditProps =
        * `selectiegegevens`.
        */
       data?: string
+      lead?: never
       /** The Wikipedia pages the data comes from, at least one. */
       pages: [WikipediaCreditPage, ...WikipediaCreditPage[]]
       /**
@@ -62,6 +68,7 @@ export const WikipediaCredit = ({
   className,
   compact,
   data = 'wedstrijdgegevens',
+  lead = 'Bron:',
   pages,
   readAt,
   readAtDateTime,
@@ -69,7 +76,7 @@ export const WikipediaCredit = ({
 }: WikipediaCreditProps) => (
   <p {...props} className={classNames('hf-meta', 'hf-wikipedia-credit', className)}>
     {compact ? (
-      'Bron: Wikipedia'
+      `${lead} Wikipedia`
     ) : (
       <>
         Bron: Wikipedia (<Link href={licenceHref}>CC BY-SA 4.0</Link>), {pages.length === 1 ? 'pagina' : 'pagina’s'}:{' '}

@@ -55,6 +55,9 @@ Daarom zet `e2e/global-setup.ts` eerst de testbronnen in het register (`e2e/test
 Daarna zet hij vóór de eerste test verzonnen koppen op die testbronnen in de database, en haalt ze er na de laatste test weer uit (`e2e/headlines.ts`).
 Hetzelfde doet het met een verzonnen artikel van de redactie, een concept en een artikel voor later, met een eigen account (`e2e/articles.ts`).
 Zo toetst axe de homepage met de kaart "Van de redactie" en de pagina `/redactie/e2e-artikel`, en toetst `e2e/articles.spec.ts` dat een concept en een artikel voor later nergens staan.
+Voor `/wedstrijden` zet hij een verzonnen stand in de database (`e2e/standings.ts`), want de seed heeft geen wedstrijden en zonder stand heeft de kaart Stand geen knop voor een afbeelding.
+Heeft de database al een stand voor dit seizoen, dan laat hij die staan en haalt hij niets weg.
+`e2e/card-image.spec.ts` klikt op die knop en toetst in de browser dat er een PNG komt, dat er niets naar een ander domein gaat en dat de CSP de afbeelding toestaat.
 Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
 De controle toetst de homepage ook met `?nieuws=15`, zodat de oudere koppen die de knop laadt ook langs axe komen.
 Hier gaat het om axe op de pagina met nieuws.

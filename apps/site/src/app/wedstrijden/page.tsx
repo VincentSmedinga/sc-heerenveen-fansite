@@ -5,10 +5,11 @@ import { cache } from 'react'
 
 import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
-import { getMatchData, overviewOf, parseCleanSheetCount } from '../../matches'
+import { getMatchData, overviewOf, parseCleanSheetCount, topScorersOf } from '../../matches'
 import {
   CleanSheetsCard,
   GoalsPerQuarterCard,
+  imageCredit,
   MatchLines,
   SeasonCard,
   SourceCredit,
@@ -97,7 +98,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme and the
           results: the table, the season, the goal scorers, the clean sheets, then the goals per quarter. */}
       <Page.Sidebar aria-label="De stand, de ranglijsten en de doelpunten per kwartier" wide>
-        <Card aria-labelledby="stand" surface="soft">
+        <Card aria-labelledby="stand" shareable={imageCredit(data.standings.length > 0)} surface="soft">
           <Heading anchor id="stand" level={2}>
             Stand
           </Heading>
@@ -108,7 +109,11 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           )}
         </Card>
         <SeasonCard matches={data.matches} />
-        <Card aria-labelledby="doelpuntenmakers" surface="soft">
+        <Card
+          aria-labelledby="doelpuntenmakers"
+          shareable={imageCredit(topScorersOf(data.matches).length > 0)}
+          surface="soft"
+        >
           <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
             Doelpuntenmakers
           </Heading>
