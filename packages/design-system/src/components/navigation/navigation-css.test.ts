@@ -26,6 +26,7 @@ describe('the colours of the bar of sub-pages', () => {
       [
         'var(--hf-colour-accent-on-header)',
         'var(--hf-colour-background-submenu)',
+        'var(--hf-colour-background-submenu)',
         'var(--hf-colour-background-submenu-pressed)',
         'var(--hf-colour-text-on-header)',
         'var(--hf-colour-text-submenu-link-hover)',
@@ -67,7 +68,9 @@ describe('the bar of sub-pages in navigation.css', () => {
   it('is on the colour of its own role, with no line under it or above it, and as wide as the page', () => {
     expect(bar).toContain('background-color: var(--hf-colour-background-submenu);')
     expect(bar).toContain('display: flex;')
-    expect(bar).not.toMatch(/border-(block|inline|top|bottom)|border:|box-shadow|outline/)
+    expect(bar).not.toMatch(/border-(block|inline|top|bottom)|border:|outline/)
+    // The only shadow is the colour that carries on to the edge of the window.
+    expect(bar.match(/box-shadow:[^;]*;/g)).toEqual(['box-shadow: 0 0 0 100vmax var(--hf-colour-background-submenu);'])
     expect(bar).not.toMatch(/max-inline-size|max-width|(?<![a-z-])inline-size:/)
   })
 
@@ -79,16 +82,30 @@ describe('the bar of sub-pages in navigation.css', () => {
     expect(rule('.hf-navigation-header')).toContain(
       '--hf-navigation-inset-start: max(var(--hf-page-inset), env(safe-area-inset-left, 0px));',
     )
-    expect(bar).toContain('padding-inline: calc(var(--hf-navigation-inset-start) - 0.625rem)')
+    expect(rule('.hf-navigation-header')).toContain(
+      '--hf-navigation-gutter-start: max(var(--hf-page-margin), env(safe-area-inset-left, 0px));',
+    )
+    expect(bar).toContain('padding-inline: calc(var(--hf-navigation-gutter-start) - 0.625rem)')
     expect(bar).toContain('env(safe-area-inset-right, 0);')
     expect(css).toContain('padding-inline: 0.625rem;')
   })
 
-  it('is as wide as the page although the menu above it keeps to the inset, by taking the inset back at both sides', () => {
-    expect(bar).toContain('flex: 0 0 calc(100% + var(--hf-navigation-inset-start) + var(--hf-navigation-inset-end));')
+  it('is as wide as the window although the menu above it keeps to the inset, with no percentage in its margins', () => {
+    expect(bar).toContain('flex: 0 0 calc(100% + var(--hf-navigation-gutter-start) + var(--hf-navigation-gutter-end));')
     expect(bar).toContain(
-      'margin-inline: calc(-1 * var(--hf-navigation-inset-start)) calc(-1 * var(--hf-navigation-inset-end));',
+      'margin-inline: calc(-1 * var(--hf-navigation-gutter-start)) calc(-1 * var(--hf-navigation-gutter-end));',
     )
+    // A percentage in the margin of a flex item is of the nav without its padding.
+    expect(bar).not.toMatch(/margin-inline:[^;]*(--hf-page-inset|%)/)
+  })
+
+  it('colours the rest of the way to the edge with a shadow that spreads far and is cut off above and below', () => {
+    expect(bar).toContain('box-shadow: 0 0 0 100vmax var(--hf-colour-background-submenu);')
+    expect(bar).toContain('clip-path: inset(0 -100vmax);')
+  })
+
+  it('ends its row at the edge of the column where the page is wider than its column, as the bar of anchors does', () => {
+    expect(bar).toMatch(/@media \(width >= 66rem\) \{\s*padding-inline-end: var\(--hf-navigation-gutter-end\);/)
   })
 
   it('comes after all the links of the menu, whichever row the link of its item is on, with the space of the menu above it', () => {

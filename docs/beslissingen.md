@@ -3675,10 +3675,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De kop is een raster met alleen het logo en de themaknop, met 0,25 rem eronder.
   Het menu is een flexrij op dezelfde achtergrond, met de lijn erboven als eerste item (`::before`, een rand, dus ook zichtbaar in geforceerde kleuren) en 0,4375 rem eronder.
   Zo is de som van de ruimtes gelijk aan die van de kop met het menu erin, en zijn de pixels gelijk (gemeten op 320, 390 en 900 pixels, licht en donker, ook met de insets van een iPhone nagebootst).
+  Alleen op de rand van de balk, op een plek met een halve pixel, verschilt één rij pixels een paar tinten door de schaduw.
   De `ul` en de `li` van het menu hebben `display: contents`.
   De links zijn dan items van de `nav`, en de balk, die in het `li` van zijn link staat, is er ook een.
   De balk heeft `order: 1` en `flex-basis` over de hele rij, dus hij staat onder alle links, ook als de link van zijn item naar een tweede rij is omgelopen.
-  De inset van de pagina zit als padding op de `nav`; de balk haalt hem terug met een negatieve marge, zodat hij van rand tot rand loopt.
+  De inset van de pagina zit als padding op de `nav`.
+  Een percentage in de marge van een flex-item is van de breedte van de `nav` zonder die padding, dus de balk kan de inset niet met een negatieve marge terughalen: op een breed scherm stopte hij dan voor de rand.
+  De balk haalt daarom alleen de marge van de pagina terug (of de uitsparing, als die groter is), en zijn kleur loopt door tot de rand als een schaduw zonder vervaging die ver uitwaaiert (`box-shadow: 0 0 0 100vmax`), boven en onder afgesneden met `clip-path`.
+  Een schaduw telt niet mee voor wat scrolt, dus de pagina scrolt niet zijwaarts.
+  Vanaf 66 rem eindigt de rij op de rand van de kolom, in lijn met het menu.
   `Navigation` geeft de `ul` en de `li` in dit menu `role="list"` en `role="listitem"`, want Safari liet lijsten met `display: contents` lang uit de toegankelijkheidsboom vallen.
   De tint, de maten, de gewichten en de rij met vervaging en snappen (`ShortcutsRow`) zijn die van #363.
   `watchTopEdge` kijkt naar de kop en naar het menu: de strook voor de statusbalk blijft zolang een van beide in beeld is, zoals voor deze wijziging de kop met het menu erin.
