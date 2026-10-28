@@ -1,3 +1,5 @@
+import type { FormResult } from '@fansite/design-system'
+
 import {
   listSeasonMatches,
   listSeasonStandings,
@@ -88,6 +90,29 @@ export function cleanSheetsOf(matches: PublicMatch[]): CleanSheets {
   const played = overviewOf(matches).results.filter((match) => match.goalsFor !== null && match.goalsAgainst !== null)
 
   return { matches: played.filter((match) => match.goalsAgainst === 0), played: played.length }
+}
+
+/**
+ * The results of the played matches of the Eredivisie, for the chart of the season: `W` for a
+ * win, `G` for a draw and `V` for a loss, in the order the matches were played (the query gives
+ * the matches by date, then by kick-off). A cup tie, a match that isn't played and a match with
+ * no score count for nothing. A match that was postponed has no result until it is played, and
+ * then it stands where it was played, so the place in the list is the order of the matches and
+ * not always the round. The Eredivisie has no extra time or shoot-out, so the score decides.
+ */
+export function leagueResultsOf(matches: PublicMatch[]): FormResult[] {
+  return matches.flatMap((match): FormResult[] => {
+    if (
+      match.competition !== 'Eredivisie' ||
+      match.status !== 'played' ||
+      match.goalsFor === null ||
+      match.goalsAgainst === null
+    ) {
+      return []
+    }
+
+    return [match.goalsFor > match.goalsAgainst ? 'W' : match.goalsFor === match.goalsAgainst ? 'G' : 'V']
+  })
 }
 
 /**

@@ -1,4 +1,5 @@
 import type { PublicMatch, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
+import type { FormResult } from '@fansite/design-system'
 
 import {
   Button,
@@ -6,6 +7,7 @@ import {
   DataTable,
   DonutChart,
   Form,
+  FormChart,
   Heading,
   Link,
   List,
@@ -25,6 +27,7 @@ import {
   cleanSheetsOf,
   goalsPerQuarter,
   goalsWithInitials,
+  leagueResultsOf,
   overviewOf,
   quarterLabels,
   scorersCoverage,
@@ -180,6 +183,43 @@ export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date
       {/* The full words of the abbreviations in use: a title only shows under a mouse. */}
       {legend.length > 0 && <Text appearance="meta">{legend.join(', ')}</Text>}
     </>
+  )
+}
+
+/**
+ * The card of the matches page with the season of the Eredivisie as a chart of bars, one for
+ * each match played, and under it the same numbers in a table, which is what a screen reader
+ * gets, because the chart is hidden from it. The cup ties don't count. Without a result it is
+ * a sentence for visitors and no chart.
+ */
+export function SeasonCard({ matches }: { matches: PublicMatch[] }) {
+  const results = leagueResultsOf(matches)
+  const count = (result: FormResult) => results.filter((item) => item === result).length
+  const [won, drawn, lost] = [count('W'), count('G'), count('V')]
+
+  return (
+    <Card aria-labelledby="verloop-van-het-seizoen" surface="warm">
+      <Heading anchor id="verloop-van-het-seizoen" level={2}>
+        Verloop van het seizoen
+      </Heading>
+      {results.length === 0 ? (
+        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+      ) : (
+        <>
+          <FormChart results={results} />
+          <DataTable
+            caption="Uitslagen van sc Heerenveen dit seizoen, met de punten"
+            columns={['Uitslag', 'Wedstrijden', 'Punten']}
+            rows={[
+              { cells: [won, won * 3], header: 'Winst' },
+              { cells: [drawn, drawn], header: 'Gelijk' },
+              { cells: [lost, 0], header: 'Verlies' },
+              { cells: [results.length, won * 3 + drawn], header: 'Totaal' },
+            ]}
+          />
+        </>
+      )}
+    </Card>
   )
 }
 

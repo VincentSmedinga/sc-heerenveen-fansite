@@ -6,6 +6,7 @@ import {
   cleanSheetsOf,
   goalsPerQuarter,
   goalsWithInitials,
+  leagueResultsOf,
   overviewOf,
   parseCleanSheetCount,
   scorersCoverage,
@@ -348,6 +349,66 @@ describe('cleanSheetsOf', () => {
 
   it('gives nothing for a season without matches', () => {
     expect(cleanSheetsOf([])).toEqual({ matches: [], played: 0 })
+  })
+})
+
+describe('leagueResultsOf', () => {
+  const playedOn = (round: string, matchDate: string, goalsFor: number, goalsAgainst: number): PublicMatch => ({
+    ...match(round, 'played', matchDate),
+    goalsAgainst,
+    goalsFor,
+  })
+
+  it('gives W for a win, G for a draw and V for a loss, on the score', () => {
+    const matches = [
+      playedOn('Speelronde 1', '2026-08-01', 3, 0),
+      playedOn('Speelronde 2', '2026-08-08', 1, 1),
+      playedOn('Speelronde 3', '2026-08-15', 0, 2),
+      playedOn('Speelronde 4', '2026-08-22', 0, 0),
+      playedOn('Speelronde 5', '2026-08-29', 2, 1),
+    ]
+
+    expect(leagueResultsOf(matches)).toEqual(['W', 'G', 'V', 'G', 'W'])
+  })
+
+  it('keeps the order the matches were played in, a postponed match where it was played', () => {
+    // Round 3 was postponed and played after round 5, so it comes after it.
+    const matches = [
+      playedOn('Speelronde 1', '2026-08-01', 1, 0),
+      playedOn('Speelronde 2', '2026-08-08', 0, 1),
+      playedOn('Speelronde 4', '2026-08-22', 1, 1),
+      playedOn('Speelronde 5', '2026-08-29', 2, 0),
+      playedOn('Speelronde 3', '2026-09-02', 0, 3),
+    ]
+
+    expect(leagueResultsOf(matches)).toEqual(['W', 'V', 'G', 'W', 'V'])
+  })
+
+  it('leaves out a cup tie, a match without a score, and a match that is postponed or still to come', () => {
+    const noScore: PublicMatch = {
+      ...match('Speelronde 9', 'played', '2026-10-01'),
+      goalsAgainst: null,
+      goalsFor: null,
+    }
+    const cup: PublicMatch = { ...playedOn('Tweede ronde', '2026-09-23', 4, 0), competition: 'KNVB Beker' }
+    const matches: PublicMatch[] = [
+      playedOn('Speelronde 1', '2026-08-01', 1, 0),
+      cup,
+      noScore,
+      match('Speelronde 5', 'postponed', '2026-08-29'),
+      match('Speelronde 6', 'scheduled', '2026-09-05'),
+    ]
+
+    expect(leagueResultsOf(matches)).toEqual(['W'])
+  })
+
+  it('gives nothing for no matches or no league match, and does not change the list it is given', () => {
+    const matches: PublicMatch[] = [{ ...playedOn('Tweede ronde', '2026-09-23', 1, 0), competition: 'KNVB Beker' }]
+    const copy = [...matches]
+
+    expect(leagueResultsOf([])).toEqual([])
+    expect(leagueResultsOf(matches)).toEqual([])
+    expect(matches).toEqual(copy)
   })
 })
 
