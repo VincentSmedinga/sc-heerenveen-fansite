@@ -151,7 +151,7 @@ describe('the text in the footer in page.css', () => {
   const columns = media('width >= 40rem')
 
   it('keeps every line of text of the footer on one line, but not the links', () => {
-    expect(nowrap).toMatch(/> :not\(:last-child\) \{\s*white-space: nowrap;\s*\}/)
+    expect(nowrap).toMatch(/> :not\(\.hf-navigation, \.hf-page-top-link\) \{\s*white-space: nowrap;\s*\}/)
   })
 
   it('does so only above a width where it fits, so a line that does not break cannot make the page scroll sideways', () => {
@@ -184,6 +184,47 @@ describe('the text in the footer in page.css', () => {
     expect(list).toMatch(/> li \{[^}]*display: inline-block;[^}]*margin-inline-start: 1\.5rem;/)
     // The margin before a link, taken back at the list's start, keeps links 1,5rem apart.
     expect(list).toContain('margin-inline-start: -1.5rem;')
+  })
+})
+
+describe('the footer with a link to the top in page.css', () => {
+  const footer = css.slice(css.indexOf('.hf-page-footer {'))
+  const withLink = footer.slice(footer.indexOf('&:has(> .hf-page-top-link) {'))
+  // The part of the rule before its first nested rule.
+  const own = withLink.match(/^[^{]*\{([^{}]*)/)?.[1] ?? ''
+  const wide = withLink.match(/@media \(width >= 40rem\) \{(.*?\n {6}\})\n/s)?.[1] ?? ''
+
+  it('adds a column for the link only when the footer has one, so a footer without it is as before', () => {
+    expect(footer.match(/&:has\(> \.hf-page-top-link\)/g)).toHaveLength(1)
+    expect(own).toContain('grid-template-columns: minmax(0, 1fr) auto;')
+    expect(footer.match(/^\.hf-page-footer \{[^@]*/)?.[0]).toContain('grid-template-columns: minmax(0, 1fr);')
+  })
+
+  it('puts the link level with the two lines of text on a narrow screen and the links under them', () => {
+    expect(withLink).toMatch(/> \.hf-page-top-link \{[^}]*grid-column: 2;[^}]*grid-row: 1 \/ 3;/)
+    expect(withLink).toMatch(/> \.hf-navigation \{\s*grid-column: 1 \/ -1;/)
+    expect(withLink).toMatch(/> :not\(\.hf-navigation, \.hf-page-top-link\) \{\s*grid-column: 1;/)
+  })
+
+  it('puts the link in a column of its own, top right, beside the links on a wide screen', () => {
+    expect(wide).toContain('grid-template-columns: auto minmax(0, 1fr) auto;')
+    expect(wide).toMatch(/> \.hf-page-top-link \{[^}]*grid-column: 3;[^}]*grid-row: 1 \/ -1;/)
+    expect(wide).toMatch(/> \.hf-navigation \{\s*grid-column: 2;/)
+  })
+
+  it('leaves room for the link beside the text, and lets the text break again where there is none', () => {
+    // 14,1rem of text, 0,5rem, 2,75rem of link and 2rem of margin: 19,35rem. With the text
+    // spacing of WCAG 1.4.12 the text is 17rem wide: 22,25rem.
+    expect(own).toContain('column-gap: 0.5rem;')
+    expect(withLink).toMatch(
+      /@media \(width < 22\.25rem\) \{\s*> :not\(\.hf-navigation, \.hf-page-top-link\) \{\s*white-space: normal;/,
+    )
+    expect(wide).toContain('column-gap: 2rem;')
+  })
+
+  it('finds the links by their class, and not as the last child, which is the link to the top', () => {
+    expect(footer).not.toContain(':last-child')
+    expect(footer).toMatch(/> \.hf-navigation \{\s*margin-block-start: 0\.5rem;/)
   })
 })
 

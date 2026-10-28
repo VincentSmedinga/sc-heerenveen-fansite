@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 export const iconNames = [
   'arrow-left',
   'arrow-right',
+  'arrow-up',
   'envelope',
   'external-link',
   'image',
@@ -55,6 +56,12 @@ const drawings: Record<IconName, ReactNode> = {
     <>
       <path d="M2.5 8h11" />
       <path d="M9 3.5 13.5 8 9 12.5" />
+    </>
+  ),
+  'arrow-up': (
+    <>
+      <path d="M8 13.5v-11" />
+      <path d="M3.5 7 8 2.5 12.5 7" />
     </>
   ),
   envelope: (
@@ -115,8 +122,8 @@ const drawings: Record<IconName, ReactNode> = {
  * button is named by its own text alone, so the icon is hidden from assistive technology and is
  * never the only sign of something. The size, the space beside it and its place in the line are
  * in icon.css. It is not exported from the package: Link, Button, SegmentedControl,
- * NewsItem, Navigation, a Heading with an anchor and the button for an image of a Card draw it
- * for the visitor. ThemeButton draws
+ * NewsItem, Navigation, a Heading with an anchor, the button for an image of a Card and
+ * Page.TopLink draw it for the visitor. ThemeButton draws
  * its own sun and moon, because they turn into each other.
  */
 export const Icon = ({ appearance = 'line', name }: IconProps) => (

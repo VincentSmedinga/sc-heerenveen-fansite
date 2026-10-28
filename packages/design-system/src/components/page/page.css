@@ -325,6 +325,16 @@
    * The stripes take no touch or mouse and are in no way part of the layout: they are positioned, so they can't make a
    * scrollbar, and they have no content, so a screen reader doesn't see them. There are none in forced colours and in print.
    * A browser that doesn't know the colour (color-mix()) shows no stripes.
+   *
+   * The link to the top of the page (Page.TopLink, see top-link.css) is the last child, after
+   * the links, so a visitor who tabs to the end of a long page meets it after the other links.
+   * It sits on the right, a column of its own, and the grid puts it level with the two lines of
+   * text on a narrow screen, above the links, and in the top right corner on a wide one, beside
+   * the links. The links are found by their class (.hf-navigation), and not as the last child.
+   * A footer without the link has no column for it. Beside the link the text has less room:
+   * 14,1rem of text, 0,5rem, the link of 2,75rem and 2rem of margin is 19,35rem, which is under
+   * 19,5rem. With the text spacing that WCAG 1.4.12 asks to support (17rem) it is 22,25rem, so
+   * under 22,25rem the lines of text may break again. They would run under the link otherwise.
    */
   .hf-page-footer {
     --hf-stripe-height: 3.5;
@@ -395,12 +405,12 @@
       }
     }
 
-    > :last-child {
+    > .hf-navigation {
       margin-block-start: 0.5rem;
     }
 
     @media (width >= 19.5rem) {
-      > :not(:last-child) {
+      > :not(.hf-navigation, .hf-page-top-link) {
         white-space: nowrap;
       }
     }
@@ -423,11 +433,51 @@
       grid-template-columns: auto minmax(0, 1fr);
       grid-template-rows: auto auto 1fr;
 
-      > :last-child {
+      > .hf-navigation {
         place-self: start end;
         grid-column: 2;
         grid-row: 1 / -1;
         margin-block-start: 0;
+      }
+    }
+
+    &:has(> .hf-page-top-link) {
+      column-gap: 0.5rem;
+      grid-template-columns: minmax(0, 1fr) auto;
+
+      > :not(.hf-navigation, .hf-page-top-link) {
+        grid-column: 1;
+      }
+
+      > .hf-navigation {
+        grid-column: 1 / -1;
+      }
+
+      > .hf-page-top-link {
+        align-self: center;
+        grid-column: 2;
+        grid-row: 1 / 3;
+      }
+
+      @media (width < 22.25rem) {
+        > :not(.hf-navigation, .hf-page-top-link) {
+          white-space: normal;
+        }
+      }
+
+      @media (width >= 40rem) {
+        column-gap: 2rem;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+
+        > .hf-navigation {
+          grid-column: 2;
+        }
+
+        > .hf-page-top-link {
+          align-self: start;
+          grid-column: 3;
+          grid-row: 1 / -1;
+        }
       }
     }
   }

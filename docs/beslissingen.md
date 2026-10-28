@@ -2554,6 +2554,88 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   "Sinds 1997 …"; dat botst met de beslissing van 22 oktober 2026 dat "sinds 1997" alleen in het logo staat.
   Een regel uit een supporterslied; de rechten, en sommige regels zijn van de club of van een andere club.
 
+### Een knop naar boven in de footer, alleen op lange pagina's, en alleen met CSS
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de footer heeft een ronde knop "Naar boven", in de stijl van de themaknop, die er alleen is als de pagina meer dan twee vensterhoogtes hoog is.
+  Dat is dezelfde regel als: de pagina kan meer dan één vensterhoogte scrollen.
+  Het is CSS (een scroll-gestuurde animatie op `visibility`), zonder JavaScript, en een browser zonder die functie toont de knop altijd.
+  De knop staat rechts in de footer en als laatste in de code, zodat het toetsenbord hem bereikt nadat de pagina naar beneden is gescrold.
+- **Waarom:** de footer is waar je naartoe komt na een lange pagina, en daar wil je terug naar boven.
+  De knop is er alleen als dat nuttig is, dus niet op een korte pagina waar hij niets doet.
+  Een scroll-gestuurde animatie heeft geen script, geen flits bij het laden en volgt het formaat van het venster.
+  `visibility: hidden` houdt hem uit de Tab-volgorde en weg bij een schermlezer.
+- **Alternatieven:** JavaScript meet de hoogte van de pagina (meer code en een flits voor het script draait).
+  De knop altijd tonen (ook waar hij niets doet).
+  Een knop die vastzit aan een hoek van het scherm (kan over de inhoud en de balken van de browser liggen).
+
+### De knop naar boven is `Page.TopLink`, een link naar `#top`
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** het onderdeel heet `Page.TopLink` en is een gewone `a` met `href="#top"`.
+  De prop `label` is verplicht en is de naam voor schermlezers ("Naar boven"); er is geen zichtbare tekst.
+  Het adres kan niet worden veranderd, want de knop is er om naar de bovenkant van het document te gaan.
+  Het pictogram is een nieuwe pijl omhoog (`arrow-up`) in `Icon`, met dezelfde lijn als de andere pijlen.
+  Het onderdeel heeft geen status en blijft daarom een servercomponent.
+- **Waarom:** het is een eigenschap van `Page`, net als `Page.Footer` waar het in staat.
+  "Link" en niet "button", want de knop navigeert en is een `a`.
+  `#top` is de bovenkant van het document, ook als er geen element met dat id is, dus de pagina hoeft geen anker te dragen.
+  Een schermlezer hoort "Naar boven, link", zoals bij elke andere link.
+  Het werkt zonder JavaScript.
+  De Next.js-router onderschept een gewone `a` met een anker niet.
+  Het vloeiende scrollen van `root.css` blijft dus gelden, en "minder beweging" ook.
+- **Alternatieven:** `Page.TopButton` (het is geen knop); een anker op `.hf-page` met een eigen id (een extra id dat elke pagina moet dragen); `window.scrollTo` in een klik (JavaScript, en dan werkt het niet zonder).
+
+### De knop naar boven toont zich na één `svh`, met een scroll-gestuurde animatie die in `@supports` staat
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** de animatie loopt op de scrollpositie van het document (`animation-timeline: scroll(root block)`) en heeft een bereik van `100svh` tot `calc(100svh + 1px)`.
+  De sleutelbeelden zetten `visibility` van `hidden` naar `visible`, met `animation-fill-mode: both`.
+  Dat is dus verborgen tot en met precies één vensterhoogte scrollen en zichtbaar zodra de pagina verder is.
+  Een pagina die niet verder kan scrollen dan één vensterhoogte, haalt die grens nooit.
+  De animatie staat in `@supports (animation-timeline: scroll()) and (animation-range: 1px 2px)`.
+  Buiten dat blok is de knop zichtbaar, dus een browser zonder die functies toont hem altijd.
+  De animatie heeft geen duur en geen overgang, dus "minder beweging" hoeft niets te stoppen.
+- **Waarom:** `svh` is de hoogte van het venster als de balken van de browser op een telefoon zichtbaar zijn.
+  Hij blijft gelijk tijdens het scrollen, dus de knop verspringt niet.
+  `dvh` volgt de balken, waardoor de grens beweegt terwijl je scrolt.
+  `lvh` is het grote venster zonder balken, waardoor een bezoeker verder moet scrollen dan hij zag.
+  Het bereik van 1 pixel maakt van de animatie een omslag op één punt.
+  De knop zit in de footer, onderaan de pagina, en daar is de scrollpositie het maximum.
+  Hij is dus zichtbaar precies als dat maximum groter is dan één vensterhoogte, dus als de pagina hoger is dan twee vensterhoogtes.
+  De animatie staat in `@supports`, omdat `animation-timeline` en `animation-range` nog niet breed beschikbaar zijn.
+  De stylelint-regel `use-baseline` eist dat.
+  Het issue vroeg om een terugval met `@supports not`.
+  Dit is hetzelfde gedrag, omgekeerd opgeschreven: de terugval is de standaard, en alleen een browser die de functies kent, verbergt de knop.
+- **Alternatieven:** `dvh` of `lvh` (zie hierboven); een animatie in tijd die door JavaScript wordt gestart; `opacity` in plaats van `visibility` (de knop blijft dan bereikbaar met Tab en wordt voorgelezen).
+
+### De knop naar boven heeft de kleuren van links in de footer en een eigen kolom in het raster
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** het pictogram heeft in rust de kleur van een link (`--hf-colour-text-link`) en onder de muis, ingedrukt en bij focus die van een link onder de muis (`--hf-colour-text-link-hover`).
+  De rand (55%) en de vulling (14%) zijn tinten van de kleur van het pictogram, met `color-mix()` op `currentcolor`, zoals bij de themaknop.
+  Er komt geen nieuwe kleurrol bij.
+  De knop is rond, 44 pixels, met een pictogram van 26 pixels, en heeft dezelfde lijn en toestanden als de themaknop.
+  In geforceerde kleuren is de rand `LinkText`, en bij het afdrukken is de knop er niet.
+  Heeft de footer een `Page.TopLink`, dan krijgt hij een kolom voor de knop.
+  Op een smal scherm staat de knop rechts, op hoogte van de twee regels tekst, en de links eronder.
+  Vanaf 40rem staat hij in een derde kolom rechts van de links.
+  De links worden gevonden met hun klasse (`.hf-navigation`) en niet meer als laatste kind.
+  De zinnen breken pas af onder 22,25rem in plaats van 19,5rem, want naast de knop is minder plaats.
+- **Waarom:** de footer is een ander vlak dan de header, dus de kleuren van de themaknop (voor het blauw van de header) passen er niet.
+  De rollen van links in de footer halen er al 4,5:1.
+  Het pictogram haalt 6,57:1 in rust en 6,66:1 onder de muis met de vulling.
+  Dat geldt in licht en in donker, ook op de strepen, gerekend met de tokens van de strepen.
+  Een rand en vulling uit `currentcolor` volgen de toestand zonder extra rollen.
+  14,1rem tekst, 0,5rem ruimte, 2,75rem knop en 2rem marge is 19,35rem; met de tekstafstand van WCAG 1.4.12 is de tekst 17rem breed en komt het op 22,25rem.
+  Onder die breedte mogen de zinnen weer afbreken, zodat ze niet onder de knop lopen en de pagina niet zijwaarts scrolt.
+  De knop is het laatste kind van de footer, dus een toetsenbordgebruiker komt hem tegen na de andere links.
+  Op een smal scherm staat hij boven de links, dus de volgorde van het toetsenbord en die van het scherm verschillen.
+  Dat mag, want WCAG 2.4.3 vraagt een betekenisvolle volgorde en geen gelijke.
+  De knop hoort bij het eind van de pagina, dus bij de laatste plek in de volgorde.
+  De knop ligt over de strepen: de kinderen van de footer zijn gepositioneerd en liggen daarom boven het deel van de strepen over de footer.
+- **Alternatieven:** de kleuren van de themaknop (die zijn gemaakt voor het donkerblauw van de header); nieuwe rollen voor rand en vulling in de footer (meer tokens voor dezelfde tinten); de knop in een hoek van de footer met `position: absolute` (hij schuift dan over de tekst of de links); de knop vóór het menu in de code (de volgorde van het toetsenbord volgt dan het scherm, maar de bezoeker die onderaan komt, tabt eerst door de knop).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -5289,6 +5371,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De themaschakelaar is één knop rechtsboven in de header_.
   De footer heeft de knoppen Licht en Donker niet meer, dus de regels voor knoppen in de footer zijn weg.
   De twee zinnen breken nog niet af, en de links blijven afbreken in rijen van gelijke lengte.
+- **Later:** zie _De knop naar boven heeft de kleuren van links in de footer en een eigen kolom in het raster_.
+  Heeft de footer die knop, dan breken de zinnen pas af onder 22,25rem in plaats van 19,5rem, en staan de links in de tweede kolom van drie.
 
 ### Artikelen van de redactie staan in de database
 
