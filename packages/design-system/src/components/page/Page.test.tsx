@@ -374,6 +374,49 @@ describe('Page.Footer', () => {
   })
 })
 
+describe('Page.TopLink', () => {
+  it('is a link to the top of the page, named by its label and with no visible text', () => {
+    render(<Page.TopLink label="Naar boven" />)
+    const link = screen.getByRole('link', { name: 'Naar boven' })
+
+    expect(link.tagName).toBe('A')
+    expect(link.getAttribute('href')).toBe('#top')
+    expect(link.className).toBe('hf-page-top-link')
+    expect(link.textContent).toBe('')
+  })
+
+  it('hides its arrow from assistive technology, so the name is the label alone', () => {
+    render(<Page.TopLink label="Naar boven" />)
+    const icon = screen.getByRole('link').querySelector('svg')
+
+    expect(icon?.getAttribute('aria-hidden')).toBe('true')
+    expect(icon?.getAttribute('focusable')).toBe('false')
+    expect(icon?.getAttribute('class')).toBe('hf-icon')
+  })
+
+  it('keeps the other attributes and adds a class to its own, but not another destination or name', () => {
+    render(<Page.TopLink className="extra" id="boven" label="Naar boven" />)
+    const link = screen.getByRole('link')
+
+    expect(link.className).toBe('hf-page-top-link extra')
+    expect(link.id).toBe('boven')
+    expect(link.getAttribute('href')).toBe('#top')
+  })
+
+  it('is the last child of the footer, after the links, so the keyboard reaches it after them', () => {
+    render(<ExampleFooter topLink />)
+    const footer = screen.getByRole('contentinfo')
+
+    expect(Array.from(footer.children).map((child) => child.tagName.toLowerCase())).toEqual(['p', 'p', 'nav', 'a'])
+    expect(footer.lastElementChild).toBe(within(footer).getByRole('link', { name: 'Naar boven' }))
+    expect(within(footer).getAllByRole('link').at(-1)).toBe(footer.lastElementChild)
+  })
+
+  it('is called Page.TopLink in the developer tools and the code examples', () => {
+    expect(Page.TopLink.displayName).toBe('Page.TopLink')
+  })
+})
+
 describe('Page.Shortcuts', () => {
   const items = [
     { href: '#programma', label: 'Programma' },

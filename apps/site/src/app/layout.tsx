@@ -98,6 +98,7 @@ export default function RootLayout({ children, shortcuts }: { children: ReactNod
             <Text appearance="meta">Alles over onze club op één plek.</Text>
             <Text appearance="meta">Voor supporters door supporters.</Text>
             <Navigation items={footerItems} label="Over de site" />
+            <Page.TopLink label="Naar boven" />
           </Page.Footer>
         </Page>
       </Body>

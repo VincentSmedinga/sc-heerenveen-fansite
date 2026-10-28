@@ -46,6 +46,7 @@ const meta = preview.meta({
 const labels: Record<IconName, string> = {
   'arrow-left': 'Pijl naar links',
   'arrow-right': 'Pijl naar rechts',
+  'arrow-up': 'Pijl omhoog',
   envelope: 'Envelop',
   'external-link': 'Externe link',
   image: 'Afbeelding',

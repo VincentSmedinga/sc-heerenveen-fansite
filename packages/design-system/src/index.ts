@@ -72,6 +72,7 @@ export type {
   PageShortcutsItem,
   PageShortcutsProps,
   PageSidebarProps,
+  PageTopLinkProps,
 } from './components/page/Page'
 export { Pagination } from './components/pagination/Pagination'
 export type { PaginationProps } from './components/pagination/Pagination'

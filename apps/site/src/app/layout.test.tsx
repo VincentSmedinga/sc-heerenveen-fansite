@@ -61,6 +61,16 @@ describe('RootLayout', () => {
   })
 })
 
+describe('the link to the top in the footer', () => {
+  it('comes last in the footer, after the links, and goes to the top of the page', () => {
+    const html = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
+
+    expect(html).toMatch(
+      /<\/nav><a [^>]*aria-label="Naar boven"[^>]*class="hf-page-top-link"[^>]*href="#top"[^>]*>.*<\/a><\/footer>/s,
+    )
+  })
+})
+
 describe('the title of the layout', () => {
   afterEach(() => {
     vi.unstubAllEnvs()

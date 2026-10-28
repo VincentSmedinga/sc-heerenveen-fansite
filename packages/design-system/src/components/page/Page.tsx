@@ -1,6 +1,7 @@
 import { type ComponentPropsWithoutRef, type ReactNode, useId } from 'react'
 
 import { classNames } from '../classNames'
+import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
 import { ShortcutsRow } from './ShortcutsRow'
 
@@ -58,6 +59,15 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
    * choose it without owning the Page.Body, which the layout of the site renders.
    */
   wide?: boolean
+}
+
+export type PageTopLinkProps = Omit<ComponentPropsWithoutRef<'a'>, 'aria-label' | 'children' | 'href'> & {
+  /**
+   * The name of the link for a screen reader, such as "Naar boven". There is no visible text,
+   * so the name is what a visitor hears. It does not say "link", which the screen reader
+   * adds itself.
+   */
+  label: string
 }
 
 /**
@@ -172,11 +182,35 @@ const Cell = ({ className, ...props }: PageCellProps) => (
 /**
  * The bottom of the page, on a band of its own that only its colour sets apart from the body: a
  * `footer` element, which is the page's contentinfo landmark. It holds two lines of text, a
- * Text each, and the links last: beside the text on a wide screen, under it on a narrow one.
- * Links in it are the blue of links elsewhere.
+ * Text each, and the links: beside the text on a wide screen, under it on a narrow one. If the
+ * page has a Page.TopLink, it comes last. Links in it are the blue of links elsewhere.
  */
 const Footer = ({ className, ...props }: PageFooterProps) => (
   <footer className={classNames('hf-page-footer', className)} {...props} />
+)
+
+/**
+ * A round button in the Page.Footer that takes the visitor back to the top of the page: a link
+ * to `#top`, the top of the document, so it works without script. It looks like the ThemeButton
+ * of the header, with an arrow pointing up, in the blue of the links in the footer. The
+ * `label` is its name, and there is no visible text.
+ *
+ * It is only there where it helps: when the page can scroll further than the height of the
+ * window, that is when the page is more than twice as high as the window. Short pages, such as
+ * an error page, never show it. A scroll-driven animation in top-link.css makes it
+ * `visibility: hidden` until then, so a hidden link is not reached with Tab and not read out.
+ * That needs no script. A browser that does not know scroll-driven animations always shows it.
+ *
+ * Put it last in the Page.Footer, after the links. A visitor who tabs to the end of a long page
+ * then meets it after the other links, once it has appeared. The footer puts it on the right,
+ * above the links on a narrow screen, so the order on the screen differs from the order of the
+ * keyboard. The link is not part of a text, and a screen reader hears no more than "Naar
+ * boven, link".
+ */
+const TopLink = ({ className, label, ...props }: PageTopLinkProps) => (
+  <a {...props} aria-label={label} className={classNames('hf-page-top-link', className)} href="#top">
+    <Icon name="arrow-up" />
+  </a>
 )
 
 // The names in React's developer tools and in the code examples in Storybook.
@@ -187,6 +221,7 @@ Main.displayName = 'Page.Main'
 Sidebar.displayName = 'Page.Sidebar'
 Cell.displayName = 'Page.Cell'
 Footer.displayName = 'Page.Footer'
+TopLink.displayName = 'Page.TopLink'
 
 /**
  * The page: as wide as the window. The backgrounds of the Page.Header and the Page.Footer run
@@ -214,3 +249,4 @@ Page.Main = Main
 Page.Sidebar = Sidebar
 Page.Cell = Cell
 Page.Footer = Footer
+Page.TopLink = TopLink
