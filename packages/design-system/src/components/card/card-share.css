@@ -89,7 +89,7 @@
   }
 
   /*
-   * The stage is a frame of one rem round a copy of the card, with the strip under it. It sits out of sight, in the page
+   * The stage is a frame of half a rem round a copy of the card, with the strip under it. It sits out of sight, in the page
    * itself, so the browser works out the same styles for it as for the card, and is taken away when the image is done.
    * The copy has the width and the padding of the card in the sidebar of a wide screen, whatever the screen is, and not
    * the button, which is left out of the copy.
@@ -107,8 +107,8 @@
     color: var(--hf-colour-text-default);
     display: grid;
     gap: 0.75rem;
-    inline-size: 33rem;
-    padding: 1rem;
+    inline-size: 32rem;
+    padding: 0.5rem;
   }
 
   .hf-card-share-copy {
@@ -120,8 +120,9 @@
   }
 
   /*
-   * The strip is a signature, not a title: the logo is smaller than in the header and has no "sinds 1997", and the
-   * address and the day stand on one line.
+   * The strip is a signature, not a title: the logo is smaller than in the header and has no "sinds 1997". As in the
+   * footer, the lines of text sit right under each other, in a column at the end side: the address and the day, then
+   * the source. The logo is level with them.
    */
   .hf-card-share-strip {
     --hf-logo-gap: 0.5rem;
@@ -129,21 +130,27 @@
 
     align-items: center;
     display: grid;
-    gap: 0.25rem 1rem;
+    gap: 0 1rem;
     grid-template-columns: auto minmax(0, 1fr);
 
     .hf-logo-tagline {
       display: none;
     }
 
+    .hf-logo {
+      grid-row: 1 / span 2;
+    }
+
     .hf-card-share-address {
       color: var(--hf-colour-text-secondary);
+      grid-column: 2;
       margin: 0;
       text-align: end;
     }
 
     .hf-card-share-credit {
-      grid-column: 1 / -1;
+      grid-column: 2;
+      text-align: end;
 
       p {
         margin: 0;
