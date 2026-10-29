@@ -2,8 +2,9 @@
 // (e2e/*.ts) in the database of the .env in the root, so a build on your own computer shows a
 // full homepage, /podcasts and the matches of the season before this one for `pnpm
 // screenshots`. Run it after `pnpm db:migrate` and `pnpm db:seed`, and before you start the
-// site: the homepage keeps its headlines for five minutes. `--remove` takes them out again.
-// The database holds nothing else of them: it is the one you develop with.
+// site: the homepage keeps its headlines for five minutes. `--remove` takes them out again,
+// the season before this one only while all its matches are made up. The database holds
+// nothing else of them: it is the one you develop with.
 //
 //   pnpm --filter site test-data
 //   pnpm --filter site test-data --remove
