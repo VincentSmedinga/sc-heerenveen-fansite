@@ -150,7 +150,7 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
       const html = await render()
 
       expect(html).toMatch(
-        /<div class="hf-page-title"><h1 class="hf-heading-1">Wedstrijden 2025\/26<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+        /<div class="hf-page-title"><h1 class="hf-heading-1">Wedstrijden<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
       )
       expect(html).toContain('action="/wedstrijden/kies"')
       expect(html).toContain('method="get"')
