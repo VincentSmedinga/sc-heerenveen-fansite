@@ -112,6 +112,46 @@ const renderBlock = (maxInlineSize: string) => () => (
 
 const renderSidebar = renderBlock('20rem')
 
+// The block of the homepage when the previous match is over but has no result yet: a cup tie
+// two hours after the kick-off, with the next match under it.
+const renderSidebarMissing = () => (
+  <div style={{ maxInlineSize: '20rem' }}>
+    <Card aria-labelledby="wedstrijden-zonder-uitslag-kop">
+      <Heading id="wedstrijden-zonder-uitslag-kop" level={2}>
+        Wedstrijden
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="KNVB Beker"
+            dateTime="2026-10-28T19:00:00Z"
+            home={false}
+            opponent="Voorbeeld United"
+            resultMissing
+            round="Tweede ronde"
+            stadium="Voorbeeldpark"
+            status="scheduled"
+            time="wo 28 okt 20:00"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-11-01T18:45:00Z"
+            home
+            opponent="Proefstad SV"
+            round="Speelronde 3"
+            stadium="Stadion Proeflaan"
+            status="scheduled"
+            time="zo 1 nov 19:45"
+          />
+        </List.Item>
+      </List>
+      <WikipediaCredit compact />
+    </Card>
+  </div>
+)
+
 const renderNarrow = renderBlock('16rem')
 
 // Every state a match can be in: still to be played with a kick-off and with only a weekend,
@@ -556,4 +596,16 @@ export const MissingDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Zonder uitslag: gegevens nog niet beschikbaar, donker',
   render: renderMissing,
+})
+
+export const SidebarMissingLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Zijbalk, de vorige wedstrijd zonder uitslag en de volgende, licht',
+  render: renderSidebarMissing,
+})
+
+export const SidebarMissingDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Zijbalk, de vorige wedstrijd zonder uitslag en de volgende, donker',
+  render: renderSidebarMissing,
 })
