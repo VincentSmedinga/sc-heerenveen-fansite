@@ -5,6 +5,11 @@ import { describe, expect, it } from 'vitest'
 // Without the comments, which mention env() in words.
 const css = readFileSync(join(import.meta.dirname, 'page.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
+// The room for the tracks at 52rem, where the columns start side by side: less 2rem between the
+// columns and the margin on both sides, which is as wide as the inset of the device. A phone on
+// its side has up to 62px (3.875rem) on each side, and a media query can't read that.
+const roomAtTheBoundary = 52 - 2 - 2 * 3.875
+
 // jsdom doesn't apply rules in a cascade layer to an element and has no safe area, so the test
 // reads the text of the file.
 describe('the safe area insets in page.css', () => {
@@ -252,12 +257,11 @@ describe('the columns of the body in page.css', () => {
     expect(body.match(/grid-template-columns:/g)).toHaveLength(2)
   })
 
-  it('lets the tracks shrink only to a width that fits in 56rem, where the columns start side by side', () => {
+  it('lets the tracks shrink only to a width that fits in 52rem, where the columns start side by side', () => {
     const [, mainMinimum, sidebarMinimum] = tracks ?? []
 
-    // 56rem less 2rem of margin and 2rem between the columns.
-    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(56 - 2 - 2)
-    expect(body).toContain('@media (width >= 56rem)')
+    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(roomAtTheBoundary)
+    expect(body).toContain('@media (width >= 52rem)')
   })
 })
 
@@ -265,7 +269,7 @@ describe('the wide sidebar in page.css', () => {
   const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
   const pageWidth = Number(layout.match(/--hf-page-max-width: (\d+)rem;/)?.[1])
   const wide = css.match(
-    /@media \(width >= 56rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-wide\) \{\s*grid-template-columns: minmax\((\d+)rem, (\d+)rem\) minmax\((\d+)rem, (\d+)rem\);/,
+    /@media \(width >= 52rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-wide\) \{\s*grid-template-columns: minmax\((\d+)rem, (\d+)rem\) minmax\((\d+)rem, (\d+)rem\);/,
   )
 
   it('has a main and a sidebar of 31rem each and 2rem between them, which fill the page of 64rem', () => {
@@ -276,10 +280,10 @@ describe('the wide sidebar in page.css', () => {
     expect(Number(main) + Number(sidebar) + 2).toBe(pageWidth)
   })
 
-  it('lets the tracks shrink only to a width that fits in 56rem, where the columns start side by side', () => {
+  it('lets the tracks shrink only to a width that fits in 52rem, where the columns start side by side', () => {
     const [, mainMinimum, , sidebarMinimum] = wide ?? []
 
-    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(56 - 2 - 2)
+    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(roomAtTheBoundary)
   })
 
   it('shrinks both tracks to the same minimum, so they are equally wide at every width', () => {

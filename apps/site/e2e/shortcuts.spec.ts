@@ -21,18 +21,34 @@ test.describe('the bar under the header of /wedstrijden', () => {
   }
 
   test('is gone, also for a screen reader, where the cards sit side by side', async ({ page }) => {
-    await page.setViewportSize({ height: 800, width: 896 })
+    await page.setViewportSize({ height: 800, width: 832 })
     await page.goto('/wedstrijden')
 
     await expect(page.locator('.hf-page-shortcuts')).toBeHidden()
     await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toHaveCount(0)
   })
 
-  test('is there one pixel under that width', async ({ page }) => {
-    await page.setViewportSize({ height: 800, width: 895 })
+  test('is there one pixel under that width (51.9rem)', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 831 })
     await page.goto('/wedstrijden')
 
     await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toBeVisible()
+  })
+
+  test('is there exactly when the body has one column, at 51.9rem and at 52rem', async ({ page }) => {
+    const columns = () =>
+      page.locator('.hf-page-body').evaluate((body) => getComputedStyle(body).gridTemplateColumns.split(' ').length)
+
+    for (const [width, count, bar] of [
+      [831, 1, 1],
+      [832, 2, 0],
+    ] as const) {
+      await page.setViewportSize({ height: 800, width })
+      await page.goto('/wedstrijden')
+
+      expect(await columns()).toBe(count)
+      await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toHaveCount(bar)
+    }
   })
 
   test('is not on the other pages', async ({ page }) => {
@@ -298,7 +314,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
   })
 
   test('does not follow the page where the bar is gone', async ({ page }) => {
-    await page.setViewportSize({ height: 800, width: 896 })
+    await page.setViewportSize({ height: 800, width: 832 })
     await page.goto('/wedstrijden')
     await page.evaluate(() => document.getElementById('stand')?.scrollIntoView({ behavior: 'instant' }))
 

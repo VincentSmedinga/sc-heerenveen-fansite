@@ -28,7 +28,7 @@ describe('the bar in shortcuts.css', () => {
   it('is gone from the width where the body has two columns, with display: none, so a screen reader skips it', () => {
     const wide = page.match(/@media \(width >= ([\d.]+rem)\) \{\s*grid-template-columns: minmax\(24rem/)?.[1]
 
-    expect(wide).toBe('56rem')
+    expect(wide).toBe('52rem')
     expect(bar).toContain(`@media (width >= ${wide}) {\n      display: none;`)
     expect(css).not.toContain('visibility')
   })
@@ -41,7 +41,7 @@ describe('the bar in shortcuts.css', () => {
 
   it('keeps the heading of a link out from under the bar that sticks, as far as the bar shows and sticks', () => {
     expect(css).toMatch(
-      /@media \(20em < width < 56rem\) \{\s*html:has\(\.hf-page-shortcuts\) \{\s*scroll-padding-block-start: calc\(env\(safe-area-inset-top, 0px\) \+ var\(--hf-shortcuts-height\)\);/,
+      /@media \(20em < width < 52rem\) \{\s*html:has\(\.hf-page-shortcuts\) \{\s*scroll-padding-block-start: calc\(env\(safe-area-inset-top, 0px\) \+ var\(--hf-shortcuts-height\)\);/,
     )
     expect(css).toContain('--hf-shortcuts-height: calc(2.25rem + 11px);')
   })
