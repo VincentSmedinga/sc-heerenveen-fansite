@@ -124,7 +124,7 @@ export const IconsDark = meta.story({
 })
 
 // A button changes colour under the mouse, so that state is imitated: the filled button and the
-// soft button of the first card are under the mouse.
+// soft button are under the mouse.
 const hoverParameters = {
   docs: {
     description: {
