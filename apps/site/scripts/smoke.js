@@ -648,6 +648,7 @@ await withEmptyDatabase((database) =>
         '#programma',
         '#uitslagen',
         '#stand',
+        '#onze-plek-in-de-competitie',
         '#verloop-van-het-seizoen',
         '#doelpuntenmakers',
         '#de-nul-gehouden',
@@ -656,6 +657,15 @@ await withEmptyDatabase((database) =>
     )
     assert.doesNotMatch(html, /hf-page-shortcuts/)
     assert.match(matchesHtml, /Testdorp FC/)
+    // The card with our place in the league: a table of five measures, after the table.
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="onze-plek-in-de-competitie">.*?href="#onze-plek-in-de-competitie">Onze plek in de /s,
+    )
+    assert.match(
+      matchesHtml,
+      /<caption class="hf-visually-hidden">De plek van sc Heerenveen in de Eredivisie, per onderdeel<\/caption>/,
+    )
     // The card of the season: the chart, and the table of the Eredivisie results under it.
     assert.match(
       matchesHtml,

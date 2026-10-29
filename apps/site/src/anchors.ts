@@ -32,6 +32,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'nul-gehouden',
     'uitslagen',
     'verloop-van-het-seizoen',
+    'onze-plek-in-de-competitie',
   ],
 }
 

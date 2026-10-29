@@ -135,6 +135,39 @@ export type GoalsPerQuarter = {
   scored: number[]
 }
 
+/** The five things the card of our place in the league ranks sc Heerenveen on. */
+export type LeagueMeasure = 'goalDifference' | 'goalsAgainst' | 'goalsFor' | 'pointsPerMatch' | 'won'
+
+/** The place of sc Heerenveen on one measure. */
+export type LeagueMeasurePlace = {
+  measure: LeagueMeasure
+  /** The place, from 1. Clubs with the same value share it. */
+  place: number
+  /** Whether another club has the same value, so the place is shared. */
+  shared: boolean
+  /** The value of sc Heerenveen: the points per match, or the number of matches or goals. */
+  value: number
+}
+
+/** A club of the table next to sc Heerenveen: the leader or the last. */
+export type LeagueNeighbour = {
+  club: string
+  /** The points sc Heerenveen is behind the leader, or ahead of the last: 0 when level. */
+  points: number
+}
+
+/** Our place in the league on five measures, and the points to the leader and the last. */
+export type LeaguePlace = {
+  /** The last, or undefined when sc Heerenveen is the last or the only club that played. */
+  last: LeagueNeighbour | undefined
+  /** The leader, or undefined when sc Heerenveen is the leader or the only club that played. */
+  leader: LeagueNeighbour | undefined
+  /** In the order of the card. */
+  measures: LeagueMeasurePlace[]
+  /** The matches sc Heerenveen played, which the card says it is based on. */
+  played: number
+}
+
 /** A goal as the line of the scorers of a match shows it. */
 export type ScorerGoal = PublicMatch['goals'][number]
 
@@ -214,6 +247,66 @@ export function goalsWithInitials(goals: ScorerGoal[]): ScorerGoal[] {
 
     return { ...goal, player: sharesInitial ? `${given} ${goal.player}` : `${initial}. ${goal.player}` }
   })
+}
+
+/**
+ * Where sc Heerenveen stands among the clubs of the table on points per match, matches won,
+ * goals for (the best attack), goals against (the best defence, so fewer is better) and goal
+ * difference. Clubs have not all played the same number of matches, so the points are compared
+ * per match, and exactly: two clubs are level when their points and matches are in the same
+ * ratio. Clubs with the same value share the place and the next place is skipped (1, 2, 2, 4).
+ * A club that has played nothing counts for nothing, so it is neither a club to be ahead of nor
+ * the last. The leader and the last are the clubs with the most and the fewest points, and the
+ * place in the table decides between clubs with the same points, so the gap is never negative.
+ * Without sc Heerenveen in the table, or when it has played nothing, there is no place.
+ */
+export function leaguePlaceOf(rows: PublicStandingsRow[]): LeaguePlace | undefined {
+  const clubs = rows.filter((row) => row.played > 0)
+  const ours = clubs.find((row) => row.club === ourClub)
+
+  if (ours === undefined) {
+    return undefined
+  }
+
+  // Better is higher, except for the goals against. The points per match are compared as
+  // fractions (points × matches of the other), so there is no rounding to make clubs level.
+  const compare: Record<LeagueMeasure, (a: PublicStandingsRow, b: PublicStandingsRow) => number> = {
+    goalDifference: (a, b) => a.goalDifference - b.goalDifference,
+    goalsAgainst: (a, b) => b.goalsAgainst - a.goalsAgainst,
+    goalsFor: (a, b) => a.goalsFor - b.goalsFor,
+    pointsPerMatch: (a, b) => a.points * b.played - b.points * a.played,
+    won: (a, b) => a.won - b.won,
+  }
+  const values: Record<LeagueMeasure, number> = {
+    goalDifference: ours.goalDifference,
+    goalsAgainst: ours.goalsAgainst,
+    goalsFor: ours.goalsFor,
+    pointsPerMatch: ours.points / ours.played,
+    won: ours.won,
+  }
+  const measures = (['pointsPerMatch', 'won', 'goalsFor', 'goalsAgainst', 'goalDifference'] as const).map(
+    (measure): LeagueMeasurePlace => {
+      const others = clubs.filter((row) => row !== ours)
+
+      return {
+        measure,
+        place: 1 + others.filter((row) => compare[measure](row, ours) > 0).length,
+        shared: others.some((row) => compare[measure](row, ours) === 0),
+        value: values[measure],
+      }
+    },
+  )
+  const byPoints = [...clubs].sort((a, b) => b.points - a.points || a.position - b.position)
+  const leader = byPoints[0]
+  const last = byPoints.at(-1)
+
+  return {
+    last: last === undefined || last === ours ? undefined : { club: last.club, points: ours.points - last.points },
+    leader:
+      leader === undefined || leader === ours ? undefined : { club: leader.club, points: leader.points - ours.points },
+    measures,
+    played: ours.played,
+  }
 }
 
 /**
