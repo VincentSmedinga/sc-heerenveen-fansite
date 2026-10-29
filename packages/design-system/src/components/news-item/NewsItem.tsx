@@ -35,8 +35,8 @@ export type NewsItemProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
   /** The name of the source, as it wants to be credited. */
   source: string
   /**
-   * The short day and the time, or the short day and the date, as a visitor reads them: `wo
-   * 14:05` or `wo 14 okt`.
+   * The short day and the time, or the short day and the date, as a visitor reads them:
+   * `wo 14:05` or `wo 14 okt`.
    */
   time: string
 }
