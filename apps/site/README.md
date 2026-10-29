@@ -198,7 +198,8 @@ De gegevens komen van de importer (zie _De wedstrijden en de stand_ in de [READM
 `src/matches.ts` vraagt alleen het lopende seizoen (`seasonOf`) en bewaart het antwoord vijf minuten; eerdere seizoenen staan in de database en komen op geen enkele pagina.
 Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 
-- **Programma:** alle wedstrijden die nog niet zijn gespeeld, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
+- **Programma:** alle wedstrijden die nog niet zijn begonnen, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
+  Een wedstrijd is begonnen als zijn aanvangstijd voorbij is, of, zonder aanvangstijd, als zijn dag in Nederlandse tijd voorbij is (`overviewOf` in `src/matches.ts`, met het moment van het verzoek).
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
 - **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
   Hebben twee verschillende spelers in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
@@ -280,8 +281,10 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Boven de lijst staat "5 keer de nul gehouden in 11 wedstrijden".
   Er staan tien regels en daaronder de knop "Laad 5 meer", die zonder JavaScript werkt: het formulier laadt de pagina opnieuw met `?nul=15`, in stappen van vijf.
   De selectie (`cleanSheetsOf` in `src/matches.ts`) gebruikt de gegevens die de pagina al voor de uitslagen haalt, dus er komt geen vraag bij.
-- **Uitslagen:** alle gespeelde wedstrijden, de nieuwste bovenaan.
-- **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de nieuwste uitslag) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
+- **Uitslagen:** alle wedstrijden die zijn begonnen, de nieuwste bovenaan.
+  Een wedstrijd zonder uitslag staat er ook in, en zegt twee uur na de aanvang "Gegevens nog niet beschikbaar" (zonder aanvangstijd vanaf de dag erna).
+  De zin komt van `lacksResult` in `src/matches.ts` en de eigenschap `resultMissing` van `Match`, en verdwijnt zodra de wedstrijd een score heeft.
+- **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de eerste van Uitslagen, ook zonder uitslag) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
   Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten.
   De blokken linken naar "Alle wedstrijden" en "De volledige stand" (`/wedstrijden#stand`).
 

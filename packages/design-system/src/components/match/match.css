@@ -12,6 +12,7 @@
   }
 
   .hf-match-label,
+  .hf-match-missing,
   .hf-match-when {
     color: var(--hf-colour-text-secondary);
     margin-block: 0;
@@ -118,6 +119,15 @@
   .hf-match-postponed {
     color: var(--hf-colour-text-accent);
     font-weight: var(--hf-strong-font-weight);
+  }
+
+  /*
+   * "Gegevens nog niet beschikbaar" stands where the result and the scorers would be. It is an
+   * explanation and not a result, so it has the plain colour of the other small lines and no
+   * colour that means something.
+   */
+  .hf-match-missing {
+    margin-block: 0.125rem;
   }
 
   /* A List with matches in it: no bullets, no indent, and a thin line between the lines. */

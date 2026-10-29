@@ -35,6 +35,7 @@ export type MatchProps =
       goalsFor?: never
       penaltiesAgainst?: never
       penaltiesFor?: never
+      resultMissing?: never
       status: 'postponed'
       time?: never
     })
@@ -54,6 +55,7 @@ export type MatchProps =
         goalsAgainst: number
         /** The goals of sc Heerenveen. */
         goalsFor: number
+        resultMissing?: never
         status: 'played'
       })
   | (MatchWithTimeProps & {
@@ -63,6 +65,12 @@ export type MatchProps =
       goalsFor?: never
       penaltiesAgainst?: never
       penaltiesFor?: never
+      /**
+       * Whether the match has begun, long enough ago to be over, and has no result yet. Instead
+       * of a result it says "Gegevens nog niet beschikbaar", in plain text. The status stays
+       * `scheduled`, and the time stays.
+       */
+      resultMissing?: boolean
       status: 'scheduled'
     })
 
@@ -142,7 +150,9 @@ const separator = (
  * side it played on, and in a shoot-out the colour follows the shoot-out. The goals say the
  * same, so a screen reader hears nothing extra. A match that is still to be played has a dash
  * between the names, which is read as "tegen".
- * A postponed match says "Uitgesteld" where the time would be.
+ * A postponed match says "Uitgesteld" where the time would be. A match that has begun long ago
+ * and has no result yet (`resultMissing`) says "Gegevens nog niet beschikbaar" under the clubs,
+ * where the scorers would be, as plain text in the colour of the other explanations.
  *
  * The scorers of a played match are one line between the clubs and the time, in the order of
  * the clock with the goals of both clubs: "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen". The
@@ -164,6 +174,7 @@ export const Match = ({
   opponent,
   penaltiesAgainst,
   penaltiesFor,
+  resultMissing,
   round,
   stadium,
   status,
@@ -239,6 +250,11 @@ export const Match = ({
             </Fragment>
           ))}
         </p>
+      ) : null}
+      {resultMissing ? (
+        <Text appearance="meta" className="hf-match-missing">
+          Gegevens nog niet beschikbaar
+        </Text>
       ) : null}
       <Text appearance="meta" className="hf-match-when">
         {status === 'postponed' ? (

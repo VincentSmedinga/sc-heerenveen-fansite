@@ -8,6 +8,7 @@ import {
   goalsPerQuarter,
   goalsWithInitials,
   homeAwayOf,
+  lacksResult,
   leaguePlaceOf,
   leagueResultsOf,
   matchFlowOf,
@@ -47,9 +48,12 @@ const season = [
   match('Speelronde 7', 'scheduled', '2026-09-12'),
 ]
 
+/** Between round 4 and the postponed round 5: the schedule has two matches still to come. */
+const between = new Date('2026-08-25T12:00:00Z')
+
 describe('overviewOf', () => {
-  it('puts the matches that are not played in the programme, in the order they are given, a postponed one included', () => {
-    expect(overviewOf(season).programme.map((item) => item.round)).toEqual([
+  it('puts the matches that have not begun in the programme, in the order they are given, a postponed one included', () => {
+    expect(overviewOf(season, between).programme.map((item) => item.round)).toEqual([
       'Speelronde 5',
       'Speelronde 6',
       'Speelronde 7',
@@ -57,7 +61,7 @@ describe('overviewOf', () => {
   })
 
   it('gives the results with the newest first', () => {
-    expect(overviewOf(season).results.map((item) => item.round)).toEqual([
+    expect(overviewOf(season, between).results.map((item) => item.round)).toEqual([
       'Speelronde 4',
       'Speelronde 3',
       'Speelronde 2',
@@ -65,26 +69,190 @@ describe('overviewOf', () => {
     ])
   })
 
-  it('gives the newest result as the previous match for the homepage', () => {
-    expect(overviewOf(season).previous?.round).toBe('Speelronde 4')
-    expect(overviewOf([match('Speelronde 5', 'postponed', '2026-08-29')]).previous).toBeUndefined()
+  it('gives the newest match that has begun as the previous match for the homepage', () => {
+    expect(overviewOf(season, between).previous?.round).toBe('Speelronde 4')
+    expect(overviewOf([match('Speelronde 5', 'postponed', '2026-08-29')], between).previous).toBeUndefined()
   })
 
-  it('takes the first match that is scheduled as the next one, and not a postponed match', () => {
-    expect(overviewOf(season).next?.round).toBe('Speelronde 6')
+  it('takes the first match that has not begun as the next one, and not a postponed match', () => {
+    expect(overviewOf(season, between).next?.round).toBe('Speelronde 6')
   })
 
   it('has no next match when only a postponed one is left, and nothing at all for no matches', () => {
-    expect(overviewOf([match('Speelronde 5', 'postponed', '2026-08-29')]).next).toBeUndefined()
-    expect(overviewOf([])).toEqual({ next: undefined, previous: undefined, programme: [], results: [] })
+    expect(overviewOf([match('Speelronde 5', 'postponed', '2026-08-29')], between).next).toBeUndefined()
+    expect(overviewOf([], between)).toEqual({ next: undefined, previous: undefined, programme: [], results: [] })
   })
 
   it('does not change the list it is given', () => {
     const copy = [...season]
 
-    overviewOf(season)
+    overviewOf(season, between)
 
     expect(season).toEqual(copy)
+  })
+
+  it('has no previous match before the first kick-off of the season, and the whole season is the programme', () => {
+    const coming = season.map((item) => ({ ...item, status: 'scheduled' as const }))
+    const overview = overviewOf(coming, new Date('2026-07-01T12:00:00Z'))
+
+    expect(overview.previous).toBeUndefined()
+    expect(overview.results).toEqual([])
+    expect(overview.next?.round).toBe('Speelronde 1')
+  })
+
+  it('has no next match after the last one has begun, and the previous match is the last of the season', () => {
+    const finished = season.filter((item) => item.status !== 'postponed')
+    const overview = overviewOf(finished, new Date('2026-10-01T12:00:00Z'))
+
+    expect(overview.next).toBeUndefined()
+    expect(overview.programme).toEqual([])
+    expect(overview.previous?.round).toBe('Speelronde 7')
+  })
+
+  it('shows the same next match on the homepage as the first match with a date in the programme', () => {
+    for (const now of [
+      '2026-08-10T12:00:00Z',
+      '2026-08-25T12:00:00Z',
+      '2026-09-05T15:00:00Z',
+      '2026-09-20T12:00:00Z',
+    ]) {
+      const overview = overviewOf(season, new Date(now))
+
+      expect(overview.next).toBe(overview.programme.find((item) => item.status !== 'postponed'))
+    }
+  })
+
+  describe('a match is split by its kick-off and not by its status', () => {
+    const cup = (extra: Partial<PublicMatch> = {}): PublicMatch => ({
+      ...match('Tweede ronde', 'scheduled', '2026-10-28'),
+      competition: 'KNVB Beker',
+      kickoffAt: new Date('2026-10-28T19:00:00Z'),
+      ...extra,
+    })
+    const before = match('Speelronde 11', 'played', '2026-10-25')
+    const after = match('Speelronde 12', 'scheduled', '2026-11-01')
+    const overviewAt = (now: string, ...matches: PublicMatch[]) => overviewOf(matches, new Date(now))
+
+    it('makes a cup match that has begun and has no result the previous match, never the next one', () => {
+      const overview = overviewAt('2026-10-29T10:00:00Z', before, cup(), after)
+
+      expect(overview.previous?.round).toBe('Tweede ronde')
+      expect(overview.next?.round).toBe('Speelronde 12')
+      expect(overview.results.map((item) => item.round)).toEqual(['Tweede ronde', 'Speelronde 11'])
+      expect(overview.programme.map((item) => item.round)).toEqual(['Speelronde 12'])
+    })
+
+    it('counts a match in progress as begun: it is the previous match, with no result', () => {
+      const overview = overviewAt('2026-10-28T19:30:00Z', before, cup(), after)
+
+      expect(overview.previous?.round).toBe('Tweede ronde')
+      expect(overview.next?.round).toBe('Speelronde 12')
+    })
+
+    it('counts a match as begun at the moment of the kick-off and not a moment before', () => {
+      expect(overviewAt('2026-10-28T18:59:59.999Z', cup()).next?.round).toBe('Tweede ronde')
+      expect(overviewAt('2026-10-28T19:00:00Z', cup()).previous?.round).toBe('Tweede ronde')
+    })
+
+    it('keeps a match without a kick-off in the programme until its day is over in Dutch time', () => {
+      const day = cup({ kickoffAt: null, matchDate: '2026-10-28' })
+
+      // The clocks went back on 25 October 2026, so Dutch time is an hour ahead of UTC.
+      expect(overviewAt('2026-10-28T22:59:59Z', day).next?.round).toBe('Tweede ronde')
+      expect(overviewAt('2026-10-28T23:00:00Z', day).previous?.round).toBe('Tweede ronde')
+    })
+
+    it('finds the end of the day in summer time too, two hours ahead of UTC', () => {
+      const day = cup({ kickoffAt: null, matchDate: '2026-08-28' })
+
+      expect(overviewAt('2026-08-28T21:59:59Z', day).next?.round).toBe('Tweede ronde')
+      expect(overviewAt('2026-08-28T22:00:00Z', day).previous?.round).toBe('Tweede ronde')
+    })
+
+    it('finds the end of a day that is 25 and one that is 23 hours long, where the clocks change', () => {
+      const autumn = cup({ kickoffAt: null, matchDate: '2026-10-25' })
+      const spring = cup({ kickoffAt: null, matchDate: '2027-03-28' })
+
+      expect(overviewAt('2026-10-25T22:59:59Z', autumn).next).toBeDefined()
+      expect(overviewAt('2026-10-25T23:00:00Z', autumn).previous).toBeDefined()
+      expect(overviewAt('2027-03-28T21:59:59Z', spring).next).toBeDefined()
+      expect(overviewAt('2027-03-28T22:00:00Z', spring).previous).toBeDefined()
+    })
+
+    it('keeps the kick-off as it is across the change of the clocks', () => {
+      const late = cup({ kickoffAt: new Date('2026-10-25T00:30:00Z'), matchDate: '2026-10-25' })
+
+      expect(overviewAt('2026-10-25T00:29:59Z', late).next).toBeDefined()
+      expect(overviewAt('2026-10-25T00:30:00Z', late).previous).toBeDefined()
+    })
+
+    it('never makes a postponed match without a new date the previous or the next match, however long ago its day was', () => {
+      const postponed = cup({ status: 'postponed' })
+      const overview = overviewAt('2026-11-10T12:00:00Z', before, postponed)
+
+      expect(overview.previous?.round).toBe('Speelronde 11')
+      expect(overview.next).toBeUndefined()
+      expect(overview.programme).toEqual([postponed])
+    })
+
+    it('treats a postponed match with a new date as a scheduled one', () => {
+      const moved = cup({ kickoffAt: new Date('2026-11-18T19:00:00Z'), matchDate: '2026-11-18' })
+
+      expect(overviewAt('2026-11-10T12:00:00Z', before, moved).next?.round).toBe('Tweede ronde')
+      expect(overviewAt('2026-11-18T19:00:00Z', before, moved).previous?.round).toBe('Tweede ronde')
+    })
+
+    it('keeps a match that is played in the results, also if the clock says it has not begun', () => {
+      const played = match('Speelronde 12', 'played', '2026-11-01')
+
+      expect(overviewAt('2026-10-01T12:00:00Z', played).previous).toBe(played)
+    })
+  })
+})
+
+describe('lacksResult', () => {
+  const cup = (extra: Partial<PublicMatch> = {}): PublicMatch => ({
+    ...match('Tweede ronde', 'scheduled', '2026-10-28'),
+    kickoffAt: new Date('2026-10-28T19:00:00Z'),
+    ...extra,
+  })
+
+  it('is false before the kick-off and for the first two hours of the match', () => {
+    expect(lacksResult(cup(), new Date('2026-10-28T18:00:00Z'))).toBe(false)
+    expect(lacksResult(cup(), new Date('2026-10-28T19:00:00Z'))).toBe(false)
+    expect(lacksResult(cup(), new Date('2026-10-28T20:59:59.999Z'))).toBe(false)
+  })
+
+  it('is true exactly two hours after the kick-off, and after that', () => {
+    expect(lacksResult(cup(), new Date('2026-10-28T21:00:00Z'))).toBe(true)
+    expect(lacksResult(cup(), new Date('2026-11-05T12:00:00Z'))).toBe(true)
+  })
+
+  it('is false for a match with a result, so the sentence goes away when the result arrives', () => {
+    const now = new Date('2026-10-29T10:00:00Z')
+    const played = cup({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    expect(lacksResult(cup(), now)).toBe(true)
+    expect(lacksResult(played, now)).toBe(false)
+  })
+
+  it('is true for a match that is played but has no score, since the result is not there', () => {
+    const noScore = cup({ goalsAgainst: null, goalsFor: null, status: 'played' })
+
+    expect(lacksResult(noScore, new Date('2026-10-29T10:00:00Z'))).toBe(true)
+  })
+
+  it('is false for a match without a kick-off on its day, and true from the day after in Dutch time', () => {
+    const day = cup({ kickoffAt: null })
+
+    expect(lacksResult(day, new Date('2026-10-28T12:00:00Z'))).toBe(false)
+    expect(lacksResult(day, new Date('2026-10-28T22:59:59Z'))).toBe(false)
+    expect(lacksResult(day, new Date('2026-10-28T23:00:00Z'))).toBe(true)
+  })
+
+  it('is false for a postponed match, and for a match that is still to come', () => {
+    expect(lacksResult(cup({ status: 'postponed' }), new Date('2026-11-05T12:00:00Z'))).toBe(false)
+    expect(lacksResult(cup(), new Date('2026-10-01T12:00:00Z'))).toBe(false)
   })
 })
 

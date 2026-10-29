@@ -827,6 +827,61 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html).toContain('wo 28 okt 19:45')
   })
 
+  describe('a match that has begun and has no result', () => {
+    // The Tweede ronde of the cup, played on 20 October, is taken as a match with no result.
+    const withoutResult = () => {
+      const [first, second, third, cup, ...rest] = matchData.matches
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [
+          first!,
+          second!,
+          third!,
+          { ...cup!, goals: [], goalsAgainst: null, goalsFor: null, status: 'scheduled' },
+          ...rest,
+        ],
+      })
+    }
+
+    it('is the previous match, with the sentence, and the next match is still the next one', async () => {
+      withoutResult()
+      const html = await renderMatchesCard()
+
+      expect(html.match(/class="hf-match"/g)).toHaveLength(2)
+      expect(html.indexOf('Tweede ronde')).toBeLessThan(html.indexOf('Speelronde 10'))
+      expect(html).toContain('Gegevens nog niet beschikbaar')
+      expect(html).toContain('di 20 okt 20:45')
+      expect(html).toContain('wo 28 okt 19:45')
+      expect(html.match(/Gegevens nog niet beschikbaar/g)).toHaveLength(1)
+    })
+
+    it('has the sentence in the plain colour of an explanation and not in a result', async () => {
+      withoutResult()
+      const html = await renderMatchesCard()
+
+      expect(html).toMatch(/<p class="hf-meta hf-match-missing">Gegevens nog niet beschikbaar<\/p>/u)
+      expect(html).not.toContain('hf-match-win')
+      expect(html).not.toContain('hf-match-loss')
+    })
+
+    it('shows only the time while the match is less than two hours old', async () => {
+      withoutResult()
+      vi.setSystemTime(new Date('2026-10-20T19:30:00Z'))
+      const html = await renderMatchesCard()
+
+      expect(html).toContain('Tweede ronde')
+      expect(html).not.toContain('Gegevens nog niet beschikbaar')
+    })
+
+    it('shows the result and no sentence once the result is in', async () => {
+      vi.mocked(getMatchData).mockResolvedValue(matchData)
+      const html = await renderMatchesCard()
+
+      expect(html).not.toContain('Gegevens nog niet beschikbaar')
+    })
+  })
+
   it('shows only the next match when nothing is played yet', async () => {
     vi.mocked(getMatchData).mockResolvedValue({
       ...matchData,
