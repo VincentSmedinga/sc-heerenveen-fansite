@@ -28,6 +28,8 @@ const notInSitemap: string[] = [
   '/zoeken',
   // One page for every published article: the sitemap lists them from the database.
   '/redactie/[slug]',
+  // The matches of a season that is over: only the current season, /wedstrijden, is listed.
+  '/wedstrijden/[seizoen]',
 ]
 
 /**

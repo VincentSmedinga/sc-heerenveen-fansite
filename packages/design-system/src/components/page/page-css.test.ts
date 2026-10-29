@@ -324,3 +324,16 @@ describe('the cells of the sidebar in page.css', () => {
     expect(css.match(/auto-fit/g)).toHaveLength(1)
   })
 })
+
+describe('the title row in page.css', () => {
+  const rule = css.match(/\.hf-page-title\s*\{(.*?)\n {2}\}/s)?.[1] ?? ''
+
+  it('wraps, so the control goes under the heading where they do not fit side by side', () => {
+    expect(rule).toMatch(/display: flex/)
+    expect(rule).toMatch(/flex-wrap: wrap/)
+  })
+
+  it('keeps the control at the end of the row, beside the heading and under it', () => {
+    expect(rule).toMatch(/> :not\(:first-child\)\s*\{\s*margin-inline-start: auto;/)
+  })
+})

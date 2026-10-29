@@ -802,6 +802,14 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     vi.mocked(getMatchData).mockResolvedValue(matchData)
   })
 
+  it('always asks for the current season, whatever season the visitor looked at on the matches page', async () => {
+    await render()
+
+    expect(getMatchData).toHaveBeenCalledOnce()
+    // No season in the call: getMatchData then gives the current one.
+    expect(vi.mocked(getMatchData).mock.calls[0]).toEqual([])
+  })
+
   it('puts the two cards at the bottom of the sidebar, under the discussions and the podcasts, and after the news', async () => {
     const html = await render()
 

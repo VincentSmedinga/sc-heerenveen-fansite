@@ -61,6 +61,8 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
   wide?: boolean
 }
 
+export type PageTitleProps = ComponentPropsWithoutRef<'div'>
+
 export type PageTopLinkProps = Omit<ComponentPropsWithoutRef<'a'>, 'aria-label' | 'children' | 'href'> & {
   /**
    * The name of the link for a screen reader, such as "Naar boven". There is no visible text,
@@ -180,6 +182,16 @@ const Cell = ({ className, ...props }: PageCellProps) => (
 )
 
 /**
+ * The title row of a page, for the `intro` of a Page.Main: the heading of the page and, beside
+ * it, one control that belongs to the whole page, such as the SeasonPicker. The control sits at
+ * the end of the row, on the right. Where the two do not fit side by side the control goes
+ * under the heading and stays on the right. A row with the heading alone is the heading.
+ */
+const Title = ({ className, ...props }: PageTitleProps) => (
+  <div className={classNames('hf-page-title', className)} {...props} />
+)
+
+/**
  * The bottom of the page, on a band of its own that only its colour sets apart from the body: a
  * `footer` element, which is the page's contentinfo landmark. It holds two lines of text, a
  * Text each, and the links: beside the text on a wide screen, under it on a narrow one. If the
@@ -219,6 +231,7 @@ Shortcuts.displayName = 'Page.Shortcuts'
 Body.displayName = 'Page.Body'
 Main.displayName = 'Page.Main'
 Sidebar.displayName = 'Page.Sidebar'
+Title.displayName = 'Page.Title'
 Cell.displayName = 'Page.Cell'
 Footer.displayName = 'Page.Footer'
 TopLink.displayName = 'Page.TopLink'
@@ -247,6 +260,7 @@ Page.Shortcuts = Shortcuts
 Page.Body = Body
 Page.Main = Main
 Page.Sidebar = Sidebar
+Page.Title = Title
 Page.Cell = Cell
 Page.Footer = Footer
 Page.TopLink = TopLink

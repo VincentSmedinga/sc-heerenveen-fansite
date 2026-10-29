@@ -72,6 +72,7 @@ export type {
   PageShortcutsItem,
   PageShortcutsProps,
   PageSidebarProps,
+  PageTitleProps,
   PageTopLinkProps,
 } from './components/page/Page'
 export { Pagination } from './components/pagination/Pagination'
@@ -85,6 +86,8 @@ export { RefreshButton } from './components/pull-to-refresh/RefreshButton'
 export type { RefreshButtonProps } from './components/pull-to-refresh/RefreshButton'
 export { Root } from './components/root/Root'
 export type { RootProps } from './components/root/Root'
+export { choosesByKey, SeasonPicker } from './components/season-picker/SeasonPicker'
+export type { SeasonPickerOption, SeasonPickerProps } from './components/season-picker/SeasonPicker'
 export { SegmentedControl } from './components/segmented-control/SegmentedControl'
 export type { SegmentedControlOption, SegmentedControlProps } from './components/segmented-control/SegmentedControl'
 export { Select } from './components/select/Select'

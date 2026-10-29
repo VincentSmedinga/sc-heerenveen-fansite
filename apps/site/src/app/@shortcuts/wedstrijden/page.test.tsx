@@ -1,18 +1,27 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData } from '../../../matches'
+import { getMatchData, getMatchSeasons } from '../../../matches'
 import { matchData } from '../../../test-matches'
 import MatchesShortcuts from './page'
 
-vi.mock('../../../matches', async (importOriginal) => ({ ...(await importOriginal<object>()), getMatchData: vi.fn() }))
+vi.mock('../../../matches', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getMatchData: vi.fn(),
+  getMatchSeasons: vi.fn(),
+}))
 
 beforeEach(() => {
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(matchData)
+  vi.mocked(getMatchSeasons).mockReset()
+  vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2026-10-23T13:40:00Z'))
 })
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
 })
 
@@ -56,5 +65,18 @@ describe('the bar of /wedstrijden', () => {
     vi.mocked(getMatchData).mockRejectedValue(new Error('no database'))
 
     expect(await MatchesShortcuts()).toBeNull()
+  })
+})
+
+describe('the bar of /wedstrijden for the current season', () => {
+  it('asks for the current season only, and not for the seasons to choose from', async () => {
+    await render()
+
+    expect(getMatchData).toHaveBeenCalledExactlyOnceWith('2026/27')
+    expect(getMatchSeasons).not.toHaveBeenCalled()
+  })
+
+  it('has Programma, which the current season has a card for', async () => {
+    expect(await render()).toContain('href="#programma"')
   })
 })

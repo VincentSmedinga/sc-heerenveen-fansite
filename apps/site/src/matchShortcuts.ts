@@ -1,7 +1,7 @@
 /**
  * The links in the bar under the header of /wedstrijden: each goes to the heading of a card, in
  * the order the cards have on a narrow screen. The ids are those of the headings in
- * app/wedstrijden/page.tsx (a test checks it).
+ * app/wedstrijden/matches-page.tsx (a test checks it).
  */
 export const matchShortcuts = [
   { href: '#programma', label: 'Programma' },
@@ -17,3 +17,10 @@ export const matchShortcuts = [
   { href: '#hoe-de-wedstrijden-verlopen', label: 'Hoe wedstrijden verlopen' },
   { href: '#uitersten', label: 'Uitersten' },
 ] as const
+
+/**
+ * The links of the bar for the page of a season: all of them for the current season, and for a
+ * season that is over the same without Programma, which has no card there.
+ */
+export const matchShortcutsOf = (current: boolean) =>
+  current ? matchShortcuts : matchShortcuts.filter((shortcut) => shortcut.href !== '#programma')

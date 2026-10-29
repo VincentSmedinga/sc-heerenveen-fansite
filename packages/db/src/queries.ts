@@ -154,6 +154,17 @@ export function listEnabledSources(db: Database) {
 }
 
 /**
+ * The seasons that have matches, such as `2026/27`, the newest first. A season without a match,
+ * even one with a table or a squad, is not in it: the season picker lists what the matches page
+ * can show.
+ */
+export async function listMatchSeasons(db: Database) {
+  const rows = await db.selectDistinct({ season: matches.season }).from(matches).orderBy(desc(matches.season))
+
+  return rows.map((row) => row.season)
+}
+
+/**
  * The discussions the importer kept of the forums that are switched on, the one with the latest
  * post first, with what the homepage shows of them: the title, the address, the number of
  * replies, the time of the last post and the screen name of whoever wrote it, which is null

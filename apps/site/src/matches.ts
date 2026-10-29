@@ -1,6 +1,7 @@
 import type { FormResult } from '@fansite/design-system'
 
 import {
+  listMatchSeasons,
   listSeasonMatches,
   listSeasonStandings,
   listWikipediaPages,
@@ -10,7 +11,7 @@ import {
 } from '@fansite/db/queries'
 import { seasonOf } from '@fansite/db/season'
 
-import { cacheFor } from './cache'
+import { cacheFor, cacheForKey } from './cache'
 import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
 import { lastDayOf } from './match-format'
@@ -42,15 +43,14 @@ export type MatchOverview = {
   results: PublicMatch[]
 }
 
-/**
- * The matches, the league table and the Wikipedia pages of the current season. Only that season
- * is asked for: the pages show no earlier one, although the database keeps them. The data is
- * cached for five minutes, so a visit doesn't cost three queries and a new result shows within
- * five minutes of the import, which runs every hour.
- */
-export const getMatchData = cacheFor(5 * 60 * 1000, async (): Promise<MatchData> => {
+/** How long the data of the current season is kept: a new result shows within five minutes. */
+const currentSeasonPeriod = 5 * 60 * 1000
+
+/** A season that is over doesn't change, so it is kept for an hour. */
+const pastSeasonPeriod = 60 * 60 * 1000
+
+async function loadSeason(season: string): Promise<MatchData> {
   const { db } = getDatabase()
-  const season = seasonOf(new Date())
   const [matches, standings, pages] = await Promise.all([
     listSeasonMatches(db, season),
     listSeasonStandings(db, season),
@@ -58,7 +58,24 @@ export const getMatchData = cacheFor(5 * 60 * 1000, async (): Promise<MatchData>
   ])
 
   return { matches, pages, season, standings }
-})
+}
+
+const currentSeasonData = cacheForKey(currentSeasonPeriod, loadSeason)
+const pastSeasonData = cacheForKey(pastSeasonPeriod, loadSeason)
+
+/**
+ * The matches, the league table and the Wikipedia pages of one season, the current one when no
+ * season is given. Each is asked for that season alone. The cache keeps an entry for every
+ * season it is asked for, so the caller asks for a season of `getMatchSeasons` only: a visitor
+ * can make up any address. The data of the current season is kept for five minutes, so a visit
+ * doesn't cost three queries and a new result shows within five minutes of the import, which
+ * runs every hour. A season that is over is kept for an hour.
+ */
+export function getMatchData(season = seasonOf(new Date())): Promise<MatchData> {
+  return season === seasonOf(new Date()) ? currentSeasonData(season) : pastSeasonData(season)
+}
+
+const matchSeasons = cacheFor(currentSeasonPeriod, async () => listMatchSeasons(getDatabase().db))
 
 /** The played matches in which sc Heerenveen kept a clean sheet, and how many were played. */
 export type CleanSheets = {
@@ -118,6 +135,19 @@ export function cleanSheetsOf(matches: PublicMatch[]): CleanSheets {
     .reverse()
 
   return { matches: played.filter((match) => match.goalsAgainst === 0), played: played.length }
+}
+
+/**
+ * The seasons the matches page can show, the newest first: the seasons that have matches, up to
+ * and including the current one. The current season is always in it, also before its first
+ * match is in the database, because the page of that season is `/wedstrijden` itself. A season
+ * after the current one is left out, because it has no page.
+ */
+export async function getMatchSeasons(): Promise<string[]> {
+  const current = seasonOf(new Date())
+  const known = (await matchSeasons()).filter((season) => season < current)
+
+  return [current, ...known].sort().reverse()
 }
 
 /**

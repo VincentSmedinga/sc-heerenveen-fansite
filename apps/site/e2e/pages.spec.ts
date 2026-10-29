@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 import { adminCookie, type E2eRole } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
+import { earlierSeasonSlug } from './earlier-season'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
 // line here. An address that doesn't exist is the page "niet gevonden"; the status code also
@@ -16,6 +17,16 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // The homepage with the older headlines, which the button under the first ten loads.
   { path: '/?nieuws=15', status: 200 },
   { path: '/wedstrijden', status: 200 },
+  // The matches of an earlier season (made up, see earlier-season.ts), the route behind the
+  // season picker, which sends the visitor on, and the addresses that say "niet gevonden": a
+  // season in the future and an address that is no season. The route and the address of the
+  // current season end on /wedstrijden, which answers 200.
+  { path: `/wedstrijden/${earlierSeasonSlug()}`, status: 200 },
+  { path: `/wedstrijden/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
+  { path: '/wedstrijden/kies?seizoen=onzin', status: 200 },
+  { path: '/wedstrijden/kies', status: 200 },
+  { path: '/wedstrijden/2099-00', status: 404 },
+  { path: '/wedstrijden/onzin', status: 404 },
   { path: '/podcasts', status: 200 },
   { path: '/podcasts?podcast=testpodcast', status: 200 },
   { path: '/podcasts?pagina=2', status: 200 },
