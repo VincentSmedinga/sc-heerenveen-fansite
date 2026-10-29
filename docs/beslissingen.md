@@ -6429,6 +6429,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een warm vlak onder de zachte stand scheidt de twee.
   De Eredivisie heeft 34 wedstrijden die de grafiek vullen, een beker niet.
 - **Alternatieven:** boven Doelpunten per kwartier in het zachte vlak (twee warme kaarten bij elkaar); op de homepage (de prioriteiten zijn daar anders); de bekerwedstrijden erbij (de plekken zijn dan niet meer de 34 van het seizoen).
+- **Later:** zie _De plek in de competitie komt uit de stand, in punten per wedstrijd, zonder grenslijnen_.
+  Er staat nu een kaart tussen Stand en Verloop van het seizoen: Onze plek in de competitie.
 
 ### De staafjes staan op volgorde van speeldatum, niet van speelronde
 
@@ -6438,6 +6440,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de component krijgt een lijst van gespeelde uitslagen en tekent ze naast elkaar.
   De lijn is het gemiddelde over de laatste vijf wedstrijden die gespeeld zijn, en dat volgt de volgorde van het spelen.
 - **Alternatieven:** een lege plek op de plaats van de speelronde van een uitgestelde wedstrijd (vraagt een lijst met gaten in de component en laat de lijn een gat zien).
+
+### De plek in de competitie komt uit de stand, in punten per wedstrijd, zonder grenslijnen
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart "Onze plek in de competitie" staat direct na de stand en geeft de plaats van sc Heerenveen in vijf onderdelen, met gedeelde plaatsen als "gedeeld".
+  De vijf onderdelen zijn punten per wedstrijd, gewonnen wedstrijden, doelpunten voor (de beste aanval), doelpunten tegen (de beste verdediging, minder is beter) en doelsaldo.
+  De punten achter de koploper en voor op de laatste staan in een zin.
+  Er zijn geen lijnen voor Europa of degradatie.
+  De kaart volgt de regels van _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397).
+- **Waarom:** de stand heeft de gegevens, dus de import verandert niet.
+  Punten per wedstrijd vergelijkt clubs die niet evenveel hebben gespeeld.
+  De lijnen voor Europa en degradatie veranderen per seizoen en zijn een mening over wat er komt.
+- **Hoe:** `leaguePlaceOf` in `apps/site/src/matches.ts` rekent de plaatsen uit.
+  Twee clubs zijn gelijk op punten per wedstrijd als hun punten en wedstrijden in dezelfde verhouding staan, zonder afronding.
+  Een club die nog niets heeft gespeeld telt niet mee, ook niet als koploper of laatste.
+  De koploper en de laatste zijn de clubs met de meeste en de minste punten, en de plaats in de stand beslist bij gelijke punten.
+  De link in de balk "Op deze pagina:" heet "Plek in de competitie": met "Onze plek in de competitie" past hij op een telefoon van 390 pixels niet tussen de twee vervagingen van de balk.
+  Het vlak van de kaart is wit: Stand heeft het zachte vlak en Verloop van het seizoen het warme, dus een zacht of warm vlak had dezelfde kleur als een buurkaart.
+- **Alternatieven:** de plaatsen als extra kolommen in de stand (de stand wordt breed op een telefoon).
+  De lijnen wel tonen (de projecteigenaar wil nu geen voorspellingen, zie #418).
+  Een zacht of warm vlak (dezelfde kleur als een buurkaart).
 
 ### Tiptap is de teksteditor voor de artikelen van de redactie
 
