@@ -15,7 +15,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
       await expect(bar).toBeVisible()
-      await expect(bar.getByRole('link')).toHaveCount(9)
+      await expect(bar.getByRole('link')).toHaveCount(10)
       expect(await checkPage(page)).toEqual([])
     })
   }
@@ -136,6 +136,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
         'Plek in de competitie',
         'Verloop van het seizoen',
         'Reeksen',
+        'Thuis en uit',
         'Doelpuntenmakers',
         'De nul gehouden',
         'Doelpunten per kwartier',
@@ -143,6 +144,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
       await walk('Shift+Tab', [
         'De nul gehouden',
         'Doelpuntenmakers',
+        'Thuis en uit',
         'Reeksen',
         'Verloop van het seizoen',
         'Plek in de competitie',
