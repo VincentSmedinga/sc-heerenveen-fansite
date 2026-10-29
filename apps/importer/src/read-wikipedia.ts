@@ -113,6 +113,16 @@ const months = [
   'december',
 ]
 
+/** The two numbers of a score or a part of it, team 1 first. */
+type Pair = { away: number; home: number }
+
+type ParsedScore =
+  | (Pair & { afterNinety: null | Pair; halfTime: null | Pair; kind: 'score' })
+  | { kind: 'none' }
+  | { kind: 'postponed' }
+  | { kind: 'stopped' }
+  | { kind: 'unknown'; text: string }
+
 /**
  * Takes the comments and the footnotes out of the text. Both can hold a `|` or a `}}` of their
  * own, and a footnote after a date (`11 mei 2026<ref>...</ref>`) would make it a date we do not
@@ -576,15 +586,34 @@ function parsePenalties(
   return score === null ? { kind: 'unknown', text } : { away: Number(score[2]), home: Number(score[1]), kind: 'score' }
 }
 
-/** The score of a box: none yet, a score, called off, or something we do not know. */
-function parseScore(
-  value: string,
-):
-  | { away: number; home: number; kind: 'score' }
-  | { kind: 'none' }
-  | { kind: 'postponed' }
-  | { kind: 'stopped' }
-  | { kind: 'unknown'; text: string } {
+/**
+ * What is wrong with the brackets of a score, or null: a part of the match cannot be higher
+ * than what follows it, and a score after 90 minutes needs extra time.
+ */
+function scoreProblem(score: Extract<ParsedScore, { kind: 'score' }>, extraTimeSaid: boolean): null | string {
+  const within = (part: null | Pair, whole: Pair) =>
+    part === null || (part.home <= whole.home && part.away <= whole.away)
+
+  if (score.afterNinety !== null && !extraTimeSaid) {
+    return 'after 90 minutes but no extra time'
+  }
+
+  const afterNinety = score.afterNinety ?? score
+
+  return within(score.afterNinety, score) && within(score.halfTime, afterNinety) ? null : 'that does not add up'
+}
+
+/** A pair of numbers such as `2 – 1`, after the spaces and the dashes of Wikipedia. */
+const pairPattern = '(\\d{1,2}) ?[–-] ?(\\d{1,2})'
+
+/**
+ * The score of a box: none yet, a score, called off, or something we do not know. A score is
+ * the final score. The older cup pages add the score at half time in brackets
+ * (`2 – 1 (1 – 0)`), or after extra time the score after 90 minutes and then the score at half
+ * time (`2 – 4 (2 – 2, 1 – 1)`). The final score is the score of the match; the brackets are
+ * read and checked, and `readMatch` keeps nothing of them yet.
+ */
+function parseScore(value: string): ParsedScore {
   const text = plain(value)
 
   if (text === '' || /^[–-]$/u.test(text)) {
@@ -594,10 +623,20 @@ function parseScore(
     return { kind: 'stopped' }
   }
 
-  const score = /^(\d{1,2}) ?[–-] ?(\d{1,2})$/u.exec(text)
+  const score = new RegExp(`^${pairPattern}(?: ?\\(${pairPattern}(?:, ?${pairPattern})?\\))?$`, 'u').exec(text)
 
   if (score !== null) {
-    return { away: Number(score[2]), home: Number(score[1]), kind: 'score' }
+    const pair = (at: number): null | Pair =>
+      score[at] === undefined ? null : { away: Number(score[at + 1]), home: Number(score[at]) }
+    const [inBrackets, last] = [pair(3), pair(5)]
+
+    return {
+      afterNinety: last === null ? null : inBrackets,
+      away: Number(score[2]),
+      halfTime: last ?? inBrackets,
+      home: Number(score[1]),
+      kind: 'score',
+    }
   }
 
   return /^(uitgesteld|afgelast)\b/iu.test(text) ? { kind: 'postponed' } : { kind: 'unknown', text }
@@ -614,7 +653,7 @@ function parseTime(value: string): null | undefined | { hours: number; minutes: 
     return null
   }
 
-  const time = /^(\d{1,2}):(\d{2}) uur$/u.exec(text)
+  const time = /^(\d{1,2}):(\d{2})(?: uur)?$/u.exec(text)
   const hours = Number(time?.[1])
   const minutes = Number(time?.[2])
 
@@ -686,6 +725,13 @@ function readMatch(box: Template, competition: Competition, round: null | string
   }
   if (score.kind === 'unknown') {
     return `${name} has a score we do not know: '${score.text.slice(0, 40)}'`
+  }
+  if (score.kind === 'score') {
+    const problem = scoreProblem(score, extraTimeSaid)
+
+    if (problem !== null) {
+      return `${name} has a score ${problem}: '${plain(box.params.get('score') ?? '').slice(0, 40)}'`
+    }
   }
   if (competition !== 'KNVB Beker' && (extraTimeSaid || penalties.kind !== 'none')) {
     return `${name} has extra time or a shoot-out, which only the cup has`

@@ -1,0 +1,57 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/KNVB_Beker_2024/25_(mannen)?action=raw, read on 30 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: the matches of other clubs, the text around the templates, and the referees, video referees, reports and
+  attendances (emptied). The score is written as the final score and the score at half time in brackets, and after extra
+  time as the final score and then the score after 90 minutes and at half time. See the tests.
+-->
+== Wedstrijden ==
+
+==== Eerste ronde ====
+{{Footballbox2
+|date=29 oktober 2024
+|time=21:00 uur
+|team1=[[V.V. IJsselmeervogels|IJsselmeervogels]]
+|score=2 – 3 (0 – 0)
+|team2='''[[sc Heerenveen]]'''
+|goals1=[[Bjorn van Gorkom|Van Gorkom]] {{goal|52}}<br />[[Thomas Beekman|Beekman]] {{goal|56}}
+|goals2={{goal|47}} [[Jacob Trenskow|Trenskow]]<br />{{goal|76}} [[Ion Nicolaescu|Nicolaescu]]<br />{{goal|78}} [[Levi Smans|Smans]]
+|location=[[Bunschoten]]
+|stadium=[[Sportpark De Westmaat]]
+|attendance=
+|referee=
+|report=
+}}
+
+==== Tweede ronde ====
+{{Footballbox2
+|date=18 december 2024
+|time=20:00
+|team1=[[ASWH]]
+|score=0 – 1 (0 – 1)
+|team2='''[[sc Heerenveen]]'''
+|goals1=
+|goals2={{goal|40}} [[Ion Nicolaescu|Nicolaescu]]<br />{{rode kaart|0|56}} [[Bernt Klaverboer|Klaverboer]]
+|location=[[Hendrik-Ido-Ambacht]]
+|stadium=Sportpark Schildman
+|attendance=
+|referee=
+|report=
+}}
+
+==== Achtste finales ====
+{{Footballbox2
+|date=16 januari 2025
+|time=21:00
+|team1='''[[K.v.v. Quick Boys|Quick Boys]]'''
+|score=3 – 2 (2 – 2, 0 – 1)
+|aet=J
+|team2=[[sc Heerenveen]]
+|goals1=[[Neville Ogidi Nwankwo]] {{goal|37}}<br />[[Milan Zonneveld|Zonneveld]] {{goal|88|pen.}}<br />[[Levi van Duijn|Van Duijn]] {{goal|105+4}}
+|goals2={{goal|48}} [[Ilias Sebaoui|Sebaoui]]<br />{{goal|76}} [[Ion Nicolaescu|Nicolaescu]]
+|location=[[Katwijk (Zuid-Holland)|Katwijk]]
+|stadium=[[Sportpark Nieuw Zuid]]
+|attendance=
+|referee=
+|report=
+}}

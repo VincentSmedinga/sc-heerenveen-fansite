@@ -1,0 +1,73 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/KNVB_Beker_2022/23_(mannen)?action=raw, read on 30 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: the matches of other clubs, the text around the templates, and the referees, video referees, reports and
+  attendances (emptied). The score is written as the final score and the score at half time in brackets, and after extra
+  time as the final score and then the score after 90 minutes and at half time. See the tests.
+-->
+== Wedstrijden ==
+
+==== Eerste ronde ====
+{{Footballbox2
+|date=18 oktober 2022
+|time=20:00 uur
+|team1=[[HSV Hoek]]
+|score=2 – 4 (2 – 2, 1 – 1)
+|aet=J
+|team2='''[[sc Heerenveen]]'''
+|goals1=[[Steve Schalkwijk|Schalkwijk]] {{goal|6}}<br />[[Rik Impens|Impens]] {{goal|26|pen.}}
+|goals2={{goal|41}} [[Mats Köhlert|Köhlert]]<br />{{goal|49||93||119}} [[Rami Al Hajj|Al Hajj]]<br />{{rode kaart|2|77|115}} [[Tibor Halilović|Halilović]]
+|location=[[Hoek (Terneuzen)|Hoek]]
+|stadium=Sportpark Denoek
+|attendance=
+|referee=
+|report=
+}}
+
+==== Tweede ronde ====
+{{Footballbox2
+|date=11 januari 2023
+|time=20:00 uur
+|team1='''[[sc Heerenveen]]'''
+|score=2 – 0 (0 – 0)
+|team2=[[FC Volendam]]
+|goals1=[[Pelle van Amersfoort|Van Amersfoort]] {{goal|48}}<br />[[Sydney van Hooijdonk|Van Hooijdonk]] {{goal|74}}
+|goals2=
+|location=[[Heerenveen (plaats)|Heerenveen]]
+|stadium=[[Abe Lenstra Stadion]]
+|attendance=
+|referee=
+|report=
+}}
+
+==== Achtste finales ====
+{{Footballbox2
+|date=7 februari 2023
+|time=21:00 uur
+|team1=[[NAC Breda]]
+|score=1 – 2 (1 – 1)
+|team2='''[[sc Heerenveen]]'''
+|goals1=[[Tom Boere|Boere]] {{goal|16}}
+|goals2={{goal|45+1||53}} [[Sydney van Hooijdonk|Van Hooijdonk]]
+|location=[[Breda (hoofdbetekenis)|Breda]]
+|stadium=[[Rat Verlegh Stadion]]
+|attendance=
+|referee=
+|report=
+}}
+
+==== Kwartfinales ====
+{{Footballbox2
+|date=1 maart 2023
+|time=20:00 uur
+|team1=[[sc Heerenveen]]
+|score=0 – 1 (0 – 0)
+|team2='''[[Feyenoord]]'''
+|goals1=
+|goals2={{goal|80}} [[Santiago Giménez|Giménez]]
+|location=[[Heerenveen (plaats)|Heerenveen]]
+|stadium=[[Abe Lenstra Stadion]]
+|attendance=
+|referee=
+|report=
+}}

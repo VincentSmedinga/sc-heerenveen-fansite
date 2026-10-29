@@ -1,0 +1,40 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/KNVB_Beker_2023/24_(mannen)?action=raw, read on 30 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: the matches of other clubs, the text around the templates, and the referees, video referees, reports and
+  attendances (emptied). The score is written as the final score and the score at half time in brackets, and after extra
+  time as the final score and then the score after 90 minutes and at half time. See the tests.
+-->
+== Wedstrijden ==
+
+==== Eerste ronde ====
+{{Footballbox2
+|date=31 oktober 2023
+|time=20:00 uur
+|team1='''[[sc Heerenveen]]'''
+|score=5 – 1 (3 – 0)
+|team2=[[VVV-Venlo]]
+|goals1=[[Pelle van Amersfoort|Van Amersfoort]] {{goal|21||40||44}}<br />[[Espen van Ee|Van Ee]] {{goal|68}}<br />[[Daniel Karlsbakk|Karlsbakk]] {{goal|90}}
+|goals2={{goal|76}} [[Soulyman Allouch|Allouch]]
+|location=[[Heerenveen (plaats)|Heerenveen]]
+|stadium=[[Abe Lenstra Stadion]]
+|attendance=
+|referee=
+|report=
+}}
+
+==== Tweede ronde ====
+{{Footballbox2
+|date=21 december 2023
+|time=20:00 uur
+|team1='''[[SBV Vitesse|Vitesse]]'''
+|score=1 – 0 (0 – 0)
+|team2=[[sc Heerenveen]]
+|goals1=[[Amine Boutrah|Boutrah]] {{goal|86}}
+|goals2=
+|location=[[Arnhem (hoofdbetekenis)|Arnhem]]
+|stadium=[[GelreDome]]
+|attendance=
+|referee=
+|report=
+}}
