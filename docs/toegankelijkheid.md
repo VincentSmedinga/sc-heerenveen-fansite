@@ -95,6 +95,9 @@ Zo test je het: tab door de pagina met een schermlezer aan, of bekijk de naam va
       Een rode rand alleen is niet genoeg (3.3.1, 3.3.3).
 - [ ] Niemand hoeft iets twee keer in te vullen (3.3.7).
       Inloggen vraagt geen puzzel, en plakken en wachtwoordmanagers werken (3.3.8).
+- [ ] Een keuze die de pagina direct ververst, zoals de seizoenskiezer, wisselt de context.
+      Een tekst bij de keuzelijst zegt het vooraf, en een schermlezer leest hem voor met `aria-describedby` (3.2.2).
+      Met het toetsenbord kies je met de pijltjes zonder dat de pagina bij elke toets verspringt: een keuze met een toets wacht op Enter.
 
 Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het toetsenbord.
 

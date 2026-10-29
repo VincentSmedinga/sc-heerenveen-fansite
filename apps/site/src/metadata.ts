@@ -73,6 +73,23 @@ export function pageMetadata(path: PagePath, title?: string, search?: string): M
   }
 }
 
+/**
+ * The same for the page of one season of a page: the title and description of that season, and
+ * its own address as the canonical URL. The page is `path` for the current season and has an
+ * address of its own (`/wedstrijden/2025-26`) for another, which is the canonical one. Like
+ * `pageMetadata`, it needs a page that renders on each request.
+ */
+export function seasonPageMetadata(
+  path: PagePath,
+  address: string,
+  { description, title }: { description: string; title: string },
+): Metadata {
+  const url = urlOf(address)
+  const { openGraph, ...metadata } = pageMetadata(path, title)
+
+  return { ...metadata, alternates: { canonical: url }, description, openGraph: { ...openGraph, description, url } }
+}
+
 /** The full address of a path in this environment, such as https://sc.heerenveen.org/bronnen. It has no query or anchor. */
 export function urlOf(path: string) {
   return new URL(path, originOf()).href

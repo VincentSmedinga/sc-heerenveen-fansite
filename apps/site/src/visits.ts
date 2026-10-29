@@ -7,6 +7,7 @@ import { getArticle } from './articles'
 import { getDatabase } from './database'
 import { reasonOf } from './errors'
 import { pages } from './pages'
+import { seasonFromSlug } from './seasons'
 
 /**
  * The browser texts that are not visitors, in one place: crawlers and other bots, tools that
@@ -29,6 +30,16 @@ export const notVisitors =
 const countedPaths: ReadonlySet<string> = new Set([...pages.map(({ path }) => path), '/contact/verstuurd', '/zoeken'])
 
 const articlePath = /^\/redactie\/([^/]+)$/u
+
+const seasonPath = /^\/wedstrijden\/([^/]+)$/u
+
+/**
+ * The path a visit is counted under. The page of a season, such as `/wedstrijden/2025-26`,
+ * counts as a visit to `/wedstrijden`: it is the same page for another season, and a count per
+ * season would be a row for every address that has the shape of one.
+ */
+const countedPathOf = (path: string) =>
+  seasonFromSlug(seasonPath.exec(path)?.[1]) === undefined ? path : '/wedstrijden'
 
 /** What a visit needs to be counted. */
 export type PageVisit = {
@@ -79,7 +90,7 @@ for (const [network, prefix] of [
  */
 export function visitOf(request: NextRequest): PageVisit | undefined {
   const { headers } = request
-  const path = request.nextUrl.pathname
+  const path = countedPathOf(request.nextUrl.pathname)
   const userAgent = headers.get('user-agent') ?? ''
   const article = articlePath.exec(path)?.[1]
 

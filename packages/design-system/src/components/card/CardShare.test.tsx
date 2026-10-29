@@ -130,6 +130,32 @@ describe('a click on the button', () => {
     expect(container.querySelector('.hf-card-share-copy')).toBeNull()
   })
 
+  it('names the season under the image and in the name of the file, for a card of a season that is over', async () => {
+    let address: null | string | undefined
+
+    vi.mocked(makeCardImage).mockImplementation((element) => {
+      address = element.querySelector('.hf-card-share-address')?.textContent
+
+      return Promise.resolve(png)
+    })
+    render(
+      <Card aria-labelledby="stand" shareable={{ season: '2025/26', source }}>
+        <Heading id="stand" level={2}>
+          Stand
+        </Heading>
+      </Card>,
+    )
+
+    fireEvent.click(button())
+    await waitFor(() => expect(deliverImage).toHaveBeenCalledOnce())
+
+    expect(address).toBe(`Seizoen 2025/26 · ${window.location.host} · 28 okt 2026`)
+    expect(deliverImage).toHaveBeenCalledWith(png, {
+      fileName: 'sc-heerenveen-stand-2025-26-2026-10-28.png',
+      title: 'Stand',
+    })
+  })
+
   it('puts the stage out of sight of everyone, and takes it away when the image is done', async () => {
     let offscreen: Element | null | undefined
 

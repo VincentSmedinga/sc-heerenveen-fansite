@@ -7,6 +7,7 @@ import {
   countPodcastEpisodes,
   findPodcast,
   listEnabledSources,
+  listMatchSeasons,
   listNewestDiscussions,
   listPodcastEpisodes,
   listPodcasts,
@@ -842,6 +843,27 @@ describe('the matches and the table of a season', () => {
     await database.pool.query('DELETE FROM players')
     await database.pool.query('DELETE FROM standings')
     await database.pool.query('DELETE FROM wikipedia_pages')
+  })
+
+  describe('listMatchSeasons', () => {
+    it('gives the seasons that have matches, the newest first and each once', async () => {
+      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(matches).values(madeUpMatches(new Date('2025-10-25T12:00:00Z')))
+      await database.db.insert(matches).values(madeUpMatches(new Date('1999-10-25T12:00:00Z')))
+
+      expect(await listMatchSeasons(database.db)).toEqual(['2026/27', '2025/26', '1999/00'])
+    })
+
+    it('leaves out a season that has only a table', async () => {
+      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(standings).values({ ...madeUpTable(now)[0]!, season: '2025/26' })
+
+      expect(await listMatchSeasons(database.db)).toEqual(['2026/27'])
+    })
+
+    it('gives nothing without matches', async () => {
+      expect(await listMatchSeasons(database.db)).toEqual([])
+    })
   })
 
   describe('listSeasonMatches', () => {

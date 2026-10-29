@@ -23,6 +23,12 @@ const messages: Record<Phase, string> = {
 const marker = 'data-hf-card-share'
 
 export type CardShareProps = {
+  /**
+   * The season the card is about, such as `2025/26`, for a card of a season that is over. It
+   * goes under the image and into the name of the file, so an image that is shared later still
+   * says which season it shows. Leave it out for the current season.
+   */
+  season?: string | undefined
   /** The credit of the data in the card, which goes under the image. */
   source: ReactNode
 }
@@ -34,7 +40,7 @@ export type CardShareProps = {
  * makes the image from a copy of the card on a stage out of sight, with the strip under it that
  * holds the logo, the address, the day and the source. card-share.css gives it its look.
  */
-export const CardShare = ({ source }: CardShareProps) => {
+export const CardShare = ({ season, source }: CardShareProps) => {
   const root = useRef<HTMLDivElement>(null)
   const slot = useRef<HTMLDivElement>(null)
   const stage = useRef<HTMLDivElement>(null)
@@ -70,7 +76,7 @@ export const CardShare = ({ source }: CardShareProps) => {
     const make = async (target: HTMLElement) => {
       try {
         const blob = await makeCardImage(target)
-        const delivery = await deliverImage(blob, { fileName: imageFileName(title, today), title })
+        const delivery = await deliverImage(blob, { fileName: imageFileName(title, today, season), title })
 
         if (current) {
           setPhase(delivery === 'cancelled' ? 'idle' : 'done')
@@ -87,7 +93,7 @@ export const CardShare = ({ source }: CardShareProps) => {
     return () => {
       current = false
     }
-  }, [phase, title, today])
+  }, [phase, season, title, today])
 
   if (title === undefined) {
     return <div className="hf-card-share" ref={root} {...{ [marker]: '' }} />
@@ -126,6 +132,7 @@ export const CardShare = ({ source }: CardShareProps) => {
                 <Logo />
                 <div className="hf-card-share-lines">
                   <Text appearance="meta" className="hf-card-share-address">
+                    {season === undefined ? '' : `Seizoen ${season} · `}
                     {window.location.host} · {imageDay(today)}
                   </Text>
                   <div className="hf-card-share-credit">{source}</div>

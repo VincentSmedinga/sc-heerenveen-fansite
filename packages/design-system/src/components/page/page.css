@@ -272,6 +272,30 @@
   }
 
   /*
+   * The title row (Page.Title): the heading of the page and one control, side by side, with
+   * the control at the end. It is a row that wraps: where the control does not fit beside the
+   * heading, it sits under it, and the margin on its start side keeps it at the end of the
+   * row. The gap is the same across and down. What is in the row has no margin of its own, so
+   * the row is as tall as the tallest of them, and the control sits level with the bottom of
+   * the heading.
+   */
+  .hf-page-title {
+    align-items: end;
+    gap: 0.5rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    > * {
+      margin-block: 0;
+    }
+
+    > :not(:first-child) {
+      margin-inline-start: auto;
+    }
+  }
+
+  /*
    * The footer closes the page as the header opens it: a band as wide as the page, a step off
    * the page. Only its colour sets it apart from the body: it has no border, so its box has no
    * edge to draw a line on.

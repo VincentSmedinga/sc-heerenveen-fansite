@@ -15,6 +15,12 @@ describe('imageFileName', () => {
     expect(imageFileName('Stand', new Date('2026-10-28T12:00:00Z'))).toBe('sc-heerenveen-stand-2026-10-28.png')
   })
 
+  it('puts the season of the card after the title, with a hyphen where the season has a slash', () => {
+    expect(imageFileName('Stand', new Date('2026-10-28T12:00:00Z'), '2025/26')).toBe(
+      'sc-heerenveen-stand-2025-26-2026-10-28.png',
+    )
+  })
+
   it('writes the title in small letters with hyphens, without accents or marks', () => {
     expect(imageFileName('Doelpunten per kwartier', new Date('2026-10-28T12:00:00Z'))).toBe(
       'sc-heerenveen-doelpunten-per-kwartier-2026-10-28.png',

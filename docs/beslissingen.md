@@ -4704,6 +4704,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** bewaren kost bijna niets, en #39 (de geschiedenis) en een mogelijk archief beginnen dan met gegevens die er al zijn.
   Een nieuw seizoen hoeft niets te wissen.
 - **Alternatieven:** de rijen bij elk nieuw seizoen vervangen (eenvoudiger, maar de uitslagen van een afgelopen seizoen zijn dan weg).
+- **Later:** zie _Een seizoen heeft een eigen adres, `/wedstrijden/2025-26`, en een kiezer die zonder JavaScript werkt_: `/wedstrijden` en de statistieken tonen nu ook een eerder seizoen, op een adres van dat seizoen.
+  Het lopende seizoen blijft op `/wedstrijden`, en de homepage toont alleen het lopende seizoen.
 
 ### Een uitgestelde wedstrijd blijft in het programma staan als "Uitgesteld"
 
@@ -6847,3 +6849,72 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alle inleidingen houden en alleen inkorten (de herhaling blijft).
   Alle toelichtingen boven de inhoud zetten (de bezoeker leest uitleg voor hij de inhoud heeft gezien).
   Een regel per pagina in plaats van één regel voor allemaal (elke pagina kiest zelf, zoals nu).
+
+### Een seizoen heeft een eigen adres, `/wedstrijden/2025-26`, en een kiezer die zonder JavaScript werkt
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** het lopende seizoen staat op `/wedstrijden`, een ander seizoen op `/wedstrijden/JJJJ-JJ`.
+  Een keuzelijst rechts naast de titel van de pagina kiest het seizoen; met JavaScript verstuurt ze het formulier bij een keuze en verdwijnt de knop, zonder JavaScript blijft de knop "Toon" (een GET naar `/wedstrijden/kies`, die doorverwijst).
+  De homepage blijft het lopende seizoen.
+  Het lopende seizoen begint op 1 juli (zoals `seasonOf`).
+  Eerdere seizoenen staan niet in de sitemap en de feeds.
+- **Waarom:** een eigen adres per seizoen is te delen en te vinden, en een pad past bij de manier waarop de projecteigenaar de site opdeelt.
+  Een keuzelijst schaalt naar de 36 seizoenen vanaf 1990 en werkt zonder JavaScript, zoals de rest van de site.
+  De homepage is een nieuwspagina van nu, dus een oud seizoen hoort daar niet.
+- **Verversen bij een keuze:** de projecteigenaar wil dat een keuze direct verstuurt.
+  Dat is een wisseling van context (WCAG 3.2.2), dus de keuzelijst heeft een uitleg die een schermlezer voorleest, en een oplossing voor het toetsenbord.
+- **Alternatieven:** een zoekopdracht (`?seizoen=`), die op elke pagina en bij de schakelaar van #406 werkt zonder omleidingen als #431 de pagina's verplaatst (de projecteigenaar koos het pad).
+  Een rij met links (36 seizoenen passen niet).
+  Een eigen pagina per seizoen met een lijst (een tik extra).
+
+### Een eerder seizoen heeft geen Programma, een uur geheugen en een eigen canoniek adres
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de lijst met seizoenen heeft de seizoenen die wedstrijden in de database hebben, tot en met het lopende, het nieuwste bovenaan.
+  Het lopende seizoen staat er altijd in, ook vóór zijn eerste wedstrijd, want de pagina van dat seizoen is `/wedstrijden` zelf.
+  Een seizoen dat niet in de lijst staat, een seizoen in de toekomst en een adres dat niet de vorm `JJJJ-JJ` heeft (waarin het tweede getal bij het jaar past), geven "niet gevonden".
+  Het lopende seizoen op zijn eigen adres (`/wedstrijden/2026-27`) verwijst door naar `/wedstrijden`, met een tijdelijke doorverwijzing, want vanaf 1 juli is dat seizoen een eigen adres.
+  Een eerder seizoen heeft geen kaart Programma, want er valt niets meer te spelen, en de balk "Op deze pagina:" linkt er dan ook niet naar.
+  De overige kaarten tonen hun gewone zin als ze voor dat seizoen niets hebben.
+  De gegevens van een eerder seizoen blijven een uur in het geheugen, die van het lopende seizoen vijf minuten.
+  De kop en de titel noemen het seizoen ("Wedstrijden 2025/26"), een eerder seizoen heeft zijn eigen adres als canoniek adres, en alleen het lopende seizoen staat in de sitemap.
+  Een bezoek aan een eerder seizoen telt als een bezoek aan `/wedstrijden`.
+  De afbeelding van een kaart van een eerder seizoen noemt het seizoen onder de afbeelding ("Seizoen 2025/26") en in de naam van het bestand.
+- **Waarom:** een afgelopen seizoen verandert niet meer, dus een uur geheugen is genoeg.
+  De pagina vraagt eerst de lijst met seizoenen en daarna pas de gegevens, want het geheugen houdt een regel per gevraagd seizoen, en een bezoeker kan elk adres met de juiste vorm verzinnen.
+  Een afbeelding die later wordt gedeeld, heeft geen adres meer bij zich, dus het seizoen staat erop.
+  Een telling per seizoen zou een rij per adres met die vorm zijn, en het is dezelfde pagina.
+- **Alternatieven:** het seizoen aan elk adres toevoegen ook voor het lopende seizoen (twee adressen voor één pagina).
+  Een doorverwijzing met 308 (een browser bewaart die, en na 1 juli klopt hij niet meer).
+  Een lege kaart Programma met een zin (de kaart zegt dan iets wat altijd waar is).
+
+### Het toetsenbord kiest een seizoen met de pijltjes en bevestigt met Enter
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de `SeasonPicker` verstuurt het formulier zodra een seizoen is gekozen met de muis, een vinger of de open lijst, en wacht bij een keuze met een toets (de pijltjes, Home, End, Page up, Page down, een letter of cijfer) op Enter.
+  Een keuze die niet is bevestigd, gaat terug naar het seizoen van de pagina zodra de lijst de focus verliest.
+  Een regel zegt het vooraf, en de lijst noemt haar met `aria-describedby`.
+  Er staat "De pagina wisselt direct van seizoen." en "Kies met de pijltjes en bevestig met Enter."
+  Met JavaScript zijn die regel en het label "Seizoen" niet te zien (`hf-visually-hidden`), maar een schermlezer leest ze voor; de projecteigenaar wilde geen tekst om de lijst (29 oktober 2026).
+  Zonder JavaScript staan het label en de knop "Toon" er wel, en de regel niet, want die knop is dan het antwoord.
+- **Waarom:** een gesloten keuzelijst stuurt in sommige browsers `change` bij elke pijltoets.
+  Dan verspringt de pagina bij de eerste pijl en komt een bezoeker met het toetsenbord nooit bij een seizoen verder weg.
+  Op een Mac, bekeken in Chromium en WebKit, openen de pijltjes de lijst, en een letter of cijfer verandert de keuze zonder te versturen; Enter verstuurt dan.
+  In de open lijst bevestigt Enter de keuze, dus daar werkt het zonder iets extra's.
+- **Nadeel:** een bezoeker die met een toets kiest, moet Enter drukken, en een ziende bezoeker leest dat niet vooraf.
+  De lijst naast de kop "Wedstrijden 2025/26" zegt zelf wat ze is, en Enter is wat een formulier altijd doet.
+- **Alternatieven:** versturen bij het verlaten van het veld (de bezoeker verlaat het veld met Tab en de pagina verspringt, zonder dat hij dat vroeg).
+  Alleen een knop "Toon" houden, ook met JavaScript (de projecteigenaar wil dat een keuze direct verstuurt).
+  Een keuze met een pijl na een korte pauze versturen (een bezoeker met een motorische beperking haalt de pauze niet).
+
+### De titelrij is `Page.Title`, en de kiezer is een onderdeel van het designsysteem
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** `Page.Title` is een rij voor de kop van een pagina met één bediening ernaast, die aan het einde staat: rechts naast de kop, en onder de kop (nog steeds rechts) als ze er niet naast passen.
+  Het einde is de rand van de hoofdkolom en niet van de pagina: de titelrij zit in `intro` van `Page.Main`, en de zijbalk begint eronder.
+  `SeasonPicker` is een component van het designsysteem, met de adressen van een seizoen (`seasonAddress`, `seasonFromSlug`, `seasonChoices` en `pickedAddress` in `src/seasons.ts`) in de site.
+  Een pagina met een ander basisadres, zoals `/statistieken` na #431, geeft die adressen aan het component en zet een route naast de pagina die `pickedAddress` aanroept.
+- **Waarom:** de kiezer hoort bij elke pagina met een seizoen, en het formulier, de uitleg en het toetsenbord moeten overal gelijk werken.
+  De titelrij is een indeling van de pagina en geen eigenschap van de kiezer, dus een andere bediening kan er ook staan.
+- **Alternatieven:** de kiezer in de site laten, naast de kop (dan bouwt elke pagina hem opnieuw).
+  Een eigenschap `actions` op `Page.Main` (de kop staat in `intro`, en een eigenschap erbij maakt twee manieren om dezelfde plek te vullen).

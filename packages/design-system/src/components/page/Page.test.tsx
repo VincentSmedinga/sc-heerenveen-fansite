@@ -338,6 +338,33 @@ describe('Page.Cell', () => {
   })
 })
 
+describe('Page.Title', () => {
+  it('is a row with the heading first and the control after it, and passes its class and props on', () => {
+    render(
+      <Page.Title className="extra" data-testid="title">
+        <h1>Wedstrijden</h1>
+        <form aria-label="Seizoen kiezen" />
+      </Page.Title>,
+    )
+    const title = screen.getByTestId('title')
+
+    expect(title.className).toBe('hf-page-title extra')
+    expect([...title.children].map((child) => child.tagName)).toEqual(['H1', 'FORM'])
+  })
+
+  it('is in the introduction of the Page.Main like any other content', () => {
+    render(
+      <Page.Body>
+        <Page.Main intro={<Page.Title>Titel</Page.Title>}>
+          <p>Een cel</p>
+        </Page.Main>
+      </Page.Body>,
+    )
+
+    expect(document.querySelector('.hf-page-intro > .hf-page-title')?.textContent).toBe('Titel')
+  })
+})
+
 describe('Page.Footer', () => {
   it('is the contentinfo of the page', () => {
     render(<Page.Footer>Voet van de pagina</Page.Footer>)

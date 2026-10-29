@@ -1,0 +1,43 @@
+/*
+ * The season picker: a label with a list, and the button "Toon" beside it, in a row that is as
+ * wide as its content and wraps when it must. It sits at the end of its line, so beside the
+ * title of a page it is on the right, and under the title on a narrow screen, still on the
+ * right. The list is as wide as its longest season and not the full width the base styles give
+ * a field, and keeps no space under it: the page decides the space around the picker.
+ *
+ * With script the button is gone (the hidden attribute), and so is the sight of the label and of the line that says that
+ * the page changes at once: both are visually hidden and stay for a screen reader.
+ */
+
+@layer hf.components {
+  .hf-season-picker {
+    display: grid;
+    gap: 0.25rem;
+    justify-items: end;
+    margin: 0;
+    max-inline-size: 100%;
+  }
+
+  .hf-season-picker-row {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: end;
+  }
+
+  .hf-season-picker-field {
+    display: grid;
+    gap: 0.25rem;
+
+    > select {
+      inline-size: auto;
+      margin: 0;
+      max-inline-size: 100%;
+    }
+  }
+
+  .hf-season-picker-row > button[hidden] {
+    display: none;
+  }
+}

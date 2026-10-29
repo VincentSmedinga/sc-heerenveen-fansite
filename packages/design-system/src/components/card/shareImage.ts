@@ -16,17 +16,26 @@ export type ImageDelivery = 'cancelled' | 'downloaded' | 'shared'
  */
 export const imageDay = (date: Date) => dayFormat.format(date)
 
-/** The name of the file: `sc-heerenveen-`, the title in small letters with hyphens, the day. */
-export const imageFileName = (title: string, date: Date) => {
-  const slug = title
+const slugOf = (text: string) =>
+  text
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+
+/**
+ * The name of the file: `sc-heerenveen-`, the title in small letters with hyphens, the season
+ * if the card has one (`2025-26`), the day.
+ */
+export const imageFileName = (title: string, date: Date, season?: string) => {
   const day = isoDayFormat.format(date)
 
-  return ['sc-heerenveen', slug, day].filter((part) => part !== '').join('-') + '.png'
+  return (
+    ['sc-heerenveen', slugOf(title), season === undefined ? '' : slugOf(season), day]
+      .filter((part) => part !== '')
+      .join('-') + '.png'
+  )
 }
 
 /** The name of the button: what it does, and for which card. */

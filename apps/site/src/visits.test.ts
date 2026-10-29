@@ -183,6 +183,17 @@ describe('visitOf', () => {
     expect(notVisitors.test(userAgent)).toBe(false)
   })
 
+  it('counts the page of a season as a visit to /wedstrijden', () => {
+    expect(visitOf(request('/wedstrijden/2025-26'))).toMatchObject({ path: '/wedstrijden' })
+  })
+
+  it.each(['/wedstrijden/2025-27', '/wedstrijden/kies', '/wedstrijden/2025-26/extra', '/wedstrijden/x'])(
+    'does not count %s, which is not the page of a season',
+    (path) => {
+      expect(visitOf(request(path))).toBeUndefined()
+    },
+  )
+
   it('counts an article through its slug, for the database to confirm', () => {
     expect(visitOf(request('/redactie/dit-zijn-wij'))).toMatchObject({
       article: 'dit-zijn-wij',
@@ -203,9 +214,10 @@ describe('visitOf', () => {
   })
 
   it('has a rule for every page of the site', () => {
-    // The pages that are on no list on purpose: the admin, and the article, which the
-    // database confirms. A slot of the layout (@shortcuts) is not a page of its own.
-    const withoutCount = ['/beheer', '/beheer/[...]', '/redactie/[slug]']
+    // The pages that are on no list on purpose: the admin, the article, which the database
+    // confirms, and the page of a season, which counts as /wedstrijden. A slot of the layout
+    // (@shortcuts) is not a page of its own.
+    const withoutCount = ['/beheer', '/beheer/[...]', '/redactie/[slug]', '/wedstrijden/[seizoen]']
     const paths = readdirSync(`${import.meta.dirname}/app`, { recursive: true, withFileTypes: true })
       .filter((entry) => entry.isFile() && entry.name === 'page.tsx')
       .map((entry) => entry.parentPath.slice(`${import.meta.dirname}/app`.length) || '/')

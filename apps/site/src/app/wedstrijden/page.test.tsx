@@ -3,14 +3,18 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData } from '../../matches'
+import { getMatchData, getMatchSeasons } from '../../matches'
 import { matchShortcuts } from '../../matchShortcuts'
 import { matchData } from '../../test-matches'
 import { withoutIcons } from '../../without-icons'
 import MatchesPage, { generateMetadata } from './page'
 
 // Only the query is replaced: the split into the programme and the results is the real one.
-vi.mock('../../matches', async (importOriginal) => ({ ...(await importOriginal<object>()), getMatchData: vi.fn() }))
+vi.mock('../../matches', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getMatchData: vi.fn(),
+  getMatchSeasons: vi.fn(),
+}))
 
 // The afternoon of Friday 23 October 2026 in the Netherlands.
 const now = new Date('2026-10-23T13:40:00Z')
@@ -32,7 +36,9 @@ beforeEach(() => {
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getMatchData).mockReset()
+  vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(matchData)
+  vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
 })
 
 afterEach(() => {
@@ -66,7 +72,9 @@ describe('the page /wedstrijden', () => {
     const html = await render()
 
     expect(html).not.toContain('hf-intro')
-    expect(html).toMatch(/<div class="hf-page-intro"><h1 class="hf-heading-1">Wedstrijden<\/h1><\/div>/)
+    expect(html).toMatch(
+      /<div class="hf-page-intro"><div class="hf-page-title"><h1 class="hf-heading-1">Wedstrijden<\/h1>/,
+    )
   })
 
   describe('the order of the parts of a card', () => {
@@ -1849,5 +1857,49 @@ describe('the page /wedstrijden', () => {
     expect(metadata.title).toBe('Wedstrijden')
     expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/wedstrijden')
     expect(metadata.description).toMatch(/programma.*uitslagen.*stand/u)
+  })
+})
+
+describe('the season picker on /wedstrijden', () => {
+  beforeEach(() => {
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
+  })
+
+  it('asks for the current season', async () => {
+    await render()
+
+    expect(getMatchData).toHaveBeenCalledExactlyOnceWith('2026/27')
+  })
+
+  it('has the picker next to the heading, with the current season chosen and the earlier seasons after it', async () => {
+    const html = await render()
+
+    expect(html).toMatch(
+      /<div class="hf-page-title"><h1 class="hf-heading-1">Wedstrijden<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+    )
+    expect(html).toContain(
+      '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
+    )
+    expect(html).toContain('action="/wedstrijden/kies"')
+  })
+
+  it('keeps the card for the programme and the images as they were', async () => {
+    const html = await render()
+
+    expect(html).toContain('id="programma"')
+    expect(html).not.toContain('Seizoen 2026/27 ·')
+  })
+
+  it('shows the picker with the current season alone when no other season has matches', async () => {
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
+
+    expect(await render()).toContain('<option value="2026-27" selected="">2026/27</option></select>')
+  })
+
+  it('has the bar of the page and the picker agree: a link for every card the page has', async () => {
+    const html = await render()
+    const ids = [...html.matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)
+
+    expect(matchShortcuts.map(({ href }) => href)).toEqual(ids)
   })
 })

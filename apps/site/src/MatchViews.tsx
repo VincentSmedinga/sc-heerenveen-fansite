@@ -48,10 +48,11 @@ import {
 /**
  * What the button for an image of a statistics card puts under the image: the credit of
  * Wikipedia, where the facts come from, as the cards of the homepage give it. It is a function,
- * so a card that has no facts yet has no button.
+ * so a card that has no facts yet has no button. A card of a season that is over also gets the
+ * season (`2025/26`), which goes under the image and into the name of the file.
  */
-export const imageCredit = (hasFacts: boolean) =>
-  hasFacts ? { source: <WikipediaCredit compact lead="Gegevens van" /> } : undefined
+export const imageCredit = (hasFacts: boolean, season?: string) =>
+  hasFacts ? { season, source: <WikipediaCredit compact lead="Gegevens van" /> } : undefined
 
 /**
  * The line under a card with statistics that says how many matches it is based on: all the
@@ -73,13 +74,26 @@ export function BasedOn({ known, played }: { known: number; played: number }) {
  * It starts with `count` lines, and the button under them loads the next ones, as on the
  * homepage: it works without JavaScript, because the form loads the page again with a larger
  * number in the address, and the part after the hash brings the visitor to the first new line.
+ * `path` is the address of the page the card is on, which differs per season.
  */
-export function CleanSheetsCard({ count, matches, now }: { count: number; matches: PublicMatch[]; now: Date }) {
+export function CleanSheetsCard({
+  count,
+  matches,
+  now,
+  path = '/wedstrijden',
+  season,
+}: {
+  count: number
+  matches: PublicMatch[]
+  now: Date
+  path?: string
+  season?: string | undefined
+}) {
   const { matches: sheets, played } = cleanSheetsOf(matches)
   const shown = sheets.slice(0, count)
 
   return (
-    <Card aria-labelledby="de-nul-gehouden" shareable={imageCredit(played > 0)} surface="soft">
+    <Card aria-labelledby="de-nul-gehouden" shareable={imageCredit(played > 0, season)} surface="soft">
       <Heading aliases={['nul-gehouden']} anchor id="de-nul-gehouden" level={2}>
         De nul gehouden
       </Heading>
@@ -105,7 +119,7 @@ export function CleanSheetsCard({ count, matches, now }: { count: number; matche
             ))}
           </List>
           {sheets.length > shown.length && (
-            <Form action={`/wedstrijden#nul-${shown.length + 1}`} method="get">
+            <Form action={`${path}#nul-${shown.length + 1}`} method="get">
               <Button appearance="soft" icon="plus" name="nul" type="submit" value={String(count + moreCleanSheets)}>
                 {`Laad ${moreCleanSheets} meer`}
               </Button>
@@ -126,7 +140,15 @@ export function CleanSheetsCard({ count, matches, now }: { count: number; matche
  * the matches whose goals are known. Without a played match it is a sentence for visitors and
  * no list.
  */
-export function ExtremesCard({ matches, now }: { matches: PublicMatch[]; now: Date }) {
+export function ExtremesCard({
+  matches,
+  now,
+  season,
+}: {
+  matches: PublicMatch[]
+  now: Date
+  season?: string | undefined
+}) {
   const { biggestLoss, biggestWin, earliestGoal, known, latestGoal, mostGoals, played } = extremesOf(matches)
   const lines = [
     { match: biggestWin, name: 'Grootste overwinning' },
@@ -138,7 +160,7 @@ export function ExtremesCard({ matches, now }: { matches: PublicMatch[]; now: Da
   const shown = lines.flatMap(({ goal, match, name }) => (match === undefined ? [] : [{ goal, match, name }]))
 
   return (
-    <Card aria-labelledby="uitersten" shareable={imageCredit(played > 0)} surface="soft">
+    <Card aria-labelledby="uitersten" shareable={imageCredit(played > 0, season)} surface="soft">
       <Heading anchor id="uitersten" level={2}>
         Uitersten
       </Heading>
@@ -180,14 +202,17 @@ export function ExtremesCard({ matches, now }: { matches: PublicMatch[]; now: Da
  * out. Without a goal in the matches we know, it is a sentence for visitors and no empty
  * charts.
  */
-export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
+export function GoalsPerQuarterCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
   const { conceded, extraTime, known, played, scored } = goalsPerQuarter(matches)
   const slices = (counts: number[]) => quarterLabels.map((label, index) => ({ label, value: counts[index] ?? 0 }))
 
   return (
     <Card
       aria-labelledby="doelpunten-per-kwartier"
-      shareable={imageCredit([...scored, ...conceded].some((count) => count > 0))}
+      shareable={imageCredit(
+        [...scored, ...conceded].some((count) => count > 0),
+        season,
+      )}
       surface="warm"
     >
       <Heading anchor id="doelpunten-per-kwartier" level={2}>
@@ -261,11 +286,17 @@ const pointsWord = (points: number) => `${points} ${points === 1 ? 'punt' : 'pun
  * the same number of matches, and the line under the card says after how many matches of ours
  * it holds. Without a table it is a sentence for visitors, like the card Stand.
  */
-export function LeaguePlaceCard({ standings }: { standings: PublicStandingsRow[] }) {
+export function LeaguePlaceCard({
+  season,
+  standings,
+}: {
+  season?: string | undefined
+  standings: PublicStandingsRow[]
+}) {
   const place = leaguePlaceOf(standings)
 
   return (
-    <Card aria-labelledby="onze-plek-in-de-competitie" shareable={imageCredit(place !== undefined)}>
+    <Card aria-labelledby="onze-plek-in-de-competitie" shareable={imageCredit(place !== undefined, season)}>
       <Heading anchor id="onze-plek-in-de-competitie" level={2}>
         Onze plek in de competitie
       </Heading>
@@ -308,7 +339,7 @@ const perMatch = (value: number | undefined) =>
  * has a dash where a number is divided and a 0 where it is counted. Without a result it is a
  * sentence for visitors and no table.
  */
-export function HomeAwayCard({ matches }: { matches: PublicMatch[] }) {
+export function HomeAwayCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
   const { away, home, total } = homeAwayOf(matches)
   const sides: HomeAwayTally[] = [home, away, total]
   const row = (header: string, cell: (side: HomeAwayTally) => number | string) => ({
@@ -317,7 +348,7 @@ export function HomeAwayCard({ matches }: { matches: PublicMatch[] }) {
   })
 
   return (
-    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0)} surface="warm">
+    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0, season)} surface="warm">
       <Heading anchor id="thuis-en-uit" level={2}>
         Thuis en uit
       </Heading>
@@ -384,12 +415,12 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
  * first goal, because both clubs scored in the same minute. Without a match with known goals it
  * is a sentence for visitors and no tables.
  */
-export function MatchFlowCard({ matches }: { matches: PublicMatch[] }) {
+export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
   const { atHalfTime, firstGoal, known, notWonAfterLead, played, unknownFirstGoal, wonAfterTrailing } =
     matchFlowOf(matches)
 
   return (
-    <Card aria-labelledby="hoe-de-wedstrijden-verlopen" shareable={imageCredit(known > 0)} surface="soft">
+    <Card aria-labelledby="hoe-de-wedstrijden-verlopen" shareable={imageCredit(known > 0, season)} surface="soft">
       <Heading anchor id="hoe-de-wedstrijden-verlopen" level={2}>
         Hoe de wedstrijden verlopen
       </Heading>
@@ -470,13 +501,13 @@ export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date
  * gets, because the chart is hidden from it. The cup ties don't count. Without a result it is
  * a sentence for visitors and no chart.
  */
-export function SeasonCard({ matches }: { matches: PublicMatch[] }) {
+export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
   const results = leagueResultsOf(matches)
   const count = (result: FormResult) => results.filter((item) => item === result).length
   const [won, drawn, lost] = [count('W'), count('G'), count('V')]
 
   return (
-    <Card aria-labelledby="verloop-van-het-seizoen" shareable={imageCredit(results.length > 0)} surface="warm">
+    <Card aria-labelledby="verloop-van-het-seizoen" shareable={imageCredit(results.length > 0, season)} surface="warm">
       <Heading anchor id="verloop-van-het-seizoen" level={2}>
         Verloop van het seizoen
       </Heading>
@@ -581,11 +612,19 @@ export function StandingsCard({ data }: { data: MatchData }) {
  * stands alone. The streaks come from the score of every played match of the league (see
  * `streaksOf`). Without a played match it is a sentence for visitors and no table.
  */
-export function StreaksCard({ matches, now }: { matches: PublicMatch[]; now: Date }) {
+export function StreaksCard({
+  matches,
+  now,
+  season,
+}: {
+  matches: PublicMatch[]
+  now: Date
+  season?: string | undefined
+}) {
   const { last, played, streaks } = streaksOf(matches)
 
   return (
-    <Card aria-labelledby="reeksen" shareable={imageCredit(played > 0)} surface="soft">
+    <Card aria-labelledby="reeksen" shareable={imageCredit(played > 0, season)} surface="soft">
       <Heading anchor id="reeksen" level={2}>
         Reeksen
       </Heading>

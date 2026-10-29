@@ -66,7 +66,9 @@ export const Card = ({
       )}
       {...props}
     >
-      {shareable ? [heading, <CardShare key="share" source={shareable.source} />, ...rest] : children}
+      {shareable
+        ? [heading, <CardShare key="share" season={shareable.season} source={shareable.source} />, ...rest]
+        : children}
     </Element>
   )
 }
