@@ -62,8 +62,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
     return <ServerError retryHref="/wedstrijden" />
   }
 
-  const { programme, results } = overviewOf(data.matches)
   const now = new Date()
+  const { programme, results } = overviewOf(data.matches, now)
 
   return (
     <>

@@ -1877,6 +1877,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Ook onder 56 rem is de hoofdkolom 38 rem breed.
 - **Later:** zie _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_.
   Het `repeat(auto-fit, …)` hierboven geldt nu alleen voor een zijbalk met `split`; zonder staan de cellen onder elkaar.
+- **Later:** zie _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_.
+  De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem.
 
 ### De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk
 
@@ -1903,6 +1905,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een pagina kan met `wide` op de `Page.Sidebar` een hoofdkolom van 30 rem en een zijbalk van 32 rem kiezen; elke andere pagina houdt 38, 2 en 24 rem.
 - **Later:** zie _De kolommen van `/wedstrijden` zijn even breed_.
   De hoofdkolom en de zijbalk met `wide` zijn allebei 31 rem breed, met 2 rem ertussen.
+- **Later:** zie _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_.
+  De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem; bij 52 rem is er dus 48 rem voor de sporen, en niet meer 52 rem.
 
 ### Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query
 
@@ -2705,6 +2709,31 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Elke kleur haalt zijn eis, dus daar was geen reden voor.
 - **Later:** vervangt _Voorlopige kleurtokens_ (20 oktober 2026): de waarden zijn vastgelegd.
 
+### De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** `Page.Body` heeft twee kolommen vanaf 52 rem (832 pixels) in plaats van 56 rem, voor een gewone en een brede zijbalk.
+  De balk "Op deze pagina:" verdwijnt op dezelfde grens.
+  De grens is een breedte in rem, geen oriëntatie of hoogte.
+- **Waarom:** de kolommen passen al vanaf 52 rem (24 + 24 + 2 rem voor de sporen en 2 rem voor de marges), en de grens van 56 rem liet de meeste telefoons in liggende stand in één kolom: 844 tot 874 pixels voor de meeste modellen, 896 en meer alleen voor de grootste.
+  Eén grens voor alle pagina's houdt de site voorspelbaar, en de balk en de kolommen wisselen op hetzelfde moment.
+  Een breedte in rem zorgt dat inzoomen en tekstvergroting op een liggend scherm weer één kolom geven (WCAG 1.4.10).
+- **Hoe:** het getal staat als `52rem` in `page.css` (drie keer, in de media queries van de sporen en van de gebieden), in `shortcuts.css` (de balk en de ruimte voor het scrollen) en in `barWidths` in `followPage.ts`.
+  Een media query kan geen custom property gebruiken, dus `page-css.test.ts`, `shortcuts-css.test.ts`, `followPage.test.ts` en de e2e-test van de balk (op 831 en 832 pixels) controleren dat ze gelijk blijven.
+  De sporen krimpen van 66 rem tot 52 rem: bij 52 rem is er 48 rem voor de sporen (50 rem na de marges, minus 2 rem ertussen).
+  De marge is zo breed als de inkeping van het apparaat (`env(safe-area-inset-left)` en `env(safe-area-inset-right)`), en een media query kan die niet lezen.
+  Een telefoon in liggende stand heeft er 47 tot 62 pixels (tot 3,875 rem) aan elke kant, dus bij 52 rem blijft 42,25 rem voor de sporen.
+  Een gewone zijbalk heeft minstens 24 + 16 rem nodig, en past.
+  Een brede zijbalk had 24 + 24 rem nodig en paste niet: op 844 pixels met een inkeping van 47 pixels liep het raster 50 pixels over.
+  De sporen van een brede zijbalk krimpen daarom tot 20 rem in plaats van 24 rem, 40 rem samen.
+  De reviewer vond dit, want Chromium heeft geen inkeping en de meting zag het niet.
+  Met een nagebootste inkeping (47 pixels op 844 en 852, 62 pixels op 874 en meer, en 62 pixels op 832 als slechtste geval) zijn de sporen 338 tot 400 pixels breed, en loopt in licht en donker op `/wedstrijden`, de homepage, `/podcasts` en `/bronnen` niets over.
+  Alle andere vermeldingen van 56 rem in dit bestand, in de beslissingen over de kolommen, de balk en `/wedstrijden`, zijn nu 52 rem; de **Later:**-regels staan bij de drie beslissingen die de kolommen vastleggen.
+- **Alternatieven:** 44 rem voor een gewone zijbalk en 52 rem voor een brede (benut elke indeling, maar twee grenzen om gelijk te houden).
+  Een lagere grens met smallere kolommen van 18 tot 20 rem (knijpt tabellen en kaarten).
+  Voor de brede zijbalk een hogere grens dan 52 rem (laat precies de telefoons in één kolom waarvoor het issue is, en de balk en de kolommen wisselen dan op twee plaatsen).
+  Een grens op oriëntatie of hoogte (laat zoom en tekstvergroting op een liggend scherm twee kolommen houden, en breekt het herschikken).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -3428,6 +3457,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een uitgestelde wedstrijd zonder nieuwe datum is geen volgende wedstrijd, maar een supporter wil wel zien dat hij is uitgesteld.
   Wie op de datum afgaat, laat een wedstrijd verdwijnen waarvan Wikipedia de uitslag nog niet heeft.
 - **Alternatieven:** een wedstrijd uit het programma halen zodra de dag voorbij is (de wedstrijd verdwijnt dan zonder uitslag); een uitgestelde wedstrijd als volgende wedstrijd tonen (staat dan weken bovenaan zonder datum).
+- **Later:** zie _De vorige en de volgende wedstrijd volgen uit de aanvangstijd, en een wedstrijd zonder uitslag zegt dat na twee uur_.
+  De uitgestelde wedstrijd zonder nieuwe datum, het blok met twee wedstrijden en de statistieken op de status `played` blijven zoals ze waren.
 
 ### Een wedstrijd is een regel zonder link en zonder clubwapen
 
@@ -3931,6 +3962,33 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alle wedstrijden met hetzelfde verschil tonen (de kaart wordt lang).
   De doelpunten van de tegenstander ook (dubbel zoveel regels, minder interessant).
   De naam boven de wedstrijd (zie Vorm).
+
+### De vorige en de volgende wedstrijd volgen uit de aanvangstijd, en een wedstrijd zonder uitslag zegt dat na twee uur
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart Wedstrijden toont de laatste wedstrijd die is begonnen en de eerste die nog niet is begonnen, op aanvangstijd.
+  Een wedstrijd zonder uitslag toont twee uur na de aanvang (zonder aanvangstijd vanaf de dag erna) "Gegevens nog niet beschikbaar".
+  De kaart op de homepage en de kaarten Programma en Uitslagen delen die verdeling.
+  Een wedstrijd die is begonnen, staat in Uitslagen, ook zonder uitslag.
+- **Waarom:** een bekerwedstrijd zonder uitslag stond als volgende wedstrijd op de kaart, terwijl hij al was gespeeld.
+  Wikipedia kan uren of dagen achterlopen, en een supporter wil toch zien wat de volgende wedstrijd is.
+  Twee uur is de grens die de projecteigenaar koos.
+  Een gewone wedstrijd is dan afgelopen, een bekerwedstrijd met verlenging en strafschoppen soms nog niet; de zin kan daar dus iets te vroeg komen.
+- **Hoe:** `overviewOf(matches, now)` in `src/matches.ts` verdeelt de wedstrijden en krijgt het moment van het verzoek mee, zodat een test het kan zetten.
+  - Een wedstrijd is begonnen als zijn aanvangstijd (`kickoffAt`) voorbij is.
+    Zonder aanvangstijd is hij begonnen als zijn dag (`matchDate`) in Nederlandse tijd voorbij is, ook rond middernacht en bij het wisselen van de zomertijd.
+    Bij een weekend ("12–14 februari") is dat de laatste dag van het bereik (`lastDayOf` in `src/match-format.ts`), want `matchDate` is dan de eerste dag.
+  - Een gespeelde wedstrijd is altijd begonnen, een uitgestelde wedstrijd zonder nieuwe datum nooit: die blijft in het programma als "Uitgesteld" en is nooit de vorige of de volgende.
+  - `lacksResult` kiest de zin: de wedstrijd heeft geen score en de aanvang is twee uur of langer geleden.
+    `Match` heeft daarvoor de eigenschap `resultMissing`; de zin staat onderaan, onder de tijd en de plaats, in een gedempt rood maar niet vet, en de tijd blijft staan.
+    Dat rood is het token `--hf-colour-text-missing`: stap 800 van de roodschaal in licht, rustiger dan het rood van "Uitgesteld" (`--hf-colour-text-accent`), dat de projecteigenaar daar te fel vond.
+    In donker is het stap 300, hetzelfde als dat rood.
+    Het token gebruikt bestaande stappen; er komt geen nieuwe kleur bij.
+    De tekst zegt het zelf, het rood komt erbij; het haalt 4,5:1 op elk vlak, in licht en donker.
+  - De statistiekkaarten tellen alleen wedstrijden met de status `played` en een score, en veranderen niet.
+- **Alternatieven:** de status laten bepalen (nu; het probleem van de bekerwedstrijd).
+  De wedstrijd verbergen tot er een uitslag is (de kaart zegt dan niets over de laatste wedstrijd).
+  Een grens van drie uur (dekt verlenging en strafschoppen, maar laat de melding bij een gewone wedstrijd lang weg).
 
 ## Importer
 
@@ -6289,6 +6347,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** 30, 2 en 32 rem laten, zoals in #283 (de zijbalk is breder dan de hoofdkolom); 32 en 30 rem (de tabel past er met de balk beter in, maar het programma wordt breder dan nodig).
 - **Later:** zie _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_.
   `wide` zet alleen de sporen op twee keer 31 rem; de cellen onder elkaar zijn nu de standaard van elke zijbalk, en de regel `.hf-page-sidebar-wide` voor de kolommen van de cellen is vervallen.
+- **Later:** zie _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_.
+  De twee kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem, en de sporen krimpen tot 20 rem in plaats van 24 rem, zodat ze ook passen naast de inkeping van een telefoon in liggende stand.
 
 ### We nemen het AD, met het filter `club` en het teken voor de betaalmuur
 

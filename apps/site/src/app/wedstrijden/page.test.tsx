@@ -299,6 +299,69 @@ describe('the page /wedstrijden', () => {
     expect(results).toContain('2–0')
   })
 
+  describe('a match that has begun and has no result', () => {
+    const cup = (kickoff: string, round: string, extra: Partial<PublicMatch> = {}): PublicMatch => ({
+      ...matchData.matches[3]!,
+      goals: [],
+      goalsAgainst: null,
+      goalsFor: null,
+      kickoffAt: new Date(kickoff),
+      matchDate: kickoff.slice(0, 10),
+      round,
+      status: 'scheduled',
+      ...extra,
+    })
+    const withMatch = (added: PublicMatch) =>
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [...matchData.matches, added].toSorted((a, b) => a.matchDate.localeCompare(b.matchDate)),
+      })
+
+    it('puts it at the top of the results and not in the programme, with the sentence after two hours', async () => {
+      withMatch(cup('2026-10-22T18:45:00Z', 'Derde ronde'))
+      const html = await render()
+      const results = section(html, 'uitslagen')
+
+      expect(section(html, 'programma')).not.toContain('Derde ronde')
+      expect(results.indexOf('Derde ronde')).toBeLessThan(results.indexOf('Tweede ronde'))
+      expect(results.match(/Gegevens nog niet beschikbaar/g)).toHaveLength(1)
+      expect(results).toContain('do 22 okt 20:45')
+    })
+
+    it('shows only the time within the two hours of the kick-off, still in the results', async () => {
+      withMatch(cup('2026-10-23T12:00:00Z', 'Derde ronde'))
+      const html = await render()
+
+      expect(section(html, 'uitslagen')).toContain('Derde ronde')
+      expect(section(html, 'programma')).not.toContain('Derde ronde')
+      expect(html).not.toContain('Gegevens nog niet beschikbaar')
+    })
+
+    it('shows the result, and no sentence, as soon as the match is played with a score', async () => {
+      withMatch(cup('2026-10-22T18:45:00Z', 'Derde ronde', { goalsAgainst: 1, goalsFor: 3, status: 'played' }))
+      const html = await render()
+
+      expect(section(html, 'uitslagen')).toContain('3–1')
+      expect(html).not.toContain('Gegevens nog niet beschikbaar')
+    })
+
+    it('says nothing of the sort for a match still to come, and keeps a postponed match in the programme', async () => {
+      const html = await render()
+
+      expect(html).not.toContain('Gegevens nog niet beschikbaar')
+      expect(section(html, 'programma')).toContain('Uitgesteld')
+    })
+
+    it('keeps the sentence about no results for a season in which no match has begun', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [cup('2026-11-22T18:45:00Z', 'Derde ronde')],
+      })
+
+      expect(section(await render(), 'uitslagen')).toContain('We hebben nog geen uitslagen van dit seizoen.')
+    })
+  })
+
   describe('a cup tie after extra time or penalties', () => {
     const tie = {
       ...matchData.matches[3]!,

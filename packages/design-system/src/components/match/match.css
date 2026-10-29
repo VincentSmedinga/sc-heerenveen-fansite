@@ -120,6 +120,18 @@
     font-weight: var(--hf-strong-font-weight);
   }
 
+  /*
+   * "Gegevens nog niet beschikbaar" is the last line of the match, under the time and the place.
+   * It is a muted red, the token for missing data: red-800 in light, a step darker than the
+   * accent of "Uitgesteld", which was too bright there, and the same red-300 in dark. It has the
+   * weight of the small lines around it. The colour only adds to the words; whoever can't see it
+   * reads the same sentence.
+   */
+  .hf-match-missing {
+    color: var(--hf-colour-text-missing);
+    margin-block: 0.125rem 0;
+  }
+
   /* A List with matches in it: no bullets, no indent, and a thin line between the lines. */
   :is(ul, ol):has(> li > .hf-match) {
     list-style: none;

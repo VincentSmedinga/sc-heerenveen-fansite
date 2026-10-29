@@ -116,8 +116,8 @@ describe('the bar of sub-pages in navigation.css', () => {
 
   it('never sticks and is never gone, at any width', () => {
     expect(css).not.toMatch(/sticky|fixed|position:|inset-block-start|z-index/)
-    expect(sub).not.toMatch(/display: none|visibility|@media \(width >=? 56rem\)/)
-    expect(css).not.toMatch(/visibility|@media \(width >=? 56rem\)/)
+    expect(sub).not.toMatch(/display: none|visibility|@media \(width >=? 52rem\)/)
+    expect(css).not.toMatch(/visibility|@media \(width >=? 52rem\)/)
     expect(css).not.toContain('scroll-padding-block-start')
   })
 

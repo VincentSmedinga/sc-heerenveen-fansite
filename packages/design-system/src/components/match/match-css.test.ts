@@ -24,6 +24,11 @@ describe('match.css', () => {
     expect(rule('.hf-match-goal-theirs')).not.toMatch(/font-weight/u)
   })
 
+  it('gives "Gegevens nog niet beschikbaar" the token for missing data, and not the weight of "Uitgesteld"', () => {
+    expect(rule('.hf-match-missing')).toMatch(/color: var\(--hf-colour-text-missing\)/u)
+    expect(rule('.hf-match-missing')).not.toMatch(/outcome|font-weight/u)
+  })
+
   it('does not take the colour away in forced colours: the weight stays whatever the browser does', () => {
     expect(css).not.toMatch(/forced-color-adjust/u)
   })
