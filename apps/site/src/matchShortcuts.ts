@@ -19,8 +19,25 @@ export const matchShortcuts = [
 ] as const
 
 /**
- * The links of the bar for the page of a season: all of them for the current season, and for a
- * season that is over the same without Programma, which has no card there.
+ * The name and the anchor of the card with the league table: Stand for the current season, and
+ * Eindstand for a season that is over, where the table is the final one.
  */
-export const matchShortcutsOf = (current: boolean) =>
-  current ? matchShortcuts : matchShortcuts.filter((shortcut) => shortcut.href !== '#programma')
+export const standingsCardOf = (current: boolean) =>
+  current ? ({ id: 'stand', name: 'Stand' } as const) : ({ id: 'eindstand', name: 'Eindstand' } as const)
+
+/**
+ * The links of the bar for the page of a season: all of them for the current season, and for a
+ * season that is over the same without Programma, which has no card there, and with Eindstand
+ * for Stand.
+ */
+export const matchShortcutsOf = (current: boolean) => {
+  if (current) {
+    return matchShortcuts
+  }
+
+  const { id, name } = standingsCardOf(false)
+
+  return matchShortcuts
+    .filter((shortcut) => shortcut.href !== '#programma')
+    .map((shortcut) => (shortcut.href === '#stand' ? { href: `#${id}`, label: name } : shortcut))
+}

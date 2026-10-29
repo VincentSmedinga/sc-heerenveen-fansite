@@ -307,6 +307,15 @@ describe('the page /wedstrijden', () => {
     expect(results).toContain('2–0')
   })
 
+  it('calls the card with the table Stand, and not Eindstand, which is for a season that is over', async () => {
+    const html = await render()
+
+    expect(html).toContain('href="#stand">Stand</a>')
+    expect(html).not.toContain('Eindstand')
+    expect(html).not.toContain('eindstand')
+    expect(html).toContain('aria-label="De stand, de ranglijsten en de doelpunten per kwartier"')
+  })
+
   describe('a match that has begun and has no result', () => {
     const cup = (kickoff: string, round: string, extra: Partial<PublicMatch> = {}): PublicMatch => ({
       ...matchData.matches[3]!,

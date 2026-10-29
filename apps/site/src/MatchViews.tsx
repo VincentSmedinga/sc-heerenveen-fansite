@@ -294,6 +294,8 @@ export function LeaguePlaceCard({
   standings: PublicStandingsRow[]
 }) {
   const place = leaguePlaceOf(standings)
+  // The card of a season that is over has a season, and calls its table the final one.
+  const table = season === undefined ? 'de stand' : 'de eindstand'
 
   return (
     <Card aria-labelledby="onze-plek-in-de-competitie" shareable={imageCredit(place !== undefined, season)}>
@@ -303,8 +305,8 @@ export function LeaguePlaceCard({
       {place === undefined ? (
         <Text>
           {standings.length === 0
-            ? 'We hebben de stand nog niet gevonden. Kijk straks nog eens.'
-            : 'We hebben de plek van sc Heerenveen in de stand nog niet. Kijk straks nog eens.'}
+            ? `We hebben ${table} nog niet gevonden. Kijk straks nog eens.`
+            : `We hebben de plek van sc Heerenveen in ${table} nog niet. Kijk straks nog eens.`}
         </Text>
       ) : (
         <>
@@ -567,12 +569,12 @@ export function SourceCredit({ pages, season }: { pages: PublicWikipediaPage[]; 
 
 /**
  * The caption of the table, which only a screen reader gets: what it is, and the day it holds
- * for.
+ * for. `name` is what the card calls the table: `Eindstand` for a season that is over.
  */
-export function standingsCaption(rows: PublicStandingsRow[]) {
+export function standingsCaption(rows: PublicStandingsRow[], name = 'Stand') {
   const [first] = rows
 
-  return first === undefined ? 'Stand' : `Stand op ${formatTableDay(first.validOn)}`
+  return first === undefined ? name : `${name} op ${formatTableDay(first.validOn)}`
 }
 
 /**
