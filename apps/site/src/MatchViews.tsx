@@ -1,5 +1,5 @@
 import type { PublicMatch, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
-import type { FormResult } from '@fansite/design-system'
+import type { FormResult, MarkRowMark } from '@fansite/design-system'
 
 import {
   Button,
@@ -11,6 +11,7 @@ import {
   Heading,
   Link,
   List,
+  MarkRow,
   Match,
   ShortMatch,
   StandingsTable,
@@ -32,6 +33,7 @@ import {
   quarterLabels,
   scorersCoverage,
   standingsAround,
+  streaksOf,
   topScorersOf,
 } from './matches'
 
@@ -42,6 +44,20 @@ import {
  */
 export const imageCredit = (hasFacts: boolean) =>
   hasFacts ? { source: <WikipediaCredit compact lead="Gegevens van" /> } : undefined
+
+/**
+ * The line under a card with statistics that says how many matches it is based on: all the
+ * played matches, or `known` of the `played` ones when only some have what the card counts.
+ */
+export function BasedOn({ known, played }: { known: number; played: number }) {
+  return (
+    <Text appearance="meta">
+      {known === played
+        ? `Gebaseerd op ${known === 1 ? '1 gespeelde wedstrijd' : `alle ${known} gespeelde wedstrijden`}`
+        : `Gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}
+    </Text>
+  )
+}
 
 /**
  * The card of the matches page with the matches in which sc Heerenveen kept a clean sheet, as
@@ -131,11 +147,7 @@ export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
               header: label,
             }))}
           />
-          <Text appearance="meta">
-            {known === played
-              ? `Gebaseerd op ${known === 1 ? '1 gespeelde wedstrijd' : `alle ${known} gespeelde wedstrijden`}`
-              : `Gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}
-          </Text>
+          <BasedOn known={known} played={played} />
           {extraTime && <Text appearance="meta">Doelpunten in de verlenging tellen niet mee.</Text>}
         </>
       )}
@@ -235,6 +247,12 @@ export function SeasonCard({ matches }: { matches: PublicMatch[] }) {
   )
 }
 
+const markOf: Record<FormResult, MarkRowMark> = {
+  G: { label: 'gelijk', mark: 'G', tone: 'neutral' },
+  V: { label: 'verlies', mark: 'V', tone: 'negative' },
+  W: { label: 'winst', mark: 'W', tone: 'positive' },
+}
+
 /**
  * The full credit for the page of the matches: the pages of Wikipedia the importer read, and
  * the last time it read them, in a card without a border or background to see, so its text
@@ -297,6 +315,53 @@ export function StandingsCard({ data }: { data: MatchData }) {
         </Link>
       </Text>
       {data.standings.length > 0 && <WikipediaCredit compact />}
+    </Card>
+  )
+}
+
+/**
+ * The card of the matches page with the streaks of sc Heerenveen in the Eredivisie: a table
+ * with the six streaks, as they stand now and the longest of the season, and under it the
+ * latest five matches, the oldest first like the form in the card of the season. They are
+ * letters in colour and, as well, short lines with the opponent and the score, so no colour
+ * stands alone. The streaks come from the score of every played match of the league (see
+ * `streaksOf`). Without a played match it is a sentence for visitors and no table.
+ */
+export function StreaksCard({ matches, now }: { matches: PublicMatch[]; now: Date }) {
+  const { last, played, streaks } = streaksOf(matches)
+
+  return (
+    <Card aria-labelledby="reeksen" shareable={imageCredit(played > 0)} surface="soft">
+      <Heading anchor id="reeksen" level={2}>
+        Reeksen
+      </Heading>
+      {played === 0 ? (
+        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+      ) : (
+        <>
+          <Text appearance="meta">Aantal wedstrijden achter elkaar</Text>
+          <DataTable
+            caption="De reeksen van sc Heerenveen in de Eredivisie dit seizoen"
+            columns={['Reeks', 'Nu', 'Langste']}
+            rows={streaks.map(({ current, label, longest }) => ({ cells: [current, longest], header: label }))}
+          />
+          <MarkRow marks={last.map(({ result }) => markOf[result])} title="Laatste wedstrijden" />
+          <List role="list">
+            {last.map(({ match }) => (
+              <List.Item key={`${match.competition}-${match.round}`}>
+                <ShortMatch
+                  {...matchMoment(match, now)}
+                  goalsAgainst={match.goalsAgainst}
+                  goalsFor={match.goalsFor}
+                  home={match.home}
+                  opponent={match.opponent}
+                />
+              </List.Item>
+            ))}
+          </List>
+          <BasedOn known={played} played={played} />
+        </>
+      )}
     </Card>
   )
 }
