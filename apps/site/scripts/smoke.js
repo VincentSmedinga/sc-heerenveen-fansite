@@ -651,6 +651,7 @@ await withEmptyDatabase((database) =>
         '#onze-plek-in-de-competitie',
         '#verloop-van-het-seizoen',
         '#reeksen',
+        '#thuis-en-uit',
         '#doelpuntenmakers',
         '#de-nul-gehouden',
         '#doelpunten-per-kwartier',
@@ -685,6 +686,15 @@ await withEmptyDatabase((database) =>
     )
     assert.match(matchesHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
     assert.match(matchesHtml, /Gebaseerd op (?:alle \d+|1) gespeelde wedstrijd/)
+    // The card of home and away: the table with a column for each.
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="thuis-en-uit">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#thuis-en-uit">Thuis en /,
+    )
+    assert.match(
+      matchesHtml,
+      /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen thuis en uit dit seizoen<\/caption>/,
+    )
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
     assert.match(
       matchesHtml,

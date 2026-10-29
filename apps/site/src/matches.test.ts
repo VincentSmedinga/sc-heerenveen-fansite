@@ -6,6 +6,7 @@ import {
   cleanSheetsOf,
   goalsPerQuarter,
   goalsWithInitials,
+  homeAwayOf,
   leaguePlaceOf,
   leagueResultsOf,
   matchFlowOf,
@@ -1167,5 +1168,116 @@ describe('leaguePlaceOf', () => {
     expect(leaguePlaceOf([club('Een', 1, 4, 10, 3, 9, 3)])).toBeUndefined()
     expect(leaguePlaceOf([club('Een', 1, 1, 3, 1, 2, 0), club('sc Heerenveen', 2, 0, 0, 0, 0, 0)])).toBeUndefined()
     expect(leaguePlaceOf([])).toBeUndefined()
+  })
+})
+
+describe('homeAwayOf', () => {
+  const game = (home: boolean, goalsFor: number, goalsAgainst: number, round = 'Speelronde 1'): PublicMatch => ({
+    ...match(round, 'played', '2026-08-01'),
+    goalsAgainst,
+    goalsFor,
+    home,
+  })
+  const matches = [
+    game(true, 3, 0, 'Speelronde 1'),
+    game(true, 1, 1, 'Speelronde 2'),
+    game(true, 0, 2, 'Speelronde 3'),
+    game(false, 2, 1, 'Speelronde 4'),
+    game(false, 0, 0, 'Speelronde 5'),
+  ]
+
+  it('counts the matches at home and away apart, with the points and the goals', () => {
+    const { away, home } = homeAwayOf(matches)
+
+    expect(home).toEqual({
+      cleanSheets: 1,
+      drawn: 1,
+      goalsAgainst: 3,
+      goalsFor: 4,
+      goalsPerMatch: 4 / 3,
+      lost: 1,
+      played: 3,
+      points: 4,
+      pointsPerMatch: 4 / 3,
+      won: 1,
+    })
+    expect(away).toEqual({
+      cleanSheets: 1,
+      drawn: 1,
+      goalsAgainst: 1,
+      goalsFor: 2,
+      goalsPerMatch: 1,
+      lost: 0,
+      played: 2,
+      points: 4,
+      pointsPerMatch: 2,
+      won: 1,
+    })
+  })
+
+  it('gives a total that is home plus away, and that agrees with the results of the season', () => {
+    const { away, home, total } = homeAwayOf(matches)
+    const results = leagueResultsOf(matches)
+    const count = (result: string) => results.filter((item) => item === result).length
+
+    for (const key of [
+      'cleanSheets',
+      'drawn',
+      'goalsAgainst',
+      'goalsFor',
+      'lost',
+      'played',
+      'points',
+      'won',
+    ] as const) {
+      expect(total[key]).toBe(home[key] + away[key])
+    }
+    expect([total.won, total.drawn, total.lost]).toEqual([count('W'), count('G'), count('V')])
+    expect(total.points).toBe(count('W') * 3 + count('G'))
+    expect(total.pointsPerMatch).toBeCloseTo(8 / 5)
+    expect(total.goalsPerMatch).toBeCloseTo(6 / 5)
+  })
+
+  it('has zeros and no average for a side that has no match yet', () => {
+    const { away, home, total } = homeAwayOf([game(true, 2, 0)])
+
+    expect(away).toEqual({
+      cleanSheets: 0,
+      drawn: 0,
+      goalsAgainst: 0,
+      goalsFor: 0,
+      goalsPerMatch: undefined,
+      lost: 0,
+      played: 0,
+      points: 0,
+      pointsPerMatch: undefined,
+      won: 0,
+    })
+    expect(home.played).toBe(1)
+    expect(home.pointsPerMatch).toBe(3)
+    expect(total).toEqual(home)
+  })
+
+  it('has zeros and no average when there is no match at all', () => {
+    const { away, home, total } = homeAwayOf([])
+
+    expect(home).toEqual(away)
+    expect(total).toEqual(away)
+    expect(total.played).toBe(0)
+    expect(total.pointsPerMatch).toBeUndefined()
+  })
+
+  it('leaves out a cup tie, a match without a score, and a match that is postponed or still to come', () => {
+    const cup: PublicMatch = { ...game(true, 4, 0), competition: 'KNVB Beker' }
+    const noScore: PublicMatch = { ...game(false, 0, 0), goalsAgainst: null, goalsFor: null }
+    const postponed: PublicMatch = { ...match('Speelronde 6', 'postponed', '2026-09-01'), home: true }
+    const scheduled: PublicMatch = { ...match('Speelronde 7', 'scheduled', '2026-09-08'), home: false }
+
+    expect(homeAwayOf([game(true, 1, 0), cup, noScore, postponed, scheduled]).total.played).toBe(1)
+  })
+
+  it('counts a match whose goals per player are not known', () => {
+    // `game` has no goals in the list, only a score: it still counts.
+    expect(homeAwayOf([game(true, 2, 1)]).home).toMatchObject({ goalsAgainst: 1, goalsFor: 2, played: 1, won: 1 })
   })
 })
