@@ -46,9 +46,8 @@ describe('the page Onze bronnen', () => {
     const html = await render()
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Onze bronnen</h1>'])
-    expect(html).toContain(
-      '<p class="hf-intro"><b>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.</b></p>',
-    )
+    // The heading and the cards say it, so there is no introduction under the heading.
+    expect(html).not.toContain('hf-intro')
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
       '<h2 class="hf-heading-2 hf-heading-anchored" id="nieuws">Nieuws</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="podcasts">Podcasts</h2>',
@@ -115,14 +114,14 @@ describe('the page Onze bronnen', () => {
     ).toHaveLength(2)
   })
 
-  it('is the one main of the page, with the h1 and the introduction as its intro and a card for each kind under it, and a sidebar with three coloured cards', async () => {
+  it('is the one main of the page, with the h1 alone as its intro and a card for each kind under it, and a sidebar with three coloured cards', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><p class="hf-intro"><b>Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen\.<\/b><\/p><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><section class="hf-card" aria-labelledby="podcasts">.*<\/section><\/div><\/main><aside class="hf-page-sidebar hf-page-sidebar-split" aria-label="Meer over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-strong" aria-labelledby="uitgever">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="nieuwsbrief-lc">.*<\/section><\/aside>$/,
+      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><section class="hf-card" aria-labelledby="podcasts">.*<\/section><\/div><\/main><aside class="hf-page-sidebar hf-page-sidebar-split" aria-label="Meer over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-strong" aria-labelledby="uitgever">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="nieuwsbrief-lc">.*<\/section><\/aside>$/,
     )
   })
 
@@ -137,7 +136,7 @@ describe('the page Onze bronnen', () => {
     expect(cards[0]?.match(/<li>/g)).toHaveLength(2)
     expect(cards[1]).toContain('<h2 class="hf-heading-2 hf-heading-anchored" id="podcasts">Podcasts</h2>')
     expect(cards[1]?.match(/<li>/g)).toHaveLength(1)
-    // The h1 and the introduction are in the intro above the cards.
+    // The h1 is in the intro above the cards.
     expect(cards.join('')).not.toContain('<h1')
     expect(cards.join('')).not.toContain('Dit zijn de bronnen')
   })
@@ -199,7 +198,7 @@ describe('the page Onze bronnen', () => {
     expect(cards).toHaveLength(4)
     expect(cards[0]).toContain('<h2 class="hf-heading-2 hf-heading-anchored" id="forum">Forum</h2>')
     expect(cards[0]?.match(/<li>/g)).toHaveLength(1)
-    expect(html).toContain('Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.')
+    expect(html).not.toContain('Dit zijn de bronnen')
     expect(html).not.toContain('We hebben nog geen bronnen')
   })
 
@@ -208,7 +207,7 @@ describe('the page Onze bronnen', () => {
 
     const html = await render()
 
-    expect(html).toContain('We hebben nog geen bronnen.')
+    expect(html).toContain('<p class="hf-intro"><b>We hebben nog geen bronnen.')
     // The div for the cards stays empty, which page.css leaves out.
     expect(html).toContain('</div><div class="hf-page-cells"></div></main>')
     expect(html).not.toContain('Dit zijn de bronnen')

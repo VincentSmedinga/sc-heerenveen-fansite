@@ -67,14 +67,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <Page.Main
-        intro={
-          <>
-            <Heading level={1}>Wedstrijden</Heading>
-            <Text appearance="intro">Het programma, de uitslagen en de stand van sc Heerenveen 1 dit seizoen.</Text>
-          </>
-        }
-      >
+      <Page.Main intro={<Heading level={1}>Wedstrijden</Heading>}>
         <Card aria-labelledby="programma">
           <Heading anchor id="programma" level={2}>
             Programma

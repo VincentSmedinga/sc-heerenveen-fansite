@@ -19,8 +19,7 @@ export default function ContactPage() {
       <Page.Cell>
         <Heading level={1}>Contact</Heading>
         <Text appearance="intro">
-          Heb je een vraag, zie je een fout of wil je dat we een bericht weghalen? Vul het formulier in, dan lezen de
-          vrijwilligers van de redactie het en antwoorden ze je per mail.
+          Stel je vraag, meld een fout of vraag ons een bericht weg te halen: we antwoorden per mail.
         </Text>
         <Text>
           Wat we met je gegevens doen, lees je bij <Link href="/privacy">Privacy</Link>.

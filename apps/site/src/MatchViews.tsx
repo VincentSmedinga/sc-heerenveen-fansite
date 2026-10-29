@@ -162,7 +162,7 @@ export function ExtremesCard({ matches, now }: { matches: PublicMatch[]; now: Da
           </List>
           <BasedOn known={played} played={played} />
           {known > 0 && known < played && (
-            <Text appearance="meta">{`Het vroegste en het laatste doelpunt zijn gebaseerd op de doelpunten van ${known} van de ${played} gespeelde wedstrijden`}</Text>
+            <Text appearance="meta">{`Vroegste en laatste doelpunt: gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}</Text>
           )}
         </>
       )}
@@ -413,7 +413,6 @@ export function MatchFlowCard({ matches }: { matches: PublicMatch[] }) {
               { cells: flowCells(atHalfTime.behind), header: 'Achter' },
             ]}
           />
-          <Text appearance="meta">G gespeeld, W winst, GL gelijk, V verlies, P punten</Text>
           <Text>
             {wonAfterTrailing === 0
               ? 'Na een achterstand won sc Heerenveen nog geen wedstrijd.'
@@ -424,6 +423,7 @@ export function MatchFlowCard({ matches }: { matches: PublicMatch[] }) {
               ? 'Na een voorsprong liet sc Heerenveen nog geen winst liggen.'
               : `Na een voorsprong haalde sc Heerenveen in ${notWonAfterLead === 1 ? '1 wedstrijd' : `${notWonAfterLead} wedstrijden`} geen winst.`}
           </Text>
+          <Text appearance="meta">G gespeeld, W winst, GL gelijk, V verlies, P punten</Text>
           <BasedOn known={known} played={played} />
           {unknownFirstGoal > 0 && (
             <Text appearance="meta">

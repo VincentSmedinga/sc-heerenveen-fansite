@@ -62,6 +62,95 @@ describe('the page /wedstrijden', () => {
     ])
   })
 
+  it('has no introduction under the h1: the headings of the cards say what is on the page', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('hf-intro')
+    expect(html).toMatch(/<div class="hf-page-intro"><h1 class="hf-heading-1">Wedstrijden<\/h1><\/div>/)
+  })
+
+  describe('the order of the parts of a card', () => {
+    // The parts of a card stand in a fixed order: the heading, the explanation, the content,
+    // the legend, "Gebaseerd op" with the sentences that go with it, the link, and the credit.
+    /** Fails when a part is missing, or stands before the one in front of it. */
+    function expectInOrder(card: string, parts: string[]) {
+      const places = parts.map((part) => card.indexOf(part))
+
+      expect(places.filter((place) => place === -1).length, `missing from the card: ${parts.join(' | ')}`).toBe(0)
+      expect(places, parts.join(' | ')).toEqual([...places].sort((a, b) => a - b))
+    }
+
+    it('has the explanation of the streaks under the heading and above the table', async () => {
+      expectInOrder(section(await render(), 'reeksen'), [
+        '</h2>',
+        'Aantal wedstrijden achter elkaar',
+        '<table',
+        'Gebaseerd op',
+      ])
+    })
+
+    it('has the legend of a table under it, and "Gebaseerd op" last', async () => {
+      const html = await render()
+
+      expectInOrder(section(html, 'stand'), ['</h2>', '<table', 'hf-bar-legend'])
+      expectInOrder(section(html, 'doelpuntenmakers'), ['</h2>', '<table', 'hf-bar-legend'])
+      expectInOrder(section(html, 'hoe-de-wedstrijden-verlopen'), [
+        '</h2>',
+        '<table',
+        'Na een voorsprong',
+        'G gespeeld, W winst',
+        'Gebaseerd op',
+      ])
+    })
+
+    it('has the key of the chart of the season under the chart, with the table of the same numbers after it', async () => {
+      expectInOrder(section(await render(), 'verloop-van-het-seizoen'), [
+        '</h2>',
+        'hf-form-chart',
+        'hf-form-chart-key',
+        'hf-form-chart-line',
+        '<table',
+      ])
+    })
+
+    it('has "Gebaseerd op" under the content on the cards that count', async () => {
+      const html = await render()
+
+      expectInOrder(section(html, 'onze-plek-in-de-competitie'), ['</h2>', '<table', 'staat', 'Gebaseerd op'])
+      expectInOrder(section(html, 'thuis-en-uit'), ['</h2>', '<table', 'Gebaseerd op'])
+      expectInOrder(section(html, 'doelpunten-per-kwartier'), ['</h2>', '<table', 'Gebaseerd op'])
+      expectInOrder(section(html, 'uitersten'), [
+        '</h2>',
+        '<ul',
+        'Gebaseerd op alle',
+        'Vroegste en laatste doelpunt: gebaseerd op',
+      ])
+    })
+
+    it('has the sentence about extra time right after "Gebaseerd op"', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((match) => (match.goals.length > 0 ? { ...match, extraTime: true } : match)),
+      })
+
+      expectInOrder(section(await render(), 'doelpunten-per-kwartier'), [
+        '</h2>',
+        '<table',
+        'Gebaseerd op',
+        'Doelpunten in de verlenging',
+      ])
+    })
+
+    it('has the legend of the abbreviations of a match under the list of matches', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((match) => (match.status === 'played' ? { ...match, extraTime: true } : match)),
+      })
+
+      expectInOrder(section(await render(), 'uitslagen'), ['</h2>', '<ul', 'n.v. na verlenging'])
+    })
+  })
+
   it('has a heading for every link of the bar under the header, with the id the link goes to, in the same order', async () => {
     const html = await render()
     const ids = [...html.matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => `#${id}`)
@@ -1039,11 +1128,12 @@ describe('the page /wedstrijden', () => {
       ])
     })
 
-    it('explains the abbreviations of the columns in a line under the tables', async () => {
+    it('explains the abbreviations of the columns in a line under the tables and the sentences', async () => {
       const card = section(await render(), 'hoe-de-wedstrijden-verlopen')
 
       expect(card).toContain('G gespeeld, W winst, GL gelijk, V verlies, P punten')
       expect(card.lastIndexOf('</table>')).toBeLessThan(card.indexOf('G gespeeld, W winst'))
+      expect(card.indexOf('Na een voorsprong')).toBeLessThan(card.indexOf('G gespeeld, W winst'))
     })
 
     it('says in how many matches sc Heerenveen won after trailing and did not win after leading', async () => {
@@ -1234,7 +1324,7 @@ describe('the page /wedstrijden', () => {
 
       expect(card).toContain('<p class="hf-meta">Gebaseerd op alle 3 gespeelde wedstrijden</p>')
       expect(card).toContain(
-        '<p class="hf-meta">Het vroegste en het laatste doelpunt zijn gebaseerd op de doelpunten van 2 van de 3 gespeelde wedstrijden</p>',
+        '<p class="hf-meta">Vroegste en laatste doelpunt: gebaseerd op 2 van de 3 gespeelde wedstrijden</p>',
       )
     })
 

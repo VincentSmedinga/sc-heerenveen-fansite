@@ -93,9 +93,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         intro={
           <>
             <Heading level={1}>Zoeken</Heading>
-            <Text appearance="intro">
-              Zoek in de koppen van het nieuws, de podcasts en de artikelen van de redactie.
-            </Text>
+            <Text appearance="intro">Zoek in de koppen van nieuws, podcasts en artikelen.</Text>
           </>
         }
       >
