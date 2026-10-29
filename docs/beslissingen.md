@@ -6417,6 +6417,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alle kaarten wit laten (de cijfers vallen dan niet op); de homepage dezelfde vlakken geven (de projecteigenaar wil die niet veranderen).
 - **Later:** zie _Het verloop van het seizoen staat onder de stand, in een warme kaart_.
   Er staat nu een kaart tussen Stand en Doelpuntenmakers, en op een telefoon is de volgorde Programma, Uitslagen, Stand, Verloop van het seizoen, Doelpuntenmakers, De nul gehouden en Doelpunten per kwartier.
+- **Later:** zie _Reeksen staan in een eigen kaart na Verloop van het seizoen_.
+  Op een telefoon staat Reeksen nu tussen Verloop van het seizoen en Doelpuntenmakers, in het zachte vlak.
 
 ### Het verloop van het seizoen staat onder de stand, in een warme kaart
 
@@ -6530,3 +6532,37 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De naam uit de kop houdt de tekst op één plek.
   Een knop zonder JavaScript doet niets, en een knop die er pas na het laden staat verschuift de kop niet.
 - **Alternatieven:** een boolean `shareable` met de bron als aparte eigenschap (een kaart kan dan zonder bron delen); een aparte component `ShareButton` die de pagina zelf in de kaart zet (de pagina moet dan zelf de kaart vinden en kiezen waar de knop komt).
+
+### Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** nieuwe statistieken komen als kaart in de zijbalk van `/wedstrijden`.
+  Een kaart telt alleen de Eredivisie, tenzij hij over de beker gaat.
+  Een kaart blijft zichtbaar bij weinig wedstrijden en zegt waarop hij is gebaseerd.
+  Voorspellingen en lijnen voor Europa of degradatie komen er niet in.
+- **Waarom:** de pagina heeft al zeven kaarten en de navigatie is voorbereid op een splitsing in subpagina's, dus nu extra kaarten bouwen kost later weinig werk.
+  Een regel voor de competitie maakt de cijfers vergelijkbaar, en een schakelaar volgt (#406).
+  Vroeg in het seizoen zijn de aantallen klein, maar de zin "Gebaseerd op" zegt dat eerlijk.
+  Een voorspelling is een mening, geen feit uit de bron.
+- **Gevolg:** de bestaande kaarten Doelpuntenmakers, De nul gehouden en Doelpunten per kwartier tellen de beker nog mee, tot de schakelaar van #406 er is.
+  De zin "Gebaseerd op" komt uit één stukje code, `BasedOn` in `MatchViews.tsx`.
+- **Alternatieven:** een eigen pagina of tabbladen voor de statistieken (komt met #363).
+  De beker meetellen (de bestaande kaarten verschillen al, één regel is duidelijker).
+  Een statistiek verbergen tot er genoeg wedstrijden zijn (de pagina is dan lang leeg).
+
+### Reeksen staan in een eigen kaart na Verloop van het seizoen
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de reeksen en de laatste vijf wedstrijden staan in een eigen kaart "Reeksen", direct na Verloop van het seizoen, in het zachte vlak.
+  Er zijn zes reeksen, elk met de lengte van nu en de langste.
+  Ze komen uit de score van de gespeelde wedstrijden van de Eredivisie.
+  De laatste vijf wedstrijden staan met de oudste eerst, als letters (`MarkRow`) en als korte regels met de tegenstander en de uitslag (`ShortMatch`).
+- **Waarom:** de reeksen gebruiken dezelfde uitslagen als Verloop van het seizoen, dus ze staan er het best naast.
+  Een eigen kaart houdt Verloop van het seizoen kort.
+  Een score is er voor elke gespeelde wedstrijd, dus de reeksen hebben geen last van wedstrijden zonder bekende doelpunten.
+  De oudste eerst is de volgorde van de vorm in de kaart erboven, en de letters en de regels staan zo in dezelfde volgorde.
+  Het zachte vlak laat de volgende kaart (Thuis en uit, #399) warm worden, zodat de kaarten daarna om en om wisselen.
+- **Alternatieven:** de reeksen in de kaart Verloop van het seizoen zetten (een lange kaart met twee onderwerpen).
+  Alleen de laatste vijf wedstrijden tonen (geen reeksen, en die zoeken supporters juist).
+  De nieuwste eerst (past bij Uitslagen en De nul gehouden, maar dan loopt de volgorde tegen die van de letters in).
+  Een warm vlak (komt naast Verloop van het seizoen, dat al warm is).

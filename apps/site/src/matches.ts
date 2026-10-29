@@ -65,6 +65,29 @@ export type CleanSheets = {
   played: number
 }
 
+/** A played match of the Eredivisie with a score, so with both numbers of goals. */
+export type LeagueMatch = PublicMatch & { goalsAgainst: number; goalsFor: number }
+
+/** One streak: matches in a row that all meet a condition, as it stands now and the longest. */
+export type Streak = {
+  /** The matches in a row up to the latest match; 0 when the latest match does not meet it. */
+  current: number
+  /** The name of the streak as the card shows it, such as `Ongeslagen`. */
+  label: string
+  /** The most matches in a row anywhere in the season. */
+  longest: number
+}
+
+/** The streaks of sc Heerenveen in the Eredivisie, and the latest matches. */
+export type Streaks = {
+  /** The latest five matches (fewer when fewer are played), the oldest first. */
+  last: { match: LeagueMatch; result: FormResult }[]
+  /** How many matches were played, with a score. */
+  played: number
+  /** The six streaks, in the order the card shows them. */
+  streaks: Streak[]
+}
+
 /**
  * A player in the list of goal scorers: the goals this season and the place, from 1. `player`
  * is the full name from the table `players` for a goal that is linked to a player, and the name
@@ -101,18 +124,63 @@ export function cleanSheetsOf(matches: PublicMatch[]): CleanSheets {
  * not always the round. The Eredivisie has no extra time or shoot-out, so the score decides.
  */
 export function leagueResultsOf(matches: PublicMatch[]): FormResult[] {
-  return matches.flatMap((match): FormResult[] => {
-    if (
-      match.competition !== 'Eredivisie' ||
-      match.status !== 'played' ||
-      match.goalsFor === null ||
-      match.goalsAgainst === null
-    ) {
-      return []
-    }
+  return leagueMatchesOf(matches).map(resultOf)
+}
 
-    return [match.goalsFor > match.goalsAgainst ? 'W' : match.goalsFor === match.goalsAgainst ? 'G' : 'V']
-  })
+/** The matches of the Eredivisie that are played and have a score, in the order given. */
+function leagueMatchesOf(matches: PublicMatch[]): LeagueMatch[] {
+  return matches.filter(
+    (match): match is LeagueMatch =>
+      match.competition === 'Eredivisie' &&
+      match.status === 'played' &&
+      match.goalsFor !== null &&
+      match.goalsAgainst !== null,
+  )
+}
+
+/** The result of a match from the side of sc Heerenveen: `W` won, `G` drawn and `V` lost. */
+function resultOf(match: LeagueMatch): FormResult {
+  return match.goalsFor > match.goalsAgainst ? 'W' : match.goalsFor === match.goalsAgainst ? 'G' : 'V'
+}
+
+/** How many of the latest matches the card shows. */
+const lastCount = 5
+
+const streakConditions: { counts: (match: LeagueMatch) => boolean; label: string }[] = [
+  { counts: (match) => match.goalsFor >= match.goalsAgainst, label: 'Ongeslagen' },
+  { counts: (match) => match.goalsFor > match.goalsAgainst, label: 'Gewonnen' },
+  { counts: (match) => match.goalsFor <= match.goalsAgainst, label: 'Zonder winst' },
+  { counts: (match) => match.goalsFor < match.goalsAgainst, label: 'Verloren' },
+  { counts: (match) => match.goalsFor > 0, label: 'Gescoord' },
+  { counts: (match) => match.goalsAgainst === 0, label: 'Zonder tegendoelpunt' },
+]
+
+/**
+ * The streaks of sc Heerenveen in the Eredivisie: six conditions (unbeaten, won, without a win,
+ * lost, scored, no goal against), each with the number of matches in a row as it stands now and
+ * the longest of the season, and the latest five matches. They come from the score, so from
+ * every played match of the league, also the ones whose scorers are not known. A cup tie, a
+ * match without a score and a match that isn't played count for nothing. A match that was
+ * postponed stands where it was played (see `leagueResultsOf`).
+ */
+export function streaksOf(matches: PublicMatch[]): Streaks {
+  const played = leagueMatchesOf(matches)
+
+  return {
+    last: played.slice(-lastCount).map((match) => ({ match, result: resultOf(match) })),
+    played: played.length,
+    streaks: streakConditions.map(({ counts, label }) => {
+      let current = 0
+      let longest = 0
+
+      for (const match of played) {
+        current = counts(match) ? current + 1 : 0
+        longest = Math.max(longest, current)
+      }
+
+      return { current, label, longest }
+    }),
+  }
 }
 
 /**

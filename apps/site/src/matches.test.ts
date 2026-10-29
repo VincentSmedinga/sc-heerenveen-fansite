@@ -12,6 +12,7 @@ import {
   parseCleanSheetCount,
   scorersCoverage,
   standingsAround,
+  streaksOf,
   topScorersOf,
 } from './matches'
 
@@ -409,6 +410,196 @@ describe('leagueResultsOf', () => {
 
     expect(leagueResultsOf([])).toEqual([])
     expect(leagueResultsOf(matches)).toEqual([])
+    expect(matches).toEqual(copy)
+  })
+})
+
+describe('streaksOf', () => {
+  // Round 1 to 8 as scores: the match in round n is played a week after the one before it.
+  const scored = (scores: [number, number][]): PublicMatch[] =>
+    scores.map(([goalsFor, goalsAgainst], index) => ({
+      ...match(`Speelronde ${index + 1}`, 'played', `2026-08-${String(index * 7 + 1).padStart(2, '0')}`),
+      goalsAgainst,
+      goalsFor,
+    }))
+  const byLabel = (matches: PublicMatch[]) =>
+    Object.fromEntries(streaksOf(matches).streaks.map(({ current, label, longest }) => [label, [current, longest]]))
+
+  it('has the six streaks, in the order the card shows them', () => {
+    expect(streaksOf(scored([[1, 0]])).streaks.map(({ label }) => label)).toEqual([
+      'Ongeslagen',
+      'Gewonnen',
+      'Zonder winst',
+      'Verloren',
+      'Gescoord',
+      'Zonder tegendoelpunt',
+    ])
+  })
+
+  it('counts each streak apart, as it stands now and the longest', () => {
+    // W G W W V G
+    const matches = scored([
+      [2, 0],
+      [1, 1],
+      [3, 1],
+      [1, 0],
+      [0, 2],
+      [0, 0],
+    ])
+
+    expect(byLabel(matches)).toEqual({
+      Gescoord: [0, 4],
+      Gewonnen: [0, 2],
+      Ongeslagen: [1, 4],
+      Verloren: [0, 1],
+      'Zonder tegendoelpunt': [1, 1],
+      'Zonder winst': [2, 2],
+    })
+  })
+
+  it('has a current streak of 0 when the latest match does not meet the condition, and counts a streak that runs', () => {
+    const matches = scored([
+      [0, 1],
+      [0, 2],
+      [2, 1],
+      [1, 0],
+      [3, 0],
+    ])
+
+    expect(byLabel(matches)).toMatchObject({
+      Gescoord: [3, 3],
+      Gewonnen: [3, 3],
+      Ongeslagen: [3, 3],
+      Verloren: [0, 2],
+      'Zonder tegendoelpunt': [2, 2],
+      'Zonder winst': [0, 2],
+    })
+  })
+
+  it('finds the longest streak early in the season, when a shorter one runs now', () => {
+    const matches = scored([
+      [1, 0],
+      [2, 0],
+      [3, 0],
+      [0, 1],
+      [1, 0],
+    ])
+
+    expect(byLabel(matches)).toMatchObject({ Gewonnen: [1, 3] })
+    expect(byLabel(matches)['Zonder tegendoelpunt']).toEqual([1, 3])
+  })
+
+  it('finds the longest streak late in the season, when the current one is 0', () => {
+    const matches = scored([
+      [0, 1],
+      [1, 1],
+      [1, 2],
+      [0, 3],
+      [0, 0],
+      [0, 0],
+      [1, 0],
+      [2, 0],
+      [0, 1],
+    ])
+
+    expect(byLabel(matches)).toMatchObject({ Ongeslagen: [0, 4], 'Zonder tegendoelpunt': [0, 4] })
+  })
+
+  it('counts a match whose scorers are not known, because the streaks come from the score', () => {
+    const matches = scored([
+      [1, 0],
+      [2, 0],
+    ])
+
+    expect(matches.every((item) => item.goals.length === 0)).toBe(true)
+    expect(byLabel(matches)).toMatchObject({ Gewonnen: [2, 2] })
+  })
+
+  it('gives the latest five matches, the oldest first, with their results', () => {
+    const matches = scored([
+      [0, 3],
+      [1, 0],
+      [1, 1],
+      [0, 2],
+      [2, 2],
+      [4, 1],
+      [0, 0],
+    ])
+    const { last } = streaksOf(matches)
+
+    expect(last.map(({ match: item }) => item.round)).toEqual([
+      'Speelronde 3',
+      'Speelronde 4',
+      'Speelronde 5',
+      'Speelronde 6',
+      'Speelronde 7',
+    ])
+    expect(last.map(({ result }) => result)).toEqual(['G', 'V', 'G', 'W', 'G'])
+  })
+
+  it('leaves out a cup tie, a match without a score and a match that is not played', () => {
+    const matches: PublicMatch[] = [
+      ...scored([[1, 0]]),
+      { ...match('Tweede ronde', 'played', '2026-08-10'), competition: 'KNVB Beker', goalsAgainst: 5, goalsFor: 0 },
+      { ...match('Speelronde 3', 'played', '2026-08-15'), goalsAgainst: null, goalsFor: null },
+      match('Speelronde 4', 'postponed', '2026-08-22'),
+      match('Speelronde 5', 'scheduled', '2026-08-29'),
+    ]
+    const result = streaksOf(matches)
+
+    expect(result.played).toBe(1)
+    expect(result.last).toHaveLength(1)
+    expect(byLabel(matches)).toMatchObject({ Verloren: [0, 0] })
+    expect(byLabel(matches)).toMatchObject({ Gewonnen: [1, 1] })
+  })
+
+  it('puts a postponed match where it was played', () => {
+    // Round 3 was postponed and played after round 5, so it is the latest match.
+    const won = (round: string, matchDate: string): PublicMatch => ({
+      ...match(round, 'played', matchDate),
+      goalsAgainst: 0,
+      goalsFor: 1,
+    })
+    const matches = [
+      won('Speelronde 1', '2026-08-01'),
+      won('Speelronde 2', '2026-08-08'),
+      won('Speelronde 4', '2026-08-22'),
+      won('Speelronde 5', '2026-08-29'),
+      { ...match('Speelronde 3', 'played', '2026-09-05'), goalsAgainst: 2, goalsFor: 0 },
+    ]
+
+    expect(byLabel(matches)).toMatchObject({ Gewonnen: [0, 4] })
+    expect(streaksOf(matches).last.at(-1)?.match.round).toBe('Speelronde 3')
+  })
+
+  it('works for one match', () => {
+    const result = streaksOf(scored([[0, 1]]))
+
+    expect(result.played).toBe(1)
+    expect(result.last).toHaveLength(1)
+    expect(
+      Object.fromEntries(result.streaks.map(({ current, label, longest }) => [label, [current, longest]])),
+    ).toEqual({
+      Gescoord: [0, 0],
+      Gewonnen: [0, 0],
+      Ongeslagen: [0, 0],
+      Verloren: [1, 1],
+      'Zonder tegendoelpunt': [0, 0],
+      'Zonder winst': [1, 1],
+    })
+  })
+
+  it('gives all zero and no matches for no matches, and does not change the list it is given', () => {
+    const matches = scored([[1, 0]])
+    const copy = [...matches]
+
+    expect(streaksOf([])).toEqual({
+      last: [],
+      played: 0,
+      streaks: expect.arrayContaining([{ current: 0, label: 'Ongeslagen', longest: 0 }]),
+    })
+    expect(streaksOf([]).streaks.every(({ current, longest }) => current === 0 && longest === 0)).toBe(true)
+    streaksOf(matches)
     expect(matches).toEqual(copy)
   })
 })

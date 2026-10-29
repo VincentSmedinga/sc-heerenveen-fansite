@@ -15,6 +15,7 @@ import {
   SeasonCard,
   SourceCredit,
   standingsCaption,
+  StreaksCard,
   TopScorers,
 } from '../../MatchViews'
 import { pageMetadata } from '../../metadata'
@@ -97,8 +98,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </Card>
       </Page.Main>
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme and the
-          results: the table, our place in the league, the season, the goal scorers, the clean
-          sheets, then the goals per quarter. */}
+          results: the table, our place in the league, the season, the streaks, the goal
+          scorers, the clean sheets, then the goals per quarter. */}
       <Page.Sidebar aria-label="De stand, de ranglijsten en de doelpunten per kwartier" wide>
         <Card aria-labelledby="stand" shareable={imageCredit(data.standings.length > 0)} surface="soft">
           <Heading anchor id="stand" level={2}>
@@ -112,6 +113,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </Card>
         <LeaguePlaceCard standings={data.standings} />
         <SeasonCard matches={data.matches} />
+        <StreaksCard matches={data.matches} now={now} />
         <Card
           aria-labelledby="doelpuntenmakers"
           shareable={imageCredit(topScorersOf(data.matches).length > 0)}
