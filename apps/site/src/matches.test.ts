@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   cleanSheetsOf,
+  extremesOf,
   goalsPerQuarter,
   goalsWithInitials,
   homeAwayOf,
@@ -836,6 +837,194 @@ describe('goalsWithInitials', () => {
     ]
 
     expect(goalsWithInitials(goals)).toEqual(goals)
+  })
+})
+
+describe('extremesOf', () => {
+  /** A played match with this score, and these goals if it has any. */
+  const scored = (round: string, goalsFor: number, goalsAgainst: number, goals: Goal[] = []): PublicMatch => ({
+    ...match(round, 'played', `2026-08-${String(Number(round.replace(/\D/g, '')) + 8).padStart(2, '0')}`),
+    goals,
+    goalsAgainst,
+    goalsFor,
+  })
+  const rounds = (...list: (PublicMatch | undefined)[]) => list.map((item) => item?.round)
+
+  it('picks the biggest win, the biggest loss and the match with the most goals from the score', () => {
+    const matches = [
+      scored('Speelronde 1', 3, 0),
+      scored('Speelronde 2', 0, 2),
+      scored('Speelronde 3', 1, 5),
+      scored('Speelronde 4', 2, 1),
+    ]
+    const extremes = extremesOf(matches)
+
+    expect(extremes.biggestWin?.round).toBe('Speelronde 1')
+    expect(extremes.biggestLoss?.round).toBe('Speelronde 3')
+    expect(extremes.mostGoals?.round).toBe('Speelronde 3')
+    expect(extremes.played).toBe(4)
+  })
+
+  it('takes the match played last when two are level, in each of the three lines', () => {
+    const matches = [
+      scored('Speelronde 1', 3, 1),
+      scored('Speelronde 2', 0, 2),
+      scored('Speelronde 3', 2, 0),
+      scored('Speelronde 4', 1, 3),
+      scored('Speelronde 5', 1, 1),
+    ]
+    const extremes = extremesOf(matches)
+
+    expect(rounds(extremes.biggestWin, extremes.biggestLoss, extremes.mostGoals)).toEqual([
+      'Speelronde 3',
+      'Speelronde 4',
+      'Speelronde 4',
+    ])
+  })
+
+  it('has no win without a win and no loss without a loss, and a draw is neither', () => {
+    expect(rounds(extremesOf([scored('Speelronde 1', 0, 1), scored('Speelronde 2', 2, 2)]).biggestWin)).toEqual([
+      undefined,
+    ])
+    expect(rounds(extremesOf([scored('Speelronde 1', 1, 0), scored('Speelronde 2', 2, 2)]).biggestLoss)).toEqual([
+      undefined,
+    ])
+    expect(
+      rounds(
+        extremesOf([scored('Speelronde 1', 0, 0)]).biggestWin,
+        extremesOf([scored('Speelronde 1', 0, 0)]).biggestLoss,
+      ),
+    ).toEqual([undefined, undefined])
+  })
+
+  it('picks our earliest and our last goal, and counts the stoppage time in the minute', () => {
+    const matches = [
+      scored('Speelronde 1', 2, 0, [
+        goal('Proefman', { minute: 44 }),
+        goal('Nepper', { minute: 45, stoppageMinutes: 2 }),
+      ]),
+      scored('Speelronde 2', 1, 0, [goal('Kopie', { minute: 48 })]),
+    ]
+    const { earliestGoal, latestGoal } = extremesOf(matches)
+
+    expect([earliestGoal?.goal.player, earliestGoal?.match.round]).toEqual(['Proefman', 'Speelronde 1'])
+    expect([latestGoal?.goal.player, latestGoal?.match.round]).toEqual(['Kopie', 'Speelronde 2'])
+  })
+
+  it('counts a goal in the stoppage time of minute 90 as the last one, and 45+3 as later than 46', () => {
+    const matches = [
+      scored('Speelronde 1', 2, 0, [
+        goal('Proefman', { minute: 90 }),
+        goal('Nepper', { minute: 90, stoppageMinutes: 4 }),
+      ]),
+      scored('Speelronde 2', 2, 0, [
+        goal('Kopie', { minute: 46 }),
+        goal('Proefman', { minute: 45, stoppageMinutes: 3 }),
+      ]),
+    ]
+
+    expect(extremesOf(matches).latestGoal?.goal.player).toBe('Nepper')
+    expect(extremesOf(matches.slice(1)).latestGoal?.goal.player).toBe('Proefman')
+  })
+
+  it('takes the match played last when two goals are in the same minute', () => {
+    const matches = [
+      scored('Speelronde 1', 1, 0, [goal('Proefman', { minute: 5 })]),
+      scored('Speelronde 2', 1, 0, [goal('Nepper', { minute: 5 })]),
+    ]
+
+    expect(extremesOf(matches).earliestGoal?.goal.player).toBe('Nepper')
+    expect(extremesOf(matches).latestGoal?.goal.player).toBe('Nepper')
+  })
+
+  it('leaves out the goals of the opponent, a goal in extra time and a goal in minute 0', () => {
+    const matches = [
+      scored('Speelronde 1', 2, 2, [
+        goal('Teststraat', { minute: 2, ours: false }),
+        goal('Proefman', { minute: 0 }),
+        goal('Nepper', { minute: 30 }),
+        goal('Kopie', { minute: 105 }),
+        goal('Teststraat', { minute: 80, ours: false }),
+      ]),
+    ]
+    const { earliestGoal, latestGoal } = extremesOf(matches)
+
+    expect([earliestGoal?.goal.player, latestGoal?.goal.player]).toEqual(['Nepper', 'Nepper'])
+  })
+
+  it('counts an own goal of the opponent as a goal of ours, with the sign that it is one', () => {
+    const matches = [scored('Speelronde 1', 1, 0, [goal('Teststraat', { minute: 3, ownGoal: true })])]
+
+    expect(extremesOf(matches).earliestGoal?.goal).toMatchObject({ ours: true, ownGoal: true, player: 'Teststraat' })
+  })
+
+  it('takes the goals only from matches whose goals are known, and says how many that are', () => {
+    const matches = [
+      scored('Speelronde 1', 4, 0),
+      scored('Speelronde 2', 0, 0),
+      scored('Speelronde 3', 1, 0, [goal('Proefman', { minute: 77 })]),
+    ]
+    const extremes = extremesOf(matches)
+
+    expect(extremes.known).toBe(2)
+    expect(extremes.played).toBe(3)
+    expect(extremes.biggestWin?.round).toBe('Speelronde 1')
+    expect(extremes.earliestGoal?.match.round).toBe('Speelronde 3')
+  })
+
+  it('keeps the three lines of the score and has no goal when no match has its goals', () => {
+    const extremes = extremesOf([scored('Speelronde 1', 2, 0), scored('Speelronde 2', 1, 3)])
+
+    expect(extremes).toMatchObject({ earliestGoal: undefined, known: 0, latestGoal: undefined, played: 2 })
+    expect(rounds(extremes.biggestWin, extremes.biggestLoss, extremes.mostGoals)).toEqual([
+      'Speelronde 1',
+      'Speelronde 2',
+      'Speelronde 2',
+    ])
+  })
+
+  it('leaves out a cup tie, a match that is not played and a match without a score', () => {
+    const matches = [
+      { ...scored('Tweede ronde', 9, 0, [goal('Proefman', { minute: 1 })]), competition: 'KNVB Beker' as const },
+      match('Speelronde 5', 'postponed', '2026-08-29'),
+      match('Speelronde 6', 'scheduled', '2026-09-05'),
+      { ...scored('Speelronde 1', 1, 0), goalsAgainst: null },
+    ]
+
+    expect(extremesOf(matches)).toEqual({
+      biggestLoss: undefined,
+      biggestWin: undefined,
+      earliestGoal: undefined,
+      known: 0,
+      latestGoal: undefined,
+      mostGoals: undefined,
+      played: 0,
+    })
+  })
+
+  it('has nothing for no matches', () => {
+    expect(extremesOf([])).toEqual({
+      biggestLoss: undefined,
+      biggestWin: undefined,
+      earliestGoal: undefined,
+      known: 0,
+      latestGoal: undefined,
+      mostGoals: undefined,
+      played: 0,
+    })
+  })
+
+  it('shows one match in every line it fits, and does not change the list it is given', () => {
+    const matches = [scored('Speelronde 1', 3, 1, [goal('Proefman', { minute: 20 })])]
+    const copy = structuredClone(matches)
+    const extremes = extremesOf(matches)
+
+    expect(rounds(extremes.biggestWin, extremes.mostGoals, extremes.earliestGoal?.match)).toEqual([
+      'Speelronde 1',
+      'Speelronde 1',
+      'Speelronde 1',
+    ])
+    expect(matches).toEqual(copy)
   })
 })
 

@@ -27,7 +27,7 @@ describe('the bar of /wedstrijden', () => {
     expect(html).toContain(`<span class="hf-page-shortcuts-label" id="${labelId}">Op deze pagina:</span>`)
   })
 
-  it('has the ten anchors, in the order of a narrow screen, each named for its card', async () => {
+  it('has the eleven anchors, in the order of a narrow screen, each named for its card', async () => {
     const html = await render()
 
     expect(
@@ -43,6 +43,7 @@ describe('the bar of /wedstrijden', () => {
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
       ['#de-nul-gehouden', 'De nul gehouden'],
       ['#doelpunten-per-kwartier', 'Doelpunten per kwartier'],
+      ['#uitersten', 'Uitersten'],
     ])
   })
 

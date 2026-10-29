@@ -26,6 +26,8 @@ import { moreCleanSheets } from './items-per-card'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import {
   cleanSheetsOf,
+  type ExtremeGoal,
+  extremesOf,
   goalsPerQuarter,
   goalsWithInitials,
   homeAwayOf,
@@ -106,6 +108,60 @@ export function CleanSheetsCard({ count, matches, now }: { count: number; matche
                 {`Laad ${moreCleanSheets} meer`}
               </Button>
             </Form>
+          )}
+        </>
+      )}
+    </Card>
+  )
+}
+
+/**
+ * The card of the matches page with the extremes of the Eredivisie: the biggest win and loss,
+ * the match with the most goals, and our earliest and our last goal. Each is a short match with
+ * its name under it, so the line the list draws between short matches stays between the items.
+ * A line without a match is left out, and the card doesn't say so. Under the list stand how
+ * many matches the lines are based on: the first three on every played match, the two goals on
+ * the matches whose goals are known. Without a played match it is a sentence for visitors and
+ * no list.
+ */
+export function ExtremesCard({ matches, now }: { matches: PublicMatch[]; now: Date }) {
+  const { biggestLoss, biggestWin, earliestGoal, known, latestGoal, mostGoals, played } = extremesOf(matches)
+  const lines = [
+    { match: biggestWin, name: 'Grootste overwinning' },
+    { match: biggestLoss, name: 'Grootste nederlaag' },
+    { match: mostGoals, name: 'Meeste doelpunten' },
+    { goal: earliestGoal, match: earliestGoal?.match, name: 'Vroegste doelpunt' },
+    { goal: latestGoal, match: latestGoal?.match, name: 'Laatste doelpunt' },
+  ]
+  const shown = lines.flatMap(({ goal, match, name }) => (match === undefined ? [] : [{ goal, match, name }]))
+
+  return (
+    <Card aria-labelledby="uitersten" shareable={imageCredit(played > 0)} surface="soft">
+      <Heading anchor id="uitersten" level={2}>
+        Uitersten
+      </Heading>
+      {played === 0 ? (
+        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+      ) : (
+        <>
+          <List role="list">
+            {shown.map(({ goal, match, name }) => (
+              <List.Item key={name}>
+                <ShortMatch
+                  // Only played matches with both scores count, so these are numbers.
+                  {...matchMoment(match, now)}
+                  goalsAgainst={match.goalsAgainst ?? 0}
+                  goalsFor={match.goalsFor ?? 0}
+                  home={match.home}
+                  opponent={match.opponent}
+                />
+                <Text appearance="meta">{goal === undefined ? name : `${name}, ${goalLine(goal)}`}</Text>
+              </List.Item>
+            ))}
+          </List>
+          <BasedOn known={played} played={played} />
+          {known > 0 && known < played && (
+            <Text appearance="meta">{`Het vroegste en het laatste doelpunt zijn gebaseerd op de doelpunten van ${known} van de ${played} gespeelde wedstrijden`}</Text>
           )}
         </>
       )}
@@ -513,6 +569,13 @@ export function TopScorers({ matches, season }: { matches: PublicMatch[]; season
       )}
     </>
   )
+}
+
+/** A goal for the name under a short match: the minute with stoppage time, and the player. */
+function goalLine({ goal }: ExtremeGoal): string {
+  const minute = goal.stoppageMinutes === null ? `${goal.minute}` : `${goal.minute}+${goal.stoppageMinutes}`
+
+  return `minuut ${minute}: ${goal.player}${goal.ownGoal ? ' (eigen doelpunt)' : ''}`
 }
 
 /** Whether a played match was decided in a shoot-out, which has both scores. */

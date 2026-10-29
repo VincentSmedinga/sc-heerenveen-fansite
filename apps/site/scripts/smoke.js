@@ -655,6 +655,7 @@ await withEmptyDatabase((database) =>
         '#doelpuntenmakers',
         '#de-nul-gehouden',
         '#doelpunten-per-kwartier',
+        '#uitersten',
       ],
     )
     assert.doesNotMatch(html, /hf-page-shortcuts/)
@@ -721,6 +722,10 @@ await withEmptyDatabase((database) =>
     assert.match(
       matchesHtml,
       /<caption class="hf-visually-hidden">Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd<\/caption>/,
+    )
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="uitersten">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#uitersten">Uiterste/,
     )
     assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     assert.doesNotMatch(matchesHtml, /action=history/)
