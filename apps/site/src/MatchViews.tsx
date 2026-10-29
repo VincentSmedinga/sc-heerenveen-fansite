@@ -222,7 +222,7 @@ const flowCells = (row: FlowRow) => [row.matches, row.won, row.drawn, row.lost, 
 
 /**
  * The columns are abbreviations, because five columns with whole words are wider than a phone
- * and than the sidebar of a small desktop. The line under the second table explains them, with
+ * and than the sidebar of a small desktop. The line under the two sentences explains them, with
  * `G gespeeld` as the table of the standings has it.
  */
 const flowColumns = [
