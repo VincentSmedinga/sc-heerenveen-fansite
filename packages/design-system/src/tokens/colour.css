@@ -132,7 +132,10 @@
     --hf-colour-text-link-visited: light-dark(var(--hf-colour-grey-600), var(--hf-colour-grey-400));
     --hf-colour-text-accent: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
 
-    /* Says that data is missing: a step darker than the accent in light, where the accent is too bright, the same in dark. */
+    /*
+     * Says that data is missing: a step darker than the accent in light, where the accent is too
+     * bright, and the same in dark.
+     */
     --hf-colour-text-missing: light-dark(var(--hf-colour-red-800), var(--hf-colour-red-300));
     --hf-colour-text-highlight: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
     --hf-colour-text-on-header: var(--hf-colour-blue-50);
