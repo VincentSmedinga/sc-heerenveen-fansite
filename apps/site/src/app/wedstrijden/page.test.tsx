@@ -960,6 +960,25 @@ describe('the page /wedstrijden', () => {
       )
     })
 
+    it('shows one match as one row with numbers in each table, and says it in the singular', async () => {
+      const first = matchData.matches.find((match) => match.goals.length > 0)
+
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: first === undefined ? [] : [first] })
+
+      const [firstGoal, halfTime] = await tables()
+
+      expect(tableRows(firstGoal ?? '')).toEqual([
+        ['Wij scoren eerst', '1', '1', '0', '0', '3'],
+        ['De tegenstander scoort eerst', '0', '0', '0', '0', '0'],
+      ])
+      expect(tableRows(halfTime ?? '')).toEqual([
+        ['Voor', '1', '1', '0', '0', '3'],
+        ['Gelijk', '0', '0', '0', '0', '0'],
+        ['Achter', '0', '0', '0', '0', '0'],
+      ])
+      expect(section(await render(), 'hoe-de-wedstrijden-verlopen')).toContain('Gebaseerd op 1 gespeelde wedstrijd<')
+    })
+
     it('says that the first goal is unknown for a match where both clubs scored in the same minute', async () => {
       vi.mocked(getMatchData).mockResolvedValue({
         ...matchData,
