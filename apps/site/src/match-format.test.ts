@@ -56,6 +56,20 @@ describe('matchMoment', () => {
     ).toEqual({ dateTime: '2026-10-18', time: 'zo 18 okt' })
   })
 
+  it('keeps the same notation for a match played more than a week ago and for one still to come', () => {
+    // The change of #428 is for publication dates; a match keeps its weekday, date and time.
+    expect(
+      matchMoment(
+        { dateText: null, kickoffAt: new Date('2026-10-04T12:15:00Z'), matchDate: '2026-10-04', status: 'played' },
+        now,
+      ),
+    ).toEqual({ dateTime: '2026-10-04', time: 'zo 4 okt' })
+    expect(matchMoment({ ...scheduled, kickoffAt: new Date('2026-11-08T15:45:00Z') }, now)).toEqual({
+      dateTime: '2026-11-08T15:45:00.000Z',
+      time: 'zo 8 nov 16:45',
+    })
+  })
+
   it('writes the day of a played match from the day, also when the kick-off is empty', () => {
     expect(matchMoment({ dateText: null, kickoffAt: null, matchDate: '2027-01-10', status: 'played' }, now).time).toBe(
       'zo 10 jan 2027',

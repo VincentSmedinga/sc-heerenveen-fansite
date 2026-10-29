@@ -6,11 +6,11 @@
 const timeZone = 'Europe/Amsterdam'
 
 /**
- * The days that get a weekday: today and the six days before it. A weekday is only clear within
- * seven days; further back "wo" could be either of two Wednesdays, so older news gets a date.
- * The time of a discussion follows the same rule.
+ * The days that get a time: today and the six days before it. Further back the hour no longer
+ * matters, so older news gets the short weekday and the date, which makes "wo" clear again. The
+ * time of a discussion follows the same rule.
  */
-const daysWithWeekday = 7
+const daysWithTime = 7
 
 const dayAndTimeFormat = new Intl.DateTimeFormat('nl-NL', {
   hour: '2-digit',
@@ -27,12 +27,18 @@ const timeFormat = new Intl.DateTimeFormat('nl-NL', {
   timeZone,
 })
 
-const dateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone })
-
-const dateWithYearFormat = new Intl.DateTimeFormat('nl-NL', {
+const dayAndDateFormat = new Intl.DateTimeFormat('nl-NL', {
   day: 'numeric',
   month: 'short',
   timeZone,
+  weekday: 'short',
+})
+
+const dayAndDateWithYearFormat = new Intl.DateTimeFormat('nl-NL', {
+  day: 'numeric',
+  month: 'short',
+  timeZone,
+  weekday: 'short',
   year: 'numeric',
 })
 
@@ -106,11 +112,19 @@ export function formatArticleDate(moment: Date) {
 }
 
 /**
- * The day of an article for a line in a list, in Dutch time: "25 okt", with the year when it is
- * not this year. An article is dated by the day, so it has no weekday and no time.
+ * The day of an article for a line in a list, in Dutch time: "zo 25 okt", with the year when it
+ * is not this year. An article is dated by the day, so it has no time.
  */
 export function formatArticleDay(moment: Date, now: Date) {
-  return (clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)
+  return formatDayAndDate(moment, now)
+}
+
+/**
+ * The short weekday and the date in the Netherlands, such as "wo 21 okt", with the year when it
+ * is not this year: "di 14 okt 2025". With the date next to it, "wo" is clear however long ago.
+ */
+export function formatDayAndDate(moment: Date, now: Date) {
+  return (clockAt(moment).year === clockAt(now).year ? dayAndDateFormat : dayAndDateWithYearFormat).format(moment)
 }
 
 /**
@@ -126,9 +140,9 @@ export function formatDayAndTime(moment: Date) {
 /**
  * The time of the last post of a discussion as a visitor reads it, in Dutch time. Of today it
  * is the time alone, such as "13:28". Of the six days before it is the short weekday and the
- * time, as for the news: "wo 14:05". Anything older is the date, such as "16 okt", with the
- * year when it is not this year. A moment after now, from a clock that is ahead, counts as
- * today.
+ * time, as for the news: "wo 14:05". Anything older is the short weekday and the date, such as
+ * "wo 16 okt", with the year when it is not this year. A moment after now, from a clock that is
+ * ahead, counts as today.
  */
 export function formatDiscussionTime(moment: Date, now: Date) {
   if (moment >= startOfDay(now, 0)) {
@@ -138,7 +152,7 @@ export function formatDiscussionTime(moment: Date, now: Date) {
     return formatDayAndTime(moment)
   }
 
-  return (clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)
+  return formatDayAndDate(moment, now)
 }
 
 /**
@@ -161,29 +175,30 @@ export function formatDuration(seconds: number) {
 /**
  * The time of a podcast episode as a visitor reads it, in Dutch time. Within seven days it is
  * the short weekday and the time, such as "wo 14:05", as for the news. Anything older is the
- * date, such as "14 okt", with the year when it is not this year: the list of episodes goes
- * back years, so a date without a year would be unclear.
+ * short weekday and the date, such as "wo 21 okt", with the year when it is not this year: the
+ * list of episodes goes back years, so a date without a year would be unclear.
  */
 export function formatEpisodeTime(moment: Date, now: Date) {
   if (moment >= weekdayStart(now)) {
     return formatDayAndTime(moment)
   }
 
-  return (clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)
+  return formatDayAndDate(moment, now)
 }
 
 /**
  * The time of a news item as a visitor reads it, in Dutch time. Of today and the six days
- * before it is the short weekday and the time, such as "wo 14:05". Anything older is the date
- * and the time, such as "14 okt 14:05", with the year when it is not this year: the news has no
- * limit in time. A moment after now, from a clock that is ahead, counts as today.
+ * before it is the short weekday and the time, such as "wo 14:05". Anything older is the short
+ * weekday and the date, such as "wo 21 okt", without the time, with the year when it is not
+ * this year: the news has no limit in time. A moment after now, from a clock that is ahead,
+ * counts as today.
  */
 export function formatNewsTime(moment: Date, now: Date) {
   if (moment >= weekdayStart(now)) {
     return formatDayAndTime(moment)
   }
 
-  return `${(clockAt(moment).year === clockAt(now).year ? dateFormat : dateWithYearFormat).format(moment)} ${timeFormat.format(moment)}`
+  return formatDayAndDate(moment, now)
 }
 
 /**
@@ -195,11 +210,11 @@ export function formatVersionTime(moment: Date) {
 }
 
 /**
- * The start of the days that get a weekday: the first moment of the Dutch day six days before
+ * The start of the days that get a time: the first moment of the Dutch day six days before
  * today.
  */
 export function weekdayStart(now: Date) {
-  return startOfDay(now, daysWithWeekday - 1)
+  return startOfDay(now, daysWithTime - 1)
 }
 
 /** What the clock and the calendar in the Netherlands show at this moment. */

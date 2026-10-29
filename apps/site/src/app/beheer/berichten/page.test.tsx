@@ -139,10 +139,10 @@ describe('the list', () => {
     expect(html.match(/niet over de club, niet op de site/g)).toHaveLength(1)
   })
 
-  it('gives the time of an old item with its time of day, not the date alone', async () => {
+  it('gives the weekday and the date of an old item, with no time of day', async () => {
     await addItem(database, ids, 'oud', { publishedAt: new Date('2025-01-02T08:05:00Z') })
 
-    expect(await render()).toMatch(/2 jan 2025 09:05/)
+    expect(await render()).toMatch(/do 2 jan 2025</)
   })
 
   it('says of a hidden item that it is hidden, since when and why, and has a button Toon weer instead', async () => {
