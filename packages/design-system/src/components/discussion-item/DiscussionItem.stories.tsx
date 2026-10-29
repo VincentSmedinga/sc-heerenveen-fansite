@@ -96,7 +96,7 @@ const renderBlock = (maxInlineSize: string) => () => (
             dateTime="2026-10-14T16:00:00Z"
             href="#jeugd"
             replies={12}
-            time="14 okt"
+            time="wo 14 okt"
             title="Jeugdopleiding"
           />
         </List.Item>

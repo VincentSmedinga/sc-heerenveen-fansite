@@ -23,7 +23,8 @@ type Row = {
  * They are in the form of real headlines, on the made-up test sources of the seed. The times
  * are counted back from the moment the check starts. The homepage shows the first ten, and the
  * button under them; `/?nieuws=15` shows all eleven and no button. The first seven are from the
- * last six days and show a weekday; the last four are older and show a date.
+ * last six days and show a weekday and the time; the last four are older and show a weekday and
+ * the date.
  */
 export const headlines: { madeUp: Row[]; notForVisitors: Row[] } = {
   madeUp: [

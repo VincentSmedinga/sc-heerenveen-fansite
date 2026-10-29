@@ -4376,6 +4376,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zonder tijd past de datum met het jaar in de smalle kolom van een nieuwsregel; een tijd erbij zou over drie regels breken.
 - **Alternatieven:** de datum en de tijd, zoals bij het nieuws; dat past niet in de kolom met het jaar erbij.
   Of altijd het jaar; dat is in de week overbodig.
+- **Later:** de datum van een aflevering van meer dan zeven dagen krijgt de korte dag erbij, zoals "wo 21 okt" (29 oktober 2026).
+  Zie _Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd_.
 
 ### Een lijst per podcast en pagina staat vijf minuten in het geheugen, na de controle van het adres
 
@@ -5055,6 +5057,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** de homepage toont nu twee weken nieuws, maar de weekdag staat bij het nieuws nog voor dezelfde zeven dagen als hier.
   Zie _De tijd van een bericht: een weekdag in de week, daarna de datum_.
   De tijd van een discussie verandert niet.
+- **Later:** van een discussie van meer dan zeven dagen staan de korte dag en de datum, zoals "wo 16 okt" (29 oktober 2026).
+  Zie _Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd_.
 
 ### De homepage toont het nieuws van twee weken
 
@@ -5078,6 +5082,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de weekdag voor alles; dat is dubbelzinnig vanaf de achtste dag.
 - **Hoe:** `news.ts` kent twee vensters: `windowStart` voor de twee weken van de homepage en `weekdayStart` voor de zeven dagen met een weekdag.
   De tijd van een discussie gebruikt `weekdayStart`, dus die regel verandert niet.
+- **Later:** van een bericht van meer dan zeven dagen staan de korte dag en de datum, zonder tijd: "wo 21 okt" (29 oktober 2026).
+  De weekdag staat dan wel bij de datum, dus de reden dat "wo" twee woensdagen kan zijn, geldt niet meer.
+  Zie _Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd_.
 
 ### Een datum in een nieuwsregel breekt in de kolom van de weekdag
 
@@ -5091,6 +5098,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een bredere kolom, 5,75 rem, voor de breedste datum op één regel; dat kost elke weekdagregel ruimte.
   Of de kolom door de inhoud laten bepalen (`max-content`); dan beginnen de koppen niet op dezelfde plek.
   Of de datum en de tijd los doorgeven en onder elkaar zetten in het component; dat is een grotere wijziging van het component.
+- **Later:** de kolom is 4,5 rem breed, voor de korte dag met de datum, zoals "ma 10 mei" (29 oktober 2026).
+  Zie _Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd_.
 
 ### Onder de kop van een kaart staat een lijst op 1,25 rem
 
@@ -6571,6 +6580,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Altijd licht (dezelfde kaart ziet er voor elke deler hetzelfde uit, maar bezoekers in donker krijgen een andere kaart dan ze zien).
   Alleen logo en adres (de vermelding gaat dan niet mee).
   Alle kaarten van `/wedstrijden`.
+- **Later:** de datum in de strook staat met de afgekorte maand en het jaar met vier cijfers, zoals "28 okt 2026", en niet meer als dd-mm-jj (29 oktober 2026).
+  Zie _Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd_.
 
 ### Delen waar het kan, anders downloaden
 
@@ -6663,6 +6674,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Twee getallen met een schuine streep zeggen niet meteen welk de dag is en welk de maand, en de tijd is voor een nieuwsbericht meer waard dan het jaar.
 - **Alternatieven:** "wo 01/09", zoals de oude fansite en het issue het noemen; dan moet de site anders gaan schrijven, wat dit issue niet vraagt.
   Of de datum voluit voor elke regel; dat is langer en past niet in de kolom.
+- **Later:** de datum na een week is de korte weekdag en de datum, zonder tijd, zoals "wo 21 okt" (29 oktober 2026).
+  Daarmee ligt de vorm dicht bij die van de oude fansite, die de weekdag en de datum ook samen schreef.
+  Zie _Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd_.
 
 ### Geen "vandaag", "gisteren" of "2 uur geleden" in een lijst of in een tekst die blijft staan
 
@@ -6724,3 +6738,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De kolommen "Wedstrijden", "Winst", "Gelijk", "Verlies" en "Punten" voluit laten staan (past niet, zie hierboven).
   De tabel een eigen scrollvlak geven (ook op een bureaublad scrolt de tabel dan, en een scrollvlak is een nieuw onderdeel).
   De tabel omdraaien, met de uitkomsten als rijen en de situaties als kolommen (past op 320 pixels ook niet).
+
+### Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** een publicatiedatum van meer dan zeven dagen oud toont de korte dag en de datum, zonder tijd: "wo 21 okt", met het jaar bij een ander jaar: "di 14 okt 2025".
+  Wat binnen de zeven dagen valt, blijft de korte dag en de tijd.
+  Dit geldt voor het nieuws, de afleveringen, de discussies en de dag van een artikel in een lijst.
+  Wedstrijden houden hun notatie en hun aanvangstijd.
+  Het jaar heeft altijd vier cijfers, ook in de strook onder een kaart op een afbeelding ("28 okt 2026", zonder weekdag).
+- **Waarom:** na een week is het uur van een bericht niet meer van belang, en de dag van de week zegt meer over wanneer het was dan de datum alleen.
+  De oude fansite deed het zo.
+  De reden om geen weekdag na een week te tonen was dat "wo" twee woensdagen kan zijn, maar met de datum erbij is dat niet meer dubbelzinnig.
+- **Waarom vier cijfers:** "28 okt 26" is te lezen als een tijd of als twee dagnummers, en een apostrof ("’26") vraagt eigen code en een uitleg voor een schermlezer.
+  Duidelijkheid gaat voor kortheid.
+- **Hoe:** `news.ts` heeft één functie, `formatDayAndDate`, voor de korte dag en de datum; `formatNewsTime`, `formatEpisodeTime`, `formatDiscussionTime` en `formatArticleDay` gebruiken die.
+  De kolom van `NewsItem` is 4,5 rem breed in plaats van 4 rem, want de breedste dag met datum, "ma 10 mei", is 68 pixels op de maat van Meta en de kolom van 4 rem is 64 pixels.
+  Staat er een jaar bij, dan breekt de tekst na de datum en komt het jaar op een tweede regel.
+  Het beheer van berichten gebruikt dezelfde functie, dus ook daar staat bij een oud bericht geen tijd meer.
+  `formatVersionTime` en de lange datum van een artikel blijven zoals ze waren.
+- **Alternatieven:** de datum en de tijd houden (de tijd is na een week ruis).
+  Alleen de datum (zegt minder over wanneer het was).
+  Een relatieve tijd als "3 weken geleden" (klopt niet meer in een pagina uit het geheugen en een schermlezer leest hem minder gemakkelijk).

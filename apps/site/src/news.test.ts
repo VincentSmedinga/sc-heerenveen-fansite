@@ -6,6 +6,7 @@ import {
   episodeDetails,
   formatArticleDate,
   formatArticleDay,
+  formatDayAndDate,
   formatDayAndTime,
   formatDiscussionTime,
   formatDuration,
@@ -128,6 +129,28 @@ describe('formatDayAndTime', () => {
   })
 })
 
+describe('formatDayAndDate', () => {
+  // Thursday 22 October 2026, 14:30 in the Netherlands.
+  const now = new Date('2026-10-22T12:30:00Z')
+
+  it('gives the short weekday and the date, never the time', () => {
+    expect(formatDayAndDate(new Date('2026-10-14T12:05:00Z'), now)).toBe('wo 14 okt')
+    expect(formatDayAndDate(new Date('2026-10-14T21:59:00Z'), now)).toBe('wo 14 okt')
+    expect(formatDayAndDate(new Date('2026-10-14T22:00:00Z'), now)).toBe('do 15 okt')
+  })
+
+  it('gives the year with four digits when the moment is not in this year', () => {
+    expect(formatDayAndDate(new Date('2025-10-14T12:05:00Z'), now)).toBe('di 14 okt 2025')
+  })
+
+  it('compares the years of the Dutch calendar at the turn of the year', () => {
+    const newYear = new Date('2027-01-01T08:00:00Z')
+
+    expect(formatDayAndDate(new Date('2026-12-31T22:59:00Z'), newYear)).toBe('do 31 dec 2026')
+    expect(formatDayAndDate(new Date('2026-12-31T23:00:00Z'), newYear)).toBe('vr 1 jan')
+  })
+})
+
 describe('formatNewsTime', () => {
   // Thursday 22 October 2026, 14:30 in the Netherlands.
   const now = new Date('2026-10-22T12:30:00Z')
@@ -142,26 +165,26 @@ describe('formatNewsTime', () => {
     expect(format('2026-10-16T22:00:00Z')).toBe('za 00:00')
   })
 
-  it('gives the date and the time from the seventh day before today', () => {
-    // The weekdays start on Friday 16 October at 00:00 in the Netherlands, which is 22:00 UTC
-    // on Thursday 15 October.
+  it('gives the short weekday and the date, without the time, from the seventh day before today', () => {
+    // The days with a time start on Friday 16 October at 00:00 in the Netherlands, which is
+    // 22:00 UTC on Thursday 15 October.
     expect(format('2026-10-15T22:00:00Z')).toBe('vr 00:00')
-    expect(format('2026-10-15T21:59:00Z')).toBe('15 okt 23:59')
-    expect(format('2026-10-14T12:05:00Z')).toBe('14 okt 14:05')
+    expect(format('2026-10-15T21:59:00Z')).toBe('do 15 okt')
+    expect(format('2026-10-14T12:05:00Z')).toBe('wo 14 okt')
   })
 
-  it('gives the date and the time for older news of this year', () => {
-    expect(format('2026-10-09T06:10:00Z')).toBe('9 okt 08:10')
-    expect(format('2026-03-02T12:00:00Z')).toBe('2 mrt 13:00')
+  it('gives the short weekday and the date for older news of this year', () => {
+    expect(format('2026-10-09T06:10:00Z')).toBe('vr 9 okt')
+    expect(format('2026-03-02T12:00:00Z')).toBe('ma 2 mrt')
   })
 
   it('gives the year too for news of another year, because the news has no limit in time', () => {
-    expect(format('2025-12-30T10:00:00Z')).toBe('30 dec 2025 11:00')
+    expect(format('2025-12-30T10:00:00Z')).toBe('di 30 dec 2025')
   })
 
-  it('gives the date and the time in Dutch time, not in UTC', () => {
+  it('gives the date in Dutch time, not in UTC', () => {
     // 23:30 UTC on 14 October is 01:30 on 15 October in summer time.
-    expect(format('2026-10-14T23:30:00Z')).toBe('15 okt 01:30')
+    expect(format('2026-10-14T23:30:00Z')).toBe('do 15 okt')
   })
 
   it('counts a moment after now as today, as a clock that is ahead would give', () => {
@@ -169,9 +192,17 @@ describe('formatNewsTime', () => {
   })
 
   it('keeps the Dutch time and the date across the end of summer time and the end of the year', () => {
-    expect(formatNewsTime(new Date('2026-10-18T23:15:00Z'), new Date('2026-10-31T12:00:00Z'))).toBe('19 okt 01:15')
-    expect(formatNewsTime(new Date('2026-12-20T23:30:00Z'), new Date('2026-12-31T10:00:00Z'))).toBe('21 dec 00:30')
-    expect(formatNewsTime(new Date('2026-12-20T23:30:00Z'), new Date('2027-01-06T10:00:00Z'))).toBe('21 dec 2026 00:30')
+    expect(formatNewsTime(new Date('2026-10-18T23:15:00Z'), new Date('2026-10-31T12:00:00Z'))).toBe('ma 19 okt')
+    expect(formatNewsTime(new Date('2026-12-20T23:30:00Z'), new Date('2026-12-31T10:00:00Z'))).toBe('ma 21 dec')
+    expect(formatNewsTime(new Date('2026-12-20T23:30:00Z'), new Date('2027-01-06T10:00:00Z'))).toBe('ma 21 dec 2026')
+  })
+
+  it('gives news from just after the turn of the year the year it has in the Netherlands', () => {
+    const later = new Date('2027-01-20T12:00:00Z')
+
+    // Half past midnight on 1 January 2027 is still 31 December in UTC.
+    expect(formatNewsTime(new Date('2026-12-31T23:30:00Z'), later)).toBe('vr 1 jan')
+    expect(formatNewsTime(new Date('2026-12-31T22:30:00Z'), later)).toBe('do 31 dec 2026')
   })
 })
 
@@ -209,19 +240,19 @@ describe('formatDiscussionTime', () => {
     expect(format('2026-10-17T10:05:00Z')).toBe('za 12:05')
   })
 
-  it('gives the date from the seventh day before today, with no time', () => {
-    // The weekdays start on Saturday 17 October at 00:00 in the Netherlands, which is 22:00 UTC
-    // on Friday 16 October.
+  it('gives the short weekday and the date from the seventh day before today, with no time', () => {
+    // The days with a time start on Saturday 17 October at 00:00 in the Netherlands, which is
+    // 22:00 UTC on Friday 16 October.
     expect(format('2026-10-16T22:00:00Z')).toBe('za 00:00')
-    expect(format('2026-10-16T21:59:59Z')).toBe('16 okt')
-    expect(format('2026-10-10T08:10:00Z')).toBe('10 okt')
+    expect(format('2026-10-16T21:59:59Z')).toBe('vr 16 okt')
+    expect(format('2026-10-10T08:10:00Z')).toBe('za 10 okt')
   })
 
   it('gives the year too when the moment is not in this year', () => {
-    expect(format('2025-12-30T12:00:00Z')).toBe('30 dec 2025')
+    expect(format('2025-12-30T12:00:00Z')).toBe('di 30 dec 2025')
     // Half past midnight on 1 January is this year in the Netherlands, although it is still
     // last year in UTC.
-    expect(format('2025-12-31T23:30:00Z')).toBe('1 jan')
+    expect(format('2025-12-31T23:30:00Z')).toBe('do 1 jan')
   })
 
   it('keeps the Dutch time across the end of summer time', () => {
@@ -246,14 +277,14 @@ describe('formatEpisodeTime', () => {
     expect(formatEpisodeTime(new Date('2026-10-17T22:30:00Z'), now)).toBe('zo 00:30')
   })
 
-  it('is the date alone, without the time, for an episode from before the last seven days', () => {
-    expect(formatEpisodeTime(new Date('2026-10-16T12:05:00Z'), now)).toBe('16 okt')
-    expect(formatEpisodeTime(new Date('2026-01-05T12:05:00Z'), now)).toBe('5 jan')
+  it('is the short weekday and the date, without the time, for an episode from before the last seven days', () => {
+    expect(formatEpisodeTime(new Date('2026-10-16T12:05:00Z'), now)).toBe('vr 16 okt')
+    expect(formatEpisodeTime(new Date('2026-01-05T12:05:00Z'), now)).toBe('ma 5 jan')
   })
 
   it('has the year when the episode is from another year, because the list goes back years', () => {
-    expect(formatEpisodeTime(new Date('2025-12-31T12:05:00Z'), now)).toBe('31 dec 2025')
-    expect(formatEpisodeTime(new Date('2021-10-06T12:05:00Z'), now)).toBe('6 okt 2021')
+    expect(formatEpisodeTime(new Date('2025-12-31T12:05:00Z'), now)).toBe('wo 31 dec 2025')
+    expect(formatEpisodeTime(new Date('2021-10-06T12:05:00Z'), now)).toBe('wo 6 okt 2021')
   })
 
   it('counts the Dutch year, not the UTC year, at New Year', () => {
@@ -261,8 +292,8 @@ describe('formatEpisodeTime', () => {
 
     // 00:30 on 1 January 2027 in the Netherlands is still 31 December 2026 in UTC, so this one
     // is from this year.
-    expect(formatEpisodeTime(new Date('2026-12-31T23:30:00Z'), later)).toBe('1 jan')
-    expect(formatEpisodeTime(new Date('2026-12-31T22:30:00Z'), later)).toBe('31 dec 2026')
+    expect(formatEpisodeTime(new Date('2026-12-31T23:30:00Z'), later)).toBe('vr 1 jan')
+    expect(formatEpisodeTime(new Date('2026-12-31T22:30:00Z'), later)).toBe('do 31 dec 2026')
   })
 
   it('writes a moment after now, from a clock that is ahead, as today', () => {
@@ -336,14 +367,14 @@ describe('formatArticleDate and dayOf', () => {
 describe('formatArticleDay', () => {
   const now = new Date('2026-10-26T12:00:00Z')
 
-  it('gives the short date of the Dutch day, without the year in this year', () => {
-    expect(formatArticleDay(new Date('2026-10-25T08:00:00Z'), now)).toBe('25 okt')
-    expect(formatArticleDay(new Date('2026-10-24T22:30:00Z'), now)).toBe('25 okt')
+  it('gives the short weekday and the date of the Dutch day, without the year in this year', () => {
+    expect(formatArticleDay(new Date('2026-10-25T08:00:00Z'), now)).toBe('zo 25 okt')
+    expect(formatArticleDay(new Date('2026-10-24T22:30:00Z'), now)).toBe('zo 25 okt')
   })
 
   it('adds the year when it is not this year', () => {
-    expect(formatArticleDay(new Date('2025-12-31T12:00:00Z'), now)).toBe('31 dec 2025')
-    expect(formatArticleDay(new Date('2026-12-31T23:30:00Z'), new Date('2026-12-31T12:00:00Z'))).toBe('1 jan 2027')
+    expect(formatArticleDay(new Date('2025-12-31T12:00:00Z'), now)).toBe('wo 31 dec 2025')
+    expect(formatArticleDay(new Date('2026-12-31T23:30:00Z'), new Date('2026-12-31T12:00:00Z'))).toBe('vr 1 jan 2027')
   })
 })
 
