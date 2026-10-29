@@ -678,6 +678,17 @@ export function overviewOf(matches: PublicMatch[], now: Date): MatchOverview {
   }
 }
 
+/**
+ * The results of a page in the order its card shows them. The current season has the newest
+ * first, because the latest news matters most there. A season that is over is read from its
+ * first match to its last, so the oldest comes first. The order follows the season, not the
+ * page, and `results` come newest first, as `overviewOf` gives them. `now` is the moment of the
+ * visit.
+ */
+export function resultsOfSeason(results: PublicMatch[], season: string, now: Date) {
+  return season === seasonOf(now) ? results : [...results].reverse()
+}
+
 /** How long after the kick-off a result may take: later than this we say it isn't there yet. */
 const waitForResult = 2 * 60 * 60 * 1000
 

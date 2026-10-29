@@ -7,7 +7,15 @@ import { cache } from 'react'
 
 import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
-import { getMatchData, getMatchSeasons, overviewOf, parseCleanSheetCount, topScorersOf } from '../../matches'
+import {
+  getMatchData,
+  getMatchSeasons,
+  overviewOf,
+  parseCleanSheetCount,
+  resultsOfSeason,
+  topScorersOf,
+} from '../../matches'
+import { standingsCardOf } from '../../matchShortcuts'
 import {
   CleanSheetsCard,
   ExtremesCard,
@@ -78,7 +86,7 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
   return season === current
     ? pageMetadata(matchesPath, 'Wedstrijden')
     : seasonPageMetadata(matchesPath, seasonAddress(matchesPath, season, current), {
-        description: `De uitslagen en de stand van sc Heerenveen 1 in het seizoen ${season}, met de bron erbij: de Nederlandse Wikipedia.`,
+        description: `De uitslagen en de eindstand van sc Heerenveen 1 in het seizoen ${season}, met de bron erbij: de Nederlandse Wikipedia.`,
         title: `Wedstrijden ${season}`,
       })
 }
@@ -86,7 +94,8 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
 /**
  * The page of a season: `/wedstrijden` for the current season and `/wedstrijden/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
- * heading. A season that is over has no Programma, and its cards put the season on the image.
+ * heading. A season that is over has no Programma, shows its results from the first match to
+ * the last, calls its table Eindstand, and its cards put the season on the image.
  * A season that has no matches in the database is the page "niet gevonden".
  */
 export async function MatchesPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
@@ -107,7 +116,9 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   // The cards of a season that is over say which one on their image. The current season is the
   // one the image has always been of.
   const imageSeason = current ? undefined : season
-  const { programme, results } = overviewOf(data.matches, now)
+  const { programme, results: newestFirst } = overviewOf(data.matches, now)
+  const results = resultsOfSeason(newestFirst, season, now)
+  const standingsCard = standingsCardOf(current)
 
   return (
     <>
@@ -149,15 +160,22 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme and the
           results: the table, our place in the league, the season, the streaks, home and away,
           the goal scorers, the clean sheets, the goals per quarter, then how the matches go. */}
-      <Page.Sidebar aria-label="De stand, de ranglijsten en de doelpunten per kwartier" wide>
-        <Card aria-labelledby="stand" shareable={imageCredit(data.standings.length > 0, imageSeason)} surface="soft">
-          <Heading anchor id="stand" level={2}>
-            Stand
+      <Page.Sidebar
+        aria-label={`${current ? 'De stand' : 'De eindstand'}, de ranglijsten en de doelpunten per kwartier`}
+        wide
+      >
+        <Card
+          aria-labelledby={standingsCard.id}
+          shareable={imageCredit(data.standings.length > 0, imageSeason)}
+          surface="soft"
+        >
+          <Heading anchor id={standingsCard.id} level={2}>
+            {standingsCard.name}
           </Heading>
           {data.standings.length === 0 ? (
-            <Text>We hebben de stand nog niet gevonden. Kijk straks nog eens.</Text>
+            <Text>{`We hebben ${current ? 'de stand' : 'de eindstand'} nog niet gevonden. Kijk straks nog eens.`}</Text>
           ) : (
-            <StandingsTable caption={standingsCaption(data.standings)} rows={data.standings} />
+            <StandingsTable caption={standingsCaption(data.standings, standingsCard.name)} rows={data.standings} />
           )}
         </Card>
         <LeaguePlaceCard season={imageSeason} standings={data.standings} />

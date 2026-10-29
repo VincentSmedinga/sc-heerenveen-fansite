@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchData, getMatchSeasons } from '../../../../matches'
-import { matchShortcuts } from '../../../../matchShortcuts'
+import { matchShortcutsOf } from '../../../../matchShortcuts'
 import { matchData } from '../../../../test-matches'
 import SeasonMatchesShortcuts from './page'
 
@@ -35,9 +35,19 @@ describe('the bar of the page of an earlier season', () => {
   it('has the anchors of the cards the page has: those of the current season without Programma', async () => {
     const html = await render('2025-26')
 
-    expect(hrefs(html)).toEqual(matchShortcuts.map(({ href }) => href).filter((href) => href !== '#programma'))
+    expect(hrefs(html)).toEqual(matchShortcutsOf(false).map(({ href }) => href))
     expect(hrefs(html)).toHaveLength(11)
+    expect(hrefs(html)).not.toContain('#programma')
     expect(html).toContain('Op deze pagina:')
+  })
+
+  it('has Eindstand for Stand, with the anchor of the card', async () => {
+    const html = await render('2025-26')
+
+    expect(hrefs(html)).toContain('#eindstand')
+    expect(hrefs(html)).not.toContain('#stand')
+    expect(html).toContain('>Eindstand</a>')
+    expect(html).not.toContain('>Stand</a>')
   })
 
   it('asks for the data of that season', async () => {

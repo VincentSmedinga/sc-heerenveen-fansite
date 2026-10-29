@@ -6954,3 +6954,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De titelrij is een indeling van de pagina en geen eigenschap van de kiezer, dus een andere bediening kan er ook staan.
 - **Alternatieven:** de kiezer in de site laten, naast de kop (dan bouwt elke pagina hem opnieuw).
   Een eigenschap `actions` op `Page.Main` (de kop staat in `intro`, en een eigenschap erbij maakt twee manieren om dezelfde plek te vullen).
+
+### Een eerder seizoen toont zijn uitslagen van oud naar nieuw, en zijn tabel heet Eindstand
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** op de pagina van een afgelopen seizoen begint de kaart Uitslagen met de eerste wedstrijd en heet de kaart Stand "Eindstand".
+  Het lopende seizoen houdt de nieuwste uitslag bovenaan en de naam Stand.
+  De volgorde en de naam hangen af van het seizoen en niet van de pagina: `resultsOfSeason` in `src/matches.ts` en `standingsCardOf` in `src/matchShortcuts.ts`.
+  De kop, het bijschrift voor een schermlezer, het label van de zijbalk, het anker en de link in de balk "Op deze pagina:" volgen de naam.
+  Het anker van een eerder seizoen is `eindstand` en dat van het lopende seizoen blijft `stand`.
+  De zin in de lege kaart en in de lege kaart "Onze plek in de competitie" zegt "de eindstand", en de beschrijving van de pagina ook.
+  De zin "Gebaseerd op de stand na 34 wedstrijden" onder de kaart "Onze plek in de competitie" blijft, want ze telt de wedstrijden waarop de plek rust.
+- **Waarom:** wie een afgelopen seizoen bekijkt, leest het van begin tot eind.
+  De nieuwste uitslag bovenaan is voor het lopende seizoen bedoeld, waar het laatste nieuws het belangrijkst is.
+  Een tabel van een afgelopen seizoen is de eindstand.
+- **Alternatieven:** de volgorde laten zoals ze is (de lijst begint dan bij het einde van het seizoen).
+  Een schakelaar voor de volgorde (meer bediening voor een kleine behoefte).
+  Het anker `stand` houden voor alle seizoenen (de link in de balk en het anker zouden dan een andere naam hebben dan de kop).

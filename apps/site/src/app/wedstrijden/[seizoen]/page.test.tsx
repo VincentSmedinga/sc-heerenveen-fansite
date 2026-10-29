@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchData, getMatchSeasons } from '../../../matches'
+import { matchShortcutsOf } from '../../../matchShortcuts'
 import { matchData } from '../../../test-matches'
 import { withoutIcons } from '../../../without-icons'
 import SeasonMatchesPage, { generateMetadata } from './page'
@@ -72,6 +73,53 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     expect(html).not.toContain('Voorbeeld United')
   })
 
+  it('shows the results from the first match of the season to the last, the oldest first', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) => ({
+        ...match,
+        kickoffAt: match.kickoffAt === null ? null : new Date(match.kickoffAt.getTime() - 365 * 24 * 60 * 60 * 1000),
+        matchDate: `2025${match.matchDate.slice(4)}`,
+      })),
+      season: '2025/26',
+    })
+    const results = (await render()).match(/<h2[^>]*id="uitslagen">.*?(?=<h2)/s)?.[0] ?? ''
+    // The made-up matches in the order of their days, from the first of the season.
+    const rounds = ['Speelronde 7', 'Speelronde 8', 'Speelronde 9', 'Tweede ronde', 'Speelronde 10']
+    const positions = rounds.map((round) => results.indexOf(round))
+
+    expect(positions.every((position) => position >= 0)).toBe(true)
+    expect(positions).toEqual([...positions].sort((a, b) => a - b))
+  })
+
+  it('calls the table Eindstand: the heading, its anchor, the caption for a screen reader and the name of the sidebar', async () => {
+    const html = await render()
+
+    expect(html).toContain(
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="eindstand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#eindstand">Eindstand</a></h2>',
+    )
+    expect(html).toContain('<caption class="hf-visually-hidden">Eindstand op ')
+    expect(html).toContain('aria-label="De eindstand, de ranglijsten en de doelpunten per kwartier"')
+    expect(html).toContain('aria-labelledby="eindstand"')
+    expect(html).not.toContain('id="stand"')
+    expect(html).not.toContain('>Stand</')
+  })
+
+  it('has a heading for every link of the bar, with the id the link goes to, in the same order', async () => {
+    const html = await render()
+    const ids = [...html.matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => `#${id}`)
+
+    expect(matchShortcutsOf(false).map(({ href }) => href)).toEqual(ids)
+  })
+
+  it('says in the empty card that the final table is not there yet', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...earlier, standings: [] })
+    const html = await render()
+
+    expect(html).toContain('We hebben de eindstand nog niet gevonden. Kijk straks nog eens.')
+    expect(html).not.toContain('We hebben de stand nog niet gevonden.')
+  })
+
   it('has the heading Wedstrijden, without the season, which the list beside it names', async () => {
     const html = await render()
 
@@ -85,7 +133,7 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     expect(html).not.toContain('id="programma"')
     expect(html).not.toContain('>Programma</a>')
     expect(html).toContain('id="uitslagen"')
-    expect(html).toContain('id="stand"')
+    expect(html).toContain('id="eindstand"')
   })
 
   it('keeps the other cards: the table, our place, the season, the streaks and the rest', async () => {
@@ -93,7 +141,7 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
 
     expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
       'uitslagen',
-      'stand',
+      'eindstand',
       'onze-plek-in-de-competitie',
       'verloop-van-het-seizoen',
       'reeksen',
@@ -227,6 +275,7 @@ describe('the title, description and canonical address of a season', () => {
     expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/wedstrijden/2025-26')
     expect(metadata.openGraph?.url).toBe('https://sc.heerenveen.org/wedstrijden/2025-26')
     expect(metadata.description).toContain('2025/26')
+    expect(metadata.description).toContain('eindstand')
     expect(metadata.description).not.toContain('dit seizoen')
   })
 
