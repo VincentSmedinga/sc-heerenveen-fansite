@@ -15,7 +15,7 @@ import { cacheFor, cacheForKey } from './cache'
 import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
 import { lastDayOf } from './match-format'
-import { type NameParts, splitPlayerName, surnameOnly } from './player-name'
+import { type NameParts, pageTitleName, splitPageName, splitPlayerName, surnameOnly } from './player-name'
 
 /** The name of our own club in the table. */
 const ourClub = 'sc Heerenveen'
@@ -110,11 +110,12 @@ export type Streaks = {
 
 /**
  * A player in the list of goal scorers: the goals this season and the place, from 1. `player`
- * is the full name from the table `players` for a goal that is linked to a player, and the name
- * as the page shows it for a goal without one. `givenName` and `surname` are its parts for
- * `PlayerName`: a linked player is split with his search term (see `splitPlayerName`), and a
- * goal without a player is a surname only. `id` tells the rows apart: the id of the player, or
- * the name for a goal without a player.
+ * is the full name from the table `players` for a goal that is linked to a player, the title of
+ * the Wikipedia page without its addition for a goal that has only a page, and the name as the
+ * match page shows it for a goal with neither. `givenName` and `surname` are its parts for
+ * `PlayerName`: a name is split with the search term (see `splitPlayerName` and
+ * `splitPageName`), and a name without a page is a surname only. `id` tells the rows apart: the
+ * id of the player, else the title of the page, else the name.
  */
 export type TopScorer = NameParts & {
   goals: number
@@ -768,26 +769,32 @@ export function standingsAround(rows: PublicStandingsRow[]): PublicStandingsRow[
  *
  * A goal that is linked to a player counts for that player, by his `id`, so two players with
  * the same surname are two rows, and a player who has left the squad still has his goals.
- * A goal with no player in the table counts for its name as the page shows it, as a row of its
- * own, so no goal is lost: it can be a second row for a player whose other goals are linked.
+ * A goal with no player in the table counts for the title of the player's Wikipedia page, which
+ * is also his full name (see `splitPageName`), and for the player it is linked to in another
+ * goal with the same page. Without a page it counts for its name as the match page shows it,
+ * as a row of its own, so no goal is lost.
  */
 export function topScorersOf(matches: PublicMatch[]): TopScorer[] {
   const scorers = new Map<string, Omit<TopScorer, 'position'>>()
+  const goals = matches.flatMap((match) => match.goals).filter((goal) => goal.ours && !goal.ownGoal)
+  const linked = new Map<string, ScorerGoal>()
 
-  for (const goal of matches.flatMap((match) => match.goals)) {
-    if (!goal.ours || goal.ownGoal) {
-      continue
+  for (const goal of goals) {
+    if (goal.playerId !== null && goal.playerPage !== null && !linked.has(goal.playerPage)) {
+      linked.set(goal.playerPage, goal)
     }
+  }
 
+  for (const own of goals) {
+    // A goal without a player counts for the linked player whose page it has, if there is one.
+    const goal = (own.playerId === null && own.playerPage !== null ? linked.get(own.playerPage) : undefined) ?? own
     const before = scorers.get(keyOf(goal))
 
     scorers.set(keyOf(goal), {
       goals: (before?.goals ?? 0) + 1,
-      id: goal.playerId ?? goal.player,
-      player: goal.playerName ?? goal.player,
-      ...(goal.playerName === null
-        ? surnameOnly(goal.player)
-        : splitPlayerName(goal.playerName, goal.playerSearchTerm ?? '')),
+      id: goal.playerId ?? goal.playerPage ?? goal.player,
+      player: goal.playerName ?? (goal.playerPage === null ? goal.player : pageTitleName(goal.playerPage)),
+      ...scorerName(goal),
     })
   }
 
@@ -870,9 +877,25 @@ function hasBegun(match: PublicMatch, now: Date) {
     : match.kickoffAt <= now
 }
 
-/** What a goal counts for: the player it is linked to, or else the name the page shows. */
-function keyOf(goal: PublicMatch['goals'][number]): string {
-  return goal.playerId === null ? `name:${goal.player}` : `id:${goal.playerId}`
+/**
+ * What a goal counts for: the player it is linked to, else the Wikipedia page of its player, or
+ * else the name the page shows.
+ */
+function keyOf(goal: ScorerGoal): string {
+  if (goal.playerId !== null) {
+    return `id:${goal.playerId}`
+  }
+
+  return goal.playerPage === null ? `name:${goal.player}` : `page:${goal.playerPage}`
+}
+
+/** The parts of the name of a scorer, from the best name the goal has. */
+function scorerName(goal: ScorerGoal): NameParts {
+  if (goal.playerName !== null) {
+    return splitPlayerName(goal.playerName, goal.playerSearchTerm ?? '')
+  }
+
+  return goal.playerPage === null ? surnameOnly(goal.player) : splitPageName(goal.player, goal.playerPage)
 }
 
 /** What a list of scorers is put in order by: the surname, or the whole name without one. */

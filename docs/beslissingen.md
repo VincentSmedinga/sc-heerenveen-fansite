@@ -4851,6 +4851,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `listSquad` toont alleen de spelers die in de selectie staan, dus ook de lijst van #107.
   De kaart met doelpuntenmakers telt een gekoppeld doelpunt per `id` en toont de volledige naam, een doelpunt zonder speler per naam als een eigen rij.
 - **Alternatieven:** doorgaan met namen in tekst en per naam tellen (twee spelers met dezelfde achternaam tellen samen); de verwijzing maken met de zoekterm of de achternaam (breekt bij dezelfde achternaam); de selectie bij elke lezing vervangen en de doelpunten opnieuw koppelen (de `id`'s veranderen, dus een link of een pagina per speler breekt later).
+- **Later:** een doelpunt zonder speler maar met een Wikipedia-pagina telt sinds 30 oktober 2026 voor die pagina en toont de titel als volledige naam; zie _Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina_.
 
 ### De Wikipedia-pagina van een speler is de sleutel, de naam is de reserve
 
@@ -6985,3 +6986,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de volgorde laten zoals ze is (de lijst begint dan bij het einde van het seizoen).
   Een schakelaar voor de volgorde (meer bediening voor een kleine behoefte).
   Het anker `stand` houden voor alle seizoenen (de link in de balk en het anker zouden dan een andere naam hebben dan de kop).
+
+### Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** een doelpunt zonder speler in `players` toont de titel van de Wikipedia-pagina van de speler, zonder toevoeging tussen haakjes, als zijn volledige naam.
+  Zonder pagina blijft de korte naam van de wedstrijdpagina.
+- **Waarom:** eerdere seizoenen hebben geen selectie en dus geen koppeling, maar de wedstrijdpagina linkt de speler wel.
+  De titel van die pagina is de volledige naam, zonder dat we iets hoeven te raden.
+- **Hoe:** `listSeasonMatches` geeft de titel mee als `playerPage`, uit dezelfde vraag.
+  `pageTitleName` haalt de toevoeging weg ("Pim Verbeek (voetballer, 1999)" wordt "Pim Verbeek").
+  `splitPageName` splitst de naam met de korte naam als zoekterm, na de beginletters die de wedstrijdpagina erbij kan zetten ("D. Rots").
+  Past de korte naam niet achter de titel, dan staat de hele naam in het gewone gewicht.
+  `topScorersOf` telt een doelpunt zonder speler op de titel van de pagina, dus twee spelers met dezelfde achternaam blijven twee rijen.
+  Heeft een gekoppeld doelpunt dezelfde pagina, dan telt het doelpunt zonder speler voor die speler en toont het zijn naam uit `players`.
+  De uitslagen houden de naam van de wedstrijdpagina.
+- **Alternatieven:** de korte naam houden (geen voornaam, zoals voorheen).
+  De selectie van elk seizoen importeren (kan niet als de pagina op Wikipedia ontbreekt).

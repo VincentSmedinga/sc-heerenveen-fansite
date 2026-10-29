@@ -954,6 +954,7 @@ describe('the matches and the table of a season', () => {
           player: 'Vroeg',
           playerId: null,
           playerName: null,
+          playerPage: null,
           playerSearchTerm: null,
           stoppageMinutes: null,
         },
@@ -965,6 +966,7 @@ describe('the matches and the table of a season', () => {
           player: 'Voor rust',
           playerId: null,
           playerName: null,
+          playerPage: null,
           playerSearchTerm: null,
           stoppageMinutes: null,
         },
@@ -976,6 +978,7 @@ describe('the matches and the table of a season', () => {
           player: 'Blessuretijd',
           playerId: null,
           playerName: null,
+          playerPage: null,
           playerSearchTerm: null,
           stoppageMinutes: 2,
         },
@@ -987,6 +990,7 @@ describe('the matches and the table of a season', () => {
           player: 'Na rust',
           playerId: null,
           playerName: null,
+          playerPage: null,
           playerSearchTerm: null,
           stoppageMinutes: null,
         },
@@ -998,6 +1002,7 @@ describe('the matches and the table of a season', () => {
           player: 'Late',
           playerId: null,
           playerName: null,
+          playerPage: null,
           playerSearchTerm: null,
           stoppageMinutes: null,
         },
@@ -1031,24 +1036,27 @@ describe('the matches and the table of a season', () => {
       })
 
       await database.db.insert(matchGoals).values([
-        { matchId: id, minute: 10, ours: true, player: 'Oyen', playerId: oyen },
+        { matchId: id, minute: 10, ours: true, player: 'Oyen', playerId: oyen, wikipediaPage: 'Luca Oyen' },
         { matchId: id, minute: 20, ours: true, player: 'Farji', playerId: farji },
+        { matchId: id, minute: 25, ours: true, player: 'Kemper', wikipediaPage: 'Boy Kemper' },
         { matchId: id, minute: 30, ours: false, player: 'Teststraat' },
       ])
 
       const cup = (await listSeasonMatches(database.db, '2026/27')).find((match) => match.round === 'Kwartfinale')
 
       expect(
-        cup?.goals.map(({ player, playerId, playerName, playerSearchTerm }) => [
+        cup?.goals.map(({ player, playerId, playerName, playerPage, playerSearchTerm }) => [
           player,
           playerId,
           playerName,
+          playerPage,
           playerSearchTerm,
         ]),
       ).toEqual([
-        ['Oyen', oyen, 'Luca Oyen', 'Oyen'],
-        ['Farji', farji, 'Marko Farji', 'Farji'],
-        ['Teststraat', null, null, null],
+        ['Oyen', oyen, 'Luca Oyen', 'Luca Oyen', 'Oyen'],
+        ['Farji', farji, 'Marko Farji', null, 'Farji'],
+        ['Kemper', null, null, 'Boy Kemper', null],
+        ['Teststraat', null, null, null, null],
       ])
     })
 
