@@ -6,6 +6,7 @@ import {
   cleanSheetsOf,
   goalsPerQuarter,
   goalsWithInitials,
+  leaguePlaceOf,
   leagueResultsOf,
   matchFlowOf,
   overviewOf,
@@ -1022,5 +1023,149 @@ describe('goalsWithInitials', () => {
     ]
 
     expect(goalsWithInitials(goals)).toEqual(goals)
+  })
+})
+
+describe('leaguePlaceOf', () => {
+  const club = (
+    name: string,
+    position: number,
+    played: number,
+    points: number,
+    won: number,
+    goalsFor: number,
+    goalsAgainst: number,
+  ): PublicStandingsRow => ({
+    ...row(position, name),
+    drawn: points - won * 3,
+    goalDifference: goalsFor - goalsAgainst,
+    goalsAgainst,
+    goalsFor,
+    lost: played - won - (points - won * 3),
+    played,
+    points,
+    won,
+  })
+  const placeOf = (rows: PublicStandingsRow[], measure: string) =>
+    leaguePlaceOf(rows)?.measures.find((item) => item.measure === measure)
+
+  it('gives the five measures in the order of the card, with the matches played', () => {
+    const place = leaguePlaceOf([club('Een', 1, 4, 10, 3, 9, 3), club('sc Heerenveen', 2, 4, 7, 2, 6, 5)])
+
+    expect(place?.measures.map((item) => item.measure)).toEqual([
+      'pointsPerMatch',
+      'won',
+      'goalsFor',
+      'goalsAgainst',
+      'goalDifference',
+    ])
+    expect(place?.played).toBe(4)
+    expect(placeOf([club('sc Heerenveen', 1, 4, 7, 2, 6, 5)], 'pointsPerMatch')?.value).toBe(1.75)
+    expect(placeOf([club('sc Heerenveen', 1, 4, 7, 2, 6, 5)], 'goalDifference')?.value).toBe(1)
+  })
+
+  it('shares a place between clubs with the same value and skips the next one', () => {
+    const rows = [
+      club('Een', 1, 4, 9, 3, 8, 2),
+      club('Twee', 2, 4, 6, 2, 5, 4),
+      club('sc Heerenveen', 3, 4, 6, 2, 5, 5),
+      club('Vier', 4, 4, 5, 1, 3, 6),
+    ]
+
+    expect(placeOf(rows, 'won')).toMatchObject({ place: 2, shared: true })
+    expect(placeOf(rows, 'goalsFor')).toMatchObject({ place: 2, shared: true })
+    expect(placeOf(rows, 'goalDifference')).toMatchObject({ place: 3, shared: false })
+    expect(placeOf([...rows, club('Vijf', 5, 4, 6, 2, 5, 5)], 'won')).toMatchObject({ place: 2, shared: true })
+  })
+
+  it('ranks the best defence on the fewest goals against', () => {
+    const rows = [
+      club('Een', 1, 4, 9, 3, 8, 2),
+      club('sc Heerenveen', 2, 4, 6, 2, 5, 3),
+      club('Drie', 3, 4, 3, 1, 3, 9),
+    ]
+
+    expect(placeOf(rows, 'goalsAgainst')).toMatchObject({ place: 2, shared: false, value: 3 })
+    expect(placeOf(rows, 'goalsFor')).toMatchObject({ place: 2 })
+  })
+
+  it('compares points per match when the clubs played a different number of matches', () => {
+    // 6 points in 3 matches (2,00) beats 7 points in 4 (1,75), and 3 in 2 (1,50) is behind it.
+    const rows = [
+      club('Meer', 1, 4, 7, 2, 6, 3),
+      club('sc Heerenveen', 2, 3, 6, 2, 5, 2),
+      club('Minder', 3, 2, 3, 1, 2, 2),
+    ]
+
+    expect(placeOf(rows, 'pointsPerMatch')).toMatchObject({ place: 1, shared: false, value: 2 })
+    expect(placeOf(rows, 'won')).toMatchObject({ place: 1, shared: true })
+  })
+
+  it('shares the place on points per match when the ratio is the same, with no rounding', () => {
+    const rows = [club('Twee', 1, 6, 12, 4, 9, 3), club('sc Heerenveen', 2, 3, 6, 2, 5, 2)]
+
+    expect(placeOf(rows, 'pointsPerMatch')).toMatchObject({ place: 1, shared: true })
+  })
+
+  it('says how many points sc Heerenveen is behind the leader and ahead of the last', () => {
+    const rows = [
+      club('Een', 1, 4, 10, 3, 9, 3),
+      club('sc Heerenveen', 2, 4, 7, 2, 6, 5),
+      club('Drie', 3, 4, 2, 0, 2, 9),
+    ]
+
+    expect(leaguePlaceOf(rows)).toMatchObject({ last: { club: 'Drie', points: 5 }, leader: { club: 'Een', points: 3 } })
+  })
+
+  it('has no leader when sc Heerenveen is the leader, and no last when it is the last', () => {
+    const rows = [club('sc Heerenveen', 1, 4, 10, 3, 9, 3), club('Twee', 2, 4, 7, 2, 6, 5)]
+
+    expect(leaguePlaceOf(rows)).toMatchObject({ last: { club: 'Twee', points: 3 }, leader: undefined })
+    expect(leaguePlaceOf([club('Een', 1, 4, 10, 3, 9, 3), club('sc Heerenveen', 2, 4, 7, 2, 6, 5)])).toMatchObject({
+      last: undefined,
+      leader: { club: 'Een', points: 3 },
+    })
+  })
+
+  it('takes the leader and the last by points, so a table out of order never gives a negative gap', () => {
+    const rows = [
+      club('Een', 1, 4, 5, 1, 5, 4),
+      club('sc Heerenveen', 2, 4, 7, 2, 6, 5),
+      club('Drie', 3, 4, 9, 3, 9, 3),
+    ]
+
+    expect(leaguePlaceOf(rows)).toMatchObject({ last: { club: 'Een', points: 2 }, leader: { club: 'Drie', points: 2 } })
+  })
+
+  it('gives 0 points behind a leader with the same points', () => {
+    const rows = [club('Een', 1, 4, 7, 2, 7, 3), club('sc Heerenveen', 2, 4, 7, 2, 6, 3)]
+
+    expect(leaguePlaceOf(rows)?.leader).toEqual({ club: 'Een', points: 0 })
+  })
+
+  it('leaves out a club that has played nothing, also as the last', () => {
+    const rows = [
+      club('Een', 1, 1, 3, 1, 2, 0),
+      club('sc Heerenveen', 2, 1, 1, 0, 1, 1),
+      club('Drie', 3, 0, 0, 0, 0, 0),
+    ]
+    const place = leaguePlaceOf(rows)
+
+    expect(place?.last).toBeUndefined()
+    expect(place?.leader).toEqual({ club: 'Een', points: 2 })
+    expect(placeOf(rows, 'goalsAgainst')).toMatchObject({ place: 2, shared: false })
+  })
+
+  it('has no leader and no last when sc Heerenveen is the only club that played', () => {
+    const place = leaguePlaceOf([club('sc Heerenveen', 1, 1, 3, 1, 2, 0), club('Twee', 2, 0, 0, 0, 0, 0)])
+
+    expect(place).toMatchObject({ last: undefined, leader: undefined, played: 1 })
+    expect(place?.measures.every((item) => item.place === 1 && !item.shared)).toBe(true)
+  })
+
+  it('gives nothing without sc Heerenveen in the table, when it has played nothing, or with an empty table', () => {
+    expect(leaguePlaceOf([club('Een', 1, 4, 10, 3, 9, 3)])).toBeUndefined()
+    expect(leaguePlaceOf([club('Een', 1, 1, 3, 1, 2, 0), club('sc Heerenveen', 2, 0, 0, 0, 0, 0)])).toBeUndefined()
+    expect(leaguePlaceOf([])).toBeUndefined()
   })
 })

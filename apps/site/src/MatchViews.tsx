@@ -28,6 +28,9 @@ import {
   cleanSheetsOf,
   goalsPerQuarter,
   goalsWithInitials,
+  type LeagueMeasure,
+  type LeaguePlace,
+  leaguePlaceOf,
   leagueResultsOf,
   matchFlowOf,
   overviewOf,
@@ -171,6 +174,70 @@ const flowColumns = [
   { abbreviation: 'V', name: 'verlies' },
   { abbreviation: 'P', name: 'punten' },
 ] as const
+
+const measureNames: Record<LeagueMeasure, string> = {
+  goalDifference: 'Doelsaldo',
+  goalsAgainst: 'Beste verdediging, doelpunten tegen',
+  goalsFor: 'Beste aanval, doelpunten voor',
+  pointsPerMatch: 'Punten per wedstrijd',
+  won: 'Gewonnen wedstrijden',
+}
+
+const pointsPerMatchFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+
+/** The value of a measure as the table writes it: the goal difference with its sign. */
+function measureValue(measure: LeagueMeasure, value: number): number | string {
+  if (measure === 'pointsPerMatch') {
+    return pointsPerMatchFormat.format(value)
+  }
+
+  return measure === 'goalDifference' ? (value > 0 ? `+${value}` : value < 0 ? `\u2212${-value}` : '0') : value
+}
+
+const pointsWord = (points: number) => `${points} ${points === 1 ? 'punt' : 'punten'}`
+
+/**
+ * The card of the matches page with the place of sc Heerenveen in the Eredivisie on five
+ * measures, in a table, and under it two sentences on the points to the leader and to the last.
+ * The places come from the table of the whole league, in which the clubs have not all played
+ * the same number of matches, and the line under the card says after how many matches of ours
+ * it holds. Without a table it is a sentence for visitors, like the card Stand.
+ */
+export function LeaguePlaceCard({ standings }: { standings: PublicStandingsRow[] }) {
+  const place = leaguePlaceOf(standings)
+
+  return (
+    <Card aria-labelledby="onze-plek-in-de-competitie" shareable={imageCredit(place !== undefined)}>
+      <Heading anchor id="onze-plek-in-de-competitie" level={2}>
+        Onze plek in de competitie
+      </Heading>
+      {place === undefined ? (
+        <Text>
+          {standings.length === 0
+            ? 'We hebben de stand nog niet gevonden. Kijk straks nog eens.'
+            : 'We hebben de plek van sc Heerenveen in de stand nog niet. Kijk straks nog eens.'}
+        </Text>
+      ) : (
+        <>
+          <DataTable
+            caption="De plek van sc Heerenveen in de Eredivisie, per onderdeel"
+            columns={['Onderdeel', 'Plaats', 'Waarde']}
+            rows={place.measures.map(({ measure, place: rank, shared, value }) => ({
+              cells: [`${shared ? 'gedeeld ' : ''}${rank}e`, measureValue(measure, value)],
+              header: measureNames[measure],
+            }))}
+          />
+          {placeSentences(place).map((sentence) => (
+            <Text key={sentence}>{sentence}</Text>
+          ))}
+          <Text appearance="meta">
+            {`Gebaseerd op de stand na ${place.played} ${place.played === 1 ? 'wedstrijd' : 'wedstrijden'} van sc Heerenveen`}
+          </Text>
+        </>
+      )}
+    </Card>
+  )
+}
 
 /**
  * The block of the homepage with the previous and the next match in one list, and a link to the
@@ -511,4 +578,34 @@ function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
   }
 
   return <Match {...common} {...matchMoment(match, now)} status="scheduled" />
+}
+
+/**
+ * The two sentences under the table: where sc Heerenveen stands to the leader and to the last.
+ * A club that is itself the leader (no leader is given) or the last says so. The sentences are
+ * left out when it is the only club that has played, and there is nothing to compare.
+ */
+function placeSentences({ last, leader }: LeaguePlace): string[] {
+  const sentences: string[] = []
+
+  if (leader !== undefined) {
+    sentences.push(
+      leader.points === 0
+        ? `sc Heerenveen heeft evenveel punten als de koploper, ${leader.club}.`
+        : `sc Heerenveen staat ${pointsWord(leader.points)} achter de koploper, ${leader.club}.`,
+    )
+  } else if (last !== undefined) {
+    sentences.push('sc Heerenveen staat bovenaan.')
+  }
+  if (last !== undefined) {
+    sentences.push(
+      last.points === 0
+        ? `sc Heerenveen heeft evenveel punten als de laatste, ${last.club}.`
+        : `sc Heerenveen staat ${pointsWord(last.points)} voor op de laatste, ${last.club}.`,
+    )
+  } else if (leader !== undefined) {
+    sentences.push('sc Heerenveen staat onderaan.')
+  }
+
+  return sentences
 }
