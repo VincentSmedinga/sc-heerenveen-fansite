@@ -31,6 +31,7 @@ import {
   goalsPerQuarter,
   goalsWithInitials,
   homeAwayOf,
+  lacksResult,
   type LeagueMeasure,
   type LeaguePlace,
   leaguePlaceOf,
@@ -352,7 +353,7 @@ export function HomeAwayCard({ matches }: { matches: PublicMatch[] }) {
  * page with them all. Without matches it says so in a sentence for visitors.
  */
 export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
-  const { next, previous } = overviewOf(data.matches)
+  const { next, previous } = overviewOf(data.matches, now)
   const shown = [previous, next].filter((match) => match !== undefined)
 
   return (
@@ -692,7 +693,9 @@ function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
     )
   }
 
-  return <Match {...common} {...matchMoment(match, now)} status="scheduled" />
+  // A match that has begun and has no result keeps its time, and says after two hours that the
+  // result isn't known yet.
+  return <Match {...common} {...matchMoment(match, now)} resultMissing={lacksResult(match, now)} status="scheduled" />
 }
 
 /**

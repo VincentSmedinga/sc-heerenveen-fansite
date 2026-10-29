@@ -3425,6 +3425,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** een uitgestelde wedstrijd zonder nieuwe datum is geen volgende wedstrijd, maar een supporter wil wel zien dat hij is uitgesteld.
   Wie op de datum afgaat, laat een wedstrijd verdwijnen waarvan Wikipedia de uitslag nog niet heeft.
 - **Alternatieven:** een wedstrijd uit het programma halen zodra de dag voorbij is (de wedstrijd verdwijnt dan zonder uitslag); een uitgestelde wedstrijd als volgende wedstrijd tonen (staat dan weken bovenaan zonder datum).
+- **Later:** zie _De vorige en de volgende wedstrijd volgen uit de aanvangstijd, en een wedstrijd zonder uitslag zegt dat na twee uur_.
+  De uitgestelde wedstrijd zonder nieuwe datum, het blok met twee wedstrijden en de statistieken op de status `played` blijven zoals ze waren.
 
 ### Een wedstrijd is een regel zonder link en zonder clubwapen
 
@@ -3928,6 +3930,33 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alle wedstrijden met hetzelfde verschil tonen (de kaart wordt lang).
   De doelpunten van de tegenstander ook (dubbel zoveel regels, minder interessant).
   De naam boven de wedstrijd (zie Vorm).
+
+### De vorige en de volgende wedstrijd volgen uit de aanvangstijd, en een wedstrijd zonder uitslag zegt dat na twee uur
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart Wedstrijden toont de laatste wedstrijd die is begonnen en de eerste die nog niet is begonnen, op aanvangstijd.
+  Een wedstrijd zonder uitslag toont twee uur na de aanvang (zonder aanvangstijd vanaf de dag erna) "Gegevens nog niet beschikbaar".
+  De kaart op de homepage en de kaarten Programma en Uitslagen delen die verdeling.
+  Een wedstrijd die is begonnen, staat in Uitslagen, ook zonder uitslag.
+- **Waarom:** een bekerwedstrijd zonder uitslag stond als volgende wedstrijd op de kaart, terwijl hij al was gespeeld.
+  Wikipedia kan uren of dagen achterlopen, en een supporter wil toch zien wat de volgende wedstrijd is.
+  Twee uur is de grens die de projecteigenaar koos.
+  Een gewone wedstrijd is dan afgelopen, een bekerwedstrijd met verlenging en strafschoppen soms nog niet; de zin kan daar dus iets te vroeg komen.
+- **Hoe:** `overviewOf(matches, now)` in `src/matches.ts` verdeelt de wedstrijden en krijgt het moment van het verzoek mee, zodat een test het kan zetten.
+  - Een wedstrijd is begonnen als zijn aanvangstijd (`kickoffAt`) voorbij is.
+    Zonder aanvangstijd is hij begonnen als zijn dag (`matchDate`) in Nederlandse tijd voorbij is, ook rond middernacht en bij het wisselen van de zomertijd.
+    Bij een weekend ("12–14 februari") is dat de laatste dag van het bereik (`lastDayOf` in `src/match-format.ts`), want `matchDate` is dan de eerste dag.
+  - Een gespeelde wedstrijd is altijd begonnen, een uitgestelde wedstrijd zonder nieuwe datum nooit: die blijft in het programma als "Uitgesteld" en is nooit de vorige of de volgende.
+  - `lacksResult` kiest de zin: de wedstrijd heeft geen score en de aanvang is twee uur of langer geleden.
+    `Match` heeft daarvoor de eigenschap `resultMissing`; de zin staat onderaan, onder de tijd en de plaats, in een gedempt rood maar niet vet, en de tijd blijft staan.
+    Dat rood is het token `--hf-colour-text-missing`: stap 800 van de roodschaal in licht, rustiger dan het rood van "Uitgesteld" (`--hf-colour-text-accent`), dat de projecteigenaar daar te fel vond.
+    In donker is het stap 300, hetzelfde als dat rood.
+    Het token gebruikt bestaande stappen; er komt geen nieuwe kleur bij.
+    De tekst zegt het zelf, het rood komt erbij; het haalt 4,5:1 op elk vlak, in licht en donker.
+  - De statistiekkaarten tellen alleen wedstrijden met de status `played` en een score, en veranderen niet.
+- **Alternatieven:** de status laten bepalen (nu; het probleem van de bekerwedstrijd).
+  De wedstrijd verbergen tot er een uitslag is (de kaart zegt dan niets over de laatste wedstrijd).
+  Een grens van drie uur (dekt verlenging en strafschoppen, maar laat de melding bij een gewone wedstrijd lang weg).
 
 ## Importer
 

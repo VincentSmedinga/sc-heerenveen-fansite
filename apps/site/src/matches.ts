@@ -13,6 +13,7 @@ import { seasonOf } from '@fansite/db/season'
 import { cacheFor } from './cache'
 import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
+import { lastDayOf } from './match-format'
 import { type NameParts, splitPlayerName, surnameOnly } from './player-name'
 
 /** The name of our own club in the table. */
@@ -26,11 +27,13 @@ export type MatchData = {
 }
 
 /**
- * The matches of the current season split the way the pages show them. `programme` is every
- * match that is still to come, in the order they are played, and a match that is called off
- * with no new date stays in it until the importer finds one. `results` is every match that is
- * played, the newest first. `next` is the first match in the programme that has a date, so not
- * one that is called off, and `latest` the newest results.
+ * The matches of the current season split the way the pages show them, by the moment a match
+ * begins and not by its status. `results` is every match that has begun, the newest first, also
+ * one whose result isn't known yet. `programme` is every match that has not begun, in the order
+ * they are played, and a match that is called off with no new date stays in it until the
+ * importer finds one. `previous` is the first of the results and `next` the first match in the
+ * programme that has a date, so not one that is called off. The homepage and the matches page
+ * both take them from here, so they never disagree on what the next match is.
  */
 export type MatchOverview = {
   next: PublicMatch | undefined
@@ -110,7 +113,9 @@ export type TopScorer = NameParts & {
  * decides this. A match that isn't played, or has no result, counts for neither.
  */
 export function cleanSheetsOf(matches: PublicMatch[]): CleanSheets {
-  const played = overviewOf(matches).results.filter((match) => match.goalsFor !== null && match.goalsAgainst !== null)
+  const played = matches
+    .filter((match) => match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null)
+    .reverse()
 
   return { matches: played.filter((match) => match.goalsAgainst === 0), played: played.length }
 }
@@ -626,18 +631,47 @@ export function matchFlowOf(matches: PublicMatch[]): MatchFlow {
 
 /**
  * Splits the matches of a season, in the order the query gives them, into the programme, the
- * results, and the previous and the next match the homepage shows.
+ * results, and the previous and the next match the homepage shows (see `MatchOverview`). A
+ * match has begun when its kick-off is past, or, without a kick-off, when its day in Dutch time
+ * is over. A match that is called off with no new date has no place in time and stays in the
+ * programme. `now` is the moment of the visit.
  */
-export function overviewOf(matches: PublicMatch[]): MatchOverview {
-  const programme = matches.filter((match) => match.status !== 'played')
-  const results = matches.filter((match) => match.status === 'played').reverse()
+export function overviewOf(matches: PublicMatch[], now: Date): MatchOverview {
+  const programme = matches.filter((match) => !hasBegun(match, now))
+  const results = matches.filter((match) => hasBegun(match, now)).reverse()
 
   return {
-    next: programme.find((match) => match.status === 'scheduled'),
+    next: programme.find((match) => match.status !== 'postponed'),
     previous: results[0],
     programme,
     results,
   }
+}
+
+/** How long after the kick-off a result may take: later than this we say it isn't there yet. */
+const waitForResult = 2 * 60 * 60 * 1000
+
+const dutchDayFormat = new Intl.DateTimeFormat('en-CA', {
+  day: '2-digit',
+  month: '2-digit',
+  timeZone: 'Europe/Amsterdam',
+  year: 'numeric',
+})
+
+/**
+ * Whether the page should say that the result isn't there yet: the match has no result, and
+ * two hours have passed since its kick-off (without a kick-off, its day is over). Within the
+ * two hours it is still being played, and the line only shows the time.
+ */
+export function lacksResult(match: PublicMatch, now: Date) {
+  if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
+    return false
+  }
+  if (match.status === 'postponed' || !hasBegun(match, now)) {
+    return false
+  }
+
+  return match.kickoffAt === null || match.kickoffAt.getTime() + waitForResult <= now.getTime()
 }
 
 /**
@@ -774,6 +808,25 @@ function goalGroups(goals: ScorerGoal[]): ScorerGoal[][] {
   }
 
   return groups
+}
+
+/**
+ * Whether a match has begun at `now`: its kick-off is past, or, without a kick-off, its day in
+ * Dutch time is over (it counts as not begun until the end of that day, and a weekend until the
+ * end of its last day). A match that is played
+ * has begun whatever the clock says, and one that is called off with no new date never has.
+ */
+function hasBegun(match: PublicMatch, now: Date) {
+  if (match.status === 'played') {
+    return true
+  }
+  if (match.status === 'postponed') {
+    return false
+  }
+
+  return match.kickoffAt === null
+    ? dutchDayFormat.format(now) > lastDayOf(match.dateText, match.matchDate)
+    : match.kickoffAt <= now
 }
 
 /** What a goal counts for: the player it is linked to, or else the name the page shows. */

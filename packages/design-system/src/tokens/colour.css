@@ -131,6 +131,12 @@
     --hf-colour-text-link-hover: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-200));
     --hf-colour-text-link-visited: light-dark(var(--hf-colour-grey-600), var(--hf-colour-grey-400));
     --hf-colour-text-accent: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
+
+    /*
+     * Says that data is missing: a step darker than the accent in light, where the accent is too
+     * bright, and the same in dark.
+     */
+    --hf-colour-text-missing: light-dark(var(--hf-colour-red-800), var(--hf-colour-red-300));
     --hf-colour-text-highlight: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
     --hf-colour-text-on-header: var(--hf-colour-blue-50);
     --hf-colour-text-on-header-secondary: var(--hf-colour-blue-200);
@@ -311,6 +317,7 @@
       --hf-colour-text-link-hover: var(--hf-colour-blue-800);
       --hf-colour-text-link-visited: var(--hf-colour-grey-600);
       --hf-colour-text-accent: var(--hf-colour-red-700);
+      --hf-colour-text-missing: var(--hf-colour-red-800);
       --hf-colour-text-highlight: var(--hf-colour-blue-800);
       --hf-colour-text-on-button: var(--hf-colour-white);
       --hf-colour-text-on-button-soft: var(--hf-colour-blue-800);

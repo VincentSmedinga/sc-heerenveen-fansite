@@ -45,6 +45,11 @@ const meta = preview.meta({
           'Is de aftrap nog niet bekend, dan staat er het weekend, zoals "weekend 12–14 februari", en `dateTime` is de eerste dag.',
           'Bij een uitgestelde wedstrijd staat er "Uitgesteld" in plaats van een tijd.',
           '',
+          'Is een wedstrijd begonnen en is de uitslag er twee uur later nog niet, dan zet je `resultMissing`.',
+          'Onderaan staat dan "Gegevens nog niet beschikbaar", onder de tijd en de plaats, in een gedempt rood, en niet vet.',
+          'De tijd blijft staan.',
+          'Het is een eerlijke melding van wat we niet weten, zonder gok naar de uitslag.',
+          '',
           '- `competition`, `round` en `opponent` zijn gewone tekst, zoals de bron ze heeft.',
           '- `home` zegt of sc Heerenveen thuis speelt.',
           '- `status` is `scheduled`, `played` of `postponed`.',
@@ -107,6 +112,46 @@ const renderBlock = (maxInlineSize: string) => () => (
 )
 
 const renderSidebar = renderBlock('20rem')
+
+// The block of the homepage when the previous match is over but has no result yet: a cup tie
+// two hours after the kick-off, with the next match under it.
+const renderSidebarMissing = () => (
+  <div style={{ maxInlineSize: '20rem' }}>
+    <Card aria-labelledby="wedstrijden-zonder-uitslag-kop">
+      <Heading id="wedstrijden-zonder-uitslag-kop" level={2}>
+        Wedstrijden
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="KNVB Beker"
+            dateTime="2026-10-28T19:00:00Z"
+            home={false}
+            opponent="Voorbeeld United"
+            resultMissing
+            round="Tweede ronde"
+            stadium="Voorbeeldpark"
+            status="scheduled"
+            time="wo 28 okt 20:00"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-11-01T18:45:00Z"
+            home
+            opponent="Proefstad SV"
+            round="Speelronde 3"
+            stadium="Stadion Proeflaan"
+            status="scheduled"
+            time="zo 1 nov 19:45"
+          />
+        </List.Item>
+      </List>
+      <WikipediaCredit compact />
+    </Card>
+  </div>
+)
 
 const renderNarrow = renderBlock('16rem')
 
@@ -418,6 +463,58 @@ const renderScorers = () => (
   </div>
 )
 
+// Matches that have begun and have no result yet: one in the league, one in the cup, and one
+// with a day and no kick-off. The clubs are made up, like the data of the seed.
+const renderMissing = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="zonder-uitslag-kop">
+      <Heading id="zonder-uitslag-kop" level={2}>
+        Zonder uitslag
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-10-25T14:30:00Z"
+            home
+            opponent="Testdorp FC"
+            resultMissing
+            round="Speelronde 11"
+            stadium="Stadion Proeflaan"
+            status="scheduled"
+            time="zo 25 okt 15:30"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="KNVB Beker"
+            dateTime="2026-10-28T19:00:00Z"
+            home={false}
+            opponent="Voorbeeld United"
+            resultMissing
+            round="Tweede ronde"
+            stadium="Voorbeeldpark"
+            status="scheduled"
+            time="wo 28 okt 20:00"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="KNVB Beker"
+            dateTime="2026-10-24"
+            home
+            opponent="Proefstad SV"
+            resultMissing
+            round="Eerste ronde"
+            status="scheduled"
+            time="weekend 24–26 oktober"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
 export const Light = meta.story({
   globals: { theme: 'light' },
   name: 'Zijbalk, met de vorige en de volgende wedstrijd, licht',
@@ -488,4 +585,28 @@ export const ScorersDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Doelpuntenmakers: een of beide clubs, penalty, eigen doelpunt, blessuretijd, lange naam, donker',
   render: renderScorers,
+})
+
+export const MissingLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Zonder uitslag: gegevens nog niet beschikbaar, licht',
+  render: renderMissing,
+})
+
+export const MissingDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Zonder uitslag: gegevens nog niet beschikbaar, donker',
+  render: renderMissing,
+})
+
+export const SidebarMissingLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Zijbalk, de vorige wedstrijd zonder uitslag en de volgende, licht',
+  render: renderSidebarMissing,
+})
+
+export const SidebarMissingDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Zijbalk, de vorige wedstrijd zonder uitslag en de volgende, donker',
+  render: renderSidebarMissing,
 })

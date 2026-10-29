@@ -261,6 +261,41 @@ describe('Match', () => {
     expect(container.querySelector('.hf-match-when')?.textContent).toBe('Uitgesteld · Thuis')
   })
 
+  describe('a match without a result', () => {
+    it('says "Gegevens nog niet beschikbaar" as the last line and keeps the time and the dash', () => {
+      const { container } = render(<Match {...scheduled} resultMissing />)
+
+      expect(container.querySelector('.hf-match-missing')?.textContent).toBe('Gegevens nog niet beschikbaar')
+      expect(container.querySelector('.hf-match-when + .hf-match-missing')).not.toBeNull()
+      expect(container.querySelector('.hf-match-missing')?.nextElementSibling).toBeNull()
+      expect(container.querySelector('time')?.textContent).toBe('zo 1 nov 14:30')
+      expect(container.querySelector('.hf-match-versus')).not.toBeNull()
+    })
+
+    it('is plain text for a screen reader, in a paragraph with the other small lines', () => {
+      const { container } = render(<Match {...scheduled} resultMissing />)
+      const missing = container.querySelector('.hf-match-missing')
+
+      expect(missing?.tagName).toBe('P')
+      expect(missing?.getAttribute('aria-hidden')).toBeNull()
+      expect(missing?.className).toMatch(/hf-meta/u)
+    })
+
+    it('says nothing without the property, and does not pass it on to the element', () => {
+      const { container } = render(<Match {...scheduled} resultMissing={false} />)
+
+      expect(container.querySelector('.hf-match-missing')).toBeNull()
+      expect(container.firstElementChild?.hasAttribute('resultmissing')).toBe(false)
+    })
+
+    it('gives way to the result: a played match has no such line', () => {
+      const { container } = render(<Match {...played} />)
+
+      expect(container.querySelector('.hf-match-missing')).toBeNull()
+      expect(textOf(container)).toContain('2–0')
+    })
+  })
+
   it('leaves out the stadium when it has none', () => {
     const { container } = render(<Match {...scheduled} stadium={null} />)
 
