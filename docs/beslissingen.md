@@ -526,6 +526,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zo hoeft CI geen browser te installeren.
 - **Alternatieven:** de stap altijd draaien (eenvoudiger, maar elke pull request betaalt ervoor); de regel van de site hergebruiken (dan draait hij ook bij elke wijziging in de site, die de stories niet raakt).
 
+### Issue-formulieren in YAML, met drie soorten en zonder lege issues
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de repository krijgt drie issue-formulieren in YAML, in `.github/ISSUE_TEMPLATE/`: een fout melden, een idee voorstellen en een bron voorstellen.
+  Lege issues staan uit.
+  Vragen gaan naar het forum.
+  Een beveiligingsprobleem moet naar de privé-melding van GitHub, zodra de projecteigenaar "Private vulnerability reporting" aanzet; tot dan verwijst `config.yml` er niet naar.
+- **Waarom:** een formulier vraagt wat we nodig hebben en laat verplichte velden niet leeg, wat een Markdown-sjabloon niet doet.
+  Een supporter die GitHub niet kent, weet dan wat er verwacht wordt.
+  Een lege optie laat de formulieren omzeilen.
+- **Alternatieven:** sjablonen in Markdown (eenvoudiger, maar niets is verplicht en ze vullen zich met gedeeltelijke teksten).
+  Een lege optie laten staan voor de Coordinator; de Coordinator maakt issues met `gh`, dus daar is geen web-optie voor nodig.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host
