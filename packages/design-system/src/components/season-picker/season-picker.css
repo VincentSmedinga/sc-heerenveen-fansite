@@ -33,6 +33,9 @@
 
     > select {
       inline-size: auto;
+
+      /* A list with the look of the site is a flex container, which a grid stretches. */
+      justify-self: start;
       margin: 0;
       max-inline-size: 100%;
     }

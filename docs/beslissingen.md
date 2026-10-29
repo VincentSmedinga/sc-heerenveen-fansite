@@ -2734,6 +2734,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Voor de brede zijbalk een hogere grens dan 52 rem (laat precies de telefoons in één kolom waarvoor het issue is, en de balk en de kolommen wisselen dan op twee plaatsen).
   Een grens op oriëntatie of hoogte (laat zoom en tekstvergroting op een liggend scherm twee kolommen houden, en breekt het herschikken).
 
+### Een keuzelijst krijgt de opmaak van de site met `appearance: base-select`, binnen `@supports`, te beginnen bij de seizoenskiezer
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** `Select` heeft een klasse `hf-select-styled` (in `select.css`) die de gesloten en de open lijst opmaakt met `appearance: base-select`.
+  Alles staat binnen `@supports (appearance: base-select)`; een browser die het niet kent, houdt zijn eigen lijst (zie _Functies die nog niet zover zijn: `@supports`, of een tijdelijke uitzondering_).
+  Alleen de `SeasonPicker` vraagt de klasse aan.
+  De andere keuzelijsten (het contactformulier, `base/forms.css`, `Field`) volgen in een eigen issue als dit goed blijkt.
+  - Het pijltje is `::picker-icon`, dus het pijltje van de browser zelf.
+    De lijst heeft 0,75 rem opvulling aan het einde en 0,5 rem tussen de tekst en het pijltje, en het pijltje draait als de lijst open is.
+  - De open lijst (`::picker(select)`) is een vlak met de rand en de hoek van het veld, en opties van minstens 2,75 rem hoog.
+  - Een optie onder de muis heeft een tint en een dunne lijn.
+    Een optie waar het toetsenbord staat, heeft een tint en de focusring van de site.
+    De gekozen optie heeft een blauwe tint, een vinkje (`::checkmark`) en een zwaarder gewicht, dus kleur staat er niet alleen.
+  - Alle kleuren zijn tokens, in licht en donker.
+  - De regels van `plugin/use-baseline` staan uit rond dat blok, met de reden erbij.
+    Zodra Baseline de functie 'widely available' noemt, meldt Stylelint de uitzondering als overbodig (`reportNeedlessDisables`) en gaan de uitzondering en de `@supports` weg.
+- **Waarom:** het pijltje van een gewone `select` zit tegen de rand en is met opvulling niet te verschuiven.
+  Een eigen pijltje als achtergrond (een verloop) is geprobeerd en door de projecteigenaar afgewezen.
+  `::picker-icon` is het pijltje zelf, dus het blijft staan in gedwongen kleuren.
+  Het toetsenbord werkt zoals in _Het toetsenbord kiest een seizoen met de pijltjes en bevestigt met Enter_: de e2e-test van de kiezer slaagt in Chromium 156 en WebKit 27.2, en de lijst blijft een `select` met dezelfde gebeurtenissen.
+  Gedwongen kleuren (in Chromium nagebootst) en 400% zoom (320 × 256 pixels, vier seizoenen) zijn bekeken: het pijltje, de rand en het vinkje staan er, en de lijst past.
+- **Nadeel:** het pijltje heeft per browser een andere vorm (een driehoek in Chromium, een punthaak in WebKit).
+  De gesloten lijst is ongeveer 10 pixels breder dan de gewone, en de kiezer past naast de kop tot 320 pixels.
+  Firefox is niet gecontroleerd, omdat Playwright hier alleen Chromium en WebKit heeft; zonder `base-select` houdt hij de lijst die hij heeft.
+  De e2e-tests draaien alleen in Chromium.
+  Met de hand draaide hetzelfde bestand in WebKit: alles slaagde, behalve de test die met Tab naar de knop "Toon" gaat, want WebKit op een Mac tabt niet naar een knop, ook niet op een lege pagina.
+- **Alternatieven:** een eigen pijltje als achtergrond van de `select` (door de projecteigenaar afgewezen, en het verdwijnt in gedwongen kleuren).
+  Een eigen keuzelijst van `div`'s (staat buiten dit issue, en het toetsenbord en de schermlezer moeten dan allemaal opnieuw).
+  Alle keuzelijsten in één keer opmaken (raakt het contactformulier en `Field`, en de seizoenskiezer is de enige met een e2e-test voor het toetsenbord).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
