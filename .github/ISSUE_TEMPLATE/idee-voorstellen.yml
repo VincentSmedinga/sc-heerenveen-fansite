@@ -1,0 +1,24 @@
+name: Een idee voorstellen
+description: Je mist iets op de site, of je weet iets wat beter kan.
+labels: ['idee']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bedankt voor je idee.
+        Dit issue is openbaar: iedereen kan het lezen.
+        Zet er geen wachtwoorden en geen persoonsgegevens in.
+  - type: textarea
+    id: wat
+    attributes:
+      label: Wat wil je?
+      description: Beschrijf wat je op de site wilt zien of doen.
+    validations:
+      required: true
+  - type: textarea
+    id: waarom
+    attributes:
+      label: Waarom?
+      description: Wat heb je eraan, en wie nog meer?
+    validations:
+      required: true

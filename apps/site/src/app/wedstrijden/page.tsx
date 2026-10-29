@@ -8,8 +8,11 @@ import { reasonOf } from '../../errors'
 import { getMatchData, overviewOf, parseCleanSheetCount, topScorersOf } from '../../matches'
 import {
   CleanSheetsCard,
+  ExtremesCard,
   GoalsPerQuarterCard,
+  HomeAwayCard,
   imageCredit,
+  LeaguePlaceCard,
   MatchLines,
   SeasonCard,
   SourceCredit,
@@ -97,8 +100,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </Card>
       </Page.Main>
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme and the
-          results: the table, the season, the streaks, the goal scorers, the clean sheets, then
-          the goals per quarter. */}
+          results: the table, our place in the league, the season, the streaks, home and away,
+          the goal scorers, the clean sheets, then the goals per quarter. */}
       <Page.Sidebar aria-label="De stand, de ranglijsten en de doelpunten per kwartier" wide>
         <Card aria-labelledby="stand" shareable={imageCredit(data.standings.length > 0)} surface="soft">
           <Heading anchor id="stand" level={2}>
@@ -110,8 +113,10 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <StandingsTable caption={standingsCaption(data.standings)} rows={data.standings} />
           )}
         </Card>
+        <LeaguePlaceCard standings={data.standings} />
         <SeasonCard matches={data.matches} />
         <StreaksCard matches={data.matches} now={now} />
+        <HomeAwayCard matches={data.matches} />
         <Card
           aria-labelledby="doelpuntenmakers"
           shareable={imageCredit(topScorersOf(data.matches).length > 0)}
@@ -124,6 +129,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </Card>
         <CleanSheetsCard count={parseCleanSheetCount(nul)} matches={data.matches} now={now} />
         <GoalsPerQuarterCard matches={data.matches} />
+        <ExtremesCard matches={data.matches} now={now} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit pages={data.pages} season={data.season} />
         )}

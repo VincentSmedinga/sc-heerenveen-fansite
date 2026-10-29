@@ -648,15 +648,27 @@ await withEmptyDatabase((database) =>
         '#programma',
         '#uitslagen',
         '#stand',
+        '#onze-plek-in-de-competitie',
         '#verloop-van-het-seizoen',
         '#reeksen',
+        '#thuis-en-uit',
         '#doelpuntenmakers',
         '#de-nul-gehouden',
         '#doelpunten-per-kwartier',
+        '#uitersten',
       ],
     )
     assert.doesNotMatch(html, /hf-page-shortcuts/)
     assert.match(matchesHtml, /Testdorp FC/)
+    // The card with our place in the league: a table of five measures, after the table.
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="onze-plek-in-de-competitie">.*?href="#onze-plek-in-de-competitie">Onze plek in de /s,
+    )
+    assert.match(
+      matchesHtml,
+      /<caption class="hf-visually-hidden">De plek van sc Heerenveen in de Eredivisie, per onderdeel<\/caption>/,
+    )
     // The card of the season: the chart, and the table of the Eredivisie results under it.
     assert.match(
       matchesHtml,
@@ -674,6 +686,15 @@ await withEmptyDatabase((database) =>
     )
     assert.match(matchesHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
     assert.match(matchesHtml, /Gebaseerd op (?:alle \d+|1) gespeelde wedstrijd/)
+    // The card of home and away: the table with a column for each.
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="thuis-en-uit">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#thuis-en-uit">Thuis en /,
+    )
+    assert.match(
+      matchesHtml,
+      /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen thuis en uit dit seizoen<\/caption>/,
+    )
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
     assert.match(
       matchesHtml,
@@ -701,6 +722,10 @@ await withEmptyDatabase((database) =>
     assert.match(
       matchesHtml,
       /<caption class="hf-visually-hidden">Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd<\/caption>/,
+    )
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="uitersten">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#uitersten">Uiterste/,
     )
     assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     assert.doesNotMatch(matchesHtml, /action=history/)

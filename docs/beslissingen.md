@@ -526,6 +526,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zo hoeft CI geen browser te installeren.
 - **Alternatieven:** de stap altijd draaien (eenvoudiger, maar elke pull request betaalt ervoor); de regel van de site hergebruiken (dan draait hij ook bij elke wijziging in de site, die de stories niet raakt).
 
+### Issue-formulieren in YAML, met drie soorten en zonder lege issues
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de repository krijgt drie issue-formulieren in YAML, in `.github/ISSUE_TEMPLATE/`: een fout melden, een idee voorstellen en een bron voorstellen.
+  Lege issues staan uit.
+  Vragen gaan naar het forum.
+  Een beveiligingsprobleem moet naar de privé-melding van GitHub, zodra de projecteigenaar "Private vulnerability reporting" aanzet; tot dan verwijst `config.yml` er niet naar.
+- **Waarom:** een formulier vraagt wat we nodig hebben en laat verplichte velden niet leeg, wat een Markdown-sjabloon niet doet.
+  Een supporter die GitHub niet kent, weet dan wat er verwacht wordt.
+  Een lege optie laat de formulieren omzeilen.
+- **Alternatieven:** sjablonen in Markdown (eenvoudiger, maar niets is verplicht en ze vullen zich met gedeeltelijke teksten).
+  Een lege optie laten staan voor de Coordinator; de Coordinator maakt issues met `gh`, dus daar is geen web-optie voor nodig.
+
 ## Hosting en data
 
 ### Beginnen op de gedeelde hosting van mijn.host
@@ -1345,6 +1358,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alle tekst haalt ermee AA, lopende tekst AAA.
 - **Uit het canvas overgenomen:** tekst in de header blauw-50 en het menu blauw-200, tekst op de wedstrijdband blauw-100, en de gemarkeerde rij in blauw-100 met blauw-800 (licht) en blauw-800 met blauw-50 (donker).
 - **Later:** zie _Alleen koppen laten zien dat je ze al hebt geopend_ (24 oktober 2026): de kleur voor bezocht staat hier voor elke link; nu geldt hij alleen voor de koppen.
+  Zie ook _De acht voorlopige kleuren blijven en heten niet meer voorlopig_ (29 oktober 2026): de waarden zijn vastgelegd en niet meer voorlopig.
 
 ### Staal voor markeringen
 
@@ -2663,6 +2677,31 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het gewicht van de huidige link verbergen met een onzichtbare dikke kopie, zodat de rij niet verspringt (extra opmaak bij elke link, en de site laadt bij elke klik toch een nieuwe pagina).
 - **Later:** vervangt delen van vier eerdere besluiten; zie de **Later:**-regels bij _Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500_, _Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter_, _De balk met links naar de kaarten volgt de pagina_ en _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_.
 
+### De acht voorlopige kleuren blijven en heten niet meer voorlopig
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kleuren die in Storybook _voorlopig_ heetten, blijven zoals ze zijn.
+  Het label en de code ervoor zijn weg uit `ColourDocs.tsx`, `tokens.ts`, `docs.css` en `colour.mdx`.
+  De tabel met contrast in Storybook meet nu ook de rand van een invoerveld op de drie andere vlakken en de gevulde knop, ook onder de muis, op een vlak en op de pagina.
+  Verhalen in licht en donker laten de kleuren zien: de knop onder de muis, de toestanden van een link, een tabel met zebrarijen en een rij onder de muis, een invoerveld, en de kop van een nieuwsbericht en de titel van een discussie, bezocht en onder de muis.
+  Lopende tekst haalt AAA (7:1), andere tekst AA (4,5:1) en wat je moet kunnen zien 3:1.
+  Het contrast is nagemeten op alle vlakken waar de kleur voorkomt, in licht en donker:
+  - knop in donker (blauw-300): de tekst erop (blauw-950) haalt 9,13:1, en de knop haalt 7,90:1 op een vlak en 9,13:1 op de pagina;
+  - knop onder de muis: wit op blauw-900 haalt 15,75:1 in licht, en blauw-950 op blauw-200 haalt 12,30:1 in donker;
+  - rij onder de muis in donker (blauw-950): lopende tekst haalt 17,17:1, een link 9,13:1;
+  - zebrarijen in donker (blauw-950): lopende tekst haalt 17,17:1, secundaire tekst en een positie 12,30:1;
+  - link onder de muis in donker (blauw-200): 10,64:1 op een vlak en 8,38:1 op een sterk of warm vlak;
+  - bezochte link: grijs-600 in licht haalt 5,30:1 tot 6,44:1 en grijs-400 in donker 4,89:1 tot 7,18:1, op elk vlak waar een kop of titel staat;
+  - rand van een invoerveld: grijs-500 in licht haalt 3,46:1 tot 4,20:1 en blauw-400 in donker 4,16:1 tot 6,10:1, op de pagina en de vier vlakken.
+- **Waarom:** elke kleur haalt zijn eis, dus er is geen reden om hem te veranderen.
+  Zo blijft wat bezoekers zien gelijk.
+- **Nadeel:** in licht en in donker zijn de rij onder de muis en de zebrarij dezelfde kleur, en geen tabel of component gebruikt ze nog.
+  Een zebrarij verandert dus niet onder de muis.
+  Wie zebrarijen gaat bouwen, besluit dan of ze een eigen kleur krijgen.
+- **Alternatieven:** per kleur een andere stap uit de reeks.
+  Elke kleur haalt zijn eis, dus daar was geen reden voor.
+- **Later:** vervangt _Voorlopige kleurtokens_ (20 oktober 2026): de waarden zijn vastgelegd.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -3868,6 +3907,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het `details` zelf in de rij zetten met `::details-content { display: contents }` en geen tweede exemplaar (één keer in de HTML, maar de lijst en de rij hebben dan dezelfde nesting en de techniek is nog jong).
   Een instelling die het aantal bepaalt, zoals `moreFrom={6}` (het issue wil dat het onderdeel zelf kiest).
   Een tweede getal voor het aantal onderdelen in de rij: het is er één, het eerste.
+
+### Uitersten staan als vijf regels in een lijst, en bij gelijke stand telt de laatste wedstrijd
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart "Uitersten" op `/wedstrijden` toont de grootste overwinning, de grootste nederlaag, de wedstrijd met de meeste doelpunten, ons vroegste en ons laatste doelpunt van de Eredivisie.
+  Bij een gelijke stand kiest hij de laatst gespeelde wedstrijd.
+  Een regel zonder wedstrijd ontbreekt, en de kaart zegt niet "geen".
+  De eerste drie regels tellen elke gespeelde wedstrijd van de Eredivisie, de laatste twee alleen de wedstrijden met bekende doelpunten (zoals `goalsPerQuarter`), zonder verlenging en zonder minuut 0.
+  Een doelpunt in de blessuretijd telt met die tijd erbij: 45+2 komt na minuut 46.
+  De kaart volgt verder de regels uit _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_.
+- **Waarom:** het zijn wedstrijden die supporters onthouden, en de gegevens zijn er al.
+  Eén wedstrijd per regel houdt de kaart kort.
+  De laatste wedstrijd is de nieuwste, dus de kaart verandert als er iets nieuws gebeurt.
+- **Vlak en plaats:** de kaart staat als laatste in de zijbalk, met een zacht vlak (`surface="soft"`), want de kaart ervoor, Doelpunten per kwartier, is warm.
+  De balk "Op deze pagina:" heeft een link "Uitersten" naar `#uitersten`, als laatste.
+- **Vorm:** elke regel is een `ShortMatch` met de naam van de regel eronder in kleine letters (`hf-meta`), bij een doelpunt met de minuut en de speler erbij.
+  De naam staat niet erboven, omdat `ShortMatch` in een lijst een lijn boven zichzelf tekent: een naam erboven zou van die lijn een streep onder de naam maken in plaats van tussen de regels.
+  De naam erboven vraagt een wijziging in het designsysteem, en het issue vraagt er geen.
+- **Alternatieven:** alle wedstrijden met hetzelfde verschil tonen (de kaart wordt lang).
+  De doelpunten van de tegenstander ook (dubbel zoveel regels, minder interessant).
+  De naam boven de wedstrijd (zie Vorm).
 
 ## Importer
 
@@ -6420,6 +6480,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Er staat nu een kaart tussen Stand en Doelpuntenmakers, en op een telefoon is de volgorde Programma, Uitslagen, Stand, Verloop van het seizoen, Doelpuntenmakers, De nul gehouden en Doelpunten per kwartier.
 - **Later:** zie _Reeksen staan in een eigen kaart na Verloop van het seizoen_.
   Op een telefoon staat Reeksen nu tussen Verloop van het seizoen en Doelpuntenmakers, in het zachte vlak.
+- **Later:** zie _Thuis en uit staan naast elkaar in een tabel, met een kolom Totaal_.
+  Thuis en uit staat nu na Reeksen en voor Doelpuntenmakers, in het warme vlak.
 
 ### Het verloop van het seizoen staat onder de stand, in een warme kaart
 
@@ -6430,6 +6492,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een warm vlak onder de zachte stand scheidt de twee.
   De Eredivisie heeft 34 wedstrijden die de grafiek vullen, een beker niet.
 - **Alternatieven:** boven Doelpunten per kwartier in het zachte vlak (twee warme kaarten bij elkaar); op de homepage (de prioriteiten zijn daar anders); de bekerwedstrijden erbij (de plekken zijn dan niet meer de 34 van het seizoen).
+- **Later:** zie _De plek in de competitie komt uit de stand, in punten per wedstrijd, zonder grenslijnen_.
+  Er staat nu een kaart tussen Stand en Verloop van het seizoen: Onze plek in de competitie.
 
 ### De staafjes staan op volgorde van speeldatum, niet van speelronde
 
@@ -6439,6 +6503,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de component krijgt een lijst van gespeelde uitslagen en tekent ze naast elkaar.
   De lijn is het gemiddelde over de laatste vijf wedstrijden die gespeeld zijn, en dat volgt de volgorde van het spelen.
 - **Alternatieven:** een lege plek op de plaats van de speelronde van een uitgestelde wedstrijd (vraagt een lijst met gaten in de component en laat de lijn een gat zien).
+
+### De plek in de competitie komt uit de stand, in punten per wedstrijd, zonder grenslijnen
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart "Onze plek in de competitie" staat direct na de stand en geeft de plaats van sc Heerenveen in vijf onderdelen, met gedeelde plaatsen als "gedeeld".
+  De vijf onderdelen zijn punten per wedstrijd, gewonnen wedstrijden, doelpunten voor (de beste aanval), doelpunten tegen (de beste verdediging, minder is beter) en doelsaldo.
+  De punten achter de koploper en voor op de laatste staan in een zin.
+  Er zijn geen lijnen voor Europa of degradatie.
+  De kaart volgt de regels van _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397).
+- **Waarom:** de stand heeft de gegevens, dus de import verandert niet.
+  Punten per wedstrijd vergelijkt clubs die niet evenveel hebben gespeeld.
+  De lijnen voor Europa en degradatie veranderen per seizoen en zijn een mening over wat er komt.
+- **Hoe:** `leaguePlaceOf` in `apps/site/src/matches.ts` rekent de plaatsen uit.
+  Twee clubs zijn gelijk op punten per wedstrijd als hun punten en wedstrijden in dezelfde verhouding staan, zonder afronding.
+  Een club die nog niets heeft gespeeld telt niet mee, ook niet als koploper of laatste.
+  De koploper en de laatste zijn de clubs met de meeste en de minste punten, en de plaats in de stand beslist bij gelijke punten.
+  De link in de balk "Op deze pagina:" heet "Plek in de competitie": met "Onze plek in de competitie" past hij op een telefoon van 390 pixels niet tussen de twee vervagingen van de balk.
+  Het vlak van de kaart is wit: Stand heeft het zachte vlak en Verloop van het seizoen het warme, dus een zacht of warm vlak had dezelfde kleur als een buurkaart.
+- **Alternatieven:** de plaatsen als extra kolommen in de stand (de stand wordt breed op een telefoon).
+  De lijnen wel tonen (de projecteigenaar wil nu geen voorspellingen, zie #418).
+  Een zacht of warm vlak (dezelfde kleur als een buurkaart).
 
 ### Tiptap is de teksteditor voor de artikelen van de redactie
 
@@ -6591,3 +6676,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hetzelfde bericht op meer plekken:** een bericht staat op elke plek met dezelfde kop, link, bronnaam en tijd.
   Schrijven twee bronnen over hetzelfde nieuws, dan zijn het twee berichten, die we niet samenvoegen.
   Zo noemt elk bericht zijn eigen bron (principe 4).
+
+### Thuis en uit staan naast elkaar in een tabel, met een kolom Totaal
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart "Thuis en uit" toont een tabel met drie kolommen, Thuis, Uit en Totaal, met de punten, de doelpunten en de punten per wedstrijd.
+  Alles komt uit de score van de gespeelde wedstrijden van de Eredivisie, volgens de regels van _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_.
+- **Waarom:** twee reeksen naast elkaar vragen een nieuw component, en een tabel is voor iedereen te lezen, ook zonder het oog.
+  De kolom Totaal laat zien dat de kaart klopt met Verloop van het seizoen.
+- **Hoe:** de kaart staat direct na Reeksen, in het warme vlak, zodat de buurkaarten niet dezelfde kleur hebben.
+  Een kant zonder gespeelde wedstrijd toont een streepje bij de gemiddelden en 0 bij de tellingen.
+  De rij met de wedstrijden zonder tegendoelpunt heet "Zonder tegendoelpunt", zodat ze niet lijkt op de kaart De nul gehouden, die ook de beker telt.
+- **Alternatieven:** een grafiek met twee staven per onderdeel (een nieuw component voor één kaart).
+  Alleen de punten tonen (de doelpunten zeggen veel over de manier van spelen).

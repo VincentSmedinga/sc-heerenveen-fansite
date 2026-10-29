@@ -42,7 +42,7 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden', () => {
-  it('has one h1 and eight h2 headings in order: the programme, the results, the table, the season, the streaks, the goal scorers, the clean sheets and the goals per quarter', async () => {
+  it('has one h1 and eleven h2 headings in order: the programme, the results, the table, our place in the league, the season, the streaks, home and away, the goal scorers, the clean sheets, the goals per quarter and the extremes', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
@@ -50,11 +50,14 @@ describe('the page /wedstrijden', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#programma">Programma</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen">Uitslagen</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#stand">Stand</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="onze-plek-in-de-competitie"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#onze-plek-in-de-competitie">Onze plek in de competitie</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="verloop-van-het-seizoen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#verloop-van-het-seizoen">Verloop van het seizoen</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="reeksen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#reeksen">Reeksen</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="thuis-en-uit"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#thuis-en-uit">Thuis en uit</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="de-nul-gehouden"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="nul-gehouden"></span><a class="hf-heading-link" href="#de-nul-gehouden">De nul gehouden</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpunten-per-kwartier"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartier</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="uitersten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitersten">Uitersten</a></h2>',
     ])
   })
 
@@ -65,7 +68,7 @@ describe('the page /wedstrijden', () => {
     expect(matchShortcuts.map((item) => item.href)).toEqual(ids)
   })
 
-  it('has the programme and the results in the main with the h1, and the table, the season, the streaks, the goal scorers, the clean sheets and the goals per quarter in a named, wide sidebar after it', async () => {
+  it('has the programme and the results in the main with the h1, and the table, our place in the league, the season, the streaks, home and away, the goal scorers, the clean sheets, the goals per quarter and the extremes in a named, wide sidebar after it', async () => {
     const html = await render()
     const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
     const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
@@ -82,13 +85,20 @@ describe('the page /wedstrijden', () => {
     expect(main).not.toContain('id="stand"')
     expect(main).not.toContain('id="verloop-van-het-seizoen"')
     expect(main).not.toContain('id="reeksen"')
+    expect(main).not.toContain('id="thuis-en-uit"')
     expect(main).not.toContain('id="doelpunten-per-kwartier"')
     expect(sidebar).not.toContain('id="uitslagen"')
-    expect(sidebar.indexOf('id="stand"')).toBeLessThan(sidebar.indexOf('id="verloop-van-het-seizoen"'))
+    expect(sidebar.indexOf('id="stand"')).toBeLessThan(sidebar.indexOf('id="onze-plek-in-de-competitie"'))
+    expect(sidebar.indexOf('id="onze-plek-in-de-competitie"')).toBeLessThan(
+      sidebar.indexOf('id="verloop-van-het-seizoen"'),
+    )
     expect(sidebar.indexOf('id="verloop-van-het-seizoen"')).toBeLessThan(sidebar.indexOf('id="reeksen"'))
-    expect(sidebar.indexOf('id="reeksen"')).toBeLessThan(sidebar.indexOf('id="doelpuntenmakers"'))
+    expect(sidebar.indexOf('id="reeksen"')).toBeLessThan(sidebar.indexOf('id="thuis-en-uit"'))
+    expect(sidebar.indexOf('id="thuis-en-uit"')).toBeLessThan(sidebar.indexOf('id="doelpuntenmakers"'))
     expect(sidebar.indexOf('id="doelpuntenmakers"')).toBeLessThan(sidebar.indexOf('id="de-nul-gehouden"'))
     expect(sidebar.indexOf('id="de-nul-gehouden"')).toBeLessThan(sidebar.indexOf('id="doelpunten-per-kwartier"'))
+    expect(sidebar.indexOf('id="doelpunten-per-kwartier"')).toBeLessThan(sidebar.indexOf('id="uitersten"'))
+    expect(main).not.toContain('id="uitersten"')
     expect(main).not.toContain('id="doelpuntenmakers"')
     expect(sidebar).not.toContain('<h1')
     expect(sidebar).not.toContain('id="programma"')
@@ -108,33 +118,39 @@ describe('the page /wedstrijden', () => {
       'doelpunten-per-kwartier',
       'uitslagen',
       'stand',
+      'onze-plek-in-de-competitie',
       'verloop-van-het-seizoen',
       'reeksen',
+      'thuis-en-uit',
       'doelpuntenmakers',
       'de-nul-gehouden',
+      'uitersten',
     ]) {
       expect(html).toMatch(new RegExp(`<section class="hf-card[ a-z-]*" aria-labelledby="${id}">`))
     }
   })
 
-  it('gives the programme and the results the white surface, the table, the streaks, the goal scorers and the clean sheets the soft one, and the season and the goals per quarter the warm one', async () => {
+  it('gives the programme, the results and our place in the league the white surface, the table, the streaks, the goal scorers, the clean sheets and the extremes the soft one, and the season, home and away and the goals per quarter the warm one', async () => {
     const html = await render()
 
     for (const [id, surface] of [
       ['programma', 'hf-card'],
       ['uitslagen', 'hf-card'],
       ['stand', 'hf-card hf-card-soft hf-card-shareable'],
+      ['onze-plek-in-de-competitie', 'hf-card hf-card-shareable'],
       ['doelpuntenmakers', 'hf-card hf-card-soft hf-card-shareable'],
       ['de-nul-gehouden', 'hf-card hf-card-soft hf-card-shareable'],
       ['verloop-van-het-seizoen', 'hf-card hf-card-warm hf-card-shareable'],
       ['reeksen', 'hf-card hf-card-soft hf-card-shareable'],
+      ['thuis-en-uit', 'hf-card hf-card-warm hf-card-shareable'],
       ['doelpunten-per-kwartier', 'hf-card hf-card-warm hf-card-shareable'],
+      ['uitersten', 'hf-card hf-card-soft hf-card-shareable'],
     ] as const) {
       expect(html).toContain(`<section class="${surface}" aria-labelledby="${id}">`)
     }
   })
 
-  it('lets the visitor make an image of the six cards with statistics, and of no other card', async () => {
+  it('lets the visitor make an image of the nine cards with statistics, and of no other card', async () => {
     const html = await render()
     const shareable = [...html.matchAll(/<section class="[^"]*hf-card-shareable[^"]*" aria-labelledby="([^"]+)"/g)].map(
       ([, id]) => id,
@@ -142,13 +158,16 @@ describe('the page /wedstrijden', () => {
 
     expect(shareable).toEqual([
       'stand',
+      'onze-plek-in-de-competitie',
       'verloop-van-het-seizoen',
       'reeksen',
+      'thuis-en-uit',
       'doelpuntenmakers',
       'de-nul-gehouden',
       'doelpunten-per-kwartier',
+      'uitersten',
     ])
-    expect(html.match(/data-hf-card-share/g)).toHaveLength(6)
+    expect(html.match(/data-hf-card-share/g)).toHaveLength(9)
     for (const id of ['programma', 'uitslagen']) {
       expect(html).toContain(`<section class="hf-card" aria-labelledby="${id}">`)
     }
@@ -487,11 +506,13 @@ describe('the page /wedstrijden', () => {
         ([, result, matches, points]) => [result, matches, points],
       )
 
-    it('is a card in the sidebar directly under the table, before the goal scorers', async () => {
+    it('is a card in the sidebar directly under our place in the league, before the goal scorers', async () => {
       const html = await render()
       const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
 
-      expect(sidebar.indexOf('id="stand"')).toBeLessThan(sidebar.indexOf('id="verloop-van-het-seizoen"'))
+      expect(sidebar.indexOf('id="onze-plek-in-de-competitie"')).toBeLessThan(
+        sidebar.indexOf('id="verloop-van-het-seizoen"'),
+      )
       expect(sidebar.indexOf('id="verloop-van-het-seizoen"')).toBeLessThan(sidebar.indexOf('id="doelpuntenmakers"'))
       expect(html.match(/<section[^>]*aria-labelledby="verloop-van-het-seizoen"/g)).toHaveLength(1)
     })
@@ -741,6 +762,112 @@ describe('the page /wedstrijden', () => {
     })
   })
 
+  describe('home and away', () => {
+    // The test data has three played matches of the Eredivisie: two at home (3-1 and 2-0) and
+    // one away (2-2), and a played cup tie away, which doesn't count.
+    const rows = (card: string) =>
+      [
+        ...card.matchAll(
+          /<tr><th scope="row">([^<]*)<\/th><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><\/tr>/g,
+        ),
+      ].map(([, header, home, away, total]) => [header, home, away, total])
+
+    it('is a card in the sidebar directly after the streaks, before the goal scorers', async () => {
+      const html = await render()
+      const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
+
+      expect(sidebar.indexOf('id="reeksen"')).toBeLessThan(sidebar.indexOf('id="thuis-en-uit"'))
+      expect(sidebar.indexOf('id="thuis-en-uit"')).toBeLessThan(sidebar.indexOf('id="doelpuntenmakers"'))
+      expect(html.match(/<section[^>]*aria-labelledby="thuis-en-uit"/g)).toHaveLength(1)
+    })
+
+    it('shows a table with the columns home, away and total, and a caption for a screen reader, and no chart', async () => {
+      const card = section(await render(), 'thuis-en-uit')
+
+      expect(card.match(/<table/g)).toHaveLength(1)
+      expect(card).toContain(
+        '<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen thuis en uit dit seizoen</caption>',
+      )
+      expect(card).toContain(
+        '<th class="hf-numeric" scope="col">Thuis</th><th class="hf-numeric" scope="col">Uit</th><th class="hf-numeric" scope="col">Totaal</th>',
+      )
+      expect(card).not.toContain('hf-donut-chart')
+      expect(card).not.toContain('hf-form-chart')
+    })
+
+    it('counts the played matches of the Eredivisie, with a comma and two digits for an average', async () => {
+      expect(rows(section(await render(), 'thuis-en-uit'))).toEqual([
+        ['Gespeeld', '2', '1', '3'],
+        ['Gewonnen', '2', '0', '2'],
+        ['Gelijk', '0', '1', '1'],
+        ['Verloren', '0', '0', '0'],
+        ['Punten', '6', '1', '7'],
+        ['Punten per wedstrijd', '3,00', '1,00', '2,33'],
+        ['Doelpunten voor', '5', '2', '7'],
+        ['Doelpunten tegen', '1', '2', '3'],
+        ['Doelpunten per wedstrijd', '2,50', '2,00', '2,33'],
+        ['Zonder tegendoelpunt', '1', '0', '1'],
+      ])
+    })
+
+    it('has a total that agrees with the table of the season', async () => {
+      const html = await render()
+      const season = [
+        ...section(html, 'verloop-van-het-seizoen').matchAll(
+          /<th scope="row">Totaal<\/th><td[^>]*>(\d+)<\/td><td[^>]*>(\d+)<\/td>/g,
+        ),
+      ][0]
+      const total = rows(section(html, 'thuis-en-uit'))
+
+      expect(total.find(([header]) => header === 'Gespeeld')?.[3]).toBe(season?.[1])
+      expect(total.find(([header]) => header === 'Punten')?.[3]).toBe(season?.[2])
+    })
+
+    it('says on how many matches it is based on', async () => {
+      expect(section(await render(), 'thuis-en-uit')).toContain('Gebaseerd op alle 3 gespeelde wedstrijden')
+    })
+
+    it('shows a dash for an average and a 0 for a count on a side with no match yet, and says one match in the singular', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.filter((match) => match.round === 'Speelronde 7'),
+      })
+
+      const card = section(await render(), 'thuis-en-uit')
+
+      expect(rows(card)).toEqual([
+        ['Gespeeld', '1', '0', '1'],
+        ['Gewonnen', '1', '0', '1'],
+        ['Gelijk', '0', '0', '0'],
+        ['Verloren', '0', '0', '0'],
+        ['Punten', '3', '0', '3'],
+        ['Punten per wedstrijd', '3,00', '–', '3,00'],
+        ['Doelpunten voor', '3', '0', '3'],
+        ['Doelpunten tegen', '1', '0', '1'],
+        ['Doelpunten per wedstrijd', '3,00', '–', '3,00'],
+        ['Zonder tegendoelpunt', '0', '0', '0'],
+      ])
+      expect(card).toContain('Gebaseerd op 1 gespeelde wedstrijd<')
+    })
+
+    it('says so in a sentence, with no table, when no match is played', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+      const card = section(await render(), 'thuis-en-uit')
+
+      expect(card).toContain('We hebben nog geen uitslagen van dit seizoen.')
+      expect(card).not.toContain('<table')
+      expect(card).not.toContain('Gebaseerd op')
+    })
+
+    it('is gone, with no card, when the database can not be read', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      vi.mocked(getMatchData).mockRejectedValue(new Error('down'))
+
+      expect(await render()).not.toContain('thuis-en-uit')
+    })
+  })
+
   describe('the goals per quarter', () => {
     // The test data has two played matches with goals: round 8 (34' and 45+1' ours) and round 9
     // (12' theirs, 40' and 63' ours, 90+3' theirs). The other two have a score and no goals.
@@ -852,6 +979,254 @@ describe('the page /wedstrijden', () => {
       vi.mocked(getMatchData).mockRejectedValue(new Error('down'))
 
       expect(await render()).not.toContain('doelpunten-per-kwartier')
+    })
+  })
+
+  describe('the extremes', () => {
+    // The test data has three played matches of the Eredivisie: round 7 (3–1, no goals known),
+    // round 8 (2–0, at home against Testdorp FC, goals in 34' and 45+1') and round 9 (2–2 away
+    // against Voorbeeld United, our goals in 40' and 63'). The cup tie doesn't count.
+    const lines = (card: string) =>
+      [...card.matchAll(/<li[^>]*>(.*?)<\/li>/gs)].map(([, line]) =>
+        (line ?? '')
+          .replaceAll(/<[^>]*>/g, ' ')
+          .replaceAll(/\s+/g, ' ')
+          .trim(),
+      )
+
+    it('is a card with a list of lines, each with a short match and under it a name and, for a goal, the minute and the player', async () => {
+      const card = section(await render(), 'uitersten')
+
+      expect(card.match(/<ul[^>]*role="list"/g)).toHaveLength(1)
+      expect(card.match(/class="hf-short-match"/g)).toHaveLength(4)
+      expect(lines(card)).toEqual([
+        expect.stringMatching(/Testdorp FC.* thuis 2–0 2 tegen 0 Grootste overwinning$/),
+        expect.stringMatching(/Voorbeeld United.* uit 2–2 2 tegen 2 Meeste doelpunten$/),
+        expect.stringMatching(/Testdorp FC · thuis 2–0 2 tegen 0 Vroegste doelpunt, minuut 34: Proefman$/),
+        expect.stringMatching(/Voorbeeld United · uit 2–2 2 tegen 2 Laatste doelpunt, minuut 63: Kopie$/),
+      ])
+    })
+
+    it('leaves out a line without a match, such as the biggest loss in a season without a loss, and does not say so', async () => {
+      const card = section(await render(), 'uitersten')
+
+      expect(card).not.toContain('Grootste nederlaag')
+      expect(card).not.toMatch(/geen/i)
+    })
+
+    it('shows the biggest loss and the stoppage time of a goal when there are some', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((match) =>
+          match.round === 'Speelronde 7'
+            ? {
+                ...match,
+                goals: [
+                  {
+                    minute: 90,
+                    ours: true,
+                    ownGoal: true,
+                    penalty: false,
+                    player: 'Teststraat',
+                    playerId: null,
+                    playerName: null,
+                    playerSearchTerm: null,
+                    stoppageMinutes: 4,
+                  },
+                ],
+                goalsAgainst: 5,
+                goalsFor: 1,
+              }
+            : match,
+        ),
+      })
+
+      const card = section(await render(), 'uitersten')
+
+      expect(lines(card)).toEqual([
+        expect.stringMatching(/Testdorp FC.*Grootste overwinning$/),
+        expect.stringMatching(/Oud Resultaat.* thuis 1–5 1 tegen 5 Grootste nederlaag$/),
+        expect.stringMatching(/Oud Resultaat.*Meeste doelpunten$/),
+        expect.stringMatching(/Vroegste doelpunt, minuut 34: Proefman$/),
+        expect.stringMatching(/Oud Resultaat.*Laatste doelpunt, minuut 90\+4: Teststraat \(eigen doelpunt\)$/),
+      ])
+    })
+
+    it('says what it is based on: every played match for the score, and the matches with goals for the two goals', async () => {
+      const card = section(await render(), 'uitersten')
+
+      expect(card).toContain('<p class="hf-meta">Gebaseerd op alle 3 gespeelde wedstrijden</p>')
+      expect(card).toContain(
+        '<p class="hf-meta">Het vroegste en het laatste doelpunt zijn gebaseerd op de doelpunten van 2 van de 3 gespeelde wedstrijden</p>',
+      )
+    })
+
+    it('says one line when every played match has its goals, and one match in the singular', async () => {
+      const withGoals = matchData.matches.filter((match) => match.goals.length > 0)
+
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: withGoals })
+
+      const all = section(await render(), 'uitersten')
+
+      expect(all).toContain('Gebaseerd op alle 2 gespeelde wedstrijden')
+      expect(all).not.toContain('Het vroegste en het laatste doelpunt')
+
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: withGoals.slice(0, 1) })
+
+      const one = section(await render(), 'uitersten')
+
+      expect(one).toContain('Gebaseerd op 1 gespeelde wedstrijd<')
+      expect(lines(one)).toHaveLength(4)
+      expect(lines(one).join(' ')).not.toContain('nederlaag')
+    })
+
+    it('keeps the three lines of the score and leaves out the two goals when no match has its goals', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((match) => ({ ...match, goals: [] })),
+      })
+
+      const card = section(await render(), 'uitersten')
+
+      expect(lines(card)).toEqual([
+        expect.stringContaining('Grootste overwinning'),
+        expect.stringContaining('Meeste doelpunten'),
+      ])
+      expect(card).not.toContain('Het vroegste en het laatste doelpunt')
+      expect(card).toContain('Gebaseerd op alle 3 gespeelde wedstrijden')
+    })
+
+    it('says so in a sentence, with no list, when there is no played match of the Eredivisie', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.filter((match) => match.competition === 'KNVB Beker' || match.status !== 'played'),
+      })
+
+      const card = section(await render(), 'uitersten')
+
+      expect(card).toContain('We hebben nog geen uitslagen van dit seizoen.')
+      expect(card).not.toContain('<ul')
+      expect(card).not.toContain('Gebaseerd op')
+      expect(card).not.toContain('hf-card-shareable')
+    })
+
+    it('says so in a sentence for a season without matches', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+      expect(section(await render(), 'uitersten')).toContain('We hebben nog geen uitslagen van dit seizoen.')
+    })
+
+    it('is gone, with no card, when the database can not be read', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      vi.mocked(getMatchData).mockRejectedValue(new Error('down'))
+
+      expect(await render()).not.toContain('uitersten')
+    })
+  })
+
+  describe('our place in the league', () => {
+    const card = async () => section(await render(), 'onze-plek-in-de-competitie')
+    const rows = (html: string) =>
+      [...html.matchAll(/<tr><th scope="row">([^<]*)<\/th><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><\/tr>/g)].map(
+        ([, measure, place, value]) => [measure, place, value],
+      )
+    const withStandings = (standings: typeof matchData.standings) =>
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, standings })
+    const club = (position: number, name: string, played: number, points: number) => ({
+      ...matchData.standings[0]!,
+      club: name,
+      played,
+      points,
+      position,
+    })
+
+    it('has a table with a caption for a screen reader, the columns place and value, and a row for each of the five measures', async () => {
+      const html = await card()
+
+      expect(html).toContain(
+        '<caption class="hf-visually-hidden">De plek van sc Heerenveen in de Eredivisie, per onderdeel</caption>',
+      )
+      expect([...html.matchAll(/<th[^>]*scope="col"[^>]*>([^<]*)<\/th>/g)].map((match) => match[1])).toEqual([
+        'Onderdeel',
+        'Plaats',
+        'Waarde',
+      ])
+      expect(rows(html)).toEqual([
+        ['Punten per wedstrijd', '1e', '3,00'],
+        ['Gewonnen wedstrijden', '1e', '2'],
+        ['Beste aanval, doelpunten voor', '2e', '3'],
+        ['Beste verdediging, doelpunten tegen', '1e', '0'],
+        ['Doelsaldo', '1e', '+3'],
+      ])
+    })
+
+    it('says a place is shared, with the points per match to two digits and a comma', async () => {
+      withStandings([club(1, 'Een', 3, 5), club(2, 'sc Heerenveen', 3, 5), club(3, 'Drie', 4, 7)])
+
+      expect(rows(await card())[0]).toEqual(['Punten per wedstrijd', 'gedeeld 2e', '1,67'])
+    })
+
+    it('says how many points sc Heerenveen is behind the leader and ahead of the last', async () => {
+      withStandings([club(1, 'Een', 3, 9), club(2, 'sc Heerenveen', 3, 5), club(3, 'Drie', 3, 1)])
+
+      const html = await card()
+
+      expect(html).toContain('sc Heerenveen staat 4 punten achter de koploper, Een.')
+      expect(html).toContain('sc Heerenveen staat 4 punten voor op de laatste, Drie.')
+    })
+
+    it('says sc Heerenveen is at the top, and is ahead of the last, when it leads', async () => {
+      const html = await card()
+
+      expect(html).toContain('sc Heerenveen staat bovenaan.')
+      expect(html).toContain('sc Heerenveen staat 5 punten voor op de laatste, Testdorp FC.')
+      expect(html).not.toContain('achter de koploper')
+    })
+
+    it('says sc Heerenveen is at the bottom when it is the last', async () => {
+      withStandings([club(1, 'Een', 3, 9), club(2, 'sc Heerenveen', 3, 1)])
+
+      const html = await card()
+
+      expect(html).toContain('sc Heerenveen staat 8 punten achter de koploper, Een.')
+      expect(html).toContain('sc Heerenveen staat onderaan.')
+    })
+
+    it('says what it is based on: the matches sc Heerenveen played, in the singular for one', async () => {
+      expect(await card()).toContain('Gebaseerd op de stand na 2 wedstrijden van sc Heerenveen')
+
+      withStandings([club(1, 'Een', 1, 3), club(2, 'sc Heerenveen', 1, 1), club(3, 'Drie', 0, 0)])
+
+      const html = await card()
+
+      expect(html).toContain('Gebaseerd op de stand na 1 wedstrijd van sc Heerenveen<')
+      expect(rows(html)).toHaveLength(5)
+      expect(html).toContain('sc Heerenveen staat 2 punten achter de koploper, Een.')
+      expect(html).toContain('sc Heerenveen staat onderaan.')
+    })
+
+    it('says there is no table yet, as the card with the table does, and gives no button for an image', async () => {
+      withStandings([])
+
+      const html = await render()
+
+      expect(section(html, 'onze-plek-in-de-competitie')).toContain(
+        'We hebben de stand nog niet gevonden. Kijk straks nog eens.',
+      )
+      expect(section(html, 'onze-plek-in-de-competitie')).not.toContain('<table')
+      expect(html).not.toMatch(
+        /<section class="[^"]*hf-card-shareable[^"]*" aria-labelledby="onze-plek-in-de-competitie"/,
+      )
+    })
+
+    it('says so when sc Heerenveen has played nothing yet, or is not in the table', async () => {
+      withStandings([club(1, 'Een', 1, 3), { ...club(2, 'sc Heerenveen', 0, 0) }])
+
+      expect(await card()).toContain('We hebben de plek van sc Heerenveen in de stand nog niet. Kijk straks nog eens.')
+
+      withStandings([club(1, 'Een', 1, 3)])
+
+      expect(await card()).toContain('We hebben de plek van sc Heerenveen in de stand nog niet.')
     })
   })
 

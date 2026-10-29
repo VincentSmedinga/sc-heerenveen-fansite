@@ -189,6 +189,27 @@ export function streaksOf(matches: PublicMatch[]): Streaks {
  */
 export const quarterLabels = ['1–15', '16–30', '31–45', '46–60', '61–75', '76–90'] as const
 
+/** A goal of sc Heerenveen and the match it was scored in. */
+export type ExtremeGoal = { goal: ScorerGoal; match: PublicMatch }
+
+/** The matches and the goals people remember of a season, and what they are based on. */
+export type Extremes = {
+  /** The match with the biggest loss, or undefined without a loss. */
+  biggestLoss: PublicMatch | undefined
+  /** The match with the biggest win, or undefined without a win. */
+  biggestWin: PublicMatch | undefined
+  /** Our earliest goal, with the stoppage time added to the minute. */
+  earliestGoal: ExtremeGoal | undefined
+  /** The played matches whose goals are known, so the ones the two goals come from. */
+  known: number
+  /** Our last goal, up to and with the stoppage time of minute 90. */
+  latestGoal: ExtremeGoal | undefined
+  /** The match with the most goals of both clubs together. */
+  mostGoals: PublicMatch | undefined
+  /** The played matches of the Eredivisie, with a score. */
+  played: number
+}
+
 /** The goals of a season per quarter of an hour, and the matches the count is based on. */
 export type GoalsPerQuarter = {
   /** The goals against, in the order of `quarterLabels`. */
@@ -203,8 +224,108 @@ export type GoalsPerQuarter = {
   scored: number[]
 }
 
+export type HomeAway = {
+  away: HomeAwayTally
+  home: HomeAwayTally
+  /** The home and away matches together, which is what the card of the season counts. */
+  total: HomeAwayTally
+}
+
+/** What sc Heerenveen did at home, away or in both, in the played matches of the Eredivisie. */
+export type HomeAwayTally = {
+  /** The matches with no goal against. */
+  cleanSheets: number
+  drawn: number
+  goalsAgainst: number
+  goalsFor: number
+  /** The goals scored per match, or undefined when there is no match. */
+  goalsPerMatch: number | undefined
+  lost: number
+  played: number
+  /** The points: 3 for a win and 1 for a draw. */
+  points: number
+  /** The points per match, or undefined when there is no match. */
+  pointsPerMatch: number | undefined
+  won: number
+}
+
+/** The five things the card of our place in the league ranks sc Heerenveen on. */
+export type LeagueMeasure = 'goalDifference' | 'goalsAgainst' | 'goalsFor' | 'pointsPerMatch' | 'won'
+
+/** The place of sc Heerenveen on one measure. */
+export type LeagueMeasurePlace = {
+  measure: LeagueMeasure
+  /** The place, from 1. Clubs with the same value share it. */
+  place: number
+  /** Whether another club has the same value, so the place is shared. */
+  shared: boolean
+  /** The value of sc Heerenveen: the points per match, or the number of matches or goals. */
+  value: number
+}
+
+/** A club of the table next to sc Heerenveen: the leader or the last. */
+export type LeagueNeighbour = {
+  club: string
+  /** The points sc Heerenveen is behind the leader, or ahead of the last: 0 when level. */
+  points: number
+}
+
+/** Our place in the league on five measures, and the points to the leader and the last. */
+export type LeaguePlace = {
+  /** The last, or undefined when sc Heerenveen is the last or the only club that played. */
+  last: LeagueNeighbour | undefined
+  /** The leader, or undefined when sc Heerenveen is the leader or the only club that played. */
+  leader: LeagueNeighbour | undefined
+  /** In the order of the card. */
+  measures: LeagueMeasurePlace[]
+  /** The matches sc Heerenveen played, which the card says it is based on. */
+  played: number
+}
+
 /** A goal as the line of the scorers of a match shows it. */
 export type ScorerGoal = PublicMatch['goals'][number]
+
+/**
+ * The extremes of the Eredivisie this season, from the played matches with a score: the biggest
+ * win (the biggest difference in our favour), the biggest loss, and the match with the most
+ * goals. They come from the score and so count every played match. Our earliest and our last
+ * goal come from the goals, so they count only the matches whose goals are known, as
+ * `goalsPerQuarter` does, and leave out a goal in extra time and one without a minute (0). An
+ * own goal of an opponent is a goal of ours, because `ours` says who profits. When two matches
+ * are level, the one played last wins, as the matches are in the order they were played; of two
+ * goals at the same minute, the later one in the list. A win needs a difference in our favour,
+ * and a loss one against us, so a season of draws has neither. The cup is left out.
+ */
+export function extremesOf(matches: PublicMatch[]): Extremes {
+  const played = matches.filter(
+    (match) =>
+      match.competition === 'Eredivisie' &&
+      match.status === 'played' &&
+      match.goalsFor !== null &&
+      match.goalsAgainst !== null,
+  )
+  const known = played.filter(hasKnownGoals)
+  const difference = (match: PublicMatch) => (match.goalsFor ?? 0) - (match.goalsAgainst ?? 0)
+  const total = (match: PublicMatch) => (match.goalsFor ?? 0) + (match.goalsAgainst ?? 0)
+  const goals = known.flatMap((match) =>
+    match.goals
+      .filter((goal) => goal.ours && goal.minute >= 1 && goal.minute <= 90)
+      .map((goal): ExtremeGoal => ({ goal, match })),
+  )
+  const minuteOf = ({ goal }: ExtremeGoal) => goal.minute + (goal.stoppageMinutes ?? 0)
+  const biggestWin = best(played, difference)
+  const biggestLoss = best(played, (match) => -difference(match))
+
+  return {
+    biggestLoss: biggestLoss !== undefined && difference(biggestLoss) < 0 ? biggestLoss : undefined,
+    biggestWin: biggestWin !== undefined && difference(biggestWin) > 0 ? biggestWin : undefined,
+    earliestGoal: best(goals, (item) => -minuteOf(item)),
+    known: known.length,
+    latestGoal: best(goals, minuteOf),
+    mostGoals: best(played, total),
+    played: played.length,
+  }
+}
 
 /**
  * The goals of sc Heerenveen and of its opponents per quarter of an hour, in the played matches
@@ -218,12 +339,7 @@ export type ScorerGoal = PublicMatch['goals'][number]
  */
 export function goalsPerQuarter(matches: PublicMatch[]): GoalsPerQuarter {
   const played = matches.filter((match) => match.status === 'played')
-  const known = played.filter(
-    (match) =>
-      match.goalsFor !== null &&
-      match.goalsAgainst !== null &&
-      (match.goals.length > 0 || match.goalsFor + match.goalsAgainst === 0),
-  )
+  const known = played.filter(hasKnownGoals)
   const scored = quarterLabels.map(() => 0)
   const conceded = quarterLabels.map(() => 0)
 
@@ -282,6 +398,107 @@ export function goalsWithInitials(goals: ScorerGoal[]): ScorerGoal[] {
 
     return { ...goal, player: sharesInitial ? `${given} ${goal.player}` : `${initial}. ${goal.player}` }
   })
+}
+
+/**
+ * The played matches of the Eredivisie with a score, counted for home, away and both. Every
+ * number comes from the score, not from the goals per player, so each played match counts. A
+ * cup tie, a match that isn't played and a match with no score count for nothing. The points
+ * are those of the card of the season: 3 for a win, 1 for a draw.
+ */
+export function homeAwayOf(matches: PublicMatch[]): HomeAway {
+  const played = matches.filter(
+    (match) =>
+      match.competition === 'Eredivisie' &&
+      match.status === 'played' &&
+      match.goalsFor !== null &&
+      match.goalsAgainst !== null,
+  )
+  const tally = (selection: PublicMatch[]): HomeAwayTally => {
+    const won = selection.filter((match) => (match.goalsFor ?? 0) > (match.goalsAgainst ?? 0)).length
+    const drawn = selection.filter((match) => match.goalsFor === match.goalsAgainst).length
+    const goalsFor = selection.reduce((sum, match) => sum + (match.goalsFor ?? 0), 0)
+    const points = won * 3 + drawn
+
+    return {
+      cleanSheets: selection.filter((match) => match.goalsAgainst === 0).length,
+      drawn,
+      goalsAgainst: selection.reduce((sum, match) => sum + (match.goalsAgainst ?? 0), 0),
+      goalsFor,
+      goalsPerMatch: selection.length === 0 ? undefined : goalsFor / selection.length,
+      lost: selection.length - won - drawn,
+      played: selection.length,
+      points,
+      pointsPerMatch: selection.length === 0 ? undefined : points / selection.length,
+      won,
+    }
+  }
+
+  return {
+    away: tally(played.filter((match) => !match.home)),
+    home: tally(played.filter((match) => match.home)),
+    total: tally(played),
+  }
+}
+
+/**
+ * Where sc Heerenveen stands among the clubs of the table on points per match, matches won,
+ * goals for (the best attack), goals against (the best defence, so fewer is better) and goal
+ * difference. Clubs have not all played the same number of matches, so the points are compared
+ * per match, and exactly: two clubs are level when their points and matches are in the same
+ * ratio. Clubs with the same value share the place and the next place is skipped (1, 2, 2, 4).
+ * A club that has played nothing counts for nothing, so it is neither a club to be ahead of nor
+ * the last. The leader and the last are the clubs with the most and the fewest points, and the
+ * place in the table decides between clubs with the same points, so the gap is never negative.
+ * Without sc Heerenveen in the table, or when it has played nothing, there is no place.
+ */
+export function leaguePlaceOf(rows: PublicStandingsRow[]): LeaguePlace | undefined {
+  const clubs = rows.filter((row) => row.played > 0)
+  const ours = clubs.find((row) => row.club === ourClub)
+
+  if (ours === undefined) {
+    return undefined
+  }
+
+  // Better is higher, except for the goals against. The points per match are compared as
+  // fractions (points × matches of the other), so there is no rounding to make clubs level.
+  const compare: Record<LeagueMeasure, (a: PublicStandingsRow, b: PublicStandingsRow) => number> = {
+    goalDifference: (a, b) => a.goalDifference - b.goalDifference,
+    goalsAgainst: (a, b) => b.goalsAgainst - a.goalsAgainst,
+    goalsFor: (a, b) => a.goalsFor - b.goalsFor,
+    pointsPerMatch: (a, b) => a.points * b.played - b.points * a.played,
+    won: (a, b) => a.won - b.won,
+  }
+  const values: Record<LeagueMeasure, number> = {
+    goalDifference: ours.goalDifference,
+    goalsAgainst: ours.goalsAgainst,
+    goalsFor: ours.goalsFor,
+    pointsPerMatch: ours.points / ours.played,
+    won: ours.won,
+  }
+  const measures = (['pointsPerMatch', 'won', 'goalsFor', 'goalsAgainst', 'goalDifference'] as const).map(
+    (measure): LeagueMeasurePlace => {
+      const others = clubs.filter((row) => row !== ours)
+
+      return {
+        measure,
+        place: 1 + others.filter((row) => compare[measure](row, ours) > 0).length,
+        shared: others.some((row) => compare[measure](row, ours) === 0),
+        value: values[measure],
+      }
+    },
+  )
+  const byPoints = [...clubs].sort((a, b) => b.points - a.points || a.position - b.position)
+  const leader = byPoints[0]
+  const last = byPoints.at(-1)
+
+  return {
+    last: last === undefined || last === ours ? undefined : { club: last.club, points: ours.points - last.points },
+    leader:
+      leader === undefined || leader === ours ? undefined : { club: leader.club, points: leader.points - ours.points },
+    measures,
+    played: ours.played,
+  }
 }
 
 /**
@@ -387,6 +604,27 @@ export function topScorersOf(matches: PublicMatch[]): TopScorer[] {
     ...scorer,
     position: sorted.findIndex((other) => other.goals === scorer.goals) + 1,
   }))
+}
+
+/** The item with the highest score, and the last of them when some are level. */
+function best<T>(items: T[], score: (item: T) => number): T | undefined {
+  return items.reduce<T | undefined>(
+    (top, item) => (top === undefined || score(item) >= score(top) ? item : top),
+    undefined,
+  )
+}
+
+/**
+ * Whether the goals of a played match are known: it has at least one, or it ended 0-0. A match
+ * with a score and no goals is one where the page named no scorers, or where they did not fit
+ * the result, and a match with no score has none to know.
+ */
+function hasKnownGoals(match: PublicMatch): boolean {
+  return (
+    match.goalsFor !== null &&
+    match.goalsAgainst !== null &&
+    (match.goals.length > 0 || match.goalsFor + match.goalsAgainst === 0)
+  )
 }
 
 /** What a goal counts for: the player it is linked to, or else the name the page shows. */

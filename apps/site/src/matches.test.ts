@@ -4,8 +4,11 @@ import { describe, expect, it } from 'vitest'
 
 import {
   cleanSheetsOf,
+  extremesOf,
   goalsPerQuarter,
   goalsWithInitials,
+  homeAwayOf,
+  leaguePlaceOf,
   leagueResultsOf,
   overviewOf,
   parseCleanSheetCount,
@@ -834,5 +837,448 @@ describe('goalsWithInitials', () => {
     ]
 
     expect(goalsWithInitials(goals)).toEqual(goals)
+  })
+})
+
+describe('extremesOf', () => {
+  /** A played match with this score, and these goals if it has any. */
+  const scored = (round: string, goalsFor: number, goalsAgainst: number, goals: Goal[] = []): PublicMatch => ({
+    ...match(round, 'played', `2026-08-${String(Number(round.replace(/\D/g, '')) + 8).padStart(2, '0')}`),
+    goals,
+    goalsAgainst,
+    goalsFor,
+  })
+  const rounds = (...list: (PublicMatch | undefined)[]) => list.map((item) => item?.round)
+
+  it('picks the biggest win, the biggest loss and the match with the most goals from the score', () => {
+    const matches = [
+      scored('Speelronde 1', 3, 0),
+      scored('Speelronde 2', 0, 2),
+      scored('Speelronde 3', 1, 5),
+      scored('Speelronde 4', 2, 1),
+    ]
+    const extremes = extremesOf(matches)
+
+    expect(extremes.biggestWin?.round).toBe('Speelronde 1')
+    expect(extremes.biggestLoss?.round).toBe('Speelronde 3')
+    expect(extremes.mostGoals?.round).toBe('Speelronde 3')
+    expect(extremes.played).toBe(4)
+  })
+
+  it('takes the match played last when two are level, in each of the three lines', () => {
+    const matches = [
+      scored('Speelronde 1', 3, 1),
+      scored('Speelronde 2', 0, 2),
+      scored('Speelronde 3', 2, 0),
+      scored('Speelronde 4', 1, 3),
+      scored('Speelronde 5', 1, 1),
+    ]
+    const extremes = extremesOf(matches)
+
+    expect(rounds(extremes.biggestWin, extremes.biggestLoss, extremes.mostGoals)).toEqual([
+      'Speelronde 3',
+      'Speelronde 4',
+      'Speelronde 4',
+    ])
+  })
+
+  it('has no win without a win and no loss without a loss, and a draw is neither', () => {
+    expect(rounds(extremesOf([scored('Speelronde 1', 0, 1), scored('Speelronde 2', 2, 2)]).biggestWin)).toEqual([
+      undefined,
+    ])
+    expect(rounds(extremesOf([scored('Speelronde 1', 1, 0), scored('Speelronde 2', 2, 2)]).biggestLoss)).toEqual([
+      undefined,
+    ])
+    expect(
+      rounds(
+        extremesOf([scored('Speelronde 1', 0, 0)]).biggestWin,
+        extremesOf([scored('Speelronde 1', 0, 0)]).biggestLoss,
+      ),
+    ).toEqual([undefined, undefined])
+  })
+
+  it('picks our earliest and our last goal, and counts the stoppage time in the minute', () => {
+    const matches = [
+      scored('Speelronde 1', 2, 0, [
+        goal('Proefman', { minute: 44 }),
+        goal('Nepper', { minute: 45, stoppageMinutes: 2 }),
+      ]),
+      scored('Speelronde 2', 1, 0, [goal('Kopie', { minute: 48 })]),
+    ]
+    const { earliestGoal, latestGoal } = extremesOf(matches)
+
+    expect([earliestGoal?.goal.player, earliestGoal?.match.round]).toEqual(['Proefman', 'Speelronde 1'])
+    expect([latestGoal?.goal.player, latestGoal?.match.round]).toEqual(['Kopie', 'Speelronde 2'])
+  })
+
+  it('counts a goal in the stoppage time of minute 90 as the last one, and 45+3 as later than 46', () => {
+    const matches = [
+      scored('Speelronde 1', 2, 0, [
+        goal('Proefman', { minute: 90 }),
+        goal('Nepper', { minute: 90, stoppageMinutes: 4 }),
+      ]),
+      scored('Speelronde 2', 2, 0, [
+        goal('Kopie', { minute: 46 }),
+        goal('Proefman', { minute: 45, stoppageMinutes: 3 }),
+      ]),
+    ]
+
+    expect(extremesOf(matches).latestGoal?.goal.player).toBe('Nepper')
+    expect(extremesOf(matches.slice(1)).latestGoal?.goal.player).toBe('Proefman')
+  })
+
+  it('takes the match played last when two goals are in the same minute', () => {
+    const matches = [
+      scored('Speelronde 1', 1, 0, [goal('Proefman', { minute: 5 })]),
+      scored('Speelronde 2', 1, 0, [goal('Nepper', { minute: 5 })]),
+    ]
+
+    expect(extremesOf(matches).earliestGoal?.goal.player).toBe('Nepper')
+    expect(extremesOf(matches).latestGoal?.goal.player).toBe('Nepper')
+  })
+
+  it('leaves out the goals of the opponent, a goal in extra time and a goal in minute 0', () => {
+    const matches = [
+      scored('Speelronde 1', 2, 2, [
+        goal('Teststraat', { minute: 2, ours: false }),
+        goal('Proefman', { minute: 0 }),
+        goal('Nepper', { minute: 30 }),
+        goal('Kopie', { minute: 105 }),
+        goal('Teststraat', { minute: 80, ours: false }),
+      ]),
+    ]
+    const { earliestGoal, latestGoal } = extremesOf(matches)
+
+    expect([earliestGoal?.goal.player, latestGoal?.goal.player]).toEqual(['Nepper', 'Nepper'])
+  })
+
+  it('counts an own goal of the opponent as a goal of ours, with the sign that it is one', () => {
+    const matches = [scored('Speelronde 1', 1, 0, [goal('Teststraat', { minute: 3, ownGoal: true })])]
+
+    expect(extremesOf(matches).earliestGoal?.goal).toMatchObject({ ours: true, ownGoal: true, player: 'Teststraat' })
+  })
+
+  it('takes the goals only from matches whose goals are known, and says how many that are', () => {
+    const matches = [
+      scored('Speelronde 1', 4, 0),
+      scored('Speelronde 2', 0, 0),
+      scored('Speelronde 3', 1, 0, [goal('Proefman', { minute: 77 })]),
+    ]
+    const extremes = extremesOf(matches)
+
+    expect(extremes.known).toBe(2)
+    expect(extremes.played).toBe(3)
+    expect(extremes.biggestWin?.round).toBe('Speelronde 1')
+    expect(extremes.earliestGoal?.match.round).toBe('Speelronde 3')
+  })
+
+  it('keeps the three lines of the score and has no goal when no match has its goals', () => {
+    const extremes = extremesOf([scored('Speelronde 1', 2, 0), scored('Speelronde 2', 1, 3)])
+
+    expect(extremes).toMatchObject({ earliestGoal: undefined, known: 0, latestGoal: undefined, played: 2 })
+    expect(rounds(extremes.biggestWin, extremes.biggestLoss, extremes.mostGoals)).toEqual([
+      'Speelronde 1',
+      'Speelronde 2',
+      'Speelronde 2',
+    ])
+  })
+
+  it('leaves out a cup tie, a match that is not played and a match without a score', () => {
+    const matches = [
+      { ...scored('Tweede ronde', 9, 0, [goal('Proefman', { minute: 1 })]), competition: 'KNVB Beker' as const },
+      match('Speelronde 5', 'postponed', '2026-08-29'),
+      match('Speelronde 6', 'scheduled', '2026-09-05'),
+      { ...scored('Speelronde 1', 1, 0), goalsAgainst: null },
+    ]
+
+    expect(extremesOf(matches)).toEqual({
+      biggestLoss: undefined,
+      biggestWin: undefined,
+      earliestGoal: undefined,
+      known: 0,
+      latestGoal: undefined,
+      mostGoals: undefined,
+      played: 0,
+    })
+  })
+
+  it('has nothing for no matches', () => {
+    expect(extremesOf([])).toEqual({
+      biggestLoss: undefined,
+      biggestWin: undefined,
+      earliestGoal: undefined,
+      known: 0,
+      latestGoal: undefined,
+      mostGoals: undefined,
+      played: 0,
+    })
+  })
+
+  it('shows one match in every line it fits, and does not change the list it is given', () => {
+    const matches = [scored('Speelronde 1', 3, 1, [goal('Proefman', { minute: 20 })])]
+    const copy = structuredClone(matches)
+    const extremes = extremesOf(matches)
+
+    expect(rounds(extremes.biggestWin, extremes.mostGoals, extremes.earliestGoal?.match)).toEqual([
+      'Speelronde 1',
+      'Speelronde 1',
+      'Speelronde 1',
+    ])
+    expect(matches).toEqual(copy)
+  })
+})
+
+describe('leaguePlaceOf', () => {
+  const club = (
+    name: string,
+    position: number,
+    played: number,
+    points: number,
+    won: number,
+    goalsFor: number,
+    goalsAgainst: number,
+  ): PublicStandingsRow => ({
+    ...row(position, name),
+    drawn: points - won * 3,
+    goalDifference: goalsFor - goalsAgainst,
+    goalsAgainst,
+    goalsFor,
+    lost: played - won - (points - won * 3),
+    played,
+    points,
+    won,
+  })
+  const placeOf = (rows: PublicStandingsRow[], measure: string) =>
+    leaguePlaceOf(rows)?.measures.find((item) => item.measure === measure)
+
+  it('gives the five measures in the order of the card, with the matches played', () => {
+    const place = leaguePlaceOf([club('Een', 1, 4, 10, 3, 9, 3), club('sc Heerenveen', 2, 4, 7, 2, 6, 5)])
+
+    expect(place?.measures.map((item) => item.measure)).toEqual([
+      'pointsPerMatch',
+      'won',
+      'goalsFor',
+      'goalsAgainst',
+      'goalDifference',
+    ])
+    expect(place?.played).toBe(4)
+    expect(placeOf([club('sc Heerenveen', 1, 4, 7, 2, 6, 5)], 'pointsPerMatch')?.value).toBe(1.75)
+    expect(placeOf([club('sc Heerenveen', 1, 4, 7, 2, 6, 5)], 'goalDifference')?.value).toBe(1)
+  })
+
+  it('shares a place between clubs with the same value and skips the next one', () => {
+    const rows = [
+      club('Een', 1, 4, 9, 3, 8, 2),
+      club('Twee', 2, 4, 6, 2, 5, 4),
+      club('sc Heerenveen', 3, 4, 6, 2, 5, 5),
+      club('Vier', 4, 4, 5, 1, 3, 6),
+    ]
+
+    expect(placeOf(rows, 'won')).toMatchObject({ place: 2, shared: true })
+    expect(placeOf(rows, 'goalsFor')).toMatchObject({ place: 2, shared: true })
+    expect(placeOf(rows, 'goalDifference')).toMatchObject({ place: 3, shared: false })
+    expect(placeOf([...rows, club('Vijf', 5, 4, 6, 2, 5, 5)], 'won')).toMatchObject({ place: 2, shared: true })
+  })
+
+  it('ranks the best defence on the fewest goals against', () => {
+    const rows = [
+      club('Een', 1, 4, 9, 3, 8, 2),
+      club('sc Heerenveen', 2, 4, 6, 2, 5, 3),
+      club('Drie', 3, 4, 3, 1, 3, 9),
+    ]
+
+    expect(placeOf(rows, 'goalsAgainst')).toMatchObject({ place: 2, shared: false, value: 3 })
+    expect(placeOf(rows, 'goalsFor')).toMatchObject({ place: 2 })
+  })
+
+  it('compares points per match when the clubs played a different number of matches', () => {
+    // 6 points in 3 matches (2,00) beats 7 points in 4 (1,75), and 3 in 2 (1,50) is behind it.
+    const rows = [
+      club('Meer', 1, 4, 7, 2, 6, 3),
+      club('sc Heerenveen', 2, 3, 6, 2, 5, 2),
+      club('Minder', 3, 2, 3, 1, 2, 2),
+    ]
+
+    expect(placeOf(rows, 'pointsPerMatch')).toMatchObject({ place: 1, shared: false, value: 2 })
+    expect(placeOf(rows, 'won')).toMatchObject({ place: 1, shared: true })
+  })
+
+  it('shares the place on points per match when the ratio is the same, with no rounding', () => {
+    const rows = [club('Twee', 1, 6, 12, 4, 9, 3), club('sc Heerenveen', 2, 3, 6, 2, 5, 2)]
+
+    expect(placeOf(rows, 'pointsPerMatch')).toMatchObject({ place: 1, shared: true })
+  })
+
+  it('says how many points sc Heerenveen is behind the leader and ahead of the last', () => {
+    const rows = [
+      club('Een', 1, 4, 10, 3, 9, 3),
+      club('sc Heerenveen', 2, 4, 7, 2, 6, 5),
+      club('Drie', 3, 4, 2, 0, 2, 9),
+    ]
+
+    expect(leaguePlaceOf(rows)).toMatchObject({ last: { club: 'Drie', points: 5 }, leader: { club: 'Een', points: 3 } })
+  })
+
+  it('has no leader when sc Heerenveen is the leader, and no last when it is the last', () => {
+    const rows = [club('sc Heerenveen', 1, 4, 10, 3, 9, 3), club('Twee', 2, 4, 7, 2, 6, 5)]
+
+    expect(leaguePlaceOf(rows)).toMatchObject({ last: { club: 'Twee', points: 3 }, leader: undefined })
+    expect(leaguePlaceOf([club('Een', 1, 4, 10, 3, 9, 3), club('sc Heerenveen', 2, 4, 7, 2, 6, 5)])).toMatchObject({
+      last: undefined,
+      leader: { club: 'Een', points: 3 },
+    })
+  })
+
+  it('takes the leader and the last by points, so a table out of order never gives a negative gap', () => {
+    const rows = [
+      club('Een', 1, 4, 5, 1, 5, 4),
+      club('sc Heerenveen', 2, 4, 7, 2, 6, 5),
+      club('Drie', 3, 4, 9, 3, 9, 3),
+    ]
+
+    expect(leaguePlaceOf(rows)).toMatchObject({ last: { club: 'Een', points: 2 }, leader: { club: 'Drie', points: 2 } })
+  })
+
+  it('gives 0 points behind a leader with the same points', () => {
+    const rows = [club('Een', 1, 4, 7, 2, 7, 3), club('sc Heerenveen', 2, 4, 7, 2, 6, 3)]
+
+    expect(leaguePlaceOf(rows)?.leader).toEqual({ club: 'Een', points: 0 })
+  })
+
+  it('leaves out a club that has played nothing, also as the last', () => {
+    const rows = [
+      club('Een', 1, 1, 3, 1, 2, 0),
+      club('sc Heerenveen', 2, 1, 1, 0, 1, 1),
+      club('Drie', 3, 0, 0, 0, 0, 0),
+    ]
+    const place = leaguePlaceOf(rows)
+
+    expect(place?.last).toBeUndefined()
+    expect(place?.leader).toEqual({ club: 'Een', points: 2 })
+    expect(placeOf(rows, 'goalsAgainst')).toMatchObject({ place: 2, shared: false })
+  })
+
+  it('has no leader and no last when sc Heerenveen is the only club that played', () => {
+    const place = leaguePlaceOf([club('sc Heerenveen', 1, 1, 3, 1, 2, 0), club('Twee', 2, 0, 0, 0, 0, 0)])
+
+    expect(place).toMatchObject({ last: undefined, leader: undefined, played: 1 })
+    expect(place?.measures.every((item) => item.place === 1 && !item.shared)).toBe(true)
+  })
+
+  it('gives nothing without sc Heerenveen in the table, when it has played nothing, or with an empty table', () => {
+    expect(leaguePlaceOf([club('Een', 1, 4, 10, 3, 9, 3)])).toBeUndefined()
+    expect(leaguePlaceOf([club('Een', 1, 1, 3, 1, 2, 0), club('sc Heerenveen', 2, 0, 0, 0, 0, 0)])).toBeUndefined()
+    expect(leaguePlaceOf([])).toBeUndefined()
+  })
+})
+
+describe('homeAwayOf', () => {
+  const game = (home: boolean, goalsFor: number, goalsAgainst: number, round = 'Speelronde 1'): PublicMatch => ({
+    ...match(round, 'played', '2026-08-01'),
+    goalsAgainst,
+    goalsFor,
+    home,
+  })
+  const matches = [
+    game(true, 3, 0, 'Speelronde 1'),
+    game(true, 1, 1, 'Speelronde 2'),
+    game(true, 0, 2, 'Speelronde 3'),
+    game(false, 2, 1, 'Speelronde 4'),
+    game(false, 0, 0, 'Speelronde 5'),
+  ]
+
+  it('counts the matches at home and away apart, with the points and the goals', () => {
+    const { away, home } = homeAwayOf(matches)
+
+    expect(home).toEqual({
+      cleanSheets: 1,
+      drawn: 1,
+      goalsAgainst: 3,
+      goalsFor: 4,
+      goalsPerMatch: 4 / 3,
+      lost: 1,
+      played: 3,
+      points: 4,
+      pointsPerMatch: 4 / 3,
+      won: 1,
+    })
+    expect(away).toEqual({
+      cleanSheets: 1,
+      drawn: 1,
+      goalsAgainst: 1,
+      goalsFor: 2,
+      goalsPerMatch: 1,
+      lost: 0,
+      played: 2,
+      points: 4,
+      pointsPerMatch: 2,
+      won: 1,
+    })
+  })
+
+  it('gives a total that is home plus away, and that agrees with the results of the season', () => {
+    const { away, home, total } = homeAwayOf(matches)
+    const results = leagueResultsOf(matches)
+    const count = (result: string) => results.filter((item) => item === result).length
+
+    for (const key of [
+      'cleanSheets',
+      'drawn',
+      'goalsAgainst',
+      'goalsFor',
+      'lost',
+      'played',
+      'points',
+      'won',
+    ] as const) {
+      expect(total[key]).toBe(home[key] + away[key])
+    }
+    expect([total.won, total.drawn, total.lost]).toEqual([count('W'), count('G'), count('V')])
+    expect(total.points).toBe(count('W') * 3 + count('G'))
+    expect(total.pointsPerMatch).toBeCloseTo(8 / 5)
+    expect(total.goalsPerMatch).toBeCloseTo(6 / 5)
+  })
+
+  it('has zeros and no average for a side that has no match yet', () => {
+    const { away, home, total } = homeAwayOf([game(true, 2, 0)])
+
+    expect(away).toEqual({
+      cleanSheets: 0,
+      drawn: 0,
+      goalsAgainst: 0,
+      goalsFor: 0,
+      goalsPerMatch: undefined,
+      lost: 0,
+      played: 0,
+      points: 0,
+      pointsPerMatch: undefined,
+      won: 0,
+    })
+    expect(home.played).toBe(1)
+    expect(home.pointsPerMatch).toBe(3)
+    expect(total).toEqual(home)
+  })
+
+  it('has zeros and no average when there is no match at all', () => {
+    const { away, home, total } = homeAwayOf([])
+
+    expect(home).toEqual(away)
+    expect(total).toEqual(away)
+    expect(total.played).toBe(0)
+    expect(total.pointsPerMatch).toBeUndefined()
+  })
+
+  it('leaves out a cup tie, a match without a score, and a match that is postponed or still to come', () => {
+    const cup: PublicMatch = { ...game(true, 4, 0), competition: 'KNVB Beker' }
+    const noScore: PublicMatch = { ...game(false, 0, 0), goalsAgainst: null, goalsFor: null }
+    const postponed: PublicMatch = { ...match('Speelronde 6', 'postponed', '2026-09-01'), home: true }
+    const scheduled: PublicMatch = { ...match('Speelronde 7', 'scheduled', '2026-09-08'), home: false }
+
+    expect(homeAwayOf([game(true, 1, 0), cup, noScore, postponed, scheduled]).total.played).toBe(1)
+  })
+
+  it('counts a match whose goals per player are not known', () => {
+    // `game` has no goals in the list, only a score: it still counts.
+    expect(homeAwayOf([game(true, 2, 1)]).home).toMatchObject({ goalsAgainst: 1, goalsFor: 2, played: 1, won: 1 })
   })
 })

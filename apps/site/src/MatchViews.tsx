@@ -20,14 +20,20 @@ import {
   WikipediaCredit,
 } from '@fansite/design-system'
 
-import type { MatchData } from './matches'
+import type { HomeAwayTally, MatchData } from './matches'
 
 import { moreCleanSheets } from './items-per-card'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import {
   cleanSheetsOf,
+  type ExtremeGoal,
+  extremesOf,
   goalsPerQuarter,
   goalsWithInitials,
+  homeAwayOf,
+  type LeagueMeasure,
+  type LeaguePlace,
+  leaguePlaceOf,
   leagueResultsOf,
   overviewOf,
   quarterLabels,
@@ -110,6 +116,60 @@ export function CleanSheetsCard({ count, matches, now }: { count: number; matche
 }
 
 /**
+ * The card of the matches page with the extremes of the Eredivisie: the biggest win and loss,
+ * the match with the most goals, and our earliest and our last goal. Each is a short match with
+ * its name under it, so the line the list draws between short matches stays between the items.
+ * A line without a match is left out, and the card doesn't say so. Under the list stand how
+ * many matches the lines are based on: the first three on every played match, the two goals on
+ * the matches whose goals are known. Without a played match it is a sentence for visitors and
+ * no list.
+ */
+export function ExtremesCard({ matches, now }: { matches: PublicMatch[]; now: Date }) {
+  const { biggestLoss, biggestWin, earliestGoal, known, latestGoal, mostGoals, played } = extremesOf(matches)
+  const lines = [
+    { match: biggestWin, name: 'Grootste overwinning' },
+    { match: biggestLoss, name: 'Grootste nederlaag' },
+    { match: mostGoals, name: 'Meeste doelpunten' },
+    { goal: earliestGoal, match: earliestGoal?.match, name: 'Vroegste doelpunt' },
+    { goal: latestGoal, match: latestGoal?.match, name: 'Laatste doelpunt' },
+  ]
+  const shown = lines.flatMap(({ goal, match, name }) => (match === undefined ? [] : [{ goal, match, name }]))
+
+  return (
+    <Card aria-labelledby="uitersten" shareable={imageCredit(played > 0)} surface="soft">
+      <Heading anchor id="uitersten" level={2}>
+        Uitersten
+      </Heading>
+      {played === 0 ? (
+        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+      ) : (
+        <>
+          <List role="list">
+            {shown.map(({ goal, match, name }) => (
+              <List.Item key={name}>
+                <ShortMatch
+                  // Only played matches with both scores count, so these are numbers.
+                  {...matchMoment(match, now)}
+                  goalsAgainst={match.goalsAgainst ?? 0}
+                  goalsFor={match.goalsFor ?? 0}
+                  home={match.home}
+                  opponent={match.opponent}
+                />
+                <Text appearance="meta">{goal === undefined ? name : `${name}, ${goalLine(goal)}`}</Text>
+              </List.Item>
+            ))}
+          </List>
+          <BasedOn known={played} played={played} />
+          {known > 0 && known < played && (
+            <Text appearance="meta">{`Het vroegste en het laatste doelpunt zijn gebaseerd op de doelpunten van ${known} van de ${played} gespeelde wedstrijden`}</Text>
+          )}
+        </>
+      )}
+    </Card>
+  )
+}
+
+/**
  * The card of the matches page with the goals of sc Heerenveen and of its opponents per quarter
  * of an hour: two donut charts, for and against, with the same numbers in a table under them,
  * which is what a screen reader gets, because the charts are hidden from it. Under the table
@@ -149,6 +209,121 @@ export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
           />
           <BasedOn known={known} played={played} />
           {extraTime && <Text appearance="meta">Doelpunten in de verlenging tellen niet mee.</Text>}
+        </>
+      )}
+    </Card>
+  )
+}
+
+const measureNames: Record<LeagueMeasure, string> = {
+  goalDifference: 'Doelsaldo',
+  goalsAgainst: 'Beste verdediging, doelpunten tegen',
+  goalsFor: 'Beste aanval, doelpunten voor',
+  pointsPerMatch: 'Punten per wedstrijd',
+  won: 'Gewonnen wedstrijden',
+}
+
+const pointsPerMatchFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+
+/** The value of a measure as the table writes it: the goal difference with its sign. */
+function measureValue(measure: LeagueMeasure, value: number): number | string {
+  if (measure === 'pointsPerMatch') {
+    return pointsPerMatchFormat.format(value)
+  }
+
+  return measure === 'goalDifference' ? (value > 0 ? `+${value}` : value < 0 ? `\u2212${-value}` : '0') : value
+}
+
+const pointsWord = (points: number) => `${points} ${points === 1 ? 'punt' : 'punten'}`
+
+/**
+ * The card of the matches page with the place of sc Heerenveen in the Eredivisie on five
+ * measures, in a table, and under it two sentences on the points to the leader and to the last.
+ * The places come from the table of the whole league, in which the clubs have not all played
+ * the same number of matches, and the line under the card says after how many matches of ours
+ * it holds. Without a table it is a sentence for visitors, like the card Stand.
+ */
+export function LeaguePlaceCard({ standings }: { standings: PublicStandingsRow[] }) {
+  const place = leaguePlaceOf(standings)
+
+  return (
+    <Card aria-labelledby="onze-plek-in-de-competitie" shareable={imageCredit(place !== undefined)}>
+      <Heading anchor id="onze-plek-in-de-competitie" level={2}>
+        Onze plek in de competitie
+      </Heading>
+      {place === undefined ? (
+        <Text>
+          {standings.length === 0
+            ? 'We hebben de stand nog niet gevonden. Kijk straks nog eens.'
+            : 'We hebben de plek van sc Heerenveen in de stand nog niet. Kijk straks nog eens.'}
+        </Text>
+      ) : (
+        <>
+          <DataTable
+            caption="De plek van sc Heerenveen in de Eredivisie, per onderdeel"
+            columns={['Onderdeel', 'Plaats', 'Waarde']}
+            rows={place.measures.map(({ measure, place: rank, shared, value }) => ({
+              cells: [`${shared ? 'gedeeld ' : ''}${rank}e`, measureValue(measure, value)],
+              header: measureNames[measure],
+            }))}
+          />
+          {placeSentences(place).map((sentence) => (
+            <Text key={sentence}>{sentence}</Text>
+          ))}
+          <Text appearance="meta">
+            {`Gebaseerd op de stand na ${place.played} ${place.played === 1 ? 'wedstrijd' : 'wedstrijden'} van sc Heerenveen`}
+          </Text>
+        </>
+      )}
+    </Card>
+  )
+}
+
+/** A number with a comma and two decimals, as in 1,83, or a dash when there is no match. */
+const perMatch = (value: number | undefined) =>
+  value === undefined ? '–' : value.toLocaleString('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+
+/**
+ * The card of the matches page with how sc Heerenveen does at home and away: a table with a
+ * column for home, away and both, and a row for the matches, the points and the goals. The
+ * numbers come from the score of the played matches of the Eredivisie. A side with no match yet
+ * has a dash where a number is divided and a 0 where it is counted. Without a result it is a
+ * sentence for visitors and no table.
+ */
+export function HomeAwayCard({ matches }: { matches: PublicMatch[] }) {
+  const { away, home, total } = homeAwayOf(matches)
+  const sides: HomeAwayTally[] = [home, away, total]
+  const row = (header: string, cell: (side: HomeAwayTally) => number | string) => ({
+    cells: sides.map(cell),
+    header,
+  })
+
+  return (
+    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0)} surface="warm">
+      <Heading anchor id="thuis-en-uit" level={2}>
+        Thuis en uit
+      </Heading>
+      {total.played === 0 ? (
+        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+      ) : (
+        <>
+          <DataTable
+            caption="De uitslagen van sc Heerenveen thuis en uit dit seizoen"
+            columns={['Onderdeel', 'Thuis', 'Uit', 'Totaal']}
+            rows={[
+              row('Gespeeld', (side) => side.played),
+              row('Gewonnen', (side) => side.won),
+              row('Gelijk', (side) => side.drawn),
+              row('Verloren', (side) => side.lost),
+              row('Punten', (side) => side.points),
+              row('Punten per wedstrijd', (side) => perMatch(side.pointsPerMatch)),
+              row('Doelpunten voor', (side) => side.goalsFor),
+              row('Doelpunten tegen', (side) => side.goalsAgainst),
+              row('Doelpunten per wedstrijd', (side) => perMatch(side.goalsPerMatch)),
+              row('Zonder tegendoelpunt', (side) => side.cleanSheets),
+            ]}
+          />
+          <BasedOn known={total.played} played={total.played} />
         </>
       )}
     </Card>
@@ -396,6 +571,13 @@ export function TopScorers({ matches, season }: { matches: PublicMatch[]; season
   )
 }
 
+/** A goal for the name under a short match: the minute with stoppage time, and the player. */
+function goalLine({ goal }: ExtremeGoal): string {
+  const minute = goal.stoppageMinutes === null ? `${goal.minute}` : `${goal.minute}+${goal.stoppageMinutes}`
+
+  return `minuut ${minute}: ${goal.player}${goal.ownGoal ? ' (eigen doelpunt)' : ''}`
+}
+
 /** Whether a played match was decided in a shoot-out, which has both scores. */
 function hasShootOut(match: PublicMatch): boolean {
   return match.penaltiesFor !== null && match.penaltiesAgainst !== null
@@ -433,4 +615,34 @@ function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
   }
 
   return <Match {...common} {...matchMoment(match, now)} status="scheduled" />
+}
+
+/**
+ * The two sentences under the table: where sc Heerenveen stands to the leader and to the last.
+ * A club that is itself the leader (no leader is given) or the last says so. The sentences are
+ * left out when it is the only club that has played, and there is nothing to compare.
+ */
+function placeSentences({ last, leader }: LeaguePlace): string[] {
+  const sentences: string[] = []
+
+  if (leader !== undefined) {
+    sentences.push(
+      leader.points === 0
+        ? `sc Heerenveen heeft evenveel punten als de koploper, ${leader.club}.`
+        : `sc Heerenveen staat ${pointsWord(leader.points)} achter de koploper, ${leader.club}.`,
+    )
+  } else if (last !== undefined) {
+    sentences.push('sc Heerenveen staat bovenaan.')
+  }
+  if (last !== undefined) {
+    sentences.push(
+      last.points === 0
+        ? `sc Heerenveen heeft evenveel punten als de laatste, ${last.club}.`
+        : `sc Heerenveen staat ${pointsWord(last.points)} voor op de laatste, ${last.club}.`,
+    )
+  } else if (leader !== undefined) {
+    sentences.push('sc Heerenveen staat onderaan.')
+  }
+
+  return sentences
 }

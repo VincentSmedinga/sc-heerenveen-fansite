@@ -27,7 +27,7 @@ describe('the bar of /wedstrijden', () => {
     expect(html).toContain(`<span class="hf-page-shortcuts-label" id="${labelId}">Op deze pagina:</span>`)
   })
 
-  it('has the eight anchors, in the order of a narrow screen, each named for its card', async () => {
+  it('has the eleven anchors, in the order of a narrow screen, each named for its card', async () => {
     const html = await render()
 
     expect(
@@ -36,11 +36,14 @@ describe('the bar of /wedstrijden', () => {
       ['#programma', 'Programma'],
       ['#uitslagen', 'Uitslagen'],
       ['#stand', 'Stand'],
+      ['#onze-plek-in-de-competitie', 'Plek in de competitie'],
       ['#verloop-van-het-seizoen', 'Verloop van het seizoen'],
       ['#reeksen', 'Reeksen'],
+      ['#thuis-en-uit', 'Thuis en uit'],
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
       ['#de-nul-gehouden', 'De nul gehouden'],
       ['#doelpunten-per-kwartier', 'Doelpunten per kwartier'],
+      ['#uitersten', 'Uitersten'],
     ])
   })
 

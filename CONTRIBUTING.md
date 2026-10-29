@@ -13,9 +13,12 @@ Alles in dit bestand geldt voor mensen en voor agents.
 
 ## Een idee of een fout melden
 
-Open een [issue](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/new) in het Nederlands.
+Open een [issue](https://github.com/VincentSmedinga/sc-heerenveen-fansite/issues/new/choose) in het Nederlands.
+GitHub laat je kiezen tussen een formulier voor een fout en een formulier voor een idee.
 Zeg wat je ziet of wilt, en waarom.
 Bij een fout helpt het als je schrijft wat je deed en wat er gebeurde.
+Een issue is openbaar: zet er geen wachtwoorden of persoonsgegevens in.
+Een vraag of een gesprek hoort op het [forum](https://forum.heerenveen.org).
 
 Een issue is klaar om te bouwen als het acceptatiecriteria heeft, in één pull request past, geen open vragen heeft en de projecteigenaar het heeft goedgekeurd.
 Die goedkeuring staat onderaan: "Goedgekeurd door de projecteigenaar op `<datum>`."
@@ -23,7 +26,8 @@ Die goedkeuring staat onderaan: "Goedgekeurd door de projecteigenaar op `<datum>
 ## Een nieuwe bron voorstellen
 
 De site toont koppen en links van media over sc Heerenveen.
-Wil je dat we een bron toevoegen, open dan een issue en vermeld:
+Wil je dat we een bron toevoegen, open dan een issue met het formulier voor een bron.
+Daarin vul je in:
 
 - de naam van de bron;
 - de website;
