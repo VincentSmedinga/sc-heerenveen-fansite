@@ -24,8 +24,8 @@ describe('match.css', () => {
     expect(rule('.hf-match-goal-theirs')).not.toMatch(/font-weight/u)
   })
 
-  it('gives "Gegevens nog niet beschikbaar" the accent red of "Uitgesteld", and not its weight', () => {
-    expect(rule('.hf-match-missing')).toMatch(/color: var\(--hf-colour-text-accent\)/u)
+  it('gives "Gegevens nog niet beschikbaar" the token for missing data, and not the weight of "Uitgesteld"', () => {
+    expect(rule('.hf-match-missing')).toMatch(/color: var\(--hf-colour-text-missing\)/u)
     expect(rule('.hf-match-missing')).not.toMatch(/outcome|font-weight/u)
   })
 

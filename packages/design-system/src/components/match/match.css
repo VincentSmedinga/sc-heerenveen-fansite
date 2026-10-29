@@ -122,12 +122,13 @@
 
   /*
    * "Gegevens nog niet beschikbaar" is the last line of the match, under the time and the place.
-   * It has the accent red of "Uitgesteld", a text colour that reaches 4.5:1 on every surface, but
-   * the weight of the small lines around it, so it is quieter. The colour only adds to the
-   * words; whoever can't see it reads the same sentence.
+   * It is a muted red, the token for missing data: red-800 in light, a step darker than the
+   * accent of "Uitgesteld", which was too bright there, and the same red-300 in dark. It has the
+   * weight of the small lines around it. The colour only adds to the words; whoever can't see it
+   * reads the same sentence.
    */
   .hf-match-missing {
-    color: var(--hf-colour-text-accent);
+    color: var(--hf-colour-text-missing);
     margin-block: 0.125rem 0;
   }
 

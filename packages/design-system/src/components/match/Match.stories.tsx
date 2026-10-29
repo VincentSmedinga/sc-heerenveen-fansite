@@ -46,7 +46,7 @@ const meta = preview.meta({
           'Bij een uitgestelde wedstrijd staat er "Uitgesteld" in plaats van een tijd.',
           '',
           'Is een wedstrijd begonnen en is de uitslag er twee uur later nog niet, dan zet je `resultMissing`.',
-          'Onderaan staat dan "Gegevens nog niet beschikbaar", onder de tijd en de plaats, in het rood van "Uitgesteld" maar niet vet.',
+          'Onderaan staat dan "Gegevens nog niet beschikbaar", onder de tijd en de plaats, in een gedempt rood, en niet vet.',
           'De tijd blijft staan.',
           'Het is een eerlijke melding van wat we niet weten, zonder gok naar de uitslag.',
           '',

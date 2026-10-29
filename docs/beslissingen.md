@@ -3948,7 +3948,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     Bij een weekend ("12–14 februari") is dat de laatste dag van het bereik (`lastDayOf` in `src/match-format.ts`), want `matchDate` is dan de eerste dag.
   - Een gespeelde wedstrijd is altijd begonnen, een uitgestelde wedstrijd zonder nieuwe datum nooit: die blijft in het programma als "Uitgesteld" en is nooit de vorige of de volgende.
   - `lacksResult` kiest de zin: de wedstrijd heeft geen score en de aanvang is twee uur of langer geleden.
-    `Match` heeft daarvoor de eigenschap `resultMissing`; de zin staat onderaan, onder de tijd en de plaats, in het rood van "Uitgesteld" (`--hf-colour-text-accent`) maar niet vet, en de tijd blijft staan.
+    `Match` heeft daarvoor de eigenschap `resultMissing`; de zin staat onderaan, onder de tijd en de plaats, in een gedempt rood maar niet vet, en de tijd blijft staan.
+    Dat rood is het token `--hf-colour-text-missing`: stap 800 van de roodschaal in licht, rustiger dan het rood van "Uitgesteld" (`--hf-colour-text-accent`), dat de projecteigenaar daar te fel vond.
+    In donker is het stap 300, hetzelfde als dat rood.
+    Het token gebruikt bestaande stappen; er komt geen nieuwe kleur bij.
     De tekst zegt het zelf, het rood komt erbij; het haalt 4,5:1 op elk vlak, in licht en donker.
   - De statistiekkaarten tellen alleen wedstrijden met de status `played` en een score, en veranderen niet.
 - **Alternatieven:** de status laten bepalen (nu; het probleem van de bekerwedstrijd).
