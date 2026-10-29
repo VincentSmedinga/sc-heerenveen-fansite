@@ -1,0 +1,715 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2025/26_(mannenvoetbal)/Wedstrijden?action=raw, read on 29 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: the matches of other clubs, except the abandoned ones with the block that finishes them and the last
+  match of the season, the text around the templates, and the referees, reports and attendances of every match
+  and the goal scorers of the matches of other clubs (emptied). The goal scorers of sc Heerenveen and the two
+  blocks of NAC Breda - sc Heerenveen are as the page has them. See the tests.
+-->
+== Speelronde 1 ==
+{{Footballbox2
+|date = 9 augustus 2025
+|time = 20:00 uur
+|team1 = [[sc Heerenveen]]
+|score = 1 – 1
+|team2 = [[FC Volendam]]
+|goals1 = [[Luuk Brouwers|Brouwers]] {{goal|4}}
+|goals2 = {{goal|65}} [[Ozan Kökçü|Kökçü]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 2 ==
+{{Footballbox2
+|date = 16 augustus 2025
+|time = 21:00 uur
+|team1 = [[FC Groningen]]
+|score = [[Derby van het Noorden|2 – 1]]
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Brynjólfur Willumsson|Willumsson]] {{goal|29||90+4}}
+|goals2 = {{goal|15}} [[Jacob Trenskow|Trenskow]]
+|location = [[Groningen (stad)|Groningen]]
+|stadium = [[Euroborg]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 3 ==
+{{Footballbox2
+|date = 24 augustus 2025
+|time = 12:15 uur
+|team1 = [[sc Heerenveen]]
+|score = 1 – 2
+|team2 = [[FC Twente]]
+|goals1 = [[Václav Sejk|Sejk]] {{goal|90+4}}<br />[[Luuk Brouwers|Brouwers]] {{rode kaart|2|80}}, <small>na afloop</small>
+|goals2 = {{goal|12}} [[Daan Rots|D. Rots]]<br />{{goal|84}} [[Naci Ünüvar|Ünüvar]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 4 ==
+{{Footballbox2
+|date = 30 augustus 2025
+|time = 18:45 uur
+|team1 = [[sc Heerenveen]]
+|score = 2 – 2
+|team2 = [[Go Ahead Eagles]]
+|goals1 = [[Nikolai Hopland|Hopland]] {{goal|45+2}}<br />[[Jacob Trenskow|Trenskow]] {{goal|48}}
+|goals2 = {{goal|1}} [[Melle Meulensteen|Meulensteen]]<br />{{goal|90+3}} [[Finn Stokkers|Stokkers]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 5 ==
+{{Footballbox2
+|date = 13 september 2025
+|time = 21:00 uur
+|team1 = [[Feyenoord]]
+|score = 1 – 0
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Anis Hadj Moussa|Hadj Moussa]] {{goal|42}}, {{rode kaart VAR|1|54|57}}
+|goals2 = {{rode kaart|2|40|72}} [[Christijan Petrov|Petrov]]
+|location = [[Rotterdam]]
+|stadium = [[Stadion Feijenoord]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 6 ==
+{{Footballbox2
+|date = 21 september 2025
+|time = 14:30 uur
+|team1 = [[sc Heerenveen]]
+|score = 3 – 2
+|team2 = [[N.E.C.]]
+|goals1 = [[Ringo Meerveld|Meerveld]] {{goal|25}}<br />[[Dylan Vente|Vente]] {{goal|50}}<br />[[Jacob Trenskow|Trenskow]] {{goal|62}}
+|goals2 = {{goal|65}} [[Koki Ogawa|Ogawa]]<br />{{goal|83}} [[Sami Ouaissa|Ouaissa]]<br />{{rode kaart|0|90+6}} [[Tjaronn Chery|Chery]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 7 ==
+{{Footballbox2
+|date = 28 september 2025
+|time = 14:30 uur
+|team1 = [[FC Utrecht]]
+|score = 2 – 2
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Souffian El Karouani|El Karouani]] {{goal|27}}<br />[[David Min|Min]] {{goal|89}}
+|goals2 = {{goal|39||70}} [[Dylan Vente|Vente]]
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 8 ==
+{{Footballbox2
+|date = 4 oktober 2025
+|time = 21:25 uur
+|team1 = [[sc Heerenveen]]
+|score = 2 – 1
+|team2 = [[Excelsior Rotterdam]]
+|goals1 = [[Dylan Vente|Vente]] {{goal|89}}<br />[[Sam Kersten|Kersten]] {{goal|90+4}}
+|goals2 = {{goal|11}} [[Irakli Yegoian|Yegoian]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 9 ==
+{{Footballbox2
+|date = 19 oktober 2025
+|time = 12:15 uur
+|team1 = [[Telstar (voetbalclub)|Telstar]]
+|score = 2 – 3
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Jeff Hardeveld|Hardeveld]] {{goal|45}}<br />[[Milan Zonneveld|Zonneveld]] {{goal|85}}
+|goals2 = {{goal|21}} [[Jacob Trenskow|Trenskow]]<br />{{goal|42|pen.}} [[Dylan Vente|Vente]]<br />{{goal|54}} [[Ringo Meerveld|Meerveld]]
+|location = [[Velsen-Zuid]]
+|stadium = [[BUKO Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 10 ==
+{{Footballbox2
+|date = 24 oktober 2025
+|time = 20:00 uur
+|team1 = [[sc Heerenveen]]
+|score = 3 – 3
+|team2 = [[NAC Breda]]
+|goals1 = [[Terence Kongolo|Kongolo]] {{goal|45+3|e.d.}}<br />[[Maas Willemsen|Willemsen]] {{goal|68}}<br />[[Václav Sejk|Sejk]] {{goal|80}}
+|goals2 = {{goal|55}} [[Leo Greiml|Greiml]]<br />{{goal|58}} [[Sydney van Hooijdonk|Van Hooijdonk]]<br />{{goal|90+4}} [[Mohamed Nassoh|Nassoh]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 11 ==
+{{Footballbox2
+|date = 1 november 2025
+|time = 16:30 uur
+|team1 = [[AFC Ajax|Ajax]]
+|score = 1 – 1
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Mika Godts|Godts]] {{goal|38}}
+|goals2 = {{goal|68}} [[Václav Sejk|Sejk]]
+|location = [[Amsterdam]]
+|stadium = [[Johan Cruijff ArenA]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 12 ==
+{{Footballbox2
+|date = 8 november 2025
+|time = 20:00 uur
+|team1 = [[Fortuna Sittard]]
+|score = 2 – 0
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Paul Gladon|Gladon]] {{goal|60}}<br />[[Mohamed Ihattaren|Ihattaren]] {{goal|66|pen.}}
+|goals2 =
+|location = [[Sittard]]
+|stadium = [[Fortuna Sittard Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 13 ==
+{{Footballbox2
+|date = 23 november 2025
+|time = 12:15 uur
+|team1 = [[sc Heerenveen]]
+|score = 3 – 1
+|team2 = [[AZ (voetbalclub)|AZ]]
+|goals1 = [[Dylan Vente|Vente]] {{goal|38}}<br />[[Joris van Overeem|Van Overeem]] {{goal|40}}<br />[[Luuk Brouwers|Brouwers]] {{goal|79}}
+|goals2 = {{goal|75}} [[Troy Parrott|Parrott]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 14 ==
+{{Footballbox2
+|date = 28 november 2025
+|time = 20:00 uur
+|team1 = [[PEC Zwolle]]
+|score = 2 – 1
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Thijs Oosting|Oosting]] {{goal|28}}<br />[[Shola Shoretire|Shoretire]] {{goal|40}}
+|goals2 = {{goal|36}} [[Ringo Meerveld|Meerveld]]
+|location = [[Zwolle]]
+|stadium = [[MAC³PARK stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+{{Footballbox2
+|date = 30 november 2025
+|time = 20:00 uur
+|team1 = [[AFC Ajax|Ajax]]
+|score = Gestaakt 6' (0 – 0)
+|team2 = [[FC Groningen]]
+|goals1 =
+|goals2 =
+|location = [[Amsterdam]]
+|stadium = [[Johan Cruijff ArenA]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+{{Footballbox2
+|date = 2 december 2025
+|time = 14:30 uur
+|team1 = [[AFC Ajax|Ajax]]
+|score = 2 – 0
+|team2 = [[FC Groningen]]
+|goals1 =
+|goals2 =
+|location = [[Amsterdam]]
+|stadium = [[Johan Cruijff ArenA]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 15 ==
+{{Footballbox2
+|date = 6 december 2025
+|time = 16:30 uur
+|team1 = [[sc Heerenveen]]
+|score = 0 – 2
+|team2 = [[PSV (voetbalclub)|PSV]]
+|goals1 =
+|goals2 = {{goal|22}} [[Joey Veerman|Veerman]]<br />{{goal|27}} [[Ricardo Pepi|Pepi]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 16 ==
+{{Footballbox2
+|date = 14 december 2025
+|time = 12:15 uur
+|team1 = [[Sparta Rotterdam]]
+|score = 0 – 3
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 = {{goal|25}} [[Jacob Trenskow|Trenskow]]<br />{{goal|47}} [[Vasilios Zagaritis|Zagaritis]]<br />{{goal|70|e.d.}} [[Saïd Bakari|Bakari]]
+|location = [[Rotterdam]]
+|stadium = [[Spartastadion Het Kasteel]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 17 ==
+{{Footballbox2
+|date = 20 december 2025
+|time = 16:30 uur
+|team1 = [[Heracles Almelo]]
+|score = 0 – 3
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 = {{goal|55}} [[Jacob Trenskow|Trenskow]]<br />{{goal|77}} [[Vasilios Zagaritis|Zagaritis]]<br />{{goal|90+5|pen.}} [[Maxence Rivera|Rivera]]
+|location = [[Almelo]]
+|stadium = [[Asito Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 18 ==
+{{Footballbox2
+|date = 11 januari 2026
+|time = 12:15 uur
+|team1 = [[sc Heerenveen]]
+|score = 2 – 2
+|team2 = [[Feyenoord]]
+|goals1 = [[Luuk Brouwers|Brouwers]] {{goal|41}}<br />[[Amourricho van Axel Dongen|Van Axel Dongen]] {{goal|87}}
+|goals2 = {{goal|30}} [[Leo Sauer|Sauer]]<br />{{goal|43}} [[Sem Steijn|Steijn]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 19 ==
+{{Footballbox2
+|date = 18 januari 2026
+|time = 12:15 uur
+|team1 = [[sc Heerenveen]]
+|score = [[Derby van het Noorden|0 – 2]]
+|team2 = [[FC Groningen]]
+|goals1 =
+|goals2 = {{goal|58|e.d.}} [[Bernt Klaverboer|Klaverboer]]<br />{{goal|79}} [[Thijmen Blokzijl|Blokzijl]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 20 ==
+{{Footballbox2
+|date = 11 februari 2026
+|time = 18:45 uur
+|team1 = [[Go Ahead Eagles]]
+|score = 1 – 3
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Julius Dirksen|Dirksen]] {{goal|54}}
+|goals2 = {{goal|58||68}} [[Lasse Nordås|Nordås]]<br />{{goal|81}} [[Jacob Trenskow|Trenskow]]
+|location = [[Deventer]]
+|stadium = [[De Adelaarshorst]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 21 ==
+{{Footballbox2
+|date = 1 februari 2026
+|time = 16:45 uur
+|team1 = [[sc Heerenveen]]
+|score = 1 – 1
+|team2 = [[FC Utrecht]]
+|goals1 = [[Jacob Trenskow|Trenskow]] {{goal|24}}
+|goals2 = {{goal|54}} [[Jesper Karlsson|Karlsson]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 22 ==
+{{Footballbox2
+|date = 7 februari 2026
+|time = 20:00 uur
+|team1 = [[FC Twente]]
+|score = 5 – 0
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Ramiz Zerrouki|Zerrouki]] {{goal|19}}<br />[[Mats Rots|M. Rots]] {{goal|30}}<br />[[Daan Rots|D. Rots]] {{goal|54}}<br />[[Kristian Hlynsson|Hlynsson]] {{goal|63}}<br />[[Sam Lammers|Lammers]] {{goal|84}}
+|goals2 =
+|location = [[Enschede]]
+|stadium = [[De Grolsch Veste]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 23 ==
+{{Footballbox2
+|date = 15 februari 2026
+|time = 14:30 uur
+|team1 = [[sc Heerenveen]]
+|score = 4 – 2
+|team2 = [[PEC Zwolle]]
+|goals1 = [[Maxence Rivera|Rivera]] {{goal|30}}<br />[[Lasse Nordås|Nordås]] {{goal|52}}<br />[[Ringo Meerveld|Meerveld]] {{goal|63}}<br />[[Eser Gürbüz|Gürbüz]] {{goal|90}}
+|goals2 = {{goal|13}} [[Younes Namli|Namli]]<br />{{goal|16}} [[Tristan Gooijer|Gooijer]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+{{Footballbox2
+|date = 15 februari 2026
+|time = 16:45 uur
+|team1 = [[Sparta Rotterdam]]
+|score = Gestaakt 7' (0 – 0)
+|team2 = [[N.E.C.]]
+|goals1 =
+|goals2 =
+|location = [[Rotterdam]]
+|stadium = [[Spartastadion Het Kasteel]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+{{Footballbox2
+|date = 17 februari 2026
+|time = 20:00 uur
+|team1 = [[Sparta Rotterdam]]
+|score = 1 – 0
+|team2 = [[N.E.C.]]
+|goals1 =
+|goals2 =
+|location = [[Rotterdam]]
+|stadium = [[Spartastadion Het Kasteel]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 24 ==
+{{Footballbox2
+|date = 21 februari 2026
+|time = 18:45 uur
+|team1 = [[PSV (voetbalclub)|PSV]]
+|score = 3 – 1
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Ivan Perišić|Perišić]] {{goal|45}}<br />[[Myron Boadu|Boadu]] {{goal|48}}<br />[[Ricardo Pepi|Pepi]] {{goal|87}}
+|goals2 = {{goal|21}} [[Lasse Nordås|Nordås]]
+|location = [[Eindhoven]]
+|stadium = [[Philips Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 25 ==
+{{Footballbox2
+|date = 28 februari 2026
+|time = 16:30 uur
+|team1 = [[sc Heerenveen]]
+|score = 2 – 1
+|team2 = [[Sparta Rotterdam]]
+|goals1 = [[Jacob Trenskow|Trenskow]] {{goal|40}}<br />[[Luuk Brouwers|Brouwers]] {{goal|82}}
+|goals2 = {{goal|86}} [[Mitchell van Bergen|Van Bergen]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 26 ==
+{{Footballbox2
+|date = 7 maart 2026
+|time = 21:00 uur
+|team1 = [[Excelsior Rotterdam]]
+|score = 1 – 2
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Noah Naujoks|Naujoks]] {{goal|74|pen.}}
+|goals2 = {{goal|38}} [[Luuk Brouwers|Brouwers]]<br />{{goal|67}} [[Joris van Overeem|Van Overeem]]
+|location = [[Rotterdam]]
+|stadium = [[Stadion Woudestein]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 27 ==
+{{Footballbox2
+|date = 14 maart 2026
+|time = 20:00 uur
+|team1 = [[sc Heerenveen]]
+|score = 3 – 0
+|team2 = [[Telstar (voetbalclub)|Telstar]]
+|goals1 = [[Lasse Nordås|Nordås]] {{goal|24}}<br />[[Maxence Rivera|Rivera]] {{goal|56}}<br />[[Jacob Trenskow|Trenskow]] {{goal|71}}
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 28 ==
+{{Footballbox2
+|date = 22 maart 2026
+|time = 12:15 uur
+|team1 = [[N.E.C.]]
+|score = 2 – 2
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Tjaronn Chery|Chery]] {{goal|19||57}}
+|goals2 = {{goal|37}} [[Jacob Trenskow|Trenskow]]<br />{{goal|45}} [[Ringo Meerveld|Meerveld]]
+|location = [[Nijmegen]]
+|stadium = [[Goffertstadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 29 ==
+{{Footballbox2
+|date = 5 april 2026
+|time = 14:30 uur
+|team1 = [[sc Heerenveen]]
+|score = 4 – 1
+|team2 = [[Heracles Almelo]]
+|goals1 = [[Jacob Trenskow|Trenskow]] {{goal|35}}<br />[[Lasse Nordås|Nordås]] {{goal|45+5|pen.}}<br />[[Remko Pasveer|Pasveer]] {{goal|47|e.d.}}<br />[[Maxence Rivera|Rivera]] {{goal|51}}
+|goals2 = {{goal|21}} [[Mario Engels|Engels]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 30 ==
+{{Footballbox2
+|date = 12 april 2026
+|time = 16:45 uur
+|team1 = [[AZ (voetbalclub)|AZ]]
+|score = 3 – 0
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Sven Mijnans|Mijnans]] {{goal|7||8}}<br />[[Troy Parrott|Parrott]] {{goal|71}}
+|goals2 =
+|location = [[Alkmaar]]
+|stadium = [[AFAS Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 31 ==
+{{Footballbox2
+|date = 25 april 2026
+|time = 18:45 uur
+|team1 = [[sc Heerenveen]]
+|score = 2 – 1
+|team2 = [[Fortuna Sittard]]
+|goals1 = [[Ringo Meerveld|Meerveld]] {{goal|16}}<br />[[Marcus Linday|Linday]] {{goal|74}}
+|goals2 = {{goal|12}} [[Philip Brittijn|Brittijn]]<br />{{rode kaart|0|90}} [[Ivo Pinto|Pinto]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 32 ==
+{{Footballbox2
+|date = 3 mei 2026
+|time = 12:15 uur
+|team1 = [[FC Volendam]]
+|score = 0 – 2
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 = {{goal|8}} [[Luca Oyen|Oyen]]<br />{{goal|86}} [[Dylan Vente|Vente]]
+|location = [[Volendam]]
+|stadium = [[Kras Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 33 ==
+{{Footballbox2
+|date = 10 mei 2026
+|time = 16:45 uur
+|team1 = [[NAC Breda]]
+|score = Gestaakt 82' (2 – 0)
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Boy Kemper|Kemper]] {{goal|36||74|pen.}}
+|goals2 =
+|location = [[Breda]]
+|stadium = [[Rat Verlegh Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+{{Footballbox2
+|date = 11 mei 2026<ref>[https://www.knvb.nl/nieuws/betaald-voetbal/vriendenloterij-eredivisie/71803/wedstrijd-nac-breda-sc-heerenveen-definitief Wedstrijd NAC Breda - sc Heerenveen definitief gestaakt], KNVB.nl, 10 mei 2026</ref>
+|time = 14:30 uur
+|team1 = [[NAC Breda]]
+|score = 2 – 0
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Boy Kemper|Kemper]] {{goal|36||74|pen.}}
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+
+== Speelronde 34 ==
+{{Footballbox2
+|date = 17 mei 2026
+|time = 14:30 uur
+|team1 = [[AZ (voetbalclub)|AZ]]
+|score = 3 – 3
+|team2 = [[NAC Breda]]
+|goals1 =
+|goals2 =
+|location = [[Alkmaar]]
+|stadium = [[AFAS Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----
+{{Footballbox2
+|date = 17 mei 2026
+|time = 14:30 uur
+|team1 = [[sc Heerenveen]]
+|score = 0 – 0
+|team2 = [[AFC Ajax|Ajax]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+----

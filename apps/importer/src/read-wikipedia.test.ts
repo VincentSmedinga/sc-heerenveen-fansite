@@ -9,6 +9,9 @@ const standingsPage = readFileSync(new URL('./fixtures/wikipedia-standings.wiki'
 const cupPage = readFileSync(new URL('./fixtures/wikipedia-cup.wiki', import.meta.url), 'utf8')
 const goalsCupPage = readFileSync(new URL('./fixtures/wikipedia-cup-goals.wiki', import.meta.url), 'utf8')
 const extraTimePage = readFileSync(new URL('./fixtures/wikipedia-cup-extra-time.wiki', import.meta.url), 'utf8')
+const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
+const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
+const seasonCup = readFileSync(new URL('./fixtures/wikipedia-season-cup.wiki', import.meta.url), 'utf8')
 
 /** A match of ours in the shape of the programme, with these fields. */
 function box(fields: Record<string, string>) {
@@ -211,6 +214,157 @@ describe('the programme and the results', () => {
     expect(readLeague(leagueWith('<!-- {{Footballbox2 | team1 = [[sc Heerenveen]] }} -->', box({})))).toMatchObject({
       matches: [{ opponent: 'FC Twente' }],
     })
+  })
+})
+
+describe('a match that was stopped', () => {
+  const stopped = box({
+    date: '10 mei 2026',
+    score: "Gestaakt 82' (2 – 0)",
+    team1: '[[NAC Breda]]',
+    team2: '[[sc Heerenveen]]',
+    time: '16:45 uur',
+  })
+  const finished = box({
+    date: '11 mei 2026<ref>[https://www.knvb.nl/nieuws Wedstrijd definitief gestaakt], KNVB.nl, 10 mei 2026</ref>',
+    score: '2 – 0',
+    team1: '[[NAC Breda]]',
+    team2: '[[sc Heerenveen]]',
+    time: '14:30 uur',
+  })
+
+  it('reads the real page of 2025/26: 34 matches, and for round 33 the block that finishes the match', () => {
+    const read = readLeague(seasonProgramme)
+
+    expect(read).toMatchObject({ hasTemplates: true, kind: 'read', lastPlayedOn: '2026-05-17' })
+    if (read.kind !== 'read') {
+      throw new Error(read.message)
+    }
+
+    expect(read.matches).toHaveLength(34)
+    expect(read.matches.filter((match) => match.home)).toHaveLength(17)
+    expect(read.matches.find((match) => match.round === 'Speelronde 33')).toMatchObject({
+      goalsAgainst: 2,
+      goalsFor: 0,
+      home: false,
+      kickoffAt: new Date('2026-05-11T12:30:00Z'),
+      matchDate: '2026-05-11',
+      opponent: 'NAC Breda',
+      stadium: 'Abe Lenstra Stadion',
+      status: 'played',
+    })
+  })
+
+  it('takes the goals of the finishing block, and they agree with the result', () => {
+    const read = readLeague(seasonProgramme)
+    const match = read.kind === 'read' ? read.matches.find((found) => found.round === 'Speelronde 33') : undefined
+
+    expect(match?.goals?.map((goal) => [goal.player, goal.minute, goal.penalty, goal.ours])).toEqual([
+      ['Kemper', 36, false, false],
+      ['Kemper', 74, true, false],
+    ])
+    expect(match === undefined ? 'no match' : checkGoals(match)).toBeUndefined()
+  })
+
+  it('leaves the matches of other clubs that were stopped alone', () => {
+    expect(seasonProgramme.match(/Gestaakt/gu)).toHaveLength(3)
+    expect(readLeague(seasonProgramme).kind).toBe('read')
+  })
+
+  it('skips the stopped block when a later block of the same two clubs is in the same round', () => {
+    expect(readLeague(leagueWith(stopped, finished))).toMatchObject({
+      kind: 'read',
+      matches: [{ goalsAgainst: 2, goalsFor: 0, matchDate: '2026-05-11', status: 'played' }],
+    })
+  })
+
+  it('finds the later block whichever club is named first', () => {
+    const reversed = box({ date: '11 mei 2026', score: '0 – 2', team1: '[[sc Heerenveen]]', team2: '[[NAC Breda]]' })
+
+    expect(readLeague(leagueWith(stopped, reversed))).toMatchObject({
+      kind: 'read',
+      matches: [{ matchDate: '2026-05-11' }],
+    })
+  })
+
+  it('stops with an error that names the match when the page has no later block', () => {
+    const read = readLeague(leagueWith(stopped))
+    const message = read.kind === 'error' ? read.message : ''
+
+    expect(message).toContain('Speelronde 12 (Eredivisie)')
+    expect(message).toContain('stopped')
+  })
+
+  it('does not use a block before the stopped one, or a block of other clubs, or of another round', () => {
+    const other = box({ date: '11 mei 2026', score: '2 – 0', team1: '[[NAC Breda]]', team2: '[[FC Twente]]' })
+
+    expect(readLeague(leagueWith(finished, stopped)).kind).toBe('error')
+    expect(readLeague(leagueWith(stopped, other)).kind).toBe('error')
+    expect(readLeague(`${leagueWith(stopped)}\n== Speelronde 13 ==\n${finished}\n`).kind).toBe('error')
+  })
+
+  it('stops when the finishing block is stopped too and nothing follows it', () => {
+    expect(readLeague(leagueWith(stopped, stopped.replace('82', '83'))).kind).toBe('error')
+  })
+
+  it('reads a date with a note as the date, also when the note closes itself or holds a template', () => {
+    const dateOf = (date: string) => {
+      const read = readLeague(leagueWith(box({ date, time: '' })))
+
+      return read.kind === 'read' ? read.matches[0]?.matchDate : read.message
+    }
+
+    expect(dateOf('11 mei 2026<ref>Een noot</ref>')).toBe('2026-05-11')
+    expect(dateOf('11 mei 2026<ref name="knvb" />')).toBe('2026-05-11')
+    expect(dateOf('11 mei 2026<ref name="knvb">Een {{noot|a|b}} met [[links|tekst]]</ref>')).toBe('2026-05-11')
+  })
+
+  it('has scorers that agree with the result for every match of ours on the real pages of 2025/26', () => {
+    const league = readLeague(seasonProgramme)
+    const cup = readCup(seasonCup)
+    const read = [...(league.kind === 'read' ? league.matches : []), ...(cup.kind === 'read' ? cup.matches : [])]
+
+    expect(read).toHaveLength(38)
+    expect(read.map((match) => checkGoals(match)).filter((problem) => problem !== undefined)).toEqual([])
+    // A match without scorers on the page is a goalless draw.
+    expect(
+      read.filter((match) => match.goals === null).every((match) => match.goalsFor === 0 && match.goalsAgainst === 0),
+    ).toBe(true)
+  })
+
+  it('leaves a red card with a VAR check out of the scorers, as a red card without one', () => {
+    const goals = matchOf(
+      leagueWith(
+        box({
+          goals1: '[[Anis Hadj Moussa|Hadj Moussa]] {{goal|42}}, {{rode kaart VAR|1|54|57}}',
+          goals2: '{{rode kaart|2|40|72}} [[Christijan Petrov|Petrov]]',
+          score: '1 – 0',
+        }),
+      ),
+      'Speelronde 12',
+    )?.goals
+
+    expect(goals?.map((goal) => [goal.player, goal.minute])).toEqual([['Hadj Moussa', 42]])
+  })
+
+  it('reads the real cup page of 2025/26: four ties', () => {
+    const read = readCup(seasonCup)
+
+    expect(
+      read.kind === 'read' ? read.matches.map((match) => [match.round, match.goalsFor, match.goalsAgainst]) : read,
+    ).toEqual([
+      ['Eerste ronde', 3, 0],
+      ['Tweede ronde', 3, 2],
+      ['Achtste finales', 3, 1],
+      ['Kwartfinales', 1, 4],
+    ])
+  })
+
+  it('reads the real table of 2025/26: 18 clubs', () => {
+    const read = readStandings(seasonStandings)
+
+    expect(read.kind === 'read' ? read.rows : read).toHaveLength(18)
+    expect(read.kind === 'read' ? read.rows[7] : read).toMatchObject({ club: 'sc Heerenveen', played: 34, points: 51 })
   })
 })
 

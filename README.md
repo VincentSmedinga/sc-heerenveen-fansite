@@ -35,22 +35,23 @@ Vul in `.env` de waarden in; `.env.example` zegt waar elke variabele voor is.
 
 Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:3000>.
 
-| Opdracht                 | Wat het doet                                                         |
-| ------------------------ | -------------------------------------------------------------------- |
-| `pnpm lint`              | ESLint, Stylelint en Prettier                                        |
-| `pnpm format`            | Prettier zet de opmaak recht                                         |
-| `pnpm typecheck`         | TypeScript in alle packages                                          |
-| `pnpm test`              | De tests van alle packages, van de hooks en van de linters           |
-| `pnpm build`             | De build van alle packages                                           |
-| `pnpm test:a11y`         | axe op de pagina's van de gebouwde site, na `pnpm build`             |
-| `pnpm test:stories`      | axe op elke story van het designsysteem, in licht en donker          |
-| `pnpm run import`        | Haalt de feeds, de wedstrijden en de selectie op                     |
-| `pnpm run import:status` | Toont per feed, voor de wedstrijden en de selectie of ze gezond zijn |
-| `pnpm release`           | Opent of werkt de release-pull request bij (vraagt `gh`)             |
-| `pnpm review <branch>`   | Start de site en Storybook voor een branch of pull request           |
-| `pnpm review:stop`       | Stopt ze weer                                                        |
-| `pnpm screenshots`       | Maakt plaatjes van een draaiende build voor een pull request         |
-| `pnpm rollover`          | Schuift het bord naar de nieuwe week (vraagt `gh`)                   |
+| Opdracht                 | Wat het doet                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `pnpm lint`              | ESLint, Stylelint en Prettier                                                |
+| `pnpm format`            | Prettier zet de opmaak recht                                                 |
+| `pnpm typecheck`         | TypeScript in alle packages                                                  |
+| `pnpm test`              | De tests van alle packages, van de hooks en van de linters                   |
+| `pnpm build`             | De build van alle packages                                                   |
+| `pnpm test:a11y`         | axe op de pagina's van de gebouwde site, na `pnpm build`                     |
+| `pnpm test:stories`      | axe op elke story van het designsysteem, in licht en donker                  |
+| `pnpm run import`        | Haalt de feeds, de wedstrijden en de selectie op                             |
+| `pnpm run import:status` | Toont per feed, voor de wedstrijden en de selectie of ze gezond zijn         |
+| `pnpm run import:season` | Leest eenmalig een afgelopen seizoen, zoals `pnpm run import:season 2025/26` |
+| `pnpm release`           | Opent of werkt de release-pull request bij (vraagt `gh`)                     |
+| `pnpm review <branch>`   | Start de site en Storybook voor een branch of pull request                   |
+| `pnpm review:stop`       | Stopt ze weer                                                                |
+| `pnpm screenshots`       | Maakt plaatjes van een draaiende build voor een pull request                 |
+| `pnpm rollover`          | Schuift het bord naar de nieuwe week (vraagt `gh`)                           |
 
 Na `pnpm release` en vóór je de release-pull request samenvoegt, schrijft de Coordinator de Nederlandse zinnen voor de pagina Updates.
 Een kleine pull request zet ze in [`apps/site/src/release-notes.ts`](apps/site/src/release-notes.ts).

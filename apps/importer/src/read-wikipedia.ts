@@ -113,9 +113,16 @@ const months = [
   'december',
 ]
 
-/** Takes the comments out of the text, which can hold a `|` or a `}}` of their own. */
+/**
+ * Takes the comments and the footnotes out of the text. Both can hold a `|` or a `}}` of their
+ * own, and a footnote after a date (`11 mei 2026<ref>...</ref>`) would make it a date we do not
+ * know.
+ */
 export function clean(text: string): string {
-  return text.replace(/<!--[\s\S]*?-->/gu, '')
+  return text
+    .replace(/<!--[\s\S]*?-->/gu, '')
+    .replace(/<ref\b[^>]*\/>/giu, '')
+    .replace(/<ref\b[^>]*>[\s\S]*?<\/ref>/giu, '')
 }
 
 /**
@@ -185,7 +192,7 @@ export function readCup(text: string): ReadProgramme {
   const matches: ReadMatch[] = []
   const problems: string[] = []
 
-  for (const box of boxes.filter(isOurs)) {
+  for (const box of boxes.filter((found) => isOurs(found) && !isSuperseded(found, boxes))) {
     const match = readMatch(box, 'KNVB Beker', box.heading)
 
     if (typeof match === 'string') {
@@ -204,7 +211,8 @@ export function readCup(text: string): ReadProgramme {
  * Reads the programme and the results of the league: the matches of sc Heerenveen, and
  * the day of the last match anyone played, which is the day the table holds for. A match
  * under a heading that is not a round of the league (a play-off) is not part of the
- * league and is left out.
+ * league and is left out. A block for a match that was stopped does not count when the round
+ * has a later block for the same two clubs (see `isSuperseded`).
  */
 export function readLeague(text: string): ReadProgramme {
   const boxes = matchBoxes(text)
@@ -230,7 +238,7 @@ export function readLeague(text: string): ReadProgramme {
     if (played.kind === 'score' && day !== undefined && (lastPlayedOn === null || day.isoDate > lastPlayedOn)) {
       lastPlayedOn = day.isoDate
     }
-    if (isOurs(box)) {
+    if (isOurs(box) && !isSuperseded(box, boxes)) {
       const match = readMatch(box, 'Eredivisie', round)
 
       if (typeof match === 'string') {
@@ -404,6 +412,25 @@ function isOurs(box: Template): boolean {
 }
 
 /**
+ * Whether a block is for a match that was stopped (`Gestaakt 82' (2 – 0)`) and a later block
+ * under the same heading is for the same two clubs. The later block has the match as it was
+ * finished, with its own date and time, and it is the one that counts. A stopped block without
+ * a later one is not superseded: `readMatch` gives an error for it.
+ */
+function isSuperseded(box: Template, boxes: Template[]): boolean {
+  const clubs = (found: Template) =>
+    [found.params.get('team1') ?? '', found.params.get('team2') ?? '']
+      .map((team) => linkTarget(team).toLowerCase())
+      .sort()
+      .join('|')
+
+  return (
+    parseScore(box.params.get('score') ?? '').kind === 'stopped' &&
+    boxes.some((other) => other.index > box.index && other.heading === box.heading && clubs(other) === clubs(box))
+  )
+}
+
+/**
  * Where a link in a value points: `sc Heerenveen` for `[[sc Heerenveen|HEE]]`, else the
  * text.
  */
@@ -474,7 +501,9 @@ function parseDate(
 function parseGoalLines(value: string, ours: boolean): { goals: ReadGoal[] } | { problem: string } {
   const goals: ReadGoal[] = []
 
-  for (const line of value.replace(/\{\{\s*(?:rode kaart|penmis)\s*\|[^{}]*\}\}/giu, '').split(/<br\s*\/?>/iu)) {
+  for (const line of value
+    .replace(/\{\{\s*(?:rode kaart(?: VAR)?|penmis)\s*\|[^{}]*\}\}/giu, '')
+    .split(/<br\s*\/?>/iu)) {
     const templates = [...line.matchAll(/\{\{\s*goal\s*\|([^{}]*)\}\}/giu)]
     // What is left of a line besides its goals is the name; a comma between templates is not.
     const name = plain(line.replace(/\{\{\s*goal\s*\|[^{}]*\}\}/giu, ' ')).replace(/^[\s,;]+|[\s,;]+$/gu, '')
@@ -554,11 +583,15 @@ function parseScore(
   | { away: number; home: number; kind: 'score' }
   | { kind: 'none' }
   | { kind: 'postponed' }
+  | { kind: 'stopped' }
   | { kind: 'unknown'; text: string } {
   const text = plain(value)
 
   if (text === '' || /^[–-]$/u.test(text)) {
     return { kind: 'none' }
+  }
+  if (/^gestaakt\b/iu.test(text)) {
+    return { kind: 'stopped' }
   }
 
   const score = /^(\d{1,2}) ?[–-] ?(\d{1,2})$/u.exec(text)
@@ -647,6 +680,9 @@ function readMatch(box: Template, competition: Competition, round: null | string
   }
   if (time === undefined) {
     return `${name} has a time we do not know: '${plain(box.params.get('time') ?? '').slice(0, 40)}'`
+  }
+  if (score.kind === 'stopped') {
+    return `${name} was stopped, and the page has no later block for the same two clubs in this round`
   }
   if (score.kind === 'unknown') {
     return `${name} has a score we do not know: '${score.text.slice(0, 40)}'`

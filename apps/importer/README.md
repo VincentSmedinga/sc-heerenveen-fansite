@@ -23,6 +23,7 @@ Schrijf `pnpm run import` en niet `pnpm import`: `import` is een opdracht van pn
 De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), één voor één, met één fetcher.
 Een feed die nog moet wachten, slaat hij over.
 Tegelijk leest hij de wedstrijden, de stand en de selectie van het lopende seizoen van de Nederlandse Wikipedia, elk hoogstens één keer per uur (zie _De wedstrijden en de stand_ en _De selectie_).
+Een afgelopen seizoen leest hij niet; dat doet de opdracht `pnpm run import:season <seizoen>`, eenmalig (zie _Een afgelopen seizoen_).
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
 
 ```text
@@ -606,6 +607,7 @@ Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/besliss
 De gegevens vallen onder CC BY-SA 4.0.
 Het gaat om de Eredivisie en de KNVB Beker van het lopende seizoen.
 Een seizoen begint op 1 juli en heet `2026/27`.
+Een afgelopen seizoen leest een aparte opdracht, eenmalig (zie _Een afgelopen seizoen_).
 
 ### Welke pagina's
 
@@ -745,6 +747,54 @@ Matches 2026/27: warning, the result of Speelronde 1 (Eredivisie) changed after 
 De waarschuwing staat ook in `match_imports.last_warning`, en dus in het overzicht.
 `matches.result_set_at` houdt bij sinds wanneer de uitslag zo staat.
 
+### Een afgelopen seizoen
+
+Een afgelopen seizoen verandert niet meer, dus de uurlijkse import leest het niet opnieuw.
+Eenmalig leest de opdracht `pnpm run import:season` het wel, bijvoorbeeld het vorige seizoen:
+
+```sh
+pnpm run import:season 2025/26
+```
+
+- Het seizoen heeft de vorm `2025/26`: het jaar, een schuine streep en de laatste twee cijfers van het jaar erna.
+  De opdracht weigert met een zin een andere vorm, twee jaren die niet op elkaar volgen, het lopende seizoen en een seizoen dat nog niet begonnen is.
+  Zonder seizoen laat ze zien hoe het moet.
+  De weigering komt voordat de opdracht Wikipedia iets vraagt of iets schrijft.
+- Ze leest de drie pagina's van dat seizoen (drie verzoeken), met dezelfde fetcher, controles en opslag als de uurlijkse import, en schrijft alles in één transactie.
+  Ze raakt alleen de rijen van dat seizoen: de rijen van het lopende seizoen blijven zoals ze zijn.
+  Draait ze nog eens, dan staat er `0 new, 0 updated, 38 unchanged`.
+- Ze neemt de lock van de import.
+  Houdt een run van cron die vast, dan doet de opdracht niets en zegt dat, met exitcode 1.
+  Probeer het dan na een paar minuten opnieuw.
+- De exitcode is 0 als het seizoen is opgeslagen, en 1 als de opdracht het seizoen weigert, een controle faalt of Wikipedia om te wachten vraagt of het niet toestaat.
+  Bij een fout blijft de database zoals ze was, en de rij in `match_imports` van dat seizoen noemt de fout.
+- De selectie van dat seizoen leest ze niet.
+  De doelpunten hebben dus geen speler (`player_id` is leeg), met de naam en de pagina van de speler zoals Wikipedia ze heeft.
+  Dat is geen fout en geen waarschuwing.
+- `pnpm run import:status` en de waarschuwingen gaan alleen over het lopende seizoen, ook al staat de rij `match_imports` van het afgelopen seizoen in de database.
+  Zo telt een seizoen dat niet wordt ververst nooit als ongezond.
+- De site laat het afgelopen seizoen nog niet zien: elke vraag van de site kiest één seizoen, en dat is het lopende.
+
+Op de host draait hetzelfde bestand als de cronjob de opdracht, met `--season` en het seizoen erachter:
+
+```sh
+node --env-file=<omgevingsbestand> <map van de app>/apps/importer/import.mjs --season 2025/26
+```
+
+#### Een gestaakte wedstrijd
+
+De pagina van 2025/26 heeft voor NAC Breda – sc Heerenveen (speelronde 33) twee blokken.
+Het eerste heeft de score "Gestaakt 82' (2 – 0)" op 10 mei 2026, het tweede de definitieve uitslag 2–0 op 11 mei, met een voetnoot bij de datum.
+De reader werkt zo:
+
+- Een blok waarvan de score met "Gestaakt" begint, telt niet mee zolang de pagina onder dezelfde kop voor dezelfde twee clubs een later blok heeft.
+  Het latere blok geldt, met zijn datum, zijn aftrap en zijn doelpunten.
+- Heeft de pagina geen later blok, dan stopt de import met een fout die de wedstrijd noemt.
+  Een score die we niet kennen, geeft altijd een fout.
+- Gestaakte wedstrijden van andere clubs leest hij niet, want alleen de wedstrijden van sc Heerenveen komen in de database.
+- Een voetnoot (`<ref>...</ref>`) haalt hij weg voordat hij de pagina leest, dus een datum met een voetnoot leest als de datum.
+- Een rode kaart met een VAR-controle (`{{rode kaart VAR|...}}`) is net als een andere rode kaart geen doelpunt.
+
 ### Wat de import niet doet
 
 - De versie van een pagina bewaart hij als de `Last-Modified` van Wikipedia (`wikipedia_pages.version`), want de ruwe tekst komt zonder versienummer.
@@ -753,7 +803,7 @@ De waarschuwing staat ook in `match_imports.last_warning`, en dus in het overzic
   De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
 - Scheidsrechter, toeschouwers en opstellingen leest hij niet, en ook geen kaarten, wissels of assists.
   Ook de fixtures hebben die velden leeg gemaakt.
-- Andere seizoenen leest hij niet, en wedstrijden van andere teams van de club ook niet.
+- Andere seizoenen leest hij niet in de uurlijkse import (alleen `pnpm run import:season` leest een afgelopen seizoen), en wedstrijden van andere teams van de club ook niet.
 
 ## De selectie
 
@@ -865,6 +915,7 @@ De zoekpagina (#107) kan daarmee de bronvermelding tonen, zoals `/wedstrijden` d
 - Cron start het daar elke 15 minuten, op minuut 7, 22, 37 en 52, met `DATABASE_URL` uit een eigen bestand in de thuismap.
   De uitvoer komt achteraan in `~/fansite-import.log`.
 - Met `--status` toont hetzelfde bestand het overzicht van de gezondheid.
+- Met `--season <seizoen>` leest hetzelfde bestand een afgelopen seizoen, eenmalig (zie _Een afgelopen seizoen_).
 
 Wat de eigenaar daarvoor eenmalig instelt, hoe je controleert dat de import werkt en wat je doet als hij niet werkt, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
 
@@ -885,11 +936,13 @@ De tests van de adapter gebruiken opnames van de feeds van de Leeuwarder Courant
 Ze zijn ingekort tot wat we mogen bewaren: de kop, de link, de `guid`, de tijd en het teken voor de betaalmuur (`premium` of de categorie `PRO`).
 Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in.
 `src/read-feed.test.ts` leest feeds zonder database, en `src/read-forum.test.ts` doet hetzelfde met verzonnen antwoorden van de API van het forum (`src/test-forum.ts`): in de vorm van het echte antwoord, met verzonnen titels en schermnamen, ook een discussie in een tag die we weglaten en een zonder laatste reageerder.
-`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
+`src/import-feeds.test.ts`, `src/import-forum.test.ts`, `src/import-season.test.ts`, `src/import.test.ts`, `src/run-log.test.ts`, `src/status.test.ts`, `src/robots-store.test.ts` en `src/bundle.test.ts` draaien op een echte MariaDB, zoals de tests van `packages/db`: start hem met `docker compose up -d --wait`.
 De tests van het logboek, de gezondheid en het wachten geven de import een nagebootste klok (de optie `clock`), zodat een test een dag of een maand overslaat zonder te wachten.
 `src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.
 
 De tests van de wedstrijden lezen verkleinde stukken van de drie pagina's van Wikipedia: [`src/fixtures/wikipedia-programme.wiki`](src/fixtures/wikipedia-programme.wiki), [`wikipedia-standings.wiki`](src/fixtures/wikipedia-standings.wiki) en [`wikipedia-cup.wiki`](src/fixtures/wikipedia-cup.wiki).
+De tests van de opdracht voor een afgelopen seizoen lezen stukken van de echte pagina's van 2025/26, op 29 oktober 2026 gelezen: [`wikipedia-season-programme.wiki`](src/fixtures/wikipedia-season-programme.wiki), [`wikipedia-season-standings.wiki`](src/fixtures/wikipedia-season-standings.wiki) en [`wikipedia-season-cup.wiki`](src/fixtures/wikipedia-season-cup.wiki).
+Het programma heeft alle wedstrijden van sc Heerenveen, de twee blokken van NAC Breda – sc Heerenveen, de gestaakte wedstrijden van andere clubs met het blok dat ze afmaakt, en de laatste wedstrijd van het seizoen.
 Ze zijn gelezen op 25 oktober 2026, en bovenaan staat de herkomst en de licentie (CC BY-SA 4.0).
 Er staan alle 34 wedstrijden van sc Heerenveen in en een paar van andere clubs.
 De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs, de scheidsrechters en de verslagen zijn leeggemaakt.
