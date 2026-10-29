@@ -2,7 +2,7 @@ import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
 import { matches, standings, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { seedMatches } from '@fansite/db/seed'
+import { madeUpMatches, seedMatches } from '@fansite/db/seed'
 import { eq } from 'drizzle-orm'
 import path from 'node:path'
 
@@ -43,17 +43,18 @@ export async function addEarlierSeason() {
   }
 
   return async () => {
-    if (!added) {
-      return
-    }
-
     const connection = connectToDatabase()
 
     try {
-      // The goals of the matches go with them.
-      await connection.db.delete(matches).where(eq(matches.season, season))
-      await connection.db.delete(standings).where(eq(standings.season, season))
-      await connection.db.delete(wikipediaPages).where(eq(wikipediaPages.season, season))
+      // Rows that this run put in, and made-up rows that an earlier run left behind, which is
+      // what `pnpm --filter site test-data --remove` meets. Real matches of that season, from
+      // an import, are never taken out: only a season whose matches are all made up goes.
+      if (added || (await holdsOnlyMadeUpMatches(connection.db, season))) {
+        // The goals of the matches go with them.
+        await connection.db.delete(matches).where(eq(matches.season, season))
+        await connection.db.delete(standings).where(eq(standings.season, season))
+        await connection.db.delete(wikipediaPages).where(eq(wikipediaPages.season, season))
+      }
     } finally {
       await connection.close()
     }
@@ -72,4 +73,18 @@ function connectToDatabase() {
   }
 
   return connect(readDatabaseEnv().DATABASE_URL)
+}
+
+/**
+ * Whether the season has matches and every one of them is a made-up match (the same
+ * competition, round and opponent as in `madeUpMatches`), so the season came from the seed and
+ * not from an import.
+ */
+async function holdsOnlyMadeUpMatches(db: ReturnType<typeof connectToDatabase>['db'], season: string) {
+  const key = (match: { competition: string; opponent: string; round: string }) =>
+    `${match.competition}|${match.round}|${match.opponent}`
+  const madeUp = new Set(madeUpMatches(aYearAgo()).map(key))
+  const rows = await db.select().from(matches).where(eq(matches.season, season))
+
+  return rows.length > 0 && rows.every((match) => madeUp.has(key(match)))
 }

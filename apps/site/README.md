@@ -59,6 +59,7 @@ Voor `/wedstrijden` zet hij een verzonnen stand in de database (`e2e/standings.t
 Heeft de database al een stand voor dit seizoen, dan laat hij die staan en haalt hij niets weg.
 Voor de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, zet hij verzonnen wedstrijden, doelpunten, een stand en de bronpagina's in het seizoen vóór het lopende (`e2e/earlier-season.ts`, met `seedMatches`), en haalt ze na de laatste test weer weg.
 Heeft de database al wedstrijden voor dat seizoen, dan laat hij die staan.
+`pnpm --filter site test-data --remove` haalt dat seizoen weg als al zijn wedstrijden verzonnen zijn, ook als een eerdere run ze erin zette, en laat het staan zodra er een echte wedstrijd van een import in staat.
 `e2e/season-picker.spec.ts` toetst de kiezer met en zonder JavaScript, het toetsenbord en de plek naast of onder de kop bij 320, 390 en 900 pixels.
 `e2e/card-image.spec.ts` klikt op die knop en toetst in de browser dat er een PNG komt, dat er niets naar een ander domein gaat en dat de CSP de afbeelding toestaat.
 Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
