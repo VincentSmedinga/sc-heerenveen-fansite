@@ -2,6 +2,7 @@ import preview from '#.storybook/preview'
 
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
+import { Text } from '../text/Text'
 import { DataTable, type DataTableRow } from './DataTable'
 
 const meta = preview.meta({
@@ -25,6 +26,8 @@ const meta = preview.meta({
           '',
           'Een lange rijkop, zoals een pad zonder spaties, breekt af waar het moet.',
           'Een kolomkop breekt alleen bij een spatie af, dus houd hem kort: een lang woord als kop maakt de tabel breder dan een telefoon.',
+          'Past een tabel met veel kolommen niet met hele woorden, geef een kolom dan als `{ abbreviation, name }`.',
+          'De kop toont de afkorting, een schermlezer hoort het hele woord, en de pagina zet een regel onder de tabel die de afkortingen uitlegt, zoals de stand van de competitie doet.',
           'De tabel is voor een lijst van dingen met elk een paar getallen, niet voor samengevoegde cellen of cellen met meer dan tekst.',
           'De stand van de competitie heeft een eigen component, `StandingsTable`.',
         ].join('\n'),
@@ -95,6 +98,46 @@ export const PhoneLight = meta.story({
   globals: { theme: 'light' },
   name: 'Op een telefoon, licht',
   render: renderDays('20rem'),
+})
+
+const results: DataTableRow[] = [
+  { cells: [8, 5, 2, 1, 17], header: 'Wij scoren eerst' },
+  { cells: [4, 1, 1, 2, 4], header: 'De tegenstander scoort eerst' },
+]
+
+const renderAbbreviations = () => (
+  <div style={{ maxInlineSize: '20rem' }}>
+    <Card aria-labelledby="afkortingen-kop">
+      <Heading id="afkortingen-kop" level={2}>
+        Na het eerste doelpunt
+      </Heading>
+      <DataTable
+        caption="Wat er gebeurt na het eerste doelpunt"
+        columns={[
+          'Eerste doelpunt',
+          { abbreviation: 'G', name: 'gespeeld' },
+          { abbreviation: 'W', name: 'winst' },
+          { abbreviation: 'GL', name: 'gelijk' },
+          { abbreviation: 'V', name: 'verlies' },
+          { abbreviation: 'P', name: 'punten' },
+        ]}
+        rows={results}
+      />
+      <Text appearance="meta">G gespeeld, W winst, GL gelijk, V verlies, P punten</Text>
+    </Card>
+  </div>
+)
+
+export const AbbreviationsLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Kolommen met een afkorting op een telefoon, licht',
+  render: renderAbbreviations,
+})
+
+export const AbbreviationsDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Kolommen met een afkorting op een telefoon, donker',
+  render: renderAbbreviations,
 })
 
 export const LongRowHeaderLight = meta.story({

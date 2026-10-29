@@ -653,6 +653,7 @@ await withEmptyDatabase((database) =>
         '#doelpuntenmakers',
         '#de-nul-gehouden',
         '#doelpunten-per-kwartier',
+        '#hoe-de-wedstrijden-verlopen',
       ],
     )
     assert.doesNotMatch(html, /hf-page-shortcuts/)
@@ -702,6 +703,16 @@ await withEmptyDatabase((database) =>
       matchesHtml,
       /<caption class="hf-visually-hidden">Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd<\/caption>/,
     )
+    // The card on how the matches go: two tables, the two sentences, and what it is based on.
+    // The two made-up league matches are both won after scoring first and leading at half-time.
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="hoe-de-wedstrijden-verlopen">.*?href="#hoe-de-wedstrijden-verlopen">Hoe de wedstrijden verlope/s,
+    )
+    assert.match(matchesHtml, /<caption class="hf-visually-hidden">Wat er gebeurt na het eerste doelpunt<\/caption>/)
+    assert.match(matchesHtml, /<caption class="hf-visually-hidden">Wat er gebeurt na de stand bij de rust<\/caption>/)
+    assert.match(matchesHtml, /<th scope="row">Wij scoren eerst<\/th><td[^>]*>2<\/td><td[^>]*>2<\/td>/)
+    assert.match(matchesHtml, /Na een achterstand won sc Heerenveen nog geen wedstrijd\./)
     assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     assert.doesNotMatch(matchesHtml, /action=history/)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)

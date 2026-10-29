@@ -20,7 +20,7 @@ import {
   WikipediaCredit,
 } from '@fansite/design-system'
 
-import type { MatchData } from './matches'
+import type { FlowRow, MatchData } from './matches'
 
 import { moreCleanSheets } from './items-per-card'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
@@ -29,6 +29,7 @@ import {
   goalsPerQuarter,
   goalsWithInitials,
   leagueResultsOf,
+  matchFlowOf,
   overviewOf,
   quarterLabels,
   scorersCoverage,
@@ -155,6 +156,22 @@ export function GoalsPerQuarterCard({ matches }: { matches: PublicMatch[] }) {
   )
 }
 
+/** The cells of a row of the tables of the card on how the matches go. */
+const flowCells = (row: FlowRow) => [row.matches, row.won, row.drawn, row.lost, row.points]
+
+/**
+ * The columns are abbreviations, because five columns with whole words are wider than a phone
+ * and than the sidebar of a small desktop. The line under the second table explains them, with
+ * `G gespeeld` as the table of the standings has it.
+ */
+const flowColumns = [
+  { abbreviation: 'G', name: 'gespeeld' },
+  { abbreviation: 'W', name: 'winst' },
+  { abbreviation: 'GL', name: 'gelijk' },
+  { abbreviation: 'V', name: 'verlies' },
+  { abbreviation: 'P', name: 'punten' },
+] as const
+
 /**
  * The block of the homepage with the previous and the next match in one list, and a link to the
  * page with them all. Without matches it says so in a sentence for visitors.
@@ -179,6 +196,67 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
         </Link>
       </Text>
       {shown.length > 0 && <WikipediaCredit compact />}
+    </Card>
+  )
+}
+
+/**
+ * The card of the matches page on how the matches of the Eredivisie go: what happens after the
+ * first goal and after the score at half-time, each as a table of results and points, and under
+ * them in how many matches sc Heerenveen won after trailing and did not win after leading.
+ * Under those stand how many matches it is based on, and how many of them could not show the
+ * first goal, because both clubs scored in the same minute. Without a match with known goals it
+ * is a sentence for visitors and no tables.
+ */
+export function MatchFlowCard({ matches }: { matches: PublicMatch[] }) {
+  const { atHalfTime, firstGoal, known, notWonAfterLead, played, unknownFirstGoal, wonAfterTrailing } =
+    matchFlowOf(matches)
+
+  return (
+    <Card aria-labelledby="hoe-de-wedstrijden-verlopen" shareable={imageCredit(known > 0)} surface="soft">
+      <Heading anchor id="hoe-de-wedstrijden-verlopen" level={2}>
+        Hoe de wedstrijden verlopen
+      </Heading>
+      {known === 0 ? (
+        <Text>We hebben nog geen doelpunten met een minuut van dit seizoen. Kijk straks nog eens.</Text>
+      ) : (
+        <>
+          <DataTable
+            caption="Wat er gebeurt na het eerste doelpunt"
+            columns={['Eerste doelpunt', ...flowColumns]}
+            rows={[
+              { cells: flowCells(firstGoal.ours), header: 'Wij scoren eerst' },
+              { cells: flowCells(firstGoal.opponent), header: 'De tegenstander scoort eerst' },
+            ]}
+          />
+          <DataTable
+            caption="Wat er gebeurt na de stand bij de rust"
+            columns={['Stand bij de rust', ...flowColumns]}
+            rows={[
+              { cells: flowCells(atHalfTime.ahead), header: 'Voor' },
+              { cells: flowCells(atHalfTime.level), header: 'Gelijk' },
+              { cells: flowCells(atHalfTime.behind), header: 'Achter' },
+            ]}
+          />
+          <Text appearance="meta">G gespeeld, W winst, GL gelijk, V verlies, P punten</Text>
+          <Text>
+            {wonAfterTrailing === 0
+              ? 'Na een achterstand won sc Heerenveen nog geen wedstrijd.'
+              : `Na een achterstand won sc Heerenveen ${wonAfterTrailing === 1 ? '1 wedstrijd' : `${wonAfterTrailing} wedstrijden`}.`}
+          </Text>
+          <Text>
+            {notWonAfterLead === 0
+              ? 'Na een voorsprong liet sc Heerenveen nog geen winst liggen.'
+              : `Na een voorsprong haalde sc Heerenveen in ${notWonAfterLead === 1 ? '1 wedstrijd' : `${notWonAfterLead} wedstrijden`} geen winst.`}
+          </Text>
+          <BasedOn known={known} played={played} />
+          {unknownFirstGoal > 0 && (
+            <Text appearance="meta">
+              {`Bij ${unknownFirstGoal === 1 ? '1 wedstrijd' : `${unknownFirstGoal} wedstrijden`} is niet te zien wie het eerst scoorde.`}
+            </Text>
+          )}
+        </>
+      )}
     </Card>
   )
 }
