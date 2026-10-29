@@ -1,0 +1,37 @@
+name: Een bron voorstellen
+description: Een website of podcast over sc Heerenveen die we op de site kunnen opnemen.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bedankt voor je voorstel.
+        Dit issue is openbaar: iedereen kan het lezen.
+        Een voorstel verandert niets aan wat we van een bron laten zien: standaard alleen de kop, de link en de naam van de bron.
+        Een intro of een foto tonen we alleen met toestemming van de bron.
+  - type: input
+    id: naam
+    attributes:
+      label: Naam van de bron
+    validations:
+      required: true
+  - type: input
+    id: website
+    attributes:
+      label: Website
+      description: Het adres van de website, bijvoorbeeld `https://www.voorbeeld.nl`.
+    validations:
+      required: true
+  - type: input
+    id: feed
+    attributes:
+      label: Feed of podcast
+      description: Het adres van de RSS-feed of van de podcast, als die er is.
+    validations:
+      required: false
+  - type: textarea
+    id: waarom
+    attributes:
+      label: Waarom past deze bron?
+      description: Schrijft hij over sc Heerenveen, en hoe vaak?
+    validations:
+      required: true

@@ -1,0 +1,58 @@
+name: Een fout melden
+description: Iets op de site werkt niet, ziet er niet goed uit of is niet te gebruiken.
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bedankt dat je een fout meldt.
+        Dit issue is openbaar: iedereen kan het lezen.
+        Zet er geen wachtwoorden en geen persoonsgegevens in, zoals je naam, e-mailadres of telefoonnummer, en ook niet die van een ander.
+  - type: textarea
+    id: gezien
+    attributes:
+      label: Wat zag je?
+      description: Beschrijf wat er misging.
+    validations:
+      required: true
+  - type: textarea
+    id: gedaan
+    attributes:
+      label: Wat deed je?
+      description: Schrijf de stappen op, zodat een ander de fout kan nadoen.
+    validations:
+      required: true
+  - type: textarea
+    id: verwacht
+    attributes:
+      label: Wat verwachtte je?
+    validations:
+      required: true
+  - type: input
+    id: pagina
+    attributes:
+      label: Op welke pagina?
+      description: Het adres van de pagina, bijvoorbeeld `https://sc.heerenveen.org/podcasts`.
+    validations:
+      required: true
+  - type: input
+    id: apparaat
+    attributes:
+      label: Welk apparaat gebruik je?
+      description: Bijvoorbeeld een iPhone 14, een Android-telefoon of een Windows-laptop.
+    validations:
+      required: false
+  - type: input
+    id: browser
+    attributes:
+      label: Welke browser gebruik je?
+      description: Bijvoorbeeld Safari, Chrome of Firefox, met de versie als je die weet.
+    validations:
+      required: false
+  - type: input
+    id: hulpmiddel
+    attributes:
+      label: Gebruik je een hulpmiddel?
+      description: Bijvoorbeeld een schermlezer zoals VoiceOver of NVDA, of een vergrotingsprogramma.
+    validations:
+      required: false
