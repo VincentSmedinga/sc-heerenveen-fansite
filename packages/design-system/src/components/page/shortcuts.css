@@ -32,7 +32,7 @@
    * a notch on the sides (see page.css). On a screen wider than the column of the page both
    * sides have it, so the bar is centred like the menu (see below).
    *
-   * It is for a narrow screen. From 56rem the Page.Body has two columns, so the cells are side
+   * It is for a narrow screen. From 52rem the Page.Body has two columns, so the cells are side
    * by side and nothing hides behind a long cell: the bar is gone, with display: none, so a
    * screen reader doesn't read it either. The number is the one of the two columns in page.css
    * (a media query can't use a custom property).
@@ -75,7 +75,7 @@
       padding-inline-end: max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
     }
 
-    @media (width >= 56rem) {
+    @media (width >= 52rem) {
       display: none;
     }
   }
@@ -85,7 +85,7 @@
    * padding of the page (see root.css) keeps clear of the top inset; here it keeps clear of the
    * bar as well, where the bar sticks and shows.
    */
-  @media (20em < width < 56rem) {
+  @media (20em < width < 52rem) {
     html:has(.hf-page-shortcuts) {
       scroll-padding-block-start: calc(env(safe-area-inset-top, 0px) + var(--hf-shortcuts-height));
     }

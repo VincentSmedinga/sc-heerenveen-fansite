@@ -9,7 +9,7 @@
  * the bar is gone (see shortcuts.css, which a test compares with this). From there on nothing
  * listens to the scrolling.
  */
-export const barWidths = '(width < 56rem)'
+export const barWidths = '(width < 52rem)'
 
 /**
  * The index of the current target, from whether each target in the order of the page has come

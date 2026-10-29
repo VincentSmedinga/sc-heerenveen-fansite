@@ -252,12 +252,12 @@ describe('the columns of the body in page.css', () => {
     expect(body.match(/grid-template-columns:/g)).toHaveLength(2)
   })
 
-  it('lets the tracks shrink only to a width that fits in 56rem, where the columns start side by side', () => {
+  it('lets the tracks shrink only to a width that fits in 52rem, where the columns start side by side', () => {
     const [, mainMinimum, sidebarMinimum] = tracks ?? []
 
-    // 56rem less 2rem of margin and 2rem between the columns.
-    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(56 - 2 - 2)
-    expect(body).toContain('@media (width >= 56rem)')
+    // 52rem less 2rem of margin and 2rem between the columns.
+    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(52 - 2 - 2)
+    expect(body).toContain('@media (width >= 52rem)')
   })
 })
 
@@ -265,7 +265,7 @@ describe('the wide sidebar in page.css', () => {
   const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
   const pageWidth = Number(layout.match(/--hf-page-max-width: (\d+)rem;/)?.[1])
   const wide = css.match(
-    /@media \(width >= 56rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-wide\) \{\s*grid-template-columns: minmax\((\d+)rem, (\d+)rem\) minmax\((\d+)rem, (\d+)rem\);/,
+    /@media \(width >= 52rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-wide\) \{\s*grid-template-columns: minmax\((\d+)rem, (\d+)rem\) minmax\((\d+)rem, (\d+)rem\);/,
   )
 
   it('has a main and a sidebar of 31rem each and 2rem between them, which fill the page of 64rem', () => {
@@ -276,10 +276,10 @@ describe('the wide sidebar in page.css', () => {
     expect(Number(main) + Number(sidebar) + 2).toBe(pageWidth)
   })
 
-  it('lets the tracks shrink only to a width that fits in 56rem, where the columns start side by side', () => {
+  it('lets the tracks shrink only to a width that fits in 52rem, where the columns start side by side', () => {
     const [, mainMinimum, , sidebarMinimum] = wide ?? []
 
-    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(56 - 2 - 2)
+    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(52 - 2 - 2)
   })
 
   it('shrinks both tracks to the same minimum, so they are equally wide at every width', () => {
