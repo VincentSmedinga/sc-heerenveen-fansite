@@ -426,6 +426,7 @@ describe('the page /wedstrijden', () => {
           player: 'Klaverboer',
           playerId: null,
           playerName: null,
+          playerPage: null,
           playerSearchTerm: null,
           stoppageMinutes: null,
         },
@@ -437,6 +438,7 @@ describe('the page /wedstrijden', () => {
           player: 'Vente',
           playerId: null,
           playerName: null,
+          playerPage: null,
           playerSearchTerm: null,
           stoppageMinutes: 5,
         },
@@ -507,6 +509,7 @@ describe('the page /wedstrijden', () => {
                 player: '<img src=x onerror=alert(1)>',
                 playerId: null,
                 playerName: null,
+                playerPage: null,
                 playerSearchTerm: null,
                 stoppageMinutes: null,
               },
@@ -1223,6 +1226,7 @@ describe('the page /wedstrijden', () => {
         player: 'Proefman',
         playerId: null,
         playerName: null,
+        playerPage: null,
         playerSearchTerm: null,
         stoppageMinutes: null,
       })
@@ -1368,6 +1372,7 @@ describe('the page /wedstrijden', () => {
                     player: 'Teststraat',
                     playerId: null,
                     playerName: null,
+                    playerPage: null,
                     playerSearchTerm: null,
                     stoppageMinutes: 4,
                   },
@@ -1652,6 +1657,7 @@ describe('the page /wedstrijden', () => {
         player: 'Jansen',
         playerId: id,
         playerName: name,
+        playerPage: null,
         playerSearchTerm: 'Jansen',
         stoppageMinutes: null,
       })
@@ -1679,6 +1685,51 @@ describe('the page /wedstrijden', () => {
       // The given name is plain and the surname heavier, in one name.
       expect(await topScorers()).toContain(
         '<span class="hf-player-name"><span class="hf-player-name-given">Kees</span> <span class="hf-player-name-surname">Jansen</span></span>',
+      )
+    })
+
+    it('shows the full name from the Wikipedia page for goals without a linked player, and counts them together', async () => {
+      const played = matchData.matches.find((item) => item.status === 'played')!
+      const goal = (shown: string, page: null | string, minute: number) => ({
+        minute,
+        ours: true,
+        ownGoal: false,
+        penalty: false,
+        player: shown,
+        playerId: null,
+        playerName: null,
+        playerPage: page,
+        playerSearchTerm: null,
+        stoppageMinutes: null,
+      })
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [
+          {
+            ...played,
+            goals: [
+              goal('Kemper', 'Boy Kemper', 10),
+              goal('Kemper', 'Boy Kemper', 20),
+              goal('Van Bergen', 'Mitchell van Bergen (voetballer, 1999)', 30),
+              goal('Proefman', null, 40),
+            ],
+            goalsAgainst: 0,
+            goalsFor: 4,
+          },
+        ],
+      })
+
+      const card = await topScorers()
+      const rows = [...card.matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">(.+?)<\/th><td[^>]*>(\d+)/g)]
+
+      expect(rows.map(([, position, player, goals]) => [position, plain(player), goals])).toEqual([
+        ['1', 'Boy Kemper', '2'],
+        ['2', 'Proefman', '1'],
+        ['2', 'Mitchell van Bergen', '1'],
+      ])
+      expect(card).toContain(
+        '<span class="hf-player-name"><span class="hf-player-name-given">Boy</span> <span class="hf-player-name-surname">Kemper</span></span>',
       )
     })
 
@@ -1731,6 +1782,7 @@ describe('the page /wedstrijden', () => {
         player: `Speler ${String.fromCharCode(65 + index)}`,
         playerId: null,
         playerName: null,
+        playerPage: null,
         playerSearchTerm: null,
         stoppageMinutes: null,
       }))

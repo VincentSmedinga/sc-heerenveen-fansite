@@ -279,7 +279,8 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
   Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
   Een doelpunt dat de importer aan een speler koppelde (`player_id`) telt voor die speler en toont zijn volledige naam uit `players` (de voornaam gewoon en de achternaam vet, met `PlayerName`), ook als hij de selectie verliet; twee spelers met dezelfde achternaam zijn dus twee rijen.
-  Een doelpunt zonder speler telt per naam zoals de pagina hem toont, als een rij van zichzelf, zodat er geen doelpunt verloren gaat.
+  Een doelpunt zonder speler maar met een Wikipedia-pagina (`playerPage`) telt voor die pagina en toont de titel zonder de toevoeging tussen haakjes als volledige naam, gesplitst met de korte naam van de wedstrijdpagina; heeft een gekoppeld doelpunt dezelfde pagina, dan tellen ze samen.
+  Een doelpunt zonder speler en zonder pagina telt per naam zoals de pagina hem toont, als een rij van zichzelf, zodat er geen doelpunt verloren gaat.
   Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet van de achternaam.
   Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
   Direct onder de kop, boven de tabel, staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord": dezelfde plek en stijl als bij de nul gehouden.

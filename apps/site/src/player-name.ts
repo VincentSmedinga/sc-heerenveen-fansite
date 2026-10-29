@@ -7,6 +7,26 @@ export type NameParts = {
 }
 
 /**
+ * The name of a player from the title of his Wikipedia page: the title without the addition in
+ * brackets that tells pages with the same title apart, so `Pim Verbeek (voetballer, 1999)` is
+ * `Pim Verbeek`.
+ */
+export function pageTitleName(title: string): string {
+  return title.replace(/\s*\([^)]*\)\s*$/, '').trim()
+}
+
+/**
+ * A goal without a player in the table has the name as the page of the match shows it, mostly a
+ * surname (`Kemper`, or `D. Rots` when two players share one), and the title of the player's
+ * Wikipedia page, which is his full name. The page gives the name and the short name the search
+ * term, after the initials it may start with, so `Boy Kemper` is split into `Boy` and `Kemper`.
+ * When the short name is no end of the full name, it is not split (see `splitPlayerName`).
+ */
+export function splitPageName(shortName: string, title: string): NameParts {
+  return splitPlayerName(pageTitleName(title), shortName.replace(/^(?:\p{Lu}\.\s*)+/u, ''))
+}
+
+/**
  * Splits the name of a player from the table `players`, with his search term, which is the
  * name without the first given name. When the name ends with the search term, at the start of a
  * word, that end is the surname and what comes before it the given name: `Joost van Aken` with

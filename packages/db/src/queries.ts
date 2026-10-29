@@ -307,7 +307,9 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * goal of one of our players also has `playerId`, and the full name and the search term of
  * that player in `playerName` and `playerSearchTerm` (all three null for a goal that has no
  * player in the table `players`: a goal of the opponent, or one that could not be linked). The
- * player may have left the squad since. The moment the importer saw a result stays
+ * player may have left the squad since. `playerPage` is the title of the player's Wikipedia
+ * page as the table of the match links it, whether or not the goal is linked to a player, and
+ * null when the table does not link the name. The moment the importer saw a result stays
  * internal. Only the season that is asked for is read: the pages show the current season alone.
  */
 export async function listSeasonMatches(db: Database, season: string) {
@@ -342,6 +344,7 @@ export async function listSeasonMatches(db: Database, season: string) {
       player: matchGoals.player,
       playerId: matchGoals.playerId,
       playerName: players.name,
+      playerPage: matchGoals.wikipediaPage,
       playerSearchTerm: players.searchTerm,
       stoppageMinutes: matchGoals.stoppageMinutes,
     })
@@ -363,6 +366,7 @@ export async function listSeasonMatches(db: Database, season: string) {
         player: goal.player,
         playerId: goal.playerId,
         playerName: goal.playerName,
+        playerPage: goal.playerPage,
         playerSearchTerm: goal.playerSearchTerm,
         stoppageMinutes: goal.stoppageMinutes,
       })),
