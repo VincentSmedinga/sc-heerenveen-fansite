@@ -222,7 +222,14 @@ export async function importPastSeason(
 
 /** Whether a season, such as `2025/26`, ended before the moment. */
 export function isPastSeason(season: string, moment: Date): boolean {
-  return /^\d{4}\//u.test(season) && Number(season.slice(0, 4)) < Number(seasonOf(moment).slice(0, 4))
+  return isSeason(season) && Number(season.slice(0, 4)) < Number(seasonOf(moment).slice(0, 4))
+}
+
+/** Whether a text is a season: the year, a slash and the last two digits of the next year. */
+export function isSeason(text: string): boolean {
+  const parts = /^(\d{4})\/(\d{2})$/u.exec(text)
+
+  return parts !== null && Number(parts[2]) === (Number(parts[1]) + 1) % 100
 }
 
 /** Whether the import has failed so often in a row that it counts as unhealthy. */

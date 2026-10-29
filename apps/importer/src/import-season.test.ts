@@ -293,15 +293,24 @@ describe('the command', () => {
     expect(await database.db.select().from(wikipediaPages)).toEqual([])
   })
 
-  it('refuses the current season even when the function is called directly', async () => {
-    const server = await serve()
-    const report = await importPastSeason(database.db, fetcherFor([server]), current, {
-      clock: () => now,
-      origin: server.origin,
-    })
+  it.each([current, '2027/28', '2025/xyz', '2025/27', '2025', ''])(
+    'refuses %j even when the function is called directly',
+    async (season) => {
+      const server = await serve()
+      const report = await importPastSeason(database.db, fetcherFor([server]), season, {
+        clock: () => now,
+        origin: server.origin,
+      })
 
-    expect(report).toMatchObject({ kind: 'error', season: current })
-    expect(server.paths()).toEqual([])
+      expect(report).toMatchObject({ kind: 'error', season })
+      expect(server.paths()).toEqual([])
+    },
+  )
+
+  it('writes no health for a season it refuses', async () => {
+    const server = await serve()
+
+    await importPastSeason(database.db, fetcherFor([server]), current, { clock: () => now, origin: server.origin })
     expect(await database.db.select().from(matchImports)).toEqual([])
   })
 
@@ -432,11 +441,15 @@ describe('the program that starts it', () => {
   }
 
   it('shows how to use it when it gets no season, a wrong one or something else, without a request', async () => {
-    const noSeason = await start(['--season'])
-    const wrong = await start(['--season', '2025/27'])
-    const stray = await start(['2025/26'])
-    const both = await start(['--season', '--status', '2025/26'])
-    const two = await start(['--season', '2025/26', '2024/25'])
+    // Each start is a process that loads TypeScript, so they run together and the test may take
+    // longer than the usual 5 seconds on a busy machine.
+    const [noSeason, wrong, stray, both, two] = await Promise.all([
+      start(['--season']),
+      start(['--season', '2025/27']),
+      start(['2025/26']),
+      start(['--season', '--status', '2025/26']),
+      start(['--season', '2025/26', '2024/25']),
+    ])
 
     expect([noSeason.code, wrong.code]).toEqual([1, 1])
     expect(noSeason.stdout).toContain(seasonUsage)
@@ -444,5 +457,5 @@ describe('the program that starts it', () => {
     expect([stray.code, both.code, two.code]).toEqual([2, 2, 2])
     expect(stray.stderr).toContain(seasonUsage)
     expect(await database.db.select().from(matchImports)).toEqual([])
-  })
+  }, 30_000)
 })
