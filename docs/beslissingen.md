@@ -1345,6 +1345,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alle tekst haalt ermee AA, lopende tekst AAA.
 - **Uit het canvas overgenomen:** tekst in de header blauw-50 en het menu blauw-200, tekst op de wedstrijdband blauw-100, en de gemarkeerde rij in blauw-100 met blauw-800 (licht) en blauw-800 met blauw-50 (donker).
 - **Later:** zie _Alleen koppen laten zien dat je ze al hebt geopend_ (24 oktober 2026): de kleur voor bezocht staat hier voor elke link; nu geldt hij alleen voor de koppen.
+  Zie ook _De acht voorlopige kleuren blijven en heten niet meer voorlopig_ (29 oktober 2026): de waarden zijn vastgelegd en niet meer voorlopig.
 
 ### Staal voor markeringen
 
@@ -2662,6 +2663,31 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De huidige plek in de balk "Op deze pagina" laten zoals hij is (de regel zou dan een uitzondering hebben).
   Het gewicht van de huidige link verbergen met een onzichtbare dikke kopie, zodat de rij niet verspringt (extra opmaak bij elke link, en de site laadt bij elke klik toch een nieuwe pagina).
 - **Later:** vervangt delen van vier eerdere besluiten; zie de **Later:**-regels bij _Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500_, _Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter_, _De balk met links naar de kaarten volgt de pagina_ en _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_.
+
+### De acht voorlopige kleuren blijven en heten niet meer voorlopig
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kleuren die in Storybook _voorlopig_ heetten, blijven zoals ze zijn.
+  Het label en de code ervoor zijn weg uit `ColourDocs.tsx`, `tokens.ts`, `docs.css` en `colour.mdx`.
+  De tabel met contrast in Storybook meet nu ook de rand van een invoerveld op de drie andere vlakken en de gevulde knop, ook onder de muis, op een vlak en op de pagina.
+  Verhalen in licht en donker laten de kleuren zien: de knop onder de muis, de toestanden van een link, een tabel met zebrarijen en een rij onder de muis, een invoerveld, en de kop van een nieuwsbericht en de titel van een discussie, bezocht en onder de muis.
+  Lopende tekst haalt AAA (7:1), andere tekst AA (4,5:1) en wat je moet kunnen zien 3:1.
+  Het contrast is nagemeten op alle vlakken waar de kleur voorkomt, in licht en donker:
+  - knop in donker (blauw-300): de tekst erop (blauw-950) haalt 9,13:1, en de knop haalt 7,90:1 op een vlak en 9,13:1 op de pagina;
+  - knop onder de muis: wit op blauw-900 haalt 15,75:1 in licht, en blauw-950 op blauw-200 haalt 12,30:1 in donker;
+  - rij onder de muis in donker (blauw-950): lopende tekst haalt 17,17:1, een link 9,13:1;
+  - zebrarijen in donker (blauw-950): lopende tekst haalt 17,17:1, secundaire tekst en een positie 12,30:1;
+  - link onder de muis in donker (blauw-200): 10,64:1 op een vlak en 8,38:1 op een sterk of warm vlak;
+  - bezochte link: grijs-600 in licht haalt 5,30:1 tot 6,44:1 en grijs-400 in donker 4,89:1 tot 7,18:1, op elk vlak waar een kop of titel staat;
+  - rand van een invoerveld: grijs-500 in licht haalt 3,46:1 tot 4,20:1 en blauw-400 in donker 4,16:1 tot 6,10:1, op de pagina en de vier vlakken.
+- **Waarom:** elke kleur haalt zijn eis, dus er is geen reden om hem te veranderen.
+  Zo blijft wat bezoekers zien gelijk.
+- **Nadeel:** in licht en in donker zijn de rij onder de muis en de zebrarij dezelfde kleur, en geen tabel of component gebruikt ze nog.
+  Een zebrarij verandert dus niet onder de muis.
+  Wie zebrarijen gaat bouwen, besluit dan of ze een eigen kleur krijgen.
+- **Alternatieven:** per kleur een andere stap uit de reeks.
+  Elke kleur haalt zijn eis, dus daar was geen reden voor.
+- **Later:** vervangt _Voorlopige kleurtokens_ (20 oktober 2026): de waarden zijn vastgelegd.
 
 ## Site
 

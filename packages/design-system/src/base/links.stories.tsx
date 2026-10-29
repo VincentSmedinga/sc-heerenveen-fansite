@@ -23,43 +23,55 @@ export const InText = meta.story({
   ),
 })
 
-export const States = meta.story({
-  name: 'Toestanden',
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Bezocht, muis en focus zijn nagebootst met de add-on Pseudo States. De bezochte link heeft dezelfde kleur als de gewone link. Met de Tab-toets zie je de echte focusrand.',
-      },
-    },
-    pseudo: {
-      focusVisible: ['[data-example="focus"]'],
-      hover: ['[data-example="hover"]'],
-      visited: ['[data-example="visited"]'],
+const statesParameters = {
+  docs: {
+    description: {
+      story:
+        'Bezocht, muis en focus zijn nagebootst met de add-on Pseudo States. De bezochte link heeft dezelfde kleur als de gewone link. Met de Tab-toets zie je de echte focusrand.',
     },
   },
-  render: () => (
-    <ul style={{ listStyleType: 'none', paddingInlineStart: 0 }}>
-      <li>
-        <a href="#nog-niet-bezocht">Gewone link</a>
-      </li>
-      <li>
-        <a data-example="visited" href="#al-bezocht">
-          Bezochte link
-        </a>
-      </li>
-      <li>
-        <a data-example="hover" href="#onder-de-muis">
-          Link onder de muis
-        </a>
-      </li>
-      <li>
-        <a data-example="focus" href="#met-focus">
-          Link met focus
-        </a>
-      </li>
-    </ul>
-  ),
+  pseudo: {
+    focusVisible: ['[data-example="focus"]'],
+    hover: ['[data-example="hover"]'],
+    visited: ['[data-example="visited"]'],
+  },
+}
+
+const renderStates = () => (
+  <ul style={{ listStyleType: 'none', paddingInlineStart: 0 }}>
+    <li>
+      <a href="#nog-niet-bezocht">Gewone link</a>
+    </li>
+    <li>
+      <a data-example="visited" href="#al-bezocht">
+        Bezochte link
+      </a>
+    </li>
+    <li>
+      <a data-example="hover" href="#onder-de-muis">
+        Link onder de muis
+      </a>
+    </li>
+    <li>
+      <a data-example="focus" href="#met-focus">
+        Link met focus
+      </a>
+    </li>
+  </ul>
+)
+
+export const StatesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Toestanden, licht',
+  parameters: statesParameters,
+  render: renderStates,
+})
+
+export const StatesDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Toestanden, donker',
+  parameters: statesParameters,
+  render: renderStates,
 })
 
 const visitedParameters = {

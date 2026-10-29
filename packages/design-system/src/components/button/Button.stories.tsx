@@ -122,3 +122,40 @@ export const IconsDark = meta.story({
   name: 'Met een envelop en een plus, donker',
   render: withIcons,
 })
+
+// A button changes colour under the mouse, so that state is imitated: the filled button and the
+// soft button are under the mouse.
+const hoverParameters = {
+  docs: {
+    description: {
+      story:
+        'Beide knoppen staan onder de muis, nagebootst met de add-on Pseudo States. De gevulde knop wordt donkerder in licht en lichter in donker.',
+    },
+  },
+  pseudo: { hover: ['[data-example="hover"]'] },
+}
+
+const renderHover = () => (
+  <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '1rem', maxInlineSize: '40rem' }}>
+    <Button data-example="hover" type="button">
+      Versturen
+    </Button>
+    <Button appearance="soft" data-example="hover" type="button">
+      Laad 5 meer
+    </Button>
+  </div>
+)
+
+export const HoverLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Onder de muis, licht',
+  parameters: hoverParameters,
+  render: renderHover,
+})
+
+export const HoverDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Onder de muis, donker',
+  parameters: hoverParameters,
+  render: renderHover,
+})
