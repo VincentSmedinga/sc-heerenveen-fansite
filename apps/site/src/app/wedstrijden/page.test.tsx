@@ -757,11 +757,11 @@ describe('the page /wedstrijden', () => {
         ),
       ].map(([, header, home, away, total]) => [header, home, away, total])
 
-    it('is a card in the sidebar directly after the season, before the goal scorers', async () => {
+    it('is a card in the sidebar directly after the streaks, before the goal scorers', async () => {
       const html = await render()
       const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
 
-      expect(sidebar.indexOf('id="verloop-van-het-seizoen"')).toBeLessThan(sidebar.indexOf('id="thuis-en-uit"'))
+      expect(sidebar.indexOf('id="reeksen"')).toBeLessThan(sidebar.indexOf('id="thuis-en-uit"'))
       expect(sidebar.indexOf('id="thuis-en-uit"')).toBeLessThan(sidebar.indexOf('id="doelpuntenmakers"'))
       expect(html.match(/<section[^>]*aria-labelledby="thuis-en-uit"/g)).toHaveLength(1)
     })

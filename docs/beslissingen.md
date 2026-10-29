@@ -6553,7 +6553,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alles komt uit de score van de gespeelde wedstrijden van de Eredivisie, volgens de regels van _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_.
 - **Waarom:** twee reeksen naast elkaar vragen een nieuw component, en een tabel is voor iedereen te lezen, ook zonder het oog.
   De kolom Totaal laat zien dat de kaart klopt met Verloop van het seizoen.
-- **Hoe:** de kaart staat direct na Verloop van het seizoen, in het warme vlak, zodat de buurkaarten niet dezelfde kleur hebben.
+- **Hoe:** de kaart staat direct na Reeksen, in het warme vlak, zodat de buurkaarten niet dezelfde kleur hebben.
   Een kant zonder gespeelde wedstrijd toont een streepje bij de gemiddelden en 0 bij de tellingen.
   De rij met de wedstrijden zonder tegendoelpunt heet "Zonder tegendoelpunt", zodat ze niet lijkt op de kaart De nul gehouden, die ook de beker telt.
 - **Alternatieven:** een grafiek met twee staven per onderdeel (een nieuw component voor één kaart).
