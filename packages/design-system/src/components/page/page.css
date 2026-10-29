@@ -123,16 +123,19 @@
    * on either side. A media query can't use a custom property, so the number is written
    * out here. Between 52rem and the full width of the column plus the margins (66rem) the
    * tracks shrink, the main to 24rem at the least and the sidebar to 16rem; at 52rem there
-   * is 48rem for them (50rem less the space between them), so they never get there and
-   * nothing scrolls sideways.
+   * is 48rem for them (50rem less the space between them), so they never get there on their
+   * own. The margin is as wide as the inset of the device, though, and a media query can't
+   * read that. A phone on its side has up to 62px (3.875rem) on both sides, which leaves
+   * 52 - 2 * 3.875 - 2 = 42.25rem for the tracks at 52rem; the minimums must fit in that,
+   * so nothing scrolls sideways.
    * The track of a column is a minmax() of fixed sizes, not fr: the space left over is shared out equally until a column is
    * as wide as its maximum.
    * A page with a wide sidebar (Page.Sidebar with `wide`) divides the same 64rem differently: a
    * main of 31rem, 2rem of space and a sidebar of 31rem, two columns of equal width, for a
    * sidebar that holds a table. It follows the same rules: one track under 52rem, tracks that
-   * shrink up to 66rem, and the sidebar second in the grid. The tracks may shrink to 24rem
-   * each, so they stay equally wide, and with the space between them (2rem) and the margins
-   * (2rem) they fill the 52rem exactly.
+   * shrink up to 66rem, and the sidebar second in the grid. The tracks may shrink to 20rem
+   * each, so they stay equally wide, and with the space between them (2rem) and the insets
+   * of a phone on its side (7.75rem) they fit in the 52rem.
    * The text in the main lines up with the wordmark of the logo on a wide screen, where the shield hangs in the margin
    * (see .hf-page-header).
    * The sidebar is second in the source and so in the grid. There is no `order`, which would split the reading order from
@@ -169,7 +172,7 @@
 
   @media (width >= 52rem) {
     .hf-page-body:has(> .hf-page-sidebar-wide) {
-      grid-template-columns: minmax(24rem, 31rem) minmax(24rem, 31rem);
+      grid-template-columns: minmax(20rem, 31rem) minmax(20rem, 31rem);
     }
   }
 

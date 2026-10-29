@@ -1903,7 +1903,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De kolommen van `/wedstrijden` zijn even breed_.
   De hoofdkolom en de zijbalk met `wide` zijn allebei 31 rem breed, met 2 rem ertussen.
 - **Later:** zie _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_.
-  De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem; de sporen krimpen dus tot 48 rem samen, en niet meer tot 52 rem.
+  De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem; bij 52 rem is er dus 48 rem voor de sporen, en niet meer 52 rem.
 
 ### Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query
 
@@ -2718,10 +2718,17 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** het getal staat als `52rem` in `page.css` (drie keer, in de media queries van de sporen en van de gebieden), in `shortcuts.css` (de balk en de ruimte voor het scrollen) en in `barWidths` in `followPage.ts`.
   Een media query kan geen custom property gebruiken, dus `page-css.test.ts`, `shortcuts-css.test.ts`, `followPage.test.ts` en de e2e-test van de balk (op 831 en 832 pixels) controleren dat ze gelijk blijven.
   De sporen krimpen van 66 rem tot 52 rem: bij 52 rem is er 48 rem voor de sporen (50 rem na de marges, minus 2 rem ertussen).
-  Een gewone zijbalk heeft minstens 24 + 16 rem nodig en een brede 24 + 24 rem, dus de brede passen precies.
+  De marge is zo breed als de inkeping van het apparaat (`env(safe-area-inset-left)` en `env(safe-area-inset-right)`), en een media query kan die niet lezen.
+  Een telefoon in liggende stand heeft er 47 tot 62 pixels (tot 3,875 rem) aan elke kant, dus bij 52 rem blijft 42,25 rem voor de sporen.
+  Een gewone zijbalk heeft minstens 24 + 16 rem nodig, en past.
+  Een brede zijbalk had 24 + 24 rem nodig en paste niet: op 844 pixels met een inkeping van 47 pixels liep het raster 50 pixels over.
+  De sporen van een brede zijbalk krimpen daarom tot 20 rem in plaats van 24 rem, 40 rem samen.
+  De reviewer vond dit, want Chromium heeft geen inkeping en de meting zag het niet.
+  Met een nagebootste inkeping (47 pixels op 844 en 852, 62 pixels op 874 en meer, en 62 pixels op 832 als slechtste geval) zijn de sporen 338 tot 400 pixels breed, en loopt in licht en donker op `/wedstrijden`, de homepage, `/podcasts` en `/bronnen` niets over.
   Alle andere vermeldingen van 56 rem in dit bestand, in de beslissingen over de kolommen, de balk en `/wedstrijden`, zijn nu 52 rem; de **Later:**-regels staan bij de drie beslissingen die de kolommen vastleggen.
 - **Alternatieven:** 44 rem voor een gewone zijbalk en 52 rem voor een brede (benut elke indeling, maar twee grenzen om gelijk te houden).
   Een lagere grens met smallere kolommen van 18 tot 20 rem (knijpt tabellen en kaarten).
+  Voor de brede zijbalk een hogere grens dan 52 rem (laat precies de telefoons in één kolom waarvoor het issue is, en de balk en de kolommen wisselen dan op twee plaatsen).
   Een grens op oriëntatie of hoogte (laat zoom en tekstvergroting op een liggend scherm twee kolommen houden, en breekt het herschikken).
 
 ## Site
@@ -6300,7 +6307,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_.
   `wide` zet alleen de sporen op twee keer 31 rem; de cellen onder elkaar zijn nu de standaard van elke zijbalk, en de regel `.hf-page-sidebar-wide` voor de kolommen van de cellen is vervallen.
 - **Later:** zie _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_.
-  De twee kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem; bij 52 rem vullen de sporen van 24 rem met de ruimte ertussen en de marges precies de breedte.
+  De twee kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem, en de sporen krimpen tot 20 rem in plaats van 24 rem, zodat ze ook passen naast de inkeping van een telefoon in liggende stand.
 
 ### We nemen het AD, met het filter `club` en het teken voor de betaalmuur
 

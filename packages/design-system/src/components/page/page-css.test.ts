@@ -5,6 +5,11 @@ import { describe, expect, it } from 'vitest'
 // Without the comments, which mention env() in words.
 const css = readFileSync(join(import.meta.dirname, 'page.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
+// The room for the tracks at 52rem, where the columns start side by side: less 2rem between the
+// columns and the margin on both sides, which is as wide as the inset of the device. A phone on
+// its side has up to 62px (3.875rem) on each side, and a media query can't read that.
+const roomAtTheBoundary = 52 - 2 - 2 * 3.875
+
 // jsdom doesn't apply rules in a cascade layer to an element and has no safe area, so the test
 // reads the text of the file.
 describe('the safe area insets in page.css', () => {
@@ -255,8 +260,7 @@ describe('the columns of the body in page.css', () => {
   it('lets the tracks shrink only to a width that fits in 52rem, where the columns start side by side', () => {
     const [, mainMinimum, sidebarMinimum] = tracks ?? []
 
-    // 52rem less 2rem of margin and 2rem between the columns.
-    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(52 - 2 - 2)
+    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(roomAtTheBoundary)
     expect(body).toContain('@media (width >= 52rem)')
   })
 })
@@ -279,7 +283,7 @@ describe('the wide sidebar in page.css', () => {
   it('lets the tracks shrink only to a width that fits in 52rem, where the columns start side by side', () => {
     const [, mainMinimum, , sidebarMinimum] = wide ?? []
 
-    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(52 - 2 - 2)
+    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(roomAtTheBoundary)
   })
 
   it('shrinks both tracks to the same minimum, so they are equally wide at every width', () => {
