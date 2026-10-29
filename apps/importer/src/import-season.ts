@@ -9,7 +9,7 @@ import { seasonOf } from '@fansite/db/season'
 import type { ImportOptions } from './import-feeds.ts'
 
 import { createFetcher } from './fetcher.ts'
-import { formatMatchReport, importPastSeason, isPastSeason, wikipediaOrigin } from './import-matches.ts'
+import { formatMatchReport, importPastSeason, isPastSeason, isSeason, wikipediaOrigin } from './import-matches.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { describeError } from './text.ts'
 
@@ -31,15 +31,11 @@ export function parseSeason(
     return refuse('No season given.')
   }
 
-  const parts = /^(\d{4})\/(\d{2})$/u.exec(argument)
-
-  if (parts === null) {
+  // `isSeason` decides what a season is; the checks here only choose the sentence.
+  if (!/^\d{4}\/\d{2}$/u.test(argument)) {
     return refuse(`'${argument.slice(0, 40)}' is not a season: write the year, a slash and two digits, like 2025/26.`)
   }
-
-  const year = Number(parts[1])
-
-  if (Number(parts[2]) !== (year + 1) % 100) {
+  if (!isSeason(argument)) {
     return refuse(`'${argument}' is not a season: the second year must follow the first, like 2025/26.`)
   }
   if (!isPastSeason(argument, now)) {
