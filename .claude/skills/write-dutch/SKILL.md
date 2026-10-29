@@ -39,7 +39,7 @@ This skill is the checklist and the places where it goes wrong.
   Split a sentence that runs on, but don't chop the text into scraps.
   Use a list for steps or choices.
 - Never two sentences joined by a comma.
-- The tone of the site itself, from supporter to supporter, comes with the style guide (#19); until then, release notes are the model (see `release-notes`).
+- The tone of the site itself, from supporter to supporter, is in the chapter Redactie of Storybook (`packages/design-system/src/docs/editorial.mdx`, under _Toon_ and _Schrijfwijzer_); release notes are a good model too (see `release-notes`).
 
 ## Line breaks
 
