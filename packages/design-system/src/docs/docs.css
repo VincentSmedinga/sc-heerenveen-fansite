@@ -97,14 +97,6 @@
     inline-size: 1.25rem;
   }
 
-  ._hf-docs-provisional {
-    background-color: var(--hf-colour-background-surface-strong);
-    border-radius: 0.25rem;
-    color: var(--hf-colour-text-default);
-    font-size: var(--hf-meta-font-size);
-    padding-inline: 0.375rem;
-  }
-
   ._hf-docs-theme-panel {
     border: 1px solid var(--hf-colour-border-surface);
     border-radius: 0.5rem;
