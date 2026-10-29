@@ -57,6 +57,25 @@ describe('DataTable', () => {
     expect(screen.getByRole('cell', { name: 'n.v.t.' })).toBeTruthy()
   })
 
+  it('shows an abbreviation as the column header and gives a screen reader the whole word', () => {
+    render(
+      <DataTable
+        caption="Uitslagen"
+        columns={['Stand', { abbreviation: 'GL', name: 'gelijk' }, 'Punten']}
+        rows={[{ cells: [2, 7], header: 'Voor' }]}
+      />,
+    )
+
+    const header = screen.getAllByRole('columnheader')[1] as HTMLElement
+
+    expect(header.querySelector('abbr')?.getAttribute('title')).toBe('Gelijk')
+    expect(header.querySelector('[aria-hidden="true"]')?.textContent).toBe('GL')
+    expect(header.querySelector('.hf-visually-hidden')?.textContent).toBe('gelijk')
+    expect(screen.getByRole('columnheader', { name: 'gelijk' })).toBeTruthy()
+    expect(header.getAttribute('scope')).toBe('col')
+    expect(header.className).toBe('hf-numeric')
+  })
+
   it('has the hf-data-table class and passes on other attributes and a class', () => {
     render(<DataTable {...props} className="extra" id="tabel" />)
 

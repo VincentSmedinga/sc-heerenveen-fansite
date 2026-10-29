@@ -188,11 +188,11 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 
 ## De wedstrijden
 
-`/wedstrijden` toont onder elf kopjes het programma, de uitslagen, de stand, onze plek in de competitie, het verloop van het seizoen, de reeksen, thuis en uit, de doelpuntenmakers, de wedstrijden waarin we de nul hielden, de doelpunten per kwartier en de uitersten van sc Heerenveen 1 (mannen) in het lopende seizoen.
-Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder onze plek in de competitie, het verloop van het seizoen, de reeksen, thuis en uit, de doelpuntenmakers, de nul gehouden, de doelpunten per kwartier en de uitersten in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
+`/wedstrijden` toont onder twaalf kopjes het programma, de uitslagen, de stand, onze plek in de competitie, het verloop van het seizoen, de reeksen, thuis en uit, de doelpuntenmakers, de wedstrijden waarin we de nul hielden, de doelpunten per kwartier, hoe de wedstrijden verlopen en de uitersten van sc Heerenveen 1 (mannen) in het lopende seizoen.
+Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder onze plek in de competitie, het verloop van het seizoen, de reeksen, thuis en uit, de doelpuntenmakers, de nul gehouden, de doelpunten per kwartier, hoe de wedstrijden verlopen en de uitersten in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
 De balk volgt de pagina: de link naar de kaart waar je bent, heeft een rode streep en staat vooraan in de rij.
-De stand, de reeksen, thuis en uit, de doelpuntenmakers, de nul gehouden en de uitersten hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen, thuis en uit en de doelpunten per kwartier een warm vlak (`surface="warm"`), en het programma, de uitslagen en onze plek in de competitie zijn wit.
+De stand, de reeksen, de doelpuntenmakers, de nul gehouden, hoe de wedstrijden verlopen en de uitersten hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen, thuis en uit en de doelpunten per kwartier een warm vlak (`surface="warm"`), en het programma, de uitslagen en onze plek in de competitie zijn wit.
 Dezelfde gegevens staan in twee blokken in de zijbalk van de homepage.
 De gegevens komen van de importer (zie _De wedstrijden en de stand_ in de [README van de importer](../importer/README.md)) en `@fansite/db/queries` haalt ze op: `listSeasonMatches`, `listSeasonStandings` en `listWikipediaPages`, steeds voor één seizoen.
 `src/matches.ts` vraagt alleen het lopende seizoen (`seasonOf`) en bewaart het antwoord vijf minuten; eerdere seizoenen staan in de database en komen op geen enkele pagina.
@@ -202,7 +202,18 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
 - **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
   Hebben twee verschillende spelers in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
-- **Doelpunten per kwartier:** een kaart in de zijbalk, onder de nul gehouden en boven de uitersten, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
+- **Hoe de wedstrijden verlopen:** een kaart in de zijbalk, direct na de doelpunten per kwartier en boven de uitersten, in het zachte vlak.
+  De link in de balk onder de kop heet "Hoe wedstrijden verlopen": de hele kop past op een telefoon niet tussen de vervaagde randen van de rij.
+  `matchFlowOf` in `src/matches.ts` werkt de gespeelde wedstrijden van de Eredivisie uit waarvan de doelpunten bekend zijn (dezelfde regel als de doelpunten per kwartier; de beker telt niet mee).
+  De doelpunten staan in de gegevens in de volgorde van de Wikipedia-pagina en niet van het spel, dus de functie sorteert ze op minuut en toegevoegde tijd (45 komt voor 45+1).
+  De kaart heeft twee tabellen (`DataTable`) met per rij de wedstrijden, winst, gelijk, verlies en punten, in kolommen met een afkorting (G, W, GL, V en P, uitgelegd in een regel onder de tabellen; vijf hele woorden passen niet op een telefoon): na het eerste doelpunt ("Wij scoren eerst", "De tegenstander scoort eerst") en na de stand bij de rust ("Voor", "Gelijk", "Achter").
+  Een doelpunt in minuut 45 of in de toegevoegde tijd van de eerste helft telt voor de rust, een doelpunt vanaf minuut 46 niet.
+  Scoren beide clubs in dezelfde minuut als het eerste doelpunt, dan is niet te zien wie het eerst scoorde: de wedstrijd telt dan niet bij het eerste doelpunt, wel bij de rust, en onder de kaart staat hoeveel wedstrijden dat zijn.
+  Een 0–0 heeft geen eerste doelpunt en staat bij de rust op "Gelijk".
+  Onder de tabellen staan twee zinnen: in hoeveel wedstrijden sc Heerenveen won na een achterstand, en in hoeveel het geen winst haalde na een voorsprong.
+  Een achterstand of voorsprong telt alleen als die klopt bij elke volgorde binnen een minuut.
+  Zonder één wedstrijd met doelpunten staat er een zin in plaats van de tabellen, en onderaan staat "Gebaseerd op 2 van de 3 gespeelde wedstrijden" (`BasedOn` in `src/MatchViews.tsx`).
+- **Doelpunten per kwartier:** een kaart in de zijbalk, onder de nul gehouden en boven hoe de wedstrijden verlopen, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
   `goalsPerQuarter` in `src/matches.ts` telt ze uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), in de competitie en de beker.
   De kwartieren zijn 1–15, 16–30, 31–45, 46–60, 61–75 en 76–90.
   Een doelpunt in blessuretijd telt bij het kwartier ervoor: 45+1 bij 31–45 en 90+3 bij 76–90.

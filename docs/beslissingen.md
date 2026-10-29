@@ -6689,3 +6689,38 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rij met de wedstrijden zonder tegendoelpunt heet "Zonder tegendoelpunt", zodat ze niet lijkt op de kaart De nul gehouden, die ook de beker telt.
 - **Alternatieven:** een grafiek met twee staven per onderdeel (een nieuw component voor één kaart).
   Alleen de punten tonen (de doelpunten zeggen veel over de manier van spelen).
+
+### Het eerste doelpunt en de stand bij de rust komen uit de doelpunten op minuut, met een regel voor gelijke minuten
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart "Hoe de wedstrijden verlopen" telt de uitslagen na het eerste doelpunt en na de stand bij de rust, voor de gespeelde wedstrijden van de Eredivisie met bekende doelpunten.
+  De doelpunten staan op minuut en toegevoegde tijd; twee doelpunten in dezelfde minuut laten het eerste doelpunt onbekend.
+  De rust telt tot en met de toegevoegde tijd van de eerste helft.
+- **Waarom:** de volgorde in de gegevens is die van de Wikipedia-pagina en niet altijd die van het spelen, dus de volgorde moet uit de minuut komen.
+  Liever zeggen dat het onbekend is dan raden wie het eerst scoorde.
+  De rust is het gewone moment om de stand te noemen.
+- **Hoe:** `matchFlowOf` in `src/matches.ts` sorteert de doelpunten van elke wedstrijd op minuut en toegevoegde tijd, dus 45 komt voor 45+1.
+  - Het eerste doelpunt is onbekend als beide clubs scoren in de eerste minuut met een doelpunt.
+    Twee doelpunten van één club in die minuut maken het niet onbekend.
+    Zo'n wedstrijd telt niet bij het eerste doelpunt, wel bij de rust, en onder de kaart staat hoeveel wedstrijden het zijn.
+  - Een 0–0 heeft geen eerste doelpunt en staat bij de rust op "Gelijk".
+  - Bij de rust telt een doelpunt in minuut 45 of in de toegevoegde tijd daarvan, en een doelpunt vanaf minuut 46 niet.
+  - Een wedstrijd telt als gewonnen na een achterstand, of als zonder winst na een voorsprong, als de stand na een volle minuut dat zegt.
+    Hangt het van de volgorde binnen een minuut af, dan telt hij niet mee, want we raden niet.
+    De twee zinnen onder de tabellen kunnen dus een wedstrijd missen, maar nooit een te veel tellen.
+  - De kolommen zijn afkortingen: G gespeeld, W winst, GL gelijk, V verlies en P punten, met een regel onder de tabellen die ze uitlegt.
+    Vijf kolommen met hele woorden zijn 434 pixels breed: breder dan een telefoon, en breder dan de zijbalk bij 900 pixels (362 pixels), zodat de pagina opzij scrolt.
+    Met afkortingen zijn ze 246 pixels breed en past de pagina bij 320 pixels.
+    Een schermlezer hoort het hele woord ("gespeeld", "winst", …), zoals bij de stand.
+    `DataTable` kan daarvoor een kolom als `{ abbreviation, name }` krijgen.
+  - De uitslag is de score, want de Eredivisie kent geen verlenging.
+  - De wedstrijden komen uit dezelfde regel als `goalsPerQuarter`: een uitslag met minstens één doelpunt, of een 0–0.
+    De beker telt niet mee; zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_.
+  - De kaart staat in de zijbalk na Doelpunten per kwartier, in het zachte vlak: de buurkaart is warm.
+  - De zin "Gebaseerd op" komt van `BasedOn` in `src/MatchViews.tsx`, het gedeelde stukje code voor die zin.
+- **Alternatieven:** de volgorde van de gegevens aanhouden (kan het verkeerde doelpunt als eerste kiezen).
+  Bij gelijke minuten de thuisclub eerst nemen (een gok).
+  Alleen wedstrijden met een volledig bekende volgorde tellen (te weinig wedstrijden).
+  De kolommen "Wedstrijden", "Winst", "Gelijk", "Verlies" en "Punten" voluit laten staan (past niet, zie hierboven).
+  De tabel een eigen scrollvlak geven (ook op een bureaublad scrolt de tabel dan, en een scrollvlak is een nieuw onderdeel).
+  De tabel omdraaien, met de uitkomsten als rijen en de situaties als kolommen (past op 320 pixels ook niet).

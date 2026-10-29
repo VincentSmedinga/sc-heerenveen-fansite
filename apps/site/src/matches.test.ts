@@ -10,6 +10,7 @@ import {
   homeAwayOf,
   leaguePlaceOf,
   leagueResultsOf,
+  matchFlowOf,
   overviewOf,
   parseCleanSheetCount,
   scorersCoverage,
@@ -765,6 +766,193 @@ describe('goalsPerQuarter', () => {
     const copy = structuredClone(matches)
 
     goalsPerQuarter(matches)
+
+    expect(matches).toEqual(copy)
+  })
+})
+
+describe('matchFlowOf', () => {
+  const ours = (minute: number, stoppageMinutes: null | number = null) =>
+    goal('Proefman', { minute, ours: true, stoppageMinutes })
+  const theirs = (minute: number, stoppageMinutes: null | number = null) =>
+    goal('Teststraat', { minute, ours: false, stoppageMinutes })
+  const row = (matches: number, won: number, drawn: number, lost: number, points: number) => ({
+    drawn,
+    lost,
+    matches,
+    points,
+    won,
+  })
+  const none = row(0, 0, 0, 0, 0)
+
+  it('puts a match in "we score first" when our goal comes first, with its result and points', () => {
+    const flow = matchFlowOf([played([ours(10), theirs(30), ours(60)]), played([ours(10), theirs(30), theirs(60)])])
+
+    expect(flow.firstGoal).toEqual({ opponent: none, ours: row(2, 1, 0, 1, 3) })
+  })
+
+  it('puts a match in "the opponent scores first" when their goal comes first', () => {
+    const flow = matchFlowOf([played([theirs(10), ours(30), ours(60)]), played([theirs(20), ours(30)])])
+
+    expect(flow.firstGoal).toEqual({ opponent: row(2, 1, 1, 0, 4), ours: none })
+  })
+
+  it('leaves a goalless draw out of the first goal, and counts it at half-time as level', () => {
+    const draw = { ...played([]), goalsAgainst: 0, goalsFor: 0 }
+    const flow = matchFlowOf([draw])
+
+    expect(flow).toMatchObject({ known: 1, played: 1, unknownFirstGoal: 0 })
+    expect(flow.firstGoal).toEqual({ opponent: none, ours: none })
+    expect(flow.atHalfTime).toEqual({ ahead: none, behind: none, level: row(1, 0, 1, 0, 1) })
+  })
+
+  it('puts the goals in the order of the clock and not in the order of the data', () => {
+    // The page lists the goals of the home club before those of the away club.
+    const flow = matchFlowOf([played([ours(70), theirs(5)])])
+
+    expect(flow.firstGoal.opponent.matches).toBe(1)
+    expect(flow.firstGoal.ours.matches).toBe(0)
+  })
+
+  it('does not know the first goal when both clubs score in the first minute with a goal', () => {
+    const flow = matchFlowOf([played([ours(12), theirs(12), ours(80)])])
+
+    expect(flow).toMatchObject({ known: 1, unknownFirstGoal: 1 })
+    expect(flow.firstGoal).toEqual({ opponent: none, ours: none })
+    expect(flow.atHalfTime.level.matches).toBe(1)
+  })
+
+  it('knows the first goal when it is two goals of one club in the same minute', () => {
+    const flow = matchFlowOf([played([ours(12), ours(12), theirs(50)])])
+
+    expect(flow.unknownFirstGoal).toBe(0)
+    expect(flow.firstGoal.ours.matches).toBe(1)
+  })
+
+  it('knows the first goal when the same minute only comes after it', () => {
+    const flow = matchFlowOf([played([theirs(5), ours(40), theirs(40)])])
+
+    expect(flow.unknownFirstGoal).toBe(0)
+    expect(flow.firstGoal.opponent.matches).toBe(1)
+  })
+
+  it('puts 45 before 45+1 and 45+1 before 45+2, so they have an order', () => {
+    const flow = matchFlowOf([played([ours(45, 1), theirs(45), ours(45, 2)])])
+
+    expect(flow.unknownFirstGoal).toBe(0)
+    expect(flow.firstGoal.opponent.matches).toBe(1)
+  })
+
+  it('does not know the first goal when both clubs score in the same stoppage minute', () => {
+    expect(matchFlowOf([played([ours(45, 2), theirs(45, 2)])]).unknownFirstGoal).toBe(1)
+  })
+
+  it('counts a goal in minute 45 and in the stoppage time of the first half for half-time', () => {
+    const flow = matchFlowOf([played([ours(45)]), played([ours(45, 3)]), played([theirs(45, 1), ours(80)])])
+
+    expect(flow.atHalfTime).toEqual({ ahead: row(2, 2, 0, 0, 6), behind: row(1, 0, 1, 0, 1), level: none })
+  })
+
+  it('does not count a goal from minute 46 for half-time', () => {
+    const flow = matchFlowOf([played([theirs(46)]), played([ours(46), ours(60)])])
+
+    expect(flow.atHalfTime).toEqual({ ahead: none, behind: none, level: row(2, 1, 0, 1, 3) })
+  })
+
+  it('splits half-time into ahead, level and behind with the result of each', () => {
+    const flow = matchFlowOf([
+      played([ours(10), theirs(70)]),
+      played([ours(10), theirs(20), ours(80)]),
+      played([theirs(10), ours(20), theirs(80)]),
+      played([theirs(10), theirs(40), ours(60)]),
+    ])
+
+    expect(flow.atHalfTime).toEqual({
+      ahead: row(1, 0, 1, 0, 1),
+      behind: row(1, 0, 0, 1, 0),
+      level: row(2, 1, 0, 1, 3),
+    })
+  })
+
+  it('counts an own goal for the club that profits', () => {
+    const own = goal('Teststraat', { minute: 10, ours: true, ownGoal: true })
+    const flow = matchFlowOf([played([own, theirs(50)])])
+
+    expect(flow.firstGoal.ours).toEqual(row(1, 0, 1, 0, 1))
+  })
+
+  it('counts a win after trailing, also when the club led later', () => {
+    const flow = matchFlowOf([played([theirs(10), ours(30), ours(60)]), played([ours(10), theirs(20), ours(60)])])
+
+    expect(flow).toMatchObject({ notWonAfterLead: 0, wonAfterTrailing: 1 })
+  })
+
+  it('counts a draw or a loss after a lead as not won after leading, and a win after a lead not', () => {
+    const flow = matchFlowOf([
+      played([ours(10), theirs(50)]),
+      played([ours(10), theirs(50), theirs(80)]),
+      played([ours(10), theirs(50), ours(80)]),
+      played([theirs(10), theirs(20)]),
+    ])
+
+    expect(flow).toMatchObject({ notWonAfterLead: 2, wonAfterTrailing: 0 })
+  })
+
+  it('counts a draw after trailing as neither', () => {
+    expect(matchFlowOf([played([theirs(10), ours(50)])])).toMatchObject({ notWonAfterLead: 0, wonAfterTrailing: 0 })
+  })
+
+  it('leaves a lead out when it depends on the order within a minute', () => {
+    // 1-0 or 0-1 after minute 20, then level: a lead or a trail only if the order were known.
+    const flow = matchFlowOf([played([ours(20), theirs(20)]), played([theirs(20), ours(20), ours(70)])])
+
+    expect(flow).toMatchObject({ notWonAfterLead: 0, wonAfterTrailing: 0 })
+  })
+
+  it('counts a lead that every order within a minute has, such as two goals against one', () => {
+    const flow = matchFlowOf([played([ours(20), ours(20), theirs(20), theirs(60)])])
+
+    expect(flow.notWonAfterLead).toBe(1)
+  })
+
+  it('leaves out a match without known goals, and a match that is not played', () => {
+    const noGoals = { ...match('Speelronde 2', 'played', '2026-08-08'), goalsAgainst: 1, goalsFor: 2 }
+    const scheduled = { ...played([ours(10)]), status: 'scheduled' as const }
+    const flow = matchFlowOf([noGoals, scheduled, played([ours(10)])])
+
+    expect(flow).toMatchObject({ known: 1, played: 2 })
+    expect(flow.firstGoal.ours.matches).toBe(1)
+  })
+
+  it('leaves out a played match without a score', () => {
+    const noScore = { ...played([ours(10)]), goalsAgainst: null, goalsFor: null }
+
+    expect(matchFlowOf([noScore])).toMatchObject({ known: 0 })
+  })
+
+  it('leaves out a cup match, in the count and in the matches played', () => {
+    const cup = { ...played([ours(10)]), competition: 'KNVB Beker' as const }
+
+    expect(matchFlowOf([cup, played([ours(10)])])).toMatchObject({ known: 1, played: 1 })
+  })
+
+  it('gives zeroes for a season without matches', () => {
+    expect(matchFlowOf([])).toEqual({
+      atHalfTime: { ahead: none, behind: none, level: none },
+      firstGoal: { opponent: none, ours: none },
+      known: 0,
+      notWonAfterLead: 0,
+      played: 0,
+      unknownFirstGoal: 0,
+      wonAfterTrailing: 0,
+    })
+  })
+
+  it('does not change the list it is given', () => {
+    const matches = [played([ours(70), theirs(5)])]
+    const copy = structuredClone(matches)
+
+    matchFlowOf(matches)
 
     expect(matches).toEqual(copy)
   })

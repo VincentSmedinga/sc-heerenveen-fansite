@@ -210,6 +210,17 @@ export type Extremes = {
   played: number
 }
 
+/** The results of the matches in a row of a table, such as "we score first". */
+export type FlowRow = {
+  drawn: number
+  lost: number
+  /** The matches in the row. */
+  matches: number
+  /** Three for a win and one for a draw. */
+  points: number
+  won: number
+}
+
 /** The goals of a season per quarter of an hour, and the matches the count is based on. */
 export type GoalsPerQuarter = {
   /** The goals against, in the order of `quarterLabels`. */
@@ -282,8 +293,29 @@ export type LeaguePlace = {
   played: number
 }
 
+/** How the matches of the league went: after the first goal and at half-time. */
+export type MatchFlow = {
+  /** The matches by the state at half-time, with goals up to 45 and its stoppage time. */
+  atHalfTime: { ahead: FlowRow; behind: FlowRow; level: FlowRow }
+  /** The matches by who scored first. A 0-0, or a first goal that is unknown, is in neither. */
+  firstGoal: { opponent: FlowRow; ours: FlowRow }
+  /** The played league matches whose goals are known, so the ones in the count. */
+  known: number
+  /** The matches that sc Heerenveen did not win after it led at some moment. */
+  notWonAfterLead: number
+  /** The played league matches, with or without known goals. */
+  played: number
+  /** The matches in the count whose first goal is unknown: both clubs scored in one minute. */
+  unknownFirstGoal: number
+  /** The matches that sc Heerenveen won after it trailed at some moment. */
+  wonAfterTrailing: number
+}
+
 /** A goal as the line of the scorers of a match shows it. */
 export type ScorerGoal = PublicMatch['goals'][number]
+
+/** A played match whose score and goals are known, so one that the cards can count. */
+type MatchWithGoals = PublicMatch & { goalsAgainst: number; goalsFor: number }
 
 /**
  * The extremes of the Eredivisie this season, from the played matches with a score: the biggest
@@ -362,6 +394,21 @@ export function goalsPerQuarter(matches: PublicMatch[]): GoalsPerQuarter {
     scored,
   }
 }
+
+/**
+ * Whether a played match has its goals: it has at least one goal, or it ended 0-0. A match with
+ * a score and no goals is one where the page named no scorers, or where they did not fit the
+ * result, and it has no minutes to count. A match without a score has none either.
+ */
+function hasKnownGoals(match: PublicMatch): match is MatchWithGoals {
+  return (
+    match.goalsFor !== null &&
+    match.goalsAgainst !== null &&
+    (match.goals.length > 0 || match.goalsFor + match.goalsAgainst === 0)
+  )
+}
+
+const emptyRow = (): FlowRow => ({ drawn: 0, lost: 0, matches: 0, points: 0, won: 0 })
 
 /**
  * The goals of one match for the line of the scorers, which shows the name as the page writes
@@ -502,6 +549,82 @@ export function leaguePlaceOf(rows: PublicStandingsRow[]): LeaguePlace | undefin
 }
 
 /**
+ * How the played matches of the Eredivisie went whose goals are known (the rule of
+ * `goalsPerQuarter`), by who scored first and by the state at half-time. The result is the
+ * score of the match, as the Eredivisie has no extra time. The cup does not count.
+ *
+ * Who scored first comes from the minutes. If the first goals fall in one minute and both clubs
+ * scored in it, the order is unknown, and the match is left out of the first goal (it still
+ * counts for half-time). Two goals of one club in the first minute are no problem. A match that
+ * ended 0-0 has no first goal. At half-time a goal in minute 45 or in its stoppage time counts,
+ * and a goal from minute 46 does not.
+ *
+ * A match counts as won after trailing, or as not won after leading, only when the goals say
+ * the club trailed or led at a moment that does not depend on the order in a minute. Looking at
+ * the score after each minute is enough for that: the other order within a minute can only make
+ * the score pass through other values in between, never take away one after the whole minute.
+ */
+export function matchFlowOf(matches: PublicMatch[]): MatchFlow {
+  const played = matches.filter((match) => match.competition === 'Eredivisie' && match.status === 'played')
+  const known = played.filter(hasKnownGoals)
+  const flow: MatchFlow = {
+    atHalfTime: { ahead: emptyRow(), behind: emptyRow(), level: emptyRow() },
+    firstGoal: { opponent: emptyRow(), ours: emptyRow() },
+    known: known.length,
+    notWonAfterLead: 0,
+    played: played.length,
+    unknownFirstGoal: 0,
+    wonAfterTrailing: 0,
+  }
+
+  for (const match of known) {
+    const { goalsAgainst, goalsFor } = match
+    const groups = goalGroups(match.goals)
+    const [first] = groups
+    let lead = 0
+    let led = false
+    let trailed = false
+
+    for (const group of groups) {
+      lead += group.reduce((sum, goal) => sum + (goal.ours ? 1 : -1), 0)
+      led ||= lead > 0
+      trailed ||= lead < 0
+    }
+
+    if (first !== undefined) {
+      const ours = first.filter((goal) => goal.ours).length
+
+      if (ours === first.length) {
+        addToRow(flow.firstGoal.ours, goalsFor, goalsAgainst)
+      } else if (ours === 0) {
+        addToRow(flow.firstGoal.opponent, goalsFor, goalsAgainst)
+      } else {
+        flow.unknownFirstGoal += 1
+      }
+    }
+
+    const atHalfTime = match.goals
+      .filter((goal) => goal.minute <= 45)
+      .reduce((sum, goal) => sum + (goal.ours ? 1 : -1), 0)
+
+    addToRow(
+      atHalfTime > 0 ? flow.atHalfTime.ahead : atHalfTime < 0 ? flow.atHalfTime.behind : flow.atHalfTime.level,
+      goalsFor,
+      goalsAgainst,
+    )
+
+    if (trailed && goalsFor > goalsAgainst) {
+      flow.wonAfterTrailing += 1
+    }
+    if (led && goalsFor <= goalsAgainst) {
+      flow.notWonAfterLead += 1
+    }
+  }
+
+  return flow
+}
+
+/**
  * Splits the matches of a season, in the order the query gives them, into the programme, the
  * results, and the previous and the next match the homepage shows.
  */
@@ -606,6 +729,20 @@ export function topScorersOf(matches: PublicMatch[]): TopScorer[] {
   }))
 }
 
+function addToRow(row: FlowRow, goalsFor: number, goalsAgainst: number) {
+  row.matches += 1
+
+  if (goalsFor > goalsAgainst) {
+    row.won += 1
+    row.points += 3
+  } else if (goalsFor === goalsAgainst) {
+    row.drawn += 1
+    row.points += 1
+  } else {
+    row.lost += 1
+  }
+}
+
 /** The item with the highest score, and the last of them when some are level. */
 function best<T>(items: T[], score: (item: T) => number): T | undefined {
   return items.reduce<T | undefined>(
@@ -615,16 +752,28 @@ function best<T>(items: T[], score: (item: T) => number): T | undefined {
 }
 
 /**
- * Whether the goals of a played match are known: it has at least one, or it ended 0-0. A match
- * with a score and no goals is one where the page named no scorers, or where they did not fit
- * the result, and a match with no score has none to know.
+ * The goals of a match in the order of the clock, in groups of goals in the same minute. The
+ * order of the goals in the data is the order of the Wikipedia page, with the goals of the home
+ * club and the away club in separate fields, so it is not the order of the play. A goal in the
+ * stoppage time of a half is after one in the minute itself (45 is before 45+1). Goals in one
+ * group have no known order between them.
  */
-function hasKnownGoals(match: PublicMatch): boolean {
-  return (
-    match.goalsFor !== null &&
-    match.goalsAgainst !== null &&
-    (match.goals.length > 0 || match.goalsFor + match.goalsAgainst === 0)
-  )
+function goalGroups(goals: ScorerGoal[]): ScorerGoal[][] {
+  const clock = (goal: ScorerGoal) => [goal.minute, goal.stoppageMinutes ?? 0] as const
+  const sorted = [...goals].sort((a, b) => clock(a)[0] - clock(b)[0] || clock(a)[1] - clock(b)[1])
+  const groups: ScorerGoal[][] = []
+
+  for (const goal of sorted) {
+    const last = groups.at(-1)
+
+    if (last?.[0] !== undefined && clock(last[0]).join() === clock(goal).join()) {
+      last.push(goal)
+    } else {
+      groups.push([goal])
+    }
+  }
+
+  return groups
 }
 
 /** What a goal counts for: the player it is linked to, or else the name the page shows. */

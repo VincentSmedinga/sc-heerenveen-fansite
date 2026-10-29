@@ -13,6 +13,7 @@ import {
   HomeAwayCard,
   imageCredit,
   LeaguePlaceCard,
+  MatchFlowCard,
   MatchLines,
   SeasonCard,
   SourceCredit,
@@ -101,7 +102,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       </Page.Main>
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme and the
           results: the table, our place in the league, the season, the streaks, home and away,
-          the goal scorers, the clean sheets, then the goals per quarter. */}
+          the goal scorers, the clean sheets, the goals per quarter, then how the matches go. */}
       <Page.Sidebar aria-label="De stand, de ranglijsten en de doelpunten per kwartier" wide>
         <Card aria-labelledby="stand" shareable={imageCredit(data.standings.length > 0)} surface="soft">
           <Heading anchor id="stand" level={2}>
@@ -129,6 +130,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </Card>
         <CleanSheetsCard count={parseCleanSheetCount(nul)} matches={data.matches} now={now} />
         <GoalsPerQuarterCard matches={data.matches} />
+        <MatchFlowCard matches={data.matches} />
         <ExtremesCard matches={data.matches} now={now} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit pages={data.pages} season={data.season} />
