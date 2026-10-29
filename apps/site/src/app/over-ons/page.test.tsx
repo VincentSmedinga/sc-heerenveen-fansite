@@ -88,7 +88,7 @@ describe('the page Over ons', () => {
 
   it('starts a paragraph of its own at "We schrijven niks over", after the intro', () => {
     expect(html).toContain(
-      'met een link naar het hele verhaal.</b></p><p>We schrijven niks over en we passen niks aan.',
+      'met de koppen over sc Heerenveen op één plek.</b></p><p>We schrijven niks over en we passen niks aan.',
     )
   })
 

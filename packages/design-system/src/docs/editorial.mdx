@@ -5,7 +5,7 @@ import { Meta } from '@storybook/addon-docs/blocks'
 # Redactie
 
 Wat we tonen en hoe we schrijven.
-Hieronder staan eerst de principes, dan wat we van ons eigen forum en van podcasts tonen, de schrijfwijze van de club, de toon en de schrijfwijzer, en tot slot de checklist voor de review.
+Hieronder staan eerst de principes, dan wat we van ons eigen forum en van podcasts tonen, de schrijfwijze van de club, de toon en de schrijfwijzer, de inleidingen en toelichtingen, de bronnen en tijden, en tot slot de checklist voor de review.
 
 ## Principes
 
@@ -192,6 +192,44 @@ Verdere vormen staan hieronder, zodat een pagina dezelfde vorm op dezelfde plek 
 Een decimaal is een komma: "4,5:1".
 Bij één staat het enkelvoud: "1 speler heeft gescoord", "3 spelers hebben gescoord".
 
+## Inleidingen en toelichtingen
+
+Een vaste tekst die niet elke bezoeker nodig heeft, kost een regel lezen en een regel hoogte op het scherm, vooral op een telefoon.
+Daarom bestaat hij alleen als hij iets zegt wat de kop en de inhoud niet zeggen, en hij staat altijd op dezelfde plek.
+
+**De regels:**
+
+1. **Een inleiding onder de kop van een pagina** bestaat alleen als ze iets zegt wat de kop en de inhoud niet zeggen.
+   Ze is één zin van hooguit ongeveer twintig woorden.
+   Herhaalt ze de kop of de namen van de kaarten, dan vervalt ze.
+2. **Een uitleg onder de kop van een kaart** bestaat alleen als de inhoud zonder haar niet te begrijpen is.
+   Ze is hooguit een zin.
+3. **Een legenda of toelichting bij een tabel of grafiek** staat altijd onder wat ze uitlegt, in het lettertype van een toelichting.
+   Staat de uitleg al in de kolomkoppen of in de naam van het teken, dan vervalt ze.
+   Een afkorting in een kolomkop of een letter in een grafiek heeft wel een legenda, want de volle woorden staan alleen voor een schermlezer.
+4. **De volgorde in een kaart** is vast:
+   de kop, de uitleg (alleen als ze nodig is), de inhoud, de legenda, de zin "Gebaseerd op", de link naar meer, de bronvermelding.
+   Een zin die zegt wat de telling buiten beschouwing laat, zoals "Doelpunten in de verlenging tellen niet mee.", hoort bij "Gebaseerd op" en staat direct erna.
+   Een grafiek heeft haar legenda eronder, en de tabel met dezelfde cijfers volgt daarna.
+5. **Wat al in de toegankelijke naam of de kolomkop staat,** hoeft niet nog een keer in een zin.
+   Een schermlezer hoort de volledige namen, en de afkortingen met hun legenda zijn voor het oog.
+
+**Wat blijft staan:**
+
+- De zin "Gebaseerd op" blijft op elke kaart die op een telling rust, want ze zegt waar het getal op rust.
+- Een zin voor een lege plek, zoals die op de homepage zonder nieuws, is geen inleiding en geen uitleg.
+  Ze zegt wat er aan de hand is (zie _Toon_).
+- Teksten met een wettelijke taak, zoals de privacyverklaring en de toegankelijkheidsverklaring, volgen hun eigen regels.
+
+**Voorbeelden:**
+
+- **Vervalt:** "Het programma, de uitslagen en de stand van sc Heerenveen 1 dit seizoen." onder de kop Wedstrijden.
+  De kaarten dragen dezelfde namen.
+- **Blijft:** "Aantal wedstrijden achter elkaar" onder de kop Reeksen.
+  Zonder die zin is niet te zien dat de getallen wedstrijden achter elkaar tellen.
+- **Blijft, onder de tabel:** "G gespeeld, W winst, GL gelijk, V verlies, P punten".
+  De kolommen zijn letters, omdat vijf hele woorden niet op een telefoon passen.
+
 ## Bronnen en tijden
 
 ### Een bron noemen
@@ -226,7 +264,7 @@ We voegen ze niet samen en kiezen er niet één uit, want elke bron moet genoemd
 ## Checklist voor de review
 
 De reviewer loopt deze punten na bij elke pull request die iets van een ander importeert, opslaat of toont.
-De laatste twee punten, over de toon en de schrijfwijzer, gelden ook voor elke pull request die tekst voor bezoekers schrijft of wijzigt.
+De laatste drie punten, over de toon, de schrijfwijzer en de inleidingen en toelichtingen, gelden ook voor elke pull request die tekst voor bezoekers schrijft of wijzigt.
 Raakt de wijziging geen van beide, dan is dit onderdeel niet van toepassing, met de reden.
 
 - **Kop, link en bronnaam (principe 1):** toont de wijziging van een bericht meer dan de kop, de link, de bronnaam en de tijd?
@@ -253,3 +291,6 @@ Raakt de wijziging geen van beide, dan is dit onderdeel niet van toepassing, met
 - **Schrijfwijzer:** staan datums, tijden, spelersnamen en uitslagen in de vorm van de schrijfwijzer, zoals "wo 14:05", "wo 21 okt" en "25 oktober 2026"?
   Staat er geen "vandaag", "gisteren" of "2 uur geleden" in een lijst of in een tekst die blijft staan?
   Staat een bericht op elke plek met dezelfde kop, link, bronnaam en tijd?
+- **Inleidingen en toelichtingen:** zegt een inleiding of uitleg iets wat de kop en de inhoud niet zeggen, in één zin voor een inleiding en hooguit een zin voor een uitleg?
+  Staat een legenda onder wat ze uitlegt, en staan de onderdelen van een kaart in de vaste volgorde?
+  Staat niets in een zin wat de kolomkop of de toegankelijke naam al zegt?

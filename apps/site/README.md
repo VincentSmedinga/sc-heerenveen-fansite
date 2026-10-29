@@ -207,7 +207,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De link in de balk onder de kop heet "Hoe wedstrijden verlopen": de hele kop past op een telefoon niet tussen de vervaagde randen van de rij.
   `matchFlowOf` in `src/matches.ts` werkt de gespeelde wedstrijden van de Eredivisie uit waarvan de doelpunten bekend zijn (dezelfde regel als de doelpunten per kwartier; de beker telt niet mee).
   De doelpunten staan in de gegevens in de volgorde van de Wikipedia-pagina en niet van het spel, dus de functie sorteert ze op minuut en toegevoegde tijd (45 komt voor 45+1).
-  De kaart heeft twee tabellen (`DataTable`) met per rij de wedstrijden, winst, gelijk, verlies en punten, in kolommen met een afkorting (G, W, GL, V en P, uitgelegd in een regel onder de tabellen; vijf hele woorden passen niet op een telefoon): na het eerste doelpunt ("Wij scoren eerst", "De tegenstander scoort eerst") en na de stand bij de rust ("Voor", "Gelijk", "Achter").
+  De kaart heeft twee tabellen (`DataTable`) met per rij de wedstrijden, winst, gelijk, verlies en punten, in kolommen met een afkorting (G, W, GL, V en P, uitgelegd in een regel onder de tabellen en de twee zinnen; vijf hele woorden passen niet op een telefoon): na het eerste doelpunt ("Wij scoren eerst", "De tegenstander scoort eerst") en na de stand bij de rust ("Voor", "Gelijk", "Achter").
   Een doelpunt in minuut 45 of in de toegevoegde tijd van de eerste helft telt voor de rust, een doelpunt vanaf minuut 46 niet.
   Scoren beide clubs in dezelfde minuut als het eerste doelpunt, dan is niet te zien wie het eerst scoorde: de wedstrijd telt dan niet bij het eerste doelpunt, wel bij de rust, en onder de kaart staat hoeveel wedstrijden dat zijn.
   Een 0–0 heeft geen eerste doelpunt en staat bij de rust op "Gelijk".
@@ -241,7 +241,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De laatste twee komen uit de doelpunten en tellen alleen de wedstrijden met bekende doelpunten, zonder verlenging en zonder minuut 0; blessuretijd telt erbij, dus 90+3 is later dan 90.
   Een eigen doelpunt van de tegenstander is een doelpunt van ons en krijgt "(eigen doelpunt)" erachter.
   Elke regel is een `ShortMatch` met de naam van de regel eronder, en bij een doelpunt de minuut en de speler.
-  Onder de lijst staat "Gebaseerd op alle 7 gespeelde wedstrijden", en als niet elke wedstrijd zijn doelpunten heeft, een regel met "de doelpunten van 6 van de 7 gespeelde wedstrijden".
+  Onder de lijst staat "Gebaseerd op alle 7 gespeelde wedstrijden", en als niet elke wedstrijd zijn doelpunten heeft, een regel met "Vroegste en laatste doelpunt: gebaseerd op 6 van de 7 gespeelde wedstrijden".
   Zonder gespeelde wedstrijd staat er een zin in plaats van de lijst.
 - **Verloop van het seizoen:** een kaart in de zijbalk, direct onder de kaart met onze plek in de competitie, met `FormChart` uit het designsysteem: de vorm, een staafje per gespeelde wedstrijd van de Eredivisie en de lijn erdoorheen.
   `leagueResultsOf` in `src/matches.ts` maakt de lijst `W`, `G` en `V` uit de gespeelde wedstrijden van de Eredivisie met een uitslag, op volgorde van speeldatum; een bekerwedstrijd telt niet mee.

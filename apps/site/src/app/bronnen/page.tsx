@@ -52,11 +52,11 @@ export default async function SourcesPage() {
         intro={
           <>
             <Heading level={1}>Onze bronnen</Heading>
-            <Text appearance="intro">
-              {groups.length === 0
-                ? 'We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.'
-                : 'Dit zijn de bronnen waar we het nieuws over sc Heerenveen vandaan halen.'}
-            </Text>
+            {groups.length === 0 && (
+              <Text appearance="intro">
+                We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.
+              </Text>
+            )}
           </>
         }
       >

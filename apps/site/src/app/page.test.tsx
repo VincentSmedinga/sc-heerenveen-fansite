@@ -973,6 +973,23 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     ])
   })
 
+  it('keeps the parts of a card in the fixed order: the heading, the content, the link and the credit', async () => {
+    const matches = withoutIcons(await renderMatchesCard())
+    const standings = withoutIcons(await renderStandingsCard())
+
+    for (const [card, link] of [
+      [matches, 'Alle wedstrijden'],
+      [standings, 'De volledige stand'],
+    ] as const) {
+      const places = ['</h2>', card.includes('<table') ? '</table>' : '</ul>', link, 'hf-wikipedia-credit'].map(
+        (part) => card.indexOf(part),
+      )
+
+      expect(places.every((place) => place > -1)).toBe(true)
+      expect(places).toEqual([...places].sort((a, b) => a - b))
+    }
+  })
+
   it('has "Bron: Wikipedia" under each card, and nothing more: the full credit is on /wedstrijden', async () => {
     for (const html of [await renderMatchesCard(), await renderStandingsCard()]) {
       expect(html).toContain('<p class="hf-meta hf-wikipedia-credit">Bron: Wikipedia</p>')

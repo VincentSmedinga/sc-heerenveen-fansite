@@ -28,8 +28,8 @@ export default function AboutPage() {
           Wie we zijn
         </Heading>
         <Text appearance="intro">
-          De sc Heerenveen Fansite is een site van supporters, voor supporters. We zetten de koppen van de media over sc
-          Heerenveen op één plek, met een link naar het hele verhaal.
+          De sc Heerenveen Fansite is een site van supporters, voor supporters, met de koppen over sc Heerenveen op één
+          plek.
         </Text>
         <Text>
           We schrijven niks over en we passen niks aan. We hebben geen advertenties, geen abonnementen en geen

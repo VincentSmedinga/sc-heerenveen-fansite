@@ -1832,6 +1832,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of een eigen component naast `Text`; dat is meer, voor een stijl van lopende tekst.
   Of een maat die met de breedte meeschaalt, zoals de koppen; één maat past bij de andere stijlen van lopende tekst.
 - **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
+- **Later:** zie _Een inleiding of toelichting bestaat alleen als ze iets toevoegt, en ze staat op een vaste plek_.
+  Een inleiding is één zin van hooguit ongeveer twintig woorden en bestaat alleen als ze iets zegt wat de kop en de inhoud niet zeggen.
+  Onze bronnen heeft er alleen nog een voor de lege plek.
 
 ### Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem
 
@@ -6798,6 +6801,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De kolommen "Wedstrijden", "Winst", "Gelijk", "Verlies" en "Punten" voluit laten staan (past niet, zie hierboven).
   De tabel een eigen scrollvlak geven (ook op een bureaublad scrolt de tabel dan, en een scrollvlak is een nieuw onderdeel).
   De tabel omdraaien, met de uitkomsten als rijen en de situaties als kolommen (past op 320 pixels ook niet).
+- **Later:** zie _Een inleiding of toelichting bestaat alleen als ze iets toevoegt, en ze staat op een vaste plek_.
+  De regel met de afkortingen staat onder de tabellen en onder de twee zinnen, direct boven "Gebaseerd op".
 
 ### Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd
 
@@ -6820,3 +6825,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de datum en de tijd houden (de tijd is na een week ruis).
   Alleen de datum (zegt minder over wanneer het was).
   Een relatieve tijd als "3 weken geleden" (klopt niet meer in een pagina uit het geheugen en een schermlezer leest hem minder gemakkelijk).
+
+### Een inleiding of toelichting bestaat alleen als ze iets toevoegt, en ze staat op een vaste plek
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** een inleiding onder de kop van een pagina en een uitleg onder de kop van een kaart bestaan alleen als de kop en de inhoud zonder haar niet genoeg zijn.
+  Een legenda of toelichting staat onder wat ze uitlegt.
+  De volgorde in een kaart is vast: kop, uitleg, inhoud, legenda, "Gebaseerd op", link, bron.
+  De regels staan in het hoofdstuk Redactie van Storybook, onder _Inleidingen en toelichtingen_.
+- **Waarom:** een vaste tekst die herhaalt wat er al staat, kost de bezoeker een regel lezen en het scherm een regel hoogte, vooral op een telefoon.
+  Een vaste plek maakt de pagina's voorspelbaar, en een schermlezer leest ze in dezelfde volgorde.
+- **Hoe:**
+  - De inleiding van `/wedstrijden` en van Onze bronnen vervalt, want ze herhalen de kop en de namen van de kaarten.
+    Onze bronnen houdt alleen de zin voor de lege plek.
+  - De inleidingen van `/zoeken`, Contact en Over ons zijn korter, in één zin.
+    De rest van de vaste teksten blijft, met een reden per tekst in de pull request (#435).
+  - Zinnen die zeggen wat de telling buiten beschouwing laat, zoals "Doelpunten in de verlenging tellen niet mee.", staan direct na "Gebaseerd op".
+    De regel met de afkortingen van Hoe de wedstrijden verlopen staat onder de tabellen én onder de twee zinnen, boven "Gebaseerd op".
+  - Een grafiek heeft haar legenda eronder, en de tabel met dezelfde cijfers volgt daarna (Verloop van het seizoen).
+  - Tests controleren de volgorde van de onderdelen van de kaarten op `/wedstrijden` en van de blokken op de homepage.
+- **Alternatieven:** alle inleidingen houden en alleen inkorten (de herhaling blijft).
+  Alle toelichtingen boven de inhoud zetten (de bezoeker leest uitleg voor hij de inhoud heeft gezien).
+  Een regel per pagina in plaats van één regel voor allemaal (elke pagina kiest zelf, zoals nu).
