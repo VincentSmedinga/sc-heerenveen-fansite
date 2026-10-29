@@ -1,8 +1,8 @@
 /*
- * A line of news: the short day and the time, or the date and the time, in red on the left, and next to it the headline
- * as a link, with the source and the paywall under it. The headline is underlined under the mouse and with the focus of
- * the keyboard, not otherwise. A line narrower than 24rem puts the day and the time above the headline instead. A List
- * of lines has a thin line between the lines.
+ * A line of news: the short day and the time, or the short day and the date, in red on the left, and next to it the
+ * headline as a link, with the source and the paywall under it. The headline is underlined under the mouse and with the
+ * focus of the keyboard, not otherwise. A line narrower than 24rem puts the day and the time above the headline
+ * instead. A List of lines has a thin line between the lines.
  */
 
 @layer hf.components {
@@ -21,16 +21,17 @@
 
   /*
    * The columns of every line are the same width, so the headlines start at the same place down the list. The first
-   * baselines of the time and the headline are on one line. The column of the time is 4rem, wide enough for the widest
-   * weekday and time, "ma 20:08" (61 pixels at the size of Meta), with a little to spare, so there is not much air
-   * between the time and the headline. A date and a time, such as "14 okt 14:05", is wider, so it breaks after the date:
-   * the time goes to a second line, and the headline still starts in the same place as on the other lines.
+   * baselines of the time and the headline are on one line. The column of the time is 4.5rem, wide enough for the widest
+   * weekday and date, "ma 10 mei" (68 pixels at the size of Meta), with a little to spare, so there is not much air
+   * between the time and the headline. A weekday and a time, such as "ma 20:08", is narrower. A weekday, a date and a
+   * year, such as "di 14 okt 2025", is wider, so it breaks after the date: the year goes to a second line, and the
+   * headline still starts in the same place as on the other lines.
    */
   .hf-news-item-layout {
     align-items: baseline;
     column-gap: 0.75rem;
     display: grid;
-    grid-template-columns: 4rem minmax(0, 1fr);
+    grid-template-columns: 4.5rem minmax(0, 1fr);
   }
 
   /*
@@ -46,8 +47,8 @@
   }
 
   /*
-   * Red, with digits of the same width, so the times line up. It may break at a space, which a date and a time use to put
-   * the time on a second line. A weekday and a time fit on one line.
+   * Red, with digits of the same width, so the times line up. It may break at a space, which a date with a year uses to
+   * put the year on a second line. A weekday and a time, or a weekday and a date, fit on one line.
    */
   .hf-news-item-time {
     color: var(--hf-colour-text-accent);

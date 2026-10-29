@@ -161,7 +161,7 @@ describe('the page Zoeken with a search', () => {
     expect(html).toContain('Klaverboer tekent bij')
     expect(html).toContain('<span>Testkrant</span>')
     expect(html).toContain('<span>voor abonnees</span>')
-    expect(html).toContain('14 okt 12:00')
+    expect(html).toContain('wo 14 okt<')
   })
 
   it('shows a podcast episode as on /podcasts, with its facts', async () => {
@@ -181,7 +181,7 @@ describe('the page Zoeken with a search', () => {
     expect(line).toContain('href="/redactie/over-klaverboer"')
     expect(line).toContain('Over Klaverboer &amp; &lt;i&gt;zijn&lt;/i&gt; doelpunten')
     expect(line).toContain('<span>Van de redactie</span>')
-    expect(line).toContain('<time class="hf-meta hf-news-item-time" dateTime="2026-10-25">25 okt</time>')
+    expect(line).toContain('<time class="hf-meta hf-news-item-time" dateTime="2026-10-25">zo 25 okt</time>')
     expect(line).not.toContain('<svg')
     expect(html).not.toContain('<i>')
   })
