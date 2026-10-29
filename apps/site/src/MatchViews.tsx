@@ -155,9 +155,7 @@ export function ExtremesCard({ matches, now }: { matches: PublicMatch[]; now: Da
               </List.Item>
             ))}
           </List>
-          <Text appearance="meta">
-            {`Gebaseerd op ${played === 1 ? '1 gespeelde wedstrijd' : `alle ${played} gespeelde wedstrijden`}`}
-          </Text>
+          <BasedOn known={played} played={played} />
           {known > 0 && known < played && (
             <Text appearance="meta">{`Het vroegste en het laatste doelpunt zijn gebaseerd op de doelpunten van ${known} van de ${played} gespeelde wedstrijden`}</Text>
           )}
