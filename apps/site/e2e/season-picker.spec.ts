@@ -125,7 +125,10 @@ test.describe('the season picker with JavaScript', () => {
 
 test.describe('the title row with the season picker', () => {
   for (const [width, beside] of [
-    [320, false],
+    // Narrower than a phone, so the row has to wrap: the heading, the space and the list are
+    // 279 pixels wide, and 300 pixels leaves 268.
+    [300, false],
+    [320, true],
     [390, true],
     [900, true],
   ] as const) {
