@@ -14,6 +14,7 @@ import {
   matchFlowOf,
   overviewOf,
   parseCleanSheetCount,
+  resultsOfSeason,
   scorersCoverage,
   standingsAround,
   streaksOf,
@@ -50,6 +51,41 @@ const season = [
 
 /** Between round 4 and the postponed round 5: the schedule has two matches still to come. */
 const between = new Date('2026-08-25T12:00:00Z')
+
+describe('resultsOfSeason', () => {
+  const newestFirst = overviewOf(season, between).results
+  const rounds = (results: PublicMatch[]) => results.map((item) => item.round)
+
+  it('keeps the newest result first in the current season', () => {
+    expect(rounds(resultsOfSeason(newestFirst, '2026/27', between))).toEqual([
+      'Speelronde 4',
+      'Speelronde 3',
+      'Speelronde 2',
+      'Speelronde 1',
+    ])
+  })
+
+  it('puts the first match of a season that is over first and the last one last', () => {
+    expect(rounds(resultsOfSeason(newestFirst, '2025/26', between))).toEqual([
+      'Speelronde 1',
+      'Speelronde 2',
+      'Speelronde 3',
+      'Speelronde 4',
+    ])
+  })
+
+  it('depends on the season and the moment of the visit, so the same results turn up in the other order later', () => {
+    const nextSeason = new Date('2027-08-25T12:00:00Z')
+
+    expect(rounds(resultsOfSeason(newestFirst, '2026/27', nextSeason))).toEqual(rounds(newestFirst).reverse())
+  })
+
+  it('leaves the list it is given alone', () => {
+    resultsOfSeason(newestFirst, '2025/26', between)
+
+    expect(rounds(newestFirst)).toEqual(['Speelronde 4', 'Speelronde 3', 'Speelronde 2', 'Speelronde 1'])
+  })
+})
 
 describe('overviewOf', () => {
   it('puts the matches that have not begun in the programme, in the order they are given, a postponed one included', () => {
