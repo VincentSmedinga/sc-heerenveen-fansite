@@ -6545,6 +6545,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen de laatste vijf wedstrijden tonen (geen reeksen, en die zoeken supporters juist).
   De nieuwste eerst (past bij Uitslagen en De nul gehouden, maar dan loopt de volgorde tegen die van de letters in).
   Een warm vlak (komt naast Verloop van het seizoen, dat al warm is).
+
 ### Thuis en uit staan naast elkaar in een tabel, met een kolom Totaal
 
 - **Datum:** 29 oktober 2026
