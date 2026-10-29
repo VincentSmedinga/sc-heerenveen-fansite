@@ -1,0 +1,62 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2025/26_(mannenvoetbal)?action=raw, read on 29 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: the text around the table and the rules and the legend of the table. See the tests.
+-->
+== Standen ==
+=== Eindstand ===
+{{#invoke:Sports table|main|style=WDL
+|sortable_table=yes
+|section=Stand regulier
+|source=[https://www.transfermarkt.nl/eredivisie/tabelle/wettbewerb/NL1?saison_id=2025 transfermarkt.nl]
+
+<!--Hier de plaatsen van de teams bijwerken-->
+|team_order=PSV, FEY, NEC, TWE, AJA, UTR, AZ, HEE, GRO, SPA, FOR, GAE, EXC, TEL, PEC, VOL, NAC, HER
+
+<!--De posities van de gekoppelde kwalificaties hier bijwerken-->
+|result1=CLCS |result2=CLCS |result3=CL3Q |result4=EL2Q |result5=POECL |result6=POECL |result7=ELCS |result8=POECL |result9=POECL |result16=POED |result17=ED |result18=ED
+
+<!--Resultaten van de teams hier bijwerken, de posities in de stand hoeven hier niet gewisseld te worden. Dat wordt hierboven automatisch gedaan.-->
+|update=complete
+|win_AJA=14 |draw_AJA=14 |loss_AJA= 6 |gf_AJA=62 |ga_AJA=41 |status_AJA=O
+|win_AZ= 14 |draw_AZ= 10 |loss_AZ= 10 |gf_AZ= 58 |ga_AZ= 51 |status_AZ=C
+|win_EXC=10 |draw_EXC= 8 |loss_EXC=16 |gf_EXC=43 |ga_EXC=56
+|win_FEY=19 |draw_FEY= 8 |loss_FEY= 7 |gf_FEY=70 |ga_FEY=44
+|win_FOR=11 |draw_FOR= 6 |loss_FOR=17 |gf_FOR=49 |ga_FOR=63
+|win_GAE= 8 |draw_GAE=14 |loss_GAE=12 |gf_GAE=54 |ga_GAE=53
+|win_GRO=14 |draw_GRO= 6 |loss_GRO=14 |gf_GRO=49 |ga_GRO=45
+|win_HEE=14 |draw_HEE= 9 |loss_HEE=11 |gf_HEE=57 |ga_HEE=53
+|win_HER= 5 |draw_HER= 4 |loss_HER=25 |gf_HER=35 |ga_HER=85 |status_HER=R
+|win_NAC= 6 |draw_NAC=11 |loss_NAC=17 |gf_NAC=35 |ga_NAC=58 |status_NAC=R
+|win_NEC=16 |draw_NEC=11 |loss_NEC= 7 |gf_NEC=77 |ga_NEC=53
+|win_PEC= 9 |draw_PEC=10 |loss_PEC=15 |gf_PEC=44 |ga_PEC=71
+|win_PSV=27 |draw_PSV= 3 |loss_PSV= 4 |gf_PSV=101|ga_PSV=45 |status_PSV=K
+|win_SPA=12 |draw_SPA= 7 |loss_SPA=15 |gf_SPA=40 |ga_SPA=62
+|win_TEL= 9 |draw_TEL=10 |loss_TEL=15 |gf_TEL=49 |ga_TEL=55
+|win_TWE=15 |draw_TWE=13 |loss_TWE= 6 |gf_TWE=59 |ga_TWE=40
+|win_UTR=15 |draw_UTR= 8 |loss_UTR=11 |gf_UTR=55 |ga_UTR=42
+|win_VOL= 8 |draw_VOL= 8 |loss_VOL=18 |gf_VOL=35 |ga_VOL=55 |status_VOL=R
+
+<!--Namen van de teams (wikilinks in de tabel)-->
+|name_AJA=[[AFC Ajax|Ajax]]
+|name_AZ= [[AZ (voetbalclub)|AZ]]
+|name_EXC=[[Excelsior Rotterdam]]
+|name_FEY=[[Feyenoord]]
+|name_FOR=[[Fortuna Sittard]]
+|name_GAE=[[Go Ahead Eagles]]
+|name_GRO=[[FC Groningen]]
+|name_HEE=[[sc Heerenveen]]
+|name_HER=[[Heracles Almelo]]
+|name_NAC=[[NAC Breda]]
+|name_NEC=[[N.E.C.]]
+|name_PEC=[[PEC Zwolle]]
+|name_PSV=[[PSV (voetbalclub)|PSV]]
+|name_SPA=[[Sparta Rotterdam]]
+|name_TEL=[[Telstar (voetbalclub)|Telstar]]
+|name_TWE=[[FC Twente]]
+|name_UTR=[[FC Utrecht]]
+|name_VOL=[[FC Volendam]]
+
+<!--Opmerkingen en noten-->
+
+}}

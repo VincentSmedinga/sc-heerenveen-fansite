@@ -173,9 +173,9 @@ export function healthAfter(
  * page can be read and every check passes (`check-wikipedia.ts`), and then all at once in one
  * transaction. Otherwise nothing changes: the last good copy stays, and the report says why.
  *
- * It reads the current season only. The rows of an earlier season are never changed or removed.
- * It throws when the health in the database can't be written; the data itself fails into an
- * error report.
+ * It reads the current season only. The rows of an earlier season are never changed or removed
+ * (`importPastSeason` is the way to read one). It throws when the health in the database can't
+ * be written; the data itself fails into an error report.
  */
 export async function importMatches(
   db: Database,
@@ -189,24 +189,47 @@ export async function importMatches(
     return { kind: 'postponed', retryAt: before.retryAt, season }
   }
 
-  let report: MatchReport
+  return readSeason(db, fetcher, season, before, origin, clock)
+}
 
-  try {
-    report = await readAndStore(db, fetcher, season, origin, clock)
-  } catch (error) {
-    report = { kind: 'error', message: describeError(error), season }
+/**
+ * Reads the three Wikipedia pages of a season that is over, once, and stores its matches,
+ * goals, table and pages like `importMatches` does, with the same checks and in one
+ * transaction. A season that is over doesn't change, so the hourly import doesn't read it
+ * again: this is the command that does (`pnpm import:season`), and it asks every time it is
+ * run. It writes the rows of that season only, and never those of the current season, which is
+ * the hourly import's. A season that is not over is an error report, and nothing is asked or
+ * written.
+ */
+export async function importPastSeason(
+  db: Database,
+  fetcher: Fetcher,
+  season: string,
+  { clock = () => new Date(), origin = wikipediaOrigin }: MatchImportOptions = {},
+): Promise<MatchReport> {
+  if (!isPastSeason(season, clock())) {
+    return {
+      kind: 'error',
+      message: `${season} is not a season that is over; the hourly import reads the current season`,
+      season,
+    }
   }
 
-  const health = healthAfter(before, report, clock())
+  const [before] = await db.select().from(matchImports).where(eq(matchImports.season, season))
 
-  if (health !== undefined) {
-    await db
-      .insert(matchImports)
-      .values({ season, ...health })
-      .onDuplicateKeyUpdate({ set: health })
-  }
+  return readSeason(db, fetcher, season, before, origin, clock)
+}
 
-  return report
+/** Whether a season, such as `2025/26`, ended before the moment. */
+export function isPastSeason(season: string, moment: Date): boolean {
+  return isSeason(season) && Number(season.slice(0, 4)) < Number(seasonOf(moment).slice(0, 4))
+}
+
+/** Whether a text is a season: the year, a slash and the last two digits of the next year. */
+export function isSeason(text: string): boolean {
+  const parts = /^(\d{4})\/(\d{2})$/u.exec(text)
+
+  return parts !== null && Number(parts[2]) === (Number(parts[1]) + 1) % 100
 }
 
 /** Whether the import has failed so often in a row that it counts as unhealthy. */
@@ -442,6 +465,38 @@ async function readAndStore(
     validOn,
     warnings: stored.warnings,
   }
+}
+
+/**
+ * Reads and stores one season, and writes the health of that season: an error becomes a report,
+ * and a database failure while writing the health throws.
+ */
+async function readSeason(
+  db: Database,
+  fetcher: Fetcher,
+  season: string,
+  before: MatchImport | undefined,
+  origin: string,
+  clock: () => Date,
+): Promise<MatchReport> {
+  let report: MatchReport
+
+  try {
+    report = await readAndStore(db, fetcher, season, origin, clock)
+  } catch (error) {
+    report = { kind: 'error', message: describeError(error), season }
+  }
+
+  const health = healthAfter(before, report, clock())
+
+  if (health !== undefined) {
+    await db
+      .insert(matchImports)
+      .values({ season, ...health })
+      .onDuplicateKeyUpdate({ set: health })
+  }
+
+  return report
 }
 
 /** One row of the table, with the season and the day it holds for. */

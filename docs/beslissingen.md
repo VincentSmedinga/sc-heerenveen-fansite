@@ -4706,6 +4706,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de rijen bij elk nieuw seizoen vervangen (eenvoudiger, maar de uitslagen van een afgelopen seizoen zijn dan weg).
 - **Later:** zie _Een seizoen heeft een eigen adres, `/wedstrijden/2025-26`, en een kiezer die zonder JavaScript werkt_: `/wedstrijden` en de statistieken tonen nu ook een eerder seizoen, op een adres van dat seizoen.
   Het lopende seizoen blijft op `/wedstrijden`, en de homepage toont alleen het lopende seizoen.
+- **Later:** zie _Een eerder seizoen wordt eenmalig geïmporteerd met een opdracht, zonder selectie_.
+  De uurlijkse import leest nog altijd alleen het lopende seizoen, en de rijen van eerdere seizoenen blijven bewaard.
+  Alleen de opdracht `pnpm run import:season` leest een afgelopen seizoen.
 
 ### Een uitgestelde wedstrijd blijft in het programma staan als "Uitgesteld"
 
@@ -4873,6 +4876,37 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zonder deze regel bleven die spelers voor altijd staan als "niet meer in de selectie", en kon een doelpunt van een echte speler op een verzonnen speler met dezelfde achternaam vallen.
   De import herkent de eerste goede lezing eraan dat `squad_imports` nog geen geslaagde lezing heeft.
 - **Alternatieven:** de verzonnen spelers laten staan (rommel in de tabel en kans op een verkeerde koppeling); de verzonnen spelers een eigen seizoen geven (de pagina's tonen dan niets in het lopende seizoen, zoals bij de verzonnen wedstrijden).
+
+### Een eerder seizoen wordt eenmalig geïmporteerd met een opdracht, zonder selectie
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** `pnpm run import:season <seizoen>` importeert de wedstrijden, doelpunten, stand en bronpagina's van een afgelopen seizoen, zoals `2025/26`.
+  De opdracht gebruikt dezelfde fetcher, controles en opslag als de uurlijkse import, in één transactie, en kost drie verzoeken aan Wikipedia.
+  De uurlijkse import blijft het lopende seizoen lezen, en `pnpm run import:status` gaat over het lopende seizoen.
+  De selectie van een eerder seizoen komt er niet bij, dus die doelpunten hebben geen `player_id`.
+- **Waarom:** een afgelopen seizoen verandert niet meer, dus elk uur lezen kost verzoeken aan Wikipedia zonder winst.
+  Een aparte opdracht met een controle op het seizoen houdt het lopende seizoen veilig: de opdracht weigert het lopende en een toekomstig seizoen, voordat ze iets vraagt of schrijft.
+  De vergelijking met het vorige seizoen (#413) heeft de selectie niet nodig, en `players` is een begrip van nu.
+- **Gevolg:** op de host draait de opdracht uit hetzelfde bestand als de uurlijkse import, met `import.mjs --season 2025/26`, zodat de host geen tweede bestand nodig heeft.
+  Zonder die optie doet het bestand niets anders dan voorheen.
+  De opdracht neemt de lock van de import, dus ze loopt nooit naast een run van cron.
+  Ze schrijft wel de rij van dat seizoen in `match_imports`, maar de status en de waarschuwingen tellen alleen het lopende seizoen, zodat een seizoen dat niet wordt ververst nooit als ongezond meetelt.
+- **Alternatieven:** de uurlijkse import ook het vorige seizoen laten lezen (verzoeken zonder reden, en een seizoen dat ongezond kan worden).
+  Een parameter van `pnpm run import` zelf (een foutje met de opdracht raakt dan de uurlijkse run).
+  Ook de selectie van 2025/26 importeren (nodig voor spelers bij doelpunten, maar niet voor deze vergelijking).
+
+### Een gestaakte wedstrijd telt niet, de latere uitslag geldt
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** een blok met de score "Gestaakt ..." telt niet zolang de pagina onder dezelfde kop (dezelfde speelronde) voor dezelfde twee clubs een later blok heeft.
+  Het latere blok geldt, met zijn datum en aftrap.
+  Zonder later blok stopt de import met een fout die de wedstrijd noemt.
+  Een voetnoot (`<ref>...</ref>`) haalt de reader weg voordat hij de pagina leest, dus een datum met een voetnoot leest als de datum.
+- **Waarom:** de pagina van 2025/26 heeft twee blokken voor NAC Breda – sc Heerenveen in speelronde 33, en de uitslag van de KNVB (2–0, op 11 mei 2026) is de definitieve.
+  Een tweede blok in dezelfde speelronde zou de controle op één wedstrijd per ronde laten falen.
+  Een gok bij een onbekende score is erger dan een fout.
+- **Alternatieven:** de gestaakte wedstrijd houden en het latere blok overslaan (de datum en de aftrap kloppen dan niet met de definitieve uitslag).
+  Elke "Gestaakt"-score als fout laten staan (het vorige seizoen is dan niet te lezen).
 
 ## Redactie
 

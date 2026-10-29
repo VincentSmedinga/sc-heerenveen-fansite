@@ -343,6 +343,19 @@ Zo kan niemand nagaan wie een account heeft.
   `echo $?` direct daarna toont 0 als elke feed gezond is, en 1 als een feed ongezond is.
   De README van de importer laat zien hoe het eruitziet.
 
+- Een afgelopen seizoen lees je eenmalig met SSH.
+  Draai hetzelfde bestand met `--season` en het seizoen erachter, op één regel:
+
+  ```sh
+  /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/importer/import.mjs --season 2025/26
+  ```
+
+  Het seizoen moet voorbij zijn: het lopende seizoen weigert de opdracht, want dat leest de cronjob elk uur.
+  De opdracht doet drie verzoeken aan Wikipedia en zegt in één regel wat ze bewaarde.
+  Een tweede keer draaien verandert niets.
+  Houdt een run van cron de lock vast, dan doet de opdracht niets en zegt dat; probeer het na een paar minuten opnieuw.
+  De site laat het seizoen nog niet zien, en `--status` blijft over het lopende seizoen gaan.
+
 - `curl -I https://acc.sc.heerenveen.org/beheer/inloggen` toont `x-robots-tag: noindex, nofollow`, `cache-control` met `no-store` erin en `referrer-policy: same-origin`.
   Een bezoeker zonder sessie die `/beheer` opvraagt, krijgt een doorverwijzing (307) naar `/beheer/inloggen`, met dezelfde headers.
 - Het inloggen werkt als je na stap 12 (en na de proefmail) een account maakt voor je eigen adres, naar <https://acc.sc.heerenveen.org/beheer/inloggen> gaat, je adres invult, binnen een paar minuten de mail "Inloggen bij het beheer van de sc Heerenveen Fansite" krijgt en na de link en de knop Inloggen "Je bent ingelogd als <je adres>." ziet.
