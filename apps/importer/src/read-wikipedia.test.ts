@@ -12,6 +12,12 @@ const extraTimePage = readFileSync(new URL('./fixtures/wikipedia-cup-extra-time.
 const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
 const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
 const seasonCup = readFileSync(new URL('./fixtures/wikipedia-season-cup.wiki', import.meta.url), 'utf8')
+const cupPages = Object.fromEntries(
+  ['2021-22', '2022-23', '2023-24', '2024-25'].map((season) => [
+    season,
+    readFileSync(new URL(`./fixtures/wikipedia-cup-${season}.wiki`, import.meta.url), 'utf8'),
+  ]),
+)
 
 /** A match of ours in the shape of the programme, with these fields. */
 function box(fields: Record<string, string>) {
@@ -416,6 +422,159 @@ describe('the cup', () => {
   it('reads a page without any Footballbox2 template as no matches, and says so', () => {
     expect(readCup('Een kale pagina')).toEqual({ hasTemplates: false, kind: 'read', lastPlayedOn: null, matches: [] })
     expect(readCup(cupPage)).toMatchObject({ hasTemplates: true })
+  })
+})
+
+describe('the cup pages of 2021/22 to 2024/25', () => {
+  const read = (text: string) => {
+    const result = readCup(text)
+
+    return result.kind === 'read' ? result.matches : result
+  }
+
+  /** A tie of ours with these fields; the score is the part that differs between the pages. */
+  const tie = (fields: Record<string, string>) =>
+    `==== Eerste ronde ====\n{{Footballbox2\n${Object.entries({
+      date: '18 oktober 2022',
+      score: '2 – 1 (1 – 0)',
+      team1: '[[sc Heerenveen]]',
+      team2: '[[Testdorp FC]]',
+      time: '20:00 uur',
+      ...fields,
+    })
+      .map(([key, value]) => `|${key}=${value}`)
+      .join('\n')}\n}}`
+
+  it('reads the real page of 2022/23: the final score, with the extra time of the first tie', () => {
+    expect(read(cupPages['2022-23']!)).toMatchObject([
+      { extraTime: true, goalsAgainst: 2, goalsFor: 4, home: false, round: 'Eerste ronde', status: 'played' },
+      { extraTime: false, goalsAgainst: 0, goalsFor: 2, home: true, round: 'Tweede ronde' },
+      { extraTime: false, goalsAgainst: 1, goalsFor: 2, home: false, round: 'Achtste finales' },
+      { extraTime: false, goalsAgainst: 1, goalsFor: 0, home: true, round: 'Kwartfinales' },
+    ])
+  })
+
+  it('reads the real page of 2024/25: a time without "uur", and the extra time of the last tie', () => {
+    expect(read(cupPages['2024-25']!)).toMatchObject([
+      { goalsAgainst: 2, goalsFor: 3, kickoffAt: new Date('2024-10-29T20:00:00Z'), round: 'Eerste ronde' },
+      { goalsAgainst: 0, goalsFor: 1, kickoffAt: new Date('2024-12-18T19:00:00Z'), round: 'Tweede ronde' },
+      {
+        extraTime: true,
+        goalsAgainst: 3,
+        goalsFor: 2,
+        kickoffAt: new Date('2025-01-16T20:00:00Z'),
+        round: 'Achtste finales',
+      },
+    ])
+  })
+
+  it('reads the real pages of 2021/22 and 2023/24 too', () => {
+    expect(read(cupPages['2021-22']!)).toMatchObject([
+      { goalsAgainst: 1, goalsFor: 2, home: false },
+      { goalsAgainst: 0, goalsFor: 2, home: true },
+      { goalsAgainst: 1, goalsFor: 0, home: true },
+    ])
+    expect(read(cupPages['2023-24']!)).toMatchObject([
+      { goalsAgainst: 1, goalsFor: 5, home: true },
+      { goalsAgainst: 1, goalsFor: 0, home: false },
+    ])
+  })
+
+  it('reads the scorers of the older pages, and they agree with the final score', () => {
+    for (const page of Object.values(cupPages)) {
+      const matches = read(page)
+
+      expect(Array.isArray(matches)).toBe(true)
+      for (const match of Array.isArray(matches) ? matches : []) {
+        expect(match.goalsProblem).toBeNull()
+        expect(match.goals?.filter((goal) => goal.ours).length ?? match.goalsFor).toBe(match.goalsFor)
+      }
+    }
+  })
+
+  it.each([
+    ['5 – 1 (3 – 0)', 5, 1],
+    ['1 – 0 (0 – 0)', 1, 0],
+    ['2 – 4 (2 – 2, 1 – 1)', 2, 4],
+    ['3&nbsp;–&nbsp;1&nbsp;(1&nbsp;–&nbsp;0)', 3, 1],
+    ['2 - 1 (1 - 0)', 2, 1],
+    ['2 – 1', 2, 1],
+  ])('reads the score %j as the final score, home side first', (score, home, away) => {
+    expect(read(tie({ aet: score.includes(',') ? 'J' : '', score }))).toMatchObject([
+      { goalsAgainst: away, goalsFor: home, home: true, status: 'played' },
+    ])
+  })
+
+  it('turns the final score for a tie away, and does not take the half time score for it', () => {
+    expect(read(tie({ score: '1 – 3 (1 – 2)', team1: '[[Testdorp FC]]', team2: '[[sc Heerenveen]]' }))).toMatchObject([
+      { goalsAgainst: 1, goalsFor: 3, home: false },
+    ])
+  })
+
+  it('reads a shoot-out after extra time in the older layout from our side', () => {
+    expect(read(tie({ aet: 'J', penaltyscore: '4 – 3', score: '1 – 1 (1 – 1, 0 – 0)' }))).toMatchObject([
+      { extraTime: true, goalsAgainst: 1, goalsFor: 1, penaltiesAgainst: 3, penaltiesFor: 4 },
+    ])
+  })
+
+  it.each(['20:00', '20:00 uur', '8:05', '20:00*'])('reads the time %j as a time', (time) => {
+    expect(read(tie({ time }))).toMatchObject([{ kickoffAt: expect.any(Date) }])
+  })
+
+  it('reads the same moment from a time with and without "uur"', () => {
+    const [withHour] = read(tie({ time: '20:00 uur' })) as { kickoffAt: Date }[]
+    const [without] = read(tie({ time: '20:00' })) as { kickoffAt: Date }[]
+
+    expect(without?.kickoffAt).toEqual(withHour?.kickoffAt)
+    expect(without?.kickoffAt).toEqual(new Date('2022-10-18T18:00:00Z'))
+  })
+
+  it.each(['25:00', '20:75', '20.00', '20:00 u', 'avond', '20:00:00'])('still refuses the time %j', (time) => {
+    expect(readCup(tie({ time }))).toEqual({
+      kind: 'error',
+      message: `Eerste ronde (KNVB Beker) has a time we do not know: '${time}'`,
+    })
+  })
+
+  it.each([
+    '2 – 1 (1 – 0',
+    '2 – 1 (1)',
+    '2 – 1 (a – b)',
+    '2 – 1 ()',
+    '2 – 1 (1 – 0, 0 – 0, 0 – 0)',
+    '2 – 1 1 – 0',
+    '2 – 1 (1 – 0) x',
+  ])('still refuses the score %j, with the name of the match', (score) => {
+    expect(readCup(tie({ aet: 'J', score }))).toMatchObject({
+      kind: 'error',
+      message: expect.stringContaining(`Eerste ronde (KNVB Beker) has a score we do not know: '${score}'`),
+    })
+  })
+
+  it.each([
+    ['2 – 1 (3 – 0)', 'a half time score above the final score'],
+    ['2 – 1 (1 – 2)', 'a half time score above the final score'],
+    ['2 – 1 (2 – 2, 1 – 0)', 'a score after 90 minutes above the final score'],
+    ['2 – 3 (2 – 2, 3 – 0)', 'a half time score above the score after 90 minutes'],
+  ])('refuses %j, because it has %s', (score) => {
+    expect(readCup(tie({ aet: 'J', score }))).toEqual({
+      kind: 'error',
+      message: `Eerste ronde (KNVB Beker) has a score that does not add up: '${score}'`,
+    })
+  })
+
+  it('refuses a score after 90 minutes on a tie without extra time', () => {
+    expect(readCup(tie({ aet: '', score: '2 – 1 (1 – 1, 0 – 0)' }))).toEqual({
+      kind: 'error',
+      message: "Eerste ronde (KNVB Beker) has a score after 90 minutes but no extra time: '2 – 1 (1 – 1, 0 – 0)'",
+    })
+  })
+
+  it('reads a score in the layout of 2025/26 as it did', () => {
+    expect(read(tie({ 'half time score': '1&nbsp;–&nbsp;0', score: '2&nbsp;–&nbsp;1' }))).toMatchObject([
+      { goalsAgainst: 1, goalsFor: 2 },
+    ])
+    expect(read(seasonCup)).toHaveLength(4)
   })
 })
 

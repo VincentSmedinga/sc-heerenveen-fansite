@@ -4895,6 +4895,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een parameter van `pnpm run import` zelf (een foutje met de opdracht raakt dan de uurlijkse run).
   Ook de selectie van 2025/26 importeren (nodig voor spelers bij doelpunten, maar niet voor deze vergelijking).
 
+### De bekerpagina's van eerdere seizoenen schrijven de score met de stand bij de rust, en de lezer kent die vorm
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** `readCup` leest `eindstand (rust)` en `eindstand (stand na 90 minuten, rust)`, en een tijd met of zonder "uur".
+  De eindstand is de score van de wedstrijd, en de waarden in de haakjes worden gelezen en gecontroleerd maar nog niet opgeslagen.
+- **Waarom:** de pagina's van 2021/22 tot en met 2024/25 schrijven zo, en zonder dit stopt de import van die seizoenen.
+  De stand na 90 minuten is de gegevens waar #300 om vraagt, dus de lezer vergeet hem niet.
+- **Controles:** een stand bij de rust is niet hoger dan de stand na 90 minuten of, zonder die, de eindstand.
+  Een stand na 90 minuten is niet hoger dan de eindstand en hoort bij een wedstrijd met verlenging (`aet`).
+  Een score die niet klopt, is een fout met de naam van de wedstrijd, zoals een score die niet te lezen is.
+  De haakjes werken ook voor de competitie, want de lezer van een score is voor beide dezelfde; de competitiepagina's van 2021/22 tot en met 2024/25 hebben ze niet.
+- **Alternatieven:** de haakjes weggooien (de stand na 90 minuten gaat dan verloren en #300 moet de pagina opnieuw lezen).
+  Elke onbekende vorm als fout laten staan (de import van eerdere seizoenen mislukt).
+
 ### Een gestaakte wedstrijd telt niet, de latere uitslag geldt
 
 - **Datum:** 29 oktober 2026

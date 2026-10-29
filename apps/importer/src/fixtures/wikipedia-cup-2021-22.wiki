@@ -1,0 +1,56 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/KNVB_Beker_2021/22_(mannen)?action=raw, read on 30 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: the matches of other clubs, the text around the templates, and the referees, video referees, reports and
+  attendances (emptied). The score is written as the final score and the score at half time in brackets, and after extra
+  time as the final score and then the score after 90 minutes and at half time. See the tests.
+-->
+== Wedstrijden ==
+
+==== Eerste ronde ====
+{{Footballbox2
+| date=27 oktober 2021
+| time=20:00 uur
+| team1=[[Amsterdamsche Football Club|AFC]]
+| score=1 – 2 (1 – 0)
+| team2='''[[sc Heerenveen]]'''
+| goals1=[[Dalian Maatsen|Maatsen]] {{goal|18}}
+| goals2={{goal|76}} [[Henk Veerman|H. Veerman]]<br />{{goal|79}} [[Filip Stevanović|Stevanović]]
+| location=[[Amsterdam (hoofdbetekenis)|Amsterdam]]
+| stadium=Sportpark Goed Genoeg
+| attendance=
+| referee=
+| report=
+}}
+
+==== Tweede ronde ====
+{{Footballbox2
+| date=16 december 2021
+| time=21:00 uur
+| team1='''[[sc Heerenveen]]'''
+| score=2 – 0 (0 – 0)
+| team2=[[De Treffers]]
+| goals1=[[Siem de Jong|De Jong]] {{goal|74}}<br />[[Joey Veerman|J. Veerman]] {{goal|88}}
+| goals2=
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=
+| referee=
+| report=
+}}
+
+==== Achtste finales ====
+{{Footballbox2
+| date=18 januari 2022
+| time=21:00 uur
+| team1=[[sc Heerenveen]]
+| score=0 – 1 (0 – 1)
+| team2='''[[Go Ahead Eagles]]'''
+| goals1=
+| goals2={{goal|15}} [[Iñigo Córdoba|Córdoba]]
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=
+| referee=
+| report=
+}}

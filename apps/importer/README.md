@@ -633,6 +633,7 @@ Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wik
   Een score die we niet kennen, zoals een gestaakte wedstrijd van ons, is een fout.
 - Een bekerwedstrijd na verlenging of strafschoppen bewaart hij ook (`extra_time`, `penalties_for` en `penalties_against`).
   Wikipedia schrijft de uitslag in `score` als "N – N", ook na verlenging.
+  De bekerpagina's van 2021/22 tot en met 2024/25 zetten er haakjes achter (zie _Oudere bekerpagina's_).
   Een gevuld `aet` (meestal `J`) is verlenging, en `penaltyscore` is de score van de strafschoppen, als "4 – 3" met team 1 eerst.
   De import zet die om naar die van sc Heerenveen en die van de tegenstander, thuis of uit.
   Een wedstrijd van de competitie met `aet` of `penaltyscore` is een fout, zoals strafschoppen zonder verlenging, strafschoppen bij een stand die niet gelijk is, en een score van de strafschoppen die geen "N – N" is.
@@ -747,6 +748,26 @@ Matches 2026/27: warning, the result of Speelronde 1 (Eredivisie) changed after 
 De waarschuwing staat ook in `match_imports.last_warning`, en dus in het overzicht.
 `matches.result_set_at` houdt bij sinds wanneer de uitslag zo staat.
 
+### Oudere bekerpagina's
+
+De bekerpagina's van 2021/22 tot en met 2024/25 schrijven de score en de tijd anders dan die van 2025/26.
+De lezer kent deze vormen:
+
+| Wikipedia schrijft                   | De lezer leest                                                                 |
+| ------------------------------------ | ------------------------------------------------------------------------------ |
+| `3 – 1`                              | de eindstand 3 – 1 (2025/26)                                                   |
+| `5 – 1 (3 – 0)`                      | de eindstand 5 – 1, met 3 – 0 bij de rust                                      |
+| `2 – 4 (2 – 2, 1 – 1)` met `aet = J` | de eindstand 2 – 4 na verlenging, met 2 – 2 na 90 minuten en 1 – 1 bij de rust |
+| `20:00 uur` en `20:00`               | dezelfde tijd                                                                  |
+
+- De eindstand is de score van de wedstrijd, met de score van de strafschoppen er los van in `penaltyscore`.
+- De import leest de waarden in de haakjes en controleert ze, maar bewaart ze niet.
+  Een stand bij de rust kan niet hoger zijn dan de stand daarvoor, en een stand na 90 minuten kan niet hoger zijn dan de eindstand.
+  Een stand na 90 minuten zonder verlenging (`aet`) is ook een fout.
+  De stand na 90 minuten bewaren en tonen is #300.
+- Een score of een tijd in een andere vorm blijft een fout met de naam van de wedstrijd, en de database blijft zoals ze was.
+- De fixtures `wikipedia-cup-2021-22.wiki` tot en met `wikipedia-cup-2024-25.wiki` in `src/fixtures/` zijn de wedstrijden van sc Heerenveen uit die vier pagina's.
+
 ### Een afgelopen seizoen
 
 Een afgelopen seizoen verandert niet meer, dus de uurlijkse import leest het niet opnieuw.
@@ -798,7 +819,7 @@ De reader werkt zo:
 ### Wat de import niet doet
 
 - De versie van een pagina bewaart hij als de `Last-Modified` van Wikipedia (`wikipedia_pages.version`), want de ruwe tekst komt zonder versienummer.
-- De schutters bij de strafschoppen en de uitslag na 90 minuten bewaart hij niet: alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging en de score van de strafschoppen.
+- De schutters bij de strafschoppen en de stand na 90 minuten bewaart hij niet (die laatste komt met #300): alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging en de score van de strafschoppen.
 - Een puntenaftrek rekent hij niet mee.
   De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
 - Scheidsrechter, toeschouwers en opstellingen leest hij niet, en ook geen kaarten, wissels of assists.

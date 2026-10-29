@@ -202,6 +202,37 @@ describe('the command', () => {
     ])
   })
 
+  it.each(['2022-23', '2024-25'])('reads a season whose cup page has the older layout (%s)', async (cupSeason) => {
+    const cup = fixture(`wikipedia-cup-${cupSeason}.wiki`)
+    const server = await serve({ last: { ...lastSeason, cup } })
+
+    const { code, lines } = await runCommand(server, past)
+    const stored = await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))
+
+    expect(code).toBe(0)
+    expect(lines).toEqual([
+      `Matches 2025/26: ${34 + stored.length} new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17`,
+    ])
+    expect(stored).toHaveLength(cupSeason === '2022-23' ? 4 : 3)
+    expect(stored.every((match) => match.status === 'played')).toBe(true)
+    expect(stored.find((match) => match.round === 'Eerste ronde')).toMatchObject(
+      cupSeason === '2022-23'
+        ? { extraTime: true, goalsAgainst: 2, goalsFor: 4, home: false, opponent: 'HSV Hoek' }
+        : { extraTime: false, goalsAgainst: 2, goalsFor: 3, home: false, opponent: 'IJsselmeervogels' },
+    )
+  })
+
+  it('stops with the name of the match when a cup score is of a layout we do not know, and writes nothing', async () => {
+    const cup = fixture('wikipedia-cup-2022-23.wiki').replace('2 – 0 (0 – 0)', '2 – 0 [0 – 0]')
+    const server = await serve({ last: { ...lastSeason, cup } })
+
+    const { code, lines } = await runCommand(server, past)
+
+    expect(code).toBe(1)
+    expect(lines.join('\n')).toContain("Tweede ronde (KNVB Beker) has a score we do not know: '2 – 0 [0 – 0]'")
+    expect(await database.db.select().from(matches)).toEqual([])
+  })
+
   it('stores no squad, and no goal has a player, without an error or a warning', async () => {
     const server = await serve()
 
