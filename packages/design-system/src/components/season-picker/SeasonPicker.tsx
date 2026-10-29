@@ -27,7 +27,7 @@ export type SeasonPickerProps = Omit<
 > & {
   /** Where the form goes: a route that sends the visitor on to the page of the season. */
   action: string
-  /** The seasons to choose from, in the order they are shown. */
+  /** The seasons to choose from, in the order shown. With fewer than two there is no picker. */
   options: readonly SeasonPickerOption[]
   /** The value of the season the page shows. */
   value: string
@@ -53,6 +53,7 @@ export const choosesByKey = ({
 
 /**
  * A form that chooses the season a page shows: a list with the seasons and a button "Toon". It
+ * is nothing when there is one season or none, because there is nothing to choose. It
  * is a form with `method="get"`, so it works without JavaScript: the button sends the choice to
  * `action`, which sends the visitor on to the address of that season.
  *
@@ -98,6 +99,11 @@ export const SeasonPicker = ({ action, className, options, value, ...props }: Se
     } else if (choosesByKey(event)) {
       byKey.current = true
     }
+  }
+
+  // A list with one season has nothing to choose.
+  if (options.length < 2) {
+    return null
   }
 
   return (

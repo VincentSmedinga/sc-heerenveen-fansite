@@ -1890,10 +1890,14 @@ describe('the season picker on /wedstrijden', () => {
     expect(html).not.toContain('Seizoen 2026/27 ·')
   })
 
-  it('shows the picker with the current season alone when no other season has matches', async () => {
+  it('has no picker when the current season is the only one, and keeps the heading', async () => {
     vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
 
-    expect(await render()).toContain('<option value="2026-27" selected="">2026/27</option></select>')
+    const html = await render()
+
+    expect(html).not.toContain('<select')
+    expect(html).not.toContain('Seizoen kiezen')
+    expect(html).toContain('<h1 class="hf-heading-1">Wedstrijden</h1>')
   })
 
   it('has the bar of the page and the picker agree: a link for every card the page has', async () => {

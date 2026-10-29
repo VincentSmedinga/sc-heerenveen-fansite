@@ -6906,6 +6906,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 29 oktober 2026
 - **Besluit:** de lijst met seizoenen heeft de seizoenen die wedstrijden in de database hebben, tot en met het lopende, het nieuwste bovenaan.
   Het lopende seizoen staat er altijd in, ook vóór zijn eerste wedstrijd, want de pagina van dat seizoen is `/wedstrijden` zelf.
+  Heeft de lijst één seizoen, dan toont de pagina de kiezer niet: er valt niets te kiezen (de projecteigenaar, 29 oktober 2026).
   Een seizoen dat niet in de lijst staat, een seizoen in de toekomst en een adres dat niet de vorm `JJJJ-JJ` heeft (waarin het tweede getal bij het jaar past), geven "niet gevonden".
   Het lopende seizoen op zijn eigen adres (`/wedstrijden/2026-27`) verwijst door naar `/wedstrijden`, met een tijdelijke doorverwijzing, want vanaf 1 juli is dat seizoen een eigen adres.
   Een eerder seizoen heeft geen kaart Programma, want er valt niets meer te spelen, en de balk "Op deze pagina:" linkt er dan ook niet naar.

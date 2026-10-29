@@ -73,6 +73,18 @@ describe('SeasonPicker', () => {
     expect(sent).toHaveBeenCalledWith('2024-25')
   })
 
+  it('renders nothing when there is one season or none, because there is nothing to choose', () => {
+    const { container, rerender } = render(
+      <SeasonPicker action="/wedstrijden/kies" options={options.slice(0, 1)} value="2026-27" />,
+    )
+
+    expect(container.innerHTML).toBe('')
+
+    rerender(<SeasonPicker action="/wedstrijden/kies" options={[]} value="2026-27" />)
+
+    expect(container.innerHTML).toBe('')
+  })
+
   describe('with script', () => {
     it('hides the button Toon, which stays in the page for a visitor without script', () => {
       setup()
