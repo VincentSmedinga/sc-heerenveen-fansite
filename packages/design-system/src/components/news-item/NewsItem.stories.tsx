@@ -110,6 +110,15 @@ const renderIn = (maxInlineSize: string) => () => (
             time="wo 14 okt"
           />
         </List.Item>
+        <List.Item>
+          <NewsItem
+            dateTime="2025-10-14T12:05:00Z"
+            headline="Terugblik op een seizoen van een jaar geleden, met het jaar erbij"
+            href="#ander-jaar"
+            source="Voorbeeldkrant"
+            time="di 14 okt 2025"
+          />
+        </List.Item>
       </List>
     </Card>
   </div>
