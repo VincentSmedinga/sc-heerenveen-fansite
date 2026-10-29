@@ -20,7 +20,7 @@ import {
   WikipediaCredit,
 } from '@fansite/design-system'
 
-import type { MatchData } from './matches'
+import type { HomeAwayTally, MatchData } from './matches'
 
 import { moreCleanSheets } from './items-per-card'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
@@ -30,6 +30,7 @@ import {
   extremesOf,
   goalsPerQuarter,
   goalsWithInitials,
+  homeAwayOf,
   type LeagueMeasure,
   type LeaguePlace,
   leaguePlaceOf,
@@ -272,6 +273,57 @@ export function LeaguePlaceCard({ standings }: { standings: PublicStandingsRow[]
           <Text appearance="meta">
             {`Gebaseerd op de stand na ${place.played} ${place.played === 1 ? 'wedstrijd' : 'wedstrijden'} van sc Heerenveen`}
           </Text>
+        </>
+      )}
+    </Card>
+  )
+}
+
+/** A number with a comma and two decimals, as in 1,83, or a dash when there is no match. */
+const perMatch = (value: number | undefined) =>
+  value === undefined ? '–' : value.toLocaleString('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+
+/**
+ * The card of the matches page with how sc Heerenveen does at home and away: a table with a
+ * column for home, away and both, and a row for the matches, the points and the goals. The
+ * numbers come from the score of the played matches of the Eredivisie. A side with no match yet
+ * has a dash where a number is divided and a 0 where it is counted. Without a result it is a
+ * sentence for visitors and no table.
+ */
+export function HomeAwayCard({ matches }: { matches: PublicMatch[] }) {
+  const { away, home, total } = homeAwayOf(matches)
+  const sides: HomeAwayTally[] = [home, away, total]
+  const row = (header: string, cell: (side: HomeAwayTally) => number | string) => ({
+    cells: sides.map(cell),
+    header,
+  })
+
+  return (
+    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0)} surface="warm">
+      <Heading anchor id="thuis-en-uit" level={2}>
+        Thuis en uit
+      </Heading>
+      {total.played === 0 ? (
+        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+      ) : (
+        <>
+          <DataTable
+            caption="De uitslagen van sc Heerenveen thuis en uit dit seizoen"
+            columns={['Onderdeel', 'Thuis', 'Uit', 'Totaal']}
+            rows={[
+              row('Gespeeld', (side) => side.played),
+              row('Gewonnen', (side) => side.won),
+              row('Gelijk', (side) => side.drawn),
+              row('Verloren', (side) => side.lost),
+              row('Punten', (side) => side.points),
+              row('Punten per wedstrijd', (side) => perMatch(side.pointsPerMatch)),
+              row('Doelpunten voor', (side) => side.goalsFor),
+              row('Doelpunten tegen', (side) => side.goalsAgainst),
+              row('Doelpunten per wedstrijd', (side) => perMatch(side.goalsPerMatch)),
+              row('Zonder tegendoelpunt', (side) => side.cleanSheets),
+            ]}
+          />
+          <BasedOn known={total.played} played={total.played} />
         </>
       )}
     </Card>
