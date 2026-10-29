@@ -24,9 +24,9 @@ describe('match.css', () => {
     expect(rule('.hf-match-goal-theirs')).not.toMatch(/font-weight/u)
   })
 
-  it('gives "Gegevens nog niet beschikbaar" the plain colour of the other small lines, not a colour that means something', () => {
-    expect(css).toMatch(/\.hf-match-missing,/u)
-    expect(rule('.hf-match-missing')).not.toMatch(/outcome|accent/u)
+  it('gives "Gegevens nog niet beschikbaar" the accent red of "Uitgesteld", and not its weight', () => {
+    expect(rule('.hf-match-missing')).toMatch(/color: var\(--hf-colour-text-accent\)/u)
+    expect(rule('.hf-match-missing')).not.toMatch(/outcome|font-weight/u)
   })
 
   it('does not take the colour away in forced colours: the weight stays whatever the browser does', () => {

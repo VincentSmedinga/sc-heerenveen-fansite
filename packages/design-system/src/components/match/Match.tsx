@@ -67,8 +67,8 @@ export type MatchProps =
       penaltiesFor?: never
       /**
        * Whether the match has begun, long enough ago to be over, and has no result yet. Instead
-       * of a result it says "Gegevens nog niet beschikbaar", in plain text. The status stays
-       * `scheduled`, and the time stays.
+       * of a result it says "Gegevens nog niet beschikbaar", in the accent colour, as the last
+       * line of the match. The status stays `scheduled`, and the time stays.
        */
       resultMissing?: boolean
       status: 'scheduled'
@@ -151,8 +151,9 @@ const separator = (
  * same, so a screen reader hears nothing extra. A match that is still to be played has a dash
  * between the names, which is read as "tegen".
  * A postponed match says "Uitgesteld" where the time would be. A match that has begun long ago
- * and has no result yet (`resultMissing`) says "Gegevens nog niet beschikbaar" under the clubs,
- * where the scorers would be, as plain text in the colour of the other explanations.
+ * and has no result yet (`resultMissing`) says "Gegevens nog niet beschikbaar" as the last
+ * line, under the time and the place, in the accent red of "Uitgesteld" but not bold. The words
+ * are the sign; the colour only adds to them.
  *
  * The scorers of a played match are one line between the clubs and the time, in the order of
  * the clock with the goals of both clubs: "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen". The
@@ -251,11 +252,6 @@ export const Match = ({
           ))}
         </p>
       ) : null}
-      {resultMissing ? (
-        <Text appearance="meta" className="hf-match-missing">
-          Gegevens nog niet beschikbaar
-        </Text>
-      ) : null}
       <Text appearance="meta" className="hf-match-when">
         {status === 'postponed' ? (
           <span className="hf-match-postponed">Uitgesteld</span>
@@ -271,6 +267,11 @@ export const Match = ({
           </>
         ) : null}
       </Text>
+      {resultMissing ? (
+        <Text appearance="meta" className="hf-match-missing">
+          Gegevens nog niet beschikbaar
+        </Text>
+      ) : null}
     </div>
   )
 }

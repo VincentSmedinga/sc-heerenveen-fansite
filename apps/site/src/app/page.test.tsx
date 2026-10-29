@@ -856,7 +856,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
       expect(html.match(/Gegevens nog niet beschikbaar/g)).toHaveLength(1)
     })
 
-    it('has the sentence in the plain colour of an explanation and not in a result', async () => {
+    it('has the sentence as a line of its own and not in a result', async () => {
       withoutResult()
       const html = await renderMatchesCard()
 

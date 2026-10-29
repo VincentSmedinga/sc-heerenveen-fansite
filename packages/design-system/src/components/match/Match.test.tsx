@@ -262,11 +262,12 @@ describe('Match', () => {
   })
 
   describe('a match without a result', () => {
-    it('says "Gegevens nog niet beschikbaar" under the clubs and keeps the time and the dash', () => {
+    it('says "Gegevens nog niet beschikbaar" as the last line and keeps the time and the dash', () => {
       const { container } = render(<Match {...scheduled} resultMissing />)
 
       expect(container.querySelector('.hf-match-missing')?.textContent).toBe('Gegevens nog niet beschikbaar')
-      expect(container.querySelector('.hf-match-clubs + .hf-match-missing')).not.toBeNull()
+      expect(container.querySelector('.hf-match-when + .hf-match-missing')).not.toBeNull()
+      expect(container.querySelector('.hf-match-missing')?.nextElementSibling).toBeNull()
       expect(container.querySelector('time')?.textContent).toBe('zo 1 nov 14:30')
       expect(container.querySelector('.hf-match-versus')).not.toBeNull()
     })
