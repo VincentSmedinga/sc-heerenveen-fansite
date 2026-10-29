@@ -1,0 +1,77 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/KNVB_Beker_2025/26_(mannen)?action=raw, read on 29 October 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: the matches of other clubs, the text around the templates, and the referees, reports and
+  attendances (emptied). See the tests.
+-->
+== Wedstrijden ==
+
+==== Eerste ronde ====
+{{Footballbox2
+| date=28 oktober 2025
+| time=21:00 uur
+| team1=[[VVV-Venlo]]
+| score=0&nbsp;–&nbsp;3
+| half time score=0&nbsp;–&nbsp;1
+| team2='''[[sc Heerenveen|SC Heerenveen]]'''
+| goals1=
+| goals2={{goal|21}} [[Václav Sejk|Sejk]]<br />{{goal|47}} [[Ringo Meerveld|Meerveld]]<br />{{goal|73|e.d.}} [[Luuk Verheij|Verheij]]
+| location=[[Venlo (stad)|Venlo]]
+| stadium=[[Seacon Stadion - De Koel -]]
+| attendance=
+| referee=
+| report=
+}}
+
+==== Tweede ronde ====
+{{Footballbox2
+| date=17 december 2025
+| time=21:00 uur
+| team1=[[Feyenoord]]
+| score=2&nbsp;–&nbsp;3
+| half time score=0&nbsp;–&nbsp;1
+| team2='''[[sc Heerenveen]]'''
+| goals1=[[Luciano Valente|Valente]] {{goal|64}}<br />[[Maas Willemsen|Willemsen]] {{goal|83|e.d.}}
+| goals2={{goal|25}} [[Dylan Vente|Vente]]<br />{{goal|78}} [[Maxence Rivera|Rivera]]<br />{{goal|90}} [[Jacob Trenskow|Trenskow]]
+| location=[[Rotterdam]]
+| stadium=[[Stadion Feijenoord|De Kuip]]
+| attendance=
+| referee=
+| report=
+}}
+
+==== Achtste finales ====
+{{Footballbox2
+| date=15 januari 2026
+| time=18:45 uur
+| team1='''[[sc Heerenveen]]'''
+| score=3&nbsp;–&nbsp;1
+| half time score=1&nbsp;–&nbsp;0
+| team2=[[RKC Waalwijk]]
+| goals1=[[Jacob Trenskow|Trenskow]] {{goal|20||90+1}}<br />[[Oliver Braude|Braude]] {{goal|75}}
+| goals2={{goal|65}} [[Jesper Uneken|Uneken]]
+| location=[[Heerenveen (plaats)|Heerenveen]]
+| stadium=[[Abe Lenstra Stadion]]
+| attendance=
+| referee=
+| videoreferee=
+| report=
+}}
+
+==== Kwartfinales ====
+{{Footballbox2
+| date=4 februari 2026
+| time=21:00 uur
+| team1='''[[PSV (voetbalclub)|PSV]]'''
+| score=4&nbsp;–&nbsp;1
+| half time score=2&nbsp;–&nbsp;0
+| team2=[[sc Heerenveen]]
+| goals1=[[Esmir Bajraktarević|Bajraktarević]] {{goal|23||32}}, {{penmis||68}}<br />[[Ivan Perišić|Perišić]] {{goal|54}}<br />[[Paul Wanner|Wanner]] {{goal|57}}
+| goals2={{goal|77}} [[Luca Oyen|Oyen]]
+| location=[[Eindhoven]]
+| stadium=[[Philips Stadion]]
+| attendance=
+| referee=
+| videoreferee=
+| report=
+}}
