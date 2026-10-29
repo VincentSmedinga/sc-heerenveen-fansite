@@ -137,7 +137,7 @@ export const SemanticTokenTable = () => {
             </tr>
           </thead>
           <tbody>
-            {group.tokens.map(({ name, provisional = [], use }) => (
+            {group.tokens.map(({ name, use }) => (
               <tr key={name}>
                 <td>
                   <code>{name}</code>
@@ -150,7 +150,6 @@ export const SemanticTokenTable = () => {
                       <span className="_hf-docs-value">
                         <span className="_hf-docs-chip" style={{ backgroundColor: colour }} />
                         {label(colour)}
-                        {provisional.includes(theme) && <span className="_hf-docs-provisional">voorlopig</span>}
                       </span>
                     </td>
                   )

@@ -53,8 +53,6 @@ export const scaleLabels: Record<ScaleName, string> = {
 
 export type SemanticToken = {
   name: string
-  /** Values that weren't part of the agreed palette and still need a decision. */
-  provisional?: Theme[]
   use: string
 }
 
@@ -88,12 +86,12 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
         use: 'Vulling van een link in de balk met subpagina’s, als je hem indrukt',
       },
       { name: '--hf-colour-background-band', use: 'Wedstrijdband' },
-      { name: '--hf-colour-background-button', provisional: ['dark'], use: 'Knoppen, vinkjes en keuzerondjes' },
-      { name: '--hf-colour-background-button-hover', provisional: ['light', 'dark'], use: 'Knop onder de muis' },
+      { name: '--hf-colour-background-button', use: 'Knoppen, vinkjes en keuzerondjes' },
+      { name: '--hf-colour-background-button-hover', use: 'Knop onder de muis' },
       { name: '--hf-colour-background-button-soft', use: 'Zachte knop' },
       { name: '--hf-colour-background-button-soft-hover', use: 'Zachte knop onder de muis' },
-      { name: '--hf-colour-background-hover', provisional: ['dark'], use: 'Rij onder de muis' },
-      { name: '--hf-colour-background-zebra', provisional: ['dark'], use: 'Zebrarijen in tabellen' },
+      { name: '--hf-colour-background-hover', use: 'Rij onder de muis' },
+      { name: '--hf-colour-background-zebra', use: 'Zebrarijen in tabellen' },
       { name: '--hf-colour-background-highlight', use: 'Gemarkeerde rij, zoals sc Heerenveen in de stand' },
       { name: '--hf-colour-background-stripe', use: 'Strepen van de Friese vlag boven de footer' },
       { name: '--hf-colour-background-stripe-footer', use: 'Strepen van de Friese vlag over de footer' },
@@ -106,10 +104,9 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-text-heading', use: 'Koppen' },
       { name: '--hf-colour-text-secondary', use: 'Secundaire tekst: bron, tijd, bijschrift' },
       { name: '--hf-colour-text-link', use: 'Links' },
-      { name: '--hf-colour-text-link-hover', provisional: ['dark'], use: 'Link onder de muis' },
+      { name: '--hf-colour-text-link-hover', use: 'Link onder de muis' },
       {
         name: '--hf-colour-text-link-visited',
-        provisional: ['light', 'dark'],
         use: 'De kop van een nieuwsbericht en de titel van een discussie, als je ze hebt geopend',
       },
       { name: '--hf-colour-text-accent', use: 'Accent en datums' },
@@ -121,7 +118,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-text-shortcuts-link-hover', use: 'Link in de balk Op deze pagina, onder de muis' },
       { name: '--hf-colour-text-submenu-link-hover', use: 'Link in de balk met subpagina’s, onder de muis' },
       { name: '--hf-colour-text-on-band', use: 'Tekst op de wedstrijdband' },
-      { name: '--hf-colour-text-on-button', provisional: ['dark'], use: 'Tekst op knoppen' },
+      { name: '--hf-colour-text-on-button', use: 'Tekst op knoppen' },
       { name: '--hf-colour-text-on-button-soft', use: 'Tekst op de zachte knop' },
     ],
   },
@@ -161,7 +158,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
         name: '--hf-colour-chart-line-edge',
         use: 'Rand om die lijn, die haar losmaakt van de staafjes: wit in licht, de kleur van de kaart in donker',
       },
-      { name: '--hf-colour-border-input', provisional: ['light', 'dark'], use: 'Rand van invoervelden' },
+      { name: '--hf-colour-border-input', use: 'Rand van invoervelden' },
       { name: '--hf-colour-border-button-soft', use: 'Rand van de zachte knop' },
       { name: '--hf-colour-focus', use: 'Focusrand' },
       { name: '--hf-colour-focus-on-header', use: 'Focusrand in de header' },
@@ -352,6 +349,13 @@ export const pairGroups: { description: string; label: string; pairs: Pair[]; te
       pair('border-button-soft', 'surface-soft', 'Rand van een zachte knop op een zacht vlak', 'grafisch'),
       pair('border-button-soft', 'surface-warm', 'Rand van een zachte knop op een warm vlak', 'grafisch'),
       pair('border-input', 'page', 'Rand van een invoerveld op de pagina', 'grafisch'),
+      pair('border-input', 'surface-strong', 'Rand van een invoerveld op een sterk vlak', 'grafisch'),
+      pair('border-input', 'surface-soft', 'Rand van een invoerveld op een zacht vlak', 'grafisch'),
+      pair('border-input', 'surface-warm', 'Rand van een invoerveld op een warm vlak', 'grafisch'),
+      pair('background-button', 'page', 'Gevulde knop op de pagina', 'grafisch'),
+      pair('background-button', 'surface', 'Gevulde knop op een vlak', 'grafisch'),
+      pair('background-button-hover', 'page', 'Gevulde knop onder de muis op de pagina', 'grafisch'),
+      pair('background-button-hover', 'surface', 'Gevulde knop onder de muis op een vlak', 'grafisch'),
       pair('marker-graphic', 'page', 'Opsommingsteken of lijn op de pagina', 'grafisch'),
       pair('marker-graphic', 'surface', 'Opsommingsteken of lijn op een vlak', 'grafisch'),
       pair('marker-graphic', 'surface-strong', 'Opsommingsteken of lijn op een sterk vlak', 'grafisch'),

@@ -1,5 +1,7 @@
 import preview from '#.storybook/preview'
 
+import { Card } from '../components/card/Card'
+
 const meta = preview.meta({
   parameters: {
     docs: {
@@ -58,4 +60,66 @@ export const Standings = meta.story({
       </tbody>
     </table>
   ),
+})
+
+// No table or component uses the zebra and hover colours yet, so the story gives the rows those
+// colours itself, with the tokens, to show them on a card. The third row shows the colour of a
+// row under the mouse.
+const zebraParameters = {
+  docs: {
+    description: {
+      story:
+        'Zebrarijen en een rij onder de muis op een kaart, met de kleuren die het designsysteem daarvoor vastlegt. Geen tabel gebruikt ze al; het verhaal geeft de rijen zelf die kleuren. De derde rij heeft de kleur van een rij onder de muis.',
+    },
+  },
+}
+
+const renderZebra = () => (
+  <>
+    <style>{`
+      .example-zebra tbody tr:nth-child(even) { background-color: var(--hf-colour-background-zebra); }
+      .example-zebra tbody tr:hover, .example-zebra tbody tr[data-example='hover'] {
+        background-color: var(--hf-colour-background-hover);
+      }
+    `}</style>
+    <Card aria-label="Stand" style={{ maxInlineSize: '32rem' }}>
+      <table className="example-zebra">
+        <caption>Stand eredivisie na negen speelronden</caption>
+        <thead>
+          <tr>
+            <th className="hf-numeric" scope="col">
+              <abbr title="Positie">#</abbr>
+            </th>
+            <th scope="col">Club</th>
+            <th className="hf-numeric" scope="col">
+              <abbr title="Punten">P</abbr>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {standings.slice(0, 6).map(({ points, position, team }, index) => (
+            <tr data-example={index === 2 ? 'hover' : undefined} key={team}>
+              <td className="hf-numeric hf-rank">{position}</td>
+              <th scope="row">{team}</th>
+              <td className="hf-numeric">{points}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Card>
+  </>
+)
+
+export const ZebraLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Zebrarijen en rij onder de muis, licht',
+  parameters: zebraParameters,
+  render: renderZebra,
+})
+
+export const ZebraDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Zebrarijen en rij onder de muis, donker',
+  parameters: zebraParameters,
+  render: renderZebra,
 })
