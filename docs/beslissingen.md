@@ -3908,6 +3908,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een instelling die het aantal bepaalt, zoals `moreFrom={6}` (het issue wil dat het onderdeel zelf kiest).
   Een tweede getal voor het aantal onderdelen in de rij: het is er één, het eerste.
 
+### Uitersten staan als vijf regels in een lijst, en bij gelijke stand telt de laatste wedstrijd
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart "Uitersten" op `/wedstrijden` toont de grootste overwinning, de grootste nederlaag, de wedstrijd met de meeste doelpunten, ons vroegste en ons laatste doelpunt van de Eredivisie.
+  Bij een gelijke stand kiest hij de laatst gespeelde wedstrijd.
+  Een regel zonder wedstrijd ontbreekt, en de kaart zegt niet "geen".
+  De eerste drie regels tellen elke gespeelde wedstrijd van de Eredivisie, de laatste twee alleen de wedstrijden met bekende doelpunten (zoals `goalsPerQuarter`), zonder verlenging en zonder minuut 0.
+  Een doelpunt in de blessuretijd telt met die tijd erbij: 45+2 komt na minuut 46.
+  De kaart volgt verder de regels uit _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_.
+- **Waarom:** het zijn wedstrijden die supporters onthouden, en de gegevens zijn er al.
+  Eén wedstrijd per regel houdt de kaart kort.
+  De laatste wedstrijd is de nieuwste, dus de kaart verandert als er iets nieuws gebeurt.
+- **Vlak en plaats:** de kaart staat als laatste in de zijbalk, met een zacht vlak (`surface="soft"`), want de kaart ervoor, Doelpunten per kwartier, is warm.
+  De balk "Op deze pagina:" heeft een link "Uitersten" naar `#uitersten`, als laatste.
+- **Vorm:** elke regel is een `ShortMatch` met de naam van de regel eronder in kleine letters (`hf-meta`), bij een doelpunt met de minuut en de speler erbij.
+  De naam staat niet erboven, omdat `ShortMatch` in een lijst een lijn boven zichzelf tekent: een naam erboven zou van die lijn een streep onder de naam maken in plaats van tussen de regels.
+  De naam erboven vraagt een wijziging in het designsysteem, en het issue vraagt er geen.
+- **Alternatieven:** alle wedstrijden met hetzelfde verschil tonen (de kaart wordt lang).
+  De doelpunten van de tegenstander ook (dubbel zoveel regels, minder interessant).
+  De naam boven de wedstrijd (zie Vorm).
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt

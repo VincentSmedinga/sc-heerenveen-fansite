@@ -36,6 +36,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'thuis-en-uit',
     'onze-plek-in-de-competitie',
     'hoe-de-wedstrijden-verlopen',
+    'uitersten',
   ],
 }
 

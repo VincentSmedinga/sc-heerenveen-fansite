@@ -15,7 +15,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
       await expect(bar).toBeVisible()
-      await expect(bar.getByRole('link')).toHaveCount(11)
+      await expect(bar.getByRole('link')).toHaveCount(12)
       expect(await checkPage(page)).toEqual([])
     })
   }
@@ -141,6 +141,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
         'De nul gehouden',
         'Doelpunten per kwartier',
         'Hoe de wedstrijden verlopen',
+        'Uitersten',
       ])
       await walk('Shift+Tab', [
         'Doelpunten per kwartier',
@@ -245,7 +246,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
 
     await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: document.documentElement.scrollHeight }))
 
-    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveText('Hoe de wedstrijden verlopen')
+    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveText('Uitersten')
   })
 
   test('makes the link that is clicked the current one, and does not scroll the page from under the bar', async ({
