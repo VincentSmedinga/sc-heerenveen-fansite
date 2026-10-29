@@ -4779,6 +4779,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De principes stonden verspreid over issues; de reviewer en nieuwe vrijwilligers vinden ze nu op één plek.
 - **Alternatieven:** korte intro's standaard tonen, zoals veel nieuwsverzamelaars doen.
   Of de principes in `docs/`, naast de checklist voor toegankelijkheid; maar Storybook is ook het handboek voor wie schrijft.
+- **Later:** zie _De toon en de schrijfwijzer staan in het hoofdstuk Redactie_: de schrijfwijzer staat nu in het hoofdstuk, in plaats van in #19.
 
 ### De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen
 
@@ -6543,3 +6544,50 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen de laatste vijf wedstrijden tonen (geen reeksen, en die zoeken supporters juist).
   De nieuwste eerst (past bij Uitslagen en De nul gehouden, maar dan loopt de volgorde tegen die van de letters in).
   Een warm vlak (komt naast Verloop van het seizoen, dat al warm is).
+
+### De toon en de schrijfwijzer staan in het hoofdstuk Redactie
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** het hoofdstuk Redactie van Storybook heeft drie nieuwe delen in plaats van de lijst "Nog te schrijven": _Toon_ (met _Fries_), _Schrijfwijzer_ en _Bronnen en tijden_.
+  `CONTRIBUTING.md` wijst naar dat hoofdstuk, en de checklist voor de reviewer heeft een punt voor de toon en een voor de schrijfwijzer.
+- **Waarom:** de toon en de schrijfwijzer horen bij wat we over de redactie zeggen, en Storybook is het handboek voor wie schrijft.
+  De delen schrijven op wat de site al doet (de besluiten over tijden, namen en bronnen), zodat een nieuwe pagina dezelfde vormen gebruikt.
+  Een stijlgids in een eigen bestand zou een tweede plek zijn naast de principes.
+- **Alternatieven:** een eigen stijlgids in `docs/`; dan staan de redactieregels op twee plekken.
+  Of de toon in `CONTRIBUTING.md`; dat is voor wie meewerkt aan de code, niet voor wie voor bezoekers schrijft.
+
+### Fries voor namen en een knipoog, nooit in wat een bezoeker nodig heeft
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** we gebruiken Fries voor namen en een enkele knipoog (Pronkkeamer, It Hearrenfean) en voor koppen van Friese bronnen, die we laten zoals ze zijn gepubliceerd.
+  Menu's, knoppen, formulieren, meldingen en uitleg zijn Nederlands.
+  De site wordt niet tweetalig.
+- **Waarom:** Fries past bij een club uit Friesland en geeft de site smaak.
+  Een bezoeker die geen Fries kent, mag er niet op vastlopen.
+  Een tweede taal voor de hele site kost bij elke tekst werk, en geen issue vraagt erom.
+- **Alternatieven:** helemaal geen Fries; dat laat een deel van de club weg.
+  Of Fries voor de hele site, of een keuze van taal; dat is groot en nu niet gevraagd.
+- **Let op:** dit is een voorstel van de Builder bij #343, bedoeld voor de projecteigenaar om te corrigeren; het issue noemt alleen "wanneer we Fries gebruiken".
+
+### Vóór een kop staat "wo 14:05" of "14 okt 14:05", en niet "wo 01/09"
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de schrijfwijzer noemt als korte datum vóór een kop de vormen die de site al heeft: de korte weekdag en de tijd binnen zeven dagen ("wo 14:05"), en de datum met een afgekorte maand en de tijd daarna ("14 okt 14:05").
+  De schrijfwijze van de oude fansite, "wo 01/09", nemen we niet over.
+- **Waarom:** de site schrijft dit sinds _De tijd van een bericht: een weekdag in de week, daarna de datum_ (24 oktober 2026), en de schrijfwijzer zegt wat is.
+  Twee getallen met een schuine streep zeggen niet meteen welk de dag is en welk de maand, en de tijd is voor een nieuwsbericht meer waard dan het jaar.
+- **Alternatieven:** "wo 01/09", zoals de oude fansite en het issue het noemen; dan moet de site anders gaan schrijven, wat dit issue niet vraagt.
+  Of de datum voluit voor elke regel; dat is langer en past niet in de kolom.
+
+### Geen "vandaag", "gisteren" of "2 uur geleden" in een lijst of in een tekst die blijft staan
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** in een lijst met berichten staat de dag of de datum en de tijd, en nooit een woord als "vandaag", "gisteren" of "2 uur geleden".
+  In een tekst die blijft staan, zoals een artikel, staat de datum voluit.
+  Eén uitzondering volgt uit _De tijd van een discussie: vandaag alleen de tijd, daarna de dag, na een week de datum_: in de smalle zijbalk staat van vandaag alleen de tijd.
+- **Waarom:** een pagina uit de cache en een tekst van vorig jaar kloppen niet meer met zo'n woord, en een vaste tijd blijft kloppen.
+  Dit schrijft de bestaande besluiten op (22 en 24 oktober 2026) en verandert niets aan de site.
+- **Alternatieven:** "vandaag" en "gisteren" in de lijst; dat is vriendelijker, maar klopt niet in een pagina uit de cache.
+- **Hetzelfde bericht op meer plekken:** een bericht staat op elke plek met dezelfde kop, link, bronnaam en tijd.
+  Schrijven twee bronnen over hetzelfde nieuws, dan zijn het twee berichten, die we niet samenvoegen.
+  Zo noemt elk bericht zijn eigen bron (principe 4).
