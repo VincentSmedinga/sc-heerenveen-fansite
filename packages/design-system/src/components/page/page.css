@@ -276,11 +276,10 @@
    * the control at the end. It is a row that wraps: where the control does not fit beside the
    * heading, it sits under it, and the margin on its start side keeps it at the end of the
    * row. The gap is the same across and down. What is in the row has no margin of its own, so
-   * the row is as tall as the tallest of them, and the control sits level with the bottom of
-   * the heading.
+   * the row is as tall as the tallest of them, and the two are centred on each other.
    */
   .hf-page-title {
-    align-items: end;
+    align-items: center;
     gap: 0.5rem 1.5rem;
     display: flex;
     flex-wrap: wrap;

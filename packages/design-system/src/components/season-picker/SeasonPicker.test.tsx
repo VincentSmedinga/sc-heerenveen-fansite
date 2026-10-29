@@ -219,6 +219,16 @@ describe('SeasonPicker', () => {
       expect(css()).toMatch(/button\[hidden\]\s*\{\s*display: none;/)
     })
 
+    it('draws a caret of its own, in the colour of the text, a fair way in from the border', () => {
+      expect(css()).toMatch(/appearance: none/)
+      expect(css()).toMatch(/linear-gradient\(45deg, transparent 50%, currentcolor 50%\)/)
+      expect(css()).toMatch(/padding-inline-end: 2\.5rem/)
+    })
+
+    it('gives the caret of the system back in forced colours, which remove background images', () => {
+      expect(css()).toMatch(/@media \(forced-colors: active\) \{\s*appearance: auto;/)
+    })
+
     it('lets the list be as wide as its content and not the width of a field, and the row wrap', () => {
       expect(css()).toMatch(/inline-size: auto/)
       expect(css()).toMatch(/flex-wrap: wrap/)

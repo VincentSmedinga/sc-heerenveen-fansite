@@ -31,7 +31,7 @@ const meta = preview.meta({
 
 const render = () => (
   <Page.Title>
-    <Heading level={1}>Wedstrijden 2025/26</Heading>
+    <Heading level={1}>Wedstrijden</Heading>
     <SeasonPicker
       action="/wedstrijden/kies"
       onSubmit={(event) => {

@@ -6911,7 +6911,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een eerder seizoen heeft geen kaart Programma, want er valt niets meer te spelen, en de balk "Op deze pagina:" linkt er dan ook niet naar.
   De overige kaarten tonen hun gewone zin als ze voor dat seizoen niets hebben.
   De gegevens van een eerder seizoen blijven een uur in het geheugen, die van het lopende seizoen vijf minuten.
-  De kop en de titel noemen het seizoen ("Wedstrijden 2025/26"), een eerder seizoen heeft zijn eigen adres als canoniek adres, en alleen het lopende seizoen staat in de sitemap.
+  De titel van de pagina noemt het seizoen ("Wedstrijden 2025/26"), een eerder seizoen heeft zijn eigen adres als canoniek adres, en alleen het lopende seizoen staat in de sitemap.
+  De kop `h1` blijft "Wedstrijden", want de keuzelijst ernaast noemt het seizoen al en een kop met het jaar herhaalt haar (de projecteigenaar, 29 oktober 2026).
   Een bezoek aan een eerder seizoen telt als een bezoek aan `/wedstrijden`.
   De afbeelding van een kaart van een eerder seizoen noemt het seizoen onder de afbeelding ("Seizoen 2025/26") en in de naam van het bestand.
 - **Waarom:** een afgelopen seizoen verandert niet meer, dus een uur geheugen is genoeg.

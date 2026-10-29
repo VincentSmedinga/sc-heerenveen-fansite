@@ -59,7 +59,7 @@ export const choosesByKey = ({
  * With JavaScript the button is gone and a choice sends the form at once. That reloads the
  * page, which is a change of context (WCAG 3.2.2), so the visitor is told before they
  * choose: the list is described by a line that a screen reader reads with it. With script the
- * label and the line are visually hidden: next to the title "Wedstrijden 2025/26" the list
+ * label and the line are visually hidden: next to the title of the page the list
  * says what it is, and the page stays quiet. Without script the label stays, with the button.
  * A keyboard must be able to reach every season without the page jumping
  * at each press, and some browsers send `change` at each arrow key on a closed list. So a

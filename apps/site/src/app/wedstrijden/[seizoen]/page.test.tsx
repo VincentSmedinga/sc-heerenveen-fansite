@@ -72,8 +72,11 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     expect(html).not.toContain('Voorbeeld United')
   })
 
-  it('names the season in the heading of the page', async () => {
-    expect(await render()).toContain('<h1 class="hf-heading-1">Wedstrijden 2025/26</h1>')
+  it('has the heading Wedstrijden, without the season, which the list beside it names', async () => {
+    const html = await render()
+
+    expect(html).toContain('<h1 class="hf-heading-1">Wedstrijden</h1>')
+    expect(html).not.toContain('Wedstrijden 2025/26</h1>')
   })
 
   it('has no card for the programme, which a season that is over has nothing to show in', async () => {
@@ -217,7 +220,7 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
 describe('the title, description and canonical address of a season', () => {
   const metadataOf = (seizoen: string) => generateMetadata({ params: Promise.resolve({ seizoen }) })
 
-  it('names the season in the title and has the address of the season as the canonical address', async () => {
+  it('names the season in the title, which the heading does not, and has the address of the season as the canonical address', async () => {
     const metadata = await metadataOf('2025-26')
 
     expect(metadata.title).toBe('Wedstrijden 2025/26')

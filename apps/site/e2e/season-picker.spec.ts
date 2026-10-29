@@ -27,7 +27,7 @@ test.describe('the season picker without JavaScript', () => {
     await picker.getByRole('button', { name: 'Toon' }).click()
 
     await expect(page).toHaveURL(new RegExp(`/wedstrijden/${slug}$`))
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(`Wedstrijden ${earlier}`)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Wedstrijden')
     await expect(listOf(page)).toHaveValue(slug)
   })
 
@@ -66,7 +66,7 @@ test.describe('the season picker with JavaScript', () => {
     await listOf(page).selectOption(slug)
 
     await expect(page).toHaveURL(new RegExp(`/wedstrijden/${slug}$`))
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(`Wedstrijden ${earlier}`)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Wedstrijden')
   })
 
   test('does not change the page at the keys that choose, and changes it at Enter', async ({ page }) => {
@@ -126,7 +126,7 @@ test.describe('the season picker with JavaScript', () => {
 test.describe('the title row with the season picker', () => {
   for (const [width, beside] of [
     [320, false],
-    [390, false],
+    [390, true],
     [900, true],
   ] as const) {
     test(`is on the right, ${beside ? 'beside' : 'under'} the title at ${width} pixels, and does not scroll the page`, async ({

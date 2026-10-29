@@ -114,7 +114,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
       <Page.Main
         intro={
           <Page.Title>
-            <Heading level={1}>{current ? 'Wedstrijden' : `Wedstrijden ${season}`}</Heading>
+            <Heading level={1}>Wedstrijden</Heading>
             <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />
           </Page.Title>
         }
