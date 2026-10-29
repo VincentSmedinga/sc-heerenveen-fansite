@@ -678,7 +678,7 @@ await withEmptyDatabase((database) =>
     // The card of home and away: the table with a column for each.
     assert.match(
       matchesHtml,
-      /<h2[^>]*id="thuis-en-uit">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#thuis-en-uit">Thuis en uit/,
+      /<h2[^>]*id="thuis-en-uit">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#thuis-en-uit">Thuis en /,
     )
     assert.match(
       matchesHtml,
