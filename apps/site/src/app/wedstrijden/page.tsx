@@ -8,6 +8,7 @@ import { reasonOf } from '../../errors'
 import { getMatchData, overviewOf, parseCleanSheetCount, topScorersOf } from '../../matches'
 import {
   CleanSheetsCard,
+  ExtremesCard,
   GoalsPerQuarterCard,
   imageCredit,
   MatchLines,
@@ -124,6 +125,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </Card>
         <CleanSheetsCard count={parseCleanSheetCount(nul)} matches={data.matches} now={now} />
         <GoalsPerQuarterCard matches={data.matches} />
+        <ExtremesCard matches={data.matches} now={now} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit pages={data.pages} season={data.season} />
         )}

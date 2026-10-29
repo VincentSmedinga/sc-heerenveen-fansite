@@ -189,6 +189,27 @@ export function streaksOf(matches: PublicMatch[]): Streaks {
  */
 export const quarterLabels = ['1–15', '16–30', '31–45', '46–60', '61–75', '76–90'] as const
 
+/** A goal of sc Heerenveen and the match it was scored in. */
+export type ExtremeGoal = { goal: ScorerGoal; match: PublicMatch }
+
+/** The matches and the goals people remember of a season, and what they are based on. */
+export type Extremes = {
+  /** The match with the biggest loss, or undefined without a loss. */
+  biggestLoss: PublicMatch | undefined
+  /** The match with the biggest win, or undefined without a win. */
+  biggestWin: PublicMatch | undefined
+  /** Our earliest goal, with the stoppage time added to the minute. */
+  earliestGoal: ExtremeGoal | undefined
+  /** The played matches whose goals are known, so the ones the two goals come from. */
+  known: number
+  /** Our last goal, up to and with the stoppage time of minute 90. */
+  latestGoal: ExtremeGoal | undefined
+  /** The match with the most goals of both clubs together. */
+  mostGoals: PublicMatch | undefined
+  /** The played matches of the Eredivisie, with a score. */
+  played: number
+}
+
 /** The goals of a season per quarter of an hour, and the matches the count is based on. */
 export type GoalsPerQuarter = {
   /** The goals against, in the order of `quarterLabels`. */
@@ -207,6 +228,48 @@ export type GoalsPerQuarter = {
 export type ScorerGoal = PublicMatch['goals'][number]
 
 /**
+ * The extremes of the Eredivisie this season, from the played matches with a score: the biggest
+ * win (the biggest difference in our favour), the biggest loss, and the match with the most
+ * goals. They come from the score and so count every played match. Our earliest and our last
+ * goal come from the goals, so they count only the matches whose goals are known, as
+ * `goalsPerQuarter` does, and leave out a goal in extra time and one without a minute (0). An
+ * own goal of an opponent is a goal of ours, because `ours` says who profits. When two matches
+ * are level, the one played last wins, as the matches are in the order they were played; of two
+ * goals at the same minute, the later one in the list. A win needs a difference in our favour,
+ * and a loss one against us, so a season of draws has neither. The cup is left out.
+ */
+export function extremesOf(matches: PublicMatch[]): Extremes {
+  const played = matches.filter(
+    (match) =>
+      match.competition === 'Eredivisie' &&
+      match.status === 'played' &&
+      match.goalsFor !== null &&
+      match.goalsAgainst !== null,
+  )
+  const known = played.filter(hasKnownGoals)
+  const difference = (match: PublicMatch) => (match.goalsFor ?? 0) - (match.goalsAgainst ?? 0)
+  const total = (match: PublicMatch) => (match.goalsFor ?? 0) + (match.goalsAgainst ?? 0)
+  const goals = known.flatMap((match) =>
+    match.goals
+      .filter((goal) => goal.ours && goal.minute >= 1 && goal.minute <= 90)
+      .map((goal): ExtremeGoal => ({ goal, match })),
+  )
+  const minuteOf = ({ goal }: ExtremeGoal) => goal.minute + (goal.stoppageMinutes ?? 0)
+  const biggestWin = best(played, difference)
+  const biggestLoss = best(played, (match) => -difference(match))
+
+  return {
+    biggestLoss: biggestLoss !== undefined && difference(biggestLoss) < 0 ? biggestLoss : undefined,
+    biggestWin: biggestWin !== undefined && difference(biggestWin) > 0 ? biggestWin : undefined,
+    earliestGoal: best(goals, (item) => -minuteOf(item)),
+    known: known.length,
+    latestGoal: best(goals, minuteOf),
+    mostGoals: best(played, total),
+    played: played.length,
+  }
+}
+
+/**
  * The goals of sc Heerenveen and of its opponents per quarter of an hour, in the played matches
  * of the season whose goals are known, in the league and the cup. A goal in stoppage time
  * counts in the quarter before it: 45+1 is minute 45 and 90+3 is minute 90. A goal after minute
@@ -218,12 +281,7 @@ export type ScorerGoal = PublicMatch['goals'][number]
  */
 export function goalsPerQuarter(matches: PublicMatch[]): GoalsPerQuarter {
   const played = matches.filter((match) => match.status === 'played')
-  const known = played.filter(
-    (match) =>
-      match.goalsFor !== null &&
-      match.goalsAgainst !== null &&
-      (match.goals.length > 0 || match.goalsFor + match.goalsAgainst === 0),
-  )
+  const known = played.filter(hasKnownGoals)
   const scored = quarterLabels.map(() => 0)
   const conceded = quarterLabels.map(() => 0)
 
@@ -387,6 +445,27 @@ export function topScorersOf(matches: PublicMatch[]): TopScorer[] {
     ...scorer,
     position: sorted.findIndex((other) => other.goals === scorer.goals) + 1,
   }))
+}
+
+/** The item with the highest score, and the last of them when some are level. */
+function best<T>(items: T[], score: (item: T) => number): T | undefined {
+  return items.reduce<T | undefined>(
+    (top, item) => (top === undefined || score(item) >= score(top) ? item : top),
+    undefined,
+  )
+}
+
+/**
+ * Whether the goals of a played match are known: it has at least one, or it ended 0-0. A match
+ * with a score and no goals is one where the page named no scorers, or where they did not fit
+ * the result, and a match with no score has none to know.
+ */
+function hasKnownGoals(match: PublicMatch): boolean {
+  return (
+    match.goalsFor !== null &&
+    match.goalsAgainst !== null &&
+    (match.goals.length > 0 || match.goalsFor + match.goalsAgainst === 0)
+  )
 }
 
 /** What a goal counts for: the player it is linked to, or else the name the page shows. */

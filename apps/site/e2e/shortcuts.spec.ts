@@ -138,8 +138,10 @@ test.describe('the bar under the header of /wedstrijden', () => {
         'Doelpuntenmakers',
         'De nul gehouden',
         'Doelpunten per kwartier',
+        'Uitersten',
       ])
       await walk('Shift+Tab', [
+        'Doelpunten per kwartier',
         'De nul gehouden',
         'Doelpuntenmakers',
         'Reeksen',
@@ -239,7 +241,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
 
     await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: document.documentElement.scrollHeight }))
 
-    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveText('Doelpunten per kwartier')
+    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveText('Uitersten')
   })
 
   test('makes the link that is clicked the current one, and does not scroll the page from under the bar', async ({

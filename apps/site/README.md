@@ -189,7 +189,7 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 ## De wedstrijden
 
 `/wedstrijden` toont onder zeven kopjes het programma, de uitslagen, de stand, het verloop van het seizoen, de doelpuntenmakers, de wedstrijden waarin we de nul hielden en de doelpunten per kwartier van sc Heerenveen 1 (mannen) in het lopende seizoen.
-Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder het verloop van het seizoen, de doelpuntenmakers, de nul gehouden en de doelpunten per kwartier in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
+Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder het verloop van het seizoen, de doelpuntenmakers, de nul gehouden, de doelpunten per kwartier en de uitersten in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
 De balk volgt de pagina: de link naar de kaart waar je bent, heeft een rode streep en staat vooraan in de rij.
 De stand, de doelpuntenmakers en de nul gehouden hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen en de doelpunten per kwartier een warm vlak (`surface="warm"`), en het programma en de uitslagen blijven wit.
@@ -202,7 +202,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een wedstrijd blijft erin staan tot Wikipedia de uitslag heeft.
 - **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
   Hebben twee verschillende spelers in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
-- **Doelpunten per kwartier:** een kaart in de zijbalk, onder de nul gehouden en boven de bronvermelding, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
+- **Doelpunten per kwartier:** een kaart in de zijbalk, onder de nul gehouden en boven de uitersten, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
   `goalsPerQuarter` in `src/matches.ts` telt ze uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), in de competitie en de beker.
   De kwartieren zijn 1–15, 16–30, 31–45, 46–60, 61–75 en 76–90.
   Een doelpunt in blessuretijd telt bij het kwartier ervoor: 45+1 bij 31–45 en 90+3 bij 76–90.
@@ -213,6 +213,16 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Daaronder staat "Gebaseerd op 8 van de 10 gespeelde wedstrijden".
   Ging een wedstrijd in de telling naar de verlenging (`extra_time`), dan staat daaronder ook "Doelpunten in de verlenging tellen niet mee."; anders staat die zin er niet.
   Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
+- **Uitersten:** een kaart in de zijbalk, als laatste kaart, met vijf regels in een lijst: de grootste overwinning, de grootste nederlaag, de wedstrijd met de meeste doelpunten, ons vroegste doelpunt en ons laatste doelpunt van de Eredivisie.
+  `extremesOf` in `src/matches.ts` kiest ze uit de gespeelde wedstrijden van de Eredivisie; de beker telt niet.
+  Bij een gelijke stand wint de laatst gespeelde wedstrijd.
+  Een regel zonder wedstrijd ontbreekt, bijvoorbeeld de nederlaag in een seizoen zonder verlies.
+  De eerste drie regels komen uit de uitslag en tellen elke gespeelde wedstrijd.
+  De laatste twee komen uit de doelpunten en tellen alleen de wedstrijden met bekende doelpunten, zonder verlenging en zonder minuut 0; blessuretijd telt erbij, dus 90+3 is later dan 90.
+  Een eigen doelpunt van de tegenstander is een doelpunt van ons en krijgt "(eigen doelpunt)" erachter.
+  Elke regel is een `ShortMatch` met de naam van de regel eronder, en bij een doelpunt de minuut en de speler.
+  Onder de lijst staat "Gebaseerd op alle 7 gespeelde wedstrijden", en als niet elke wedstrijd zijn doelpunten heeft, een regel met "de doelpunten van 6 van de 7 gespeelde wedstrijden".
+  Zonder gespeelde wedstrijd staat er een zin in plaats van de lijst.
 - **Verloop van het seizoen:** een kaart in de zijbalk, direct onder de stand, met `FormChart` uit het designsysteem: de vorm, een staafje per gespeelde wedstrijd van de Eredivisie en de lijn erdoorheen.
   `leagueResultsOf` in `src/matches.ts` maakt de lijst `W`, `G` en `V` uit de gespeelde wedstrijden van de Eredivisie met een uitslag, op volgorde van speeldatum; een bekerwedstrijd telt niet mee.
   Een uitgestelde wedstrijd heeft pas een staafje als hij gespeeld is, en staat dan op de plek waar hij gespeeld is.
