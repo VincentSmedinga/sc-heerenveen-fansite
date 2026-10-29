@@ -190,7 +190,7 @@ describe('the homepage', () => {
     )
   })
 
-  it('shows the date and the time for an item from before the last seven days, and the weekday for the six days before today', async () => {
+  it('shows the weekday and the date, with no time, for an item from before the last seven days, and the weekday and the time for the six days before today', async () => {
     vi.mocked(getHeadlines).mockResolvedValue({
       headlines: [
         { ...headlines[0]!, publishedAt: new Date('2026-10-17T07:30:00Z') },
@@ -203,8 +203,8 @@ describe('the homepage', () => {
     const html = await render()
 
     expect(html).toContain('dateTime="2026-10-17T07:30:00.000Z">za 09:30</time>')
-    expect(html).toContain('dateTime="2026-10-16T12:05:00.000Z">16 okt 14:05</time>')
-    expect(html).toContain('dateTime="2026-10-10T21:59:00.000Z">10 okt 23:59</time>')
+    expect(html).toContain('dateTime="2026-10-16T12:05:00.000Z">vr 16 okt</time>')
+    expect(html).toContain('dateTime="2026-10-10T21:59:00.000Z">za 10 okt</time>')
   })
 
   it('puts "voor abonnees" in text with an item behind the paywall, and with no other item', async () => {
@@ -486,14 +486,14 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
     expect(html).toContain('Proefpodcast')
   })
 
-  it('shows a weekday and the time for this week, and the date, with the year when it is not this year, before that', async () => {
+  it('shows a weekday and the time for this week, and the weekday and the date, with the year when it is not this year, before that', async () => {
     vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
 
     const html = await renderEpisodes()
 
     expect(html).toContain('do 12:00')
-    expect(html).toContain('12 okt')
-    expect(html).toContain('30 dec 2025')
+    expect(html).toContain('ma 12 okt')
+    expect(html).toContain('di 30 dec 2025')
   })
 
   it('shows the season, the number and the duration of an episode after the name, for what the feed gave', async () => {
@@ -574,12 +574,12 @@ describe('the discussions in the sidebar of the homepage', () => {
     )
   })
 
-  it('shows today as the time alone, the days before as the weekday and the time, and older ones as the date', async () => {
+  it('shows today as the time alone, the days before as the weekday and the time, and older ones as the weekday and the date', async () => {
     const html = await renderDiscussions()
 
     expect(html).toContain('<time dateTime="2026-10-23T11:28:21.000Z">13:28</time>')
     expect(html).toContain('<time dateTime="2026-10-21T19:45:00.000Z">wo 21:45</time>')
-    expect(html).toContain('<time dateTime="2026-10-10T08:10:00.000Z">10 okt</time>')
+    expect(html).toContain('<time dateTime="2026-10-10T08:10:00.000Z">za 10 okt</time>')
   })
 
   it('writes "1 reactie" and "0 reacties", and only the time when the last poster is not known', async () => {
