@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { creditName, formatReadAt, formatTableDay, matchMoment, weekendText, wikipediaUrl } from './match-format'
+import {
+  creditName,
+  formatReadAt,
+  formatTableDay,
+  lastDayOf,
+  matchMoment,
+  weekendText,
+  wikipediaUrl,
+} from './match-format'
 
 // The afternoon of Sunday 25 October 2026 in the Netherlands, when summer time has just ended.
 const now = new Date('2026-10-25T13:40:00Z')
@@ -52,6 +60,25 @@ describe('matchMoment', () => {
     expect(matchMoment({ dateText: null, kickoffAt: null, matchDate: '2027-01-10', status: 'played' }, now).time).toBe(
       'zo 10 jan 2027',
     )
+  })
+})
+
+describe('lastDayOf', () => {
+  it('gives the last day of a weekend, with or without the year', () => {
+    expect(lastDayOf('12-14 februari 2027', '2027-02-12')).toBe('2027-02-14')
+    expect(lastDayOf('24–26 oktober', '2026-10-24')).toBe('2026-10-26')
+  })
+
+  it('goes on into the next month, and the next year, when the weekend does', () => {
+    expect(lastDayOf('30 januari-1 februari 2027', '2027-01-30')).toBe('2027-02-01')
+    expect(lastDayOf('27 februari-1 maart 2028', '2028-02-27')).toBe('2028-03-01')
+    expect(lastDayOf('31 december-2 januari', '2026-12-31')).toBe('2027-01-02')
+  })
+
+  it('gives the day itself for a single day, a text it does not know and no text', () => {
+    expect(lastDayOf('13 februari 2027', '2027-02-13')).toBe('2027-02-13')
+    expect(lastDayOf('februari 2027', '2027-02-01')).toBe('2027-02-01')
+    expect(lastDayOf(null, '2027-02-13')).toBe('2027-02-13')
   })
 })
 

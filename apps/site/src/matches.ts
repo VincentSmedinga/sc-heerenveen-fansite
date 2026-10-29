@@ -13,6 +13,7 @@ import { seasonOf } from '@fansite/db/season'
 import { cacheFor } from './cache'
 import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
+import { lastDayOf } from './match-format'
 import { type NameParts, splitPlayerName, surnameOnly } from './player-name'
 
 /** The name of our own club in the table. */
@@ -811,7 +812,8 @@ function goalGroups(goals: ScorerGoal[]): ScorerGoal[][] {
 
 /**
  * Whether a match has begun at `now`: its kick-off is past, or, without a kick-off, its day in
- * Dutch time is over (it counts as not begun until the end of that day). A match that is played
+ * Dutch time is over (it counts as not begun until the end of that day, and a weekend until the
+ * end of its last day). A match that is played
  * has begun whatever the clock says, and one that is called off with no new date never has.
  */
 function hasBegun(match: PublicMatch, now: Date) {
@@ -822,7 +824,9 @@ function hasBegun(match: PublicMatch, now: Date) {
     return false
   }
 
-  return match.kickoffAt === null ? dutchDayFormat.format(now) > match.matchDate : match.kickoffAt <= now
+  return match.kickoffAt === null
+    ? dutchDayFormat.format(now) > lastDayOf(match.dateText, match.matchDate)
+    : match.kickoffAt <= now
 }
 
 /** What a goal counts for: the player it is linked to, or else the name the page shows. */

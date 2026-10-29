@@ -500,7 +500,7 @@ const renderMissing = () => (
         <List.Item>
           <Match
             competition="KNVB Beker"
-            dateTime="2026-10-27"
+            dateTime="2026-10-24"
             home
             opponent="Proefstad SV"
             resultMissing

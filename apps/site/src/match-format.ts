@@ -71,6 +71,27 @@ export function formatTableDay(day: PublicStandingsRow['validOn']) {
 }
 
 /**
+ * The last day a match without a kick-off can be played, as a calendar day such as
+ * `2027-02-14`. `matchDate` is the first day, so for a weekend ("12-14 februari 2027") it is
+ * the last day of the range, also when the range runs into the next month. A single day, or a
+ * text the function does not know, gives `matchDate` itself.
+ */
+export function lastDayOf(dateText: null | string, matchDate: string) {
+  const days = dateText === null ? null : range.exec(dateText)
+
+  if (days === null) {
+    return matchDate
+  }
+
+  const [year = 0, month = 1, first = 1] = matchDate.split('-').map(Number)
+  const last = Number(days[3])
+  const monthLength = new Date(Date.UTC(year, month, 0)).getUTCDate()
+  const extra = last >= first ? last - first : monthLength - first + last
+
+  return new Date(Date.UTC(year, month - 1, first + extra)).toISOString().slice(0, 10)
+}
+
+/**
  * The moment of a match as a visitor reads it, with the value for the `time` element:
  *
  * - a match with a kick-off: the weekday, the date and the time in Dutch time, "zo 1 nov

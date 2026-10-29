@@ -162,6 +162,14 @@ describe('overviewOf', () => {
       expect(overviewAt('2026-10-28T23:00:00Z', day).previous?.round).toBe('Tweede ronde')
     })
 
+    it('keeps a weekend without a kick-off in the programme until the end of its last day', () => {
+      const weekend = cup({ dateText: '24-26 oktober 2026', kickoffAt: null, matchDate: '2026-10-24' })
+
+      expect(overviewAt('2026-10-25T12:00:00Z', weekend).next?.round).toBe('Tweede ronde')
+      expect(overviewAt('2026-10-26T22:59:59Z', weekend).next?.round).toBe('Tweede ronde')
+      expect(overviewAt('2026-10-26T23:00:00Z', weekend).previous?.round).toBe('Tweede ronde')
+    })
+
     it('finds the end of the day in summer time too, two hours ahead of UTC', () => {
       const day = cup({ kickoffAt: null, matchDate: '2026-08-28' })
 
@@ -248,6 +256,13 @@ describe('lacksResult', () => {
     expect(lacksResult(day, new Date('2026-10-28T12:00:00Z'))).toBe(false)
     expect(lacksResult(day, new Date('2026-10-28T22:59:59Z'))).toBe(false)
     expect(lacksResult(day, new Date('2026-10-28T23:00:00Z'))).toBe(true)
+  })
+
+  it('is false during a weekend without a kick-off, and true from the day after its last day', () => {
+    const weekend = cup({ dateText: '24-26 oktober 2026', kickoffAt: null, matchDate: '2026-10-24' })
+
+    expect(lacksResult(weekend, new Date('2026-10-25T12:00:00Z'))).toBe(false)
+    expect(lacksResult(weekend, new Date('2026-10-27T12:00:00Z'))).toBe(true)
   })
 
   it('is false for a postponed match, and for a match that is still to come', () => {
