@@ -649,6 +649,7 @@ await withEmptyDatabase((database) =>
         '#uitslagen',
         '#stand',
         '#verloop-van-het-seizoen',
+        '#reeksen',
         '#doelpuntenmakers',
         '#de-nul-gehouden',
         '#doelpunten-per-kwartier',
@@ -665,6 +666,14 @@ await withEmptyDatabase((database) =>
       matchesHtml,
       /<caption class="hf-visually-hidden">Uitslagen van sc Heerenveen dit seizoen, met de punten<\/caption>/,
     )
+    // The card of the streaks: the table, and the latest matches under it.
+    assert.match(matchesHtml, /<h2[^>]*id="reeksen">.*?href="#reeksen">Reeks/s)
+    assert.match(
+      matchesHtml,
+      /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie dit seizoen<\/caption>/,
+    )
+    assert.match(matchesHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
+    assert.match(matchesHtml, /Gebaseerd op (?:alle \d+|1) gespeelde wedstrijd/)
     assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
     assert.match(
       matchesHtml,
