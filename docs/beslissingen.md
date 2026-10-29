@@ -6419,6 +6419,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Er staat nu een kaart tussen Stand en Doelpuntenmakers, en op een telefoon is de volgorde Programma, Uitslagen, Stand, Verloop van het seizoen, Doelpuntenmakers, De nul gehouden en Doelpunten per kwartier.
 - **Later:** zie _Reeksen staan in een eigen kaart na Verloop van het seizoen_.
   Op een telefoon staat Reeksen nu tussen Verloop van het seizoen en Doelpuntenmakers, in het zachte vlak.
+- **Later:** zie _Thuis en uit staan naast elkaar in een tabel, met een kolom Totaal_.
+  Thuis en uit staat nu na Reeksen en voor Doelpuntenmakers, in het warme vlak.
 
 ### Het verloop van het seizoen staat onder de stand, in een warme kaart
 
@@ -6543,3 +6545,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen de laatste vijf wedstrijden tonen (geen reeksen, en die zoeken supporters juist).
   De nieuwste eerst (past bij Uitslagen en De nul gehouden, maar dan loopt de volgorde tegen die van de letters in).
   Een warm vlak (komt naast Verloop van het seizoen, dat al warm is).
+### Thuis en uit staan naast elkaar in een tabel, met een kolom Totaal
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart "Thuis en uit" toont een tabel met drie kolommen, Thuis, Uit en Totaal, met de punten, de doelpunten en de punten per wedstrijd.
+  Alles komt uit de score van de gespeelde wedstrijden van de Eredivisie, volgens de regels van _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_.
+- **Waarom:** twee reeksen naast elkaar vragen een nieuw component, en een tabel is voor iedereen te lezen, ook zonder het oog.
+  De kolom Totaal laat zien dat de kaart klopt met Verloop van het seizoen.
+- **Hoe:** de kaart staat direct na Verloop van het seizoen, in het warme vlak, zodat de buurkaarten niet dezelfde kleur hebben.
+  Een kant zonder gespeelde wedstrijd toont een streepje bij de gemiddelden en 0 bij de tellingen.
+  De rij met de wedstrijden zonder tegendoelpunt heet "Zonder tegendoelpunt", zodat ze niet lijkt op de kaart De nul gehouden, die ook de beker telt.
+- **Alternatieven:** een grafiek met twee staven per onderdeel (een nieuw component voor één kaart).
+  Alleen de punten tonen (de doelpunten zeggen veel over de manier van spelen).

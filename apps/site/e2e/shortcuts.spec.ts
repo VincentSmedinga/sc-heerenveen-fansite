@@ -135,6 +135,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
         'Stand',
         'Verloop van het seizoen',
         'Reeksen',
+        'Thuis en uit',
         'Doelpuntenmakers',
         'De nul gehouden',
         'Doelpunten per kwartier',
@@ -142,6 +143,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
       await walk('Shift+Tab', [
         'De nul gehouden',
         'Doelpuntenmakers',
+        'Thuis en uit',
         'Reeksen',
         'Verloop van het seizoen',
         'Stand',

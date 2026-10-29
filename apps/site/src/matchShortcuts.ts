@@ -9,6 +9,7 @@ export const matchShortcuts = [
   { href: '#stand', label: 'Stand' },
   { href: '#verloop-van-het-seizoen', label: 'Verloop van het seizoen' },
   { href: '#reeksen', label: 'Reeksen' },
+  { href: '#thuis-en-uit', label: 'Thuis en uit' },
   { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
   { href: '#de-nul-gehouden', label: 'De nul gehouden' },
   { href: '#doelpunten-per-kwartier', label: 'Doelpunten per kwartier' },

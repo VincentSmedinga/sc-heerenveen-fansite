@@ -203,6 +203,31 @@ export type GoalsPerQuarter = {
   scored: number[]
 }
 
+export type HomeAway = {
+  away: HomeAwayTally
+  home: HomeAwayTally
+  /** The home and away matches together, which is what the card of the season counts. */
+  total: HomeAwayTally
+}
+
+/** What sc Heerenveen did at home, away or in both, in the played matches of the Eredivisie. */
+export type HomeAwayTally = {
+  /** The matches with no goal against. */
+  cleanSheets: number
+  drawn: number
+  goalsAgainst: number
+  goalsFor: number
+  /** The goals scored per match, or undefined when there is no match. */
+  goalsPerMatch: number | undefined
+  lost: number
+  played: number
+  /** The points: 3 for a win and 1 for a draw. */
+  points: number
+  /** The points per match, or undefined when there is no match. */
+  pointsPerMatch: number | undefined
+  won: number
+}
+
 /** A goal as the line of the scorers of a match shows it. */
 export type ScorerGoal = PublicMatch['goals'][number]
 
@@ -282,6 +307,47 @@ export function goalsWithInitials(goals: ScorerGoal[]): ScorerGoal[] {
 
     return { ...goal, player: sharesInitial ? `${given} ${goal.player}` : `${initial}. ${goal.player}` }
   })
+}
+
+/**
+ * The played matches of the Eredivisie with a score, counted for home, away and both. Every
+ * number comes from the score, not from the goals per player, so each played match counts. A
+ * cup tie, a match that isn't played and a match with no score count for nothing. The points
+ * are those of the card of the season: 3 for a win, 1 for a draw.
+ */
+export function homeAwayOf(matches: PublicMatch[]): HomeAway {
+  const played = matches.filter(
+    (match) =>
+      match.competition === 'Eredivisie' &&
+      match.status === 'played' &&
+      match.goalsFor !== null &&
+      match.goalsAgainst !== null,
+  )
+  const tally = (selection: PublicMatch[]): HomeAwayTally => {
+    const won = selection.filter((match) => (match.goalsFor ?? 0) > (match.goalsAgainst ?? 0)).length
+    const drawn = selection.filter((match) => match.goalsFor === match.goalsAgainst).length
+    const goalsFor = selection.reduce((sum, match) => sum + (match.goalsFor ?? 0), 0)
+    const points = won * 3 + drawn
+
+    return {
+      cleanSheets: selection.filter((match) => match.goalsAgainst === 0).length,
+      drawn,
+      goalsAgainst: selection.reduce((sum, match) => sum + (match.goalsAgainst ?? 0), 0),
+      goalsFor,
+      goalsPerMatch: selection.length === 0 ? undefined : goalsFor / selection.length,
+      lost: selection.length - won - drawn,
+      played: selection.length,
+      points,
+      pointsPerMatch: selection.length === 0 ? undefined : points / selection.length,
+      won,
+    }
+  }
+
+  return {
+    away: tally(played.filter((match) => !match.home)),
+    home: tally(played.filter((match) => match.home)),
+    total: tally(played),
+  }
 }
 
 /**

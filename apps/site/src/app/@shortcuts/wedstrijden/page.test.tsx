@@ -38,6 +38,7 @@ describe('the bar of /wedstrijden', () => {
       ['#stand', 'Stand'],
       ['#verloop-van-het-seizoen', 'Verloop van het seizoen'],
       ['#reeksen', 'Reeksen'],
+      ['#thuis-en-uit', 'Thuis en uit'],
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
       ['#de-nul-gehouden', 'De nul gehouden'],
       ['#doelpunten-per-kwartier', 'Doelpunten per kwartier'],
