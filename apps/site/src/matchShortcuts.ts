@@ -14,6 +14,6 @@ export const matchShortcuts = [
   { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
   { href: '#de-nul-gehouden', label: 'De nul gehouden' },
   { href: '#doelpunten-per-kwartier', label: 'Doelpunten per kwartier' },
-  { href: '#hoe-de-wedstrijden-verlopen', label: 'Hoe de wedstrijden verlopen' },
+  { href: '#hoe-de-wedstrijden-verlopen', label: 'Hoe wedstrijden verlopen' },
   { href: '#uitersten', label: 'Uitersten' },
 ] as const

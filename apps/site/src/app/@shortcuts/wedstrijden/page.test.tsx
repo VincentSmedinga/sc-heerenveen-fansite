@@ -43,7 +43,7 @@ describe('the bar of /wedstrijden', () => {
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
       ['#de-nul-gehouden', 'De nul gehouden'],
       ['#doelpunten-per-kwartier', 'Doelpunten per kwartier'],
-      ['#hoe-de-wedstrijden-verlopen', 'Hoe de wedstrijden verlopen'],
+      ['#hoe-de-wedstrijden-verlopen', 'Hoe wedstrijden verlopen'],
       ['#uitersten', 'Uitersten'],
     ])
   })

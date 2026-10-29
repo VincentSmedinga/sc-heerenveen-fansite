@@ -140,10 +140,11 @@ test.describe('the bar under the header of /wedstrijden', () => {
         'Doelpuntenmakers',
         'De nul gehouden',
         'Doelpunten per kwartier',
-        'Hoe de wedstrijden verlopen',
+        'Hoe wedstrijden verlopen',
         'Uitersten',
       ])
       await walk('Shift+Tab', [
+        'Hoe wedstrijden verlopen',
         'Doelpunten per kwartier',
         'De nul gehouden',
         'Doelpuntenmakers',
