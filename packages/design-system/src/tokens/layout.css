@@ -27,6 +27,15 @@
     --hf-content-max-width: 38rem;
 
     /*
+     * The widest the main column gets on a page with a narrow sidebar (Page.Sidebar with
+     * `narrow`), and the width of that sidebar. With the space between them (2rem) they fill
+     * the column of the page, 64rem, like the sizes above. The page that has them is /nieuws,
+     * where the list is the point and the sidebar holds a filter.
+     */
+    --hf-content-max-width-broad: 46rem;
+    --hf-sidebar-width-narrow: 16rem;
+
+    /*
      * The logo: the gap between the shield and the wordmark, the size of the shield, and how far the shield hangs outside
      * the column when the text of the page lines up with the wordmark (see .hf-page-header in page.css). The shield is
      * 1.55 times the font size of the wordmark.

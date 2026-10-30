@@ -18,6 +18,7 @@ const meta = preview.meta({
           '- Met `split` staan de cellen naast elkaar, in twee kolommen, zodra er twee passen. Dat is onder de hoofdkolom op een middelbaar scherm. Kies het voor een zijbalk met kleine cellen, zoals een paar korte kaarten. Cellen met een lijst worden er smal en krap van.',
           '- Geef hem een naam met `aria-label` of `aria-labelledby`.',
           '- Met `wide` is hij even breed als de hoofdkolom, voor een zijbalk met een tabel. De hoofdkolom wordt er smaller van, zodat samen de kolommen even breed blijven als zonder. De `Page.Body` hoef je er niets voor te geven: de zijbalk zegt het zelf.',
+          "- Met `narrow` is hij smaller dan op andere pagina's en is de hoofdkolom breder, voor een zijbalk met iets kleins, zoals een filter, naast een lange lijst. Samen blijven de kolommen even breed als zonder. Kies er niet `wide` bij.",
         ].join('\n'),
       },
       source: exampleSource,
@@ -111,6 +112,36 @@ export const WideMiddleLight = meta.story({
     },
   },
   render: wideRender,
+})
+
+const narrowRender = () => (
+  <Page.Body>
+    <ExampleMain />
+    <ExampleSidebar narrow />
+  </Page.Body>
+)
+
+export const NarrowLight = meta.story({
+  ...screen,
+  globals: { theme: 'light', viewport: { value: 'wide' } },
+  name: 'Smalle zijbalk, breed scherm, licht',
+  parameters: {
+    ...screen.parameters,
+    docs: {
+      description: {
+        story:
+          "Met `narrow` is de hoofdkolom breder en de zijbalk smaller dan op andere pagina's, en samen vullen ze de pagina net als zonder. Op een smaller scherm staat de zijbalk onder de hoofdkolom, zoals altijd.",
+      },
+    },
+  },
+  render: narrowRender,
+})
+
+export const NarrowDark = meta.story({
+  ...screen,
+  globals: { theme: 'dark', viewport: { value: 'wide' } },
+  name: 'Smalle zijbalk, breed scherm, donker',
+  render: narrowRender,
 })
 
 const splitRender = () => (

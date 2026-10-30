@@ -142,7 +142,7 @@ describe('the page Nieuwsarchief', () => {
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(html.slice(html.indexOf('<aside'))).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="Bronnen"><section class="hf-card hf-card-soft" aria-labelledby="sources-heading"><h2 class="hf-heading-2" id="sources-heading">Bronnen<\/h2><nav aria-label="Bronnen filteren"/,
+      /^<aside class="hf-page-sidebar hf-page-sidebar-narrow" aria-label="Bronnen"><section class="hf-card hf-card-soft" aria-labelledby="sources-heading"><h2 class="hf-heading-2" id="sources-heading">Bronnen<\/h2><nav aria-label="Bronnen filteren"/,
     )
   })
 

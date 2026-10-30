@@ -142,7 +142,7 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
       {sources.length > 0 && (
         // The sidebar is second in the source, so on a narrow screen the filter sits under the
         // list and the pagination.
-        <Page.Sidebar aria-label="Bronnen">
+        <Page.Sidebar aria-label="Bronnen" narrow>
           <Card aria-labelledby="sources-heading" surface="soft">
             <Heading id="sources-heading" level={2}>
               Bronnen

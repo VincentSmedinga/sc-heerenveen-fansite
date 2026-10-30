@@ -302,6 +302,33 @@ describe('the wide sidebar in page.css', () => {
   })
 })
 
+describe('the narrow sidebar in page.css', () => {
+  const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+  const token = (name: string) => Number(layout.match(new RegExp(String.raw`${name}: (\d+(?:\.\d+)?)rem;`))?.[1])
+  const narrow = css.match(
+    /@media \(width >= 52rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-narrow\) \{\s*grid-template-columns: minmax\((\d+)rem, var\(--hf-content-max-width-broad\)\) var\(--hf-sidebar-width-narrow\);/,
+  )
+
+  it('has a main of 46rem and a sidebar of 16rem with 2rem between them, which fill the page of 64rem', () => {
+    expect(token('--hf-content-max-width-broad')).toBe(46)
+    expect(token('--hf-sidebar-width-narrow')).toBe(16)
+    expect(token('--hf-content-max-width-broad') + token('--hf-sidebar-width-narrow') + 2).toBe(
+      token('--hf-page-max-width'),
+    )
+  })
+
+  it('lets the main shrink only to a width that fits in 52rem, where the columns start side by side', () => {
+    const [, mainMinimum] = narrow ?? []
+
+    expect(Number(mainMinimum) + token('--hf-sidebar-width-narrow')).toBeLessThanOrEqual(roomAtTheBoundary)
+  })
+
+  it('is chosen by the sidebar, which the page renders, and comes after the wide one', () => {
+    expect(css.match(/\.hf-page-body:has\(> \.hf-page-sidebar-narrow\)/g)).toHaveLength(1)
+    expect(css.indexOf('.hf-page-sidebar-narrow')).toBeGreaterThan(css.indexOf('.hf-page-sidebar-wide'))
+  })
+})
+
 describe('the cells of the sidebar in page.css', () => {
   const rule = (selector: string) => css.match(new RegExp(String.raw`${selector} \{([^{}]*)\}`))?.[1] ?? ''
   const columns = css.match(

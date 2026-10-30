@@ -289,6 +289,17 @@ describe('Page.Sidebar', () => {
     expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
   })
 
+  it('adds a class for the narrow sidebar only with `narrow`, and passes no `narrow` on to the element', () => {
+    const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" narrow />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-narrow extra')
+    expect(screen.getByRole('complementary').hasAttribute('narrow')).toBe(false)
+
+    rerender(<Page.Sidebar aria-label="Zijbalk" narrow={false} />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
+  })
+
   it('adds a class for splitting the cells only with `split`, and passes no `split` on to the element', () => {
     const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" split />)
 
