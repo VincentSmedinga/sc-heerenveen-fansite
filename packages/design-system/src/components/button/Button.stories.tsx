@@ -75,6 +75,7 @@ export const Default = meta.story({
 
 const surfaceLabels = {
   default: 'Vlak',
+  header: 'Vlak van de header',
   soft: 'Zacht vlak',
   strong: 'Sterk vlak',
   transparent: 'Doorzichtig vlak',

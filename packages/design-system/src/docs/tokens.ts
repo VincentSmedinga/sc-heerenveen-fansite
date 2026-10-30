@@ -67,7 +67,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-background-surface-strong', use: 'Sterk vlak, ook code' },
       { name: '--hf-colour-background-surface-soft', use: 'Zacht vlak; in donker gelijk aan het vlak' },
       { name: '--hf-colour-background-surface-warm', use: 'Warm vlak; in donker gelijk aan het sterke vlak' },
-      { name: '--hf-colour-background-header', use: 'Header' },
+      { name: '--hf-colour-background-header', use: 'Header, en de kaart met het donkere vlak' },
       { name: '--hf-colour-background-footer', use: 'Footer' },
       {
         name: '--hf-colour-background-shortcuts',

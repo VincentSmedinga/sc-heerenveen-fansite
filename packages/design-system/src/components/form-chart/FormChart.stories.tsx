@@ -44,6 +44,7 @@ const seasonResults = [...'WWGVWGGWVWWGWVGWWWGVWGWVWWGGWWVWGW'] as FormResult[]
 
 const surfaceNames = {
   default: 'wit',
+  header: 'donkerblauw',
   soft: 'zacht',
   strong: 'sterk',
   transparent: 'doorzichtig',

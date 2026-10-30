@@ -10,9 +10,10 @@ export type CardElement = (typeof cardElements)[number]
 
 /**
  * The surfaces a Card can have: the four the colour tokens name (the surface (white), strong,
- * soft and warm) and `transparent`, which has no background or border to see.
+ * soft and warm), `header`, which is the dark blue of the header in light and in dark, and
+ * `transparent`, which has no background or border to see.
  */
-export const cardSurfaces = ['default', 'strong', 'soft', 'warm', 'transparent'] as const
+export const cardSurfaces = ['default', 'strong', 'soft', 'warm', 'header', 'transparent'] as const
 
 export type CardProps = ComponentPropsWithoutRef<'section'> & {
   /**

@@ -548,7 +548,7 @@ const markOf: Record<FormResult, MarkRowMark> = {
 }
 
 /**
- * The head coach or coaches of a season as a card with the strong blue surface and a list, in
+ * The head coach or coaches of a season as a card with the dark blue surface and a list, in
  * the order they began. The title is "Hoofdtrainer" for one and "Hoofdtrainers" for more. A
  * season with one coach has his name only; with more, each line has "tot" and the day he
  * stopped, and the last has "vanaf" and the day he began (see `coachPeriods`). The name is
@@ -564,7 +564,7 @@ export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
   const periods = coachPeriods(coaches)
 
   return (
-    <Card aria-labelledby={id} surface="strong">
+    <Card aria-labelledby={id} surface="header">
       <Heading anchor id={id} level={2}>
         {name}
       </Heading>

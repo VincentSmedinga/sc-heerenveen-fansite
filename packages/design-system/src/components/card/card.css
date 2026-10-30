@@ -69,6 +69,28 @@
   }
 
   /*
+   * The dark blue of the header, in light and in dark: it is the surface the header has, so it is
+   * called after it and not `dark`, which would say the theme sets it. The roles of text,
+   * secondary text, links, lines and the focus ring are set again to those the header uses on
+   * this blue, so what is in the card needs no styles of its own for it: text-on-header and its
+   * secondary reach 4.5:1 on it in both themes. The border is the colour of the background, so
+   * it keeps its space and shows no line.
+   */
+  .hf-card-header {
+    --hf-colour-border-default: var(--hf-colour-border-on-header);
+    --hf-colour-focus: var(--hf-colour-focus-on-header);
+    --hf-colour-text-default: var(--hf-colour-text-on-header);
+    --hf-colour-text-heading: var(--hf-colour-text-on-header);
+    --hf-colour-text-link: var(--hf-colour-text-on-header-secondary);
+    --hf-colour-text-link-hover: var(--hf-colour-text-on-header);
+    --hf-colour-text-secondary: var(--hf-colour-text-on-header-secondary);
+
+    background-color: var(--hf-colour-background-header);
+    border-color: var(--hf-colour-background-header);
+    color: var(--hf-colour-text-default);
+  }
+
+  /*
    * No background and no border to see, but the border keeps its space and the padding at the
    * sides is the same, so the text sits where it does in a card with a border. That is how text
    * beside the other cards lines up with the text in them. There is no padding above and below:

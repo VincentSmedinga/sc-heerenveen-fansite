@@ -46,6 +46,7 @@ const meta = preview.meta({
           'Een kaart zet een blok van de pagina op een eigen vlak, met een rand en ronde hoeken.',
           'Zo staat elk blok los op de pagina, en dat geeft de pagina rust en richting.',
           'Een kaart met het vlak `transparent` heeft geen rand en achtergrond die je ziet, en geen binnenruimte boven en onder: de tekst erin staat op één lijn met de tekst in de andere kaarten, zonder dat de ruimte tussen de kaarten groter wordt.',
+          'Een kaart met het vlak `header` heeft het donkerblauw van de header, in licht en in donker. Kies hem voor een kaart die er bewust uit moet springen, en niet voor meer dan één kaart per pagina. Hij is voor tekst, links en lijsten: de kleuren van de tekst, de links en de lijnen zijn die van de header, en een rood accent of een uitslag in kleur is er niet voor gemaakt.',
           'Staat er direct onder de kop een lijst, dan is de ruimte daartussen groter dan bij tekst, zodat de eerste regel van de lijst niet tegen de kop zit.',
           'Onder de lijst kan een formulier met een knop staan, zoals "Laad 5 meer" in de kaart met de nul gehouden op Wedstrijden.',
           'Met `shareable` krijgt de kaart rechtsboven een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron eronder.',
@@ -104,7 +105,22 @@ const surfaces: { label: string; surface: CardSurface }[] = [
   { label: 'Sterk vlak', surface: 'strong' },
   { label: 'Zacht vlak', surface: 'soft' },
   { label: 'Warm vlak', surface: 'warm' },
+  { label: 'Vlak van de header', surface: 'header' },
 ]
+
+// The surface of the header has the colours of the header for text, links and lines. The red of
+// the time of a news item is not one of them, so the card has text, a link and a list instead.
+const headerContent = (
+  <>
+    <Text>
+      Tekst en <Link href="#testlink">een link</Link> hebben de kleuren van de header.
+    </Text>
+    <List role="list">
+      <List.Item>Een regel in een lijst, met een dunne lijn ertussen.</List.Item>
+      <List.Item>Nog een regel, in de tweede kleur van de tekst.</List.Item>
+    </List>
+  </>
+)
 
 const renderSurfaces = () => (
   <Page.Body>
@@ -114,16 +130,16 @@ const renderSurfaces = () => (
           <Heading appearance={3} id={`surface-${surface}`} level={2}>
             {label}
           </Heading>
-          {newsItems}
+          {surface === 'header' ? headerContent : newsItems}
         </Card>
       ))}
     </Page.Main>
   </Page.Body>
 )
 
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Vier vlakken, licht', render: renderSurfaces })
+export const Light = meta.story({ globals: { theme: 'light' }, name: 'Vijf vlakken, licht', render: renderSurfaces })
 
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Vier vlakken, donker', render: renderSurfaces })
+export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Vijf vlakken, donker', render: renderSurfaces })
 
 const renderWithButton = () => (
   <Page.Body>

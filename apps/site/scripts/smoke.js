@@ -649,7 +649,7 @@ await withEmptyDatabase((database) =>
     assert.equal(matchesPage.status, 200)
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
     // The head coach comes from the seed the site runs at its start, not from anyone by hand:
-    // a card with the strong surface in the sidebar, right after the table, with his name only.
+    // a card with the header surface in the sidebar, right after the table, with his name only.
     assert.match(
       matchesHtml,
       /<h2[^>]*id="hoofdtrainer">.*?href="#hoofdtrainer">Hoofdtraine.*?<\/h2><ul role="list"><li><div class="hf-short-match hf-short-staff"><span class="hf-short-match-opponent"><span class="hf-player-name"><span class="hf-player-name-given">Robin<\/span> <span class="hf-player-name-surname">Veldman<\/span><\/span><\/span><\/div><\/li><\/ul><\/section>/s,
