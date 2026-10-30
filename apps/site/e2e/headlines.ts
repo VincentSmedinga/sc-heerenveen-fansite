@@ -22,8 +22,8 @@ type Row = {
  *
  * They are in the form of real headlines, on the made-up test sources of the seed. The times
  * are counted back from the moment the check starts. The homepage shows the first ten, and the
- * button under them. The first seven are from the last six days and show a weekday and the
- * time; the next four are older and show a weekday and the date.
+ * link to the archive under them. The first seven are from the last six days and show a weekday
+ * and the time; the next four are older and show a weekday and the date.
  *
  * Behind them come 45 older headlines of two sources, so that the news archive (/nieuws) has 56
  * in all and a second page of 50 per page, and a page of one source (`/nieuws?bron=testkrant`).

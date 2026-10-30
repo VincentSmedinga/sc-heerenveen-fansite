@@ -4077,7 +4077,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 30 oktober 2026
 - **Besluit:** `/nieuws` toont alle koppen die we hebben opgehaald (relevant, niet verborgen, van een bron die aanstaat, geen podcast), met 50 per pagina, de nieuwste eerst en zonder indeling per dag.
   Er is een filter per bron (`?bron=<slug>`) en paginering (`?pagina=N`), zoals bij `/podcasts`.
-  De homepage linkt ernaar met "Alle koppen", onder de kaart Laatste nieuws.
+  De homepage linkt ernaar met "Alle koppen", onder de koppen in de kaart Laatste nieuws.
   Het menu verandert niet tot de opbouw van de site is vastgesteld (#431).
 - **Waarom:** de homepage houdt de laatste weken, en wie verder terug wil, heeft een archief nodig.
   Dezelfde onderdelen en adressen als de podcasts houden de site voorspelbaar en besparen werk.
@@ -4089,11 +4089,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een nieuwe kop schuift de inhoud van de pagina's op (pagina 2 van gisteren is pagina 3 van vandaag).
   Dat is zo bij elk archief en niet te voorkomen met adressen met een paginanummer; de bron en het filter blijven wel vast.
   `nieuws` staat bij de gereserveerde adressen voor een artikel van de redactie.
-  De link staat buiten de kaart: binnen de kaart komt hij direct onder de knop "Laad 5 meer", en de twee raken elkaar dan bijna, wat de controle op de grootte van een aanraakdoel afkeurt.
 - **Alternatieven:** laden met "Laad meer", zoals de homepage (geen vaste adressen, terwijl het issue ze vraagt).
   Een indeling per dag (langere pagina's met kopjes die weinig toevoegen).
   Een grens van 12 maanden (oudere koppen verdwijnen van de site terwijl ze in de database staan).
   Meteen een plek in het menu (de opbouw is nog niet gekozen).
+
+### De homepage heeft geen knop "Laad 5 meer" meer, maar de link "Alle koppen"
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** de kaart Laatste nieuws op de homepage toont de tien nieuwste koppen, en onder de lijst staat de link "Alle koppen" naar `/nieuws`.
+  De knop "Laad 5 meer" is weg, met `?nieuws=`, de ankers `#nieuws-N` bij de koppen, `parseHeadlineCount`, `maxHeadlines` en `moreHeadlines`.
+  Een adres als `/?nieuws=15` laat de homepage zien.
+- **Waarom:** het archief op `/nieuws` is er voor ouder nieuws, met vaste adressen en paginering.
+  Een tweede manier om meer koppen te laden maakt de pagina langer en de code groter, zonder iets wat het archief niet beter doet.
+  De homepage heeft zo geen parameters meer, en de lijst heeft nog maar één plek in het geheugen.
+- **Gevolg:** de koppen van de homepage hebben geen `id` meer, en de knop blijft op de pagina met de gehouden nullen en op `/zoeken`.
+- **Alternatieven:** de knop houden naast de link (twee manieren om meer koppen te zien, en de knop en de link raken elkaar onder de lijst).
+
+### Het filter van het nieuwsarchief staat in een lichtblauwe kaart in de zijbalk
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** op `/nieuws` staat het filter per bron in een kaart op een zacht vlak (`surface="soft"`) in de zijbalk, met de kop "Bronnen", en niet meer onder de kop van de pagina.
+  De naam "Bronnen filteren" en de markering van de huidige bron blijven zoals ze waren.
+  Zonder koppen is er geen filter en dus geen zijbalk.
+  Op een smal scherm staat de zijbalk onder de lijst en de paginering.
+- **Waarom:** het filter hoort bij de lijst en niet boven alles, en de pagina krijgt zo een zijbalk zoals `/podcasts` die heeft bij een gekozen podcast, met dezelfde kaart.
+  De zijbalk staat in de bron na de hoofdkolom, en het designsysteem houdt de volgorde van de bron en van het scherm gelijk (geen `order`).
+- **Nadeel:** op een telefoon moet de bezoeker voorbij de lijst en de paginering scrollen om een andere bron te kiezen.
+  Een balk met een link naar het filter (`Page.Shortcuts`), of een zijbalk die op een smal scherm boven de lijst staat, lost dat op, maar vraagt iets van het designsysteem en is aan de projecteigenaar.
+- **Alternatieven:** het filter boven de lijst laten (het was zo, en de zijbalk blijft dan leeg).
+  Het filter twee keer op de pagina zetten, boven de lijst op een smal scherm en in de zijbalk op een breed scherm (een dubbele navigatie voor een schermlezer).
 
 ## Importer
 
@@ -5606,6 +5631,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Eerst gekozen en weer losgelaten:** het formulier ging eerst naar de kaart zelf (`/#nieuws`).
   Dan sprong de pagina na de klik naar de bovenkant van de kaart, en moest de bezoeker de nieuwe koppen zelf zoeken.
 - **Alternatieven:** de koppen met JavaScript ophalen en toevoegen (vloeiender, maar een API en niets voor wie geen script heeft); dat kan later als aanvulling.
+- **Later:** de knop is weg en de homepage kent `?nieuws=` niet meer; zie _De homepage heeft geen knop "Laad 5 meer" meer, maar de link "Alle koppen"_.
+  Het besluit blijft gelden voor de knop op andere pagina's, zoals de pagina met de gehouden nullen en `/zoeken`.
 
 ### Het nieuws heeft geen grens in de tijd, en een grens van 100 koppen
 
@@ -5622,6 +5649,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** het aantal in het adres is een geheel getal vanaf 10, in stappen van 5; een ander getal geeft de eerste tien, en er zijn hoogstens negentien lijsten (10 tot en met 100).
   Zie _De nieuwskaart begint met tien koppen_.
 - **Later:** zie _Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron_; het archief is er, en de grens van 100 koppen op de homepage blijft.
+- **Later:** de grens van 100 koppen en de getallen in het adres vervallen met de knop; zie _De homepage heeft geen knop "Laad 5 meer" meer, maar de link "Alle koppen"_.
+  Het nieuws heeft nog steeds geen grens in de tijd.
 
 ### De nieuwskaart begint met tien koppen
 
@@ -5634,6 +5663,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** het nieuws is de hoofdkaart van de pagina.
   Met tien koppen ziet een bezoeker meer zonder te klikken, terwijl de kaarten naast het nieuws kort blijven.
 - **Alternatieven:** alle kaarten op vijf, zoals _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_ besloot; alle kaarten op tien, wat de kaarten met discussies en podcasts langer maakt dan nodig.
+- **Later:** de nieuwskaart heeft tien koppen en geen knop meer, en `moreHeadlines` en `?nieuws=` zijn weg; zie _De homepage heeft geen knop "Laad 5 meer" meer, maar de link "Alle koppen"_.
 
 ### Storybook en het Forum krijgen dezelfde iconen als de fansite, op een eigen vlak
 

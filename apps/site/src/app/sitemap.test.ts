@@ -66,7 +66,7 @@ describe('sitemap', () => {
     expect(await sitemap()).toEqual(pages.map(({ path }) => ({ url: `${origin}${path}` })))
   })
 
-  it('has no address with a query, such as the homepage with ?nieuws=10', async () => {
+  it('has no address with a query, such as `/nieuws?pagina=2`', async () => {
     vi.stubEnv('SITE_ENV', 'local')
 
     expect((await sitemap()).filter(({ url }) => url.includes('?'))).toEqual([])

@@ -75,8 +75,8 @@ const discussions: PublicDiscussion[] = [
 /** A season without matches, a table or a page that was read: the importer has not run yet. */
 const noMatchData: MatchData = { matches: [], pages: [], season: '2026/27', standings: [] }
 
-async function render(query: Record<string, string | string[]> = {}) {
-  return renderToStaticMarkup(await HomePage({ searchParams: Promise.resolve(query) }))
+async function render() {
+  return renderToStaticMarkup(await HomePage())
 }
 
 /** The card with the discussions of the forum alone. */
@@ -123,7 +123,7 @@ afterEach(() => {
 
 describe('the homepage', () => {
   it('has one h1, for screen readers only, and an h2 for the news, the discussions, the podcasts, the matches and the table, and no heading for a day', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
@@ -139,38 +139,38 @@ describe('the homepage', () => {
     ])
   })
 
-  it('is the one main of the page, with the h1, the news in a card and the link to the archive', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+  it('is the one main of the page, with the h1 and the news in a card', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><p><a href="\/nieuws">.*<\/a><\/p><\/main><aside/,
+      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><\/main><aside/,
     )
   })
 
   it('puts the h2 and the headlines in the card, which takes its name from the h2', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await renderMain()
     const cards = html.match(/<section.*?<\/section>/g) ?? []
 
     expect(cards).toHaveLength(1)
     expect(cards[0]).toContain('<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>')
-    expect(cards[0]?.match(/<li id="nieuws-\d+">/g)).toHaveLength(3)
+    expect(cards[0]?.match(/<li>/g)).toHaveLength(3)
     // The h1 is a cell of its own, outside the card.
     expect(cards[0]).not.toContain('<h1')
   })
 
   it('shows each headline as a link to the item at the source, with the day and the time before it and the source under it', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
     expect(html).toMatch(
       new RegExp(
-        '<li id="nieuws-1"><div class="hf-news-item"><div class="hf-news-item-layout"><time class="hf-meta hf-news-item-time" dateTime="2026-10-22T08:15:00.000Z">do 10:15</time>' +
+        '<li><div class="hf-news-item"><div class="hf-news-item-layout"><time class="hf-meta hf-news-item-time" dateTime="2026-10-22T08:15:00.000Z">do 10:15</time>' +
           '<div class="hf-news-item-body"><a class="hf-headline hf-news-item-headline" href="https://testkrant.test/heerenveen-testclub">Heerenveen houdt Testclub op afstand</a>' +
           '<p class="hf-meta hf-news-item-meta"><span>Testkrant</span><svg [^>]*aria-hidden="true"[^>]*>.*?</svg></p></div></div></div></li>',
       ),
@@ -178,7 +178,7 @@ describe('the homepage', () => {
   })
 
   it('shows the short day and the time in Dutch time, with the full time in the time element', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
@@ -191,14 +191,11 @@ describe('the homepage', () => {
   })
 
   it('shows the weekday and the date, with no time, for an item from before the last seven days, and the weekday and the time for the six days before today', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({
-      headlines: [
-        { ...headlines[0]!, publishedAt: new Date('2026-10-17T07:30:00Z') },
-        { ...headlines[1]!, publishedAt: new Date('2026-10-16T12:05:00Z') },
-        { ...headlines[2]!, publishedAt: new Date('2026-10-10T21:59:00Z') },
-      ],
-      more: false,
-    })
+    vi.mocked(getHeadlines).mockResolvedValue([
+      { ...headlines[0]!, publishedAt: new Date('2026-10-17T07:30:00Z') },
+      { ...headlines[1]!, publishedAt: new Date('2026-10-16T12:05:00Z') },
+      { ...headlines[2]!, publishedAt: new Date('2026-10-10T21:59:00Z') },
+    ])
 
     const html = await render()
 
@@ -208,7 +205,7 @@ describe('the homepage', () => {
   })
 
   it('puts "voor abonnees" in text with an item behind the paywall, and with no other item', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
@@ -219,7 +216,7 @@ describe('the homepage', () => {
   })
 
   it('names the source as the query gives it, and shows the headline as the source published it', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
 
@@ -230,26 +227,26 @@ describe('the homepage', () => {
   })
 
   it('opens the links in the same tab', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     expect(await render()).not.toContain('target=')
   })
 
   it('shows the items in one list, in the order the query gives them, with no heading for a day', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await renderMain()
 
     expect(html.match(/<ul/g)).toHaveLength(1)
     expect(html).toContain('<ul role="list">')
-    expect(html.match(/<li id="nieuws-\d+">/g)).toHaveLength(3)
+    expect(html.match(/<li>/g)).toHaveLength(3)
     expect(html).not.toContain('<h3')
     expect(html.indexOf('Heerenveen houdt Testclub')).toBeLessThan(html.indexOf('jonge garde'))
     expect(html.indexOf('jonge garde')).toBeLessThan(html.indexOf('Trainer verwacht'))
   })
 
   it('shows nothing of a source but the headline, the link, the name, the day and time and the paywall', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await renderMain()
 
@@ -269,7 +266,7 @@ describe('the homepage', () => {
   })
 
   it('has no text under the news about the sources, nor a link to them, and the old text is gone', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await renderMain()
 
@@ -279,19 +276,17 @@ describe('the homepage', () => {
     expect(html).not.toContain('Binnenkort meer')
   })
 
-  it('links to the news archive under the card, with or without the button', async () => {
-    for (const more of [false, true]) {
-      vi.mocked(getHeadlines).mockResolvedValue({ headlines, more })
+  it('links to the news archive under the headlines, in the card, and nowhere else', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
-      const html = await renderMain()
+    const html = await renderMain()
 
-      expect(withoutIcons(html)).toMatch(/<\/section><p><a href="\/nieuws">Alle koppen<\/a><\/p><\/main>$/)
-      expect(html.match(/href="\/nieuws"/g)).toHaveLength(1)
-    }
+    expect(withoutIcons(html)).toMatch(/<\/ul><p><a href="\/nieuws">Alle koppen<\/a><\/p><\/section><\/main>$/)
+    expect(html.match(/href="\/nieuws"/g)).toHaveLength(1)
   })
 
   it('draws an arrow to the right behind "Alle koppen", hidden from screen readers', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await renderMain()
     const link = html.match(/<a href="\/nieuws">.*?<\/a>/)?.[0] ?? ''
@@ -302,15 +297,15 @@ describe('the homepage', () => {
   })
 
   it('keeps the link to the archive when there is no news yet, like the card of the podcasts', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines: [], more: false })
+    vi.mocked(getHeadlines).mockResolvedValue([])
 
     expect(withoutIcons(await renderMain())).toContain(
-      '<p>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</p></section><p><a href="/nieuws">Alle koppen</a></p>',
+      '<p>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</p><p><a href="/nieuws">Alle koppen</a></p></section>',
     )
   })
 
   it('tells visitors there is no news yet, without a heading for a day', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines: [], more: false })
+    vi.mocked(getHeadlines).mockResolvedValue([])
 
     const html = await renderMain()
 
@@ -323,9 +318,9 @@ describe('the homepage', () => {
 
   it('titles the page with the name of the site, describes it and lets search engines in', async () => {
     vi.stubEnv('SITE_ENV', 'acceptance')
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
-    const metadata = await generateMetadata({ searchParams: Promise.resolve({}) })
+    const metadata = await generateMetadata()
 
     expect(metadata).toMatchObject({
       alternates: { canonical: 'https://acc.sc.heerenveen.org/' },
@@ -337,110 +332,37 @@ describe('the homepage', () => {
   })
 })
 
-describe('the button that loads five more headlines', () => {
+describe('the headlines of the homepage', () => {
   beforeEach(() => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: true })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
   })
 
-  it('asks for the first ten headlines without a number in the address', async () => {
+  it('asks for the headlines once, whatever the address says: older news is for the archive', async () => {
     await render()
 
-    expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(10)
+    expect(getHeadlines).toHaveBeenCalledExactlyOnceWith()
   })
 
-  it.each([
-    ['10', 10],
-    ['15', 15],
-    ['20', 20],
-    ['100', 100],
-  ])('asks for %s headlines for ?nieuws=%s', async (value, count) => {
-    await render({ nieuws: value })
-
-    expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(count)
-  })
-
-  it.each(['0', '4', '5', '7', '12', '-5', '5.5', '1e1', '010', '105', '1000', 'abc', ''])(
-    'asks for the first ten headlines for ?nieuws=%j, which is not a valid number',
-    async (value) => {
-      await render({ nieuws: value })
-
-      expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(10)
-    },
-  )
-
-  it('asks for the first ten headlines when the number is given twice', async () => {
-    await render({ nieuws: ['10', '15'] })
-
-    expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(10)
-  })
-
-  it('shows a real button "Laad 5 meer" under the list, in the card, when there are older headlines', async () => {
-    const html = await renderMain()
-    const card = html.match(/<section.*?<\/section>/)?.[0] ?? ''
-
-    expect(card).toMatch(
-      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="15" name="nieuws"><span class="hf-icon-head"><svg [^>]*class="hf-icon"[^>]*>.*?<\/svg>Laad<\/span> 5 meer<\/button><\/form><\/section>$/,
-    )
-  })
-
-  it('draws a plus in front of the text of the button, hidden from screen readers, and the button is still named "Laad 5 meer"', async () => {
-    const html = await renderMain()
-    const button = html.match(/<button.*?<\/button>/)?.[0] ?? ''
-
-    expect(button).toMatch(/^<button [^>]*><span class="hf-icon-head"><svg aria-hidden="true"/)
-    expect(button.match(/<svg /g)).toHaveLength(1)
-    expect(button.replace(/<svg.*?<\/svg>/, '').replace(/<[^>]*>/g, '')).toBe('Laad 5 meer')
-  })
-
-  it('gives each headline an id with its number, and sends the button to the first new headline', async () => {
-    const html = await renderMain()
-
-    expect(html.match(/<li id="nieuws-\d+">/g)).toEqual([
-      '<li id="nieuws-1">',
-      '<li id="nieuws-2">',
-      '<li id="nieuws-3">',
-    ])
-    // With three headlines on the page, the first new one is the fourth: the page that loads
-    // again has it.
-    expect(html).toContain('action="/#nieuws-4"')
-  })
-
-  it('has the button ask for the number after the one in the address', async () => {
-    expect(await render()).toContain('value="15" name="nieuws"')
-    expect(await render({ nieuws: '15' })).toContain('value="20" name="nieuws"')
-    expect(await render({ nieuws: '95' })).toContain('value="100" name="nieuws"')
-  })
-
-  it('shows no button when there are no older headlines', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
-
+  it('has no button, no form and no number for more headlines', async () => {
     const html = await render()
 
     expect(html).not.toContain('<button')
     expect(html).not.toContain('<form')
     expect(html).not.toContain('Laad')
-  })
-
-  it('needs no script and no address of an API: the only form is a GET form to the card', async () => {
-    const html = await render()
-
-    expect(html.match(/<form/g)).toHaveLength(1)
+    expect(html).not.toContain('name="nieuws"')
     expect(html).not.toContain('<script')
-    expect(html).not.toContain('/api/')
-    expect(html).not.toContain('method="post"')
   })
 
-  it('has the homepage itself as canonical address, whatever the number in the address', async () => {
+  it('has the homepage itself as canonical address, and lets search engines in', async () => {
     vi.stubEnv('SITE_ENV', 'acceptance')
 
-    const metadata = await generateMetadata({ searchParams: Promise.resolve({ nieuws: '15' }) })
+    const metadata = await generateMetadata()
 
     expect(metadata).toMatchObject({
       alternates: { canonical: 'https://acc.sc.heerenveen.org/' },
       openGraph: { url: 'https://acc.sc.heerenveen.org/' },
     })
     expect(metadata).not.toHaveProperty('robots')
-    expect(getHeadlines).toHaveBeenCalledWith(15)
   })
 })
 
@@ -483,7 +405,7 @@ async function renderEpisodes() {
 
 describe('the podcast episodes in the sidebar of the homepage', () => {
   beforeEach(() => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines: [], more: false })
+    vi.mocked(getHeadlines).mockResolvedValue([])
   })
 
   it('puts the block under the forum, named by its h2, with the link to all podcasts under the list', async () => {
@@ -566,7 +488,7 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
 
   it('shows the error page when only the episodes can not be read', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
     vi.mocked(getLatestEpisodes).mockRejectedValue(new Error('Failed query'))
 
     const html = await render()
@@ -578,7 +500,7 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
 
 describe('the discussions in the sidebar of the homepage', () => {
   beforeEach(() => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
     vi.mocked(getDiscussions).mockResolvedValue(discussions)
   })
 
@@ -674,7 +596,7 @@ describe('the discussions in the sidebar of the homepage', () => {
   })
 
   it('shows the discussions when there is no news', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines: [], more: false })
+    vi.mocked(getHeadlines).mockResolvedValue([])
 
     const html = await render()
 
@@ -692,7 +614,7 @@ describe('the card with the newest article of the editors', () => {
   }
 
   beforeEach(() => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
   })
 
   it('puts the card at the top of the main column, above the news, after the h1', async () => {
@@ -743,7 +665,7 @@ describe('the card with the newest article of the editors', () => {
 
     const html = await render()
 
-    expect(getHeadlines).toHaveBeenCalledWith(10)
+    expect(getHeadlines).toHaveBeenCalledExactlyOnceWith()
     expect(html.match(/class="hf-news-item"/g)).toHaveLength(headlines.length)
   })
 
@@ -782,21 +704,21 @@ describe('the homepage when the database can not be read', () => {
   })
 
   it('titles the page Er ging iets mis and keeps it out of the search engines', async () => {
-    expect(await generateMetadata({ searchParams: Promise.resolve({}) })).toEqual({
+    expect(await generateMetadata()).toEqual({
       robots: { index: false },
       title: { absolute: 'Er ging iets mis' },
     })
   })
 
   it('shows the error page when only the discussions can not be read', async () => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
     vi.mocked(getDiscussions).mockRejectedValue(failure)
 
     const html = await render()
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
     expect(html).not.toContain('Nieuwste discussies')
-    expect(await generateMetadata({ searchParams: Promise.resolve({}) })).toEqual({
+    expect(await generateMetadata()).toEqual({
       robots: { index: false },
       title: { absolute: 'Er ging iets mis' },
     })
@@ -828,7 +750,7 @@ async function renderStandingsCard() {
 
 describe('the matches and the table in the sidebar of the homepage', () => {
   beforeEach(() => {
-    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
     vi.mocked(getDiscussions).mockResolvedValue(discussions)
     vi.mocked(getMatchData).mockResolvedValue(matchData)
   })
@@ -1064,7 +986,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(error).toHaveBeenCalledExactlyOnceWith(
       'Could not read the matches and the table for the homepage: Failed query: select 1 (boom)',
     )
-    expect(await generateMetadata({ searchParams: Promise.resolve({}) })).not.toHaveProperty('robots')
+    expect(await generateMetadata()).not.toHaveProperty('robots')
   })
 
   it('asks the matches for the homepage only once, and not again for the title', async () => {

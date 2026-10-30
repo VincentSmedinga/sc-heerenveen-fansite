@@ -14,8 +14,6 @@ import { earlierSeasonSlug } from './earlier-season'
 // made-up published article, which the database gives.
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
-  // The homepage with the older headlines, which the button under the first ten loads.
-  { path: '/?nieuws=15', status: 200 },
   // The news archive: all sources, one source, the second page (the made-up headlines fill
   // more than one page), and the addresses that say "niet gevonden".
   { path: '/nieuws', status: 200 },

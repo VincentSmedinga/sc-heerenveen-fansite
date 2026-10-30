@@ -51,8 +51,8 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-const titles = async (getHeadlines: (count: number) => Promise<{ headlines: { title: string }[] }>) =>
-  (await getHeadlines(10)).headlines.map((item) => item.title)
+const titles = async (getHeadlines: () => Promise<{ title: string }[]>) =>
+  (await getHeadlines()).map((item) => item.title)
 
 describe('the headlines of the homepage', () => {
   it('lose a hidden item within five minutes, and no later', async () => {
@@ -87,7 +87,6 @@ describe('the headlines of the homepage', () => {
 
     await hideItem(database.db, userId, itemId, 'Fout in het bericht')
 
-    expect((await getHeadlines(10)).more).toBe(false)
     expect(await titles(getHeadlines)).toEqual(['Kop twee'])
   })
 })

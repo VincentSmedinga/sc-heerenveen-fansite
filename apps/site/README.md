@@ -65,8 +65,8 @@ Verzonnen wedstrijden van een eerdere run haalt hij na de laatste test wel weg.
 Een test die de opmaak meet of naar een kaart scrolt, wacht eerst op `hydrated(page)` uit `e2e/hydrated.ts`: tot React de pagina heeft opgebouwd, toont de kiezer nog zijn label en zijn knop, en is de pagina langer.
 `e2e/card-image.spec.ts` klikt op die knop en toetst in de browser dat er een PNG komt, dat er niets naar een ander domein gaat en dat de CSP de afbeelding toestaat.
 Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
-De controle toetst de homepage ook met `?nieuws=15`, zodat de oudere koppen die de knop laadt ook langs axe komen.
-Hier gaat het om axe op de pagina met nieuws.
+De controle toetst ook `/nieuws` met een tweede pagina, zodat de oudere koppen van het archief langs axe komen.
+Hier gaat het om axe op de pagina's met nieuws.
 Draait de database van de controle ook echte berichten, door `pnpm run import`, dan staan die er gewoon tussen.
 Playwright wacht tot `/robots.txt` antwoordt en niet tot de homepage, want die bewaart haar koppen vijf minuten in het geheugen.
 
@@ -155,16 +155,9 @@ Hij heeft de klasse `hf-visually-hidden` uit het designsysteem, dus een schermle
 Daaronder staat het blok "Laatste nieuws": de tien nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
 Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
-Zijn er oudere berichten, dan staat onder de lijst de knop "Laad 5 meer".
-De knop zit in een formulier met `method="get"` dat de homepage opnieuw laadt met het aantal in het adres, zoals `/?nieuws=15#nieuws-11`.
-Elke kop in de lijst heeft een `id` met zijn nummer (`nieuws-11`), en het formulier gaat naar de eerste nieuwe kop, dus de bezoeker blijft op dezelfde plek.
-Dat werkt zonder JavaScript en zonder API.
-`parseHeadlineCount` in `src/headlines.ts` controleert het getal: een geheel getal vanaf 10, in stappen van 5, en niet meer dan 100.
-Elk ander getal geeft de eerste tien.
-De getallen staan op één plek, in `src/items-per-card.ts`: `firstHeadlines` (10) en `moreHeadlines` (5).
-Bij tien koppen of minder is er geen knop, en bij 100 koppen verdwijnt hij; ouder nieuws is voor het archief op `/nieuws` (zie _Het nieuwsarchief_).
-Onder de kaart staat de link "Alle koppen" naar dat archief.
-Een pagina met `?nieuws=` heeft de homepage zelf als canoniek adres, en staat niet in de sitemap.
+Onder de lijst staat de link "Alle koppen" naar het archief op `/nieuws` (zie _Het nieuwsarchief_): ouder nieuws is daarvoor.
+Het aantal staat op één plek, `firstHeadlines` (10) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
+De homepage kent geen parameters: een adres als `/?nieuws=15`, dat de knop "Laad 5 meer" vroeger maakte, laat gewoon de homepage zien.
 
 De kaarten met discussies en podcasts tonen vijf items: het aantal staat op één plek, `itemsPerCard` in `src/items-per-card.ts`.
 
@@ -324,7 +317,9 @@ Het zijn dezelfde koppen als op de homepage, ook met "voor abonnees" bij een kop
 Een intro of foto staat er niet, net als op de homepage.
 De query is `listArchivePage` in `packages/db/src/queries.ts`, met `countArchiveItems` voor het aantal en `listArchiveSources` voor het filter.
 Ze delen met `listRecentItems` de voorwaarden (`newsFilter`): relevant, niet verborgen, van een bron die aanstaat, geen podcast en niet na nu.
-Boven de lijst staat het filter (`Filter`): "Alle bronnen" en een link per bron met minstens één kop in het archief, op alfabet, als `/nieuws?bron=leeuwarder-courant`.
+Het filter (`Filter`) staat in een lichtblauwe kaart (`surface="soft"`) met de kop "Bronnen" in de zijbalk: "Alle bronnen" en een link per bron met minstens één kop in het archief, op alfabet, als `/nieuws?bron=leeuwarder-courant`.
+Op een smal scherm staat de zijbalk onder de lijst en de paginering, want de zijbalk komt na de hoofdkolom in de bron en het designsysteem laat de volgorde van de bron en van het scherm gelijk.
+Zonder koppen is er geen filter en geen zijbalk.
 De slug komt uit de kolom `slug` van `sources`, die de seed voor elke bron met koppen vastlegt (`packages/db/src/seed.ts`), dus een andere naam verandert het adres niet.
 Een bron zonder slug staat niet in het filter, maar haar koppen staan wel bij "Alle bronnen".
 Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/nieuws?pagina=2`, en met een bron `/nieuws?bron=leeuwarder-courant&pagina=2`.

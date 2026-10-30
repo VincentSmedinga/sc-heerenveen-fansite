@@ -73,26 +73,28 @@ afterEach(() => {
 })
 
 describe('the page Nieuwsarchief', () => {
-  it('has one h1, Nieuwsarchief, and no other heading', async () => {
+  it('has one h1, Nieuwsarchief, and an h2 for the filter in the sidebar, and no other heading', async () => {
     const html = await render()
 
-    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual(['<h1 class="hf-heading-1">Nieuwsarchief</h1>'])
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
+      '<h1 class="hf-heading-1">Nieuwsarchief</h1>',
+      '<h2 class="hf-heading-2" id="sources-heading">Bronnen</h2>',
+    ])
   })
 
-  it('is the one main of the page, with the h1 and the filter as its introduction and the list in a card', async () => {
+  it('is the one main of the page, with the h1 as its introduction and the list in a card', async () => {
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html).toMatch(/<main class="hf-page-main"><div class="hf-page-intro"><h1.*<\/h1><nav.*<\/nav><\/div>/)
+    expect(html).toMatch(/<main class="hf-page-main"><div class="hf-page-intro"><h1[^>]*>Nieuwsarchief<\/h1><\/div>/)
     expect(html).toMatch(/<div class="hf-card"><ul role="list">/)
-    expect(html).not.toContain('<aside')
+    expect(html.slice(0, html.indexOf('</main>'))).not.toContain('<nav aria-label="Bronnen filteren"')
   })
 
   it('shows each headline as a link to the source, with the name of the source, and the day and time of its own', async () => {
     const html = await render()
 
-    // The filter has list items too, so count the headlines in the card.
-    expect(html.slice(html.indexOf('<div class="hf-card">')).match(/<li>/g)).toHaveLength(3)
+    expect(html.slice(0, html.indexOf('</main>')).match(/<li>/g)).toHaveLength(3)
     expect(html).toContain('href="https://lc.test/heerenveen-testclub"')
     expect(html).toContain('href="https://voorbeeldkrant.test/jonge-garde"')
     expect(html).toContain('<span>Voorbeeldkrant, met dank aan de redactie</span>')
@@ -134,9 +136,28 @@ describe('the page Nieuwsarchief', () => {
     ])
   })
 
+  it('puts the filter in a card on a soft surface in the sidebar, after the main, with a name for the sidebar', async () => {
+    const html = await render()
+
+    expect(html.match(/<aside/g)).toHaveLength(1)
+    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(html.slice(html.indexOf('<aside'))).toMatch(
+      /^<aside class="hf-page-sidebar" aria-label="Bronnen"><section class="hf-card hf-card-soft" aria-labelledby="sources-heading"><h2 class="hf-heading-2" id="sources-heading">Bronnen<\/h2><nav aria-label="Bronnen filteren"/,
+    )
+  })
+
+  it('has no sidebar and no filter when there are no sources', async () => {
+    vi.mocked(getArchivePage).mockResolvedValue({ ...everything, headlines: [], sources: [] })
+
+    const html = await render()
+
+    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('Bronnen')
+  })
+
   it('has a filter with a link to all sources and one to each source, in a navigation with a name', async () => {
     const html = await render()
-    const nav = html.match(/<nav[^>]*aria-label="Bronnen filteren".*?<\/nav>/)?.[0] ?? ''
+    const nav = html.slice(html.indexOf('<aside')).match(/<nav[^>]*aria-label="Bronnen filteren".*?<\/nav>/)?.[0] ?? ''
 
     expect(
       [...nav.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
@@ -272,6 +293,7 @@ describe('a page without headlines', () => {
     expect(html).toContain('<p>We hebben nog geen nieuws gevonden.</p>')
     expect(html).not.toContain('<ul')
     expect(html).not.toContain('<nav')
+    expect(html).not.toContain('<aside')
     expect(html).not.toContain('Alle bronnen')
   })
 })

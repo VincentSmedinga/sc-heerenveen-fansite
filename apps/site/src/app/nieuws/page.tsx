@@ -107,44 +107,51 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
   ]
 
   return (
-    <Page.Main
-      intro={
-        <>
-          <Heading level={1}>Nieuwsarchief</Heading>
-          {sources.length > 0 && <Filter items={filter} label="Bronnen filteren" />}
-        </>
-      }
-    >
-      <Card as="div">
-        {headlines.length === 0 ? (
-          <Text>We hebben nog geen nieuws gevonden.</Text>
-        ) : (
-          <List role="list">
-            {headlines.map((item, index) => (
-              <List.Item key={index}>
-                <NewsItem
-                  dateTime={dateTimeOf(item.publishedAt)}
-                  headline={item.title}
-                  href={item.url}
-                  paywalled={item.paywalled}
-                  source={item.sourceName}
-                  time={formatNewsTime(item.publishedAt, now)}
-                />
-              </List.Item>
-            ))}
-          </List>
-        )}
-        {pageCount > 1 && (
-          <Pagination
-            current={page}
-            label="Paginering"
-            nextHref={page < pageCount ? archiveHref(source, page + 1) : undefined}
-            previousHref={page > 1 ? archiveHref(source, page - 1) : undefined}
-            total={pageCount}
-          />
-        )}
-      </Card>
-    </Page.Main>
+    <>
+      <Page.Main intro={<Heading level={1}>Nieuwsarchief</Heading>}>
+        <Card as="div">
+          {headlines.length === 0 ? (
+            <Text>We hebben nog geen nieuws gevonden.</Text>
+          ) : (
+            <List role="list">
+              {headlines.map((item, index) => (
+                <List.Item key={index}>
+                  <NewsItem
+                    dateTime={dateTimeOf(item.publishedAt)}
+                    headline={item.title}
+                    href={item.url}
+                    paywalled={item.paywalled}
+                    source={item.sourceName}
+                    time={formatNewsTime(item.publishedAt, now)}
+                  />
+                </List.Item>
+              ))}
+            </List>
+          )}
+          {pageCount > 1 && (
+            <Pagination
+              current={page}
+              label="Paginering"
+              nextHref={page < pageCount ? archiveHref(source, page + 1) : undefined}
+              previousHref={page > 1 ? archiveHref(source, page - 1) : undefined}
+              total={pageCount}
+            />
+          )}
+        </Card>
+      </Page.Main>
+      {sources.length > 0 && (
+        // The sidebar is second in the source, so on a narrow screen the filter sits under the
+        // list and the pagination.
+        <Page.Sidebar aria-label="Bronnen">
+          <Card aria-labelledby="sources-heading" surface="soft">
+            <Heading id="sources-heading" level={2}>
+              Bronnen
+            </Heading>
+            <Filter items={filter} label="Bronnen filteren" />
+          </Card>
+        </Page.Sidebar>
+      )}
+    </>
   )
 }
 

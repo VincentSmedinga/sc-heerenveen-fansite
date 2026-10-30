@@ -10,7 +10,6 @@ const [doubtful, irrelevant] = headlines.notForVisitors
 
 const visitorPages = [
   '/',
-  '/?nieuws=15',
   '/nieuws',
   '/nieuws?bron=testkrant',
   '/podcasts',
