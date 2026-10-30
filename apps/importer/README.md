@@ -251,26 +251,34 @@ Een scherm om twijfelgevallen te beoordelen, en het met de hand corrigeren van e
 ### Koppen over de tegenstander
 
 Een bericht over de tegenstander rond een wedstrijd tegen ons is ook nieuws over sc Heerenveen, ook als de kop de club niet noemt: "ADO beleeft frustrerende avond".
-Noemt een kop een club, en speelt sc Heerenveen in het lopende seizoen een wedstrijd tegen die club die hoogstens 7 dagen voor of na de publicatie van het bericht ligt, dan is de kop `relevant`.
+Noemt een kop een club, en speelt sc Heerenveen in het lopende seizoen een wedstrijd tegen die club, dan is de kop `relevant` van 3 dagen voor tot en met 7 dagen na die wedstrijd.
+Noemt de kop ook een andere profclub uit de lijst, dan telt hij niet.
 Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
 
-- **Het venster:** de datum van de wedstrijd min 7 dagen tot en met plus 7 dagen.
+- **Het venster:** de datum van de wedstrijd min 3 dagen tot en met plus 7 dagen.
+  Een bericht van 3 dagen voor de wedstrijd telt, een bericht van 4 dagen ervoor niet.
+  Daarna telt een bericht tot en met de 7e dag na de wedstrijd.
   Het bericht en de wedstrijd tellen als Nederlandse dagen (`Europe/Amsterdam`).
   Zo staat een bericht van half één 's nachts, in de nacht van de overgang naar de wintertijd, op de dag die een lezer zag.
-  Een bericht op de 8e dag ervoor of erna valt erbuiten.
+  Een bericht op de 8e dag erna valt erbuiten.
 - **De wedstrijden:** de wedstrijden van de competitie en de beker in `matches`, gespeeld of nog te spelen, van het lopende seizoen.
   De tabel heeft ook eerdere seizoenen (`pnpm import:season`), maar die tellen niet.
   Een wedstrijd zonder aftrap telt met de datum die we hebben, en een uitgestelde wedstrijd zonder nieuwe datum telt niet.
   Speelt een club twee keer tegen ons, dan heeft elke wedstrijd zijn eigen venster.
   Alleen de tegenstander van die wedstrijd telt: een club die we pas over een maand treffen, doet nu niets.
 - **Hoe het werkt:** `judgeRelevance` leest zelf niets uit de database.
-  `importFeeds` leest de wedstrijden van het seizoen één keer per run, en `opponentsAround` (in `src/relevance.ts`) kiest bij elk bericht de tegenstanders van de wedstrijden binnen 7 dagen van de publicatie.
+  `importFeeds` leest de wedstrijden van het seizoen één keer per run, en `opponentsAround` (in `src/relevance.ts`) kiest bij elk bericht de tegenstanders van de wedstrijden binnen het venster.
   Die namen gaan als tweede argument naar `judgeRelevance`.
   Zonder wedstrijden werkt het filter als eerst.
   Een wedstrijd die de Wikipedia-import in dezelfde run bewaart, telt vanaf de volgende run.
 - **Hetzelfde bericht opnieuw:** de importer beoordeelt een bekend bericht bij elke run opnieuw.
   Een bericht dat `irrelevant` was voordat de wedstrijd bekend was, wordt dus `relevant` zodra hij erin staat.
   Een verborgen bericht blijft verborgen, en een feed met het filter `none` verandert niet.
+- **Alleen de tegenstander:** een kop die de tegenstander noemt en ook een andere profclub uit `otherClubGroups`, gaat over een andere wedstrijd: "NEC kan geen vervolg geven: ploeg speelt gelijk tegen FC Groningen".
+  Zo'n kop telt niet als kop over de tegenstander.
+  Een club die naar een plaats heet, telt ook hier alleen met zijn volledige naam: "tegen Groningen" is geen andere club, "tegen FC Groningen" wel.
+  Twee namen van dezelfde club zijn één club, en een tegenstander die niet in de lijst staat, telt niet als een club uit de lijst met zijn eigen naam ("Excelsior Maassluis" is niet "Excelsior" uit Rotterdam).
+  Een kop met "Heerenveen" valt onder de andere regels en wordt niet slechter van een tweede club.
 - **De naam van de tegenstander:** de naam in `matches.opponent` ("N.E.C.", "ADO Den Haag", "Almere City FC") hoort bij de namen die het filter voor die club kent.
   Dat verband staat op één plek: `otherClubGroups` in [`src/relevance-terms.ts`](src/relevance-terms.ts), met de namen van één club bij elkaar.
   De naam uit de wedstrijd, of die naam zonder FC, SC, VV, SV of AFC ervoor of erachter, moet een van die namen zijn.

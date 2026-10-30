@@ -459,10 +459,11 @@ describe('the opponent of a match', () => {
     expect(judgeRelevance('Supporters in Heerenveen kijken uit naar ADO', ['ADO Den Haag'])).toBe('relevant')
   })
 
-  it('changes nothing for a headline the other rules judge relevant, and nothing without opponents', () => {
+  it('changes nothing for a headline without the opponent, and nothing without opponents', () => {
     for (const [title, expected] of [...namesTheClub, ...doubtful, ...irrelevant]) {
       expect(judgeRelevance(title, []), title).toBe(judgeRelevance(title))
-      expect(judgeRelevance(title, ['Ajax']), title).toBe(/\bajax\b/iu.test(title) ? 'relevant' : expected)
+      // An opponent that the headline doesn't name changes nothing.
+      expect(judgeRelevance(title, ['Telstar']), title).toBe(expected)
     }
   })
 
@@ -470,14 +471,55 @@ describe('the opponent of a match', () => {
     expect(judgeRelevance('Feyenoord wint na rommelige wedstrijd', ['ADO Den Haag'])).toBe('irrelevant')
   })
 
-  describe('the window of 7 days, in Dutch time', () => {
+  describe('a headline that names another professional club as well', () => {
+    it.each([
+      // The opponent only: it counts.
+      ['ADO Den Haag', 'ADO beleeft frustrerende avond', 'relevant'],
+      ['N.E.C.', 'Weer geen overwinning voor N.E.C.: "Wordt nu weleens tijd"', 'relevant'],
+      // The opponent and another club of the list: another match, so it does not count.
+      [
+        'N.E.C.',
+        'NEC kan historische uitzege geen vervolg geven: ploeg speelt gelijk tegen FC Groningen',
+        'irrelevant',
+      ],
+      ['ADO Den Haag', 'LIVE KNVB-beker | ADO trapt bekerweek af met uitwedstrijd bij Excelsior’31', 'irrelevant'],
+      ['ADO Den Haag', 'Ajax en ADO strijden om een plek', 'irrelevant'],
+      ['ADO Den Haag', 'ADO Den Haag wint van Vitesse', 'irrelevant'],
+      // A club named after a place counts as another club only with its full name.
+      ['N.E.C.', 'N.E.C. komt terug van achterstand tegen counterend Groningen', 'relevant'],
+      ['N.E.C.', 'N.E.C. komt terug van achterstand tegen FC Groningen', 'irrelevant'],
+      // Two names of the same club are one club.
+      ['ADO Den Haag', 'ADO Den Haag: ADO beleeft frustrerende avond', 'relevant'],
+      ['N.E.C.', 'NEC Nijmegen verrast: N.E.C. wint', 'relevant'],
+      // An opponent not on the list is not "Excelsior" of Rotterdam, another club.
+      ['Excelsior Maassluis', 'Excelsior Maassluis verrast', 'relevant'],
+      ['Excelsior Maassluis', 'Excelsior Maassluis verrast Ajax', 'irrelevant'],
+      ['Excelsior Maassluis', 'Excelsior Maassluis tegen Excelsior', 'irrelevant'],
+      ['Quick Boys', 'Quick Boys verrast', 'relevant'],
+    ] as [string, string, ItemRelevance][])('%s: %j is %s', (opponent, title, expected) => {
+      expect(judgeRelevance(title, [opponent])).toBe(expected)
+    })
+
+    it('does not count a headline that names two opponents of the window of one item', () => {
+      expect(judgeRelevance('ADO en N.E.C. bereiden zich voor', ['ADO Den Haag', 'N.E.C.'])).toBe('irrelevant')
+      expect(judgeRelevance('ADO bereidt zich voor', ['ADO Den Haag', 'N.E.C.'])).toBe('relevant')
+    })
+
+    it('changes nothing for a headline that names Heerenveen, whatever other clubs it names', () => {
+      expect(judgeRelevance('Ajax - Heerenveen: de opstellingen', ['ADO Den Haag'])).toBe('relevant')
+      expect(judgeRelevance('Ajax - Heerenveen: de opstellingen', [])).toBe('relevant')
+    })
+  })
+
+  describe('the window of 3 days before and 7 days after, in Dutch time', () => {
     const day = (publishedAt: string) => judgeAt('ADO beleeft frustrerende avond', publishedAt, ado)
 
     it.each([
       ['on the day of the match', '2026-10-24T20:00:00+02:00', 'relevant'],
-      ['7 days before', '2026-10-17T12:00:00+02:00', 'relevant'],
+      ['3 days before', '2026-10-21T12:00:00+02:00', 'relevant'],
       ['7 days after', '2026-10-31T23:59:00+01:00', 'relevant'],
-      ['8 days before', '2026-10-16T23:59:00+02:00', 'irrelevant'],
+      ['4 days before', '2026-10-20T23:59:00+02:00', 'irrelevant'],
+      ['7 days before', '2026-10-17T12:00:00+02:00', 'irrelevant'],
       ['8 days after', '2026-11-01T00:00:00+01:00', 'irrelevant'],
     ])('is %s: %s is %s', (_name, publishedAt, expected) => {
       expect(day(publishedAt)).toBe(expected)
@@ -485,11 +527,11 @@ describe('the opponent of a match', () => {
 
     // The clocks went back on 25 October 2026, at 3:00 to 2:00.
     it('counts the day as a reader in the Netherlands saw it, at midnight of the change to winter time', () => {
-      const match1 = [match('ADO Den Haag', '2026-11-01')]
+      const match1 = [match('ADO Den Haag', '2026-10-28')]
 
-      // 00:30 on 25 October (22:30 UTC on the 24th): 7 days before, although UTC says the 24th.
+      // 00:30 on 25 October (22:30 UTC on the 24th): 3 days before, although UTC says the 24th.
       expect(judgeAt('ADO in vorm', '2026-10-24T22:30:00Z', match1)).toBe('relevant')
-      // 23:30 on 24 October (21:30 UTC): 8 days before.
+      // 23:30 on 24 October (21:30 UTC): 4 days before.
       expect(judgeAt('ADO in vorm', '2026-10-24T21:30:00Z', match1)).toBe('irrelevant')
 
       const match2 = [match('ADO Den Haag', '2026-10-18')]
@@ -519,7 +561,7 @@ describe('the opponent of a match', () => {
 
       expect(judgeAt('ADO in vorm', '2026-10-30T12:00:00Z', twice)).toBe('relevant')
       expect(judgeAt('ADO in vorm', '2026-12-01T12:00:00Z', twice)).toBe('irrelevant')
-      expect(judgeAt('ADO in vorm', '2027-02-10T12:00:00Z', twice)).toBe('relevant')
+      expect(judgeAt('ADO in vorm', '2027-02-11T12:00:00Z', twice)).toBe('relevant')
       expect(
         opponentsAround(new Date('2026-10-24T12:00:00Z'), [...twice, match('ADO Den Haag', '2026-10-27')]),
       ).toEqual(['ADO Den Haag', 'ADO Den Haag'])
@@ -529,7 +571,7 @@ describe('the opponent of a match', () => {
       const matches = [match('ADO Den Haag', '2026-10-24', 'played'), match('Ajax', '2026-11-24')]
 
       expect(judgeAt('Ajax maakt zich op', '2026-10-24T12:00:00Z', matches)).toBe('irrelevant')
-      expect(judgeAt('Ajax maakt zich op', '2026-11-20T12:00:00Z', matches)).toBe('relevant')
+      expect(judgeAt('Ajax maakt zich op', '2026-11-21T12:00:00Z', matches)).toBe('relevant')
     })
 
     it('works as before without matches', () => {

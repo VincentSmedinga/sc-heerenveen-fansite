@@ -27,8 +27,9 @@ import {
  * - `irrelevant`: neither.
  *
  * A headline that would be `doubtful` or `irrelevant` is `relevant` when it names the opponent
- * of a match: `opponents` has the names, as `matches.opponent` has them, of the matches of the
- * season that are at most 7 days from the day the item was published (see `opponentsAround`).
+ * of a match and no other professional club: `opponents` has the names, as `matches.opponent`
+ * has them, of the matches of the season around the day the item was published (see
+ * `opponentsAround`). A headline about the opponent and another club is about another match.
  * The matches are an argument, not something this function reads, so the same arguments always
  * give the same answer; without opponents the rules are the ones above.
  *
@@ -60,15 +61,18 @@ export function judgeRelevance(title: string, opponents: readonly string[] = [])
     return 'relevant'
   }
 
-  if (opponents.some((opponent) => opponentPhrases(opponent).some((phrase) => containsPhrase(words, phrase)))) {
+  if (opponents.some((opponent) => namesOpponentOnly(words, opponent))) {
     return 'relevant'
   }
 
   return named || surname ? 'doubtful' : 'irrelevant'
 }
 
-/** How many days before and after a match an item about the opponent is `relevant`. */
-export const opponentWindowDays = 7
+/** How many days before a match an item about the opponent is `relevant`. */
+export const opponentDaysBefore = 3
+
+/** How many days after a match an item about the opponent is `relevant`. */
+export const opponentDaysAfter = 7
 
 /** The part of a match that the rule of the opponent needs. */
 export type MatchDay = {
@@ -81,18 +85,23 @@ export type MatchDay = {
 }
 
 /**
- * The opponents of the matches that are at most `opponentWindowDays` days before or after the
- * day an item was published. Both days are counted in Dutch time, so an item at half past
- * midnight on the night the clocks go back is on the day the reader saw it. A club that plays
- * us twice has two matches and so two windows. Returns the names as `matches.opponent` has
- * them, for the second argument of `judgeRelevance`.
+ * The opponents of the matches from `opponentDaysBefore` days after the day an item was
+ * published to `opponentDaysAfter` days before it: a match 3 days ahead and one 7 days back
+ * count, one 4 days ahead and one 8 days back do not. Both days are counted in Dutch time, so
+ * an item at half past midnight on the night the clocks go back is on the day the reader saw
+ * it. A club that plays us twice has two matches and so two windows. Returns the names as
+ * `matches.opponent` has them, for the second argument of `judgeRelevance`.
  */
 export function opponentsAround(publishedAt: Date, matches: readonly MatchDay[]): string[] {
   const published = dayNumber(dutchDay.format(publishedAt))
 
   return matches
     .filter((match) => match.status !== 'postponed')
-    .filter((match) => Math.abs(dayNumber(match.matchDate) - published) <= opponentWindowDays)
+    .filter((match) => {
+      const daysAfterMatch = published - dayNumber(match.matchDate)
+
+      return daysAfterMatch >= -opponentDaysBefore && daysAfterMatch <= opponentDaysAfter
+    })
     .map((match) => match.opponent)
 }
 
@@ -131,17 +140,30 @@ const clubPhrases = {
   surnames: clubSurnames.map(normaliseTitle),
 }
 
-const opponentPhraseCache = new Map<string, string[][]>()
+/**
+ * The names of the opponent of a match as lists of words (`own`), and the names of the other
+ * professional clubs on the list (`others`).
+ */
+type OpponentTerms = { others: string[][]; own: string[][] }
+
+const opponentTermsCache = new Map<string, OpponentTerms>()
+
+const allClubPhrases = otherClubGroups.map((names) => names.map(normaliseTitle))
 
 /** Whether `phrase` is in `words` as a run of words next to each other, in that order. */
 function containsPhrase(words: string[], phrase: string[]): boolean {
+  return indexOfPhrase(words, phrase) >= 0
+}
+
+/** Where `phrase` starts in `words`, or -1. */
+function indexOfPhrase(words: string[], phrase: string[]): number {
   for (let start = 0; start + phrase.length <= words.length; start++) {
     if (phrase.every((word, offset) => words[start + offset] === word)) {
-      return true
+      return start
     }
   }
 
-  return false
+  return -1
 }
 
 function isOrdinaryOrPrefix(word: string): boolean {
@@ -150,6 +172,31 @@ function isOrdinaryOrPrefix(word: string): boolean {
 
 function isPrefix(word: string): boolean {
   return (clubPrefixes as readonly string[]).includes(word)
+}
+
+/**
+ * Whether the headline names the opponent and no other professional club of the list. The words
+ * of the longest name of the opponent are left out first, so "Excelsior Maassluis" is not
+ * "Excelsior" of Rotterdam as well.
+ */
+function namesOpponentOnly(words: string[], opponent: string): boolean {
+  const { others, own } = opponentTerms(opponent)
+  let found = { length: 0, start: -1 }
+
+  for (const phrase of own) {
+    const start = indexOfPhrase(words, phrase)
+
+    if (start >= 0 && phrase.length > found.length) {
+      found = { length: phrase.length, start }
+    }
+  }
+  if (found.start < 0) {
+    return false
+  }
+
+  const rest = words.map((word, index) => (index >= found.start && index < found.start + found.length ? '' : word))
+
+  return !others.some((phrase) => containsPhrase(rest, phrase))
 }
 
 /**
@@ -165,9 +212,12 @@ function isPrefix(word: string): boolean {
  *    Maassluis", "Quick Boys", "De Treffers", "HSV Hoek", and the one word of a club such as
  *    "IJsselmeervogels" or "ASWH" ("FC Lisse" is "Lisse"). Not when it is one word that is
  *    also an ordinary word (`ordinaryClubWords`), and not a name that is only a prefix.
+ *
+ * The names of every other club on the list are the `others`: a headline that has one of them
+ * is about another match.
  */
-function opponentPhrases(opponent: string): string[][] {
-  const cached = opponentPhraseCache.get(opponent)
+function opponentTerms(opponent: string): OpponentTerms {
+  const cached = opponentTermsCache.get(opponent)
 
   if (cached !== undefined) {
     return cached
@@ -178,16 +228,17 @@ function opponentPhrases(opponent: string): string[][] {
   const group = otherClubGroups.find((names) =>
     names.some((term) => [name, bare].some((candidate) => candidate.join(' ') === term)),
   )
-  let phrases: string[][] = []
+  const terms: OpponentTerms = { others: allClubPhrases.flat(), own: [] }
 
   if (group !== undefined) {
-    phrases = group.map(normaliseTitle)
+    terms.own = group.map(normaliseTitle)
+    terms.others = allClubPhrases.filter((_phrases, index) => otherClubGroups[index] !== group).flat()
   } else if (bare.length >= 2 || (bare.length === 1 && !isOrdinaryOrPrefix(bare[0] ?? ''))) {
-    phrases = [bare]
+    terms.own = [bare]
   }
-  opponentPhraseCache.set(opponent, phrases)
+  opponentTermsCache.set(opponent, terms)
 
-  return phrases
+  return terms
 }
 
 /** The words of a name without the prefixes and suffixes of `clubPrefixes`, if any is left. */

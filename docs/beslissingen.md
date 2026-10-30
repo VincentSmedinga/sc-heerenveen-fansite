@@ -4952,6 +4952,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `doubtful` in plaats van `relevant` (de projecteigenaar wil ze tonen).
   Een ander venster dan 7 dagen (een week voor en na past bij de speelweek, en de Builder kan het meten).
   Het filter zelf de database laten lezen (dan is het niet meer zuiver en zijn de tests trager).
+- **Later:** zie _Een kop over de tegenstander is `relevant` van 3 dagen voor tot 7 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt_: het venster is 3 dagen voor en 7 dagen na de wedstrijd, en een kop met een tweede profclub telt niet.
+  De rest blijft: het filter blijft zuiver, alleen het lopende seizoen telt, de dagen zijn Nederlandse dagen en `otherClubGroups` legt het verband met de namen.
+
+### Een kop over de tegenstander is `relevant` van 3 dagen voor tot 7 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** het venster van de regel over de tegenstander loopt van 3 dagen voor tot en met 7 dagen na de dag van de wedstrijd, en een kop die ook een andere profclub uit `otherClubGroups` noemt, telt niet.
+  - `opponentDaysBefore` is 3 en `opponentDaysAfter` is 7 in `apps/importer/src/relevance.ts`.
+    Een bericht van 3 dagen voor de wedstrijd telt, een bericht van 4 dagen ervoor niet, en een bericht van 7 dagen erna telt, een bericht van 8 dagen erna niet.
+  - `judgeRelevance` laat de kop alleen door als hij een naam van de tegenstander heeft en geen naam van een andere club in de lijst.
+    Een club die naar een plaats heet, telt als andere club alleen met zijn volledige naam, zoals de lijst nu al doet.
+    De woorden van de naam van de tegenstander tellen niet mee als andere club, zodat "Excelsior Maassluis" niet ook "Excelsior" uit Rotterdam is.
+- **Waarom:** de meting op de berichten die de importer toen had (30 oktober 2026): van de 8 koppen die de regel `relevant` maakte, ging er 1 over de wedstrijd tegen ons.
+  De andere 7 gingen over een andere wedstrijd van de tegenstander in dezelfde week: vijf koppen over N.E.C. tegen Groningen, zes dagen voor onze wedstrijd tegen N.E.C., een podcast over ADO, en het bekerduel van ADO bij Excelsior'31.
+  In de dagen voor de wedstrijd gaat het nieuws over de tegenstander vooral over hun vorige wedstrijd, en dat gaat niet over ons.
+  Na de wedstrijd staat er vaak nog een nabeschouwing, dus het venster erna blijft een week.
+- **Nadeel:** een voorbeschouwing van meer dan 3 dagen voor de wedstrijd mist de regel.
+  Een kop over de tegenstander in de week na de wedstrijd, die niet over de wedstrijd gaat (zoals een podcast over ADO), blijft `relevant`.
+- **Alternatieven:** het venster van 7 dagen aan beide kanten houden (7 van de 8 koppen waren een misser).
+  Alleen de aanscherping met de tweede club (dat haalt twee van de zeven missers weg).
+  Alleen het kortere venster (dat haalt de vijf koppen over N.E.C. weg).
 
 ## Redactie
 
