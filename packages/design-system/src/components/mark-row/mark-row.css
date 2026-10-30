@@ -13,6 +13,11 @@
     margin-block: 0 0.5rem;
   }
 
+  /* A list under the row has lines of its own, so it gets the space of a paragraph. */
+  .hf-mark-row + :is(ul, ol) {
+    margin-block-start: 1rem;
+  }
+
   .hf-mark-row-title {
     color: var(--hf-colour-text-heading);
     font-weight: var(--hf-strong-font-weight);

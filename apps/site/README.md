@@ -265,6 +265,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Elke reeks heeft de lengte van nu en de langste van het seizoen, en komt uit alle gespeelde wedstrijden, ook die zonder bekende doelpunten.
   Een bekerwedstrijd, een wedstrijd zonder score en een wedstrijd die niet is gespeeld tellen niet mee.
   De kaart toont de reeksen in een tabel (`DataTable`), daaronder de laatste vijf wedstrijden met de oudste eerst, als letters (`MarkRow`) en als korte regels (`ShortMatch`), en onderaan "Gebaseerd op alle 6 gespeelde wedstrijden" (`BasedOn` in `src/MatchViews.tsx`).
+  Een eerder seizoen heeft alleen de kolommen Reeks en Langste en geen laatste vijf wedstrijden, en noemt het seizoen in het bijschrift.
   Zonder een gespeelde wedstrijd staat er een zin in plaats van de tabel.
 - **Thuis en uit:** een kaart in de zijbalk, direct na de reeksen, met een tabel (`DataTable`) met de kolommen Thuis, Uit en Totaal.
   `homeAwayOf` in `src/matches.ts` telt de gespeelde wedstrijden van de Eredivisie met een score, gesplitst op `home`: gespeeld, gewonnen, gelijk, verloren, de punten (3 voor een winst, 1 voor een gelijkspel), de doelpunten voor en tegen en de wedstrijden zonder tegendoelpunt.
