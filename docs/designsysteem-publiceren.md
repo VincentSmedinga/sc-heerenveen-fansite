@@ -205,8 +205,36 @@ Een agent heeft daar geen toegang.
 - De stap _Copy the MCP server to the host_ meldt "Deploy stopped": het pad van de app is niet `domains/ds.heerenveen.org/mcp`.
   Controleer `DEPLOY_PATH`: de workflow maakt het pad van de app daaruit.
 - _Check ds.heerenveen.org/mcp_ is rood met `404`: de host stuurt het pad niet naar de app.
-  Controleer in _Setup Node.js App_ dat het adres van de app `ds.heerenveen.org` met pad `mcp` is, en dat de app aanstaat.
+  De melding in de run zegt waar het antwoord vandaan kwam:
+  - `content-type: text/html` en `server: LiteSpeed`: de webserver van de host antwoordde met zijn eigen pagina _404 Not Found_.
+    Het verzoek bereikte de app niet.
+    De kopie van de bestanden slaagde dan wel, maar er is geen Node.js-app die `ds.heerenveen.org/mcp` beantwoordt.
+  - `content-type: text/plain`: de app antwoordde zelf, maar niet op dit pad.
+    Controleer het adres van de app in _Setup Node.js App_.
+
+  Zo vind je het, in deze volgorde:
+  1. **Bestanden.**
+     Open in DirectAdmin de bestandsbeheerder en kijk of `domains/ds.heerenveen.org/mcp/server.mjs` er staat.
+     De stap _Copy the MCP server to the host_ zet het daar.
+  2. **De app.**
+     Open _Setup Node.js App_ en kijk of er een app is met _Application root_ `domains/ds.heerenveen.org/mcp`, _Application URL_ `ds.heerenveen.org` met pad `mcp`, _Application startup file_ `server.mjs` en Node.js 24.
+     Is er geen app, maak hem dan aan zoals in stap 7 staat.
+     Staat de app uit, zet hem aan en kies _Restart_.
+  3. **Het pad.**
+     Laat het formulier het pad `mcp` niet toe, meld dat dan in het issue (#213).
+     Zet niets anders neer: de alternatieven staan in stap 7 en de eigenaar beslist.
+  4. **De regels.**
+     Kijk of `public_html/.htaccess` de regels van de app bevat.
+     De host zet ze daar bij het aanmaken van de app, en de kopie van Storybook laat dat bestand staan.
+  5. **Controleren.**
+     Gebruik `curl -i -X GET https://ds.heerenveen.org/mcp`.
+     Is de app bereikt, dan antwoordt hij met `405` en de tekst `Method not allowed` als gewone tekst.
+     Een HTML-pagina met `404` is nog steeds de webserver.
+  6. **Opnieuw.**
+     Start _Actions → Storybook → Run workflow_ op `main`, of raak `tmp/restart.txt` aan, en lees de stap _Check ds.heerenveen.org/mcp_ opnieuw.
+
   Zie ook stap 7 als het formulier het pad niet toelaat.
+
 - _Check ds.heerenveen.org/mcp_ is rood met `500` of `503`, of met "fetch failed": de app start niet.
   Lees `stderr.log` in `domains/ds.heerenveen.org/mcp`, of het logboek in _Setup Node.js App_.
   Controleer dat Node 24 gekozen is, dat het startbestand `server.mjs` heet, en dat het bestand in de map staat.
