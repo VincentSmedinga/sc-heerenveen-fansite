@@ -72,7 +72,7 @@ export function judgeRelevance(title: string, opponents: readonly string[] = [])
 export const opponentDaysBefore = 3
 
 /** How many days after a match an item about the opponent is `relevant`. */
-export const opponentDaysAfter = 7
+export const opponentDaysAfter = 3
 
 /** The part of a match that the rule of the opponent needs. */
 export type MatchDay = {
@@ -86,8 +86,8 @@ export type MatchDay = {
 
 /**
  * The opponents of the matches from `opponentDaysBefore` days after the day an item was
- * published to `opponentDaysAfter` days before it: a match 3 days ahead and one 7 days back
- * count, one 4 days ahead and one 8 days back do not. Both days are counted in Dutch time, so
+ * published to `opponentDaysAfter` days before it: a match 3 days ahead and one 3 days back
+ * count, one 4 days ahead and one 4 days back do not. Both days are counted in Dutch time, so
  * an item at half past midnight on the night the clocks go back is on the day the reader saw
  * it. A club that plays us twice has two matches and so two windows. Returns the names as
  * `matches.opponent` has them, for the second argument of `judgeRelevance`.

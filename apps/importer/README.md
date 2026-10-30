@@ -251,16 +251,15 @@ Een scherm om twijfelgevallen te beoordelen, en het met de hand corrigeren van e
 ### Koppen over de tegenstander
 
 Een bericht over de tegenstander rond een wedstrijd tegen ons is ook nieuws over sc Heerenveen, ook als de kop de club niet noemt: "ADO beleeft frustrerende avond".
-Noemt een kop een club, en speelt sc Heerenveen in het lopende seizoen een wedstrijd tegen die club, dan is de kop `relevant` van 3 dagen voor tot en met 7 dagen na die wedstrijd.
+Noemt een kop een club, en speelt sc Heerenveen in het lopende seizoen een wedstrijd tegen die club, dan is de kop `relevant` van 3 dagen voor tot en met 3 dagen na die wedstrijd.
 Noemt de kop ook een andere profclub uit de lijst, dan telt hij niet.
 Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
 
-- **Het venster:** de datum van de wedstrijd min 3 dagen tot en met plus 7 dagen.
+- **Het venster:** de datum van de wedstrijd min 3 dagen tot en met plus 3 dagen.
   Een bericht van 3 dagen voor de wedstrijd telt, een bericht van 4 dagen ervoor niet.
-  Daarna telt een bericht tot en met de 7e dag na de wedstrijd.
+  Na de wedstrijd telt een bericht tot en met de 3e dag, en een bericht van 4 dagen erna niet.
   Het bericht en de wedstrijd tellen als Nederlandse dagen (`Europe/Amsterdam`).
   Zo staat een bericht van half één 's nachts, in de nacht van de overgang naar de wintertijd, op de dag die een lezer zag.
-  Een bericht op de 8e dag erna valt erbuiten.
 - **De wedstrijden:** de wedstrijden van de competitie en de beker in `matches`, gespeeld of nog te spelen, van het lopende seizoen.
   De tabel heeft ook eerdere seizoenen (`pnpm import:season`), maar die tellen niet.
   Een wedstrijd zonder aftrap telt met de datum die we hebben, en een uitgestelde wedstrijd zonder nieuwe datum telt niet.

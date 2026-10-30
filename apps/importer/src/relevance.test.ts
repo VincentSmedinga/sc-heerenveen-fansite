@@ -511,16 +511,17 @@ describe('the opponent of a match', () => {
     })
   })
 
-  describe('the window of 3 days before and 7 days after, in Dutch time', () => {
+  describe('the window of 3 days before and 3 days after, in Dutch time', () => {
     const day = (publishedAt: string) => judgeAt('ADO beleeft frustrerende avond', publishedAt, ado)
 
     it.each([
       ['on the day of the match', '2026-10-24T20:00:00+02:00', 'relevant'],
       ['3 days before', '2026-10-21T12:00:00+02:00', 'relevant'],
-      ['7 days after', '2026-10-31T23:59:00+01:00', 'relevant'],
+      ['3 days after', '2026-10-27T23:59:00+01:00', 'relevant'],
       ['4 days before', '2026-10-20T23:59:00+02:00', 'irrelevant'],
       ['7 days before', '2026-10-17T12:00:00+02:00', 'irrelevant'],
-      ['8 days after', '2026-11-01T00:00:00+01:00', 'irrelevant'],
+      ['4 days after', '2026-10-28T00:00:00+01:00', 'irrelevant'],
+      ['7 days after', '2026-10-31T23:59:00+01:00', 'irrelevant'],
     ])('is %s: %s is %s', (_name, publishedAt, expected) => {
       expect(day(publishedAt)).toBe(expected)
     })
@@ -534,11 +535,11 @@ describe('the opponent of a match', () => {
       // 23:30 on 24 October (21:30 UTC): 4 days before.
       expect(judgeAt('ADO in vorm', '2026-10-24T21:30:00Z', match1)).toBe('irrelevant')
 
-      const match2 = [match('ADO Den Haag', '2026-10-18')]
+      const match2 = [match('ADO Den Haag', '2026-10-22')]
 
-      // 23:30 on 25 October, after the change (22:30 UTC): 7 days after.
+      // 23:30 on 25 October, after the change (22:30 UTC): 3 days after.
       expect(judgeAt('ADO in vorm', '2026-10-25T22:30:00Z', match2)).toBe('relevant')
-      // 00:30 on 26 October (23:30 UTC on the 25th): 8 days after, although UTC says the 25th.
+      // 00:30 on 26 October (23:30 UTC on the 25th): 4 days after, although UTC says the 25th.
       expect(judgeAt('ADO in vorm', '2026-10-25T23:30:00Z', match2)).toBe('irrelevant')
     })
 
@@ -559,7 +560,7 @@ describe('the opponent of a match', () => {
     it('gives every match of a club its own window', () => {
       const twice = [match('ADO Den Haag', '2026-10-24', 'played'), match('ADO Den Haag', '2027-02-14')]
 
-      expect(judgeAt('ADO in vorm', '2026-10-30T12:00:00Z', twice)).toBe('relevant')
+      expect(judgeAt('ADO in vorm', '2026-10-27T12:00:00Z', twice)).toBe('relevant')
       expect(judgeAt('ADO in vorm', '2026-12-01T12:00:00Z', twice)).toBe('irrelevant')
       expect(judgeAt('ADO in vorm', '2027-02-11T12:00:00Z', twice)).toBe('relevant')
       expect(
