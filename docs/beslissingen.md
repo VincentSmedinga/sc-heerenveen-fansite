@@ -953,6 +953,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat staat uitgeschreven in `docs/back-ups.md`.
 - **Alternatieven:** de tabellen vooraf laten wegvallen (`DROP TABLE`, een fout met grote gevolgen); terugzetten in een niet-lege database met `--force` (kan half werk achterlaten).
 
+### Een afgelopen seizoen wordt op acceptatie geïmporteerd met een workflow die je met de hand start
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** een workflow `import-season.yml` draait `import.mjs --season <seizoen>` op de host, alleen met de hand gestart, met het seizoen als gecontroleerde invoer en dezelfde omgeving, geheimen en SSH-opzet als de deploy.
+  - Het seizoen gaat door een reguliere expressie (`^[0-9]{4}/[0-9]{2}$`) voordat de workflow verbinding maakt, en gaat via een omgevingsvariabele naar de stappen en niet in de tekst van een opdracht.
+  - De workflow draait de opdracht met de Node van cron (`/opt/alt/alt-nodejs24/root/usr/bin/node`) en het bestand met `DATABASE_URL` uit de thuismap (`~/fansite-acceptatie.env`).
+  - Hij deelt de `concurrency`-groep `acceptance` met `acceptance.yml` en breekt geen draaiende run af, dus een import en een deploy draaien nooit tegelijk.
+  - Zijn de geheimen er niet, dan slaat hij de import over met een melding en blijft hij groen.
+- **Waarom:** een afgelopen seizoen wordt eenmalig gelezen, en over SSH met de hand is een fout met een pad of een bestand met variabelen snel gemaakt.
+  Een workflow laat het logboek zien en laat niemand zijn sleutel gebruiken buiten GitHub.
+- **Nadeel:** het pad van Node staat nu ook in de workflow, naast de cronjob.
+  Verandert het, dan past de eigenaar het op twee plekken aan (`docs/acceptatieomgeving.md`, stap 9).
+  GitHub houdt per `concurrency`-groep één wachtende run, dus een wachtende run kan door een nieuwere worden vervangen.
+  Start je een import terwijl een deploy wacht, dan vervangt de import die deploy, en de samengevoegde wijziging komt dan niet op acceptatie: start de deploy dan opnieuw.
+- **Alternatieven:** de opdracht met de hand over SSH draaien (kost elke keer de stappen en het pad).
+  De seizoenen in de deploy meenemen (de deploy leest dan elke keer Wikipedia).
+  Een tweede cronjob (leest een afgelopen seizoen steeds opnieuw, zonder reden).
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft

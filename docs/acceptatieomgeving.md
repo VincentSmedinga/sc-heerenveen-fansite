@@ -103,6 +103,36 @@ Wat hij per feed schrijft, staat in de [README van de importer](../apps/importer
 Elke deploy kopieert de importer samen met de site.
 Zo past hij bij het schema, dat de site bijwerkt als de host haar start.
 
+### Een afgelopen seizoen importeren
+
+Een afgelopen seizoen leest cron niet, want het verandert niet meer.
+De workflow [`import-season.yml`](../.github/workflows/import-season.yml) leest het eenmalig, zonder dat je zelf inlogt met SSH:
+
+1. Open in GitHub _Actions → Import season_ en kies _Run workflow_, met de branch `main`.
+   De omgeving `acceptatie` staat alleen `main` toe (stap 6 van _Eenmalig instellen_).
+2. Vul het seizoen in zoals `2025/26`: het jaar waarin het begon, een schuine streep en de laatste twee cijfers van het jaar erna.
+   De workflow weigert een andere vorm, voordat hij verbinding maakt.
+   De opdracht zelf weigert het lopende seizoen, een seizoen dat nog niet begonnen is en twee jaren die niet op elkaar volgen.
+3. Open de run en lees het logboek van de stap _Import the season on the host_.
+   Daar staat de uitvoer van de opdracht, in één regel, zoals `Matches 2025/26: 38 new, ...`.
+   Een tweede run van hetzelfde seizoen verandert niets en meldt `0 new, 0 updated`.
+
+De workflow draait op de host hetzelfde bestand als cron (`apps/importer/import.mjs`), met dezelfde Node en hetzelfde bestand voor `DATABASE_URL` (stap 8 en 9 van _Eenmalig instellen_).
+Hij gebruikt de omgeving `acceptatie` en dezelfde geheimen als de deploy, dus hij vraagt niets extra's.
+Ontbreekt een geheim, dan slaat de workflow de import over met een melding en blijft hij groen.
+
+- De run wordt rood als de opdracht een andere exitcode geeft dan 0: de opdracht weigert het seizoen, een controle faalt, Wikipedia vraagt om te wachten of een run van cron houdt de lock vast.
+  Bij een lock probeer je het na een paar minuten opnieuw.
+  De database blijft dan zoals ze was.
+- Een import en een deploy draaien nooit tegelijk: beide staan in de `concurrency`-groep `acceptance`.
+  Een draaiende run wordt niet afgebroken.
+  GitHub houdt per groep één wachtende run, dus start je een import terwijl er al een run wacht, dan vervangt de nieuwe de wachtende.
+  Dat kan ook een deploy zijn: de samengevoegde wijziging staat dan niet op acceptatie.
+  Mist een run in _Actions_, start hem dan opnieuw (de deploy met _Actions → Acceptance → Run workflow_).
+- De uitvoer komt in het logboek van de run en niet in `~/fansite-import.log`.
+- De site laat een afgelopen seizoen nog niet zien (zie de [README van de importer](../apps/importer/README.md), _Een afgelopen seizoen_).
+  Of het gelukt is, controleer je met het logboek van de run, of met SSH (zie _Controleren_).
+
 ## Eenmalig instellen
 
 De eigenaar doet dit zelf, in DirectAdmin en in GitHub.
@@ -343,8 +373,8 @@ Zo kan niemand nagaan wie een account heeft.
   `echo $?` direct daarna toont 0 als elke feed gezond is, en 1 als een feed ongezond is.
   De README van de importer laat zien hoe het eruitziet.
 
-- Een afgelopen seizoen lees je eenmalig met SSH.
-  Draai hetzelfde bestand met `--season` en het seizoen erachter, op één regel:
+- Een afgelopen seizoen lees je eenmalig met de workflow _Import season_ (zie _Een afgelopen seizoen importeren_).
+  Wil je het toch met SSH, draai dan hetzelfde bestand met `--season` en het seizoen erachter, op één regel:
 
   ```sh
   /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/importer/import.mjs --season 2025/26
