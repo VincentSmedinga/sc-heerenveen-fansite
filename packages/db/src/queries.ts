@@ -18,6 +18,10 @@ import {
   wikipediaPages,
 } from './schema.ts'
 
+export type PublicArchiveItem = Awaited<ReturnType<typeof listArchivePage>>[number]
+
+export type PublicArchiveSource = Awaited<ReturnType<typeof listArchiveSources>>[number]
+
 export type PublicArticle = NonNullable<Awaited<ReturnType<typeof findPublishedArticle>>>
 
 export type PublicArticleCard = NonNullable<Awaited<ReturnType<typeof findNewestArticle>>>
@@ -43,6 +47,19 @@ export type PublicSource = Awaited<ReturnType<typeof listEnabledSources>>[number
 export type PublicStandingsRow = Awaited<ReturnType<typeof listSeasonStandings>>[number]
 
 export type PublicWikipediaPage = Awaited<ReturnType<typeof listWikipediaPages>>[number]
+
+/**
+ * How many headlines `listArchivePage` gives in all, with the same `until` and `source`.
+ */
+export async function countArchiveItems(db: Database, { source, until }: { source?: string; until: Date }) {
+  const [row] = await db
+    .select({ total: count() })
+    .from(items)
+    .innerJoin(sources, eq(items.sourceId, sources.id))
+    .where(newsFilter(until, source))
+
+  return row?.total ?? 0
+}
 
 /**
  * How many episodes `listPodcastEpisodes` gives in all, with the same `until` and `podcast`.
@@ -133,6 +150,57 @@ export async function findSquadPage(db: Database, season: string) {
     .where(and(eq(wikipediaPages.season, season), eq(wikipediaPages.kind, 'squad')))
 
   return row
+}
+
+/**
+ * One page of the news archive: the headlines of the sources that are switched on, newest
+ * first, from `offset`, at most `limit`, with what the pages show of them, the same as
+ * `listRecentItems`. It has the same headlines too, but without a limit in age: all that the
+ * importer found, up to `until`. Give the `slug` of a source as `source` to get the headlines
+ * of that source only.
+ *
+ * Pass the moment of now as `until`, as with `listRecentItems`.
+ */
+export function listArchivePage(
+  db: Database,
+  { limit, offset = 0, source, until }: { limit: number; offset?: number; source?: string; until: Date },
+) {
+  return db
+    .select(newsColumns)
+    .from(items)
+    .innerJoin(sources, eq(items.sourceId, sources.id))
+    .where(newsFilter(until, source))
+    .orderBy(desc(items.publishedAt), desc(items.id))
+    .limit(limit)
+    .offset(offset)
+}
+
+/**
+ * The sources for the filter of the news archive: those that are switched on, are not a
+ * podcast, have a slug and have at least one headline that the archive shows (up to `until`),
+ * by name, with the name as the source wants to be credited and the slug for the address.
+ */
+export function listArchiveSources(db: Database, until: Date) {
+  return db
+    .select({
+      name: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('source_name'),
+      slug: sql<string>`${sources.slug}`.as('slug'),
+    })
+    .from(sources)
+    .where(
+      and(
+        isNotNull(sources.slug),
+        exists(
+          db
+            .select({ one: sql`1` })
+            .from(items)
+            .where(and(eq(items.sourceId, sources.id), lte(items.publishedAt, until), isShown())),
+        ),
+        eq(sources.enabled, true),
+        ne(sources.kind, 'podcast'),
+      ),
+    )
+    .orderBy(asc(sources.name))
 }
 
 /**
@@ -281,16 +349,10 @@ export function listPublishedArticles(db: Database, until: Date, limit = 5000) {
  */
 export function listRecentItems(db: Database, { limit, until }: { limit: number; until: Date }) {
   return db
-    .select({
-      paywalled: items.paywalled,
-      publishedAt: items.publishedAt,
-      sourceName: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('source_name'),
-      title: items.title,
-      url: items.url,
-    })
+    .select(newsColumns)
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(and(eq(sources.enabled, true), ne(sources.kind, 'podcast'), lte(items.publishedAt, until), isShown()))
+    .where(newsFilter(until))
     .orderBy(desc(items.publishedAt), desc(items.id))
     .limit(limit)
 }
@@ -511,6 +573,19 @@ export async function searchPublic(
 }
 
 /**
+ * What a page shows of a headline: the headline, the link, the time, whether it is behind a
+ * paywall, and the name of the source as it wants to be credited. Nothing else leaves the
+ * database.
+ */
+const newsColumns = {
+  paywalled: items.paywalled,
+  publishedAt: items.publishedAt,
+  sourceName: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('source_name'),
+  title: items.title,
+  url: items.url,
+}
+
+/**
  * The conditions that make an item an episode to show: of a podcast that is switched on, not
  * hidden, not later than `until`, and of the podcast with this slug when `podcast` is given.
  */
@@ -527,7 +602,7 @@ function episodeFilter(until: Date, podcast: string | undefined) {
 /**
  * Whether the source has exactly this slug. The column ignores case and accents, which keeps
  * two slugs that differ only in those from both being in the register, but an address must name
- * one podcast only, so this compares byte for byte.
+ * one source only, so this compares byte for byte.
  */
 function hasSlug(slug: string) {
   return sql`${sources.slug} = ${slug} collate utf8mb4_bin`
@@ -556,4 +631,19 @@ function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColum
  */
 function isShown() {
   return and(eq(items.relevance, 'relevant'), isNull(items.hiddenAt))
+}
+
+/**
+ * The conditions that make an item a headline to show: of a source that is switched on and is
+ * no podcast, shown (see `isShown`), not later than `until`, and of the source with this slug
+ * when `source` is given.
+ */
+function newsFilter(until: Date, source?: string) {
+  return and(
+    eq(sources.enabled, true),
+    ne(sources.kind, 'podcast'),
+    lte(items.publishedAt, until),
+    isShown(),
+    source === undefined ? undefined : hasSlug(source),
+  )
 }

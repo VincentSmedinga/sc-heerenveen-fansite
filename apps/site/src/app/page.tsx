@@ -1,18 +1,6 @@
 import type { Metadata } from 'next'
 
-import {
-  ArticleCard,
-  Button,
-  Card,
-  DiscussionItem,
-  Form,
-  Heading,
-  Link,
-  List,
-  NewsItem,
-  Page,
-  Text,
-} from '@fansite/design-system'
+import { ArticleCard, Card, DiscussionItem, Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
 import { getNewestArticle } from '../articles'
@@ -20,8 +8,7 @@ import { getDiscussions } from '../discussions'
 import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
 import { forumUrl } from '../forum'
-import { getHeadlines, parseHeadlineCount } from '../headlines'
-import { moreHeadlines } from '../items-per-card'
+import { getHeadlines } from '../headlines'
 import { getMatchData, type MatchData } from '../matches'
 import { MatchesCard, StandingsCard } from '../MatchViews'
 import { pageMetadata } from '../metadata'
@@ -41,8 +28,6 @@ import { withBranch } from '../title'
 // Render on each request, so the build never reads the database. getHeadlines caches the list
 // itself.
 export const dynamic = 'force-dynamic'
-
-type SearchParams = Record<string, string | string[] | undefined>
 
 /**
  * The newest article of our own editors, or undefined when there is none or the database can't
@@ -75,24 +60,23 @@ async function loadMatches(): Promise<MatchData | undefined> {
 }
 
 /**
- * The newest `count` headlines, the newest discussions of the forum and the newest podcast
+ * The newest headlines, the newest discussions of the forum and the newest podcast
  * episodes, and the newest article of the editors and the matches, or undefined when the
  * database can't give them. A page that throws gets an empty page with a 500 from Next.js, and
  * the text only after JavaScript runs. So this page catches the error and shows the error page
- * itself, in the HTML. `cache` makes the page and its metadata share one call per request; its
- * argument is a plain value, because `cache` compares objects by identity.
+ * itself, in the HTML. `cache` makes the page and its metadata share one call per request.
  */
-const loadContent = cache(async (count: number) => {
+const loadContent = cache(async () => {
   try {
-    const [{ headlines, more }, discussions, episodes, article, matches] = await Promise.all([
-      getHeadlines(count),
+    const [headlines, discussions, episodes, article, matches] = await Promise.all([
+      getHeadlines(),
       getDiscussions(),
       getLatestEpisodes(),
       loadArticle(),
       loadMatches(),
     ])
 
-    return { article, discussions, episodes, headlines, matches, more }
+    return { article, discussions, episodes, headlines, matches }
   } catch (error) {
     console.error(`Could not read the headlines, discussions and episodes for the homepage: ${reasonOf(error)}`)
 
@@ -100,29 +84,23 @@ const loadContent = cache(async (count: number) => {
   }
 })
 
-export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   // A page that failed answers 200, so noindex keeps search engines from keeping it. The title
   // of the error page is the title alone, without the template of the layout: the slot of the
   // layout (@shortcuts) is a segment under it, which brings the template to this page too.
-  // A page with `?nieuws=` is the homepage with more headlines: it has the homepage as its
-  // canonical address, so no search query is given.
-  const { nieuws } = await searchParams
-
-  return (await loadContent(parseHeadlineCount(nieuws))) === undefined
+  return (await loadContent()) === undefined
     ? { robots: { index: false }, title: { absolute: withBranch(serverErrorTitle, reviewBranch()) } }
     : pageMetadata('/')
 }
 
-export default async function HomePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  const { nieuws } = await searchParams
-  const count = parseHeadlineCount(nieuws)
-  const content = await loadContent(count)
+export default async function HomePage() {
+  const content = await loadContent()
 
   if (content === undefined) {
     return <ServerError retryHref="/" />
   }
 
-  const { article, discussions, episodes, headlines, matches, more } = content
+  const { article, discussions, episodes, headlines, matches } = content
   const now = new Date()
 
   return (
@@ -151,9 +129,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           ) : (
             <List role="list">
               {headlines.map((item, index) => (
-                // The number of a headline in the address of the button, so the page that loads
-                // again can start at the first new one.
-                <List.Item id={`nieuws-${index + 1}`} key={index}>
+                <List.Item key={index}>
                   <NewsItem
                     dateTime={dateTimeOf(item.publishedAt)}
                     headline={item.title}
@@ -166,16 +142,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               ))}
             </List>
           )}
-          {more && (
-            // Works without JavaScript: the form loads the page again with more headlines in
-            // the address, and the part after the hash brings the visitor to the first of the
-            // new ones, so they stay in place.
-            <Form action={`/#nieuws-${headlines.length + 1}`} method="get">
-              <Button appearance="soft" icon="plus" name="nieuws" type="submit" value={String(count + moreHeadlines)}>
-                {`Laad ${moreHeadlines} meer`}
-              </Button>
-            </Form>
-          )}
+          <Text>
+            <Link href="/nieuws" icon="arrow-right">
+              Alle koppen
+            </Link>
+          </Text>
         </Card>
       </Page.Main>
       <Page.Sidebar aria-label="Het forum, de podcasts en de wedstrijden">

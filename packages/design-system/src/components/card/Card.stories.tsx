@@ -47,7 +47,7 @@ const meta = preview.meta({
           'Zo staat elk blok los op de pagina, en dat geeft de pagina rust en richting.',
           'Een kaart met het vlak `transparent` heeft geen rand en achtergrond die je ziet, en geen binnenruimte boven en onder: de tekst erin staat op één lijn met de tekst in de andere kaarten, zonder dat de ruimte tussen de kaarten groter wordt.',
           'Staat er direct onder de kop een lijst, dan is de ruimte daartussen groter dan bij tekst, zodat de eerste regel van de lijst niet tegen de kop zit.',
-          'Onder de lijst kan een formulier met een knop staan, zoals "Laad 5 meer" in de kaart met nieuws.',
+          'Onder de lijst kan een formulier met een knop staan, zoals "Laad 5 meer" in de kaart met de nul gehouden op Wedstrijden.',
           'Met `shareable` krijgt de kaart rechtsboven een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron eronder.',
           'De bezoeker deelt die afbeelding of bewaart hem, en er gaat niets naar een server.',
           'Gebruik hem alleen voor een kaart met cijfers en feiten die we mogen laten rondgaan, nooit voor het werk van journalisten.',

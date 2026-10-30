@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu negen pagina's: de homepage met de nieuwste koppen, `/wedstrijden` met het programma, de uitslagen en de stand, `/podcasts` met de afleveringen van de podcasts, `/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu tien pagina's: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/podcasts` met de afleveringen van de podcasts, `/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -65,8 +65,8 @@ Verzonnen wedstrijden van een eerdere run haalt hij na de laatste test wel weg.
 Een test die de opmaak meet of naar een kaart scrolt, wacht eerst op `hydrated(page)` uit `e2e/hydrated.ts`: tot React de pagina heeft opgebouwd, toont de kiezer nog zijn label en zijn knop, en is de pagina langer.
 `e2e/card-image.spec.ts` klikt op die knop en toetst in de browser dat er een PNG komt, dat er niets naar een ander domein gaat en dat de CSP de afbeelding toestaat.
 Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
-De controle toetst de homepage ook met `?nieuws=15`, zodat de oudere koppen die de knop laadt ook langs axe komen.
-Hier gaat het om axe op de pagina met nieuws.
+De controle toetst ook `/nieuws` met een tweede pagina, zodat de oudere koppen van het archief langs axe komen.
+Hier gaat het om axe op de pagina's met nieuws.
 Draait de database van de controle ook echte berichten, door `pnpm run import`, dan staan die er gewoon tussen.
 Playwright wacht tot `/robots.txt` antwoordt en niet tot de homepage, want die bewaart haar koppen vijf minuten in het geheugen.
 
@@ -102,7 +102,7 @@ De bestanden heten naar het pad of de story en de breedte, zoals `podcasts-390.p
 Kies een andere map met `--out <map>`.
 `--full-page` neemt de hele pagina in plaats van het eerste scherm.
 
-De homepage (met de kaart van het artikel), `/redactie/e2e-artikel`, `/podcasts` en de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
+De homepage (met de kaart van het artikel), `/redactie/e2e-artikel`, `/nieuws`, `/podcasts` en de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
 `pnpm --filter site test-data` zet ze in de database van je `.env`, en `pnpm --filter site test-data --remove` haalt ze er weer uit.
 Gebruik daarvoor de database waarmee je ontwikkelt, niet die van de controle of van de hosting.
 Vanuit de root:
@@ -155,15 +155,9 @@ Hij heeft de klasse `hf-visually-hidden` uit het designsysteem, dus een schermle
 Daaronder staat het blok "Laatste nieuws": de tien nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
 Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
-Zijn er oudere berichten, dan staat onder de lijst de knop "Laad 5 meer".
-De knop zit in een formulier met `method="get"` dat de homepage opnieuw laadt met het aantal in het adres, zoals `/?nieuws=15#nieuws-11`.
-Elke kop in de lijst heeft een `id` met zijn nummer (`nieuws-11`), en het formulier gaat naar de eerste nieuwe kop, dus de bezoeker blijft op dezelfde plek.
-Dat werkt zonder JavaScript en zonder API.
-`parseHeadlineCount` in `src/headlines.ts` controleert het getal: een geheel getal vanaf 10, in stappen van 5, en niet meer dan 100.
-Elk ander getal geeft de eerste tien.
-De getallen staan op één plek, in `src/items-per-card.ts`: `firstHeadlines` (10) en `moreHeadlines` (5).
-Bij tien koppen of minder is er geen knop, en bij 100 koppen verdwijnt hij; ouder nieuws is voor het archief (#26).
-Een pagina met `?nieuws=` heeft de homepage zelf als canoniek adres, en staat niet in de sitemap.
+Onder de lijst staat de link "Alle koppen" naar het archief op `/nieuws` (zie _Het nieuwsarchief_): ouder nieuws is daarvoor.
+Het aantal staat op één plek, `firstHeadlines` (10) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
+De homepage kent geen parameters: een adres als `/?nieuws=15`, dat de knop "Laad 5 meer" vroeger maakte, laat gewoon de homepage zien.
 
 De kaarten met discussies en podcasts tonen vijf items: het aantal staat op één plek, `itemsPerCard` in `src/items-per-card.ts`.
 
@@ -315,6 +309,28 @@ De pagina's komen uit `wikipedia_pages` (alleen die van de wedstrijden, niet de 
 De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en er staan geen clubwapens, alleen de namen.
 
 `pnpm test:a11y` gebruikt de verzonnen wedstrijden en stand van de seed (`madeUpMatches` en `madeUpTable`), met de pagina's die ze bronnen (`madeUpWikipediaPages`).
+
+## Het nieuwsarchief
+
+`/nieuws` toont alle koppen die we hebben opgehaald, nieuwste eerst, 50 per pagina, elk als `NewsItem`, zonder indeling per dag: elke regel heeft zijn eigen dag en tijd (`formatNewsTime`).
+Het zijn dezelfde koppen als op de homepage, ook met "voor abonnees" bij een kop achter een betaalmuur, maar zonder grens in leeftijd.
+Een intro of foto staat er niet, net als op de homepage.
+De query is `listArchivePage` in `packages/db/src/queries.ts`, met `countArchiveItems` voor het aantal en `listArchiveSources` voor het filter.
+Ze delen met `listRecentItems` de voorwaarden (`newsFilter`): relevant, niet verborgen, van een bron die aanstaat, geen podcast en niet na nu.
+Het filter (`Filter`) staat in een lichtblauwe kaart (`surface="soft"`) met de kop "Bronnen" in de zijbalk: "Alle bronnen" en een link per bron met minstens één kop in het archief, op alfabet, als `/nieuws?bron=leeuwarder-courant`.
+Op een smal scherm staat de zijbalk onder de lijst en de paginering, want de zijbalk komt na de hoofdkolom in de bron en het designsysteem laat de volgorde van de bron en van het scherm gelijk.
+Zonder koppen is er geen filter en geen zijbalk.
+De slug komt uit de kolom `slug` van `sources`, die de seed voor elke bron met koppen vastlegt (`packages/db/src/seed.ts`), dus een andere naam verandert het adres niet.
+Een bron zonder slug staat niet in het filter, maar haar koppen staan wel bij "Alle bronnen".
+Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/nieuws?pagina=2`, en met een bron `/nieuws?bron=leeuwarder-courant&pagina=2`.
+Een nieuwe kop schuift de inhoud van de pagina's op; de bron en het filter blijven vast.
+Een bron die niet in het filter staat, en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
+De titel noemt de bron en de pagina, zoals "Nieuwsarchief van NOS, pagina 3", en elke pagina is zijn eigen canonieke adres.
+De server bewaart elke combinatie van bron en pagina vijf minuten, maar alleen na de controle van het adres (`src/archive.ts`).
+Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/podcasts`.
+De pagina staat niet in het hoofdmenu; dat volgt uit de opbouw van de site (#431).
+
+`pnpm test:a11y` zet verzonnen koppen op de testbronnen, genoeg voor een tweede pagina (`e2e/headlines.ts`).
 
 ## De podcasts
 
@@ -469,7 +485,7 @@ Alle formulieren zijn gewone posts van een serveractie (`actions.ts`), dus ze we
 - De reden is verplicht en hoogstens 300 tekens.
   Een reden zonder tekst of te lang laat het bericht staan en brengt je terug op de lijst, met de fout in een `ErrorSummary` bovenaan en bij het veld (`?fout=reden-leeg&bericht=<nummer>`, zoals het inloggen met `?fout=` doet).
 - Na het verbergen of tonen staat bovenaan wat er gebeurde: "Staat binnen vijf minuten niet meer op de site" of "weer op de site".
-  Dat is waar, want de homepage en `/podcasts` bewaren hun lijsten vijf minuten in het geheugen van de server; `src/headlines-hidden.test.ts` bewijst het tegen een echte database.
+  Dat is waar, want de homepage, `/nieuws` en `/podcasts` bewaren hun lijsten vijf minuten in het geheugen van de server; `src/headlines-hidden.test.ts` bewijst het tegen een echte database.
   De melding komt uit de database van dat moment, niet uit het adres: `?verborgen=<nummer>` zegt alleen iets over een bericht dat echt verborgen is.
 - Verbergen en tonen schrijven allebei één regel in het logboek `audit_log`, in dezelfde transactie, via `recordAction` (`src/beheer/audit-log.ts`).
   Daar staat het nummer van het account, de tijd, de actie, het nummer van het bericht en de reden: geen e-mailadres en niets anders van het verzoek.

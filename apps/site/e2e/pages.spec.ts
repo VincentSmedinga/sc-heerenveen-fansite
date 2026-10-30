@@ -14,8 +14,15 @@ import { earlierSeasonSlug } from './earlier-season'
 // made-up published article, which the database gives.
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
-  // The homepage with the older headlines, which the button under the first ten loads.
-  { path: '/?nieuws=15', status: 200 },
+  // The news archive: all sources, one source, the second page (the made-up headlines fill
+  // more than one page), and the addresses that say "niet gevonden".
+  { path: '/nieuws', status: 200 },
+  { path: '/nieuws?bron=testkrant', status: 200 },
+  { path: '/nieuws?pagina=2', status: 200 },
+  { path: '/nieuws?bron=testkrant&pagina=99999', status: 404 },
+  { path: '/nieuws?bron=bestaat-niet', status: 404 },
+  { path: '/nieuws?pagina=99999', status: 404 },
+  { path: '/nieuws?pagina=0', status: 404 },
   { path: '/wedstrijden', status: 200 },
   // The matches of an earlier season (made up, see earlier-season.ts), the route behind the
   // season picker, which sends the visitor on, and the addresses that say "niet gevonden": a

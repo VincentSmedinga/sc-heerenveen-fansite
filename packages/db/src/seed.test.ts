@@ -371,6 +371,36 @@ describe('the seed', () => {
     }
   })
 
+  it('gives every source that can have headlines a slug of its own, and the forum none', () => {
+    const all = [...testSources, ...realSources]
+    const withHeadlines = all.filter((source) => source.kind !== 'forum')
+    const slugs = withHeadlines.map((source) => source.slug)
+
+    expect(withHeadlines.length).toBeGreaterThanOrEqual(10)
+    expect(new Set(slugs).size).toBe(slugs.length)
+    for (const source of withHeadlines) {
+      expect(source.slug, source.name).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u)
+    }
+    for (const forum of all.filter((source) => source.kind === 'forum')) {
+      expect('slug' in forum, forum.name).toBe(false)
+    }
+  })
+
+  it('gives a real source that is in the register without a slug its slug, and keeps what the admin changed', async () => {
+    await database.db.insert(sources).values({
+      domain: 'www.lc.nl',
+      enabled: false,
+      kind: 'news',
+      name: 'Leeuwarder Courant (oud)',
+    })
+
+    await seedRealSources(database.db)
+
+    const [courant] = await database.db.select().from(sources).where(eq(sources.domain, 'www.lc.nl'))
+
+    expect(courant).toMatchObject({ enabled: false, name: 'Leeuwarder Courant', slug: 'leeuwarder-courant' })
+  })
+
   it('holds made-up test sources only, and real sources that are not made up', () => {
     for (const source of testSources) {
       expect(source.domain, source.name).toMatch(/\.test$/)

@@ -35,10 +35,9 @@ describe('the headlines of the homepage', () => {
     await addItem(database, ids, 'club', { publishedAt: new Date('2026-10-20T10:00:00Z') })
 
     const { getHeadlines } = await import('./headlines')
-    const { headlines, more } = await getHeadlines(10)
+    const headlines = await getHeadlines()
 
     expect(headlines.map((item) => item.title)).toEqual(['Kop club'])
-    expect(more).toBe(false)
   })
 })
 

@@ -5,11 +5,8 @@
  */
 export const itemsPerCard = 5
 
-/** How many headlines the news card starts with. */
+/** How many headlines the news card shows. Older news is for the archive at /nieuws. */
 export const firstHeadlines = 10
-
-/** How many more headlines the button of the news card loads with each press. */
-export const moreHeadlines = 5
 
 /** How many clean sheets the card on the matches page starts with. */
 export const firstCleanSheets = 10
