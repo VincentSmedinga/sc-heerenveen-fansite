@@ -320,7 +320,8 @@ Ze delen met `listRecentItems` de voorwaarden (`newsFilter`): relevant, niet ver
 Het filter (`Filter`) staat in een lichtblauwe kaart (`surface="soft"`) met de kop "Bronnen" in de zijbalk: "Alle bronnen" en een link per bron met minstens één kop in het archief, op alfabet, als `/nieuws?bron=leeuwarder-courant`.
 Op een smal scherm staat de zijbalk onder de lijst en de paginering, want de zijbalk komt na de hoofdkolom in de bron en het designsysteem laat de volgorde van de bron en van het scherm gelijk.
 Zonder koppen is er geen filter en geen zijbalk.
-De pagina heeft een hoofdkolom van 46 rem, 2 rem ruimte en een zijbalk van 16 rem (`narrow` op `Page.Sidebar`), samen de 64 rem van de pagina; zonder zijbalk heeft de hoofdkolom de gewone breedte van 38 rem.
+De pagina heeft een hoofdkolom van 46 rem, 2 rem ruimte en een zijbalk van 16 rem (`narrow` op `Page.Sidebar`), samen de 64 rem van de pagina.
+Zonder zijbalk heeft de hoofdkolom de gewone breedte van 38 rem.
 De slug komt uit de kolom `slug` van `sources`, die de seed voor elke bron met koppen vastlegt (`packages/db/src/seed.ts`), dus een andere naam verandert het adres niet.
 Een bron zonder slug staat niet in het filter, maar haar koppen staan wel bij "Alle bronnen".
 Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/nieuws?pagina=2`, en met een bron `/nieuws?bron=leeuwarder-courant&pagina=2`.

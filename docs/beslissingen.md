@@ -4135,7 +4135,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** de pagina kiest de verdeling met `narrow` op de `Page.Sidebar`, zoals `/wedstrijden` `wide` kiest, want de `Page.Body` staat in de layout van de site en is voor alle pagina's dezelfde.
   `Page.Body` ziet de smalle zijbalk met `:has()`.
   De maten staan als tokens in `layout.css`: `--hf-content-max-width-broad` (46 rem) en `--hf-sidebar-width-narrow` (16 rem).
-  Vanaf 52 rem is het raster `minmax(24rem, 46rem)` en 16 rem: tot 66 rem breed krimpt alleen de hoofdkolom mee, tot 24 rem, en de zijbalk blijft 16 rem.
+  Vanaf 52 rem is het raster `minmax(24rem, 46rem)` en 16 rem.
+  Tot 66 rem breed krimpt alleen de hoofdkolom mee, tot 24 rem, en de zijbalk blijft 16 rem.
   Samen passen de minima (40 rem) in de 42,25 rem die een telefoon op zijn kant bij 52 rem overhoudt.
   Onder 52 rem is er één spoor van hoogstens 38 rem, zoals op elke pagina, en staat de zijbalk onder de lijst en de paginering, in de volgorde van de bron.
   Op een telefoon staat het filter dus onder de lijst, zoals de beslissing _Het filter van het nieuwsarchief staat in een lichtblauwe kaart in de zijbalk_ al zei; dat verandert hier niet.
