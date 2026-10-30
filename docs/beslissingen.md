@@ -4881,6 +4881,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `listSquad` toont alleen de spelers die in de selectie staan, dus ook de lijst van #107.
   De kaart met doelpuntenmakers telt een gekoppeld doelpunt per `id` en toont de volledige naam, een doelpunt zonder speler per naam als een eigen rij.
 - **Alternatieven:** doorgaan met namen in tekst en per naam tellen (twee spelers met dezelfde achternaam tellen samen); de verwijzing maken met de zoekterm of de achternaam (breekt bij dezelfde achternaam); de selectie bij elke lezing vervangen en de doelpunten opnieuw koppelen (de `id`'s veranderen, dus een link of een pagina per speler breekt later).
+- **Later:** een doelpunt zonder speler maar met een Wikipedia-pagina telt sinds 30 oktober 2026 voor die pagina en toont de titel als volledige naam; zie _Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina_.
 
 ### De Wikipedia-pagina van een speler is de sleutel, de naam is de reserve
 
@@ -4924,6 +4925,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de uurlijkse import ook het vorige seizoen laten lezen (verzoeken zonder reden, en een seizoen dat ongezond kan worden).
   Een parameter van `pnpm run import` zelf (een foutje met de opdracht raakt dan de uurlijkse run).
   Ook de selectie van 2025/26 importeren (nodig voor spelers bij doelpunten, maar niet voor deze vergelijking).
+
+### De bekerpagina's van eerdere seizoenen schrijven de score met de stand bij de rust, en de lezer kent die vorm
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** `readCup` leest `eindstand (rust)` en `eindstand (stand na 90 minuten, rust)`, en een tijd met of zonder "uur".
+  De eindstand is de score van de wedstrijd, en de waarden in de haakjes worden gelezen en gecontroleerd maar nog niet opgeslagen.
+- **Waarom:** de pagina's van 2021/22 tot en met 2024/25 schrijven zo, en zonder dit stopt de import van die seizoenen.
+  De stand na 90 minuten is de gegevens waar #300 om vraagt, dus de lezer vergeet hem niet.
+- **Controles:** een stand bij de rust is niet hoger dan de stand na 90 minuten of, zonder die, de eindstand.
+  Een stand na 90 minuten is niet hoger dan de eindstand en hoort bij een wedstrijd met verlenging (`aet`).
+  Een score die niet klopt, is een fout met de naam van de wedstrijd, zoals een score die niet te lezen is.
+  De haakjes werken ook voor de competitie, want de lezer van een score is voor beide dezelfde; de competitiepagina's van 2021/22 tot en met 2024/25 hebben ze niet.
+- **Alternatieven:** de haakjes weggooien (de stand na 90 minuten gaat dan verloren en #300 moet de pagina opnieuw lezen).
+  Elke onbekende vorm als fout laten staan (de import van eerdere seizoenen mislukt).
 
 ### Een gestaakte wedstrijd telt niet, de latere uitslag geldt
 
@@ -7001,3 +7016,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de volgorde laten zoals ze is (de lijst begint dan bij het einde van het seizoen).
   Een schakelaar voor de volgorde (meer bediening voor een kleine behoefte).
   Het anker `stand` houden voor alle seizoenen (de link in de balk en het anker zouden dan een andere naam hebben dan de kop).
+
+### Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** een doelpunt zonder speler in `players` toont de titel van de Wikipedia-pagina van de speler, zonder toevoeging tussen haakjes, als zijn volledige naam.
+  Zonder pagina blijft de korte naam van de wedstrijdpagina.
+- **Waarom:** eerdere seizoenen hebben geen selectie en dus geen koppeling, maar de wedstrijdpagina linkt de speler wel.
+  De titel van die pagina is de volledige naam, zonder dat we iets hoeven te raden.
+- **Hoe:** `listSeasonMatches` geeft de titel mee als `playerPage`, uit dezelfde vraag.
+  `pageTitleName` haalt de toevoeging weg ("Pim Verbeek (voetballer, 1999)" wordt "Pim Verbeek").
+  `splitPageName` splitst de naam met de korte naam als zoekterm, na de beginletters die de wedstrijdpagina erbij kan zetten ("D. Rots").
+  Past de korte naam niet achter de titel, dan staat de hele naam in het gewone gewicht.
+  `topScorersOf` telt een doelpunt zonder speler op de titel van de pagina, dus twee spelers met dezelfde achternaam blijven twee rijen.
+  Heeft een gekoppeld doelpunt dezelfde pagina, dan telt het doelpunt zonder speler voor die speler en toont het zijn naam uit `players`.
+  De uitslagen houden de naam van de wedstrijdpagina.
+- **Alternatieven:** de korte naam houden (geen voornaam, zoals voorheen).
+  De selectie van elk seizoen importeren (kan niet als de pagina op Wikipedia ontbreekt).
