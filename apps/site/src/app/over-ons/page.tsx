@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
+import { Card, Heading, Link, Page, Text } from '@fansite/design-system'
 
 import { email } from '../../contact'
 import { pageMetadata } from '../../metadata'
@@ -64,37 +64,35 @@ export default function AboutPage() {
       </Page.Main>
       <Page.Sidebar aria-label="Over de gegevens">
         <Card aria-labelledby="gegevens" surface="soft">
-          <Heading anchor id="gegevens" level={2}>
+          <Heading anchor appearance={3} id="gegevens" level={2}>
             Waar de gegevens vandaan komen
           </Heading>
-          <List loose>
-            <List.Item>
-              <Heading level={3}>Nieuws</Heading>
-              <Text>
-                De importer, een programma, haalt regelmatig de feeds op. Bij sommige bronnen kiest een filter de koppen
-                over sc Heerenveen, rond een wedstrijd ook over de tegenstander. Het mist soms een kop of laat er een te
-                veel staan.
-              </Text>
-            </List.Item>
-            <List.Item>
-              <Heading level={3}>Wedstrijden en stand</Heading>
-              <Text>
-                Uitslagen, doelpunten en stand komen van de Nederlandse Wikipedia (CC BY-SA 4.0). We lezen haar
-                hoogstens één keer per uur, dus een uitslag kan achterlopen. Namen staan zoals Wikipedia ze schrijft,
-                soms anders dan bij de club.
-              </Text>
-            </List.Item>
-            <List.Item>
-              <Heading level={3}>Forum en podcasts</Heading>
-              <Text>Discussies komen van ons forum, afleveringen uit de podcastfeeds.</Text>
-            </List.Item>
-            <List.Item>
-              <Heading level={3}>Een fout?</Heading>
-              <Text>
-                Meld hem via <Link href="/contact">Contact</Link>. Staat hij ook op Wikipedia, verbeter hem dan daar.
-              </Text>
-            </List.Item>
-          </List>
+          <Heading appearance={4} level={3}>
+            Nieuws
+          </Heading>
+          <Text>
+            De importer, een programma, haalt regelmatig de feeds op. Bij sommige bronnen kiest een filter de koppen
+            over sc Heerenveen, rond een wedstrijd ook over de tegenstander. Het mist soms een kop of laat er een te
+            veel staan.
+          </Text>
+          <Heading appearance={4} level={3}>
+            Wedstrijden en stand
+          </Heading>
+          <Text>
+            Uitslagen, doelpunten en stand komen van de Nederlandse Wikipedia (CC BY-SA 4.0). We lezen haar hoogstens
+            één keer per uur, dus een uitslag kan achterlopen. Namen staan zoals Wikipedia ze schrijft, soms anders dan
+            bij de club.
+          </Text>
+          <Heading appearance={4} level={3}>
+            Forum en podcasts
+          </Heading>
+          <Text>Discussies komen van ons forum, afleveringen uit de podcastfeeds.</Text>
+          <Heading appearance={4} level={3}>
+            Een fout?
+          </Heading>
+          <Text>
+            Meld hem via <Link href="/contact">Contact</Link>. Staat hij ook op Wikipedia, verbeter hem dan daar.
+          </Text>
         </Card>
       </Page.Sidebar>
     </>

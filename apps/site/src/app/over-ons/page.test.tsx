@@ -53,7 +53,7 @@ describe('the page Over ons', () => {
     expect(sidebarHtml.match(/<section/g)).toHaveLength(1)
     expect(sidebarHtml).toContain('<section class="hf-card hf-card-soft" aria-labelledby="gegevens">')
     expect(plain).toContain(
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="gegevens">Waar de gegevens vandaan komen</h2>',
+      '<h2 class="hf-heading-3 hf-heading-anchored" id="gegevens">Waar de gegevens vandaan komen</h2>',
     )
   })
 
@@ -69,10 +69,10 @@ describe('the page Over ons', () => {
     expect(text).toContain('podcasts')
   })
 
-  it('keeps the card compact: about 100 words, as a list with a heading per subject', () => {
+  it('keeps the card compact: about 100 words, with a heading per subject and no list', () => {
     expect(sidebarWords.length).toBeLessThanOrEqual(110)
-    expect(sidebarHtml.match(/<li>/g)).toHaveLength(4)
-    expect(sidebarHtml.match(/<li><h3 class="hf-heading-3">/g)).toHaveLength(4)
+    expect(sidebarHtml).not.toMatch(/<[ou]l[ >]/)
+    expect(sidebarHtml.match(/<h3 class="hf-heading-4">/g)).toHaveLength(4)
   })
 
   it('shows the first paragraph under the h1, below the h2 Wie we zijn, as the intro, and no other paragraph', () => {
@@ -89,7 +89,7 @@ describe('the page Over ons', () => {
     expect(plain.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
       '<h2 class="hf-heading-2 hf-heading-anchored" id="wie-we-zijn">Wie we zijn</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="hoe-we-werken">Hoe we werken</h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="gegevens">Waar de gegevens vandaan komen</h2>',
+      '<h2 class="hf-heading-3 hf-heading-anchored" id="gegevens">Waar de gegevens vandaan komen</h2>',
     ])
   })
 
