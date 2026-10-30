@@ -253,8 +253,35 @@ jobs:
 
       # initialize, the list of tools, and docs-list must answer, and docs-list must name every component of this build.
       # The host starts the app on the first request after the restart, so the check tries for 90 seconds.
-      - name: Check ds.heerenveen.org/mcp
+      - id: mcp-check
+        name: Check ds.heerenveen.org/mcp
         if: steps.secrets.outputs.ready == 'true'
         env:
           BUILD: ${{ runner.temp }}/storybook
         run: node apps/design-system-mcp/scripts/check.js https://ds.heerenveen.org/mcp "$BUILD" 90
+
+      # Only when that check failed: shows what is on the host, because the owner can't see its hidden
+      # files in the file manager. The log of a run is public, so the script of the host prints no
+      # owner, group or secret, and only the three Passenger lines of the .htaccess. host-report.js
+      # then removes the account name from what it printed, errors of ssh included. The step only
+      # reads, and it can't change the result: the run is red because of the check.
+      - name: Show what is on the host
+        if: failure() && steps.secrets.outputs.ready == 'true' && steps.mcp-check.outcome == 'failure'
+        continue-on-error: true
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          HOST_REPORT_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          app_path="${DEPLOY_PATH%/public_html}/mcp"
+          if ! printf '%s\n' "$app_path" | grep -Eq '^/[A-Za-z0-9._/-]+/domains/ds\.heerenveen\.org/mcp$' \
+            || printf '%s\n' "$app_path" | grep -Fq '..'; then
+            echo "::error title=Host report skipped::The folder of the MCP server is not domains/ds.heerenveen.org/mcp. See docs/designsysteem-publiceren.md."
+            exit 1
+          fi
+          # The script is sent on stdin; the two paths, both checked above, are its only arguments.
+          timeout 60 ssh -p 26 -i "$HOME/.ssh/designsystem_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes \
+            "$SSH_USER@$SSH_HOST" "sh -s -- $(printf '%q' "$app_path") $(printf '%q' "$DEPLOY_PATH")" \
+            < apps/design-system-mcp/scripts/host-report.sh 2>&1 \
+            | node apps/design-system-mcp/scripts/host-report.js
