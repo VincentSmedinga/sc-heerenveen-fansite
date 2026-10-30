@@ -35,4 +35,13 @@ export const releaseNotes: ReleaseNotes = {
     'Bezoeken tellen we anoniem: zonder cookies en zonder je te volgen.',
     'Diverse verbeteringen in de vormgeving.',
   ],
+  '0.4.0': [
+    'Op wedstrijden: kies een seizoen en blik terug, met de eindstand en alle uitslagen van eerste tot laatste wedstrijd.',
+    'Meer cijfers over het seizoen: onze plek in de competitie, reeksen en de laatste vijf wedstrijden, thuis en uit, de uitersten, het verloop en hoe wedstrijden verlopen.',
+    'Doelpunten per kwartier, en bij de doelpuntenmakers de volledige namen.',
+    'Delen? Kaarten met cijfers hebben een knop die er een plaatje van maakt.',
+    'Nieuws: rond een wedstrijd ook koppen over de tegenstander.',
+    'Over ons: waar onze gegevens vandaan komen en wat er mis kan gaan.',
+    'Licht of donker: de knop staat nu bovenin.',
+  ],
 }
