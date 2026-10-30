@@ -4,7 +4,10 @@
  * day as a Dutch calendar day.
  */
 
-import type { PublicMatch, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
+import type { PublicMatch, PublicStaff, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
+import type { StaffDate } from '@fansite/db/staff'
+
+import { partOfSeason } from '@fansite/db/staff'
 
 const timeZone = 'Europe/Amsterdam'
 
@@ -68,6 +71,41 @@ export function formatReadAt(moment: Date) {
  */
 export function formatTableDay(day: PublicStandingsRow['validOn']) {
   return longDayFormat.format(noonOf(day))
+}
+
+const shortDayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone, year: 'numeric' })
+
+const shortMonthFormat = new Intl.DateTimeFormat('nl-NL', { month: 'short', timeZone, year: 'numeric' })
+
+/**
+ * What part of a season a coach had the job, as the list of head coaches says it: "hele
+ * seizoen", "tot 14 mrt 2026" for a coach who stopped in the season, "vanaf 1 sep 2025" for one
+ * who began in it, and "van 1 sep 2025 tot 14 mrt 2026" for one who did both. A date known to
+ * the month or year says so ("tot mrt 2026") and is never taken for the edge of the season.
+ */
+export function coachPeriod(coach: PublicStaff, season: string) {
+  const { end, start } = partOfSeason(coach, season)
+
+  if (start === null && end === null) {
+    return 'hele seizoen'
+  }
+
+  const from = start === null ? '' : `${end === null ? 'vanaf' : 'van'} ${formatStaffDate(start)}`
+  const until = end === null ? '' : `tot ${formatStaffDate(end)}`
+
+  return [from, until].filter(Boolean).join(' ')
+}
+
+/**
+ * A date of the staff the way its precision allows: "14 mrt 2026" for a day, "mrt 2026" for a
+ * month and "2026" for a year. It never writes a day it does not know.
+ */
+export function formatStaffDate({ date, precision }: StaffDate) {
+  if (precision === 'year') {
+    return date.slice(0, 4)
+  }
+
+  return (precision === 'month' ? shortMonthFormat : shortDayFormat).format(noonOf(date))
 }
 
 /**

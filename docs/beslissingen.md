@@ -7174,17 +7174,31 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een trainer in elk seizoen tonen dat zijn periode ook maar mogelijk raakt (twee trainers te veel bij Lodeweges en Van Persie).
   De trainer van een seizoen kiezen met de meeste wedstrijden (kan niet zonder de dag per wedstrijd en de onzekerheid ervan).
 
-### De trainers van een seizoen staan als een regel boven de kaarten, met "Bron: Wikipedia" erbij
+### De trainers van een seizoen staan in een witte kaart onder de stand, met een regel per trainer
 
 - **Datum:** 30 oktober 2026
-- **Besluit:** de seizoenspagina (`/wedstrijden` en `/wedstrijden/JJJJ-JJ`) toont de hoofdtrainer(s) als een regel boven de kaarten, in de hoofdkolom: "Hoofdtrainer: Robin Veldman" of "Hoofdtrainers: Robin van Persie, Henk Brugge (interim) en Robin Veldman".
-  Een trainer met een pagina op Wikipedia is een link naar die pagina, en onder de regel staat "Bron: Wikipedia" in de korte vorm.
-  Een seizoen zonder trainer in de tabel toont de regel niet.
-- **Waarom:** de trainer is een feit over het hele seizoen en geen cijferkaart, en een regel kost op een telefoon één regel.
-  Boven de kaarten leest een bezoeker hem eerst, zonder dat de zijbalk er een kaart bij krijgt die onder de tabel van de stand verdwijnt.
-  De link naar de pagina is de bronvermelding aan de schrijvers van het artikel, zoals bij de pagina's van de wedstrijden.
-- **Alternatieven:** een kleine kaart in de zijbalk (de telefoon zet de zijbalk onder de uitslagen, en de trainer valt dan weg).
-  Een kop `h2` voor een regel (de kop zou meer opvallen dan de regel zelf).
+- **Besluit:** de seizoenspagina (`/wedstrijden` en `/wedstrijden/JJJJ-JJ`) toont de hoofdtrainer(s) in een witte kaart in de zijbalk, direct onder de stand.
+  De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, een `h2`, met altijd het anker `#hoofdtrainer`.
+  Elke trainer is een regel van het nieuwe patroon `ShortStaff`, in dezelfde vorm als een `ShortMatch`: eerst welk deel van het seizoen hij de functie had, dan zijn naam met "(interim)" waar dat zo is.
+  De kaart staat ook als link in de balk "Op deze pagina:", na Stand of Eindstand.
+  Een seizoen zonder trainer in de tabel heeft de kaart en de link niet.
+- **Welke trainers en in welke volgorde:** alle trainers die zeker een dag van het seizoen in dienst waren (zie _Een maand of jaar telt als "ergens in"…_), op volgorde van begin.
+  De tekst vooraan is:
+  - "hele seizoen" als hij er op de eerste dag al was en er op de laatste dag nog is;
+  - "tot 14 mrt 2026" als hij er al was en in het seizoen stopte;
+  - "vanaf 1 sep 2025" als hij in het seizoen begon en erna bleef (ook een tijdelijke trainer die tot het einde van het seizoen bleef);
+  - "van 1 sep 2025 tot 14 mrt 2026" als hij in het seizoen begon en stopte.
+    Een datum die alleen als maand of jaar bekend is, staat zo ("tot mrt 2026", "vanaf 2024") en telt niet als de rand van het seizoen.
+    De dag staat in de Nederlandse korte notatie, "14 mrt 2026".
+- **Bron:** een trainer met een pagina op Wikipedia is een link naar die pagina, en onder de lijst staat "Bron: Wikipedia" in de korte vorm.
+  De link is de bronvermelding aan de schrijvers van het artikel, zoals bij de pagina's van de wedstrijden.
+- **Waarom:** de eerste versie, een regel boven de kaarten, viel te veel op voor een feit dat een bezoeker zelden zoekt (de projecteigenaar, 30 oktober 2026).
+  Een kaart onder de stand hoort bij de andere kaarten, en een lijst zegt per trainer welk deel van het seizoen hij had zonder dat een zin de volgorde hoeft uit te leggen.
+  De regel hergebruikt de klassen van `ShortMatch` (`ShortStaff` voegt alleen een bredere kolom toe voor de tekst vooraan), zodat de lijst er hetzelfde uitziet.
+  Het anker is voor één en meer trainers gelijk, zodat een link niet breekt als een seizoen er een tweede trainer bij krijgt.
+- **Alternatieven:** een regel boven de kaarten (viel te veel op).
+  Een eigen lijstregel met eigen CSS (dubbel werk, en de twee lijsten gaan dan uit elkaar lopen).
+  De trainer die het seizoen begon met de trainer die het eindigde samenvatten in één zin (zegt niet wanneer er gewisseld is).
 
 ### De hoofdtrainers staan in de seed met de laatste dag, en een afgeleide laatste dag is de dag voor de opvolger
 

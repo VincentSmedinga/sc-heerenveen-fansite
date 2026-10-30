@@ -9,7 +9,7 @@ import type { TestDatabase } from './test-database.ts'
 import { findStaffOn, listStaffInSeason } from './queries.ts'
 import { staff, staffRoles } from './schema.ts'
 import { headCoaches, seedStaff } from './staff-seed.ts'
-import { coverage, rangeOf, servedInSeason } from './staff.ts'
+import { coverage, partOfSeason, rangeOf, servedInSeason } from './staff.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -273,5 +273,48 @@ describe('the days a date can be', () => {
     expect(servedInSeason(open, '2023/24')).toBe(false)
     expect(servedInSeason(open, '2024/25')).toBe(true)
     expect(servedInSeason({ ...open, endDate: '2024-06-01', endPrecision: 'month' }, '2024/25')).toBe(false)
+  })
+})
+
+describe('the part of a season a person had the job', () => {
+  const of = async (name: string, season: string) => {
+    const [member] = (await listStaffInSeason(database.db, 'coach', season)).filter((row) => row.name === name)
+
+    return partOfSeason(member!, season)
+  }
+
+  it('has no start and no end for a coach who had the whole season', async () => {
+    expect(await of('Gertjan Verbeek', '2005/06')).toEqual({ end: null, start: null })
+    // He began on 1 July and ended on 30 June: both edges of the season.
+    expect(await of('Gertjan Verbeek', '2004/05')).toEqual({ end: null, start: null })
+    expect(await of('Robin Veldman', '2026/27')).toEqual({ end: null, start: null })
+  })
+
+  it('has an end for a coach who stopped in the season, and a start for one who began in it', async () => {
+    expect(await of('Trond Sollied', '2009/10')).toEqual({ end: { date: '2009-08-31', precision: 'day' }, start: null })
+    expect(await of('Robin Veldman', '2024/25')).toEqual({ end: null, start: { date: '2025-03-21', precision: 'day' } })
+    expect(await of('Jan Everse', '2009/10')).toEqual({ end: null, start: { date: '2010-02-05', precision: 'day' } })
+  })
+
+  it('has both for a coach who began and stopped in the season', async () => {
+    expect(await of('Jan de Jonge', '2009/10')).toEqual({
+      end: { date: '2010-02-03', precision: 'day' },
+      start: { date: '2009-09-01', precision: 'day' },
+    })
+  })
+
+  it('keeps the precision of a date known to the month or the year, and never takes it for an edge', async () => {
+    expect(await of('Henk Brugge', '2024/25')).toEqual({
+      end: { date: '2025-03-20', precision: 'day' },
+      start: { date: '2025-02-01', precision: 'month' },
+    })
+    expect(await of('Robin van Persie', '2024/25')).toEqual({
+      end: { date: '2025-02-01', precision: 'month' },
+      start: { date: '2024-01-01', precision: 'year' },
+    })
+    expect(await of('Foppe de Haan', '2003/04')).toEqual({
+      end: { date: '2004-01-01', precision: 'year' },
+      start: null,
+    })
   })
 })

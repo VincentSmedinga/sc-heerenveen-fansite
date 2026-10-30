@@ -1,4 +1,4 @@
-import type { PublicMatch } from '@fansite/db/queries'
+import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -1980,17 +1980,17 @@ describe('the head coaches of the season', () => {
     wikipediaPage: 'Robin Veldman',
   } as const
   const brugge = {
-    endDate: '2025-03-20',
+    endDate: '2026-12-20',
     endPrecision: 'day',
     interim: true,
     name: 'Henk Brugge',
-    startDate: '2025-02-01',
-    startPrecision: 'month',
+    startDate: '2026-09-01',
+    startPrecision: 'day',
     wikipediaPage: 'Henk Brugge',
   } as const
   const persie = {
-    endDate: '2025-02-01',
-    endPrecision: 'month',
+    endDate: '2026-08-31',
+    endPrecision: 'day',
     interim: false,
     name: 'Robin van Persie',
     startDate: '2024-01-01',
@@ -1998,63 +1998,73 @@ describe('the head coaches of the season', () => {
     wikipediaPage: null,
   } as const
 
-  const withCoaches = (coaches: (typeof brugge | typeof persie | typeof veldman)[]) =>
-    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, coaches })
+  const withCoaches = (coaches: PublicStaff[]) => vi.mocked(getMatchData).mockResolvedValue({ ...matchData, coaches })
 
-  /** The line of the coaches: the text of its paragraph, without the markup. */
-  async function coachesLine() {
+  /** The card of the coaches: from its heading to the next h2. */
+  async function coachesCard() {
     const html = await render()
-    const line = html.match(/<p[^>]*>(Hoofdtrainers?: .*?)<\/p>/)?.[1]
 
-    return { html, line, text: line?.replace(/<[^>]+>/g, '') }
+    return { card: section(html, 'hoofdtrainer'), html }
   }
 
-  it('shows nothing for a season without a coach in the table', async () => {
-    const { html } = await coachesLine()
+  const textOf = (html: string) => html.replace(/<[^>]+>/g, '|').replace(/\|+/g, '|')
+
+  it('has no card for a season without a coach in the table', async () => {
+    const { html } = await coachesCard()
 
     expect(html).not.toContain('Hoofdtrainer')
   })
 
-  it('says "Hoofdtrainer" with the name for a season with one, and links the page of the coach on Wikipedia', async () => {
+  it('is a card named "Hoofdtrainer" for one coach, with a list of one line: the whole season', async () => {
     withCoaches([veldman])
 
-    const { line, text } = await coachesLine()
+    const { card } = await coachesCard()
 
-    expect(text).toBe('Hoofdtrainer: Robin Veldman')
-    expect(line).toContain('<a href="https://nl.wikipedia.org/wiki/Robin_Veldman">Robin Veldman</a>')
+    expect(card).toContain('href="#hoofdtrainer">Hoofdtrainer</a></h2>')
+    expect(card).toContain('<ul role="list">')
+    expect(card.match(/<li>/g)).toHaveLength(1)
+    expect(card).toContain('<span class="hf-short-match-when">hele seizoen</span>')
+    expect(card).toContain(
+      '<span class="hf-short-match-opponent"><a href="https://nl.wikipedia.org/wiki/Robin_Veldman">Robin Veldman</a></span>',
+    )
   })
 
-  it('says "Hoofdtrainers" for more, in the order given, with "(interim)" and the last after "en"', async () => {
+  it('is named "Hoofdtrainers" for more, in the order given, saying what part of the season each had', async () => {
     withCoaches([persie, brugge, veldman])
 
-    const { text } = await coachesLine()
+    const { card } = await coachesCard()
 
-    expect(text).toBe('Hoofdtrainers: Robin van Persie, Henk Brugge (interim) en Robin Veldman')
+    expect(card).toContain('href="#hoofdtrainer">Hoofdtrainers</a></h2>')
+    expect(textOf(card)).toContain(
+      '|tot 31 aug 2026|Robin van Persie|van 1 sep 2026 tot 20 dec 2026|Henk Brugge| (interim)|hele seizoen|Robin Veldman|',
+    )
   })
 
-  it('says two with "en" and no comma', async () => {
-    withCoaches([brugge, veldman])
+  it('says "vanaf" for a coach who began in the season and stays, as the last line', async () => {
+    withCoaches([{ ...veldman, startDate: '2026-11-02' }])
 
-    expect((await coachesLine()).text).toBe('Hoofdtrainers: Henk Brugge (interim) en Robin Veldman')
+    expect(textOf((await coachesCard()).card)).toContain('|vanaf 2 nov 2026|Robin Veldman|')
   })
 
   it('shows a coach without a page as plain text, and a coach with one as a link to Wikipedia', async () => {
-    withCoaches([persie, brugge])
+    withCoaches([persie, veldman])
 
-    const { line } = await coachesLine()
+    const { card } = await coachesCard()
 
-    expect(line).toMatch(/^Hoofdtrainers: Robin van Persie en <a /)
-    expect(line).not.toContain('Robin_van_Persie')
-    expect(line).toContain('<a href="https://nl.wikipedia.org/wiki/Henk_Brugge">Henk Brugge</a> (interim)')
+    expect(card).toContain('<span class="hf-short-match-opponent">Robin van Persie</span>')
+    expect(card).not.toContain('Robin_van_Persie')
+    expect(card).toContain('<a href="https://nl.wikipedia.org/wiki/Robin_Veldman">Robin Veldman</a>')
   })
 
-  it('credits Wikipedia under the line, and sits above the programme without a heading of its own', async () => {
+  it('is a white card in the sidebar right after the table, named by its heading, with a credit under the list', async () => {
     withCoaches([veldman])
 
-    const { html } = await coachesLine()
+    const { card, html } = await coachesCard()
 
-    expect(html.indexOf('Hoofdtrainer: ')).toBeLessThan(html.indexOf('id="programma"'))
-    expect(html.slice(html.indexOf('Hoofdtrainer: '), html.indexOf('id="programma"'))).toContain('Bron: Wikipedia')
-    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(13)
+    expect(html).toContain('<section class="hf-card" aria-labelledby="hoofdtrainer">')
+    expect(html.indexOf('id="hoofdtrainer"')).toBeGreaterThan(html.indexOf('id="stand"'))
+    expect(html.indexOf('id="hoofdtrainer"')).toBeLessThan(html.indexOf('id="onze-plek-in-de-competitie"'))
+    expect(card).toContain('<p class="hf-meta hf-wikipedia-credit">Bron: Wikipedia</p>')
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(14)
   })
 })

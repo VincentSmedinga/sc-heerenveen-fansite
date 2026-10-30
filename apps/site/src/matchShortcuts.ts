@@ -25,19 +25,43 @@ export const matchShortcuts = [
 export const standingsCardOf = (current: boolean) =>
   current ? ({ id: 'stand', name: 'Stand' } as const) : ({ id: 'eindstand', name: 'Eindstand' } as const)
 
+type Shortcut = { href: string; label: string }
+
 /**
- * The links of the bar for the page of a season: all of them for the current season, and for a
- * season that is over the same without Programma, which has no card there, and with Eindstand
- * for Stand.
+ * The name and the anchor of the card with the head coaches of a season: Hoofdtrainer for one,
+ * Hoofdtrainers for more. The anchor is the same for both, so a link to it keeps working when
+ * a season gets a second coach.
  */
-export const matchShortcutsOf = (current: boolean) => {
-  if (current) {
-    return matchShortcuts
+export const coachesCardOf = (coachCount: number) =>
+  ({ id: 'hoofdtrainer', name: coachCount === 1 ? 'Hoofdtrainer' : 'Hoofdtrainers' }) as const
+
+/**
+ * The links of the bar for the page of a season, in the order of the cards: all of them for the
+ * current season, and for a season that is over the same without Programma, which has no card
+ * there, and with Eindstand for Stand. The card with the head coaches, straight after the
+ * table, has a link when the season has a coach in the table (`coachCount` above 0).
+ */
+export const matchShortcutsOf = (current: boolean, coachCount = 0): Shortcut[] => {
+  const standings = standingsCardOf(current)
+  const coaches = coachesCardOf(coachCount)
+  const links: Shortcut[] = []
+
+  for (const shortcut of matchShortcuts as readonly Shortcut[]) {
+    if (shortcut.href === '#programma' && !current) {
+      continue
+    }
+
+    if (shortcut.href !== '#stand') {
+      links.push(shortcut)
+      continue
+    }
+
+    links.push({ href: `#${standings.id}`, label: standings.name })
+
+    if (coachCount > 0) {
+      links.push({ href: `#${coaches.id}`, label: coaches.name })
+    }
   }
 
-  const { id, name } = standingsCardOf(false)
-
-  return matchShortcuts
-    .filter((shortcut) => shortcut.href !== '#programma')
-    .map((shortcut) => (shortcut.href === '#stand' ? { href: `#${id}`, label: name } : shortcut))
+  return links
 }

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  coachPeriod,
   creditName,
   formatReadAt,
+  formatStaffDate,
   formatTableDay,
   lastDayOf,
   matchMoment,
@@ -130,5 +132,52 @@ describe('the links to Wikipedia', () => {
     expect(creditName('standings', '2026/27')).toBe('Eredivisie 2026/27')
     expect(creditName('programme', '2026/27')).toBe('Programma Eredivisie 2026/27')
     expect(creditName('cup', '2026/27')).toBe('KNVB Beker 2026/27')
+  })
+})
+
+describe('formatStaffDate', () => {
+  it('writes a day, a month or a year, and never a day it does not know', () => {
+    expect(formatStaffDate({ date: '2026-03-14', precision: 'day' })).toBe('14 mrt 2026')
+    expect(formatStaffDate({ date: '2009-09-01', precision: 'day' })).toBe('1 sep 2009')
+    expect(formatStaffDate({ date: '1992-10-01', precision: 'month' })).toBe('okt 1992')
+    expect(formatStaffDate({ date: '2004-01-01', precision: 'year' })).toBe('2004')
+  })
+})
+
+describe('coachPeriod', () => {
+  const coach = {
+    endDate: null,
+    endPrecision: null,
+    interim: false,
+    name: 'Testtrainer',
+    startDate: '2020-07-01',
+    startPrecision: 'day',
+    wikipediaPage: null,
+  } as const
+
+  it('says "hele seizoen" for a coach who had the first and the last day of the season', () => {
+    expect(coachPeriod(coach, '2025/26')).toBe('hele seizoen')
+    expect(coachPeriod({ ...coach, endDate: '2026-06-30', endPrecision: 'day' }, '2025/26')).toBe('hele seizoen')
+  })
+
+  it('says "tot" and the day for a coach who stopped in the season', () => {
+    expect(coachPeriod({ ...coach, endDate: '2026-03-14', endPrecision: 'day' }, '2025/26')).toBe('tot 14 mrt 2026')
+  })
+
+  it('says "vanaf" and the day for a coach who began in the season and stays', () => {
+    expect(coachPeriod({ ...coach, startDate: '2025-09-01' }, '2025/26')).toBe('vanaf 1 sep 2025')
+  })
+
+  it('says "van … tot …" for a coach who began and stopped in the season', () => {
+    expect(
+      coachPeriod({ ...coach, endDate: '2026-02-03', endPrecision: 'day', startDate: '2025-09-01' }, '2025/26'),
+    ).toBe('van 1 sep 2025 tot 3 feb 2026')
+  })
+
+  it('says the month or the year for a date that is only known so, and does not take it for an edge', () => {
+    expect(
+      coachPeriod({ ...coach, endDate: '1993-02-01', endPrecision: 'month', startDate: '1992-07-01' }, '1992/93'),
+    ).toBe('tot feb 1993')
+    expect(coachPeriod({ ...coach, startDate: '2024-01-01', startPrecision: 'year' }, '2024/25')).toBe('vanaf 2024')
   })
 })
