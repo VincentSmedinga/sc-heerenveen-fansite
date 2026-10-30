@@ -54,6 +54,7 @@ Dat gebeurt in `register()` in `apps/site/src/instrumentation.ts`, en de site be
    Met `local` doet hij dat niet: daar zet `pnpm db:seed` de bronnen erin.
    Een bron die er al staat, werkt hij bij op haar domein, dus er komen geen dubbele.
    Wat het beheer straks wijzigt, laat hij staan: `enabled`, de velden `consent_*`, `attribution` en het beleid voor intro, foto en insluiten.
+   Op dezelfde omgevingen zet hij de hoofdtrainers in de tabel `staff` (`seedStaff`): een database die ze nog niet had, krijgt ze bij de eerste start, en een tweede start verandert niets.
 3. Alleen met `SITE_ENV=acceptance` haalt hij daarna de testbronnen uit het register, als ze er nog staan.
    De acceptatieomgeving had ze voor 26 oktober 2026 in de database.
    Hij herkent ze aan hun domein, uit de lijst `testSources`, en verwijdert die rijen met hun feeds en berichten.

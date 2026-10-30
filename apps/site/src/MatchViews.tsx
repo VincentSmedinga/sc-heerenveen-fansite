@@ -1,4 +1,4 @@
-import type { PublicMatch, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
+import type { PublicMatch, PublicStaff, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
 import type { FormResult, MarkRowMark } from '@fansite/design-system'
 
 import {
@@ -19,6 +19,7 @@ import {
   TopScorersTable,
   WikipediaCredit,
 } from '@fansite/design-system'
+import { Fragment } from 'react'
 
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
 
@@ -538,6 +539,39 @@ const markOf: Record<FormResult, MarkRowMark> = {
   G: { label: 'gelijk', mark: 'G', tone: 'neutral' },
   V: { label: 'verlies', mark: 'V', tone: 'negative' },
   W: { label: 'winst', mark: 'W', tone: 'positive' },
+}
+
+/**
+ * The head coach or coaches of a season, in the order they began: "Hoofdtrainer: Robin Veldman"
+ * or "Hoofdtrainers: Robin van Persie, Henk Brugge (interim) en Robin Veldman". A coach with a
+ * Wikipedia page links to it, which credits its authors, and the line says whose data it is
+ * (`WikipediaCredit` in its short form: the full credit is in the sidebar). A season with no
+ * coach in the table shows nothing.
+ */
+export function CoachesLine({ coaches }: { coaches: PublicStaff[] }) {
+  if (coaches.length === 0) {
+    return null
+  }
+
+  return (
+    <Card as="div" surface="transparent">
+      <Text>
+        {coaches.length === 1 ? 'Hoofdtrainer' : 'Hoofdtrainers'}:{' '}
+        {coaches.map((coach, index) => (
+          <Fragment key={`${coach.name}-${coach.startDate}`}>
+            {index === 0 ? '' : index === coaches.length - 1 ? ' en ' : ', '}
+            {coach.wikipediaPage === null ? (
+              coach.name
+            ) : (
+              <Link href={wikipediaUrl(coach.wikipediaPage)}>{coach.name}</Link>
+            )}
+            {coach.interim ? ' (interim)' : ''}
+          </Fragment>
+        ))}
+      </Text>
+      <WikipediaCredit compact />
+    </Card>
+  )
 }
 
 /**

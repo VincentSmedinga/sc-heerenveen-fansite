@@ -380,9 +380,9 @@ De pagina's delen één verbinding met de database (`src/database.ts`).
 ## De database bij het starten
 
 Als de server start, zet hij de database klaar, en pas daarna beantwoordt hij verzoeken (`src/instrumentation.ts`).
-Hij draait de migraties die de database nog niet had, uit `packages/db/drizzle`, en met `SITE_ENV=acceptance` of `production` zet hij de echte bronnen uit de seed in het register.
+Hij draait de migraties die de database nog niet had, uit `packages/db/drizzle`, en met `SITE_ENV=acceptance` of `production` zet hij de echte bronnen uit de seed in het register en de hoofdtrainers in de tabel `staff`.
 Met `acceptance` haalt hij ook de testbronnen weg die er nog stonden, met hun feeds en berichten.
-Met `local` zet hij niets in het register.
+Met `local` zet hij niets in het register en niets in `staff`.
 `assemble` zet de migraties in de map, op dezelfde plek ten opzichte van `apps/site` als in de repository.
 Een slot in de database (`GET_LOCK`) laat twee processen die tegelijk starten, om de beurt migreren.
 Lukt het niet, bijvoorbeeld omdat de database niet bereikbaar is, dan staat de reden in het logboek en blijft de server draaien.

@@ -3,7 +3,7 @@ import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 import { and, asc, count, desc, eq, exists, inArray, isNotNull, isNull, lte, ne, or, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
-import type { MatchPageKind } from './schema.ts'
+import type { MatchPageKind, StaffRole } from './schema.ts'
 
 import {
   articles,
@@ -14,9 +14,11 @@ import {
   matchPageKinds,
   players,
   sources,
+  staff,
   standings,
   wikipediaPages,
 } from './schema.ts'
+import { servedInSeason, type StaffOnDay, staffOnDay } from './staff.ts'
 
 export type PublicArticle = NonNullable<Awaited<ReturnType<typeof findPublishedArticle>>>
 
@@ -39,6 +41,8 @@ export type PublicPodcast = Awaited<ReturnType<typeof listPodcasts>>[number]
 export type PublicSearchHit = Awaited<ReturnType<typeof searchPublic>>['hits'][number]
 
 export type PublicSource = Awaited<ReturnType<typeof listEnabledSources>>[number]
+
+export type PublicStaff = Awaited<ReturnType<typeof listStaffInSeason>>[number]
 
 export type PublicStandingsRow = Awaited<ReturnType<typeof listSeasonStandings>>[number]
 
@@ -133,6 +137,16 @@ export async function findSquadPage(db: Database, season: string) {
     .where(and(eq(wikipediaPages.season, season), eq(wikipediaPages.kind, 'squad')))
 
   return row
+}
+
+/**
+ * Who has a role on a day (`YYYY-MM-DD`): `certain` with the person, `uncertain` with the
+ * people who might when the day lies in the uncertainty of a date known to the month or year
+ * only, and `none` for a day in a gap or outside the rows (see `staffOnDay`). A person is never
+ * named as the answer when the day is not surely in the period.
+ */
+export async function findStaffOn(db: Database, role: StaffRole, day: string): Promise<StaffOnDay<PublicStaff>> {
+  return staffOnDay(await staffOfRole(db, role), day)
 }
 
 /**
@@ -414,6 +428,18 @@ export function listSquad(db: Database, season: string) {
 }
 
 /**
+ * The staff with a role in a season, such as `2024/25`, in the order their periods began: the
+ * people who surely held a day of the season, so a coach whose start is only known to the year
+ * is not in the season before it (see `servedInSeason`). It gives what the pages show: the
+ * name, the title of the Wikipedia page (null when there is none), whether the person stood in,
+ * and the dates with how exactly each is known. The seed holds some twenty rows per role, so
+ * the rows of the role are read and the season is picked in code.
+ */
+export async function listStaffInSeason(db: Database, role: StaffRole, season: string) {
+  return (await staffOfRole(db, role)).filter((member) => servedInSeason(member, season))
+}
+
+/**
  * The Wikipedia pages the match import read for a season, such as `2026/27`: the title of the
  * page, which kind it is and the moment it was last read, so a page can credit them. The
  * order is the standings, the programme and the cup. The page of the squad is not one of them.
@@ -556,4 +582,20 @@ function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColum
  */
 function isShown() {
   return and(eq(items.relevance, 'relevant'), isNull(items.hiddenAt))
+}
+
+function staffOfRole(db: Database, role: StaffRole) {
+  return db
+    .select({
+      endDate: staff.endDate,
+      endPrecision: staff.endPrecision,
+      interim: staff.interim,
+      name: staff.name,
+      startDate: staff.startDate,
+      startPrecision: staff.startPrecision,
+      wikipediaPage: staff.wikipediaPage,
+    })
+    .from(staff)
+    .where(eq(staff.role, role))
+    .orderBy(asc(staff.startDate), asc(staff.id))
 }

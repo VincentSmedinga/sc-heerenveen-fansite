@@ -73,7 +73,7 @@ const discussions: PublicDiscussion[] = [
 ]
 
 /** A season without matches, a table or a page that was read: the importer has not run yet. */
-const noMatchData: MatchData = { matches: [], pages: [], season: '2026/27', standings: [] }
+const noMatchData: MatchData = { coaches: [], matches: [], pages: [], season: '2026/27', standings: [] }
 
 async function render(query: Record<string, string | string[]> = {}) {
   return renderToStaticMarkup(await HomePage({ searchParams: Promise.resolve(query) }))

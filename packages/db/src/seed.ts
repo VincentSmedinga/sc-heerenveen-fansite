@@ -16,6 +16,7 @@ import { connect } from './client.ts'
 import { readDatabaseEnv } from './env.ts'
 import { feeds, matches, matchGoals, players, sources, standings, wikipediaPages } from './schema.ts'
 import { seasonOf } from './season.ts'
+import { seedStaff } from './staff-seed.ts'
 
 /**
  * Made-up sources for local development, with different policies and permissions. None is real:
@@ -783,8 +784,11 @@ if (import.meta.main) {
     await seedSources(db)
     await seedMatches(db)
     await seedSquad(db)
+
+    const coaches = await seedStaff(db)
+
     console.log(
-      `The register holds ${testSources.length} test sources and the real sources: ${realSources.map((source) => source.name).join(', ')}.`,
+      `The register holds ${testSources.length} test sources and the real sources: ${realSources.map((source) => source.name).join(', ')}. The table staff holds ${coaches} head coaches.`,
     )
   } finally {
     await close()

@@ -1875,7 +1875,7 @@ describe('the page /wedstrijden', () => {
   })
 
   it('says in a sentence for visitors that there is nothing yet when the importer has not run', async () => {
-    vi.mocked(getMatchData).mockResolvedValue({ matches: [], pages: [], season: '2026/27', standings: [] })
+    vi.mocked(getMatchData).mockResolvedValue({ coaches: [], matches: [], pages: [], season: '2026/27', standings: [] })
 
     const html = await render()
 
@@ -1966,5 +1966,95 @@ describe('the season picker on /wedstrijden', () => {
     const ids = [...html.matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)
 
     expect(matchShortcuts.map(({ href }) => href)).toEqual(ids)
+  })
+})
+
+describe('the head coaches of the season', () => {
+  const veldman = {
+    endDate: null,
+    endPrecision: null,
+    interim: false,
+    name: 'Robin Veldman',
+    startDate: '2025-03-21',
+    startPrecision: 'day',
+    wikipediaPage: 'Robin Veldman',
+  } as const
+  const brugge = {
+    endDate: '2025-03-20',
+    endPrecision: 'day',
+    interim: true,
+    name: 'Henk Brugge',
+    startDate: '2025-02-01',
+    startPrecision: 'month',
+    wikipediaPage: 'Henk Brugge',
+  } as const
+  const persie = {
+    endDate: '2025-02-01',
+    endPrecision: 'month',
+    interim: false,
+    name: 'Robin van Persie',
+    startDate: '2024-01-01',
+    startPrecision: 'year',
+    wikipediaPage: null,
+  } as const
+
+  const withCoaches = (coaches: (typeof brugge | typeof persie | typeof veldman)[]) =>
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, coaches })
+
+  /** The line of the coaches: the text of its paragraph, without the markup. */
+  async function coachesLine() {
+    const html = await render()
+    const line = html.match(/<p[^>]*>(Hoofdtrainers?: .*?)<\/p>/)?.[1]
+
+    return { html, line, text: line?.replace(/<[^>]+>/g, '') }
+  }
+
+  it('shows nothing for a season without a coach in the table', async () => {
+    const { html } = await coachesLine()
+
+    expect(html).not.toContain('Hoofdtrainer')
+  })
+
+  it('says "Hoofdtrainer" with the name for a season with one, and links the page of the coach on Wikipedia', async () => {
+    withCoaches([veldman])
+
+    const { line, text } = await coachesLine()
+
+    expect(text).toBe('Hoofdtrainer: Robin Veldman')
+    expect(line).toContain('<a href="https://nl.wikipedia.org/wiki/Robin_Veldman">Robin Veldman</a>')
+  })
+
+  it('says "Hoofdtrainers" for more, in the order given, with "(interim)" and the last after "en"', async () => {
+    withCoaches([persie, brugge, veldman])
+
+    const { text } = await coachesLine()
+
+    expect(text).toBe('Hoofdtrainers: Robin van Persie, Henk Brugge (interim) en Robin Veldman')
+  })
+
+  it('says two with "en" and no comma', async () => {
+    withCoaches([brugge, veldman])
+
+    expect((await coachesLine()).text).toBe('Hoofdtrainers: Henk Brugge (interim) en Robin Veldman')
+  })
+
+  it('shows a coach without a page as plain text, and a coach with one as a link to Wikipedia', async () => {
+    withCoaches([persie, brugge])
+
+    const { line } = await coachesLine()
+
+    expect(line).toMatch(/^Hoofdtrainers: Robin van Persie en <a /)
+    expect(line).not.toContain('Robin_van_Persie')
+    expect(line).toContain('<a href="https://nl.wikipedia.org/wiki/Henk_Brugge">Henk Brugge</a> (interim)')
+  })
+
+  it('credits Wikipedia under the line, and sits above the programme without a heading of its own', async () => {
+    withCoaches([veldman])
+
+    const { html } = await coachesLine()
+
+    expect(html.indexOf('Hoofdtrainer: ')).toBeLessThan(html.indexOf('id="programma"'))
+    expect(html.slice(html.indexOf('Hoofdtrainer: '), html.indexOf('id="programma"'))).toContain('Bron: Wikipedia')
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(13)
   })
 })

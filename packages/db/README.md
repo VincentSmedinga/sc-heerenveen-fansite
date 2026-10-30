@@ -25,14 +25,14 @@ Wil je opnieuw beginnen, voeg dan `--volumes` toe: dat wist de gegevens.
 
 Draai ze vanuit de root van de repository.
 
-| Opdracht           | Wat het doet                                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `pnpm db:generate` | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                                        |
-| `pnpm db:migrate`  | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had                                       |
-| `pnpm db:seed`     | Zet de testbronnen en de echte bronnen met hun feeds in het register; een tweede keer maakt het geen dubbele |
-| `pnpm db:backup`   | Maakt een gecomprimeerde dump van de database uit `DATABASE_URL` in `BACKUP_FOLDER` (zie _Back-ups_)         |
-| `pnpm db:restore`  | Zet een dump terug in een lege database (zie _Back-ups_)                                                     |
-| `pnpm test`        | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                                                  |
+| Opdracht           | Wat het doet                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `pnpm db:generate` | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                                               |
+| `pnpm db:migrate`  | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had                                              |
+| `pnpm db:seed`     | Zet de testbronnen, de echte bronnen met hun feeds en de hoofdtrainers erin; een tweede keer maakt het geen dubbele |
+| `pnpm db:backup`   | Maakt een gecomprimeerde dump van de database uit `DATABASE_URL` in `BACKUP_FOLDER` (zie _Back-ups_)                |
+| `pnpm db:restore`  | Zet een dump terug in een lege database (zie _Back-ups_)                                                            |
+| `pnpm test`        | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                                                         |
 
 `db:migrate` gebruikt de migrator van `drizzle-orm` en niet drizzle-kit.
 Daardoor kan dezelfde code op de hosting draaien, zonder ontwikkelgereedschap: de site doet dat als hij start (zie _In andere packages_).
@@ -45,7 +45,7 @@ De seed heeft twee lijsten in `src/seed.ts`:
   Ze staan op elke omgeving in het register.
 
 `db:seed` zet allebei erin en weigert als `SITE_ENV` `production` is: wat de site bij het opstarten doet, is daar de enige weg.
-Met `SITE_ENV=acceptance` of `production` zet de site alleen `realSources` in het register (`seedRealSources`).
+Met `SITE_ENV=acceptance` of `production` zet de site alleen `realSources` in het register (`seedRealSources`) en de hoofdtrainers in `staff` (`seedStaff`).
 Een bron die er al staat, werkt hij bij op haar domein, behalve wat het beheer straks wijzigt: `enabled`, de velden `consent_*`, `attribution` en het beleid voor intro, foto en insluiten.
 Op acceptatie haalt de site ook de testbronnen weg die er voor 26 oktober 2026 stonden (`removeTestSources`).
 Hij herkent ze aan hun domein uit `testSources`, en verwijdert die rijen met hun feeds en berichten; een echte bron blijft ongemoeid.
@@ -382,6 +382,46 @@ Ook een verzonnen selectie met verzonnen namen komt erin (`madeUpSquad` en `seed
 De goede lezing van de selectie vervangt de verzonnen selectie bij de eerste keer dat hij slaagt, en de lezing van de wedstrijden vervangt de verzonnen wedstrijden.
 Een database met echte wedstrijden raakt de seed niet aan.
 De verzonnen doelpunten verwijzen naar verzonnen spelers (`madeUpGoals` en `madeUpSquad`), met een speler die de selectie verliet en twee spelers met dezelfde achternaam (Testvoort), zodat de pagina's en de controles de gevallen van de koppeling hebben.
+
+## De tabel `staff`
+
+De staf van sc Heerenveen 1 (mannen), met een rol per rij.
+Nu zijn dat de hoofdtrainers sinds 1 juli 1990, de eerste Eredivisie-wedstrijd van de club, met de rol `coach`.
+De lijst met rollen (`staffRoles`) is een `enum` die kan groeien, bijvoorbeeld met `assistant-coach`.
+Een rij is een periode van een persoon: een trainer met meer dan één periode, zoals Foppe de Haan, heeft meer dan één rij.
+
+| Kolom                           | Betekenis                                                                                                 |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `role`                          | De rol: nu alleen `coach`                                                                                 |
+| `name`                          | De naam, hoogstens 100 tekens                                                                             |
+| `wikipedia_page`                | De titel van de pagina op de Nederlandse Wikipedia, zoals `Johnny Jansen (1975)`; leeg als die er niet is |
+| `start_date`, `start_precision` | De eerste dag van de periode, en hoe precies hij bekend is: `day`, `month` of `year`                      |
+| `end_date`, `end_precision`     | De laatste dag van de periode, met dezelfde precisie; beide leeg bij iemand die nog in dienst is          |
+| `interim`                       | Of de trainer tijdelijk invalde                                                                           |
+| `note`                          | Een korte toelichting in onze woorden, bijvoorbeeld wat de bron openlaat, hoogstens 500 tekens            |
+
+Een datum die Wikipedia alleen als maand of jaar geeft, is niet gegokt: hij staat als de eerste dag van die maand of dat jaar, met de precisie `month` of `year`.
+Een CHECK-constraint weigert een maand die niet op de eerste dag staat en een jaar dat niet op 1 januari staat.
+Andere constraints weigeren een einde voor het begin, een einddatum zonder precisie en een precisie zonder einddatum.
+Een rol, naam en begindatum komen samen één keer voor.
+
+De seed (`headCoaches` en `seedStaff` in `src/staff-seed.ts`) zet de rijen erin, van de Nederlandse Wikipedia, gelezen op 30 oktober 2026.
+Elke omgeving krijgt ze: de site zet ze bij het opstarten op acceptatie en productie, en `pnpm db:seed` lokaal.
+Een tweede keer maakt geen dubbele rijen: de seed vindt een rij op rol, naam en begindatum en werkt de rest bij.
+Een rij met een andere begindatum is dus een nieuwe rij; een datum die je in een bestaande rij wilt corrigeren, vraagt een migratie.
+Een nieuwe trainer komt als rij in `headCoaches`.
+Waar Wikipedia een gat of een tegenspraak heeft, kiest de seed de voorzichtige waarde en schrijft de reden in `note`.
+
+De vragen staan in `queries.ts`, met de rol als invoer, en rekenen met de dagen in `src/staff.ts`:
+
+- `listStaffInSeason(db, role, season)` geeft de staf met die rol die in het seizoen zeker een dag in dienst was, op volgorde van begin.
+  Een trainer die "in 2024" begon, staat dus niet in het seizoen ervoor, en iemand die "in juli 2014" stopte, niet in het seizoen dat op 1 juli 2014 begint.
+- `findStaffOn(db, role, day)` geeft wie de rol heeft op een dag: `certain` met de persoon, `uncertain` met de personen die het kunnen zijn als de dag valt in de onzekerheid van een maand of jaar, en `none` voor een dag in een gat of vóór de eerste rij.
+  Zo zegt een pagina niet stilzwijgend een naam bij een wedstrijd die in een grensmaand valt.
+  Op de dag dat een nieuwe trainer begint, is hij de trainer; de laatste dag van de vorige is de dag ervoor.
+
+De einddatum is de laatste dag.
+Een einde in een maand of jaar telt als "in die maand gestopt", dus de laatste dag die zeker is, is de dag ervoor.
 
 ## Tijden
 

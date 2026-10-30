@@ -18,6 +18,7 @@ import {
 import { standingsCardOf } from '../../matchShortcuts'
 import {
   CleanSheetsCard,
+  CoachesLine,
   ExtremesCard,
   GoalsPerQuarterCard,
   HomeAwayCard,
@@ -130,6 +131,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
           </Page.Title>
         }
       >
+        <CoachesLine coaches={data.coaches} />
         {current && (
           <Card aria-labelledby="programma">
             <Heading anchor id="programma" level={2}>

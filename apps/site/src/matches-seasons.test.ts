@@ -2,6 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { matches, standings, wikipediaPages } from '@fansite/db/schema'
 import { madeUpMatches, madeUpTable } from '@fansite/db/seed'
+import { seedStaff } from '@fansite/db/staff-seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -33,6 +34,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM standings')
   await database.pool.query('DELETE FROM wikipedia_pages')
+  await database.pool.query('DELETE FROM staff')
+  await seedStaff(database.db)
   await database.db.insert(matches).values(madeUpMatches(now))
   await database.db.insert(matches).values(madeUpMatches(earlier).slice(0, 3))
   await database.db.insert(standings).values(madeUpTable(now))
@@ -74,7 +77,19 @@ describe('getMatchData', () => {
     const { getMatchData } = await import('./matches')
     const data = await getMatchData('2010/11')
 
-    expect(data).toEqual({ matches: [], pages: [], season: '2010/11', standings: [] })
+    expect(data).toMatchObject({ matches: [], pages: [], season: '2010/11', standings: [] })
+  })
+
+  it('gives the head coaches of the season it is asked for, in the order they began', async () => {
+    const { getMatchData } = await import('./matches')
+
+    expect((await getMatchData()).coaches.map((coach) => coach.name)).toEqual(['Robin Veldman'])
+    expect((await getMatchData('2024/25')).coaches.map((coach) => [coach.name, coach.interim])).toEqual([
+      ['Robin van Persie', false],
+      ['Henk Brugge', true],
+      ['Robin Veldman', false],
+    ])
+    expect((await getMatchData('2010/11')).coaches.map((coach) => coach.name)).toEqual(['Ron Jans'])
   })
 
   it('keeps the current season for the homepage after a visit to an earlier season', async () => {

@@ -856,3 +856,67 @@ export const squadImports = mysqlTable('squad_imports', {
 })
 
 export type SquadImport = typeof squadImports.$inferSelect
+
+/**
+ * What a person of the staff does. The list grows with the roles we keep, such as
+ * `assistant-coach`.
+ */
+export const staffRoles = ['coach'] as const
+
+export type StaffRole = (typeof staffRoles)[number]
+
+/**
+ * How exactly a date of the staff is known: the `day`, only the `month` or only the `year`. A
+ * date known to the month or the year is stored as the first day of that month or year, and the
+ * precision says the real day is somewhere in it.
+ */
+export const datePrecisions = ['day', 'month', 'year'] as const
+
+export type DatePrecision = (typeof datePrecisions)[number]
+
+/** The most characters a column of `staff` holds. */
+export const staffLimits = { name: 100, note: 500, wikipediaPage: wikipediaPageMaxLength }
+
+/**
+ * The staff of sc Heerenveen 1 (men), one row per period of a person in a role, from the Dutch
+ * Wikipedia. A person with two periods, such as Foppe de Haan, has two rows. `role` is `coach`
+ * for a head coach, and the only role for now. `wikipedia_page` is the title of the person's
+ * page, empty when there is none. `end_date` is the last day of the period, empty for a person
+ * who is still in service, and then so is `end_precision`. A date the source gives to the month
+ * or the year only is not made exact: see `DatePrecision`. `interim` is true for a person who
+ * stood in. `note` is a short remark in our own words, such as what the source leaves open.
+ * The rows come from the seed (`seedStaff`).
+ */
+export const staff = mysqlTable(
+  'staff',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    role: mysqlEnum('role', staffRoles).notNull(),
+    name: varchar('name', { length: staffLimits.name }).notNull(),
+    wikipediaPage: varchar('wikipedia_page', { length: staffLimits.wikipediaPage }),
+    startDate: date('start_date', { mode: 'string' }).notNull(),
+    startPrecision: mysqlEnum('start_precision', datePrecisions).notNull(),
+    endDate: date('end_date', { mode: 'string' }),
+    endPrecision: mysqlEnum('end_precision', datePrecisions),
+    interim: boolean('interim').notNull().default(false),
+    note: varchar('note', { length: staffLimits.note }),
+  },
+  (table) => [
+    unique('staff_role_name_start_date_unique').on(table.role, table.name, table.startDate),
+    index('staff_role_start_date_idx').on(table.role, table.startDate),
+    check('staff_end_not_before_start', sql`${table.endDate} is null or ${table.endDate} >= ${table.startDate}`),
+    check('staff_end_precision_with_end_date', sql`(${table.endDate} is null) = (${table.endPrecision} is null)`),
+    check(
+      'staff_start_date_fits_precision',
+      sql`(${table.startPrecision} = 'day') or (${table.startPrecision} = 'month' and dayofmonth(${table.startDate}) = 1) or (${table.startPrecision} = 'year' and dayofyear(${table.startDate}) = 1)`,
+    ),
+    check(
+      'staff_end_date_fits_precision',
+      sql`${table.endDate} is null or (${table.endPrecision} = 'day') or (${table.endPrecision} = 'month' and dayofmonth(${table.endDate}) = 1) or (${table.endPrecision} = 'year' and dayofyear(${table.endDate}) = 1)`,
+    ),
+  ],
+)
+
+export type NewStaff = typeof staff.$inferInsert
+
+export type StaffMember = typeof staff.$inferSelect
