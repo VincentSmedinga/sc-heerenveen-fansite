@@ -615,8 +615,9 @@ export function StandingsCard({ data }: { data: MatchData }) {
  * `streaksOf`). Without a played match it is a sentence for visitors and no table.
  *
  * A season that is over (it has a `season`) has no column for how the streaks stand now: the
- * streak it ended with doesn't change any more and says little. Its texts name the season, not
- * "this season".
+ * streak it ended with doesn't change any more and says little. It has no latest five matches
+ * either, which are no more special at the end of a season than any other five. Its texts name
+ * the season, not "this season".
  */
 export function StreaksCard({
   matches,
@@ -649,20 +650,24 @@ export function StreaksCard({
               header: label,
             }))}
           />
-          <MarkRow marks={last.map(({ result }) => markOf[result])} title="Laatste wedstrijden" />
-          <List role="list">
-            {last.map(({ match }) => (
-              <List.Item key={`${match.competition}-${match.round}`}>
-                <ShortMatch
-                  {...matchMoment(match, now)}
-                  goalsAgainst={match.goalsAgainst}
-                  goalsFor={match.goalsFor}
-                  home={match.home}
-                  opponent={match.opponent}
-                />
-              </List.Item>
-            ))}
-          </List>
+          {!over && (
+            <>
+              <MarkRow marks={last.map(({ result }) => markOf[result])} title="Laatste wedstrijden" />
+              <List role="list">
+                {last.map(({ match }) => (
+                  <List.Item key={`${match.competition}-${match.round}`}>
+                    <ShortMatch
+                      {...matchMoment(match, now)}
+                      goalsAgainst={match.goalsAgainst}
+                      goalsFor={match.goalsFor}
+                      home={match.home}
+                      opponent={match.opponent}
+                    />
+                  </List.Item>
+                ))}
+              </List>
+            </>
+          )}
           <BasedOn known={played} played={played} />
         </>
       )}

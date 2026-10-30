@@ -167,6 +167,16 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
       expect(card.match(/<td[^>]*>\d+<\/td>/g)).toHaveLength(6)
     })
 
+    it('has no latest five matches: no row of marks and no list of matches', async () => {
+      const card = section(await render())
+
+      expect(card).not.toContain('Laatste wedstrijden')
+      expect(card).not.toContain('hf-mark-row')
+      expect(card).not.toContain('<ul')
+      expect(card).not.toContain('Vorig Seizoen FC')
+      expect(card).toContain('Gebaseerd op')
+    })
+
     it('names the season in the caption and not "this season"', async () => {
       const card = section(await render())
 
