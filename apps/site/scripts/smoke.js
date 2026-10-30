@@ -634,6 +634,11 @@ await withEmptyDatabase((database) =>
     const matchesHtml = await matchesPage.text()
     assert.equal(matchesPage.status, 200)
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
+    // The head coach comes from the seed the site runs at its start, not from anyone by hand.
+    assert.match(
+      matchesHtml,
+      /<p>Hoofdtrainer(?:<!-- -->)?:(?:<!-- -->)? <a href="https:\/\/nl\.wikipedia\.org\/wiki\/Robin_Veldman">Robin Veldman<\/a><\/p>/,
+    )
     // The main menu is its own nav right after the header, and the bar with a link to each card
     // comes after it, outside the main; none on the home.
     assert.match(matchesHtml, /<\/header><nav aria-label="Hoofdmenu" class="hf-navigation hf-navigation-header">/)
