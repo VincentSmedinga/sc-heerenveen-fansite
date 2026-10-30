@@ -154,6 +154,36 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     ])
   })
 
+  describe('the streaks', () => {
+    const section = (html: string) => html.slice(html.indexOf('id="reeksen"'), html.indexOf('id="thuis-en-uit"'))
+    const columns = (card: string) =>
+      [...card.matchAll(/<th [^>]*scope="col"[^>]*>([^<]*)<\/th>/g)].map(([, name]) => name)
+
+    it('has the columns Reeks and Langste, and no column Nu, with the six streaks as rows', async () => {
+      const card = section(await render())
+
+      expect(columns(card)).toEqual(['Reeks', 'Langste'])
+      expect(card.match(/<th scope="row">/g)).toHaveLength(6)
+      expect(card.match(/<td[^>]*>\d+<\/td>/g)).toHaveLength(6)
+    })
+
+    it('names the season in the caption and not "this season"', async () => {
+      const card = section(await render())
+
+      expect(card).toContain('De reeksen van sc Heerenveen in de Eredivisie in 2025/26')
+      expect(card).not.toContain('dit seizoen')
+    })
+
+    it('names the season in the sentence without matches too', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches: [] })
+
+      const card = section(await render())
+
+      expect(card).toContain('We hebben geen uitslagen in 2025/26.')
+      expect(card).not.toContain('dit seizoen')
+    })
+  })
+
   it('credits the Wikipedia pages of that season', async () => {
     vi.mocked(getMatchData).mockResolvedValue({
       ...earlier,

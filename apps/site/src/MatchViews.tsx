@@ -613,6 +613,10 @@ export function StandingsCard({ data }: { data: MatchData }) {
  * letters in colour and, as well, short lines with the opponent and the score, so no colour
  * stands alone. The streaks come from the score of every played match of the league (see
  * `streaksOf`). Without a played match it is a sentence for visitors and no table.
+ *
+ * A season that is over (it has a `season`) has no column for how the streaks stand now: the
+ * streak it ended with doesn't change any more and says little. Its texts name the season, not
+ * "this season".
  */
 export function StreaksCard({
   matches,
@@ -624,6 +628,8 @@ export function StreaksCard({
   season?: string | undefined
 }) {
   const { last, played, streaks } = streaksOf(matches)
+  const over = season !== undefined
+  const when = over ? `in ${season}` : 'dit seizoen'
 
   return (
     <Card aria-labelledby="reeksen" shareable={imageCredit(played > 0, season)} surface="soft">
@@ -631,14 +637,17 @@ export function StreaksCard({
         Reeksen
       </Heading>
       {played === 0 ? (
-        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+        <Text>{over ? `We hebben geen uitslagen ${when}.` : `We hebben nog geen uitslagen van ${when}.`}</Text>
       ) : (
         <>
           <Text appearance="meta">Aantal wedstrijden achter elkaar</Text>
           <DataTable
-            caption="De reeksen van sc Heerenveen in de Eredivisie dit seizoen"
-            columns={['Reeks', 'Nu', 'Langste']}
-            rows={streaks.map(({ current, label, longest }) => ({ cells: [current, longest], header: label }))}
+            caption={`De reeksen van sc Heerenveen in de Eredivisie ${when}`}
+            columns={over ? ['Reeks', 'Langste'] : ['Reeks', 'Nu', 'Langste']}
+            rows={streaks.map(({ current, label, longest }) => ({
+              cells: over ? [longest] : [current, longest],
+              header: label,
+            }))}
           />
           <MarkRow marks={last.map(({ result }) => markOf[result])} title="Laatste wedstrijden" />
           <List role="list">

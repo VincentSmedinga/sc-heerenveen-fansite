@@ -6837,6 +6837,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen de laatste vijf wedstrijden tonen (geen reeksen, en die zoeken supporters juist).
   De nieuwste eerst (past bij Uitslagen en De nul gehouden, maar dan loopt de volgorde tegen die van de letters in).
   Een warm vlak (komt naast Verloop van het seizoen, dat al warm is).
+- **Later:** een eerder seizoen toont alleen de langste reeksen, zonder de lengte van nu, zie _Een eerder seizoen toont bij de reeksen alleen de langste_ (30 oktober 2026).
 
 ### De toon en de schrijfwijzer staan in het hoofdstuk Redactie
 
@@ -7086,3 +7087,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De uitslagen houden de naam van de wedstrijdpagina.
 - **Alternatieven:** de korte naam houden (geen voornaam, zoals voorheen).
   De selectie van elk seizoen importeren (kan niet als de pagina op Wikipedia ontbreekt).
+
+### Een eerder seizoen toont bij de reeksen alleen de langste
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** de kaart Reeksen van een afgelopen seizoen heeft geen kolom "Nu", alleen "Langste".
+  Het lopende seizoen houdt beide.
+  Het bijschrift en de zin zonder wedstrijden noemen in een afgelopen seizoen het seizoen ("in 2025/26") en niet "dit seizoen".
+  De kaart weet het uit `season`, dat alleen een afgelopen seizoen heeft; `streaksOf` verandert niet.
+- **Waarom:** de reeks waarmee een afgelopen seizoen eindigde verandert niet meer en zegt weinig.
+  De langste reeks is wat de moeite waard blijft.
+- **Alternatieven:** de kolom hernoemen naar "Aan het eind" (houdt een getal dat nauwelijks informatie geeft).
+  De kolom laten staan (verwarrend: "Nu" in een seizoen van vorig jaar).
