@@ -255,7 +255,8 @@ Noemt een kop een club, en speelt sc Heerenveen in het lopende seizoen een wedst
 Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
 
 - **Het venster:** de datum van de wedstrijd min 7 dagen tot en met plus 7 dagen.
-  Het bericht en de wedstrijd tellen als Nederlandse dagen (`Europe/Amsterdam`): een bericht van half één 's nachts op de nacht van de overgang naar de wintertijd staat op de dag die een lezer zag.
+  Het bericht en de wedstrijd tellen als Nederlandse dagen (`Europe/Amsterdam`).
+  Zo staat een bericht van half één 's nachts, in de nacht van de overgang naar de wintertijd, op de dag die een lezer zag.
   Een bericht op de 8e dag ervoor of erna valt erbuiten.
 - **De wedstrijden:** de wedstrijden van de competitie en de beker in `matches`, gespeeld of nog te spelen, van het lopende seizoen.
   De tabel heeft ook eerdere seizoenen (`pnpm import:season`), maar die tellen niet.
@@ -278,7 +279,7 @@ Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
 - **Een tegenstander die niet in de lijst staat:** een amateurclub in de beker telt met zijn naam uit de wedstrijd, zonder voor- of achtervoegsel.
   Bij twee woorden of meer telt de naam altijd: "Excelsior Maassluis", "Quick Boys", "De Treffers".
   Bij één woord telt hij ook ("IJsselmeervogels", "ASWH"), tenzij het een gewoon woord is (`ordinaryClubWords`: Quick, Victoria en dergelijke) of alleen een voorvoegsel ("AFC").
-  Staat een club die vaak voorkomt in een kop die er niet over gaat, zet hem dan in `ordinaryClubWords`, of de volledige naam in `otherClubGroups`.
+  Komt een club vaak voor in een kop die er niet over gaat, zet hem dan in `ordinaryClubWords`, of zijn volledige naam in `otherClubGroups`.
 
 ### Een feed op `club` zetten
 
