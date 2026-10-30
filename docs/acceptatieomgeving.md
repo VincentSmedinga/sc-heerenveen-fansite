@@ -323,7 +323,7 @@ Zo kan niemand nagaan wie een account heeft.
   `/beheer/artikelen` is voor een beheerder: daar schrijft, bekijkt, publiceert en trekt hij een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)).
   `/beheer/bezoek` is voor een beheerder: de bezoekers en paginaweergaven van de laatste dagen en de meest bekeken pagina's (zie _Bezoekers tellen_ hieronder).
   `/beheer/berichten` is voor een beheerder of moderator, die er een bericht verbergt, met een reden, en het weer toont.
-  Een verborgen bericht staat binnen vijf minuten niet meer op de homepage en op `/podcasts`, en de import zet het niet terug.
+  Een verborgen bericht staat binnen vijf minuten niet meer op de homepage, op `/nieuws` en op `/podcasts`, en de import zet het niet terug.
   De lijst toont ook de berichten die het relevantiefilter een twijfelgeval vond of niet over de club; die staan niet op de site (zie _Het relevantiefilter_ in de [README van de importer](../apps/importer/README.md)).
   Elke actie komt in het logboek, de tabel `audit_log`.
   Er is nog geen scherm om het logboek te lezen; lees het in phpMyAdmin:
@@ -338,7 +338,7 @@ Zo kan niemand nagaan wie een account heeft.
 
 - De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, het blok "Laatste nieuws" en in de zijbalk het blok "Nieuwste discussies".
   Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben nog geen nieuws gevonden. Kijk straks nog eens." en "We hebben nog geen discussies van het forum."
-  Daarna staan er de tien nieuwste koppen van de echte nieuwsbronnen uit de seed, met onder de lijst de knop "Laad 5 meer" als er meer zijn.
+  Daarna staan er de tien nieuwste koppen van de echte nieuwsbronnen uit de seed, met onder de lijst de link "Alle koppen" naar `/nieuws`.
   In het blok "Nieuwste discussies" staan dan de vijf discussies waar het laatst op is gereageerd, elk met het aantal reacties, de laatste reageerder en de tijd, en onderaan de link "Naar het forum".
   Controleer dat er geen discussie van Offtopics of Sport overig bij staat.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.

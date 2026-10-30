@@ -28,7 +28,7 @@ A source we show is bound by the principles in the Redactie chapter (`packages/d
 
 ## 2. Register the source
 
-- `packages/db/src/seed.ts`, in `realSources`: `domain`, `name`, `kind`, a `description` of at most 300 characters in Dutch, and `feeds`.
+- `packages/db/src/seed.ts`, in `realSources`: `domain`, `name`, `kind`, a `slug` (lowercase words with hyphens, unique: the fixed name of the source in `/nieuws?bron=<slug>`, so without one the source is not in the filter of the archive; not for a forum), a `description` of at most 300 characters in Dutch, and `feeds`.
   - A feed that covers more than the club gets `{ filter: 'club', url }`; a feed that is all about the club stays a plain string.
   - Don't set a consent status, intro length, image or embed: the strictest values are the default, and a check in the schema keeps them there without consent.
 - `packages/db/src/seed.test.ts`: add the feed to the list of `club` feeds if it has the filter, and add a test like the one for the last source added (strictest policy, filter, description present and short).

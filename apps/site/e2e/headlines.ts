@@ -22,9 +22,11 @@ type Row = {
  *
  * They are in the form of real headlines, on the made-up test sources of the seed. The times
  * are counted back from the moment the check starts. The homepage shows the first ten, and the
- * button under them; `/?nieuws=15` shows all eleven and no button. The first seven are from the
- * last six days and show a weekday and the time; the last four are older and show a weekday and
- * the date.
+ * link to the archive under them. The first seven are from the last six days and show a weekday
+ * and the time; the next four are older and show a weekday and the date.
+ *
+ * Behind them come 45 older headlines of two sources, so that the news archive (/nieuws) has 56
+ * in all and a second page of 50 per page, and a page of one source (`/nieuws?bron=testkrant`).
  */
 export const headlines: { madeUp: Row[]; notForVisitors: Row[] } = {
   madeUp: [
@@ -121,12 +123,27 @@ export const headlines: { madeUp: Row[]; notForVisitors: Row[] } = {
 }
 
 /**
+ * The 45 headlines for the second page of the archive: older than the eleven above, alternately
+ * of Testkrant and Proefnieuws.
+ */
+const archiveRows: Row[] = Array.from({ length: 45 }, (_, index) => {
+  const testkrant = index % 2 === 0
+
+  return {
+    domain: testkrant ? 'testkrant.test' : 'proefnieuws.test',
+    hoursAgo: 400 + index * 12,
+    source: testkrant ? 'Testkrant' : 'Proefnieuws',
+    title: `Archiefkop ${index + 1}: terugblik op een wedstrijd van Heerenveen tegen Testclub`,
+  }
+})
+
+/**
  * The feeds of the made-up items. A feed that the importer would read must not outlast the
  * check, so it is easy to recognise.
  */
 const feedPath = '/e2e-a11y/rss/'
 
-const rows: Row[] = [...headlines.madeUp, ...headlines.notForVisitors]
+const rows: Row[] = [...headlines.madeUp, ...archiveRows, ...headlines.notForVisitors]
 
 /**
  * Puts the made-up headlines in the database and returns the function that takes them out

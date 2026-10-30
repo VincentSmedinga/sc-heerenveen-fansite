@@ -4,8 +4,11 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { TestDatabase } from './test-database.ts'
 
 import {
+  countArchiveItems,
   countPodcastEpisodes,
   findPodcast,
+  listArchivePage,
+  listArchiveSources,
   listEnabledSources,
   listMatchSeasons,
   listNewestDiscussions,
@@ -369,6 +372,307 @@ describe('listRecentItems', () => {
     await addSource()
 
     expect(await listRecentItems(database.db, { limit: 10, until: now })).toEqual([])
+  })
+})
+
+describe('the news archive', () => {
+  const now = new Date('2026-10-22T10:00:00Z')
+  const day = 24 * 60 * 60 * 1000
+
+  /** Puts a source with a feed in the register and returns the ids that an item needs. */
+  async function addSource(overrides: Partial<typeof sources.$inferInsert> = {}) {
+    const domain = overrides.domain ?? 'testkrant.test'
+    const [source] = await database.db
+      .insert(sources)
+      .values({ domain, kind: 'news', name: 'Testkrant', slug: 'testkrant', ...overrides })
+      .$returningId()
+    const sourceId = source?.id ?? 0
+    const [feed] = await database.db
+      .insert(feeds)
+      .values({ sourceId, url: `https://${domain}/rss/` })
+      .$returningId()
+
+    return { feedId: feed?.id ?? 0, sourceId }
+  }
+
+  async function addItem(
+    ids: { feedId: number; sourceId: number },
+    key: string,
+    publishedAt: Date,
+    overrides: Partial<typeof items.$inferInsert> = {},
+  ) {
+    await database.db.insert(items).values({
+      ...ids,
+      key,
+      publishedAt,
+      title: `Kop ${key}`,
+      url: `https://testkrant.test/${key}`,
+      ...overrides,
+    })
+  }
+
+  const titles = async (options: { limit?: number; offset?: number; source?: string } = {}) =>
+    (await listArchivePage(database.db, { limit: 50, until: now, ...options })).map((item) => item.title)
+
+  describe('listArchivePage', () => {
+    it('gives the headlines newest first, however old they are', async () => {
+      const ids = await addSource()
+
+      await addItem(ids, 'vorig-jaar', new Date('2025-10-21T12:05:00Z'))
+      await addItem(ids, 'gisteren', new Date('2026-10-21T12:05:00Z'))
+      await addItem(ids, 'twintig-jaar', new Date('2006-05-01T12:05:00Z'))
+      await addItem(ids, 'vanochtend', new Date('2026-10-22T07:30:00Z'))
+
+      expect(await titles()).toEqual(['Kop vanochtend', 'Kop gisteren', 'Kop vorig-jaar', 'Kop twintig-jaar'])
+    })
+
+    it('starts at the offset and gives at most the limit, so the pages follow each other without a gap', async () => {
+      const ids = await addSource()
+
+      for (const index of [1, 2, 3, 4, 5]) {
+        await addItem(ids, String(index), new Date(now.getTime() - index * day))
+      }
+
+      expect(await titles({ limit: 2 })).toEqual(['Kop 1', 'Kop 2'])
+      expect(await titles({ limit: 2, offset: 2 })).toEqual(['Kop 3', 'Kop 4'])
+      expect(await titles({ limit: 2, offset: 4 })).toEqual(['Kop 5'])
+      expect(await titles({ limit: 2, offset: 6 })).toEqual([])
+    })
+
+    it('puts the item that was stored last first when two were published in the same second', async () => {
+      const ids = await addSource()
+      const same = new Date('2026-10-22T08:00:00Z')
+
+      await addItem(ids, 'eerst', same)
+      await addItem(ids, 'daarna', same)
+
+      expect(await titles()).toEqual(['Kop daarna', 'Kop eerst'])
+    })
+
+    it('gives the headlines of one source when it gets the slug, and of all sources without', async () => {
+      const krant = await addSource()
+      const nieuws = await addSource({ domain: 'proefnieuws.test', name: 'Proefnieuws', slug: 'proefnieuws' })
+
+      await addItem(krant, 'krant', new Date('2026-10-22T08:00:00Z'))
+      await addItem(nieuws, 'nieuws', new Date('2026-10-22T07:00:00Z'))
+
+      expect(await titles()).toEqual(['Kop krant', 'Kop nieuws'])
+      expect(await titles({ source: 'proefnieuws' })).toEqual(['Kop nieuws'])
+      expect(await titles({ source: 'bestaat-niet' })).toEqual([])
+    })
+
+    it('finds a source by its slug exactly, and not by the same letters in another case or with accents', async () => {
+      const ids = await addSource({ slug: 'omrop-fryslan' })
+
+      await addItem(ids, 'bericht', new Date('2026-10-22T08:00:00Z'))
+
+      expect(await titles({ source: 'omrop-fryslan' })).toEqual(['Kop bericht'])
+      expect(await titles({ source: 'OMROP-FRYSLAN' })).toEqual([])
+      expect(await titles({ source: 'omrop-fryslán' })).toEqual([])
+    })
+
+    it('gives no headline of a source that is switched off, and the headlines of the others', async () => {
+      const off = await addSource({ domain: 'uit.test', enabled: false, name: 'Uit', slug: 'uit' })
+      const on = await addSource()
+
+      await addItem(off, 'uit', new Date('2026-10-22T08:00:00Z'))
+      await addItem(on, 'aan', new Date('2026-10-22T07:00:00Z'))
+
+      expect(await titles()).toEqual(['Kop aan'])
+      expect(await titles({ source: 'uit' })).toEqual([])
+    })
+
+    it('gives no headline that is hidden, and the headlines around it', async () => {
+      const ids = await addSource()
+
+      await addItem(ids, 'nieuwste', new Date('2026-10-22T08:00:00Z'), { hiddenAt: new Date('2026-10-22T09:00:00Z') })
+      await addItem(ids, 'tweede', new Date('2026-10-22T07:00:00Z'))
+
+      expect(await titles()).toEqual(['Kop tweede'])
+    })
+
+    it.each(['doubtful', 'irrelevant'] as const)(
+      'gives no %s headline, and the headlines around it',
+      async (relevance) => {
+        const ids = await addSource()
+
+        await addItem(ids, 'nieuwste', new Date('2026-10-22T08:00:00Z'), { relevance })
+        await addItem(ids, 'tweede', new Date('2026-10-22T07:00:00Z'))
+
+        expect(await titles()).toEqual(['Kop tweede'])
+      },
+    )
+
+    it('gives an item again once it is shown', async () => {
+      const ids = await addSource()
+
+      await addItem(ids, 'bericht', new Date('2026-10-22T08:00:00Z'), { hiddenAt: new Date('2026-10-22T09:00:00Z') })
+      await database.db.update(items).set({ hiddenAt: null })
+
+      expect(await titles()).toEqual(['Kop bericht'])
+    })
+
+    it('gives an item published at exactly the end time, and not one a second after it', async () => {
+      const ids = await addSource()
+
+      await addItem(ids, 'precies', now)
+      await addItem(ids, 'later', new Date(now.getTime() + 1000))
+
+      expect(await titles()).toEqual(['Kop precies'])
+    })
+
+    it('gives no episodes of a podcast, even with a slug, and the headlines of the others', async () => {
+      const podcast = await addSource({ domain: 'testpodcast.test', kind: 'podcast', slug: 'testpodcast' })
+      const news = await addSource()
+
+      await addItem(podcast, 'aflevering', new Date('2026-10-22T08:00:00Z'))
+      await addItem(news, 'bericht', new Date('2026-10-22T07:00:00Z'))
+
+      expect(await titles()).toEqual(['Kop bericht'])
+      expect(await titles({ source: 'testpodcast' })).toEqual([])
+    })
+
+    it('gives the headlines of sources of every kind but a podcast', async () => {
+      const club = await addSource({ domain: 'testclub.test', kind: 'club', slug: 'testclub' })
+      const video = await addSource({ domain: 'voorbeeldvideo.test', kind: 'video', slug: 'voorbeeldvideo' })
+
+      await addItem(club, 'club', new Date('2026-10-22T08:00:00Z'))
+      await addItem(video, 'video', new Date('2026-10-22T07:00:00Z'))
+
+      expect(await titles()).toEqual(['Kop club', 'Kop video'])
+    })
+
+    it('gives the headlines of a source without a slug in the archive of all sources only', async () => {
+      const ids = await addSource({ slug: null })
+
+      await addItem(ids, 'bericht', new Date('2026-10-22T08:00:00Z'))
+
+      expect(await titles()).toEqual(['Kop bericht'])
+    })
+
+    it('gives only the headline, the link, the time, the paywall and the name of the source as it wants to be credited', async () => {
+      const ids = await addSource({
+        allowImage: true,
+        attribution: 'Voorbeeldkrant, met dank aan de redactie',
+        consentStatus: 'given',
+        introMaxLength: 200,
+      })
+
+      await addItem(ids, 'een', new Date('2026-10-21T12:05:00Z'), { paywalled: true })
+
+      expect(await listArchivePage(database.db, { limit: 10, until: now })).toEqual([
+        {
+          paywalled: true,
+          publishedAt: new Date('2026-10-21T12:05:00Z'),
+          sourceName: 'Voorbeeldkrant, met dank aan de redactie',
+          title: 'Kop een',
+          url: 'https://testkrant.test/een',
+        },
+      ])
+    })
+
+    it('gives an empty list when there are no items', async () => {
+      expect(await titles()).toEqual([])
+    })
+  })
+
+  describe('countArchiveItems', () => {
+    it('counts what listArchivePage gives in all: the same headlines, for all sources or one', async () => {
+      const krant = await addSource()
+      const nieuws = await addSource({ domain: 'proefnieuws.test', name: 'Proefnieuws', slug: 'proefnieuws' })
+      const off = await addSource({ domain: 'uit.test', enabled: false, name: 'Uit', slug: 'uit' })
+      const podcast = await addSource({ domain: 'testpodcast.test', kind: 'podcast', slug: 'testpodcast' })
+
+      await addItem(krant, 'een', new Date('2026-10-22T08:00:00Z'))
+      await addItem(krant, 'twee', new Date('2020-01-01T08:00:00Z'))
+      await addItem(krant, 'verborgen', new Date('2026-10-22T08:00:00Z'), {
+        hiddenAt: new Date('2026-10-22T09:00:00Z'),
+      })
+      await addItem(krant, 'twijfel', new Date('2026-10-22T08:00:00Z'), { relevance: 'doubtful' })
+      await addItem(krant, 'toekomst', new Date('2026-10-23T08:00:00Z'))
+      await addItem(nieuws, 'drie', new Date('2026-10-22T07:00:00Z'))
+      await addItem(off, 'uit', new Date('2026-10-22T07:00:00Z'))
+      await addItem(podcast, 'aflevering', new Date('2026-10-22T07:00:00Z'))
+
+      expect(await countArchiveItems(database.db, { until: now })).toBe(3)
+      expect(await countArchiveItems(database.db, { source: 'testkrant', until: now })).toBe(2)
+      expect(await countArchiveItems(database.db, { source: 'proefnieuws', until: now })).toBe(1)
+      expect(await countArchiveItems(database.db, { source: 'uit', until: now })).toBe(0)
+      expect(await countArchiveItems(database.db, { source: 'TESTKRANT', until: now })).toBe(0)
+      expect(await listArchivePage(database.db, { limit: 50, until: now })).toHaveLength(3)
+    })
+
+    it('is zero when there are no items', async () => {
+      expect(await countArchiveItems(database.db, { until: now })).toBe(0)
+    })
+  })
+
+  describe('listArchiveSources', () => {
+    it('gives the sources with a slug and a headline that the archive shows, by name, with their slug', async () => {
+      const zeta = await addSource({ domain: 'zeta.test', name: 'Zeta', slug: 'zeta' })
+      const alfa = await addSource({ domain: 'alfa.test', name: 'Alfa', slug: 'alfa' })
+      const club = await addSource({ domain: 'club.test', kind: 'club', name: 'Club', slug: 'club' })
+
+      await addItem(zeta, 'zeta', new Date('2026-10-20T08:00:00Z'))
+      await addItem(alfa, 'alfa', new Date('2010-10-20T08:00:00Z'))
+      await addItem(club, 'club', new Date('2026-10-20T08:00:00Z'))
+
+      expect(await listArchiveSources(database.db, now)).toEqual([
+        { name: 'Alfa', slug: 'alfa' },
+        { name: 'Club', slug: 'club' },
+        { name: 'Zeta', slug: 'zeta' },
+      ])
+    })
+
+    it('names a source as it wants to be credited', async () => {
+      const ids = await addSource({ attribution: 'Voorbeeldkrant, met dank aan de redactie' })
+
+      await addItem(ids, 'een', new Date('2026-10-20T08:00:00Z'))
+
+      expect(await listArchiveSources(database.db, now)).toEqual([
+        { name: 'Voorbeeldkrant, met dank aan de redactie', slug: 'testkrant' },
+      ])
+    })
+
+    it('leaves out a source that is switched off, a podcast, a source without a slug and a source without headlines', async () => {
+      const off = await addSource({ domain: 'uit.test', enabled: false, slug: 'uit' })
+      const podcast = await addSource({ domain: 'testpodcast.test', kind: 'podcast', slug: 'testpodcast' })
+      const withoutSlug = await addSource({ domain: 'zonder.test', slug: null })
+
+      await addSource({ domain: 'leeg.test', slug: 'leeg' })
+      for (const [ids, key] of [
+        [off, 'uit'],
+        [podcast, 'aflevering'],
+        [withoutSlug, 'zonder'],
+      ] as const) {
+        await addItem(ids, key, new Date('2026-10-20T08:00:00Z'))
+      }
+
+      expect(await listArchiveSources(database.db, now)).toEqual([])
+    })
+
+    it('leaves out a source whose headlines are all hidden, not relevant or in the future', async () => {
+      const hidden = await addSource({ domain: 'verborgen.test', slug: 'verborgen' })
+      const doubtful = await addSource({ domain: 'twijfel.test', slug: 'twijfel' })
+      const later = await addSource({ domain: 'later.test', slug: 'later' })
+
+      await addItem(hidden, 'verborgen', new Date('2026-10-20T08:00:00Z'), {
+        hiddenAt: new Date('2026-10-21T08:00:00Z'),
+      })
+      await addItem(doubtful, 'twijfel', new Date('2026-10-20T08:00:00Z'), { relevance: 'doubtful' })
+      await addItem(later, 'later', new Date('2026-10-23T08:00:00Z'))
+
+      expect(await listArchiveSources(database.db, now)).toEqual([])
+    })
+
+    it('gives a source once, however many headlines it has', async () => {
+      const ids = await addSource()
+
+      await addItem(ids, 'een', new Date('2026-10-20T08:00:00Z'))
+      await addItem(ids, 'twee', new Date('2026-10-21T08:00:00Z'))
+
+      expect(await listArchiveSources(database.db, now)).toHaveLength(1)
+    })
   })
 })
 

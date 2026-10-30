@@ -1,63 +1,15 @@
-import { listRecentItems, type PublicItem } from '@fansite/db/queries'
+import { listRecentItems } from '@fansite/db/queries'
 
-import { cacheForKey } from './cache'
+import { cacheFor } from './cache'
 import { getDatabase } from './database'
-import { firstHeadlines, moreHeadlines } from './items-per-card'
-
-/** The most headlines the homepage shows. Older news is for the archive (#26). */
-export const maxHeadlines = 100
-
-export type Headlines = {
-  /**
-   * The newest headlines, newest first: `count` of them, or fewer when the sources have fewer.
-   */
-  headlines: PublicItem[]
-  /**
-   * Whether the sources have older headlines than these, and the homepage can show more of
-   * them.
-   */
-  more: boolean
-}
+import { firstHeadlines } from './items-per-card'
 
 /**
- * The newest `count` headlines from the sources that are switched on, newest first, and none
- * published after now, however old they are. It asks for one more than `count`, to know whether
- * there are older ones. At `maxHeadlines` there are no more to load, so it doesn't ask for the
- * extra one. The list for each `count` is cached for five minutes, so a visit doesn't cost a
- * query and a new item shows within five minutes.
- *
- * The cache has an entry for every `count` it is asked for, so a `count` that isn't one that
- * `parseHeadlineCount` gives becomes the first headlines: a visitor can't fill the memory of
- * the server with numbers of their own. That leaves nineteen entries at most.
+ * The newest headlines from the sources that are switched on, newest first, and none published
+ * after now, however old they are: `firstHeadlines` of them, or fewer when the sources have
+ * fewer. Older news is for the archive at /nieuws. The list is cached for five minutes, so a
+ * visit doesn't cost a query and a new item shows within five minutes.
  */
-export function getHeadlines(count: number): Promise<Headlines> {
-  return getHeadlinesFor(String(parseHeadlineCount(String(count))))
-}
-
-/**
- * The number of headlines that the address asks for with `?nieuws=`: a whole number from
- * `firstHeadlines`, in steps of `moreHeadlines`, and no more than `maxHeadlines`. Anything
- * else, such as no number, a number twice, `5`, `12`, `0`, `-5`, `1e1`, `010`, `105` or `abc`,
- * gives the first headlines.
- */
-export function parseHeadlineCount(value: string | string[] | undefined) {
-  if (typeof value !== 'string' || !/^[1-9]\d{0,2}$/u.test(value)) {
-    return firstHeadlines
-  }
-
-  const count = Number(value)
-
-  return count >= firstHeadlines && (count - firstHeadlines) % moreHeadlines === 0 && count <= maxHeadlines
-    ? count
-    : firstHeadlines
-}
-
-const getHeadlinesFor = cacheForKey(5 * 60 * 1000, async (key) => {
-  const count = Number(key)
-  const found = await listRecentItems(getDatabase().db, {
-    limit: count < maxHeadlines ? count + 1 : count,
-    until: new Date(),
-  })
-
-  return { headlines: found.slice(0, count), more: found.length > count }
-})
+export const getHeadlines = cacheFor(5 * 60 * 1000, () =>
+  listRecentItems(getDatabase().db, { limit: firstHeadlines, until: new Date() }),
+)

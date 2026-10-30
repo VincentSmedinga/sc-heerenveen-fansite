@@ -30,6 +30,9 @@ const meta = preview.meta({
           'Het component is een `div`.',
           'Zet hem in een `List.Item` en geef de `List` `role="list"`: Safari noemt een lijst zonder opsommingstekens anders geen lijst meer.',
           'Tussen de regels staat een dunne lijn.',
+          'Een regel kan een naam boven de wedstrijd hebben, zoals "Grootste overwinning", als toelichting (`Text` met `appearance="meta"`) in dezelfde `List.Item`, vóór `ShortMatch`.',
+          'De lijn staat dan boven de naam en niet ertussen, en de naam staat dicht bij zijn wedstrijd.',
+          'Een schermlezer leest eerst de naam.',
           'Zet de lijst in een `Card`, onder een kop van niveau 2.',
         ].join('\n'),
       },
@@ -83,6 +86,34 @@ const renderCard = (
 )
 
 const renderShort = () => renderCard(shortList)
+
+// Lines with a name above the match, as the card Uitersten has them. The dot is for the eye.
+const renderNamed = () => (
+  <div style={{ maxInlineSize: '20rem' }}>
+    <Card aria-labelledby="uitersten-kop">
+      <Heading id="uitersten-kop" level={2}>
+        Uitersten
+      </Heading>
+      <List role="list">
+        {shortList.map((match, index) => (
+          <List.Item key={match.dateTime}>
+            <Text appearance="meta">
+              {index === 0 ? (
+                'Grootste overwinning'
+              ) : (
+                <>
+                  Vroegste doelpunt <span aria-hidden="true">·</span> minuut {index + 2}{' '}
+                  <span aria-hidden="true">·</span> Proefman
+                </>
+              )}
+            </Text>
+            <ShortMatch {...match} />
+          </List.Item>
+        ))}
+      </List>
+    </Card>
+  </div>
+)
 
 const renderLongName = () => renderCard([...shortList, longName])
 
@@ -138,6 +169,12 @@ export const ShortDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Korte lijst, thuis en uit, donker',
   render: renderShort,
+})
+
+export const NamedLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Met een naam boven de wedstrijd',
+  render: renderNamed,
 })
 
 export const LongListLight = meta.story({

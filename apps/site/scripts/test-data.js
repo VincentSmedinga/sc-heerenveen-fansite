@@ -1,6 +1,6 @@
 // Puts the made-up headlines, discussions, episodes and articles of the accessibility checks
 // (e2e/*.ts) in the database of the .env in the root, so a build on your own computer shows a
-// full homepage, /podcasts and the matches of the season before this one for `pnpm
+// full homepage, /nieuws, /podcasts and the matches of the season before this one for `pnpm
 // screenshots`. Run it after `pnpm db:migrate` and `pnpm db:seed`, and before you start the
 // site: the homepage keeps its headlines for five minutes. `--remove` takes them out again,
 // the season before this one only while all its matches are made up. The database holds

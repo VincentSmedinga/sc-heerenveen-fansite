@@ -14,6 +14,11 @@ export const pages = [
   },
   {
     description:
+      'Alle koppen over sc Heerenveen die we hebben opgehaald, de nieuwste eerst, met een filter per bron en een link naar het bericht bij de bron.',
+    path: '/nieuws',
+  },
+  {
+    description:
       'Het programma, de uitslagen en de stand van sc Heerenveen 1 dit seizoen, met de bron erbij: de Nederlandse Wikipedia.',
     path: '/wedstrijden',
   },

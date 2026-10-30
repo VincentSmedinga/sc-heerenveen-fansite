@@ -54,7 +54,7 @@ const anchoredHeadingPattern =
  * page, and each heading with an anchor must be among them, so adding an anchor is as
  * deliberate as taking one away. An id that comes twice on the page makes a link ambiguous,
  * so that is wrong as well, also when it clashes with an id of something else, such as
- * `nieuws-3` on the homepage.
+ * the id of a list item.
  */
 export function anchorProblems(page: string, html: string, published: readonly string[]) {
   const ids = [...html.matchAll(idPattern)].map(([, id]) => id ?? '')

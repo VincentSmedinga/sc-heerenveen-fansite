@@ -66,6 +66,39 @@ export async function check(url, storybookDir) {
   return { components: ids.length }
 }
 
+const guide = 'docs/designsysteem-publiceren.md, under "Als het niet werkt"'
+
+/**
+ * Says what an answer that is not a 200 means and where to look. The app answers with plain
+ * text, so any other kind of answer, such as the HTML page of the web server, came from the
+ * host and never reached the app.
+ */
+export function describeAnswer(method, response) {
+  const status = response.status
+  const contentType = response.headers.get('content-type') ?? 'none'
+  const server = response.headers.get('server')
+  const seen = `${method} answered ${status} (content-type: ${contentType}${server ? `, server: ${server}` : ''}).`
+  const fromApp = contentType.startsWith('text/plain')
+
+  if (fromApp && status >= 500) {
+    return `${seen} The app answered with an error. Read stderr.log in domains/ds.heerenveen.org/mcp on the host. See ${guide}, the item about 500 or 503.`
+  }
+
+  if (fromApp) {
+    return `${seen} The app answered, so the request reached it, but not on a path it serves. Check the address of the app in Setup Node.js App. See ${guide}, the item about 404.`
+  }
+
+  if (status === 404) {
+    return `${seen} That is the page of the web server, not of the app: the host does not send this address to the Node.js app, or the app does not exist. Check Setup Node.js App on the host (step 7 of "Eenmalig instellen"). See ${guide}, the item about 404.`
+  }
+
+  if (status >= 500) {
+    return `${seen} The host answered with an error, so the app probably does not start. Read stderr.log in domains/ds.heerenveen.org/mcp. See ${guide}, the item about 500 or 503.`
+  }
+
+  return `${seen} See ${guide}.`
+}
+
 export async function rpc(url, method, params) {
   const response = await fetch(url, {
     body: JSON.stringify({ id: nextId++, jsonrpc: '2.0', method, params }),
@@ -75,7 +108,9 @@ export async function rpc(url, method, params) {
   })
   const text = await response.text()
 
-  assert.equal(response.status, 200, `${method} answered ${response.status}`)
+  if (response.status !== 200) {
+    throw new Error(describeAnswer(method, response))
+  }
 
   // The answer is an event stream with one message, or plain JSON.
   const data = response.headers.get('content-type')?.includes('text/event-stream')
@@ -114,7 +149,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       break
     } catch (error) {
       if (Date.now() >= deadline) {
-        console.error(`${url} failed the check: ${error instanceof Error ? error.message : error}`)
+        const reason = error instanceof Error ? error.message : String(error)
+
+        console.error(`${url} failed the check: ${reason}`)
+
+        if (process.env['GITHUB_ACTIONS'] === 'true') {
+          console.error(`::error title=Check ds.heerenveen.org/mcp failed::${url} failed the check: ${reason}`)
+        }
+
         process.exit(1)
       }
 
