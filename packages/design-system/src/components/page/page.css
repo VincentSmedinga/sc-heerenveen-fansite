@@ -67,9 +67,10 @@
    * wide screen the shield hangs in the margin to the left of the column, and the text of the page is in line with the
    * wordmark: the logo gets a negative margin as wide as the shield and the space beside it (--hf-logo-hang), which is
    * worked out from the tokens of the logo. It only does so when the margin is wide enough for that and for 1rem to the edge
-   * of the window: 64rem for the column, twice (4.2375rem + 1rem) for the margins, which makes 74.475rem, rounded up to
-   * 74.5rem. A media query can't use a custom property, so the number is written out here. The focus ring of the link around
-   * the logo then sits in the margin as well, inside the window. The logo is the first thing in the header.
+   * of the window: 64rem for the column, twice (3.9875rem + 1rem) for the margins, which makes
+   * 73.975rem, rounded up to 74rem. A media query can't use a custom property, so the number is
+   * written out here. The focus ring of the link around the logo then sits in the margin as
+   * well, inside the window. The logo is the first thing in the header.
    */
   .hf-page-header {
     --hf-colour-focus: var(--hf-colour-focus-on-header);
@@ -84,9 +85,9 @@
     box-sizing: border-box;
     color: var(--hf-colour-text-default);
     display: grid;
-    gap: 0 0.5rem;
+    gap: 0 var(--hf-space-s);
     grid-template-columns: minmax(0, 1fr) auto;
-    padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.25rem;
+    padding-block: max(var(--hf-space-m), env(safe-area-inset-top, 0px)) var(--hf-space-xs);
     padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
       max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
 
@@ -103,7 +104,7 @@
       justify-self: end;
     }
 
-    @media (width >= 74.5rem) {
+    @media (width >= 74rem) {
       > :is(.hf-logo, :has(> .hf-logo)):first-child {
         margin-inline-start: calc(-1 * var(--hf-logo-hang));
       }
@@ -156,8 +157,8 @@
    * cells through a custom property.
    */
   .hf-page-body {
-    --hf-page-body-cell-gap: 2rem;
-    --hf-page-body-end-space: 4rem;
+    --hf-page-body-cell-gap: var(--hf-space-xl);
+    --hf-page-body-end-space: calc(2 * var(--hf-space-xl));
 
     place-content: start center;
     align-items: start;
@@ -291,7 +292,7 @@
    */
   .hf-page-title {
     align-items: center;
-    gap: 0.5rem 1.5rem;
+    gap: var(--hf-space-s) var(--hf-space-l);
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -378,10 +379,10 @@
     background-color: var(--hf-colour-background-footer);
     box-sizing: border-box;
     color: var(--hf-colour-text-secondary);
-    column-gap: 2rem;
+    column-gap: var(--hf-space-xl);
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    padding-block: 1.5rem max(1.5rem, env(safe-area-inset-bottom, 0px));
+    padding-block: var(--hf-space-l) max(var(--hf-space-l), env(safe-area-inset-bottom, 0px));
     padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
       max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
     position: relative;
@@ -441,7 +442,7 @@
     }
 
     > .hf-navigation {
-      margin-block-start: 0.5rem;
+      margin-block-start: var(--hf-space-s);
     }
 
     @media (width >= 19.5rem) {
@@ -453,12 +454,12 @@
     @supports (text-wrap: balance) {
       .hf-navigation-list {
         display: block;
-        margin-inline-start: -1.5rem;
+        margin-inline-start: calc(-1 * var(--hf-space-l));
         text-wrap: balance;
 
         > li {
           display: inline-block;
-          margin-inline-start: 1.5rem;
+          margin-inline-start: var(--hf-space-l);
           vertical-align: top;
         }
       }
@@ -477,7 +478,7 @@
     }
 
     &:has(> .hf-page-top-link) {
-      column-gap: 0.5rem;
+      column-gap: var(--hf-space-s);
       grid-template-columns: minmax(0, 1fr) auto;
 
       > :not(.hf-navigation, .hf-page-top-link) {
@@ -501,7 +502,7 @@
       }
 
       @media (width >= 40rem) {
-        column-gap: 2rem;
+        column-gap: var(--hf-space-xl);
         grid-template-columns: auto minmax(0, 1fr) auto;
 
         > .hf-navigation {

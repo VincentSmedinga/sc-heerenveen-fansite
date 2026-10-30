@@ -267,3 +267,28 @@
     padding: 0.5rem 1rem;
   }
 }
+
+/* The chapter Ruimte: a square for each step, as large as the step. */
+@layer hf.components {
+  ._hf-docs-space {
+    align-items: end;
+    display: grid;
+    gap: var(--hf-space-m);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      align-items: end;
+      display: grid;
+      gap: var(--hf-space-m);
+      grid-template-columns: var(--hf-space-xl) 1fr;
+    }
+  }
+
+  ._hf-docs-space-block {
+    background-color: var(--hf-colour-text-link);
+    block-size: var(--hf-docs-space);
+    inline-size: var(--hf-docs-space);
+  }
+}

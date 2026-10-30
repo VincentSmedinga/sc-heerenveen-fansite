@@ -123,8 +123,8 @@ describe('the row of the header in page.css', () => {
   })
 
   it('keeps the space under the logo that was between the logo and the line of the menu', () => {
-    expect(header).toContain('padding-block: max(0.75rem, env(safe-area-inset-top, 0px)) 0.25rem;')
-    expect(header).toContain('gap: 0 0.5rem;')
+    expect(header).toContain('padding-block: max(var(--hf-space-m), env(safe-area-inset-top, 0px)) var(--hf-space-xs);')
+    expect(header).toContain('gap: 0 var(--hf-space-s);')
   })
 
   it('aligns the logo in its link to the top, so the link is as tall as the logo and not as the line of text', () => {
@@ -180,9 +180,9 @@ describe('the text in the footer in page.css', () => {
 
     expect(list).toContain('display: block;')
     expect(list).toContain('text-wrap: balance;')
-    expect(list).toMatch(/> li \{[^}]*display: inline-block;[^}]*margin-inline-start: 1\.5rem;/)
-    // The margin before a link, taken back at the list's start, keeps links 1,5rem apart.
-    expect(list).toContain('margin-inline-start: -1.5rem;')
+    expect(list).toMatch(/> li \{[^}]*display: inline-block;[^}]*margin-inline-start: var\(--hf-space-l\);/)
+    // The margin before a link, taken back at the start of the list, keeps links apart.
+    expect(list).toContain('margin-inline-start: calc(-1 * var(--hf-space-l));')
   })
 })
 
@@ -214,16 +214,16 @@ describe('the footer with a link to the top in page.css', () => {
   it('leaves room for the link beside the text, and lets the text break again where there is none', () => {
     // 14,1rem of text, 0,5rem, 2,75rem of link and 2rem of margin: 19,35rem. With the text
     // spacing of WCAG 1.4.12 the text is 17rem wide: 22,25rem.
-    expect(own).toContain('column-gap: 0.5rem;')
+    expect(own).toContain('column-gap: var(--hf-space-s);')
     expect(withLink).toMatch(
       /@media \(width < 22\.25rem\) \{\s*> :not\(\.hf-navigation, \.hf-page-top-link\) \{\s*white-space: normal;/,
     )
-    expect(wide).toContain('column-gap: 2rem;')
+    expect(wide).toContain('column-gap: var(--hf-space-xl);')
   })
 
   it('finds the links by their class, and not as the last child, which is the link to the top', () => {
     expect(footer).not.toContain(':last-child')
-    expect(footer).toMatch(/> \.hf-navigation \{\s*margin-block-start: 0\.5rem;/)
+    expect(footer).toMatch(/> \.hf-navigation \{\s*margin-block-start: var\(--hf-space-s\);/)
   })
 })
 
@@ -241,7 +241,7 @@ describe('the columns of the body in page.css', () => {
     expect(token('--hf-content-max-width')).toBe(38)
     expect(Number(sidebar)).toBe(24)
     expect(token('--hf-page-max-width')).toBe(64)
-    expect(body).toContain('--hf-page-body-cell-gap: 2rem;')
+    expect(body).toContain('--hf-page-body-cell-gap: var(--hf-space-xl);')
     expect(token('--hf-content-max-width') + Number(sidebar) + 2).toBe(token('--hf-page-max-width'))
   })
 
@@ -251,8 +251,8 @@ describe('the columns of the body in page.css', () => {
     expect(css).not.toContain('--hf-page-body-column-gap')
   })
 
-  it('keeps 4rem under the columns, and the main as wide with a sidebar as without', () => {
-    expect(body).toContain('--hf-page-body-end-space: 4rem;')
+  it('keeps twice the largest space under the columns, and the main as wide with a sidebar as without', () => {
+    expect(body).toContain('--hf-page-body-end-space: calc(2 * var(--hf-space-xl));')
     expect(body).toContain('padding-block: var(--hf-page-body-cell-gap) var(--hf-page-body-end-space);')
     expect(body.match(/grid-template-columns:/g)).toHaveLength(2)
   })

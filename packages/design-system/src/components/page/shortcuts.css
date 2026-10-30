@@ -48,7 +48,7 @@
     border-block-end: 1px solid var(--hf-colour-border-shortcuts);
     box-sizing: border-box;
     display: flex;
-    gap: 0.5rem;
+    gap: var(--hf-space-s);
     padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px)) env(safe-area-inset-right, 0);
 
     /*
@@ -204,7 +204,7 @@
 
   @supports not (animation-timeline: scroll()) {
     .hf-page-shortcuts-list {
-      padding-inline-end: 1.5rem;
+      padding-inline-end: var(--hf-space-l);
     }
   }
 
@@ -227,7 +227,7 @@
     font-size: 1rem;
     font-weight: var(--hf-anchor-font-weight);
     line-height: 1;
-    padding-inline: 0.625rem;
+    padding-inline: var(--hf-space-s);
     text-decoration-line: none;
     transition:
       color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
@@ -277,7 +277,7 @@
   @media (width <= 20em) {
     .hf-page-shortcuts {
       flex-wrap: wrap;
-      padding-block: 0.5rem;
+      padding-block: var(--hf-space-s);
       padding-inline-end: max(var(--hf-page-margin), env(safe-area-inset-right, 0px));
       row-gap: 0;
     }
@@ -294,7 +294,7 @@
     .hf-page-shortcuts-list {
       flex-wrap: wrap;
       inline-size: auto;
-      margin-inline-start: -0.625rem;
+      margin-inline-start: calc(-1 * var(--hf-space-s));
       padding-inline: 0;
     }
   }

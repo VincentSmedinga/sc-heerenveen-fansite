@@ -6,7 +6,7 @@
 
 @layer hf.tokens {
   :root {
-    --hf-page-margin: 1rem;
+    --hf-page-margin: var(--hf-space-m);
     --hf-page-max-width: 64rem;
 
     /*
@@ -40,7 +40,7 @@
      * the column when the text of the page lines up with the wordmark (see .hf-page-header in page.css). The shield is
      * 1.55 times the font size of the wordmark.
      */
-    --hf-logo-gap: 0.75rem;
+    --hf-logo-gap: var(--hf-space-s);
     --hf-logo-mark-size: calc(var(--hf-wordmark-font-size) * 1.55);
     --hf-logo-hang: calc(var(--hf-logo-mark-size) + var(--hf-logo-gap));
   }

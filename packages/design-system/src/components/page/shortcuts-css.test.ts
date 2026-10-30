@@ -102,7 +102,7 @@ describe('the row in shortcuts.css', () => {
   it('falls back to a fixed fade at the right and room behind the last link, without scroll animations', () => {
     expect(row).toMatch(/@supports not \(animation-timeline: scroll\(\)\) \{\s*--hf-shortcuts-fade-end: 1\.5rem;/)
     expect(css).toMatch(
-      /@supports not \(animation-timeline: scroll\(\)\) \{\s*\.hf-page-shortcuts-list \{\s*padding-inline-end: 1\.5rem;/,
+      /@supports not \(animation-timeline: scroll\(\)\) \{\s*\.hf-page-shortcuts-list \{\s*padding-inline-end: var\(--hf-space-l\);/,
     )
   })
 
@@ -186,6 +186,6 @@ describe('the wrapped bar in shortcuts.css', () => {
   })
 
   it('pulls the list back by the padding of a link, so the text of the first link is in line with the label', () => {
-    expect(narrow).toMatch(/\.hf-page-shortcuts-list \{[^}]*margin-inline-start: -0\.625rem;/)
+    expect(narrow).toMatch(/\.hf-page-shortcuts-list \{[^}]*margin-inline-start: calc\(-1 \* var\(--hf-space-s\)\);/)
   })
 })

@@ -1,0 +1,47 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks'
+
+import * as SpaceStories from './space.stories'
+
+<Meta of={SpaceStories} />
+
+# Ruimte
+
+De ruimte tussen dingen komt uit een reeks van vijf stappen.
+Een onderdeel kiest een stap voor zijn `padding`, `margin` en `gap` en schrijft nooit zelf een getal.
+Dan lijken alle onderdelen op elkaar, en verandert een stap op één plek overal tegelijk.
+
+**Gemiddeld is de vaste keuze.**
+Twijfel je, neem dan `--hf-space-m`.
+
+## Stappen
+
+<Story of={SpaceStories.Steps} />
+
+## Welke stap?
+
+- **Extra klein** (`--hf-space-xs`) is het kleinste.
+  Neem hem voor een rand die net niet raakt, of voor twee dingen die bij elkaar horen.
+- **Klein** (`--hf-space-s`) staat tussen tekst en iets anders kleins, zoals een pictogram of een label.
+- **Gemiddeld** (`--hf-space-m`) is de vaste keuze.
+  Hij staat tussen twee gelijke of vergelijkbare kleine onderdelen, zoals twee knoppen of twee items in een lijst.
+- **Groot** (`--hf-space-l`) zit tussen gemiddeld en het raster.
+  Neem hem als een onderdeel meer lucht om zich heen wil dan gemiddeld, zoals de opvulling van een kaart op een breed scherm.
+- **Extra groot** (`--hf-space-xl`) is de ruimte in het raster van de pagina, en het maximum.
+  Niets in een onderdeel is groter.
+  Alleen de maten van de pagina zelf gaan erboven, zoals de ruimte onder de kolommen.
+
+## Regels
+
+- **Alleen de tokens:** voor `padding`, `margin` en `gap` gebruikt de CSS van een onderdeel een token, `0`, `auto` of `inherit`.
+  Een test in het designsysteem, `tokens/space-css.test.ts`, faalt op een getal dat daar niet uit komt.
+  Tot alle onderdelen zijn omgezet staan de bestanden die nog een getal hebben op een lijst in die test.
+  Elke omzetting haalt een bestand van die lijst, en een nieuw bestand komt er niet op.
+- **Een waarde tussen twee stappen** gaat naar de stap die bij de betekenis past, en niet naar de dichtstbijzijnde.
+  Tekst met iets kleins ernaast gaat naar klein, twee gelijke onderdelen naar gemiddeld.
+  Past geen enkele stap, bedenk dan geen eigen getal: leg het voor aan de projecteigenaar.
+- **Een optische correctie is geen ruimte.**
+  De heel kleine tussenruimte tussen twee kleine knoppen die bij elkaar horen, is een getal om het oog te helpen, en blijft een getal.
+  Het is de enige uitzondering.
+- **Maten zijn geen ruimte:** de breedte van een kolom, de hoogte van een knop en de grootte van een pictogram horen niet bij deze stappen.
+- **Een scherm met minder plek** kiest een kleinere stap voor dezelfde plek, bijvoorbeeld in de kaart.
+  Het token behoudt zijn naam en de onderdelen houden hun betekenis.

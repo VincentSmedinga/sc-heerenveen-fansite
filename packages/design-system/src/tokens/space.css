@@ -1,0 +1,28 @@
+/*
+ * Space tokens: the steps of the space between things, as padding, margin and gap. A component
+ * takes a step and writes no number of its own; the chapter Ruimte in Storybook says when to
+ * take which. The test in space-css.test.ts keeps it that way: it fails on a number of rem
+ * outside this file, apart from the files that are not converted yet.
+ *
+ * Medium is the default: when in doubt, take it. The one number that is not a step is 0.125rem,
+ * an optical correction between two small controls, and it stays where it is.
+ */
+
+@layer hf.tokens {
+  :root {
+    /* The least: a border that just doesn't touch, or two things that belong together. */
+    --hf-space-xs: 0.25rem;
+
+    /* Between text and something else small, such as an icon or a label. */
+    --hf-space-s: 0.5rem;
+
+    /* The default, and between two equal or comparable small components, such as buttons. */
+    --hf-space-m: 1rem;
+
+    /* Between medium and the grid: the padding of a card on a wide screen. */
+    --hf-space-l: 1.5rem;
+
+    /* The space in the grid of the page, and the most there is: no component has more. */
+    --hf-space-xl: 2rem;
+  }
+}

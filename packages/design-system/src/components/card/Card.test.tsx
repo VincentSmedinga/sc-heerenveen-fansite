@@ -140,8 +140,8 @@ describe('the transparent surface in card.css', () => {
     expect(rule(String.raw`\.hf-card`)).toContain(
       'padding: var(--hf-card-padding-block) var(--hf-card-padding-inline);',
     )
-    expect(rule(String.raw`\.hf-card`)).toContain('--hf-card-padding-block: 1rem;')
-    expect(rule(String.raw`\.hf-card`)).toContain('--hf-card-padding-inline: 1.25rem;')
+    expect(rule(String.raw`\.hf-card`)).toContain('--hf-card-padding-block: var(--hf-space-m);')
+    expect(rule(String.raw`\.hf-card`)).toContain('--hf-card-padding-inline: var(--hf-space-m);')
     expect(transparent).not.toMatch(/(^|\s)(padding|padding-inline|padding-inline-start|padding-inline-end):/)
   })
 
@@ -160,15 +160,8 @@ describe('the space for the arrow of a heading in card.css', () => {
   const css = readFileSync(join(import.meta.dirname, 'card.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
   it('says how wide the padding at the start side is, so the arrow of a heading with an anchor stands in the middle of it', () => {
-    const narrow = /--hf-heading-gutter: ([\d.]+rem);\s*@media/.exec(css)?.[1]
-    const narrowPadding = /--hf-card-padding-inline: ([\d.]+rem);/.exec(css)?.[1]
-    const wide =
-      /@media \(width >= 40rem\) \{\s*--hf-card-padding-block: [\d.]+rem;\s*--hf-card-padding-inline: ([\d.]+rem);\s*--hf-heading-gutter: ([\d.]+rem);/.exec(
-        css,
-      )
-
-    expect(narrow).toBe('1.25rem')
-    expect(narrowPadding).toBe(narrow)
-    expect(wide?.[1]).toBe(wide?.[2])
+    // The gutter is the padding itself, set once, so it follows the padding on a wide screen.
+    expect(css).toMatch(/--hf-heading-gutter: var\(--hf-card-padding-inline\);\s*@media/)
+    expect(css.match(/--hf-heading-gutter:/g)).toHaveLength(1)
   })
 })
