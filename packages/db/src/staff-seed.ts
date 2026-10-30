@@ -10,7 +10,8 @@ import { staff } from './schema.ts'
  * Wikipedia gives it; a date it does not give is left to the month or the year, never guessed.
  * `end_date` is the last day of the period, so a coach whose successor begins on a day ends on
  * the day before it. Where the source leaves a gap or contradicts itself, the note says what we
- * took and why.
+ * took and why. A date that comes from another source than Wikipedia, such as the end of Robin
+ * van Persie, which is from the announcement of the club, says so in a comment and in the note.
  *
  * A change to a row that is already in a database is a migration: the seed finds a row by its
  * role, name and begin date, and a row with another begin date is a new row.
@@ -155,10 +156,12 @@ export const headCoaches = [
     wikipediaPage: 'Kees van Wonderen',
   },
   {
-    endDate: '2025-02-01',
-    endPrecision: 'month',
+    // The last day comes from the announcement of the club, not from Wikipedia, which only has
+    // "about 23 February 2025": he left sc Heerenveen on 23 February 2025.
+    endDate: '2025-02-23',
+    endPrecision: 'day',
     name: 'Robin van Persie',
-    note: 'Gepresenteerd op 17 mei 2024. Wikipedia geeft alleen het jaar van zijn begin. De clubs bereikten op 20 februari 2025 overeenstemming over zijn vertrek, ongeveer op 23 februari.',
+    note: 'Gepresenteerd op 17 mei 2024. Wikipedia geeft alleen het jaar van zijn begin. De clubs bereikten op 20 februari 2025 overeenstemming. Hij vertrok op 23 februari 2025; die dag komt uit de aankondiging van de club en niet van Wikipedia.',
     startDate: '2024-01-01',
     startPrecision: 'year',
     wikipediaPage: 'Robin van Persie',
@@ -168,7 +171,7 @@ export const headCoaches = [
     endPrecision: 'day',
     interim: true,
     name: 'Henk Brugge',
-    note: 'Wikipedia noemt februari of maart 2025 als begin. We nemen februari. Het einde volgt uit het begin van Robin Veldman op 21 maart 2025: we nemen de dag ervoor als laatste dag.',
+    note: 'Wikipedia noemt februari of maart 2025 als begin. We nemen februari, de maand van het vertrek van Robin van Persie op 23 februari: een dag in februari vóór die dag is dus niet zeker. Het einde volgt uit het begin van Robin Veldman op 21 maart 2025: we nemen de dag ervoor als laatste dag.',
     startDate: '2025-02-01',
     startPrecision: 'month',
     wikipediaPage: 'Henk Brugge',

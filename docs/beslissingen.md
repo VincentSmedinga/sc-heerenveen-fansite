@@ -7207,6 +7207,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** de seed (`headCoaches` in `packages/db/src/staff-seed.ts`) heeft de hoofdtrainers van 1 juli 1990 tot nu uit de Nederlandse Wikipedia (gelezen op 30 oktober 2026), elk met de precisie die Wikipedia geeft.
   Waar Wikipedia een einde afleidt uit het begin van de opvolger (Jan Everse en Henk Brugge), staat als laatste dag de dag ervoor, zodat twee periodes elkaar niet overlappen.
   Een "einde van het seizoen" is de laatste dag van dat seizoen, 30 juni.
+  Eén datum komt niet van Wikipedia: Robin van Persie vertrok op 23 februari 2025, volgens de aankondiging van de club (de projecteigenaar, 30 oktober 2026).
+  Wikipedia heeft daar "ongeveer 23 februari", dus de rij heeft de dag met de precisie `day`, en een opmerking in de seed en de toelichting zegt waar de datum vandaan komt.
+  Zijn begin is alleen als jaar bekend, en dat blijft zo.
   De toelichting (`note`) schrijft op wat de bron openlaat of tegenspreekt, in onze woorden.
   De tabel is er vanaf nu voor een nieuwe trainer: die komt als rij in de seed.
 - **Waarom:** acceptatie en productie krijgen de rijen zonder iets met de hand te doen, want de site zet ze bij het opstarten in de tabel, zoals de echte bronnen.

@@ -235,6 +235,19 @@ describe('the staff on a day', () => {
     })
   })
 
+  it('has Van Persie end on 23 February 2025, known to the day, and Brugge in the days after it', async () => {
+    expect(await findStaffOn(database.db, 'coach', '2025-02-22')).toMatchObject({
+      member: { name: 'Robin van Persie' },
+    })
+    expect(await findStaffOn(database.db, 'coach', '2025-02-23')).toMatchObject({
+      kind: 'certain',
+      member: { endDate: '2025-02-23', endPrecision: 'day', name: 'Robin van Persie' },
+    })
+    // Brugge began "in February or March": from 24 February he may be it, not for certain.
+    expect(candidatesOf(await findStaffOn(database.db, 'coach', '2025-02-24'))).toEqual(['Henk Brugge'])
+    expect(await findStaffOn(database.db, 'coach', '2025-03-01')).toMatchObject({ member: { name: 'Henk Brugge' } })
+  })
+
   it('has no coach in the gap between Jansen and Tobiassen', async () => {
     expect(await findStaffOn(database.db, 'coach', '2022-01-24')).toMatchObject({ member: { name: 'Johnny Jansen' } })
     expect(await findStaffOn(database.db, 'coach', '2022-01-25')).toEqual({ kind: 'none' })

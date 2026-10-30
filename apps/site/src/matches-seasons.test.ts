@@ -89,6 +89,8 @@ describe('getMatchData', () => {
       ['Henk Brugge', true],
       ['Robin Veldman', false],
     ])
+    // The end of Van Persie is the day of the announcement of the club, known to the day.
+    expect((await getMatchData('2024/25')).coaches[0]).toMatchObject({ endDate: '2025-02-23', endPrecision: 'day' })
     expect((await getMatchData('2010/11')).coaches.map((coach) => coach.name)).toEqual(['Ron Jans'])
   })
 
