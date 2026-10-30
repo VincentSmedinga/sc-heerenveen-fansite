@@ -4609,6 +4609,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een pagina die buiten het bereik valt, geeft 404 en niet een lege lijst.
 - **Alternatieven:** een pagina per podcast, `/podcasts/omroep-abe`.
   Of de slug uit de naam afleiden in de code; dan verandert het adres mee met de naam.
+- **Later:** zie _Op `/podcasts` kies je podcasts met selectievakjes in een fieldset_: het filter per podcast is een groep selectievakjes met een knop "Toon", en `?podcast=<slug>` mag vaker voorkomen.
+  Zonder `podcast` zijn het alle podcasts.
 - **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de pagina staat op `/nieuws/podcasts`, met dezelfde parameters (`?podcast=<slug>` en `?pagina=N`).
   `/podcasts` vervalt zonder omleiding.
 
@@ -4635,6 +4637,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een adres moet één podcast noemen, dus `?podcast=Omroep-Abe` is een onbekende podcast en geen tweede adres voor Omroep Abe.
 - **Alternatieven:** de collatie van de kolom veranderen in `utf8mb4_bin`; dan staan `omroep-abe` en `Omroep-Abe` allebei in het register.
   Of de pagina de slug laten toetsen; dan kan een andere query dezelfde fout maken.
+- **Later:** zie _Op `/podcasts` kies je podcasts met selectievakjes in een fieldset_: een adres mag meer podcasts noemen, elk met zijn eigen slug.
+  Elke slug wordt letter voor letter vergeleken, en `?podcast=Omroep-Abe` blijft een onbekende podcast.
 
 ### Een aflevering is een nieuwsregel
 
@@ -4667,6 +4671,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   "Pagina 1 van 1" zonder een link zegt een bezoeker niets.
 - **Alternatieven:** een eigen component met een eigen lijst; dat is dubbel werk.
   Of een `Select` voor de podcasts; dat vraagt JavaScript of een knop om te verzenden.
+- **Later:** zie _Op `/podcasts` kies je podcasts met selectievakjes in een fieldset_: `/podcasts` gebruikt `Filter` niet meer.
+  Het component blijft in het designsysteem, maar geen enkele pagina gebruikt het nu.
+  De paginering blijft zoals ze was.
 
 ### De tijd van een aflevering: de dag in de week, daarna de datum
 
@@ -4689,6 +4696,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Met de controle vooraf zijn er hooguit zoveel lijsten als er podcasts en pagina's zijn.
 - **Alternatieven:** niet bewaren; dat is een query per bezoek.
   Of een grens aan het aantal bewaarde lijsten; dat is meer code en laat een bezoeker de goede lijsten uit het geheugen duwen.
+- **Later:** zie _Op `/podcasts` kies je podcasts met selectievakjes in een fieldset_: de sleutel is de lijst slugs van de gekozen podcasts, in de volgorde van de lijst, en alle podcasts zijn dezelfde sleutel als geen.
+  De controle vooraf blijft.
+
+### Op `/podcasts` kies je podcasts met selectievakjes in een fieldset
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** het filter per podcast op `/podcasts` is een formulier met `method="get"` naar `/podcasts`, met een `fieldset` en een `legend` "Podcasts", een selectievakje per podcast (`name="podcast"`, de `slug` als waarde) en een knop "Toon".
+  Het is dezelfde aanpak als bij de bronnen op `/nieuws` (_Op `/nieuws` kies je bronnen met selectievakjes in een fieldset_), met hetzelfde onderdeel, `CheckboxGroup`.
+  - **Geen vinkje betekent alle podcasts**, en alle vinkjes ook.
+    Vanaf het eerste vinkje toont de pagina alleen de aangevinkte podcasts.
+    "Alle podcasts" als link vervalt.
+  - **Het adres** is `?podcast=a&podcast=b`, in de volgorde van de lijst, en `?pagina=N` blijft.
+    Een adres met alle podcasts is dezelfde pagina als het adres zonder `podcast`: het canonieke adres en de adressen van de paginering hebben geen `podcast`.
+    Een onbekende slug, een slug die twee keer voorkomt en een verkeerde `pagina` geven "niet gevonden".
+    Een nieuwe keuze begint op pagina 1, omdat het formulier geen `pagina` verstuurt.
+  - **De kaart staat bovenaan de zijbalk**, lichtblauw, en de pagina heeft dus altijd een zijbalk zolang er podcasts zijn.
+    De maten van `/nieuws` (46 rem, 2 rem en 16 rem) gelden hier niet; de zijbalk heeft de gewone breedte.
+  - **Eén podcast aangevinkt:** de naam van de podcast staat niet bij elke aflevering, want hij staat in de kop ("Podcasts van A") en in het vakje, en de naam blijft in elke regel voor een schermlezer (`showSource` van `NewsItem`).
+    De kaart "Over A" met de beschrijving en de links naar Apple Podcasts en Spotify staat dan onder de kaart met de vakjes, op een warm vlak, zodat de twee kaarten niet allebei lichtblauw zijn.
+    Bij geen vinkje, bij alle vinkjes en bij meer dan één vinkje is er geen kaart "Over".
+  - **De titel en de kop** noemen de gekozen podcasts: "Podcasts van A en B", bij meer podcasts "A, B en C", en "Podcasts" voor alle podcasts.
+- **Waarom:** met links kun je één podcast kiezen en met vakjes meer, en een formulier met een GET geeft een adres dat je kunt delen en werkt zonder JavaScript.
+  Dezelfde regels als op `/nieuws` houden de twee pagina's gelijk voor wie ze gebruikt, en voor wie ze onderhoudt: de functies die het adres lezen en maken staan voor beide in `src/filter-query.ts`.
+- **Gevolg:** de queries `listPodcastEpisodes` en `countPodcastEpisodes` nemen `podcasts`, een lijst slugs, in plaats van `podcast`.
+  De server bewaart de pagina's per keuze, met de podcasts in de volgorde van de lijst.
+  `Filter` heeft geen pagina meer die hem gebruikt.
+  We laten hem staan; of hij weg moet, beslist de projecteigenaar.
+- **Alternatieven:** de kaart "Over" ook tonen bij meer podcasts (dan zijn het er meer dan de zijbalk aankan, en de teksten zijn per podcast).
+  De maten van `/nieuws` ook hier gebruiken (dat vraagt de projecteigenaar apart).
+  Alle vakjes aangevinkt als een eigen adres laten bestaan (twee adressen voor dezelfde pagina).
 
 ### De duur, het seizoen en het nummer van een aflevering tonen we wel
 

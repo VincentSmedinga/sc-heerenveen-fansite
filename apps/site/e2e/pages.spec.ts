@@ -39,9 +39,16 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/wedstrijden/kies', status: 200 },
   { path: '/wedstrijden/2099-00', status: 404 },
   { path: '/wedstrijden/onzin', status: 404 },
+  // The podcasts: all, one (with the card about it), both (which is all), the second page, and
+  // the addresses that say "niet gevonden": an unknown podcast, a podcast given twice and a
+  // page that is wrong.
   { path: '/podcasts', status: 200 },
   { path: '/podcasts?podcast=testpodcast', status: 200 },
+  { path: '/podcasts?podcast=proefpodcast&podcast=testpodcast', status: 200 },
+  { path: '/podcasts?podcast=testpodcast&podcast=testpodcast', status: 404 },
+  { path: '/podcasts?podcast=testpodcast&podcast=bestaat-niet', status: 404 },
   { path: '/podcasts?pagina=2', status: 200 },
+  { path: '/podcasts?podcast=testpodcast&pagina=2', status: 200 },
   { path: '/podcasts?podcast=bestaat-niet', status: 404 },
   { path: '/podcasts?pagina=99', status: 404 },
   { path: '/podcasts?pagina=0', status: 404 },

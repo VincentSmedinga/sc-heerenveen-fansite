@@ -940,9 +940,9 @@ describe('the podcasts', () => {
       expect((await listPodcastEpisodes(database.db, { limit: 25, until: now })).map((e) => e.title)).toEqual([
         'Aflevering zichtbaar',
       ])
-      expect((await listPodcastEpisodes(database.db, { limit: 25, podcast: 'abe', until: now })).length).toBe(1)
+      expect((await listPodcastEpisodes(database.db, { limit: 25, podcasts: ['abe'], until: now })).length).toBe(1)
       expect(await countPodcastEpisodes(database.db, { until: now })).toBe(1)
-      expect(await countPodcastEpisodes(database.db, { podcast: 'abe', until: now })).toBe(1)
+      expect(await countPodcastEpisodes(database.db, { podcasts: ['abe'], until: now })).toBe(1)
     })
 
     it.each(['doubtful', 'irrelevant'] as const)('gives no %s episode, and does not count it', async (relevance) => {
@@ -961,9 +961,9 @@ describe('the podcasts', () => {
       expect((await listPodcastEpisodes(database.db, { limit: 25, until: now })).map((e) => e.title)).toEqual([
         'Aflevering zichtbaar',
       ])
-      expect((await listPodcastEpisodes(database.db, { limit: 25, podcast: 'abe', until: now })).length).toBe(1)
+      expect((await listPodcastEpisodes(database.db, { limit: 25, podcasts: ['abe'], until: now })).length).toBe(1)
       expect(await countPodcastEpisodes(database.db, { until: now })).toBe(1)
-      expect(await countPodcastEpisodes(database.db, { podcast: 'abe', until: now })).toBe(1)
+      expect(await countPodcastEpisodes(database.db, { podcasts: ['abe'], until: now })).toBe(1)
     })
 
     it('leaves a podcast out of the filter when none of its episodes is relevant', async () => {
@@ -1016,11 +1016,31 @@ describe('the podcasts', () => {
       await addItem(ids.proef, 'proef', new Date('2026-10-20T08:00:00Z'))
 
       expect(
-        (await listPodcastEpisodes(database.db, { limit: 25, podcast: 'testpodcast', until: now })).map((e) => e.title),
+        (await listPodcastEpisodes(database.db, { limit: 25, podcasts: ['testpodcast'], until: now })).map(
+          (e) => e.title,
+        ),
       ).toEqual(['Aflevering test'])
-      expect(await countPodcastEpisodes(database.db, { podcast: 'testpodcast', until: now })).toBe(1)
-      expect(await listPodcastEpisodes(database.db, { limit: 25, podcast: 'testkrant', until: now })).toEqual([])
-      expect(await countPodcastEpisodes(database.db, { podcast: 'nergens', until: now })).toBe(0)
+      expect(await countPodcastEpisodes(database.db, { podcasts: ['testpodcast'], until: now })).toBe(1)
+      expect(await listPodcastEpisodes(database.db, { limit: 25, podcasts: ['testkrant'], until: now })).toEqual([])
+      expect(await countPodcastEpisodes(database.db, { podcasts: ['nergens'], until: now })).toBe(0)
+    })
+
+    it('gives the episodes of more podcasts, by slug, and the total of them', async () => {
+      const ids = await fill()
+
+      await addItem(ids.test, 'test', new Date('2026-10-01T08:00:00Z'))
+      await addItem(ids.proef, 'proef', new Date('2026-10-20T08:00:00Z'))
+
+      const both = { limit: 25, podcasts: ['testpodcast', 'proefpodcast'], until: now }
+
+      expect((await listPodcastEpisodes(database.db, both)).map((e) => e.title)).toEqual([
+        'Aflevering proef',
+        'Aflevering test',
+      ])
+      expect(await countPodcastEpisodes(database.db, both)).toBe(2)
+      // A slug that no podcast has adds nothing, and no slugs is every podcast.
+      expect(await countPodcastEpisodes(database.db, { podcasts: ['testpodcast', 'nergens'], until: now })).toBe(1)
+      expect(await countPodcastEpisodes(database.db, { podcasts: [], until: now })).toBe(2)
     })
 
     it('gives a page, and the total of all pages', async () => {
@@ -1140,7 +1160,7 @@ describe('the podcasts', () => {
       expect(await findPodcast(database.db, 'testpodcast')).toBeDefined()
       expect(await findPodcast(database.db, 'Testpodcast')).toBeUndefined()
       expect(await findPodcast(database.db, 'testpodcást')).toBeUndefined()
-      expect(await countPodcastEpisodes(database.db, { podcast: 'TESTPODCAST', until: now })).toBe(0)
+      expect(await countPodcastEpisodes(database.db, { podcasts: ['TESTPODCAST'], until: now })).toBe(0)
     })
   })
 })
