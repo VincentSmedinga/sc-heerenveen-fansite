@@ -617,14 +617,18 @@ await withEmptyDatabase((database) =>
     assert.match(sourcesHtml, /Leeuwarder Courant/)
     assert.doesNotMatch(sourcesHtml, /Testkrant|Uitgezette testbron/)
 
-    // The podcast page reads the episodes, and the seed has none. A podcast or a page that
-    // doesn't exist is a 404.
+    // The podcast page reads the episodes, and the seed has none, so there is no filter. A
+    // podcast, several podcasts or a page that doesn't exist is a 404, and so is a podcast
+    // given twice.
     const podcastPage = await fetch(`${origin}/podcasts`)
     const podcastHtml = await podcastPage.text()
     assert.equal(podcastPage.status, 200)
     assert.match(podcastHtml, /<h1[^>]*>Podcasts<\/h1>/)
     assert.match(podcastHtml, /We hebben nog geen podcastafleveringen gevonden\./)
+    assert.doesNotMatch(podcastHtml, /<aside|<fieldset|type="checkbox"/)
     assert.equal((await fetch(`${origin}/podcasts?podcast=bestaat-niet`)).status, 404)
+    assert.equal((await fetch(`${origin}/podcasts?podcast=bestaat-niet&podcast=omroep-abe`)).status, 404)
+    assert.equal((await fetch(`${origin}/podcasts?podcast=omroep-abe&podcast=omroep-abe`)).status, 404)
     assert.equal((await fetch(`${origin}/podcasts?pagina=2`)).status, 404)
     assert.equal((await fetch(`${origin}/podcasts?pagina=0`)).status, 404)
 

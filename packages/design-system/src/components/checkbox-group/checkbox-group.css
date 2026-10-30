@@ -9,13 +9,15 @@
 @layer hf.components {
   .hf-checkbox-group {
     border: 0;
-    margin: 0;
+
+    /* Room under the last checkbox, before the button of the form. */
+    margin: 0 0 0.5rem;
     min-inline-size: 0;
     padding: 0;
   }
 
   .hf-checkbox-group > legend {
-    margin-block-end: 0.5rem;
+    margin-block-end: 1rem;
     padding: 0;
   }
 

@@ -353,16 +353,24 @@ De pagina staat niet in het hoofdmenu; dat volgt uit de opbouw van de site (#431
 `/podcasts` toont de afleveringen van de podcasts die aanstaan, nieuwste eerst, 25 per pagina, elk als `NewsItem`: de titel als link naar de pagina van de aflevering bij de maker, de naam van de podcast en de tijd.
 Achter de naam staan de feiten die de feed geeft, als `details` van de `NewsItem`: het seizoen en het nummer, zoals "seizoen 9, aflevering 16" of "aflevering 120", en de duur, zoals "37 min" of "1 uur 12 min" (`episodeDetails` in `src/news.ts`).
 Een aflevering van deze week heeft de korte dag en de tijd, zoals "wo 14:05"; een oudere heeft de datum, met het jaar als dat niet dit jaar is, want de lijst gaat jaren terug.
-Boven de lijst staat het filter (`Filter` uit het designsysteem): "Alle podcasts" en een link per podcast met afleveringen, als `/podcasts?podcast=omroep-abe`.
-De slug komt uit de kolom `slug` van `sources`, dus een andere naam verandert het adres niet.
-Bij een gekozen podcast staat in de zijbalk een kaart op een tonaal vlak (`Card` met `surface="soft"`) met de kop "Over Omroep Abe", de beschrijving van de podcast uit het register (`sources.description`, de tekst van de maker uit zijn feed, dezelfde als op Onze bronnen), en daarna "Luister ook op" met een lijst met een tekstlink per adres dat de podcast heeft.
+Het filter staat in een lichtblauwe kaart (`surface="soft"`) bovenaan de zijbalk: een formulier met een GET naar `/podcasts`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Podcasts") en de knop "Toon".
+Er is een vakje per podcast met afleveringen, op alfabet, met de `slug` als waarde, dus een andere naam verandert het adres niet (de kolom `slug` van `sources`).
+De knop blijft ook met JavaScript, en het formulier werkt zonder.
+Zonder vinkje en met alle vinkjes toont de pagina alle afleveringen, op het adres zonder `podcast`: `/podcasts`.
+Met één of meer vinkjes (maar niet alle) staan er alleen afleveringen van die podcasts, op `/podcasts?podcast=omroep-abe&podcast=radio-camataru`, in de volgorde van de lijst.
+De queries nemen de slugs als `podcasts` (`listPodcastEpisodes` en `countPodcastEpisodes` in `packages/db/src/queries.ts`).
+De functies die het adres lezen en maken staan in `src/podcasts-query.ts`; ze delen hun werk met `/nieuws` in `src/filter-query.ts`.
+Met precies één vinkje staat de naam van de podcast niet bij elke aflevering (`showSource` van `NewsItem`), want de kop van de pagina noemt hem al; een schermlezer hoort hem nog wel.
+De titel en de kop noemen de gekozen podcasts, zoals "Podcasts van Omroep Abe en Radio Camataru".
+Bij precies één vinkje staat onder de kaart met de vakjes een tweede kaart op een warm vlak (`surface="warm"`), zodat hij anders is dan de lichtblauwe kaart erboven, met de kop "Over Omroep Abe", de beschrijving van de podcast uit het register (`sources.description`, de tekst van de maker uit zijn feed, dezelfde als op Onze bronnen), en daarna "Luister ook op" met een lijst met een tekstlink per adres dat de podcast heeft.
 Heeft de podcast geen adressen, dan staat de beschrijving er alleen.
-Bij "Alle podcasts" staat er geen kaart.
+Bij geen vinkje en bij meer dan één vinkje staat er geen kaart "Over".
 Op een smal scherm staat de zijbalk onder de lijst, zoals bij de andere pagina's.
-Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/podcasts?pagina=2`, en met een filter `/podcasts?podcast=omroep-abe&pagina=2`.
-Een podcast die niet in het filter staat, en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
+Zonder afleveringen is er geen filter en geen zijbalk.
+Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/podcasts?pagina=2`, en met podcasts `/podcasts?podcast=omroep-abe&podcast=radio-camataru&pagina=2`.
+Een podcast die niet in het filter staat, een podcast die twee keer in het adres staat en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
 Een parameter die de pagina niet kent, telt niet mee.
-De server bewaart elke combinatie van podcast en pagina vijf minuten, maar alleen na de controle van het adres, zodat een bezoeker de cache niet kan vullen met adressen van zichzelf (`src/podcasts.ts`).
+De server bewaart elke combinatie van podcasts en pagina vijf minuten, maar alleen na de controle van het adres, zodat een bezoeker de cache niet kan vullen met adressen van zichzelf (`src/podcasts.ts`).
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
 De pagina laadt niets van een podcastplatform: alleen de links gaan erheen.
 
