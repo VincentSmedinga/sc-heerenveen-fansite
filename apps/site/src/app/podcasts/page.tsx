@@ -144,7 +144,7 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
             </Form>
           </Card>
           {about !== undefined && (
-            <Card aria-labelledby="about-heading" surface="soft">
+            <Card aria-labelledby="about-heading" surface="warm">
               <Heading id="about-heading" level={2}>
                 Over {about.name}
               </Heading>

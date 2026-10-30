@@ -288,7 +288,7 @@ describe('the card about the podcast in the sidebar', () => {
   /** The card alone, or an empty text when the page has none. */
   const sidebarOf = (html: string) => (html.includes('<section') ? html.slice(html.indexOf('<section')) : '')
 
-  it('is a card on a tonal surface in the sidebar under the card with the filter, named by its h2 "Over" and the name of the podcast', async () => {
+  it('is a card on a warm surface in the sidebar under the card with the filter, named by its h2 "Over" and the name of the podcast', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, about: bothAddresses, selected: [abe] })
 
     const html = await render({ podcast: 'omroep-abe' })
@@ -296,9 +296,9 @@ describe('the card about the podcast in the sidebar', () => {
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(html.indexOf('<fieldset')).toBeLessThan(html.indexOf('<section'))
-    expect(html).toContain('</form></div><section class="hf-card hf-card-soft" aria-labelledby="about-heading">')
+    expect(html).toContain('</form></div><section class="hf-card hf-card-warm" aria-labelledby="about-heading">')
     expect(sidebarOf(html)).toMatch(
-      /^<section class="hf-card hf-card-soft" aria-labelledby="about-heading"><h2 class="hf-heading-2" id="about-heading">Over Omroep Abe<\/h2>/,
+      /^<section class="hf-card hf-card-warm" aria-labelledby="about-heading"><h2 class="hf-heading-2" id="about-heading">Over Omroep Abe<\/h2>/,
     )
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Podcasts van Omroep Abe</h1>',

@@ -4658,7 +4658,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - **De kaart staat bovenaan de zijbalk**, lichtblauw, en de pagina heeft dus altijd een zijbalk zolang er podcasts zijn.
     De maten van `/nieuws` (46 rem, 2 rem en 16 rem) gelden hier niet; de zijbalk heeft de gewone breedte.
   - **Eén podcast aangevinkt:** de naam van de podcast staat niet bij elke aflevering, want hij staat in de kop ("Podcasts van A") en in het vakje, en de naam blijft in elke regel voor een schermlezer (`showSource` van `NewsItem`).
-    De kaart "Over A" met de beschrijving en de links naar Apple Podcasts en Spotify staat dan onder de kaart met de vakjes.
+    De kaart "Over A" met de beschrijving en de links naar Apple Podcasts en Spotify staat dan onder de kaart met de vakjes, op een warm vlak, zodat de twee kaarten niet allebei lichtblauw zijn.
     Bij geen vinkje, bij alle vinkjes en bij meer dan één vinkje is er geen kaart "Over".
   - **De titel en de kop** noemen de gekozen podcasts: "Podcasts van A en B", bij meer podcasts "A, B en C", en "Podcasts" voor alle podcasts.
 - **Waarom:** met links kun je één podcast kiezen en met vakjes meer, en een formulier met een GET geeft een adres dat je kunt delen en werkt zonder JavaScript.

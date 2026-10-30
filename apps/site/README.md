@@ -362,7 +362,7 @@ De queries nemen de slugs als `podcasts` (`listPodcastEpisodes` en `countPodcast
 De functies die het adres lezen en maken staan in `src/podcasts-query.ts`; ze delen hun werk met `/nieuws` in `src/filter-query.ts`.
 Met precies één vinkje staat de naam van de podcast niet bij elke aflevering (`showSource` van `NewsItem`), want de kop van de pagina noemt hem al; een schermlezer hoort hem nog wel.
 De titel en de kop noemen de gekozen podcasts, zoals "Podcasts van Omroep Abe en Radio Camataru".
-Bij precies één vinkje staat onder de kaart met de vakjes een tweede kaart op een tonaal vlak met de kop "Over Omroep Abe", de beschrijving van de podcast uit het register (`sources.description`, de tekst van de maker uit zijn feed, dezelfde als op Onze bronnen), en daarna "Luister ook op" met een lijst met een tekstlink per adres dat de podcast heeft.
+Bij precies één vinkje staat onder de kaart met de vakjes een tweede kaart op een warm vlak (`surface="warm"`), zodat hij anders is dan de lichtblauwe kaart erboven, met de kop "Over Omroep Abe", de beschrijving van de podcast uit het register (`sources.description`, de tekst van de maker uit zijn feed, dezelfde als op Onze bronnen), en daarna "Luister ook op" met een lijst met een tekstlink per adres dat de podcast heeft.
 Heeft de podcast geen adressen, dan staat de beschrijving er alleen.
 Bij geen vinkje en bij meer dan één vinkje staat er geen kaart "Over".
 Op een smal scherm staat de zijbalk onder de lijst, zoals bij de andere pagina's.
