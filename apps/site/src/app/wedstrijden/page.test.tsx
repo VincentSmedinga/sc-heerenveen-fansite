@@ -1345,17 +1345,27 @@ describe('the page /wedstrijden', () => {
           .trim(),
       )
 
-    it('is a card with a list of lines, each with a short match and under it a name and, for a goal, the minute and the player', async () => {
+    it('is a card with a list of lines, each with a name above a short match and, for a goal, the minute and the player in the name', async () => {
       const card = section(await render(), 'uitersten')
 
       expect(card.match(/<ul[^>]*role="list"/g)).toHaveLength(1)
       expect(card.match(/class="hf-short-match"/g)).toHaveLength(4)
       expect(lines(card)).toEqual([
-        expect.stringMatching(/Testdorp FC.* thuis 2–0 2 tegen 0 Grootste overwinning$/),
-        expect.stringMatching(/Voorbeeld United.* uit 2–2 2 tegen 2 Meeste doelpunten$/),
-        expect.stringMatching(/Testdorp FC · thuis 2–0 2 tegen 0 Vroegste doelpunt, minuut 34: Proefman$/),
-        expect.stringMatching(/Voorbeeld United · uit 2–2 2 tegen 2 Laatste doelpunt, minuut 63: Kopie$/),
+        expect.stringMatching(/^Grootste overwinning .*Testdorp FC.* thuis 2–0 2 tegen 0$/),
+        expect.stringMatching(/^Meeste doelpunten .*Voorbeeld United.* uit 2–2 2 tegen 2$/),
+        expect.stringMatching(/^Vroegste doelpunt · minuut 34 · Proefman .*Testdorp FC · thuis 2–0 2 tegen 0$/),
+        expect.stringMatching(/^Laatste doelpunt · minuut 63 · Kopie .*Voorbeeld United · uit 2–2 2 tegen 2$/),
       ])
+    })
+
+    it('puts the name in the same item right before the short match, with a dot a screen reader skips', async () => {
+      const card = section(await render(), 'uitersten')
+
+      expect(card.match(/<li>(?:<p class="hf-meta">[^]*?<\/p>)<div class="hf-short-match">/g)).toHaveLength(4)
+      expect(card).toContain(
+        '<p class="hf-meta">Vroegste doelpunt <span aria-hidden="true">·</span> minuut 34 <span aria-hidden="true">·</span> Proefman</p><div class="hf-short-match">',
+      )
+      expect(card).toContain('<p class="hf-meta">Grootste overwinning</p><div class="hf-short-match">')
     })
 
     it('leaves out a line without a match, such as the biggest loss in a season without a loss, and does not say so', async () => {
@@ -1396,11 +1406,11 @@ describe('the page /wedstrijden', () => {
       const card = section(await render(), 'uitersten')
 
       expect(lines(card)).toEqual([
-        expect.stringMatching(/Testdorp FC.*Grootste overwinning$/),
-        expect.stringMatching(/Oud Resultaat.* thuis 1–5 1 tegen 5 Grootste nederlaag$/),
-        expect.stringMatching(/Oud Resultaat.*Meeste doelpunten$/),
-        expect.stringMatching(/Vroegste doelpunt, minuut 34: Proefman$/),
-        expect.stringMatching(/Oud Resultaat.*Laatste doelpunt, minuut 90\+4: Teststraat \(eigen doelpunt\)$/),
+        expect.stringMatching(/^Grootste overwinning .*Testdorp FC/),
+        expect.stringMatching(/^Grootste nederlaag .*Oud Resultaat.* thuis 1–5 1 tegen 5$/),
+        expect.stringMatching(/^Meeste doelpunten .*Oud Resultaat/),
+        expect.stringMatching(/^Vroegste doelpunt · minuut 34 · Proefman /),
+        expect.stringMatching(/^Laatste doelpunt · minuut 90\+4 · Teststraat \(eigen doelpunt\) .*Oud Resultaat/),
       ])
     })
 

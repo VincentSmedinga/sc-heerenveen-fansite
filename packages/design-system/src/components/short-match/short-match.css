@@ -1,7 +1,7 @@
 /*
  * A short match: the day, the opponent with where it was played, and the result, on one line
  * that wraps when the place is narrow. It has no colour of its own for the outcome. A List of
- * short matches has a thin line between the lines.
+ * short matches has a thin line between the lines, and a line can have a name above its match.
  */
 
 @layer hf.components {
@@ -60,5 +60,28 @@
 
   li:last-child > .hf-short-match {
     padding-block-end: 0;
+  }
+
+  /*
+   * A name above the match, in the same item: the thin line goes above the name, so the name
+   * stays with its match. The name is close to the match, with more space to the line above it
+   * than to its own match. The name comes first in the item, so a screen reader reads it first.
+   * This comes after the rules above, which have the same weight.
+   */
+  li > :not(.hf-short-match):has(+ .hf-short-match) {
+    border-block-start: 1px solid var(--hf-colour-border-default);
+    margin-block: 0.75rem 0;
+    padding-block-start: 0.5rem;
+  }
+
+  li:first-child > :not(.hf-short-match):has(+ .hf-short-match) {
+    border-block-start: 0;
+    margin-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  li > :not(.hf-short-match) + .hf-short-match {
+    border-block-start: 0;
+    padding-block-start: 0.25rem;
   }
 }
