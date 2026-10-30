@@ -159,6 +159,13 @@ export const motionChanges: MotionChange[] = [
     why: 'Druk (`:active`)',
   },
   {
+    component: 'Select, pijltje van de opgemaakte lijst',
+    group: 'selecteren',
+    now: 'Draait in 0,2 seconde (#440).',
+    what: 'Draaiing van het pijltje',
+    why: 'Open lijst (`:open`)',
+  },
+  {
     component: 'Heading, ankerlink',
     group: 'verschijnen',
     now: jumps,
