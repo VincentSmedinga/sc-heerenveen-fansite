@@ -31,12 +31,13 @@ export const motionGroups: MotionGroup[] = [
     why: 'De bezoeker ziet dat het ding reageert, en het voelt zacht in plaats van als een schakelaar. Het is kort, zodat een snelle muis niet achterloopt.',
   },
   {
-    contains: 'Ingedrukt (alleen even) en geselecteerd (het blijft zo): `:active` en `aria-pressed`.',
+    contains: 'Ingedrukt (alleen even), en geselecteerd of open (het blijft zo): `:active`, `aria-pressed` en `:open`.',
     id: 'selecteren',
     label: 'Ingedrukt en geselecteerd',
-    moves: 'Vulling, rand en kleur. Ingedrukt volgt de vinger meteen; geselecteerd neemt de tijd van aanwijzen.',
+    moves:
+      'Vulling, rand en kleur, en de draaiing van het pijltje van een open lijst. Ingedrukt volgt de vinger meteen; geselecteerd en open nemen de tijd van aanwijzen.',
     tokens: ['--hf-motion-duration-quick', '--hf-motion-duration-short', '--hf-motion-ease-change'],
-    why: 'Wie drukt, wil dat het ding direct antwoordt. Wat blijft staan, mag rustig overgaan.',
+    why: "Wie drukt, wil dat het ding direct antwoordt. Wat blijft staan, mag rustig overgaan. Een pijltje dat draait als een lijst opent, is zo'n staat die blijft, en het wisselt niet van vorm: het draait een halve slag. Daarom volstaat de tijd van aanwijzen, en is het geen beweging van de hele pagina.",
   },
   {
     contains:
