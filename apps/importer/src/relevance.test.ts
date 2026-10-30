@@ -2,15 +2,20 @@ import type { ItemRelevance } from '@fansite/db/schema'
 
 import { describe, expect, it } from 'vitest'
 
+import type { MatchDay } from './relevance.ts'
+
 import {
   clubNames,
   clubPeople,
+  clubPrefixes,
   clubSurnames,
   footballWords,
   frisianFootballWords,
+  ordinaryClubWords,
+  otherClubGroups,
   otherClubs,
 } from './relevance-terms.ts'
-import { judgeRelevance, normaliseTitle } from './relevance.ts'
+import { judgeRelevance, normaliseTitle, opponentsAround } from './relevance.ts'
 
 type Case = [title: string, expected: ItemRelevance]
 
@@ -427,6 +432,205 @@ describe('judgeRelevance', () => {
   })
 })
 
+const match = (opponent: string, matchDate: string, status: MatchDay['status'] = 'scheduled'): MatchDay => ({
+  matchDate,
+  opponent,
+  status,
+})
+
+/** The value of a headline published at `publishedAt`, with the matches of the season. */
+const judgeAt = (title: string, publishedAt: string, matches: MatchDay[]) =>
+  judgeRelevance(title, opponentsAround(new Date(publishedAt), matches))
+
+describe('the opponent of a match', () => {
+  const ado = [match('ADO Den Haag', '2026-10-24', 'played')]
+
+  it('makes a headline about the opponent relevant, without the name of the club', () => {
+    expect(judgeRelevance('ADO beleeft frustrerende avond', [])).toBe('irrelevant')
+    expect(judgeRelevance('ADO beleeft frustrerende avond', ['ADO Den Haag'])).toBe('relevant')
+    expect(
+      judgeRelevance("ADO beleeft frustrerende avond: 'Ongelofelijk dat je geen punt pakt'", ['ADO Den Haag']),
+    ).toBe('relevant')
+  })
+
+  it('makes a headline relevant that is doubtful on its own when it also names the opponent', () => {
+    expect(judgeRelevance('Veldman kijkt uit naar ADO', [])).toBe('doubtful')
+    expect(judgeRelevance('Veldman kijkt uit naar ADO', ['ADO Den Haag'])).toBe('relevant')
+    expect(judgeRelevance('Supporters in Heerenveen kijken uit naar ADO', ['ADO Den Haag'])).toBe('relevant')
+  })
+
+  it('changes nothing for a headline the other rules judge relevant, and nothing without opponents', () => {
+    for (const [title, expected] of [...namesTheClub, ...doubtful, ...irrelevant]) {
+      expect(judgeRelevance(title, []), title).toBe(judgeRelevance(title))
+      expect(judgeRelevance(title, ['Ajax']), title).toBe(/\bajax\b/iu.test(title) ? 'relevant' : expected)
+    }
+  })
+
+  it('does not make a headline about another club relevant', () => {
+    expect(judgeRelevance('Feyenoord wint na rommelige wedstrijd', ['ADO Den Haag'])).toBe('irrelevant')
+  })
+
+  describe('the window of 7 days, in Dutch time', () => {
+    const day = (publishedAt: string) => judgeAt('ADO beleeft frustrerende avond', publishedAt, ado)
+
+    it.each([
+      ['on the day of the match', '2026-10-24T20:00:00+02:00', 'relevant'],
+      ['7 days before', '2026-10-17T12:00:00+02:00', 'relevant'],
+      ['7 days after', '2026-10-31T23:59:00+01:00', 'relevant'],
+      ['8 days before', '2026-10-16T23:59:00+02:00', 'irrelevant'],
+      ['8 days after', '2026-11-01T00:00:00+01:00', 'irrelevant'],
+    ])('is %s: %s is %s', (_name, publishedAt, expected) => {
+      expect(day(publishedAt)).toBe(expected)
+    })
+
+    // The clocks went back on 25 October 2026, at 3:00 to 2:00.
+    it('counts the day as a reader in the Netherlands saw it, at midnight of the change to winter time', () => {
+      const match1 = [match('ADO Den Haag', '2026-11-01')]
+
+      // 00:30 on 25 October (22:30 UTC on the 24th): 7 days before, although UTC says the 24th.
+      expect(judgeAt('ADO in vorm', '2026-10-24T22:30:00Z', match1)).toBe('relevant')
+      // 23:30 on 24 October (21:30 UTC): 8 days before.
+      expect(judgeAt('ADO in vorm', '2026-10-24T21:30:00Z', match1)).toBe('irrelevant')
+
+      const match2 = [match('ADO Den Haag', '2026-10-18')]
+
+      // 23:30 on 25 October, after the change (22:30 UTC): 7 days after.
+      expect(judgeAt('ADO in vorm', '2026-10-25T22:30:00Z', match2)).toBe('relevant')
+      // 00:30 on 26 October (23:30 UTC on the 25th): 8 days after, although UTC says the 25th.
+      expect(judgeAt('ADO in vorm', '2026-10-25T23:30:00Z', match2)).toBe('irrelevant')
+    })
+
+    it('counts the matches of a played, a scheduled and a cup round the same', () => {
+      for (const status of ['played', 'scheduled'] as const) {
+        expect(judgeAt('ADO in vorm', '2026-10-24T12:00:00Z', [match('ADO Den Haag', '2026-10-24', status)])).toBe(
+          'relevant',
+        )
+      }
+    })
+
+    it('does not count a postponed match without a new date', () => {
+      expect(judgeAt('ADO in vorm', '2026-10-24T12:00:00Z', [match('ADO Den Haag', '2026-10-24', 'postponed')])).toBe(
+        'irrelevant',
+      )
+    })
+
+    it('gives every match of a club its own window', () => {
+      const twice = [match('ADO Den Haag', '2026-10-24', 'played'), match('ADO Den Haag', '2027-02-14')]
+
+      expect(judgeAt('ADO in vorm', '2026-10-30T12:00:00Z', twice)).toBe('relevant')
+      expect(judgeAt('ADO in vorm', '2026-12-01T12:00:00Z', twice)).toBe('irrelevant')
+      expect(judgeAt('ADO in vorm', '2027-02-10T12:00:00Z', twice)).toBe('relevant')
+      expect(
+        opponentsAround(new Date('2026-10-24T12:00:00Z'), [...twice, match('ADO Den Haag', '2026-10-27')]),
+      ).toEqual(['ADO Den Haag', 'ADO Den Haag'])
+    })
+
+    it('counts only the opponent of the match in the window', () => {
+      const matches = [match('ADO Den Haag', '2026-10-24', 'played'), match('Ajax', '2026-11-24')]
+
+      expect(judgeAt('Ajax maakt zich op', '2026-10-24T12:00:00Z', matches)).toBe('irrelevant')
+      expect(judgeAt('Ajax maakt zich op', '2026-11-20T12:00:00Z', matches)).toBe('relevant')
+    })
+
+    it('works as before without matches', () => {
+      expect(judgeAt('ADO in vorm', '2026-10-24T12:00:00Z', [])).toBe('irrelevant')
+      expect(opponentsAround(new Date('2026-10-24T12:00:00Z'), [])).toEqual([])
+    })
+  })
+
+  describe('finds the opponent from the name in matches', () => {
+    it.each([
+      ['N.E.C.', 'N.E.C. verrast in Nijmegen', 'relevant'],
+      ['N.E.C.', 'NEC verrast in Nijmegen', 'relevant'],
+      ['N.E.C.', 'NEC Nijmegen verrast', 'relevant'],
+      ['ADO Den Haag', 'ADO verrast', 'relevant'],
+      ['ADO Den Haag', 'ADO Den Haag verrast', 'relevant'],
+      ['Almere City FC', 'Almere City verrast', 'relevant'],
+      ['Excelsior Rotterdam', 'Excelsior verrast', 'relevant'],
+      ['Go Ahead Eagles', 'Go Ahead Eagles verrast', 'relevant'],
+      ['VVV-Venlo', 'VVV Venlo verrast', 'relevant'],
+      ['SC Cambuur', 'Cambuur verrast', 'relevant'],
+      ['PSV', 'PSV verrast', 'relevant'],
+      ['AZ', 'AZ verrast', 'relevant'],
+      // A club that is named after a place needs the full name, as in the list.
+      ['FC Twente', 'FC Twente verrast', 'relevant'],
+      ['FC Twente', 'Twente verrast', 'irrelevant'],
+      ['FC Twente', 'Twentse boeren verrast', 'irrelevant'],
+      ['FC Utrecht', 'Utrecht verrast', 'irrelevant'],
+      ['FC Groningen', 'Groningen verrast', 'irrelevant'],
+      ['PEC Zwolle', 'Zwolle verrast', 'irrelevant'],
+      ['PEC Zwolle', 'PEC Zwolle verrast', 'relevant'],
+      // A club that is not on the list: its name from the match, without FC, SC and the like.
+      ['Excelsior Maassluis', 'Excelsior Maassluis verrast', 'relevant'],
+      ['Excelsior Maassluis', 'Excelsior verrast', 'irrelevant'],
+      ['Quick Boys', 'Quick Boys verrast', 'relevant'],
+      ['HSV Hoek', 'HSV Hoek verrast', 'relevant'],
+      ['De Treffers', 'De Treffers verrast', 'relevant'],
+      ['FC Dordrecht', 'Dordrecht verrast', 'irrelevant'],
+      ['IJsselmeervogels', 'IJsselmeervogels verrast', 'relevant'],
+      ['ASWH', 'ASWH verrast', 'relevant'],
+      ['VV Katwijk', 'Katwijk verrast', 'relevant'],
+      ['SV Spakenburg', 'Spakenburg verrast', 'relevant'],
+      ['Hercules', 'Hercules verrast', 'irrelevant'],
+      ['Hercules', 'Hercules Utrecht verrast', 'irrelevant'],
+      ['AFC', 'AFC Bournemouth verrast', 'irrelevant'],
+      ['Quick', 'Quick verrast', 'irrelevant'],
+    ] as [string, string, ItemRelevance][])('%s: %j is %s', (opponent, title, expected) => {
+      expect(judgeRelevance(title, [opponent])).toBe(expected)
+    })
+  })
+
+  it('finds the opponents of the matches in the database as they are in matches', () => {
+    // Every opponent that the matches of 2021/22 to 2026/27 have, as the import stored it.
+    const opponents = [
+      'ADO Den Haag',
+      'AFC',
+      'Ajax',
+      'Almere City FC',
+      'ASWH',
+      'AZ',
+      'De Treffers',
+      'Excelsior',
+      'Excelsior Maassluis',
+      'Excelsior Rotterdam',
+      'FC Emmen',
+      'FC Groningen',
+      'FC Twente',
+      'FC Utrecht',
+      'FC Volendam',
+      'Feyenoord',
+      'Fortuna Sittard',
+      'Go Ahead Eagles',
+      'Heracles Almelo',
+      'HSV Hoek',
+      'IJsselmeervogels',
+      'N.E.C.',
+      'NAC Breda',
+      'PEC Zwolle',
+      'PSV',
+      'Quick Boys',
+      'RKC Waalwijk',
+      'SC Cambuur',
+      'Sparta Rotterdam',
+      'Telstar',
+      'Vitesse',
+      'VVV-Venlo',
+      'Willem II',
+    ]
+    const notLooked = new Set(['AFC'])
+
+    for (const opponent of opponents) {
+      const title = `${opponent.replaceAll('.', '').replaceAll('-', ' ')} verrast`
+
+      expect(judgeRelevance(title, [opponent]), opponent).toBe(notLooked.has(opponent) ? 'irrelevant' : 'relevant')
+    }
+  })
+
+  it('gives the same answer for the same headline and opponents', () => {
+    expect(judgeRelevance('ADO verrast', ['ADO Den Haag'])).toBe(judgeRelevance('ADO verrast', ['ADO Den Haag']))
+  })
+})
+
 describe('normaliseTitle', () => {
   it.each([
     ['sc Heerenveen', ['sc', 'heerenveen']],
@@ -476,6 +680,20 @@ describe('the lists of names and words', () => {
         clubPeople.some((name) => name.endsWith(` ${surname}`)),
         `"${surname}" is the surname of nobody on the list`,
       ).toBe(true)
+    }
+  })
+
+  it('keep the names of one club in one group, and every group in the list of clubs', () => {
+    expect(otherClubs).toEqual(otherClubGroups.flat())
+    for (const group of otherClubGroups) {
+      expect(group.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('hold prefixes and ordinary words that are normalised and not names of a club on the list', () => {
+    for (const word of [...clubPrefixes, ...ordinaryClubWords]) {
+      expect(word, `"${word}" is not normalised`).toBe(normalised(word))
+      expect(otherClubs).not.toContain(word)
     }
   })
 

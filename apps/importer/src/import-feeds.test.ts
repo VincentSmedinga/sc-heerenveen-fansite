@@ -2,7 +2,7 @@ import type { FeedFilter, SourceKind } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { listRecentItems } from '@fansite/db/queries'
-import { adminUsers, feeds, importResults, items, sources } from '@fansite/db/schema'
+import { adminUsers, feeds, importResults, items, matches, sources } from '@fansite/db/schema'
 import { seedSources } from '@fansite/db/seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
@@ -38,6 +38,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
   // After the sources: an item that is hidden refers to the account of the moderator.
   await database.pool.query('DELETE FROM admin_users')
+  await database.pool.query('DELETE FROM matches')
 })
 
 afterEach(async () => {
@@ -533,6 +534,120 @@ describe('the relevance filter', () => {
     const [result] = await database.db.select().from(importResults)
 
     expect(result).toMatchObject({ doubtful: 2, irrelevant: 1, relevant: 1 })
+  })
+})
+
+describe('the relevance filter and the matches of the season', () => {
+  const adoHeadline = "ADO beleeft frustrerende avond: 'Ongelofelijk dat je geen punt pakt'"
+
+  const relevanceByKey = async () =>
+    Object.fromEntries((await itemsInDatabase()).map((row) => [row.key, row.relevance]))
+
+  /** A match against the opponent, on a day in Dutch time. */
+  async function addMatch(opponent: string, matchDate: string, season = '2026/27', round = 'Speelronde 1') {
+    await database.db.insert(matches).values({
+      competition: 'Eredivisie',
+      home: true,
+      kickoffAt: new Date(`${matchDate}T18:45:00Z`),
+      matchDate,
+      opponent,
+      round,
+      season,
+      status: 'scheduled',
+    })
+  }
+
+  const feedAbout = () =>
+    feedWith(
+      entry('ado', { pubDate: 'Sat, 24 Oct 2026 20:42:00 GMT', title: adoHeadline }),
+      entry('ver', { pubDate: 'Sat, 24 Oct 2026 20:42:00 GMT', title: 'Provincie opent nieuwe fietsbrug' }),
+      entry('oud', { pubDate: 'Tue, 1 Sep 2026 10:00:00 GMT', title: adoHeadline }),
+    )
+
+  it('makes an item about the opponent relevant in the week around the match, and only then', async () => {
+    const server = await serve(feedAbout())
+    const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+
+    await addMatch('ADO Den Haag', '2026-10-24')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, firstRun, [
+      { matchDate: '2026-10-24', opponent: 'ADO Den Haag', status: 'scheduled' },
+    ])
+
+    expect(await relevanceByKey()).toEqual({ ado: 'relevant', oud: 'irrelevant', ver: 'irrelevant' })
+    expect(report).toMatchObject({ relevance: { doubtful: 0, irrelevant: 2, relevant: 1 } })
+  })
+
+  it('reads the matches of the current season from the database once per run', async () => {
+    const server = await serve(feedAbout())
+
+    await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+    await addMatch('ADO Den Haag', '2026-10-24')
+    await importAll()
+
+    expect(await relevanceByKey()).toEqual({ ado: 'relevant', oud: 'irrelevant', ver: 'irrelevant' })
+  })
+
+  it('does not use a match of an earlier season, although the table holds it', async () => {
+    const server = await serve(feedAbout())
+
+    await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+    // The same week, a year earlier (the season 2025/26): it says nothing about this week.
+    await addMatch('ADO Den Haag', '2026-10-24', '2025/26')
+    await addMatch('ADO Den Haag', '2026-10-24', '2020/21', 'Speelronde 2')
+    await importAll()
+
+    expect(await relevanceByKey()).toEqual({ ado: 'irrelevant', oud: 'irrelevant', ver: 'irrelevant' })
+  })
+
+  it('works as before when the table of matches is empty', async () => {
+    const server = await serve(feedAbout())
+
+    await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+    await importAll()
+
+    expect(await relevanceByKey()).toEqual({ ado: 'irrelevant', oud: 'irrelevant', ver: 'irrelevant' })
+  })
+
+  it('judges a known item again once the match is known, and leaves a hidden item hidden', async () => {
+    const server = await serve(feedAbout())
+    const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
+
+    await importFeed(database.db, fetcherFor(servers), feed, firstRun)
+
+    expect((await relevanceByKey())['ado']).toBe('irrelevant')
+
+    await addMatch('ADO Den Haag', '2026-10-24')
+
+    const [user] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .$returningId()
+
+    await database.db
+      .update(items)
+      .set({ hiddenAt: firstRun, hiddenBy: user?.id ?? 0, hiddenReason: 'Fout in het bericht' })
+      .where(eq(items.key, 'ver'))
+
+    const runId = await startRun(database.db, secondRun)
+    const [report] = await importFeeds(database.db, fetcherFor(servers), { clock: () => secondRun, runId })
+
+    expect(report).toMatchObject({ added: 0, updated: 1 })
+    expect((await relevanceByKey())['ado']).toBe('relevant')
+    expect((await itemsInDatabase()).find((row) => row.key === 'ver')).toMatchObject({
+      hiddenReason: 'Fout in het bericht',
+      relevance: 'irrelevant',
+    })
+  })
+
+  it('changes nothing for a feed with the filter none', async () => {
+    const server = await serve(feedAbout())
+
+    await addFeed(`${server.origin}/rss/`, { filter: 'none' })
+    await addMatch('ADO Den Haag', '2026-10-24')
+    await importAll()
+
+    expect(await relevanceByKey()).toEqual({ ado: 'relevant', oud: 'relevant', ver: 'relevant' })
   })
 })
 

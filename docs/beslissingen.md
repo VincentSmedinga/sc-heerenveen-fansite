@@ -4494,6 +4494,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De lijsten kennen geen andere clubs en spelers van andere clubs: een kop met "Heerenveen" en een speler van Ajax zonder voetbalwoord is `doubtful`.
   De koppen uit de logs van het prototype laten straks zien of dat vaak genoeg misgaat om een lijst met andere clubs te maken.
   Een kop over de Abe Lenstra Boulevard komt er ook in; een moderator verbergt zo'n bericht.
+- **Later:** zie _Een kop over de tegenstander is `relevant` in de week voor en na de wedstrijd_: `judgeRelevance` blijft zuiver, maar krijgt de tegenstanders van de wedstrijden rond de publicatie als tweede argument, en de kop alleen is dan niet meer alles wat het filter ziet.
 - **Abe Lenstra:** een kop met "Abe Lenstra" is `relevant`, ook zonder de club.
   Hij is onze grootste speler aller tijden, dus berichten over hem horen op de site (besluit van de projecteigenaar, 25 oktober 2026; dit is een aanvulling op de regels van #74).
 - **Niet te streng:** de projecteigenaar wil een filter dat niet te streng is, want een bericht dat doorkomt is zo verborgen, en een bericht dat wordt tegengehouden ziet niemand.
@@ -4922,6 +4923,35 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een gok bij een onbekende score is erger dan een fout.
 - **Alternatieven:** de gestaakte wedstrijd houden en het latere blok overslaan (de datum en de aftrap kloppen dan niet met de definitieve uitslag).
   Elke "Gestaakt"-score als fout laten staan (het vorige seizoen is dan niet te lezen).
+
+### Een kop over de tegenstander is `relevant` in de week voor en na de wedstrijd
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** noemt een kop een club tegen wie sc Heerenveen een wedstrijd speelt die hoogstens 7 dagen voor of na de publicatie ligt, dan is de kop `relevant`, ook zonder de naam van onze club.
+- **Waarom:** de voorbeschouwing en de nabeschouwing van een wedstrijd gaan ook over ons, en de kop noemt vaak alleen de tegenstander ("ADO beleeft frustrerende avond").
+  De wedstrijden staan sinds #27 in de database, dus het filter kan weten wie wanneer onze tegenstander is.
+- **Hoe:** de regel komt erbij op het eind van `judgeRelevance`, en maakt alleen van een `doubtful` of `irrelevant` kop een `relevant` kop.
+  - `judgeRelevance` blijft zuiver.
+    Het krijgt de namen van de tegenstanders als tweede argument, en leest zelf niets uit de database.
+  - `importFeeds` leest de wedstrijden van het lopende seizoen één keer per run, en geeft `opponentsAround` bij elk bericht de wedstrijden mee.
+    Wedstrijden van een eerder seizoen tellen niet, want `pnpm import:season` zet er ook in de tabel.
+    Een wedstrijd die de Wikipedia-import in dezelfde run bewaart, telt vanaf de volgende run.
+  - Het venster loopt van de datum van de wedstrijd min 7 dagen tot en met plus 7 dagen.
+    De dag van het bericht en `match_date` zijn Nederlandse dagen (`Europe/Amsterdam`).
+    Een uitgestelde wedstrijd zonder nieuwe datum telt niet.
+    Een club die twee keer tegen ons speelt, heeft per wedstrijd een venster.
+  - Het verband tussen de naam in `matches.opponent` en de woorden van het filter staat in `relevance-terms.ts`: `otherClubGroups` zet de namen van één club bij elkaar ("ado den haag" en "ado", "nec" en "n e c").
+    De naam uit de wedstrijd, of zonder voor- of achtervoegsel uit `clubPrefixes` (FC, SC, VV, SV, AFC), moet een van die namen zijn.
+    Een club die naar een plaats heet, telt dus alleen met zijn volledige naam ("FC Twente").
+  - Staat de tegenstander niet in de lijst, zoals een amateurclub in de beker, dan telt zijn naam zonder voor- of achtervoegsel, als hij uit twee woorden bestaat ("Excelsior Maassluis", "Quick Boys").
+    Eén woord telt ook, tenzij het een gewoon woord is (`ordinaryClubWords`) of alleen een voorvoegsel ("AFC").
+- **Nadeel:** de regel kijkt niet of de kop over de wedstrijd tegen ons gaat.
+  Een kop over een andere wedstrijd van de tegenstander in die week wordt ook `relevant` (zie de meting in de pull request van #315).
+- **Alternatieven:** niets doen (een supporter mist de berichten over de tegenstander rond de wedstrijd).
+  Elke kop met een andere profclub `relevant` maken (te veel: elk bericht over de Eredivisie komt erdoor).
+  `doubtful` in plaats van `relevant` (de projecteigenaar wil ze tonen).
+  Een ander venster dan 7 dagen (een week voor en na past bij de speelweek, en de Builder kan het meten).
+  Het filter zelf de database laten lezen (dan is het niet meer zuiver en zijn de tests trager).
 
 ## Redactie
 

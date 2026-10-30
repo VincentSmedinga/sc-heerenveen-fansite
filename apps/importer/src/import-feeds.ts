@@ -4,20 +4,22 @@ import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
-import { discussions, feeds, items, sources } from '@fansite/db/schema'
+import { discussions, feeds, items, matches, sources } from '@fansite/db/schema'
+import { seasonOf } from '@fansite/db/season'
 import { removeVisitorData } from '@fansite/db/visits'
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
 import type { Fetcher, RobotsStore } from './fetcher.ts'
 import type { FeedItem, SkippedItem } from './read-feed.ts'
 import type { ForumDiscussion } from './read-forum.ts'
+import type { MatchDay } from './relevance.ts'
 
 import { createFetcher } from './fetcher.ts'
 import { formatMatchReport, importMatches, wikipediaOrigin } from './import-matches.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
 import { paywallCategoryFor, paywallNamespaceFor, readFeed, timeRuleFor } from './read-feed.ts'
 import { readForum } from './read-forum.ts'
-import { judgeRelevance } from './relevance.ts'
+import { judgeRelevance, opponentsAround } from './relevance.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { finishRun, reasonOf, recordLockTaken, recordReport, removeOldRuns, startRun } from './run-log.ts'
 import { describeError } from './text.ts'
@@ -142,6 +144,9 @@ export function formatReport(report: FeedReport): string {
  * in full, without an `ETag`: a database that is empty must get its discussions back, and a
  * forum that changed would only say so by asking again.
  *
+ * `seasonMatches` are the matches of the current season, for the relevance of an item about the
+ * opponent (see `storeItems`); without them the filter looks at the headline alone.
+ *
  * It throws when the database fails; `importFeeds` turns that into a report.
  */
 export async function importFeed(
@@ -149,6 +154,7 @@ export async function importFeed(
   fetcher: Fetcher,
   feed: StoredFeed,
   now: Date = new Date(),
+  seasonMatches: readonly MatchDay[] = [],
 ): Promise<FeedReport> {
   const [source] = await db
     .select({ domain: sources.domain, kind: sources.kind })
@@ -189,7 +195,7 @@ export async function importFeed(
   }
 
   const counts = await db.transaction(async (transaction) => {
-    const stored = await storeItems(transaction, feed, read.items, now)
+    const stored = await storeItems(transaction, feed, read.items, now, seasonMatches)
 
     await transaction
       .update(feeds)
@@ -207,6 +213,10 @@ export async function importFeed(
  * each. A feed that fails, because the source is down or the database refuses something, stops
  * no other feed. A feed whose time to try again has not come yet is not asked for. What came of
  * each feed goes in the log of the run, and into its health.
+ *
+ * The matches of the current season are read from the database once, before the first feed, for
+ * the relevance of the items that are about the opponent of a match. A match that the
+ * Wikipedia import stores during this run counts from the next run.
  */
 export async function importFeeds(
   db: Database,
@@ -214,9 +224,10 @@ export async function importFeeds(
   { clock = () => new Date(), runId }: Pick<ImportOptions, 'clock'> & { runId: number },
 ): Promise<FeedReport[]> {
   const reports: FeedReport[] = []
+  const seasonMatches = await listSeasonMatches(db, seasonOf(clock()))
 
   for (const feed of await listFeedsToImport(db)) {
-    const report = await importDueFeed(db, fetcher, feed, clock())
+    const report = await importDueFeed(db, fetcher, feed, clock(), seasonMatches)
 
     // The time after the request, so a wait counts from the moment the source answered.
     await recordReport(db, runId, feed, report, clock())
@@ -359,13 +370,19 @@ function formatRelevance({ doubtful, irrelevant, relevant }: RelevanceCounts): s
  * Reads a feed whose time has come, or reports that it waits. A failure of the database becomes
  * an error report.
  */
-async function importDueFeed(db: Database, fetcher: Fetcher, feed: StoredFeed, now: Date): Promise<FeedReport> {
+async function importDueFeed(
+  db: Database,
+  fetcher: Fetcher,
+  feed: StoredFeed,
+  now: Date,
+  seasonMatches: readonly MatchDay[],
+): Promise<FeedReport> {
   if (feed.retryAt !== null && feed.retryAt > now) {
     return { failuresInARow: feed.failuresInARow, kind: 'postponed', retryAt: feed.retryAt, url: feed.url }
   }
 
   try {
-    return await importFeed(db, fetcher, feed, now)
+    return await importFeed(db, fetcher, feed, now, seasonMatches)
   } catch (error) {
     return { kind: 'error', message: describeError(error), url: feed.url }
   }
@@ -415,6 +432,18 @@ async function importWikipedia(db: Database, fetcher: Fetcher, clock: () => Date
   }
 
   return lines
+}
+
+/**
+ * The day, the opponent and the status of every match of a season. Only the current season:
+ * the table holds earlier seasons too (`pnpm import:season`), and a match of last year says
+ * nothing about who we play this week.
+ */
+function listSeasonMatches(db: Database, season: string): Promise<MatchDay[]> {
+  return db
+    .select({ matchDate: matches.matchDate, opponent: matches.opponent, status: matches.status })
+    .from(matches)
+    .where(eq(matches.season, season))
 }
 
 /**
@@ -469,12 +498,20 @@ async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDisc
  * changed, whatever the source offers, and counts as unchanged.
  *
  * Every item gets its relevance: `relevant` for a feed without a filter, and for a feed with
- * the filter `club` what `judgeRelevance` says about the headline, each time the item comes
- * by, so an improved rule works on items we already have. A different value counts as a
- * change. The items are all stored, whatever the value. The counts of the values hold the
- * decision for every item of the feed, also for a hidden item, whose own value stays as it is.
+ * the filter `club` what `judgeRelevance` says about the headline and the opponents of the
+ * matches within 7 days of its publication, each time the item comes by, so an improved rule
+ * works on items we already have, and so does a match that becomes known after the item. A
+ * different value counts as a change. The items are all stored, whatever the value. The counts
+ * of the values hold the decision for every item of the feed, also for a hidden item, whose own
+ * value stays as it is.
  */
-async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now: Date) {
+async function storeItems(
+  db: Executor,
+  feed: StoredFeed,
+  found: FeedItem[],
+  now: Date,
+  seasonMatches: readonly MatchDay[],
+) {
   const counts = { added: 0, unchanged: 0, updated: 0 }
   const relevance: RelevanceCounts = { doubtful: 0, irrelevant: 0, relevant: 0 }
 
@@ -499,7 +536,8 @@ async function storeItems(db: Executor, feed: StoredFeed, found: FeedItem[], now
     const rows = batch.map((item) => {
       const before = known.get(item.key)
       const publishedAt = item.publishedAt ?? before?.publishedAt ?? now
-      const itemRelevance = feed.filter === 'club' ? judgeRelevance(item.title) : 'relevant'
+      const itemRelevance =
+        feed.filter === 'club' ? judgeRelevance(item.title, opponentsAround(publishedAt, seasonMatches)) : 'relevant'
 
       relevance[itemRelevance]++
 
