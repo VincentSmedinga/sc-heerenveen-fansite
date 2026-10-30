@@ -34,3 +34,4 @@ claude mcp add --transport http ds-local http://127.0.0.1:3124/mcp
   CI draait het op de build die het gaat deployen.
 - `scripts/check.js <adres> <map met een gebouwde Storybook> [seconden]` is dezelfde controle op een adres.
   De workflow draait het na een deploy tegen `https://ds.heerenveen.org/mcp`.
+  Faalt hij, dan zegt de melding welk antwoord hij kreeg, of dat de webserver van de host antwoordde en niet de app, en waar in `docs/designsysteem-publiceren.md` je moet kijken.
