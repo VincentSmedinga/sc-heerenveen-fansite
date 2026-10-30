@@ -4,7 +4,8 @@
  * day as a Dutch calendar day.
  */
 
-import type { PublicMatch, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
+import type { PublicMatch, PublicStaff, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
+import type { DatePrecision } from '@fansite/db/schema'
 
 const timeZone = 'Europe/Amsterdam'
 
@@ -68,6 +69,45 @@ export function formatReadAt(moment: Date) {
  */
 export function formatTableDay(day: PublicStandingsRow['validOn']) {
   return longDayFormat.format(noonOf(day))
+}
+
+const shortDayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone, year: 'numeric' })
+
+const shortMonthFormat = new Intl.DateTimeFormat('nl-NL', { month: 'short', timeZone, year: 'numeric' })
+
+/**
+ * What the list of head coaches says in front of each name, in the order the coaches began: a
+ * season with one coach says nothing, because the name is enough. With more, each coach but the
+ * last has "tot 14 mrt 2026", the day he stopped, and the last has "vanaf 1 sep 2025", the day
+ * he began. A date known to the month or year says so ("tot mrt 2026", "vanaf 2024"). A coach
+ * but the last who has no end in the table says nothing.
+ */
+export function coachPeriods(coaches: PublicStaff[]): (string | undefined)[] {
+  return coaches.map((coach, index) => {
+    if (coaches.length === 1) {
+      return undefined
+    }
+
+    if (index === coaches.length - 1) {
+      return `vanaf ${formatStaffDate({ date: coach.startDate, precision: coach.startPrecision })}`
+    }
+
+    return coach.endDate === null || coach.endPrecision === null
+      ? undefined
+      : `tot ${formatStaffDate({ date: coach.endDate, precision: coach.endPrecision })}`
+  })
+}
+
+/**
+ * A date of the staff the way its precision allows: "14 mrt 2026" for a day, "mrt 2026" for a
+ * month and "2026" for a year. It never writes a day it does not know.
+ */
+export function formatStaffDate({ date, precision }: { date: string; precision: DatePrecision }) {
+  if (precision === 'year') {
+    return date.slice(0, 4)
+  }
+
+  return (precision === 'month' ? shortMonthFormat : shortDayFormat).format(noonOf(date))
 }
 
 /**

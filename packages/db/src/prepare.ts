@@ -3,6 +3,7 @@ import { migrate } from 'drizzle-orm/mysql2/migrator'
 import { connect } from './client.ts'
 import { lockNameFor, withLock } from './lock.ts'
 import { removeTestSources, seedMatches, seedRealSources, seedSquad } from './seed.ts'
+import { seedStaff } from './staff-seed.ts'
 
 export type PrepareOptions = {
   /** How many seconds to wait for a process that is preparing the same database. */
@@ -11,9 +12,9 @@ export type PrepareOptions = {
   migrationsFolder: string
   /**
    * What to put in the database after the migrations. `acceptance` and `production` put the
-   * real sources in the register, and `acceptance` also takes out the test sources it had and
-   * puts made-up matches in. `local` and `false` put nothing in: locally `pnpm db:seed` does
-   * that.
+   * real sources in the register and the head coaches in `staff`, and `acceptance` also takes
+   * out the test sources it had and puts made-up matches in. `local` and `false` put nothing
+   * in: locally `pnpm db:seed` does that.
    */
   seed: 'acceptance' | 'local' | 'production' | false
   /** The `DATABASE_URL`. */
@@ -22,10 +23,11 @@ export type PrepareOptions = {
 
 /**
  * Brings the database up to date: runs the migrations it hasn't had yet and, when asked, puts
- * the real sources in the register (see `PrepareOptions`). The test sources are for local
- * development and the tests only; acceptance removes the ones it had. The site calls this
- * when it starts. A lock in the database (`GET_LOCK`) makes two processes that start at the
- * same moment take turns, so the second one finds nothing left to do.
+ * the real sources in the register and the head coaches in `staff` (see `PrepareOptions`). The
+ * test sources are for local development and the tests only; acceptance removes the ones it
+ * had. The site calls this when it starts. A lock in the database (`GET_LOCK`) makes two
+ * processes that start at the same moment take turns, so the second one finds nothing left to
+ * do.
  *
  * It throws when the database can't be reached, when the lock stays taken, or when a migration
  * or the seed fails. The caller decides what that means. A migration that fails halfway can
@@ -45,6 +47,7 @@ export async function prepareDatabase({ lockSeconds = 30, migrationsFolder, seed
 
       if (seed === 'acceptance' || seed === 'production') {
         await seedRealSources(db)
+        await seedStaff(db)
       }
 
       if (seed === 'acceptance') {

@@ -120,6 +120,39 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     expect(html).not.toContain('We hebben de stand nog niet gevonden.')
   })
 
+  it('shows the head coaches of that season, in the order they began', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...earlier,
+      coaches: [
+        {
+          endDate: '2025-12-14',
+          endPrecision: 'day',
+          interim: false,
+          name: 'Robin van Persie',
+          startDate: '2024-01-01',
+          startPrecision: 'year',
+          wikipediaPage: 'Robin van Persie',
+        },
+        {
+          endDate: null,
+          endPrecision: null,
+          interim: true,
+          name: 'Henk Brugge',
+          startDate: '2025-12-15',
+          startPrecision: 'day',
+          wikipediaPage: null,
+        },
+      ],
+    })
+
+    const html = await render()
+
+    expect(html).toContain('href="#hoofdtrainer">Hoofdtrainers</a></h2>')
+    expect(html.replace(/<[^>]+>/g, '|').replace(/\|+/g, '|')).toContain(
+      '|tot 14 dec 2025|Robin| |van Persie|vanaf 15 dec 2025|Henk| |Brugge| |(interim)|',
+    )
+  })
+
   it('has the heading Wedstrijden, without the season, which the list beside it names', async () => {
     const html = await render()
 

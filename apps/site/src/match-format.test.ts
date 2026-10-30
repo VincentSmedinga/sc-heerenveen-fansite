@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  coachPeriods,
   creditName,
   formatReadAt,
+  formatStaffDate,
   formatTableDay,
   lastDayOf,
   matchMoment,
@@ -130,5 +132,53 @@ describe('the links to Wikipedia', () => {
     expect(creditName('standings', '2026/27')).toBe('Eredivisie 2026/27')
     expect(creditName('programme', '2026/27')).toBe('Programma Eredivisie 2026/27')
     expect(creditName('cup', '2026/27')).toBe('KNVB Beker 2026/27')
+  })
+})
+
+describe('formatStaffDate', () => {
+  it('writes a day, a month or a year, and never a day it does not know', () => {
+    expect(formatStaffDate({ date: '2026-03-14', precision: 'day' })).toBe('14 mrt 2026')
+    expect(formatStaffDate({ date: '2009-09-01', precision: 'day' })).toBe('1 sep 2009')
+    expect(formatStaffDate({ date: '1992-10-01', precision: 'month' })).toBe('okt 1992')
+    expect(formatStaffDate({ date: '2004-01-01', precision: 'year' })).toBe('2004')
+  })
+})
+
+describe('coachPeriods', () => {
+  const coach = {
+    endDate: null,
+    endPrecision: null,
+    interim: false,
+    name: 'Testtrainer',
+    startDate: '2020-07-01',
+    startPrecision: 'day',
+    wikipediaPage: null,
+  } as const
+
+  it('says nothing for a season with one coach: the name is enough', () => {
+    expect(coachPeriods([coach])).toEqual([undefined])
+    expect(coachPeriods([{ ...coach, endDate: '2026-03-14', endPrecision: 'day' }])).toEqual([undefined])
+  })
+
+  it('says "tot" and the day he stopped for each coach but the last, and "vanaf" and the day he began for the last', () => {
+    const first = { ...coach, endDate: '2026-03-14', endPrecision: 'day', startDate: '2024-07-01' } as const
+    const middle = { ...coach, endDate: '2026-04-30', endPrecision: 'day', startDate: '2026-03-15' } as const
+    const last = { ...coach, startDate: '2026-05-01' } as const
+
+    expect(coachPeriods([first, middle, last])).toEqual(['tot 14 mrt 2026', 'tot 30 apr 2026', 'vanaf 1 mei 2026'])
+    expect(coachPeriods([first, last])).toEqual(['tot 14 mrt 2026', 'vanaf 1 mei 2026'])
+  })
+
+  it('says the month or the year for a date that is only known so', () => {
+    const first = { ...coach, endDate: '1992-10-01', endPrecision: 'month', startDate: '1990-07-01' } as const
+    const last = { ...coach, startDate: '1992-10-01', startPrecision: 'month' } as const
+    const later = { ...coach, startDate: '2024-01-01', startPrecision: 'year' } as const
+
+    expect(coachPeriods([first, last])).toEqual(['tot okt 1992', 'vanaf okt 1992'])
+    expect(coachPeriods([first, later])[1]).toBe('vanaf 2024')
+  })
+
+  it('says nothing for a coach but the last who has no end in the table', () => {
+    expect(coachPeriods([coach, { ...coach, startDate: '2026-05-01' }])).toEqual([undefined, 'vanaf 1 mei 2026'])
   })
 })

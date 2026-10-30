@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { pageTitleName, splitPageName, splitPlayerName, surnameOnly } from './player-name'
+import { pageTitleName, splitPageName, splitPlayerName, splitStaffName, surnameOnly } from './player-name'
 
 describe('splitPlayerName', () => {
   it.each([
@@ -79,5 +79,17 @@ describe('splitPageName', () => {
 
   it('does not split when the short name is no end of the title', () => {
     expect(splitPageName('Dinho', 'Dinho Santos')).toEqual({ givenName: 'Dinho Santos', surname: '' })
+  })
+})
+
+describe('splitStaffName', () => {
+  it('takes the first word as the given name and the rest as the surname', () => {
+    expect(splitStaffName('Henk Brugge')).toEqual({ givenName: 'Henk', surname: 'Brugge' })
+    expect(splitStaffName('Robin van Persie')).toEqual({ givenName: 'Robin', surname: 'van Persie' })
+    expect(splitStaffName('Jan Olde Riekerink')).toEqual({ givenName: 'Jan', surname: 'Olde Riekerink' })
+  })
+
+  it('makes a name of one word a surname', () => {
+    expect(splitStaffName('Dinho')).toEqual({ surname: 'Dinho' })
   })
 })

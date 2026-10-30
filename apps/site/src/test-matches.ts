@@ -22,6 +22,7 @@ const base = {
 } as const
 
 export const matchData: MatchData = {
+  coaches: [],
   matches: [
     {
       ...base,

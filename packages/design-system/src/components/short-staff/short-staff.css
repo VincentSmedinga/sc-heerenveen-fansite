@@ -1,0 +1,11 @@
+/*
+ * A short staff line takes everything from the short match (short-match.css). Only the column
+ * before the name is wider here, because "tot 14 mrt 2026" is longer than "za 24 okt", and the
+ * names of the lines still start at the same place.
+ */
+
+@layer hf.components {
+  .hf-short-staff > .hf-short-match-when {
+    min-inline-size: 8.5rem;
+  }
+}

@@ -4,8 +4,10 @@ import {
   listMatchSeasons,
   listSeasonMatches,
   listSeasonStandings,
+  listStaffInSeason,
   listWikipediaPages,
   type PublicMatch,
+  type PublicStaff,
   type PublicStandingsRow,
   type PublicWikipediaPage,
 } from '@fansite/db/queries'
@@ -21,6 +23,8 @@ import { type NameParts, pageTitleName, splitPageName, splitPlayerName, surnameO
 const ourClub = 'sc Heerenveen'
 
 export type MatchData = {
+  /** The head coaches of the season, in the order their periods began. */
+  coaches: PublicStaff[]
   matches: PublicMatch[]
   pages: PublicWikipediaPage[]
   season: string
@@ -51,25 +55,26 @@ const pastSeasonPeriod = 60 * 60 * 1000
 
 async function loadSeason(season: string): Promise<MatchData> {
   const { db } = getDatabase()
-  const [matches, standings, pages] = await Promise.all([
+  const [matches, standings, pages, coaches] = await Promise.all([
     listSeasonMatches(db, season),
     listSeasonStandings(db, season),
     listWikipediaPages(db, season),
+    listStaffInSeason(db, 'coach', season),
   ])
 
-  return { matches, pages, season, standings }
+  return { coaches, matches, pages, season, standings }
 }
 
 const currentSeasonData = cacheForKey(currentSeasonPeriod, loadSeason)
 const pastSeasonData = cacheForKey(pastSeasonPeriod, loadSeason)
 
 /**
- * The matches, the league table and the Wikipedia pages of one season, the current one when no
- * season is given. Each is asked for that season alone. The cache keeps an entry for every
- * season it is asked for, so the caller asks for a season of `getMatchSeasons` only: a visitor
- * can make up any address. The data of the current season is kept for five minutes, so a visit
- * doesn't cost three queries and a new result shows within five minutes of the import, which
- * runs every hour. A season that is over is kept for an hour.
+ * The matches, the league table, the Wikipedia pages and the head coaches of one season, the
+ * current one when no season is given. Each is asked for that season alone. The cache keeps an
+ * entry for every season it is asked for, so the caller asks for a season of `getMatchSeasons`
+ * only: a visitor can make up any address. The data of the current season is kept for five
+ * minutes, so a visit doesn't cost four queries and a new result shows within five minutes of
+ * the import, which runs every hour. A season that is over is kept for an hour.
  */
 export function getMatchData(season = seasonOf(new Date())): Promise<MatchData> {
   return season === seasonOf(new Date()) ? currentSeasonData(season) : pastSeasonData(season)

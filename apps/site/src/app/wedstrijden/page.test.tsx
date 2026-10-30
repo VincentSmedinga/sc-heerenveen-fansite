@@ -1,4 +1,4 @@
-import type { PublicMatch } from '@fansite/db/queries'
+import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -1885,7 +1885,7 @@ describe('the page /wedstrijden', () => {
   })
 
   it('says in a sentence for visitors that there is nothing yet when the importer has not run', async () => {
-    vi.mocked(getMatchData).mockResolvedValue({ matches: [], pages: [], season: '2026/27', standings: [] })
+    vi.mocked(getMatchData).mockResolvedValue({ coaches: [], matches: [], pages: [], season: '2026/27', standings: [] })
 
     const html = await render()
 
@@ -1976,5 +1976,108 @@ describe('the season picker on /wedstrijden', () => {
     const ids = [...html.matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)
 
     expect(matchShortcuts.map(({ href }) => href)).toEqual(ids)
+  })
+})
+
+describe('the head coaches of the season', () => {
+  const veldman = {
+    endDate: null,
+    endPrecision: null,
+    interim: false,
+    name: 'Robin Veldman',
+    startDate: '2025-03-21',
+    startPrecision: 'day',
+    wikipediaPage: 'Robin Veldman',
+  } as const
+  const brugge = {
+    endDate: '2026-12-20',
+    endPrecision: 'day',
+    interim: true,
+    name: 'Henk Brugge',
+    startDate: '2026-09-01',
+    startPrecision: 'day',
+    wikipediaPage: 'Henk Brugge',
+  } as const
+  const persie = {
+    endDate: '2026-08-31',
+    endPrecision: 'day',
+    interim: false,
+    name: 'Robin van Persie',
+    startDate: '2024-01-01',
+    startPrecision: 'year',
+    wikipediaPage: null,
+  } as const
+
+  const withCoaches = (coaches: PublicStaff[]) => vi.mocked(getMatchData).mockResolvedValue({ ...matchData, coaches })
+
+  /** The card of the coaches: from its heading to the next h2. */
+  async function coachesCard() {
+    const html = await render()
+
+    return { card: section(html, 'hoofdtrainer'), html }
+  }
+
+  const textOf = (html: string) => html.replace(/<[^>]+>/g, '|').replace(/\|+/g, '|')
+
+  it('has no card for a season without a coach in the table', async () => {
+    const { html } = await coachesCard()
+
+    expect(html).not.toContain('Hoofdtrainer')
+  })
+
+  it('is a card named "Hoofdtrainer" for one coach, with one line that has the name and nothing else', async () => {
+    withCoaches([veldman])
+
+    const { card } = await coachesCard()
+
+    expect(card).toContain('href="#hoofdtrainer">Hoofdtrainer')
+    expect(card).toContain('<ul role="list">')
+    expect(card.match(/<li>/g)).toHaveLength(1)
+    expect(card).not.toContain('hele seizoen')
+    expect(card).not.toContain('hf-short-match-when')
+    expect(textOf(card)).toBe('|Hoofdtrainer|Robin| |Veldman|')
+  })
+
+  it('is named "Hoofdtrainers" for more, with "tot" and the day for each but the last, and "vanaf" for the last', async () => {
+    withCoaches([persie, brugge, veldman])
+
+    const { card } = await coachesCard()
+
+    expect(card).toContain('href="#hoofdtrainer">Hoofdtrainers')
+    expect(textOf(card)).toContain(
+      '|Hoofdtrainers|tot 31 aug 2026|Robin| |van Persie|tot 20 dec 2026|Henk| |Brugge| |(interim)|vanaf 21 mrt 2025|Robin| |Veldman|',
+    )
+  })
+
+  it('has the given name in the normal weight and the surname in the stronger one, like a player', async () => {
+    withCoaches([persie, veldman])
+
+    const { card } = await coachesCard()
+
+    expect(card).toContain(
+      '<span class="hf-player-name"><span class="hf-player-name-given">Robin</span> <span class="hf-player-name-surname">van Persie</span></span>',
+    )
+  })
+
+  it('says "(interim)" in the quiet style behind the name, and has no link to Wikipedia', async () => {
+    withCoaches([persie, brugge])
+
+    const { card } = await coachesCard()
+
+    expect(card).toContain('<span class="hf-short-match-where">(interim)</span>')
+    expect(card).not.toContain('<a href="https://nl.wikipedia.org')
+    expect(card).not.toContain('wikipedia')
+  })
+
+  it('is a card with the strong blue surface in the sidebar right after the table, named by its heading, without a source of its own', async () => {
+    withCoaches([veldman])
+
+    const { card, html } = await coachesCard()
+
+    expect(html).toContain('<section class="hf-card hf-card-strong" aria-labelledby="hoofdtrainer">')
+    expect(html.indexOf('id="hoofdtrainer"')).toBeGreaterThan(html.indexOf('id="stand"'))
+    expect(html.indexOf('id="hoofdtrainer"')).toBeLessThan(html.indexOf('id="onze-plek-in-de-competitie"'))
+    expect(card).not.toContain('hf-wikipedia-credit')
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(14)
   })
 })

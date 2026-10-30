@@ -231,6 +231,14 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Daaronder staat "Gebaseerd op 8 van de 10 gespeelde wedstrijden".
   Ging een wedstrijd in de telling naar de verlenging (`extra_time`), dan staat daaronder ook "Doelpunten in de verlenging tellen niet mee."; anders staat die zin er niet.
   Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
+- **Hoofdtrainer of Hoofdtrainers:** een kaart met het sterke blauwe vlak (`surface="strong"`) in de zijbalk, direct onder de stand, met de hoofdtrainers van het seizoen uit de tabel `staff` (zie de README van `packages/db`), op volgorde van begin.
+  De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, met altijd het anker `#hoofdtrainer`.
+  Elke trainer is een regel (`ShortStaff`) met zijn naam, zoals de naam van een speler: de voornaam in het normale gewicht en de achternaam in het sterkere (`splitStaffName` in `src/player-name.ts`), met "(interim)" erachter in het normale gewicht.
+  Een seizoen met één trainer toont alleen de naam.
+  Bij meer trainers staat voor elke trainer behalve de laatste "tot 14 mrt 2026", de dag waarop hij stopte, en voor de laatste "vanaf 1 sep 2025", de dag waarop hij begon (`coachPeriods` in `src/match-format.ts`).
+  Een datum die alleen als maand of jaar bekend is, staat zo ("tot mrt 2026").
+  De namen zijn geen links en de kaart heeft geen bronvermelding van zichzelf: de bron staat onderaan de pagina.
+  Een seizoen zonder trainer in de tabel heeft de kaart niet, en dan ook geen link in de balk "Op deze pagina:".
 - **Onze plek in de competitie:** een kaart in de zijbalk, direct onder de stand, met een `DataTable` die de plaats van sc Heerenveen in de hele Eredivisie geeft op vijf onderdelen: punten per wedstrijd, gewonnen wedstrijden, de beste aanval (doelpunten voor), de beste verdediging (doelpunten tegen, minder is beter) en het doelsaldo.
   `leaguePlaceOf` in `src/matches.ts` rekent ze uit de stand, dus de import verandert niet.
   Punten per wedstrijd is de eerlijke vergelijking, want de clubs hebben niet evenveel gespeeld; twee clubs zijn gelijk als hun punten en wedstrijden in dezelfde verhouding staan.
@@ -398,9 +406,9 @@ De pagina's delen één verbinding met de database (`src/database.ts`).
 ## De database bij het starten
 
 Als de server start, zet hij de database klaar, en pas daarna beantwoordt hij verzoeken (`src/instrumentation.ts`).
-Hij draait de migraties die de database nog niet had, uit `packages/db/drizzle`, en met `SITE_ENV=acceptance` of `production` zet hij de echte bronnen uit de seed in het register.
+Hij draait de migraties die de database nog niet had, uit `packages/db/drizzle`, en met `SITE_ENV=acceptance` of `production` zet hij de echte bronnen uit de seed in het register en de hoofdtrainers in de tabel `staff`.
 Met `acceptance` haalt hij ook de testbronnen weg die er nog stonden, met hun feeds en berichten.
-Met `local` zet hij niets in het register.
+Met `local` zet hij niets in het register en niets in `staff`.
 `assemble` zet de migraties in de map, op dezelfde plek ten opzichte van `apps/site` als in de repository.
 Een slot in de database (`GET_LOCK`) laat twee processen die tegelijk starten, om de beurt migreren.
 Lukt het niet, bijvoorbeeld omdat de database niet bereikbaar is, dan staat de reden in het logboek en blijft de server draaien.

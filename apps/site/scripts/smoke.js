@@ -648,6 +648,12 @@ await withEmptyDatabase((database) =>
     const matchesHtml = await matchesPage.text()
     assert.equal(matchesPage.status, 200)
     assert.match(matchesHtml, /<h1[^>]*>Wedstrijden<\/h1>/)
+    // The head coach comes from the seed the site runs at its start, not from anyone by hand:
+    // a card with the strong surface in the sidebar, right after the table, with his name only.
+    assert.match(
+      matchesHtml,
+      /<h2[^>]*id="hoofdtrainer">.*?href="#hoofdtrainer">Hoofdtraine.*?<\/h2><ul role="list"><li><div class="hf-short-match hf-short-staff"><span class="hf-short-match-opponent"><span class="hf-player-name"><span class="hf-player-name-given">Robin<\/span> <span class="hf-player-name-surname">Veldman<\/span><\/span><\/span><\/div><\/li><\/ul><\/section>/s,
+    )
     // The main menu is its own nav right after the header, and the bar with a link to each card
     // comes after it, outside the main; none on the home.
     assert.match(matchesHtml, /<\/header><nav aria-label="Hoofdmenu" class="hf-navigation hf-navigation-header">/)
@@ -662,6 +668,7 @@ await withEmptyDatabase((database) =>
         '#programma',
         '#uitslagen',
         '#stand',
+        '#hoofdtrainer',
         '#onze-plek-in-de-competitie',
         '#verloop-van-het-seizoen',
         '#reeksen',

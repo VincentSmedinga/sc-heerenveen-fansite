@@ -18,6 +18,7 @@ import {
 import { standingsCardOf } from '../../matchShortcuts'
 import {
   CleanSheetsCard,
+  CoachesCard,
   ExtremesCard,
   GoalsPerQuarterCard,
   HomeAwayCard,
@@ -157,9 +158,10 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
           )}
         </Card>
       </Page.Main>
-      {/* The table is wide, so the sidebar is too. On a phone it follows the programme and the
-          results: the table, our place in the league, the season, the streaks, home and away,
-          the goal scorers, the clean sheets, the goals per quarter, then how the matches go. */}
+      {/* The table is wide, so the sidebar is too. On a phone it follows the programme and
+          the results: the table, the head coaches, our place in the league, the season, the
+          streaks, home and away, the goal scorers, the clean sheets, the goals per quarter,
+          then how the matches go. */}
       <Page.Sidebar
         aria-label={`${current ? 'De stand' : 'De eindstand'}, de ranglijsten en de doelpunten per kwartier`}
         wide
@@ -178,6 +180,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             <StandingsTable caption={standingsCaption(data.standings, standingsCard.name)} rows={data.standings} />
           )}
         </Card>
+        <CoachesCard coaches={data.coaches} />
         <LeaguePlaceCard season={imageSeason} standings={data.standings} />
         <SeasonCard matches={data.matches} season={imageSeason} />
         <StreaksCard matches={data.matches} now={now} season={imageSeason} />

@@ -7232,3 +7232,95 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de laatste vijf wedstrijden in een afgelopen seizoen laten staan (ze zeggen over dat seizoen niets bijzonders).
   De kolom hernoemen naar "Aan het eind" (houdt een getal dat nauwelijks informatie geeft).
   De kolom laten staan (verwarrend: "Nu" in een seizoen van vorig jaar).
+
+### De staf staat in een tabel `staff` met een rol, en de hoofdtrainers zijn de eerste rijen
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** de staf van sc Heerenveen staat in de tabel `staff`, met een rol per rij.
+  De hoofdtrainers sinds 1 juli 1990 zijn de eerste rijen, met de rol `coach`, een begin en een einde en per datum de precisie (`day`, `month` of `year`).
+  De rijen komen uit de seed, gevuld met wat Wikipedia geeft.
+  Een vraag naar de trainer op een datum zegt dat het onzeker is als de datum in de onzekerheid van een grens valt.
+- **Waarom:** Wikipedia geeft voor de recente trainers meestal een dag en voor de jaren negentig maanden of jaren.
+  Een gok zou een wedstrijd bij de verkeerde trainer zetten.
+  Met de precisie erbij kan een pagina eerlijk zijn over wat we weten.
+  Een eigen tabel is eenvoudiger dan elke keer Wikipedia te lezen, want de lijst op Wikipedia heeft geen dagen en verandert zelden.
+- **Een tabel met een rol:** assistent-trainers en andere functies hebben dezelfde vorm (naam, periode, precisie).
+  Eén tabel met een rol voorkomt een nieuwe tabel per functie.
+- **Alternatieven:** een tabel alleen voor hoofdtrainers (`coaches`; een nieuwe tabel voor elke volgende functie).
+  De trainer per seizoen opslaan in plaats van per periode (kan niet bij twee trainers in één seizoen, of een wedstrijd).
+  De trainer bij elke wedstrijd opslaan (veel dubbel werk, en onjuist als een datum verandert).
+  De lijst van Wikipedia met de importer lezen (de lijst heeft geen dagen, en de pagina's van de trainers hebben een andere opbouw).
+  Dagen verzinnen waar Wikipedia ze niet geeft (misleidend).
+
+### Een maand of jaar telt als "ergens in", en een trainer staat alleen in een seizoen als hij er zeker een dag in dienst was
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** een datum met de precisie `month` of `year` staat als de eerste dag van die maand of dat jaar, en betekent dat de echte dag ergens daarin ligt.
+  De einddatum is de laatste dag van de periode.
+  Een einde in een maand of jaar telt als "in die maand gestopt", dus de laatste dag die zeker is, is de dag ervoor.
+  Daarop rekenen twee vragen in `packages/db/src/staff.ts` en `queries.ts`:
+  - `findStaffOn` zegt `certain` met de persoon als de dag zeker in zijn periode ligt, `uncertain` met de mogelijke personen als de dag in de onzekerheid van een grens ligt, en `none` voor een dag in een gat of vóór de eerste rij.
+    Op de dag dat een nieuwe trainer begint, is hij de trainer.
+  - `listStaffInSeason` geeft de staf die zeker een dag van het seizoen in dienst was, op volgorde van begin en niet op aantal wedstrijden.
+    Een trainer die "in 2024" begon, staat niet in 2023/24, en Van Basten, die volgens Wikipedia in juli 2014 stopte, niet in 2014/15.
+- **Waarom:** de pagina mag geen naam bij een seizoen of wedstrijd zetten die we niet weten.
+  Een seizoen met een trainer te veel is een fout die een bezoeker meteen ziet, een dag die `uncertain` heet doet niemand pijn.
+  De volgorde op begin is wat de seizoenspagina toont ("op volgorde van begin"), en een telling per trainer hoort bij de pagina van een wedstrijd (#108), die de dagen toch al per wedstrijd vraagt.
+- **Gevolg:** een seizoen waarin een datum vaag is, kan een trainer missen die er volgens Wikipedia maar een deel van was.
+  Henk Brugge begon "in februari of maart 2025": we nemen februari, en hij staat in 2024/25.
+  De trainers uit de jaren negentig en tot 2014 hebben vaak alleen een maand of jaar, dus bij hen zegt de vraag naar een dag vaker `uncertain`.
+- **Alternatieven:** de eerste dag van een maand of jaar als de echte dag nemen (een gok, en een wedstrijd komt bij de verkeerde trainer).
+  Een trainer in elk seizoen tonen dat zijn periode ook maar mogelijk raakt (twee trainers te veel bij Lodeweges en Van Persie).
+  De trainer van een seizoen kiezen met de meeste wedstrijden (kan niet zonder de dag per wedstrijd en de onzekerheid ervan).
+
+### De trainers van een seizoen staan in een kaart met het sterke blauwe vlak onder de stand, met een regel per trainer
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** de seizoenspagina (`/wedstrijden` en `/wedstrijden/JJJJ-JJ`) toont de hoofdtrainer(s) in een kaart met het sterke vlak van het designsysteem (`surface="strong"`, licht blauw in licht en donker blauw in donker, zoals "Ben je zelf een bron?" op `/bronnen`) in de zijbalk, direct onder de stand.
+  De tekst, de namen, de kolom met de dag en "(interim)" gebruiken de gewone tekstkleuren, die op dit vlak minstens 4,5:1 halen: 13,7:1 voor de tekst en 5,3:1 voor de dag en "(interim)" in licht, en 11,7:1 en 8,4:1 in donker.
+  De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, een `h2`, met altijd het anker `#hoofdtrainer`.
+  Elke trainer is een regel van het nieuwe patroon `ShortStaff`, in dezelfde vorm als een `ShortMatch`.
+  De naam staat als die van een speler (`PlayerName`): de voornaam in het normale gewicht, de achternaam in het sterkere, en "(interim)" erachter in het normale gewicht.
+  De kaart staat ook als link in de balk "Op deze pagina:", na Stand of Eindstand.
+  Een seizoen zonder trainer in de tabel heeft de kaart en de link niet.
+- **Welke trainers en in welke volgorde:** alle trainers die zeker een dag van het seizoen in dienst waren (zie _Een maand of jaar telt als "ergens in"…_), op volgorde van begin.
+  - Een seizoen met één trainer toont alleen zijn naam, zonder "hele seizoen".
+  - Bij meer trainers heeft elke trainer behalve de laatste "tot 14 mrt 2026", de dag waarop hij stopte, en de laatste "vanaf 1 sep 2025", de dag waarop hij begon (`coachPeriods` in `src/match-format.ts`).
+    Een trainer die in het midden begon en stopte, heeft dus alleen zijn "tot".
+  - Een datum die alleen als maand of jaar bekend is, staat zo ("tot mrt 2026", "vanaf 2024").
+    De dag staat in de Nederlandse korte notatie, "14 mrt 2026".
+- **Bron:** de kaart heeft geen bronvermelding van zichzelf en de namen zijn geen links naar Wikipedia.
+  De bron staat al onderaan de pagina, en een korte bronvermelding in elke kaart is te veel (de projecteigenaar, 30 oktober 2026).
+  De kolom `wikipedia_page` blijft in de tabel, voor de pagina van een wedstrijd (#108) of een latere link.
+- **Waarom:** de eerste versie, een regel boven de kaarten, viel te veel op voor een feit dat een bezoeker zelden zoekt.
+  Een kaart onder de stand hoort bij de andere kaarten, en een lijst zegt per trainer wanneer hij begon of stopte zonder dat een zin de volgorde hoeft uit te leggen.
+  De regel hergebruikt de klassen van `ShortMatch` (`ShortStaff` voegt alleen een bredere kolom toe voor de tekst vooraan), en de naam hergebruikt `PlayerName`, zodat de lijst er hetzelfde uitziet als bij de spelers.
+  Het anker is voor één en meer trainers gelijk, zodat een link niet breekt als een seizoen er een tweede trainer bij krijgt.
+  Het sterke vlak is de keuze van de projecteigenaar (30 oktober 2026): de kaart valt er tussen de witte en zachte kaarten op, zonder dat hij zwaarder weegt dan de stand.
+  Er is geen eigen kleur voor het vlak nodig, want de tokens voor tekst en secundaire tekst zijn voor dit vlak gekozen.
+- **Alternatieven:** een regel boven de kaarten (viel te veel op).
+  "hele seizoen" bij de enige trainer (de naam zegt het al).
+  Een "van … tot …" bij elke trainer (de regel wordt lang, en de dag van het begin van een trainer is de dag van het einde van de vorige).
+  Een eigen lijstregel met eigen CSS (dubbel werk, en de twee lijsten gaan dan uit elkaar lopen).
+
+### De hoofdtrainers staan in de seed met de laatste dag, en een afgeleide laatste dag is de dag voor de opvolger
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** de seed (`headCoaches` in `packages/db/src/staff-seed.ts`) heeft de hoofdtrainers van 1 juli 1990 tot nu uit de Nederlandse Wikipedia (gelezen op 30 oktober 2026), elk met de precisie die Wikipedia geeft.
+  Waar Wikipedia een einde afleidt uit het begin van de opvolger (Jan Everse en Henk Brugge), staat als laatste dag de dag ervoor, zodat twee periodes elkaar niet overlappen.
+  Een "einde van het seizoen" is de laatste dag van dat seizoen, 30 juni.
+  Eén datum komt niet van Wikipedia: Robin van Persie vertrok op 23 februari 2025, volgens de aankondiging van de club (de projecteigenaar, 30 oktober 2026).
+  Wikipedia heeft daar "ongeveer 23 februari", dus de rij heeft de dag met de precisie `day`, en een opmerking in de seed en de toelichting zegt waar de datum vandaan komt.
+  Zijn begin is alleen als jaar bekend, en dat blijft zo.
+  De toelichting (`note`) schrijft op wat de bron openlaat of tegenspreekt, in onze woorden.
+  De tabel is er vanaf nu voor een nieuwe trainer: die komt als rij in de seed.
+- **Waarom:** acceptatie en productie krijgen de rijen zonder iets met de hand te doen, want de site zet ze bij het opstarten in de tabel, zoals de echte bronnen.
+  Een seed die een rij vindt op rol, naam en begindatum werkt hem bij en maakt geen dubbele rijen.
+  Een datum corrigeren in een bestaande rij vraagt een migratie, want een andere begindatum is een andere rij.
+- **Keuzes bij een gat of een tegenspraak:** Johnny Jansen begon op 10 april 2019 als interim-trainer, en andere pagina's noemen 3 juni 2019 als begin.
+  We nemen de eerste datum en tonen hem niet als interim, want hij werd daarna de vaste trainer en de rest van zijn periode zou anders onjuist "(interim)" dragen.
+  Tussen Jansen (ontslagen op 24 januari 2022) en Ole Tobiassen (begon op 4 februari 2022) zit een gat van tien dagen: een vraag naar een dag daarin geeft geen trainer.
+  Fritz Korbach begon in februari 1990, maar zijn periode begint op 1 juli 1990, de eerste Eredivisie-wedstrijd van de club, zoals de rij zegt.
+- **Alternatieven:** de seed alle rijen van de rol `coach` laten vervangen (wist later wat het beheer toevoegt).
+  Jansen in twee rijen splitsen, op 3 juni 2019 (de pagina's zeggen niet wat er die dag gebeurde).
+  Het gat tussen Jansen en Tobiassen dichten (we zouden een datum verzinnen).

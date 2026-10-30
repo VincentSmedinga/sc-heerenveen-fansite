@@ -1,4 +1,4 @@
-import type { PublicMatch, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
+import type { PublicMatch, PublicStaff, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
 import type { FormResult, MarkRowMark } from '@fansite/design-system'
 
 import {
@@ -14,6 +14,7 @@ import {
   MarkRow,
   Match,
   ShortMatch,
+  ShortStaff,
   StandingsTable,
   Text,
   TopScorersTable,
@@ -23,7 +24,7 @@ import {
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
 
 import { moreCleanSheets } from './items-per-card'
-import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
+import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import {
   cleanSheetsOf,
   type ExtremeGoal,
@@ -44,6 +45,8 @@ import {
   streaksOf,
   topScorersOf,
 } from './matches'
+import { coachesCardOf } from './matchShortcuts'
+import { splitStaffName } from './player-name'
 
 /**
  * What the button for an image of a statistics card puts under the image: the credit of
@@ -542,6 +545,38 @@ const markOf: Record<FormResult, MarkRowMark> = {
   G: { label: 'gelijk', mark: 'G', tone: 'neutral' },
   V: { label: 'verlies', mark: 'V', tone: 'negative' },
   W: { label: 'winst', mark: 'W', tone: 'positive' },
+}
+
+/**
+ * The head coach or coaches of a season as a card with the strong blue surface and a list, in
+ * the order they began. The title is "Hoofdtrainer" for one and "Hoofdtrainers" for more. A
+ * season with one coach has his name only; with more, each line has "tot" and the day he
+ * stopped, and the last has "vanaf" and the day he began (see `coachPeriods`). The name is
+ * shown as a player's is, with "(interim)" behind it where that is so. The source of the data
+ * is the credit under the page. A season with no coach in the table has no card.
+ */
+export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
+  if (coaches.length === 0) {
+    return null
+  }
+
+  const { id, name } = coachesCardOf(coaches.length)
+  const periods = coachPeriods(coaches)
+
+  return (
+    <Card aria-labelledby={id} surface="strong">
+      <Heading anchor id={id} level={2}>
+        {name}
+      </Heading>
+      <List role="list">
+        {coaches.map((coach, index) => (
+          <List.Item key={`${coach.name}-${coach.startDate}`}>
+            <ShortStaff interim={coach.interim} period={periods[index]} {...splitStaffName(coach.name)} />
+          </List.Item>
+        ))}
+      </List>
+    </Card>
+  )
 }
 
 /**

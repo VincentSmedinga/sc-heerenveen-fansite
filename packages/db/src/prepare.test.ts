@@ -11,6 +11,7 @@ import { lockNameFor } from './lock.ts'
 import { prepareDatabase } from './prepare.ts'
 import { feeds, items, sources } from './schema.ts'
 import { realSources, seedSources, testSources } from './seed.ts'
+import { headCoaches } from './staff-seed.ts'
 import { createTestDatabase } from './test-database.ts'
 
 const migrationsFolder = fileURLToPath(new URL('../drizzle', import.meta.url))
@@ -117,7 +118,22 @@ describe('prepareDatabase', () => {
     await prepareDatabase({ migrationsFolder, seed: 'local', url: database.url })
 
     expect(await count('sources')).toBe(0)
+    expect(await count('staff')).toBe(0)
   })
+
+  it.each(['acceptance', 'production'] as const)(
+    'puts the head coaches in on %s, also in a database that was migrated without them, and makes no duplicates',
+    async (seed) => {
+      await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
+
+      expect(await count('staff')).toBe(0)
+
+      await prepareDatabase({ migrationsFolder, seed, url: database.url })
+      await prepareDatabase({ migrationsFolder, seed, url: database.url })
+
+      expect(await count('staff')).toBe(headCoaches.length)
+    },
+  )
 
   it('puts made-up matches in on acceptance and never on production', async () => {
     await prepareDatabase({ migrationsFolder, seed: 'production', url: database.url })
