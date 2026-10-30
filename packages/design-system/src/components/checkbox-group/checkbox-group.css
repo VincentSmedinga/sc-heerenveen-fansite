@@ -1,0 +1,35 @@
+/*
+ * A group of checkboxes: a fieldset without the border and the padding the base styles give it,
+ * because the group sits in a card that has its own. The legend is the heading of the group and
+ * has the look of a level 2 heading. Each label is a row as high as a target needs to be
+ * (WCAG 2.5.8), with the checkbox on the first line of a label that runs over more lines. The
+ * whole row can be clicked.
+ */
+
+@layer hf.components {
+  .hf-checkbox-group {
+    border: 0;
+    margin: 0;
+    min-inline-size: 0;
+    padding: 0;
+  }
+
+  .hf-checkbox-group > legend {
+    margin-block-end: 0.5rem;
+    padding: 0;
+  }
+
+  .hf-checkbox-group-label {
+    align-items: flex-start;
+    cursor: pointer;
+    display: flex;
+    min-block-size: 2rem;
+    overflow-wrap: anywhere;
+    padding-block: 0.25rem;
+
+    > input {
+      flex: none;
+      margin-block-start: 0.125rem;
+    }
+  }
+}

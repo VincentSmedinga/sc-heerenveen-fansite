@@ -53,14 +53,17 @@ export type PublicStandingsRow = Awaited<ReturnType<typeof listSeasonStandings>>
 export type PublicWikipediaPage = Awaited<ReturnType<typeof listWikipediaPages>>[number]
 
 /**
- * How many headlines `listArchivePage` gives in all, with the same `until` and `source`.
+ * How many headlines `listArchivePage` gives in all, with the same `until` and `sources`.
  */
-export async function countArchiveItems(db: Database, { source, until }: { source?: string; until: Date }) {
+export async function countArchiveItems(
+  db: Database,
+  { sources: slugs, until }: { sources?: readonly string[]; until: Date },
+) {
   const [row] = await db
     .select({ total: count() })
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(newsFilter(until, source))
+    .where(newsFilter(until, slugs))
 
   return row?.total ?? 0
 }
@@ -170,20 +173,25 @@ export async function findStaffOn(db: Database, role: StaffRole, day: string): P
  * One page of the news archive: the headlines of the sources that are switched on, newest
  * first, from `offset`, at most `limit`, with what the pages show of them, the same as
  * `listRecentItems`. It has the same headlines too, but without a limit in age: all that the
- * importer found, up to `until`. Give the `slug` of a source as `source` to get the headlines
- * of that source only.
+ * importer found, up to `until`. Give the slugs of some sources as `sources` to get the
+ * headlines of those sources only; without them, or with none, it has those of all sources.
  *
  * Pass the moment of now as `until`, as with `listRecentItems`.
  */
 export function listArchivePage(
   db: Database,
-  { limit, offset = 0, source, until }: { limit: number; offset?: number; source?: string; until: Date },
+  {
+    limit,
+    offset = 0,
+    sources: slugs,
+    until,
+  }: { limit: number; offset?: number; sources?: readonly string[]; until: Date },
 ) {
   return db
     .select(newsColumns)
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(newsFilter(until, source))
+    .where(newsFilter(until, slugs))
     .orderBy(desc(items.publishedAt), desc(items.id))
     .limit(limit)
     .offset(offset)
@@ -661,16 +669,16 @@ function isShown() {
 
 /**
  * The conditions that make an item a headline to show: of a source that is switched on and is
- * no podcast, shown (see `isShown`), not later than `until`, and of the source with this slug
- * when `source` is given.
+ * no podcast, shown (see `isShown`), not later than `until`, and of one of the sources with
+ * these slugs when some are given.
  */
-function newsFilter(until: Date, source?: string) {
+function newsFilter(until: Date, slugs: readonly string[] = []) {
   return and(
     eq(sources.enabled, true),
     ne(sources.kind, 'podcast'),
     lte(items.publishedAt, until),
     isShown(),
-    source === undefined ? undefined : hasSlug(source),
+    slugs.length === 0 ? undefined : or(...slugs.map(hasSlug)),
   )
 }
 

@@ -411,7 +411,7 @@ describe('the news archive', () => {
     })
   }
 
-  const titles = async (options: { limit?: number; offset?: number; source?: string } = {}) =>
+  const titles = async (options: { limit?: number; offset?: number; sources?: string[] } = {}) =>
     (await listArchivePage(database.db, { limit: 50, until: now, ...options })).map((item) => item.title)
 
   describe('listArchivePage', () => {
@@ -449,16 +449,21 @@ describe('the news archive', () => {
       expect(await titles()).toEqual(['Kop daarna', 'Kop eerst'])
     })
 
-    it('gives the headlines of one source when it gets the slug, and of all sources without', async () => {
+    it('gives the headlines of the sources that get a slug, and of all sources without or with none', async () => {
       const krant = await addSource()
       const nieuws = await addSource({ domain: 'proefnieuws.test', name: 'Proefnieuws', slug: 'proefnieuws' })
+      const omroep = await addSource({ domain: 'omroep.test', name: 'Omroep', slug: 'omroep' })
 
       await addItem(krant, 'krant', new Date('2026-10-22T08:00:00Z'))
       await addItem(nieuws, 'nieuws', new Date('2026-10-22T07:00:00Z'))
+      await addItem(omroep, 'omroep', new Date('2026-10-22T06:00:00Z'))
 
-      expect(await titles()).toEqual(['Kop krant', 'Kop nieuws'])
-      expect(await titles({ source: 'proefnieuws' })).toEqual(['Kop nieuws'])
-      expect(await titles({ source: 'bestaat-niet' })).toEqual([])
+      expect(await titles()).toEqual(['Kop krant', 'Kop nieuws', 'Kop omroep'])
+      expect(await titles({ sources: [] })).toEqual(['Kop krant', 'Kop nieuws', 'Kop omroep'])
+      expect(await titles({ sources: ['proefnieuws'] })).toEqual(['Kop nieuws'])
+      expect(await titles({ sources: ['omroep', 'testkrant'] })).toEqual(['Kop krant', 'Kop omroep'])
+      expect(await titles({ sources: ['bestaat-niet'] })).toEqual([])
+      expect(await titles({ sources: ['bestaat-niet', 'proefnieuws'] })).toEqual(['Kop nieuws'])
     })
 
     it('finds a source by its slug exactly, and not by the same letters in another case or with accents', async () => {
@@ -466,9 +471,9 @@ describe('the news archive', () => {
 
       await addItem(ids, 'bericht', new Date('2026-10-22T08:00:00Z'))
 
-      expect(await titles({ source: 'omrop-fryslan' })).toEqual(['Kop bericht'])
-      expect(await titles({ source: 'OMROP-FRYSLAN' })).toEqual([])
-      expect(await titles({ source: 'omrop-fryslán' })).toEqual([])
+      expect(await titles({ sources: ['omrop-fryslan'] })).toEqual(['Kop bericht'])
+      expect(await titles({ sources: ['OMROP-FRYSLAN'] })).toEqual([])
+      expect(await titles({ sources: ['omrop-fryslán'] })).toEqual([])
     })
 
     it('gives no headline of a source that is switched off, and the headlines of the others', async () => {
@@ -479,7 +484,7 @@ describe('the news archive', () => {
       await addItem(on, 'aan', new Date('2026-10-22T07:00:00Z'))
 
       expect(await titles()).toEqual(['Kop aan'])
-      expect(await titles({ source: 'uit' })).toEqual([])
+      expect(await titles({ sources: ['uit'] })).toEqual([])
     })
 
     it('gives no headline that is hidden, and the headlines around it', async () => {
@@ -529,7 +534,7 @@ describe('the news archive', () => {
       await addItem(news, 'bericht', new Date('2026-10-22T07:00:00Z'))
 
       expect(await titles()).toEqual(['Kop bericht'])
-      expect(await titles({ source: 'testpodcast' })).toEqual([])
+      expect(await titles({ sources: ['testpodcast'] })).toEqual([])
     })
 
     it('gives the headlines of sources of every kind but a podcast', async () => {
@@ -577,7 +582,7 @@ describe('the news archive', () => {
   })
 
   describe('countArchiveItems', () => {
-    it('counts what listArchivePage gives in all: the same headlines, for all sources or one', async () => {
+    it('counts what listArchivePage gives in all: the same headlines, for all sources, one or more', async () => {
       const krant = await addSource()
       const nieuws = await addSource({ domain: 'proefnieuws.test', name: 'Proefnieuws', slug: 'proefnieuws' })
       const off = await addSource({ domain: 'uit.test', enabled: false, name: 'Uit', slug: 'uit' })
@@ -595,10 +600,11 @@ describe('the news archive', () => {
       await addItem(podcast, 'aflevering', new Date('2026-10-22T07:00:00Z'))
 
       expect(await countArchiveItems(database.db, { until: now })).toBe(3)
-      expect(await countArchiveItems(database.db, { source: 'testkrant', until: now })).toBe(2)
-      expect(await countArchiveItems(database.db, { source: 'proefnieuws', until: now })).toBe(1)
-      expect(await countArchiveItems(database.db, { source: 'uit', until: now })).toBe(0)
-      expect(await countArchiveItems(database.db, { source: 'TESTKRANT', until: now })).toBe(0)
+      expect(await countArchiveItems(database.db, { sources: ['testkrant'], until: now })).toBe(2)
+      expect(await countArchiveItems(database.db, { sources: ['proefnieuws'], until: now })).toBe(1)
+      expect(await countArchiveItems(database.db, { sources: ['proefnieuws', 'testkrant'], until: now })).toBe(3)
+      expect(await countArchiveItems(database.db, { sources: ['uit'], until: now })).toBe(0)
+      expect(await countArchiveItems(database.db, { sources: ['TESTKRANT'], until: now })).toBe(0)
       expect(await listArchivePage(database.db, { limit: 50, until: now })).toHaveLength(3)
     })
 

@@ -36,6 +36,9 @@ const meta = preview.meta({
           '  Het component kent geen tijdzone en rekent niet: de pagina zegt welke dag en tijd de bezoeker ziet.',
           '- `internal` is voor een pagina van onze eigen site, zoals een artikel van de redactie: het pictogram voor een link naar buiten blijft dan weg.',
           '  De naam van de bron is dan "Van de redactie".',
+          '- `showSource` staat standaard aan.',
+          '  Met `false` is de naam van de bron niet te zien, voor een lijst waarin elke regel dezelfde bron heeft en de kop van de pagina al zegt welke.',
+          '  De naam blijft er voor een schermlezer, want de bron noemen we altijd (principe 4), en het pictogram bij de naam vervalt.',
           '- `paywalled` zet "voor abonnees" onder de kop, achter de naam van de bron.',
           '  Dat staat in tekst, zodat het ook werkt voor een schermlezer en zonder kleur.',
           '- `details` is een lijst met korte feiten als tekst, zoals "49 min" of "seizoen 9, aflevering 16".',
@@ -181,6 +184,42 @@ export const StatesDark = meta.story({
   name: 'Kop onder de muis, met focus en bezocht, donker',
   parameters: stateParameters,
   render: renderWide,
+})
+
+export const WithoutTheSource = meta.story({
+  name: 'Zonder de naam van de bron',
+  render: () => (
+    <div style={{ maxInlineSize: '38rem' }}>
+      <Card aria-labelledby="een-bron-kop">
+        <Heading id="een-bron-kop" level={2}>
+          Nieuws van Testkrant
+        </Heading>
+        <List role="list">
+          <List.Item>
+            <NewsItem
+              dateTime="2026-10-21T12:05:00Z"
+              headline="Heerenveen wint in blessuretijd van Testclub"
+              href="#heerenveen-wint"
+              showSource={false}
+              source="Testkrant"
+              time="wo 14:05"
+            />
+          </List.Item>
+          <List.Item>
+            <NewsItem
+              dateTime="2026-10-21T08:30:00Z"
+              headline="Trainer over de blessures: ‘Er komt niemand terug voor zondag’"
+              href="#blessures"
+              paywalled
+              showSource={false}
+              source="Testkrant"
+              time="wo 10:30"
+            />
+          </List.Item>
+        </List>
+      </Card>
+    </div>
+  ),
 })
 
 const renderEpisodes = () => (

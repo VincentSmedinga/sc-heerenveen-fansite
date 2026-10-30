@@ -43,7 +43,7 @@ const headlines: PublicArchiveItem[] = [
   },
 ]
 
-const everything: Content = { headlines, pageCount: 1, selected: undefined, sources }
+const everything: Content = { headlines, pageCount: 1, selected: [], sources }
 
 type Query = Record<string, string | string[] | undefined>
 
@@ -73,13 +73,10 @@ afterEach(() => {
 })
 
 describe('the page Nieuwsarchief', () => {
-  it('has one h1, Nieuwsarchief, and an h2 for the filter in the sidebar, and no other heading', async () => {
+  it('has one h1, Nieuwsarchief, and no other heading: the filter is named by its legend', async () => {
     const html = await render()
 
-    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
-      '<h1 class="hf-heading-1">Nieuwsarchief</h1>',
-      '<h2 class="hf-heading-2" id="sources-heading">Bronnen</h2>',
-    ])
+    expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual(['<h1 class="hf-heading-1">Nieuwsarchief</h1>'])
   })
 
   it('is the one main of the page, with the h1 as its introduction and the list in a card', async () => {
@@ -88,7 +85,7 @@ describe('the page Nieuwsarchief', () => {
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(/<main class="hf-page-main"><div class="hf-page-intro"><h1[^>]*>Nieuwsarchief<\/h1><\/div>/)
     expect(html).toMatch(/<div class="hf-card"><ul role="list">/)
-    expect(html.slice(0, html.indexOf('</main>'))).not.toContain('<nav aria-label="Bronnen filteren"')
+    expect(html.slice(0, html.indexOf('</main>'))).not.toContain('<form')
   })
 
   it('shows each headline as a link to the source, with the name of the source, and the day and time of its own', async () => {
@@ -142,7 +139,7 @@ describe('the page Nieuwsarchief', () => {
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(html.slice(html.indexOf('<aside'))).toMatch(
-      /^<aside class="hf-page-sidebar hf-page-sidebar-narrow" aria-label="Bronnen"><section class="hf-card hf-card-soft" aria-labelledby="sources-heading"><h2 class="hf-heading-2" id="sources-heading">Bronnen<\/h2><nav aria-label="Bronnen filteren"/,
+      /^<aside class="hf-page-sidebar hf-page-sidebar-narrow" aria-label="Bronnen"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws" method="get"><fieldset class="hf-checkbox-group"><legend class="hf-heading-2">Bronnen<\/legend>/,
     )
   })
 
@@ -155,43 +152,141 @@ describe('the page Nieuwsarchief', () => {
     expect(html).not.toContain('Bronnen')
   })
 
-  it('has a filter with a link to all sources and one to each source, in a navigation with a name', async () => {
+  it('has a form that gets to /nieuws, with a group named Bronnen and a button Toon, so it works without JavaScript', async () => {
     const html = await render()
-    const nav = html.slice(html.indexOf('<aside')).match(/<nav[^>]*aria-label="Bronnen filteren".*?<\/nav>/)?.[0] ?? ''
+    const form = html.slice(html.indexOf('<aside')).match(/<form.*?<\/form>/)?.[0] ?? ''
+
+    expect(form).toMatch(/^<form [^>]*action="\/nieuws"[^>]*method="get"/)
+    expect(form).toContain('<fieldset')
+    expect(form.match(/<legend[^>]*>Bronnen<\/legend>/)).not.toBeNull()
+    expect(form).toMatch(/<button type="submit">Toon<\/button><\/form>$/)
+    expect(form).not.toContain('hidden')
+    expect(form).not.toContain('<script')
+  })
+
+  it('has a checkbox for each source, named bron, with the slug as value and the name of the source as label, in the order of the list', async () => {
+    const html = await render()
+    const group = html.slice(html.indexOf('<fieldset')).match(/<fieldset.*?<\/fieldset>/)?.[0] ?? ''
 
     expect(
-      [...nav.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
+      [...group.matchAll(/<label[^>]*><input([^>]*)\/><span>([^<]*)<\/span><\/label>/g)].map(([, input, label]) => [
+        input?.match(/value="([^"]*)"/)?.[1],
+        input?.match(/name="([^"]*)"/)?.[1],
+        input?.match(/type="([^"]*)"/)?.[1],
+        label,
+      ]),
     ).toEqual([
-      ['/nieuws', 'Alle bronnen'],
-      ['/nieuws?bron=leeuwarder-courant', 'Leeuwarder Courant'],
-      ['/nieuws?bron=voorbeeldkrant', 'Voorbeeldkrant, met dank aan de redactie'],
+      ['leeuwarder-courant', 'bron', 'checkbox', 'Leeuwarder Courant'],
+      ['voorbeeldkrant', 'bron', 'checkbox', 'Voorbeeldkrant, met dank aan de redactie'],
     ])
   })
 
-  it('marks Alle bronnen as the choice when no source is chosen', async () => {
+  it('has no link to filter and no link to all sources: Alle bronnen is gone', async () => {
     const html = await render()
 
-    expect([...html.matchAll(/<a [^>]*aria-current="page"[^>]*>([^<]*)<\/a>/g)].map(([, label]) => label)).toEqual([
-      'Alle bronnen',
-    ])
+    expect(html).not.toContain('Alle bronnen')
+    expect(html).not.toContain('Bronnen filteren')
+    expect(html).not.toContain('aria-current')
+    expect(html).not.toMatch(/href="\/nieuws\?bron=/)
   })
 
-  it('marks the source that is chosen, and asks for its headlines', async () => {
-    vi.mocked(getArchivePage).mockResolvedValue({ ...everything, selected: sources[0] })
+  it('checks nothing when no source is chosen', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('checked')
+  })
+
+  it('checks the sources that are chosen, as the address says, and asks for their headlines', async () => {
+    vi.mocked(getArchivePage).mockResolvedValue({ ...everything, selected: [sources[0] as PublicArchiveSource] })
 
     const html = await render({ bron: 'leeuwarder-courant' })
 
-    expect([...html.matchAll(/<a [^>]*aria-current="page"[^>]*>([^<]*)<\/a>/g)].map(([, label]) => label)).toEqual([
-      'Leeuwarder Courant',
+    expect([...html.matchAll(/<input[^>]*checked=""[^>]*value="([^"]*)"/g)].map(([, value]) => value)).toEqual([
+      'leeuwarder-courant',
     ])
-    expect(getArchivePage).toHaveBeenCalledExactlyOnceWith('leeuwarder-courant', 1)
+    expect(getArchivePage).toHaveBeenCalledExactlyOnceWith(['leeuwarder-courant'], 1)
+  })
+
+  it('asks for more sources at once, in the order of the address, and checks them all', async () => {
+    vi.mocked(getArchivePage).mockResolvedValue({ ...everything, selected: sources })
+
+    const html = await render({ bron: ['voorbeeldkrant', 'leeuwarder-courant'] })
+
+    expect(getArchivePage).toHaveBeenCalledExactlyOnceWith(['voorbeeldkrant', 'leeuwarder-courant'], 1)
+    expect(html.match(/checked=""/g)).toHaveLength(2)
+  })
+
+  it('checks every source as the address says when all are in it, and links to the pages without bron', async () => {
+    vi.mocked(getArchivePage).mockResolvedValue({ ...everything, pageCount: 3, selected: [] })
+
+    const html = withoutIcons(await render({ bron: ['leeuwarder-courant', 'voorbeeldkrant'] }))
+
+    expect(html.match(/checked=""/g)).toHaveLength(2)
+    expect(html).toContain('<h1 class="hf-heading-1">Nieuwsarchief</h1>')
+    expect(html).toContain('href="/nieuws?pagina=2" rel="next">Volgende')
   })
 
   it('asks for the first page of all sources without parameters, and ignores a parameter it does not know', async () => {
     const html = await render({ utm_source: 'nieuwsbrief' })
 
     expect(html).toContain('<h1 class="hf-heading-1">Nieuwsarchief</h1>')
-    expect(getArchivePage).toHaveBeenCalledExactlyOnceWith(undefined, 1)
+    expect(getArchivePage).toHaveBeenCalledExactlyOnceWith([], 1)
+  })
+})
+
+describe('the sources that are chosen', () => {
+  const one: Content = { ...everything, selected: [sources[0] as PublicArchiveSource] }
+
+  it('names the source in the heading when one is chosen, and shows its name on no line', async () => {
+    vi.mocked(getArchivePage).mockResolvedValue(one)
+
+    const html = await render({ bron: 'leeuwarder-courant' })
+
+    expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual([
+      '<h1 class="hf-heading-1">Nieuwsarchief van Leeuwarder Courant</h1>',
+    ])
+    // The name stays in each line for a screen reader, but nobody sees it.
+    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Leeuwarder Courant<\/span>/g)).toBeNull()
+    expect(html.slice(0, html.indexOf('</main>')).match(/class="hf-visually-hidden">[^<]* <\/span>/g)).toHaveLength(3)
+  })
+
+  it('shows the name of the source on each line when none is chosen', async () => {
+    const html = await render()
+
+    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Leeuwarder Courant<\/span>/g)).toHaveLength(2)
+    expect(html).not.toContain('hf-visually-hidden')
+  })
+
+  it('names two sources in the heading with "en", and shows the name on each line, as more than one source is in the list', async () => {
+    vi.mocked(getArchivePage).mockResolvedValue({ ...everything, selected: sources })
+
+    const html = await render({ bron: ['leeuwarder-courant', 'voorbeeldkrant'] })
+
+    expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual([
+      '<h1 class="hf-heading-1">Nieuwsarchief van Leeuwarder Courant en Voorbeeldkrant, met dank aan de redactie</h1>',
+    ])
+    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Leeuwarder Courant<\/span>/g)).toHaveLength(2)
+  })
+
+  it('names three sources with commas and "en"', async () => {
+    const three = [...sources, { name: 'Omrop Fryslân', slug: 'omrop-fryslan' }]
+
+    vi.mocked(getArchivePage).mockResolvedValue({ ...everything, selected: three, sources: three })
+
+    const html = await render({ bron: ['leeuwarder-courant', 'voorbeeldkrant', 'omrop-fryslan'] })
+
+    expect(html).toContain(
+      '<h1 class="hf-heading-1">Nieuwsarchief van Leeuwarder Courant, Voorbeeldkrant, met dank aan de redactie en Omrop Fryslân</h1>',
+    )
+  })
+
+  it('shows the error page at the address that was asked, with all its sources', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(getArchivePage).mockRejectedValue(new Error('no database'))
+
+    const html = await render({ bron: ['voorbeeldkrant', 'leeuwarder-courant'] })
+
+    expect(html).toContain('<a href="/nieuws?bron=voorbeeldkrant&amp;bron=leeuwarder-courant">Probeer het opnieuw</a>')
   })
 })
 
@@ -223,7 +318,7 @@ describe('the pagination', () => {
     expect(second).toContain('Pagina 2 van 9')
     expect(second).toContain('href="/nieuws" rel="prev">Vorige')
     expect(second).toContain('href="/nieuws?pagina=3" rel="next">Volgende')
-    expect(getArchivePage).toHaveBeenCalledExactlyOnceWith(undefined, 2)
+    expect(getArchivePage).toHaveBeenCalledExactlyOnceWith([], 2)
   })
 
   it('has a link to the previous page and none to a next page on the last page', async () => {
@@ -236,20 +331,37 @@ describe('the pagination', () => {
   })
 
   it('keeps the source in the addresses of the pages, and the filter starts at the first page', async () => {
-    vi.mocked(getArchivePage).mockResolvedValue({ ...many, selected: sources[0] })
+    vi.mocked(getArchivePage).mockResolvedValue({ ...many, selected: [sources[0] as PublicArchiveSource] })
 
     const html = withoutIcons(await render({ bron: 'leeuwarder-courant', pagina: '2' }))
 
     expect(html).toContain('href="/nieuws?bron=leeuwarder-courant" rel="prev">Vorige')
     expect(html).toContain('href="/nieuws?bron=leeuwarder-courant&amp;pagina=3" rel="next">Volgende')
-    expect(html).toContain('href="/nieuws?bron=voorbeeldkrant"')
-    expect(html).not.toContain('bron=voorbeeldkrant&amp;pagina')
+  })
+
+  it('keeps all the chosen sources in the addresses of the pages, in the order of the list', async () => {
+    vi.mocked(getArchivePage).mockResolvedValue({ ...many, selected: sources })
+
+    const html = withoutIcons(await render({ bron: ['voorbeeldkrant', 'leeuwarder-courant'], pagina: '2' }))
+
+    expect(html).toContain('href="/nieuws?bron=leeuwarder-courant&amp;bron=voorbeeldkrant" rel="prev">Vorige')
+    expect(html).toContain(
+      'href="/nieuws?bron=leeuwarder-courant&amp;bron=voorbeeldkrant&amp;pagina=3" rel="next">Volgende',
+    )
+  })
+
+  it('starts at the first page after a new choice, because the form sends no page', async () => {
+    const html = await render({ pagina: '2' })
+    const form = html.match(/<form.*?<\/form>/)?.[0] ?? ''
+
+    expect(form).not.toContain('pagina')
   })
 })
 
 describe('an address that is wrong', () => {
   it.each([
     ['a source that does not exist', { bron: 'bestaat-niet' }],
+    ['one source that does not exist next to one that does', { bron: ['bestaat-niet', 'leeuwarder-courant'] }],
     ['a page that does not exist', { pagina: '99' }],
   ])('gives the page niet gevonden for %s, when the data has none', async (_, query) => {
     vi.mocked(getArchivePage).mockResolvedValue(undefined)
@@ -269,7 +381,8 @@ describe('an address that is wrong', () => {
     ['a page with spaces', { pagina: ' 2' }],
     ['a page that is far too large', { pagina: '99999999999999999999' }],
     ['a page given twice', { pagina: ['1', '2'] }],
-    ['a source given twice', { bron: ['nos', 'espn'] }],
+    ['a source given twice', { bron: ['nos', 'nos'] }],
+    ['a source given twice next to another', { bron: ['nos', 'espn', 'nos'] }],
   ])('gives the page niet gevonden for %s, without asking the data', async (_, query) => {
     await expect(render(query)).rejects.toEqual(notFound)
     await expect(generateMetadata(props(query))).rejects.toEqual(notFound)
@@ -280,7 +393,7 @@ describe('an address that is wrong', () => {
     vi.mocked(getArchivePage).mockResolvedValue(undefined)
 
     await expect(render({ bron: '' })).rejects.toEqual(notFound)
-    expect(getArchivePage).toHaveBeenCalledExactlyOnceWith('', 1)
+    expect(getArchivePage).toHaveBeenCalledExactlyOnceWith([''], 1)
   })
 })
 
@@ -312,8 +425,8 @@ describe('the metadata', () => {
 
   it('gives each page and each source its own canonical address, so search engines keep them apart', async () => {
     vi.stubEnv('SITE_ENV', 'production')
-    vi.mocked(getArchivePage).mockImplementation((source) =>
-      Promise.resolve({ ...everything, selected: sources.find((item) => item.slug === source) }),
+    vi.mocked(getArchivePage).mockImplementation((slugs) =>
+      Promise.resolve({ ...everything, selected: sources.filter((item) => slugs.includes(item.slug)) }),
     )
 
     const canonical = async (query: Query) => (await generateMetadata(props(query))).alternates?.canonical
@@ -332,8 +445,8 @@ describe('the metadata', () => {
 
   it('names the source and the page in the title', async () => {
     vi.stubEnv('SITE_ENV', 'production')
-    vi.mocked(getArchivePage).mockImplementation((source) =>
-      Promise.resolve({ ...everything, selected: sources.find((item) => item.slug === source) }),
+    vi.mocked(getArchivePage).mockImplementation((slugs) =>
+      Promise.resolve({ ...everything, selected: sources.filter((item) => slugs.includes(item.slug)) }),
     )
 
     const title = async (query: Query) => (await generateMetadata(props(query))).title
@@ -343,6 +456,9 @@ describe('the metadata', () => {
     expect(await title({ bron: 'leeuwarder-courant' })).toBe('Nieuwsarchief van Leeuwarder Courant')
     expect(await title({ bron: 'leeuwarder-courant', pagina: '3' })).toBe(
       'Nieuwsarchief van Leeuwarder Courant, pagina 3',
+    )
+    expect(await title({ bron: ['leeuwarder-courant', 'voorbeeldkrant'] })).toBe(
+      'Nieuwsarchief van Leeuwarder Courant en Voorbeeldkrant, met dank aan de redactie',
     )
   })
 })
