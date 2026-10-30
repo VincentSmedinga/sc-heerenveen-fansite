@@ -1923,6 +1923,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een pagina kan met `wide` op de `Page.Sidebar` een hoofdkolom van 30 rem en een zijbalk van 32 rem kiezen; elke andere pagina houdt 38, 2 en 24 rem.
 - **Later:** zie _De kolommen van `/wedstrijden` zijn even breed_.
   De hoofdkolom en de zijbalk met `wide` zijn allebei 31 rem breed, met 2 rem ertussen.
+- **Later:** zie _/nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem_.
+  Een pagina kan met `narrow` op de `Page.Sidebar` een hoofdkolom van 46 rem en een zijbalk van 16 rem kiezen.
 - **Later:** zie _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_.
   De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem; bij 52 rem is er dus 48 rem voor de sporen, en niet meer 52 rem.
 
@@ -4119,6 +4121,28 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een balk met een link naar het filter (`Page.Shortcuts`), of een zijbalk die op een smal scherm boven de lijst staat, lost dat op, maar vraagt iets van het designsysteem en is aan de projecteigenaar.
 - **Alternatieven:** het filter boven de lijst laten (het was zo, en de zijbalk blijft dan leeg).
   Het filter twee keer op de pagina zetten, boven de lijst op een smal scherm en in de zijbalk op een breed scherm (een dubbele navigatie voor een schermlezer).
+- **Later:** zie _/nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem_.
+  De zijbalk met het filter is 16 rem breed en de lijst 46 rem.
+
+### /nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** op `/nieuws` is de hoofdkolom 46 rem breed, met 2 rem ruimte en een zijbalk van 16 rem, samen de 64 rem van de pagina.
+  Andere pagina's houden hun verdeling (38, 2 en 24 rem, of 31, 2 en 31 rem op `/wedstrijden`).
+  Een `/nieuws` zonder koppen heeft geen zijbalk en dus de gewone hoofdkolom van 38 rem.
+- **Waarom:** de projecteigenaar vindt dat het archief meer aandacht moet krijgen, en de zijbalk heeft alleen een filter nodig.
+  De lijst krijgt daarom de breedte en de zijbalk niet meer dan het filter vraagt.
+- **Hoe:** de pagina kiest de verdeling met `narrow` op de `Page.Sidebar`, zoals `/wedstrijden` `wide` kiest, want de `Page.Body` staat in de layout van de site en is voor alle pagina's dezelfde.
+  `Page.Body` ziet de smalle zijbalk met `:has()`.
+  De maten staan als tokens in `layout.css`: `--hf-content-max-width-broad` (46 rem) en `--hf-sidebar-width-narrow` (16 rem).
+  Vanaf 52 rem is het raster `minmax(24rem, 46rem)` en 16 rem.
+  Tot 66 rem breed krimpt alleen de hoofdkolom mee, tot 24 rem, en de zijbalk blijft 16 rem.
+  Samen passen de minima (40 rem) in de 42,25 rem die een telefoon op zijn kant bij 52 rem overhoudt.
+  Onder 52 rem is er één spoor van hoogstens 38 rem, zoals op elke pagina, en staat de zijbalk onder de lijst en de paginering, in de volgorde van de bron.
+  Op een telefoon staat het filter dus onder de lijst, zoals de beslissing _Het filter van het nieuwsarchief staat in een lichtblauwe kaart in de zijbalk_ al zei; dat verandert hier niet.
+- **Alternatieven:** de verdeling aan `Page.Body` meegeven (kan niet: de layout van de site rendert hem voor alle pagina's).
+  Een eigenschap `size` met namen als `wide` en `narrow` (voor twee waarden meer dan nodig).
+  De breedte van 46 rem ook onder 52 rem gebruiken (op een tablet zou de pagina breder zijn dan alle andere pagina's).
 
 ## Importer
 
