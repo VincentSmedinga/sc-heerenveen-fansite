@@ -169,66 +169,74 @@ export const clubSurnames = [
  * writes only "Utrecht" for the club can still get in with a word from football. A club whose
  * short name is the club in nearly every headline (Ajax, PSV, Cambuur, Volendam) is on the
  * list with it.
+ *
+ * The names of one club are in one group. That is how the rule of the opponent finds a club
+ * from the name in `matches` ("N.E.C.", "ADO Den Haag", "Almere City FC", "Excelsior
+ * Rotterdam"): the name of the match, or the name without a prefix or suffix from
+ * `clubPrefixes`, is one of the names of a group, and a headline with any name of the group
+ * names the opponent. So "ADO beleeft frustrerende avond" names ADO Den Haag.
  */
-export const otherClubs = [
+export const otherClubGroups = [
   // Eredivisie
-  'ado den haag',
-  'ado',
-  'ajax',
-  'afc ajax',
-  'az alkmaar',
-  'az',
-  'cambuur',
-  'sc cambuur',
-  'excelsior',
-  'feyenoord',
-  'fortuna sittard',
-  'go ahead eagles',
-  'fc groningen',
-  'nec nijmegen',
-  'nec',
-  'n e c',
-  'pec zwolle',
-  'pec',
-  'psv',
-  'psv eindhoven',
-  'sparta rotterdam',
-  'sparta',
-  'telstar',
-  'sc telstar',
-  'fc twente',
-  'fc utrecht',
-  'willem ii',
+  ['ado den haag', 'ado'],
+  ['ajax', 'afc ajax'],
+  ['az alkmaar', 'az'],
+  ['cambuur', 'sc cambuur'],
+  ['excelsior', 'excelsior rotterdam'],
+  ['feyenoord'],
+  ['fortuna sittard'],
+  ['go ahead eagles'],
+  ['fc groningen'],
+  ['nec nijmegen', 'nec', 'n e c'],
+  ['pec zwolle', 'pec'],
+  ['psv', 'psv eindhoven'],
+  ['sparta rotterdam', 'sparta'],
+  ['telstar', 'sc telstar'],
+  ['fc twente'],
+  ['fc utrecht'],
+  ['willem ii'],
   // Eerste Divisie
-  'almere city',
-  'fc den bosch',
-  'fc dordrecht',
-  'fc eindhoven',
-  'fc emmen',
-  'de graafschap',
-  'graafschap',
-  'helmond sport',
-  'heracles almelo',
-  'heracles',
-  'jong ajax',
-  'jong az',
-  'jong fc utrecht',
-  'jong psv',
-  'mvv maastricht',
-  'mvv',
-  'nac breda',
-  'nac',
-  'rkc waalwijk',
-  'rkc',
-  'roda jc kerkrade',
-  'roda jc',
-  'roda',
-  'top oss',
-  'vitesse',
-  'fc volendam',
-  'volendam',
-  'vvv venlo',
+  ['almere city'],
+  ['fc den bosch'],
+  ['fc dordrecht'],
+  ['fc eindhoven'],
+  ['fc emmen'],
+  ['de graafschap', 'graafschap'],
+  ['helmond sport'],
+  ['heracles almelo', 'heracles'],
+  ['jong ajax'],
+  ['jong az'],
+  ['jong fc utrecht'],
+  ['jong psv'],
+  ['mvv maastricht', 'mvv'],
+  ['nac breda', 'nac'],
+  ['rkc waalwijk', 'rkc'],
+  ['roda jc kerkrade', 'roda jc', 'roda'],
+  ['top oss'],
+  ['vitesse'],
+  ['fc volendam', 'volendam'],
+  ['vvv venlo'],
 ] as const
+
+/** The names of `otherClubGroups` in one list, for the rule of "Heerenveen" next to a club. */
+export const otherClubs: readonly string[] = otherClubGroups.flat()
+
+/**
+ * The words that start or end the name of a club without being part of the name: FC, SC, VV,
+ * SV and AFC. The rule of the opponent leaves them out of the name of a match when the name is
+ * not on the list of clubs: "FC Lisse" is looked for as "Lisse". A name that is only one of
+ * them ("AFC", an amateur club in the cup) is not looked for, because it would be every club
+ * with that prefix.
+ */
+export const clubPrefixes = ['afc', 'fc', 'sc', 'sv', 'vv'] as const
+
+/**
+ * Names of amateur clubs of one word that are also an ordinary word, so a headline with the
+ * word is not about the club. The rule of the opponent looks for the other one-word names of
+ * clubs that are not on the list of clubs (IJsselmeervogels, ASWH), and for none of these.
+ * Add a word when a headline shows that we need it.
+ */
+export const ordinaryClubWords = ['concordia', 'hercules', 'olympia', 'quick', 'rapid', 'union', 'victoria'] as const
 
 /**
  * Words from football. Alone they say nothing about sc Heerenveen: a headline needs

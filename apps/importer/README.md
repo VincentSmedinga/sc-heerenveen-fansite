@@ -231,8 +231,8 @@ Er is nog geen beheer (#30), dus de seed zet ze erin (`packages/db/src/seed.ts`)
 
 Een regionale krant schrijft over meer dan de club.
 Het filter bepaalt voor elk bericht uit zo'n feed of het over sc Heerenveen gaat, zet twijfelgevallen apart en gooit niets weg.
-Het kijkt alleen naar de kop, want de importer bewaart geen intro of categorie.
-De functie is `judgeRelevance` in [`src/relevance.ts`](src/relevance.ts); ze is zuiver, dus dezelfde kop geeft altijd dezelfde waarde.
+Het kijkt naar de kop en naar de tegenstanders van de wedstrijden rond de publicatie, want de importer bewaart geen intro of categorie.
+De functie is `judgeRelevance` in [`src/relevance.ts`](src/relevance.ts); ze is zuiver, dus dezelfde kop met dezelfde tegenstanders (zie _Koppen over de tegenstander_) geeft altijd dezelfde waarde.
 
 | Waarde       | Wanneer                                                                                                                                                                                                                                                             | Wat de site doet          |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
@@ -240,12 +240,55 @@ De functie is `judgeRelevance` in [`src/relevance.ts`](src/relevance.ts); ze is 
 | `doubtful`   | De kop noemt alleen "Heerenveen" of "Hearrenfean" (de gemeente en de plaats schrijven ook veel nieuws), of alleen een achternaam van de club                                                                                                                        | Toont het bericht nergens |
 | `irrelevant` | Verder                                                                                                                                                                                                                                                              | Toont het bericht nergens |
 
+Een kop over de tegenstander van een wedstrijd rond de publicatie is ook `relevant` (zie _Koppen over de tegenstander_).
 Hoofdletters en accenten tellen niet, en alleen hele woorden: "Heerenveenseweg" is niet "Heerenveen" en "wandelwedstrijd" is geen "wedstrijd".
 Het filter kent ook de Friese schrijfwijze (zie _Friese woorden_).
 De keuzes staan in `docs/beslissingen.md`, onder _De regels van het filter_.
 De importer bewaart elk bericht, ook `doubtful` en `irrelevant`.
 Het beheer (`/beheer/berichten`) toont ze wel, met een woord erbij, zodat een moderator ze kan vinden en verbergen.
 Een scherm om twijfelgevallen te beoordelen, en het met de hand corrigeren van een uitkomst (#76), komen later.
+
+### Koppen over de tegenstander
+
+Een bericht over de tegenstander rond een wedstrijd tegen ons is ook nieuws over sc Heerenveen, ook als de kop de club niet noemt: "ADO beleeft frustrerende avond".
+Een kop noemt een club, en sc Heerenveen speelt in het lopende seizoen een wedstrijd tegen die club.
+Dan is de kop `relevant` van 3 dagen voor tot en met 3 dagen na die wedstrijd.
+Noemt de kop ook een andere profclub uit de lijst, dan telt hij niet.
+Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
+
+- **Het venster:** de datum van de wedstrijd min 3 dagen tot en met plus 3 dagen.
+  Een bericht van 3 dagen voor de wedstrijd telt, een bericht van 4 dagen ervoor niet.
+  Na de wedstrijd telt een bericht tot en met de 3e dag, en een bericht van 4 dagen erna niet.
+  Het bericht en de wedstrijd tellen als Nederlandse dagen (`Europe/Amsterdam`).
+  Zo staat een bericht van half één 's nachts, in de nacht van de overgang naar de wintertijd, op de dag die een lezer zag.
+- **De wedstrijden:** de wedstrijden van de competitie en de beker in `matches`, gespeeld of nog te spelen, van het lopende seizoen.
+  De tabel heeft ook eerdere seizoenen (`pnpm import:season`), maar die tellen niet.
+  Een wedstrijd zonder aftrap telt met de datum die we hebben, en een uitgestelde wedstrijd zonder nieuwe datum telt niet.
+  Speelt een club twee keer tegen ons, dan heeft elke wedstrijd zijn eigen venster.
+  Alleen de tegenstander van die wedstrijd telt: een club die we pas over een maand treffen, doet nu niets.
+- **Hoe het werkt:** `judgeRelevance` leest zelf niets uit de database.
+  `importFeeds` leest de wedstrijden van het seizoen één keer per run, en `opponentsAround` (in `src/relevance.ts`) kiest bij elk bericht de tegenstanders van de wedstrijden binnen het venster.
+  Die namen gaan als tweede argument naar `judgeRelevance`.
+  Zonder wedstrijden werkt het filter als eerst.
+  Een wedstrijd die de Wikipedia-import in dezelfde run bewaart, telt vanaf de volgende run.
+- **Hetzelfde bericht opnieuw:** de importer beoordeelt een bekend bericht bij elke run opnieuw.
+  Een bericht dat `irrelevant` was voordat de wedstrijd bekend was, wordt dus `relevant` zodra hij erin staat.
+  Een verborgen bericht blijft verborgen, en een feed met het filter `none` verandert niet.
+- **Alleen de tegenstander:** een kop die de tegenstander noemt en ook een andere profclub uit `otherClubGroups`, gaat over een andere wedstrijd: "NEC kan geen vervolg geven: ploeg speelt gelijk tegen FC Groningen".
+  Zo'n kop telt niet als kop over de tegenstander.
+  Een club die naar een plaats heet, telt ook hier alleen met zijn volledige naam: "tegen Groningen" is geen andere club, "tegen FC Groningen" wel.
+  Twee namen van dezelfde club zijn één club.
+  Een tegenstander die niet in de lijst staat, telt niet mee als club uit de lijst: "Excelsior Maassluis" is niet "Excelsior" uit Rotterdam.
+  Een kop met "Heerenveen" valt onder de andere regels en wordt niet slechter van een tweede club.
+- **De naam van de tegenstander:** de naam in `matches.opponent` ("N.E.C.", "ADO Den Haag", "Almere City FC") hoort bij de namen die het filter voor die club kent.
+  Dat verband staat op één plek: `otherClubGroups` in [`src/relevance-terms.ts`](src/relevance-terms.ts), met de namen van één club bij elkaar.
+  De naam uit de wedstrijd, of die naam zonder FC, SC, VV, SV of AFC ervoor of erachter, moet een van die namen zijn.
+  Dan telt elke naam van de groep: "ADO beleeft frustrerende avond" noemt ADO Den Haag.
+  Een club die naar een plaats heet, telt alleen met zijn volledige naam ("FC Twente", niet "Twente"), zodat een kop over de stad niet `relevant` wordt.
+- **Een tegenstander die niet in de lijst staat:** een amateurclub in de beker telt met zijn naam uit de wedstrijd, zonder voor- of achtervoegsel.
+  Bij twee woorden of meer telt de naam altijd: "Excelsior Maassluis", "Quick Boys", "De Treffers".
+  Bij één woord telt hij ook ("IJsselmeervogels", "ASWH"), tenzij het een gewoon woord is (`ordinaryClubWords`: Quick, Victoria en dergelijke) of alleen een voorvoegsel ("AFC").
+  Komt een club vaak voor in een kop die er niet over gaat, zet hem dan in `ordinaryClubWords`, of zijn volledige naam in `otherClubGroups`.
 
 ### Een feed op `club` zetten
 
@@ -315,11 +358,13 @@ Zo voeg je een Fries woord toe:
 
 ### De profclubs bijhouden
 
-`otherClubs` in [`src/relevance-terms.ts`](src/relevance-terms.ts) heeft de namen van de andere profclubs van de Eredivisie en de Eerste Divisie.
+`otherClubGroups` in [`src/relevance-terms.ts`](src/relevance-terms.ts) heeft de namen van de andere profclubs van de Eredivisie en de Eerste Divisie, met de namen van één club bij elkaar.
+`otherClubs` is dezelfde lijst plat.
 "Heerenveen" naast zo'n naam is een wedstrijd, dus de kop is `relevant`, ook zonder voetbalwoord.
 Een club zonder "Heerenveen" zegt niets.
 Een club waarvan de korte naam ook een plaats is (Groningen, Utrecht, Zwolle, Emmen), staat er alleen met zijn volledige naam: "Heerenveen en Groningen" staat net zo goed in een kop over de A7.
 Pas de lijst aan na de promotie en degradatie van elk seizoen (mei tot juli), en schrijf bovenaan de datum van de controle.
+Zet de namen die een club in een kop heeft in één groep: de regel van de tegenstander vindt de club met de naam uit `matches` (zie _Koppen over de tegenstander_).
 
 ### De testkoppen
 
