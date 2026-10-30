@@ -32,6 +32,14 @@ export type NewsItemProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
    * Whether the item is behind the paywall of the source. The component then says so in text.
    */
   paywalled?: boolean
+  /**
+   * Whether the name of the source is shown. Pass `false` in a list where every line has the
+   * same source and the heading of the page says which, so the name is not repeated. The name
+   * stays in the line for a screen reader, which is always told the source (editorial principle
+   * 4), and the icon for a link to another site goes, because it belongs with the name. Without
+   * it, the name is shown.
+   */
+  showSource?: boolean
   /** The name of the source, as it wants to be credited. */
   source: string
   /**
@@ -73,36 +81,44 @@ export const NewsItem = ({
   href,
   internal = false,
   paywalled,
+  showSource = true,
   source,
   time,
   ...props
-}: NewsItemProps) => (
-  <div {...props} className={classNames('hf-news-item', className)}>
-    <div className="hf-news-item-layout">
-      <time className="hf-meta hf-news-item-time" dateTime={dateTime}>
-        {time}
-      </time>
-      <div className="hf-news-item-body">
-        <Link className="hf-headline hf-news-item-headline" href={href}>
-          {headline}
-        </Link>
-        <Text appearance="meta" className="hf-news-item-meta">
-          <span>{source}</span>
-          {!internal && <Icon name="external-link" />}
-          {paywalled && (
-            <>
-              {separator}
-              <span>voor abonnees</span>
-            </>
-          )}
-          {details?.map((detail) => (
-            <Fragment key={detail}>
-              {separator}
-              <span>{detail}</span>
-            </Fragment>
-          ))}
-        </Text>
+}: NewsItemProps) => {
+  // The parts of the line under the headline, which the separator goes between.
+  const parts = [
+    showSource ? (
+      <>
+        <span>{source}</span>
+        {!internal && <Icon name="external-link" />}
+      </>
+    ) : undefined,
+    paywalled ? <span>voor abonnees</span> : undefined,
+    ...(details ?? []).map((detail) => <span key={detail}>{detail}</span>),
+  ].filter((part) => part !== undefined)
+
+  return (
+    <div {...props} className={classNames('hf-news-item', className)}>
+      <div className="hf-news-item-layout">
+        <time className="hf-meta hf-news-item-time" dateTime={dateTime}>
+          {time}
+        </time>
+        <div className="hf-news-item-body">
+          <Link className="hf-headline hf-news-item-headline" href={href}>
+            {headline}
+          </Link>
+          <Text appearance="meta" className="hf-news-item-meta">
+            {!showSource && <span className="hf-visually-hidden">{source} </span>}
+            {parts.map((part, index) => (
+              <Fragment key={index}>
+                {index > 0 && separator}
+                {part}
+              </Fragment>
+            ))}
+          </Text>
+        </div>
       </div>
     </div>
-  </div>
-)
+  )
+}

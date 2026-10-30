@@ -315,18 +315,24 @@ De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en
 `/nieuws` toont alle koppen die we hebben opgehaald, nieuwste eerst, 50 per pagina, elk als `NewsItem`, zonder indeling per dag: elke regel heeft zijn eigen dag en tijd (`formatNewsTime`).
 Het zijn dezelfde koppen als op de homepage, ook met "voor abonnees" bij een kop achter een betaalmuur, maar zonder grens in leeftijd.
 Een intro of foto staat er niet, net als op de homepage.
-De query is `listArchivePage` in `packages/db/src/queries.ts`, met `countArchiveItems` voor het aantal en `listArchiveSources` voor het filter.
+De query is `listArchivePage` in `packages/db/src/queries.ts`, met `countArchiveItems` voor het aantal en `listArchiveSources` voor het filter; beide nemen een lijst slugs als `sources`.
 Ze delen met `listRecentItems` de voorwaarden (`newsFilter`): relevant, niet verborgen, van een bron die aanstaat, geen podcast en niet na nu.
-Het filter (`Filter`) staat in een lichtblauwe kaart (`surface="soft"`) met de kop "Bronnen" in de zijbalk: "Alle bronnen" en een link per bron met minstens één kop in het archief, op alfabet, als `/nieuws?bron=leeuwarder-courant`.
+Het filter staat in een lichtblauwe kaart (`surface="soft"`) in de zijbalk: een formulier met een GET naar `/nieuws`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Bronnen") en de knop "Toon".
+Er is een vakje per bron met minstens één kop in het archief, op alfabet, met de `slug` als waarde.
+De knop blijft ook met JavaScript, en het formulier werkt zonder.
+Zonder vinkje en met alle vinkjes toont de pagina alle koppen, op het adres zonder `bron`: `/nieuws`.
+Met één of meer vinkjes (maar niet alle) staan er alleen koppen van die bronnen, op `/nieuws?bron=leeuwarder-courant&bron=nos`, in de volgorde van de lijst.
+Met precies één vinkje staat de naam van de bron niet bij elke kop (`showSource` van `NewsItem`), want de kop van de pagina noemt hem al; een schermlezer hoort hem nog wel.
+De functies die het adres lezen en maken staan in `src/archive-query.ts`.
 Op een smal scherm staat de zijbalk onder de lijst en de paginering, want de zijbalk komt na de hoofdkolom in de bron en het designsysteem laat de volgorde van de bron en van het scherm gelijk.
 Zonder koppen is er geen filter en geen zijbalk.
 De slug komt uit de kolom `slug` van `sources`, die de seed voor elke bron met koppen vastlegt (`packages/db/src/seed.ts`), dus een andere naam verandert het adres niet.
-Een bron zonder slug staat niet in het filter, maar haar koppen staan wel bij "Alle bronnen".
-Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/nieuws?pagina=2`, en met een bron `/nieuws?bron=leeuwarder-courant&pagina=2`.
-Een nieuwe kop schuift de inhoud van de pagina's op; de bron en het filter blijven vast.
-Een bron die niet in het filter staat, en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
-De titel noemt de bron en de pagina, zoals "Nieuwsarchief van NOS, pagina 3", en elke pagina is zijn eigen canonieke adres.
-De server bewaart elke combinatie van bron en pagina vijf minuten, maar alleen na de controle van het adres (`src/archive.ts`).
+Een bron zonder slug staat niet in het filter, maar haar koppen staan wel bij alle bronnen.
+Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/nieuws?pagina=2`, en met bronnen `/nieuws?bron=leeuwarder-courant&bron=nos&pagina=2`.
+Een nieuwe kop schuift de inhoud van de pagina's op; de bronnen en het filter blijven vast, en een nieuwe keuze begint op pagina 1.
+Een bron die niet in het filter staat, een bron die twee keer in het adres staat en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
+De titel en de kop noemen de bronnen en de pagina, zoals "Nieuwsarchief van NOS en Omrop Fryslân, pagina 3", en elke pagina is zijn eigen canonieke adres.
+De server bewaart elke combinatie van bronnen en pagina vijf minuten, maar alleen na de controle van het adres (`src/archive.ts`).
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/podcasts`.
 De pagina staat niet in het hoofdmenu; dat volgt uit de opbouw van de site (#431).
 

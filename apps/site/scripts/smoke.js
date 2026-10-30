@@ -628,17 +628,20 @@ await withEmptyDatabase((database) =>
     assert.equal((await fetch(`${origin}/podcasts?pagina=2`)).status, 404)
     assert.equal((await fetch(`${origin}/podcasts?pagina=0`)).status, 404)
 
-    // The news archive reads the headlines, and the seed has none. A source or a page that
-    // doesn't exist is a 404.
+    // The news archive reads the headlines, and the seed has none, so there is no filter. A
+    // source, several sources or a page that doesn't exist is a 404, and so is a source given
+    // twice.
     const archivePage = await fetch(`${origin}/nieuws`)
     const archiveHtml = await archivePage.text()
     assert.equal(archivePage.status, 200)
     assert.match(archiveHtml, /<h1[^>]*>Nieuwsarchief<\/h1>/)
     assert.match(archiveHtml, /We hebben nog geen nieuws gevonden\./)
-    assert.doesNotMatch(archiveHtml, /Bronnen filteren|<aside/)
+    assert.doesNotMatch(archiveHtml, /<aside|<fieldset|type="checkbox"/)
     assert.match(html, /<a href="\/nieuws">Alle <span class="hf-icon-tail">koppen</)
     assert.equal((await fetch(`${origin}/nieuws?bron=leeuwarder-courant`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws?bron=bestaat-niet`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws?bron=leeuwarder-courant&bron=nos`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws?bron=nos&bron=nos`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws?pagina=2`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws?pagina=0`)).status, 404)
 

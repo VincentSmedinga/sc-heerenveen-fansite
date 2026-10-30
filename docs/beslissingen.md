@@ -4093,6 +4093,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een indeling per dag (langere pagina's met kopjes die weinig toevoegen).
   Een grens van 12 maanden (oudere koppen verdwijnen van de site terwijl ze in de database staan).
   Meteen een plek in het menu (de opbouw is nog niet gekozen).
+- **Later:** zie _Op `/nieuws` kies je bronnen met selectievakjes in een fieldset_: het filter per bron is een groep selectievakjes met een knop "Toon", en "Alle bronnen" als link vervalt.
+  `?bron=<slug>` mag vaker voorkomen, en zonder `bron` zijn het alle bronnen.
 
 ### De homepage heeft geen knop "Laad 5 meer" meer, maar de link "Alle koppen"
 
@@ -4119,6 +4121,34 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een balk met een link naar het filter (`Page.Shortcuts`), of een zijbalk die op een smal scherm boven de lijst staat, lost dat op, maar vraagt iets van het designsysteem en is aan de projecteigenaar.
 - **Alternatieven:** het filter boven de lijst laten (het was zo, en de zijbalk blijft dan leeg).
   Het filter twee keer op de pagina zetten, boven de lijst op een smal scherm en in de zijbalk op een breed scherm (een dubbele navigatie voor een schermlezer).
+- **Later:** zie _Op `/nieuws` kies je bronnen met selectievakjes in een fieldset_: de kaart blijft, maar bevat een formulier met een `fieldset` en een `legend` "Bronnen" in plaats van de kop en de navigatie "Bronnen filteren".
+
+### Op `/nieuws` kies je bronnen met selectievakjes in een fieldset
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** het filter per bron op `/nieuws` is een formulier met `method="get"` naar `/nieuws`, met een `fieldset` en een `legend` "Bronnen", een selectievakje per bron (`name="bron"`, de `slug` als waarde) en een knop "Toon".
+  - **Geen vinkje betekent alle bronnen**, en alle vinkjes ook.
+    Vanaf het eerste vinkje toont de pagina alleen de aangevinkte bronnen.
+    "Alle bronnen" als link vervalt.
+  - **Het adres** is `?bron=a&bron=b`, in de volgorde van de lijst, en `?pagina=N` blijft.
+    Een adres met alle bronnen is dezelfde pagina als het adres zonder `bron`: de pagina toont alle koppen, de vakjes staan aangevinkt zoals het adres zegt, en het canonieke adres en de adressen van de paginering hebben geen `bron`.
+    Een andere volgorde in het adres geeft dezelfde pagina.
+    Een onbekende slug, een slug die twee keer voorkomt en een verkeerde `pagina` geven "niet gevonden".
+    Een nieuwe keuze begint op pagina 1, omdat het formulier geen `pagina` verstuurt.
+  - **De knop blijft altijd staan**, ook met JavaScript, anders dan bij de seizoenskiezer.
+    Een pagina die bij elk vinkje opnieuw laadt, neemt de focus mee en is lastig voor toetsenbord en schermlezer.
+  - **Eén bron aangevinkt:** de naam van de bron staat niet bij elke kop, want hij staat in de kop van de pagina ("Nieuwsarchief van A") en in het vakje.
+    De naam blijft in elke regel voor een schermlezer, omdat we de bron altijd noemen (principe 4 van de Redactie).
+  - **De titel en de kop** noemen de gekozen bronnen: "Nieuwsarchief van A en B", bij meer bronnen "A, B en C".
+- **Waarom:** met links kun je één bron kiezen en met vakjes meer, en een formulier met een GET geeft een adres dat je kunt delen en werkt zonder JavaScript, zoals de seizoenskiezer.
+  Dat alle vakjes en geen vakje dezelfde pagina zijn, geeft een bezoeker die alles aanvinkt dezelfde pagina als een bezoeker die niets doet, op één adres.
+- **Gevolg:** het designsysteem krijgt `CheckboxGroup` (in de subgroep Formulier), een `fieldset` met een `legend` en een vakje per optie, en `NewsItem` krijgt `showSource` om de naam van de bron te verbergen zonder hem uit de HTML te halen.
+  De queries `listArchivePage` en `countArchiveItems` nemen `sources`, een lijst slugs, in plaats van `source`.
+  De server bewaart de pagina's per keuze, met de bronnen in de volgorde van de lijst, zodat dezelfde keuze in een andere volgorde dezelfde plek in het geheugen heeft.
+  `Filter` blijft, want `/podcasts` gebruikt hem.
+- **Alternatieven:** de bron laten staan bij elke kop met een schermlezer (de naam is dan vaker te horen dan nodig) of hem helemaal weglaten (de bron staat dan alleen in de kop).
+  Het formulier met JavaScript laten verzenden bij elk vinkje, zoals de seizoenskiezer (de pagina laadt dan opnieuw tijdens het kiezen).
+  Een doorverwijzing naar `/nieuws` bij alle vinkjes (een extra stap, en de vakjes staan dan niet aangevinkt zoals de bezoeker koos).
 
 ## Importer
 

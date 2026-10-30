@@ -271,3 +271,30 @@ describe('NewsItem', () => {
     expect(elements).toHaveLength(5)
   })
 })
+
+describe('NewsItem without the name of the source', () => {
+  it('shows the name by default', () => {
+    const { container } = render(<NewsItem {...props} />)
+
+    expect(container.querySelector('.hf-news-item-meta .hf-visually-hidden')).toBeNull()
+    expect(container.querySelector('.hf-news-item-meta')?.textContent).toBe('Testkrant')
+  })
+
+  it('keeps the name for a screen reader but shows it to no one, and leaves out the icon that goes with it', () => {
+    const { container } = render(<NewsItem {...props} showSource={false} />)
+    const meta = container.querySelector('.hf-news-item-meta')
+
+    expect(meta?.querySelector('.hf-visually-hidden')?.textContent).toBe('Testkrant ')
+    expect(meta?.querySelector('span:not(.hf-visually-hidden)')).toBeNull()
+    expect(meta?.querySelector('svg')).toBeNull()
+  })
+
+  it('puts no dot in front of "voor abonnees" or of the details, because nothing visible comes before them', () => {
+    const { container } = render(<NewsItem {...props} details={['49 min']} paywalled showSource={false} />)
+    const meta = container.querySelector('.hf-news-item-meta')
+    const visible = [...(meta?.children ?? [])].filter((child) => !child.classList.contains('hf-visually-hidden'))
+
+    expect(visible.map((child) => child.textContent)).toEqual(['voor abonnees', '·', '49 min'])
+    expect(meta?.textContent).toBe('Testkrant voor abonnees · 49 min')
+  })
+})

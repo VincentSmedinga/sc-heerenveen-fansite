@@ -14,10 +14,15 @@ import { earlierSeasonSlug } from './earlier-season'
 // made-up published article, which the database gives.
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
-  // The news archive: all sources, one source, the second page (the made-up headlines fill
-  // more than one page), and the addresses that say "niet gevonden".
+  // The news archive: all sources, one source, more sources, the second page (the made-up
+  // headlines fill more than one page), and the addresses that say "niet gevonden": an unknown
+  // source, a source given twice and a page that is wrong.
   { path: '/nieuws', status: 200 },
   { path: '/nieuws?bron=testkrant', status: 200 },
+  { path: '/nieuws?bron=testkrant&bron=proefnieuws', status: 200 },
+  { path: '/nieuws?bron=proefnieuws&bron=testkrant&bron=voorbeeldkrant', status: 200 },
+  { path: '/nieuws?bron=testkrant&bron=testkrant', status: 404 },
+  { path: '/nieuws?bron=testkrant&bron=bestaat-niet', status: 404 },
   { path: '/nieuws?pagina=2', status: 200 },
   { path: '/nieuws?bron=testkrant&pagina=99999', status: 404 },
   { path: '/nieuws?bron=bestaat-niet', status: 404 },
