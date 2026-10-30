@@ -4057,7 +4057,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 30 oktober 2026
 - **Besluit:** `/nieuws` toont alle koppen die we hebben opgehaald (relevant, niet verborgen, van een bron die aanstaat, geen podcast), met 50 per pagina, de nieuwste eerst en zonder indeling per dag.
   Er is een filter per bron (`?bron=<slug>`) en paginering (`?pagina=N`), zoals bij `/podcasts`.
-  De homepage linkt ernaar met "Alle koppen", onder de koppen in de kaart Laatste nieuws.
+  De homepage linkt ernaar met "Alle koppen", onder de kaart Laatste nieuws.
   Het menu verandert niet tot de opbouw van de site is vastgesteld (#431).
 - **Waarom:** de homepage houdt de laatste weken, en wie verder terug wil, heeft een archief nodig.
   Dezelfde onderdelen en adressen als de podcasts houden de site voorspelbaar en besparen werk.
@@ -4069,6 +4069,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een nieuwe kop schuift de inhoud van de pagina's op (pagina 2 van gisteren is pagina 3 van vandaag).
   Dat is zo bij elk archief en niet te voorkomen met adressen met een paginanummer; de bron en het filter blijven wel vast.
   `nieuws` staat bij de gereserveerde adressen voor een artikel van de redactie.
+  De link staat buiten de kaart: binnen de kaart komt hij direct onder de knop "Laad 5 meer", en de twee raken elkaar dan bijna, wat de controle op de grootte van een aanraakdoel afkeurt.
 - **Alternatieven:** laden met "Laad meer", zoals de homepage (geen vaste adressen, terwijl het issue ze vraagt).
   Een indeling per dag (langere pagina's met kopjes die weinig toevoegen).
   Een grens van 12 maanden (oudere koppen verdwijnen van de site terwijl ze in de database staan).

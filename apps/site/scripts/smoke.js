@@ -636,7 +636,7 @@ await withEmptyDatabase((database) =>
     assert.match(archiveHtml, /<h1[^>]*>Nieuwsarchief<\/h1>/)
     assert.match(archiveHtml, /We hebben nog geen nieuws gevonden\./)
     assert.doesNotMatch(archiveHtml, /Bronnen filteren/)
-    assert.match(html, /<a href="\/nieuws"[^>]*>.*Alle koppen.*<\/a>/s)
+    assert.match(html, /<a href="\/nieuws">Alle <span class="hf-icon-tail">koppen</)
     assert.equal((await fetch(`${origin}/nieuws?bron=leeuwarder-courant`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws?bron=bestaat-niet`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws?pagina=2`)).status, 404)

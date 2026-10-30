@@ -176,12 +176,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </Button>
             </Form>
           )}
-          <Text>
-            <Link href="/nieuws" icon="arrow-right">
-              Alle koppen
-            </Link>
-          </Text>
         </Card>
+        <Text>
+          <Link href="/nieuws" icon="arrow-right">
+            Alle koppen
+          </Link>
+        </Text>
       </Page.Main>
       <Page.Sidebar aria-label="Het forum, de podcasts en de wedstrijden">
         <Card aria-labelledby="discussions-heading">

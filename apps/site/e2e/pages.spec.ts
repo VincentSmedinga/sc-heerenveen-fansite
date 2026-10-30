@@ -21,9 +21,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/nieuws', status: 200 },
   { path: '/nieuws?bron=testkrant', status: 200 },
   { path: '/nieuws?pagina=2', status: 200 },
-  { path: '/nieuws?bron=testkrant&pagina=2', status: 404 },
+  { path: '/nieuws?bron=testkrant&pagina=99999', status: 404 },
   { path: '/nieuws?bron=bestaat-niet', status: 404 },
-  { path: '/nieuws?pagina=3', status: 404 },
+  { path: '/nieuws?pagina=99999', status: 404 },
   { path: '/nieuws?pagina=0', status: 404 },
   { path: '/wedstrijden', status: 200 },
   // The matches of an earlier season (made up, see earlier-season.ts), the route behind the

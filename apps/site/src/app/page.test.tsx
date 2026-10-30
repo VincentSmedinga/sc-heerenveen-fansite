@@ -139,14 +139,14 @@ describe('the homepage', () => {
     ])
   })
 
-  it('is the one main of the page, with the h1 and the news in a card', async () => {
+  it('is the one main of the page, with the h1, the news in a card and the link to the archive', async () => {
     vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
 
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><\/main><aside/,
+      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><p><a href="\/nieuws">.*<\/a><\/p><\/main><aside/,
     )
   })
 
@@ -279,14 +279,13 @@ describe('the homepage', () => {
     expect(html).not.toContain('Binnenkort meer')
   })
 
-  it('links to the news archive under the headlines, in the card, with or without the button', async () => {
+  it('links to the news archive under the card, with or without the button', async () => {
     for (const more of [false, true]) {
       vi.mocked(getHeadlines).mockResolvedValue({ headlines, more })
 
       const html = await renderMain()
-      const card = html.match(/<section.*?<\/section>/)?.[0] ?? ''
 
-      expect(withoutIcons(card)).toMatch(/<p><a href="\/nieuws">Alle koppen<\/a><\/p><\/section>$/)
+      expect(withoutIcons(html)).toMatch(/<\/section><p><a href="\/nieuws">Alle koppen<\/a><\/p><\/main>$/)
       expect(html.match(/href="\/nieuws"/g)).toHaveLength(1)
     }
   })
@@ -306,7 +305,7 @@ describe('the homepage', () => {
     vi.mocked(getHeadlines).mockResolvedValue({ headlines: [], more: false })
 
     expect(withoutIcons(await renderMain())).toContain(
-      '<p>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</p><p><a href="/nieuws">Alle koppen</a></p>',
+      '<p>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</p></section><p><a href="/nieuws">Alle koppen</a></p>',
     )
   })
 
@@ -375,12 +374,12 @@ describe('the button that loads five more headlines', () => {
     expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(10)
   })
 
-  it('shows a real button "Laad 5 meer" under the list, in the card, when there are older headlines, and the link to the archive after it', async () => {
+  it('shows a real button "Laad 5 meer" under the list, in the card, when there are older headlines', async () => {
     const html = await renderMain()
     const card = html.match(/<section.*?<\/section>/)?.[0] ?? ''
 
     expect(card).toMatch(
-      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="15" name="nieuws"><span class="hf-icon-head"><svg [^>]*class="hf-icon"[^>]*>.*?<\/svg>Laad<\/span> 5 meer<\/button><\/form><p>.*<\/p><\/section>$/,
+      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="15" name="nieuws"><span class="hf-icon-head"><svg [^>]*class="hf-icon"[^>]*>.*?<\/svg>Laad<\/span> 5 meer<\/button><\/form><\/section>$/,
     )
   })
 
