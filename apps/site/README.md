@@ -62,6 +62,7 @@ Heeft de database al echte wedstrijden voor dat seizoen, van een import, dan laa
 Verzonnen wedstrijden van een eerdere run haalt hij na de laatste test wel weg.
 `pnpm --filter site test-data --remove` haalt dat seizoen weg als al zijn wedstrijden verzonnen zijn, ook als een eerdere run ze erin zette, en laat het staan zodra er een echte wedstrijd van een import in staat.
 `e2e/season-picker.spec.ts` toetst de kiezer met en zonder JavaScript, het toetsenbord en de plek naast of onder de kop bij 320, 390 en 900 pixels.
+Een test die de opmaak meet of naar een kaart scrolt, wacht eerst op `hydrated(page)` uit `e2e/hydrated.ts`: tot React de pagina heeft opgebouwd, toont de kiezer nog zijn label en zijn knop, en is de pagina langer.
 `e2e/card-image.spec.ts` klikt op die knop en toetst in de browser dat er een PNG komt, dat er niets naar een ander domein gaat en dat de CSP de afbeelding toestaat.
 Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
 De controle toetst de homepage ook met `?nieuws=15`, zodat de oudere koppen die de knop laadt ook langs axe komen.

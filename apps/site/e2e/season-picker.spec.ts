@@ -2,6 +2,7 @@ import { expect, type Page, test } from '@playwright/test'
 
 import { checkPage } from './check-page'
 import { earlierSeason, earlierSeasonSlug } from './earlier-season'
+import { hydrated } from './hydrated'
 
 const earlier = earlierSeason()
 const slug = earlierSeasonSlug()
@@ -137,6 +138,7 @@ test.describe('the title row with the season picker', () => {
     }) => {
       await page.setViewportSize({ height: 900, width })
       await page.goto(`/wedstrijden/${slug}`)
+      await hydrated(page)
 
       const heading = (await page.getByRole('heading', { level: 1 }).boundingBox())!
       const picker = (await page.getByRole('form', { name: 'Seizoen kiezen' }).boundingBox())!

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { checkPage } from './check-page'
+import { hydrated } from './hydrated'
 
 // The pages in pages.spec.ts are checked in a window of 1280 pixels wide, where the bar under
 // the header is gone (display: none). axe and the contrast of the bar need a window in which it
@@ -193,6 +194,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
     const current = bar.locator('[aria-current]')
 
+    await hydrated(page)
     await expect(bar.getByRole('link').first()).toBeVisible()
     await expect(current).toHaveCount(0)
 
