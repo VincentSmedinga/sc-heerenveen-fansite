@@ -965,7 +965,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een workflow laat het logboek zien en laat niemand zijn sleutel gebruiken buiten GitHub.
 - **Nadeel:** het pad van Node staat nu ook in de workflow, naast de cronjob.
   Verandert het, dan past de eigenaar het op twee plekken aan (`docs/acceptatieomgeving.md`, stap 9).
-  GitHub houdt per `concurrency`-groep één wachtende run, dus een import die wacht op een deploy kan door een nieuwere run worden vervangen.
+  GitHub houdt per `concurrency`-groep één wachtende run, dus een wachtende run kan door een nieuwere worden vervangen.
+  Start je een import terwijl een deploy wacht, dan vervangt de import die deploy, en de samengevoegde wijziging komt dan niet op acceptatie: start de deploy dan opnieuw.
 - **Alternatieven:** de opdracht met de hand over SSH draaien (kost elke keer de stappen en het pad).
   De seizoenen in de deploy meenemen (de deploy leest dan elke keer Wikipedia).
   Een tweede cronjob (leest een afgelopen seizoen steeds opnieuw, zonder reden).

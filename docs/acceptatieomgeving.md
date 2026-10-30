@@ -108,7 +108,8 @@ Zo past hij bij het schema, dat de site bijwerkt als de host haar start.
 Een afgelopen seizoen leest cron niet, want het verandert niet meer.
 De workflow [`import-season.yml`](../.github/workflows/import-season.yml) leest het eenmalig, zonder dat je zelf inlogt met SSH:
 
-1. Open in GitHub _Actions → Import season_ en kies _Run workflow_.
+1. Open in GitHub _Actions → Import season_ en kies _Run workflow_, met de branch `main`.
+   De omgeving `acceptatie` staat alleen `main` toe (stap 6 van _Eenmalig instellen_).
 2. Vul het seizoen in zoals `2025/26`: het jaar waarin het begon, een schuine streep en de laatste twee cijfers van het jaar erna.
    De workflow weigert een andere vorm, voordat hij verbinding maakt.
    De opdracht zelf weigert het lopende seizoen, een seizoen dat nog niet begonnen is en twee jaren die niet op elkaar volgen.
@@ -126,7 +127,8 @@ Ontbreekt een geheim, dan slaat de workflow de import over met een melding en bl
 - Een import en een deploy draaien nooit tegelijk: beide staan in de `concurrency`-groep `acceptance`.
   Een draaiende run wordt niet afgebroken.
   GitHub houdt per groep één wachtende run, dus start je een import terwijl er al een run wacht, dan vervangt de nieuwe de wachtende.
-  Mist een run in _Actions_, start hem dan opnieuw.
+  Dat kan ook een deploy zijn: de samengevoegde wijziging staat dan niet op acceptatie.
+  Mist een run in _Actions_, start hem dan opnieuw (de deploy met _Actions → Acceptance → Run workflow_).
 - De uitvoer komt in het logboek van de run en niet in `~/fansite-import.log`.
 - De site laat een afgelopen seizoen nog niet zien (zie de [README van de importer](../apps/importer/README.md), _Een afgelopen seizoen_).
   Of het gelukt is, controleer je met het logboek van de run, of met SSH (zie _Controleren_).
