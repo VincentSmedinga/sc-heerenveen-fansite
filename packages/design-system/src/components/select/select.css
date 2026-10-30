@@ -7,3 +7,96 @@
     border-width: 0.125rem;
   }
 }
+
+/*
+ * A list with the look of the site, both closed and open: space between the arrow and the
+ * edge, and a list of options in our colours. It is for a list that asks for the class
+ * `hf-select-styled`. Browsers without `appearance: base-select` keep the list they have,
+ * which is why all of it is in `@supports`. The arrow is the one of the browser
+ * (`::picker-icon`), so it keeps its shape in forced colours; it only gets room, and turns
+ * when the list is open.
+ */
+
+@layer hf.components {
+  /*
+   * The pseudo-elements and :open are new, and are behind @supports here. Once Baseline calls
+   * them widely available, Stylelint reports this disable as needless: then remove it, and
+   * the @supports.
+   */
+  /* stylelint-disable plugin/use-baseline -- base-select is not widely available yet */
+  @supports (appearance: base-select) {
+    .hf-select-styled,
+    .hf-select-styled::picker(select) {
+      appearance: base-select;
+    }
+
+    .hf-select-styled {
+      align-items: center;
+      cursor: pointer;
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
+      padding-inline: 0.75rem;
+
+      &::picker-icon {
+        color: var(--hf-colour-text-default);
+        transition: rotate var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+      }
+
+      &:open::picker-icon {
+        rotate: 180deg;
+      }
+
+      /* The open list: a surface with a border, below the closed list and as wide as it. */
+      &::picker(select) {
+        background-color: var(--hf-colour-background-surface);
+        border: 1px solid;
+        border-color: var(--hf-colour-border-input);
+        border-radius: 0.25rem;
+        box-sizing: border-box;
+        color: var(--hf-colour-text-default);
+        margin-block: 0.25rem;
+        padding: 0.375rem;
+      }
+
+      option {
+        align-items: center;
+        border-radius: 0.125rem;
+        box-sizing: border-box;
+        cursor: pointer;
+        display: flex;
+        gap: 0.75rem;
+        min-block-size: 2.75rem;
+        padding-block: 0.5rem;
+        padding-inline: 0.75rem;
+
+        /*
+         * Under the mouse: a tint and a thin line, which stays in forced colours. Where the
+         * keyboard is: a tint and the focus ring of the site.
+         */
+        &:hover,
+        &:focus-visible {
+          background-color: var(--hf-colour-background-hover);
+        }
+
+        &:hover:not(:focus-visible) {
+          outline: 1px solid var(--hf-colour-border-input);
+          outline-offset: -1px;
+        }
+
+        /* The chosen option: a tint, a mark and a heavier weight, so colour is not alone. */
+        &:checked {
+          background-color: var(--hf-colour-background-highlight);
+          color: var(--hf-colour-text-highlight);
+          font-weight: var(--hf-strong-font-weight);
+        }
+
+        &::checkmark {
+          color: currentcolor;
+          order: 1;
+        }
+      }
+    }
+  }
+  /* stylelint-enable plugin/use-baseline */
+}

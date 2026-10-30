@@ -123,6 +123,7 @@ export const SeasonPicker = ({ action, className, options, value, ...props }: Se
             </label>
             <Select
               aria-describedby={scripted ? hintId : undefined}
+              className="hf-select-styled"
               defaultValue={value}
               id={id}
               key={value}
