@@ -227,8 +227,16 @@ export const ExampleMainWithIntro = () => (
  * the main column. With `wide` it is the wide sidebar, and with `split` the cells sit side by
  * side where two fit.
  */
-export const ExampleSidebar = ({ split = false, wide = false }: { split?: boolean; wide?: boolean }) => (
-  <Page.Sidebar aria-label="Naast het nieuws" split={split} wide={wide}>
+export const ExampleSidebar = ({
+  narrow = false,
+  split = false,
+  wide = false,
+}: {
+  narrow?: boolean
+  split?: boolean
+  wide?: boolean
+}) => (
+  <Page.Sidebar aria-label="Naast het nieuws" narrow={narrow} split={split} wide={wide}>
     <Page.Cell>
       <Heading appearance={3} level={2}>
         Volgende wedstrijd

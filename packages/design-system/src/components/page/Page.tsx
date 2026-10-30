@@ -47,6 +47,13 @@ export type PageShortcutsProps = Omit<
 
 export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
   /**
+   * A sidebar that is narrower than on other pages, with a broader main column, for a page
+   * whose main column holds a long list and whose sidebar holds a short one, such as a filter.
+   * The columns stay as wide together as without it. Like `wide`, it is the Page.Sidebar that
+   * tells the Page.Body. Don't combine it with `wide`.
+   */
+  narrow?: boolean
+  /**
    * Puts the cells next to each other, in two columns, where two of them fit, which is under
    * the main column on a middle screen. For a sidebar of small cells. Without it the cells sit
    * under each other at every width, which suits cells with a list.
@@ -159,14 +166,16 @@ const Main = ({ children, className, intro, ...props }: PageMainProps) => (
 /**
  * The sidebar, an `aside`: beside the Page.Main, or under it on a narrow screen. Each of its
  * children is a cell, and the cells sit under each other. With `split` they sit side by side
- * where two fit, and with `wide` the sidebar is as wide as the main column.
+ * where two fit, with `wide` the sidebar is as wide as the main column, and with `narrow` it is
+ * narrower than usual and the main column broader.
  */
-const Sidebar = ({ className, split = false, wide = false, ...props }: PageSidebarProps) => (
+const Sidebar = ({ className, narrow = false, split = false, wide = false, ...props }: PageSidebarProps) => (
   <aside
     className={classNames(
       'hf-page-sidebar',
       split && 'hf-page-sidebar-split',
       wide && 'hf-page-sidebar-wide',
+      narrow && 'hf-page-sidebar-narrow',
       className,
     )}
     {...props}

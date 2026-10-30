@@ -107,7 +107,7 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
         // list and the pagination. The form is a GET to this page, so it works without
         // JavaScript and a choice is an address that can be shared. The button stays with
         // JavaScript too: a page that reloads at each tick takes the focus with it.
-        <Page.Sidebar aria-label="Bronnen">
+        <Page.Sidebar aria-label="Bronnen" narrow>
           <Card as="div" surface="soft">
             <Form action="/nieuws" autoComplete="off" method="get">
               <CheckboxGroup

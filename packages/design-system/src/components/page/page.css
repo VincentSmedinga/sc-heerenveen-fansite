@@ -136,6 +136,11 @@
    * shrink up to 66rem, and the sidebar second in the grid. The tracks may shrink to 20rem
    * each, so they stay equally wide, and with the space between them (2rem) and the insets
    * of a phone on its side (7.75rem) they fit in the 52rem.
+   * A page with a narrow sidebar (Page.Sidebar with `narrow`) divides it into a main of
+   * 46rem, 2rem and a sidebar of 16rem (--hf-content-max-width-broad and
+   * --hf-sidebar-width-narrow). It follows the same rules: one track under 52rem, and a main
+   * that shrinks up to 66rem, to 24rem at the least, so the minimums (24rem and 16rem) fit in
+   * the 42.25rem of a phone on its side.
    * The text in the main lines up with the wordmark of the logo on a wide screen, where the shield hangs in the margin
    * (see .hf-page-header).
    * The sidebar is second in the source and so in the grid. There is no `order`, which would split the reading order from
@@ -173,6 +178,12 @@
   @media (width >= 52rem) {
     .hf-page-body:has(> .hf-page-sidebar-wide) {
       grid-template-columns: minmax(20rem, 31rem) minmax(20rem, 31rem);
+    }
+  }
+
+  @media (width >= 52rem) {
+    .hf-page-body:has(> .hf-page-sidebar-narrow) {
+      grid-template-columns: minmax(24rem, var(--hf-content-max-width-broad)) var(--hf-sidebar-width-narrow);
     }
   }
 
