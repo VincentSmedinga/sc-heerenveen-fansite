@@ -14,4 +14,11 @@ describe('short-match.css', () => {
     expect(css).toMatch(/flex-wrap: wrap/u)
     expect(css).toMatch(/overflow-wrap: anywhere/u)
   })
+
+  it('draws the line above a name that stands before the match, and not between the name and the match', () => {
+    expect(css).toMatch(
+      /li > :not\(\.hf-short-match\):has\(\+ \.hf-short-match\) \{[^}]*border-block-start: 1px solid/u,
+    )
+    expect(css).toMatch(/li > :not\(\.hf-short-match\) \+ \.hf-short-match \{[^}]*border-block-start: 0;/u)
+  })
 })

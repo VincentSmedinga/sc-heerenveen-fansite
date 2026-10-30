@@ -253,7 +253,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De eerste drie regels komen uit de uitslag en tellen elke gespeelde wedstrijd.
   De laatste twee komen uit de doelpunten en tellen alleen de wedstrijden met bekende doelpunten, zonder verlenging en zonder minuut 0; blessuretijd telt erbij, dus 90+3 is later dan 90.
   Een eigen doelpunt van de tegenstander is een doelpunt van ons en krijgt "(eigen doelpunt)" erachter.
-  Elke regel is een `ShortMatch` met de naam van de regel eronder, en bij een doelpunt de minuut en de speler.
+  Elke regel is een naam boven een `ShortMatch`, en bij een doelpunt staan de minuut en de speler in de naam, gescheiden door een middenpunt.
   Onder de lijst staat "Gebaseerd op alle 7 gespeelde wedstrijden", en als niet elke wedstrijd zijn doelpunten heeft, een regel met "Vroegste en laatste doelpunt: gebaseerd op 6 van de 7 gespeelde wedstrijden".
   Zonder gespeelde wedstrijd staat er een zin in plaats van de lijst.
 - **Verloop van het seizoen:** een kaart in de zijbalk, direct onder de kaart met onze plek in de competitie, met `FormChart` uit het designsysteem: de vorm, een staafje per gespeelde wedstrijd van de Eredivisie en de lijn erdoorheen.

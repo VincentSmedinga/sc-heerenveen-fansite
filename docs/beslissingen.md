@@ -4011,6 +4011,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alle wedstrijden met hetzelfde verschil tonen (de kaart wordt lang).
   De doelpunten van de tegenstander ook (dubbel zoveel regels, minder interessant).
   De naam boven de wedstrijd (zie Vorm).
+- **Later:** zie _De naam van een regel in Uitersten staat boven de wedstrijd_.
+  De naam staat nu boven de wedstrijd, met een middenpunt in plaats van een komma en een dubbele punt.
 
 ### De vorige en de volgende wedstrijd volgen uit de aanvangstijd, en een wedstrijd zonder uitslag zegt dat na twee uur
 
@@ -4051,6 +4053,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De uitleg bij elke kaart zetten (veel herhaling op de pagina, en we hebben net vaste teksten ingekort).
   Een aparte pagina "Hoe het werkt" (een pagina meer om bij te houden, en bezoekers vinden hem minder snel).
   Niets zeggen (de achterstand en de spelling blijven onverklaard).
+
+### De naam van een regel in Uitersten staat boven de wedstrijd
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** in de kaart Uitersten staat de naam van elke regel ("Grootste overwinning", "Vroegste doelpunt, …") als toelichting (`<Text appearance="meta">`) boven de wedstrijd en niet eronder.
+  De naam en de wedstrijd staan in dezelfde `List.Item`, en de naam komt eerst in de HTML, dus een schermlezer leest eerst de naam.
+- **Waarom:** de naam werkt als kopje van de regel.
+  Boven de wedstrijd zegt hij wat de lezer gaat zien, en onder de wedstrijd leest hij als aanvulling.
+- **Scheiding:** bij een doelpunt scheidt een middenpunt de naam, de minuut en de speler: "Vroegste doelpunt · minuut 3 · Kemper", in plaats van een komma en een dubbele punt.
+  Een middenpunt gebruikt de site al voor losse onderdelen op een regel, zoals "83 reacties · laatst 13:28" bij een discussie.
+  Het teken staat, zoals daar en in `ShortMatch`, in een `span` met `aria-hidden="true"`, met de spaties erbuiten: een schermlezer slaat het over en de delen groeien niet aan elkaar.
+- **Hoe:** de lijn tussen de regels, die `ShortMatch` eerst boven zichzelf tekende, staat in `short-match.css` boven alles wat in dezelfde `li` voor de wedstrijd staat.
+  Zo blijft de lijn tussen de regels en niet tussen een naam en zijn wedstrijd, wat de vorige beslissing hierover tegenhield.
+  De naam staat dicht bij zijn wedstrijd (`0.25rem`), en heeft meer ruimte naar de lijn erboven (`0.75rem` boven de lijn, `0.5rem` eronder).
+  Samen met de ruimte onder de vorige wedstrijd (`0.5rem`) is de ruimte tussen twee regels even groot als eerst.
+- **Alternatieven:** de naam onder de wedstrijd laten (nu).
+  Een `h3` boven elke regel (zes koppen in een kleine kaart, te zwaar).
+  Een eigenschap voor de naam op `ShortMatch` (een nieuwe API in het designsysteem, terwijl de CSS al genoeg is).
 
 ### Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron
 
