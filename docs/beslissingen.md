@@ -7174,10 +7174,11 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een trainer in elk seizoen tonen dat zijn periode ook maar mogelijk raakt (twee trainers te veel bij Lodeweges en Van Persie).
   De trainer van een seizoen kiezen met de meeste wedstrijden (kan niet zonder de dag per wedstrijd en de onzekerheid ervan).
 
-### De trainers van een seizoen staan in een witte kaart onder de stand, met een regel per trainer
+### De trainers van een seizoen staan in een kaart met het sterke blauwe vlak onder de stand, met een regel per trainer
 
 - **Datum:** 30 oktober 2026
-- **Besluit:** de seizoenspagina (`/wedstrijden` en `/wedstrijden/JJJJ-JJ`) toont de hoofdtrainer(s) in een witte kaart in de zijbalk, direct onder de stand.
+- **Besluit:** de seizoenspagina (`/wedstrijden` en `/wedstrijden/JJJJ-JJ`) toont de hoofdtrainer(s) in een kaart met het sterke vlak van het designsysteem (`surface="strong"`, licht blauw in licht en donker blauw in donker, zoals "Ben je zelf een bron?" op `/bronnen`) in de zijbalk, direct onder de stand.
+  De tekst, de namen, de kolom met de dag en "(interim)" gebruiken de gewone tekstkleuren, die op dit vlak minstens 4,5:1 halen: 13,7:1 voor de tekst en 5,3:1 voor de dag en "(interim)" in licht, en 11,7:1 en 8,4:1 in donker.
   De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, een `h2`, met altijd het anker `#hoofdtrainer`.
   Elke trainer is een regel van het nieuwe patroon `ShortStaff`, in dezelfde vorm als een `ShortMatch`.
   De naam staat als die van een speler (`PlayerName`): de voornaam in het normale gewicht, de achternaam in het sterkere, en "(interim)" erachter in het normale gewicht.
@@ -7196,6 +7197,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een kaart onder de stand hoort bij de andere kaarten, en een lijst zegt per trainer wanneer hij begon of stopte zonder dat een zin de volgorde hoeft uit te leggen.
   De regel hergebruikt de klassen van `ShortMatch` (`ShortStaff` voegt alleen een bredere kolom toe voor de tekst vooraan), en de naam hergebruikt `PlayerName`, zodat de lijst er hetzelfde uitziet als bij de spelers.
   Het anker is voor één en meer trainers gelijk, zodat een link niet breekt als een seizoen er een tweede trainer bij krijgt.
+  Het sterke vlak is de keuze van de projecteigenaar (30 oktober 2026): de kaart valt er tussen de witte en zachte kaarten op, zonder dat hij zwaarder weegt dan de stand.
+  Er is geen eigen kleur voor het vlak nodig, want de tokens voor tekst en secundaire tekst zijn voor dit vlak gekozen.
 - **Alternatieven:** een regel boven de kaarten (viel te veel op).
   "hele seizoen" bij de enige trainer (de naam zegt het al).
   Een "van … tot …" bij elke trainer (de regel wordt lang, en de dag van het begin van een trainer is de dag van het einde van de vorige).

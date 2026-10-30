@@ -544,12 +544,12 @@ const markOf: Record<FormResult, MarkRowMark> = {
 }
 
 /**
- * The head coach or coaches of a season as a white card with a list, in the order they began.
- * The title is "Hoofdtrainer" for one and "Hoofdtrainers" for more. A season with one coach has
- * his name only; with more, each line has "tot" and the day he stopped, and the last has
- * "vanaf" and the day he began (see `coachPeriods`). The name is shown as a player's is, with
- * "(interim)" behind it where that is so. The source of the data is the credit under the page.
- * A season with no coach in the table has no card.
+ * The head coach or coaches of a season as a card with the strong blue surface and a list, in
+ * the order they began. The title is "Hoofdtrainer" for one and "Hoofdtrainers" for more. A
+ * season with one coach has his name only; with more, each line has "tot" and the day he
+ * stopped, and the last has "vanaf" and the day he began (see `coachPeriods`). The name is
+ * shown as a player's is, with "(interim)" behind it where that is so. The source of the data
+ * is the credit under the page. A season with no coach in the table has no card.
  */
 export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
   if (coaches.length === 0) {
@@ -560,7 +560,7 @@ export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
   const periods = coachPeriods(coaches)
 
   return (
-    <Card aria-labelledby={id}>
+    <Card aria-labelledby={id} surface="strong">
       <Heading anchor id={id} level={2}>
         {name}
       </Heading>

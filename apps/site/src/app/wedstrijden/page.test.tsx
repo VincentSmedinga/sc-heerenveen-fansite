@@ -2059,12 +2059,12 @@ describe('the head coaches of the season', () => {
     expect(card).not.toContain('wikipedia')
   })
 
-  it('is a white card in the sidebar right after the table, named by its heading, without a source of its own', async () => {
+  it('is a card with the strong blue surface in the sidebar right after the table, named by its heading, without a source of its own', async () => {
     withCoaches([veldman])
 
     const { card, html } = await coachesCard()
 
-    expect(html).toContain('<section class="hf-card" aria-labelledby="hoofdtrainer">')
+    expect(html).toContain('<section class="hf-card hf-card-strong" aria-labelledby="hoofdtrainer">')
     expect(html.indexOf('id="hoofdtrainer"')).toBeGreaterThan(html.indexOf('id="stand"'))
     expect(html.indexOf('id="hoofdtrainer"')).toBeLessThan(html.indexOf('id="onze-plek-in-de-competitie"'))
     expect(card).not.toContain('hf-wikipedia-credit')
