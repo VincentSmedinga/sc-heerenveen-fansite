@@ -233,8 +233,6 @@ Een agent heeft daar geen toegang.
   6. **Opnieuw.**
      Start _Actions → Storybook → Run workflow_ op `main`, of raak `tmp/restart.txt` aan, en lees de stap _Check ds.heerenveen.org/mcp_ opnieuw.
 
-  Zie ook stap 7 als het formulier het pad niet toelaat.
-
 - _Check ds.heerenveen.org/mcp_ is rood met `500` of `503`, of met "fetch failed": de app start niet.
   Lees `stderr.log` in `domains/ds.heerenveen.org/mcp`, of het logboek in _Setup Node.js App_.
   Controleer dat Node 24 gekozen is, dat het startbestand `server.mjs` heet, en dat het bestand in de map staat.

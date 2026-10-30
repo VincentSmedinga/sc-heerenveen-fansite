@@ -1,5 +1,7 @@
+import { execFile } from 'node:child_process'
 import { createServer } from 'node:http'
 import path from 'node:path'
+import { promisify } from 'node:util'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { createMcpServer } from '../src/server.ts'
@@ -57,5 +59,26 @@ describe('the check of the MCP server on the host', () => {
     )
 
     await expect(check(url, fixtureDir)).rejects.toThrow(/answered 503.*the app probably does not start.*stderr\.log/)
+  })
+
+  it('prints the failure as an annotation of the run on GitHub, and exits with 1', async () => {
+    const url = await start(
+      createServer((request, response) => {
+        response.writeHead(404, { 'content-type': 'text/html', server: 'LiteSpeed' })
+        response.end('<title>404 Not Found</title>')
+      }),
+    )
+    const run = promisify(execFile)(
+      process.execPath,
+      [path.join(import.meta.dirname, 'check.js'), url, fixtureDir, '0'],
+      {
+        env: { ...process.env, GITHUB_ACTIONS: 'true' },
+      },
+    )
+
+    await expect(run).rejects.toMatchObject({
+      code: 1,
+      stderr: expect.stringMatching(/^::error title=Check ds\.heerenveen\.org\/mcp failed::.*initialize answered 404/m),
+    })
   })
 })
