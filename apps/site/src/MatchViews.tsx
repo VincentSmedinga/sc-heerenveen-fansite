@@ -134,7 +134,8 @@ export function CleanSheetsCard({
 /**
  * The card of the matches page with the extremes of the Eredivisie: the biggest win and loss,
  * the match with the most goals, and our earliest and our last goal. Each is a short match with
- * its name under it, so the line the list draws between short matches stays between the items.
+ * its name above it, as the heading of the line, in the same item as the match. The list draws
+ * its line above the name (see short-match.css), so it stays between the items.
  * A line without a match is left out, and the card doesn't say so. Under the list stand how
  * many matches the lines are based on: the first three on every played match, the two goals on
  * the matches whose goals are known. Without a played match it is a sentence for visitors and
@@ -171,6 +172,10 @@ export function ExtremesCard({
           <List role="list">
             {shown.map(({ goal, match, name }) => (
               <List.Item key={name}>
+                <Text appearance="meta">
+                  {name}
+                  {goal !== undefined && goalLine(goal)}
+                </Text>
                 <ShortMatch
                   // Only played matches with both scores count, so these are numbers.
                   {...matchMoment(match, now)}
@@ -179,7 +184,6 @@ export function ExtremesCard({
                   home={match.home}
                   opponent={match.opponent}
                 />
-                <Text appearance="meta">{goal === undefined ? name : `${name}, ${goalLine(goal)}`}</Text>
               </List.Item>
             ))}
           </List>
@@ -705,11 +709,30 @@ export function TopScorers({ matches, season }: { matches: PublicMatch[]; season
   )
 }
 
-/** A goal for the name under a short match: the minute with stoppage time, and the player. */
-function goalLine({ goal }: ExtremeGoal): string {
+// Between the parts of a line of meta text. The dot is only for the eye and is hidden from a
+// screen reader, as in a short match. The spaces stay outside the hidden span, so the parts
+// don't run together in the accessibility tree.
+const metaSeparator = (
+  <>
+    {' '}
+    <Text aria-hidden="true" as="span">
+      ·
+    </Text>{' '}
+  </>
+)
+
+/** A goal for the name above a short match: the minute with stoppage time, and the player. */
+function goalLine({ goal }: ExtremeGoal) {
   const minute = goal.stoppageMinutes === null ? `${goal.minute}` : `${goal.minute}+${goal.stoppageMinutes}`
 
-  return `minuut ${minute}: ${goal.player}${goal.ownGoal ? ' (eigen doelpunt)' : ''}`
+  return (
+    <>
+      {metaSeparator}
+      {`minuut ${minute}`}
+      {metaSeparator}
+      {`${goal.player}${goal.ownGoal ? ' (eigen doelpunt)' : ''}`}
+    </>
+  )
 }
 
 /** Whether a played match was decided in a shoot-out, which has both scores. */
