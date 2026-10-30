@@ -3633,6 +3633,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** woorden van één teken stilzwijgend negeren (de vraag verandert zonder dat de bezoeker het ziet); geen grens aan het aantal resultaten (een bezoeker kan de database zwaar belasten met een adres); de pagina in de sitemap (een zoekmachine zou pagina's overslaan die `noindex` zijn).
 - **Hoe:** `Input` van het designsysteem krijgt het type `hidden`, voor de knop "Laad 5 meer", die de vraag meeneemt in een `GET`-formulier.
   `NewsItem` krijgt `internal` voor een artikel van de redactie, zodat het pictogram voor een link naar een andere site wegblijft.
+- **Later:** er is nu een archief voor wie verder terug wil, zie _Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron_; het zoeken blijft `/zoeken`.
 
 ### Een gepubliceerd anker staat in `src/anchors.ts`, en de rooktest bewaakt het
 
@@ -4050,6 +4051,28 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De uitleg bij elke kaart zetten (veel herhaling op de pagina, en we hebben net vaste teksten ingekort).
   Een aparte pagina "Hoe het werkt" (een pagina meer om bij te houden, en bezoekers vinden hem minder snel).
   Niets zeggen (de achterstand en de spelling blijven onverklaard).
+
+### Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** `/nieuws` toont alle koppen die we hebben opgehaald (relevant, niet verborgen, van een bron die aanstaat, geen podcast), met 50 per pagina, de nieuwste eerst en zonder indeling per dag.
+  Er is een filter per bron (`?bron=<slug>`) en paginering (`?pagina=N`), zoals bij `/podcasts`.
+  De homepage linkt ernaar met "Alle koppen", onder de koppen in de kaart Laatste nieuws.
+  Het menu verandert niet tot de opbouw van de site is vastgesteld (#431).
+- **Waarom:** de homepage houdt de laatste weken, en wie verder terug wil, heeft een archief nodig.
+  Dezelfde onderdelen en adressen als de podcasts houden de site voorspelbaar en besparen werk.
+  50 per pagina geeft minder pagina's dan 25, en elke regel toont zijn eigen dag, dus een indeling per dag is overbodig.
+  Een bron met een vaste `slug` houdt zijn adres als de naam verandert.
+- **Gevolg:** elke bron in de seed die koppen kan hebben, heeft een vaste `slug`; het forum niet, want dat heeft discussies en geen koppen.
+  De seed zet de `slug` ook bij een bron die al in het register staat zonder.
+  Een bron zonder `slug` staat niet in het filter, maar haar koppen staan wel bij "Alle bronnen".
+  Een nieuwe kop schuift de inhoud van de pagina's op (pagina 2 van gisteren is pagina 3 van vandaag).
+  Dat is zo bij elk archief en niet te voorkomen met adressen met een paginanummer; de bron en het filter blijven wel vast.
+  `nieuws` staat bij de gereserveerde adressen voor een artikel van de redactie.
+- **Alternatieven:** laden met "Laad meer", zoals de homepage (geen vaste adressen, terwijl het issue ze vraagt).
+  Een indeling per dag (langere pagina's met kopjes die weinig toevoegen).
+  Een grens van 12 maanden (oudere koppen verdwijnen van de site terwijl ze in de database staan).
+  Meteen een plek in het menu (de opbouw is nog niet gekozen).
 
 ## Importer
 
@@ -5577,6 +5600,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de twee weken houden als grens van de knop; geen grens, ook niet van aantal (een pagina die onbeperkt kan groeien).
 - **Later:** het aantal in het adres is een geheel getal vanaf 10, in stappen van 5; een ander getal geeft de eerste tien, en er zijn hoogstens negentien lijsten (10 tot en met 100).
   Zie _De nieuwskaart begint met tien koppen_.
+- **Later:** zie _Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron_; het archief is er, en de grens van 100 koppen op de homepage blijft.
 
 ### De nieuwskaart begint met tien koppen
 

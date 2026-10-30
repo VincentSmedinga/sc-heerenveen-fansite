@@ -8,7 +8,16 @@ import { headlines } from './headlines'
 
 const [doubtful, irrelevant] = headlines.notForVisitors
 
-const visitorPages = ['/', '/?nieuws=15', '/podcasts', '/podcasts?podcast=testpodcast', '/bronnen', '/over-ons']
+const visitorPages = [
+  '/',
+  '/?nieuws=15',
+  '/nieuws',
+  '/nieuws?bron=testkrant',
+  '/podcasts',
+  '/podcasts?podcast=testpodcast',
+  '/bronnen',
+  '/over-ons',
+]
 
 test.describe('the items that are not relevant', () => {
   for (const path of visitorPages) {

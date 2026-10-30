@@ -255,15 +255,16 @@ describe('the homepage', () => {
 
     expect(html).not.toMatch(/<(img|picture|iframe|video|audio|script|image|use)/)
     expect(html).not.toMatch(/(src|srcset|poster)=/)
-    // The only svg is our own icon for a link to another site, hidden from assistive
-    // technology, one for each item.
-    expect(html.match(/<svg /g)).toHaveLength(3)
-    expect(html.match(/<svg [^>]*aria-hidden="true"/g)).toHaveLength(3)
-    // The only addresses are the links of the items.
+    // The only svgs are our own icons, hidden from assistive technology: one for each item, for
+    // a link to another site, and the arrow of the link to the archive.
+    expect(html.match(/<svg /g)).toHaveLength(4)
+    expect(html.match(/<svg [^>]*aria-hidden="true"/g)).toHaveLength(4)
+    // The only addresses are the links of the items and the link to the archive.
     expect([...html.matchAll(/href="([^"]*)"/g)].map(([, href]) => href)).toEqual([
       'https://testkrant.test/heerenveen-testclub',
       'https://voorbeeldkrant.test/jonge-garde',
       'https://testkrant.test/basis',
+      '/nieuws',
     ])
   })
 
@@ -276,6 +277,37 @@ describe('the homepage', () => {
     expect(html).not.toContain('Onze bronnen')
     expect(html).not.toContain('href="/bronnen"')
     expect(html).not.toContain('Binnenkort meer')
+  })
+
+  it('links to the news archive under the headlines, in the card, with or without the button', async () => {
+    for (const more of [false, true]) {
+      vi.mocked(getHeadlines).mockResolvedValue({ headlines, more })
+
+      const html = await renderMain()
+      const card = html.match(/<section.*?<\/section>/)?.[0] ?? ''
+
+      expect(withoutIcons(card)).toMatch(/<p><a href="\/nieuws">Alle koppen<\/a><\/p><\/section>$/)
+      expect(html.match(/href="\/nieuws"/g)).toHaveLength(1)
+    }
+  })
+
+  it('draws an arrow to the right behind "Alle koppen", hidden from screen readers', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue({ headlines, more: false })
+
+    const html = await renderMain()
+    const link = html.match(/<a href="\/nieuws">.*?<\/a>/)?.[0] ?? ''
+
+    expect(link).toContain('<path d="M2.5 8h11"></path><path d="M9 3.5 13.5 8 9 12.5"></path>')
+    expect(link).toContain('aria-hidden="true"')
+    expect(link.replace(/<[^>]*>/g, '')).toBe('Alle koppen')
+  })
+
+  it('keeps the link to the archive when there is no news yet, like the card of the podcasts', async () => {
+    vi.mocked(getHeadlines).mockResolvedValue({ headlines: [], more: false })
+
+    expect(withoutIcons(await renderMain())).toContain(
+      '<p>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</p><p><a href="/nieuws">Alle koppen</a></p>',
+    )
   })
 
   it('tells visitors there is no news yet, without a heading for a day', async () => {
@@ -343,12 +375,12 @@ describe('the button that loads five more headlines', () => {
     expect(getHeadlines).toHaveBeenCalledExactlyOnceWith(10)
   })
 
-  it('shows a real button "Laad 5 meer" under the list, in the card, when there are older headlines', async () => {
+  it('shows a real button "Laad 5 meer" under the list, in the card, when there are older headlines, and the link to the archive after it', async () => {
     const html = await renderMain()
     const card = html.match(/<section.*?<\/section>/)?.[0] ?? ''
 
     expect(card).toMatch(
-      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="15" name="nieuws"><span class="hf-icon-head"><svg [^>]*class="hf-icon"[^>]*>.*?<\/svg>Laad<\/span> 5 meer<\/button><\/form><\/section>$/,
+      /<\/ul><form class="hf-form" noValidate="" action="\/#nieuws-4" method="get"><button class="hf-button-soft" type="submit" value="15" name="nieuws"><span class="hf-icon-head"><svg [^>]*class="hf-icon"[^>]*>.*?<\/svg>Laad<\/span> 5 meer<\/button><\/form><p>.*<\/p><\/section>$/,
     )
   })
 

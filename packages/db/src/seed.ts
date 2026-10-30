@@ -28,6 +28,7 @@ export const testSources = [
     domain: 'testkrant.test',
     kind: 'news',
     name: 'Testkrant',
+    slug: 'testkrant',
   },
   {
     consentNote: 'Verzonnen: toestemming gevraagd, nog geen antwoord.',
@@ -36,6 +37,7 @@ export const testSources = [
     domain: 'proefnieuws.test',
     kind: 'news',
     name: 'Proefnieuws',
+    slug: 'proefnieuws',
   },
   {
     allowImage: true,
@@ -48,6 +50,7 @@ export const testSources = [
     introMaxLength: 200,
     kind: 'news',
     name: 'Voorbeeldkrant',
+    slug: 'voorbeeldkrant',
   },
   {
     allowEmbed: true,
@@ -84,6 +87,7 @@ export const testSources = [
     domain: 'testclub.test',
     kind: 'club',
     name: 'Testclub',
+    slug: 'testclub',
   },
   {
     allowEmbed: true,
@@ -93,12 +97,14 @@ export const testSources = [
     domain: 'voorbeeldvideo.test',
     kind: 'video',
     name: 'Voorbeeldvideo',
+    slug: 'voorbeeldvideo',
   },
   {
     domain: 'uitgezet.test',
     enabled: false,
     kind: 'news',
     name: 'Uitgezette testbron',
+    slug: 'uitgezette-testbron',
   },
 ] satisfies NewSource[]
 
@@ -108,6 +114,11 @@ export const testSources = [
  * sources are in our own words; the description of a podcast is the text its maker puts in the
  * channel of its feed, as it is written but without the HTML (see `docs/beslissingen.md`).
  * `docs/bronnen.md` says which sources belong here and why.
+ *
+ * Every source that can have headlines has a `slug`, the fixed name of the source in the
+ * address of the news archive (`/nieuws?bron=<slug>`). It stays the same when the name changes,
+ * so a renamed source keeps its address. The forum has none, because it has discussions and no
+ * items.
  *
  * A podcast is a source of kind podcast: the importer reads its feed like a news feed, and an
  * episode is an item whose link is the page of the episode. The enclosure, the MP3 file, is
@@ -129,6 +140,7 @@ export const realSources = [
     feeds: ['https://www.lc.nl/sport/sc-heerenveen/rss/'],
     kind: 'news',
     name: 'Leeuwarder Courant',
+    slug: 'leeuwarder-courant',
   },
   {
     description:
@@ -137,6 +149,7 @@ export const realSources = [
     feeds: ['https://www.vi.nl/feed/news.xml?tag=sc-heerenveen'],
     kind: 'news',
     name: 'Voetbal International',
+    slug: 'voetbal-international',
   },
   {
     description:
@@ -145,6 +158,7 @@ export const realSources = [
     feeds: ['https://www.telegraaf.nl/tag/sc-heerenveen/rss/'],
     kind: 'news',
     name: 'De Telegraaf',
+    slug: 'de-telegraaf',
   },
   {
     description:
@@ -186,6 +200,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.omropfryslan.nl/rss/index.xml' }],
     kind: 'news',
     name: 'Omrop Fryslân',
+    slug: 'omrop-fryslan',
   },
   {
     description:
@@ -194,6 +209,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://feeds.nos.nl/nosvoetbal' }],
     kind: 'news',
     name: 'NOS',
+    slug: 'nos',
   },
   {
     description:
@@ -202,6 +218,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.ad.nl/voetbal/rss.xml' }],
     kind: 'news',
     name: 'Algemeen Dagblad',
+    slug: 'algemeen-dagblad',
   },
   {
     description:
@@ -210,6 +227,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.espn.nl/espn/rss/soccer/news' }],
     kind: 'news',
     name: 'ESPN',
+    slug: 'espn',
   },
 ] satisfies (NewSource & { feeds: (string | { filter: FeedFilter; url: string })[] })[]
 

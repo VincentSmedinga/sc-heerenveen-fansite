@@ -628,6 +628,20 @@ await withEmptyDatabase((database) =>
     assert.equal((await fetch(`${origin}/podcasts?pagina=2`)).status, 404)
     assert.equal((await fetch(`${origin}/podcasts?pagina=0`)).status, 404)
 
+    // The news archive reads the headlines, and the seed has none. A source or a page that
+    // doesn't exist is a 404.
+    const archivePage = await fetch(`${origin}/nieuws`)
+    const archiveHtml = await archivePage.text()
+    assert.equal(archivePage.status, 200)
+    assert.match(archiveHtml, /<h1[^>]*>Nieuwsarchief<\/h1>/)
+    assert.match(archiveHtml, /We hebben nog geen nieuws gevonden\./)
+    assert.doesNotMatch(archiveHtml, /Bronnen filteren/)
+    assert.match(html, /<a href="\/nieuws"[^>]*>.*Alle koppen.*<\/a>/s)
+    assert.equal((await fetch(`${origin}/nieuws?bron=leeuwarder-courant`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws?bron=bestaat-niet`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws?pagina=2`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws?pagina=0`)).status, 404)
+
     // The matches page shows the made-up matches and table of the seed, with the credit for
     // Wikipedia under them. The homepage has the two blocks, under the podcasts.
     const matchesPage = await fetch(`${origin}/wedstrijden`)
@@ -893,6 +907,14 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   assert.match(podcastsHtml, /<meta name="robots" content="noindex"\/>/)
   assert.match(podcastsHtml, /<a href="\/podcasts\?podcast=omroep-abe&amp;pagina=2">Probeer het opnieuw<\/a>/)
   assert.match(log(), /Could not read the episodes for \/podcasts: .*ECONNREFUSED/)
+
+  const archive = await fetch(`${origin}/nieuws?bron=nos&pagina=2`)
+  const archiveHtml = await archive.text()
+  assert.equal(archive.status, 200)
+  assert.match(archiveHtml, /<h1[^>]*>Er ging iets mis<\/h1>/)
+  assert.match(archiveHtml, /<meta name="robots" content="noindex"\/>/)
+  assert.match(archiveHtml, /<a href="\/nieuws\?bron=nos&amp;pagina=2">Probeer het opnieuw<\/a>/)
+  assert.match(log(), /Could not read the headlines for \/nieuws: .*ECONNREFUSED/)
 
   const sources = await fetch(`${origin}/bronnen`)
   const sourcesHtml = await sources.text()

@@ -4,7 +4,7 @@ import { cacheForKey } from './cache'
 import { getDatabase } from './database'
 import { firstHeadlines, moreHeadlines } from './items-per-card'
 
-/** The most headlines the homepage shows. Older news is for the archive (#26). */
+/** The most headlines the homepage shows. Older news is for the archive at /nieuws. */
 export const maxHeadlines = 100
 
 export type Headlines = {
