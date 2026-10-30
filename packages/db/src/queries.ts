@@ -69,14 +69,17 @@ export async function countArchiveItems(
 }
 
 /**
- * How many episodes `listPodcastEpisodes` gives in all, with the same `until` and `podcast`.
+ * How many episodes `listPodcastEpisodes` gives in all, with the same `until` and `podcasts`.
  */
-export async function countPodcastEpisodes(db: Database, { podcast, until }: { podcast?: string; until: Date }) {
+export async function countPodcastEpisodes(
+  db: Database,
+  { podcasts: slugs, until }: { podcasts?: readonly string[]; until: Date },
+) {
   const [row] = await db
     .select({ total: count() })
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(episodeFilter(until, podcast))
+    .where(episodeFilter(until, slugs))
 
   return row?.total ?? 0
 }
@@ -285,14 +288,20 @@ export function listNewestDiscussions(db: Database, limit = 5) {
  * the time, the name of the podcast, and the duration, the season and the number of the
  * episode, which are null when the feed gives none. That name is the way the podcast wants to
  * be credited, or else its own name. Every other column stays internal, so none can reach a
- * page. Give the `slug` of a podcast as `podcast` to get the episodes of that podcast only.
+ * page. Give the slugs of some podcasts as `podcasts` to get the episodes of those podcasts
+ * only; without them, or with none, it has those of all podcasts.
  *
  * Pass the moment of now as `until`, as with `listRecentItems`: an episode a feed dated later
  * doesn't belong on top.
  */
 export function listPodcastEpisodes(
   db: Database,
-  { limit, offset = 0, podcast, until }: { limit: number; offset?: number; podcast?: string; until: Date },
+  {
+    limit,
+    offset = 0,
+    podcasts: slugs,
+    until,
+  }: { limit: number; offset?: number; podcasts?: readonly string[]; until: Date },
 ) {
   return db
     .select({
@@ -306,7 +315,7 @@ export function listPodcastEpisodes(
     })
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
-    .where(episodeFilter(until, podcast))
+    .where(episodeFilter(until, slugs))
     .orderBy(desc(items.publishedAt), desc(items.id))
     .limit(limit)
     .offset(offset)
@@ -621,15 +630,16 @@ const newsColumns = {
 
 /**
  * The conditions that make an item an episode to show: of a podcast that is switched on, not
- * hidden, not later than `until`, and of the podcast with this slug when `podcast` is given.
+ * hidden, not later than `until`, and of one of the podcasts with these slugs when some are
+ * given.
  */
-function episodeFilter(until: Date, podcast: string | undefined) {
+function episodeFilter(until: Date, slugs: readonly string[] = []) {
   return and(
     eq(sources.enabled, true),
     eq(sources.kind, 'podcast'),
     lte(items.publishedAt, until),
     isShown(),
-    podcast === undefined ? undefined : hasSlug(podcast),
+    slugs.length === 0 ? undefined : or(...slugs.map(hasSlug)),
   )
 }
 

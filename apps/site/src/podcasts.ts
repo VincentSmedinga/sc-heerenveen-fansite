@@ -26,11 +26,11 @@ export const getLatestEpisodes = cacheFor(fiveMinutes, () =>
 )
 
 /**
- * The part of the options of a query that limits it to a podcast, or nothing for all podcasts
- * (an empty slug).
+ * The part of the options of a query that limits it to some podcasts, or nothing for all
+ * podcasts (an empty key).
  */
-function onlyPodcast(slug: string) {
-  return slug === '' ? {} : { podcast: slug }
+function onlyPodcasts(key: string) {
+  return key === '' ? {} : { podcasts: key.split(',') }
 }
 
 /** The podcasts for the filter: those that are switched on and have an episode. */
@@ -43,73 +43,77 @@ const getPodcasts = cacheFor(fiveMinutes, () => listPodcasts(getDatabase().db))
 const getLinks = cacheForKey(fiveMinutes, (slug) => findPodcast(getDatabase().db, slug))
 
 /**
- * The number of episodes of all podcasts, or of one. The key is the slug, or an empty text for
- * all.
+ * The number of episodes of all podcasts, or of some. The key is the slugs, in the order of the
+ * list of podcasts and with a comma between them, or an empty text for all.
  */
-const getTotal = cacheForKey(fiveMinutes, (slug) =>
-  countPodcastEpisodes(getDatabase().db, { ...onlyPodcast(slug), until: new Date() }),
+const getTotal = cacheForKey(fiveMinutes, (slugs) =>
+  countPodcastEpisodes(getDatabase().db, { ...onlyPodcasts(slugs), until: new Date() }),
 )
 
 /**
- * One page of episodes. The key is the slug (empty for all), a line feed and the number of the
- * page.
+ * One page of episodes. The key is the slugs as for `getTotal`, a line feed and the number of
+ * the page.
  */
 const getPage = cacheForKey(fiveMinutes, (key) => {
-  const [slug = '', page = '1'] = key.split('\n')
+  const [slugs = '', page = '1'] = key.split('\n')
 
   return listPodcastEpisodes(getDatabase().db, {
     limit: episodesPerPage,
     offset: (Number(page) - 1) * episodesPerPage,
-    ...onlyPodcast(slug),
+    ...onlyPodcasts(slugs),
     until: new Date(),
   })
 })
 
 export type PodcastPage = {
+  /**
+   * The description and the addresses of the podcast that is chosen, when it is exactly one, or
+   * undefined.
+   */
+  about:
+    undefined | { applePodcastsUrl: null | string; description: null | string; name: string; spotifyUrl: null | string }
   episodes: PublicEpisode[]
   /** The number of pages, at least 1. */
   pageCount: number
   /** The podcasts for the filter. */
   podcasts: PublicPodcast[]
   /**
-   * The podcast that is chosen, with its description and its addresses, or undefined for all
-   * podcasts.
+   * The podcasts that are chosen, in the order of the list. It is empty for all podcasts: none
+   * chosen and all chosen are the same page.
    */
-  selected:
-    undefined | { applePodcastsUrl: null | string; description: null | string; name: string; spotifyUrl: null | string }
+  selected: PublicPodcast[]
 }
 
 /**
- * What /podcasts shows for a podcast (its slug, or undefined for all) and a page, counting from
- * 1. It gives undefined when there is no such page: a podcast that isn't in the filter, or a
- * page after the last. The slug is checked against the list of podcasts, and the page against
- * the number of pages, before anything is cached under them, so a visitor can't fill the cache
- * with addresses of their own.
+ * What /podcasts shows for podcasts (their slugs, in any order, none for all) and a page,
+ * counting from 1. It gives undefined when there is no such page: a slug that isn't in the
+ * filter or is given twice, or a page after the last. The slugs are checked against the list of
+ * podcasts, and the page against the number of pages, before anything is cached under them, so
+ * a visitor can't fill the cache with addresses of their own. The podcasts are put in the order
+ * of the list, so the same choice has one key, and all podcasts are the same as none.
  */
-export async function getPodcastPage(podcast: string | undefined, page: number): Promise<PodcastPage | undefined> {
+export async function getPodcastPage(slugs: readonly string[], page: number): Promise<PodcastPage | undefined> {
   const podcasts = await getPodcasts()
+  const chosen = podcasts.filter((item) => slugs.includes(item.slug))
 
-  if (podcast !== undefined && !podcasts.some((item) => item.slug === podcast)) {
+  if (chosen.length !== slugs.length) {
     return undefined
   }
 
-  const total = await getTotal(podcast ?? '')
-  const pageCount = Math.max(1, Math.ceil(total / episodesPerPage))
+  const selected = chosen.length === podcasts.length ? [] : chosen
+  const key = selected.map((item) => item.slug).join(',')
+  const pageCount = Math.max(1, Math.ceil((await getTotal(key)) / episodesPerPage))
 
   if (page > pageCount) {
     return undefined
   }
 
-  const links = podcast === undefined ? undefined : await getLinks(podcast)
+  const [only] = selected
+  const about = selected.length === 1 && only !== undefined ? await getLinks(only.slug) : undefined
 
-  if (podcast !== undefined && links === undefined) {
+  if (selected.length === 1 && about === undefined) {
     return undefined
   }
 
-  return {
-    episodes: await getPage(`${podcast ?? ''}\n${page}`),
-    pageCount,
-    podcasts,
-    selected: links,
-  }
+  return { about, episodes: await getPage(`${key}\n${page}`), pageCount, podcasts, selected }
 }

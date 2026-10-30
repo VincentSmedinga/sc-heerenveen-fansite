@@ -1,14 +1,29 @@
 import type { Metadata } from 'next'
 
-import { Card, Filter, Heading, Link, List, NewsItem, Page, Pagination, Text } from '@fansite/design-system'
+import {
+  Button,
+  Card,
+  CheckboxGroup,
+  Form,
+  Heading,
+  Link,
+  List,
+  NewsItem,
+  Page,
+  Pagination,
+  Text,
+} from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
+
+import type { SearchParams } from '../../filter-query'
 
 import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
 import { pageMetadata } from '../../metadata'
 import { dateTimeOf, episodeDetails, formatEpisodeTime } from '../../news'
 import { getPodcastPage } from '../../podcasts'
+import { parsePodcastsQuery, podcastsHeading, podcastsHref, podcastsQuery, podcastsTitle } from '../../podcasts-query'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
 
@@ -16,63 +31,17 @@ import { withBranch } from '../../title'
 // lists itself.
 export const dynamic = 'force-dynamic'
 
-type SearchParams = Record<string, string | string[] | undefined>
-
-/**
- * The podcast and the page that the address asks for, or undefined when the address is wrong: a
- * parameter that is given twice, or a `pagina` that is not a positive whole number written
- * without anything else, such as `0`, `-1`, `2.5` or `abc`.
- */
-function parseQuery(searchParams: SearchParams) {
-  const { pagina, podcast } = searchParams
-
-  if (Array.isArray(podcast) || Array.isArray(pagina)) {
-    return undefined
-  }
-  if (pagina !== undefined && !/^[1-9]\d{0,8}$/u.test(pagina)) {
-    return undefined
-  }
-
-  return { page: pagina === undefined ? 1 : Number(pagina), podcast }
-}
-
-/**
- * The address of /podcasts for a podcast (its slug) and a page. The first page and all podcasts
- * have no parameter.
- */
-function podcastsHref(podcast: string | undefined, page: number) {
-  const query = podcastsQuery(podcast, page)
-
-  return query === '' ? '/podcasts' : `/podcasts?${query}`
-}
-
-/**
- * The query of /podcasts for a podcast (its slug) and a page, without the question mark. It is
- * empty for the first page of all podcasts.
- */
-function podcastsQuery(podcast: string | undefined, page: number) {
-  const parameters = new URLSearchParams()
-
-  if (podcast !== undefined) {
-    parameters.set('podcast', podcast)
-  }
-  if (page > 1) {
-    parameters.set('pagina', String(page))
-  }
-
-  return parameters.toString()
-}
-
 /**
  * The page that the address asks for, undefined when the database can't give it, or 'unknown'
  * when there is no such page. A page that throws gets an empty page with a 500 from Next.js,
  * and the text only after JavaScript runs. So this page catches the error and shows the error
  * page itself, in the HTML. `cache` makes the page and its metadata share one call per request;
- * its arguments are plain values, because `cache` compares objects by identity.
+ * its arguments are plain values, because `cache` compares objects by identity: the slugs are
+ * a JSON text, so that an empty slug stays one.
  */
-const loadPage = cache(async (podcast: string | undefined, page: number) => {
+const loadPage = cache(async (podcasts: string, page: number) => {
   try {
-    return (await getPodcastPage(podcast, page)) ?? 'unknown'
+    return (await getPodcastPage(JSON.parse(podcasts) as string[], page)) ?? 'unknown'
   } catch (error) {
     console.error(`Could not read the episodes for /podcasts: ${reasonOf(error)}`)
 
@@ -81,51 +50,51 @@ const loadPage = cache(async (podcast: string | undefined, page: number) => {
 })
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
-  const { content, page, podcast } = await loadFor(searchParams)
+  const { content, page } = await loadFor(searchParams)
 
   // A page that failed answers 200, so noindex keeps search engines from keeping it.
   return content === undefined
     ? { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
-    : pageMetadata('/podcasts', page > 1 ? `Podcasts, pagina ${page}` : 'Podcasts', podcastsQuery(podcast, page))
+    : pageMetadata(
+        '/podcasts',
+        podcastsTitle(
+          content.selected.map((item) => item.name),
+          page,
+        ),
+        podcastsQuery(
+          content.selected.map((item) => item.slug),
+          page,
+        ),
+      )
 }
 
 export default async function PodcastsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  const { content, page, podcast } = await loadFor(searchParams)
+  const { chosen, content, page } = await loadFor(searchParams)
 
   if (content === undefined) {
-    return <ServerError retryHref={podcastsHref(podcast, page)} />
+    return <ServerError retryHref={podcastsHref(chosen, page)} />
   }
 
-  const { episodes, pageCount, podcasts, selected } = content
+  const { about, episodes, pageCount, podcasts, selected } = content
   const now = new Date()
-  const filter = [
-    { current: podcast === undefined, href: podcastsHref(undefined, 1), label: 'Alle podcasts' },
-    ...podcasts.map((item) => ({
-      current: item.slug === podcast,
-      href: podcastsHref(item.slug, 1),
-      label: item.name,
-    })),
-  ]
+  // The addresses of the pages are those of the podcasts that limit the list: all podcasts have
+  // none, so the address of the list is the same however the visitor reached it.
+  const slugs = selected.map((item) => item.slug)
+  // With one podcast the name is the same on every line, and the heading says it.
+  const showSource = selected.length !== 1
   // The addresses of the chosen podcast, as links in words. Each has the name of the podcast in
   // its name for a screen reader.
   const platforms =
-    selected === undefined
+    about === undefined
       ? []
       : [
-          { href: selected.applePodcastsUrl, name: 'Apple Podcasts' },
-          { href: selected.spotifyUrl, name: 'Spotify' },
+          { href: about.applePodcastsUrl, name: 'Apple Podcasts' },
+          { href: about.spotifyUrl, name: 'Spotify' },
         ].filter((platform): platform is { href: string; name: string } => platform.href !== null)
 
   return (
     <>
-      <Page.Main
-        intro={
-          <>
-            <Heading level={1}>Podcasts</Heading>
-            <Filter items={filter} label="Podcasts filteren" />
-          </>
-        }
-      >
+      <Page.Main intro={<Heading level={1}>{podcastsHeading(selected.map((item) => item.name))}</Heading>}>
         <Card as="div">
           {episodes.length === 0 ? (
             <Text>We hebben nog geen podcastafleveringen gevonden.</Text>
@@ -138,6 +107,7 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
                     details={episodeDetails(episode)}
                     headline={episode.title}
                     href={episode.url}
+                    showSource={showSource}
                     source={episode.sourceName}
                     time={formatEpisodeTime(episode.publishedAt, now)}
                   />
@@ -149,38 +119,55 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
             <Pagination
               current={page}
               label="Paginering"
-              nextHref={page < pageCount ? podcastsHref(podcast, page + 1) : undefined}
-              previousHref={page > 1 ? podcastsHref(podcast, page - 1) : undefined}
+              nextHref={page < pageCount ? podcastsHref(slugs, page + 1) : undefined}
+              previousHref={page > 1 ? podcastsHref(slugs, page - 1) : undefined}
               total={pageCount}
             />
           )}
         </Card>
       </Page.Main>
-      {selected !== undefined && (
-        <Page.Sidebar aria-label={`Over ${selected.name}`}>
-          <Card aria-labelledby="about-heading" surface="soft">
-            <Heading id="about-heading" level={2}>
-              Over {selected.name}
-            </Heading>
-            {selected.description !== null && selected.description !== '' && <Text>{selected.description}</Text>}
-            {platforms.length > 0 && (
-              <>
-                <Text>Luister ook op</Text>
-                <List role="list">
-                  {platforms.map((platform) => (
-                    <List.Item key={platform.name}>
-                      <Link href={platform.href} icon="external-link">
-                        <Text as="span" className="hf-visually-hidden">
-                          {selected.name} op{' '}
-                        </Text>
-                        {platform.name}
-                      </Link>
-                    </List.Item>
-                  ))}
-                </List>
-              </>
-            )}
+      {podcasts.length > 0 && (
+        // The sidebar is second in the source, so on a narrow screen the filter sits under the
+        // list and the pagination. The form is a GET to this page, so it works without
+        // JavaScript and a choice is an address that can be shared. The button stays with
+        // JavaScript too: a page that reloads at each tick takes the focus with it.
+        <Page.Sidebar aria-label="Podcasts">
+          <Card as="div" surface="soft">
+            <Form action="/podcasts" autoComplete="off" method="get">
+              <CheckboxGroup
+                legend="Podcasts"
+                name="podcast"
+                options={podcasts.map((item) => ({ label: item.name, value: item.slug }))}
+                value={chosen}
+              />
+              <Button type="submit">Toon</Button>
+            </Form>
           </Card>
+          {about !== undefined && (
+            <Card aria-labelledby="about-heading" surface="soft">
+              <Heading id="about-heading" level={2}>
+                Over {about.name}
+              </Heading>
+              {about.description !== null && about.description !== '' && <Text>{about.description}</Text>}
+              {platforms.length > 0 && (
+                <>
+                  <Text>Luister ook op</Text>
+                  <List role="list">
+                    {platforms.map((platform) => (
+                      <List.Item key={platform.name}>
+                        <Link href={platform.href} icon="external-link">
+                          <Text as="span" className="hf-visually-hidden">
+                            {about.name} op{' '}
+                          </Text>
+                          {platform.name}
+                        </Link>
+                      </List.Item>
+                    ))}
+                  </List>
+                </>
+              )}
+            </Card>
+          )}
         </Page.Sidebar>
       )}
     </>
@@ -191,17 +178,17 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
  * The page for the address in the props, or the page "niet gevonden" when the address is wrong.
  */
 async function loadFor(searchParams: Promise<SearchParams>) {
-  const query = parseQuery(await searchParams)
+  const query = parsePodcastsQuery(await searchParams)
 
   if (query === undefined) {
     notFound()
   }
 
-  const content = await loadPage(query.podcast, query.page)
+  const content = await loadPage(JSON.stringify(query.podcasts), query.page)
 
   if (content === 'unknown') {
     notFound()
   }
 
-  return { content, ...query }
+  return { chosen: query.podcasts, content, page: query.page }
 }

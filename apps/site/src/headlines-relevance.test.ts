@@ -51,6 +51,6 @@ describe('the podcast episodes', () => {
     const { getLatestEpisodes, getPodcastPage } = await import('./podcasts')
 
     expect((await getLatestEpisodes()).map((episode) => episode.title)).toEqual(['Kop club'])
-    expect((await getPodcastPage(undefined, 1))?.episodes.map((episode) => episode.title)).toEqual(['Kop club'])
+    expect((await getPodcastPage([], 1))?.episodes.map((episode) => episode.title)).toEqual(['Kop club'])
   })
 })

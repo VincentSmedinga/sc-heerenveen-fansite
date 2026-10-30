@@ -40,7 +40,10 @@ const episodes: PublicEpisode[] = [
   },
 ]
 
-const everything: Content = { episodes, pageCount: 1, podcasts, selected: undefined }
+const abe = podcasts[0] as PublicPodcast
+const camataru = podcasts[1] as PublicPodcast
+
+const everything: Content = { about: undefined, episodes, pageCount: 1, podcasts, selected: [] }
 
 const bothAddresses = {
   applePodcastsUrl: 'https://podcasts.apple.com/nl/podcast/omroep-abe/id1',
@@ -83,19 +86,19 @@ describe('the page Podcasts', () => {
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual(['<h1 class="hf-heading-1">Podcasts</h1>'])
   })
 
-  it('is the one main of the page, with the h1 and the filter as its introduction and the list in a card', async () => {
+  it('is the one main of the page, with the h1 as its introduction and the list in a card', async () => {
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html).toMatch(/<main class="hf-page-main"><div class="hf-page-intro"><h1.*<\/h1><nav.*<\/nav><\/div>/)
+    expect(html).toMatch(/<main class="hf-page-main"><div class="hf-page-intro"><h1[^>]*>Podcasts<\/h1><\/div>/)
     expect(html).toMatch(/<div class="hf-card"><ul role="list">/)
+    expect(html.slice(0, html.indexOf('</main>'))).not.toContain('<form')
   })
 
   it('shows each episode as a link to its page at the maker, with the name of the podcast and the time', async () => {
     const html = await render()
 
-    // The filter has list items too, so count the episodes in the card.
-    expect(html.slice(html.indexOf('<div class="hf-card">')).match(/<li>/g)).toHaveLength(2)
+    expect(html.slice(0, html.indexOf('</main>')).match(/<li>/g)).toHaveLength(2)
     expect(html).toContain('href="https://omny.test/shows/abe/12"')
     expect(html).toContain('href="https://camataru.test/e/1/"')
     expect(html).toContain('Radio Camataru')
@@ -120,55 +123,185 @@ describe('the page Podcasts', () => {
     expect(html).not.toMatch(/<img|<audio|<iframe|<script|\.mp3/)
   })
 
-  it('has a filter with a link to all podcasts and one to each podcast, in a navigation with a name', async () => {
+  it('puts the filter in a card on a soft surface in the sidebar, after the main, with a name for the sidebar', async () => {
     const html = await render()
-    const nav = html.match(/<nav[^>]*aria-label="Podcasts filteren".*?<\/nav>/)?.[0] ?? ''
+
+    expect(html.match(/<aside/g)).toHaveLength(1)
+    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(html.slice(html.indexOf('<aside'))).toMatch(
+      /^<aside class="hf-page-sidebar" aria-label="Podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/podcasts" method="get"><fieldset class="hf-checkbox-group"><legend class="hf-heading-2">Podcasts<\/legend>/,
+    )
+  })
+
+  it('has no sidebar and no filter when there are no podcasts', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, episodes: [], podcasts: [] })
+
+    const html = await render()
+
+    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('<fieldset')
+  })
+
+  it('has a form that gets to /podcasts, with a group named Podcasts and a button Toon, so it works without JavaScript', async () => {
+    const html = await render()
+    const form = html.slice(html.indexOf('<aside')).match(/<form.*?<\/form>/)?.[0] ?? ''
+
+    expect(form).toMatch(/^<form [^>]*action="\/podcasts"[^>]*method="get"/)
+    expect(form).toContain('<fieldset')
+    expect(form.match(/<legend[^>]*>Podcasts<\/legend>/)).not.toBeNull()
+    expect(form).toMatch(/<button type="submit">Toon<\/button><\/form>$/)
+    expect(form).not.toContain('hidden')
+    expect(form).not.toContain('<script')
+  })
+
+  it('has a checkbox for each podcast, named podcast, with the slug as value and the name of the podcast as label, in the order of the list', async () => {
+    const html = await render()
+    const group = html.slice(html.indexOf('<fieldset')).match(/<fieldset.*?<\/fieldset>/)?.[0] ?? ''
 
     expect(
-      [...nav.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
+      [...group.matchAll(/<label[^>]*><input([^>]*)\/><span>([^<]*)<\/span><\/label>/g)].map(([, input, label]) => [
+        input?.match(/value="([^"]*)"/)?.[1],
+        input?.match(/name="([^"]*)"/)?.[1],
+        input?.match(/type="([^"]*)"/)?.[1],
+        label,
+      ]),
     ).toEqual([
-      ['/podcasts', 'Alle podcasts'],
-      ['/podcasts?podcast=omroep-abe', 'Omroep Abe'],
-      ['/podcasts?podcast=radio-camataru', 'Radio Camataru'],
+      ['omroep-abe', 'podcast', 'checkbox', 'Omroep Abe'],
+      ['radio-camataru', 'podcast', 'checkbox', 'Radio Camataru'],
     ])
   })
 
-  it('marks Alle podcasts as the choice when no podcast is chosen', async () => {
+  it('has no link to filter and no link to all podcasts: Alle podcasts is gone', async () => {
     const html = await render()
 
-    expect([...html.matchAll(/<a [^>]*aria-current="page"[^>]*>([^<]*)<\/a>/g)].map(([, label]) => label)).toEqual([
-      'Alle podcasts',
-    ])
+    expect(html).not.toContain('Alle podcasts')
+    expect(html).not.toContain('Podcasts filteren')
+    expect(html).not.toContain('aria-current')
+    expect(html).not.toMatch(/href="\/podcasts\?podcast=/)
   })
 
-  it('marks the podcast that is chosen, and asks for its episodes', async () => {
-    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
+  it('checks nothing when no podcast is chosen', async () => {
+    expect(await render()).not.toContain('checked')
+  })
+
+  it('checks the podcast that is chosen, as the address says, and asks for its episodes', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, about: bothAddresses, selected: [abe] })
 
     const html = await render({ podcast: 'omroep-abe' })
 
-    expect([...html.matchAll(/<a [^>]*aria-current="page"[^>]*>([^<]*)<\/a>/g)].map(([, label]) => label)).toEqual([
-      'Omroep Abe',
+    expect([...html.matchAll(/<input[^>]*checked=""[^>]*value="([^"]*)"/g)].map(([, value]) => value)).toEqual([
+      'omroep-abe',
     ])
-    expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith('omroep-abe', 1)
+    expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith(['omroep-abe'], 1)
+  })
+
+  it('asks for more podcasts at once, in the order of the address, and checks them all', async () => {
+    const three = [...podcasts, { name: 'Zondag Zes', slug: 'zondag-zes' }]
+
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, podcasts: three, selected: [abe, camataru] })
+
+    const html = await render({ podcast: ['radio-camataru', 'omroep-abe'] })
+
+    expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith(['radio-camataru', 'omroep-abe'], 1)
+    expect(html.match(/checked=""/g)).toHaveLength(2)
+  })
+
+  it('checks every podcast as the address says when all are in it, and links to the pages without podcast', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, pageCount: 3 })
+
+    const html = withoutIcons(await render({ podcast: ['omroep-abe', 'radio-camataru'] }))
+
+    expect(html.match(/checked=""/g)).toHaveLength(2)
+    expect(html).toContain('<h1 class="hf-heading-1">Podcasts</h1>')
+    expect(html).toContain('href="/podcasts?pagina=2" rel="next">Volgende')
+    expect(html).not.toContain('Over ')
+  })
+})
+
+describe('the podcasts that are chosen', () => {
+  it('names the podcast in the heading when one is chosen, and shows its name on no line', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, about: bothAddresses, selected: [abe] })
+
+    const html = await render({ podcast: 'omroep-abe' })
+
+    expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Podcasts van Omroep Abe</h1>'])
+    // The name stays in each line for a screen reader, but nobody sees it.
+    const list = html.slice(0, html.indexOf('</main>'))
+
+    expect(list.match(/<span>Omroep Abe<\/span>/g)).toBeNull()
+    expect(list.match(/class="hf-visually-hidden">[^<]* <\/span>/g)).toHaveLength(2)
+  })
+
+  it('shows the name of the podcast on each line when none is chosen', async () => {
+    const html = await render()
+
+    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Omroep Abe<\/span>/g)).toHaveLength(1)
+    expect(html).not.toContain('hf-visually-hidden')
+  })
+
+  it('names two podcasts in the heading with "en", and shows the name on each line, as more than one podcast is in the list', async () => {
+    const three = [...podcasts, { name: 'Zondag Zes', slug: 'zondag-zes' }]
+
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, podcasts: three, selected: [abe, camataru] })
+
+    const html = await render({ podcast: ['omroep-abe', 'radio-camataru'] })
+
+    expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual([
+      '<h1 class="hf-heading-1">Podcasts van Omroep Abe en Radio Camataru</h1>',
+    ])
+    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Omroep Abe<\/span>/g)).toHaveLength(1)
+    expect(html).not.toContain('Over Omroep Abe')
+  })
+
+  it('names three podcasts with commas and "en"', async () => {
+    const four = [...podcasts, { name: 'Zondag Zes', slug: 'zondag-zes' }, { name: 'De Klup', slug: 'de-klup' }]
+
+    vi.mocked(getPodcastPage).mockResolvedValue({
+      ...everything,
+      podcasts: four,
+      selected: [abe, camataru, { name: 'Zondag Zes', slug: 'zondag-zes' }],
+    })
+
+    const html = await render({ podcast: ['omroep-abe', 'radio-camataru', 'zondag-zes'] })
+
+    expect(html).toContain('<h1 class="hf-heading-1">Podcasts van Omroep Abe, Radio Camataru en Zondag Zes</h1>')
+  })
+
+  it('shows the error page at the address that was asked, with all its podcasts', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(getPodcastPage).mockRejectedValue(new Error('no database'))
+
+    const html = await render({ podcast: ['radio-camataru', 'omroep-abe'] })
+
+    expect(html).toContain('<a href="/podcasts?podcast=radio-camataru&amp;podcast=omroep-abe">Probeer het opnieuw</a>')
+  })
+
+  it('asks for the first page of all podcasts without parameters, and ignores a parameter it does not know', async () => {
+    const html = await render({ utm_source: 'nieuwsbrief' })
+
+    expect(html).toContain('<h1 class="hf-heading-1">Podcasts</h1>')
+    expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith([], 1)
   })
 })
 
 describe('the card about the podcast in the sidebar', () => {
-  /** The sidebar alone, or an empty text when the page has none. */
-  const sidebarOf = (html: string) => (html.includes('<aside') ? html.slice(html.indexOf('<aside')) : '')
+  /** The card alone, or an empty text when the page has none. */
+  const sidebarOf = (html: string) => (html.includes('<section') ? html.slice(html.indexOf('<section')) : '')
 
-  it('is a card on a tonal surface in the sidebar, named by its h2 "Over" and the name of the podcast', async () => {
-    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
+  it('is a card on a tonal surface in the sidebar under the card with the filter, named by its h2 "Over" and the name of the podcast', async () => {
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, about: bothAddresses, selected: [abe] })
 
     const html = await render({ podcast: 'omroep-abe' })
 
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(html.indexOf('<fieldset')).toBeLessThan(html.indexOf('<section'))
+    expect(html).toContain('</form></div><section class="hf-card hf-card-soft" aria-labelledby="about-heading">')
     expect(sidebarOf(html)).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="Over Omroep Abe"><section class="hf-card hf-card-soft" aria-labelledby="about-heading"><h2 class="hf-heading-2" id="about-heading">Over Omroep Abe<\/h2>/,
+      /^<section class="hf-card hf-card-soft" aria-labelledby="about-heading"><h2 class="hf-heading-2" id="about-heading">Over Omroep Abe<\/h2>/,
     )
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
-      '<h1 class="hf-heading-1">Podcasts</h1>',
+      '<h1 class="hf-heading-1">Podcasts van Omroep Abe</h1>',
       '<h2 class="hf-heading-2" id="about-heading">Over Omroep Abe</h2>',
     ])
   })
@@ -176,7 +309,8 @@ describe('the card about the podcast in the sidebar', () => {
   it('has the description of the podcast from the register, as text, before the links', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({
       ...everything,
-      selected: { ...bothAddresses, description: 'Elke week & <b>vet</b> gepraat.' },
+      about: { ...bothAddresses, description: 'Elke week & <b>vet</b> gepraat.' },
+      selected: [abe],
     })
 
     const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
@@ -187,7 +321,7 @@ describe('the card about the podcast in the sidebar', () => {
   })
 
   it('has "Luister ook op" and a list with a text link for each address, named after the podcast', async () => {
-    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, about: bothAddresses, selected: [abe] })
 
     const sidebar = withoutIcons(sidebarOf(await render({ podcast: 'omroep-abe' })))
 
@@ -198,7 +332,7 @@ describe('the card about the podcast in the sidebar', () => {
   })
 
   it('draws the icon for a link to another site behind each address, hidden from screen readers, and the link is still named after the podcast', async () => {
-    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, about: bothAddresses, selected: [abe] })
 
     const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
     const links = [...sidebar.matchAll(/<a href="[^"]*">(.*?)<\/a>/g)].map(([, content]) => content ?? '')
@@ -219,7 +353,8 @@ describe('the card about the podcast in the sidebar', () => {
   it('has one item when the podcast has one address', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({
       ...everything,
-      selected: { ...bothAddresses, spotifyUrl: null },
+      about: { ...bothAddresses, spotifyUrl: null },
+      selected: [abe],
     })
 
     const sidebar = withoutIcons(sidebarOf(await render({ podcast: 'omroep-abe' })))
@@ -232,7 +367,8 @@ describe('the card about the podcast in the sidebar', () => {
   it('has the description alone when the podcast has no address: no line and no list', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({
       ...everything,
-      selected: { ...bothAddresses, applePodcastsUrl: null, spotifyUrl: null },
+      about: { ...bothAddresses, applePodcastsUrl: null, spotifyUrl: null },
+      selected: [abe],
     })
 
     const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
@@ -245,7 +381,8 @@ describe('the card about the podcast in the sidebar', () => {
   it('has the addresses alone when the podcast has no description', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({
       ...everything,
-      selected: { ...bothAddresses, description: null },
+      about: { ...bothAddresses, description: null },
+      selected: [abe],
     })
 
     const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
@@ -257,7 +394,8 @@ describe('the card about the podcast in the sidebar', () => {
   it('has only the h2 when the podcast has no description and no address', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({
       ...everything,
-      selected: { applePodcastsUrl: null, description: '', name: 'Omroep Abe', spotifyUrl: null },
+      about: { applePodcastsUrl: null, description: '', name: 'Omroep Abe', spotifyUrl: null },
+      selected: [abe],
     })
 
     const sidebar = sidebarOf(await render({ podcast: 'omroep-abe' }))
@@ -266,15 +404,23 @@ describe('the card about the podcast in the sidebar', () => {
     expect(sidebar).not.toContain('<p>')
   })
 
-  it('is not there for all podcasts, and the line "Luister ook op" is no longer under the h1', async () => {
+  it('is not there for all podcasts or for more than one, and the line "Luister ook op" is no longer under the h1', async () => {
     const html = await render()
 
-    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('<section')
     expect(html).not.toContain('Luister ook')
+
+    vi.mocked(getPodcastPage).mockResolvedValue({
+      ...everything,
+      podcasts: [...podcasts, { name: 'Zondag Zes', slug: 'zondag-zes' }],
+      selected: [abe, camataru],
+    })
+
+    expect(await render({ podcast: ['omroep-abe', 'radio-camataru'] })).not.toContain('Over ')
   })
 
   it('does not put the line under the h1 either when a podcast is chosen', async () => {
-    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: bothAddresses })
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, about: bothAddresses, selected: [abe] })
 
     const html = await render({ podcast: 'omroep-abe' })
     const main = html.slice(0, html.indexOf('</main>'))
@@ -311,7 +457,7 @@ describe('the pagination', () => {
     expect(second).toContain('Pagina 2 van 9')
     expect(second).toContain('href="/podcasts" rel="prev">Vorige')
     expect(second).toContain('href="/podcasts?pagina=3" rel="next">Volgende')
-    expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith(undefined, 2)
+    expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith([], 2)
   })
 
   it('has a link to the previous page and none to a next page on the last page', async () => {
@@ -339,7 +485,7 @@ describe('the pagination', () => {
   })
 
   it('keeps the podcast in the addresses of the pages', async () => {
-    vi.mocked(getPodcastPage).mockResolvedValue({ ...many, selected: bothAddresses })
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...many, about: bothAddresses, selected: [abe] })
 
     const html = withoutIcons(await render({ pagina: '2', podcast: 'omroep-abe' }))
 
@@ -370,25 +516,19 @@ describe('an address that is wrong', () => {
     ['a page with spaces', { pagina: ' 2' }],
     ['a page that is far too large', { pagina: '99999999999999999999' }],
     ['a page given twice', { pagina: ['1', '2'] }],
-    ['a podcast given twice', { podcast: ['omroep-abe', 'radio-camataru'] }],
+    ['a podcast given twice', { podcast: ['omroep-abe', 'omroep-abe'] }],
+    ['a podcast given twice, next to another', { podcast: ['omroep-abe', 'radio-camataru', 'omroep-abe'] }],
   ])('gives the page niet gevonden for %s, without asking the data', async (_, query) => {
     await expect(render(query)).rejects.toEqual(notFound)
     await expect(generateMetadata(props(query))).rejects.toEqual(notFound)
     expect(getPodcastPage).not.toHaveBeenCalled()
   })
 
-  it('ignores a parameter that the page does not know', async () => {
-    const html = await render({ utm_source: 'nieuwsbrief' })
-
-    expect(html).toContain('<h1 class="hf-heading-1">Podcasts</h1>')
-    expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith(undefined, 1)
-  })
-
   it('gives the page niet gevonden for an empty podcast, because that is no podcast', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue(undefined)
 
     await expect(render({ podcast: '' })).rejects.toEqual(notFound)
-    expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith('', 1)
+    expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith([''], 1)
   })
 })
 
@@ -415,18 +555,33 @@ describe('the metadata', () => {
     expect(metadata.robots).toBeUndefined()
   })
 
-  it('gives each page and each podcast its own canonical address, so search engines keep them apart', async () => {
+  it('gives each page and each choice of podcasts its own canonical address, in the order of the list, so search engines keep them apart', async () => {
     vi.stubEnv('SITE_ENV', 'production')
 
-    const canonical = async (query: Query) => (await generateMetadata(props(query))).alternates?.canonical
+    const three = [...podcasts, { name: 'Zondag Zes', slug: 'zondag-zes' }]
+    const canonical = async (query: Query, content: Content = everything) => {
+      vi.mocked(getPodcastPage).mockResolvedValue(content)
+
+      return (await generateMetadata(props(query))).alternates?.canonical
+    }
 
     expect(await canonical({})).toBe('https://sc.heerenveen.org/podcasts')
     expect(await canonical({ pagina: '1' })).toBe('https://sc.heerenveen.org/podcasts')
     expect(await canonical({ pagina: '2' })).toBe('https://sc.heerenveen.org/podcasts?pagina=2')
-    expect(await canonical({ podcast: 'omroep-abe' })).toBe('https://sc.heerenveen.org/podcasts?podcast=omroep-abe')
-    expect(await canonical({ pagina: '2', podcast: 'omroep-abe' })).toBe(
+    expect(await canonical({ podcast: 'omroep-abe' }, { ...everything, selected: [abe] })).toBe(
+      'https://sc.heerenveen.org/podcasts?podcast=omroep-abe',
+    )
+    expect(await canonical({ pagina: '2', podcast: 'omroep-abe' }, { ...everything, selected: [abe] })).toBe(
       'https://sc.heerenveen.org/podcasts?podcast=omroep-abe&pagina=2',
     )
+    expect(
+      await canonical(
+        { podcast: ['radio-camataru', 'omroep-abe'] },
+        { ...everything, podcasts: three, selected: [abe, camataru] },
+      ),
+    ).toBe('https://sc.heerenveen.org/podcasts?podcast=omroep-abe&podcast=radio-camataru')
+    // Every podcast is the page of all podcasts, and so is its address.
+    expect(await canonical({ podcast: ['omroep-abe', 'radio-camataru'] })).toBe('https://sc.heerenveen.org/podcasts')
     expect((await generateMetadata(props({ pagina: '2' }))).openGraph?.url).toBe(
       'https://sc.heerenveen.org/podcasts?pagina=2',
     )
@@ -437,6 +592,22 @@ describe('the metadata', () => {
 
     expect((await generateMetadata(props({ pagina: '2' }))).title).toBe('Podcasts, pagina 2')
     expect((await generateMetadata(props({ pagina: '1' }))).title).toBe('Podcasts')
+  })
+
+  it('names the podcasts that are chosen in the title, before the page', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+
+    const three = [...podcasts, { name: 'Zondag Zes', slug: 'zondag-zes' }]
+
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, selected: [abe] })
+
+    expect((await generateMetadata(props({ podcast: 'omroep-abe' }))).title).toBe('Podcasts van Omroep Abe')
+
+    vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, podcasts: three, selected: [abe, camataru] })
+
+    expect((await generateMetadata(props({ pagina: '3', podcast: ['omroep-abe', 'radio-camataru'] }))).title).toBe(
+      'Podcasts van Omroep Abe en Radio Camataru, pagina 3',
+    )
   })
 })
 
