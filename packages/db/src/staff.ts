@@ -43,9 +43,6 @@ function endRangeOf(date: string, precision: DatePrecision): DateRange {
 /** A period that has not ended goes on without an end, which is a day no question reaches. */
 const noEnd: DateRange = { from: '9999-12-31', to: '9999-12-31' }
 
-/** A date of a period as stored, with how exactly it is known. */
-export type StaffDate = { date: string; precision: DatePrecision }
-
 /**
  * Who has a role on a day: `certain` with the one person who surely has it, `uncertain` with
  * the people who might (the day lies in the uncertainty of a boundary, or two people surely
@@ -66,27 +63,6 @@ export function coverage(period: Period, day: string): 'certain' | 'no' | 'possi
   }
 
   return start.from <= day && day <= end.to ? 'possible' : 'no'
-}
-
-/**
- * What part of a season, such as `2025/26`, a period covers: `start` is the day it began when
- * that is within the season, and `end` the day it ended when that is within the season. A
- * `start` or `end` that is null means the period surely covers that edge of the season: it was
- * there from the first day of the season on (`start` null), or went on to the last day (`end`
- * null). Both null is the whole season. A date known to the month or year is never taken for
- * an edge, so a coach who began "in 2024" has a `start` in 2024/25.
- */
-export function partOfSeason(period: Period, season: string): { end: null | StaffDate; start: null | StaffDate } {
-  const { end, start } = bounds(period)
-  const first = Number(season.slice(0, 4))
-
-  return {
-    end:
-      period.endDate === null || period.endPrecision === null || end.from >= `${first + 1}-06-30`
-        ? null
-        : { date: period.endDate, precision: period.endPrecision },
-    start: start.to <= `${first}-07-01` ? null : { date: period.startDate, precision: period.startPrecision },
-  }
 }
 
 /**

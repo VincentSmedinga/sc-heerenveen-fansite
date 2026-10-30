@@ -180,7 +180,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             <StandingsTable caption={standingsCaption(data.standings, standingsCard.name)} rows={data.standings} />
           )}
         </Card>
-        <CoachesCard coaches={data.coaches} season={data.season} />
+        <CoachesCard coaches={data.coaches} />
         <LeaguePlaceCard season={imageSeason} standings={data.standings} />
         <SeasonCard matches={data.matches} season={imageSeason} />
         <StreaksCard matches={data.matches} now={now} season={imageSeason} />

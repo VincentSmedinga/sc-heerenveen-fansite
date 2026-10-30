@@ -5,9 +5,7 @@
  */
 
 import type { PublicMatch, PublicStaff, PublicStandingsRow, PublicWikipediaPage } from '@fansite/db/queries'
-import type { StaffDate } from '@fansite/db/staff'
-
-import { partOfSeason } from '@fansite/db/staff'
+import type { DatePrecision } from '@fansite/db/schema'
 
 const timeZone = 'Europe/Amsterdam'
 
@@ -78,29 +76,33 @@ const shortDayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month:
 const shortMonthFormat = new Intl.DateTimeFormat('nl-NL', { month: 'short', timeZone, year: 'numeric' })
 
 /**
- * What part of a season a coach had the job, as the list of head coaches says it: "hele
- * seizoen", "tot 14 mrt 2026" for a coach who stopped in the season, "vanaf 1 sep 2025" for one
- * who began in it, and "van 1 sep 2025 tot 14 mrt 2026" for one who did both. A date known to
- * the month or year says so ("tot mrt 2026") and is never taken for the edge of the season.
+ * What the list of head coaches says in front of each name, in the order the coaches began: a
+ * season with one coach says nothing, because the name is enough. With more, each coach but the
+ * last has "tot 14 mrt 2026", the day he stopped, and the last has "vanaf 1 sep 2025", the day
+ * he began. A date known to the month or year says so ("tot mrt 2026", "vanaf 2024"). A coach
+ * but the last who has no end in the table says nothing.
  */
-export function coachPeriod(coach: PublicStaff, season: string) {
-  const { end, start } = partOfSeason(coach, season)
+export function coachPeriods(coaches: PublicStaff[]): (string | undefined)[] {
+  return coaches.map((coach, index) => {
+    if (coaches.length === 1) {
+      return undefined
+    }
 
-  if (start === null && end === null) {
-    return 'hele seizoen'
-  }
+    if (index === coaches.length - 1) {
+      return `vanaf ${formatStaffDate({ date: coach.startDate, precision: coach.startPrecision })}`
+    }
 
-  const from = start === null ? '' : `${end === null ? 'vanaf' : 'van'} ${formatStaffDate(start)}`
-  const until = end === null ? '' : `tot ${formatStaffDate(end)}`
-
-  return [from, until].filter(Boolean).join(' ')
+    return coach.endDate === null || coach.endPrecision === null
+      ? undefined
+      : `tot ${formatStaffDate({ date: coach.endDate, precision: coach.endPrecision })}`
+  })
 }
 
 /**
  * A date of the staff the way its precision allows: "14 mrt 2026" for a day, "mrt 2026" for a
  * month and "2026" for a year. It never writes a day it does not know.
  */
-export function formatStaffDate({ date, precision }: StaffDate) {
+export function formatStaffDate({ date, precision }: { date: string; precision: DatePrecision }) {
   if (precision === 'year') {
     return date.slice(0, 4)
   }

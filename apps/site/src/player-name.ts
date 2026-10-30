@@ -58,6 +58,17 @@ export function splitPlayerName(name: string, searchTerm: string): NameParts {
   return { givenName: whole, surname: '' }
 }
 
+/**
+ * The name of a person of the staff in the two parts `PlayerName` shows: the first word is the
+ * given name and the rest the surname, so `Robin van Persie` is `Robin` and `van Persie`, and
+ * `Jan Olde Riekerink` is `Jan` and `Olde Riekerink`. A name of one word is a surname.
+ */
+export function splitStaffName(name: string): NameParts {
+  const [first = '', ...rest] = name.trim().split(/\s+/)
+
+  return rest.length === 0 ? { surname: first } : { givenName: first, surname: rest.join(' ') }
+}
+
 /** A name as the page shows it, for a player who is not in the table: it is a surname. */
 export function surnameOnly(name: string): NameParts {
   return { surname: name }

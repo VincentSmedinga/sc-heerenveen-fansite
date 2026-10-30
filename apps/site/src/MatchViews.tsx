@@ -24,7 +24,7 @@ import {
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
 
 import { moreCleanSheets } from './items-per-card'
-import { coachPeriod, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
+import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import {
   cleanSheetsOf,
   type ExtremeGoal,
@@ -46,6 +46,7 @@ import {
   topScorersOf,
 } from './matches'
 import { coachesCardOf } from './matchShortcuts'
+import { splitStaffName } from './player-name'
 
 /**
  * What the button for an image of a statistics card puts under the image: the credit of
@@ -544,18 +545,19 @@ const markOf: Record<FormResult, MarkRowMark> = {
 
 /**
  * The head coach or coaches of a season as a white card with a list, in the order they began.
- * The title is "Hoofdtrainer" for one and "Hoofdtrainers" for more. Each line says what part of
- * the season the coach had the job (see `coachPeriod`) and the name, with "(interim)" where
- * that is so. A coach with a Wikipedia page links to it, which credits its authors, and under
- * the list stands "Bron: Wikipedia" in its short form: the full credit is in the sidebar. A
- * season with no coach in the table has no card.
+ * The title is "Hoofdtrainer" for one and "Hoofdtrainers" for more. A season with one coach has
+ * his name only; with more, each line has "tot" and the day he stopped, and the last has
+ * "vanaf" and the day he began (see `coachPeriods`). The name is shown as a player's is, with
+ * "(interim)" behind it where that is so. The source of the data is the credit under the page.
+ * A season with no coach in the table has no card.
  */
-export function CoachesCard({ coaches, season }: { coaches: PublicStaff[]; season: string }) {
+export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
   if (coaches.length === 0) {
     return null
   }
 
   const { id, name } = coachesCardOf(coaches.length)
+  const periods = coachPeriods(coaches)
 
   return (
     <Card aria-labelledby={id}>
@@ -563,23 +565,12 @@ export function CoachesCard({ coaches, season }: { coaches: PublicStaff[]; seaso
         {name}
       </Heading>
       <List role="list">
-        {coaches.map((coach) => (
+        {coaches.map((coach, index) => (
           <List.Item key={`${coach.name}-${coach.startDate}`}>
-            <ShortStaff
-              interim={coach.interim}
-              name={
-                coach.wikipediaPage === null ? (
-                  coach.name
-                ) : (
-                  <Link href={wikipediaUrl(coach.wikipediaPage)}>{coach.name}</Link>
-                )
-              }
-              period={coachPeriod(coach, season)}
-            />
+            <ShortStaff interim={coach.interim} period={periods[index]} {...splitStaffName(coach.name)} />
           </List.Item>
         ))}
       </List>
-      <WikipediaCredit compact />
     </Card>
   )
 }

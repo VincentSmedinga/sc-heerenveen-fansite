@@ -149,7 +149,7 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
 
     expect(html).toContain('href="#hoofdtrainer">Hoofdtrainers</a></h2>')
     expect(html.replace(/<[^>]+>/g, '|').replace(/\|+/g, '|')).toContain(
-      '|tot 14 dec 2025|Robin van Persie|vanaf 15 dec 2025|Henk Brugge (interim)|',
+      '|tot 14 dec 2025|Robin| |van Persie|vanaf 15 dec 2025|Henk| |Brugge| |(interim)|',
     )
   })
 

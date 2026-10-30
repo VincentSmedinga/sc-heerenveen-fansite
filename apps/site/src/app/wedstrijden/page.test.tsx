@@ -2015,48 +2015,51 @@ describe('the head coaches of the season', () => {
     expect(html).not.toContain('Hoofdtrainer')
   })
 
-  it('is a card named "Hoofdtrainer" for one coach, with a list of one line: the whole season', async () => {
+  it('is a card named "Hoofdtrainer" for one coach, with one line that has the name and nothing else', async () => {
     withCoaches([veldman])
 
     const { card } = await coachesCard()
 
-    expect(card).toContain('href="#hoofdtrainer">Hoofdtrainer</a></h2>')
+    expect(card).toContain('href="#hoofdtrainer">Hoofdtrainer')
     expect(card).toContain('<ul role="list">')
     expect(card.match(/<li>/g)).toHaveLength(1)
-    expect(card).toContain('<span class="hf-short-match-when">hele seizoen</span>')
-    expect(card).toContain(
-      '<span class="hf-short-match-opponent"><a href="https://nl.wikipedia.org/wiki/Robin_Veldman">Robin Veldman</a></span>',
-    )
+    expect(card).not.toContain('hele seizoen')
+    expect(card).not.toContain('hf-short-match-when')
+    expect(textOf(card)).toBe('|Hoofdtrainer|Robin| |Veldman|')
   })
 
-  it('is named "Hoofdtrainers" for more, in the order given, saying what part of the season each had', async () => {
+  it('is named "Hoofdtrainers" for more, with "tot" and the day for each but the last, and "vanaf" for the last', async () => {
     withCoaches([persie, brugge, veldman])
 
     const { card } = await coachesCard()
 
-    expect(card).toContain('href="#hoofdtrainer">Hoofdtrainers</a></h2>')
+    expect(card).toContain('href="#hoofdtrainer">Hoofdtrainers')
     expect(textOf(card)).toContain(
-      '|tot 31 aug 2026|Robin van Persie|van 1 sep 2026 tot 20 dec 2026|Henk Brugge| (interim)|hele seizoen|Robin Veldman|',
+      '|Hoofdtrainers|tot 31 aug 2026|Robin| |van Persie|tot 20 dec 2026|Henk| |Brugge| |(interim)|vanaf 21 mrt 2025|Robin| |Veldman|',
     )
   })
 
-  it('says "vanaf" for a coach who began in the season and stays, as the last line', async () => {
-    withCoaches([{ ...veldman, startDate: '2026-11-02' }])
-
-    expect(textOf((await coachesCard()).card)).toContain('|vanaf 2 nov 2026|Robin Veldman|')
-  })
-
-  it('shows a coach without a page as plain text, and a coach with one as a link to Wikipedia', async () => {
+  it('has the given name in the normal weight and the surname in the stronger one, like a player', async () => {
     withCoaches([persie, veldman])
 
     const { card } = await coachesCard()
 
-    expect(card).toContain('<span class="hf-short-match-opponent">Robin van Persie</span>')
-    expect(card).not.toContain('Robin_van_Persie')
-    expect(card).toContain('<a href="https://nl.wikipedia.org/wiki/Robin_Veldman">Robin Veldman</a>')
+    expect(card).toContain(
+      '<span class="hf-player-name"><span class="hf-player-name-given">Robin</span> <span class="hf-player-name-surname">van Persie</span></span>',
+    )
   })
 
-  it('is a white card in the sidebar right after the table, named by its heading, with a credit under the list', async () => {
+  it('says "(interim)" in the quiet style behind the name, and has no link to Wikipedia', async () => {
+    withCoaches([persie, brugge])
+
+    const { card } = await coachesCard()
+
+    expect(card).toContain('<span class="hf-short-match-where">(interim)</span>')
+    expect(card).not.toContain('<a href="https://nl.wikipedia.org')
+    expect(card).not.toContain('wikipedia')
+  })
+
+  it('is a white card in the sidebar right after the table, named by its heading, without a source of its own', async () => {
     withCoaches([veldman])
 
     const { card, html } = await coachesCard()
@@ -2064,7 +2067,7 @@ describe('the head coaches of the season', () => {
     expect(html).toContain('<section class="hf-card" aria-labelledby="hoofdtrainer">')
     expect(html.indexOf('id="hoofdtrainer"')).toBeGreaterThan(html.indexOf('id="stand"'))
     expect(html.indexOf('id="hoofdtrainer"')).toBeLessThan(html.indexOf('id="onze-plek-in-de-competitie"'))
-    expect(card).toContain('<p class="hf-meta hf-wikipedia-credit">Bron: Wikipedia</p>')
+    expect(card).not.toContain('hf-wikipedia-credit')
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toHaveLength(14)
   })
 })

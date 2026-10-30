@@ -239,9 +239,11 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
 - **Hoofdtrainer of Hoofdtrainers:** een witte kaart in de zijbalk, direct onder de stand, met de hoofdtrainers van het seizoen uit de tabel `staff` (zie de README van `packages/db`), op volgorde van begin.
   De kop is "Hoofdtrainer" bij één trainer en "Hoofdtrainers" bij meer, met altijd het anker `#hoofdtrainer`.
-  Elke trainer is een regel (`ShortStaff`) die zegt welk deel van het seizoen hij de functie had, en dan zijn naam met "(interim)" waar dat zo is: "hele seizoen", "tot 14 mrt 2026", "vanaf 1 sep 2025" of "van 1 sep 2025 tot 14 mrt 2026" (`coachPeriod` in `src/match-format.ts`).
-  Een datum die alleen als maand of jaar bekend is, staat zo ("tot mrt 2026") en telt niet als de rand van het seizoen.
-  Een trainer met een pagina op Wikipedia is een link, en onder de lijst staat "Bron: Wikipedia".
+  Elke trainer is een regel (`ShortStaff`) met zijn naam, zoals de naam van een speler: de voornaam in het normale gewicht en de achternaam in het sterkere (`splitStaffName` in `src/player-name.ts`), met "(interim)" erachter in het normale gewicht.
+  Een seizoen met één trainer toont alleen de naam.
+  Bij meer trainers staat voor elke trainer behalve de laatste "tot 14 mrt 2026", de dag waarop hij stopte, en voor de laatste "vanaf 1 sep 2025", de dag waarop hij begon (`coachPeriods` in `src/match-format.ts`).
+  Een datum die alleen als maand of jaar bekend is, staat zo ("tot mrt 2026").
+  De namen zijn geen links en de kaart heeft geen bronvermelding van zichzelf: de bron staat onderaan de pagina.
   Een seizoen zonder trainer in de tabel heeft de kaart niet, en dan ook geen link in de balk "Op deze pagina:".
 - **Onze plek in de competitie:** een kaart in de zijbalk, direct onder de stand, met een `DataTable` die de plaats van sc Heerenveen in de hele Eredivisie geeft op vijf onderdelen: punten per wedstrijd, gewonnen wedstrijden, de beste aanval (doelpunten voor), de beste verdediging (doelpunten tegen, minder is beter) en het doelsaldo.
   `leaguePlaceOf` in `src/matches.ts` rekent ze uit de stand, dus de import verandert niet.
