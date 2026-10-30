@@ -102,7 +102,8 @@ test.describe('the podcasts on /podcasts with JavaScript', () => {
     await expect(page.getByRole('button', { name: 'Toon' })).toBeFocused()
     await page.keyboard.press('Enter')
 
-    // Both are checked, which is every podcast, so the address has none.
+    // The browser sends both, and both checked is every podcast: the heading, the canonical
+    // address and the pagination have none.
     await expect(page).toHaveURL(/\/podcasts\?podcast=proefpodcast&podcast=testpodcast$/)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Podcasts')
   })
