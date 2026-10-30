@@ -21,6 +21,8 @@ De workflow [`storybook.yml`](../.github/workflows/storybook.yml) heeft twee tak
    De run wordt rood als een van beide niet met 200 antwoordt, of niet hetzelfde is als het bestand in de build.
    Dan raakt hij `tmp/restart.txt` van de MCP-server aan en vraagt `https://ds.heerenveen.org/mcp` om `initialize`, de lijst met gereedschappen en `docs-list`, tot anderhalve minuut lang.
    De run wordt rood als de server niet antwoordt, andere gereedschappen geeft dan de drie voor de documentatie, of een component van de build uit het overzicht mist.
+   Is die controle rood, dan laat een laatste stap, _Show what is on the host_, zien wat er op de host staat (zie _Als het niet werkt_).
+   Slaagt de controle, dan slaat de workflow die stap over.
 
 Een push naar `main` start de workflow alleen als hij iets wijzigt waar Storybook of de MCP-server uit bestaat: iets in `packages/design-system/` of `apps/design-system-mcp/`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` of `.github/workflows/storybook.yml`.
 Een samenvoeging die alleen `apps/site` of `docs/` raakt, zet niets neer.
@@ -233,6 +235,26 @@ Een agent heeft daar geen toegang.
   6. **Opnieuw.**
      Start _Actions → Storybook → Run workflow_ op `main`, of raak `tmp/restart.txt` aan, en lees de stap _Check ds.heerenveen.org/mcp_ opnieuw.
 
+- Na een rode _Check ds.heerenveen.org/mcp_ draait de stap _Show what is on the host_.
+  Hij laat via SSH zien wat de eigenaar anders in verborgen bestanden zou moeten zoeken, en hij leest alleen: hij schrijft, verplaatst of verwijdert niets en start de app niet opnieuw.
+  Het logboek van een run is openbaar, dus hij toont geen eigenaar of groep, geen geheimen of omgevingsvariabelen, en `/home/<naam>` staat er als `/home/…`.
+  De stap kan de run niet groen maken: de run blijft rood door de controle zelf.
+  Zegt hij "Host report skipped", dan klopt het pad van de app niet: controleer `DEPLOY_PATH`.
+  Hij laat drie dingen zien:
+  1. **De map van de app.**
+     Naam, grootte, laatste wijziging en soort van elk bestand in `domains/ds.heerenveen.org/mcp`, met de verborgen bestanden en de map `tmp/`, en of `server.mjs` en `tmp/restart.txt` er staan.
+     Mist `server.mjs`, dan lukte de kopie niet of staat de app in een andere map.
+     Mist `tmp/restart.txt`, dan raakte de workflow hem niet aan, en dan start de host de app niet opnieuw.
+  2. **Het `.htaccess` van de document root.**
+     Staat er "The block of CloudLinux Passenger is missing", dan heeft _Setup Node.js App_ geen app aangemaakt of de regels niet in dit bestand gezet, en bereikt het verzoek de app nooit.
+     Maak de app dan aan of sla hem opnieuw op (stap 7).
+     Staat het blok er wel, dan zie je alleen de regels `PassengerBaseURI`, `PassengerStartupFile` en `PassengerAppType`.
+     Ze moeten `/mcp`, `server.mjs` en `node` zeggen.
+     Een ander pad of bestand betekent een verkeerd adres of startbestand in het formulier.
+  3. **De laatste 20 regels van `stderr.log`.**
+     "There is no stderr.log" betekent meestal dat de app nooit gestart is: het verzoek bereikte hem niet, of de host heeft hem nog niet gestart.
+     "stderr.log is empty" betekent dat de app wel gestart is en niets misging, dus de fout zit in het pad.
+     Staan er regels, dan zegt de laatste wat de app tegenhield.
 - _Check ds.heerenveen.org/mcp_ is rood met `500` of `503`, of met "fetch failed": de app start niet.
   Lees `stderr.log` in `domains/ds.heerenveen.org/mcp`, of het logboek in _Setup Node.js App_.
   Controleer dat Node 24 gekozen is, dat het startbestand `server.mjs` heet, en dat het bestand in de map staat.
