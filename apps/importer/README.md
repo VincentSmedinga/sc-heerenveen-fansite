@@ -802,6 +802,8 @@ Op de host draait hetzelfde bestand als de cronjob de opdracht, met `--season` e
 node --env-file=<omgevingsbestand> <map van de app>/apps/importer/import.mjs --season 2025/26
 ```
 
+Op acceptatie start je dat in GitHub met de workflow _Import season_, zonder SSH (zie _Een afgelopen seizoen importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
+
 #### Een gestaakte wedstrijd
 
 De pagina van 2025/26 heeft voor NAC Breda – sc Heerenveen (speelronde 33) twee blokken.
