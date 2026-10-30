@@ -13,7 +13,7 @@
     margin-block: 0 0.5rem;
   }
 
-  /* A list under the row has lines of its own, so it gets the space of a paragraph, not of a line. */
+  /* A list under the row has lines of its own: it gets the space of a paragraph, not of a line. */
   .hf-mark-row + :is(ul, ol) {
     margin-block-start: 1rem;
   }
