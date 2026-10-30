@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { checkPage } from './check-page'
+import { hydrated } from './hydrated'
 
 // The pages in pages.spec.ts are checked in a window of 1280 pixels wide, where the bar under
 // the header is gone (display: none). axe and the contrast of the bar need a window in which it
@@ -193,6 +194,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
     const current = bar.locator('[aria-current]')
 
+    await hydrated(page)
     await expect(bar.getByRole('link').first()).toBeVisible()
     await expect(current).toHaveCount(0)
 
@@ -208,6 +210,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto('/wedstrijden')
+    await hydrated(page)
     const current = page.locator('.hf-page-shortcuts [aria-current="location"]')
 
     await page.evaluate(() => document.getElementById('stand')?.scrollIntoView({ behavior: 'instant', block: 'start' }))
@@ -236,6 +239,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
   test('follows the page on down and up again, and has one current link at a time', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/wedstrijden')
+    await hydrated(page)
     const current = page.locator('.hf-page-shortcuts [aria-current]')
     const to = (id: string) =>
       page.evaluate((target) => document.getElementById(target)?.scrollIntoView({ behavior: 'instant' }), id)
@@ -260,6 +264,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
   }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/wedstrijden')
+    await hydrated(page)
 
     await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: document.documentElement.scrollHeight }))
 
@@ -271,6 +276,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
   }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/wedstrijden')
+    await hydrated(page)
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
     await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()

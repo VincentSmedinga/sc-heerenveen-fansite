@@ -9,6 +9,17 @@ const html = renderToStaticMarkup(<AboutPage />)
 // Without the links that the headings are, for the tests about the other links and icons.
 const plain = withoutHeadingLinks(html)
 
+/** The sidebar, and the main column without it. */
+const [mainHtml = '', sidebarHtml = ''] = html.split('<aside')
+
+/** The words of the text in the sidebar, without the heading. */
+const sidebarWords = sidebarHtml
+  .replace(/^[^>]*>/, '')
+  .replace(/<h2.*?<\/h2>/, '')
+  .replace(/<[^>]*>/g, ' ')
+  .split(/\s+/)
+  .filter((word) => /[\p{L}\p{N}]/u.test(word))
+
 /** The href and the text of each link, in the order of the page. */
 const links = [...withoutIcons(plain).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
   href,
@@ -31,9 +42,37 @@ describe('the page Over ons', () => {
     })
   })
 
-  it('is the one main of the page, with all its content in one cell', () => {
+  it('is the one main of the page, with all its content in one cell, and the sidebar after it', () => {
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
+    expect(html.match(/<aside/g)).toHaveLength(1)
+    expect(mainHtml).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
+    expect(sidebarHtml).toMatch(/^ class="hf-page-sidebar" aria-label="Over de gegevens">.*<\/aside>$/)
+  })
+
+  it('has a sidebar with one card, named by its h2 Waar de gegevens vandaan komen, with an anchor', () => {
+    expect(sidebarHtml.match(/<section/g)).toHaveLength(1)
+    expect(sidebarHtml).toContain('<section class="hf-card hf-card-soft" aria-labelledby="gegevens">')
+    expect(plain).toContain(
+      '<h2 class="hf-heading-3 hf-heading-anchored" id="gegevens">Waar de gegevens vandaan komen</h2>',
+    )
+  })
+
+  it('names the sources and what can go wrong: Wikipedia and its licence, a late result, other spelling and the filter', () => {
+    const text = sidebarHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ')
+
+    expect(text).toContain('Nederlandse Wikipedia (CC BY-SA 4.0)')
+    expect(text).toContain('een uitslag kan achterlopen')
+    expect(text).toContain('soms anders dan bij de club')
+    expect(text).toContain('Het mist soms een kop of laat er een te veel staan')
+    expect(text).toContain('hoogstens één keer per uur')
+    expect(text).toContain('forum')
+    expect(text).toContain('podcasts')
+  })
+
+  it('keeps the card compact: about 100 words, with a heading per subject and no list', () => {
+    expect(sidebarWords.length).toBeLessThanOrEqual(110)
+    expect(sidebarHtml).not.toMatch(/<[ou]l[ >]/)
+    expect(sidebarHtml.match(/<h3 class="hf-heading-4">/g)).toHaveLength(4)
   })
 
   it('shows the first paragraph under the h1, below the h2 Wie we zijn, as the intro, and no other paragraph', () => {
@@ -41,7 +80,7 @@ describe('the page Over ons', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="wie-we-zijn">Wie we zijn</h2><p class="hf-intro"><b>De sc Heerenveen Fansite is een site',
     )
     expect(html.match(/class="hf-intro"/g)).toHaveLength(1)
-    expect(html.match(/<b>/g)).toHaveLength(1)
+    expect(mainHtml.match(/<b>/g)).toHaveLength(1)
   })
 
   it('has one h1 and an h2 per section, and no section or anchor for privacy', () => {
@@ -50,6 +89,7 @@ describe('the page Over ons', () => {
     expect(plain.match(/<h2[^>]*>.*?<\/h2>/g)).toEqual([
       '<h2 class="hf-heading-2 hf-heading-anchored" id="wie-we-zijn">Wie we zijn</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="hoe-we-werken">Hoe we werken</h2>',
+      '<h2 class="hf-heading-3 hf-heading-anchored" id="gegevens">Waar de gegevens vandaan komen</h2>',
     ])
   })
 
@@ -57,16 +97,18 @@ describe('the page Over ons', () => {
     expect(headingAnchors(html)).toEqual([
       ['wie-we-zijn', 'Wie we zijn'],
       ['hoe-we-werken', 'Hoe we werken'],
+      ['gegevens', 'Waar de gegevens vandaan komen'],
     ])
   })
 
-  it('links to the forum, the sources, the contact form, the editors by email and the page Privacy', () => {
+  it('links to the forum, the sources, the contact form, the editors by email and the page Privacy, and from the sidebar to the contact form', () => {
     expect(links).toEqual([
       ['https://forum.heerenveen.org', 'ons forum'],
       ['/bronnen', 'Onze bronnen'],
       ['/contact', 'Contact'],
       ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
       ['/privacy', 'Privacy'],
+      ['/contact', 'Contact'],
     ])
   })
 

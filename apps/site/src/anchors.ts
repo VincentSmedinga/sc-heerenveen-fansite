@@ -18,7 +18,7 @@
 /** The anchors per page, as the address of the page without the part after the hash. */
 export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/bronnen': ['nieuws', 'podcasts', 'forum', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
-  '/over-ons': ['wie-we-zijn', 'hoe-we-werken'],
+  '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],

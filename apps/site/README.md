@@ -62,6 +62,7 @@ Heeft de database al echte wedstrijden voor dat seizoen, van een import, dan laa
 Verzonnen wedstrijden van een eerdere run haalt hij na de laatste test wel weg.
 `pnpm --filter site test-data --remove` haalt dat seizoen weg als al zijn wedstrijden verzonnen zijn, ook als een eerdere run ze erin zette, en laat het staan zodra er een echte wedstrijd van een import in staat.
 `e2e/season-picker.spec.ts` toetst de kiezer met en zonder JavaScript, het toetsenbord en de plek naast of onder de kop bij 320, 390 en 900 pixels.
+Een test die de opmaak meet of naar een kaart scrolt, wacht eerst op `hydrated(page)` uit `e2e/hydrated.ts`: tot React de pagina heeft opgebouwd, toont de kiezer nog zijn label en zijn knop, en is de pagina langer.
 `e2e/card-image.spec.ts` klikt op die knop en toetst in de browser dat er een PNG komt, dat er niets naar een ander domein gaat en dat de CSP de afbeelding toestaat.
 Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
 De controle toetst de homepage ook met `?nieuws=15`, zodat de oudere koppen die de knop laadt ook langs axe komen.
@@ -264,6 +265,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Elke reeks heeft de lengte van nu en de langste van het seizoen, en komt uit alle gespeelde wedstrijden, ook die zonder bekende doelpunten.
   Een bekerwedstrijd, een wedstrijd zonder score en een wedstrijd die niet is gespeeld tellen niet mee.
   De kaart toont de reeksen in een tabel (`DataTable`), daaronder de laatste vijf wedstrijden met de oudste eerst, als letters (`MarkRow`) en als korte regels (`ShortMatch`), en onderaan "Gebaseerd op alle 6 gespeelde wedstrijden" (`BasedOn` in `src/MatchViews.tsx`).
+  Een eerder seizoen heeft alleen de kolommen Reeks en Langste en geen laatste vijf wedstrijden, en noemt het seizoen in het bijschrift.
   Zonder een gespeelde wedstrijd staat er een zin in plaats van de tabel.
 - **Thuis en uit:** een kaart in de zijbalk, direct na de reeksen, met een tabel (`DataTable`) met de kolommen Thuis, Uit en Totaal.
   `homeAwayOf` in `src/matches.ts` telt de gespeelde wedstrijden van de Eredivisie met een score, gesplitst op `home`: gespeeld, gewonnen, gelijk, verloren, de punten (3 voor een winst, 1 voor een gelijkspel), de doelpunten voor en tegen en de wedstrijden zonder tegendoelpunt.

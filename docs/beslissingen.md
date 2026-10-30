@@ -2752,6 +2752,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Voor de brede zijbalk een hogere grens dan 52 rem (laat precies de telefoons in één kolom waarvoor het issue is, en de balk en de kolommen wisselen dan op twee plaatsen).
   Een grens op oriëntatie of hoogte (laat zoom en tekstvergroting op een liggend scherm twee kolommen houden, en breekt het herschikken).
 
+### Een keuzelijst krijgt de opmaak van de site met `appearance: base-select`, binnen `@supports`, te beginnen bij de seizoenskiezer
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** `Select` heeft een klasse `hf-select-styled` (in `select.css`) die de gesloten en de open lijst opmaakt met `appearance: base-select`.
+  Alles staat binnen `@supports (appearance: base-select)`; een browser die het niet kent, houdt zijn eigen lijst (zie _Functies die nog niet zover zijn: `@supports`, of een tijdelijke uitzondering_).
+  Alleen de `SeasonPicker` vraagt de klasse aan.
+  De andere keuzelijsten (het contactformulier, `base/forms.css`, `Field`) volgen in een eigen issue als dit goed blijkt.
+  - Het pijltje is `::picker-icon`, dus het pijltje van de browser zelf.
+    De lijst heeft 0,75 rem opvulling aan het einde en 0,5 rem tussen de tekst en het pijltje, en het pijltje draait als de lijst open is.
+  - De open lijst (`::picker(select)`) is een vlak met de rand en de hoek van het veld, en opties van minstens 2,75 rem hoog.
+  - Een optie onder de muis heeft een tint en een dunne lijn.
+    Een optie waar het toetsenbord staat, heeft een tint en de focusring van de site.
+    De gekozen optie heeft een blauwe tint, een vinkje (`::checkmark`) en een zwaarder gewicht, dus kleur staat er niet alleen.
+  - Alle kleuren zijn tokens, in licht en donker.
+  - De regels van `plugin/use-baseline` staan uit rond dat blok, met de reden erbij.
+    Zodra Baseline de functie 'widely available' noemt, meldt Stylelint de uitzondering als overbodig (`reportNeedlessDisables`) en gaan de uitzondering en de `@supports` weg.
+- **Waarom:** het pijltje van een gewone `select` zit tegen de rand en is met opvulling niet te verschuiven.
+  Een eigen pijltje als achtergrond (een verloop) is geprobeerd en door de projecteigenaar afgewezen.
+  `::picker-icon` is het pijltje zelf, dus het blijft staan in gedwongen kleuren.
+  Het toetsenbord werkt zoals in _Het toetsenbord kiest een seizoen met de pijltjes en bevestigt met Enter_: de e2e-test van de kiezer slaagt in Chromium 156 en WebKit 27.2, en de lijst blijft een `select` met dezelfde gebeurtenissen.
+  Gedwongen kleuren (in Chromium nagebootst) en 400% zoom (320 × 256 pixels, vier seizoenen) zijn bekeken: het pijltje, de rand en het vinkje staan er, en de lijst past.
+- **Nadeel:** het pijltje heeft per browser een andere vorm (een driehoek in Chromium, een punthaak in WebKit).
+  De gesloten lijst is ongeveer 10 pixels breder dan de gewone, en de kiezer past naast de kop tot 320 pixels.
+  Firefox is niet gecontroleerd, omdat Playwright hier alleen Chromium en WebKit heeft; zonder `base-select` houdt hij de lijst die hij heeft.
+  De e2e-tests draaien alleen in Chromium.
+  Met de hand draaide hetzelfde bestand in WebKit: alles slaagde, behalve de test die met Tab naar de knop "Toon" gaat, want WebKit op een Mac tabt niet naar een knop, ook niet op een lege pagina.
+- **Alternatieven:** een eigen pijltje als achtergrond van de `select` (door de projecteigenaar afgewezen, en het verdwijnt in gedwongen kleuren).
+  Een eigen keuzelijst van `div`'s (staat buiten dit issue, en het toetsenbord en de schermlezer moeten dan allemaal opnieuw).
+  Alle keuzelijsten in één keer opmaken (raakt het contactformulier en `Field`, en de seizoenskiezer is de enige met een e2e-test voor het toetsenbord).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -4008,6 +4038,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De wedstrijd verbergen tot er een uitslag is (de kaart zegt dan niets over de laatste wedstrijd).
   Een grens van drie uur (dekt verlenging en strafschoppen, maar laat de melding bij een gewone wedstrijd lang weg).
 
+### Over ons zegt waar de gegevens vandaan komen en wat er mis kan gaan
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** Over ons krijgt een compacte kaart in de zijbalk die zegt dat het nieuws en de wedstrijden door een importer binnenkomen, dat de uitslagen van de Nederlandse Wikipedia komen en kunnen achterlopen, dat namen anders gespeld kunnen zijn dan bij de club, en dat het filter een kop kan missen.
+  De kaart is een kop per onderwerp met een korte alinea, zonder lijst, want de koppen geven de onderdelen al aan, en haar koppen zijn kleiner dan die van andere zijbalken: de h2 heeft de stijl van Kop 3 en de h3's die van Kop 4.
+  De kaart noemt geen getal dat per omgeving verschilt: het nieuws wordt "regelmatig" opgehaald, en Wikipedia "hoogstens één keer per uur", want dat is de grens in de code (`match_imports.retry_at`) en geen instelling van de host.
+- **Waarom:** een bezoeker die een achterlopende uitslag of een afwijkende spelling ziet, moet kunnen lezen waarom.
+  Het past bij onze regel om open te zijn over onze bronnen, en bespaart vragen en misverstanden.
+- **Alternatieven:** een deel in de hoofdkolom onder _Hoe we werken_ (de projecteigenaar wil de uitleg compact en naast de hoofdtekst, niet erin).
+  De uitleg bij elke kaart zetten (veel herhaling op de pagina, en we hebben net vaste teksten ingekort).
+  Een aparte pagina "Hoe het werkt" (een pagina meer om bij te houden, en bezoekers vinden hem minder snel).
+  Niets zeggen (de achterstand en de spelling blijven onverklaard).
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
@@ -4512,6 +4555,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De lijsten kennen geen andere clubs en spelers van andere clubs: een kop met "Heerenveen" en een speler van Ajax zonder voetbalwoord is `doubtful`.
   De koppen uit de logs van het prototype laten straks zien of dat vaak genoeg misgaat om een lijst met andere clubs te maken.
   Een kop over de Abe Lenstra Boulevard komt er ook in; een moderator verbergt zo'n bericht.
+- **Later:** zie _Een kop over de tegenstander is `relevant` in de week voor en na de wedstrijd_: `judgeRelevance` blijft zuiver, maar krijgt de tegenstanders van de wedstrijden rond de publicatie als tweede argument, en de kop alleen is dan niet meer alles wat het filter ziet.
 - **Abe Lenstra:** een kop met "Abe Lenstra" is `relevant`, ook zonder de club.
   Hij is onze grootste speler aller tijden, dus berichten over hem horen op de site (besluit van de projecteigenaar, 25 oktober 2026; dit is een aanvulling op de regels van #74).
 - **Niet te streng:** de projecteigenaar wil een filter dat niet te streng is, want een bericht dat doorkomt is zo verborgen, en een bericht dat wordt tegengehouden ziet niemand.
@@ -4940,6 +4984,58 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een gok bij een onbekende score is erger dan een fout.
 - **Alternatieven:** de gestaakte wedstrijd houden en het latere blok overslaan (de datum en de aftrap kloppen dan niet met de definitieve uitslag).
   Elke "Gestaakt"-score als fout laten staan (het vorige seizoen is dan niet te lezen).
+
+### Een kop over de tegenstander is `relevant` in de week voor en na de wedstrijd
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** noemt een kop een club tegen wie sc Heerenveen een wedstrijd speelt die hoogstens 7 dagen voor of na de publicatie ligt, dan is de kop `relevant`, ook zonder de naam van onze club.
+- **Waarom:** de voorbeschouwing en de nabeschouwing van een wedstrijd gaan ook over ons, en de kop noemt vaak alleen de tegenstander ("ADO beleeft frustrerende avond").
+  De wedstrijden staan sinds #27 in de database, dus het filter kan weten wie wanneer onze tegenstander is.
+- **Hoe:** de regel komt erbij op het eind van `judgeRelevance`, en maakt alleen van een `doubtful` of `irrelevant` kop een `relevant` kop.
+  - `judgeRelevance` blijft zuiver.
+    Het krijgt de namen van de tegenstanders als tweede argument, en leest zelf niets uit de database.
+  - `importFeeds` leest de wedstrijden van het lopende seizoen één keer per run, en geeft `opponentsAround` bij elk bericht de wedstrijden mee.
+    Wedstrijden van een eerder seizoen tellen niet, want `pnpm import:season` zet er ook in de tabel.
+    Een wedstrijd die de Wikipedia-import in dezelfde run bewaart, telt vanaf de volgende run.
+  - Het venster loopt van de datum van de wedstrijd min 7 dagen tot en met plus 7 dagen.
+    De dag van het bericht en `match_date` zijn Nederlandse dagen (`Europe/Amsterdam`).
+    Een uitgestelde wedstrijd zonder nieuwe datum telt niet.
+    Een club die twee keer tegen ons speelt, heeft per wedstrijd een venster.
+  - Het verband tussen de naam in `matches.opponent` en de woorden van het filter staat in `relevance-terms.ts`: `otherClubGroups` zet de namen van één club bij elkaar ("ado den haag" en "ado", "nec" en "n e c").
+    De naam uit de wedstrijd, of zonder voor- of achtervoegsel uit `clubPrefixes` (FC, SC, VV, SV, AFC), moet een van die namen zijn.
+    Een club die naar een plaats heet, telt dus alleen met zijn volledige naam ("FC Twente").
+  - Staat de tegenstander niet in de lijst, zoals een amateurclub in de beker, dan telt zijn naam zonder voor- of achtervoegsel, als hij uit twee woorden bestaat ("Excelsior Maassluis", "Quick Boys").
+    Eén woord telt ook, tenzij het een gewoon woord is (`ordinaryClubWords`) of alleen een voorvoegsel ("AFC").
+- **Nadeel:** de regel kijkt niet of de kop over de wedstrijd tegen ons gaat.
+  Een kop over een andere wedstrijd van de tegenstander in die week wordt ook `relevant` (zie de meting in de pull request van #315).
+- **Alternatieven:** niets doen (een supporter mist de berichten over de tegenstander rond de wedstrijd).
+  Elke kop met een andere profclub `relevant` maken (te veel: elk bericht over de Eredivisie komt erdoor).
+  `doubtful` in plaats van `relevant` (de projecteigenaar wil ze tonen).
+  Een ander venster dan 7 dagen (een week voor en na past bij de speelweek, en de Builder kan het meten).
+  Het filter zelf de database laten lezen (dan is het niet meer zuiver en zijn de tests trager).
+- **Later:** zie _Een kop over de tegenstander is `relevant` van 3 dagen voor tot 3 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt_: het venster is 3 dagen voor en 3 dagen na de wedstrijd, en een kop met een tweede profclub telt niet.
+  De rest blijft: het filter blijft zuiver, alleen het lopende seizoen telt, de dagen zijn Nederlandse dagen en `otherClubGroups` legt het verband met de namen.
+
+### Een kop over de tegenstander is `relevant` van 3 dagen voor tot 3 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** het venster van de regel over de tegenstander loopt van 3 dagen voor tot en met 3 dagen na de dag van de wedstrijd, en een kop die ook een andere profclub uit `otherClubGroups` noemt, telt niet.
+  - `opponentDaysBefore` en `opponentDaysAfter` zijn allebei 3 in `apps/importer/src/relevance.ts`.
+    Een bericht van 3 dagen voor de wedstrijd telt, een bericht van 4 dagen ervoor niet, en een bericht van 3 dagen erna telt, een bericht van 4 dagen erna niet.
+  - `judgeRelevance` laat de kop alleen door als hij een naam van de tegenstander heeft en geen naam van een andere club in de lijst.
+    Een club die naar een plaats heet, telt als andere club alleen met zijn volledige naam, zoals de lijst nu al doet.
+    De woorden van de naam van de tegenstander tellen niet mee als andere club, zodat "Excelsior Maassluis" niet ook "Excelsior" uit Rotterdam is.
+- **Waarom:** de meting op de berichten die de importer toen had (30 oktober 2026): van de 8 koppen die de regel `relevant` maakte, ging er 1 over de wedstrijd tegen ons.
+  De andere 7 gingen over een andere wedstrijd van de tegenstander in dezelfde week: vijf koppen over N.E.C. tegen Groningen, zes dagen voor onze wedstrijd tegen N.E.C., een podcast over ADO, en het bekerduel van ADO bij Excelsior'31.
+  In de dagen voor de wedstrijd gaat het nieuws over de tegenstander vooral over hun vorige wedstrijd, en dat gaat niet over ons.
+  Een nabeschouwing komt meestal in de dagen na de wedstrijd, dus het venster erna is even lang als dat ervoor.
+- **Nadeel:** een voorbeschouwing van meer dan 3 dagen voor de wedstrijd mist de regel.
+  Een kop over de tegenstander in de 3 dagen na de wedstrijd, die niet over de wedstrijd gaat (zoals een podcast over ADO), blijft `relevant`.
+  Een nabeschouwing van meer dan 3 dagen na de wedstrijd mist de regel ook.
+- **Alternatieven:** het venster van 7 dagen aan beide kanten houden (7 van de 8 koppen waren een misser).
+  3 dagen voor en 7 dagen na (de eerste versie van dit besluit): dat gaf dezelfde twee koppen, maar een langer venster laat meer koppen door die niet over de wedstrijd gaan.
+  Alleen de aanscherping met de tweede club (dat haalt twee van de zeven missers weg).
+  Alleen het kortere venster (dat haalt de vijf koppen over N.E.C. weg).
 
 ## Redactie
 
@@ -6772,6 +6868,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen de laatste vijf wedstrijden tonen (geen reeksen, en die zoeken supporters juist).
   De nieuwste eerst (past bij Uitslagen en De nul gehouden, maar dan loopt de volgorde tegen die van de letters in).
   Een warm vlak (komt naast Verloop van het seizoen, dat al warm is).
+- **Later:** een eerder seizoen toont alleen de langste reeksen, zonder de lengte van nu en zonder de laatste vijf wedstrijden, zie _Een eerder seizoen toont bij de reeksen alleen de langste_ (30 oktober 2026).
 
 ### De toon en de schrijfwijzer staan in het hoofdstuk Redactie
 
@@ -7021,3 +7118,18 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De uitslagen houden de naam van de wedstrijdpagina.
 - **Alternatieven:** de korte naam houden (geen voornaam, zoals voorheen).
   De selectie van elk seizoen importeren (kan niet als de pagina op Wikipedia ontbreekt).
+
+### Een eerder seizoen toont bij de reeksen alleen de langste
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** de kaart Reeksen van een afgelopen seizoen heeft geen kolom "Nu", alleen "Langste".
+  Het lopende seizoen houdt beide.
+  Het bijschrift en de zin zonder wedstrijden noemen in een afgelopen seizoen het seizoen ("in 2025/26") en niet "dit seizoen".
+  Een afgelopen seizoen heeft ook geen blok met de laatste vijf wedstrijden (de letters en de korte regels): ze zijn aan het eind van een seizoen niet bijzonderder dan vijf andere.
+  Het lopende seizoen houdt dat blok, met iets meer ruimte onder de rij met letters: een lijst direct onder een `MarkRow` begint een rem lager (`mark-row.css`), zoals een alinea, en niet een halve rem.
+  De kaart weet het uit `season`, dat alleen een afgelopen seizoen heeft; `streaksOf` verandert niet.
+- **Waarom:** de reeks waarmee een afgelopen seizoen eindigde verandert niet meer en zegt weinig.
+  De langste reeks is wat de moeite waard blijft.
+- **Alternatieven:** de laatste vijf wedstrijden in een afgelopen seizoen laten staan (ze zeggen over dat seizoen niets bijzonders).
+  De kolom hernoemen naar "Aan het eind" (houdt een getal dat nauwelijks informatie geeft).
+  De kolom laten staan (verwarrend: "Nu" in een seizoen van vorig jaar).

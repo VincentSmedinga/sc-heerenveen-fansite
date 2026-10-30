@@ -18,6 +18,10 @@ const meta = preview.meta({
           '',
           'Het veld is hoog genoeg om met een vinger te raken, en zijn rand is goed te zien tegen de achtergrond.',
           'Heeft het veld een fout (`aria-invalid`), dan is de rand dikker en heeft hij de kleur van fouten.',
+          '',
+          'Met `className="hf-select-styled"` krijgt de lijst de opmaak van de site, gesloten en open: ruimte tussen het pijltje en de rand, en een lijst met keuzes in onze kleuren, waarin de gekozen keuze een vinkje heeft.',
+          'Dat werkt in een browser die dat kan; een andere browser houdt zijn eigen lijst.',
+          'De seizoenskiezer gebruikt het al.',
         ].join('\n'),
       },
     },
@@ -26,9 +30,9 @@ const meta = preview.meta({
   title: 'Componenten/Formulier/Select',
 })
 
-const render = () => (
+const render = (className?: string) => (
   <Field id="onderwerp" label="Onderwerp">
-    <Select defaultValue="verwijderen" name="onderwerp">
+    <Select className={className} defaultValue="verwijderen" name="onderwerp">
       <Select.Option value="verwijderen">Een bericht laten verwijderen</Select.Option>
       <Select.Option value="fout">Een fout in een bericht</Select.Option>
       <Select.Option value="bron">Een bron voorstellen</Select.Option>
@@ -37,6 +41,11 @@ const render = () => (
   </Field>
 )
 
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
+export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render: () => render() })
 
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
+export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render: () => render() })
+
+export const Styled = meta.story({
+  name: 'Met de opmaak van de site',
+  render: () => render('hf-select-styled'),
+})

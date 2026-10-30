@@ -26,6 +26,9 @@ const meta = preview.meta({
           'Met JavaScript zijn het label en die regel niet te zien, maar een schermlezer leest ze voor; zonder JavaScript staat het label er, met de knop.',
           'Met het toetsenbord kies je met de pijltjes en bevestig je met Enter, zodat de pagina niet bij elke pijl verspringt.',
           'Een keuze met de muis, een vinger of de open lijst wisselt direct.',
+          '',
+          'De lijst heeft de opmaak van de site (`hf-select-styled` van `Select`), in een browser die dat kan: ruimte tussen het pijltje en de rand, en een lijst met seizoenen in onze kleuren.',
+          'Een andere browser houdt zijn eigen lijst.',
         ].join('\n'),
       },
     },
@@ -63,6 +66,14 @@ export const Default = meta.story({
 export const Dark = meta.story({
   globals: { theme: 'dark' },
   name: 'Donker',
+  render: () => <Example />,
+})
+
+export const Open = meta.story({
+  name: 'Geopend',
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Seizoen' }))
+  },
   render: () => <Example />,
 })
 
