@@ -4020,6 +4020,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De wedstrijd verbergen tot er een uitslag is (de kaart zegt dan niets over de laatste wedstrijd).
   Een grens van drie uur (dekt verlenging en strafschoppen, maar laat de melding bij een gewone wedstrijd lang weg).
 
+### Over ons zegt waar de gegevens vandaan komen en wat er mis kan gaan
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** Over ons krijgt een compacte kaart in de zijbalk die zegt dat het nieuws en de wedstrijden door een importer binnenkomen, dat de uitslagen van de Nederlandse Wikipedia komen en kunnen achterlopen, dat namen anders gespeld kunnen zijn dan bij de club, en dat het filter een kop kan missen.
+  De kaart is een kop per onderwerp met een korte alinea, zonder lijst, want de koppen geven de onderdelen al aan, en haar koppen zijn kleiner dan die van andere zijbalken: de h2 heeft de stijl van Kop 3 en de h3's die van Kop 4.
+  De kaart noemt geen getal dat per omgeving verschilt: het nieuws wordt "regelmatig" opgehaald, en Wikipedia "hoogstens één keer per uur", want dat is de grens in de code (`match_imports.retry_at`) en geen instelling van de host.
+- **Waarom:** een bezoeker die een achterlopende uitslag of een afwijkende spelling ziet, moet kunnen lezen waarom.
+  Het past bij onze regel om open te zijn over onze bronnen, en bespaart vragen en misverstanden.
+- **Alternatieven:** een deel in de hoofdkolom onder _Hoe we werken_ (de projecteigenaar wil de uitleg compact en naast de hoofdtekst, niet erin).
+  De uitleg bij elke kaart zetten (veel herhaling op de pagina, en we hebben net vaste teksten ingekort).
+  Een aparte pagina "Hoe het werkt" (een pagina meer om bij te houden, en bezoekers vinden hem minder snel).
+  Niets zeggen (de achterstand en de spelling blijven onverklaard).
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
