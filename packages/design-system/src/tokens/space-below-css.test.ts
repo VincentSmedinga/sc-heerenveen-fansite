@@ -79,6 +79,12 @@ describe('the large space below a large building block', () => {
     expect(block('base/table.css', 'table')).toContain('margin-block: 0 var(--hf-space-l);')
   })
 
+  it('is also gone when only the hidden line of a table that sorts follows it', () => {
+    expect(block('base/table.css', 'table')).toMatch(
+      /&:has\(\+ \.hf-visually-hidden:last-child\) \{\s*margin-block-end: 0;\s*\}/u,
+    )
+  })
+
   it('is below the table of the standings and of the top scorers, and not when it is the last in its place', () => {
     const table = block('components/bar/bar.css', '.hf-bar-place > table')
 
