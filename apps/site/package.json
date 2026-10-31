@@ -9,14 +9,14 @@
     "admin": "node --env-file-if-exists=../../.env src/admin.ts",
     "assemble": "node scripts/assemble.js",
     "build": "tsc -b && next build",
-    "dev": "next dev",
+    "dev": "node ../../scripts/worktree-env.js run --database --ports site -- next dev --port {SITE_PORT}",
     "icons": "node scripts/make-icons.js",
     "screenshots": "node scripts/screenshots.js",
     "share-image": "node scripts/make-share-image.js",
-    "smoke": "node --env-file-if-exists=../../.env scripts/smoke.js",
-    "test": "vitest run && node --test 'scripts/*.test.js'",
+    "smoke": "node ../../scripts/worktree-env.js run --ports smoke -- node --env-file-if-exists=../../.env scripts/smoke.js",
+    "test": "node ../../scripts/worktree-env.js run -- vitest run && node --test 'scripts/*.test.js'",
     "test-data": "node scripts/test-data.js",
-    "test:a11y": "playwright test",
+    "test:a11y": "node ../../scripts/worktree-env.js run --database --ports e2e,e2e-without-database,mail -- playwright test",
     "typecheck": "tsc -b"
   },
   "dependencies": {

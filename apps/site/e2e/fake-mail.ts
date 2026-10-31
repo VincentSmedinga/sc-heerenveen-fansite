@@ -4,10 +4,10 @@ import { fileURLToPath } from 'node:url'
 
 /**
  * Where scripts/fake-smtp.js writes the mails the site sends, and the port it listens on (see
- * playwright.config.ts).
+ * playwright.config.ts). The port is the one of this worktree (see scripts/worktree-env.js).
  */
 export const fakeMailFolder = fileURLToPath(new URL('../.next/fake-smtp', import.meta.url))
-export const fakeMailPort = '2525'
+export const fakeMailPort = process.env['FAKE_MAIL_PORT'] ?? '2525'
 
 /**
  * The mails the site has sent to the fake mail server so far, as the server received them:
