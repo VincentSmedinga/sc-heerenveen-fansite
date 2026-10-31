@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
+import { Link } from '../link/Link'
 
 export type DataTableColumn = {
   /** What the header shows, one to three letters such as `GL`. */
@@ -38,6 +39,11 @@ export type DataTableRow = {
   cells: readonly (number | string)[]
   /** What the row is about, as plain text. It is the row header, so it must be unique. */
   header: string
+  /**
+   * Makes the row header a link, to the page about what the row is about, such as the page of a
+   * club in a list of clubs. The link says the same as the header, so it names where it goes.
+   */
+  href?: string
 }
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
@@ -48,8 +54,9 @@ const nameOf = (column: DataTableColumn | string | undefined) => (typeof column 
  * A table of numbers: a real `table` with a caption that is not shown, column headers and row
  * headers with `scope`, and the numbers aligned to the end with tabular figures. It is a list
  * of things that each have a few numbers, such as the days of a month, not a table with merged
- * cells or cells with more than text. A long row header, such as a path, wraps instead of
- * making the table wider than the space. base/table.css gives it its look.
+ * cells or cells with more than text. A row can have a link in its header (`href`). A long row
+ * header, such as a path, wraps instead of making the table wider than the space.
+ * base/table.css gives it its look.
  */
 export const DataTable = ({ caption, className, columns, rows, ...props }: DataTableProps) => (
   <table {...props} className={classNames('hf-data-table', className)}>
@@ -73,7 +80,7 @@ export const DataTable = ({ caption, className, columns, rows, ...props }: DataT
     <tbody>
       {rows.map((row) => (
         <tr key={row.header}>
-          <th scope="row">{row.header}</th>
+          <th scope="row">{row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}</th>
           {row.cells.map((cell, index) => (
             <td className="hf-numeric" key={nameOf(columns[index + 1]) ?? index}>
               {typeof cell === 'number' ? numberFormat.format(cell) : cell}
