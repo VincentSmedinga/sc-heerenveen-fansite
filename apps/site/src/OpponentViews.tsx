@@ -22,23 +22,34 @@ export function BasedOnSince({ choice, played, since }: { choice: CompetitionCho
   )
 }
 
-/** The columns of the list: the club, and a number each, with the word a screen reader says. */
-const clubColumns = [
-  'Club',
-  { abbreviation: 'G', name: 'gespeeld' },
-  { abbreviation: 'W', name: 'gewonnen' },
-  { abbreviation: 'GL', name: 'gelijk' },
-  { abbreviation: 'V', name: 'verloren' },
-  { abbreviation: 'D', name: 'doelpunten' },
-] as const
+/**
+ * The columns of the list: the club, and a number each, with the word a screen reader says.
+ * Every column can be sorted, and the points are only there with the choice Eredivisie, because
+ * the cup gives none.
+ */
+const clubColumns = (choice: CompetitionChoice) =>
+  [
+    { name: 'Club', sortable: true },
+    { abbreviation: 'G', name: 'gespeeld', sortable: true },
+    { abbreviation: 'W', name: 'gewonnen', sortable: true },
+    { abbreviation: 'GL', name: 'gelijk', sortable: true },
+    { abbreviation: 'V', name: 'verloren', sortable: true },
+    { abbreviation: 'D', name: 'doelpunten', sortable: true },
+    ...(choice === 'league' ? [{ abbreviation: 'P', name: 'punten', sortable: true }] : []),
+  ] as const
+
+/** The points against a club in the Eredivisie: 3 for a win and 1 for a draw. */
+const pointsOf = (record: PublicClubRecord) => record.won * 3 + record.drawn
 
 /**
  * The card of the page Tegenstanders with every club we played, A to Z, each name a link to
  * the page of that club (`address` is the base address of the pages of the clubs; `query` is
  * the part of the address that holds the choice, which every link keeps). The columns are the
- * played, won, drawn and lost matches and the goals for and against, as "7–5". They are
- * abbreviations, which fit a phone, and the line under the table explains them. There is no way
- * to sort the table and no pagination: the list is one page, A to Z.
+ * played, won, drawn and lost matches, the goals for and against, as "7–5", and with the
+ * choice Eredivisie the points. They are abbreviations, which fit a phone, and the line under
+ * the table explains them. The visitor can sort on every column, with JavaScript; the table
+ * of the server is A to Z. The goals sort on the goals for. There is no pagination: the list
+ * is one page.
  */
 export function ClubsCard({
   address,
@@ -66,20 +77,23 @@ export function ClubsCard({
         <>
           <DataTable
             caption={`De tegenstanders van sc Heerenveen, van A tot Z, met onze uitslagen tegen elk${choice === 'league' ? ' in de Eredivisie' : ''}`}
-            columns={clubColumns}
+            columns={clubColumns(choice)}
             rows={records.map((record) => ({
               cells: [
                 record.played,
                 record.won,
                 record.drawn,
                 record.lost,
-                `${record.goalsFor}–${record.goalsAgainst}`,
+                { sortValue: record.goalsFor, text: `${record.goalsFor}–${record.goalsAgainst}` },
+                ...(choice === 'league' ? [pointsOf(record)] : []),
               ],
               header: record.name,
               href: `${address}/${record.slug}${query}`,
             }))}
           />
-          <Text appearance="meta">G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen)</Text>
+          <Text appearance="meta">
+            {`G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen)${choice === 'league' ? ', P punten' : ''}`}
+          </Text>
           <BasedOnSince choice={choice} played={played} since={since} />
         </>
       )}
