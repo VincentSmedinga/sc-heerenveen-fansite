@@ -511,7 +511,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Kiezen op grond van de dekking van elke test; dat kan, maar het is zwaar en broos.
   Een `paths`-filter; dat blokkeert het samenvoegen.
   Niets doen; elke documentatiewijziging wacht dan ruim vier minuten.
-- **Later:** CI is sinds 31 oktober 2026 opgesplitst in jobs naast elkaar; zie _CI draait in parallelle jobs, met één afsluitende controle_. De stap _Check the site_ en de stories zijn nu jobs met een `if` op de uitvoer van _Decide which checks to run_, en de regels van het script zijn gelijk gebleven.
+- **Later:** CI is sinds 31 oktober 2026 opgesplitst in jobs naast elkaar; zie _CI draait in parallelle jobs, met één afsluitende controle_.
+  De stap _Check the site_ en de stories zijn nu jobs met een `if` op de uitvoer van _Decide which checks to run_, en de regels van het script zijn gelijk gebleven.
 
 ### CI toetst de stories alleen bij wijzigingen die ze raken
 
@@ -562,6 +563,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   | Idem met vier workers (1 run)                                 | 452               | 819               |
   | Twee delen, rooktest los (mediaan van 7 groene runs)          | 314               | 923               |
   | Drie delen, rooktest bij het schrijfdeel (3 groene runs)      | 229 (223 tot 249) | 838 (818 tot 933) |
+
+  De mediaan per stap van de oude job (seconden, laatste 10 geslaagde runs op `main` / van pull requests):
+
+  | Stap                               | `main` | pull requests |
+  | ---------------------------------- | ------ | ------------- |
+  | Containers starten                 | 12     | 11            |
+  | Checkout, pnpm en Node             | 10     | 9,5           |
+  | Installeren                        | 3      | 3             |
+  | `pnpm lint`                        | 35     | 33,5          |
+  | `pnpm typecheck`                   | 21     | 21            |
+  | Migreren en seeden                 | 2      | 2             |
+  | `pnpm test`                        | 112,5  | 107           |
+  | De stories met axe                 | 77,5   | 81            |
+  | `pnpm build`                       | 18,5   | 18            |
+  | De rooktest                        | 38     | 38            |
+  | De toegankelijkheidscontrole (e2e) | 288,5  | 242           |
 
   Met drie delen is de klok 64% korter dan de mediaan op `main`, 60% korter dan die van pull requests en 68% korter dan de run van hetzelfde uur.
   De som is 33%, 47% en 19% hoger.
@@ -1085,6 +1102,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** ook de typecontrole in de pre-commit-hook.
   Grondiger, maar elke commit wordt trager.
 - **Later:** de controles van de site worden sinds 26 oktober 2026 bij sommige pull requests overgeslagen; zie _CI slaat de controles van de site over bij wijzigingen die ze niet raken_.
+- **Later:** CI is sinds 31 oktober 2026 een reeks jobs naast elkaar in plaats van één opdracht; zie _CI draait in parallelle jobs, met één afsluitende controle_.
+  Wat CI draait is gelijk gebleven.
 
 ### De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job
 
@@ -1105,7 +1124,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of toetsen tegen `next dev`; dat is sneller, maar bezoekers krijgen een andere pagina.
   Of ook Firefox en WebKit; die kosten tijd, en axe vindt daar zelden iets anders.
 - **Later:** de controles van de site worden sinds 26 oktober 2026 bij sommige pull requests overgeslagen; zie _CI slaat de controles van de site over bij wijzigingen die ze niet raken_.
-- **Later:** sinds 31 oktober 2026 is het niet meer een stap in één job maar een eigen job in drie delen; zie _CI draait in parallelle jobs, met één afsluitende controle_. De controle die de regels voor `main` eisen is dezelfde gebleven.
+- **Later:** sinds 31 oktober 2026 is het niet meer een stap in één job maar een eigen job in drie delen; zie _CI draait in parallelle jobs, met één afsluitende controle_.
+  De controle die de regels voor `main` eisen is dezelfde gebleven.
 
 ### CI gebruikt de Chrome van de runner
 

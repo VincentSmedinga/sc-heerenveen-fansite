@@ -92,10 +92,14 @@ CI draait die controles in jobs naast elkaar, zodat een run niet langer duurt da
 - _Typecheck and build_ draait `pnpm typecheck` en `pnpm build`, en zet de map voor de host klaar die de twee jobs van de site gebruiken;
 - _Migrate, seed and test_ draait de migraties en de seed op een lege database, en `pnpm test`;
 - _Check the stories with axe_ draait `pnpm test:stories`;
-- _Check the site_ draait de rooktest en `pnpm test:a11y` op die map, in vier delen die elk een eigen runner en een eigen database hebben: de tests van het project `chromium` in drie delen, en de tests die een artikel schrijven samen met de rooktest;
+- _Check the site_ draait de rooktest en `pnpm test:a11y` op die map.
+  Het zijn vier delen, elk op een eigen runner met een eigen database.
+  Drie delen draaien de tests van het project `chromium`, en het vierde draait de tests die een artikel schrijven, samen met de rooktest;
 - _Lint, typecheck, test and build_ wacht op alle andere en is de controle die de regels voor `main` eisen.
-  Hij slaagt alleen als elke job is geslaagd, en alleen de jobs van de site en van de stories mogen zijn overgeslagen, en dan alleen als _Decide which checks to run_ dat zei.
-  Een job die niet draaide terwijl hij had moeten draaien, een deel dat geen test draaide en een run die is afgebroken maken hem rood (zie `scripts/ci-gate.js` en `scripts/ci-e2e-report.js`, en de beslissing _CI draait in parallelle jobs, met één afsluitende controle_ in `docs/beslissingen.md`).
+  Hij slaagt alleen als elke job is geslaagd.
+  Alleen de jobs van de site en van de stories mogen zijn overgeslagen, en dan alleen als _Decide which checks to run_ dat zei.
+  Hij wordt rood door een job die niet draaide terwijl hij had moeten draaien, door een deel dat geen test draaide en door een run die is afgebroken.
+  `scripts/ci-gate.js` en `scripts/ci-e2e-report.js` hebben de regels, en de beslissing _CI draait in parallelle jobs, met één afsluitende controle_ in `docs/beslissingen.md` zegt waarom.
 
 Hernoem je een job, dan hoeft alleen de naam van de laatste te blijven kloppen met de regels voor `main`.
 Draai je `pnpm test:a11y` lokaal, dan draait alles in een keer; de verdeling in delen is er alleen voor CI.
