@@ -4,6 +4,8 @@
  * (:focus-visible) it comes forward: the icon in the lightest blue of the header, with a rim and a fill. It is made
  * for the dark blue of the header, so its colours are the tokens for the header and not the roles of the page.
  *
+ * The small size (hf-size-small) is 36 by 36 pixels, with an icon of 22 pixels.
+ *
  * The rim is there at rest as well, but see-through, so the button does not change size when it comes forward, and a
  * browser in forced colours keeps an outline. The base styles of a button fill it; this comes later in the cascade, so
  * a button that is under the mouse on a touch screen (where the browser leaves it so after a tap) is not filled.
@@ -25,7 +27,6 @@
  */
 
 @layer hf.components {
-  /* The small size (hf-size-small) is 36 by 36 pixels, with an icon of 22 pixels. */
   .hf-theme-button {
     /* How long the sun and the moon take to turn into each other (the medium duration). */
     --hf-theme-button-morph: var(--hf-motion-duration-medium);
