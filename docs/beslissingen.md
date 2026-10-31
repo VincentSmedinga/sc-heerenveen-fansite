@@ -2940,6 +2940,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of een prop op `Navigation` voor de opmaak van de header; dan moet elke plek die het menu in een header zet, eraan denken.
 - **Later:** zie _Het hoofdmenu staat in een eigen rij onder de sitenaam_ voor de opmaak van het menu: de onderdelen staan niet meer in halfvet en in de lichtblauwe kleur maar in gewicht 500 en de lichtste kleur van de header, en de huidige pagina heeft alleen de rode streep.
   De onderdelen van het menu zelf en de rode streep blijven.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): Podcasts komt niet meer in het menu maar onder Nieuws, en Statistieken komt erbij.
 
 ### Een eigen foutpagina bij een fout op de server
 
@@ -3543,6 +3544,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De blokken op de homepage linken er direct naartoe, de stand naar `/wedstrijden#stand`.
 - **Waarom:** supporters zoeken ze samen en één pagina is minder om te bouwen en te onderhouden.
 - **Alternatieven:** een pagina `/stand` apart (kortere pagina's, maar twee menu-items en twee keer een bronvermelding).
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de kaarten met cijfers staan niet meer op die pagina maar op `/statistieken`.
+  Programma, uitslagen en stand blijven op `/wedstrijden`.
 
 ### Blokken onderaan de zijbalk
 
@@ -3679,6 +3682,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De bronvermelding onder de lijst is `WikipediaCredit`, met het woord `selectiegegevens` voor onze eigen gegevens (eigenschap `data`), want de standaardzin noemt de wedstrijdgegevens.
   `listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 is één voorwaarde in de `where` van die vraag (zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_).
 - **Alternatieven:** een item in het hoofdmenu (zoals het issue voorstelde: zichtbaarder, maar het menu breekt op een telefoon al af en de header krijgt een nieuw ontwerp); een zoekveld in de kop op elke pagina (altijd een stap dichtbij, maar breed en het vraagt een ontwerp van de kop); de lijst altijd boven de resultaten (prominent, maar op een telefoon schuiven de resultaten naar beneden).
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de pagina staat op `/nieuws/zoeken` en staat ook in de balk van Nieuws.
+  Het item "Zoeken" in de footer blijft en wijst naar het nieuwe adres; `/zoeken` vervalt zonder omleiding.
 
 ### De zoekpagina laat woorden van één teken niet toe, toont hoogstens 100 resultaten en staat niet in de sitemap
 
@@ -3696,6 +3701,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** `Input` van het designsysteem krijgt het type `hidden`, voor de knop "Laad 5 meer", die de vraag meeneemt in een `GET`-formulier.
   `NewsItem` krijgt `internal` voor een artikel van de redactie, zodat het pictogram voor een link naar een andere site wegblijft.
 - **Later:** er is nu een archief voor wie verder terug wil, zie _Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron_; het zoeken blijft `/zoeken`.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de pagina staat op `/nieuws/zoeken` en niet meer op `/zoeken`.
+  De regels voor woorden van één teken, de grens van 100 resultaten, de sitemap en de teller blijven.
 
 ### Een gepubliceerd anker staat in `src/anchors.ts`, en de rooktest bewaakt het
 
@@ -3716,6 +3723,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `/podcasts` heeft geen anker: de kop "Over" met de naam van de podcast staat er alleen bij een gekozen podcast, en niemand linkt naar dat deel.
 - **Alternatieven:** een controle op de bronbestanden in plaats van de gebouwde pagina's (ziet niet wat de bezoeker krijgt, en niet de ankers die uit gegevens komen); alle ankers uit de pagina's halen en bewaren in een bestand dat de build maakt (de lijst is dan geen keuze meer, maar een afspiegeling); een toets in de e2e-controle in de browser (trager, en axe toetst dit niet).
 - **Later:** op `/bronnen` staat een derde kaart in de zijbalk, de nieuwsbrief van de LC, met het anker `nieuwsbrief-lc`.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de ankers van de negen kaarten met cijfers, zoals `de-nul-gehouden` met het oude `nul-gehouden`, verhuizen naar `/statistieken`.
+  Op `/wedstrijden` breken ze, zonder omleiding.
 
 ### De themaschakelaar is één knop rechtsboven in de header
 
@@ -3837,6 +3846,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dit besluit zei dat dezelfde balk later de subpagina's kon tonen.
   Dat wordt een eigen onderdeel, `Page.Submenu`, onder het menu en voor deze balk, in een tint van de kop.
   Deze balk blijft zandkleurig in licht, blijft voor ankers, plakt als enige en is vanaf 56 rem nog steeds weg.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de balk geldt voor `/wedstrijden` en voor `/statistieken`, elk met de links naar zijn eigen kaarten.
 
 ### De balk komt via een slot in de layout, een parallelle route
 
@@ -3998,6 +4008,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een subgrid (de rij van het menu loopt om op de breedte van de inhoud, en een raster kan dat niet).
 - **Later:** zie _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026): de huidige pagina in de geneste lijst is nu 600 in plaats van 700, tegen 400 voor de andere links, en het menu in de footer heeft hetzelfde.
   De gewichten van de kop blijven.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de site gebruikt de balk met subpagina's nu voor Nieuws (Podcasts, Archief en Zoeken).
+  Het eerste subitem is geen overzichtspagina: het item Nieuws is zelf de link terug.
 
 ### Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen
 
@@ -4054,6 +4066,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het `details` zelf in de rij zetten met `::details-content { display: contents }` en geen tweede exemplaar (één keer in de HTML, maar de lijst en de rij hebben dan dezelfde nesting en de techniek is nog jong).
   Een instelling die het aantal bepaalt, zoals `moreFrom={6}` (het issue wil dat het onderdeel zelf kiest).
   Een tweede getal voor het aantal onderdelen in de rij: het is er één, het eerste.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): het hoofdmenu van de site blijft bij vier onderdelen, dus de knop blijft ongebruikt.
+  Nieuwe pagina's komen als subpagina in de balk.
 
 ### Uitersten staan als vijf regels in een lijst, en bij gelijke stand telt de laatste wedstrijd
 
@@ -4159,6 +4173,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Meteen een plek in het menu (de opbouw is nog niet gekozen).
 - **Later:** zie _Op `/nieuws` kies je bronnen met selectievakjes in een fieldset_: het filter per bron is een groep selectievakjes met een knop "Toon", en "Alle bronnen" als link vervalt.
   `?bron=<slug>` mag vaker voorkomen, en zonder `bron` zijn het alle bronnen.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): het archief krijgt een plek in de balk met subpagina's van Nieuws, onder de naam Archief.
 
 ### De homepage heeft geen knop "Laad 5 meer" meer, maar de link "Alle koppen"
 
@@ -4235,6 +4250,55 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de bron laten staan bij elke kop met een schermlezer (de naam is dan vaker te horen dan nodig) of hem helemaal weglaten (de bron staat dan alleen in de kop).
   Het formulier met JavaScript laten verzenden bij elk vinkje, zoals de seizoenskiezer (de pagina laadt dan opnieuw tijdens het kiezen).
   Een doorverwijzing naar `/nieuws` bij alle vinkjes (een extra stap, en de vakjes staan dan niet aangevinkt zoals de bezoeker koos).
+
+### De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum (extern).
+  Dit is optie 4 van het ontwerp van #431.
+  - **Nieuws** is `/`, en blijft de homepage.
+    Onder het menu staat een balk met de subpagina's Podcasts, Archief en Zoeken, in die volgorde.
+  - **Podcasts** staat op `/nieuws/podcasts` en het archief op `/nieuws` (#26).
+    `/podcasts` vervalt zonder omleiding: productie en lancering (#33, #34) staan nog open, dus er zijn geen openbare links.
+  - **Zoeken** staat op `/nieuws/zoeken`, zonder omleiding, om dezelfde reden als bij Podcasts: productie is niet live en er zijn geen openbare links.
+    `/zoeken` vervalt.
+    De link in de footer blijft en wijst naar het nieuwe adres.
+    Zoekt het later ook in spelers en tegenstanders, dan kan het uit Nieuws terug.
+  - **Wedstrijden** blijft één pagina met Programma, Uitslagen, Stand en de hoofdtrainers.
+    De Beker (#404) hoort erbij.
+    Komen er subpagina's, dan krijgt de pagina een balk.
+  - **Statistieken** staat op `/statistieken`, met een eigen seizoenskiezer zoals Wedstrijden.
+    Later komen Spelers, Tegenstanders en Seizoenen als subpagina's in een balk.
+  - **De scheiding:** Wedstrijden is wat je opzoekt: een lijst van wedstrijden, de stand zoals hij is en de hoofdtrainers.
+    Statistieken is wat uit veel wedstrijden volgt: een telling, een gemiddelde, een rangorde of een verloop.
+  - **De negen kaarten met cijfers** verhuizen van `/wedstrijden` naar `/statistieken`: Onze plek in de competitie, Verloop van het seizoen, Reeksen, Thuis en uit, Doelpuntenmakers, De nul gehouden, Doelpunten per kwartier, Hoe de wedstrijden verlopen en Uitersten.
+    De Stand blijft op Wedstrijden, met een link naar de kaarten waar hij bij hoort.
+    Ze staan op Statistieken in twee gelijke kolommen, vanaf het breekpunt voor twee kolommen.
+  - **De ankers** van die negen kaarten breken, zonder omleiding: een server kan een anker niet omleiden, en er zijn geen openbare links.
+  - **De afbeelding van een korte vorm**, zoals de top 5 van Doelpuntenmakers, mag worden gedeeld, met "top 5" in de kop.
+  - **De kaart Stand op de homepage** krijgt geen regel met de topscorer: de projecteigenaar wil dat niet.
+- **Waarom:** de balk met Podcasts staat op `/` op het eerste scherm, dus Podcasts blijft één tik van de homepage.
+  Het menu blijft kort en past op 390 pixels.
+  Zonder de negen kaarten is Wedstrijden een korte pagina.
+  Optie 4 is optie 1 in stappen, dus wat we nu bouwen gaat niet verloren als Wedstrijden groeit.
+  Het zoeken doorzoekt koppen, afleveringen van podcasts en artikelen van de redactie, dus het is een zoekopdracht in het nieuws.
+  In de balk van Nieuws is het makkelijker te vinden dan in de footer.
+- **Nadeel:** we geven op dat alle onderdelen hetzelfde patroon hebben: Wedstrijden krijgt nog geen korte kaarten en balk.
+  Podcasts is vanaf Wedstrijden en Statistieken twee tikken.
+  De ankers van negen kaarten breken.
+  Met Statistieken is het menu 345 pixels breed, en op een telefoon van 375 pixels valt Forum naar een tweede rij.
+- **Gevolg:** de bouw volgt in #482 (Podcasts verhuist en Nieuws krijgt een balk) en #483 (de pagina Statistieken).
+  De top 5, Spelers, Tegenstanders en Seizoenen, de wedstrijdpagina en een balk voor Wedstrijden volgen als eigen issues.
+- **Alternatieven:** de drie andere opties van het ontwerp.
+  - Optie 1: elk onderdeel een hoofdpagina met korte kaarten en een balk.
+    Dat is nu te veel werk: negen nieuwe adressen en korte vormen voor een pagina met drie kaarten.
+  - Optie 2: Podcasts en Statistieken als eigen onderdelen in een menu van vijf, zonder balk.
+    Dat schaalt niet: bij acht onderdelen staan Wedstrijden en Statistieken op een telefoon achter "Meer".
+  - Optie 3: elk onderdeel een hub met "Alle …"-knoppen, zonder balk.
+    Een stap naar een zusterpagina kost dan twee tikken, en Podcasts staat laag op de homepage.
+  - De Stand naar Statistieken: er is geen goede reden voor, want de stand hoort bij de lijsten.
+  - `/podcasts` houden en `/nieuws/podcasts` met een omleiding laten verwijzen: zonder openbare links is een omleiding niet nodig.
+  - Het zoeken in de footer laten op `/zoeken`: het is daar moeilijk te vinden, en het adres past niet bij de andere pagina's van Nieuws.
 
 ## Importer
 
@@ -4620,6 +4684,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de slug uit de naam afleiden in de code; dan verandert het adres mee met de naam.
 - **Later:** zie _Op `/podcasts` kies je podcasts met selectievakjes in een fieldset_: het filter per podcast is een groep selectievakjes met een knop "Toon", en `?podcast=<slug>` mag vaker voorkomen.
   Zonder `podcast` zijn het alle podcasts.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de pagina staat op `/nieuws/podcasts`, met dezelfde parameters (`?podcast=<slug>` en `?pagina=N`).
+  `/podcasts` vervalt zonder omleiding.
 
 ### Een aflevering linkt naar de maker, een podcast ook naar Apple en Spotify
 
@@ -4665,6 +4731,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Vier regels past bij het forumblok.
 - **Alternatieven:** het blok boven het forum, of in de hoofdkolom onder het nieuws.
 - **Later:** zie _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_: het blok toont nu vijf afleveringen.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de link van het blok gaat naar `/nieuws/podcasts`.
 
 ### Het filter is een Navigation, en de paginering verdwijnt bij één pagina
 
@@ -6367,6 +6434,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De hoofdkolom heeft nu twee kaarten, het programma en daaronder de doelpunten per kwartier; op een telefoon is de volgorde het programma, de doelpunten per kwartier, de stand en de rest van de zijbalk.
 - **Later:** zie _Op /wedstrijden hebben de kaarten met cijfers een zacht en een warm vlak, en de uitslagen staan in de hoofdkolom_.
   De uitslagen staan nu in de hoofdkolom na het programma, en de volgorde op een telefoon is Programma, Uitslagen, Stand, Doelpuntenmakers, De nul gehouden en Doelpunten per kwartier; de breedtes blijven.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de kaarten met cijfers verhuizen naar `/statistieken`, dus de zijbalk van `/wedstrijden` houdt van die kaarten alleen de Stand.
 
 ### De stand toont geen doelpunten voor en tegen
 
@@ -6897,6 +6965,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** één diagram met twee ringen (compact, maar moeilijker te lezen); staafjes in plaats van een taart (leesbaarder, maar de projecteigenaar vroeg om een taart); de verlenging als aparte plakken; de wedstrijden zonder bekende doelpunten meetellen met nul doelpunten (de telling lijkt dan completer dan ze is).
 - **Later:** zie _Op /wedstrijden hebben de kaarten met cijfers een zacht en een warm vlak, en de uitslagen staan in de hoofdkolom_.
   De kaart staat in de zijbalk, na De nul gehouden, en heeft een warm vlak; de telling blijft.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de kaart en zijn anker `doelpunten-per-kwartier` staan straks op `/statistieken`.
 
 ### De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop
 
@@ -6910,6 +6979,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het bijschrift van de tabel zegt "Doelpuntenmakers van sc Heerenveen in het seizoen …".
   De namen in de code (`TopScorers`, `topScorersOf`, `TopScorersTable`) blijven, omdat bezoekers ze niet zien.
 - **Alternatieven:** "Topscorers" houden (kort en bekend, maar niet meer waar); "Wie scoorde" (dichter bij de spreektaal, maar minder netjes als kop).
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de kaart en zijn ankers `doelpuntenmakers` en `topscorers` staan straks op `/statistieken`.
 
 ### De scheiding in een ring is een lichte omlijning, in licht en in donker
 
@@ -6949,6 +7019,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Op een telefoon staat Reeksen nu tussen Verloop van het seizoen en Doelpuntenmakers, in het zachte vlak.
 - **Later:** zie _Thuis en uit staan naast elkaar in een tabel, met een kolom Totaal_.
   Thuis en uit staat nu na Reeksen en voor Doelpuntenmakers, in het warme vlak.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de kaarten met cijfers verhuizen naar `/statistieken`, en hun vlakken gaan mee.
+  De Stand blijft op `/wedstrijden`.
 
 ### Het verloop van het seizoen staat onder de stand, in een warme kaart
 
@@ -7081,6 +7153,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een eigen pagina of tabbladen voor de statistieken (komt met #363).
   De beker meetellen (de bestaande kaarten verschillen al, één regel is duidelijker).
   Een statistiek verbergen tot er genoeg wedstrijden zijn (de pagina is dan lang leeg).
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): nieuwe statistieken komen als kaart op `/statistieken` en niet op `/wedstrijden`.
+  De regels voor de Eredivisie en voor "Gebaseerd op" blijven.
 
 ### Reeksen staan in een eigen kaart na Verloop van het seizoen
 
