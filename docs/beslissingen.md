@@ -2882,6 +2882,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     De focus blijft op de knop, want de kop wordt bij een klik niet vervangen.
   - **De maat:** de knop is minstens 1,5 rem hoog en breed (24 bij 24 pixels, WCAG 2.5.8), zonder vlak en rand, onderstreept zodat hij als iets om op te drukken leest.
     De pijl heeft de kleur van de tekst, dus hij haalt 3:1 als de tekst 4,5:1 haalt, en hij is een vorm, dus de kleur is niet het enige teken.
+    De getalkolommen van een tabel die sorteert hebben opzij 0,25 rem ruimte in plaats van 0,5 rem, want de knoppen maken ze breder dan de getallen en zeven kolommen (de lijst met Punten) pasten anders niet op 320 pixels: ze waren 7 pixels te breed.
   - **Niet in het adres:** de gekozen volgorde staat niet in de URL en blijft niet bewaard.
     Een nieuwe lading, ook na een wissel van de schakelaar van #406, geeft de tabel weer van A tot Z.
   - **De lijst van de tegenstanders:** de kolommen Club, Gespeeld, Gewonnen, Gelijk, Verloren en Doelpunten sorteren, en bij de keuze Eredivisie ook de nieuwe kolom Punten (afkorting P): 3 punten per winst en 1 per gelijkspel tegen die club, uit de cijfers van de Eredivisie.
