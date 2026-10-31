@@ -749,6 +749,30 @@ De regels staan op één plek, `createClubBook` in [`clubs.ts`](../../packages/d
    Een naam die de club al had, verandert niets, zodat twee schrijfwijzen in één seizoen niet om de beurt de naam zijn.
    Een naam van een andere club blijft bij die club.
 
+Een lijst met volledige namen gaat vóór deze regels (`clubFullNames` in [`src/club-names.ts`](src/club-names.ts)).
+Ze zegt van een club hoe hij heet en welke andere schrijfwijzen dezelfde club zijn: nu `Excelsior Rotterdam` met `Excelsior` en `SBV Excelsior`.
+De import zoekt een naam eerst in die lijst, met of zonder artikel, en een naam die erin staat is altijd de volledige naam.
+Een club die de import onder zo'n naam maakt, krijgt de slug van de volledige naam (`excelsior-rotterdam`) en de andere schrijfwijzen als andere namen.
+Een naam die niet in de lijst staat, werkt zoals hierboven: `Excelsior Maassluis`, een amateurclub in de beker, is een andere club.
+
+De lijst herstelt ook wat er al in de database staat.
+Vóór hij de wedstrijden van een seizoen schrijft, zoekt de import in dezelfde transactie de clubs van de lijst die er twee keer staan of onder een andere naam (`repairClubs`, zie de README van `@fansite/db`).
+Hij voegt ze samen en zet de volledige naam en de slug goed.
+Hebben twee van die clubs elk een eigen artikel, dan laat hij ze staan en zegt dat in het logboek: één artikel is één club.
+Een tweede lezing verandert niets en schrijft geen regel.
+
+Een club aan de lijst toevoegen:
+
+1. Controleer dat het dezelfde club is, op Wikipedia: één artikel.
+   Een ander artikel is een andere club, ook als de naam erop lijkt.
+2. Zet in `clubFullNames` een regel met `name` (de volledige naam) en `aliases` (de andere schrijfwijzen, zoals Wikipedia ze in wedstrijden schrijft).
+   Een naam staat hoogstens één keer in de lijst, hoofdletters, accenten en leestekens niet meegeteld.
+3. Zet een test in [`src/import-matches.test.ts`](src/import-matches.test.ts) bij _a club the list of full names knows_.
+4. De volgende lezing van een seizoen voegt de dubbele club samen.
+   De wedstrijden van elk seizoen gaan mee naar de club die blijft, ook die van seizoenen die de import niet meer leest.
+
+`otherClubGroups` in `relevance-terms.ts` is een andere lijst met een ander doel, het filter van de koppen, en blijft zoals hij is.
+
 Een wedstrijd kan van club veranderen als Wikipedia een ander artikel linkt; dan telt hij als bijgewerkt.
 De import verwijdert nooit een club, ook niet als er geen wedstrijd meer aan hangt (zoals de verzonnen clubs van de seed): de queries tonen alleen clubs met een wedstrijd.
 
@@ -762,11 +786,14 @@ Matches 2026/27: article 'PEC Zwolle' for club 'PEC Zwolle'
 Matches 2026/27: club 'Telstar' is now called 'Telstar 1963'
 Matches 2026/27: new name 'Telstar' for club 'Telstar 1963'
 Matches 2026/27: name 'Excelsior' stays with club 'Excelsior', not added to club 'Quick'
+Matches 2026/27: merged club 'Excelsior' into club 'Excelsior Rotterdam'
+Matches 2026/27: club 'Excelsior' is now called 'Excelsior Rotterdam'
+Matches 2026/27: slug of club 'Excelsior Rotterdam' is now 'excelsior-rotterdam'
 ```
 
 Een club is geen persoon, dus de regels hebben alleen de naam en het artikel.
 De eerste lezing van een seizoen schrijft een regel per club, zo'n zeventien; daarna komt er alleen een regel als er iets nieuws is.
-Een club met twee namen voegt de projecteigenaar samen met de hand (zie de README van `@fansite/db`).
+Een club die niet in de lijst met volledige namen staat en toch twee keer voorkomt, voegt de projecteigenaar samen met de hand (zie de README van `@fansite/db`).
 
 ### De controles
 
