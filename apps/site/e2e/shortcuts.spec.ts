@@ -353,22 +353,22 @@ test.describe('the bar under the header of /statistieken', () => {
   })
 })
 
-// The page Spelers has one card, so its bar has one link. It is gone from 52rem on, like the
+// The page Spelers has two cards, so its bar has two links. It is gone from 52rem on, like the
 // other bars, although the page has one column.
 test.describe('the bar under the header of /statistieken/spelers', () => {
   for (const colorScheme of ['light', 'dark'] as const) {
-    test(`has one link on a phone, to the card Doelpuntenmakers, and passes axe in ${colorScheme}`, async ({
-      page,
-    }) => {
+    test(`has two links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme })
       await page.setViewportSize({ height: 800, width: 390 })
       await page.goto('/statistieken/spelers')
 
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-      await expect(bar.getByRole('link')).toHaveCount(1)
+      await expect(bar.getByRole('link')).toHaveCount(2)
       await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
       await expect(page).toHaveURL(/#doelpuntenmakers$/)
+      await bar.getByRole('link', { name: 'Bijzondere doelpunten' }).click()
+      await expect(page).toHaveURL(/#bijzondere-doelpunten$/)
       expect(await checkPage(page)).toEqual([])
     })
   }
@@ -389,7 +389,7 @@ test.describe('the bar under the header of /statistieken/spelers', () => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto(`/statistieken/spelers/${earlierSeasonSlug()}`)
 
-    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')).toHaveCount(1)
+    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')).toHaveCount(2)
   })
 })
 

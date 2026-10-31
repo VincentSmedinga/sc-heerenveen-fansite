@@ -4385,6 +4385,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De balk "Op deze pagina:" van Spelers heeft één link, naar de enige kaart; hij krijgt er meer als de extra's van #403 en #407 erbij komen.
 - **Alternatieven:** de volledige lijst houden en de kaart inklappen met een knop (kost JavaScript of een extra adres, en de afbeelding toont dan de hele lijst); de top 5 op een vaste hoogte afkappen en een speler met evenveel doelpunten weglaten (willekeurig); de vijf met gelijkstaanden tot hoogstens acht rijen, zoals de kaart eerder had (een grens die de gelijke plekken toch afkapt); Spelers alleen met de lijst, zonder balk met subpagina's (de pagina is dan alleen via de link te vinden).
 - **Later:** zie _De kaart met topscorers toont alle doelpuntenmakers_ (26 oktober 2026): sinds 31 oktober 2026 toont `/statistieken` weer de top 5, nu met alle gelijke plekken en zonder grens, en de volledige lijst staat op `/statistieken/spelers`.
+- **Later:** zie _De pagina Spelers toont bijzondere doelpunten_ (31 oktober 2026): Spelers heeft sinds die dag een tweede kaart, en de balk "Op deze pagina:" van Spelers heeft twee links.
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de balk met subpagina's van Statistieken heeft sindsdien ook Tegenstanders, en op de pagina's daarvan is Tegenstanders de huidige subpagina.
 
 ### Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken
@@ -7764,3 +7765,34 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een sleutel per keuze in de cache (meer geheugen en meer code voor dezelfde gegevens).
   Een zin op de drie kaarten die de keuze niet volgen (langere kaarten, en de schakelaar zegt het al).
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de schakelaar staat sindsdien ook op `/statistieken/tegenstanders` en op de pagina van een club, en telt daar de wedstrijden van alle seizoenen.
+
+### De pagina Spelers toont bijzondere doelpunten
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** `/statistieken/spelers` en zijn seizoenen hebben onder Doelpuntenmakers een kaart Bijzondere doelpunten (#403), met het anker `bijzondere-doelpunten` en een tweede link in de balk "Op deze pagina:".
+  - **Hattricks en dubbelslagen:** een hattrick is drie of meer doelpunten van één speler in één wedstrijd, een dubbelslag is er precies twee.
+    De kaart toont de spelers achter elkaar met komma's, met hoe vaak het gebeurde ("Jan Jansen 2×, Piet Pietersen"; één keer staat er geen getal).
+    Een speler met een hattrick staat in die wedstrijd niet ook bij de dubbelslagen, maar een andere wedstrijd kan hem wel een dubbelslag geven.
+    De doelpunten van twee wedstrijden tellen niet bij elkaar op.
+    Een strafschop is een doelpunt van de speler en telt dus mee; een eigen doelpunt telt voor niemand, en een doelpunt van de tegenstander ook niet.
+    Een doelpunt zonder minuut of zonder speler in de tabel is gewoon een doelpunt: een speler wordt herkend zoals in de lijst van doelpuntenmakers (op `id`, anders op de Wikipedia-pagina, anders op de naam).
+  - **Strafschoppen:** het aantal doelpunten van sc Heerenveen uit een strafschop, uit alle doelpunten van sc Heerenveen: "1 van de 17 doelpunten".
+    Een eigen doelpunt van de tegenstander is een doelpunt van ons en staat in het totaal.
+    Strafschoppen van de tegenstander tellen niet, en de strafschoppenserie na afloop ook niet, want die staat niet in de doelpunten.
+  - **Eigen doelpunten:** twee getallen op één regel, "1 door de tegenstander · 0 door ons": het aantal dat een speler van de tegenstander in eigen doel maakte en het aantal dat een speler van ons deed.
+  - **Lege delen:** staat er geen hattrick of dubbelslag, dan staat er "Nog geen" in de rustige kleur, want een supporter zoekt ze juist.
+    De strafschoppen en de eigen doelpunten zijn getallen, dus 0 blijft staan.
+    Is er geen doelpunt van ons in een gespeelde wedstrijd, dan is de kaart één zin zonder delen en zonder knop voor een afbeelding.
+  - **De wedstrijden:** de kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier (een wedstrijd met een score en zonder doelpunten blijft eruit), en volgt de schakelaar van #406: een bekerwedstrijd telt alleen bij Alle wedstrijden, met de doelpunten uit de verlenging erbij.
+    Onder de kaart staat "Gebaseerd op …" in de vorm van de andere kaarten.
+  - **De opmaak:** een lijst van vier delen zonder grafiek, en zonder koppen van niveau 3: de kaart heeft één kop, van niveau 2.
+    Elk deel heeft zijn naam als rustige tekst erboven en zijn waarde eronder, met een dunne lijn tussen de delen, zoals de kaart Uitersten (de projecteigenaar koos dit op 31 oktober 2026; vier subkoppen waren te zwaar).
+    Het is een `List` met in elk `List.Item` de naam (`Text appearance="meta"`) en de waarde in een `ShortFact`, een nieuw onderdeel van het designsysteem dat de klassen van `ShortMatch` neemt, zodat de lijnen uit `short-match.css` komen en er geen CSS is gekopieerd.
+    De naam komt eerst in het lijstitem, dus een schermlezer leest de naam en de waarde samen; een beschrijvingslijst (`dl`) kreeg de lijnen niet, want die zijn aan `li` gebonden.
+    De kaart is zacht en heeft een knop voor een afbeelding met de bronvermelding van Wikipedia.
+    De namen zijn een `PlayerName`.
+- **Waarom:** dit zijn de dingen die supporters bij een seizoen willen weten en die de lijst met doelpuntenmakers niet laat zien.
+  Alles komt uit de doelpunten die de pagina al heeft, dus er is geen nieuwe vraag aan de database.
+  Lijsten zijn korter dan tabellen voor een paar namen, en een zin voor een leeg deel zegt dat er niets mis is met de pagina.
+- **Niet erin:** de positie van de doelpuntenmaker (voor een afgelopen seizoen bestaat geen selectie), het aandeel van de topscorer en het aantal verschillende spelers (dat staat in Doelpuntenmakers).
+- **Alternatieven:** vier koppen van niveau 3 met onder elk een lijst of een zin (te zwaar voor vier korte feiten, en de eerste versie van deze kaart); een tabel met een rij per speler (veel kolommen voor weinig getallen); een `dl` met `dt` en `dd` (de dunne lijnen horen bij `li`, en de kaart Uitersten is ook een lijst); de lege delen weglaten (een bezoeker kan niet zien of ze er niet zijn of er niet werden gezocht); een hattrick ook bij de dubbelslagen laten staan (dezelfde wedstrijd wordt dan twee keer genoemd); de kaart naar Statistieken zetten (de pagina Spelers is er voor wat bij spelers hoort, zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_).
