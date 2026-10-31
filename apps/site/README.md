@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu twaalf pagina's: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/statistieken/spelers` met alle doelpuntenmakers, `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu twaalf pagina's: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/statistieken/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -377,7 +377,20 @@ De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolo
 Het toont de kaart Doelpuntenmakers met alle spelers die scoorden, zoals die kaart vroeger op `/statistieken` stond: dezelfde cijfers en dezelfde volgorde, met hetzelfde anker `#doelpuntenmakers` en het oude anker `#topscorers`.
 De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`; `/statistieken` gebruikt dezelfde kaart met de link naar deze pagina, en dan zijn het de eerste rijen van de lijst (`topFiveOf` in `src/matches.ts`).
 De pagina deelt alles rond het seizoen met Statistieken: de kiezer, de adressen `/statistieken/spelers/2025-26` en de route `app/statistieken/spelers/kies`, via `playersPath` in `src/season-page.ts`.
-De balk "Op deze pagina:" heeft één link, naar de kaart (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/statistieken/spelers`).
+Eronder staat de kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`.
+Die heeft vier delen, elk met een kop van niveau 3:
+
+- **Hattricks:** de spelers met drie of meer doelpunten in één wedstrijd, met namen en hoe vaak ("Jan Jansen, 2×"; één keer staat er geen getal).
+  Een speler met een hattrick staat in die wedstrijd niet ook bij de dubbelslagen, maar een andere wedstrijd kan hem wel een dubbelslag geven.
+- **Dubbelslagen:** de spelers met precies twee doelpunten in één wedstrijd, op dezelfde manier.
+- **Strafschoppen:** "1 van de 17 doelpunten", het aantal doelpunten van sc Heerenveen uit een strafschop, van alle doelpunten van sc Heerenveen (een eigen doelpunt van de tegenstander telt mee).
+- **Eigen doelpunten:** het aantal dat een speler van de tegenstander in eigen doel maakte, en het aantal dat een speler van ons deed.
+
+Heeft niemand een hattrick of een dubbelslag, dan staat er "Nog geen hattricks." of "Nog geen dubbelslagen."; de cijfers van de strafschoppen en de eigen doelpunten blijven staan, ook als ze 0 zijn.
+Zonder doelpunt in een gespeelde wedstrijd is de kaart één zin zonder delen en zonder knop voor een afbeelding.
+De kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier, en zegt onderaan "Gebaseerd op …" in dezelfde vorm als de andere kaarten.
+Een speler wordt herkend zoals in de lijst van doelpuntenmakers.
+De balk "Op deze pagina:" heeft twee links, naar de twee kaarten (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/statistieken/spelers`).
 De bezoekteller telt de pagina van een seizoen als een bezoek aan `/statistieken/spelers`.
 
 ### De keuze tussen alle wedstrijden en de Eredivisie
@@ -389,7 +402,7 @@ Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "nie
 De schakelaar staat er alleen bij een seizoen met een gespeelde bekerwedstrijd (`hasPlayedCupMatch`): zonder die zijn de twee keuzes gelijk.
 Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alle wedstrijden alleen de wedstrijden die er zijn.
 
-De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Doelpuntenmakers (ook op Spelers), De nul gehouden, Doelpunten per kwartier en Uitersten.
+De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Doelpuntenmakers (ook op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier en Uitersten.
 De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes en de stand na 90 minuten rusten.
 Een bekerwedstrijd telt met de score na de verlenging.
 Een strafschoppenserie telt niet mee: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel.

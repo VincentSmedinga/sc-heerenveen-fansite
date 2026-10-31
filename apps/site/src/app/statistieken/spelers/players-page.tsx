@@ -12,6 +12,7 @@ import { pageMetadata, seasonPageMetadata } from '../../../metadata'
 import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams } from '../../../season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '../../../seasons'
 import { ServerError, serverErrorTitle } from '../../../ServerError'
+import { SpecialGoalsCard } from '../../../SpecialGoalsCard'
 import { withBranch } from '../../../title'
 
 /** The route that sends the season picker on to its season (app/statistieken/spelers/kies). */
@@ -43,10 +44,11 @@ export async function playersMetadata(season: string): Promise<Metadata> {
 /**
  * The page Spelers of a season: `/statistieken/spelers` for the current season and
  * `/statistieken/spelers/2025-26` for another, which is what the two routes render. It has the
- * title row and the season picker of Statistieken, and the card Doelpuntenmakers with every
- * player who scored, which is the card that stood on Statistieken before it got the top 5. A
+ * title row and the season picker of Statistieken, the card Doelpuntenmakers with every
+ * player who scored, which is the card that stood on Statistieken before it got the top 5, and
+ * under it the card Bijzondere doelpunten (hattricks, penalties and own goals). A
  * season that is over has the card put the season on its image. A season that has no matches in
- * the database is the page "niet gevonden". The card counts all the matches or, with
+ * the database is the page "niet gevonden". The cards count all the matches or, with
  * `?competitie=eredivisie`, the Eredivisie alone, as on Statistieken, and so does the switch.
  */
 export async function PlayersPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
@@ -90,6 +92,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
         season={data.season}
         seasonOnImage={current ? undefined : season}
       />
+      <SpecialGoalsCard competition={competition} matches={data.matches} seasonOnImage={current ? undefined : season} />
       {(data.matches.length > 0 || data.standings.length > 0) && (
         <SourceCredit pages={data.pages} season={data.season} />
       )}

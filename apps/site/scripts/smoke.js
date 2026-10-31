@@ -853,7 +853,7 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#doelpuntenmakers'],
+      ['#doelpuntenmakers', '#bijzondere-doelpunten'],
     )
     assert.match(
       playersHtml,
@@ -872,6 +872,26 @@ await withEmptyDatabase((database) =>
     assert.match(playersHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
     assert.doesNotMatch(playersHtml, /<th scope="row">Kopie<\/th>/)
     assert.doesNotMatch(playersHtml, /Alle (?:<span[^>]*>)?doelpuntenmakers/)
+    // The card Bijzondere doelpunten comes under the list of scorers: the made-up data has two
+    // doubles (Demo, and Proefman in the cup), no hattrick, one penalty and an own goal of the
+    // opponent. It is soft, with a button for an image, and it counts the cup for all matches.
+    const specialCard =
+      /<section[^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''
+    assert.ok(playersHtml.indexOf('id="doelpuntenmakers"') < playersHtml.indexOf('id="bijzondere-doelpunten"'))
+    assert.match(specialCard, /^<section class="hf-card hf-card-soft hf-card-shareable"/)
+    assert.match(specialCard, /<h3 class="hf-heading-3">Hattricks<\/h3><p>Nog geen hattricks\.<\/p>/)
+    assert.match(
+      specialCard,
+      /<h3 class="hf-heading-3">Dubbelslagen<\/h3><ul role="list"><li>.*Demo.*<\/li><li>.*Proefman.*<\/li><\/ul>/s,
+    )
+    assert.match(specialCard, /Strafschoppen<\/h3><p>1 van de \d+ doelpunten<\/p>/)
+    assert.match(specialCard, /Door de tegenstander in eigen doel: 1<\/li><li>Door ons in eigen doel: 0</)
+    assert.match(specialCard, /Gebaseerd op /)
+    const eredivisieCard = /<section[^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(
+      await (await fetch(`${origin}/statistieken/spelers?competitie=eredivisie`)).text(),
+    )?.[0]
+    assert.doesNotMatch(eredivisieCard ?? '', /Proefman/)
+    assert.match(eredivisieCard ?? '', /Strafschoppen<\/h3><p>0 van de \d+ doelpunten<\/p>/)
     assert.match(playersHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     // The route behind the season picker sends the visitor on to the page of the season.
     const pickedPlayers = await fetch(`${origin}/statistieken/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })
