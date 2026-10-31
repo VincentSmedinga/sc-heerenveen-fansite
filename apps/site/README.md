@@ -262,8 +262,13 @@ De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en
 `/statistieken` toont onder negen kopjes de kaarten met cijfers over sc Heerenveen 1 (mannen) in het lopende seizoen: onze plek in de competitie, het verloop van het seizoen, de reeksen, thuis en uit, de doelpuntenmakers, de wedstrijden waarin we de nul hielden, de doelpunten per kwartier, hoe de wedstrijden verlopen en de uitersten.
 Wedstrijden is wat je opzoekt, een lijst van wedstrijden en de stand; Statistieken is wat uit veel wedstrijden volgt, een telling, een rangorde of een verloop (de beslissing staat in `docs/beslissingen.md`, _De site heeft vier onderdelen_).
 De kaarten staan in twee gelijke kolommen: de eerste vier in de hoofdkolom, onder de kop met de seizoenskiezer, en de andere vijf in een brede zijbalk (`wide` op `Page.Sidebar`), die even breed is als de hoofdkolom.
-De verdeling is 4 en 5 omdat de linker kolom (onze plek, het verloop, de reeksen, thuis en uit) en de rechter (de doelpuntenmakers, de nul gehouden, de doelpunten per kwartier, hoe de wedstrijden verlopen, de uitersten en de bronvermelding) ongeveer even hoog worden, en de volgorde in de broncode de volgorde van de balk en van een telefoon blijft.
-Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom, en onder de kop staat een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`); op een breed scherm is hij er niet.
+De verdeling is 4 en 5, omdat de kolommen dan het minst in hoogte verschillen.
+Links staan onze plek, het verloop, de reeksen en thuis en uit.
+Rechts staan de doelpuntenmakers, de nul gehouden, de doelpunten per kwartier, hoe de wedstrijden verlopen, de uitersten en de bronvermelding.
+De volgorde in de broncode blijft de volgorde van de balk en van een telefoon.
+Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom.
+Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`).
+Op een breed scherm is de balk er niet.
 De balk volgt de pagina, zoals die van Wedstrijden.
 De stand, de reeksen, de doelpuntenmakers, de nul gehouden, hoe de wedstrijden verlopen en de uitersten hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen, thuis en uit en de doelpunten per kwartier een warm vlak (`surface="warm"`), en onze plek in de competitie is wit.
 
