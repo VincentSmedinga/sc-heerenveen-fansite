@@ -27,7 +27,11 @@ export const notVisitors =
  * on no list, so they are not counted. A path that is on no list, such as one that doesn't
  * exist, is not counted either.
  */
-const countedPaths: ReadonlySet<string> = new Set([...pages.map(({ path }) => path), '/contact/verstuurd', '/zoeken'])
+const countedPaths: ReadonlySet<string> = new Set([
+  ...pages.map(({ path }) => path),
+  '/contact/verstuurd',
+  '/nieuws/zoeken',
+])
 
 const articlePath = /^\/redactie\/([^/]+)$/u
 

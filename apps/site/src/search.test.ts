@@ -107,10 +107,10 @@ describe('parseResultCount', () => {
 
 describe('searchHref', () => {
   it('puts the text in the address, with the characters that need it written out', () => {
-    expect(searchHref('Klaverboer')).toBe('/zoeken?q=Klaverboer')
-    expect(searchHref('van der Kooi')).toBe('/zoeken?q=van+der+Kooi')
-    expect(searchHref('Dijkhuizen & zoon')).toBe('/zoeken?q=Dijkhuizen+%26+zoon')
-    expect(searchHref('100%')).toBe('/zoeken?q=100%25')
+    expect(searchHref('Klaverboer')).toBe('/nieuws/zoeken?q=Klaverboer')
+    expect(searchHref('van der Kooi')).toBe('/nieuws/zoeken?q=van+der+Kooi')
+    expect(searchHref('Dijkhuizen & zoon')).toBe('/nieuws/zoeken?q=Dijkhuizen+%26+zoon')
+    expect(searchHref('100%')).toBe('/nieuws/zoeken?q=100%25')
   })
 
   it('makes an address that parseSearch reads back as the same words', () => {

@@ -3,14 +3,14 @@ import type { PublicPlayer, PublicSearchHit } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { Squad } from '../../search'
+import type { Squad } from '../../../search'
 
-import { getSquad, searchSite } from '../../search'
-import { withoutIcons } from '../../without-icons'
+import { getSquad, searchSite } from '../../../search'
+import { withoutIcons } from '../../../without-icons'
 import SearchPage, { generateMetadata } from './page'
 
 // Only the two queries are replaced: the checks of the search and the groups are the real ones.
-vi.mock('../../search', async (importOriginal) => ({
+vi.mock('../../../search', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getSquad: vi.fn(),
   searchSite: vi.fn(),
@@ -105,10 +105,10 @@ describe('the page Zoeken without a search', () => {
     expect(searchSite).not.toHaveBeenCalled()
   })
 
-  it('is a GET form to /zoeken with a field named q, so it works without JavaScript and can be shared', async () => {
+  it('is a GET form to /nieuws/zoeken with a field named q, so it works without JavaScript and can be shared', async () => {
     const html = await render()
 
-    expect(html).toMatch(/<form[^>]*action="\/zoeken"[^>]*method="get"/u)
+    expect(html).toMatch(/<form[^>]*action="\/nieuws\/zoeken"[^>]*method="get"/u)
     expect(html).toMatch(/<input type="search"[^>]*name="q"/u)
     expect(html).toMatch(/<form[^>]*role="search"/u)
   })
@@ -206,7 +206,7 @@ describe('the page Zoeken with a search', () => {
 
     expect(html).toContain('>12 resultaten voor klaverboer</h2>')
     expect(html).toContain('Laad 5 meer')
-    expect(html).toMatch(/<form[^>]*action="\/zoeken#resultaat-4"[^>]*method="get"/u)
+    expect(html).toMatch(/<form[^>]*action="\/nieuws\/zoeken#resultaat-4"[^>]*method="get"/u)
     expect(html).toContain('<input type="hidden" name="q" value="klaverboer"/>')
     expect(html).toMatch(/<button[^>]*value="15"[^>]*name="aantal"/u)
   })
@@ -329,13 +329,13 @@ describe('the list of players', () => {
 
     expect(
       [...sidebarOf(html).matchAll(/<a href="([^"]*)">(.*?)<\/a>/g)]
-        .filter(([, href]) => href?.startsWith('/zoeken'))
+        .filter(([, href]) => href?.startsWith('/nieuws/zoeken'))
         .map(([, href, name]) => [href, name?.replaceAll(/<[^>]*>/g, '')]),
     ).toEqual([
-      ['/zoeken?q=Brandsma', 'Tjerk Brandsma'],
-      ['/zoeken?q=van+der+Kooi', 'Jurre van der Kooi'],
-      ['/zoeken?q=Klaverboer', 'Bernt Klaverboer'],
-      ['/zoeken?q=Dinho', 'Dinho'],
+      ['/nieuws/zoeken?q=Brandsma', 'Tjerk Brandsma'],
+      ['/nieuws/zoeken?q=van+der+Kooi', 'Jurre van der Kooi'],
+      ['/nieuws/zoeken?q=Klaverboer', 'Bernt Klaverboer'],
+      ['/nieuws/zoeken?q=Dinho', 'Dinho'],
     ])
   })
 
@@ -379,7 +379,9 @@ describe('the list of players', () => {
 
     expect(html).not.toContain('<aside')
     expect(html).toContain('>3 resultaten voor klaverboer</h2>')
-    expect(error).toHaveBeenCalledWith('Could not read the squad for /zoeken: connect ECONNREFUSED 127.0.0.1:3306')
+    expect(error).toHaveBeenCalledWith(
+      'Could not read the squad for /nieuws/zoeken: connect ECONNREFUSED 127.0.0.1:3306',
+    )
   })
 
   it('has no credit when the squad has no page', async () => {
@@ -401,8 +403,8 @@ describe('when the database cannot give the results', () => {
     const html = await render({ q: 'klaverboer zwolle' })
 
     expect(html).toContain('<h1 class="hf-heading-1">Er ging iets mis</h1>')
-    expect(html).toContain('href="/zoeken?q=klaverboer+zwolle"')
-    expect(error).toHaveBeenCalledWith('Could not search for /zoeken: connect ECONNREFUSED 127.0.0.1:3306')
+    expect(html).toContain('href="/nieuws/zoeken?q=klaverboer+zwolle"')
+    expect(error).toHaveBeenCalledWith('Could not search for /nieuws/zoeken: connect ECONNREFUSED 127.0.0.1:3306')
     expect(JSON.stringify(error.mock.calls)).not.toContain('klaverboer')
     expect(await generateMetadata(props({ q: 'klaverboer zwolle' }))).toMatchObject({ title: 'Er ging iets mis' })
   })

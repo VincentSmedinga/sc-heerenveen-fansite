@@ -52,7 +52,7 @@ export function SearchCard({
  */
 export function SearchForm({ error, text }: { error?: string | undefined; text: string }) {
   return (
-    <Form action="/zoeken" aria-label="Zoeken in onze koppen" method="get" role="search">
+    <Form action="/nieuws/zoeken" aria-label="Zoeken in onze koppen" method="get" role="search">
       <Field
         error={error}
         hint="Alle woorden moeten erin staan. Een deel van een woord is genoeg."
@@ -182,7 +182,7 @@ function SearchResults({
       )}
       {hits.length < total &&
         (count < maxResults ? (
-          <Form action={`/zoeken#resultaat-${hits.length + 1}`} method="get">
+          <Form action={`/nieuws/zoeken#resultaat-${hits.length + 1}`} method="get">
             <Input name="q" type="hidden" value={text} />
             <Button appearance="soft" icon="plus" name="aantal" type="submit" value={String(count + moreResults)}>
               {`Laad ${moreResults} meer`}

@@ -415,13 +415,13 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
 
     expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('episodes-heading'))
     expect(await renderEpisodes()).toMatch(
-      /^<section class="hf-card" aria-labelledby="episodes-heading"><h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts<\/h2><ul role="list">.*<\/ul><p><a href="\/podcasts">Alle <span class="hf-icon-tail">podcasts<svg [^>]*class="hf-icon"[^>]*>.*?<\/svg><\/span><\/a><\/p><\/section><section class="hf-card" aria-labelledby="matches-heading">/,
+      /^<section class="hf-card" aria-labelledby="episodes-heading"><h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts<\/h2><ul role="list">.*<\/ul><p><a href="\/nieuws\/podcasts">Alle <span class="hf-icon-tail">podcasts<svg [^>]*class="hf-icon"[^>]*>.*?<\/svg><\/span><\/a><\/p><\/section><section class="hf-card" aria-labelledby="matches-heading">/,
     )
   })
 
   it('draws an arrow to the right behind "Alle podcasts", hidden from screen readers, and no icon for the external link', async () => {
     const html = await renderEpisodes()
-    const link = html.match(/<a href="\/podcasts">.*?<\/a>/)?.[0] ?? ''
+    const link = html.match(/<a href="\/nieuws\/podcasts">.*?<\/a>/)?.[0] ?? ''
 
     expect(link).toContain('<path d="M2.5 8h11"></path><path d="M9 3.5 13.5 8 9 12.5"></path>')
     expect(link).toContain('aria-hidden="true"')
@@ -482,7 +482,7 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
     const html = await renderEpisodes()
 
     expect(withoutIcons(html)).toContain(
-      '<p>We hebben nog geen podcastafleveringen gevonden.</p><p><a href="/podcasts">Alle podcasts</a></p>',
+      '<p>We hebben nog geen podcastafleveringen gevonden.</p><p><a href="/nieuws/podcasts">Alle podcasts</a></p>',
     )
   })
 

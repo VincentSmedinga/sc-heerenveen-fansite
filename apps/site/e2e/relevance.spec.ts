@@ -12,8 +12,8 @@ const visitorPages = [
   '/',
   '/nieuws',
   '/nieuws?bron=testkrant',
-  '/podcasts',
-  '/podcasts?podcast=testpodcast',
+  '/nieuws/podcasts',
+  '/nieuws/podcasts?podcast=testpodcast',
   '/bronnen',
   '/over-ons',
 ]

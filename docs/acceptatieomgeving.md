@@ -323,7 +323,7 @@ Zo kan niemand nagaan wie een account heeft.
   `/beheer/artikelen` is voor een beheerder: daar schrijft, bekijkt, publiceert en trekt hij een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)).
   `/beheer/bezoek` is voor een beheerder: de bezoekers en paginaweergaven van de laatste dagen en de meest bekeken pagina's (zie _Bezoekers tellen_ hieronder).
   `/beheer/berichten` is voor een beheerder of moderator, die er een bericht verbergt, met een reden, en het weer toont.
-  Een verborgen bericht staat binnen vijf minuten niet meer op de homepage, op `/nieuws` en op `/podcasts`, en de import zet het niet terug.
+  Een verborgen bericht staat binnen vijf minuten niet meer op de homepage, op `/nieuws` en op `/nieuws/podcasts`, en de import zet het niet terug.
   De lijst toont ook de berichten die het relevantiefilter een twijfelgeval vond of niet over de club; die staan niet op de site (zie _Het relevantiefilter_ in de [README van de importer](../apps/importer/README.md)).
   Elke actie komt in het logboek, de tabel `audit_log`.
   Er is nog geen scherm om het logboek te lezen; lees het in phpMyAdmin:

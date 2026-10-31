@@ -38,8 +38,8 @@ export const sessionCookieName = 'beheer-sessie'
 
 /**
  * The made-up items the tests of the admin hide and show, on the source of the seed that is
- * switched off, so the homepage and /podcasts never show them and a test that hides one can't
- * change what another test reads there.
+ * switched off, so the homepage and /nieuws/podcasts never show them and a test that hides
+ * one can't change what another test reads there.
  */
 export const adminItems = {
   withoutScript: 'Verzonnen bericht om te verbergen zonder JavaScript',

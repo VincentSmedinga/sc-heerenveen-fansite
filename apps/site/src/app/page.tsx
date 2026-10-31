@@ -201,7 +201,7 @@ export default async function HomePage() {
             </List>
           )}
           <Text>
-            <Link href="/podcasts" icon="arrow-right">
+            <Link href="/nieuws/podcasts" icon="arrow-right">
               Alle podcasts
             </Link>
           </Text>

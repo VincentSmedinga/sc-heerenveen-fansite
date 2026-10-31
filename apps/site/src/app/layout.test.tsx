@@ -50,7 +50,7 @@ describe('RootLayout', () => {
     expect(
       [...footer.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
-      ['/zoeken', 'Zoeken'],
+      ['/nieuws/zoeken', 'Zoeken'],
       ['/over-ons', 'Over ons'],
       ['/contact', 'Contact'],
       ['/bronnen', 'Bronnen'],

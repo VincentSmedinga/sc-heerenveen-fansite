@@ -63,7 +63,7 @@ describe('the page with the numbers of the visit', () => {
     await database.db.insert(dailyVisitors).values({ day: today, visitors: 1234 })
     await database.db.insert(pageViews).values([
       { day: today, path: '/', views: 2000 },
-      { day: today, path: '/podcasts', views: 3 },
+      { day: today, path: '/nieuws/podcasts', views: 3 },
     ])
 
     const html = renderToStaticMarkup(await VisitPage())
@@ -82,7 +82,7 @@ describe('the page with the numbers of the visit', () => {
     // A thousands separator in the Dutch way.
     expect(html).toContain('<td class="hf-numeric">1.234</td>')
     expect(html).toContain('<td class="hf-numeric">2.003</td>')
-    expect(html.match(/<th scope="row"[^>]*>\/(podcasts)?<\/th>/g)).toHaveLength(2)
+    expect(html.match(/<th scope="row"[^>]*>\/(nieuws\/podcasts)?<\/th>/g)).toHaveLength(2)
     // 30 days and the two totals.
     expect(html.match(/<th scope="row"/g)).toHaveLength(2 + 30 + 2)
   })

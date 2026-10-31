@@ -57,7 +57,7 @@ describe('visitNumbers', () => {
   it('adds the views of all pages of a day', async () => {
     await database.db.insert(pageViews).values([
       { day: '2026-10-26', path: '/', views: 5 },
-      { day: '2026-10-26', path: '/podcasts', views: 2 },
+      { day: '2026-10-26', path: '/nieuws/podcasts', views: 2 },
     ])
 
     expect((await visitNumbers(database.db, now)).perDay[0]).toEqual({ day: '2026-10-26', views: 7, visitors: 0 })
@@ -88,8 +88,8 @@ describe('visitNumbers', () => {
 
   it('lists the most viewed pages of the 30 days, most first, ties by path', async () => {
     await database.db.insert(pageViews).values([
-      { day: '2026-10-26', path: '/podcasts', views: 3 },
-      { day: '2026-10-25', path: '/podcasts', views: 4 },
+      { day: '2026-10-26', path: '/nieuws/podcasts', views: 3 },
+      { day: '2026-10-25', path: '/nieuws/podcasts', views: 4 },
       { day: '2026-10-26', path: '/', views: 5 },
       { day: '2026-10-26', path: '/bronnen', views: 7 },
       { day: '2026-10-26', path: '/contact', views: 7 },
@@ -99,7 +99,7 @@ describe('visitNumbers', () => {
     expect((await visitNumbers(database.db, now)).topPages).toEqual([
       { path: '/bronnen', views: 7 },
       { path: '/contact', views: 7 },
-      { path: '/podcasts', views: 7 },
+      { path: '/nieuws/podcasts', views: 7 },
       { path: '/', views: 5 },
     ])
   })

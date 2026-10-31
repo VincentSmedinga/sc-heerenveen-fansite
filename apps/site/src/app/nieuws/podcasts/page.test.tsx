@@ -3,13 +3,13 @@ import type { PublicEpisode, PublicPodcast } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { PodcastPage as Content } from '../../podcasts'
+import type { PodcastPage as Content } from '../../../podcasts'
 
-import { getPodcastPage } from '../../podcasts'
-import { withoutIcons } from '../../without-icons'
+import { getPodcastPage } from '../../../podcasts'
+import { withoutIcons } from '../../../without-icons'
 import PodcastsPage, { generateMetadata } from './page'
 
-vi.mock('../../podcasts', () => ({ getPodcastPage: vi.fn() }))
+vi.mock('../../../podcasts', () => ({ getPodcastPage: vi.fn() }))
 
 // The moment of now is the afternoon of Friday 23 October 2026 in the Netherlands.
 const now = new Date('2026-10-23T13:40:00Z')
@@ -129,7 +129,7 @@ describe('the page Podcasts', () => {
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(html.slice(html.indexOf('<aside'))).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="Podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/podcasts" method="get"><fieldset class="hf-checkbox-group"><legend class="hf-heading-2">Podcasts<\/legend>/,
+      /^<aside class="hf-page-sidebar" aria-label="Podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws\/podcasts" method="get"><fieldset class="hf-checkbox-group"><legend class="hf-heading-2">Podcasts<\/legend>/,
     )
   })
 
@@ -142,11 +142,11 @@ describe('the page Podcasts', () => {
     expect(html).not.toContain('<fieldset')
   })
 
-  it('has a form that gets to /podcasts, with a group named Podcasts and a button Toon, so it works without JavaScript', async () => {
+  it('has a form that gets to /nieuws/podcasts, with a group named Podcasts and a button Toon, so it works without JavaScript', async () => {
     const html = await render()
     const form = html.slice(html.indexOf('<aside')).match(/<form.*?<\/form>/)?.[0] ?? ''
 
-    expect(form).toMatch(/^<form [^>]*action="\/podcasts"[^>]*method="get"/)
+    expect(form).toMatch(/^<form [^>]*action="\/nieuws\/podcasts"[^>]*method="get"/)
     expect(form).toContain('<fieldset')
     expect(form.match(/<legend[^>]*>Podcasts<\/legend>/)).not.toBeNull()
     expect(form).toMatch(/<button type="submit">Toon<\/button><\/form>$/)
@@ -177,7 +177,7 @@ describe('the page Podcasts', () => {
     expect(html).not.toContain('Alle podcasts')
     expect(html).not.toContain('Podcasts filteren')
     expect(html).not.toContain('aria-current')
-    expect(html).not.toMatch(/href="\/podcasts\?podcast=/)
+    expect(html).not.toMatch(/href="\/nieuws\/podcasts\?podcast=/)
   })
 
   it('checks nothing when no podcast is chosen', async () => {
@@ -213,7 +213,7 @@ describe('the page Podcasts', () => {
 
     expect(html.match(/checked=""/g)).toHaveLength(2)
     expect(html).toContain('<h1 class="hf-heading-1">Podcasts</h1>')
-    expect(html).toContain('href="/podcasts?pagina=2" rel="next">Volgende')
+    expect(html).toContain('href="/nieuws/podcasts?pagina=2" rel="next">Volgende')
     expect(html).not.toContain('Over ')
   })
 })
@@ -273,7 +273,9 @@ describe('the podcasts that are chosen', () => {
 
     const html = await render({ podcast: ['radio-camataru', 'omroep-abe'] })
 
-    expect(html).toContain('<a href="/podcasts?podcast=radio-camataru&amp;podcast=omroep-abe">Probeer het opnieuw</a>')
+    expect(html).toContain(
+      '<a href="/nieuws/podcasts?podcast=radio-camataru&amp;podcast=omroep-abe">Probeer het opnieuw</a>',
+    )
   })
 
   it('asks for the first page of all podcasts without parameters, and ignores a parameter it does not know', async () => {
@@ -444,7 +446,7 @@ describe('the pagination', () => {
     expect(html).toContain('<nav aria-label="Paginering"')
     expect(html).toContain('Pagina 1 van 9')
     expect(withoutIcons(html)).toContain(
-      '<a class="hf-pagination-link hf-pagination-next" href="/podcasts?pagina=2" rel="next">Volgende</a>',
+      '<a class="hf-pagination-link hf-pagination-next" href="/nieuws/podcasts?pagina=2" rel="next">Volgende</a>',
     )
     expect(html).not.toContain('Vorige')
   })
@@ -455,8 +457,8 @@ describe('the pagination', () => {
     const second = withoutIcons(await render({ pagina: '2' }))
 
     expect(second).toContain('Pagina 2 van 9')
-    expect(second).toContain('href="/podcasts" rel="prev">Vorige')
-    expect(second).toContain('href="/podcasts?pagina=3" rel="next">Volgende')
+    expect(second).toContain('href="/nieuws/podcasts" rel="prev">Vorige')
+    expect(second).toContain('href="/nieuws/podcasts?pagina=3" rel="next">Volgende')
     expect(getPodcastPage).toHaveBeenCalledExactlyOnceWith([], 2)
   })
 
@@ -465,7 +467,7 @@ describe('the pagination', () => {
 
     const html = withoutIcons(await render({ pagina: '9' }))
 
-    expect(html).toContain('href="/podcasts?pagina=8" rel="prev">Vorige')
+    expect(html).toContain('href="/nieuws/podcasts?pagina=8" rel="prev">Vorige')
     expect(html).not.toContain('Volgende')
   })
 
@@ -489,8 +491,8 @@ describe('the pagination', () => {
 
     const html = withoutIcons(await render({ pagina: '2', podcast: 'omroep-abe' }))
 
-    expect(html).toContain('href="/podcasts?podcast=omroep-abe" rel="prev">Vorige')
-    expect(html).toContain('href="/podcasts?podcast=omroep-abe&amp;pagina=3" rel="next">Volgende')
+    expect(html).toContain('href="/nieuws/podcasts?podcast=omroep-abe" rel="prev">Vorige')
+    expect(html).toContain('href="/nieuws/podcasts?podcast=omroep-abe&amp;pagina=3" rel="next">Volgende')
   })
 })
 
@@ -551,7 +553,7 @@ describe('the metadata', () => {
 
     expect(metadata.title).toBe('Podcasts')
     expect(metadata.description).toContain('podcasts over sc Heerenveen')
-    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/podcasts')
+    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/nieuws/podcasts')
     expect(metadata.robots).toBeUndefined()
   })
 
@@ -565,25 +567,27 @@ describe('the metadata', () => {
       return (await generateMetadata(props(query))).alternates?.canonical
     }
 
-    expect(await canonical({})).toBe('https://sc.heerenveen.org/podcasts')
-    expect(await canonical({ pagina: '1' })).toBe('https://sc.heerenveen.org/podcasts')
-    expect(await canonical({ pagina: '2' })).toBe('https://sc.heerenveen.org/podcasts?pagina=2')
+    expect(await canonical({})).toBe('https://sc.heerenveen.org/nieuws/podcasts')
+    expect(await canonical({ pagina: '1' })).toBe('https://sc.heerenveen.org/nieuws/podcasts')
+    expect(await canonical({ pagina: '2' })).toBe('https://sc.heerenveen.org/nieuws/podcasts?pagina=2')
     expect(await canonical({ podcast: 'omroep-abe' }, { ...everything, selected: [abe] })).toBe(
-      'https://sc.heerenveen.org/podcasts?podcast=omroep-abe',
+      'https://sc.heerenveen.org/nieuws/podcasts?podcast=omroep-abe',
     )
     expect(await canonical({ pagina: '2', podcast: 'omroep-abe' }, { ...everything, selected: [abe] })).toBe(
-      'https://sc.heerenveen.org/podcasts?podcast=omroep-abe&pagina=2',
+      'https://sc.heerenveen.org/nieuws/podcasts?podcast=omroep-abe&pagina=2',
     )
     expect(
       await canonical(
         { podcast: ['radio-camataru', 'omroep-abe'] },
         { ...everything, podcasts: three, selected: [abe, camataru] },
       ),
-    ).toBe('https://sc.heerenveen.org/podcasts?podcast=omroep-abe&podcast=radio-camataru')
+    ).toBe('https://sc.heerenveen.org/nieuws/podcasts?podcast=omroep-abe&podcast=radio-camataru')
     // Every podcast is the page of all podcasts, and so is its address.
-    expect(await canonical({ podcast: ['omroep-abe', 'radio-camataru'] })).toBe('https://sc.heerenveen.org/podcasts')
+    expect(await canonical({ podcast: ['omroep-abe', 'radio-camataru'] })).toBe(
+      'https://sc.heerenveen.org/nieuws/podcasts',
+    )
     expect((await generateMetadata(props({ pagina: '2' }))).openGraph?.url).toBe(
-      'https://sc.heerenveen.org/podcasts?pagina=2',
+      'https://sc.heerenveen.org/nieuws/podcasts?pagina=2',
     )
   })
 
@@ -623,7 +627,7 @@ describe('when the database can not be read', () => {
     const html = await render({ pagina: '2', podcast: 'omroep-abe' })
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
-    expect(html).toContain('<a href="/podcasts?podcast=omroep-abe&amp;pagina=2">Probeer het opnieuw</a>')
+    expect(html).toContain('<a href="/nieuws/podcasts?podcast=omroep-abe&amp;pagina=2">Probeer het opnieuw</a>')
     expect(html).not.toContain('Luister ook')
   })
 
@@ -635,7 +639,7 @@ describe('when the database can not be read', () => {
     await render()
 
     expect(console.error).toHaveBeenCalledExactlyOnceWith(
-      'Could not read the episodes for /podcasts: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
+      'Could not read the episodes for /nieuws/podcasts: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
     )
   })
 })

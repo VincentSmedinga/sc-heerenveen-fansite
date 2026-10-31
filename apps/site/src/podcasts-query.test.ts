@@ -56,23 +56,23 @@ describe('parsePodcastsQuery', () => {
 describe('podcastsQuery and podcastsHref', () => {
   it('have no query for the first page of all podcasts', () => {
     expect(podcastsQuery([], 1)).toBe('')
-    expect(podcastsHref([], 1)).toBe('/podcasts')
+    expect(podcastsHref([], 1)).toBe('/nieuws/podcasts')
   })
 
   it('write one podcast for each podcast, in the order given, and the page after them', () => {
-    expect(podcastsHref(['omroep-abe'], 1)).toBe('/podcasts?podcast=omroep-abe')
+    expect(podcastsHref(['omroep-abe'], 1)).toBe('/nieuws/podcasts?podcast=omroep-abe')
     expect(podcastsHref(['omroep-abe', 'radio-camataru'], 1)).toBe(
-      '/podcasts?podcast=omroep-abe&podcast=radio-camataru',
+      '/nieuws/podcasts?podcast=omroep-abe&podcast=radio-camataru',
     )
-    expect(podcastsHref([], 2)).toBe('/podcasts?pagina=2')
+    expect(podcastsHref([], 2)).toBe('/nieuws/podcasts?pagina=2')
     expect(podcastsHref(['omroep-abe', 'radio-camataru'], 3)).toBe(
-      '/podcasts?podcast=omroep-abe&podcast=radio-camataru&pagina=3',
+      '/nieuws/podcasts?podcast=omroep-abe&podcast=radio-camataru&pagina=3',
     )
     expect(podcastsQuery(['omroep-abe'], 3)).toBe('podcast=omroep-abe&pagina=3')
   })
 
   it('escape what is not safe in an address', () => {
-    expect(podcastsHref(['a&b=c'], 1)).toBe('/podcasts?podcast=a%26b%3Dc')
+    expect(podcastsHref(['a&b=c'], 1)).toBe('/nieuws/podcasts?podcast=a%26b%3Dc')
   })
 })
 

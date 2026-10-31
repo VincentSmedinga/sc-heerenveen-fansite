@@ -25,7 +25,7 @@ const notInSitemap: string[] = [
   '/beheer/inloggen/verstuurd',
   '/contact/verstuurd',
   // A page of results has no use in a search engine, and says noindex.
-  '/zoeken',
+  '/nieuws/zoeken',
   // One page for every published article: the sitemap lists them from the database.
   '/redactie/[slug]',
   // The matches of a season that is over: only the current season, /wedstrijden, is listed.

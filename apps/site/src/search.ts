@@ -14,7 +14,7 @@ export const maxWords = 5
 /** The fewest characters of a word. A word of two letters is a search too (LC, VI, AZ). */
 export const minWordLength = 2
 
-/** The most results /zoeken shows, however often the button is pressed. */
+/** The most results /nieuws/zoeken shows, however often the button is pressed. */
 export const maxResults = 100
 
 /**
@@ -28,7 +28,7 @@ export type Search =
   | { kind: 'none' }
   | { kind: 'valid'; text: string; words: string[] }
 
-/** What the list of players on /zoeken needs, for the current season. */
+/** What the list of players on /nieuws/zoeken needs, for the current season. */
 export type Squad = {
   /** The Wikipedia page the squad was read from, or undefined when none was read. */
   page: Awaited<ReturnType<typeof findSquadPage>>
@@ -115,7 +115,7 @@ export function parseSearch(value: string | string[] | undefined): Search {
 
 /** The address of the search for a text, such as the surname of a player. */
 export function searchHref(text: string) {
-  return `/zoeken?${new URLSearchParams({ q: text }).toString()}`
+  return `/nieuws/zoeken?${new URLSearchParams({ q: text }).toString()}`
 }
 
 /**

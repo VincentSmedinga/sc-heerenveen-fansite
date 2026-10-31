@@ -22,13 +22,15 @@ describe('pageMetadata', () => {
   it('puts the query in the canonical URL and the Open Graph address when the page has one, and nothing for an empty one', () => {
     vi.stubEnv('SITE_ENV', 'production')
 
-    expect(pageMetadata('/podcasts', 'Podcasts', 'pagina=2').alternates?.canonical).toBe(
-      'https://sc.heerenveen.org/podcasts?pagina=2',
+    expect(pageMetadata('/nieuws/podcasts', 'Podcasts', 'pagina=2').alternates?.canonical).toBe(
+      'https://sc.heerenveen.org/nieuws/podcasts?pagina=2',
     )
-    expect(pageMetadata('/podcasts', 'Podcasts', 'pagina=2').openGraph?.url).toBe(
-      'https://sc.heerenveen.org/podcasts?pagina=2',
+    expect(pageMetadata('/nieuws/podcasts', 'Podcasts', 'pagina=2').openGraph?.url).toBe(
+      'https://sc.heerenveen.org/nieuws/podcasts?pagina=2',
     )
-    expect(pageMetadata('/podcasts', 'Podcasts', '').alternates?.canonical).toBe('https://sc.heerenveen.org/podcasts')
+    expect(pageMetadata('/nieuws/podcasts', 'Podcasts', '').alternates?.canonical).toBe(
+      'https://sc.heerenveen.org/nieuws/podcasts',
+    )
   })
 
   it('gives the page its canonical URL, description and Open Graph tags, with the picture of our own domain', () => {

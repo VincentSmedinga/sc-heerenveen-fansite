@@ -16,16 +16,22 @@ import {
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
-import type { SearchParams } from '../../filter-query'
+import type { SearchParams } from '../../../filter-query'
 
-import { reviewBranch } from '../../env'
-import { reasonOf } from '../../errors'
-import { pageMetadata } from '../../metadata'
-import { dateTimeOf, episodeDetails, formatEpisodeTime } from '../../news'
-import { getPodcastPage } from '../../podcasts'
-import { parsePodcastsQuery, podcastsHeading, podcastsHref, podcastsQuery, podcastsTitle } from '../../podcasts-query'
-import { ServerError, serverErrorTitle } from '../../ServerError'
-import { withBranch } from '../../title'
+import { reviewBranch } from '../../../env'
+import { reasonOf } from '../../../errors'
+import { pageMetadata } from '../../../metadata'
+import { dateTimeOf, episodeDetails, formatEpisodeTime } from '../../../news'
+import { getPodcastPage } from '../../../podcasts'
+import {
+  parsePodcastsQuery,
+  podcastsHeading,
+  podcastsHref,
+  podcastsQuery,
+  podcastsTitle,
+} from '../../../podcasts-query'
+import { ServerError, serverErrorTitle } from '../../../ServerError'
+import { withBranch } from '../../../title'
 
 // Render on each request, so the build never reads the database. getPodcastPage caches the
 // lists itself.
@@ -43,7 +49,7 @@ const loadPage = cache(async (podcasts: string, page: number) => {
   try {
     return (await getPodcastPage(JSON.parse(podcasts) as string[], page)) ?? 'unknown'
   } catch (error) {
-    console.error(`Could not read the episodes for /podcasts: ${reasonOf(error)}`)
+    console.error(`Could not read the episodes for /nieuws/podcasts: ${reasonOf(error)}`)
 
     return undefined
   }
@@ -56,7 +62,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   return content === undefined
     ? { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
     : pageMetadata(
-        '/podcasts',
+        '/nieuws/podcasts',
         podcastsTitle(
           content.selected.map((item) => item.name),
           page,
@@ -133,7 +139,7 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
         // JavaScript too: a page that reloads at each tick takes the focus with it.
         <Page.Sidebar aria-label="Podcasts">
           <Card as="div" surface="soft">
-            <Form action="/podcasts" autoComplete="off" method="get">
+            <Form action="/nieuws/podcasts" autoComplete="off" method="get">
               <CheckboxGroup
                 legend="Podcasts"
                 name="podcast"

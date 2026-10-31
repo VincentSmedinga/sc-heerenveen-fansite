@@ -10,12 +10,12 @@ const podcasts = [
 ]
 
 /**
- * Made-up episodes for the checks of /podcasts and of the homepage. They are not in the seed:
- * the seed also runs on acceptance, where they would mix with the real episodes. The check puts
- * them in the database before the first test and takes them out after the last one. There are
- * more than 25 in all, so /podcasts has a second page, and they go back far enough to show a
- * weekday, a date and a date with a year. The first has a title with a very long word, and one
- * has a title that is HTML: it is shown as text.
+ * Made-up episodes for the checks of /nieuws/podcasts and of the homepage. They are not in the
+ * seed: the seed also runs on acceptance, where they would mix with the real episodes. The
+ * check puts them in the database before the first test and takes them out after the last one.
+ * There are more than 25 in all, so /nieuws/podcasts has a second page, and they go back far
+ * enough to show a weekday, a date and a date with a year. The first has a title with a very
+ * long word, and one has a title that is HTML: it is shown as text.
  */
 export const episodeTitles = {
   html: 'Aflevering over <b>vet</b> & "aanhalingstekens"',
