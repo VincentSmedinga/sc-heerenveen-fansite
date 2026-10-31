@@ -93,7 +93,13 @@ export const motionChanges: MotionChange[] = [
   { component: 'Link', group: 'aanwijzen', now: jumps, what: 'Kleur en dikte van de streep', why: 'Muis' },
   { component: 'Button', group: 'aanwijzen', now: jumps, what: 'Vulling en rand', why: 'Muis' },
   { component: 'Button, zacht', group: 'aanwijzen', now: jumps, what: 'Vulling en rand', why: 'Muis' },
-  { component: 'SegmentedControl', group: 'aanwijzen', now: jumps, what: 'Kleur van de tekst', why: 'Muis' },
+  {
+    component: 'SegmentedControl',
+    group: 'aanwijzen',
+    now: 'Kleur van de tekst in 0,2 seconde (#500).',
+    what: 'Kleur van de tekst',
+    why: 'Muis',
+  },
   { component: 'RichTextEditor, werkbalk', group: 'aanwijzen', now: jumps, what: 'Kleur van de tekst', why: 'Muis' },
   {
     component: 'Navigation, footer',
@@ -139,11 +145,11 @@ export const motionChanges: MotionChange[] = [
     why: 'Ingedrukt (`:active`)',
   },
   {
-    component: 'SegmentedControl',
+    component: 'SegmentedControl, knop',
     group: 'selecteren',
-    now: jumps,
-    what: 'Vulling, rand en kleur',
-    why: 'Geselecteerd (`aria-pressed`)',
+    now: 'Schuift in 0,2 seconde naar de gekozen keuze, de kleur van de tekst gaat over (#500). Tussen twee pagina’s schuift hij met een overgang tussen pagina’s, waar de browser die kent.',
+    what: 'Plaats van de knop en kleur van de tekst',
+    why: 'Geselecteerd (`aria-pressed`, `aria-current`)',
   },
   {
     component: 'RichTextEditor, werkbalk',

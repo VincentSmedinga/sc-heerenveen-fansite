@@ -4,6 +4,7 @@ import { Button } from './button/Button'
 import { Field } from './field/Field'
 import { Input } from './input/Input'
 import { Pagination } from './pagination/Pagination'
+import { SegmentedLinks } from './segmented-control/SegmentedLinks'
 import { Select } from './select/Select'
 import { sizes } from './size'
 
@@ -35,6 +36,15 @@ const Row = ({ size }: { size: (typeof sizes)[number] }) => (
         <Input name={`naam-${size}`} size={size} type="search" />
       </Field>
     </div>
+    <SegmentedLinks
+      label={`Welke wedstrijden, ${labels[size].toLowerCase()}`}
+      options={[
+        { href: '#alle-wedstrijden', label: 'Alle wedstrijden', value: 'all' },
+        { href: '#eredivisie', label: 'Eredivisie', value: 'league' },
+      ]}
+      size={size}
+      value="all"
+    />
     <Pagination
       current={5}
       label={`Pagina's, ${labels[size].toLowerCase()}`}

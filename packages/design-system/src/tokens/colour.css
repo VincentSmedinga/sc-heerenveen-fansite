@@ -104,6 +104,21 @@
     --hf-colour-background-button-soft: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-700));
     --hf-colour-background-button-soft-hover: light-dark(var(--hf-colour-blue-200), var(--hf-colour-blue-600));
     --hf-colour-background-hover: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
+
+    /*
+     * The track of a segmented control and the thumb under the chosen option. The track is a
+     * step darker than the page and the surfaces in light (grey-200) and a step lighter than
+     * them in dark (blue-800), so it reads as a groove. The thumb is white in light and
+     * blue-700 in dark. Its border is the border of a field (--hf-colour-border-input), which
+     * reaches 3:1 against the track and against the thumb itself in both themes. The shadow is
+     * a light edge below the thumb.
+     */
+    --hf-colour-background-track: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-800));
+    --hf-colour-background-thumb: light-dark(var(--hf-colour-white), var(--hf-colour-blue-700));
+    --hf-colour-shadow-thumb: light-dark(
+      color-mix(in srgb, var(--hf-colour-grey-900) 22%, transparent),
+      color-mix(in srgb, var(--hf-colour-blue-950) 70%, transparent)
+    );
     --hf-colour-background-zebra: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
     --hf-colour-background-highlight: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
 
@@ -306,6 +321,9 @@
       --hf-colour-background-button-soft: var(--hf-colour-blue-100);
       --hf-colour-background-button-soft-hover: var(--hf-colour-blue-200);
       --hf-colour-background-hover: var(--hf-colour-grey-50);
+      --hf-colour-background-track: var(--hf-colour-grey-200);
+      --hf-colour-background-thumb: var(--hf-colour-white);
+      --hf-colour-shadow-thumb: color-mix(in srgb, var(--hf-colour-grey-900) 22%, transparent);
       --hf-colour-background-zebra: var(--hf-colour-grey-50);
       --hf-colour-background-highlight: var(--hf-colour-blue-100);
       --hf-colour-background-stripe: color-mix(in srgb, var(--hf-colour-grey-300) 30%, transparent);

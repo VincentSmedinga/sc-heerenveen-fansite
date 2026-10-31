@@ -41,7 +41,7 @@ describe('SegmentedControl', () => {
 
     expect(light.querySelector('svg')?.getAttribute('fill')).toBe('none')
     expect(dark.querySelector('svg')?.getAttribute('fill')).toBe('currentColor')
-    expect(light.firstElementChild?.className).toBe('hf-icon-head')
+    expect(light.querySelector('.hf-segmented-label')?.firstElementChild?.className).toBe('hf-icon-head')
     expect(light.textContent).toBe('Licht')
     expect(dark.textContent).toBe('Donker')
   })
@@ -88,5 +88,74 @@ describe('SegmentedControl', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Donker' }))
 
     expect(screen.getByRole('button', { name: 'Licht' }).getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('places the thumb with the number of options and the index of the chosen one', () => {
+    const { rerender } = render(
+      <SegmentedControl
+        label="Thema"
+        onChange={vi.fn()}
+        options={[...options, { label: 'Systeem', value: 'system' }]}
+        value="dark"
+      />,
+    )
+    const group = screen.getByRole('group', { name: 'Thema' })
+
+    expect(group.style.getPropertyValue('--hf-segmented-count')).toBe('3')
+    expect(group.style.getPropertyValue('--hf-segmented-index')).toBe('1')
+    expect(group.hasAttribute('data-empty')).toBe(false)
+
+    rerender(
+      <SegmentedControl
+        label="Thema"
+        onChange={vi.fn()}
+        options={[...options, { label: 'Systeem', value: 'system' }]}
+        value="system"
+      />,
+    )
+
+    expect(group.style.getPropertyValue('--hf-segmented-index')).toBe('2')
+  })
+
+  it('leaves the thumb out when the value is none of the options', () => {
+    render(<SegmentedControl label="Thema" onChange={vi.fn()} options={options} value={'other' as 'light'} />)
+
+    expect(screen.getByRole('group', { name: 'Thema' }).hasAttribute('data-empty')).toBe(true)
+  })
+
+  it('has the standard size without a class, and the small size with the shared class', () => {
+    const { rerender } = render(<SegmentedControl label="Thema" onChange={vi.fn()} options={options} value="light" />)
+
+    expect(screen.getByRole('group').className).toBe('hf-segmented-control')
+
+    rerender(<SegmentedControl label="Thema" onChange={vi.fn()} options={options} size="small" value="light" />)
+
+    expect(screen.getByRole('group').className).toBe('hf-segmented-control hf-size-small')
+    expect(screen.getByRole('group').hasAttribute('size')).toBe(false)
+  })
+
+  it('keeps the class and the style of the caller next to its own', () => {
+    render(
+      <SegmentedControl
+        className="extra"
+        label="Thema"
+        onChange={vi.fn()}
+        options={options}
+        style={{ marginBlockStart: '1px' }}
+        value="light"
+      />,
+    )
+    const group = screen.getByRole('group')
+
+    expect(group.className).toBe('hf-segmented-control extra')
+    expect(group.style.marginBlockStart).toBe('1px')
+    expect(group.style.getPropertyValue('--hf-segmented-count')).toBe('2')
+  })
+
+  it('wraps the text of an option with a copy of it for the bold width, and the name stays the text', () => {
+    render(<SegmentedControl label="Thema" onChange={vi.fn()} options={options} value="light" />)
+    const button = screen.getByRole('button', { name: 'Licht' })
+
+    expect(button.querySelector('.hf-segmented-label')?.getAttribute('data-label')).toBe('Licht')
   })
 })

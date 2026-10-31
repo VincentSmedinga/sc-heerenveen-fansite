@@ -17,6 +17,7 @@ export function CompetitionLinks({ address, competition }: { address: string; co
         { href: address, label: 'Alle wedstrijden', value: 'all' },
         { href: `${address}${competitionQuery('league')}`, label: 'Eredivisie', value: 'league' },
       ]}
+      size="small"
       value={competition}
     />
   )

@@ -2239,6 +2239,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een eigen component voor alleen het thema, met de opslag erin; dat bindt een knoppenrij aan één functie. Of keuzerondjes (`radio`) in een `fieldset`; dat is meer opmaak voor twee opties en leest een schermlezer minder kort voor. Of één knop die naar het andere thema schakelt; dan zegt de knop niet welk thema je ziet.
 - **Later:** zie _De themaschakelaar is één knop rechtsboven in de header_.
   De site gebruikt `SegmentedControl` niet meer voor het thema, maar het component blijft in het designsysteem, en wat hier staat over de groep, `aria-pressed` en de gevulde knop blijft gelden.
+- **Later:** zie _De schakelaar is een baan met een schuivende knop_ (31 oktober 2026): de ingedrukte knop is niet meer gevuld en de andere geen omlijning, maar de gekozen keuze ligt op een knop in een baan en heeft dikkere letters.
+  De groep, `aria-pressed` en het feit dat het component niets bewaart blijven gelden.
 
 ### Head zet één script vóór de eerste weergave in de head
 
@@ -3018,6 +3020,50 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een tabel met een sorteerbare kolom stuurt een stukje script mee, waar een gewone `DataTable` er geen heeft.
   "7–5" sorteert op één getal en een schermlezer hoort dat niet, want de kop zegt alleen "doelpunten".
 - **Alternatieven:** sorteren op de server met `?sorteer=` in het adres (werkt zonder JavaScript, maar laadt de pagina opnieuw, past niet bij de schakelaar en maakt de volgorde onderdeel van het adres: het issue sluit dat uit); knoppen in de koppen ook zonder JavaScript (knoppen die niets doen); de pagina laten sorteren met eigen code (dan bouwt elke tabel het opnieuw); het doelpuntensaldo als waarde van Doelpunten (zegt niet hoe vaak we scoorden); sorteren op meer kolommen tegelijk, filteren en paginering (buiten het issue); alle kolommen met een pijl van een neutrale vorm (een extra pictogram en meer breedte op 320 pixels).
+
+### De schakelaar is een baan met een schuivende knop
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** `SegmentedControl` en `SegmentedLinks` zijn een afgeronde baan met de keuzes naast elkaar, en een knop onder de gekozen keuze die naar een nieuwe keuze schuift (#500).
+  - **De vorm:** de keuzes delen de breedte van de baan gelijk, en de knop is zo breed als één keuze, met een kleine marge rondom.
+    De baan heeft de rol `--hf-colour-background-track` (in licht grijs-200, een stap onder de pagina en de vlakken; in donker blauw-800), de knop `--hf-colour-background-thumb` (wit; in donker blauw-700) met een lichte schaduw uit `--hf-colour-shadow-thumb`.
+    De rand van de knop is `--hf-colour-border-input`: 3:1 tegen de baan en tegen de knop zelf, in beide thema's.
+    De gekozen keuze heeft dikkere letters in de tekstkleur, de andere keuzes gewone letters in de rustige kleur van secundaire tekst (4,5:1 op de baan).
+    Een pictogram blijft mogelijk.
+    De gekozen keuze is dus te zien aan een rand en dikkere letters, niet aan kleur alleen.
+    Een label ligt over een onzichtbaar, even breed exemplaar in dik, zodat de baan niet breder of smaller wordt met de keuze.
+  - **De maten:** de standaardmaat is 44 pixels hoog en de kleine maat 36 pixels uit `--hf-size-control-small`, met dezelfde eigenschap `size` en dezelfde klasse `hf-size-small` als de knoppen en velden (zie _Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat_).
+    Een keuze is over de hele hoogte van de baan te raken, ook al is de knop kleiner.
+    De site zet de schakelaar op Statistieken en Spelers (#406) in de kleine maat.
+  - **De beweging:** de knop schuift in `--hf-motion-duration-short` met `--hf-motion-ease-change`, en de kleur van de tekst gaat in dezelfde tijd over.
+    Met `prefers-reduced-motion: reduce` zijn de duren 0 seconden, dus de knop springt.
+    De plaats van de knop volgt uit twee custom properties op de groep, het aantal keuzes en de plaats van de gekozen keuze.
+    Daardoor schuift hij met CSS als de pagina de waarde verandert (`onChange`), en staat hij goed in de HTML van de server, ook zonder JavaScript.
+  - **Links zonder JavaScript:** een link laadt een nieuwe pagina, en dan kan de knop alleen schuiven met een overgang tussen pagina's (`@view-transition` met `view-transition-name`).
+    Het is een extraatje: een browser zonder die ondersteuning laadt de pagina en de knop staat meteen bij de nieuwe keuze.
+    De knop en de eerste vier keuzes hebben een eigen naam in de overgang, zodat de letters boven de knop blijven (een benoemd element ligt boven de rest van de pagina).
+    De rest van de pagina, de root, krijgt geen animatie en verandert dus meteen, zoals voorheen.
+    Met `prefers-reduced-motion: reduce` doet de pagina niet mee.
+    Elke pagina met het stylesheet van het designsysteem doet mee aan de overgang, ook een pagina zonder schakelaar; die gaat dan zonder animatie over.
+    Eén schakelaar per pagina, en voor de knop die schuift hoogstens vier keuzes, want een naam kan maar één element hebben.
+    Gezien in Chromium 156 en in WebKit (Playwright 27.2) met twee losse pagina's: in beide gaat de overgang door en schuift de knop in 0,2 seconde.
+    Safari zelf is niet gezien.
+  - **Stylelint:** `@view-transition` en `::view-transition-*` zijn nog niet 'widely available' (2028).
+    `light-dark()` kreeg dezelfde uitzondering; de `stylelint-disable` staat in `segmented-control.css` met de reden.
+    De test van de bewegingstokens liet geen `animation-duration` toe; hij eist nu dat die een bewegingstoken is, zodat de overgang tussen pagina's geen eigen tijd schrijft.
+- **Waarom:** de standaardvorm, een volle blauwe knop, was te opvallend naast de inhoud, en de projecteigenaar koos op 31 oktober 2026 voor het ontwerp van de baan met een lichte knop.
+  Een baan met een knop laat in één oogopslag zien dat het één keuze uit een paar is, en de beweging zegt wat er veranderde.
+  CSS en twee custom properties houden het component een servercomponent, zonder script en zonder meting in de browser.
+  De overgang tussen pagina's is een extraatje dat bij weinig ondersteuning alleen de beweging mist, niet de keuze.
+- **Gevolg:** de HTML van de schakelaar heeft nu een `style` met twee custom properties, een `span` om de tekst van elke keuze, en in de kleine maat de klasse `hf-size-small`.
+  De tests van de pagina's Statistieken en Spelers lezen die opmaak.
+  Op Statistieken en Spelers is de schakelaar 36 pixels hoog in plaats van 44, een baan met een lichte knop in plaats van twee knoppen met een rand; de kolom, de plek en de kaarten veranderen niet.
+- **Alternatieven:** een knop als eigen element in de HTML, met een meting van de plaats in JavaScript (werkt niet zonder script en vraagt een client-component).
+  Een knop die alleen met `aria-pressed` of `aria-current` van kleur wisselt, zonder te schuiven (de projecteigenaar wilde de beweging).
+  De overgang tussen pagina's met JavaScript, in `pageswap` en `pagereveal` (dan werkt hij niet zonder script en moet de site een script laden).
+  `@view-transition` alleen op pagina's met een schakelaar (CSS kan dat niet kiezen; het zou een script of een eigen stylesheet per pagina kosten).
+  Een tweede maat-eigenschap voor de schakelaar (de kleine maat is al één mechanisme voor alle knoppen en velden).
+- **Later:** zie _Een SegmentedControl bewaart niets, en de ingedrukte knop is gevuld_: de ingedrukte knop is niet meer gevuld, maar de gekozen keuze heeft een knop en dikkere letters.
 
 ## Site
 
@@ -8014,6 +8060,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de schakelaar staat sindsdien ook op `/statistieken/tegenstanders` en op de pagina van een club, en telt daar de wedstrijden van alle seizoenen.
 - **Later:** zie _De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast_ (31 oktober 2026): de links van de balk onder het hoofdmenu houden het seizoen en de keuze nu vast.
   Het hoofdmenu zelf houdt ze niet vast.
+- **Later:** zie _De schakelaar is een baan met een schuivende knop_ (31 oktober 2026): de schakelaar staat in de kleine maat van 36 pixels in plaats van 44, en is een baan met een knop.
+  De plek, de links en `aria-current` blijven.
 
 ### `ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`
 
