@@ -60,6 +60,7 @@ Zonder zinnen toont de pagina de nieuwe versie niet.
 De database draait in Docker.
 Start hem met `docker compose up -d --wait`, en maak dan de tabellen met `pnpm db:migrate`.
 Zonder database slagen de tests van `packages/db` niet.
+Werk je in een worktree, dan krijg je daar een eigen database en eigen poorten bij; zie _Een database per worktree_ in de README van het package.
 [`packages/db`](packages/db/README.md) legt de opdrachten `pnpm db:generate`, `pnpm db:migrate` en `pnpm db:seed` uit, en de opdrachten `pnpm db:backup` en `pnpm db:restore` voor een dump van de database.
 
 `pnpm install` zet ook twee git hooks klaar.
@@ -144,6 +145,8 @@ Stop ze met:
 pnpm review:stop
 ```
 
+`pnpm review` blijft op de poorten 3000 en 6006 en op de database `fansite`, ook al is de reviewmap een worktree: het is voor jou, en het stopt bewust wat daar al draait.
+De worktrees van agents hebben wel eigen poorten en een eigen database (zie [`packages/db`](packages/db/README.md), _Een database per worktree_).
 De reviewmap en de lokale database zijn voor alle branches dezelfde.
 Een migratie van een nieuwere branch blijft dus in de database staan als je daarna een oudere branch bekijkt.
 Wil je opnieuw beginnen, dan wist `docker compose down --volumes` de database.

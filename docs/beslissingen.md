@@ -302,6 +302,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een agent kan dat zelf niet.
   Het opstarten door de agent helpt dus de volgende sessie, of de huidige na een Reconnect van de projecteigenaar.
   Draait Storybook al bij het begin van een sessie, dan werkt alles meteen.
+- **Later:** sinds 1 november 2026 draait Storybook in een worktree op een eigen poort, uit het blok van die worktree, dus twee worktrees kunnen er naast elkaar een starten (zie _Elke werkmap heeft een eigen database en eigen poorten_).
+  De MCP-server in `.mcp.json` blijft op poort 6006, en toont dus alleen de Storybook van een checkout met de standaardpoorten.
 - **Alternatieven:** de projecteigenaar houdt Storybook draaiend vanuit de hoofdmap, zodat de server er is als een sessie begint; dat is betrouwbaarder, maar een stap bij elke sessie, en de server toont dan de code van de hoofdmap in plaats van die van de worktree.
   Of in `AGENTS.md` alleen melden dat de server er is.
   Of de reviewer de hulpmiddelen voor documentatie geven; die lezen alleen.
@@ -319,6 +321,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gevolg:** houdt iets anders dan de fansite een van de poorten bezet, dan stopt de opdracht met een melding en verandert hij niets.
   Een pull request van een fork neemt hij niet, want hij draait de code van de branch op je computer.
   De naam van de branch komt in de omgevingsvariabele `REVIEW_BRANCH`, en alleen `next dev` en `storybook dev` lezen die.
+- **Later:** een eigen paar poorten per branch, een van de alternatieven hieronder, hebben de worktrees van agents sinds 1 november 2026 wel (zie _Elke werkmap heeft een eigen database en eigen poorten_).
+  `pnpm review` blijft op 3000 en 6006 en op de database `fansite`, want het is voor de projecteigenaar; de reviewmap krijgt met `WORKTREE_NAME` leeg de standaardwaarden.
 - **Alternatieven:** `pnpm dev` in elke map, die zegt welke map een poort bezet; dan zoek je de worktree nog zelf.
   Of startconfiguraties voor de app van Claude; dan botsen de poorten tussen sessies.
   Of een eigen paar poorten per branch, zodat je branches naast elkaar ziet.
@@ -608,6 +612,40 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** de beslissingen _Controles: snel bij de commit, volledig in CI_, _De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job_ en _CI slaat de controles van de site over bij wijzigingen die ze niet raken_ spreken over één job met stappen.
   Dat zijn nu jobs; de keuzes zelf, wat CI draait en wat het overslaat, zijn gelijk gebleven.
 
+### Elke werkmap heeft een eigen database en eigen poorten
+
+- **Datum:** 1 november 2026
+- **Besluit:** elke worktree krijgt een eigen database op de gedeelde MariaDB en een eigen blok poorten, afgeleid van de naam van de map.
+  De database heet `fansite_<naam van de map>`, in kleine letters, cijfers en onderstrepingstekens.
+  Het blok heeft zes poorten: de site, Storybook, de rooktest, de site van de toegankelijkheidscontroles, diezelfde site zonder database en de nepmailserver.
+  Elke werkmap heeft een eigen blok van acht poorten tussen 24000 en 27999.
+  Hetzelfde geldt voor de tests: hun tijdelijke databases heten `fansite_test_<naam van de map>_<hex>`, en die van de rooktest `fansite_smoke_<naam van de map>_<hex>`.
+  Een gewone checkout, een map die geen worktree is en CI houden 3000, 6006, 3123, 3124, 3125, 2525 en `fansite`.
+  Een variabele die je zelf zet, wint van de afgeleide waarde, en een databasenaam anders dan `fansite` in `DATABASE_URL` blijft zoals hij is.
+  `WORKTREE_NAME` in de omgeving kiest een andere naam; een lege waarde zet het uit.
+- **Hoe:** `scripts/worktree-env.js` rekent de waarden uit en start de opdracht ermee.
+  De scripts `dev`, `storybook`, `smoke`, `test:a11y` en `test` van de site, het designsysteem, `@fansite/db` en de importer lopen erdoor.
+  `--database` maakt de database de eerste keer aan, draait de migraties en de seed.
+  `pnpm worktree:db:drop` haalt hem weg, en alleen een naam die met `fansite_` begint.
+  Is een poort uit het blok bezet, dan stopt de opdracht met een melding die de poort en de worktree noemt, en kiest hij niet stilletjes een andere.
+  De poorten hangen af van de naam van de map: twee mappen kunnen toevallig hetzelfde blok krijgen (zo'n 0,2 procent per paar).
+  De melding zegt dan welke poort bezet is, en `SITE_PORT` en de andere variabelen zetten een andere.
+- **Waarom:** sessies die naast elkaar werken, botsten op wat ze delen.
+  De tests van `packages/db` faalden als twee sessies ze tegelijk draaiden, `pnpm test:a11y` faalde op de poort van de nepmailserver die een andere sessie vasthield, en Storybook, de site en de e2e-tests hebben vaste poorten.
+  De lokale database `fansite` heeft bovendien de echte import, en liet daardoor e2e-tests falen die een lege database verwachten.
+  Een naam uit de map is stabiel: dezelfde map geeft elke keer dezelfde waarden, zodat je ze kunt onthouden en een draaiende server terugvindt.
+- **Let op:** de projecteigenaar besloot op 31 oktober 2026 ook dat er hoogstens twee Builders tegelijk werken.
+  De laptop liep warm (belasting boven de 20 bij vijf sessies, plus de Docker-VM), en eigen poorten maken sessies niet zuiniger.
+  Dat is het werk van de Coordinator en geen onderdeel van deze beslissing.
+  De MCP-server van Storybook in `.mcp.json` blijft op poort 6006: die is van de checkout met de standaardpoorten.
+  De Storybook van een worktree draait op zijn eigen poort, en `pnpm worktree:env` zegt welke.
+  De database `fansite` en de databases die sessies al met de hand maakten, blijven ongemoeid.
+- **Alternatieven:** een eigen MariaDB-server per werkmap; dat scheidt alles, maar kost een Docker-container en geheugen per sessie, op een computer die al warm loopt.
+  Of een vaste lijst van werkmappen met nummers; dat botst niet, maar elke nieuwe werkmap moet erin, en dat vergeet een agent.
+  Of de poort laten kiezen door het systeem (poort 0); dan weet niemand welke poort een server heeft, en `.mcp.json` en de afspraken in `AGENTS.md` kunnen er niet naar verwijzen.
+  Of niets doen en sessies laten wachten; dat is wat misging.
+- **Later:** een eigen server per werkmap, als de botsingen blijven; of de poorten laten kiezen door een bestand in de werkmap als twee namen vaak hetzelfde blok krijgen.
+
 ### Issue-formulieren in YAML, met drie soorten en zonder lege issues
 
 - **Datum:** 26 oktober 2026
@@ -683,6 +721,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** de lokale MariaDB draait met Docker Compose, met de image `mariadb:10.11`.
   CI gebruikt dezelfde versie als servicecontainer.
 - **Waarom:** één commando, dezelfde versie als op de hosting, en wat in CI draait is wat lokaal draait.
+- **Later:** sinds 1 november 2026 heeft elke worktree een eigen database op die ene server, `fansite_<naam van de map>`; zie _Elke werkmap heeft een eigen database en eigen poorten_.
+  De database `fansite` en de server zelf zijn gelijk gebleven.
 - **Alternatieven:** alleen een gids voor `mariadb@10.11` met Homebrew.
   Dat vraagt geen Docker, maar werkt alleen op macOS en is lastiger gelijk te houden met CI.
 
@@ -796,6 +836,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een migratie die halverwege mislukt, kan een half veranderd schema achterlaten.
   Productie krijgt daarom een back-up vóór een migratie (#33).
 - **Later:** de back-up vóór een migratie op productie hoort sinds 26 oktober 2026 bij #347; zie _De dump bewaart 14 dagen, laat de nieuwste altijd staan, en laat tabellen zonder blijvende gegevens leeg_ en _Back-ups zijn een dagelijkse dump op de host, 14 dagen bewaard, en een terugzetting die we één keer echt testen_.
+- **Later:** de database van de rooktest heet sinds 1 november 2026 `fansite_smoke_<naam van de worktree>_<hex>` in een worktree, en de poort komt uit het blok van die worktree; zie _Elke werkmap heeft een eigen database en eigen poorten_.
 - **Alternatieven:** na het kopiëren een opdracht op de host draaien via SSH.
   Een SSH-sessie krijgt de variabelen van de app niet, dus `DATABASE_URL` moet dan ook in een bestand op de host, en we moeten Node daar zelf vinden.
   Of vanuit GitHub migreren door een SSH-tunnel; dan komt `DATABASE_URL` in de geheimen van GitHub.

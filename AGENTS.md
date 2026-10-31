@@ -257,13 +257,14 @@ It lists the components of the design system with their props and types, the doc
   Agents in this repository keep using the local server, which also has the development tools and shows your own worktree.
   `.mcp.json` doesn't change.
   It is the app in `apps/design-system-mcp`; `docs/designsysteem-publiceren.md` says how it runs.
-- The server shows the Storybook of the worktree where it runs, which isn't always yours, and two worktrees can't both use port 6006.
+- The server shows the Storybook of the worktree where it runs, which isn't always yours.
+  A worktree's Storybook is on a port of its own (see _Database and ports per worktree_), but `.mcp.json` points at port 6006, so only a Storybook on the default ports is the server.
   Read your own changes in your own code, not through the server.
-  To see whose Storybook holds the port: `lsof -a -d cwd -p $(lsof -tiTCP:6006 -sTCP:LISTEN)`.
-- If Storybook isn't running, start it in the background from your own worktree: `pnpm --filter design-system storybook --no-open --exact-port`.
-  With `--exact-port` it stops when another worktree has the port, instead of moving to a port the `.mcp.json` doesn't point at.
+  To see whose Storybook holds port 6006: `lsof -a -d cwd -p $(lsof -tiTCP:6006 -sTCP:LISTEN)`.
+- If Storybook isn't running, start it in the background from your own worktree: `pnpm --filter design-system storybook --no-open`.
+  It listens on the port of your worktree (`pnpm worktree:env` says which) and stops with a message when that port is busy.
   Leave another worktree's Storybook alone.
-  Stop the one you started when you are done, so the next worktree gets the port.
+  Stop the one you started when you are done.
 - Claude Code connects to the server when a session starts.
   If Storybook wasn't running then, the server shows as failed in `/mcp`, and starting Storybook later doesn't change that (we tried, over thirty seconds later it was still failed).
   Only a reconnect helps: the owner chooses Reconnect for `storybook` in `/mcp`, or starts a new session.
@@ -273,10 +274,26 @@ It lists the components of the design system with their props and types, the doc
   The server is a help, not a condition.
 - The Reviewer doesn't use the server: it reads the code, which is the source.
 
+## Database and ports per worktree
+
+Sessions that work next to each other on one computer must not share a database or a port.
+So a worktree gets a database of its own on the shared MariaDB, `fansite_<name of the folder>`, and a block of ports, both derived from the name of its folder by `scripts/worktree-env.js`.
+`pnpm dev`, Storybook, the smoke test, `pnpm test:a11y` and the tests of `@fansite/db`, the site and the importer use them without you doing anything.
+The first run that needs the database makes it, runs the migrations and the seed, and `pnpm worktree:db:drop` drops it.
+`pnpm worktree:env` shows the database and the ports of the folder you are in.
+
+- A normal checkout, a folder that isn't a worktree and CI keep 3000, 6006, 3123, 3124, 3125, 2525 and the database `fansite`.
+- A variable you set yourself wins: `DATABASE_URL`, `SITE_PORT`, `STORYBOOK_PORT`, `SMOKE_PORT`, `E2E_PORT`, `E2E_WITHOUT_DATABASE_PORT` and `FAKE_MAIL_PORT`.
+  A `DATABASE_URL` in `.env` with another database than `fansite`, such as `fansite_496`, also stays as it is, so remove that line to get the database of your worktree.
+- If a port of your block is busy, the command stops and names the port and the worktree.
+  It never picks another port.
+- Never drop or empty another worktree's database, and never stop another worktree's servers.
+- `packages/db/README.md` has the details and the decision is in `docs/beslissingen.md`.
+
 ## The review folder
 
 `pnpm review <pull request or branch>` is for the project owner.
-It puts a branch in `../sc-heerenveen-fansite-review`, next to the repository, and starts the site and Storybook from there on ports 3000 and 6006.
+It puts a branch in `../sc-heerenveen-fansite-review`, next to the repository, and starts the site and Storybook from there on ports 3000 and 6006, with the database `fansite`, whatever the name of the folder: it is the one command that doesn't use a worktree's own ports.
 A branch that exists on the owner's computer is shown as it is there, with commits that aren't pushed; changes that aren't committed are not.
 Each server opens on the page the branch changes, found from the files that differ from `main`.
 Agents don't use that command and don't work in the review folder.
@@ -300,6 +317,7 @@ That is expected; carry on from the code.
    ```
 
    If the code reads environment variables, copy `.env.example` to `.env` in the worktree and fill it in.
+   Leave `DATABASE_URL` at `fansite`: the scripts turn it into the database of your worktree (see _Database and ports per worktree_).
 
 3. Build the smallest change that meets the acceptance criteria.
    For components and stories, ask the Storybook server first (see _The Storybook server_).

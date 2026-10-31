@@ -73,7 +73,7 @@ export function busyMessage({ busy, worktree }) {
   return [
     ...busy.map(
       ({ label, port }) =>
-        `Port ${port} (${label}) is busy. It is in the block of ports of the worktree "${worktree}", so it is not another worktree's.`,
+        `Port ${port} (${label}) is busy. It is in the block of ports of the worktree "${worktree}", so something else holds it, or an earlier run in this worktree still does.`,
     ),
     `Stop what holds ${busy.length === 1 ? 'it' : 'them'} (\`lsof -i :${busy[0].port}\` says what it is), or set ${busy
       .map(({ variable }) => variable)

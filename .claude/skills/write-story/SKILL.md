@@ -15,8 +15,8 @@ Use `builder-workflow` for everything around this.
 - `docs-list` once, then `docs-show` for each component you use or change.
   Don't dig the props out of the code, and don't assume a prop exists: if the server doesn't show it, it doesn't exist.
 - Call `get-storybook-story-instructions` before you write a story.
-- The server shows the Storybook of whichever worktree started it, and two worktrees can't both use port 6006.
-  See _The Storybook server_ in `AGENTS.md` for how to start yours (`pnpm --filter design-system storybook --no-open --exact-port`) and to leave another worktree's alone.
+- The server shows the Storybook of whichever worktree started it, and `.mcp.json` points at port 6006, while a worktree's Storybook is on a port of its own.
+  See _The Storybook server_ in `AGENTS.md` for how to start yours (`pnpm --filter design-system storybook --no-open`) and to leave another worktree's alone.
   Read your own changes in your own code, not through the server.
 - If the tools are missing after you started Storybook, say so once and carry on from the code.
 
