@@ -16,7 +16,7 @@
 import { realpathSync } from 'node:fs'
 
 /** The jobs that always run, and the jobs that an output of the job `changes` switches. */
-export const always = ['changes', 'lint-typecheck', 'test', 'build']
+export const always = ['changes', 'lint', 'test', 'build']
 export const decided = [
   { job: 'stories', output: 'stories' },
   { job: 'smoke', output: 'site' },

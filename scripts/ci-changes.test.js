@@ -189,7 +189,7 @@ test('the workflow switches only the checks of the site and the stories with ci-
   assert.equal(jobs.build.split(site).length - 1, 2)
 
   // The jobs that always run have no condition at all, so nothing but a failure can skip them.
-  for (const id of ['lint-typecheck', 'test']) {
+  for (const id of ['lint', 'test']) {
     assert.doesNotMatch(jobs[id], /^ {4}if:/m, id)
   }
 
@@ -215,4 +215,28 @@ test('the last job has the name the rules for main require and waits for every o
   for (const id of others) {
     assert.doesNotMatch(jobs[id], /^ {4}name: Lint, typecheck, test and build$/m, id)
   }
+})
+
+test('the e2e tests run in parts that together hold every test, and each part is checked', () => {
+  const { jobs } = workflowJobs()
+  const parts = [...jobs.e2e.matchAll(/^ {10}- args: (.+)\n {12}part: (.+)$/gm)].map(([, args, part]) => ({
+    args,
+    part,
+  }))
+  const shards = parts.filter(({ args }) => args.includes('--shard='))
+  const total = Number(/--shard=1\/(\d+)/.exec(shards[0]?.args ?? '')?.[1])
+
+  // The parts 1/n to n/n of the project chromium, each once, and the writing project alone.
+  // A project with `dependencies` can't be sharded: Playwright keeps all its tests in part 1.
+  assert.deepEqual(
+    shards.map(({ args }) => args),
+    Array.from({ length: total }, (_, index) => `--project=chromium --shard=${index + 1}/${total}`),
+  )
+  assert.deepEqual(
+    parts.filter(({ args }) => !args.includes('--shard=')),
+    [{ args: '--project=chromium-writing --no-deps', part: 'writing' }],
+  )
+  assert.doesNotMatch(jobs.e2e, /\s--retries/)
+  // A part that ran nothing is green in Playwright. The report must show tests that passed.
+  assert.match(jobs.e2e, /node scripts\/ci-e2e-report\.js "\$PLAYWRIGHT_JSON_OUTPUT_NAME"/)
 })

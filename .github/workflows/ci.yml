@@ -4,10 +4,10 @@
 # why it is built this way.
 #
 #   changes         decides which checks of the site and the stories run (scripts/ci-changes.js)
-#   lint-typecheck  lint and typecheck
+#   lint            lint
 #   test            the migrations and the seed on an empty database, and pnpm test
 #   stories         every story in Chrome with axe
-#   build           pnpm build, and the folder the host runs, which the next two jobs use
+#   build           typecheck and pnpm build, and the folder the host runs, which the next two jobs use
 #   smoke           the site the way the host runs it
 #   e2e             axe and a few checks of our own on every page, in parts that each have their own database
 #   check           the check that the rules for main require (scripts/ci-gate.js)
@@ -19,13 +19,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      shards:
-        default: '["1/2","2/2"]'
-        description: The parts of the e2e tests, as JSON
-      workers:
-        default: ''
-        description: Playwright workers per part, empty for the configured number
 
 permissions:
   contents: read
@@ -70,8 +63,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-  lint-typecheck:
-    name: Lint and typecheck
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -89,8 +82,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm lint
-
-      - run: pnpm typecheck
 
   test:
     name: Migrate, seed and test
@@ -159,10 +150,11 @@ jobs:
 
       - run: pnpm test:stories
 
-  # The build runs on every change. When the checks of the site run, it also makes the folder that the host runs
+  # The typecheck and the build run on every change, one after the other because the build repeats the typecheck of the
+  # site and finds it done. When the checks of the site run, the job also makes the folder that the host runs
   # (`assemble`) and hands it to the jobs smoke and e2e, so the site is built once.
   build:
-    name: Build
+    name: Typecheck and build
     needs: changes
     runs-on: ubuntu-latest
     steps:
@@ -178,6 +170,8 @@ jobs:
           node-version-file: .nvmrc
 
       - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck
 
       - run: pnpm build
 
@@ -245,7 +239,7 @@ jobs:
   # it took ten minutes.
   e2e:
     if: needs.changes.outputs.site != 'false'
-    name: Check accessibility
+    name: Check accessibility (${{ matrix.part }})
     needs: [changes, build]
     env:
       DATABASE_URL: mysql://root@127.0.0.1:3306/fansite
@@ -265,8 +259,19 @@ jobs:
           - 3306:3306
     strategy:
       fail-fast: false
+      # Two parts of the tests of the chromium project, and the writing project in a part of its own, as it runs on its
+      # database alone and nothing else sees the article it publishes. `--shard` on all projects does not work: the writing
+      # project depends on the other one, and Playwright then keeps every test in the first part and runs none in the others
+      # (with exit code 0). `--no-deps` stops the writing project from running the other one first. Every part is in the
+      # list or the job check fails, and scripts/ci-e2e-report.js fails a part that ran no test.
       matrix:
-        shard: ${{ fromJSON(inputs.shards || '["1/2","2/2"]') }}
+        include:
+          - args: --project=chromium --shard=1/2
+            part: 1/2
+          - args: --project=chromium --shard=2/2
+            part: 2/2
+          - args: --project=chromium-writing --no-deps
+            part: writing
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -287,10 +292,13 @@ jobs:
           path: ${{ runner.temp }}/site
 
       - name: Check accessibility
-        run: SITE_FOLDER="$RUNNER_TEMP/site" pnpm test:a11y --shard="$SHARD" ${WORKERS:+--workers="$WORKERS"}
+        # $ARGS is not quoted on purpose: it is a few options.
+        run: |
+          SITE_FOLDER="$RUNNER_TEMP/site" pnpm test:a11y --reporter=list,json $ARGS
+          node scripts/ci-e2e-report.js "$PLAYWRIGHT_JSON_OUTPUT_NAME"
         env:
-          SHARD: ${{ matrix.shard }}
-          WORKERS: ${{ inputs.workers }}
+          ARGS: ${{ matrix.args }}
+          PLAYWRIGHT_JSON_OUTPUT_NAME: ${{ runner.temp }}/e2e-report.json
 
   # The check that the rules for main require. It runs whatever the other jobs did, because GitHub counts a skipped job
   # as a pass and skips a job whose predecessor failed. scripts/ci-gate.js has the rules: every job must have passed,
@@ -300,7 +308,7 @@ jobs:
   check:
     if: always()
     name: Lint, typecheck, test and build
-    needs: [changes, lint-typecheck, test, stories, build, smoke, e2e]
+    needs: [changes, lint, test, stories, build, smoke, e2e]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

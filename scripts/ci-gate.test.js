@@ -9,7 +9,7 @@ const everythingRan = {
   build: { result: 'success' },
   changes: { outputs: { site: 'true', stories: 'true' }, result: 'success' },
   e2e: { result: 'success' },
-  'lint-typecheck': { result: 'success' },
+  lint: { result: 'success' },
   smoke: { result: 'success' },
   stories: { result: 'success' },
   test: { result: 'success' },
@@ -22,7 +22,7 @@ test('a full run where every job passed passes', () => {
 })
 
 test('a job that failed, was cancelled or was skipped fails the check', () => {
-  for (const job of ['build', 'changes', 'lint-typecheck', 'test']) {
+  for (const job of ['build', 'changes', 'lint', 'test']) {
     for (const result of ['failure', 'cancelled', 'skipped']) {
       assert.equal(check(withResult(job, result)).length, 1, `${job} ${result}`)
     }
@@ -79,7 +79,7 @@ test('a failed changes job skips the rest, and the check fails on changes', () =
     build: { result: 'skipped' },
     changes: { outputs: {}, result: 'failure' },
     e2e: { result: 'skipped' },
-    'lint-typecheck': { result: 'success' },
+    lint: { result: 'success' },
     smoke: { result: 'skipped' },
     stories: { result: 'skipped' },
     test: { result: 'success' },
