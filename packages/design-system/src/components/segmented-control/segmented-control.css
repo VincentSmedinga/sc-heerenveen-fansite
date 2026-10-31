@@ -1,9 +1,10 @@
 /*
  * A segmented control: a rounded track with the options side by side and a thumb under the
  * chosen one. The options share the width of the track equally, and the thumb is as wide as one
- * option, less a margin all round. The standard size is 44px high and the small size (hf-size-
- * small) 36px, from the token of the sizes, so an option is a target of that height over its
- * whole cell.
+ * option, less a margin all round. The standard size is 44px high and the small size, with the
+ * class hf-size-small, 36px from the token of the sizes, so an option is a target of that
+ * height over its whole cell. In a grid, such as the cells of a page, the group keeps the width
+ * of its options and stays at the start.
  *
  * The thumb is the pseudo-element ::before of the group. It finds its place from two custom
  * properties that the component sets, the number of options and the index of the chosen one, so
@@ -29,6 +30,7 @@
     grid-auto-columns: minmax(0, 1fr);
     grid-auto-flow: column;
     isolation: isolate;
+    justify-self: start;
     max-inline-size: 100%;
     min-block-size: 2.75rem;
     position: relative;
