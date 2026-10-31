@@ -295,6 +295,13 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
     expect(plain(html)).not.toContain('Nog geen dubbelslagen.')
   })
 
+  it('says "doelpunt" in the singular for one goal', async () => {
+    withGoals([goal('Proefman', { penalty: true })])
+
+    expect(plain(cardOf(await render()))).toContain('1 van de 1 doelpunt')
+    expect(plain(cardOf(await render()))).not.toContain('1 van de 1 doelpunten')
+  })
+
   it('says how many matches it is based on, in the form of the other cards', async () => {
     expect(plain(cardOf(await render()))).toContain('Gebaseerd op 2 van de 4 gespeelde wedstrijden')
   })
@@ -344,7 +351,7 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
     expect(all).toContain('Gebaseerd op alle 2 gespeelde wedstrijden')
     expect(league).not.toContain('Bekerman')
     expect(league).toContain('Nog geen hattricks.')
-    expect(league).toContain('0 van de 1 doelpunten')
+    expect(league).toContain('0 van de 1 doelpunt')
     expect(league).toContain('Gebaseerd op 1 gespeelde wedstrijd')
   })
 

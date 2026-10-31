@@ -44,7 +44,7 @@ export function SpecialGoalsCard({
           <Heading level={3}>Dubbelslagen</Heading>
           {doubles.length === 0 ? <Text>Nog geen dubbelslagen.</Text> : <MultiGoalList players={doubles} />}
           <Heading level={3}>Strafschoppen</Heading>
-          <Text>{`${penalties} van de ${goalsFor} doelpunten`}</Text>
+          <Text>{`${penalties} van de ${goalsFor} ${goalsFor === 1 ? 'doelpunt' : 'doelpunten'}`}</Text>
           <Heading level={3}>Eigen doelpunten</Heading>
           <List role="list">
             <List.Item>{`Door de tegenstander in eigen doel: ${ownGoalsFor}`}</List.Item>

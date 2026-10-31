@@ -385,12 +385,13 @@ Die heeft vier delen, elk met een kop van niveau 3:
 - **Dubbelslagen:** de spelers met precies twee doelpunten in één wedstrijd, op dezelfde manier.
 - **Strafschoppen:** "1 van de 17 doelpunten", het aantal doelpunten van sc Heerenveen uit een strafschop, van alle doelpunten van sc Heerenveen (een eigen doelpunt van de tegenstander telt mee).
 - **Eigen doelpunten:** het aantal dat een speler van de tegenstander in eigen doel maakte, en het aantal dat een speler van ons deed.
-  Heeft niemand een hattrick of een dubbelslag, dan staat er "Nog geen hattricks." of "Nog geen dubbelslagen."; de cijfers van de strafschoppen en de eigen doelpunten blijven staan, ook als ze 0 zijn.
-  Zonder doelpunt in een gespeelde wedstrijd is de kaart één zin zonder delen en zonder knop voor een afbeelding.
-  De kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier, en zegt onderaan "Gebaseerd op …" in dezelfde vorm als de andere kaarten.
-  Een speler wordt herkend zoals in de lijst van doelpuntenmakers.
-  De balk "Op deze pagina:" heeft twee links, naar de twee kaarten (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/statistieken/spelers`).
-  De bezoekteller telt de pagina van een seizoen als een bezoek aan `/statistieken/spelers`.
+
+Heeft niemand een hattrick of een dubbelslag, dan staat er "Nog geen hattricks." of "Nog geen dubbelslagen."; de cijfers van de strafschoppen en de eigen doelpunten blijven staan, ook als ze 0 zijn.
+Zonder doelpunt in een gespeelde wedstrijd is de kaart één zin zonder delen en zonder knop voor een afbeelding.
+De kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier, en zegt onderaan "Gebaseerd op …" in dezelfde vorm als de andere kaarten.
+Een speler wordt herkend zoals in de lijst van doelpuntenmakers.
+De balk "Op deze pagina:" heeft twee links, naar de twee kaarten (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/statistieken/spelers`).
+De bezoekteller telt de pagina van een seizoen als een bezoek aan `/statistieken/spelers`.
 
 ### De keuze tussen alle wedstrijden en de Eredivisie
 
