@@ -761,6 +761,15 @@ await withEmptyDatabase((database) =>
       /<a href="\/statistieken">Alle wedstrijden<\/a><a aria-current="page" href="\/statistieken\?competitie=eredivisie">Eredivisie<\/a>/,
     )
     assert.equal((await fetch(`${origin}/statistieken?competitie=onzin`)).status, 404)
+    // The bar under the menu keeps the choice, and the items of the menu itself do not.
+    assert.match(
+      leagueHtml,
+      /<div class="hf-navigation-bar">.*?href="\/statistieken\/spelers\?competitie=eredivisie">Spelers<\/a>.*?href="\/statistieken\/tegenstanders\?competitie=eredivisie">Tegenstanders<\/a>/s,
+    )
+    assert.match(
+      leagueHtml,
+      /<a aria-current="page" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a>/,
+    )
     // The cup gives no points: all the matches have no rows with points and the Eredivisie has
     // them, and the Eredivisie names itself alone in the streaks.
     assert.doesNotMatch(statisticsHtml, /<th scope="row">Punten<\/th>/)

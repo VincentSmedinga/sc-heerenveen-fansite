@@ -4038,6 +4038,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De gewichten van de kop blijven.
 - **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de site gebruikt de balk met subpagina's nu voor Nieuws (Podcasts, Archief en Zoeken).
   Het eerste subitem is geen overzichtspagina: het item Nieuws is zelf de link terug.
+- **Later:** zie _De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast_ (31 oktober 2026): de balk van Statistieken wordt door een pagina getekend (`NavigationBar`) en via het slot `@subnav` aan het item gegeven.
+  Hij blijft in het `li` van zijn onderdeel, in de ene `nav`, dus de nesting blijft zoals hier besloten.
 
 ### Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen
 
@@ -4432,6 +4434,45 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een cel als "7–5" leest een schermlezer als twee getallen zonder het woord "tegen"; de kolomkop zegt "doelpunten" en de regel onder de tabel "voor–tegen".
   De lijst heeft clubs met nullen zolang we alleen een wedstrijd uit de toekomst tegen ze hebben.
 - **Alternatieven:** alleen clubs met een minimum aantal wedstrijden (de projecteigenaar koos er geen); hele woorden als kolomkop (past niet op een telefoon); de lijst sorteerbaar of met paginering (te veel voor een lijst van enkele tientallen clubs); een kaart met tegenstanders op de pagina Statistieken (de pagina is al vol); de bronvermelding in korte vorm, "Bron: Wikipedia" (zegt niet uit welke pagina's de cijfers komen); in de cache een sleutel per verzonnen slug (laat het geheugen volgroeien).
+
+### De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de links van de balk onder het hoofdmenu bij Statistieken, Spelers en Tegenstanders, houden het seizoen en de keuze tussen alle wedstrijden en de Eredivisie vast (#498).
+  De balk komt uit een nieuw slot van de layout, `@subnav`, en niet meer uit de vaste lijst in `SiteNavigation`.
+  - **De adressen:** op `/statistieken/2025-26?competitie=eredivisie` gaat Spelers naar `/statistieken/spelers/2025-26?competitie=eredivisie`, en op Spelers gaat Tegenstanders naar `/statistieken/tegenstanders?competitie=eredivisie`.
+    Het lopende seizoen heeft zoals overal één adres zonder seizoen, en zonder keuze is er geen parameter.
+    Tegenstanders telt alle seizoenen, dus die link houdt alleen de keuze vast.
+    Een keuze die de pagina niet kent is de pagina "niet gevonden", en dan wijzen de links naar de standaard.
+  - **Het hoofdmenu** houdt niets vast: Statistieken in het menu is altijd `/statistieken`, het lopende seizoen met alle wedstrijden.
+    De balk heeft geen link terug naar Statistieken; dat is het item van het menu.
+  - **Het slot:** `layout.tsx` zet `@subnav` naast `@shortcuts` en geeft het aan `SiteNavigation` (`statisticsBar`), dat het aan het item Statistieken geeft.
+    Alleen de pagina's van Statistieken hebben een route in het slot: `/statistieken`, `/statistieken/<seizoen>`, `/statistieken/spelers`, `/statistieken/spelers/<seizoen>`, `/statistieken/tegenstanders` en `/statistieken/tegenstanders/<club>`.
+    Elke route leest `?competitie=` en het seizoen uit het adres op de server en tekent de balk met dezelfde functie, `StatisticsBar` in `src/statisticsBar.tsx`.
+    Elk ander adres, ook de homepage, krijgt een leeg slot (`[...rest]`, `page.tsx` en `default.tsx`).
+  - **Het designsysteem:** een item van `Navigation` kreeg de eigenschap `bar`, een `ReactNode` die de balk vervangt die `Navigation` uit `subitems` tekent, onder dezelfde voorwaarden.
+    De balk zelf is nu een eigen onderdeel, `NavigationBar`, zodat een pagina hem kan tekenen.
+    De `subitems` blijven nodig, want die zeggen welke subpagina de huidige is.
+    Zonder `bar` is de uitvoer gelijk aan die van vroeger, dus de balk van Nieuws verandert niet; een test laat dat zien.
+- **Waarom:** de keuze staat in de query string, en die lezen kan alleen een pagina of een slot op de server, of een clientcomponent met `useSearchParams`.
+  `useSearchParams` in een clientcomponent van de root-layout vraagt een Suspense-grens in de layout, en die raakt elke pagina van de site; zonder JavaScript kent de balk de keuze dan ook niet.
+  Een slot doet dat in de HTML van de server, voor alleen de pagina's die het nodig hebben, zoals `@shortcuts` dat voor de balk "Op deze pagina:" al doet.
+  De balk blijft zo in het `li` van zijn onderdeel in de ene `nav`, zoals _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_ wil.
+- **Gemeten:** de build van deze branch en die van `main` hebben dezelfde vier statische routes (`/_global-error`, `/_not-found`, `/contact/verstuurd` en `/manifest.webmanifest`).
+  Alle andere pagina's waren al dynamisch en zijn dat gebleven; geen pagina is dynamisch geworden.
+  De pagina's van Statistieken lezen al `searchParams`, dus het slot kost daar geen extra render.
+- **Nadeel:** de negen kleine bestanden in `app/@subnav` (zes routes en drie lege) volgen de pagina's van Statistieken; een nieuwe pagina op een dieper adres krijgt zonder route in het slot geen balk.
+  Een pagina op één niveau onder `/statistieken` valt onder `[seizoen]`, en een adres dat geen seizoen is, krijgt daar de balk naar het lopende seizoen.
+  Een "niet gevonden" onder een diepere map heeft geen balk meer, waar de vaste lijst hem wel liet zien.
+  Het slot en de zichtbare balk zijn los van elkaar: het slot tekent de links, `SiteNavigation` kiest uit het pad of ze getoond worden.
+  Komt er ooit `next/link`, dan wordt de balk bij een klik vervangen door de balk van de volgende pagina en gaat de focus verloren.
+  Nu laadt elke klik de hele pagina, want de site heeft geen `next/link`: de balk is met elke pagina nieuw en de focus begint bovenaan, zoals na elke andere link.
+  Een e2e-test controleert de volgorde van het toetsenbord in het menu en de balk.
+- **Alternatieven:** `useSearchParams` met een Suspense-grens in `SiteNavigation` (raakt elke pagina en werkt niet zonder JavaScript).
+  Het hele menu als slot, `@menu` (het menu wordt bij elke pagina een nieuw onderdeel).
+  De balk als tweede `nav` in `@shortcuts` (twee landmarks en een nieuw onderdeel in plaats van de geneste lijst).
+  De URL van het verzoek in een header lezen in de layout (elke pagina wordt dynamisch; zie _Het hoofdmenu leest het pad in een clientcomponent_).
+  De keuze onthouden in een cookie (zie _De statistieken tellen standaard alle wedstrijden_).
 
 ## Importer
 
@@ -7803,6 +7844,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een sleutel per keuze in de cache (meer geheugen en meer code voor dezelfde gegevens).
   Een zin op de drie kaarten die de keuze niet volgen (langere kaarten, en de schakelaar zegt het al).
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de schakelaar staat sindsdien ook op `/statistieken/tegenstanders` en op de pagina van een club, en telt daar de wedstrijden van alle seizoenen.
+- **Later:** zie _De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast_ (31 oktober 2026): de links van de balk onder het hoofdmenu houden het seizoen en de keuze nu vast.
+  Het hoofdmenu zelf houdt ze niet vast.
 
 ### `ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`
 

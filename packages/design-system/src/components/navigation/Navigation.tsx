@@ -1,9 +1,9 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import { classNames } from '../classNames'
 import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
-import { ShortcutsRow } from '../page/ShortcutsRow'
+import { NavigationBar } from './NavigationBar'
 import { NavigationMore } from './NavigationMore'
 
 /**
@@ -13,6 +13,14 @@ import { NavigationMore } from './NavigationMore'
 const itemsFromMore = 6
 
 export type NavigationItem = {
+  /**
+   * The bar with the sub-pages, drawn by the caller (see `NavigationBar`), for a page that has
+   * to build the links itself. It takes the place of the bar that `Navigation` draws from
+   * `subitems`, under the same conditions: only while the visitor is on this item or on one of
+   * its sub-pages. `subitems` still tell which sub-page is the current one, so the item gets
+   * its `aria-current`. Without `bar`, or with `null`, the bar is drawn from `subitems`.
+   */
+  bar?: ReactNode
   /** Whether this is the page the visitor is on. At most one item can be. */
   current?: boolean
   /**
@@ -108,25 +116,7 @@ export const Navigation = ({
           {item.label}
           {item.external && <Icon name="external-link" />}
         </Link>
-        {showSubitems && (
-          <div className="hf-navigation-bar">
-            <ShortcutsRow follow={false}>
-              <ul className="hf-page-shortcuts-list" role="list">
-                {subitems.map((subitem) => (
-                  <li key={subitem.href} role="listitem">
-                    <Link
-                      aria-current={subitem.current ? 'page' : undefined}
-                      className="hf-navigation-sublink"
-                      href={subitem.href}
-                    >
-                      {subitem.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </ShortcutsRow>
-          </div>
-        )}
+        {showSubitems && (item.bar ?? <NavigationBar subitems={subitems} />)}
       </li>
     )
   }

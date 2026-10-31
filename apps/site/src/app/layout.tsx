@@ -77,7 +77,22 @@ export const viewport: Viewport = {
 // it: the route of the same path in the slot renders the bar, in the HTML, before the
 // Page.Body, without JavaScript to move it. A page without a route in the slot gets an empty
 // one.
-export default function RootLayout({ children, shortcuts }: { children: ReactNode; shortcuts: ReactNode }) {
+//
+// The slot `@subnav` works the same way for the bar of sub-pages of Statistieken, which is part
+// of the main menu and so goes into it, not between the menu and the Page.Body. Its links keep
+// the season and the choice of competition of the page, and the choice is only in the query
+// string, which a page and a slot can read on the server and a layout cannot. Only the pages of
+// Statistieken have a route in the slot, and they already render on each request; every other
+// page gets an empty slot, which is static (see SiteNavigation for why not `useSearchParams`).
+export default function RootLayout({
+  children,
+  shortcuts,
+  subnav,
+}: {
+  children: ReactNode
+  shortcuts: ReactNode
+  subnav: ReactNode
+}) {
   return (
     <Root suppressHydrationWarning>
       <Head script="/theme.js" />
@@ -91,7 +106,7 @@ export default function RootLayout({ children, shortcuts }: { children: ReactNod
             </Link>
             <ThemeToggle />
           </Page.Header>
-          <SiteNavigation />
+          <SiteNavigation statisticsBar={subnav} />
           {shortcuts}
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
