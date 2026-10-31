@@ -865,6 +865,117 @@ export const topScorersPlaces = 5
 export const topFiveOf = (scorers: TopScorer[]): TopScorer[] =>
   scorers.filter((scorer) => scorer.position <= topScorersPlaces)
 
+/** A player who scored three or more goals in a match, or two, and how often it happened. */
+export type MultiGoalScorer = NameParts & {
+  /** What tells the player from the others, as in `TopScorer`. */
+  id: number | string
+  player: string
+  /** The number of matches in which the player did it. */
+  times: number
+}
+
+/** The goals that stand out, for the card Bijzondere doelpunten. */
+export type SpecialGoals = {
+  /** The players with two goals in a match, and not three, the most often first. */
+  doubles: MultiGoalScorer[]
+  /** The goals of sc Heerenveen in the counted matches, own goals of opponents included. */
+  goalsFor: number
+  /** The players with three or more goals in a match, the most often first. */
+  hattricks: MultiGoalScorer[]
+  /** The counted matches: played, and with their goals known. */
+  known: number
+  /** The own goals of players of ours, which are goals for the opponent. */
+  ownGoalsAgainst: number
+  /** The own goals of players of the opponent, which are goals for us. */
+  ownGoalsFor: number
+  /** The goals of sc Heerenveen from a penalty. */
+  penalties: number
+  /** The played matches of the choice, counted or not. */
+  played: number
+}
+
+/**
+ * The goals that stand out in the played matches of the season whose goals are known (as for
+ * `goalsPerQuarter`: a match with a score and no goals is left out), in the league and, for the
+ * choice `all`, the cup. A match counts on its goals, so a goal in extra time counts, and a
+ * shoot-out has no goals at all.
+ *
+ * A hattrick is three or more goals by one player in one match, a double (a "dubbelslag") is
+ * exactly two. A player who scored a hattrick in a match is not also in the doubles of that
+ * match, but another match can give him a double. A penalty counts as a goal of the player; an
+ * own goal does not, for anybody. A goal without a minute (0) is still a goal. Players are told
+ * apart as in `topScorersOf`: by id, else by Wikipedia page, else by name, and a goal that has
+ * only a page counts for the linked player with the same page.
+ *
+ * The penalties are the goals of sc Heerenveen that came from a penalty, out of all the goals
+ * of sc Heerenveen: the goals of the opponent are not counted, and neither are their penalties.
+ * An own goal is counted on the side that profits, as `ours` says, so `ownGoalsFor` is the
+ * number of times an opponent scored in his own goal and `ownGoalsAgainst` the number of times
+ * a player of ours did.
+ */
+export function specialGoalsOf(matches: PublicMatch[], choice: CompetitionChoice = 'all'): SpecialGoals {
+  const counted = matches.filter((match) => countsFor(match, choice) && match.status === 'played')
+  const known = counted.filter(hasKnownGoals)
+  const goals = known.flatMap((match) => match.goals)
+  const linked = new Map<string, ScorerGoal>()
+
+  for (const goal of goals) {
+    if (
+      goal.ours &&
+      !goal.ownGoal &&
+      goal.playerId !== null &&
+      goal.playerPage !== null &&
+      !linked.has(goal.playerPage)
+    ) {
+      linked.set(goal.playerPage, goal)
+    }
+  }
+
+  const hattricks = new Map<string, MultiGoalScorer>()
+  const doubles = new Map<string, MultiGoalScorer>()
+
+  for (const match of known) {
+    const perPlayer = new Map<string, { goals: number; scorer: ScorerGoal }>()
+
+    for (const own of match.goals.filter((goal) => goal.ours && !goal.ownGoal)) {
+      const goal = (own.playerId === null && own.playerPage !== null ? linked.get(own.playerPage) : undefined) ?? own
+      const before = perPlayer.get(keyOf(goal))
+
+      perPlayer.set(keyOf(goal), { goals: (before?.goals ?? 0) + 1, scorer: goal })
+    }
+
+    for (const [key, { goals: count, scorer }] of perPlayer) {
+      const target = count >= 3 ? hattricks : count === 2 ? doubles : undefined
+
+      target?.set(key, {
+        id: scorer.playerId ?? scorer.playerPage ?? scorer.player,
+        player: scorer.playerName ?? (scorer.playerPage === null ? scorer.player : pageTitleName(scorer.playerPage)),
+        times: (target.get(key)?.times ?? 0) + 1,
+        ...scorerName(scorer),
+      })
+    }
+  }
+
+  const inOrder = (players: Map<string, MultiGoalScorer>) =>
+    [...players.values()].sort(
+      (a, b) =>
+        b.times - a.times ||
+        sortName(a).localeCompare(sortName(b), 'nl') ||
+        (a.givenName ?? '').localeCompare(b.givenName ?? '', 'nl'),
+    )
+
+  return {
+    doubles: inOrder(doubles),
+    goalsFor: goals.filter((goal) => goal.ours).length,
+    hattricks: inOrder(hattricks),
+    known: known.length,
+    ownGoalsAgainst: goals.filter((goal) => !goal.ours && goal.ownGoal).length,
+    ownGoalsFor: goals.filter((goal) => goal.ours && goal.ownGoal).length,
+    penalties: goals.filter((goal) => goal.ours && goal.penalty).length,
+    played: counted.length,
+  }
+}
+
 function addToRow(row: FlowRow, goalsFor: number, goalsAgainst: number) {
   row.matches += 1
 

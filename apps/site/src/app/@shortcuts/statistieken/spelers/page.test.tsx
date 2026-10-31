@@ -29,14 +29,17 @@ afterEach(() => {
 const render = async () => renderToStaticMarkup(await PlayersShortcuts({ searchParams: Promise.resolve({}) }))
 
 describe('the bar of /statistieken/spelers', () => {
-  it('is a navigation named Op deze pagina:, with one link: to the card Doelpuntenmakers', async () => {
+  it('is a navigation named Op deze pagina:, with two links: to the cards Doelpuntenmakers and Bijzondere doelpunten', async () => {
     const html = await render()
 
     expect(html).toContain('Op deze pagina:')
     expect(
       [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
-    ).toEqual([['#doelpuntenmakers', 'Doelpuntenmakers']])
-    expect(playersShortcuts).toHaveLength(1)
+    ).toEqual([
+      ['#doelpuntenmakers', 'Doelpuntenmakers'],
+      ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
+    ])
+    expect(playersShortcuts).toHaveLength(2)
   })
 
   it('has none of the other eight cards of Statistieken', async () => {
