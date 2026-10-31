@@ -28,7 +28,7 @@
     line-height: var(--hf-meta-line-height);
     max-inline-size: calc(100% - 2rem);
     opacity: var(--hf-pull-progress);
-    padding: 0.5rem 1rem;
+    padding: var(--hf-space-s) var(--hf-space-m);
     pointer-events: none;
     position: fixed;
     text-align: center;

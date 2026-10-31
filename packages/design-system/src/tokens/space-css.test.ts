@@ -16,29 +16,11 @@ const cssFiles = (dir: string): string[] =>
         : [],
   )
 
-// The tokens define the steps, and the documentation is not a component.
+// The tokens define the steps. Every other CSS file is checked, the documentation's too.
 const outside = ['fonts.css', 'tokens/space.css']
-const components = cssFiles(src).filter((file) => !outside.includes(file) && !file.startsWith('docs/'))
+const components = cssFiles(src).filter((file) => !outside.includes(file))
 
 const read = (file: string) => strip(readFileSync(join(src, file), 'utf8'))
-
-// The files that still have a number of rem for space, which the next issues (#480 and #481)
-// convert. Each of them takes its own lines off this list, one file per line, in the order of
-// the alphabet. The test below fails on a file that is on the list and has no such number any
-// more, so the list can only get shorter, and the last issue leaves it empty.
-const notConverted = [
-  'components/navigation/navigation.css',
-  'components/news-item/news-item.css',
-  'components/pagination/pagination.css',
-  'components/pull-to-refresh/pull-to-refresh.css',
-  'components/rich-text-editor/rich-text-editor.css',
-  'components/season-picker/season-picker.css',
-  'components/segmented-control/segmented-control.css',
-  'components/select/select.css',
-  'components/short-match/short-match.css',
-  'components/text/text.css',
-  'components/wikipedia-credit/wikipedia-credit.css',
-]
 
 // What the guard looks at: padding, margin and gap (also row-gap, column-gap and the logical
 // sides), and the custom properties that carry a space under a name with one of those words in
@@ -97,7 +79,8 @@ describe('the space in the CSS of the components', () => {
     expect(components).toContain('components/card/card.css')
     expect(components).toContain('tokens/layout.css')
     expect(components).not.toContain('tokens/space.css')
-    expect(components).not.toContain('docs/docs.css')
+    expect(components).toContain('docs/docs.css')
+    expect(components).toContain('components/navigation/navigation.css')
     expect(components.length).toBeGreaterThan(40)
   })
 
@@ -111,33 +94,9 @@ describe('the space in the CSS of the components', () => {
     expect(loose('calc(1.5rem + 5px)')).toEqual(['1.5'])
   })
 
-  it('writes no number of rem for padding, margin or gap in a file that is not on the list', () => {
-    for (const file of components.filter((file) => !notConverted.includes(file))) {
+  it('writes no number of rem for padding, margin or gap in a file', () => {
+    for (const file of components) {
       expect(violations(file), file).toEqual([])
-    }
-  })
-
-  it('lists only files that exist, once, in the order of the alphabet', () => {
-    expect(notConverted.filter((file) => !components.includes(file))).toEqual([])
-    expect(new Set(notConverted).size).toBe(notConverted.length)
-    expect(notConverted).toEqual([...notConverted].sort())
-  })
-
-  it('lists only files that still have a number of rem for space, so a converted file comes off the list', () => {
-    for (const file of notConverted) {
-      expect(violations(file).length, `${file} is converted: take it off the list`).toBeGreaterThan(0)
-    }
-  })
-
-  it('has converted the page and the card', () => {
-    for (const file of [
-      'tokens/layout.css',
-      'components/page/page.css',
-      'components/page/shortcuts.css',
-      'components/page/top-link.css',
-      'components/card/card.css',
-    ]) {
-      expect(notConverted, file).not.toContain(file)
     }
   })
 })

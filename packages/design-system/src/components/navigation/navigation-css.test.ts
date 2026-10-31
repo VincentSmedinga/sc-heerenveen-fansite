@@ -85,9 +85,9 @@ describe('the bar of sub-pages in navigation.css', () => {
     expect(rule('.hf-navigation-header')).toContain(
       '--hf-navigation-gutter-start: max(var(--hf-page-margin), env(safe-area-inset-left, 0px));',
     )
-    expect(bar).toContain('padding-inline: calc(var(--hf-navigation-gutter-start) - 0.625rem)')
+    expect(bar).toContain('padding-inline: calc(var(--hf-navigation-gutter-start) - var(--hf-space-s))')
     expect(bar).toContain('env(safe-area-inset-right, 0);')
-    expect(css).toContain('padding-inline: 0.625rem;')
+    expect(css).toContain('padding-inline: var(--hf-space-s);')
   })
 
   it('is as wide as the window although the menu above it keeps to the inset, with no percentage in its margins', () => {
@@ -110,8 +110,8 @@ describe('the bar of sub-pages in navigation.css', () => {
 
   it('comes after all the links of the menu, whichever row the link of its item is on, with the space of the menu above it', () => {
     expect(bar).toContain('order: 1;')
-    expect(bar).toContain('margin-block: var(--hf-navigation-end) calc(-1 * var(--hf-navigation-end));')
-    expect(rule('.hf-navigation-header')).toContain('padding-block-end: var(--hf-navigation-end);')
+    expect(bar).toContain('margin-block: var(--hf-navigation-space-end) calc(-1 * var(--hf-navigation-space-end));')
+    expect(rule('.hf-navigation-header')).toContain('padding-block-end: var(--hf-navigation-space-end);')
   })
 
   it('never sticks and is never gone, at any width', () => {
@@ -218,19 +218,19 @@ describe('the main menu in navigation.css', () => {
     expect(band).toContain('background-color: var(--hf-colour-background-header);')
     expect(band).toContain('display: flex;')
     expect(band).toContain('flex-wrap: wrap;')
-    expect(band).toContain('gap: 0 1rem;')
+    expect(band).toContain('gap: 0 var(--hf-space-m);')
   })
 
   it('has the inset of the page at both sides, and the same space under the links as the header used to keep', () => {
     expect(band).toContain('padding-inline: var(--hf-navigation-inset-start) var(--hf-navigation-inset-end);')
-    expect(band).toContain('--hf-navigation-end: 0.4375rem;')
+    expect(band).toContain('--hf-navigation-space-end: var(--hf-space-s);')
     expect(band).toContain('--hf-navigation-inset-end: max(var(--hf-page-inset), env(safe-area-inset-right, 0px));')
   })
 
   it('has a thin line above the links that stops at the inset, and that stays in forced colours', () => {
     expect(band).toMatch(/&::before \{[^}]*border-block-start: 1px solid var\(--hf-colour-border-on-header\);/)
     expect(band).toMatch(/&::before \{[^}]*flex: 0 0 100%;/)
-    expect(band).toMatch(/&::before \{[^}]*margin-block-end: 0\.25rem;/)
+    expect(band).toMatch(/&::before \{[^}]*margin-block-end: var\(--hf-space-xs\);/)
     expect(band).toMatch(/&::before \{[^}]*order: -1;/)
     expect(band).not.toMatch(/&::before \{[^}]*background/)
   })

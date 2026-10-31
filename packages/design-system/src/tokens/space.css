@@ -2,7 +2,7 @@
  * Space tokens: the steps of the space between things, as padding, margin and gap. A component
  * takes a step and writes no number of its own; the chapter Ruimte in Storybook says when to
  * take which. The test in space-css.test.ts keeps it that way: it fails on a number of rem
- * outside this file, apart from the files that are not converted yet.
+ * outside this file, in any CSS file of the design system.
  *
  * Medium is the default: when in doubt, take it. The one number that is not a step is 0.125rem,
  * an optical correction between two small controls, and it stays where it is.
