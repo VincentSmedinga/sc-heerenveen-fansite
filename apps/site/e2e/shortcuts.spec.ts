@@ -361,7 +361,6 @@ test.describe('the bar under the header of /statistieken/spelers', () => {
       await page.emulateMedia({ colorScheme })
       await page.setViewportSize({ height: 800, width: 390 })
       await page.goto('/statistieken/spelers')
-      await hydrated(page)
 
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
