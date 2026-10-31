@@ -360,7 +360,9 @@ describe('the title row in page.css', () => {
     expect(rule).toMatch(/flex-wrap: wrap/)
   })
 
-  it('keeps the control at the end of the row, beside the heading and under it', () => {
-    expect(rule).toMatch(/> :not\(:first-child\)\s*\{\s*margin-inline-start: auto;/)
+  it('keeps the controls at the end of the row, beside the heading and under it', () => {
+    // Every line ends at the end; the heading pushes the controls there with its margin.
+    expect(rule).toMatch(/justify-content: flex-end/)
+    expect(rule).toMatch(/> :first-child\s*\{\s*margin-inline-end: auto;/)
   })
 })
