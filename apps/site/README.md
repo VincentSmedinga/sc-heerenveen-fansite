@@ -288,7 +288,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Punten per wedstrijd is de eerlijke vergelijking, want de clubs hebben niet evenveel gespeeld; twee clubs zijn gelijk als hun punten en wedstrijden in dezelfde verhouding staan.
   Clubs met dezelfde waarde delen de plaats ("gedeeld 2e") en een club die nog niets speelde telt niet mee.
   Onder de tabel staan twee zinnen: hoeveel punten sc Heerenveen achter de koploper staat (of dat het bovenaan staat) en hoeveel het voor staat op de laatste (of dat het onderaan staat).
-  Daaronder staat "Gebaseerd op de stand na n wedstrijden van sc Heerenveen".
+  Daaronder staat "Stand na n wedstrijden".
   Staat sc Heerenveen niet in de stand, of heeft het nog niets gespeeld, dan staat er een zin in plaats van de tabel.
   Er zijn geen lijnen voor Europa of degradatie en geen verwachte eindstand: de kaart zegt wat er is.
 - **Verloop van het seizoen:** een kaart in de linker kolom, direct onder de kaart met onze plek in de competitie, met `FormChart` uit het designsysteem: de vorm, een staafje per gespeelde wedstrijd van de Eredivisie en de lijn erdoorheen.
@@ -301,7 +301,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Elke reeks heeft de lengte van nu en de langste van het seizoen, en komt uit alle gespeelde wedstrijden, ook die zonder bekende doelpunten.
   Een bekerwedstrijd telt mee bij de keuze Alle wedstrijden en niet bij Eredivisie.
   Een wedstrijd zonder score en een wedstrijd die niet is gespeeld tellen nooit mee.
-  De kaart toont de reeksen in een tabel (`DataTable`), daaronder de laatste vijf wedstrijden met de oudste eerst, als letters (`MarkRow`) en als korte regels (`ShortMatch`), en onderaan "Gebaseerd op alle 6 gespeelde wedstrijden" (`BasedOn` in `src/MatchViews.tsx`).
+  De kaart toont de reeksen in een tabel (`DataTable`), daaronder de laatste vijf wedstrijden met de oudste eerst, als letters (`MarkRow`) en als korte regels (`ShortMatch`), en onderaan "Alle 6 gespeelde wedstrijden" (`Coverage` in `src/MatchViews.tsx`).
   Een eerder seizoen heeft alleen de kolommen Reeks en Langste en geen laatste vijf wedstrijden, en noemt het seizoen in het bijschrift.
   Zonder een gespeelde wedstrijd staat er een zin in plaats van de tabel.
 - **Thuis en uit:** de laatste kaart van de linker kolom, direct na de reeksen, met een tabel (`DataTable`) met de kolommen Thuis, Uit en Totaal.
@@ -311,7 +311,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   De kolom Totaal stemt overeen met de tabel van het verloop van het seizoen.
   De punten en de doelpunten per wedstrijd hebben een komma en twee cijfers, zoals "1,83".
   Een kant zonder gespeelde wedstrijd heeft een streepje waar gedeeld wordt en 0 bij de tellingen.
-  Onder de tabel staat "Gebaseerd op alle 11 gespeelde wedstrijden".
+  Onder de tabel staat "Alle 11 gespeelde wedstrijden".
   Zonder een uitslag staat er een zin in plaats van de tabel.
 - **Doelpuntenmakers:** de eerste kaart van de rechter kolom, met de top 5 van de spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten (`topFiveOf` in `src/matches.ts`).
   Delen spelers de vijfde plek, dan staan ze er allemaal in, dus de kaart kan meer dan vijf namen tonen; een plek vóór de vijfde houdt ook al zijn spelers.
@@ -327,7 +327,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
   Direct onder de kop, boven de tabel, staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord": dezelfde plek en stijl als bij de nul gehouden.
   Het oude anker `#topscorers` blijft werken: het is een oud anker (`aliases`) op de kop.
-  Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "Gebaseerd op de doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
+  Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "De doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
   De kop van de doelpunten is de afkorting D, met het volle woord onder de tabel.
   Zonder doelpunten staat er een zin in plaats van een tabel.
 - **De nul gehouden:** een kaart in de rechter kolom, onder de doelpuntenmakers en boven de doelpunten per kwartier, met de gespeelde wedstrijden van dit seizoen waarin `goals_against` 0 is, de nieuwste bovenaan: de competitie en de beker bij de keuze Alle wedstrijden, alleen de competitie bij Eredivisie.
@@ -343,7 +343,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Een eigen doelpunt telt voor de club die ervan profiteert, zoals `ours` al regelt.
   Een gespeelde wedstrijd telt mee als hij minstens één doelpunt heeft of eindigde in 0–0; een wedstrijd met een uitslag maar zonder doelpunten in `match_goals` heeft geen minuten en blijft erbuiten.
   Onder het diagram staat dezelfde informatie als tabel (`DataTable`), die de schermlezer krijgt, want de diagrammen zijn voor hulpsoftware verborgen.
-  Daaronder staat "Gebaseerd op 8 van de 10 gespeelde wedstrijden".
+  Daaronder staat "8 van de 10 gespeelde wedstrijden".
   Ging een wedstrijd in de telling naar de verlenging (`extra_time`), dan staat daaronder ook "Doelpunten in de verlenging tellen niet mee."; anders staat die zin er niet.
   Zonder één doelpunt met een minuut staat er een zin in plaats van de diagrammen.
 - **Hoe de wedstrijden verlopen:** een kaart in de rechter kolom, direct na de doelpunten per kwartier en boven de uitersten, in het zachte vlak.
@@ -356,7 +356,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Een 0–0 heeft geen eerste doelpunt en staat bij de rust op "Gelijk".
   Onder de tabellen staan twee zinnen: in hoeveel wedstrijden sc Heerenveen won na een achterstand, en in hoeveel het geen winst haalde na een voorsprong.
   Een achterstand of voorsprong telt alleen als die klopt bij elke volgorde binnen een minuut.
-  Zonder één wedstrijd met doelpunten staat er een zin in plaats van de tabellen, en onderaan staat "Gebaseerd op 2 van de 3 gespeelde wedstrijden" (`BasedOn` in `src/MatchViews.tsx`).
+  Zonder één wedstrijd met doelpunten staat er een zin in plaats van de tabellen, en onderaan staat "2 van de 3 gespeelde wedstrijden" (`Coverage` in `src/MatchViews.tsx`).
 - **Uitersten:** de laatste kaart, rechts, met vijf regels in een lijst: de grootste overwinning, de grootste nederlaag, de wedstrijd met de meeste doelpunten, ons vroegste doelpunt en ons laatste doelpunt, in de Eredivisie en bij Alle wedstrijden ook in de beker.
   `extremesOf` in `src/matches.ts` kiest ze uit de gespeelde wedstrijden die de keuze telt; de beker telt alleen bij Alle wedstrijden.
   Bij een gelijke stand wint de laatst gespeelde wedstrijd.
@@ -365,7 +365,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   De laatste twee komen uit de doelpunten en tellen alleen de wedstrijden met bekende doelpunten, zonder verlenging en zonder minuut 0; blessuretijd telt erbij, dus 90+3 is later dan 90.
   Een eigen doelpunt van de tegenstander is een doelpunt van ons en krijgt "(eigen doelpunt)" erachter.
   Elke regel is een naam boven een `ShortMatch`, en bij een doelpunt staan de minuut en de speler in de naam, gescheiden door een middenpunt.
-  Onder de lijst staat "Gebaseerd op alle 7 gespeelde wedstrijden", en als niet elke wedstrijd zijn doelpunten heeft, een regel met "Vroegste en laatste doelpunt: gebaseerd op 6 van de 7 gespeelde wedstrijden".
+  Onder de lijst staat "Alle 7 gespeelde wedstrijden", en als niet elke wedstrijd zijn doelpunten heeft, een regel met "Vroegste en laatste doelpunt: 6 van de 7 gespeelde wedstrijden".
   Zonder gespeelde wedstrijd staat er een zin in plaats van de lijst.
 
 De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolom, zoals die van Wedstrijden onderaan zijn zijbalk staat.

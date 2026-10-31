@@ -785,7 +785,7 @@ await withEmptyDatabase((database) =>
       /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie en de KNVB Beker dit seizoen<\/caption>/,
     )
     assert.match(statisticsHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
-    assert.match(statisticsHtml, /Gebaseerd op (?:alle \d+|1) gespeelde wedstrijd/)
+    assert.match(statisticsHtml, /(?:Alle \d+|1) gespeelde wedstrijd/)
     // The card of home and away: the table with a column for each.
     assert.match(
       statisticsHtml,
@@ -820,7 +820,7 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /<caption class="hf-visually-hidden">Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd<\/caption>/,
     )
-    // The card on how the matches go: two tables, the two sentences, and what it is based on.
+    // The card on how the matches go: two tables, the two sentences, and the matches it counts.
     // The two made-up league matches are both won after scoring first and leading at half-time.
     assert.match(
       statisticsHtml,

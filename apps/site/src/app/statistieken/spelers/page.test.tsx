@@ -164,7 +164,7 @@ describe('the page /statistieken/spelers', () => {
   })
 
   it('says which part of the played matches the list is based on, when scorers are missing', async () => {
-    expect(await render()).toContain('Gebaseerd op de doelpuntenmakers van 2 van de 4 gespeelde wedstrijden')
+    expect(await render()).toContain('De doelpuntenmakers van 2 van de 4 gespeelde wedstrijden')
   })
 
   it('says there are no scorers yet in a sentence, and shows no table, when there is no goal', async () => {

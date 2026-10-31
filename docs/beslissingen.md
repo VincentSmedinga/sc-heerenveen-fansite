@@ -4384,6 +4384,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De balk "Op deze pagina:" van Spelers heeft één link, naar de enige kaart; hij krijgt er meer als de extra's van #403 en #407 erbij komen.
 - **Alternatieven:** de volledige lijst houden en de kaart inklappen met een knop (kost JavaScript of een extra adres, en de afbeelding toont dan de hele lijst); de top 5 op een vaste hoogte afkappen en een speler met evenveel doelpunten weglaten (willekeurig); de vijf met gelijkstaanden tot hoogstens acht rijen, zoals de kaart eerder had (een grens die de gelijke plekken toch afkapt); Spelers alleen met de lijst, zonder balk met subpagina's (de pagina is dan alleen via de link te vinden).
 - **Later:** zie _De kaart met topscorers toont alle doelpuntenmakers_ (26 oktober 2026): sinds 31 oktober 2026 toont `/statistieken` weer de top 5, nu met alle gelijke plekken en zonder grens, en de volledige lijst staat op `/statistieken/spelers`.
+- **Later:** zie _De zin onder een kaart met cijfers zegt alleen waarop de telling rust, zonder "Gebaseerd op"_ (31 oktober 2026): de zin onder de tabel begint niet meer met "Gebaseerd op" ("De doelpuntenmakers van 6 van de 7 gespeelde wedstrijden").
 
 ## Importer
 
@@ -7019,6 +7020,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** de kaart toont sinds 26 oktober 2026 alle doelpuntenmakers van het seizoen en niet meer de beste vijf met gelijkstaanden; zie _De kaart met topscorers toont alle doelpuntenmakers_.
 - **Later:** de kaart heet sinds 26 oktober 2026 "Doelpuntenmakers" en niet meer "Topscorers", en het aantal spelers staat onder de kop en niet meer onder de tabel; zie _De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop_.
 - **Later:** de kaart telt sinds 27 oktober 2026 per speler (`player_id`) en toont zijn volledige naam, dus twee spelers met dezelfde achternaam zijn twee rijen; een doelpunt zonder speler telt per naam als een eigen rij; zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_.
+- **Later:** zie _De zin onder een kaart met cijfers zegt alleen waarop de telling rust, zonder "Gebaseerd op"_ (31 oktober 2026): de zin onder de tabel is "De doelpuntenmakers van X van Y gespeelde wedstrijden", zonder "Gebaseerd op".
 
 ### De lijst met gehouden nullen is een lijst van korte wedstrijdregels
 
@@ -7080,6 +7082,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _Op /wedstrijden hebben de kaarten met cijfers een zacht en een warm vlak, en de uitslagen staan in de hoofdkolom_.
   De kaart staat in de zijbalk, na De nul gehouden, en heeft een warm vlak; de telling blijft.
 - **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de kaart en zijn anker `doelpunten-per-kwartier` staan straks op `/statistieken`.
+- **Later:** zie _De zin onder een kaart met cijfers zegt alleen waarop de telling rust, zonder "Gebaseerd op"_ (31 oktober 2026): de zin onder de tabel begint niet meer met "Gebaseerd op" ("8 van de 10 gespeelde wedstrijden", "Alle 10 gespeelde wedstrijden", "1 gespeelde wedstrijd").
 
 ### De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop
 
@@ -7273,6 +7276,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De statistieken tellen standaard alle wedstrijden, met een schakelaar naar alleen de Eredivisie_ (31 oktober 2026): de regel "een kaart telt alleen de Eredivisie, tenzij hij over de beker gaat" is vervallen.
   De kaarten tellen standaard de Eredivisie en de KNVB Beker, en de schakelaar kiest alleen de Eredivisie; drie kaarten blijven de Eredivisie.
   Het gevolg dat de bestaande kaarten de beker meetellen "tot de schakelaar van #406 er is" is daarmee opgelost.
+- **Later:** zie _De zin onder een kaart met cijfers zegt alleen waarop de telling rust, zonder "Gebaseerd op"_ (31 oktober 2026): de zin begint niet meer met "Gebaseerd op" en het stukje code heet `Coverage`.
+  De regel dat de zin op elke kaart met een telling blijft, en op dezelfde plek, blijft.
 
 ### Reeksen staan in een eigen kaart na Verloop van het seizoen
 
@@ -7391,6 +7396,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De tabel omdraaien, met de uitkomsten als rijen en de situaties als kolommen (past op 320 pixels ook niet).
 - **Later:** zie _Een inleiding of toelichting bestaat alleen als ze iets toevoegt, en ze staat op een vaste plek_.
   De regel met de afkortingen staat onder de tabellen en onder de twee zinnen, direct boven "Gebaseerd op".
+- **Later:** zie _De zin onder een kaart met cijfers zegt alleen waarop de telling rust, zonder "Gebaseerd op"_ (31 oktober 2026): de zin heet de zin over het aantal wedstrijden, en `BasedOn` heet `Coverage`.
 
 ### Een publicatiedatum van meer dan een week oud is de korte dag en de datum, zonder tijd
 
@@ -7435,6 +7441,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alle inleidingen houden en alleen inkorten (de herhaling blijft).
   Alle toelichtingen boven de inhoud zetten (de bezoeker leest uitleg voor hij de inhoud heeft gezien).
   Een regel per pagina in plaats van één regel voor allemaal (elke pagina kiest zelf, zoals nu).
+- **Later:** zie _De zin onder een kaart met cijfers zegt alleen waarop de telling rust, zonder "Gebaseerd op"_ (31 oktober 2026): de zin "Gebaseerd op" in de volgorde van een kaart heet de zin over het aantal wedstrijden.
+  De plek blijft.
 
 ### Een seizoen heeft een eigen adres, `/wedstrijden/2025-26`, en een kiezer die zonder JavaScript werkt
 
@@ -7523,6 +7531,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de volgorde laten zoals ze is (de lijst begint dan bij het einde van het seizoen).
   Een schakelaar voor de volgorde (meer bediening voor een kleine behoefte).
   Het anker `stand` houden voor alle seizoenen (de link in de balk en het anker zouden dan een andere naam hebben dan de kop).
+- **Later:** zie _De zin onder een kaart met cijfers zegt alleen waarop de telling rust, zonder "Gebaseerd op"_ (31 oktober 2026): de zin onder de kaart "Onze plek in de competitie" is "Stand na 34 wedstrijden", zonder "Gebaseerd op" en zonder "van sc Heerenveen".
 
 ### Zonder koppeling is de naam van een doelpuntenmaker de titel van zijn Wikipedia-pagina
 
@@ -7688,3 +7697,22 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De schakelaar als eerste cel van de zijbalk (de zijbalk volgt in de bron op de hoofdkolom, dus op een telefoon staat hij dan na vier kaarten, waaronder twee die hij bedient; met CSS naar boven halen laat de zichtbare volgorde afwijken van de volgorde van het toetsenbord).
   Een sleutel per keuze in de cache (meer geheugen en meer code voor dezelfde gegevens).
   Een zin op de drie kaarten die de keuze niet volgen (langere kaarten, en de schakelaar zegt het al).
+
+### De zin onder een kaart met cijfers zegt alleen waarop de telling rust, zonder "Gebaseerd op"
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de zin onder een kaart met een telling begint niet meer met "Gebaseerd op".
+  Ze zegt alleen waarop de telling rust (#494).
+  - **De vormen:** "Alle 7 gespeelde wedstrijden", "1 gespeelde wedstrijd" en "6 van de 7 gespeelde wedstrijden".
+  - **Eigen teksten:** "Vroegste en laatste doelpunt: 6 van de 7 gespeelde wedstrijden" (Uitersten), "Stand na 34 wedstrijden" (Onze plek in de competitie, zonder "van sc Heerenveen") en "De doelpuntenmakers van 6 van de 7 gespeelde wedstrijden" (Doelpuntenmakers, ook op Spelers).
+  - **De plek** in de kaart blijft: na de legenda en voor de link.
+    Een zin met een uitzondering, zoals "Doelpunten in de verlenging tellen niet mee.", staat er nog direct na.
+  - **De regel in Storybook** (`editorial.mdx`, Redactie) zegt "de zin over het aantal wedstrijden" in plaats van "de zin 'Gebaseerd op'".
+  - **Het stukje code** heet `Coverage` in plaats van `BasedOn`, in `src/MatchViews.tsx`.
+  - **De aantallen** zijn dezelfde als eerst, en dit besluit verandert niets aan wat een kaart telt.
+- **Waarom:** de projecteigenaar vond het voorvoegsel overbodig.
+  "Alle 7 gespeelde wedstrijden" onder een tabel zegt zonder voorvoegsel wat de zin moet zeggen: hoeveel wedstrijden de telling omvat.
+  De zin blijft, want vroeg in het seizoen zijn de aantallen klein en de zin zegt dat eerlijk.
+- **Alternatieven:** "Gebaseerd op" houden (de projecteigenaar vond het overbodig).
+  "Op basis van" of een ander voorvoegsel (zelfde bezwaar).
+  De zin weglaten op een kaart waar alle wedstrijden meetellen (dan zegt de ene kaart het wel en de andere niet, en een lezer weet niet hoeveel wedstrijden het zijn).

@@ -63,20 +63,6 @@ export const imageCredit = (hasFacts: boolean, season?: string) =>
   hasFacts ? { season, source: <WikipediaCredit compact lead="Gegevens van" /> } : undefined
 
 /**
- * The line under a card with statistics that says how many matches it is based on: all the
- * played matches, or `known` of the `played` ones when only some have what the card counts.
- */
-export function BasedOn({ known, played }: { known: number; played: number }) {
-  return (
-    <Text appearance="meta">
-      {known === played
-        ? `Gebaseerd op ${known === 1 ? '1 gespeelde wedstrijd' : `alle ${known} gespeelde wedstrijden`}`
-        : `Gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}
-    </Text>
-  )
-}
-
-/**
  * The card of the statistics page with the matches in which sc Heerenveen kept a clean sheet,
  * as short lines with the newest first, and above them how many there are in how many matches.
  * It starts with `count` lines, and the button under them loads the next ones, as on the
@@ -144,6 +130,22 @@ export function CleanSheetsCard({
 }
 
 /**
+ * The line under a card with statistics that says which matches the count rests on: all the
+ * played matches, or `known` of the `played` ones when only some have what the card counts.
+ */
+export function Coverage({ known, played }: { known: number; played: number }) {
+  return (
+    <Text appearance="meta">
+      {known === played
+        ? known === 1
+          ? '1 gespeelde wedstrijd'
+          : `Alle ${known} gespeelde wedstrijden`
+        : `${known} van de ${played} gespeelde wedstrijden`}
+    </Text>
+  )
+}
+
+/**
  * The card of the statistics page with the extremes of the matches that are counted: the
  * biggest win and loss, the match with the most goals, and our earliest and our last goal. Each
  * is a short match with its name above it, as the heading of the line, in the same item as the
@@ -204,9 +206,9 @@ export function ExtremesCard({
               </List.Item>
             ))}
           </List>
-          <BasedOn known={played} played={played} />
+          <Coverage known={played} played={played} />
           {known > 0 && known < played && (
-            <Text appearance="meta">{`Vroegste en laatste doelpunt: gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}</Text>
+            <Text appearance="meta">{`Vroegste en laatste doelpunt: ${known} van de ${played} gespeelde wedstrijden`}</Text>
           )}
         </>
       )}
@@ -263,7 +265,7 @@ export function GoalsPerQuarterCard({
               header: label,
             }))}
           />
-          <BasedOn known={known} played={played} />
+          <Coverage known={known} played={played} />
           {extraTime && <Text appearance="meta">Doelpunten in de verlenging tellen niet mee.</Text>}
         </>
       )}
@@ -351,7 +353,7 @@ export function LeaguePlaceCard({
             <Text key={sentence}>{sentence}</Text>
           ))}
           <Text appearance="meta">
-            {`Gebaseerd op de stand na ${place.played} ${place.played === 1 ? 'wedstrijd' : 'wedstrijden'} van sc Heerenveen`}
+            {`Stand na ${place.played} ${place.played === 1 ? 'wedstrijd' : 'wedstrijden'}`}
           </Text>
         </>
       )}
@@ -417,7 +419,7 @@ export function HomeAwayCard({
               row('Zonder tegendoelpunt', (side) => side.cleanSheets),
             ]}
           />
-          <BasedOn known={total.played} played={total.played} />
+          <Coverage known={total.played} played={total.played} />
         </>
       )}
     </Card>
@@ -501,7 +503,7 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
               : `Na een voorsprong haalde sc Heerenveen in ${notWonAfterLead === 1 ? '1 wedstrijd' : `${notWonAfterLead} wedstrijden`} geen winst.`}
           </Text>
           <Text appearance="meta">G gespeeld, W winst, GL gelijk, V verlies, P punten</Text>
-          <BasedOn known={known} played={played} />
+          <Coverage known={known} played={played} />
           {unknownFirstGoal > 0 && (
             <Text appearance="meta">
               {`Bij ${unknownFirstGoal === 1 ? '1 wedstrijd' : `${unknownFirstGoal} wedstrijden`} is niet te zien wie het eerst scoorde.`}
@@ -745,7 +747,7 @@ export function StreaksCard({
               </List>
             </>
           )}
-          <BasedOn known={played} played={played} />
+          <Coverage known={played} played={played} />
         </>
       )}
     </Card>
@@ -799,7 +801,7 @@ export function TopScorers({
       />
       {known < played && (
         <Text appearance="meta">
-          Gebaseerd op de doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
+          De doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
         </Text>
       )}
       {playersHref !== undefined && (

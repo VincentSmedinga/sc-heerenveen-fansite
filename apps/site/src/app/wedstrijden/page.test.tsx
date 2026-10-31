@@ -70,7 +70,8 @@ describe('the page /wedstrijden', () => {
 
   describe('the order of the parts of a card', () => {
     // The parts of a card stand in a fixed order: the heading, the explanation, the content,
-    // the legend, "Gebaseerd op" with the sentences that go with it, the link, and the credit.
+    // the legend, the sentence about the matches with the sentences that go with it, the link,
+    // and the credit.
     /** Fails when a part is missing, or stands before the one in front of it. */
     function expectInOrder(card: string, parts: string[]) {
       const places = parts.map((part) => card.indexOf(part))
