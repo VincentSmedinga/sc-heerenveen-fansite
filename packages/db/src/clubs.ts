@@ -1,4 +1,4 @@
-import { asc, eq, max } from 'drizzle-orm'
+import { asc, eq, max, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { NewMatch } from './schema.ts'
@@ -13,6 +13,18 @@ export const reservedClubSlugs: readonly string[] = ['kies']
 
 /** The longest slug of a name; the rest of the 80 characters is for `-2`, `-3`, and so on. */
 const slugBaseLength = 70
+
+/**
+ * A club with its full name and the other spellings that are the same club, such as
+ * `Excelsior Rotterdam` with `Excelsior` and `SBV Excelsior`. The importer keeps the list (see
+ * `club-names.ts` in the importer).
+ */
+export type ClubFullName = {
+  /** The other spellings. They are never the name of a club, and never a club of their own. */
+  aliases: readonly string[]
+  /** The full name, which is the name of the club and gives its slug. */
+  name: string
+}
 
 /** A match as the importer reads it, before its club is found or made. */
 export type NewMatchWithoutClub = Omit<NewMatch, 'clubId'>
@@ -37,6 +49,9 @@ type KnownClub = {
   slug: string
   wikipediaPage: null | string
 }
+
+/** What `repairClubs` writes through: it also deletes the club that goes away. */
+type RepairDatabase = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 
 /**
  * The slug a name gives before it is checked against the slugs that exist: lowercase letters,
@@ -79,8 +94,18 @@ export function clubSlug(name: string): string {
  * `season` is the season of the match, such as `2026/27`; without it a name is only added to
  * the other names. The events are lines for the log of the run, in English, with no personal
  * data: clubs are no persons.
+ *
+ * `fullNames` is looked at first: a name that is a full name or one of the other spellings in
+ * it is the full name, so `Excelsior` is the club `Excelsior Rotterdam`, with or without an
+ * article. A club the book makes under a listed full name gets the other spellings as its other
+ * names. A name that is not listed, such as `Excelsior Maassluis`, works as before. Run
+ * `repairClubs` first when the database may hold such a club twice.
  */
-export async function createClubBook(db: ClubDatabase) {
+export async function createClubBook(
+  db: ClubDatabase,
+  { fullNames = [] }: { fullNames?: readonly ClubFullName[] } = {},
+) {
+  const listed = listedNames(fullNames)
   const rows = await db.select().from(clubs).orderBy(asc(clubs.id))
   const names = await db.select().from(clubNames).orderBy(asc(clubNames.id))
   const seasons = await db
@@ -138,9 +163,16 @@ export async function createClubBook(db: ClubDatabase) {
     }
   }
 
-  async function create(name: string, page: null | string, season: null | string): Promise<KnownClub> {
+  async function create(
+    name: string,
+    page: null | string,
+    season: null | string,
+    events: string[],
+  ): Promise<KnownClub> {
     const slug = freeSlug(name)
     const [{ insertId }] = await db.insert(clubs).values({ name, slug, wikipediaPage: page })
+
+    events.push(`new club '${name}'${page === null ? ', with no article' : ` (article '${page}')`}`)
     const club: KnownClub = {
       id: insertId,
       name,
@@ -158,13 +190,21 @@ export async function createClubBook(db: ClubDatabase) {
     if (!byName.has(normaliseClubName(name))) {
       byName.set(normaliseClubName(name), club)
     }
+    for (const alias of listed.get(normaliseClubName(name))?.aliases ?? []) {
+      if (!byName.has(normaliseClubName(alias))) {
+        await db.insert(clubNames).values({ clubId: insertId, name: alias })
+        club.otherNames.add(normaliseClubName(alias))
+        byName.set(normaliseClubName(alias), club)
+        events.push(`new name '${alias}' for club '${name}'`)
+      }
+    }
 
     return club
   }
 
   return {
     async resolve({
-      name,
+      name: given,
       page,
       season,
     }: {
@@ -173,6 +213,7 @@ export async function createClubBook(db: ClubDatabase) {
       season?: string
     }): Promise<ResolvedClub> {
       const events: string[] = []
+      const name = listed.get(normaliseClubName(given))?.name ?? given
       const key = normaliseClubName(name)
       let club = page === null ? byName.get(key) : byPage.get(page)
 
@@ -188,8 +229,7 @@ export async function createClubBook(db: ClubDatabase) {
         }
       }
       if (club === undefined) {
-        club = await create(name, page, season ?? null)
-        events.push(`new club '${name}'${page === null ? ', with no article' : ` (article '${page}')`}`)
+        club = await create(name, page, season ?? null, events)
       } else if (key !== normaliseClubName(club.name) && !club.otherNames.has(key)) {
         const owner = byName.get(key)
 
@@ -234,6 +274,135 @@ export function normaliseClubName(name: string): string {
 }
 
 /**
+ * Finds the clubs of each listed full name that are in the database more than once or under the
+ * wrong name, and makes them one club with the full name. Call it with the transaction of the
+ * import: the merge is several writes that belong together.
+ *
+ * For each entry, the clubs of that name are the clubs whose name or one of whose other names
+ * is the full name or one of its other spellings, whatever the capitals and punctuation:
+ *
+ * - the club that stays is the one with the article, else the one with the most matches, else
+ *   the oldest. Two clubs with an article each are two articles and so two clubs: nothing is
+ *   merged, and the event says so.
+ * - the matches and the other names of the other clubs go to the club that stays, their names
+ *   become other names of it, and their rows go. The slug of a club that goes is free again.
+ * - the club that stays gets the full name, with the name it had as an other name, the other
+ *   spellings of the entry as other names, and the slug of the full name unless a club that is
+ *   not part of the entry has it.
+ *
+ * A club that is right already changes nothing, so running it again writes nothing and gives no
+ * events. The events are lines for the log of the run, in English, with no personal data.
+ */
+export async function repairClubs(db: RepairDatabase, fullNames: readonly ClubFullName[]): Promise<string[]> {
+  const events: string[] = []
+
+  for (const entry of fullNames) {
+    const wanted = new Set([entry.name, ...entry.aliases].map(normaliseClubName))
+    const rows = await db.select().from(clubs).orderBy(asc(clubs.id))
+    const names = await db.select().from(clubNames)
+    const found = rows.filter(
+      (row) =>
+        wanted.has(normaliseClubName(row.name)) ||
+        names.some((other) => other.clubId === row.id && wanted.has(normaliseClubName(other.name))),
+    )
+
+    if (found.length === 0) {
+      continue
+    }
+
+    const counts = await db
+      .select({ clubId: matches.clubId, matches: sql<number>`count(*)`.mapWith(Number) })
+      .from(matches)
+      .groupBy(matches.clubId)
+    const matchesOf = (id: number) => counts.find((count) => count.clubId === id)?.matches ?? 0
+    const withArticle = found.filter((row) => row.wikipediaPage !== null)
+
+    if (withArticle.length > 1) {
+      events.push(
+        `clubs ${found.map((row) => `'${row.name}'`).join(' and ')} have an article each, not merged into '${entry.name}'`,
+      )
+      continue
+    }
+
+    const [stays] = [...found].sort(
+      (a, b) =>
+        Number(b.wikipediaPage !== null) - Number(a.wikipediaPage !== null) ||
+        matchesOf(b.id) - matchesOf(a.id) ||
+        a.id - b.id,
+    )
+
+    if (stays === undefined) {
+      continue
+    }
+
+    const others = found.filter((row) => row.id !== stays.id)
+    const goneIds = new Set(others.map((row) => row.id))
+    const full = normaliseClubName(entry.name)
+    // The names a club has once the others are merged in, and the ones another club has.
+    const had = new Set(
+      names
+        .filter((other) => other.clubId === stays.id || goneIds.has(other.clubId))
+        .map((other) => normaliseClubName(other.name)),
+    )
+    const ofOthers = new Set(
+      names
+        .filter((other) => !found.some((one) => one.id === other.clubId))
+        .map((other) => normaliseClubName(other.name)),
+    )
+    const addName = async (name: string, say: boolean) => {
+      const key = normaliseClubName(name)
+
+      if (key !== full && !had.has(key) && !ofOthers.has(key)) {
+        await db.insert(clubNames).values({ clubId: stays.id, name })
+        had.add(key)
+        if (say) {
+          events.push(`new name '${name}' for club '${entry.name}'`)
+        }
+      }
+    }
+
+    for (const other of others) {
+      await db.update(matches).set({ clubId: stays.id }).where(eq(matches.clubId, other.id))
+      await db.update(clubNames).set({ clubId: stays.id }).where(eq(clubNames.clubId, other.id))
+      await db.delete(clubs).where(eq(clubs.id, other.id))
+      events.push(`merged club '${other.name}' into club '${stays.name}'`)
+    }
+
+    const slug = clubSlug(entry.name)
+    const taken = rows.some((row) => row.slug === slug && !goneIds.has(row.id) && row.id !== stays.id)
+    const set: { name?: string; slug?: string } = {}
+
+    if (stays.name !== entry.name) {
+      set.name = entry.name
+    }
+    if (stays.slug !== slug && !taken) {
+      set.slug = slug
+    }
+    if (Object.keys(set).length > 0) {
+      await db.update(clubs).set(set).where(eq(clubs.id, stays.id))
+    }
+    if (set.name !== undefined) {
+      events.push(`club '${stays.name}' is now called '${entry.name}'`)
+    }
+    if (set.slug !== undefined) {
+      events.push(`slug of club '${entry.name}' is now '${slug}'`)
+    } else if (stays.slug !== slug) {
+      events.push(`slug '${slug}' belongs to another club, club '${entry.name}' keeps '${stays.slug}'`)
+    }
+
+    for (const other of others) {
+      await addName(other.name, false)
+    }
+    await addName(stays.name, false)
+    for (const alias of entry.aliases) {
+      await addName(alias, true)
+    }
+  }
+
+  return events
+}
+
+/**
  * Gives each row the club of its `opponent`, found or made by name. For tests and the seed,
  * where there is no article to go by.
  */
@@ -246,4 +415,22 @@ export async function withClubs(db: ClubDatabase, rows: NewMatchWithoutClub[]): 
   }
 
   return result
+}
+
+/** The listed names, normalised, and the entry each belongs to. */
+function listedNames(fullNames: readonly ClubFullName[]): Map<string, ClubFullName> {
+  const listed = new Map<string, ClubFullName>()
+
+  for (const entry of fullNames) {
+    for (const name of [entry.name, ...entry.aliases]) {
+      const key = normaliseClubName(name)
+
+      if (listed.has(key) && listed.get(key) !== entry) {
+        throw new Error(`The name '${name}' is in the list of full names twice`)
+      }
+      listed.set(key, entry)
+    }
+  }
+
+  return listed
 }

@@ -1,7 +1,7 @@
 import type { Database } from '@fansite/db/client'
 import type { Match, MatchGoal, MatchImport, NewMatchGoal, WikipediaPageKind } from '@fansite/db/schema'
 
-import { createClubBook } from '@fansite/db/clubs'
+import { createClubBook, repairClubs } from '@fansite/db/clubs'
 import { matches, matchGoals, matchImports, players, standings, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
 import { and, asc, eq, inArray } from 'drizzle-orm'
@@ -10,6 +10,7 @@ import type { Fetcher } from './fetcher.ts'
 import type { ReadGoal, ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
 
 import { checkGoals, checkMatches, checkStandings } from './check-wikipedia.ts'
+import { clubFullNames } from './club-names.ts'
 import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
 import { pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-wikipedia.ts'
 import { retryUnhealthyAfterMs, unhealthyAfter, waitLimits } from './run-log.ts'
@@ -535,8 +536,10 @@ async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: 
  * squad has him, and a goal that is linked keeps its link until the table says otherwise. A
  * goal of ours that has no player is a warning too (once the squad has been read), and no
  * reason to keep the match out. Every match gets its club (`clubs.ts` in the database package):
- * the club with the article the match links, or else with the name, or a new one. What that
- * made or changed comes back as lines for the log.
+ * the club with the article the match links, or else with the name, or a new one. A club of
+ * `club-names.ts` that is in the database twice is merged first, and its names are the full
+ * name and the spellings of the list. What that made or changed comes back as lines for the
+ * log.
  */
 async function storeMatches(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
@@ -544,6 +547,8 @@ async function storeMatches(
   found: ReadMatch[],
   now: Date,
 ) {
+  // Before the matches are read: a merged club moves its matches to the club that stays.
+  const clubLines = await repairClubs(db, clubFullNames)
   const known = new Map(
     (await db.select().from(matches).where(eq(matches.season, season))).map((row) => [key(row), row]),
   )
@@ -560,9 +565,8 @@ async function storeMatches(
     storedGoals.set(goal.goal.matchId, [...(storedGoals.get(goal.goal.matchId) ?? []), goal.goal])
   }
 
-  const book = await createClubBook(db)
+  const book = await createClubBook(db, { fullNames: clubFullNames })
   const counts = { added: 0, removed: 0, unchanged: 0, updated: 0 }
-  const clubLines: string[] = []
   const warnings: string[] = []
   const linkedGoals: LinkedGoal[] = []
 

@@ -5448,6 +5448,41 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** een club die Wikipedia op twee manieren linkt, zoals `Excelsior` zonder en `Excelsior Rotterdam` met een artikel, wordt twee clubs tot iemand ze samenvoegt.
   De import raadt dat niet, net als bij de spelers met dezelfde achternaam.
 - **Alternatieven:** de naam als sleutel en slug (breekt bij elke nieuwe schrijfwijze); een tabel met alleen een lijst van namen zonder artikel (dan is een fusie of een naamswijziging niet te zien); de slug uit de huidige naam laten volgen (een adres dat verandert, breekt links); een samenvoegcommando (nu niet nodig).
+- **Later:** zie _Een club heeft een volledige naam, en een kleine lijst in de importer zegt welke schrijfwijzen dezelfde club zijn_ (31 oktober 2026): het nadeel hierboven is voor de clubs in die lijst opgelost, en de importer voegt zo'n club zelf samen.
+  De rest van deze beslissing blijft: één artikel is één club, de slug verandert niet door een andere naam, en een club die niet in de lijst staat, voegt de projecteigenaar nog met de hand samen.
+  Alleen bij het samenvoegen van een club uit de lijst verandert de slug van de club die blijft.
+
+### Een club heeft een volledige naam, en een kleine lijst in de importer zegt welke schrijfwijzen dezelfde club zijn
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de importer heeft een kleine, vaste lijst van clubs met hun volledige naam en hun andere schrijfwijzen, `clubFullNames` in `apps/importer/src/club-names.ts`.
+  Nu is dat één club: `Excelsior Rotterdam`, met `Excelsior` en `SBV Excelsior` (#511).
+  - De importer zoekt een naam eerst in die lijst.
+    `Excelsior`, `SBV Excelsior` en `Excelsior Rotterdam` zijn dezelfde club, met of zonder artikel, en de club heet altijd de volledige naam.
+    Een naam die er niet in staat, werkt zoals voorheen, dus `Excelsior Maassluis` blijft een andere club.
+  - De pagina's tonen de volledige naam, met de slug ervan, `excelsior-rotterdam`.
+    De andere schrijfwijzen staan in `club_names` en nergens op de pagina.
+  - Staat een club uit de lijst twee keer in de database, dan voegt de importer ze samen bij de eerstvolgende lezing van een seizoen, in dezelfde transactie als de import (`repairClubs` in `@fansite/db/clubs`).
+    De club met een artikel blijft, anders die met de meeste wedstrijden, anders de oudste.
+    De wedstrijden en de andere namen gaan naar die club, de naam van de club die weggaat wordt een andere naam, en dan verdwijnt zijn rij.
+    De club die blijft krijgt de volledige naam en de slug ervan.
+    De oude slug, `excelsior`, vervalt zonder omleiding.
+    Elke samenvoeging, naamswijziging en nieuwe naam staat in het logboek van de run.
+  - Hebben twee clubs elk een eigen artikel, dan voegt de importer ze niet samen: één artikel is één club.
+    Hij zegt dat in het logboek.
+  - Meer clubs komen alleen op de lijst als de projecteigenaar het per club beslist.
+    Bij het zoeken naar zulke paren in de lokale gegevens stond alleen Excelsior dubbel.
+- **Waarom:** de pagina Tegenstanders (#415) toonde `Excelsior` en `Excelsior Rotterdam` als twee clubs, omdat Wikipedia de club in het programma met een link en in de beker zonder schrijft.
+  De projecteigenaar wil één club met één adres en de volledige naam, zoals bij Sparta Rotterdam.
+  De importer kan niet raden dat twee schrijfwijzen dezelfde club zijn: `Excelsior Maassluis` begint ook met `Excelsior`.
+  Een lijst met namen is dan de kleinste oplossing, en de projecteigenaar kijkt per club mee.
+- **Hoe:** de importer herstelt de bestaande gegevens zelf bij de volgende lezing en niet met een migratie.
+  De lokale gegevens zijn echte importen, en op acceptatie en productie draait de import elk uur: een migratie zou dezelfde stappen maken zonder dat ze in het logboek van de run komen.
+  Een tweede lezing verandert niets meer.
+- **Nadeel:** een club moet op de lijst staan voordat hij goed samengaat.
+  Een nieuw paar dat niet op de lijst staat, wordt nog steeds twee clubs tot iemand het ziet.
+  De lijst is een tweede plek met clubnamen naast `otherClubGroups` in `relevance-terms.ts`; die twee hebben een ander doel en blijven los.
+- **Alternatieven:** de volledige naam raden uit het begin van een naam (`Excelsior` en `Excelsior Maassluis` zouden samenvallen); een migratie die de twee clubs samenvoegt (geen regel in het logboek, en de lijst moet in de importer toch bestaan); een samenvoegcommando (een commando voor één club, en de lijst doet het vanzelf); de oude slug laten omleiden (er zijn nog geen openbare links, zie #33).
 
 ### Een gestaakte wedstrijd telt niet, de latere uitslag geldt
 

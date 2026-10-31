@@ -916,7 +916,7 @@ describe('the import command', () => {
     const { server } = await serve(original, { matchPages: true })
 
     const { code, lines: reports } = await run(server, feed)
-    const lines = reports.flatMap((report) => report.split('\n')).filter((line) => !line.includes(': new club '))
+    const lines = reports.flatMap((report) => report.split('\n')).filter((line) => !/: new (club|name) /u.test(line))
 
     expect(code).toBe(0)
     expect(lines.slice(0, 4)).toEqual([
