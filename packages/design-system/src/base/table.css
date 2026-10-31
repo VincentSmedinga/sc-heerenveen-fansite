@@ -6,8 +6,9 @@
 
 @layer hf.base {
   /*
-   * A table is a large building block: the large space is under it when something follows. When it is the last in its
-   * cell, a card or a column takes that space away (see card.css and page.css).
+   * A table is a large building block: the large space is under it when something follows.
+   * When it is the last in its cell, a card or a column takes that space away (see card.css
+   * and page.css).
    */
   table {
     border-collapse: collapse;

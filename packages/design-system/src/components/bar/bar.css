@@ -22,8 +22,9 @@
   }
 
   /*
-   * The legend under the table has the large space of a table above it. Without a legend the table is the last in its
-   * place, which is a container with its own formatting context, so the space would stay inside it: it has none then.
+   * The legend under the table has the large space of a table above it. Without a legend the
+   * table is the last in its place, which is a container with its own formatting context, so
+   * the space would stay inside it: it has none then.
    */
   .hf-bar-place > table {
     margin-block-end: var(--hf-space-l);

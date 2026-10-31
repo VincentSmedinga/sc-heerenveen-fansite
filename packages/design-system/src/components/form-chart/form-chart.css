@@ -4,7 +4,7 @@
  */
 
 @layer hf.components {
-  /* The large space of a chart is under it when something follows; as the last in a cell it has none (see card.css). */
+  /* The large space of a chart is under it when something follows, none as the last in a cell. */
   .hf-form-chart {
     margin-block-end: var(--hf-space-l);
   }
