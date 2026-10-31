@@ -56,6 +56,8 @@ export type PublicPodcast = Awaited<ReturnType<typeof listPodcasts>>[number]
 
 export type PublicSearchHit = Awaited<ReturnType<typeof searchPublic>>['hits'][number]
 
+export type PublicSeasonWikipediaPage = Awaited<ReturnType<typeof listAllWikipediaPages>>[number]
+
 export type PublicSource = Awaited<ReturnType<typeof listEnabledSources>>[number]
 
 export type PublicStaff = Awaited<ReturnType<typeof listStaffInSeason>>[number]
@@ -207,6 +209,27 @@ export async function findSquadPage(db: Database, season: string) {
  */
 export async function findStaffOn(db: Database, role: StaffRole, day: string): Promise<StaffOnDay<PublicStaff>> {
   return staffOnDay(await staffOfRole(db, role), day)
+}
+
+/**
+ * The Wikipedia pages the match import read for every season, newest season first, in the order
+ * of `listWikipediaPages` within a season: the season, the title of the page, which kind it is
+ * and the moment it was last read. A page that counts across seasons, such as the head-to-head
+ * record against a club, credits them all. The page of the squad is not one of them.
+ */
+export async function listAllWikipediaPages(db: Database) {
+  const rows = await db
+    .select({
+      kind: wikipediaPages.kind,
+      readAt: wikipediaPages.readAt,
+      season: wikipediaPages.season,
+      title: wikipediaPages.title,
+    })
+    .from(wikipediaPages)
+    .where(inArray(wikipediaPages.kind, matchPageKinds))
+    .orderBy(desc(wikipediaPages.season), asc(wikipediaPages.kind), asc(wikipediaPages.title))
+
+  return rows.map((row) => ({ ...row, kind: row.kind as MatchPageKind }))
 }
 
 /**

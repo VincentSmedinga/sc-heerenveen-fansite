@@ -23,6 +23,7 @@ const meta = preview.meta({
           '  Een rij heeft een `header` en `cells`, één voor elke kolom na de eerste.',
           '  Een getal schrijft het component op zijn Nederlands, met een punt tussen de duizendtallen.',
           '  De `header` moet uniek zijn.',
+          '  Met `href` wordt de rijkop een link naar de pagina over de rij, zoals de pagina van een club in een lijst van clubs.',
           '',
           'Een lange rijkop, zoals een pad zonder spaties, breekt af waar het moet.',
           'Een kolomkop breekt alleen bij een spatie af, dus houd hem kort: een lang woord als kop maakt de tabel breder dan een telefoon.',
@@ -50,6 +51,12 @@ const pages: DataTableRow[] = [
   { cells: [2000], header: '/' },
   { cells: [310], header: '/podcasts' },
   { cells: [12], header: '/redactie/een-heel-lang-pad/dat-de-pagina-niet-breder-mag-maken/zonder-spaties' },
+]
+
+const clubs: DataTableRow[] = [
+  { cells: [4, 2, 1, 1, '7–5'], header: 'Testclub', href: '#testclub' },
+  { cells: [3, 0, 1, 2, '2–6'], header: 'FC Voorbeeld', href: '#fc-voorbeeld' },
+  { cells: [1, 1, 0, 0, '3–1'], header: 'Proefstad SV', href: '#proefstad-sv' },
 ]
 
 const renderDays = (maxInlineSize: string) => () => (
@@ -150,4 +157,30 @@ export const LongRowHeaderDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Een lange rijkop breekt af op een telefoon, donker',
   render: renderPages('20rem'),
+})
+
+export const Links = meta.story({
+  name: 'Rijen met een link op een telefoon',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="clubs-kop">
+        <Heading id="clubs-kop" level={2}>
+          Tegenstanders
+        </Heading>
+        <DataTable
+          caption="De tegenstanders van sc Heerenveen met onze uitslagen tegen elk"
+          columns={[
+            'Club',
+            { abbreviation: 'G', name: 'gespeeld' },
+            { abbreviation: 'W', name: 'gewonnen' },
+            { abbreviation: 'GL', name: 'gelijk' },
+            { abbreviation: 'V', name: 'verloren' },
+            { abbreviation: 'D', name: 'doelpunten' },
+          ]}
+          rows={clubs}
+        />
+        <Text appearance="meta">G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen)</Text>
+      </Card>
+    </div>
+  ),
 })

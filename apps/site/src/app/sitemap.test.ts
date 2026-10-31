@@ -4,9 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { pages } from '../pages'
 import sitemap from './sitemap'
 
-const { getPublishedArticles } = vi.hoisted(() => ({ getPublishedArticles: vi.fn() }))
+const { getClubRecords, getPublishedArticles } = vi.hoisted(() => ({
+  getClubRecords: vi.fn(),
+  getPublishedArticles: vi.fn(),
+}))
 
 vi.mock('../articles', () => ({ getPublishedArticles }))
+vi.mock('../opponents', () => ({ getClubRecords, opponentsPath: '/statistieken/tegenstanders' }))
 
 // The pages that are not in the sitemap on purpose, as paths such as '/beheer'. A new page.tsx
 // that isn't in the list of pages in pages.ts must be named here, so a new page doesn't forget
@@ -28,6 +32,8 @@ const notInSitemap: string[] = [
   '/nieuws/zoeken',
   // One page for every published article: the sitemap lists them from the database.
   '/redactie/[slug]',
+  // One page for every club we played: the sitemap lists them from the database.
+  '/statistieken/tegenstanders/[club]',
   // The statistics of a season that is over: only the current season, /statistieken, is listed.
   '/statistieken/[seizoen]',
   // The same for the players of a season that is over: only /statistieken/spelers is listed.
@@ -52,6 +58,8 @@ function pagePaths() {
 beforeEach(() => {
   getPublishedArticles.mockReset()
   getPublishedArticles.mockResolvedValue([])
+  getClubRecords.mockReset()
+  getClubRecords.mockResolvedValue([])
 })
 
 afterEach(() => {
@@ -84,6 +92,28 @@ describe('sitemap', () => {
       { url: 'https://sc.heerenveen.org/redactie/dit-zijn-wij' },
       { url: 'https://sc.heerenveen.org/redactie/eerder' },
     ])
+  })
+
+  it('lists the page of each club we played, A to Z as the query gives them, and nothing else', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+    getClubRecords.mockResolvedValue([{ slug: 'ado-den-haag' }, { slug: 'fc-groningen' }])
+
+    expect(await sitemap()).toEqual([
+      ...pages.map(({ path }) => ({ url: `https://sc.heerenveen.org${path}` })),
+      { url: 'https://sc.heerenveen.org/statistieken/tegenstanders/ado-den-haag' },
+      { url: 'https://sc.heerenveen.org/statistieken/tegenstanders/fc-groningen' },
+    ])
+    expect(getClubRecords).toHaveBeenCalledWith('all')
+  })
+
+  it('still lists the pages, and says why in the log, when the database cannot give the clubs', async () => {
+    vi.stubEnv('SITE_ENV', 'local')
+    getClubRecords.mockRejectedValue(new Error('connect ECONNREFUSED 127.0.0.1:3306'))
+
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    expect(await sitemap()).toEqual(pages.map(({ path }) => ({ url: `http://localhost:3000${path}` })))
+    expect(error).toHaveBeenCalledWith('Could not read the clubs for the sitemap: connect ECONNREFUSED 127.0.0.1:3306')
   })
 
   it('still lists the pages, and says why in the log, when the database cannot give the articles', async () => {

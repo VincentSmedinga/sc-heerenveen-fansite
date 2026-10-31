@@ -410,19 +410,28 @@ async function checkShareImage() {
 }
 
 /**
- * Fetches the sitemap and checks it: the pages of the site, each with the address of
- * `siteOrigin`, and nothing but the addresses (no lastmod, changefreq or priority). The feed of
- * Updates is not a page, so it is not in it.
+ * Fetches the sitemap and checks it: the pages of the site and then the page of each club, each
+ * with the address of `siteOrigin` (the clubs only when the database has matches), and nothing
+ * but the addresses (no lastmod, changefreq or priority). The feed of Updates is not a page, so
+ * it is not in it.
  */
-async function checkSitemap(siteOrigin) {
+async function checkSitemap(siteOrigin, { clubs: hasClubs }) {
   const sitemap = await fetch(`${origin}/sitemap.xml`)
   const xml = await sitemap.text()
   assert.equal(sitemap.status, 200)
   assert.match(sitemap.headers.get('content-type') ?? '', /^application\/xml/)
-  assert.deepEqual(
-    [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map(([, location]) => location),
-    pages.map(({ path }) => `${siteOrigin}${path}`),
+  const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map(([, location]) => location)
+  const listed = pages.map(({ path }) => `${siteOrigin}${path}`)
+  assert.deepEqual(locations.slice(0, listed.length), listed)
+  // Then the page of each club the made-up matches have, and nothing else.
+  const clubs = locations.slice(listed.length)
+  assert.equal(
+    clubs.includes(`${siteOrigin}/statistieken/tegenstanders/testdorp-fc`),
+    hasClubs,
+    'the page of a club is listed when there are matches',
   )
+  assert.equal(clubs.length > 0, hasClubs)
+  assert.ok(clubs.every((location) => location.startsWith(`${siteOrigin}/statistieken/tegenstanders/`)))
   assert.doesNotMatch(xml, /lastmod|changefreq|priority|feed\.xml/)
 
   return sitemap
@@ -598,7 +607,7 @@ await withEmptyDatabase((database) =>
       await checkMetaTags(path, await response.text(), 'https://acc.sc.heerenveen.org')
     }
 
-    const sitemap = await checkSitemap('https://acc.sc.heerenveen.org')
+    const sitemap = await checkSitemap('https://acc.sc.heerenveen.org', { clubs: true })
     const shareImageResponse = await checkShareImage()
 
     // Every page points to the manifest and the icons, and the site serves them itself.
@@ -879,6 +888,61 @@ await withEmptyDatabase((database) =>
     assert.equal(pickedPlayers.headers.get('location'), '/statistieken/spelers')
     assert.equal((await fetch(`${origin}/statistieken/spelers/2099-00`)).status, 404)
 
+    // The page Tegenstanders lists every club of the made-up matches A to Z, each name a link
+    // to its page, in a table with a caption and column headers with scope. The menu has it as
+    // a sub-page of Statistieken, and it is the current one.
+    const opponentsPage = await fetch(`${origin}/statistieken/tegenstanders`)
+    const opponentsHtml = await opponentsPage.text()
+    assert.equal(opponentsPage.status, 200)
+    assert.match(opponentsHtml, /<h1[^>]*>Tegenstanders<\/h1>/)
+    assert.match(
+      opponentsHtml,
+      /<a aria-current="true" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/statistieken\/spelers">Spelers<\/a><\/li><li role="listitem"><a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>/s,
+    )
+    assert.match(opponentsHtml, /<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z/)
+    assert.match(
+      opponentsHtml,
+      /<th scope="row"><a href="\/statistieken\/tegenstanders\/testdorp-fc">Testdorp FC<\/a><\/th><td class="hf-numeric">\d+<\/td>/,
+    )
+    assert.match(opponentsHtml, /Gebaseerd op alle \d+ gespeelde wedstrijden sinds \d{4}\/\d{2}/)
+    assert.match(opponentsHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and
+    // the links keep the choice.
+    assert.match(opponentsHtml, /href="\/statistieken\/tegenstanders\/fc-maquette"/)
+
+    const leagueOpponents = await (await fetch(`${origin}/statistieken/tegenstanders?competitie=eredivisie`)).text()
+    assert.doesNotMatch(leagueOpponents, /fc-maquette/)
+    assert.match(leagueOpponents, /href="\/statistieken\/tegenstanders\/testdorp-fc\?competitie=eredivisie"/)
+    assert.equal((await fetch(`${origin}/statistieken/tegenstanders?competitie=onzin`)).status, 404)
+
+    // The page of a club: its name, the summary with Totaal, Thuis and Uit, the matches, and
+    // the credit. A club met in the cup only has a sentence with the choice Eredivisie, and a
+    // slug that no club has is "niet gevonden".
+    const clubPage = await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc`)
+    const clubHtml = await clubPage.text()
+    assert.equal(clubPage.status, 200)
+    assert.match(clubHtml, /<h1[^>]*>Testdorp FC<\/h1>/)
+    assert.match(clubHtml, /<h2[^>]*id="onze-uitslagen">/)
+    assert.match(
+      clubHtml,
+      /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen tegen Testdorp FC, in totaal, thuis en uit<\/caption>/,
+    )
+    assert.match(
+      clubHtml,
+      /<th [^>]*scope="col"[^>]*>Totaal<\/th><th [^>]*scope="col"[^>]*>Thuis<\/th><th [^>]*scope="col"[^>]*>Uit<\/th>/,
+    )
+    assert.match(clubHtml, /<h2[^>]*id="wedstrijden">/)
+    assert.match(clubHtml, /Gebaseerd op (?:1 gespeelde wedstrijd|alle \d+ gespeelde wedstrijden) sinds \d{4}\/\d{2}/)
+    assert.match(clubHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.match(
+      clubHtml,
+      /<a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>/,
+    )
+    const cupClub = await (await fetch(`${origin}/statistieken/tegenstanders/fc-maquette?competitie=eredivisie`)).text()
+    assert.match(cupClub, /In de Eredivisie hebben we nog niet tegen deze club gespeeld\./)
+    assert.equal((await fetch(`${origin}/statistieken/tegenstanders/bestaat-niet`)).status, 404)
+    assert.equal((await fetch(`${origin}/statistieken/tegenstanders/testdorp-fc?competitie=onzin`)).status, 404)
+
     // Updates shows the versions of the build, newest first, and points feed readers to its
     // feed.
     const updatesResponse = await fetch(`${origin}/updates`)
@@ -984,7 +1048,7 @@ await withEmptyDatabase((database) =>
       await checkMetaTags(path, await response.text(), 'https://sc.heerenveen.org')
     }
 
-    await checkSitemap('https://sc.heerenveen.org')
+    await checkSitemap('https://sc.heerenveen.org', { clubs: false })
 
     const sources = await fetch(`${origin}/bronnen`)
     const sourcesHtml = await sources.text()

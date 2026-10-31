@@ -82,4 +82,26 @@ describe('DataTable', () => {
     expect(screen.getByRole('table').className).toBe('hf-data-table extra')
     expect(screen.getByRole('table').id).toBe('tabel')
   })
+
+  it('makes the row header a link when the row has an href, and leaves the others as text', () => {
+    render(
+      <DataTable
+        {...props}
+        rows={[
+          { cells: [1, 2], header: 'ma 26 okt 2026', href: '/dag/26' },
+          { cells: [3, 4], header: 'zo 25 okt 2026' },
+        ]}
+      />,
+    )
+
+    const [first, second] = screen.getAllByRole('rowheader')
+
+    expect(
+      within(first as HTMLElement)
+        .getByRole('link', { name: 'ma 26 okt 2026' })
+        .getAttribute('href'),
+    ).toBe('/dag/26')
+    expect(within(second as HTMLElement).queryByRole('link')).toBeNull()
+    expect(first?.getAttribute('scope')).toBe('row')
+  })
 })
