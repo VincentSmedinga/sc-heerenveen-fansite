@@ -43,11 +43,11 @@
     color: var(--hf-colour-text-default);
     display: block;
     inline-size: 100%;
-    margin-block: 0.25rem 1rem;
+    margin-block: var(--hf-space-xs) var(--hf-space-m);
     max-inline-size: 30rem;
     min-block-size: 2.75rem;
-    padding-block: 0.5rem;
-    padding-inline: 0.75rem;
+    padding-block: var(--hf-space-s);
+    padding-inline: var(--hf-space-s);
   }
 
   ::placeholder {
@@ -59,7 +59,7 @@
     block-size: 1.25rem;
     inline-size: 1.25rem;
     margin-block: 0;
-    margin-inline: 0 0.5rem;
+    margin-inline: 0 var(--hf-space-s);
     vertical-align: -0.2em;
   }
 
@@ -75,15 +75,15 @@
     border-color: var(--hf-colour-border-surface);
     border-radius: 0.25rem;
     box-sizing: border-box;
-    margin-block: 0 1rem;
+    margin-block: 0 var(--hf-space-m);
     margin-inline: 0;
-    padding-block: 0.5rem 1rem;
-    padding-inline: 1rem;
+    padding-block: var(--hf-space-s) var(--hf-space-m);
+    padding-inline: var(--hf-space-m);
   }
 
   legend {
     color: var(--hf-colour-text-heading);
     font-weight: var(--hf-name-font-weight);
-    padding-inline: 0.25rem;
+    padding-inline: var(--hf-space-xs);
   }
 }

@@ -4,7 +4,7 @@
   /* Colour and spacing of headings. Their type styles follow below, in the typography layer. */
   :is(h1, h2, h3, h4, h5, h6) {
     color: var(--hf-colour-text-heading);
-    margin-block: 2rem 0.75rem;
+    margin-block: var(--hf-space-xl) var(--hf-space-s);
 
     &:first-child {
       margin-block-start: 0;

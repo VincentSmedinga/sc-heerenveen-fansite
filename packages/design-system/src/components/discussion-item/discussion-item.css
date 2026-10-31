@@ -8,7 +8,7 @@
   /* A long word in a title or a name breaks instead of making the page scroll sideways. */
   .hf-discussion-item {
     overflow-wrap: anywhere;
-    padding-block: 0.75rem;
+    padding-block: var(--hf-space-m);
   }
 
   /*

@@ -9,20 +9,20 @@
     border-collapse: collapse;
     font-variant-numeric: tabular-nums;
     inline-size: 100%;
-    margin-block: 0 1rem;
+    margin-block: 0 var(--hf-space-m);
   }
 
   caption {
     color: var(--hf-colour-text-heading);
     font-weight: var(--hf-strong-font-weight);
-    margin-block-end: 0.5rem;
+    margin-block-end: var(--hf-space-s);
     text-align: start;
   }
 
   th,
   td {
-    padding-block: 0.375rem;
-    padding-inline: 0.5rem;
+    padding-block: var(--hf-space-s);
+    padding-inline: var(--hf-space-s);
     text-align: start;
     vertical-align: baseline;
   }

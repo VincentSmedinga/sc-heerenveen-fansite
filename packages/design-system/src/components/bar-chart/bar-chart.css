@@ -13,7 +13,7 @@
 
     container-name: hf-bar-chart;
     container-type: inline-size;
-    margin-block: 0.5rem;
+    margin-block: var(--hf-space-s);
   }
 
   /*
@@ -22,7 +22,7 @@
    * and it sits in the column of the plot, so the numbers line up with the places.
    */
   .hf-bar-chart-frame {
-    column-gap: 0.5rem;
+    column-gap: var(--hf-space-s);
     display: grid;
     grid-template-columns: minmax(0, 1fr);
   }
@@ -170,7 +170,7 @@
   @container hf-bar-chart (inline-size >= 24rem) {
     .hf-bar-chart-frame {
       grid-template-columns: 1.25rem minmax(0, 1fr);
-      padding-block-start: 0.5rem;
+      padding-block-start: var(--hf-space-s);
     }
 
     .hf-bar-chart-plot {

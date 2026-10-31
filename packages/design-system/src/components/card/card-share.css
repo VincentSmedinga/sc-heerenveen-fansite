@@ -85,7 +85,7 @@
   /* The message is for a screen reader, except when something went wrong: then it is a sentence for everyone. */
   .hf-card-share-status:not(.hf-visually-hidden) {
     color: var(--hf-colour-text-default);
-    margin-block: 0.75rem 0;
+    margin-block: var(--hf-space-s) 0;
   }
 
   /*
@@ -106,9 +106,9 @@
     box-sizing: border-box;
     color: var(--hf-colour-text-default);
     display: grid;
-    gap: 0.75rem;
+    gap: var(--hf-space-s);
     inline-size: 32rem;
-    padding: 1.5rem;
+    padding: var(--hf-space-l);
   }
 
   .hf-card-share-copy {
@@ -126,12 +126,12 @@
    * not pull them apart. The logo is level with them.
    */
   .hf-card-share-strip {
-    --hf-logo-gap: 0.5rem;
+    --hf-logo-gap: var(--hf-space-s);
     --hf-wordmark-font-size: 0.9375rem;
 
     align-items: center;
     display: grid;
-    gap: 1rem;
+    gap: var(--hf-space-m);
     grid-template-columns: auto minmax(0, 1fr);
 
     .hf-logo-tagline {
