@@ -32,7 +32,7 @@ body:
     id: pagina
     attributes:
       label: Op welke pagina?
-      description: Het adres van de pagina, bijvoorbeeld `https://sc.heerenveen.org/podcasts`.
+      description: Het adres van de pagina, bijvoorbeeld `https://sc.heerenveen.org/nieuws/podcasts`.
     validations:
       required: true
   - type: input
