@@ -264,6 +264,30 @@ export const SortableDark = meta.story({
   render: renderSortable('40rem'),
 })
 
+export const SortableLast = meta.story({
+  globals: { theme: 'light' },
+  name: 'Sorteerbaar, als laatste in een kaart, licht',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De tabel is het laatste in de kaart, met alleen de verborgen regel voor de schermlezer erachter. Er komt geen extra ruimte onder, want de kaart heeft haar eigen binnenruimte.',
+      },
+    },
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('table')).toHaveStyle({ marginBlockEnd: '0px' })
+  },
+  render: () => (
+    <Card aria-labelledby="sorteerbaar-laatste" style={{ maxInlineSize: '40rem' }}>
+      <Heading id="sorteerbaar-laatste" level={2}>
+        Tegenstanders
+      </Heading>
+      <DataTable caption="De tegenstanders van sc Heerenveen" columns={sortableColumns} rows={manyClubs} />
+    </Card>
+  ),
+})
+
 export const SortedPhone = meta.story({
   globals: { theme: 'light' },
   name: 'Gesorteerd op een telefoon, licht',

@@ -21,9 +21,17 @@
     position: relative;
   }
 
-  /* The table of a card has no space below it: the legend, if there is one, is under it. */
+  /*
+   * The legend under the table has the large space of a table above it. Without a legend the
+   * table is the last in its place, which is a container with its own formatting context, so
+   * the space would stay inside it: it has none then.
+   */
   .hf-bar-place > table {
-    margin-block-end: var(--hf-space-s);
+    margin-block-end: var(--hf-space-l);
+
+    &:last-child {
+      margin-block-end: 0;
+    }
   }
 
   .hf-bar-table {

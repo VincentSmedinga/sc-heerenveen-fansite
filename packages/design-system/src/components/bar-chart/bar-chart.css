@@ -13,7 +13,7 @@
 
     container-name: hf-bar-chart;
     container-type: inline-size;
-    margin-block: var(--hf-space-s);
+    margin-block: var(--hf-space-s) var(--hf-space-l);
   }
 
   /*

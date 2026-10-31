@@ -4,6 +4,11 @@
  */
 
 @layer hf.components {
+  /* The large space of a chart is under it, and none when it is the last in its cell. */
+  .hf-form-chart {
+    margin-block-end: var(--hf-space-l);
+  }
+
   .hf-form-chart-key,
   .hf-form-chart-line {
     margin-block: var(--hf-space-xs) 0;

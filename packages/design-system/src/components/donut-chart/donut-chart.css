@@ -13,7 +13,7 @@
     display: grid;
     gap: var(--hf-space-l) var(--hf-space-m);
     grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
-    margin-block: var(--hf-space-m);
+    margin-block: var(--hf-space-m) var(--hf-space-l);
   }
 
   .hf-donut-chart {
