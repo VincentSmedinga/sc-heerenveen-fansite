@@ -61,6 +61,7 @@ export const SortableDataTable = ({ caption, className, columns, rows, ...props 
             {columns.map((column, index) => {
               const active = sorting?.column === index
               const sortable = scripted && column.sortable === true
+              const arrow = active && <Icon name={sorting.direction === 'ascending' ? 'arrow-up' : 'arrow-down'} />
 
               return (
                 <th
@@ -77,8 +78,9 @@ export const SortableDataTable = ({ caption, className, columns, rows, ...props 
                       }}
                       type="button"
                     >
+                      {index > 0 && arrow}
                       <ColumnText column={column} named />
-                      {active && <Icon name={sorting.direction === 'ascending' ? 'arrow-up' : 'arrow-down'} />}
+                      {index === 0 && arrow}
                     </button>
                   ) : (
                     <ColumnText column={column} />

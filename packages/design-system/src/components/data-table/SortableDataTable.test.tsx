@@ -166,6 +166,19 @@ describe('DataTable with sortable columns', () => {
     expect(document.querySelector('thead svg')?.getAttribute('aria-hidden')).toBe('true')
   })
 
+  it('puts the arrow before the header in a number column and after it in the first column', () => {
+    render(<DataTable {...props} />)
+
+    fireEvent.click(button('G gespeeld'))
+
+    expect(button('G gespeeld').firstElementChild?.tagName.toLowerCase()).toBe('svg')
+
+    fireEvent.click(button('Club'))
+
+    expect(button('Club').lastElementChild?.tagName.toLowerCase()).toBe('svg')
+    expect(button('G gespeeld').querySelector('svg')).toBeNull()
+  })
+
   it('says what happened in a polite live region that is there before the click', () => {
     render(<DataTable {...props} />)
 
@@ -232,5 +245,19 @@ describe('data-table.css for a sortable column', () => {
     expect(css.slice(start, css.indexOf('&:hover', start))).toMatch(
       /min-block-size: 1\.5rem[\s\S]*min-inline-size: 1\.5rem/u,
     )
+  })
+
+  it('ends the header of a number column where its numbers end, so no gap stands before it', () => {
+    const start = css.indexOf('.hf-data-table .hf-numeric .hf-data-table-sort {')
+
+    expect(start).not.toBe(-1)
+    expect(css.slice(start, css.indexOf('}', start))).toMatch(/justify-content: flex-end/u)
+  })
+
+  it('keeps a score on one line in a table that sorts', () => {
+    const start = css.indexOf('.hf-data-table-sortable td.hf-numeric {')
+
+    expect(start).not.toBe(-1)
+    expect(css.slice(start, css.indexOf('}', start))).toMatch(/white-space: nowrap/u)
   })
 })

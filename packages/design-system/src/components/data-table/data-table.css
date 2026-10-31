@@ -19,7 +19,8 @@
    * border, the colour and weight of the header, underlined so it reads as something to press.
    * It is at least 24 by 24 pixels (WCAG 2.5.8). The arrow of the sorted column has the colour
    * of the text, so it has the contrast of the text, and is a shape, so colour is not the
-   * only sign.
+   * only sign. An unsorted header has no arrow and no room kept for one: a slot for each of
+   * seven columns would not fit a phone.
    */
   .hf-data-table .hf-data-table-sort {
     align-items: center;
@@ -42,19 +43,57 @@
       text-decoration-thickness: 2px;
     }
 
-    /* The arrow stands next to the header, and takes the room it needs and no more. */
+    /*
+     * The arrow is a little smaller than the text and takes the room it needs and no more. In
+     * a number column it stands before the header, in the first column after it.
+     */
     .hf-icon {
-      margin-inline-start: 0.125em;
+      --hf-icon-size: 0.75;
+
+      margin-inline: 0.125em 0;
+    }
+
+    .hf-icon:first-child {
+      margin-inline: 0 0.125em;
     }
   }
 
   /*
+   * The header of a number column ends where its numbers end. The button is at least 24 pixels
+   * wide, so a short header such as G would stand at the start of the button, with a gap
+   * between it and the numbers. The arrow of the sorted column takes room that the header
+   * leaves free, so the columns keep their width when the sort changes, except where the header
+   * and the arrow are wider than the numbers and the button.
+   */
+  .hf-data-table .hf-numeric .hf-data-table-sort {
+    justify-content: flex-end;
+  }
+
+  /*
    * A table that sorts has buttons of at least 24 pixels wide in its headers, so its number
-   * columns are wider than the numbers. They give up half of their space beside the text, so a
-   * list with seven columns, such as the opponents with the points, still fits a phone.
+   * columns are wider than the numbers, and the arrow of the sorted column needs room as well.
+   * On the narrowest phones the columns give up most of their space beside the text, so a
+   * list with seven columns, such as the opponents with the points, still fits at 320 pixels
+   * when a column is sorted. From a wider phone they keep a little more, so the numbers of
+   * two columns do not run together.
    */
   .hf-data-table-sortable :is(th, td).hf-numeric {
-    padding-inline: var(--hf-space-xs);
+    padding-inline: calc(var(--hf-space-xs) / 2);
+  }
+
+  /* The first column keeps less room after it too: the number columns have their own space. */
+  .hf-data-table-sortable :is(th, td):first-child {
+    padding-inline-end: calc(var(--hf-space-xs) / 2);
+  }
+
+  @media (width >= 24rem) {
+    .hf-data-table-sortable :is(th, td).hf-numeric {
+      padding-inline: var(--hf-space-xs);
+    }
+
+    .hf-data-table-sortable :is(th, td):first-child {
+      padding-inline-end: var(--hf-space-xs);
+    }
   }
 
   /* A score such as 35–17 stays on one line, so it reads as one figure; the row header gives way. */

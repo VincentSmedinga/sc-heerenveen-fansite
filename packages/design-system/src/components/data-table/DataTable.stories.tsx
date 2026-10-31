@@ -285,3 +285,30 @@ export const SortedPhoneDark = meta.story({
   },
   render: renderSortable('20rem'),
 })
+
+export const SortableLongHeaders = meta.story({
+  globals: { theme: 'light' },
+  name: 'Sorteerbare kolommen met een lange kop en een korte, gesorteerd, licht',
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Weergaven' }))
+    await expect(canvas.getByRole('columnheader', { name: 'Weergaven' })).toHaveAttribute('aria-sort', 'descending')
+  },
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="lange-kop">
+        <Heading id="lange-kop" level={2}>
+          Per dag
+        </Heading>
+        <DataTable
+          caption="Unieke bezoekers en paginaweergaven per dag"
+          columns={[
+            { name: 'Dag', sortable: true },
+            { name: 'Bezoekers', sortable: true },
+            { name: 'Weergaven', sortable: true },
+          ]}
+          rows={days}
+        />
+      </Card>
+    </div>
+  ),
+})

@@ -2884,7 +2884,11 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     In een gewone kop blijft de afkorting verborgen voor een schermlezer, die alleen het hele woord hoort.
   - **De maat:** de knop is minstens 1,5 rem hoog en breed (24 bij 24 pixels, WCAG 2.5.8), zonder vlak en rand, onderstreept zodat hij als iets om op te drukken leest.
     De pijl heeft de kleur van de tekst, dus hij haalt 3:1 als de tekst 4,5:1 haalt, en hij is een vorm, dus de kleur is niet het enige teken.
-    De getalkolommen van een tabel die sorteert hebben opzij 0,25 rem ruimte in plaats van 0,5 rem, want de knoppen maken ze breder dan de getallen en zeven kolommen (de lijst met Punten) pasten anders niet op 320 pixels: ze waren 7 pixels te breed.
+    De getalkolommen van een tabel die sorteert hebben opzij 0,125 rem ruimte in plaats van 0,5 rem, en vanaf 24 rem schermbreedte 0,25 rem, want de knoppen maken ze breder dan de getallen en zeven kolommen (de lijst met Punten) pasten anders niet op 320 pixels, ook niet als de pijl erbij komt.
+    Op een bredere telefoon is er ruimte genoeg, en dan lopen de getallen van twee kolommen niet in elkaar over.
+    De kop van een getalkolom eindigt waar de getallen eindigen, zodat er geen gat voor staat.
+    De pijl staat in een getalkolom vóór de kop en in de eerste kolom erachter, en een ongesorteerde kop houdt geen plek voor een pijl vrij: zeven plekken zouden niet op 320 pixels passen.
+    De breedte van een kolom verandert dus niet als de pijl in de ruimte van de kop past, en groeit een paar pixels als hij breder is, zoals bij GL.
   - **Niet in het adres:** de gekozen volgorde staat niet in de URL en blijft niet bewaard.
     Een nieuwe lading, ook na een wissel van de schakelaar van #406, geeft de tabel weer van A tot Z.
   - **De lijst van de tegenstanders:** de kolommen Club, Gespeeld, Gewonnen, Gelijk, Verloren en Doelpunten sorteren, en bij de keuze Eredivisie ook de nieuwe kolom Punten (afkorting P): 3 punten per winst en 1 per gelijkspel tegen die club, uit de cijfers van de Eredivisie.
