@@ -104,6 +104,23 @@ Zo test je het: tab door de pagina met een schermlezer aan, of bekijk de naam va
 
 Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het toetsenbord.
 
+### Tabellen
+
+- [ ] Een tabel is een echte `table` met een bijschrift, kolomkoppen en rijkoppen met `scope`.
+      Een afgekorte kop heeft het hele woord voor een schermlezer, en een regel onder de tabel legt de afkortingen uit (1.3.1).
+- [ ] Een tabel die kan sorteren, werkt ook zonder JavaScript: de server stuurt de hele tabel in een vaste volgorde, met koppen van gewone tekst en zonder knoppen die niets doen.
+      Met JavaScript wordt de kop van een sorteerbare kolom een knop (4.1.2).
+- [ ] De gesorteerde kop heeft `aria-sort="ascending"` of `"descending"`, en de andere sorteerbare koppen `"none"`.
+      Een pijl laat het zien, want kleur is niet het enige teken (1.4.1).
+      De pijl haalt 3:1 (1.4.11) en de kop 4,5:1 (1.4.3), in licht en donker.
+- [ ] Na een klik zegt een beleefde regel (`role="status"`, niet te zien) wat er gebeurde, zoals "Gesorteerd op Gespeeld, van hoog naar laag" (4.1.3).
+      De regio is er al voor de klik, en de focus blijft op de knop (2.4.3).
+- [ ] De knop in de kop is minstens 24 bij 24 pixels (2.5.8), en de tabel past op 320 pixels zonder zijwaarts scrollen (1.4.10).
+      Een tabel die niet past met hele woorden, krijgt afkortingen.
+
+Zo test je het: tab naar een kop, druk Enter en spatie, en kijk of de volgorde en de pijl veranderen, de focus blijft en de schermlezer de regel voorleest.
+Zet JavaScript uit en kijk of de tabel er in de volgorde van de server staat, zonder knoppen.
+
 ### Contrast in licht en donker
 
 - [ ] Tekst haalt minstens 4,5:1, grote tekst 3:1 (1.4.3).
