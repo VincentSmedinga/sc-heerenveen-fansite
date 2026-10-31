@@ -574,8 +574,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - Vier workers per runner in plaats van twee: 7% sneller voor de e2e-job (373 tegen 401 seconden) en meer kans op wankele tests onder belasting; niet gehouden.
   - De cache van Next (`apps/site/.next/cache`): `pnpm build` duurde 15 in plaats van 19 seconden; niet gehouden.
   - De browsers van Playwright cachen: niet van toepassing, want CI gebruikt het Google Chrome van de runner (zie _CI gebruikt de Chrome van de runner_).
-  - Elk deel zelf laten bouwen in plaats van de map als artifact te delen: de build kost 19 seconden en `assemble` 1 seconde per deel, tegen 4 seconden uploaden en 1 tot 3 seconden downloaden. Het artifact is goedkoper (19 MB).
-  - Een stap die dubbel draait: `pnpm typecheck` en het begin van `pnpm build` deden allebei `tsc -b`. De typecontrole zit nu in dezelfde job als de build, die haar dan klaar vindt (ongeveer 20 seconden minder).
+  - Elk deel zelf laten bouwen in plaats van de map als artifact te delen: de build kost 19 seconden en `assemble` 1 seconde per deel, tegen 4 seconden uploaden en 1 tot 3 seconden downloaden.
+    Het artifact is goedkoper (19 MB).
+  - Een stap die dubbel draait: `pnpm typecheck` en het begin van `pnpm build` deden allebei `tsc -b`.
+    De typecontrole zit nu in dezelfde job als de build, die haar dan klaar vindt (ongeveer 20 seconden minder).
   - De rooktest in een eigen job: 70 seconden voor 39 seconden werk; nu een stap in het kleinste deel, wat 40 seconden scheelt.
 - **Pull requests die alleen documentatie wijzigen:** de regels van `scripts/ci-changes.js` en zijn tests zijn niet veranderd.
   Zo'n run duurt 162 seconden (som 258) tegen 214 seconden (mediaan van 5 runs) in de oude indeling; de som is hoger door het opstarten van de jobs.
