@@ -6726,6 +6726,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een letter (W, G, V) of een woord erbij, voor wie kleuren niet uit elkaar houdt (de projecteigenaar vond de cijfers voldoende); gele of blauwe kleur voor gelijkspel (geel is een waarschuwing en blauw is de kleur van links); de beker apart behandelen (niet nodig: neutraal zegt niets over wie doorging).
 - **Later:** zie _Verlenging en strafschoppen worden bewaard en getoond_.
   Bij strafschoppen volgt de kleur de strafschoppen, en een gelijke stand zonder bekende strafschoppen blijft neutraal.
+- **Later:** zie _`ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`_ (31 oktober 2026): ook `ShortMatch` gebruikt deze kleuren, met dezelfde regel voor de uitkomst.
 
 ### Verlenging en strafschoppen worden bewaard en getoond
 
@@ -7107,6 +7108,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `ShortMatch` heeft zes props en geen kleur, want in deze lijst hebben alle regels dezelfde soort uitslag.
   De selectie en het aantal komen uit dezelfde wedstrijden die de pagina al haalt (`cleanSheetsOf`), en de knop "Laad 5 meer" werkt zoals op de homepage, met `?nul=` in het adres.
 - **Alternatieven:** de volledige wedstrijdregels (veel dubbele informatie naast de uitslagen); alleen een getal zonder lijst (zegt niet welke wedstrijden); een markering in de lijst met uitslagen (de nullen verdwijnen dan tussen de rest); een korte uitvoering van `Match` (maakt `Match` groter).
+- **Later:** zie _`ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`_ (31 oktober 2026): `ShortMatch` heeft sindsdien wel de kleur van de uitkomst.
+  De rest blijft: een eigen onderdeel met zes props, zonder competitie, ronde, stadion of doelpuntenmakers.
 
 ### De kaart met topscorers toont alle doelpuntenmakers
 
@@ -7764,3 +7767,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een sleutel per keuze in de cache (meer geheugen en meer code voor dezelfde gegevens).
   Een zin op de drie kaarten die de keuze niet volgen (langere kaarten, en de schakelaar zegt het al).
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de schakelaar staat sindsdien ook op `/statistieken/tegenstanders` en op de pagina van een club, en telt daar de wedstrijden van alle seizoenen.
+
+### `ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de uitslag in `ShortMatch` is groen bij winst, rood bij verlies en neutraal bij gelijkspel, voor sc Heerenveen, thuis en uit, zoals in `Match` (#510).
+  - **De regel:** `Match` en `ShortMatch` gebruiken dezelfde hulpfunctie, `outcomeOf` in `components/outcome.ts`, en niet een kopie.
+    De uitkomst volgt uit `goalsFor` en `goalsAgainst`.
+  - **De opmaak:** dezelfde klassen (`hf-match-win`, `hf-match-loss`, `hf-match-draw`) en dezelfde tokens (`--hf-colour-outcome-win`, `-loss` en `-draw`).
+    Er komt geen eigenschap en geen schakelaar: elke `ShortMatch` krijgt de kleur.
+  - **Het gewicht** was al dat van `Match` (`--hf-figure-font-weight`), dus de CSS van de uitslag verandert niet.
+    In geforceerde kleuren vervangt de browser de kleur en blijft het gewicht.
+  - **Het contrast** haalt 4,5:1 op de vier vlakken van een kaart (wit, zacht, warm en sterk), in licht en donker: het laagste is 5,31:1 (winst en gelijkspel op het warme vlak in licht).
+    Er is dus geen kleur aangepast.
+    `pnpm test:stories` toetst het met axe op een story per vlak, in licht en donker.
+  - **Een bekerwedstrijd na strafschoppen** staat in `ShortMatch` als gelijkspel, omdat het onderdeel de strafschoppen niet kent.
+    Dat is een bekende beperking, geen onderdeel van dit besluit.
+  - **`ShortStaff`** leent de opmaak maar heeft geen uitslag, dus hij blijft zoals hij was; een test laat dat zien.
+- **Waarom:** in een lijst als de wedstrijden tegen één club, Uitersten of De nul gehouden ziet een supporter zo in één oogopslag wat we wonnen en verloren.
+  De eerdere reden om het weg te laten (alle regels van De nul gehouden hebben dezelfde soort uitslag) gold niet voor de andere lijsten, en een regel die zo hoort te werken als `Match` hoort ook dezelfde kleur te hebben.
+  Een gedeelde functie voorkomt dat de twee onderdelen op den duur een andere uitkomst kleuren.
+  De kleur is een aanvulling op de cijfers en niet het enige teken: de tekst voor een schermlezer blijft "3 tegen 0".
+- **Alternatieven:** een eigenschap om de kleur uit te zetten (niemand vroeg erom, en elke lijst zou een keuze moeten maken); de regel kopiëren naar `ShortMatch` (twee plaatsen die uit elkaar kunnen lopen); een eigen klasse per uitkomst in `short-match.css` (dezelfde kleuren op twee plaatsen).

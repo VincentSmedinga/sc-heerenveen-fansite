@@ -1,6 +1,7 @@
 import { type ComponentPropsWithoutRef, Fragment } from 'react'
 
 import { classNames } from '../classNames'
+import { outcomeOf } from '../outcome'
 import { Text } from '../text/Text'
 import { Time } from '../time/Time'
 
@@ -115,10 +116,6 @@ type MatchWithTimeProps = MatchBaseProps & {
    */
   time: string
 }
-
-/** How a played match went for sc Heerenveen, whichever side it played on. */
-const outcomeOf = (goalsFor: number, goalsAgainst: number) =>
-  goalsFor > goalsAgainst ? 'win' : goalsFor < goalsAgainst ? 'loss' : 'draw'
 
 /** The two numbers of a result from the home club's side, such as `2–0`, with this dash. */
 const sides = (home: boolean, ours: number, theirs: number, dash: string) =>

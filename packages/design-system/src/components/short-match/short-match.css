@@ -1,7 +1,9 @@
 /*
  * A short match: the day, the opponent with where it was played, and the result, on one line
- * that wraps when the place is narrow. It has no colour of its own for the outcome. A List of
- * short matches has a thin line between the lines, and a line can have a name above its match.
+ * that wraps when the place is narrow. The result has the colour of the outcome for sc
+ * Heerenveen, from the classes of match.css (.hf-match-win, .hf-match-loss and .hf-match-draw),
+ * so the two components colour a result alike. A List of short matches has a thin line between
+ * the lines, and a line can have a name above its match.
  */
 
 @layer hf.components {
@@ -36,7 +38,11 @@
     font-weight: var(--hf-body-font-weight);
   }
 
-  /* The result keeps its digits the same width and stays on one line: "3–0" is never split. */
+  /*
+   * The result keeps its digits the same width and stays on one line: "3–0" is never split. The
+   * weight is the one of Match, and it is what marks the result when a forced colour replaces
+   * the colour of the outcome.
+   */
   .hf-short-match-score {
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-figure-font-weight);
