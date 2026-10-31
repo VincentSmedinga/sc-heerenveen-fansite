@@ -84,7 +84,7 @@ Hij start de site een tweede keer, zonder bereikbare database, voor de foutpagin
 Eerst start hij `scripts/fake-smtp.js`, een nepmailserver voor `e2e/contact.spec.ts`.
 Die zet elke mail in `.next/fake-smtp`, en maakt zijn certificaat met `openssl`, dat dus op je computer moet staan (op macOS en op de runner van CI staat het er al).
 CI geeft de map die de job _Typecheck and build_ maakte mee in `SITE_FOLDER`, zodat dezelfde map wordt getoetst als bij de rooktest.
-CI draait de tests in drie delen, elk op een eigen runner met een eigen database: `--project=chromium --shard=1/2` en `2/2`, en `--project=chromium-writing --no-deps` voor de tests die een artikel schrijven.
+CI draait de tests in vier delen, elk op een eigen runner met een eigen database: `--project=chromium --shard=1/3` tot `3/3`, en `--project=chromium-writing --no-deps` voor de tests die een artikel schrijven, samen met de rooktest.
 Een gewone `--shard` over alle projecten werkt niet: het project `chromium-writing` hangt af van `chromium`, en Playwright zet dan alle tests in het eerste deel en meldt voor de andere een groene run zonder tests.
 `scripts/ci-e2e-report.js` laat zo'n deel falen.
 Faalt een pagina, dan noemt de log de pagina en het thema (in de naam van de test), de regel van axe en het element.

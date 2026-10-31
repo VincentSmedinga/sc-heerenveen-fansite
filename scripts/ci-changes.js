@@ -1,5 +1,5 @@
 // Decides whether CI has to run the checks of the site: the smoke test and the accessibility
-// check (the e2e tests), about 400 of the 850 machine seconds of a run. CI starts it as the job
+// check (the e2e tests), about 500 of the 840 machine seconds of a run. CI starts it as the job
 // "Decide which checks to run" and gives the jobs of the site and of the stories an `if` on its
 // outputs, `site` and `stories`. The job "Lint, typecheck, test and build" (scripts/ci-gate.js)
 // fails when one of those jobs ran and shouldn't have, or was skipped and shouldn't have been.

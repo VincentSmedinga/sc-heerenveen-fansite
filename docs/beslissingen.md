@@ -511,6 +511,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Kiezen op grond van de dekking van elke test; dat kan, maar het is zwaar en broos.
   Een `paths`-filter; dat blokkeert het samenvoegen.
   Niets doen; elke documentatiewijziging wacht dan ruim vier minuten.
+- **Later:** CI is sinds 31 oktober 2026 opgesplitst in jobs naast elkaar; zie _CI draait in parallelle jobs, met één afsluitende controle_. De stap _Check the site_ en de stories zijn nu jobs met een `if` op de uitvoer van _Decide which checks to run_, en de regels van het script zijn gelijk gebleven.
 
 ### CI toetst de stories alleen bij wijzigingen die ze raken
 
@@ -525,6 +526,68 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Chrome:** de controle gebruikt in CI het Google Chrome van de runner (`channel: 'chrome'`) en lokaal het Chromium van Playwright, zoals de controle van de site.
   Zo hoeft CI geen browser te installeren.
 - **Alternatieven:** de stap altijd draaien (eenvoudiger, maar elke pull request betaalt ervoor); de regel van de site hergebruiken (dan draait hij ook bij elke wijziging in de site, die de stories niet raakt).
+
+### CI draait in parallelle jobs, met één afsluitende controle
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** CI is niet meer één lange job maar zes jobs naast elkaar, en een afsluitende controle die de regels voor `main` zien.
+  - _Decide which checks to run_ draait `scripts/ci-changes.js`;
+  - _Lint_;
+  - _Typecheck and build_: de typecontrole, `pnpm build` en de map voor de host (`assemble`), die de jobs van de site als artifact krijgen;
+  - _Migrate, seed and test_: de migraties en de seed op een lege database, en `pnpm test`;
+  - _Check the stories with axe_;
+  - _Check the site_ in vier delen, elk met een eigen MariaDB: de tests van het project `chromium` in drie delen (`--shard=1/3` tot `3/3`), en het deel met de tests die een artikel schrijven (`chromium-writing --no-deps`) samen met de rooktest;
+  - _Lint, typecheck, test and build_ wacht op alle andere en is de controle die de regels voor `main` eisen.
+    De naam blijft dezelfde, en ook _Build Storybook_ en _Conventional Commits title_ zijn niet veranderd.
+- **De afsluitende controle:** hij draait altijd (`if: always()`) en `scripts/ci-gate.js` beslist.
+  Elke job moet zijn geslaagd.
+  Alleen de stories en de jobs van de site mogen zijn overgeslagen, en alleen als _Decide which checks to run_ dat zei.
+  Een overgeslagen job die had moeten draaien, een afgebroken run en een job die ontbreekt maken hem rood.
+  GitHub rekent een overgeslagen job als geslaagd en slaat een job over waarvan de voorganger faalde, dus de afsluitende controle kan niet gewoon op de andere wachten.
+  Een deel van de e2e-tests dat faalt, maakt de job _Check the site_ en dus de afsluitende controle rood: [run 41244284495](https://github.com/VincentSmedinga/sc-heerenveen-fansite/actions/runs/41244284495) liet dat zien met een test die met opzet faalde.
+- **Delen:** `--shard` over alle projecten werkt niet.
+  `chromium-writing` hangt af van `chromium`, en Playwright zet dan alle 405 tests in het eerste deel.
+  Deel 2 van 2 draaide nul tests en meldde een groene run met exitcode 0 (31 oktober 2026, runs 41240738753 en 41240746178).
+  Daarom delen we alleen `chromium` en draait het schrijfproject apart, met een eigen database: geen andere test ziet het artikel dat het publiceert, net als voorheen.
+  `scripts/ci-e2e-report.js` laat een deel falen dat geen test draaide of waarvan een test faalde of is overgeslagen.
+  Een test in `scripts/ci-changes.test.js` controleert dat de delen 1/n tot n/n er allemaal staan en dat de afsluitende controle op elke job wacht.
+- **Gemeten (31 oktober 2026, volle run, in seconden):** de klok van de eerste tot de laatste job, en de som van de seconden van alle jobs.
+
+  | Indeling                                                      | Klok              | Som               |
+  | ------------------------------------------------------------- | ----------------- | ----------------- |
+  | Eén job (mediaan van 10 runs op `main`)                       | 632               | 632               |
+  | Eén job (mediaan van 10 runs van pull requests)               | 571               | 571               |
+  | Eén job (`main`, handmatig, hetzelfde uur als de nieuwe runs) | 707               | 707               |
+  | Jobs naast elkaar, e2e in één job, twee workers (1 run)       | 480               | 791               |
+  | Idem met vier workers (1 run)                                 | 452               | 819               |
+  | Twee delen, rooktest los (mediaan van 7 groene runs)          | 314               | 923               |
+  | Drie delen, rooktest bij het schrijfdeel (3 groene runs)      | 229 (223 tot 249) | 838 (818 tot 933) |
+
+  Met drie delen is de klok 64% korter dan de mediaan op `main`, 60% korter dan die van pull requests en 68% korter dan de run van hetzelfde uur.
+  De som is 33%, 47% en 19% hoger.
+  De grens van 15% meer minuten halen we dus niet; het issue zegt dat de klok dan wint.
+  De repository is openbaar, dus de minuten van de runners kosten voor zover bekend niets.
+  Meer jobs betekent meer opstarttijd: elke job kost 13 seconden (zonder database) tot 27 seconden (met MariaDB) aan checkout, pnpm, Node, installatie en containers.
+  Twee delen kosten niet minder minuten (863 en 897 seconden in twee runs) en maken de klok ongeveer 70 seconden langer, dus we nemen er drie.
+
+- **Wat ook is geprobeerd:**
+  - Vier workers per runner in plaats van twee: 7% sneller voor de e2e-job (373 tegen 401 seconden) en meer kans op wankele tests onder belasting; niet gehouden.
+  - De cache van Next (`apps/site/.next/cache`): `pnpm build` duurde 15 in plaats van 19 seconden; niet gehouden.
+  - De browsers van Playwright cachen: niet van toepassing, want CI gebruikt het Google Chrome van de runner (zie _CI gebruikt de Chrome van de runner_).
+  - Elk deel zelf laten bouwen in plaats van de map als artifact te delen: de build kost 19 seconden en `assemble` 1 seconde per deel, tegen 4 seconden uploaden en 1 tot 3 seconden downloaden. Het artifact is goedkoper (19 MB).
+  - Een stap die dubbel draait: `pnpm typecheck` en het begin van `pnpm build` deden allebei `tsc -b`. De typecontrole zit nu in dezelfde job als de build, die haar dan klaar vindt (ongeveer 20 seconden minder).
+  - De rooktest in een eigen job: 70 seconden voor 39 seconden werk; nu een stap in het kleinste deel, wat 40 seconden scheelt.
+- **Pull requests die alleen documentatie wijzigen:** de regels van `scripts/ci-changes.js` en zijn tests zijn niet veranderd.
+  Zo'n run duurt 162 seconden (som 258) tegen 214 seconden (mediaan van 5 runs) in de oude indeling; de som is hoger door het opstarten van de jobs.
+  [Pull request 521](https://github.com/VincentSmedinga/sc-heerenveen-fansite/pull/521) laat het zien: de stories en de jobs van de site zijn overgeslagen, en de afsluitende controle slaagt.
+- **Waarom:** de eigenaar wacht op de klok, niet op de minuten.
+  De e2e-tests (288 van de 632 seconden) bepaalden alles, en ze rekenen op de processor van de runner; meer workers op dezelfde runner helpen weinig, meer runners wel.
+- **Gevolg:** de afsluitende controle is de enige naam die de regels voor `main` zien.
+  Wie een job hernoemt, laat die naam staan.
+  Een job die niet in de lijst `needs` van de afsluitende controle staat, kan falen zonder dat `main` het merkt; een test controleert dat.
+- **Alternatieven:** de job laten zoals hij was (de wachttijd blijft elf minuten); alleen de stappen van de site naar een eigen job verplaatsen (de klok wordt 450 seconden); twee delen (even veel minuten, langere klok); de e2e-tests zelf sneller maken, wat buiten dit issue valt (#507).
+- **Later:** de beslissingen _Controles: snel bij de commit, volledig in CI_, _De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job_ en _CI slaat de controles van de site over bij wijzigingen die ze niet raken_ spreken over één job met stappen.
+  Dat zijn nu jobs; de keuzes zelf, wat CI draait en wat het overslaat, zijn gelijk gebleven.
 
 ### Issue-formulieren in YAML, met drie soorten en zonder lege issues
 
@@ -1040,6 +1103,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of toetsen tegen `next dev`; dat is sneller, maar bezoekers krijgen een andere pagina.
   Of ook Firefox en WebKit; die kosten tijd, en axe vindt daar zelden iets anders.
 - **Later:** de controles van de site worden sinds 26 oktober 2026 bij sommige pull requests overgeslagen; zie _CI slaat de controles van de site over bij wijzigingen die ze niet raken_.
+- **Later:** sinds 31 oktober 2026 is het niet meer een stap in één job maar een eigen job in drie delen; zie _CI draait in parallelle jobs, met één afsluitende controle_. De controle die de regels voor `main` eisen is dezelfde gebleven.
 
 ### CI gebruikt de Chrome van de runner
 

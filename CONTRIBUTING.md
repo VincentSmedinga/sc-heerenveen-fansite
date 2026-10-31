@@ -92,17 +92,16 @@ CI draait die controles in jobs naast elkaar, zodat een run niet langer duurt da
 - _Typecheck and build_ draait `pnpm typecheck` en `pnpm build`, en zet de map voor de host klaar die de twee jobs van de site gebruiken;
 - _Migrate, seed and test_ draait de migraties en de seed op een lege database, en `pnpm test`;
 - _Check the stories with axe_ draait `pnpm test:stories`;
-- _Check the site the way the host runs it_ draait de rooktest op die map;
-- _Check accessibility_ draait `pnpm test:a11y` op die map in drie delen, elk met een eigen database: de eerste en de tweede helft van de tests, en de test die een artikel schrijft apart;
+- _Check the site_ draait de rooktest en `pnpm test:a11y` op die map, in vier delen die elk een eigen runner en een eigen database hebben: de tests van het project `chromium` in drie delen, en de tests die een artikel schrijven samen met de rooktest;
 - _Lint, typecheck, test and build_ wacht op alle andere en is de controle die de regels voor `main` eisen.
   Hij slaagt alleen als elke job is geslaagd, en alleen de jobs van de site en van de stories mogen zijn overgeslagen, en dan alleen als _Decide which checks to run_ dat zei.
-  Een job die niet draaide terwijl hij had moeten draaien, een deel dat geen test draaide en een run die is afgebroken maken hem rood (zie `scripts/ci-gate.js` en `scripts/ci-e2e-report.js`).
+  Een job die niet draaide terwijl hij had moeten draaien, een deel dat geen test draaide en een run die is afgebroken maken hem rood (zie `scripts/ci-gate.js` en `scripts/ci-e2e-report.js`, en de beslissing _CI draait in parallelle jobs, met één afsluitende controle_ in `docs/beslissingen.md`).
 
 Hernoem je een job, dan hoeft alleen de naam van de laatste te blijven kloppen met de regels voor `main`.
 Draai je `pnpm test:a11y` lokaal, dan draait alles in een keer; de verdeling in delen is er alleen voor CI.
 
 CI slaat de rooktest en `pnpm test:a11y` over bij een pull request die alleen `docs/`, `.claude/`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `apps/importer/` of `apps/design-system-mcp/` wijzigt.
-Die controles raken zulke wijzigingen niet, en ze kosten ongeveer 150 seconden machinetijd.
+Die controles raken zulke wijzigingen niet, en ze zijn het grootste deel van de machinetijd van een run.
 Lint, typecheck, `pnpm test`, de build en de controle van de titel draaien altijd.
 `pnpm test:stories` draait alleen bij een wijziging die een story kan raken: in `packages/design-system/`, in het lockfile, in `pnpm-workspace.yaml` of in de workflow zelf.
 Een push naar `main`, een handmatige run en het label draaien hem ook.
