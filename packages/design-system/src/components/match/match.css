@@ -8,7 +8,7 @@
   /* A long club name or stadium breaks instead of making the page scroll sideways. */
   .hf-match {
     overflow-wrap: anywhere;
-    padding-block: 0.75rem;
+    padding-block: var(--hf-space-m);
   }
 
   .hf-match-label,
@@ -50,7 +50,7 @@
   .hf-match-score {
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-figure-font-weight);
-    padding-inline: 0.25rem;
+    padding-inline: var(--hf-space-xs);
     white-space: nowrap;
   }
 

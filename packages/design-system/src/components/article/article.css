@@ -21,6 +21,6 @@
 
   .hf-article-meta {
     color: var(--hf-colour-text-secondary);
-    margin-block: 0.5rem 1.5rem;
+    margin-block: var(--hf-space-s) var(--hf-space-l);
   }
 }

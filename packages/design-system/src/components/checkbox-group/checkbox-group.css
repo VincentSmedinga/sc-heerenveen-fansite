@@ -11,13 +11,13 @@
     border: 0;
 
     /* Room under the last checkbox, before the button of the form. */
-    margin: 0 0 0.5rem;
+    margin: 0 0 var(--hf-space-s);
     min-inline-size: 0;
     padding: 0;
   }
 
   .hf-checkbox-group > legend {
-    margin-block-end: 1rem;
+    margin-block-end: var(--hf-space-m);
     padding: 0;
   }
 
@@ -27,7 +27,7 @@
     display: flex;
     min-block-size: 2rem;
     overflow-wrap: anywhere;
-    padding-block: 0.25rem;
+    padding-block: var(--hf-space-xs);
 
     > input {
       flex: none;
