@@ -2825,6 +2825,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Tokens naar waarde noemen, zoals `--hf-space-8` (zeggen niet waarvoor).
   Elke waarde naar de dichtstbijzijnde stap ronden (0,75 rem is dan 0,5 of 1 rem zonder reden).
   Alle onderdelen in één pull request omzetten (te groot om te reviewen; het is nu in drie issues verdeeld).
+- **Later:** de omzetting is klaar: #480 en #481 hebben alle bestanden omgezet, de lijst in de test is weg en de test bewaakt ook de CSS van de documentatie, `docs/docs.css`.
 
 ## Site
 

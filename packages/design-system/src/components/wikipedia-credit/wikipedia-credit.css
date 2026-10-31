@@ -7,7 +7,7 @@
   /* An address in a link breaks instead of making the page scroll sideways. */
   .hf-wikipedia-credit {
     color: var(--hf-colour-text-secondary);
-    margin-block: 1rem 0;
+    margin-block: var(--hf-space-m) 0;
     overflow-wrap: anywhere;
   }
 }

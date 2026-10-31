@@ -4,7 +4,7 @@
   .hf-navigation-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 0 1.5rem;
+    gap: 0 var(--hf-space-l);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -72,7 +72,7 @@
     box-sizing: border-box;
     display: flex;
     flex-wrap: wrap;
-    gap: 0 1rem;
+    gap: 0 var(--hf-space-m);
     padding-block-end: var(--hf-navigation-end);
     padding-inline: var(--hf-navigation-inset-start) var(--hf-navigation-inset-end);
 
@@ -82,7 +82,7 @@
       border-block-start: 1px solid var(--hf-colour-border-on-header);
       content: '';
       flex: 0 0 100%;
-      margin-block-end: 0.25rem;
+      margin-block-end: var(--hf-space-xs);
       order: -1;
     }
   }
@@ -188,12 +188,12 @@
 
     .hf-navigation-header .hf-navigation-list > .hf-navigation-wide-here > .hf-navigation-link {
       grid-area: 1 / 2;
-      margin-inline-end: 1rem;
+      margin-inline-end: var(--hf-space-m);
     }
 
     .hf-navigation-header .hf-navigation-list > li:first-child > .hf-navigation-link {
       grid-area: 1 / 1;
-      margin-inline-end: 1rem;
+      margin-inline-end: var(--hf-space-m);
     }
 
     .hf-navigation-header .hf-navigation-list > .hf-navigation-more {
@@ -252,7 +252,7 @@
    * sideways.
    *
    * The padding on the start side puts the text of the first link on the inset of the page, in
-   * line with the logo and the menu, because the link has the padding of a pill (0.625rem) that
+   * line with the logo and the menu, because the link has the padding of a pill (0.5rem) that
    * the text sits inside. It is 46px high: the list has 5px of room all round for the ring (see
    * shortcuts.css) and a link is 2.25rem high. The row runs on to the edge of the screen on the
    * end side, apart from a notch, so the last link is cut off and the reader sees there is
@@ -273,7 +273,7 @@
     margin-inline: calc(-1 * var(--hf-navigation-gutter-start)) calc(-1 * var(--hf-navigation-gutter-end));
     min-inline-size: 0;
     order: 1;
-    padding-inline: calc(var(--hf-navigation-gutter-start) - 0.625rem) env(safe-area-inset-right, 0);
+    padding-inline: calc(var(--hf-navigation-gutter-start) - var(--hf-space-s)) env(safe-area-inset-right, 0);
 
     @media (width >= 66rem) {
       padding-inline-end: var(--hf-navigation-gutter-end);
@@ -299,7 +299,7 @@
     font-size: 1rem;
     font-weight: var(--hf-submenu-font-weight);
     line-height: 1;
-    padding-inline: 0.625rem;
+    padding-inline: var(--hf-space-s);
     text-decoration-line: none;
     transition:
       color var(--hf-motion-duration-short) var(--hf-motion-ease-change),

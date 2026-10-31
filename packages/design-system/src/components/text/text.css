@@ -2,7 +2,7 @@
 
 @layer hf.base {
   p {
-    margin-block: 0 1rem;
+    margin-block: 0 var(--hf-space-m);
   }
 
   b,

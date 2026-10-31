@@ -11,8 +11,8 @@
   .hf-rich-text-editor-toolbar {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-block: 0.25rem 0.5rem;
+    gap: var(--hf-space-s);
+    margin-block: var(--hf-space-xs) var(--hf-space-s);
 
     > button {
       background-color: transparent;
@@ -50,17 +50,17 @@
     border-color: var(--hf-colour-border-surface-soft);
     border-radius: 0.25rem;
     box-sizing: border-box;
-    margin-block: 0 0.5rem;
+    margin-block: 0 var(--hf-space-s);
     max-inline-size: 40rem;
-    padding-block: 1rem 0.25rem;
-    padding-inline: 1rem;
+    padding-block: var(--hf-space-m) var(--hf-space-xs);
+    padding-inline: var(--hf-space-m);
   }
 
   .hf-rich-text-editor-link-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-block-end: 0.75rem;
+    gap: var(--hf-space-s);
+    margin-block-end: var(--hf-space-s);
   }
 
   .hf-rich-text-editor-content {
@@ -75,8 +75,8 @@
     overflow-wrap: anywhere;
     max-inline-size: 40rem;
     min-block-size: 12rem;
-    padding-block: 0.75rem;
-    padding-inline: 0.75rem;
+    padding-block: var(--hf-space-s);
+    padding-inline: var(--hf-space-s);
 
     /* The text has no margin to the outside: the field decides the space around it. */
     > :first-child {

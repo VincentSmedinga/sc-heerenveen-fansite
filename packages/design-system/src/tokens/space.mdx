@@ -34,8 +34,7 @@ Twijfel je, neem dan `--hf-space-m`.
 
 - **Alleen de tokens:** voor `padding`, `margin` en `gap` gebruikt de CSS van een onderdeel een token, `0`, `auto` of `inherit`.
   Een test in het designsysteem, `tokens/space-css.test.ts`, faalt op een getal dat daar niet uit komt.
-  Tot alle onderdelen zijn omgezet staan de bestanden die nog een getal hebben op een lijst in die test.
-  Elke omzetting haalt een bestand van die lijst, en een nieuw bestand komt er niet op.
+  De test kijkt naar de CSS van alle onderdelen, de basisstijlen en de documentatie, en kent geen uitzonderingen.
 - **Een waarde tussen twee stappen** gaat naar de stap die bij de betekenis past, en niet naar de dichtstbijzijnde.
   Tekst met iets kleins ernaast gaat naar klein, twee gelijke onderdelen naar gemiddeld.
   Past geen enkele stap, bedenk dan geen eigen getal: leg het voor aan de projecteigenaar.
