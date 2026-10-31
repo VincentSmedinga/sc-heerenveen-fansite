@@ -196,14 +196,19 @@ const renderOutcomes = () => (
 )
 
 // The same list on each surface a card has on the pages, since the colours must hold on all.
-const surfaces = ['default', 'soft', 'warm', 'strong'] as const
+const surfaces = [
+  { name: 'Wit vlak', surface: 'default' },
+  { name: 'Zacht vlak', surface: 'soft' },
+  { name: 'Warm vlak', surface: 'warm' },
+  { name: 'Sterk vlak', surface: 'strong' },
+] as const
 
 const renderSurfaces = () => (
   <div style={{ display: 'grid', gap: '1rem', maxInlineSize: '20rem' }}>
-    {surfaces.map((surface) => (
+    {surfaces.map(({ name, surface }) => (
       <Card aria-labelledby={`vlak-${surface}`} key={surface} surface={surface}>
         <Heading id={`vlak-${surface}`} level={2}>
-          {`Vlak ${surface}`}
+          {name}
         </Heading>
         <List role="list">
           {outcomes.slice(0, 3).map((match) => (
