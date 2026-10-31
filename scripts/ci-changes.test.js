@@ -156,21 +156,63 @@ test('runs it for a path it does not trust, an empty list, the label and any oth
   }
 })
 
-test('the workflow gives only the two checks of the site and the stories an if, and has no paths filter', () => {
+/** Gives the jobs of ci.yml by their id, each as the text of the job. */
+function workflowJobs() {
   const workflow = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8')
-  const steps = workflow.split(/^ {6}- /m).slice(1)
-  const guarded = steps.filter((step) => step.includes("steps.changes.outputs.site != 'false'"))
-
-  assert.deepEqual(
-    guarded.map((step) => /name: (.+)/.exec(step)?.[1]),
-    ['Check the site the way the host runs it', 'Check accessibility'],
+  const jobs = Object.fromEntries(
+    workflow
+      .slice(workflow.indexOf('\njobs:\n'))
+      .split(/^ {2}([a-z0-9-]+):$/m)
+      .slice(1)
+      .reduce((pairs, part, index, parts) => (index % 2 === 0 ? [...pairs, [part, parts[index + 1]]] : pairs), []),
   )
-  assert.ok(steps.some((step) => step.includes('id: changes') && step.includes('scripts/ci-changes.js')))
 
-  const stories = steps.filter((step) => step.includes('pnpm test:stories'))
+  return { jobs, workflow }
+}
 
-  assert.equal(stories.length, 1)
-  assert.match(stories[0], /if: steps\.changes\.outputs\.stories != 'false'/)
-  // A required check that never reports blocks the merge. A skipped step doesn't.
+test('the workflow switches only the checks of the site and the stories with ci-changes.js, and has no paths filter', () => {
+  const { jobs, workflow } = workflowJobs()
+  const site = "needs.changes.outputs.site != 'false'"
+  const switched = (output) =>
+    Object.entries(jobs)
+      .filter(([, job]) => new RegExp(`^ {4}if: needs\\.changes\\.outputs\\.${output} != 'false'$`, 'm').test(job))
+      .map(([id]) => id)
+
+  assert.deepEqual(switched('site'), ['smoke', 'e2e'])
+  assert.deepEqual(switched('stories'), ['stories'])
+  assert.match(jobs.changes, /run: node scripts\/ci-changes\.js/)
+  assert.match(jobs.changes, /site: \$\{\{ steps\.changes\.outputs\.site \}\}/)
+  assert.match(jobs.changes, /stories: \$\{\{ steps\.changes\.outputs\.stories \}\}/)
+
+  // The build always runs. Only the two steps that hand the folder to the site checks wait.
+  assert.doesNotMatch(jobs.build, /^ {4}if:/m)
+  assert.equal(jobs.build.split(site).length - 1, 2)
+
+  // The jobs that always run have no condition at all, so nothing but a failure can skip them.
+  for (const id of ['lint-typecheck', 'test']) {
+    assert.doesNotMatch(jobs[id], /^ {4}if:/m, id)
+  }
+
+  assert.match(jobs.stories, /run: pnpm test:stories/)
+  // A required check that never reports blocks the merge. A skipped job doesn't.
   assert.doesNotMatch(workflow, /^ {2,4}paths(-ignore)?:/m)
+})
+
+test('the last job has the name the rules for main require and waits for every other job', () => {
+  const { jobs } = workflowJobs()
+  const others = Object.keys(jobs).filter((id) => id !== 'check')
+
+  assert.match(jobs.check, /^ {4}name: Lint, typecheck, test and build$/m)
+  assert.match(jobs.check, /^ {4}if: always\(\)$/m)
+  assert.match(jobs.check, /run: node scripts\/ci-gate\.js/)
+
+  // A job that check doesn't wait for could fail without turning the required check red.
+  const needs = /^ {4}needs: \[(.+)\]$/m.exec(jobs.check)?.[1].split(', ')
+
+  assert.deepEqual([...(needs ?? [])].sort(), [...others].sort())
+
+  // No other job may take the name of the check, or the rules would take its result too.
+  for (const id of others) {
+    assert.doesNotMatch(jobs[id], /^ {4}name: Lint, typecheck, test and build$/m, id)
+  }
 })
