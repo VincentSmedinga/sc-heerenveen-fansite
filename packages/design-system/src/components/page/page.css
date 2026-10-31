@@ -286,28 +286,24 @@
   /*
    * The title row (Page.Title): the heading of the page and one or two controls, side by side,
    * with the controls at the end. It is a row that wraps: where a control does not fit beside
-   * the heading, it sits under it, and the margin on its start side keeps it at the end of the
-   * row. The gap is the same across and down. What is in the row has no margin of its own, so
-   * the row is as tall as the tallest of them, and the two are centred on each other.
+   * the heading, it sits under it, and the row puts every line at its end, so the control stays
+   * on that side. The heading keeps the start with the margin on its end side. The gap is the
+   * same across and down. What is in the row has no margin of its own, so the row is as tall as
+   * the tallest of them, and they are centred on each other.
    */
   .hf-page-title {
     align-items: center;
     gap: var(--hf-space-s) var(--hf-space-l);
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-end;
 
     > * {
       margin-block: 0;
     }
 
-    > :not(:first-child) {
-      margin-inline-start: auto;
-    }
-
-    /* A second control follows the first, on its side, so the two stay together at the end. */
-    > :not(:first-child) ~ :not(:first-child) {
-      margin-inline-start: 0;
+    > :first-child {
+      margin-inline-end: auto;
     }
   }
 
