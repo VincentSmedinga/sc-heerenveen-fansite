@@ -6,6 +6,7 @@ import { BlockList, isIP } from 'node:net'
 import { getArticle } from './articles'
 import { getDatabase } from './database'
 import { reasonOf } from './errors'
+import { isClubSlug } from './opponents'
 import { pages } from './pages'
 import { seasonFromSlug } from './seasons'
 
@@ -22,7 +23,8 @@ export const notVisitors =
  * The pages that are counted: those in `pages.ts`, the page after the contact form and the
  * search, which is no page for a search engine but is for a visitor. The path has no query, so
  * what was searched for is not part of the count. An
- * article is counted by `articlePath`, once the database says it exists. The admin, the files,
+ * article is counted by `articlePath`, and the page of a club by `clubPath`, once the database
+ * says it exists. The admin, the files,
  * `/_next` and the addresses for machines (feeds, robots.txt, sitemap.xml, the manifest) are
  * on no list, so they are not counted. A path that is on no list, such as one that doesn't
  * exist, is not counted either.
@@ -34,6 +36,8 @@ const countedPaths: ReadonlySet<string> = new Set([
 ])
 
 const articlePath = /^\/redactie\/([^/]+)$/u
+
+const clubPath = /^\/statistieken\/tegenstanders\/([^/]+)$/u
 
 const seasonPath = /^(\/wedstrijden|\/statistieken\/spelers|\/statistieken)\/([^/]+)$/u
 
@@ -55,6 +59,8 @@ export type PageVisit = {
   address: string | undefined
   /** The slug of the article when the page is one; the database has to know it. */
   article: string | undefined
+  /** The slug of the club when the page is the page of a club; the database has to know it. */
+  club: string | undefined
   /** The path of the page, without a query. */
   path: string
   /** The browser text. */
@@ -101,10 +107,11 @@ export function visitOf(request: NextRequest): PageVisit | undefined {
   const path = countedPathOf(request.nextUrl.pathname)
   const userAgent = headers.get('user-agent') ?? ''
   const article = articlePath.exec(path)?.[1]
+  const club = clubPath.exec(path)?.[1]
 
   if (
     request.method !== 'GET' ||
-    (!countedPaths.has(path) && article === undefined) ||
+    (!countedPaths.has(path) && article === undefined && club === undefined) ||
     !(headers.get('accept') ?? '').includes('text/html') ||
     isPrefetch(headers) ||
     headers.get('dnt') === '1' ||
@@ -115,7 +122,7 @@ export function visitOf(request: NextRequest): PageVisit | undefined {
     return undefined
   }
 
-  return { address: addressOf(headers), article, path, userAgent }
+  return { address: addressOf(headers), article, club, path, userAgent }
 }
 
 /**
@@ -184,6 +191,11 @@ export function countVisit(
     const counted = (async () => {
       // An article that doesn't exist, a draft and an article for later give "niet gevonden".
       if (visit.article !== undefined && (await getArticle(visit.article)) === undefined) {
+        return
+      }
+
+      // A club that does not exist gives "niet gevonden", so the made-up address is no page.
+      if (visit.club !== undefined && !(await isClubSlug(visit.club))) {
         return
       }
 

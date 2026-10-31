@@ -62,9 +62,11 @@ describe('SiteNavigation', () => {
     expect(render('/wedstrijden')).not.toMatch(/href="\/nieuws/)
   })
 
-  it('has no link to Spelers in the menu itself, only in the bar of Statistieken', () => {
-    expect(render('/wedstrijden')).not.toContain('/statistieken/spelers')
-    expect(render('/')).not.toContain('/statistieken/spelers')
+  it('has no link to Spelers or Tegenstanders in the menu itself, only in the bar of Statistieken', () => {
+    for (const path of ['/wedstrijden', '/']) {
+      expect(render(path)).not.toContain('/statistieken/spelers')
+      expect(render(path)).not.toContain('/statistieken/tegenstanders')
+    }
   })
 
   it('shows the bar with the archive, the podcasts and the search on the home page, with no sub-page current', () => {
@@ -114,7 +116,10 @@ describe('SiteNavigation', () => {
       const html = render(path)
 
       expect(currentLinks(html)).toEqual(['Statistieken'])
-      expect(barLinks(html)).toEqual([['/statistieken/spelers', 'Spelers']])
+      expect(barLinks(html)).toEqual([
+        ['/statistieken/spelers', 'Spelers'],
+        ['/statistieken/tegenstanders', 'Tegenstanders'],
+      ])
       expect(linksWith(html, 'true')).toEqual([])
     },
   )
@@ -124,8 +129,21 @@ describe('SiteNavigation', () => {
     (path) => {
       const html = render(path)
 
-      expect(barLinks(html)).toEqual([['/statistieken/spelers', 'Spelers']])
+      expect(barLinks(html)).toEqual([
+        ['/statistieken/spelers', 'Spelers'],
+        ['/statistieken/tegenstanders', 'Tegenstanders'],
+      ])
       expect(currentLinks(html)).toEqual(['Spelers'])
+      expect(linksWith(html, 'true')).toEqual(['Statistieken'])
+    },
+  )
+
+  it.each(['/statistieken/tegenstanders', '/statistieken/tegenstanders/ado-den-haag'])(
+    'marks Tegenstanders as the current sub-page on %s, and Statistieken as the item that holds it',
+    (path) => {
+      const html = render(path)
+
+      expect(currentLinks(html)).toEqual(['Tegenstanders'])
       expect(linksWith(html, 'true')).toEqual(['Statistieken'])
     },
   )
@@ -159,6 +177,8 @@ describe('currentOf', () => {
     ['/statistieken/2025-26', { item: '/statistieken' }],
     ['/statistieken/spelers', { item: '/statistieken', subitem: '/statistieken/spelers' }],
     ['/statistieken/spelers/2025-26', { item: '/statistieken', subitem: '/statistieken/spelers' }],
+    ['/statistieken/tegenstanders', { item: '/statistieken', subitem: '/statistieken/tegenstanders' }],
+    ['/statistieken/tegenstanders/ado-den-haag', { item: '/statistieken', subitem: '/statistieken/tegenstanders' }],
     ['/bronnen', {}],
     ['/nieuws/bestaat-niet', {}],
     ['/podcasts', {}],

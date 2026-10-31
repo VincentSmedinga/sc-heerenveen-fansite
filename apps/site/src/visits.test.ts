@@ -5,9 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { pages } from './pages'
 import { countVisit, notVisitors, visitOf } from './visits'
 
-const { getArticle } = vi.hoisted(() => ({ getArticle: vi.fn() }))
+const { getArticle, isClubSlug } = vi.hoisted(() => ({ getArticle: vi.fn(), isClubSlug: vi.fn() }))
 
 vi.mock('./articles', () => ({ getArticle }))
+vi.mock('./opponents', () => ({ isClubSlug }))
 
 const firefox = 'Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0'
 
@@ -29,6 +30,8 @@ function request(path = '/', headers: Record<string, string> = {}, method = 'GET
 beforeEach(() => {
   getArticle.mockReset()
   getArticle.mockResolvedValue({ slug: 'dit-zijn-wij' })
+  isClubSlug.mockReset()
+  isClubSlug.mockResolvedValue(true)
 })
 
 afterEach(() => {
@@ -221,6 +224,15 @@ describe('visitOf', () => {
     })
   })
 
+  it('counts the page of a club through its slug, for the database to confirm, under its own path', () => {
+    expect(visitOf(request('/statistieken/tegenstanders/ado-den-haag?competitie=eredivisie'))).toMatchObject({
+      club: 'ado-den-haag',
+      path: '/statistieken/tegenstanders/ado-den-haag',
+    })
+    expect(visitOf(request('/statistieken/tegenstanders'))).toMatchObject({ club: undefined })
+    expect(visitOf(request('/statistieken/tegenstanders/ado-den-haag/extra'))).toBeUndefined()
+  })
+
   it('has no link of Next.js, so every page view is a whole page load that the proxy sees', () => {
     const root = `${import.meta.dirname}/../../..`
     const uses = ['apps/site/src', 'packages/design-system/src']
@@ -234,15 +246,17 @@ describe('visitOf', () => {
   })
 
   it('has a rule for every page of the site', () => {
-    // The pages that are on no list on purpose: the admin, the article, which the database
-    // confirms, and the page of a season, which counts as /wedstrijden, /statistieken or
-    // /statistieken/spelers. A slot of the layout (@shortcuts) is not a page of its own.
+    // The pages that are on no list on purpose: the admin, the article and the page of a club,
+    // which the database confirms, and the page of a season, which counts as /wedstrijden,
+    // /statistieken or /statistieken/spelers. A slot of the layout (@shortcuts) is not a page
+    // of its own.
     const withoutCount = [
       '/beheer',
       '/beheer/[...]',
       '/redactie/[slug]',
       '/statistieken/[seizoen]',
       '/statistieken/spelers/[seizoen]',
+      '/statistieken/tegenstanders/[club]',
       '/wedstrijden/[seizoen]',
     ]
     const paths = readdirSync(`${import.meta.dirname}/app`, { recursive: true, withFileTypes: true })
@@ -293,6 +307,21 @@ describe('countVisit', () => {
     expect(getArticle).toHaveBeenCalledTimes(2)
     expect(record).toHaveBeenCalledOnce()
     expect(record).toHaveBeenCalledWith(expect.objectContaining({ path: '/redactie/dit-zijn-wij' }))
+  })
+
+  it('counts the page of a club that exists, and not one that does not', async () => {
+    const record = vi.fn().mockResolvedValue(undefined)
+    const waitUntil = vi.fn()
+
+    countVisit(request('/statistieken/tegenstanders/ado-den-haag'), waitUntil, record)
+    await waitUntil.mock.calls[0]?.[0]
+    isClubSlug.mockResolvedValue(false)
+    countVisit(request('/statistieken/tegenstanders/bestaat-niet'), waitUntil, record)
+    await waitUntil.mock.calls[1]?.[0]
+
+    expect(isClubSlug).toHaveBeenCalledTimes(2)
+    expect(record).toHaveBeenCalledOnce()
+    expect(record).toHaveBeenCalledWith(expect.objectContaining({ path: '/statistieken/tegenstanders/ado-den-haag' }))
   })
 
   it('does not wait for the counter: the call returns while the database has not answered', async () => {
