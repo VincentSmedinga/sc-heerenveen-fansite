@@ -9,7 +9,7 @@
     "admin": "node --env-file-if-exists=../../.env src/admin.ts",
     "assemble": "node scripts/assemble.js",
     "build": "tsc -b && next build",
-    "dev": "node ../../scripts/worktree-env.js run --database --ports site -- next dev --port {SITE_PORT}",
+    "dev": "node ../../scripts/worktree-env.js run --database --seed --ports site -- next dev --port {SITE_PORT}",
     "icons": "node scripts/make-icons.js",
     "screenshots": "node scripts/screenshots.js",
     "share-image": "node scripts/make-share-image.js",

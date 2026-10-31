@@ -279,7 +279,7 @@ It lists the components of the design system with their props and types, the doc
 Sessions that work next to each other on one computer must not share a database or a port.
 So a worktree gets a database of its own on the shared MariaDB, `fansite_<name of the folder>`, and a block of ports, both derived from the name of its folder by `scripts/worktree-env.js`.
 `pnpm dev`, Storybook, the smoke test, `pnpm test:a11y` and the tests of `@fansite/db`, the site and the importer use them without you doing anything.
-The first run that needs the database makes it, runs the migrations and the seed, and `pnpm worktree:db:drop` drops it.
+The first run that needs the database makes it and runs the migrations (`pnpm dev` also puts the seed in), and `pnpm worktree:db:drop` drops it.
 `pnpm worktree:env` shows the database and the ports of the folder you are in.
 
 - A normal checkout, a folder that isn't a worktree and CI keep 3000, 6006, 3123, 3124, 3125, 2525 and the database `fansite`.

@@ -20,13 +20,14 @@ export async function dropWorktreeDatabase(url: string) {
 
 /**
  * The database of a worktree: `fansite_<name of the worktree>` on the server in `DATABASE_URL`,
- * which scripts/worktree-env.js puts there. `ensure` makes it when it isn't there yet, runs the
- * migrations and puts the seed in it, as CI does for its database; `drop` removes it. Only a
- * name that starts with `fansite_` is touched, so `fansite`, with the real import, stays.
+ * which scripts/worktree-env.js puts there. `ensure` makes it when it isn't there yet and runs
+ * the migrations; with `--seed` it also puts the seed in it, as `pnpm db:seed` does. The checks
+ * of the site leave that out, as CI does: they add their own made-up data. `drop` removes it.
+ * Only a name that starts with `fansite_` is touched, so `fansite` stays, with the real import.
  *
  * `pnpm worktree:db:drop` runs the second.
  */
-export async function ensureWorktreeDatabase(url: string) {
+export async function ensureWorktreeDatabase(url: string, { seed = false }: { seed?: boolean } = {}) {
   const name = worktreeDatabaseName(url)
   const server = await connectToServer(url)
 
@@ -40,10 +41,13 @@ export async function ensureWorktreeDatabase(url: string) {
 
   try {
     await migrateDatabase(db)
-    await seedSources(db)
-    await seedMatches(db)
-    await seedSquad(db)
-    await seedStaff(db)
+
+    if (seed) {
+      await seedSources(db)
+      await seedMatches(db)
+      await seedSquad(db)
+      await seedStaff(db)
+    }
   } finally {
     await close()
   }
@@ -67,12 +71,12 @@ if (import.meta.main) {
   const { DATABASE_URL } = readDatabaseEnv()
 
   if (action === 'ensure') {
-    await ensureWorktreeDatabase(DATABASE_URL)
+    await ensureWorktreeDatabase(DATABASE_URL, { seed: process.argv.includes('--seed') })
     console.log(`The database ${worktreeDatabaseName(DATABASE_URL)} is ready.`)
   } else if (action === 'drop') {
     console.log(`Dropped the database ${await dropWorktreeDatabase(DATABASE_URL)}.`)
   } else {
-    console.error('Usage: node worktree-database.ts ensure|drop')
+    console.error('Usage: node worktree-database.ts ensure [--seed] | drop')
     process.exit(2)
   }
 }

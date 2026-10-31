@@ -625,7 +625,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `WORKTREE_NAME` in de omgeving kiest een andere naam; een lege waarde zet het uit.
 - **Hoe:** `scripts/worktree-env.js` rekent de waarden uit en start de opdracht ermee.
   De scripts `dev`, `storybook`, `smoke`, `test:a11y` en `test` van de site, het designsysteem, `@fansite/db` en de importer lopen erdoor.
-  `--database` maakt de database de eerste keer aan, draait de migraties en de seed.
+  `--database` maakt de database de eerste keer aan en draait de migraties, en `--seed` zet er ook de seed in; `pnpm dev` doet dat, en `pnpm test:a11y` niet, want CI seedt voor die controles ook niets.
   `pnpm worktree:db:drop` haalt hem weg, en alleen een naam die met `fansite_` begint.
   Is een poort uit het blok bezet, dan stopt de opdracht met een melding die de poort en de worktree noemt, en kiest hij niet stilletjes een andere.
   De poorten hangen af van de naam van de map: twee mappen kunnen toevallig hetzelfde blok krijgen (zo'n 0,2 procent per paar).

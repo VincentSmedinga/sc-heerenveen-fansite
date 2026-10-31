@@ -5,16 +5,17 @@
 // docs/beslissingen.md says why.
 //
 //   node scripts/worktree-env.js                      shows what this folder gets
-//   node scripts/worktree-env.js run [--database] [--ports site,mail] -- <command> <arguments>
+//   node scripts/worktree-env.js run [--database [--seed]] [--ports a,b] -- <command> [...]
 //   node scripts/worktree-env.js drop                 drops the database of this worktree
 //
 // `run` puts the values in the environment of the command. `{SITE_PORT}` and the other port
 // names in its arguments become the port, for a tool that wants it as an option. `--ports` is
 // the ports the command listens on: when one of them is busy, nothing starts and the message
-// names the port and the worktree. `--database` makes the database of the worktree, with the
-// tables and the seed, the first time. A normal checkout, a folder that isn't a worktree and CI
-// get the values they always had (3000, 6006, 3123, 3124, 3125, 2525 and the database
-// `fansite`), and a variable that is set already wins over the derived one.
+// names the port and the worktree. `--database` makes the database of the worktree and runs
+// the migrations; `--seed` also puts the seed in it, for `pnpm dev`. A normal checkout, a
+// folder that isn't a worktree and CI get the values they always had (3000, 6006, 3123, 3124,
+// 3125, 2525 and the database `fansite`), and a variable that is set already wins over the
+// derived one.
 //
 // What decides something is a function without side effects, exported for the tests. What
 // touches the computer (files, ports, processes) is below that, and only runs when this file is
@@ -206,19 +207,21 @@ export function parseArguments(argv) {
 
   if (separator === -1 || separator === rest.length - 1) {
     throw new WorktreeEnvError(
-      'Say what to run after "--": node scripts/worktree-env.js run [--database] [--ports a,b] -- <command>',
+      'Say what to run after "--": node scripts/worktree-env.js run [--database [--seed]] [--ports a,b] -- <command>',
       2,
     )
   }
 
   const options = rest.slice(0, separator)
-  const run = { command, database: false, ports: [], run: rest.slice(separator + 1) }
+  const run = { command, database: false, ports: [], run: rest.slice(separator + 1), seed: false }
 
   for (let index = 0; index < options.length; index += 1) {
     const option = options[index]
 
     if (option === '--database') {
       run.database = true
+    } else if (option === '--seed') {
+      run.seed = true
     } else if (option === '--ports') {
       const names = (options[(index += 1)] ?? '').split(',').filter(Boolean)
       const unknown = names.find((name) => !portDefinitions.some((definition) => definition.name === name))
@@ -234,6 +237,10 @@ export function parseArguments(argv) {
     } else {
       throw new WorktreeEnvError(`Unknown option "${option}".`, 2)
     }
+  }
+
+  if (run.seed && !run.database) {
+    throw new WorktreeEnvError('--seed goes with --database.', 2)
   }
 
   return run
@@ -305,8 +312,9 @@ export function worktreeNameOf({ env, folder, linked }) {
 const root = path.resolve(import.meta.dirname, '..')
 
 /** Runs the helper of `packages/db` that makes or drops the database. */
-function databaseCommand(action, env) {
-  const result = spawnSync(process.execPath, [path.join(root, 'packages/db/src/worktree-database.ts'), action], {
+function databaseCommand(action, env, ...options) {
+  const file = path.join(root, 'packages/db/src/worktree-database.ts')
+  const result = spawnSync(process.execPath, [file, action, ...options], {
     env,
     stdio: 'inherit',
   })
@@ -357,7 +365,7 @@ async function main(argv) {
   const parsed = parseArguments(argv)
   const env = process.env
   const derivation = deriveEnv({
-    databaseUrl: env['DATABASE_URL'] ?? databaseUrlFromFile(root),
+    databaseUrl: env['DATABASE_URL'] || databaseUrlFromFile(root),
     env,
     folder: root,
     linked: isLinkedWorktree(root),
@@ -392,7 +400,7 @@ async function main(argv) {
   }
 
   if (parsed.database && derivation.database !== undefined) {
-    databaseCommand('ensure', childEnv)
+    databaseCommand('ensure', childEnv, ...(parsed.seed ? ['--seed'] : []))
   }
 
   const [command, ...args] = fillPorts(parsed.run, { env, values: derivation.values })

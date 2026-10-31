@@ -30,7 +30,9 @@ Zo botsen twee sessies niet op de database `fansite`, en heeft elke worktree een
 Dezelfde opdracht geeft elke worktree een eigen blok poorten (zie de [README van de site](../../apps/site/README.md)).
 
 - **Aanmaken:** doe niets.
-  `pnpm dev` en `pnpm test:a11y` maken de database de eerste keer zelf, draaien de migraties en de seed, en een volgende keer alleen de migraties die ontbreken.
+  `pnpm dev` en `pnpm test:a11y` maken de database de eerste keer zelf en draaien de migraties die ontbreken.
+  `pnpm dev` zet er ook de seed in, zoals `pnpm db:seed` dat doet.
+  `pnpm test:a11y` doet dat niet, net als in CI: de controles zetten hun eigen verzonnen gegevens erin.
 - **Gebruiken:** zet `DATABASE_URL` in `.env` op `fansite`, zoals `.env.example` het heeft.
   `pnpm test`, `pnpm --filter site smoke` en de andere opdrachten die erdoor lopen, gebruiken dan de database van de map.
   `pnpm db:migrate`, `pnpm db:seed` en `pnpm import` gebruiken `DATABASE_URL` zoals die in `.env` staat, dus `fansite`: ze lopen niet door het script.

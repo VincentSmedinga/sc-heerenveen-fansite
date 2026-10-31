@@ -115,6 +115,10 @@ test('WORKTREE_NAME wins over the folder, and an empty one turns it off', () => 
   assert.equal(worktreeNameOf({ env: {}, folder, linked: true }), '514-worktree-env')
 })
 
+test('an empty DATABASE_URL in the environment is no choice', () => {
+  assert.equal(derive({ env: { DATABASE_URL: '' } }).database, 'mysql://root@127.0.0.1:3306/fansite_514_worktree_env')
+})
+
 test('a name becomes lower case letters, digits and underscores', () => {
   assert.equal(slugOf('514-Worktree.Env'), '514_worktree_env')
   assert.equal(slugOf('  --a  b--  '), 'a_b')
@@ -162,13 +166,16 @@ test('reads the command line', () => {
       database: true,
       ports: ['site', 'mail'],
       run: ['next', 'dev', '--port', '3000'],
+      seed: false,
     },
   )
+  assert.equal(parseArguments(['run', '--database', '--seed', '--', 'x']).seed, true)
   assert.deepEqual(parseArguments(['run', '--', 'vitest']), {
     command: 'run',
     database: false,
     ports: [],
     run: ['vitest'],
+    seed: false,
   })
 })
 
@@ -180,6 +187,7 @@ test('refuses a command line it does not understand', () => {
     ['run', '--ports', 'nope', '--', 'x'],
     ['run', '--ports'],
     ['run', '--what', '--', 'x'],
+    ['run', '--seed', '--', 'x'],
     ['go'],
     ['drop', 'x'],
   ]) {
