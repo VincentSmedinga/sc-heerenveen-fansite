@@ -2967,6 +2967,58 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een kleine maat van 32 pixels (haalt 2.5.8 ook, maar laat minder ruimte voor een vinger).
   Alle bedieningselementen kleiner maken (een formulier op een telefoon heeft de 44 pixels nodig).
 
+### Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** `DataTable` kan sorteren, en de lijst van de tegenstanders is de eerste tabel die het gebruikt (#509).
+  - **Wat de pagina doet:** zeggen welke kolommen sorteren, met `sortable: true` op de kolom.
+    Een cel die op een andere waarde sorteert dan hij toont, is `{ text, sortValue }`, zoals "7–5" dat op het aantal doelpunten sorteert.
+    Een kolom zonder afkorting is `{ name, sortable: true }`, zodat ook de eerste kolom (Club) kan sorteren.
+    De pagina schrijft geen sorteercode.
+  - **Zonder JavaScript:** de server stuurt de hele tabel in de volgorde van `rows`, met koppen van gewone tekst en zonder knoppen die niets doen.
+    `DataTable` blijft daarvoor een servercomponent.
+    Heeft een tabel geen sorteerbare kolom, dan is de uitvoer gelijk aan die van voor dit besluit en komt er geen script bij.
+    Heeft hij er wel een, dan geeft `DataTable` het werk aan `SortableDataTable`, een clientcomponent.
+    Die tekent bij het laden hetzelfde als de server en maakt er na het laden knoppen van, zoals de seizoenskiezer zijn knop weghaalt.
+  - **De bediening:** een klik, Enter of spatie op de kop sorteert op die kolom.
+    De eerste klik zet een kolom met alleen getallen aflopend (het grootste eerst) en een kolom met tekst oplopend, van A tot Z.
+    De eerste kolom is tekst.
+    Een tweede klik keert de richting om, en een andere kolom begint weer bij zijn eerste richting.
+    Getallen sorteren als getallen, en tekst met de Nederlandse regels (`Intl.Collator('nl')`): hoofdletters en accenten tellen niet mee, en een getal in een naam telt op waarde, dus "Club 2" komt voor "Club 10".
+    Gelijke waarden staan op de volgorde van de eerste kolom, van A tot Z, ook als de richting aflopend is.
+    Is ook dat gelijk, dan blijft de gegeven volgorde.
+  - **De uitleg voor wie het niet ziet:** de gesorteerde kop heeft `aria-sort="ascending"` of `"descending"` en de andere sorteerbare koppen `"none"`.
+    Zichtbaar is de gesorteerde kolom aan een pijl: omhoog is oplopend en omlaag is aflopend.
+    De pijl is een pictogram van het designsysteem, nieuw is `arrow-down`, en staat alleen in de gesorteerde kop.
+    Na een klik zegt een regel wat er gebeurde, in een `role="status"` die niet te zien is: "Gesorteerd op Gespeeld, van hoog naar laag", of "van laag naar hoog", of bij tekst "van A tot Z" en "van Z tot A".
+    De regio is er al voor de eerste klik, maar pas met JavaScript, en is dan leeg.
+    De focus blijft op de knop, want de kop wordt bij een klik niet vervangen.
+    De knop heet voor een schermlezer en voor spraakbesturing "GL gelijk": de afkorting staat in de naam, want een knop moet heten wat erop staat (2.5.3).
+    In een gewone kop blijft de afkorting verborgen voor een schermlezer, die alleen het hele woord hoort.
+  - **De maat:** de knop is minstens 1,5 rem hoog en breed (24 bij 24 pixels, WCAG 2.5.8), zonder vlak en rand, onderstreept zodat hij als iets om op te drukken leest.
+    De pijl heeft de kleur van de tekst, dus hij haalt 3:1 als de tekst 4,5:1 haalt, en hij is een vorm, dus de kleur is niet het enige teken.
+    De getalkolommen van een tabel die sorteert hebben opzij 0,125 rem ruimte in plaats van 0,5 rem, en vanaf 24 rem schermbreedte 0,25 rem, want de knoppen maken ze breder dan de getallen en zeven kolommen (de lijst met Punten) pasten anders niet op 320 pixels, ook niet als de pijl erbij komt.
+    Op een bredere telefoon is er ruimte genoeg, en dan lopen de getallen van twee kolommen niet in elkaar over.
+    De kop van een getalkolom eindigt waar de getallen eindigen, zodat er geen gat voor staat.
+    De pijl staat in een getalkolom vóór de kop en in de eerste kolom erachter, en een ongesorteerde kop houdt geen plek voor een pijl vrij: zeven plekken zouden niet op 320 pixels passen.
+    De breedte van een kolom verandert dus niet als de pijl in de ruimte van de kop past, en groeit een paar pixels als hij breder is, zoals bij GL.
+  - **Niet in het adres:** de gekozen volgorde staat niet in de URL en blijft niet bewaard.
+    Een nieuwe lading, ook na een wissel van de schakelaar van #406, geeft de tabel weer van A tot Z.
+  - **De lijst van de tegenstanders:** de kolommen Club, Gespeeld, Gewonnen, Gelijk, Verloren en Doelpunten sorteren, en bij de keuze Eredivisie ook de nieuwe kolom Punten (afkorting P): 3 punten per winst en 1 per gelijkspel tegen die club, uit de cijfers van de Eredivisie.
+    Bij "Alle wedstrijden" is er geen kolom Punten, want een bekerwedstrijd geeft geen punten, net als bij de rijen Punten van Thuis en uit (#406).
+    Doelpunten sorteert op de doelpunten voor: een bezoeker zoekt de club waartegen we het vaakst scoorden, en het saldo staat niet in de tabel.
+    De regel onder de tabel noemt P erbij als de kolom er is.
+- **Waarom:** een lijst van enkele tientallen clubs van A tot Z laat niet zien tegen wie we de meeste wedstrijden speelden of de meeste doelpunten maakten.
+  Het sorteren in het onderdeel houdt de pagina's klein en maakt het beschikbaar voor elke tabel met getallen.
+  Zonder JavaScript is er niets stuk: de tabel is er, in de volgorde van de server.
+  Knoppen in de koppen zijn de gewone bediening voor sorteren, met een toetsenbord en een schermlezer, en `aria-sort` plus een beleefde regel zegt wat er veranderde.
+  De eerste richting volgt wat een bezoeker zoekt: het grootste getal, of A tot Z.
+  Doelpunten voor is de uitkomst die bij de vraag "waar maakten we de meeste" hoort.
+- **Nadeel:** zonder JavaScript sorteert de tabel niet.
+  Een tabel met een sorteerbare kolom stuurt een stukje script mee, waar een gewone `DataTable` er geen heeft.
+  "7–5" sorteert op één getal en een schermlezer hoort dat niet, want de kop zegt alleen "doelpunten".
+- **Alternatieven:** sorteren op de server met `?sorteer=` in het adres (werkt zonder JavaScript, maar laadt de pagina opnieuw, past niet bij de schakelaar en maakt de volgorde onderdeel van het adres: het issue sluit dat uit); knoppen in de koppen ook zonder JavaScript (knoppen die niets doen); de pagina laten sorteren met eigen code (dan bouwt elke tabel het opnieuw); het doelpuntensaldo als waarde van Doelpunten (zegt niet hoe vaak we scoorden); sorteren op meer kolommen tegelijk, filteren en paginering (buiten het issue); alle kolommen met een pijl van een neutrale vorm (een extra pictogram en meer breedte op 320 pixels).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -4547,6 +4599,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een cel als "7–5" leest een schermlezer als twee getallen zonder het woord "tegen"; de kolomkop zegt "doelpunten" en de regel onder de tabel "voor–tegen".
   De lijst heeft clubs met nullen zolang we alleen een wedstrijd uit de toekomst tegen ze hebben.
 - **Alternatieven:** alleen clubs met een minimum aantal wedstrijden (de projecteigenaar koos er geen); hele woorden als kolomkop (past niet op een telefoon); de lijst sorteerbaar of met paginering (te veel voor een lijst van enkele tientallen clubs); een kaart met tegenstanders op de pagina Statistieken (de pagina is al vol); de bronvermelding in korte vorm, "Bron: Wikipedia" (zegt niet uit welke pagina's de cijfers komen); in de cache een sleutel per verzonnen slug (laat het geheugen volgroeien).
+- **Later:** zie _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026): de lijst sorteert sindsdien met JavaScript op elke kolom en heeft bij de keuze Eredivisie de kolom Punten.
+  De tabel van de server blijft van A tot Z, zonder knoppen.
 
 ### De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
 

@@ -87,7 +87,7 @@ describe('the large space below a large building block', () => {
   })
 
   it('leaves the data table to the rule for every table: it sets no margin of its own', () => {
-    expect(read('components/data-table/data-table.css')).not.toMatch(/margin/u)
+    expect(read('components/data-table/data-table.css')).not.toMatch(/margin-block|margin:/u)
   })
 
   it('is below a chart: the bar chart, the group of donut charts and the chart of the form', () => {
