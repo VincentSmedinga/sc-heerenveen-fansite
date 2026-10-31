@@ -16,7 +16,8 @@ Start dan de site:
 pnpm --filter site dev
 ```
 
-De site luistert op <http://localhost:3000>.
+De site luistert op <http://localhost:3000>, in een gewone checkout.
+In een worktree gebruikt hij de poort en de database van die worktree (zie _Poorten per worktree_).
 Next.js leest alleen een `.env` in deze map, dus `next.config.ts` laadt de `.env` uit de root zelf.
 
 | Opdracht                                   | Wat het doet                                                                                    |
@@ -39,6 +40,26 @@ Zo bewijst hij ook dat de migraties in de map zitten.
 Hij start de map ook met een database die niet bereikbaar is, en controleert dat de homepage en `/bronnen` de foutpagina tonen.
 Op `/updates` controleert hij dat de pagina de versies uit `CHANGELOG.md` toont die zinnen hebben, en dat de links in de feed naar het adres van acceptatie of productie gaan.
 Hij controleert ook dat de oude adressen `/wat-is-er-nieuw` en `/wat-is-er-nieuw/feed.xml` blijvend doorverwijzen naar `/updates` en de feed.
+
+## Poorten per worktree
+
+Een worktree heeft een eigen blok poorten en een eigen database, zodat twee sessies naast elkaar `pnpm dev`, de rooktest en `pnpm test:a11y` kunnen draaien.
+`scripts/worktree-env.js` rekent ze uit de naam van de map uit, en de scripts `dev`, `smoke` en `test:a11y` lopen erdoor.
+De poorten staan in het bereik 24000 tot 28000, acht per worktree:
+
+| Wat                                                | Variabele                   | Poort in een gewone checkout en in CI |
+| -------------------------------------------------- | --------------------------- | ------------------------------------- |
+| De site met `pnpm dev`                             | `SITE_PORT`                 | 3000                                  |
+| Storybook                                          | `STORYBOOK_PORT`            | 6006                                  |
+| De rooktest                                        | `SMOKE_PORT`                | 3123                                  |
+| De site van `pnpm test:a11y`                       | `E2E_PORT`                  | 3124                                  |
+| Diezelfde site zonder database, voor de foutpagina | `E2E_WITHOUT_DATABASE_PORT` | 3125                                  |
+| De nepmailserver van `pnpm test:a11y`              | `FAKE_MAIL_PORT`            | 2525                                  |
+
+`pnpm worktree:env` laat zien welke poorten jouw map heeft.
+Is er een bezet, dan stopt de opdracht en noemt hij de poort en de worktree; hij kiest nooit stilletjes een andere.
+Zet je een van de variabelen zelf in de omgeving, dan wint die.
+`pnpm screenshots` en de adressen in de voorbeelden hieronder gaan uit van de standaardpoorten; neem in een worktree de poort uit `pnpm worktree:env`.
 
 ## Toegankelijkheid controleren
 

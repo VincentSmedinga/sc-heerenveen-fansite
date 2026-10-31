@@ -73,6 +73,11 @@ De gebouwde site maakt zelf de tabellen en zet de echte bronnen erin, en de cont
 `pnpm test:stories` opent elke story van het designsysteem in Chrome en toetst hem met axe, één keer in licht en één keer in donker.
 Het heeft geen database nodig, en eenmalig Chromium (zie de [README van het designsysteem](packages/design-system/README.md)).
 `pnpm test` draait de tests van de componenten zonder browser.
+Werk je in een worktree, dan krijg je een eigen database en eigen poorten, zodat twee sessies naast elkaar kunnen werken.
+`scripts/worktree-env.js` leidt ze af van de naam van de map, en de opdrachten hierboven gebruiken ze zonder dat je iets doet.
+Een gewone checkout en CI houden de poorten 3000, 6006, 3123, 3124, 3125 en 2525 en de database `fansite`.
+Wat je zelf in de omgeving zet, wint.
+`pnpm worktree:env` laat zien wat jouw map krijgt, en `pnpm worktree:db:drop` haalt de database van de map weg (zie de [README van het package](packages/db/README.md)).
 Verandert je wijziging de opmaak of de tekst van een pagina, of een regel in het logboek van de site?
 Draai dan na `pnpm build` ook de rooktest, zoals CI dat doet:
 

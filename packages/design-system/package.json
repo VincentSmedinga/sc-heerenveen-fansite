@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build-storybook": "storybook build",
-    "storybook": "storybook dev --port 6006 --no-version-updates",
+    "storybook": "node ../../scripts/worktree-env.js run --ports storybook -- storybook dev --port {STORYBOOK_PORT} --no-version-updates",
     "test": "vitest run --project unit",
     "test:stories": "STORYBOOK_THEME=light vitest run --project stories && STORYBOOK_THEME=dark vitest run --project stories",
     "typecheck": "tsc -b"

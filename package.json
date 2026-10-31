@@ -36,7 +36,9 @@
     "test": "pnpm -r --if-present run test && node --test '.claude/hooks/*.test.js' 'baseline.test.js' 'scripts/*.test.js' 'templates.test.js'",
     "test:a11y": "pnpm --filter site test:a11y",
     "test:stories": "pnpm --filter @fansite/design-system test:stories",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "worktree:db:drop": "node scripts/worktree-env.js drop",
+    "worktree:env": "node scripts/worktree-env.js"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",

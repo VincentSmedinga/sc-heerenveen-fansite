@@ -2,12 +2,14 @@ import { defineConfig, devices } from '@playwright/test'
 
 import { fakeMailFolder, fakeMailPort } from './e2e/fake-mail'
 
-// Not the port of smoke.js (3123), so the two can't get in each other's way.
-const port = '3124'
+// Not the port of smoke.js (3123), so the two can't get in each other's way. The ports are the
+// defaults of a normal checkout and CI; in a worktree scripts/worktree-env.js sets others, and
+// `pnpm test:a11y` runs through it (see package.json).
+const port = process.env['E2E_PORT'] ?? '3124'
 const origin = `http://127.0.0.1:${port}`
 // A second copy of the site, without a database, for the error page (e2e/error-page.spec.ts).
 // Nothing listens on port 1 of this computer, so the connection is refused at once.
-const withoutDatabasePort = '3125'
+const withoutDatabasePort = process.env['E2E_WITHOUT_DATABASE_PORT'] ?? '3125'
 // Acceptance doesn't start without the settings of the mail server. The contact form sends
 // mail, so they point at a mail server of our own that keeps the mails in a folder
 // (scripts/fake-smtp.js), and the sites trust its certificate.

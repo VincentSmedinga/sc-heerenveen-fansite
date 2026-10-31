@@ -5,7 +5,7 @@ import { checkPage } from './check-page'
 // The second copy of the site in playwright.config.ts, which has no database. The pages that
 // read the database, the homepage, the sources, podcasts, matches and statistics pages, are the
 // error page.
-const withoutDatabase = 'http://127.0.0.1:3125'
+const withoutDatabase = `http://127.0.0.1:${process.env['E2E_WITHOUT_DATABASE_PORT'] ?? '3125'}`
 
 for (const path of ['/', '/bronnen', '/nieuws/podcasts', '/wedstrijden', '/statistieken', '/statistieken/spelers']) {
   for (const colorScheme of ['light', 'dark'] as const) {

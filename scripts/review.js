@@ -304,7 +304,9 @@ export function buildServerCommand(server, { branch, reviewFolder }, env) {
     args: server.args,
     command: 'pnpm',
     cwd: reviewFolder,
-    env: { ...cleanEnv(env), NO_COLOR: '1', REVIEW_BRANCH: branch },
+    // An empty WORKTREE_NAME keeps the review folder, which is a worktree, on the ports and the
+    // database of a normal checkout (see scripts/worktree-env.js): it is for the owner.
+    env: { ...cleanEnv(env), NO_COLOR: '1', REVIEW_BRANCH: branch, WORKTREE_NAME: '' },
   }
 }
 
