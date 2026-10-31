@@ -6,7 +6,7 @@ import { checkPage } from './check-page'
 // read the database, the homepage, the sources, podcasts and matches pages, are the error page.
 const withoutDatabase = 'http://127.0.0.1:3125'
 
-for (const path of ['/', '/bronnen', '/podcasts', '/wedstrijden']) {
+for (const path of ['/', '/bronnen', '/nieuws/podcasts', '/wedstrijden']) {
   for (const colorScheme of ['light', 'dark'] as const) {
     test(`the error page on ${path} in ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme })

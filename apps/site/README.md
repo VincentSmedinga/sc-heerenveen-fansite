@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu tien pagina's: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/podcasts` met de afleveringen van de podcasts, `/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu tien pagina's: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -102,7 +102,7 @@ De bestanden heten naar het pad of de story en de breedte, zoals `podcasts-390.p
 Kies een andere map met `--out <map>`.
 `--full-page` neemt de hele pagina in plaats van het eerste scherm.
 
-De homepage (met de kaart van het artikel), `/redactie/e2e-artikel`, `/nieuws`, `/podcasts` en de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
+De homepage (met de kaart van het artikel), `/redactie/e2e-artikel`, `/nieuws`, `/nieuws/podcasts` en de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
 `pnpm --filter site test-data` zet ze in de database van je `.env`, en `pnpm --filter site test-data --remove` haalt ze er weer uit.
 Gebruik daarvoor de database waarmee je ontwikkelt, niet die van de controle of van de hosting.
 Vanuit de root:
@@ -123,7 +123,7 @@ De site luistert op <http://127.0.0.1:3000>.
 Maak de plaatjes in een tweede terminal:
 
 ```sh
-pnpm screenshots http://127.0.0.1:3000 / /podcasts
+pnpm screenshots http://127.0.0.1:3000 / /nieuws/podcasts
 pnpm screenshots http://127.0.0.1:3000 /over-ons --dark
 ```
 
@@ -147,6 +147,21 @@ De layout, de pagina's en de pagina voor een onbekend adres bevatten geen HTML, 
 Dat geldt voor elk `.tsx`-bestand in `src`, behalve tests.
 `pnpm lint` faalt op een HTML-element, zoals `<p>` of `<li>`.
 De header, met het logo, de themaknop en het hoofdmenu, en de footer staan in `src/app/layout.tsx`, dus elke pagina heeft ze.
+
+## Het hoofdmenu en de balk van Nieuws
+
+Het hoofdmenu (`src/SiteNavigation.tsx`) heeft drie onderdelen: Nieuws, Wedstrijden en Forum (extern).
+Nieuws heeft een balk met subpagina's onder het menu: Archief (`/nieuws`), Podcasts (`/nieuws/podcasts`) en Zoeken (`/nieuws/zoeken`), in die volgorde.
+De balk komt uit `Navigation` van het designsysteem (`subitems`), dus het menu en de balk zijn één navigatie, "Hoofdmenu".
+`currentOf` in hetzelfde bestand kiest uit het pad het huidige onderdeel en de huidige subpagina:
+
+- Nieuws is het huidige onderdeel op `/`, `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en Wedstrijden op `/wedstrijden` en elke pagina eronder, zoals een seizoen.
+- Staat de bezoeker op een subpagina, dan is die `aria-current="page"` en heeft het item Nieuws `aria-current="true"`.
+  Op `/` en op een artikel van de redactie is alleen Nieuws het huidige onderdeel, met `aria-current="page"`, en is er geen huidige subpagina.
+- Een ander pad, zoals `/bronnen` of een adres dat niet bestaat, heeft geen huidig onderdeel en geen balk.
+
+De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen.md`).
+De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf Wedstrijden kunt zoeken.
 
 ## De homepage
 
@@ -175,9 +190,9 @@ Het haalt alleen berichten op die `relevant` zijn en niet verborgen (`isShown`);
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
-Onder de discussies staat het blok "Nieuwste podcasts": de vijf nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/podcasts` eronder.
+Onder de discussies staat het blok "Nieuwste podcasts": de vijf nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
-De afleveringen hebben dezelfde feiten als op `/podcasts`.
+De afleveringen hebben dezelfde feiten als op `/nieuws/podcasts`.
 
 Onder de podcasts staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
 Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan onderaan de pagina.
@@ -343,21 +358,21 @@ Een nieuwe kop schuift de inhoud van de pagina's op; de bronnen en het filter bl
 Een bron die niet in het filter staat, een bron die twee keer in het adres staat en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
 De titel en de kop noemen de bronnen en de pagina, zoals "Nieuwsarchief van NOS en Omrop Fryslân, pagina 3", en elke pagina is zijn eigen canonieke adres.
 De server bewaart elke combinatie van bronnen en pagina vijf minuten, maar alleen na de controle van het adres (`src/archive.ts`).
-Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/podcasts`.
-De pagina staat niet in het hoofdmenu; dat volgt uit de opbouw van de site (#431).
+Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/nieuws/podcasts`.
+De pagina staat als Archief in de balk van Nieuws, onder het hoofdmenu (zie _Het hoofdmenu en de balk van Nieuws_).
 
 `pnpm test:a11y` zet verzonnen koppen op de testbronnen, genoeg voor een tweede pagina (`e2e/headlines.ts`).
 
 ## De podcasts
 
-`/podcasts` toont de afleveringen van de podcasts die aanstaan, nieuwste eerst, 25 per pagina, elk als `NewsItem`: de titel als link naar de pagina van de aflevering bij de maker, de naam van de podcast en de tijd.
+`/nieuws/podcasts` toont de afleveringen van de podcasts die aanstaan, nieuwste eerst, 25 per pagina, elk als `NewsItem`: de titel als link naar de pagina van de aflevering bij de maker, de naam van de podcast en de tijd.
 Achter de naam staan de feiten die de feed geeft, als `details` van de `NewsItem`: het seizoen en het nummer, zoals "seizoen 9, aflevering 16" of "aflevering 120", en de duur, zoals "37 min" of "1 uur 12 min" (`episodeDetails` in `src/news.ts`).
 Een aflevering van deze week heeft de korte dag en de tijd, zoals "wo 14:05"; een oudere heeft de datum, met het jaar als dat niet dit jaar is, want de lijst gaat jaren terug.
-Het filter staat in een lichtblauwe kaart (`surface="soft"`) bovenaan de zijbalk: een formulier met een GET naar `/podcasts`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Podcasts") en de knop "Toon".
+Het filter staat in een lichtblauwe kaart (`surface="soft"`) bovenaan de zijbalk: een formulier met een GET naar `/nieuws/podcasts`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Podcasts") en de knop "Toon".
 Er is een vakje per podcast met afleveringen, op alfabet, met de `slug` als waarde, dus een andere naam verandert het adres niet (de kolom `slug` van `sources`).
 De knop blijft ook met JavaScript, en het formulier werkt zonder.
-Zonder vinkje en met alle vinkjes toont de pagina alle afleveringen, op het adres zonder `podcast`: `/podcasts`.
-Met één of meer vinkjes (maar niet alle) staan er alleen afleveringen van die podcasts, op `/podcasts?podcast=omroep-abe&podcast=radio-camataru`, in de volgorde van de lijst.
+Zonder vinkje en met alle vinkjes toont de pagina alle afleveringen, op het adres zonder `podcast`: `/nieuws/podcasts`.
+Met één of meer vinkjes (maar niet alle) staan er alleen afleveringen van die podcasts, op `/nieuws/podcasts?podcast=omroep-abe&podcast=radio-camataru`, in de volgorde van de lijst.
 De queries nemen de slugs als `podcasts` (`listPodcastEpisodes` en `countPodcastEpisodes` in `packages/db/src/queries.ts`).
 De functies die het adres lezen en maken staan in `src/podcasts-query.ts`; ze delen hun werk met `/nieuws` in `src/filter-query.ts`.
 Met precies één vinkje staat de naam van de podcast niet bij elke aflevering (`showSource` van `NewsItem`), want de kop van de pagina noemt hem al; een schermlezer hoort hem nog wel.
@@ -367,7 +382,7 @@ Heeft de podcast geen adressen, dan staat de beschrijving er alleen.
 Bij geen vinkje en bij meer dan één vinkje staat er geen kaart "Over".
 Op een smal scherm staat de zijbalk onder de lijst, zoals bij de andere pagina's.
 Zonder afleveringen is er geen filter en geen zijbalk.
-Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/podcasts?pagina=2`, en met podcasts `/podcasts?podcast=omroep-abe&podcast=radio-camataru&pagina=2`.
+Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/nieuws/podcasts?pagina=2`, en met podcasts `/nieuws/podcasts?podcast=omroep-abe&podcast=radio-camataru&pagina=2`.
 Een podcast die niet in het filter staat, een podcast die twee keer in het adres staat en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
 Een parameter die de pagina niet kent, telt niet mee.
 De server bewaart elke combinatie van podcasts en pagina vijf minuten, maar alleen na de controle van het adres, zodat een bezoeker de cache niet kan vullen met adressen van zichzelf (`src/podcasts.ts`).
@@ -378,7 +393,7 @@ De pagina laadt niets van een podcastplatform: alleen de links gaan erheen.
 
 ## Zoeken
 
-`/zoeken` zoekt in wat we zelf bewaren: de titels van de berichten en de podcastafleveringen die de site toont (`relevance` is `relevant`, niet verborgen, van een bron die aanstaat) en de titel en de inleiding van de gepubliceerde artikelen van de redactie.
+`/nieuws/zoeken` zoekt in wat we zelf bewaren: de titels van de berichten en de podcastafleveringen die de site toont (`relevance` is `relevant`, niet verborgen, van een bron die aanstaat) en de titel en de inleiding van de gepubliceerde artikelen van de redactie.
 Forumonderwerpen zitten er niet in, want we bewaren er maar de nieuwste.
 De zoekopdracht is `searchPublic` in `packages/db/src/queries.ts`: `LIKE`, dus zonder index, en geen FULLTEXT.
 Alle woorden moeten voorkomen, in elke volgorde, en een deel van een woord telt mee.
@@ -392,22 +407,22 @@ Zo beschermen de grenzen de gedeelde hosting.
 Een zoekopdracht kost op een database met 10.000 berichten ongeveer 7 tot 14 milliseconden.
 
 Het formulier staat in dezelfde kaart als de resultaten (`SearchCard`), blauw zolang er nog niet gezocht is en daarna wit.
-Het is een gewoon `GET`-formulier naar `/zoeken?q=…`, dus de pagina werkt zonder JavaScript en het adres is te delen.
+Het is een gewoon `GET`-formulier naar `/nieuws/zoeken?q=…`, dus de pagina werkt zonder JavaScript en het adres is te delen.
 De resultaten staan met de nieuwste bovenaan, tien eerst, en de knop "Laad 5 meer" laadt de pagina opnieuw met `?aantal=15`, in stappen van vijf en tot 100.
 Daarna staat er een zin dat dit de nieuwste zijn.
 De site bewaart een zoekvraag zelf nergens: er staat geen cookie, geen lijst van gezochte woorden en geen adres van de bezoeker bij.
 De logbestanden van de hosting hebben wel het hele adres van een pagina, dus ook `?q=`, zoals van elke pagina.
-De teller van het bezoek telt `/zoeken` zonder de vraag (`src/visits.ts`), en een fout in het logboek noemt de reden en niet de vraag.
+De teller van het bezoek telt `/nieuws/zoeken` zonder de vraag (`src/visits.ts`), en een fout in het logboek noemt de reden en niet de vraag.
 De pagina is `noindex`, ook met een vraag, en staat niet in de sitemap.
 
 De lijst met spelers staat in de zijbalk, na de resultaten in de bron, dus op een smal scherm onder de resultaten en zonder vraag direct onder het formulier.
-Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam (`PlayerName`, met de achternaam vet) is een link naar `/zoeken?q=<achternaam>`.
+Ze komt uit `players` van het lopende seizoen (`listSquad`), gegroepeerd per positie, en elke naam (`PlayerName`, met de achternaam vet) is een link naar `/nieuws/zoeken?q=<achternaam>`.
 Zijn er geen spelers, dan laat de pagina de lijst weg.
 Onder de lijst staat de bronvermelding van de selectie (`WikipediaCredit`), met de pagina uit `wikipedia_pages` met `kind` `squad` (`findSquadPage`).
 `listSquad` is de ene plek die bepaalt wie in de lijst staat, en geeft alleen de spelers die in de selectie staan (`in_squad`): een speler die vertrok, blijft in `players` voor zijn doelpunten.
 De server bewaart de lijst vijf minuten, een zoekopdracht niet.
 
-`pnpm test:a11y` toetst `/zoeken` zonder vraag, met een vraag, met meer dan tien resultaten, zonder resultaten en met een vraag die niet mag.
+`pnpm test:a11y` toetst `/nieuws/zoeken` zonder vraag, met een vraag, met meer dan tien resultaten, zonder resultaten en met een vraag die niet mag.
 De lijst met spelers staat er alleen op als de database de verzonnen selectie van `pnpm db:seed` heeft (`madeUpSquad`).
 
 ## De bronnen
@@ -509,7 +524,7 @@ Alle formulieren zijn gewone posts van een serveractie (`actions.ts`), dus ze we
 - De reden is verplicht en hoogstens 300 tekens.
   Een reden zonder tekst of te lang laat het bericht staan en brengt je terug op de lijst, met de fout in een `ErrorSummary` bovenaan en bij het veld (`?fout=reden-leeg&bericht=<nummer>`, zoals het inloggen met `?fout=` doet).
 - Na het verbergen of tonen staat bovenaan wat er gebeurde: "Staat binnen vijf minuten niet meer op de site" of "weer op de site".
-  Dat is waar, want de homepage, `/nieuws` en `/podcasts` bewaren hun lijsten vijf minuten in het geheugen van de server; `src/headlines-hidden.test.ts` bewijst het tegen een echte database.
+  Dat is waar, want de homepage, `/nieuws` en `/nieuws/podcasts` bewaren hun lijsten vijf minuten in het geheugen van de server; `src/headlines-hidden.test.ts` bewijst het tegen een echte database.
   De melding komt uit de database van dat moment, niet uit het adres: `?verborgen=<nummer>` zegt alleen iets over een bericht dat echt verborgen is.
 - Verbergen en tonen schrijven allebei één regel in het logboek `audit_log`, in dezelfde transactie, via `recordAction` (`src/beheer/audit-log.ts`).
   Daar staat het nummer van het account, de tijd, de actie, het nummer van het bericht en de reden: geen e-mailadres en niets anders van het verzoek.

@@ -43,7 +43,7 @@ HOSTNAME=127.0.0.1 pnpm --filter site exec node --env-file-if-exists=../../.env 
 ```
 
 Put the test data in before you start the site: the homepage keeps its headlines for five minutes.
-Then in a second terminal: `pnpm screenshots http://127.0.0.1:3000 / /podcasts [--dark] [--full-page]`.
+Then in a second terminal: `pnpm screenshots http://127.0.0.1:3000 / /nieuws/podcasts [--dark] [--full-page]`.
 
 For a component, `pnpm --filter design-system build-storybook`, serve `packages/design-system/storybook-static` on port 6006 (`python3 -m http.server 6006 --bind 127.0.0.1 --directory …`), and run `pnpm screenshots http://127.0.0.1:6006 <story id>`.
 A story id looks like `componenten-pagina-page-footer--light`.

@@ -620,17 +620,20 @@ await withEmptyDatabase((database) =>
     // The podcast page reads the episodes, and the seed has none, so there is no filter. A
     // podcast, several podcasts or a page that doesn't exist is a 404, and so is a podcast
     // given twice.
-    const podcastPage = await fetch(`${origin}/podcasts`)
+    const podcastPage = await fetch(`${origin}/nieuws/podcasts`)
     const podcastHtml = await podcastPage.text()
     assert.equal(podcastPage.status, 200)
     assert.match(podcastHtml, /<h1[^>]*>Podcasts<\/h1>/)
     assert.match(podcastHtml, /We hebben nog geen podcastafleveringen gevonden\./)
     assert.doesNotMatch(podcastHtml, /<aside|<fieldset|type="checkbox"/)
-    assert.equal((await fetch(`${origin}/podcasts?podcast=bestaat-niet`)).status, 404)
-    assert.equal((await fetch(`${origin}/podcasts?podcast=bestaat-niet&podcast=omroep-abe`)).status, 404)
-    assert.equal((await fetch(`${origin}/podcasts?podcast=omroep-abe&podcast=omroep-abe`)).status, 404)
-    assert.equal((await fetch(`${origin}/podcasts?pagina=2`)).status, 404)
-    assert.equal((await fetch(`${origin}/podcasts?pagina=0`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws/podcasts?podcast=bestaat-niet`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws/podcasts?podcast=bestaat-niet&podcast=omroep-abe`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws/podcasts?podcast=omroep-abe&podcast=omroep-abe`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws/podcasts?pagina=2`)).status, 404)
+    assert.equal((await fetch(`${origin}/nieuws/podcasts?pagina=0`)).status, 404)
+    // The old addresses of the podcasts and the search are gone, without a redirect.
+    assert.equal((await fetch(`${origin}/podcasts`, { redirect: 'manual' })).status, 404)
+    assert.equal((await fetch(`${origin}/zoeken`, { redirect: 'manual' })).status, 404)
 
     // The news archive reads the headlines, and the seed has none, so there is no filter. A
     // source, several sources or a page that doesn't exist is a 404, and so is a source given
@@ -687,7 +690,12 @@ await withEmptyDatabase((database) =>
         '#uitersten',
       ],
     )
-    assert.doesNotMatch(html, /hf-page-shortcuts/)
+    // The home page has no bar of shortcuts, only the bar of sub-pages of Nieuws in the menu.
+    assert.doesNotMatch(html, /class="hf-page-shortcuts"/)
+    assert.match(
+      html,
+      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws">Archief<\/a>.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
+    )
     assert.match(matchesHtml, /Testdorp FC/)
     // The card with our place in the league: a table of five measures, after the table.
     assert.match(
@@ -914,13 +922,13 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   assert.doesNotMatch(homeHtml, /Laatste nieuws|Binnenkort meer/)
   assert.match(log(), /Could not read the headlines, discussions and episodes for the homepage: .*ECONNREFUSED/)
 
-  const podcasts = await fetch(`${origin}/podcasts?podcast=omroep-abe&pagina=2`)
+  const podcasts = await fetch(`${origin}/nieuws/podcasts?podcast=omroep-abe&pagina=2`)
   const podcastsHtml = await podcasts.text()
   assert.equal(podcasts.status, 200)
   assert.match(podcastsHtml, /<h1[^>]*>Er ging iets mis<\/h1>/)
   assert.match(podcastsHtml, /<meta name="robots" content="noindex"\/>/)
-  assert.match(podcastsHtml, /<a href="\/podcasts\?podcast=omroep-abe&amp;pagina=2">Probeer het opnieuw<\/a>/)
-  assert.match(log(), /Could not read the episodes for \/podcasts: .*ECONNREFUSED/)
+  assert.match(podcastsHtml, /<a href="\/nieuws\/podcasts\?podcast=omroep-abe&amp;pagina=2">Probeer het opnieuw<\/a>/)
+  assert.match(log(), /Could not read the episodes for \/nieuws\/podcasts: .*ECONNREFUSED/)
 
   const archive = await fetch(`${origin}/nieuws?bron=nos&pagina=2`)
   const archiveHtml = await archive.text()

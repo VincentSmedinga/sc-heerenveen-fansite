@@ -17,7 +17,7 @@ import { updatesPath, updatesTitle } from '../updates'
 // form, the sources, the privacy page, the accessibility statement and the updates. The main
 // menu does not have them.
 const footerItems = [
-  { href: '/zoeken', label: 'Zoeken' },
+  { href: '/nieuws/zoeken', label: 'Zoeken' },
   { href: '/over-ons', label: 'Over ons' },
   { href: '/contact', label: 'Contact' },
   { href: '/bronnen', label: 'Bronnen' },

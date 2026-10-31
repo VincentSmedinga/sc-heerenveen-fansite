@@ -38,10 +38,10 @@ afterEach(() => {
 
 describe('visitOf', () => {
   it('counts a visit to a page, with the path without the query', () => {
-    expect(visitOf(request('/podcasts?podcast=testpodcast&pagina=2'))).toEqual({
+    expect(visitOf(request('/nieuws/podcasts?podcast=testpodcast&pagina=2'))).toEqual({
       address,
       article: undefined,
-      path: '/podcasts',
+      path: '/nieuws/podcasts',
       userAgent: firefox,
     })
     expect(visitOf(request('/?nieuws=15'))).toMatchObject({ path: '/' })
@@ -55,10 +55,10 @@ describe('visitOf', () => {
     expect(visitOf(request('/contact/verstuurd'))).toMatchObject({ path: '/contact/verstuurd' })
   })
 
-  it('counts the search as /zoeken, without what was searched for', () => {
-    expect(visitOf(request('/zoeken'))).toMatchObject({ path: '/zoeken' })
-    expect(JSON.stringify(visitOf(request('/zoeken?q=klaverboer&aantal=15')))).not.toContain('klaverboer')
-    expect(visitOf(request('/zoeken?q=klaverboer&aantal=15'))).toMatchObject({ path: '/zoeken' })
+  it('counts the search as /nieuws/zoeken, without what was searched for', () => {
+    expect(visitOf(request('/nieuws/zoeken'))).toMatchObject({ path: '/nieuws/zoeken' })
+    expect(JSON.stringify(visitOf(request('/nieuws/zoeken?q=klaverboer&aantal=15')))).not.toContain('klaverboer')
+    expect(visitOf(request('/nieuws/zoeken?q=klaverboer&aantal=15'))).toMatchObject({ path: '/nieuws/zoeken' })
   })
 
   it('takes the visitor from the end of X-Forwarded-For, where the host puts it', () => {
@@ -223,7 +223,9 @@ describe('visitOf', () => {
       .map((entry) => entry.parentPath.slice(`${import.meta.dirname}/app`.length) || '/')
       .filter((path) => !path.startsWith('/beheer') && !path.startsWith('/@') && !withoutCount.includes(path))
 
-    expect(paths.toSorted()).toEqual([...pages.map(({ path }) => path), '/contact/verstuurd', '/zoeken'].toSorted())
+    expect(paths.toSorted()).toEqual(
+      [...pages.map(({ path }) => path), '/contact/verstuurd', '/nieuws/zoeken'].toSorted(),
+    )
   })
 })
 

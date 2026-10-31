@@ -11,7 +11,7 @@ import { cacheFor, cacheForKey } from './cache'
 import { getDatabase } from './database'
 import { itemsPerCard } from './items-per-card'
 
-/** The number of episodes on a page of /podcasts. */
+/** The number of episodes on a page of /nieuws/podcasts. */
 export const episodesPerPage = 25
 
 const fiveMinutes = 5 * 60 * 1000
@@ -85,12 +85,13 @@ export type PodcastPage = {
 }
 
 /**
- * What /podcasts shows for podcasts (their slugs, in any order, none for all) and a page,
- * counting from 1. It gives undefined when there is no such page: a slug that isn't in the
- * filter or is given twice, or a page after the last. The slugs are checked against the list of
- * podcasts, and the page against the number of pages, before anything is cached under them, so
- * a visitor can't fill the cache with addresses of their own. The podcasts are put in the order
- * of the list, so the same choice has one key, and all podcasts are the same as none.
+ * What /nieuws/podcasts shows for podcasts (their slugs, in any order, none for all) and a
+ * page, counting from 1. It gives undefined when there is no such page: a slug that isn't in
+ * the filter or is given twice, or a page after the last. The slugs are checked against the
+ * list of podcasts, and the page against the number of pages, before anything is cached under
+ * them, so a visitor can't fill the cache with addresses of their own. The podcasts are put in
+ * the order of the list, so the same choice has one key, and all podcasts are the same as
+ * none.
  */
 export async function getPodcastPage(slugs: readonly string[], page: number): Promise<PodcastPage | undefined> {
   const podcasts = await getPodcasts()

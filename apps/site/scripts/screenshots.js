@@ -9,7 +9,7 @@
 //   pnpm screenshots <address of the build> <path or story id>... [--dark] [--full-page]
 //     [--out <folder>]
 //
-//   pnpm screenshots http://localhost:3000 / /podcasts
+//   pnpm screenshots http://localhost:3000 / /nieuws/podcasts
 //   pnpm screenshots http://localhost:6006 componenten-pagina-page-footer--light --dark
 //
 // A target that starts with a slash is a path on the site. Anything else is the id of a story,

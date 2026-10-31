@@ -55,7 +55,7 @@ test.describe('the bar under the header of /wedstrijden', () => {
   test('is not on the other pages', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
 
-    for (const path of ['/', '/podcasts', '/bronnen']) {
+    for (const path of ['/', '/nieuws/podcasts', '/bronnen']) {
       await page.goto(path)
 
       await expect(page.locator('.hf-page-shortcuts')).toHaveCount(0)
@@ -65,8 +65,8 @@ test.describe('the bar under the header of /wedstrijden', () => {
   test('is left when the visitor goes on to another page, and comes back with the page', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/wedstrijden')
-    await page.getByRole('navigation', { name: 'Hoofdmenu' }).getByRole('link', { name: 'Podcasts' }).click()
-    await expect(page).toHaveURL(/\/podcasts$/)
+    await page.getByRole('navigation', { name: 'Hoofdmenu' }).getByRole('link', { name: 'Nieuws' }).click()
+    await expect(page).toHaveURL(/\/$/)
     await expect(page.locator('.hf-page-shortcuts')).toHaveCount(0)
 
     await page.getByRole('navigation', { name: 'Hoofdmenu' }).getByRole('link', { name: 'Wedstrijden' }).click()

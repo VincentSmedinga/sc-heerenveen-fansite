@@ -3,12 +3,12 @@ import type { Metadata } from 'next'
 import { Heading, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
-import { reviewBranch } from '../../env'
-import { reasonOf } from '../../errors'
-import { getSquad, parseResultCount, parseSearch, searchHref, searchSite, type Squad } from '../../search'
-import { SearchCard, SquadCard } from '../../SearchViews'
-import { ServerError, serverErrorTitle } from '../../ServerError'
-import { withBranch } from '../../title'
+import { reviewBranch } from '../../../env'
+import { reasonOf } from '../../../errors'
+import { getSquad, parseResultCount, parseSearch, searchHref, searchSite, type Squad } from '../../../search'
+import { SearchCard, SquadCard } from '../../../SearchViews'
+import { ServerError, serverErrorTitle } from '../../../ServerError'
+import { withBranch } from '../../../title'
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -24,7 +24,7 @@ async function loadSquad(): Promise<Squad | undefined> {
   try {
     return await getSquad()
   } catch (error) {
-    console.error(`Could not read the squad for /zoeken: ${reasonOf(error)}`)
+    console.error(`Could not read the squad for /nieuws/zoeken: ${reasonOf(error)}`)
 
     return undefined
   }
@@ -48,7 +48,7 @@ const loadContent = cache(async (text: string, count: number) => {
 
     return { results, squad }
   } catch (error) {
-    console.error(`Could not search for /zoeken: ${reasonOf(error)}`)
+    console.error(`Could not search for /nieuws/zoeken: ${reasonOf(error)}`)
 
     return undefined
   }
@@ -80,7 +80,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const content = await loadContent(search.kind === 'valid' ? search.text : '', count)
 
   if (content === undefined) {
-    return <ServerError retryHref={search.kind === 'valid' ? searchHref(search.text) : '/zoeken'} />
+    return <ServerError retryHref={search.kind === 'valid' ? searchHref(search.text) : '/nieuws/zoeken'} />
   }
 
   const { results, squad } = content
