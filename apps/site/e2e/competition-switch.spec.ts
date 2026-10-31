@@ -51,6 +51,8 @@ test.describe('the switch of the matches with JavaScript', () => {
     await page.getByRole('link', { name: 'Alle doelpuntenmakers' }).click()
 
     await expect(page).toHaveURL(/\/statistieken\/spelers\?competitie=eredivisie$/)
-    await expect(page.getByRole('link', { name: 'Eredivisie' })).toHaveAttribute('aria-current', 'page')
+    await expect(
+      page.getByRole('group', { name: 'Welke wedstrijden' }).getByRole('link', { name: 'Eredivisie' }),
+    ).toHaveAttribute('aria-current', 'page')
   })
 })
