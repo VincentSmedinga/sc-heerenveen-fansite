@@ -3622,6 +3622,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De bronvermelding onder de lijst is `WikipediaCredit`, met het woord `selectiegegevens` voor onze eigen gegevens (eigenschap `data`), want de standaardzin noemt de wedstrijdgegevens.
   `listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 is één voorwaarde in de `where` van die vraag (zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_).
 - **Alternatieven:** een item in het hoofdmenu (zoals het issue voorstelde: zichtbaarder, maar het menu breekt op een telefoon al af en de header krijgt een nieuw ontwerp); een zoekveld in de kop op elke pagina (altijd een stap dichtbij, maar breed en het vraagt een ontwerp van de kop); de lijst altijd boven de resultaten (prominent, maar op een telefoon schuiven de resultaten naar beneden).
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de pagina staat op `/nieuws/zoeken` en staat ook in de balk van Nieuws.
+  Het item "Zoeken" in de footer blijft en wijst naar het nieuwe adres; `/zoeken` vervalt zonder omleiding.
 
 ### De zoekpagina laat woorden van één teken niet toe, toont hoogstens 100 resultaten en staat niet in de sitemap
 
@@ -3639,6 +3641,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** `Input` van het designsysteem krijgt het type `hidden`, voor de knop "Laad 5 meer", die de vraag meeneemt in een `GET`-formulier.
   `NewsItem` krijgt `internal` voor een artikel van de redactie, zodat het pictogram voor een link naar een andere site wegblijft.
 - **Later:** er is nu een archief voor wie verder terug wil, zie _Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron_; het zoeken blijft `/zoeken`.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de pagina staat op `/nieuws/zoeken` en niet meer op `/zoeken`.
+  De regels voor woorden van één teken, de grens van 100 resultaten, de sitemap en de teller blijven.
 
 ### Een gepubliceerd anker staat in `src/anchors.ts`, en de rooktest bewaakt het
 
@@ -3942,7 +3946,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een subgrid (de rij van het menu loopt om op de breedte van de inhoud, en een raster kan dat niet).
 - **Later:** zie _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026): de huidige pagina in de geneste lijst is nu 600 in plaats van 700, tegen 400 voor de andere links, en het menu in de footer heeft hetzelfde.
   De gewichten van de kop blijven.
-- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de site gebruikt de balk met subpagina's nu voor Nieuws (Podcasts en Archief).
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de site gebruikt de balk met subpagina's nu voor Nieuws (Podcasts, Archief en Zoeken).
   Het eerste subitem is geen overzichtspagina: het item Nieuws is zelf de link terug.
 
 ### Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen
@@ -4191,9 +4195,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum (extern).
   Dit is optie 4 van het ontwerp van #431.
   - **Nieuws** is `/`, en blijft de homepage.
-    Onder het menu staat een balk met de subpagina's Podcasts en Archief.
+    Onder het menu staat een balk met de subpagina's Podcasts, Archief en Zoeken, in die volgorde.
   - **Podcasts** staat op `/nieuws/podcasts` en het archief op `/nieuws` (#26).
     `/podcasts` vervalt zonder omleiding: productie en lancering (#33, #34) staan nog open, dus er zijn geen openbare links.
+  - **Zoeken** staat op `/nieuws/zoeken`, zonder omleiding, om dezelfde reden als bij Podcasts: productie is niet live en er zijn geen openbare links.
+    `/zoeken` vervalt.
+    De link in de footer blijft en wijst naar het nieuwe adres.
+    Zoekt het later ook in spelers en tegenstanders, dan kan het uit Nieuws terug.
   - **Wedstrijden** blijft één pagina met Programma, Uitslagen, Stand en de hoofdtrainers.
     De Beker (#404) hoort erbij.
     Komen er subpagina's, dan krijgt de pagina een balk.
@@ -4211,6 +4219,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het menu blijft kort en past op 390 pixels.
   Zonder de negen kaarten is Wedstrijden een korte pagina.
   Optie 4 is optie 1 in stappen, dus wat we nu bouwen gaat niet verloren als Wedstrijden groeit.
+  Het zoeken doorzoekt koppen, afleveringen van podcasts en artikelen van de redactie, dus het is een zoekopdracht in het nieuws.
+  In de balk van Nieuws is het makkelijker te vinden dan in de footer.
 - **Nadeel:** we geven op dat alle onderdelen hetzelfde patroon hebben: Wedstrijden krijgt nog geen korte kaarten en balk.
   Podcasts is vanaf Wedstrijden en Statistieken twee tikken.
   De ankers van negen kaarten breken.
@@ -4226,6 +4236,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     Een stap naar een zusterpagina kost dan twee tikken, en Podcasts staat laag op de homepage.
   - De Stand naar Statistieken: er is geen goede reden voor, want de stand hoort bij de lijsten.
   - `/podcasts` houden en `/nieuws/podcasts` met een omleiding laten verwijzen: zonder openbare links is een omleiding niet nodig.
+  - Het zoeken in de footer laten op `/zoeken`: het is daar moeilijk te vinden, en het adres past niet bij de andere pagina's van Nieuws.
 
 ## Importer
 
