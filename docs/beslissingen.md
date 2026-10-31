@@ -4461,7 +4461,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gemeten:** de build van deze branch en die van `main` hebben dezelfde vier statische routes (`/_global-error`, `/_not-found`, `/contact/verstuurd` en `/manifest.webmanifest`).
   Alle andere pagina's waren al dynamisch en zijn dat gebleven; geen pagina is dynamisch geworden.
   De pagina's van Statistieken lezen al `searchParams`, dus het slot kost daar geen extra render.
-- **Nadeel:** de zeven kleine bestanden in `app/@subnav` volgen de pagina's van Statistieken; een nieuwe pagina op een dieper adres krijgt zonder route in het slot geen balk.
+- **Nadeel:** de negen kleine bestanden in `app/@subnav` (zes routes en drie lege) volgen de pagina's van Statistieken; een nieuwe pagina op een dieper adres krijgt zonder route in het slot geen balk.
   Een pagina op één niveau onder `/statistieken` valt onder `[seizoen]`, en een adres dat geen seizoen is, krijgt daar de balk naar het lopende seizoen.
   Een "niet gevonden" onder een diepere map heeft geen balk meer, waar de vaste lijst hem wel liet zien.
   Het slot en de zichtbare balk zijn los van elkaar: het slot tekent de links, `SiteNavigation` kiest uit het pad of ze getoond worden.
