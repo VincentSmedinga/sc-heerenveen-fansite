@@ -164,7 +164,7 @@ describe('the command', () => {
     const { code, lines } = await runCommand(server, past)
 
     expect(code).toBe(0)
-    expect(lines).toEqual([
+    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !line.includes(': new club '))).toEqual([
       'Matches 2025/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
     ])
     expect(pageRequests(server)).toHaveLength(3)
@@ -210,7 +210,7 @@ describe('the command', () => {
     const stored = await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))
 
     expect(code).toBe(0)
-    expect(lines).toEqual([
+    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !line.includes(': new club '))).toEqual([
       `Matches 2025/26: ${34 + stored.length} new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17`,
     ])
     expect(stored).toHaveLength(cupSeason === '2022-23' ? 4 : 3)

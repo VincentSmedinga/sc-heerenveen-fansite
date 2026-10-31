@@ -1,12 +1,15 @@
+import type { SQL } from 'drizzle-orm'
 import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 
 import { and, asc, count, desc, eq, exists, inArray, isNotNull, isNull, lte, ne, or, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
-import type { MatchPageKind, StaffRole } from './schema.ts'
+import type { Competition, MatchPageKind, StaffRole } from './schema.ts'
 
 import {
   articles,
+  clubNames,
+  clubs,
   discussions,
   items,
   matches,
@@ -30,6 +33,12 @@ export type PublicArticle = NonNullable<Awaited<ReturnType<typeof findPublishedA
 export type PublicArticleCard = NonNullable<Awaited<ReturnType<typeof findNewestArticle>>>
 
 export type PublicArticleLink = Awaited<ReturnType<typeof listPublishedArticles>>[number]
+
+export type PublicClub = NonNullable<Awaited<ReturnType<typeof findClubBySlug>>>
+
+export type PublicClubMatch = Awaited<ReturnType<typeof listClubMatches>>[number]
+
+export type PublicClubRecord = Awaited<ReturnType<typeof listClubRecords>>[number]
 
 export type PublicDiscussion = Awaited<ReturnType<typeof listNewestDiscussions>>[number]
 
@@ -85,6 +94,31 @@ export async function countPodcastEpisodes(
     .where(episodeFilter(until, slugs))
 
   return row?.total ?? 0
+}
+
+/**
+ * One club by its `slug`, the fixed name in its address, with the other names Wikipedia writes
+ * for it (`otherNames`, A to Z, without the name it has now) and the title of its article,
+ * which is null for a club the importer has not met with an article. It gives nothing for a
+ * slug that no club has.
+ */
+export async function findClubBySlug(db: Database, slug: string) {
+  const [club] = await db
+    .select({ id: clubs.id, name: clubs.name, slug: clubs.slug, wikipediaPage: clubs.wikipediaPage })
+    .from(clubs)
+    .where(eq(clubs.slug, slug))
+
+  if (club === undefined) {
+    return undefined
+  }
+
+  const others = await db
+    .select({ name: clubNames.name })
+    .from(clubNames)
+    .where(eq(clubNames.clubId, club.id))
+    .orderBy(asc(clubNames.name))
+
+  return { ...club, otherNames: others.map((other) => other.name) }
 }
 
 /**
@@ -229,6 +263,72 @@ export function listArchiveSources(db: Database, until: Date) {
       ),
     )
     .orderBy(asc(sources.name))
+}
+
+/**
+ * The matches against one club, the newest first, whether they are played or not, with what a
+ * list of results shows: the season, the competition and round, the day, the kick-off, the
+ * result from the side of sc Heerenveen, and whether it was at home. `club` is the `id` of the
+ * club (from `findClubBySlug`). With `competition` only the matches of that competition are
+ * given; without it all of them. A club with no match, or none in that competition, gives an
+ * empty list.
+ */
+export function listClubMatches(db: Database, club: number, { competition }: { competition?: Competition } = {}) {
+  return db
+    .select({
+      competition: matches.competition,
+      dateText: matches.dateText,
+      extraTime: matches.extraTime,
+      goalsAgainst: matches.goalsAgainst,
+      goalsFor: matches.goalsFor,
+      home: matches.home,
+      id: matches.id,
+      kickoffAt: matches.kickoffAt,
+      matchDate: matches.matchDate,
+      opponent: matches.opponent,
+      penaltiesAgainst: matches.penaltiesAgainst,
+      penaltiesFor: matches.penaltiesFor,
+      round: matches.round,
+      season: matches.season,
+      stadium: matches.stadium,
+      status: matches.status,
+    })
+    .from(matches)
+    .where(and(eq(matches.clubId, club), competition === undefined ? undefined : eq(matches.competition, competition)))
+    .orderBy(desc(matches.matchDate), desc(matches.kickoffAt), desc(matches.id))
+}
+
+/**
+ * The clubs sc Heerenveen has a match against, A to Z by their name, each with the record of
+ * the played matches against it: played, won, drawn, lost, and the goals for and against. A
+ * match is won, drawn or lost by the goals, as Wikipedia gives them, so a cup tie that a
+ * shoot-out decided after a level score is drawn. With `competition` only the matches of that
+ * competition count, and a club without one in it is left out; without it all of them count.
+ * A club that has matches but none played yet is in the list with zeros.
+ */
+export function listClubRecords(db: Database, { competition }: { competition?: Competition } = {}) {
+  const played = eq(matches.status, 'played')
+  const total = (condition: SQL) => sql<number>`cast(coalesce(sum(${condition}), 0) as unsigned)`.mapWith(Number)
+
+  return db
+    .select({
+      drawn: total(and(played, sql`${matches.goalsFor} = ${matches.goalsAgainst}`) as SQL),
+      goalsAgainst: sql<number>`cast(coalesce(sum(${matches.goalsAgainst}), 0) as unsigned)`.mapWith(Number),
+      goalsFor: sql<number>`cast(coalesce(sum(${matches.goalsFor}), 0) as unsigned)`.mapWith(Number),
+      id: clubs.id,
+      lost: total(and(played, sql`${matches.goalsFor} < ${matches.goalsAgainst}`) as SQL),
+      name: clubs.name,
+      played: total(played),
+      slug: clubs.slug,
+      won: total(and(played, sql`${matches.goalsFor} > ${matches.goalsAgainst}`) as SQL),
+    })
+    .from(clubs)
+    .innerJoin(
+      matches,
+      and(eq(matches.clubId, clubs.id), competition === undefined ? undefined : eq(matches.competition, competition)),
+    )
+    .groupBy(clubs.id)
+    .orderBy(asc(clubs.name), asc(clubs.id))
 }
 
 /**

@@ -5374,6 +5374,34 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de haakjes weggooien (de stand na 90 minuten gaat dan verloren en #300 moet de pagina opnieuw lezen).
   Elke onbekende vorm als fout laten staan (de import van eerdere seizoenen mislukt).
 
+### Een club is één artikel op Wikipedia, met een vaste slug voor zijn adres
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** elke tegenstander is een club in de tabel `clubs`, en elke wedstrijd verwijst ernaar met `matches.club_id`.
+  Een club is één artikel op de Nederlandse Wikipedia: `wikipedia_page` is de titel van dat artikel, en een club met twee schrijfwijzen is nog steeds één rij.
+  De andere schrijfwijzen staan in `club_names`.
+  De `slug` is de vaste naam in een adres.
+  Hij komt van de naam bij het aanmaken, zonder accenten, punten en apostrofs (`N.E.C.` geeft `nec`), met `-2` erachter als een andere club hem al heeft, en verandert nooit meer, ook niet als de naam verandert.
+  `kies` is voorbehouden, want de site gebruikt `kies` zelf in een adres, zoals `/statistieken/kies`.
+- **Waarom:** de pagina's per tegenstander (#415) hebben een adres nodig dat blijft werken.
+  Een naam is dat niet: clubs veranderen van naam, fuseren, en Wikipedia schrijft dezelfde club in de competitie en in de beker soms anders (`N.E.C.` en `NEC`).
+  Het artikel is wat Wikipedia zelf als identiteit gebruikt, zoals bij de spelers.
+- **Hoe:** de importer zoekt bij elke wedstrijd de club met het artikel dat de wedstrijd linkt, en anders de club met die naam of een van zijn andere namen, zonder verschil in hoofdletters, accenten en leestekens.
+  Vindt hij er geen, dan maakt hij een club.
+  Een naam die de club nog niet had, komt bij zijn andere namen; hoort de wedstrijd bij het nieuwste seizoen dat we van de club hebben, dan wordt het de naam van de club.
+  Elke nieuwe club en elke nieuwe naam staat in het logboek van de run, met de naam en het artikel en zonder gegevens van personen.
+  De migratie `0021_add_clubs` maakt clubs van de bestaande waarden van `opponent`, zodat elke wedstrijd direct een club heeft, en de importer vult het artikel aan bij de volgende lezing.
+  `relevance-terms.ts` blijft zoals het is: de namen voor het filter van de koppen hebben een ander doel.
+- **Twee clubs samenvoegen:** een Builder of de projecteigenaar doet dat met de hand, in één transactie: de wedstrijden en de andere namen van de club die weggaat gaan naar de club die blijft, zijn naam wordt een andere naam van die club, en dan verdwijnt zijn rij.
+  De README van `@fansite/db` heeft de vier opdrachten.
+  Er komt geen commando voor, want het komt zelden voor.
+  Een club die een eigen artikel heeft, is geen samenvoegen: één artikel is één club.
+- **Bron en licentie:** de naam van de club en de titel van het artikel komen uit de wedstrijdpagina's van de Nederlandse Wikipedia, via `/wiki/<pagina>?action=raw`, dus onder CC BY-SA 4.0 zoals de andere gegevens van Wikipedia (zie _Onze wedstrijdgegevens zijn CC BY-SA 4.0_).
+  De bronvermelding op de site verandert niet.
+- **Nadeel:** een club die Wikipedia op twee manieren linkt, zoals `Excelsior` zonder en `Excelsior Rotterdam` met een artikel, wordt twee clubs tot iemand ze samenvoegt.
+  De import raadt dat niet, net als bij de spelers met dezelfde achternaam.
+- **Alternatieven:** de naam als sleutel en slug (breekt bij elke nieuwe schrijfwijze); een tabel met alleen een lijst van namen zonder artikel (dan is een fusie of een naamswijziging niet te zien); de slug uit de huidige naam laten volgen (een adres dat verandert, breekt links); een samenvoegcommando (nu niet nodig).
+
 ### Een gestaakte wedstrijd telt niet, de latere uitslag geldt
 
 - **Datum:** 29 oktober 2026

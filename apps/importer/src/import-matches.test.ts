@@ -1,6 +1,9 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { withClubs } from '@fansite/db/clubs'
 import {
+  clubNames,
+  clubs,
   feeds,
   items,
   matches,
@@ -58,6 +61,8 @@ afterAll(async () => {
 beforeEach(async () => {
   for (const table of [
     'matches',
+    'club_names',
+    'clubs',
     'players',
     'standings',
     'wikipedia_pages',
@@ -137,6 +142,7 @@ describe('the first import, into an empty database', () => {
     const report = await importAt(server, first)
 
     expect(report).toEqual({
+      clubs: expect.any(Array),
       kind: 'imported',
       matches: { added: 35, removed: 0, unchanged: 0, updated: 0 },
       season,
@@ -144,7 +150,7 @@ describe('the first import, into an empty database', () => {
       validOn: '2026-10-24',
       warnings: [],
     })
-    expect(formatMatchReport(report)).toBe(
+    expect(formatMatchReport(report).split('\n')[0]).toBe(
       'Matches 2026/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-10-24',
     )
 
@@ -590,11 +596,175 @@ describe('the goal scorers', () => {
   })
 })
 
+describe('the clubs of the opponents', () => {
+  const clubLines = (report: Awaited<ReturnType<typeof importAt>>) =>
+    formatMatchReport(report)
+      .split('\n')
+      .filter((line) => line.includes(': new club '))
+
+  /** The club of each match, by the round and the competition. */
+  async function clubsByRound() {
+    const rows = await database.db
+      .select({
+        club: clubs.name,
+        competition: matches.competition,
+        page: clubs.wikipediaPage,
+        round: matches.round,
+        slug: clubs.slug,
+      })
+      .from(matches)
+      .innerJoin(clubs, eq(matches.clubId, clubs.id))
+
+    return new Map(rows.map((row) => [`${row.competition}|${row.round}`, row]))
+  }
+
+  it('makes a club of each opponent, with the article the match links to, and logs each one', async () => {
+    const { server } = await serve()
+    const report = await importAt(server, first)
+    const byRound = await clubsByRound()
+
+    expect(byRound.size).toBe(35)
+    expect(byRound.get('Eredivisie|Speelronde 6')).toMatchObject({
+      club: 'Telstar',
+      page: 'Telstar (voetbalclub)',
+      slug: 'telstar',
+    })
+    expect(byRound.get('Eredivisie|Speelronde 1')).toMatchObject({
+      club: 'FC Twente',
+      page: 'FC Twente',
+      slug: 'fc-twente',
+    })
+    expect(byRound.get('KNVB Beker|Eerste ronde')).toMatchObject({
+      club: 'Excelsior Maassluis',
+      slug: 'excelsior-maassluis',
+    })
+    expect(await database.db.select().from(clubs)).toHaveLength(report.kind === 'imported' ? report.clubs.length : -1)
+    expect(clubLines(report)).toContain("Matches 2026/27: new club 'Telstar' (article 'Telstar (voetbalclub)')")
+    expect(clubLines(report)).toHaveLength(18)
+  })
+
+  it('makes no club twice in a second run, and logs nothing about clubs', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await database.db.select().from(clubs)
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ clubs: [], kind: 'imported', matches: { added: 0, unchanged: 35, updated: 0 } })
+    expect(await database.db.select().from(clubs)).toEqual(before)
+    expect(await database.db.select().from(clubNames)).toEqual([])
+  })
+
+  it('makes a club without an article from the name, and gives it the article when the page links it later', async () => {
+    const unlinked = original.programme.replaceAll('[[PEC Zwolle]]', 'PEC Zwolle')
+
+    expect(unlinked).not.toBe(original.programme)
+
+    const { server } = await serve({ programme: unlinked })
+    const report = await importAt(server, first)
+
+    expect(clubLines(report)).toContain("Matches 2026/27: new club 'PEC Zwolle', with no article")
+    expect(await database.db.select().from(clubs).where(eq(clubs.name, 'PEC Zwolle'))).toMatchObject([
+      { slug: 'pec-zwolle', wikipediaPage: null },
+    ])
+
+    const { server: linked } = await serve()
+    const later = await importAt(linked, new Date(first.getTime() + hours(1)))
+
+    expect(later).toMatchObject({ clubs: ["article 'PEC Zwolle' for club 'PEC Zwolle'"], matches: { unchanged: 35 } })
+    expect(await database.db.select().from(clubs).where(eq(clubs.name, 'PEC Zwolle'))).toMatchObject([
+      { slug: 'pec-zwolle', wikipediaPage: 'PEC Zwolle' },
+    ])
+    expect(await database.db.select().from(clubs)).toHaveLength(18)
+  })
+
+  it('finds a club under another spelling that is among its other names, and makes no second club', async () => {
+    const [club] = await database.db.insert(clubs).values({ name: 'NEC Nijmegen', slug: 'nec' }).$returningId()
+
+    await database.db.insert(clubNames).values({ clubId: club!.id, name: 'N.E.C.' })
+
+    const { server } = await serve()
+    const report = await importAt(server, first)
+    const byRound = await clubsByRound()
+
+    expect(byRound.get('Eredivisie|Speelronde 11')).toMatchObject({ club: 'NEC Nijmegen', page: 'N.E.C.', slug: 'nec' })
+    expect(clubLines(report)).toHaveLength(17)
+    expect(await database.db.select().from(clubs)).toHaveLength(18)
+    expect(await database.db.select().from(clubNames)).toHaveLength(1)
+  })
+
+  it('adds a new spelling of a club with the same article to its other names, and logs it', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const renamed = original.programme.replace(
+      '[[Telstar (voetbalclub)|Telstar]]',
+      '[[Telstar (voetbalclub)|Telstar 1963]]',
+    )
+
+    expect(renamed).not.toBe(original.programme)
+
+    const { server: later } = await serve({ programme: renamed })
+    const report = await importAt(later, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ clubs: ["club 'Telstar' is now called 'Telstar 1963'"], matches: { updated: 1 } })
+    expect(await database.db.select().from(clubs).where(eq(clubs.slug, 'telstar'))).toMatchObject([
+      { name: 'Telstar 1963', wikipediaPage: 'Telstar (voetbalclub)' },
+    ])
+    expect(await database.db.select().from(clubNames)).toMatchObject([{ name: 'Telstar' }])
+    expect(await database.db.select().from(clubs)).toHaveLength(18)
+  })
+
+  it('gives a new club the next free slug when another club has the slug', async () => {
+    await database.db
+      .insert(clubs)
+      .values({ name: 'FC Twente (oud)', slug: 'fc-twente', wikipediaPage: 'FC Twente (oud)' })
+
+    const { server } = await serve()
+    const report = await importAt(server, first)
+
+    expect((await clubsByRound()).get('Eredivisie|Speelronde 1')).toMatchObject({
+      club: 'FC Twente',
+      slug: 'fc-twente-2',
+    })
+    expect(clubLines(report)).toHaveLength(18)
+  })
+
+  it('writes nothing about a club in the log when the read fails, and makes no club', async () => {
+    const { server } = await serve({ programme: 'Een kale pagina' })
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'error' })
+    expect(await database.db.select().from(clubs)).toEqual([])
+  })
+
+  it('moves a match to another club when the page links another article, and counts it as updated', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const relinked = original.programme.replace('[[AZ (voetbalclub)|AZ]]', '[[AZ (2)|AZ]]')
+
+    expect(relinked).not.toBe(original.programme)
+
+    const { server: later } = await serve({ programme: relinked })
+    const report = await importAt(later, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ matches: { unchanged: 34, updated: 1 } })
+    expect((await clubsByRound()).get('Eredivisie|Speelronde 5')).toMatchObject({
+      page: 'AZ (2)',
+      slug: 'az-2',
+    })
+  })
+})
+
 describe('the lines of a report', () => {
   it('cleans text from Wikipedia of control characters, in a warning as in an error', () => {
     const counts = { added: 0, removed: 0, unchanged: 1, updated: 1 }
     const warning = 'the result of Speelronde 1 (Eredivisie) changed\u001b[31m from x\nto y'
     const imported = formatMatchReport({
+      clubs: [],
       kind: 'imported',
       matches: counts,
       season,
@@ -763,16 +933,20 @@ describe('a read that fails a check or a page that has changed', () => {
   it('reads a cup page without templates as no cup matches, and replaces a made-up cup tie of the seed', async () => {
     const { server } = await serve({ cup: 'Het schema volgt na de loting.' })
 
-    await database.db.insert(matches).values({
-      competition: 'KNVB Beker',
-      home: false,
-      kickoffAt: first,
-      matchDate: '2026-10-25',
-      opponent: 'SV Proefdorp',
-      round: 'Tweede ronde',
-      season,
-      status: 'scheduled',
-    })
+    await database.db.insert(matches).values(
+      await withClubs(database.db, [
+        {
+          competition: 'KNVB Beker',
+          home: false,
+          kickoffAt: first,
+          matchDate: '2026-10-25',
+          opponent: 'SV Proefdorp',
+          round: 'Tweede ronde',
+          season,
+          status: 'scheduled',
+        },
+      ]),
+    )
 
     const report = await importAt(server, first)
 
@@ -864,7 +1038,7 @@ describe('seasons', () => {
     const { server } = await serve()
 
     await importAt(server, first)
-    await database.db.insert(matches).values(oldMatch)
+    await database.db.insert(matches).values(await withClubs(database.db, [oldMatch]))
     await database.db.insert(standings).values({
       club: 'sc Heerenveen',
       drawn: 5,
@@ -900,7 +1074,7 @@ describe('seasons', () => {
   })
 
   it('reads and replaces only the current season, also when an earlier season has a round with the same name', async () => {
-    await database.db.insert(matches).values(oldMatch)
+    await database.db.insert(matches).values(await withClubs(database.db, [oldMatch]))
 
     const { server } = await serve()
 
@@ -917,7 +1091,7 @@ describe('seasons', () => {
   })
 
   it('refuses a match with a result that is not played, or a played match without a result', async () => {
-    const values = { ...oldMatch }
+    const values = (await withClubs(database.db, [oldMatch]))[0]!
 
     await expect(database.db.insert(matches).values({ ...values, goalsFor: null })).rejects.toThrow()
     await expect(database.db.insert(matches).values({ ...values, status: 'scheduled' })).rejects.toThrow()
@@ -970,7 +1144,7 @@ describe('the import command', () => {
     const { code, lines } = await run(server, feed)
 
     expect(code).toBe(0)
-    expect(lines).toEqual([
+    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !line.includes(': new club '))).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       'Matches 2026/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-10-24',
     ])

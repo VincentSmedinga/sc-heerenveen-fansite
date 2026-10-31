@@ -53,6 +53,11 @@ export type ReadMatch = {
   /** The local day, or the first day when only a weekend is known: `2026-10-24`. */
   matchDate: string
   opponent: string
+  /**
+   * The article of the opponent as the match links it: `Telstar (voetbalclub)` for
+   * `[[Telstar (voetbalclub)|Telstar]]`, or null when the name has no link (`linkedPage`).
+   */
+  opponentPage: null | string
   /** The shoot-out of a cup match level after extra time, from our side. Both or neither. */
   penaltiesAgainst: null | number
   penaltiesFor: null | number
@@ -766,6 +771,7 @@ function readMatch(box: Template, competition: Competition, round: null | string
     kickoffAt,
     matchDate: day.isoDate,
     opponent,
+    opponentPage: linkedPage(home ? team2 : team1),
     penaltiesAgainst: penalties.kind === 'score' ? (home ? penalties.away : penalties.home) : null,
     penaltiesFor: penalties.kind === 'score' ? (home ? penalties.home : penalties.away) : null,
     round,

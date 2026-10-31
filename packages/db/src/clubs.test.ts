@@ -1,0 +1,271 @@
+import { eq } from 'drizzle-orm'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+
+import type { TestDatabase } from './test-database.ts'
+
+import { clubSlug, createClubBook, normaliseClubName, reservedClubSlugs, withClubs } from './clubs.ts'
+import { clubNames, clubs, matches } from './schema.ts'
+import { createTestDatabase } from './test-database.ts'
+
+describe('normaliseClubName', () => {
+  it.each([
+    ['N.E.C.', 'NEC'],
+    ['Go Ahead Eagles', 'Go-Ahead Eagles'],
+    ["Be Quick '28", 'be quick 28'],
+    ['FC Zürich', 'fc zurich'],
+  ])('takes %s and %s for the same club', (a, b) => {
+    expect(normaliseClubName(a)).toBe(normaliseClubName(b))
+  })
+
+  it('keeps two different clubs apart', () => {
+    expect(normaliseClubName('Excelsior')).not.toBe(normaliseClubName('Excelsior Rotterdam'))
+  })
+})
+
+describe('clubSlug', () => {
+  it.each([
+    ['ADO Den Haag', 'ado-den-haag'],
+    ['N.E.C.', 'nec'],
+    ["Be Quick '28", 'be-quick-28'],
+    ['Telstar (voetbalclub)', 'telstar-voetbalclub'],
+    ['VVV-Venlo', 'vvv-venlo'],
+    ['FC Zürich', 'fc-zurich'],
+    ['???', 'club'],
+  ])('writes %s as %s', (name, slug) => {
+    expect(clubSlug(name)).toBe(slug)
+  })
+
+  it('stays within 70 characters and does not end in a hyphen', () => {
+    const slug = clubSlug(`${'a'.repeat(68)} bb cc`)
+
+    expect(slug.length).toBeLessThanOrEqual(70)
+    expect(slug.endsWith('-')).toBe(false)
+  })
+
+  it('keeps `kies` in the list of slugs a club never gets', () => {
+    expect(reservedClubSlugs).toContain('kies')
+  })
+})
+
+describe('the book of clubs', () => {
+  let database: TestDatabase
+
+  beforeAll(async () => {
+    database = await createTestDatabase()
+  })
+
+  afterAll(async () => {
+    // Undefined when the server wasn't there, which beforeAll has already reported.
+    await database?.drop()
+  })
+
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM matches')
+    await database.pool.query('DELETE FROM club_names')
+    await database.pool.query('DELETE FROM clubs')
+  })
+
+  const book = () => createClubBook(database.db)
+
+  const stored = async () =>
+    (await database.db.select().from(clubs).orderBy(clubs.id)).map((club) => ({
+      name: club.name,
+      slug: club.slug,
+      wikipediaPage: club.wikipediaPage,
+    }))
+
+  it('makes a club with the article and the slug of the name, and says so', async () => {
+    const result = await (await book()).resolve({ name: 'FC Twente', page: 'FC Twente', season: '2026/27' })
+
+    expect(result.events).toEqual(["new club 'FC Twente' (article 'FC Twente')"])
+    expect(await stored()).toEqual([{ name: 'FC Twente', slug: 'fc-twente', wikipediaPage: 'FC Twente' }])
+  })
+
+  it('makes a club without an article from a name alone, and says so', async () => {
+    const result = await (await book()).resolve({ name: 'SV Proefdorp', page: null, season: '2026/27' })
+
+    expect(result.events).toEqual(["new club 'SV Proefdorp', with no article"])
+    expect(await stored()).toEqual([{ name: 'SV Proefdorp', slug: 'sv-proefdorp', wikipediaPage: null }])
+  })
+
+  it('finds the same club again, in the same book and in a new one, without a line in the log', async () => {
+    const first = await (await book()).resolve({ name: 'FC Twente', page: 'FC Twente', season: '2026/27' })
+    const again = await (await book()).resolve({ name: 'FC Twente', page: 'FC Twente', season: '2026/27' })
+    const byName = await (await book()).resolve({ name: 'fc twente', page: null, season: '2026/27' })
+
+    expect([again.id, byName.id]).toEqual([first.id, first.id])
+    expect([again.events, byName.events]).toEqual([[], []])
+    expect(await stored()).toHaveLength(1)
+  })
+
+  it('puts a spelling that is already among the other names with the club, whatever the punctuation', async () => {
+    const [club] = await database.db.insert(clubs).values({ name: 'NEC Nijmegen', slug: 'nec-nijmegen' }).$returningId()
+
+    await database.db.insert(clubNames).values({ clubId: club!.id, name: 'N.E.C. Nijmegen' })
+
+    const result = await (await book()).resolve({ name: 'NEC-Nijmegen', page: null, season: '2026/27' })
+
+    expect(result).toEqual({ events: [], id: club!.id })
+  })
+
+  it('takes two articles for two clubs with the same name, and gives the second slug a number', async () => {
+    const first = await (await book()).resolve({ name: 'Quick', page: 'Quick (Den Haag)', season: '2026/27' })
+    const second = await (await book()).resolve({ name: 'Quick', page: 'Quick (Oldenzaal)', season: '2026/27' })
+
+    expect(second.id).not.toBe(first.id)
+    expect((await stored()).map((club) => club.slug)).toEqual(['quick', 'quick-2'])
+  })
+
+  it('numbers the slug of a club whose slug is taken, and counts on', async () => {
+    const clubBook = await book()
+
+    await clubBook.resolve({ name: 'F.C. Groningen', page: 'F.C. Groningen', season: '2026/27' })
+    await clubBook.resolve({ name: 'FC Groningen', page: 'FC Groningen (2)', season: '2026/27' })
+    await clubBook.resolve({ name: 'FC-Groningen', page: 'FC Groningen (3)', season: '2026/27' })
+
+    expect((await stored()).map((club) => club.slug)).toEqual(['fc-groningen', 'fc-groningen-2', 'fc-groningen-3'])
+  })
+
+  it('never gives a club a slug the pages of the site use', async () => {
+    await (await book()).resolve({ name: 'Kies', page: null, season: '2026/27' })
+
+    expect((await stored()).map((club) => club.slug)).toEqual(['kies-2'])
+  })
+
+  it('gives the article to the club of that name when it has none yet, and says so', async () => {
+    await database.db.insert(clubs).values({ name: 'FC Twente', slug: 'fc-twente' })
+
+    const result = await (await book()).resolve({ name: 'FC Twente', page: 'FC Twente', season: '2026/27' })
+
+    expect(result.events).toEqual(["article 'FC Twente' for club 'FC Twente'"])
+    expect(await stored()).toEqual([{ name: 'FC Twente', slug: 'fc-twente', wikipediaPage: 'FC Twente' }])
+  })
+
+  it('finds a club by its article when the name differs, and adds the name as the name of a newer season', async () => {
+    await (await book()).resolve({ name: 'Telstar', page: 'Telstar (voetbalclub)', season: '2025/26' })
+
+    const result = await (
+      await book()
+    ).resolve({ name: 'Telstar 1963', page: 'Telstar (voetbalclub)', season: '2026/27' })
+
+    expect(result.events).toEqual(["club 'Telstar' is now called 'Telstar 1963'"])
+    expect(await stored()).toEqual([{ name: 'Telstar 1963', slug: 'telstar', wikipediaPage: 'Telstar (voetbalclub)' }])
+    expect((await database.db.select().from(clubNames)).map((row) => row.name)).toEqual(['Telstar'])
+  })
+
+  it('adds the name of an older season to the other names and keeps the name of the newest season', async () => {
+    const [club] = await database.db
+      .insert(clubs)
+      .values({ name: 'Telstar 1963', slug: 'telstar', wikipediaPage: 'Telstar (voetbalclub)' })
+      .$returningId()
+
+    await database.db.insert(matches).values({
+      clubId: club!.id,
+      competition: 'Eredivisie',
+      dateText: 'februari 2027',
+      home: true,
+      matchDate: '2026-10-24',
+      opponent: 'Telstar 1963',
+      round: 'Speelronde 1',
+      season: '2026/27',
+      status: 'scheduled',
+    })
+
+    const result = await (await book()).resolve({ name: 'Telstar', page: 'Telstar (voetbalclub)', season: '2025/26' })
+
+    expect(result).toEqual({ events: ["new name 'Telstar' for club 'Telstar 1963'"], id: club!.id })
+    expect((await stored())[0]).toMatchObject({ name: 'Telstar 1963' })
+    expect((await database.db.select().from(clubNames)).map((row) => row.name)).toEqual(['Telstar'])
+  })
+
+  it('does not let two spellings in one season take turns, and logs a new name once', async () => {
+    const clubBook = await book()
+
+    await clubBook.resolve({ name: 'Telstar', page: 'Telstar (voetbalclub)', season: '2026/27' })
+
+    const first = await clubBook.resolve({ name: 'Telstar 1963', page: 'Telstar (voetbalclub)', season: '2026/27' })
+    const second = await clubBook.resolve({ name: 'Telstar', page: 'Telstar (voetbalclub)', season: '2026/27' })
+    const third = await (
+      await book()
+    ).resolve({ name: 'Telstar 1963', page: 'Telstar (voetbalclub)', season: '2026/27' })
+
+    expect(first.events).toHaveLength(1)
+    expect([second.events, third.events]).toEqual([[], []])
+    expect((await stored())[0]).toMatchObject({ name: 'Telstar 1963' })
+  })
+
+  it('makes a second club when a name with another article is taken by a club that has an article', async () => {
+    await database.db.insert(clubs).values({ name: 'Excelsior', slug: 'excelsior', wikipediaPage: 'Excelsior' })
+
+    const result = await (
+      await book()
+    ).resolve({
+      name: 'Excelsior',
+      page: 'Excelsior Rotterdam',
+      season: '2026/27',
+    })
+
+    // The article is not known, and the name is that of a club with another article.
+    expect(result.events).toEqual(["new club 'Excelsior' (article 'Excelsior Rotterdam')"])
+
+    const other = await (await book()).resolve({ name: 'Excelsior', page: 'Excelsior Rotterdam', season: '2026/27' })
+
+    expect(other.events).toEqual([])
+    expect((await stored()).map((club) => club.slug)).toEqual(['excelsior', 'excelsior-2'])
+
+    const named = await (await book()).resolve({ name: 'Excelsior', page: 'Excelsior Maassluis', season: '2026/27' })
+
+    expect(named.events).toEqual(["new club 'Excelsior' (article 'Excelsior Maassluis')"])
+  })
+
+  it('does not take a name from another club', async () => {
+    const [one] = await database.db
+      .insert(clubs)
+      .values({ name: 'Excelsior', slug: 'excelsior', wikipediaPage: 'A' })
+      .$returningId()
+    const [two] = await database.db
+      .insert(clubs)
+      .values({ name: 'Quick', slug: 'quick', wikipediaPage: 'B' })
+      .$returningId()
+
+    // The article B is club two, but the name belongs to club one.
+    const result = await (await book()).resolve({ name: 'Excelsior', page: 'B', season: '2026/27' })
+
+    expect(result).toEqual({
+      events: ["name 'Excelsior' stays with club 'Excelsior', not added to club 'Quick'"],
+      id: two!.id,
+    })
+    expect(await database.db.select().from(clubNames)).toEqual([])
+    expect(one!.id).not.toBe(two!.id)
+  })
+
+  it('has the clubs of a made-up match found by name, and the same club for the same opponent', async () => {
+    const rows = await withClubs(database.db, [
+      {
+        competition: 'Eredivisie',
+        dateText: 'x',
+        home: true,
+        matchDate: '2026-10-24',
+        opponent: 'FC Maquette',
+        round: 'a',
+        season: '2026/27',
+        status: 'scheduled',
+      },
+      {
+        competition: 'Eredivisie',
+        dateText: 'x',
+        home: false,
+        matchDate: '2026-10-31',
+        opponent: 'FC Maquette',
+        round: 'b',
+        season: '2026/27',
+        status: 'scheduled',
+      },
+    ])
+
+    expect(rows[0]!.clubId).toBe(rows[1]!.clubId)
+    expect(await database.db.select().from(clubs).where(eq(clubs.id, rows[0]!.clubId))).toMatchObject([
+      { name: 'FC Maquette', slug: 'fc-maquette' },
+    ])
+  })
+})

@@ -1,6 +1,7 @@
 import type { FeedFilter, SourceKind } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { withClubs } from '@fansite/db/clubs'
 import { listRecentItems } from '@fansite/db/queries'
 import { adminUsers, feeds, importResults, items, matches, sources } from '@fansite/db/schema'
 import { seedSources } from '@fansite/db/seed'
@@ -545,16 +546,20 @@ describe('the relevance filter and the matches of the season', () => {
 
   /** A match against the opponent, on a day in Dutch time. */
   async function addMatch(opponent: string, matchDate: string, season = '2026/27', round = 'Speelronde 1') {
-    await database.db.insert(matches).values({
-      competition: 'Eredivisie',
-      home: true,
-      kickoffAt: new Date(`${matchDate}T18:45:00Z`),
-      matchDate,
-      opponent,
-      round,
-      season,
-      status: 'scheduled',
-    })
+    await database.db.insert(matches).values(
+      await withClubs(database.db, [
+        {
+          competition: 'Eredivisie',
+          home: true,
+          kickoffAt: new Date(`${matchDate}T18:45:00Z`),
+          matchDate,
+          opponent,
+          round,
+          season,
+          status: 'scheduled',
+        },
+      ]),
+    )
   }
 
   const feedAbout = () =>
