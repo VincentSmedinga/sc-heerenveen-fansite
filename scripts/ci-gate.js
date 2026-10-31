@@ -7,7 +7,7 @@
 //
 // The rules:
 // 1. Every job must have succeeded, except the two that scripts/ci-changes.js can switch off:
-//    "stories" and the jobs of the site ("smoke" and "e2e").
+//    "stories" and "site" (the smoke test and the e2e tests).
 // 2. Those must have succeeded when ci-changes.js said to run them (its output is not "false",
 //    so a missing output runs them too), and must have been skipped when it said not to.
 // 3. A result we don't know, such as "cancelled" or a job that isn't there, is a failure.
@@ -19,8 +19,7 @@ import { realpathSync } from 'node:fs'
 export const always = ['changes', 'lint', 'test', 'build']
 export const decided = [
   { job: 'stories', output: 'stories' },
-  { job: 'smoke', output: 'site' },
-  { job: 'e2e', output: 'site' },
+  { job: 'site', output: 'site' },
 ]
 
 /**

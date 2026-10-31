@@ -178,7 +178,7 @@ test('the workflow switches only the checks of the site and the stories with ci-
       .filter(([, job]) => new RegExp(`^ {4}if: needs\\.changes\\.outputs\\.${output} != 'false'$`, 'm').test(job))
       .map(([id]) => id)
 
-  assert.deepEqual(switched('site'), ['smoke', 'e2e'])
+  assert.deepEqual(switched('site'), ['site'])
   assert.deepEqual(switched('stories'), ['stories'])
   assert.match(jobs.changes, /run: node scripts\/ci-changes\.js/)
   assert.match(jobs.changes, /site: \$\{\{ steps\.changes\.outputs\.site \}\}/)
@@ -219,10 +219,12 @@ test('the last job has the name the rules for main require and waits for every o
 
 test('the e2e tests run in parts that together hold every test, and each part is checked', () => {
   const { jobs } = workflowJobs()
-  const parts = [...jobs.e2e.matchAll(/^ {10}- args: (.+)\n {12}part: (.+)$/gm)].map(([, args, part]) => ({
-    args,
-    part,
-  }))
+  const parts = [...jobs.site.matchAll(/^ {10}- args: (.+)\n {12}part: (.+?)(?:\n {12}smoke: true)?$/gm)].map(
+    ([, args, part]) => ({
+      args,
+      part,
+    }),
+  )
   const shards = parts.filter(({ args }) => args.includes('--shard='))
   const total = Number(/--shard=1\/(\d+)/.exec(shards[0]?.args ?? '')?.[1])
 
@@ -234,9 +236,10 @@ test('the e2e tests run in parts that together hold every test, and each part is
   )
   assert.deepEqual(
     parts.filter(({ args }) => !args.includes('--shard=')),
-    [{ args: '--project=chromium-writing --no-deps', part: 'writing' }],
+    [{ args: '--project=chromium-writing --no-deps', part: 'writing and the host' }],
   )
-  assert.doesNotMatch(jobs.e2e, /\s--retries/)
+  assert.match(jobs.site, /smoke: true/)
+  assert.doesNotMatch(jobs.site, /\s--retries/)
   // A part that ran nothing is green in Playwright. The report must show tests that passed.
-  assert.match(jobs.e2e, /node scripts\/ci-e2e-report\.js "\$PLAYWRIGHT_JSON_OUTPUT_NAME"/)
+  assert.match(jobs.site, /node scripts\/ci-e2e-report\.js "\$PLAYWRIGHT_JSON_OUTPUT_NAME"/)
 })
