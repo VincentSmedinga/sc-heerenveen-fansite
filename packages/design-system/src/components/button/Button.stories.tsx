@@ -2,6 +2,7 @@ import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card, cardSurfaces } from '../card/Card'
+import { sizes } from '../size'
 import { Button, buttonAppearances, buttonIcons, buttonTypes } from './Button'
 
 // The type of the props as the table of controls shows it: the compiler gives `unknown[number]`
@@ -21,6 +22,12 @@ const meta = preview.meta({
       description: 'Een pictogram vóór de tekst.',
       options: buttonIcons,
       table: union(buttonIcons),
+    },
+    size: {
+      control: 'radio',
+      description: 'De maat van de knop.',
+      options: sizes,
+      table: union(sizes),
     },
     type: {
       control: 'radio',
@@ -55,6 +62,8 @@ const meta = preview.meta({
           'Een knop heet voor een schermlezer zijn tekst alleen: het pictogram is verborgen.',
           'Het pictogram heeft de kleur van de tekst, ook onder de muis, en blijft bij het eerste woord als de tekst afbreekt.',
           'Gebruik het niet op elke knop: alleen waar het iets zegt. Inloggen, Uitloggen en de knoppen van het beheer hebben er geen.',
+          '',
+          'Met `size` kies je de maat. `small` is een lagere knop voor een secundair bedieningselement naast de inhoud; in het hoofdstuk Maten van knoppen en velden staat wanneer je welke kiest.',
           '',
           'Zet niet twee gevulde knoppen naast elkaar: dan weet niemand welke de hoofdactie is.',
           'De zachte knop is even groot en even goed te raken als de gevulde. Zijn rand zorgt dat hij op elke kaart te zien is.',
@@ -159,3 +168,18 @@ export const HoverDark = meta.story({
   parameters: hoverParameters,
   render: renderHover,
 })
+
+const small = () => (
+  <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '1rem', maxInlineSize: '40rem' }}>
+    <Button size="small" type="button">
+      Versturen
+    </Button>
+    <Button appearance="soft" icon="plus" size="small" type="button">
+      Laad 5 meer
+    </Button>
+  </div>
+)
+
+export const SmallLight = meta.story({ globals: { theme: 'light' }, name: 'Kleine maat, licht', render: small })
+
+export const SmallDark = meta.story({ globals: { theme: 'dark' }, name: 'Kleine maat, donker', render: small })

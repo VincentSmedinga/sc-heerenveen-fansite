@@ -2,6 +2,7 @@ import { seasonOf } from '@fansite/db/season'
 import { notFound, redirect } from 'next/navigation'
 import { cache } from 'react'
 
+import { competitionParam, competitionQuery, parseCompetition } from './competition'
 import { reasonOf } from './errors'
 import { getMatchData, getMatchSeasons } from './matches'
 import { pickedAddress, seasonFromSlug } from './seasons'
@@ -62,9 +63,19 @@ export const pickerPathOf = (path: string) => `${path}/kies`
  * season. A value that isn't a season, one that is given twice and a season without matches go
  * back to the base address, and so does a database that can't be read: the page itself shows
  * what is wrong. The address is relative, so it keeps the host the visitor came to.
+ *
+ * A page that has a choice of competition (`keepCompetition`) gets the choice of the visitor
+ * back in the address it is sent to: `?competitie=eredivisie` stays, and anything else, such as
+ * a value that is not known or one given twice, is left out, so the picker never sends a
+ * visitor to the page "niet gevonden".
  */
-export async function pickedSeasonResponse(request: Request, path: string) {
-  const values = new URL(request.url).searchParams.getAll('seizoen')
+export async function pickedSeasonResponse(
+  request: Request,
+  path: string,
+  { keepCompetition = false }: { keepCompetition?: boolean } = {},
+) {
+  const { searchParams } = new URL(request.url)
+  const values = searchParams.getAll('seizoen')
   let seasons: string[] = []
 
   try {
@@ -77,8 +88,13 @@ export async function pickedSeasonResponse(request: Request, path: string) {
     current: seasonOf(new Date()),
     seasons,
   })
+  const choices = searchParams.getAll(competitionParam)
+  const competition = keepCompetition && choices.length === 1 ? parseCompetition(choices[0]) : undefined
 
-  return new Response(null, { headers: { Location: address }, status: 303 })
+  return new Response(null, {
+    headers: { Location: `${address}${competition === undefined ? '' : competitionQuery(competition)}` },
+    status: 303,
+  })
 }
 
 /**

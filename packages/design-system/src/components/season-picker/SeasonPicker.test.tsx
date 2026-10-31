@@ -73,6 +73,29 @@ describe('SeasonPicker', () => {
     expect(sent).toHaveBeenCalledWith('2024-25')
   })
 
+  it('sends the fields it is given along with the season, as hidden fields', () => {
+    render(
+      <SeasonPicker
+        action="/statistieken/kies"
+        fields={{ competitie: 'eredivisie' }}
+        options={options}
+        value="2026-27"
+      />,
+    )
+
+    const field = document.querySelector<HTMLInputElement>('form input[type="hidden"]')
+
+    expect(field?.name).toBe('competitie')
+    expect(field?.value).toBe('eredivisie')
+    expect(document.querySelectorAll('form input[type="hidden"]')).toHaveLength(1)
+  })
+
+  it('has no hidden fields unless it is given some', () => {
+    setup()
+
+    expect(document.querySelector('form input[type="hidden"]')).toBeNull()
+  })
+
   it('renders nothing when there is one season or none, because there is nothing to choose', () => {
     const { container, rerender } = render(
       <SeasonPicker action="/wedstrijden/kies" options={options.slice(0, 1)} value="2026-27" />,

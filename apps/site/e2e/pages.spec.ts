@@ -56,6 +56,17 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/statistieken/spelers/kies', status: 200 },
   { path: '/statistieken/spelers/2099-00', status: 404 },
   { path: '/statistieken/spelers/onzin', status: 404 },
+  // The choice between all the matches and the Eredivisie, on both pages: `eredivisie` is the
+  // only value, and anything else or the same twice says "niet gevonden". The route behind the
+  // season picker keeps the choice, and drops a value it does not know.
+  { path: '/statistieken?competitie=eredivisie', status: 200 },
+  { path: `/statistieken/${earlierSeasonSlug()}?competitie=eredivisie`, status: 200 },
+  { path: '/statistieken?competitie=onzin', status: 404 },
+  { path: '/statistieken?competitie=eredivisie&competitie=eredivisie', status: 404 },
+  { path: `/statistieken/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
+  { path: '/statistieken/spelers?competitie=eredivisie', status: 200 },
+  { path: '/statistieken/spelers?competitie=onzin', status: 404 },
+  { path: `/statistieken/spelers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
   // The podcasts: all, one (with the card about it), both (which is all), the second page, and
   // the addresses that say "niet gevonden": an unknown podcast, a podcast given twice and a
   // page that is wrong.

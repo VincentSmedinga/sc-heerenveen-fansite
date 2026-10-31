@@ -13,11 +13,17 @@
     margin-block-start: var(--hf-space-m);
   }
 
-  /* The target is at least 44 pixels high, more than the 24 that WCAG asks for. */
+  /* The target is at least 44 pixels high (36 in the small size), above the 24 of WCAG. */
   .hf-pagination-link {
     align-items: center;
     display: inline-flex;
     min-block-size: 2.75rem;
+  }
+
+  /* The small size: the links are lower and have the size of the text between them. */
+  .hf-pagination.hf-size-small .hf-pagination-link {
+    font-size: var(--hf-meta-font-size);
+    min-block-size: var(--hf-size-control-small);
   }
 
   .hf-pagination-previous {

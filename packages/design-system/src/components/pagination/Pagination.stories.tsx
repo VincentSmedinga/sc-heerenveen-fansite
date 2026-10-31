@@ -18,7 +18,7 @@ const meta = preview.meta({
           '',
           '"Vorige" en "Volgende" zijn woorden en niet alleen pijlen.',
           'Elke link is een adres, dus de paginering werkt zonder JavaScript.',
-          'De links zijn 44 pixels hoog.',
+          'De links zijn hoog genoeg om met een vinger te raken; met `size="small"` zijn ze lager, voor een plek naast andere inhoud.',
           'Op een smal scherm staat de tekst boven de links.',
         ].join('\n'),
       },
@@ -66,3 +66,18 @@ export const NarrowDark = meta.story({
   name: 'Bij 320 pixels, donker',
   render: middle,
 })
+
+const small = () => (
+  <Pagination
+    current={5}
+    label="Pagina's"
+    nextHref="/podcasts?pagina=6"
+    previousHref="/podcasts?pagina=4"
+    size="small"
+    total={9}
+  />
+)
+
+export const SmallLight = meta.story({ globals: { theme: 'light' }, name: 'Kleine maat, licht', render: small })
+
+export const SmallDark = meta.story({ globals: { theme: 'dark' }, name: 'Kleine maat, donker', render: small })

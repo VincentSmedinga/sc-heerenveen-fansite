@@ -14,6 +14,7 @@ import {
 import { seasonOf } from '@fansite/db/season'
 
 import { cacheFor, cacheForKey } from './cache'
+import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
 import { lastDayOf } from './match-format'
@@ -21,6 +22,30 @@ import { type NameParts, pageTitleName, splitPageName, splitPlayerName, surnameO
 
 /** The name of our own club in the table. */
 const ourClub = 'sc Heerenveen'
+
+/** Whether a match counts for the choice: the league alone, or the league and the cup. */
+const countsFor = (match: PublicMatch, choice: CompetitionChoice) =>
+  choice === 'all' || match.competition === 'Eredivisie'
+
+/** Whether a match is a cup tie that was played and has a score, so one the choice can add. */
+const isPlayedCupMatch = (match: PublicMatch) =>
+  match.competition !== 'Eredivisie' &&
+  match.status === 'played' &&
+  match.goalsFor !== null &&
+  match.goalsAgainst !== null
+
+/**
+ * Whether the season has a cup tie that was played, so whether there is anything to choose:
+ * without one, the two choices count the same matches and the page has no switch.
+ */
+export const hasPlayedCupMatch = (matches: PublicMatch[]) => matches.some(isPlayedCupMatch)
+
+/**
+ * The competitions a card counts, as the captions of the cards name them: the cup is in only
+ * when the choice is `all` and a cup tie was played, because then it is in the numbers.
+ */
+export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoice) =>
+  choice === 'all' && hasPlayedCupMatch(matches) ? 'de Eredivisie en de KNVB Beker' : 'de Eredivisie'
 
 export type MatchData = {
   /** The head coaches of the season, in the order their periods began. */
@@ -130,14 +155,18 @@ export type TopScorer = NameParts & {
 }
 
 /**
- * The matches of the season in which sc Heerenveen conceded no goal, in the league and the cup,
- * the newest first, and how many matches were played. A match counts on the result of the
- * match, so after extra time on the score after it; a shoot-out is kept apart and never
- * decides this. A match that isn't played, or has no result, counts for neither.
+ * The matches of the season in which sc Heerenveen conceded no goal, the newest first, and how
+ * many matches were played. `choice` says whether the cup counts (`all`, the default) or the
+ * league alone. A match counts on the result of the match, so after extra time on the score
+ * after it; a shoot-out is kept apart and never decides this. A match that isn't played, or has
+ * no result, counts for neither.
  */
-export function cleanSheetsOf(matches: PublicMatch[]): CleanSheets {
+export function cleanSheetsOf(matches: PublicMatch[], choice: CompetitionChoice = 'all'): CleanSheets {
   const played = matches
-    .filter((match) => match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null)
+    .filter(
+      (match) =>
+        countsFor(match, choice) && match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null,
+    )
     .reverse()
 
   return { matches: played.filter((match) => match.goalsAgainst === 0), played: played.length }
@@ -166,17 +195,18 @@ export async function getMatchSeasons(): Promise<string[]> {
  * not always the round. The Eredivisie has no extra time or shoot-out, so the score decides.
  */
 export function leagueResultsOf(matches: PublicMatch[]): FormResult[] {
-  return leagueMatchesOf(matches).map(resultOf)
+  return playedMatchesOf(matches, 'league').map(resultOf)
 }
 
-/** The matches of the Eredivisie that are played and have a score, in the order given. */
-function leagueMatchesOf(matches: PublicMatch[]): LeagueMatch[] {
+/**
+ * The matches that are played and have a score, in the order given: those of the Eredivisie
+ * for the choice `league`, and those of the cup as well for `all`. The score is the one after
+ * extra time, and a shoot-out is not in it, so a cup tie that a shoot-out decided is a draw.
+ */
+function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoice): LeagueMatch[] {
   return matches.filter(
     (match): match is LeagueMatch =>
-      match.competition === 'Eredivisie' &&
-      match.status === 'played' &&
-      match.goalsFor !== null &&
-      match.goalsAgainst !== null,
+      countsFor(match, choice) && match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null,
   )
 }
 
@@ -198,15 +228,16 @@ const streakConditions: { counts: (match: LeagueMatch) => boolean; label: string
 ]
 
 /**
- * The streaks of sc Heerenveen in the Eredivisie: six conditions (unbeaten, won, without a win,
- * lost, scored, no goal against), each with the number of matches in a row as it stands now and
- * the longest of the season, and the latest five matches. They come from the score, so from
- * every played match of the league, also the ones whose scorers are not known. A cup tie, a
- * match without a score and a match that isn't played count for nothing. A match that was
- * postponed stands where it was played (see `leagueResultsOf`).
+ * The streaks of sc Heerenveen in the Eredivisie, and in the cup for the choice `all`: six
+ * conditions (unbeaten, won, without a win, lost, scored, no goal against), each with the
+ * number of matches in a row as it stands now and the longest of the season, and the latest
+ * five matches. They come from the score, so from every played match, also the ones whose
+ * scorers are not known. With the choice `league` (the default here) a cup tie counts for
+ * nothing. A match without a score and a match that isn't played count for nothing. A match
+ * that was postponed stands where it was played (see `leagueResultsOf`).
  */
-export function streaksOf(matches: PublicMatch[]): Streaks {
-  const played = leagueMatchesOf(matches)
+export function streaksOf(matches: PublicMatch[], choice: CompetitionChoice = 'league'): Streaks {
+  const played = playedMatchesOf(matches, choice)
 
   return {
     last: played.slice(-lastCount).map((match) => ({ match, result: resultOf(match) })),
@@ -248,7 +279,7 @@ export type Extremes = {
   latestGoal: ExtremeGoal | undefined
   /** The match with the most goals of both clubs together. */
   mostGoals: PublicMatch | undefined
-  /** The played matches of the Eredivisie, with a score. */
+  /** The played matches with a score that the choice counts. */
   played: number
 }
 
@@ -280,11 +311,16 @@ export type GoalsPerQuarter = {
 export type HomeAway = {
   away: HomeAwayTally
   home: HomeAwayTally
+  /**
+   * Whether every counted match is a match of the Eredivisie. Only then are the points the
+   * points of the table: a cup tie gives none.
+   */
+  leagueOnly: boolean
   /** The home and away matches together, which is what the card of the season counts. */
   total: HomeAwayTally
 }
 
-/** What sc Heerenveen did at home, away or in both, in the played matches of the Eredivisie. */
+/** What sc Heerenveen did at home, away or in both, in the played matches that are counted. */
 export type HomeAwayTally = {
   /** The matches with no goal against. */
   cleanSheets: number
@@ -368,16 +404,11 @@ type MatchWithGoals = PublicMatch & { goalsAgainst: number; goalsFor: number }
  * own goal of an opponent is a goal of ours, because `ours` says who profits. When two matches
  * are level, the one played last wins, as the matches are in the order they were played; of two
  * goals at the same minute, the later one in the list. A win needs a difference in our favour,
- * and a loss one against us, so a season of draws has neither. The cup is left out.
+ * and a loss one against us, so a season of draws has neither. The cup is left out, unless the
+ * choice is `all`: then a cup tie counts on its score after extra time.
  */
-export function extremesOf(matches: PublicMatch[]): Extremes {
-  const played = matches.filter(
-    (match) =>
-      match.competition === 'Eredivisie' &&
-      match.status === 'played' &&
-      match.goalsFor !== null &&
-      match.goalsAgainst !== null,
-  )
+export function extremesOf(matches: PublicMatch[], choice: CompetitionChoice = 'league'): Extremes {
+  const played = playedMatchesOf(matches, choice)
   const known = played.filter(hasKnownGoals)
   const difference = (match: PublicMatch) => (match.goalsFor ?? 0) - (match.goalsAgainst ?? 0)
   const total = (match: PublicMatch) => (match.goalsFor ?? 0) + (match.goalsAgainst ?? 0)
@@ -403,16 +434,17 @@ export function extremesOf(matches: PublicMatch[]): Extremes {
 
 /**
  * The goals of sc Heerenveen and of its opponents per quarter of an hour, in the played matches
- * of the season whose goals are known, in the league and the cup. A goal in stoppage time
- * counts in the quarter before it: 45+1 is minute 45 and 90+3 is minute 90. A goal after minute
- * 90 is in extra time and is left out, and so is a minute that can't be played (0). A goal
- * counts for the club that profits, as `ours` says, so an own goal is a goal of the other club.
- * A match counts when it has at least one goal, or when it ended 0-0: a match with a score and
- * no goals is one where the page named no scorers, or where they did not fit the result, and it
- * is left out. A match that is not played, or has no score, is left out too.
+ * of the season whose goals are known, in the league and, for the choice `all`, the cup. A goal
+ * in stoppage time counts in the quarter before it: 45+1 is minute 45 and 90+3 is minute 90. A
+ * goal after minute 90 is in extra time and is left out, and so is a minute that can't be
+ * played (0). A goal counts for the club that profits, as `ours` says, so an own goal is a goal
+ * of the other club. A match counts when it has at least one goal, or when it ended 0-0: a
+ * match with a score and no goals is one where the page named no scorers, or where they did not
+ * fit the result, and it is left out. A match that is not played, or has no score, is left out
+ * too.
  */
-export function goalsPerQuarter(matches: PublicMatch[]): GoalsPerQuarter {
-  const played = matches.filter((match) => match.status === 'played')
+export function goalsPerQuarter(matches: PublicMatch[], choice: CompetitionChoice = 'all'): GoalsPerQuarter {
+  const played = matches.filter((match) => countsFor(match, choice) && match.status === 'played')
   const known = played.filter(hasKnownGoals)
   const scored = quarterLabels.map(() => 0)
   const conceded = quarterLabels.map(() => 0)
@@ -490,19 +522,15 @@ export function goalsWithInitials(goals: ScorerGoal[]): ScorerGoal[] {
 }
 
 /**
- * The played matches of the Eredivisie with a score, counted for home, away and both. Every
+ * The played matches with a score, counted for home, away and both: those of the Eredivisie
+ * for the choice `league` (the default here), and those of the cup as well for `all`. Every
  * number comes from the score, not from the goals per player, so each played match counts. A
- * cup tie, a match that isn't played and a match with no score count for nothing. The points
- * are those of the card of the season: 3 for a win, 1 for a draw.
+ * match that isn't played and a match with no score count for nothing. The points are those of
+ * the card of the season: 3 for a win, 1 for a draw. The cup gives no points, so `leagueOnly`
+ * says whether they are the points of the table.
  */
-export function homeAwayOf(matches: PublicMatch[]): HomeAway {
-  const played = matches.filter(
-    (match) =>
-      match.competition === 'Eredivisie' &&
-      match.status === 'played' &&
-      match.goalsFor !== null &&
-      match.goalsAgainst !== null,
-  )
+export function homeAwayOf(matches: PublicMatch[], choice: CompetitionChoice = 'league'): HomeAway {
+  const played = playedMatchesOf(matches, choice)
   const tally = (selection: PublicMatch[]): HomeAwayTally => {
     const won = selection.filter((match) => (match.goalsFor ?? 0) > (match.goalsAgainst ?? 0)).length
     const drawn = selection.filter((match) => match.goalsFor === match.goalsAgainst).length
@@ -526,6 +554,7 @@ export function homeAwayOf(matches: PublicMatch[]): HomeAway {
   return {
     away: tally(played.filter((match) => !match.home)),
     home: tally(played.filter((match) => match.home)),
+    leagueOnly: played.every((match) => match.competition === 'Eredivisie'),
     total: tally(played),
   }
 }
@@ -744,8 +773,11 @@ export function parseCleanSheetCount(value: string | string[] | undefined) {
  * leaves them out when they don't fit the result). A match we didn't score in has nothing to
  * miss, so it is complete.
  */
-export function scorersCoverage(matches: PublicMatch[]): { known: number; played: number } {
-  const played = matches.filter((match) => match.status === 'played')
+export function scorersCoverage(
+  matches: PublicMatch[],
+  choice: CompetitionChoice = 'all',
+): { known: number; played: number } {
+  const played = matches.filter((match) => countsFor(match, choice) && match.status === 'played')
   const missing = played.filter((match) => match.goalsFor !== 0 && match.goals.length === 0)
 
   return { known: played.length - missing.length, played: played.length }
@@ -766,7 +798,8 @@ export function standingsAround(rows: PublicStandingsRow[]): PublicStandingsRow[
 }
 
 /**
- * The goals of sc Heerenveen per player in the matches of a season, for everybody who scored,
+ * The goals of sc Heerenveen per player in the matches of a season (the Eredivisie and the cup,
+ * or the Eredivisie alone for the choice `league`), for everybody who scored,
  * from the most goals down and from A to Z on the surname when level. Level players share a
  * place (1, 2, 2, 4). A penalty counts. An own goal does not: with `ours` it is the goal of an
  * opponent who scored for us by mistake, and without `ours` it is a player of ours who scored
@@ -780,9 +813,12 @@ export function standingsAround(rows: PublicStandingsRow[]): PublicStandingsRow[
  * goal with the same page. Without a page it counts for its name as the match page shows it,
  * as a row of its own, so no goal is lost.
  */
-export function topScorersOf(matches: PublicMatch[]): TopScorer[] {
+export function topScorersOf(matches: PublicMatch[], choice: CompetitionChoice = 'all'): TopScorer[] {
   const scorers = new Map<string, Omit<TopScorer, 'position'>>()
-  const goals = matches.flatMap((match) => match.goals).filter((goal) => goal.ours && !goal.ownGoal)
+  const goals = matches
+    .filter((match) => countsFor(match, choice))
+    .flatMap((match) => match.goals)
+    .filter((goal) => goal.ours && !goal.ownGoal)
   const linked = new Map<string, ScorerGoal>()
 
   for (const goal of goals) {

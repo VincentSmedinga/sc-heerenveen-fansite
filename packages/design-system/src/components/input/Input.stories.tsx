@@ -19,6 +19,7 @@ const meta = preview.meta({
           'De browser kan het dan invullen, en niemand hoeft iets twee keer te typen.',
           '',
           'Het veld is hoog genoeg om met een vinger te raken, en zijn rand is goed te zien tegen de achtergrond.',
+          'Met `size="small"` is het veld lager, voor een veld naast de inhoud; in het hoofdstuk Maten van knoppen en velden staat wanneer je welke maat kiest.',
           'Heeft het veld een fout (`aria-invalid`), dan is de rand dikker en heeft hij de kleur van fouten.',
           '`Field` zet dat attribuut; de foutmelding zelf staat in tekst.',
         ].join('\n'),
@@ -46,3 +47,13 @@ const render = () => (
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
+
+const small = () => (
+  <Field id="zoeken" label="Zoeken">
+    <Input name="zoeken" size="small" type="search" />
+  </Field>
+)
+
+export const SmallLight = meta.story({ globals: { theme: 'light' }, name: 'Kleine maat, licht', render: small })
+
+export const SmallDark = meta.story({ globals: { theme: 'dark' }, name: 'Kleine maat, donker', render: small })

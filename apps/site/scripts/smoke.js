@@ -738,6 +738,28 @@ await withEmptyDatabase((database) =>
         '#uitersten',
       ],
     )
+    // The seed has played cup ties, so the page has the switch between all the matches and the
+    // Eredivisie, with all the matches chosen. The choice is in the address of the other link.
+    assert.match(
+      statisticsHtml,
+      /<div aria-label="Welke wedstrijden" class="hf-segmented-control" role="group"><a aria-current="page" href="\/statistieken">Alle wedstrijden<\/a><a href="\/statistieken\?competitie=eredivisie">Eredivisie<\/a><\/div>/,
+    )
+    const leagueResponse = await fetch(`${origin}/statistieken?competitie=eredivisie`)
+    const leagueHtml = await leagueResponse.text()
+    assert.equal(leagueResponse.status, 200)
+    assert.match(
+      leagueHtml,
+      /<a href="\/statistieken">Alle wedstrijden<\/a><a aria-current="page" href="\/statistieken\?competitie=eredivisie">Eredivisie<\/a>/,
+    )
+    assert.equal((await fetch(`${origin}/statistieken?competitie=onzin`)).status, 404)
+    // The cup gives no points: all the matches have no rows with points and the Eredivisie has
+    // them, and the Eredivisie names itself alone in the streaks.
+    assert.doesNotMatch(statisticsHtml, /<th scope="row">Punten<\/th>/)
+    assert.match(leagueHtml, /<th scope="row">Punten<\/th>/)
+    assert.match(
+      leagueHtml,
+      /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie dit seizoen<\/caption>/,
+    )
     // The card with our place in the league: a table of five measures, after the table.
     assert.match(
       statisticsHtml,
@@ -760,7 +782,7 @@ await withEmptyDatabase((database) =>
     assert.match(statisticsHtml, /<h2[^>]*id="reeksen">.*?href="#reeksen">Reeks/s)
     assert.match(
       statisticsHtml,
-      /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie dit seizoen<\/caption>/,
+      /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie en de KNVB Beker dit seizoen<\/caption>/,
     )
     assert.match(statisticsHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
     assert.match(statisticsHtml, /Gebaseerd op (?:alle \d+|1) gespeelde wedstrijd/)

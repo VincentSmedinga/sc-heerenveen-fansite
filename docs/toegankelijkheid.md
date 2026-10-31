@@ -83,6 +83,9 @@ Zo test je het: bekijk de lijst met koppen in de toegankelijkheidsboom van je br
 - [ ] Een link gaat naar een andere plek, een knop doet iets op de pagina.
 - [ ] Wat je kunt aanklikken, is minstens 24 bij 24 pixels, of heeft genoeg ruimte eromheen (2.5.8).
       Velden en knoppen van het designsysteem zijn 44 pixels hoog.
+      Met `size="small"` zijn ze 36 pixels hoog, voor een secundair bedieningselement naast de inhoud, zoals een kiezer of een schakelaar in een zijkolom of een werkbalk.
+      Dat mag, want 36 pixels haalt de 24 bij 24 pixels van 2.5.8 ruim, en de kleine maat houdt dezelfde zichtbare focus en hetzelfde toetsenbord.
+      Formulieren, de hoofdhandeling op een telefoon en wat alleen staat houden de standaardmaat; Storybook zegt het in het hoofdstuk Maten van knoppen en velden.
 
 Zo test je het: tab door de pagina met een schermlezer aan, of bekijk de naam van elk element in de toegankelijkheidsboom.
 
@@ -172,7 +175,7 @@ Gebruik wat er is, in plaats van het opnieuw te bouwen (#19):
 - [Tokens/Kleur](https://ds.heerenveen.org/?path=/docs/tokens-kleur--documentatie): elk kleurpaar met zijn contrast, in licht en donker.
 - [HTML-elementen/Koppen](https://ds.heerenveen.org/?path=/docs/html-elementen-koppen--documentatie): de stijl van een kop staat los van het niveau.
 - [HTML-elementen/Links](https://ds.heerenveen.org/?path=/docs/html-elementen-links--documentatie): onderstreepte links, met hover, focus en bezocht.
-- [HTML-elementen/Formulier](https://ds.heerenveen.org/?path=/docs/html-elementen-formulier--documentatie): labels, velden en knoppen van 44 pixels hoog, en randen van 3:1.
+- [HTML-elementen/Formulier](https://ds.heerenveen.org/?path=/docs/html-elementen-formulier--documentatie): labels, velden en knoppen van 44 pixels hoog (en 36 pixels in de kleine maat), en randen van 3:1.
 - [Componenten/Pagina/Page](https://ds.heerenveen.org/?path=/docs/componenten-pagina-page--documentatie): de componenten voor de paginaopbouw, met de landmarks `header`, `nav`, `main` en `footer`, een navigatie met een naam en een kop met een niveau los van zijn stijl.
 - [Hulpklassen/Alleen voor schermlezers](https://ds.heerenveen.org/?path=/docs/hulpklassen-alleen-voor-schermlezers--documentatie): de klasse `hf-visually-hidden`, voor tekst die je niet ziet maar die een schermlezer wel voorleest.
 

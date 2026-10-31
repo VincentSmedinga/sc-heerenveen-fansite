@@ -1,3 +1,4 @@
+import { type SearchParams } from '../../../../season-page'
 import { seasonFromSlug } from '../../../../seasons'
 import { SeasonShortcuts } from '../season-shortcuts'
 
@@ -9,8 +10,14 @@ export const dynamic = 'force-dynamic'
  * season has no bar: the page is "niet gevonden". The current season is sent to /statistieken
  * by the page, so it gets the bar there.
  */
-export default async function SeasonStatisticsShortcuts({ params }: { params: Promise<{ seizoen: string }> }) {
+export default async function SeasonStatisticsShortcuts({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ seizoen: string }>
+  searchParams: Promise<SearchParams>
+}) {
   const season = seasonFromSlug((await params).seizoen)
 
-  return season === undefined ? null : SeasonShortcuts({ season })
+  return season === undefined ? null : SeasonShortcuts({ searchParams, season })
 }
