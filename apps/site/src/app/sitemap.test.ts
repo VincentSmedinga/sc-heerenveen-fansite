@@ -30,6 +30,8 @@ const notInSitemap: string[] = [
   '/redactie/[slug]',
   // The statistics of a season that is over: only the current season, /statistieken, is listed.
   '/statistieken/[seizoen]',
+  // The same for the players of a season that is over: only /statistieken/spelers is listed.
+  '/statistieken/spelers/[seizoen]',
   // The matches of a season that is over: only the current season, /wedstrijden, is listed.
   '/wedstrijden/[seizoen]',
 ]

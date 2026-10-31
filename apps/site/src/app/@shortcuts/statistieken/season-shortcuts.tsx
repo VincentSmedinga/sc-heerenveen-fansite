@@ -1,5 +1,5 @@
 import { seasonOf } from '@fansite/db/season'
-import { Page } from '@fansite/design-system'
+import { Page, type PageShortcutsItem } from '@fansite/design-system'
 
 import { getMatchData, getMatchSeasons } from '../../../matches'
 import { statisticsShortcuts } from '../../../statisticsShortcuts'
@@ -13,8 +13,16 @@ import { statisticsShortcuts } from '../../../statisticsShortcuts'
  * keeps its answer for a few minutes, so asking again costs nothing; the page logs the error.
  * The season is only asked for after it is found among the seasons that have matches, as the
  * page does.
+ *
+ * The page Spelers has a bar of its own, with `items`: the same checks, and a link to its card.
  */
-export async function SeasonShortcuts({ season }: { season: string }) {
+export async function SeasonShortcuts({
+  items = statisticsShortcuts,
+  season,
+}: {
+  items?: readonly PageShortcutsItem[]
+  season: string
+}) {
   try {
     if (season !== seasonOf(new Date()) && !(await getMatchSeasons()).includes(season)) {
       return null
@@ -25,5 +33,5 @@ export async function SeasonShortcuts({ season }: { season: string }) {
     return null
   }
 
-  return <Page.Shortcuts items={statisticsShortcuts} label="Op deze pagina:" />
+  return <Page.Shortcuts items={items} label="Op deze pagina:" />
 }

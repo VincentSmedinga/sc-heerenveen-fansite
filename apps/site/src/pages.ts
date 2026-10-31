@@ -29,6 +29,11 @@ export const pages = [
   },
   {
     description:
+      'Alle spelers van sc Heerenveen 1 die dit seizoen scoorden, met hun doelpunten en de bron erbij: de Nederlandse Wikipedia.',
+    path: '/statistieken/spelers',
+  },
+  {
+    description:
       'Alle afleveringen van de podcasts over sc Heerenveen op één plek, met een link naar de pagina van de aflevering bij de maker.',
     path: '/nieuws/podcasts',
   },

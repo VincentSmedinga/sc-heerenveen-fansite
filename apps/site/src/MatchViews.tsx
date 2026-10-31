@@ -43,7 +43,9 @@ import {
   scorersCoverage,
   standingsAround,
   streaksOf,
+  topFiveOf,
   topScorersOf,
+  topScorersPlaces,
 } from './matches'
 import { coachesCardOf } from './matchShortcuts'
 import { splitStaffName } from './player-name'
@@ -715,13 +717,29 @@ export function StreaksCard({
 }
 
 /**
- * Everybody who scored this season: a line under the heading for how many players scored, as on
+ * The goal scorers of this season: a line under the heading for how many players scored, as on
  * the card of the clean sheets, then a table with a bar (its caption is for a screen reader
  * only), and a line when not every played match has its scorers, so nobody takes an incomplete
  * list for a complete one. Without a goal it is a sentence for visitors and no table.
+ *
+ * Without `playersHref` it is everybody who scored, as on the page Spelers. With it, it is the
+ * short form of the page Statistieken: the first five places (see topFiveOf), the line says "De
+ * top 5 van 17 spelers die scoorden", and the link "Alle doelpuntenmakers" under the list goes
+ * to `playersHref`, the page with the whole list. The line only says "top 5" when the list was
+ * cut: if nobody is left out, it counts the players, as the full list does.
  */
-export function TopScorers({ matches, season }: { matches: PublicMatch[]; season: string }) {
+export function TopScorers({
+  matches,
+  playersHref,
+  season,
+}: {
+  matches: PublicMatch[]
+  playersHref?: string | undefined
+  season: string
+}) {
   const scorers = topScorersOf(matches)
+  const shown = playersHref === undefined ? scorers : topFiveOf(scorers)
+  const cut = shown.length < scorers.length
   const { known, played } = scorersCoverage(matches)
 
   if (scorers.length === 0) {
@@ -730,17 +748,62 @@ export function TopScorers({ matches, season }: { matches: PublicMatch[]; season
 
   return (
     <>
-      <Text>{scorers.length === 1 ? '1 speler heeft gescoord' : `${scorers.length} spelers hebben gescoord`}</Text>
+      <Text>
+        {cut
+          ? `De top ${topScorersPlaces} van ${scorers.length} spelers die scoorden`
+          : scorers.length === 1
+            ? '1 speler heeft gescoord'
+            : `${scorers.length} spelers hebben gescoord`}
+      </Text>
       <TopScorersTable
-        caption={`Doelpuntenmakers van sc Heerenveen in het seizoen ${season}, in de Eredivisie en de KNVB Beker`}
-        rows={scorers}
+        caption={`${cut ? `De top ${topScorersPlaces} van de doelpuntenmakers` : 'Doelpuntenmakers'} van sc Heerenveen in het seizoen ${season}, in de Eredivisie en de KNVB Beker`}
+        rows={shown}
       />
       {known < played && (
         <Text appearance="meta">
           Gebaseerd op de doelpuntenmakers van {known} van de {played} gespeelde wedstrijden
         </Text>
       )}
+      {playersHref !== undefined && (
+        <Text>
+          <Link href={playersHref} icon="arrow-right">
+            Alle doelpuntenmakers
+          </Link>
+        </Text>
+      )}
     </>
+  )
+}
+
+/**
+ * The card Doelpuntenmakers, on the page Statistieken as the short form (the top 5, with the
+ * link to the page Spelers) and on the page Spelers as the whole list. Both have the same
+ * heading, anchor and button for an image, so a link to `#doelpuntenmakers` works on both.
+ * `playersHref` is the page Spelers of the season the card is about; the page Spelers leaves it
+ * out.
+ */
+export function TopScorersCard({
+  matches,
+  playersHref,
+  season,
+  seasonOnImage,
+}: {
+  matches: PublicMatch[]
+  playersHref?: string | undefined
+  season: string
+  seasonOnImage?: string | undefined
+}) {
+  return (
+    <Card
+      aria-labelledby="doelpuntenmakers"
+      shareable={imageCredit(topScorersOf(matches).length > 0, seasonOnImage)}
+      surface="soft"
+    >
+      <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
+        Doelpuntenmakers
+      </Heading>
+      <TopScorers matches={matches} playersHref={playersHref} season={season} />
+    </Card>
   )
 }
 

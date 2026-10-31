@@ -18,6 +18,7 @@ import {
   scorersCoverage,
   standingsAround,
   streaksOf,
+  topFiveOf,
   topScorersOf,
 } from './matches'
 
@@ -584,6 +585,67 @@ describe('topScorersOf', () => {
     expect(topScorersOf([])).toEqual([])
     expect(topScorersOf([played([])])).toEqual([])
     expect(topScorersOf([played([goal('Teststraat', { ours: false })])])).toEqual([])
+  })
+})
+
+describe('topFiveOf', () => {
+  /** Matches in which each player scored the given number of goals, in the order given. */
+  const withGoals = (counts: Record<string, number>) => [
+    played(Object.entries(counts).flatMap(([name, count]) => Array.from({ length: count }, () => goal(name)))),
+  ]
+
+  const top = (counts: Record<string, number>) =>
+    topFiveOf(topScorersOf(withGoals(counts))).map((item) => [item.position, item.player, item.goals])
+
+  it('is the first five of the list, in the same order and with the same figures', () => {
+    const matches = withGoals({ Alfa: 7, Beta: 6, Delta: 4, Epsilon: 3, Eta: 1, Gamma: 5, Zeta: 2 })
+    const all = topScorersOf(matches)
+
+    expect(topFiveOf(all)).toEqual(all.slice(0, 5))
+    expect(topFiveOf(all).map((item) => item.player)).toEqual(['Alfa', 'Beta', 'Gamma', 'Delta', 'Epsilon'])
+  })
+
+  it('has everybody when five players or fewer scored', () => {
+    expect(top({ Alfa: 2, Beta: 1 })).toEqual([
+      [1, 'Alfa', 2],
+      [2, 'Beta', 1],
+    ])
+    expect(topFiveOf([])).toEqual([])
+  })
+
+  it('shows all the players who share fifth place, so it has more than five names', () => {
+    expect(top({ Alfa: 5, Beta: 4, Delta: 2, Epsilon: 1, Eta: 1, Gamma: 3, Theta: 1, Zeta: 1 })).toEqual([
+      [1, 'Alfa', 5],
+      [2, 'Beta', 4],
+      [3, 'Gamma', 3],
+      [4, 'Delta', 2],
+      [5, 'Epsilon', 1],
+      [5, 'Eta', 1],
+      [5, 'Theta', 1],
+      [5, 'Zeta', 1],
+    ])
+  })
+
+  it('keeps everybody in a place before the fifth, and leaves out those behind it', () => {
+    // Three players share fourth place, so the next place is seventh: not in the top five.
+    expect(top({ Alfa: 5, Beta: 4, Delta: 2, Epsilon: 2, Eta: 1, Gamma: 3, Zeta: 2 })).toEqual([
+      [1, 'Alfa', 5],
+      [2, 'Beta', 4],
+      [3, 'Gamma', 3],
+      [4, 'Delta', 2],
+      [4, 'Epsilon', 2],
+      [4, 'Zeta', 2],
+    ])
+  })
+
+  it('does not take the sixth place into the top five when there is no tie for the fifth', () => {
+    expect(top({ Alfa: 6, Beta: 5, Delta: 3, Epsilon: 2, Gamma: 4, Zeta: 1 }).map(([, player]) => player)).toEqual([
+      'Alfa',
+      'Beta',
+      'Gamma',
+      'Delta',
+      'Epsilon',
+    ])
   })
 })
 
