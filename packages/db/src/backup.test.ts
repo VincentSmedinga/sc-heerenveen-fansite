@@ -387,29 +387,11 @@ describe('runBackupCommand', () => {
   })
 })
 
-describe('structureOnlyTables', () => {
-  it('are tables of the database, so the second pass of the dump finds them', async () => {
-    const database = await createTestDatabase()
-
-    try {
-      const [rows] = await database.pool.query<RowDataPacket[]>(
-        'SELECT table_name AS name FROM information_schema.tables WHERE table_schema = DATABASE()',
-      )
-      const names = rows.map((row) => String(row['name']))
-
-      for (const table of structureOnlyTables) {
-        expect(names).toContain(table)
-      }
-    } finally {
-      await database.drop()
-    }
-  })
-})
-
-describe('restore', () => {
-  let empty: TestDatabase
+// One database with the migrations run, for the tests that only read it. Making one takes a
+// second or more when other tests run beside it, so a test that makes its own can run out of
+// its five seconds on a busy runner. The one for structureOnlyTables did.
+describe('with a migrated database', () => {
   let full: TestDatabase
-  let dump: string
 
   beforeAll(async () => {
     full = await createTestDatabase()
@@ -420,106 +402,124 @@ describe('restore', () => {
     await full?.drop()
   })
 
-  // Every test restores into a database of its own, since a restore fills it.
-  beforeEach(async () => {
-    empty = await createTestDatabase({ migrate: false })
-    dump = path.join(work, `dump-${counter}.sql.gz`)
-    writeFileSync(
-      dump,
-      gzipSync("CREATE TABLE notes (text varchar(20));\nINSERT INTO notes VALUES ('Ik ben terug');\n"),
-    )
+  describe('structureOnlyTables', () => {
+    it('are tables of the database, so the second pass of the dump finds them', async () => {
+      const [rows] = await full.pool.query<RowDataPacket[]>(
+        'SELECT table_name AS name FROM information_schema.tables WHERE table_schema = DATABASE()',
+      )
+      const names = rows.map((row) => String(row['name']))
+
+      for (const table of structureOnlyTables) {
+        expect(names).toContain(table)
+      }
+    })
   })
 
-  afterEach(async () => {
-    await empty?.drop()
-  })
+  describe('restore', () => {
+    let empty: TestDatabase
+    let dump: string
 
-  /**
-   * A `mysql` that runs what it reads on the database in `FAKE_DATABASE_URL`, with the mysql2
-   * of this package, and keeps the arguments it was given.
-   */
-  function fakeClient() {
-    const script = path.join(work, `client-${counter}.mjs`)
-    const driver = import.meta.resolve('mysql2/promise')
+    // Every test restores into a database of its own, since a restore fills it.
+    beforeEach(async () => {
+      empty = await createTestDatabase({ migrate: false })
+      dump = path.join(work, `dump-${counter}.sql.gz`)
+      writeFileSync(
+        dump,
+        gzipSync("CREATE TABLE notes (text varchar(20));\nINSERT INTO notes VALUES ('Ik ben terug');\n"),
+      )
+    })
 
-    writeFileSync(
-      script,
-      [
-        `import { createConnection } from '${driver}'`,
-        'const chunks = []',
-        'for await (const chunk of process.stdin) chunks.push(chunk)',
-        'const connection = await createConnection({ multipleStatements: true, uri: process.env.FAKE_DATABASE_URL })',
-        'await connection.query(Buffer.concat(chunks).toString())',
-        'await connection.end()',
-      ].join('\n'),
-    )
+    afterEach(async () => {
+      await empty?.drop()
+    })
 
-    return program(
-      'mysql',
-      `printf "%s\\n" "$@" > "$FAKE_RECORD/args"\ncp "\${1#--defaults-extra-file=}" "$FAKE_RECORD/option-file"\nexec "${process.execPath}" "${script}"`,
-    )
-  }
+    /**
+     * A `mysql` that runs what it reads on the database in `FAKE_DATABASE_URL`, with the mysql2
+     * of this package, and keeps the arguments it was given.
+     */
+    function fakeClient() {
+      const script = path.join(work, `client-${counter}.mjs`)
+      const driver = import.meta.resolve('mysql2/promise')
 
-  it('puts a dump into an empty database', async () => {
-    process.env['FAKE_DATABASE_URL'] = empty.url
+      writeFileSync(
+        script,
+        [
+          `import { createConnection } from '${driver}'`,
+          'const chunks = []',
+          'for await (const chunk of process.stdin) chunks.push(chunk)',
+          'const connection = await createConnection({ multipleStatements: true, uri: process.env.FAKE_DATABASE_URL })',
+          'await connection.query(Buffer.concat(chunks).toString())',
+          'await connection.end()',
+        ].join('\n'),
+      )
 
-    try {
-      const result = await restore(env({ DATABASE_URL: empty.url, MYSQL_COMMAND: fakeClient() }), dump)
-
-      expect(result.tables).toBe(1)
-    } finally {
-      delete process.env['FAKE_DATABASE_URL']
+      return program(
+        'mysql',
+        `printf "%s\\n" "$@" > "$FAKE_RECORD/args"\ncp "\${1#--defaults-extra-file=}" "$FAKE_RECORD/option-file"\nexec "${process.execPath}" "${script}"`,
+      )
     }
 
-    const [rows] = await empty.pool.query('SELECT text FROM notes')
+    it('puts a dump into an empty database', async () => {
+      process.env['FAKE_DATABASE_URL'] = empty.url
 
-    expect(rows).toEqual([{ text: 'Ik ben terug' }])
-    expect(readFileSync(path.join(process.env['FAKE_RECORD'] ?? '', 'args'), 'utf8')).not.toContain('password')
-  })
+      try {
+        const result = await restore(env({ DATABASE_URL: empty.url, MYSQL_COMMAND: fakeClient() }), dump)
 
-  it('refuses a database that has tables, and starts no client', async () => {
-    await expect(restore(env({ DATABASE_URL: full.url, MYSQL_COMMAND: fakeClient() }), dump)).rejects.toThrow(
-      /has \d+ tables\. A dump goes into an empty database/,
-    )
-    expect(readdirSync(process.env['FAKE_RECORD'] ?? '')).toEqual([])
-  })
+        expect(result.tables).toBe(1)
+      } finally {
+        delete process.env['FAKE_DATABASE_URL']
+      }
 
-  it('refuses a file that is not a dump, or not there', async () => {
-    await expect(restore(env({ DATABASE_URL: empty.url }), path.join(work, 'notes.txt'))).rejects.toThrow(/\.sql\.gz/)
-    await expect(restore(env({ DATABASE_URL: empty.url }), path.join(work, 'nothing.sql.gz'))).rejects.toThrow(
-      /no file at/,
-    )
-  })
+      const [rows] = await empty.pool.query('SELECT text FROM notes')
 
-  it('fails when the client fails, with what the client said', async () => {
-    const failing = program(
-      'mysql',
-      'cat > /dev/null\necho "ERROR 1064: You have an error in your SQL syntax" >&2\nexit 1',
-    )
+      expect(rows).toEqual([{ text: 'Ik ben terug' }])
+      expect(readFileSync(path.join(process.env['FAKE_RECORD'] ?? '', 'args'), 'utf8')).not.toContain('password')
+    })
 
-    await expect(restore(env({ DATABASE_URL: empty.url, MYSQL_COMMAND: failing }), dump)).rejects.toThrow(
-      /stopped with code 1.*ERROR 1064/s,
-    )
-  })
+    it('refuses a database that has tables, and starts no client', async () => {
+      await expect(restore(env({ DATABASE_URL: full.url, MYSQL_COMMAND: fakeClient() }), dump)).rejects.toThrow(
+        /has \d+ tables\. A dump goes into an empty database/,
+      )
+      expect(readdirSync(process.env['FAKE_RECORD'] ?? '')).toEqual([])
+    })
 
-  it('fails when the client ran but nothing arrived in the database', async () => {
-    const idle = program('mysql', 'cat > /dev/null')
+    it('refuses a file that is not a dump, or not there', async () => {
+      await expect(restore(env({ DATABASE_URL: empty.url }), path.join(work, 'notes.txt'))).rejects.toThrow(/\.sql\.gz/)
+      await expect(restore(env({ DATABASE_URL: empty.url }), path.join(work, 'nothing.sql.gz'))).rejects.toThrow(
+        /no file at/,
+      )
+    })
 
-    await expect(restore(env({ DATABASE_URL: empty.url, MYSQL_COMMAND: idle }), dump)).rejects.toThrow(
-      /still has no tables/,
-    )
-  })
+    it('fails when the client fails, with what the client said', async () => {
+      const failing = program(
+        'mysql',
+        'cat > /dev/null\necho "ERROR 1064: You have an error in your SQL syntax" >&2\nexit 1',
+      )
 
-  it('exits with 1 for the command when the database has tables', async () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+      await expect(restore(env({ DATABASE_URL: empty.url, MYSQL_COMMAND: failing }), dump)).rejects.toThrow(
+        /stopped with code 1.*ERROR 1064/s,
+      )
+    })
 
-    expect(
-      await runBackupCommand(['restore', dump], {
-        BACKUP_FOLDER: folder,
-        DATABASE_URL: full.url,
-        MYSQL_COMMAND: fakeClient(),
-      }),
-    ).toBe(1)
-    expect(String(error.mock.calls[0]?.[0])).toMatch(/^The restore failed: /)
+    it('fails when the client ran but nothing arrived in the database', async () => {
+      const idle = program('mysql', 'cat > /dev/null')
+
+      await expect(restore(env({ DATABASE_URL: empty.url, MYSQL_COMMAND: idle }), dump)).rejects.toThrow(
+        /still has no tables/,
+      )
+    })
+
+    it('exits with 1 for the command when the database has tables', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      expect(
+        await runBackupCommand(['restore', dump], {
+          BACKUP_FOLDER: folder,
+          DATABASE_URL: full.url,
+          MYSQL_COMMAND: fakeClient(),
+        }),
+      ).toBe(1)
+      expect(String(error.mock.calls[0]?.[0])).toMatch(/^The restore failed: /)
+    })
   })
 })
