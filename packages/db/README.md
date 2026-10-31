@@ -443,7 +443,7 @@ De regels voor het vinden en maken van een club staan in `src/clubs.ts` (`@fansi
 De seed zet de verzonnen wedstrijden erin met verzonnen clubs.
 Lezen de import de echte wedstrijden, dan verdwijnen de verzonnen wedstrijden maar blijven hun clubs staan; ze hebben geen wedstrijd meer, dus de queries tonen ze niet.
 
-Drie queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
+Vier queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
 
 - `listClubRecords(db, { competition })` geeft de clubs met minstens één wedstrijd, van A tot Z op naam, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden en de doelpunten voor en tegen.
   Een wedstrijd telt als gespeeld, gewonnen, gelijk of verloren op de doelpunten zoals Wikipedia ze geeft, dus een bekerwedstrijd die op strafschoppen is beslist, is gelijk.
@@ -453,6 +453,8 @@ Drie queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
 - `listClubMatches(db, clubId, { competition })` geeft de wedstrijden tegen de club, de nieuwste eerst over alle seizoenen, ook de wedstrijden die nog niet gespeeld zijn.
   Bij elke wedstrijd staan het seizoen, de competitie, de ronde, de dag of de tekst voor de datum, de aftrap, thuis of uit, de uitslag en eventuele verlenging en strafschoppen.
   Met `competition` alleen die van de competitie.
+- `listAllWikipediaPages(db)` geeft de pagina's van Wikipedia die de import voor de wedstrijden las, van alle seizoenen, het nieuwste seizoen eerst: het seizoen, de titel, het soort en het moment van lezen.
+  Een pagina die over alle seizoenen telt, zoals de onderlinge resultaten, noemt ze allemaal als bron.
 
 ### Een club met twee namen samenvoegen
 
