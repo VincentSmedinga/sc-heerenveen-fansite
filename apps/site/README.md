@@ -330,13 +330,13 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "Gebaseerd op de doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
   De kop van de doelpunten is de afkorting D, met het volle woord onder de tabel.
   Zonder doelpunten staat er een zin in plaats van een tabel.
-- **De nul gehouden:** een kaart in de rechter kolom, onder de doelpuntenmakers en boven de doelpunten per kwartier, met de gespeelde wedstrijden van dit seizoen waarin `goals_against` 0 is, in de competitie en de beker, de nieuwste bovenaan.
+- **De nul gehouden:** een kaart in de rechter kolom, onder de doelpuntenmakers en boven de doelpunten per kwartier, met de gespeelde wedstrijden van dit seizoen waarin `goals_against` 0 is, de nieuwste bovenaan: de competitie en de beker bij de keuze Alle wedstrijden, alleen de competitie bij Eredivisie.
   Elke wedstrijd is een korte regel (`ShortMatch`): de dag, de tegenstander met "thuis" of "uit" en de uitslag vanuit onze kant.
   Boven de lijst staat "5 keer de nul gehouden in 11 wedstrijden".
   Er staan tien regels en daaronder de knop "Laad 5 meer", die zonder JavaScript werkt: het formulier laadt de pagina opnieuw met `?nul=15`, in stappen van vijf.
   De selectie (`cleanSheetsOf` in `src/matches.ts`) gebruikt de gegevens die de pagina al voor de uitslagen haalt, dus er komt geen vraag bij.
 - **Doelpunten per kwartier:** een kaart in de rechter kolom, onder de nul gehouden en boven hoe de wedstrijden verlopen, met twee donutdiagrammen (`DonutChart` uit het designsysteem): de doelpunten van sc Heerenveen en de tegendoelpunten per kwartier van de wedstrijd.
-  `goalsPerQuarter` in `src/matches.ts` telt ze uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), in de competitie en de beker.
+  `goalsPerQuarter` in `src/matches.ts` telt ze uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), in de competitie en bij Alle wedstrijden ook in de beker.
   De kwartieren zijn 1–15, 16–30, 31–45, 46–60, 61–75 en 76–90.
   Een doelpunt in blessuretijd telt bij het kwartier ervoor: 45+1 bij 31–45 en 90+3 bij 76–90.
   Een doelpunt na minuut 90, in de verlenging, telt niet mee.
@@ -357,7 +357,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Onder de tabellen staan twee zinnen: in hoeveel wedstrijden sc Heerenveen won na een achterstand, en in hoeveel het geen winst haalde na een voorsprong.
   Een achterstand of voorsprong telt alleen als die klopt bij elke volgorde binnen een minuut.
   Zonder één wedstrijd met doelpunten staat er een zin in plaats van de tabellen, en onderaan staat "Gebaseerd op 2 van de 3 gespeelde wedstrijden" (`BasedOn` in `src/MatchViews.tsx`).
-- **Uitersten:** de laatste kaart, rechts, met vijf regels in een lijst: de grootste overwinning, de grootste nederlaag, de wedstrijd met de meeste doelpunten, ons vroegste doelpunt en ons laatste doelpunt van de Eredivisie.
+- **Uitersten:** de laatste kaart, rechts, met vijf regels in een lijst: de grootste overwinning, de grootste nederlaag, de wedstrijd met de meeste doelpunten, ons vroegste doelpunt en ons laatste doelpunt, in de Eredivisie en bij Alle wedstrijden ook in de beker.
   `extremesOf` in `src/matches.ts` kiest ze uit de gespeelde wedstrijden die de keuze telt; de beker telt alleen bij Alle wedstrijden.
   Bij een gelijke stand wint de laatst gespeelde wedstrijd.
   Een regel zonder wedstrijd ontbreekt, bijvoorbeeld de nederlaag in een seizoen zonder verlies.
