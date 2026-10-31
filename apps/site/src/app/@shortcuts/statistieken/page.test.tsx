@@ -84,7 +84,9 @@ describe('the bar of /statistieken', () => {
 
 describe('the bar of /statistieken and the choice of the matches', () => {
   it('is there for the Eredivisie, which is a page, and left out for a value that the page does not know', async () => {
-    expect(StatisticsShortcuts({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) })).not.toBeNull()
+    expect(
+      renderToStaticMarkup(await StatisticsShortcuts({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) })),
+    ).toContain('Op deze pagina:')
 
     for (const competitie of ['alle', '', ['eredivisie', 'eredivisie']]) {
       expect(await StatisticsShortcuts({ searchParams: Promise.resolve({ competitie }) })).toBeNull()

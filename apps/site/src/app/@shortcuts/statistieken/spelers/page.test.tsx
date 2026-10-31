@@ -67,7 +67,9 @@ describe('the bar of /statistieken/spelers', () => {
 
 describe('the bar of /statistieken/spelers and the choice of the matches', () => {
   it('is there for the Eredivisie, which is a page, and left out for a value that the page does not know', async () => {
-    expect(PlayersShortcuts({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) })).not.toBeNull()
+    expect(
+      renderToStaticMarkup(await PlayersShortcuts({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) })),
+    ).toContain('Op deze pagina:')
 
     for (const competitie of ['alle', '', ['eredivisie', 'eredivisie']]) {
       expect(await PlayersShortcuts({ searchParams: Promise.resolve({ competitie }) })).toBeNull()
