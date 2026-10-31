@@ -872,26 +872,35 @@ await withEmptyDatabase((database) =>
     assert.match(playersHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
     assert.doesNotMatch(playersHtml, /<th scope="row">Kopie<\/th>/)
     assert.doesNotMatch(playersHtml, /Alle (?:<span[^>]*>)?doelpuntenmakers/)
-    // The card Bijzondere doelpunten comes under the list of scorers: the made-up data has two
-    // doubles (Demo, and Proefman in the cup), no hattrick, one penalty and an own goal of the
-    // opponent. It is soft, with a button for an image, and it counts the cup for all matches.
-    const specialCard =
-      /<section[^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''
+    // The card Bijzondere doelpunten comes under the list of scorers. The made-up data has no
+    // hattrick, two doubles (Demo, and Proefman in the cup), one penalty and an own goal of the
+    // opponent. The card is a list of four parts, each with its name as quiet text above its
+    // value, with no subheadings, soft, with a button for an image, and it counts the cup for
+    // all matches.
+    const cardOf = (html) =>
+      /<section[^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(html)?.[0] ?? ''
+    const factsOf = (card) =>
+      [...card.matchAll(/<li><p[^>]*>(.*?)<\/p>(.*?)<\/li>/g)].map(([, name, value]) => [
+        name,
+        value.replaceAll(/<[^>]*>/g, ''),
+      ])
+    const specialCard = cardOf(playersHtml)
     assert.ok(playersHtml.indexOf('id="doelpuntenmakers"') < playersHtml.indexOf('id="bijzondere-doelpunten"'))
     assert.match(specialCard, /^<section class="hf-card hf-card-soft hf-card-shareable"/)
-    assert.match(specialCard, /<h3 class="hf-heading-3">Hattricks<\/h3><p>Nog geen hattricks\.<\/p>/)
-    assert.match(
-      specialCard,
-      /<h3 class="hf-heading-3">Dubbelslagen<\/h3><ul role="list"><li>.*Demo.*<\/li><li>.*Proefman.*<\/li><\/ul>/s,
+    assert.equal(specialCard.match(/<h[1-6]/g)?.length, 1)
+    const facts = factsOf(specialCard)
+    assert.deepEqual(
+      facts.map(([name]) => name),
+      ['Hattricks', 'Dubbelslagen', 'Strafschoppen', 'Eigen doelpunten'],
     )
-    assert.match(specialCard, /Strafschoppen<\/h3><p>1 van de \d+ doelpunten<\/p>/)
-    assert.match(specialCard, /Door de tegenstander in eigen doel: 1<\/li><li>Door ons in eigen doel: 0</)
+    assert.equal(facts[0][1], 'Nog geen')
+    assert.match(facts[1][1], /Demo.*Proefman/)
+    assert.match(facts[2][1], /^1 van de \d+ doelpunten$/)
+    assert.match(facts[3][1], /^1 door de tegenstander · 0 door ons$/)
     assert.match(specialCard, /Gebaseerd op /)
-    const eredivisieCard = /<section[^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(
-      await (await fetch(`${origin}/statistieken/spelers?competitie=eredivisie`)).text(),
-    )?.[0]
-    assert.doesNotMatch(eredivisieCard ?? '', /Proefman/)
-    assert.match(eredivisieCard ?? '', /Strafschoppen<\/h3><p>0 van de \d+ doelpunten<\/p>/)
+    const eredivisieCard = cardOf(await (await fetch(`${origin}/statistieken/spelers?competitie=eredivisie`)).text())
+    assert.doesNotMatch(eredivisieCard, /Proefman/)
+    assert.match(factsOf(eredivisieCard)[2][1], /^0 van de \d+ doelpunten$/)
     assert.match(playersHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     // The route behind the season picker sends the visitor on to the page of the season.
     const pickedPlayers = await fetch(`${origin}/statistieken/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })

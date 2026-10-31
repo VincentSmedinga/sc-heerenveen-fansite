@@ -74,17 +74,13 @@ afterEach(() => {
 })
 
 describe('the page /statistieken/spelers', () => {
-  it('has one h1, Spelers, with the season picker beside it, and two h2, the cards Doelpuntenmakers and Bijzondere doelpunten', async () => {
+  it('has one h1, Spelers, with the season picker beside it, and two h2, the cards Doelpuntenmakers and Bijzondere doelpunten, and no h3', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Spelers</h1>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="bijzondere-doelpunten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#bijzondere-doelpunten">Bijzondere doelpunten</a></h2>',
-      '<h3 class="hf-heading-3">Hattricks</h3>',
-      '<h3 class="hf-heading-3">Dubbelslagen</h3>',
-      '<h3 class="hf-heading-3">Strafschoppen</h3>',
-      '<h3 class="hf-heading-3">Eigen doelpunten</h3>',
     ])
     expect(html).toMatch(/<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1>/)
   })
@@ -224,6 +220,9 @@ describe('the page /statistieken/spelers', () => {
 describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
   const cardOf = (html: string) =>
     /<section [^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(html)?.[0] ?? ''
+  /** The parts of the card: the name and the value under it, as a screen reader reads them. */
+  const facts = (html: string) =>
+    [...html.matchAll(/<li><p[^>]*>(.*?)<\/p>(.*?)<\/li>/g)].map(([, name, value]) => [plain(name), plain(value)])
   const goal = (player: string, options: Partial<PublicMatch['goals'][number]> = {}) => ({
     minute: 10,
     ours: true,
@@ -259,14 +258,32 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
     expect(cardOf(html)).toContain('data-hf-card-share')
   })
 
-  it('shows a sentence for an empty list of hattricks and doubles, and the numbers for the rest', async () => {
-    const text = plain(cardOf(await render()))
+  it('is a list of four parts, each with its name as quiet text above its value, and no subheadings', async () => {
+    const html = cardOf(await render())
 
-    expect(text).toContain('Nog geen hattricks.')
-    expect(text).toContain('Nog geen dubbelslagen.')
-    expect(text).toContain('0 van de 4 doelpunten')
-    expect(text).toContain('Door de tegenstander in eigen doel: 0')
-    expect(text).toContain('Door ons in eigen doel: 0')
+    expect(html).toMatch(
+      /<ul role="list"><li><p class="hf-meta">Hattricks<\/p><div class="hf-short-match hf-short-fact">/,
+    )
+    expect(facts(html).map(([name]) => name)).toEqual([
+      'Hattricks',
+      'Dubbelslagen',
+      'Strafschoppen',
+      'Eigen doelpunten',
+    ])
+    expect(html.match(/<h[1-6]/g)).toHaveLength(1)
+    expect(html.match(/<li>/g)).toHaveLength(4)
+  })
+
+  it('says "Nog geen" in the quiet style for hattricks and doubles nobody has, and keeps the numbers', async () => {
+    const html = cardOf(await render())
+
+    expect(facts(html)).toEqual([
+      ['Hattricks', 'Nog geen'],
+      ['Dubbelslagen', 'Nog geen'],
+      ['Strafschoppen', '0 van de 4 doelpunten'],
+      ['Eigen doelpunten', '0 door de tegenstander · 0 door ons'],
+    ])
+    expect(html.match(/<span class="hf-short-match-where">Nog geen<\/span>/g)).toHaveLength(2)
   })
 
   it('lists the hattricks and the doubles with the names as one name, and how often for a repeat', async () => {
@@ -276,30 +293,42 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
       goal('Proefman'),
       goal('Nepper', { penalty: true }),
       goal('Nepper'),
+      goal('Kemper'),
+      goal('Kemper'),
       goal('Teststraat', { minute: 50, ownGoal: true }),
       goal('Kopie', { minute: 60, ours: false, ownGoal: true }),
     ])
 
     const html = cardOf(await render())
 
-    expect(html).toContain(
-      '<ul role="list"><li><span class="hf-player-name"><span class="hf-player-name-surname">Proefman</span></span></li></ul>',
-    )
-    expect(html).toContain(
-      '<li><span class="hf-player-name"><span class="hf-player-name-surname">Nepper</span></span></li>',
-    )
-    expect(plain(html)).toContain('1 van de 6 doelpunten')
-    expect(plain(html)).toContain('Door de tegenstander in eigen doel: 1')
-    expect(plain(html)).toContain('Door ons in eigen doel: 1')
-    expect(plain(html)).not.toContain('Nog geen hattricks.')
-    expect(plain(html)).not.toContain('Nog geen dubbelslagen.')
+    expect(facts(html)).toEqual([
+      ['Hattricks', 'Proefman'],
+      ['Dubbelslagen', 'Kemper, Nepper'],
+      ['Strafschoppen', '1 van de 8 doelpunten'],
+      ['Eigen doelpunten', '1 door de tegenstander · 1 door ons'],
+    ])
+    expect(html).toContain('<span class="hf-player-name"><span class="hf-player-name-surname">Proefman</span></span>')
+    expect(html).not.toContain('Nog geen')
+  })
+
+  it('writes how often after a name, and separates the names with commas', async () => {
+    const double = (player: string) => [goal(player), goal(player)]
+
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: [
+        { ...played, goals: double('Proefman'), goalsAgainst: 0, goalsFor: 2 },
+        { ...played, goals: [...double('Proefman'), ...double('Nepper')], goalsAgainst: 0, goalsFor: 4 },
+      ],
+    })
+
+    expect(facts(cardOf(await render()))[1]).toEqual(['Dubbelslagen', 'Proefman 2×, Nepper'])
   })
 
   it('says "doelpunt" in the singular for one goal', async () => {
     withGoals([goal('Proefman', { penalty: true })])
 
-    expect(plain(cardOf(await render()))).toContain('1 van de 1 doelpunt')
-    expect(plain(cardOf(await render()))).not.toContain('1 van de 1 doelpunten')
+    expect(facts(cardOf(await render()))[2]).toEqual(['Strafschoppen', '1 van de 1 doelpunt'])
   })
 
   it('says how many matches it is based on, in the form of the other cards', async () => {
@@ -315,7 +344,7 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
     const html = cardOf(await render())
 
     expect(plain(html)).toContain('We hebben nog geen doelpunten van dit seizoen. Kijk straks nog eens.')
-    expect(html).not.toContain('<h3')
+    expect(html).not.toContain('<li>')
     expect(html).not.toContain('data-hf-card-share')
   })
 
@@ -346,11 +375,11 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
       ),
     )
 
-    expect(all).toContain('Bekerman')
+    expect(all).toContain('HattricksBekerman')
     expect(all).toContain('1 van de 4 doelpunten')
     expect(all).toContain('Gebaseerd op alle 2 gespeelde wedstrijden')
     expect(league).not.toContain('Bekerman')
-    expect(league).toContain('Nog geen hattricks.')
+    expect(league).toContain('HattricksNog geen')
     expect(league).toContain('0 van de 1 doelpunt')
     expect(league).toContain('Gebaseerd op 1 gespeelde wedstrijd')
   })

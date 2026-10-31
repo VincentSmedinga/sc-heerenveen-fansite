@@ -378,15 +378,17 @@ Het toont de kaart Doelpuntenmakers met alle spelers die scoorden, zoals die kaa
 De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`; `/statistieken` gebruikt dezelfde kaart met de link naar deze pagina, en dan zijn het de eerste rijen van de lijst (`topFiveOf` in `src/matches.ts`).
 De pagina deelt alles rond het seizoen met Statistieken: de kiezer, de adressen `/statistieken/spelers/2025-26` en de route `app/statistieken/spelers/kies`, via `playersPath` in `src/season-page.ts`.
 Eronder staat de kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`.
-Die heeft vier delen, elk met een kop van niveau 3:
+De kaart heeft één kop, van niveau 2, en daaronder een lijst van vier delen, gebouwd zoals de kaart Uitersten: elk deel is een `List.Item` met de naam als rustige tekst erboven (`Text appearance="meta"`) en de waarde eronder in een `ShortFact` van het designsysteem, dat de dunne lijnen tussen de delen tekent.
+De naam en de waarde staan in hetzelfde lijstitem, dus een schermlezer leest ze samen.
+De delen zijn:
 
-- **Hattricks:** de spelers met drie of meer doelpunten in één wedstrijd, met namen en hoe vaak ("Jan Jansen, 2×"; één keer staat er geen getal).
+- **Hattricks:** de spelers met drie of meer doelpunten in één wedstrijd, achter elkaar met komma's ("Jan Jansen 2×, Piet Pietersen"; één keer staat er geen getal), of "Nog geen" in de rustige kleur.
   Een speler met een hattrick staat in die wedstrijd niet ook bij de dubbelslagen, maar een andere wedstrijd kan hem wel een dubbelslag geven.
 - **Dubbelslagen:** de spelers met precies twee doelpunten in één wedstrijd, op dezelfde manier.
 - **Strafschoppen:** "1 van de 17 doelpunten", het aantal doelpunten van sc Heerenveen uit een strafschop, van alle doelpunten van sc Heerenveen (een eigen doelpunt van de tegenstander telt mee).
-- **Eigen doelpunten:** het aantal dat een speler van de tegenstander in eigen doel maakte, en het aantal dat een speler van ons deed.
+- **Eigen doelpunten:** "1 door de tegenstander · 0 door ons": het aantal dat een speler van de tegenstander in eigen doel maakte, en het aantal dat een speler van ons deed.
 
-Heeft niemand een hattrick of een dubbelslag, dan staat er "Nog geen hattricks." of "Nog geen dubbelslagen."; de cijfers van de strafschoppen en de eigen doelpunten blijven staan, ook als ze 0 zijn.
+De cijfers van de strafschoppen en de eigen doelpunten blijven staan, ook als ze 0 zijn.
 Zonder doelpunt in een gespeelde wedstrijd is de kaart één zin zonder delen en zonder knop voor een afbeelding.
 De kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier, en zegt onderaan "Gebaseerd op …" in dezelfde vorm als de andere kaarten.
 Een speler wordt herkend zoals in de lijst van doelpuntenmakers.

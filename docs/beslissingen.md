@@ -7723,7 +7723,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 31 oktober 2026
 - **Besluit:** `/statistieken/spelers` en zijn seizoenen hebben onder Doelpuntenmakers een kaart Bijzondere doelpunten (#403), met het anker `bijzondere-doelpunten` en een tweede link in de balk "Op deze pagina:".
   - **Hattricks en dubbelslagen:** een hattrick is drie of meer doelpunten van één speler in één wedstrijd, een dubbelslag is er precies twee.
-    De kaart toont de spelers met hoe vaak het gebeurde ("Jan Jansen, 2×"; één keer staat er geen getal).
+    De kaart toont de spelers achter elkaar met komma's, met hoe vaak het gebeurde ("Jan Jansen 2×, Piet Pietersen"; één keer staat er geen getal).
     Een speler met een hattrick staat in die wedstrijd niet ook bij de dubbelslagen, maar een andere wedstrijd kan hem wel een dubbelslag geven.
     De doelpunten van twee wedstrijden tellen niet bij elkaar op.
     Een strafschop is een doelpunt van de speler en telt dus mee; een eigen doelpunt telt voor niemand, en een doelpunt van de tegenstander ook niet.
@@ -7731,17 +7731,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - **Strafschoppen:** het aantal doelpunten van sc Heerenveen uit een strafschop, uit alle doelpunten van sc Heerenveen: "1 van de 17 doelpunten".
     Een eigen doelpunt van de tegenstander is een doelpunt van ons en staat in het totaal.
     Strafschoppen van de tegenstander tellen niet, en de strafschoppenserie na afloop ook niet, want die staat niet in de doelpunten.
-  - **Eigen doelpunten:** twee getallen, het aantal dat een speler van de tegenstander in eigen doel maakte ("Door de tegenstander in eigen doel") en het aantal dat een speler van ons deed ("Door ons in eigen doel").
-  - **Lege delen:** staat er geen hattrick of dubbelslag, dan staat er een zin ("Nog geen hattricks.", "Nog geen dubbelslagen."), want een supporter zoekt ze juist.
+  - **Eigen doelpunten:** twee getallen op één regel, "1 door de tegenstander · 0 door ons": het aantal dat een speler van de tegenstander in eigen doel maakte en het aantal dat een speler van ons deed.
+  - **Lege delen:** staat er geen hattrick of dubbelslag, dan staat er "Nog geen" in de rustige kleur, want een supporter zoekt ze juist.
     De strafschoppen en de eigen doelpunten zijn getallen, dus 0 blijft staan.
     Is er geen doelpunt van ons in een gespeelde wedstrijd, dan is de kaart één zin zonder delen en zonder knop voor een afbeelding.
   - **De wedstrijden:** de kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier (een wedstrijd met een score en zonder doelpunten blijft eruit), en volgt de schakelaar van #406: een bekerwedstrijd telt alleen bij Alle wedstrijden, met de doelpunten uit de verlenging erbij.
     Onder de kaart staat "Gebaseerd op …" in de vorm van de andere kaarten.
-  - **De opmaak:** lijsten en een korte zin per deel, zonder grafiek, onder een kop van niveau 3.
+  - **De opmaak:** een lijst van vier delen zonder grafiek, en zonder koppen van niveau 3: de kaart heeft één kop, van niveau 2.
+    Elk deel heeft zijn naam als rustige tekst erboven en zijn waarde eronder, met een dunne lijn tussen de delen, zoals de kaart Uitersten (de projecteigenaar koos dit op 31 oktober 2026; vier subkoppen waren te zwaar).
+    Het is een `List` met in elk `List.Item` de naam (`Text appearance="meta"`) en de waarde in een `ShortFact`, een nieuw onderdeel van het designsysteem dat de klassen van `ShortMatch` neemt, zodat de lijnen uit `short-match.css` komen en er geen CSS is gekopieerd.
+    De naam komt eerst in het lijstitem, dus een schermlezer leest de naam en de waarde samen; een beschrijvingslijst (`dl`) kreeg de lijnen niet, want die zijn aan `li` gebonden.
     De kaart is zacht en heeft een knop voor een afbeelding met de bronvermelding van Wikipedia.
     De namen zijn een `PlayerName`.
 - **Waarom:** dit zijn de dingen die supporters bij een seizoen willen weten en die de lijst met doelpuntenmakers niet laat zien.
   Alles komt uit de doelpunten die de pagina al heeft, dus er is geen nieuwe vraag aan de database.
   Lijsten zijn korter dan tabellen voor een paar namen, en een zin voor een leeg deel zegt dat er niets mis is met de pagina.
 - **Niet erin:** de positie van de doelpuntenmaker (voor een afgelopen seizoen bestaat geen selectie), het aandeel van de topscorer en het aantal verschillende spelers (dat staat in Doelpuntenmakers).
-- **Alternatieven:** een tabel met een rij per speler (veel kolommen voor weinig getallen); de lege delen weglaten (een bezoeker kan niet zien of ze er niet zijn of er niet werden gezocht); een hattrick ook bij de dubbelslagen laten staan (dezelfde wedstrijd wordt dan twee keer genoemd); de kaart naar Statistieken zetten (de pagina Spelers is er voor wat bij spelers hoort, zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_).
+- **Alternatieven:** vier koppen van niveau 3 met onder elk een lijst of een zin (te zwaar voor vier korte feiten, en de eerste versie van deze kaart); een tabel met een rij per speler (veel kolommen voor weinig getallen); een `dl` met `dt` en `dd` (de dunne lijnen horen bij `li`, en de kaart Uitersten is ook een lijst); de lege delen weglaten (een bezoeker kan niet zien of ze er niet zijn of er niet werden gezocht); een hattrick ook bij de dubbelslagen laten staan (dezelfde wedstrijd wordt dan twee keer genoemd); de kaart naar Statistieken zetten (de pagina Spelers is er voor wat bij spelers hoort, zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_).
