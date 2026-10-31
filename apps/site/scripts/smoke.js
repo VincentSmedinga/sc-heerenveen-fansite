@@ -690,7 +690,12 @@ await withEmptyDatabase((database) =>
         '#uitersten',
       ],
     )
-    assert.doesNotMatch(html, /hf-page-shortcuts/)
+    // The home page has no bar of shortcuts, only the bar of sub-pages of Nieuws in the menu.
+    assert.doesNotMatch(html, /class="hf-page-shortcuts"/)
+    assert.match(
+      html,
+      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/nieuws">Archief<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
+    )
     assert.match(matchesHtml, /Testdorp FC/)
     // The card with our place in the league: a table of five measures, after the table.
     assert.match(
