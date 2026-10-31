@@ -2900,6 +2900,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de header in elke pagina, met de huidige pagina als prop; dan herhaalt elke pagina de header.
   Of het pad lezen uit de headers van het verzoek; dan maakt de server elke pagina per bezoek, ook de homepage.
   Of de huidige pagina niet markeren.
+- **Later:** zie _Het hoofdmenu kiest het onderdeel en de subpagina uit het pad_ (31 oktober 2026): `SiteNavigation` markeert nu ook een subpagina in de balk, en een onderdeel is ook huidig op de pagina's eronder.
+
+### Het hoofdmenu kiest het onderdeel en de subpagina uit het pad
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** `currentOf` in `SiteNavigation.tsx` kiest uit het pad het huidige onderdeel en de huidige subpagina.
+  Een subpagina is huidig op precies haar eigen pad: `/nieuws/podcasts`, `/nieuws` en `/nieuws/zoeken`.
+  Nieuws is het huidige onderdeel op die paden, op `/` en op elk artikel van de redactie (`/redactie/<naam>`), en Wedstrijden op `/wedstrijden` en elk pad eronder, zoals een seizoen.
+  Op `/` en op een artikel is Nieuws zelf `aria-current="page"` en is er geen huidige subpagina; op een subpagina is die `aria-current="page"` en Nieuws `aria-current="true"`.
+  Een ander pad, zoals `/bronnen` of een pad dat niet bestaat, heeft geen huidig onderdeel en geen balk.
+- **Waarom:** de balk laat zien waar je bent binnen Nieuws, dus een artikel hoort bij Nieuws en een seizoen bij Wedstrijden.
+  Een lijst van paden voor Nieuws laat een adres dat niet bestaat, zoals `/nieuws/bestaat-niet`, zonder markering, in plaats van dat het onder Nieuws valt.
+  Onder `/wedstrijden` bestaat alleen wat bij de pagina hoort, dus daar telt elk pad.
+- **Nadeel:** op een artikel van de redactie wijst `aria-current="page"` op een link naar `/`, terwijl het artikel een andere pagina is.
+  `Navigation` toont de balk alleen bij een onderdeel dat huidig is of een huidige subpagina heeft, en heeft geen tussenvorm voor "hier, maar niet precies hier".
+- **Alternatieven:** elk pad dat met `/nieuws/` begint onder Nieuws laten vallen (korter, maar een adres dat niet bestaat staat dan onder Nieuws).
+  Op een artikel geen balk en Nieuws niet huidig (dan weet de bezoeker niet waar hij is).
+  Een eigenschap op `Navigation` voor "in dit onderdeel" met `aria-current="true"` (juister, maar een wijziging in het designsysteem voor één pagina).
 
 ### Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep
 
