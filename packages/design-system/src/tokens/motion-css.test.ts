@@ -97,9 +97,14 @@ describe('the motion in the rest of the CSS', () => {
     expect(seen).toBeGreaterThan(0)
   })
 
-  it('has no animation without a transition or a token, and no keyframes with a time of their own', () => {
+  it('has no delay, and no duration of its own: a duration property takes a motion token', () => {
     for (const file of others) {
-      expect(read(file), file).not.toMatch(/animation-duration|animation-delay|transition-duration|transition-delay/)
+      const css = read(file)
+
+      expect(css, file).not.toMatch(/animation-delay|transition-delay/)
+      for (const [, value] of css.matchAll(/(?<![\w-])(?:animation|transition)-duration\s*:\s*([^;]+);/g)) {
+        expect(value, file).toContain('var(--hf-motion-duration-')
+      }
     }
   })
 

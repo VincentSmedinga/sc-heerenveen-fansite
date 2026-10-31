@@ -1,40 +1,96 @@
 /*
- * A segmented control: buttons side by side, one of them pressed. It builds on the base button, which is at least 44px
- * high and filled. Here a button is an outline, in the colour of the text around it, and the pressed one is filled like
- * a button, so it shows without colour. In forced-colours mode the system colours replace the fill, so the pressed button
- * is underlined as well.
+ * A segmented control: a rounded track with the options side by side and a thumb under the chosen one. The options share
+ * the width of the track equally, and the thumb is as wide as one option, less a margin all round. The standard size is
+ * 44px high and the small size (hf-size-small) 36px, from the token of the sizes, so an option is a target of that
+ * height over its whole cell.
  *
- * The same choice as links (SegmentedLinks) has the same look: a link is as high as a button,
- * without the underline of a link, and the current one, with aria-current, is filled.
+ * The thumb is the pseudo-element ::before of the group. It finds its place from two custom properties that the
+ * component sets, the number of options and the index of the chosen one, so it works for links without JavaScript, and
+ * for buttons whose value the page changes. It slides with a transition on `translate`, which the motion tokens make
+ * 0s with reduced motion, so it jumps there. The chosen option is shown by more than colour: the thumb has a border
+ * that reaches 3:1 against the track, and the letters are heavier. A label is laid over a copy of itself in bold
+ * (see SegmentedLabel), so the track does not change width with the choice.
+ *
+ * Between two pages, when the options are links, the thumb slides if the browser supports view transitions between
+ * documents; see the end of this file. Without that support it jumps to the new choice.
  */
 
 @layer hf.components {
   .hf-segmented-control {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: var(--hf-space-s);
+    --hf-segmented-edge: var(--hf-space-xs);
 
-    > button {
+    background-color: var(--hf-colour-background-track);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    display: inline-grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    isolation: isolate;
+    max-inline-size: 100%;
+    min-block-size: 2.75rem;
+    position: relative;
+
+    /* The thumb. */
+    &::before {
+      background-color: var(--hf-colour-background-thumb);
+      border: 1px solid var(--hf-colour-border-input);
+      border-radius: 0.25rem;
+      box-shadow: 0 1px 2px var(--hf-colour-shadow-thumb);
+      box-sizing: border-box;
+      content: '';
+      inline-size: calc(100% / var(--hf-segmented-count) - 2 * var(--hf-segmented-edge));
+      inset-block: var(--hf-segmented-edge);
+      inset-inline-start: var(--hf-segmented-edge);
+      position: absolute;
+      transition: translate var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+      translate: calc(var(--hf-segmented-index) * (100% + 2 * var(--hf-segmented-edge))) 0;
+      z-index: -1;
+
+      @media (forced-colors: active) {
+        border-color: CanvasText;
+        border-width: 2px;
+      }
+    }
+
+    &[data-empty]::before {
+      display: none;
+    }
+
+    /* The options: a button, or a link that looks like one. */
+    > :is(button, a) {
+      align-items: center;
       background-color: transparent;
-      border-color: currentcolor;
-      color: inherit;
+      border: 0;
+      border-radius: 0.5rem;
+      box-sizing: border-box;
+      color: var(--hf-colour-text-secondary);
+      cursor: pointer;
+      display: flex;
+      font-weight: var(--hf-body-font-weight);
+      justify-content: center;
+      min-block-size: 0;
+      min-inline-size: 0;
+      overflow-wrap: anywhere;
+      padding-block: var(--hf-space-s);
+      padding-inline: var(--hf-space-m);
+      text-align: center;
+      text-decoration: none;
+      transition: color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
 
       &:hover {
         background-color: transparent;
-        border-color: currentcolor;
         color: var(--hf-colour-text-default);
       }
 
-      &[aria-pressed='true'] {
-        background-color: var(--hf-colour-background-button);
-        border-color: var(--hf-colour-background-button);
-        color: var(--hf-colour-text-on-button);
+      /* The ring runs round the thumb, in the space between the thumb and the edge of the cell. */
+      &:focus-visible {
+        outline-offset: calc(-1 * var(--hf-segmented-edge));
+      }
 
-        &:hover {
-          background-color: var(--hf-colour-background-button-hover);
-          border-color: var(--hf-colour-background-button-hover);
-          color: var(--hf-colour-text-on-button);
-        }
+      &[aria-pressed='true'],
+      &[aria-current] {
+        color: var(--hf-colour-text-default);
+        font-weight: var(--hf-strong-font-weight);
 
         @media (forced-colors: active) {
           text-decoration: underline;
@@ -42,40 +98,103 @@
       }
     }
 
-    > a {
-      align-items: center;
-      background-color: transparent;
-      border: 1px solid currentcolor;
-      border-radius: 0.25rem;
-      box-sizing: border-box;
-      color: inherit;
-      display: inline-flex;
-      font-weight: var(--hf-strong-font-weight);
-      min-block-size: 2.75rem;
-      min-inline-size: 2.75rem;
-      padding-block: var(--hf-space-s);
-      padding-inline: var(--hf-space-m);
-      text-decoration: none;
+    /* The small size. */
+    &.hf-size-small {
+      min-block-size: var(--hf-size-control-small);
 
-      &:hover {
-        color: var(--hf-colour-text-default);
-      }
-
-      &[aria-current] {
-        background-color: var(--hf-colour-background-button);
-        border-color: var(--hf-colour-background-button);
-        color: var(--hf-colour-text-on-button);
-
-        &:hover {
-          background-color: var(--hf-colour-background-button-hover);
-          border-color: var(--hf-colour-background-button-hover);
-          color: var(--hf-colour-text-on-button);
-        }
-
-        @media (forced-colors: active) {
-          text-decoration: underline;
-        }
+      > :is(button, a) {
+        font-size: var(--hf-meta-font-size);
+        line-height: var(--hf-meta-line-height);
+        padding-inline: calc(var(--hf-segmented-edge) + var(--hf-space-s));
       }
     }
   }
+
+  /*
+   * The text of an option, with a copy of it in bold below that takes no height, so the option is as wide for its bold
+   * letters as for its regular ones.
+   */
+  .hf-segmented-label {
+    display: block;
+
+    &::after {
+      block-size: 0;
+      content: attr(data-label);
+      display: block;
+      font-weight: var(--hf-strong-font-weight);
+      overflow: hidden;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    /* The icon in front of the text takes room the copy does not have: its size and its space to the text (icon.css). */
+    &:has(> .hf-icon-head)::after {
+      padding-inline-start: 1.375em;
+    }
+  }
+}
+
+/*
+ * The slide from one page to the next, for options that are links. A browser that supports view transitions between
+ * documents keeps the thumb as an element of its own and moves it from the old place to the new one, and the labels
+ * stay above it (they have names of their own, because a named element is painted over the page). Everything else on
+ * the page, the root, changes at once, as it did before. With reduced motion the pages are not joined, so the thumb
+ * jumps. A browser without support loads the next page as ever. Only one such group should be on a page: a name is
+ * used by one element.
+ */
+@supports (view-transition-name: none) {
+  /*
+   * Temporary exception to the Baseline rule: view transitions between documents have been newly available since 2025
+   * and become widely available in 2028. Stylelint then reports this disable as needless. Then remove it.
+   */
+  /* stylelint-disable plugin/use-baseline -- widely available in 2028 */
+  @media (prefers-reduced-motion: no-preference) {
+    @view-transition {
+      navigation: auto;
+    }
+  }
+  /* stylelint-enable plugin/use-baseline */
+
+  .hf-segmented-control::before {
+    view-transition-name: hf-segmented-thumb;
+  }
+
+  .hf-segmented-control > :nth-child(1) {
+    view-transition-name: hf-segmented-option-1;
+  }
+
+  .hf-segmented-control > :nth-child(2) {
+    view-transition-name: hf-segmented-option-2;
+  }
+
+  .hf-segmented-control > :nth-child(3) {
+    view-transition-name: hf-segmented-option-3;
+  }
+
+  .hf-segmented-control > :nth-child(4) {
+    view-transition-name: hf-segmented-option-4;
+  }
+
+  /* stylelint-disable plugin/use-baseline -- widely available in 2028, see above */
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+
+  ::view-transition-old(root) {
+    display: none;
+  }
+
+  ::view-transition-new(root) {
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: var(--hf-motion-duration-short);
+    animation-timing-function: var(--hf-motion-ease-change);
+  }
+  /* stylelint-enable plugin/use-baseline */
 }

@@ -6,6 +6,8 @@ import { describe, expect, it } from 'vitest'
 import { Button } from './button/Button'
 import { Input } from './input/Input'
 import { Pagination } from './pagination/Pagination'
+import { SegmentedControl } from './segmented-control/SegmentedControl'
+import { SegmentedLinks } from './segmented-control/SegmentedLinks'
 import { Select } from './select/Select'
 import { sizeClassName, sizes } from './size'
 import { ThemeButton } from './theme-button/ThemeButton'
@@ -29,6 +31,13 @@ describe('the sizes', () => {
         <Select aria-label="Seizoen" />
         <Pagination current={1} label="Pagina's" total={2} />
         <ThemeButton dark={false} label="Donker" />
+        <SegmentedControl
+          label="Thema"
+          onChange={() => undefined}
+          options={[{ label: 'Licht', value: 'light' }]}
+          value="light"
+        />
+        <SegmentedLinks label="Welke" options={[{ href: '#a', label: 'Alles', value: 'all' }]} value="all" />
       </>,
     )
 
@@ -37,6 +46,8 @@ describe('the sizes', () => {
     expect(screen.getByRole('combobox').hasAttribute('class')).toBe(false)
     expect(screen.getByRole('navigation').className).toBe('hf-pagination')
     expect(screen.getByRole('button', { name: 'Donker' }).className).toBe('hf-theme-button')
+    expect(screen.getByRole('group', { name: 'Thema' }).className).toBe('hf-segmented-control')
+    expect(screen.getByRole('group', { name: 'Welke' }).className).toBe('hf-segmented-control')
   })
 
   it('put the same class on every component that takes the small size, next to its other classes', () => {
@@ -49,6 +60,19 @@ describe('the sizes', () => {
         <Select aria-label="Seizoen" size="small" />
         <Pagination current={1} label="Pagina's" size="small" total={2} />
         <ThemeButton dark={false} label="Donker" size="small" />
+        <SegmentedControl
+          label="Thema"
+          onChange={() => undefined}
+          options={[{ label: 'Licht', value: 'light' }]}
+          size="small"
+          value="light"
+        />
+        <SegmentedLinks
+          label="Welke"
+          options={[{ href: '#a', label: 'Alles', value: 'all' }]}
+          size="small"
+          value="all"
+        />
       </>,
     )
 
@@ -57,6 +81,8 @@ describe('the sizes', () => {
     expect(screen.getByRole('combobox').className).toBe('hf-size-small')
     expect(screen.getByRole('navigation').className).toBe('hf-pagination hf-size-small')
     expect(screen.getByRole('button', { name: 'Donker' }).className).toBe('hf-theme-button hf-size-small')
+    expect(screen.getByRole('group', { name: 'Thema' }).className).toBe('hf-segmented-control hf-size-small')
+    expect(screen.getByRole('group', { name: 'Welke' }).className).toBe('hf-segmented-control hf-size-small')
   })
 
   it('do not pass the size on as the attribute of the HTML element', () => {
@@ -86,6 +112,7 @@ describe('the small size in CSS', () => {
     'components/select/select.css',
     'components/pagination/pagination.css',
     'components/theme-button/theme-button.css',
+    'components/segmented-control/segmented-control.css',
   ])('sets the height from the token in %s, and no height of its own', (file) => {
     const css = read(file)
     const small = css.slice(css.indexOf('hf-size-small'))

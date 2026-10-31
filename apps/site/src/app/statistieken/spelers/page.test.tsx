@@ -493,17 +493,19 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
 
   it('has the switch, with links to this page, and marks the choice of the address', async () => {
     expect(switchOf(await render())).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control" role="group"><a aria-current="page" href="/statistieken/spelers">Alle wedstrijden</a><a href="/statistieken/spelers?competitie=eredivisie">Eredivisie</a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/statistieken/spelers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/statistieken/spelers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
     expect(switchOf(await renderWith({ competitie: 'eredivisie' }))).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control" role="group"><a href="/statistieken/spelers">Alle wedstrijden</a><a aria-current="page" href="/statistieken/spelers?competitie=eredivisie">Eredivisie</a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:1"><a href="/statistieken/spelers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/statistieken/spelers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
   })
 
   it('puts the switch in a plain cell, the first of the main column, before the card it controls', async () => {
     const html = await render()
 
-    expect(html).toMatch(/<div class="hf-page-cells"><div aria-label="Welke wedstrijden" class="hf-segmented-control"/)
+    expect(html).toMatch(
+      /<div class="hf-page-cells"><div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small"/,
+    )
     expect(html.indexOf('Welke wedstrijden')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
     expect(html).not.toMatch(/<section[^>]*>(?:(?!<\/section>).)*Welke wedstrijden/s)
   })

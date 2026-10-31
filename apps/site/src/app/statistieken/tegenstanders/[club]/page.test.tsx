@@ -170,7 +170,7 @@ describe('the page of a club', () => {
     const html = await render()
 
     expect(html).toMatch(
-      /<a aria-current="page"[^>]*href="\/statistieken\/tegenstanders\/testclub"[^>]*>Alle wedstrijden/,
+      /<a aria-current="page"[^>]*href="\/statistieken\/tegenstanders\/testclub"[^>]*><span[^>]*>Alle wedstrijden/,
     )
     expect(html).toContain('href="/statistieken/tegenstanders/testclub?competitie=eredivisie"')
   })
@@ -190,7 +190,7 @@ describe('the page of a club', () => {
 
     expect(html).toContain('In de Eredivisie hebben we nog niet tegen deze club gespeeld.')
     expect(html).not.toContain('<table')
-    expect(html).toMatch(/<a [^>]*href="\/statistieken\/tegenstanders\/beker-united"[^>]*>Alle wedstrijden/)
+    expect(html).toMatch(/<a [^>]*href="\/statistieken\/tegenstanders\/beker-united"[^>]*><span[^>]*>Alle wedstrijden/)
   })
 
   it('shows the summary for that same club with all the matches, a single cup tie', async () => {

@@ -431,7 +431,7 @@ De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clu
 
 ### De keuze tussen alle wedstrijden en de Eredivisie
 
-Bovenaan `/statistieken`, `/statistieken/spelers`, `/statistieken/tegenstanders` en de pagina van een club, direct onder de kop en links, staat een schakelaar (`SegmentedLinks` uit het designsysteem, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
+Bovenaan `/statistieken`, `/statistieken/spelers`, `/statistieken/tegenstanders` en de pagina van een club, direct onder de kop en links, staat een schakelaar (`SegmentedLinks` uit het designsysteem in de kleine maat, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
 Alle wedstrijden is de standaard en heeft geen parameter; Eredivisie is `?competitie=eredivisie`.
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
 Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.

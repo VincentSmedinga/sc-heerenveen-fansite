@@ -90,7 +90,9 @@ describe('the page /statistieken/tegenstanders', () => {
     const html = await render()
 
     expect(html).toContain('aria-label="Welke wedstrijden"')
-    expect(html).toMatch(/<a aria-current="page"[^>]*href="\/statistieken\/tegenstanders"[^>]*>Alle wedstrijden/)
+    expect(html).toMatch(
+      /<a aria-current="page"[^>]*href="\/statistieken\/tegenstanders"[^>]*><span[^>]*>Alle wedstrijden/,
+    )
     expect(html).toContain('href="/statistieken/tegenstanders?competitie=eredivisie"')
   })
 
@@ -109,7 +111,7 @@ describe('the page /statistieken/tegenstanders', () => {
       '/statistieken/tegenstanders/testclub?competitie=eredivisie',
     ])
     expect(html).toContain('Gebaseerd op alle 7 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
-    expect(html).toMatch(/<a aria-current="page"[^>]*>Eredivisie</)
+    expect(html).toMatch(/<a aria-current="page"[^>]*><span[^>]*>Eredivisie</)
   })
 
   it('credits the Wikipedia pages of the seasons we have, with the licence', async () => {

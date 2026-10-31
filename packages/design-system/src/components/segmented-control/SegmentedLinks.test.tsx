@@ -31,4 +31,28 @@ describe('SegmentedLinks', () => {
 
     expect(screen.getByTestId('switch').className).toBe('hf-segmented-control extra')
   })
+
+  it('places the thumb under the current link, and has the small size when asked', () => {
+    render(<SegmentedLinks label="Welke wedstrijden" options={options} size="small" value="league" />)
+    const group = screen.getByRole('group', { name: 'Welke wedstrijden' })
+
+    expect(group.style.getPropertyValue('--hf-segmented-count')).toBe('2')
+    expect(group.style.getPropertyValue('--hf-segmented-index')).toBe('1')
+    expect(group.className).toBe('hf-segmented-control hf-size-small')
+  })
+
+  it('leaves the thumb out when no link is current', () => {
+    render(<SegmentedLinks label="Welke wedstrijden" options={options} value="other" />)
+
+    expect(screen.getByRole('group').hasAttribute('data-empty')).toBe(true)
+    expect(screen.getAllByRole('link').every((link) => !link.hasAttribute('aria-current'))).toBe(true)
+  })
+
+  it('wraps the text of a link in the label that keeps the width of the bold text', () => {
+    render(<SegmentedLinks label="Welke wedstrijden" options={options} value="all" />)
+
+    expect(screen.getByRole('link', { name: 'Eredivisie' }).innerHTML).toBe(
+      '<span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span>',
+    )
+  })
 })
