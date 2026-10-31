@@ -272,14 +272,17 @@ describe('the page /statistieken', () => {
       expect(sheets).not.toContain('Voorbeeld United')
     })
 
-    it('has no competition, round, stadium, scorers or colour of the outcome', async () => {
+    it('has no competition, round, stadium or scorers, and colours the result by the outcome', async () => {
       const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets).not.toContain('Eredivisie')
       expect(sheets).not.toContain('KNVB Beker')
       expect(sheets).not.toContain('Speelronde')
       expect(sheets).not.toContain('Stadion Proeflaan')
-      expect(sheets).not.toContain('hf-match')
+      // The colour of the outcome is the one of Match, but nothing else of its line is here.
+      expect(sheets).toContain('hf-match-win')
+      expect(sheets).not.toContain('hf-match-score')
+      expect(sheets).not.toContain('hf-match-clubs')
       expect(sheets).not.toContain('Proefman')
     })
 

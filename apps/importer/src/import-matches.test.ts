@@ -638,7 +638,7 @@ describe('the clubs of the opponents', () => {
       club: 'Excelsior Maassluis',
       slug: 'excelsior-maassluis',
     })
-    expect(await database.db.select().from(clubs)).toHaveLength(report.kind === 'imported' ? report.clubs.length : -1)
+    expect(await database.db.select().from(clubs)).toHaveLength(18)
     expect(clubLines(report)).toContain("Matches 2026/27: new club 'Telstar' (article 'Telstar (voetbalclub)')")
     expect(clubLines(report)).toHaveLength(18)
   })
@@ -653,7 +653,11 @@ describe('the clubs of the opponents', () => {
 
     expect(report).toMatchObject({ clubs: [], kind: 'imported', matches: { added: 0, unchanged: 35, updated: 0 } })
     expect(await database.db.select().from(clubs)).toEqual(before)
-    expect(await database.db.select().from(clubNames)).toEqual([])
+    // The only other names are the spellings of Excelsior Rotterdam, from the list.
+    expect((await database.db.select().from(clubNames)).map((row) => row.name).sort()).toEqual([
+      'Excelsior',
+      'SBV Excelsior',
+    ])
   })
 
   it('makes a club without an article from the name, and gives it the article when the page links it later', async () => {
@@ -691,7 +695,7 @@ describe('the clubs of the opponents', () => {
     expect(byRound.get('Eredivisie|Speelronde 11')).toMatchObject({ club: 'NEC Nijmegen', page: 'N.E.C.', slug: 'nec' })
     expect(clubLines(report)).toHaveLength(17)
     expect(await database.db.select().from(clubs)).toHaveLength(18)
-    expect(await database.db.select().from(clubNames)).toHaveLength(1)
+    expect(await database.db.select().from(clubNames).where(eq(clubNames.clubId, club!.id))).toHaveLength(1)
   })
 
   it('adds a new spelling of a club with the same article to its other names, and logs it', async () => {
@@ -713,7 +717,7 @@ describe('the clubs of the opponents', () => {
     expect(await database.db.select().from(clubs).where(eq(clubs.slug, 'telstar'))).toMatchObject([
       { name: 'Telstar 1963', wikipediaPage: 'Telstar (voetbalclub)' },
     ])
-    expect(await database.db.select().from(clubNames)).toMatchObject([{ name: 'Telstar' }])
+    expect(await database.db.select().from(clubNames).where(eq(clubNames.name, 'Telstar'))).toHaveLength(1)
     expect(await database.db.select().from(clubs)).toHaveLength(18)
   })
 
@@ -730,6 +734,139 @@ describe('the clubs of the opponents', () => {
       slug: 'fc-twente-2',
     })
     expect(clubLines(report)).toHaveLength(18)
+  })
+
+  describe('a club the list of full names knows', () => {
+    /** The clubs with Excelsior in the name, and the club of each match against them. */
+    async function excelsior() {
+      const rows = await database.db
+        .select({ club: clubs.name, opponent: matches.opponent, slug: clubs.slug })
+        .from(matches)
+        .innerJoin(clubs, eq(matches.clubId, clubs.id))
+      const names = await database.db
+        .select({ club: clubs.name, name: clubNames.name })
+        .from(clubNames)
+        .innerJoin(clubs, eq(clubNames.clubId, clubs.id))
+
+      return {
+        clubs: await database.db.select({ name: clubs.name, slug: clubs.slug }).from(clubs).orderBy(clubs.slug),
+        matches: rows.filter((row) => row.opponent.includes('Excelsior') && row.club !== 'Excelsior Maassluis'),
+        names,
+      }
+    }
+
+    it.each([
+      ['an article with the short name', '[[Excelsior Rotterdam|Excelsior]]'],
+      ['an article with the name of the old club', '[[Excelsior Rotterdam|SBV Excelsior]]'],
+      ['the short name with no article', 'Excelsior'],
+      ['the old name with no article', 'SBV Excelsior'],
+    ])('makes one club of Excelsior Rotterdam from %s, with the full name and the slug of it', async (_name, text) => {
+      const spelled = original.programme.replace('[[Excelsior Rotterdam]]', text)
+
+      expect(spelled).not.toBe(original.programme)
+
+      const { server } = await serve({ programme: spelled })
+      const report = await importAt(server, first)
+      const found = await excelsior()
+
+      // The programme has two matches against the club: the second one keeps its own spelling.
+      expect(found.matches).toHaveLength(2)
+      expect(found.matches.every((row) => row.club === 'Excelsior Rotterdam')).toBe(true)
+      expect(found.matches.every((row) => row.slug === 'excelsior-rotterdam')).toBe(true)
+      expect(found.clubs.filter((club) => club.name.startsWith('Excelsior'))).toEqual([
+        { name: 'Excelsior Maassluis', slug: 'excelsior-maassluis' },
+        { name: 'Excelsior Rotterdam', slug: 'excelsior-rotterdam' },
+      ])
+      expect(found.names).toEqual(
+        expect.arrayContaining([
+          { club: 'Excelsior Rotterdam', name: 'Excelsior' },
+          { club: 'Excelsior Rotterdam', name: 'SBV Excelsior' },
+        ]),
+      )
+      expect(found.names).toHaveLength(2)
+      expect(clubLines(report)).toHaveLength(18)
+      expect(formatMatchReport(report)).toContain("new name 'SBV Excelsior' for club 'Excelsior Rotterdam'")
+    })
+
+    it('keeps Excelsior Maassluis apart from Excelsior Rotterdam', async () => {
+      const { server } = await serve({
+        programme: original.programme.replace('[[Excelsior Rotterdam]]', 'Excelsior'),
+      })
+
+      await importAt(server, first)
+
+      const byRound = await clubsByRound()
+
+      expect(byRound.get('KNVB Beker|Eerste ronde')).toMatchObject({
+        club: 'Excelsior Maassluis',
+        slug: 'excelsior-maassluis',
+      })
+      expect(await database.db.select().from(clubs).where(eq(clubs.slug, 'excelsior'))).toEqual([])
+    })
+
+    /** Excelsior as an earlier import made it: two clubs, each with older matches. */
+    async function excelsiorTwice() {
+      const older = (opponent: string, round: string, matchDate: string) => ({
+        competition: 'Eredivisie' as const,
+        home: true,
+        kickoffAt: new Date(`${matchDate}T18:45:00Z`),
+        matchDate,
+        opponent,
+        round,
+        season: '2025/26',
+        status: 'scheduled' as const,
+      })
+
+      await database.db
+        .insert(matches)
+        .values(
+          await withClubs(database.db, [
+            older('Excelsior', 'Speelronde 3', '2025-08-24'),
+            older('Excelsior', 'Speelronde 20', '2026-01-18'),
+            older('Excelsior Rotterdam', 'Speelronde 9', '2025-10-05'),
+          ]),
+        )
+    }
+
+    it('merges the two clubs of an earlier import on the next read, and logs it', async () => {
+      await excelsiorTwice()
+
+      expect((await excelsior()).clubs.filter((club) => club.name.startsWith('Excelsior'))).toEqual([
+        { name: 'Excelsior', slug: 'excelsior' },
+        { name: 'Excelsior Rotterdam', slug: 'excelsior-rotterdam' },
+      ])
+
+      const { server } = await serve()
+      const report = await importAt(server, first)
+      const found = await excelsior()
+
+      expect(formatMatchReport(report)).toContain(
+        "Matches 2026/27: merged club 'Excelsior Rotterdam' into club 'Excelsior'",
+      )
+      expect(found.clubs.filter((club) => club.name.startsWith('Excelsior'))).toEqual([
+        { name: 'Excelsior Maassluis', slug: 'excelsior-maassluis' },
+        { name: 'Excelsior Rotterdam', slug: 'excelsior-rotterdam' },
+      ])
+      expect(found.matches).toHaveLength(5)
+      expect(found.matches.every((row) => row.club === 'Excelsior Rotterdam')).toBe(true)
+      expect(found.names).toEqual(expect.arrayContaining([{ club: 'Excelsior Rotterdam', name: 'Excelsior' }]))
+      // The match of the season that was read is not counted as updated: it was right already.
+      expect(report).toMatchObject({ matches: { added: 35, updated: 0 } })
+    })
+
+    it('changes nothing when it reads again', async () => {
+      await excelsiorTwice()
+
+      const { server } = await serve()
+
+      await importAt(server, first)
+
+      const before = await excelsior()
+      const again = await importAt(server, new Date(first.getTime() + hours(1)))
+
+      expect(again).toMatchObject({ clubs: [], matches: { added: 0, unchanged: 35, updated: 0 } })
+      expect(await excelsior()).toEqual(before)
+    })
   })
 
   it('writes nothing about a club in the log when the read fails, and makes no club', async () => {
@@ -1144,7 +1281,7 @@ describe('the import command', () => {
     const { code, lines } = await run(server, feed)
 
     expect(code).toBe(0)
-    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !line.includes(': new club '))).toEqual([
+    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       'Matches 2026/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-10-24',
     ])

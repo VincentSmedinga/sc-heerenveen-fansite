@@ -14,13 +14,16 @@ const meta = preview.meta({
       description: {
         component: [
           'Een gespeelde wedstrijd van sc Heerenveen 1 als korte regel in een lijst: de dag, de tegenstander met "thuis" of "uit", en de uitslag vanuit onze kant, zoals "za 24 okt Testdorp FC · thuis 3–0".',
-          'Het is voor een lijst die over onze club gaat, zoals de wedstrijden waarin we de nul hielden.',
+          'Het is voor een lijst die over onze club gaat, zoals de wedstrijden waarin we de nul hielden of de wedstrijden tegen één club.',
           'Onze eigen naam staat dus niet in de regel.',
           '',
-          'De regel heeft geen competitie, ronde, stadion, tijd of doelpuntenmakers: dat is een `Match`.',
-          "Hij heeft ook niet de kleur van de uitkomst, want in zo'n lijst hebben alle regels dezelfde soort uitslag.",
-          'Een schermlezer hoort de uitslag als "3 tegen 0".',
+          'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen, zoals in een `Match`: groen bij winst, rood bij verlies en neutraal bij gelijkspel, thuis en uit.',
+          'De uitkomst volgt uit `goalsFor` en `goalsAgainst`, met dezelfde regel als `Match`, dus er is geen eigenschap voor.',
+          'De kleur is nooit het enige teken: de cijfers zijn de uitslag, ze staan in een zwaarder gewicht, en een schermlezer hoort de uitslag als "3 tegen 0".',
+          'In geforceerde kleuren vervangt de browser de kleur en blijft het gewicht.',
+          'Een bekerwedstrijd die op strafschoppen is beslist, staat hier als gelijkspel, want het onderdeel kent de strafschoppen niet.',
           '',
+          'De regel heeft geen competitie, ronde, stadion, tijd of doelpuntenmakers: dat is een `Match`.',
           '- `time` is de dag zoals een bezoeker hem leest, zoals "za 24 okt", en `dateTime` is de waarde voor machines, zoals "2026-10-24".',
           '- `home` zegt of sc Heerenveen thuis speelde.',
           '- `goalsFor` zijn de doelpunten van sc Heerenveen, `goalsAgainst` die van de tegenstander.',
@@ -158,6 +161,90 @@ const renderNone = () => (
     </Card>
   </div>
 )
+
+// Each outcome, home and away, from the side of sc Heerenveen: 0–2 away is a win.
+const outcomes = [
+  { dateTime: '2026-10-24', goalsAgainst: 0, goalsFor: 3, home: true, opponent: 'Testdorp FC', time: 'za 24 okt' },
+  { dateTime: '2026-10-17', goalsAgainst: 2, goalsFor: 0, home: true, opponent: 'Voorbeeld United', time: 'za 17 okt' },
+  { dateTime: '2026-10-10', goalsAgainst: 1, goalsFor: 1, home: false, opponent: 'Proefstad SV', time: 'za 10 okt' },
+  { dateTime: '2026-10-03', goalsAgainst: 0, goalsFor: 2, home: false, opponent: 'Nepdorp FC', time: 'za 3 okt' },
+  {
+    dateTime: '2026-09-26',
+    goalsAgainst: 3,
+    goalsFor: 1,
+    home: false,
+    opponent: 'Voorbeeldstad BV',
+    time: 'za 26 sep',
+  },
+] as const
+
+const renderOutcomes = () => (
+  <div style={{ maxInlineSize: '20rem' }}>
+    <Card aria-labelledby="uitkomsten-kop">
+      <Heading id="uitkomsten-kop" level={2}>
+        Wedstrijden tegen Testdorp FC
+      </Heading>
+      <List role="list">
+        {outcomes.map((match) => (
+          <List.Item key={match.dateTime}>
+            <ShortMatch {...match} />
+          </List.Item>
+        ))}
+      </List>
+    </Card>
+  </div>
+)
+
+// The same list on each surface a card has on the pages, since the colours must hold on all.
+const surfaces = [
+  { name: 'Wit vlak', surface: 'default' },
+  { name: 'Zacht vlak', surface: 'soft' },
+  { name: 'Warm vlak', surface: 'warm' },
+  { name: 'Sterk vlak', surface: 'strong' },
+] as const
+
+const renderSurfaces = () => (
+  <div style={{ display: 'grid', gap: '1rem', maxInlineSize: '20rem' }}>
+    {surfaces.map(({ name, surface }) => (
+      <Card aria-labelledby={`vlak-${surface}`} key={surface} surface={surface}>
+        <Heading id={`vlak-${surface}`} level={2}>
+          {name}
+        </Heading>
+        <List role="list">
+          {outcomes.slice(0, 3).map((match) => (
+            <List.Item key={match.dateTime}>
+              <ShortMatch {...match} />
+            </List.Item>
+          ))}
+        </List>
+      </Card>
+    ))}
+  </div>
+)
+
+export const OutcomesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Winst, verlies en gelijkspel onder elkaar, licht',
+  render: renderOutcomes,
+})
+
+export const OutcomesDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Winst, verlies en gelijkspel onder elkaar, donker',
+  render: renderOutcomes,
+})
+
+export const SurfacesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Op elk vlak van een kaart, licht',
+  render: renderSurfaces,
+})
+
+export const SurfacesDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Op elk vlak van een kaart, donker',
+  render: renderSurfaces,
+})
 
 export const ShortLight = meta.story({
   globals: { theme: 'light' },

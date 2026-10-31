@@ -91,6 +91,9 @@ test.describe('the link to the top in the footer', () => {
     await page.setViewportSize({ height: 500, width: 390 })
     await page.goto(longPage)
     await scrollTo(page, (await heights(page)).page)
+    // The scroll position drives the animation that shows the link, and the browser applies it
+    // in the next frame. A Tab before that frame passes a link that is still hidden.
+    await expect(page.locator('.hf-page-top-link')).toHaveCSS('visibility', 'visible')
 
     await page.getByRole('navigation', { name: 'Over de site' }).getByRole('link').last().focus()
     await page.keyboard.press('Tab')

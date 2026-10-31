@@ -5513,6 +5513,41 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** een club die Wikipedia op twee manieren linkt, zoals `Excelsior` zonder en `Excelsior Rotterdam` met een artikel, wordt twee clubs tot iemand ze samenvoegt.
   De import raadt dat niet, net als bij de spelers met dezelfde achternaam.
 - **Alternatieven:** de naam als sleutel en slug (breekt bij elke nieuwe schrijfwijze); een tabel met alleen een lijst van namen zonder artikel (dan is een fusie of een naamswijziging niet te zien); de slug uit de huidige naam laten volgen (een adres dat verandert, breekt links); een samenvoegcommando (nu niet nodig).
+- **Later:** zie _Een club heeft een volledige naam, en een kleine lijst in de importer zegt welke schrijfwijzen dezelfde club zijn_ (31 oktober 2026): het nadeel hierboven is voor de clubs in die lijst opgelost, en de importer voegt zo'n club zelf samen.
+  De rest van deze beslissing blijft: één artikel is één club, de slug verandert niet door een andere naam, en een club die niet in de lijst staat, voegt de projecteigenaar nog met de hand samen.
+  Alleen bij het samenvoegen van een club uit de lijst verandert de slug van de club die blijft.
+
+### Een club heeft een volledige naam, en een kleine lijst in de importer zegt welke schrijfwijzen dezelfde club zijn
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de importer heeft een kleine, vaste lijst van clubs met hun volledige naam en hun andere schrijfwijzen, `clubFullNames` in `apps/importer/src/club-names.ts`.
+  Nu is dat één club: `Excelsior Rotterdam`, met `Excelsior` en `SBV Excelsior` (#511).
+  - De importer zoekt een naam eerst in die lijst.
+    `Excelsior`, `SBV Excelsior` en `Excelsior Rotterdam` zijn dezelfde club, met of zonder artikel, en de club heet altijd de volledige naam.
+    Een naam die er niet in staat, werkt zoals voorheen, dus `Excelsior Maassluis` blijft een andere club.
+  - De pagina's tonen de volledige naam, met de slug ervan, `excelsior-rotterdam`.
+    De andere schrijfwijzen staan in `club_names` en nergens op de pagina.
+  - Staat een club uit de lijst twee keer in de database, dan voegt de importer ze samen bij de eerstvolgende lezing van een seizoen, in dezelfde transactie als de import (`repairClubs` in `@fansite/db/clubs`).
+    De club met een artikel blijft, anders die met de meeste wedstrijden, anders de oudste.
+    De wedstrijden en de andere namen gaan naar die club, de naam van de club die weggaat wordt een andere naam, en dan verdwijnt zijn rij.
+    De club die blijft krijgt de volledige naam en de slug ervan.
+    De oude slug, `excelsior`, vervalt zonder omleiding.
+    Elke samenvoeging, naamswijziging en nieuwe naam staat in het logboek van de run.
+  - Hebben twee clubs elk een eigen artikel, dan voegt de importer ze niet samen: één artikel is één club.
+    Hij zegt dat in het logboek.
+  - Meer clubs komen alleen op de lijst als de projecteigenaar het per club beslist.
+    Bij het zoeken naar zulke paren in de lokale gegevens stond alleen Excelsior dubbel.
+- **Waarom:** de pagina Tegenstanders (#415) toonde `Excelsior` en `Excelsior Rotterdam` als twee clubs, omdat Wikipedia de club in het programma met een link en in de beker zonder schrijft.
+  De projecteigenaar wil één club met één adres en de volledige naam, zoals bij Sparta Rotterdam.
+  De importer kan niet raden dat twee schrijfwijzen dezelfde club zijn: `Excelsior Maassluis` begint ook met `Excelsior`.
+  Een lijst met namen is dan de kleinste oplossing, en de projecteigenaar kijkt per club mee.
+- **Hoe:** de importer herstelt de bestaande gegevens zelf bij de volgende lezing en niet met een migratie.
+  De lokale gegevens zijn echte importen, en op acceptatie en productie draait de import elk uur: een migratie zou dezelfde stappen maken zonder dat ze in het logboek van de run komen.
+  Een tweede lezing verandert niets meer.
+- **Nadeel:** een club moet op de lijst staan voordat hij goed samengaat.
+  Een nieuw paar dat niet op de lijst staat, wordt nog steeds twee clubs tot iemand het ziet.
+  De lijst is een tweede plek met clubnamen naast `otherClubGroups` in `relevance-terms.ts`; die twee hebben een ander doel en blijven los.
+- **Alternatieven:** de volledige naam raden uit het begin van een naam (`Excelsior` en `Excelsior Maassluis` zouden samenvallen); een migratie die de twee clubs samenvoegt (geen regel in het logboek, en de lijst moet in de importer toch bestaan); een samenvoegcommando (een commando voor één club, en de lijst doet het vanzelf); de oude slug laten omleiden (er zijn nog geen openbare links, zie #33).
 
 ### Een gestaakte wedstrijd telt niet, de latere uitslag geldt
 
@@ -6791,6 +6826,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een letter (W, G, V) of een woord erbij, voor wie kleuren niet uit elkaar houdt (de projecteigenaar vond de cijfers voldoende); gele of blauwe kleur voor gelijkspel (geel is een waarschuwing en blauw is de kleur van links); de beker apart behandelen (niet nodig: neutraal zegt niets over wie doorging).
 - **Later:** zie _Verlenging en strafschoppen worden bewaard en getoond_.
   Bij strafschoppen volgt de kleur de strafschoppen, en een gelijke stand zonder bekende strafschoppen blijft neutraal.
+- **Later:** zie _`ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`_ (31 oktober 2026): ook `ShortMatch` gebruikt deze kleuren, met dezelfde regel voor de uitkomst.
 
 ### Verlenging en strafschoppen worden bewaard en getoond
 
@@ -7172,6 +7208,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `ShortMatch` heeft zes props en geen kleur, want in deze lijst hebben alle regels dezelfde soort uitslag.
   De selectie en het aantal komen uit dezelfde wedstrijden die de pagina al haalt (`cleanSheetsOf`), en de knop "Laad 5 meer" werkt zoals op de homepage, met `?nul=` in het adres.
 - **Alternatieven:** de volledige wedstrijdregels (veel dubbele informatie naast de uitslagen); alleen een getal zonder lijst (zegt niet welke wedstrijden); een markering in de lijst met uitslagen (de nullen verdwijnen dan tussen de rest); een korte uitvoering van `Match` (maakt `Match` groter).
+- **Later:** zie _`ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`_ (31 oktober 2026): `ShortMatch` heeft sindsdien wel de kleur van de uitkomst.
+  De rest blijft: een eigen onderdeel met zes props, zonder competitie, ronde, stadion of doelpuntenmakers.
 
 ### De kaart met topscorers toont alle doelpuntenmakers
 
@@ -7829,6 +7867,28 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een sleutel per keuze in de cache (meer geheugen en meer code voor dezelfde gegevens).
   Een zin op de drie kaarten die de keuze niet volgen (langere kaarten, en de schakelaar zegt het al).
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de schakelaar staat sindsdien ook op `/statistieken/tegenstanders` en op de pagina van een club, en telt daar de wedstrijden van alle seizoenen.
+
+### `ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de uitslag in `ShortMatch` is groen bij winst, rood bij verlies en neutraal bij gelijkspel, voor sc Heerenveen, thuis en uit, zoals in `Match` (#510).
+  - **De regel:** `Match` en `ShortMatch` gebruiken dezelfde hulpfunctie, `outcomeOf` in `components/outcome.ts`, en niet een kopie.
+    De uitkomst volgt uit `goalsFor` en `goalsAgainst`.
+  - **De opmaak:** dezelfde klassen (`hf-match-win`, `hf-match-loss`, `hf-match-draw`) en dezelfde tokens (`--hf-colour-outcome-win`, `-loss` en `-draw`).
+    Er komt geen eigenschap en geen schakelaar: elke `ShortMatch` krijgt de kleur.
+  - **Het gewicht** was al dat van `Match` (`--hf-figure-font-weight`), dus de CSS van de uitslag verandert niet.
+    In geforceerde kleuren vervangt de browser de kleur en blijft het gewicht.
+  - **Het contrast** haalt 4,5:1 op de vier vlakken van een kaart (wit, zacht, warm en sterk), in licht en donker: het laagste is 5,31:1 (winst en gelijkspel op het warme vlak in licht).
+    Er is dus geen kleur aangepast.
+    `pnpm test:stories` toetst het met axe op een story per vlak, in licht en donker.
+  - **Een bekerwedstrijd na strafschoppen** staat in `ShortMatch` als gelijkspel, omdat het onderdeel de strafschoppen niet kent.
+    Dat is een bekende beperking, geen onderdeel van dit besluit.
+  - **`ShortStaff`** leent de opmaak maar heeft geen uitslag, dus hij blijft zoals hij was; een test laat dat zien.
+- **Waarom:** in een lijst als de wedstrijden tegen één club, Uitersten of De nul gehouden ziet een supporter zo in één oogopslag wat we wonnen en verloren.
+  De eerdere reden om het weg te laten (alle regels van De nul gehouden hebben dezelfde soort uitslag) gold niet voor de andere lijsten, en een regel die zo hoort te werken als `Match` hoort ook dezelfde kleur te hebben.
+  Een gedeelde functie voorkomt dat de twee onderdelen op den duur een andere uitkomst kleuren.
+  De kleur is een aanvulling op de cijfers en niet het enige teken: de tekst voor een schermlezer blijft "3 tegen 0".
+- **Alternatieven:** een eigenschap om de kleur uit te zetten (niemand vroeg erom, en elke lijst zou een keuze moeten maken); de regel kopiëren naar `ShortMatch` (twee plaatsen die uit elkaar kunnen lopen); een eigen klasse per uitkomst in `short-match.css` (dezelfde kleuren op twee plaatsen).
 
 ### De pagina Spelers toont bijzondere doelpunten
 

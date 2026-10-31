@@ -458,7 +458,15 @@ Vier queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
 
 ### Een club met twee namen samenvoegen
 
-Staan dezelfde club en dezelfde artikelen twee keer in `clubs`, zoals `Excelsior` en `Excelsior Rotterdam` (de eerste zonder artikel, uit een wedstrijd waar de naam geen link had), dan voegt de projecteigenaar of een Builder ze met de hand samen.
+Staat een club twee keer in `clubs` omdat Wikipedia hem op twee manieren schrijft, zoals `Excelsior` en `Excelsior Rotterdam`, dan zijn er twee wegen.
+
+Staat de club in de lijst met volledige namen van de importer (`clubFullNames` in `apps/importer/src/club-names.ts`), dan voegt de importer ze zelf samen bij de volgende lezing van een seizoen, met `repairClubs(db, lijst)`.
+Dat doet hetzelfde als de opdrachten hieronder, in één transactie met de import.
+De club met een artikel blijft, anders die met de meeste wedstrijden, anders de oudste, en hij krijgt de volledige naam, de slug ervan en de andere schrijfwijzen als andere namen.
+Hebben beide clubs een eigen artikel, dan voegt hij niets samen en zegt dat in het logboek.
+Een club aan de lijst toevoegen staat in de [README van de importer](../../apps/importer/README.md), onder _De clubs van de tegenstanders_.
+
+Staat de club niet in die lijst, dan voegt de projecteigenaar of een Builder ze met de hand samen.
 Er is geen opdracht voor, want het komt zelden voor.
 Doe het in één transactie, met `<blijft>` en `<gaat weg>` als het `id` van de twee clubs:
 
@@ -535,7 +543,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
 - `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `standings`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
-- `@fansite/db/clubs`: `createClubBook(db)` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
+- `@fansite/db/clubs`: `createClubBook(db, { fullNames })` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft, en een naam uit de lijst met volledige namen eerst als de volledige naam neemt; `repairClubs(db, fullNames)` voegt een club uit die lijst samen die er twee keer staat; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;

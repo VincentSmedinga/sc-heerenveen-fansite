@@ -37,4 +37,11 @@ describe('ShortStaff', () => {
     expect(container.querySelector('.hf-short-match-opponent')?.textContent).toBe('Testtrainer Twee')
     expect(container.querySelector('.hf-short-match-where')).toBeNull()
   })
+
+  it('has no result and so no colour of an outcome, although it borrows the look of a short match', () => {
+    const { container } = render(<ShortStaff givenName="Testtrainer" interim period="tot 14 mrt 2026" surname="Een" />)
+
+    expect(container.querySelector('.hf-short-match-score')).toBeNull()
+    expect(container.querySelector('[class*="hf-match-"]')).toBeNull()
+  })
 })

@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
+import { outcomeOf } from '../outcome'
 import { Time } from '../time/Time'
 
 export type ShortMatchProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
@@ -35,9 +36,13 @@ const separator = (
  * "thuis" or "uit", and the result from the side of sc Heerenveen, as in "za 24 okt Testdorp FC
  * · thuis 3–0". It is for a list that is about our club, such as the matches in which we kept a
  * clean sheet, so our own name is not in the line. It has no competition, round, stadium, time
- * or scorers, and no colour for the outcome: those belong to Match. A screen reader hears the
- * result as "3 tegen 0". short-match.css gives it its look, and draws the lines between the
- * lines of a List.
+ * or scorers: those belong to Match. The result has the colour of the outcome for sc
+ * Heerenveen, as in Match: green for a win, red for a loss and neutral for a draw, whichever
+ * side it played on, from the same rule and with the same classes. The goals say the same, so
+ * the colour is never the only sign, and a screen reader hears nothing extra: it hears the
+ * result as "3 tegen 0". A cup match that went to a shoot-out is a draw here, because the
+ * component doesn't know the shoot-out. short-match.css gives it its look, and draws the lines
+ * between the lines of a List.
  */
 export const ShortMatch = ({
   className,
@@ -58,7 +63,7 @@ export const ShortMatch = ({
       {separator}
       <span className="hf-short-match-where">{home ? 'thuis' : 'uit'}</span>
     </span>
-    <span className="hf-short-match-score">
+    <span className={classNames('hf-short-match-score', `hf-match-${outcomeOf(goalsFor, goalsAgainst)}`)}>
       <span aria-hidden="true">
         {goalsFor}–{goalsAgainst}
       </span>
