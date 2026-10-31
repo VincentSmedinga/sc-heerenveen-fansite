@@ -1,18 +1,21 @@
 /*
- * A segmented control: a rounded track with the options side by side and a thumb under the chosen one. The options share
- * the width of the track equally, and the thumb is as wide as one option, less a margin all round. The standard size is
- * 44px high and the small size (hf-size-small) 36px, from the token of the sizes, so an option is a target of that
- * height over its whole cell.
+ * A segmented control: a rounded track with the options side by side and a thumb under the
+ * chosen one. The options share the width of the track equally, and the thumb is as wide as one
+ * option, less a margin all round. The standard size is 44px high and the small size (hf-size-
+ * small) 36px, from the token of the sizes, so an option is a target of that height over its
+ * whole cell.
  *
- * The thumb is the pseudo-element ::before of the group. It finds its place from two custom properties that the
- * component sets, the number of options and the index of the chosen one, so it works for links without JavaScript, and
- * for buttons whose value the page changes. It slides with a transition on `translate`, which the motion tokens make
- * 0s with reduced motion, so it jumps there. The chosen option is shown by more than colour: the thumb has a border
- * that reaches 3:1 against the track, and the letters are heavier. A label is laid over a copy of itself in bold
- * (see SegmentedLabel), so the track does not change width with the choice.
+ * The thumb is the pseudo-element ::before of the group. It finds its place from two custom
+ * properties that the component sets, the number of options and the index of the chosen one, so
+ * it works for links without JavaScript, and for buttons whose value the page changes. It
+ * slides with a transition on `translate`, which the motion tokens make 0s with reduced motion,
+ * so it jumps there. The chosen option is shown by more than colour: the thumb has a border
+ * that reaches 3:1 against the track, and the letters are heavier. A label is laid over a copy
+ * of itself in bold (see SegmentedLabel), so the track does not change width with the choice.
  *
- * Between two pages, when the options are links, the thumb slides if the browser supports view transitions between
- * documents; see the end of this file. Without that support it jumps to the new choice.
+ * Between two pages, when the options are links, the thumb slides if the browser supports view
+ * transitions between documents; see the end of this file. Without that support it jumps to the
+ * new choice.
  */
 
 @layer hf.components {
@@ -82,7 +85,9 @@
         color: var(--hf-colour-text-default);
       }
 
-      /* The ring runs round the thumb, in the space between the thumb and the edge of the cell. */
+      /*
+       * The ring runs round the thumb, in the space between the thumb and the edge of the cell.
+       */
       &:focus-visible {
         outline-offset: calc(-1 * var(--hf-segmented-edge));
       }
@@ -111,8 +116,8 @@
   }
 
   /*
-   * The text of an option, with a copy of it in bold below that takes no height, so the option is as wide for its bold
-   * letters as for its regular ones.
+   * The text of an option, with a copy of it in bold below that takes no height, so the option
+   * is as wide for its bold letters as for its regular ones.
    */
   .hf-segmented-label {
     display: block;
@@ -127,7 +132,10 @@
       visibility: hidden;
     }
 
-    /* The icon in front of the text takes room the copy does not have: its size and its space to the text (icon.css). */
+    /*
+     * The icon in front of the text takes room the copy does not have: its size and its space
+     * to the text (icon.css).
+     */
     &:has(> .hf-icon-head)::after {
       padding-inline-start: 1.375em;
     }
@@ -135,17 +143,19 @@
 }
 
 /*
- * The slide from one page to the next, for options that are links. A browser that supports view transitions between
- * documents keeps the thumb as an element of its own and moves it from the old place to the new one, and the labels
- * stay above it (they have names of their own, because a named element is painted over the page). Everything else on
- * the page, the root, changes at once, as it did before. With reduced motion the pages are not joined, so the thumb
- * jumps. A browser without support loads the next page as ever. Only one such group should be on a page: a name is
- * used by one element.
+ * The slide from one page to the next, for options that are links. A browser that supports view
+ * transitions between documents keeps the thumb as an element of its own and moves it from the
+ * old place to the new one, and the labels stay above it (they have names of their own, because
+ * a named element is painted over the page). Everything else on the page, the root, changes at
+ * once, as it did before. With reduced motion the pages are not joined, so the thumb jumps. A
+ * browser without support loads the next page as ever. Only one such group should be on a page:
+ * a name is used by one element.
  */
 @supports (view-transition-name: none) {
   /*
-   * Temporary exception to the Baseline rule: view transitions between documents have been newly available since 2025
-   * and become widely available in 2028. Stylelint then reports this disable as needless. Then remove it.
+   * Temporary exception to the Baseline rule: view transitions between documents have been
+   * newly available since 2025 and become widely available in 2028. Stylelint then reports this
+   * disable as needless. Then remove it.
    */
   /* stylelint-disable plugin/use-baseline -- widely available in 2028 */
   @media (prefers-reduced-motion: no-preference) {

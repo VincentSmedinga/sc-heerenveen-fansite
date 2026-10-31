@@ -106,10 +106,12 @@
     --hf-colour-background-hover: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
 
     /*
-     * The track of a segmented control and the thumb under the chosen option. The track is a step darker than the page
-     * and the surfaces in light (grey-200) and a step lighter than them in dark (blue-800), so it reads as a groove. The
-     * thumb is white in light and blue-700 in dark. Its border is the border of a field (--hf-colour-border-input), which
-     * reaches 3:1 against the track and against the thumb itself in both themes. The shadow is a light edge below the thumb.
+     * The track of a segmented control and the thumb under the chosen option. The track is a
+     * step darker than the page and the surfaces in light (grey-200) and a step lighter than
+     * them in dark (blue-800), so it reads as a groove. The thumb is white in light and
+     * blue-700 in dark. Its border is the border of a field (--hf-colour-border-input), which
+     * reaches 3:1 against the track and against the thumb itself in both themes. The shadow is
+     * a light edge below the thumb.
      */
     --hf-colour-background-track: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-800));
     --hf-colour-background-thumb: light-dark(var(--hf-colour-white), var(--hf-colour-blue-700));
