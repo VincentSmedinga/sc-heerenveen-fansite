@@ -66,13 +66,13 @@ describe('createVisitCounter', () => {
 
     await counter.record({ address: '203.0.113.7', now: morning, path: '/', userAgent: browser })
     await counter.record({ address: '203.0.113.7', now: morning, path: '/', userAgent: browser })
-    await counter.record({ address: '203.0.113.7', now: morning, path: '/podcasts', userAgent: browser })
+    await counter.record({ address: '203.0.113.7', now: morning, path: '/nieuws/podcasts', userAgent: browser })
     await counter.record({ address: '203.0.113.8', now: morning, path: '/', userAgent: browser })
     await counter.record({ address: '203.0.113.7', now: morning, path: '/', userAgent: 'Safari' })
 
     expect(await rows('page_views')).toEqual([
       { day: '2026-10-26', path: '/', views: 4 },
-      { day: '2026-10-26', path: '/podcasts', views: 1 },
+      { day: '2026-10-26', path: '/nieuws/podcasts', views: 1 },
     ])
     // Three visitors: two addresses, and the first address with another browser.
     expect(await rows('daily_visitors')).toEqual([{ day: '2026-10-26', visitors: 3 }])

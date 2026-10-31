@@ -164,7 +164,7 @@ describe('the page Zoeken with a search', () => {
     expect(html).toContain('wo 14 okt<')
   })
 
-  it('shows a podcast episode as on /podcasts, with its facts', async () => {
+  it('shows a podcast episode as on /nieuws/podcasts, with its facts', async () => {
     const html = await render({ q: 'klaverboer' })
 
     expect(html).toContain('href="https://podcast.test/e/120"')

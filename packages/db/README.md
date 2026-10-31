@@ -369,7 +369,7 @@ Een naam komt in een seizoen één keer voor, en een pagina ook.
 Er staat niets anders in: geen nationaliteit, leeftijd, contract, statistieken of foto.
 De zoekterm is een eigen kolom, zodat je hem voor één speler kunt verbeteren: de importer zet hem alleen bij een nieuwe speler.
 
-De lijst met spelers op `/zoeken` komt uit `listSquad` in `queries.ts`, de ene plek die bepaalt wie erin staat.
+De lijst met spelers op `/nieuws/zoeken` komt uit `listSquad` in `queries.ts`, de ene plek die bepaalt wie erin staat.
 Alleen de rijen van het lopende seizoen horen erin, en alleen de spelers die in de selectie staan (`in_squad`): een speler die vertrok, blijft in de tabel voor zijn doelpunten en staat niet in de lijst.
 De zoekpagina met de lijst van spelers (#107) moet dus `listSquad` gebruiken en geen eigen vraag naar `players` doen.
 De pagina van de selectie geeft `findSquadPage`, voor de bronvermelding onder de lijst.
