@@ -152,9 +152,28 @@ Een agent heeft daar geen toegang.
 
    Maakt de host de map van de app niet zelf aan en klaagt het formulier daarover, maak dan de lege map `domains/ds.heerenveen.org/mcp` aan met de bestandsbeheerder van DirectAdmin.
    Er hoeft niets in te staan: de eerste deploy zet `server.mjs` erin.
+
+   Maak daarna, in dezelfde bestandsbeheerder en voordat je de app aanzet, twee dingen aan:
+   1. De lege map `domains/ds.heerenveen.org/public_html/mcp`.
+      _Setup Node.js App_ schrijft de regels voor het pad in de map van het adres van de app.
+      Bestaat die map niet, dan geeft _Stop_ of _Restart_ een `FileNotFoundError`.
+   2. Daarin het lege bestand `.htaccess`.
+      Het paneel past dat bestand aan en maakt het zelf niet aan.
+
    Zet de app daarna aan.
-   Waarschijnlijk zet de host de instellingen voor het pad in `public_html/.htaccess`, maar dat is niet uitgeprobeerd.
-   De kopie van Storybook laat dat bestand in elk geval staan.
+   Het paneel zet zijn blok met regels (`PassengerBaseURI` en meer) in `public_html/mcp/.htaccess`, en niet in `public_html/.htaccess`.
+   De kopie van Storybook laat `public_html/mcp/` staan (`--exclude=/mcp/` in `storybook.yml`), dus dat bestand blijft bij elke deploy bestaan.
+
+   Twee dingen zijn normaal:
+   - _Save_ blijft grijs.
+     De knop wordt pas actief als je een veld wijzigt.
+     _Stop_, _Start_ en _Restart_ werken ook zonder.
+   - De webserver stuurt een `GET` op `/mcp` door naar `/mcp/`, omdat de map `public_html/mcp` bestaat.
+     Een `POST` bereikt de app wel.
+
+   Verplaats de _Application root_ niet naar `public_html`.
+   Die blijft `domains/ds.heerenveen.org/mcp`, naast `public_html`.
+   Staat hij in `public_html`, dan zegt het paneel "Unable to find app-root folder".
 
 8. **Eerste deploy van de MCP-server.**
    Voeg de pull request samen, of start _Actions → Storybook → Run workflow_ op `main`.
@@ -187,7 +206,7 @@ Een agent heeft daar geen toegang.
 
   Het antwoord begint met `event: message` en bevat `"serverInfo"`.
 
-- Een ander adres onder de app geeft `404`, en geen van beide mag iets laten zien van de host: `curl -i https://ds.heerenveen.org/mcp/anders` en `curl -i -X GET https://ds.heerenveen.org/mcp` (`405`).
+- Een ander adres onder de app geeft `404`, en mag niets van de host laten zien: `curl -i https://ds.heerenveen.org/mcp/anders`.
   Storybook zelf blijft werken: <https://ds.heerenveen.org> en `index.json` zijn nog dezelfde.
 - Een sessie van Claude Code in een andere map voegt de server toe met `claude mcp add --transport http ds https://ds.heerenveen.org/mcp`.
   `/mcp` toont `ds` als verbonden, en een vraag naar de props van `Heading` wordt beantwoord met `level` en `appearance`, met hun typen.
@@ -226,11 +245,12 @@ Een agent heeft daar geen toegang.
      Laat het formulier het pad `mcp` niet toe, meld dat dan in het issue (#213).
      Zet niets anders neer: de alternatieven staan in stap 7 en de eigenaar beslist.
   4. **De regels.**
-     Kijk of `public_html/.htaccess` de regels van de app bevat.
-     De host zet ze daar bij het aanmaken van de app, en de kopie van Storybook laat dat bestand staan.
+     Kijk of `public_html/mcp/.htaccess` bestaat en de regels van de app bevat (`PassengerBaseURI` en meer).
+     Het paneel zet ze daar als je de app aanmaakt of opnieuw opslaat, en de kopie van Storybook laat de map `public_html/mcp/` staan.
+     Bestaat de map of het bestand niet, maak ze dan aan zoals in stap 7 staat, en kies _Stop_ en daarna _Start_.
   5. **Controleren.**
-     Gebruik `curl -i -X GET https://ds.heerenveen.org/mcp`.
-     Is de app bereikt, dan antwoordt hij met `405` en de tekst `Method not allowed` als gewone tekst.
+     Gebruik de `initialize` uit _Controleren_.
+     Is de app bereikt, dan is het antwoord `200` en begint het met `event: message`.
      Een HTML-pagina met `404` is nog steeds de webserver.
   6. **Opnieuw.**
      Start _Actions → Storybook → Run workflow_ op `main`, of raak `tmp/restart.txt` aan, en lees de stap _Check ds.heerenveen.org/mcp_ opnieuw.
@@ -246,8 +266,9 @@ Een agent heeft daar geen toegang.
      Mist `server.mjs`, dan lukte de kopie niet of staat de app in een andere map.
      Mist `tmp/restart.txt`, dan raakte de workflow hem niet aan, en dan start de host de app niet opnieuw.
   2. **Het `.htaccess` van de document root.**
-     Staat er "The block of CloudLinux Passenger is missing", dan heeft _Setup Node.js App_ geen app aangemaakt of de regels niet in dit bestand gezet, en bereikt het verzoek de app nooit.
-     Maak de app dan aan of sla hem opnieuw op (stap 7).
+     Het paneel zet zijn blok in `public_html/mcp/.htaccess` en niet in dit bestand.
+     "The block of CloudLinux Passenger is missing" en "There is no .htaccess" betekenen dus niet dat de app mist.
+     Kijk dan zelf in `public_html/mcp/.htaccess` (de vierde stap hierboven).
      Staat het blok er wel, dan zie je alleen de regels `PassengerBaseURI`, `PassengerStartupFile` en `PassengerAppType`.
      Ze moeten `/mcp`, `server.mjs` en `node` zeggen.
      Een ander pad of bestand betekent een verkeerd adres of startbestand in het formulier.
@@ -255,6 +276,14 @@ Een agent heeft daar geen toegang.
      "There is no stderr.log" betekent meestal dat de app nooit gestart is: het verzoek bereikte hem niet, of de host heeft hem nog niet gestart.
      "stderr.log is empty" betekent dat de app wel gestart is en niets misging, dus de fout zit in het pad.
      Staan er regels, dan zegt de laatste wat de app tegenhield.
+- _Check ds.heerenveen.org/mcp_ geeft de HTML-pagina `404` van de webserver, en `public_html` heeft geen `.htaccess` en er is geen `stderr.log`: de app is nooit gestart.
+  Het paneel schrijft zijn regels naar `public_html/mcp/.htaccess`, dus dat `public_html/.htaccess` ontbreekt, is niet de oorzaak.
+  Maak de map `public_html/mcp` en daarin een leeg `.htaccess` aan (stap 7), en kies _Stop_ en daarna _Start_.
+- _Stop_ of _Restart_ in _Setup Node.js App_ meldt `FileNotFoundError` over `…/domains/ds.heerenveen.org/public_html/mcp/.htaccess`: de map `public_html/mcp` of het bestand `.htaccess` daarin bestaat niet.
+  Het paneel past dat bestand aan en maakt het niet aan.
+  Maak eerst de lege map, en als de fout blijft, daarin het lege bestand `.htaccess`, en probeer het opnieuw.
+- _Setup Node.js App_ meldt "Unable to find app-root folder": de _Application root_ wijst naar een map die niet bestaat, meestal omdat hij in `public_html` staat.
+  Zet hem terug op `domains/ds.heerenveen.org/mcp`, naast `public_html`.
 - _Check ds.heerenveen.org/mcp_ is rood met `500` of `503`, of met "fetch failed": de app start niet.
   Lees `stderr.log` in `domains/ds.heerenveen.org/mcp`, of het logboek in _Setup Node.js App_.
   Controleer dat Node 24 gekozen is, dat het startbestand `server.mjs` heet, en dat het bestand in de map staat.
