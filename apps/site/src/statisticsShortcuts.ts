@@ -18,9 +18,12 @@ export const statisticsShortcuts = [
 ] as const
 
 /**
- * The link in the bar under the header of /statistieken/spelers: the card with the goal
- * scorers, the one card on the page. The id is that of its heading in
- * app/statistieken/spelers/players-page.tsx (a test checks it). It is the same card for a
- * season that is over, so the bar is too.
+ * The links in the bar under the header of /statistieken/spelers: the card with the goal
+ * scorers and the card with the goals that stand out, in the order of the page. The ids are
+ * those of their headings in app/statistieken/spelers/players-page.tsx (a test checks it). They
+ * are the same cards for a season that is over, so the bar is too.
  */
-export const playersShortcuts = [{ href: '#doelpuntenmakers', label: 'Doelpuntenmakers' }] as const
+export const playersShortcuts = [
+  { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
+  { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
+] as const

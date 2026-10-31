@@ -36,8 +36,9 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'uitersten',
   ],
   // The card Doelpuntenmakers is on /statistieken as the top 5 and here as the whole list, with
-  // the same anchor (#487). The old anchor topscorers comes along.
-  '/statistieken/spelers': ['doelpuntenmakers', 'topscorers'],
+  // the same anchor (#487). The old anchor topscorers comes along. The card Bijzondere
+  // doelpunten (#403) is under it.
+  '/statistieken/spelers': ['doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
   '/wedstrijden': ['programma', 'stand', 'uitslagen', 'hoofdtrainer'],
