@@ -366,7 +366,8 @@ Een naam komt in een seizoen één keer voor, en een pagina ook.
 | `in_squad`       | Of de speler nu in de selectie staat; een speler die de tabel verliet, blijft staan met `false`             |
 | `left_squad_at`  | Het moment waarop hij de selectie verliet (UTC); leeg zolang hij erin staat                                 |
 
-Er staat niets anders in: geen nationaliteit, leeftijd, contract, statistieken of foto.
+Er staat niets anders in: geen nationaliteit, leeftijd, contract of foto.
+De cijfers van een speler staan in `player_season_stats` (zie hieronder).
 De zoekterm is een eigen kolom, zodat je hem voor één speler kunt verbeteren: de importer zet hem alleen bij een nieuwe speler.
 
 De lijst met spelers op `/nieuws/zoeken` komt uit `listSquad` in `queries.ts`, de ene plek die bepaalt wie erin staat.
@@ -375,6 +376,28 @@ De zoekpagina met de lijst van spelers (#107) moet dus `listSquad` gebruiken en 
 De pagina van de selectie geeft `findSquadPage`, voor de bronvermelding onder de lijst.
 
 `squad_imports` heeft per seizoen de gezondheid van de import van de selectie, met dezelfde velden als `match_imports`.
+
+`player_season_stats` heeft per speler, seizoen en competitie de optredens, doelpunten en assists uit de tabel van de selectie op de Nederlandse Wikipedia (bron en licentie als bij de selectie: CC BY-SA 4.0).
+De importer schrijft de rijen in dezelfde run als de selectie (zie de [README van de importer](../../apps/importer/README.md), _De cijfers van een speler_).
+
+| Kolom         | Betekenis                                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------------------------- |
+| `player_id`   | De speler in `players`; een foreign key met `ON DELETE CASCADE`, dus de rij gaat met haar speler                |
+| `season`      | Het seizoen, zoals `2026/27`                                                                                    |
+| `competition` | `Eredivisie` of `KNVB Beker`; het totaal heeft geen rij, wie het toont telt de rijen op                         |
+| `appearances` | Het aantal wedstrijden dat de speler erbij was, ook als invaller: het zijn geen minuten en geen basisplaatsen   |
+| `goals`       | Het aantal doelpunten                                                                                           |
+| `assists`     | Het aantal assists                                                                                              |
+| `updated_at`  | Het moment waarop de cijfers voor het laatst veranderden (UTC); een run met dezelfde cijfers laat het ongemoeid |
+
+Een speler, een seizoen en een competitie komen samen één keer voor.
+Een competitie waarvoor de tabel geen cijfers geeft (een lege cel) heeft geen rij, en een streepje is nul.
+Een speler die de selectie verlaat, houdt zijn laatste cijfers, want de importer haalt geen rij weg.
+De tabel wordt met de hand bijgehouden en loopt soms een speelronde achter.
+De importer vergelijkt de doelpunten met die in `match_goals` en waarschuwt bij een verschil, maar verbetert niets.
+`listSeasonPlayerStats(db, season)` in `queries.ts` geeft de cijfers van een seizoen, per speler en competitie.
+Bij elke rij staan de naam, de positie, de pagina op Wikipedia en of de speler in de selectie staat.
+De rijen komen op naam en dan competitie.
 
 De seed zet verzonnen wedstrijden, een verzonnen stand en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
 De pagina's staan erbij, zodat de site de bronvermelding laat zien zoals met echte gegevens.
@@ -442,7 +465,7 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `standings`, `wikipedia_pages`, `match_imports`, `players`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `standings`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
@@ -451,6 +474,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
   `listPodcastEpisodes(db, { limit, offset, podcast, until })` geeft juist de afleveringen van de podcasts die aanstaan, het nieuwste eerst, met alleen de titel, de link, de tijd, de naam van de podcast en de duur, het seizoen en het nummer van de aflevering, en `countPodcastEpisodes` geeft het totaal; `podcast` is de `slug` van één podcast;
   `listArchivePage(db, { limit, offset, source, until })` geeft dezelfde berichten als `listRecentItems`, maar vanaf `offset` en zonder grens in leeftijd, voor het nieuwsarchief op `/nieuws`; `countArchiveItems` geeft het totaal, en `listArchiveSources` de bronnen met een `slug` en minstens één bericht voor het filter; `source` is de `slug` van één bron;
   `findPublishedArticle(db, slug, until)`, `findNewestArticle(db, until)` en `listPublishedArticles(db, until)` geven de gepubliceerde artikelen van de redactie (zie _De tabel `articles`_);
+  `listSeasonPlayerStats(db, season)` geeft de optredens, doelpunten en assists van de spelers van een seizoen, een rij per speler en competitie (zie _De wedstrijden en de stand_);
   `listSeasonMatches(db, season)`, `listSeasonStandings(db, season)` en `listWikipediaPages(db, season)` geven de wedstrijden op volgorde van spelen, de stand van boven naar beneden en de pagina's van Wikipedia die de import las, voor één seizoen, met alleen de velden die een pagina toont;
   `listPodcasts(db)` geeft de podcasts met een `slug` en minstens één aflevering, voor het filter, en `findPodcast(db, slug)` geeft de naam, de beschrijving en de adressen bij Apple Podcasts en Spotify van één podcast;
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);

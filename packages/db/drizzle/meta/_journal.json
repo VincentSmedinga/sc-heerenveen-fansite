@@ -141,6 +141,13 @@
       "when": 1793377741192,
       "tag": "0019_add_staff",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1793444015172,
+      "tag": "0020_add_player_season_stats",
+      "breakpoints": true
     }
   ]
 }

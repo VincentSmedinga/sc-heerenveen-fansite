@@ -802,8 +802,9 @@ export type PlayerPosition = (typeof playerPositions)[number]
  * never replaces it, so a player keeps his `id`, which the goals in `match_goals` point to. A
  * player who is no longer in the table stays, with `in_squad` false and the moment he left in
  * `left_squad_at` (UTC), and comes back into the squad when the table has him again. The rows
- * of an earlier season are kept and never shown. Only what the search page needs is kept: no
- * nationality, age, contract, statistics or photo.
+ * of an earlier season are kept and never shown. Only what the pages need is kept: no
+ * nationality, age, contract or photo. The numbers of a player (appearances, goals and assists)
+ * are in `player_season_stats`, not here.
  *
  * `name` is the name as the table shows it, such as `Joost van Aken`, and `position` the group
  * it is under. `shirt_number` is empty for a player without one. `search_term` is the name
@@ -837,6 +838,46 @@ export const players = mysqlTable(
 export type NewPlayer = typeof players.$inferInsert
 
 export type Player = typeof players.$inferSelect
+
+/**
+ * The numbers of a player in a competition of a season, from the Dutch Wikipedia: the columns
+ * of the squad table (see `players`), one row per player, season and competition.
+ * `appearances` counts every match the player was in, also as a substitute: it is not minutes
+ * and not starts. The total over the competitions is worked out by whoever shows it, so it
+ * has no row.
+ *
+ * The importer writes the rows in the run that reads the squad. A cell that is empty gives no
+ * row, and a dash is zero. A player who leaves the squad keeps his last numbers. `updated_at`
+ * (UTC) is the moment the numbers last changed, and stays when a run finds the same numbers.
+ * The table is kept by volunteers, so it can run a round behind the matches; the importer
+ * compares the goals with those in `match_goals` and warns when they differ (see
+ * `import-squad.ts`). A row goes with its player.
+ */
+export const playerSeasonStats = mysqlTable(
+  'player_season_stats',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    playerId: int('player_id', { unsigned: true })
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    competition: mysqlEnum('competition', competitions).notNull(),
+    appearances: int('appearances', { unsigned: true }).notNull(),
+    goals: int('goals', { unsigned: true }).notNull(),
+    assists: int('assists', { unsigned: true }).notNull(),
+    updatedAt: datetime('updated_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+  },
+  (table) => [
+    unique('player_season_stats_player_season_competition_unique').on(table.playerId, table.season, table.competition),
+    index('player_season_stats_season_idx').on(table.season),
+  ],
+)
+
+export type NewPlayerSeasonStats = typeof playerSeasonStats.$inferInsert
+
+export type PlayerSeasonStats = typeof playerSeasonStats.$inferSelect
 
 /**
  * The health of the squad import, one row per season, in the same words as `match_imports`:

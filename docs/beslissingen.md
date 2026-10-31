@@ -5219,6 +5219,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De namen uit de doelpuntenmakers (#297) halen (alleen spelers die scoorden, dus onvolledig).
   De site van de club (geen toestemming, zie #16).
 - **Later:** we bewaren sinds 27 oktober 2026 ook de pagina van de speler op Wikipedia en of hij nog in de selectie staat; zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_.
+- **Later:** we bewaren sinds 31 oktober 2026 ook de optredens, doelpunten en assists per speler, uit dezelfde tabel; zie _De cijfers van een speler staan in een eigen tabel, per seizoen en competitie_.
 
 ### De zoekterm is de achternaam, als eigen kolom
 
@@ -5305,6 +5306,33 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de uurlijkse import ook het vorige seizoen laten lezen (verzoeken zonder reden, en een seizoen dat ongezond kan worden).
   Een parameter van `pnpm run import` zelf (een foutje met de opdracht raakt dan de uurlijkse run).
   Ook de selectie van 2025/26 importeren (nodig voor spelers bij doelpunten, maar niet voor deze vergelijking).
+
+### De cijfers van een speler staan in een eigen tabel, per seizoen en competitie
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de importer bewaart per speler, per seizoen en per competitie (`Eredivisie` en `KNVB Beker`) het aantal wedstrijden, doelpunten en assists, uit dezelfde tabel "Spelers" op de Nederlandse Wikipedia waaruit hij de selectie leest.
+  Ze staan in een nieuwe tabel, `player_season_stats` (#407), met het moment van de laatste wijziging.
+  De kaarten die ze tonen volgen in #493.
+- **Waarom:** de projecteigenaar wil meer van de spelers bewaren dan een naam, een positie en een nummer, en de tabel staat al op de pagina die we elk uur lezen.
+  Een eigen tabel laat `players` zoals het was: de cijfers van een speler die vertrekt blijven staan, en de schakelaar van #406 raakt de selectie niet.
+  De bron en de licentie zijn die van de selectie: de Nederlandse Wikipedia, via `/wiki/…?action=raw`, CC BY-SA 4.0, met de bronvermelding van de pagina.
+- **Hoe:**
+  - **De tabel:** één rij per speler, seizoen en competitie (uniek), met een verwijzing naar `players` met `ON DELETE CASCADE`.
+    Het totaal heeft geen rij, want het is de som.
+    "W" telt ook invalbeurten: het zijn geen minuten en geen basisplaatsen.
+  - **De import:** de importer leest de cellen na het contract in dezelfde lezing en dezelfde transactie als de selectie.
+    Een speler die uit de tabel verdwijnt, houdt zijn laatste cijfers.
+    Een lege cel geeft geen rij en een streepje is nul.
+    Een waarde die we niet kennen, een rij met een ander aantal cellen en kopjes in een andere volgorde dan Eredivisie en KNVB Beker geven een waarschuwing en geen rij, en stoppen de selectie niet.
+    Een speler die niet te koppelen is, geeft een waarschuwing en een overgeslagen rij.
+  - **De controle:** de tabel wordt met de hand bijgehouden en loopt soms een speelronde achter.
+    De importer vergelijkt daarom na elke lezing de doelpunten van een speler per competitie met de doelpunten uit de wedstrijden (`match_goals`, zonder eigen doelpunten) en waarschuwt in het logboek bij een verschil, met de naam, het seizoen, de competitie en de twee aantallen.
+    Hij verbetert niets en stopt niets: de tabel is de bron van de cijfers die we tonen.
+    Zonder een gespeelde wedstrijd in het seizoen zegt hij niets.
+  - **De query:** `listSeasonPlayerStats` in `packages/db` geeft de cijfers van een seizoen per speler en competitie.
+  - **Het seizoen:** alleen het lopende seizoen, want alleen dat heeft een selectie in onze gegevens.
+    Afgelopen seizoenen volgen met #414.
+- **Alternatieven:** kolommen in `players` (een speler met een rij per seizoen krijgt dan cijfers per competitie in breedte, en de schakelaar van #406 raakt ze); de cijfers uit de wedstrijden zelf tellen (het is al wat de kaart met doelpuntenmakers doet, maar assists en optredens staan niet in de wedstrijden); de cijfers van de site van de club of van een statistiekensite halen (geen toestemming, en een tweede bron die met de Wikipedia kan botsen); de tabel van Wikipedia laten winnen van de wedstrijden of andersom bij een verschil (het is onbekend welke van de twee loopt achter, dus de importer laat het verschil zien en kiest niet).
 
 ### De bekerpagina's van eerdere seizoenen schrijven de score met de stand bij de rust, en de lezer kent die vorm
 
