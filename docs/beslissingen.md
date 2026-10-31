@@ -7244,6 +7244,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een statistiek verbergen tot er genoeg wedstrijden zijn (de pagina is dan lang leeg).
 - **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): nieuwe statistieken komen als kaart op `/statistieken` en niet op `/wedstrijden`.
   De regels voor de Eredivisie en voor "Gebaseerd op" blijven.
+- **Later:** zie _De statistieken tellen standaard alle wedstrijden, met een schakelaar naar alleen de Eredivisie_ (31 oktober 2026): de regel "een kaart telt alleen de Eredivisie, tenzij hij over de beker gaat" is vervallen.
+  De kaarten tellen standaard de Eredivisie en de KNVB Beker, en de schakelaar kiest alleen de Eredivisie; drie kaarten blijven de Eredivisie.
+  Het gevolg dat de bestaande kaarten de beker meetellen "tot de schakelaar van #406 er is" is daarmee opgelost.
 
 ### Reeksen staan in een eigen kaart na Verloop van het seizoen
 
@@ -7618,3 +7621,44 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de seed alle rijen van de rol `coach` laten vervangen (wist later wat het beheer toevoegt).
   Jansen in twee rijen splitsen, op 3 juni 2019 (de pagina's zeggen niet wat er die dag gebeurde).
   Het gat tussen Jansen en Tobiassen dichten (we zouden een datum verzinnen).
+
+### De statistieken tellen standaard alle wedstrijden, met een schakelaar naar alleen de Eredivisie
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** op `/statistieken` en `/statistieken/spelers` tellen de kaarten standaard alle wedstrijden, de Eredivisie en de KNVB Beker, en een schakelaar kiest daarnaast alleen de Eredivisie (#406).
+  - **De keuzes en het adres:** "Alle wedstrijden" is de standaard en heeft geen parameter, "Eredivisie" is `?competitie=eredivisie`.
+    De keuze zit in het adres en niet in een cookie.
+    Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden", ook in de balk "Op deze pagina:".
+  - **De schakelaar** is een `SegmentedLinks` van het designsysteem: twee links met `aria-current="page"` op de huidige keuze, in de standaardmaat van 44 pixels.
+    Hij staat in een gewone cel zonder kaart, als eerste cel van de hoofdkolom, direct onder de titelrij en links; de seizoenskiezer blijft rechts naast de kop.
+    Eerst stond hij in de titelrij, maar daar was hij te opvallend; de projecteigenaar koos de plek onder de kop op 31 oktober 2026.
+    Hij staat er alleen bij een seizoen met een gespeelde bekerwedstrijd, want anders valt er niets te kiezen.
+  - **Welke kaarten de keuze volgen:** Reeksen en de laatste vijf wedstrijden, Thuis en uit, Doelpuntenmakers (ook de top 5 en de lijst op Spelers), De nul gehouden, Doelpunten per kwartier en Uitersten.
+    Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes of de stand na 90 minuten rusten.
+  - **De telling van de beker:** een bekerwedstrijd telt met de score na de verlenging, en een strafschoppenserie telt niet mee.
+    Een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel in de cijfers, dus de reeks "ongeslagen" loopt door.
+    Doelpunten in de verlenging blijven buiten Doelpunten per kwartier.
+    Een bekerwedstrijd zonder uitslag, of die nog niet is gespeeld, telt niet.
+  - **Thuis en uit:** de rijen Punten en Punten per wedstrijd staan er alleen als elke getelde wedstrijd een competitiewedstrijd is (bij Eredivisie en bij een seizoen zonder gespeelde beker), want de beker geeft geen punten.
+  - **Seizoen en keuze blijven:** de link "Alle doelpuntenmakers", de schakelaar, de knop "Laad 5 meer" van De nul gehouden en de seizoenskiezer (ook de route `kies`) houden de keuze vast, ook zonder JavaScript.
+    De route laat een waarde weg die de pagina niet kent, zodat de kiezer niemand naar "niet gevonden" stuurt.
+- **Waarom:** een doelpunt in de beker is ook een doelpunt, en Programma en Uitslagen op Wedstrijden tonen de beker ook samen met de competitie.
+  Wie alleen de competitie wil vergelijken, kiest Eredivisie.
+  De keuze in het adres is te delen, werkt zonder JavaScript en kost geen cookie.
+  De drie kaarten die de Eredivisie blijven, rusten op iets wat de beker niet heeft, en een zin die dat zegt, zou de kaarten alleen langer maken.
+- **Hoe:** de keuze (`CompetitionChoice` in `src/competition.ts`) is het laatste argument van de hulpfuncties in `src/matches.ts`, en een kaart krijgt haar als eigenschap.
+  De wedstrijden van een seizoen blijven in één gecachete lezing per seizoen (`getMatchData`), en de keuze filtert die lijst bij het tellen.
+  De cache heeft dus geen sleutel per keuze nodig, en de ene keuze kan de andere niet overschrijven: een test laat zien dat beide keuzes dezelfde, bevroren gegevens lezen en er niets aan veranderen.
+  Het issue vroeg een sleutel per keuze; de projecteigenaar nam dit over op 31 oktober 2026.
+  `SegmentedLinks` is een tweede onderdeel naast `SegmentedControl`, met dezelfde opmaak, omdat knoppen met `aria-pressed` een JavaScript-handler nodig hebben en een keuze in het adres links is.
+  `SeasonPicker` kreeg `fields` voor verborgen velden, zodat de kiezer de keuze meestuurt.
+- **Nadeel:** het menu bovenaan de site heeft vaste adressen en houdt het seizoen en de keuze niet vast, want het hoort bij elke pagina van de site.
+  Wie van Statistieken via het menu naar Spelers gaat, begint weer bij het lopende seizoen en alle wedstrijden.
+  Dat valt buiten dit besluit, op verzoek van de projecteigenaar (31 oktober 2026): de links op de pagina's zelf houden ze vast, en het menu krijgt een eigen issue.
+- **Alternatieven:** standaard alleen de Eredivisie, zoals de meeste sites (een doelpunt in de beker telt dan niet).
+  De keuze in een cookie (niet te delen, en een verborgen toestand).
+  Een `SegmentedControl` met knoppen en JavaScript (werkt niet zonder).
+  De schakelaar in de titelrij naast de kiezer (te opvallend).
+  De schakelaar als eerste cel van de zijbalk (de zijbalk volgt in de bron op de hoofdkolom, dus op een telefoon staat hij dan na vier kaarten, waaronder twee die hij bedient; met CSS naar boven halen laat de zichtbare volgorde afwijken van de volgorde van het toetsenbord).
+  Een sleutel per keuze in de cache (meer geheugen en meer code voor dezelfde gegevens).
+  Een zin op de drie kaarten die de keuze niet volgen (langere kaarten, en de schakelaar zegt het al).

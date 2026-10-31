@@ -9,6 +9,7 @@ import {
   Form,
   FormChart,
   Heading,
+  Input,
   Link,
   List,
   MarkRow,
@@ -23,10 +24,12 @@ import {
 
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
 
+import { type CompetitionChoice, competitionParam, leagueValue } from './competition'
 import { moreCleanSheets } from './items-per-card'
 import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import {
   cleanSheetsOf,
+  competitionNames,
   type ExtremeGoal,
   extremesOf,
   goalsPerQuarter,
@@ -82,19 +85,21 @@ export function BasedOn({ known, played }: { known: number; played: number }) {
  * `path` is the address of the page the card is on, which differs per season.
  */
 export function CleanSheetsCard({
+  competition,
   count,
   matches,
   now,
   path = '/statistieken',
   season,
 }: {
+  competition: CompetitionChoice
   count: number
   matches: PublicMatch[]
   now: Date
   path?: string
   season?: string | undefined
 }) {
-  const { matches: sheets, played } = cleanSheetsOf(matches)
+  const { matches: sheets, played } = cleanSheetsOf(matches, competition)
   const shown = sheets.slice(0, count)
 
   return (
@@ -125,6 +130,8 @@ export function CleanSheetsCard({
           </List>
           {sheets.length > shown.length && (
             <Form action={`${path}#nul-${shown.length + 1}`} method="get">
+              {/* The form replaces the query of the address, so it carries the choice. */}
+              {competition === 'league' && <Input name={competitionParam} type="hidden" value={leagueValue} />}
               <Button appearance="soft" icon="plus" name="nul" type="submit" value={String(count + moreCleanSheets)}>
                 {`Laad ${moreCleanSheets} meer`}
               </Button>
@@ -137,25 +144,30 @@ export function CleanSheetsCard({
 }
 
 /**
- * The card of the statistics page with the extremes of the Eredivisie: the biggest win and
- * loss, the match with the most goals, and our earliest and our last goal. Each is a short
- * match with its name above it, as the heading of the line, in the same item as the match. The
- * list draws its line above the name (see short-match.css), so it stays between the items. A
- * line without a match is left out, and the card doesn't say so. Under the list stand how many
- * matches the lines are based on: the first three on every played match, the two goals on the
- * matches whose goals are known. Without a played match it is a sentence for visitors and no
- * list.
+ * The card of the statistics page with the extremes of the matches that are counted: the
+ * biggest win and loss, the match with the most goals, and our earliest and our last goal. Each
+ * is a short match with its name above it, as the heading of the line, in the same item as the
+ * match. The list draws its line above the name (see short-match.css), so it stays between the
+ * items. A line without a match is left out, and the card doesn't say so. Under the list stand
+ * how many matches the lines are based on: the first three on every played match, the two goals
+ * on the matches whose goals are known. Without a played match it is a sentence for visitors
+ * and no list.
  */
 export function ExtremesCard({
+  competition,
   matches,
   now,
   season,
 }: {
+  competition: CompetitionChoice
   matches: PublicMatch[]
   now: Date
   season?: string | undefined
 }) {
-  const { biggestLoss, biggestWin, earliestGoal, known, latestGoal, mostGoals, played } = extremesOf(matches)
+  const { biggestLoss, biggestWin, earliestGoal, known, latestGoal, mostGoals, played } = extremesOf(
+    matches,
+    competition,
+  )
   const lines = [
     { match: biggestWin, name: 'Grootste overwinning' },
     { match: biggestLoss, name: 'Grootste nederlaag' },
@@ -211,8 +223,16 @@ export function ExtremesCard({
  * out. Without a goal in the matches we know, it is a sentence for visitors and no empty
  * charts.
  */
-export function GoalsPerQuarterCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
-  const { conceded, extraTime, known, played, scored } = goalsPerQuarter(matches)
+export function GoalsPerQuarterCard({
+  competition,
+  matches,
+  season,
+}: {
+  competition: CompetitionChoice
+  matches: PublicMatch[]
+  season?: string | undefined
+}) {
+  const { conceded, extraTime, known, played, scored } = goalsPerQuarter(matches, competition)
   const slices = (counts: number[]) => quarterLabels.map((label, index) => ({ label, value: counts[index] ?? 0 }))
 
   return (
@@ -346,12 +366,21 @@ const perMatch = (value: number | undefined) =>
 /**
  * The card of the statistics page with how sc Heerenveen does at home and away: a table with a
  * column for home, away and both, and a row for the matches, the points and the goals. The
- * numbers come from the score of the played matches of the Eredivisie. A side with no match yet
- * has a dash where a number is divided and a 0 where it is counted. Without a result it is a
- * sentence for visitors and no table.
+ * numbers come from the score of the played matches that are counted. The rows with the points
+ * are only there when every one of them is a match of the Eredivisie, because the cup gives no
+ * points. A side with no match yet has a dash where a number is divided and a 0 where it is
+ * counted. Without a result it is a sentence for visitors and no table.
  */
-export function HomeAwayCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
-  const { away, home, total } = homeAwayOf(matches)
+export function HomeAwayCard({
+  competition,
+  matches,
+  season,
+}: {
+  competition: CompetitionChoice
+  matches: PublicMatch[]
+  season?: string | undefined
+}) {
+  const { away, home, leagueOnly, total } = homeAwayOf(matches, competition)
   const sides: HomeAwayTally[] = [home, away, total]
   const row = (header: string, cell: (side: HomeAwayTally) => number | string) => ({
     cells: sides.map(cell),
@@ -375,8 +404,13 @@ export function HomeAwayCard({ matches, season }: { matches: PublicMatch[]; seas
               row('Gewonnen', (side) => side.won),
               row('Gelijk', (side) => side.drawn),
               row('Verloren', (side) => side.lost),
-              row('Punten', (side) => side.points),
-              row('Punten per wedstrijd', (side) => perMatch(side.pointsPerMatch)),
+              // The cup gives no points, so these rows need a league match for every match.
+              ...(leagueOnly
+                ? [
+                    row('Punten', (side) => side.points),
+                    row('Punten per wedstrijd', (side) => perMatch(side.pointsPerMatch)),
+                  ]
+                : []),
               row('Doelpunten voor', (side) => side.goalsFor),
               row('Doelpunten tegen', (side) => side.goalsAgainst),
               row('Doelpunten per wedstrijd', (side) => perMatch(side.goalsPerMatch)),
@@ -648,12 +682,12 @@ export function StandingsCard({ data }: { data: MatchData }) {
 }
 
 /**
- * The card of the statistics page with the streaks of sc Heerenveen in the Eredivisie: a table
- * with the six streaks, as they stand now and the longest of the season, and under it the
- * latest five matches, the oldest first like the form in the card of the season. They are
- * letters in colour and, as well, short lines with the opponent and the score, so no colour
- * stands alone. The streaks come from the score of every played match of the league (see
- * `streaksOf`). Without a played match it is a sentence for visitors and no table.
+ * The card of the statistics page with the streaks of sc Heerenveen in the matches that are
+ * counted: a table with the six streaks, as they stand now and the longest of the season, and
+ * under it the latest five matches, the oldest first like the form in the card of the season.
+ * They are letters in colour and, as well, short lines with the opponent and the score, so no
+ * colour stands alone. The streaks come from the score of every played match that is counted
+ * (see `streaksOf`). Without a played match it is a sentence for visitors and no table.
  *
  * A season that is over (it has a `season`) has no column for how the streaks stand now: the
  * streak it ended with doesn't change any more and says little. It has no latest five matches
@@ -661,15 +695,17 @@ export function StandingsCard({ data }: { data: MatchData }) {
  * the season, not "this season".
  */
 export function StreaksCard({
+  competition,
   matches,
   now,
   season,
 }: {
+  competition: CompetitionChoice
   matches: PublicMatch[]
   now: Date
   season?: string | undefined
 }) {
-  const { last, played, streaks } = streaksOf(matches)
+  const { last, played, streaks } = streaksOf(matches, competition)
   const over = season !== undefined
   const when = over ? `in ${season}` : 'dit seizoen'
 
@@ -684,7 +720,7 @@ export function StreaksCard({
         <>
           <Text appearance="meta">Aantal wedstrijden achter elkaar</Text>
           <DataTable
-            caption={`De reeksen van sc Heerenveen in de Eredivisie ${when}`}
+            caption={`De reeksen van sc Heerenveen in ${competitionNames(matches, competition)} ${when}`}
             columns={over ? ['Reeks', 'Langste'] : ['Reeks', 'Nu', 'Langste']}
             rows={streaks.map(({ current, label, longest }) => ({
               cells: over ? [longest] : [current, longest],
@@ -729,18 +765,20 @@ export function StreaksCard({
  * cut: if nobody is left out, it counts the players, as the full list does.
  */
 export function TopScorers({
+  competition,
   matches,
   playersHref,
   season,
 }: {
+  competition: CompetitionChoice
   matches: PublicMatch[]
   playersHref?: string | undefined
   season: string
 }) {
-  const scorers = topScorersOf(matches)
+  const scorers = topScorersOf(matches, competition)
   const shown = playersHref === undefined ? scorers : topFiveOf(scorers)
   const cut = shown.length < scorers.length
-  const { known, played } = scorersCoverage(matches)
+  const { known, played } = scorersCoverage(matches, competition)
 
   if (scorers.length === 0) {
     return <Text>We hebben nog geen doelpuntenmakers van dit seizoen. Kijk straks nog eens.</Text>
@@ -756,7 +794,7 @@ export function TopScorers({
             : `${scorers.length} spelers hebben gescoord`}
       </Text>
       <TopScorersTable
-        caption={`${cut ? `De top ${topScorersPlaces} van de doelpuntenmakers` : 'Doelpuntenmakers'} van sc Heerenveen in het seizoen ${season}, in de Eredivisie en de KNVB Beker`}
+        caption={`${cut ? `De top ${topScorersPlaces} van de doelpuntenmakers` : 'Doelpuntenmakers'} van sc Heerenveen in het seizoen ${season}, in ${competitionNames(matches, competition)}`}
         rows={shown}
       />
       {known < played && (
@@ -783,11 +821,13 @@ export function TopScorers({
  * out.
  */
 export function TopScorersCard({
+  competition,
   matches,
   playersHref,
   season,
   seasonOnImage,
 }: {
+  competition: CompetitionChoice
   matches: PublicMatch[]
   playersHref?: string | undefined
   season: string
@@ -796,13 +836,13 @@ export function TopScorersCard({
   return (
     <Card
       aria-labelledby="doelpuntenmakers"
-      shareable={imageCredit(topScorersOf(matches).length > 0, seasonOnImage)}
+      shareable={imageCredit(topScorersOf(matches, competition).length > 0, seasonOnImage)}
       surface="soft"
     >
       <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
         Doelpuntenmakers
       </Heading>
-      <TopScorers matches={matches} playersHref={playersHref} season={season} />
+      <TopScorers competition={competition} matches={matches} playersHref={playersHref} season={season} />
     </Card>
   )
 }

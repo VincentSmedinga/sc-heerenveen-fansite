@@ -72,3 +72,9 @@ describe('/wedstrijden/kies', () => {
     expect(error).toHaveBeenCalledOnce()
   })
 })
+
+describe('/wedstrijden/kies and the choice of the statistics', () => {
+  it('does not take over a choice of the competition, which only the statistics pages have', async () => {
+    expect((await ask('?seizoen=2025-26&competitie=eredivisie')).headers.get('location')).toBe('/wedstrijden/2025-26')
+  })
+})

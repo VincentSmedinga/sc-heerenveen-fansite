@@ -27,6 +27,12 @@ export type SeasonPickerProps = Omit<
 > & {
   /** Where the form goes: a route that sends the visitor on to the page of the season. */
   action: string
+  /**
+   * What else the form sends with the season, as hidden fields, such as the choice of the
+   * competition that the page keeps when the season changes. The route behind `action` reads
+   * them.
+   */
+  fields?: Readonly<Record<string, string>>
   /** The seasons to choose from, in the order shown. With fewer than two there is no picker. */
   options: readonly SeasonPickerOption[]
   /** The value of the season the page shows. */
@@ -68,7 +74,7 @@ export const choosesByKey = ({
  * open list sends at once. A choice that is not confirmed is put back when the list loses the
  * focus, so the list never shows a season the page does not.
  */
-export const SeasonPicker = ({ action, className, options, value, ...props }: SeasonPickerProps) => {
+export const SeasonPicker = ({ action, className, fields = {}, options, value, ...props }: SeasonPickerProps) => {
   const id = useId()
   const hintId = `${id}-hint`
   // Whether script runs: only then the button and the label are hidden and the line is there.
@@ -116,6 +122,9 @@ export const SeasonPicker = ({ action, className, options, value, ...props }: Se
         className={classNames('hf-season-picker', className)}
         method="get"
       >
+        {Object.entries(fields).map(([name, fieldValue]) => (
+          <input key={name} name={name} type="hidden" value={fieldValue} />
+        ))}
         <div className="hf-season-picker-row">
           <div className="hf-season-picker-field">
             <label className={scripted ? 'hf-visually-hidden' : undefined} htmlFor={id}>
