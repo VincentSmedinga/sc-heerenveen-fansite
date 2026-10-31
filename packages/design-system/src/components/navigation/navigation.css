@@ -62,7 +62,7 @@
    */
   .hf-navigation-header {
     --hf-colour-focus: var(--hf-colour-focus-on-header);
-    --hf-navigation-end: 0.4375rem;
+    --hf-navigation-space-end: var(--hf-space-s);
     --hf-navigation-gutter-end: max(var(--hf-page-margin), env(safe-area-inset-right, 0px));
     --hf-navigation-gutter-start: max(var(--hf-page-margin), env(safe-area-inset-left, 0px));
     --hf-navigation-inset-end: max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
@@ -73,7 +73,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0 var(--hf-space-m);
-    padding-block-end: var(--hf-navigation-end);
+    padding-block-end: var(--hf-navigation-space-end);
     padding-inline: var(--hf-navigation-inset-start) var(--hf-navigation-inset-end);
 
     /* The line is a border, and so stays in forced colours. */
@@ -269,7 +269,7 @@
     clip-path: inset(0 -100vmax);
     display: flex;
     flex: 0 0 calc(100% + var(--hf-navigation-gutter-start) + var(--hf-navigation-gutter-end));
-    margin-block: var(--hf-navigation-end) calc(-1 * var(--hf-navigation-end));
+    margin-block: var(--hf-navigation-space-end) calc(-1 * var(--hf-navigation-space-end));
     margin-inline: calc(-1 * var(--hf-navigation-gutter-start)) calc(-1 * var(--hf-navigation-gutter-end));
     min-inline-size: 0;
     order: 1;

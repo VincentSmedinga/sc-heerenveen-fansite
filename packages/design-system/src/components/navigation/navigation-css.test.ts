@@ -110,8 +110,8 @@ describe('the bar of sub-pages in navigation.css', () => {
 
   it('comes after all the links of the menu, whichever row the link of its item is on, with the space of the menu above it', () => {
     expect(bar).toContain('order: 1;')
-    expect(bar).toContain('margin-block: var(--hf-navigation-end) calc(-1 * var(--hf-navigation-end));')
-    expect(rule('.hf-navigation-header')).toContain('padding-block-end: var(--hf-navigation-end);')
+    expect(bar).toContain('margin-block: var(--hf-navigation-space-end) calc(-1 * var(--hf-navigation-space-end));')
+    expect(rule('.hf-navigation-header')).toContain('padding-block-end: var(--hf-navigation-space-end);')
   })
 
   it('never sticks and is never gone, at any width', () => {
@@ -223,7 +223,7 @@ describe('the main menu in navigation.css', () => {
 
   it('has the inset of the page at both sides, and the same space under the links as the header used to keep', () => {
     expect(band).toContain('padding-inline: var(--hf-navigation-inset-start) var(--hf-navigation-inset-end);')
-    expect(band).toContain('--hf-navigation-end: 0.4375rem;')
+    expect(band).toContain('--hf-navigation-space-end: var(--hf-space-s);')
     expect(band).toContain('--hf-navigation-inset-end: max(var(--hf-page-inset), env(safe-area-inset-right, 0px));')
   })
 
