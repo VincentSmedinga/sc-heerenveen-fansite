@@ -4329,6 +4329,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - Het zoeken in de footer laten op `/zoeken`: het is daar moeilijk te vinden, en het adres past niet bij de andere pagina's van Nieuws.
 - **Later:** de balk van Nieuws heeft op verzoek van de projecteigenaar (31 oktober 2026) de volgorde Archief, Podcasts en Zoeken, en niet Podcasts, Archief en Zoeken.
 - **Later:** de top 5 en Spelers staan sinds 31 oktober 2026 op `/statistieken` en `/statistieken/spelers`; zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_.
+- **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): Tegenstanders is er, naast Spelers, in de balk van Statistieken.
 
 ### De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
 
@@ -4385,6 +4386,52 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de volledige lijst houden en de kaart inklappen met een knop (kost JavaScript of een extra adres, en de afbeelding toont dan de hele lijst); de top 5 op een vaste hoogte afkappen en een speler met evenveel doelpunten weglaten (willekeurig); de vijf met gelijkstaanden tot hoogstens acht rijen, zoals de kaart eerder had (een grens die de gelijke plekken toch afkapt); Spelers alleen met de lijst, zonder balk met subpagina's (de pagina is dan alleen via de link te vinden).
 - **Later:** zie _De kaart met topscorers toont alle doelpuntenmakers_ (26 oktober 2026): sinds 31 oktober 2026 toont `/statistieken` weer de top 5, nu met alle gelijke plekken en zonder grens, en de volledige lijst staat op `/statistieken/spelers`.
 - **Later:** zie _De pagina Spelers toont bijzondere doelpunten_ (31 oktober 2026): Spelers heeft sinds die dag een tweede kaart, en de balk "Op deze pagina:" van Spelers heeft twee links.
+- **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de balk met subpagina's van Statistieken heeft sindsdien ook Tegenstanders, en op de pagina's daarvan is Tegenstanders de huidige subpagina.
+
+### Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** onder Statistieken komen de lijst `/statistieken/tegenstanders` en een pagina per club, `/statistieken/tegenstanders/<club>`, met de onderlinge resultaten over alle seizoenen die we hebben (#415).
+  - **De lijst** heeft elke club die in de gegevens staat, zonder minimum aantal wedstrijden, van A tot Z.
+    De kolommen zijn Club, Gespeeld, Gewonnen, Gelijk, Verloren en Doelpunten (voor–tegen).
+    De vijf cijferkolommen hebben een afkorting (G, W, GL, V, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit, zodat de tabel op een telefoon past.
+    Elke clubnaam is een link; de tabel heeft geen knop om te sorteren en geen paginering.
+    Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
+  - **De pagina van een club** heeft de naam als h1, met "Eerder: …" eronder als Wikipedia de club onder andere namen schrijft.
+    De kaart "Onze uitslagen tegen …" heeft een tabel met Totaal, Thuis en Uit en de rijen gespeeld, gewonnen, gelijk, verloren, doelpunten voor en doelpunten tegen, zonder punten, omdat de beker er geen geeft.
+    Eronder staan de grootste overwinning en de grootste nederlaag, als regels zoals op de kaart Uitersten; bij twee even grote wint de latere, zoals daar.
+    De kaart heeft de afbeeldingsknop, en de naam van de club staat in de kop, zodat de afbeelding zegt waarover hij gaat.
+    De kaart Wedstrijden toont elke gespeelde wedstrijd, de nieuwste eerst, als korte regel (`ShortMatch`) met het seizoen en de competitie erboven.
+    De regel noemt de club zoals Wikipedia hem in die wedstrijd schreef, dus een oude naam is zichtbaar.
+    Een wedstrijd die nog niet is gespeeld, staat er niet in.
+  - **De zin over het aantal** houdt de vorm van de andere kaarten, "Gebaseerd op alle 12 gespeelde wedstrijden", en krijgt "sinds 2010/11" erachter: het eerste seizoen waarvan we wedstrijden hebben, ook als de eerste wedstrijd tegen deze club later was.
+    Bij de keuze Eredivisie staat er "in de Eredivisie" bij.
+    De vorm van die zin is onderdeel van #494 en verandert hier niet.
+  - **De schakelaar van #406** werkt op beide pagina's, met `?competitie=eredivisie` in elke link, en staat er alleen als er een gespeelde bekerwedstrijd is (bij de club: tegen die club).
+    Een club die we alleen in de beker troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt "In de Eredivisie hebben we nog niet tegen deze club gespeeld."
+    Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden", en een slug die geen club heeft ook.
+    De pagina's hebben geen seizoenskiezer, want ze tellen alle seizoenen.
+  - **De balk van Statistieken** heeft Tegenstanders naast Spelers.
+    Op de lijst en op elke clubpagina is Tegenstanders de huidige subpagina (`aria-current="page"`), en Statistieken is het huidige onderdeel van het menu.
+  - **De bezoekteller en de sitemap:** de lijst staat in `pages.ts`, dus in de sitemap en de teller.
+    Elke clubpagina staat in de sitemap, uit de database zoals de artikelen, en telt mee onder zijn eigen adres, nadat de database heeft bevestigd dat de club bestaat, zoals bij een artikel.
+    Een verzonnen adres is dus geen rij in de tellers.
+  - **De bron:** onderaan staat de volledige bronvermelding van Wikipedia met een link naar de pagina's van alle seizoenen die in de cijfers zitten (op de lijst alle seizoenen, bij een club de seizoenen waarin we hem troffen), met de licentie CC BY-SA 4.0.
+    Daarvoor is er een query, `listAllWikipediaPages`, die de pagina's van alle seizoenen in één keer geeft.
+- **Waarom:** een supporter wil weten hoe vaak we van een club wonnen, en de clubs hebben sinds #496 een adres dat blijft werken.
+  Een lijst van alle clubs zonder minimum laat zien wat we hebben; de pagina's vullen zich vanzelf als #414 oudere seizoenen importeert.
+  De afkortingen houden de tabel op een telefoon smal, en de zin "sinds …" laat zien hoe ver de cijfers teruggaan.
+  Een bron die alle seizoenen noemt, is de eerlijke vermelding voor cijfers die uit al die pagina's komen.
+- **Hoe:** de cijfers van de lijst komen uit `listClubRecords` en die van een club uit `listClubMatches`, via `src/opponents.ts`.
+  Daar staan ook de optelling van een lijst wedstrijden (`tallyOf`, `summaryOf`) en de gecachete lezingen.
+  De lijst heeft twee sleutels in de cache, alle wedstrijden en de Eredivisie, en de wedstrijden van een club staan per slug in de cache, pas nadat de slug is gecontroleerd tegen de bekende clubs, want een bezoeker kan elk adres verzinnen.
+  Een test laat zien dat Totaal gelijk is aan Thuis plus Uit en dat gewonnen, gelijk en verloren samen het aantal gespeelde wedstrijden zijn, voor alle wedstrijden en voor de Eredivisie, en een e2e-test dat de cijfers van een club in de lijst die van zijn pagina zijn.
+  `DataTable` kreeg `href` op een rij, zodat de rijkop een link is.
+  `CompetitionSwitch` kreeg een zusje, `CompetitionLinks`, voor een pagina die zelf weet of er iets te kiezen valt.
+- **Nadeel:** de bronvermelding wordt lang zodra #414 de oudere seizoenen importeert, want elk seizoen heeft tot drie pagina's.
+  Een cel als "7–5" leest een schermlezer als twee getallen zonder het woord "tegen"; de kolomkop zegt "doelpunten" en de regel onder de tabel "voor–tegen".
+  De lijst heeft clubs met nullen zolang we alleen een wedstrijd uit de toekomst tegen ze hebben.
+- **Alternatieven:** alleen clubs met een minimum aantal wedstrijden (de projecteigenaar koos er geen); hele woorden als kolomkop (past niet op een telefoon); de lijst sorteerbaar of met paginering (te veel voor een lijst van enkele tientallen clubs); een kaart met tegenstanders op de pagina Statistieken (de pagina is al vol); de bronvermelding in korte vorm, "Bron: Wikipedia" (zegt niet uit welke pagina's de cijfers komen); in de cache een sleutel per verzonnen slug (laat het geheugen volgroeien).
 
 ## Importer
 
@@ -7717,6 +7764,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De schakelaar als eerste cel van de zijbalk (de zijbalk volgt in de bron op de hoofdkolom, dus op een telefoon staat hij dan na vier kaarten, waaronder twee die hij bedient; met CSS naar boven halen laat de zichtbare volgorde afwijken van de volgorde van het toetsenbord).
   Een sleutel per keuze in de cache (meer geheugen en meer code voor dezelfde gegevens).
   Een zin op de drie kaarten die de keuze niet volgen (langere kaarten, en de schakelaar zegt het al).
+- **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de schakelaar staat sindsdien ook op `/statistieken/tegenstanders` en op de pagina van een club, en telt daar de wedstrijden van alle seizoenen.
 
 ### De pagina Spelers toont bijzondere doelpunten
 

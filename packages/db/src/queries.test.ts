@@ -8,6 +8,7 @@ import {
   countArchiveItems,
   countPodcastEpisodes,
   findPodcast,
+  listAllWikipediaPages,
   listArchivePage,
   listArchiveSources,
   listEnabledSources,
@@ -1461,6 +1462,41 @@ describe('the matches and the table of a season', () => {
       const rows = await listSeasonStandings(database.db, '2026/27')
 
       expect(rows.at(-1)?.goalDifference).toBe(-2)
+    })
+  })
+
+  describe('listAllWikipediaPages', () => {
+    it('gives the pages of every season, the newest season first, and leaves out the squad', async () => {
+      await database.db.insert(wikipediaPages).values([
+        ...madeUpWikipediaPages(now).reverse(),
+        madeUpSquadPage(now),
+        {
+          kind: 'standings',
+          readAt: new Date('2025-10-25T12:00:00Z'),
+          season: '2025/26',
+          title: 'Eredivisie 2025/26 (mannenvoetbal)',
+          version: null,
+        },
+      ])
+
+      const rows = await listAllWikipediaPages(database.db)
+
+      expect(rows.map((page) => `${page.season} ${page.kind}`)).toEqual([
+        '2026/27 standings',
+        '2026/27 programme',
+        '2026/27 cup',
+        '2025/26 standings',
+      ])
+      expect(rows[3]).toEqual({
+        kind: 'standings',
+        readAt: new Date('2025-10-25T12:00:00Z'),
+        season: '2025/26',
+        title: 'Eredivisie 2025/26 (mannenvoetbal)',
+      })
+    })
+
+    it('gives nothing while no page was read', async () => {
+      expect(await listAllWikipediaPages(database.db)).toEqual([])
     })
   })
 
