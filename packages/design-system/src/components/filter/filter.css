@@ -2,6 +2,6 @@
 
 @layer hf.components {
   .hf-filter {
-    margin-block-end: 0.5rem;
+    margin-block-end: var(--hf-space-s);
   }
 }

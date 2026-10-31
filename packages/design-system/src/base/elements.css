@@ -16,9 +16,9 @@
     border-inline-start: 0.25rem solid;
     border-inline-start-color: var(--hf-colour-marker-graphic);
     box-sizing: border-box;
-    margin-block: 0 1rem;
+    margin-block: 0 var(--hf-space-m);
     margin-inline: 0;
-    padding-inline-start: 1rem;
+    padding-inline-start: var(--hf-space-m);
 
     > :last-child {
       margin-block-end: 0;
@@ -52,10 +52,10 @@
     border-radius: 0.25rem;
     box-sizing: border-box;
     line-height: 1.45;
-    margin-block: 0 1rem;
+    margin-block: 0 var(--hf-space-m);
     overflow: auto;
-    padding-block: 0.75rem;
-    padding-inline: 1rem;
+    padding-block: var(--hf-space-s);
+    padding-inline: var(--hf-space-m);
 
     code {
       background-color: transparent;
@@ -69,11 +69,11 @@
     border-block-start: 1px solid;
     border-block-start-color: var(--hf-colour-border-default);
     box-sizing: border-box;
-    margin-block: 2rem;
+    margin-block: var(--hf-space-xl);
   }
 
   figure {
-    margin-block: 0 1rem;
+    margin-block: 0 var(--hf-space-m);
     margin-inline: 0;
   }
 
@@ -81,7 +81,7 @@
     color: var(--hf-colour-text-secondary);
     font-size: var(--hf-meta-font-size);
     line-height: var(--hf-meta-line-height);
-    margin-block-start: 0.5rem;
+    margin-block-start: var(--hf-space-s);
   }
 
   img,

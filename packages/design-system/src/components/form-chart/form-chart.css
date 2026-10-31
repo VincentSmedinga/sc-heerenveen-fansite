@@ -6,7 +6,7 @@
 @layer hf.components {
   .hf-form-chart-key,
   .hf-form-chart-line {
-    margin-block: 0.25rem 0;
+    margin-block: var(--hf-space-xs) 0;
   }
 
   /* The letters of the key are heavier than the words, so they are easy to find. */

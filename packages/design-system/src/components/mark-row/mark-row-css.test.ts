@@ -27,8 +27,8 @@ describe('mark-row.css', () => {
   })
 
   it('gives a list straight under the row the space of a paragraph, more than the row has under it', () => {
-    expect(declarationsOf('.hf-mark-row + :is(ul, ol)')).toMatch(/margin-block-start: 1rem/u)
-    expect(declarationsOf('.hf-mark-row')).toMatch(/margin-block: 0 0\.5rem/u)
+    expect(declarationsOf('.hf-mark-row + :is(ul, ol)')).toMatch(/margin-block-start: var\(--hf-space-m\)/u)
+    expect(declarationsOf('.hf-mark-row')).toMatch(/margin-block: 0 var\(--hf-space-s\)/u)
   })
 
   it('shows the marks in a system colour in forced colours', () => {

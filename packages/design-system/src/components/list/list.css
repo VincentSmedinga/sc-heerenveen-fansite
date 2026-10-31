@@ -3,7 +3,7 @@
 @layer hf.base {
   ul,
   ol {
-    margin-block: 0 1rem;
+    margin-block: 0 var(--hf-space-m);
     padding-inline-start: 1.5em;
   }
 
@@ -30,7 +30,7 @@
   }
 
   dl {
-    margin-block: 0 1rem;
+    margin-block: 0 var(--hf-space-m);
   }
 
   dt {
@@ -39,7 +39,7 @@
   }
 
   dd {
-    margin-block-end: 0.5rem;
+    margin-block-end: var(--hf-space-s);
     margin-inline-start: 0;
   }
 }
@@ -50,7 +50,7 @@
  */
 @layer hf.components {
   .hf-list-loose > li {
-    margin-block-end: 1rem;
+    margin-block-end: var(--hf-space-m);
 
     &:last-child,
     > :last-child {
