@@ -44,6 +44,37 @@ export const Default = meta.story({
   render: (args) => <Heading {...args}>Wedstrijden</Heading>,
 })
 
+export const SpaceBelow = meta.story({
+  name: 'Ruimte onder een kop',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Onder elke kop staat de grote ruimte, welk niveau of welke stijl de kop ook heeft. Staat de kop als laatste in een kaart, dan komt er geen ruimte onder, want de kaart heeft haar eigen binnenruimte.',
+      },
+    },
+  },
+  render: () => (
+    <div style={{ display: 'grid', gap: 'var(--hf-space-xl)', maxInlineSize: '24rem' }}>
+      <Card aria-labelledby="ruimte-onder-1">
+        <Heading id="ruimte-onder-1" level={2}>
+          Laatste nieuws
+        </Heading>
+        <Text>Een kop met tekst eronder.</Text>
+        <Heading appearance={4} level={3}>
+          Een kop met de stijl van kop 4
+        </Heading>
+        <Text appearance="meta">Ook deze kop heeft de grote ruimte onder zich.</Text>
+      </Card>
+      <Card aria-labelledby="ruimte-onder-2">
+        <Heading id="ruimte-onder-2" level={2}>
+          Een kop als laatste
+        </Heading>
+      </Card>
+    </div>
+  ),
+})
+
 export const Anchor = meta.story({
   name: 'Met een anker',
   parameters: {

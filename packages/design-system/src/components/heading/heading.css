@@ -1,10 +1,15 @@
 /* Headings h1 to h6: their colour and spacing, and the type styles they take by default. */
 
 @layer hf.base {
-  /* Colour and spacing of headings. Their type styles follow below, in the typography layer. */
+  /*
+   * Colour and spacing of headings. Their type styles follow below, in the typography layer.
+   * Under every heading is the large space (--hf-space-l), whatever the level or the style. This is the one place that
+   * says so: a card, a sidebar or a main does not set its own. A heading that is the last in its cell has no space
+   * under it (see card.css and page.css), so it does not add to the gap between cells.
+   */
   :is(h1, h2, h3, h4, h5, h6) {
     color: var(--hf-colour-text-heading);
-    margin-block: var(--hf-space-xl) var(--hf-space-s);
+    margin-block: var(--hf-space-xl) var(--hf-space-l);
 
     &:first-child {
       margin-block-start: 0;

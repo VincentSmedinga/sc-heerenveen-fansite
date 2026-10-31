@@ -2915,6 +2915,33 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alle onderdelen in één pull request omzetten (te groot om te reviewen; het is nu in drie issues verdeeld).
 - **Later:** de omzetting is klaar: #480 en #481 hebben alle bestanden omgezet, de lijst in de test is weg en de test bewaakt ook de CSS van de documentatie, `docs/docs.css`.
   De ruimte onder de menubalk van de navigatie, een eigen maat van 7 pixels, is nu ook `s` (1 pixel meer), en haar custom property heet nu `--hf-navigation-space-end`, zodat de test hem bewaakt.
+- **Later:** onder een kop en onder een grote bouwsteen staat sinds 31 oktober 2026 `--hf-space-l` en niet meer `s` of `m`; zie _Onder koppen en onder grote bouwstenen staat de grote ruimte_.
+  De stappen en de keuze voor `m` blijven zoals ze zijn.
+
+### Onder koppen en onder grote bouwstenen staat de grote ruimte
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** onder elke kop staat `--hf-space-l` (1,5 rem), en onder een tabel met getallen en onder een grafiek ook, als er iets op volgt (#513).
+  Daaronder vallen de koppen `h1` tot en met `h6`, ook met de stijl van een andere kop, en de ruwe `table`, `StandingsTable`, `TopScorersTable`, `DataTable`, `BarChart`, `DonutChart.Group` en `FormChart`.
+  Staat zo'n kop of bouwsteen als laatste in zijn cel, dan komt er geen ruimte onder: de kaart of de kolom haalt hem weg, zodat de ruimte tussen twee cellen niet groter wordt.
+  Kleinere bouwstenen, zoals een alinea, een lijst, een formulierveld en een knop, houden `m` of `s`, en de ruimte tussen kaarten en kolommen blijft `xl`.
+- **Waarom:** de projecteigenaar wilde meer lucht onder koppen en onder een tabel met cijfers.
+  De grote stap is de grootste die een onderdeel mag hebben: de extra grote is de ruimte van het raster tussen kaarten en kolommen, en die blijft het maximum.
+- **Hoe:** één regel voor alle koppen in `heading.css`, en één regel voor elke tabel in `base/table.css`.
+  `bar.css` doet hetzelfde voor de tabel van de stand en van de doelpuntenmakers, en laat de ruimte weg als er geen legenda op volgt.
+  De ruimte onder een grafiek staat in `bar-chart.css`, `donut-chart.css` en `form-chart.css`.
+  De regel in `card.css` voor een lijst direct onder een kop is weg: de grote ruimte onder de kop is nu overal dezelfde.
+  `DataTable` heeft geen eigen regel en volgt de regel voor elke tabel.
+  `tokens/space-below-css.test.ts` faalt als een kop een andere stap heeft, als een andere regel een kop een marge geeft, of als een bouwsteen de grote stap kwijtraakt.
+  De stories Ruimte onder een kop en Ruimte onder een tabel laten het zien, met en zonder iets eronder.
+- **Gevolg:** elke kaart wordt hoger, de een meer dan de ander.
+  Een kop met direct daaronder een korte regel die erbij hoort, zoals het aantal spelers dat scoorde, heeft de grote ruimte tussen de kop en die regel.
+  Dat is wat de projecteigenaar vroeg.
+  Schijnt het een kop en zijn regel te ver uit elkaar te zetten, dan is een andere indeling (de grote ruimte pas onder de regel) een vervolgvraag.
+- **Alternatieven:** de extra grote stap, `xl` (gelijk aan de ruimte tussen kaarten, dus kaarten en hun inhoud lopen in elkaar over).
+  Een regel per plek of per kaart (laat de pagina's uit elkaar lopen).
+  Een eigen klasse voor de kop met de grote ruimte (dan moet elke kop de klasse nog krijgen).
+  Een nieuwe stap tussen `l` en `xl` (zeven stappen is te veel, zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_).
 
 ### Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat
 
@@ -5981,6 +6008,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de ruimte in elke lijst of op elke pagina zelf zetten; dat laat het patroon uit elkaar lopen.
 - **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de ruimte is `--hf-space-l` (1,5 rem), niet 1,25 rem.
   Ze blijft groter dan de ruimte van tekst onder een kop, ook als die ruimte een token wordt.
+  Sinds 31 oktober 2026 staat onder elke kop `--hf-space-l` en is de regel in `card.css` weg; zie _Onder koppen en onder grote bouwstenen staat de grote ruimte_.
 
 ### De site is installeerbaar, zonder service worker
 

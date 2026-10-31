@@ -123,3 +123,56 @@ export const ZebraDark = meta.story({
   parameters: zebraParameters,
   render: renderZebra,
 })
+
+const scorers = [
+  { goals: 12, name: 'Testspeler Een' },
+  { goals: 9, name: 'Testspeler Twee' },
+  { goals: 4, name: 'Testspeler Drie' },
+]
+
+const ScorersTable = () => (
+  <table>
+    <caption>Doelpunten per speler</caption>
+    <thead>
+      <tr>
+        <th scope="col">Speler</th>
+        <th className="hf-numeric" scope="col">
+          <abbr title="Doelpunten">D</abbr>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {scorers.map(({ goals, name }) => (
+        <tr key={name}>
+          <th scope="row">{name}</th>
+          <td className="hf-numeric">{goals}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)
+
+export const SpaceBelow = meta.story({
+  name: 'Ruimte onder een tabel',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een tabel met cijfers is een grote bouwsteen: staat er iets onder, zoals een regel met de afkortingen, dan staat daartussen de grote ruimte. Is de tabel het laatste in de kaart, dan komt er geen ruimte onder.',
+      },
+    },
+  },
+  render: () => (
+    <div style={{ display: 'grid', gap: 'var(--hf-space-xl)', maxInlineSize: '24rem' }}>
+      <Card aria-label="Met iets eronder">
+        <ScorersTable />
+        <p className="hf-meta">
+          <b>D</b> doelpunten
+        </p>
+      </Card>
+      <Card aria-label="Als laatste">
+        <ScorersTable />
+      </Card>
+    </div>
+  ),
+})
