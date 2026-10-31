@@ -56,4 +56,9 @@
   .hf-data-table-sortable :is(th, td).hf-numeric {
     padding-inline: var(--hf-space-xs);
   }
+
+  /* A score such as 35–17 stays on one line, so it reads as one figure; the row header gives way. */
+  .hf-data-table-sortable td.hf-numeric {
+    white-space: nowrap;
+  }
 }
