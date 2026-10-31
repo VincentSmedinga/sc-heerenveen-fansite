@@ -15,10 +15,11 @@
 
 @layer hf.components {
   /*
-   * The header of a sortable column is a button that looks like its text: no fill and no border,
-   * the colour and weight of the header, underlined so it reads as something to press. It is
-   * at least 24 by 24 pixels (WCAG 2.5.8). The arrow of the sorted column has the colour of the
-   * text, so it has the contrast of the text, and is a shape, so colour is not the only sign.
+   * The header of a sortable column is a button that looks like its text: no fill and no
+   * border, the colour and weight of the header, underlined so it reads as something to press.
+   * It is at least 24 by 24 pixels (WCAG 2.5.8). The arrow of the sorted column has the colour
+   * of the text, so it has the contrast of the text, and is a shape, so colour is not the
+   * only sign.
    */
   .hf-data-table .hf-data-table-sort {
     align-items: center;
@@ -45,5 +46,14 @@
     .hf-icon {
       margin-inline-start: 0.125em;
     }
+  }
+
+  /*
+   * A table that sorts has buttons of at least 24 pixels wide in its headers, so its number
+   * columns are wider than the numbers. They give up half of their space beside the text, so a
+   * list with seven columns, such as the opponents with the points, still fits a phone.
+   */
+  .hf-data-table-sortable :is(th, td).hf-numeric {
+    padding-inline: var(--hf-space-xs);
   }
 }

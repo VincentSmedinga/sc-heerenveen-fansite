@@ -208,7 +208,7 @@ describe('DataTable with sortable columns', () => {
   it('passes on a class and other attributes to the table', () => {
     render(<DataTable {...props} className="extra" id="tabel" />)
 
-    expect(screen.getByRole('table').className).toBe('hf-data-table extra')
+    expect(screen.getByRole('table').className).toBe('hf-data-table hf-data-table-sortable extra')
     expect(screen.getByRole('table').id).toBe('tabel')
   })
 })

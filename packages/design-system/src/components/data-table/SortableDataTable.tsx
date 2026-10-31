@@ -54,7 +54,7 @@ export const SortableDataTable = ({ caption, className, columns, rows, ...props 
 
   return (
     <>
-      <table {...props} className={classNames('hf-data-table', className)}>
+      <table {...props} className={classNames('hf-data-table', 'hf-data-table-sortable', className)}>
         <caption className="hf-visually-hidden">{caption}</caption>
         <thead>
           <tr>
