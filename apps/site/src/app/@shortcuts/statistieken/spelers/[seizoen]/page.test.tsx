@@ -34,7 +34,7 @@ const render = async (seizoen: string) =>
 const hrefs = (html: string) => [...html.matchAll(/<a [^>]*href="([^"]*)"/g)].map(([, href]) => href)
 
 describe('the bar of the page Spelers of an earlier season', () => {
-  it('has the same link as the current season: the card is the same', async () => {
+  it('has the same links as the current season: the cards are the same', async () => {
     const html = await render('2025-26')
 
     expect(hrefs(html)).toEqual(playersShortcuts.map(({ href }) => href))

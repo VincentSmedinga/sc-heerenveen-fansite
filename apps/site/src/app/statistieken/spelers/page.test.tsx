@@ -74,12 +74,13 @@ afterEach(() => {
 })
 
 describe('the page /statistieken/spelers', () => {
-  it('has one h1, Spelers, with the season picker beside it, and one h2, the card Doelpuntenmakers', async () => {
+  it('has one h1, Spelers, with the season picker beside it, and two h2, the cards Doelpuntenmakers and Bijzondere doelpunten, and no h3', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Spelers</h1>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="bijzondere-doelpunten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#bijzondere-doelpunten">Bijzondere doelpunten</a></h2>',
     ])
     expect(html).toMatch(/<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1>/)
   })
@@ -98,7 +99,7 @@ describe('the page /statistieken/spelers', () => {
     expect(html).toContain(
       '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="doelpuntenmakers">',
     )
-    expect(html.match(/data-hf-card-share/g)).toHaveLength(1)
+    expect(html.match(/data-hf-card-share/g)).toHaveLength(2)
   })
 
   it('has the card, the credit and nothing else: no other cards of Statistieken or Wedstrijden', async () => {
@@ -213,6 +214,180 @@ describe('the page /statistieken/spelers', () => {
     expect(metadata.title).toBe('Spelers')
     expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/statistieken/spelers')
     expect(metadata.description).toContain('scoorden')
+  })
+})
+
+describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
+  const cardOf = (html: string) =>
+    /<section [^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(html)?.[0] ?? ''
+  /** The parts of the card: the name and the value under it, as a screen reader reads them. */
+  const facts = (html: string) =>
+    [...html.matchAll(/<li><p[^>]*>(.*?)<\/p>(.*?)<\/li>/g)].map(([, name, value]) => [plain(name), plain(value)])
+  const goal = (player: string, options: Partial<PublicMatch['goals'][number]> = {}) => ({
+    minute: 10,
+    ours: true,
+    ownGoal: false,
+    penalty: false,
+    player,
+    playerId: null,
+    playerName: null,
+    playerPage: null,
+    playerSearchTerm: null,
+    stoppageMinutes: null,
+    ...options,
+  })
+  const withGoals = (goals: PublicMatch['goals']) =>
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: [
+        {
+          ...played,
+          goals,
+          goalsAgainst: goals.filter((item) => !item.ours).length,
+          goalsFor: goals.filter((item) => item.ours).length,
+        },
+      ],
+    })
+
+  it('comes under the card Doelpuntenmakers and before the credit, and is soft with a button for an image', async () => {
+    const html = await render()
+
+    expect(html.indexOf('id="doelpuntenmakers"')).toBeLessThan(html.indexOf('id="bijzondere-doelpunten"'))
+    expect(html.indexOf('id="bijzondere-doelpunten"')).toBeLessThan(html.lastIndexOf('hf-wikipedia-credit'))
+    expect(cardOf(html)).toContain('class="hf-card hf-card-soft hf-card-shareable"')
+    expect(cardOf(html)).toContain('data-hf-card-share')
+  })
+
+  it('is a list of four parts, each with its name as quiet text above its value, and no subheadings', async () => {
+    const html = cardOf(await render())
+
+    expect(html).toMatch(
+      /<ul role="list"><li><p class="hf-meta">Hattricks<\/p><div class="hf-short-match hf-short-fact">/,
+    )
+    expect(facts(html).map(([name]) => name)).toEqual([
+      'Hattricks',
+      'Dubbelslagen',
+      'Strafschoppen',
+      'Eigen doelpunten',
+    ])
+    expect(html.match(/<h[1-6]/g)).toHaveLength(1)
+    expect(html.match(/<li>/g)).toHaveLength(4)
+  })
+
+  it('says "Nog geen" in the quiet style for hattricks and doubles nobody has, and keeps the numbers', async () => {
+    const html = cardOf(await render())
+
+    expect(facts(html)).toEqual([
+      ['Hattricks', 'Nog geen'],
+      ['Dubbelslagen', 'Nog geen'],
+      ['Strafschoppen', '0 van de 4 doelpunten'],
+      ['Eigen doelpunten', '0 door de tegenstander · 0 door ons'],
+    ])
+    expect(html.match(/<span class="hf-short-match-where">Nog geen<\/span>/g)).toHaveLength(2)
+  })
+
+  it('lists the hattricks and the doubles with the names as one name, and how often for a repeat', async () => {
+    withGoals([
+      goal('Proefman'),
+      goal('Proefman'),
+      goal('Proefman'),
+      goal('Nepper', { penalty: true }),
+      goal('Nepper'),
+      goal('Kemper'),
+      goal('Kemper'),
+      goal('Teststraat', { minute: 50, ownGoal: true }),
+      goal('Kopie', { minute: 60, ours: false, ownGoal: true }),
+    ])
+
+    const html = cardOf(await render())
+
+    expect(facts(html)).toEqual([
+      ['Hattricks', 'Proefman'],
+      ['Dubbelslagen', 'Kemper, Nepper'],
+      ['Strafschoppen', '1 van de 8 doelpunten'],
+      ['Eigen doelpunten', '1 door de tegenstander · 1 door ons'],
+    ])
+    expect(html).toContain('<span class="hf-player-name"><span class="hf-player-name-surname">Proefman</span></span>')
+    expect(html).not.toContain('Nog geen')
+  })
+
+  it('writes how often after a name, and separates the names with commas', async () => {
+    const double = (player: string) => [goal(player), goal(player)]
+
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: [
+        { ...played, goals: double('Proefman'), goalsAgainst: 0, goalsFor: 2 },
+        { ...played, goals: [...double('Proefman'), ...double('Nepper')], goalsAgainst: 0, goalsFor: 4 },
+      ],
+    })
+
+    expect(facts(cardOf(await render()))[1]).toEqual(['Dubbelslagen', 'Proefman 2×, Nepper'])
+  })
+
+  it('says "doelpunt" in the singular for one goal', async () => {
+    withGoals([goal('Proefman', { penalty: true })])
+
+    expect(facts(cardOf(await render()))[2]).toEqual(['Strafschoppen', '1 van de 1 doelpunt'])
+  })
+
+  it('says how many matches it is based on, in the form of the other cards', async () => {
+    expect(plain(cardOf(await render()))).toContain('Gebaseerd op 2 van de 4 gespeelde wedstrijden')
+  })
+
+  it('has a sentence and no parts and no button for an image when there is no goal', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((item) => ({ ...item, goals: [] })),
+    })
+
+    const html = cardOf(await render())
+
+    expect(plain(html)).toContain('We hebben nog geen doelpunten van dit seizoen. Kijk straks nog eens.')
+    expect(html).not.toContain('<li>')
+    expect(html).not.toContain('data-hf-card-share')
+  })
+
+  it('counts a goal of the cup for all the matches and not for the Eredivisie', async () => {
+    const cup = (goals: PublicMatch['goals']): PublicMatch => ({
+      ...played,
+      competition: 'KNVB Beker',
+      goals,
+      goalsAgainst: 0,
+      goalsFor: goals.length,
+      round: 'Tweede ronde',
+    })
+
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: [
+        { ...played, goals: [goal('Nepper')], goalsAgainst: 0, goalsFor: 1 },
+        cup([goal('Bekerman', { penalty: true }), goal('Bekerman'), goal('Bekerman')]),
+      ],
+    })
+
+    const all = plain(cardOf(await render()))
+    const league = plain(
+      cardOf(
+        withoutIcons(
+          renderToStaticMarkup(await PlayersPage({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) })),
+        ),
+      ),
+    )
+
+    expect(all).toContain('HattricksBekerman')
+    expect(all).toContain('1 van de 4 doelpunten')
+    expect(all).toContain('Gebaseerd op alle 2 gespeelde wedstrijden')
+    expect(league).not.toContain('Bekerman')
+    expect(league).toContain('HattricksNog geen')
+    expect(league).toContain('0 van de 1 doelpunt')
+    expect(league).toContain('Gebaseerd op 1 gespeelde wedstrijd')
+  })
+
+  it('loads nothing from another domain and has no link outside the page', async () => {
+    const html = cardOf(await render())
+
+    expect(html).not.toMatch(/https?:|<img|src=/)
   })
 })
 
