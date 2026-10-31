@@ -1,14 +1,12 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
-import { classNames } from '../classNames'
-import { Link } from '../link/Link'
+import type { DataTableColumn, DataTableRow } from './dataTableTypes'
 
-export type DataTableColumn = {
-  /** What the header shows, one to three letters such as `GL`. */
-  abbreviation: string
-  /** The whole word, as a screen reader says it, such as `gelijk`. It must be unique. */
-  name: string
-}
+import { classNames } from '../classNames'
+import { columnOf, ColumnText, TableRows } from './dataTableParts'
+import { SortableDataTable } from './SortableDataTable'
+
+export type { DataTableCell, DataTableColumn, DataTableRow } from './dataTableTypes'
 
 export type DataTableProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & {
   /**
@@ -24,31 +22,13 @@ export type DataTableProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'>
    * the others hold numbers, aligned to the end. Keep a header short: it only wraps at a space,
    * so a long word makes the table wider than a phone. A table with many columns, which does
    * not fit a phone with whole words, gives a column as `{ abbreviation, name }`: the header
-   * shows the abbreviation, and the page explains it in a line under the table.
+   * shows the abbreviation, and the page explains it in a line under the table. A column given
+   * as `{ name, sortable: true }` lets the visitor sort the table on it.
    */
   columns: readonly (DataTableColumn | string)[]
   /** The rows of the table, from the first down. */
   rows: readonly DataTableRow[]
 }
-
-export type DataTableRow = {
-  /**
-   * The numbers of the row, one for each column after the first. A number is written the Dutch
-   * way, with a point between the thousands. Text is shown as it is.
-   */
-  cells: readonly (number | string)[]
-  /** What the row is about, as plain text. It is the row header, so it must be unique. */
-  header: string
-  /**
-   * Makes the row header a link, to the page about what the row is about, such as the page of a
-   * club in a list of clubs. The link says the same as the header, so it names where it goes.
-   */
-  href?: string
-}
-
-const numberFormat = new Intl.NumberFormat('nl-NL')
-
-const nameOf = (column: DataTableColumn | string | undefined) => (typeof column === 'string' ? column : column?.name)
 
 /**
  * A table of numbers: a real `table` with a caption that is not shown, column headers and row
@@ -57,37 +37,32 @@ const nameOf = (column: DataTableColumn | string | undefined) => (typeof column 
  * cells or cells with more than text. A row can have a link in its header (`href`). A long row
  * header, such as a path, wraps instead of making the table wider than the space.
  * base/table.css gives it its look.
+ *
+ * A column can be `sortable`. The table then lets the visitor sort on it, which needs
+ * JavaScript: the server sends the whole table in the order of `rows`, with plain headers, and
+ * in the browser the headers of the sortable columns become buttons (see SortableDataTable). A
+ * table without a sortable column is the same plain table as ever and sends no script.
  */
-export const DataTable = ({ caption, className, columns, rows, ...props }: DataTableProps) => (
-  <table {...props} className={classNames('hf-data-table', className)}>
-    <caption className="hf-visually-hidden">{caption}</caption>
-    <thead>
-      <tr>
-        {columns.map((column, index) => (
-          <th className={index === 0 ? undefined : 'hf-numeric'} key={nameOf(column)} scope="col">
-            {typeof column === 'string' ? (
-              column
-            ) : (
-              <abbr title={column.name.charAt(0).toUpperCase() + column.name.slice(1)}>
-                <span aria-hidden="true">{column.abbreviation}</span>
-                <span className="hf-visually-hidden">{column.name}</span>
-              </abbr>
-            )}
-          </th>
-        ))}
-      </tr>
-    </thead>
-    <tbody>
-      {rows.map((row) => (
-        <tr key={row.header}>
-          <th scope="row">{row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}</th>
-          {row.cells.map((cell, index) => (
-            <td className="hf-numeric" key={nameOf(columns[index + 1]) ?? index}>
-              {typeof cell === 'number' ? numberFormat.format(cell) : cell}
-            </td>
+export const DataTable = ({ caption, className, columns, rows, ...props }: DataTableProps) => {
+  const all = columns.map(columnOf)
+
+  if (all.some((column) => column.sortable === true)) {
+    return <SortableDataTable {...props} caption={caption} className={className} columns={all} rows={rows} />
+  }
+
+  return (
+    <table {...props} className={classNames('hf-data-table', className)}>
+      <caption className="hf-visually-hidden">{caption}</caption>
+      <thead>
+        <tr>
+          {all.map((column, index) => (
+            <th className={index === 0 ? undefined : 'hf-numeric'} key={column.name} scope="col">
+              <ColumnText column={column} />
+            </th>
           ))}
         </tr>
-      ))}
-    </tbody>
-  </table>
-)
+      </thead>
+      <TableRows columns={all} rows={rows} />
+    </table>
+  )
+}

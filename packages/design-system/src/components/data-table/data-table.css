@@ -12,3 +12,38 @@
     overflow-wrap: anywhere;
   }
 }
+
+@layer hf.components {
+  /*
+   * The header of a sortable column is a button that looks like its text: no fill and no border,
+   * the colour and weight of the header, underlined so it reads as something to press. It is
+   * at least 24 by 24 pixels (WCAG 2.5.8). The arrow of the sorted column has the colour of the
+   * text, so it has the contrast of the text, and is a shape, so colour is not the only sign.
+   */
+  .hf-data-table .hf-data-table-sort {
+    align-items: center;
+    background-color: transparent;
+    border: 0;
+    border-radius: 0.25rem;
+    color: inherit;
+    display: inline-flex;
+    font-weight: inherit;
+    min-block-size: 1.5rem;
+    min-inline-size: 1.5rem;
+    padding: 0;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+
+    &:hover {
+      background-color: transparent;
+      color: var(--hf-colour-text-default);
+      text-decoration-thickness: 2px;
+    }
+
+    /* The arrow stands next to the header, and takes the room it needs and no more. */
+    .hf-icon {
+      margin-inline-start: 0.125em;
+    }
+  }
+}

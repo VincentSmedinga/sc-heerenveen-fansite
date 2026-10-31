@@ -933,6 +933,11 @@ await withEmptyDatabase((database) =>
       opponentsHtml,
       /<th scope="row"><a href="\/statistieken\/tegenstanders\/testdorp-fc">Testdorp FC<\/a><\/th><td class="hf-numeric">\d+<\/td>/,
     )
+    // The server sends the whole table in the given order, with plain headers: sorting is for
+    // the browser, so there is no button or aria-sort yet, and no column Punten for the cup.
+    assert.doesNotMatch(opponentsHtml, /<th[^>]*aria-sort/)
+    assert.doesNotMatch(opponentsHtml, /<th[^>]*scope="col"[^>]*><button/)
+    assert.doesNotMatch(opponentsHtml, /<span class="hf-visually-hidden">punten<\/span>/)
     assert.match(opponentsHtml, /Gebaseerd op alle \d+ gespeelde wedstrijden sinds \d{4}\/\d{2}/)
     assert.match(opponentsHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and
@@ -941,6 +946,8 @@ await withEmptyDatabase((database) =>
 
     const leagueOpponents = await (await fetch(`${origin}/statistieken/tegenstanders?competitie=eredivisie`)).text()
     assert.doesNotMatch(leagueOpponents, /fc-maquette/)
+    assert.match(leagueOpponents, /<span class="hf-visually-hidden">punten<\/span>/)
+    assert.match(leagueOpponents, /P punten/)
     assert.match(leagueOpponents, /href="\/statistieken\/tegenstanders\/testdorp-fc\?competitie=eredivisie"/)
     assert.equal((await fetch(`${origin}/statistieken/tegenstanders?competitie=onzin`)).status, 404)
 

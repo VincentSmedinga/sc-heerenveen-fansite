@@ -74,12 +74,52 @@ describe('the page /statistieken/tegenstanders', () => {
     expect(html).toContain('G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen)')
   })
 
-  it('has no button to sort and no pagination', async () => {
+  it('sends the table without buttons, because sorting needs JavaScript, and has no pagination', async () => {
     const html = await render()
 
     expect(html).not.toContain('<button')
+    expect(html).not.toContain('aria-sort')
+    expect(html).not.toContain('role="status"')
     expect(html).not.toContain('aria-label="Paginering"')
     expect(html).not.toContain('pagina=')
+  })
+
+  it('sends the names of the columns in the order of the table for every column that can be sorted', async () => {
+    const html = await render()
+
+    expect([...html.matchAll(/<th [^>]*scope="col">(.*?)<\/th>/g)].map(([, header]) => header)).toEqual([
+      'Club',
+      '<abbr title="Gespeeld"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gespeeld</span></abbr>',
+      '<abbr title="Gewonnen"><span aria-hidden="true">W</span><span class="hf-visually-hidden">gewonnen</span></abbr>',
+      '<abbr title="Gelijk"><span aria-hidden="true">GL</span><span class="hf-visually-hidden">gelijk</span></abbr>',
+      '<abbr title="Verloren"><span aria-hidden="true">V</span><span class="hf-visually-hidden">verloren</span></abbr>',
+      '<abbr title="Doelpunten"><span aria-hidden="true">D</span><span class="hf-visually-hidden">doelpunten</span></abbr>',
+    ])
+  })
+
+  it('has no column Punten with all the matches, because a cup tie gives no points', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('>punten<')
+    expect(html).not.toContain(', P punten')
+  })
+
+  it('has the column Punten with the Eredivisie, 3 for a win and 1 for a draw, and explains it', async () => {
+    const html = await render({ competitie: 'eredivisie' })
+
+    expect(html.match(/<th [^>]*scope="col"/g)).toHaveLength(7)
+    expect(html).toContain(
+      '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
+    )
+    expect(html).toContain('G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen), P punten')
+    expect(rowsOf(html)).toEqual([
+      [
+        'FC Voorbeeld',
+        '/statistieken/tegenstanders/fc-voorbeeld?competitie=eredivisie',
+        ['3', '1', '1', '1', '4–4', '4'],
+      ],
+      ['Testclub', '/statistieken/tegenstanders/testclub?competitie=eredivisie', ['4', '3', '1', '0', '10–3', '10']],
+    ])
   })
 
   it('says how many matches the table is based on and since which season we have them', async () => {

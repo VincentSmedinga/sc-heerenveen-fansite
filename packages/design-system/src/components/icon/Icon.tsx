@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 /** The icons of the design system, by name. */
 export const iconNames = [
+  'arrow-down',
   'arrow-left',
   'arrow-right',
   'arrow-up',
@@ -46,6 +47,12 @@ export type IconProps =
 // of the sun and the moon is the same paths with a fill. The rays of the sun are lines without
 // an area, so the fill only shows in the disc and the crescent.
 const drawings: Record<IconName, ReactNode> = {
+  'arrow-down': (
+    <>
+      <path d="M8 2.5v11" />
+      <path d="M3.5 9 8 13.5 12.5 9" />
+    </>
+  ),
   'arrow-left': (
     <>
       <path d="M13.5 8h-11" />

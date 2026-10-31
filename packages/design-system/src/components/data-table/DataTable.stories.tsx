@@ -1,11 +1,60 @@
+import { expect, userEvent } from 'storybook/test'
+
 import preview from '#.storybook/preview'
 
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { Text } from '../text/Text'
-import { DataTable, type DataTableRow } from './DataTable'
+import { DataTable, type DataTableProps, type DataTableRow } from './DataTable'
+
+// Made-up clubs, so the table has enough rows to look for the extremes.
+type Figures = [played: number, won: number, drawn: number, lost: number, goalsFor: number, goalsAgainst: number]
+
+const club = (header: string, [played, won, drawn, lost, goalsFor, goalsAgainst]: Figures): DataTableRow => ({
+  cells: [
+    played,
+    won,
+    drawn,
+    lost,
+    { sortValue: goalsFor - goalsAgainst, text: `${goalsFor}–${goalsAgainst}` },
+    won * 3 + drawn,
+  ],
+  header,
+  href: '#club',
+})
+
+const manyClubs: DataTableRow[] = [
+  club('Testclub', [12, 7, 3, 2, 21, 12]),
+  club('FC Voorbeeld', [9, 2, 3, 4, 8, 11]),
+  club('Proefstad SV', [3, 1, 1, 1, 3, 3]),
+  club('Teststad Boys', [18, 11, 4, 3, 35, 17]),
+  club('VV Maquette', [2, 0, 0, 2, 1, 5]),
+  club('Oefendorp FC', [6, 3, 1, 2, 9, 7]),
+  club('Fictief United', [15, 6, 5, 4, 20, 19]),
+  club('Zonderland', [1, 1, 0, 0, 2, 0]),
+  club('Ajax Test', [22, 5, 4, 13, 18, 41]),
+  club('Nepclub ’s-Gravenvoorbeeld', [7, 4, 1, 2, 11, 6]),
+  club('Elders Combinatie', [5, 2, 2, 1, 7, 5]),
+  club('Álbum Rangers', [4, 1, 2, 1, 4, 4]),
+]
+
+const sortableColumns: DataTableProps['columns'] = [
+  { name: 'Club', sortable: true },
+  { abbreviation: 'G', name: 'gespeeld', sortable: true },
+  { abbreviation: 'W', name: 'gewonnen', sortable: true },
+  { abbreviation: 'GL', name: 'gelijk', sortable: true },
+  { abbreviation: 'V', name: 'verloren', sortable: true },
+  { abbreviation: 'D', name: 'doelpunten', sortable: true },
+  { abbreviation: 'P', name: 'punten', sortable: true },
+]
 
 const meta = preview.meta({
+  args: {
+    caption: 'De tegenstanders van sc Heerenveen, met onze uitslagen tegen elk',
+    columns: sortableColumns,
+    rows: manyClubs,
+  },
+  component: DataTable,
   parameters: {
     docs: {
       description: {
@@ -31,6 +80,12 @@ const meta = preview.meta({
           'De kop toont de afkorting, een schermlezer hoort het hele woord, en de pagina zet een regel onder de tabel die de afkortingen uitlegt, zoals de stand van de competitie doet.',
           'De tabel is voor een lijst van dingen met elk een paar getallen, niet voor samengevoegde cellen of cellen met meer dan tekst.',
           'De stand van de competitie heeft een eigen component, `StandingsTable`.',
+          '',
+          'Kies sorteerbare kolommen (`sortable`) voor een tabel met veel rijen, als de bezoeker een uiterste zoekt: de club waartegen we de meeste wedstrijden speelden, of de meeste doelpunten maakten.',
+          'Bij een tabel van een paar rijen is sorteren overbodig.',
+          'Sorteren werkt met JavaScript: de server stuurt de hele tabel in de volgorde van `rows`, en in de browser worden de koppen van die kolommen knoppen.',
+          'Een getallenkolom begint met het grootste getal bovenaan en de eerste kolom van A tot Z; een tweede klik keert de richting om.',
+          'Een cel als `{ text, sortValue }` toont `text` en sorteert op `sortValue`, bijvoorbeeld “7–5” dat op het doelpuntensaldo sorteert.',
         ].join('\n'),
       },
     },
@@ -183,4 +238,50 @@ export const Links = meta.story({
       </Card>
     </div>
   ),
+})
+
+const renderSortable = (maxInlineSize: string) => (args: DataTableProps) => (
+  <div style={{ maxInlineSize }}>
+    <Card aria-labelledby="sorteerbaar-kop">
+      <Heading id="sorteerbaar-kop" level={2}>
+        Alle tegenstanders
+      </Heading>
+      <DataTable {...args} />
+      <Text appearance="meta">G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen), P punten</Text>
+    </Card>
+  </div>
+)
+
+export const Sortable = meta.story({
+  globals: { theme: 'light' },
+  name: 'Sorteerbare kolommen, licht',
+  render: renderSortable('40rem'),
+})
+
+export const SortableDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Sorteerbare kolommen, donker',
+  render: renderSortable('40rem'),
+})
+
+export const SortedPhone = meta.story({
+  globals: { theme: 'light' },
+  name: 'Gesorteerd op een telefoon, licht',
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'doelpunten' }))
+    await expect(canvas.getByRole('columnheader', { name: 'doelpunten' })).toHaveAttribute('aria-sort', 'descending')
+    await expect(canvas.getByRole('button', { name: 'doelpunten' })).toHaveFocus()
+  },
+  render: renderSortable('20rem'),
+})
+
+export const SortedPhoneDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Gesorteerd op een telefoon, donker',
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Club' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Club' }))
+    await expect(canvas.getByRole('columnheader', { name: 'Club' })).toHaveAttribute('aria-sort', 'descending')
+  },
+  render: renderSortable('20rem'),
 })
