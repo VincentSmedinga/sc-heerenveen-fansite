@@ -1,21 +1,30 @@
+import { usePathname } from 'next/navigation'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { headerColour } from '../colours'
 import RootLayout, { metadata, viewport } from './layout'
 
-vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
+vi.mock('next/navigation', () => ({ usePathname: vi.fn(() => '/') }))
 
 describe('RootLayout', () => {
   it('puts the page in a Page.Body, which is a div, between the main menu and the footer, so the page brings the main', () => {
-    const html = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
 
     expect(html).toMatch(/<\/nav><div class="hf-page-body">Inhoud<\/div><footer/)
     expect(html).not.toContain('<main')
   })
 
   it('puts the main menu in its own nav right after the header, outside the banner, in the order of the focus', () => {
-    const html = renderToStaticMarkup(<RootLayout shortcuts={<nav aria-label="Balk">Links</nav>}>Inhoud</RootLayout>)
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={<nav aria-label="Balk">Links</nav>} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
     const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
 
     expect(header).not.toContain('<nav')
@@ -27,15 +36,52 @@ describe('RootLayout', () => {
   })
 
   it('puts the slot for a bar between the main menu and the Page.Body, outside the main, and nothing there without one', () => {
-    const html = renderToStaticMarkup(<RootLayout shortcuts={<nav aria-label="Balk">Links</nav>}>Inhoud</RootLayout>)
-    const without = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={<nav aria-label="Balk">Links</nav>} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
+    const without = renderToStaticMarkup(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
 
     expect(html).toMatch(/<\/nav><nav aria-label="Balk">Links<\/nav><div class="hf-page-body">Inhoud<\/div><footer/)
     expect(without).not.toContain('aria-label="Balk"')
   })
 
+  it('hands the slot for the bar of Statistieken to the main menu, which draws it inside its own nav', () => {
+    vi.mocked(usePathname).mockReturnValue('/statistieken')
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={null} subnav={<div className="hf-navigation-bar">Balk van de slot</div>}>
+        Inhoud
+      </RootLayout>,
+    )
+    const menu = html.slice(html.indexOf('aria-label="Hoofdmenu"'), html.indexOf('hf-page-body'))
+
+    expect(menu).toContain('Balk van de slot')
+    expect(html.match(/<nav aria-label="Hoofdmenu"/g)).toHaveLength(1)
+  })
+
+  it('draws the fixed bar of Nieuws on the home page, whatever the slot holds', () => {
+    vi.mocked(usePathname).mockReturnValue('/')
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={null} subnav={<div className="hf-navigation-bar">Balk van de slot</div>}>
+        Inhoud
+      </RootLayout>,
+    )
+
+    expect(html).not.toContain('Balk van de slot')
+    expect(html).toContain('href="/nieuws/podcasts"')
+  })
+
   it('puts the two sentences of the footer in a paragraph each, before the links', () => {
-    const html = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
 
     expect(html).toContain(
       '<footer class="hf-page-footer"><p class="hf-meta">Alles over onze club op één plek.</p><p class="hf-meta">Voor supporters door supporters.</p><nav',
@@ -43,7 +89,11 @@ describe('RootLayout', () => {
   })
 
   it('links to Zoeken, Over ons, Contact, Bronnen, Privacy, Toegankelijkheid and Updates in the footer, in a navigation named Over de site', () => {
-    const html = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
     const footer = html.match(/<footer[^>]*>.*<\/footer>/s)?.[0] ?? ''
 
     expect(footer).toContain('<nav aria-label="Over de site"')
@@ -63,7 +113,11 @@ describe('RootLayout', () => {
 
 describe('the link to the top in the footer', () => {
   it('comes last in the footer, after the links, and goes to the top of the page', () => {
-    const html = renderToStaticMarkup(<RootLayout shortcuts={null}>Inhoud</RootLayout>)
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
 
     expect(html).toMatch(
       /<\/nav><a [^>]*aria-label="Naar boven"[^>]*class="hf-page-top-link"[^>]*href="#top"[^>]*>.*<\/a><\/footer>/s,

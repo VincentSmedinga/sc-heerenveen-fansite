@@ -12,6 +12,7 @@ import {
 } from '../../docs/ExamplePage'
 import { exampleSource } from '../../docs/exampleSource'
 import { Navigation } from './Navigation'
+import { NavigationBar } from './NavigationBar'
 
 const meta = preview.meta({
   parameters: {
@@ -50,6 +51,9 @@ const meta = preview.meta({
           'Ze staat als een balk over de volle breedte onder de rij van het menu, in een tint van de header, in gewone letters, met de huidige subpagina zwaarder en met de rode streep.',
           'Een lange rij scrolt zijwaarts, met een vervaging aan de rand, en begint zo gescrold dat de huidige subpagina in beeld is.',
           'Op een heel smal scherm, of bij sterk inzoomen, loopt de rij om.',
+          '',
+          'Moet de pagina de links van de balk zelf maken, omdat ze iets uit het adres van de pagina meenemen, dan tekent de pagina de balk met `NavigationBar` en geeft hem aan het onderdeel als `bar`.',
+          'De balk staat dan op dezelfde plek en ziet er hetzelfde uit; de `subitems` blijven nodig, want die zeggen welke subpagina de huidige is.',
           '',
           'Is de huidige pagina een onderdeel van het menu, dan heeft dat onderdeel `aria-current="page"`.',
           'Is het een subpagina, dan heeft de subpagina `aria-current="page"` en het onderdeel `aria-current="true"`.',
@@ -164,6 +168,37 @@ export const SectionDark = meta.story({
   name: 'Onderdeel met subpagina’s, donker',
   parameters: { ...fullscreen, ...onSectionStory },
   render: withSubpages('Wedstrijden'),
+})
+
+const barFromCallerStory = {
+  docs: {
+    description: {
+      story:
+        'De pagina tekent de balk zelf met `NavigationBar` en geeft hem als `bar` aan het onderdeel. Hij ziet er hetzelfde uit als de balk die `Navigation` uit `subitems` tekent.',
+    },
+  },
+}
+
+export const BarFromCaller = meta.story({
+  globals: { theme: 'light' },
+  name: 'Balk van de pagina zelf',
+  parameters: { ...fullscreen, ...barFromCallerStory },
+  render: () => {
+    const items = exampleMenuWithSubpages('Uitslagen').map((item) =>
+      item.subitems === undefined
+        ? item
+        : {
+            ...item,
+            bar: (
+              <NavigationBar
+                subitems={item.subitems.map((subitem) => ({ ...subitem, href: `${subitem.href}-eredivisie` }))}
+              />
+            ),
+          },
+    )
+
+    return <Navigation appearance="header" items={items} label="Hoofdmenu" />
+  },
 })
 
 const onSubpageStory = {

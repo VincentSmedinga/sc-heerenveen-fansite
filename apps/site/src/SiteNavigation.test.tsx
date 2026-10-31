@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import { usePathname } from 'next/navigation'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
@@ -25,10 +27,10 @@ function linksWith(html: string, value: 'page' | 'true') {
   ].map(([, label]) => label)
 }
 
-function render(pathname: string) {
+function render(pathname: string, statisticsBar?: ReactNode) {
   vi.mocked(usePathname).mockReturnValue(pathname)
 
-  return renderToStaticMarkup(<SiteNavigation />)
+  return renderToStaticMarkup(<SiteNavigation statisticsBar={statisticsBar} />)
 }
 
 describe('SiteNavigation', () => {
@@ -147,6 +149,56 @@ describe('SiteNavigation', () => {
       expect(linksWith(html, 'true')).toEqual(['Statistieken'])
     },
   )
+
+  describe('with the bar of Statistieken from the slot', () => {
+    // What the slot @subnav draws for ?competitie=eredivisie on the page of a season.
+    const bar = (
+      <div className="hf-navigation-bar">
+        <a href="/statistieken/spelers/2025-26?competitie=eredivisie">Spelers</a>
+        <a href="/statistieken/tegenstanders?competitie=eredivisie">Tegenstanders</a>
+      </div>
+    )
+
+    it.each(['/statistieken', '/statistieken/2025-26', '/statistieken/spelers/2025-26', '/statistieken/tegenstanders'])(
+      'draws that bar instead of the fixed one on %s, in the item of Statistieken',
+      (path) => {
+        const html = render(path, bar)
+
+        expect(barLinks(html)).toEqual([
+          ['/statistieken/spelers/2025-26?competitie=eredivisie', 'Spelers'],
+          ['/statistieken/tegenstanders?competitie=eredivisie', 'Tegenstanders'],
+        ])
+        expect(html.match(/hf-navigation-bar/g)).toHaveLength(1)
+        expect(html).toMatch(/<a [^>]*href="\/statistieken"[^>]*>Statistieken<\/a><div class="hf-navigation-bar">/)
+      },
+    )
+
+    it('keeps the current place of the menu from the path: Spelers current, Statistieken aria-current="true"', () => {
+      const html = render('/statistieken/spelers/2025-26', bar)
+
+      expect(linksWith(html, 'true')).toEqual(['Statistieken'])
+      expect(currentOf('/statistieken/spelers/2025-26').subitem).toBe('/statistieken/spelers')
+    })
+
+    it('keeps the addresses of the main menu fixed, with no season and no choice', () => {
+      const html = render('/statistieken/2025-26', bar)
+      const menu = html.replace(/<div class="hf-navigation-bar">.*?<\/div>/, '')
+
+      expect([...menu.matchAll(/href="([^"]*)"/g)].map(([, href]) => href)).toEqual([
+        '/',
+        '/wedstrijden',
+        '/statistieken',
+        'https://forum.heerenveen.org',
+      ])
+    })
+
+    it.each(['/', '/nieuws/podcasts', '/wedstrijden', '/bronnen'])(
+      'leaves the other pages as they are, with their own bar or none, on %s',
+      (path) => {
+        expect(render(path, bar)).toBe(render(path))
+      },
+    )
+  })
 
   it.each(['/bronnen', '/nieuws/bestaat-niet', '/podcasts', '/zoeken', '/redactie', '/bestaat-niet'])(
     'marks nothing on %s, which is not in the menu, and shows no bar',

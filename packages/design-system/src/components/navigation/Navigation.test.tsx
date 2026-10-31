@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -5,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 
 import { exampleLongMenu, exampleMenuAt } from '../../docs/ExamplePage'
 import { Navigation } from './Navigation'
+import { NavigationBar } from './NavigationBar'
 
 const items = [
   { current: true, href: '/nieuws', label: 'Nieuws' },
@@ -323,6 +326,72 @@ describe('Navigation with sub-pages', () => {
       'Stand',
       'Forum',
     ])
+  })
+
+  describe('with a bar from the caller', () => {
+    /** The menu at a path, with the bar of the Wedstrijden item drawn by the caller. */
+    const withBar = (path: string, bar: ReactNode) =>
+      at(path).map((item) => (item.subitems === undefined ? item : { ...item, bar }))
+
+    const callerBar = (
+      <NavigationBar
+        subitems={[
+          { href: '/wedstrijden/programma?competitie=eredivisie', label: 'Programma' },
+          { current: true, href: '/wedstrijden/uitslagen?competitie=eredivisie', label: 'Uitslagen' },
+        ]}
+      />
+    )
+
+    it('draws the bar of the caller instead of the one from the sub-pages, in the same place', () => {
+      render(<Navigation appearance="header" items={withBar('/wedstrijden/uitslagen', callerBar)} label="Hoofdmenu" />)
+
+      expect(document.querySelectorAll('.hf-navigation-bar')).toHaveLength(1)
+      expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+        '/',
+        '/wedstrijden',
+        '/wedstrijden/programma?competitie=eredivisie',
+        '/wedstrijden/uitslagen?competitie=eredivisie',
+        'https://forum.heerenveen.org',
+      ])
+      expect(screen.getByRole('link', { name: 'Wedstrijden' }).closest('li')!.lastElementChild!.className).toBe(
+        'hf-navigation-bar',
+      )
+    })
+
+    it('still takes the current sub-page and the aria-current of the item from the sub-pages', () => {
+      render(<Navigation appearance="header" items={withBar('/wedstrijden/uitslagen', callerBar)} label="Hoofdmenu" />)
+
+      expect(screen.getByRole('link', { name: 'Wedstrijden' }).getAttribute('aria-current')).toBe('true')
+      expect(screen.getByRole('link', { name: 'Uitslagen' }).getAttribute('aria-current')).toBe('page')
+    })
+
+    it('shows the bar only where the bar from the sub-pages would be, and not on another item', () => {
+      render(<Navigation appearance="header" items={withBar('/', callerBar)} label="Hoofdmenu" />)
+
+      expect(document.querySelector('.hf-navigation-bar')).toBeNull()
+    })
+
+    it('draws the bar from the sub-pages when the bar is null, and the same markup as NavigationBar does', () => {
+      const drawn = render(<Navigation appearance="header" items={at('/wedstrijden/stand')} label="Hoofdmenu" />)
+      const fromNull = drawn.container.innerHTML
+      drawn.unmount()
+      const given = render(
+        <Navigation
+          appearance="header"
+          items={withBar('/wedstrijden/stand', <NavigationBar subitems={at('/wedstrijden/stand')[1]!.subitems!} />)}
+          label="Hoofdmenu"
+        />,
+      )
+
+      expect(given.container.innerHTML).toBe(fromNull)
+      expect(fromNull).toContain('hf-navigation-bar')
+    })
+
+    it('leaves the bar out of a navigation that is not the main menu', () => {
+      render(<Navigation items={withBar('/wedstrijden/uitslagen', callerBar)} label="Over de site" />)
+
+      expect(document.querySelector('.hf-navigation-bar')).toBeNull()
+    })
   })
 
   it('can be the last item that has sub-pages, which the menu row keeps on the right', () => {

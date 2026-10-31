@@ -1,5 +1,7 @@
 'use client'
 
+import type { ReactNode } from 'react'
+
 import { Navigation } from '@fansite/design-system'
 import { usePathname } from 'next/navigation'
 
@@ -16,10 +18,12 @@ const statisticsSubitems = [
   { href: '/statistieken/tegenstanders', label: 'Tegenstanders' },
 ]
 
+const statisticsPath = '/statistieken'
+
 const items = [
   { href: '/', label: 'Nieuws', subitems: newsSubitems },
   { href: '/wedstrijden', label: 'Wedstrijden' },
-  { href: '/statistieken', label: 'Statistieken', subitems: statisticsSubitems },
+  { href: statisticsPath, label: 'Statistieken', subitems: statisticsSubitems },
   { external: true, href: 'https://forum.heerenveen.org', label: 'Forum' },
 ]
 
@@ -68,18 +72,28 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
  * marks the item the visitor is on, and the bar the sub-page. A layout gets no path, so this is
  * a client component: usePathname gives the path, also when the server renders the HTML.
  *
+ * The addresses of the items are fixed, and so are the links of the bar of Nieuws. The bar of
+ * Statistieken is different: its links keep the season and the choice between all matches and
+ * the Eredivisie of the page, and the choice is in the query string, which a client component
+ * in a layout can only read with `useSearchParams` and a Suspense boundary, and that would
+ * touch every page. So the pages of Statistieken draw the bar on the server (the slot
+ * `@subnav`, see layout.tsx) and hand it in as `statisticsBar`. The sub-pages listed here only
+ * tell which one is the current one, and give the bar when there is no slot.
+ *
  * On a sub-page the item Nieuws or Statistieken is not the current page itself (the design
  * system gives it `aria-current="true"` then); only on the home page and on an article of the
  * editors, and on /statistieken and the page of a season below it, is it.
  */
-export function SiteNavigation() {
-  const here = currentOf(usePathname())
+export function SiteNavigation({ statisticsBar }: { statisticsBar?: ReactNode }) {
+  const pathname = usePathname()
+  const here = currentOf(pathname)
 
   return (
     <Navigation
       appearance="header"
       items={items.map((item) => ({
         ...item,
+        ...(item.href === statisticsPath && statisticsBar !== undefined && { bar: statisticsBar }),
         current: item.href === here.item && here.subitem === undefined,
         ...(item.subitems && {
           subitems: item.subitems.map((subitem) => ({ ...subitem, current: subitem.href === here.subitem })),

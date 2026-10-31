@@ -269,7 +269,13 @@ De volgorde in de broncode blijft de volgorde van de balk en van een telefoon.
 Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`).
 De kaarten tellen standaard alle wedstrijden, de Eredivisie en de KNVB Beker; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
-Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu Spelers en Tegenstanders (`statisticsSubitems` in `src/SiteNavigation.tsx`).
+Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu Spelers en Tegenstanders.
+De links van die balk houden het seizoen en de keuze tussen alle wedstrijden en de Eredivisie vast: op `/statistieken/2025-26?competitie=eredivisie` gaat Spelers naar `/statistieken/spelers/2025-26?competitie=eredivisie`, en Tegenstanders naar `/statistieken/tegenstanders?competitie=eredivisie` (die telt alle seizoenen).
+De items van het menu zelf houden niets vast: Statistieken is altijd `/statistieken`.
+De keuze staat in de query string, en die kan een clientcomponent in de layout alleen lezen met `useSearchParams` en een Suspense-grens, en dat raakt elke pagina.
+Daarom tekent het slot `@subnav` van de layout de balk op de server (`app/@subnav/statistieken`, `src/statisticsBar.tsx`), en geeft de layout hem aan `SiteNavigation` (`statisticsBar`), dat hem aan het item Statistieken geeft (`bar` van `Navigation`).
+`statisticsSubitems` in `src/SiteNavigation.tsx` zegt alleen welke subpagina de huidige is.
+Alleen de pagina's van Statistieken hebben een route in het slot, en zij worden al per verzoek gemaakt; elke andere pagina krijgt een leeg slot.
 Op `/statistieken` is geen subpagina de huidige; op `/statistieken/spelers` en zijn seizoenen is Spelers het wel, op `/statistieken/tegenstanders` en de pagina's van de clubs is Tegenstanders het wel, en Statistieken blijft het huidige onderdeel van het menu.
 Op een breed scherm is de balk er niet.
 De balk volgt de pagina, zoals die van Wedstrijden.
@@ -439,7 +445,7 @@ De hulpfuncties in `src/matches.ts` krijgen de keuze als laatste argument (`Comp
 De keuze blijft bij elke link tussen de twee pagina's: de link "Alle doelpuntenmakers", de schakelaar zelf, de knop "Laad 5 meer" van De nul gehouden (die een formulier met een verborgen veld is) en de seizoenskiezer, die de keuze als verborgen veld (`fields`) naar de route `kies` stuurt.
 `pickedSeasonResponse` stuurt de keuze mee naar het adres van het seizoen (`keepCompetition`) en laat een waarde weg die de pagina niet kent, zodat de kiezer niemand naar "niet gevonden" stuurt.
 De balk "Op deze pagina:" heeft alleen verwijzingen naar een plek op dezelfde pagina, dus hij houdt het seizoen en de keuze vanzelf vast.
-Het menu bovenaan de site heeft vaste adressen en houdt de keuze niet vast.
+De balk onder het hoofdmenu houdt het seizoen en de keuze wel vast (zie _Het hoofdmenu en de balk van Nieuws_), de items van het menu zelf niet: die hebben vaste adressen.
 
 De telling zelf gebeurt na het lezen: `getMatchData` bewaart de wedstrijden van een seizoen vijf minuten (of een uur voor een afgelopen seizoen), en de keuze filtert die lijst.
 Er is dus geen sleutel per keuze in de cache nodig, en de ene keuze kan de andere niet overschrijven.
