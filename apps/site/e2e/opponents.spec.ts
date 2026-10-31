@@ -56,12 +56,15 @@ test.describe('sorting the list', () => {
   test('sorts with the keyboard, keeps the focus on the button and says what happened', async ({ page }) => {
     await page.goto('/statistieken/tegenstanders')
 
-    const played = page.getByRole('button', { exact: true, name: 'gespeeld' })
+    const played = page.getByRole('button', { exact: true, name: 'G gespeeld' })
     const status = page.getByRole('status')
     const given = await clubNames(page)
 
-    await expect(page.getByRole('columnheader', { exact: true, name: 'gespeeld' })).toHaveAttribute('aria-sort', 'none')
-    await expect(page.getByRole('columnheader', { exact: true, name: 'doelpunten' })).toHaveAttribute(
+    await expect(page.getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
+      'aria-sort',
+      'none',
+    )
+    await expect(page.getByRole('columnheader', { exact: true, name: 'D doelpunten' })).toHaveAttribute(
       'aria-sort',
       'none',
     )
@@ -69,11 +72,11 @@ test.describe('sorting the list', () => {
     await page.keyboard.press('Enter')
 
     await expect(played).toBeFocused()
-    await expect(page.getByRole('columnheader', { exact: true, name: 'gespeeld' })).toHaveAttribute(
+    await expect(page.getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
       'aria-sort',
       'descending',
     )
-    await expect(page.getByRole('columnheader', { exact: true, name: 'doelpunten' })).toHaveAttribute(
+    await expect(page.getByRole('columnheader', { exact: true, name: 'D doelpunten' })).toHaveAttribute(
       'aria-sort',
       'none',
     )
@@ -87,7 +90,7 @@ test.describe('sorting the list', () => {
     await page.keyboard.press('Space')
 
     await expect(played).toBeFocused()
-    await expect(page.getByRole('columnheader', { exact: true, name: 'gespeeld' })).toHaveAttribute(
+    await expect(page.getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
       'aria-sort',
       'ascending',
     )
@@ -99,7 +102,7 @@ test.describe('sorting the list', () => {
 
   test('sorts the clubs from A to Z on the first click on Club, then from Z to A', async ({ page }) => {
     await page.goto('/statistieken/tegenstanders')
-    await page.getByRole('button', { exact: true, name: 'gespeeld' }).click()
+    await page.getByRole('button', { exact: true, name: 'G gespeeld' }).click()
     await page.getByRole('button', { exact: true, name: 'Club' }).click()
 
     const collator = new Intl.Collator('nl', { sensitivity: 'base' })
@@ -116,11 +119,11 @@ test.describe('sorting the list', () => {
   test('has the column Punten only with the Eredivisie, and sorts on it', async ({ page }) => {
     await page.goto('/statistieken/tegenstanders')
 
-    await expect(page.getByRole('columnheader', { exact: true, name: 'punten' })).toHaveCount(0)
+    await expect(page.getByRole('columnheader', { exact: true, name: 'P punten' })).toHaveCount(0)
 
     await page.goto('/statistieken/tegenstanders?competitie=eredivisie')
-    await expect(page.getByRole('columnheader', { exact: true, name: 'punten' })).toHaveAttribute('aria-sort', 'none')
-    await page.getByRole('button', { exact: true, name: 'punten' }).click()
+    await expect(page.getByRole('columnheader', { exact: true, name: 'P punten' })).toHaveAttribute('aria-sort', 'none')
+    await page.getByRole('button', { exact: true, name: 'P punten' }).click()
 
     const points = await columnFigures(page, 6)
 
@@ -132,12 +135,12 @@ test.describe('sorting the list', () => {
   test('fits a phone of 320 pixels, with the arrow and every column', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 320 })
     await page.goto('/statistieken/tegenstanders?competitie=eredivisie')
-    await page.getByRole('button', { exact: true, name: 'doelpunten' }).click()
+    await page.getByRole('button', { exact: true, name: 'D doelpunten' }).click()
 
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
     ).toBe(true)
-    for (const name of ['Club', 'gespeeld', 'gewonnen', 'gelijk', 'verloren', 'doelpunten', 'punten']) {
+    for (const name of ['Club', 'G gespeeld', 'W gewonnen', 'GL gelijk', 'V verloren', 'D doelpunten', 'P punten']) {
       const box = await page.getByRole('button', { exact: true, name }).boundingBox()
 
       expect(box?.width ?? 0).toBeGreaterThanOrEqual(24)

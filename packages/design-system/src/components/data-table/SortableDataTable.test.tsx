@@ -50,11 +50,18 @@ describe('DataTable with sortable columns', () => {
     expect(table.querySelectorAll('tbody td')).toHaveLength(12)
   })
 
+  it('names a button with the abbreviation and the word, so what the visitor reads is in the name', () => {
+    render(<DataTable {...props} />)
+
+    expect(screen.getByRole('button', { name: 'G gespeeld' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'W gewonnen' })).toBeTruthy()
+  })
+
   it('makes the headers of the sortable columns buttons, and leaves the other headers as text', () => {
     render(<DataTable {...props} />)
 
-    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual(['Club', 'Ggespeeld', 'Wgewonnen'])
-    expect(button('gespeeld').getAttribute('type')).toBe('button')
+    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual(['Club', 'G gespeeld', 'W gewonnen'])
+    expect(button('G gespeeld').getAttribute('type')).toBe('button')
     expect(within(screen.getByRole('columnheader', { name: 'doelpunten' })).queryByRole('button')).toBeNull()
     expect(order()).toEqual(['Alkmaar', 'Breda', 'Cambuur', 'Dalen'])
   })
@@ -73,21 +80,21 @@ describe('DataTable with sortable columns', () => {
   it('sorts a column of numbers from the biggest down on the first click, and turns round on the second', () => {
     render(<DataTable {...props} />)
 
-    fireEvent.click(button('gespeeld'))
+    fireEvent.click(button('G gespeeld'))
 
     expect(order()).toEqual(['Breda', 'Cambuur', 'Alkmaar', 'Dalen'])
-    expect(screen.getByRole('columnheader', { name: 'gespeeld' }).getAttribute('aria-sort')).toBe('descending')
+    expect(screen.getByRole('columnheader', { name: 'G gespeeld' }).getAttribute('aria-sort')).toBe('descending')
 
-    fireEvent.click(button('gespeeld'))
+    fireEvent.click(button('G gespeeld'))
 
     expect(order()).toEqual(['Dalen', 'Alkmaar', 'Breda', 'Cambuur'])
-    expect(screen.getByRole('columnheader', { name: 'gespeeld' }).getAttribute('aria-sort')).toBe('ascending')
+    expect(screen.getByRole('columnheader', { name: 'G gespeeld' }).getAttribute('aria-sort')).toBe('ascending')
   })
 
   it('sorts the first column from A to Z on the first click, then Z to A', () => {
     render(<DataTable {...props} />)
 
-    fireEvent.click(button('gespeeld'))
+    fireEvent.click(button('G gespeeld'))
     fireEvent.click(button('Club'))
 
     expect(order()).toEqual(['Alkmaar', 'Breda', 'Cambuur', 'Dalen'])
@@ -100,9 +107,9 @@ describe('DataTable with sortable columns', () => {
   it('starts a column at its first direction again after another column, and leaves aria-sort none elsewhere', () => {
     render(<DataTable {...props} />)
 
-    fireEvent.click(button('gespeeld'))
-    fireEvent.click(button('gespeeld'))
-    fireEvent.click(button('gewonnen'))
+    fireEvent.click(button('G gespeeld'))
+    fireEvent.click(button('G gespeeld'))
+    fireEvent.click(button('W gewonnen'))
 
     expect(order()).toEqual(['Breda', 'Alkmaar', 'Dalen', 'Cambuur'])
     expect(screen.getAllByRole('columnheader').map((header) => header.getAttribute('aria-sort'))).toEqual([
@@ -116,12 +123,12 @@ describe('DataTable with sortable columns', () => {
   it('keeps equal values in the order of the first column', () => {
     render(<DataTable {...props} />)
 
-    fireEvent.click(button('gespeeld'))
+    fireEvent.click(button('G gespeeld'))
 
     // Breda and Cambuur both played 10.
     expect(order().slice(0, 2)).toEqual(['Breda', 'Cambuur'])
 
-    fireEvent.click(button('gespeeld'))
+    fireEvent.click(button('G gespeeld'))
 
     expect(order().slice(2)).toEqual(['Breda', 'Cambuur'])
   })
@@ -134,7 +141,7 @@ describe('DataTable with sortable columns', () => {
       />,
     )
 
-    fireEvent.click(button('doelpunten'))
+    fireEvent.click(button('D doelpunten'))
 
     expect(order()).toEqual(['Breda', 'Alkmaar', 'Dalen', 'Cambuur'])
     expect(screen.getByRole('cell', { name: '30–21' })).toBeTruthy()
@@ -145,14 +152,16 @@ describe('DataTable with sortable columns', () => {
 
     expect(document.querySelectorAll('thead svg')).toHaveLength(0)
 
-    fireEvent.click(button('gespeeld'))
+    fireEvent.click(button('G gespeeld'))
 
-    const down = within(screen.getByRole('columnheader', { name: 'gespeeld' })).getByRole('button').innerHTML
+    const down = within(screen.getByRole('columnheader', { name: 'G gespeeld' })).getByRole('button').innerHTML
     expect(document.querySelectorAll('thead svg')).toHaveLength(1)
 
-    fireEvent.click(button('gespeeld'))
+    fireEvent.click(button('G gespeeld'))
 
-    expect(within(screen.getByRole('columnheader', { name: 'gespeeld' })).getByRole('button').innerHTML).not.toBe(down)
+    expect(within(screen.getByRole('columnheader', { name: 'G gespeeld' })).getByRole('button').innerHTML).not.toBe(
+      down,
+    )
     expect(document.querySelectorAll('thead svg')).toHaveLength(1)
     expect(document.querySelector('thead svg')?.getAttribute('aria-hidden')).toBe('true')
   })
@@ -165,7 +174,7 @@ describe('DataTable with sortable columns', () => {
     expect(status.textContent).toBe('')
     expect(status.className).toBe('hf-visually-hidden')
 
-    fireEvent.click(button('gespeeld'))
+    fireEvent.click(button('G gespeeld'))
 
     expect(screen.getByRole('status')).toBe(status)
     expect(status.textContent).toBe('Gesorteerd op Gespeeld, van hoog naar laag')
@@ -178,13 +187,13 @@ describe('DataTable with sortable columns', () => {
   it('keeps the focus on the button that was pressed', () => {
     render(<DataTable {...props} />)
 
-    const target = button('gespeeld')
+    const target = button('G gespeeld')
 
     target.focus()
     fireEvent.click(target)
 
     expect(document.activeElement).toBe(target)
-    expect(button('gespeeld')).toBe(target)
+    expect(button('G gespeeld')).toBe(target)
   })
 
   it('leaves a table without a sortable column alone: the same table, no buttons, no live region', () => {

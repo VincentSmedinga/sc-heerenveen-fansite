@@ -268,9 +268,9 @@ export const SortedPhone = meta.story({
   globals: { theme: 'light' },
   name: 'Gesorteerd op een telefoon, licht',
   play: async ({ canvas }) => {
-    await userEvent.click(canvas.getByRole('button', { name: 'doelpunten' }))
-    await expect(canvas.getByRole('columnheader', { name: 'doelpunten' })).toHaveAttribute('aria-sort', 'descending')
-    await expect(canvas.getByRole('button', { name: 'doelpunten' })).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'D doelpunten' }))
+    await expect(canvas.getByRole('columnheader', { name: 'D doelpunten' })).toHaveAttribute('aria-sort', 'descending')
+    await expect(canvas.getByRole('button', { name: 'D doelpunten' })).toHaveFocus()
   },
   render: renderSortable('20rem'),
 })

@@ -19,14 +19,17 @@ const textOf = (cell: DataTableCell) => {
 
 /**
  * The text of a column header: the abbreviation, with the whole word for a screen reader, or
- * the name itself when the column has no abbreviation.
+ * the name itself when the column has no abbreviation. In a button (`named`) the abbreviation
+ * is part of the name as well, as in `GL gelijk`, so what the visitor reads is in the name and
+ * speech control can say "click GL" (WCAG 2.5.3).
  */
-export const ColumnText = ({ column }: { column: DataTableColumn }) =>
+export const ColumnText = ({ column, named = false }: { column: DataTableColumn; named?: boolean }) =>
   column.abbreviation === undefined ? (
     column.name
   ) : (
     <abbr title={column.name.charAt(0).toUpperCase() + column.name.slice(1)}>
-      <span aria-hidden="true">{column.abbreviation}</span>
+      <span aria-hidden={named ? undefined : 'true'}>{column.abbreviation}</span>
+      {named && ' '}
       <span className="hf-visually-hidden">{column.name}</span>
     </abbr>
   )

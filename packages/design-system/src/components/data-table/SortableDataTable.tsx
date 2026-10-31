@@ -77,7 +77,7 @@ export const SortableDataTable = ({ caption, className, columns, rows, ...props 
                       }}
                       type="button"
                     >
-                      <ColumnText column={column} />
+                      <ColumnText column={column} named />
                       {active && <Icon name={sorting.direction === 'ascending' ? 'arrow-up' : 'arrow-down'} />}
                     </button>
                   ) : (
