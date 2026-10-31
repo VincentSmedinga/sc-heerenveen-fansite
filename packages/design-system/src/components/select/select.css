@@ -96,6 +96,12 @@
           order: 1;
         }
       }
+
+      /* A small list has small options, so the open list matches the closed one. */
+      &.hf-size-small option {
+        min-block-size: var(--hf-size-control-small);
+        padding-block: var(--hf-space-xs);
+      }
     }
   }
   /* stylelint-enable plugin/use-baseline */

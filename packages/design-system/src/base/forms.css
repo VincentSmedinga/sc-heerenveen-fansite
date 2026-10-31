@@ -1,5 +1,6 @@
 /*
- * Form elements. Fields and buttons are at least 44px high; field borders reach 3:1 against the field.
+ * Form elements. Fields and buttons are at least 44px high, or 36px in the small size
+ * (hf-size-small). Field borders reach 3:1 against the field.
  * Buttons are in components/button/button.css, and the height and the error of text fields in the files of their components.
  * Borders set their width and style in the shorthand and take only the colour from a token. If a token can't
  * be resolved, the border falls back to the text colour instead of disappearing.
@@ -85,5 +86,15 @@
     color: var(--hf-colour-text-heading);
     font-weight: var(--hf-name-font-weight);
     padding-inline: var(--hf-space-xs);
+  }
+}
+
+@layer hf.components {
+  /* The small size of a text field and a list. A textarea has no small size. */
+  input.hf-size-small,
+  select.hf-size-small {
+    font-size: var(--hf-meta-font-size);
+    min-block-size: var(--hf-size-control-small);
+    padding-block: var(--hf-space-xs);
   }
 }

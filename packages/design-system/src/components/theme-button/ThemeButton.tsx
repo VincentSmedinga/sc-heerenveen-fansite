@@ -3,6 +3,7 @@
 import { type ComponentPropsWithoutRef, useId, useState } from 'react'
 
 import { classNames } from '../classNames'
+import { type Size, sizeClassName } from '../size'
 
 export type ThemeButtonProps = Omit<
   ComponentPropsWithoutRef<'button'>,
@@ -15,6 +16,8 @@ export type ThemeButtonProps = Omit<
    * the name is what a visitor hears, together with whether the button is pressed.
    */
   label: string
+  /** `default` is the standard size. `small` is a smaller button, for a crowded header. */
+  size?: Size
 }
 
 /**
@@ -37,6 +40,7 @@ export const ThemeButton = ({
   onBlur,
   onClick,
   onPointerLeave,
+  size = 'default',
   ...props
 }: ThemeButtonProps) => {
   const [settled, setSettled] = useState(false)
@@ -47,7 +51,7 @@ export const ThemeButton = ({
       {...props}
       aria-label={label}
       aria-pressed={dark}
-      className={classNames('hf-theme-button', className)}
+      className={classNames('hf-theme-button', sizeClassName(size), className)}
       data-settled={settled ? '' : undefined}
       onBlur={(event) => {
         setSettled(false)

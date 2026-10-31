@@ -1,0 +1,34 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks'
+
+import * as SizeStories from './size.stories'
+
+<Meta of={SizeStories} />
+
+# Maten van knoppen en velden
+
+Knoppen en velden hebben twee maten: de standaardmaat en de kleine maat.
+Je kiest ze met dezelfde eigenschap, `size`, met de waarden `default` en `small`, op `Button`, `Input`, `Select`, `Pagination` en `ThemeButton`.
+Zonder `size` krijg je de standaardmaat, dus niets verandert voor wie hem niet kiest.
+
+**De standaardmaat is de vaste keuze.**
+Twijfel je, neem dan de standaardmaat.
+
+<Story of={SizeStories.SideBySide} />
+
+## Welke maat?
+
+- **Standaard** voor een formulier, voor wat op een telefoon de hoofdhandeling is, en voor wat alleen staat.
+  Een vinger raakt hem zonder moeite.
+- **Klein** voor een secundair bedieningselement naast de inhoud, zoals een kiezer of een schakelaar in een zijkolom of een werkbalk.
+  Zo valt het niet meer op dan de inhoud zelf.
+- Zet in één groep dezelfde maat naast elkaar: een kleine kiezer naast een standaardknop ziet er scheef uit.
+
+## Regels
+
+- **Eén eigenschap:** `size` heet overal hetzelfde en doet op elk onderdeel hetzelfde.
+  Op `Input` en `Select` neemt hij de plaats in van het HTML-attribuut `size`, dat een breedte of een aantal regels is.
+- **Alleen waar het past:** een `Textarea` is een blok met regels en heeft geen kleine maat.
+  De ronde knop van `Card` en de knop naar boven houden hun maat, want ze staan in een hoek en moeten met een vinger te raken zijn.
+- **Toegankelijk:** ook de kleine maat is ruim boven de 24 bij 24 pixels die WCAG 2.5.8 vraagt, heeft ruimte eromheen en heeft dezelfde zichtbare focus.
+  Alles werkt hetzelfde met het toetsenbord en een schermlezer.
+- **Alleen tokens:** de kleine maat gebruikt de ruimtetokens en het token voor de hoogte, `--hf-size-control-small`.

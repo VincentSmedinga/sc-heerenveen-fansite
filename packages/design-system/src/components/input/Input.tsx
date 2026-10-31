@@ -1,5 +1,8 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
+import { classNames } from '../classNames'
+import { type Size, sizeClassName } from '../size'
+
 /**
  * The types of a text field an Input can be, and `hidden`, which is no field to see but carries
  * a value along with a form, such as the search that a button to load more results repeats. A
@@ -21,7 +24,12 @@ export const inputTypes = [
   'week',
 ] as const
 
-export type InputProps = Omit<ComponentPropsWithoutRef<'input'>, 'type'> & {
+export type InputProps = Omit<ComponentPropsWithoutRef<'input'>, 'size' | 'type'> & {
+  /**
+   * `default` is the standard size. `small` is lower, for a field next to the content. It takes
+   * the place of the `size` of the HTML element, which is a width in characters.
+   */
+  size?: Size
   /** The kind of text field. Without it, it is `text`. */
   type?: InputType
 }
@@ -33,4 +41,6 @@ export type InputType = (typeof inputTypes)[number]
  * field with personal data pass `autoComplete`, such as `name` or `email`, so the browser can
  * fill it in.
  */
-export const Input = ({ type = 'text', ...props }: InputProps) => <input type={type} {...props} />
+export const Input = ({ className, size = 'default', type = 'text', ...props }: InputProps) => (
+  <input className={classNames(sizeClassName(size), className)} type={type} {...props} />
+)

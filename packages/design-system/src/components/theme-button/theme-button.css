@@ -25,6 +25,7 @@
  */
 
 @layer hf.components {
+  /* The small size (hf-size-small) is 36 by 36 pixels, with an icon of 22 pixels. */
   .hf-theme-button {
     /* How long the sun and the moon take to turn into each other (the medium duration). */
     --hf-theme-button-morph: var(--hf-motion-duration-medium);
@@ -55,6 +56,20 @@
       /* The rays go outwards, past the edge of the icon. */
       overflow: visible;
       vertical-align: baseline;
+    }
+
+    /* The small size: 36 by 36 pixels, with an icon of 22 pixels. */
+    &.hf-size-small {
+      block-size: var(--hf-size-control-small);
+      inline-size: var(--hf-size-control-small);
+
+      /* The small size of a button sets a padding, and this button has none. */
+      padding: 0;
+
+      .hf-icon {
+        block-size: 22px;
+        inline-size: 22px;
+      }
     }
 
     &:active,
