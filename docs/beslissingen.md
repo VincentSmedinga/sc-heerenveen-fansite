@@ -5356,7 +5356,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De andere schrijfwijzen staan in `club_names`.
   De `slug` is de vaste naam in een adres.
   Hij komt van de naam bij het aanmaken, zonder accenten, punten en apostrofs (`N.E.C.` geeft `nec`), met `-2` erachter als een andere club hem al heeft, en verandert nooit meer, ook niet als de naam verandert.
-  `kies` is voorbehouden, want `/statistieken/tegenstanders/kies` is een pagina van de site.
+  `kies` is voorbehouden, want de site gebruikt `kies` zelf in een adres, zoals `/statistieken/kies`.
 - **Waarom:** de pagina's per tegenstander (#415) hebben een adres nodig dat blijft werken.
   Een naam is dat niet: clubs veranderen van naam, fuseren, en Wikipedia schrijft dezelfde club in de competitie en in de beker soms anders (`N.E.C.` en `NEC`).
   Het artikel is wat Wikipedia zelf als identiteit gebruikt, zoals bij de spelers.

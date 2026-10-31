@@ -742,7 +742,7 @@ De regels staan op één plek, `createClubBook` in [`clubs.ts`](../../packages/d
    Is er geen, dan maakt hij een nieuwe club zonder artikel.
 4. De slug van een nieuwe club komt van de naam, zonder accenten, punten en apostrofs (`N.E.C.` geeft `nec`, `Be Quick '28` geeft `be-quick-28`).
    Heeft een andere club de slug al, dan komt er `-2` achter, dan `-3`, enzovoort.
-   `kies` is nooit een slug, want `/statistieken/tegenstanders/kies` is een pagina van de site zelf.
+   `kies` is nooit een slug, want de site gebruikt `kies` zelf in een adres, zoals `/statistieken/kies`.
    Een club houdt zijn slug, ook als zijn naam verandert.
 5. Schrijft Wikipedia de naam van een club die we al hebben anders, dan komt die naam bij de andere namen.
    Is de wedstrijd van het nieuwste seizoen dat we van de club hebben, dan wordt het de naam van de club, en de oude naam komt bij de andere namen.

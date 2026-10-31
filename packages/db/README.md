@@ -434,7 +434,7 @@ Een club met wedstrijden is niet te verwijderen (de verwijzing heeft geen cascad
 
 De migratie `0021_add_clubs` maakt van de verschillende waarden van `matches.opponent` een club (hoofdletters tellen niet mee), met een slug van de naam, en koppelt elke wedstrijd.
 De slug heeft geen accenten, punten of apostrofs (`N.E.C.` geeft `nec`) en krijgt `-2`, `-3` erachter als een andere club hem al heeft.
-`kies` is voorbehouden, want `/statistieken/tegenstanders/kies` is een pagina van de site; een club die zo heet, krijgt `kies-2`.
+`kies` is voorbehouden, want de site gebruikt `kies` zelf in een adres, zoals `/statistieken/kies`; een club die zo heet, krijgt `kies-2`.
 In een lege database doet de migratie niets.
 Een club zonder artikel krijgt dat van de importer de eerstvolgende keer dat hij het seizoen leest.
 
