@@ -1,5 +1,3 @@
-import type { PublicMatch } from '@fansite/db/queries'
-
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -99,7 +97,7 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="eindstand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#eindstand">Eindstand</a></h2>',
     )
     expect(html).toContain('<caption class="hf-visually-hidden">Eindstand op ')
-    expect(html).toContain('aria-label="De eindstand, de ranglijsten en de doelpunten per kwartier"')
+    expect(html).toContain('aria-label="De eindstand"')
     expect(html).toContain('aria-labelledby="eindstand"')
     expect(html).not.toContain('id="stand"')
     expect(html).not.toContain('>Stand</')
@@ -169,62 +167,25 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     expect(html).toContain('id="eindstand"')
   })
 
-  it('keeps the other cards: the table, our place, the season, the streaks and the rest', async () => {
+  it('has the results, the final table and no other card without a coach in the table', async () => {
     const html = await render()
 
     expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
       'uitslagen',
       'eindstand',
-      'onze-plek-in-de-competitie',
-      'verloop-van-het-seizoen',
-      'reeksen',
-      'thuis-en-uit',
-      'doelpuntenmakers',
-      'de-nul-gehouden',
-      'doelpunten-per-kwartier',
-      'hoe-de-wedstrijden-verlopen',
-      'uitersten',
     ])
   })
 
-  describe('the streaks', () => {
-    const section = (html: string) => html.slice(html.indexOf('id="reeksen"'), html.indexOf('id="thuis-en-uit"'))
-    const columns = (card: string) =>
-      [...card.matchAll(/<th [^>]*scope="col"[^>]*>([^<]*)<\/th>/g)].map(([, name]) => name)
+  it('has a link under the final table to our place in the league on the statistics page of that season', async () => {
+    const html = await render()
 
-    it('has the columns Reeks and Langste, and no column Nu, with the six streaks as rows', async () => {
-      const card = section(await render())
+    expect(html).toContain('<a href="/statistieken/2025-26#onze-plek-in-de-competitie">Onze plek in de competitie</a>')
+  })
 
-      expect(columns(card)).toEqual(['Reeks', 'Langste'])
-      expect(card.match(/<th scope="row">/g)).toHaveLength(6)
-      expect(card.match(/<td[^>]*>\d+<\/td>/g)).toHaveLength(6)
-    })
+  it('has a link under the results to the course of the season on the statistics page of that season', async () => {
+    const html = await render()
 
-    it('has no latest five matches: no row of marks and no list of matches', async () => {
-      const card = section(await render())
-
-      expect(card).not.toContain('Laatste wedstrijden')
-      expect(card).not.toContain('hf-mark-row')
-      expect(card).not.toContain('<ul')
-      expect(card).not.toContain('Vorig Seizoen FC')
-      expect(card).toContain('Gebaseerd op')
-    })
-
-    it('names the season in the caption and not "this season"', async () => {
-      const card = section(await render())
-
-      expect(card).toContain('De reeksen van sc Heerenveen in de Eredivisie in 2025/26')
-      expect(card).not.toContain('dit seizoen')
-    })
-
-    it('names the season in the sentence without matches too', async () => {
-      vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches: [] })
-
-      const card = section(await render())
-
-      expect(card).toContain('We hebben geen uitslagen in 2025/26.')
-      expect(card).not.toContain('dit seizoen')
-    })
+    expect(html).toContain('<a href="/statistieken/2025-26#verloop-van-het-seizoen">Het verloop van het seizoen</a>')
   })
 
   it('credits the Wikipedia pages of that season', async () => {
@@ -249,21 +210,6 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
       addresses.every((address) => /^https:\/\/(nl\.wikipedia\.org|creativecommons\.org)\//.test(address ?? '')),
     ).toBe(true)
     expect(html).not.toMatch(/\ssrc="/)
-  })
-
-  it('keeps the button for more clean sheets on the page of the season, not on /wedstrijden', async () => {
-    const sheets = Array.from({ length: 11 }, (_, index): PublicMatch => ({
-      ...earlierMatch,
-      goals: [],
-      goalsAgainst: 0,
-      matchDate: `2025-09-${String(index + 1).padStart(2, '0')}`,
-      opponent: `Proefclub ${index + 1}`,
-      round: `Speelronde ${100 + index}`,
-    }))
-
-    vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches: sheets })
-
-    expect(await render()).toContain('action="/wedstrijden/2025-26#nul-11"')
   })
 
   describe('the season picker', () => {

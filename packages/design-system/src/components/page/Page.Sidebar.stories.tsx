@@ -17,7 +17,7 @@ const meta = preview.meta({
           '- Net als de hoofdkolom bestaat hij uit cellen die onder elkaar staan, op elk scherm, ook onder de hoofdkolom.',
           '- Met `split` staan de cellen naast elkaar, in twee kolommen, zodra er twee passen. Dat is onder de hoofdkolom op een middelbaar scherm. Kies het voor een zijbalk met kleine cellen, zoals een paar korte kaarten. Cellen met een lijst worden er smal en krap van.',
           '- Geef hem een naam met `aria-label` of `aria-labelledby`.',
-          '- Met `wide` is hij even breed als de hoofdkolom, voor een zijbalk met een tabel. De hoofdkolom wordt er smaller van, zodat samen de kolommen even breed blijven als zonder. De `Page.Body` hoef je er niets voor te geven: de zijbalk zegt het zelf.',
+          '- Met `wide` is hij even breed als de hoofdkolom, voor een zijbalk met een tabel, of om twee even brede kolommen met kaarten te maken. De hoofdkolom wordt er smaller van, zodat samen de kolommen even breed blijven als zonder. De `Page.Body` hoef je er niets voor te geven: de zijbalk zegt het zelf.',
           "- Met `narrow` is hij smaller dan op andere pagina's en is de hoofdkolom breder. Kies het voor een zijbalk met iets kleins, zoals een filter, naast een lange lijst. Samen blijven de kolommen even breed als zonder. Kies er niet `wide` bij.",
         ].join('\n'),
       },

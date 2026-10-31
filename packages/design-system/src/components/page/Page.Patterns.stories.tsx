@@ -7,6 +7,7 @@ import {
   exampleMenuWithSubpages,
   ExampleSidebar,
 } from '../../docs/ExamplePage'
+import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { Link } from '../link/Link'
 import { Logo } from '../logo/Logo'
@@ -27,6 +28,7 @@ const meta = preview.meta({
           '',
           '- **Gewone pagina:** header, hoofdmenu, een hoofdkolom en de footer.',
           '- **Met zijbalk:** een `Page.Sidebar` naast de hoofdkolom in de `Page.Body`.',
+          '- **Met twee gelijke kolommen:** een `Page.Main` met een `intro` en de eerste kaarten, en een `Page.Sidebar` met `wide` met de rest. Op een breed scherm staan ze naast elkaar, even breed. Op een smal scherm staan alle kaarten onder elkaar, eerst die van de `Page.Main`. Verdeel de kaarten dus in de volgorde waarin ze onder elkaar moeten staan, en zo dat de kolommen ongeveer even hoog worden.',
           '- **Met subpagina’s:** een onderdeel van het hoofdmenu met `subitems`. De balk met subpagina’s hoort bij het menu en staat in dezelfde `nav`.',
           '- **Met subpagina’s en ankers:** daaronder een `Page.Shortcuts` met links naar de kaarten van de pagina, voor een smal scherm. Alleen die balk plakt.',
           '',
@@ -137,6 +139,54 @@ const renderWithSubpagesAndShortcuts = (_args: unknown, context: Globals) => (
   </Page>
 )
 
+const equalColumns = {
+  main: ['Onze plek in de competitie', 'Verloop van het seizoen', 'Reeksen'],
+  sidebar: ['Doelpuntenmakers', 'Doelpunten per kwartier', 'Uitersten'],
+}
+
+const idOf = (title: string) => title.toLowerCase().replaceAll(' ', '-')
+
+const EqualColumnsCard = ({ title }: { title: string }) => (
+  <Card aria-labelledby={idOf(title)}>
+    <Heading anchor id={idOf(title)} level={2}>
+      {title}
+    </Heading>
+    <Text>Hier staat een kaart met cijfers. Elke kaart is een cel van zijn kolom.</Text>
+  </Card>
+)
+
+const renderWithEqualColumns = (_args: unknown, context: Globals) => (
+  <Page>
+    <Page.Header>
+      <Link href="#home">
+        <Logo />
+      </Link>
+      <ThemeButton dark={isDark(context)} label="Donker" />
+    </Page.Header>
+    <Navigation appearance="header" items={exampleMenu} label="Hoofdmenu" />
+    <Page.Shortcuts
+      items={[...equalColumns.main, ...equalColumns.sidebar].map((title) => ({
+        href: `#${idOf(title)}`,
+        label: title,
+      }))}
+      label="Op deze pagina:"
+    />
+    <Page.Body>
+      <Page.Main intro={<Heading level={1}>Cijfers</Heading>}>
+        {equalColumns.main.map((title) => (
+          <EqualColumnsCard key={title} title={title} />
+        ))}
+      </Page.Main>
+      <Page.Sidebar aria-label="Meer cijfers" wide>
+        {equalColumns.sidebar.map((title) => (
+          <EqualColumnsCard key={title} title={title} />
+        ))}
+      </Page.Sidebar>
+    </Page.Body>
+    <ExampleFooter />
+  </Page>
+)
+
 const phone = { tags: ['!autodocs'] }
 const mobile = { theme: 'light', viewport: { value: 'mobile2' } }
 
@@ -162,6 +212,41 @@ export const WithSidebarDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Met zijbalk, donker',
   render: renderWithSidebar,
+})
+
+export const WithEqualColumnsLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Met twee gelijke kolommen, licht',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Op een breed scherm staan de kaarten van de `Page.Main` links en die van de `Page.Sidebar` met `wide` rechts, even breed. De kop staat boven de linker kolom. De balk met ankers verdwijnt waar de kolommen naast elkaar staan.',
+      },
+    },
+  },
+  render: renderWithEqualColumns,
+})
+
+export const WithEqualColumnsDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Met twee gelijke kolommen, donker',
+  render: renderWithEqualColumns,
+})
+
+export const WithEqualColumnsPhone = meta.story({
+  ...phone,
+  globals: mobile,
+  name: 'Met twee gelijke kolommen, telefoon',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Op een smal scherm staan alle kaarten onder elkaar, eerst die van de `Page.Main`, dan die van de zijbalk.',
+      },
+    },
+  },
+  render: renderWithEqualColumns,
 })
 
 export const WithSubpagesLight = meta.story({

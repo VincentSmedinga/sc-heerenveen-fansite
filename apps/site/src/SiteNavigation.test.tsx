@@ -32,7 +32,7 @@ function render(pathname: string) {
 }
 
 describe('SiteNavigation', () => {
-  it('links to the news, the matches and the forum, in a navigation named Hoofdmenu', () => {
+  it('links to the news, the matches, the statistics and the forum, in a navigation named Hoofdmenu', () => {
     const html = render('/wedstrijden')
 
     expect(html).toContain('<nav aria-label="Hoofdmenu"')
@@ -44,6 +44,7 @@ describe('SiteNavigation', () => {
     ).toEqual([
       ['/', 'Nieuws'],
       ['/wedstrijden', 'Wedstrijden'],
+      ['/statistieken', 'Statistieken'],
       ['https://forum.heerenveen.org', 'Forum'],
     ])
   })
@@ -52,8 +53,8 @@ describe('SiteNavigation', () => {
     const html = render('/wedstrijden')
     const links = [...html.matchAll(/<a [^>]*>(.*?)<\/a>/g)].map(([, content]) => content ?? '')
 
-    expect(links.map((content) => content.includes('<svg'))).toEqual([false, false, true])
-    expect(links[2]).toMatch(/^Forum<svg aria-hidden="true" class="hf-icon"/)
+    expect(links.map((content) => content.includes('<svg'))).toEqual([false, false, false, true])
+    expect(links[3]).toMatch(/^Forum<svg aria-hidden="true" class="hf-icon"/)
     expect(html.match(/<svg/g)).toHaveLength(1)
   })
 
@@ -102,6 +103,16 @@ describe('SiteNavigation', () => {
     },
   )
 
+  it.each(['/statistieken', '/statistieken/2025-26'])(
+    'marks Statistieken as the current page on %s, with no bar',
+    (path) => {
+      const html = render(path)
+
+      expect(currentLinks(html)).toEqual(['Statistieken'])
+      expect(html).not.toContain('hf-navigation-bar')
+    },
+  )
+
   it.each(['/bronnen', '/nieuws/bestaat-niet', '/podcasts', '/zoeken', '/redactie', '/bestaat-niet'])(
     'marks nothing on %s, which is not in the menu, and shows no bar',
     (path) => {
@@ -127,6 +138,8 @@ describe('currentOf', () => {
     ['/redactie/een-artikel', { item: '/' }],
     ['/wedstrijden', { item: '/wedstrijden' }],
     ['/wedstrijden/2025-26', { item: '/wedstrijden' }],
+    ['/statistieken', { item: '/statistieken' }],
+    ['/statistieken/2025-26', { item: '/statistieken' }],
     ['/bronnen', {}],
     ['/nieuws/bestaat-niet', {}],
     ['/podcasts', {}],

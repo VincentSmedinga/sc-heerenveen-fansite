@@ -24,6 +24,11 @@ export const pages = [
   },
   {
     description:
+      'De cijfers over sc Heerenveen 1 dit seizoen, zoals de plek in de competitie, de reeksen en de doelpuntenmakers, met de bron erbij: de Nederlandse Wikipedia.',
+    path: '/statistieken',
+  },
+  {
+    description:
       'Alle afleveringen van de podcasts over sc Heerenveen op één plek, met een link naar de pagina van de aflevering bij de maker.',
     path: '/nieuws/podcasts',
   },

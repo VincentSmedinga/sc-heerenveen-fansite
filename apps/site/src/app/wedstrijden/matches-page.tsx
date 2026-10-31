@@ -1,73 +1,21 @@
 import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
-import { Card, Heading, Page, SeasonPicker, StandingsTable, Text } from '@fansite/design-system'
+import { Card, Heading, Link, Page, SeasonPicker, StandingsTable, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
-import { cache } from 'react'
 
 import { reviewBranch } from '../../env'
-import { reasonOf } from '../../errors'
-import {
-  getMatchData,
-  getMatchSeasons,
-  overviewOf,
-  parseCleanSheetCount,
-  resultsOfSeason,
-  topScorersOf,
-} from '../../matches'
-import { standingsCardOf } from '../../matchShortcuts'
-import {
-  CleanSheetsCard,
-  CoachesCard,
-  ExtremesCard,
-  GoalsPerQuarterCard,
-  HomeAwayCard,
-  imageCredit,
-  LeaguePlaceCard,
-  MatchFlowCard,
-  MatchLines,
-  SeasonCard,
-  SourceCredit,
-  standingsCaption,
-  StreaksCard,
-  TopScorers,
-} from '../../MatchViews'
+import { overviewOf, resultsOfSeason } from '../../matches'
+import { coachesCardOf, standingsCardOf } from '../../matchShortcuts'
+import { CoachesCard, imageCredit, MatchLines, SourceCredit, standingsCaption } from '../../MatchViews'
 import { pageMetadata, seasonPageMetadata } from '../../metadata'
+import { loadSeasonPage, matchesPath, pickerPathOf, statisticsPath } from '../../season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '../../seasons'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
 
-export type SearchParams = Record<string, string | string[] | undefined>
-
-/** The address of the matches page of the current season, and the base of the others. */
-export const matchesPath = '/wedstrijden'
-
 /** The route that sends the season picker on to its season (app/wedstrijden/kies). */
-export const pickerPath = `${matchesPath}/kies`
-
-/**
- * The matches, the table and the Wikipedia pages of a season, and the seasons to choose from,
- * or what went wrong. A page that throws gets an empty page with a 500 from Next.js, and the
- * text only after JavaScript runs. So this page catches the error and shows the error page
- * itself, in the HTML. The season is checked against the seasons that have matches before its
- * data is asked for, because the data is cached for each season that is asked for and a visitor
- * can make up any address. `cache` makes the page and its metadata share one call per request.
- */
-const loadPage = cache(async (season: string) => {
-  try {
-    const seasons = await getMatchSeasons()
-
-    if (!seasons.includes(season)) {
-      return { kind: 'unknown' } as const
-    }
-
-    return { data: await getMatchData(season), kind: 'found', seasons } as const
-  } catch (error) {
-    console.error(`Could not read the matches and the table for ${matchesPath}: ${reasonOf(error)}`)
-
-    return { kind: 'error' } as const
-  }
-})
+export const pickerPath = pickerPathOf(matchesPath)
 
 /**
  * The title, description and canonical address of the page of a season. The current season is
@@ -75,7 +23,7 @@ const loadPage = cache(async (season: string) => {
  * address, and a title that names the season.
  */
 export async function matchesMetadata(season: string): Promise<Metadata> {
-  const loaded = await loadPage(season)
+  const loaded = await loadSeasonPage(season, matchesPath)
 
   // A page that failed answers 200, so noindex keeps search engines from keeping it.
   if (loaded.kind === 'error') {
@@ -96,12 +44,12 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * The page of a season: `/wedstrijden` for the current season and `/wedstrijden/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
  * heading. A season that is over has no Programma, shows its results from the first match to
- * the last, calls its table Eindstand, and its cards put the season on the image.
- * A season that has no matches in the database is the page "niet gevonden".
+ * the last, and calls its table Eindstand. Under the table and the results is a link to the
+ * card with figures that belongs to it on the page Statistieken, of the same season. A season
+ * that has no matches in the database is the page "niet gevonden".
  */
-export async function MatchesPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
-  const { nul } = await searchParams
-  const loaded = await loadPage(season)
+export async function MatchesPage({ season }: { season: string }) {
+  const loaded = await loadSeasonPage(season, matchesPath)
 
   if (loaded.kind === 'unknown') {
     notFound()
@@ -120,6 +68,9 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const { programme, results: newestFirst } = overviewOf(data.matches, now)
   const results = resultsOfSeason(newestFirst, season, now)
   const standingsCard = standingsCardOf(current)
+  const coachesCard = coachesCardOf(data.coaches.length)
+  // The cards with figures are on the statistics page of the same season.
+  const statistics = (id: string) => `${seasonAddress(statisticsPath, season, seasonOf(now))}#${id}`
 
   return (
     <>
@@ -156,14 +107,19 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
           ) : (
             <MatchLines matches={results} now={now} />
           )}
+          {results.length > 0 && (
+            <Text>
+              <Link href={statistics('verloop-van-het-seizoen')} icon="arrow-right">
+                Het verloop van het seizoen
+              </Link>
+            </Text>
+          )}
         </Card>
       </Page.Main>
       {/* The table is wide, so the sidebar is too. On a phone it follows the programme and
-          the results: the table, the head coaches, our place in the league, the season, the
-          streaks, home and away, the goal scorers, the clean sheets, the goals per quarter,
-          then how the matches go. */}
+          the results: the table and the head coaches. */}
       <Page.Sidebar
-        aria-label={`${current ? 'De stand' : 'De eindstand'}, de ranglijsten en de doelpunten per kwartier`}
+        aria-label={`${current ? 'De stand' : 'De eindstand'}${data.coaches.length > 0 ? ` en de ${coachesCard.name.toLowerCase()}` : ''}`}
         wide
       >
         <Card
@@ -177,34 +133,17 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
           {data.standings.length === 0 ? (
             <Text>{`We hebben ${current ? 'de stand' : 'de eindstand'} nog niet gevonden. Kijk straks nog eens.`}</Text>
           ) : (
-            <StandingsTable caption={standingsCaption(data.standings, standingsCard.name)} rows={data.standings} />
+            <>
+              <StandingsTable caption={standingsCaption(data.standings, standingsCard.name)} rows={data.standings} />
+              <Text>
+                <Link href={statistics('onze-plek-in-de-competitie')} icon="arrow-right">
+                  Onze plek in de competitie
+                </Link>
+              </Text>
+            </>
           )}
         </Card>
         <CoachesCard coaches={data.coaches} />
-        <LeaguePlaceCard season={imageSeason} standings={data.standings} />
-        <SeasonCard matches={data.matches} season={imageSeason} />
-        <StreaksCard matches={data.matches} now={now} season={imageSeason} />
-        <HomeAwayCard matches={data.matches} season={imageSeason} />
-        <Card
-          aria-labelledby="doelpuntenmakers"
-          shareable={imageCredit(topScorersOf(data.matches).length > 0, imageSeason)}
-          surface="soft"
-        >
-          <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
-            Doelpuntenmakers
-          </Heading>
-          <TopScorers matches={data.matches} season={data.season} />
-        </Card>
-        <CleanSheetsCard
-          count={parseCleanSheetCount(nul)}
-          matches={data.matches}
-          now={now}
-          path={seasonAddress(matchesPath, season, seasonOf(now))}
-          season={imageSeason}
-        />
-        <GoalsPerQuarterCard matches={data.matches} season={imageSeason} />
-        <MatchFlowCard matches={data.matches} season={imageSeason} />
-        <ExtremesCard matches={data.matches} now={now} season={imageSeason} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit pages={data.pages} season={data.season} />
         )}

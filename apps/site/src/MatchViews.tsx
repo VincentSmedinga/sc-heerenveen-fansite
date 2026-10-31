@@ -72,8 +72,8 @@ export function BasedOn({ known, played }: { known: number; played: number }) {
 }
 
 /**
- * The card of the matches page with the matches in which sc Heerenveen kept a clean sheet, as
- * short lines with the newest first, and above them how many there are in how many matches.
+ * The card of the statistics page with the matches in which sc Heerenveen kept a clean sheet,
+ * as short lines with the newest first, and above them how many there are in how many matches.
  * It starts with `count` lines, and the button under them loads the next ones, as on the
  * homepage: it works without JavaScript, because the form loads the page again with a larger
  * number in the address, and the part after the hash brings the visitor to the first new line.
@@ -83,7 +83,7 @@ export function CleanSheetsCard({
   count,
   matches,
   now,
-  path = '/wedstrijden',
+  path = '/statistieken',
   season,
 }: {
   count: number
@@ -135,14 +135,14 @@ export function CleanSheetsCard({
 }
 
 /**
- * The card of the matches page with the extremes of the Eredivisie: the biggest win and loss,
- * the match with the most goals, and our earliest and our last goal. Each is a short match with
- * its name above it, as the heading of the line, in the same item as the match. The list draws
- * its line above the name (see short-match.css), so it stays between the items.
- * A line without a match is left out, and the card doesn't say so. Under the list stand how
- * many matches the lines are based on: the first three on every played match, the two goals on
- * the matches whose goals are known. Without a played match it is a sentence for visitors and
- * no list.
+ * The card of the statistics page with the extremes of the Eredivisie: the biggest win and
+ * loss, the match with the most goals, and our earliest and our last goal. Each is a short
+ * match with its name above it, as the heading of the line, in the same item as the match. The
+ * list draws its line above the name (see short-match.css), so it stays between the items. A
+ * line without a match is left out, and the card doesn't say so. Under the list stand how many
+ * matches the lines are based on: the first three on every played match, the two goals on the
+ * matches whose goals are known. Without a played match it is a sentence for visitors and no
+ * list.
  */
 export function ExtremesCard({
   matches,
@@ -201,11 +201,11 @@ export function ExtremesCard({
 }
 
 /**
- * The card of the matches page with the goals of sc Heerenveen and of its opponents per quarter
- * of an hour: two donut charts, for and against, with the same numbers in a table under them,
- * which is what a screen reader gets, because the charts are hidden from it. Under the table
- * stand how many matches the count is based on, because a match without known goals has no
- * minutes, and, when one of those matches went to extra time, a line that extra time is left
+ * The card of the statistics page with the goals of sc Heerenveen and of its opponents per
+ * quarter of an hour: two donut charts, for and against, with the same numbers in a table under
+ * them, which is what a screen reader gets, because the charts are hidden from it. Under the
+ * table stand how many matches the count is based on, because a match without known goals has
+ * no minutes, and, when one of those matches went to extra time, a line that extra time is left
  * out. Without a goal in the matches we know, it is a sentence for visitors and no empty
  * charts.
  */
@@ -287,7 +287,7 @@ function measureValue(measure: LeagueMeasure, value: number): number | string {
 const pointsWord = (points: number) => `${points} ${points === 1 ? 'punt' : 'punten'}`
 
 /**
- * The card of the matches page with the place of sc Heerenveen in the Eredivisie on five
+ * The card of the statistics page with the place of sc Heerenveen in the Eredivisie on five
  * measures, in a table, and under it two sentences on the points to the leader and to the last.
  * The places come from the table of the whole league, in which the clubs have not all played
  * the same number of matches, and the line under the card says after how many matches of ours
@@ -342,7 +342,7 @@ const perMatch = (value: number | undefined) =>
   value === undefined ? '–' : value.toLocaleString('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
 
 /**
- * The card of the matches page with how sc Heerenveen does at home and away: a table with a
+ * The card of the statistics page with how sc Heerenveen does at home and away: a table with a
  * column for home, away and both, and a row for the matches, the points and the goals. The
  * numbers come from the score of the played matches of the Eredivisie. A side with no match yet
  * has a dash where a number is divided and a 0 where it is counted. Without a result it is a
@@ -417,12 +417,12 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
 }
 
 /**
- * The card of the matches page on how the matches of the Eredivisie go: what happens after the
- * first goal and after the score at half-time, each as a table of results and points, and under
- * them in how many matches sc Heerenveen won after trailing and did not win after leading.
- * Under those stand how many matches it is based on, and how many of them could not show the
- * first goal, because both clubs scored in the same minute. Without a match with known goals it
- * is a sentence for visitors and no tables.
+ * The card of the statistics page on how the matches of the Eredivisie go: what happens after
+ * the first goal and after the score at half-time, each as a table of results and points, and
+ * under them in how many matches sc Heerenveen won after trailing and did not win after
+ * leading. Under those stand how many matches it is based on, and how many of them could not
+ * show the first goal, because both clubs scored in the same minute. Without a match with known
+ * goals it is a sentence for visitors and no tables.
  */
 export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
   const { atHalfTime, firstGoal, known, notWonAfterLead, played, unknownFirstGoal, wonAfterTrailing } =
@@ -505,7 +505,7 @@ export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date
 }
 
 /**
- * The card of the matches page with the season of the Eredivisie as a chart of bars, one for
+ * The card of the statistics page with the season of the Eredivisie as a chart of bars, one for
  * each match played, and under it the same numbers in a table, which is what a screen reader
  * gets, because the chart is hidden from it. The cup ties don't count. Without a result it is
  * a sentence for visitors and no chart.
@@ -646,7 +646,7 @@ export function StandingsCard({ data }: { data: MatchData }) {
 }
 
 /**
- * The card of the matches page with the streaks of sc Heerenveen in the Eredivisie: a table
+ * The card of the statistics page with the streaks of sc Heerenveen in the Eredivisie: a table
  * with the six streaks, as they stand now and the longest of the season, and under it the
  * latest five matches, the oldest first like the form in the card of the season. They are
  * letters in colour and, as well, short lines with the opponent and the score, so no colour

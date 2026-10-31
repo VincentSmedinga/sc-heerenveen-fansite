@@ -36,7 +36,7 @@ describe('the bar of /wedstrijden', () => {
     expect(html).toContain(`<span class="hf-page-shortcuts-label" id="${labelId}">Op deze pagina:</span>`)
   })
 
-  it('has the twelve anchors, in the order of a narrow screen, each named for its card', async () => {
+  it('has the three anchors of its cards, in the order of a narrow screen, and none of the cards with figures', async () => {
     const html = await render()
 
     expect(
@@ -45,15 +45,35 @@ describe('the bar of /wedstrijden', () => {
       ['#programma', 'Programma'],
       ['#uitslagen', 'Uitslagen'],
       ['#stand', 'Stand'],
-      ['#onze-plek-in-de-competitie', 'Plek in de competitie'],
-      ['#verloop-van-het-seizoen', 'Verloop van het seizoen'],
-      ['#reeksen', 'Reeksen'],
-      ['#thuis-en-uit', 'Thuis en uit'],
-      ['#doelpuntenmakers', 'Doelpuntenmakers'],
-      ['#de-nul-gehouden', 'De nul gehouden'],
-      ['#doelpunten-per-kwartier', 'Doelpunten per kwartier'],
-      ['#hoe-de-wedstrijden-verlopen', 'Hoe wedstrijden verlopen'],
-      ['#uitersten', 'Uitersten'],
+    ])
+  })
+
+  it('has a link to the head coaches straight after the table when the season has a coach in the table', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      coaches: [
+        {
+          endDate: null,
+          endPrecision: null,
+          interim: false,
+          name: 'Robin Veldman',
+          startDate: '2025-03-21',
+          startPrecision: 'day',
+          wikipediaPage: 'Robin Veldman',
+        },
+      ],
+    })
+
+    expect(
+      [...(await render()).matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [
+        href,
+        label,
+      ]),
+    ).toEqual([
+      ['#programma', 'Programma'],
+      ['#uitslagen', 'Uitslagen'],
+      ['#stand', 'Stand'],
+      ['#hoofdtrainer', 'Hoofdtrainer'],
     ])
   })
 
