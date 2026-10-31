@@ -5,7 +5,8 @@
    * The padding and the border count in the size of the card. A card has no margin: the space between cards is the gap
    * of the column they are in. Its first and last child have none against the padding either, so a heading at the top
    * has no space above it.
-   * The padding is 24px 28px, and less on a screen narrower than 40rem.
+   * The padding is the large space (24px) on all sides, and the medium one (16px) on a screen
+   * narrower than 40rem.
    */
   .hf-card {
     background-color: var(--hf-colour-background-surface);
@@ -14,19 +15,18 @@
     box-sizing: border-box;
 
     /* The padding, as two numbers: the button of a card with an image puts itself by them. */
-    --hf-card-padding-block: 1rem;
-    --hf-card-padding-inline: 1.25rem;
+    --hf-card-padding-block: var(--hf-space-m);
+    --hf-card-padding-inline: var(--hf-space-m);
 
     padding: var(--hf-card-padding-block) var(--hf-card-padding-inline);
     position: relative;
 
     /* The space at the start side of a heading, where its arrow stands (see heading.css). */
-    --hf-heading-gutter: 1.25rem;
+    --hf-heading-gutter: var(--hf-card-padding-inline);
 
     @media (width >= 40rem) {
-      --hf-card-padding-block: 1.5rem;
-      --hf-card-padding-inline: 1.75rem;
-      --hf-heading-gutter: 1.75rem;
+      --hf-card-padding-block: var(--hf-space-l);
+      --hf-card-padding-inline: var(--hf-space-l);
     }
 
     > :first-child {
@@ -44,13 +44,13 @@
      */
     > :is(h1, h2, h3, h4, h5, h6) + :is(ul, ol, dl),
     > :is(h1, h2, h3, h4, h5, h6) + .hf-card-share + :is(ul, ol, dl) {
-      margin-block-start: 1.25rem;
+      margin-block-start: var(--hf-space-l);
     }
   }
 
   /* The heading of a card with a button for an image leaves room for it, so it never runs under it. */
   .hf-card-shareable > :first-child:is(h1, h2, h3, h4, h5, h6) {
-    padding-inline-end: 2.75rem;
+    padding-inline-end: calc(var(--hf-space-xl) + var(--hf-space-s));
   }
 
   .hf-card-strong {

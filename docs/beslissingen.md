@@ -1793,6 +1793,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of het sterke vlak voor het blok op de homepage.
   Of nu al tokens voor ruimte (#19).
   Of een andere naam dan `strong` voor het tonale vlak: `blue` lijkt te veel op `soft`, `tinted` is ook waar voor `soft` en `warm`, `accent` is al de rode tekstkleur en `highlight` is al een achtergrond met dezelfde waarden.
+- **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de binnenruimte van een kaart is 1 rem rondom op een smal scherm en 1,5 rem rondom op een breed scherm, en de ruimte voor het pijltje van een kop volgt de binnenruimte.
+  Het was 1 en 1,25 rem, en 1,5 en 1,75 rem.
 
 ### Hulpklassen zitten in de sterkste laag
 
@@ -1897,6 +1899,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het `repeat(auto-fit, …)` hierboven geldt nu alleen voor een zijbalk met `split`; zonder staan de cellen onder elkaar.
 - **Later:** zie _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_.
   De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem.
+- **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de ruimte naast het woordmerk is 0,5 rem, dus de hang van het schild is 3,9875 rem en het logo hangt vanaf 74 rem buiten de kolom (was 4,2375 rem en 74,5 rem).
+  De ruimten van 2 rem en 4 rem zijn nu `--hf-space-xl` en tweemaal die stap: de "eerste aanzet voor de tokens voor ruimte" is de reeks geworden.
 
 ### De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk
 
@@ -2783,6 +2787,44 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een eigen pijltje als achtergrond van de `select` (door de projecteigenaar afgewezen, en het verdwijnt in gedwongen kleuren).
   Een eigen keuzelijst van `div`'s (staat buiten dit issue, en het toetsenbord en de schermlezer moeten dan allemaal opnieuw).
   Alle keuzelijsten in één keer opmaken (raakt het contactformulier en `Field`, en de seizoenskiezer is de enige met een e2e-test voor het toetsenbord).
+
+### Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** het designsysteem heeft vijf stappen voor de ruimte tussen dingen: `--hf-space-xs`, `--hf-space-s`, `--hf-space-m`, `--hf-space-l` en `--hf-space-xl`, in `tokens/space.css`.
+  Gemiddeld (`m`) is de vaste keuze: twijfel je, neem hem.
+  De CSS van een onderdeel gebruikt voor `padding`, `margin` en `gap` alleen die tokens, `0`, `auto` of `inherit`.
+  Een optische correctie is geen ruimte en blijft een getal: 0,125 rem tussen twee kleine knoppen die bij elkaar horen.
+  De betekenis van de stappen:
+  - `xs` is het kleinste: een rand die net niet raakt, of twee dingen die bij elkaar horen.
+  - `s` staat tussen tekst en iets anders kleins, zoals een pictogram of een label.
+  - `m` staat tussen twee gelijke of vergelijkbare kleine onderdelen, en is de vaste keuze.
+  - `l` zit tussen gemiddeld en het raster.
+  - `xl` is de ruimte in het raster van de pagina, en het maximum: niets in een onderdeel is groter.
+    Alleen de maten van de pagina zelf gaan erboven, zoals de ruimte onder de kolommen (tweemaal `xl`).
+- **Waarom:** in 43 CSS-bestanden stonden 266 regels met `padding`, `margin` of `gap`, elk met een eigen getal: 0,5 rem (41 keer), 1 rem (35), 0,75 rem (23), 1,5 rem (22), 0,25 rem (17), 2 rem (8), 1,25 rem (6) en een paar losse waarden.
+  Een kleine reeks met één vaste keuze maakt kiezen goedkoop, laat onderdelen op elkaar lijken en maakt een andere maat een wijziging op één plek.
+  De stap volgt de betekenis en niet de dichtstbijzijnde waarde, zodat 0,75 rem niet willekeurig naar boven of naar beneden valt.
+- **Hoe:** de stappen zijn 0,25, 0,5, 1, 1,5 en 2 rem, in de laag `hf.tokens`.
+  `tokens/space-css.test.ts` leest de CSS van alle onderdelen en faalt op een getal in rem voor `padding`, `margin`, `gap` of een custom property met een van die woorden (of `space` of `gutter`) in de naam, zoals `weight-css.test.ts` dat voor gewichten doet.
+  De bestanden die nog een getal hebben staan op een lijst in de test, een bestand per regel, en de test faalt ook op een bestand dat op de lijst staat en geen getal meer heeft.
+  Zo kan de lijst alleen korter worden, en #480 en #481 halen er elk hun bestanden af.
+  Dit besluit zet `tokens/layout.css`, `page.css`, `shortcuts.css`, `top-link.css` en `card.css` om, en in `card-share.css` de binnenruimte van het exemplaar van de kaart, omdat die gelijk moet zijn aan die van de kaart.
+  Het hoofdstuk Ruimte in Storybook (Tokens/Ruimte) toont de stappen en zegt wanneer je welke kiest.
+  De stijlen in stories en de ruimte van de pagina's van de site vallen erbuiten.
+  Pixels voor de ruimte van een focusrand (5 px bij de snelkoppelingen) blijven staan: die horen bij de dikte van de rand.
+- **Gevolg:** niets verschuift met meer dan 0,25 rem.
+  Dit verschuift wel, per plek:
+  - de ruimte naast het woordmerk is 0,5 rem in plaats van 0,75 rem, dus het schild hangt vanaf 74 rem buiten de kolom (was 74,5 rem);
+  - de ruimte boven het logo in de header is 1 rem in plaats van 0,75 rem;
+  - een snelkoppeling heeft 0,5 rem aan beide kanten in plaats van 0,625 rem;
+  - de binnenruimte van een kaart is 1 rem rondom op een smal scherm (was 1 en 1,25 rem) en 1,5 rem rondom op een breed scherm (was 1,5 en 1,75 rem), en de ruimte voor het pijltje van een kop volgt de binnenruimte;
+  - de ruimte tussen de kop van een kaart en een lijst is 1,5 rem in plaats van 1,25 rem;
+  - een kop met een knop voor een afbeelding laat 2,5 rem vrij in plaats van 2,75 rem.
+- **Alternatieven:** meer stappen, zoals acht of negen (meer keuze, en geen vaste keuze meer).
+  Tokens naar waarde noemen, zoals `--hf-space-8` (zeggen niet waarvoor).
+  Elke waarde naar de dichtstbijzijnde stap ronden (0,75 rem is dan 0,5 of 1 rem zonder reden).
+  Alle onderdelen in één pull request omzetten (te groot om te reviewen; het is nu in drie issues verdeeld).
 
 ## Site
 
@@ -3724,6 +3766,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rij, de lijn erboven, de afstanden, het gewicht en de maten blijven zoals ze zijn.
 - **Later:** zie _Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen_ (28 oktober 2026): een menu met zes of meer onderdelen en een `moreLabel` heeft op een smal scherm de knop "Meer" in plaats van een rij die omloopt.
   Bij vijf onderdelen of minder blijft de rij zoals hij was, en de knop "Meer" is een knop in de rij, geen menuknop die alles verbergt.
+- **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de ruimte boven het logo is 1 rem, niet 0,75 rem.
+  De ruimte onder het logo en naast de knop blijft 0,25 en 0,5 rem, nu als `--hf-space-xs` en `--hf-space-s`.
 
 ### Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat
 
@@ -5499,6 +5543,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Tekst onder een kop houdt de ruimte van een kop.
 - **Alternatieven:** de ruimte onder elke kop groter maken; dat verandert ook tekst en pagina's zonder kaart.
   Of de ruimte in elke lijst of op elke pagina zelf zetten; dat laat het patroon uit elkaar lopen.
+- **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de ruimte is `--hf-space-l` (1,5 rem), niet 1,25 rem.
+  Ze blijft groter dan de ruimte van tekst onder een kop, ook als die ruimte een token wordt.
 
 ### De site is installeerbaar, zonder service worker
 

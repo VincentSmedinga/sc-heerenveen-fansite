@@ -112,9 +112,9 @@
   }
 
   .hf-card-share-copy {
-    --hf-card-padding-block: 1.5rem;
-    --hf-card-padding-inline: 1.75rem;
-    --hf-heading-gutter: 1.75rem;
+    --hf-card-padding-block: var(--hf-space-l);
+    --hf-card-padding-inline: var(--hf-space-l);
+    --hf-heading-gutter: var(--hf-card-padding-inline);
 
     inline-size: 29rem;
   }
