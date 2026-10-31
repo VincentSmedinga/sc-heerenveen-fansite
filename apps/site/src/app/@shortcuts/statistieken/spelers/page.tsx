@@ -1,5 +1,7 @@
 import { seasonOf } from '@fansite/db/season'
 
+import type { SearchParams } from '../../../../season-page'
+
 import { playersShortcuts } from '../../../../statisticsShortcuts'
 import { SeasonShortcuts } from '../season-shortcuts'
 
@@ -7,6 +9,6 @@ import { SeasonShortcuts } from '../season-shortcuts'
 export const dynamic = 'force-dynamic'
 
 /** The bar of /statistieken/spelers, for the current season (see SeasonShortcuts). */
-export default function PlayersShortcuts() {
-  return SeasonShortcuts({ items: playersShortcuts, season: seasonOf(new Date()) })
+export default function PlayersShortcuts({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  return SeasonShortcuts({ items: playersShortcuts, searchParams, season: seasonOf(new Date()) })
 }

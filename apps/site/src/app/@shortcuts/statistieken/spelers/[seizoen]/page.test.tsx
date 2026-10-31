@@ -27,7 +27,9 @@ afterEach(() => {
 })
 
 const render = async (seizoen: string) =>
-  renderToStaticMarkup(await SeasonPlayersShortcuts({ params: Promise.resolve({ seizoen }) }))
+  renderToStaticMarkup(
+    await SeasonPlayersShortcuts({ params: Promise.resolve({ seizoen }), searchParams: Promise.resolve({}) }),
+  )
 
 const hrefs = (html: string) => [...html.matchAll(/<a [^>]*href="([^"]*)"/g)].map(([, href]) => href)
 

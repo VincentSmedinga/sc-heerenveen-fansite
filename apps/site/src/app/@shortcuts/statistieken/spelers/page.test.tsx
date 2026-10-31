@@ -26,7 +26,7 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-const render = async () => renderToStaticMarkup(await PlayersShortcuts())
+const render = async () => renderToStaticMarkup(await PlayersShortcuts({ searchParams: Promise.resolve({}) }))
 
 describe('the bar of /statistieken/spelers', () => {
   it('is a navigation named Op deze pagina:, with one link: to the card Doelpuntenmakers', async () => {
@@ -54,7 +54,7 @@ describe('the bar of /statistieken/spelers', () => {
   it('is left out when the page shows the error page, which has no card to jump to', async () => {
     vi.mocked(getMatchData).mockRejectedValue(new Error('no database'))
 
-    expect(await PlayersShortcuts()).toBeNull()
+    expect(await PlayersShortcuts({ searchParams: Promise.resolve({}) })).toBeNull()
   })
 
   it('asks for the current season only, and not for the seasons to choose from', async () => {
@@ -62,5 +62,15 @@ describe('the bar of /statistieken/spelers', () => {
 
     expect(getMatchData).toHaveBeenCalledExactlyOnceWith('2026/27')
     expect(getMatchSeasons).not.toHaveBeenCalled()
+  })
+})
+
+describe('the bar of /statistieken/spelers and the choice of the matches', () => {
+  it('is there for the Eredivisie, which is a page, and left out for a value that the page does not know', async () => {
+    expect(PlayersShortcuts({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) })).not.toBeNull()
+
+    for (const competitie of ['alle', '', ['eredivisie', 'eredivisie']]) {
+      expect(await PlayersShortcuts({ searchParams: Promise.resolve({ competitie }) })).toBeNull()
+    }
   })
 })

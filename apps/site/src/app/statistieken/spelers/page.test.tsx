@@ -20,7 +20,7 @@ vi.mock('../../../matches', async (importOriginal) => ({
 // The afternoon of Friday 23 October 2026 in the Netherlands.
 const now = new Date('2026-10-23T13:40:00Z')
 
-const render = async () => withoutIcons(renderToStaticMarkup(await PlayersPage()))
+const render = async () => withoutIcons(renderToStaticMarkup(await PlayersPage({ searchParams: Promise.resolve({}) })))
 
 const renderStatistics = async () =>
   withoutIcons(renderToStaticMarkup(await StatisticsPage({ searchParams: Promise.resolve({}) })))
@@ -231,7 +231,7 @@ describe('the season picker on /statistieken/spelers', () => {
     const html = await render()
 
     expect(html).toMatch(
-      /<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+      /<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1><div [^>]*aria-label="Welke wedstrijden"[^>]*>.*?<\/div><form [^>]*aria-label="Seizoen kiezen"/,
     )
     expect(html).toContain(
       '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
@@ -288,5 +288,74 @@ describe('the list of Spelers and the card of Statistieken', () => {
     const { all, top } = await bothFor([3, 2, 1, 1])
 
     expect(top).toEqual(all)
+  })
+})
+
+describe('the choice between all the matches and the Eredivisie on /statistieken/spelers', () => {
+  // The cup tie of the test data, in which a player of the cup scored once.
+  const cupScorer = {
+    minute: 70,
+    ours: true,
+    ownGoal: false,
+    penalty: false,
+    player: 'Bekerman',
+    playerId: null,
+    playerName: null,
+    playerPage: null,
+    playerSearchTerm: null,
+    stoppageMinutes: null,
+  }
+  const withCupGoal = () =>
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) =>
+        match.competition === 'KNVB Beker' ? { ...match, goals: [cupScorer] } : match,
+      ),
+    })
+  const renderWith = async (searchParams: Record<string, string | string[] | undefined>) =>
+    withoutIcons(renderToStaticMarkup(await PlayersPage({ searchParams: Promise.resolve(searchParams) })))
+  const switchOf = (html: string) => /<div [^>]*aria-label="Welke wedstrijden"[^>]*>.*?<\/div>/.exec(html)?.[0]
+
+  it('has the switch, with links to this page, and marks the choice of the address', async () => {
+    expect(switchOf(await render())).toBe(
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control" role="group"><a aria-current="page" href="/statistieken/spelers">Alle wedstrijden</a><a href="/statistieken/spelers?competitie=eredivisie">Eredivisie</a></div>',
+    )
+    expect(switchOf(await renderWith({ competitie: 'eredivisie' }))).toBe(
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control" role="group"><a href="/statistieken/spelers">Alle wedstrijden</a><a aria-current="page" href="/statistieken/spelers?competitie=eredivisie">Eredivisie</a></div>',
+    )
+  })
+
+  it('has no switch in a season without a played cup tie', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.filter((match) => match.competition === 'Eredivisie'),
+    })
+
+    expect(switchOf(await render())).toBeUndefined()
+  })
+
+  it('counts the goals in the cup for all the matches, and not for the Eredivisie', async () => {
+    withCupGoal()
+
+    expect(rowsOf(await render()).map(([, player]) => player)).toContain('Bekerman')
+    expect(rowsOf(await renderWith({ competitie: 'eredivisie' })).map(([, player]) => player)).not.toContain('Bekerman')
+    expect(await renderWith({ competitie: 'eredivisie' })).toContain(
+      'in het seizoen 2026/27, in de Eredivisie</caption>',
+    )
+  })
+
+  it('keeps the choice in the season picker, and gives the page "niet gevonden" for a value that is not known', async () => {
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
+
+    const html = await renderWith({ competitie: 'eredivisie' })
+
+    expect(html).toMatch(
+      /<form [^>]*aria-label="Seizoen kiezen"[^>]*><input [^>]*name="competitie"[^>]*value="eredivisie"/,
+    )
+    expect(await render()).not.toContain('type="hidden"')
+
+    for (const competitie of ['alle', '', ['eredivisie', 'eredivisie']]) {
+      await expect(renderWith({ competitie })).rejects.toHaveProperty('digest', expect.stringContaining('404'))
+    }
   })
 })

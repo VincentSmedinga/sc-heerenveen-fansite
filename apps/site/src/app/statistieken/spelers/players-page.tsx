@@ -4,10 +4,12 @@ import { seasonOf } from '@fansite/db/season'
 import { Heading, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { parseCompetition } from '../../../competition'
+import { competitionFields, CompetitionSwitch } from '../../../CompetitionSwitch'
 import { reviewBranch } from '../../../env'
 import { SourceCredit, TopScorersCard } from '../../../MatchViews'
 import { pageMetadata, seasonPageMetadata } from '../../../metadata'
-import { loadSeasonPage, pickerPathOf, playersPath } from '../../../season-page'
+import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams } from '../../../season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '../../../seasons'
 import { ServerError, serverErrorTitle } from '../../../ServerError'
 import { withBranch } from '../../../title'
@@ -44,12 +46,15 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * title row and the season picker of Statistieken, and the card Doelpuntenmakers with every
  * player who scored, which is the card that stood on Statistieken before it got the top 5. A
  * season that is over has the card put the season on its image. A season that has no matches in
- * the database is the page "niet gevonden".
+ * the database is the page "niet gevonden". The card counts all the matches or, with
+ * `?competitie=eredivisie`, the Eredivisie alone, as on Statistieken, and so does the switch.
  */
-export async function PlayersPage({ season }: { season: string }) {
+export async function PlayersPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
+  const { competitie } = await searchParams
+  const competition = parseCompetition(competitie)
   const loaded = await loadSeasonPage(season, playersPath)
 
-  if (loaded.kind === 'unknown') {
+  if (competition === undefined || loaded.kind === 'unknown') {
     notFound()
   }
 
@@ -65,11 +70,26 @@ export async function PlayersPage({ season }: { season: string }) {
       intro={
         <Page.Title>
           <Heading level={1}>Spelers</Heading>
-          <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />
+          <CompetitionSwitch
+            address={seasonAddress(playersPath, season, seasonOf(new Date()))}
+            competition={competition}
+            matches={data.matches}
+          />
+          <SeasonPicker
+            action={pickerPath}
+            fields={competitionFields(competition)}
+            options={seasonChoices(seasons)}
+            value={seasonSlug(season)}
+          />
         </Page.Title>
       }
     >
-      <TopScorersCard matches={data.matches} season={data.season} seasonOnImage={current ? undefined : season} />
+      <TopScorersCard
+        competition={competition}
+        matches={data.matches}
+        season={data.season}
+        seasonOnImage={current ? undefined : season}
+      />
       {(data.matches.length > 0 || data.standings.length > 0) && (
         <SourceCredit pages={data.pages} season={data.season} />
       )}

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { playersPath, seasonOfAddress } from '../../../../season-page'
+import { playersPath, type SearchParams, seasonOfAddress } from '../../../../season-page'
 import { playersMetadata, PlayersPage } from '../players-page'
 
 // Render on each request, so the build never reads the database. getMatchData caches the data
@@ -18,6 +18,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
  * `/statistieken/spelers/2025-26`. A season that has no matches in the database is the page
  * "niet gevonden" (see PlayersPage).
  */
-export default async function SeasonPlayersPage({ params }: { params: Promise<Params> }) {
-  return PlayersPage({ season: seasonOfAddress((await params).seizoen, playersPath) })
+export default async function SeasonPlayersPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>
+  searchParams: Promise<SearchParams>
+}) {
+  return PlayersPage({ searchParams, season: seasonOfAddress((await params).seizoen, playersPath) })
 }

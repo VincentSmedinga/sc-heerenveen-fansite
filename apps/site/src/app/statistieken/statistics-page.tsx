@@ -4,6 +4,8 @@ import { seasonOf } from '@fansite/db/season'
 import { Heading, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { competitionQuery, parseCompetition } from '../../competition'
+import { competitionFields, CompetitionSwitch } from '../../CompetitionSwitch'
 import { reviewBranch } from '../../env'
 import { parseCleanSheetCount } from '../../matches'
 import {
@@ -57,6 +59,12 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
  * four on the left and the other five on the right, and under each other on a narrow one, in
  * the order of the bar "Op deze pagina:". A season that is over has its cards put the season
  * on the image. A season that has no matches in the database is the page "niet gevonden".
+ *
+ * The cards count all the matches, the Eredivisie and the KNVB Beker, or the Eredivisie alone
+ * with `?competitie=eredivisie` (see CompetitionSwitch). Three cards do not follow the choice:
+ * our place in the league, the season and how the matches go rest on the table, the 34 rounds
+ * or the score after 90 minutes, so they stay the Eredivisie. A value other than that one is
+ * the page "niet gevonden", and so is one given twice.
  */
 export async function StatisticsPage({
   searchParams,
@@ -65,10 +73,11 @@ export async function StatisticsPage({
   searchParams: Promise<SearchParams>
   season: string
 }) {
-  const { nul } = await searchParams
+  const { competitie, nul } = await searchParams
+  const competition = parseCompetition(competitie)
   const loaded = await loadSeasonPage(season, statisticsPath)
 
-  if (loaded.kind === 'unknown') {
+  if (competition === undefined || loaded.kind === 'unknown') {
     notFound()
   }
 
@@ -82,6 +91,7 @@ export async function StatisticsPage({
   // The cards of a season that is over say which one on their image. The current season is the
   // one the image has always been of.
   const imageSeason = current ? undefined : season
+  const address = seasonAddress(statisticsPath, season, seasonOf(now))
 
   return (
     <>
@@ -89,14 +99,20 @@ export async function StatisticsPage({
         intro={
           <Page.Title>
             <Heading level={1}>Statistieken</Heading>
-            <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />
+            <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
+            <SeasonPicker
+              action={pickerPath}
+              fields={competitionFields(competition)}
+              options={seasonChoices(seasons)}
+              value={seasonSlug(season)}
+            />
           </Page.Title>
         }
       >
         <LeaguePlaceCard season={imageSeason} standings={data.standings} />
         <SeasonCard matches={data.matches} season={imageSeason} />
-        <StreaksCard matches={data.matches} now={now} season={imageSeason} />
-        <HomeAwayCard matches={data.matches} season={imageSeason} />
+        <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
+        <HomeAwayCard competition={competition} matches={data.matches} season={imageSeason} />
       </Page.Main>
       {/* The second column is a sidebar as wide as the main column, so the two are equal. On a
           phone it follows the main: our place in the league, the season, the streaks, home and
@@ -104,21 +120,23 @@ export async function StatisticsPage({
           and the extremes. */}
       <Page.Sidebar aria-label="Meer cijfers over het seizoen" wide>
         <TopScorersCard
+          competition={competition}
           matches={data.matches}
-          playersHref={seasonAddress(playersPath, season, seasonOf(now))}
+          playersHref={`${seasonAddress(playersPath, season, seasonOf(now))}${competitionQuery(competition)}`}
           season={data.season}
           seasonOnImage={imageSeason}
         />
         <CleanSheetsCard
+          competition={competition}
           count={parseCleanSheetCount(nul)}
           matches={data.matches}
           now={now}
-          path={seasonAddress(statisticsPath, season, seasonOf(now))}
+          path={address}
           season={imageSeason}
         />
-        <GoalsPerQuarterCard matches={data.matches} season={imageSeason} />
+        <GoalsPerQuarterCard competition={competition} matches={data.matches} season={imageSeason} />
         <MatchFlowCard matches={data.matches} season={imageSeason} />
-        <ExtremesCard matches={data.matches} now={now} season={imageSeason} />
+        <ExtremesCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit pages={data.pages} season={data.season} />
         )}

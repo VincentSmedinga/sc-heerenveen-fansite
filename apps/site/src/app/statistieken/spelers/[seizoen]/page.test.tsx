@@ -22,7 +22,7 @@ const goal = matchData.matches.flatMap((match) => match.goals).find((item) => it
 const earlierMatch = { ...matchData.matches[0]!, goals: [goal], matchDate: '2025-09-20', opponent: 'Vorig Seizoen FC' }
 const earlier = { ...matchData, matches: [earlierMatch], season: '2025/26' }
 
-const params = (seizoen: string) => ({ params: Promise.resolve({ seizoen }) })
+const params = (seizoen: string) => ({ params: Promise.resolve({ seizoen }), searchParams: Promise.resolve({}) })
 
 const render = async (seizoen = '2025-26') =>
   withoutIcons(renderToStaticMarkup(await SeasonPlayersPage(params(seizoen))))
@@ -65,7 +65,7 @@ describe('the page of an earlier season, /statistieken/spelers/2025-26', () => {
     expect(html).toContain('<h1 class="hf-heading-1">Spelers</h1>')
     expect(html).not.toContain('Spelers 2025/26</h1>')
     expect(html).toContain('<p>1 speler heeft gescoord</p>')
-    expect(html).toContain('in het seizoen 2025/26, in de Eredivisie en de KNVB Beker</caption>')
+    expect(html).toContain('in het seizoen 2025/26, in de Eredivisie</caption>')
     expect(html).not.toContain('Alle doelpuntenmakers')
   })
 

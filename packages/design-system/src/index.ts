@@ -92,6 +92,8 @@ export { choosesByKey, SeasonPicker } from './components/season-picker/SeasonPic
 export type { SeasonPickerOption, SeasonPickerProps } from './components/season-picker/SeasonPicker'
 export { SegmentedControl } from './components/segmented-control/SegmentedControl'
 export type { SegmentedControlOption, SegmentedControlProps } from './components/segmented-control/SegmentedControl'
+export { SegmentedLinks } from './components/segmented-control/SegmentedLinks'
+export type { SegmentedLinksOption, SegmentedLinksProps } from './components/segmented-control/SegmentedLinks'
 export { Select } from './components/select/Select'
 export type { SelectOptionProps, SelectProps } from './components/select/Select'
 export { ShortMatch } from './components/short-match/ShortMatch'

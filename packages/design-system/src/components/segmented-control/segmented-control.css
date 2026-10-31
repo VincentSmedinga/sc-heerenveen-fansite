@@ -3,6 +3,9 @@
  * high and filled. Here a button is an outline, in the colour of the text around it, and the pressed one is filled like
  * a button, so it shows without colour. In forced-colours mode the system colours replace the fill, so the pressed button
  * is underlined as well.
+ *
+ * The same choice as links (SegmentedLinks) has the same look: a link is as high as a button,
+ * without the underline of a link, and the current one, with aria-current, is filled.
  */
 
 @layer hf.components {
@@ -23,6 +26,42 @@
       }
 
       &[aria-pressed='true'] {
+        background-color: var(--hf-colour-background-button);
+        border-color: var(--hf-colour-background-button);
+        color: var(--hf-colour-text-on-button);
+
+        &:hover {
+          background-color: var(--hf-colour-background-button-hover);
+          border-color: var(--hf-colour-background-button-hover);
+          color: var(--hf-colour-text-on-button);
+        }
+
+        @media (forced-colors: active) {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    > a {
+      align-items: center;
+      background-color: transparent;
+      border: 1px solid currentcolor;
+      border-radius: 0.25rem;
+      box-sizing: border-box;
+      color: inherit;
+      display: inline-flex;
+      font-weight: var(--hf-strong-font-weight);
+      min-block-size: 2.75rem;
+      min-inline-size: 2.75rem;
+      padding-block: var(--hf-space-s);
+      padding-inline: var(--hf-space-m);
+      text-decoration: none;
+
+      &:hover {
+        color: var(--hf-colour-text-default);
+      }
+
+      &[aria-current] {
         background-color: var(--hf-colour-background-button);
         border-color: var(--hf-colour-background-button);
         color: var(--hf-colour-text-on-button);

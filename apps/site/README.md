@@ -268,6 +268,7 @@ Rechts staan de doelpuntenmakers (de top 5, zie _De spelers_), de nul gehouden, 
 De volgorde in de broncode blijft de volgorde van de balk en van een telefoon.
 Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`).
+De kaarten tellen standaard alle wedstrijden, de Eredivisie en de KNVB Beker; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
 Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu alleen Spelers (`statisticsSubitems` in `src/SiteNavigation.tsx`).
 Op `/statistieken` is geen subpagina de huidige; op `/statistieken/spelers` en zijn seizoenen is Spelers het wel, en Statistieken blijft het huidige onderdeel van het menu.
 Op een breed scherm is de balk er niet.
@@ -296,15 +297,17 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Onder de grafiek staat dezelfde informatie als tabel (`DataTable`: winst, gelijk, verlies en totaal, met de wedstrijden en de punten), die de schermlezer krijgt, want de grafiek is voor hulpsoftware verborgen.
   Zonder een uitslag staat er een zin in plaats van de grafiek.
 - **Reeksen:** een kaart in de linker kolom, direct na Verloop van het seizoen, in het zachte vlak.
-  `streaksOf` in `src/matches.ts` geeft zes reeksen uit de score van de gespeelde wedstrijden van de Eredivisie: ongeslagen, gewonnen, zonder winst, verloren, gescoord en zonder tegendoelpunt.
+  `streaksOf` in `src/matches.ts` geeft zes reeksen uit de score van de gespeelde wedstrijden: ongeslagen, gewonnen, zonder winst, verloren, gescoord en zonder tegendoelpunt.
   Elke reeks heeft de lengte van nu en de langste van het seizoen, en komt uit alle gespeelde wedstrijden, ook die zonder bekende doelpunten.
-  Een bekerwedstrijd, een wedstrijd zonder score en een wedstrijd die niet is gespeeld tellen niet mee.
+  Een bekerwedstrijd telt mee bij de keuze Alle wedstrijden en niet bij Eredivisie.
+  Een wedstrijd zonder score en een wedstrijd die niet is gespeeld tellen nooit mee.
   De kaart toont de reeksen in een tabel (`DataTable`), daaronder de laatste vijf wedstrijden met de oudste eerst, als letters (`MarkRow`) en als korte regels (`ShortMatch`), en onderaan "Gebaseerd op alle 6 gespeelde wedstrijden" (`BasedOn` in `src/MatchViews.tsx`).
   Een eerder seizoen heeft alleen de kolommen Reeks en Langste en geen laatste vijf wedstrijden, en noemt het seizoen in het bijschrift.
   Zonder een gespeelde wedstrijd staat er een zin in plaats van de tabel.
 - **Thuis en uit:** de laatste kaart van de linker kolom, direct na de reeksen, met een tabel (`DataTable`) met de kolommen Thuis, Uit en Totaal.
-  `homeAwayOf` in `src/matches.ts` telt de gespeelde wedstrijden van de Eredivisie met een score, gesplitst op `home`: gespeeld, gewonnen, gelijk, verloren, de punten (3 voor een winst, 1 voor een gelijkspel), de doelpunten voor en tegen en de wedstrijden zonder tegendoelpunt.
-  Alles komt uit de score en niet uit de doelpuntenmakers, dus elke gespeelde wedstrijd telt mee, en de bekerwedstrijden niet.
+  `homeAwayOf` in `src/matches.ts` telt de gespeelde wedstrijden met een score, gesplitst op `home`: gespeeld, gewonnen, gelijk, verloren, de punten (3 voor een winst, 1 voor een gelijkspel), de doelpunten voor en tegen en de wedstrijden zonder tegendoelpunt.
+  Alles komt uit de score en niet uit de doelpuntenmakers, dus elke gespeelde wedstrijd telt mee, en een bekerwedstrijd alleen bij de keuze Alle wedstrijden.
+  De beker geeft geen punten: de rijen Punten en Punten per wedstrijd staan er alleen als elke getelde wedstrijd een competitiewedstrijd is (`leagueOnly`).
   De kolom Totaal stemt overeen met de tabel van het verloop van het seizoen.
   De punten en de doelpunten per wedstrijd hebben een komma en twee cijfers, zoals "1,83".
   Een kant zonder gespeelde wedstrijd heeft een streepje waar gedeeld wordt en 0 bij de tellingen.
@@ -355,7 +358,7 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Een achterstand of voorsprong telt alleen als die klopt bij elke volgorde binnen een minuut.
   Zonder één wedstrijd met doelpunten staat er een zin in plaats van de tabellen, en onderaan staat "Gebaseerd op 2 van de 3 gespeelde wedstrijden" (`BasedOn` in `src/MatchViews.tsx`).
 - **Uitersten:** de laatste kaart, rechts, met vijf regels in een lijst: de grootste overwinning, de grootste nederlaag, de wedstrijd met de meeste doelpunten, ons vroegste doelpunt en ons laatste doelpunt van de Eredivisie.
-  `extremesOf` in `src/matches.ts` kiest ze uit de gespeelde wedstrijden van de Eredivisie; de beker telt niet.
+  `extremesOf` in `src/matches.ts` kiest ze uit de gespeelde wedstrijden die de keuze telt; de beker telt alleen bij Alle wedstrijden.
   Bij een gelijke stand wint de laatst gespeelde wedstrijd.
   Een regel zonder wedstrijd ontbreekt, bijvoorbeeld de nederlaag in een seizoen zonder verlies.
   De eerste drie regels komen uit de uitslag en tellen elke gespeelde wedstrijd.
@@ -376,6 +379,30 @@ De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`; `/statistieken` gebr
 De pagina deelt alles rond het seizoen met Statistieken: de kiezer, de adressen `/statistieken/spelers/2025-26` en de route `app/statistieken/spelers/kies`, via `playersPath` in `src/season-page.ts`.
 De balk "Op deze pagina:" heeft één link, naar de kaart (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/statistieken/spelers`).
 De bezoekteller telt de pagina van een seizoen als een bezoek aan `/statistieken/spelers`.
+
+### De keuze tussen alle wedstrijden en de Eredivisie
+
+Bovenaan `/statistieken` en `/statistieken/spelers`, naast de seizoenskiezer, staat een schakelaar (`SegmentedLinks` uit het designsysteem, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
+Alle wedstrijden is de standaard en heeft geen parameter; Eredivisie is `?competitie=eredivisie`.
+De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
+Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.
+De schakelaar staat er alleen bij een seizoen met een gespeelde bekerwedstrijd (`hasPlayedCupMatch`): zonder die zijn de twee keuzes gelijk.
+Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alle wedstrijden alleen de wedstrijden die er zijn.
+
+De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Doelpuntenmakers (ook op Spelers), De nul gehouden, Doelpunten per kwartier en Uitersten.
+De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes en de stand na 90 minuten rusten.
+Een bekerwedstrijd telt met de score na de verlenging.
+Een strafschoppenserie telt niet mee: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel.
+Doelpunten in de verlenging blijven buiten Doelpunten per kwartier, met de zin die dat zegt.
+De hulpfuncties in `src/matches.ts` krijgen de keuze als laatste argument (`CompetitionChoice`); wie het weglaat, krijgt wat de kaart tot nu toe deed.
+
+De keuze blijft bij elke link tussen de twee pagina's: de link "Alle doelpuntenmakers", de schakelaar zelf, de knop "Laad 5 meer" van De nul gehouden (die een formulier met een verborgen veld is) en de seizoenskiezer, die de keuze als verborgen veld (`fields`) naar de route `kies` stuurt.
+`pickedSeasonResponse` stuurt de keuze mee naar het adres van het seizoen (`keepCompetition`) en laat een waarde weg die de pagina niet kent, zodat de kiezer niemand naar "niet gevonden" stuurt.
+De balk "Op deze pagina:" heeft alleen verwijzingen naar een plek op dezelfde pagina, dus hij houdt het seizoen en de keuze vanzelf vast.
+Het menu bovenaan de site heeft vaste adressen en houdt de keuze niet vast.
+
+De telling zelf gebeurt na het lezen: `getMatchData` bewaart de wedstrijden van een seizoen vijf minuten (of een uur voor een afgelopen seizoen), en de keuze filtert die lijst.
+Er is dus geen sleutel per keuze in de cache nodig, en de ene keuze kan de andere niet overschrijven.
 
 ## Het nieuwsarchief
 

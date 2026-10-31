@@ -284,9 +284,9 @@
   }
 
   /*
-   * The title row (Page.Title): the heading of the page and one control, side by side, with
-   * the control at the end. It is a row that wraps: where the control does not fit beside the
-   * heading, it sits under it, and the margin on its start side keeps it at the end of the
+   * The title row (Page.Title): the heading of the page and one or two controls, side by side,
+   * with the controls at the end. It is a row that wraps: where a control does not fit beside
+   * the heading, it sits under it, and the margin on its start side keeps it at the end of the
    * row. The gap is the same across and down. What is in the row has no margin of its own, so
    * the row is as tall as the tallest of them, and the two are centred on each other.
    */
@@ -303,6 +303,11 @@
 
     > :not(:first-child) {
       margin-inline-start: auto;
+    }
+
+    /* A second control follows the first, on its side, so the two stay together at the end. */
+    > :not(:first-child) ~ :not(:first-child) {
+      margin-inline-start: 0;
     }
   }
 
