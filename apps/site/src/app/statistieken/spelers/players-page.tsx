@@ -70,11 +70,6 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
       intro={
         <Page.Title>
           <Heading level={1}>Spelers</Heading>
-          <CompetitionSwitch
-            address={seasonAddress(playersPath, season, seasonOf(new Date()))}
-            competition={competition}
-            matches={data.matches}
-          />
           <SeasonPicker
             action={pickerPath}
             fields={competitionFields(competition)}
@@ -84,6 +79,11 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
         </Page.Title>
       }
     >
+      <CompetitionSwitch
+        address={seasonAddress(playersPath, season, seasonOf(new Date()))}
+        competition={competition}
+        matches={data.matches}
+      />
       <TopScorersCard
         competition={competition}
         matches={data.matches}

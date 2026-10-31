@@ -192,10 +192,9 @@ const Cell = ({ className, ...props }: PageCellProps) => (
 
 /**
  * The title row of a page, for the `intro` of a Page.Main: the heading of the page and, beside
- * it, a control that belongs to the whole page, such as the SeasonPicker, or two, such as
- * SegmentedLinks and the SeasonPicker. The controls sit at the end of the row, on the right.
- * Where they do not fit side by side they go under the heading and stay on the right. A row
- * with the heading alone is the heading.
+ * it, one control that belongs to the whole page, such as the SeasonPicker. The control sits at
+ * the end of the row, on the right. Where the two do not fit side by side the control goes
+ * under the heading and stays on the right. A row with the heading alone is the heading.
  */
 const Title = ({ className, ...props }: PageTitleProps) => (
   <div className={classNames('hf-page-title', className)} {...props} />

@@ -382,7 +382,7 @@ De bezoekteller telt de pagina van een seizoen als een bezoek aan `/statistieken
 
 ### De keuze tussen alle wedstrijden en de Eredivisie
 
-Bovenaan `/statistieken` en `/statistieken/spelers`, naast de seizoenskiezer, staat een schakelaar (`SegmentedLinks` uit het designsysteem, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
+Bovenaan `/statistieken` en `/statistieken/spelers`, direct onder de kop en links, staat een schakelaar (`SegmentedLinks` uit het designsysteem, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
 Alle wedstrijden is de standaard en heeft geen parameter; Eredivisie is `?competitie=eredivisie`.
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
 Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.

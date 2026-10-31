@@ -1676,7 +1676,7 @@ describe('the season picker on /statistieken', () => {
     const html = await render()
 
     expect(html).toMatch(
-      /<div class="hf-page-title"><h1 class="hf-heading-1">Statistieken<\/h1><div [^>]*aria-label="Welke wedstrijden"[^>]*>.*?<\/div><form [^>]*aria-label="Seizoen kiezen"/,
+      /<div class="hf-page-title"><h1 class="hf-heading-1">Statistieken<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
     )
     expect(html).toContain(
       '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
@@ -1733,6 +1733,25 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
       '<div aria-label="Welke wedstrijden" class="hf-segmented-control" role="group"><a href="/statistieken">Alle wedstrijden</a><a aria-current="page" href="/statistieken?competitie=eredivisie">Eredivisie</a></div>',
     )
     expect(all.match(/aria-current/g)).toHaveLength(1)
+  })
+
+  it('puts the switch in a plain cell, the first of the main column, right under the title row', async () => {
+    const html = await render()
+    const main = /<main class="hf-page-main">(.*?)<\/main>/s.exec(html)?.[1] ?? ''
+    const cells = /<div class="hf-page-cells">(.*)/s.exec(main)?.[1] ?? ''
+
+    // The title row is the introduction, and the switch the first child of the cells under it.
+    expect(main).toMatch(
+      /^<div class="hf-page-intro"><div class="hf-page-title">.*?<\/div><\/div><div class="hf-page-cells"><div aria-label="Welke wedstrijden"/s,
+    )
+    expect(cells.startsWith('<div aria-label="Welke wedstrijden" class="hf-segmented-control" role="group">')).toBe(
+      true,
+    )
+    // It is no card and has no card around it, and it comes before the cards it controls.
+    expect(main.indexOf('Welke wedstrijden')).toBeLessThan(main.indexOf('id="reeksen"'))
+    expect(html.indexOf('Welke wedstrijden')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
+    expect(html).not.toMatch(/<section[^>]*>(?:(?!<\/section>).)*Welke wedstrijden/s)
+    expect(html.match(/hf-page-title">.*?<\/div><\/div>/s)?.[0]).not.toContain('hf-segmented-control')
   })
 
   it('has no switch in a season without a played cup tie, nor for one that is still to come', async () => {

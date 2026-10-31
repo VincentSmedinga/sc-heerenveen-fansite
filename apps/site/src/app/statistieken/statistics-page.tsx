@@ -57,8 +57,10 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
  * another, which is what the two routes render. The title row has the season picker beside the
  * heading. The nine cards with figures sit in two equal columns on a wide screen, the first
  * four on the left and the other five on the right, and under each other on a narrow one, in
- * the order of the bar "Op deze pagina:". A season that is over has its cards put the season
- * on the image. A season that has no matches in the database is the page "niet gevonden".
+ * the order of the bar "Op deze pagina:". The switch between the matches (see below) is the
+ * first cell of the main column, a plain cell without a card, directly under the title row.
+ * A season that is over has its cards put the season on the image. A season that has no matches
+ * in the database is the page "niet gevonden".
  *
  * The cards count all the matches, the Eredivisie and the KNVB Beker, or the Eredivisie alone
  * with `?competitie=eredivisie` (see CompetitionSwitch). Three cards do not follow the choice:
@@ -99,7 +101,6 @@ export async function StatisticsPage({
         intro={
           <Page.Title>
             <Heading level={1}>Statistieken</Heading>
-            <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
             <SeasonPicker
               action={pickerPath}
               fields={competitionFields(competition)}
@@ -109,6 +110,7 @@ export async function StatisticsPage({
           </Page.Title>
         }
       >
+        <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
         <LeaguePlaceCard season={imageSeason} standings={data.standings} />
         <SeasonCard matches={data.matches} season={imageSeason} />
         <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />

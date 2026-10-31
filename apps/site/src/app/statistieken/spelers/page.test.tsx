@@ -231,7 +231,7 @@ describe('the season picker on /statistieken/spelers', () => {
     const html = await render()
 
     expect(html).toMatch(
-      /<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1><div [^>]*aria-label="Welke wedstrijden"[^>]*>.*?<\/div><form [^>]*aria-label="Seizoen kiezen"/,
+      /<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
     )
     expect(html).toContain(
       '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
@@ -323,6 +323,14 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
     expect(switchOf(await renderWith({ competitie: 'eredivisie' }))).toBe(
       '<div aria-label="Welke wedstrijden" class="hf-segmented-control" role="group"><a href="/statistieken/spelers">Alle wedstrijden</a><a aria-current="page" href="/statistieken/spelers?competitie=eredivisie">Eredivisie</a></div>',
     )
+  })
+
+  it('puts the switch in a plain cell, the first of the main column, before the card it controls', async () => {
+    const html = await render()
+
+    expect(html).toMatch(/<div class="hf-page-cells"><div aria-label="Welke wedstrijden" class="hf-segmented-control"/)
+    expect(html.indexOf('Welke wedstrijden')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
+    expect(html).not.toMatch(/<section[^>]*>(?:(?!<\/section>).)*Welke wedstrijden/s)
   })
 
   it('has no switch in a season without a played cup tie', async () => {
