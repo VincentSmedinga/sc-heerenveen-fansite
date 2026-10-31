@@ -19,8 +19,11 @@ describe('statisticsShortcuts', () => {
 })
 
 describe('playersShortcuts', () => {
-  it('has one link, to the card Doelpuntenmakers, which is the one on the page Spelers', () => {
-    expect(playersShortcuts).toEqual([{ href: '#doelpuntenmakers', label: 'Doelpuntenmakers' }])
+  it('has two links, to the cards Doelpuntenmakers and Bijzondere doelpunten, in the order of the page', () => {
+    expect(playersShortcuts).toEqual([
+      { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
+      { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
+    ])
   })
 
   it('goes to the same anchor as the card on Statistieken, which keeps its link', () => {
