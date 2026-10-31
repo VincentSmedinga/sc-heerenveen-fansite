@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu elf pagina's: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu twaalf pagina's: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/statistieken/spelers` met alle doelpuntenmakers, `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -264,10 +264,12 @@ Wedstrijden is wat je opzoekt, een lijst van wedstrijden en de stand; Statistiek
 De kaarten staan in twee gelijke kolommen: de eerste vier in de hoofdkolom, onder de kop met de seizoenskiezer, en de andere vijf in een brede zijbalk (`wide` op `Page.Sidebar`), die even breed is als de hoofdkolom.
 De verdeling is 4 en 5, omdat de kolommen dan het minst in hoogte verschillen.
 Links staan onze plek, het verloop, de reeksen en thuis en uit.
-Rechts staan de doelpuntenmakers, de nul gehouden, de doelpunten per kwartier, hoe de wedstrijden verlopen, de uitersten en de bronvermelding.
+Rechts staan de doelpuntenmakers (de top 5, zie _De spelers_), de nul gehouden, de doelpunten per kwartier, hoe de wedstrijden verlopen, de uitersten en de bronvermelding.
 De volgorde in de broncode blijft de volgorde van de balk en van een telefoon.
 Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`).
+Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu alleen Spelers (`statisticsSubitems` in `src/SiteNavigation.tsx`).
+Op `/statistieken` is geen subpagina de huidige; op `/statistieken/spelers` en zijn seizoenen is Spelers het wel, en Statistieken blijft het huidige onderdeel van het menu.
 Op een breed scherm is de balk er niet.
 De balk volgt de pagina, zoals die van Wedstrijden.
 De stand, de reeksen, de doelpuntenmakers, de nul gehouden, hoe de wedstrijden verlopen en de uitersten hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen, thuis en uit en de doelpunten per kwartier een warm vlak (`surface="warm"`), en onze plek in de competitie is wit.
@@ -308,7 +310,11 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Een kant zonder gespeelde wedstrijd heeft een streepje waar gedeeld wordt en 0 bij de tellingen.
   Onder de tabel staat "Gebaseerd op alle 11 gespeelde wedstrijden".
   Zonder een uitslag staat er een zin in plaats van de tabel.
-- **Doelpuntenmakers:** de eerste kaart van de rechter kolom, met alle spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten.
+- **Doelpuntenmakers:** de eerste kaart van de rechter kolom, met de top 5 van de spelers van sc Heerenveen die dit seizoen scoorden, van veel naar weinig doelpunten (`topFiveOf` in `src/matches.ts`).
+  Delen spelers de vijfde plek, dan staan ze er allemaal in, dus de kaart kan meer dan vijf namen tonen; een plek vóór de vijfde houdt ook al zijn spelers.
+  Onder de kop staat "De top 5 van 17 spelers die scoorden", zodat de afbeelding van de kaart "top 5" zegt; scoorden er vijf of minder, dan is er niets weggelaten en staat er "4 spelers hebben gescoord".
+  Onder de tabel staat de link "Alle doelpuntenmakers" naar de pagina Spelers van hetzelfde seizoen.
+  De kaart met alle spelers staat op `/statistieken/spelers` (zie _De spelers_); de rest van deze alinea gaat over die lijst.
   `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
   Een penalty telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
   Een doelpunt dat de importer aan een speler koppelde (`player_id`) telt voor die speler en toont zijn volledige naam uit `players` (de voornaam gewoon en de achternaam vet, met `PlayerName`), ook als hij de selectie verliet; twee spelers met dezelfde achternaam zijn dus twee rijen.
@@ -361,6 +367,15 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
 
 De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolom, zoals die van Wedstrijden onderaan zijn zijbalk staat.
 `pnpm test:a11y` gebruikt dezelfde verzonnen wedstrijden en stand van de seed.
+
+### De spelers
+
+`/statistieken/spelers` is de eerste subpagina van Statistieken.
+Het toont de kaart Doelpuntenmakers met alle spelers die scoorden, zoals die kaart vroeger op `/statistieken` stond: dezelfde cijfers en dezelfde volgorde, met hetzelfde anker `#doelpuntenmakers` en het oude anker `#topscorers`.
+De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`; `/statistieken` gebruikt dezelfde kaart met de link naar deze pagina, en dan zijn het de eerste rijen van de lijst (`topFiveOf` in `src/matches.ts`).
+De pagina deelt alles rond het seizoen met Statistieken: de kiezer, de adressen `/statistieken/spelers/2025-26` en de route `app/statistieken/spelers/kies`, via `playersPath` in `src/season-page.ts`.
+De balk "Op deze pagina:" heeft één link, naar de kaart (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/statistieken/spelers`).
+De bezoekteller telt de pagina van een seizoen als een bezoek aan `/statistieken/spelers`.
 
 ## Het nieuwsarchief
 

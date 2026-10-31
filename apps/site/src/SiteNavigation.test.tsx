@@ -62,6 +62,11 @@ describe('SiteNavigation', () => {
     expect(render('/wedstrijden')).not.toMatch(/href="\/nieuws/)
   })
 
+  it('has no link to Spelers in the menu itself, only in the bar of Statistieken', () => {
+    expect(render('/wedstrijden')).not.toContain('/statistieken/spelers')
+    expect(render('/')).not.toContain('/statistieken/spelers')
+  })
+
   it('shows the bar with the archive, the podcasts and the search on the home page, with no sub-page current', () => {
     const html = render('/')
 
@@ -104,12 +109,24 @@ describe('SiteNavigation', () => {
   )
 
   it.each(['/statistieken', '/statistieken/2025-26'])(
-    'marks Statistieken as the current page on %s, with no bar',
+    'marks Statistieken as the current page on %s, with the bar of its sub-pages and none of them current',
     (path) => {
       const html = render(path)
 
       expect(currentLinks(html)).toEqual(['Statistieken'])
-      expect(html).not.toContain('hf-navigation-bar')
+      expect(barLinks(html)).toEqual([['/statistieken/spelers', 'Spelers']])
+      expect(linksWith(html, 'true')).toEqual([])
+    },
+  )
+
+  it.each(['/statistieken/spelers', '/statistieken/spelers/2025-26'])(
+    'marks Spelers as the current sub-page on %s, and Statistieken as the item that holds it',
+    (path) => {
+      const html = render(path)
+
+      expect(barLinks(html)).toEqual([['/statistieken/spelers', 'Spelers']])
+      expect(currentLinks(html)).toEqual(['Spelers'])
+      expect(linksWith(html, 'true')).toEqual(['Statistieken'])
     },
   )
 
@@ -140,6 +157,8 @@ describe('currentOf', () => {
     ['/wedstrijden/2025-26', { item: '/wedstrijden' }],
     ['/statistieken', { item: '/statistieken' }],
     ['/statistieken/2025-26', { item: '/statistieken' }],
+    ['/statistieken/spelers', { item: '/statistieken', subitem: '/statistieken/spelers' }],
+    ['/statistieken/spelers/2025-26', { item: '/statistieken', subitem: '/statistieken/spelers' }],
     ['/bronnen', {}],
     ['/nieuws/bestaat-niet', {}],
     ['/podcasts', {}],

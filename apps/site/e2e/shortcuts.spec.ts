@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { checkPage } from './check-page'
+import { earlierSeasonSlug } from './earlier-season'
 import { hydrated } from './hydrated'
 
 // The pages in pages.spec.ts are checked in a window of 1280 pixels wide, where the bar under
@@ -137,7 +138,7 @@ test.describe('the bar under the header of /statistieken', () => {
       const measure = () =>
         page.evaluate(() => {
           const link = document.activeElement
-          const row = document.querySelector('.hf-page-shortcuts-row')
+          const row = document.querySelector('.hf-page-shortcuts .hf-page-shortcuts-row')
 
           if (!(link instanceof HTMLElement) || !row) {
             return undefined
@@ -245,7 +246,7 @@ test.describe('the bar under the header of /statistieken', () => {
     await expect
       .poll(() =>
         page.evaluate(() => {
-          const row = document.querySelector('.hf-page-shortcuts-row')
+          const row = document.querySelector('.hf-page-shortcuts .hf-page-shortcuts-row')
           const link = document.querySelector('.hf-page-shortcuts [aria-current="location"]')
 
           return row && link
@@ -349,5 +350,74 @@ test.describe('the bar under the header of /statistieken', () => {
     await page.evaluate(() => document.getElementById('reeksen')?.scrollIntoView({ behavior: 'instant' }))
 
     await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveCount(0)
+  })
+})
+
+// The page Spelers has one card, so its bar has one link. It is gone from 52rem on, like the
+// other bars, although the page has one column.
+test.describe('the bar under the header of /statistieken/spelers', () => {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`has one link on a phone, to the card Doelpuntenmakers, and passes axe in ${colorScheme}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await page.setViewportSize({ height: 800, width: 390 })
+      await page.goto('/statistieken/spelers')
+
+      const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
+
+      await expect(bar.getByRole('link')).toHaveCount(1)
+      await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
+      await expect(page).toHaveURL(/#doelpuntenmakers$/)
+      expect(await checkPage(page)).toEqual([])
+    })
+  }
+
+  test('is gone, also for a screen reader, from 52rem on, and is there one pixel under it', async ({ page }) => {
+    for (const [width, bar] of [
+      [831, 1],
+      [832, 0],
+    ] as const) {
+      await page.setViewportSize({ height: 800, width })
+      await page.goto('/statistieken/spelers')
+
+      await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toHaveCount(bar)
+    }
+  })
+
+  test('is also on the page of an earlier season', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto(`/statistieken/spelers/${earlierSeasonSlug()}`)
+
+    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')).toHaveCount(1)
+  })
+})
+
+test.describe('the bar of Statistieken in the main menu', () => {
+  test('has Spelers, and marks it as the current page on /statistieken/spelers, not on /statistieken', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/statistieken')
+    const menu = page.getByRole('navigation', { name: 'Hoofdmenu' })
+
+    await expect(menu.getByRole('link', { name: 'Statistieken' })).toHaveAttribute('aria-current', 'page')
+    await expect(menu.getByRole('link', { name: 'Spelers' })).not.toHaveAttribute('aria-current', /.*/)
+
+    await menu.getByRole('link', { name: 'Spelers' }).click()
+
+    await expect(page).toHaveURL(/\/statistieken\/spelers$/)
+    await expect(menu.getByRole('link', { name: 'Spelers' })).toHaveAttribute('aria-current', 'page')
+    await expect(menu.getByRole('link', { name: 'Statistieken' })).toHaveAttribute('aria-current', 'true')
+  })
+
+  test('is left when the visitor goes on to Wedstrijden, which has no bar', async ({ page }) => {
+    await page.goto('/statistieken/spelers')
+    const menu = page.getByRole('navigation', { name: 'Hoofdmenu' })
+
+    await menu.getByRole('link', { name: 'Wedstrijden' }).click()
+
+    await expect(page).toHaveURL(/\/wedstrijden$/)
+    await expect(menu.getByRole('link', { name: 'Spelers' })).toHaveCount(0)
   })
 })

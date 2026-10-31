@@ -10,18 +10,23 @@ const newsSubitems = [
   { href: '/nieuws/zoeken', label: 'Zoeken' },
 ]
 
+// The sub-pages of Statistieken. Tegenstanders and Seizoenen come later.
+const statisticsSubitems = [{ href: '/statistieken/spelers', label: 'Spelers' }]
+
 const items = [
   { href: '/', label: 'Nieuws', subitems: newsSubitems },
   { href: '/wedstrijden', label: 'Wedstrijden' },
-  { href: '/statistieken', label: 'Statistieken' },
+  { href: '/statistieken', label: 'Statistieken', subitems: statisticsSubitems },
   { external: true, href: 'https://forum.heerenveen.org', label: 'Forum' },
 ]
 
 /**
  * The item of the menu and the sub-page that a path belongs to, each as an href, or undefined.
  * Nieuws has the home page, its sub-pages and the articles of the editors (`/redactie/<name>`);
- * Wedstrijden and Statistieken have the page and every page below it, such as the season. A
- * path that belongs to no item, such as /bronnen or a page that does not exist, has neither.
+ * Wedstrijden has the page and every page below it, such as the season. Statistieken has the
+ * same, and a sub-page of its own, Spelers, with the page of each season below it
+ * (`/statistieken/spelers/2025-26`). A path that belongs to no item, such as /bronnen or a page
+ * that does not exist, has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
   const subitem = newsSubitems.find((candidate) => candidate.href === pathname)
@@ -38,6 +43,10 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
     return { item: '/wedstrijden' }
   }
 
+  if (pathname === '/statistieken/spelers' || pathname.startsWith('/statistieken/spelers/')) {
+    return { item: '/statistieken', subitem: '/statistieken/spelers' }
+  }
+
   if (pathname === '/statistieken' || pathname.startsWith('/statistieken/')) {
     return { item: '/statistieken' }
   }
@@ -47,12 +56,13 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
 
 /**
  * The main menu of the site, under the header: the news, the matches, the statistics and the
- * forum. The news has a bar with its sub-pages under the menu. The menu marks the item the
- * visitor is on, and the bar the sub-page. A layout gets no path, so this is a client
- * component: usePathname gives the path, also when the server renders the HTML.
+ * forum. The news and the statistics have a bar with their sub-pages under the menu. The menu
+ * marks the item the visitor is on, and the bar the sub-page. A layout gets no path, so this is
+ * a client component: usePathname gives the path, also when the server renders the HTML.
  *
- * On a sub-page the item Nieuws is not the current page itself (the design system gives it
- * `aria-current="true"` then); only on the home page and on an article of the editors is it.
+ * On a sub-page the item Nieuws or Statistieken is not the current page itself (the design
+ * system gives it `aria-current="true"` then); only on the home page and on an article of the
+ * editors, and on /statistieken and the page of a season below it, is it.
  */
 export function SiteNavigation() {
   const here = currentOf(usePathname())

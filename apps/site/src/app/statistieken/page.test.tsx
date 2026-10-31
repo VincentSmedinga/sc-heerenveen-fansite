@@ -97,7 +97,13 @@ describe('the page /statistieken', () => {
     it('has the legend of a table under it, and "Gebaseerd op" last', async () => {
       const html = await render()
 
-      expectInOrder(section(html, 'doelpuntenmakers'), ['</h2>', '<table', 'hf-bar-legend'])
+      expectInOrder(section(html, 'doelpuntenmakers'), [
+        '</h2>',
+        '<table',
+        'hf-bar-legend',
+        'Gebaseerd op',
+        'Alle doelpuntenmakers',
+      ])
       expectInOrder(section(html, 'hoe-de-wedstrijden-verlopen'), [
         '</h2>',
         '<table',
@@ -1444,32 +1450,108 @@ describe('the page /statistieken', () => {
       expect(await topScorers()).toContain('<p>1 speler heeft gescoord</p>')
     })
 
-    it('shows everybody who scored, not only the best five, with level players on one place', async () => {
-      const scorers = Array.from({ length: 14 }, (_, index) => ({
-        minute: index + 1,
-        ours: true,
-        ownGoal: false,
-        penalty: false,
-        player: `Speler ${String.fromCharCode(65 + index)}`,
-        playerId: null,
-        playerName: null,
-        playerPage: null,
-        playerSearchTerm: null,
-        stoppageMinutes: null,
-      }))
+    /** One match in which each player scored the number of goals given, as made-up players. */
+    const withScorers = (counts: number[]) => {
       const played = matchData.matches.find((item) => item.status === 'played')!
+      const goals = counts.flatMap((count, index) =>
+        Array.from({ length: count }, (_, goalIndex) => ({
+          minute: goalIndex + 1,
+          ours: true,
+          ownGoal: false,
+          penalty: false,
+          player: `Speler ${String.fromCharCode(65 + index)}`,
+          playerId: null,
+          playerName: null,
+          playerPage: null,
+          playerSearchTerm: null,
+          stoppageMinutes: null,
+        })),
+      )
 
       vi.mocked(getMatchData).mockResolvedValue({
         ...matchData,
-        matches: [{ ...played, goals: scorers, goalsAgainst: 0, goalsFor: 14 }],
+        matches: [{ ...played, goals, goalsAgainst: 0, goalsFor: goals.length }],
       })
+    }
+
+    const rowsOf = (card: string) =>
+      [...card.matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">(.+?)<\/th><td[^>]*>(\d+)/g)].map(
+        ([, position, player, goals]) => [position, plain(player), goals],
+      )
+
+    it('shows the first five places only, and says it is the top 5 of how many players scored', async () => {
+      withScorers([9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1, 1])
 
       const card = await topScorers()
-      const rows = [...card.matchAll(/<tr><td[^>]*>(\d+)<\/td><th scope="row">(.+?)<\/th>/g)]
 
-      expect(rows).toHaveLength(14)
-      expect(rows.every(([, position]) => position === '1')).toBe(true)
+      expect(rowsOf(card)).toEqual([
+        ['1', 'Speler A', '9'],
+        ['2', 'Speler B', '8'],
+        ['3', 'Speler C', '7'],
+        ['4', 'Speler D', '6'],
+        ['5', 'Speler E', '5'],
+      ])
+      expect(card).toContain('<p>De top 5 van 14 spelers die scoorden</p>')
+      expect(card).toContain(
+        '<caption class="hf-visually-hidden">De top 5 van de doelpuntenmakers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker</caption>',
+      )
+      expect(card).not.toContain('14 spelers hebben gescoord')
+    })
+
+    it('shows all the players who share fifth place, so it has more than five names', async () => {
+      withScorers([9, 8, 7, 6, 2, 2, 2, 1])
+
+      const card = await topScorers()
+
+      expect(rowsOf(card)).toEqual([
+        ['1', 'Speler A', '9'],
+        ['2', 'Speler B', '8'],
+        ['3', 'Speler C', '7'],
+        ['4', 'Speler D', '6'],
+        ['5', 'Speler E', '2'],
+        ['5', 'Speler F', '2'],
+        ['5', 'Speler G', '2'],
+      ])
+      expect(card).toContain('<p>De top 5 van 8 spelers die scoorden</p>')
+    })
+
+    it('shows all of them, and counts the players, when nobody is left out', async () => {
+      withScorers([3, 2, 1, 1, 1])
+
+      const card = await topScorers()
+
+      expect(rowsOf(card)).toHaveLength(5)
+      expect(card).toContain('<p>5 spelers hebben gescoord</p>')
+      expect(card).not.toContain('De top 5')
+    })
+
+    it('shows everybody when they all share the first place, however many that is', async () => {
+      withScorers(Array.from({ length: 14 }, () => 1))
+
+      const card = await topScorers()
+
+      expect(rowsOf(card)).toHaveLength(14)
+      expect(rowsOf(card).every(([position]) => position === '1')).toBe(true)
       expect(card).toContain('14 spelers hebben gescoord')
+    })
+
+    it('has the link "Alle doelpuntenmakers" to the page Spelers under the list', async () => {
+      const card = await topScorers()
+
+      expect(card).toContain('<p><a href="/statistieken/spelers">Alle doelpuntenmakers</a></p>')
+      expect(card.indexOf('Alle doelpuntenmakers')).toBeGreaterThan(card.indexOf('</table>'))
+      expect(card.match(/<a /g)).toHaveLength(2)
+    })
+
+    it('has the link also when everybody is shown, and none when nobody scored', async () => {
+      expect(await topScorers()).toContain('Alle doelpuntenmakers')
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((item) => ({ ...item, goals: [] })),
+      })
+
+      expect(await topScorers()).not.toContain('Alle doelpuntenmakers')
     })
 
     it('says which part of the played matches the list is based on, when scorers are missing', async () => {
@@ -1499,10 +1581,12 @@ describe('the page /statistieken', () => {
     })
 
     it('has no link or request to another site', async () => {
-      // The link of the heading to itself is not one of them.
-      const withoutAnchor = (await topScorers()).replace(/<a class="hf-heading-link" href="#doelpuntenmakers">/, '')
+      // The link of the heading to itself and the link to the page Spelers are not one of them.
+      const withoutOurLinks = (await topScorers())
+        .replace(/<a class="hf-heading-link" href="#doelpuntenmakers">/, '')
+        .replace(/<a [^>]*href="\/statistieken\/spelers"[^>]*>/, '')
 
-      expect(withoutAnchor).not.toMatch(/https?:|<a |<img|src=/)
+      expect(withoutOurLinks).not.toMatch(/https?:|<a |<img|src=/)
     })
   })
 

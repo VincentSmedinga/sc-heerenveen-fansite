@@ -1,26 +1,25 @@
 import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
-import { Card, Heading, Page, SeasonPicker } from '@fansite/design-system'
+import { Heading, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { reviewBranch } from '../../env'
-import { parseCleanSheetCount, topScorersOf } from '../../matches'
+import { parseCleanSheetCount } from '../../matches'
 import {
   CleanSheetsCard,
   ExtremesCard,
   GoalsPerQuarterCard,
   HomeAwayCard,
-  imageCredit,
   LeaguePlaceCard,
   MatchFlowCard,
   SeasonCard,
   SourceCredit,
   StreaksCard,
-  TopScorers,
+  TopScorersCard,
 } from '../../MatchViews'
 import { pageMetadata, seasonPageMetadata } from '../../metadata'
-import { loadSeasonPage, pickerPathOf, type SearchParams, statisticsPath } from '../../season-page'
+import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams, statisticsPath } from '../../season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '../../seasons'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
@@ -104,16 +103,12 @@ export async function StatisticsPage({
           away, the goal scorers, the clean sheets, the goals per quarter, how the matches go
           and the extremes. */}
       <Page.Sidebar aria-label="Meer cijfers over het seizoen" wide>
-        <Card
-          aria-labelledby="doelpuntenmakers"
-          shareable={imageCredit(topScorersOf(data.matches).length > 0, imageSeason)}
-          surface="soft"
-        >
-          <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
-            Doelpuntenmakers
-          </Heading>
-          <TopScorers matches={data.matches} season={data.season} />
-        </Card>
+        <TopScorersCard
+          matches={data.matches}
+          playersHref={seasonAddress(playersPath, season, seasonOf(now))}
+          season={data.season}
+          seasonOnImage={imageSeason}
+        />
         <CleanSheetsCard
           count={parseCleanSheetCount(nul)}
           matches={data.matches}

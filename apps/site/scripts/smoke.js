@@ -777,18 +777,19 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
     )
-    assert.match(
-      statisticsHtml,
-      /<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen in het seizoen \d{4}\/\d{2}, /,
-    )
+    // The card shows the top 5, with the link to the page with everybody who scored; the whole
+    // list is on that page (below).
+    assert.match(statisticsHtml, /<caption class="hf-visually-hidden">(?:De top 5 van de d|D)oelpuntenmakers van sc /)
+    assert.match(statisticsHtml, /<a href="\/statistieken\/spelers">Alle <span class="hf-icon-tail">doelpuntenmakers</)
     assert.match(
       statisticsHtml,
       /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
     )
-    // Two players called Testvoort are two rows, each with his full name.
-    assert.match(statisticsHtml, /hf-player-name-given">Joris<\/span> <span class="hf-player-name-surname">Testvoort</)
-    assert.match(statisticsHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
-    assert.doesNotMatch(statisticsHtml, /<th scope="row">Kopie<\/th>/)
+    // The menu has the bar of Statistieken, with Spelers and no sub-page as the current page.
+    assert.match(
+      statisticsHtml,
+      /<a aria-current="page" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/statistieken\/spelers">Spelers<\/a>/s,
+    )
     assert.match(
       statisticsHtml,
       /<h2[^>]*id="doelpunten-per-kwartier">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartie/,
@@ -816,6 +817,45 @@ await withEmptyDatabase((database) =>
     )
     assert.match(statisticsHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
     assert.doesNotMatch(statisticsHtml, /action=history/)
+
+    // The page Spelers has the card with everybody who scored, which is the card that stood on
+    // the statistics page before it got the top 5. The menu has Statistieken as the item that
+    // holds it and Spelers as the current sub-page.
+    const playersPage = await fetch(`${origin}/statistieken/spelers`)
+    const playersHtml = await playersPage.text()
+    assert.equal(playersPage.status, 200)
+    assert.match(playersHtml, /<h1[^>]*>Spelers<\/h1>/)
+    assert.match(
+      playersHtml,
+      /<a aria-current="true" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/spelers">Spelers<\/a>/s,
+    )
+    assert.deepEqual(
+      [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
+      ['#doelpuntenmakers'],
+    )
+    assert.match(
+      playersHtml,
+      /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
+    )
+    assert.match(
+      playersHtml,
+      /<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen in het seizoen \d{4}\/\d{2}, /,
+    )
+    assert.match(
+      playersHtml,
+      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
+    )
+    // Two players called Testvoort are two rows, each with his full name.
+    assert.match(playersHtml, /hf-player-name-given">Joris<\/span> <span class="hf-player-name-surname">Testvoort</)
+    assert.match(playersHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
+    assert.doesNotMatch(playersHtml, /<th scope="row">Kopie<\/th>/)
+    assert.doesNotMatch(playersHtml, /Alle (?:<span[^>]*>)?doelpuntenmakers/)
+    assert.match(playersHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    // The route behind the season picker sends the visitor on to the page of the season.
+    const pickedPlayers = await fetch(`${origin}/statistieken/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })
+    assert.equal(pickedPlayers.status, 303)
+    assert.equal(pickedPlayers.headers.get('location'), '/statistieken/spelers')
+    assert.equal((await fetch(`${origin}/statistieken/spelers/2099-00`)).status, 404)
 
     // Updates shows the versions of the build, newest first, and points feed readers to its
     // feed.

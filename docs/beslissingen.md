@@ -4300,6 +4300,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - `/podcasts` houden en `/nieuws/podcasts` met een omleiding laten verwijzen: zonder openbare links is een omleiding niet nodig.
   - Het zoeken in de footer laten op `/zoeken`: het is daar moeilijk te vinden, en het adres past niet bij de andere pagina's van Nieuws.
 - **Later:** de balk van Nieuws heeft op verzoek van de projecteigenaar (31 oktober 2026) de volgorde Archief, Podcasts en Zoeken, en niet Podcasts, Archief en Zoeken.
+- **Later:** de top 5 en Spelers staan sinds 31 oktober 2026 op `/statistieken` en `/statistieken/spelers`; zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_.
 
 ### De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
 
@@ -4324,6 +4325,37 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Die verdelen de kaarten zelf over de kolommen, maar een kaart die groeit, zoals De nul gehouden met "Laad 5 meer", springt dan naar de andere kolom, en een lange kaart laat een gat achter.
   Een raster met rijen van twee kaarten: de volgorde op een telefoon (links, rechts, links, rechts) is dan niet die van de kolommen, en de kaarten van een rij zijn niet even hoog.
   Een nieuwe prop op `Page.Body` of `Page.Main` voor twee kolommen: dubbel werk naast `wide`.
+
+### Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de kaart Doelpuntenmakers op `/statistieken` toont de top 5, en de volledige lijst staat op een nieuwe pagina Spelers, de eerste subpagina van Statistieken.
+  - **De kaart op Statistieken** houdt zijn naam, zijn anker `doelpuntenmakers` (met het oude `topscorers`), zijn afbeeldingsknop, "Gebaseerd op" en de bronvermelding.
+    Onder de kop staat "De top 5 van 17 spelers die scoorden", zodat de afbeelding "top 5" zegt, en onder de tabel de link "Alle doelpuntenmakers" naar de pagina Spelers van hetzelfde seizoen.
+  - **De gelijke plekken:** de kaart toont iedereen die op een van de eerste vijf plekken staat.
+    Delen twee spelers de vijfde plek, dan staan ze er allebei in, en de kaart kan meer dan vijf namen tonen.
+    Staan er drie spelers op de vierde plek, dan blijven ze alle drie en is er geen vijfde plek.
+    Er is geen grens aan het aantal rijen.
+    Is er niemand weggelaten, omdat vijf spelers of minder scoorden of omdat iedereen gelijk staat, dan staat er geen "top 5" maar het aantal spelers, zoals op de pagina Spelers: "4 spelers hebben gescoord".
+  - **De adressen** van Spelers zijn `/statistieken/spelers` voor het lopende seizoen en `/statistieken/spelers/2025-26` voor een eerder seizoen, met de kiezer op `/statistieken/spelers/kies`.
+    De regels zijn die van Statistieken: één adres per seizoen, een onbekend seizoen geeft "niet gevonden", en lukt het lezen niet, dan staat er de foutpagina.
+    De pagina gebruikt `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` uit `src/season-page.ts`, dus er is niets gekopieerd.
+  - **De pagina Spelers** heeft de kaart die op Statistieken stond, met alle spelers, hetzelfde anker en dezelfde kaart (`TopScorersCard`), zonder de link.
+    De bezoekteller telt een seizoen van Spelers als een bezoek aan `/statistieken/spelers`, zoals bij Statistieken.
+  - **De balk met subpagina's** van Statistieken heeft Spelers.
+    Op `/statistieken` is geen subpagina de huidige; op `/statistieken/spelers` is Spelers dat wel (`aria-current="page"`), en Statistieken is op beide pagina's het huidige onderdeel van het menu.
+    De balk "Op deze pagina:" van Spelers heeft één link, naar de kaart.
+- **Waarom:** de lijst met doelpuntenmakers is met zestien tot twintig rijen te lang voor een pagina met negen kaarten, en het is de kaart die het meest groeit.
+  De top 5 laat zien wie er bovenaan staat en is kort genoeg om als afbeelding te delen.
+  Wie de rest wil, heeft één tik nodig.
+  Gelijke plekken horen er helemaal bij: de zesde speler met evenveel doelpunten als de vijfde weglaten, zou een willekeurige keuze zijn.
+  Een grens van acht rijen, zoals de kaart ooit had, geeft hetzelfde probleem een andere plek.
+  Het gedeelde stuk maakt dat de top 5 en de lijst nooit uit elkaar lopen: ze komen uit dezelfde telling (`topScorersOf`), en de top 5 is er het begin van (`topFiveOf`).
+- **Nadeel:** de kaart op Statistieken heeft een wisselende hoogte, want de gelijke plekken tellen mee: in een seizoen waarin iedereen één doelpunt maakte, staan alle spelers erin.
+  De afbeelding van de kaart bevat ook de link "Alle doelpuntenmakers", als tekst, omdat de knop de kaart kopieert.
+  De balk "Op deze pagina:" van Spelers heeft één link, naar de enige kaart; hij krijgt er meer als de extra's van #403 en #407 erbij komen.
+- **Alternatieven:** de volledige lijst houden en de kaart inklappen met een knop (kost JavaScript of een extra adres, en de afbeelding toont dan de hele lijst); de top 5 op een vaste hoogte afkappen en een speler met evenveel doelpunten weglaten (willekeurig); de vijf met gelijkstaanden tot hoogstens acht rijen, zoals de kaart eerder had (een grens die de gelijke plekken toch afkapt); Spelers alleen met de lijst, zonder balk met subpagina's (de pagina is dan alleen via de link te vinden).
+- **Later:** zie _De kaart met topscorers toont alle doelpuntenmakers_ (26 oktober 2026): sinds 31 oktober 2026 toont `/statistieken` weer de top 5, nu met alle gelijke plekken en zonder grens, en de volledige lijst staat op `/statistieken/spelers`.
 
 ## Importer
 
@@ -6956,6 +6988,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De telling blijft op één plek, `topScorersOf`, want #333 laat haar later per speler in plaats van per naam tellen.
 - **Alternatieven:** de beste vijf houden, met gelijkstaanden (korter, maar de rest blijft onzichtbaar); de beste vijf met een knop voor de rest (extra stap en meer code, terwijl de lijst kort genoeg is).
 - **Later:** de kaart heet sinds 26 oktober 2026 "Doelpuntenmakers" en het aantal spelers staat sinds die dag onder de kop en niet meer onder de tabel; zie _De kaart heet Doelpuntenmakers, met het aantal spelers onder de kop_.
+- **Later:** zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_ (31 oktober 2026): de kaart op `/statistieken` toont de top 5, met alle gelijke plekken; alle doelpuntenmakers staan op `/statistieken/spelers`.
 - **Later:** zie _Op /wedstrijden hebben de kaarten met cijfers een zacht en een warm vlak, en de uitslagen staan in de hoofdkolom_.
   De zijbalk heet nu "De stand, de ranglijsten en de doelpunten per kwartier".
 
@@ -7005,6 +7038,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De namen in de code (`TopScorers`, `topScorersOf`, `TopScorersTable`) blijven, omdat bezoekers ze niet zien.
 - **Alternatieven:** "Topscorers" houden (kort en bekend, maar niet meer waar); "Wie scoorde" (dichter bij de spreektaal, maar minder netjes als kop).
 - **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de kaart en zijn ankers `doelpuntenmakers` en `topscorers` staan straks op `/statistieken`.
+- **Later:** zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_ (31 oktober 2026): de kaart staat met zijn ankers op `/statistieken` als top 5 en op `/statistieken/spelers` met alle spelers.
 
 ### De scheiding in een ring is een lichte omlijning, in licht en in donker
 

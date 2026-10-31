@@ -48,6 +48,14 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/statistieken/kies', status: 200 },
   { path: '/statistieken/2099-00', status: 404 },
   { path: '/statistieken/onzin', status: 404 },
+  // The page Spelers of Statistieken, with the same set of addresses.
+  { path: '/statistieken/spelers', status: 200 },
+  { path: `/statistieken/spelers/${earlierSeasonSlug()}`, status: 200 },
+  { path: `/statistieken/spelers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
+  { path: '/statistieken/spelers/kies?seizoen=onzin', status: 200 },
+  { path: '/statistieken/spelers/kies', status: 200 },
+  { path: '/statistieken/spelers/2099-00', status: 404 },
+  { path: '/statistieken/spelers/onzin', status: 404 },
   // The podcasts: all, one (with the card about it), both (which is all), the second page, and
   // the addresses that say "niet gevonden": an unknown podcast, a podcast given twice and a
   // page that is wrong.

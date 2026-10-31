@@ -16,3 +16,11 @@ export const statisticsShortcuts = [
   { href: '#hoe-de-wedstrijden-verlopen', label: 'Hoe wedstrijden verlopen' },
   { href: '#uitersten', label: 'Uitersten' },
 ] as const
+
+/**
+ * The link in the bar under the header of /statistieken/spelers: the card with the goal
+ * scorers, the one card on the page. The id is that of its heading in
+ * app/statistieken/spelers/players-page.tsx (a test checks it). It is the same card for a
+ * season that is over, so the bar is too.
+ */
+export const playersShortcuts = [{ href: '#doelpuntenmakers', label: 'Doelpuntenmakers' }] as const

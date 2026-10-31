@@ -817,6 +817,18 @@ export function topScorersOf(matches: PublicMatch[]): TopScorer[] {
   }))
 }
 
+/** How many places the short list of the goal scorers has. */
+export const topScorersPlaces = 5
+
+/**
+ * The first places of the list of scorers: everyone who stands in the first five places.
+ * Players who share a place all show, so a tie for fifth place gives more than five names, and
+ * a tie that starts before it (three players in fourth place) keeps all of them. The list is
+ * in the order of `topScorersOf`, so these are its first rows.
+ */
+export const topFiveOf = (scorers: TopScorer[]): TopScorer[] =>
+  scorers.filter((scorer) => scorer.position <= topScorersPlaces)
+
 function addToRow(row: FlowRow, goalsFor: number, goalsAgainst: number) {
   row.matches += 1
 

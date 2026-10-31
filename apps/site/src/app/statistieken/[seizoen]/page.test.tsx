@@ -103,6 +103,17 @@ describe('the page of an earlier season, /statistieken/2025-26', () => {
     ])
   })
 
+  it('links the card Doelpuntenmakers to the page Spelers of the same season', async () => {
+    const goal = matchData.matches.flatMap((match) => match.goals).find((item) => item.ours)!
+
+    vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches: [{ ...earlierMatch, goals: [goal] }] })
+
+    const html = await render()
+
+    expect(html).toContain('<p><a href="/statistieken/spelers/2025-26">Alle doelpuntenmakers</a></p>')
+    expect(html).not.toContain('href="/statistieken/spelers"')
+  })
+
   describe('the streaks', () => {
     const section = (html: string) => html.slice(html.indexOf('id="reeksen"'), html.indexOf('id="thuis-en-uit"'))
     const columns = (card: string) =>
