@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
 import { Link } from '../link/Link'
+import { type Size, sizeClassName } from '../size'
 
 export type PaginationProps = Omit<ComponentPropsWithoutRef<'nav'>, 'aria-label' | 'aria-labelledby' | 'children'> & {
   /** The number of the page the visitor is on, counting from 1. */
@@ -17,6 +18,8 @@ export type PaginationProps = Omit<ComponentPropsWithoutRef<'nav'>, 'aria-label'
    * The address of the previous page. Leave it out on the first page: then there is no link.
    */
   previousHref?: string | undefined
+  /** `default` is the standard size. `small` makes the two links lower. */
+  size?: Size
   /** The number of pages in all. */
   total: number
 }
@@ -28,8 +31,17 @@ export type PaginationProps = Omit<ComponentPropsWithoutRef<'nav'>, 'aria-label'
  * first page there is no previous link and on the last page no next link; the text stays in the
  * middle either way.
  */
-export const Pagination = ({ className, current, label, nextHref, previousHref, total, ...props }: PaginationProps) => (
-  <nav {...props} aria-label={label} className={classNames('hf-pagination', className)}>
+export const Pagination = ({
+  className,
+  current,
+  label,
+  nextHref,
+  previousHref,
+  size = 'default',
+  total,
+  ...props
+}: PaginationProps) => (
+  <nav {...props} aria-label={label} className={classNames('hf-pagination', sizeClassName(size), className)}>
     {previousHref === undefined ? null : (
       <Link className="hf-pagination-link hf-pagination-previous" href={previousHref} icon="arrow-left" rel="prev">
         Vorige

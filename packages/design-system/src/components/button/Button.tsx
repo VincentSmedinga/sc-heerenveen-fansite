@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { classNames } from '../classNames'
 import { attachIcon } from '../icon/attachIcon'
 import { Icon } from '../icon/Icon'
+import { type Size, sizeClassName } from '../size'
 
 /**
  * The looks a Button can have: the filled one, and the soft one for an action next to the main
@@ -33,6 +34,10 @@ export type ButtonProps = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
    */
   icon?: ButtonIcon
   /**
+   * `default` is the standard size. `small` is lower, for a button next to the content.
+   */
+  size?: Size
+  /**
    * What the button does. It is required: a button in a form sends the form unless it says
    * otherwise.
    */
@@ -43,11 +48,20 @@ export type ButtonType = (typeof buttonTypes)[number]
 
 /**
  * A button. Its text says what it does ("Versturen"), also on its own. button.css gives it its
- * look; the filled button has no class of its own, the soft one has `hf-button-soft`.
+ * look; the filled button has no class of its own, the soft one has `hf-button-soft`, and the
+ * small size has `hf-size-small`.
  */
-export const Button = ({ appearance = 'default', children, className, icon, type, ...props }: ButtonProps) => (
+export const Button = ({
+  appearance = 'default',
+  children,
+  className,
+  icon,
+  size = 'default',
+  type,
+  ...props
+}: ButtonProps) => (
   <button
-    className={classNames(appearance !== 'default' && `hf-button-${appearance}`, className)}
+    className={classNames(appearance !== 'default' && `hf-button-${appearance}`, sizeClassName(size), className)}
     type={type}
     {...props}
   >

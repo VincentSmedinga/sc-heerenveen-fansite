@@ -2142,6 +2142,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De regels bij een component zonder eigen klasse volgen `list.css`: een element in `hf.base`.
 - **Alternatieven:** de gedeelde regel in elk van de drie bestanden herhalen; of klassen (`hf-input`) en de regels naar `hf.components` verplaatsen.
   Dan is de ruwe `input` zonder component niet meer opgemaakt, en dat is de bedoeling van `base/` niet.
+- **Later:** een kleine maat van knoppen en velden (31 oktober 2026, _Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat_) is de eerste klasse op deze elementen: `Button`, `Input` en `Select` zetten `hf-size-small` bij `size="small"`, met de regels daarvoor in `hf.components`.
+  De standaardmaat, en dus de opmaak van deze beslissing, blijft zoals hij was.
 
 ### Een SegmentedControl bewaart niets, en de ingedrukte knop is gevuld
 
@@ -2827,6 +2829,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alle onderdelen in één pull request omzetten (te groot om te reviewen; het is nu in drie issues verdeeld).
 - **Later:** de omzetting is klaar: #480 en #481 hebben alle bestanden omgezet, de lijst in de test is weg en de test bewaakt ook de CSS van de documentatie, `docs/docs.css`.
   De ruimte onder de menubalk van de navigatie, een eigen maat van 7 pixels, is nu ook `s` (1 pixel meer), en haar custom property heet nu `--hf-navigation-space-end`, zodat de test hem bewaakt.
+
+### Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** `Button`, `Input`, `Select`, `Pagination` en `ThemeButton` hebben één gedeelde eigenschap, `size`, met de waarden `default` en `small`, en dezelfde klasse `hf-size-small` (`components/size.ts`).
+  Zonder `size` verandert niets: de standaardmaat heeft geen klasse.
+  De kleine maat is 2,25 rem hoog (36 pixels), uit het token `--hf-size-control-small` (`tokens/size.css`), met `--hf-space-xs` boven en onder, `--hf-space-s` opzij (bij een knop) en de lettergrootte van Meta, een stap onder die van Tekst.
+  De ronde themaknop is dan 36 bij 36 pixels, met een pictogram van 22 pixels, en een open lijst van een `Select` met de opmaak van de site heeft opties van dezelfde hoogte.
+  Wanneer welke maat: de standaardmaat voor formulieren, voor wat op een telefoon de hoofdhandeling is en voor wat alleen staat; de kleine maat voor secundaire bedieningselementen naast de inhoud, zoals een kiezer of een schakelaar in een zijkolom of een werkbalk.
+  Het hoofdstuk Maten van knoppen en velden in Storybook zegt dat in woorden en toont beide maten onder elkaar.
+  Dit is een afwijking van de regel dat velden en knoppen 44 pixels hoog zijn (`docs/toegankelijkheid.md`), en die is nu beperkt tot het gebruik van de kleine maat.
+- **Waarom:** de seizoenskiezer en de schakelaar op Statistieken zijn te opvallend naast de inhoud als ze 44 pixels hoog zijn.
+  36 pixels haalt WCAG 2.5.8 (24 bij 24 pixels) ruim, en is dezelfde maat als een link in de balk "Op deze pagina:" (zie _Een link in de balk is 36 pixels hoog_).
+  Eén eigenschap met één naam houdt de keuze eenvoudig, en een klasse in plaats van een eigen klasse per component houdt de CSS op één regel per element.
+  De hoogte staat in rem, zodat hij met de lettergrootte van de bezoeker meegroeit.
+- **Gevolg:** op `Input` en `Select` neemt `size` de plaats in van het HTML-attribuut `size` (een breedte in tekens of een aantal regels), dat de site nergens gebruikt.
+  `Textarea` heeft geen kleine maat: het is een blok met regels en heeft geen hoogte van 44 pixels.
+  De ronde knop van `Card` (`card-share.css`) en de knop naar boven (`top-link.css`) houden hun 44 pixels: ze staan in een hoek van een kaart of de pagina, waar een vinger ze moet raken, en er is geen plek waar ze lager moeten.
+  Niets op de site verschuift: geen pagina gebruikt de kleine maat.
+  De `SegmentedControl` (#500) krijgt zijn kleine maat in zijn eigen issue, op deze eigenschap, en de seizoenskiezer volgt in het ontwerp van de werkbalk (#501).
+- **Alternatieven:** een eigen klasse per component, zoals `hf-button-small` (meer klassen voor hetzelfde).
+  Een derde maat, groot (niemand vraagt erom).
+  Een kleine maat van 32 pixels (haalt 2.5.8 ook, maar laat minder ruimte voor een vinger).
+  Alle bedieningselementen kleiner maken (een formulier op een telefoon heeft de 44 pixels nodig).
 
 ## Site
 

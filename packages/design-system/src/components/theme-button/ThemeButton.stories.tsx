@@ -3,6 +3,8 @@ import { expect, userEvent } from 'storybook/test'
 
 import preview from '#.storybook/preview'
 
+import type { Size } from '../size'
+
 import { Page } from '../page/Page'
 import { ThemeButton } from './ThemeButton'
 
@@ -32,6 +34,8 @@ const meta = preview.meta({
           'Van maan naar zon krimpt de schijf weer, en de stralen komen uit de schijf naar buiten.',
           'Wat een schermlezer hoort, verandert niet: dat is de naam en of de knop is ingedrukt.',
           '',
+          'Met `size="small"` is de knop kleiner, voor een drukke header; in het hoofdstuk Maten van knoppen en velden staat wanneer je welke maat kiest.',
+          '',
           'De knop is gemaakt voor het donkerblauw van de header en staat daar in de eerste rij, rechts naast het logo.',
           'Het component bewaart het thema niet: de pagina geeft `dark` en handelt de klik af.',
         ].join('\n'),
@@ -42,12 +46,14 @@ const meta = preview.meta({
   title: 'Componenten/Navigatie/ThemeButton',
 })
 
-const inHeader = (dark: boolean) => () => (
-  <Page.Header>
-    <span />
-    <ThemeButton dark={dark} label="Donker" />
-  </Page.Header>
-)
+const inHeader =
+  (dark: boolean, size: Size = 'default') =>
+  () => (
+    <Page.Header>
+      <span />
+      <ThemeButton dark={dark} label="Donker" size={size} />
+    </Page.Header>
+  )
 
 export const Light = meta.story({
   globals: { theme: 'light' },
@@ -59,6 +65,18 @@ export const Dark = meta.story({
   globals: { theme: 'dark' },
   name: 'Donker',
   render: inHeader(true),
+})
+
+export const SmallLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Kleine maat, licht',
+  render: inHeader(false, 'small'),
+})
+
+export const SmallDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Kleine maat, donker',
+  render: inHeader(true, 'small'),
 })
 
 const Example = ({ start }: { start: boolean }) => {

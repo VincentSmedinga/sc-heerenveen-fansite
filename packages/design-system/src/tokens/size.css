@@ -1,0 +1,12 @@
+/*
+ * Size tokens: the height of the small size of buttons and fields. The standard size is 2.75rem
+ * (44 pixels) and is written where it is used. The small size is lower than the 44 pixels of the
+ * standard, and still well above the 24 by 24 pixels that WCAG 2.5.8 asks for. The chapter Maten
+ * van knoppen en velden in Storybook says when to take which.
+ */
+
+@layer hf.tokens {
+  :root {
+    --hf-size-control-small: 2.25rem;
+  }
+}
