@@ -1,8 +1,10 @@
 // Decides whether CI has to run the checks of the site: the smoke test and the accessibility
-// check (the e2e tests), about 150 of the 268 seconds of a run. CI starts it as a step of the
-// job "Lint, typecheck, test and build" and gives the later steps an `if` on its output,
-// `site`. The decision "CI slaat de controles van de site over bij wijzigingen die ze niet
-// raken" in docs/beslissingen.md says why.
+// check (the e2e tests), about 400 of the 850 machine seconds of a run. CI starts it as the job
+// "Decide which checks to run" and gives the jobs of the site and of the stories an `if` on its
+// outputs, `site` and `stories`. The job "Lint, typecheck, test and build" (scripts/ci-gate.js)
+// fails when one of those jobs ran and shouldn't have, or was skipped and shouldn't have been.
+// The decision "CI slaat de controles van de site over bij wijzigingen die ze niet raken" in
+// docs/beslissingen.md says why.
 //
 //   node scripts/ci-changes.js
 //
@@ -18,7 +20,7 @@
 // 5. A package.json or a tsconfig, wherever it is, runs them too: a dependency or a compiler
 //    option can change what the site builds, also from inside a skippable folder.
 //
-// The axe check of the stories of the design system (`pnpm test:stories`, 44 seconds in CI) is
+// The axe check of the stories of the design system (`pnpm test:stories`, 80 seconds in CI) is
 // decided here too, by `decideStories`, as the output `stories`. It follows the same first
 // three rules, then runs only if a file that can change a story changed (see `storiesRules`).
 //
