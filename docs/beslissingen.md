@@ -7618,12 +7618,14 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De keuze in het adres is te delen, werkt zonder JavaScript en kost geen cookie.
   De drie kaarten die de Eredivisie blijven, rusten op iets wat de beker niet heeft, en een zin die dat zegt, zou de kaarten alleen langer maken.
 - **Hoe:** de keuze (`CompetitionChoice` in `src/competition.ts`) is het laatste argument van de hulpfuncties in `src/matches.ts`, en een kaart krijgt haar als eigenschap.
-  De wedstrijden van een seizoen blijven in één cache (`getMatchData`), en de keuze filtert die lijst bij het tellen.
-  De cache heeft dus geen sleutel per keuze nodig, en de ene keuze kan de andere niet overschrijven; een test laat zien dat beide keuzes dezelfde gegevens lezen.
+  De wedstrijden van een seizoen blijven in één gecachete lezing per seizoen (`getMatchData`), en de keuze filtert die lijst bij het tellen.
+  De cache heeft dus geen sleutel per keuze nodig, en de ene keuze kan de andere niet overschrijven: een test laat zien dat beide keuzes dezelfde, bevroren gegevens lezen en er niets aan veranderen.
+  Het issue vroeg een sleutel per keuze; de projecteigenaar nam dit over op 31 oktober 2026.
   `SegmentedLinks` is een tweede onderdeel naast `SegmentedControl`, met dezelfde opmaak, omdat knoppen met `aria-pressed` een JavaScript-handler nodig hebben en een keuze in het adres links is.
   `Page.Title` laat twee bedieningen aan het einde bij elkaar staan, en `SeasonPicker` kreeg `fields` voor verborgen velden.
 - **Nadeel:** het menu bovenaan de site heeft vaste adressen en houdt het seizoen en de keuze niet vast, want het hoort bij elke pagina van de site.
   Wie van Statistieken via het menu naar Spelers gaat, begint weer bij het lopende seizoen en alle wedstrijden.
+  Dat valt buiten dit besluit, op verzoek van de projecteigenaar (31 oktober 2026): de links op de pagina's zelf houden ze vast, en het menu krijgt een eigen issue.
 - **Alternatieven:** standaard alleen de Eredivisie, zoals de meeste sites (een doelpunt in de beker telt dan niet).
   De keuze in een cookie (niet te delen, en een verborgen toestand).
   Een `SegmentedControl` met knoppen en JavaScript (werkt niet zonder).

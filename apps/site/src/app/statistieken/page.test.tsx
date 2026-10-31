@@ -1861,6 +1861,19 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
   })
 
   it('reads the same data for both choices and keeps nothing between them: the choice only filters', async () => {
+    // Frozen: a choice that changed the cached data would throw, not change the other choice.
+    const freeze = <T extends object>(value: T): T => {
+      for (const inner of Object.values(value)) {
+        if (typeof inner === 'object' && inner !== null) {
+          freeze(inner)
+        }
+      }
+
+      return Object.freeze(value)
+    }
+
+    vi.mocked(getMatchData).mockResolvedValue(freeze(structuredClone(matchData)))
+
     const first = await render()
 
     await render(eredivisie)
