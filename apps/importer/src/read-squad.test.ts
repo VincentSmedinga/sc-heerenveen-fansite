@@ -32,6 +32,16 @@ function problemOf(text: string): string {
   return read.message
 }
 
+function warningsOf(text: string): string[] {
+  const read = readSquad(text)
+
+  if (read.kind === 'error') {
+    throw new Error(read.message)
+  }
+
+  return read.warnings
+}
+
 const keeper = '|-\n! colspan="13" align="left" |Doelmannen'
 
 describe('the title of the page', () => {
@@ -86,6 +96,10 @@ describe('the page of the squad', () => {
       position: 'doelman',
       searchTerm: 'Klaverboer',
       shirtNumber: 22,
+      stats: [
+        { appearances: 9, assists: 0, competition: 'Eredivisie', goals: 0 },
+        { appearances: 0, assists: 0, competition: 'KNVB Beker', goals: 0 },
+      ],
       wikipediaPage: 'Bernt Klaverboer',
     })
     expect(players.find((player) => player.name === 'Sam Kersten')).toMatchObject({ shirtNumber: 4 })
@@ -97,6 +111,10 @@ describe('the page of the squad', () => {
       position: 'verdediger',
       searchTerm: 'Willemsen',
       shirtNumber: 3,
+      stats: [
+        { appearances: 9, assists: 0, competition: 'Eredivisie', goals: 0 },
+        { appearances: 0, assists: 0, competition: 'KNVB Beker', goals: 0 },
+      ],
       wikipediaPage: 'Maas Willemsen',
     })
   })
@@ -107,6 +125,10 @@ describe('the page of the squad', () => {
       position: 'doelman',
       searchTerm: 'Kremers',
       shirtNumber: null,
+      stats: [
+        { appearances: 0, assists: 0, competition: 'Eredivisie', goals: 0 },
+        { appearances: 0, assists: 0, competition: 'KNVB Beker', goals: 0 },
+      ],
       wikipediaPage: 'Sten Kremers',
     })
   })
@@ -119,10 +141,32 @@ describe('the page of the squad', () => {
     })
   })
 
-  it('keeps nothing but the name, the position, the number, the search term and the page', () => {
+  it('keeps nothing but the name, the position, the number, the search term, the numbers and the page', () => {
     for (const player of players) {
-      expect(Object.keys(player).sort()).toEqual(['name', 'position', 'searchTerm', 'shirtNumber', 'wikipediaPage'])
+      expect(Object.keys(player).sort()).toEqual([
+        'name',
+        'position',
+        'searchTerm',
+        'shirtNumber',
+        'stats',
+        'wikipediaPage',
+      ])
     }
+  })
+
+  it('reads the appearances, goals and assists of both competitions, and not the total', () => {
+    expect(players.find((player) => player.name === 'Oliver Braude')?.stats).toEqual([
+      { appearances: 8, assists: 0, competition: 'Eredivisie', goals: 2 },
+      { appearances: 0, assists: 0, competition: 'KNVB Beker', goals: 0 },
+    ])
+    expect(players.find((player) => player.name === 'Levi Smans')?.stats).toMatchObject([
+      { appearances: 7, assists: 3, competition: 'Eredivisie', goals: 0 },
+      {},
+    ])
+  })
+
+  it('has no warning for the table as it is', () => {
+    expect(warningsOf(page)).toEqual([])
   })
 
   it('has no markup, flag, link or statistic in a name', () => {
@@ -176,6 +220,78 @@ describe('the ways a name is written', () => {
     expect(playersOf(pageWith(`${keeper}\n|-\n|1\n|{{NL-VLAG}}\n|[[Pim Verbeek]]\n|2029`))).toMatchObject([
       { name: 'Pim Verbeek', shirtNumber: 1 },
     ])
+  })
+})
+
+describe('the numbers of a player', () => {
+  const heading = (...names: string[]) => `! ${names.join('\n! ')}`
+
+  /** A table with the headings of the real page, and one player with these numbers. */
+  function tableWith(numbers: string, ...names: string[]) {
+    const [first = 'Eredivisie', second = 'KNVB Beker'] = names
+
+    return `== Selectie 2026/27 ==\n=== Spelers ===\n{| class="wikitable"\n|-\n! Nr.\n! Nat.\n! Naam\n! Contract tot\n${heading(`colspan="3"| <small>${first}</small>`, `colspan="3"| <small>${second}</small>`, 'colspan="3"| <small>Totaal</small>')}\n${keeper}\n|-\n|'''1'''||{{NL-VLAG}}|| align="left" |[[Pim Verbeek]]||2029||${numbers}\n|}\n`
+  }
+
+  it('reads a dash as zero', () => {
+    expect(playersOf(tableWith('-||-||-||3||1||-||3||1||0'))[0]?.stats).toEqual([
+      { appearances: 0, assists: 0, competition: 'Eredivisie', goals: 0 },
+      { appearances: 3, assists: 0, competition: 'KNVB Beker', goals: 1 },
+    ])
+  })
+
+  it('reads an en dash and an em dash as zero too', () => {
+    expect(playersOf(tableWith('–||—||-||1||2||3||1||2||3'))[0]?.stats[0]).toMatchObject({
+      appearances: 0,
+      assists: 0,
+      goals: 0,
+    })
+  })
+
+  it('gives no numbers for a competition with an empty cell, and keeps the other', () => {
+    const read = readSquad(tableWith('4||1||2||||||||4||1||2'))
+
+    expect(read).toMatchObject({ kind: 'read', warnings: [] })
+    expect(playersOf(tableWith('4||1||2||||||||4||1||2'))[0]?.stats).toEqual([
+      { appearances: 4, assists: 2, competition: 'Eredivisie', goals: 1 },
+    ])
+    expect(playersOf(tableWith('4||1||||0||0||0||4||1||2'))[0]?.stats).toEqual([
+      { appearances: 0, assists: 0, competition: 'KNVB Beker', goals: 0 },
+    ])
+  })
+
+  it('gives no numbers for a row of three cells, as in a table without numbers, and no warning', () => {
+    const text = tableWith('x').replace('||2029||x', '')
+
+    expect(playersOf(text)[0]?.stats).toEqual([])
+    expect(warningsOf(text)).toEqual([])
+  })
+
+  it('leaves out a competition with a value it does not know, with a warning', () => {
+    const text = tableWith('4||twee||2||1||0||0||5||2||2')
+
+    expect(playersOf(text)[0]?.stats).toEqual([{ appearances: 1, assists: 0, competition: 'KNVB Beker', goals: 0 }])
+    expect(warningsOf(text)).toEqual(["Pim Verbeek: the Eredivisie numbers have a value we do not know: 'twee'"])
+  })
+
+  it('leaves out the numbers of a row with a different number of cells, with a warning', () => {
+    const text = tableWith('4||1||2||1||0||0')
+
+    expect(playersOf(text)[0]?.stats).toEqual([])
+    expect(warningsOf(text)).toEqual(['Pim Verbeek: the row has 10 cells, not 13, so no numbers are read'])
+  })
+
+  it('reads no numbers when the headings are not Eredivisie and then KNVB Beker, with a warning', () => {
+    const text = tableWith('4||1||2||1||0||0||5||1||2', 'KNVB Beker', 'Eredivisie')
+
+    expect(playersOf(text)[0]).toMatchObject({ name: 'Pim Verbeek', stats: [] })
+    expect(warningsOf(text)).toEqual([
+      'the squad table does not have the columns Eredivisie and KNVB Beker in that order, so no numbers are read',
+    ])
+  })
+
+  it('still reads the players when the numbers have changed shape', () => {
+    expect(playersOf(tableWith('?', 'Competitie', 'Totaal'))).toHaveLength(1)
   })
 })
 

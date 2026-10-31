@@ -13,6 +13,7 @@ import {
   matchGoals,
   matchPageKinds,
   players,
+  playerSeasonStats,
   sources,
   staff,
   standings,
@@ -39,6 +40,8 @@ export type PublicItem = Awaited<ReturnType<typeof listRecentItems>>[number]
 export type PublicMatch = Awaited<ReturnType<typeof listSeasonMatches>>[number]
 
 export type PublicPlayer = Awaited<ReturnType<typeof listSquad>>[number]
+
+export type PublicPlayerStats = Awaited<ReturnType<typeof listSeasonPlayerStats>>[number]
 
 export type PublicPodcast = Awaited<ReturnType<typeof listPodcasts>>[number]
 
@@ -464,6 +467,35 @@ export async function listSeasonMatches(db: Database, season: string) {
         stoppageMinutes: goal.stoppageMinutes,
       })),
   }))
+}
+
+/**
+ * The numbers of the players in a season, such as `2026/27`: one row per player and
+ * competition, with the appearances (also as a substitute), goals and assists the squad table
+ * of the Dutch Wikipedia gives. The rows come in the order of the player's name and then the
+ * competition (Eredivisie before KNVB Beker). A player without numbers in a competition has no
+ * row for it, and a player who left the squad keeps his rows (`inSquad` says whether he is
+ * still in it). There is no total over the competitions: whoever shows one adds the rows. The
+ * player is given by `playerId`, the same `id` as `match_goals.player_id`, with the name, the
+ * position and the Wikipedia page of the player.
+ */
+export function listSeasonPlayerStats(db: Database, season: string) {
+  return db
+    .select({
+      appearances: playerSeasonStats.appearances,
+      assists: playerSeasonStats.assists,
+      competition: playerSeasonStats.competition,
+      goals: playerSeasonStats.goals,
+      inSquad: players.inSquad,
+      name: players.name,
+      playerId: players.id,
+      position: players.position,
+      wikipediaPage: players.wikipediaPage,
+    })
+    .from(playerSeasonStats)
+    .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
+    .where(eq(playerSeasonStats.season, season))
+    .orderBy(asc(players.name), asc(players.id), asc(playerSeasonStats.competition))
 }
 
 /**

@@ -1,6 +1,15 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { feeds, matches, matchGoals, players, sources, squadImports, wikipediaPages } from '@fansite/db/schema'
+import {
+  feeds,
+  matches,
+  matchGoals,
+  players,
+  playerSeasonStats,
+  sources,
+  squadImports,
+  wikipediaPages,
+} from '@fansite/db/schema'
 import { madeUpSquad } from '@fansite/db/seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
@@ -43,6 +52,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   for (const table of [
+    'player_season_stats',
     'players',
     'squad_imports',
     'wikipedia_pages',
@@ -125,9 +135,15 @@ describe('the first import, into an empty database', () => {
       kind: 'imported',
       players: { added: 25, left: 0, unchanged: 0, updated: 0 },
       season,
+      stats: { added: 50, unchanged: 0, updated: 0 },
       warnings: [],
     })
-    expect(formatSquadReport(report)).toBe('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad')
+    expect(formatSquadReport(report)).toBe(
+      [
+        'Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad',
+        'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
+      ].join('\n'),
+    )
 
     const stored = await database.db.select().from(players).orderBy(asc(players.id))
 
@@ -245,7 +261,12 @@ describe('reading again', () => {
     const report = await importAt(server, later)
 
     expect(report).toMatchObject({ kind: 'imported', players: { added: 1, left: 1, unchanged: 23, updated: 1 } })
-    expect(formatSquadReport(report)).toBe('Squad 2026/27: 1 new, 1 updated, 23 unchanged, 1 left the squad')
+    expect(formatSquadReport(report)).toBe(
+      [
+        'Squad 2026/27: 1 new, 1 updated, 23 unchanged, 1 left the squad',
+        'Squad 2026/27: numbers of the players: 2 new, 0 updated, 48 unchanged',
+      ].join('\n'),
+    )
 
     const after = await database.db.select().from(players).orderBy(asc(players.id))
     const named = (name: string) => after.find((player) => player.name === name)
@@ -561,6 +582,245 @@ describe('a read that fails a check or a page that has changed', () => {
   })
 })
 
+describe('the numbers of the players', () => {
+  /** The page with the row of this player written again, with these cells after the contract */
+  function withNumbers(text: string, name: string, shirt: number, numbers: string) {
+    return text
+      .split(/(?=^\|-)/mu)
+      .map((row) =>
+        row.includes(`[[${name}]]`)
+          ? `|-\n|'''${shirt}'''||{{NL-VLAG}}|| align="left" |[[${name}]]||2029||${numbers}\n`
+          : row,
+      )
+      .join('')
+  }
+
+  async function statsOf(name: string) {
+    return database.db
+      .select({
+        appearances: playerSeasonStats.appearances,
+        assists: playerSeasonStats.assists,
+        competition: playerSeasonStats.competition,
+        goals: playerSeasonStats.goals,
+        updatedAt: playerSeasonStats.updatedAt,
+      })
+      .from(playerSeasonStats)
+      .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
+      .where(eq(players.name, name))
+      .orderBy(asc(playerSeasonStats.competition))
+  }
+
+  /** A match that was played, with the Eredivisie goals of the squad table. */
+  async function playMatchWithTheGoalsOfTheTable() {
+    const rows = await database.db
+      .select({ goals: playerSeasonStats.goals, name: players.name, playerId: players.id })
+      .from(playerSeasonStats)
+      .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
+      .where(eq(playerSeasonStats.competition, 'Eredivisie'))
+    const scorers = rows.flatMap((row) => Array.from({ length: row.goals }, () => row))
+    const [{ insertId }] = await database.db.insert(matches).values({
+      competition: 'Eredivisie',
+      goalsAgainst: 0,
+      goalsFor: scorers.length,
+      home: true,
+      kickoffAt: new Date('2026-10-24T18:45:00Z'),
+      matchDate: '2026-10-24',
+      opponent: 'Testdorp FC',
+      round: 'Speelronde 1',
+      season,
+      status: 'played',
+    })
+
+    await database.db.insert(matchGoals).values(
+      scorers.map((scorer, index) => ({
+        matchId: insertId,
+        minute: index + 1,
+        ours: true,
+        player: scorer.name,
+        playerId: scorer.playerId,
+      })),
+    )
+
+    return insertId
+  }
+
+  it('stores the appearances, goals and assists of each player in each competition', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    expect(await database.db.select().from(playerSeasonStats)).toHaveLength(50)
+    expect(await statsOf('Luca Oyen')).toEqual([
+      { appearances: 8, assists: 1, competition: 'Eredivisie', goals: 2, updatedAt: first },
+      { appearances: 0, assists: 0, competition: 'KNVB Beker', goals: 0, updatedAt: first },
+    ])
+    expect((await database.db.select().from(playerSeasonStats)).every((row) => row.season === season)).toBe(true)
+  })
+
+  it('gives a player without numbers, an empty cell, no row, and a dash is zero', async () => {
+    const text = withNumbers(
+      withNumbers(original, 'Luca Oyen', 11, '||||||||||||||||'),
+      'Jacob Trenskow',
+      20,
+      '-||-||-||2||1||-||2||1||0',
+    )
+    const { server } = await serve(text)
+
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({
+      kind: 'imported',
+      players: { added: 25 },
+      stats: { added: 48, unchanged: 0, updated: 0 },
+      warnings: [],
+    })
+    expect(await statsOf('Luca Oyen')).toEqual([])
+    expect(await statsOf('Jacob Trenskow')).toEqual([
+      { appearances: 0, assists: 0, competition: 'Eredivisie', goals: 0, updatedAt: first },
+      { appearances: 2, assists: 0, competition: 'KNVB Beker', goals: 1, updatedAt: first },
+    ])
+    expect(await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))).toHaveLength(1)
+  })
+
+  it('updates the numbers in the next run, without double rows, and moves the moment only for a change', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+    page.squad = withNumbers(original, 'Luca Oyen', 11, '9||3||1||1||1||0||10||4||1')
+
+    const later = new Date(first.getTime() + hours(1))
+    const report = await importAt(server, later)
+
+    expect(report).toMatchObject({ kind: 'imported', stats: { added: 0, unchanged: 48, updated: 2 } })
+    expect(await database.db.select().from(playerSeasonStats)).toHaveLength(50)
+    expect(await statsOf('Luca Oyen')).toEqual([
+      { appearances: 9, assists: 1, competition: 'Eredivisie', goals: 3, updatedAt: later },
+      { appearances: 1, assists: 0, competition: 'KNVB Beker', goals: 1, updatedAt: later },
+    ])
+    expect((await statsOf('Dylan Vente'))[0]?.updatedAt).toEqual(first)
+
+    // The same page again changes nothing, also not the moment.
+    const again = await importAt(server, new Date(first.getTime() + hours(2)))
+
+    expect(again).toMatchObject({ kind: 'imported', stats: { added: 0, unchanged: 50, updated: 0 } })
+    expect(await database.db.select().from(playerSeasonStats)).toHaveLength(50)
+    expect((await statsOf('Luca Oyen'))[0]?.updatedAt).toEqual(later)
+  })
+
+  it('keeps the last numbers of a player who leaves the table', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+    page.squad = without(original, 'Marko Farji')
+    await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))).toMatchObject([
+      { inSquad: false },
+    ])
+    expect(await statsOf('Marko Farji')).toEqual([
+      { appearances: 4, assists: 0, competition: 'Eredivisie', goals: 1, updatedAt: first },
+      { appearances: 0, assists: 0, competition: 'KNVB Beker', goals: 0, updatedAt: first },
+    ])
+    expect(await database.db.select().from(playerSeasonStats)).toHaveLength(50)
+  })
+
+  it('keeps the numbers of a player whose cells become empty', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+    page.squad = withNumbers(original, 'Luca Oyen', 11, '||||||||||||||||')
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', stats: { added: 0, unchanged: 48, updated: 0 } })
+    expect(await statsOf('Luca Oyen')).toHaveLength(2)
+  })
+
+  it('leaves a player out, with a warning, when his row is already taken by another player of the table', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+    // One player is known by the page, another by the name: both would land on the same row.
+    page.squad = original
+      .replace('[[Sam Kersten]]', '[[Sam Kersten|Sammie Kersten]]')
+      .replace(
+        '\n|}',
+        "\n|-\n|'''40'''||{{NL-VLAG}}|| align=\"left\" |[[Anderen Pagina|Sam Kersten]]||2028||1||0||0||0||0||0||1||0||0\n|}",
+      )
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({
+      kind: 'imported',
+      warnings: ['Sam Kersten: could not be linked to a player in the squad, so the numbers are skipped'],
+    })
+    expect(await database.db.select().from(playerSeasonStats)).toHaveLength(50)
+    expect(await database.db.select().from(players)).toHaveLength(25)
+  })
+
+  it('does not warn when the goals in the table are those of the matches', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await playMatchWithTheGoalsOfTheTable()
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', warnings: [] })
+    expect((await database.db.select().from(squadImports))[0]).toMatchObject({ lastWarning: null })
+  })
+
+  it('warns when the goals differ, with the name, the season and both numbers, and changes nothing', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+
+    const matchId = await playMatchWithTheGoalsOfTheTable()
+    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+
+    // One goal less for Oyen. His own goal and a goal of the opponent don't count for him.
+    await database.pool.query('DELETE FROM match_goals WHERE player_id = ? LIMIT 1', [oyen?.id])
+    await database.db.insert(matchGoals).values([
+      { matchId, minute: 80, ours: false, ownGoal: true, player: 'Oyen', playerId: oyen?.id ?? null },
+      { matchId, minute: 81, ours: false, player: 'Oyen' },
+    ])
+
+    const before = await database.db.select().from(playerSeasonStats).orderBy(asc(playerSeasonStats.id))
+    const later = new Date(first.getTime() + hours(1))
+    const report = await importAt(server, later)
+
+    expect(report).toMatchObject({
+      kind: 'imported',
+      warnings: ['Luca Oyen (2026/27) has 2 goals in the Eredivisie in the squad table and 1 in the matches'],
+    })
+    expect(formatSquadReport(report).split('\n').at(-1)).toBe(
+      'Squad 2026/27: warning, Luca Oyen (2026/27) has 2 goals in the Eredivisie in the squad table and 1 in the matches',
+    )
+    expect((await database.db.select().from(squadImports))[0]).toMatchObject({
+      failuresInARow: 0,
+      lastOutcome: 'imported',
+      lastWarning: 'Luca Oyen (2026/27) has 2 goals in the Eredivisie in the squad table and 1 in the matches',
+      lastWarningAt: later,
+    })
+    // The table stays the source: nothing in the numbers changed.
+    expect(await database.db.select().from(playerSeasonStats).orderBy(asc(playerSeasonStats.id))).toEqual(before)
+  })
+
+  it('compares each competition on its own', async () => {
+    const { server } = await serve(withNumbers(original, 'Luca Oyen', 11, '8||0||1||1||2||0||9||2||1'))
+
+    await importAt(server, first)
+    await playMatchWithTheGoalsOfTheTable()
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    // Oyen has no Eredivisie goal in the table now, so the goals of the matches are not his.
+    expect(report).toMatchObject({
+      warnings: ['Luca Oyen (2026/27) has 2 goals in the KNVB Beker in the squad table and 0 in the matches'],
+    })
+  })
+})
+
 describe('seasons', () => {
   const oldPlayer = {
     name: 'Oude Speler',
@@ -644,14 +904,21 @@ describe('the import command', () => {
     const feed = await addFeed()
     const { server } = await serve(original, { matchPages: true })
 
-    const { code, lines } = await run(server, feed)
+    const { code, lines: reports } = await run(server, feed)
+    const lines = reports.flatMap((report) => report.split('\n'))
 
     expect(code).toBe(0)
-    expect(lines).toEqual([
+    expect(lines.slice(0, 4)).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       expect.stringContaining('Matches 2026/27: 35 new'),
-      'Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad',
+      expect.stringContaining('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad'),
+      'Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged',
     ])
+    // The goals of the made-up matches differ from the made-up table: a line for each.
+    expect(lines.length).toBeGreaterThan(4)
+    expect(lines.slice(4).every((line) => /^Squad 2026\/27: warning, .+ goals? in the Eredivisie/u.test(line))).toBe(
+      true,
+    )
     expect(pageRequests(server).at(-1)).toBe('/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)?action=raw')
     expect(await database.db.select().from(players)).toHaveLength(25)
   })
@@ -660,11 +927,15 @@ describe('the import command', () => {
     const feed = await addFeed()
     const { server } = await serve()
 
-    const { code, lines } = await run(server, feed)
+    const { code, lines: reports } = await run(server, feed)
+    const lines = reports.flatMap((report) => report.split('\n'))
 
     expect(code).toBe(0)
     expect(lines[1]).toContain('Matches 2026/27: warning, nothing changed and the last good copy stays')
     expect(lines[2]).toBe('Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad')
+    expect(lines[3]).toBe('Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged')
+    // No match was played in the database, so there is nothing to compare the goals with.
+    expect(lines).toHaveLength(4)
     expect(await database.db.select().from(matches)).toEqual([])
   })
 

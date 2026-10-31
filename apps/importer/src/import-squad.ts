@@ -1,9 +1,9 @@
 import type { Database } from '@fansite/db/client'
 import type { Player } from '@fansite/db/schema'
 
-import { players, squadImports, wikipediaPages } from '@fansite/db/schema'
+import { matches, matchGoals, players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { eq } from 'drizzle-orm'
+import { and, count, eq, isNotNull } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { MatchImportOptions } from './import-matches.ts'
@@ -38,6 +38,8 @@ export type SquadReport =
       kind: 'imported'
       players: { added: number; left: number; unchanged: number; updated: number }
       season: string
+      /** What came of the numbers of the players (see `storeStats`). */
+      stats: { added: number; unchanged: number; updated: number }
       warnings: string[]
     }
   | {
@@ -59,6 +61,7 @@ export function formatSquadReport(report: SquadReport): string {
     case 'imported':
       return [
         `${head}: ${report.players.added} new, ${report.players.updated} updated, ${report.players.unchanged} unchanged, ${report.players.left} left the squad`,
+        `${head}: numbers of the players: ${report.stats.added} new, ${report.stats.updated} updated, ${report.stats.unchanged} unchanged`,
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
       ].join('\n')
     case 'postponed':
@@ -69,10 +72,13 @@ export function formatSquadReport(report: SquadReport): string {
 }
 
 /**
- * Reads the page of the squad of the current season and stores the players of sc Heerenveen,
- * once an hour at most. The squad goes in the database only when the table is found and every
- * check passes (`checkSquad`), and then all at once in one transaction. Otherwise nothing
- * changes: the last good squad stays, and the report says why.
+ * Reads the page of the squad of the current season and stores the players of sc Heerenveen
+ * with their numbers (appearances, goals and assists), once an hour at most. The squad goes in
+ * the database only when the table is found and every check passes (`checkSquad`), and then
+ * all at once in one transaction. Otherwise nothing changes: the last good squad stays, and
+ * the report says why. A number we cannot read or link to a player is a warning and a skipped
+ * row, and so is a player whose goals in the table differ from the goals in the matches
+ * (`goalsWarnings`): they never stop the import.
  *
  * It reads the current season only. The rows of an earlier season are never changed or removed.
  * A player who is no longer in the table is never removed either, since goals point to his row.
@@ -121,6 +127,70 @@ export async function importSquad(
 }
 
 /**
+ * Compares the goals in the table with the goals of the matches, for each player and
+ * competition the table gives numbers for. The goals of the matches are those of ours that the
+ * match import linked to the player and that are not own goals. One warning for each
+ * difference, with the name, the season, the competition and both numbers. It changes nothing:
+ * the table is the source of the numbers we show. A match page that did not name the scorers
+ * yet or a table that runs a round behind shows up here, and so does the first run on an empty
+ * database, before the match import has linked the goals to the new players (the next run
+ * finds them). A season without a match that was played has nothing to compare with and gives
+ * no warning.
+ */
+async function goalsWarnings(
+  db: Database,
+  season: string,
+  found: ReadPlayer[],
+  ids: Map<ReadPlayer, null | number>,
+): Promise<string[]> {
+  const [played] = await db
+    .select({ total: count() })
+    .from(matches)
+    .where(and(eq(matches.season, season), eq(matches.status, 'played')))
+
+  // Without a match that was played there is nothing to compare with, which is no news.
+  if (played === undefined || played.total === 0) {
+    return []
+  }
+
+  const counted = await db
+    .select({ competition: matches.competition, goals: count(), playerId: matchGoals.playerId })
+    .from(matchGoals)
+    .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+    .where(
+      and(
+        eq(matches.season, season),
+        eq(matchGoals.ours, true),
+        eq(matchGoals.ownGoal, false),
+        isNotNull(matchGoals.playerId),
+      ),
+    )
+    .groupBy(matches.competition, matchGoals.playerId)
+  const fromMatches = new Map(counted.map((row) => [`${row.playerId}/${row.competition}`, row.goals]))
+  const warnings: string[] = []
+
+  for (const player of found) {
+    const playerId = ids.get(player) ?? null
+
+    if (playerId === null) {
+      continue
+    }
+
+    for (const { competition, goals } of player.stats) {
+      const matched = fromMatches.get(`${playerId}/${competition}`) ?? 0
+
+      if (matched !== goals) {
+        warnings.push(
+          `${player.name} (${season}) has ${goals} ${goals === 1 ? 'goal' : 'goals'} in the ${competition} in the squad table and ${matched} in the matches`,
+        )
+      }
+    }
+  }
+
+  return warnings
+}
+
+/**
  * Reads, checks and stores. A database failure throws; `importSquad` turns it into a report.
  */
 async function readAndStore(
@@ -160,6 +230,7 @@ async function readAndStore(
   }
 
   const now = clock()
+  const warnings = [...read.warnings]
   const counts = await db.transaction(async (transaction) => {
     // The first good read of a season replaces what the seed made up, and nothing else: a
     // player from an earlier read stays. A goal of a made-up player loses its link.
@@ -168,6 +239,10 @@ async function readAndStore(
     }
 
     const result = await storePlayers(transaction, season, read.players, now)
+    const stats = await storeStats(transaction, season, read.players, result.ids, now)
+
+    warnings.push(...stats.warnings)
+
     const values = { kind: 'squad' as const, readAt: now, season, version: outcome.lastModified }
 
     await transaction
@@ -175,10 +250,12 @@ async function readAndStore(
       .values({ title, ...values })
       .onDuplicateKeyUpdate({ set: values })
 
-    return result
+    return { ids: result.ids, players: result.counts, stats: stats.counts }
   })
 
-  return { kind: 'imported', players: counts, season, warnings: [] }
+  warnings.push(...(await goalsWarnings(db, season, read.players, counts.ids)))
+
+  return { kind: 'imported', players: counts.players, season, stats: counts.stats, warnings }
 }
 
 /**
@@ -192,6 +269,9 @@ async function readAndStore(
  * term, so a correction by hand survives the import. Rows of another season are not touched.
  *
  * `left` counts the players who left the squad in this read, not those who were gone already.
+ * `ids` gives the row of each player found, or null for one that could not be placed: a row can
+ * be claimed by one player of the table only, and a second one that would land on it is left
+ * out, so two players never write to the same row.
  */
 async function storePlayers(
   db: Pick<Database, 'insert' | 'select' | 'update'>,
@@ -212,6 +292,7 @@ async function storePlayers(
   }
 
   const counts = { added: 0, left: 0, unchanged: 0, updated: 0 }
+  const ids = new Map<ReadPlayer, null | number>()
   const seen = new Set<number>()
 
   for (const player of found) {
@@ -221,12 +302,21 @@ async function storePlayers(
 
     if (before === undefined) {
       counts.added++
-      await db.insert(players).values({ ...player, season })
+
+      const [{ insertId }] = await db.insert(players).values({ ...player, season })
+
+      ids.set(player, insertId)
+
+      continue
+    }
+    if (seen.has(before.id)) {
+      ids.set(player, null)
 
       continue
     }
 
     seen.add(before.id)
+    ids.set(player, before.id)
 
     if (
       before.inSquad &&
@@ -259,5 +349,57 @@ async function storePlayers(
     }
   }
 
-  return counts
+  return { counts, ids }
+}
+
+/**
+ * Writes the numbers of the players found, one row per player and competition, and never
+ * removes one: a player who left the squad keeps his last numbers. Rows with the same numbers
+ * stay as they are, so `updated_at` is the moment the numbers last changed. A player without
+ * a row to write to (see `storePlayers`) is a warning and a skipped player.
+ */
+async function storeStats(
+  db: Pick<Database, 'insert' | 'select' | 'update'>,
+  season: string,
+  found: ReadPlayer[],
+  ids: Map<ReadPlayer, null | number>,
+  now: Date,
+) {
+  const rows = await db.select().from(playerSeasonStats).where(eq(playerSeasonStats.season, season))
+  const known = new Map(rows.map((row) => [`${row.playerId}/${row.competition}`, row]))
+  const counts = { added: 0, unchanged: 0, updated: 0 }
+  const warnings: string[] = []
+
+  for (const player of found) {
+    const playerId = ids.get(player) ?? null
+
+    if (playerId === null) {
+      if (player.stats.length > 0) {
+        warnings.push(`${player.name}: could not be linked to a player in the squad, so the numbers are skipped`)
+      }
+
+      continue
+    }
+
+    for (const { appearances, assists, competition, goals } of player.stats) {
+      const before = known.get(`${playerId}/${competition}`)
+
+      if (before === undefined) {
+        counts.added++
+        await db
+          .insert(playerSeasonStats)
+          .values({ appearances, assists, competition, goals, playerId, season, updatedAt: now })
+      } else if (before.appearances === appearances && before.goals === goals && before.assists === assists) {
+        counts.unchanged++
+      } else {
+        counts.updated++
+        await db
+          .update(playerSeasonStats)
+          .set({ appearances, assists, goals, updatedAt: now })
+          .where(eq(playerSeasonStats.id, before.id))
+      }
+    }
+  }
+
+  return { counts, warnings }
 }

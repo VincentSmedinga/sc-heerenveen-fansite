@@ -875,8 +875,8 @@ De reader werkt zo:
 
 ## De selectie
 
-De import leest ook de selectie van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, voor de lijst met spelers op de zoekpagina (#107).
-Hij bewaart haar in `players`, met de gezondheid in `squad_imports` en de pagina in `wikipedia_pages` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
+De import leest ook de selectie van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, voor de lijst met spelers op de zoekpagina (#107) en voor de optredens, doelpunten en assists per speler (#407).
+Hij bewaart haar in `players`, de cijfers in `player_season_stats`, de gezondheid in `squad_imports` en de pagina in `wikipedia_pages` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
 De bron, de licentie (CC BY-SA 4.0), de controles en het uur tussen twee lezingen zijn die van de wedstrijden.
 Waarom dezelfde bron en waarom de zoekterm een eigen kolom is, staat in [`docs/beslissingen.md`](../../docs/beslissingen.md).
 
@@ -899,7 +899,8 @@ Een andere groepskop is een fout.
 Bij de eerste cel staat het rugnummer, vet gedrukt of niet.
 Een streepje (`| -`) of een lege cel is een speler zonder rugnummer.
 Een nummer buiten 1 tot en met 99 is een fout.
-De tweede cel is de nationaliteit en blijft weg, net als de cellen na de naam (contract en statistieken).
+De tweede cel is de nationaliteit en blijft weg, net als de vierde, het contract.
+De cijfers komen uit de cellen daarna (zie _De cijfers van een speler_).
 De naam komt uit de derde cel, zonder attribuut als `align="left"`:
 
 - `[[Naam]]` geeft `Naam`, en `[[Pagina|Naam]]` de tekst achter de `|`;
@@ -912,7 +913,8 @@ Een naam zonder link heeft geen pagina.
 ### Wat de import bewaart
 
 Van een speler bewaart hij het seizoen, de naam zoals de tabel hem toont, de positie, het rugnummer (mag ontbreken), de zoekterm en de pagina op Wikipedia (`wikipedia_page`, mag ontbreken).
-Nationaliteit, leeftijd, contract, statistieken en foto's bewaart hij niet, en vlaggen ook niet.
+Nationaliteit, leeftijd, contract en foto's bewaart hij niet, en vlaggen ook niet.
+De cijfers van een speler staan in een eigen tabel (zie _De cijfers van een speler_).
 De zoekterm is de naam zonder de eerste voornaam, uit `searchTerm` in `src/read-squad.ts`: `Bernt Klaverboer` geeft `Klaverboer` en `Joost van Aken` geeft `van Aken`.
 Een naam van één woord blijft zoals hij is.
 Een voornaam met een streepje, zoals `Jan-Willem`, is één woord.
@@ -932,6 +934,39 @@ De import houdt namen uit elkaar zoals de database dat doet: zonder accenten en 
 Rijen van een eerder seizoen blijven bewaard en worden niet getoond.
 De eerste goede lezing van een seizoen haalt eerst de verzonnen selectie van de seed weg.
 
+### De cijfers van een speler
+
+Een rij van de tabel heeft na het contract negen cellen: per competitie het aantal wedstrijden (`W`), de doelpunten en de assists, voor de Eredivisie, de KNVB Beker en het totaal.
+`W` telt ook invalbeurten: het zijn geen minuten en geen basisplaatsen.
+De import leest de eerste zes cellen, de Eredivisie en de KNVB Beker, en bewaart ze in `player_season_stats`, in dezelfde run en dezelfde transactie als de selectie.
+Het totaal leest hij niet: dat is de som, en wie het toont, telt de rijen op.
+
+- Een getal is dat getal, en een streepje (`-`, `–` of `—`) is nul.
+- Een competitie met een lege cel krijgt voor die speler geen rij.
+  De tabel wordt met de hand bijgehouden, en lege cellen zijn nog niet ingevuld.
+- Een waarde die geen getal of streepje is, of een rij met een ander aantal cellen dan 13, geeft een waarschuwing met de naam, en de speler krijgt voor die competitie geen rij.
+  Staan de kopjes van de kolommen niet in de volgorde Eredivisie en dan KNVB Beker, dan leest de import geen cijfers en zegt de waarschuwing waarom: een cijfer onder het verkeerde kopje is erger dan geen cijfer.
+  Een rij van drie cellen, een tabel zonder cijfers, is geen verandering en geeft geen waarschuwing.
+- De rij hoort bij de speler in `players`, dezelfde `id` als de doelpunten.
+  Kan de import een speler niet koppelen, omdat zijn rij al van een andere speler van de tabel is, dan staat er een waarschuwing en slaat hij die speler over.
+- Een volgende run werkt de rij bij als de cijfers anders zijn, en laat hem anders staan, dus `updated_at` is het moment van de laatste wijziging.
+  Er komen geen dubbele rijen: een speler heeft hoogstens één rij per seizoen en competitie.
+- Een speler die uit de tabel verdwijnt, houdt zijn laatste cijfers.
+  Dat geldt ook voor een cel die later leeg wordt: de import haalt nooit een rij weg.
+
+De tabel loopt soms een speelronde achter op de wedstrijden.
+Daarom vergelijkt de import na het wegschrijven het aantal doelpunten per speler en competitie in de tabel met het aantal uit de wedstrijden: de doelpunten van ons in `match_goals` die aan de speler gekoppeld zijn, zonder eigen doelpunten.
+Verschilt het, dan komt er een waarschuwing met de naam, het seizoen, de competitie en de twee aantallen:
+
+```text
+Squad 2026/27: warning, Luca Oyen (2026/27) has 2 goals in the Eredivisie in the squad table and 1 in the matches
+```
+
+De controle verandert niets en stopt niets: de tabel is de bron van de cijfers die we tonen.
+De waarschuwing komt ook in `squad_imports.last_warning`.
+Is er in het seizoen nog geen wedstrijd gespeeld, dan is er niets om mee te vergelijken en zegt de controle niets.
+Bij de allereerste run op een lege database geeft de controle waarschuwingen voor wie al scoorde, omdat de import van de wedstrijden zijn doelpunten pas koppelt zodra de selectie er is; de run een uur later vindt ze en de waarschuwingen zijn weg.
+
 ### De controles
 
 De import schrijft alleen als alles slaagt.
@@ -950,10 +985,11 @@ De import schrijft een waarschuwing met de reden, en de wedstrijden en de feeds 
 Squad 2026/27: warning, nothing changed and the last good copy stays: Sc Heerenveen in het seizoen 2026/27 (mannen): the squad has 17 players, not 18 to 45
 ```
 
-Een goede lezing schrijft één regel:
+Een goede lezing schrijft twee regels, en daarna een regel voor elke waarschuwing:
 
 ```text
 Squad 2026/27: 25 new, 0 updated, 0 unchanged, 0 left the squad
+Squad 2026/27: numbers of the players: 50 new, 0 updated, 0 unchanged
 ```
 
 ### Hoogstens één keer per uur
@@ -1021,7 +1057,8 @@ Een test die `runImport` draait en niets met de wedstrijden te maken heeft, geef
 De tests van het commando zelf (`src/import.test.ts` en `src/bundle.test.ts`) zetten een gezondheidsrij voor de wedstrijden en voor de selectie met een `retry_at` ver weg, zodat het commando de echte Wikipedia niet vraagt.
 
 De tests van de selectie lezen [`src/fixtures/wikipedia-squad.wiki`](src/fixtures/wikipedia-squad.wiki): de tabel "Spelers" van de pagina van het seizoen 2026/27, gelezen op 26 oktober 2026, met bovenaan de herkomst en de licentie (CC BY-SA 4.0).
-De tabel staat er zoals de pagina haar heeft, in beide schrijfwijzen, met 25 spelers, onder wie een speler met een streepje in plaats van een rugnummer.
-`src/read-squad.test.ts` leest hem zonder database en toetst de zoekterm op voorbeelden met voorvoegsels, een streepje en een naam van één woord.
+De tabel staat er zoals de pagina haar heeft, in beide schrijfwijzen, met 25 spelers, onder wie een speler met een streepje in plaats van een rugnummer, en met de cijfers van de Eredivisie, de KNVB Beker en het totaal.
+`src/read-squad.test.ts` leest hem zonder database en toetst de zoekterm op voorbeelden met voorvoegsels, een streepje en een naam van één woord, en de cijfers: een streepje, een lege cel, een waarde die we niet kennen en kopjes in een andere volgorde.
 `src/check-wikipedia.test.ts` toetst de controles, en `src/import-squad.test.ts` draait op een echte MariaDB met een eigen webserver en laat zien dat een falende controle de database ongemoeid laat, dat een speler zijn `id` houdt, dat een vertrokken speler blijft staan en dat een terugkerende speler weer in de selectie komt.
+Dezelfde test laat zien dat de cijfers van een nieuwe speler, een speler zonder cijfers, een vertrokken speler, een streepje en twee runs achter elkaar goed gaan, en dat de controle van de doelpunten wel waarschuwt bij een verschil en niet bij gelijke aantallen.
 `src/link-players.test.ts` toetst de regels van de koppeling zonder database, ook voor twee spelers met dezelfde achternaam, en `src/import-matches.test.ts` laat zien dat de doelpunten van een wedstrijd hun speler krijgen.
