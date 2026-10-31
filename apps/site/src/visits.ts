@@ -35,15 +35,19 @@ const countedPaths: ReadonlySet<string> = new Set([
 
 const articlePath = /^\/redactie\/([^/]+)$/u
 
-const seasonPath = /^\/wedstrijden\/([^/]+)$/u
+const seasonPath = /^(\/wedstrijden|\/statistieken)\/([^/]+)$/u
 
 /**
- * The path a visit is counted under. The page of a season, such as `/wedstrijden/2025-26`,
- * counts as a visit to `/wedstrijden`: it is the same page for another season, and a count per
- * season would be a row for every address that has the shape of one.
+ * The path a visit is counted under. The page of a season, such as `/wedstrijden/2025-26` or
+ * `/statistieken/2025-26`, counts as a visit to `/wedstrijden` or `/statistieken`: it is the
+ * same page for another season, and a count per season would be a row for every address that
+ * has the shape of one.
  */
-const countedPathOf = (path: string) =>
-  seasonFromSlug(seasonPath.exec(path)?.[1]) === undefined ? path : '/wedstrijden'
+const countedPathOf = (path: string) => {
+  const [, page, slug] = seasonPath.exec(path) ?? []
+
+  return page !== undefined && seasonFromSlug(slug) !== undefined ? page : path
+}
 
 /** What a visit needs to be counted. */
 export type PageVisit = {

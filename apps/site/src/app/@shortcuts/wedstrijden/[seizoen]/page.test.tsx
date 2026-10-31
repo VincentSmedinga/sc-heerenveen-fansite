@@ -36,7 +36,7 @@ describe('the bar of the page of an earlier season', () => {
     const html = await render('2025-26')
 
     expect(hrefs(html)).toEqual(matchShortcutsOf(false).map(({ href }) => href))
-    expect(hrefs(html)).toHaveLength(11)
+    expect(hrefs(html)).toHaveLength(2)
     expect(hrefs(html)).not.toContain('#programma')
     expect(html).toContain('Op deze pagina:')
   })

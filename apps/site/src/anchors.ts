@@ -20,25 +20,24 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/bronnen': ['nieuws', 'podcasts', 'forum', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
-  '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
-  '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
-  '/wedstrijden': [
-    'programma',
+  // The nine cards with figures moved to /statistieken (#483). Their anchors on /wedstrijden
+  // are gone on purpose, without a redirect: a link to one of them breaks.
+  '/statistieken': [
     'doelpunten-per-kwartier',
-    'stand',
     'doelpuntenmakers',
     'topscorers',
     'de-nul-gehouden',
     'nul-gehouden',
-    'uitslagen',
     'verloop-van-het-seizoen',
     'reeksen',
     'thuis-en-uit',
     'onze-plek-in-de-competitie',
-    'hoofdtrainer',
     'hoe-de-wedstrijden-verlopen',
     'uitersten',
   ],
+  '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
+  '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
+  '/wedstrijden': ['programma', 'stand', 'uitslagen', 'hoofdtrainer'],
 }
 
 // Every id on the page, with the elements that carry it.

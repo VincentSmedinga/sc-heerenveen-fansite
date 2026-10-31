@@ -144,10 +144,11 @@ export function cleanSheetsOf(matches: PublicMatch[]): CleanSheets {
 }
 
 /**
- * The seasons the matches page can show, the newest first: the seasons that have matches, up to
- * and including the current one. The current season is always in it, also before its first
- * match is in the database, because the page of that season is `/wedstrijden` itself. A season
- * after the current one is left out, because it has no page.
+ * The seasons the matches and statistics pages can show, the newest first: the seasons that
+ * have matches, up to and including the current one. The current season is always in it, also
+ * before its first match is in the database, because the page of that season is the base
+ * address of the page itself. A season after the current one is left out, because it has no
+ * page.
  */
 export async function getMatchSeasons(): Promise<string[]> {
   const current = seasonOf(new Date())
@@ -225,8 +226,8 @@ export function streaksOf(matches: PublicMatch[]): Streaks {
 }
 
 /**
- * The quarters of an hour of a match, as the card of the matches page and its table write them.
- * The dash is an en dash.
+ * The quarters of an hour of a match, as the cards of the statistics page and their tables
+ * write them. The dash is an en dash.
  */
 export const quarterLabels = ['1–15', '16–30', '31–45', '46–60', '61–75', '76–90'] as const
 

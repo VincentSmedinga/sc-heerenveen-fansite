@@ -653,7 +653,8 @@ await withEmptyDatabase((database) =>
     assert.equal((await fetch(`${origin}/nieuws?pagina=0`)).status, 404)
 
     // The matches page shows the made-up matches and table of the seed, with the credit for
-    // Wikipedia under them. The homepage has the two blocks, under the podcasts.
+    // Wikipedia under them, and a link under the table and the results to the cards with
+    // figures on the statistics page. The homepage has the two blocks, under the podcasts.
     const matchesPage = await fetch(`${origin}/wedstrijden`)
     const matchesHtml = await matchesPage.text()
     assert.equal(matchesPage.status, 200)
@@ -674,11 +675,58 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
+      ['#programma', '#uitslagen', '#stand', '#hoofdtrainer'],
+    )
+    // The home page has no bar of shortcuts, only the bar of sub-pages of Nieuws in the menu.
+    assert.doesNotMatch(html, /class="hf-page-shortcuts"/)
+    assert.match(
+      html,
+      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws">Archief<\/a>.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
+    )
+    assert.match(matchesHtml, /Testdorp FC/)
+    assert.match(
+      matchesHtml,
+      /<a href="\/statistieken#onze-plek-in-de-competitie">Onze plek in de <span class="hf-icon-tail">competitie</,
+    )
+    assert.match(
+      matchesHtml,
+      /<a href="\/statistieken#verloop-van-het-seizoen">Het verloop van het <span class="hf-icon-tail">seizoen</,
+    )
+    // The cards with figures moved to the statistics page: none of them is left on this one.
+    assert.doesNotMatch(matchesHtml, /id="(?:onze-plek-in-de-competitie|reeksen|doelpuntenmakers|uitersten)"/)
+    assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
+    // In the line of the scorers of one match the two are told apart by an initial.
+    assert.match(matchesHtml, /J\. Testvoort/)
+    assert.match(matchesHtml, /B\. Testvoort/)
+    assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.doesNotMatch(matchesHtml, /action=history/)
+    assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
+    assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
+
+    // The statistics page shows the nine cards with figures of the made-up matches and table of
+    // the seed, in two equal columns (the sidebar is as wide as the main), with the credit for
+    // Wikipedia under them.
+    const statisticsPage = await fetch(`${origin}/statistieken`)
+    const statisticsHtml = await statisticsPage.text()
+    assert.equal(statisticsPage.status, 200)
+    assert.match(statisticsHtml, /<h1[^>]*>Statistieken<\/h1>/)
+    // The bar with a link to each card comes after the main menu, outside the main. The menu
+    // has Statistieken as the current page.
+    assert.match(
+      statisticsHtml,
+      /<a aria-current="page" class="hf-navigation-link" href="\/statistieken">Statistieken<\/a>/,
+    )
+    assert.match(
+      statisticsHtml,
+      /<aside class="hf-page-sidebar hf-page-sidebar-wide" aria-label="Meer cijfers over het seizoen">/,
+    )
+    assert.match(
+      statisticsHtml,
+      /<\/header><nav aria-label="Hoofdmenu".*?<\/nav><nav aria-labelledby="([^"]+)" class="hf-page-shortcuts"><span class="hf-page-shortcuts-label" id="\1">Op deze pagina:<\/span>.*<\/nav><div class="hf-page-body"><main/s,
+    )
+    assert.deepEqual(
+      [...statisticsHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       [
-        '#programma',
-        '#uitslagen',
-        '#stand',
-        '#hoofdtrainer',
         '#onze-plek-in-de-competitie',
         '#verloop-van-het-seizoen',
         '#reeksen',
@@ -690,94 +738,84 @@ await withEmptyDatabase((database) =>
         '#uitersten',
       ],
     )
-    // The home page has no bar of shortcuts, only the bar of sub-pages of Nieuws in the menu.
-    assert.doesNotMatch(html, /class="hf-page-shortcuts"/)
-    assert.match(
-      html,
-      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws">Archief<\/a>.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
-    )
-    assert.match(matchesHtml, /Testdorp FC/)
     // The card with our place in the league: a table of five measures, after the table.
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<h2[^>]*id="onze-plek-in-de-competitie">.*?href="#onze-plek-in-de-competitie">Onze plek in de /s,
     )
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<caption class="hf-visually-hidden">De plek van sc Heerenveen in de Eredivisie, per onderdeel<\/caption>/,
     )
     // The card of the season: the chart, and the table of the Eredivisie results under it.
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<h2[^>]*id="verloop-van-het-seizoen">.*?href="#verloop-van-het-seizoen">Verloop van het /s,
     )
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<caption class="hf-visually-hidden">Uitslagen van sc Heerenveen dit seizoen, met de punten<\/caption>/,
     )
     // The card of the streaks: the table, and the latest matches under it.
-    assert.match(matchesHtml, /<h2[^>]*id="reeksen">.*?href="#reeksen">Reeks/s)
+    assert.match(statisticsHtml, /<h2[^>]*id="reeksen">.*?href="#reeksen">Reeks/s)
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie dit seizoen<\/caption>/,
     )
-    assert.match(matchesHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
-    assert.match(matchesHtml, /Gebaseerd op (?:alle \d+|1) gespeelde wedstrijd/)
+    assert.match(statisticsHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
+    assert.match(statisticsHtml, /Gebaseerd op (?:alle \d+|1) gespeelde wedstrijd/)
     // The card of home and away: the table with a column for each.
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<h2[^>]*id="thuis-en-uit">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#thuis-en-uit">Thuis en /,
     )
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen thuis en uit dit seizoen<\/caption>/,
     )
-    assert.match(matchesHtml, /<caption class="hf-visually-hidden">Stand op \d+ \w+ \d{4}<\/caption>/)
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
     )
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen in het seizoen \d{4}\/\d{2}, /,
     )
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
     )
     // Two players called Testvoort are two rows, each with his full name.
-    assert.match(matchesHtml, /hf-player-name-given">Joris<\/span> <span class="hf-player-name-surname">Testvoort</)
-    assert.match(matchesHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
-    // In the line of the scorers of one match the two are told apart by an initial.
-    assert.match(matchesHtml, /J\. Testvoort/)
-    assert.match(matchesHtml, /B\. Testvoort/)
-    assert.doesNotMatch(matchesHtml, /<th scope="row">Kopie<\/th>/)
+    assert.match(statisticsHtml, /hf-player-name-given">Joris<\/span> <span class="hf-player-name-surname">Testvoort</)
+    assert.match(statisticsHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
+    assert.doesNotMatch(statisticsHtml, /<th scope="row">Kopie<\/th>/)
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<h2[^>]*id="doelpunten-per-kwartier">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartie/,
     )
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<caption class="hf-visually-hidden">Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd<\/caption>/,
     )
     // The card on how the matches go: two tables, the two sentences, and what it is based on.
     // The two made-up league matches are both won after scoring first and leading at half-time.
     assert.match(
-      matchesHtml,
+      statisticsHtml,
       /<h2[^>]*id="hoe-de-wedstrijden-verlopen">.*?href="#hoe-de-wedstrijden-verlopen">Hoe de wedstrijden verlope/s,
     )
-    assert.match(matchesHtml, /<caption class="hf-visually-hidden">Wat er gebeurt na het eerste doelpunt<\/caption>/)
-    assert.match(matchesHtml, /<caption class="hf-visually-hidden">Wat er gebeurt na de stand bij de rust<\/caption>/)
-    assert.match(matchesHtml, /<th scope="row">Wij scoren eerst<\/th><td[^>]*>2<\/td><td[^>]*>2<\/td>/)
-    assert.match(matchesHtml, /Na een achterstand won sc Heerenveen nog geen wedstrijd\./)
+    assert.match(statisticsHtml, /<caption class="hf-visually-hidden">Wat er gebeurt na het eerste doelpunt<\/caption>/)
     assert.match(
-      matchesHtml,
+      statisticsHtml,
+      /<caption class="hf-visually-hidden">Wat er gebeurt na de stand bij de rust<\/caption>/,
+    )
+    assert.match(statisticsHtml, /<th scope="row">Wij scoren eerst<\/th><td[^>]*>2<\/td><td[^>]*>2<\/td>/)
+    assert.match(statisticsHtml, /Na een achterstand won sc Heerenveen nog geen wedstrijd\./)
+    assert.match(
+      statisticsHtml,
       /<h2[^>]*id="uitersten">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#uitersten">Uiterste/,
     )
-    assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
-    assert.doesNotMatch(matchesHtml, /action=history/)
-    assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
-    assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
+    assert.match(statisticsHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.doesNotMatch(statisticsHtml, /action=history/)
 
     // Updates shows the versions of the build, newest first, and points feed readers to its
     // feed.

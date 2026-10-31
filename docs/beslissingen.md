@@ -4301,6 +4301,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - Het zoeken in de footer laten op `/zoeken`: het is daar moeilijk te vinden, en het adres past niet bij de andere pagina's van Nieuws.
 - **Later:** de balk van Nieuws heeft op verzoek van de projecteigenaar (31 oktober 2026) de volgorde Archief, Podcasts en Zoeken, en niet Podcasts, Archief en Zoeken.
 
+### De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de pagina Statistieken maakt zijn twee gelijke kolommen met wat het designsysteem al heeft: een `Page.Main` met de kop en de kiezer als `intro`, en een `Page.Sidebar` met `wide`.
+  Er komt geen nieuwe variant van `Page.Body`, alleen een verhaal (_Met twee gelijke kolommen_ bij Patronen › Pagina) en een regel in de documentatie van `Page.Sidebar` en van het patroon.
+  - **De verdeling:** de eerste vier kaarten in de volgorde van de balk "Op deze pagina:" staan links in de hoofdkolom (Onze plek in de competitie, Verloop van het seizoen, Reeksen en Thuis en uit).
+    De andere vijf staan rechts in de zijbalk (Doelpuntenmakers, De nul gehouden, Doelpunten per kwartier, Hoe de wedstrijden verlopen en Uitersten), met de bronvermelding als laatste.
+  - **De volgorde:** de broncode is de volgorde van de balk en van een telefoon, dus eerst de hoofdkolom en dan de zijbalk.
+    De kolommen volgen de broncode van boven naar beneden, zonder rijen die elkaar in de weg zitten.
+  - **De naam van de zijbalk** is "Meer cijfers over het seizoen", want de zijbalk is een `aside` en krijgt een naam.
+- **Waarom:** `wide` maakt de zijbalk even breed als de hoofdkolom en doet dat vanaf het breekpunt dat het designsysteem voor twee kolommen heeft, precies wat Wedstrijden al had.
+  Een nieuwe variant zou hetzelfde doen onder een andere naam.
+  Een pagina heeft één `main`, dus een tweede hoofdkolom kan niet.
+  Gemeten op 1100 pixels breed, met de verzonnen gegevens van de controle, is de linker kolom 2107 pixels hoog en de rechter 2651, met de bronvermelding erbij.
+  De kaarten zijn 191 tot 665 pixels hoog, met 32 pixels ertussen.
+  Bij een andere verdeling is het verschil groter: bij 5 en 4 is de linker kolom 2773 en de rechter 1985, en bij 3 en 6 is de linker 1547 en de rechter 3211.
+  Met 4 en 5 is het verschil het kleinst, 544 pixels.
+  De hoogte hangt af van de gegevens: meer doelpuntenmakers of meer wedstrijden met de nul gehouden maken de rechter kolom hoger.
+  Dat nemen we aan, want een andere verdeling per seizoen zou de volgorde van de balk breken.
+- **Alternatieven:** de kolommen laten vullen door de browser met CSS-kolommen (`columns: 2`).
+  Die verdelen de kaarten zelf over de kolommen, maar een kaart die groeit, zoals De nul gehouden met "Laad 5 meer", springt dan naar de andere kolom, en een lange kaart laat een gat achter.
+  Een raster met rijen van twee kaarten: de volgorde op een telefoon (links, rechts, links, rechts) is dan niet die van de kolommen, en de kaarten van een rij zijn niet even hoog.
+  Een nieuwe prop op `Page.Body` of `Page.Main` voor twee kolommen: dubbel werk naast `wide`.
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
