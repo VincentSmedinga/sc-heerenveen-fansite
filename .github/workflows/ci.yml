@@ -173,13 +173,6 @@ jobs:
 
       - run: pnpm typecheck
 
-      # next build reuses what it compiled and optimised in an earlier run.
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
-          path: apps/site/.next/cache
-          restore-keys: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-
       - run: pnpm build
 
       - name: Assemble the folder the host runs
