@@ -393,8 +393,11 @@ De importer schrijft de rijen in dezelfde run als de selectie (zie de [README va
 Een speler, een seizoen en een competitie komen samen één keer voor.
 Een competitie waarvoor de tabel geen cijfers geeft (een lege cel) heeft geen rij, en een streepje is nul.
 Een speler die de selectie verlaat, houdt zijn laatste cijfers, want de importer haalt geen rij weg.
-De tabel wordt met de hand bijgehouden en loopt soms een speelronde achter; de importer vergelijkt de doelpunten met die in `match_goals` en waarschuwt bij een verschil, maar verbetert niets.
-`listSeasonPlayerStats(db, season)` in `queries.ts` geeft de cijfers van een seizoen, per speler en competitie, met de naam, de positie, de pagina op Wikipedia en of de speler in de selectie staat; de rijen komen op naam en dan competitie.
+De tabel wordt met de hand bijgehouden en loopt soms een speelronde achter.
+De importer vergelijkt de doelpunten met die in `match_goals` en waarschuwt bij een verschil, maar verbetert niets.
+`listSeasonPlayerStats(db, season)` in `queries.ts` geeft de cijfers van een seizoen, per speler en competitie.
+Bij elke rij staan de naam, de positie, de pagina op Wikipedia en of de speler in de selectie staat.
+De rijen komen op naam en dan competitie.
 
 De seed zet verzonnen wedstrijden, een verzonnen stand en de pagina's van Wikipedia waar ze naar verwijzen in het lopende seizoen (`madeUpMatches`, `madeUpTable` en `madeUpWikipediaPages` in `src/seed.ts`), maar alleen als dat seizoen er nog geen wedstrijden of stand heeft.
 De pagina's staan erbij, zodat de site de bronvermelding laat zien zoals met echte gegevens.
