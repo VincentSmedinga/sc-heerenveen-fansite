@@ -605,8 +605,8 @@ describe('the page /statistieken', () => {
 
       const card = section(await render(eredivisie), 'reeksen')
 
-      expect(card).toContain('1 gespeelde wedstrijd')
-      expect(card).not.toContain('alle 1')
+      expect(card).toContain('>1 gespeelde wedstrijd<')
+      expect(card).not.toContain('Alle 1')
     })
 
     it('shows the matches there are when fewer than five are played', async () => {
@@ -732,7 +732,7 @@ describe('the page /statistieken', () => {
         ['Doelpunten per wedstrijd', '3,00', '–', '3,00'],
         ['Zonder tegendoelpunt', '0', '0', '0'],
       ])
-      expect(card).toContain('1 gespeelde wedstrijd<')
+      expect(card).toContain('>1 gespeelde wedstrijd<')
     })
 
     it('says so in a sentence, with no table, when no match is played', async () => {
@@ -833,7 +833,7 @@ describe('the page /statistieken', () => {
 
       vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: goalMatches.slice(0, 1) })
 
-      expect(section(await render(), 'doelpunten-per-kwartier')).toContain('1 gespeelde wedstrijd<')
+      expect(section(await render(), 'doelpunten-per-kwartier')).toContain('>1 gespeelde wedstrijd<')
     })
 
     it('says so in a sentence, with no chart or table, when there is no goal with a minute', async () => {
@@ -978,7 +978,7 @@ describe('the page /statistieken', () => {
         ['Gelijk', '0', '0', '0', '0', '0'],
         ['Achter', '0', '0', '0', '0', '0'],
       ])
-      expect(section(await render(), 'hoe-de-wedstrijden-verlopen')).toContain('1 gespeelde wedstrijd<')
+      expect(section(await render(), 'hoe-de-wedstrijden-verlopen')).toContain('>1 gespeelde wedstrijd<')
     })
 
     it('says that the first goal is unknown for a match where both clubs scored in the same minute', async () => {
@@ -1136,7 +1136,7 @@ describe('the page /statistieken', () => {
 
       const one = section(await render(eredivisie), 'uitersten')
 
-      expect(one).toContain('1 gespeelde wedstrijd<')
+      expect(one).toContain('>1 gespeelde wedstrijd<')
       expect(lines(one)).toHaveLength(4)
       expect(lines(one).join(' ')).not.toContain('nederlaag')
     })
