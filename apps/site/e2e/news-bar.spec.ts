@@ -13,8 +13,8 @@ test.describe('the bar of Nieuws', () => {
     await expect(menu(page).locator('[aria-current="true"]')).toHaveCount(0)
 
     for (const [name, path] of [
-      ['Podcasts', '/nieuws/podcasts'],
       ['Archief', '/nieuws'],
+      ['Podcasts', '/nieuws/podcasts'],
       ['Zoeken', '/nieuws/zoeken'],
     ] as const) {
       await menu(page).getByRole('link', { exact: true, name }).click()
@@ -40,7 +40,7 @@ test.describe('the bar of Nieuws', () => {
       await page.setViewportSize({ height: 800, width: 320 })
       await page.goto('/nieuws/zoeken')
 
-      for (const name of ['Podcasts', 'Archief', 'Zoeken']) {
+      for (const name of ['Archief', 'Podcasts', 'Zoeken']) {
         await expect(menu(page).getByRole('link', { exact: true, name })).toBeInViewport({ ratio: 1 })
       }
 

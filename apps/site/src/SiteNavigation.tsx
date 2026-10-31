@@ -3,10 +3,10 @@
 import { Navigation } from '@fansite/design-system'
 import { usePathname } from 'next/navigation'
 
-// The sub-pages of Nieuws, in the bar under the menu: the podcasts, the archive and the search.
+// The sub-pages of Nieuws, in the bar under the menu: the archive, the podcasts and the search.
 const newsSubitems = [
-  { href: '/nieuws/podcasts', label: 'Podcasts' },
   { href: '/nieuws', label: 'Archief' },
+  { href: '/nieuws/podcasts', label: 'Podcasts' },
   { href: '/nieuws/zoeken', label: 'Zoeken' },
 ]
 

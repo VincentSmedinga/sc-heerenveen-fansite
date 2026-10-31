@@ -4299,6 +4299,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - De Stand naar Statistieken: er is geen goede reden voor, want de stand hoort bij de lijsten.
   - `/podcasts` houden en `/nieuws/podcasts` met een omleiding laten verwijzen: zonder openbare links is een omleiding niet nodig.
   - Het zoeken in de footer laten op `/zoeken`: het is daar moeilijk te vinden, en het adres past niet bij de andere pagina's van Nieuws.
+- **Later:** de balk van Nieuws heeft op verzoek van de projecteigenaar (31 oktober 2026) de volgorde Archief, Podcasts en Zoeken, en niet Podcasts, Archief en Zoeken.
 
 ## Importer
 

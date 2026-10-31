@@ -694,7 +694,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(html, /class="hf-page-shortcuts"/)
     assert.match(
       html,
-      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/nieuws">Archief<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
+      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws">Archief<\/a>.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
     )
     assert.match(matchesHtml, /Testdorp FC/)
     // The card with our place in the league: a table of five measures, after the table.

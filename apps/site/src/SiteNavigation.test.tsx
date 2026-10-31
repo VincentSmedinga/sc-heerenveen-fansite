@@ -57,16 +57,16 @@ describe('SiteNavigation', () => {
     expect(html.match(/<svg/g)).toHaveLength(1)
   })
 
-  it('has no link to the podcasts, the archive or the search in the menu itself', () => {
+  it('has no link to the archive, the podcasts or the search in the menu itself', () => {
     expect(render('/wedstrijden')).not.toMatch(/href="\/nieuws/)
   })
 
-  it('shows the bar with the podcasts, the archive and the search on the home page, with no sub-page current', () => {
+  it('shows the bar with the archive, the podcasts and the search on the home page, with no sub-page current', () => {
     const html = render('/')
 
     expect(barLinks(html)).toEqual([
-      ['/nieuws/podcasts', 'Podcasts'],
       ['/nieuws', 'Archief'],
+      ['/nieuws/podcasts', 'Podcasts'],
       ['/nieuws/zoeken', 'Zoeken'],
     ])
     expect(currentLinks(html)).toEqual(['Nieuws'])
@@ -74,13 +74,13 @@ describe('SiteNavigation', () => {
   })
 
   it.each([
-    ['/nieuws/podcasts', 'Podcasts'],
     ['/nieuws', 'Archief'],
+    ['/nieuws/podcasts', 'Podcasts'],
     ['/nieuws/zoeken', 'Zoeken'],
   ])('marks %s as the current sub-page in the bar, and Nieuws as the item that holds it', (path, label) => {
     const html = render(path)
 
-    expect(barLinks(html).map(([, text]) => text)).toEqual(['Podcasts', 'Archief', 'Zoeken'])
+    expect(barLinks(html).map(([, text]) => text)).toEqual(['Archief', 'Podcasts', 'Zoeken'])
     expect(currentLinks(html)).toEqual([label])
     expect(linksWith(html, 'true')).toEqual(['Nieuws'])
   })

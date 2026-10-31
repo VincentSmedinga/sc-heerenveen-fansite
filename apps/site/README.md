@@ -151,7 +151,7 @@ De header, met het logo, de themaknop en het hoofdmenu, en de footer staan in `s
 ## Het hoofdmenu en de balk van Nieuws
 
 Het hoofdmenu (`src/SiteNavigation.tsx`) heeft drie onderdelen: Nieuws, Wedstrijden en Forum (extern).
-Nieuws heeft een balk met subpagina's onder het menu: Podcasts (`/nieuws/podcasts`), Archief (`/nieuws`) en Zoeken (`/nieuws/zoeken`), in die volgorde.
+Nieuws heeft een balk met subpagina's onder het menu: Archief (`/nieuws`), Podcasts (`/nieuws/podcasts`) en Zoeken (`/nieuws/zoeken`), in die volgorde.
 De balk komt uit `Navigation` van het designsysteem (`subitems`), dus het menu en de balk zijn één navigatie, "Hoofdmenu".
 `currentOf` in hetzelfde bestand kiest uit het pad het huidige onderdeel en de huidige subpagina:
 
