@@ -3,10 +3,16 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
+import { withClubs } from './clubs.ts'
 import { matches, matchGoals } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
+
+/** A match against Testdorp FC, with its club. */
+async function clubbed(values: Omit<NewMatch, 'clubId'>): Promise<NewMatch> {
+  return (await withClubs(database.db, [values]))[0]!
+}
 
 beforeAll(async () => {
   database = await createTestDatabase()
@@ -21,7 +27,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
 })
 
-const cupMatch: NewMatch = {
+const cupMatch: Omit<NewMatch, 'clubId'> = {
   competition: 'KNVB Beker',
   goalsAgainst: 1,
   goalsFor: 1,
@@ -36,7 +42,7 @@ const cupMatch: NewMatch = {
 
 describe('the extra time and the shoot-out of a match', () => {
   it('has no extra time and no shoot-out unless it is said', async () => {
-    await database.db.insert(matches).values(cupMatch)
+    await database.db.insert(matches).values(await clubbed(cupMatch))
 
     const [row] = await database.db.select().from(matches)
 
@@ -44,10 +50,12 @@ describe('the extra time and the shoot-out of a match', () => {
   })
 
   it('keeps a win after extra time, and a shoot-out after a level score, from our side', async () => {
-    await database.db.insert(matches).values({ ...cupMatch, extraTime: true, goalsFor: 2 })
+    await database.db.insert(matches).values(await clubbed({ ...cupMatch, extraTime: true, goalsFor: 2 }))
     await database.db
       .insert(matches)
-      .values({ ...cupMatch, extraTime: true, penaltiesAgainst: 3, penaltiesFor: 4, round: 'Derde ronde' })
+      .values(
+        await clubbed({ ...cupMatch, extraTime: true, penaltiesAgainst: 3, penaltiesFor: 4, round: 'Derde ronde' }),
+      )
 
     const rows = await database.db.select().from(matches)
 
@@ -82,7 +90,7 @@ describe('the extra time and the shoot-out of a match', () => {
   ] satisfies [string, string, Partial<NewMatch>][])('refuses %s', async (_name, constraint, change) => {
     const failure = await database.db
       .insert(matches)
-      .values({ ...cupMatch, ...change })
+      .values(await clubbed({ ...cupMatch, ...change }))
       .then(
         () => undefined,
         (error: unknown) => error,
@@ -95,7 +103,7 @@ describe('the extra time and the shoot-out of a match', () => {
 
 describe('the goals of a match', () => {
   async function insertMatch() {
-    const [{ insertId }] = await database.db.insert(matches).values(cupMatch)
+    const [{ insertId }] = await database.db.insert(matches).values(await clubbed(cupMatch))
 
     return insertId
   }

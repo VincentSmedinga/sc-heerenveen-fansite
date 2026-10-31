@@ -13,6 +13,7 @@ import type {
 } from './schema.ts'
 
 import { connect } from './client.ts'
+import { withClubs } from './clubs.ts'
 import { readDatabaseEnv } from './env.ts'
 import { feeds, matches, matchGoals, players, sources, standings, wikipediaPages } from './schema.ts'
 import { seasonOf } from './season.ts'
@@ -332,6 +333,9 @@ const day = 24 * 60 * 60 * 1000
 /** The goals of one made-up match, without the match they belong to. */
 export type MadeUpGoal = Omit<NewMatchGoal, 'id' | 'matchId'>
 
+/** A made-up match, without its club: `withClubs` finds or makes it from the opponent. */
+export type MadeUpMatch = Omit<NewMatch, 'clubId'>
+
 /**
  * Made-up matches for the current season, for the pages and the accessibility checks.
  * Every date counts from the moment of the seed, so the season is always the current
@@ -344,7 +348,7 @@ export type MadeUpGoal = Omit<NewMatchGoal, 'id' | 'matchId'>
  * a win on penalties and a loss on penalties. `result_set_at` stays empty, so the import never
  * warns about a made-up result it replaces.
  */
-export function madeUpMatches(now: Date): NewMatch[] {
+export function madeUpMatches(now: Date): MadeUpMatch[] {
   const season = seasonOf(now)
   const at = (days: number, hours: number, minutes: number) => {
     const moment = new Date(now.getTime() + days * day)
@@ -705,7 +709,7 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
       return false
     }
 
-    await transaction.insert(matches).values(madeUpMatches(now))
+    await transaction.insert(matches).values(await withClubs(transaction, madeUpMatches(now)))
 
     const goals = (await transaction.select().from(matches).where(eq(matches.season, season))).flatMap((match) =>
       (madeUpGoals[`${match.competition}|${match.round}`] ?? []).map((goal) => ({ ...goal, matchId: match.id })),

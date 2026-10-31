@@ -672,7 +672,7 @@ Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wik
 ### Wat de import bewaart
 
 - Van sc Heerenveen alleen: de wedstrijden waar de club als `[[sc Heerenveen]]` in staat.
-  Van een wedstrijd bewaart hij de ronde (de kop boven het sjabloon, zoals `Speelronde 12` of `Eerste ronde`), de tegenstander, thuis of uit, het stadion, de status en de uitslag.
+  Van een wedstrijd bewaart hij de ronde (de kop boven het sjabloon, zoals `Speelronde 12` of `Eerste ronde`), de tegenstander, de club van de tegenstander (zie _De clubs van de tegenstanders_), thuis of uit, het stadion, de status en de uitslag.
   Een speelronde van de competitie is een kop `Speelronde <nummer>`; wedstrijden onder andere koppen, zoals de play-offs, leest hij niet.
 - De status is `played` bij een score, `postponed` als de score "uitgesteld" of "afgelast" zegt, en anders `scheduled`.
   Een score die we niet kennen, zoals een gestaakte wedstrijd van ons, is een fout.
@@ -725,6 +725,48 @@ Matches 2026/27: warning, 3 goals of ours have no player in the squad table: Oye
 
 `pnpm run import:status` toont hetzelfde aantal onder de wedstrijden: `goals of ours without a player: 3 of 41 (Oyen, Vente)`.
 De import van de wedstrijden schrijft de doelpunten van een wedstrijd opnieuw als de koppeling verandert, dus een doelpunt krijgt zijn speler bij de eerstvolgende lezing nadat de selectie hem heeft.
+
+### De clubs van de tegenstanders
+
+Elke wedstrijd hangt aan een club (`matches.club_id`, zie _De tabellen `clubs` en `club_names`_ in de [README van `@fansite/db`](../../packages/db/README.md)).
+Een club is één artikel op de Nederlandse Wikipedia, met een vaste slug voor zijn adres.
+De regels staan op één plek, `createClubBook` in [`clubs.ts`](../../packages/db/src/clubs.ts) van het package, en de import van de wedstrijden past ze toe op elke wedstrijd die hij schrijft:
+
+1. De reader leest de pagina van de link bij de tegenstander (`[[Telstar (voetbalclub)|Telstar]]` geeft `Telstar (voetbalclub)`), zoals bij de spelers.
+   De naam is de tekst die de pagina toont, zoals voorheen.
+2. Heeft de wedstrijd een artikel, dan zoekt de import de club met dat artikel.
+   Is er geen, dan neemt de club met die naam het artikel als hij er nog geen heeft (een club die de migratie van alleen een naam maakte).
+   Is ook die er niet, dan maakt de import een nieuwe club.
+3. Heeft de wedstrijd geen artikel, dan zoekt de import de club op naam, ook tussen de andere namen (`club_names`).
+   Hoofdletters, accenten en leestekens tellen niet mee: `N.E.C.` en `NEC` zijn dezelfde naam.
+   Is er geen, dan maakt hij een nieuwe club zonder artikel.
+4. De slug van een nieuwe club komt van de naam, zonder accenten, punten en apostrofs (`N.E.C.` geeft `nec`, `Be Quick '28` geeft `be-quick-28`).
+   Heeft een andere club de slug al, dan komt er `-2` achter, dan `-3`, enzovoort.
+   `kies` is nooit een slug, want `/statistieken/tegenstanders/kies` is een pagina van de site zelf.
+   Een club houdt zijn slug, ook als zijn naam verandert.
+5. Schrijft Wikipedia de naam van een club die we al hebben anders, dan komt die naam bij de andere namen.
+   Is de wedstrijd van het nieuwste seizoen dat we van de club hebben, dan wordt het de naam van de club, en de oude naam komt bij de andere namen.
+   Een naam die de club al had, verandert niets, zodat twee schrijfwijzen in één seizoen niet om de beurt de naam zijn.
+   Een naam van een andere club blijft bij die club.
+
+Een wedstrijd kan van club veranderen als Wikipedia een ander artikel linkt; dan telt hij als bijgewerkt.
+De import verwijdert nooit een club, ook niet als er geen wedstrijd meer aan hangt (zoals de verzonnen clubs van de seed): de queries tonen alleen clubs met een wedstrijd.
+
+Elke nieuwe club, elk artikel dat een club krijgt en elke naam die hij bijmaakt, krijgt een regel in het logboek van de run, naast de regel van de wedstrijden:
+
+```text
+Matches 2026/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-10-24
+Matches 2026/27: new club 'Telstar' (article 'Telstar (voetbalclub)')
+Matches 2026/27: new club 'SV Proefdorp', with no article
+Matches 2026/27: article 'PEC Zwolle' for club 'PEC Zwolle'
+Matches 2026/27: club 'Telstar' is now called 'Telstar 1963'
+Matches 2026/27: new name 'Telstar' for club 'Telstar 1963'
+Matches 2026/27: name 'Excelsior' stays with club 'Excelsior', not added to club 'Quick'
+```
+
+Een club is geen persoon, dus de regels hebben alleen de naam en het artikel.
+De eerste lezing van een seizoen schrijft een regel per club, zo'n zeventien; daarna komt er alleen een regel als er iets nieuws is.
+Een club met twee namen voegt de projecteigenaar samen met de hand (zie de README van `@fansite/db`).
 
 ### De controles
 

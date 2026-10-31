@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 import type { Match, MatchGoal, MatchImport, NewMatchGoal, WikipediaPageKind } from '@fansite/db/schema'
 
+import { createClubBook } from '@fansite/db/clubs'
 import { matches, matchGoals, matchImports, players, standings, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
 import { and, asc, eq, inArray } from 'drizzle-orm'
@@ -44,6 +45,22 @@ export type MatchReport =
     }
   | {
       /**
+       * The clubs the import made or changed, one line each: a new club, the article of a
+       * club, a new name. They go in the log of the run.
+       */
+      clubs: string[]
+      kind: 'imported'
+      matches: { added: number; removed: number; unchanged: number; updated: number }
+      season: string
+      /** The number of clubs in the table. */
+      standings: number
+      /** The day the table holds for. */
+      validOn: string
+      /** A result that had stood for days changed. The new result is taken over. */
+      warnings: string[]
+    }
+  | {
+      /**
        * The import did not ask: it reads Wikipedia once an hour, and that hour has not
        * passed.
        */
@@ -55,17 +72,6 @@ export type MatchReport =
       kind: 'blocked-by-robots'
       season: string
       url: string
-    }
-  | {
-      kind: 'imported'
-      matches: { added: number; removed: number; unchanged: number; updated: number }
-      season: string
-      /** The number of clubs in the table. */
-      standings: number
-      /** The day the table holds for. */
-      validOn: string
-      /** A result that had stood for days changed. The new result is taken over. */
-      warnings: string[]
     }
   | {
       kind: 'wait'
@@ -99,6 +105,7 @@ export function formatMatchReport(report: MatchReport): string {
     case 'imported':
       return [
         `${head}: ${report.matches.added} new, ${report.matches.updated} updated, ${report.matches.unchanged} unchanged, ${report.matches.removed} removed; table of ${report.standings} clubs for ${report.validOn}`,
+        ...report.clubs.map((club) => `${head}: ${printable(club)}`),
         ...report.warnings.map((warning) => `${head}: warning, ${printable(warning)}`),
       ].join('\n')
     case 'postponed':
@@ -349,8 +356,9 @@ function goalsOf(match: ReadMatch, link: (goal: ReadGoal) => null | number): { g
 }
 
 /** Whether a stored match is what Wikipedia says now, apart from `result_set_at`. */
-function isSame(before: Match, now: ReadMatch): boolean {
+function isSame(before: Match, now: ReadMatch, clubId: number): boolean {
   return (
+    before.clubId === clubId &&
     before.opponent === now.opponent &&
     before.home === now.home &&
     before.stadium === now.stadium &&
@@ -458,6 +466,7 @@ async function readAndStore(
   })
 
   return {
+    clubs: stored.clubs,
     kind: 'imported',
     matches: stored.counts,
     season,
@@ -525,7 +534,9 @@ async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: 
  * players of the season as they are in the table now, so a goal gets its player as soon as the
  * squad has him, and a goal that is linked keeps its link until the table says otherwise. A
  * goal of ours that has no player is a warning too (once the squad has been read), and no
- * reason to keep the match out.
+ * reason to keep the match out. Every match gets its club (`clubs.ts` in the database package):
+ * the club with the article the match links, or else with the name, or a new one. What that
+ * made or changed comes back as lines for the log.
  */
 async function storeMatches(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
@@ -549,13 +560,18 @@ async function storeMatches(
     storedGoals.set(goal.goal.matchId, [...(storedGoals.get(goal.goal.matchId) ?? []), goal.goal])
   }
 
+  const book = await createClubBook(db)
   const counts = { added: 0, removed: 0, unchanged: 0, updated: 0 }
+  const clubLines: string[] = []
   const warnings: string[] = []
   const linkedGoals: LinkedGoal[] = []
 
   for (const match of found) {
     const before = known.get(key(match))
     const scorers = goalsOf(match, link)
+    const club = await book.resolve({ name: match.opponent, page: match.opponentPage, season })
+
+    clubLines.push(...club.events)
 
     linkedGoals.push(...scorers.goals)
 
@@ -569,10 +585,10 @@ async function storeMatches(
 
       const [{ insertId }] = await db
         .insert(matches)
-        .values({ ...match, resultSetAt: match.status === 'played' ? now : null, season })
+        .values({ ...match, clubId: club.id, resultSetAt: match.status === 'played' ? now : null, season })
 
       await storeGoals(db, insertId, scorers.goals)
-    } else if (isSame(before, match) && isSameGoals(storedGoals.get(before.id) ?? [], scorers.goals)) {
+    } else if (isSame(before, match, club.id) && isSameGoals(storedGoals.get(before.id) ?? [], scorers.goals)) {
       counts.unchanged++
     } else {
       counts.updated++
@@ -598,7 +614,11 @@ async function storeMatches(
 
       await db
         .update(matches)
-        .set({ ...match, resultSetAt: sameResult ? before.resultSetAt : match.status === 'played' ? now : null })
+        .set({
+          ...match,
+          clubId: club.id,
+          resultSetAt: sameResult ? before.resultSetAt : match.status === 'played' ? now : null,
+        })
         .where(eq(matches.id, before.id))
       if (!isSameGoals(storedGoals.get(before.id) ?? [], scorers.goals)) {
         await db.delete(matchGoals).where(eq(matchGoals.matchId, before.id))
@@ -621,5 +641,5 @@ async function storeMatches(
     warnings.push(unlinked)
   }
 
-  return { counts, warnings }
+  return { clubs: clubLines, counts, warnings }
 }

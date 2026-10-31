@@ -1,5 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { withClubs } from '@fansite/db/clubs'
 import {
   feeds,
   matches,
@@ -391,18 +392,22 @@ describe('reading again', () => {
     const [farji] = await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))
     const [match] = await database.db
       .insert(matches)
-      .values({
-        competition: 'Eredivisie',
-        goalsAgainst: 0,
-        goalsFor: 1,
-        home: true,
-        kickoffAt: first,
-        matchDate: '2026-10-25',
-        opponent: 'Testdorp FC',
-        round: 'Speelronde 1',
-        season,
-        status: 'played',
-      })
+      .values(
+        await withClubs(database.db, [
+          {
+            competition: 'Eredivisie',
+            goalsAgainst: 0,
+            goalsFor: 1,
+            home: true,
+            kickoffAt: first,
+            matchDate: '2026-10-25',
+            opponent: 'Testdorp FC',
+            round: 'Speelronde 1',
+            season,
+            status: 'played',
+          },
+        ]),
+      )
       .$returningId()
 
     await database.db.insert(matchGoals).values({
@@ -618,18 +623,24 @@ describe('the numbers of the players', () => {
       .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
       .where(eq(playerSeasonStats.competition, 'Eredivisie'))
     const scorers = rows.flatMap((row) => Array.from({ length: row.goals }, () => row))
-    const [{ insertId }] = await database.db.insert(matches).values({
-      competition: 'Eredivisie',
-      goalsAgainst: 0,
-      goalsFor: scorers.length,
-      home: true,
-      kickoffAt: new Date('2026-10-24T18:45:00Z'),
-      matchDate: '2026-10-24',
-      opponent: 'Testdorp FC',
-      round: 'Speelronde 1',
-      season,
-      status: 'played',
-    })
+    const [{ insertId }] = await database.db.insert(matches).values(
+      (
+        await withClubs(database.db, [
+          {
+            competition: 'Eredivisie',
+            goalsAgainst: 0,
+            goalsFor: scorers.length,
+            home: true,
+            kickoffAt: new Date('2026-10-24T18:45:00Z'),
+            matchDate: '2026-10-24',
+            opponent: 'Testdorp FC',
+            round: 'Speelronde 1',
+            season,
+            status: 'played',
+          },
+        ])
+      )[0]!,
+    )
 
     await database.db.insert(matchGoals).values(
       scorers.map((scorer, index) => ({
@@ -905,7 +916,7 @@ describe('the import command', () => {
     const { server } = await serve(original, { matchPages: true })
 
     const { code, lines: reports } = await run(server, feed)
-    const lines = reports.flatMap((report) => report.split('\n'))
+    const lines = reports.flatMap((report) => report.split('\n')).filter((line) => !line.includes(': new club '))
 
     expect(code).toBe(0)
     expect(lines.slice(0, 4)).toEqual([

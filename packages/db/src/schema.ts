@@ -518,6 +518,69 @@ export type MatchStatus = (typeof matchStatuses)[number]
 export const matchLimits = { dateText: 60, opponent: 100, round: 60, season: 7, stadium: 150 }
 
 /**
+ * The most characters the Wikipedia page of a player or a club holds, in `players`,
+ * `match_goals` and `clubs`.
+ * A title on Wikipedia is up to 255 bytes, so a longer one is not a page we keep.
+ */
+export const wikipediaPageMaxLength = 255
+
+/** The most characters a column of `clubs` and `club_names` holds. */
+export const clubLimits = { name: matchLimits.opponent, slug: 80 }
+
+/**
+ * A page title on Wikipedia, compared byte for byte: `Go Ahead Eagles` and `Go ahead eagles`
+ * are two pages there, while the collation of the other tables (utf8mb4_unicode_ci) would
+ * treat them as one.
+ */
+const articleTitle = customType<{ data: string }>({
+  dataType: () => `varchar(${wikipediaPageMaxLength}) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin`,
+})
+
+/**
+ * The clubs sc Heerenveen played against. One club is one article on the Dutch Wikipedia:
+ * `wikipedia_page` is its title (unique where there is one), and a club that is named in more
+ * than one way is still one row. `slug` is the fixed name in an address, with lowercase
+ * letters, digits and single hyphens (the check ignores the collation, which would let capitals
+ * through); it is unique and never changes when the name does. `name` is the name of the
+ * newest season we have of the club; the other names it was written with are in `club_names`.
+ * Times are UTC.
+ */
+export const clubs = mysqlTable(
+  'clubs',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    slug: varchar('slug', { length: clubLimits.slug }).notNull().unique(),
+    name: varchar('name', { length: clubLimits.name }).notNull(),
+    wikipediaPage: articleTitle('wikipedia_page').unique(),
+    createdAt: datetime('created_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+  },
+  (table) => [check('clubs_slug_format', sql`${table.slug} regexp '(?-i)^[a-z0-9]+(-[a-z0-9]+)*$'`)],
+)
+
+export type Club = typeof clubs.$inferSelect
+
+export type NewClub = typeof clubs.$inferInsert
+
+/**
+ * The other names of a club, as Wikipedia writes them in the matches (`N.E.C.` for `NEC`). A
+ * name belongs to one club, so it is unique; the club's own `name` is not repeated here. The
+ * rows go with their club.
+ */
+export const clubNames = mysqlTable('club_names', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  clubId: int('club_id', { unsigned: true })
+    .notNull()
+    .references(() => clubs.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: clubLimits.name }).notNull().unique(),
+})
+
+export type ClubName = typeof clubNames.$inferSelect
+
+export type NewClubName = typeof clubNames.$inferInsert
+
+/**
  * The matches of sc Heerenveen 1 (men), from the Dutch Wikipedia: the Eredivisie and the KNVB
  * Beker. A season starts on 1 July and is written `2026/27`. The importer reads the current
  * season only and never changes or removes the rows of an earlier one.
@@ -541,6 +604,9 @@ export const matchLimits = { dateText: 60, opponent: 100, round: 60, season: 7, 
  *
  * `result_set_at` is the moment the importer first saw the current result, so it can tell that
  * a result which stood for days has changed.
+ *
+ * `club_id` is the opponent as a club (`clubs`), which gives it a fixed name in an address.
+ * `opponent` stays as Wikipedia wrote it in this match.
  */
 export const matches = mysqlTable(
   'matches',
@@ -550,6 +616,9 @@ export const matches = mysqlTable(
     competition: mysqlEnum('competition', competitions).notNull(),
     round: varchar('round', { length: matchLimits.round }).notNull(),
     opponent: varchar('opponent', { length: matchLimits.opponent }).notNull(),
+    clubId: int('club_id', { unsigned: true })
+      .notNull()
+      .references(() => clubs.id),
     home: boolean('home').notNull(),
     stadium: varchar('stadium', { length: matchLimits.stadium }),
     status: mysqlEnum('status', matchStatuses).notNull(),
@@ -592,12 +661,6 @@ export type NewMatch = typeof matches.$inferInsert
 
 /** The most characters the player column of `match_goals` holds. */
 export const matchGoalPlayerMaxLength = 100
-
-/**
- * The most characters the Wikipedia page of a player holds, in `players` and in `match_goals`.
- * A title on Wikipedia is up to 255 bytes, so a longer one is not a page we keep.
- */
-export const wikipediaPageMaxLength = 255
 
 /**
  * The goals of a played match, one row for each, from the Dutch Wikipedia. `ours` is true for a

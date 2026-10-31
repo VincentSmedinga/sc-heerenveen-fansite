@@ -148,6 +148,13 @@
       "when": 1793444015172,
       "tag": "0020_add_player_season_stats",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1793461504729,
+      "tag": "0021_add_clubs",
+      "breakpoints": true
     }
   ]
 }

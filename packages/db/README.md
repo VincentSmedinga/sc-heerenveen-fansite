@@ -289,7 +289,8 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `season`, `competition`              | Het seizoen en de competitie: `Eredivisie` of `KNVB Beker`                                                   |
 | `round`                              | De ronde zoals Wikipedia die noemt, zoals `Speelronde 12` of `Eerste ronde`; uniek per seizoen en competitie |
-| `opponent`, `home`, `stadium`        | De tegenstander, of de wedstrijd thuis is, en het stadion (kan ontbreken)                                    |
+| `opponent`, `home`, `stadium`        | De tegenstander zoals Wikipedia hem schrijft, of de wedstrijd thuis is, en het stadion (kan ontbreken)       |
+| `club_id`                            | De tegenstander als club (zie _De tabellen `clubs` en `club_names`_); verplicht                              |
 | `status`                             | `scheduled`, `played` of `postponed`                                                                         |
 | `goals_for`, `goals_against`         | De doelpunten van sc Heerenveen en van de tegenstander; alleen gevuld bij `played`                           |
 | `extra_time`                         | Of een gespeelde bekerwedstrijd in verlenging ging; anders `false`                                           |
@@ -406,6 +407,71 @@ De goede lezing van de selectie vervangt de verzonnen selectie bij de eerste kee
 Een database met echte wedstrijden raakt de seed niet aan.
 De verzonnen doelpunten verwijzen naar verzonnen spelers (`madeUpGoals` en `madeUpSquad`), met een speler die de selectie verliet en twee spelers met dezelfde achternaam (Testvoort), zodat de pagina's en de controles de gevallen van de koppeling hebben.
 
+## De tabellen `clubs` en `club_names`
+
+De clubs waartegen sc Heerenveen speelde, zodat elke tegenstander een vaste naam en een vast adres heeft.
+Een club is één artikel op de Nederlandse Wikipedia, ook als Wikipedia hem in de wedstrijden op twee manieren schrijft.
+De gegevens komen van Wikipedia en vallen onder CC BY-SA 4.0, zoals de wedstrijden.
+
+`clubs` heeft een rij per club.
+
+| Kolom            | Betekenis                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `slug`           | De vaste naam in een adres: kleine letters, cijfers en enkele streepjes, hoogstens 80 tekens; uniek, en een nieuwe naam verandert hem niet |
+| `name`           | De huidige naam: die van het nieuwste seizoen waarin we tegen de club speelden                                                             |
+| `wikipedia_page` | De titel van het artikel, zoals `Telstar (voetbalclub)`; uniek als hij er is, en leeg voor een club waarvan we alleen een naam kennen      |
+| `created_at`     | Wanneer de club is toegevoegd, in UTC                                                                                                      |
+
+De CHECK-constraint `clubs_slug_format` weigert een slug met hoofdletters, een underscore of twee streepjes achter elkaar, in elke tool.
+`wikipedia_page` vergelijkt letter voor letter (de collatie is `utf8mb4_bin`), want `Go Ahead Eagles` en `Go ahead eagles` zijn twee pagina's.
+`club_names` heeft de andere namen van een club, zoals Wikipedia ze in wedstrijden schrijft (`N.E.C.` bij `NEC`).
+Het zijn `club_id` en `name`; een naam is uniek, want hij hoort bij één club, en de rij gaat weg met haar club.
+De huidige naam staat er niet nog eens in.
+
+`matches.club_id` verwijst naar de club van de tegenstander.
+Een club met wedstrijden is niet te verwijderen (de verwijzing heeft geen cascade), en een wedstrijd zonder club bestaat niet.
+`matches.opponent` blijft de naam zoals Wikipedia hem in die wedstrijd schrijft.
+
+De migratie `0021_add_clubs` maakt van de verschillende waarden van `matches.opponent` een club (hoofdletters tellen niet mee), met een slug van de naam, en koppelt elke wedstrijd.
+De slug heeft geen accenten, punten of apostrofs (`N.E.C.` geeft `nec`) en krijgt `-2`, `-3` erachter als een andere club hem al heeft.
+`kies` is voorbehouden, want `/statistieken/tegenstanders/kies` is een pagina van de site; een club die zo heet, krijgt `kies-2`.
+In een lege database doet de migratie niets.
+Een club zonder artikel krijgt dat van de importer de eerstvolgende keer dat hij het seizoen leest.
+
+De regels voor het vinden en maken van een club staan in `src/clubs.ts` (`@fansite/db/clubs`), en de importer gebruikt ze (zie de [README van de importer](../../apps/importer/README.md), _De clubs van de tegenstanders_).
+`withClubs(db, rijen)` geeft wedstrijden zonder club hun club op naam, voor de seed en de tests.
+De seed zet de verzonnen wedstrijden erin met verzonnen clubs.
+Lezen de import de echte wedstrijden, dan verdwijnen de verzonnen wedstrijden maar blijven hun clubs staan; ze hebben geen wedstrijd meer, dus de queries tonen ze niet.
+
+Drie queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
+
+- `listClubRecords(db, { competition })` geeft de clubs met minstens één wedstrijd, van A tot Z op naam, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden en de doelpunten voor en tegen.
+  Een wedstrijd telt als gespeeld, gewonnen, gelijk of verloren op de doelpunten zoals Wikipedia ze geeft, dus een bekerwedstrijd die op strafschoppen is beslist, is gelijk.
+  Zonder `competition` tellen alle wedstrijden, met `competition: 'Eredivisie'` alleen die van de competitie, en een club die we alleen in de beker troffen staat er dan niet in.
+  Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
+- `findClubBySlug(db, slug)` geeft één club met zijn `id`, `slug`, `name`, `wikipediaPage` en de andere namen (`otherNames`, van A tot Z), of niets voor een slug die niemand heeft.
+- `listClubMatches(db, clubId, { competition })` geeft de wedstrijden tegen de club, de nieuwste eerst over alle seizoenen, ook de wedstrijden die nog niet gespeeld zijn.
+  Bij elke wedstrijd staan het seizoen, de competitie, de ronde, de dag of de tekst voor de datum, de aftrap, thuis of uit, de uitslag en eventuele verlenging en strafschoppen.
+  Met `competition` alleen die van de competitie.
+
+### Een club met twee namen samenvoegen
+
+Staan dezelfde club en dezelfde artikelen twee keer in `clubs`, zoals `Excelsior` en `Excelsior Rotterdam` (de eerste zonder artikel, uit een wedstrijd waar de naam geen link had), dan voegt de projecteigenaar of een Builder ze met de hand samen.
+Er is geen opdracht voor, want het komt zelden voor.
+Doe het in één transactie, met `<blijft>` en `<gaat weg>` als het `id` van de twee clubs:
+
+```sql
+UPDATE matches SET club_id = <blijft> WHERE club_id = <gaat weg>;
+UPDATE club_names SET club_id = <blijft> WHERE club_id = <gaat weg>;
+INSERT INTO club_names (club_id, name) SELECT <blijft>, name FROM clubs WHERE id = <gaat weg>;
+DELETE FROM clubs WHERE id = <gaat weg>;
+```
+
+De naam van de club die weggaat, staat daarna bij de andere namen van de club die blijft.
+Schrijft Wikipedia die naam later weer, zonder link, dan vindt de importer de club die blijft.
+Had de club die weggaat een eigen artikel, dan is het geen samenvoegen maar een vergissing: één artikel is één club, en de importer maakt de club bij de volgende lezing opnieuw.
+De slug van de club die weggaat, werkt dan niet meer; de slug van de club die blijft verandert niet.
+
 ## De tabel `staff`
 
 De staf van sc Heerenveen 1 (mannen), met een rol per rij.
@@ -465,8 +531,9 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `standings`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `standings`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
+- `@fansite/db/clubs`: `createClubBook(db)` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
@@ -475,6 +542,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
   `listArchivePage(db, { limit, offset, source, until })` geeft dezelfde berichten als `listRecentItems`, maar vanaf `offset` en zonder grens in leeftijd, voor het nieuwsarchief op `/nieuws`; `countArchiveItems` geeft het totaal, en `listArchiveSources` de bronnen met een `slug` en minstens één bericht voor het filter; `source` is de `slug` van één bron;
   `findPublishedArticle(db, slug, until)`, `findNewestArticle(db, until)` en `listPublishedArticles(db, until)` geven de gepubliceerde artikelen van de redactie (zie _De tabel `articles`_);
   `listSeasonPlayerStats(db, season)` geeft de optredens, doelpunten en assists van de spelers van een seizoen, een rij per speler en competitie (zie _De wedstrijden en de stand_);
+  `listClubRecords(db, { competition })`, `findClubBySlug(db, slug)` en `listClubMatches(db, clubId, { competition })` geven de clubs met hun cijfers, één club en de wedstrijden tegen een club (zie _De tabellen `clubs` en `club_names`_);
   `listSeasonMatches(db, season)`, `listSeasonStandings(db, season)` en `listWikipediaPages(db, season)` geven de wedstrijden op volgorde van spelen, de stand van boven naar beneden en de pagina's van Wikipedia die de import las, voor één seizoen, met alleen de velden die een pagina toont;
   `listPodcasts(db)` geeft de podcasts met een `slug` en minstens één aflevering, voor het filter, en `findPodcast(db, slug)` geeft de naam, de beschrijving en de adressen bij Apple Podcasts en Spotify van één podcast;
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);

@@ -8,6 +8,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { NewMatch, NewPlayer } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
+import { withClubs } from './clubs.ts'
 import { prepareDatabase } from './prepare.ts'
 import { matches, matchGoals, players } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
@@ -16,7 +17,7 @@ const migrationsFolder = fileURLToPath(new URL('../drizzle', import.meta.url))
 
 const migration = '0018_add_player_links'
 
-const match: NewMatch = {
+const match: Omit<NewMatch, 'clubId'> = {
   competition: 'Eredivisie',
   goalsAgainst: 0,
   goalsFor: 1,
@@ -55,7 +56,9 @@ describe('the links between goals and players', () => {
   })
 
   async function insertGoal(playerId: null | number) {
-    const [{ insertId: matchId }] = await database.db.insert(matches).values(match)
+    const [{ insertId: matchId }] = await database.db
+      .insert(matches)
+      .values((await withClubs(database.db, [match]))[0]!)
 
     await database.db
       .insert(matchGoals)

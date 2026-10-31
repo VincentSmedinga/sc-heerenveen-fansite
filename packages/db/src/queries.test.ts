@@ -3,6 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
+import { withClubs } from './clubs.ts'
 import {
   countArchiveItems,
   countPodcastEpisodes,
@@ -1177,15 +1178,19 @@ describe('the matches and the table of a season', () => {
 
   describe('listMatchSeasons', () => {
     it('gives the seasons that have matches, the newest first and each once', async () => {
-      await database.db.insert(matches).values(madeUpMatches(now))
-      await database.db.insert(matches).values(madeUpMatches(new Date('2025-10-25T12:00:00Z')))
-      await database.db.insert(matches).values(madeUpMatches(new Date('1999-10-25T12:00:00Z')))
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
+      await database.db
+        .insert(matches)
+        .values(await withClubs(database.db, madeUpMatches(new Date('2025-10-25T12:00:00Z'))))
+      await database.db
+        .insert(matches)
+        .values(await withClubs(database.db, madeUpMatches(new Date('1999-10-25T12:00:00Z'))))
 
       expect(await listMatchSeasons(database.db)).toEqual(['2026/27', '2025/26', '1999/00'])
     })
 
     it('leaves out a season that has only a table', async () => {
-      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
       await database.db.insert(standings).values({ ...madeUpTable(now)[0]!, season: '2025/26' })
 
       expect(await listMatchSeasons(database.db)).toEqual(['2026/27'])
@@ -1198,27 +1203,31 @@ describe('the matches and the table of a season', () => {
 
   describe('listSeasonMatches', () => {
     it('gives the matches of the season in the order they are played, a match without a kick-off first on its day', async () => {
-      await database.db.insert(matches).values(madeUpMatches(now))
-      await database.db.insert(matches).values({
-        competition: 'KNVB Beker',
-        home: true,
-        kickoffAt: new Date('2026-10-28T19:30:00Z'),
-        matchDate: '2026-10-28',
-        opponent: 'Late Gast',
-        round: 'Derde ronde',
-        season: '2026/27',
-        status: 'scheduled',
-      })
-      await database.db.insert(matches).values({
-        competition: 'Eredivisie',
-        dateText: '28 oktober 2026',
-        home: false,
-        matchDate: '2026-10-28',
-        opponent: 'Vroege Gast',
-        round: 'Speelronde 9',
-        season: '2026/27',
-        status: 'scheduled',
-      })
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
+      await database.db.insert(matches).values(
+        await withClubs(database.db, [
+          {
+            competition: 'KNVB Beker',
+            home: true,
+            kickoffAt: new Date('2026-10-28T19:30:00Z'),
+            matchDate: '2026-10-28',
+            opponent: 'Late Gast',
+            round: 'Derde ronde',
+            season: '2026/27',
+            status: 'scheduled',
+          },
+          {
+            competition: 'Eredivisie',
+            dateText: '28 oktober 2026',
+            home: false,
+            matchDate: '2026-10-28',
+            opponent: 'Vroege Gast',
+            round: 'Speelronde 9',
+            season: '2026/27',
+            status: 'scheduled',
+          },
+        ]),
+      )
 
       const rows = await listSeasonMatches(database.db, '2026/27')
       const days = rows.map((match) => match.matchDate)
@@ -1231,7 +1240,7 @@ describe('the matches and the table of a season', () => {
     })
 
     it('gives a played match its goals and the others none, and keeps the kick-off in UTC', async () => {
-      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
 
       const rows = await listSeasonMatches(database.db, '2026/27')
       const played = rows.find((match) => match.round === 'Speelronde 1')
@@ -1243,7 +1252,7 @@ describe('the matches and the table of a season', () => {
     })
 
     it('gives a cup match its extra time and its shoot-out from the side of sc Heerenveen', async () => {
-      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
 
       const rows = await listSeasonMatches(database.db, '2026/27')
       const extra = rows.find((match) => match.round === 'Eerste ronde')
@@ -1256,7 +1265,7 @@ describe('the matches and the table of a season', () => {
     })
 
     it('gives a played match its scorers in the order of the clock, and the others none', async () => {
-      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
 
       const [cupMatch] = await database.db
         .select({ id: matches.id })
@@ -1341,7 +1350,7 @@ describe('the matches and the table of a season', () => {
     })
 
     it('gives a goal of one of our players the player and his full name, also when he has left the squad', async () => {
-      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
 
       const [cupMatch] = await database.db
         .select({ id: matches.id })
@@ -1391,8 +1400,10 @@ describe('the matches and the table of a season', () => {
     })
 
     it('gives only the season it is asked for', async () => {
-      await database.db.insert(matches).values(madeUpMatches(now))
-      await database.db.insert(matches).values(madeUpMatches(new Date('2027-08-01T12:00:00Z')))
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
+      await database.db
+        .insert(matches)
+        .values(await withClubs(database.db, madeUpMatches(new Date('2027-08-01T12:00:00Z'))))
 
       const rows = await listSeasonMatches(database.db, '2026/27')
 
@@ -1401,7 +1412,7 @@ describe('the matches and the table of a season', () => {
     })
 
     it('leaves the columns that are internal out', async () => {
-      await database.db.insert(matches).values(madeUpMatches(now))
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
 
       const [row] = await listSeasonMatches(database.db, '2026/27')
 

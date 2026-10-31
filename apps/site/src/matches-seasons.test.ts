@@ -1,5 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { withClubs } from '@fansite/db/clubs'
 import { matches, standings, wikipediaPages } from '@fansite/db/schema'
 import { madeUpMatches, madeUpTable } from '@fansite/db/seed'
 import { seedStaff } from '@fansite/db/staff-seed'
@@ -36,8 +37,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM wikipedia_pages')
   await database.pool.query('DELETE FROM staff')
   await seedStaff(database.db)
-  await database.db.insert(matches).values(madeUpMatches(now))
-  await database.db.insert(matches).values(madeUpMatches(earlier).slice(0, 3))
+  await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
+  await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(earlier).slice(0, 3)))
   await database.db.insert(standings).values(madeUpTable(now))
   await database.db.insert(standings).values(madeUpTable(earlier).slice(0, 4))
   await database.db.insert(wikipediaPages).values([
@@ -137,7 +138,9 @@ describe('getMatchSeasons', () => {
   })
 
   it('leaves a season after the current one out, because it has no page', async () => {
-    await database.db.insert(matches).values(madeUpMatches(new Date('2027-10-23T13:40:00Z')).slice(0, 1))
+    await database.db
+      .insert(matches)
+      .values(await withClubs(database.db, madeUpMatches(new Date('2027-10-23T13:40:00Z')).slice(0, 1)))
 
     const { getMatchSeasons } = await import('./matches')
 
