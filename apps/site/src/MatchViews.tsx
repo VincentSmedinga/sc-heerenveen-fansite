@@ -850,7 +850,7 @@ export function TopScorersCard({
 // Between the parts of a line of meta text. The dot is only for the eye and is hidden from a
 // screen reader, as in a short match. The spaces stay outside the hidden span, so the parts
 // don't run together in the accessibility tree.
-const metaSeparator = (
+export const metaSeparator = (
   <>
     {' '}
     <Text aria-hidden="true" as="span">

@@ -34,6 +34,11 @@ export const pages = [
   },
   {
     description:
+      'Alle clubs waar sc Heerenveen tegen speelde, met hoe vaak we wonnen, gelijkspeelden en verloren, en de bron erbij: de Nederlandse Wikipedia.',
+    path: '/statistieken/tegenstanders',
+  },
+  {
+    description:
       'Alle afleveringen van de podcasts over sc Heerenveen op één plek, met een link naar de pagina van de aflevering bij de maker.',
     path: '/nieuws/podcasts',
   },

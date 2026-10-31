@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu twaalf pagina's: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/statistieken/spelers` met alle doelpuntenmakers, `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu dertien pagina's, en een pagina per tegenstander: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/statistieken/spelers` met alle doelpuntenmakers, `/statistieken/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -269,8 +269,8 @@ De volgorde in de broncode blijft de volgorde van de balk en van een telefoon.
 Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`).
 De kaarten tellen standaard alle wedstrijden, de Eredivisie en de KNVB Beker; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
-Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu alleen Spelers (`statisticsSubitems` in `src/SiteNavigation.tsx`).
-Op `/statistieken` is geen subpagina de huidige; op `/statistieken/spelers` en zijn seizoenen is Spelers het wel, en Statistieken blijft het huidige onderdeel van het menu.
+Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu Spelers en Tegenstanders (`statisticsSubitems` in `src/SiteNavigation.tsx`).
+Op `/statistieken` is geen subpagina de huidige; op `/statistieken/spelers` en zijn seizoenen is Spelers het wel, op `/statistieken/tegenstanders` en de pagina's van de clubs is Tegenstanders het wel, en Statistieken blijft het huidige onderdeel van het menu.
 Op een breed scherm is de balk er niet.
 De balk volgt de pagina, zoals die van Wedstrijden.
 De stand, de reeksen, de doelpuntenmakers, de nul gehouden, hoe de wedstrijden verlopen en de uitersten hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen, thuis en uit en de doelpunten per kwartier een warm vlak (`surface="warm"`), en onze plek in de competitie is wit.
@@ -380,9 +380,34 @@ De pagina deelt alles rond het seizoen met Statistieken: de kiezer, de adressen 
 De balk "Op deze pagina:" heeft één link, naar de kaart (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/statistieken/spelers`).
 De bezoekteller telt de pagina van een seizoen als een bezoek aan `/statistieken/spelers`.
 
+### De tegenstanders
+
+`/statistieken/tegenstanders` is de tweede subpagina van Statistieken.
+Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden en de doelpunten voor en tegen.
+Elke clubnaam is een link naar `/statistieken/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
+De tabel heeft geen knop om te sorteren en geen paginering.
+De vijf cijferkolommen hebben een afkorting (G, W, GL, V, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit; de rijkop is een link dankzij `href` op een rij van `DataTable`.
+Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
+
+De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als Wikipedia hem onder andere namen schrijft.
+De kaart "Onze uitslagen tegen …" heeft de samenvatting (Totaal, Thuis en Uit, zonder punten), de grootste overwinning en de grootste nederlaag, de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
+De kaart Wedstrijden toont elke gespeelde wedstrijd, de nieuwste eerst, met het seizoen en de competitie boven de regel; de regel noemt de club zoals Wikipedia hem in die wedstrijd schreef.
+Een slug die geen club heeft, een andere waarde van `?competitie=` en een waarde die twee keer staat, geven "niet gevonden".
+
+De pagina's tellen de wedstrijden van alle seizoenen, dus ze hebben geen seizoenskiezer.
+Ze volgen de schakelaar tussen alle wedstrijden en de Eredivisie (`CompetitionLinks` in `src/CompetitionSwitch.tsx`, zie _De keuze tussen alle wedstrijden en de Eredivisie_), die er alleen staat als er een gespeelde bekerwedstrijd is.
+Een club die we alleen in de beker troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt dat we in de Eredivisie nog niet tegen hem speelden.
+De keuze zit in elke link van de lijst.
+
+De code staat in `src/opponents.ts` (de optelling van de wedstrijden en de gecachete lezingen, op de queries van `packages/db`), `src/OpponentViews.tsx` (de kaarten) en `app/statistieken/tegenstanders` (de twee pagina's).
+De cache heeft twee sleutels voor de lijst en per club een sleutel, pas nadat de slug is gecontroleerd tegen de bekende clubs.
+De bronvermelding onderaan noemt de pagina's van Wikipedia van alle seizoenen in de cijfers (`listAllWikipediaPages`).
+De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clubpagina staat ook in de sitemap en telt onder zijn eigen adres mee, nadat de database heeft bevestigd dat de club bestaat (`isClubSlug`).
+`pnpm test:a11y` gebruikt de verzonnen wedstrijden van de seed: `testdorp-fc` is een club uit de competitie, `fc-maquette` een club uit de beker.
+
 ### De keuze tussen alle wedstrijden en de Eredivisie
 
-Bovenaan `/statistieken` en `/statistieken/spelers`, direct onder de kop en links, staat een schakelaar (`SegmentedLinks` uit het designsysteem, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
+Bovenaan `/statistieken`, `/statistieken/spelers`, `/statistieken/tegenstanders` en de pagina van een club, direct onder de kop en links, staat een schakelaar (`SegmentedLinks` uit het designsysteem, via `CompetitionSwitch` in `src/CompetitionSwitch.tsx`) met twee links: Alle wedstrijden en Eredivisie.
 Alle wedstrijden is de standaard en heeft geen parameter; Eredivisie is `?competitie=eredivisie`.
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
 Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.

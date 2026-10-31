@@ -10,8 +10,11 @@ const newsSubitems = [
   { href: '/nieuws/zoeken', label: 'Zoeken' },
 ]
 
-// The sub-pages of Statistieken. Tegenstanders and Seizoenen come later.
-const statisticsSubitems = [{ href: '/statistieken/spelers', label: 'Spelers' }]
+// The sub-pages of Statistieken. Seizoenen comes later.
+const statisticsSubitems = [
+  { href: '/statistieken/spelers', label: 'Spelers' },
+  { href: '/statistieken/tegenstanders', label: 'Tegenstanders' },
+]
 
 const items = [
   { href: '/', label: 'Nieuws', subitems: newsSubitems },
@@ -24,9 +27,10 @@ const items = [
  * The item of the menu and the sub-page that a path belongs to, each as an href, or undefined.
  * Nieuws has the home page, its sub-pages and the articles of the editors (`/redactie/<name>`);
  * Wedstrijden has the page and every page below it, such as the season. Statistieken has the
- * same, and a sub-page of its own, Spelers, with the page of each season below it
- * (`/statistieken/spelers/2025-26`). A path that belongs to no item, such as /bronnen or a page
- * that does not exist, has neither.
+ * same, and two sub-pages of its own: Spelers, with the page of each season below it
+ * (`/statistieken/spelers/2025-26`), and Tegenstanders, with the page of each club below it
+ * (`/statistieken/tegenstanders/ado-den-haag`). A path that belongs to no item, such as
+ * /bronnen or a page that does not exist, has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
   const subitem = newsSubitems.find((candidate) => candidate.href === pathname)
@@ -45,6 +49,10 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
 
   if (pathname === '/statistieken/spelers' || pathname.startsWith('/statistieken/spelers/')) {
     return { item: '/statistieken', subitem: '/statistieken/spelers' }
+  }
+
+  if (pathname === '/statistieken/tegenstanders' || pathname.startsWith('/statistieken/tegenstanders/')) {
+    return { item: '/statistieken', subitem: '/statistieken/tegenstanders' }
   }
 
   if (pathname === '/statistieken' || pathname.startsWith('/statistieken/')) {
