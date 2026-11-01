@@ -846,7 +846,7 @@ function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColum
 function isShown(until?: Date) {
   const sibling = alias(items, 'sibling')
   const sameStory = sql`${sibling.sourceId} = ${items.sourceId} and ${sibling.threadKey} = ${items.threadKey} and ${sibling.hiddenAt} is null${
-    until === undefined ? sql`` : sql` and ${sibling.publishedAt} <= ${until}`
+    until === undefined ? sql`` : sql` and ${lte(sibling.publishedAt, until)}`
   }`
 
   return and(

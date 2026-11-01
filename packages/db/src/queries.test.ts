@@ -836,7 +836,7 @@ describe('the versions of a story', () => {
     const ids = await addSource()
 
     await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111' })
-    await addItem(ids, 'blog-2', '2026-10-23T08:00:00Z', { threadKey: '~aaaa1111' })
+    await addItem(ids, 'blog-2', '2026-10-22T10:30:00Z', { threadKey: '~aaaa1111' })
 
     expect(await archive()).toEqual(['Kop blog-1'])
   })
