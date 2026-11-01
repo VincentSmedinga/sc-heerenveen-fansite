@@ -72,6 +72,9 @@ export default defineConfig({
   reporter: 'list',
   testDir: 'e2e',
   use: { baseURL: origin },
+  // Two browsers at a time while sessions share the computer. The default is half the cores,
+  // five on the owner's computer. CI keeps it (see docs/beslissingen.md).
+  ...(process.env['CI'] === undefined ? { workers: 2 } : {}),
   webServer: [
     {
       // First, because it makes the certificate that the sites trust when they start.

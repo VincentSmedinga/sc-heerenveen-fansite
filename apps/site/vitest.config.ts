@@ -20,6 +20,13 @@ if (process.env['DATABASE_URL'] === undefined && existsSync(envFile)) {
 
 export default defineConfig({
   test: {
+    // The tests that make a database and run the migrations take several seconds on a busy
+    // computer. The default of 5 seconds made them fail there and pass alone.
+    hookTimeout: 30_000,
+    testTimeout: 30_000,
+    // Two test files at a time while sessions share the computer. CI keeps the default, because
+    // a runner has the computer to itself (see docs/beslissingen.md).
+    ...(process.env['CI'] === undefined ? { maxWorkers: 2 } : {}),
     // The same colour of the header that next.config.ts puts into the code (see
     // src/colours.ts).
     env: headerColourEnv(),

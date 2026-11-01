@@ -20,7 +20,8 @@ If there is none, stop here and follow the last point of _Push and open the pull
 ## Before you start it
 
 1. Don't wait for CI.
-   The Reviewer runs the checks itself and looks CI up right before it writes its report.
+   The Reviewer runs lint, typecheck and the tests of the packages the change touches, takes the heavy checks (build, accessibility, stories, Storybook build) from CI, and looks CI up right before it writes its report.
+   Don't start a heavy check of your own while it runs.
 2. Run `git fetch origin` **inside your worktree**.
    The Reviewer starts in the folder of your last Bash command, and its hook blocks `cd` and `git -C`, so from the main checkout it can't run the checks on your branch.
 3. Start the database: `docker compose up -d --wait`.
