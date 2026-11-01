@@ -33,6 +33,7 @@ const theirs = (player: string, options: Partial<Goal> = {}) => goal(player, { o
 const played = (goals: Goal[], options: Partial<PublicMatch> = {}): PublicMatch => ({
   afterNinetyAgainst: null,
   afterNinetyFor: null,
+  attendance: null,
   competition: 'Eredivisie',
   dateText: null,
   extraTime: false,
@@ -46,6 +47,7 @@ const played = (goals: Goal[], options: Partial<PublicMatch> = {}): PublicMatch 
   opponent: 'Testdorp FC',
   penaltiesAgainst: null,
   penaltiesFor: null,
+  referee: null,
   round: 'Speelronde 1',
   stadium: null,
   status: 'played',

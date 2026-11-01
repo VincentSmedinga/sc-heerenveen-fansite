@@ -5,6 +5,7 @@ import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
+import { listSeasonMatches } from './queries.ts'
 import { matchChanges, matches, matchGoals, matchLimits } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -203,6 +204,63 @@ describe('the note of a match', () => {
     await database.db.insert(matches).values(await clubbed({ ...cupMatch, note }))
 
     expect((await database.db.select().from(matches))[0]).toMatchObject({ note })
+  })
+})
+
+describe('the spectators and the referee of a match', () => {
+  it('are empty unless the importer wrote them', async () => {
+    await database.db.insert(matches).values(await clubbed(cupMatch))
+
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ attendance: null, referee: null })
+  })
+
+  it('keep a number, 0 for a match without an audience, and a name of the longest length', async () => {
+    const referee = 'R'.repeat(matchLimits.referee)
+
+    await database.db
+      .insert(matches)
+      .values(await clubbed({ ...cupMatch, attendance: matchLimits.attendance, referee }))
+    await database.db.insert(matches).values(await clubbed({ ...cupMatch, attendance: 0, round: 'Derde ronde' }))
+
+    expect(await database.db.select().from(matches).orderBy(matches.id)).toMatchObject([
+      { attendance: matchLimits.attendance, referee },
+      { attendance: 0, referee: null },
+    ])
+  })
+
+  it('are in the public list of the season', async () => {
+    await database.db
+      .insert(matches)
+      .values(await clubbed({ ...cupMatch, attendance: 21022, referee: 'Sander van der Eijk' }))
+
+    expect((await listSeasonMatches(database.db, '2026/27'))[0]).toMatchObject({
+      attendance: 21022,
+      referee: 'Sander van der Eijk',
+    })
+  })
+
+  it.each([
+    [
+      'an attendance above the limit',
+      'matches_attendance_in_range_when_played',
+      { attendance: matchLimits.attendance + 1 },
+    ],
+    [
+      'an attendance for a match that is not played',
+      'matches_attendance_in_range_when_played',
+      { attendance: 100, goalsAgainst: null, goalsFor: null, status: 'scheduled' },
+    ],
+    ['an empty referee', 'matches_referee_not_empty', { referee: '' }],
+  ] satisfies [string, string, Partial<NewMatch>][])('refuse %s', async (_name, constraint, change) => {
+    const failure = await database.db
+      .insert(matches)
+      .values(await clubbed({ ...cupMatch, ...change }))
+      .then(
+        () => undefined,
+        (error: unknown) => error,
+      )
+
+    expect(String((failure as Error | undefined)?.cause)).toContain(constraint)
   })
 })
 

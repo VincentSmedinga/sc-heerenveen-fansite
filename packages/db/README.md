@@ -320,12 +320,13 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 | `penalties_for`, `penalties_against`       | De strafschoppen van sc Heerenveen en van de tegenstander; leeg zonder strafschoppen, anders allebei gevuld  |
 | `after_ninety_for`, `after_ninety_against` | De stand na 90 minuten bij een wedstrijd met verlenging, als de pagina hem geeft; anders allebei leeg        |
 | `note`                                     | Een regel onder de wedstrijd, nu alleen voor een gestaakte wedstrijd die later is uitgespeeld; anders leeg   |
+| `attendance`, `referee`                    | Het aantal toeschouwers (0 is zonder publiek) en de volledige naam van de scheidsrechter; leeg als onbekend  |
 | `match_date`                               | De dag in Nederland, of de eerste dag als alleen een weekend bekend is                                       |
 | `kickoff_at`                               | De aftrap in UTC; leeg zolang de tijd niet bekend is                                                         |
 | `date_text`                                | De datum zoals Wikipedia die geeft, zoals `12-14 februari 2027`; gevuld als er geen aftrap is                |
 | `result_set_at`                            | Sinds wanneer de uitslag zo staat, in UTC; de import vergelijkt dat met 24 uur                               |
 
-Zeven CHECK-constraints houden de rijen heel:
+Negen CHECK-constraints houden de rijen heel:
 
 - een uitslag hoort bij `played` en nergens anders (`matches_result_only_when_played`);
 - een wedstrijd heeft een aftrap of een tekst voor de datum (`matches_time_or_text`);
@@ -333,7 +334,9 @@ Zeven CHECK-constraints houden de rijen heel:
 - strafschoppen komen in een paar (`matches_penalties_in_a_pair`);
 - strafschoppen horen bij verlenging en een gelijke stand (`matches_penalties_after_level_extra_time`);
 - de stand na 90 minuten komt in een paar (`matches_after_ninety_in_a_pair`);
-- de stand na 90 minuten hoort bij verlenging en is niet hoger dan de eindstand, maar mag er gelijk aan zijn (`matches_after_ninety_within_extra_time`).
+- de stand na 90 minuten hoort bij verlenging en is niet hoger dan de eindstand, maar mag er gelijk aan zijn (`matches_after_ninety_within_extra_time`);
+- het aantal toeschouwers is hoogstens 150.000 en hoort bij een gespeelde wedstrijd (`matches_attendance_in_range_when_played`);
+- de scheidsrechter is nooit een lege tekst (`matches_referee_not_empty`).
 
 `goals_for` en `goals_against` blijven de stand zoals Wikipedia die geeft, zonder de strafschoppen.
 

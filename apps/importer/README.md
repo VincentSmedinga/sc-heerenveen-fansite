@@ -786,6 +786,18 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Dat is de enige manier om de paren te herkennen, want een paar redacteuren schreven ze omgekeerd (de rust eerst).
   Een veld met één paar, een leeg veld, een veld dat we niet kunnen lezen en paren die niet kloppen geven "niet bekend": de wedstrijd blijft bewaard zonder die stand, en het is geen fout.
   De stand na 90 minuten mag gelijk zijn aan de eindstand, want de verlenging kan zonder doelpunt voorbijgaan.
+- Hij bewaart ook het aantal toeschouwers (`attendance`) en de scheidsrechter (`referee`) uit de velden `attendance` en `referee` van elk blok, voor de competitie, de beker en de play-offs.
+  Punten, spaties en vaste spaties in het getal zijn duizendtallen ("21.022" is 21022), en `0` is een wedstrijd zonder publiek.
+  Alleen een gespeelde wedstrijd heeft een aantal.
+  De scheidsrechter is de volledige naam uit het doel van de link (`[[Sander van der Eijk|Van der Eijk]]` geeft "Sander van der Eijk"), of de tekst als er geen link is.
+  Een vervanger achter de naam telt niet mee.
+  We bewaren geen link, pagina of foto van de scheidsrechter.
+  Een leeg veld, een streepje of "n.b." is "niet bekend".
+  Een getal boven 150.000, tekst die geen getal is en een naam met opmaak die we niet lezen geven ook "niet bekend", met een waarschuwing in het logboek: de wedstrijd blijft bewaard, en het is geen fout.
+  Bij een gestaakte wedstrijd zijn het de gegevens van het gestaakte blok, want dat is de wedstrijd (19.241 en Van der Eijk voor NAC Breda – sc Heerenveen).
+  Een leeg veld dat later gevuld wordt, gaat zonder meer door.
+  Een bijgesteld aantal is een verbetering van kort geleden (soort 2, zie hieronder), en een andere scheidsrechter bij een wedstrijd van drie dagen of langer geleden wacht.
+  Geen pagina toont deze velden nog.
   Bij een wedstrijd zonder `aet` leest hij `half time score` niet als stand na 90 minuten, ook niet met een komma erin.
   De stand bij de rust bewaart hij niet.
   Een ronde van de play-offs met een heen- en terugwedstrijd ("Halve finale, wedstrijd 1/2") krijgt hem niet, want de verlenging komt na de tweede wedstrijd.
@@ -1204,8 +1216,7 @@ De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het resta
 - De schutters bij de strafschoppen en de stand bij de rust bewaart hij niet: alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging, de stand na 90 minuten als de pagina die geeft en de score van de strafschoppen.
 - Een puntenaftrek rekent hij niet mee.
   De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
-- Scheidsrechter, toeschouwers en opstellingen leest hij niet, en ook geen kaarten, wissels of assists.
-  Ook de fixtures hebben die velden leeg gemaakt.
+- Opstellingen leest hij niet, en ook geen kaarten, wissels of assists.
 - Andere seizoenen leest hij niet in de uurlijkse import (alleen `pnpm run import:season` leest een afgelopen seizoen), en wedstrijden van andere teams van de club ook niet.
 
 ## De selectie
@@ -1386,7 +1397,7 @@ De tests van de opdracht voor een afgelopen seizoen lezen stukken van de echte p
 Het programma heeft alle wedstrijden van sc Heerenveen, de twee blokken van NAC Breda – sc Heerenveen, de gestaakte wedstrijden van andere clubs met het blok dat ze afmaakt, en de laatste wedstrijd van het seizoen.
 Ze zijn gelezen op 25 oktober 2026, en bovenaan staat de herkomst en de licentie (CC BY-SA 4.0).
 Er staan alle 34 wedstrijden van sc Heerenveen in en een paar van andere clubs.
-De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs, de scheidsrechters en de verslagen zijn leeggemaakt.
+De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs en de verslagen zijn leeggemaakt, en de scheidsrechters en toeschouwers van andere clubs ook.
 [`wikipedia-playoffs-2026.wiki`](src/fixtures/wikipedia-playoffs-2026.wiki) en `wikipedia-playoffs-2025.wiki` zijn het begin van de echte pagina's van de play-offs, gelezen op 1 november 2026, met de halve finale van sc Heerenveen tegen FC Utrecht en tegen AZ.
 `wikipedia-playoffs-2024.wiki` is een jaar zonder sc Heerenveen, en `wikipedia-playoffs-2022.wiki` een jaar met een halve finale over twee wedstrijden.
 [`wikipedia-playoffs-after-ninety.wiki`](src/fixtures/wikipedia-playoffs-after-ninety.wiki) heeft twee verzonnen wedstrijden met verlenging in de lay-out van de echte pagina, met `half time score` zoals de bekerpagina het schrijft, omdat de echte play-offpagina's dat veld nog niet hebben.
