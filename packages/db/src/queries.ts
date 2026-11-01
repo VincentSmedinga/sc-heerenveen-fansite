@@ -188,13 +188,14 @@ export async function findPublishedArticle(db: Database, slug: string, until: Da
 }
 
 /**
- * The Wikipedia page the squad of a season, such as `2026/27`, was read from: the title and the
- * moment it was last read, so the list of players can credit it. It gives nothing while no
- * squad has been read. The `Last-Modified` of the page stays internal.
+ * The Wikipedia page the squad of a season, such as `2026/27`, was read from: the title, the
+ * moment it was last read, so the list of players can credit it, and the `Last-Modified` of the
+ * page (`version`), so a card can say when its source last changed. It gives nothing while no
+ * squad has been read.
  */
 export async function findSquadPage(db: Database, season: string) {
   const [row] = await db
-    .select({ readAt: wikipediaPages.readAt, title: wikipediaPages.title })
+    .select({ readAt: wikipediaPages.readAt, title: wikipediaPages.title, version: wikipediaPages.version })
     .from(wikipediaPages)
     .where(and(eq(wikipediaPages.season, season), eq(wikipediaPages.kind, 'squad')))
 
@@ -213,9 +214,10 @@ export async function findStaffOn(db: Database, role: StaffRole, day: string): P
 
 /**
  * The Wikipedia pages the match import read for every season, newest season first, in the order
- * of `listWikipediaPages` within a season: the season, the title of the page, which kind it is
- * and the moment it was last read. A page that counts across seasons, such as the head-to-head
- * record against a club, credits them all. The page of the squad is not one of them.
+ * of `listWikipediaPages` within a season: the season, the title of the page, which kind it is,
+ * the moment it was last read and its `Last-Modified` (`version`). A page that counts across
+ * seasons, such as the head-to-head record against a club, credits them all. The page of the
+ * squad is not one of them.
  */
 export async function listAllWikipediaPages(db: Database) {
   const rows = await db
@@ -224,6 +226,7 @@ export async function listAllWikipediaPages(db: Database) {
       readAt: wikipediaPages.readAt,
       season: wikipediaPages.season,
       title: wikipediaPages.title,
+      version: wikipediaPages.version,
     })
     .from(wikipediaPages)
     .where(inArray(wikipediaPages.kind, matchPageKinds))
@@ -675,13 +678,18 @@ export async function listStaffInSeason(db: Database, role: StaffRole, season: s
 
 /**
  * The Wikipedia pages the match import read for a season, such as `2026/27`: the title of the
- * page, which kind it is and the moment it was last read, so a page can credit them. The
+ * page, which kind it is, the moment it was last read, so a page can credit them, and the
+ * `Last-Modified` of the page (`version`), so a card can say when its source last changed. The
  * order is the standings, the programme and the cup. The page of the squad is not one of them.
- * The `Last-Modified` of a page stays internal.
  */
 export async function listWikipediaPages(db: Database, season: string) {
   const rows = await db
-    .select({ kind: wikipediaPages.kind, readAt: wikipediaPages.readAt, title: wikipediaPages.title })
+    .select({
+      kind: wikipediaPages.kind,
+      readAt: wikipediaPages.readAt,
+      title: wikipediaPages.title,
+      version: wikipediaPages.version,
+    })
     .from(wikipediaPages)
     .where(and(eq(wikipediaPages.season, season), inArray(wikipediaPages.kind, matchPageKinds)))
     .orderBy(asc(wikipediaPages.kind), asc(wikipediaPages.title))

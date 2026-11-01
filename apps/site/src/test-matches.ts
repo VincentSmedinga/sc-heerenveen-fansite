@@ -185,15 +185,33 @@ export const matchData: MatchData = {
     },
   ] satisfies PublicMatch[],
   pages: [
-    { kind: 'standings', readAt: new Date('2026-10-23T12:05:00Z'), title: 'Eredivisie 2026/27 (mannenvoetbal)' },
+    {
+      kind: 'standings',
+      readAt: new Date('2026-10-23T12:05:00Z'),
+      title: 'Eredivisie 2026/27 (mannenvoetbal)',
+      version: 'Thu, 22 Oct 2026 10:00:00 GMT',
+    },
     {
       kind: 'programme',
       readAt: new Date('2026-10-23T12:05:00Z'),
       title: 'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden',
+      version: 'Fri, 23 Oct 2026 09:30:00 GMT',
     },
-    { kind: 'cup', readAt: new Date('2026-10-23T11:05:00Z'), title: 'KNVB Beker 2026/27 (mannen)' },
+    {
+      kind: 'cup',
+      readAt: new Date('2026-10-23T11:05:00Z'),
+      title: 'KNVB Beker 2026/27 (mannen)',
+      version: 'Mon, 19 Oct 2026 20:15:00 GMT',
+    },
   ],
   season: '2026/27',
+  // The made-up pages above and a page of the squad that changed after the table, on Wednesday.
+  sources: [
+    { kind: 'standings', version: 'Thu, 22 Oct 2026 10:00:00 GMT' },
+    { kind: 'programme', version: 'Fri, 23 Oct 2026 09:30:00 GMT' },
+    { kind: 'cup', version: 'Mon, 19 Oct 2026 20:15:00 GMT' },
+    { kind: 'squad', version: 'Wed, 21 Oct 2026 18:00:00 GMT' },
+  ],
   standings: [
     {
       club: 'Demo Boys',

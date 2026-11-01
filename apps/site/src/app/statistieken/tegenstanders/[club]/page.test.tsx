@@ -79,6 +79,43 @@ const meetingsOf = (html: string) =>
   ])
 
 describe('the page of a club', () => {
+  describe('the line "Laatst gewijzigd"', () => {
+    /** The part of the page from the heading with this id up to the end of its card. */
+    const cardWith = (html: string, id: string) => {
+      const start = html.indexOf(`aria-labelledby="${id}"`)
+
+      return html.slice(start, html.indexOf('</section>', start))
+    }
+    // The newest page of the seasons of the matches: the cup of 2026/27, on Sunday 25 October.
+    const line =
+      '<p class="hf-meta" data-hf-card-share="">Laatst gewijzigd: <time dateTime="2026-10-25T07:00:00.000Z">zo 08:00</time></p>'
+
+    it('is the last line of the card with our record and of the card with the matches', async () => {
+      const html = await render()
+
+      expect(cardWith(html, 'onze-uitslagen').endsWith(line)).toBe(true)
+      expect(cardWith(html, 'wedstrijden').endsWith(line)).toBe(true)
+    })
+
+    it('takes only the pages of the seasons in which we met the club', async () => {
+      // The cup tie is the only match, in 2025/26: the pages of 2026/27 are left out.
+      vi.mocked(getClubPage).mockResolvedValue({
+        ...beker,
+        matches: beker.matches.map((match) => ({ ...match, season: '2025/26' })),
+      })
+
+      const html = await render('beker-united')
+
+      expect(cardWith(html, 'onze-uitslagen')).toContain('Laatst gewijzigd: <time dateTime="2025-05-05T10:00:00.000Z">')
+    })
+
+    it('is not there when the pages of those seasons have no version', async () => {
+      vi.mocked(getSourcePages).mockResolvedValue(sourcePages.map((page) => ({ ...page, version: null })))
+
+      expect(await render()).not.toContain('Laatst gewijzigd')
+    })
+  })
+
   it('has the name of the club as the h1, and "Eerder: …" under it for the other names', async () => {
     const html = await render()
 

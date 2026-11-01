@@ -73,6 +73,40 @@ test.describe('the image of a card on /wedstrijden', () => {
     expect(violations).toEqual([])
   })
 
+  test('leaves the line "Laatst gewijzigd" out, though the card on the page has it', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'canShare', { value: undefined })
+      // Writes down the text of the copy of the card that the image is drawn from.
+      const copies: string[] = []
+
+      Object.assign(window, { copies })
+      new MutationObserver((records) => {
+        for (const record of records) {
+          for (const node of record.addedNodes) {
+            if (node instanceof HTMLElement && node.matches('.hf-card-share-copy')) {
+              copies.push(node.textContent ?? '')
+            }
+          }
+        }
+      }).observe(document, { childList: true, subtree: true })
+    })
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/wedstrijden')
+    // The card on the page ends with the date of the source.
+    await expect(page.locator('section[aria-labelledby="stand"]')).toContainText('Laatst gewijzigd:')
+
+    const download = page.waitForEvent('download')
+
+    await button(page).click()
+    await download
+
+    const copies = await page.evaluate(() => (window as unknown as { copies: string[] }).copies)
+
+    expect(copies).toHaveLength(1)
+    expect(copies[0]).toContain('Stand')
+    expect(copies[0]).not.toContain('Laatst gewijzigd')
+  })
+
   test('is shared with the share sheet where the browser can share files, and a closed sheet is no error', async ({
     page,
   }) => {

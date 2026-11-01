@@ -7954,6 +7954,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alle inleidingen houden en alleen inkorten (de herhaling blijft).
   Alle toelichtingen boven de inhoud zetten (de bezoeker leest uitleg voor hij de inhoud heeft gezien).
   Een regel per pagina in plaats van één regel voor allemaal (elke pagina kiest zelf, zoals nu).
+- **Later:** zie _Een kaart met gegevens uit een import eindigt met "Laatst gewijzigd: <datum>"_.
+  De volgorde in een kaart blijft zoals hier staat, met de regel "Laatst gewijzigd" als laatste, na de bron.
 
 ### Een seizoen heeft een eigen adres, `/wedstrijden/2025-26`, en een kiezer die zonder JavaScript werkt
 
@@ -8265,3 +8267,36 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Lijsten zijn korter dan tabellen voor een paar namen, en een zin voor een leeg deel zegt dat er niets mis is met de pagina.
 - **Niet erin:** de positie van de doelpuntenmaker (voor een afgelopen seizoen bestaat geen selectie), het aandeel van de topscorer en het aantal verschillende spelers (dat staat in Doelpuntenmakers).
 - **Alternatieven:** vier koppen van niveau 3 met onder elk een lijst of een zin (te zwaar voor vier korte feiten, en de eerste versie van deze kaart); een tabel met een rij per speler (veel kolommen voor weinig getallen); een `dl` met `dt` en `dd` (de dunne lijnen horen bij `li`, en de kaart Uitersten is ook een lijst); de lege delen weglaten (een bezoeker kan niet zien of ze er niet zijn of er niet werden gezocht); een hattrick ook bij de dubbelslagen laten staan (dezelfde wedstrijd wordt dan twee keer genoemd); de kaart naar Statistieken zetten (de pagina Spelers is er voor wat bij spelers hoort, zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_).
+
+### Een kaart met gegevens uit een import eindigt met "Laatst gewijzigd: <datum>"
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** elke kaart met gegevens uit een import heeft als laatste regel "Laatst gewijzigd: <datum>" (#517), in de stijl Meta.
+  - **Wat de datum betekent:** het moment waarop de bron van de gegevens voor het laatst veranderde, niet het moment waarop wij hem lazen.
+    Bij Wikipedia is dat de `Last-Modified` van de pagina (`wikipedia_pages.version`).
+    Rust een kaart op meer pagina's, dan staat er de nieuwste.
+    Het moment van lezen (`read_at`) blijft in de bronvermelding, bij "Laatst gelezen op".
+  - **De notatie:** die van het nieuws, `formatNewsTime`: de korte dag en de tijd binnen zeven dagen ("wo 14:05"), daarna de korte dag en de datum ("wo 21 okt"), met het jaar bij een ander jaar.
+    Het moment staat in `<time dateTime>`.
+  - **De plek:** de laatste regel van de kaart, na de bronvermelding.
+    De afbeelding van een kaart heeft de regel niet, want die heeft al de dag van het maken en de bron.
+    Het onderdeel `LastModified` van het designsysteem draagt daarvoor de markering die het kopie van de kaart voor de afbeelding weglaat.
+  - **Onbekend:** heeft een kaart geen moment (de bron is nog niet gelezen of de `version` ontbreekt), of heeft hij geen gegevens en dus een zin als "Kijk straks nog eens", dan staat er geen regel, en geen gok met een andere datum.
+    Een moment in de toekomst telt niet mee.
+  - **Welke pagina's bij welke kaart horen** staat op één plek, in `apps/site/src/card-sources.ts`: de drie pagina's van de wedstrijden (de competitie, de wedstrijden en de beker) voor het programma, de uitslagen, de kaarten met cijfers en de pagina's van de tegenstanders; de pagina van de competitie voor de stand en onze plek in de competitie; de pagina van de selectie voor de hoofdtrainers en de lijst met spelers.
+    De kaarten met spelersnamen (Doelpuntenmakers en Bijzondere doelpunten) rusten op de wedstrijden en op de selectie, want de doelpunten komen uit de ene en de namen uit de andere.
+    Een test noemt elke kaart met een bron, zodat een nieuwe kaart zonder bron opvalt.
+  - **Eén stuk code voor elke bron:** `lastModifiedOf` krijgt een lijst momenten en neemt het nieuwste; de kaart noemt alleen zijn eigen naam.
+    Een bron die er later bij komt, levert alleen zijn moment.
+  - **Het seizoen:** de datum hoort bij de pagina's van het seizoen dat de kaart toont, en verandert dus niet met de keuze tussen alle wedstrijden en de Eredivisie.
+    De kaarten van de tegenstanders nemen de pagina's van de seizoenen die ze tellen.
+  - **Niet erin:** de kaarten met nieuws, podcasts en discussies, want elk bericht heeft zijn eigen tijd, en de datum van het lezen door de importer.
+- **Waarom:** een bezoeker ziet zo hoe vers de cijfers zijn, zonder dat we de bron laten lijken op iets wat wij zelf schreven.
+  De datum van de bron is het eerlijke antwoord: onze eigen leestijd verandert elk uur, ook als er niets nieuws is.
+  Meta en de notatie van het nieuws zijn er al, dus een bezoeker leest de datum zoals elke andere datum op de site.
+- **Nadeel:** een kaart kan een oudere datum tonen dan de bronvermelding eronder ("gelezen" is nieuwer dan "gewijzigd"), en dat is juist de bedoeling.
+  Een kaart van het ene seizoen die op twee pagina's rust, toont de nieuwste van de twee, ook als de andere pagina de cijfers niet raakte.
+- **Alternatieven:** de datum van het lezen tonen (verandert elk uur zonder dat er iets nieuws is, en zegt niets over de bron).
+  De datum van de laatste wedstrijd (zegt niets over de bron, en een kaart zonder wedstrijden zou geen datum hebben).
+  Eén regel per pagina onder de kaarten, zoals de bronvermelding (de datum hoort bij de kaart, niet bij de pagina).
+  De regel ook in de afbeelding van een kaart (de afbeelding heeft al de dag van het maken en de bron, en wordt hoger).

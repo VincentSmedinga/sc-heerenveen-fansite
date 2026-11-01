@@ -2,7 +2,7 @@ import type { PublicClubMatch } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { earlierNames, meetingsOf, seasonsOf, summaryOf, tallyOf } from './opponents'
+import { earlierNames, meetingsOf, seasonsOf, sourcesOf, summaryOf, tallyOf } from './opponents'
 
 let id = 0
 
@@ -161,5 +161,23 @@ describe('earlierNames', () => {
 describe('seasonsOf', () => {
   it('gives each season once, the newest first', () => {
     expect(seasonsOf(matches)).toEqual(['2026/27', '2025/26', '2024/25', '2023/24', '2021/22'])
+  })
+})
+
+describe('sourcesOf', () => {
+  const pages = [
+    { kind: 'standings', season: '2026/27', version: 'Sat, 24 Oct 2026 08:00:00 GMT' },
+    { kind: 'cup', season: '2026/27', version: null },
+    { kind: 'standings', season: '2025/26', version: 'Mon, 05 May 2025 10:00:00 GMT' },
+  ] as const
+
+  it('gives the pages of the seasons the card counts, with the moment each changed', () => {
+    expect(sourcesOf(pages, ['2025/26'])).toEqual([{ kind: 'standings', version: 'Mon, 05 May 2025 10:00:00 GMT' }])
+    expect(sourcesOf(pages, ['2026/27', '2025/26'])).toHaveLength(3)
+  })
+
+  it('gives nothing for a season whose pages were not read', () => {
+    expect(sourcesOf(pages, ['2010/11'])).toEqual([])
+    expect(sourcesOf(pages, [])).toEqual([])
   })
 })

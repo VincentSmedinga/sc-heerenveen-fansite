@@ -24,6 +24,8 @@ import {
 
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
 
+import { type SourceVersion } from './card-sources'
+import { CardLastModified } from './CardLastModified'
 import { type CompetitionChoice, competitionParam, leagueValue } from './competition'
 import { moreCleanSheets } from './items-per-card'
 import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
@@ -91,6 +93,7 @@ export function CleanSheetsCard({
   now,
   path = '/statistieken',
   season,
+  sources,
 }: {
   competition: CompetitionChoice
   count: number
@@ -98,6 +101,7 @@ export function CleanSheetsCard({
   now: Date
   path?: string
   season?: string | undefined
+  sources: readonly SourceVersion[]
 }) {
   const { matches: sheets, played } = cleanSheetsOf(matches, competition)
   const shown = sheets.slice(0, count)
@@ -137,6 +141,7 @@ export function CleanSheetsCard({
               </Button>
             </Form>
           )}
+          <CardLastModified card="de-nul-gehouden" now={now} sources={sources} />
         </>
       )}
     </Card>
@@ -158,11 +163,13 @@ export function ExtremesCard({
   matches,
   now,
   season,
+  sources,
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
   now: Date
   season?: string | undefined
+  sources: readonly SourceVersion[]
 }) {
   const { biggestLoss, biggestWin, earliestGoal, known, latestGoal, mostGoals, played } = extremesOf(
     matches,
@@ -208,6 +215,7 @@ export function ExtremesCard({
           {known > 0 && known < played && (
             <Text appearance="meta">{`Vroegste en laatste doelpunt: gebaseerd op ${known} van de ${played} gespeelde wedstrijden`}</Text>
           )}
+          <CardLastModified card="uitersten" now={now} sources={sources} />
         </>
       )}
     </Card>
@@ -226,11 +234,15 @@ export function ExtremesCard({
 export function GoalsPerQuarterCard({
   competition,
   matches,
+  now,
   season,
+  sources,
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
+  now: Date
   season?: string | undefined
+  sources: readonly SourceVersion[]
 }) {
   const { conceded, extraTime, known, played, scored } = goalsPerQuarter(matches, competition)
   const slices = (counts: number[]) => quarterLabels.map((label, index) => ({ label, value: counts[index] ?? 0 }))
@@ -265,6 +277,7 @@ export function GoalsPerQuarterCard({
           />
           <BasedOn known={known} played={played} />
           {extraTime && <Text appearance="meta">Doelpunten in de verlenging tellen niet mee.</Text>}
+          <CardLastModified card="doelpunten-per-kwartier" now={now} sources={sources} />
         </>
       )}
     </Card>
@@ -316,10 +329,14 @@ const pointsWord = (points: number) => `${points} ${points === 1 ? 'punt' : 'pun
  * it holds. Without a table it is a sentence for visitors, like the card Stand.
  */
 export function LeaguePlaceCard({
+  now,
   season,
+  sources,
   standings,
 }: {
+  now: Date
   season?: string | undefined
+  sources: readonly SourceVersion[]
   standings: PublicStandingsRow[]
 }) {
   const place = leaguePlaceOf(standings)
@@ -353,6 +370,7 @@ export function LeaguePlaceCard({
           <Text appearance="meta">
             {`Gebaseerd op de stand na ${place.played} ${place.played === 1 ? 'wedstrijd' : 'wedstrijden'} van sc Heerenveen`}
           </Text>
+          <CardLastModified card="onze-plek-in-de-competitie" now={now} sources={sources} />
         </>
       )}
     </Card>
@@ -374,11 +392,15 @@ const perMatch = (value: number | undefined) =>
 export function HomeAwayCard({
   competition,
   matches,
+  now,
   season,
+  sources,
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
+  now: Date
   season?: string | undefined
+  sources: readonly SourceVersion[]
 }) {
   const { away, home, leagueOnly, total } = homeAwayOf(matches, competition)
   const sides: HomeAwayTally[] = [home, away, total]
@@ -418,6 +440,7 @@ export function HomeAwayCard({
             ]}
           />
           <BasedOn known={total.played} played={total.played} />
+          <CardLastModified card="thuis-en-uit" now={now} sources={sources} />
         </>
       )}
     </Card>
@@ -447,7 +470,12 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
           Alle wedstrijden
         </Link>
       </Text>
-      {shown.length > 0 && <WikipediaCredit compact />}
+      {shown.length > 0 && (
+        <>
+          <WikipediaCredit compact />
+          <CardLastModified card="home-wedstrijden" now={now} sources={data.sources} />
+        </>
+      )}
     </Card>
   )
 }
@@ -460,7 +488,17 @@ export function MatchesCard({ data, now }: { data: MatchData; now: Date }) {
  * show the first goal, because both clubs scored in the same minute. Without a match with known
  * goals it is a sentence for visitors and no tables.
  */
-export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
+export function MatchFlowCard({
+  matches,
+  now,
+  season,
+  sources,
+}: {
+  matches: PublicMatch[]
+  now: Date
+  season?: string | undefined
+  sources: readonly SourceVersion[]
+}) {
   const { atHalfTime, firstGoal, known, notWonAfterLead, played, unknownFirstGoal, wonAfterTrailing } =
     matchFlowOf(matches)
 
@@ -507,6 +545,7 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
               {`Bij ${unknownFirstGoal === 1 ? '1 wedstrijd' : `${unknownFirstGoal} wedstrijden`} is niet te zien wie het eerst scoorde.`}
             </Text>
           )}
+          <CardLastModified card="hoe-de-wedstrijden-verlopen" now={now} sources={sources} />
         </>
       )}
     </Card>
@@ -546,7 +585,17 @@ export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date
  * gets, because the chart is hidden from it. The cup ties don't count. Without a result it is
  * a sentence for visitors and no chart.
  */
-export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
+export function SeasonCard({
+  matches,
+  now,
+  season,
+  sources,
+}: {
+  matches: PublicMatch[]
+  now: Date
+  season?: string | undefined
+  sources: readonly SourceVersion[]
+}) {
   const results = leagueResultsOf(matches)
   const count = (result: FormResult) => results.filter((item) => item === result).length
   const [won, drawn, lost] = [count('W'), count('G'), count('V')]
@@ -571,6 +620,7 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
               { cells: [results.length, won * 3 + drawn], header: 'Totaal' },
             ]}
           />
+          <CardLastModified card="verloop-van-het-seizoen" now={now} sources={sources} />
         </>
       )}
     </Card>
@@ -591,7 +641,15 @@ const markOf: Record<FormResult, MarkRowMark> = {
  * shown as a player's is, with "(interim)" behind it where that is so. The source of the data
  * is the credit under the page. A season with no coach in the table has no card.
  */
-export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
+export function CoachesCard({
+  coaches,
+  now,
+  sources,
+}: {
+  coaches: PublicStaff[]
+  now: Date
+  sources: readonly SourceVersion[]
+}) {
   if (coaches.length === 0) {
     return null
   }
@@ -611,6 +669,7 @@ export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
           </List.Item>
         ))}
       </List>
+      <CardLastModified card="hoofdtrainers" now={now} sources={sources} />
     </Card>
   )
 }
@@ -656,7 +715,7 @@ export function standingsCaption(rows: PublicStandingsRow[], name = 'Stand') {
  * The block of the homepage with three clubs of the league table in its short form, with sc
  * Heerenveen in the middle if possible, and a link to the full table on the matches page.
  */
-export function StandingsCard({ data }: { data: MatchData }) {
+export function StandingsCard({ data, now }: { data: MatchData; now: Date }) {
   return (
     <Card aria-labelledby="standings-heading">
       <Heading id="standings-heading" level={2}>
@@ -676,7 +735,12 @@ export function StandingsCard({ data }: { data: MatchData }) {
           De volledige stand
         </Link>
       </Text>
-      {data.standings.length > 0 && <WikipediaCredit compact />}
+      {data.standings.length > 0 && (
+        <>
+          <WikipediaCredit compact />
+          <CardLastModified card="home-stand" now={now} sources={data.sources} />
+        </>
+      )}
     </Card>
   )
 }
@@ -699,11 +763,13 @@ export function StreaksCard({
   matches,
   now,
   season,
+  sources,
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
   now: Date
   season?: string | undefined
+  sources: readonly SourceVersion[]
 }) {
   const { last, played, streaks } = streaksOf(matches, competition)
   const over = season !== undefined
@@ -746,6 +812,7 @@ export function StreaksCard({
             </>
           )}
           <BasedOn known={played} played={played} />
+          <CardLastModified card="reeksen" now={now} sources={sources} />
         </>
       )}
     </Card>
@@ -823,26 +890,29 @@ export function TopScorers({
 export function TopScorersCard({
   competition,
   matches,
+  now,
   playersHref,
   season,
   seasonOnImage,
+  sources,
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
+  now: Date
   playersHref?: string | undefined
   season: string
   seasonOnImage?: string | undefined
+  sources: readonly SourceVersion[]
 }) {
+  const hasScorers = topScorersOf(matches, competition).length > 0
+
   return (
-    <Card
-      aria-labelledby="doelpuntenmakers"
-      shareable={imageCredit(topScorersOf(matches, competition).length > 0, seasonOnImage)}
-      surface="soft"
-    >
+    <Card aria-labelledby="doelpuntenmakers" shareable={imageCredit(hasScorers, seasonOnImage)} surface="soft">
       <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
         Doelpuntenmakers
       </Heading>
       <TopScorers competition={competition} matches={matches} playersHref={playersHref} season={season} />
+      {hasScorers && <CardLastModified card="doelpuntenmakers" now={now} sources={sources} />}
     </Card>
   )
 }

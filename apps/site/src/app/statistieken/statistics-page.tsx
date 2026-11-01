@@ -111,10 +111,22 @@ export async function StatisticsPage({
         }
       >
         <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
-        <LeaguePlaceCard season={imageSeason} standings={data.standings} />
-        <SeasonCard matches={data.matches} season={imageSeason} />
-        <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
-        <HomeAwayCard competition={competition} matches={data.matches} season={imageSeason} />
+        <LeaguePlaceCard now={now} season={imageSeason} sources={data.sources} standings={data.standings} />
+        <SeasonCard matches={data.matches} now={now} season={imageSeason} sources={data.sources} />
+        <StreaksCard
+          competition={competition}
+          matches={data.matches}
+          now={now}
+          season={imageSeason}
+          sources={data.sources}
+        />
+        <HomeAwayCard
+          competition={competition}
+          matches={data.matches}
+          now={now}
+          season={imageSeason}
+          sources={data.sources}
+        />
       </Page.Main>
       {/* The second column is a sidebar as wide as the main column, so the two are equal. On a
           phone it follows the main: our place in the league, the season, the streaks, home and
@@ -124,9 +136,11 @@ export async function StatisticsPage({
         <TopScorersCard
           competition={competition}
           matches={data.matches}
+          now={now}
           playersHref={`${seasonAddress(playersPath, season, seasonOf(now))}${competitionQuery(competition)}`}
           season={data.season}
           seasonOnImage={imageSeason}
+          sources={data.sources}
         />
         <CleanSheetsCard
           competition={competition}
@@ -135,10 +149,23 @@ export async function StatisticsPage({
           now={now}
           path={address}
           season={imageSeason}
+          sources={data.sources}
         />
-        <GoalsPerQuarterCard competition={competition} matches={data.matches} season={imageSeason} />
-        <MatchFlowCard matches={data.matches} season={imageSeason} />
-        <ExtremesCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
+        <GoalsPerQuarterCard
+          competition={competition}
+          matches={data.matches}
+          now={now}
+          season={imageSeason}
+          sources={data.sources}
+        />
+        <MatchFlowCard matches={data.matches} now={now} season={imageSeason} sources={data.sources} />
+        <ExtremesCard
+          competition={competition}
+          matches={data.matches}
+          now={now}
+          season={imageSeason}
+          sources={data.sources}
+        />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit pages={data.pages} season={data.season} />
         )}

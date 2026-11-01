@@ -62,6 +62,9 @@ const layersFile = path.resolve(import.meta.dirname, '../../../packages/design-s
 const declaredLayers = layersIn(readFileSync(layersFile, 'utf8'))
 assert.ok(declaredLayers.length > 0, 'layers.css declares no layers')
 
+/** How many cards in the HTML end with the line "Laatst gewijzigd" with a date. */
+const modifiedLinesOf = (html) => html.match(/Laatst gewijzigd: <time dateTime="[^"]+">[^<]+<\/time>/g)?.length ?? 0
+
 /**
  * Checks what the admin sends on this environment, whichever it is: a visitor without a session
  * goes to the login page, and every response under /beheer, a redirect too, keeps search
@@ -677,7 +680,7 @@ await withEmptyDatabase((database) =>
     // a card with the strong surface in the sidebar, right after the table, with his name only.
     assert.match(
       matchesHtml,
-      /<h2[^>]*id="hoofdtrainer">.*?href="#hoofdtrainer">Hoofdtraine.*?<\/h2><ul role="list"><li><div class="hf-short-match hf-short-staff"><span class="hf-short-match-opponent"><span class="hf-player-name"><span class="hf-player-name-given">Robin<\/span> <span class="hf-player-name-surname">Veldman<\/span><\/span><\/span><\/div><\/li><\/ul><\/section>/s,
+      /<h2[^>]*id="hoofdtrainer">.*?href="#hoofdtrainer">Hoofdtraine.*?<\/h2><ul role="list"><li><div class="hf-short-match hf-short-staff"><span class="hf-short-match-opponent"><span class="hf-player-name"><span class="hf-player-name-given">Robin<\/span> <span class="hf-player-name-surname">Veldman<\/span><\/span><\/span><\/div><\/li><\/ul><p class="hf-meta" data-hf-card-share="">Laatst gewijzigd: <time dateTime="[^"]+">[^<]+<\/time><\/p><\/section>/s,
     )
     // The main menu is its own nav right after the header, and the bar with a link to each card
     // comes after it, outside the main; none on the home.
@@ -716,8 +719,13 @@ await withEmptyDatabase((database) =>
     assert.match(matchesHtml, /J\. Testvoort/)
     assert.match(matchesHtml, /B\. Testvoort/)
     assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    // The programme, the results, the table and the head coaches end with the date their source
+    // last changed, from the seed; it is not the date of the reading.
+    assert.equal(modifiedLinesOf(matchesHtml), 4)
     assert.doesNotMatch(matchesHtml, /action=history/)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
+    // The two blocks end with the date the pages of Wikipedia last changed, from the seed.
+    assert.equal(modifiedLinesOf(html), 2)
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
 
     // The statistics page shows the nine cards with figures of the made-up matches and table of
@@ -864,6 +872,7 @@ await withEmptyDatabase((database) =>
       /<h2[^>]*id="uitersten">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#uitersten">Uiterste/,
     )
     assert.match(statisticsHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.equal(modifiedLinesOf(statisticsHtml), 9)
     assert.doesNotMatch(statisticsHtml, /action=history/)
 
     // The page Spelers has the card with everybody who scored, which is the card that stood on
@@ -928,6 +937,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(eredivisieCard, /Proefman/)
     assert.match(factsOf(eredivisieCard)[2][1], /^0 van de \d+ doelpunten$/)
     assert.match(playersHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.equal(modifiedLinesOf(playersHtml), 2)
     // The route behind the season picker sends the visitor on to the page of the season.
     const pickedPlayers = await fetch(`${origin}/statistieken/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })
     assert.equal(pickedPlayers.status, 303)
@@ -957,6 +967,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(opponentsHtml, /<span class="hf-visually-hidden">punten<\/span>/)
     assert.match(opponentsHtml, /Gebaseerd op alle \d+ gespeelde wedstrijden sinds \d{4}\/\d{2}/)
     assert.match(opponentsHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.equal(modifiedLinesOf(opponentsHtml), 1)
     // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and
     // the links keep the choice.
     assert.match(opponentsHtml, /href="\/statistieken\/tegenstanders\/fc-maquette"/)
@@ -987,6 +998,7 @@ await withEmptyDatabase((database) =>
     assert.match(clubHtml, /<h2[^>]*id="wedstrijden">/)
     assert.match(clubHtml, /Gebaseerd op (?:1 gespeelde wedstrijd|alle \d+ gespeelde wedstrijden) sinds \d{4}\/\d{2}/)
     assert.match(clubHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.equal(modifiedLinesOf(clubHtml), 2)
     assert.match(
       clubHtml,
       /<a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>/,

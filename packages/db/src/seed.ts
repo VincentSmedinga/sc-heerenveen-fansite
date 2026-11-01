@@ -328,7 +328,8 @@ const dutchMonths = [
   'december',
 ]
 
-const day = 24 * 60 * 60 * 1000
+const hour = 60 * 60 * 1000
+const day = 24 * hour
 
 /** The goals of one made-up match, without the match they belong to. */
 export type MadeUpGoal = Omit<NewMatchGoal, 'id' | 'matchId'>
@@ -626,7 +627,13 @@ export function madeUpSquad(now: Date): NewPlayer[] {
 export function madeUpSquadPage(now: Date): NewWikipediaPage {
   const season = seasonOf(now)
 
-  return { kind: 'squad', readAt: now, season, title: `Sc Heerenveen in het seizoen ${season} (mannen)`, version: null }
+  return {
+    kind: 'squad',
+    readAt: now,
+    season,
+    title: `Sc Heerenveen in het seizoen ${season} (mannen)`,
+    version: madeUpVersion(now),
+  }
 }
 
 /**
@@ -673,7 +680,7 @@ export function madeUpWikipediaPages(now: Date): NewWikipediaPage[] {
     readAt: now,
     season,
     title,
-    version: null,
+    version: madeUpVersion(now),
   })
 
   return [
@@ -725,7 +732,7 @@ export async function seedMatches(db: Database, now: Date = new Date()): Promise
       await transaction
         .insert(wikipediaPages)
         .values(page)
-        .onDuplicateKeyUpdate({ set: { readAt: page.readAt } })
+        .onDuplicateKeyUpdate({ set: { readAt: page.readAt, version: page.version } })
     }
 
     return true
@@ -759,7 +766,7 @@ export async function seedSquad(db: Database, now: Date = new Date()): Promise<b
     await transaction
       .insert(wikipediaPages)
       .values(page)
-      .onDuplicateKeyUpdate({ set: { readAt: page.readAt } })
+      .onDuplicateKeyUpdate({ set: { readAt: page.readAt, version: page.version } })
 
     return true
   })
@@ -790,6 +797,15 @@ async function linkMadeUpGoals(db: Pick<Database, 'select' | 'update'>, season: 
       await db.update(matchGoals).set({ playerId }).where(eq(matchGoals.id, goal.id))
     }
   }
+}
+
+/**
+ * The `Last-Modified` a made-up page pretends to have, as Wikipedia sends it: a day and two
+ * hours before `now`. The pages of the made-up data have one, so a card shows the line "Laatst
+ * gewijzigd" on made-up data too.
+ */
+function madeUpVersion(now: Date) {
+  return new Date(now.getTime() - day - 2 * hour).toUTCString()
 }
 
 if (import.meta.main) {

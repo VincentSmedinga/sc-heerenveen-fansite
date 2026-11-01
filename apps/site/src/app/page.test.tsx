@@ -73,7 +73,7 @@ const discussions: PublicDiscussion[] = [
 ]
 
 /** A season without matches, a table or a page that was read: the importer has not run yet. */
-const noMatchData: MatchData = { coaches: [], matches: [], pages: [], season: '2026/27', standings: [] }
+const noMatchData: MatchData = { coaches: [], matches: [], pages: [], season: '2026/27', sources: [], standings: [] }
 
 async function render() {
   return renderToStaticMarkup(await HomePage())
@@ -938,7 +938,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     ])
   })
 
-  it('keeps the parts of a card in the fixed order: the heading, the content, the link and the credit', async () => {
+  it('keeps the parts of a card in the fixed order: the heading, the content, the link, the credit and the date', async () => {
     const matches = withoutIcons(await renderMatchesCard())
     const standings = withoutIcons(await renderStandingsCard())
 
@@ -946,13 +946,47 @@ describe('the matches and the table in the sidebar of the homepage', () => {
       [matches, 'Alle wedstrijden'],
       [standings, 'De volledige stand'],
     ] as const) {
-      const places = ['</h2>', card.includes('<table') ? '</table>' : '</ul>', link, 'hf-wikipedia-credit'].map(
-        (part) => card.indexOf(part),
-      )
+      const places = [
+        '</h2>',
+        card.includes('<table') ? '</table>' : '</ul>',
+        link,
+        'hf-wikipedia-credit',
+        'Laatst gewijzigd',
+      ].map((part) => card.indexOf(part))
 
       expect(places.every((place) => place > -1)).toBe(true)
       expect(places).toEqual([...places].sort((a, b) => a - b))
     }
+  })
+
+  it('ends the card Wedstrijden with the newest page of the matches, and the card Stand with the table', async () => {
+    const line = (dateTime: string, text: string) =>
+      `<p class="hf-meta" data-hf-card-share="">Laatst gewijzigd: <time dateTime="${dateTime}">${text}</time></p></section>`
+
+    expect(await renderMatchesCard()).toContain(line('2026-10-23T09:30:00.000Z', 'vr 11:30'))
+    expect(await renderStandingsCard()).toContain(line('2026-10-22T10:00:00.000Z', 'do 12:00'))
+  })
+
+  it('has no line when the pages have no version, and none in the cards that say there is nothing yet', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      sources: matchData.sources.map(({ kind }) => ({ kind, version: null })),
+    })
+
+    expect(await renderMatchesCard()).not.toContain('Laatst gewijzigd')
+    expect(await renderStandingsCard()).not.toContain('Laatst gewijzigd')
+
+    vi.mocked(getMatchData).mockResolvedValue(noMatchData)
+
+    expect(await renderMatchesCard()).not.toContain('Laatst gewijzigd')
+    expect(await renderStandingsCard()).not.toContain('Laatst gewijzigd')
+  })
+
+  it('has no line on the cards with news, podcasts and discussions, which show a time for each item', async () => {
+    const html = await render()
+    const outside = html.slice(0, html.indexOf('matches-heading')) + html.slice(html.indexOf('episodes-heading'))
+
+    expect(outside).not.toContain('Laatst gewijzigd')
   })
 
   it('has "Bron: Wikipedia" under each card, and nothing more: the full credit is on /wedstrijden', async () => {

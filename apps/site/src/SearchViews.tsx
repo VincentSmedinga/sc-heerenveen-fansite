@@ -16,6 +16,7 @@ import {
 } from '@fansite/design-system'
 import { Fragment } from 'react'
 
+import { CardLastModified } from './CardLastModified'
 import { moreResults } from './items-per-card'
 import { formatReadAt, wikipediaUrl } from './match-format'
 import { dateTimeOf, dayOf, episodeDetails, formatArticleDay, formatEpisodeTime, formatNewsTime } from './news'
@@ -70,7 +71,7 @@ export function SearchForm({ error, text }: { error?: string | undefined; text: 
  * The card with the players of the squad under their position, each name a link that searches
  * for the surname, and the credit to Wikipedia under it. It is nothing without players.
  */
-export function SquadCard({ squad }: { squad: Squad }) {
+export function SquadCard({ now, squad }: { now: Date; squad: Squad }) {
   const groups = squadGroups(squad.players)
 
   if (groups.length === 0) {
@@ -98,6 +99,11 @@ export function SquadCard({ squad }: { squad: Squad }) {
             </List>
           </Fragment>
         ))}
+        <CardLastModified
+          card="spelers"
+          now={now}
+          sources={squad.page === undefined ? [] : [{ kind: 'squad', version: squad.page.version }]}
+        />
       </Card>
       <SquadCredit squad={squad} />
     </>

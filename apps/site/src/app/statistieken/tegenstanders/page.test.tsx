@@ -48,6 +48,40 @@ const rowsOf = (html: string) =>
   )
 
 describe('the page /statistieken/tegenstanders', () => {
+  describe('the line "Laatst gewijzigd"', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      // Monday 26 October 2026 in the Netherlands.
+      vi.setSystemTime(new Date('2026-10-26T13:40:00Z'))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('is the last line of the card, with the newest page of every season', async () => {
+      const html = await render()
+
+      expect(
+        html.includes(
+          '<p class="hf-meta" data-hf-card-share="">Laatst gewijzigd: <time dateTime="2026-10-25T07:00:00.000Z">zo 08:00</time></p></section>',
+        ),
+      ).toBe(true)
+    })
+
+    it('is not there when none of the pages has a version', async () => {
+      vi.mocked(getSourcePages).mockResolvedValue(sourcePages.map((page) => ({ ...page, version: null })))
+
+      expect(await render()).not.toContain('Laatst gewijzigd')
+    })
+
+    it('is not there without a club, which says "Kijk straks nog eens"', async () => {
+      vi.mocked(getClubRecords).mockResolvedValue([])
+
+      expect(await render()).not.toContain('Laatst gewijzigd')
+    })
+  })
+
   it('has one h1, Tegenstanders, and one h2, the card Alle tegenstanders', async () => {
     const html = await render()
 

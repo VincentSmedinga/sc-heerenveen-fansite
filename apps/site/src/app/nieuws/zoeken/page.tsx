@@ -111,7 +111,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           under the form on a first visit. */}
       {hasSquad && (
         <Page.Sidebar aria-label="De spelers van sc Heerenveen">
-          <SquadCard squad={squad} />
+          <SquadCard now={now} squad={squad} />
         </Page.Sidebar>
       )}
     </>

@@ -20,6 +20,7 @@ import {
   meetingsOf,
   opponentsPath,
   seasonsOf,
+  sourcesOf,
   summaryOf,
 } from '../../../opponents'
 import { ClubMeetingsCard, ClubsCard, ClubSummaryCard, OpponentsCredit } from '../../../OpponentViews'
@@ -103,6 +104,7 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
     return <ServerError retryHref={opponentsPath} />
   }
 
+  const now = new Date()
   const played = (records: { played: number }[]) => records.reduce((sum, record) => sum + record.played, 0)
   // Without a cup tie the two choices count the same matches and there is nothing to choose.
   const hasCup = played(loaded.all) > played(loaded.league)
@@ -119,9 +121,11 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
       <ClubsCard
         address={opponentsPath}
         choice={competition}
+        now={now}
         query={competitionQuery(competition)}
         records={competition === 'league' ? loaded.league : loaded.all}
         since={sinceOf(loaded.seasons)}
+        sources={sourcesOf(loaded.pages, loaded.seasons)}
       />
       <OpponentsCredit pages={loaded.pages} seasons={loaded.seasons} />
     </Page.Main>
@@ -198,9 +202,10 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             name={club.name}
             now={now}
             since={sinceOf(loaded.seasons)}
+            sources={sourcesOf(loaded.pages, seasonsOf(meetings))}
             summary={summaryOf(meetings)}
           />
-          <ClubMeetingsCard meetings={meetings} now={now} />
+          <ClubMeetingsCard meetings={meetings} now={now} sources={sourcesOf(loaded.pages, seasonsOf(meetings))} />
           <OpponentsCredit pages={loaded.pages} seasons={seasonsOf(meetings)} />
         </>
       )}

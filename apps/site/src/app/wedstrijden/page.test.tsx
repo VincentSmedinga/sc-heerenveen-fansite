@@ -48,6 +48,15 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden', () => {
+  /** The card with this id up to its end, so the part after the last line is left out. */
+  const cardWith = (html: string, id: string) => {
+    const card = section(html, id)
+
+    return card.slice(0, card.indexOf('</section>'))
+  }
+  const line = (dateTime: string, text: string) =>
+    `<p class="hf-meta" data-hf-card-share="">Laatst gewijzigd: <time dateTime="${dateTime}">${text}</time></p>`
+
   it('has one h1 and three h2 headings in order: the programme, the results and the table', async () => {
     const html = await render()
 
@@ -100,6 +109,82 @@ describe('the page /wedstrijden', () => {
         'n.v. na verlenging',
         '#verloop-van-het-seizoen',
       ])
+    })
+  })
+
+  describe('the line "Laatst gewijzigd"', () => {
+    it('is the last line of the card Programma, with the newest of the three pages of the matches', async () => {
+      const card = cardWith(await render(), 'programma')
+
+      expect(card.endsWith(line('2026-10-23T09:30:00.000Z', 'vr 11:30'))).toBe(true)
+    })
+
+    it('is the last line of the card Uitslagen, after the link to the course of the season', async () => {
+      const card = cardWith(await render(), 'uitslagen')
+
+      expect(card.endsWith(`</a></p>${line('2026-10-23T09:30:00.000Z', 'vr 11:30')}`)).toBe(true)
+    })
+
+    it('is the last line of the card Stand, from the page of the competition alone', async () => {
+      const card = cardWith(await render(), 'stand')
+
+      expect(card.endsWith(`</a></p>${line('2026-10-22T10:00:00.000Z', 'do 12:00')}`)).toBe(true)
+    })
+
+    it('is the last line of the card of the head coaches, from the page of the squad', async () => {
+      const coach = {
+        endDate: null,
+        endPrecision: null,
+        interim: false,
+        name: 'Robin Veldman',
+        startDate: '2025-03-21',
+        startPrecision: 'day',
+        wikipediaPage: 'Robin Veldman',
+      } as const
+
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, coaches: [coach] })
+
+      const card = cardWith(await render(), 'hoofdtrainer')
+
+      expect(card.endsWith(line('2026-10-21T18:00:00.000Z', 'wo 20:00'))).toBe(true)
+    })
+
+    it('is only on the cards that have data, and the card Uitslagen has none without a result', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.filter((match) => match.status !== 'played'),
+      })
+
+      const html = await render()
+
+      expect(cardWith(html, 'uitslagen')).not.toContain('Laatst gewijzigd')
+      expect(cardWith(html, 'programma')).toContain('Laatst gewijzigd')
+    })
+
+    it('is not in the card of a season without matches or a table, which says "Kijk straks nog eens"', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        coaches: [],
+        matches: [],
+        pages: [],
+        season: '2026/27',
+        sources: [],
+        standings: [],
+      })
+
+      expect(await render()).not.toContain('Laatst gewijzigd')
+    })
+
+    it('is not in a card whose pages have no version, and shows no other date instead', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        sources: matchData.sources.map(({ kind }) => ({ kind, version: null })),
+      })
+
+      expect(await render()).not.toContain('Laatst gewijzigd')
+    })
+
+    it('is not in the image of the card: it has the marker that the copy for the image leaves out', async () => {
+      expect(await render()).toContain('<p class="hf-meta" data-hf-card-share="">Laatst gewijzigd:')
     })
   })
 
@@ -199,7 +284,7 @@ describe('the page /wedstrijden', () => {
     )
 
     expect(shareable).toEqual(['stand'])
-    expect(html.match(/data-hf-card-share/g)).toHaveLength(1)
+    expect(html.match(/<div class="hf-card-share"/g)).toHaveLength(1)
     for (const id of ['programma', 'uitslagen']) {
       expect(html).toContain(`<section class="hf-card" aria-labelledby="${id}">`)
     }
@@ -535,7 +620,14 @@ describe('the page /wedstrijden', () => {
   })
 
   it('says in a sentence for visitors that there is nothing yet when the importer has not run', async () => {
-    vi.mocked(getMatchData).mockResolvedValue({ coaches: [], matches: [], pages: [], season: '2026/27', standings: [] })
+    vi.mocked(getMatchData).mockResolvedValue({
+      coaches: [],
+      matches: [],
+      pages: [],
+      season: '2026/27',
+      sources: [],
+      standings: [],
+    })
 
     const html = await render()
 
@@ -676,7 +768,7 @@ describe('the head coaches of the season', () => {
     expect(html).not.toContain('Hoofdtrainer')
   })
 
-  it('is a card named "Hoofdtrainer" for one coach, with one line that has the name and nothing else', async () => {
+  it('is a card named "Hoofdtrainer" for one coach, with one line that has the name and nothing else, and the line of the date', async () => {
     withCoaches([veldman])
 
     const { card } = await coachesCard()
@@ -686,7 +778,7 @@ describe('the head coaches of the season', () => {
     expect(card.match(/<li>/g)).toHaveLength(1)
     expect(card).not.toContain('hele seizoen')
     expect(card).not.toContain('hf-short-match-when')
-    expect(textOf(card)).toBe('|Hoofdtrainer|Robin| |Veldman|')
+    expect(textOf(card)).toBe('|Hoofdtrainer|Robin| |Veldman|Laatst gewijzigd: |wo 20:00|')
   })
 
   it('is named "Hoofdtrainers" for more, with "tot" and the day for each but the last, and "vanaf" for the last', async () => {

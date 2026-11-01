@@ -9,6 +9,7 @@ import {
 } from '@fansite/db/queries'
 
 import { cacheFor, cacheForKey } from './cache'
+import { type SourceVersion } from './card-sources'
 import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
 
@@ -125,6 +126,17 @@ export const earlierNames = (otherNames: readonly string[]) =>
 /** The seasons of the meetings, the newest first, each once. */
 export const seasonsOf = (matches: readonly PublicClubMatch[]) =>
   [...new Set(matches.map((match) => match.season))].sort().reverse()
+
+/**
+ * The sources a card of the opponents rests on, with the moment each last changed: the pages of
+ * Wikipedia of the seasons in `seasons`, the seasons whose matches the card counts. The line
+ * "Laatst gewijzigd" under the card takes the newest of them.
+ */
+export const sourcesOf = (
+  pages: readonly Pick<PublicSeasonWikipediaPage, 'kind' | 'season' | 'version'>[],
+  seasons: readonly string[],
+): SourceVersion[] =>
+  pages.filter((page) => seasons.includes(page.season)).map(({ kind, version }) => ({ kind, version }))
 
 const clubRecords = cacheForKey(period, (choice) =>
   listClubRecords(getDatabase().db, choice === 'league' ? { competition: 'Eredivisie' } : {}),

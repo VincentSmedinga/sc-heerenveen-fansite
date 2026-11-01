@@ -65,7 +65,8 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
   }
 
   const { data, seasons } = loaded
-  const current = season === seasonOf(new Date())
+  const now = new Date()
+  const current = season === seasonOf(now)
 
   return (
     <Page.Main
@@ -89,10 +90,18 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
       <TopScorersCard
         competition={competition}
         matches={data.matches}
+        now={now}
         season={data.season}
         seasonOnImage={current ? undefined : season}
+        sources={data.sources}
       />
-      <SpecialGoalsCard competition={competition} matches={data.matches} seasonOnImage={current ? undefined : season} />
+      <SpecialGoalsCard
+        competition={competition}
+        matches={data.matches}
+        now={now}
+        seasonOnImage={current ? undefined : season}
+        sources={data.sources}
+      />
       {(data.matches.length > 0 || data.standings.length > 0) && (
         <SourceCredit pages={data.pages} season={data.season} />
       )}

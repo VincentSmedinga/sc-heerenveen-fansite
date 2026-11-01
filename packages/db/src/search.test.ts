@@ -354,17 +354,24 @@ describe('listSquad', () => {
 })
 
 describe('findSquadPage', () => {
-  it('gives the title and the time of the page of the squad, and not those of the matches', async () => {
+  it('gives the title, the time of reading and the version of the page of the squad, and not those of the matches', async () => {
     const readAt = new Date('2026-10-25T12:05:00Z')
 
     await database.db.insert(wikipediaPages).values([
-      { kind: 'squad', readAt, season: '2026/27', title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)' },
+      {
+        kind: 'squad',
+        readAt,
+        season: '2026/27',
+        title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)',
+        version: 'Sat, 24 Oct 2026 10:30:00 GMT',
+      },
       { kind: 'standings', readAt: new Date(), season: '2026/27', title: 'Eredivisie 2026/27' },
     ])
 
     expect(await findSquadPage(database.db, '2026/27')).toEqual({
       readAt,
       title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)',
+      version: 'Sat, 24 Oct 2026 10:30:00 GMT',
     })
     expect(await findSquadPage(database.db, '2025/26')).toBeUndefined()
   })

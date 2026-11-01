@@ -4,6 +4,7 @@ import { seasonOf } from '@fansite/db/season'
 import { Card, Heading, Link, Page, SeasonPicker, StandingsTable, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { CardLastModified } from '../../CardLastModified'
 import { reviewBranch } from '../../env'
 import { overviewOf, resultsOfSeason } from '../../matches'
 import { coachesCardOf, standingsCardOf } from '../../matchShortcuts'
@@ -94,7 +95,10 @@ export async function MatchesPage({ season }: { season: string }) {
                   : 'Er staan dit seizoen geen wedstrijden meer op het programma.'}
               </Text>
             ) : (
-              <MatchLines matches={programme} now={now} />
+              <>
+                <MatchLines matches={programme} now={now} />
+                <CardLastModified card="programma" now={now} sources={data.sources} />
+              </>
             )}
           </Card>
         )}
@@ -108,11 +112,14 @@ export async function MatchesPage({ season }: { season: string }) {
             <MatchLines matches={results} now={now} />
           )}
           {results.length > 0 && (
-            <Text>
-              <Link href={statistics('verloop-van-het-seizoen')} icon="arrow-right">
-                Het verloop van het seizoen
-              </Link>
-            </Text>
+            <>
+              <Text>
+                <Link href={statistics('verloop-van-het-seizoen')} icon="arrow-right">
+                  Het verloop van het seizoen
+                </Link>
+              </Text>
+              <CardLastModified card="uitslagen" now={now} sources={data.sources} />
+            </>
           )}
         </Card>
       </Page.Main>
@@ -140,10 +147,11 @@ export async function MatchesPage({ season }: { season: string }) {
                   Onze plek in de competitie
                 </Link>
               </Text>
+              <CardLastModified card="stand" now={now} sources={data.sources} />
             </>
           )}
         </Card>
-        <CoachesCard coaches={data.coaches} />
+        <CoachesCard coaches={data.coaches} now={now} sources={data.sources} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
           <SourceCredit pages={data.pages} season={data.season} />
         )}

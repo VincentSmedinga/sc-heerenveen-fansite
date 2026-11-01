@@ -9,6 +9,7 @@ import { Logo } from '../logo/Logo'
 import { Text } from '../text/Text'
 import { makeCardImage } from './makeCardImage'
 import { deliverImage, imageButtonName, imageDay, imageFileName } from './shareImage'
+import { shareMarker } from './shareMarker'
 
 type Phase = 'busy' | 'done' | 'error' | 'idle'
 
@@ -18,9 +19,6 @@ const messages: Record<Phase, string> = {
   error: 'Het maken van de afbeelding is niet gelukt.',
   idle: '',
 }
-
-/** On the button and the message, so the copy of the card for the image leaves them out. */
-const marker = 'data-hf-card-share'
 
 export type CardShareProps = {
   /**
@@ -68,7 +66,7 @@ export const CardShare = ({ season, source }: CardShareProps) => {
     let current = true
     const copy = card.cloneNode(true) as HTMLElement
 
-    copy.querySelectorAll(`[${marker}]`).forEach((part) => part.remove())
+    copy.querySelectorAll(`[${shareMarker}]`).forEach((part) => part.remove())
     copy.classList.remove('hf-card-shareable')
     copy.classList.add('hf-card-share-copy')
     slot.current.replaceChildren(copy)
@@ -96,13 +94,13 @@ export const CardShare = ({ season, source }: CardShareProps) => {
   }, [phase, season, title, today])
 
   if (title === undefined) {
-    return <div className="hf-card-share" ref={root} {...{ [marker]: '' }} />
+    return <div className="hf-card-share" ref={root} {...{ [shareMarker]: '' }} />
   }
 
   const busy = phase === 'busy'
 
   return (
-    <div className="hf-card-share" ref={root} {...{ [marker]: '' }}>
+    <div className="hf-card-share" ref={root} {...{ [shareMarker]: '' }}>
       <button
         aria-disabled={busy || undefined}
         aria-label={imageButtonName(title)}

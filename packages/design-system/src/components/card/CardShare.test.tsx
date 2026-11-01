@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { Heading } from '../heading/Heading'
+import { LastModified } from '../last-modified/LastModified'
 import { Card } from './Card'
 import { makeCardImage } from './makeCardImage'
 import { deliverImage } from './shareImage'
@@ -128,6 +129,32 @@ describe('a click on the button', () => {
     expect(stage?.textContent).toContain('Bron: Testbron')
     // The card on the page is as it was.
     expect(container.querySelector('.hf-card-share-copy')).toBeNull()
+  })
+
+  it('leaves the line "Laatst gewijzigd" out of the copy, so the image does not grow', async () => {
+    let copy: string | undefined
+
+    vi.mocked(makeCardImage).mockImplementation((element) => {
+      copy = element.innerHTML
+
+      return Promise.resolve(png)
+    })
+    render(
+      <Card aria-labelledby="stand" shareable={{ source }}>
+        <Heading id="stand" level={2}>
+          Stand
+        </Heading>
+        <p>Een regel in de kaart</p>
+        <LastModified dateTime="2026-10-21T12:05:00.000Z">wo 14:05</LastModified>
+      </Card>,
+    )
+
+    fireEvent.click(button())
+    await waitFor(() => expect(makeCardImage).toHaveBeenCalledOnce())
+
+    expect(screen.getByText(/Laatst gewijzigd/u)).not.toBeNull()
+    expect(copy).toContain('Een regel in de kaart')
+    expect(copy).not.toContain('Laatst gewijzigd')
   })
 
   it('names the season under the image and in the name of the file, for a card of a season that is over', async () => {

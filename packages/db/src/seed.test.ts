@@ -754,6 +754,8 @@ describe('the made-up matches', () => {
       'KNVB Beker 2026/27 (mannen)',
     ])
     expect(pages.every((page) => page.readAt.getTime() === now.getTime())).toBe(true)
+    // A made-up page has a `Last-Modified` too, so a card has its line on made-up data.
+    expect(pages.every((page) => page.version !== null && new Date(page.version).getTime() < now.getTime())).toBe(true)
   })
 
   it('has a table that agrees with its own results', async () => {

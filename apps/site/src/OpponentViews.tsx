@@ -2,8 +2,10 @@ import type { PublicClubRecord, PublicSeasonWikipediaPage } from '@fansite/db/qu
 
 import { Card, DataTable, Heading, List, ShortMatch, Text, WikipediaCredit } from '@fansite/design-system'
 
+import type { SourceVersion } from './card-sources'
 import type { ClubSummary, Meeting, Tally } from './opponents'
 
+import { CardLastModified } from './CardLastModified'
 import { type CompetitionChoice } from './competition'
 import { creditName, formatReadAt, matchMoment, wikipediaUrl } from './match-format'
 import { imageCredit, metaSeparator } from './MatchViews'
@@ -54,15 +56,19 @@ const pointsOf = (record: PublicClubRecord) => record.won * 3 + record.drawn
 export function ClubsCard({
   address,
   choice,
+  now,
   query,
   records,
   since,
+  sources,
 }: {
   address: string
   choice: CompetitionChoice
+  now: Date
   query: string
   records: PublicClubRecord[]
   since: string
+  sources: readonly SourceVersion[]
 }) {
   const played = records.reduce((sum, record) => sum + record.played, 0)
 
@@ -95,6 +101,7 @@ export function ClubsCard({
             {`G gespeeld, W gewonnen, GL gelijk, V verloren, D doelpunten (voor–tegen)${choice === 'league' ? ', P punten' : ''}`}
           </Text>
           <BasedOnSince choice={choice} played={played} since={since} />
+          <CardLastModified card="alle-tegenstanders" now={now} sources={sources} />
         </>
       )}
     </Card>
@@ -113,7 +120,15 @@ const summaryRow = (header: string, tallies: Tally[], figure: (tally: Tally) => 
  * the day, the name as Wikipedia wrote the club in that match (so an earlier name shows), where
  * it was played and the result from our side.
  */
-export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: Date }) {
+export function ClubMeetingsCard({
+  meetings,
+  now,
+  sources,
+}: {
+  meetings: Meeting[]
+  now: Date
+  sources: readonly SourceVersion[]
+}) {
   return (
     <Card aria-labelledby="wedstrijden" surface="soft">
       <Heading id="wedstrijden" level={2}>
@@ -131,6 +146,7 @@ export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: 
           </List.Item>
         ))}
       </List>
+      <CardLastModified card="wedstrijden" now={now} sources={sources} />
     </Card>
   )
 }
@@ -147,12 +163,14 @@ export function ClubSummaryCard({
   name,
   now,
   since,
+  sources,
   summary,
 }: {
   choice: CompetitionChoice
   name: string
   now: Date
   since: string
+  sources: readonly SourceVersion[]
   summary: ClubSummary
 }) {
   const tallies = [summary.total, summary.home, summary.away]
@@ -189,6 +207,7 @@ export function ClubSummaryCard({
         </List>
       )}
       <BasedOnSince choice={choice} played={summary.total.played} since={since} />
+      <CardLastModified card="onze-uitslagen" now={now} sources={sources} />
     </Card>
   )
 }

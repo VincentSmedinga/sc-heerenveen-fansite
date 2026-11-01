@@ -1,6 +1,7 @@
 import type { FormResult } from '@fansite/design-system'
 
 import {
+  findSquadPage,
   listMatchSeasons,
   listSeasonMatches,
   listSeasonStandings,
@@ -14,6 +15,7 @@ import {
 import { seasonOf } from '@fansite/db/season'
 
 import { cacheFor, cacheForKey } from './cache'
+import { type SourceVersion } from './card-sources'
 import { type CompetitionChoice } from './competition'
 import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
@@ -53,6 +55,12 @@ export type MatchData = {
   matches: PublicMatch[]
   pages: PublicWikipediaPage[]
   season: string
+  /**
+   * The sources the cards of the season rest on, with the moment each last changed: the pages
+   * of the matches and the page of the squad. The line "Laatst gewijzigd" under a card takes
+   * them (see `cardSources`).
+   */
+  sources: SourceVersion[]
   standings: PublicStandingsRow[]
 }
 
@@ -80,14 +88,19 @@ const pastSeasonPeriod = 60 * 60 * 1000
 
 async function loadSeason(season: string): Promise<MatchData> {
   const { db } = getDatabase()
-  const [matches, standings, pages, coaches] = await Promise.all([
+  const [matches, standings, pages, coaches, squad] = await Promise.all([
     listSeasonMatches(db, season),
     listSeasonStandings(db, season),
     listWikipediaPages(db, season),
     listStaffInSeason(db, 'coach', season),
+    findSquadPage(db, season),
   ])
+  const sources: SourceVersion[] = [
+    ...pages.map(({ kind, version }) => ({ kind, version })),
+    ...(squad === undefined ? [] : [{ kind: 'squad' as const, version: squad.version }]),
+  ]
 
-  return { coaches, matches, pages, season, standings }
+  return { coaches, matches, pages, season, sources, standings }
 }
 
 const currentSeasonData = cacheForKey(currentSeasonPeriod, loadSeason)
@@ -98,7 +111,7 @@ const pastSeasonData = cacheForKey(pastSeasonPeriod, loadSeason)
  * current one when no season is given. Each is asked for that season alone. The cache keeps an
  * entry for every season it is asked for, so the caller asks for a season of `getMatchSeasons`
  * only: a visitor can make up any address. The data of the current season is kept for five
- * minutes, so a visit doesn't cost four queries and a new result shows within five minutes of
+ * minutes, so a visit doesn't cost five queries and a new result shows within five minutes of
  * the import, which runs every hour. A season that is over is kept for an hour.
  */
 export function getMatchData(season = seasonOf(new Date())): Promise<MatchData> {

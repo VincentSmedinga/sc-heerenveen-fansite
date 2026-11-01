@@ -74,6 +74,57 @@ afterEach(() => {
 })
 
 describe('the page /statistieken/spelers', () => {
+  describe('the line "Laatst gewijzigd"', () => {
+    /** The card with this id up to its end. */
+    const cardWith = (html: string, id: string) => {
+      const start = html.indexOf(`aria-labelledby="${id}"`)
+
+      return html.slice(start, html.indexOf('</section>', start))
+    }
+    const line = (dateTime: string, text: string) =>
+      `<p class="hf-meta" data-hf-card-share="">Laatst gewijzigd: <time dateTime="${dateTime}">${text}</time></p>`
+    // The newest of the pages of the matches and of the page of the squad: Friday morning.
+    const newest = line('2026-10-23T09:30:00.000Z', 'vr 11:30')
+
+    it('is the last line of the card Doelpuntenmakers and of the card Bijzondere doelpunten', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: scorers([3, 1]) })
+
+      const html = await render()
+
+      expect(cardWith(html, 'doelpuntenmakers').endsWith(newest)).toBe(true)
+      expect(cardWith(html, 'bijzondere-doelpunten').endsWith(newest)).toBe(true)
+    })
+
+    it('takes the page of the squad as well: a squad that changed last is the date of both cards', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: scorers([3, 1]),
+        sources: [...matchData.sources, { kind: 'squad', version: 'Fri, 23 Oct 2026 12:00:00 GMT' }],
+      })
+
+      const html = await render()
+
+      expect(cardWith(html, 'doelpuntenmakers')).toContain('vr 14:00')
+      expect(cardWith(html, 'bijzondere-doelpunten')).toContain('vr 14:00')
+    })
+
+    it('is in neither card without a goal, which say "Kijk straks nog eens"', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+      expect(await render()).not.toContain('Laatst gewijzigd')
+    })
+
+    it('is in neither card when the pages have no version', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: scorers([3, 1]),
+        sources: matchData.sources.map(({ kind }) => ({ kind, version: null })),
+      })
+
+      expect(await render()).not.toContain('Laatst gewijzigd')
+    })
+  })
+
   it('has one h1, Spelers, with the season picker beside it, and two h2, the cards Doelpuntenmakers and Bijzondere doelpunten, and no h3', async () => {
     const html = await render()
 
@@ -99,7 +150,7 @@ describe('the page /statistieken/spelers', () => {
     expect(html).toContain(
       '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="doelpuntenmakers">',
     )
-    expect(html.match(/data-hf-card-share/g)).toHaveLength(2)
+    expect(html.match(/<div class="hf-card-share"/g)).toHaveLength(2)
   })
 
   it('has the card, the credit and nothing else: no other cards of Statistieken or Wedstrijden', async () => {
@@ -255,7 +306,7 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
     expect(html.indexOf('id="doelpuntenmakers"')).toBeLessThan(html.indexOf('id="bijzondere-doelpunten"'))
     expect(html.indexOf('id="bijzondere-doelpunten"')).toBeLessThan(html.lastIndexOf('hf-wikipedia-credit'))
     expect(cardOf(html)).toContain('class="hf-card hf-card-soft hf-card-shareable"')
-    expect(cardOf(html)).toContain('data-hf-card-share')
+    expect(cardOf(html)).toContain('<div class="hf-card-share"')
   })
 
   it('is a list of four parts, each with its name as quiet text above its value, and no subheadings', async () => {
@@ -345,7 +396,7 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
 
     expect(plain(html)).toContain('We hebben nog geen doelpunten van dit seizoen. Kijk straks nog eens.')
     expect(html).not.toContain('<li>')
-    expect(html).not.toContain('data-hf-card-share')
+    expect(html).not.toContain('<div class="hf-card-share"')
   })
 
   it('counts a goal of the cup for all the matches and not for the Eredivisie', async () => {

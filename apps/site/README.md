@@ -285,6 +285,18 @@ Onder de twee blokken op de homepage staat alleen "Bron: Wikipedia".
 De pagina's komen uit `wikipedia_pages` (alleen die van de wedstrijden, niet de pagina van de selectie); zonder gegevens van de wedstrijden staat er ook geen bronvermelding.
 De pagina's laden niets van een ander domein en hebben geen JavaScript nodig, en er staan geen clubwapens, alleen de namen.
 
+### Laatst gewijzigd
+
+Elke kaart met gegevens uit een import eindigt met "Laatst gewijzigd: wo 14:05" (`CardLastModified` in `src/CardLastModified.tsx`, met `LastModified` van het designsysteem), in de notatie van het nieuws (`formatNewsTime`).
+De datum is het moment waarop de bron veranderde, niet het moment waarop de importer hem las: bij Wikipedia de `version` van de pagina's waar de kaart op rust, en bij meer pagina's de nieuwste.
+`getMatchData` geeft ze als `sources` bij de pagina's van het seizoen, met de pagina van de selectie erbij; de pagina's van de tegenstanders nemen die van de seizoenen die ze tellen (`sourcesOf` in `src/opponents.ts`).
+Welke pagina's bij welke kaart horen, staat op één plek: `cardSources` in `src/card-sources.ts`.
+Een nieuwe kaart met gegevens uit een import komt daar bij, en `src/card-sources.test.ts` noemt elke kaart, zodat een nieuwe kaart zonder bron opvalt.
+`lastModifiedOf` in `src/last-modified.ts` kent geen bron: het krijgt een lijst momenten en neemt het nieuwste.
+Een bron zonder moment en een moment in de toekomst tellen niet mee, en zonder moment staat er geen regel.
+Een kaart zonder gegevens (de zin "Kijk straks nog eens") heeft de regel niet, en de afbeelding van een kaart ook niet.
+De kaarten met nieuws, podcasts en discussies hebben hem niet, want elk bericht heeft zijn eigen tijd.
+
 `pnpm test:a11y` gebruikt de verzonnen wedstrijden en stand van de seed (`madeUpMatches` en `madeUpTable`), met de pagina's die ze bronnen (`madeUpWikipediaPages`).
 
 ## De statistieken

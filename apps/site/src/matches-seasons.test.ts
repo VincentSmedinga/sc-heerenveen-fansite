@@ -42,9 +42,28 @@ beforeEach(async () => {
   await database.db.insert(standings).values(madeUpTable(now))
   await database.db.insert(standings).values(madeUpTable(earlier).slice(0, 4))
   await database.db.insert(wikipediaPages).values([
-    { kind: 'standings', readAt: now, season: '2026/27', title: 'Eredivisie 2026/27' },
-    { kind: 'standings', readAt: earlier, season: '2025/26', title: 'Eredivisie 2025/26' },
-    { kind: 'cup', readAt: earlier, season: '2025/26', title: 'KNVB Beker 2025/26' },
+    {
+      kind: 'standings',
+      readAt: now,
+      season: '2026/27',
+      title: 'Eredivisie 2026/27',
+      version: 'Thu, 22 Oct 2026 10:00:00 GMT',
+    },
+    {
+      kind: 'squad',
+      readAt: now,
+      season: '2026/27',
+      title: 'Selectie 2026/27',
+      version: 'Wed, 21 Oct 2026 18:00:00 GMT',
+    },
+    {
+      kind: 'standings',
+      readAt: earlier,
+      season: '2025/26',
+      title: 'Eredivisie 2025/26',
+      version: 'Wed, 22 Oct 2025 10:00:00 GMT',
+    },
+    { kind: 'cup', readAt: earlier, season: '2025/26', title: 'KNVB Beker 2025/26', version: null },
   ])
 })
 
@@ -72,6 +91,21 @@ describe('getMatchData', () => {
     expect(data.matches.every((match) => match.matchDate.startsWith('2025-'))).toBe(true)
     expect(data.standings).toHaveLength(4)
     expect(data.pages.map((page) => page.title).toSorted()).toEqual(['Eredivisie 2025/26', 'KNVB Beker 2025/26'])
+  })
+
+  it('gives the sources of the season with the moment each changed, the squad included, and of no other season', async () => {
+    const { getMatchData } = await import('./matches')
+
+    expect((await getMatchData()).sources).toEqual([
+      { kind: 'standings', version: 'Thu, 22 Oct 2026 10:00:00 GMT' },
+      { kind: 'squad', version: 'Wed, 21 Oct 2026 18:00:00 GMT' },
+    ])
+    // A page without a version is a source without a moment. This season has no squad.
+    expect((await getMatchData('2025/26')).sources).toEqual([
+      { kind: 'standings', version: 'Wed, 22 Oct 2025 10:00:00 GMT' },
+      { kind: 'cup', version: null },
+    ])
+    expect((await getMatchData('2010/11')).sources).toEqual([])
   })
 
   it('gives nothing for a season without data, and does not take the current season for it', async () => {

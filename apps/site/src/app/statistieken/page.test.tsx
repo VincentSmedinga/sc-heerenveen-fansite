@@ -51,6 +51,68 @@ afterEach(() => {
 })
 
 describe('the page /statistieken', () => {
+  /** The card with this id up to its end. */
+  const cardWith = (html: string, id: string) => {
+    const card = section(html, id)
+
+    return card.slice(0, card.indexOf('</section>'))
+  }
+  const line = (dateTime: string, text: string) =>
+    `<p class="hf-meta" data-hf-card-share="">Laatst gewijzigd: <time dateTime="${dateTime}">${text}</time></p>`
+
+  describe('the line "Laatst gewijzigd"', () => {
+    const tableLine = line('2026-10-22T10:00:00.000Z', 'do 12:00')
+    const matchesLine = line('2026-10-23T09:30:00.000Z', 'vr 11:30')
+
+    it('is the last line of each of the nine cards', async () => {
+      const html = await render()
+      const ids = statisticsShortcuts.map(({ href }) => href.slice(1))
+
+      expect(ids).toHaveLength(9)
+      for (const id of ids) {
+        expect(cardWith(html, id).endsWith(id === 'onze-plek-in-de-competitie' ? tableLine : matchesLine), id).toBe(
+          true,
+        )
+      }
+    })
+
+    it('is after the button that loads more clean sheets, so it is the last line', async () => {
+      const html = await render()
+      const card = cardWith(html, 'de-nul-gehouden')
+
+      expect(card.endsWith(matchesLine)).toBe(true)
+      expect(card.indexOf('Laatst gewijzigd')).toBeGreaterThan(card.indexOf('Gebaseerd op'))
+    })
+
+    it('does not follow the choice between the matches, because it belongs to the pages of the season', async () => {
+      const all = await render()
+      const league = await render(eredivisie)
+
+      expect(cardWith(league, 'reeksen')).toContain('vr 11:30')
+      expect(cardWith(all, 'reeksen')).toContain('vr 11:30')
+    })
+
+    it('is not in a card that says "Kijk straks nog eens", and not when the pages have no version', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        coaches: [],
+        matches: [],
+        pages: [],
+        season: '2026/27',
+        sources: [],
+        standings: [],
+      })
+
+      expect(await render()).not.toContain('Laatst gewijzigd')
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        sources: matchData.sources.map(({ kind }) => ({ kind, version: null })),
+      })
+
+      expect(await render()).not.toContain('Laatst gewijzigd')
+    })
+  })
+
   it('has one h1 and nine h2 headings in order: our place in the league, the season, the streaks, home and away, the goal scorers, the clean sheets, the goals per quarter, how the matches go and the extremes', async () => {
     const html = await render()
 
@@ -234,7 +296,7 @@ describe('the page /statistieken', () => {
     )
 
     expect(shareable).toEqual(statisticsShortcuts.map(({ href }) => href.slice(1)))
-    expect(html.match(/data-hf-card-share/g)).toHaveLength(9)
+    expect(html.match(/<div class="hf-card-share"/g)).toHaveLength(9)
   })
 
   it('has no button for an image on a card that has no facts yet', async () => {
@@ -1627,7 +1689,14 @@ describe('the page /statistieken', () => {
   })
 
   it('says in a sentence for visitors that there is nothing yet when the importer has not run', async () => {
-    vi.mocked(getMatchData).mockResolvedValue({ coaches: [], matches: [], pages: [], season: '2026/27', standings: [] })
+    vi.mocked(getMatchData).mockResolvedValue({
+      coaches: [],
+      matches: [],
+      pages: [],
+      season: '2026/27',
+      sources: [],
+      standings: [],
+    })
 
     const html = await render()
 

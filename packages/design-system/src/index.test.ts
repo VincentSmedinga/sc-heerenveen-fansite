@@ -24,6 +24,8 @@ const components = [
   'Heading',
   'Honeypot',
   'Input',
+  'LastModified',
+  'LastModified',
   'Link',
   'List',
   'Logo',

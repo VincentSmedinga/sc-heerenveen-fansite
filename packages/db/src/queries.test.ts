@@ -1492,7 +1492,9 @@ describe('the matches and the table of a season', () => {
         readAt: new Date('2025-10-25T12:00:00Z'),
         season: '2025/26',
         title: 'Eredivisie 2025/26 (mannenvoetbal)',
+        version: null,
       })
+      expect(rows[0]?.version).toBe(madeUpWikipediaPages(now)[0]?.version)
     })
 
     it('gives nothing while no page was read', async () => {
@@ -1513,10 +1515,22 @@ describe('the matches and the table of a season', () => {
 
       const rows = await listWikipediaPages(database.db, '2026/27')
 
+      const [standingsPage, programmePage, cupPage] = madeUpWikipediaPages(now)
+
       expect(rows).toEqual([
-        { kind: 'standings', readAt: now, title: 'Eredivisie 2026/27 (mannenvoetbal)' },
-        { kind: 'programme', readAt: now, title: 'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden' },
-        { kind: 'cup', readAt: now, title: 'KNVB Beker 2026/27 (mannen)' },
+        {
+          kind: 'standings',
+          readAt: now,
+          title: 'Eredivisie 2026/27 (mannenvoetbal)',
+          version: standingsPage?.version,
+        },
+        {
+          kind: 'programme',
+          readAt: now,
+          title: 'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden',
+          version: programmePage?.version,
+        },
+        { kind: 'cup', readAt: now, title: 'KNVB Beker 2026/27 (mannen)', version: cupPage?.version },
       ])
     })
 

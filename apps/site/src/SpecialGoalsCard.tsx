@@ -3,8 +3,10 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { Card, Heading, List, PlayerName, ShortFact, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
+import type { SourceVersion } from './card-sources'
 import type { MultiGoalScorer } from './matches'
 
+import { CardLastModified } from './CardLastModified'
 import { type CompetitionChoice } from './competition'
 import { specialGoalsOf } from './matches'
 import { BasedOn, imageCredit } from './MatchViews'
@@ -23,11 +25,15 @@ import { BasedOn, imageCredit } from './MatchViews'
 export function SpecialGoalsCard({
   competition,
   matches,
+  now,
   seasonOnImage,
+  sources,
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
+  now: Date
   seasonOnImage?: string | undefined
+  sources: readonly SourceVersion[]
 }) {
   const { doubles, goalsFor, hattricks, known, ownGoalsAgainst, ownGoalsFor, penalties, played } = specialGoalsOf(
     matches,
@@ -68,6 +74,7 @@ export function SpecialGoalsCard({
             </List.Item>
           </List>
           <BasedOn known={known} played={played} />
+          <CardLastModified card="bijzondere-doelpunten" now={now} sources={sources} />
         </>
       ) : (
         <Text>We hebben nog geen doelpunten van dit seizoen. Kijk straks nog eens.</Text>

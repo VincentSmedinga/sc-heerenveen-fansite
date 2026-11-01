@@ -54,7 +54,11 @@ const player = (name: string, position: PublicPlayer['position'], searchTerm: st
 })
 
 const squad: Squad = {
-  page: { readAt: new Date('2026-10-25T12:05:00Z'), title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)' },
+  page: {
+    readAt: new Date('2026-10-25T12:05:00Z'),
+    title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)',
+    version: 'Sun, 25 Oct 2026 10:30:00 GMT',
+  },
   players: [
     player('Tjerk Brandsma', 'doelman', 'Brandsma'),
     player('Jurre van der Kooi', 'verdediger', 'van der Kooi'),
@@ -382,6 +386,25 @@ describe('the list of players', () => {
     expect(error).toHaveBeenCalledWith(
       'Could not read the squad for /nieuws/zoeken: connect ECONNREFUSED 127.0.0.1:3306',
     )
+  })
+
+  it('ends the card with the date the page of the squad last changed, in Dutch time, before the credit', async () => {
+    const sidebar = sidebarOf(await render())
+    const line =
+      '<p class="hf-meta" data-hf-card-share="">Laatst gewijzigd: <time dateTime="2026-10-25T10:30:00.000Z">zo 11:30</time></p></section>'
+
+    expect(sidebar).toContain(line)
+    expect(sidebar.indexOf('Laatst gewijzigd')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
+  })
+
+  it('has no date when the squad has no page, or the page has no version', async () => {
+    vi.mocked(getSquad).mockResolvedValue({ ...squad, page: undefined })
+
+    expect(sidebarOf(await render())).not.toContain('Laatst gewijzigd')
+
+    vi.mocked(getSquad).mockResolvedValue({ ...squad, page: { ...squad.page!, version: null } })
+
+    expect(sidebarOf(await render())).not.toContain('Laatst gewijzigd')
   })
 
   it('has no credit when the squad has no page', async () => {

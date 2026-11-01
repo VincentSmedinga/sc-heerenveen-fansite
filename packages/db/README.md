@@ -369,7 +369,7 @@ De sleutel is het seizoen met de plaats.
 
 `wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme` en `cup` voor de wedstrijden, `squad` voor de selectie), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
 Een pagina kan daarmee de bron noemen.
-`listWikipediaPages` geeft alleen de pagina's van de wedstrijden.
+`listWikipediaPages` geeft alleen de pagina's van de wedstrijden, met hun `version`, zodat een kaart kan zeggen wanneer de bron veranderde.
 
 `match_imports` heeft per seizoen de gezondheid van de import: `last_success_at`, `last_outcome`, `failures_in_a_row`, `last_error`, `last_warning` en `retry_at`, de tijd waarvoor de import Wikipedia niet opnieuw vraagt.
 Het zijn dezelfde velden als bij een feed.
@@ -397,7 +397,7 @@ De zoekterm is een eigen kolom, zodat je hem voor één speler kunt verbeteren: 
 De lijst met spelers op `/nieuws/zoeken` komt uit `listSquad` in `queries.ts`, de ene plek die bepaalt wie erin staat.
 Alleen de rijen van het lopende seizoen horen erin, en alleen de spelers die in de selectie staan (`in_squad`): een speler die vertrok, blijft in de tabel voor zijn doelpunten en staat niet in de lijst.
 De zoekpagina met de lijst van spelers (#107) moet dus `listSquad` gebruiken en geen eigen vraag naar `players` doen.
-De pagina van de selectie geeft `findSquadPage`, voor de bronvermelding onder de lijst.
+De pagina van de selectie geeft `findSquadPage`, voor de bronvermelding onder de lijst en voor de datum "Laatst gewijzigd" (`version`).
 
 `squad_imports` heeft per seizoen de gezondheid van de import van de selectie, met dezelfde velden als `match_imports`.
 
@@ -476,7 +476,7 @@ Vier queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
 - `listClubMatches(db, clubId, { competition })` geeft de wedstrijden tegen de club, de nieuwste eerst over alle seizoenen, ook de wedstrijden die nog niet gespeeld zijn.
   Bij elke wedstrijd staan het seizoen, de competitie, de ronde, de dag of de tekst voor de datum, de aftrap, thuis of uit, de uitslag en eventuele verlenging en strafschoppen.
   Met `competition` alleen die van de competitie.
-- `listAllWikipediaPages(db)` geeft de pagina's van Wikipedia die de import voor de wedstrijden las, van alle seizoenen, het nieuwste seizoen eerst: het seizoen, de titel, het soort en het moment van lezen.
+- `listAllWikipediaPages(db)` geeft de pagina's van Wikipedia die de import voor de wedstrijden las, van alle seizoenen, het nieuwste seizoen eerst: het seizoen, de titel, het soort, het moment van lezen en de `version`.
   Een pagina die over alle seizoenen telt, zoals de onderlinge resultaten, noemt ze allemaal als bron.
 
 ### Een club met twee namen samenvoegen
