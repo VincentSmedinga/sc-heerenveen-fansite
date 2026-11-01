@@ -33,11 +33,14 @@ test.describe('the bar of Statistieken without JavaScript', () => {
     ).toHaveAttribute('aria-current', 'page')
   })
 
-  test('leaves the links of the main menu as they are, whatever the page', async ({ page }) => {
+  test('takes the season, and not the choice, to the links of the main menu', async ({ page }) => {
     await page.goto(`/statistieken/${slug}?competitie=eredivisie`)
 
-    await expect(menu(page).getByRole('link', { name: 'Statistieken' })).toHaveAttribute('href', '/statistieken')
-    await expect(menu(page).getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('href', '/wedstrijden')
+    await expect(menu(page).getByRole('link', { name: 'Statistieken' })).toHaveAttribute(
+      'href',
+      `/statistieken/${slug}`,
+    )
+    await expect(menu(page).getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('href', `/wedstrijden/${slug}`)
     await expect(menu(page).getByRole('link', { name: 'Statistieken' })).toHaveAttribute('aria-current', 'page')
   })
 

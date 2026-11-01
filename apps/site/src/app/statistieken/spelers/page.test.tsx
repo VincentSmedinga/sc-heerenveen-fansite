@@ -93,13 +93,37 @@ describe('the page /statistieken/spelers', () => {
     expect(html).toMatch(/<section class="hf-card[ a-z-]*" aria-labelledby="doelpuntenmakers">/)
   })
 
-  it('has the card as Statistieken had it before the top 5: soft, with a button for an image', async () => {
+  it('has the card as Statistieken had it before the top 5, but white, with a button for an image', async () => {
     const html = await render()
+
+    expect(html).toContain('<section class="hf-card hf-card-shareable" aria-labelledby="doelpuntenmakers">')
+    expect(html.match(/data-hf-card-share/g)).toHaveLength(2)
+  })
+
+  it('keeps the card on Statistieken soft, where it is in the sidebar', async () => {
+    const html = await renderStatistics()
 
     expect(html).toContain(
       '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="doelpuntenmakers">',
     )
-    expect(html.match(/data-hf-card-share/g)).toHaveLength(2)
+  })
+
+  it('has the main column with the white card Doelpuntenmakers and a named sidebar with the soft card Bijzondere doelpunten', async () => {
+    const html = await render()
+    const main = html.match(/<main.*<\/main>/s)?.[0] ?? ''
+    const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
+
+    expect(html.match(/<aside/g)).toHaveLength(1)
+    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(sidebar).toMatch(/^<aside class="hf-page-sidebar" aria-label="Meer cijfers over de spelers">/)
+    expect(main).toContain('id="doelpuntenmakers"')
+    expect(main).not.toContain('id="bijzondere-doelpunten"')
+    expect(sidebar).toContain('id="bijzondere-doelpunten"')
+    expect(sidebar).not.toContain('id="doelpuntenmakers"')
+    expect(main).toContain('<section class="hf-card hf-card-shareable" aria-labelledby="doelpuntenmakers">')
+    expect(sidebar).toContain(
+      '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="bijzondere-doelpunten">',
+    )
   })
 
   it('has the card, the credit and nothing else: no other cards of Statistieken or Wedstrijden', async () => {
@@ -109,7 +133,7 @@ describe('the page /statistieken/spelers', () => {
       expect(html).not.toContain(`id="${id}"`)
     }
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html).not.toContain('<aside')
+    expect(html.match(/<aside/g)).toHaveLength(1)
   })
 
   it('is a table with a caption for a screen reader, in the card under the table', async () => {
@@ -181,13 +205,14 @@ describe('the page /statistieken/spelers', () => {
     expect(html).not.toContain('hf-card-shareable')
   })
 
-  it('has one credit under the card, with the time of the last reading, and loads nothing from another domain', async () => {
+  it('has one credit at the end of the sidebar, with the time of the last reading, and loads nothing from another domain', async () => {
     const html = await render()
 
     expect(html.match(/class="hf-meta hf-wikipedia-credit"/g)).toHaveLength(1)
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)"')
     expect(html).toContain('<time dateTime="2026-10-23T12:05:00.000Z">23 oktober 2026 om 14:05</time>')
     expect(html.lastIndexOf('hf-wikipedia-credit')).toBeGreaterThan(html.lastIndexOf('</table>'))
+    expect(html.match(/<aside.*<\/aside>/s)?.[0]).toContain('hf-wikipedia-credit')
     expect(html).not.toMatch(/<(?:img|script|iframe|link)\b/u)
   })
 
@@ -249,7 +274,7 @@ describe('the card Bijzondere doelpunten on /statistieken/spelers', () => {
       ],
     })
 
-  it('comes under the card Doelpuntenmakers and before the credit, and is soft with a button for an image', async () => {
+  it('comes after the card Doelpuntenmakers, in the sidebar and before the credit, and is soft with a button for an image', async () => {
     const html = await render()
 
     expect(html.indexOf('id="doelpuntenmakers"')).toBeLessThan(html.indexOf('id="bijzondere-doelpunten"'))

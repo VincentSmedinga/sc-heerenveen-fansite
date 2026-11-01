@@ -135,6 +135,29 @@ describe('the cookie of the admin', () => {
     })
   })
 
+  it.each([
+    ['development', false],
+    ['production', true],
+    ['test', true],
+  ])('under NODE_ENV=%s sets Secure: %s, and keeps every other attribute', async (nodeEnv, secure) => {
+    vi.stubEnv('NODE_ENV', nodeEnv)
+    vi.resetModules()
+
+    try {
+      const { sessionCookieOptions: options } = await import('./require-role')
+
+      expect(options).toEqual({
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60,
+        path: '/beheer',
+        sameSite: 'lax',
+        secure,
+      })
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it('has a name that says nothing about who is logged in', () => {
     expect(sessionCookieName).toBe('beheer-sessie')
   })

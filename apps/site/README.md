@@ -186,6 +186,9 @@ De balk komt uit `Navigation` van het designsysteem (`subitems`), dus het menu e
   Op `/nieuws` en op een artikel van de redactie is alleen Nieuws het huidige onderdeel, met `aria-current="page"`, en is er geen huidige subpagina.
 - Een ander pad, zoals `/`, `/bronnen` of een adres dat niet bestaat, heeft geen huidig onderdeel en geen balk.
 
+Op `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/statistieken/spelers/<seizoen>` nemen de items Wedstrijden en Statistieken het seizoen van de pagina mee (`seasonOfPath` en `hrefOf`), zodat een bezoeker in een afgelopen seizoen daarin blijft.
+Een pad zonder seizoen, of met een waarde die geen seizoen is (`seasonFromSlug`), laat de adressen zoals ze zijn.
+
 De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen.md`).
 De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf Wedstrijden kunt zoeken.
 
@@ -428,8 +431,10 @@ De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolo
 `/statistieken/spelers` is de eerste subpagina van Statistieken.
 Het toont de kaart Doelpuntenmakers met alle spelers die scoorden, zoals die kaart vroeger op `/statistieken` stond: dezelfde cijfers en dezelfde volgorde, met hetzelfde anker `#doelpuntenmakers` en het oude anker `#topscorers`.
 De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`; `/statistieken` gebruikt dezelfde kaart met de link naar deze pagina, en dan zijn het de eerste rijen van de lijst (`topFiveOf` in `src/matches.ts`).
+Op Spelers heeft de kaart het witte vlak, want de lijst is waar de pagina voor bestaat (de eigenschap `surface`); op Statistieken staat hij in de zijkolom op het zachte vlak.
 De pagina deelt alles rond het seizoen met Statistieken: de kiezer, de adressen `/statistieken/spelers/2025-26` en de route `app/statistieken/spelers/kies`, via `playersPath` in `src/season-page.ts`.
-Eronder staat de kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`.
+De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
+Op een telefoon volgt de zijkolom op de hoofdkolom, en de bronvermelding sluit de zijkolom af.
 De kaart heeft één kop, van niveau 2, en daaronder een lijst van vier delen, gebouwd zoals de kaart Uitersten: elk deel is een `List.Item` met de naam als rustige tekst erboven (`Text appearance="meta"`) en de waarde eronder in een `ShortFact` van het designsysteem, dat de dunne lijnen tussen de delen tekent.
 De naam en de waarde staan in hetzelfde lijstitem, dus een schermlezer leest ze samen.
 De delen zijn:
@@ -507,7 +512,8 @@ De hulpfuncties in `src/matches.ts` krijgen de keuze als laatste argument (`Comp
 De keuze blijft bij elke link tussen de twee pagina's: de link "Alle doelpuntenmakers", de schakelaar zelf, de knop "Laad 5 meer" van De nul gehouden (die een formulier met een verborgen veld is) en de seizoenskiezer, die de keuze als verborgen veld (`fields`) naar de route `kies` stuurt.
 `pickedSeasonResponse` stuurt de keuze mee naar het adres van het seizoen (`keepCompetition`) en laat een waarde weg die de pagina niet kent, zodat de kiezer niemand naar "niet gevonden" stuurt.
 De balk "Op deze pagina:" heeft alleen verwijzingen naar een plek op dezelfde pagina, dus hij houdt het seizoen en de keuze vanzelf vast.
-De balk onder het hoofdmenu houdt het seizoen en de keuze wel vast (zie _Het hoofdmenu en de balk van Nieuws_), de items van het menu zelf niet: die hebben vaste adressen.
+De balk onder het hoofdmenu houdt het seizoen en de keuze vast (zie _Het hoofdmenu en de balk van Nieuws_).
+De items Wedstrijden en Statistieken van het menu zelf nemen het seizoen van de pagina mee, maar niet de keuze: die kan het menu niet lezen zonder `useSearchParams`.
 
 De telling zelf gebeurt na het lezen: `getMatchData` bewaart de wedstrijden van een seizoen vijf minuten (of een uur voor een afgelopen seizoen), en de keuze filtert die lijst.
 Er is dus geen sleutel per keuze in de cache nodig, en de ene keuze kan de andere niet overschrijven.
@@ -681,8 +687,9 @@ Lokaal log je zo in:
 
    Open de link, en kies Inloggen.
 
-Het cookie van het beheer is `Secure`, ook lokaal.
-Chrome en Firefox nemen dat aan op `localhost`; Safari niet, dus log lokaal in met Chrome of Firefox.
+Het cookie van het beheer is `Secure`, behalve in de ontwikkelserver (`pnpm --filter site dev` en `pnpm review`).
+Daar werkt het beheer lokaal in elke browser, ook in Safari, dat een `Secure`-cookie niet bewaart op `http://localhost`.
+Een gebouwde site (`pnpm build`, acceptatie en productie) zet het cookie altijd met `Secure`.
 
 - `requireRole` in `src/beheer/require-role.ts` is de ene controle van het beheer.
   Elke pagina, route en serveractie onder `/beheer` roept hem als eerste aan, behalve de pagina's en acties om in te loggen.

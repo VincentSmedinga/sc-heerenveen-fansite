@@ -3228,6 +3228,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een tweede soort vlak, of nieuwe kleuren (niet nodig voor de regels; de projecteigenaar probeert later vier kleuren in donker).
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): Onze uitslagen op de pagina van een club blijft niet warm maar wordt zacht, en Wedstrijden daar wordt wit (regel 1 en regel 4).
 - **Later:** zie _Statistieken heeft een kaart Opmerkelijk: één feit per dag, in vaste volgorde_ (1 november 2026): met de kaart Opmerkelijk zijn drie van de tien kaarten op Statistieken warm (regel 3).
+- **Later:** zie _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026): op de pagina Spelers is de ranglijst Doelpuntenmakers de hoofdinhoud en dus wit (regel 1 in plaats van regel 4); op Statistieken blijft de top 5 zacht.
 
 ### De knop om een kaart als afbeelding op te slaan toont een camera, en is in rust rustiger
 
@@ -3776,6 +3777,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `Path=/beheer` houdt het uit verzoeken naar de rest van de site, en het is nog steeds het enige cookie dat de site zet.
   `Secure` geldt ook lokaal: Chrome en Firefox nemen het aan op `localhost`, Safari niet.
 - **Alternatieven:** de token zelf bewaren (een gelekte database logt dan in); een ondertekend cookie met een einddatum (niet in te trekken zonder lijst op de server).
+- **Later:** zie _Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure_ (1 november 2026): `Secure` geldt niet meer onder `NODE_ENV=development`, omdat Safari het cookie anders niet bewaart op `http://localhost`.
+  De rest van deze beslissing blijft.
 
 ### Het antwoord op een verzoek om een link is voor elk adres hetzelfde
 
@@ -3857,6 +3860,18 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de host heeft alleen de standalone build en Node, geen pnpm, en een SSH-sessie krijgt de variabelen van de Node.js-app niet (zie _De site draait de migraties als ze start_ en `docs/acceptatieomgeving.md`, stap 8 tot en met 10).
   Eén bestand en één bestand met `DATABASE_URL` is wat de importer al gebruikt, dus de eigenaar leert niets nieuws.
 - **Alternatieven:** een beheerpagina om accounts te maken (een aanvalsvlak, en buiten dit issue); de opdracht in `apps/site/server.js` laten draaien (dat vraagt de variabelen van de site, en meer van de host).
+
+### Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure
+
+- **Datum:** 1 november 2026
+- **Besluit:** het cookie `beheer-sessie` is `Secure` behalve onder `NODE_ENV=development`.
+  `sessionCookieOptions` in `apps/site/src/beheer/require-role.ts` kiest dat op één plek, en inloggen en uitloggen gebruiken die opties.
+- **Waarom:** Safari bewaart een `Secure`-cookie niet op `http://localhost`, dus de projecteigenaar kon lokaal niet inloggen in zijn eigen browser.
+  De ontwikkelserver (`pnpm --filter site dev` en `pnpm review`) draait alleen op de computer van de ontwikkelaar.
+  Wat echt gebruikt wordt, houdt `Secure`: acceptatie, productie en elke gebouwde site, ook die van de rooktest en de e2e-tests.
+  Een afweging op `NODE_ENV` kan een verzoek niet beïnvloeden, een afweging op de `Host`-header wel.
+- **Alternatieven:** `Secure` weglaten wanneer het verzoek `http` is op `localhost` (de header is door de verzender te kiezen); lokaal HTTPS met een zelfgemaakt certificaat (een extra stap voor elke ontwikkelaar); alles laten zoals het is en Chrome of Firefox gebruiken.
+- **Later:** vervangt de regel "`Secure` geldt ook lokaal" van _Een link en een sessie bewaren we als SHA-256, in de database_; de rest van die beslissing blijft.
 
 ### De privacyverklaring noemt het cookie van het beheer
 
@@ -4982,6 +4997,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De balk als tweede `nav` in `@shortcuts` (twee landmarks en een nieuw onderdeel in plaats van de geneste lijst).
   De URL van het verzoek in een header lezen in de layout (elke pagina wordt dynamisch; zie _Het hoofdmenu leest het pad in een clientcomponent_).
   De keuze onthouden in een cookie (zie _De statistieken tellen standaard alle wedstrijden_).
+- **Later:** zie _Het hoofdmenu neemt het seizoen van de pagina mee_ (1 november 2026): op de pagina van een afgelopen seizoen is Statistieken in het menu het adres van dat seizoen (`/statistieken/2025-26`) en niet meer altijd `/statistieken`, en Wedstrijden is dat ook; de keuze tussen alle wedstrijden en de Eredivisie houdt het menu nog steeds niet vast.
 
 ### De pagina van een club toont de namen van zijn stadion en heeft een zijkolom
 
@@ -5018,6 +5034,42 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Twee spellingen die we niet samenvoegen, staan als twee namen met een eigen periode.
 - **Alternatieven:** ook de bekerwedstrijden en play-offs tellen (een finale op een neutraal veld zou het stadion van de club lijken); "vanaf" ook bij één naam (zegt dat het stadion pas toen begon); alle spellingen in één naam samenvoegen met een lijst van afkortingen en voorvoegsels (een foute samenvoeging is erger dan twee regels); een eigen tabel met stadions en de datum waarop we een naam het eerst zagen (#549, een groter werk dat dit issue niet nodig heeft); Onze uitslagen warm laten (de kaart is geen uitnodiging of iets opmerkelijks, en de pagina heeft dan twee kaarten die de aandacht vragen).
 - **Later:** een eigen lijst met stadions per club (#549) zou de namen uit deze kaart kunnen halen, met de datum waarop we een naam het eerst zagen in plaats van de dag van een wedstrijd.
+
+### Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom
+
+- **Datum:** 1 november 2026
+- **Besluit:** op de pagina Spelers (`/statistieken/spelers` en de pagina's van een seizoen) is Doelpuntenmakers de inhoud van de pagina en heeft het witte vlak.
+  Bijzondere doelpunten staat in de zijkolom op het zachte vlak.
+  Op Statistieken blijft de top 5 in de zijkolom op het zachte vlak (#583).
+  - **Het vlak:** `TopScorersCard` krijgt een eigenschap `surface`, `soft` als niets is opgegeven en `default` (wit) op Spelers, zodat Statistieken niet verandert.
+  - **De zijkolom:** een `Page.Sidebar` van de gewone breedte, want de kaart is een lijst van korte regels en heeft de breedte van een tabel niet nodig.
+    Hij heet "Meer cijfers over de spelers" en volgt op een telefoon op de hoofdkolom, dus de volgorde is er dezelfde.
+    De bronvermelding sluit de zijkolom af, zoals op Statistieken.
+  - **Ongewijzigd:** de inhoud van de kaart Bijzondere doelpunten, het anker `#bijzondere-doelpunten`, de balk "Op deze pagina:" en de knop voor een afbeelding van beide kaarten.
+    Alleen de plaats en het vlak van de kaarten veranderen.
+    De balk is vanaf 52 rem weg, en dat is ook de breedte waarop de zijkolom naast de hoofdkolom komt.
+- **Waarom:** op Spelers is de ranglijst waarvoor de bezoeker komt, dus wit past bij de inhoud van de pagina (regel 1 van _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_).
+  Bijzondere doelpunten is een record en een bijzaak, dus de zijkolom en het zachte vlak.
+- **Alternatieven:** beide kaarten wit onder elkaar (de bijzaak weegt dan even zwaar als de lijst); alles zoals nu; de zijkolom zo breed als de hoofdkolom (de kaart heeft die breedte niet nodig, en de lijst met doelpuntenmakers wordt er smaller van).
+- **Later:** vult voor de pagina Spelers de beslissing _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (#537) aan, waarin een ranglijst op het zachte vlak staat.
+
+### Het hoofdmenu neemt het seizoen van de pagina mee
+
+- **Datum:** 1 november 2026
+- **Besluit:** op een pagina met een seizoen in het adres wijzen de menu-items Wedstrijden en Statistieken naar het adres van datzelfde seizoen.
+  Het seizoen komt uit het pad en niet uit een parameter of een cookie.
+  - **Welke pagina's:** `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/statistieken/spelers/<seizoen>`.
+    Op elke andere pagina, ook op die van het lopende seizoen, blijven de adressen zoals ze waren.
+  - **Hoe:** `seasonOfPath` in `SiteNavigation.tsx` leest het seizoen uit het pad met `seasonFromSlug`, dezelfde controle als de pagina's, dus `/wedstrijden/kies` of `/wedstrijden/2023-25` verandert niets.
+    `hrefOf` zet het seizoen achter het adres van het menu-item.
+    Welk item huidig is (`aria-current`) verandert niet.
+  - **De keuze voor de competitie gaat niet mee:** die hoort bij Statistieken, en Wedstrijden heeft haar niet.
+    Het menu kan haar niet lezen zonder `useSearchParams` en een Suspense-grens, en de balk onder Statistieken houdt haar al vast.
+- **Waarom:** een bezoeker die een afgelopen seizoen bekijkt, verwacht dat de pagina's die erbij horen hetzelfde seizoen tonen.
+  Een clientcomponent leest het pad ook op de server, dus het kost geen Suspense-grens en geen onthouden voorkeur.
+  Een seizoen dat bij de ene pagina bestaat, bestaat ook bij de andere, dus een meegenomen seizoen leidt nooit naar "niet gevonden".
+- **Alternatieven:** een parameter `?seizoen=` (de pagina's hebben al een adres per seizoen, dus dat zou een tweede adres voor dezelfde pagina zijn); het gekozen seizoen onthouden in een cookie (we volgen bezoekers niet, en een cookie maakt het adres afhankelijk van een eerder bezoek).
+- **Later:** zie _Het hoofdmenu leest het pad in een clientcomponent_ (22 oktober 2026): het menu leest het pad nu ook voor de adressen van twee onderdelen, niet alleen voor de markering.
 
 ## Importer
 
@@ -8946,7 +8998,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een zin op de drie kaarten die de keuze niet volgen (langere kaarten, en de schakelaar zegt het al).
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de schakelaar staat sindsdien ook op `/statistieken/tegenstanders` en op de pagina van een club, en telt daar de wedstrijden van alle seizoenen.
 - **Later:** zie _De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast_ (31 oktober 2026): de links van de balk onder het hoofdmenu houden het seizoen en de keuze nu vast.
-  Het hoofdmenu zelf houdt ze niet vast.
+  Het hoofdmenu zelf houdt de keuze niet vast.
+- **Later:** zie _Het hoofdmenu neemt het seizoen van de pagina mee_ (1 november 2026): het menu van de site neemt nu het seizoen mee naar Wedstrijden en Statistieken, maar niet de keuze tussen alle wedstrijden en de Eredivisie; het **Nadeel** hierboven geldt daarom alleen nog voor die keuze.
 - **Later:** zie _De schakelaar is een baan met een schuivende knop_ (31 oktober 2026): de schakelaar staat in de kleine maat van 36 pixels in plaats van 44, en is een baan met een knop.
   De plek, de links en `aria-current` blijven.
 - **Later:** zie _De play-offs voor de Conference League zijn een derde competitie, een ontbrekende pagina is geen mislukking_.
@@ -9004,6 +9057,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Lijsten zijn korter dan tabellen voor een paar namen, en een zin voor een leeg deel zegt dat er niets mis is met de pagina.
 - **Niet erin:** de positie van de doelpuntenmaker (voor een afgelopen seizoen bestaat geen selectie), het aandeel van de topscorer en het aantal verschillende spelers (dat staat in Doelpuntenmakers).
 - **Alternatieven:** vier koppen van niveau 3 met onder elk een lijst of een zin (te zwaar voor vier korte feiten, en de eerste versie van deze kaart); een tabel met een rij per speler (veel kolommen voor weinig getallen); een `dl` met `dt` en `dd` (de dunne lijnen horen bij `li`, en de kaart Uitersten is ook een lijst); de lege delen weglaten (een bezoeker kan niet zien of ze er niet zijn of er niet werden gezocht); een hattrick ook bij de dubbelslagen laten staan (dezelfde wedstrijd wordt dan twee keer genoemd); de kaart naar Statistieken zetten (de pagina Spelers is er voor wat bij spelers hoort, zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_).
+- **Later:** zie _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026): de kaart staat niet meer onder Doelpuntenmakers maar in de zijkolom, en de bronvermelding sluit de zijkolom af.
 
 ### De Stand zegt dat een uitslag nog ontbreekt, zonder datum op de kaarten
 
