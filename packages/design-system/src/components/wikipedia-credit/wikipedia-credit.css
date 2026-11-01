@@ -16,8 +16,8 @@
     }
 
     /*
-     * The line that opens and closes it. It is at least 44px high to press with a thumb, the arrow
-     * is the only mark besides the words, and the browser's own marker is gone.
+     * The line that opens and closes it. It is at least 44px high to press with a thumb, the
+     * arrow is the only mark besides the words, and the browser's own marker is gone.
      */
     > summary {
       align-items: center;
