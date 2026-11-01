@@ -1905,3 +1905,164 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
     expect(vi.mocked(getMatchData).mock.calls.map(([season]) => season)).toEqual(['2026/27', '2026/27', '2026/27'])
   })
 })
+
+describe('the card Opmerkelijk on /statistieken', () => {
+  const base = matchData.matches[1]!
+  /** A match with a score of seven goals and no goals listed, so a fact. */
+  const manyGoals = (round: number, opponent: string, competition: PublicMatch['competition'] = 'Eredivisie') => ({
+    ...base,
+    competition,
+    goals: [],
+    goalsAgainst: 4,
+    goalsFor: 3,
+    matchDate: `2026-09-${String(round).padStart(2, '0')}`,
+    opponent,
+    round: `Wedstrijd ${round}`,
+    status: 'played' as const,
+  })
+  const withFacts = (...matches: PublicMatch[]) =>
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, ...matches] })
+  const card = (html: string) =>
+    /<section class="hf-card hf-card-warm" aria-labelledby="opmerkelijk">.*?<\/section>/.exec(html)?.[0]
+  const sentence = (html: string) => /<p[^>]*>(.*?)<\/p>/.exec(card(html) ?? '')?.[1]
+  const three = [manyGoals(1, 'Proefclub A'), manyGoals(2, 'Proefclub B'), manyGoals(3, 'Proefclub C')]
+
+  it('has no card, and no empty one, in a season without a fact', async () => {
+    const html = await render()
+
+    expect(card(html)).toBeUndefined()
+    expect(html).not.toContain('Opmerkelijk')
+    expect(html).not.toContain('Nog iets opmerkelijks')
+  })
+
+  it('has no card for a season without matches', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+    expect(card(await render())).toBeUndefined()
+  })
+
+  it('is a card with the warm surface and a heading of level 2, with one sentence and the link "Nog iets opmerkelijks"', async () => {
+    withFacts(...three)
+
+    const html = await render()
+
+    expect(card(html)).toMatch(
+      /^<section class="hf-card hf-card-warm" aria-labelledby="opmerkelijk"><h2 class="hf-heading-2" id="opmerkelijk">Opmerkelijk<\/h2>/,
+    )
+    expect(card(html)?.match(/<p/g)).toHaveLength(1)
+    expect(sentence(html)).toMatch(
+      /^Thuis tegen Proefclub [ABC] \(3–4, \d+ september 2026\) vielen zeven doelpunten\.$/,
+    )
+    expect(card(html)).toMatch(/<a href="\/statistieken\?opmerkelijk=\d#opmerkelijk">Nog iets opmerkelijks<\/a>/)
+  })
+
+  it('is the last card of the main column, after home and away', async () => {
+    withFacts(...three)
+
+    const html = await render()
+
+    expect(html.indexOf('id="opmerkelijk"')).toBeGreaterThan(html.indexOf('id="thuis-en-uit"'))
+    expect(html.indexOf('id="opmerkelijk"')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
+  })
+
+  it('shows the fact that ?opmerkelijk= asks for, and goes round after the last one', async () => {
+    withFacts(...three)
+
+    const sentences = await Promise.all(
+      ['1', '2', '3', '4', '5'].map(async (fact) => sentence(await render({ opmerkelijk: fact }))),
+    )
+
+    expect(new Set(sentences.slice(0, 3)).size).toBe(3)
+    expect(sentences[3]).toBe(sentences[0])
+    expect(sentences[4]).toBe(sentences[1])
+  })
+
+  it('links each fact to the next, and the last to the first', async () => {
+    withFacts(...three)
+
+    const link = async (fact?: string) =>
+      /<a href="([^"]+)">Nog iets opmerkelijks<\/a>/.exec(
+        card(await render(fact === undefined ? {} : { opmerkelijk: fact })) ?? '',
+      )?.[1]
+
+    expect(await link()).toBe('/statistieken?opmerkelijk=2#opmerkelijk')
+    expect(await link('2')).toBe('/statistieken?opmerkelijk=3#opmerkelijk')
+    expect(await link('3')).toBe('/statistieken?opmerkelijk=1#opmerkelijk')
+    expect(await link('4')).toBe('/statistieken?opmerkelijk=2#opmerkelijk')
+  })
+
+  it('shows the first fact for a number that is not valid', async () => {
+    withFacts(...three)
+
+    const first = sentence(await render())
+
+    for (const fact of ['0', '-1', 'abc', '1.5', '02', '']) {
+      expect(sentence(await render({ opmerkelijk: fact })), fact).toBe(first)
+    }
+
+    expect(sentence(await render({ opmerkelijk: ['2', '3'] }))).toBe(first)
+  })
+
+  it('has no link when there is one fact: it would lead to the same card', async () => {
+    withFacts(manyGoals(1, 'Proefclub A'))
+
+    const html = await render()
+
+    expect(sentence(html)).toContain('Proefclub A')
+    expect(html).not.toContain('Nog iets opmerkelijks')
+  })
+
+  it('keeps the choice of the Eredivisie in the link, and leaves the facts of the cup out of the list', async () => {
+    withFacts(manyGoals(1, 'Proefclub A'), manyGoals(2, 'Proefclub B'), manyGoals(3, 'Bekerclub', 'KNVB Beker'))
+
+    const all = await render()
+    const league = await render(eredivisie)
+
+    expect(card(all)).toContain('href="/statistieken?opmerkelijk=2#opmerkelijk"')
+    expect(card(league)).toContain('href="/statistieken?competitie=eredivisie&amp;opmerkelijk=2#opmerkelijk"')
+    expect(card(league)).not.toContain('Bekerclub')
+
+    const everyone = await Promise.all(
+      ['1', '2', '3'].map(async (fact) => sentence(await render({ opmerkelijk: fact }))),
+    )
+
+    expect(everyone.filter((text) => text?.includes('Bekerclub'))).toHaveLength(1)
+  })
+
+  it('keeps the order for the whole day and changes it the next day', async () => {
+    withFacts(...three)
+
+    const order = async () =>
+      Promise.all(['1', '2', '3'].map(async (fact) => sentence(await render({ opmerkelijk: fact }))))
+    const today = await order()
+
+    vi.setSystemTime(new Date('2026-10-23T21:30:00Z'))
+
+    expect(await order()).toEqual(today)
+
+    const orders = new Set<string>()
+
+    for (let day = 24; day <= 30; day += 1) {
+      vi.setSystemTime(new Date(`2026-10-${day}T13:40:00Z`))
+      orders.add((await order()).join('|'))
+    }
+
+    expect(orders.size).toBeGreaterThan(1)
+  })
+
+  it('is in the bar of nobody: the bar has the nine cards with figures', async () => {
+    withFacts(...three)
+
+    const ids = [...(await render()).matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)
+
+    expect(ids.filter((id) => !statisticsShortcuts.some(({ href }) => href === id))).toEqual(['#opmerkelijk'])
+  })
+
+  it('has no request to another site, no script and no button', async () => {
+    withFacts(...three)
+
+    const html = card(await render()) ?? ''
+
+    expect(html).not.toMatch(/<script|<button|<form|https?:/)
+  })
+})

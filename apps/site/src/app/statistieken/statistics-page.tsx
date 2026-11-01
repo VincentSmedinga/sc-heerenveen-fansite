@@ -21,6 +21,8 @@ import {
   TopScorersCard,
 } from '../../MatchViews'
 import { pageMetadata, seasonPageMetadata } from '../../metadata'
+import { noteworthy, parseNoteworthyNumber } from '../../noteworthy'
+import { NoteworthyCard } from '../../NoteworthyCard'
 import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams, statisticsPath } from '../../season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '../../seasons'
 import { ServerError, serverErrorTitle } from '../../ServerError'
@@ -59,6 +61,8 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
  * four on the left and the other five on the right, and under each other on a narrow one, in
  * the order of the bar "Op deze pagina:". The switch between the matches (see below) is the
  * first cell of the main column, a plain cell without a card, directly under the title row.
+ * The card Opmerkelijk is the last of the main column and is not in the bar: it is one fact
+ * that changes with the day (see NoteworthyCard).
  * A season that is over has its cards put the season on the image. A season that has no matches
  * in the database is the page "niet gevonden".
  *
@@ -75,7 +79,7 @@ export async function StatisticsPage({
   searchParams: Promise<SearchParams>
   season: string
 }) {
-  const { competitie, nul } = await searchParams
+  const { competitie, [noteworthy.param]: factNumber, nul } = await searchParams
   const competition = parseCompetition(competitie)
   const loaded = await loadSeasonPage(season, statisticsPath)
 
@@ -115,6 +119,14 @@ export async function StatisticsPage({
         <SeasonCard matches={data.matches} season={imageSeason} />
         <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         <HomeAwayCard competition={competition} matches={data.matches} season={imageSeason} />
+        <NoteworthyCard
+          coaches={data.coaches}
+          competition={competition}
+          matches={data.matches}
+          now={now}
+          number={parseNoteworthyNumber(factNumber)}
+          path={address}
+        />
       </Page.Main>
       {/* The second column is a sidebar as wide as the main column, so the two are equal. On a
           phone it follows the main: our place in the league, the season, the streaks, home and
