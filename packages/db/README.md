@@ -483,8 +483,8 @@ Vier queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
 
 Staat een club twee keer in `clubs` omdat Wikipedia hem op twee manieren schrijft, zoals `Excelsior` en `Excelsior Rotterdam`, dan zijn er twee wegen.
 
-Staat de club in de lijst met volledige namen van de importer (`clubFullNames` in `apps/importer/src/club-names.ts`), dan voegt de importer ze zelf samen bij de volgende lezing van een seizoen, met `repairClubs(db, lijst)`.
-Dat doet hetzelfde als de opdrachten hieronder, in één transactie met de import.
+Staat de club in de lijst met volledige namen van de importer (`clubFullNames` in `apps/importer/src/club-names.ts`), dan voegt de importer ze zelf samen aan het begin van elke run, vóór hij een seizoen leest, met `repairClubs(db, lijst)`.
+Dat doet hetzelfde als de opdrachten hieronder, in een eigen transactie.
 De club met een artikel blijft, anders die met de meeste wedstrijden, anders de oudste, en hij krijgt de volledige naam, de slug ervan en de andere schrijfwijzen als andere namen.
 Hebben beide clubs een eigen artikel, dan voegt hij niets samen en zegt dat in het logboek.
 Een club aan de lijst toevoegen staat in de [README van de importer](../../apps/importer/README.md), onder _De clubs van de tegenstanders_.

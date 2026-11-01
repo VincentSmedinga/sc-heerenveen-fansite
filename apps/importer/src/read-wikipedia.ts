@@ -457,50 +457,80 @@ function matchBoxes(text: string): Template[] {
   return findTemplates(clean(text), /\{\{\s*Footballbox2\s*(?=\||\n)/giu)
 }
 
-/** The date of a match, or undefined when it is not one of the shapes we know. */
+/**
+ * The date of a match, or undefined when it is not one of the shapes we know: one day, or
+ * several days from the first to the last (a weekend, or the days a cup round is played on).
+ * The days of several are joined by a hyphen or an en dash, with or without spaces around it:
+ * `12-14 februari 2027`, `1–3 december 2026`, `29 april-3 mei 2027`, `30 november–2 december
+ * 2026`. The year is on the last day, and may be on the first as well (`31 december 2026 – 2
+ * januari 2027`); a date without a year is not one we know, because the year would be a guess.
+ * The date is the first day, and `text` is what Wikipedia wrote.
+ */
 function parseDate(
   value: string,
 ): undefined | { day: number; isoDate: string; month: number; single: boolean; text: string; year: number } {
   const text = plain(value).replace(/\*+$/u, '').trim()
   const month = '(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)'
-  let day: number
-  let monthName: string
-  let year: number
-  let single = false
-  let match: null | RegExpExecArray
+  const dash = '\\s*[-–]\\s*'
+  const normalised = text.replaceAll('&ndash;', '–').replaceAll('&#8211;', '–')
+  const single = new RegExp(`^(\\d{1,2}) ${month} (\\d{4})$`, 'u').exec(normalised)
+  const several = new RegExp(`^(\\d{1,2})(?: ${month}(?: (\\d{4}))?)?${dash}(\\d{1,2}) ${month} (\\d{4})$`, 'u').exec(
+    normalised,
+  )
+  let first: undefined | { day: number; monthName: string; year: number }
 
-  if ((match = new RegExp(`^(\\d{1,2}) ${month} (\\d{4})$`, 'u').exec(text))) {
-    single = true
-    day = Number(match[1])
-    monthName = match[2] ?? ''
-    year = Number(match[3])
-  } else if ((match = new RegExp(`^(\\d{1,2})-\\d{1,2} ${month} (\\d{4})$`, 'u').exec(text))) {
-    day = Number(match[1])
-    monthName = match[2] ?? ''
-    year = Number(match[3])
-  } else if ((match = new RegExp(`^(\\d{1,2}) ${month}-\\d{1,2} ${month} (\\d{4})$`, 'u').exec(text))) {
-    day = Number(match[1])
-    monthName = match[2] ?? ''
-    // A weekend from 31 December to 2 January belongs to the year before the one that is named.
-    year = Number(match[4]) - (months.indexOf(monthName) > months.indexOf(match[3] ?? '') ? 1 : 0)
-  } else {
+  if (single !== null) {
+    first = { day: Number(single[1]), monthName: single[2] ?? '', year: Number(single[3]) }
+  } else if (several !== null) {
+    const monthName = several[2] ?? several[5] ?? ''
+
+    first = {
+      day: Number(several[1]),
+      monthName,
+      // A weekend from 31 December to 2 January belongs to the year before the one named.
+      year:
+        several[3] === undefined
+          ? Number(several[6]) - (months.indexOf(monthName) > months.indexOf(several[5] ?? '') ? 1 : 0)
+          : Number(several[3]),
+    }
+  }
+
+  if (first === undefined) {
     return undefined
   }
 
-  const monthNumber = months.indexOf(monthName) + 1
-  const check = new Date(Date.UTC(year, monthNumber - 1, day))
+  const monthNumber = months.indexOf(first.monthName) + 1
+  const start = Date.UTC(first.year, monthNumber - 1, first.day)
+  const check = new Date(start)
 
-  if (check.getUTCMonth() !== monthNumber - 1 || check.getUTCDate() !== day) {
+  if (check.getUTCMonth() !== monthNumber - 1 || check.getUTCDate() !== first.day) {
     return undefined
+  }
+
+  if (several !== null) {
+    const lastMonth = months.indexOf(several[5] ?? '')
+    const lastYear = Number(several[6])
+    const last = new Date(Date.UTC(lastYear, lastMonth, Number(several[4])))
+
+    // The last day exists, and does not come before the first. A first day that is put in the
+    // year before is a weekend over the New Year, not eleven months.
+    if (
+      last.getUTCMonth() !== lastMonth ||
+      last.getUTCDate() !== Number(several[4]) ||
+      last.getTime() < start ||
+      (first.year < lastYear && last.getTime() - start > 31 * 24 * 60 * 60 * 1000)
+    ) {
+      return undefined
+    }
   }
 
   return {
-    day,
-    isoDate: `${year}-${String(monthNumber).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+    day: first.day,
+    isoDate: `${first.year}-${String(monthNumber).padStart(2, '0')}-${String(first.day).padStart(2, '0')}`,
     month: monthNumber,
-    single,
+    single: single !== null,
     text,
-    year,
+    year: first.year,
   }
 }
 

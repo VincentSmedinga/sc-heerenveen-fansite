@@ -1,0 +1,58 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)?action=raw, read on 1 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  The second round, as Wikipedia has it after the draw: every match has several days and no time.
+  Left out: the other matches of the page and the text around the templates. See the tests.
+-->
+== Wedstrijden ==
+
+=== Hoofdtoernooi ===
+==== Tweede ronde ====
+{{Footballbox2
+|date = 1–3 december 2026
+|time = 
+|team1 = [[sc Heerenveen]]
+|score = 
+|half time score = 
+|aet = 
+|team2 = [[De Treffers]]
+|goals1 = 
+|goals2 = 
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 
+|referee = 
+|report = 
+}}
+{{Footballbox2
+|date = 1–3 december 2026
+|time = 
+|team1 = [[FC Eindhoven]]
+|score = 
+|half time score = 
+|aet = 
+|team2 = [[K.v.v. Quick Boys|Quick Boys]]
+|goals1 = 
+|goals2 = 
+|location = [[Eindhoven]]
+|stadium = [[Jan Louwers Stadion]]
+|attendance = 
+|referee = 
+|report = 
+}}
+{{Footballbox2
+|date = 15–17 december 2026
+|time = 
+|team1 = [[Excelsior '31]]
+|score = 
+|half time score = 
+|aet = 
+|team2 = [[N.E.C.]]
+|goals1 = 
+|goals2 = 
+|location = [[Rijssen]]
+|stadium = [[Sportpark De Koerbelt]]
+|attendance = 
+|referee = 
+|report = 
+}}

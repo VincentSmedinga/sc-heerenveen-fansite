@@ -7,6 +7,7 @@ import { linkedPage, pageTitles, pageUrl, readCup, readLeague, readStandings } f
 const programme = readFileSync(new URL('./fixtures/wikipedia-programme.wiki', import.meta.url), 'utf8')
 const standingsPage = readFileSync(new URL('./fixtures/wikipedia-standings.wiki', import.meta.url), 'utf8')
 const cupPage = readFileSync(new URL('./fixtures/wikipedia-cup.wiki', import.meta.url), 'utf8')
+const secondRoundPage = readFileSync(new URL('./fixtures/wikipedia-cup-second-round.wiki', import.meta.url), 'utf8')
 const goalsCupPage = readFileSync(new URL('./fixtures/wikipedia-cup-goals.wiki', import.meta.url), 'utf8')
 const extraTimePage = readFileSync(new URL('./fixtures/wikipedia-cup-extra-time.wiki', import.meta.url), 'utf8')
 const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
@@ -154,6 +155,66 @@ describe('the programme and the results', () => {
     // A date with a day but no time is kept as it is written.
     expect(readLeague(leagueWith(box({ date: '14 februari 2027', time: '' })))).toMatchObject({
       matches: [{ dateText: '14 februari 2027', kickoffAt: null, matchDate: '2027-02-14' }],
+    })
+  })
+
+  it.each([
+    ['1–3 december 2026', '2026-12-01'],
+    ['1-3 december 2026', '2026-12-01'],
+    ['1 – 3 december 2026', '2026-12-01'],
+    ['1&ndash;3 december 2026', '2026-12-01'],
+    ['12-14 februari 2027', '2027-02-12'],
+    ['30 november–2 december 2026', '2026-11-30'],
+    ['30 november - 2 december 2026', '2026-11-30'],
+    ['30 november 2026–2 december 2026', '2026-11-30'],
+    ['31 december–2 januari 2027', '2026-12-31'],
+    ['31 december 2026–2 januari 2027', '2026-12-31'],
+    ['1–3 december 2026*', '2026-12-01'],
+  ])('reads the days of %s as the first day, and keeps the text as it is written', (date, first) => {
+    expect(readLeague(leagueWith(box({ date, time: '' })))).toMatchObject({
+      matches: [{ dateText: date.replace(/\*$/u, ''), kickoffAt: null, matchDate: first, status: 'scheduled' }],
+    })
+  })
+
+  it('gives no kick-off to a date of several days, also when the page has a time', () => {
+    expect(readLeague(leagueWith(box({ date: '1–3 december 2026', time: '20:00 uur' })))).toMatchObject({
+      matches: [{ dateText: '1–3 december 2026', kickoffAt: null, matchDate: '2026-12-01' }],
+    })
+  })
+
+  it.each([
+    ['without a year', '1–3 december'],
+    ['with the last day before the first', '3–1 december 2026'],
+    ['with a last day that does not exist', '30–31 februari 2027'],
+    ['with a last month before the first in one year', '2 december–1 november 2026'],
+    ['with a first day that does not exist', '31 november–2 december 2026'],
+    ['with three days', '1–3–5 december 2026'],
+    ['with a word between', '1 tot 3 december 2026'],
+  ])('does not know a date of several days %s', (_name, date) => {
+    expect(readLeague(leagueWith(box({ date, time: '' })))).toEqual({
+      kind: 'error',
+      message: `Speelronde 12 (Eredivisie) has a date we do not know: '${date}'`,
+    })
+  })
+
+  it('reads the second round of the cup, where every date has three days and no time', () => {
+    expect(readCup(secondRoundPage)).toMatchObject({
+      hasTemplates: true,
+      kind: 'read',
+      lastPlayedOn: null,
+      matches: [
+        {
+          competition: 'KNVB Beker',
+          dateText: '1–3 december 2026',
+          home: true,
+          kickoffAt: null,
+          matchDate: '2026-12-01',
+          opponent: 'De Treffers',
+          round: 'Tweede ronde',
+          stadium: 'Abe Lenstra Stadion',
+          status: 'scheduled',
+        },
+      ],
     })
   })
 
