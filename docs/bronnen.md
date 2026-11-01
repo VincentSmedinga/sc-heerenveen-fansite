@@ -409,7 +409,7 @@ Al in het register (#561), met het filter `club`.
   Er bestaat geen kolom voor de beschrijving, de auteur, de afbeelding of het logo, dus de importer bewaart ze niet.
   De tests (`import-feeds.test.ts`, "importing the sport feed of De Gelderlander, the way the register has it") lezen een verzonnen feed op een `.test`-domein.
   Een kop over N.E.C. is daarin `relevant` in de dagen rond een wedstrijd tegen N.E.C. en daarbuiten niet; hetzelfde geldt voor Go Ahead Eagles.
-  Een kop over Thialf of Nijmegen Devils is nooit `relevant`, en een kop over de club is het altijd.
+  Een kop over Thialf of Nijmegen Devils is nooit `relevant`, en een kop die Heerenveen noemt, is het wel.
 
 ### Rijnmond
 
