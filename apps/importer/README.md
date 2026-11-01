@@ -779,7 +779,8 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Een wedstrijd van de competitie met `aet` of `penaltyscore` is een fout, zoals strafschoppen zonder verlenging, strafschoppen bij een stand die niet gelijk is, en een score van de strafschoppen die geen "N – N" is.
   Verlenging zonder strafschoppen mag, ook bij een gelijke stand: de strafschoppen komen er bij de volgende lezing bij.
   Zo'n nieuwe score van strafschoppen is geen verandering van de uitslag en geeft geen waarschuwing; een score die verandert wel.
-- Bij een bekerwedstrijd met `aet` bewaart hij ook de stand na 90 minuten, en bij een wedstrijd van de play-offs voor de Conference League met `aet` als die in één wedstrijd is gespeeld (`after_ninety_for` en `after_ninety_against`, van sc Heerenveen en van de tegenstander).
+- Bij een bekerwedstrijd met `aet` bewaart hij ook de stand na 90 minuten (`after_ninety_for` en `after_ninety_against`, van sc Heerenveen en van de tegenstander).
+  Hetzelfde geldt voor een wedstrijd van de play-offs voor de Conference League met `aet`, als de ronde in één wedstrijd is gespeeld.
   Op de pagina van 2025/26 staat hij in `half time score`, als twee paren gescheiden door een komma: eerst de stand na 90 minuten en dan de rust, zoals "2 – 2, 1 – 1".
   Hij neemt het eerste paar over als het tweede paar er niet boven ligt en het eerste niet boven de eindstand ligt.
   Dat is de enige manier om de paren te herkennen, want een paar redacteuren schreven ze omgekeerd (de rust eerst).
