@@ -314,6 +314,7 @@ Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
   Een club die naar een plaats heet, telt ook hier alleen met zijn volledige naam: "tegen Groningen" is geen andere club, "tegen FC Groningen" wel.
   Twee namen van dezelfde club zijn één club.
   Een tegenstander die niet in de lijst staat, telt niet mee als club uit de lijst: "Excelsior Maassluis" is niet "Excelsior" uit Rotterdam.
+  Een club in het buitenland met dezelfde naam telt niet als de tegenstander: "Sparta Praag" is niet Sparta Rotterdam (`namesakeClubs` in `src/relevance-terms.ts`).
   Een kop met "Heerenveen" valt onder de andere regels en wordt niet slechter van een tweede club.
 - **De naam van de tegenstander:** de naam in `matches.opponent` ("N.E.C.", "ADO Den Haag", "Almere City FC") hoort bij de namen die het filter voor die club kent.
   Dat verband staat op één plek: `otherClubGroups` in [`src/relevance-terms.ts`](src/relevance-terms.ts), met de namen van één club bij elkaar.
@@ -341,7 +342,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een moderator verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_) en die van ESPN (zie _De voetbalfeed van ESPN NL_).
+Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_) en de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_).
 
 ### De uitkomst bekijken
 
@@ -491,6 +492,19 @@ De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden 
 De test in `src/import-feeds.test.ts` ("importing the sport feed of De Gelderlander, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/gelderlander-sample.xml`](src/fixtures/gelderlander-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft koppen over N.E.C. en Go Ahead Eagles, over Thialf en Nijmegen Devils en over een andere club, een kop over de club, en een bericht zonder `dpp:paid`.
 De test geeft de feed een wedstrijd tegen N.E.C. en dan een tegen Go Ahead Eagles, en laat zien dat alleen de kop over die tegenstander rond de wedstrijd `relevant` wordt.
+
+## De sportfeed van Rijnmond
+
+Rijnmond is een bron met de feed `https://www.rijnmond.nl/rss/sport.xml`, het sportnieuws van de regionale omroep van Rotterdam.
+De feed is RSS 2.0, met 50 berichten en tijden in GMT, en heeft geen betaalmuur; de adapter leest hem zonder aanpassing.
+Het regionieuws van Rijnmond staat niet in het register (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
+Bijna geen kop gaat over sc Heerenveen: de feed gaat vooral over Feyenoord, en verder over Sparta en Excelsior.
+De seed zet de feed op `club`, en de bron telt door de regel van de tegenstander: een kop over Feyenoord, Sparta of Excelsior is `relevant` van 3 dagen voor tot 3 dagen na een wedstrijd tegen die club (zie _Het relevantiefilter_).
+"Sparta Praag" is een andere club dan Sparta Rotterdam: de zinnen in `namesakeClubs` in [`src/relevance-terms.ts`](src/relevance-terms.ts) laat de regel eerst weg.
+Een run van 1 november 2026 bewaarde alle 50 berichten, en het filter vond er 0 `relevant`, 0 `doubtful` en 50 `irrelevant`, want er was geen wedstrijd tegen een Rotterdamse club in de buurt.
+Elk bericht heeft een beschrijving, een auteur en een afbeelding; de adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
+De test in `src/import-feeds.test.ts` ("importing the sports feed of Rijnmond, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/rijnmond-sample.xml`](src/fixtures/rijnmond-sample.xml), met proefwedstrijden tegen Feyenoord, Sparta Rotterdam en Excelsior Rotterdam.
+De tests van de regel zelf staan in `src/relevance.test.ts`.
 
 ## De velden van de feed van de Leeuwarder Courant
 

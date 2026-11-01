@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A small, made-up feed in the shape of the sports feed of Rijnmond (see docs/bronnen.md,
+  Rijnmond): RSS 2.0, headlines, descriptions, authors and links in CDATA, times in GMT, and an
+  image and a logo in the channel. The headlines, links and texts are invented; none is copied
+  from a real feed. The description and the author are here to show that the importer does not
+  read them. The headlines are about Feyenoord, Sparta and Excelsior on days around and far
+  from the matches that import-feeds.test.ts gives: Feyenoord on 8 November 2026, Sparta on 29
+  November and Excelsior on 13 December. One headline is about Sparta Praag, which is not
+  Sparta Rotterdam, and one names two of the clubs.
+-->
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/">
+<channel>
+  <title><![CDATA[Rijnmond.test - Sport]]></title>
+  <description><![CDATA[Verzonnen sportnieuws]]></description>
+  <link>https://www.rijnmond.test/sport</link>
+  <language>nl</language>
+  <lastBuildDate>Mon, 14 Dec 2026 09:00:00 GMT</lastBuildDate>
+  <image>
+    <url>https://www.rijnmond.test/logo.png</url>
+    <title>Rijnmond.test - Sport</title>
+    <link>https://www.rijnmond.test/sport</link>
+  </image>
+  <item>
+    <title><![CDATA[Feyenoord-trainer waarschuwt voor de eigen fouten]]></title>
+    <link>https://www.rijnmond.test/sport/9100001/feyenoord-trainer-waarschuwt</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100001.jpg" medium="image"/>
+    <guid isPermaLink="false">9100001</guid>
+    <pubDate>Fri, 06 Nov 2026 09:30:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Feyenoord-aanvaller twijfelgeval na de interlandperiode]]></title>
+    <link>https://www.rijnmond.test/sport/9100002/feyenoord-aanvaller-twijfelgeval</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100002.jpg" medium="image"/>
+    <guid isPermaLink="false">9100002</guid>
+    <pubDate>Wed, 11 Nov 2026 11:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Feyenoord haalt een nieuwe verdediger binnen]]></title>
+    <link>https://www.rijnmond.test/sport/9100003/feyenoord-nieuwe-verdediger</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100003.jpg" medium="image"/>
+    <guid isPermaLink="false">9100003</guid>
+    <pubDate>Thu, 12 Nov 2026 08:15:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Feyenoord kijkt vooruit op de komende maand]]></title>
+    <link>https://www.rijnmond.test/sport/9100004/feyenoord-vooruitblik</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100004.jpg" medium="image"/>
+    <guid isPermaLink="false">9100004</guid>
+    <pubDate>Wed, 04 Nov 2026 16:45:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Sparta zoekt na de pauze een nieuwe doelman]]></title>
+    <link>https://www.rijnmond.test/sport/9100005/sparta-nieuwe-doelman</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100005.jpg" medium="image"/>
+    <guid isPermaLink="false">9100005</guid>
+    <pubDate>Fri, 27 Nov 2026 10:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Feyenoord verlengt het contract van de trainer]]></title>
+    <link>https://www.rijnmond.test/sport/9100006/feyenoord-contract-trainer</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100006.jpg" medium="image"/>
+    <guid isPermaLink="false">9100006</guid>
+    <pubDate>Sat, 28 Nov 2026 12:20:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Sparta Praag verrast in de Conference League]]></title>
+    <link>https://www.rijnmond.test/sport/9100007/sparta-praag-verrast</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100007.jpg" medium="image"/>
+    <guid isPermaLink="false">9100007</guid>
+    <pubDate>Sat, 28 Nov 2026 21:05:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Excelsior verlengt met de keeper]]></title>
+    <link>https://www.rijnmond.test/sport/9100008/excelsior-verlengt-keeper</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100008.jpg" medium="image"/>
+    <guid isPermaLink="false">9100008</guid>
+    <pubDate>Fri, 11 Dec 2026 13:40:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Feyenoord en Sparta strijden om de derby van de stad]]></title>
+    <link>https://www.rijnmond.test/sport/9100009/feyenoord-sparta-derby</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100009.jpg" medium="image"/>
+    <guid isPermaLink="false">9100009</guid>
+    <pubDate>Fri, 06 Nov 2026 14:10:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Ajax wint nipt van PEC Zwolle]]></title>
+    <link>https://www.rijnmond.test/sport/9100010/ajax-wint-nipt</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100010.jpg" medium="image"/>
+    <guid isPermaLink="false">9100010</guid>
+    <pubDate>Sat, 07 Nov 2026 19:55:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[sc Heerenveen kijkt uit naar de uitwedstrijd in Rotterdam]]></title>
+    <link>https://www.rijnmond.test/sport/9100011/heerenveen-uitwedstrijd</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100011.jpg" medium="image"/>
+    <guid isPermaLink="false">9100011</guid>
+    <pubDate>Thu, 01 Oct 2026 12:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title><![CDATA[Sparta presenteert een nieuw uitshirt]]></title>
+    <link>https://www.rijnmond.test/sport/9100012/sparta-uitshirt</link>
+    <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+    <dc:creator><![CDATA[Een Verzonnen Auteur]]></dc:creator>
+    <media:content url="https://www.rijnmond.test/media/9100012.jpg" medium="image"/>
+    <guid isPermaLink="false">9100012</guid>
+    <pubDate>Thu, 10 Dec 2026 09:00:00 GMT</pubDate>
+  </item>
+</channel>
+</rss>

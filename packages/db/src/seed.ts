@@ -240,6 +240,15 @@ export const realSources = [
     name: 'ESPN',
     slug: 'espn',
   },
+  {
+    description:
+      'Regionale publieke omroep van Rotterdam. In de sportfeed staat vooral nieuws over Feyenoord, Sparta en Excelsior; we tonen alleen berichten over sc Heerenveen, en over de Rotterdamse tegenstander rond een wedstrijd.',
+    domain: 'www.rijnmond.nl',
+    feeds: [{ filter: 'club', url: 'https://www.rijnmond.nl/rss/sport.xml' }],
+    kind: 'news',
+    name: 'Rijnmond',
+    slug: 'rijnmond',
+  },
 ] satisfies (NewSource & { feeds: (string | { filter: FeedFilter; url: string })[] })[]
 
 /**

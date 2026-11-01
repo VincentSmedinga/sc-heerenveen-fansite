@@ -8,6 +8,7 @@ import {
   clubSurnames,
   footballWords,
   frisianFootballWords,
+  namesakeClubs,
   ordinaryClubWords,
   otherClubGroups,
   otherClubs,
@@ -61,7 +62,9 @@ export function judgeRelevance(title: string, opponents: readonly string[] = [])
     return 'relevant'
   }
 
-  if (opponents.some((opponent) => namesOpponentOnly(words, opponent))) {
+  const withoutNamesakes = leaveOut(words, clubPhrases.namesakes)
+
+  if (opponents.some((opponent) => namesOpponentOnly(withoutNamesakes, opponent))) {
     return 'relevant'
   }
 
@@ -135,6 +138,7 @@ function dayNumber(day: string): number {
 const clubPhrases = {
   footballWords: [...footballWords, ...frisianFootballWords].map(normaliseTitle),
   legends: clubLegends.map(normaliseTitle),
+  namesakes: namesakeClubs.map(normaliseTitle),
   otherClubs: otherClubs.map(normaliseTitle),
   people: clubPeople.map(normaliseTitle),
   surnames: clubSurnames.map(normaliseTitle),
@@ -172,6 +176,19 @@ function isOrdinaryOrPrefix(word: string): boolean {
 
 function isPrefix(word: string): boolean {
   return (clubPrefixes as readonly string[]).includes(word)
+}
+
+/** The words with every run of `phrases` blanked out, so no rule finds a name in it. */
+function leaveOut(words: string[], phrases: string[][]): string[] {
+  const left = [...words]
+
+  for (const phrase of phrases) {
+    for (let start = indexOfPhrase(left, phrase); start >= 0; start = indexOfPhrase(left, phrase)) {
+      left.fill('', start, start + phrase.length)
+    }
+  }
+
+  return left
 }
 
 /**
