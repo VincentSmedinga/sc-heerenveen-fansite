@@ -3972,6 +3972,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   In forced colours heeft hij de kleur van de achtergrond, zodat hij ook daar niet te zien is.
 - **Alternatieven:** de bronvermelding zonder kaart laten (de tekst staat dan aan de rand van de kolom, naast de tekst in de kaarten); de link naar de geschiedenis houden (volledig, maar twee links in een zin die voor het oog een bijzaak is).
   **Let op:** de CC BY-SA vraagt een aanduiding van de auteurs op een redelijke manier; een link naar het artikel voldoet volgens de uitleg van Wikipedia over hergebruik, maar geen jurist heeft dat getoetst.
+- **Later:** zie _De bronvermelding van Wikipedia staat dicht in een uitklap_.
+  De volledige vorm is een `details` met "Bron: Wikipedia" in de `summary`; de licentie, de pagina's, de tijd van het lezen en de zin over onze gegevens staan in de uitklap.
+  De doorzichtige kaart, het ontbreken van een link naar de geschiedenis en de korte vorm blijven.
+
+### De bronvermelding van Wikipedia staat dicht in een uitklap
+
+- **Datum:** 1 november 2026
+- **Besluit:** de volledige vorm van `WikipediaCredit` is een `details` met een `summary` die "Bron: Wikipedia" zegt, en staat dicht voor elke pagina, ook als er maar één is (de projecteigenaar, 1 november 2026).
+  De uitklap heeft de licentie "CC BY-SA 4.0" met zijn link, de pagina's met hun links, "Laatst gelezen op …" en de zin dat onze gegevens ook CC BY-SA 4.0 zijn.
+  De `summary` heeft geen link, want een klik doet dan twee dingen.
+  De korte vorm (`compact`) verandert niet.
+- **Waarom:** op Tegenstanders staat een link naar elk seizoen, en de bronvermelding was langer dan de lijst erboven.
+  "Bron: Wikipedia" is zonder klik te zien, zoals principe 4 van de Redactie vraagt, en de licentie en de pagina's zijn één klik verder.
+  Eén vorm is makkelijker te leren dan een vorm die afhangt van het aantal pagina's.
+- **Hoe:** een gewone `details`, zonder script: het werkt met het toetsenbord (Enter en spatie), een schermlezer meldt dat hij is in- of uitgeklapt en de browser zoekt ook in de dichte tekst.
+  Het pijltje is het icoon `arrow-down` in de kleur van de metatekst; het draait een halve slag als hij open is, met de tijden van de beweging, dus bij "minder beweging" klapt het om zonder te draaien.
+  De regel van de `summary` is minstens 44 pixels hoog om te raken met een duim.
+  De controle op de pagina's (`checkPage`) klapt elke `details` open voor axe, want axe slaat ingeklapte tekst over.
+- **Alternatieven:** alleen inklappen bij veel pagina's (twee vormen om te leren, en de grens is willekeurig); "Bron: Wikipedia (CC BY-SA 4.0)" met een link in de `summary` (een klik doet twee dingen); de pagina's weglaten (de licentie vraagt een aanduiding van de auteurs, en die staat in de link naar het artikel).
 
 ### Zoeken in koppen, afleveringen en artikelen, met LIKE
 

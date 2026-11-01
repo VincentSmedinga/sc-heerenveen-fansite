@@ -91,6 +91,13 @@ const jumps = 'Springt.'
 
 export const motionChanges: MotionChange[] = [
   { component: 'Link', group: 'aanwijzen', now: jumps, what: 'Kleur en dikte van de streep', why: 'Muis' },
+  {
+    component: 'WikipediaCredit, regel',
+    group: 'aanwijzen',
+    now: jumps,
+    what: 'Kleur van de tekst',
+    why: 'Muis',
+  },
   { component: 'Button', group: 'aanwijzen', now: jumps, what: 'Vulling en rand', why: 'Muis' },
   { component: 'Button, zacht', group: 'aanwijzen', now: jumps, what: 'Vulling en rand', why: 'Muis' },
   {
@@ -171,6 +178,13 @@ export const motionChanges: MotionChange[] = [
     now: 'Draait in 0,2 seconde (#440).',
     what: 'Draaiing van het pijltje',
     why: 'Open lijst (`:open`)',
+  },
+  {
+    component: 'WikipediaCredit, pijltje',
+    group: 'selecteren',
+    now: 'Draait in 0,2 seconde.',
+    what: 'Draaiing van het pijltje',
+    why: 'Uitklap open (`[open]`)',
   },
   {
     component: 'Heading, ankerlink',

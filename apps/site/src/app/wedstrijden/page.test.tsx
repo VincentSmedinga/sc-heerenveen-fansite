@@ -615,7 +615,8 @@ describe('the page /wedstrijden', () => {
     const html = await render()
 
     expect(html.match(/class="hf-meta hf-wikipedia-credit"/g)).toHaveLength(1)
-    expect(html).toContain('Bron: Wikipedia (')
+    expect(html).toContain('<summary>Bron: Wikipedia</summary>')
+    expect(html).toContain('<details class="hf-meta hf-wikipedia-credit"><summary>')
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)"')
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)"')
     expect(html).toContain('<time dateTime="2026-10-23T12:05:00.000Z">23 oktober 2026 om 14:05</time>')
@@ -628,14 +629,14 @@ describe('the page /wedstrijden', () => {
   it('puts the credit in a card without a border or background to see, and links to no history', async () => {
     const html = await render()
 
-    expect(html).toMatch(/<div class="hf-card hf-card-transparent"><p class="hf-meta hf-wikipedia-credit"/)
+    expect(html).toMatch(/<div class="hf-card hf-card-transparent"><details class="hf-meta hf-wikipedia-credit"/)
     expect(html).not.toContain('action=history')
     expect(html).not.toContain('geschiedenis')
   })
 
   it('has no link to another site except in the credit, and loads nothing from another domain', async () => {
     const html = await render()
-    const outside = html.replace(/<p class="hf-meta hf-wikipedia-credit".*?<\/p>/s, '')
+    const outside = html.replace(/<details class="hf-meta hf-wikipedia-credit".*?<\/details>/s, '')
 
     expect(outside).not.toMatch(/https?:\/\//u)
     expect(html).not.toMatch(/<(?:img|script|iframe|link)\b/u)

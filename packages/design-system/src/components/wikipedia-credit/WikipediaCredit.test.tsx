@@ -20,8 +20,41 @@ describe('WikipediaCredit', () => {
     const { container } = render(<WikipediaCredit {...props} pages={[standings]} />)
 
     expect(container.textContent).toBe(
-      'Bron: Wikipedia (CC BY-SA 4.0), pagina: Eredivisie 2026/27. Laatst gelezen op 25 oktober 2026 om 14:05. Onze wedstrijdgegevens zijn ook CC BY-SA 4.0.',
+      'Bron: WikipediaLicentie: CC BY-SA 4.0. Pagina: Eredivisie 2026/27. Laatst gelezen op 25 oktober 2026 om 14:05. Onze wedstrijdgegevens zijn ook CC BY-SA 4.0.',
     )
+  })
+
+  it('is a closed details with a summary that says "Bron: Wikipedia" and holds no link', () => {
+    const { container } = render(<WikipediaCredit {...props} pages={[standings]} />)
+    const details = container.firstElementChild as HTMLDetailsElement
+    const summary = details.querySelector('summary')
+
+    expect(details.tagName).toBe('DETAILS')
+    expect(details.open).toBe(false)
+    expect(summary?.textContent).toBe('Bron: Wikipedia')
+    expect(summary?.querySelector('a')).toBeNull()
+  })
+
+  it('is closed for many pages too, and stays closed unless it is told to open', () => {
+    const many = [
+      standings,
+      cup,
+      { href: 'https://nl.wikipedia.org/wiki/Eredivisie_2025/26', name: 'Eredivisie 2025/26' },
+    ]
+    const { container, rerender } = render(<WikipediaCredit {...props} pages={[many[0]!, ...many.slice(1)]} />)
+
+    expect((container.firstElementChild as HTMLDetailsElement).open).toBe(false)
+
+    rerender(<WikipediaCredit {...props} open pages={[standings]} />)
+
+    expect((container.firstElementChild as HTMLDetailsElement).open).toBe(true)
+  })
+
+  it('has an arrow that is hidden from a screen reader, so the words are the only name', () => {
+    const { container } = render(<WikipediaCredit {...props} pages={[standings]} />)
+    const icon = container.querySelector('summary svg')
+
+    expect(icon?.getAttribute('aria-hidden')).toBe('true')
   })
 
   it('names our own data after the pages it is given, such as the squad', () => {
@@ -53,7 +86,7 @@ describe('WikipediaCredit', () => {
   it('says "pagina’s" for more than one page', () => {
     const { container } = render(<WikipediaCredit {...props} pages={[standings, cup]} />)
 
-    expect(container.textContent).toContain('pagina’s: Eredivisie 2026/27, KNVB Beker 2026/27. Laatst gelezen')
+    expect(container.textContent).toContain('Pagina’s: Eredivisie 2026/27, KNVB Beker 2026/27. Laatst gelezen')
   })
 
   it('puts the time of reading in a time element with the machine value', () => {
@@ -64,10 +97,10 @@ describe('WikipediaCredit', () => {
     expect(time.getAttribute('datetime')).toBe('2026-10-25T12:05:00Z')
   })
 
-  it('is a paragraph in the style of small text, passes other props on and adds its class to a given one', () => {
+  it('is in the style of small text, passes other props on and adds its class to a given one', () => {
     const { container } = render(<WikipediaCredit {...props} className="extra" id="bron" pages={[standings]} />)
 
-    expect(container.firstElementChild?.tagName).toBe('P')
+    expect(container.firstElementChild?.tagName).toBe('DETAILS')
     expect(container.firstElementChild?.className).toBe('hf-meta hf-wikipedia-credit extra')
     expect(container.firstElementChild?.id).toBe('bron')
   })
@@ -76,6 +109,7 @@ describe('WikipediaCredit', () => {
     const { container } = render(<WikipediaCredit compact />)
 
     expect(container.textContent).toBe('Bron: Wikipedia')
+    expect(container.firstElementChild?.tagName).toBe('P')
     expect(screen.queryAllByRole('link')).toHaveLength(0)
     expect(container.querySelector('time')).toBeNull()
     expect(container.firstElementChild?.className).toBe('hf-meta hf-wikipedia-credit')
