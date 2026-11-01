@@ -59,6 +59,11 @@ describe('the strip over the top edge in page.css', () => {
   it('has no opacity, which Safari does not count either', () => {
     expect(strip).not.toContain('opacity')
   })
+
+  it('is always there: no rule takes it off the page', () => {
+    expect(strip).not.toMatch(/display|visibility/)
+    expect(css).not.toMatch(/hf-page-top-edge[^{]*\[hidden\]|hf-page-top-edge[^{]*:not\(/)
+  })
 })
 
 describe('the stripes of the Frisian flag in page.css', () => {
