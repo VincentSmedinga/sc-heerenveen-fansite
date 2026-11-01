@@ -3162,6 +3162,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een vast maximum aan warme kaarten per pagina (een getal dat niets zegt over wat opmerkelijk is).
   Een test die de regels afdwingt (een machine kan niet bepalen wat opmerkelijk is).
   Een tweede soort vlak, of nieuwe kleuren (niet nodig voor de regels; de projecteigenaar probeert later vier kleuren in donker).
+- **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): Onze uitslagen op de pagina van een club blijft niet warm maar wordt zacht, en Wedstrijden daar wordt wit (regel 1 en regel 4).
 - **Later:** zie _Statistieken heeft een kaart Opmerkelijk: één feit per dag, in vaste volgorde_ (1 november 2026): met de kaart Opmerkelijk zijn drie van de tien kaarten op Statistieken warm (regel 3).
 
 ## Site
@@ -4818,6 +4819,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** alleen clubs met een minimum aantal wedstrijden (de projecteigenaar koos er geen); hele woorden als kolomkop (past niet op een telefoon); de lijst sorteerbaar of met paginering (te veel voor een lijst van enkele tientallen clubs); een kaart met tegenstanders op de pagina Statistieken (de pagina is al vol); de bronvermelding in korte vorm, "Bron: Wikipedia" (zegt niet uit welke pagina's de cijfers komen); in de cache een sleutel per verzonnen slug (laat het geheugen volgroeien).
 - **Later:** zie _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026): de lijst sorteert sindsdien met JavaScript op elke kolom en heeft bij de keuze Eredivisie de kolom Punten.
   De tabel van de server blijft van A tot Z, zonder knoppen.
+- **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): de pagina van een club heeft sindsdien een hoofdkolom en een zijkolom.
+  Wedstrijden staat in de hoofdkolom en is wit, Onze uitslagen staat in de zijkolom en is zacht (niet meer warm), en de kaart Stadion(s) en de bronvermelding staan daaronder.
+  De volgorde van de kaarten en hun vlakken zijn dus niet meer die van hier.
 
 ### De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
 
@@ -4857,6 +4861,42 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De balk als tweede `nav` in `@shortcuts` (twee landmarks en een nieuw onderdeel in plaats van de geneste lijst).
   De URL van het verzoek in een header lezen in de layout (elke pagina wordt dynamisch; zie _Het hoofdmenu leest het pad in een clientcomponent_).
   De keuze onthouden in een cookie (zie _De statistieken tellen standaard alle wedstrijden_).
+
+### De pagina van een club toont de namen van zijn stadion en heeft een zijkolom
+
+- **Datum:** 1 november 2026
+- **Besluit:** de pagina van een tegenstander (`/statistieken/tegenstanders/<club>`) krijgt de kaart "Stadion" of "Stadions" en een nieuwe indeling (#557).
+  - **De namen** komen uit de Eredivisie-wedstrijden waarin de tegenstander thuis speelde, dus onze uitwedstrijden, want daar is het stadion dat van de club.
+    Bekerwedstrijden en play-offs tellen niet mee, omdat die op een neutraal veld kunnen zijn, zoals een finale.
+    Een gestaakte wedstrijd telt voor zijn begin (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_), dus ook daar is het stadion dat van de club.
+    De kaart staat er ook bij de keuze Eredivisie en bij alle wedstrijden, want de keuze verandert de namen niet.
+  - **De namen staan in de volgorde van de wedstrijden**, zoals Wikipedia ze toen schreef.
+    Spellingen die alleen verschillen in hoofdletters, spaties of een koppelteken zijn één naam, geschreven zoals de eerste wedstrijd met die naam hem schreef.
+    Een twijfelgeval, zoals "Galgenwaard" naast "Stadion Galgenwaard", blijft liever twee regels dan een foute samenvoeging.
+    Een naam die na een andere terugkomt (A, B, A) staat als drie regels.
+    Een wedstrijd zonder stadion telt niet mee.
+  - **De perioden** volgen die van de kaart Hoofdtrainers (`stadiumPeriods` in `src/match-format.ts`): bij één naam staat alleen de naam, bij meer heeft elke naam behalve de laatste "tot" en de dag van de laatste wedstrijd met die naam, en de laatste "vanaf" en de dag van de eerste wedstrijd met die naam.
+    Het zijn de dagen van onze wedstrijden, niet van de dag dat de naam veranderde, en een regel onder de lijst zegt dat.
+    Bij één naam geen "vanaf", want dat zou zeggen dat het stadion pas toen begon, terwijl onze gegevens maar tot een bepaald seizoen teruggaan.
+  - **De kaart** is sterk (regel 2 van _De vier vlakken van een kaart hebben een betekenis_: de organisaties achter de inhoud), heeft een `h2` met het anker `#stadion` voor beide titels en een lijst met `ShortStaff`-regels, zoals Hoofdtrainers.
+    Een club zonder wedstrijd waarin hij thuis speelde, of zonder stadion in die wedstrijden, heeft geen kaart.
+    De bronvermelding onderaan geldt ook voor deze kaart.
+  - **De indeling:** de hoofdkolom heeft de keuze voor de competitie en de kaart Wedstrijden, nu op het witte vlak (regel 1: de hoofdinhoud).
+    De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) heeft Onze uitslagen op het zachte vlak (regel 4: cijfers en records die bij de hoofdinhoud horen), dan de kaart Stadion(s) en dan de bronvermelding.
+    Op een telefoon volgt de zijkolom op de hoofdkolom.
+    Onze uitslagen houdt de tabel, de tekst en de afbeeldingsknop; alleen het vlak en de plaats veranderen.
+    De pagina heeft geen warme kaart meer.
+    Een club zonder wedstrijden toont dezelfde zin als eerst, zonder kaarten en zonder zijkolom.
+- **Waarom:** een stadion krijgt vaak een nieuwe naam, en supporters willen weten hoe het eerder heette.
+  Wikipedia noemt in elke wedstrijd de naam die toen gold, dus de wedstrijden die we al hebben, zeggen het al.
+  Er is geen nieuwe bron en geen nieuwe tabel nodig.
+  De uitwedstrijden in de competitie zijn de enige wedstrijden waarvan het stadion zeker dat van de tegenstander is.
+  De wedstrijden zijn de hoofdinhoud van de pagina, dus wit; de cijfers over onze uitslagen zijn het gewone voorbeeld van "records die bij de hoofdinhoud horen".
+- **Nadeel:** de periodes zijn zo precies als onze wedstrijden: een stadion dat van naam veranderde tussen twee uitwedstrijden, heeft de overgang ergens in die tussentijd.
+  Een club die we nooit in de Eredivisie bezochten, heeft geen kaart, ook al kennen we zijn stadion uit de beker.
+  Twee spellingen die we niet samenvoegen, staan als twee namen met een eigen periode.
+- **Alternatieven:** ook de bekerwedstrijden en play-offs tellen (een finale op een neutraal veld zou het stadion van de club lijken); "vanaf" ook bij één naam (zegt dat het stadion pas toen begon); alle spellingen in één naam samenvoegen met een lijst van afkortingen en voorvoegsels (een foute samenvoeging is erger dan twee regels); een eigen tabel met stadions en de datum waarop we een naam het eerst zagen (#549, een groter werk dat dit issue niet nodig heeft); Onze uitslagen warm laten (de kaart is geen uitnodiging of iets opmerkelijks, en de pagina heeft dan twee kaarten die de aandacht vragen).
+- **Later:** een eigen lijst met stadions per club (#549) zou de namen uit deze kaart kunnen halen, met de datum waarop we een naam het eerst zagen in plaats van de dag van een wedstrijd.
 
 ## Importer
 

@@ -39,6 +39,9 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   // the same anchor (#487). The old anchor topscorers comes along. The card Bijzondere
   // doelpunten (#403) is under it.
   '/statistieken/spelers': ['doelpuntenmakers', 'topscorers', 'bijzondere-doelpunten'],
+  // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
+  // made-up club with two names of its stadium.
+  '/statistieken/tegenstanders/voorbeeld-united': ['stadion'],
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
   '/wedstrijden': ['programma', 'stand', 'uitslagen', 'hoofdtrainer'],

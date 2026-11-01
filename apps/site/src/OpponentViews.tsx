@@ -1,11 +1,11 @@
 import type { PublicClubRecord, PublicSeasonWikipediaPage } from '@fansite/db/queries'
 
-import { Card, DataTable, Heading, List, ShortMatch, Text, WikipediaCredit } from '@fansite/design-system'
+import { Card, DataTable, Heading, List, ShortMatch, ShortStaff, Text, WikipediaCredit } from '@fansite/design-system'
 
-import type { ClubSummary, Meeting, Tally } from './opponents'
+import type { ClubSummary, Meeting, Stadium, Tally } from './opponents'
 
 import { type CompetitionChoice } from './competition'
-import { creditName, formatReadAt, matchMoment, wikipediaUrl } from './match-format'
+import { creditName, formatReadAt, matchMoment, stadiumPeriods, wikipediaUrl } from './match-format'
 import { imageCredit, metaSeparator } from './MatchViews'
 
 /**
@@ -111,11 +111,12 @@ const summaryRow = (header: string, tallies: Tally[], figure: (tally: Tally) => 
  * The card of the page of a club with every match against it that was played, the newest
  * first, as short lines. Above each line stand the season and the competition, and the line has
  * the day, the name as Wikipedia wrote the club in that match (so an earlier name shows), where
- * it was played and the result from our side.
+ * it was played and the result from our side. It is the main content of the page, so it has
+ * the white surface.
  */
 export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: Date }) {
   return (
-    <Card aria-labelledby="wedstrijden" surface="soft">
+    <Card aria-labelledby="wedstrijden">
       <Heading id="wedstrijden" level={2}>
         Wedstrijden
       </Heading>
@@ -140,7 +141,8 @@ export function ClubMeetingsCard({ meetings, now }: { meetings: Meeting[]; now: 
  * total, at home and away, and a row for the matches played, won, drawn and lost and the goals
  * for and against, and under it the biggest win and the biggest loss against this club. There
  * are no points, because the cup gives none. It has the button for an image, with the name of
- * the club in the heading, so the image says who it is about.
+ * the club in the heading, so the image says who it is about. It is figures and records that
+ * belong to the main content, so it has the soft surface, in the sidebar.
  */
 export function ClubSummaryCard({
   choice,
@@ -162,7 +164,7 @@ export function ClubSummaryCard({
   ].flatMap(({ match, name: label }) => (match === undefined ? [] : [{ label, match }]))
 
   return (
-    <Card aria-labelledby="onze-uitslagen" shareable={imageCredit(true)} surface="warm">
+    <Card aria-labelledby="onze-uitslagen" shareable={imageCredit(true)} surface="soft">
       <Heading id="onze-uitslagen" level={2}>
         {`Onze uitslagen tegen ${name}`}
       </Heading>
@@ -220,6 +222,45 @@ export function OpponentsCredit({
   return (
     <Card as="div" surface="transparent">
       <WikipediaCredit pages={[first, ...rest]} readAt={formatReadAt(readAt)} readAtDateTime={readAt.toISOString()} />
+    </Card>
+  )
+}
+
+/**
+ * The card of the page of a club with the names of its stadium in the order we saw them, on the
+ * strong surface, like the head coaches. With one name there is the name alone; with more, each
+ * name has "tot" and the day of the last match with it, and the last has "vanaf" and the day of
+ * the first (see `stadiumPeriods`). The line under the list says where the names come
+ * from and, with more than one, that the days are those of our matches and not of the change of
+ * the name. The anchor is the same for "Stadion" and
+ * "Stadions". A club without a name has no card.
+ */
+export function StadiumsCard({ stadiums }: { stadiums: Stadium[] }) {
+  if (stadiums.length === 0) {
+    return null
+  }
+
+  const periods = stadiumPeriods(stadiums)
+
+  return (
+    <Card aria-labelledby="stadion" surface="strong">
+      <Heading anchor id="stadion" level={2}>
+        {stadiums.length === 1 ? 'Stadion' : 'Stadions'}
+      </Heading>
+      <List role="list">
+        {stadiums.map((stadium, index) => (
+          // The name can come back after another, so the place in the list is part of the key.
+          <List.Item key={`${index}-${stadium.name}`}>
+            {/* A ShortStaff is a line with the days in front of a name, as this is. */}
+            <ShortStaff period={periods[index]} surname={stadium.name} />
+          </List.Item>
+        ))}
+      </List>
+      <Text appearance="meta">
+        {stadiums.length === 1
+          ? 'Zo noemt Wikipedia het stadion bij onze uitwedstrijden in de Eredivisie.'
+          : 'Zo noemt Wikipedia het stadion bij onze uitwedstrijden in de Eredivisie. De dagen zijn die van onze wedstrijden, niet van de dag dat de naam veranderde.'}
+      </Text>
     </Card>
   )
 }

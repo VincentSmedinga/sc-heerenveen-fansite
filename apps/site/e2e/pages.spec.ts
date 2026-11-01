@@ -56,15 +56,17 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/statistieken/spelers/kies', status: 200 },
   { path: '/statistieken/spelers/2099-00', status: 404 },
   { path: '/statistieken/spelers/onzin', status: 404 },
-  // The page Tegenstanders: the list, a club met in the league (Testdorp FC) and one met in the
-  // cup only (FC Maquette, who is not in the list with the choice Eredivisie and has a sentence
-  // on its page), the choice, and the addresses that say "niet gevonden": a slug no club has,
-  // a choice that is not known, and a path below a club.
+  // The page Tegenstanders: the list, a club met in the league (Testdorp FC), one with two
+  // names of its stadium (Voorbeeld United) and one met in the cup only (FC Maquette, who is
+  // not in the list with the choice Eredivisie and has a sentence on its page), the choice, and
+  // the addresses that say "niet gevonden": a slug no club has, a choice that is not known, and
+  // a path below a club.
   { path: '/statistieken/tegenstanders', status: 200 },
   { path: '/statistieken/tegenstanders?competitie=eredivisie', status: 200 },
   { path: '/statistieken/tegenstanders?competitie=onzin', status: 404 },
   { path: '/statistieken/tegenstanders/testdorp-fc', status: 200 },
   { path: '/statistieken/tegenstanders/testdorp-fc?competitie=eredivisie', status: 200 },
+  { path: '/statistieken/tegenstanders/voorbeeld-united', status: 200 },
   { path: '/statistieken/tegenstanders/fc-maquette', status: 200 },
   { path: '/statistieken/tegenstanders/fc-maquette?competitie=eredivisie', status: 200 },
   { path: '/statistieken/tegenstanders/testdorp-fc?competitie=onzin', status: 404 },

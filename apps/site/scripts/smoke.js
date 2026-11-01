@@ -997,6 +997,18 @@ await withEmptyDatabase((database) =>
       /<th [^>]*scope="col"[^>]*>Totaal<\/th><th [^>]*scope="col"[^>]*>Thuis<\/th><th [^>]*scope="col"[^>]*>Uit<\/th>/,
     )
     assert.match(clubHtml, /<h2[^>]*id="wedstrijden">/)
+    // The matches are in the main column, the results in the sidebar after it. Testdorp FC was
+    // only met in the league at home, so the stadium is ours and there is no card Stadion.
+    assert.match(clubHtml, /<main[^>]*>.*id="wedstrijden".*<\/main>.*<aside[^>]*>.*id="onze-uitslagen"/s)
+    assert.doesNotMatch(clubHtml, /id="stadion"/)
+    // Voorbeeld United was visited twice in the league, in a stadium with two names, so it has
+    // the card Stadions: the older name with "tot", the newer with "vanaf", after the results.
+    const stadiumClub = await (await fetch(`${origin}/statistieken/tegenstanders/voorbeeld-united`)).text()
+    assert.match(
+      stadiumClub,
+      /id="onze-uitslagen".*<h2[^>]*id="stadion">.*href="#stadion">Stadion<span class="hf-icon-tail">s<.*tot [^<]*<.*Oud Voorbeeldpark.*vanaf [^<]*<.*Voorbeeldpark/s,
+    )
+    assert.match(stadiumClub, /De dagen zijn die van onze wedstrijden/)
     assert.match(clubHtml, /Gebaseerd op (?:1 gespeelde wedstrijd|alle \d+ gespeelde wedstrijden) sinds \d{4}\/\d{2}/)
     assert.match(clubHtml, closedWikipediaCredit)
     assert.match(

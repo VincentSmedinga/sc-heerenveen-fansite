@@ -457,8 +457,23 @@ De vijf cijferkolommen hebben een afkorting (G, W, GL, V, D) met het hele woord 
 Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
 
 De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als Wikipedia hem onder andere namen schrijft.
-De kaart "Onze uitslagen tegen …" heeft de samenvatting (Totaal, Thuis en Uit, zonder punten), de grootste overwinning en de grootste nederlaag, de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
-De kaart Wedstrijden toont elke gespeelde wedstrijd, de nieuwste eerst, met het seizoen en de competitie boven de regel; de regel noemt de club zoals Wikipedia hem in die wedstrijd schreef.
+De pagina heeft twee kolommen.
+De hoofdkolom heeft de keuze voor de competitie en de kaart Wedstrijden op het witte vlak: elke gespeelde wedstrijd, de nieuwste eerst, met het seizoen en de competitie boven de regel; de regel noemt de club zoals Wikipedia hem in die wedstrijd schreef.
+De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) volgt op een telefoon op de hoofdkolom.
+Ze heeft drie delen:
+
+- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (Totaal, Thuis en Uit, zonder punten), de grootste overwinning en de grootste nederlaag, de afbeeldingsknop en de zin "Gebaseerd op alle 12 gespeelde wedstrijden sinds 2010/11".
+- De kaart "Stadion" of "Stadions" op het sterke vlak, met de namen van het stadion van de club in de volgorde waarin we ze zagen (`stadiumsOf` in `src/opponents.ts`, `StadiumsCard` in `src/OpponentViews.tsx`).
+  De namen komen uit onze uitwedstrijden in de Eredivisie, want daar is het stadion dat van de club; een bekerwedstrijd of play-off kan op een neutraal veld zijn en telt niet mee.
+  Een gestaakte wedstrijd telt voor zijn begin, dus ook daar is het stadion dat van de club.
+  Spellingen die alleen verschillen in hoofdletters, spaties of een koppelteken zijn één naam; een twijfelgeval, zoals "Galgenwaard" naast "Stadion Galgenwaard", blijft twee regels.
+  Een naam die terugkomt na een andere, staat opnieuw.
+  Bij één naam staat alleen de naam; bij meer heeft elke naam behalve de laatste "tot" en de dag van de laatste wedstrijd met die naam, en de laatste "vanaf" en de dag van de eerste (`stadiumPeriods` in `src/match-format.ts`).
+  Het zijn de dagen van onze wedstrijden, niet van de dag dat de naam veranderde, en een regel onder de lijst zegt dat.
+  De kop heeft het anker `#stadion` bij beide titels.
+  Een club zonder uitwedstrijd in de Eredivisie, of zonder stadion in die wedstrijden, heeft de kaart niet.
+- De bronvermelding, die ook voor deze kaart geldt.
+
 Een slug die geen club heeft, een andere waarde van `?competitie=` en een waarde die twee keer staat, geven "niet gevonden".
 
 De pagina's tellen de wedstrijden van alle seizoenen, dus ze hebben geen seizoenskiezer.
@@ -470,7 +485,7 @@ De code staat in `src/opponents.ts` (de optelling van de wedstrijden en de gecac
 De cache heeft twee sleutels voor de lijst en per club een sleutel, pas nadat de slug is gecontroleerd tegen de bekende clubs.
 De bronvermelding onderaan noemt de pagina's van Wikipedia van alle seizoenen in de cijfers (`listAllWikipediaPages`).
 De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clubpagina staat ook in de sitemap en telt onder zijn eigen adres mee, nadat de database heeft bevestigd dat de club bestaat (`isClubSlug`).
-`pnpm test:a11y` gebruikt de verzonnen wedstrijden van de seed: `testdorp-fc` is een club uit de competitie, `fc-maquette` een club uit de beker.
+`pnpm test:a11y` gebruikt de verzonnen wedstrijden van de seed: `testdorp-fc` is een club uit de competitie (we speelden er alleen thuis tegen, dus zonder kaart Stadion), `voorbeeld-united` een club met twee namen van zijn stadion en `fc-maquette` een club uit de beker.
 
 ### De keuze tussen alle wedstrijden en de Eredivisie
 
