@@ -531,8 +531,8 @@ const madeUpScorers: [name: string, shirtNumber: number, inSquad: boolean][] = [
  * the order of the clock. The goals of each club add up to its result. Together they cover the
  * cases a page must show: goals of one club only and of both, a penalty, an own goal, added
  * time, a player with two goals, extra time and a long name. Two goals in minutes that follow
- * each other (66 and 67 of the second round) give the card Weetjes of the statistics page a
- * weetje to show. The players are made up, like the clubs. For the top scorers they make
+ * each other (66 and 67 of the second round) give the card Opmerkelijk of the statistics page a
+ * fact to show. The players are made up, like the clubs. For the top scorers they make
  * twelve players: Wouter Proefman with three goals, two players with two goals who share the
  * second place, and nine with one goal who share the fourth. The own goal of an opponent
  * counts for nobody.

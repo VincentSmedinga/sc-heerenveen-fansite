@@ -761,11 +761,11 @@ await withEmptyDatabase((database) =>
         '#uitersten',
       ],
     )
-    // The seed has one weetje, two goals in minutes that follow each other, so the card Weetjes
-    // has it and no link to a next one.
+    // The seed has one fact, two goals in minutes that follow each other, so the card
+    // Opmerkelijk has it and no link to a next one.
     assert.match(
       statisticsHtml,
-      /<section class="hf-card hf-card-warm" aria-labelledby="weetjes"><h2 class="hf-heading-2" id="weetjes">Weetjes<\/h2><p>[^<]*vielen in de 66e en de 67e minuut twee doelpunten achter elkaar\.<\/p><\/section>/,
+      /<section class="hf-card hf-card-warm" aria-labelledby="opmerkelijk"><h2 class="hf-heading-2" id="opmerkelijk">Opmerkelijk<\/h2><p>[^<]*vielen in de 66e en de 67e minuut twee doelpunten achter elkaar\.<\/p><\/section>/,
     )
     // The seed has played cup ties, so the page has the switch between all the matches and the
     // Eredivisie, with all the matches chosen. The choice is in the address of the other link.

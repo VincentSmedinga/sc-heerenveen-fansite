@@ -5,41 +5,53 @@ import { formatTableDay } from './match-format'
 import { type LeagueMatch, playedMatchesOf } from './matches'
 
 /**
- * The weetjes of the card on the statistics page: one fact about one match, player or coach, in
- * a sentence, and never a total or an average (the other cards do that). A kind of weetje is a
- * small function in `kinds` that reads the matches of the season and gives the weetjes it
- * finds; a new kind is one more function in that list and a test. There is no query for it:
+ * The words the card shows and the address uses, in one place: the heading, the link to the
+ * next fact, and the `?opmerkelijk=` parameter and the `#opmerkelijk` anchor that keep the
+ * visitor on the card.
+ */
+export const noteworthy = {
+  anchor: 'opmerkelijk',
+  heading: 'Opmerkelijk',
+  next: 'Nog iets opmerkelijks',
+  param: 'opmerkelijk',
+} as const
+
+/**
+ * The noteworthy facts of the card on the statistics page: one fact about one match, player or
+ * coach, in a sentence, and never a total or an average (the other cards do that). A kind of
+ * fact is a small function in `kinds` that reads the matches of the season and gives the facts
+ * it finds; a new kind is one more function in that list and a test. There is no query for it:
  * the cards of the page already hold the matches, with their goals, and the head coaches of
  * the season.
  */
 
 /**
- * A weetje: the sentence, and an `id` that stays the same for the same fact, so the order of
- * the day (see `orderWeetjes`) does not change when another weetje comes or goes.
+ * A fact: the sentence, and an `id` that stays the same for the same fact, so the order of
+ * the day (see `orderNoteworthyFacts`) does not change when another fact comes or goes.
  */
-export type Weetje = { id: string; text: string }
-
-type Kind = (input: WeetjeInput) => Weetje[]
-
-type MatchGoal = PublicMatch['goals'][number]
+export type NoteworthyFact = { id: string; text: string }
 
 /**
- * What a kind of weetje reads. `matches` are all the matches of the season, in the order they
+ * What a kind of fact reads. `matches` are all the matches of the season, in the order they
  * were played; `played` are the ones of them that the choice of the visitor counts, with a
  * score.
  */
-type WeetjeInput = { coaches: PublicStaff[]; matches: PublicMatch[]; played: LeagueMatch[] }
+type FactInput = { coaches: PublicStaff[]; matches: PublicMatch[]; played: LeagueMatch[] }
 
-/** How many wins at home or away in a row make a weetje. */
+type Kind = (input: FactInput) => NoteworthyFact[]
+
+type MatchGoal = PublicMatch['goals'][number]
+
+/** How many wins at home or away in a row make a fact. */
 const longRun = 5
 
-/** How many goals in one match make a weetje. */
+/** How many goals in one match make a fact. */
 const manyGoals = 7
 
-/** How many goals a player needs in one match for a weetje. */
+/** How many goals a player needs in one match for a fact. */
 const hattrick = 3
 
-/** How many goals behind we must have been, and still won, for a weetje. */
+/** How many goals behind we must have been, and still won, for a fact. */
 const bigDeficit = 2
 
 const numberWords = [
@@ -83,7 +95,7 @@ const follows = (earlier: MatchGoal, later: MatchGoal) =>
  * A win after we were behind by two goals or more, read from the order of the goals. It needs
  * every goal of the match, so a match whose scorers are not all known says nothing.
  */
-function comeback({ played }: WeetjeInput): Weetje[] {
+function comeback({ played }: FactInput): NoteworthyFact[] {
   return played.flatMap((match) => {
     if (match.goalsFor <= match.goalsAgainst || match.goals.length !== match.goalsFor + match.goalsAgainst) {
       return []
@@ -108,8 +120,8 @@ function comeback({ played }: WeetjeInput): Weetje[] {
   })
 }
 
-/** Two goals in minutes that follow each other, of ours or against us: one weetje per match. */
-function consecutiveMinutes({ played }: WeetjeInput): Weetje[] {
+/** Two goals in minutes that follow each other, of ours or against us: one fact per match. */
+function consecutiveMinutes({ played }: FactInput): NoteworthyFact[] {
   return played.flatMap((match) => {
     const goals = match.goals.filter((goal) => goal.minute >= 1)
     const first = goals.find((goal, index) => {
@@ -138,7 +150,7 @@ function consecutiveMinutes({ played }: WeetjeInput): Weetje[] {
  * goal of the player, an own goal is a goal of nobody. A player is known by the id, then the
  * Wikipedia page and then the name, as in the list of goal scorers.
  */
-function hattricks({ played }: WeetjeInput): Weetje[] {
+function hattricks({ played }: FactInput): NoteworthyFact[] {
   return played.flatMap((match) => {
     const scored = new Map<string, { count: number; name: string; ours: boolean }>()
 
@@ -161,7 +173,7 @@ function hattricks({ played }: WeetjeInput): Weetje[] {
 }
 
 /** A match with seven goals or more, of both clubs together. */
-function manyGoalsInAMatch({ played }: WeetjeInput): Weetje[] {
+function manyGoalsInAMatch({ played }: FactInput): NoteworthyFact[] {
   return played
     .filter((match) => match.goalsFor + match.goalsAgainst >= manyGoals)
     .map((match) => ({
@@ -175,9 +187,9 @@ function manyGoalsInAMatch({ played }: WeetjeInput): Weetje[] {
  * needs the day he began, so a coach known to the month or the year says nothing, and it needs
  * a match before it: the opener of the season is the first match under everybody. The match is
  * the first of the season that is played on that day or later, in any competition; when the
- * choice of the visitor leaves it out, or it has no score yet, there is no weetje.
+ * choice of the visitor leaves it out, or it has no score yet, there is no fact.
  */
-function newCoach({ coaches, matches, played }: WeetjeInput): Weetje[] {
+function newCoach({ coaches, matches, played }: FactInput): NoteworthyFact[] {
   return coaches.flatMap((coach, index) => {
     const first = matches.find((match) => match.matchDate >= coach.startDate)
     const match = played.find((item) => item === first)
@@ -201,7 +213,7 @@ function newCoach({ coaches, matches, played }: WeetjeInput): Weetje[] {
 }
 
 /** Two or more goals in the stoppage time of one half, of both clubs together. */
-function stoppageTime({ played }: WeetjeInput): Weetje[] {
+function stoppageTime({ played }: FactInput): NoteworthyFact[] {
   return played.flatMap((match) =>
     [
       { half: 'eerste', minute: 45 },
@@ -223,12 +235,12 @@ function stoppageTime({ played }: WeetjeInput): Weetje[] {
 
 /**
  * Five wins or more in a row at home, or in a row away: only the matches at that place count,
- * so the other place in between does not break the run. A draw or a loss does. One weetje for
+ * so the other place in between does not break the run. A draw or a loss does. One fact for
  * each run, with its length, from the last win of it.
  */
-function wins({ played }: WeetjeInput): Weetje[] {
+function wins({ played }: FactInput): NoteworthyFact[] {
   return [true, false].flatMap((home) => {
-    const result: Weetje[] = []
+    const result: NoteworthyFact[] = []
     let run: LeagueMatch[] = []
 
     const close = () => {
@@ -261,16 +273,20 @@ function wins({ played }: WeetjeInput): Weetje[] {
 }
 
 /**
- * The kinds of weetje, each a small function. A kind that finds nothing gives an empty list.
+ * The kinds of fact, each a small function. A kind that finds nothing gives an empty list.
  * The order here only matters for the order before the day shuffles them.
  */
 const kinds: Kind[] = [consecutiveMinutes, stoppageTime, hattricks, manyGoalsInAMatch, comeback, wins, newCoach]
 
 /**
- * Every weetje of the season for the choice of the visitor: the matches the choice counts, the
+ * Every fact of the season for the choice of the visitor: the matches the choice counts, the
  * played ones with a score, and the head coaches of the season.
  */
-export function weetjesOf(matches: PublicMatch[], coaches: PublicStaff[], choice: CompetitionChoice): Weetje[] {
+export function noteworthyFactsOf(
+  matches: PublicMatch[],
+  coaches: PublicStaff[],
+  choice: CompetitionChoice,
+): NoteworthyFact[] {
   const input = { coaches, matches, played: playedMatchesOf(matches, choice) }
 
   return kinds.flatMap((kind) => kind(input))
@@ -287,41 +303,41 @@ const dutchDayFormat = new Intl.DateTimeFormat('en-CA', {
 export const dutchDay = (now: Date) => dutchDayFormat.format(now)
 
 /**
- * The weetjes in the order of a day: shuffled, and the same for the whole day, so the page is
- * the same all day and the cache works. Each weetje has a place of its own, from its id and the
- * day, so a weetje that comes or goes in the middle of the day does not move the others.
+ * The facts in the order of a day: shuffled, and the same for the whole day, so the page is
+ * the same all day and the cache works. Each fact has a place of its own, from its id and the
+ * day, so a fact that comes or goes in the middle of the day does not move the others.
  */
-export function orderWeetjes(weetjes: Weetje[], day: string): Weetje[] {
-  return weetjes
-    .map((weetje) => ({ hash: hashOf(`${day}|${weetje.id}`), weetje }))
-    .toSorted((a, b) => a.hash - b.hash || a.weetje.id.localeCompare(b.weetje.id))
-    .map(({ weetje }) => weetje)
+export function orderNoteworthyFacts(facts: NoteworthyFact[], day: string): NoteworthyFact[] {
+  return facts
+    .map((fact) => ({ fact, hash: hashOf(`${day}|${fact.id}`) }))
+    .toSorted((a, b) => a.hash - b.hash || a.fact.id.localeCompare(b.fact.id))
+    .map(({ fact }) => fact)
 }
 
 /**
- * The number that `?weetje=` asks for: a whole number from 1, up to three digits. Anything
+ * The number that `?opmerkelijk=` asks for: a whole number from 1, up to three digits. Anything
  * else, such as no number, a number twice, `0`, `-1`, `1.5`, `02` or `abc`, gives the first
- * weetje.
+ * fact.
  */
-export function parseWeetjeNumber(value: string | string[] | undefined) {
+export function parseNoteworthyNumber(value: string | string[] | undefined) {
   return typeof value === 'string' && /^[1-9]\d{0,2}$/u.test(value) ? Number(value) : 1
 }
 
 /**
- * The weetje that number `n` of the day is, counting from 1 and going round after the last, and
- * the number of the one after it. It gives nothing when there are no weetjes, and no next one
+ * The fact that number `n` of the day is, counting from 1 and going round after the last, and
+ * the number of the one after it. It gives nothing when there are no facts, and no next one
  * when there is only one.
  */
-export function pickWeetje(ordered: Weetje[], n: number) {
-  const weetje = ordered[(n - 1) % ordered.length]
+export function pickNoteworthyFact(ordered: NoteworthyFact[], n: number) {
+  const fact = ordered[(n - 1) % ordered.length]
 
-  if (weetje === undefined) {
+  if (fact === undefined) {
     return undefined
   }
 
   const number = ((n - 1) % ordered.length) + 1
 
-  return { next: ordered.length > 1 ? (number % ordered.length) + 1 : undefined, number, weetje }
+  return { fact, next: ordered.length > 1 ? (number % ordered.length) + 1 : undefined, number }
 }
 
 /** A number from a text, the same for the same text (FNV-1a, 32 bits). */

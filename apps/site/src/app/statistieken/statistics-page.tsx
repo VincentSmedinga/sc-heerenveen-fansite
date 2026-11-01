@@ -21,12 +21,12 @@ import {
   TopScorersCard,
 } from '../../MatchViews'
 import { pageMetadata, seasonPageMetadata } from '../../metadata'
+import { noteworthy, parseNoteworthyNumber } from '../../noteworthy'
+import { NoteworthyCard } from '../../NoteworthyCard'
 import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams, statisticsPath } from '../../season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '../../seasons'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
-import { parseWeetjeNumber } from '../../weetjes'
-import { WeetjesCard } from '../../WeetjesCard'
 
 /** The route that sends the season picker on to its season (app/statistieken/kies). */
 export const pickerPath = pickerPathOf(statisticsPath)
@@ -61,8 +61,8 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
  * four on the left and the other five on the right, and under each other on a narrow one, in
  * the order of the bar "Op deze pagina:". The switch between the matches (see below) is the
  * first cell of the main column, a plain cell without a card, directly under the title row.
- * The card Weetjes is the last of the main column and is not in the bar: it is one fact that
- * changes with the day (see WeetjesCard).
+ * The card Opmerkelijk is the last of the main column and is not in the bar: it is one fact
+ * that changes with the day (see NoteworthyCard).
  * A season that is over has its cards put the season on the image. A season that has no matches
  * in the database is the page "niet gevonden".
  *
@@ -79,7 +79,7 @@ export async function StatisticsPage({
   searchParams: Promise<SearchParams>
   season: string
 }) {
-  const { competitie, nul, weetje } = await searchParams
+  const { competitie, [noteworthy.param]: factNumber, nul } = await searchParams
   const competition = parseCompetition(competitie)
   const loaded = await loadSeasonPage(season, statisticsPath)
 
@@ -119,12 +119,12 @@ export async function StatisticsPage({
         <SeasonCard matches={data.matches} season={imageSeason} />
         <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         <HomeAwayCard competition={competition} matches={data.matches} season={imageSeason} />
-        <WeetjesCard
+        <NoteworthyCard
           coaches={data.coaches}
           competition={competition}
           matches={data.matches}
           now={now}
-          number={parseWeetjeNumber(weetje)}
+          number={parseNoteworthyNumber(factNumber)}
           path={address}
         />
       </Page.Main>

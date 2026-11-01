@@ -2,7 +2,14 @@ import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { dutchDay, orderWeetjes, parseWeetjeNumber, pickWeetje, type Weetje, weetjesOf } from './weetjes'
+import {
+  dutchDay,
+  type NoteworthyFact,
+  noteworthyFactsOf,
+  orderNoteworthyFacts,
+  parseNoteworthyNumber,
+  pickNoteworthyFact,
+} from './noteworthy'
 
 type Goal = PublicMatch['goals'][number]
 
@@ -61,11 +68,11 @@ const coach = (options: Partial<PublicStaff> = {}): PublicStaff => ({
 })
 
 const texts = (matches: PublicMatch[], coaches: PublicStaff[] = [], choice: 'all' | 'league' = 'all') =>
-  weetjesOf(matches, coaches, choice).map(({ text }) => text)
+  noteworthyFactsOf(matches, coaches, choice).map(({ text }) => text)
 
 const times = (count: number, make: (index: number) => Goal) => Array.from({ length: count }, (_, index) => make(index))
 
-describe('weetjesOf: goals in minutes that follow each other', () => {
+describe('noteworthyFactsOf: goals in minutes that follow each other', () => {
   it('finds two goals in minutes that follow each other, of ours', () => {
     expect(texts([played([goal('A', { minute: 23 }), goal('B', { minute: 24 })])])).toEqual([
       'Thuis tegen Testdorp FC (2–0, 1 augustus 2026) vielen in de 23e en de 24e minuut twee doelpunten achter elkaar.',
@@ -91,14 +98,14 @@ describe('weetjesOf: goals in minutes that follow each other', () => {
     expect(texts([played(goals)])).toEqual([])
   })
 
-  it('gives one weetje for a match with three goals in a row', () => {
+  it('gives one fact for a match with three goals in a row', () => {
     const goals = [10, 11, 12].map((minute) => goal(`Speler ${minute}`, { minute }))
 
     expect(texts([played(goals)])).toHaveLength(1)
   })
 })
 
-describe('weetjesOf: goals in stoppage time', () => {
+describe('noteworthyFactsOf: goals in stoppage time', () => {
   it('finds two goals in the stoppage time of the first half, of both clubs together', () => {
     const goals = [goal('A', { minute: 45, stoppageMinutes: 1 }), theirs('X', { minute: 45, stoppageMinutes: 3 })]
 
@@ -127,7 +134,7 @@ describe('weetjesOf: goals in stoppage time', () => {
   })
 })
 
-describe('weetjesOf: hattricks', () => {
+describe('noteworthyFactsOf: hattricks', () => {
   it('finds a hattrick of one of our players, by name', () => {
     const goals = [10, 30, 70].map((minute) => goal('Proefman', { minute, playerName: 'Piet Proefman' }))
 
@@ -180,7 +187,7 @@ describe('weetjesOf: hattricks', () => {
   })
 })
 
-describe('weetjesOf: many goals', () => {
+describe('noteworthyFactsOf: many goals', () => {
   it('finds a match with seven goals, of both clubs together, from the score', () => {
     expect(texts([scored(4, 3)])).toEqual(['Thuis tegen Testdorp FC (4–3, 1 augustus 2026) vielen zeven doelpunten.'])
   })
@@ -195,7 +202,7 @@ describe('weetjesOf: many goals', () => {
   })
 })
 
-describe('weetjesOf: a win after a deficit of two goals', () => {
+describe('noteworthyFactsOf: a win after a deficit of two goals', () => {
   const comeback = [
     theirs('X', { minute: 10 }),
     theirs('Y', { minute: 20 }),
@@ -245,7 +252,7 @@ describe('weetjesOf: a win after a deficit of two goals', () => {
   })
 })
 
-describe('weetjesOf: wins in a row at home or away', () => {
+describe('noteworthyFactsOf: wins in a row at home or away', () => {
   const home = (round: number, goalsFor = 1, goalsAgainst = 0) =>
     scored(goalsFor, goalsAgainst, {
       matchDate: `2026-08-${String(round).padStart(2, '0')}`,
@@ -264,7 +271,7 @@ describe('weetjesOf: wins in a row at home or away', () => {
     ])
   })
 
-  it('finds a longer run as one weetje with its length', () => {
+  it('finds a longer run as one fact with its length', () => {
     const matches = Array.from({ length: 6 }, (_, index) => home(index + 1))
 
     expect(texts(matches)).toEqual([
@@ -286,7 +293,7 @@ describe('weetjesOf: wins in a row at home or away', () => {
     expect(texts([home(1), home(2), home(3, 0, 1), home(4), home(5), home(6), home(7)])).toEqual([])
   })
 
-  it('finds two runs of the same place as two weetjes', () => {
+  it('finds two runs of the same place as two facts', () => {
     const matches = [...Array.from({ length: 5 }, (_, index) => home(index + 1)), home(6, 0, 0)]
 
     matches.push(...Array.from({ length: 5 }, (_, index) => home(index + 7)))
@@ -295,7 +302,7 @@ describe('weetjesOf: wins in a row at home or away', () => {
   })
 })
 
-describe('weetjesOf: the first match under a new coach', () => {
+describe('noteworthyFactsOf: the first match under a new coach', () => {
   const season = [
     scored(1, 0, { matchDate: '2026-08-01', round: 'Speelronde 1' }),
     scored(2, 2, { matchDate: '2026-08-08', round: 'Speelronde 2' }),
@@ -355,29 +362,31 @@ describe('weetjesOf: the first match under a new coach', () => {
   })
 })
 
-describe('weetjesOf', () => {
+describe('noteworthyFactsOf', () => {
   it('has nothing for a season without matches, or one without a result', () => {
-    expect(weetjesOf([], [], 'all')).toEqual([])
-    expect(weetjesOf([played([], { goalsAgainst: null, goalsFor: null, status: 'scheduled' })], [], 'all')).toEqual([])
+    expect(noteworthyFactsOf([], [], 'all')).toEqual([])
+    expect(
+      noteworthyFactsOf([played([], { goalsAgainst: null, goalsFor: null, status: 'scheduled' })], [], 'all'),
+    ).toEqual([])
   })
 
   it('has nothing for a match that was postponed', () => {
-    expect(weetjesOf([scored(5, 4, { status: 'postponed' })], [], 'all')).toEqual([])
+    expect(noteworthyFactsOf([scored(5, 4, { status: 'postponed' })], [], 'all')).toEqual([])
   })
 
   it('follows the choice: a cup tie counts for all the matches and not for the league alone', () => {
     const cup = scored(5, 3, { competition: 'KNVB Beker' })
 
-    expect(weetjesOf([cup], [], 'all')).toHaveLength(1)
-    expect(weetjesOf([cup], [], 'league')).toEqual([])
+    expect(noteworthyFactsOf([cup], [], 'all')).toHaveLength(1)
+    expect(noteworthyFactsOf([cup], [], 'league')).toEqual([])
   })
 
-  it('gives a weetje an id of its own, the same on every call', () => {
+  it('gives a fact an id of its own, the same on every call', () => {
     const matches = [scored(5, 3), scored(4, 4, { round: 'Speelronde 2' })]
-    const ids = weetjesOf(matches, [], 'all').map(({ id }) => id)
+    const ids = noteworthyFactsOf(matches, [], 'all').map(({ id }) => id)
 
     expect(new Set(ids).size).toBe(2)
-    expect(weetjesOf(matches, [], 'all').map(({ id }) => id)).toEqual(ids)
+    expect(noteworthyFactsOf(matches, [], 'all').map(({ id }) => id)).toEqual(ids)
   })
 
   it('gives every kind that fits, for one match', () => {
@@ -387,7 +396,7 @@ describe('weetjesOf', () => {
       ...times(5, (index) => goal('Proefman', { minute: 50 + index * 10 })),
     ]
 
-    expect(weetjesOf([played(goals)], [], 'all').map(({ id }) => id.split(':')[0])).toEqual([
+    expect(noteworthyFactsOf([played(goals)], [], 'all').map(({ id }) => id.split(':')[0])).toEqual([
       'opeenvolgende-minuten',
       'hattrick',
       'veel-doelpunten',
@@ -403,72 +412,81 @@ describe('dutchDay', () => {
   })
 })
 
-describe('orderWeetjes', () => {
-  const weetjes: Weetje[] = Array.from({ length: 12 }, (_, index) => ({ id: `kind:${index}`, text: `Weetje ${index}` }))
-  const ids = (list: Weetje[]) => list.map(({ id }) => id)
+describe('orderNoteworthyFacts', () => {
+  const facts: NoteworthyFact[] = Array.from({ length: 12 }, (_, index) => ({
+    id: `kind:${index}`,
+    text: `NoteworthyFact ${index}`,
+  }))
+  const ids = (list: NoteworthyFact[]) => list.map(({ id }) => id)
 
   it('gives the same order on the same day, whatever the order it gets', () => {
-    expect(ids(orderWeetjes(weetjes, '2026-11-01'))).toEqual(ids(orderWeetjes([...weetjes].reverse(), '2026-11-01')))
+    expect(ids(orderNoteworthyFacts(facts, '2026-11-01'))).toEqual(
+      ids(orderNoteworthyFacts([...facts].reverse(), '2026-11-01')),
+    )
   })
 
   it('gives another order on another day', () => {
-    expect(ids(orderWeetjes(weetjes, '2026-11-01'))).not.toEqual(ids(orderWeetjes(weetjes, '2026-11-02')))
+    expect(ids(orderNoteworthyFacts(facts, '2026-11-01'))).not.toEqual(ids(orderNoteworthyFacts(facts, '2026-11-02')))
   })
 
   it('shuffles: it is not the order of the list', () => {
-    expect(ids(orderWeetjes(weetjes, '2026-11-01'))).not.toEqual(ids(weetjes))
+    expect(ids(orderNoteworthyFacts(facts, '2026-11-01'))).not.toEqual(ids(facts))
   })
 
-  it('keeps every weetje, once', () => {
-    expect(ids(orderWeetjes(weetjes, '2026-11-01')).toSorted()).toEqual(ids(weetjes).toSorted())
+  it('keeps every fact, once', () => {
+    expect(ids(orderNoteworthyFacts(facts, '2026-11-01')).toSorted()).toEqual(ids(facts).toSorted())
   })
 
-  it('does not move the others when a weetje is added or goes', () => {
-    const order = ids(orderWeetjes(weetjes, '2026-11-01'))
-    const without = ids(orderWeetjes(weetjes.slice(1), '2026-11-01'))
+  it('does not move the others when a fact is added or goes', () => {
+    const order = ids(orderNoteworthyFacts(facts, '2026-11-01'))
+    const without = ids(orderNoteworthyFacts(facts.slice(1), '2026-11-01'))
 
     expect(without).toEqual(order.filter((id) => id !== 'kind:0'))
   })
 
   it('gives an empty list for none', () => {
-    expect(orderWeetjes([], '2026-11-01')).toEqual([])
+    expect(orderNoteworthyFacts([], '2026-11-01')).toEqual([])
   })
 })
 
-describe('parseWeetjeNumber', () => {
+describe('parseNoteworthyNumber', () => {
   it('reads a whole number from 1', () => {
-    expect(parseWeetjeNumber('1')).toBe(1)
-    expect(parseWeetjeNumber('2')).toBe(2)
-    expect(parseWeetjeNumber('15')).toBe(15)
+    expect(parseNoteworthyNumber('1')).toBe(1)
+    expect(parseNoteworthyNumber('2')).toBe(2)
+    expect(parseNoteworthyNumber('15')).toBe(15)
   })
 
   it.each([undefined, '', '0', '-1', '1.5', '02', '1e1', 'abc', '1000', ['2', '3']])(
     'gives the first for %j',
     (value) => {
-      expect(parseWeetjeNumber(value)).toBe(1)
+      expect(parseNoteworthyNumber(value)).toBe(1)
     },
   )
 })
 
-describe('pickWeetje', () => {
-  const ordered: Weetje[] = ['a', 'b', 'c'].map((id) => ({ id, text: id }))
+describe('pickNoteworthyFact', () => {
+  const ordered: NoteworthyFact[] = ['a', 'b', 'c'].map((id) => ({ id, text: id }))
 
   it('picks the nth, and the number of the next', () => {
-    expect(pickWeetje(ordered, 1)).toEqual({ next: 2, number: 1, weetje: ordered[0] })
-    expect(pickWeetje(ordered, 2)).toEqual({ next: 3, number: 2, weetje: ordered[1] })
+    expect(pickNoteworthyFact(ordered, 1)).toEqual({ fact: ordered[0], next: 2, number: 1 })
+    expect(pickNoteworthyFact(ordered, 2)).toEqual({ fact: ordered[1], next: 3, number: 2 })
   })
 
   it('goes round to the first after the last', () => {
-    expect(pickWeetje(ordered, 3)).toEqual({ next: 1, number: 3, weetje: ordered[2] })
-    expect(pickWeetje(ordered, 4)).toEqual({ next: 2, number: 1, weetje: ordered[0] })
-    expect(pickWeetje(ordered, 999)).toMatchObject({ number: 3 })
+    expect(pickNoteworthyFact(ordered, 3)).toEqual({ fact: ordered[2], next: 1, number: 3 })
+    expect(pickNoteworthyFact(ordered, 4)).toEqual({ fact: ordered[0], next: 2, number: 1 })
+    expect(pickNoteworthyFact(ordered, 999)).toMatchObject({ number: 3 })
   })
 
-  it('has no next one when there is only one weetje', () => {
-    expect(pickWeetje([ordered[0] as Weetje], 5)).toEqual({ next: undefined, number: 1, weetje: ordered[0] })
+  it('has no next one when there is only one fact', () => {
+    expect(pickNoteworthyFact([ordered[0] as NoteworthyFact], 5)).toEqual({
+      fact: ordered[0],
+      next: undefined,
+      number: 1,
+    })
   })
 
-  it('gives nothing when there is no weetje', () => {
-    expect(pickWeetje([], 1)).toBeUndefined()
+  it('gives nothing when there is no fact', () => {
+    expect(pickNoteworthyFact([], 1)).toBeUndefined()
   })
 })
