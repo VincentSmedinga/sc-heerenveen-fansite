@@ -5,7 +5,7 @@
   "description": "De fansite over sc Heerenveen, sinds 1997: koppen en links, zonder advertenties.",
   "license": "EUPL-1.2",
   "type": "module",
-  "packageManager": "pnpm@12.14.0",
+  "packageManager": "pnpm@12.16.1",
   "engines": {
     "node": "^24",
     "pnpm": "^12"
@@ -48,10 +48,10 @@
     "@eslint/js": "10.0.1",
     "eslint": "10.13.0",
     "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-baseline-js": "0.7.5",
-    "eslint-plugin-perfectionist": "5.12.1",
+    "eslint-plugin-baseline-js": "0.7.6",
+    "eslint-plugin-perfectionist": "5.13.0",
     "eslint-plugin-react-hooks": "7.1.1",
-    "eslint-plugin-storybook": "10.6.3",
+    "eslint-plugin-storybook": "10.6.5",
     "globals": "17.13.0",
     "husky": "9.1.7",
     "lint-staged": "17.6.0",
@@ -61,6 +61,6 @@
     "stylelint-plugin-use-baseline": "1.4.8",
     "stylelint-use-logical": "2.1.3",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.72.0"
+    "typescript-eslint": "8.72.1"
   }
 }
