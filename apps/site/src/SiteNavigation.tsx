@@ -37,8 +37,7 @@ const items = [
  * season. Statistieken has the same, and two sub-pages of its own: Spelers, with the page of
  * each season below it (`/statistieken/spelers/2025-26`), and Tegenstanders, with the page of
  * each club below it (`/statistieken/tegenstanders/ado-den-haag`). A path that belongs to no
- * item, such as
- * /bronnen, the home page or a page that does not exist, has neither.
+ * item, such as /bronnen, the home page or a page that does not exist, has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
   const subitem = newsSubitems.find((candidate) => candidate.href === pathname)
