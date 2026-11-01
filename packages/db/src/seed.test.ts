@@ -112,6 +112,7 @@ describe('the seed', () => {
       'https://www.omropfryslan.nl/rss/index.xml',
       'https://feeds.nos.nl/nosvoetbal',
       'https://www.ad.nl/voetbal/rss.xml',
+      'https://www.gelderlander.nl/sport/rss.xml',
       'https://www.espn.nl/espn/rss/soccer/news',
     ])
   })
@@ -185,6 +186,32 @@ describe('the seed', () => {
     expect(ad?.description).toBeTruthy()
     expect(ad?.description?.length).toBeLessThanOrEqual(300)
     expect(adFeeds.map((feed) => [feed.url, feed.filter])).toEqual([['https://www.ad.nl/voetbal/rss.xml', 'club']])
+  })
+
+  it('puts De Gelderlander in the register with its sport feed on the club filter and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [gelderlander] = await database.db.select().from(sources).where(eq(sources.domain, 'www.gelderlander.nl'))
+    const gelderlanderFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, gelderlander?.id ?? 0))
+
+    expect(gelderlander).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'De Gelderlander',
+      slug: 'de-gelderlander',
+    })
+    expect(gelderlander?.consentStatus).not.toBe('given')
+    expect(gelderlander?.description).toBeTruthy()
+    expect(gelderlander?.description?.length).toBeLessThanOrEqual(300)
+    expect(gelderlanderFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
+      ['https://www.gelderlander.nl/sport/rss.xml', 'club'],
+    ])
   })
 
   it('puts ESPN in the register with its football feed on the club filter and the strictest policy', async () => {
