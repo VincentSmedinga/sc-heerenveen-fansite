@@ -601,7 +601,8 @@ Lukt het niet, bijvoorbeeld omdat de database niet bereikbaar is, dan staat de r
 
 ## Mail versturen
 
-`sendMail` in `src/mail.ts` verstuurt een mail in platte tekst via de mailserver van de hosting, met TLS.
+`sendMail` verstuurt een mail in platte tekst via de mailserver van de hosting, met TLS.
+De code staat in `@fansite/shared` (`packages/shared/src/mail.ts`), zodat de importer er ook mee mailt; `src/mail.ts` geeft hem door.
 De pagina's die het nodig hebben (het contactformulier en het inloggen voor het beheer) roepen het aan:
 
 ```ts

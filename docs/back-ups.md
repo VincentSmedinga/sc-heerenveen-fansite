@@ -117,6 +117,9 @@ Productie (#33) krijgt zijn eigen bestand met instellingen en zijn eigen map.
    Laat het e-mailadres voor de uitvoer van cron leeg.
    De uitvoer komt achteraan in `~/fansite-back-up.log`, met de tijd van de run ervoor.
    Niets ruimt dat bestand op; het groeit met twee regels per nacht.
+   Faalt de back-up drie nachten achter elkaar, dan mailt hij de projecteigenaar.
+   Daarvoor moeten `ALERT_MAIL_TO` en de instellingen van de mailbox in het bestand van stap 2 staan (zie _Een mail als een import blijft falen_ in `acceptatieomgeving.md`).
+   Slaagt hij weer, dan volgt één mail dat het weer werkt.
 
 ## Controleren
 

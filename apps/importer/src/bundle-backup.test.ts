@@ -32,7 +32,7 @@ beforeAll(async () => {
   writeFileSync(
     envFile,
     [
-      'DATABASE_URL=mysql://fansite:secret@localhost:3306/fansite_acc',
+      'DATABASE_URL=mysql://fansite:secret@127.0.0.1:1/fansite_acc',
       `BACKUP_FOLDER=${backups}`,
       `MYSQLDUMP_COMMAND=${dump}`,
       '',
@@ -64,7 +64,10 @@ it('makes a dump on its own, with its settings from a file, and exits with 0', a
   const { code, output } = await run(['backup'])
 
   expect(code).toBe(0)
-  expect(output).toMatch(/^Dumped fansite_acc to .*fansite-backups\/fansite_acc-.*\.sql\.gz \(1 KB\)/)
+  // Nothing listens on the port of the database in the file, so the mail about failing backups
+  // can't keep track of this one. That is a line and no failure: the dump is made all the same.
+  expect(output).toContain('Alert: could not keep track of backup: error ECONNREFUSED\n')
+  expect(output).toMatch(/Dumped fansite_acc to .*fansite-backups\/fansite_acc-.*\.sql\.gz \(1 KB\)/)
   expect(output).not.toContain('secret')
 
   const [name, ...others] = readdirSync(backups)
@@ -76,7 +79,7 @@ it('makes a dump on its own, with its settings from a file, and exits with 0', a
 }, 30_000)
 
 it('exits with 1 and names the variable when the file has no BACKUP_FOLDER', async () => {
-  writeFileSync(envFile, 'DATABASE_URL=mysql://fansite:secret@localhost:3306/fansite_acc\n')
+  writeFileSync(envFile, 'DATABASE_URL=mysql://fansite:secret@127.0.0.1:1/fansite_acc\n')
 
   const { code, output } = await run(['backup'])
 

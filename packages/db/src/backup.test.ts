@@ -360,6 +360,37 @@ describe('runBackupCommand', () => {
     expect(String(error.mock.calls[0]?.[0])).not.toContain('p@ss')
   })
 
+  it('tells the report how a backup went, and never lets the report change the result', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const report = vi.fn(() => Promise.resolve())
+    const failing = program('mysqldump', 'echo "Access denied for user" >&2\nexit 2')
+
+    expect(await runBackupCommand(['backup'], source(), now, report)).toBe(0)
+    expect(report).toHaveBeenLastCalledWith({ ok: true })
+    expect(
+      await runBackupCommand(
+        ['backup'],
+        source({ MYSQLDUMP_COMMAND: failing }),
+        new Date(now.getTime() + 1000),
+        report,
+      ),
+    ).toBe(1)
+    expect(report).toHaveBeenLastCalledWith({ error: expect.stringContaining('Access denied') as string, ok: false })
+    expect(report).toHaveBeenCalledTimes(2)
+
+    // A report that fails is no failed backup. A restore or a wrong command is not reported.
+    expect(
+      await runBackupCommand(['backup'], source(), new Date(now.getTime() + 2000), () =>
+        Promise.reject(new Error('no')),
+      ),
+    ).toBe(0)
+    expect(await runBackupCommand(['restore', '/nowhere.sql'], source(), now, report)).toBe(1)
+    expect(await runBackupCommand(['dump'], source(), now, report)).toBe(2)
+    expect(report).toHaveBeenCalledTimes(2)
+  })
+
   it('exits with 1 when a variable is missing, and names it', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {})
 

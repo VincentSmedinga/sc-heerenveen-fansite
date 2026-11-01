@@ -106,6 +106,40 @@ Per feed staan in `feeds` de laatste geslaagde run, het aantal mislukte runs op 
 Na drie mislukte runs op rij is een feed ongezond.
 De laatste fout blijft staan als de feed daarna weer slaagt.
 
+### Een mail als een import faalt
+
+Wie het logboek niet leest, ziet niet dat een import stilstaat.
+Daarom mailt de importer de projecteigenaar als dezelfde import drie runs achter elkaar faalt (`alertAfterFailures` in `packages/db/src/alerts.ts`, de enige plek voor dat getal).
+Hij mailt naar `ALERT_MAIL_TO`, via de brievenbus van de site (`sendMail` in `@fansite/shared`, met dezelfde `SMTP_*` en `MAIL_FROM`).
+
+- **Wat meetelt** als een import: een feed, de wedstrijden van het lopende seizoen, de selectie van het lopende seizoen en de back-up van de database (`pnpm db:backup`, elke nacht).
+  Elke import telt apart.
+- **Wat een mislukte run is:** dezelfde als bij de gezondheid hierboven.
+  Een feed die een fout geeft telt, en bij de wedstrijden en de selectie telt een lezing die niets verandert en de laatste goede kopie laat staan (`Matches 2026/27: warning, nothing changed ...`).
+  Een back-up die faalt telt ook.
+- **Wat niet meetelt:** wachten (429 of 503), een weigering door `robots.txt` en een run die de feed of het uur overslaat (`postponed`).
+  Een waarschuwing bij een lezing die wel is bewaard telt ook niet, zoals een uitslag die veranderde of een doelpunt zonder speler.
+  Dat geldt ook voor de clubs die niet hersteld zijn.
+  Ook een afgelopen seizoen met `pnpm run import:season` telt niet: dat start de projecteigenaar zelf.
+  Is de database niet bereikbaar, dan kan de importer niet bijhouden wat hij mailde, en blijft ook de mail uit.
+- **De melding:** de derde mislukte run stuurt één mail.
+  Hij zegt welke import het is, sinds wanneer, hoe vaak het misging, de laatste foutmelding en de omgeving (acceptatie of productie).
+  Daarna volgt hoogstens één herinnering per 24 uur, zolang het misgaat.
+- **Weer in orde:** de eerste run die weer slaagt na een melding stuurt één mail.
+  Een run die slaagt zonder dat er een melding was, stuurt niets.
+- **De mail kan niet weg:** staat `ALERT_MAIL_TO` niet in de omgeving, of mist de brievenbus, dan schrijft de importer een regel `Alert: ... needs a mail, but ... so none is sent.` in het logboek.
+  Weigert de mailserver de mail, dan komt er een regel `Alert: the mail about ... could not be sent`.
+  De importer probeert het bij de volgende mislukte run opnieuw.
+  De import zelf slaagt of faalt daar niet door, en wacht er niet op.
+- **De tekst** is Nederlands en bevat geen wachtwoorden of gegevens van personen.
+  De foutmelding wordt eerst geschoond.
+  Van een webadres blijven de host en het pad over, zonder wachtwoord, query en lange sleutels.
+  Een e-mailadres wordt `[e-mailadres]`, en van een pad op de schijf blijft het laatste deel.
+- **Waar de stand staat:** in de tabel `import_alerts`, één rij per import (`feed:<id>`, `matches:<seizoen>`, `squad:<seizoen>`, `backup`) zolang het misgaat.
+  Een run die slaagt, haalt de rij weg.
+
+Hoe je het instelt en wat de mails betekenen, staat in `docs/acceptatieomgeving.md`, onder _Een mail als een import blijft falen_.
+
 ### Wachten
 
 De kolom `feeds.retry_at` zegt tot wanneer de import een feed overslaat.

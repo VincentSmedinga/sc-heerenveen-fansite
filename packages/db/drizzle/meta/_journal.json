@@ -155,6 +155,13 @@
       "when": 1793461504729,
       "tag": "0021_add_clubs",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1793494600355,
+      "tag": "0022_add_import_alerts",
+      "breakpoints": true
     }
   ]
 }

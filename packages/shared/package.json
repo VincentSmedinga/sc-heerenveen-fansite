@@ -6,16 +6,22 @@
   "license": "EUPL-1.2",
   "type": "module",
   "exports": {
-    "./env": "./src/env.ts"
+    "./contact-email": "./src/contact-email.ts",
+    "./env": "./src/env.ts",
+    "./mail": "./src/mail.ts",
+    "./mail-env": "./src/mail-env.ts",
+    "./site-env": "./src/site-env.ts"
   },
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -b"
   },
   "dependencies": {
+    "nodemailer": "10.1.4",
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@types/node": "24.19.2",
     "vitest": "5.0.5"
   }
 }

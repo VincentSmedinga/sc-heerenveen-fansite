@@ -265,11 +265,16 @@ export async function restore(env: BackupEnv, file: string) {
  * when it failed (the message says why), and 2 when the command is wrong. `pnpm db:backup` and
  * `pnpm db:restore` run it locally, and the file that `assemble` makes of
  * `backup-command.ts` runs it on the host (see docs/back-ups.md).
+ *
+ * `report` hears how a backup went, so the host can mail the owner about a backup that keeps
+ * failing (see `alerts.ts`). It is not called for a restore or a wrong command, and what it
+ * does never changes the result.
  */
 export async function runBackupCommand(
   args: readonly string[],
   source: Record<string, string | undefined> = process.env,
   now = new Date(),
+  report: (outcome: { error: string; ok: false } | { ok: true }) => Promise<void> = async () => {},
 ) {
   const [command, file, ...rest] = args
 
@@ -288,6 +293,8 @@ export async function runBackupCommand(
     if (command === 'backup') {
       const result = await backUp(env, now)
 
+      await report({ ok: true }).catch(() => {})
+
       console.log(
         `Dumped ${result.database} to ${result.file} (${formatBytes(result.bytes)}). ` +
           `Removed ${result.removed.length} ${result.removed.length === 1 ? 'dump' : 'dumps'} older than ${env.BACKUP_KEEP_DAYS} days.`,
@@ -301,6 +308,10 @@ export async function runBackupCommand(
     return 0
   } catch (error) {
     console.error(`${command === 'backup' ? 'The backup' : 'The restore'} failed: ${messageOf(error)}`)
+
+    if (command === 'backup') {
+      await report({ error: messageOf(error), ok: false }).catch(() => {})
+    }
 
     return 1
   }

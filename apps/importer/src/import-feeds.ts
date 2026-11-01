@@ -1,7 +1,9 @@
+import type { AlertOptions } from '@fansite/db/alerts'
 import type { Database } from '@fansite/db/client'
 import type { Feed, ItemRelevance } from '@fansite/db/schema'
 import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 
+import { recordRun } from '@fansite/db/alerts'
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { discussions, feeds, items, matches, sources } from '@fansite/db/schema'
@@ -10,10 +12,12 @@ import { removeVisitorData } from '@fansite/db/visits'
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
 import type { Fetcher, RobotsStore } from './fetcher.ts'
+import type { HealthReport } from './import-matches.ts'
 import type { FeedItem, SkippedItem } from './read-feed.ts'
 import type { ForumDiscussion } from './read-forum.ts'
 import type { MatchDay } from './relevance.ts'
 
+import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-runs.ts'
 import { createFetcher } from './fetcher.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
@@ -71,6 +75,12 @@ export type FeedReport =
     }
 
 export type ImportOptions = {
+  /**
+   * How the run mails the owner about an import that keeps failing (see `recordRun`): a test
+   * gives a fake mailer and its own environment, so it sends nothing real. The clock and the
+   * output are those of the run.
+   */
+  alerts?: Pick<AlertOptions, 'env' | 'send'>
   /** Gives the time. A test gives its own, to run the import at a moment it chooses. */
   clock?: () => Date
   /**
@@ -221,7 +231,12 @@ export async function importFeed(
 export async function importFeeds(
   db: Database,
   fetcher: Fetcher,
-  { clock = () => new Date(), runId }: Pick<ImportOptions, 'clock'> & { runId: number },
+  {
+    alerts = {},
+    clock = () => new Date(),
+    runId,
+    write = console.log,
+  }: Pick<ImportOptions, 'alerts' | 'clock' | 'write'> & { runId: number },
 ): Promise<FeedReport[]> {
   const reports: FeedReport[] = []
   const seasonMatches = await listSeasonMatches(db, seasonOf(clock()))
@@ -231,6 +246,12 @@ export async function importFeeds(
 
     // The time after the request, so a wait counts from the moment the source answered.
     await recordReport(db, runId, feed, report, clock())
+
+    const alertRun = alertRunOf(feedSubject(feed), report)
+
+    if (alertRun !== undefined) {
+      await recordRun(db, alertRun, { ...alerts, clock, write })
+    }
     reports.push(report)
   }
 
@@ -248,6 +269,7 @@ export function listFeedsToImport(db: Database) {
       lastModified: feeds.lastModified,
       retryAt: feeds.retryAt,
       sourceId: feeds.sourceId,
+      sourceName: sources.name,
       url: feeds.url,
     })
     .from(feeds)
@@ -276,6 +298,7 @@ export function listFeedsToImport(db: Database) {
 export async function runImport(
   databaseUrl: string,
   {
+    alerts = {},
     clock = () => new Date(),
     makeFetcher = (robots) => createFetcher({ robots }),
     wikipediaOrigin: origin = wikipediaOrigin,
@@ -301,8 +324,8 @@ export async function runImport(
       const clubLines = await repairKnownClubs(db, clock)
       const fetcher = makeFetcher(robotsStoreFor(db, clock))
       const [reports, wikipedia] = await Promise.allSettled([
-        importFeeds(db, fetcher, { clock, runId }),
-        origin === null ? [] : importWikipedia(db, fetcher, clock, origin),
+        importFeeds(db, fetcher, { alerts, clock, runId, write }),
+        origin === null ? [] : importWikipedia(db, fetcher, clock, origin, { ...alerts, clock, write }),
       ])
 
       await finishRun(db, runId, clock())
@@ -416,7 +439,13 @@ async function importForum(db: Database, feed: StoredFeed, read: ReturnType<type
  * Reads the matches and then the squad, and returns the lines to write. A failure of one does
  * not stop the other, and an import that finds its hour not over yet says nothing.
  */
-async function importWikipedia(db: Database, fetcher: Fetcher, clock: () => Date, origin: string): Promise<string[]> {
+async function importWikipedia(
+  db: Database,
+  fetcher: Fetcher,
+  clock: () => Date,
+  origin: string,
+  alerts: AlertOptions,
+): Promise<string[]> {
   const lines: string[] = []
 
   try {
@@ -425,6 +454,8 @@ async function importWikipedia(db: Database, fetcher: Fetcher, clock: () => Date
     if (report.kind !== 'postponed') {
       lines.push(formatMatchReport(report))
     }
+
+    await recordWikipediaRun(db, matchesSubject(report.season), report, alerts)
   } catch (error) {
     lines.push(`Matches: warning, not imported: ${describeError(error)}`)
   }
@@ -434,6 +465,8 @@ async function importWikipedia(db: Database, fetcher: Fetcher, clock: () => Date
     if (report.kind !== 'postponed') {
       lines.push(formatSquadReport(report))
     }
+
+    await recordWikipediaRun(db, squadSubject(report.season), report, alerts)
   } catch (error) {
     lines.push(`Squad: warning, not imported: ${describeError(error)}`)
   }
@@ -451,6 +484,20 @@ function listSeasonMatches(db: Database, season: string): Promise<MatchDay[]> {
     .select({ matchDate: matches.matchDate, opponent: matches.opponent, status: matches.status })
     .from(matches)
     .where(eq(matches.season, season))
+}
+
+/** Tells the alerts how the import of a season went, if it asked Wikipedia. */
+async function recordWikipediaRun(
+  db: Database,
+  subject: { label: string; subject: string },
+  report: HealthReport,
+  alerts: AlertOptions,
+) {
+  const alertRun = alertRunOf(subject, report)
+
+  if (alertRun !== undefined) {
+    await recordRun(db, alertRun, alerts)
+  }
 }
 
 /**

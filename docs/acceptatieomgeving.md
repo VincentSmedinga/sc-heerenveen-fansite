@@ -90,7 +90,8 @@ Wat hij per feed schrijft, staat in de [README van de importer](../apps/importer
 - Een cronjob krijgt de variabelen van de Node.js-app niet.
   De importer leest `DATABASE_URL` daarom uit een eigen bestand in de thuismap, `~/fansite-acceptatie.env`, met `node --env-file`.
 - De uitvoer komt achteraan in `~/fansite-import.log`, met de tijd van de run ervoor.
-  Er gaat geen e-mail.
+  Cron mailt de uitvoer niet.
+  Een import die herhaaldelijk faalt, mailt de importer zelf (zie _Een mail als een import blijft falen_).
   Niets ruimt dat bestand op; het groeit met een paar regels per run.
 - De importer weigert adressen die niet op het openbare internet liggen, zoals `localhost` of `10.0.0.1`, ook na een doorverwijzing.
 - Een run neemt een lock in de database, dus er draaien nooit twee runs tegelijk.
@@ -133,6 +134,55 @@ Ontbreekt een geheim, dan slaat de workflow de import over met een melding en bl
 - De uitvoer komt in het logboek van de run en niet in `~/fansite-import.log`.
 - De site laat een afgelopen seizoen nog niet zien (zie de [README van de importer](../apps/importer/README.md), _Een afgelopen seizoen_).
   Of het gelukt is, controleer je met het logboek van de run, of met SSH (zie _Controleren_).
+
+### Een mail als een import blijft falen
+
+Faalt dezelfde import drie runs achter elkaar, dan mailt de importer de projecteigenaar.
+Het gaat om een feed, de wedstrijden of de selectie van het lopende seizoen, of de nachtelijke back-up (zie [`back-ups.md`](back-ups.md)).
+Wat meetelt als een mislukte run, staat in de [README van de importer](../apps/importer/README.md), onder _Een mail als een import faalt_.
+Een feed krijgt elk kwartier een run, dus drie runs zijn een half uur.
+De wedstrijden en de selectie leest de import hoogstens elk uur, dus daar zijn het drie uur.
+
+Zo zet je het aan:
+
+1. Zet in `~/fansite-acceptatie.env` (stap 8 van _Eenmalig instellen_), met een editor en niet met `echo`, deze regels erbij:
+
+   ```sh
+   ALERT_MAIL_TO=eigenaar@voorbeeld.nl
+   SITE_ENV=acceptance
+   SMTP_HOST=...
+   SMTP_PORT=...
+   SMTP_USER=...
+   SMTP_PASSWORD=...
+   MAIL_FROM=...
+   ```
+
+   `ALERT_MAIL_TO` is het adres waar de mail heen gaat: één adres, of een naam gevolgd door een adres in `< >`.
+   De andere zes zijn dezelfde als bij de Node.js-app (stap 2 en 11).
+   `SITE_ENV` staat erbij, zodat de mail zegt of het acceptatie of productie is.
+   De proefmail onder _Controleren_ gebruikt dezelfde regels, dus als die aankomt, kan de importer ook mailen.
+
+2. Er is niets anders om aan te zetten: de volgende run houdt de stand bij, en mailt bij de derde mislukte run.
+   De tabel `import_alerts` komt vanzelf, net als de rest van het schema.
+
+Staat `ALERT_MAIL_TO` er niet, of mist de brievenbus, dan mailt de importer niet.
+Hij schrijft dan een regel in `~/fansite-import.log` en gaat door.
+Die regel begint met `Alert:` en noemt `ALERT_MAIL_TO` of de brievenbus.
+Mislukt het versturen zelf, dan staat er `Alert: the mail about ... could not be sent` met een code.
+De importer probeert het bij de volgende mislukte run opnieuw.
+De import slaagt of faalt daar niet door.
+
+Dit zijn de drie mails, in het Nederlands, en elk onderwerp begint met de omgeving, zoals `[acceptatie]`:
+
+| Onderwerp                                                   | Wat het betekent                                                                                                                 |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `De feed van <bron> staat stil sinds <datum>`               | De derde mislukte run in één storing. In de mail staat sinds wanneer, hoe vaak, de laatste foutmelding en het adres van de site. |
+| `Herinnering: <import> staat nog steeds stil sinds <datum>` | Het gaat nog steeds mis. Er komt hoogstens één herinnering per 24 uur.                                                           |
+| `<import> werkt weer`                                       | De eerste run die slaagt na een melding. Er hoeft niets te gebeuren.                                                             |
+
+De mail bevat geen wachtwoorden en geen gegevens van personen.
+Een webadres in de foutmelding verliest zijn wachtwoord, zijn query en lange sleutels, en een e-mailadres wordt `[e-mailadres]`.
+Zoek je meer, kijk dan met SSH naar het overzicht van de gezondheid (zie _Controleren_) en in het logboek van de import.
 
 ## Eenmalig instellen
 
@@ -252,7 +302,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
     De opdracht schrijft alles in het logbestand, dus er is ook niets om te mailen.
 
 11. **Mail.**
-    De site mailt via de mailserver van de hosting, vanaf de brievenbus `fansite@heerenveen.org` (zie `sendMail` in `apps/site/src/mail.ts`).
+    De site mailt via de mailserver van de hosting, vanaf de brievenbus `fansite@heerenveen.org` (zie `sendMail` in `packages/shared/src/mail.ts`).
     Het contactformulier en het inloggen voor het beheer gebruiken dat later.
     Zet bij de omgevingsvariabelen van de Node.js-app (stap 2) deze vijf, **voordat** je de versie met `sendMail` samenvoegt: zonder deze vijf start de site niet, en de workflow wordt rood bij stap 6.
 

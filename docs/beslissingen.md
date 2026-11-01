@@ -3425,6 +3425,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat verandert de code niet.
 - **Alternatieven:** een mailbezorger zoals Postmark of Mailgun, die betrouwbaarder bezorgt maar een derde partij is en geld kost.
   Of `sendmail` op de server: geen dependency, maar afhankelijk van hoe de hosting het instelt, en zonder foutmeldingen.
+- **Later:** zie _De importer mailt de projecteigenaar als dezelfde import drie runs achter elkaar faalt_.
+  `sendMail` staat nu in `packages/shared/src/mail.ts`, en de site importeert hem nog uit `apps/site/src/mail.ts`; de rest blijft zoals het was.
 
 ### Voor SMTP gebruiken we nodemailer 10.0.16
 
@@ -3442,6 +3444,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een eigen SMTP-client op `node:tls`.
   Dat is geen dependency, maar de coderingen en de randgevallen zijn dan van ons.
   Of een andere bibliotheek; nodemailer is de gangbare keuze voor Node en heeft zelf geen dependencies.
+- **Later:** zie _De importer mailt de projecteigenaar als dezelfde import drie runs achter elkaar faalt_.
+  `nodemailer` is een dependency van `@fansite/shared`, waar `sendMail` nu staat, en niet meer van `apps/site`.
 
 ### Mail gaat altijd over TLS, en zonder instellingen alleen lokaal naar het logboek
 
@@ -5919,6 +5923,44 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   3 dagen voor en 7 dagen na (de eerste versie van dit besluit): dat gaf dezelfde twee koppen, maar een langer venster laat meer koppen door die niet over de wedstrijd gaan.
   Alleen de aanscherping met de tweede club (dat haalt twee van de zeven missers weg).
   Alleen het kortere venster (dat haalt de vijf koppen over N.E.C. weg).
+
+### De importer mailt de projecteigenaar als dezelfde import drie runs achter elkaar faalt
+
+- **Datum:** 1 november 2026
+- **Besluit:** de importer stuurt een mail naar `ALERT_MAIL_TO` als dezelfde import drie runs achter elkaar faalt (#533).
+  - Een import is een feed, de wedstrijden van het lopende seizoen, de selectie van het lopende seizoen en de nachtelijke back-up.
+    Elke import telt apart.
+  - Het getal staat op één plek, `alertAfterFailures` in `packages/db/src/alerts.ts`.
+  - De derde mislukte run stuurt één mail, met de import, sinds wanneer, hoe vaak, de laatste foutmelding en de omgeving.
+    Daarna volgt hoogstens één herinnering per 24 uur.
+    De eerste run die weer slaagt na een melding stuurt één mail dat het weer werkt.
+    Een run die slaagt zonder melding stuurt niets.
+  - Dezelfde fouten tellen als bij de gezondheid van een feed: een fout.
+    Wachten, een weigering door `robots.txt`, een run die niets vroeg en een waarschuwing bij een lezing die wel is bewaard tellen niet.
+  - De mail gaat door de brievenbus van de site.
+    `sendMail` staat daarom in `@fansite/shared` (`packages/shared/src/mail.ts`), en de site gebruikt hem van daar.
+  - Zonder `ALERT_MAIL_TO` of zonder brievenbus schrijft de importer een regel in het logboek.
+    Een mail die niet weg kan, laat de import niet falen en houdt hem niet op.
+  - De foutmelding wordt geschoond van geheimen (de sleutel in een webadres, een wachtwoord, een e-mailadres, een pad op de schijf) voordat ze in de mail of de database komt.
+- **Hoe:** de tabel `import_alerts` heeft een rij per import zolang het misgaat: het aantal mislukte runs, sinds wanneer en wanneer de laatste mail wegging.
+  Zo mailt een run die elk kwartier draait niet elk kwartier, en komt "weer in orde" alleen na een melding.
+  Een aparte tabel en geen kolommen bij `feeds`, `match_imports` en `squad_imports`.
+  De back-up heeft geen gezondheid om kolommen aan toe te voegen, drie tabellen vragen drie keer dezelfde kolommen, en de gezondheid blijft zoals ze was.
+  De tabel telt zelf mee, met dezelfde indeling in mislukt, geslaagd en geen van beide als de gezondheid.
+  Die indeling staat in `alertRunOf` (`apps/importer/src/alert-runs.ts`), met een test die haar naast die van de gezondheid legt.
+- **Waarom:** de import van 2026/27 stond dagenlang stil zonder dat iemand het merkte (#532): de waarschuwing stond alleen in het logboek.
+  Een mail komt bij een mens op een plek die hij toch leest, gebruikt wat er al is (de brievenbus en de database) en stuurt niets naar een derde.
+  Drie runs voorkomt een mail bij een storing van korte duur, en één herinnering per dag houdt de mail kort.
+- **Nadeel:** cron start de importer elk kwartier en leest de wedstrijden en de selectie hoogstens elk uur.
+  Drie runs zijn voor een feed dus een half uur, en voor de wedstrijden en de selectie drie uur.
+  Een storing van een feed van een half uur kan al een mail geven.
+  Een database die niet bereikbaar is, kan niets bijhouden, en geeft dus geen mail.
+- **Alternatieven:** een externe bewaking, zoals een dienst die een adres aanroept (een verzoek naar een derde, en alleen een teken van leven, geen reden).
+  Een pagina in het beheer met de gezondheid: nuttig, maar je moet erheen, en dat komt bij #49.
+  De workflow Acceptance rood laten worden bij een waarschuwing: GitHub mailt dan, maar alleen bij een samenvoeging en niet elk uur, en de import op de host zelf valt erbuiten.
+  Bewaking van de beschikbaarheid van de site hoort bij #172.
+  Een mail bij elke fout: te veel mail bij een storing van een uur bij een bron.
+  Kolommen bij de bestaande gezondheidstabellen, zonder nieuwe tabel: de back-up heeft er geen.
 
 ## Redactie
 

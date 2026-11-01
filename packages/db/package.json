@@ -6,6 +6,7 @@
   "license": "EUPL-1.2",
   "type": "module",
   "exports": {
+    "./alerts": "./src/alerts.ts",
     "./client": "./src/client.ts",
     "./clubs": "./src/clubs.ts",
     "./env": "./src/env.ts",
