@@ -181,7 +181,9 @@ describe('the seed', () => {
       enabled: true,
       introMaxLength: 0,
       kind: 'news',
+      local: false,
       name: 'Algemeen Dagblad',
+      publisher: 'dpg-media',
     })
     expect(ad?.consentStatus).not.toBe('given')
     expect(ad?.description).toBeTruthy()
@@ -204,7 +206,9 @@ describe('the seed', () => {
       enabled: true,
       introMaxLength: 0,
       kind: 'news',
+      local: true,
       name: 'De Gelderlander',
+      publisher: 'dpg-media',
       slug: 'de-gelderlander',
     })
     expect(gelderlander?.consentStatus).not.toBe('given')
@@ -423,6 +427,19 @@ describe('the seed', () => {
         expect(address ?? 'https://', podcast.name).toMatch(/^https:\/\//u)
       }
     }
+  })
+
+  it('gives only the Algemeen Dagblad and De Gelderlander a publisher, and makes only De Gelderlander local', () => {
+    const withPublisher = realSources.filter((source) => 'publisher' in source)
+
+    expect(withPublisher.map((source) => [source.name, source.publisher])).toEqual([
+      ['Algemeen Dagblad', 'dpg-media'],
+      ['De Gelderlander', 'dpg-media'],
+    ])
+    expect(realSources.filter((source) => 'local' in source && source.local).map((source) => source.name)).toEqual([
+      'De Gelderlander',
+    ])
+    expect(testSources.some((source) => 'publisher' in source || 'local' in source)).toBe(false)
   })
 
   it('gives every source that can have headlines a slug of its own, and the forum none', () => {
