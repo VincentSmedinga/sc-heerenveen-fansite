@@ -194,18 +194,19 @@ De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf We
 De `h1` van de homepage is "sc Heerenveen Fansite", maar die zie je niet: het logo erboven zegt het al.
 Hij heeft de klasse `hf-visually-hidden` uit het designsysteem, dus een schermlezer leest hem wel voor.
 Bovenaan de hoofdkolom staat de kaart "Van de redactie": het nieuwste artikel van onze eigen redactie, in de lange vorm van `ArticleCard`, met de titel, de datum, de inleiding en de link "Lees verder".
-Daaronder staat het blok "Laatste nieuws": de tien nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
+Daaronder staat het blok "Laatste nieuws": de vijf nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
 Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
 Onder de lijst staat de link "Alle nieuws" naar `/nieuws` (zie _De nieuwspagina_): ouder nieuws is daarvoor.
-Het aantal staat op één plek, `firstHeadlines` (10) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
+Het aantal staat op één plek, `firstHeadlines` (5, uit `listSizes`) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
 De homepage kent geen parameters, geen filter, geen paginering en geen balk met subpagina's: een adres als `/?nieuws=15`, dat de knop "Laad 5 meer" vroeger maakte, laat gewoon de homepage zien.
 
-De server leest vijf discussies en vijf afleveringen (`itemsPerCard` in `src/items-per-card.ts`), en de kaarten in de zijbalk tonen er twee van elk (`homeDiscussions` en `homeEpisodes`), zodat de zijbalk ongeveer even lang is als de hoofdkolom.
-Bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 1339 pixels hoog en de zijbalk 1371.
-De kaart "Podcasts" op `/nieuws` toont alle vijf.
+Elke kaart met een lijst toont standaard vijf items: de koppen, de discussies en de afleveringen, op de homepage en op `/nieuws` (`itemsPerCard` in `src/items-per-card.ts`).
+De toegestane maten staan op één plek, `listSizes`: 5, 10, 20 en 50, en elk aantal in dat bestand komt daaruit; een test (`src/items-per-card.test.ts`) zegt dat.
+Een bezoeker kiest geen maat.
+De hoofdkolom en de zijbalk zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 805 pixels hoog en de zijbalk 2055.
 
-In de zijbalk naast het nieuws staat bovenaan het blok "Nieuwste discussies", want het forum is onze zustersite: de twee discussies van het forum waar het laatst op is gereageerd.
+In de zijbalk naast het nieuws staat bovenaan het blok "Nieuwste discussies", want het forum is onze zustersite: de vijf discussies van het forum waar het laatst op is gereageerd.
 Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar het laatste bericht van de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1 · 13:28".
 Van vandaag staat alleen de tijd, van de zes dagen ervoor de korte dag en de tijd, en daarvoor de datum.
 Onder de discussies staat de link "Naar het forum"; zijn er geen discussies, dan staat er een tekst voor bezoekers boven die link.
@@ -219,12 +220,11 @@ Het haalt alleen berichten op die `relevant` zijn en niet verborgen (`isShown`);
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
-Onderaan de zijbalk staat het blok "Nieuwste podcasts": de twee nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
+Onderaan de zijbalk staat het blok "Nieuwste podcasts": de vijf nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/nieuws/podcasts`.
 
 Tussen de discussies en de podcasts staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
-De volgorde en het aantal items maken de hoofdkolom en de zijbalk ongeveer even lang.
 Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan onderaan de pagina.
 Zonder gegevens van de wedstrijden staat er een zin voor bezoekers.
 Lukt het lezen van de wedstrijden niet, dan verdwijnen de twee blokken en schrijft de site de reden in het logboek, zoals bij het artikel; de rest van de pagina blijft werken.

@@ -7,7 +7,6 @@ import { getDiscussions } from '../discussions'
 import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
 import { getHeadlines } from '../headlines'
-import { homeDiscussions, homeEpisodes } from '../items-per-card'
 import { getMatchData, type MatchData } from '../matches'
 import { MatchesCard, StandingsCard } from '../MatchViews'
 import { pageMetadata } from '../metadata'
@@ -127,14 +126,14 @@ export default async function HomePage() {
         </Card>
       </Page.Main>
       <Page.Sidebar aria-label="Het forum, de wedstrijden, de stand en de podcasts">
-        <DiscussionsCard discussions={discussions.slice(0, homeDiscussions)} now={now} />
+        <DiscussionsCard discussions={discussions} now={now} />
         {matches !== undefined && (
           <>
             <MatchesCard data={matches} now={now} />
             <StandingsCard data={matches} />
           </>
         )}
-        <EpisodesCard episodes={episodes.slice(0, homeEpisodes)} heading="Nieuwste podcasts" now={now} />
+        <EpisodesCard episodes={episodes} heading="Nieuwste podcasts" now={now} />
       </Page.Sidebar>
     </>
   )
