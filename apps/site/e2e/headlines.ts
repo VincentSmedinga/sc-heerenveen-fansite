@@ -21,7 +21,7 @@ type Row = {
  * check puts them in the database before the first test and takes them out after the last one.
  *
  * They are in the form of real headlines, on the made-up test sources of the seed. The times
- * are counted back from the moment the check starts. The homepage shows the first five, and the
+ * are counted back from the moment the check starts. The homepage shows the first ten, and the
  * link to /nieuws under them. The first seven are from the last six days and show a weekday and
  * the time; the next four are older and show a weekday and the date. The news page shows them
  * all.

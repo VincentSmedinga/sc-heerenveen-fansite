@@ -16,9 +16,9 @@ describe('the counts of the lists', () => {
     }
   })
 
-  it('show 5 items on a card by default, and 50 headlines on a page of /nieuws', () => {
+  it('show 5 items on a card by default, 10 headlines on the homepage and 50 on a page of /nieuws', () => {
     expect(counts.itemsPerCard).toBe(5)
-    expect(counts.firstHeadlines).toBe(5)
+    expect(counts.firstHeadlines).toBe(10)
     expect(counts.headlinesPerPage).toBe(50)
   })
 })

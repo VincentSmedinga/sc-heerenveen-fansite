@@ -28,13 +28,13 @@ afterEach(() => {
 })
 
 describe('getHeadlines', () => {
-  it('asks the query for the five newest headlines, up to now, with no start in time', async () => {
+  it('asks the query for the ten newest headlines, up to now, with no start in time', async () => {
     const { getHeadlines } = await loadHeadlines()
 
     await getHeadlines()
 
     expect(listRecentItems).toHaveBeenCalledExactlyOnceWith(db, {
-      limit: 5,
+      limit: 10,
       until: new Date('2026-10-22T12:30:00.000Z'),
     })
   })

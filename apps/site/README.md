@@ -194,14 +194,14 @@ De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf We
 De `h1` van de homepage is "sc Heerenveen Fansite", maar die zie je niet: het logo erboven zegt het al.
 Hij heeft de klasse `hf-visually-hidden` uit het designsysteem, dus een schermlezer leest hem wel voor.
 Bovenaan de hoofdkolom staat de kaart "Van de redactie": het nieuwste artikel van onze eigen redactie, in de lange vorm van `ArticleCard`, met de titel, de datum, de inleiding en de link "Lees verder".
-Daaronder staat het blok "Laatste nieuws": de vijf nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
+Daaronder staat het blok "Laatste nieuws": de tien nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
 Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
 Onder de lijst staat de link "Alle nieuws" naar `/nieuws` (zie _De nieuwspagina_): ouder nieuws is daarvoor.
-Het aantal staat op één plek, `firstHeadlines` (5, uit `listSizes`) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
+Het aantal staat op één plek, `firstHeadlines` (10, uit `listSizes`) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
 De homepage kent geen parameters, geen filter, geen paginering en geen balk met subpagina's: een adres als `/?nieuws=15`, dat de knop "Laad 5 meer" vroeger maakte, laat gewoon de homepage zien.
 
-Elke kaart met een lijst toont standaard vijf items: de koppen, de discussies en de afleveringen, op de homepage en op `/nieuws` (`itemsPerCard` in `src/items-per-card.ts`).
+Elke kaart met een lijst toont standaard vijf items: de discussies en de afleveringen op de homepage en de afleveringen op `/nieuws` (`itemsPerCard` in `src/items-per-card.ts`); het nieuws is de hoofdkaart en toont tien koppen.
 De toegestane maten staan op één plek, `listSizes`: 5, 10, 20 en 50, en elk aantal in dat bestand komt daaruit; een test (`src/items-per-card.test.ts`) zegt dat.
 Een bezoeker kiest geen maat.
 De hoofdkolom en de zijbalk zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 805 pixels hoog en de zijbalk 2055.

@@ -4608,21 +4608,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     Het is het huidige onderdeel op `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en de homepage heeft geen huidig onderdeel.
     De balk van Nieuws heeft Podcasts en Zoeken, in die volgorde, op die pagina's; het item Archief vervalt.
   - **Adressen:** geen omleidingen en `?nieuws=` is weg, want er zijn nog geen openbare links (#33).
-  - **De aantallen:** elke kaart met een lijst toont standaard vijf items, op de homepage en op `/nieuws`: de koppen, de discussies en de afleveringen (`itemsPerCard` en `firstHeadlines` in `apps/site/src/items-per-card.ts`).
+  - **De aantallen:** elke kaart met een lijst toont standaard vijf items: de discussies en de afleveringen op de homepage, en de afleveringen op `/nieuws` (`itemsPerCard` in `apps/site/src/items-per-card.ts`).
+    Het nieuws is de hoofdkaart: "Laatste nieuws" op de homepage blijft tien koppen (`firstHeadlines`), en de lijst op `/nieuws` blijft 50 per pagina (`headlinesPerPage`).
     Kaarten van een eigen soort, zoals de vorige en de volgende wedstrijd en de stand met drie clubs, houden hun eigen aantal.
-    De lijst op `/nieuws` blijft 50 per pagina.
     De toegestane maten zijn 5, 10, 20 en 50, vast in de code (`listSizes`), en elk aantal in dat bestand komt daaruit; een test zegt dat.
     Een bezoeker kiest geen maat.
-    De kolommen zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom van de homepage 805 pixels hoog en de zijbalk 2055.
+    De kolommen zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom van de homepage 1339 pixels hoog en de zijbalk 2055.
 - **Waarom:** de homepage is het overzicht met de aankondiging bovenaan en het forum prominent, en het nieuws krijgt één plek met zijn eigen balk.
   Een item Nieuws dat naar de homepage wees, gaf op de homepage een balk met subpagina's die de projecteigenaar niet verwachtte.
   Zo bestaat er niets dubbel: Nieuws is het archief, dus een item Archief erbij is overbodig.
-  Vijf items per kaart zijn genoeg om te zien wat er is, en dezelfde maat op elke kaart houdt de pagina's gelijk.
+  Vijf items per kaart in de zijbalk zijn genoeg om te zien wat er is, en dezelfde maat op elke kaart houdt de pagina's gelijk.
   Een gelijke lengte van de kolommen is minder belangrijk dan genoeg items en gelijke aantallen.
-- **Nadeel:** de hoofdkolom van de homepage is veel korter dan de zijbalk (805 tegen 2055 pixels bij 1100 pixels), omdat het nieuws maar vijf koppen heeft.
-  Daaronder staat dus leeg vlak naast de zijbalk.
+- **Nadeel:** de hoofdkolom van de homepage is korter dan de zijbalk (1339 tegen 2055 pixels bij 1100 pixels), dus onder het nieuws staat leeg vlak naast de zijbalk.
   De hoogte hangt van de gegevens af: lange titels maken een kaart hoger.
-  Het nieuws toont vijf koppen in plaats van tien, en het forum en de podcasts tonen er vijf.
   Op een telefoon staat de zijbalk van `/nieuws` na de 50 koppen en de paginering, dus het filter staat ver onderaan (zie #206).
 - **Gevolg:** de pagina's en tests van `/` en `/nieuws`, het menu, de e2e-tests en de rooktest zijn bijgewerkt, en de kaarten voor discussies en podcasts zijn onderdelen in `apps/site/src/NewsCards.tsx` die beide pagina's gebruiken.
   Wat verderop in de tijd komt, zoals vijf wedstrijden op de kaart Wedstrijden (#516), verandert de hoogte van de zijbalk.
@@ -6430,7 +6428,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** per kaart een eigen aantal, zoals nu; ook `/podcasts` op vijf zetten (meer pagina's voor dezelfde afleveringen).
 - **Later:** het nieuws begint sinds 25 oktober 2026 met tien koppen en laadt er vijf bij; de kaarten met discussies en podcasts blijven op vijf.
   Zie _De nieuwskaart begint met tien koppen_.
-- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): elke kaart met een lijst op de homepage en op `/nieuws` toont standaard vijf items, uit `itemsPerCard`; de toegestane maten zijn 5, 10, 20 en 50 (`listSizes`).
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): de kaarten met discussies en podcasts op de homepage en de kaart met podcasts op `/nieuws` tonen vijf items, uit `itemsPerCard`; de toegestane maten zijn 5, 10, 20 en 50 (`listSizes`).
 
 ### "Laad 5 meer" werkt zonder JavaScript
 
@@ -6484,7 +6482,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Met tien koppen ziet een bezoeker meer zonder te klikken, terwijl de kaarten naast het nieuws kort blijven.
 - **Alternatieven:** alle kaarten op vijf, zoals _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_ besloot; alle kaarten op tien, wat de kaarten met discussies en podcasts langer maakt dan nodig.
 - **Later:** de nieuwskaart heeft tien koppen en geen knop meer, en `moreHeadlines` en `?nieuws=` zijn weg; zie _De homepage heeft geen knop "Laad 5 meer" meer, maar de link "Alle koppen"_.
-- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): het nieuws op de homepage toont vijf koppen, zoals elke kaart met een lijst.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): het nieuws op de homepage blijft tien koppen, en de lijst op `/nieuws` 50 per pagina; de toegestane maten zijn 5, 10, 20 en 50 (`listSizes`).
 
 ### Storybook en het Forum krijgen dezelfde iconen als de fansite, op een eigen vlak
 
