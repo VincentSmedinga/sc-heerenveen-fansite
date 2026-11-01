@@ -224,7 +224,7 @@ export function leagueResultsOf(matches: PublicMatch[]): FormResult[] {
  * for the choice `league`, and those of the cup as well for `all`. The score is the one after
  * extra time, and a shoot-out is not in it, so a cup tie that a shoot-out decided is a draw.
  */
-function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoice): LeagueMatch[] {
+export function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoice): LeagueMatch[] {
   return matches.filter(
     (match): match is LeagueMatch =>
       countsFor(match, choice) && match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null,

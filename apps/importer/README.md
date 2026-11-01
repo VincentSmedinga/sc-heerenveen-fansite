@@ -244,7 +244,7 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   `feedsmith` leest elementen die het niet kent niet, dus een tweede lezing met `fast-xml-parser` zoekt dit ene element.
   Bij Voetbal International is het de categorie met `domain="https://www.vi.nl/pro"` (tekst `PRO`), die `feedsmith` wel leest.
   De categorie zelf bewaren we niet; de adapter gebruikt haar alleen voor `items.paywalled`.
-  Bij het Algemeen Dagblad is het het element `<dpp:paid>true</dpp:paid>`, met `false` of zonder het element is het bericht open.
+  Bij het Algemeen Dagblad en De Gelderlander (beide van DPG Media) is het het element `<dpp:paid>true</dpp:paid>`, met `false` of zonder het element is het bericht open.
   De adapter herkent de naamruimte aan haar adres, `https://www.dpgmedia.cloud/paidrss`, en niet aan het voorvoegsel `dpp`: hij leest eerst welke voorvoegsels de feed voor dat adres kiest.
   Ook dit element leest de tweede lezing, want `feedsmith` kent het niet.
   Een feed zonder het teken van zijn bron heeft geen betaalmuur.
@@ -342,7 +342,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een moderator verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van ESPN (zie _De voetbalfeed van ESPN NL_) en de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_).
+Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_) en de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_).
 
 ### De uitkomst bekijken
 
@@ -456,7 +456,7 @@ Elk bericht in de feed heeft een beschrijving, een auteur, een `media:content` e
 De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
 De test in `src/import-feeds.test.ts` ("importing the football feed of the Algemeen Dagblad, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/ad-sample.xml`](src/fixtures/ad-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft ook een bericht zonder `dpp:paid` en een bericht dat de club alleen in de beschrijving noemt: het filter kijkt alleen naar de kop, dus dat is `irrelevant`.
-De test van de adapter zelf ("the paywall of the Algemeen Dagblad", in `src/read-feed.test.ts`) laat zien dat een ander voorvoegsel voor hetzelfde adres ook werkt.
+De test van de adapter zelf ("the paywall of the Algemeen Dagblad and De Gelderlander", in `src/read-feed.test.ts`) laat zien dat een ander voorvoegsel voor hetzelfde adres ook werkt.
 
 ## De voetbalfeed van ESPN NL
 
@@ -474,6 +474,24 @@ De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden 
 De test in `src/import-feeds.test.ts` ("importing the football feed of ESPN NL, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/espn-sample.xml`](src/fixtures/espn-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft berichten van vlak vóór en vlak na het einde van de zomertijd op 25 oktober 2026, een bericht met een tijd die geen tijd is, en een samenvatting die de club alleen in de beschrijving noemt.
 De tests van de regel zelf staan in `src/read-feed.test.ts`.
+
+## De sportfeed van De Gelderlander
+
+De Gelderlander is een bron met de feed `https://www.gelderlander.nl/sport/rss.xml`, het sportnieuws van de regionale krant.
+Een feed van de hele krant bestaat niet.
+De club is er een klein deel van, dus de feed staat in de seed op `club`.
+De krant staat dicht bij N.E.C. en Go Ahead Eagles: rond een wedstrijd tegen een van hen telt een kop over de tegenstander mee (zie _Het relevantiefilter_), en daarbuiten alleen een kop over sc Heerenveen.
+De feed is RSS 2.0, met tijden in GMT en een `guid` die de link is.
+De krant is van DPG Media, net als het Algemeen Dagblad, en de feed markeert een bericht achter de betaalmuur op dezelfde manier, met `<dpp:paid>` (zie _Wat de adapter bewaart_).
+De adapter heeft daar geen nieuwe regel voor: het domein `www.gelderlander.nl` staat bij het adres van de naamruimte in `paywallNamespaces`.
+Een run van 1 november 2026 bewaarde alle 30 berichten, en het filter vond er 2 `relevant`, 0 `doubtful` en 28 `irrelevant`.
+De adapter herkende 9 berichten als betaalmuur (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
+De koppen over Thialf en over de ijshockeyclub Nijmegen Devils zijn `irrelevant`: ze noemen geen club uit de lijsten, en Nijmegen Devils is niet N.E.C.
+Elk bericht in de feed heeft een beschrijving, een auteur, een `media:content` en een `media:thumbnail`, en de feed heeft een logo.
+De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
+De test in `src/import-feeds.test.ts` ("importing the sport feed of De Gelderlander, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/gelderlander-sample.xml`](src/fixtures/gelderlander-sample.xml), via de bron zoals de seed hem in het register zet.
+De fixture heeft koppen over N.E.C. en Go Ahead Eagles, over Thialf en Nijmegen Devils en over een andere club, een kop over de club, en een bericht zonder `dpp:paid`.
+De test geeft de feed een wedstrijd tegen N.E.C. en dan een tegen Go Ahead Eagles, en laat zien dat alleen de kop over die tegenstander rond de wedstrijd `relevant` wordt.
 
 ## De sportfeed van Rijnmond
 

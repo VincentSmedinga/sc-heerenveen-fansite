@@ -3163,6 +3163,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een test die de regels afdwingt (een machine kan niet bepalen wat opmerkelijk is).
   Een tweede soort vlak, of nieuwe kleuren (niet nodig voor de regels; de projecteigenaar probeert later vier kleuren in donker).
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): Onze uitslagen op de pagina van een club blijft niet warm maar wordt zacht, en Wedstrijden daar wordt wit (regel 1 en regel 4).
+- **Later:** zie _Statistieken heeft een kaart Opmerkelijk: één feit per dag, in vaste volgorde_ (1 november 2026): met de kaart Opmerkelijk zijn drie van de tien kaarten op Statistieken warm (regel 3).
 
 ## Site
 
@@ -7803,6 +7804,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** wachten op schriftelijke toestemming van Disney (voorzichtiger, maar Disney antwoordt zelden); `EST` voor alle feeds als Nederlandse tijd lezen (verkeerd voor een feed waar het echt EST is); de tijd van deze bron negeren en alleen het moment van eerste zien gebruiken (de berichten staan dan niet op hun echte tijd).
 - **Daarna:** schriftelijk toestemming vragen aan Disney hoort bij #35; de projecteigenaar nam het voorbehoud van Disney aan bij het goedkeuren van het issue.
 
+### We nemen De Gelderlander na het relevantiefilter
+
+- **Datum:** 1 november 2026
+- **Besluit:** het register krijgt de sportfeed van De Gelderlander (`https://www.gelderlander.nl/sport/rss.xml`) met het filter `club`.
+  De bron toont alleen de kop, de link, de bronnaam en de tijd, met "voor abonnees" bij een bericht achter de betaalmuur.
+  De beschrijving, de auteur, de afbeeldingen en het logo in de feed bewaart de importer niet en toont de site niet.
+  De importer leest `<dpp:paid>true</dpp:paid>` met dezelfde regel als bij het Algemeen Dagblad: het domein `www.gelderlander.nl` staat erbij in `paywallNamespaces`.
+  Er komt geen nieuw codepad en geen term in de lijsten van het filter.
+- **Waarom:** de projecteigenaar wil De Gelderlander vooral voor de koppen over N.E.C. en Go Ahead Eagles rond een wedstrijd tegen hen.
+  De krant staat daar dichtbij, en het filter laat een kop over de tegenstander toe van 3 dagen voor tot 3 dagen na de wedstrijd (zie _Een kop over de tegenstander is `relevant` van 3 dagen voor tot 3 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt_).
+  De feed is het sportnieuws van de regio, met schaatsen, ijshockey en de wereldtop van het voetbal, dus zonder het filter zouden de meeste koppen niets met de club te maken hebben.
+  Buiten de dagen rond zo'n wedstrijd toont de site alleen wat over sc Heerenveen zelf gaat.
+- **Gemeten op de echte feed** (1 november 2026, één run van de importer): 30 berichten bewaard, waarvan 2 `relevant`, 0 `doubtful` en 28 `irrelevant`, en 9 herkend als betaalmuur.
+  De twee `relevant` berichten zijn de verslagen van N.E.C. – sc Heerenveen.
+  Een kop over Thialf of over Nijmegen Devils, ook een die beide noemt, bleef `irrelevant`; een test houdt dat vast.
+  De wedstrijden in de lokale database waren die van de seed, dus de regel van de tegenstander had in deze run niets te doen; de tests met een verzonnen feed laten hem zien.
+- **Voorwaarden:** niet gelezen.
+  De pagina's van DPG Media en van de krant stuurden ons naar een toestemmingspagina, die we niet hebben doorgeklikt.
+  Het `robots.txt` heeft hetzelfde voorbehoud als dat van het Algemeen Dagblad tegen scrapen en andere geautomatiseerde manieren om gegevens te verzamelen, en laat de feed toe.
+  Het blijft een risico dat geen jurist heeft getoetst.
+  We nemen één feed, alleen een kop en een link, en we stoppen op verzoek.
+- **Alternatieven:** wachten op schriftelijke toestemming van DPG Media (voorzichtiger, maar DPG antwoordt zelden); de bron zonder het filter nemen (de feed is breed, en de meeste koppen gaan over ander sport); een term voor Thialf en Nijmegen Devils in de lijsten (niet nodig, want de echte koppen daarover bleven `irrelevant`).
+- **Daarna:** schriftelijk toestemming vragen aan DPG Media hoort bij #35; de projecteigenaar nam het voorbehoud van de bron aan bij het goedkeuren van het issue.
+
 ### We nemen Rijnmond na het relevantiefilter, voor de Rotterdamse tegenstanders
 
 - **Datum:** 1 november 2026
@@ -8626,3 +8651,59 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een wedstrijd zonder uitslag zegt dat zelf al, maar de Stand staat op een andere plek, en een tabel die achterloopt moet dat zeggen.
   De afbeelding is een momentopname met de dag van het maken, en de regel is een tijdelijke staat.
 - **Alternatieven:** een datum op elke kaart (#517, gesloten: te veel nadruk op wat achterloopt); dezelfde zin als bij een wedstrijd (bij een wedstrijd ontbreekt de uitslag, bij de Stand loopt de tabel achter); de regel ook bij een Eindstand (die verandert niet meer en de wedstrijden zeggen het zelf); een tweede grens voor de Stand (zou uit elkaar kunnen lopen).
+
+### Statistieken heeft een kaart Opmerkelijk: één feit per dag, in vaste volgorde
+
+- **Datum:** 1 november 2026
+- **Besluit:** de pagina Statistieken en de pagina van een eerder seizoen krijgen onderaan de hoofdkolom een kaart Opmerkelijk (#553), met één opmerkelijk feit uit onze eigen wedstrijden.
+  - **De namen:** de kaart heet "Opmerkelijk", de link naar het volgende feit "Nog iets opmerkelijks", en het adres heeft `?opmerkelijk=n` en het anker `#opmerkelijk` (de projecteigenaar koos dit op 1 november 2026).
+    In de code heet het "noteworthy": `noteworthy.ts`, `NoteworthyCard` en `NoteworthyFact`.
+    De woorden voor de bezoeker staan op één plek, in de constante `noteworthy`.
+  - **Eén feit:** een opmerkelijk feit gaat over één wedstrijd, speler of trainer en is nooit een totaal of een gemiddelde, want dat doen de andere kaarten.
+    Het is één zin in de stem van een supporter, met de wedstrijd, de uitslag en de dag erin ("Thuis tegen FC Twente (3–2, 14 maart 2026) vielen in de 23e en de 24e minuut twee doelpunten achter elkaar.").
+    De uitslag staat met de thuisclub eerst, zoals `Match`.
+    Alle feiten gaan over het getoonde seizoen, dus de dag met het jaar is het enige wat de zin over het seizoen zegt.
+  - **Zeven soorten:**
+    - twee doelpunten in opeenvolgende minuten, van ons of tegen ons; de blessuretijd telt niet mee, want daar zijn de minuten geen klok;
+    - twee of meer doelpunten in de blessuretijd van één helft;
+    - een hattrick van één speler, ook van de tegenstander; een eigen doelpunt telt voor niemand;
+    - een wedstrijd met zeven of meer doelpunten;
+    - een zege na een achterstand van twee doelpunten of meer, uit de volgorde van de doelpunten, en alleen als alle doelpunten bekend zijn;
+    - vijf of meer thuis- of uitzeges op rij;
+    - de eerste wedstrijd onder een trainer die tijdens het seizoen kwam.
+
+    Elke soort is een kleine functie in `noteworthy.ts` met een test, en een nieuwe soort is één functie erbij.
+
+  - **Een reeks is een reeks zeges:** "vijf thuis- of uitwedstrijden op rij" las de Builder als vijf zeges op rij op dezelfde plek, want vijf thuiswedstrijden achter elkaar bestaan in de Eredivisie niet.
+    De wedstrijden op de andere plek ertussen breken de reeks niet, een gelijkspel of verlies wel.
+    Een reeks is één feit, vanaf de laatste zege.
+  - **De trainer:** het gaat om een trainer die niet de eerste van het seizoen is, met een begindag die op de dag bekend is, en met een wedstrijd van het seizoen ervoor.
+    De eerste wedstrijd is de eerste van het seizoen vanaf die dag, in elke competitie.
+    Laat de keuze van de bezoeker die wedstrijd weg, of heeft hij nog geen uitslag, dan is er geen feit.
+  - **Niet erin:**
+    - de eerste ontmoeting met een tegenstander na een of meer seizoenen: de kaart heeft alleen de wedstrijden van het getoonde seizoen, en een nieuwe query is niet gewenst;
+    - de debuut van een speler, want we hebben geen opstellingen;
+    - de wedstrijd in twee stadions, die volgt met `matches.note` (#548);
+    - alles met toeschouwers of scheidsrechter (#416 en #417).
+  - **Geen link naar de tegenstander:** een wedstrijd heeft de naam van de tegenstander en niet de slug van de club, dus een link vraagt een nieuwe query of een gok.
+  - **De volgorde per dag:** de feiten van het seizoen en de keuze van de bezoeker staan in een door elkaar gehusselde volgorde die een dag in Nederlandse tijd vastligt.
+    Elk feit heeft een vaste id en zijn plek komt uit een hash van de dag en die id (FNV-1a), dus een feit dat erbij komt of weggaat verschuift de andere niet.
+    De pagina is de hele dag gelijk en de cache werkt.
+  - **Nog iets opmerkelijks:** `?opmerkelijk=n` toont het n-de feit, en na het laatste komt het eerste.
+    Een ongeldig getal geeft het eerste.
+    De link "Nog iets opmerkelijks" is een gewone link naar `?opmerkelijk=<volgende>#opmerkelijk`, met `competitie=eredivisie` erbij als die gekozen is.
+    Er is geen script en er wordt niets over de bezoeker bewaard.
+    Bij één feit is er geen link, want hij leidt naar dezelfde kaart.
+    Zonder feit is er geen kaart.
+  - **De kaart:** het warme vlak (regel 3 van _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_), met een kop van niveau 2 zonder anker, de zin als gewone tekst en de link.
+    Hij staat niet in de balk "Op deze pagina:", want dat zijn de negen kaarten met cijfers.
+    Er is geen deelknop: de kaart verandert per dag en heeft geen afbeelding om te delen.
+  - **De verzonnen gegevens:** in `madeUpGoals` valt het tweede doelpunt van Testvoort in speelronde 2 in minuut 67 in plaats van 74, zodat de gegevens van de toegankelijkheidscontrole en van de screenshots één opmerkelijk feit hebben.
+    De minuut blijft in hetzelfde kwartier.
+- **Waarom:** een supporter leest graag iets leuks dat hij niet zocht, en de cijfers staan er al.
+  Een feit per dag houdt de kaart klein en de pagina rustig, en geeft een reden om terug te komen.
+  Een vaste volgorde per dag houdt de pagina gelijk binnen een dag en laat de cache werken.
+  Een gewone link werkt zonder script en onthoudt niets.
+- **Nadeel:** dezelfde dag geeft dezelfde volgorde voor iedereen.
+  Het derde feit van de dag is niet te vinden zonder drie keer te klikken.
+- **Alternatieven:** een willekeurig feit bij elk bezoek (de pagina verandert bij verversen, en de cache werkt niet); een husselvolgorde met een zaadgetal (elk feit dat erbij komt verschuift alle andere); het volgende feit met een script en een cookie (we bewaren niets over een bezoeker); alle feiten onder elkaar (te lang, en de kaart is er voor één feit); een deelknop (de kaart heeft geen vaste inhoud om te delen); een link naar de pagina van de tegenstander (nieuwe query, zie hierboven); vijf thuiswedstrijden achter elkaar zonder meer (komt in de Eredivisie niet voor); de naam Weetjes (de eerste naam, die de projecteigenaar liet vervangen door Opmerkelijk).

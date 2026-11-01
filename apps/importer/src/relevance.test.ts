@@ -249,6 +249,9 @@ const irrelevant: Case[] = [
   ['Weer: zonnig en droog in Friesland', 'irrelevant'],
   ['Wedstrijd in Drachten afgelast', 'irrelevant'],
   ['Trainer van FC Emmen ontslagen', 'irrelevant'],
+  // Other sport from the same region: the ice rink Thialf, and the ice hockey club of Nijmegen.
+  ['Schaatsers strijden in Thialf om de laatste WK-tickets', 'irrelevant'],
+  ['Nijmegen Devils laat in de ijshal een punt liggen', 'irrelevant'],
   ['', 'irrelevant'],
   ['   ', 'irrelevant'],
 ]
@@ -469,6 +472,13 @@ describe('the opponent of a match', () => {
 
   it('does not make a headline about another club relevant', () => {
     expect(judgeRelevance('Feyenoord wint na rommelige wedstrijd', ['ADO Den Haag'])).toBe('irrelevant')
+  })
+
+  it('does not take the ice hockey club of Nijmegen, or the ice rink Thialf, for the opponent', () => {
+    for (const opponent of ['N.E.C.', 'Go Ahead Eagles']) {
+      expect(judgeRelevance('Nijmegen Devils laat in de ijshal een punt liggen', [opponent])).toBe('irrelevant')
+      expect(judgeRelevance('Schaatsers strijden in Thialf om de laatste WK-tickets', [opponent])).toBe('irrelevant')
+    }
   })
 
   describe('a headline that names another professional club as well', () => {

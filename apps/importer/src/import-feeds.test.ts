@@ -923,6 +923,165 @@ describe('importing the football feed of the Algemeen Dagblad, the way the regis
   })
 })
 
+describe('importing the sport feed of De Gelderlander, the way the register has it', () => {
+  const sample = readFileSync(new URL('./fixtures/gelderlander-sample.xml', import.meta.url), 'utf8')
+  const gelderlanderRun = new Date('2026-11-01T12:00:00Z')
+  const nec = [{ matchDate: '2026-11-04', opponent: 'N.E.C.', status: 'scheduled' as const }]
+  const goAheadEagles = [{ matchDate: '2026-11-04', opponent: 'Go Ahead Eagles', status: 'scheduled' as const }]
+
+  /** The sport feed of De Gelderlander as the seed registers it, pointed at the test server. */
+  async function gelderlanderFeed(origin: string) {
+    await seedSources(database.db)
+
+    const [row] = await database.db
+      .select({ id: feeds.id })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, 'www.gelderlander.nl'))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  const relevanceByTitle = async () =>
+    Object.fromEntries((await itemsInDatabase()).map((row) => [row.title, row.relevance]))
+
+  it('reads the feed on the club filter and keeps to the club outside the days around a match', async () => {
+    const server = await serve(sample)
+    const feed = await gelderlanderFeed(server.origin)
+
+    expect(feed.filter).toBe('club')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, gelderlanderRun)
+
+    expect(report).toMatchObject({ added: 8, relevance: { doubtful: 1, irrelevant: 6, relevant: 1 }, skipped: [] })
+    expect(await relevanceByTitle()).toEqual({
+      'Feyenoord wint in de slotfase van Fortuna': 'irrelevant',
+      'Go Ahead Eagles houdt vast aan de ervaren keeper': 'irrelevant',
+      'Heerenveen wint met 1-0 van Utrecht dankzij een late treffer': 'relevant',
+      'N.E.C. kijkt terug op een vervelende maand': 'irrelevant',
+      'N.E.C. wil na een lange reeks eindelijk weer winnen': 'irrelevant',
+      'Nijmegen Devils laat in de ijshal een punt liggen': 'irrelevant',
+      'Schaatsers strijden in Thialf om de laatste WK-tickets': 'irrelevant',
+      'Veldman denkt na over zijn toekomst bij de club': 'doubtful',
+    })
+  })
+
+  it('makes the headlines about N.E.C. relevant in the days around a match against N.E.C., and only then', async () => {
+    const server = await serve(sample)
+    const report = await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await gelderlanderFeed(server.origin),
+      gelderlanderRun,
+      nec,
+    )
+
+    expect(report).toMatchObject({ relevance: { doubtful: 1, irrelevant: 5, relevant: 2 } })
+    expect(await relevanceByTitle()).toMatchObject({
+      'Go Ahead Eagles houdt vast aan de ervaren keeper': 'irrelevant',
+      // 15 October is far from the match.
+      'N.E.C. kijkt terug op een vervelende maand': 'irrelevant',
+      // 4 November is three days from 1 November: the headline of that day is in.
+      'N.E.C. wil na een lange reeks eindelijk weer winnen': 'relevant',
+    })
+  })
+
+  it('makes the headlines about Go Ahead Eagles relevant in the days around a match against them, and not those about N.E.C.', async () => {
+    const server = await serve(sample)
+
+    await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await gelderlanderFeed(server.origin),
+      gelderlanderRun,
+      goAheadEagles,
+    )
+
+    expect(await relevanceByTitle()).toMatchObject({
+      'Go Ahead Eagles houdt vast aan de ervaren keeper': 'relevant',
+      'N.E.C. wil na een lange reeks eindelijk weer winnen': 'irrelevant',
+    })
+  })
+
+  it('never makes a headline about Thialf, Nijmegen Devils or another club relevant, match or no match', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await gelderlanderFeed(server.origin), gelderlanderRun, nec)
+
+    const verdicts = await relevanceByTitle()
+
+    expect(verdicts['Nijmegen Devils laat in de ijshal een punt liggen']).toBe('irrelevant')
+    expect(verdicts['Schaatsers strijden in Thialf om de laatste WK-tickets']).toBe('irrelevant')
+    expect(verdicts['Feyenoord wint in de slotfase van Fortuna']).toBe('irrelevant')
+  })
+
+  it('knows the items behind the paywall by `dpp:paid`, and the items with false or without it as open', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await gelderlanderFeed(server.origin), gelderlanderRun)
+
+    const rows = await database.db.select().from(items)
+
+    expect(Object.fromEntries(rows.map((row) => [row.url.split('~')[1]?.replace('/', ''), row.paywalled]))).toEqual({
+      ag2000001: false,
+      ag2000002: true,
+      ag2000003: false,
+      ag2000004: true,
+      ag2000005: true,
+      ag2000006: false,
+      ag2000007: true,
+      ag2000008: false,
+    })
+  })
+
+  it('keeps the time of publication in UTC, and the link', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await gelderlanderFeed(server.origin), gelderlanderRun)
+
+    const rows = await database.db.select().from(items)
+    const byLink = Object.fromEntries(rows.map((row) => [row.url, row.publishedAt]))
+
+    expect(byLink['https://gld.test/sport/heerenveen-wint-van-utrecht~ag2000001/']).toEqual(
+      new Date('2026-10-31T18:50:00Z'),
+    )
+    expect(byLink['https://gld.test/sport/schaatsers-in-thialf~ag2000006/']).toEqual(new Date('2026-11-01T09:51:00Z'))
+  })
+
+  it('keeps nothing of the description, the author, the images or the logo of the channel', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await gelderlanderFeed(server.origin), gelderlanderRun)
+
+    const stored = JSON.stringify(await database.db.select().from(items))
+
+    expect(stored).not.toContain('verzonnen intro')
+    expect(stored).not.toContain('Sportredactie')
+    expect(stored).not.toContain('images.gld.test')
+    expect(stored).not.toContain('statics.gld.test')
+    expect(stored).not.toContain('bijschrift')
+  })
+
+  it('shows only the relevant items to a visitor, with "voor abonnees" where the paywall is', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await gelderlanderFeed(server.origin), gelderlanderRun, nec)
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-02T00:00:00Z') })
+
+    expect(shown.map((item) => [item.title, item.paywalled])).toEqual([
+      ['N.E.C. wil na een lange reeks eindelijk weer winnen', true],
+      ['Heerenveen wint met 1-0 van Utrecht dankzij een late treffer', false],
+    ])
+    expect(shown.every((item) => item.sourceName === 'De Gelderlander')).toBe(true)
+  })
+})
+
 describe('importing the football feed of ESPN NL, the way the register has it', () => {
   const sample = readFileSync(new URL('./fixtures/espn-sample.xml', import.meta.url), 'utf8')
   const espnRun = new Date('2026-10-26T12:00:00Z')
