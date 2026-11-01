@@ -3229,6 +3229,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): Onze uitslagen op de pagina van een club blijft niet warm maar wordt zacht, en Wedstrijden daar wordt wit (regel 1 en regel 4).
 - **Later:** zie _Statistieken heeft een kaart Opmerkelijk: één feit per dag, in vaste volgorde_ (1 november 2026): met de kaart Opmerkelijk zijn drie van de tien kaarten op Statistieken warm (regel 3).
 
+### De knop om een kaart als afbeelding op te slaan toont een camera, en is in rust rustiger
+
+- **Datum:** 1 november 2026
+- **Besluit:** de knop toont het pictogram `camera` in plaats van `image`, en `image` verdwijnt uit de lijst.
+  In rust staat het pictogram in `--hf-colour-marker-graphic` (staal 500 in licht, staal 400 in donker) en niet in de linkkleur.
+  Bij hover, focus, indrukken en tijdens het maken van de afbeelding blijft de knop zoals hij was: de vulling, de rand en de kleur van de zachte knop.
+- **Waarom:** een camera zegt dat de knop een foto van de kaart maakt, en een plaatje zegt dat er een afbeelding staat.
+  De kaart is het belangrijkste, dus de knop hoeft in rust niet te concurreren met de koppen en de links.
+  Het blijft een bedienelement, dus het pictogram haalt 3:1 tegen elk van de vier vlakken van een kaart.
+  Gemeten haalt staal 500 in licht 4,19:1 op wit, 3,85:1 op zacht, 3,46:1 op sterk en 3,45:1 op warm, en staal 400 in donker 6,21:1 op wit en zacht en 4,89:1 op sterk en warm.
+  De linkkleur haalde 7,68:1 of meer in licht en 6,23:1 of meer in donker.
+  Halverwege de overgang naar hover is het contrast niet lager dan aan het begin.
+- **Alternatieven:** het pictogram doorzichtig maken; het contrast verschilt dan per vlak en haalt 3:1 niet overal.
+  De knop pas bij hover tonen; op een aanraakscherm is er geen hover, dus de knop zou er niet zijn.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

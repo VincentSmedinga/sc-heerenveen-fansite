@@ -1,14 +1,16 @@
 /*
  * The button of a card that makes an image of it, and the stage where that image is drawn.
  *
- * The button is round, 44 by 44 pixels, at the top right of the card. At rest it is quiet: only the icon, in the colour
- * of links, without a rim or a fill. Under the mouse, pressed, with the keyboard (:focus-visible) and while the image is
- * made, it comes forward: a fill and a rim of the soft button, and the icon in the colour of its text. Those roles
- * (--hf-colour-text-link, --hf-colour-background-button-soft and --hf-colour-border-button-soft) reach their contrast on
- * the four surfaces in both themes, so the button needs no colour of its own. The rim is there at rest as well, but
- * see-through, so the button does not change size when it comes forward and a browser in forced colours keeps an
- * outline. Hover is only for devices with a mouse (hover: hover), so nothing stays lit after a tap on a phone; pressing
- * (:active) counts on touch as well. The change takes the short motion duration, and none with reduced motion.
+ * The button is round, 44 by 44 pixels, at the top right of the card. At rest it is quiet: only the camera, in the
+ * colour of graphic markers, without a rim or a fill. That is quieter than the colour of links, and still reaches 3:1
+ * on the four surfaces in both themes, which a see-through colour would not do on every surface. Under the mouse,
+ * pressed, with the keyboard (:focus-visible) and while the image is made, it comes forward: a fill and a rim of the
+ * soft button, and the icon in the colour of its text. Those roles (--hf-colour-marker-graphic,
+ * --hf-colour-background-button-soft and --hf-colour-border-button-soft) reach their contrast on the four surfaces in
+ * both themes, so the button needs no colour of its own. The rim is there at rest as well, but see-through, so the
+ * button does not change size when it comes forward and a browser in forced colours keeps an outline. Hover is only
+ * for devices with a mouse (hover: hover), so nothing stays lit after a tap on a phone; pressing (:active) counts on
+ * touch as well. The change takes the short motion duration, and none with reduced motion.
  */
 
 @layer hf.components {
@@ -28,7 +30,7 @@
     border: 1px solid transparent;
     border-radius: 50%;
     box-sizing: border-box;
-    color: var(--hf-colour-text-link);
+    color: var(--hf-colour-marker-graphic);
     cursor: pointer;
     display: inline-flex;
     inline-size: 2.75rem;

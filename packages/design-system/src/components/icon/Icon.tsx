@@ -6,9 +6,9 @@ export const iconNames = [
   'arrow-left',
   'arrow-right',
   'arrow-up',
+  'camera',
   'envelope',
   'external-link',
-  'image',
   'link',
   'moon',
   'plus',
@@ -71,6 +71,13 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M3.5 7 8 2.5 12.5 7" />
     </>
   ),
+  // A camera from the front: the body with the bump of the viewfinder on top, and the lens.
+  camera: (
+    <>
+      <path d="M3.5 4.5h2l1-2h3l1 2h2A1.5 1.5 0 0 1 14 6v6a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12V6a1.5 1.5 0 0 1 1.5-1.5Z" />
+      <circle cx="8" cy="9" r="2.25" />
+    </>
+  ),
   envelope: (
     <>
       <path d="M3.5 3.5h9a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11V5a1.5 1.5 0 0 1 1.5-1.5Z" />
@@ -82,14 +89,6 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M9.5 2.5h4v4" />
       <path d="M13.5 2.5 7.5 8.5" />
       <path d="M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3" />
-    </>
-  ),
-  // A picture: a frame with a sun in the top left corner and two hills in the bottom.
-  image: (
-    <>
-      <path d="M3.5 2.5h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z" />
-      <circle cx="6" cy="6" r="1" />
-      <path d="m2.5 11 3-3 2.5 2.5 1.5-1.5 4 4" />
     </>
   ),
   // Two links of a chain on the diagonal, from the bottom left to the top right, joined by a
