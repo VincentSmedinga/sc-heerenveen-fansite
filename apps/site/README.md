@@ -186,6 +186,9 @@ De balk komt uit `Navigation` van het designsysteem (`subitems`), dus het menu e
   Op `/nieuws` en op een artikel van de redactie is alleen Nieuws het huidige onderdeel, met `aria-current="page"`, en is er geen huidige subpagina.
 - Een ander pad, zoals `/`, `/bronnen` of een adres dat niet bestaat, heeft geen huidig onderdeel en geen balk.
 
+Op `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/statistieken/spelers/<seizoen>` nemen de items Wedstrijden en Statistieken het seizoen van de pagina mee (`seasonOfPath` en `hrefOf`), zodat een bezoeker in een afgelopen seizoen daarin blijft.
+Een pad zonder seizoen, of met een waarde die geen seizoen is (`seasonFromSlug`), laat de adressen zoals ze zijn.
+
 De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen.md`).
 De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf Wedstrijden kunt zoeken.
 
@@ -507,7 +510,8 @@ De hulpfuncties in `src/matches.ts` krijgen de keuze als laatste argument (`Comp
 De keuze blijft bij elke link tussen de twee pagina's: de link "Alle doelpuntenmakers", de schakelaar zelf, de knop "Laad 5 meer" van De nul gehouden (die een formulier met een verborgen veld is) en de seizoenskiezer, die de keuze als verborgen veld (`fields`) naar de route `kies` stuurt.
 `pickedSeasonResponse` stuurt de keuze mee naar het adres van het seizoen (`keepCompetition`) en laat een waarde weg die de pagina niet kent, zodat de kiezer niemand naar "niet gevonden" stuurt.
 De balk "Op deze pagina:" heeft alleen verwijzingen naar een plek op dezelfde pagina, dus hij houdt het seizoen en de keuze vanzelf vast.
-De balk onder het hoofdmenu houdt het seizoen en de keuze wel vast (zie _Het hoofdmenu en de balk van Nieuws_), de items van het menu zelf niet: die hebben vaste adressen.
+De balk onder het hoofdmenu houdt het seizoen en de keuze vast (zie _Het hoofdmenu en de balk van Nieuws_).
+De items Wedstrijden en Statistieken van het menu zelf nemen het seizoen van de pagina mee, maar niet de keuze: die kan het menu niet lezen zonder `useSearchParams`.
 
 De telling zelf gebeurt na het lezen: `getMatchData` bewaart de wedstrijden van een seizoen vijf minuten (of een uur voor een afgelopen seizoen), en de keuze filtert die lijst.
 Er is dus geen sleutel per keuze in de cache nodig, en de ene keuze kan de andere niet overschrijven.

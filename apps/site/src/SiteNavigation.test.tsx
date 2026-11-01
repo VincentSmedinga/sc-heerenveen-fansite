@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
-import { currentOf, SiteNavigation } from './SiteNavigation'
+import { currentOf, hrefOf, seasonOfPath, SiteNavigation } from './SiteNavigation'
 
 vi.mock('next/navigation', () => ({ usePathname: vi.fn() }))
 
@@ -175,7 +175,7 @@ describe('SiteNavigation', () => {
           ['/statistieken/tegenstanders?competitie=eredivisie', 'Tegenstanders'],
         ])
         expect(html.match(/hf-navigation-bar/g)).toHaveLength(1)
-        expect(html).toMatch(/<a [^>]*href="\/statistieken"[^>]*>Statistieken<\/a><div class="hf-navigation-bar">/)
+        expect(html).toMatch(/<a [^>]*href="\/statistieken[^"]*"[^>]*>Statistieken<\/a><div class="hf-navigation-bar">/)
       },
     )
 
@@ -186,14 +186,14 @@ describe('SiteNavigation', () => {
       expect(currentOf('/statistieken/spelers/2025-26').subitem).toBe('/statistieken/spelers')
     })
 
-    it('keeps the addresses of the main menu fixed, with no season and no choice', () => {
+    it('takes the season of the page along in the main menu, and no choice', () => {
       const html = render('/statistieken/2025-26', bar)
       const menu = html.replace(/<div class="hf-navigation-bar">.*?<\/div>/, '')
 
       expect([...menu.matchAll(/href="([^"]*)"/g)].map(([, href]) => href)).toEqual([
         '/nieuws',
-        '/wedstrijden',
-        '/statistieken',
+        '/wedstrijden/2025-26',
+        '/statistieken/2025-26',
         'https://forum.heerenveen.org',
       ])
     })
@@ -219,6 +219,80 @@ describe('SiteNavigation', () => {
 
   it('has no link to Onze bronnen: that is in the footer', () => {
     expect(render('/bronnen')).not.toContain('/bronnen')
+  })
+})
+
+/** The addresses of the links of the menu, without the bar. */
+function menuAddresses(pathname: string) {
+  const html = render(pathname).replace(/<div class="hf-navigation-bar">.*?<\/div>/, '')
+
+  return [...html.matchAll(/href="([^"]*)"/g)].map(([, href]) => href)
+}
+
+describe('the addresses of the main menu', () => {
+  const fixed = ['/nieuws', '/wedstrijden', '/statistieken', 'https://forum.heerenveen.org']
+  const inSeason = ['/nieuws', '/wedstrijden/2023-24', '/statistieken/2023-24', 'https://forum.heerenveen.org']
+
+  it.each(['/wedstrijden/2023-24', '/statistieken/2023-24', '/statistieken/spelers/2023-24'])(
+    'take the season of the page along on %s, in the HTML of the server',
+    (path) => {
+      expect(menuAddresses(path)).toEqual(inSeason)
+    },
+  )
+
+  it.each([
+    '/',
+    '/wedstrijden',
+    '/statistieken',
+    '/statistieken/spelers',
+    '/statistieken/tegenstanders',
+    '/statistieken/tegenstanders/ado-den-haag',
+    '/nieuws',
+    '/nieuws/podcasts',
+    '/redactie/een-artikel',
+    '/bronnen',
+    '/wedstrijden/kies',
+    '/wedstrijden/onzin',
+    '/wedstrijden/2023-25',
+    '/wedstrijden/2023-24/',
+    '/wedstrijden/2023-24/onzin',
+    '/statistieken/kies',
+    '/statistieken/spelers/kies',
+    '/statistieken/spelers/onzin',
+    '/statistieken/spelers/2023-24/onzin',
+    '/statistieken/tegenstanders/2023-24',
+  ])('stay as they are on %s: no season, no valid season, or not a page with a season', (path) => {
+    expect(menuAddresses(path)).toEqual(fixed)
+  })
+
+  it('keeps the current item and the sub-page as the path says, whatever the address', () => {
+    expect(currentLinks(render('/wedstrijden/2023-24'))).toEqual(['Wedstrijden'])
+    expect(currentLinks(render('/statistieken/2023-24'))).toEqual(['Statistieken'])
+    expect(currentLinks(render('/statistieken/spelers/2023-24'))).toEqual(['Spelers'])
+    expect(linksWith(render('/statistieken/spelers/2023-24'), 'true')).toEqual(['Statistieken'])
+  })
+})
+
+describe('seasonOfPath', () => {
+  it.each([
+    ['/wedstrijden/2023-24', '2023/24'],
+    ['/statistieken/2023-24', '2023/24'],
+    ['/statistieken/spelers/2023-24', '2023/24'],
+    ['/wedstrijden', undefined],
+    ['/statistieken/spelers', undefined],
+    ['/wedstrijden/2023-25', undefined],
+    ['/wedstrijden/kies', undefined],
+    ['/nieuws/2023-24', undefined],
+    ['/', undefined],
+  ])('reads %s as the season %s', (path, expected) => {
+    expect(seasonOfPath(path)).toBe(expected)
+  })
+})
+
+describe('hrefOf', () => {
+  it('leaves the other items alone, also on the page of a season', () => {
+    expect(hrefOf('/nieuws', '/wedstrijden/2023-24')).toBe('/nieuws')
+    expect(hrefOf('https://forum.heerenveen.org', '/wedstrijden/2023-24')).toBe('https://forum.heerenveen.org')
   })
 })
 
