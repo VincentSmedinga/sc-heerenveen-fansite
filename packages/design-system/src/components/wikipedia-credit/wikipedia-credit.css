@@ -1,6 +1,6 @@
 /*
  * The credit for data from Wikipedia: small type under a block or a page, in the colour of
- * secondary text.
+ * secondary text. The full form is a closed `details` whose `summary` says "Bron: Wikipedia".
  */
 
 @layer hf.components {
@@ -9,5 +9,42 @@
     color: var(--hf-colour-text-secondary);
     margin-block: var(--hf-space-m) 0;
     overflow-wrap: anywhere;
+
+    /* The paragraph inside the fold is the text of the credit and has no space of its own. */
+    > p {
+      margin-block: 0;
+    }
+
+    /*
+     * The line that opens and closes it. It is at least 44px high to press with a thumb, the
+     * arrow is the only mark besides the words, and the browser's own marker is gone.
+     */
+    > summary {
+      align-items: center;
+      cursor: pointer;
+      display: flex;
+      list-style: none;
+      min-block-size: 2.75rem;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
+      /* Only with a mouse, so nothing stays lit after a tap. */
+      @media (hover: hover) {
+        &:hover {
+          color: var(--hf-colour-text-default);
+        }
+      }
+
+      /* The arrow points down while it is closed, and up when it is open. */
+      .hf-icon {
+        transition: transform var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+      }
+    }
+
+    &[open] > summary .hf-icon {
+      transform: rotate(180deg);
+    }
   }
 }

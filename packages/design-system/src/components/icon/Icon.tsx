@@ -129,8 +129,8 @@ const drawings: Record<IconName, ReactNode> = {
  * button is named by its own text alone, so the icon is hidden from assistive technology and is
  * never the only sign of something. The size, the space beside it and its place in the line are
  * in icon.css. It is not exported from the package: Link, Button, SegmentedControl,
- * NewsItem, Navigation, a Heading with an anchor, the button for an image of a Card and
- * Page.TopLink draw it for the visitor. ThemeButton draws
+ * NewsItem, Navigation, a Heading with an anchor, the button for an image of a Card,
+ * Page.TopLink and WikipediaCredit draw it for the visitor. ThemeButton draws
  * its own sun and moon, because they turn into each other.
  */
 export const Icon = ({ appearance = 'line', name }: IconProps) => (

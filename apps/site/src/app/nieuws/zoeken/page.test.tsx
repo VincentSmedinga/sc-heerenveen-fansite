@@ -351,7 +351,7 @@ describe('the list of players', () => {
   it('credits Wikipedia under the list, with the page and the time of the last good read', async () => {
     const sidebar = sidebarOf(await render())
 
-    expect(sidebar).toContain('Bron: Wikipedia (')
+    expect(sidebar).toContain('<summary>Bron: Wikipedia</summary>')
     expect(sidebar).toContain('href="https://nl.wikipedia.org/wiki/Sc_Heerenveen_in_het_seizoen_2026/27_(mannen)"')
     expect(sidebar).toContain('>Selectie 2026/27</a>')
     expect(sidebar).toContain('<time dateTime="2026-10-25T12:05:00.000Z">25 oktober 2026 om 13:05</time>')

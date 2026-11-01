@@ -281,7 +281,10 @@ Een wedstrijd is een `Match` uit het designsysteem, de stand een `StandingsTable
 De aftrap staat in Nederlandse tijd (`src/match-format.ts`), zoals "zo 1 nov 14:30", met het jaar als dat niet dit jaar is.
 Is de aftrap nog niet bekend, dan staat er het weekend, zoals "weekend 12–14 februari", uit `date_text`; een uitslag heeft alleen de dag.
 Onderaan de zijbalk staat de bronvermelding (`WikipediaCredit`) in een doorzichtige kaart (`Card` met `surface="transparent"`), zodat de tekst op één lijn staat met de tekst in de kaarten erboven.
-Ze noemt de licentie, linkt naar elke pagina van Wikipedia die de import las, noemt de tijd van de laatste keer lezen en zegt dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
+Ze staat dicht, op elke pagina en voor elk aantal pagina's: een `details` met een `summary` die "Bron: Wikipedia" zegt, zonder link.
+Eén klik laat de licentie zien, een link naar elke pagina van Wikipedia die de import las, de tijd van de laatste keer lezen en de zin dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
+De bron is dus zonder klik te zien (principe 4 van de Redactie), en de rest is één klik verder.
+Ze werkt zonder JavaScript en met het toetsenbord.
 Ze linkt niet naar de geschiedenis van die pagina's: Wikipedia ziet een link naar het artikel als een goede bronvermelding, en de auteurs staan in de geschiedenis van het artikel.
 Onder de twee blokken op de homepage staat alleen "Bron: Wikipedia".
 De pagina's komen uit `wikipedia_pages` (alleen die van de wedstrijden, niet de pagina van de selectie); zonder gegevens van de wedstrijden staat er ook geen bronvermelding.
