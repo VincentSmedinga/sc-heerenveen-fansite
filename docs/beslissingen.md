@@ -4052,7 +4052,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Eén geval blijft over: de bezoeker staat helemaal onderaan met de uitklap open en sluit hem.
   Het document wordt dan korter dan de pagina is gescrold, en de browser trekt de scrollpositie elk beeld mee.
   De pagina schuift dan soepel mee in dezelfde 0,2 seconde en de `summary` zakt 156 pixels op een telefoon, tot het document zijn nieuwe lengte heeft.
-  Er is geen sprong, maar de `summary` blijft in dat ene geval niet op zijn plek.
+  Er is geen sprong, maar de `summary` blijft in dat ene geval niet op zijn plek, en de projecteigenaar neemt dat voor lief (1 november 2026).
   Dat te voorkomen vraagt ruimte onderaan de pagina die voor elke bezoeker verandert hoe de pagina eindigt, of een script.
 - **Alternatieven:** een script dat de hoogte meet en zet (kost een clientcomponent voor één uitklap, en bewaart staat); `max-block-size` met een vaste waarde (een getal dat verkeerd wordt zodra de tekst langer is, en een eigen getal naast de tokens); alleen de doorzichtigheid laten bewegen (de uitklap blijft dan springen, en dat vroeg de projecteigenaar niet); extra ruimte onderaan de pagina (zie hierboven); `scrollIntoView` na het openen (de tekst staat al in beeld, want de footer geeft ruimte, en het is een script).
 - **Later:** vult _Beweging heeft vaste duren en curves, en valt bij minder beweging op één plek weg_ (27 oktober 2026) aan: de regel dat wat opent of sluit niet van hoogte wisselt, kent nu deze ene uitzondering.
