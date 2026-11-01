@@ -656,6 +656,19 @@ describe('the page /wedstrijden', () => {
     expect(stand).toContain('style="--hf-bar-share:16.67"')
   })
 
+  it('says under the credit that the editors entered some of the data, only while that is so', async () => {
+    const sentence = 'Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.'
+
+    expect(await render()).not.toContain(sentence)
+
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, edited: true })
+
+    const html = await render()
+
+    expect(html).toContain(`<p class="hf-meta hf-wikipedia-credit-edited">${sentence}</p>`)
+    expect(html.indexOf(sentence)).toBeGreaterThan(html.indexOf('<summary>Bron: Wikipedia</summary>'))
+  })
+
   it('has one credit under the page, for the three pages, with the time of the last reading', async () => {
     const html = await render()
 
@@ -688,7 +701,14 @@ describe('the page /wedstrijden', () => {
   })
 
   it('says in a sentence for visitors that there is nothing yet when the importer has not run', async () => {
-    vi.mocked(getMatchData).mockResolvedValue({ coaches: [], matches: [], pages: [], season: '2026/27', standings: [] })
+    vi.mocked(getMatchData).mockResolvedValue({
+      coaches: [],
+      edited: false,
+      matches: [],
+      pages: [],
+      season: '2026/27',
+      standings: [],
+    })
 
     const html = await render()
 

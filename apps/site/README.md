@@ -698,6 +698,7 @@ Een gebouwde site (`pnpm build`, acceptatie en productie) zet het cookie altijd 
   Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
 - `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen, met bron, kop als link, tijd en of ze verborgen zijn (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
+- `/beheer/wedstrijden` is voor beheerders alleen: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
 - `/beheer/bezoek` is voor beheerders alleen: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
 - De proxy (`src/proxy.ts`) geeft elk antwoord onder `/beheer` de headers `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: same-origin`, op elke omgeving.
   De proxy is geen toegangscontrole.
@@ -722,7 +723,7 @@ Alle formulieren zijn gewone posts van een serveractie (`actions.ts`), dus ze we
 - Na het verbergen of tonen staat bovenaan wat er gebeurde: "Staat binnen vijf minuten niet meer op de site" of "weer op de site".
   Dat is waar, want de homepage, `/nieuws` en `/nieuws/podcasts` bewaren hun lijsten vijf minuten in het geheugen van de server; `src/headlines-hidden.test.ts` bewijst het tegen een echte database.
   De melding komt uit de database van dat moment, niet uit het adres: `?verborgen=<nummer>` zegt alleen iets over een bericht dat echt verborgen is.
-- Verbergen en tonen schrijven allebei één regel in het logboek `audit_log`, in dezelfde transactie, via `recordAction` (`src/beheer/audit-log.ts`).
+- Verbergen en tonen schrijven allebei één regel in het logboek `audit_log`, in dezelfde transactie, via `recordAction` (`packages/db/src/audit-log.ts`, die `src/beheer/audit-log.ts` doorgeeft).
   Daar staat het nummer van het account, de tijd, de actie, het nummer van het bericht en de reden: geen e-mailadres en niets anders van het verzoek.
 - De pagina gebruikt `NewsItem`, `Form`, `Field` en de andere componenten van het designsysteem, en heeft geen eigen component.
 
@@ -746,6 +747,24 @@ De fouten staan in een `ErrorSummary` en bij het veld, en met JavaScript krijgt 
   Onder het formulier staat de lijst "Eerdere versies", en `/beheer/artikelen/<nummer>/versies/<versienummer>` toont een versie met dezelfde onderdelen als het voorbeeld.
   Er is geen knop om terug te zetten of te verwijderen.
 - De opmaak en de werkwijze voor wie schrijft, staan in [`docs/artikelen.md`](../../docs/artikelen.md).
+
+### Wedstrijden invullen
+
+`/beheer/wedstrijden` (`src/app/beheer/wedstrijden`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
+De lijst toont de wedstrijden van het lopende seizoen, die zonder uitslag eerst (twee uur na de aftrap, zoals `lacksResult`), met "Aangepast door de redactie" bij een wedstrijd met een invoer.
+De pagina van een wedstrijd (`/beheer/wedstrijden/<nummer>`) heeft het formulier (`MatchForm.tsx`) en, bij een invoer, wat de redactie invulde, wat Wikipedia zei toen het afweek, en een eigen formulier om de invoer weg te halen.
+Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md); de import is beschreven in de [README van de importer](../importer/README.md).
+
+- Het formulier is een client-component met `useActionState`, en een gewone post die zonder JavaScript werkt.
+  Een doelpunt toevoegen of weghalen is een knop van hetzelfde formulier, die de server beantwoordt met de waarden bewaard en de focus op het goede veld.
+  De eerste knop is een verborgen "Opslaan", zodat Enter opslaat.
+- `src/beheer/match-form.ts` leest en controleert wat het formulier stuurt, altijd opnieuw op de server, met dezelfde regels als de checks van `matches` en `match_goals` en de eis dat de doelpunten samen de uitslag geven (een uitslag zonder doelpunten mag).
+  `src/beheer/match-entries.ts` schrijft de invoer in `matches` en `match_goals`, zet de markering in `match_edits` met de wedstrijd van vóór de eerste invoer, en schrijft `match.edit` of `match.undo` in het logboek, alles in één transactie.
+- Elke invoer en elk weghalen vraagt een reden.
+  Een invoer zonder verschil, en "weghalen" zonder invoer, schrijven niets.
+- Een wijziging van Wikipedia die voor de wedstrijd wachtte in `match_changes`, vervalt bij een invoer.
+- Zolang minstens één wedstrijd een markering heeft, zetten de pagina's met de volledige bronvermelding (`SourceCredit`, `OpponentsCredit`) onder die bronvermelding de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." (`edited` van `WikipediaCredit`).
+  De vlag komt uit `hasEditedMatches` en is zo vers als de gegevens van het seizoen.
 
 ### Het bezoek bekijken
 

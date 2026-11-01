@@ -4,6 +4,7 @@ import { adminCookie, type E2eRole } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
+import { matchId } from './matches'
 
 // Every page of the site, one line each, and the status code it must answer. A new page is one
 // line here. An address that doesn't exist is the page "niet gevonden"; the status code also
@@ -11,7 +12,8 @@ import { earlierSeasonSlug } from './earlier-season'
 // the admin, checked as the moderator or the beheerder that the global setup logs in (see
 // admin.ts).
 // `{draft}` and `{published}` in a path stand for the number of the made-up draft and the
-// made-up published article, which the database gives.
+// made-up published article, and `{match}` for the first made-up match of this season that
+// is still to be played, which the database gives.
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
   // The news archive: all sources, one source, more sources, the second page (the made-up
@@ -152,6 +154,15 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'moderator', path: '/beheer/artikelen/nieuw', status: 404 },
   { admin: 'moderator', path: '/beheer/artikelen/{published}/versies/1', status: 404 },
   // The numbers of the visit are for a beheerder. A moderator gets "niet gevonden".
+  // The matches are for a beheerder: the list, the notice for a match that is gone, the form of
+  // a match with and without a notice, and the addresses that say "niet gevonden".
+  { admin: 'beheerder', path: '/beheer/wedstrijden', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden?fout=weg', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}?gedaan=ongewijzigd', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden/999999', status: 404 },
+  { admin: 'moderator', path: '/beheer/wedstrijden', status: 404 },
+  { admin: 'moderator', path: '/beheer/wedstrijden/{match}', status: 404 },
   { admin: 'beheerder', path: '/beheer/bezoek', status: 200 },
   { admin: 'moderator', path: '/beheer/bezoek', status: 404 },
   // An article of the editors, and the addresses that must say "niet gevonden": a draft, an
@@ -170,6 +181,7 @@ async function withNumbers(path: string) {
     ? path
         .replace('{draft}', String(await articleIdOf(testArticles.draft.slug)))
         .replace('{published}', String(await articleIdOf(testArticles.published.slug)))
+        .replace('{match}', path.includes('{match}') ? String(await matchId()) : '{match}')
     : path
 }
 

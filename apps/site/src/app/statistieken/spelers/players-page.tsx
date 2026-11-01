@@ -104,7 +104,7 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
           seasonOnImage={current ? undefined : season}
         />
         {(data.matches.length > 0 || data.standings.length > 0) && (
-          <SourceCredit pages={data.pages} season={data.season} />
+          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
         )}
       </Page.Sidebar>
     </>

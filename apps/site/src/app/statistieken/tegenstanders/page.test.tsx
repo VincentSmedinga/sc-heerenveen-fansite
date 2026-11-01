@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchSeasons } from '../../../matches'
+import { getEditedMatches, getMatchSeasons } from '../../../matches'
 import { getClubRecords, getSourcePages } from '../../../opponents'
 import { allRecords, leagueRecords, matchSeasons, sourcePages } from '../../../test-opponents'
 import { withoutIcons } from '../../../without-icons'
@@ -9,6 +9,7 @@ import OpponentsPage, { generateMetadata } from './page'
 
 vi.mock('../../../matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getEditedMatches: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
 vi.mock('../../../opponents', async (importOriginal) => ({
@@ -27,6 +28,7 @@ beforeEach(() => {
     Promise.resolve(choice === 'league' ? leagueRecords : allRecords),
   )
   vi.mocked(getMatchSeasons).mockReset()
+  vi.mocked(getEditedMatches).mockResolvedValue(false)
   vi.mocked(getMatchSeasons).mockResolvedValue(matchSeasons)
   vi.mocked(getSourcePages).mockReset()
   vi.mocked(getSourcePages).mockResolvedValue(sourcePages)
@@ -152,6 +154,16 @@ describe('the page /statistieken/tegenstanders', () => {
     ])
     expect(html).toContain('Gebaseerd op alle 7 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
     expect(html).toMatch(/<a aria-current="page"[^>]*><span[^>]*>Eredivisie</)
+  })
+
+  it('says under the credit that the editors entered some of the data, only while that is so', async () => {
+    const sentence = 'Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.'
+
+    expect(await render()).not.toContain(sentence)
+
+    vi.mocked(getEditedMatches).mockResolvedValue(true)
+
+    expect(await render()).toContain(sentence)
   })
 
   it('credits the Wikipedia pages of the seasons we have, with the licence', async () => {

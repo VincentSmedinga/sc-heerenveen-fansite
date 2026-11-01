@@ -3924,6 +3924,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat kan later, als we het logboek tegen iemand met toegang tot de database moeten bewijzen.
 - **Alternatieven:** triggers die `UPDATE` en `DELETE` weigeren (de gebruiker met het recht `TRIGGER` kan ze weer weghalen, en het is meer om te onderhouden dan dit issue vraagt); het e-mailadres in het logboek zetten (persoonsgegevens, en een adres dat verandert).
 - **Later:** het logboek heeft ook de acties van de artikelen; zie _Een artikel schrijven geeft vier acties in het logboek, en schrijft alleen als er iets veranderde_.
+- **Later:** het logboek heeft ook regels van de import, zonder account, en de functie staat in het databasepakket; zie _Het logboek van het beheer heeft ook regels van de import, zonder account_.
 - **Lezen:** er is nog geen scherm voor.
   `docs/acceptatieomgeving.md` heeft de vraag voor phpMyAdmin.
 
@@ -6357,6 +6358,112 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De bewerkingsgeschiedenis van Wikipedia lezen (staat onder `/w/`, gesloten voor ons).
   Een uitslag in het gat tussen 24 uur en drie dagen wel overnemen (een vandaal wacht dan twee dagen en komt erdoor).
 - **Later:** zie _Een uitslag die verandert, nemen we over, en na drie dagen met een waarschuwing_.
+- **Later:** een wedstrijd met een markering van de redactie volgt andere regels; zie _De invoer van de redactie staat in de gewone tabellen, met een markering_ en _Bij een verschil blijft de invoer staan en schrijft de import het op_.
+
+### De invoer van de redactie staat in de gewone tabellen, met een markering
+
+- **Datum:** 1 november 2026
+- **Besluit:** een beheerder vult een wedstrijd in of verbetert hem op `/beheer/wedstrijden` (#272).
+  De invoer komt in `matches` en `match_goals`, waar elke pagina, de stand per club, de series en de spelerspagina's haar al lezen.
+  De tabel `match_edits` markeert per wedstrijd welke onderdelen van de redactie zijn: de aftrap (`match_date`, `kickoff_at`, `date_text`), de uitslag met de status (de score, de verlenging, de stand na 90 minuten en de strafschoppen) en de doelpunten.
+  Ze bewaart ook wie het laatst invulde, wanneer en waarom, en de wedstrijd en de doelpunten zoals ze waren vóór de eerste invoer (`before_match` en `before_goals`, als JSON).
+  Een rij verdwijnt als geen onderdeel meer een markering heeft.
+- **Waarom:** elke pagina, statistiek en spelerslijst leest die tabellen al.
+  Een tweede laag naast de gelezen waarde moet op elke plek worden bijgehouden, en een plek die het vergeet toont stilzwijgend de verkeerde waarde.
+- **Keuzes bij het bouwen** (1 november 2026):
+  - De uitslag en de doelpunten tellen apart, want Wikipedia zet meestal eerst de uitslag en pas later de doelpuntenmakers.
+    De aftrap is een derde onderdeel, zodat een aangepaste tijd niet vastzit aan een uitslag.
+  - De invoer zet `result_set_at` op het moment van de invoer, en een uitslag die verdwijnt zet het op leeg.
+    Een status die niet "gespeeld" is, maakt het aantal toeschouwers leeg, want de database staat dat niet toe.
+  - Een invoer die niets verandert, schrijft niets en komt niet in het logboek.
+    Het formulier kan niet teruggeven wat de import van een doelpunt bewaart: de link naar de pagina van de doelpuntenmaker en zijn naam zoals Wikipedia hem schrijft.
+    Een doelpunt van ons is daarom hetzelfde als het dezelfde speler heeft, en een ander doelpunt als de naam in hoofdletters en kleine letters overeenkomt.
+    Een doelpunt dat niet veranderde, houdt zijn link en zijn naam als de redacteur een ander doelpunt aanpast.
+  - Een wijziging van Wikipedia die voor die wedstrijd wachtte in `match_changes`, vervalt bij een invoer (`replaced`): de invoer is nieuwer.
+    Anders zou `pnpm run import:changes accept` de invoer later ongemerkt overschrijven.
+  - "Weghalen" zet alleen terug wat nog een markering heeft.
+    Een onderdeel dat Wikipedia al overnam, blijft zoals het is.
+    Vult een redacteur zo'n onderdeel later opnieuw in, dan wordt de momentopname van dat onderdeel ververst met wat Wikipedia toen had: weghalen zet het terug naar Wikipedia en niet naar vóór de eerste invoer.
+    De import leest daarna weer wat Wikipedia zegt.
+  - De onderdelen zonder markering volgen Wikipedia zoals bij elke wedstrijd, maar zonder de beoordeling van _Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht_: de beoordeling kijkt naar de hele wedstrijd, en de wedstrijd is al van de redactie.
+    Een wedstrijd met een markering telt niet mee voor de grens van zes wedstrijden in een run, en wordt niet verwijderd als hij van de pagina verdwijnt.
+  - Voor de import is een aangepaste wedstrijd eigen invoer, ook voor `import:season`: dezelfde code leest elk seizoen.
+  - Een uitslag staat in de lijst, het logboek en de waarschuwing met een en-streep ("2–1"), zoals de schrijfwijzer van Redactie het vraagt.
+  - Er is geen scherm voor het verleden: de lijst toont het lopende seizoen, en alleen een beheerder ziet haar.
+- **Later:** vervangt voor de plaats van de opslag de beslissing van 25 oktober 2026 uit het issue (een aanpassing naast de gelezen waarde); de rest ervan blijft: een aanpassing geldt tot Wikipedia hetzelfde zegt of een beheerder haar weghaalt.
+- **Alternatieven:** een aparte tabel met aanpassingen die elke query eroverheen legt (veel plekken en een groot risico op vergeten); de gelezen waarde overschrijven zonder markering (de volgende import maakt de verbetering ongedaan, en niemand ziet wat van de redactie is).
+
+### Bij een verschil blijft de invoer staan en schrijft de import het op
+
+- **Datum:** 1 november 2026
+- **Besluit:** de import (`apps/importer/src/edited-matches.ts`) beoordeelt elk onderdeel met een markering apart (#272):
+  1. Heeft Wikipedia voor het onderdeel nog niets, dan blijft de invoer staan en wordt niets gemeld.
+     "Niets" is: bij de aftrap geen tijd, bij de uitslag de status gepland, bij de doelpunten geen doelpunten.
+  2. Heeft Wikipedia hetzelfde, dan verdwijnt de markering en schrijft de import `match.caught-up` in het logboek.
+     Hetzelfde is bij de doelpunten: dezelfde kant, minuut, blessuretijd, soort en speler, in elke volgorde.
+     De speler van ons is dezelfde als hij hetzelfde `player_id` heeft, en een andere speler als de naam in hoofdletters en kleine letters overeenkomt.
+     Het onderdeel volgt vanaf dan Wikipedia.
+  3. Zegt Wikipedia iets anders, dan blijft de invoer staan, en schrijft de import `match.differs` in het logboek en een waarschuwing in `match_imports.last_warning`, met beide waarden.
+     Dat gebeurt één keer: `match_edits.reported_kickoff`, `reported_result` en `reported_goals` bewaren wat Wikipedia de vorige keer zei.
+     Zegt Wikipedia hetzelfde als de vorige keer, dan zwijgt de import.
+     Maakt Wikipedia er iets nieuws van, of neemt een redacteur het onderdeel opnieuw in, dan is het weer nieuws.
+- **Waarom:** de redactie weet vaak meer dan een anonieme bewerking op Wikipedia, maar kan zich ook vergissen, dus het verschil hoort bij een mens (#577).
+  Tot dan is de invoer laten staan veiliger dan Wikipedia laten winnen, en één regel per verschil houdt het logboek leesbaar bij een import die elk uur draait.
+  De uitslag en de doelpunten tellen apart, want Wikipedia loopt met de ene achter de andere aan.
+- **Nadeel:** tot #577 klaar is, staat de invoer tot een beheerder haar weghaalt, en ziet een redacteur het verschil alleen op de pagina van de wedstrijd ("Wikipedia zegt iets anders") en in `pnpm run import:status`.
+  De stand na 90 minuten telt mee in "hetzelfde": heeft Wikipedia hem niet en de redactie wel, dan is dat een verschil.
+- **Alternatieven:** Wikipedia wint zodra het iets heeft (een vandaal op Wikipedia overschrijft de redactie); het verschil meteen als wachtende wijziging vastleggen (dat is #577, om #272 in één pull request te houden); het verschil bij elke run opnieuw schrijven (honderden regels voor één afwijking).
+
+### Het logboek van het beheer heeft ook regels van de import, zonder account
+
+- **Datum:** 1 november 2026
+- **Besluit:** `audit_log.user_id` mag leeg zijn: een lege waarde is "de import" (#272).
+  `recordAction` verhuist naar het databasepakket (`@fansite/db/audit-log`), zodat de site en de importer dezelfde ene functie gebruiken.
+  `apps/site/src/beheer/audit-log.ts` geeft hem alleen door.
+  Het logboek krijgt vier acties: `match.edit` (een invoer), `match.undo` (de invoer weggehaald), `match.caught-up` en `match.differs` (de laatste twee schrijft alleen de import).
+  Een nieuwe kolom `detail` (hoogstens 1000 tekens, langer wordt met een beletselteken afgekapt) zegt wat veranderde: het onderdeel met de waarde ervoor en erna.
+  `item_id` is bij een `match.`-actie het nummer van de wedstrijd.
+- **Waarom:** de import is geen account, en elke invoer, elke wijziging en elk automatisch weghalen of overnemen moet in hetzelfde logboek staan, met wie of "de import".
+  Eén functie houdt de afspraak "alleen toevoegen" op één plek.
+- **Wat erin staat:** de import schrijft de reden en het detail in het Nederlands, want een redacteur leest ze.
+  De waarschuwing in `match_imports` blijft Engels, zoals de rest van wat de import logt.
+- **Later:** vult _Het logboek van het beheer krijgt één schrijffunctie, en alleen toevoegen_ aan: de functie staat nu in `packages/db/src/audit-log.ts`, heeft vijf velden in plaats van vier, `user_id` mag leeg zijn, en `audit-log.test.ts` kijkt naar dat bestand.
+- **Alternatieven:** een account "de import" in `admin_users` (een rij met een adres dat nooit inlogt, die `admin:revoke` en de lijst met accounts moeten kennen); een vast nummer 0 zonder foreign key (een nummer dat geen account is, en een rij die naar niets wijst); een eigen tabel voor het logboek van de import (twee plekken om te lezen als een redacteur wil weten wat er met een wedstrijd gebeurde).
+
+### Het formulier van een wedstrijd werkt zonder JavaScript, met één veld voor de speler
+
+- **Datum:** 1 november 2026
+- **Besluit:** het formulier op `/beheer/wedstrijden/<nummer>` is een gewoon formulier dat de server beantwoordt (#272):
+  - Een doelpunt toevoegen of weghalen is een knop van hetzelfde formulier (`knop=doelpunt-toevoegen` en `knop=doelpunt-weghalen-<n>`).
+    De server geeft het formulier terug met de waarden bewaard en de focus op het nieuwe doelpunt, of op het doelpunt dat de plaats van het weggehaalde nam, of anders op de knop "Doelpunt toevoegen".
+    Elke knop zegt welk doelpunt hij is ("Doelpunt 2 weghalen"), net als elk veld ("Minuut, doelpunt 2").
+  - De eerste knop in het formulier is een verborgen "Opslaan", zodat de Enter-toets in een veld opslaat en nooit het eerste doelpunt weghaalt.
+    De knop is niet bereikbaar met het toetsenbord en voor schermlezers verborgen.
+  - Een doelpunt heeft een kant, de minuut met eventueel blessuretijd, een soort (gewoon, strafschop of eigen doelpunt) en één veld voor de speler: een speler van sc Heerenveen kies je uit de selectie van het seizoen (zo krijgt het doelpunt zijn `player_id`), en voor een speler van de tegenstander kies je "Andere speler" en schrijf je de naam.
+    De kant is het team dat het doelpunt krijgt, ook bij een eigen doelpunt, zoals `match_goals.ours`.
+    Welke speler uit de selectie komt, volgt uit kant en soort: een doelpunt van ons, of een eigen doelpunt van de tegenstander.
+    Een veld dat bij dat doelpunt niet past, geeft een fout in plaats van stilzwijgend genegeerd te worden.
+  - Elke fout staat bij het veld en in de foutenlijst bovenaan, en de doelpunten die samen de uitslag niet geven, staan als fout bij de kop "Doelpunten".
+  - De aftrap is een datum en een tijd, of een datum en een tekst als de tijd nog niet bekend is (zoals "12-14 februari 2027"); beide samen is een fout.
+  - "Invoer weghalen" is een eigen formulier met een eigen reden, onder het formulier.
+- **Waarom:** het beheer werkt zonder JavaScript, zoals de artikelen, en een formulier met rijen die je toevoegt en weghaalt kan dat met een rondje naar de server.
+  Eén speler-veld voorkomt dat een redacteur twee velden moet leren die elkaar uitsluiten.
+- **Alternatieven:** een knop die met JavaScript een rij toevoegt (werkt niet zonder, en de focus is dan ons eigen werk); twee velden naast elkaar voor de speler (de redacteur moet weten welk veld bij welk doelpunt hoort); de Enter-toets laten zoals hij is (hij haalt het eerste doelpunt weg).
+
+### Onder de bronvermelding staat een zin zolang de redactie gegevens zelf invulde
+
+- **Datum:** 1 november 2026
+- **Besluit:** zolang minstens één wedstrijd een markering heeft (een rij in `match_edits`), staat onder de volledige bronvermelding van Wikipedia de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." (#272).
+  De zin is een eigenschap van het onderdeel, `edited`, en staat buiten de uitklap, zodat een bezoeker hem ziet zonder iets te openen.
+  Hij staat onder de volledige bronvermelding van `/wedstrijden`, van de statistieken en de spelers, en van de tegenstanders, en nergens anders.
+  De korte vorm ("Bron: Wikipedia") op de kaarten van home heeft hem niet.
+  De pagina's lezen de vlag uit de gegevens van het seizoen (`MatchData.edited`) of uit `getEditedMatches()`, met dezelfde cache als de wedstrijden zelf.
+- **Waarom:** de ingevulde waarden staan op de plek van die van Wikipedia, en de bronvermelding zegt dat de gegevens van Wikipedia komen.
+  Dat klopt niet meer helemaal zolang een wedstrijd van de redactie is.
+  Een zin die alleen staat zolang het waar is, maakt dat eerlijk zonder dat een bezoeker er iets mee hoeft.
+- **Nadeel:** de zin staat bij alle wedstrijden, ook als de invoer één andere wedstrijd betreft, want de vlag geldt voor de hele site.
+  De stand komt van Wikipedia en verandert niet mee: hij loopt achter tot Wikipedia de uitslag heeft.
+- **Alternatieven:** een zin bij de wedstrijd zelf (een extra regel in elke lijst, en `Match` en `ShortMatch` moeten hem kennen); de zin in de uitklap (een bezoeker ziet hem alleen als hij openklapt); de zin ook op de korte vorm (een lange zin in een kleine kaart op home).
 
 ### Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel
 

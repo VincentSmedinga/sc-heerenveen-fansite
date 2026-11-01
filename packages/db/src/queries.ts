@@ -13,6 +13,7 @@ import {
   clubs,
   discussions,
   items,
+  matchEdits,
   matches,
   matchGoals,
   matchPageKinds,
@@ -796,6 +797,17 @@ const newsColumns = {
   sourceName: sql<string>`coalesce(nullif(${sources.attribution}, ''), ${sources.name})`.as('source_name'),
   title: items.title,
   url: items.url,
+}
+
+/**
+ * Whether the editors filled in or corrected a match that Wikipedia has not taken over yet
+ * (a row in `match_edits`). The pages that show match data say so under the credit of
+ * Wikipedia for as long as it is true.
+ */
+export async function hasEditedMatches(db: Database): Promise<boolean> {
+  const [row] = await db.select({ matchId: matchEdits.matchId }).from(matchEdits).limit(1)
+
+  return row !== undefined
 }
 
 /**

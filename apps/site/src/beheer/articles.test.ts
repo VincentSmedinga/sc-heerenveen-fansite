@@ -76,7 +76,15 @@ describe('createArticle', () => {
       updatedAt: t0,
     })
     expect(await log()).toEqual([
-      { action: 'article.create', createdAt: t0, id: expect.any(Number), itemId: id, reason: null, userId },
+      {
+        action: 'article.create',
+        createdAt: t0,
+        detail: null,
+        id: expect.any(Number),
+        itemId: id,
+        reason: null,
+        userId,
+      },
     ])
   })
 

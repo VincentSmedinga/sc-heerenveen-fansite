@@ -105,6 +105,21 @@ describe('WikipediaCredit', () => {
     expect(container.firstElementChild?.id).toBe('bron')
   })
 
+  it('says under the credit that the editors entered some of the data, outside the fold, and only then', () => {
+    const { container, rerender } = render(<WikipediaCredit {...props} pages={[standings]} />)
+
+    expect(container.textContent).not.toContain('onze redactie')
+
+    rerender(<WikipediaCredit {...props} edited pages={[standings]} />)
+
+    const note = screen.getByText('Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.')
+
+    expect(note.tagName).toBe('P')
+    expect(note.closest('details')).toBeNull()
+    expect(container.firstElementChild?.tagName).toBe('DETAILS')
+    expect(container.lastElementChild).toBe(note)
+  })
+
   it('says only "Bron: Wikipedia" in the short form, with no link and no time', () => {
     const { container } = render(<WikipediaCredit compact />)
 

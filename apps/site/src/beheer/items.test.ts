@@ -150,6 +150,7 @@ describe('hideItem', () => {
       {
         action: 'item.hide',
         createdAt: now,
+        detail: null,
         id: expect.any(Number),
         itemId: id,
         reason: 'Fout in het bericht',

@@ -202,9 +202,11 @@ export function ClubSummaryCard({
  * importer has read none of them.
  */
 export function OpponentsCredit({
+  edited,
   pages,
   seasons,
 }: {
+  edited: boolean
   pages: PublicSeasonWikipediaPage[]
   seasons: readonly string[]
 }) {
@@ -221,7 +223,12 @@ export function OpponentsCredit({
 
   return (
     <Card as="div" surface="transparent">
-      <WikipediaCredit pages={[first, ...rest]} readAt={formatReadAt(readAt)} readAtDateTime={readAt.toISOString()} />
+      <WikipediaCredit
+        edited={edited}
+        pages={[first, ...rest]}
+        readAt={formatReadAt(readAt)}
+        readAtDateTime={readAt.toISOString()}
+      />
     </Card>
   )
 }

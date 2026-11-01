@@ -29,6 +29,7 @@ import {
   isMassChange,
 } from './classify-change.ts'
 import { clubFullNames } from './club-names.ts'
+import { importEditedMatch, mergeEntry, readEdits } from './edited-matches.ts'
 import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
 import {
   decide,
@@ -723,6 +724,7 @@ async function storeMatches(
     storedGoals.set(goal.goal.matchId, [...(storedGoals.get(goal.goal.matchId) ?? []), goal.goal])
   }
 
+  const edits = await readEdits(db, season)
   const book = await createClubBook(db, { fullNames: clubFullNames })
   const changes = await readSeasonChanges(db, season, now)
   const counts = { added: 0, held: 0, removed: 0, unchanged: 0, updated: 0 }
@@ -754,6 +756,33 @@ async function storeMatches(
 
     if (before === undefined) {
       entries.push({ kind: 'add', proposal })
+      continue
+    }
+
+    const edit = edits.get(before.id)
+
+    if (edit !== undefined) {
+      // The editors filled in a part of this match: see `edited-matches.ts`. What stays theirs
+      // stays, and the rest follows the page without the judgement of `classify-change.ts`.
+      const stored = storedGoals.get(before.id) ?? []
+      const outcome = await importEditedMatch(
+        db,
+        { before, edit, storedGoals: stored, wikipedia: match, wikipediaGoals: scorers.goals },
+        now,
+      )
+      const merged = mergeEntry(before, match, outcome.keep)
+      const keepsGoals = outcome.keep.includes('goals')
+      const goalsDiffer = !keepsGoals && !isSameGoals(stored, scorers.goals)
+
+      warnings.push(...outcome.warnings)
+
+      if (isSame(before, merged, club.id) && !goalsDiffer) {
+        counts.unchanged++
+      } else {
+        counts.updated++
+        await updateMatch(db, before, { clubId: club.id, goals: scorers.goals, match: merged }, goalsDiffer, now)
+      }
+
       continue
     }
 
@@ -815,6 +844,12 @@ async function storeMatches(
 
   for (const row of known.values()) {
     if (!playoffsRead && row.competition === 'Play-offs Conference League') {
+      continue
+    }
+
+    if (edits.has(row.id)) {
+      // A match the editors filled in stays, whether the page still has it or not.
+      counts.unchanged++
       continue
     }
 

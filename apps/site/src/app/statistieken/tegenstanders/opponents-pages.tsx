@@ -10,7 +10,7 @@ import { competitionQuery, parseCompetition } from '../../../competition'
 import { CompetitionLinks } from '../../../CompetitionSwitch'
 import { reviewBranch } from '../../../env'
 import { reasonOf } from '../../../errors'
-import { getMatchSeasons } from '../../../matches'
+import { getEditedMatches, getMatchSeasons } from '../../../matches'
 import { pageMetadata, seasonPageMetadata } from '../../../metadata'
 import {
   earlierNames,
@@ -35,14 +35,15 @@ import { withBranch } from '../../../title'
  */
 const loadClubList = cache(async () => {
   try {
-    const [all, league, seasons, pages] = await Promise.all([
+    const [all, league, seasons, pages, edited] = await Promise.all([
       getClubRecords('all'),
       getClubRecords('league'),
       getMatchSeasons(),
       getSourcePages(),
+      getEditedMatches(),
     ])
 
-    return { all, kind: 'found', league, pages, seasons } as const
+    return { all, edited, kind: 'found', league, pages, seasons } as const
   } catch (error) {
     console.error(`Could not read the opponents for ${opponentsPath}: ${reasonOf(error)}`)
 
@@ -58,7 +59,13 @@ const loadClub = cache(async (slug: string) => {
       return { kind: 'unknown' } as const
     }
 
-    return { kind: 'found', page, pages: await getSourcePages(), seasons: await getMatchSeasons() } as const
+    return {
+      edited: await getEditedMatches(),
+      kind: 'found',
+      page,
+      pages: await getSourcePages(),
+      seasons: await getMatchSeasons(),
+    } as const
   } catch (error) {
     console.error(`Could not read the opponent ${slug} for ${opponentsPath}: ${reasonOf(error)}`)
 
@@ -124,7 +131,7 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
         records={competition === 'league' ? loaded.league : loaded.all}
         since={sinceOf(loaded.seasons)}
       />
-      <OpponentsCredit pages={loaded.pages} seasons={loaded.seasons} />
+      <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={loaded.seasons} />
     </Page.Main>
   )
 }
@@ -212,7 +219,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             summary={summaryOf(meetings)}
           />
           <StadiumsCard stadiums={stadiums} />
-          <OpponentsCredit pages={loaded.pages} seasons={seasonsOf(meetings)} />
+          <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={seasonsOf(meetings)} />
         </Page.Sidebar>
       )}
     </>

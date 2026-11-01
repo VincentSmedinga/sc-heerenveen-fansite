@@ -37,6 +37,7 @@ describe('recordAction', () => {
       {
         action: 'item.hide',
         createdAt: now,
+        detail: null,
         id: expect.any(Number),
         itemId: 42,
         reason: 'Fout in het bericht',
@@ -59,14 +60,22 @@ describe('recordAction', () => {
     expect(Math.abs((row?.createdAt.getTime() ?? 0) - Date.now())).toBeLessThan(60_000)
   })
 
-  it('copies the four fields it knows and nothing else, whatever the caller passes', async () => {
+  it('copies the five fields it knows and nothing else, whatever the caller passes', async () => {
     const entry = { action: 'item.hide', extra: 'jelle@example.org', itemId: 1, token: 'geheim', userId } as const
 
     await recordAction(database.db, entry)
 
     const [row] = await database.db.select().from(auditLog)
 
-    expect(Object.keys(row ?? {}).toSorted()).toEqual(['action', 'createdAt', 'id', 'itemId', 'reason', 'userId'])
+    expect(Object.keys(row ?? {}).toSorted()).toEqual([
+      'action',
+      'createdAt',
+      'detail',
+      'id',
+      'itemId',
+      'reason',
+      'userId',
+    ])
     expect(JSON.stringify(row)).not.toMatch(/jelle|geheim/u)
   })
 
@@ -88,7 +97,23 @@ describe('recordAction', () => {
     ).rejects.toBeDefined()
   })
 
-  it('names the actions of the admin so far', () => {
+  it('keeps a line of the importer, which has no account, and a detail that is cut off when it is too long', async () => {
+    await recordAction(database.db, {
+      action: 'match.caught-up',
+      detail: 'x'.repeat(1200),
+      itemId: 5,
+      reason: 'Wikipedia heeft de uitslag overgenomen',
+      userId: null,
+    })
+
+    const [row] = await database.db.select().from(auditLog)
+
+    expect(row).toMatchObject({ action: 'match.caught-up', itemId: 5, userId: null })
+    expect(row?.detail).toHaveLength(1000)
+    expect(row?.detail?.endsWith('…')).toBe(true)
+  })
+
+  it('names the actions of the admin and of the importer so far', () => {
     expect(auditActions).toEqual([
       'item.hide',
       'item.show',
@@ -96,6 +121,10 @@ describe('recordAction', () => {
       'article.update',
       'article.publish',
       'article.unpublish',
+      'match.edit',
+      'match.undo',
+      'match.caught-up',
+      'match.differs',
     ])
   })
 
@@ -139,7 +168,9 @@ describe('the log is only added to', () => {
     expect(code).not.toMatch(/\.(update|delete)\(\s*auditLog\b/u)
     expect(code).not.toMatch(/(truncate|drop|delete\s+from|update)\s+(table\s+)?`?audit_log\b/iu)
     expect(
-      readFileSync(path.join(import.meta.dirname, 'audit-log.ts'), 'utf8').match(/\.(insert|update|delete|select)\(/gu),
+      readFileSync(path.join(root, 'packages/db/src/audit-log.ts'), 'utf8').match(
+        /\.(insert|update|delete|select)\(/gu,
+      ),
     ).toEqual(['.insert('])
   })
 })

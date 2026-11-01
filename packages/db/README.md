@@ -216,18 +216,36 @@ De importer overschrijft het niet: de voorwaarde staat in het `INSERT … ON DUP
 
 Het logboek van het beheer: één rij per beheeractie, voor wie later wil weten wat er gebeurde.
 
-| Kolom        | Betekenis                                                                                                                 |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| `created_at` | Wanneer, in UTC                                                                                                           |
-| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres                                                         |
-| `action`     | Wat: `item.hide`, `item.show`, `article.create`, `article.update`, `article.publish` of `article.unpublish`               |
-| `item_id`    | Welk bericht, of bij een `article.`-actie welk artikel; zonder foreign key, zodat de rij blijft als het bericht verdwijnt |
-| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide`; leeg bij `item.show`                                                     |
+| Kolom        | Betekenis                                                                                                                                                                   |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `created_at` | Wanneer, in UTC                                                                                                                                                             |
+| `user_id`    | Wie: het nummer van het account (`admin_users`), geen e-mailadres; leeg voor een regel van de import, die geen account heeft                                                |
+| `action`     | Wat: `item.hide`, `item.show`, `article.create`, `article.update`, `article.publish`, `article.unpublish`, `match.edit`, `match.undo`, `match.caught-up` of `match.differs` |
+| `item_id`    | Welk bericht, bij een `article.`-actie welk artikel en bij een `match.`-actie welke wedstrijd; zonder foreign key, zodat de rij blijft                                      |
+| `reason`     | De reden (hoogstens 300 tekens) bij `item.hide` en `match.edit`; leeg bij `item.show`                                                                                       |
+| `detail`     | Wat veranderde, voor `match.`-acties: het onderdeel met de waarde ervoor en erna (hoogstens 1000 tekens)                                                                    |
 
-Alleen `recordAction` in `apps/site/src/beheer/audit-log.ts` schrijft erin, en alleen met `INSERT`.
+Alleen `recordAction` in `packages/db/src/audit-log.ts` schrijft erin, en alleen met `INSERT`.
+De site en de importer gebruiken dezelfde functie.
 Geen enkele code wijzigt of verwijdert een rij, en `audit-log.test.ts` toetst dat in de broncode.
 Een account dat in het logboek staat, kan niet uit `admin_users` verdwijnen (een foreign key): `admin:revoke` zet het uit.
 Er is nog geen scherm om het logboek te lezen; zie `docs/acceptatieomgeving.md` voor de vraag die het toont.
+
+## De tabel `match_edits`
+
+Wat de redactie van een wedstrijd invulde of verbeterde (zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)).
+De invoer zelf staat in `matches` en `match_goals`; deze tabel markeert welke onderdelen van de redactie zijn.
+Er is één rij per wedstrijd met een invoer, en ze gaat weg met de wedstrijd.
+
+| Kolom                                                   | Betekenis                                                                                                                      |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `match_id`                                              | De wedstrijd; de sleutel                                                                                                       |
+| `kickoff_edited`, `result_edited`, `goals_edited`       | Welke onderdelen de redactie vasthoudt: de aftrap, de uitslag met de status, de doelpunten. Minstens één staat aan (een check) |
+| `edited_by`, `edited_at`, `reason`                      | Wie het laatst invulde (het nummer van het account), wanneer (UTC) en waarom; het logboek heeft elke invoer                    |
+| `before_match`, `before_goals`                          | De wedstrijd en de doelpunten zoals ze waren vóór de eerste invoer, als JSON; "invoer weghalen" zet ze terug                   |
+| `reported_kickoff`, `reported_result`, `reported_goals` | Wat Wikipedia de vorige keer zei toen het van de invoer afweek, zodat de import een verschil één keer meldt                    |
+
+De import wist een markering als Wikipedia hetzelfde heeft, en de rij als er geen markering meer is (zie _Een wedstrijd die de redactie invulde_ in de [README van de importer](../../apps/importer/README.md)).
 
 ## De tabel `articles`
 

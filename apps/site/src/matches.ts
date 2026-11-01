@@ -1,6 +1,7 @@
 import type { FormResult } from '@fansite/design-system'
 
 import {
+  hasEditedMatches,
   listMatchSeasons,
   listSeasonMatches,
   listSeasonStandings,
@@ -71,6 +72,8 @@ export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoi
 export type MatchData = {
   /** The head coaches of the season, in the order their periods began. */
   coaches: PublicStaff[]
+  /** Whether the editors entered data that Wikipedia has not taken over yet. */
+  edited: boolean
   matches: PublicMatch[]
   pages: PublicWikipediaPage[]
   season: string
@@ -101,14 +104,15 @@ const pastSeasonPeriod = 60 * 60 * 1000
 
 async function loadSeason(season: string): Promise<MatchData> {
   const { db } = getDatabase()
-  const [matches, standings, pages, coaches] = await Promise.all([
+  const [matches, standings, pages, coaches, edited] = await Promise.all([
     listSeasonMatches(db, season),
     listSeasonStandings(db, season),
     listWikipediaPages(db, season),
     listStaffInSeason(db, 'coach', season),
+    hasEditedMatches(db),
   ])
 
-  return { coaches, matches, pages, season, standings }
+  return { coaches, edited, matches, pages, season, standings }
 }
 
 const currentSeasonData = cacheForKey(currentSeasonPeriod, loadSeason)
@@ -125,6 +129,9 @@ const pastSeasonData = cacheForKey(pastSeasonPeriod, loadSeason)
 export function getMatchData(season = seasonOf(new Date())): Promise<MatchData> {
   return season === seasonOf(new Date()) ? currentSeasonData(season) : pastSeasonData(season)
 }
+
+/** Whether the editors entered data that Wikipedia has not taken over yet. */
+export const getEditedMatches = cacheFor(currentSeasonPeriod, async () => hasEditedMatches(getDatabase().db))
 
 const matchSeasons = cacheFor(currentSeasonPeriod, async () => listMatchSeasons(getDatabase().db))
 
@@ -761,7 +768,10 @@ const dutchDayFormat = new Intl.DateTimeFormat('en-CA', {
  * two hours have passed since its kick-off (without a kick-off, its day is over). Within the
  * two hours it is still being played, and the line only shows the time.
  */
-export function lacksResult(match: PublicMatch, now: Date) {
+export function lacksResult(
+  match: Pick<PublicMatch, 'dateText' | 'goalsAgainst' | 'goalsFor' | 'kickoffAt' | 'matchDate' | 'status'>,
+  now: Date,
+) {
   if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
     return false
   }
@@ -1060,7 +1070,7 @@ function goalGroups(goals: ScorerGoal[]): ScorerGoal[][] {
  * end of its last day). A match that is played
  * has begun whatever the clock says, and one that is called off with no new date never has.
  */
-function hasBegun(match: PublicMatch, now: Date) {
+function hasBegun(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate' | 'status'>, now: Date) {
   if (match.status === 'played') {
     return true
   }
