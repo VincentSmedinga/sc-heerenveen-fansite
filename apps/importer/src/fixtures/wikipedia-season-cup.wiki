@@ -1,8 +1,8 @@
 <!--
   A trimmed piece of https://nl.wikipedia.org/wiki/KNVB_Beker_2025/26_(mannen)?action=raw, read on 29 October 2026.
   Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
-  Left out: the matches of other clubs, the text around the templates, and the referees, reports and
-  attendances (emptied). See the tests.
+  Left out: the matches of other clubs, the text around the templates, and the reports (emptied). The referees and
+  attendances are as the page has them: two matches have no attendance. See the tests.
 -->
 == Wedstrijden ==
 
@@ -19,7 +19,7 @@
 | location=[[Venlo (stad)|Venlo]]
 | stadium=[[Seacon Stadion - De Koel -]]
 | attendance=
-| referee=
+| referee=[[Stan Teuben|S.P.M. Teuben]]
 | report=
 }}
 
@@ -36,7 +36,7 @@
 | location=[[Rotterdam]]
 | stadium=[[Stadion Feijenoord|De Kuip]]
 | attendance=
-| referee=
+| referee=[[Bas Nijhuis|H.S.H. Nijhuis]]
 | report=
 }}
 
@@ -52,8 +52,8 @@
 | goals2={{goal|65}} [[Jesper Uneken|Uneken]]
 | location=[[Heerenveen (plaats)|Heerenveen]]
 | stadium=[[Abe Lenstra Stadion]]
-| attendance=
-| referee=
+| attendance=16.593
+| referee=[[Martijn Vos|M. Vos]]
 | videoreferee=
 | report=
 }}
@@ -70,8 +70,8 @@
 | goals2={{goal|77}} [[Luca Oyen|Oyen]]
 | location=[[Eindhoven]]
 | stadium=[[Philips Stadion]]
-| attendance=
-| referee=
+| attendance=26.200
+| referee=[[Joey Kooij|J. Kooij]]
 | videoreferee=
 | report=
 }}

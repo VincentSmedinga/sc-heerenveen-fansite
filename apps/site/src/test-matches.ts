@@ -12,6 +12,7 @@ const noGoals: PublicMatch['goals'] = []
 const base = {
   afterNinetyAgainst: null,
   afterNinetyFor: null,
+  attendance: null,
   dateText: null,
   extraTime: false,
   goals: noGoals,
@@ -21,6 +22,7 @@ const base = {
   note: null,
   penaltiesAgainst: null,
   penaltiesFor: null,
+  referee: null,
   stadium: null,
 } as const
 

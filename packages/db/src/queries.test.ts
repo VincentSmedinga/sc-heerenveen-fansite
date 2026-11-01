@@ -1861,6 +1861,7 @@ describe('the matches and the table of a season', () => {
       expect(Object.keys(row ?? {}).sort()).toEqual([
         'afterNinetyAgainst',
         'afterNinetyFor',
+        'attendance',
         'competition',
         'dateText',
         'extraTime',
@@ -1874,6 +1875,7 @@ describe('the matches and the table of a season', () => {
         'opponent',
         'penaltiesAgainst',
         'penaltiesFor',
+        'referee',
         'round',
         'stadium',
         'status',

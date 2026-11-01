@@ -522,21 +522,24 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * stadium, the status, the goals (null unless the match is played), whether it went to extra
  * time and the shoot-out (null unless there was one), the day, the kick-off in
  * UTC (null while it is unknown) and the date as Wikipedia has it (null when the kick-off is
- * known). `goals` are the scorers of a played match in the order of the clock, both clubs
- * together, and empty when the page names none. `player` is the name as the page shows it. A
- * goal of one of our players also has `playerId`, and the full name and the search term of
- * that player in `playerName` and `playerSearchTerm` (all three null for a goal that has no
- * player in the table `players`: a goal of the opponent, or one that could not be linked). The
- * player may have left the squad since. `playerPage` is the title of the player's Wikipedia
- * page as the table of the match links it, whether or not the goal is linked to a player, and
- * null when the table does not link the name. The moment the importer saw a result stays
- * internal. Only the season that is asked for is read: the pages show the current season alone.
+ * known), the number of spectators and the name of the referee (both null when the page does
+ * not give them; no page shows them yet). `goals` are the scorers of a played match in the
+ * order of the clock, both clubs together, and empty when the page names none. `player` is the
+ * name as the page shows it. A goal of one of our players also has `playerId`, and the full
+ * name and the search term of that player in `playerName` and `playerSearchTerm` (all three
+ * null for a goal that has no player in the table `players`: a goal of the opponent, or one
+ * that could not be linked). The player may have left the squad since. `playerPage` is the
+ * title of the player's Wikipedia page as the table of the match links it, whether or not the
+ * goal is linked to a player, and null when the table does not link the name. The moment the
+ * importer saw a result stays internal. Only the season that is asked for is read: the pages
+ * show the current season alone.
  */
 export async function listSeasonMatches(db: Database, season: string) {
   const rows = await db
     .select({
       afterNinetyAgainst: matches.afterNinetyAgainst,
       afterNinetyFor: matches.afterNinetyFor,
+      attendance: matches.attendance,
       competition: matches.competition,
       dateText: matches.dateText,
       extraTime: matches.extraTime,
@@ -550,6 +553,7 @@ export async function listSeasonMatches(db: Database, season: string) {
       opponent: matches.opponent,
       penaltiesAgainst: matches.penaltiesAgainst,
       penaltiesFor: matches.penaltiesFor,
+      referee: matches.referee,
       round: matches.round,
       stadium: matches.stadium,
       status: matches.status,

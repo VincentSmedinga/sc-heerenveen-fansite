@@ -12,6 +12,8 @@ import {
   wikipediaPageMaxLength,
 } from '@fansite/db/schema'
 
+import { printable } from './text.ts'
+
 /** One goal of a played match, as the page names it. */
 export type ReadGoal = {
   /** The minute on the clock: 45 for "45+1". */
@@ -37,11 +39,21 @@ export type ReadMatch = {
    */
   afterNinetyAgainst: null | number
   afterNinetyFor: null | number
+  /**
+   * The number of spectators of a played match: 0 for a match without an audience, null when
+   * the page has no number or none we can read (see `factsProblem`).
+   */
+  attendance: null | number
   competition: Competition
   /** The date as Wikipedia writes it, only when the time is unknown. */
   dateText: null | string
   /** Whether a played match went to extra time. Only the cup and the play-offs have it. */
   extraTime: boolean
+  /**
+   * Why the attendance or the referee could not be read, or null. Then the field in question
+   * is null and the match is imported all the same: it is a side issue.
+   */
+  factsProblem: null | string
   /**
    * The goals in the order of the clock, both clubs together. Null when the page names no
    * scorers (yet), and for a match that is not played. They are not checked against the score
@@ -73,6 +85,12 @@ export type ReadMatch = {
   /** The shoot-out of a match level after extra time, from our side. Both or neither. */
   penaltiesAgainst: null | number
   penaltiesFor: null | number
+  /**
+   * The full name of the referee, from the link target when the name is linked, else the text
+   * (`Sander van der Eijk` for `[[Sander van der Eijk|Van der Eijk]]`). Null when the page has
+   * none or none we can read: see `factsProblem`.
+   */
+  referee: null | string
   /** As Wikipedia has it: `Speelronde 12`, `Eerste ronde`. */
   round: string
   stadium: null | string
@@ -752,6 +770,50 @@ function keepsScoreAfterNinety(competition: Competition, round: string): boolean
 }
 
 /**
+ * The number of spectators of a box: none when the page leaves it open (empty, a dash or
+ * `n.b.`), a count, or something we cannot read. Dots, spaces and non-breaking spaces separate
+ * the thousands (`21.022`), and a count above `matchLimits.attendance` is a typing error.
+ */
+function parseAttendance(value: string): { count: number; kind: 'count' } | { kind: 'none' } | { kind: 'unknown' } {
+  const text = plain(value)
+
+  if (text === '' || /^(?:[–—-]|n\.? ?b\.?)$/iu.test(text)) {
+    return { kind: 'none' }
+  }
+  if (!/^(?:\d{1,3}(?:[.\s]\d{3})+|\d+)$/u.test(text)) {
+    return { kind: 'unknown' }
+  }
+
+  const count = Number(text.replace(/[.\s]/gu, ''))
+
+  return count > matchLimits.attendance ? { kind: 'unknown' } : { count, kind: 'count' }
+}
+
+/**
+ * The full name of the referee of a box: from the target of the first link when the name is
+ * linked (a replacement after it, `([[Joshua Kuipers|Kuipers]] 46')`, is left out), else the
+ * text up to a bracket. A disambiguation in the title (`Jan Smit (scheidsrechter)`) goes, and
+ * the control characters with it. None when the page leaves it open; unknown when what is left
+ * is no name: markup we do not read, or a name longer than the database holds.
+ */
+function parseReferee(value: string): { kind: 'name'; name: string } | { kind: 'none' } | { kind: 'unknown' } {
+  const page = linkedPage(value)
+  const text = plain(value)
+
+  if (text === '' || /^(?:[–—-]|n\.? ?b\.?)$/iu.test(text)) {
+    return { kind: 'none' }
+  }
+
+  const name = printable(page === null ? text.replace(/\s*\(.*$/u, '') : page.replace(/\s*\([^)]*\)$/u, ''))
+    .replace(/\s+/gu, ' ')
+    .trim()
+
+  return name === '' || /[[\]{}<>|]/u.test(name) || name.length > matchLimits.referee
+    ? { kind: 'unknown' }
+    : { kind: 'name', name }
+}
+
+/**
  * The score of a box: none yet, a score, called off, or something we do not know. A score is
  * the final score. The older cup pages add the score at half time in brackets
  * (`2 – 1 (1 – 0)`), or after extra time the score after 90 minutes and then the score at half
@@ -809,6 +871,31 @@ function parseTime(value: string): null | undefined | { hours: number; minutes: 
 }
 
 /**
+ * The spectators and the referee of a match, from the block that began it: the block of a match
+ * that was stopped is leading, as the rest is another day with another audience. A field that
+ * is open or cannot be read is null, and `problem` says which of them could not be read; they
+ * never stop the import of the match. Only a played match has spectators.
+ */
+function readFacts(
+  box: Template,
+  played: boolean,
+  name: string,
+): { attendance: null | number; problem: null | string; referee: null | string } {
+  const attendance = parseAttendance(box.params.get('attendance') ?? '')
+  const referee = parseReferee(box.params.get('referee') ?? '')
+  const problems = [
+    ...(attendance.kind === 'unknown' ? ['the attendance is not a number we can use'] : []),
+    ...(referee.kind === 'unknown' ? ['the referee is not a name we can use'] : []),
+  ]
+
+  return {
+    attendance: played && attendance.kind === 'count' ? attendance.count : null,
+    problem: problems.length === 0 ? null : `${name} ${problems.join(' and ')}`,
+    referee: referee.kind === 'name' ? referee.name : null,
+  }
+}
+
+/**
  * The goals of a played match from `goals1` (the home club) and `goals2` (the away club), in
  * order of the clock; at the same minute the home club's goal comes first. Null goals mean the
  * page names no scorers yet: both fields are empty.
@@ -845,7 +932,8 @@ function readGoals(box: Template, home: boolean): { goals: null | ReadGoal[]; pr
  * later block that finished it (see `restOf`). The stopped block gives where and when the
  * match began: the stadium, the date, the kick-off and who was at home, so the statistics per
  * stadium count the match for the place it began. The rest gives the result and the goals, and
- * the day and the stadium for the note (see `stoppedNote`).
+ * the day and the stadium for the note (see `stoppedNote`). The spectators and the referee
+ * are the ones of the stopped block (see `readFacts`).
  */
 function readMatch(box: Template, competition: Competition, round: null | string, rest?: Template): ReadMatch | string {
   const name = `${round ?? 'a match'} (${competition})`
@@ -927,6 +1015,7 @@ function readMatch(box: Template, competition: Competition, round: null | string
   const ours = score.kind === 'score' ? (resultHome ? score.home : score.away) : null
   const theirs = score.kind === 'score' ? (resultHome ? score.away : score.home) : null
   const scorers = status === 'played' ? readGoals(result, resultHome) : { goals: null, problem: null }
+  const facts = readFacts(box, status === 'played', name)
   const afterNinety =
     keepsScoreAfterNinety(competition, round) && extraTimeSaid && score.kind === 'score'
       ? scoreAfterNinety(score, result.params.get('half time score') ?? '')
@@ -935,9 +1024,11 @@ function readMatch(box: Template, competition: Competition, round: null | string
   return {
     afterNinetyAgainst: afterNinety === null ? null : resultHome ? afterNinety.away : afterNinety.home,
     afterNinetyFor: afterNinety === null ? null : resultHome ? afterNinety.home : afterNinety.away,
+    attendance: facts.attendance,
     competition,
     dateText: kickoffAt === null ? day.text.slice(0, matchLimits.dateText) : null,
     extraTime: extraTimeSaid && score.kind === 'score',
+    factsProblem: facts.problem,
     goals: scorers.goals,
     goalsAgainst: theirs,
     goalsFor: ours,
@@ -950,6 +1041,7 @@ function readMatch(box: Template, competition: Competition, round: null | string
     opponentPage: linkedPage(home ? team2 : team1),
     penaltiesAgainst: penalties.kind === 'score' ? (resultHome ? penalties.away : penalties.home) : null,
     penaltiesFor: penalties.kind === 'score' ? (resultHome ? penalties.home : penalties.away) : null,
+    referee: facts.referee,
     round,
     stadium,
     status,

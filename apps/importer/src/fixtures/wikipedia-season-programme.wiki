@@ -2,9 +2,10 @@
   A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2025/26_(mannenvoetbal)/Wedstrijden?action=raw, read on 29 October 2026.
   Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
   Left out: the matches of other clubs, except the abandoned ones with the block that finishes them and the last
-  match of the season, the text around the templates, and the referees, reports and attendances of every match
-  and the goal scorers of the matches of other clubs (emptied). The goal scorers of sc Heerenveen and the two
-  blocks of NAC Breda - sc Heerenveen are as the page has them. See the tests.
+  match of the season, the text around the templates, and the reports of every match, the referees and
+  attendances of the matches of other clubs and the goal scorers of the matches of other clubs (emptied). The goal
+  scorers, referees and attendances of sc Heerenveen and the two blocks of NAC Breda - sc Heerenveen are as the page
+  has them. See the tests.
 -->
 == Speelronde 1 ==
 {{Footballbox2
@@ -17,8 +18,8 @@
 |goals2 = {{goal|65}} [[Ozan Kökçü|Kökçü]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 23.764
+|referee = [[Marc Nagtegaal|Nagtegaal]]
 |videoreferee =
 |report =
 }}
@@ -35,8 +36,8 @@
 |goals2 = {{goal|15}} [[Jacob Trenskow|Trenskow]]
 |location = [[Groningen (stad)|Groningen]]
 |stadium = [[Euroborg]]
-|attendance =
-|referee =
+|attendance = 22.525
+|referee = [[Jeroen Manschot|Manschot]]
 |videoreferee =
 |report =
 }}
@@ -53,8 +54,8 @@
 |goals2 = {{goal|12}} [[Daan Rots|D. Rots]]<br />{{goal|84}} [[Naci Ünüvar|Ünüvar]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 21.772
+|referee = [[Dennis Higler|Higler]]
 |videoreferee =
 |report =
 }}
@@ -71,8 +72,8 @@
 |goals2 = {{goal|1}} [[Melle Meulensteen|Meulensteen]]<br />{{goal|90+3}} [[Finn Stokkers|Stokkers]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 22.771
+|referee = [[Allard Lindhout|Lindhout]]
 |videoreferee =
 |report =
 }}
@@ -89,8 +90,8 @@
 |goals2 = {{rode kaart|2|40|72}} [[Christijan Petrov|Petrov]]
 |location = [[Rotterdam]]
 |stadium = [[Stadion Feijenoord]]
-|attendance =
-|referee =
+|attendance = 47.500
+|referee = [[Robin Hensgens|Hensgens]]
 |videoreferee =
 |report =
 }}
@@ -107,8 +108,8 @@
 |goals2 = {{goal|65}} [[Koki Ogawa|Ogawa]]<br />{{goal|83}} [[Sami Ouaissa|Ouaissa]]<br />{{rode kaart|0|90+6}} [[Tjaronn Chery|Chery]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 22.411
+|referee = [[Jannick van der Laan|Van der Laan]]
 |videoreferee =
 |report =
 }}
@@ -125,8 +126,8 @@
 |goals2 = {{goal|39||70}} [[Dylan Vente|Vente]]
 |location = [[Utrecht (stad)|Utrecht]]
 |stadium = [[Stadion Galgenwaard]]
-|attendance =
-|referee =
+|attendance = 23.001
+|referee = [[Alex Bos|Bos]]
 |videoreferee =
 |report =
 }}
@@ -143,8 +144,8 @@
 |goals2 = {{goal|11}} [[Irakli Yegoian|Yegoian]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 22.298
+|referee = [[Richard Martens|Martens]]
 |videoreferee =
 |report =
 }}
@@ -161,8 +162,8 @@
 |goals2 = {{goal|21}} [[Jacob Trenskow|Trenskow]]<br />{{goal|42|pen.}} [[Dylan Vente|Vente]]<br />{{goal|54}} [[Ringo Meerveld|Meerveld]]
 |location = [[Velsen-Zuid]]
 |stadium = [[BUKO Stadion]]
-|attendance =
-|referee =
+|attendance = 5.293
+|referee = [[Dennis Higler|Higler]]
 |videoreferee =
 |report =
 }}
@@ -179,8 +180,8 @@
 |goals2 = {{goal|55}} [[Leo Greiml|Greiml]]<br />{{goal|58}} [[Sydney van Hooijdonk|Van Hooijdonk]]<br />{{goal|90+4}} [[Mohamed Nassoh|Nassoh]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 23.200
+|referee = [[Martin van den Kerkhof|Van den Kerkhof]]
 |videoreferee =
 |report =
 }}
@@ -197,8 +198,8 @@
 |goals2 = {{goal|68}} [[Václav Sejk|Sejk]]
 |location = [[Amsterdam]]
 |stadium = [[Johan Cruijff ArenA]]
-|attendance =
-|referee =
+|attendance = 54.283
+|referee = [[Jannick van der Laan|Van der Laan]]
 |videoreferee =
 |report =
 }}
@@ -215,8 +216,8 @@
 |goals2 =
 |location = [[Sittard]]
 |stadium = [[Fortuna Sittard Stadion]]
-|attendance =
-|referee =
+|attendance = 10.196
+|referee = [[Jeroen Manschot|Manschot]]
 |videoreferee =
 |report =
 }}
@@ -233,8 +234,8 @@
 |goals2 = {{goal|75}} [[Troy Parrott|Parrott]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 21.285
+|referee = [[Allard Lindhout|Lindhout]]
 |videoreferee =
 |report =
 }}
@@ -251,8 +252,8 @@
 |goals2 = {{goal|36}} [[Ringo Meerveld|Meerveld]]
 |location = [[Zwolle]]
 |stadium = [[MAC³PARK stadion]]
-|attendance =
-|referee =
+|attendance = 14.000
+|referee = [[Stan Teuben|Teuben]]
 |videoreferee =
 |report =
 }}
@@ -301,8 +302,8 @@
 |goals2 = {{goal|22}} [[Joey Veerman|Veerman]]<br />{{goal|27}} [[Ricardo Pepi|Pepi]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 24.372
+|referee = [[Serdar Gözübüyük|Gözübüyük]]
 |videoreferee =
 |report =
 }}
@@ -319,8 +320,8 @@
 |goals2 = {{goal|25}} [[Jacob Trenskow|Trenskow]]<br />{{goal|47}} [[Vasilios Zagaritis|Zagaritis]]<br />{{goal|70|e.d.}} [[Saïd Bakari|Bakari]]
 |location = [[Rotterdam]]
 |stadium = [[Spartastadion Het Kasteel]]
-|attendance =
-|referee =
+|attendance = 10.020
+|referee = [[Robin Hensgens|Hensgens]]
 |videoreferee =
 |report =
 }}
@@ -337,8 +338,8 @@
 |goals2 = {{goal|55}} [[Jacob Trenskow|Trenskow]]<br />{{goal|77}} [[Vasilios Zagaritis|Zagaritis]]<br />{{goal|90+5|pen.}} [[Maxence Rivera|Rivera]]
 |location = [[Almelo]]
 |stadium = [[Asito Stadion]]
-|attendance =
-|referee =
+|attendance = 11.834
+|referee = [[Martin van den Kerkhof|Van den Kerkhof]]
 |videoreferee =
 |report =
 }}
@@ -355,8 +356,8 @@
 |goals2 = {{goal|30}} [[Leo Sauer|Sauer]]<br />{{goal|43}} [[Sem Steijn|Steijn]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 22.334
+|referee = [[Sander van der Eijk|Van der Eijk]]
 |videoreferee =
 |report =
 }}
@@ -373,8 +374,8 @@
 |goals2 = {{goal|58|e.d.}} [[Bernt Klaverboer|Klaverboer]]<br />{{goal|79}} [[Thijmen Blokzijl|Blokzijl]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 24.105
+|referee = [[Rob Dieperink|Dieperink]]
 |videoreferee =
 |report =
 }}
@@ -391,8 +392,8 @@
 |goals2 = {{goal|58||68}} [[Lasse Nordås|Nordås]]<br />{{goal|81}} [[Jacob Trenskow|Trenskow]]
 |location = [[Deventer]]
 |stadium = [[De Adelaarshorst]]
-|attendance =
-|referee =
+|attendance = 8.662
+|referee = [[Robin Hensgens|Hensgens]]
 |videoreferee =
 |report =
 }}
@@ -409,8 +410,8 @@
 |goals2 = {{goal|54}} [[Jesper Karlsson|Karlsson]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 22.555
+|referee = [[Jannick van der Laan|Van der Laan]]
 |videoreferee =
 |report =
 }}
@@ -427,8 +428,8 @@
 |goals2 =
 |location = [[Enschede]]
 |stadium = [[De Grolsch Veste]]
-|attendance =
-|referee =
+|attendance = 29.500
+|referee = [[Jeroen Manschot|Manschot]]
 |videoreferee =
 |report =
 }}
@@ -445,8 +446,8 @@
 |goals2 = {{goal|13}} [[Younes Namli|Namli]]<br />{{goal|16}} [[Tristan Gooijer|Gooijer]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 22.510
+|referee = [[Ingmar Oostrom|Oostrom]]
 |videoreferee =
 |report =
 }}
@@ -495,8 +496,8 @@
 |goals2 = {{goal|21}} [[Lasse Nordås|Nordås]]
 |location = [[Eindhoven]]
 |stadium = [[Philips Stadion]]
-|attendance =
-|referee =
+|attendance = 34.600
+|referee = [[Rob Dieperink|Dieperink]]
 |videoreferee =
 |report =
 }}
@@ -513,8 +514,8 @@
 |goals2 = {{goal|86}} [[Mitchell van Bergen|Van Bergen]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 23.265
+|referee = [[Martijn Vos|Vos]]
 |videoreferee =
 |report =
 }}
@@ -531,8 +532,8 @@
 |goals2 = {{goal|38}} [[Luuk Brouwers|Brouwers]]<br />{{goal|67}} [[Joris van Overeem|Van Overeem]]
 |location = [[Rotterdam]]
 |stadium = [[Stadion Woudestein]]
-|attendance =
-|referee =
+|attendance = 4.600
+|referee = [[Danny Makkelie|Makkelie]]
 |videoreferee =
 |report =
 }}
@@ -549,8 +550,8 @@
 |goals2 =
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 24.100
+|referee = [[Sander van der Eijk|Van der Eijk]]
 |videoreferee =
 |report =
 }}
@@ -567,8 +568,8 @@
 |goals2 = {{goal|37}} [[Jacob Trenskow|Trenskow]]<br />{{goal|45}} [[Ringo Meerveld|Meerveld]]
 |location = [[Nijmegen]]
 |stadium = [[Goffertstadion]]
-|attendance =
-|referee =
+|attendance = 12.650
+|referee = [[Martin van den Kerkhof|Van den Kerkhof]]
 |videoreferee =
 |report =
 }}
@@ -585,8 +586,8 @@
 |goals2 = {{goal|21}} [[Mario Engels|Engels]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 23.878
+|referee = [[Ingmar Oostrom|Oostrom]]
 |videoreferee =
 |report =
 }}
@@ -603,8 +604,8 @@
 |goals2 =
 |location = [[Alkmaar]]
 |stadium = [[AFAS Stadion]]
-|attendance =
-|referee =
+|attendance = 18.554
+|referee = [[Marc Nagtegaal|Nagtegaal]]
 |videoreferee =
 |report =
 }}
@@ -621,8 +622,8 @@
 |goals2 = {{goal|12}} [[Philip Brittijn|Brittijn]]<br />{{rode kaart|0|90}} [[Ivo Pinto|Pinto]]
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 25.164
+|referee = [[Edwin van de Graaf|Van de Graaf]]
 |videoreferee =
 |report =
 }}
@@ -639,8 +640,8 @@
 |goals2 = {{goal|8}} [[Luca Oyen|Oyen]]<br />{{goal|86}} [[Dylan Vente|Vente]]
 |location = [[Volendam]]
 |stadium = [[Kras Stadion]]
-|attendance =
-|referee =
+|attendance = 6.948
+|referee = [[Serdar Gözübüyük|Gözübüyük]]
 |videoreferee =
 |report =
 }}
@@ -657,8 +658,8 @@
 |goals2 =
 |location = [[Breda]]
 |stadium = [[Rat Verlegh Stadion]]
-|attendance =
-|referee =
+|attendance = 19.241
+|referee = [[Sander van der Eijk|Van der Eijk]]
 |videoreferee =
 |report =
 }}
@@ -673,8 +674,8 @@
 |goals2 =
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 0
+|referee = [[Sander van der Eijk|Van der Eijk]]
 |videoreferee =
 |report =
 }}
@@ -707,8 +708,8 @@
 |goals2 =
 |location = [[Heerenveen (plaats)|Heerenveen]]
 |stadium = [[Abe Lenstra Stadion]]
-|attendance =
-|referee =
+|attendance = 25.450
+|referee = [[Joey Kooij|Kooij]]
 |videoreferee =
 |report =
 }}

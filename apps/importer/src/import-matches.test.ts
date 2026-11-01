@@ -1580,6 +1580,132 @@ describe('a result that changes', () => {
   })
 })
 
+describe('the spectators and the referee', () => {
+  /** Round 1 was played on 9 August 2026, and this is half an hour after it ended. */
+  const roundOne = new Date('2026-08-09T17:30:00Z')
+  const after = (at: Date, ...spans: number[]) => new Date(at.getTime() + spans.reduce((sum, span) => sum + span, 0))
+  const days = (count: number) => count * 24 * hours(1)
+  const roundOneRow = async () => (await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1')))[0]
+  const changes = () => database.db.select().from(matchChanges).orderBy(asc(matchChanges.id))
+  const emptied = '|attendance = \n|referee ='
+  const filled = '|attendance = 21.022\n|referee = [[Sander van der Eijk|Van der Eijk]]'
+  /** The programme with these two lines in the box of round 1, the only one with a number. */
+  const withFacts = (programme: string, lines: string) => programme.replace('|attendance = 21.022\n|referee =', lines)
+
+  it('stores the number and the full name of a played match, and nothing for a match that is not played', async () => {
+    const { server } = await serve({ programme: withFacts(original.programme, filled) })
+
+    expect(await importAt(server, roundOne)).toMatchObject({ kind: 'imported', warnings: [] })
+    expect(await roundOneRow()).toMatchObject({ attendance: 21022, referee: 'Sander van der Eijk' })
+
+    const others = (await database.db.select().from(matches)).filter((match) => match.round !== 'Speelronde 1')
+
+    expect(others.every((match) => match.referee === null)).toBe(true)
+    expect(others.filter((match) => match.status !== 'played').every((match) => match.attendance === null)).toBe(true)
+  })
+
+  it('stores an attendance of 0 as 0, which is a match without an audience', async () => {
+    const { server } = await serve({ programme: withFacts(original.programme, '|attendance = 0\n|referee =') })
+
+    await importAt(server, roundOne)
+    expect(await roundOneRow()).toMatchObject({ attendance: 0, referee: null })
+  })
+
+  it('fills in what was empty from the next import, without a warning or a note in match_changes', async () => {
+    const { pages, server } = await serve({ programme: withFacts(original.programme, emptied) })
+
+    await importAt(server, roundOne)
+    expect(await roundOneRow()).toMatchObject({ attendance: null, referee: null })
+
+    pages.programme = withFacts(original.programme, filled)
+
+    const report = await importAt(server, after(roundOne, days(30)))
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { held: 0, unchanged: 34, updated: 1 }, warnings: [] })
+    expect(await roundOneRow()).toMatchObject({ attendance: 21022, referee: 'Sander van der Eijk' })
+    expect(await changes()).toEqual([])
+    expect(await importAt(server, after(roundOne, days(30), hours(1)))).toMatchObject({
+      matches: { unchanged: 35, updated: 0 },
+    })
+  })
+
+  it('takes a revised attendance over as a correction, with a warning', async () => {
+    const { pages, server } = await serve({ programme: withFacts(original.programme, filled) })
+
+    await importAt(server, roundOne)
+    pages.programme = withFacts(original.programme, filled.replace('21.022', '21.318'))
+
+    const at = after(roundOne, days(10))
+    const report = await importAt(server, at)
+
+    expect(report).toMatchObject({
+      matches: { held: 0, updated: 1 },
+      warnings: ['Speelronde 1 (Eredivisie): the attendance was revised'],
+    })
+    expect(await roundOneRow()).toMatchObject({ attendance: 21318 })
+    expect(await changes()).toMatchObject([
+      {
+        changed: 'attendance',
+        class: 'improvement',
+        newValue: expect.stringContaining('21318 spectators'),
+        oldValue: expect.stringContaining('21022 spectators'),
+        status: 'accepted',
+      },
+    ])
+  })
+
+  it('holds another referee for a match of days ago, and takes it over when the page keeps it', async () => {
+    const { pages, server } = await serve({ programme: withFacts(original.programme, filled) })
+
+    await importAt(server, roundOne)
+    pages.programme = withFacts(
+      original.programme,
+      filled.replace('Sander van der Eijk|Van der Eijk', 'Danny Makkelie|Makkelie'),
+    )
+
+    const heldAt = after(roundOne, days(4))
+
+    expect(await importAt(server, heldAt)).toMatchObject({
+      matches: { held: 1, updated: 0 },
+      warnings: ['held, Speelronde 1 (Eredivisie): the referee of a match played 4 days ago changed'],
+    })
+    expect(await roundOneRow()).toMatchObject({ referee: 'Sander van der Eijk' })
+    expect(await changes()).toMatchObject([{ changed: 'referee', class: 'suspicious', status: 'pending' }])
+
+    expect(await importAt(server, after(heldAt, days(7)))).toMatchObject({ matches: { held: 0, updated: 1 } })
+    expect(await roundOneRow()).toMatchObject({ referee: 'Danny Makkelie' })
+  })
+
+  it('keeps a number that goes from the page for as long as it waits', async () => {
+    const { pages, server } = await serve({ programme: withFacts(original.programme, filled) })
+
+    await importAt(server, roundOne)
+    pages.programme = withFacts(original.programme, emptied)
+
+    expect(await importAt(server, after(roundOne, hours(2)))).toMatchObject({
+      matches: { held: 1, updated: 0 },
+      warnings: ['held, Speelronde 1 (Eredivisie): the attendance of a played match is no longer on the page'],
+    })
+    expect(await roundOneRow()).toMatchObject({ attendance: 21022, referee: 'Sander van der Eijk' })
+  })
+
+  it('imports a match whose number or name it cannot read, with a warning and without them', async () => {
+    const { server } = await serve({
+      programme: withFacts(original.programme, '|attendance = ongeveer 21.000\n|referee = {{x}}'),
+    })
+
+    const report = await importAt(server, roundOne)
+
+    expect(report).toMatchObject({
+      kind: 'imported',
+      warnings: [
+        'Speelronde 1 (Eredivisie) the attendance is not a number we can use and the referee is not a name we can use',
+      ],
+    })
+    expect(await roundOneRow()).toMatchObject({ attendance: null, goalsFor: 1, referee: null, status: 'played' })
+  })
+})
+
 describe('a read that fails a check or a page that has changed', () => {
   const failures: [string, (pages: Pages) => Partial<Pages>, string][] = [
     [

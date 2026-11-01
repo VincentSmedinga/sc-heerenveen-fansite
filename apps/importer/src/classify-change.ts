@@ -52,7 +52,10 @@ export type GoalState = Pick<ReadGoal, 'minute' | 'ours' | 'ownGoal' | 'penalty'
 
 /** What the importer judged about the change of one match. */
 export type Judgement = {
-  /** What changed: `result`, `goals`, `date`, `opponent`, `stadium` or `removed`. */
+  /**
+   * What changed: `result`, `goals`, `date`, `opponent`, `stadium`, `attendance`, `referee` or
+   * `removed`.
+   */
   changed: string[]
   class: ChangeClass
   /** Whether the change replaces information we had, not only fills in what was empty. */
@@ -74,6 +77,7 @@ export type MatchState = Pick<
   Match,
   | 'afterNinetyAgainst'
   | 'afterNinetyFor'
+  | 'attendance'
   | 'clubId'
   | 'dateText'
   | 'extraTime'
@@ -86,6 +90,7 @@ export type MatchState = Pick<
   | 'opponent'
   | 'penaltiesAgainst'
   | 'penaltiesFor'
+  | 'referee'
   | 'stadium'
   | 'status'
 >
@@ -114,7 +119,9 @@ export function describeState(match: MatchState, goals: GoalState[]): string {
   const when = match.kickoffAt === null ? (match.dateText ?? match.matchDate) : match.kickoffAt.toISOString()
   const venue = match.stadium === null ? '' : `, ${match.stadium}`
   const note = match.note === null ? '' : ` (${match.note})`
-  const head = `${match.home ? 'home' : 'away'} ${match.opponent}, ${when}${venue}${note}: ${score}`
+  const spectators = match.attendance === null ? '' : `, ${match.attendance} spectators`
+  const referee = match.referee === null ? '' : `, referee ${match.referee}`
+  const head = `${match.home ? 'home' : 'away'} ${match.opponent}, ${when}${venue}${spectators}${referee}${note}: ${score}`
 
   return goals.length === 0 ? head : `${head}; ${goals.map(describeGoal).join(', ')}`
 }
@@ -313,6 +320,28 @@ function judge({ at, before, beforeGoals, now, nowGoals, previousReadAt }: Chang
   }
   if (before.note !== now.note) {
     judgement = worse(judgement, before.note === null ? part('note', 'new') : shown('note', 'the note'))
+  }
+  if (before.attendance !== now.attendance) {
+    // Filling an empty field is news. The number is often revised after the match, so a new
+    // number is a correction; a number that disappears is not.
+    judgement = worse(
+      judgement,
+      before.attendance === null || before.status !== 'played'
+        ? part('attendance', 'new')
+        : now.attendance === null
+          ? part('attendance', 'suspicious', 'the attendance of a played match is no longer on the page', true)
+          : part('attendance', 'improvement', 'the attendance was revised', true),
+    )
+  }
+  if (before.referee !== now.referee) {
+    judgement = worse(
+      judgement,
+      before.referee === null
+        ? part('referee', 'new')
+        : now.referee === null
+          ? part('referee', 'suspicious', 'the referee is no longer on the page', true)
+          : shown('referee', 'the referee'),
+    )
   }
   if (before.dateText !== now.dateText) {
     // The weekend that becomes a day, or a time, is news; a played match keeps its date.

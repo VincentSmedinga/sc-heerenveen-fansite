@@ -798,6 +798,18 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Dat is de enige manier om de paren te herkennen, want een paar redacteuren schreven ze omgekeerd (de rust eerst).
   Een veld met één paar, een leeg veld, een veld dat we niet kunnen lezen en paren die niet kloppen geven "niet bekend": de wedstrijd blijft bewaard zonder die stand, en het is geen fout.
   De stand na 90 minuten mag gelijk zijn aan de eindstand, want de verlenging kan zonder doelpunt voorbijgaan.
+- Hij bewaart ook het aantal toeschouwers (`attendance`) en de scheidsrechter (`referee`) uit de velden `attendance` en `referee` van elk blok, voor de competitie, de beker en de play-offs.
+  Punten, spaties en vaste spaties in het getal zijn duizendtallen ("21.022" is 21022), en `0` is een wedstrijd zonder publiek.
+  Alleen een gespeelde wedstrijd heeft een aantal.
+  De scheidsrechter is de volledige naam uit het doel van de link (`[[Sander van der Eijk|Van der Eijk]]` geeft "Sander van der Eijk"), of de tekst als er geen link is.
+  Een vervanger achter de naam telt niet mee.
+  We bewaren geen link, pagina of foto van de scheidsrechter.
+  Een leeg veld, een streepje of "n.b." is "niet bekend".
+  Een getal boven 150.000, tekst die geen getal is en een naam met opmaak die we niet lezen geven ook "niet bekend", met een waarschuwing in het logboek: de wedstrijd blijft bewaard, en het is geen fout.
+  Bij een gestaakte wedstrijd zijn het de gegevens van het gestaakte blok, want dat is de wedstrijd (19.241 en Van der Eijk voor NAC Breda – sc Heerenveen).
+  Een leeg veld dat later gevuld wordt, gaat zonder meer door.
+  Een bijgesteld aantal is een verbetering, en een andere scheidsrechter bij een wedstrijd van drie dagen of langer geleden wacht (zie _Hoe betrouwbaar een wijziging is_).
+  Geen pagina toont deze velden nog.
   Bij een wedstrijd zonder `aet` leest hij `half time score` niet als stand na 90 minuten, ook niet met een komma erin.
   De stand bij de rust bewaart hij niet.
   Een ronde van de play-offs met een heen- en terugwedstrijd ("Halve finale, wedstrijd 1/2") krijgt hem niet, want de verlenging komt na de tweede wedstrijd.
@@ -998,11 +1010,11 @@ Hij vergelijkt per wedstrijd wat de pagina nu zegt met wat in de database staat,
 Alleen wat de import zelf ziet telt: de pagina, de tijd van de wedstrijd en de momenten waarop hij iets voor het eerst zag.
 De bewerkingsgeschiedenis van Wikipedia leest hij niet, want die staat onder `/w/`.
 
-| Soort                        | Wat de import doet                                                             | Voorbeelden                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nieuwe informatie            | Neemt de wijziging meteen over, zonder melding.                                | Een nieuwe wedstrijd. Een uitslag binnen drie dagen na de aanvang. Doelpuntenmakers bij een wedstrijd die er geen had, of doelpunten erbij waarbij de bestaande blijven. Een aanvangstijd, een datum of een uitstel voor een wedstrijd die niet is gespeeld. Verlenging of strafschoppen die bij dezelfde score verschijnen. |
-| Verbetering van kort geleden | Neemt de wijziging over, met een waarschuwing en een regel in `match_changes`. | Een uitslag die minder dan 24 uur nadat hij voor het eerst stond verandert, bij een wedstrijd van minder dan drie dagen geleden. Een doelpunt dat verandert bij zo'n wedstrijd. Een tikfout van een uur oud.                                                                                                                 |
-| Verdacht                     | Laat de oude waarde staan en houdt de wijziging vast.                          | Alles wat in geen andere regel past. Zie hieronder.                                                                                                                                                                                                                                                                          |
+| Soort                        | Wat de import doet                                                             | Voorbeelden                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nieuwe informatie            | Neemt de wijziging meteen over, zonder melding.                                | Een nieuwe wedstrijd. Een uitslag binnen drie dagen na de aanvang. Doelpuntenmakers bij een wedstrijd die er geen had, of doelpunten erbij waarbij de bestaande blijven. Een aanvangstijd, een datum of een uitstel voor een wedstrijd die niet is gespeeld. Verlenging of strafschoppen die bij dezelfde score verschijnen. Een toeschouwersaantal of een scheidsrechter die er nog niet was. |
+| Verbetering van kort geleden | Neemt de wijziging over, met een waarschuwing en een regel in `match_changes`. | Een uitslag die minder dan 24 uur nadat hij voor het eerst stond verandert, bij een wedstrijd van minder dan drie dagen geleden. Een doelpunt dat verandert bij zo'n wedstrijd. Een tikfout van een uur oud.                                                                                                                                                                                   |
+| Verdacht                     | Laat de oude waarde staan en houdt de wijziging vast.                          | Alles wat in geen andere regel past. Zie hieronder.                                                                                                                                                                                                                                                                                                                                            |
 
 Een wijziging is verdacht als:
 
@@ -1011,6 +1023,8 @@ Een wijziging is verdacht als:
 - een gespeelde wedstrijd weer "gepland" wordt;
 - een wedstrijd van de pagina verdwijnt;
 - de datum of de tegenstander van een gespeelde wedstrijd van drie dagen of langer geleden verandert;
+- de scheidsrechter van een gespeelde wedstrijd van drie dagen of langer geleden verandert;
+- een toeschouwersaantal of een scheidsrechter van een gespeelde wedstrijd weer van de pagina verdwijnt;
 - een uitslag pas komt nadat de import de pagina na de eerste drie dagen zag zonder uitslag;
 - een wedstrijd weer de waarde krijgt die hij eerder had (A, dan B, dan A), of een eerder afgewezen waarde terugkomt: dat kan een bewerkingsoorlog zijn;
 - de wedstrijd bij een afgelopen seizoen hoort en de wijziging iets overschrijft: zijn wedstrijden veranderen niet meer;
@@ -1021,6 +1035,7 @@ Een grens is strikt: een uitslag die precies 24 uur of precies drie dagen vastst
 Een nieuwe link naar een andere pagina over dezelfde tegenstander is nieuwe informatie, ook bij een oude wedstrijd.
 Een andere spelling van zijn naam, een ander stadion of een andere datumtekst telt als een gewone wijziging: bij een gespeelde wedstrijd een verbetering of verdacht, en altijd meetellend voor de grens van zes.
 Een doelpunt dat alleen zijn speler of pagina krijgt (de selectie is bijgewerkt) ook.
+Een bijgesteld aantal toeschouwers is bij een gespeelde wedstrijd een verbetering, ook na dagen, en een andere scheidsrechter bij een wedstrijd van minder dan drie dagen geleden ook.
 
 Een verbetering geeft een regel zoals:
 
@@ -1216,8 +1231,7 @@ De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het resta
 - De schutters bij de strafschoppen en de stand bij de rust bewaart hij niet: alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging, de stand na 90 minuten als de pagina die geeft en de score van de strafschoppen.
 - Een puntenaftrek rekent hij niet mee.
   De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
-- Scheidsrechter, toeschouwers en opstellingen leest hij niet, en ook geen kaarten, wissels of assists.
-  Ook de fixtures hebben die velden leeg gemaakt.
+- Opstellingen leest hij niet, en ook geen kaarten, wissels of assists.
 - Andere seizoenen leest hij niet in de uurlijkse import (alleen `pnpm run import:season` leest een afgelopen seizoen), en wedstrijden van andere teams van de club ook niet.
 
 ## De selectie
@@ -1398,7 +1412,7 @@ De tests van de opdracht voor een afgelopen seizoen lezen stukken van de echte p
 Het programma heeft alle wedstrijden van sc Heerenveen, de twee blokken van NAC Breda – sc Heerenveen, de gestaakte wedstrijden van andere clubs met het blok dat ze afmaakt, en de laatste wedstrijd van het seizoen.
 Ze zijn gelezen op 25 oktober 2026, en bovenaan staat de herkomst en de licentie (CC BY-SA 4.0).
 Er staan alle 34 wedstrijden van sc Heerenveen in en een paar van andere clubs.
-De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs, de scheidsrechters en de verslagen zijn leeggemaakt.
+De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs, de verslagen en de scheidsrechters en toeschouwers van andere clubs zijn leeggemaakt.
 [`wikipedia-playoffs-2026.wiki`](src/fixtures/wikipedia-playoffs-2026.wiki) en `wikipedia-playoffs-2025.wiki` zijn het begin van de echte pagina's van de play-offs, gelezen op 1 november 2026, met de halve finale van sc Heerenveen tegen FC Utrecht en tegen AZ.
 `wikipedia-playoffs-2024.wiki` is een jaar zonder sc Heerenveen, en `wikipedia-playoffs-2022.wiki` een jaar met een halve finale over twee wedstrijden.
 [`wikipedia-playoffs-after-ninety.wiki`](src/fixtures/wikipedia-playoffs-after-ninety.wiki) heeft twee verzonnen wedstrijden met verlenging in de lay-out van de echte pagina, met `half time score` zoals de bekerpagina het schrijft, omdat de echte play-offpagina's dat veld nog niet hebben.
