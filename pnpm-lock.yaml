@@ -249,8 +249,8 @@ importers:
         specifier: 0.45.4
         version: 0.45.4(mysql2@3.24.6(@types/node@24.19.2))
       entities:
-        specifier: 7.0.1
-        version: 7.0.1
+        specifier: 9.0.0
+        version: 9.0.0
       fast-xml-parser:
         specifier: 5.11.2
         version: 5.11.2
@@ -2756,6 +2756,10 @@ packages:
 
   entities@8.1.0:
     resolution: {integrity: sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==}
+    engines: {node: '>=20.19.0'}
+
+  entities@9.0.0:
+    resolution: {integrity: sha512-oJFNDJg3kTPwAD1cNn2+WmUq4wFoo09npc3Ydf1D7ED4smRiWrsKnaLxykrTWgyGEcusc87P5dxlAleol9kpkg==}
     engines: {node: '>=20.19.0'}
 
   env-paths@2.2.1:
@@ -6039,6 +6043,8 @@ snapshots:
   entities@7.0.1: {}
 
   entities@8.1.0: {}
+
+  entities@9.0.0: {}
 
   env-paths@2.2.1: {}
 
