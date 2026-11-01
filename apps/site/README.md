@@ -281,7 +281,10 @@ Een wedstrijd is een `Match` uit het designsysteem, de stand een `StandingsTable
 De aftrap staat in Nederlandse tijd (`src/match-format.ts`), zoals "zo 1 nov 14:30", met het jaar als dat niet dit jaar is.
 Is de aftrap nog niet bekend, dan staat er het weekend, zoals "weekend 12–14 februari", uit `date_text`; een uitslag heeft alleen de dag.
 Onderaan de zijbalk staat de bronvermelding (`WikipediaCredit`) in een doorzichtige kaart (`Card` met `surface="transparent"`), zodat de tekst op één lijn staat met de tekst in de kaarten erboven.
-Ze noemt de licentie, linkt naar elke pagina van Wikipedia die de import las, noemt de tijd van de laatste keer lezen en zegt dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
+Ze staat dicht, op elke pagina en voor elk aantal pagina's: een `details` met een `summary` die "Bron: Wikipedia" zegt, zonder link.
+Eén klik laat de licentie zien, een link naar elke pagina van Wikipedia die de import las, de tijd van de laatste keer lezen en de zin dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
+De bron is dus zonder klik te zien (principe 4 van de Redactie), en de rest is één klik verder.
+Ze werkt zonder JavaScript en met het toetsenbord.
 Ze linkt niet naar de geschiedenis van die pagina's: Wikipedia ziet een link naar het artikel als een goede bronvermelding, en de auteurs staan in de geschiedenis van het artikel.
 Onder de twee blokken op de homepage staat alleen "Bron: Wikipedia".
 De pagina's komen uit `wikipedia_pages` (alleen die van de wedstrijden, niet de pagina van de selectie); zonder gegevens van de wedstrijden staat er ook geen bronvermelding.
@@ -300,7 +303,7 @@ Rechts staan de doelpuntenmakers (de top 5, zie _De spelers_), de nul gehouden, 
 De volgorde in de broncode blijft de volgorde van de balk en van een telefoon.
 Op een telefoon staan alle kaarten onder elkaar, eerst die van de linker kolom.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/statistieken`, de links in `src/statisticsShortcuts.ts`).
-De kaarten tellen standaard alle wedstrijden, de Eredivisie en de KNVB Beker; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
+De kaarten tellen standaard alle wedstrijden, de Eredivisie, de KNVB Beker en de play-offs voor de Conference League; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
 Onder het hoofdmenu staat een balk met de subpagina's van Statistieken, nu Spelers en Tegenstanders.
 De links van die balk houden het seizoen en de keuze tussen alle wedstrijden en de Eredivisie vast: op `/statistieken/2025-26?competitie=eredivisie` gaat Spelers naar `/statistieken/spelers/2025-26?competitie=eredivisie`, en Tegenstanders naar `/statistieken/tegenstanders?competitie=eredivisie` (die telt alle seizoenen).
 De items van het menu zelf houden niets vast: Statistieken is altijd `/statistieken`.
@@ -448,8 +451,8 @@ De kaart Wedstrijden toont elke gespeelde wedstrijd, de nieuwste eerst, met het 
 Een slug die geen club heeft, een andere waarde van `?competitie=` en een waarde die twee keer staat, geven "niet gevonden".
 
 De pagina's tellen de wedstrijden van alle seizoenen, dus ze hebben geen seizoenskiezer.
-Ze volgen de schakelaar tussen alle wedstrijden en de Eredivisie (`CompetitionLinks` in `src/CompetitionSwitch.tsx`, zie _De keuze tussen alle wedstrijden en de Eredivisie_), die er alleen staat als er een gespeelde bekerwedstrijd is.
-Een club die we alleen in de beker troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt dat we in de Eredivisie nog niet tegen hem speelden.
+Ze volgen de schakelaar tussen alle wedstrijden en de Eredivisie (`CompetitionLinks` in `src/CompetitionSwitch.tsx`, zie _De keuze tussen alle wedstrijden en de Eredivisie_), die er alleen staat als er een gespeelde bekerwedstrijd of play-offwedstrijd is.
+Een club die we alleen in de beker of de play-offs troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt dat we in de Eredivisie nog niet tegen hem speelden.
 De keuze zit in elke link van de lijst.
 
 De code staat in `src/opponents.ts` (de optelling van de wedstrijden en de gecachete lezingen, op de queries van `packages/db`), `src/OpponentViews.tsx` (de kaarten) en `app/statistieken/tegenstanders` (de twee pagina's).
@@ -464,12 +467,13 @@ Bovenaan `/statistieken`, `/statistieken/spelers`, `/statistieken/tegenstanders`
 Alle wedstrijden is de standaard en heeft geen parameter; Eredivisie is `?competitie=eredivisie`.
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
 Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.
-De schakelaar staat er alleen bij een seizoen met een gespeelde bekerwedstrijd (`hasPlayedCupMatch`): zonder die zijn de twee keuzes gelijk.
+De schakelaar staat er alleen bij een seizoen met een gespeelde bekerwedstrijd of play-offwedstrijd (`hasPlayedExtraMatch`): zonder die zijn de twee keuzes gelijk.
+De play-offs voor de Conference League tellen net als de beker alleen bij Alle wedstrijden, en de bijschriften van de kaarten noemen wat meetelt: "de Eredivisie en de play-offs", of met beide "de Eredivisie, de KNVB Beker en de play-offs" (`competitionNames`).
 Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alle wedstrijden alleen de wedstrijden die er zijn.
 
 De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Doelpuntenmakers (ook op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier en Uitersten.
 De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes en de stand na 90 minuten rusten.
-Een bekerwedstrijd telt met de score na de verlenging.
+Een bekerwedstrijd en een play-offwedstrijd tellen met de score na de verlenging.
 Een strafschoppenserie telt niet mee: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel.
 Doelpunten in de verlenging blijven buiten Doelpunten per kwartier, met de zin die dat zegt.
 De hulpfuncties in `src/matches.ts` krijgen de keuze als laatste argument (`CompetitionChoice`); wie het weglaat, krijgt wat de kaart tot nu toe deed.

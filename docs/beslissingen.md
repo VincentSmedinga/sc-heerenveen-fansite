@@ -3992,6 +3992,25 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   In forced colours heeft hij de kleur van de achtergrond, zodat hij ook daar niet te zien is.
 - **Alternatieven:** de bronvermelding zonder kaart laten (de tekst staat dan aan de rand van de kolom, naast de tekst in de kaarten); de link naar de geschiedenis houden (volledig, maar twee links in een zin die voor het oog een bijzaak is).
   **Let op:** de CC BY-SA vraagt een aanduiding van de auteurs op een redelijke manier; een link naar het artikel voldoet volgens de uitleg van Wikipedia over hergebruik, maar geen jurist heeft dat getoetst.
+- **Later:** zie _De bronvermelding van Wikipedia staat dicht in een uitklap_.
+  De volledige vorm is een `details` met "Bron: Wikipedia" in de `summary`; de licentie, de pagina's, de tijd van het lezen en de zin over onze gegevens staan in de uitklap.
+  De doorzichtige kaart, het ontbreken van een link naar de geschiedenis en de korte vorm blijven.
+
+### De bronvermelding van Wikipedia staat dicht in een uitklap
+
+- **Datum:** 1 november 2026
+- **Besluit:** de volledige vorm van `WikipediaCredit` is een `details` met een `summary` die "Bron: Wikipedia" zegt, en staat dicht voor elke pagina, ook als er maar één is (de projecteigenaar, 1 november 2026).
+  De uitklap heeft de licentie "CC BY-SA 4.0" met zijn link, de pagina's met hun links, "Laatst gelezen op …" en de zin dat onze gegevens ook CC BY-SA 4.0 zijn.
+  De `summary` heeft geen link, want een klik doet dan twee dingen.
+  De korte vorm (`compact`) verandert niet.
+- **Waarom:** op Tegenstanders staat een link naar elk seizoen, en de bronvermelding was langer dan de lijst erboven.
+  "Bron: Wikipedia" is zonder klik te zien, zoals principe 4 van de Redactie vraagt, en de licentie en de pagina's zijn één klik verder.
+  Eén vorm is makkelijker te leren dan een vorm die afhangt van het aantal pagina's.
+- **Hoe:** een gewone `details`, zonder script: het werkt met het toetsenbord (Enter en spatie), een schermlezer meldt dat hij is in- of uitgeklapt en de browser zoekt ook in de dichte tekst.
+  Het pijltje is het icoon `arrow-down` in de kleur van de metatekst; het draait een halve slag als hij open is, met de tijden van de beweging, dus bij "minder beweging" klapt het om zonder te draaien.
+  De regel van de `summary` is minstens 44 pixels hoog om te raken met een duim.
+  De controle op de pagina's (`checkPage`) klapt elke `details` open voor axe, want axe slaat ingeklapte tekst over.
+- **Alternatieven:** alleen inklappen bij veel pagina's (twee vormen om te leren, en de grens is willekeurig); "Bron: Wikipedia (CC BY-SA 4.0)" met een link in de `summary` (een klik doet twee dingen); de pagina's weglaten (de licentie vraagt een aanduiding van de auteurs, en die staat in de link naar het artikel).
 
 ### Zoeken in koppen, afleveringen en artikelen, met LIKE
 
@@ -5652,6 +5671,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Elke 15 minuten lezen (vier keer zoveel verzoeken aan Wikipedia voor weinig winst).
   Een ontbrekende bekerpagina overslaan (een hernoemde pagina laat dan stil onze bekerwedstrijden verdwijnen).
   Een bekerpagina zonder sjablonen altijd tegenhouden (vroeg in het seizoen blokkeert dat de competitie wekenlang).
+- **Later:** zie _De play-offs voor de Conference League zijn een derde competitie, een ontbrekende pagina is geen mislukking_.
+  De import leest daarna vier pagina's; alleen de pagina van de play-offs mag ontbreken (404).
 
 ### Een uitslag die verandert, nemen we over, en na drie dagen met een waarschuwing
 
@@ -6021,6 +6042,40 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Bewaking van de beschikbaarheid van de site hoort bij #172.
   Een mail bij elke fout: te veel mail bij een storing van een uur bij een bron.
   Kolommen bij de bestaande gezondheidstabellen, zonder nieuwe tabel: de back-up heeft er geen.
+
+### De play-offs voor de Conference League zijn een derde competitie, een ontbrekende pagina is geen mislukking
+
+- **Datum:** 1 november 2026
+- **Besluit:** de import leest de play-offs voor de Conference League van sc Heerenveen als een derde competitie, naast de Eredivisie en de KNVB Beker (#543).
+  - **De pagina:** `Play-offs Nederlands voetbal <jaar>`, met het jaar waarin het seizoen eindigt (2027 voor 2026/27).
+    De import leest alleen de wedstrijden van sc Heerenveen onder de kop `Play-offs voor de UEFA Conference League` (in 2022 en 2023 met `Europa` erin).
+    De play-offs om promotie en degradatie op dezelfde pagina leest hij niet.
+  - **De competitie:** `Play-offs Conference League` in `matches.competition`, en de soort `playoffs` in `wikipedia_pages.kind`, met een migratie (`0023_add_conference_playoffs`).
+    De ronde is `Halve finale` of `Finale`, de kop boven de wedstrijd, en bij een halve finale over twee wedstrijden (2022 en 2023) `Halve finale, wedstrijd 1/2`.
+    Verlenging en strafschoppen leest hij zoals bij de beker, dus de CHECK-constraint voor verlenging staat nu op beide competities (`matches_extra_time_only_in_played_knockout`).
+  - **Een pagina die er niet is:** Wikipedia geeft 404 zolang de pagina niet bestaat, en dat is geen mislukking.
+    De import gaat door met de andere pagina's, schrijft geen fout en telt niet mee voor `failures_in_a_row`, dus ook niet voor de mail van #533.
+    De play-offwedstrijden die er al zijn, blijven staan.
+    Elk ander antwoord blijft een mislukking, en een pagina zonder de kop van de Conference League ook: dan is hij veranderd.
+  - **Een jaar zonder sc Heerenveen:** de pagina heeft de kop en geen wedstrijd van ons.
+    Dat is geen fout; de import bewaart geen wedstrijd en noemt de pagina niet als bron.
+  - **De cijfers:** de play-offs tellen alleen mee bij "Alle wedstrijden", zoals de beker, en niet in de stand of bij "Eredivisie".
+    De schakelaar staat er ook als de enige extra wedstrijd een play-offwedstrijd is.
+    De bijschriften noemen "de Eredivisie en de play-offs", of met beide "de Eredivisie, de KNVB Beker en de play-offs".
+  - **De spelersstatistieken:** `player_season_stats` houdt twee competities (`statsCompetitions`), want de tabel van de selectie heeft geen kolommen voor de play-offs.
+    De doelpuntenmakers van de wedstrijd staan wel in `match_goals`.
+- **Waarom:** de halve finale van 2026 (FC Utrecht – sc Heerenveen 3–2) en die van 2025 (AZ – sc Heerenveen 4–1) stonden nergens op de site, terwijl supporters ze tellen.
+  Een play-offwedstrijd is geen bekerwedstrijd, dus een eigen competitie laat de ronde en de naam kloppen, en laat de cijfers van de Eredivisie en de beker ongemoeid.
+  De pagina komt pas in mei: zonder uitzondering voor 404 zou de import van een lopend seizoen negen maanden per jaar mislukken en de mail van #533 vullen.
+  De wedstrijden die er zijn laten staan bij een ontbrekende pagina voorkomt dat een hernoemde pagina ze stil laat verdwijnen met alleen een melding dat ze weg zijn; een pagina die er nog is maar de kop mist, geeft wel een fout.
+- **Nadeel:** de import vraagt elk uur een vierde pagina, ook in een seizoen dat nog geen play-offs heeft; dat is één verzoek extra dat met 404 antwoordt.
+  Een pagina die verdwijnt, melden we niet: alleen een andere fout telt als mislukking.
+  Seizoenen voor 2021/22 hebben een andere kop (play-offs voor de Europa League) en geven een fout; #457 beslist wat daarmee gebeurt.
+- **Alternatieven:** de play-offs als bekerwedstrijd bewaren (de schakelaar, de bijschriften en de ronde zouden iets zeggen wat niet klopt).
+  Een 404 als mislukking tellen (de mail van #533 komt dan bij elk lopend seizoen).
+  Een aparte tabel voor de play-offs (alle lijsten en cijfers moeten dan twee bronnen lezen).
+  De play-offwedstrijden verwijderen als de pagina er niet is (een hernoemde pagina laat dan stil wedstrijden verdwijnen).
+  De pagina pas vragen na 1 mei (een regel en een test erbij voor één verzoek per uur).
 
 ## Redactie
 
@@ -8319,6 +8374,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het hoofdmenu zelf houdt ze niet vast.
 - **Later:** zie _De schakelaar is een baan met een schuivende knop_ (31 oktober 2026): de schakelaar staat in de kleine maat van 36 pixels in plaats van 44, en is een baan met een knop.
   De plek, de links en `aria-current` blijven.
+- **Later:** zie _De play-offs voor de Conference League zijn een derde competitie, een ontbrekende pagina is geen mislukking_.
+  "Alle wedstrijden" telt ook de play-offs, en de schakelaar staat er ook bij een gespeelde play-offwedstrijd.
 
 ### `ShortMatch` toont de uitkomst met kleur en gewicht, zoals `Match`
 

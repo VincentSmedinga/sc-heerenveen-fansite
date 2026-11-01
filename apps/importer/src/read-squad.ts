@@ -5,7 +5,7 @@
 // keeps the squad it has. The numbers of a player (appearances, goals and assists in the
 // Eredivisie and the KNVB Beker) are read from the same row; a number we cannot be sure of is
 // left out with a warning, since the squad does not depend on it.
-import type { Competition, PlayerPosition } from '@fansite/db/schema'
+import type { PlayerPosition, StatsCompetition } from '@fansite/db/schema'
 
 import { playerNameMaxLength } from '@fansite/db/schema'
 
@@ -45,7 +45,7 @@ export type ReadSquad =
 export type ReadStats = {
   appearances: number
   assists: number
-  competition: Competition
+  competition: StatsCompetition
   goals: number
 }
 
@@ -54,7 +54,7 @@ export type ReadStats = {
  * the name and the contract come three cells for the Eredivisie, three for the KNVB Beker and
  * three for the total.
  */
-const statsColumns: { competition: Competition; first: number }[] = [
+const statsColumns: { competition: StatsCompetition; first: number }[] = [
   { competition: 'Eredivisie', first: 4 },
   { competition: 'KNVB Beker', first: 7 },
 ]

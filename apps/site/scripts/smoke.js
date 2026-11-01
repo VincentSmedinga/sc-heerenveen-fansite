@@ -56,6 +56,12 @@ const serverFile = path.resolve(folder, 'apps/site/server.js')
 const changelogFile = path.resolve(import.meta.dirname, '../../../CHANGELOG.md')
 const releases = releasesOf(existsSync(changelogFile) ? readFileSync(changelogFile, 'utf8') : '', releaseNotes)
 
+// The credit of Wikipedia on a page of match data: a details that is closed (it has no `open`
+// attribute after its class), with "Bron: Wikipedia" in the summary, and the licence and the
+// time of the last reading in the fold.
+const closedWikipediaCredit =
+  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Laatst gelezen op/s
+
 // The layers of the design system, from weak to strong, as layers.css declares them. The build
 // must keep that order.
 const layersFile = path.resolve(import.meta.dirname, '../../../packages/design-system/src/layers.css')
@@ -715,7 +721,7 @@ await withEmptyDatabase((database) =>
     // In the line of the scorers of one match the two are told apart by an initial.
     assert.match(matchesHtml, /J\. Testvoort/)
     assert.match(matchesHtml, /B\. Testvoort/)
-    assert.match(matchesHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.match(matchesHtml, closedWikipediaCredit)
     assert.doesNotMatch(matchesHtml, /action=history/)
     assert.match(html, /id="matches-heading">Wedstrijden<\/h2>/)
     assert.match(html, /<a href="\/wedstrijden#stand">De volledige /)
@@ -808,7 +814,7 @@ await withEmptyDatabase((database) =>
     assert.match(statisticsHtml, /<h2[^>]*id="reeksen">.*?href="#reeksen">Reeks/s)
     assert.match(
       statisticsHtml,
-      /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie en de KNVB Beker dit seizoen<\/caption>/,
+      /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie, de KNVB Beker en de play-offs dit seizoen<\/caption>/,
     )
     assert.match(statisticsHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
     assert.match(statisticsHtml, /Gebaseerd op (?:alle \d+|1) gespeelde wedstrijd/)
@@ -863,7 +869,7 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /<h2[^>]*id="uitersten">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#uitersten">Uiterste/,
     )
-    assert.match(statisticsHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.match(statisticsHtml, closedWikipediaCredit)
     assert.doesNotMatch(statisticsHtml, /action=history/)
 
     // The page Spelers has the card with everybody who scored, which is the card that stood on
@@ -927,7 +933,7 @@ await withEmptyDatabase((database) =>
     const eredivisieCard = cardOf(await (await fetch(`${origin}/statistieken/spelers?competitie=eredivisie`)).text())
     assert.doesNotMatch(eredivisieCard, /Proefman/)
     assert.match(factsOf(eredivisieCard)[2][1], /^0 van de \d+ doelpunten$/)
-    assert.match(playersHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.match(playersHtml, closedWikipediaCredit)
     // The route behind the season picker sends the visitor on to the page of the season.
     const pickedPlayers = await fetch(`${origin}/statistieken/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })
     assert.equal(pickedPlayers.status, 303)
@@ -956,7 +962,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(opponentsHtml, /<th[^>]*scope="col"[^>]*><button/)
     assert.doesNotMatch(opponentsHtml, /<span class="hf-visually-hidden">punten<\/span>/)
     assert.match(opponentsHtml, /Gebaseerd op alle \d+ gespeelde wedstrijden sinds \d{4}\/\d{2}/)
-    assert.match(opponentsHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.match(opponentsHtml, closedWikipediaCredit)
     // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and
     // the links keep the choice.
     assert.match(opponentsHtml, /href="\/statistieken\/tegenstanders\/fc-maquette"/)
@@ -986,7 +992,7 @@ await withEmptyDatabase((database) =>
     )
     assert.match(clubHtml, /<h2[^>]*id="wedstrijden">/)
     assert.match(clubHtml, /Gebaseerd op (?:1 gespeelde wedstrijd|alle \d+ gespeelde wedstrijden) sinds \d{4}\/\d{2}/)
-    assert.match(clubHtml, /Bron: Wikipedia \(.*CC BY-SA 4\.0.*Laatst gelezen op/s)
+    assert.match(clubHtml, closedWikipediaCredit)
     assert.match(
       clubHtml,
       /<a aria-current="page" class="hf-navigation-sublink" href="\/statistieken\/tegenstanders">Tegenstanders<\/a>/,

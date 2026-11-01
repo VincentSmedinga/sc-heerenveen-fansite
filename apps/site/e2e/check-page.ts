@@ -22,6 +22,15 @@ export async function checkPage(page: Page) {
   // title to be back. A page that has none still fails: after the wait, axe reports it.
   await page.waitForFunction(() => document.title.trim() !== '', undefined, { timeout: 2000 }).catch(() => undefined)
 
+  // axe skips what is folded away, such as the pages and the licence in the credit of
+  // Wikipedia. Open every details, so the contrast of what is inside is checked, and so is the
+  // width of a long list of pages at 320 pixels.
+  await page.evaluate(() => {
+    for (const details of document.querySelectorAll('details')) {
+      details.open = true
+    }
+  })
+
   const { violations } = await new AxeBuilder({ page }).withTags(tags).analyze()
 
   for (const { help, id, nodes } of violations) {

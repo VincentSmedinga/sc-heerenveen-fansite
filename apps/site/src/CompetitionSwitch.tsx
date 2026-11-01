@@ -3,7 +3,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { SegmentedLinks } from '@fansite/design-system'
 
 import { type CompetitionChoice, competitionParam, competitionQuery, leagueValue } from './competition'
-import { hasPlayedCupMatch } from './matches'
+import { hasPlayedExtraMatch } from './matches'
 
 /**
  * The two links of the switch, for a page that knows itself whether there is anything to
@@ -40,7 +40,7 @@ export function CompetitionSwitch({
   competition: CompetitionChoice
   matches: PublicMatch[]
 }) {
-  return hasPlayedCupMatch(matches) ? <CompetitionLinks address={address} competition={competition} /> : null
+  return hasPlayedExtraMatch(matches) ? <CompetitionLinks address={address} competition={competition} /> : null
 }
 
 /** What the season picker sends with the season to keep the choice (see `SeasonPicker`). */

@@ -412,6 +412,19 @@ export function madeUpMatches(now: Date): MadeUpMatch[] {
     },
     {
       ...base,
+      competition: 'Play-offs Conference League',
+      goalsAgainst: 2,
+      goalsFor: 0,
+      home: false,
+      kickoffAt: at(-30, 21, 0),
+      matchDate: dayOf(at(-30, 21, 0)),
+      opponent: 'Oefenstad FC',
+      round: 'Halve finale',
+      stadium: 'Stadion Voorbeeldlaan',
+      status: 'played',
+    },
+    {
+      ...base,
       competition: 'Eredivisie',
       goalsAgainst: 0,
       goalsFor: 6,
@@ -564,6 +577,10 @@ export const madeUpGoals: Record<string, MadeUpGoal[]> = {
     { minute: 70, ours: true, ownGoal: true, player: 'Kopie', stoppageMinutes: null },
     { minute: 88, ours: false, player: 'Teststraat', stoppageMinutes: null },
   ],
+  'Play-offs Conference League|Halve finale': [
+    { minute: 46, ours: false, player: 'Teststraat', stoppageMinutes: null },
+    { minute: 58, ours: false, player: 'Oefenaar', stoppageMinutes: null },
+  ],
 }
 
 /**
@@ -680,6 +697,7 @@ export function madeUpWikipediaPages(now: Date): NewWikipediaPage[] {
     page('standings', `Eredivisie ${season} (mannenvoetbal)`),
     page('programme', `Eredivisie ${season} (mannenvoetbal)/Wedstrijden`),
     page('cup', `KNVB Beker ${season} (mannen)`),
+    page('playoffs', `Play-offs Nederlands voetbal ${Number(season.slice(0, 4)) + 1}`),
   ]
 }
 

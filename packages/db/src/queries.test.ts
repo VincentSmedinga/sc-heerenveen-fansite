@@ -1485,9 +1485,10 @@ describe('the matches and the table of a season', () => {
         '2026/27 standings',
         '2026/27 programme',
         '2026/27 cup',
+        '2026/27 playoffs',
         '2025/26 standings',
       ])
-      expect(rows[3]).toEqual({
+      expect(rows[4]).toEqual({
         kind: 'standings',
         readAt: new Date('2025-10-25T12:00:00Z'),
         season: '2025/26',
@@ -1517,6 +1518,7 @@ describe('the matches and the table of a season', () => {
         { kind: 'standings', readAt: now, title: 'Eredivisie 2026/27 (mannenvoetbal)' },
         { kind: 'programme', readAt: now, title: 'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden' },
         { kind: 'cup', readAt: now, title: 'KNVB Beker 2026/27 (mannen)' },
+        { kind: 'playoffs', readAt: now, title: 'Play-offs Nederlands voetbal 2027' },
       ])
     })
 
@@ -1527,6 +1529,7 @@ describe('the matches and the table of a season', () => {
         'standings',
         'programme',
         'cup',
+        'playoffs',
       ])
     })
 
@@ -1537,6 +1540,7 @@ describe('the matches and the table of a season', () => {
         'standings',
         'programme',
         'cup',
+        'playoffs',
       ])
     })
   })

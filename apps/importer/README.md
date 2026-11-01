@@ -684,30 +684,58 @@ De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en
 De import leest het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, en bewaart ze in `matches`, `standings`, `wikipedia_pages` en `match_imports` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
 Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/beslissingen.md`](../../docs/beslissingen.md).
 De gegevens vallen onder CC BY-SA 4.0.
-Het gaat om de Eredivisie en de KNVB Beker van het lopende seizoen.
+Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen.
 Een seizoen begint op 1 juli en heet `2026/27`.
 Een afgelopen seizoen leest een aparte opdracht, eenmalig (zie _Een afgelopen seizoen_).
 
 ### Welke pagina's
 
-Per seizoen leest de import drie pagina's, met de titels uit `pageTitles` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts):
+Per seizoen leest de import vier pagina's, met de titels uit `pageTitles` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts):
 
 | Pagina                                           | Wat erop staat                                                                     |
 | ------------------------------------------------ | ---------------------------------------------------------------------------------- |
 | `Eredivisie 2026/27 (mannenvoetbal)`             | De stand, in het sjabloon `Sports table`                                           |
 | `Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden` | Het programma en de uitslagen van de hele competitie, in `Footballbox2`, per ronde |
 | `KNVB Beker 2026/27 (mannen)`                    | De bekerwedstrijden, ook in `Footballbox2`, met een kop per ronde                  |
+| `Play-offs Nederlands voetbal 2027`              | De play-offs voor de Conference League, ook in `Footballbox2` (zie _De play-offs_) |
 
 De titels volgen uit het seizoen, dus een nieuw seizoen kost geen code.
 Alles gaat door de fetcher en alleen naar `/wiki/<pagina>?action=raw`: `robots.txt` van Wikipedia sluit `/w/` en dus `api.php`.
 De fetcher stuurt dan de herkenbare user agent en houdt zich aan 429 en `Retry-After`.
 Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wikipedia.ts` daarin de sjablonen.
 
+### De play-offs
+
+Na de competitie spelen de clubs op de plekken vijf tot en met negen om één ticket voor de tweede voorronde van de Conference League.
+Wikipedia heeft per jaar een pagina, `Play-offs Nederlands voetbal <jaar>`, met het jaar waarin het seizoen eindigt: voor 2026/27 is dat 2027.
+De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Conference League`, en `wikipedia_pages` bewaart de pagina met de soort `playoffs`.
+
+- Hij leest alleen de wedstrijden onder de kop `Play-offs voor de UEFA Conference League` (in de eerste jaren `UEFA Europa Conference League`), tot de volgende kop van dat niveau.
+  De play-offs om promotie en degradatie op dezelfde pagina laat hij weg.
+- De ronde is de kop van het niveau erboven, `Halve finales` als `Halve finale` en `Finale`, en niet de kop `Wedstrijd A`.
+  Een wedstrijd onder een andere kop is een fout.
+- In 2022 en 2023 speelden de clubs de halve finale over twee wedstrijden, elk met `round = Wedstrijd 1/2` in het sjabloon.
+  De ronde is dan `Halve finale, wedstrijd 1/2`, zodat de sleutel (seizoen, competitie, ronde) per wedstrijd verschilt.
+- Verlenging en strafschoppen leest hij zoals bij de beker.
+- De pagina komt pas in mei, en een lopend seizoen heeft hem niet: Wikipedia geeft dan 404.
+  Dat is geen mislukking: de import gaat door met de andere pagina's, schrijft geen fout en telt niet mee voor `failures_in_a_row` (en dus niet voor de mail van #533).
+  De play-offwedstrijden die er al zijn, blijven dan staan, want een pagina die er niet is, zegt niets over hen.
+  Elk ander antwoord is wel een mislukking, zoals bij de andere pagina's.
+- Een jaar waarin sc Heerenveen niet meespeelt, heeft de kop en geen wedstrijd.
+  Dat is geen fout; de import bewaart dan geen wedstrijd en noemt de pagina niet als bron.
+  Staat de kop er niet meer, dan is de pagina veranderd en is het wel een fout.
+- Bij de bron staat alleen wat de wedstrijd zelf zegt: de namen, de stand, de minuten, het stadion en de aftrap.
+  Het verslag van de NOS in het sjabloon bewaren we niet.
+- Gecontroleerd tegen de volledige pagina's van 2022, 2023, 2024, 2025 en 2026: ze hebben dezelfde opbouw.
+  De pagina van 2023 is met de hand gelezen en heeft geen fixture; de andere vier staan in `src/fixtures/`.
+  Dat de import ze leest zonder verdere wijziging, laat de test voor 2025/26 zien (zie _Een afgelopen seizoen_).
+  Voor oudere seizoenen, waarin de kop anders heette, leest de import niets: de kop ontbreekt dan, en dat is een fout.
+
 ### Wat de import bewaart
 
 - Van sc Heerenveen alleen: de wedstrijden waar de club als `[[sc Heerenveen]]` in staat.
   Van een wedstrijd bewaart hij de ronde (de kop boven het sjabloon, zoals `Speelronde 12` of `Eerste ronde`), de tegenstander, de club van de tegenstander (zie _De clubs van de tegenstanders_), thuis of uit, het stadion, de status en de uitslag.
-  Een speelronde van de competitie is een kop `Speelronde <nummer>`; wedstrijden onder andere koppen, zoals de play-offs, leest hij niet.
+  Een speelronde van de competitie is een kop `Speelronde <nummer>`; wedstrijden onder andere koppen leest hij niet.
 - De status is `played` bij een score, `postponed` als de score "uitgesteld" of "afgelast" zegt, en anders `scheduled`.
   Een score die we niet kennen, zoals een gestaakte wedstrijd van ons, is een fout.
 - Een bekerwedstrijd na verlenging of strafschoppen bewaart hij ook (`extra_time`, `penalties_for` en `penalties_against`).
@@ -947,7 +975,7 @@ pnpm run import:season 2025/26
   De opdracht weigert met een zin een andere vorm, twee jaren die niet op elkaar volgen, het lopende seizoen en een seizoen dat nog niet begonnen is.
   Zonder seizoen laat ze zien hoe het moet.
   De weigering komt voordat de opdracht Wikipedia iets vraagt of iets schrijft.
-- Ze leest de drie pagina's van dat seizoen (drie verzoeken), met dezelfde fetcher, controles en opslag als de uurlijkse import, en schrijft alles in één transactie.
+- Ze leest de vier pagina's van dat seizoen (vier verzoeken), met dezelfde fetcher, controles en opslag als de uurlijkse import, en schrijft alles in één transactie.
   Ze raakt alleen de rijen van dat seizoen: de rijen van het lopende seizoen blijven zoals ze zijn.
   Draait ze nog eens, dan staat er `0 new, 0 updated, 38 unchanged`.
 - Ze neemt de lock van de import.
@@ -1167,15 +1195,17 @@ Een beschrijving, afbeelding of auteur staat er niet in, en hoort er ook niet in
 De tests van het logboek, de gezondheid en het wachten geven de import een nagebootste klok (de optie `clock`), zodat een test een dag of een maand overslaat zonder te wachten.
 `src/bundle.test.ts` bundelt de importer in een lege map en draait hem daar, zonder `node_modules`.
 
-De tests van de wedstrijden lezen verkleinde stukken van de drie pagina's van Wikipedia: [`src/fixtures/wikipedia-programme.wiki`](src/fixtures/wikipedia-programme.wiki), [`wikipedia-standings.wiki`](src/fixtures/wikipedia-standings.wiki) en [`wikipedia-cup.wiki`](src/fixtures/wikipedia-cup.wiki).
+De tests van de wedstrijden lezen verkleinde stukken van de pagina's van Wikipedia: [`src/fixtures/wikipedia-programme.wiki`](src/fixtures/wikipedia-programme.wiki), [`wikipedia-standings.wiki`](src/fixtures/wikipedia-standings.wiki) en [`wikipedia-cup.wiki`](src/fixtures/wikipedia-cup.wiki).
 De tests van de opdracht voor een afgelopen seizoen lezen stukken van de echte pagina's van 2025/26, op 29 oktober 2026 gelezen: [`wikipedia-season-programme.wiki`](src/fixtures/wikipedia-season-programme.wiki), [`wikipedia-season-standings.wiki`](src/fixtures/wikipedia-season-standings.wiki) en [`wikipedia-season-cup.wiki`](src/fixtures/wikipedia-season-cup.wiki).
 Het programma heeft alle wedstrijden van sc Heerenveen, de twee blokken van NAC Breda – sc Heerenveen, de gestaakte wedstrijden van andere clubs met het blok dat ze afmaakt, en de laatste wedstrijd van het seizoen.
 Ze zijn gelezen op 25 oktober 2026, en bovenaan staat de herkomst en de licentie (CC BY-SA 4.0).
 Er staan alle 34 wedstrijden van sc Heerenveen in en een paar van andere clubs.
 De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs, de scheidsrechters en de verslagen zijn leeggemaakt.
+[`wikipedia-playoffs-2026.wiki`](src/fixtures/wikipedia-playoffs-2026.wiki) en `wikipedia-playoffs-2025.wiki` zijn het begin van de echte pagina's van de play-offs, gelezen op 1 november 2026, met de halve finale van sc Heerenveen tegen FC Utrecht en tegen AZ.
+`wikipedia-playoffs-2024.wiki` is een jaar zonder sc Heerenveen, en `wikipedia-playoffs-2022.wiki` een jaar met een halve finale over twee wedstrijden.
 [`wikipedia-cup-goals.wiki`](src/fixtures/wikipedia-cup-goals.wiki) heeft de vier bekerwedstrijden van sc Heerenveen uit het seizoen 2025/26, gelezen op 26 oktober 2026, met een eigen doelpunt, twee doelpunten van één speler in één sjabloon, blessuretijd en een gemiste penalty.
 `src/read-wikipedia.test.ts` leest ze zonder database en `src/check-wikipedia.test.ts` toetst de controles.
-`src/import-matches.test.ts` draait op een echte MariaDB met een eigen webserver die de drie pagina's geeft, en laat zien dat een falende controle de database ongemoeid laat.
+`src/import-matches.test.ts` draait op een echte MariaDB met een eigen webserver die de pagina's geeft, en laat zien dat een falende controle de database ongemoeid laat.
 Een test die `runImport` draait en niets met de wedstrijden te maken heeft, geeft de optie `wikipediaOrigin: null`.
 De tests van het commando zelf (`src/import.test.ts` en `src/bundle.test.ts`) zetten een gezondheidsrij voor de wedstrijden en voor de selectie met een `retry_at` ver weg, zodat het commando de echte Wikipedia niet vraagt.
 

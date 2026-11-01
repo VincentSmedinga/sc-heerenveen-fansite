@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
+import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
 import { Time } from '../time/Time'
 
@@ -15,20 +16,7 @@ export type WikipediaCreditPage = {
 }
 
 export type WikipediaCreditProps =
-  | (WikipediaCreditBaseProps & {
-      /** The short form, "Bron: Wikipedia", for a small card. It takes only `lead` besides. */
-      compact: true
-      data?: never
-      /**
-       * What stands before "Wikipedia" instead of `Bron:`, such as `Gegevens van` in the strip
-       * under the image of a card.
-       */
-      lead?: string
-      pages?: never
-      readAt?: never
-      readAtDateTime?: never
-    })
-  | (WikipediaCreditBaseProps & {
+  | (WikipediaCreditBaseProps<'details'> & {
       compact?: false
       /**
        * What our own data from these pages is called in the last sentence, "Onze
@@ -48,21 +36,38 @@ export type WikipediaCreditProps =
       /** The same moment in a form a machine reads, such as `2026-10-25T12:05:00Z`. */
       readAtDateTime: string
     })
+  | (WikipediaCreditBaseProps<'p'> & {
+      /** The short form, "Bron: Wikipedia", for a small card. It takes only `lead` besides. */
+      compact: true
+      data?: never
+      /**
+       * What stands before "Wikipedia" instead of `Bron:`, such as `Gegevens van` in the strip
+       * under the image of a card.
+       */
+      lead?: string
+      pages?: never
+      readAt?: never
+      readAtDateTime?: never
+    })
 
-type WikipediaCreditBaseProps = Omit<ComponentPropsWithoutRef<'p'>, 'children'> & {
+type WikipediaCreditBaseProps<Tag extends 'details' | 'p'> = Omit<ComponentPropsWithoutRef<Tag>, 'children'> & {
   /** A credit has no children: everything it shows comes from the props below. */
   children?: never
 }
 
 /**
- * The credit for data from Wikipedia. The full form says "Bron: Wikipedia (CC BY-SA 4.0)", with
- * a link to each page the data comes from, the time of the last reading, and a sentence that
- * our own data from them are CC BY-SA 4.0 too: the match data, or what `data` names. The short
- * form (`compact`) says only "Bron: Wikipedia", for a small card on a page that has the full
- * form elsewhere. It is principle 4 of the Redactie ("Altijd de bron vermelden"), and it is a
- * component so that a page with Wikipedia data can't leave it out. The link to a page names
- * the page, which is the credit to its authors: their names are one click away in the history
- * of the article. The links go to another site and are never fetched by the page.
+ * The credit for data from Wikipedia. The full form is a `details` that is closed: it says
+ * "Bron: Wikipedia", and one click or press shows the licence (CC BY-SA 4.0), a link to each
+ * page the data comes from, the time of the last reading, and a sentence that our own data
+ * from them are CC BY-SA 4.0 too: the match data, or what `data` names. It is closed for one
+ * page as well as for fifty, so there is one form to learn and a long list, such as that of
+ * the opponents, does not make the credit longer than the page. The short form (`compact`)
+ * says only "Bron: Wikipedia", for a small card on a page that has the full form elsewhere.
+ * It is principle 4 of the Redactie ("Altijd de bron vermelden"), and it is a component so
+ * that a page with Wikipedia data can't leave it out. The link to a page names the page, which
+ * is the credit to its authors: their names are one click away in the history of the article.
+ * The links go to another site and are never fetched by the page. The `summary` holds no link,
+ * so a click on it does one thing.
  */
 export const WikipediaCredit = ({
   className,
@@ -73,13 +78,25 @@ export const WikipediaCredit = ({
   readAt,
   readAtDateTime,
   ...props
-}: WikipediaCreditProps) => (
-  <p {...props} className={classNames('hf-meta', 'hf-wikipedia-credit', className)}>
-    {compact ? (
-      `${lead} Wikipedia`
-    ) : (
-      <>
-        Bron: Wikipedia (<Link href={licenceHref}>CC BY-SA 4.0</Link>), {pages.length === 1 ? 'pagina' : 'pagina’s'}:{' '}
+}: WikipediaCreditProps) =>
+  compact ? (
+    <p
+      {...(props as ComponentPropsWithoutRef<'p'>)}
+      className={classNames('hf-meta', 'hf-wikipedia-credit', className)}
+    >
+      {`${lead} Wikipedia`}
+    </p>
+  ) : (
+    <details
+      {...(props as ComponentPropsWithoutRef<'details'>)}
+      className={classNames('hf-meta', 'hf-wikipedia-credit', className)}
+    >
+      <summary>
+        Bron: Wikipedia
+        <Icon name="arrow-down" />
+      </summary>
+      <p>
+        Licentie: <Link href={licenceHref}>CC BY-SA 4.0</Link>. {pages.length === 1 ? 'Pagina' : 'Pagina’s'}:{' '}
         {pages.map((page, index) => (
           <span key={page.href}>
             {index > 0 ? ', ' : ''}
@@ -87,7 +104,6 @@ export const WikipediaCredit = ({
           </span>
         ))}
         . Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook CC BY-SA 4.0.
-      </>
-    )}
-  </p>
-)
+      </p>
+    </details>
+  )

@@ -306,6 +306,63 @@ describe('the page /wedstrijden', () => {
     })
   })
 
+  describe('a match of the play-offs for the Conference League', () => {
+    const playoffs = (extra: Partial<PublicMatch> = {}): PublicMatch => ({
+      ...matchData.matches[3]!,
+      competition: 'Play-offs Conference League',
+      goals: [],
+      goalsAgainst: 3,
+      goalsFor: 2,
+      kickoffAt: new Date('2026-10-22T19:00:00Z'),
+      matchDate: '2026-10-22',
+      opponent: 'FC Voorbeeld',
+      round: 'Halve finale',
+      status: 'played',
+      ...extra,
+    })
+    const withMatch = (added: PublicMatch) =>
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, added] })
+
+    it('names the competition and the round as text in the results, with the result', async () => {
+      withMatch(playoffs())
+
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).toContain('Play-offs Conference League')
+      expect(results).toContain('Halve finale')
+      expect(results).toContain('FC Voorbeeld')
+      expect(results).toContain('3–2')
+      expect(results).toContain('3 tegen 2')
+    })
+
+    it('puts it in the programme, with the competition and the round, while it is still to be played', async () => {
+      withMatch(
+        playoffs({
+          goalsAgainst: null,
+          goalsFor: null,
+          kickoffAt: new Date('2026-10-30T19:00:00Z'),
+          matchDate: '2026-10-30',
+          status: 'scheduled',
+        }),
+      )
+
+      const html = await render()
+
+      expect(section(html, 'programma')).toContain('Play-offs Conference League')
+      expect(section(html, 'programma')).toContain('Halve finale')
+      expect(section(html, 'uitslagen')).not.toContain('Halve finale')
+    })
+
+    it('says "Gegevens nog niet beschikbaar" after two hours without a result, like any other match', async () => {
+      withMatch(playoffs({ goalsAgainst: null, goalsFor: null, status: 'scheduled' }))
+
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).toContain('Halve finale')
+      expect(results.match(/Gegevens nog niet beschikbaar/g)).toHaveLength(1)
+    })
+  })
+
   describe('the line under the table when the data is behind', () => {
     const lacking = (kickoff: string): PublicMatch => ({
       ...matchData.matches[3]!,
@@ -558,7 +615,8 @@ describe('the page /wedstrijden', () => {
     const html = await render()
 
     expect(html.match(/class="hf-meta hf-wikipedia-credit"/g)).toHaveLength(1)
-    expect(html).toContain('Bron: Wikipedia (')
+    expect(html).toContain('<summary>Bron: Wikipedia</summary>')
+    expect(html).toContain('<details class="hf-meta hf-wikipedia-credit"><summary>')
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)"')
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)"')
     expect(html).toContain('<time dateTime="2026-10-23T12:05:00.000Z">23 oktober 2026 om 14:05</time>')
@@ -571,14 +629,14 @@ describe('the page /wedstrijden', () => {
   it('puts the credit in a card without a border or background to see, and links to no history', async () => {
     const html = await render()
 
-    expect(html).toMatch(/<div class="hf-card hf-card-transparent"><p class="hf-meta hf-wikipedia-credit"/)
+    expect(html).toMatch(/<div class="hf-card hf-card-transparent"><details class="hf-meta hf-wikipedia-credit"/)
     expect(html).not.toContain('action=history')
     expect(html).not.toContain('geschiedenis')
   })
 
   it('has no link to another site except in the credit, and loads nothing from another domain', async () => {
     const html = await render()
-    const outside = html.replace(/<p class="hf-meta hf-wikipedia-credit".*?<\/p>/s, '')
+    const outside = html.replace(/<details class="hf-meta hf-wikipedia-credit".*?<\/details>/s, '')
 
     expect(outside).not.toMatch(/https?:\/\//u)
     expect(html).not.toMatch(/<(?:img|script|iframe|link)\b/u)
