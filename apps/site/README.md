@@ -267,12 +267,14 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 - **Stand:** de volledige tabel met een balk naast de punten, en een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.
   Een eerder seizoen noemt de kaart en het bijschrift "Eindstand", met het anker `eindstand`.
   De balk verdwijnt op een smalle plek.
+  Is bij een wedstrijd van het lopende seizoen de uitslag er twee uur na de aanvang nog niet (`standingsLag` in `src/matches.ts`, op `lacksResult`), dan staat onder de tabel "Gegevens nog niet bijgewerkt" (`StandingsBehind` in `src/MatchViews.tsx`), in `Text appearance="meta"` en boven de link.
+  Een Eindstand krijgt de regel niet, een kaart zonder tabel ook niet, en de afbeelding van de kaart laat haar weg (`data-hf-card-share-skip`).
 - **Uitslagen:** alle wedstrijden die zijn begonnen, de nieuwste bovenaan.
   Een eerder seizoen begint bij de eerste wedstrijd (`resultsOfSeason` in `src/matches.ts`).
   Een wedstrijd zonder uitslag staat er ook in, en zegt twee uur na de aanvang "Gegevens nog niet beschikbaar" (zonder aanvangstijd vanaf de dag erna).
   De zin komt van `lacksResult` in `src/matches.ts` en de eigenschap `resultMissing` van `Match`, en verdwijnt zodra de wedstrijd een score heeft.
 - **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de eerste van Uitslagen, ook zonder uitslag) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
-  Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten.
+  Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten, en onder de tabel dezelfde regel "Gegevens nog niet bijgewerkt" als de kaart Stand op Wedstrijden.
   De blokken linken naar "Alle wedstrijden" en "De volledige stand" (`/wedstrijden#stand`).
 
 Een wedstrijd is een `Match` uit het designsysteem, de stand een `StandingsTable`.

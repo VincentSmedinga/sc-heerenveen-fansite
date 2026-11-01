@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation'
 import { reviewBranch } from '../../env'
 import { overviewOf, resultsOfSeason } from '../../matches'
 import { coachesCardOf, standingsCardOf } from '../../matchShortcuts'
-import { CoachesCard, imageCredit, MatchLines, SourceCredit, standingsCaption } from '../../MatchViews'
+import { CoachesCard, imageCredit, MatchLines, SourceCredit, StandingsBehind, standingsCaption } from '../../MatchViews'
 import { pageMetadata, seasonPageMetadata } from '../../metadata'
 import { loadSeasonPage, matchesPath, pickerPathOf, statisticsPath } from '../../season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '../../seasons'
@@ -135,6 +135,8 @@ export async function MatchesPage({ season }: { season: string }) {
           ) : (
             <>
               <StandingsTable caption={standingsCaption(data.standings, standingsCard.name)} rows={data.standings} />
+              {/* An Eindstand no longer changes, so only the current season can be behind. */}
+              {current && <StandingsBehind matches={data.matches} now={now} />}
               <Text>
                 <Link href={statistics('onze-plek-in-de-competitie')} icon="arrow-right">
                   Onze plek in de competitie

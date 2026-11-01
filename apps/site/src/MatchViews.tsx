@@ -45,6 +45,7 @@ import {
   quarterLabels,
   scorersCoverage,
   standingsAround,
+  standingsLag,
   streaksOf,
   topFiveOf,
   topScorersOf,
@@ -643,6 +644,19 @@ export function SourceCredit({ pages, season }: { pages: PublicWikipediaPage[]; 
 }
 
 /**
+ * The line under the table of the current season when it may be behind (see `standingsLag`):
+ * the matches of the season say whether a result is missing. It is a temporary state, so the
+ * image of the card leaves it out. The sentence is here for both cards Stand.
+ */
+export function StandingsBehind({ matches, now }: { matches: PublicMatch[]; now: Date }) {
+  return standingsLag(matches, now) ? (
+    <Text appearance="meta" data-hf-card-share-skip="">
+      Gegevens nog niet bijgewerkt
+    </Text>
+  ) : null
+}
+
+/**
  * The caption of the table, which only a screen reader gets: what it is, and the day it holds
  * for. `name` is what the card calls the table: `Eindstand` for a season that is over.
  */
@@ -656,7 +670,7 @@ export function standingsCaption(rows: PublicStandingsRow[], name = 'Stand') {
  * The block of the homepage with three clubs of the league table in its short form, with sc
  * Heerenveen in the middle if possible, and a link to the full table on the matches page.
  */
-export function StandingsCard({ data }: { data: MatchData }) {
+export function StandingsCard({ data, now }: { data: MatchData; now: Date }) {
   return (
     <Card aria-labelledby="standings-heading">
       <Heading id="standings-heading" level={2}>
@@ -671,6 +685,7 @@ export function StandingsCard({ data }: { data: MatchData }) {
           rows={standingsAround(data.standings)}
         />
       )}
+      {data.standings.length > 0 && <StandingsBehind matches={data.matches} now={now} />}
       <Text>
         <Link href="/wedstrijden#stand" icon="arrow-right">
           De volledige stand
