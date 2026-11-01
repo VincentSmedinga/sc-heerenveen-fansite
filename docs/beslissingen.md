@@ -2612,6 +2612,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of een bibliotheek voor animaties; dat is een dependency voor iets wat CSS kan.
   Of helemaal geen overgangen behalve de themaknop; dat laat de site hard aanvoelen, en het besluit is dat beweging een bewuste keuze is, geen toeval.
 - **Later:** vult het besluit _Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat_ (27 oktober 2026) aan: de duren staan nu in de tokens van `motion.css`.
+- **Later:** zie _De uitklap van de bronvermelding van Wikipedia gaat zacht open en dicht_.
+  "Alleen kleur, doorzichtigheid en transformatie bewegen" kent één uitzondering: de hoogte van die uitklap.
+  Hij staat in de groep Verschijnen en verdwijnen en neemt de curve van het pijltje.
 
 ### Het label van de balk blijft staan, de rij scrolt, en de vervaging is CSS
 
@@ -4050,6 +4053,47 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De regel van de `summary` is minstens 44 pixels hoog om te raken met een duim.
   De controle op de pagina's (`checkPage`) klapt elke `details` open voor axe, want axe slaat ingeklapte tekst over.
 - **Alternatieven:** alleen inklappen bij veel pagina's (twee vormen om te leren, en de grens is willekeurig); "Bron: Wikipedia (CC BY-SA 4.0)" met een link in de `summary` (een klik doet twee dingen); de pagina's weglaten (de licentie vraagt een aanduiding van de auteurs, en die staat in de link naar het artikel).
+- **Later:** zie _De uitklap van de bronvermelding van Wikipedia gaat zacht open en dicht_.
+  De uitklap springt niet meer, maar gaat over met zijn hoogte en zijn doorzichtigheid.
+
+### De uitklap van de bronvermelding van Wikipedia gaat zacht open en dicht
+
+- **Datum:** 1 november 2026
+- **Besluit:** de uitklap van `WikipediaCredit` gaat over met zijn hoogte en zijn doorzichtigheid, bij openen en bij sluiten, met `--hf-motion-duration-short` en `--hf-motion-ease-change`: dezelfde duur en curve als het pijltje.
+  Een browser die het niet kan, laat de uitklap springen zoals voorheen.
+  Wie om minder beweging vraagt, ziet geen overgang, want de duur is dan 0 s.
+  Dit is de ene uitzondering op de regel van het hoofdstuk Beweging dat wat opent of sluit niet van hoogte wisselt (de projecteigenaar, 1 november 2026).
+- **Waarom:** het pijltje draaide zacht terwijl de tekst sprong, en dat voelde ongemaakt.
+  De uitklap is een klik van de bezoeker zelf.
+  Hij staat onderaan een pagina en de tekst ervan is kort.
+  Daarom is een hoogte die meebeweegt hier te dragen, en elders blijft de regel gelden.
+- **Hoe:** alleen CSS, in `wikipedia-credit.css`, achter `@supports (interpolate-size: allow-keywords) and selector(::details-content)`.
+  `interpolate-size: allow-keywords` laat de browser naar `auto` bewegen, en `::details-content` is het vak dat de browser met de hoogte en de doorzichtigheid laat bewegen.
+  `content-visibility` gaat mee in de overgang (`allow-discrete`): tijdens het sluiten blijft de tekst zichtbaar, en daarna is hij weg voor het toetsenbord en de schermlezer, zoals bij een gewone dichte `details`.
+  Het vak knipt zijn hoogte af.
+  Daarom heeft het opvulling zo breed als de focusring (3 pixels dik, 2 pixels ervandaan) en een gelijke negatieve marge.
+  Zo wordt de ring van een link op de eerste of de laatste regel niet afgesneden, en blijft het vak even hoog.
+  De `details` heeft `display: flow-root`, anders valt de negatieve marge onderaan samen met die van de `details` zelf.
+  De `summary` heeft `position: relative` en `z-index: 1`, want het vak reikt 5 pixels onder de regel en nam anders de onderste 5 pixels van een klik weg.
+  Het element en de bediening zijn niet veranderd: Enter en spatie, de melding "uitgeklapt" en "ingeklapt" en de zoekfunctie van de browser werken zoals eerst.
+  Een test (`wikipedia-credit-css.test.ts`) bewaakt de middelen en dat de duur en curve gelijk zijn aan die van het pijltje.
+- **Browsers:** gemeten in Chromium 152 (de browser van het Browser-paneel van Claude en die van Playwright) en in WebKit van Playwright, op 390 en 900 pixels breed.
+  In Chromium gaat de uitklap zacht over.
+  WebKit kent `::details-content`, maar nog niet `interpolate-size`, dus daar springt de uitklap, en dat is de bedoelde terugval.
+  Firefox en Safari op een iPhone zijn niet gemeten.
+  Firefox kent `interpolate-size` ook niet, dus daar springt hij naar verwachting ook.
+  Zodra Safari en Firefox beide kennen, gaat de uitklap daar vanzelf zacht.
+- **Geen schokjes:** de pagina zelf springt niet.
+  Bij het openen blijft de `summary` op dezelfde plek op het scherm en groeit de pagina eronder; bij het sluiten, ook midden op de pagina, blijft hij op zijn plek en krimpt de pagina eronder.
+  Dat is gemeten per beeld met `requestAnimationFrame` op `/statistieken/tegenstanders`, met de scrollpositie, de hoogte van het document en de plaats van de `summary`.
+  Eén geval blijft over: de bezoeker staat helemaal onderaan met de uitklap open en sluit hem.
+  Het document wordt dan korter dan de pagina is gescrold, en de browser trekt de scrollpositie elk beeld mee.
+  De pagina schuift dan soepel mee in dezelfde 0,2 seconde en de `summary` zakt 156 pixels op een telefoon, tot het document zijn nieuwe lengte heeft.
+  Er is geen sprong, maar de `summary` blijft in dat ene geval niet op zijn plek, en de projecteigenaar neemt dat voor lief (1 november 2026).
+  Dat te voorkomen vraagt ruimte onderaan de pagina die voor elke bezoeker verandert hoe de pagina eindigt, of een script.
+- **Alternatieven:** een script dat de hoogte meet en zet (kost een clientcomponent voor één uitklap, en bewaart staat); `max-block-size` met een vaste waarde (een getal dat verkeerd wordt zodra de tekst langer is, en een eigen getal naast de tokens); alleen de doorzichtigheid laten bewegen (de uitklap blijft dan springen, en dat vroeg de projecteigenaar niet); extra ruimte onderaan de pagina (zie hierboven); `scrollIntoView` na het openen (de tekst staat al in beeld, want de footer geeft ruimte, en het is een script).
+- **Later:** vult _Beweging heeft vaste duren en curves, en valt bij minder beweging op één plek weg_ (27 oktober 2026) aan: de regel dat wat opent of sluit niet van hoogte wisselt, kent nu deze ene uitzondering.
+- **Later:** vult _De bronvermelding van Wikipedia staat dicht in een uitklap_ (1 november 2026) aan: de uitklap springt niet meer, hij gaat over met zijn hoogte en zijn doorzichtigheid.
 
 ### Zoeken in koppen, afleveringen en artikelen, met LIKE
 
