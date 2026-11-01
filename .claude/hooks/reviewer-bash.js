@@ -6,9 +6,10 @@ import { readFileSync } from 'node:fs'
 const rules = [
   // Read the change. --output, or an abbreviation of it, would write a file.
   { allow: /^git (diff|log|show|status)(\s|$)/, unless: /\s--out/ },
-  // Read the issue, the pull request and its checks. gh api only reads: no method, fields or
-  // input, also not as short flags run together, such as -XPOST.
-  { allow: /^gh (issue view|pr checks|pr diff|pr view)(\s|$)/ },
+  // Read the issue, the pull request and its checks, and the runs of CI, where the heavy checks
+  // run (see .claude/agents/reviewer.md). gh api only reads: no method, fields or input, also
+  // not as short flags run together, such as -XPOST.
+  { allow: /^gh (issue view|pr checks|pr diff|pr view|run list|run view)(\s|$)/ },
   { allow: /^gh api\s/, unless: /\s(-[a-zA-Z]*[XfF]|--method|--field|--raw-field|--input)/ },
   // The checks, as the package scripts define them, without extra arguments. pnpm test:a11y
   // runs Playwright with axe on the pages, and pnpm test:stories runs Vitest with axe on every

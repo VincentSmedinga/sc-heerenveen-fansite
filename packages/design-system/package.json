@@ -15,10 +15,10 @@
     "#.storybook/preview": "./.storybook/preview.tsx"
   },
   "scripts": {
-    "build-storybook": "storybook build",
+    "build-storybook": "node ../../scripts/heavy-lock.js -- storybook build",
     "storybook": "node ../../scripts/worktree-env.js run --ports storybook -- storybook dev --port {STORYBOOK_PORT} --no-version-updates",
     "test": "vitest run --project unit",
-    "test:stories": "STORYBOOK_THEME=light vitest run --project stories && STORYBOOK_THEME=dark vitest run --project stories",
+    "test:stories": "node ../../scripts/heavy-lock.js -- sh -c 'STORYBOOK_THEME=light vitest run --project stories && STORYBOOK_THEME=dark vitest run --project stories'",
     "typecheck": "tsc -b"
   },
   "dependencies": {

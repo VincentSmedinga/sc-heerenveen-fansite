@@ -96,9 +96,10 @@ Reviews each pull request in a fresh context, as the `reviewer` subagent in [`.c
 
 The Reviewer:
 
-- Checks the code of the pages that use a component and runs `pnpm test:a11y` and `pnpm test:stories`, and does not go through every story by eye: `pnpm test:stories` checks every story with axe, in light and dark.
+- Checks the code of the pages that use a component, and does not go through every story by eye: `pnpm test:stories` checks every story with axe, in light and dark, and CI runs it.
   Every visual component has a story; the owner looks at the pages in light and dark in a browser.
-- Reads and searches the code, looks at `git diff`, and runs the checks: lint, typecheck, tests and builds, the accessibility checks on the pages, `pnpm test:a11y`, and the accessibility checks on the stories, `pnpm test:stories`.
+- Reads and searches the code, looks at `git diff`, and runs the cheap checks itself: lint, typecheck and the tests of the packages the change touches.
+  The heavy checks run in CI, so it takes their result from there instead of running them a third time (see _Heavy checks_ below).
   A hook, `.claude/hooks/reviewer-bash.js`, blocks every other command.
   Claude Code only runs that hook in a folder you have trusted; elsewhere it skips the hook without a warning.
 - Changes nothing: no edits, commits, pushes or approvals.
@@ -168,7 +169,8 @@ For agents:
   The owner can always ask for a Reviewer.
 - Otherwise, the Builder then starts the Reviewer straight away, without waiting for CI.
   The app doesn't let a session watch CI itself, and Auto-fix doesn't report a CI run that passes.
-  The Reviewer runs the checks itself and looks up CI's result right before it writes its report.
+  The Reviewer runs the cheap checks itself and looks up CI's result right before it writes its report.
+  The Builder doesn't start a heavy check of its own while the Reviewer runs.
 - The Builder runs `git fetch origin` and then starts the Reviewer (the `reviewer` subagent) from its worktree, so the Reviewer can run the checks and compare against the current base.
   The Builder gives it only the pull request and the issue number, nothing about how the work went, so it forms its own view.
 - The Reviewer's hook blocks `docker`, and the tests of `packages/db` need a MariaDB.
@@ -179,6 +181,21 @@ For agents:
   Afterwards, check the `model` field of the subagent's assistant messages in its output file, and tell the owner if it isn't the model asked for.
 - The Builder posts the report on the pull request as a comment, unchanged, and ticks the three review checkboxes in the description to match.
 - Before opening a pull request, the Builder goes through the code and security checklist itself.
+
+## Heavy checks
+
+Sessions work next to each other on one computer, and these checks take every core they can get: `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` and `pnpm --filter design-system build-storybook`.
+So they run one at a time, over all worktrees: the scripts take a slot first (`scripts/heavy-lock.js`), and when another session holds it they say so and wait.
+Don't work around it, and don't kill the process that holds the slot.
+A slot that is held for more than 30 minutes, or whose process has gone, is taken over.
+The other checks are capped too, so they can run next to a heavy one: `pnpm test` runs at most two packages at a time with two test processes each, Playwright uses two, and the commit hook runs two tasks at a time.
+The decision is in `docs/beslissingen.md`, under _De zware controles delen de machine_.
+
+- The Builder runs the heavy checks before it asks for the go-ahead, once, after the last commit.
+- The Reviewer doesn't run them again when CI has: it runs lint, typecheck and the tests of the packages the change touches, and reads the rest from CI.
+  It runs a heavy check itself only when CI skipped it and the change can still affect it.
+- CI skips the slot and keeps the default number of test processes of Vitest and Playwright, because a runner has one job (`CI` is set).
+  The limit of two packages at a time in `pnpm build` and `pnpm test`, and the time-out of 30 seconds for the database tests, apply in CI too.
 
 ## Screenshots
 

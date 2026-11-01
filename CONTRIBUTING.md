@@ -73,6 +73,14 @@ De gebouwde site maakt zelf de tabellen en zet de echte bronnen erin, en de cont
 `pnpm test:stories` opent elke story van het designsysteem in Chrome en toetst hem met axe, één keer in licht en één keer in donker.
 Het heeft geen database nodig, en eenmalig Chromium (zie de [README van het designsysteem](packages/design-system/README.md)).
 `pnpm test` draait de tests van de componenten zonder browser.
+Sessies werken naast elkaar op één computer, en de zware controles nemen elk alle kernen.
+Daarom lopen `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` en `pnpm --filter design-system build-storybook` om beurten, over alle worktrees heen.
+Ze nemen eerst een slot (`scripts/heavy-lock.js`) en melden "Waiting for the slot of the heavy checks" als een andere sessie het heeft.
+Wacht dan, en stop dat proces niet.
+Een slot dat langer dan 30 minuten vastzit, of waarvan het proces weg is, neemt de volgende over.
+De andere controles zijn begrensd: `pnpm test` draait hoogstens twee pakketten tegelijk, met elk hoogstens twee testprocessen, Playwright gebruikt er twee, en de commit-hook draait hoogstens twee taken tegelijk.
+In CI telt het slot niet, en de testprocessen van Vitest en Playwright houden hun standaard: daar staat `CI` aan, en een runner heeft één taak.
+De grens van twee pakketten tegelijk bij `pnpm build` en `pnpm test`, en de time-out van 30 seconden bij de tests van de database, gelden ook in CI.
 Werk je in een worktree, dan krijg je een eigen database en eigen poorten, zodat twee sessies naast elkaar kunnen werken.
 `scripts/worktree-env.js` leidt ze af van de naam van de map, en de opdrachten hierboven gebruiken ze zonder dat je iets doet.
 Een gewone checkout en CI houden de poorten 3000, 6006, 3123, 3124, 3125 en 2525 en de database `fansite`.
@@ -183,6 +191,9 @@ De toon van de site zelf, van supporter tot supporter, en de schrijfwijze van sp
 - Een pull request krijgt hoogstens twee reviewrondes.
   Een ronde is een verslag van de reviewer en de verbeteringen die daarop volgen.
   Zegt het tweede verslag nog dat de pull request niet klaar is, dan beslist een mens: samenvoegen zoals hij is, met de hand verbeteren, of de rest in een nieuw issue zetten.
+- De reviewer draait de zware controles niet nog een keer.
+  Hij draait `pnpm lint`, `pnpm typecheck` en de tests van de pakketten die de pull request raakt, en neemt `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` en de build van Storybook over uit CI, vlak voordat hij zijn verslag schrijft.
+  Heeft CI een controle overgeslagen die de wijziging wel kan raken, dan draait hij die zelf.
 - De reviewer schrijft een verslag met drie onderdelen: code en beveiliging, toegankelijkheid, en redactie en bronbeleid.
   Het verslag staat als reactie bij de pull request.
 - Een pull request krijgt geen reviewer als hij alleen Markdown of MDX in `docs/` of `packages/design-system/src/docs/` wijzigt, of verhalen (`*.stories.tsx`) zonder visuele wijziging, zoals een titel, een beschrijving of commentaar.
