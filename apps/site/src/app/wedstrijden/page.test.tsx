@@ -448,6 +448,21 @@ describe('the page /wedstrijden', () => {
       expect(results).not.toContain('n.s.')
     })
 
+    it('shows the note of a stopped match as the last line of the match, and none for the others', async () => {
+      const note = 'Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion.'
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.map((match) => (match.round === 'Speelronde 9' ? { ...match, note } : match)),
+      })
+
+      const results = section(await render(), 'uitslagen')
+
+      expect(results.split(note)).toHaveLength(2)
+      expect(results).toContain(`Voorbeeldpark</span></p><p class="hf-meta hf-match-note">${note}</p></div>`)
+      expect(results.match(/hf-match-note/gu)).toHaveLength(1)
+    })
+
     it('shows the score after 90 minutes behind "n.v.", and names the abbreviation under the results', async () => {
       vi.mocked(getMatchData).mockResolvedValue({
         ...matchData,

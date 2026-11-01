@@ -1440,6 +1440,7 @@ describe('the matches and the table of a season', () => {
         'home',
         'kickoffAt',
         'matchDate',
+        'note',
         'opponent',
         'penaltiesAgainst',
         'penaltiesFor',

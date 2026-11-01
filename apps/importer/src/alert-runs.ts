@@ -10,7 +10,7 @@ import type { HealthReport } from './import-matches.ts'
  * read and stored, or found unchanged, is a run that worked. A request to wait, a refusal by
  * robots.txt and a run that did not ask are no fault of ours, and neither count nor reset.
  *
- * A warning inside a report that was stored, such as a result that changed after days, is no
+ * A warning inside a report that was stored, such as a change that waits for seven days, is no
  * failure either: the data is stored.
  */
 export function alertRunOf(

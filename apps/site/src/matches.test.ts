@@ -35,6 +35,7 @@ const match = (round: string, status: PublicMatch['status'], matchDate: string):
   home: true,
   kickoffAt: new Date(`${matchDate}T14:30:00Z`),
   matchDate,
+  note: null,
   opponent: 'Testdorp FC',
   penaltiesAgainst: null,
   penaltiesFor: null,

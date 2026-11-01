@@ -24,6 +24,7 @@ De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), éé
 Een feed die nog moet wachten, slaat hij over.
 Tegelijk leest hij de wedstrijden, de stand en de selectie van het lopende seizoen van de Nederlandse Wikipedia, elk hoogstens één keer per uur (zie _De wedstrijden en de stand_ en _De selectie_).
 Een afgelopen seizoen leest hij niet; dat doet de opdracht `pnpm run import:season <seizoen>`, eenmalig (zie _Een afgelopen seizoen_).
+Wat verdacht lijkt, houdt hij vast; de opdracht `pnpm run import:changes` toont en beslist die wijzigingen (zie _Hoe betrouwbaar een wijziging is_).
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
 
 ```text
@@ -755,6 +756,8 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Bij een wedstrijd zonder `aet` leest hij `half time score` niet als stand na 90 minuten, ook niet met een komma erin.
   De stand bij de rust bewaart hij niet.
   Een play-offwedstrijd krijgt hem niet.
+- Bij een wedstrijd die gestaakt en later uitgespeeld is, bewaart hij een regel in `note` (zie _Een gestaakte wedstrijd_ hieronder).
+  Elke andere wedstrijd heeft geen `note`, en de volgende import van het seizoen vult hem bij een wedstrijd die al in de database stond.
 - De doelpuntenmakers van een gespeelde wedstrijd bewaart hij in `match_goals`, een rij per doelpunt.
   Wikipedia heeft ze in `goals1` (het eerste team van het sjabloon) en `goals2`: `[[Luca Oyen|Oyen]] {{goal|52}}` voor het eerste team en `{{goal|45}} [[Jacob Trenskow|Trenskow]]` voor het tweede, een speler per regel en de regels gescheiden door `<br />`.
   De import bewaart de naam zoals die op de pagina staat (de tekst achter de `|` in de link), de pagina waar de link naar wijst (`wikipedia_page`, zoals `Luca Oyen`), de minuut, de blessuretijd en of het een eigen doelpunt of een penalty was.
@@ -924,6 +927,8 @@ De import schrijft een regel met de reden:
 Matches 2026/27: warning, nothing changed and the last good copy stays: the row of sc Heerenveen (11 played, 18-13, 18 points) is not what the matches say (10 played, 18-13, 15 points)
 ```
 
+Ook een pagina die te veel wedstrijden in één keer verandert, houdt de import vast zoals een mislukte controle (zie _Veel wijzigingen tegelijk_).
+De wijzigingen die wachten staan dan wel in `match_changes`.
 De mislukte poging staat in `match_imports` (`failures_in_a_row`, `last_error`), en `pnpm run import:status` laat hem zien.
 Na drie mislukte runs op rij is de import ongezond, zoals een feed, en stopt het overzicht met exitcode 1.
 De run zelf stopt niet met exitcode 1: een tikfout op Wikipedia is geen fout van de importer.
@@ -939,17 +944,146 @@ De import van de wedstrijden vraagt Wikipedia pas weer als `match_imports.retry_
 Vraagt Wikipedia met 429 of 503 om te wachten, dan wacht hij zo lang als `Retry-After` zegt, hoogstens een dag.
 Een run die moet wachten, schrijft niets.
 
-### Een uitslag die verandert
+### Hoe betrouwbaar een wijziging is
 
-Een nieuwe uitslag neemt de import altijd over.
-Stond de oude uitslag drie dagen of langer vast, dan schrijft hij erbij:
+Wikipedia kan iedereen bewerken.
+De import neemt daarom niet elke wijziging over die de controles doorstaat.
+Hij vergelijkt per wedstrijd wat de pagina nu zegt met wat in de database staat, en geeft een wijziging een soort (`src/classify-change.ts`, zuivere functies).
+Alleen wat de import zelf ziet telt: de pagina, de tijd van de wedstrijd en de momenten waarop hij iets voor het eerst zag.
+De bewerkingsgeschiedenis van Wikipedia leest hij niet, want die staat onder `/w/`.
+
+| Soort                        | Wat de import doet                                                             | Voorbeelden                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nieuwe informatie            | Neemt de wijziging meteen over, zonder melding.                                | Een nieuwe wedstrijd. Een uitslag binnen drie dagen na de aanvang. Doelpuntenmakers bij een wedstrijd die er geen had, of doelpunten erbij waarbij de bestaande blijven. Een aanvangstijd, een datum of een uitstel voor een wedstrijd die niet is gespeeld. Verlenging of strafschoppen die bij dezelfde score verschijnen. |
+| Verbetering van kort geleden | Neemt de wijziging over, met een waarschuwing en een regel in `match_changes`. | Een uitslag die minder dan 24 uur nadat hij voor het eerst stond verandert, bij een wedstrijd van minder dan drie dagen geleden. Een doelpunt dat verandert bij zo'n wedstrijd. Een tikfout van een uur oud.                                                                                                                 |
+| Verdacht                     | Laat de oude waarde staan en houdt de wijziging vast.                          | Alles wat in geen andere regel past. Zie hieronder.                                                                                                                                                                                                                                                                          |
+
+Een wijziging is verdacht als:
+
+- een uitslag verandert nadat hij 24 uur of langer vaststond, of bij een wedstrijd van drie dagen of langer geleden;
+- een doelpunt van een wedstrijd van drie dagen of langer geleden een andere speler, minuut, eigen-doelpunt- of strafschopaanduiding krijgt, of verdwijnt;
+- een gespeelde wedstrijd weer "gepland" wordt;
+- een wedstrijd van de pagina verdwijnt;
+- de datum of de tegenstander van een gespeelde wedstrijd van drie dagen of langer geleden verandert;
+- een uitslag pas komt nadat de import de pagina na de eerste drie dagen zag zonder uitslag;
+- een wedstrijd weer de waarde krijgt die hij eerder had (A, dan B, dan A), of een eerder afgewezen waarde terugkomt: dat kan een bewerkingsoorlog zijn;
+- de wedstrijd bij een afgelopen seizoen hoort en de wijziging iets overschrijft: zijn wedstrijden veranderen niet meer;
+- de wedstrijd verschilt op een manier die geen regel kent;
+- meer dan zes wedstrijden in één run iets overschrijven wat we al hadden (zie hieronder).
+
+Een grens is strikt: een uitslag die precies 24 uur of precies drie dagen vaststond, valt buiten het venster.
+Een nieuwe link naar een andere pagina over dezelfde tegenstander is nieuwe informatie, ook bij een oude wedstrijd.
+Een andere spelling van zijn naam, een ander stadion of een andere datumtekst telt als een gewone wijziging: bij een gespeelde wedstrijd een verbetering of verdacht, en altijd meetellend voor de grens van zes.
+Een doelpunt dat alleen zijn speler of pagina krijgt (de selectie is bijgewerkt) ook.
+
+Een verbetering geeft een regel zoals:
 
 ```text
-Matches 2026/27: warning, the result of Speelronde 1 (Eredivisie) changed after 4 days, from sc Heerenveen 1-0 FC Twente to sc Heerenveen 1-1 FC Twente
+Matches 2026/27: warning, Speelronde 1 (Eredivisie): the result changed after 3 hours, from sc Heerenveen 1-0 FC Twente to sc Heerenveen 1-1 FC Twente
 ```
 
 De waarschuwing staat ook in `match_imports.last_warning`, en dus in het overzicht.
 `matches.result_set_at` houdt bij sinds wanneer de uitslag zo staat.
+
+#### Een verdachte wijziging wacht
+
+De wedstrijd en zijn doelpunten in de database veranderen niet, dus de site blijft de oude waarde tonen, zonder melding.
+De import bewaart de wijziging in `match_changes`: de wedstrijd, wat er veranderde, de oude en de nieuwe waarde als één regel tekst, de reden, wanneer hij voor het eerst en voor het laatst is gezien, hoe vaak, en de status `pending`.
+De regel van de run zegt het en het overzicht toont hem:
+
+```text
+Matches 2026/27: 0 new, 0 updated, 34 unchanged, 0 removed, 1 held; table of 18 clubs for 2026-10-24
+Matches 2026/27: warning, held, Speelronde 1 (Eredivisie): the result changed after 4 days, from sc Heerenveen 1-0 FC Twente to sc Heerenveen 1-1 FC Twente
+```
+
+Elke run die dezelfde nieuwe waarde op de pagina ziet, telt de wijziging mee (`times_seen`).
+Daarna gebeurt een van deze dingen:
+
+- **Overgenomen** na zeven dagen van dezelfde waarde (`resolution` is `stood`), of als iemand hem accepteert (`person`).
+  De uitslag, de doelpunten of de wedstrijd zelf wordt dan zoals de pagina zegt, en `result_set_at` wordt dat moment.
+- **Afgewezen** als Wikipedia de oude waarde terugzet (`reverted`), als Wikipedia er weer iets anders van maakt (`replaced`: de zeven dagen beginnen dan opnieuw met de nieuwe waarde), of als iemand hem afwijst (`person`).
+  Een wijziging die iemand afwees, komt niet terug zolang de pagina dezelfde waarde toont.
+
+Elke stap staat met de tijd in `decided_at`.
+Een verbetering die de import meteen overnam, staat er ook, met `status` `accepted` en `resolution` `applied`: zo ziet hij een wedstrijd die heen en weer wisselt.
+
+De wijzigingen die wachten, staan in `pnpm run import:status` (op de host `import.mjs --status`) en komen met de opdracht:
+
+```sh
+pnpm run import:changes
+pnpm run import:changes accept 12
+pnpm run import:changes reject 12 13
+pnpm run import:changes accept all
+```
+
+- Zonder argument toont de opdracht de wijzigingen die wachten, met nummer, de oude en de nieuwe waarde en het moment waarop de import ze overneemt.
+- `accept` en `reject` nemen nummers of `all`.
+  Ze vragen niets aan Wikipedia: een geaccepteerde wijziging wordt wat de import zag op het moment van de wijziging.
+  Ze nemen de lock van de import, zoals `pnpm run import:season`.
+- De exitcode is 0 als alles besloten is, en 1 bij een weigering, een nummer dat niet wacht of een import die de lock houdt.
+- Een melding per mail komt er niet bij: de eigenaar kijkt in het overzicht en in het logboek.
+  Het beheer komt met #272.
+
+#### Veel wijzigingen tegelijk
+
+Meer dan zes wedstrijden die iets overschrijven wat we al hadden, lijkt op een bewerking van de hele pagina.
+De wedstrijden die al wachten en nog op de pagina staan, tellen mee.
+Dan wacht elk van die wedstrijden, en de run schrijft verder niets: geen nieuwe wedstrijden, geen stand en geen pagina's.
+De laatste goede kopie blijft staan zoals bij een mislukte controle, en de run telt als mislukt:
+
+```text
+Matches 2026/27: warning, nothing changed and the last good copy stays: 7 matches changed at once, which looks like an edit of the whole page: the changes wait (pnpm run import:changes)
+```
+
+De pagina blijft vastgehouden zolang die wijzigingen wachten.
+Elke run meldt dat opnieuw, en de mail over een import die blijft falen komt zoals bij elke fout.
+Zijn de wijzigingen besloten (`accept` of `reject`) of zeven dagen oud, dan gaat de rest van de pagina door.
+Het invullen van wat leeg was telt niet mee: een uitslag die nieuw is, doelpuntenmakers erbij of een aanvangstijd die voor het eerst komt.
+Zo wacht de aankondiging van elf aanvangstijden in één keer niet.
+
+#### Wat de grenzen zijn
+
+| Grens               | Waarde          | Waar het voor is                                                                        |
+| ------------------- | --------------- | --------------------------------------------------------------------------------------- |
+| `correctionWithin`  | 24 uur          | Een verbetering van een uitslag die hij zo kort geleden nog niet had                    |
+| `recentMatch`       | drie dagen      | Een wedstrijd waarvan de uitslag nieuw is en waarvan de doelpunten nog veranderen mogen |
+| `suspiciousStands`  | zeven dagen     | Zo lang moet een verdachte wijziging op de pagina blijven staan                         |
+| `mostChangesInARun` | zes wedstrijden | Het aantal wijzigingen dat een run mag overschrijven                                    |
+| `warLookback`       | zeven dagen     | Hoe ver terug de import kijkt naar een wedstrijd die heen en weer wisselt               |
+
+Ze staan in `reliability` in `src/classify-change.ts`.
+De proef (zie _De proef_) gaf geen reden om ze te veranderen.
+
+Een uitslag die tussen 24 uur en drie dagen nadat hij voor het eerst stond verandert, valt in geen regel van een verbetering of van iets duidelijks verdachts.
+Wat de regels niet noemen, is verdacht, dus die wijziging wacht.
+
+#### Wat voor de eerste keer geldt
+
+Heeft de import een seizoen nog nooit goed gelezen (er staat geen pagina in `wikipedia_pages`), dan komt niets in de database van Wikipedia.
+Zulke wedstrijden zijn de verzonnen wedstrijden van de seed, en de eerste echte lezing vervangt ze zonder te wachten.
+
+Een afgelopen seizoen verandert niet meer, dus een wijziging daarin die iets overschrijft is verdacht.
+Wat leeg was invullen mag wel, zoals de stand na 90 minuten of doelpuntenmakers bij een wedstrijd die er geen had, en een nieuwe wedstrijd ook.
+De uurlijkse import leest een afgelopen seizoen niet, dus een wijziging daarin wacht tot iemand haar besluit, of tot `pnpm run import:season` het seizoen na zeven dagen weer leest en de pagina nog dezelfde waarde toont.
+
+#### De stand en de selectie
+
+Dit gaat over wedstrijden en doelpunten.
+De stand en de selectie volgen Wikipedia zoals voorheen: ze zijn een vervolg.
+Alleen als de hele pagina vastgehouden wordt (zie _Veel wijzigingen tegelijk_), blijft ook de stand staan.
+
+#### De proef
+
+De regels zijn nagespeeld op de echte pagina's van de zeven seizoenen 2020/21 tot en met 2026/27 (266 wedstrijden).
+Per seizoen is het leven van de pagina nagebouwd: de aanvangstijden komen in groepen van elf, een uitslag drie uur na de aanvang en de doelpuntenmakers een uur later, en elke wijziging kreeg een oordeel van de echte functie.
+
+- Het zijn 735 wijzigingen, en alle zijn nieuwe informatie: 0 verbeteringen en 0 verdachte.
+- Het meeste dat één lezing wijzigt is 11 (de aanvangstijden), en geen van die 11 overschrijft iets.
+  De grens van zes wedstrijden raakt dit niet.
+- Met een storing van vijf dagen midden in het seizoen is het resultaat hetzelfde.
+
+Wat de proef niet kan zeggen is hoeveel echte bewerkingen op Wikipedia er verdacht zouden zijn: de bewerkingsgeschiedenis is voor ons gesloten.
+De tabel `match_changes` verzamelt dat vanaf nu zelf: na een paar maanden telt de eigenaar de rijen per soort en past de grenzen aan.
 
 ### Oudere bekerpagina's
 
@@ -992,6 +1126,8 @@ pnpm run import:season 2025/26
   Probeer het dan na een paar minuten opnieuw.
 - De exitcode is 0 als het seizoen is opgeslagen, en 1 als de opdracht het seizoen weigert, een controle faalt of Wikipedia om te wachten vraagt of het niet toestaat.
   Bij een fout blijft de database zoals ze was, en de rij in `match_imports` van dat seizoen noemt de fout.
+- Staat het seizoen al in de database, dan wacht een wijziging die iets overschrijft (zie _Hoe betrouwbaar een wijziging is_).
+  Een eerste lezing en een lezing zonder verschil schrijven alles of niets, zoals hierboven.
 - De selectie van dat seizoen leest ze niet.
   De doelpunten hebben dus geen speler (`player_id` is leeg), met de naam en de pagina van de speler zoals Wikipedia ze heeft.
   Dat is geen fout en geen waarschuwing.
@@ -1010,12 +1146,19 @@ Op acceptatie start je dat in GitHub met de workflow _Import season_, zonder SSH
 #### Een gestaakte wedstrijd
 
 De pagina van 2025/26 heeft voor NAC Breda – sc Heerenveen (speelronde 33) twee blokken.
-Het eerste heeft de score "Gestaakt 82' (2 – 0)" op 10 mei 2026, het tweede de definitieve uitslag 2–0 op 11 mei, met een voetnoot bij de datum.
-De reader werkt zo:
+Het eerste heeft de score "Gestaakt 82' (2 – 0)" op 10 mei 2026 in Breda, het tweede de definitieve uitslag 2–0 op 11 mei in het Abe Lenstra Stadion, met een voetnoot bij de datum.
+De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)):
 
-- Een blok waarvan de score met "Gestaakt" begint, telt niet mee zolang de pagina onder dezelfde kop voor dezelfde twee clubs een later blok heeft.
-  Het latere blok geldt, met zijn datum, zijn aftrap en zijn doelpunten.
+- Een blok waarvan de score met "Gestaakt" begint, is de wedstrijd.
+  Het geeft het stadion, thuis of uit, de datum en de aftrap, zodat de cijfers per stadion de wedstrijd tellen voor de plek waar hij begon.
+- Het laatste blok daarna onder dezelfde kop voor dezelfde twee clubs maakt de wedstrijd af en is zelf geen wedstrijd.
+  Het geeft de uitslag en de doelpunten, en de dag en het stadion voor de regel in `matches.note`: "Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion."
+  De minuut staat in de score van het gestaakte blok.
+  Een naam die op "Stadion" eindigt, krijgt "het" ervoor.
+  Heeft het blok nog geen uitslag, dan staat er "wordt gespeeld".
+  Over de reden van het staken of het publiek zegt de regel niets.
 - Heeft de pagina geen later blok, dan stopt de import met een fout die de wedstrijd noemt.
+  Dat geldt ook als het latere blok zelf gestaakt is, een dag of minuut heeft die we niet kennen, of een uitgestelde wedstrijd is.
   Een score die we niet kennen, geeft altijd een fout.
 - Gestaakte wedstrijden van andere clubs leest hij niet, want alleen de wedstrijden van sc Heerenveen komen in de database.
 - Een voetnoot (`<ref>...</ref>`) haalt hij weg voordat hij de pagina leest, dus een datum met een voetnoot leest als de datum.
@@ -1215,6 +1358,7 @@ De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die v
 [`wikipedia-cup-goals.wiki`](src/fixtures/wikipedia-cup-goals.wiki) heeft de vier bekerwedstrijden van sc Heerenveen uit het seizoen 2025/26, gelezen op 26 oktober 2026, met een eigen doelpunt, twee doelpunten van één speler in één sjabloon, blessuretijd en een gemiste penalty.
 `src/read-wikipedia.test.ts` leest ze zonder database en `src/check-wikipedia.test.ts` toetst de controles.
 `src/import-matches.test.ts` draait op een echte MariaDB met een eigen webserver die de pagina's geeft, en laat zien dat een falende controle de database ongemoeid laat.
+`src/classify-change.test.ts` toetst het oordeel over een wijziging zonder database, met de randen (precies 24 uur, precies drie dagen, de zevende wedstrijd), en `src/import-matches.test.ts` en `src/import-season.test.ts` laten zien dat een verdachte wijziging wacht, na zeven dagen wordt overgenomen of vervalt, dat een mens haar beslist en dat een fout in de beoordeling de database ongemoeid laat.
 Een test die `runImport` draait en niets met de wedstrijden te maken heeft, geeft de optie `wikipediaOrigin: null`.
 De tests van het commando zelf (`src/import.test.ts` en `src/bundle.test.ts`) zetten een gezondheidsrij voor de wedstrijden en voor de selectie met een `retry_at` ver weg, zodat het commando de echte Wikipedia niet vraagt.
 

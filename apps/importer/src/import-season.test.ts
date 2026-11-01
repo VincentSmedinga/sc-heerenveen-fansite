@@ -1,8 +1,9 @@
+import type { MatchChange } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { listSeasonMatches, listSeasonStandings, listWikipediaPages } from '@fansite/db/queries'
-import { matches, matchGoals, matchImports, players, standings, wikipediaPages } from '@fansite/db/schema'
+import { matchChanges, matches, matchGoals, matchImports, players, standings, wikipediaPages } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { execFile } from 'node:child_process'
@@ -13,6 +14,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { Handler, TestServer } from './test-server.ts'
 
+import { changesUsage, nameChange, parseChangesArguments, runChangesCommand } from './import-changes.ts'
 import { importMatches, importPastSeason } from './import-matches.ts'
 import { parseSeason, runSeasonImport, seasonUsage } from './import-season.ts'
 import { pageTitles, pageUrl } from './read-wikipedia.ts'
@@ -58,7 +60,15 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  for (const table of ['matches', 'players', 'standings', 'wikipedia_pages', 'match_imports', 'squad_imports']) {
+  for (const table of [
+    'match_changes',
+    'matches',
+    'players',
+    'standings',
+    'wikipedia_pages',
+    'match_imports',
+    'squad_imports',
+  ]) {
     await database.pool.query(`DELETE FROM ${table}`)
   }
 })
@@ -192,10 +202,13 @@ describe('the command', () => {
       goalsAgainst: 2,
       goalsFor: 0,
       home: false,
-      kickoffAt: new Date('2026-05-11T12:30:00Z'),
-      matchDate: '2026-05-11',
+      kickoffAt: new Date('2026-05-10T14:45:00Z'),
+      matchDate: '2026-05-10',
+      note: 'Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion.',
       opponent: 'NAC Breda',
+      stadium: 'Rat Verlegh Stadion',
     })
+    expect(stored.filter((match) => match.note !== null)).toHaveLength(1)
 
     const table = await database.db.select().from(standings).orderBy(asc(standings.position))
 
@@ -405,6 +418,175 @@ describe('the command', () => {
     expect(held.ran && held.result.lines.join('\n')).toContain('An import is still running')
     expect(server.paths()).toEqual([])
     expect(await database.db.select().from(matches)).toEqual([])
+  })
+})
+
+describe('a season that is over, read again', () => {
+  /** The first match of the season starts half an hour later. */
+  const edited = { ...lastSeason, programme: lastSeason.programme.replace('|time = 20:00 uur', '|time = 20:30 uur') }
+
+  it('holds a change in it, since the matches of a season that is over do not change', async () => {
+    const first = await serve()
+
+    await runCommand(first, past)
+    expect(lastSeason.programme).not.toBe(edited.programme)
+
+    const before = await rowsOf(past)
+    const second = await runCommand(await serve({ last: edited }), past)
+
+    expect(second.code).toBe(0)
+    expect(second.lines.join('\n')).toContain('0 new, 0 updated, 37 unchanged, 0 removed, 1 held;')
+    expect(second.lines.join('\n')).toContain('warning, held, Speelronde 1 (Eredivisie): the season is over')
+    expect((await rowsOf(past)).matches).toEqual(before.matches)
+    expect(await database.db.select().from(matchChanges)).toMatchObject([
+      { class: 'suspicious', season: past, status: 'pending' },
+    ])
+  })
+
+  it('takes the change over after seven days of the same page, when the command is run again', async () => {
+    await runCommand(await serve(), past)
+
+    const server = await serve({ last: edited })
+    const run = (at: Date) =>
+      runSeasonImport(database.url, past, {
+        clock: () => at,
+        makeFetcher: (robots) => fetcherFor([server], { robots }),
+        wikipediaOrigin: server.origin,
+        write: () => undefined,
+      })
+
+    await run(now)
+    await run(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000))
+    expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
+      { kickoffAt: new Date('2025-08-09T18:30:00Z') },
+    ])
+    expect(await database.db.select().from(matchChanges)).toMatchObject([
+      { resolution: 'stood', status: 'accepted', timesSeen: 1 },
+    ])
+  })
+})
+
+describe('the command that decides the changes', () => {
+  const edited = { ...lastSeason, programme: lastSeason.programme.replace('|time = 20:00 uur', '|time = 20:30 uur') }
+
+  async function held() {
+    await runCommand(await serve(), past)
+    await runCommand(await serve({ last: edited }), past)
+  }
+
+  async function decide(...args: string[]) {
+    const lines: string[] = []
+    const code = await runChangesCommand(database.url, args, { clock: () => now, write: (line) => lines.push(line) })
+
+    return { code, lines }
+  }
+
+  it.each([
+    [[], { kind: 'list' }],
+    [['accept', 'all'], { action: 'accept', ids: 'all', kind: 'decide' }],
+    [['reject', '12', '7'], { action: 'reject', ids: [12, 7], kind: 'decide' }],
+  ])('reads %j', (args, expected) => {
+    expect(parseChangesArguments(args)).toEqual(expected)
+  })
+
+  it.each([
+    [['accept'], 'No change given to accept'],
+    [['remove', '1'], 'is not accept or reject'],
+    [['accept', 'one'], 'A change is a number'],
+    [['accept', 'all', '3'], 'A change is a number'],
+    [['reject', '-1'], 'A change is a number'],
+  ])('refuses %j with a sentence and the usage', (args, reason) => {
+    const request = parseChangesArguments(args)
+
+    expect(request.kind === 'refused' ? request.message : '').toContain(reason)
+    expect(request.kind === 'refused' ? request.message : '').toContain(changesUsage)
+  })
+
+  it('cleans the round of control characters, like the rest of the text from Wikipedia', async () => {
+    await held()
+
+    const [change] = await database.db.select().from(matchChanges)
+
+    expect(nameChange({ ...(change as MatchChange), round: 'Eerste\u001b[31m ronde' })).not.toContain('\u001b')
+  })
+
+  it('lists the changes that wait, with the old and the new value and when they are taken over', async () => {
+    expect(await decide()).toEqual({ code: 0, lines: ['No changes wait.'] })
+
+    await held()
+
+    const { code, lines } = await decide()
+
+    expect(code).toBe(0)
+    expect(lines).toEqual([
+      'Changes that wait: 1',
+      expect.stringMatching(/^#\d+ Speelronde 1 \(Eredivisie 2025\/26\): the season is over/u),
+      expect.stringContaining('  now: home '),
+      expect.stringContaining('  Wikipedia: home '),
+      expect.stringMatching(
+        /^ {2}first seen .* UTC, last seen .* UTC, seen 1 time; taken over from .* UTC if it stays$/u,
+      ),
+    ])
+  })
+
+  it('shows them in the status, and a status without changes says nothing about them', async () => {
+    const status = async () => {
+      const lines: string[] = []
+
+      await showStatus(database.url, { clock: () => now, write: (line) => lines.push(line) })
+
+      return lines.join('\n')
+    }
+
+    expect(await status()).not.toContain('Changes of matches that wait')
+
+    await held()
+    expect(await status()).toContain('Changes of matches that wait: 1')
+  })
+
+  it('accepts a change by its number: the match becomes what Wikipedia showed', async () => {
+    await held()
+
+    const [change] = await database.db.select().from(matchChanges)
+    const { code, lines } = await decide('accept', String(change?.id))
+
+    expect(code).toBe(0)
+    expect(lines).toEqual([`#${change?.id} Speelronde 1 (Eredivisie 2025/26): accepted`])
+    expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
+      { kickoffAt: new Date('2025-08-09T18:30:00Z') },
+    ])
+    expect(await database.db.select().from(matchChanges)).toMatchObject([
+      { decidedAt: now, resolution: 'person', status: 'accepted' },
+    ])
+  })
+
+  it('rejects all of them: the matches stay', async () => {
+    await held()
+
+    expect((await decide('reject', 'all')).code).toBe(0)
+    expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
+      { kickoffAt: new Date('2025-08-09T18:00:00Z') },
+    ])
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ resolution: 'person', status: 'rejected' }])
+    expect((await decide()).lines).toEqual(['No changes wait.'])
+  })
+
+  it('says so, with exit code 1, for a number that waits no more', async () => {
+    await held()
+
+    expect(await decide('accept', '999999')).toEqual({ code: 1, lines: ['#999999: no change with this number waits'] })
+    expect(await decide('reject', 'all')).toMatchObject({ code: 0 })
+    expect(await decide('reject', 'all')).toEqual({ code: 0, lines: ['No changes wait.'] })
+  })
+
+  it('does nothing while an import holds the lock, and says so', async () => {
+    await held()
+
+    const run = await withLock(database.pool, lockNameFor(database.url, 'import'), 0, () => decide('accept', 'all'))
+
+    expect(run.ran && run.result.code).toBe(1)
+    expect(run.ran && run.result.lines.join('\n')).toContain('An import is still running')
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
   })
 })
 

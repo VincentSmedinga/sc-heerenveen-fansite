@@ -527,7 +527,7 @@ export type MatchStatus = (typeof matchStatuses)[number]
  * The most characters a column of `matches` holds. The importer checks them before it
  * stores.
  */
-export const matchLimits = { dateText: 60, opponent: 100, round: 60, season: 7, stadium: 150 }
+export const matchLimits = { dateText: 60, note: 255, opponent: 100, round: 60, season: 7, stadium: 150 }
 
 /**
  * The most characters the Wikipedia page of a player or a club holds, in `players`,
@@ -614,14 +614,20 @@ export type NewClubName = typeof clubNames.$inferInsert
  * give that score. They can equal the final score, because extra time can pass without a goal,
  * but never exceed it.
  *
+ * `note` is a line under the match, from facts the page gives, and is empty for nearly every
+ * match. The importer writes it for a match that was stopped and finished later: "Gestaakt in
+ * minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion." Such a match counts
+ * for where and when it began (`stadium`, `match_date`, `kickoff_at`, `home`), and the note is
+ * the only place that holds where the rest was played.
+ *
  * `match_date` is the local day (Europe/Amsterdam), or the first day when Wikipedia only knows
  * a weekend. `kickoff_at` is the kick-off in UTC and is empty while the time is unknown: the
  * KNVB announces the times of rounds 22 to 32 on 22 December 2026. `date_text` then holds the
  * date as Wikipedia gives it, such as `12-14 februari 2027`, and is empty when the kick-off is
  * known.
  *
- * `result_set_at` is the moment the importer first saw the current result, so it can tell that
- * a result which stood for days has changed.
+ * `result_set_at` is the moment the importer first saw the current result, so it can tell a
+ * correction of a few hours old from a change after days (see `match_changes`).
  *
  * `club_id` is the opponent as a club (`clubs`), which gives it a fixed name in an address.
  * `opponent` stays as Wikipedia wrote it in this match.
@@ -650,6 +656,7 @@ export const matches = mysqlTable(
     matchDate: date('match_date', { mode: 'string' }).notNull(),
     kickoffAt: datetime('kickoff_at'),
     dateText: varchar('date_text', { length: matchLimits.dateText }),
+    note: varchar('note', { length: matchLimits.note }),
     resultSetAt: datetime('result_set_at'),
   },
   (table) => [
@@ -811,9 +818,9 @@ export type MatchImportOutcome = (typeof matchImportOutcomes)[number]
 /**
  * The health of the match import, one row per season, like the health a feed has: the
  * last time it succeeded, the last outcome, the failed runs in a row, the last error and
- * the last warning (a result that changed after it had stood for days). `retry_at` is
- * when the import may ask Wikipedia again: an hour after each try, longer when Wikipedia
- * asks us to wait. Times are UTC.
+ * the last warning (a correction that was taken over, or a change that waits in
+ * `match_changes`). `retry_at` is when the import may ask Wikipedia again: an hour after each
+ * try, longer when Wikipedia asks us to wait. Times are UTC.
  */
 export const matchImports = mysqlTable('match_imports', {
   season: varchar('season', { length: matchLimits.season }).primaryKey(),
@@ -828,6 +835,74 @@ export const matchImports = mysqlTable('match_imports', {
 })
 
 export type MatchImport = typeof matchImports.$inferSelect
+
+export const matchChangeStatuses = ['pending', 'accepted', 'rejected'] as const
+
+export type MatchChangeStatus = (typeof matchChangeStatuses)[number]
+
+export const matchChangeClasses = ['improvement', 'suspicious'] as const
+
+export type MatchChangeClass = (typeof matchChangeClasses)[number]
+
+/**
+ * How a change was decided: `applied` is an improvement of a few hours old that the import took
+ * over at once, `stood` a suspicious change that stayed on the page for seven days, `person` a
+ * decision with `pnpm run import:changes`, `reverted` a change that Wikipedia undid, and
+ * `replaced` one that Wikipedia changed again into something else.
+ */
+export const matchChangeResolutions = ['applied', 'stood', 'person', 'reverted', 'replaced'] as const
+
+export type MatchChangeResolution = (typeof matchChangeResolutions)[number]
+
+/**
+ * A change of a match that the importer saw on Wikipedia and judged by how reliable it looks
+ * (`classify-change.ts` in the importer). Nothing is kept for a change that is plainly new
+ * information, such as a first result or a goal added.
+ *
+ * An `improvement` is a correction of a few hours old: the import takes it over at once and the
+ * row is `accepted`, `applied`. It is kept to see a match that flips back and forth. A
+ * `suspicious` change waits: the match and its goals in `matches` stay as they are, and the row
+ * is `pending` with the value Wikipedia shows now. It becomes `accepted` after seven days of
+ * the same value or when a person accepts it, and `rejected` when Wikipedia puts the old value
+ * back or a person rejects it.
+ *
+ * `old_value` and `new_value` describe the whole match and its goals in one line each, as the
+ * importer compares them; `new_value` is empty when the match is gone from the page. `proposal`
+ * is the new match and its goals as JSON, so a person can accept the change without Wikipedia.
+ * `season`, `competition` and `round` name the match and stay when the match is deleted,
+ * `match_id` then becomes empty. `first_seen_at` and `last_seen_at` are the first and the last
+ * run that saw this new value, `times_seen` the number of runs. Times are UTC.
+ */
+export const matchChanges = mysqlTable(
+  'match_changes',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    competition: mysqlEnum('competition', competitions).notNull(),
+    round: varchar('round', { length: matchLimits.round }).notNull(),
+    matchId: int('match_id', { unsigned: true }).references(() => matches.id, { onDelete: 'set null' }),
+    changed: varchar('changed', { length: 100 }).notNull(),
+    class: mysqlEnum('class', matchChangeClasses).notNull(),
+    reason: varchar('reason', { length: reasonMaxLength }).notNull(),
+    oldValue: text('old_value').notNull(),
+    newValue: text('new_value'),
+    proposal: text('proposal'),
+    status: mysqlEnum('status', matchChangeStatuses).notNull(),
+    resolution: mysqlEnum('resolution', matchChangeResolutions),
+    firstSeenAt: datetime('first_seen_at').notNull(),
+    lastSeenAt: datetime('last_seen_at').notNull(),
+    timesSeen: int('times_seen', { unsigned: true }).notNull().default(1),
+    decidedAt: datetime('decided_at'),
+  },
+  (table) => [
+    index('match_changes_season_status_idx').on(table.season, table.status),
+    index('match_changes_match_idx').on(table.season, table.competition, table.round),
+  ],
+)
+
+export type MatchChange = typeof matchChanges.$inferSelect
+
+export type NewMatchChange = typeof matchChanges.$inferInsert
 
 /** The longest `subject` of an alert: the kind of import and what it reads, as `feed:12`. */
 export const importAlertSubjectMaxLength = 100

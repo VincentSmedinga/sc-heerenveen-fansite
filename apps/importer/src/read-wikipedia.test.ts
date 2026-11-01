@@ -108,6 +108,7 @@ describe('the programme and the results', () => {
       home: true,
       kickoffAt: new Date('2026-08-09T14:45:00Z'),
       matchDate: '2026-08-09',
+      note: null,
       opponent: 'FC Twente',
       opponentPage: 'FC Twente',
       penaltiesAgainst: null,
@@ -138,6 +139,7 @@ describe('the programme and the results', () => {
       goalsFor: null,
       kickoffAt: new Date('2026-10-31T17:45:00Z'),
       matchDate: '2026-10-31',
+      note: null,
       opponent: 'N.E.C.',
       status: 'scheduled',
     })
@@ -219,6 +221,7 @@ describe('the programme and the results', () => {
           home: true,
           kickoffAt: null,
           matchDate: '2026-12-01',
+          note: null,
           opponent: 'De Treffers',
           round: 'Tweede ronde',
           stadium: 'Abe Lenstra Stadion',
@@ -299,6 +302,7 @@ describe('a match that was stopped', () => {
   const stopped = box({
     date: '10 mei 2026',
     score: "Gestaakt 82' (2 – 0)",
+    stadium: '[[Rat Verlegh Stadion]]',
     team1: '[[NAC Breda]]',
     team2: '[[sc Heerenveen]]',
     time: '16:45 uur',
@@ -306,12 +310,13 @@ describe('a match that was stopped', () => {
   const finished = box({
     date: '11 mei 2026<ref>[https://www.knvb.nl/nieuws Wedstrijd definitief gestaakt], KNVB.nl, 10 mei 2026</ref>',
     score: '2 – 0',
+    stadium: '[[Abe Lenstra Stadion]]',
     team1: '[[NAC Breda]]',
     team2: '[[sc Heerenveen]]',
     time: '14:30 uur',
   })
 
-  it('reads the real page of 2025/26: 34 matches, and for round 33 the block that finishes the match', () => {
+  it('reads the real page of 2025/26: 34 matches, and for round 33 the match as it began and the result of the rest', () => {
     const read = readLeague(seasonProgramme)
 
     expect(read).toMatchObject({ hasTemplates: true, kind: 'read', lastPlayedOn: '2026-05-17' })
@@ -325,12 +330,14 @@ describe('a match that was stopped', () => {
       goalsAgainst: 2,
       goalsFor: 0,
       home: false,
-      kickoffAt: new Date('2026-05-11T12:30:00Z'),
-      matchDate: '2026-05-11',
+      kickoffAt: new Date('2026-05-10T14:45:00Z'),
+      matchDate: '2026-05-10',
+      note: 'Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion.',
       opponent: 'NAC Breda',
-      stadium: 'Abe Lenstra Stadion',
+      stadium: 'Rat Verlegh Stadion',
       status: 'played',
     })
+    expect(read.matches.filter((match) => match.note !== null)).toHaveLength(1)
   })
 
   it('takes the goals of the finishing block, and they agree with the result', () => {
@@ -349,20 +356,82 @@ describe('a match that was stopped', () => {
     expect(readLeague(seasonProgramme).kind).toBe('read')
   })
 
-  it('skips the stopped block when a later block of the same two clubs is in the same round', () => {
-    expect(readLeague(leagueWith(stopped, finished))).toMatchObject({
+  it('is one match: where and when it began, and the result of the block that finishes it', () => {
+    const read = readLeague(leagueWith(stopped, finished))
+
+    expect(read).toMatchObject({
       kind: 'read',
-      matches: [{ goalsAgainst: 2, goalsFor: 0, matchDate: '2026-05-11', status: 'played' }],
+      matches: [
+        {
+          goalsAgainst: 2,
+          goalsFor: 0,
+          home: false,
+          kickoffAt: new Date('2026-05-10T14:45:00Z'),
+          matchDate: '2026-05-10',
+          note: 'Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion.',
+          stadium: 'Rat Verlegh Stadion',
+          status: 'played',
+        },
+      ],
     })
+    expect(read.kind === 'read' ? read.matches : []).toHaveLength(1)
   })
 
-  it('finds the later block whichever club is named first', () => {
-    const reversed = box({ date: '11 mei 2026', score: '0 – 2', team1: '[[sc Heerenveen]]', team2: '[[NAC Breda]]' })
+  it('gives a match that was not stopped no note', () => {
+    expect(matchOf(leagueWith(box({ score: '2 – 1' })), 'Speelronde 12')).toMatchObject({ note: null })
+    expect(matchOf(programme, 'Speelronde 1')).toMatchObject({ note: null })
+  })
+
+  it('finds the later block whichever club is named first, and reads its score from its own side', () => {
+    const reversed = box({
+      date: '11 mei 2026',
+      goals1: '[[Anis Hadj Moussa|Hadj Moussa]] {{goal|90}}',
+      score: '1 – 2',
+      team1: '[[sc Heerenveen]]',
+      team2: '[[NAC Breda]]',
+    })
 
     expect(readLeague(leagueWith(stopped, reversed))).toMatchObject({
       kind: 'read',
-      matches: [{ matchDate: '2026-05-11' }],
+      matches: [
+        {
+          goals: [{ minute: 90, ours: true }],
+          goalsAgainst: 2,
+          goalsFor: 1,
+          home: false,
+          matchDate: '2026-05-10',
+          stadium: 'Rat Verlegh Stadion',
+        },
+      ],
     })
+  })
+
+  it('leaves the stadium out of the note when the finishing block has none, and says it is still to be played when it has no score', () => {
+    const noStadium = finished.replace(/\|stadium = .*\n/u, '')
+    const notPlayed = finished.replace('|score = 2 – 0', '|score = ')
+
+    expect(matchOf(leagueWith(stopped, noStadium), 'Speelronde 12')?.note).toBe(
+      'Gestaakt in minuut 82. Het restant is op 11 mei gespeeld.',
+    )
+    expect(matchOf(leagueWith(stopped, notPlayed), 'Speelronde 12')).toMatchObject({
+      goalsFor: null,
+      note: 'Gestaakt in minuut 82. Het restant wordt op 11 mei gespeeld in het Abe Lenstra Stadion.',
+      status: 'scheduled',
+    })
+  })
+
+  it('stops when the minute or the day of the rest is not one we know', () => {
+    const message = (text: string) => {
+      const read = readLeague(text)
+
+      return read.kind === 'error' ? read.message : ''
+    }
+
+    expect(message(leagueWith(stopped.replace("82'", 'vroeg'), finished))).toContain('a minute we do not know')
+    expect(message(leagueWith(stopped, finished.replace(/11 mei 2026<ref>.*<\/ref>/u, 'eind mei')))).toContain(
+      'a day we do not know',
+    )
+    expect(message(leagueWith(stopped, finished.replace('2 – 0', 'uitgesteld')))).toContain('no score we can use')
   })
 
   it('stops with an error that names the match when the page has no later block', () => {
@@ -466,6 +535,7 @@ describe('the cup', () => {
           home: false,
           kickoffAt: new Date('2026-10-28T20:00:00Z'),
           matchDate: '2026-10-28',
+          note: null,
           opponent: 'Excelsior Maassluis',
           opponentPage: 'Excelsior Maassluis',
           penaltiesAgainst: null,
@@ -1212,6 +1282,7 @@ describe('the play-offs for the Conference League', () => {
         home: false,
         kickoffAt: new Date('2026-05-21T19:00:00Z'),
         matchDate: '2026-05-21',
+        note: null,
         opponent: 'FC Utrecht',
         opponentPage: 'FC Utrecht',
         penaltiesAgainst: null,
@@ -1233,6 +1304,7 @@ describe('the play-offs for the Conference League', () => {
       goalsFor: 1,
       home: false,
       matchDate: '2025-05-22',
+      note: null,
       opponent: 'AZ',
       round: 'Halve finale',
       stadium: 'AFAS Stadion',

@@ -1,10 +1,11 @@
+import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { matches, matchGoals } from './schema.ts'
+import { matchChanges, matches, matchGoals, matchLimits } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -170,6 +171,23 @@ describe('the extra time and the shoot-out of a match', () => {
   })
 })
 
+describe('the note of a match', () => {
+  it('is empty unless the importer wrote one', async () => {
+    await database.db.insert(matches).values(await clubbed(cupMatch))
+
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ note: null })
+  })
+
+  it('keeps a line of text with a stadium of the longest name', async () => {
+    const note = `Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het ${'S'.repeat(150)}.`
+
+    expect(note.length).toBeLessThanOrEqual(matchLimits.note)
+    await database.db.insert(matches).values(await clubbed({ ...cupMatch, note }))
+
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ note })
+  })
+})
+
 describe('the goals of a match', () => {
   async function insertMatch() {
     const [{ insertId }] = await database.db.insert(matches).values(await clubbed(cupMatch))
@@ -225,5 +243,54 @@ describe('the goals of a match', () => {
       )
 
     expect(String((failure as Error | undefined)?.cause)).toContain('match_goals_not_own_goal_and_penalty')
+  })
+})
+
+describe('the changes of a match that wait', () => {
+  const change = {
+    changed: 'result',
+    class: 'suspicious',
+    competition: 'KNVB Beker',
+    firstSeenAt: new Date('2026-10-28T20:00:00Z'),
+    lastSeenAt: new Date('2026-10-28T20:00:00Z'),
+    newValue: 'home Testdorp FC: 2-1',
+    oldValue: 'home Testdorp FC: 1-1',
+    reason: 'the result changed after 4 days',
+    round: 'Tweede ronde',
+    season: '2026/27',
+    status: 'pending',
+  } as const
+
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM match_changes')
+  })
+
+  it('starts as seen once, without a decision, and keeps what it proposes as text', async () => {
+    await database.db.insert(matchChanges).values({ ...change, proposal: '{"goals":[]}' })
+
+    const [row] = await database.db.select().from(matchChanges)
+
+    expect(row).toMatchObject({ decidedAt: null, proposal: '{"goals":[]}', resolution: null, timesSeen: 1 })
+  })
+
+  it('stays when its match goes, and no longer points at it', async () => {
+    const [{ insertId }] = await database.db.insert(matches).values(await clubbed(cupMatch))
+
+    await database.db.insert(matchChanges).values({ ...change, matchId: insertId })
+    await database.db.delete(matches).where(eq(matches.id, insertId))
+
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ matchId: null, round: 'Tweede ronde' }])
+  })
+
+  it('refuses a change of a match that does not exist', async () => {
+    const failure = await database.db
+      .insert(matchChanges)
+      .values({ ...change, matchId: 987654 })
+      .then(
+        () => undefined,
+        (error: unknown) => error,
+      )
+
+    expect(String((failure as Error | undefined)?.cause)).toContain('match_changes_match_id_matches_id_fk')
   })
 })
