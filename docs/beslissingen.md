@@ -6381,7 +6381,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 1 november 2026
 - **Besluit:** twee bronnen van één uitgever die hetzelfde artikel geven onder één artikelcode, tonen de lijsten één keer, onder de naam van de lokale krant.
-  - **De eigenschappen:** `sources.publisher` (tekst, leeg als er geen is) en `sources.local` (waar of onwaar, standaard onwaar), met de migratie `0028_add_source_publisher` en in het register (`realSources`).
+  - **De eigenschappen:** `sources.publisher` (tekst, leeg als er geen is) en `sources.local` (waar of onwaar, standaard onwaar), met de migratie `0029_add_source_publisher` en in het register (`realSources`).
     Het Algemeen Dagblad en De Gelderlander hebben `publisher` `dpg-media`, en De Gelderlander is `local`.
     De andere bronnen hebben geen `publisher`.
   - **Wat we vergeleken:** op 1 november 2026 lazen we de feeds van de Leeuwarder Courant en De Telegraaf (Mediahuis) één keer, alleen gelezen: 50 berichten per feed, met geen enkele gelijke artikelcode en geen gelijke kop.
