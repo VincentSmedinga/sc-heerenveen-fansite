@@ -39,8 +39,8 @@ export async function StatisticsBar({
  * the Eredivisie, which are in the address of the page (`/statistieken/2025-26?competitie=
  * eredivisie` is `/statistieken/spelers/2025-26?competitie=eredivisie`). Tegenstanders counts
  * every season, so it only keeps the choice. The current season is the address without a
- * season, as on the pages themselves. The main menu does not do this: its links have fixed
- * addresses (see SiteNavigation).
+ * season, as on the pages themselves. The main menu keeps the season of the page for
+ * Wedstrijden and Statistieken, but not the choice (see SiteNavigation).
  */
 export function statisticsBarItems({
   competition,
