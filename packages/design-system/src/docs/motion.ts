@@ -45,9 +45,14 @@ export const motionGroups: MotionGroup[] = [
     id: 'verschijnen',
     label: 'Verschijnen en verdwijnen',
     moves:
-      'Alleen de doorzichtigheid. Komt iets binnen, dan versnelt het eerst en zakt het uit; gaat het weg, dan is het eerst langzaam.',
-    tokens: ['--hf-motion-duration-short', '--hf-motion-ease-enter', '--hf-motion-ease-exit'],
-    why: 'Het is de enige beweging die niets onder de ogen van de lezer verschuift. Openen en sluiten is hier ook onder gerekend: de ruimte staat er al, of springt.',
+      'De doorzichtigheid. Komt iets binnen, dan versnelt het eerst en zakt het uit; gaat het weg, dan is het eerst langzaam. De uitklap van de bronvermelding neemt ook zijn hoogte mee, met de duur en de curve van het pijltje dat erbij draait.',
+    tokens: [
+      '--hf-motion-duration-short',
+      '--hf-motion-ease-enter',
+      '--hf-motion-ease-exit',
+      '--hf-motion-ease-change',
+    ],
+    why: 'Doorzichtigheid verschuift niets onder de ogen van de lezer, dus openen en sluiten springt, of laat de ruimte staan. De uitklap van de bronvermelding is de ene uitzondering: hij gaat over met het pijltje dat erbij draait, dus met dezelfde duur en curve, en springt in een browser die dat niet kan.',
   },
   {
     contains:
@@ -184,6 +189,13 @@ export const motionChanges: MotionChange[] = [
     group: 'selecteren',
     now: 'Draait in 0,2 seconde.',
     what: 'Draaiing van het pijltje',
+    why: 'Uitklap open (`[open]`)',
+  },
+  {
+    component: 'WikipediaCredit, uitklap',
+    group: 'verschijnen',
+    now: 'Hoogte en doorzichtigheid in 0,2 seconde, bij openen en bij sluiten. Springt in een browser zonder `interpolate-size` en `::details-content`.',
+    what: 'Hoogte en doorzichtigheid van de uitklap',
     why: 'Uitklap open (`[open]`)',
   },
   {
