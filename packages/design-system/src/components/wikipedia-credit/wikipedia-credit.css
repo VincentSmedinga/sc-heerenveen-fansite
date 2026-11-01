@@ -46,5 +46,34 @@
     &[open] > summary .hf-icon {
       transform: rotate(180deg);
     }
+
+    /*
+     * The fold opens and closes with its height and its opacity, in the time and curve of the
+     * arrow. The browser can animate to `auto` only with `interpolate-size`, and it can show a
+     * closing `details` for the length of the transition only through `::details-content`
+     * and a transition of `content-visibility`. A browser without both keeps a fold that
+     * jumps, which is the whole of the credit. With reduced motion the duration is 0s, so the
+     * fold jumps there too. `content-visibility` stays visible until the end of a closing
+     * transition and is hidden after it, so closed text is out of the tab order and the
+     * reading order.
+     */
+    @supports (interpolate-size: allow-keywords) and selector(::details-content) {
+      interpolate-size: allow-keywords;
+
+      &::details-content {
+        block-size: 0;
+        opacity: 0;
+        overflow-y: clip;
+        transition:
+          block-size var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+          content-visibility var(--hf-motion-duration-short) var(--hf-motion-ease-change) allow-discrete,
+          opacity var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+      }
+
+      &[open]::details-content {
+        block-size: auto;
+        opacity: 1;
+      }
+    }
   }
 }
