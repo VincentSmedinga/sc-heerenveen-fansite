@@ -270,6 +270,17 @@ describe('the page of a club', () => {
     expect(await render()).not.toContain('id="stadion"')
   })
 
+  it('names the sidebar after what it holds: the stadium only when there is a card for it', async () => {
+    expect(await render()).toContain('aria-label="Onze uitslagen, het stadion en de bron"')
+
+    vi.mocked(getClubPage).mockResolvedValue({
+      ...testclub,
+      matches: testclub.matches.map((item) => ({ ...item, stadium: null })),
+    })
+
+    expect(await render()).toContain('aria-label="Onze uitslagen en de bron"')
+  })
+
   it('has no cards and no sidebar for a club with the choice Eredivisie when we only met it in the cup', async () => {
     const html = await render('beker-united', { competitie: 'eredivisie' })
 

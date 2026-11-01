@@ -177,6 +177,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
   const meetings = meetingsOf(matches, competition)
   const hasCup = meetingsOf(matches, 'all').length > meetingsOf(matches, 'league').length
   const earlier = earlierNames(club.otherNames)
+  const stadiums = stadiumsOf(matches)
 
   return (
     <>
@@ -202,7 +203,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
       {/* The sidebar is as wide as the main column, as on Statistieken. On a phone it follows the
           matches: our record against the club, the names of its stadium and the credit. */}
       {meetings.length > 0 && (
-        <Page.Sidebar aria-label="Onze uitslagen, het stadion en de bron" wide>
+        <Page.Sidebar aria-label={`Onze uitslagen${stadiums.length > 0 ? ', het stadion' : ''} en de bron`} wide>
           <ClubSummaryCard
             choice={competition}
             name={club.name}
@@ -210,7 +211,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             since={sinceOf(loaded.seasons)}
             summary={summaryOf(meetings)}
           />
-          <StadiumsCard stadiums={stadiumsOf(matches)} />
+          <StadiumsCard stadiums={stadiums} />
           <OpponentsCredit pages={loaded.pages} seasons={seasonsOf(meetings)} />
         </Page.Sidebar>
       )}
