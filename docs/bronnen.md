@@ -18,6 +18,7 @@ Een pad dat `robots.txt` voor ons weigert, hebben we niet opgehaald.
 Een feed die doorverwees, hebben we op het nieuwe adres één keer opgehaald.
 Wat we vonden, is een momentopname van die dag.
 Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS, het Algemeen Dagblad en ESPN NL op 26 oktober 2026, alle vier met een run van de importer (zie bij de bron).
+De feed van de sport van Rijnmond lazen we op 1 november 2026, ook met een run van de importer (zie bij de bron).
 
 - **Wat we tellen:** het aantal berichten, de datum van het nieuwste (in UTC) en hoeveel berichten over sc Heerenveen gaan.
   Een bericht gaat over de club als "Heerenveen" in de kop of in de categorieën staat, zonder op hoofdletters te letten.
@@ -70,12 +71,12 @@ Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in 
 
 ### Overzicht
 
-| Besluit                             | Bronnen                                                                                                                                                                                                                                                       |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), ESPN NL (met het filter), Omroep Abe (podcast), Radio Camataru (podcast)                          |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                            |
-| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                              |
-| Afwijzen                            | RTV Noord, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Rijnmond, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast |
+| Besluit                             | Bronnen                                                                                                                                                                                                                                                                    |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), ESPN NL (met het filter), Rijnmond (sportfeed, met het filter), Omroep Abe (podcast), Radio Camataru (podcast) |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                                         |
+| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                                           |
+| Afwijzen                            | RTV Noord, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast                        |
 
 ## Nemen
 
@@ -351,6 +352,44 @@ Al in het register (#311), met het filter `club`.
   Er bestaat geen kolom voor de beschrijving, de auteur of het logo, dus de importer bewaart ze niet.
   Verschuift ESPN de tijd van een bericht, dan verschuift hij op de site mee, zoals bij elke bron.
 
+### Rijnmond
+
+Al in het register (#562), met de feed van de sport en het filter `club`.
+De feed van het regionieuws blijft afgewezen (zie onder).
+
+- **Domein:** `www.rijnmond.nl`
+- **Soort:** nieuws, regionale publieke omroep van Rotterdam en omgeving
+- **Feed die we nemen:** `https://www.rijnmond.nl/rss/sport.xml`
+  - Werkt: ja, RSS 2.0 met 50 berichten, de tijden in GMT.
+    Op 1 november 2026 was het nieuwste bericht van 31 oktober 2026 en het oudste van 18 oktober 2026.
+  - Over sc Heerenveen: geen enkel bericht in de kop.
+    Van de 50 koppen noemen er 32 Feyenoord, vier Sparta, vier Excelsior en twee Ajax.
+    Daarom gaat deze bron niet om de club zelf, maar om de Rotterdamse tegenstanders: een kop over Feyenoord, Sparta of Excelsior telt als `relevant` van 3 dagen voor tot 3 dagen na een wedstrijd tegen die club (#315), en op de andere dagen niet.
+    Een kop over twee clubs tegelijk, zoals een Rotterdamse derby, is een andere wedstrijd en telt niet.
+    "Sparta Praag" is een andere club dan Sparta Rotterdam en telt niet (`namesakeClubs` in `apps/importer/src/relevance-terms.ts`).
+  - Betaalmuur: nee; de feed geeft er geen teken van.
+  - Het filter, in een run van 1 november 2026: van de 50 berichten bewaarde de import er 50 en sloeg er 0 over; 0 kregen de waarde `relevant`, 0 `doubtful` en 50 `irrelevant`.
+    Dat klopt: de lokale database had geen wedstrijd tegen een Rotterdamse club (de eerstvolgende is Feyenoord op 8 november 2026), en geen kop gaat over sc Heerenveen.
+    Met de koppen van die run, nagerekend op de eigen computer alsof er een wedstrijd was, zijn 19 van de 50 `relevant` in de week rond een wedstrijd tegen Feyenoord, 0 rond een wedstrijd tegen Sparta en 1 rond een wedstrijd tegen Excelsior.
+    De vier koppen over Sparta noemen alle ook een andere club, zoals Ajax of Fortuna Sittard, en horen dan bij een andere wedstrijd.
+- **Feed die we niet nemen:** `https://www.rijnmond.nl/rss/index.xml`, het regionieuws.
+  Op 24 oktober 2026 telden we 50 berichten, het nieuwste van 23 oktober 2026, en geen enkel bericht ging over sc Heerenveen.
+  In dezelfde week had het regionieuws geen enkel bericht over sport.
+  Deze feed staat niet in het register.
+- **`robots.txt`:** laat ons de feed toe; alleen een paar crawlers zijn bij naam geweigerd, wij niet.
+- **Voorwaarden** (disclaimer, zonder datum, gelezen op 24 oktober 2026): koppen mogen via de RSS-feed en ongewijzigd worden overgenomen.
+  Kopiëren of publiceren van de rest vraagt vooraf schriftelijke toestemming.
+  Over datamining staat niets.
+- **Meer tonen:** toestemming nodig; we tonen niet meer dan de standaard.
+  De beschrijving, de auteur, de afbeeldingen en het logo in de feed bewaren we niet.
+- **Besluit: nemen na het relevantiefilter.**
+  De sportfeed is een andere feed dan het regionieuws dat we op 24 oktober 2026 afwezen, en sinds #315 laat het filter een kop over de tegenstander door in de dagen rond een wedstrijd.
+  Zo toont de site wat de regionale omroep schrijft over de Rotterdamse tegenstander, en buiten die dagen niets van deze bron.
+  De projecteigenaar vroeg om deze bron en keurde het issue goed (1 november 2026).
+- **Importer:** leest de feed zonder nieuwe code, met het filter `club`.
+  Er is één aanpassing aan het filter: "Sparta Praag" telt niet als Sparta Rotterdam.
+  De test met een verzonnen feed staat in `apps/importer/src/import-feeds.test.ts` ("importing the sports feed of Rijnmond, the way the register has it").
+
 ## Nemen na het relevantiefilter (#74)
 
 Deze feeds zijn breed.
@@ -520,22 +559,6 @@ Hoort bij #16.
 - **Meer tonen:** toestemming nodig.
 - **Besluit: afwijzen.**
   De feed is het regionieuws van Zuid-Holland, en alleen één intro noemt de club.
-
-### Rijnmond
-
-- **Domein:** `www.rijnmond.nl`
-- **Soort:** nieuws, regionale publieke omroep
-- **Feed:** `https://www.rijnmond.nl/rss/index.xml`
-  - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 23 oktober 2026, het oudste van 22 oktober 2026.
-  - Over sc Heerenveen: geen enkel bericht in de kop, de categorieën of de intro.
-  - Betaalmuur: nee.
-- **`robots.txt`:** laat ons de feed toe; een lange lijst crawlers is bij naam geweigerd, wij niet.
-- **Voorwaarden** (disclaimer, zonder datum): koppen mogen via de RSS-feed en ongewijzigd worden overgenomen.
-  Kopiëren of publiceren van de rest vraagt vooraf schriftelijke toestemming.
-  Over datamining staat niets.
-- **Meer tonen:** toestemming nodig.
-- **Besluit: afwijzen.**
-  De feed is het regionieuws van Rotterdam en omgeving, en geen van de 50 berichten gaat over sc Heerenveen.
 
 ### Omroep Zeeland
 

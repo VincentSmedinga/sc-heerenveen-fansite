@@ -113,6 +113,7 @@ describe('the seed', () => {
       'https://feeds.nos.nl/nosvoetbal',
       'https://www.ad.nl/voetbal/rss.xml',
       'https://www.espn.nl/espn/rss/soccer/news',
+      'https://www.rijnmond.nl/rss/sport.xml',
     ])
   })
 
@@ -209,6 +210,32 @@ describe('the seed', () => {
     expect(espn?.description?.length).toBeLessThanOrEqual(300)
     expect(espnFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
       ['https://www.espn.nl/espn/rss/soccer/news', 'club'],
+    ])
+  })
+
+  it('puts Rijnmond in the register with its sports feed on the club filter and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [rijnmond] = await database.db.select().from(sources).where(eq(sources.domain, 'www.rijnmond.nl'))
+    const rijnmondFeeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, rijnmond?.id ?? 0))
+
+    expect(rijnmond).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'Rijnmond',
+      slug: 'rijnmond',
+    })
+    expect(rijnmond?.consentStatus).not.toBe('given')
+    expect(rijnmond?.description).toBeTruthy()
+    expect(rijnmond?.description?.length).toBeLessThanOrEqual(300)
+    expect(rijnmondFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
+      ['https://www.rijnmond.nl/rss/sport.xml', 'club'],
     ])
   })
 

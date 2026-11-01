@@ -10,6 +10,7 @@ import { eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
+import type { MatchDay } from './relevance.ts'
 import type { Handler, TestServer } from './test-server.ts'
 
 import { formatReport, importFeed, importFeeds, listFeedsToImport } from './import-feeds.ts'
@@ -1026,6 +1027,118 @@ describe('importing the football feed of ESPN NL, the way the register has it', 
 
     expect(times).toHaveLength(7)
     expect(times.every((time) => time.getTime() === espnRun.getTime())).toBe(true)
+  })
+})
+
+describe('importing the sports feed of Rijnmond, the way the register has it', () => {
+  const sample = readFileSync(new URL('./fixtures/rijnmond-sample.xml', import.meta.url), 'utf8')
+  const rijnmondRun = new Date('2026-12-14T09:30:00Z')
+
+  /** The Rotterdam opponents of the season, as the table of matches has them. */
+  const opponents: MatchDay[] = [
+    { matchDate: '2026-11-08', opponent: 'Feyenoord', status: 'scheduled' },
+    { matchDate: '2026-11-29', opponent: 'Sparta Rotterdam', status: 'scheduled' },
+    { matchDate: '2026-12-13', opponent: 'Excelsior Rotterdam', status: 'scheduled' },
+  ]
+
+  /** The sports feed of Rijnmond as the seed registers it, pointed at the test server. */
+  async function rijnmondFeed(origin: string) {
+    await seedSources(database.db)
+
+    const [row] = await database.db
+      .select({ id: feeds.id })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, 'www.rijnmond.nl'))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  it('reads the feed on the club filter and gives every item its value', async () => {
+    const server = await serve(sample)
+    const feed = await rijnmondFeed(server.origin)
+
+    expect(feed.filter).toBe('club')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, rijnmondRun, opponents)
+
+    expect(report).toMatchObject({ added: 12, relevance: { doubtful: 0, irrelevant: 7, relevant: 5 }, skipped: [] })
+    expect(Object.fromEntries((await itemsInDatabase()).map((row) => [row.key, row.relevance]))).toEqual({
+      // Feyenoord on 8 November: relevant from 5 to 11 November, not on 4 or 12 November.
+      '9100001': 'relevant',
+      '9100002': 'relevant',
+      '9100003': 'irrelevant',
+      '9100004': 'irrelevant',
+      // Sparta on 29 November. Feyenoord in that week is another match, and Sparta Praag is
+      // another club.
+      '9100005': 'relevant',
+      '9100006': 'irrelevant',
+      '9100007': 'irrelevant',
+      // Excelsior on 13 December.
+      '9100008': 'relevant',
+      // Two of the clubs in one headline, and a club that is not a Rotterdam opponent.
+      '9100009': 'irrelevant',
+      '9100010': 'irrelevant',
+      // The club itself counts on any day; Sparta far from its match does not.
+      '9100011': 'relevant',
+      '9100012': 'irrelevant',
+    })
+  })
+
+  it('reads the times in GMT as they are', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await rijnmondFeed(server.origin), rijnmondRun, opponents)
+
+    const rows = await itemsInDatabase()
+
+    expect(rows.find((row) => row.key === '9100001')?.publishedAt).toEqual(new Date('2026-11-06T09:30:00Z'))
+    expect(rows.find((row) => row.key === '9100008')?.publishedAt).toEqual(new Date('2026-12-11T13:40:00Z'))
+  })
+
+  it('keeps nothing of the description, the author, the image or the logo', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await rijnmondFeed(server.origin), rijnmondRun, opponents)
+
+    const stored = JSON.stringify(await database.db.select().from(items))
+
+    expect(stored).not.toContain('verzonnen intro')
+    expect(stored).not.toContain('Verzonnen Auteur')
+    expect(stored).not.toContain('.jpg')
+    expect(stored).not.toContain('logo.png')
+  })
+
+  it('shows only the relevant items to a visitor, with the name of the source', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await rijnmondFeed(server.origin), rijnmondRun, opponents)
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-12-15T00:00:00Z') })
+
+    expect(shown.map((item) => item.title)).toEqual([
+      'Excelsior verlengt met de keeper',
+      'Sparta zoekt na de pauze een nieuwe doelman',
+      'Feyenoord-aanvaller twijfelgeval na de interlandperiode',
+      'Feyenoord-trainer waarschuwt voor de eigen fouten',
+      'sc Heerenveen kijkt uit naar de uitwedstrijd in Rotterdam',
+    ])
+    expect(shown.every((item) => item.sourceName === 'Rijnmond')).toBe(true)
+  })
+
+  it('shows nothing of the Rotterdam clubs without a match around, however often they are in the news', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await rijnmondFeed(server.origin), rijnmondRun, [])
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-12-15T00:00:00Z') })
+
+    expect(shown.map((item) => item.title)).toEqual(['sc Heerenveen kijkt uit naar de uitwedstrijd in Rotterdam'])
   })
 })
 

@@ -500,6 +500,31 @@ describe('the opponent of a match', () => {
       expect(judgeRelevance(title, [opponent])).toBe(expected)
     })
 
+    it.each([
+      // The Rotterdam opponents, by the short name a headline uses.
+      ['Feyenoord', 'Feyenoord-trainer waarschuwt voor de eigen fouten', 'relevant'],
+      ['Sparta Rotterdam', 'Sparta zoekt na de pauze een nieuwe doelman', 'relevant'],
+      ['Sparta Rotterdam', 'Sparta Rotterdam zoekt een nieuwe doelman', 'relevant'],
+      ['Excelsior Rotterdam', 'Excelsior verlengt met de keeper', 'relevant'],
+      // Two of them in one headline are about their own match.
+      ['Feyenoord', 'Feyenoord en Sparta strijden om de derby van de stad', 'irrelevant'],
+      ['Sparta Rotterdam', 'Feyenoord en Sparta strijden om de derby van de stad', 'irrelevant'],
+      // A Rotterdam club that is not the opponent of this match.
+      ['Sparta Rotterdam', 'Feyenoord verlengt het contract van de trainer', 'irrelevant'],
+      ['Feyenoord', 'Excelsior verlengt met de keeper', 'irrelevant'],
+      // "Sparta" is also the club in Prague, and the adjective is a word of its own.
+      ['Sparta Rotterdam', 'Sparta Praag verrast in de Conference League', 'irrelevant'],
+      ['Sparta Rotterdam', 'Sparta Prague verrast in de Conference League', 'irrelevant'],
+      ['Sparta Rotterdam', 'Spartaanse training in de regen', 'irrelevant'],
+      ['Feyenoord', 'Sparta Praag verrast in de Conference League', 'irrelevant'],
+      // A match against the club in Prague is no match against the club in Rotterdam, and the
+      // other way round.
+      ['Feyenoord', 'Feyenoord wint bij Sparta Praag', 'relevant'],
+      ['Sparta Rotterdam', 'Sparta Rotterdam verrast, Sparta Praag ook', 'relevant'],
+    ] as [string, string, ItemRelevance][])('%s: %j is %s', (opponent, title, expected) => {
+      expect(judgeRelevance(title, [opponent])).toBe(expected)
+    })
+
     it('does not count a headline that names two opponents of the window of one item', () => {
       expect(judgeRelevance('ADO en N.E.C. bereiden zich voor', ['ADO Den Haag', 'N.E.C.'])).toBe('irrelevant')
       expect(judgeRelevance('ADO bereidt zich voor', ['ADO Den Haag', 'N.E.C.'])).toBe('relevant')

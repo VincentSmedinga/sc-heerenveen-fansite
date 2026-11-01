@@ -222,6 +222,13 @@ export const otherClubGroups = [
 export const otherClubs: readonly string[] = otherClubGroups.flat()
 
 /**
+ * Clubs abroad that share a name with a club on the list, as headlines write them. The rule of
+ * the opponent leaves these phrases out first, so "Sparta Praag wint in Praag" is not about
+ * Sparta Rotterdam. Add a phrase when a headline shows that we need it.
+ */
+export const namesakeClubs = ['sparta praag', 'sparta prague'] as const
+
+/**
  * The words that start or end the name of a club without being part of the name: FC, SC, VV,
  * SV and AFC. The rule of the opponent leaves them out of the name of a match when the name is
  * not on the list of clubs: "FC Lisse" is looked for as "Lisse". A name that is only one of

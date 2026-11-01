@@ -5139,6 +5139,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Bij de keuze voor Voetbal International (#142) was dat voorbehoud nog een reden om De Telegraaf niet te kiezen.
 - **Alternatieven:** bij een voorbehoud eerst schriftelijke toestemming vragen; dat is voorzichtiger, maar we missen dan bronnen die zelden antwoorden.
 - **Later:** zie _Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed_; ook een brede feed nemen we, als het relevantiefilter (`club`) erop staat.
+- **Later:** zie _We nemen Rijnmond na het relevantiefilter, voor de Rotterdamse tegenstanders_; Rijnmond, op 24 oktober 2026 afgewezen om zijn regionieuws, staat met de feed van de sport in het register.
+  Het regionieuws van Rijnmond blijft afgewezen.
 
 ### De feeds van andere clubs nemen we niet
 
@@ -7800,6 +7802,31 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alle 25 tijden waren geldig.
 - **Alternatieven:** wachten op schriftelijke toestemming van Disney (voorzichtiger, maar Disney antwoordt zelden); `EST` voor alle feeds als Nederlandse tijd lezen (verkeerd voor een feed waar het echt EST is); de tijd van deze bron negeren en alleen het moment van eerste zien gebruiken (de berichten staan dan niet op hun echte tijd).
 - **Daarna:** schriftelijk toestemming vragen aan Disney hoort bij #35; de projecteigenaar nam het voorbehoud van Disney aan bij het goedkeuren van het issue.
+
+### We nemen Rijnmond na het relevantiefilter, voor de Rotterdamse tegenstanders
+
+- **Datum:** 1 november 2026
+- **Besluit:** het register krijgt de feed van de sport van Rijnmond (`https://www.rijnmond.nl/rss/sport.xml`) met het filter `club`.
+  Het regionieuws van Rijnmond (`https://www.rijnmond.nl/rss/index.xml`) blijft afgewezen en staat niet in het register.
+  De bron toont alleen de kop, de link, de bronnaam en de tijd.
+  Een kop over Feyenoord, Sparta of Excelsior is `relevant` van 3 dagen voor tot 3 dagen na een wedstrijd tegen die club, en alleen als hij geen andere profclub noemt (de regel van #315).
+  Een kop over sc Heerenveen zelf telt op elke dag.
+  Op de andere dagen toont de site niets van deze bron.
+- **Waarom:** op 24 oktober 2026 wezen we Rijnmond af, omdat geen enkel bericht van het regionieuws over sc Heerenveen ging.
+  De feed van de sport is een andere feed, en sinds #315 kan de site met het filter tonen wat de regionale omroep schrijft over de volgende tegenstander.
+  Op 1 november 2026 noemden 32 van de 50 koppen Feyenoord, vier Sparta en vier Excelsior.
+  Zonder de regel van de tegenstander was geen enkele kop `relevant`, en met de regel toont de bron iets vanaf 5 november 2026, drie dagen voor de wedstrijd tegen Feyenoord.
+  De voorwaarden laten koppen via de RSS-feed ongewijzigd toe, en `robots.txt` laat ons de feed lezen (zie `docs/bronnen.md`).
+- **Het filter:** de namen "Feyenoord", "Sparta" en "Excelsior" stonden al in de lijst met profclubs (`otherClubGroups`).
+  Eén naam beoordeelde verkeerd: "Sparta Praag" is een andere club dan Sparta Rotterdam, maar bevat het woord "Sparta".
+  De regel van de tegenstander laat de zinnen uit `namesakeClubs` (`sparta praag`, `sparta prague`) eerst weg, zodat zo'n kop niet `relevant` wordt in de week van een wedstrijd tegen Sparta.
+  Een kop met ook een andere profclub hoort bij een andere wedstrijd, zoals een Rotterdamse derby.
+- **Gemeten op de echte feed** (1 november 2026, één run van de importer op de eigen database): 50 berichten bewaard, 0 overgeslagen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`.
+  Dat klopt, want de eerstvolgende wedstrijd tegen een Rotterdamse club is Feyenoord op 8 november 2026.
+  Nagerekend met dezelfde koppen alsof er een wedstrijd was, zijn 19 van de 50 `relevant` in de week rond een wedstrijd tegen Feyenoord, 0 rond Sparta en 1 rond Excelsior.
+- **Nadeel:** de bron toont per wedstrijd alleen wat de regionale omroep over de Rotterdamse tegenstander schrijft, en bijna niets over sc Heerenveen.
+  Een kop over de tegenstander die de club niet noemt, zoals een vraaggesprek met een trainer van Feyenoord, kan dus op de site staan.
+- **Alternatieven:** de bron afgewezen laten (een regionale omroep met nieuws over de volgende tegenstander gaat dan verloren); het regionieuws erbij nemen (geen enkel bericht ging over de club, en het filter laat alleen de dagen rond een wedstrijd door); alleen Feyenoord in het filter (Sparta en Excelsior hebben dezelfde regel nodig, en de lijst met clubs bestond al).
 
 ### De echte bronnen komen op productie via de seed
 
