@@ -163,13 +163,13 @@ describe('the page Nieuws', () => {
     ])
   })
 
-  it('puts the filter in a card on the white surface in the sidebar, after the main, with a name for the sidebar', async () => {
+  it('puts the filter in a card on a soft surface in the sidebar, after the main, with a name for the sidebar', async () => {
     const html = await render()
 
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(html.slice(html.indexOf('<aside'))).toMatch(
-      /^<aside class="hf-page-sidebar hf-page-sidebar-narrow" aria-label="Het filter, de redactie en de podcasts"><div class="hf-card"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws" method="get"><fieldset class="hf-checkbox-group"><legend class="hf-heading-2">Bronnen<\/legend>/,
+      /^<aside class="hf-page-sidebar hf-page-sidebar-narrow" aria-label="Het filter, de redactie en de podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws" method="get"><fieldset class="hf-checkbox-group"><legend class="hf-heading-2">Bronnen<\/legend>/,
     )
   })
 

@@ -23,9 +23,9 @@ import { splitPlayerName } from './player-name'
 import { maxQueryLength, maxResults, searchHref, type Squad, squadGroups } from './search'
 
 /**
- * The card of the page: the form and, under it, the results of the search. It is white, before
- * the first search too, because the form and the results are what the page is for. The
- * players beside it start level with this card.
+ * The card of the page: the form and, under it, the results of the search. Before a search
+ * there are no results and the card is blue, so the form stands out; with results it is white,
+ * like the other cards. The players beside it start level with this card.
  */
 export function SearchCard({
   error,
@@ -37,7 +37,7 @@ export function SearchCard({
   results?: Parameters<typeof SearchResults>[0] | undefined
 }) {
   return (
-    <Card as="div">
+    <Card as="div" surface={results === undefined ? 'soft' : 'default'}>
       <SearchForm error={error} text={formText} />
       {results !== undefined && <SearchResults {...results} />}
     </Card>

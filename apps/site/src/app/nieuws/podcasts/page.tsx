@@ -138,7 +138,7 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
         // JavaScript and a choice is an address that can be shared. The button stays with
         // JavaScript too: a page that reloads at each tick takes the focus with it.
         <Page.Sidebar aria-label="Podcasts">
-          <Card as="div">
+          <Card as="div" surface="soft">
             <Form action="/nieuws/podcasts" autoComplete="off" method="get">
               <CheckboxGroup
                 legend="Podcasts"

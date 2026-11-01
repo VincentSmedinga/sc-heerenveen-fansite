@@ -3111,15 +3111,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 1 november 2026
 - **Besluit:** de vier vlakken van een kaart, `default` (wit), `strong`, `warm` en `soft`, en het doorzichtige vlak hebben een vaste betekenis.
   Een kaart krijgt het vlak van de eerste regel die past:
-  1. **Wit** (`default`): de kaart is waar de pagina voor bestaat, of een bediening die erop werkt.
-     Dat zijn de hoofdinhoud van de pagina en de filters en het zoekformulier die erbij horen.
+  1. **Wit** (`default`): de kaart is waar de pagina voor bestaat.
+     Dat zijn de hoofdinhoud van de pagina, zoals de lijsten met nieuws, het programma en de uitslagen, en het overzicht van ons seizoen.
      De blokken van de homepage zijn allemaal wit, want elk blok is er de inhoud.
   2. **Sterk** (`strong`): de kaart gaat over de mensen of organisaties achter de inhoud, of is aan hen gericht.
      Voorbeelden zijn de hoofdtrainer, "Ben je zelf een bron?" en later het officiële clubnieuws.
   3. **Warm** (`warm`): iets opmerkelijks, zoals een kaart die bijzonder of oorspronkelijk is of een uitnodiging.
      Voorbeelden zijn de grafieken van het seizoen, de ringen van Doelpunten per kwartier en de nieuwsbrief van de LC.
      Ongeveer één kaart op de zes, zonder vast maximum per pagina, en nooit om buren van elkaar te onderscheiden.
-  4. **Zacht** (`soft`): ranglijsten, lijsten en records die bij de hoofdinhoud horen, en al het andere dat de pagina aanvult.
+  4. **Zacht** (`soft`): ranglijsten, lijsten en records die bij de hoofdinhoud horen, de filters, de kaart van de eerste zoekvraag en al het andere dat de pagina aanvult.
   5. **Transparant** (`transparent`): bronvermeldingen.
      De schakelaar voor de competitie blijft zoals hij is, zonder vlak.
   6. **Buurkaarten mogen dezelfde kleur hebben.**
@@ -3128,8 +3128,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
      In donker zijn zacht en wit gelijk, en warm en sterk ook, dus de betekenis moet ook uit de plaats en de kop komen.
 - **Wat verandert:** bijna niets.
   Thuis en uit op Statistieken wordt wit (was warm).
-  Het filter per bron op `/nieuws` en het filter op `/nieuws/podcasts` worden wit (waren zacht).
-  De kaart met het formulier en de resultaten op `/nieuws/zoeken` is altijd wit (was zacht voor de eerste zoekvraag).
+  De filters op `/nieuws` en `/nieuws/podcasts` en de kaart van de eerste zoekvraag blijven zacht: te veel witte kaarten maken de pagina's saai en geven minder aanwijzingen over wat belangrijk is.
   Alle andere kaarten houden hun vlak, ook de homepage en `ArticleCard` (zacht).
 - **Waarom:** de kleuren van de kaarten waren vooral gekozen om buurkaarten van elkaar te onderscheiden en zeiden niets.
   Ze wisselden om en om, zes kaarten op vijf pagina's waren warm, en zacht was de vuilnisbak geworden voor ongeveer vijftien kaarten.
@@ -3985,7 +3984,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Hoofdletters en accenten tellen niet door de collatie `utf8mb4_unicode_ci` van de kolommen, die `search.test.ts` van `@fansite/db` controleert.
   Een bericht telt mee onder dezelfde voorwaarden als op de homepage (`isShown`, een bron die aanstaat, niet later dan nu), een artikel als het gepubliceerd is.
 - **Alternatieven:** FULLTEXT in MariaDB (rangschikt op passendheid, maar vindt woorden korter dan de minimale lengte niet en hangt af van een serverinstelling die we niet kennen); alleen koppen (podcasts en artikelen blijven onvindbaar); ook forumonderwerpen (onvolledig).
-- **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de kaart met het formulier en de resultaten is altijd wit, ook voor de eerste zoekvraag.
 
 ### De zoekpagina staat in de footer, met de lijst met spelers in de zijbalk
 
@@ -4530,8 +4528,6 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _Op `/nieuws` kies je bronnen met selectievakjes in een fieldset_: de kaart blijft, maar bevat een formulier met een `fieldset` en een `legend` "Bronnen" in plaats van de kop en de navigatie "Bronnen filteren".
 - **Later:** zie _/nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem_.
   De zijbalk met het filter is 16 rem breed en de lijst 46 rem.
-- **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de kaart van het filter is wit, want een filter is een bediening die bij de lijst hoort.
-  De kaart blijft in de zijbalk, en de kop van deze beslissing zegt dus niet meer wat het vlak is.
 
 ### /nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem
 
@@ -5316,8 +5312,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de kaart "Over" ook tonen bij meer podcasts (dan zijn het er meer dan de zijbalk aankan, en de teksten zijn per podcast).
   De maten van `/nieuws` ook hier gebruiken (dat vraagt de projecteigenaar apart).
   Alle vakjes aangevinkt als een eigen adres laten bestaan (twee adressen voor dezelfde pagina).
-- **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de kaart met het filter is wit, en niet meer lichtblauw.
-  De kaart "Over A" blijft warm, maar niet meer om de twee kaarten uit elkaar te houden: een beschrijving van de maker met links om te luisteren is een uitnodiging.
+- **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de kaart "Over A" blijft warm, maar niet meer om de twee kaarten uit elkaar te houden: een beschrijving van de maker met links om te luisteren is een uitnodiging.
 
 ### De duur, het seizoen en het nummer van een aflevering tonen we wel
 

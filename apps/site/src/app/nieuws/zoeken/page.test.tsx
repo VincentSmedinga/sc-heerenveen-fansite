@@ -113,14 +113,14 @@ describe('the page Zoeken without a search', () => {
     expect(html).toMatch(/<form[^>]*role="search"/u)
   })
 
-  it('has the h1 and the sentence in the introduction, and the form in a white card, so the players start level with it', async () => {
+  it('has the h1 and the sentence in the introduction, and the form in a blue card, so the players start level with it', async () => {
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
       /<div class="hf-page-intro"><h1 class="hf-heading-1">Zoeken<\/h1><p class="hf-intro">.*?<\/p><\/div>/u,
     )
-    expect(html).toMatch(/<div class="hf-page-cells"><div class="hf-card"><form/u)
+    expect(html).toMatch(/<div class="hf-page-cells"><div class="hf-card hf-card-soft"><form/u)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
   })
 })

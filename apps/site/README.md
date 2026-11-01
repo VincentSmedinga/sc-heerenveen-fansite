@@ -496,7 +496,7 @@ De zijbalk heeft drie kaarten, in deze volgorde, ook op een telefoon:
 - "Podcasts": de nieuwste afleveringen, met de link "Alle podcasts" naar `/nieuws/podcasts`.
   Het artikel en de podcasts zijn extra's: lukt het lezen ervan niet, dan staat de kaart er niet en schrijft de site de reden in het logboek.
 
-Het filter staat in een witte kaart in de zijbalk: een formulier met een GET naar `/nieuws`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Bronnen") en de knop "Toon".
+Het filter staat in een lichtblauwe kaart (`surface="soft"`) in de zijbalk: een formulier met een GET naar `/nieuws`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Bronnen") en de knop "Toon".
 Er is een vakje per bron met minstens één kop in het archief, op alfabet, met de `slug` als waarde.
 De knop blijft ook met JavaScript, en het formulier werkt zonder.
 Zonder vinkje en met alle vinkjes toont de pagina alle koppen, op het adres zonder `bron`: `/nieuws`.
@@ -524,7 +524,7 @@ De pagina is het item Nieuws in het hoofdmenu, met de balk van Nieuws eronder (z
 `/nieuws/podcasts` toont de afleveringen van de podcasts die aanstaan, nieuwste eerst, 25 per pagina, elk als `NewsItem`: de titel als link naar de pagina van de aflevering bij de maker, de naam van de podcast en de tijd.
 Achter de naam staan de feiten die de feed geeft, als `details` van de `NewsItem`: het seizoen en het nummer, zoals "seizoen 9, aflevering 16" of "aflevering 120", en de duur, zoals "37 min" of "1 uur 12 min" (`episodeDetails` in `src/news.ts`).
 Een aflevering van deze week heeft de korte dag en de tijd, zoals "wo 14:05"; een oudere heeft de datum, met het jaar als dat niet dit jaar is, want de lijst gaat jaren terug.
-Het filter staat in een witte kaart bovenaan de zijbalk: een formulier met een GET naar `/nieuws/podcasts`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Podcasts") en de knop "Toon".
+Het filter staat in een lichtblauwe kaart (`surface="soft"`) bovenaan de zijbalk: een formulier met een GET naar `/nieuws/podcasts`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Podcasts") en de knop "Toon".
 Er is een vakje per podcast met afleveringen, op alfabet, met de `slug` als waarde, dus een andere naam verandert het adres niet (de kolom `slug` van `sources`).
 De knop blijft ook met JavaScript, en het formulier werkt zonder.
 Zonder vinkje en met alle vinkjes toont de pagina alle afleveringen, op het adres zonder `podcast`: `/nieuws/podcasts`.
@@ -562,7 +562,7 @@ Is ze leeg, te lang of heeft ze te veel of te korte woorden, dan staat er bij he
 Zo beschermen de grenzen de gedeelde hosting.
 Een zoekopdracht kost op een database met 10.000 berichten ongeveer 7 tot 14 milliseconden.
 
-Het formulier staat in dezelfde kaart als de resultaten (`SearchCard`), en die kaart is altijd wit, ook voor de eerste zoekvraag.
+Het formulier staat in dezelfde kaart als de resultaten (`SearchCard`), blauw zolang er nog niet gezocht is en daarna wit.
 Het is een gewoon `GET`-formulier naar `/nieuws/zoeken?q=…`, dus de pagina werkt zonder JavaScript en het adres is te delen.
 De resultaten staan met de nieuwste bovenaan, tien eerst, en de knop "Laad 5 meer" laadt de pagina opnieuw met `?aantal=15`, in stappen van vijf en tot 100.
 Daarna staat er een zin dat dit de nieuwste zijn.
