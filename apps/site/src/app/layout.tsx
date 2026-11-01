@@ -10,7 +10,6 @@ import { reviewBranch } from '../env'
 import { SiteNavigation } from '../SiteNavigation'
 import { ThemeToggle } from '../ThemeToggle'
 import { withBranch } from '../title'
-import { TopEdge } from '../TopEdge'
 import { updatesPath, updatesTitle } from '../updates'
 
 // The links in the footer, about the site itself: the search, the page about us, the contact
@@ -98,7 +97,6 @@ export default function RootLayout({
       <Head script="/theme.js" />
       <Body>
         <PullToRefresh />
-        <TopEdge />
         <Page>
           <Page.Header>
             <Link href="/">

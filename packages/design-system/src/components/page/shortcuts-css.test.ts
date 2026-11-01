@@ -33,15 +33,17 @@ describe('the bar in shortcuts.css', () => {
     expect(css).not.toContain('visibility')
   })
 
-  it('sticks to the top of the window under the top inset, over the cells, but not when it wraps', () => {
-    expect(bar).toMatch(/@media \(width > 20em\) \{[^}]*inset-block-start: env\(safe-area-inset-top, 0\);/)
+  it('sticks to the top of the window under the strip over the status bar, over the cells, but not when it wraps', () => {
+    expect(bar).toMatch(
+      /@media \(width > 20em\) \{[^}]*inset-block-start: var\(--hf-top-edge, env\(safe-area-inset-top, 0\)\);/,
+    )
     expect(bar).toMatch(/@media \(width > 20em\) \{[^}]*position: sticky;/)
     expect(bar).toMatch(/@media \(width > 20em\) \{[^}]*z-index: 1;/)
   })
 
   it('keeps the heading of a link out from under the bar that sticks, as far as the bar shows and sticks', () => {
     expect(css).toMatch(
-      /@media \(20em < width < 52rem\) \{\s*html:has\(\.hf-page-shortcuts\) \{\s*scroll-padding-block-start: calc\(env\(safe-area-inset-top, 0px\) \+ var\(--hf-shortcuts-height\)\);/,
+      /@media \(20em < width < 52rem\) \{\s*html:has\(\.hf-page-shortcuts\) \{\s*scroll-padding-block-start: calc\(var\(--hf-top-edge, env\(safe-area-inset-top, 0px\)\) \+ var\(--hf-shortcuts-height\)\);/,
     )
     expect(css).toContain('--hf-shortcuts-height: calc(2.25rem + 11px);')
   })
