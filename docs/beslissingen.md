@@ -3228,6 +3228,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een tweede soort vlak, of nieuwe kleuren (niet nodig voor de regels; de projecteigenaar probeert later vier kleuren in donker).
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): Onze uitslagen op de pagina van een club blijft niet warm maar wordt zacht, en Wedstrijden daar wordt wit (regel 1 en regel 4).
 - **Later:** zie _Statistieken heeft een kaart Opmerkelijk: één feit per dag, in vaste volgorde_ (1 november 2026): met de kaart Opmerkelijk zijn drie van de tien kaarten op Statistieken warm (regel 3).
+- **Later:** zie _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026): op de pagina Spelers is de ranglijst Doelpuntenmakers de hoofdinhoud en dus wit (regel 1 in plaats van regel 4); op Statistieken blijft de top 5 zacht.
 
 ## Site
 
@@ -5002,6 +5003,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Twee spellingen die we niet samenvoegen, staan als twee namen met een eigen periode.
 - **Alternatieven:** ook de bekerwedstrijden en play-offs tellen (een finale op een neutraal veld zou het stadion van de club lijken); "vanaf" ook bij één naam (zegt dat het stadion pas toen begon); alle spellingen in één naam samenvoegen met een lijst van afkortingen en voorvoegsels (een foute samenvoeging is erger dan twee regels); een eigen tabel met stadions en de datum waarop we een naam het eerst zagen (#549, een groter werk dat dit issue niet nodig heeft); Onze uitslagen warm laten (de kaart is geen uitnodiging of iets opmerkelijks, en de pagina heeft dan twee kaarten die de aandacht vragen).
 - **Later:** een eigen lijst met stadions per club (#549) zou de namen uit deze kaart kunnen halen, met de datum waarop we een naam het eerst zagen in plaats van de dag van een wedstrijd.
+
+### Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom
+
+- **Datum:** 1 november 2026
+- **Besluit:** op de pagina Spelers (`/statistieken/spelers` en de pagina's van een seizoen) is Doelpuntenmakers de inhoud van de pagina en heeft het witte vlak.
+  Bijzondere doelpunten staat in de zijkolom op het zachte vlak.
+  Op Statistieken blijft de top 5 in de zijkolom op het zachte vlak (#583).
+  - **Het vlak:** `TopScorersCard` krijgt een eigenschap `surface`, `soft` als niets is opgegeven en `default` (wit) op Spelers, zodat Statistieken niet verandert.
+  - **De zijkolom:** een `Page.Sidebar` van de gewone breedte, want de kaart is een lijst van korte regels en heeft de breedte van een tabel niet nodig.
+    Hij heet "Meer cijfers over de spelers" en volgt op een telefoon op de hoofdkolom, dus de volgorde is er dezelfde.
+    De bronvermelding sluit de zijkolom af, zoals op Statistieken.
+  - **Ongewijzigd:** de inhoud van de kaart Bijzondere doelpunten, het anker `#bijzondere-doelpunten`, de balk "Op deze pagina:" en de knop voor een afbeelding van beide kaarten.
+    Alleen de plaats en het vlak van de kaarten veranderen.
+    De balk is vanaf 52 rem weg, en dat is ook de breedte waarop de zijkolom naast de hoofdkolom komt.
+- **Waarom:** op Spelers is de ranglijst waarvoor de bezoeker komt, dus wit past bij de inhoud van de pagina (regel 1 van _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_).
+  Bijzondere doelpunten is een record en een bijzaak, dus de zijkolom en het zachte vlak.
+- **Alternatieven:** beide kaarten wit onder elkaar (de bijzaak weegt dan even zwaar als de lijst); alles zoals nu; de zijkolom zo breed als de hoofdkolom (de kaart heeft die breedte niet nodig, en de lijst met doelpuntenmakers wordt er smaller van).
+- **Later:** vult voor de pagina Spelers de beslissing _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (#537) aan, waarin een ranglijst op het zachte vlak staat.
 
 ## Importer
 
@@ -8882,6 +8901,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Lijsten zijn korter dan tabellen voor een paar namen, en een zin voor een leeg deel zegt dat er niets mis is met de pagina.
 - **Niet erin:** de positie van de doelpuntenmaker (voor een afgelopen seizoen bestaat geen selectie), het aandeel van de topscorer en het aantal verschillende spelers (dat staat in Doelpuntenmakers).
 - **Alternatieven:** vier koppen van niveau 3 met onder elk een lijst of een zin (te zwaar voor vier korte feiten, en de eerste versie van deze kaart); een tabel met een rij per speler (veel kolommen voor weinig getallen); een `dl` met `dt` en `dd` (de dunne lijnen horen bij `li`, en de kaart Uitersten is ook een lijst); de lege delen weglaten (een bezoeker kan niet zien of ze er niet zijn of er niet werden gezocht); een hattrick ook bij de dubbelslagen laten staan (dezelfde wedstrijd wordt dan twee keer genoemd); de kaart naar Statistieken zetten (de pagina Spelers is er voor wat bij spelers hoort, zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_).
+- **Later:** zie _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026): de kaart staat niet meer onder Doelpuntenmakers maar in de zijkolom, en de bronvermelding sluit de zijkolom af.
 
 ### De Stand zegt dat een uitslag nog ontbreekt, zonder datum op de kaarten
 

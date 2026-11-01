@@ -835,7 +835,8 @@ export function TopScorers({
  * link to the page Spelers) and on the page Spelers as the whole list. Both have the same
  * heading, anchor and button for an image, so a link to `#doelpuntenmakers` works on both.
  * `playersHref` is the page Spelers of the season the card is about; the page Spelers leaves it
- * out.
+ * out. The card is soft in the sidebar of Statistieken and white on the page Spelers, where the
+ * list is the content of the page (`surface`).
  */
 export function TopScorersCard({
   competition,
@@ -843,18 +844,20 @@ export function TopScorersCard({
   playersHref,
   season,
   seasonOnImage,
+  surface = 'soft',
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
   playersHref?: string | undefined
   season: string
   seasonOnImage?: string | undefined
+  surface?: 'default' | 'soft'
 }) {
   return (
     <Card
       aria-labelledby="doelpuntenmakers"
       shareable={imageCredit(topScorersOf(matches, competition).length > 0, seasonOnImage)}
-      surface="soft"
+      surface={surface}
     >
       <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
         Doelpuntenmakers

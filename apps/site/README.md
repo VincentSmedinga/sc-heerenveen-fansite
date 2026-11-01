@@ -428,8 +428,10 @@ De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolo
 `/statistieken/spelers` is de eerste subpagina van Statistieken.
 Het toont de kaart Doelpuntenmakers met alle spelers die scoorden, zoals die kaart vroeger op `/statistieken` stond: dezelfde cijfers en dezelfde volgorde, met hetzelfde anker `#doelpuntenmakers` en het oude anker `#topscorers`.
 De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`; `/statistieken` gebruikt dezelfde kaart met de link naar deze pagina, en dan zijn het de eerste rijen van de lijst (`topFiveOf` in `src/matches.ts`).
+Op Spelers heeft de kaart het witte vlak, want de lijst is waar de pagina voor bestaat (de eigenschap `surface`); op Statistieken staat hij in de zijkolom op het zachte vlak.
 De pagina deelt alles rond het seizoen met Statistieken: de kiezer, de adressen `/statistieken/spelers/2025-26` en de route `app/statistieken/spelers/kies`, via `playersPath` in `src/season-page.ts`.
-Eronder staat de kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`.
+De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
+Op een telefoon volgt de zijkolom op de hoofdkolom, en de bronvermelding sluit de zijkolom af.
 De kaart heeft één kop, van niveau 2, en daaronder een lijst van vier delen, gebouwd zoals de kaart Uitersten: elk deel is een `List.Item` met de naam als rustige tekst erboven (`Text appearance="meta"`) en de waarde eronder in een `ShortFact` van het designsysteem, dat de dunne lijnen tussen de delen tekent.
 De naam en de waarde staan in hetzelfde lijstitem, dus een schermlezer leest ze samen.
 De delen zijn:
