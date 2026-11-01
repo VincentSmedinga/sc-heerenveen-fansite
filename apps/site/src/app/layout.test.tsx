@@ -19,6 +19,17 @@ describe('RootLayout', () => {
     expect(html).not.toContain('<main')
   })
 
+  it('puts the strip for the status bar first on the page, and nothing in the layout takes it off', () => {
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
+
+    expect(html).toMatch(/<div aria-hidden="true" class="hf-page-top-edge"><\/div><header/)
+    expect(html).not.toMatch(/hf-page-top-edge[^>]*hidden=/)
+  })
+
   it('puts the main menu in its own nav right after the header, outside the banner, in the order of the focus', () => {
     const html = renderToStaticMarkup(
       <RootLayout shortcuts={<nav aria-label="Balk">Links</nav>} subnav={null}>

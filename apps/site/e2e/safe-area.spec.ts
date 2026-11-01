@@ -98,20 +98,32 @@ test.describe('the page on a screen with a notch', () => {
     expect(await colourOf(edge)).not.toBe(lightHeader)
   })
 
-  // In Safari on an iPhone the status bar is blue while the strip is there, and takes the
-  // colour of the page when it is gone. The colour itself only shows on a phone.
-  test('goes off the page when the header has scrolled away, and comes back with the header', async ({ page }) => {
-    await page.setViewportSize({ height: 400, width: 390 })
-    await page.goto('/over-ons')
+  // In Safari on an iPhone the status bar has the colour of the strip, so the strip must stay,
+  // in the blue of the theme, when the header has scrolled away. Only a phone shows the colour
+  // of the bar itself.
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`stays on the page in the colour of the header after scrolling, in ${scheme}`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme })
+      await page.setViewportSize({ height: 400, width: 390 })
+      await page.goto('/over-ons')
 
-    const edge = page.locator('.hf-page-top-edge')
+      const edge = page.locator('.hf-page-top-edge')
+      const colourOf = (selector: string) =>
+        page.evaluate((s) => getComputedStyle(document.querySelector(s)!).backgroundColor, selector)
+      const atTop = await colourOf('.hf-page-top-edge')
 
-    await expect(edge).not.toHaveAttribute('hidden')
+      await page.evaluate(() => window.scrollTo(0, document.querySelector('header')!.offsetHeight + 100))
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100)
 
-    await page.evaluate(() => window.scrollTo(0, document.querySelector('header')!.offsetHeight + 100))
-    await expect(edge).toHaveAttribute('hidden', '')
+      // The header is off the screen now, and the strip is still there and has the same colour.
+      await expect(edge).not.toHaveAttribute('hidden')
+      expect(await edge.evaluate((node) => getComputedStyle(node).display)).not.toBe('none')
+      expect(await colourOf('.hf-page-top-edge')).toBe(atTop)
+      expect(atTop).toBe(await colourOf('header'))
 
-    await page.evaluate(() => window.scrollTo(0, 0))
-    await expect(edge).not.toHaveAttribute('hidden')
-  })
+      await page.evaluate(() => window.scrollTo(0, 0))
+      await expect(edge).not.toHaveAttribute('hidden')
+      expect(await colourOf('.hf-page-top-edge')).toBe(atTop)
+    })
+  }
 })

@@ -4295,6 +4295,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het eerste subitem is geen overzichtspagina: het item Nieuws is zelf de link terug.
 - **Later:** zie _De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast_ (31 oktober 2026): de balk van Statistieken wordt door een pagina getekend (`NavigationBar`) en via het slot `@subnav` aan het item gegeven.
   Hij blijft in het `li` van zijn onderdeel, in de ene `nav`, dus de nesting blijft zoals hier besloten.
+- **Later:** zie _De statusbalk van Safari heeft altijd één van de twee blauwen, tot de modus wisselt_ (1 november 2026): `watchTopEdge` is weg, en de strook voor de statusbalk blijft ook als het menu en de kop uit beeld zijn.
 
 ### Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen
 
@@ -6583,6 +6584,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De strook alleen op een iPhone met uitsparing tonen; daar is in CSS geen vraag voor, want de inset is in Safari 0.
   Een strook van 4 pixels of minder, of een bijna doorzichtige; Safari negeert die.
 - **Later:** de strook blijft niet meer staan als de kop uit beeld is; zie _De blauwe rand bovenaan scrolt weg met de kop_.
+- **Later:** de strook blijft nu altijd staan, ook als de kop uit beeld is; zie _De statusbalk van Safari heeft altijd één van de twee blauwen, tot de modus wisselt_.
 - **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, in licht en in donker, boven aan de pagina en na het scrollen, met Licht en Donker en met het systeemthema gewisseld terwijl de pagina open stond.
   Niet in iOS 26 (geen simulator beschikbaar), niet op een echte telefoon, niet op een iPad en niet in een app op het beginscherm; de projecteigenaar kijkt dat na.
   Een test in Chromium (`e2e/safe-area.spec.ts`) controleert dat de strook het eerste element van de pagina is, vastzit, geen aanraking aanneemt, dezelfde kleur heeft als de kop en `theme-color` in licht en donker, en na Licht of Donker terugkomt.
@@ -6606,6 +6608,35 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Beide hebben we niet uitgeprobeerd.
 - **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, in licht en donker: blauw bovenaan, de kleur van de pagina met de zachte overgang na het scrollen langs de kop, weer blauw als de kop terugkomt, en na Licht of Donker terwijl de strook weg was.
   Niet op een echte telefoon, niet in iOS 26 en niet in de app op het beginscherm.
+- **Later:** dit vervalt: `watchTopEdge` en `TopEdge` zijn weg en de strook blijft altijd staan; zie _De statusbalk van Safari heeft altijd één van de twee blauwen, tot de modus wisselt_.
+
+### De statusbalk van Safari heeft altijd één van de twee blauwen, tot de modus wisselt
+
+- **Datum:** 1 november 2026
+- **Besluit:** de strook `hf-page-top-edge` blijft altijd op de pagina, ook nadat de kop en het hoofdmenu uit beeld zijn gescrold (#528).
+  `watchTopEdge` en `TopEdge` zijn weg: er is niets meer dat de strook met `hidden` van de pagina haalt.
+  De statusbalk van Safari op een iPhone of iPad heeft daardoor `blue-900` in licht en `blue-800` in donker, uit het token van de kop, zowel boven aan de pagina als na het scrollen.
+  De kleur verandert alleen als de modus wisselt: met de knop Licht of Donker, of als het systeem van thema wisselt.
+  Dat doet `refreshTopEdge` in `theme.ts` nog steeds, met de strook twee beeldjes van de pagina.
+  De balk "Op deze pagina:" plakt onder de strook vast: `inset-block-start` en de scroll-padding bij de balk gebruiken `--hf-top-edge` en niet langer alleen de inset.
+  De app op het beginscherm, Android en een computer veranderen niet, en `theme-color` ook niet.
+- **Waarom:** de projecteigenaar wilde geen zand meer in de statusbalk (de kleur van de pagina, die Safari nam zodra de strook weg was) en geen flikkering (de strook ging aan en uit tijdens het scrollen langs de kop).
+  Eén van de twee blauwen, tot de modus wisselt, is wat hij kiest boven de zachte overgang naar de pagina.
+  De blauwe rand loopt na het scrollen 8 pixels door onder de statusbalk, zoals de beslissing van 25 oktober voor de strook zelf al beschreef.
+  De balk "Op deze pagina:" moest onder de strook, want hij plakte vast bij `top: 0`, over de strook heen: Safari nam dan de kleur van de balk voor de statusbalk (zand in licht), en niet het blauw van de strook.
+- **Gemeten in de simulator:** twee dingen.
+  Met de balk over de strook is de statusbalk na het scrollen zand; met de balk eronder is hij blauw.
+  Met één beeldje `display: none` in `refreshTopEdge` in plaats van twee leest Safari de nieuwe kleur niet: de statusbalk bleef de oude kleur terwijl de strook zelf al de nieuwe had.
+  Twee beeldjes blijven dus nodig, en die tijd (ruim 30 milliseconden) kunnen we niet korter maken.
+- **Alternatieven:** de strook alleen laten staan zolang de kop of het menu in beeld is, zoals de beslissing van 25 oktober (dan neemt Safari de kleur van de pagina, en de strook wisselt aan en uit tijdens het scrollen).
+  Een strook die met `position: absolute` meescrolt, of een animatie op basis van de scrollpositie (zie _De blauwe rand bovenaan scrolt weg met de kop_); beide hebben we niet uitgeprobeerd, want de strook die blijft staat is eenvoudiger en doet wat de projecteigenaar vroeg.
+  De balk "Op deze pagina:" laten zoals hij was, over de strook (Safari neemt dan zijn kleur).
+  `refreshTopEdge` verkorten tot één beeldje (zie boven: Safari leest de kleur dan niet).
+- **Later:** de strook in de kleur van de kop zit er nu ook na het scrollen; zie _De rand bovenaan in Safari heeft de kleur van de kop, door een echte strook van minstens 8 pixels_ en _De blauwe rand bovenaan scrolt weg met de kop_ voor wat daarvoor gold.
+- **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, op `/statistieken` met de balk "Op deze pagina:" en op `/over-ons`: de statusbalk is blauw boven aan de pagina en na het scrollen, in licht en in donker, en wisselt mee als het systeem van thema wisselt (ook na het scrollen) en met de knop Licht of Donker.
+  Een screenshot kan de twee beeldjes waarin de strook van de pagina is niet laten zien, dus of de statusbalk bij het wisselen nog een ogenblik flikkert, is niet te zeggen; bij scrollen is er niets meer dat de strook wisselt.
+  Een test in Chromium (`e2e/safe-area.spec.ts`) controleert dat de strook na het scrollen blijft, zonder `hidden`, en in licht en donker de kleur van de kop heeft.
+  Niet op een echte telefoon, niet in iOS 26, niet op een iPad en niet in een app op het beginscherm; de projecteigenaar kijkt dat na.
 
 ### De inhoud van de kop blijft zichtbaar als hij onder de statusbalk wegscrolt
 
@@ -6621,6 +6652,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `visibility: hidden` haalt de kop uit de toegankelijkheidsboom en laat een element met focus verdwijnen.
 - **Gecontroleerd en niet gecontroleerd:** de code is gelijk aan die na #251.
   Niet op een echte telefoon, niet in iOS 26 en niet in de app op het beginscherm.
+- **Later:** de strook die met de kop wegscrolt, blijft niet: zie _De statusbalk van Safari heeft altijd één van de twee blauwen, tot de modus wisselt_ (de strook blijft altijd staan).
 
 ### De footer heeft geen lijn bovenaan
 

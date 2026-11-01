@@ -69,7 +69,8 @@ export function readPreference(storage?: Storage): ThemePreference {
  * Safari on an iPhone colours its status bar from the strip fixed to the top of the page (see
  * .hf-page-top-edge in page.css), and only looks at the strip again when it comes back on the
  * page: a new colour alone, a changed height or taking it out and putting it back at once don't
- * make it look. So the strip is taken off for two frames, which Safari does notice.
+ * make it look. So the strip is taken off for two frames, which Safari does notice; one frame
+ * is not enough (measured in the iOS Simulator). The strip stays on the page otherwise.
  */
 export function refreshTopEdge(doc: Document = document) {
   const edge = doc.querySelector<HTMLElement>('.hf-page-top-edge')

@@ -53,12 +53,13 @@
 
     /*
      * It sticks to the top of the window when the page scrolls, so the links are at hand along
-     * the whole page. It sticks under the top inset of the phone (the strip over the status
-     * bar, see page.css), and over the cells. A wrapped bar is too tall to stick: it would take
-     * a large part of a small window.
+     * the whole page. It sticks under the strip over the status bar (--hf-top-edge, see
+     * page.css), and over the cells. A wrapped bar is too tall to stick: it would take a large
+     * part of a small window. Over the strip it would give Safari its own colour for the status
+     * bar, instead of the blue of the strip.
      */
     @media (width > 20em) {
-      inset-block-start: env(safe-area-inset-top, 0);
+      inset-block-start: var(--hf-top-edge, env(safe-area-inset-top, 0));
       position: sticky;
       z-index: 1;
     }
@@ -82,12 +83,12 @@
 
   /*
    * A link to a heading must not bring the heading under the bar that sticks. The scroll
-   * padding of the page (see root.css) keeps clear of the top inset; here it keeps clear of the
+   * padding of the page (see root.css) keeps clear of the strip; here it keeps clear of the
    * bar as well, where the bar sticks and shows.
    */
   @media (20em < width < 52rem) {
     html:has(.hf-page-shortcuts) {
-      scroll-padding-block-start: calc(env(safe-area-inset-top, 0px) + var(--hf-shortcuts-height));
+      scroll-padding-block-start: calc(var(--hf-top-edge, env(safe-area-inset-top, 0px)) + var(--hf-shortcuts-height));
     }
   }
 
