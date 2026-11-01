@@ -83,7 +83,7 @@ export type MatchProps =
 export type MatchStatus = (typeof matchStatuses)[number]
 
 /**
- * The score after 90 minutes of a cup match with extra time: both scores, or none. It can be
+ * The score after 90 minutes of a match with extra time: both scores, or none. It can be
  * the same as the result, when extra time had no goal.
  */
 type MatchAfterNinety =

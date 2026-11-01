@@ -1,0 +1,40 @@
+<!--
+  Two play-off ties of ours that went to extra time, in the layout of the page of the play-offs of 2026,
+  https://nl.wikipedia.org/wiki/Play-offs_Nederlands_voetbal_2026?action=raw, read on 1 November 2026, with the field
+  `half time score` as the cup page of 2025/26 writes it: the score after 90 minutes first and then half time.
+  The play-off boxes of the real pages do not have that field yet, so the clubs, the results, the dates and the field are
+  made up, and the goal scorers, referees and reports are left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+== Play-offs voor de UEFA Conference League ==
+
+=== Halve finales ===
+==== Wedstrijd A ====
+{{Footballbox2
+|date = 21 mei 2026
+|time = 21:00 uur
+|team1 = [[Testdorp FC]]
+|score = 1&nbsp;–&nbsp;2
+|half time score = 1&nbsp;–&nbsp;1, 0&nbsp;–&nbsp;1
+|aet = ja
+|team2 = '''[[sc Heerenveen]]'''
+|location = [[Testdorp]]
+|stadium = [[Sportpark Proefdorp]]
+}}
+
+=== Finale ===
+==== Wedstrijd C ====
+{{Footballbox2
+|date = 24 mei 2026
+|time = 14:30 uur
+|team1 = '''[[sc Heerenveen]]'''
+|score = 2&nbsp;–&nbsp;2
+|half time score = 2&nbsp;–&nbsp;2, 1&nbsp;–&nbsp;0
+|aet = ja
+|penaltyscore = 4&nbsp;–&nbsp;3
+|team2 = [[Testdorp FC]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+}}
+
+== Play-offs om promotie/degradatie Eredivisie/Eerste divisie ==
