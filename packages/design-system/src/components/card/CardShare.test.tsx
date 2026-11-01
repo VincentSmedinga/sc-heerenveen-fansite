@@ -304,13 +304,18 @@ describe('the button in card-share.css', () => {
     expect(outside).not.toContain(':hover')
   })
 
-  it('takes its colours from the roles of links and of the soft button, and from no colour of its own', () => {
+  it('takes its colours from the roles of markers and of the soft button, and from no colour of its own', () => {
     const colours = css.match(/(?:color|background-color|border-color): [^;]+;/g) ?? []
 
     expect(colours.length).toBeGreaterThan(0)
     for (const colour of colours) {
       expect(colour, colour).toMatch(/var\(--hf-colour-[a-z-]+\)|transparent|ButtonText/)
     }
+  })
+
+  it('is quiet at rest: the icon has the colour of graphic markers, and no opacity makes it paler', () => {
+    expect(css).toMatch(/\.hf-card-share-button \{[^}]*?\n {4}color: var\(--hf-colour-marker-graphic\);/s)
+    expect(css).not.toContain('opacity')
   })
 
   it('moves with the motion tokens, which are zero with reduced motion', () => {

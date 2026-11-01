@@ -120,7 +120,7 @@ export const CardShare = ({ season, source }: CardShareProps) => {
         }}
         type="button"
       >
-        <Icon name="image" />
+        <Icon name="camera" />
       </button>
       <p className={classNames('hf-card-share-status', phase !== 'error' && 'hf-visually-hidden')} role="status">
         {messages[phase]}

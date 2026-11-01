@@ -142,7 +142,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       },
       {
         name: '--hf-colour-marker-graphic',
-        use: 'Opsommingstekens, de lijn bij een citaat en de stippellijn onder een afkorting; later ook scheidingstekens, kleine pictogrammen en balkjes in grafiekjes',
+        use: 'Opsommingstekens, de lijn bij een citaat en de stippellijn onder een afkorting; het pictogram van de knop om een kaart als afbeelding op te slaan, in rust; later ook scheidingstekens, kleine pictogrammen en balkjes in grafiekjes',
       },
     ],
   },
