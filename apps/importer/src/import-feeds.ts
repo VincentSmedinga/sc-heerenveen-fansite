@@ -9,11 +9,11 @@ import { lockNameFor, withLock } from '@fansite/db/lock'
 import { discussions, feeds, items, matches, sources } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { removeVisitorData } from '@fansite/db/visits'
-import { and, asc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNull, like, sql } from 'drizzle-orm'
 
 import type { Fetcher, RobotsStore } from './fetcher.ts'
 import type { HealthReport } from './import-matches.ts'
-import type { FeedItem, SkippedItem } from './read-feed.ts'
+import type { FeedItem, SkippedItem, ThreadRule } from './read-feed.ts'
 import type { ForumDiscussion } from './read-forum.ts'
 import type { MatchDay } from './relevance.ts'
 
@@ -21,7 +21,14 @@ import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-r
 import { createFetcher } from './fetcher.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
-import { paywallCategoryFor, paywallNamespaceFor, readFeed, timeRuleFor } from './read-feed.ts'
+import {
+  paywallCategoryFor,
+  paywallNamespaceFor,
+  readFeed,
+  threadKeyOf,
+  threadRuleFor,
+  timeRuleFor,
+} from './read-feed.ts'
 import { readForum } from './read-forum.ts'
 import { judgeRelevance, opponentsAround } from './relevance.ts'
 import { robotsStoreFor } from './robots-store.ts'
@@ -171,6 +178,14 @@ export async function importFeed(
     .from(sources)
     .where(eq(sources.id, feed.sourceId))
   const isForum = source?.kind === 'forum'
+  const threadRule = isForum ? undefined : threadRuleFor(source?.domain ?? '')
+
+  // Before the feed is asked for, so also a source that answers `not modified` gives the items
+  // it already has a key.
+  if (threadRule !== undefined) {
+    await backfillThreadKeys(db, feed.sourceId, threadRule)
+  }
+
   const outcome = await fetcher.fetch(feed.url, isForum ? {} : { etag: feed.etag, lastModified: feed.lastModified })
   const { url } = feed
 
@@ -197,6 +212,7 @@ export async function importFeed(
     now,
     paywallCategory: paywallCategoryFor(domain),
     paywallNamespace: paywallNamespaceFor(domain),
+    threadRule,
     timeRule: timeRuleFor(domain),
   })
 
@@ -364,6 +380,28 @@ export async function runImport(
     return reports.value.some((report) => report.kind === 'error') ? 1 : 0
   } finally {
     await close()
+  }
+}
+
+/**
+ * Gives the items of a source that were stored before it had a rule for the versions of a story
+ * the key of their story, from their link. An item without a key and a link without a code stay
+ * as they are, and so does a hidden item, which the importer leaves alone. Items the feed no
+ * longer lists are covered too: the key comes from the stored link. It does nothing once every
+ * item has its key.
+ */
+async function backfillThreadKeys(db: Executor, sourceId: number, rule: ThreadRule) {
+  const keyless = await db
+    .select({ id: items.id, url: items.url })
+    .from(items)
+    .where(and(eq(items.sourceId, sourceId), isNull(items.threadKey), isNull(items.hiddenAt), like(items.url, '%~%')))
+
+  for (const { id, url } of keyless) {
+    const threadKey = threadKeyOf(url, rule)
+
+    if (threadKey !== null) {
+      await db.update(items).set({ threadKey }).where(eq(items.id, id))
+    }
   }
 }
 
@@ -602,6 +640,7 @@ async function storeItems(
         (before.title === item.title &&
           before.url === item.url &&
           before.paywalled === item.paywalled &&
+          before.threadKey === item.threadKey &&
           before.relevance === itemRelevance &&
           before.durationSeconds === item.durationSeconds &&
           before.seasonNumber === item.seasonNumber &&
@@ -625,6 +664,7 @@ async function storeItems(
         relevance: itemRelevance,
         seasonNumber: item.seasonNumber,
         sourceId: feed.sourceId,
+        threadKey: item.threadKey,
         title: item.title,
         url: item.url,
       }
@@ -647,6 +687,7 @@ async function storeItems(
           publishedAt: unlessHidden(items.publishedAt),
           relevance: unlessHidden(items.relevance),
           seasonNumber: unlessHidden(items.seasonNumber),
+          threadKey: unlessHidden(items.threadKey),
           title: unlessHidden(items.title),
           url: unlessHidden(items.url),
         },

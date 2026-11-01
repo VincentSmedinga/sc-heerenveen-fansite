@@ -5542,6 +5542,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** één plek voor de voorwaarde voorkomt dat een nieuwe query er een vergeet.
   De moderator moet een bericht kunnen vinden dat het filter ten onrechte weghoudt.
 - **Alternatieven:** de voorwaarde in elke query zelf (zoals bij `hidden_at` tot nu toe); een apart scherm voor twijfelgevallen (een eigen issue).
+- **Later:** zie _Van een bericht met meerdere versies toont de site alleen de laatste kop_ (1 november 2026): `isShown` kijkt bij een bericht met een `thread_key` naar het hele verhaal.
+  Een bericht zonder sleutel gaat door dezelfde voorwaarde als hier.
 
 ### Omrop Fryslân is de eerste regionale bron, met het filter `club` vanaf de seed
 
@@ -6245,6 +6247,42 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De regel in de code van de site schrijven (de site kent de pagina van Wikipedia niet).
 - **Later:** zie _Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht_.
   Krijgt een gespeelde wedstrijd van drie dagen of langer geleden een ander stadion, een andere datum of een andere regel, dan wacht die wijziging zeven dagen of tot een mens besluit.
+
+### Van een bericht met meerdere versies toont de site alleen de laatste kop
+
+- **Datum:** 1 november 2026
+- **Besluit:** een bron die een bericht steeds onder een nieuwe kop in de feed zet, zoals het liveblog van het Algemeen Dagblad, toont de site met de laatste kop.
+  - **De sleutel:** `items.thread_key` (tekst, met een index op `source_id` en `thread_key`) bindt de versies van één verhaal.
+    De importer maakt hem per domein uit de link, volgens `threadRules` in `apps/importer/src/read-feed.ts`.
+    Bij het Algemeen Dagblad en De Gelderlander (DPG Media) is het de code `~` met acht letters en cijfers aan het eind van het pad, zoals `~a40dbd48`.
+    Een bron zonder regel, en een link zonder code, geeft geen sleutel: dat bericht is zijn eigen verhaal.
+  - **Alleen binnen een bron:** de site voegt versies samen met dezelfde `source_id` en `thread_key`.
+    Dezelfde code bij twee bronnen geeft twee berichten, elk onder de naam van zijn eigen bron.
+  - **De laatste kop:** het bericht met de nieuwste `published_at`, bij dezelfde tijd het hoogste `id`.
+    De sortering, de betaalmuur en de link komen van die versie.
+  - **Relevant als één versie het was:** een verhaal is te zien als een van zijn versies `relevant` is, ook als de laatste kop de club niet noemt.
+    Het toont dan de laatste kop.
+    Zo verdwijnt het liveblog van een wedstrijd niet doordat de laatste kop alleen "het eindsignaal" zegt.
+    Is geen versie `relevant`, dan toont de site het verhaal niet.
+  - **Verborgen:** een versie die een moderator verbergt, bestaat niet meer voor de site.
+    Het verhaal toont de nieuwste versie die niet verborgen is, en verdwijnt als er geen over is.
+  - **Eén plek:** de regel staat in `isShown` in `packages/db/src/queries.ts`, dus de lijst met het filter per bron, de tellingen van de paginering, de homepage en de zoekresultaten volgen hem samen.
+  - **Oudere versies blijven:** de importer en de database bewaren elke versie, en het beheer toont ze allemaal.
+  - **Bestaande berichten:** de importer vult de sleutel van berichten die hem missen aan het begin van elke import van zo'n bron, uit de bewaarde link, ook als de feed niet gewijzigd is of het bericht er niet meer in staat.
+    Een verborgen bericht blijft zoals het is.
+- **Waarom:** een liveblog van negen versies stond met negen koppen onder elkaar op `/nieuws`, want elke versie is een bericht met een eigen link.
+  De code in de link is wat DPG Media zelf gebruikt voor een artikel, en blijft gelijk terwijl de kop verandert (gecontroleerd op 1 november 2026 bij de negen versies van het liveblog van N.E.C. – sc Heerenveen: `~a40dbd48`).
+  De laatste kop is ook de beste: een liveblog wordt na de wedstrijd het verslag onder dezelfde code.
+  Een sleutel in de database, in plaats van een groepering in de query, houdt de query eenvoudig en laat de regel per bron veranderen zonder de site aan te raken.
+  Een regel in `isShown` voorkomt dat een pagina vergeet te groeperen.
+- **Nadeel:** de query kijkt voor elk bericht met een sleutel naar zijn versies (twee `exists`).
+  De index op `source_id` en `thread_key` houdt dat klein voor de duizenden berichten per jaar die we bewaren, maar het is meer dan een vlakke lijst.
+  Een versie met een andere kop dan de laatste is niet meer te vinden op de site, ook niet met zoeken.
+- **Alternatieven:** groeperen in de query met `GROUP BY` (elke query moet het opnieuw doen en de kolommen van het gekozen bericht horen niet bij de groep).
+  De oudere versies verwijderen (de importer verwijdert geen berichten, en de sleutel van een versie kent de volgende niet).
+  Een sleutel uit de kop (de kop verandert juist).
+  Verhalen van twee bronnen samenvoegen (volgt in #567 en vraagt een besluit over de naam van de bron).
+  Het filter laten beoordelen op de laatste kop alleen (een liveblog van een wedstrijd van de club valt weg als de laatste kop de club niet noemt).
 
 ## Redactie
 

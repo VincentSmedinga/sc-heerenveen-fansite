@@ -2,6 +2,7 @@ import type { SQL } from 'drizzle-orm'
 import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 
 import { and, asc, count, desc, eq, exists, inArray, isNotNull, isNull, lte, ne, or, sql } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/mysql-core'
 
 import type { Database } from './client.ts'
 import type { Competition, MatchPageKind, StaffRole } from './schema.ts'
@@ -279,7 +280,7 @@ export function listArchiveSources(db: Database, until: Date) {
           db
             .select({ one: sql`1` })
             .from(items)
-            .where(and(eq(items.sourceId, sources.id), lte(items.publishedAt, until), isShown())),
+            .where(and(eq(items.sourceId, sources.id), lte(items.publishedAt, until), isShown(until))),
         ),
         eq(sources.enabled, true),
         ne(sources.kind, 'podcast'),
@@ -728,7 +729,9 @@ export async function searchPublic(
       })
       .from(items)
       .innerJoin(sources, eq(items.sourceId, sources.id))
-      .where(and(eq(sources.enabled, true), lte(items.publishedAt, until), isShown(), hasWords(words, items.title)))
+      .where(
+        and(eq(sources.enabled, true), lte(items.publishedAt, until), isShown(until), hasWords(words, items.title)),
+      )
       .orderBy(desc(items.publishedAt), desc(items.id))
       .limit(limit),
     db
@@ -827,12 +830,36 @@ function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColum
 }
 
 /**
- * The condition that makes an item one to show to a visitor: the importer found it `relevant`
- * (see `items.relevance`), and no moderator hid it. Every query that puts items on a page
+ * The condition that makes an item one to show to a visitor: no moderator hid it, and the
+ * importer found it `relevant` (see `items.relevance`). Every query that puts items on a page
  * includes it. The admin's list is the one that doesn't, so a moderator finds every item.
+ *
+ * An item with a `thread_key` is a version of a story that its source put in the feed again
+ * under a new headline, such as a live blog. Only the newest version of the story is shown (the
+ * newest `published_at`, and the highest `id` among versions of the same time), and the story
+ * counts as relevant when any of its versions is: the headline of the last version may say
+ * "the final whistle" and nothing about the club. A version a moderator hid is not a version:
+ * the one before it is shown, and no version is left when all are hidden. Versions of one key
+ * at two sources are two stories. Pass `until` to leave out the versions that are later than
+ * that, as the query itself does for the item.
  */
-function isShown() {
-  return and(eq(items.relevance, 'relevant'), isNull(items.hiddenAt))
+function isShown(until?: Date) {
+  const sibling = alias(items, 'sibling')
+  const sameStory = sql`${sibling.sourceId} = ${items.sourceId} and ${sibling.threadKey} = ${items.threadKey} and ${sibling.hiddenAt} is null${
+    until === undefined ? sql`` : sql` and ${lte(sibling.publishedAt, until)}`
+  }`
+
+  return and(
+    isNull(items.hiddenAt),
+    or(
+      and(isNull(items.threadKey), eq(items.relevance, 'relevant')),
+      and(
+        isNotNull(items.threadKey),
+        sql`not exists (select 1 from items sibling where ${sameStory} and (${sibling.publishedAt} > ${items.publishedAt} or (${sibling.publishedAt} = ${items.publishedAt} and ${sibling.id} > ${items.id})))`,
+        sql`exists (select 1 from items sibling where ${sameStory} and ${sibling.relevance} = 'relevant')`,
+      ),
+    ),
+  )
 }
 
 /**
@@ -845,7 +872,7 @@ function newsFilter(until: Date, slugs: readonly string[] = []) {
     eq(sources.enabled, true),
     ne(sources.kind, 'podcast'),
     lte(items.publishedAt, until),
-    isShown(),
+    isShown(until),
     slugs.length === 0 ? undefined : or(...slugs.map(hasSlug)),
   )
 }

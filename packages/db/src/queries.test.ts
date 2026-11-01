@@ -20,6 +20,7 @@ import {
   listSeasonMatches,
   listSeasonStandings,
   listWikipediaPages,
+  searchPublic,
 } from './queries.ts'
 import {
   discussions,
@@ -681,6 +682,196 @@ describe('the news archive', () => {
 
       expect(await listArchiveSources(database.db, now)).toHaveLength(1)
     })
+  })
+})
+
+describe('the versions of a story', () => {
+  const now = new Date('2026-10-22T10:00:00Z')
+
+  /** Puts a source with a feed in the register and returns the ids that an item needs. */
+  async function addSource(overrides: Partial<typeof sources.$inferInsert> = {}) {
+    const domain = overrides.domain ?? 'testkrant.test'
+    const [source] = await database.db
+      .insert(sources)
+      .values({ domain, kind: 'news', name: 'Testkrant', slug: 'testkrant', ...overrides })
+      .$returningId()
+    const sourceId = source?.id ?? 0
+    const [feed] = await database.db
+      .insert(feeds)
+      .values({ sourceId, url: `https://${domain}/rss/` })
+      .$returningId()
+
+    return { feedId: feed?.id ?? 0, sourceId }
+  }
+
+  async function addItem(
+    ids: { feedId: number; sourceId: number },
+    key: string,
+    publishedAt: string,
+    overrides: Partial<typeof items.$inferInsert> = {},
+  ) {
+    await database.db.insert(items).values({
+      ...ids,
+      key,
+      publishedAt: new Date(publishedAt),
+      title: `Kop ${key}`,
+      url: `https://testkrant.test/${key}`,
+      ...overrides,
+    })
+  }
+
+  const archive = async (options: { limit?: number; offset?: number; sources?: string[] } = {}) =>
+    (await listArchivePage(database.db, { limit: 50, until: now, ...options })).map((item) => item.title)
+
+  /** A story of three versions at 08:00, 08:30 and 09:00, and an item of its own at 08:45. */
+  async function addLiveBlog(ids: { feedId: number; sourceId: number }, overrides = {}) {
+    await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111', ...overrides })
+    await addItem(ids, 'blog-2', '2026-10-22T08:30:00Z', { threadKey: '~aaaa1111', ...overrides })
+    await addItem(ids, 'blog-3', '2026-10-22T09:00:00Z', { threadKey: '~aaaa1111', ...overrides })
+    await addItem(ids, 'los', '2026-10-22T08:45:00Z')
+  }
+
+  it('gives the newest version of a story and the items that have no key, newest first', async () => {
+    const ids = await addSource()
+
+    await addLiveBlog(ids)
+
+    expect(await archive()).toEqual(['Kop blog-3', 'Kop los'])
+    expect((await listRecentItems(database.db, { limit: 10, until: now })).map((item) => item.title)).toEqual([
+      'Kop blog-3',
+      'Kop los',
+    ])
+  })
+
+  it('counts a story once, so the pages follow the list and not the rows', async () => {
+    const ids = await addSource()
+
+    await addLiveBlog(ids)
+
+    expect(await countArchiveItems(database.db, { until: now })).toBe(2)
+    expect(await countArchiveItems(database.db, { sources: ['testkrant'], until: now })).toBe(2)
+    expect(await archive({ limit: 1 })).toEqual(['Kop blog-3'])
+    expect(await archive({ limit: 1, offset: 1 })).toEqual(['Kop los'])
+    expect(await archive({ limit: 1, offset: 2 })).toEqual([])
+  })
+
+  it('puts a story where its newest version is, and gives the paywall of that version', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'blog-1', '2026-10-22T07:00:00Z', { paywalled: true, threadKey: '~aaaa1111' })
+    await addItem(ids, 'los', '2026-10-22T08:00:00Z')
+    await addItem(ids, 'blog-2', '2026-10-22T09:00:00Z', { paywalled: false, threadKey: '~aaaa1111' })
+
+    const [first] = await listArchivePage(database.db, { limit: 50, until: now })
+
+    expect(first).toMatchObject({ paywalled: false, title: 'Kop blog-2' })
+    expect(await archive()).toEqual(['Kop blog-2', 'Kop los'])
+  })
+
+  it('gives the version with the highest id when two have the same time', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111' })
+    await addItem(ids, 'blog-2', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111' })
+
+    expect(await archive()).toEqual(['Kop blog-2'])
+  })
+
+  it('keeps two stories with different keys apart', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'een-1', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111' })
+    await addItem(ids, 'twee-1', '2026-10-22T08:10:00Z', { threadKey: '~bbbb2222' })
+    await addItem(ids, 'een-2', '2026-10-22T08:20:00Z', { threadKey: '~aaaa1111' })
+    await addItem(ids, 'twee-2', '2026-10-22T08:30:00Z', { threadKey: '~bbbb2222' })
+
+    expect(await archive()).toEqual(['Kop twee-2', 'Kop een-2'])
+  })
+
+  it('shows the newest version of a story when any version was relevant, whatever the newest says', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111' })
+    await addItem(ids, 'blog-2', '2026-10-22T09:00:00Z', { relevance: 'irrelevant', threadKey: '~aaaa1111' })
+
+    expect(await archive()).toEqual(['Kop blog-2'])
+    expect(await countArchiveItems(database.db, { until: now })).toBe(1)
+  })
+
+  it('shows nothing of a story when no version was relevant, not even when the newest is', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', { relevance: 'doubtful', threadKey: '~aaaa1111' })
+    await addItem(ids, 'blog-2', '2026-10-22T09:00:00Z', { relevance: 'irrelevant', threadKey: '~aaaa1111' })
+
+    expect(await archive()).toEqual([])
+    expect(await countArchiveItems(database.db, { until: now })).toBe(0)
+  })
+
+  it('shows the version before the newest when a moderator hid the newest, and nothing when all are hidden', async () => {
+    const ids = await addSource()
+    const hiddenAt = new Date('2026-10-22T09:30:00Z')
+
+    await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111' })
+    await addItem(ids, 'blog-2', '2026-10-22T09:00:00Z', { hiddenAt, threadKey: '~aaaa1111' })
+
+    expect(await archive()).toEqual(['Kop blog-1'])
+
+    await database.db.update(items).set({ hiddenAt }).where(eq(items.key, 'blog-1'))
+
+    expect(await archive()).toEqual([])
+    expect(await countArchiveItems(database.db, { until: now })).toBe(0)
+  })
+
+  it('does not count a hidden version when it is the only relevant one', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', { hiddenAt: now, threadKey: '~aaaa1111' })
+    await addItem(ids, 'blog-2', '2026-10-22T09:00:00Z', { relevance: 'irrelevant', threadKey: '~aaaa1111' })
+
+    expect(await archive()).toEqual([])
+  })
+
+  it('leaves out the versions that are later than the end time', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111' })
+    await addItem(ids, 'blog-2', '2026-10-22T10:30:00Z', { threadKey: '~aaaa1111' })
+
+    expect(await archive()).toEqual(['Kop blog-1'])
+  })
+
+  it('never joins two sources that have the same key', async () => {
+    const krant = await addSource()
+    const nieuws = await addSource({ domain: 'proefnieuws.test', name: 'Proefnieuws', slug: 'proefnieuws' })
+
+    await addItem(krant, 'blog-1', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111' })
+    await addItem(krant, 'blog-2', '2026-10-22T09:00:00Z', { threadKey: '~aaaa1111' })
+    await addItem(nieuws, 'blog-1', '2026-10-22T08:30:00Z', { threadKey: '~aaaa1111' })
+
+    expect(await archive()).toEqual(['Kop blog-2', 'Kop blog-1'])
+    expect(await archive({ sources: ['proefnieuws'] })).toEqual(['Kop blog-1'])
+    expect(await countArchiveItems(database.db, { until: now })).toBe(2)
+  })
+
+  it('keeps the source in the filter when only an older version is relevant', async () => {
+    const ids = await addSource()
+
+    await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', { threadKey: '~aaaa1111' })
+    await addItem(ids, 'blog-2', '2026-10-22T09:00:00Z', { relevance: 'irrelevant', threadKey: '~aaaa1111' })
+
+    expect((await listArchiveSources(database.db, now)).map((source) => source.slug)).toEqual(['testkrant'])
+  })
+
+  it('searches the newest version of a story only', async () => {
+    const ids = await addSource()
+
+    await addLiveBlog(ids)
+
+    const { hits, total } = await searchPublic(database.db, { limit: 10, until: now, words: ['kop'] })
+
+    expect(hits.map((hit) => (hit.kind === 'article' ? hit.slug : hit.title))).toEqual(['Kop blog-3', 'Kop los'])
+    expect(total).toBe(2)
   })
 })
 
