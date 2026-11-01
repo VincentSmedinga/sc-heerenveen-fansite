@@ -269,7 +269,12 @@ test('starts the site on port 3000 and Storybook on port 6006, in the review fol
 
   for (const { cwd, env: serverEnv } of [siteCommand, storybookCommand]) {
     assert.equal(cwd, reviewFolder)
-    assert.deepEqual(serverEnv, { HOME: '/Users/me', NO_COLOR: '1', REVIEW_BRANCH: 'feat/120-bigger-type' })
+    assert.deepEqual(serverEnv, {
+      HOME: '/Users/me',
+      NO_COLOR: '1',
+      REVIEW_BRANCH: 'feat/120-bigger-type',
+      WORKTREE_NAME: '',
+    })
   }
 })
 

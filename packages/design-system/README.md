@@ -12,8 +12,10 @@ pnpm install
 pnpm --filter design-system storybook
 ```
 
-Storybook draait dan op <http://localhost:6006>.
-Het heeft ook een MCP-server voor agents, op <http://localhost:6006/mcp>.
+Storybook draait dan op <http://localhost:6006>, in een gewone checkout.
+In een worktree luistert het op een eigen poort, die `pnpm worktree:env` laat zien, zodat twee worktrees er naast elkaar een kunnen starten.
+Is die poort bezet, dan stopt het met een melding.
+Het heeft ook een MCP-server voor agents, op <http://localhost:6006/mcp>; `.mcp.json` wijst naar die poort, dus alleen een Storybook op de standaardpoort is de server.
 De gepubliceerde Storybook heeft er ook een, openbaar en alleen-lezen, op <https://ds.heerenveen.org/mcp>.
 Een agent in een andere repository voegt hem toe met `claude mcp add --transport http ds https://ds.heerenveen.org/mcp`; agents in deze repository houden de lokale server, die ook de gereedschappen om te ontwikkelen heeft.
 Met `pnpm --filter design-system build-storybook` bouw je een statische versie in `storybook-static/`.
