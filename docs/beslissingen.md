@@ -4464,6 +4464,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de status laten bepalen (nu; het probleem van de bekerwedstrijd).
   De wedstrijd verbergen tot er een uitslag is (de kaart zegt dan niets over de laatste wedstrijd).
   Een grens van drie uur (dekt verlenging en strafschoppen, maar laat de melding bij een gewone wedstrijd lang weg).
+- **Later:** zie _De Stand zegt dat een uitslag nog ontbreekt, zonder datum op de kaarten_.
+  Dezelfde twee uur bepalen ook of de Stand zegt dat hij achterloopt, via `standingsLag`.
 
 ### Over ons zegt waar de gegevens vandaan komen en wat er mis kan gaan
 
@@ -8369,3 +8371,16 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Lijsten zijn korter dan tabellen voor een paar namen, en een zin voor een leeg deel zegt dat er niets mis is met de pagina.
 - **Niet erin:** de positie van de doelpuntenmaker (voor een afgelopen seizoen bestaat geen selectie), het aandeel van de topscorer en het aantal verschillende spelers (dat staat in Doelpuntenmakers).
 - **Alternatieven:** vier koppen van niveau 3 met onder elk een lijst of een zin (te zwaar voor vier korte feiten, en de eerste versie van deze kaart); een tabel met een rij per speler (veel kolommen voor weinig getallen); een `dl` met `dt` en `dd` (de dunne lijnen horen bij `li`, en de kaart Uitersten is ook een lijst); de lege delen weglaten (een bezoeker kan niet zien of ze er niet zijn of er niet werden gezocht); een hattrick ook bij de dubbelslagen laten staan (dezelfde wedstrijd wordt dan twee keer genoemd); de kaart naar Statistieken zetten (de pagina Spelers is er voor wat bij spelers hoort, zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_).
+
+### De Stand zegt dat een uitslag nog ontbreekt, zonder datum op de kaarten
+
+- **Datum:** 1 november 2026
+- **Besluit:** de kaart Stand op de homepage en op Wedstrijden toont onder de tabel "Gegevens nog niet bijgewerkt" (#542), in `Text appearance="meta"` en in hetzelfde rood als "Gegevens nog niet beschikbaar" bij een wedstrijd (het token `--hf-colour-text-missing`, de projecteigenaar vroeg erom op 1 november 2026), boven de link, zodra een wedstrijd van het lopende seizoen geen uitslag heeft twee uur na de aanvang.
+  Dezelfde grens als de zin "Gegevens nog niet beschikbaar" bij een wedstrijd: `standingsLag` in `src/matches.ts` roept `lacksResult` aan, dus er is geen tweede kopie van de twee uur.
+  Een Eindstand krijgt de regel niet, ook niet met wedstrijden zonder uitslag (de projecteigenaar koos dit op 1 november 2026), een kaart zonder tabel ook niet, en de afbeelding van de kaart laat de regel weg (`data-hf-card-share-skip`).
+  De regel verdwijnt zodra de uitslag er is.
+- **Waarom:** een datum op elke kaart ("Laatst gewijzigd", #517) wijst te veel op gegevens die achterlopen, en geen aanduiding betekent dat het waarschijnlijk klopt.
+  De regel staat er alleen als het nodig is.
+  Een wedstrijd zonder uitslag zegt dat zelf al, maar de Stand staat op een andere plek, en een tabel die achterloopt moet dat zeggen.
+  De afbeelding is een momentopname met de dag van het maken, en de regel is een tijdelijke staat.
+- **Alternatieven:** een datum op elke kaart (#517, gesloten: te veel nadruk op wat achterloopt); dezelfde zin als bij een wedstrijd (bij een wedstrijd ontbreekt de uitslag, bij de Stand loopt de tabel achter); de regel ook bij een Eindstand (die verandert niet meer en de wedstrijden zeggen het zelf); een tweede grens voor de Stand (zou uit elkaar kunnen lopen).

@@ -17,6 +17,7 @@ import {
   resultsOfSeason,
   scorersCoverage,
   standingsAround,
+  standingsLag,
   streaksOf,
   topFiveOf,
   topScorersOf,
@@ -252,6 +253,50 @@ describe('overviewOf', () => {
 
       expect(overviewAt('2026-10-01T12:00:00Z', played).previous).toBe(played)
     })
+  })
+})
+
+describe('standingsLag', () => {
+  const played = match('Speelronde 7', 'played', '2026-10-04')
+  const unplayed = (extra: Partial<PublicMatch> = {}): PublicMatch => ({
+    ...match('Tweede ronde', 'scheduled', '2026-10-28'),
+    kickoffAt: new Date('2026-10-28T19:00:00Z'),
+    ...extra,
+  })
+
+  it('is false without a match that lacks a result, also when there are no matches', () => {
+    const now = new Date('2026-11-05T12:00:00Z')
+
+    expect(standingsLag([], now)).toBe(false)
+    expect(standingsLag([played], now)).toBe(false)
+  })
+
+  it('is false for a match within the two hours of its kick-off, and true from the two hours on', () => {
+    expect(standingsLag([played, unplayed()], new Date('2026-10-28T20:59:59.999Z'))).toBe(false)
+    expect(standingsLag([played, unplayed()], new Date('2026-10-28T21:00:00Z'))).toBe(true)
+  })
+
+  it('is false for a postponed match and for a match still to come', () => {
+    const now = new Date('2026-10-28T21:00:00Z')
+
+    expect(standingsLag([played, unplayed({ status: 'postponed' })], now)).toBe(false)
+    expect(
+      standingsLag([played, unplayed({ kickoffAt: new Date('2026-12-01T19:00:00Z'), matchDate: '2026-12-01' })], now),
+    ).toBe(false)
+  })
+
+  it('is false for a match without a kick-off on its day, and true from the day after in Dutch time', () => {
+    const day = unplayed({ kickoffAt: null })
+
+    expect(standingsLag([day], new Date('2026-10-28T22:59:59Z'))).toBe(false)
+    expect(standingsLag([day], new Date('2026-10-28T23:00:00Z'))).toBe(true)
+  })
+
+  it('is true as soon as one match lacks a result, and false again when it has one', () => {
+    const now = new Date('2026-11-05T12:00:00Z')
+
+    expect(standingsLag([played, unplayed(), played], now)).toBe(true)
+    expect(standingsLag([played, unplayed({ goalsAgainst: 1, goalsFor: 2, status: 'played' })], now)).toBe(false)
   })
 })
 

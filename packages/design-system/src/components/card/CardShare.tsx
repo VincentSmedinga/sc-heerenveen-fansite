@@ -22,6 +22,9 @@ const messages: Record<Phase, string> = {
 /** On the button and the message, so the copy of the card for the image leaves them out. */
 const marker = 'data-hf-card-share'
 
+/** On a part of the card that is not for the image, such as a line that holds for a while. */
+const skip = 'data-hf-card-share-skip'
+
 export type CardShareProps = {
   /**
    * The season the card is about, such as `2025/26`, for a card of a season that is over. It
@@ -68,7 +71,7 @@ export const CardShare = ({ season, source }: CardShareProps) => {
     let current = true
     const copy = card.cloneNode(true) as HTMLElement
 
-    copy.querySelectorAll(`[${marker}]`).forEach((part) => part.remove())
+    copy.querySelectorAll(`[${marker}], [${skip}]`).forEach((part) => part.remove())
     copy.classList.remove('hf-card-shareable')
     copy.classList.add('hf-card-share-copy')
     slot.current.replaceChildren(copy)
