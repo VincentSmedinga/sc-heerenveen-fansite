@@ -491,7 +491,7 @@ Ze delen met `listRecentItems` de voorwaarden (`newsFilter`): relevant, niet ver
 De zijbalk heeft drie kaarten, in deze volgorde, ook op een telefoon:
 
 - het filter per bron;
-- het nieuwste artikel van de redactie, in de korte vorm van `ArticleCard` (`short`): de titel als link, de datum en de inleiding, zonder "Lees verder".
+- "Van de redactie": het nieuwste artikel als één nieuwsregel (`NewsItem`, `EditorsCard` in `src/NewsCards.tsx`): de titel als link naar `/redactie/<naam>`, de dag, en "Van de redactie" als bron, zonder pictogram voor een andere site en zonder inleiding.
   Is er geen artikel, dan staat er geen kaart;
 - "Podcasts": de nieuwste afleveringen, met de link "Alle podcasts" naar `/nieuws/podcasts`.
   Het artikel en de podcasts zijn extra's: lukt het lezen ervan niet, dan staat de kaart er niet en schrijft de site de reden in het logboek.

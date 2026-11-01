@@ -93,7 +93,7 @@ test.describe('the card on the homepage', () => {
 })
 
 test.describe('the card on the news page', () => {
-  test('is in the short form in the sidebar, under the filter and above the podcasts', async ({ page }) => {
+  test('is one news line in the sidebar, under the filter and above the podcasts', async ({ page }) => {
     await page.goto('/nieuws')
 
     const card = page.getByRole('region', { name: 'Van de redactie' })
@@ -101,8 +101,9 @@ test.describe('the card on the news page', () => {
 
     await expect(sidebar.getByRole('region', { name: 'Van de redactie' })).toBeVisible()
     await expect(card.getByRole('link', { name: published.title })).toHaveAttribute('href', address)
-    await expect(card).toContainText(published.intro)
+    await expect(card).not.toContainText(published.intro)
     await expect(card.getByRole('link', { name: /Lees verder/ })).toHaveCount(0)
+    await expect(card.locator('time')).toHaveCount(1)
 
     const filterBox = await sidebar.getByRole('group', { name: 'Bronnen' }).boundingBox()
     const cardBox = await card.boundingBox()

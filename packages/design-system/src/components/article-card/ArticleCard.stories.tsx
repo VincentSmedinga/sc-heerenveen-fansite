@@ -23,7 +23,6 @@ const meta = preview.meta({
           '',
           '- `title` is de titel van het artikel, `intro` de inleiding.',
           '- `href` is het adres van het artikel op de site.',
-          '- `short` is de korte vorm voor een smalle kolom naast het nieuws: zonder "Lees verder", zodat de titel de ene link is.',
           '- `date` is de datum zoals een lezer hem leest, en `dateTime` dezelfde dag voor het `time`-element.',
         ].join('\n'),
       },
@@ -84,33 +83,6 @@ const renderLong = () => (
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Boven het nieuws, licht', render: renderOnPage })
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Boven het nieuws, donker', render: renderOnPage })
-
-// The short form, as in the sidebar of the news page. The text is made up.
-const renderShort = () => (
-  <div style={{ maxInlineSize: '16rem' }}>
-    <ArticleCard
-      date="25 oktober 2026"
-      dateTime="2026-10-25"
-      href="#dit-zijn-wij"
-      intro="Wij zijn de redactie van de Fansite. Hier lees je wie we zijn en wat je van ons mag verwachten."
-      short
-      title="Dit zijn wij"
-    />
-  </div>
-)
-
-export const Short = meta.story({
-  name: 'Korte vorm in een smalle kolom',
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'De korte vorm heeft de titel als link, de datum en de inleiding, zonder "Lees verder". Hij is voor de zijkolom van het nieuws.',
-      },
-    },
-  },
-  render: renderShort,
-})
 
 export const LongLight = meta.story({
   globals: { theme: 'light' },

@@ -5,7 +5,7 @@ import type { getDiscussions } from './discussions'
 import { getNewestArticle } from './articles'
 import { reasonOf } from './errors'
 import { forumUrl } from './forum'
-import { dateTimeOf, episodeDetails, formatDiscussionTime, formatEpisodeTime } from './news'
+import { dateTimeOf, dayOf, episodeDetails, formatArticleDay, formatDiscussionTime, formatEpisodeTime } from './news'
 import { getLatestEpisodes } from './podcasts'
 
 /** The card with the newest discussions of the forum, our sister site, and the link to it. */
@@ -44,6 +44,39 @@ export function DiscussionsCard({
           Naar het forum
         </Link>
       </Text>
+    </Card>
+  )
+}
+
+/**
+ * The card with the newest article of our own editors on /nieuws: one news line, like the cards
+ * with the podcasts and the discussions. The source is "Van de redactie", and the line has no
+ * intro: that is for the long form on the homepage. The article is dated by the day.
+ */
+export function EditorsCard({
+  article,
+  now,
+}: {
+  article: NonNullable<Awaited<ReturnType<typeof getNewestArticle>>>
+  now: Date
+}) {
+  return (
+    <Card aria-labelledby="editors-heading">
+      <Heading id="editors-heading" level={2}>
+        Van de redactie
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <NewsItem
+            dateTime={dayOf(article.publishedAt)}
+            headline={article.title}
+            href={`/redactie/${article.slug}`}
+            internal
+            source="Van de redactie"
+            time={formatArticleDay(article.publishedAt, now)}
+          />
+        </List.Item>
+      </List>
     </Card>
   )
 }

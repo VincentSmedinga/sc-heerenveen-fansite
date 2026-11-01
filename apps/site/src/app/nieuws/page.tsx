@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
 import {
-  ArticleCard,
   Button,
   Card,
   CheckboxGroup,
@@ -28,8 +27,8 @@ import {
 import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
 import { pageMetadata } from '../../metadata'
-import { dateTimeOf, dayOf, formatArticleDate, formatNewsTime } from '../../news'
-import { EpisodesCard, loadArticle, loadEpisodes } from '../../NewsCards'
+import { dateTimeOf, formatNewsTime } from '../../news'
+import { EditorsCard, EpisodesCard, loadArticle, loadEpisodes } from '../../NewsCards'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
 
@@ -150,16 +149,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
               </Form>
             </Card>
           )}
-          {article !== undefined && (
-            <ArticleCard
-              date={formatArticleDate(article.publishedAt)}
-              dateTime={dayOf(article.publishedAt)}
-              href={`/redactie/${article.slug}`}
-              intro={article.intro}
-              short
-              title={article.title}
-            />
-          )}
+          {article !== undefined && <EditorsCard article={article} now={now} />}
           {episodes !== undefined && <EpisodesCard episodes={episodes} heading="Podcasts" now={now} />}
         </Page.Sidebar>
       )}

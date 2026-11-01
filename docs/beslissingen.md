@@ -4601,7 +4601,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     De hoofdkolom heeft bovenaan "Van de redactie", in de lange vorm, want daar komt de aankondiging van de livegang, en daaronder "Laatste nieuws" met tien koppen en de link "Alle nieuws" naar `/nieuws`.
     De zijbalk heeft bovenaan het forum ("Nieuwste discussies"), onze zustersite, en daaronder Wedstrijden, Stand en "Nieuwste podcasts".
   - **Het nieuws `/nieuws`** heet "Nieuws" en is het archief: de hoofdkolom heeft alleen koppen, 50 per pagina, met `?bron=` en `?pagina=` zoals eerder.
-    De zijbalk heeft van boven naar beneden het filter per bron, één artikel van de redactie in de korte vorm van `ArticleCard` (`short`: de titel als link, de datum en de inleiding, zonder "Lees verder"; zonder artikel geen kaart) en de kaart "Podcasts" met de nieuwste afleveringen.
+    De zijbalk heeft van boven naar beneden het filter per bron, één artikel van de redactie als één nieuwsregel (`NewsItem` met de bron "Van de redactie", zonder inleiding en zonder pictogram voor een andere site; zonder artikel geen kaart) en de kaart "Podcasts" met de nieuwste afleveringen.
     Er staan geen wedstrijdkaarten op.
   - **Het hoofdmenu** heeft Nieuws op `/nieuws`.
     Het is het huidige onderdeel op `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en de homepage heeft geen huidig onderdeel.
@@ -4624,6 +4624,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een apart item Archief houden naast Nieuws (twee plekken voor dezelfde koppen).
   Omleidingen van de oude adressen (er zijn geen openbare links).
   Vijf items per kaart houden (de zijbalk is dan meer dan anderhalf keer zo lang als de hoofdkolom).
+  Een korte vorm van `ArticleCard` met de inleiding in de zijbalk van `/nieuws`, zonder "Lees verder" (een tweede vorm van een onderdeel voor één plek; de projecteigenaar koos op 1 november 2026 voor de nieuwsregel, zoals de andere kaarten).
 
 ### De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
 
@@ -6687,7 +6688,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een artikel krijgt geen eigen afbeelding bij een gedeelde link; het heeft hetzelfde plaatje als elke pagina: het schild op het donkerblauw van de kop, zoals de app-iconen (zie _Het schild van de site, als PNG van ons eigen domein, is de afbeelding bij het delen van links_).
   De projecteigenaar koos dit op 25 oktober 2026; het issue (#263) zegt dat "geen afbeelding bij de link" geen eigen afbeelding per artikel betekende.
   Een eigen afbeelding per artikel kan later.
-- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): het nieuwste artikel staat ook in een korte vorm in de zijbalk van `/nieuws`.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): het nieuwste artikel staat ook als nieuwsregel in de zijbalk van `/nieuws`.
 
 ### Artikeltekst heeft een kleine eigen opmaak, die een eigen functie omzet
 

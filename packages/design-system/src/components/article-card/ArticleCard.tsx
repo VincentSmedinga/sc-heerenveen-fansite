@@ -20,11 +20,6 @@ export type ArticleCardProps = Omit<ComponentPropsWithoutRef<'section'>, 'childr
   href: string
   /** The introduction of the article, as the editors wrote it. */
   intro: string
-  /**
-   * The short form for a narrow column: the title as a link, the date and the introduction,
-   * without the link "Lees verder". The long form is for the main column of the homepage.
-   */
-  short?: boolean
   /** The title of the article. */
   title: string
 }
@@ -37,20 +32,8 @@ export type ArticleCardProps = Omit<ComponentPropsWithoutRef<'section'>, 'childr
  * go to the same page; the name of the second link says which article it is for, which starts
  * with its text, so a speech control that says "Lees verder" finds it. article-card.css gives
  * it its look.
- *
- * The short form (`short`) is for a narrow column beside the news: it leaves out "Lees verder",
- * so the title is the one link to the article.
  */
-export const ArticleCard = ({
-  className,
-  date,
-  dateTime,
-  href,
-  intro,
-  short = false,
-  title,
-  ...props
-}: ArticleCardProps) => {
+export const ArticleCard = ({ className, date, dateTime, href, intro, title, ...props }: ArticleCardProps) => {
   const headingId = useId()
 
   return (
@@ -65,13 +48,11 @@ export const ArticleCard = ({
         <Time dateTime={dateTime}>{date}</Time>
       </Text>
       <Text>{intro}</Text>
-      {!short && (
-        <Text>
-          <Link aria-label={`Lees verder over ${title}`} href={href} icon="arrow-right">
-            Lees verder
-          </Link>
-        </Text>
-      )}
+      <Text>
+        <Link aria-label={`Lees verder over ${title}`} href={href} icon="arrow-right">
+          Lees verder
+        </Link>
+      </Text>
     </Card>
   )
 }

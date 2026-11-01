@@ -438,20 +438,30 @@ describe('the sidebar of the news page', () => {
     const html = await render()
     const sidebar = html.slice(html.indexOf('<aside'))
 
-    expect(sidebar.indexOf('<form')).toBeLessThan(sidebar.indexOf('Van de redactie'))
-    expect(sidebar.indexOf('Van de redactie')).toBeLessThan(sidebar.indexOf('id="episodes-heading"'))
+    expect(sidebar.indexOf('<form')).toBeLessThan(sidebar.indexOf('id="editors-heading"'))
+    expect(sidebar.indexOf('id="editors-heading"')).toBeLessThan(sidebar.indexOf('id="episodes-heading"'))
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<form'))
   })
 
-  it('shows the article in the short form: the title as the one link, the date and the intro, without "Lees verder"', async () => {
+  it('shows the article as one news line: the title as a link, the day, "Van de redactie" as the source and no intro', async () => {
     const html = withoutIcons(await render())
-    const card = html.match(/<section class="hf-card hf-card-soft hf-article-card".*?<\/section>/)?.[0] ?? ''
+    const card = html.match(/<section class="hf-card" aria-labelledby="editors-heading">.*?<\/section>/)?.[0] ?? ''
 
-    expect(card).toContain('<a href="/redactie/dit-zijn-wij">Dit zijn wij</a>')
-    expect(card).toContain('<time dateTime="2026-10-25">25 oktober 2026</time>')
-    expect(card).toContain('Wij zijn de redactie van de Fansite. Hier lees je wie we zijn.')
+    expect(card).toContain('<h2 class="hf-heading-2" id="editors-heading">Van de redactie</h2>')
+    expect(card).toContain('href="/redactie/dit-zijn-wij"')
+    expect(card).toContain('Dit zijn wij')
+    expect(card).toContain('<time class="hf-meta hf-news-item-time" dateTime="2026-10-25">zo 25 okt</time>')
+    expect(card).toContain('<span>Van de redactie</span>')
+    expect(card).not.toContain('Wij zijn de redactie van de Fansite')
     expect(card).not.toContain('Lees verder')
     expect(card.match(/<a /g)).toHaveLength(1)
+  })
+
+  it('draws no icon for another site behind the article: it is a page of our own', async () => {
+    const html = await render()
+    const card = html.match(/<section class="hf-card" aria-labelledby="editors-heading">.*?<\/section>/)?.[0] ?? ''
+
+    expect(card).not.toContain('<svg')
   })
 
   it('leaves the card of the editors out when there is no article', async () => {
