@@ -9,7 +9,7 @@
     "import": "node --env-file-if-exists=../../.env src/import.ts",
     "import:season": "node --env-file-if-exists=../../.env src/import.ts --season",
     "import:status": "node --env-file-if-exists=../../.env src/import.ts --status",
-    "test": "vitest run",
+    "test": "node ../../scripts/worktree-env.js run -- vitest run",
     "typecheck": "tsc -b"
   },
   "devDependencies": {

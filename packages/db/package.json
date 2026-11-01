@@ -26,7 +26,7 @@
     "db:migrate": "node --env-file-if-exists=../../.env src/migrate.ts",
     "db:restore": "node --env-file-if-exists=../../.env src/backup-command.ts restore",
     "db:seed": "node --env-file-if-exists=../../.env src/seed.ts",
-    "test": "vitest run",
+    "test": "node ../../scripts/worktree-env.js run -- vitest run",
     "typecheck": "tsc -b"
   },
   "dependencies": {

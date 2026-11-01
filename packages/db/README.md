@@ -21,18 +21,41 @@ De database heeft geen wachtwoord en luistert alleen op je eigen computer.
 Stop hem met `docker compose down`.
 Wil je opnieuw beginnen, voeg dan `--volumes` toe: dat wist de gegevens.
 
+## Een database per worktree
+
+Werk je in een git-worktree, dan deelt die de MariaDB met de andere worktrees, maar niet de database.
+`scripts/worktree-env.js` maakt uit de naam van de map een databasenaam, `fansite_<naam van de map>` (kleine letters, cijfers en onderstrepingstekens), en zet die in `DATABASE_URL`.
+De server, de gebruiker en het wachtwoord blijven die uit je `.env`.
+Zo botsen twee sessies niet op de database `fansite`, en heeft elke worktree een lege database in plaats van de echte import.
+Dezelfde opdracht geeft elke worktree een eigen blok poorten (zie de [README van de site](../../apps/site/README.md)).
+
+- **Aanmaken:** doe niets.
+  `pnpm dev` en `pnpm test:a11y` maken de database de eerste keer zelf en draaien de migraties die ontbreken.
+  `pnpm dev` zet er ook de seed in, zoals `pnpm db:seed` dat doet.
+  `pnpm test:a11y` doet dat niet, net als in CI: de controles zetten hun eigen verzonnen gegevens erin.
+- **Gebruiken:** zet `DATABASE_URL` in `.env` op `fansite`, zoals `.env.example` het heeft.
+  `pnpm test`, `pnpm --filter site smoke` en de andere opdrachten die erdoor lopen, gebruiken dan de database van de map.
+  `pnpm db:migrate`, `pnpm db:seed` en `pnpm import` gebruiken `DATABASE_URL` zoals die in `.env` staat, dus `fansite`: ze lopen niet door het script.
+- **Bekijken:** `pnpm worktree:env` laat de databasenaam en de poorten van de map zien.
+- **Weghalen:** `pnpm worktree:db:drop` haalt de database van de map weg.
+  Het raakt alleen een naam die met `fansite_` begint, nooit `fansite` zelf, en doet niets in een map die geen worktree is.
+- **Niet afleiden:** een gewone checkout, een map zonder worktree en CI houden `fansite`.
+  Dat geldt ook als je zelf `DATABASE_URL` in de omgeving zet, of in `.env` een andere database dan `fansite` zet, zoals `fansite_496`.
+  Met `WORKTREE_NAME` in de omgeving kies je een andere naam, en leeg zet je het af.
+
 ## Opdrachten
 
 Draai ze vanuit de root van de repository.
 
-| Opdracht           | Wat het doet                                                                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `pnpm db:generate` | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                                               |
-| `pnpm db:migrate`  | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had                                              |
-| `pnpm db:seed`     | Zet de testbronnen, de echte bronnen met hun feeds en de hoofdtrainers erin; een tweede keer maakt het geen dubbele |
-| `pnpm db:backup`   | Maakt een gecomprimeerde dump van de database uit `DATABASE_URL` in `BACKUP_FOLDER` (zie _Back-ups_)                |
-| `pnpm db:restore`  | Zet een dump terug in een lege database (zie _Back-ups_)                                                            |
-| `pnpm test`        | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                                                         |
+| Opdracht                | Wat het doet                                                                                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `pnpm db:generate`      | Maakt een migratie uit `src/schema.ts` met drizzle-kit, in `drizzle/`                                               |
+| `pnpm db:migrate`       | Voert de migraties uit die de database uit `DATABASE_URL` nog niet had                                              |
+| `pnpm db:seed`          | Zet de testbronnen, de echte bronnen met hun feeds en de hoofdtrainers erin; een tweede keer maakt het geen dubbele |
+| `pnpm db:backup`        | Maakt een gecomprimeerde dump van de database uit `DATABASE_URL` in `BACKUP_FOLDER` (zie _Back-ups_)                |
+| `pnpm db:restore`       | Zet een dump terug in een lege database (zie _Back-ups_)                                                            |
+| `pnpm test`             | Draait de tests, ook die op een echte MariaDB (zie _Tests_)                                                         |
+| `pnpm worktree:db:drop` | Haalt de database van deze worktree weg (zie _Een database per worktree_)                                           |
 
 `db:migrate` gebruikt de migrator van `drizzle-orm` en niet drizzle-kit.
 Daardoor kan dezelfde code op de hosting draaien, zonder ontwikkelgereedschap: de site doet dat als hij start (zie _In andere packages_).
@@ -532,6 +555,8 @@ De standaardwaarde is `UTC_TIMESTAMP()`, en Drizzle leest en schrijft een `datet
 
 De tests draaien op een echte MariaDB: die van `DATABASE_URL`.
 Elk testbestand maakt een eigen database (`fansite_test_…`), draait de migraties erop en haalt hem daarna weg.
+In een worktree staat de naam van de worktree in die naam, en elke run heeft een eigen willekeurig deel: `fansite_test_<naam van de map>_<hex>`.
+Twee runs, ook in twee worktrees tegelijk, botsen dus niet.
 De ontwikkeldatabase blijft ongemoeid, maar de gebruiker uit `DATABASE_URL` moet databases mogen maken.
 
 Draait de database niet, dan stoppen de tests met de melding dat ze hem niet kunnen bereiken.

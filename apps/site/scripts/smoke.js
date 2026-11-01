@@ -8,10 +8,10 @@
 //
 //   node scripts/smoke.js <folder with apps/site/server.js>
 import { connect } from '@fansite/db/client'
+import { scratchDatabaseName } from '@fansite/db/test-database'
 import { visitDay } from '@fansite/db/visits'
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
-import { randomBytes } from 'node:crypto'
 import { once } from 'node:events'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -506,7 +506,7 @@ async function waitUntilUp(server) {
 async function withEmptyDatabase(checks) {
   const server = new URL(databaseUrl)
   server.pathname = ''
-  const name = `fansite_smoke_${randomBytes(6).toString('hex')}`
+  const name = scratchDatabaseName('smoke', databaseUrl)
   const { close, pool } = connect(server.href)
 
   try {
