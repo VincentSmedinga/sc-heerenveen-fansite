@@ -7,10 +7,12 @@
   "type": "module",
   "exports": {
     "./alerts": "./src/alerts.ts",
+    "./audit-log": "./src/audit-log.ts",
     "./client": "./src/client.ts",
     "./clubs": "./src/clubs.ts",
     "./env": "./src/env.ts",
     "./lock": "./src/lock.ts",
+    "./match-edits": "./src/match-edits.ts",
     "./prepare": "./src/prepare.ts",
     "./queries": "./src/queries.ts",
     "./schema": "./src/schema.ts",

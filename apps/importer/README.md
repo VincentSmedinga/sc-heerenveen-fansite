@@ -1143,6 +1143,30 @@ Per seizoen is het leven van de pagina nagebouwd: de aanvangstijden komen in gro
 Wat de proef niet kan zeggen is hoeveel echte bewerkingen op Wikipedia er verdacht zouden zijn: de bewerkingsgeschiedenis is voor ons gesloten.
 De tabel `match_changes` verzamelt dat vanaf nu zelf: na een paar maanden telt de eigenaar de rijen per soort en past de grenzen aan.
 
+### Een wedstrijd die de redactie invulde
+
+Een beheerder kan een wedstrijd invullen of verbeteren (`/beheer/wedstrijden`, zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)).
+De invoer staat in `matches` en `match_goals`, en de tabel `match_edits` markeert welke onderdelen van de wedstrijd van de redactie zijn: de aftrap, de uitslag (met de status) en de doelpunten.
+Voor de import is zo'n wedstrijd eigen invoer, ook voor `pnpm run import:season`.
+`src/edited-matches.ts` beoordeelt elk onderdeel met een markering apart, want Wikipedia zet meestal eerst de uitslag en pas later de doelpuntenmakers:
+
+| Wikipedia heeft                                                             | De import doet                                                                                                  |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Nog niets voor het onderdeel: geen tijd, de status gepland, geen doelpunten | Niets: de invoer blijft staan en er wordt niets gemeld.                                                         |
+| Hetzelfde                                                                   | Wist de markering, haalt de rij uit `match_edits` als er geen markering meer is, en schrijft `match.caught-up`. |
+| Iets anders                                                                 | Laat de invoer staan, en schrijft `match.differs` en een waarschuwing in `match_imports`, één keer.             |
+
+- Hetzelfde is bij de uitslag: de status, de score, de verlenging, de stand na 90 minuten en de strafschoppen zijn gelijk.
+  Bij de doelpunten zijn de kant, de minuut, de blessuretijd, de soort en de speler gelijk, in elke volgorde.
+  Een speler van ons is dezelfde als hij hetzelfde `player_id` heeft, een andere speler als de naam overeenkomt.
+- Een verschil staat één keer in het logboek (`audit_log`, zonder account, dus "de import") en één keer in de waarschuwing van het seizoen, met beide waarden: "held, Speelronde 1 (Eredivisie): Wikipedia differs from the entry of the editors in the result: ours sc Heerenveen 2-0 FC Twente, Wikipedia sc Heerenveen 1-0 FC Twente".
+  `match_edits.reported_*` bewaart wat Wikipedia zei, zodat de volgende run zwijgt zolang Wikipedia hetzelfde zegt.
+  Zegt Wikipedia iets anders dan de vorige keer, dan is het weer nieuws.
+  Het melden aan een redacteur en het besluit in het beheer volgen in #577; tot dan blijft de invoer staan tot een beheerder haar weghaalt.
+- De onderdelen zonder markering volgen Wikipedia zoals bij elke wedstrijd, zonder de beoordeling van _Hoe betrouwbaar een wijziging is_.
+  De wedstrijd telt niet mee voor de grens van zes wedstrijden in een run, en blijft staan als hij van de pagina verdwijnt.
+- Een wijziging die voor de wedstrijd wachtte in `match_changes`, vervalt bij een invoer.
+
 ### Oudere bekerpagina's
 
 De bekerpagina's van 2021/22 tot en met 2024/25 schrijven de score en de tijd anders dan die van 2025/26.

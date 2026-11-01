@@ -91,4 +91,11 @@
       }
     }
   }
+
+  /* The sentence under the credit when the editors entered some of the data: always visible. */
+  .hf-wikipedia-credit-edited {
+    color: var(--hf-colour-text-secondary);
+    margin-block: 0;
+    overflow-wrap: anywhere;
+  }
 }

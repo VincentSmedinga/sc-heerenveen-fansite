@@ -17,6 +17,9 @@ const meta = preview.meta({
           '',
           'Een kleine kaart op een pagina die de volledige vorm elders heeft, gebruikt de korte vorm: `compact` zegt alleen "Bron: Wikipedia", zonder uitklap.',
           '',
+          'Heeft onze redactie een deel van de gegevens zelf ingevuld of aangepast, dan zet `edited` onder de bronvermelding de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast."',
+          'Die zin staat buiten de uitklap, dus een bezoeker ziet hem zonder iets te openen.',
+          '',
           'Het is een component, zodat een pagina met gegevens van Wikipedia er niet omheen kan.',
           'Zet het onder het blok of de pagina met de gegevens.',
           '',
@@ -24,6 +27,7 @@ const meta = preview.meta({
           '  Elke pagina heeft een `name` voor de link en een `href`.',
           '- `data` is het woord voor onze eigen gegevens uit die pagina\'s in de laatste zin, "Onze wedstrijdgegevens zijn ook CC BY-SA 4.0".',
           '  Een pagina met andere gegevens, zoals de selectie, geeft het eigen woord in het meervoud: `selectiegegevens`.',
+          '- `edited` zet de zin van de redactie onder de bronvermelding; alleen de volledige vorm heeft hem.',
           '- `readAt` is de tijd van de laatste keer lezen zoals een bezoeker hem leest, in Nederlandse tijd.',
           '  `readAtDateTime` is dezelfde tijd voor machines.',
           '- `open` laat de uitklap open staan, voor een voorbeeld; op een pagina blijft hij dicht.',
@@ -100,6 +104,15 @@ export const ManyPagesOpen = meta.story({
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <WikipediaCredit {...readAt} open pages={manyPages} />
+    </div>
+  ),
+})
+
+export const Edited = meta.story({
+  name: 'Met een zin dat de redactie gegevens zelf invulde, dicht',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <WikipediaCredit {...readAt} edited pages={[standings]} />
     </div>
   ),
 })

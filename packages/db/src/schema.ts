@@ -395,30 +395,45 @@ export const auditActions = [
   'article.update',
   'article.publish',
   'article.unpublish',
+  'match.edit',
+  'match.undo',
+  'match.caught-up',
+  'match.differs',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
 
 /**
+ * The most characters the `detail` of a row of `audit_log` holds. A longer text is cut off with
+ * an ellipsis before it is stored.
+ */
+export const auditDetailMaxLength = 1000
+
+/**
  * What the admin did, one row per action, written by the one function `recordAction` in the
- * site and never changed or removed: no code updates or deletes a row, and a test keeps it so.
- * It keeps who (the id of the account, not the address), when (UTC), what, which item or
- * article and the reason. `item_id` is the number of an item for an `item.` action and of an
- * article for an `article.` action: the action says which. It has no foreign key, so the row
- * stays when an item is deleted. `reason` is empty for an action that has none, such as
- * showing an item again. It holds nothing else of the request.
+ * database package and never changed or removed: no code updates or deletes a row, and a test
+ * keeps it so. It keeps who (the id of the account, not the address), when (UTC), what, which
+ * item, article or match and the reason. `item_id` is the number of an item for an `item.`
+ * action, of an article for an `article.` action and of a match for a `match.` action: the
+ * action says which. It has no foreign key, so the row stays when an item is deleted. `reason`
+ * is empty for an action that has none, such as showing an item again. `detail` says what
+ * changed, for the actions that change values: the part of a match and the values before and
+ * after. It holds nothing else of the request.
+ *
+ * `user_id` is empty for a line the importer writes: it has no account. The `match.caught-up`
+ * and `match.differs` actions are only ever written by the importer, and have no account, which
+ * the log shows as "de import".
  */
 export const auditLog = mysqlTable(
   'audit_log',
   {
     id: int('id', { unsigned: true }).autoincrement().primaryKey(),
     createdAt: datetime('created_at').notNull(),
-    userId: int('user_id', { unsigned: true })
-      .notNull()
-      .references(() => adminUsers.id),
+    userId: int('user_id', { unsigned: true }).references(() => adminUsers.id),
     action: mysqlEnum('action', auditActions).notNull(),
     itemId: int('item_id', { unsigned: true }).notNull(),
     reason: varchar('reason', { length: hiddenReasonMaxLength }),
+    detail: varchar('detail', { length: auditDetailMaxLength }),
   },
   (table) => [index('audit_log_item_id_idx').on(table.itemId)],
 )
@@ -781,6 +796,54 @@ export const matchGoals = mysqlTable(
 export type MatchGoal = typeof matchGoals.$inferSelect
 
 export type NewMatchGoal = typeof matchGoals.$inferInsert
+
+/**
+ * What the editors filled in or corrected of a match, one row per match that has an entry. The
+ * entry itself is in `matches` and `match_goals`, where every page reads it; this row marks
+ * which parts of the match are theirs: `kickoff_edited` for the kick-off (`match_date`,
+ * `kickoff_at`, `date_text`), `result_edited` for the status and the result (the score, extra
+ * time, the score after 90 minutes and the penalties) and `goals_edited` for the goals. The
+ * importer keeps a marked part as it is until Wikipedia has the same, and then clears the
+ * marker; the row is gone when no marker is left.
+ *
+ * `edited_by`, `edited_at` and `reason` are who made the last entry, when (UTC) and why;
+ * `audit_log` has every entry. `before_match` and `before_goals` are the match and its goals
+ * as JSON, as they were before the first entry (see `match-edits.ts`), so removing the entry
+ * can put them back. `reported_kickoff`, `reported_result` and `reported_goals` are what
+ * Wikipedia said the last time it differed from the entry of that part, so the importer reports
+ * a difference once and not on every run.
+ */
+export const matchEdits = mysqlTable(
+  'match_edits',
+  {
+    matchId: int('match_id', { unsigned: true })
+      .primaryKey()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    kickoffEdited: boolean('kickoff_edited').notNull().default(false),
+    resultEdited: boolean('result_edited').notNull().default(false),
+    goalsEdited: boolean('goals_edited').notNull().default(false),
+    editedBy: int('edited_by', { unsigned: true })
+      .notNull()
+      .references(() => adminUsers.id),
+    editedAt: datetime('edited_at').notNull(),
+    reason: varchar('reason', { length: hiddenReasonMaxLength }).notNull(),
+    beforeMatch: text('before_match').notNull(),
+    beforeGoals: text('before_goals').notNull(),
+    reportedKickoff: text('reported_kickoff'),
+    reportedResult: text('reported_result'),
+    reportedGoals: text('reported_goals'),
+  },
+  (table) => [
+    check(
+      'match_edits_a_part_is_edited',
+      sql`${table.kickoffEdited} = 1 or ${table.resultEdited} = 1 or ${table.goalsEdited} = 1`,
+    ),
+  ],
+)
+
+export type MatchEdit = typeof matchEdits.$inferSelect
+
+export type NewMatchEdit = typeof matchEdits.$inferInsert
 
 /** The most characters the club column of `standings` holds. */
 export const standingsClubMaxLength = 100

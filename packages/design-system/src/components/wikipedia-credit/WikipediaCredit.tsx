@@ -5,6 +5,9 @@ import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
 import { Time } from '../time/Time'
 
+/** What the credit says under itself when the editors entered some of the data. */
+const editedSentence = 'Enkele gegevens heeft onze redactie zelf ingevuld of aangepast.'
+
 /** The licence of Wikipedia and of our own match data. */
 const licenceHref = 'https://creativecommons.org/licenses/by-sa/4.0/deed.nl'
 
@@ -25,6 +28,12 @@ export type WikipediaCreditProps =
        * `selectiegegevens`.
        */
       data?: string
+      /**
+       * Whether our own editors filled in or corrected some of the data themselves. The full
+       * form then says so under the credit, "Enkele gegevens heeft onze redactie zelf ingevuld
+       * of aangepast.", visible without opening it.
+       */
+      edited?: boolean
       lead?: never
       /** The Wikipedia pages the data comes from, at least one. */
       pages: [WikipediaCreditPage, ...WikipediaCreditPage[]]
@@ -40,6 +49,7 @@ export type WikipediaCreditProps =
       /** The short form, "Bron: Wikipedia", for a small card. It takes only `lead` besides. */
       compact: true
       data?: never
+      edited?: never
       /**
        * What stands before "Wikipedia" instead of `Bron:`, such as `Gegevens van` in the strip
        * under the image of a card.
@@ -73,6 +83,7 @@ export const WikipediaCredit = ({
   className,
   compact,
   data = 'wedstrijdgegevens',
+  edited = false,
   lead = 'Bron:',
   pages,
   readAt,
@@ -87,23 +98,26 @@ export const WikipediaCredit = ({
       {`${lead} Wikipedia`}
     </p>
   ) : (
-    <details
-      {...(props as ComponentPropsWithoutRef<'details'>)}
-      className={classNames('hf-meta', 'hf-wikipedia-credit', className)}
-    >
-      <summary>
-        Bron: Wikipedia
-        <Icon name="arrow-down" />
-      </summary>
-      <p>
-        Licentie: <Link href={licenceHref}>CC BY-SA 4.0</Link>. {pages.length === 1 ? 'Pagina' : 'Pagina’s'}:{' '}
-        {pages.map((page, index) => (
-          <span key={page.href}>
-            {index > 0 ? ', ' : ''}
-            <Link href={page.href}>{page.name}</Link>
-          </span>
-        ))}
-        . Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook CC BY-SA 4.0.
-      </p>
-    </details>
+    <>
+      <details
+        {...(props as ComponentPropsWithoutRef<'details'>)}
+        className={classNames('hf-meta', 'hf-wikipedia-credit', className)}
+      >
+        <summary>
+          Bron: Wikipedia
+          <Icon name="arrow-down" />
+        </summary>
+        <p>
+          Licentie: <Link href={licenceHref}>CC BY-SA 4.0</Link>. {pages.length === 1 ? 'Pagina' : 'Pagina’s'}:{' '}
+          {pages.map((page, index) => (
+            <span key={page.href}>
+              {index > 0 ? ', ' : ''}
+              <Link href={page.href}>{page.name}</Link>
+            </span>
+          ))}
+          . Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook CC BY-SA 4.0.
+        </p>
+      </details>
+      {edited ? <p className="hf-meta hf-wikipedia-credit-edited">{editedSentence}</p> : null}
+    </>
   )
