@@ -86,8 +86,8 @@ jobs:
       # path, and DATABASE_URL from the file in the home folder. The output goes to this log and
       # not to ~/fansite-import.log. ssh exits with the exit code of the command, so a refused
       # season, or one or more seasons that were not read, turns this step red after the others
-      # were read. The path and the season go
-      # through printf %q, so the remote shell reads them as one word each.
+      # were read. The path and the season go through printf %q, so the remote shell reads them
+      # as one word each.
       - name: Import the seasons on the host
         if: steps.secrets.outputs.ready == 'true'
         env:
