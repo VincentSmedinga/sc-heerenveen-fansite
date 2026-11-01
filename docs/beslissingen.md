@@ -4982,6 +4982,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De balk als tweede `nav` in `@shortcuts` (twee landmarks en een nieuw onderdeel in plaats van de geneste lijst).
   De URL van het verzoek in een header lezen in de layout (elke pagina wordt dynamisch; zie _Het hoofdmenu leest het pad in een clientcomponent_).
   De keuze onthouden in een cookie (zie _De statistieken tellen standaard alle wedstrijden_).
+- **Later:** zie _Het hoofdmenu neemt het seizoen van de pagina mee_ (1 november 2026): op de pagina van een afgelopen seizoen is Statistieken in het menu het adres van dat seizoen (`/statistieken/2025-26`) en niet meer altijd `/statistieken`, en Wedstrijden is dat ook; de keuze tussen alle wedstrijden en de Eredivisie houdt het menu nog steeds niet vast.
 
 ### De pagina van een club toont de namen van zijn stadion en heeft een zijkolom
 
@@ -5036,6 +5037,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Bijzondere doelpunten is een record en een bijzaak, dus de zijkolom en het zachte vlak.
 - **Alternatieven:** beide kaarten wit onder elkaar (de bijzaak weegt dan even zwaar als de lijst); alles zoals nu; de zijkolom zo breed als de hoofdkolom (de kaart heeft die breedte niet nodig, en de lijst met doelpuntenmakers wordt er smaller van).
 - **Later:** vult voor de pagina Spelers de beslissing _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (#537) aan, waarin een ranglijst op het zachte vlak staat.
+
+### Het hoofdmenu neemt het seizoen van de pagina mee
+
+- **Datum:** 1 november 2026
+- **Besluit:** op een pagina met een seizoen in het adres wijzen de menu-items Wedstrijden en Statistieken naar het adres van datzelfde seizoen.
+  Het seizoen komt uit het pad en niet uit een parameter of een cookie.
+  - **Welke pagina's:** `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/statistieken/spelers/<seizoen>`.
+    Op elke andere pagina, ook op die van het lopende seizoen, blijven de adressen zoals ze waren.
+  - **Hoe:** `seasonOfPath` in `SiteNavigation.tsx` leest het seizoen uit het pad met `seasonFromSlug`, dezelfde controle als de pagina's, dus `/wedstrijden/kies` of `/wedstrijden/2023-25` verandert niets.
+    `hrefOf` zet het seizoen achter het adres van het menu-item.
+    Welk item huidig is (`aria-current`) verandert niet.
+  - **De keuze voor de competitie gaat niet mee:** die hoort bij Statistieken, en Wedstrijden heeft haar niet.
+    Het menu kan haar niet lezen zonder `useSearchParams` en een Suspense-grens, en de balk onder Statistieken houdt haar al vast.
+- **Waarom:** een bezoeker die een afgelopen seizoen bekijkt, verwacht dat de pagina's die erbij horen hetzelfde seizoen tonen.
+  Een clientcomponent leest het pad ook op de server, dus het kost geen Suspense-grens en geen onthouden voorkeur.
+  Een seizoen dat bij de ene pagina bestaat, bestaat ook bij de andere, dus een meegenomen seizoen leidt nooit naar "niet gevonden".
+- **Alternatieven:** een parameter `?seizoen=` (de pagina's hebben al een adres per seizoen, dus dat zou een tweede adres voor dezelfde pagina zijn); het gekozen seizoen onthouden in een cookie (we volgen bezoekers niet, en een cookie maakt het adres afhankelijk van een eerder bezoek).
+- **Later:** zie _Het hoofdmenu leest het pad in een clientcomponent_ (22 oktober 2026): het menu leest het pad nu ook voor de adressen van twee onderdelen, niet alleen voor de markering.
 
 ## Importer
 
@@ -8858,7 +8877,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een zin op de drie kaarten die de keuze niet volgen (langere kaarten, en de schakelaar zegt het al).
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de schakelaar staat sindsdien ook op `/statistieken/tegenstanders` en op de pagina van een club, en telt daar de wedstrijden van alle seizoenen.
 - **Later:** zie _De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast_ (31 oktober 2026): de links van de balk onder het hoofdmenu houden het seizoen en de keuze nu vast.
-  Het hoofdmenu zelf houdt ze niet vast.
+  Het hoofdmenu zelf houdt de keuze niet vast.
+- **Later:** zie _Het hoofdmenu neemt het seizoen van de pagina mee_ (1 november 2026): het menu van de site neemt nu het seizoen mee naar Wedstrijden en Statistieken, maar niet de keuze tussen alle wedstrijden en de Eredivisie; het **Nadeel** hierboven geldt daarom alleen nog voor die keuze.
 - **Later:** zie _De schakelaar is een baan met een schuivende knop_ (31 oktober 2026): de schakelaar staat in de kleine maat van 36 pixels in plaats van 44, en is een baan met een knop.
   De plek, de links en `aria-current` blijven.
 - **Later:** zie _De play-offs voor de Conference League zijn een derde competitie, een ontbrekende pagina is geen mislukking_.
