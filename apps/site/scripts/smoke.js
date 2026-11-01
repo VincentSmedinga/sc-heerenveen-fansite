@@ -910,11 +910,11 @@ await withEmptyDatabase((database) =>
     assert.match(playersHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
     assert.doesNotMatch(playersHtml, /<th scope="row">Kopie<\/th>/)
     assert.doesNotMatch(playersHtml, /Alle (?:<span[^>]*>)?doelpuntenmakers/)
-    // The card Bijzondere doelpunten comes under the list of scorers. The made-up data has no
-    // hattrick, two doubles (Demo, and Proefman in the cup), one penalty and an own goal of the
-    // opponent. The card is a list of four parts, each with its name as quiet text above its
-    // value, with no subheadings, soft, with a button for an image, and it counts the cup for
-    // all matches.
+    // The card Bijzondere doelpunten comes after the list of scorers, in the sidebar. The
+    // made-up data has no hattrick, two doubles (Demo, and Proefman in the cup), one penalty
+    // and an own goal of the opponent. The card is a list of four parts, each with its name as
+    // quiet text above its value, with no subheadings, soft, with a button for an image, and
+    // it counts the cup for all matches.
     const cardOf = (html) =>
       /<section[^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(html)?.[0] ?? ''
     const factsOf = (card) =>
@@ -925,6 +925,11 @@ await withEmptyDatabase((database) =>
     const specialCard = cardOf(playersHtml)
     assert.ok(playersHtml.indexOf('id="doelpuntenmakers"') < playersHtml.indexOf('id="bijzondere-doelpunten"'))
     assert.match(specialCard, /^<section class="hf-card hf-card-soft hf-card-shareable"/)
+    assert.match(
+      playersHtml,
+      /<aside class="hf-page-sidebar" aria-label="Meer cijfers over de spelers">.*?id="bijzondere-doelpunten"/s,
+    )
+    assert.match(playersHtml, /<section class="hf-card hf-card-shareable" aria-labelledby="doelpuntenmakers">/)
     assert.equal(specialCard.match(/<h[1-6]/g)?.length, 1)
     const facts = factsOf(specialCard)
     assert.deepEqual(

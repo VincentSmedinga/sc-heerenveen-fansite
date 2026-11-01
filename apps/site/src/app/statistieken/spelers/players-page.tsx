@@ -44,11 +44,13 @@ export async function playersMetadata(season: string): Promise<Metadata> {
 /**
  * The page Spelers of a season: `/statistieken/spelers` for the current season and
  * `/statistieken/spelers/2025-26` for another, which is what the two routes render. It has the
- * title row and the season picker of Statistieken, the card Doelpuntenmakers with every
- * player who scored, which is the card that stood on Statistieken before it got the top 5, and
- * under it the card Bijzondere doelpunten (hattricks, penalties and own goals). A
- * season that is over has the card put the season on its image. A season that has no matches in
- * the database is the page "niet gevonden". The cards count all the matches or, with
+ * title row and the season picker of Statistieken, and the card Doelpuntenmakers with every
+ * player who scored, which is the card that stood on Statistieken before it got the top 5. The
+ * card is white: the list is what the page is for. The card Bijzondere doelpunten (hattricks,
+ * penalties and own goals) is a record on the side, so it is soft and in the sidebar, which
+ * follows the main column on a phone and ends with the credit, as on Statistieken. A season
+ * that is over has the cards put the season on their image. A season that has no matches in the
+ * database is the page "niet gevonden". The cards count all the matches or, with
  * `?competitie=eredivisie`, the Eredivisie alone, as on Statistieken, and so does the switch.
  */
 export async function PlayersPage({ searchParams, season }: { searchParams: Promise<SearchParams>; season: string }) {
@@ -68,34 +70,43 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
   const current = season === seasonOf(new Date())
 
   return (
-    <Page.Main
-      intro={
-        <Page.Title>
-          <Heading level={1}>Spelers</Heading>
-          <SeasonPicker
-            action={pickerPath}
-            fields={competitionFields(competition)}
-            options={seasonChoices(seasons)}
-            value={seasonSlug(season)}
-          />
-        </Page.Title>
-      }
-    >
-      <CompetitionSwitch
-        address={seasonAddress(playersPath, season, seasonOf(new Date()))}
-        competition={competition}
-        matches={data.matches}
-      />
-      <TopScorersCard
-        competition={competition}
-        matches={data.matches}
-        season={data.season}
-        seasonOnImage={current ? undefined : season}
-      />
-      <SpecialGoalsCard competition={competition} matches={data.matches} seasonOnImage={current ? undefined : season} />
-      {(data.matches.length > 0 || data.standings.length > 0) && (
-        <SourceCredit pages={data.pages} season={data.season} />
-      )}
-    </Page.Main>
+    <>
+      <Page.Main
+        intro={
+          <Page.Title>
+            <Heading level={1}>Spelers</Heading>
+            <SeasonPicker
+              action={pickerPath}
+              fields={competitionFields(competition)}
+              options={seasonChoices(seasons)}
+              value={seasonSlug(season)}
+            />
+          </Page.Title>
+        }
+      >
+        <CompetitionSwitch
+          address={seasonAddress(playersPath, season, seasonOf(new Date()))}
+          competition={competition}
+          matches={data.matches}
+        />
+        <TopScorersCard
+          competition={competition}
+          matches={data.matches}
+          season={data.season}
+          seasonOnImage={current ? undefined : season}
+          surface="default"
+        />
+      </Page.Main>
+      <Page.Sidebar aria-label="Meer cijfers over de spelers">
+        <SpecialGoalsCard
+          competition={competition}
+          matches={data.matches}
+          seasonOnImage={current ? undefined : season}
+        />
+        {(data.matches.length > 0 || data.standings.length > 0) && (
+          <SourceCredit pages={data.pages} season={data.season} />
+        )}
+      </Page.Sidebar>
+    </>
   )
 }

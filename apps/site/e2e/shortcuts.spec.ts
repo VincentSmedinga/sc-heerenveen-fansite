@@ -354,7 +354,7 @@ test.describe('the bar under the header of /statistieken', () => {
 })
 
 // The page Spelers has two cards, so its bar has two links. It is gone from 52rem on, like the
-// other bars, although the page has one column.
+// other bars, because the second card then sits in the sidebar beside the first.
 test.describe('the bar under the header of /statistieken/spelers', () => {
   for (const colorScheme of ['light', 'dark'] as const) {
     test(`has two links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
