@@ -841,7 +841,11 @@ describe('the clubs of the opponents', () => {
     const { server: later } = await serve({ programme: renamed })
     const report = await importAt(later, new Date(first.getTime() + hours(1)))
 
-    expect(report).toMatchObject({ clubs: ["club 'Telstar' is now called 'Telstar 1963'"], matches: { updated: 1 } })
+    // The club is renamed at once; the name on the old match is a change that waits.
+    expect(report).toMatchObject({
+      clubs: ["club 'Telstar' is now called 'Telstar 1963'"],
+      matches: { held: 1, updated: 0 },
+    })
     expect(await database.db.select().from(clubs).where(eq(clubs.slug, 'telstar'))).toMatchObject([
       { name: 'Telstar 1963', wikipediaPage: 'Telstar (voetbalclub)' },
     ])
@@ -1385,11 +1389,21 @@ describe('a result that changes', () => {
       expect((await changes())[0]?.reason).toContain('7 matches changed at once')
       expect(await health()).toMatchObject({ failuresInARow: 1, lastOutcome: 'error' })
 
-      // The next time the changes are waiting already, so the rest of the page goes through.
-      const next = await importAt(server, after(first, hours(2)))
-
-      expect(next).toMatchObject({ kind: 'imported', matches: { held: 7, unchanged: 28 } })
+      // The changes that wait count: the page stays held while they are on it.
+      expect(await importAt(server, after(first, hours(2)))).toMatchObject({
+        kind: 'error',
+        message: expect.stringContaining('7 matches changed at once'),
+      })
+      expect(await snapshot()).toEqual(stored)
       expect(await changes()).toMatchObject(Array.from({ length: 7 }, () => ({ status: 'pending', timesSeen: 2 })))
+
+      // After seven days of the same page they are taken over, and the page goes through.
+      const taken = await importAt(server, after(at, days(7)))
+
+      expect(taken).toMatchObject({ kind: 'imported', matches: { held: 0, unchanged: 28, updated: 7 } })
+      expect(await changes()).toMatchObject(
+        Array.from({ length: 7 }, () => ({ resolution: 'stood', status: 'accepted' })),
+      )
     })
   })
 

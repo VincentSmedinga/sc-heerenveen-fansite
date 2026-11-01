@@ -278,23 +278,37 @@ function judge({ at, before, beforeGoals, now, nowGoals, previousReadAt }: Chang
   const sameDate = before.matchDate === now.matchDate && before.kickoffAt?.getTime() === now.kickoffAt?.getTime()
   let judgement = nothing
 
+  // Something we showed that changes: free for a match that is not played, a correction when
+  // the match is recent, and suspicious after that.
+  const shown = (changed: string, what: string) =>
+    before.status !== 'played'
+      ? part(changed, 'new', '', true)
+      : part(
+          changed,
+          recent ? 'improvement' : 'suspicious',
+          `${what} of a match played ${describeSpan(age)} ago changed`,
+          true,
+        )
+
   if (!sameIdentity) {
-    judgement = worse(
-      judgement,
-      before.status !== 'played'
-        ? part('opponent', 'new')
-        : part(
-            'opponent',
-            recent ? 'improvement' : 'suspicious',
-            `the opponent or the venue of a match played ${describeSpan(age)} ago changed`,
-            true,
-          ),
-    )
-  } else if (before.opponent !== now.opponent || before.clubId !== now.clubId) {
+    judgement = worse(judgement, shown('opponent', 'the opponent or the venue'))
+  } else if (before.opponent !== now.opponent) {
+    judgement = worse(judgement, shown('opponent', 'the name of the opponent'))
+  } else if (before.clubId !== now.clubId) {
+    // The same name under another article: only the link was corrected.
     judgement = worse(judgement, part('opponent', 'new'))
   }
-  if (before.stadium !== now.stadium || before.dateText !== now.dateText) {
-    judgement = worse(judgement, part('stadium', 'new'))
+  if (before.stadium !== now.stadium) {
+    judgement = worse(judgement, before.stadium === null ? part('stadium', 'new') : shown('stadium', 'the stadium'))
+  }
+  if (before.dateText !== now.dateText) {
+    // The weekend that becomes a day, or a time, is news; a played match keeps its date.
+    judgement = worse(
+      judgement,
+      before.dateText !== null && now.dateText !== null && before.status === 'played'
+        ? shown('date', 'the date')
+        : part('date', 'new'),
+    )
   }
   if (!sameDate) {
     judgement = worse(

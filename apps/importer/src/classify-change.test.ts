@@ -140,7 +140,13 @@ describe('a result that changes', () => {
 
   it('is new in a season that is over when it only fills in what was empty', () => {
     expect(judge({ nowGoals: [goal(12)], pastSeason: true })).toMatchObject({ class: 'new', overwrites: false })
-    expect(judge({ now: { ...played, stadium: 'Elders' }, pastSeason: true }).class).toBe('new')
+    expect(
+      judge({
+        before: { ...played, resultSetAt: kickoff, stadium: null },
+        now: { ...played, stadium: 'Elders' },
+        pastSeason: true,
+      }).class,
+    ).toBe('new')
   })
 
   it('is new on the first read of a season, whatever it is', () => {
@@ -281,10 +287,52 @@ describe('the rest of a match', () => {
     expect(judge({ now: other }).class).toBe('improvement')
   })
 
-  it('is new when only the article of the opponent, its spelling or the stadium changes', () => {
-    expect(judge({ after: 10 * day, now: { ...played, clubId: 2 } }).class).toBe('new')
-    expect(judge({ after: 10 * day, now: { ...played, opponent: 'Twente' } }).class).toBe('new')
-    expect(judge({ after: 10 * day, now: { ...played, stadium: 'De Grolsch Veste' } })).toMatchObject({
+  it('is new when only the article of the opponent changes, or the stadium comes', () => {
+    expect(judge({ after: 10 * day, now: { ...played, clubId: 2 } })).toMatchObject({ class: 'new', overwrites: false })
+    expect(
+      judge({
+        after: 10 * day,
+        before: { ...played, resultSetAt: kickoff, stadium: null },
+        now: { ...played, stadium: 'De Grolsch Veste' },
+      }),
+    ).toMatchObject({ class: 'new', overwrites: false })
+  })
+
+  it('overwrites when the name of the opponent, the stadium or the date text had a value', () => {
+    const renamed = { ...played, opponent: 'Twente' }
+    const moved = { ...played, stadium: 'De Grolsch Veste' }
+    const text = { ...played, dateText: '24-25 oktober 2026', kickoffAt: null }
+
+    expect(judge({ after: 10 * day, now: renamed })).toMatchObject({ class: 'suspicious', overwrites: true })
+    expect(judge({ after: 10 * day, now: moved })).toMatchObject({
+      changed: ['stadium'],
+      class: 'suspicious',
+      overwrites: true,
+      reason: 'the stadium of a match played 10 days ago changed',
+    })
+    expect(judge({ now: renamed })).toMatchObject({ class: 'improvement', overwrites: true })
+    expect(judge({ now: moved })).toMatchObject({ class: 'improvement', overwrites: true })
+    expect(
+      judge({
+        after: -30 * day,
+        before: { ...planned, resultSetAt: null },
+        now: { ...planned, ...renamed, goalsAgainst: null, goalsFor: null, status: 'scheduled' },
+      }),
+    ).toMatchObject({ class: 'new', overwrites: true })
+    expect(
+      judge({
+        after: 10 * day,
+        before: { ...text, resultSetAt: kickoff },
+        now: { ...text, dateText: '25 oktober 2026' },
+      }).class,
+    ).toBe('suspicious')
+    expect(judge({ now: moved, pastSeason: true })).toMatchObject({ class: 'suspicious', overwrites: true })
+  })
+
+  it('is news when a weekend that was text becomes another text for a match that is not played', () => {
+    const before = { ...planned, dateText: '24-25 oktober 2026', kickoffAt: null, resultSetAt: null }
+
+    expect(judge({ after: -30 * day, before, now: { ...before, dateText: '25 oktober 2026' } })).toMatchObject({
       class: 'new',
       overwrites: false,
     })

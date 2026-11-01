@@ -950,11 +950,11 @@ Hij vergelijkt per wedstrijd wat de pagina nu zegt met wat in de database staat,
 Alleen wat de import zelf ziet telt: de pagina, de tijd van de wedstrijd en de momenten waarop hij iets voor het eerst zag.
 De bewerkingsgeschiedenis van Wikipedia leest hij niet, want die staat onder `/w/`.
 
-| Soort                | Wat de import doet                                                             | Voorbeelden                                                                                                                                                                                                                                                                                                                  |
-| -------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nieuwe informatie    | Neemt de wijziging meteen over, zonder melding.                                | Een nieuwe wedstrijd. Een uitslag binnen drie dagen na de aanvang. Doelpuntenmakers bij een wedstrijd die er geen had, of doelpunten erbij waarbij de bestaande blijven. Een aanvangstijd, een datum of een uitstel voor een wedstrijd die niet is gespeeld. Verlenging of strafschoppen die bij dezelfde score verschijnen. |
-| Verbetering van kort | Neemt de wijziging over, met een waarschuwing en een regel in `match_changes`. | Een uitslag die minder dan 24 uur nadat hij voor het eerst stond verandert, bij een wedstrijd van minder dan drie dagen geleden. Een doelpunt dat verandert bij zo'n wedstrijd. Een tikfout van een uur oud.                                                                                                                 |
-| Verdacht             | Laat de oude waarde staan en houdt de wijziging vast.                          | Alles wat in geen andere regel past. Zie hieronder.                                                                                                                                                                                                                                                                          |
+| Soort                        | Wat de import doet                                                             | Voorbeelden                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nieuwe informatie            | Neemt de wijziging meteen over, zonder melding.                                | Een nieuwe wedstrijd. Een uitslag binnen drie dagen na de aanvang. Doelpuntenmakers bij een wedstrijd die er geen had, of doelpunten erbij waarbij de bestaande blijven. Een aanvangstijd, een datum of een uitstel voor een wedstrijd die niet is gespeeld. Verlenging of strafschoppen die bij dezelfde score verschijnen. |
+| Verbetering van kort geleden | Neemt de wijziging over, met een waarschuwing en een regel in `match_changes`. | Een uitslag die minder dan 24 uur nadat hij voor het eerst stond verandert, bij een wedstrijd van minder dan drie dagen geleden. Een doelpunt dat verandert bij zo'n wedstrijd. Een tikfout van een uur oud.                                                                                                                 |
+| Verdacht                     | Laat de oude waarde staan en houdt de wijziging vast.                          | Alles wat in geen andere regel past. Zie hieronder.                                                                                                                                                                                                                                                                          |
 
 Een wijziging is verdacht als:
 
@@ -969,7 +969,8 @@ Een wijziging is verdacht als:
 - meer dan zes wedstrijden in één run iets overschrijven wat we al hadden (zie hieronder).
 
 Een grens is strikt: een uitslag die precies 24 uur of precies drie dagen vaststond, valt buiten het venster.
-Een nieuwe link naar een andere pagina over dezelfde tegenstander, een andere spelling van zijn naam en een ander stadion zijn nieuwe informatie, ook bij een oude wedstrijd.
+Een nieuwe link naar een andere pagina over dezelfde tegenstander is nieuwe informatie, ook bij een oude wedstrijd.
+Een andere spelling van zijn naam, een ander stadion of een andere datumtekst telt als een gewone wijziging: bij een gespeelde wedstrijd een verbetering of verdacht, en altijd meetellend voor de grens van zes.
 Een doelpunt dat alleen zijn speler of pagina krijgt (de selectie is bijgewerkt) ook.
 
 Een verbetering geeft een regel zoals:
@@ -1022,7 +1023,8 @@ pnpm run import:changes accept all
 
 #### Veel wijzigingen tegelijk
 
-Meer dan zes wedstrijden in één run die iets overschrijven wat we al hadden, lijkt op een bewerking van de hele pagina.
+Meer dan zes wedstrijden die iets overschrijven wat we al hadden, lijkt op een bewerking van de hele pagina.
+De wedstrijden die al wachten en nog op de pagina staan, tellen mee.
 Dan wacht elk van die wedstrijden, en de run schrijft verder niets: geen nieuwe wedstrijden, geen stand en geen pagina's.
 De laatste goede kopie blijft staan zoals bij een mislukte controle, en de run telt als mislukt:
 
@@ -1030,7 +1032,9 @@ De laatste goede kopie blijft staan zoals bij een mislukte controle, en de run t
 Matches 2026/27: warning, nothing changed and the last good copy stays: 7 matches changed at once, which looks like an edit of the whole page: the changes wait (pnpm run import:changes)
 ```
 
-De volgende run ziet dezelfde zeven wijzigingen al wachten, en dan gaat de rest van de pagina door.
+De pagina blijft vastgehouden zolang die wijzigingen wachten.
+Elke run meldt dat opnieuw, en de mail over een import die blijft falen komt zoals bij elke fout.
+Zijn de wijzigingen besloten (`accept` of `reject`) of zeven dagen oud, dan gaat de rest van de pagina door.
 Het invullen van wat leeg was telt niet mee: een uitslag die nieuw is, doelpuntenmakers erbij of een aanvangstijd die voor het eerst komt.
 Zo wacht de aankondiging van elf aanvangstijden in één keer niet.
 

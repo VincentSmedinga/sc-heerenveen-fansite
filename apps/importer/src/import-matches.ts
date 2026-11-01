@@ -726,6 +726,7 @@ async function storeMatches(
   const warnings: string[] = []
   const linkedGoals: LinkedGoal[] = []
   const entries: Entry[] = []
+  let waiting = 0
   const handled = new Set<string>()
   const storedStates = (id: number) => (storedGoals.get(id) ?? []).map(goalStateOf)
 
@@ -767,6 +768,7 @@ async function storeMatches(
         } else {
           await noteSeen(db, pending, now)
           counts.held++
+          waiting++
         }
 
         continue
@@ -824,6 +826,7 @@ async function storeMatches(
         } else {
           await noteSeen(db, pending, now)
           counts.held++
+          waiting++
         }
 
         continue
@@ -852,7 +855,9 @@ async function storeMatches(
   }
 
   const overwrites = entries.filter((entry) => entry.kind !== 'add' && entry.judgement.overwrites).length
-  const heldAll = isMassChange(overwrites)
+  // The changes that waited already and are still on the page count: the page stays held until
+  // they are decided or have stood for seven days.
+  const heldAll = isMassChange(overwrites + waiting)
 
   for (const entry of entries) {
     if (entry.kind === 'add') {
@@ -951,5 +956,5 @@ async function storeMatches(
     warnings.push(unlinked)
   }
 
-  return { clubs: clubLines, counts, heldAll, overwrites, warnings }
+  return { clubs: clubLines, counts, heldAll, overwrites: overwrites + waiting, warnings }
 }

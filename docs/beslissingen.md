@@ -6107,9 +6107,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - Een uitslag die tussen 24 uur en drie dagen na de eerste keer verandert, valt in geen regel.
     Verdacht is wat de regels niet noemen, dus hij wacht.
   - Meer dan zes wedstrijden in één run die iets overschrijven wat we al hadden, lijken op een bewerking van de hele pagina.
+    De wedstrijden die al wachten en nog op de pagina staan, tellen mee.
     De run schrijft dan niets, behalve de wijzigingen die wachten, en telt als mislukt.
     Het invullen van wat leeg was telt niet mee, zodat de aankondiging van elf aanvangstijden gewoon doorgaat.
-    De volgende run ziet de wijzigingen al wachten en laat de rest van de pagina door.
+    De pagina blijft vastgehouden tot de wijzigingen besloten zijn of zeven dagen hebben gestaan.
   - Een uitslag die pas komt nadat de import de pagina na de eerste drie dagen zag zonder uitslag, is verdacht.
     Was de import er in die dagen niet (een storing), dan is de uitslag gewoon nieuw.
   - Een wedstrijd die weer de waarde krijgt die hij in de laatste zeven dagen had, of een waarde die is afgewezen, is verdacht: dat kan een bewerkingsoorlog zijn.
@@ -6120,7 +6121,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     Wat leeg was invullen mag wel (de stand na 90 minuten van #300, doelpuntenmakers bij een wedstrijd die er geen had), en een nieuwe wedstrijd ook.
     Zo hoeft een nieuwe kolom geen opdracht van de eigenaar om een seizoen bij te werken.
     De uurlijkse import leest zo'n seizoen niet, dus de zeven dagen tellen pas bij de volgende `pnpm run import:season`, of een mens besluit.
-  - Een andere link of spelling voor dezelfde tegenstander, een ander stadion en een doelpunt dat alleen zijn speler of pagina krijgt, zijn nieuwe informatie.
+  - Een andere link voor dezelfde tegenstander en een doelpunt dat alleen zijn speler of pagina krijgt, zijn nieuwe informatie.
+    Een andere spelling van de naam, een ander stadion en een andere datumtekst die al een waarde hadden, overschrijven iets en volgen de regels van een uitslag.
   - De stand en de selectie volgen Wikipedia zoals voorheen, tenzij de hele pagina vastgehouden wordt.
     Een melding per mail komt er niet: de eigenaar kijkt in het overzicht.
 - **Waarom:** iedereen kan Wikipedia bewerken, en wij nemen over wat daar staat.
