@@ -92,6 +92,27 @@ test.describe('the card on the homepage', () => {
   })
 })
 
+test.describe('the card on the news page', () => {
+  test('is in the short form in the sidebar, under the filter and above the podcasts', async ({ page }) => {
+    await page.goto('/nieuws')
+
+    const card = page.getByRole('region', { name: 'Van de redactie' })
+    const sidebar = page.getByRole('complementary')
+
+    await expect(sidebar.getByRole('region', { name: 'Van de redactie' })).toBeVisible()
+    await expect(card.getByRole('link', { name: published.title })).toHaveAttribute('href', address)
+    await expect(card).toContainText(published.intro)
+    await expect(card.getByRole('link', { name: /Lees verder/ })).toHaveCount(0)
+
+    const filterBox = await sidebar.getByRole('group', { name: 'Bronnen' }).boundingBox()
+    const cardBox = await card.boundingBox()
+    const podcastsBox = await sidebar.getByRole('region', { name: 'Podcasts' }).boundingBox()
+
+    expect(filterBox?.y).toBeLessThan(cardBox?.y ?? 0)
+    expect(cardBox?.y).toBeLessThan(podcastsBox?.y ?? 0)
+  })
+})
+
 test.describe('a draft and an article for later', () => {
   for (const { slug, title } of [draft, later]) {
     test(`${slug} says "niet gevonden", like an address that is no article, and shows nothing of itself`, async ({
@@ -107,13 +128,15 @@ test.describe('a draft and an article for later', () => {
       await expect(page.locator('body')).not.toContainText(title)
     })
 
-    test(`${slug} is not on the homepage`, async ({ page }) => {
-      await page.goto('/')
+    test(`${slug} is not on the homepage or the news page`, async ({ page }) => {
+      for (const path of ['/', '/nieuws']) {
+        await page.goto(path)
 
-      const html = await page.content()
+        const html = await page.content()
 
-      expect(html).not.toContain(title)
-      expect(html).not.toContain(slug)
+        expect(html).not.toContain(title)
+        expect(html).not.toContain(slug)
+      }
     })
   }
 })

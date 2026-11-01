@@ -338,7 +338,7 @@ Zo kan niemand nagaan wie een account heeft.
 
 - De pagina op <https://acc.sc.heerenveen.org> laat "sc Heerenveen Fansite" in het logo zien, het blok "Laatste nieuws" en in de zijbalk het blok "Nieuwste discussies".
   Zolang de import op de host niet draait (zie _Eenmalig instellen_, stap 8 tot en met 10), staat er "We hebben nog geen nieuws gevonden. Kijk straks nog eens." en "We hebben nog geen discussies van het forum."
-  Daarna staan er de tien nieuwste koppen van de echte nieuwsbronnen uit de seed, met onder de lijst de link "Alle koppen" naar `/nieuws`.
+  Daarna staan er de tien nieuwste koppen van de echte nieuwsbronnen uit de seed, met onder de lijst de link "Alle nieuws" naar `/nieuws`.
   In het blok "Nieuwste discussies" staan dan de vijf discussies waar het laatst op is gereageerd, elk met het aantal reacties, de laatste reageerder en de tijd, en onderaan de link "Naar het forum".
   Controleer dat er geen discussie van Offtopics of Sport overig bij staat.
   Toont hij "Er ging iets mis", dan kan de site de database niet lezen: kijk in het logboek.

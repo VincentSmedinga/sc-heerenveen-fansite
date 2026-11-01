@@ -644,16 +644,18 @@ await withEmptyDatabase((database) =>
     assert.equal((await fetch(`${origin}/podcasts`, { redirect: 'manual' })).status, 404)
     assert.equal((await fetch(`${origin}/zoeken`, { redirect: 'manual' })).status, 404)
 
-    // The news archive reads the headlines, and the seed has none, so there is no filter. A
-    // source, several sources or a page that doesn't exist is a 404, and so is a source given
-    // twice.
+    // The news page reads the headlines, and the seed has none, so there is no filter. It has
+    // the card with the podcasts, and no card with matches. A source, several sources or a page
+    // that doesn't exist is a 404, and so is a source given twice.
     const archivePage = await fetch(`${origin}/nieuws`)
     const archiveHtml = await archivePage.text()
     assert.equal(archivePage.status, 200)
-    assert.match(archiveHtml, /<h1[^>]*>Nieuwsarchief<\/h1>/)
+    assert.match(archiveHtml, /<h1[^>]*>Nieuws<\/h1>/)
     assert.match(archiveHtml, /We hebben nog geen nieuws gevonden\./)
-    assert.doesNotMatch(archiveHtml, /<aside|<fieldset|type="checkbox"/)
-    assert.match(html, /<a href="\/nieuws">Alle <span class="hf-icon-tail">koppen</)
+    assert.doesNotMatch(archiveHtml, /<fieldset|type="checkbox"/)
+    assert.match(archiveHtml, /<aside.*<h2[^>]*>Podcasts<\/h2>.*<\/aside>/s)
+    assert.doesNotMatch(archiveHtml, /Wedstrijden<\/h2>|Stand<\/h2>|Nieuwste discussies/)
+    assert.match(html, /<a href="\/nieuws">Alle <span class="hf-icon-tail">nieuws</)
     assert.equal((await fetch(`${origin}/nieuws?bron=leeuwarder-courant`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws?bron=bestaat-niet`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws?bron=leeuwarder-courant&bron=nos`)).status, 404)
@@ -663,7 +665,8 @@ await withEmptyDatabase((database) =>
 
     // The matches page shows the made-up matches and table of the seed, with the credit for
     // Wikipedia under them, and a link under the table and the results to the cards with
-    // figures on the statistics page. The homepage has the two blocks, under the podcasts.
+    // figures on the statistics page. The homepage has the two blocks, between the forum and
+    // the podcasts.
     const matchesPage = await fetch(`${origin}/wedstrijden`)
     const matchesHtml = await matchesPage.text()
     assert.equal(matchesPage.status, 200)
@@ -686,12 +689,15 @@ await withEmptyDatabase((database) =>
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       ['#programma', '#uitslagen', '#stand', '#hoofdtrainer'],
     )
-    // The home page has no bar of shortcuts, only the bar of sub-pages of Nieuws in the menu.
-    assert.doesNotMatch(html, /class="hf-page-shortcuts"/)
+    // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
+    // current. The news page has the bar of Nieuws, with the podcasts and the search.
+    assert.doesNotMatch(html, /class="hf-page-shortcuts"|hf-navigation-bar|aria-current/)
+    assert.match(html, /<nav aria-label="Hoofdmenu".*?<a class="hf-navigation-link" href="\/nieuws">Nieuws<\/a>/s)
     assert.match(
-      html,
-      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws">Archief<\/a>.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
+      archiveHtml,
+      /<nav aria-label="Hoofdmenu".*?<a aria-current="page" class="hf-navigation-link" href="\/nieuws">Nieuws<\/a><div class="hf-navigation-bar">.*?href="\/nieuws\/podcasts">Podcasts<\/a>.*?href="\/nieuws\/zoeken">Zoeken<\/a>/s,
     )
+    assert.doesNotMatch(archiveHtml, /Archief/)
     assert.match(matchesHtml, /Testdorp FC/)
     assert.match(
       matchesHtml,

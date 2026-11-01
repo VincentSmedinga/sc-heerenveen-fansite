@@ -1,26 +1,17 @@
 import type { Metadata } from 'next'
 
-import { ArticleCard, Card, DiscussionItem, Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
+import { ArticleCard, Card, Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
-import { getNewestArticle } from '../articles'
 import { getDiscussions } from '../discussions'
 import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
-import { forumUrl } from '../forum'
 import { getHeadlines } from '../headlines'
 import { getMatchData, type MatchData } from '../matches'
 import { MatchesCard, StandingsCard } from '../MatchViews'
 import { pageMetadata } from '../metadata'
-import {
-  dateTimeOf,
-  dayOf,
-  episodeDetails,
-  formatArticleDate,
-  formatDiscussionTime,
-  formatEpisodeTime,
-  formatNewsTime,
-} from '../news'
+import { dateTimeOf, dayOf, formatArticleDate, formatNewsTime } from '../news'
+import { DiscussionsCard, EpisodesCard, loadArticle } from '../NewsCards'
 import { getLatestEpisodes } from '../podcasts'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
@@ -28,21 +19,6 @@ import { withBranch } from '../title'
 // Render on each request, so the build never reads the database. getHeadlines caches the list
 // itself.
 export const dynamic = 'force-dynamic'
-
-/**
- * The newest article of our own editors, or undefined when there is none or the database can't
- * give it. The card is an extra: the homepage shows the news without it, and the log says why
- * it is missing.
- */
-async function loadArticle() {
-  try {
-    return await getNewestArticle()
-  } catch (error) {
-    console.error(`Could not read the newest article for the homepage: ${reasonOf(error)}`)
-
-    return undefined
-  }
-}
 
 /**
  * The matches and the league table of the current season, or undefined when the database can't
@@ -72,7 +48,7 @@ const loadContent = cache(async () => {
       getHeadlines(),
       getDiscussions(),
       getLatestEpisodes(),
-      loadArticle(),
+      loadArticle('the homepage'),
       loadMatches(),
     ])
 
@@ -144,74 +120,20 @@ export default async function HomePage() {
           )}
           <Text>
             <Link href="/nieuws" icon="arrow-right">
-              Alle koppen
+              Alle nieuws
             </Link>
           </Text>
         </Card>
       </Page.Main>
-      <Page.Sidebar aria-label="Het forum, de podcasts en de wedstrijden">
-        <Card aria-labelledby="discussions-heading">
-          <Heading id="discussions-heading" level={2}>
-            Nieuwste discussies
-          </Heading>
-          {discussions.length === 0 ? (
-            <Text>We hebben nog geen discussies van het forum.</Text>
-          ) : (
-            <List role="list">
-              {discussions.map((discussion, index) => (
-                <List.Item key={index}>
-                  <DiscussionItem
-                    dateTime={dateTimeOf(discussion.lastPostedAt)}
-                    href={discussion.url}
-                    lastPostedBy={discussion.lastPostedBy}
-                    replies={discussion.replyCount}
-                    time={formatDiscussionTime(discussion.lastPostedAt, now)}
-                    title={discussion.title}
-                  />
-                </List.Item>
-              ))}
-            </List>
-          )}
-          <Text>
-            <Link href={forumUrl} icon="external-link">
-              Naar het forum
-            </Link>
-          </Text>
-        </Card>
-        <Card aria-labelledby="episodes-heading">
-          <Heading id="episodes-heading" level={2}>
-            Nieuwste podcasts
-          </Heading>
-          {episodes.length === 0 ? (
-            <Text>We hebben nog geen podcastafleveringen gevonden.</Text>
-          ) : (
-            <List role="list">
-              {episodes.map((episode, index) => (
-                <List.Item key={index}>
-                  <NewsItem
-                    dateTime={dateTimeOf(episode.publishedAt)}
-                    details={episodeDetails(episode)}
-                    headline={episode.title}
-                    href={episode.url}
-                    source={episode.sourceName}
-                    time={formatEpisodeTime(episode.publishedAt, now)}
-                  />
-                </List.Item>
-              ))}
-            </List>
-          )}
-          <Text>
-            <Link href="/nieuws/podcasts" icon="arrow-right">
-              Alle podcasts
-            </Link>
-          </Text>
-        </Card>
+      <Page.Sidebar aria-label="Het forum, de wedstrijden, de stand en de podcasts">
+        <DiscussionsCard discussions={discussions} now={now} />
         {matches !== undefined && (
           <>
             <MatchesCard data={matches} now={now} />
             <StandingsCard data={matches} />
           </>
         )}
+        <EpisodesCard episodes={episodes} heading="Nieuwste podcasts" now={now} />
       </Page.Sidebar>
     </>
   )

@@ -44,7 +44,7 @@ describe('SiteNavigation', () => {
         label,
       ]),
     ).toEqual([
-      ['/', 'Nieuws'],
+      ['/nieuws', 'Nieuws'],
       ['/wedstrijden', 'Wedstrijden'],
       ['/statistieken', 'Statistieken'],
       ['https://forum.heerenveen.org', 'Forum'],
@@ -60,22 +60,21 @@ describe('SiteNavigation', () => {
     expect(html.match(/<svg/g)).toHaveLength(1)
   })
 
-  it('has no link to the archive, the podcasts or the search in the menu itself', () => {
-    expect(render('/wedstrijden')).not.toMatch(/href="\/nieuws/)
+  it('has no link to the podcasts or the search in the menu itself', () => {
+    expect(render('/wedstrijden')).not.toMatch(/href="\/nieuws\//)
   })
 
   it('has no link to Spelers or Tegenstanders in the menu itself, only in the bar of Statistieken', () => {
-    for (const path of ['/wedstrijden', '/']) {
+    for (const path of ['/wedstrijden', '/nieuws']) {
       expect(render(path)).not.toContain('/statistieken/spelers')
       expect(render(path)).not.toContain('/statistieken/tegenstanders')
     }
   })
 
-  it('shows the bar with the archive, the podcasts and the search on the home page, with no sub-page current', () => {
-    const html = render('/')
+  it('marks Nieuws as the current page on /nieuws, with the bar of the podcasts and the search and no sub-page current', () => {
+    const html = render('/nieuws')
 
     expect(barLinks(html)).toEqual([
-      ['/nieuws', 'Archief'],
       ['/nieuws/podcasts', 'Podcasts'],
       ['/nieuws/zoeken', 'Zoeken'],
     ])
@@ -83,14 +82,21 @@ describe('SiteNavigation', () => {
     expect(linksWith(html, 'true')).toEqual([])
   })
 
+  it('has no item that is current and no bar on the home page', () => {
+    const html = render('/')
+
+    expect(currentLinks(html)).toEqual([])
+    expect(linksWith(html, 'true')).toEqual([])
+    expect(html).not.toContain('hf-navigation-bar')
+  })
+
   it.each([
-    ['/nieuws', 'Archief'],
     ['/nieuws/podcasts', 'Podcasts'],
     ['/nieuws/zoeken', 'Zoeken'],
   ])('marks %s as the current sub-page in the bar, and Nieuws as the item that holds it', (path, label) => {
     const html = render(path)
 
-    expect(barLinks(html).map(([, text]) => text)).toEqual(['Archief', 'Podcasts', 'Zoeken'])
+    expect(barLinks(html).map(([, text]) => text)).toEqual(['Podcasts', 'Zoeken'])
     expect(currentLinks(html)).toEqual([label])
     expect(linksWith(html, 'true')).toEqual(['Nieuws'])
   })
@@ -98,7 +104,7 @@ describe('SiteNavigation', () => {
   it('shows the bar on an article of the editors, with Nieuws as the current item and no sub-page', () => {
     const html = render('/redactie/een-artikel')
 
-    expect(barLinks(html)).toHaveLength(3)
+    expect(barLinks(html)).toHaveLength(2)
     expect(currentLinks(html)).toEqual(['Nieuws'])
   })
 
@@ -185,14 +191,14 @@ describe('SiteNavigation', () => {
       const menu = html.replace(/<div class="hf-navigation-bar">.*?<\/div>/, '')
 
       expect([...menu.matchAll(/href="([^"]*)"/g)].map(([, href]) => href)).toEqual([
-        '/',
+        '/nieuws',
         '/wedstrijden',
         '/statistieken',
         'https://forum.heerenveen.org',
       ])
     })
 
-    it.each(['/', '/nieuws/podcasts', '/wedstrijden', '/bronnen'])(
+    it.each(['/', '/nieuws', '/nieuws/podcasts', '/wedstrijden', '/bronnen'])(
       'leaves the other pages as they are, with their own bar or none, on %s',
       (path) => {
         expect(render(path, bar)).toBe(render(path))
@@ -218,11 +224,11 @@ describe('SiteNavigation', () => {
 
 describe('currentOf', () => {
   it.each([
-    ['/', { item: '/' }],
-    ['/nieuws', { item: '/', subitem: '/nieuws' }],
-    ['/nieuws/podcasts', { item: '/', subitem: '/nieuws/podcasts' }],
-    ['/nieuws/zoeken', { item: '/', subitem: '/nieuws/zoeken' }],
-    ['/redactie/een-artikel', { item: '/' }],
+    ['/', {}],
+    ['/nieuws', { item: '/nieuws' }],
+    ['/nieuws/podcasts', { item: '/nieuws', subitem: '/nieuws/podcasts' }],
+    ['/nieuws/zoeken', { item: '/nieuws', subitem: '/nieuws/zoeken' }],
+    ['/redactie/een-artikel', { item: '/nieuws' }],
     ['/wedstrijden', { item: '/wedstrijden' }],
     ['/wedstrijden/2025-26', { item: '/wedstrijden' }],
     ['/statistieken', { item: '/statistieken' }],

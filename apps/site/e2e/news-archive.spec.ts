@@ -26,7 +26,7 @@ test.describe('the sources on /nieuws without JavaScript', () => {
 
     // The addresses follow the order of the form, which is the order of the list.
     await expect(page).toHaveURL(/\/nieuws\?bron=proefnieuws&bron=testkrant$/)
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nieuwsarchief van Proefnieuws en Testkrant')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nieuws van Proefnieuws en Testkrant')
     await expect(group(page).getByRole('checkbox', { checked: true })).toHaveCount(2)
     await expect(page.getByText('Voorbeeldkrant, met dank aan de redactie')).toHaveCount(1)
   })
@@ -37,14 +37,14 @@ test.describe('the sources on /nieuws without JavaScript', () => {
     await page.getByRole('button', { name: 'Toon' }).click()
 
     await expect(page).toHaveURL(/\/nieuws\?bron=testkrant$/)
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nieuwsarchief van Testkrant')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nieuws van Testkrant')
     // The name is in the heading, the title and the label of the checkbox. On each line it is
     // only there for a screen reader.
     const lines = page.locator('main .hf-news-item-meta')
 
     await expect(lines.locator('span:not(.hf-visually-hidden)', { hasText: 'Testkrant' })).toHaveCount(0)
     await expect(lines.locator('.hf-visually-hidden', { hasText: 'Testkrant' })).not.toHaveCount(0)
-    await expect(page).toHaveTitle(/^Nieuwsarchief van Testkrant/)
+    await expect(page).toHaveTitle(/^Nieuws van Testkrant/)
   })
 
   test('with every source checked is the page of all sources, and the pagination has no source', async ({ page }) => {
@@ -54,8 +54,8 @@ test.describe('the sources on /nieuws without JavaScript', () => {
     }
     await page.getByRole('button', { name: 'Toon' }).click()
 
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nieuwsarchief')
-    await expect(page).toHaveTitle(/^Nieuwsarchief( |$|\|)/)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nieuws')
+    await expect(page).toHaveTitle(/^Nieuws( |$|\||–)/)
     await expect(page.getByRole('link', { name: 'Volgende' })).toHaveAttribute('href', '/nieuws?pagina=2')
   })
 

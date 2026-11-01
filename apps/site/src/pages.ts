@@ -14,7 +14,7 @@ export const pages = [
   },
   {
     description:
-      'Alle koppen over sc Heerenveen die we hebben opgehaald, de nieuwste eerst, met een filter per bron en een link naar het bericht bij de bron.',
+      'Alle koppen over sc Heerenveen die we hebben, de nieuwste eerst, met een filter per bron, een artikel van de redactie en de nieuwste podcasts.',
     path: '/nieuws',
   },
   {

@@ -3,11 +3,11 @@ import { filterHref, filterQuery, joinNames, parseFilterQuery, type SearchParams
 export type { SearchParams }
 
 /**
- * The heading of the page: "Nieuwsarchief", with the names of the sources that are chosen after
+ * The heading of the page: "Nieuws", with the names of the sources that are chosen after
  * "van": "A", "A en B" or "A, B en C".
  */
 export function archiveHeading(names: readonly string[]) {
-  return names.length === 0 ? 'Nieuwsarchief' : `Nieuwsarchief van ${joinNames(names)}`
+  return names.length === 0 ? 'Nieuws' : `Nieuws van ${joinNames(names)}`
 }
 
 /** The address of /nieuws for sources and a page, as `archiveQuery` makes the query. */

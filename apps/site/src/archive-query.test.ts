@@ -60,20 +60,20 @@ describe('archiveQuery and archiveHref', () => {
 })
 
 describe('archiveHeading and archiveTitle', () => {
-  it('say Nieuwsarchief for all sources', () => {
-    expect(archiveHeading([])).toBe('Nieuwsarchief')
-    expect(archiveTitle([], 1)).toBe('Nieuwsarchief')
+  it('say Nieuws for all sources', () => {
+    expect(archiveHeading([])).toBe('Nieuws')
+    expect(archiveTitle([], 1)).toBe('Nieuws')
   })
 
   it('name one source, two with "en", and three or more with commas and "en"', () => {
-    expect(archiveHeading(['A'])).toBe('Nieuwsarchief van A')
-    expect(archiveHeading(['A', 'B'])).toBe('Nieuwsarchief van A en B')
-    expect(archiveHeading(['A', 'B', 'C'])).toBe('Nieuwsarchief van A, B en C')
-    expect(archiveHeading(['A', 'B', 'C', 'D'])).toBe('Nieuwsarchief van A, B, C en D')
+    expect(archiveHeading(['A'])).toBe('Nieuws van A')
+    expect(archiveHeading(['A', 'B'])).toBe('Nieuws van A en B')
+    expect(archiveHeading(['A', 'B', 'C'])).toBe('Nieuws van A, B en C')
+    expect(archiveHeading(['A', 'B', 'C', 'D'])).toBe('Nieuws van A, B, C en D')
   })
 
   it('add the page after the first page', () => {
-    expect(archiveTitle([], 2)).toBe('Nieuwsarchief, pagina 2')
-    expect(archiveTitle(['A', 'B'], 3)).toBe('Nieuwsarchief van A en B, pagina 3')
+    expect(archiveTitle([], 2)).toBe('Nieuws, pagina 2')
+    expect(archiveTitle(['A', 'B'], 3)).toBe('Nieuws van A en B, pagina 3')
   })
 })
