@@ -157,6 +157,25 @@ export function matchMoment(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 
 }
 
 /**
+ * What the list of stadium names of a club says in front of each name, in the order we saw
+ * them: one name says nothing, because the name is enough, and a "vanaf" there would say the
+ * stadium began when our data begins. With more, each name but the last has "tot 14 mrt 2026",
+ * the day of the last match with that name, and the last has "vanaf 1 sep 2025", the day of the
+ * first match with it. They are days of our matches, not of the change of the name.
+ */
+export function stadiumPeriods(stadiums: readonly { firstDay: string; lastDay: string }[]): (string | undefined)[] {
+  return stadiums.map(({ firstDay, lastDay }, index) => {
+    if (stadiums.length === 1) {
+      return undefined
+    }
+
+    return index === stadiums.length - 1
+      ? `vanaf ${formatStaffDate({ date: firstDay, precision: 'day' })}`
+      : `tot ${formatStaffDate({ date: lastDay, precision: 'day' })}`
+  })
+}
+
+/**
  * The text Wikipedia gives for a date that has no time yet, as visitors say it: "12-14 februari
  * 2027" is "weekend 12–14 februari", "13 februari 2027" is "13 februari". A text the function
  * does not know stays as it is.

@@ -122,6 +122,65 @@ export function summaryOf(meetings: readonly Meeting[]): ClubSummary {
 export const earlierNames = (otherNames: readonly string[]) =>
   otherNames.length === 0 ? undefined : otherNames.join(', ')
 
+/**
+ * A name of the stadium of a club, as Wikipedia wrote it, with the first and the last day of
+ * the league matches in which we saw that name.
+ */
+export type Stadium = { firstDay: string; lastDay: string; name: string }
+
+/**
+ * The key by which two spellings of a stadium count as one name: capitals, the amount of
+ * spaces and a hyphen or dash instead of a space make no difference. Nothing else does, so
+ * "Stadion Galgenwaard" and "Galgenwaard" stay two names.
+ */
+const stadiumKey = (name: string) =>
+  name
+    .normalize('NFC')
+    .toLowerCase()
+    .replaceAll(/[\s‐-―-]+/g, ' ')
+    .trim()
+
+/** The order the matches were played in: the day, then the kick-off, then the import order. */
+const byPlayedOrder = (a: PublicClubMatch, b: PublicClubMatch) =>
+  a.matchDate.localeCompare(b.matchDate) || (a.kickoffAt?.getTime() ?? 0) - (b.kickoffAt?.getTime() ?? 0) || a.id - b.id
+
+/**
+ * The names of the stadium of a club in the order we saw them, each with the first and the last
+ * day of the matches that had it. The names come from the Eredivisie matches that were played
+ * away, where sc Heerenveen visited the club: the stadium of a match is then the one of the
+ * club. A cup tie or a play-off can be at a neutral ground, so those do not count. A match that
+ * was stopped counts for where it began, as the match does, so it gives the club's stadium.
+ * A match without a stadium is left out.
+ *
+ * Spellings that only differ in capitals, spaces or hyphens are one name, written as the first
+ * match of it wrote it. A name that returns after another is a line of its own, because the
+ * list is the order in which we saw them. A club that we never visited gives an empty list.
+ */
+export function stadiumsOf(matches: readonly PublicClubMatch[]): Stadium[] {
+  const stadiums: (Stadium & { key: string })[] = []
+
+  for (const { matchDate, stadium } of meetingsOf(matches, 'league')
+    .filter((meeting) => !meeting.home)
+    .toSorted(byPlayedOrder)) {
+    const name = stadium?.trim() ?? ''
+
+    if (name === '') {
+      continue
+    }
+
+    const key = stadiumKey(name)
+    const last = stadiums.at(-1)
+
+    if (last?.key === key) {
+      last.lastDay = matchDate
+    } else {
+      stadiums.push({ firstDay: matchDate, key, lastDay: matchDate, name })
+    }
+  }
+
+  return stadiums.map(({ firstDay, lastDay, name }) => ({ firstDay, lastDay, name }))
+}
+
 /** The seasons of the meetings, the newest first, each once. */
 export const seasonsOf = (matches: readonly PublicClubMatch[]) =>
   [...new Set(matches.map((match) => match.season))].sort().reverse()

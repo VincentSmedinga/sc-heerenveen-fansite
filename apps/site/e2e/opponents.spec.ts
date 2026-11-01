@@ -1,7 +1,8 @@
 import { expect, type Page, test } from '@playwright/test'
 
 // The page Tegenstanders and the page of a club, on the made-up matches of the checks: Testdorp
-// FC is met in the league, FC Maquette in the cup only.
+// FC is met in the league, FC Maquette in the cup only, and Voorbeeld United is visited twice
+// in the league in a stadium with two names.
 
 const columns = ['Gespeeld', 'Gewonnen', 'Gelijk', 'Verloren'] as const
 
@@ -185,6 +186,49 @@ test.describe('without JavaScript', () => {
 
     await expect(page).toHaveURL(/\/statistieken\/tegenstanders\/fc-maquette$/)
     await expect(page.getByRole('heading', { level: 2, name: 'Onze uitslagen tegen FC Maquette' })).toBeVisible()
+  })
+})
+
+test.describe('the page of a club', () => {
+  test('has the matches in the main column and the results and the stadiums in the sidebar', async ({ page }) => {
+    await page.goto('/statistieken/tegenstanders/voorbeeld-united')
+
+    await expect(page.getByRole('main').getByRole('heading', { level: 2, name: 'Wedstrijden' })).toBeVisible()
+    await expect(page.getByRole('main').getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toHaveCount(0)
+
+    const sidebar = page.getByRole('complementary', { name: 'Onze uitslagen, het stadion en de bron' })
+
+    await expect(sidebar.getByRole('heading', { level: 2 })).toHaveText([
+      'Onze uitslagen tegen Voorbeeld United',
+      'Stadions',
+    ])
+    await expect(sidebar.getByText(/^Bron: /)).toBeVisible()
+  })
+
+  test('names the stadium of a club that changed it, in the order we saw them', async ({ page }) => {
+    await page.goto('/statistieken/tegenstanders/voorbeeld-united')
+
+    // The checks also seed the season of a year ago, so the made-up names come twice: the old
+    // name, the new one, and then both again. A name that returns is a line of its own.
+    const items = page.getByRole('region', { name: 'Stadions' }).locator('li')
+
+    await expect(items).toHaveCount(4)
+    await expect(items.nth(0)).toContainText(/^tot .*Oud Voorbeeldpark$/)
+    await expect(items.nth(1)).toContainText(/^tot .*Voorbeeldpark$/)
+    await expect(items.nth(2)).toContainText(/^tot .*Oud Voorbeeldpark$/)
+    await expect(items.nth(3)).toContainText(/^vanaf .*Voorbeeldpark$/)
+    await expect(
+      page.getByRole('region', { name: 'Stadions' }).getByRole('link', { name: 'Stadions' }),
+    ).toHaveAttribute('href', '#stadion')
+  })
+
+  test('has no card Stadion for a club whose only league match was at home, and none for the cup', async ({ page }) => {
+    for (const club of ['testdorp-fc', 'fc-maquette']) {
+      await page.goto(`/statistieken/tegenstanders/${club}`)
+
+      await expect(page.getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: /^Stadions?$/ })).toHaveCount(0)
+    }
   })
 })
 

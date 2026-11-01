@@ -211,6 +211,72 @@ describe('the page of a club', () => {
     expect(html).not.toContain('Eredivisie 2023/24')
   })
 
+  it('has Wedstrijden on the white surface in the main column, and the summary and the stadiums in the sidebar', async () => {
+    const html = await render()
+    const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'))
+    const sidebar = html.slice(html.indexOf('<aside'), html.indexOf('</aside>'))
+
+    expect(main).toMatch(
+      /<section class="hf-card" aria-labelledby="wedstrijden">|<section aria-labelledby="wedstrijden" class="hf-card">/,
+    )
+    expect(main).not.toContain('id="onze-uitslagen"')
+    expect(sidebar).toMatch(
+      /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="onze-uitslagen"|aria-labelledby="onze-uitslagen"[^>]*class="hf-card hf-card-soft/,
+    )
+    expect(sidebar.indexOf('id="onze-uitslagen"')).toBeLessThan(sidebar.indexOf('id="stadion"'))
+    expect(sidebar.indexOf('id="stadion"')).toBeLessThan(sidebar.indexOf('Bron:'))
+    expect(html).not.toContain('hf-card-warm')
+  })
+
+  it('has the card Stadions on the strong surface, with each name and when we saw it, for a club that changed', async () => {
+    const html = await render()
+    const card = html.slice(html.indexOf('aria-labelledby="stadion"') - 40, html.indexOf('Zo noemt Wikipedia'))
+
+    expect(card).toContain('hf-card-strong')
+    expect(card).toMatch(/<h2[^>]*id="stadion"[^>]*>.*Stadions/)
+    expect(card).toContain('<a class="hf-heading-link" href="#stadion"')
+    expect(plain(card.slice(card.indexOf('<ul')))).toBe('tot 2 apr 2023 Oud Testpark vanaf 1 mrt 2025 Nieuw Testpark')
+    expect(html).toContain('De dagen zijn die van onze wedstrijden, niet van de dag dat de naam veranderde.')
+    expect(html).not.toContain('Neutraal Stadion')
+    expect(html).not.toContain('Abe Lenstra Stadion')
+  })
+
+  it('has the card Stadion with the name alone for a club with one name, and no periods', async () => {
+    vi.mocked(getClubPage).mockResolvedValue({ ...testclub, matches: testclub.matches.slice(0, 4) })
+
+    const html = await render()
+    const card = html.slice(html.indexOf('aria-labelledby="stadion"'), html.indexOf('Zo noemt Wikipedia'))
+
+    expect(card).toMatch(/<h2[^>]*id="stadion"[^>]*>.*Stadion</)
+    expect(plain(card.slice(card.indexOf('<ul')))).toBe('Nieuw Testpark')
+    expect(html).not.toContain('niet van de dag dat de naam veranderde')
+  })
+
+  it('has the same stadiums with the choice Eredivisie', async () => {
+    const html = await render('testclub', { competitie: 'eredivisie' })
+
+    expect(html).toContain('Oud Testpark')
+    expect(html).toContain('Nieuw Testpark')
+  })
+
+  it('has no card Stadion for a club we only visited in the cup, or without a stadium', async () => {
+    expect(await render('beker-united')).not.toContain('id="stadion"')
+
+    vi.mocked(getClubPage).mockResolvedValue({
+      ...testclub,
+      matches: testclub.matches.map((item) => ({ ...item, stadium: null })),
+    })
+
+    expect(await render()).not.toContain('id="stadion"')
+  })
+
+  it('has no cards and no sidebar for a club with the choice Eredivisie when we only met it in the cup', async () => {
+    const html = await render('beker-united', { competitie: 'eredivisie' })
+
+    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('hf-card')
+  })
+
   it('is the page "niet gevonden" for a slug that no club has', async () => {
     await expect(render('bestaat-niet')).rejects.toHaveProperty('digest', expect.stringContaining('404'))
   })
