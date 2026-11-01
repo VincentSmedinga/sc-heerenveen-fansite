@@ -9,7 +9,14 @@ import { seasonOf } from '@fansite/db/season'
 import type { ImportOptions } from './import-feeds.ts'
 
 import { createFetcher } from './fetcher.ts'
-import { formatMatchReport, importPastSeason, isPastSeason, isSeason, wikipediaOrigin } from './import-matches.ts'
+import {
+  formatMatchReport,
+  importPastSeason,
+  isPastSeason,
+  isSeason,
+  repairKnownClubs,
+  wikipediaOrigin,
+} from './import-matches.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { describeError } from './text.ts'
 
@@ -86,6 +93,11 @@ export async function runSeasonImport(
 
   try {
     const run = await withLock(pool, lockNameFor(databaseUrl, 'import'), 0, async () => {
+      // As in the hourly import: the clubs are right before the season is read.
+      for (const line of await repairKnownClubs(db, clock)) {
+        write(line)
+      }
+
       try {
         return await importPastSeason(db, makeFetcher(robotsStoreFor(db, clock)), parsed.season, { clock, origin })
       } catch (error) {

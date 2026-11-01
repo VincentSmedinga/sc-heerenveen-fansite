@@ -24,7 +24,7 @@ import type { LinkedGoal } from './import-matches.ts'
 import type { Handler, TestServer } from './test-server.ts'
 
 import { runImport } from './import-feeds.ts'
-import { formatMatchReport, importMatches, unlinkedWarning } from './import-matches.ts'
+import { formatMatchReport, importMatches, repairKnownClubs, unlinkedWarning } from './import-matches.ts'
 import { pageTitles, pageUrl } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
@@ -329,6 +329,51 @@ describe('reading again', () => {
     expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 12'))).toMatchObject([
       { kickoffAt: new Date('2027-01-20T19:00:00Z'), status: 'scheduled' },
     ])
+  })
+})
+
+describe('a cup round with days instead of a day', () => {
+  /** The cup page of the 25th, with the second round as Wikipedia has it on 1 November. */
+  const withSecondRound = `${original.cup}\n${fixture('wikipedia-cup-second-round.wiki')}`
+
+  it('stores the match of the second round with its first day, and the days as Wikipedia writes them', async () => {
+    const { server } = await serve({ cup: withSecondRound })
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 36, updated: 0 } })
+    expect(
+      await database.db
+        .select({
+          dateText: matches.dateText,
+          kickoffAt: matches.kickoffAt,
+          matchDate: matches.matchDate,
+          opponent: matches.opponent,
+          status: matches.status,
+        })
+        .from(matches)
+        .where(eq(matches.round, 'Tweede ronde')),
+    ).toEqual([
+      {
+        dateText: '1–3 december 2026',
+        kickoffAt: null,
+        matchDate: '2026-12-01',
+        opponent: 'De Treffers',
+        status: 'scheduled',
+      },
+    ])
+    expect(await importAt(server, new Date(first.getTime() + hours(1)))).toMatchObject({
+      matches: { added: 0, unchanged: 36, updated: 0 },
+    })
+  })
+
+  it('still stops on a date it does not know, and keeps the last good copy', async () => {
+    const { server } = await serve({ cup: withSecondRound.replaceAll('1–3 december 2026', 'begin december') })
+    const report = await importAt(server, first)
+
+    expect(formatMatchReport(report)).toContain(
+      "Matches 2026/27: warning, nothing changed and the last good copy stays: Tweede ronde (KNVB Beker) has a date we do not know: 'begin december'",
+    )
+    expect(await database.db.select().from(matches)).toEqual([])
   })
 })
 
@@ -828,7 +873,14 @@ describe('the clubs of the opponents', () => {
         )
     }
 
-    it('merges the two clubs of an earlier import on the next read, and logs it', async () => {
+    const mergeLines = [
+      "Clubs: merged club 'Excelsior Rotterdam' into club 'Excelsior'",
+      "Clubs: club 'Excelsior' is now called 'Excelsior Rotterdam'",
+      "Clubs: slug of club 'Excelsior Rotterdam' is now 'excelsior-rotterdam'",
+      "Clubs: new name 'SBV Excelsior' for club 'Excelsior Rotterdam'",
+    ]
+
+    it('merges the two clubs of an earlier import before the season is read, and logs it', async () => {
       await excelsiorTwice()
 
       expect((await excelsior()).clubs.filter((club) => club.name.startsWith('Excelsior'))).toEqual([
@@ -836,22 +888,78 @@ describe('the clubs of the opponents', () => {
         { name: 'Excelsior Rotterdam', slug: 'excelsior-rotterdam' },
       ])
 
-      const { server } = await serve()
-      const report = await importAt(server, first)
+      const lines = await repairKnownClubs(database.db)
       const found = await excelsior()
 
-      expect(formatMatchReport(report)).toContain(
-        "Matches 2026/27: merged club 'Excelsior Rotterdam' into club 'Excelsior'",
-      )
+      expect(lines).toEqual(mergeLines)
       expect(found.clubs.filter((club) => club.name.startsWith('Excelsior'))).toEqual([
-        { name: 'Excelsior Maassluis', slug: 'excelsior-maassluis' },
         { name: 'Excelsior Rotterdam', slug: 'excelsior-rotterdam' },
       ])
-      expect(found.matches).toHaveLength(5)
+      expect(found.matches).toHaveLength(3)
       expect(found.matches.every((row) => row.club === 'Excelsior Rotterdam')).toBe(true)
       expect(found.names).toEqual(expect.arrayContaining([{ club: 'Excelsior Rotterdam', name: 'Excelsior' }]))
-      // The match of the season that was read is not counted as updated: it was right already.
-      expect(report).toMatchObject({ matches: { added: 35, updated: 0 } })
+
+      // The read after it finds the clubs right: no match of the season counts as updated.
+      const { server } = await serve()
+
+      expect(await importAt(server, first)).toMatchObject({
+        clubs: expect.not.arrayContaining([expect.stringContaining('merged')]),
+        matches: { added: 35, updated: 0 },
+      })
+    })
+
+    it('merges the two clubs when the season cannot be read, and the run goes on', async () => {
+      await excelsiorTwice()
+
+      const { server } = await serve({ programme: 'Een kale pagina' })
+      const lines: string[] = []
+      const code = await runImport(database.url, {
+        clock: () => first,
+        makeFetcher: () => fetcherFor([server]),
+        wikipediaOrigin: server.origin,
+        write: (line) => lines.push(line),
+      })
+      const found = await excelsior()
+
+      expect(code).toBe(0)
+      expect(lines.filter((line) => /^(Clubs|Matches)/u.test(line))).toEqual([
+        ...mergeLines,
+        expect.stringContaining('Matches 2026/27: warning, nothing changed and the last good copy stays'),
+      ])
+      expect(found.clubs.filter((club) => club.name.startsWith('Excelsior'))).toEqual([
+        { name: 'Excelsior Rotterdam', slug: 'excelsior-rotterdam' },
+      ])
+      expect(found.matches).toHaveLength(3)
+      expect(found.matches.every((row) => row.club === 'Excelsior Rotterdam')).toBe(true)
+    })
+
+    it('makes a warning of a repair that fails, on the health of the season, and does not throw', async () => {
+      await excelsiorTwice()
+
+      const failing = Object.create(database.db, {
+        transaction: { value: () => Promise.reject(new Error('Deadlock found when trying to get lock')) },
+      }) as typeof database.db
+      const warning = 'clubs not repaired: Deadlock found when trying to get lock'
+
+      expect(await repairKnownClubs(failing, () => first)).toEqual([`Clubs: warning, ${warning}`])
+      expect(await database.db.select().from(matchImports)).toEqual([
+        expect.objectContaining({ lastWarning: warning, lastWarningAt: first, season: '2026/27' }),
+      ])
+      // Nothing was merged, and the next run tries again.
+      expect((await excelsior()).clubs.filter((club) => club.name.startsWith('Excelsior'))).toHaveLength(2)
+
+      // The health of a season that was read stays, and the warning is added to it.
+      const { server } = await serve()
+
+      await importAt(server, first)
+
+      const later = new Date(first.getTime() + hours(2))
+
+      expect(await repairKnownClubs(failing, () => later)).toEqual([`Clubs: warning, ${warning}`])
+
+      const [health] = await database.db.select().from(matchImports)
+
+      expect(health).toMatchObject({ lastOutcome: 'imported', lastSuccessAt: first, lastWarningAt: later })
     })
 
     it('changes nothing when it reads again', async () => {

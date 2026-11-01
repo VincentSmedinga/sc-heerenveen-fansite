@@ -696,6 +696,13 @@ Met `action=raw` krijgt de import de wikitekst van de pagina, en leest `read-wik
 - De aftrap staat in UTC (`kickoff_at`), omgerekend uit de tijd in Nederland.
   Staat er geen tijd, zoals bij speelronde 22 tot en met 32 tot 22 december 2026, dan is `kickoff_at` leeg en staat de datum zoals Wikipedia die geeft in `date_text`, zoals `12-14 februari 2027`.
   `match_date` is dan de eerste dag.
+- Een datum van meer dagen, voor een weekend of een bekerronde, leest de import in elke schrijfwijze die Wikipedia gebruikt.
+  De dagen staan achter elkaar met een koppelteken of een gedachtestreepje, met of zonder spaties erom: `12-14 februari 2027`, `1–3 december 2026` en `1 – 3 december 2026`.
+  Over twee maanden staat de tweede maand erbij: `30 november–2 december 2026`.
+  Het jaar staat achter de laatste dag, en mag ook achter de eerste staan: `31 december 2026 – 2 januari 2027`.
+  Staat het jaar alleen achter de laatste dag en loopt de datum door het nieuwe jaar (`31 december–2 januari 2027`), dan hoort de eerste dag bij het jaar ervoor.
+  Een datum van meer dagen heeft nooit een aftrap, ook niet als de pagina een tijd geeft: `kickoff_at` is leeg, en `date_text` heeft de tekst van Wikipedia.
+  Een datum zonder jaar, een laatste dag voor de eerste of een dag die niet bestaat kent de import niet: dat is een fout, en de import verandert niets (zie _Slaagt of mislukt_).
 - De stand heeft alleen gewonnen, gelijk, verloren en de doelpunten; gespeeld en punten rekent de import uit.
   `valid_on` is de dag van de laatste competitiewedstrijd die iemand speelde.
 - Een rij van een eerder seizoen verandert of verdwijnt nooit, en de import leest die seizoenen niet.
@@ -756,10 +763,20 @@ Een club die de import onder zo'n naam maakt, krijgt de slug van de volledige na
 Een naam die niet in de lijst staat, werkt zoals hierboven: `Excelsior Maassluis`, een amateurclub in de beker, is een andere club.
 
 De lijst herstelt ook wat er al in de database staat.
-Vóór hij de wedstrijden van een seizoen schrijft, zoekt de import in dezelfde transactie de clubs van de lijst die er twee keer staan of onder een andere naam (`repairClubs`, zie de README van `@fansite/db`).
-Hij voegt ze samen en zet de volledige naam en de slug goed.
+Aan het begin van elke run, vóór een seizoen wordt gelezen, zoekt de import de clubs van de lijst die er twee keer staan of onder een andere naam (`repairKnownClubs`, dat `repairClubs` draait, zie de README van `@fansite/db`).
+Hij voegt ze samen en zet de volledige naam en de slug goed, in een eigen transactie.
+Het herstel wacht dus niet op een seizoen dat te lezen is: ook als de import van het seizoen stilstaat, bijvoorbeeld op een datum die de reader niet kent, staan de clubs goed.
+Het commando voor een afgelopen seizoen (`pnpm import:season`) herstelt de clubs ook, vóór hij het seizoen leest.
 Hebben twee van die clubs elk een eigen artikel, dan laat hij ze staan en zegt dat in het logboek: één artikel is één club.
-Een tweede lezing verandert niets en schrijft geen regel.
+Elke samenvoeging, naamswijziging en nieuwe naam staat in de uitvoer van de run, met `Clubs:` vooraan:
+
+```text
+Clubs: merged club 'Excelsior' into club 'Excelsior Rotterdam'
+```
+
+Een tweede run verandert niets en schrijft geen regel.
+Faalt het herstel, dan stopt de import niet.
+De run schrijft `Clubs: warning, clubs not repaired: <reden>`, de waarschuwing komt in `match_imports` (`last_warning`) van het lopende seizoen, en de volgende run probeert het opnieuw.
 
 Een club aan de lijst toevoegen:
 
@@ -768,7 +785,7 @@ Een club aan de lijst toevoegen:
 2. Zet in `clubFullNames` een regel met `name` (de volledige naam) en `aliases` (de andere schrijfwijzen, zoals Wikipedia ze in wedstrijden schrijft).
    Een naam staat hoogstens één keer in de lijst, hoofdletters, accenten en leestekens niet meegeteld.
 3. Zet een test in [`src/import-matches.test.ts`](src/import-matches.test.ts) bij _a club the list of full names knows_.
-4. De volgende lezing van een seizoen voegt de dubbele club samen.
+4. De volgende run voegt de dubbele club samen, vóór hij een seizoen leest.
    De wedstrijden van elk seizoen gaan mee naar de club die blijft, ook die van seizoenen die de import niet meer leest.
 
 `otherClubGroups` in `relevance-terms.ts` is een andere lijst met een ander doel, het filter van de koppen, en blijft zoals hij is.
@@ -786,10 +803,9 @@ Matches 2026/27: article 'PEC Zwolle' for club 'PEC Zwolle'
 Matches 2026/27: club 'Telstar' is now called 'Telstar 1963'
 Matches 2026/27: new name 'Telstar' for club 'Telstar 1963'
 Matches 2026/27: name 'Excelsior' stays with club 'Excelsior', not added to club 'Quick'
-Matches 2026/27: merged club 'Excelsior' into club 'Excelsior Rotterdam'
-Matches 2026/27: club 'Excelsior' is now called 'Excelsior Rotterdam'
-Matches 2026/27: slug of club 'Excelsior Rotterdam' is now 'excelsior-rotterdam'
 ```
+
+Het herstel van een dubbele club staat er niet bij: het draait vóór de seizoenen, en zijn regels beginnen met `Clubs:` (zie hierboven).
 
 Een club is geen persoon, dus de regels hebben alleen de naam en het artikel.
 De eerste lezing van een seizoen schrijft een regel per club, zo'n zeventien; daarna komt er alleen een regel als er iets nieuws is.
@@ -840,6 +856,8 @@ Matches 2026/27: warning, nothing changed and the last good copy stays: the row 
 De mislukte poging staat in `match_imports` (`failures_in_a_row`, `last_error`), en `pnpm run import:status` laat hem zien.
 Na drie mislukte runs op rij is de import ongezond, zoals een feed, en stopt het overzicht met exitcode 1.
 De run zelf stopt niet met exitcode 1: een tikfout op Wikipedia is geen fout van de importer.
+Een import die stilstaat, ziet de eigenaar dus op de host: elke run schrijft de regel hierboven in `~/fansite-import.log` en in de uitvoer van de run, en `pnpm run import:status` (op de host `import.mjs --status`) toont de teller, de laatste fout en het laatste geslaagde moment.
+Er is nog geen melding en geen pagina in het beheer die het zegt.
 De feeds, de wedstrijden en de selectie lopen in dezelfde run, maar een fout in de ene stopt de andere niet.
 Een pagina vastzetten op een oude versie doet de import niet.
 

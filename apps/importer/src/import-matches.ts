@@ -246,6 +246,42 @@ export function isUnhealthy(health: Pick<MatchImport, 'failuresInARow'>): boolea
 }
 
 /**
+ * Makes the clubs of `club-names.ts` right in the database: a club that is there twice, or
+ * under another name, is merged and gets its full name and its slug (`repairClubs` in the
+ * database package). It runs at the start of every import run, before any season is read, in a
+ * transaction of its own, and so does not wait for a season that can be read and stored. A run
+ * that has nothing to repair writes nothing. Returns the lines for the log, one for each thing
+ * it did, in English.
+ *
+ * A failure is no reason to stop the import: it gives a line that says so, and the warning goes
+ * on the health of the current season (`match_imports`), where `pnpm run import:status` shows
+ * it. The next run tries again. It never throws: when the warning can't be written either, the
+ * line says that too.
+ */
+export async function repairKnownClubs(db: Database, clock: () => Date = () => new Date()): Promise<string[]> {
+  try {
+    const events = await db.transaction((transaction) => repairClubs(transaction, clubFullNames))
+
+    return events.map((event) => `Clubs: ${printable(event)}`)
+  } catch (error) {
+    const now = clock()
+    const warning = printable(`clubs not repaired: ${describeError(error)}`)
+    const values = { lastWarning: warning, lastWarningAt: now }
+
+    try {
+      await db
+        .insert(matchImports)
+        .values({ lastOutcome: 'error', season: seasonOf(now), ...values })
+        .onDuplicateKeyUpdate({ set: values })
+
+      return [`Clubs: warning, ${warning}`]
+    } catch (writeError) {
+      return [`Clubs: warning, ${warning}; the warning was not saved: ${describeError(writeError)}`]
+    }
+  }
+}
+
+/**
  * A cup page without a template is no cup matches yet, early in a season. It is the page we
  * know only if the cup matches we have did not come from that page: when we read cup matches
  * from it before, a page that has none now has changed shape, and the import keeps what it has.
@@ -536,10 +572,10 @@ async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: 
  * squad has him, and a goal that is linked keeps its link until the table says otherwise. A
  * goal of ours that has no player is a warning too (once the squad has been read), and no
  * reason to keep the match out. Every match gets its club (`clubs.ts` in the database package):
- * the club with the article the match links, or else with the name, or a new one. A club of
- * `club-names.ts` that is in the database twice is merged first, and its names are the full
- * name and the spellings of the list. What that made or changed comes back as lines for the
- * log.
+ * the club with the article the match links, or else with the name, or a new one, by the full
+ * names and spellings of `club-names.ts`. A club of that list that is in the database twice is
+ * merged before the import reads a season (`repairKnownClubs`). What the import made or changed
+ * comes back as lines for the log.
  */
 async function storeMatches(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
@@ -547,8 +583,7 @@ async function storeMatches(
   found: ReadMatch[],
   now: Date,
 ) {
-  // Before the matches are read: a merged club moves its matches to the club that stays.
-  const clubLines = await repairClubs(db, clubFullNames)
+  const clubLines: string[] = []
   const known = new Map(
     (await db.select().from(matches).where(eq(matches.season, season))).map((row) => [key(row), row]),
   )
