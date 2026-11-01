@@ -170,6 +170,87 @@ describe('saveEntry', () => {
     expect(await stored(id)).toMatchObject({ kickoffAt: new Date('2026-10-31T18:00:00Z'), resultSetAt: null })
   })
 
+  describe('a goal that the import stored', () => {
+    /** A played match with two goals as the import keeps them, with links and short names. */
+    async function importedMatch() {
+      const id = await addMatch({ goalsAgainst: 1, goalsFor: 1, status: 'played' })
+      const [{ id: playerId }] = await database.db
+        .insert(players)
+        .values({
+          name: 'Luca Oyen',
+          position: 'aanvaller',
+          searchTerm: 'oyen',
+          season: '2026/27',
+          wikipediaPage: 'Luca Oyen',
+        })
+        .$returningId()
+        .then((rows) => rows as [{ id: number }])
+
+      await database.db.insert(matchGoals).values([
+        { matchId: id, minute: 12, ours: true, player: 'Oyen', playerId, wikipediaPage: 'Luca Oyen' },
+        { matchId: id, minute: 40, ours: false, player: 'Sibbing', wikipediaPage: 'Sven Sibbing' },
+      ])
+
+      // What the form gives back for those goals: the name of the player table, and no link
+      // for a player of the opponent.
+      const asEntered = [
+        goal({ minute: 12, player: 'Luca Oyen', playerId, wikipediaPage: 'Luca Oyen' }),
+        goal({ minute: 40, ours: false, player: 'Sibbing' }),
+      ]
+
+      return { asEntered, id, playerId }
+    }
+
+    const sameResult = { ...entry().result, goalsAgainst: 1, goalsFor: 1 }
+
+    it('is no change when the form gives back the same goals without the links', async () => {
+      const { asEntered, id } = await importedMatch()
+
+      expect(
+        await saveEntry(
+          database.db,
+          userId,
+          id,
+          entry({
+            goals: asEntered,
+            kickoff: { dateText: null, kickoffAt: new Date('2026-10-31T18:00:00Z'), matchDate: '2026-10-31' },
+            result: sameResult,
+          }),
+          'Alleen de aftrap',
+          t0,
+        ),
+      ).toEqual({ parts: ['kickoff'], status: 'saved' })
+      expect(markedParts((await edit(id))!)).toEqual(['kickoff'])
+      expect(await goalsOf(id)).toMatchObject([
+        { player: 'Oyen', wikipediaPage: 'Luca Oyen' },
+        { player: 'Sibbing', wikipediaPage: 'Sven Sibbing' },
+      ])
+      expect((await log())[0]?.detail).not.toContain('Doelpunten')
+    })
+
+    it('keeps the link and the name of the goals that did not change when one goal does', async () => {
+      const { asEntered, id } = await importedMatch()
+
+      await saveEntry(
+        database.db,
+        userId,
+        id,
+        entry({ goals: [asEntered[0]!, goal({ minute: 41, ours: false, player: 'Sibbing' })], result: sameResult }),
+        'Een minuut later',
+        t0,
+      )
+
+      expect(markedParts((await edit(id))!)).toEqual(['goals'])
+      expect((await goalsOf(id)).map((row) => [row.minute, row.player, row.ours])).toEqual([
+        [12, 'Oyen', true],
+        [41, 'Sibbing', false],
+      ])
+      expect(
+        (await database.db.select().from(matchGoals).orderBy(asc(matchGoals.id))).map((row) => row.wikipediaPage),
+      ).toEqual(['Luca Oyen', null])
+    })
+  })
+
   it('stores and logs nothing for a save that changes nothing', async () => {
     const id = await addMatch()
 

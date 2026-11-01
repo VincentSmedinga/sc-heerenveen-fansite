@@ -6324,6 +6324,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - De invoer zet `result_set_at` op het moment van de invoer, en een uitslag die verdwijnt zet het op leeg.
     Een status die niet "gespeeld" is, maakt het aantal toeschouwers leeg, want de database staat dat niet toe.
   - Een invoer die niets verandert, schrijft niets en komt niet in het logboek.
+    Het formulier kan niet teruggeven wat de import van een doelpunt bewaart: de link naar de pagina van de doelpuntenmaker en zijn naam zoals Wikipedia hem schrijft.
+    Een doelpunt van ons is daarom hetzelfde als het dezelfde speler heeft, en een ander doelpunt als de naam in hoofdletters en kleine letters overeenkomt.
+    Een doelpunt dat niet veranderde, houdt zijn link en zijn naam als de redacteur een ander doelpunt aanpast.
   - Een wijziging van Wikipedia die voor die wedstrijd wachtte in `match_changes`, vervalt bij een invoer (`replaced`): de invoer is nieuwer.
     Anders zou `pnpm run import:changes accept` de invoer later ongemerkt overschrijven.
   - "Weghalen" zet alleen terug wat nog een markering heeft.

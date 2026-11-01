@@ -261,7 +261,7 @@ describe('the lines the log and the page use', () => {
   it('writes a kick-off in Dutch time, or the date as it is given', () => {
     expect(
       describeEntryKickoff({ dateText: null, kickoffAt: new Date('2026-10-31T17:45:00Z'), matchDate: '2026-10-31' }),
-    ).toBe('31 oktober 2026 18:45')
+    ).toBe('31 oktober 2026 om 18:45')
     expect(describeEntryKickoff({ dateText: '12-14 februari 2027', kickoffAt: null, matchDate: '2027-02-12' })).toBe(
       '12-14 februari 2027',
     )

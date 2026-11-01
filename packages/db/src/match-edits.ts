@@ -126,7 +126,7 @@ export function describeEntryKickoff(match: KickoffFields): string {
     timeZone: 'Europe/Amsterdam',
   }).format(match.kickoffAt)
 
-  return `${day} ${time}`
+  return `${day} om ${time}`
 }
 
 /** The result as a line, from the side of the home club: `sc Heerenveen 2-1 N.E.C.`. */

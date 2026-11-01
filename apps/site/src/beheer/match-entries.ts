@@ -15,7 +15,7 @@ import {
 import { adminUsers, matchChanges, matchEdits, matches, matchGoals, players } from '@fansite/db/schema'
 import { and, asc, eq } from 'drizzle-orm'
 
-import type { MatchEntry, SquadPlayer } from './match-form'
+import type { EntryGoal, MatchEntry, SquadPlayer } from './match-form'
 
 import { lacksResult } from '../matches'
 import { recordAction } from './audit-log'
@@ -163,7 +163,9 @@ export async function saveEntry(
       await transaction.delete(matchGoals).where(eq(matchGoals.matchId, id))
 
       if (entry.goals.length > 0) {
-        await transaction.insert(matchGoals).values(entry.goals.map((goal) => ({ ...goal, matchId: id })))
+        await transaction
+          .insert(matchGoals)
+          .values(keepStoredLinks(goals, entry.goals).map((goal) => ({ ...goal, matchId: id })))
       }
     }
 
@@ -293,19 +295,7 @@ function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry): Matc
     parts.push('result')
   }
 
-  const key = (goal: Omit<MatchEntry['goals'][number], never>) =>
-    [
-      goal.ours,
-      goal.minute,
-      goal.stoppageMinutes ?? null,
-      goal.player,
-      goal.playerId ?? null,
-      goal.wikipediaPage ?? null,
-      goal.ownGoal ?? false,
-      goal.penalty ?? false,
-    ].join('|')
-
-  if (goals.map(key).join(';') !== entry.goals.map(key).join(';')) {
+  if (!sameGoals(goals, entry.goals)) {
     parts.push('goals')
   }
 
@@ -329,4 +319,47 @@ function describeChanges(match: Match, goals: MatchGoal[], entry: MatchEntry, pa
   }
 
   return lines.join('; ')
+}
+
+/**
+ * Whether a stored goal is the goal of the entry. The form can not give back what the import
+ * keeps of a goal: the link of the scorer to his page on Wikipedia, and his name as Wikipedia
+ * writes it. So a scorer of ours is the same by his player, and any other scorer by his name in
+ * any case.
+ */
+function isSameGoal(
+  stored: Pick<MatchGoal, 'minute' | 'ours' | 'ownGoal' | 'penalty' | 'player' | 'playerId' | 'stoppageMinutes'>,
+  entry: EntryGoal,
+) {
+  return (
+    stored.ours === entry.ours &&
+    stored.minute === entry.minute &&
+    (stored.stoppageMinutes ?? null) === (entry.stoppageMinutes ?? null) &&
+    stored.ownGoal === entry.ownGoal &&
+    stored.penalty === entry.penalty &&
+    (stored.playerId === null || entry.playerId === null
+      ? stored.playerId === entry.playerId &&
+        stored.player.toLocaleLowerCase('nl') === entry.player.toLocaleLowerCase('nl')
+      : stored.playerId === entry.playerId)
+  )
+}
+
+/**
+ * The goals of the entry, where a goal that did not change keeps what the import stored of it:
+ * the link to the page of its scorer and his name as Wikipedia writes it.
+ */
+function keepStoredLinks(stored: MatchGoal[], entry: EntryGoal[]): EntryGoal[] {
+  const left = [...stored]
+
+  return entry.map((goal) => {
+    const at = left.findIndex((candidate) => isSameGoal(candidate, goal))
+    const [found] = at === -1 ? [] : left.splice(at, 1)
+
+    return found === undefined ? goal : { ...goal, player: found.player, wikipediaPage: found.wikipediaPage }
+  })
+}
+
+/** Whether the goals of the entry are the stored goals, in the same order. */
+function sameGoals(stored: MatchGoal[], entry: EntryGoal[]) {
+  return stored.length === entry.length && stored.every((goal, index) => isSameGoal(goal, entry[index]!))
 }
