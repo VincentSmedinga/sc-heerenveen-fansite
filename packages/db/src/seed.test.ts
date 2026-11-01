@@ -752,6 +752,7 @@ describe('the made-up matches', () => {
       'Eredivisie 2026/27 (mannenvoetbal)',
       'Eredivisie 2026/27 (mannenvoetbal)/Wedstrijden',
       'KNVB Beker 2026/27 (mannen)',
+      'Play-offs Nederlands voetbal 2027',
     ])
     expect(pages.every((page) => page.readAt.getTime() === now.getTime())).toBe(true)
   })

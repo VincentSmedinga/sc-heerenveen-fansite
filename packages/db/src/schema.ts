@@ -499,9 +499,21 @@ export const articleVersions = mysqlTable(
 
 export type ArticleVersion = typeof articleVersions.$inferSelect
 
-export const competitions = ['Eredivisie', 'KNVB Beker'] as const
+/**
+ * The competitions of a match. `Play-offs Conference League` is the match or two that decide
+ * the ticket for the second qualifying round after the league season.
+ */
+export const competitions = ['Eredivisie', 'KNVB Beker', 'Play-offs Conference League'] as const
 
 export type Competition = (typeof competitions)[number]
+
+/**
+ * The competitions the squad table has numbers for. The play-offs are not in it, so they have
+ * no rows in `player_season_stats`.
+ */
+export const statsCompetitions = ['Eredivisie', 'KNVB Beker'] as const
+
+export type StatsCompetition = (typeof statsCompetitions)[number]
 
 /**
  * Where a match stands: `scheduled` is still to be played (with or without a time), `played`
@@ -581,20 +593,21 @@ export type ClubName = typeof clubNames.$inferSelect
 export type NewClubName = typeof clubNames.$inferInsert
 
 /**
- * The matches of sc Heerenveen 1 (men), from the Dutch Wikipedia: the Eredivisie and the KNVB
- * Beker. A season starts on 1 July and is written `2026/27`. The importer reads the current
- * season only and never changes or removes the rows of an earlier one.
+ * The matches of sc Heerenveen 1 (men), from the Dutch Wikipedia: the Eredivisie, the KNVB
+ * Beker and the play-offs for the Conference League. A season starts on 1 July and is written
+ * `2026/27`. The importer reads the current season only and never changes or removes the rows
+ * of an earlier one.
  *
  * `round` is the label as Wikipedia has it, such as `Speelronde 12` or `Eerste ronde`; it is
  * unique per season and competition, because sc Heerenveen plays one match in each. `home` is
  * true for a match at the Abe Lenstra Stadion. `goals_for` and `goals_against` are the goals
  * of sc Heerenveen and of the opponent, and both are empty unless the match is `played`.
  *
- * `extra_time` is true when a played cup match went to extra time. When the score was still
- * level after that, a shoot-out decides it, and `penalties_for` and `penalties_against` hold
- * its score from the side of sc Heerenveen and of the opponent: both or neither. Only the cup
- * has them, and `goals_for` and `goals_against` stay the score as Wikipedia gives it, shoot-out
- * not included.
+ * `extra_time` is true when a played match of the cup or the play-offs went to extra time.
+ * When the score was still level after that, a shoot-out decides it, and `penalties_for` and
+ * `penalties_against` hold its score from the side of sc Heerenveen and of the opponent: both
+ * or neither. Only the cup and the play-offs have them, and `goals_for` and `goals_against`
+ * stay the score as Wikipedia gives it, shoot-out not included.
  *
  * `match_date` is the local day (Europe/Amsterdam), or the first day when Wikipedia only knows
  * a weekend. `kickoff_at` is the kick-off in UTC and is empty while the time is unknown: the
@@ -641,8 +654,8 @@ export const matches = mysqlTable(
     ),
     check('matches_time_or_text', sql`${table.kickoffAt} is not null or ${table.dateText} is not null`),
     check(
-      'matches_extra_time_only_in_played_cup',
-      sql`${table.extraTime} = 0 or (${table.status} = 'played' and ${table.competition} = 'KNVB Beker')`,
+      'matches_extra_time_only_in_played_knockout',
+      sql`${table.extraTime} = 0 or (${table.status} = 'played' and ${table.competition} in ('KNVB Beker', 'Play-offs Conference League'))`,
     ),
     check(
       'matches_penalties_in_a_pair',
@@ -748,7 +761,7 @@ export type NewStandingsRow = typeof standings.$inferInsert
 export type StandingsRow = typeof standings.$inferSelect
 
 /** The pages that hold the matches and the table: what `/wedstrijden` credits. */
-export const matchPageKinds = ['standings', 'programme', 'cup'] as const
+export const matchPageKinds = ['standings', 'programme', 'cup', 'playoffs'] as const
 
 export type MatchPageKind = (typeof matchPageKinds)[number]
 
@@ -758,7 +771,7 @@ export type WikipediaPageKind = (typeof wikipediaPageKinds)[number]
 
 /**
  * The Wikipedia pages the importer read the last time it succeeded, so a page can credit its
- * source: the three pages of the matches and the page of the squad. `title` is the title of the
+ * source: the pages of the matches and the page of the squad. `title` is the title of the
  * page, such as `KNVB Beker 2026/27 (mannen)`. `version` is the `Last-Modified` of the page as
  * Wikipedia sent it: the raw text of a page comes without a revision number, and this is the
  * time of the revision we read. `read_at` is the last time the page was read and every check
@@ -944,7 +957,7 @@ export const playerSeasonStats = mysqlTable(
       .notNull()
       .references(() => players.id, { onDelete: 'cascade' }),
     season: varchar('season', { length: matchLimits.season }).notNull(),
-    competition: mysqlEnum('competition', competitions).notNull(),
+    competition: mysqlEnum('competition', statsCompetitions).notNull(),
     appearances: int('appearances', { unsigned: true }).notNull(),
     goals: int('goals', { unsigned: true }).notNull(),
     assists: int('assists', { unsigned: true }).notNull(),

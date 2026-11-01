@@ -792,6 +792,32 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html).toContain('wo 28 okt 19:45')
   })
 
+  it('shows a match of the play-offs as the previous match, with its competition and round', async () => {
+    const [first, second, third, cup, ...rest] = matchData.matches
+
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: [
+        first!,
+        second!,
+        third!,
+        {
+          ...cup!,
+          competition: 'Play-offs Conference League',
+          opponent: 'FC Voorbeeld',
+          round: 'Halve finale',
+        },
+        ...rest,
+      ],
+    })
+
+    const html = await renderMatchesCard()
+
+    expect(html).toContain('Play-offs Conference League <span aria-hidden="true">·</span> Halve finale')
+    expect(html.indexOf('Halve finale')).toBeLessThan(html.indexOf('Speelronde 10'))
+    expect(html).not.toContain('KNVB Beker')
+  })
+
   describe('a match that has begun and has no result', () => {
     // The Tweede ronde of the cup, played on 20 October, is taken as a match with no result.
     const withoutResult = () => {

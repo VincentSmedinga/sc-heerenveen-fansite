@@ -808,7 +808,7 @@ await withEmptyDatabase((database) =>
     assert.match(statisticsHtml, /<h2[^>]*id="reeksen">.*?href="#reeksen">Reeks/s)
     assert.match(
       statisticsHtml,
-      /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie en de KNVB Beker dit seizoen<\/caption>/,
+      /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie, de KNVB Beker en de play-offs dit seizoen<\/caption>/,
     )
     assert.match(statisticsHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
     assert.match(statisticsHtml, /Gebaseerd op (?:alle \d+|1) gespeelde wedstrijd/)

@@ -1,0 +1,226 @@
+<!--
+  The play-offs of 2025 (the season 2024/25), with the semi-final of sc Heerenveen against AZ.
+  https://nl.wikipedia.org/wiki/Play-offs_Nederlands_voetbal_2025?action=raw, read on 1 November 2026, cut off after the first
+  match of the play-offs for promotion and relegation. The rest of the page is left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+De '''play-offs van het [[Voetbal in Nederland|Nederlands voetbal]] in 2025''' werden na afloop van de reguliere competitie gespeeld. Hierin streden 4 clubs uit de [[Eredivisie (mannenvoetbal)|Eredivisie]] voor deelname aan de [[UEFA Conference League]]. Daarnaast speelden een zevental clubs voor [[Promotie en degradatie|promotie/handhaving]] naar/in de Eredivisie. Tijdens deze wedstrijden was er ook een video-assistent (VAR) aanwezig.
+
+Daarnaast speelden een achttal clubs voor promotie/handhaving naar/in de [[Tweede divisie (voetbal Nederland)|Tweede divisie]] en een zestiental clubs voor promotie/handhaving naar/in de [[Derde divisie (voetbal Nederland)|Derde divisie]].
+
+== Play-offs voor de UEFA Conference League ==
+Deze play-offs werden gespeeld door de nummers 5, 6, 8 en 9 van de [[Eredivisie 2024/25 (mannenvoetbal)|Eredivisie]]. Aan het eind van het seizoen werden de volgende Europese tickets toegewezen:<ref>[https://x.com/KNVB/status/1922748346466242812 Speelschema Eredivisie play-offs voor Europees ticket 2024/25, Toelichting KNVB]</ref>
+
+* Eredivisie #1: competitiefase Champions League
+* Eredivisie #2: competitiefase Champions League
+* Eredivisie #3: derde voorronde Champions League
+* Eredivisie #4: tweede voorronde Europa League
+* Bekerwinnaar(/Eredivisie #7): competitiefase Europa League (ticket van het KNVB Bekertoernooi) <sup>1</sup>
+* Eredivisie play-offs (#5, #6, #8 of #9): tweede voorronde Conference League <sup>1</sup>
+
+<sup>1</sup> De clubs op de plekken vijf tot en met acht spelen normaliter in de play-offs om één ticket dat recht geeft tot toegang tot de tweede kwalificatieronde van de Conference League. Dat zijn respectievelijk AZ, FC Twente, Go Ahead Eagles en N.E.C. Go Ahead Eagles plaatst zich direct voor de competitiefase van de Europa League, omdat zij de [[KNVB Beker|TOTO KNVB Beker]] heeft gewonnen, hoeft in dit geval niet de play-offs te spelen en daarom krijgt ook de nummer negen (sc Heerenveen) een ticket voor de play-offs.
+
+De play-offs werden over één wedstrijd per ronde gespeeld met als regel dat bij een gelijke stand na 90 minuten er werd verlengd en eventueel overgaan werd op het nemen van strafschoppen. De club met de hoogste classificatie speelde thuis.
+
+=== Wedstrijdschema ===
+{{Wedstrijdschema laatste 4 zonder 3 met seeds
+| RD1 = '''halve finales'''<br />22 mei
+| RD2 = '''finale'''<br />25 mei
+| score-width = 20
+| RD1-seed1 = '''ERE5'''
+| RD1-team1 = '''[[AZ (voetbalclub)|AZ]]'''
+| RD1-score1-1 = '''4'''
+| RD1-seed2 = '''ERE9'''
+| RD1-team2 = [[sc Heerenveen]]
+| RD1-score2-1 = 1
+| RD1-seed3 = '''ERE6'''
+| RD1-team3 = '''[[FC Twente]] ([[Verlenging|w.n.v.]])'''
+| RD1-score3-1 = '''3'''
+| RD1-seed4 = '''ERE8'''
+| RD1-team4 = [[N.E.C.]]
+| RD1-score4-1 = 2
+| RD2-seed1 = '''A'''
+| RD2-team1 = '''[[AZ (voetbalclub)|AZ]]'''
+| RD2-score1-1 = '''3'''
+| RD2-seed2 = '''B'''
+| RD2-team2 = [[FC Twente]]
+| RD2-score2-1 = 2
+}}
+
+=== Halve finales ===
+==== Wedstrijd A ====
+{{Footballbox2
+|date = 22 mei 2025
+|time = 18:45 uur
+|team1 = '''[[AZ (voetbalclub)|AZ]]'''
+|score = 4 – 1
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Mexx Meerdink|Meerdink]] {{goal|3||21||45}}<br />[[Alexandre Penetra|Penetra]] {{goal|66}}
+|goals2 = {{goal|74}} [[Ion Nicolaescu|Nicolaescu]]
+|location = [[Alkmaar]]
+|stadium = [[AFAS Stadion]]
+|attendance = 12.007
+|referee = [[Marc Nagtegaal|Nagtegaal]]
+|videoreferee = [[Jochem Kamphuis|Kamphuis]]
+|report = [https://nos.nl/artikel/2568333-messcherpe-meerdink-schiet-az-met-hattrick-naar-finale-play-offs Verslag]
+}}
+
+==== Wedstrijd B ====
+{{Footballbox2
+|date = 22 mei 2025
+|time = 21:00 uur
+|team1 = '''[[FC Twente]]'''
+|score = 3 – 2
+|aet = ja
+|team2 = [[N.E.C.]]
+|goals1 = [[Michal Sadílek|Sadílek]] {{goal|16}}<br />[[Alec Van Hoorenbeeck|Van Hoorenbeeck]] {{rode kaart|0|41}}<br />[[Sem Steijn|Steijn]] {{goal|62}}<br />[[Younes Taha|Taha]] {{goal|94}}
+|goals2 = {{goal|47}} [[Kodai Sano|Sano]]<br />{{goal|57}} [[Vito van Crooij|Van Crooij]]
+|location = [[Enschede]]
+|stadium = [[De Grolsch Veste]]
+|attendance = 27.000
+|referee = [[Sander van der Eijk|Van der Eijk]]
+|videoreferee = [[Dennis Higler|Higler]]
+|report = [https://nos.nl/artikel/2568352-twente-is-finalist-in-play-offs-na-enerverende-comeback-tegen-nec Verslag]
+}}
+
+=== Finale ===
+==== Wedstrijd C ====
+{{Footballbox2
+|date = 25 mei 2025
+|time = 18:00 uur
+|team1 = '''[[AZ (voetbalclub)|AZ]]'''
+|score = 3 – 2
+|team2 = [[FC Twente]]
+|goals1 = [[Mexx Meerdink|Meerdink]] {{goal|43}}<br />[[Ruben van Bommel|Van Bommel]] {{goal|53}}<br />[[Ibrahim Sadiq|Sadiq]] {{goal|90+3}}
+|goals2 = {{goal|22|pen.|40}} [[Sem Steijn|Steijn]]
+|location = [[Alkmaar]]
+|stadium = [[AFAS Stadion]]
+|attendance = 14.154
+|referee = [[Serdar Gözübüyük|Gözübüyük]]
+|videoreferee = [[Pol van Boekel|Van Boekel]]
+|report = [https://nos.nl/artikel/2568706-sadiq-schiet-az-ver-in-blessuretijd-langs-fc-twente-en-naar-europees-voetbal Verslag]
+|info = '''Bijz.:''' '''AZ''' plaatste zich voor de tweede voorronde van de [[UEFA Conference League 2025/26|Conference League]].
+}}
+
+== Play-offs om promotie/degradatie Eredivisie/Eerste divisie ==
+In de periode van 12 mei tot en met 1 juni werden de play-offs om promotie/degradatie tussen de [[Eerste divisie (voetbal Nederland)|Eerste divisie]] en de [[Eredivisie (mannenvoetbal)|Eredivisie]] gespeeld. De play-offs werden gespeeld door de nummer 16 van de [[Eredivisie 2024/25 (mannenvoetbal)|Eredivisie 2024/25]], aangevuld met zes clubs uit de [[Eerste divisie 2024/25]]. De nummer 17 en nummer 18 van de Eredivisie degradeerden direct. De kampioen en nummer 2 van de Eerste divisie promoveerden direct.
+
+Van de zes clubs uit de Eerste divisie 2024/25 kregen vier teams het recht tot deelname aan de play-offs op grond van de resultaten in de perioden. Dit waren:
+
+* Periode 1: [[FC Den Bosch]]
+* Periode 2: [[FC Volendam]]
+* Periode 3: [[ADO Den Haag]]
+* Periode 4: [[Excelsior Rotterdam]]
+
+[[FC Volendam]] (kampioen) en [[Excelsior Rotterdam]] (nummer 2) promoveerden direct naar de Eredivisie, daardoor werden de play-offtickets doorgeschoven naar de eerstvolgende hoogst geklasseerde club (die het recht tot deelname aan de play-offs nog niet heeft verkregen) in de reguliere eindstand.
+
+De deelnemende clubs voor de eerste ronde waren zes clubs uit de Eerste divisie en dat waren: [[SC Cambuur]] (ED3), [[ADO Den Haag]] (ED4), [[FC Dordrecht]] (ED5), [[BV De Graafschap|De Graafschap]] (ED6), [[Telstar (voetbalclub)|Telstar]] (ED7) en [[FC Den Bosch]] (ED9).
+
+De deelnemende club voor de halve finales was de nummer 16 van de Eredivisie en dat was: [[Willem II (voetbalclub)|Willem II]] (ERE16).
+
+De clubs uit de Eerste divisie kregen een classificatie mee op basis van de eindstand van de ranglijst. Zo was de club die derde eindigt aangeduid met ED3 en tot en met ED9 voor de clubs op de plaatsen tot en met 9.<ref>[https://x.com/KNVB/status/1920933254766448998 Speelschema promotie/degradatie Eredivisie/Eerste divisie 2024/25, Toelichting KNVB]</ref>
+
+Tevens werden deze play-offs over twee wedstrijden per ronde gespeeld met als regel dat bij een gelijke stand over die twee wedstrijden er werd verlengd en eventueel overgaan werd op het nemen van strafschoppen. De club met de hoogste classificatie speelde in de tweede wedstrijd thuis.
+
+=== Wedstrijdschema ===
+<div style="overflow-x: auto; white-space: nowrap;">
+{{Wedstrijdschema laatste 8 zonder 3 met seeds, bye en agg
+| RD1 = '''eerste ronde'''<br />12/13 en 16/17 mei
+| RD2 = '''halve finales'''<br />20/21 en 23/24 mei
+| RD3 = '''finale'''<br />29 mei en 1 juni
+| RD1-header01 = '''Wedstrijd A'''
+| RD1-seed01 = '''ED9'''
+| RD1-team01 = '''[[FC Den Bosch]] ([[Verlenging|w.n.v.]])'''
+| RD1-score01-1 = 1
+| RD1-score01-2 = 1
+| RD1-score01-agg = 2
+| RD1-seed02 = '''ED3'''
+| RD1-team02 = [[SC Cambuur]]
+| RD1-score02-1 = 0
+| RD1-score02-2 = 1
+| RD1-score02-agg = 1
+| RD1-header02 = '''Wedstrijd B'''
+| RD1-seed03 = '''ED7'''
+| RD1-team03 = '''[[Telstar (voetbalclub)|Telstar]]'''
+| RD1-score03-1 = 2
+| RD1-score03-2 = 1
+| RD1-score03-agg = 3
+| RD1-seed04 = '''ED4'''
+| RD1-team04 = [[ADO Den Haag]]
+| RD1-score04-1 = 0
+| RD1-score04-2 = 0
+| RD1-score04-agg = 0
+| RD1-header03 = '''Wedstrijd C'''
+| RD1-seed05 = '''ED6'''
+| RD1-team05 = [[BV De Graafschap|De Graafschap]]
+| RD1-score05-1 = 0
+| RD1-score05-2 = 0
+| RD1-score05-agg = 0
+| RD1-seed06 = '''ED5'''
+| RD1-team06 = '''[[FC Dordrecht]]'''
+| RD1-score06-1 = 0
+| RD1-score06-2 = 2
+| RD1-score06-agg = 2
+| RD1-seed07 = 
+| RD1-team07 = 
+| RD1-score07-1 = 
+| RD1-score07-2 = 
+| RD1-score07-agg = 
+| RD1-seed08 = 
+| RD1-team08 = 
+| RD1-score08-1 = 
+| RD1-score08-2 = 
+| RD1-score08-agg = 
+| RD2-header01 = '''Wedstrijd D'''
+| RD2-seed01 = '''A'''
+| RD2-team01 = [[FC Den Bosch]]
+| RD2-score01-1 = 0
+| RD2-score01-2 = 1
+| RD2-score01-agg = 1
+| RD2-seed02 = '''B'''
+| RD2-team02 = '''[[Telstar (voetbalclub)|Telstar]] ([[Verlenging|w.n.v.]])'''
+| RD2-score02-1 = 0
+| RD2-score02-2 = 2
+| RD2-score02-agg = 2
+| RD2-header02 = '''Wedstrijd E'''
+| RD2-seed03 = '''C'''
+| RD2-team03 = [[FC Dordrecht]]
+| RD2-score03-1 = 2
+| RD2-score03-2 = 2
+| RD2-score03-agg = &#160;4 (4)&#160;
+| RD2-seed04 = '''ERE16'''
+| RD2-team04 = '''[[Willem II (voetbalclub)|Willem II]] ([[Strafschop#Strafschoppenserie|w.n.s.]])'''
+| RD2-score04-1 = 1
+| RD2-score04-2 = 3
+| RD2-score04-agg = &#160;4 (5)&#160;
+| RD3-header01 = '''Wedstrijd F'''
+| RD3-seed01 = '''D'''
+| RD3-team01 = '''[[Telstar (voetbalclub)|Telstar]]'''
+| RD3-score01-1 = 2
+| RD3-score01-2 = 3
+| RD3-score01-agg = 5
+| RD3-seed02 = '''E'''
+| RD3-team02 = [[Willem II (voetbalclub)|Willem II]]
+| RD3-score02-1 = 2
+| RD3-score02-2 = 1
+| RD3-score02-agg = 3
+}}</div>
+
+=== Eerste ronde ===
+==== Wedstrijd A ====
+{{Footballbox2
+|round = Wedstrijd 1/2
+|date = 12 mei 2025
+|time = 20:00 uur
+|team1 = [[FC Den Bosch]]
+|score = 1 – 0
+|team2 = [[SC Cambuur]]
+|goals1 = [[Konstantinos Doumtsios|Doumtsios]] {{goal|20}}
+|goals2 =
+|location = [['s-Hertogenbosch]]
+|stadium = [[Stadion De Vliert]]
+|attendance = 6.289
+|referee = [[Alex Bos|Bos]]
+|videoreferee = [[Richard Martens|Martens]]
+|report = [https://nos.nl/artikel/2567028-den-bosch-klopt-cambuur-met-1-0-in-eerste-wedstrijd-play-offs-om-promotie Verslag]
+}}

@@ -80,8 +80,16 @@ async function runCommand(server: TestServer, argument: string | undefined) {
   return { code, lines }
 }
 
-/** Starts a web server that serves the pages of both seasons the way Wikipedia does. */
-async function serve({ last = lastSeason, now: thisOne = thisSeason }: { last?: Pages; now?: Pages } = {}) {
+/**
+ * Starts a web server that serves the pages of both seasons the way Wikipedia does. The page of
+ * the play-offs is served for the season that is over only when the test gives it: the season
+ * that is going has none yet, and Wikipedia answers 404 for a page that is not there.
+ */
+async function serve({
+  last = lastSeason,
+  now: thisOne = thisSeason,
+  playoffs,
+}: { last?: Pages; now?: Pages; playoffs?: string } = {}) {
   const routes: Record<string, Handler> = { '/robots.txt': reply(200, '', { 'Content-Type': 'text/plain' }) }
 
   for (const [season, pages] of [
@@ -91,6 +99,9 @@ async function serve({ last = lastSeason, now: thisOne = thisSeason }: { last?: 
     for (const kind of ['cup', 'programme', 'standings'] as const) {
       routes[pageUrl('', pageTitles(season)[kind])] = reply(200, pages[kind], wiki)
     }
+  }
+  if (playoffs !== undefined) {
+    routes[pageUrl('', pageTitles(past).playoffs)] = reply(200, playoffs, wiki)
   }
 
   const server = await startServer(routes)
@@ -167,7 +178,7 @@ describe('the command', () => {
     expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
       'Matches 2025/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
     ])
-    expect(pageRequests(server)).toHaveLength(3)
+    expect(pageRequests(server)).toHaveLength(4)
 
     const stored = await database.db.select().from(matches).orderBy(asc(matches.matchDate))
     const league = stored.filter((match) => match.competition === 'Eredivisie')
@@ -199,6 +210,24 @@ describe('the command', () => {
     ])
     expect(await database.db.select().from(matchImports)).toMatchObject([
       { failuresInARow: 0, lastOutcome: 'imported', season: past },
+    ])
+  })
+
+  it('reads the play-offs for the Conference League of a season that is over: the page of the year it ended in', async () => {
+    const server = await serve({ playoffs: fixture('wikipedia-playoffs-2026.wiki') })
+
+    const { code, lines } = await runCommand(server, past)
+
+    expect(code).toBe(0)
+    expect(lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line))).toEqual([
+      'Matches 2025/26: 39 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-05-17',
+    ])
+    expect(pageRequests(server)).toContain('/wiki/Play-offs_Nederlands_voetbal_2026?action=raw')
+    expect(
+      await database.db.select().from(matches).where(eq(matches.competition, 'Play-offs Conference League')),
+    ).toMatchObject([{ goalsAgainst: 3, goalsFor: 2, opponent: 'FC Utrecht', round: 'Halve finale', season: past }])
+    expect(await database.db.select().from(wikipediaPages).where(eq(wikipediaPages.kind, 'playoffs'))).toMatchObject([
+      { season: past, title: 'Play-offs Nederlands voetbal 2026' },
     ])
   })
 
@@ -271,7 +300,7 @@ describe('the command', () => {
       code: 0,
       lines: ['Matches 2025/26: 0 new, 0 updated, 38 unchanged, 0 removed; table of 18 clubs for 2026-05-17'],
     })
-    expect(pageRequests(server)).toHaveLength(6)
+    expect(pageRequests(server)).toHaveLength(8)
     expect((await rowsOf(past)).matches).toEqual(before.matches)
     expect((await rowsOf(past)).goals).toEqual(before.goals)
   })
@@ -302,7 +331,7 @@ describe('the command', () => {
     expect(
       pageRequests(server)
         .slice(requests)
-        .every((path) => path?.includes('2026')),
+        .every((path) => path?.includes('2026/27') || path?.includes('voetbal_2027')),
     ).toBe(true)
     expect(await rowsOf(past)).toEqual(last)
     expect((await rowsOf(current)).matches).toEqual(current26.matches)
