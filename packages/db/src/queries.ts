@@ -534,6 +534,8 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
 export async function listSeasonMatches(db: Database, season: string) {
   const rows = await db
     .select({
+      afterNinetyAgainst: matches.afterNinetyAgainst,
+      afterNinetyFor: matches.afterNinetyFor,
       competition: matches.competition,
       dateText: matches.dateText,
       extraTime: matches.extraTime,

@@ -22,7 +22,8 @@ const meta = preview.meta({
           'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen: groen bij winst, rood bij verlies en neutraal bij gelijkspel, ook in de beker zolang er geen strafschoppen zijn.',
           'Dat volgt uit de doelpunten van sc Heerenveen en niet uit die van de thuisclub: 0–2 uit is een winst en 2–0 uit een verlies.',
           'Een bekerwedstrijd na verlenging zegt "n.v." en na strafschoppen "n.s." met de score ervan, bijvoorbeeld "3–3 (5–3 n.s.)", direct achter de uitslag en in de volgorde van de clubs.',
-          'Elke afkorting heeft de volle woorden in een `title`, en een schermlezer hoort de volle woorden na de uitslag: "1 tegen 1, na strafschoppen 4 tegen 3".',
+          'Is de stand na 90 minuten bekend, dan staat die tussen haakjes achter "n.v.": "2–1 n.v. (1–1)", en met strafschoppen "3–3 n.v. (2–2), 5–3 n.s.". Is hij niet bekend, dan staat er alleen "n.v.".',
+          'Elke afkorting heeft de volle woorden in een `title`, en een schermlezer hoort de volle woorden na de uitslag: "1 tegen 1, na strafschoppen 4 tegen 3", of "2 tegen 1, na verlenging; na 90 minuten 1 tegen 1".',
           'Onder een lijst met zulke wedstrijden staat wat de afkortingen betekenen, want een `title` toont alleen onder een muis.',
           'Bij strafschoppen volgt de kleur de strafschoppen: groen als sc Heerenveen ze won en rood als het ze verloor.',
           '',
@@ -293,8 +294,10 @@ const renderResults = () => (
   </div>
 )
 
-// Cup ties decided after extra time: a win after extra time away, a win on penalties at
-// home, and a loss on penalties away. The legend under the list is what the site puts there.
+// Cup ties decided after extra time: a win away with the score after 90 minutes, a win on
+// penalties at home without it, a loss on penalties away with a score after 90 minutes that
+// equals the result, and a win at home without it. The legend under the list is what the site
+// puts there.
 const renderCup = () => (
   <div style={{ maxInlineSize: '24rem' }}>
     <Card aria-labelledby="beker-kop">
@@ -304,6 +307,8 @@ const renderCup = () => (
       <List role="list">
         <List.Item>
           <Match
+            afterNinetyAgainst={1}
+            afterNinetyFor={1}
             competition="KNVB Beker"
             dateTime="2026-11-25"
             extraTime
@@ -336,6 +341,8 @@ const renderCup = () => (
         </List.Item>
         <List.Item>
           <Match
+            afterNinetyAgainst={2}
+            afterNinetyFor={2}
             competition="KNVB Beker"
             dateTime="2027-01-20"
             extraTime
@@ -349,6 +356,21 @@ const renderCup = () => (
             stadium="Stadion Proeflaan"
             status="played"
             time="wo 20 jan"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="KNVB Beker"
+            dateTime="2027-02-03"
+            extraTime
+            goalsAgainst={2}
+            goalsFor={3}
+            home
+            opponent="Maquette FC"
+            round="Kwartfinale"
+            stadium="Abe Lenstra Stadion"
+            status="played"
+            time="wo 3 feb"
           />
         </List.Item>
       </List>

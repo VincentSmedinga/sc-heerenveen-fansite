@@ -28,19 +28,8 @@ export type MatchGoal = {
 }
 
 export type MatchProps =
-  | (MatchBaseProps & {
-      dateTime?: never
-      extraTime?: never
-      goals?: never
-      goalsAgainst?: never
-      goalsFor?: never
-      penaltiesAgainst?: never
-      penaltiesFor?: never
-      resultMissing?: never
-      status: 'postponed'
-      time?: never
-    })
-  | (MatchShootOut &
+  | (MatchAfterNinety &
+      MatchShootOut &
       MatchWithTimeProps & {
         /**
          * Whether the match went to extra time, which only a cup match does. The score is the
@@ -59,7 +48,23 @@ export type MatchProps =
         resultMissing?: never
         status: 'played'
       })
+  | (MatchBaseProps & {
+      afterNinetyAgainst?: never
+      afterNinetyFor?: never
+      dateTime?: never
+      extraTime?: never
+      goals?: never
+      goalsAgainst?: never
+      goalsFor?: never
+      penaltiesAgainst?: never
+      penaltiesFor?: never
+      resultMissing?: never
+      status: 'postponed'
+      time?: never
+    })
   | (MatchWithTimeProps & {
+      afterNinetyAgainst?: never
+      afterNinetyFor?: never
       extraTime?: never
       goals?: never
       goalsAgainst?: never
@@ -76,6 +81,19 @@ export type MatchProps =
     })
 
 export type MatchStatus = (typeof matchStatuses)[number]
+
+/**
+ * The score after 90 minutes of a cup match with extra time: both scores, or none. It can be
+ * the same as the result, when extra time had no goal.
+ */
+type MatchAfterNinety =
+  | {
+      /** The goals of the opponent after 90 minutes. Only shown together with `extraTime`. */
+      afterNinetyAgainst: number
+      /** The goals of sc Heerenveen after 90 minutes. */
+      afterNinetyFor: number
+    }
+  | { afterNinetyAgainst?: never; afterNinetyFor?: never }
 
 type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /** A match has no children: everything it shows comes from the props below. */
@@ -142,11 +160,14 @@ const separator = (
  * result between the names, as "2–0" seen from the home club's side, and a screen reader hears
  * "2 tegen 0". After extra time the result says "n.v." and after a shoot-out "n.s." with its
  * score, as "(4–2 n.s.)" in the order of the clubs; a screen reader hears the full words after
- * the result, as "1 tegen 1, na strafschoppen 4 tegen 2". The result has the colour of the
- * outcome for sc Heerenveen: green for a win, red for a loss and neutral for a draw, whichever
- * side it played on, and in a shoot-out the colour follows the shoot-out. The goals say the
- * same, so a screen reader hears nothing extra. A match that is still to be played has a dash
- * between the names, which is read as "tegen".
+ * the result, as "1 tegen 1, na strafschoppen 4 tegen 2". When the score after 90 minutes is
+ * known it follows "n.v." in brackets, as "2–1 n.v. (1–1)", and a shoot-out then follows after
+ * a comma, as "3–3 n.v. (2–2), 5–3 n.s."; a screen reader hears "2 tegen 1, na verlenging; na
+ * 90 minuten 1 tegen 1". The result has the colour of the outcome for sc Heerenveen: green for
+ * a win, red for a loss and neutral for a draw, whichever side it played on, and in a shoot-out
+ * the colour follows the shoot-out. The goals say the same, so a screen reader hears nothing
+ * extra. A match that is still to be played has a dash between the names, which is read as
+ * "tegen".
  * A postponed match says "Uitgesteld" where the time would be. A match that has begun long ago
  * and has no result yet (`resultMissing`) says "Gegevens nog niet beschikbaar" as the last
  * line, under the time and the place, in a muted red, and not bold. The words are the sign;
@@ -161,6 +182,8 @@ const separator = (
  * abbreviations with the full words.
  */
 export const Match = ({
+  afterNinetyAgainst,
+  afterNinetyFor,
   className,
   competition,
   dateTime,
@@ -181,6 +204,7 @@ export const Match = ({
 }: MatchProps) => {
   const [first, second] = home ? [ourClub, opponent] : [opponent, ourClub]
   const shootOut = penaltiesFor !== undefined && penaltiesAgainst !== undefined
+  const afterNinety = extraTime && afterNinetyFor !== undefined && afterNinetyAgainst !== undefined
   // A shoot-out decides a level score, so the colour follows it; a level one has no winner.
   const outcome =
     status !== 'played'
@@ -193,13 +217,15 @@ export const Match = ({
       ? {
           hidden: [
             sides(home, goalsFor, goalsAgainst, ' tegen '),
-            shootOut
-              ? `na strafschoppen ${sides(home, penaltiesFor, penaltiesAgainst, ' tegen ')}`
-              : extraTime
-                ? 'na verlenging'
-                : undefined,
+            [
+              extraTime && (afterNinety || !shootOut) ? 'na verlenging' : undefined,
+              afterNinety ? `na 90 minuten ${sides(home, afterNinetyFor, afterNinetyAgainst, ' tegen ')}` : undefined,
+              shootOut ? `na strafschoppen ${sides(home, penaltiesFor, penaltiesAgainst, ' tegen ')}` : undefined,
+            ]
+              .filter((part) => part !== undefined)
+              .join('; '),
           ]
-            .filter((part) => part !== undefined)
+            .filter((part) => part !== '')
             .join(', '),
           shown: sides(home, goalsFor, goalsAgainst, '–'),
         }
@@ -217,7 +243,21 @@ export const Match = ({
         <span className={classNames('hf-match-score', outcome ? `hf-match-${outcome}` : 'hf-match-versus')}>
           <span aria-hidden="true">
             {score.shown}
-            {shootOut ? (
+            {afterNinety ? (
+              // A non-breaking space keeps "n.v. (1–1)" and "5–3 n.s." in one piece, so a
+              // narrow card breaks the line between the parts.
+              <span className="hf-match-extra">
+                {' '}
+                <abbr title="Na verlenging">n.v.</abbr>
+                {`\u00a0(${sides(home, afterNinetyFor, afterNinetyAgainst, '–')})`}
+                {shootOut ? (
+                  <>
+                    {`, ${sides(home, penaltiesFor, penaltiesAgainst, '–')}\u00a0`}
+                    <abbr title="Na strafschoppen">n.s.</abbr>
+                  </>
+                ) : null}
+              </span>
+            ) : shootOut ? (
               <span className="hf-match-extra">
                 {' '}
                 ({sides(home, penaltiesFor, penaltiesAgainst, '–')} <abbr title="Na strafschoppen">n.s.</abbr>)

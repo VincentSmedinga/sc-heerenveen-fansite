@@ -597,6 +597,12 @@ describe('the made-up matches', () => {
     ).toBe(true)
     expect(has((match) => match.penaltiesFor !== null && match.penaltiesFor > match.penaltiesAgainst!)).toBe(true)
     expect(has((match) => match.penaltiesFor !== null && match.penaltiesFor < match.penaltiesAgainst!)).toBe(true)
+    // The score after 90 minutes: known and below the result, equal to it, and missing.
+    expect(
+      has((match) => match.extraTime && match.afterNinetyFor !== null && match.afterNinetyFor < match.goalsFor!),
+    ).toBe(true)
+    expect(has((match) => match.extraTime && match.afterNinetyFor === match.goalsFor)).toBe(true)
+    expect(has((match) => match.extraTime && match.afterNinetyFor === null)).toBe(true)
     // The dates of the made-up matches count from the day of the seed: this one is 10 days on.
     expect(rows.find((match) => match.dateText !== null)?.dateText).toBe('4-6 november 2026')
   })

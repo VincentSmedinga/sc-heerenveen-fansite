@@ -10,6 +10,7 @@ const cupPage = readFileSync(new URL('./fixtures/wikipedia-cup.wiki', import.met
 const secondRoundPage = readFileSync(new URL('./fixtures/wikipedia-cup-second-round.wiki', import.meta.url), 'utf8')
 const goalsCupPage = readFileSync(new URL('./fixtures/wikipedia-cup-goals.wiki', import.meta.url), 'utf8')
 const extraTimePage = readFileSync(new URL('./fixtures/wikipedia-cup-extra-time.wiki', import.meta.url), 'utf8')
+const afterNinetyPage = readFileSync(new URL('./fixtures/wikipedia-cup-after-ninety.wiki', import.meta.url), 'utf8')
 const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
 const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
 const seasonCup = readFileSync(new URL('./fixtures/wikipedia-season-cup.wiki', import.meta.url), 'utf8')
@@ -85,6 +86,8 @@ describe('the programme and the results', () => {
 
   it('reads a match that was played: the score from our side, the stadium and the time in UTC', () => {
     expect(matchOf(programme, 'Speelronde 1')).toEqual({
+      afterNinetyAgainst: null,
+      afterNinetyFor: null,
       competition: 'Eredivisie',
       dateText: null,
       extraTime: false,
@@ -451,6 +454,8 @@ describe('the cup', () => {
       lastPlayedOn: null,
       matches: [
         {
+          afterNinetyAgainst: null,
+          afterNinetyFor: null,
           competition: 'KNVB Beker',
           dateText: null,
           extraTime: false,
@@ -735,6 +740,99 @@ describe('extra time and a shoot-out in the cup', () => {
   it('reads a league match with empty fields for them, as Wikipedia has it', () => {
     expect(readLeague(leagueWith(box({ aet: '', penaltyscore: '', score: '1 – 1' })))).toMatchObject({
       matches: [{ extraTime: false, penaltiesFor: null }],
+    })
+  })
+})
+
+describe('the score after 90 minutes of a cup tie', () => {
+  const tie = (fields: Record<string, string>, score = '1&nbsp;–&nbsp;1') =>
+    `==== Eerste ronde ====\n{{Footballbox2\n${Object.entries({
+      aet: 'J',
+      date: '28 oktober 2026',
+      score,
+      team1: '[[sc Heerenveen]]',
+      team2: '[[Testdorp FC]]',
+      time: '20:00 uur',
+      ...fields,
+    })
+      .map(([key, value]) => `|${key} = ${value}`)
+      .join('\n')}\n}}`
+  const afterNinetyOf = (page: string) => {
+    const read = readCup(page)
+
+    return read.kind === 'error' ? read : read.matches.map((match) => [match.afterNinetyFor, match.afterNinetyAgainst])
+  }
+
+  it('reads the first pair of the half time score as the score after 90 minutes, from our side', () => {
+    expect(afterNinetyOf(tie({ 'half time score': '1 – 0, 0 – 0' }, '3 – 1'))).toEqual([[1, 0]])
+    expect(
+      afterNinetyOf(
+        tie({ 'half time score': '1 – 0, 0 – 0', team1: '[[Testdorp FC]]', team2: '[[sc Heerenveen]]' }, '3 – 1'),
+      ),
+    ).toEqual([[0, 1]])
+    expect(afterNinetyOf(tie({ 'half time score': '1&nbsp;–&nbsp;1,&nbsp;0&nbsp;–&nbsp;0' }, '2 – 1'))).toEqual([
+      [1, 1],
+    ])
+  })
+
+  it('reads the five ways of the real page: known, equal to the result, missing, the other way round, one pair', () => {
+    expect(readCup(afterNinetyPage)).toMatchObject({
+      matches: [
+        { afterNinetyAgainst: 1, afterNinetyFor: 1, round: 'Eerste ronde' },
+        { afterNinetyAgainst: 2, afterNinetyFor: 2, round: 'Tweede ronde' },
+        { afterNinetyAgainst: null, afterNinetyFor: null, round: 'Derde ronde' },
+        { afterNinetyAgainst: null, afterNinetyFor: null, round: 'Achtste finale' },
+        { afterNinetyAgainst: null, afterNinetyFor: null, round: 'Kwartfinale' },
+      ],
+    })
+  })
+
+  it('reads it for the three ties of the page with extra time', () => {
+    expect(afterNinetyOf(extraTimePage)).toEqual([
+      [1, 1],
+      [0, 0],
+      [1, 1],
+    ])
+  })
+
+  it('reads the score after 90 minutes from the brackets of the older pages', () => {
+    expect(afterNinetyOf(tie({}, '2 – 4 (2 – 2, 1 – 1)'))).toEqual([[2, 2]])
+    expect(
+      afterNinetyOf(tie({ team1: '[[Testdorp FC]]', team2: '[[sc Heerenveen]]' }, '2 – 4 (2 – 3, 1 – 1)')),
+    ).toEqual([[3, 2]])
+  })
+
+  it.each([
+    ['one pair', { 'half time score': '1 – 0' }],
+    ['an empty field', { 'half time score': '' }],
+    ['no field', {}],
+    ['a field we cannot read', { 'half time score': 'onbekend' }],
+    ['three pairs', { 'half time score': '1 – 1, 0 – 0, 0 – 0' }],
+    ['pairs the other way round', { 'half time score': '0 – 0, 1 – 1' }],
+    ['a score above the result', { 'half time score': '3 – 3, 1 – 1' }],
+  ])('keeps the match without the score after 90 minutes for %s, and it is no fault', (_name, fields) => {
+    expect(readCup(tie(fields, '2 – 2'))).toMatchObject({
+      matches: [{ afterNinetyAgainst: null, afterNinetyFor: null, extraTime: true, status: 'played' }],
+    })
+  })
+
+  it('does not read the half time score of a tie without extra time, also not with a comma in it', () => {
+    expect(afterNinetyOf(tie({ aet: '', 'half time score': '0 – 0' }, '2 – 1'))).toEqual([[null, null]])
+    expect(afterNinetyOf(tie({ aet: '', 'half time score': '1 – 1, 0 – 0' }, '2 – 1'))).toEqual([[null, null]])
+  })
+
+  it('does not read it of a match that has no score yet', () => {
+    expect(afterNinetyOf(tie({ 'half time score': '1 – 1, 0 – 0' }, ''))).toEqual([[null, null]])
+  })
+
+  it('does not read it in the play-offs, which this does not cover', () => {
+    const page = playoffPages[2026]?.replace(
+      '|score = 3 – 2\n|team2 = [[sc Heerenveen]]',
+      '|score = 2 – 2\n|half time score = 1 – 1, 0 – 0\n|aet = ja\n|penaltyscore = 3 – 4\n|team2 = [[sc Heerenveen]]',
+    )
+
+    expect(readPlayoffs(page ?? '')).toMatchObject({
+      matches: [{ afterNinetyAgainst: null, afterNinetyFor: null, extraTime: true }],
     })
   })
 })
@@ -1056,6 +1154,8 @@ describe('the play-offs for the Conference League', () => {
   it('reads the semi-final of 2026: FC Utrecht 3-2 sc Heerenveen, away, with the goals and the stadium', () => {
     expect(matchesOf(2026)).toEqual([
       {
+        afterNinetyAgainst: null,
+        afterNinetyFor: null,
         competition: 'Play-offs Conference League',
         dateText: null,
         extraTime: false,
