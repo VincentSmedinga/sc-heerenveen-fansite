@@ -5779,6 +5779,33 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een nieuw paar dat niet op de lijst staat, wordt nog steeds twee clubs tot iemand het ziet.
   De lijst is een tweede plek met clubnamen naast `otherClubGroups` in `relevance-terms.ts`; die twee hebben een ander doel en blijven los.
 - **Alternatieven:** de volledige naam raden uit het begin van een naam (`Excelsior` en `Excelsior Maassluis` zouden samenvallen); een migratie die de twee clubs samenvoegt (geen regel in het logboek, en de lijst moet in de importer toch bestaan); een samenvoegcommando (een commando voor één club, en de lijst doet het vanzelf); de oude slug laten omleiden (er zijn nog geen openbare links, zie #33).
+- **Later:** zie _Het herstel van de clubs draait aan het begin van elke run, en een datum van meer dagen is een datum in elke schrijfwijze_ (1 november 2026): het herstel draait aan het begin van de run, vóór een seizoen wordt gelezen, en in een eigen transactie in plaats van in de transactie van de import.
+  De rest blijft: de lijst, de volledige naam en de slug, wie blijft en wat er in het logboek komt.
+
+### Het herstel van de clubs draait aan het begin van elke run, en een datum van meer dagen is een datum in elke schrijfwijze
+
+- **Datum:** 1 november 2026
+- **Besluit:** twee dingen, uit #532.
+  - De reader leest een datum van meer dagen in alle schrijfwijzen die Wikipedia gebruikt: een koppelteken of een gedachtestreepje met of zonder spaties, met of zonder tweede maand, en met het jaar achter de laatste dag of achter beide: `1–3 december 2026`, `12-14 februari 2027`, `30 november–2 december 2026`.
+    De eerste dag is `match_date`, de tekst van Wikipedia staat in `date_text` en `kickoff_at` is leeg.
+    Een datum zonder jaar, een laatste dag voor de eerste, een dag die niet bestaat of een tekst die we niet kennen, blijft een fout met dezelfde melding, en dan verandert er niets.
+  - `repairClubs` draait aan het begin van elke run, vóór een seizoen wordt gelezen, in een eigen transactie (`repairKnownClubs` in `apps/importer/src/import-matches.ts`), ook in `pnpm import:season`.
+    Het wacht niet op een seizoen dat te lezen is.
+    Het is idempotent en schrijft zijn regels met `Clubs:` vooraan in de uitvoer.
+    Een fout in het herstel is een waarschuwing in de uitvoer en in `match_imports.last_warning` van het lopende seizoen, en houdt de import niet tegen.
+- **Waarom:** de import van 2026/27 stond sinds minstens 31 oktober stil, op de datum `1–3 december 2026` van de tweede ronde van de beker.
+  De reader kende een datum van meer dagen alleen met een koppelteken (`12-14 februari 2027`), niet met het gedachtestreepje dat Wikipedia hier gebruikt.
+  Eén datum die de reader niet kent, houdt de hele import van het seizoen tegen (zie _Een gestaakte wedstrijd telt niet, de latere uitslag geldt_: een gok is erger dan een fout), dus nieuwe uitslagen kwamen niet binnen.
+  Het herstel van Excelsior en Excelsior Rotterdam zat in het opslaan van de wedstrijden van een seizoen en kwam daardoor ook niet aan de beurt: op acceptatie stonden nog twee clubs.
+  Een herstel van de database hoort niet af te hangen van een pagina op Wikipedia.
+- **Nadeel:** het herstel draait nu elke run, ook als er niets te herstellen is: enkele kleine query's per run, op een lijst van één club.
+  Een datum zonder jaar leest de reader nog niet, omdat het jaar dan een gok is.
+  Eén wedstrijd met een datum die we niet kennen houdt de import van het seizoen nog steeds tegen: dat blijft zo.
+  Niets meldt de projecteigenaar dat de import stilstaat; hij ziet het in de uitvoer van de run en in `import:status` (zie de README van de importer).
+- **Alternatieven:** alleen de datum herstellen (het herstel van de clubs blijft dan afhangen van een geslaagde lezing van een seizoen, en de volgende onbekende schrijfwijze zet alles weer stil).
+  Een wedstrijd met een datum die we niet kennen overslaan en de rest bewaren (dat is de regel van _Een gestaakte wedstrijd telt niet, de latere uitslag geldt_ omgekeerd, en een overgeslagen wedstrijd zou uit de lijst verdwijnen).
+  Het jaar van een datum zonder jaar afleiden uit het seizoen (een gok; Wikipedia schrijft het jaar bij elke datum in de sjablonen die we lazen).
+  Het herstel in de transactie van de import laten, maar dan ook als het seizoen niet leest (de transactie bestaat dan niet).
 
 ### Een gestaakte wedstrijd telt niet, de latere uitslag geldt
 

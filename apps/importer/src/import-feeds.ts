@@ -15,7 +15,7 @@ import type { ForumDiscussion } from './read-forum.ts'
 import type { MatchDay } from './relevance.ts'
 
 import { createFetcher } from './fetcher.ts'
-import { formatMatchReport, importMatches, wikipediaOrigin } from './import-matches.ts'
+import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
 import { paywallCategoryFor, paywallNamespaceFor, readFeed, timeRuleFor } from './read-feed.ts'
 import { readForum } from './read-forum.ts'
@@ -296,6 +296,9 @@ export async function runImport(
         write(`Visitor data: warning, not removed: ${describeError(error)}`),
       )
 
+      // Before any season is read: the clubs are right whether or not a season can be read. A
+      // failure is a warning and no reason to stop.
+      const clubLines = await repairKnownClubs(db, clock)
       const fetcher = makeFetcher(robotsStoreFor(db, clock))
       const [reports, wikipedia] = await Promise.allSettled([
         importFeeds(db, fetcher, { clock, runId }),
@@ -304,7 +307,7 @@ export async function runImport(
 
       await finishRun(db, runId, clock())
 
-      return { reports, wikipedia }
+      return { clubLines, reports, wikipedia }
     })
 
     if (!run.ran) {
@@ -314,7 +317,11 @@ export async function runImport(
       return 0
     }
 
-    const { reports, wikipedia } = run.result
+    const { clubLines, reports, wikipedia } = run.result
+
+    for (const line of clubLines) {
+      write(line)
+    }
 
     if (reports.status === 'fulfilled' && reports.value.length === 0) {
       write('There are no feeds to read: no source that is switched on has a feed. See `pnpm db:seed`.')
