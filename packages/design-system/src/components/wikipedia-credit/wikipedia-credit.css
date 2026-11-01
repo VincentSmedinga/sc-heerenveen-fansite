@@ -39,7 +39,7 @@
 
       /* The arrow points down while it is closed, and up when it is open. */
       .hf-icon {
-        transition: transform var(--hf-motion-duration-short) var(--hf-motion-ease-morph);
+        transition: transform var(--hf-motion-duration-short) var(--hf-motion-ease-change);
       }
     }
 
