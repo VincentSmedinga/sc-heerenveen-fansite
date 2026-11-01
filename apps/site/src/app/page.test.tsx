@@ -1,4 +1,4 @@
-import type { PublicDiscussion, PublicEpisode, PublicItem } from '@fansite/db/queries'
+import type { PublicDiscussion, PublicEpisode, PublicItem, PublicMatch } from '@fansite/db/queries'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -1029,5 +1029,71 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     const html = (await renderMatchesCard()) + (await renderStandingsCard())
 
     expect(html).not.toMatch(/<(?:img|script|iframe|link)\b/u)
+  })
+})
+
+describe('the line under the table in the sidebar of the homepage', () => {
+  const lacking = (kickoff: string): PublicMatch => ({
+    ...matchData.matches[3]!,
+    goals: [],
+    goalsAgainst: null,
+    goalsFor: null,
+    kickoffAt: new Date(kickoff),
+    matchDate: kickoff.slice(0, 10),
+    round: 'Derde ronde',
+    status: 'scheduled',
+  })
+  const withMatch = (added: PublicMatch) =>
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, added] })
+
+  beforeEach(() => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
+    vi.mocked(getDiscussions).mockResolvedValue(discussions)
+  })
+
+  it('says the data is not up to date, in the meta style, when a match has no result two hours after its kick-off', async () => {
+    withMatch(lacking('2026-10-22T18:45:00Z'))
+    const html = await renderStandingsCard()
+
+    expect(html.match(/Gegevens nog niet bijgewerkt/g)).toHaveLength(1)
+    expect(html).toContain(
+      '<p class="hf-meta hf-text-missing" data-hf-card-share-skip="">Gegevens nog niet bijgewerkt</p>',
+    )
+  })
+
+  it('puts the line straight under the table and above the link to the full table', async () => {
+    withMatch(lacking('2026-10-22T18:45:00Z'))
+    const html = withoutIcons(await renderStandingsCard())
+    const places = ['</table>', 'Gegevens nog niet bijgewerkt', 'De volledige stand'].map((part) => html.indexOf(part))
+
+    expect(places.every((place) => place >= 0)).toBe(true)
+    expect(places).toEqual([...places].sort((a, b) => a - b))
+  })
+
+  it('says nothing within the two hours of the kick-off, or when every result is there', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.filter((match) => match.status === 'played'),
+    })
+    expect(await renderStandingsCard()).not.toContain('Gegevens nog niet bijgewerkt')
+
+    withMatch(lacking('2026-10-23T12:00:00Z'))
+    expect(await renderStandingsCard()).not.toContain('Gegevens nog niet bijgewerkt')
+  })
+
+  it('does not put the line in the card with the matches, which has its own sentence per match', async () => {
+    withMatch(lacking('2026-10-22T18:45:00Z'))
+
+    expect(await renderMatchesCard()).not.toContain('Gegevens nog niet bijgewerkt')
+  })
+
+  it('has no line in a card without a table, whatever the matches say', async () => {
+    withMatch(lacking('2026-10-22T18:45:00Z'))
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...(await getMatchData()),
+      standings: [],
+    })
+
+    expect(await renderStandingsCard()).not.toContain('Gegevens nog niet bijgewerkt')
   })
 })

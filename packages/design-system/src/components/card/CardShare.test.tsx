@@ -130,6 +130,32 @@ describe('a click on the button', () => {
     expect(container.querySelector('.hf-card-share-copy')).toBeNull()
   })
 
+  it('leaves a part of the card out of the image when it is marked, and keeps it on the page', async () => {
+    let copy: string | undefined
+
+    vi.mocked(makeCardImage).mockImplementation((element) => {
+      copy = element.innerHTML
+
+      return Promise.resolve(png)
+    })
+    const { container } = render(
+      <Card aria-labelledby="stand" shareable={{ source }}>
+        <Heading id="stand" level={2}>
+          Stand
+        </Heading>
+        <p>Een regel in de kaart</p>
+        <p data-hf-card-share-skip="">Een regel die even geldt</p>
+      </Card>,
+    )
+
+    fireEvent.click(button())
+    await waitFor(() => expect(makeCardImage).toHaveBeenCalledOnce())
+
+    expect(copy).toContain('Een regel in de kaart')
+    expect(copy).not.toContain('Een regel die even geldt')
+    expect(container.textContent).toContain('Een regel die even geldt')
+  })
+
   it('names the season under the image and in the name of the file, for a card of a season that is over', async () => {
     let address: null | string | undefined
 

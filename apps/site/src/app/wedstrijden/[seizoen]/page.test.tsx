@@ -1,3 +1,5 @@
+import type { PublicMatch } from '@fansite/db/queries'
+
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -101,6 +103,29 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     expect(html).toContain('aria-labelledby="eindstand"')
     expect(html).not.toContain('id="stand"')
     expect(html).not.toContain('>Stand</')
+  })
+
+  it('says "Gegevens nog niet beschikbaar" at each of two matches without a result, and nothing under the Eindstand', async () => {
+    const lacking = (round: string, matchDate: string): PublicMatch => ({
+      ...earlierMatch,
+      goalsAgainst: null,
+      goalsFor: null,
+      kickoffAt: new Date(`${matchDate}T14:30:00Z`),
+      matchDate,
+      opponent: round,
+      round,
+      status: 'scheduled',
+    })
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...earlier,
+      matches: [earlierMatch, lacking('Derde Club', '2025-10-04'), lacking('Vierde Club', '2025-10-11')],
+    })
+    const html = await render()
+    const table = html.match(/<h2[^>]*id="eindstand">.*?(?=<section|<\/aside>)/s)?.[0] ?? ''
+
+    expect(html.match(/Gegevens nog niet beschikbaar/g)).toHaveLength(2)
+    expect(table).toContain('<table')
+    expect(html).not.toContain('Gegevens nog niet bijgewerkt')
   })
 
   it('has a heading for every link of the bar, with the id the link goes to, in the same order', async () => {

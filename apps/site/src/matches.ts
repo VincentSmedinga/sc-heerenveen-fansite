@@ -819,6 +819,16 @@ export function standingsAround(rows: PublicStandingsRow[]): PublicStandingsRow[
 }
 
 /**
+ * Whether the league table may be behind: a match of the season has begun and still has no
+ * result (`lacksResult`, so the same two hours as the line in Uitslagen). The table comes from
+ * the same page as the results, so a missing result is a reason to think it has not caught up
+ * either. The page asks this for the current season only.
+ */
+export function standingsLag(matches: PublicMatch[], now: Date) {
+  return matches.some((match) => lacksResult(match, now))
+}
+
+/**
  * The goals of sc Heerenveen per player in the matches of a season (the Eredivisie and the cup,
  * or the Eredivisie alone for the choice `league`), for everybody who scored,
  * from the most goals down and from A to Z on the surname when level. Level players share a

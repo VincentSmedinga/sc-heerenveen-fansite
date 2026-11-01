@@ -130,7 +130,7 @@ export default async function HomePage() {
         {matches !== undefined && (
           <>
             <MatchesCard data={matches} now={now} />
-            <StandingsCard data={matches} />
+            <StandingsCard data={matches} now={now} />
           </>
         )}
         <EpisodesCard episodes={episodes} heading="Nieuwste podcasts" now={now} />
