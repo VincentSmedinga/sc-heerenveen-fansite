@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "2eced67b-f1a8-45de-b7d6-ab2f56d1e4f8",
+  "id": "369cbce2-8aee-46e6-b70e-88136e31dcb3",
   "prevId": "53b4b30d-016a-4b9a-9fbb-1e16869ed039",
   "tables": {
     "admin_login_attempts": {
@@ -1227,6 +1227,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "thread_key": {
+          "name": "thread_key",
+          "type": "varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "title": {
           "name": "title",
           "type": "varchar(500)",
@@ -1323,7 +1330,16 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "items_source_id_thread_key_idx": {
+          "name": "items_source_id_thread_key_idx",
+          "columns": [
+            "source_id",
+            "thread_key"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "items_source_id_sources_id_fk": {
           "name": "items_source_id_sources_id_fk",
@@ -1914,20 +1930,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "attendance": {
-          "name": "attendance",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "referee": {
-          "name": "referee",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "result_set_at": {
           "name": "result_set_at",
           "type": "datetime",
@@ -2007,14 +2009,6 @@
         "matches_after_ninety_within_extra_time": {
           "name": "matches_after_ninety_within_extra_time",
           "value": "`matches`.`after_ninety_for` is null or (`matches`.`extra_time` = 1 and `matches`.`after_ninety_for` <= `matches`.`goals_for` and `matches`.`after_ninety_against` <= `matches`.`goals_against`)"
-        },
-        "matches_attendance_in_range_when_played": {
-          "name": "matches_attendance_in_range_when_played",
-          "value": "`matches`.`attendance` is null or (`matches`.`status` = 'played' and `matches`.`attendance` <= 150000)"
-        },
-        "matches_referee_not_empty": {
-          "name": "matches_referee_not_empty",
-          "value": "`matches`.`referee` is null or char_length(`matches`.`referee`) > 0"
         }
       }
     },

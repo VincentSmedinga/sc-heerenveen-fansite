@@ -109,7 +109,7 @@ export const hiddenReasonMaxLength = 300
  * instead of cutting it off. A key can be 700 characters at most: that is the longest a unique
  * index over it and `source_id` allows (3072 bytes).
  */
-export const itemLimits = { key: 700, title: 500, url: 2048 }
+export const itemLimits = { key: 700, threadKey: 100, title: 500, url: 2048 }
 
 /**
  * A key that two items share only when they are the same byte for byte: a GUID is
@@ -118,6 +118,14 @@ export const itemLimits = { key: 700, title: 500, url: 2048 }
  */
 const itemKey = customType<{ data: string }>({
   dataType: () => `varchar(${itemLimits.key}) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin`,
+})
+
+/**
+ * The key that ties the versions of one story together, as byte-for-byte as `itemKey`: a code
+ * in a link is case-sensitive too.
+ */
+const threadKey = customType<{ data: string }>({
+  dataType: () => `varchar(${itemLimits.threadKey}) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin`,
 })
 
 /**
@@ -181,6 +189,11 @@ export const items = mysqlTable(
       .notNull()
       .references(() => feeds.id, { onDelete: 'cascade' }),
     key: itemKey('item_key').notNull(),
+    // Ties the versions of one story together: a source that puts a story in its feed again
+    // under a new headline (a live blog) gives every version a link with the same code. The
+    // pages show the newest version of a thread of a source only. Empty for an item of a source
+    // with no rule for it (see `apps/importer/src/read-feed.ts`): it is its own story.
+    threadKey: threadKey('thread_key'),
     title: varchar('title', { length: itemLimits.title }).notNull(),
     url: varchar('url', { length: itemLimits.url }).notNull(),
     publishedAt: datetime('published_at').notNull(),
@@ -206,7 +219,10 @@ export const items = mysqlTable(
     hiddenBy: int('hidden_by', { unsigned: true }).references(() => adminUsers.id),
     hiddenReason: varchar('hidden_reason', { length: hiddenReasonMaxLength }),
   },
-  (table) => [unique('items_source_id_item_key_unique').on(table.sourceId, table.key)],
+  (table) => [
+    unique('items_source_id_item_key_unique').on(table.sourceId, table.key),
+    index('items_source_id_thread_key_idx').on(table.sourceId, table.threadKey),
+  ],
 )
 
 export type Item = typeof items.$inferSelect

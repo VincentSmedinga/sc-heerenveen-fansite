@@ -2,7 +2,7 @@ import type { FeedFilter, SourceKind } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { listRecentItems } from '@fansite/db/queries'
+import { countArchiveItems, listArchivePage, listRecentItems } from '@fansite/db/queries'
 import { adminUsers, feeds, importResults, items, matches, sources } from '@fansite/db/schema'
 import { seedSources } from '@fansite/db/seed'
 import { createTestDatabase } from '@fansite/db/test-database'
@@ -1298,6 +1298,182 @@ describe('importing the sports feed of Rijnmond, the way the register has it', (
     const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-12-15T00:00:00Z') })
 
     expect(shown.map((item) => item.title)).toEqual(['sc Heerenveen kijkt uit naar de uitwedstrijd in Rotterdam'])
+  })
+})
+
+describe('the versions of a story', () => {
+  const later = new Date('2026-10-22T12:00:00Z')
+
+  /** A version of a story: the headline in the link changes with every update, the code not. */
+  function version(code: string, headline: string, pubDate: string) {
+    const key = `${headline}~${code}`
+
+    return entry(key, { link: `https://krant.test/regio/${headline}~${code}/`, pubDate, title: headline })
+  }
+
+  async function addKeyedFeed(origin: string, domain = 'www.ad.nl') {
+    return addFeed(`${origin}/${domain}/rss/`, { domain })
+  }
+
+  async function importBody(feed: Awaited<ReturnType<typeof addFeed>>, body: string, now = firstRun) {
+    const server = await serve(body)
+
+    await database.db
+      .update(feeds)
+      .set({ etag: null, lastModified: null, url: `${server.origin}/rss/` })
+      .where(eq(feeds.id, feed.id))
+
+    return importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), now)
+  }
+
+  const shownTitles = async () =>
+    (await listArchivePage(database.db, { limit: 50, until: later })).map((item) => item.title)
+
+  it('stores the key of the story with every version, and none for a link without a code', async () => {
+    const feed = await addKeyedFeed('http://unused.test')
+
+    await importBody(
+      feed,
+      feedWith(
+        version('aaaa1111', 'bal-rolt', 'Thu, 22 Oct 2026 08:00:00 GMT'),
+        version('aaaa1111', 'rust-zonder-doelpunten', 'Thu, 22 Oct 2026 09:00:00 GMT'),
+        version('bbbb2222', 'andere-wedstrijd', 'Thu, 22 Oct 2026 08:30:00 GMT'),
+        entry('zonder-code'),
+      ),
+    )
+
+    expect((await itemsInDatabase()).map((row) => [row.title, row.threadKey])).toEqual([
+      ['bal-rolt', '~aaaa1111'],
+      ['rust-zonder-doelpunten', '~aaaa1111'],
+      ['andere-wedstrijd', '~bbbb2222'],
+      ['Kop zonder-code', null],
+    ])
+  })
+
+  it('shows the newest version of each story after a second import, and counts the stories', async () => {
+    const feed = await addKeyedFeed('http://unused.test')
+
+    await importBody(
+      feed,
+      feedWith(
+        version('aaaa1111', 'bal-rolt', 'Thu, 22 Oct 2026 08:00:00 GMT'),
+        version('bbbb2222', 'andere-wedstrijd', 'Thu, 22 Oct 2026 08:30:00 GMT'),
+        entry('zonder-code', { pubDate: 'Thu, 22 Oct 2026 08:45:00 GMT' }),
+      ),
+    )
+    await importBody(
+      feed,
+      feedWith(
+        version('aaaa1111', 'bal-rolt', 'Thu, 22 Oct 2026 08:00:00 GMT'),
+        version('aaaa1111', 'eindstand', 'Thu, 22 Oct 2026 10:00:00 GMT'),
+        version('bbbb2222', 'andere-wedstrijd', 'Thu, 22 Oct 2026 08:30:00 GMT'),
+        entry('zonder-code', { pubDate: 'Thu, 22 Oct 2026 08:45:00 GMT' }),
+      ),
+      secondRun,
+    )
+
+    expect(await itemsInDatabase()).toHaveLength(4)
+    expect(await shownTitles()).toEqual(['eindstand', 'Kop zonder-code', 'andere-wedstrijd'])
+    expect(await countArchiveItems(database.db, { until: later })).toBe(3)
+  })
+
+  it('shows a story whose newest version does not name the club, when an older version did', async () => {
+    const feed = await addFeed('http://unused.test/rss/', { domain: 'www.ad.nl', filter: 'club' })
+
+    await importBody(
+      feed,
+      feedWith(
+        version('aaaa1111', 'sc-heerenveen-begint-sterk', 'Thu, 22 Oct 2026 08:00:00 GMT'),
+        version('aaaa1111', 'het-eindsignaal-klinkt', 'Thu, 22 Oct 2026 10:00:00 GMT'),
+        version('bbbb2222', 'brand-in-schuur', 'Thu, 22 Oct 2026 09:00:00 GMT'),
+        version('bbbb2222', 'brand-geblust', 'Thu, 22 Oct 2026 09:30:00 GMT'),
+      ),
+    )
+
+    expect((await itemsInDatabase()).map((row) => [row.title, row.relevance])).toEqual([
+      ['sc-heerenveen-begint-sterk', 'relevant'],
+      ['het-eindsignaal-klinkt', 'irrelevant'],
+      ['brand-in-schuur', 'irrelevant'],
+      ['brand-geblust', 'irrelevant'],
+    ])
+    expect(await shownTitles()).toEqual(['het-eindsignaal-klinkt'])
+  })
+
+  it('gives the key to the items that were stored before, also when the feed has not changed', async () => {
+    const feed = await addKeyedFeed('http://unused.test')
+    const sourceId = feed.sourceId
+    const stored = { feedId: feed.id, publishedAt: new Date('2026-10-22T08:00:00Z'), sourceId }
+    const earlier = new Date('2026-10-22T07:00:00Z')
+
+    await database.db.insert(items).values([
+      { ...stored, key: 'een', title: 'een', url: 'https://krant.test/regio/een~aaaa1111/' },
+      { ...stored, key: 'twee', title: 'twee', url: 'https://krant.test/regio/twee~aaaa1111/' },
+      { ...stored, key: 'zonder', publishedAt: earlier, title: 'zonder', url: 'https://krant.test/regio/zonder-code/' },
+      {
+        ...stored,
+        hiddenAt: firstRun,
+        key: 'verborgen',
+        title: 'verborgen',
+        url: 'https://krant.test/regio/verborgen~aaaa1111/',
+      },
+    ])
+    await database.db.update(feeds).set({ etag: '"abc"' }).where(eq(feeds.id, feed.id))
+
+    const server = await serve((request, response) => {
+      expect(request.headers['if-none-match']).toBe('"abc"')
+      response.writeHead(304)
+      response.end()
+    })
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${server.origin}/rss/` })
+      .where(eq(feeds.id, feed.id))
+
+    expect(await importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), later)).toMatchObject({
+      kind: 'not-modified',
+    })
+    expect((await itemsInDatabase()).map((row) => [row.title, row.threadKey])).toEqual([
+      ['een', '~aaaa1111'],
+      ['twee', '~aaaa1111'],
+      ['zonder', null],
+      ['verborgen', null],
+    ])
+    expect(await shownTitles()).toEqual(['twee', 'zonder'])
+  })
+
+  it('counts an item with a key as unchanged when the next import finds it the same', async () => {
+    const feed = await addKeyedFeed('http://unused.test')
+    const body = feedWith(version('aaaa1111', 'bal-rolt', 'Thu, 22 Oct 2026 08:00:00 GMT'))
+
+    expect(await importBody(feed, body)).toMatchObject({ added: 1, unchanged: 0, updated: 0 })
+    expect(await importBody(feed, body, secondRun)).toMatchObject({ added: 0, unchanged: 1, updated: 0 })
+  })
+
+  it('never joins two sources that have the same key', async () => {
+    const krant = await addKeyedFeed('http://unused.test', 'www.ad.nl')
+    const andere = await addKeyedFeed('http://unused.test', 'www.gelderlander.nl')
+
+    await importBody(krant, feedWith(version('aaaa1111', 'ad-kop', 'Thu, 22 Oct 2026 08:00:00 GMT')))
+    await importBody(andere, feedWith(version('aaaa1111', 'dg-kop', 'Thu, 22 Oct 2026 09:00:00 GMT')))
+
+    expect(await shownTitles()).toEqual(['dg-kop', 'ad-kop'])
+    expect(await countArchiveItems(database.db, { until: later })).toBe(2)
+  })
+
+  it('gives a source without a rule no key, so a code in its links changes nothing', async () => {
+    const feed = await addFeed('http://unused.test/rss/', { domain: 'www.lc.nl' })
+
+    await importBody(
+      feed,
+      feedWith(
+        version('aaaa1111', 'eerste', 'Thu, 22 Oct 2026 08:00:00 GMT'),
+        version('aaaa1111', 'tweede', 'Thu, 22 Oct 2026 09:00:00 GMT'),
+      ),
+    )
+
+    expect((await itemsInDatabase()).map((row) => row.threadKey)).toEqual([null, null])
+    expect(await shownTitles()).toEqual(['tweede', 'eerste'])
   })
 })
 

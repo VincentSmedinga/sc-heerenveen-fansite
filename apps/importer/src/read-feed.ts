@@ -24,6 +24,8 @@ export type FeedItem = {
   publishedAt: Date | null
   /** The season of a podcast episode, a positive whole number up to 99999, or null. */
   seasonNumber: null | number
+  /** The key of the story this item is a version of (see `threadRuleFor`), or null. */
+  threadKey: null | string
   /** The headline as text. */
   title: string
   /** The link, always `http` or `https`. */
@@ -144,6 +146,15 @@ const paywallNamespaces: Record<string, string> = {
 }
 
 /**
+ * How a source tells the versions of one story apart from other stories: a pattern that finds
+ * a code in the path of a link. A source that puts a story in its feed again under a new
+ * headline, such as a live blog that gets a headline for every update, gives every version a
+ * link with the same code. The pattern has one group, the code, which is the `thread_key` of
+ * the item. The site shows the newest version of a story of a source only.
+ */
+export type ThreadRule = RegExp
+
+/**
  * A zone label that a source puts on times that are in another zone: `label` is what the feed
  * writes at the end of a time, `timeZone` is the zone the times are really in.
  */
@@ -163,6 +174,24 @@ export function paywallCategoryFor(sourceDomain: string): string | undefined {
  */
 export function paywallNamespaceFor(sourceDomain: string): string | undefined {
   return paywallNamespaces[sourceDomain]
+}
+
+/**
+ * The code of DPG Media, the publisher of the Algemeen Dagblad and De Gelderlander: a tilde and
+ * eight letters and digits at the end of the path, as in `/regio/een-kop~a40dbd48/`. The text
+ * before the tilde is the headline and changes with every version, the code does not. It is the
+ * same code at both newspapers for an article they share, which is why the key only joins items
+ * of one source.
+ */
+const dpgMediaThread: ThreadRule = /~([a-z0-9]{8})\/?$/iu
+
+/**
+ * The rules for the versions of a story, by the domain of the source. A source without a rule
+ * has no keys: every item is its own story.
+ */
+const threadRules: Record<string, ThreadRule> = {
+  'www.ad.nl': dpgMediaThread,
+  'www.gelderlander.nl': dpgMediaThread,
 }
 
 /**
@@ -188,12 +217,14 @@ export function readFeed(
     now = new Date(),
     paywallCategory,
     paywallNamespace,
+    threadRule,
     timeRule,
   }: {
     contentType?: null | string
     now?: Date
     paywallCategory?: string | undefined
     paywallNamespace?: string | undefined
+    threadRule?: ThreadRule | undefined
     timeRule?: TimeRule | undefined
   } = {},
 ): ReadFeed {
@@ -230,7 +261,7 @@ export function readFeed(
 
   raw.forEach((candidate, index) => {
     const position = index + 1
-    const item = cleanItem(candidate, now, timeRule)
+    const item = cleanItem(candidate, now, timeRule, threadRule)
 
     if ('reason' in item) {
       skipped.push({ position, reason: item.reason })
@@ -243,6 +274,25 @@ export function readFeed(
   })
 
   return { items, kind: 'read', skipped }
+}
+
+/**
+ * The key of the story that a link belongs to under a rule, or null when the link has no code.
+ * The key is the code as the link writes it, in lower case, with its tilde: `~a40dbd48`.
+ */
+export function threadKeyOf(href: string, rule: ThreadRule): null | string {
+  try {
+    const code = rule.exec(new URL(href).pathname)?.[1]
+
+    return code === undefined ? null : `~${code.toLowerCase()}`
+  } catch {
+    return null
+  }
+}
+
+/** The rule for the versions of a story at this source, or undefined when it has none. */
+export function threadRuleFor(sourceDomain: string): ThreadRule | undefined {
+  return threadRules[sourceDomain]
 }
 
 /** The rule for the times of this source, or undefined when its zones are right. */
@@ -270,7 +320,12 @@ function atomItems(feed: Atom.Feed<string>): RawItem[] {
 }
 
 /** Checks and cleans one item. */
-function cleanItem(raw: RawItem, now: Date, timeRule: TimeRule | undefined): FeedItem | { reason: string } {
+function cleanItem(
+  raw: RawItem,
+  now: Date,
+  timeRule: TimeRule | undefined,
+  threadRule: ThreadRule | undefined,
+): FeedItem | { reason: string } {
   const title = cleanHeadline(raw.title ?? '')
 
   if (title === '') {
@@ -302,6 +357,7 @@ function cleanItem(raw: RawItem, now: Date, timeRule: TimeRule | undefined): Fee
     paywalled: raw.paywalled === true,
     publishedAt: parseTime(raw.time, now, timeRule),
     seasonNumber: wholeNumber(raw.season, maxNumber),
+    threadKey: threadRule === undefined ? null : threadKeyOf(link.href, threadRule),
     title,
     url: link.href,
   }

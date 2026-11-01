@@ -248,6 +248,15 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   De adapter herkent de naamruimte aan haar adres, `https://www.dpgmedia.cloud/paidrss`, en niet aan het voorvoegsel `dpp`: hij leest eerst welke voorvoegsels de feed voor dat adres kiest.
   Ook dit element leest de tweede lezing, want `feedsmith` kent het niet.
   Een feed zonder het teken van zijn bron heeft geen betaalmuur.
+- **Versies van een verhaal:** een bron kan een verhaal steeds onder een nieuwe kop in de feed zetten, zoals een liveblog dat bij elke update een nieuwe kop krijgt.
+  Elke versie is dan een bericht met een eigen link en sleutel.
+  De adapter kiest aan het domein van de bron of die versies een gedeelde sleutel krijgen (`threadRules` in [`src/read-feed.ts`](src/read-feed.ts)), en zet hem in `items.thread_key`.
+  Bij het Algemeen Dagblad en De Gelderlander (DPG Media) is het de code `~` met acht letters en cijfers aan het eind van het pad, zoals `~a40dbd48` in `…/een-kop~a40dbd48/`: de kop in de link verandert, de code niet.
+  Een bron zonder regel, en een link zonder die code, krijgt geen sleutel; zo'n bericht is zijn eigen verhaal.
+  Dezelfde code bij twee bronnen is geen verband: de site voegt alleen versies van één bron samen.
+  De importer bewaart elke versie en verwijdert er geen; de site toont de laatste (zie de [README van de database](../../packages/db/README.md), _De versies van een verhaal_).
+  Bij elke import van een bron met een regel krijgt een bericht dat de sleutel nog mist hem uit zijn bewaarde link, ook als de feed niet gewijzigd is (`backfillThreadKeys` in [`src/import-feeds.ts`](src/import-feeds.ts)); een verborgen bericht blijft zoals het is.
+  Een bekend bericht dat de sleutel krijgt of verliest, telt als gewijzigd.
 - **Te lang:** een kop van meer dan 500 tekens, een link van meer dan 2048 of een sleutel van meer dan 700 slaat de adapter over, in plaats van hem af te kappen.
 - **Bijwerken:** een nieuw bericht komt erbij.
   Een bekend bericht krijgt de nieuwe kop, link, tijd en betaalmuur als de bron die veranderde, en de relevantie die het filter nu vindt (zie _Het relevantiefilter_).

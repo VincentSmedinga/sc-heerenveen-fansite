@@ -3,7 +3,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { FeedItem } from './read-feed.ts'
 
-import { cleanHeadline, paywallCategoryFor, paywallNamespaceFor, readFeed, timeRuleFor } from './read-feed.ts'
+import {
+  cleanHeadline,
+  paywallCategoryFor,
+  paywallNamespaceFor,
+  readFeed,
+  threadKeyOf,
+  threadRuleFor,
+  timeRuleFor,
+} from './read-feed.ts'
 
 const now = new Date('2026-10-22T12:00:00Z')
 
@@ -85,6 +93,7 @@ describe('the recording of the Leeuwarder Courant', () => {
       paywalled: false,
       publishedAt: new Date('2026-10-20T11:58:00Z'),
       seasonNumber: null,
+      threadKey: null,
       // The source has a space after the headline and an ampersand in CDATA; the headline is
       // otherwise as published.
       title: 'Timo Zaal verkast naar Zweedse club & nieuwe aflevering van Omroep Abe',
@@ -119,7 +128,7 @@ describe('the recording of the Leeuwarder Courant', () => {
     }
   })
 
-  it('gives items with these eight fields only: no intro, image, author or category, and no duration or number for news', () => {
+  it('gives items with these nine fields only: no intro, image, author or category, and no duration or number for news', () => {
     const items = result.kind === 'read' ? result.items : []
 
     for (const item of items) {
@@ -130,6 +139,7 @@ describe('the recording of the Leeuwarder Courant', () => {
         'paywalled',
         'publishedAt',
         'seasonNumber',
+        'threadKey',
         'title',
         'url',
       ])
@@ -167,6 +177,7 @@ describe('the recording of Voetbal International', () => {
       paywalled: true,
       publishedAt: new Date('2026-10-21T13:00:00Z'),
       seasonNumber: null,
+      threadKey: null,
       title: 'Een extra toevoeging aan het spel van een jonge ervaren rot bij SC Heerenveen',
       url: 'https://www.vi.nl/pro/een-extra-toevoeging-aan-het-spel-van-een-jonge-ervaren-rot-bij-sc-heerenveen',
     })
@@ -189,7 +200,7 @@ describe('the recording of Voetbal International', () => {
     }
   })
 
-  it('gives items with these eight fields only: no intro, image, author or category, and no duration or number for news', () => {
+  it('gives items with these nine fields only: no intro, image, author or category, and no duration or number for news', () => {
     for (const item of items) {
       expect(Object.keys(item).sort()).toEqual([
         'durationSeconds',
@@ -198,6 +209,7 @@ describe('the recording of Voetbal International', () => {
         'paywalled',
         'publishedAt',
         'seasonNumber',
+        'threadKey',
         'title',
         'url',
       ])
@@ -605,6 +617,7 @@ describe('an Atom feed', () => {
       paywalled: false,
       publishedAt: new Date('2026-10-20T11:58:00Z'),
       seasonNumber: null,
+      threadKey: null,
       title: 'Een vette kop & meer',
       url: 'https://krant.test/een',
     })
@@ -676,6 +689,7 @@ describe('a podcast feed', () => {
       paywalled: false,
       publishedAt: new Date('2026-10-19T22:31:00Z'),
       seasonNumber: null,
+      threadKey: null,
       title: 'Aflevering één',
       url: 'https://podcast.test/e/aflevering-een/',
     })
@@ -770,6 +784,7 @@ describe('a podcast feed', () => {
       'paywalled',
       'publishedAt',
       'seasonNumber',
+      'threadKey',
       'title',
       'url',
     ])
@@ -949,5 +964,49 @@ describe('the paywall of the Algemeen Dagblad and De Gelderlander', () => {
     expect(paywallNamespaceFor('www.gelderlander.nl')).toBe(dpp)
     expect(paywallNamespaceFor('www.lc.nl')).toBeUndefined()
     expect(paywallNamespaceFor('www.vi.nl')).toBeUndefined()
+  })
+})
+
+describe('the key of the versions of a story', () => {
+  const rule = threadRuleFor('www.ad.nl')
+
+  const keyedFeed = (link: string) =>
+    rss(`<item><title>Kop</title><link>${link}</link><guid isPermaLink="false">g</guid></item>`)
+
+  it('has a rule for the domains of DPG Media and for no other', () => {
+    expect(threadRuleFor('www.ad.nl')).toBeDefined()
+    expect(threadRuleFor('www.gelderlander.nl')).toBe(threadRuleFor('www.ad.nl'))
+    expect(threadRuleFor('www.lc.nl')).toBeUndefined()
+    expect(threadRuleFor('www.vi.nl')).toBeUndefined()
+    expect(threadRuleFor('')).toBeUndefined()
+  })
+
+  it('is the code after the tilde at the end of the path, whatever the headline in front of it says', () => {
+    expect(threadKeyOf('https://krant.test/regio/een-kop~a40dbd48/', rule!)).toBe('~a40dbd48')
+    expect(threadKeyOf('https://krant.test/regio/een-heel-andere-kop~a40dbd48/', rule!)).toBe('~a40dbd48')
+    expect(threadKeyOf('https://krant.test/regio/een-kop~a40dbd48', rule!)).toBe('~a40dbd48')
+  })
+
+  it('does not look at the query or the fragment, and writes the code in lower case', () => {
+    expect(threadKeyOf('https://krant.test/regio/een-kop~A40DBD48/?ref=feed#top', rule!)).toBe('~a40dbd48')
+  })
+
+  it('is null for a link without a code of eight letters and digits at the end', () => {
+    expect(threadKeyOf('https://krant.test/regio/een-kop/', rule!)).toBeNull()
+    expect(threadKeyOf('https://krant.test/regio/een-kop~a40dbd4/', rule!)).toBeNull()
+    expect(threadKeyOf('https://krant.test/regio/een-kop~a40dbd489/', rule!)).toBeNull()
+    expect(threadKeyOf('https://krant.test/regio/een~a40dbd48/kop', rule!)).toBeNull()
+    expect(threadKeyOf('https://krant.test/regio/een-kop?id=~a40dbd48', rule!)).toBeNull()
+    expect(threadKeyOf('geen link', rule!)).toBeNull()
+  })
+
+  it('is given to an item when the source has a rule, and null without one', () => {
+    const feed = keyedFeed('https://krant.test/regio/een-kop~a40dbd48/')
+
+    expect(readFeed(encode(feed), { now, threadRule: rule })).toMatchObject({ items: [{ threadKey: '~a40dbd48' }] })
+    expect(readFeed(encode(feed), { now })).toMatchObject({ items: [{ threadKey: null }] })
+    expect(readFeed(encode(keyedFeed('https://krant.test/regio/een-kop/')), { now, threadRule: rule })).toMatchObject({
+      items: [{ threadKey: null }],
+    })
   })
 })

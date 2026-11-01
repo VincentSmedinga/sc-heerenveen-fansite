@@ -137,22 +137,23 @@ Van een aflevering van een podcast staan er drie feiten bij die geen inhoud zijn
 Een intro, een afbeelding, een auteur of een categorie heeft geen kolom, want geen bron heeft daar nu toestemming voor (principe 2 van de Redactie).
 Een kolom daarvoor komt met de eerste bron die het wel mag; een test houdt de lijst met kolommen vast.
 
-| Kolom                           | Betekenis                                                                                       |
-| ------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `source_id`, `feed_id`          | De bron en de feed waar het bericht voor het laatst in stond                                    |
-| `item_key`                      | De sleutel per bron: de `guid` van het bericht, of anders de link (hoogstens 700 tekens)        |
-| `title`                         | De kop als tekst (hoogstens 500 tekens)                                                         |
-| `url`                           | De link, altijd `http` of `https` (hoogstens 2048 tekens)                                       |
-| `published_at`                  | De tijd van publicatie, in UTC; zonder geldige tijd de tijd van de eerste keer dat we het zagen |
-| `paywalled`                     | Of het bericht achter de betaalmuur staat; een kenmerk van het bericht en geen inhoud           |
-| `duration_seconds`              | De duur van een aflevering in hele seconden; leeg als de feed hem niet geeft, en bij nieuws     |
-| `season_number`                 | Het seizoen van een aflevering; leeg als de feed het niet geeft                                 |
-| `episode_number`                | Het nummer van een aflevering; leeg als de feed het niet geeft                                  |
-| `first_seen_at`, `last_seen_at` | Wanneer we het bericht voor het eerst en het laatst zagen, in UTC                               |
-| `hidden_at`                     | Wanneer een moderator het bericht verborg, in UTC; leeg voor een bericht dat te zien is         |
-| `hidden_by`                     | Het account dat het verborg (`admin_users`); leeg als het bericht niet verborgen is             |
-| `hidden_reason`                 | Waarom, hoogstens 300 tekens; leeg als het bericht niet verborgen is                            |
-| `relevance`                     | Wat de importer van de kop vond: `relevant` (de beginwaarde), `doubtful` of `irrelevant`        |
+| Kolom                           | Betekenis                                                                                          |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `source_id`, `feed_id`          | De bron en de feed waar het bericht voor het laatst in stond                                       |
+| `item_key`                      | De sleutel per bron: de `guid` van het bericht, of anders de link (hoogstens 700 tekens)           |
+| `title`                         | De kop als tekst (hoogstens 500 tekens)                                                            |
+| `url`                           | De link, altijd `http` of `https` (hoogstens 2048 tekens)                                          |
+| `published_at`                  | De tijd van publicatie, in UTC; zonder geldige tijd de tijd van de eerste keer dat we het zagen    |
+| `paywalled`                     | Of het bericht achter de betaalmuur staat; een kenmerk van het bericht en geen inhoud              |
+| `duration_seconds`              | De duur van een aflevering in hele seconden; leeg als de feed hem niet geeft, en bij nieuws        |
+| `season_number`                 | Het seizoen van een aflevering; leeg als de feed het niet geeft                                    |
+| `episode_number`                | Het nummer van een aflevering; leeg als de feed het niet geeft                                     |
+| `first_seen_at`, `last_seen_at` | Wanneer we het bericht voor het eerst en het laatst zagen, in UTC                                  |
+| `hidden_at`                     | Wanneer een moderator het bericht verborg, in UTC; leeg voor een bericht dat te zien is            |
+| `hidden_by`                     | Het account dat het verborg (`admin_users`); leeg als het bericht niet verborgen is                |
+| `hidden_reason`                 | Waarom, hoogstens 300 tekens; leeg als het bericht niet verborgen is                               |
+| `relevance`                     | Wat de importer van de kop vond: `relevant` (de beginwaarde), `doubtful` of `irrelevant`           |
+| `thread_key`                    | De sleutel van het verhaal waar het bericht een versie van is (hoogstens 100 tekens); meestal leeg |
 
 `item_key` is uniek per bron (`source_id` en `item_key` samen) en hoofdlettergevoelig: de kolom heeft de collatie `utf8mb4_bin`, want een `guid` en het pad van een URL kennen hoofdletters.
 Een lengte die niet past, geeft een fout in plaats van dat de database de tekst afkapt; de importer slaat zo'n bericht eerder al over.
@@ -168,6 +169,20 @@ De importer bewaart elk bericht, ook `doubtful` en `irrelevant`; de regels en de
 De site toont alleen `relevant`: elke query in `queries.ts` die berichten toont, gaat door `isShown`, samen met `hidden_at IS NULL`.
 Een nieuwe query op `items` voor een pagina gebruikt `isShown` ook; het beheer zelf (`listItems`) is de enige die elke waarde toont.
 Een migratie zet elk bericht dat er al was op `relevant` en elke feed op `none`.
+
+### De versies van een verhaal
+
+Een bron kan een verhaal steeds onder een nieuwe kop in de feed zetten, zoals een liveblog.
+Elke versie is een bericht, en `thread_key` bindt ze: de importer maakt hem per domein uit de link (zie de [README van de importer](../../apps/importer/README.md), _Versies van een verhaal_) en laat hem leeg bij een bron zonder regel.
+De kolom is hoofdlettergevoelig (`utf8mb4_bin`), met een index op `source_id` en `thread_key`.
+De site toont per bron en sleutel het nieuwste bericht (de nieuwste `published_at`, bij dezelfde tijd het hoogste `id`), en `isShown` regelt dat voor elke query samen met de relevantie en het verbergen:
+
+- een verhaal is te zien als een van zijn versies `relevant` is, en het toont de laatste kop, ook als die niet `relevant` is;
+- een verborgen versie telt niet mee: het verhaal toont de nieuwste versie die niet verborgen is, en verdwijnt als er geen over is;
+- twee bronnen met dezelfde sleutel zijn twee verhalen;
+- een bericht zonder sleutel is zijn eigen verhaal en gaat door de gewone voorwaarde.
+
+De oudere versies blijven in de tabel, en het beheer toont ze allemaal.
 
 ### Een bericht verbergen
 
