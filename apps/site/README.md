@@ -757,3 +757,11 @@ Het donkerblauw komt uit het token `--hf-colour-background-header` in `colour.cs
 `next.config.ts` leest het bij de bouw (zie `src/header-colour.ts`), en het script voor de iconen leest hetzelfde bestand.
 Draai het script alleen opnieuw als de vector of dat token verandert, en zet de nieuwe bestanden in de repository.
 `src/icons.test.ts` controleert de afmetingen en de transparantie, en dat het vlak de kleur van het token heeft.
+
+De `theme-color` in `src/app/layout.tsx` kleurt de balken van Chrome en andere browsers met de kop: `blue-900` in licht en `blue-800` in donker.
+Safari op een iPhone of iPad gebruikt die niet voor zijn statusbalk.
+Daar krijgt de statusbalk de kleur van de strook `.hf-page-top-edge` bovenaan de pagina (zie `page.css` in het designsysteem).
+Die strook staat altijd op de pagina, ook als de kop is weggescrolt, zodat de statusbalk altijd het blauw van de modus heeft.
+De kleur verandert alleen als de modus wisselt: met de knop Licht of Donker of als het systeem van thema wisselt (`refreshTopEdge` in `src/theme.ts`, dat de strook twee beeldjes van de pagina haalt, omdat Safari de nieuwe kleur anders niet leest).
+Een vast element of een balk die vastplakt bovenaan mag niet over de strook liggen, want dan neemt Safari de kleur daarvan: de balk "Op deze pagina:" plakt onder de strook vast.
+`e2e/safe-area.spec.ts` toetst de kleur van de strook in licht en donker, ook na het scrollen; de kleur van de statusbalk zelf is alleen op een telefoon of in de iOS-simulator te zien.

@@ -331,7 +331,8 @@ async function checkIcons() {
 /**
  * Checks that the page links to the manifest and the icons, which come from our own server, and
  * that the browser gets the colours of the header and the short name for the home screen of an
- * iPhone.
+ * iPhone. The strip that gives Safari on an iPhone the colour of its status bar is there, and
+ * is not taken off the page.
  */
 function checkIconTags(path, html) {
   assert.match(html, /<link rel="manifest" href="\/manifest\.webmanifest"/, path)
@@ -345,6 +346,7 @@ function checkIconTags(path, html) {
   assert.match(html, /<meta name="apple-mobile-web-app-title" content="Fansite"/, path)
   assert.match(html, /<meta name="theme-color" content="#[0-9a-f]{6}" media="\(prefers-color-scheme: light\)"/, path)
   assert.match(html, /<meta name="theme-color" content="#[0-9a-f]{6}" media="\(prefers-color-scheme: dark\)"/, path)
+  assert.match(html, /<div aria-hidden="true" class="hf-page-top-edge"><\/div>/, path)
 }
 
 /**
