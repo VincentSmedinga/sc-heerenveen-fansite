@@ -22,7 +22,7 @@
   "dependencies": {
     "@fansite/db": "workspace:*",
     "drizzle-orm": "0.45.4",
-    "entities": "7.0.1",
+    "entities": "9.0.0",
     "fast-xml-parser": "5.11.2",
     "feedsmith": "3.0.1",
     "undici": "8.12.3"
