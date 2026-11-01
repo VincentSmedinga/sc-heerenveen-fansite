@@ -726,7 +726,8 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Staat de kop er niet meer, dan is de pagina veranderd en is het wel een fout.
 - Bij de bron staat alleen wat de wedstrijd zelf zegt: de namen, de stand, de minuten, het stadion en de aftrap.
   Het verslag van de NOS in het sjabloon bewaren we niet.
-- Gecontroleerd tegen de pagina's van 2022, 2023, 2024, 2025 en 2026: de pagina's van 2022 tot en met 2026 hebben dezelfde opbouw.
+- Gecontroleerd tegen de volledige pagina's van 2022, 2023, 2024, 2025 en 2026: ze hebben dezelfde opbouw.
+  De pagina van 2023 is met de hand gelezen en heeft geen fixture; de andere vier staan in `src/fixtures/`.
   Dat de import ze leest zonder verdere wijziging, laat de test voor 2025/26 zien (zie _Een afgelopen seizoen_).
   Voor oudere seizoenen, waarin de kop anders heette, leest de import niets: de kop ontbreekt dan, en dat is een fout.
 
