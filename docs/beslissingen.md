@@ -8280,7 +8280,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     Het moment staat in `<time dateTime>`.
   - **De plek:** de laatste regel van de kaart, na de bronvermelding.
     De afbeelding van een kaart heeft de regel niet, want die heeft al de dag van het maken en de bron.
-    Het onderdeel `LastModified` van het designsysteem draagt daarvoor de markering die het kopie van de kaart voor de afbeelding weglaat.
+    Het onderdeel `LastModified` van het designsysteem draagt daarvoor de markering die de kopie van de kaart voor de afbeelding weglaat.
   - **Onbekend:** heeft een kaart geen moment (de bron is nog niet gelezen of de `version` ontbreekt), of heeft hij geen gegevens en dus een zin als "Kijk straks nog eens", dan staat er geen regel, en geen gok met een andere datum.
     Een moment in de toekomst telt niet mee.
   - **Welke pagina's bij welke kaart horen** staat op één plek, in `apps/site/src/card-sources.ts`: de drie pagina's van de wedstrijden (de competitie, de wedstrijden en de beker) voor het programma, de uitslagen, de kaarten met cijfers en de pagina's van de tegenstanders; de pagina van de competitie voor de stand en onze plek in de competitie; de pagina van de selectie voor de hoofdtrainers en de lijst met spelers.
