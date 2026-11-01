@@ -58,7 +58,7 @@ type WikipediaCreditBaseProps<Tag extends 'details' | 'p'> = Omit<ComponentProps
 /**
  * The credit for data from Wikipedia. The full form is a `details` that is closed: it says
  * "Bron: Wikipedia", and one click or press shows the licence (CC BY-SA 4.0), a link to each
- * page the data comes from, a plain sentence that asks the reader to consider a small donation
+ * page the data comes from, a plain sentence that asks the reader to consider a donation
  * (to Wikipedia, which we read for free), the time of the last reading, and a sentence that our
  * own data from them are CC BY-SA 4.0 too: the match data, or what `data` names. It is closed
  * for one page as well as for fifty, so there is one form to learn and a long list, such as
@@ -105,8 +105,8 @@ export const WikipediaCredit = ({
             <Link href={page.href}>{page.name}</Link>
           </span>
         ))}
-        . Overweeg de volgende keer een kleine donatie. Laatst gelezen op{' '}
-        <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook CC BY-SA 4.0.
+        . Overweeg eens een donatie. Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn
+        ook CC BY-SA 4.0.
       </p>
     </details>
   )

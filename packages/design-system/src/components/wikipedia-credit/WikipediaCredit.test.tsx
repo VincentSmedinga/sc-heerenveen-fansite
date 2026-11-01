@@ -20,7 +20,7 @@ describe('WikipediaCredit', () => {
     const { container } = render(<WikipediaCredit {...props} pages={[standings]} />)
 
     expect(container.textContent).toBe(
-      'Bron: WikipediaLicentie: CC BY-SA 4.0. Pagina: Eredivisie 2026/27. Overweeg de volgende keer een kleine donatie. Laatst gelezen op 25 oktober 2026 om 14:05. Onze wedstrijdgegevens zijn ook CC BY-SA 4.0.',
+      'Bron: WikipediaLicentie: CC BY-SA 4.0. Pagina: Eredivisie 2026/27. Overweeg eens een donatie. Laatst gelezen op 25 oktober 2026 om 14:05. Onze wedstrijdgegevens zijn ook CC BY-SA 4.0.',
     )
   })
 
@@ -87,7 +87,7 @@ describe('WikipediaCredit', () => {
     const { container } = render(<WikipediaCredit {...props} pages={[standings, cup]} />)
 
     expect(container.textContent).toContain(
-      'Pagina’s: Eredivisie 2026/27, KNVB Beker 2026/27. Overweeg de volgende keer een kleine donatie. Laatst gelezen',
+      'Pagina’s: Eredivisie 2026/27, KNVB Beker 2026/27. Overweeg eens een donatie. Laatst gelezen',
     )
   })
 

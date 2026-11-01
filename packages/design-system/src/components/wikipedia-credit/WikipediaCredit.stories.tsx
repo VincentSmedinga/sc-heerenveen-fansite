@@ -9,7 +9,7 @@ const meta = preview.meta({
         component: [
           'De bronvermelding voor gegevens van Wikipedia, in de vorm van principe 4 van de Redactie: altijd de bron vermelden.',
           'De volledige vorm staat dicht en zegt "Bron: Wikipedia".',
-          'Eén klik of toetsdruk laat de licentie (CC BY-SA 4.0), een link naar elke pagina waar de gegevens vandaan komen, de zin "Overweeg de volgende keer een kleine donatie.", de tijd van de laatste keer lezen en de zin zien dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.',
+          'Eén klik of toetsdruk laat de licentie (CC BY-SA 4.0), een link naar elke pagina waar de gegevens vandaan komen, de zin "Overweeg eens een donatie.", de tijd van de laatste keer lezen en de zin zien dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.',
           'Hij is dicht voor elke pagina, ook als er maar één is, zodat een bezoeker één vorm leert kennen en een lange lijst, zoals die van de tegenstanders, de pagina niet vult.',
           'Wikipedia noemt een link naar het artikel een goede bronvermelding: de auteurs staan in de geschiedenis van het artikel, die vanaf de pagina te bereiken is.',
           'Daarom linkt de bronvermelding niet zelf naar die geschiedenis.',
