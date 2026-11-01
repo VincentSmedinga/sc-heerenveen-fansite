@@ -875,6 +875,245 @@ describe('the versions of a story', () => {
   })
 })
 
+describe('a story that two sources of one publisher have', () => {
+  const now = new Date('2026-10-22T10:00:00Z')
+  const key = '~aaaa1111'
+
+  /** Puts a source with a feed in the register and returns the ids that an item needs. */
+  async function addSource(slug: string, overrides: Partial<typeof sources.$inferInsert> = {}) {
+    const domain = `${slug}.test`
+    const [source] = await database.db
+      .insert(sources)
+      .values({ domain, kind: 'news', name: slug, publisher: 'uitgever-a', slug, ...overrides })
+      .$returningId()
+    const sourceId = source?.id ?? 0
+    const [feed] = await database.db
+      .insert(feeds)
+      .values({ sourceId, url: `https://${domain}/rss/` })
+      .$returningId()
+
+    return { feedId: feed?.id ?? 0, sourceId }
+  }
+
+  async function addItem(
+    ids: { feedId: number; sourceId: number },
+    title: string,
+    publishedAt: string,
+    overrides: Partial<typeof items.$inferInsert> = {},
+  ) {
+    await database.db.insert(items).values({
+      ...ids,
+      key: title,
+      publishedAt: new Date(publishedAt),
+      threadKey: key,
+      title,
+      url: `https://proef.test/${title}`,
+      ...overrides,
+    })
+  }
+
+  /** A local and a national paper of one publisher, and a paper of another. */
+  async function addPapers() {
+    return {
+      andere: await addSource('andere', { publisher: 'uitgever-b' }),
+      landelijk: await addSource('landelijk'),
+      lokaal: await addSource('lokaal', { local: true }),
+    }
+  }
+
+  const archive = async (options: { limit?: number; offset?: number; sources?: string[] } = {}) =>
+    (await listArchivePage(database.db, { limit: 50, until: now, ...options })).map((item) => item.title)
+
+  const recent = async () => (await listRecentItems(database.db, { limit: 50, until: now })).map((item) => item.title)
+
+  const searched = async () =>
+    (await searchPublic(database.db, { limit: 50, until: now, words: ['verslag'] })).hits.map((hit) =>
+      hit.kind === 'article' ? hit.slug : hit.title,
+    )
+
+  it('shows the item of the local source, whichever source had it first', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z')
+
+    expect(await archive()).toEqual(['Verslag lokaal'])
+    expect(await recent()).toEqual(['Verslag lokaal'])
+    expect(await searched()).toEqual(['Verslag lokaal'])
+    expect(await countArchiveItems(database.db, { until: now })).toBe(1)
+  })
+
+  it('takes the name, the link, the time and the paywall of the winner', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z', { paywalled: false })
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { paywalled: true })
+
+    expect(await listArchivePage(database.db, { limit: 50, until: now })).toEqual([
+      {
+        paywalled: true,
+        publishedAt: new Date('2026-10-22T08:05:00Z'),
+        sourceName: 'lokaal',
+        title: 'Verslag lokaal',
+        url: 'https://proef.test/Verslag lokaal',
+      },
+    ])
+  })
+
+  it('shows the item that was published first when no source or both are local', async () => {
+    const { landelijk, lokaal } = await addPapers()
+    const tweede = await addSource('tweede-lokaal', { local: true })
+
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z')
+    await addItem(tweede, 'Verslag tweede lokaal', '2026-10-22T08:01:00Z')
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+
+    expect(await archive()).toEqual(['Verslag tweede lokaal'])
+  })
+
+  it('shows the item of the lowest id when the time is the same too', async () => {
+    const eerste = await addSource('eerste')
+    const tweede = await addSource('tweede')
+
+    await addItem(tweede, 'Verslag tweede', '2026-10-22T08:00:00Z')
+    await addItem(eerste, 'Verslag eerste', '2026-10-22T08:00:00Z')
+
+    expect(await archive()).toEqual(['Verslag tweede'])
+  })
+
+  it('shows the item of the other source when the winner is hidden or was never in its feed', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { hiddenAt: new Date('2026-10-22T09:00:00Z') })
+
+    expect(await archive()).toEqual(['Verslag landelijk'])
+    expect(await recent()).toEqual(['Verslag landelijk'])
+    expect(await countArchiveItems(database.db, { until: now })).toBe(1)
+
+    await database.pool.query('DELETE FROM items WHERE title = ?', ['Verslag lokaal'])
+
+    expect(await archive()).toEqual(['Verslag landelijk'])
+  })
+
+  it('shows nothing when every item of the story is hidden', async () => {
+    const { landelijk, lokaal } = await addPapers()
+    const hiddenAt = new Date('2026-10-22T09:00:00Z')
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z', { hiddenAt })
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { hiddenAt })
+
+    expect(await archive()).toEqual([])
+    expect(await searched()).toEqual([])
+  })
+
+  it('shows the story when one of its items is relevant, with the headline of the winner', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { relevance: 'irrelevant' })
+
+    expect(await archive()).toEqual(['Verslag lokaal'])
+    expect(await countArchiveItems(database.db, { until: now })).toBe(1)
+    expect(await searched()).toEqual(['Verslag lokaal'])
+  })
+
+  it('shows nothing when no item of the story is relevant', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z', { relevance: 'doubtful' })
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { relevance: 'irrelevant' })
+
+    expect(await archive()).toEqual([])
+  })
+
+  it('compares the newest version of each source', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk 1', '2026-10-22T07:00:00Z')
+    await addItem(landelijk, 'Verslag landelijk 2', '2026-10-22T09:00:00Z')
+    await addItem(lokaal, 'Verslag lokaal 1', '2026-10-22T08:00:00Z')
+
+    expect(await archive()).toEqual(['Verslag lokaal 1'])
+
+    await addItem(lokaal, 'Verslag lokaal 2', '2026-10-22T09:30:00Z')
+
+    expect(await archive()).toEqual(['Verslag lokaal 2'])
+  })
+
+  it('shows everything of a source when the visitor chooses it, with the same count', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z')
+
+    expect(await archive({ sources: ['landelijk'] })).toEqual(['Verslag landelijk'])
+    expect(await archive({ sources: ['lokaal'] })).toEqual(['Verslag lokaal'])
+    expect(await archive({ sources: ['landelijk', 'lokaal'] })).toEqual(['Verslag lokaal', 'Verslag landelijk'])
+    expect(await countArchiveItems(database.db, { sources: ['landelijk'], until: now })).toBe(1)
+    expect(await countArchiveItems(database.db, { sources: ['landelijk', 'lokaal'], until: now })).toBe(2)
+    expect((await listArchiveSources(database.db, now)).map((source) => source.slug)).toEqual(['landelijk', 'lokaal'])
+  })
+
+  it('never joins sources of different publishers or without a publisher', async () => {
+    const { andere, landelijk } = await addPapers()
+    const zonder = await addSource('zonder', { publisher: null })
+    const ook = await addSource('ook-zonder', { publisher: null })
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(andere, 'Verslag andere', '2026-10-22T08:01:00Z')
+    await addItem(zonder, 'Verslag zonder', '2026-10-22T08:02:00Z')
+    await addItem(ook, 'Verslag ook zonder', '2026-10-22T08:03:00Z')
+
+    expect(await archive()).toEqual(['Verslag ook zonder', 'Verslag zonder', 'Verslag andere', 'Verslag landelijk'])
+    expect(await countArchiveItems(database.db, { until: now })).toBe(4)
+  })
+
+  it('keeps two stories of the same publisher with different keys apart', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { threadKey: '~bbbb2222' })
+
+    expect(await archive()).toEqual(['Verslag lokaal', 'Verslag landelijk'])
+  })
+
+  it('leaves out a source that is switched off, and an item with no key', async () => {
+    const { landelijk, lokaal } = await addPapers()
+    const uit = await addSource('uit', { enabled: false, local: true })
+
+    await addItem(uit, 'Verslag uit', '2026-10-22T07:00:00Z')
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(lokaal, 'Los lokaal', '2026-10-22T08:05:00Z', { threadKey: null })
+    await addItem(landelijk, 'Los landelijk', '2026-10-22T08:06:00Z', { threadKey: null })
+
+    expect(await archive()).toEqual(['Los landelijk', 'Los lokaal', 'Verslag landelijk'])
+  })
+
+  it('does not count a later item of the other source before it is published', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T11:00:00Z')
+
+    expect(await archive()).toEqual(['Verslag landelijk'])
+  })
+
+  it('pages through the list the visitor sees', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z')
+    await addItem(landelijk, 'Los een', '2026-10-22T07:00:00Z', { threadKey: null })
+    await addItem(lokaal, 'Los twee', '2026-10-22T06:00:00Z', { threadKey: null })
+
+    expect(await countArchiveItems(database.db, { until: now })).toBe(3)
+    expect(await archive({ limit: 2 })).toEqual(['Verslag lokaal', 'Los een'])
+    expect(await archive({ limit: 2, offset: 2 })).toEqual(['Los twee'])
+    expect(await archive({ limit: 2, offset: 4 })).toEqual([])
+  })
+})
+
 describe('listNewestDiscussions', () => {
   async function addForum(overrides: Partial<typeof sources.$inferInsert> = {}) {
     const [forum] = await database.db

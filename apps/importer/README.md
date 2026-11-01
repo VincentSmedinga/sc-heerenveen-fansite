@@ -23,7 +23,7 @@ Schrijf `pnpm run import` en niet `pnpm import`: `import` is een opdracht van pn
 De opdracht leest elke feed van elke bron die aanstaat (`sources.enabled`), één voor één, met één fetcher.
 Een feed die nog moet wachten, slaat hij over.
 Tegelijk leest hij de wedstrijden, de stand en de selectie van het lopende seizoen van de Nederlandse Wikipedia, elk hoogstens één keer per uur (zie _De wedstrijden en de stand_ en _De selectie_).
-Een afgelopen seizoen leest hij niet; dat doet de opdracht `pnpm run import:season <seizoen>`, eenmalig (zie _Een afgelopen seizoen_).
+Een afgelopen seizoen leest hij niet; dat doet de opdracht `pnpm run import:season <seizoen>`, eenmalig, en `pnpm run import:seasons <seizoen>` voor alle afgelopen seizoenen vanaf een seizoen (zie _Een afgelopen seizoen_).
 Wat verdacht lijkt, houdt hij vast; de opdracht `pnpm run import:changes` toont en beslist die wijzigingen (zie _Hoe betrouwbaar een wijziging is_).
 Hij schrijft per feed één regel, en per bericht dat hij overslaat een regel erbij:
 
@@ -253,7 +253,10 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   De adapter kiest aan het domein van de bron of die versies een gedeelde sleutel krijgen (`threadRules` in [`src/read-feed.ts`](src/read-feed.ts)), en zet hem in `items.thread_key`.
   Bij het Algemeen Dagblad en De Gelderlander (DPG Media) is het de code `~` met acht letters en cijfers aan het eind van het pad, zoals `~a40dbd48` in `…/een-kop~a40dbd48/`: de kop in de link verandert, de code niet.
   Een bron zonder regel, en een link zonder die code, krijgt geen sleutel; zo'n bericht is zijn eigen verhaal.
-  Dezelfde code bij twee bronnen is geen verband: de site voegt alleen versies van één bron samen.
+  Dezelfde code bij twee bronnen is geen verband, tenzij de bronnen dezelfde `publisher` hebben: het Algemeen Dagblad en De Gelderlander hebben `dpg-media`, en De Gelderlander is `local`.
+  Dan toont de site een artikel dat beide geven één keer, bij de lokale krant (zie de [README van de database](../../packages/db/README.md), _Eén artikel van twee kranten_).
+  `publisher` en `local` staan in het register (`realSources` in `packages/db/src/seed.ts`) en de seed zet ze; de importer leest ze niet.
+  Een bron krijgt pas een `publisher` als de feeds van die bronnen bewezen dezelfde artikelcodes delen.
   De importer bewaart elke versie en verwijdert er geen; de site toont de laatste (zie de [README van de database](../../packages/db/README.md), _De versies van een verhaal_).
   Bij elke import van een bron met een regel krijgt een bericht dat de sleutel nog mist hem uit zijn bewaarde link, ook als de feed niet gewijzigd is (`backfillThreadKeys` in [`src/import-feeds.ts`](src/import-feeds.ts)); een verborgen bericht blijft zoals het is.
   Een bekend bericht dat de sleutel krijgt of verliest, telt als gewijzigd.
@@ -1225,6 +1228,28 @@ node --env-file=<omgevingsbestand> <map van de app>/apps/importer/import.mjs --s
 
 Op acceptatie start je dat in GitHub met de workflow _Import season_, zonder SSH (zie _Een afgelopen seizoen importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
 
+#### Alle afgelopen seizoenen
+
+Na een wijziging in de importer moeten alle afgelopen seizoenen opnieuw worden gelezen.
+Dat doet `--from-season`, met het eerste seizoen erachter:
+
+```sh
+pnpm run import:seasons 2020/21
+```
+
+- Ze leest elk afgelopen seizoen vanaf dat seizoen tot en met het laatste seizoen dat is afgelopen, het oudste eerst, één voor één.
+  De opdracht weigert met een zin een beginseizoen dat geen seizoen is, een seizoen dat nog niet begonnen is en het lopende seizoen, want dan is er niets te lezen.
+  De weigering komt voordat de opdracht Wikipedia iets vraagt of iets schrijft.
+- Elk seizoen doet wat `--season` doet, met één fetcher voor de hele run, dus de regels van `robots.txt` gelden over alle seizoenen.
+  Elk seizoen neemt de lock van de import en laat hem weer los, zodat cron er tussendoor kan lopen.
+  Houdt een andere run de lock vast, dan slaat de opdracht dat seizoen over met dezelfde zin als `--season`, en telt het als mislukt.
+- Een seizoen dat mislukt, stopt de run niet.
+  Er staat één regel per seizoen in de uitvoer en aan het eind een samenvatting, zoals `Seasons: 5 of 6 read, 1 not read:`, met de seizoenen die mislukten en hun reden.
+  De exitcode is 0 als alle seizoenen zijn opgeslagen, en 1 als er één of meer mislukten.
+  De database van een mislukt seizoen blijft zoals ze was.
+- Op de host draait hetzelfde bestand als de cronjob de opdracht, met `--from-season` en het beginseizoen erachter.
+  Op acceptatie start je dat in GitHub met de workflow _Import seasons_ (zie _Alle afgelopen seizoenen importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
+
 #### Een gestaakte wedstrijd
 
 De pagina van 2025/26 heeft voor NAC Breda – sc Heerenveen (speelronde 33) twee blokken.
@@ -1403,7 +1428,7 @@ De zoekpagina (#107) kan daarmee de bronvermelding tonen, zoals `/wedstrijden` d
 - Cron start het daar elke 15 minuten, op minuut 7, 22, 37 en 52, met `DATABASE_URL` uit een eigen bestand in de thuismap.
   De uitvoer komt achteraan in `~/fansite-import.log`.
 - Met `--status` toont hetzelfde bestand het overzicht van de gezondheid.
-- Met `--season <seizoen>` leest hetzelfde bestand een afgelopen seizoen, eenmalig (zie _Een afgelopen seizoen_).
+- Met `--season <seizoen>` leest hetzelfde bestand een afgelopen seizoen, eenmalig, en met `--from-season <seizoen>` alle afgelopen seizoenen vanaf dat seizoen (zie _Een afgelopen seizoen_).
 
 Wat de eigenaar daarvoor eenmalig instelt, hoe je controleert dat de import werkt en wat je doet als hij niet werkt, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
 

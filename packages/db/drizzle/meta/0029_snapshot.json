@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "569a6fb6-23fa-42f9-a296-7d325dd3881a",
+  "id": "330fa4cf-6322-4dad-a805-61a898a4190f",
   "prevId": "62a13d42-272d-4e8f-80db-9925eb37c971",
   "tables": {
     "admin_login_attempts": {
@@ -543,12 +543,12 @@
           "name": "user_id",
           "type": "int unsigned",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "action": {
           "name": "action",
-          "type": "enum('item.hide','item.show','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs')",
+          "type": "enum('item.hide','item.show','article.create','article.update','article.publish','article.unpublish')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -563,13 +563,6 @@
         "reason": {
           "name": "reason",
           "type": "varchar(300)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "detail": {
-          "name": "detail",
-          "type": "varchar(1000)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -1576,142 +1569,6 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "match_edits": {
-      "name": "match_edits",
-      "columns": {
-        "match_id": {
-          "name": "match_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "kickoff_edited": {
-          "name": "kickoff_edited",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "result_edited": {
-          "name": "result_edited",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "goals_edited": {
-          "name": "goals_edited",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "edited_by": {
-          "name": "edited_by",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "edited_at": {
-          "name": "edited_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "reason": {
-          "name": "reason",
-          "type": "varchar(300)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "before_match": {
-          "name": "before_match",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "before_goals": {
-          "name": "before_goals",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "reported_kickoff": {
-          "name": "reported_kickoff",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "reported_result": {
-          "name": "reported_result",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "reported_goals": {
-          "name": "reported_goals",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "match_edits_match_id_matches_id_fk": {
-          "name": "match_edits_match_id_matches_id_fk",
-          "tableFrom": "match_edits",
-          "tableTo": "matches",
-          "columnsFrom": [
-            "match_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "match_edits_edited_by_admin_users_id_fk": {
-          "name": "match_edits_edited_by_admin_users_id_fk",
-          "tableFrom": "match_edits",
-          "tableTo": "admin_users",
-          "columnsFrom": [
-            "edited_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "match_edits_match_id": {
-          "name": "match_edits_match_id",
-          "columns": [
-            "match_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {
-        "match_edits_a_part_is_edited": {
-          "name": "match_edits_a_part_is_edited",
-          "value": "`match_edits`.`kickoff_edited` = 1 or `match_edits`.`result_edited` = 1 or `match_edits`.`goals_edited` = 1"
-        }
-      }
-    },
     "match_goals": {
       "name": "match_goals",
       "columns": {
@@ -2554,6 +2411,21 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "publisher": {
+          "name": "publisher",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "local": {
+          "name": "local",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         },
         "consent_status": {
           "name": "consent_status",

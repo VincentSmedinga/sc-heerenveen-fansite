@@ -1131,6 +1131,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De seizoenen in de deploy meenemen (de deploy leest dan elke keer Wikipedia).
   Een tweede cronjob (leest een afgelopen seizoen steeds opnieuw, zonder reden).
 
+### Alle afgelopen seizoenen vanaf een beginseizoen staan in één workflow en één opdracht
+
+- **Datum:** 1 november 2026
+- **Besluit:** een tweede workflow, `import-seasons.yml` (_Import seasons_), draait `import.mjs --from-season <seizoen>` op de host, met het beginseizoen als enige invoer.
+  De lus zit in de opdracht (`runSeasonsImport` in `apps/importer/src/import-season.ts`) en niet in de workflow.
+  - De opdracht leest elk afgelopen seizoen vanaf het beginseizoen tot en met het laatste afgelopen seizoen, het oudste eerst, één voor één.
+    Hij weigert een beginseizoen dat geen seizoen is, een seizoen dat nog niet begonnen is en het lopende seizoen (dan is er niets te lezen), voordat hij Wikipedia iets vraagt of iets schrijft.
+  - Alle seizoenen gebruiken dezelfde fetcher, dus de regels van `robots.txt` gelden over de hele run, en er loopt nooit meer dan één verzoek tegelijk.
+  - Elk seizoen neemt de lock van de import en laat hem weer los, zodat de import van cron er tussendoor kan lopen.
+  - De workflow heeft dezelfde omgeving, geheimen, SSH-opzet, controle van de invoer en `concurrency`-groep als `import-season.yml`, en een `timeout-minutes` van 30 in plaats van 10.
+- **Waarom:** na een wijziging in de importer start de projecteigenaar nu zes keer dezelfde workflow, en de lus hoort bij de opdracht, waar hij een test krijgt.
+- **Nadeel:** een lange import houdt de groep `acceptance` vast, dus een deploy wacht tot de import klaar is.
+  Een run van één seizoen duurde 10 tot 15 seconden, dus de wachttijd is een paar minuten.
+- **Alternatieven:** een matrix met een run per seizoen (de groep `acceptance` houdt één wachtende run vast, dus runs vervangen elkaar); een lus in bash in de workflow (zonder test); het bestaande `import-season.yml` met een tweede invoer (de workflow voor één seizoen blijft eenvoudig).
+
+### Een seizoen dat mislukt stopt de run niet, en maakt hem rood aan het eind
+
+- **Datum:** 1 november 2026
+- **Besluit:** `--from-season` gaat door met het volgende seizoen na een seizoen dat niet te lezen is of waarvan de lock bezet is.
+  Hij schrijft per seizoen één regel, sluit af met een samenvatting (hoeveel seizoenen zijn gelezen en welke niet, met de reden) en geeft exitcode 1 als één of meer seizoenen mislukten, anders 0.
+  De database van een mislukt seizoen blijft zoals ze was.
+- **Waarom:** een seizoen dat de lezer nog niet kan lezen (de seizoenen vóór 2020/21) mag de rest niet tegenhouden, en de projecteigenaar wil in één logboek zien wat ontbreekt.
+- **Alternatieven:** stoppen bij de eerste fout (de rest blijft dan ongelezen).
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft
@@ -6476,6 +6500,39 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een sleutel uit de kop (de kop verandert juist).
   Verhalen van twee bronnen samenvoegen (volgt in #567 en vraagt een besluit over de naam van de bron).
   Het filter laten beoordelen op de laatste kop alleen (een liveblog van een wedstrijd van de club valt weg als de laatste kop de club niet noemt).
+- **Later:** zie _Een artikel van twee kranten van één uitgever staat één keer in de lijst, bij de lokale krant_ (1 november 2026).
+  De regel "alleen binnen een bron" geldt nog voor bronnen zonder `publisher`, en voor het filter per bron; bronnen met dezelfde `publisher` tonen een verhaal met dezelfde sleutel samen één keer.
+
+### Een artikel van twee kranten van één uitgever staat één keer in de lijst, bij de lokale krant
+
+- **Datum:** 1 november 2026
+- **Besluit:** twee bronnen van één uitgever die hetzelfde artikel geven onder één artikelcode, tonen de lijsten één keer, onder de naam van de lokale krant.
+  - **De eigenschappen:** `sources.publisher` (tekst, leeg als er geen is) en `sources.local` (waar of onwaar, standaard onwaar), met de migratie `0029_add_source_publisher` en in het register (`realSources`).
+    Het Algemeen Dagblad en De Gelderlander hebben `publisher` `dpg-media`, en De Gelderlander is `local`.
+    De andere bronnen hebben geen `publisher`.
+  - **Wat we vergeleken:** op 1 november 2026 lazen we de feeds van de Leeuwarder Courant en De Telegraaf (Mediahuis) één keer, alleen gelezen: 50 berichten per feed, met geen enkele gelijke artikelcode en geen gelijke kop.
+    Zij krijgen dus geen `publisher` en geen regel voor een sleutel; delen ze later wel een code, dan is dat een nieuw issue.
+  - **Eén bericht per uitgever en sleutel:** op `/nieuws` zonder keuze van een bron, op de homepage en in de zoekresultaten staat van bronnen met dezelfde `publisher` onder dezelfde `thread_key` één bericht.
+    Elke bron brengt haar nieuwste bericht van het verhaal dat niet verborgen is naar voren.
+    Wint de bron met `local`; zijn er twee lokale bronnen of geen, dan het bericht met de vroegste `published_at`, en bij dezelfde tijd het laagste `id`.
+    De naam, de link, de tijd en de betaalmuur zijn die van de winnaar.
+  - **Het filter per bron blijft volledig:** met `?bron=…` toont de lijst alles wat die bron zelf heeft, ook wat de lokale krant anders zou vervangen.
+    Het aantal en de pagina's volgen de lijst die de bezoeker ziet.
+  - **De winnaar valt weg:** is het bericht van de winnaar verborgen, of heeft zijn bron het nooit in de feed gehad, dan toont de lijst dat van de andere bron.
+    Een bericht dat uit de feed verdwijnt, blijft in de database en blijft dus winnen.
+  - **Relevantie:** het verhaal is te zien als een van zijn berichten `relevant` is, bij welke bron ook, en de kop van de winnaar is wat de bezoeker ziet.
+  - **Nooit over uitgevers heen:** bronnen van verschillende uitgevers, en bronnen zonder `publisher`, worden niet samengevoegd, ook niet bij dezelfde kop.
+  - **Eén plek:** de regel staat in `isShownOnce` in `packages/db/src/queries.ts`, aangeroepen door `isShown` met `merge`; de oudere berichten blijven bewaard.
+- **Waarom:** het verslag van N.E.C. – sc Heerenveen stond twee keer op `/nieuws`, met dezelfde kop, tijd, intro en schrijver, in het Algemeen Dagblad en in De Gelderlander (gecontroleerd op 1 november 2026).
+  De lokale krant staat het dichtst bij het nieuws, en zo is de keuze elke keer dezelfde.
+  Een eigenschap bij de bron, in plaats van een regel in de code, laat een volgende uitgever erbij komen zonder de site aan te raken.
+- **Nadeel:** de query zoekt voor elk bericht met een sleutel bij een bron met een `publisher` ook in de berichten van de andere bronnen van die uitgever (nog twee `exists`).
+  De index op `source_id` en `thread_key` houdt dat klein, want het zijn er hoogstens een paar per uitgever.
+  Twee verschillende artikelen over dezelfde wedstrijd, met een andere code, blijven twee berichten.
+- **Alternatieven:** samenvoegen op de kop (twee verschillende artikelen met bijna dezelfde kop zouden verdwijnen).
+  De landelijke krant laten winnen (het nieuws staat dan minder dicht bij de lezer).
+  Een instelling per wedstrijd om te kiezen welke krant lokaal is (meer werk voor één wedstrijd, en niet nodig voor het eerste geval).
+  De oudere versies verwijderen (de importer verwijdert geen berichten).
 
 ## Redactie
 

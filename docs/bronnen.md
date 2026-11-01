@@ -87,6 +87,9 @@ Al in het register (#72).
 
 - **Domein:** `www.lc.nl`
 - **Soort:** nieuws, regionaal dagblad
+- **Uitgever:** geen in het register (#567).
+  De Leeuwarder Courant hoort bij Mediahuis, net als De Telegraaf, maar de twee feeds delen geen artikelcode.
+  Op 1 november 2026 hadden ze elk 50 berichten, met geen enkele gelijke code (de getallen aan het eind van de link) en geen gelijke kop.
 - **Feed:** `https://www.lc.nl/sport/sc-heerenveen/rss/`
   - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 23 oktober 2026, het oudste van 15 augustus 2026.
   - Over sc Heerenveen: 47 van de 50 noemen Heerenveen in de kop of de categorieën.
@@ -127,6 +130,7 @@ Al in het register (#142).
 
 - **Domein:** `www.telegraaf.nl`
 - **Soort:** nieuws, landelijk dagblad
+- **Uitgever:** geen in het register, zie bij de Leeuwarder Courant (#567)
 - **Feed:** `https://www.telegraaf.nl/tag/sc-heerenveen/rss/`
   - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 19 oktober 2026, het oudste van 21 februari 2026.
     Dat is ongeveer anderhalf bericht per week.
@@ -228,6 +232,7 @@ Al in het register (#310), met het filter `club`.
 
 - **Domein:** `www.ad.nl`
 - **Soort:** nieuws, landelijk dagblad
+- **Uitgever:** `dpg-media`, niet lokaal (#567): een artikel dat ook in De Gelderlander staat, tonen we één keer, bij De Gelderlander
 - **Feed:** `https://www.ad.nl/voetbal/rss.xml`
   - Werkt: ja, RSS 2.0 met 30 berichten.
     Op 26 oktober 2026 was het nieuwste van 26 oktober (08:50 UTC) en het oudste van 24 oktober (18:25 UTC).
@@ -359,6 +364,7 @@ Al in het register (#561), met het filter `club`.
 
 - **Domein:** `www.gelderlander.nl`
 - **Soort:** nieuws, regionaal dagblad voor Gelderland, van DPG Media (net als het Algemeen Dagblad)
+- **Uitgever:** `dpg-media`, lokaal (#567): een artikel dat ook in het Algemeen Dagblad staat, tonen we één keer, bij De Gelderlander
 - **Feed:** `https://www.gelderlander.nl/sport/rss.xml`
   - Er is geen feed van de hele krant: `/rss.xml` bestaat niet (404).
     We nemen daarom de feed van de sport.

@@ -735,7 +735,12 @@ export async function searchPublic(
       .from(items)
       .innerJoin(sources, eq(items.sourceId, sources.id))
       .where(
-        and(eq(sources.enabled, true), lte(items.publishedAt, until), isShown(until), hasWords(words, items.title)),
+        and(
+          eq(sources.enabled, true),
+          lte(items.publishedAt, until),
+          isShown(until, { merge: true }),
+          hasWords(words, items.title),
+        ),
       )
       .orderBy(desc(items.publishedAt), desc(items.id))
       .limit(limit),
@@ -858,14 +863,18 @@ function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColum
  * the one before it is shown, and no version is left when all are hidden. Versions of one key
  * at two sources are two stories. Pass `until` to leave out the versions that are later than
  * that, as the query itself does for the item.
+ *
+ * With `merge` the query must join `sources`, and the sources of one publisher (`publisher`)
+ * that have a story under the same key are one story: see `isShownOnce`. Without it, a list
+ * shows everything a source itself has, which is what the filter per source needs.
  */
-function isShown(until?: Date) {
+function isShown(until?: Date, { merge = false }: { merge?: boolean } = {}) {
   const sibling = alias(items, 'sibling')
   const sameStory = sql`${sibling.sourceId} = ${items.sourceId} and ${sibling.threadKey} = ${items.threadKey} and ${sibling.hiddenAt} is null${
     until === undefined ? sql`` : sql` and ${lte(sibling.publishedAt, until)}`
   }`
 
-  return and(
+  const ofItsSource = and(
     isNull(items.hiddenAt),
     or(
       and(isNull(items.threadKey), eq(items.relevance, 'relevant')),
@@ -876,19 +885,58 @@ function isShown(until?: Date) {
       ),
     ),
   )
+
+  return merge
+    ? or(and(or(isNull(sources.publisher), isNull(items.threadKey)), ofItsSource), isShownOnce(until))
+    : ofItsSource
+}
+
+/**
+ * Whether an item of a source with a `publisher` and a `thread_key` is the one to show of its
+ * story, when the lists show a story of one publisher once. The story is every item of the
+ * sources that are switched on, no podcast and have this publisher, under this key. It is
+ * relevant when one of the items that no moderator hid is, whatever the source. Each source
+ * puts forward its newest item that no moderator hid. Of those, the one of a `local` source
+ * goes first, and then the one that was published first, and then the lowest `id`. The others
+ * are not shown. A moderator who hid the item of the winner, or a winner that was never in the
+ * feed, leaves the item of another source to be shown.
+ */
+function isShownOnce(until?: Date) {
+  const other = alias(items, 'other')
+  const otherSource = alias(sources, 'other_source')
+  const later = alias(items, 'later')
+  const dated = (item: { publishedAt: AnyMySqlColumn }) =>
+    until === undefined ? sql`` : sql` and ${lte(item.publishedAt, until)}`
+  // The newest item of its source that no moderator hid: no item of the same key that is not
+  // hidden is later (or of the same time and a higher id).
+  const newestOf = (item: Record<'id' | 'publishedAt' | 'sourceId' | 'threadKey', AnyMySqlColumn>) =>
+    sql`not exists (select 1 from items later where ${later.sourceId} = ${item.sourceId} and ${later.threadKey} = ${item.threadKey} and ${later.hiddenAt} is null${dated(later)} and (${later.publishedAt} > ${item.publishedAt} or (${later.publishedAt} = ${item.publishedAt} and ${later.id} > ${item.id})))`
+  const ofStory = sql`${otherSource.id} = ${other.sourceId} and ${otherSource.publisher} = ${sources.publisher} and ${otherSource.enabled} = true and ${otherSource.kind} <> 'podcast' and ${other.threadKey} = ${items.threadKey} and ${other.hiddenAt} is null${dated(other)}`
+  const beats = sql`(${otherSource.local} > ${sources.local} or (${otherSource.local} = ${sources.local} and (${other.publishedAt} < ${items.publishedAt} or (${other.publishedAt} = ${items.publishedAt} and ${other.id} < ${items.id}))))`
+
+  return and(
+    isNotNull(sources.publisher),
+    isNotNull(items.threadKey),
+    isNull(items.hiddenAt),
+    newestOf(items),
+    sql`exists (select 1 from items other, sources other_source where ${ofStory} and ${other.relevance} = 'relevant')`,
+    sql`not exists (select 1 from items other, sources other_source where ${ofStory} and ${other.sourceId} <> ${items.sourceId} and ${newestOf(other)} and ${beats})`,
+  )
 }
 
 /**
  * The conditions that make an item a headline to show: of a source that is switched on and is
  * no podcast, shown (see `isShown`), not later than `until`, and of one of the sources with
- * these slugs when some are given.
+ * these slugs when some are given. Without slugs a story that sources of one publisher have
+ * all is shown once (see `isShownOnce`); with slugs the list has all that those sources have.
  */
 function newsFilter(until: Date, slugs: readonly string[] = []) {
   return and(
     eq(sources.enabled, true),
     ne(sources.kind, 'podcast'),
     lte(items.publishedAt, until),
-    isShown(until),
+    // A story of two sources of one publisher is shown once, unless the visitor chose sources.
+    isShown(until, { merge: slugs.length === 0 }),
     slugs.length === 0 ? undefined : or(...slugs.map(hasSlug)),
   )
 }
