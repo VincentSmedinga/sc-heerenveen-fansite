@@ -4013,6 +4013,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De regel van de `summary` is minstens 44 pixels hoog om te raken met een duim.
   De controle op de pagina's (`checkPage`) klapt elke `details` open voor axe, want axe slaat ingeklapte tekst over.
 - **Alternatieven:** alleen inklappen bij veel pagina's (twee vormen om te leren, en de grens is willekeurig); "Bron: Wikipedia (CC BY-SA 4.0)" met een link in de `summary` (een klik doet twee dingen); de pagina's weglaten (de licentie vraagt een aanduiding van de auteurs, en die staat in de link naar het artikel).
+- **Later:** de uitklap van de volledige vorm heeft na de pagina's ook de zin "Overweeg de volgende keer een kleine donatie." (de projecteigenaar, 1 november 2026, issue #556).
+  Het is gewone tekst zonder link, en de korte vorm heeft hem niet.
+  Wikipedia is een bron waar we gratis uit lezen, en zo vragen we de lezer er iets voor terug te doen.
 
 ### Zoeken in koppen, afleveringen en artikelen, met LIKE
 

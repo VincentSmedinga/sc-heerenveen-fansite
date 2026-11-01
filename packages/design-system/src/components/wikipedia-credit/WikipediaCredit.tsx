@@ -58,11 +58,13 @@ type WikipediaCreditBaseProps<Tag extends 'details' | 'p'> = Omit<ComponentProps
 /**
  * The credit for data from Wikipedia. The full form is a `details` that is closed: it says
  * "Bron: Wikipedia", and one click or press shows the licence (CC BY-SA 4.0), a link to each
- * page the data comes from, the time of the last reading, and a sentence that our own data
- * from them are CC BY-SA 4.0 too: the match data, or what `data` names. It is closed for one
- * page as well as for fifty, so there is one form to learn and a long list, such as that of
- * the opponents, does not make the credit longer than the page. The short form (`compact`)
- * says only "Bron: Wikipedia", for a small card on a page that has the full form elsewhere.
+ * page the data comes from, a plain sentence that asks the reader to consider a small donation
+ * (to Wikipedia, which we read for free), the time of the last reading, and a sentence that our
+ * own data from them are CC BY-SA 4.0 too: the match data, or what `data` names. It is closed
+ * for one page as well as for fifty, so there is one form to learn and a long list, such as
+ * that of the opponents, does not make the credit longer than the page. The short form
+ * (`compact`) says only "Bron: Wikipedia", for a small card on a page that has the full form
+ * elsewhere.
  * It is principle 4 of the Redactie ("Altijd de bron vermelden"), and it is a component so
  * that a page with Wikipedia data can't leave it out. The link to a page names the page, which
  * is the credit to its authors: their names are one click away in the history of the article.
@@ -103,7 +105,8 @@ export const WikipediaCredit = ({
             <Link href={page.href}>{page.name}</Link>
           </span>
         ))}
-        . Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook CC BY-SA 4.0.
+        . Overweeg de volgende keer een kleine donatie. Laatst gelezen op{' '}
+        <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook CC BY-SA 4.0.
       </p>
     </details>
   )

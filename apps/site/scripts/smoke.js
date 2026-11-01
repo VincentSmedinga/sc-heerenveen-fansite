@@ -57,10 +57,10 @@ const changelogFile = path.resolve(import.meta.dirname, '../../../CHANGELOG.md')
 const releases = releasesOf(existsSync(changelogFile) ? readFileSync(changelogFile, 'utf8') : '', releaseNotes)
 
 // The credit of Wikipedia on a page of match data: a details that is closed (it has no `open`
-// attribute after its class), with "Bron: Wikipedia" in the summary, and the licence and the
-// time of the last reading in the fold.
+// attribute after its class), with "Bron: Wikipedia" in the summary, and the licence, the
+// donation sentence and the time of the last reading in the fold.
 const closedWikipediaCredit =
-  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Laatst gelezen op/s
+  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Overweeg de volgende keer een kleine donatie\. Laatst gelezen op/s
 
 // The layers of the design system, from weak to strong, as layers.css declares them. The build
 // must keep that order.

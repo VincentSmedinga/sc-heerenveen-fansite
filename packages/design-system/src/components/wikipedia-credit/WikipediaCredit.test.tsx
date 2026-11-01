@@ -16,11 +16,11 @@ const cup = {
 const props = { readAt: '25 oktober 2026 om 14:05', readAtDateTime: '2026-10-25T12:05:00Z' }
 
 describe('WikipediaCredit', () => {
-  it('names Wikipedia and the licence, the page, the time of reading and the licence of our data', () => {
+  it('names Wikipedia and the licence, the page, the donation sentence, the time of reading and the licence of our data', () => {
     const { container } = render(<WikipediaCredit {...props} pages={[standings]} />)
 
     expect(container.textContent).toBe(
-      'Bron: WikipediaLicentie: CC BY-SA 4.0. Pagina: Eredivisie 2026/27. Laatst gelezen op 25 oktober 2026 om 14:05. Onze wedstrijdgegevens zijn ook CC BY-SA 4.0.',
+      'Bron: WikipediaLicentie: CC BY-SA 4.0. Pagina: Eredivisie 2026/27. Overweeg de volgende keer een kleine donatie. Laatst gelezen op 25 oktober 2026 om 14:05. Onze wedstrijdgegevens zijn ook CC BY-SA 4.0.',
     )
   })
 
@@ -86,7 +86,9 @@ describe('WikipediaCredit', () => {
   it('says "pagina’s" for more than one page', () => {
     const { container } = render(<WikipediaCredit {...props} pages={[standings, cup]} />)
 
-    expect(container.textContent).toContain('Pagina’s: Eredivisie 2026/27, KNVB Beker 2026/27. Laatst gelezen')
+    expect(container.textContent).toContain(
+      'Pagina’s: Eredivisie 2026/27, KNVB Beker 2026/27. Overweeg de volgende keer een kleine donatie. Laatst gelezen',
+    )
   })
 
   it('puts the time of reading in a time element with the machine value', () => {
