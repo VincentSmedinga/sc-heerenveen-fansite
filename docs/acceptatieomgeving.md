@@ -133,6 +133,35 @@ Ontbreekt een geheim, dan slaat de workflow de import over met een melding en bl
   Mist een run in _Actions_, start hem dan opnieuw (de deploy met _Actions → Acceptance → Run workflow_).
 - De uitvoer komt in het logboek van de run en niet in `~/fansite-import.log`.
 - De site laat een afgelopen seizoen nog niet zien (zie de [README van de importer](../apps/importer/README.md), _Een afgelopen seizoen_).
+
+#### Alle afgelopen seizoenen importeren
+
+Na een wijziging in de importer of in de wedstrijdgegevens moeten alle afgelopen seizoenen opnieuw worden gelezen.
+De workflow [`import-seasons.yml`](../.github/workflows/import-seasons.yml) doet dat in één run, vanaf een beginseizoen:
+
+1. Open in GitHub _Actions → Import seasons_ en kies _Run workflow_, met de branch `main`.
+2. Vul het eerste seizoen in, zoals `2020/21`.
+   De workflow leest dan elk afgelopen seizoen vanaf 2020/21 tot en met het laatste seizoen dat is afgelopen, het oudste eerst.
+   Hij weigert een andere vorm dan `2025/26`, voordat hij verbinding maakt.
+   De opdracht zelf weigert een seizoen dat nog niet begonnen is en het lopende seizoen, want daarvan af is er niets te lezen.
+   Het lopende seizoen leest de uurlijkse import.
+3. Lees het logboek van de stap _Import the seasons on the host_.
+   Daar staat per seizoen één regel, zoals `Matches 2025/26: 0 new, 0 updated, 39 unchanged, 0 removed; ...`, en aan het eind een samenvatting: `Seasons: 6 of 6 read.`
+   Een tweede run meldt overal `0 new, 0 updated`.
+
+- Een seizoen dat mislukt, stopt de run niet.
+  De opdracht gaat door met het volgende seizoen, en de samenvatting noemt de seizoenen die mislukten met hun reden, zoals `2019/20: warning, nothing changed ...`.
+  Is er één seizoen mislukt, dan wordt de run rood.
+  De seizoenen die wel lukten, zijn bijgewerkt, en de database van een mislukt seizoen blijft zoals ze was.
+  De seizoenen vóór 2020/21 kan de lezer nog niet lezen (#457), dus begin niet eerder.
+- Elk seizoen neemt de lock van de import en laat hem weer los, zodat de import van cron er tussendoor kan lopen.
+  Houdt een run van cron de lock vast als een seizoen aan de beurt is, dan slaat de opdracht dat seizoen over, telt het als mislukt en gaat door.
+  Start de workflow dan opnieuw met het beginseizoen van het seizoen dat ontbreekt.
+- Alle seizoenen gebruiken dezelfde fetcher, dus de regels van `robots.txt` gelden over de hele run, en er loopt nooit meer dan één verzoek tegelijk.
+- Een run van één seizoen duurde 10 tot 15 seconden, ook met de voorbereiding.
+  Alle seizoenen vanaf 2010/11 zijn dus een paar minuten, en de workflow breekt na 30 minuten af.
+- **Let op:** de run houdt de `concurrency`-groep `acceptance` vast tot hij klaar is, dus een deploy wacht zolang de import loopt.
+  Voor één seizoen duurt dat seconden, voor alle seizoenen een paar minuten.
   Of het gelukt is, controleer je met het logboek van de run, of met SSH (zie _Controleren_).
 
 ### Een mail als een import blijft falen
@@ -424,7 +453,7 @@ Zo kan niemand nagaan wie een account heeft.
   `echo $?` direct daarna toont 0 als elke feed gezond is, en 1 als een feed ongezond is.
   De README van de importer laat zien hoe het eruitziet.
 
-- Een afgelopen seizoen lees je eenmalig met de workflow _Import season_ (zie _Een afgelopen seizoen importeren_).
+- Een afgelopen seizoen lees je eenmalig met de workflow _Import season_, en alle afgelopen seizoenen vanaf een beginseizoen met _Import seasons_ (zie _Een afgelopen seizoen importeren_).
   Wil je het toch met SSH, draai dan hetzelfde bestand met `--season` en het seizoen erachter, op één regel:
 
   ```sh

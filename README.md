@@ -47,6 +47,7 @@ Start de site met `pnpm --filter site dev`; die luistert op <http://localhost:30
 | `pnpm run import`         | Haalt de feeds, de wedstrijden en de selectie op                                         |
 | `pnpm run import:status`  | Toont per feed, voor de wedstrijden en de selectie of ze gezond zijn                     |
 | `pnpm run import:season`  | Leest eenmalig een afgelopen seizoen, zoals `pnpm run import:season 2025/26`             |
+| `pnpm run import:seasons` | Leest alle afgelopen seizoenen vanaf een seizoen: `pnpm run import:seasons 2020/21`      |
 | `pnpm run import:changes` | Toont de wijzigingen van Wikipedia die wachten, of beslist ze: `accept 12`, `reject all` |
 | `pnpm release`            | Opent of werkt de release-pull request bij (vraagt `gh`)                                 |
 | `pnpm review <branch>`    | Start de site en Storybook voor een branch of pull request                               |
