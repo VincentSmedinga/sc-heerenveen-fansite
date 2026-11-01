@@ -71,7 +71,7 @@ describe('getHeadlines', () => {
 
     expect(listRecentItems).toHaveBeenCalledTimes(2)
     expect(listRecentItems).toHaveBeenNthCalledWith(2, db, {
-      limit: 5,
+      limit: 10,
       until: new Date('2026-10-22T12:35:00.000Z'),
     })
   })
