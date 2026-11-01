@@ -1905,3 +1905,161 @@ describe('the choice between all the matches and the Eredivisie on /statistieken
     expect(vi.mocked(getMatchData).mock.calls.map(([season]) => season)).toEqual(['2026/27', '2026/27', '2026/27'])
   })
 })
+
+describe('the card Weetjes on /statistieken', () => {
+  const base = matchData.matches[1]!
+  /** A match with a score of seven goals and no goals listed, so a weetje. */
+  const manyGoals = (round: number, opponent: string, competition: PublicMatch['competition'] = 'Eredivisie') => ({
+    ...base,
+    competition,
+    goals: [],
+    goalsAgainst: 4,
+    goalsFor: 3,
+    matchDate: `2026-09-${String(round).padStart(2, '0')}`,
+    opponent,
+    round: `Wedstrijd ${round}`,
+    status: 'played' as const,
+  })
+  const withWeetjes = (...matches: PublicMatch[]) =>
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, ...matches] })
+  const card = (html: string) =>
+    /<section class="hf-card hf-card-warm" aria-labelledby="weetjes">.*?<\/section>/.exec(html)?.[0]
+  const sentence = (html: string) => /<p[^>]*>(.*?)<\/p>/.exec(card(html) ?? '')?.[1]
+  const three = [manyGoals(1, 'Proefclub A'), manyGoals(2, 'Proefclub B'), manyGoals(3, 'Proefclub C')]
+
+  it('has no card, and no empty one, in a season without a weetje', async () => {
+    const html = await render()
+
+    expect(card(html)).toBeUndefined()
+    expect(html).not.toContain('Weetjes')
+    expect(html).not.toContain('Nog een weetje')
+  })
+
+  it('has no card for a season without matches', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+    expect(card(await render())).toBeUndefined()
+  })
+
+  it('is a card with the warm surface and a heading of level 2, with one sentence and the link "Nog een weetje"', async () => {
+    withWeetjes(...three)
+
+    const html = await render()
+
+    expect(card(html)).toMatch(
+      /^<section class="hf-card hf-card-warm" aria-labelledby="weetjes"><h2 class="hf-heading-2" id="weetjes">Weetjes<\/h2>/,
+    )
+    expect(card(html)?.match(/<p/g)).toHaveLength(1)
+    expect(sentence(html)).toMatch(
+      /^Thuis tegen Proefclub [ABC] \(3–4, \d+ september 2026\) vielen zeven doelpunten\.$/,
+    )
+    expect(card(html)).toMatch(/<a href="\/statistieken\?weetje=\d#weetjes">Nog een weetje<\/a>/)
+  })
+
+  it('is the last card of the main column, after home and away', async () => {
+    withWeetjes(...three)
+
+    const html = await render()
+
+    expect(html.indexOf('id="weetjes"')).toBeGreaterThan(html.indexOf('id="thuis-en-uit"'))
+    expect(html.indexOf('id="weetjes"')).toBeLessThan(html.indexOf('id="doelpuntenmakers"'))
+  })
+
+  it('shows the weetje that ?weetje= asks for, and goes round after the last one', async () => {
+    withWeetjes(...three)
+
+    const sentences = await Promise.all(
+      ['1', '2', '3', '4', '5'].map(async (weetje) => sentence(await render({ weetje }))),
+    )
+
+    expect(new Set(sentences.slice(0, 3)).size).toBe(3)
+    expect(sentences[3]).toBe(sentences[0])
+    expect(sentences[4]).toBe(sentences[1])
+  })
+
+  it('links each weetje to the next, and the last to the first', async () => {
+    withWeetjes(...three)
+
+    const link = async (weetje?: string) =>
+      /<a href="([^"]+)">Nog een weetje<\/a>/.exec(
+        card(await render(weetje === undefined ? {} : { weetje })) ?? '',
+      )?.[1]
+
+    expect(await link()).toBe('/statistieken?weetje=2#weetjes')
+    expect(await link('2')).toBe('/statistieken?weetje=3#weetjes')
+    expect(await link('3')).toBe('/statistieken?weetje=1#weetjes')
+    expect(await link('4')).toBe('/statistieken?weetje=2#weetjes')
+  })
+
+  it('shows the first weetje for a number that is not valid', async () => {
+    withWeetjes(...three)
+
+    const first = sentence(await render())
+
+    for (const weetje of ['0', '-1', 'abc', '1.5', '02', '']) {
+      expect(sentence(await render({ weetje })), weetje).toBe(first)
+    }
+
+    expect(sentence(await render({ weetje: ['2', '3'] }))).toBe(first)
+  })
+
+  it('has no link when there is one weetje: it would lead to the same card', async () => {
+    withWeetjes(manyGoals(1, 'Proefclub A'))
+
+    const html = await render()
+
+    expect(sentence(html)).toContain('Proefclub A')
+    expect(html).not.toContain('Nog een weetje')
+  })
+
+  it('keeps the choice of the Eredivisie in the link, and leaves the weetjes of the cup out of the list', async () => {
+    withWeetjes(manyGoals(1, 'Proefclub A'), manyGoals(2, 'Proefclub B'), manyGoals(3, 'Bekerclub', 'KNVB Beker'))
+
+    const all = await render()
+    const league = await render(eredivisie)
+
+    expect(card(all)).toContain('href="/statistieken?weetje=2#weetjes"')
+    expect(card(league)).toContain('href="/statistieken?competitie=eredivisie&amp;weetje=2#weetjes"')
+    expect(card(league)).not.toContain('Bekerclub')
+
+    const everyone = await Promise.all(['1', '2', '3'].map(async (weetje) => sentence(await render({ weetje }))))
+
+    expect(everyone.filter((text) => text?.includes('Bekerclub'))).toHaveLength(1)
+  })
+
+  it('keeps the order for the whole day and changes it the next day', async () => {
+    withWeetjes(...three)
+
+    const order = async () => Promise.all(['1', '2', '3'].map(async (weetje) => sentence(await render({ weetje }))))
+    const today = await order()
+
+    vi.setSystemTime(new Date('2026-10-23T21:30:00Z'))
+
+    expect(await order()).toEqual(today)
+
+    const orders = new Set<string>()
+
+    for (let day = 24; day <= 30; day += 1) {
+      vi.setSystemTime(new Date(`2026-10-${day}T13:40:00Z`))
+      orders.add((await order()).join('|'))
+    }
+
+    expect(orders.size).toBeGreaterThan(1)
+  })
+
+  it('is in the bar of nobody: the bar has the nine cards with figures', async () => {
+    withWeetjes(...three)
+
+    const ids = [...(await render()).matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => `#${id}`)
+
+    expect(ids.filter((id) => !statisticsShortcuts.some(({ href }) => href === id))).toEqual(['#weetjes'])
+  })
+
+  it('has no request to another site, no script and no button', async () => {
+    withWeetjes(...three)
+
+    const html = card(await render()) ?? ''
+
+    expect(html).not.toMatch(/<script|<button|<form|https?:/)
+  })
+})

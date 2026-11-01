@@ -528,10 +528,12 @@ const madeUpScorers: [name: string, shirtNumber: number, inSquad: boolean][] = [
  * Made-up scorers for the played matches of `madeUpMatches`, by `<competition>|<round>`, in
  * the order of the clock. The goals of each club add up to its result. Together they cover the
  * cases a page must show: goals of one club only and of both, a penalty, an own goal, added
- * time, a player with two goals, extra time and a long name. The players are made up, like the
- * clubs. For the top scorers they make twelve players: Wouter Proefman with three goals, two
- * players with two goals who share the second place, and nine with one goal who share the
- * fourth. The own goal of an opponent counts for nobody.
+ * time, a player with two goals, extra time and a long name. Two goals in minutes that follow
+ * each other (66 and 67 of the second round) give the card Weetjes of the statistics page a
+ * weetje to show. The players are made up, like the clubs. For the top scorers they make
+ * twelve players: Wouter Proefman with three goals, two players with two goals who share the
+ * second place, and nine with one goal who share the fourth. The own goal of an opponent
+ * counts for nobody.
  *
  * The goals of our players have the page of the player (`wikipedia_page`), as the importer
  * stores it, and the seed links them to `players`: a goal of a player who left the squad
@@ -552,7 +554,7 @@ export const madeUpGoals: Record<string, MadeUpGoal[]> = {
     { minute: 23, ours: true, player: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
     { minute: 51, ours: true, player: 'Steekproef', stoppageMinutes: null, wikipediaPage: 'Niels Steekproef' },
     { minute: 66, ours: true, player: 'Testvoort', stoppageMinutes: null, wikipediaPage: 'Joris Testvoort' },
-    { minute: 74, ours: true, player: 'Testvoort', stoppageMinutes: null, wikipediaPage: 'Bas Testvoort' },
+    { minute: 67, ours: true, player: 'Testvoort', stoppageMinutes: null, wikipediaPage: 'Bas Testvoort' },
     { minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4, wikipediaPage: 'Gerrit Nepper' },
   ],
   'KNVB Beker|Achtste finale': [

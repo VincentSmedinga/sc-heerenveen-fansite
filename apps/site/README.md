@@ -408,6 +408,14 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Elke regel is een naam boven een `ShortMatch`, en bij een doelpunt staan de minuut en de speler in de naam, gescheiden door een middenpunt.
   Onder de lijst staat "Gebaseerd op alle 7 gespeelde wedstrijden", en als niet elke wedstrijd zijn doelpunten heeft, een regel met "Vroegste en laatste doelpunt: gebaseerd op 6 van de 7 gespeelde wedstrijden".
   Zonder gespeelde wedstrijd staat er een zin in plaats van de lijst.
+- **Weetjes:** de laatste kaart van de linker kolom, na Thuis en uit, met het warme vlak en één weetje: een feit over één wedstrijd, speler of trainer, in één zin (`WeetjesCard` in `src/WeetjesCard.tsx`).
+  Elke soort weetje is een kleine functie in `src/weetjes.ts`, met een test in `src/weetjes.test.ts`: doelpunten in opeenvolgende minuten, in de blessuretijd, een hattrick, zeven doelpunten of meer, een zege na een achterstand van twee, vijf zeges op rij thuis of uit, en de eerste wedstrijd onder een nieuwe trainer.
+  Een nieuwe soort is één functie in `kinds`, zonder nieuwe query: ze lezen de wedstrijden en de trainers van het seizoen, die de pagina al heeft.
+  De volgorde is per dag vast en door elkaar gehusseld (`orderWeetjes`, op de dag in Nederlandse tijd), en `?weetje=n` kiest het n-de weetje, met rond na het laatste.
+  De link "Nog een weetje" is een gewone link naar het volgende (`?weetje=2#weetjes`), met de keuze van de competitie erbij.
+  Er is geen script en er wordt niets bewaard.
+  Zonder weetje is er geen kaart, en bij één weetje geen link.
+  De kaart staat niet in de balk "Op deze pagina:" en volgt de keuze van de competitie.
 
 De bronvermelding (`Wikipedia` in `SourceCredit`) staat onderaan de rechter kolom, zoals die van Wedstrijden onderaan zijn zijbalk staat.
 `pnpm test:a11y` gebruikt dezelfde verzonnen wedstrijden en stand van de seed.
@@ -471,7 +479,7 @@ De schakelaar staat er alleen bij een seizoen met een gespeelde bekerwedstrijd o
 De play-offs voor de Conference League tellen net als de beker alleen bij Alle wedstrijden, en de bijschriften van de kaarten noemen wat meetelt: "de Eredivisie en de play-offs", of met beide "de Eredivisie, de KNVB Beker en de play-offs" (`competitionNames`).
 Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alle wedstrijden alleen de wedstrijden die er zijn.
 
-De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Doelpuntenmakers (ook op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier en Uitersten.
+De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Doelpuntenmakers (ook op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Weetjes.
 De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes en de stand na 90 minuten rusten.
 Een bekerwedstrijd en een play-offwedstrijd tellen met de score na de verlenging.
 Een strafschoppenserie telt niet mee: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een gelijkspel.
