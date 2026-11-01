@@ -133,6 +133,7 @@ Ontbreekt een geheim, dan slaat de workflow de import over met een melding en bl
   Mist een run in _Actions_, start hem dan opnieuw (de deploy met _Actions → Acceptance → Run workflow_).
 - De uitvoer komt in het logboek van de run en niet in `~/fansite-import.log`.
 - De site laat een afgelopen seizoen nog niet zien (zie de [README van de importer](../apps/importer/README.md), _Een afgelopen seizoen_).
+- Of het gelukt is, controleer je met het logboek van de run, of met SSH (zie _Controleren_).
 
 #### Alle afgelopen seizoenen importeren
 
@@ -143,7 +144,7 @@ De workflow [`import-seasons.yml`](../.github/workflows/import-seasons.yml) doet
 2. Vul het eerste seizoen in, zoals `2020/21`.
    De workflow leest dan elk afgelopen seizoen vanaf 2020/21 tot en met het laatste seizoen dat is afgelopen, het oudste eerst.
    Hij weigert een andere vorm dan `2025/26`, voordat hij verbinding maakt.
-   De opdracht zelf weigert een seizoen dat nog niet begonnen is en het lopende seizoen, want daarvan af is er niets te lezen.
+   De opdracht zelf weigert een seizoen dat nog niet begonnen is en het lopende seizoen, want vanaf dat seizoen is er niets te lezen.
    Het lopende seizoen leest de uurlijkse import.
 3. Lees het logboek van de stap _Import the seasons on the host_.
    Daar staat per seizoen één regel, zoals `Matches 2025/26: 0 new, 0 updated, 39 unchanged, 0 removed; ...`, en aan het eind een samenvatting: `Seasons: 6 of 6 read.`
@@ -162,7 +163,6 @@ De workflow [`import-seasons.yml`](../.github/workflows/import-seasons.yml) doet
   Alle seizoenen vanaf 2010/11 zijn dus een paar minuten, en de workflow breekt na 30 minuten af.
 - **Let op:** de run houdt de `concurrency`-groep `acceptance` vast tot hij klaar is, dus een deploy wacht zolang de import loopt.
   Voor één seizoen duurt dat seconden, voor alle seizoenen een paar minuten.
-  Of het gelukt is, controleer je met het logboek van de run, of met SSH (zie _Controleren_).
 
 ### Een mail als een import blijft falen
 
