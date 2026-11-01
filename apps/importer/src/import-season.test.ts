@@ -16,7 +16,14 @@ import type { Handler, TestServer } from './test-server.ts'
 
 import { changesUsage, nameChange, parseChangesArguments, runChangesCommand } from './import-changes.ts'
 import { importMatches, importPastSeason } from './import-matches.ts'
-import { parseSeason, runSeasonImport, seasonUsage } from './import-season.ts'
+import {
+  fromSeasonUsage,
+  parseFromSeason,
+  parseSeason,
+  runSeasonImport,
+  runSeasonsImport,
+  seasonUsage,
+} from './import-season.ts'
 import { pageTitles, pageUrl } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
@@ -175,6 +182,48 @@ describe('the season of the command', () => {
   it('moves on with the clock: on 1 July the season that just ended is over', () => {
     expect(parseSeason('2026/27', new Date('2027-06-30T12:00:00Z')).kind).toBe('refused')
     expect(parseSeason('2026/27', new Date('2027-07-01T00:00:00Z'))).toEqual({ kind: 'season', season: '2026/27' })
+  })
+})
+
+describe('the seasons of the command for all seasons', () => {
+  it.each([
+    ['2025/26', now, ['2025/26']],
+    ['2023/24', now, ['2023/24', '2024/25', '2025/26']],
+    ['2020/21', now, ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25', '2025/26']],
+    ['1999/00', new Date('2001-08-01T00:00:00Z'), ['1999/00', '2000/01']],
+  ])('reads from %s the seasons that are over, the oldest first', (argument, at, seasons) => {
+    expect(parseFromSeason(argument, at)).toEqual({ kind: 'seasons', seasons })
+  })
+
+  it('ends at the last season that is over, and moves on with the clock', () => {
+    expect(parseFromSeason('2025/26', new Date('2026-06-30T12:00:00Z'))).toMatchObject({ kind: 'refused' })
+    expect(parseFromSeason('2025/26', new Date('2026-07-01T00:00:00Z'))).toEqual({
+      kind: 'seasons',
+      seasons: ['2025/26'],
+    })
+    expect(parseFromSeason('2025/26', new Date('2027-07-01T00:00:00Z'))).toEqual({
+      kind: 'seasons',
+      seasons: ['2025/26', '2026/27'],
+    })
+  })
+
+  it.each([
+    [undefined, 'No season given'],
+    ['', 'No season given'],
+    ['2025', 'is not a season'],
+    ['2025/2026', 'is not a season'],
+    [' 2020/21', 'is not a season'],
+    ['2020/21\n2021/22', 'is not a season'],
+    ['2025/27', 'second year must follow the first'],
+    ['2026/27', 'is the current season'],
+    ['2027/28', 'has not started yet'],
+    ['2030/31', 'has not started yet'],
+  ])('refuses %j with a sentence and the usage', (argument, reason) => {
+    const parsed = parseFromSeason(argument, now)
+
+    expect(parsed.kind).toBe('refused')
+    expect(parsed.kind === 'refused' ? parsed.message : '').toContain(reason)
+    expect(parsed.kind === 'refused' ? parsed.message : '').toContain(fromSeasonUsage)
   })
 })
 
@@ -418,6 +467,170 @@ describe('the command', () => {
     expect(held.ran && held.result.lines.join('\n')).toContain('An import is still running')
     expect(server.paths()).toEqual([])
     expect(await database.db.select().from(matches)).toEqual([])
+  })
+})
+
+describe('the command for all seasons', () => {
+  /** The moment the seasons 2025/26 and 2026/27 are both over. */
+  const later = new Date('2027-10-25T12:00:00Z')
+
+  /** Runs the command at a moment against this server, and collects what it prints. */
+  async function runAll(server: TestServer, argument: string | undefined, at: Date = now, fetchers?: unknown[]) {
+    const lines: string[] = []
+    const code = await runSeasonsImport(database.url, argument, {
+      clock: () => at,
+      makeFetcher: (robots) => {
+        const fetcher = fetcherFor([server], { robots })
+
+        fetchers?.push(fetcher)
+
+        return fetcher
+      },
+      wikipediaOrigin: server.origin,
+      write: (line) => lines.push(line),
+    })
+
+    return {
+      code,
+      lines: lines.flatMap((line) => line.split('\n')).filter((line) => !/: new (club|name) /u.test(line)),
+    }
+  }
+
+  it('reads the seasons that are over one after the other, the oldest first, and sums up', async () => {
+    const server = await serve()
+    const fetchers: unknown[] = []
+
+    const { code, lines } = await runAll(server, past, later, fetchers)
+
+    expect(code).toBe(0)
+    expect(lines).toEqual([
+      expect.stringMatching(/^Matches 2025\/26: 38 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for /u),
+      expect.stringMatching(/^Matches 2026\/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for /u),
+      'Seasons: 2 of 2 read.',
+    ])
+
+    // One fetcher for the whole run, and the pages of the oldest season first.
+    expect(fetchers).toHaveLength(1)
+
+    // The pages of 2025/26 (and the play-offs of 2026) come before those of 2026/27.
+    const order = pageRequests(server).map((path) =>
+      path?.includes('2026/27') || path?.includes('voetbal_2027') ? 1 : 0,
+    )
+
+    expect(order).toContain(0)
+    expect(order).toContain(1)
+    expect(order).toEqual([...order].sort())
+    expect(server.paths().filter((path) => path === '/robots.txt')).toHaveLength(1)
+    expect(await database.db.select().from(matchImports).orderBy(asc(matchImports.season))).toMatchObject([
+      { lastOutcome: 'imported', season: past },
+      { lastOutcome: 'imported', season: current },
+    ])
+  })
+
+  it('changes nothing the second time: every season is unchanged', async () => {
+    const server = await serve()
+
+    await runAll(server, past, later)
+
+    const before = [await rowsOf(past), await rowsOf(current)]
+    const second = await runAll(server, past, later)
+
+    expect(second.code).toBe(0)
+    expect(second.lines).toEqual([
+      expect.stringMatching(/^Matches 2025\/26: 0 new, 0 updated, 38 unchanged, 0 removed; /u),
+      expect.stringMatching(/^Matches 2026\/27: 0 new, 0 updated, 35 unchanged, 0 removed; /u),
+      'Seasons: 2 of 2 read.',
+    ])
+    expect([await rowsOf(past), await rowsOf(current)]).toEqual(before)
+  })
+
+  it('goes on after a season that fails, leaves its rows alone, names it in the summary and exits with 1', async () => {
+    // Wikipedia has no pages for 2024/25 here, so that season cannot be read.
+    const server = await serve()
+
+    const { code, lines } = await runAll(server, '2024/25')
+
+    expect(code).toBe(1)
+    expect(lines).toEqual([
+      expect.stringMatching(/^Matches 2024\/25: warning, nothing changed and the last good copy stays: /u),
+      expect.stringMatching(/^Matches 2025\/26: 38 new, 0 updated, 0 unchanged, 0 removed; /u),
+      'Seasons: 1 of 2 read, 1 not read:',
+      expect.stringMatching(/^ {2}2024\/25: warning, nothing changed and the last good copy stays: /u),
+    ])
+    expect(await database.db.select().from(matches).where(eq(matches.season, '2024/25'))).toEqual([])
+    expect((await rowsOf(past)).matches).toHaveLength(38)
+    expect(await database.db.select().from(matchImports).orderBy(asc(matchImports.season))).toMatchObject([
+      { failuresInARow: 1, lastOutcome: 'error', season: '2024/25' },
+      { failuresInARow: 0, lastOutcome: 'imported', season: past },
+    ])
+  })
+
+  it('exits with 1 when the last season fails, after the first was stored', async () => {
+    const server = await serve({ now: { ...thisSeason, programme: 'Geen wedstrijden meer.' } })
+
+    const { code, lines } = await runAll(server, past, later)
+
+    expect(code).toBe(1)
+    expect(lines[0]).toMatch(/^Matches 2025\/26: 38 new/u)
+    expect(lines.slice(-2)).toEqual([
+      'Seasons: 1 of 2 read, 1 not read:',
+      expect.stringMatching(/^ {2}2026\/27: warning, nothing changed/u),
+    ])
+    expect((await rowsOf(past)).matches).toHaveLength(38)
+    expect(await database.db.select().from(matches).where(eq(matches.season, current))).toEqual([])
+  })
+
+  it('skips every season, with the sentence of the other command, while an import holds the lock', async () => {
+    const server = await serve()
+    const held = await withLock(database.pool, lockNameFor(database.url, 'import'), 0, () =>
+      runAll(server, past, later),
+    )
+
+    expect(held.ran && held.result.code).toBe(1)
+    expect(held.ran && held.result.lines).toEqual([
+      expect.stringContaining('Matches 2025/26: not read. An import is still running on this database'),
+      expect.stringContaining('Matches 2026/27: not read. An import is still running on this database'),
+      'Seasons: 0 of 2 read, 2 not read:',
+      expect.stringContaining('  2025/26: An import is still running on this database'),
+      expect.stringContaining('  2026/27: An import is still running on this database'),
+    ])
+    expect(server.paths()).toEqual([])
+    expect(await database.db.select().from(matches)).toEqual([])
+  })
+
+  it('lets go of the lock after each season, so the hourly import can run in between', async () => {
+    const server = await serve()
+
+    await runAll(server, past, later)
+
+    const free = await withLock(database.pool, lockNameFor(database.url, 'import'), 0, async () => 'free')
+
+    expect(free).toEqual({ ran: true, result: 'free' })
+  })
+
+  it('refuses a wrong first season before it asks Wikipedia or writes anything', async () => {
+    const server = await serve()
+
+    for (const argument of [undefined, 'abc', '2025/27', current, '2027/28']) {
+      const { code, lines } = await runAll(server, argument)
+
+      expect(code).toBe(1)
+      expect(lines.join('\n')).toContain(fromSeasonUsage)
+    }
+
+    expect(server.paths()).toEqual([])
+    expect(await database.db.select().from(matches)).toEqual([])
+    expect(await database.db.select().from(matchImports)).toEqual([])
+    expect(await database.db.select().from(wikipediaPages)).toEqual([])
+  })
+
+  it('does not read the current season', async () => {
+    const server = await serve()
+
+    await runAll(server, past)
+
+    expect(await database.db.select().from(matches).where(eq(matches.season, current))).toEqual([])
+    expect(pageRequests(server).every((path) => !path?.includes('2026/27'))).toBe(true)
   })
 })
 
@@ -681,6 +894,23 @@ describe('the program that starts it', () => {
       return { code, stderr, stdout }
     }
   }
+
+  it('starts the command for all seasons, which refuses a wrong first season without a request', async () => {
+    const [none, wrong, current, two] = await Promise.all([
+      start(['--from-season']),
+      start(['--from-season', '2025/27']),
+      start(['--from-season', '2099/00']),
+      start(['--from-season', '2020/21', '2021/22']),
+    ])
+
+    expect([none.code, wrong.code, current.code]).toEqual([1, 1, 1])
+    expect(none.stdout).toContain(fromSeasonUsage)
+    expect(wrong.stdout).toContain('second year must follow the first')
+    expect(current.stdout).toContain('has not started yet')
+    expect(two.code).toBe(2)
+    expect(two.stderr).toContain(fromSeasonUsage)
+    expect(await database.db.select().from(matchImports)).toEqual([])
+  }, 30_000)
 
   it('shows how to use it when it gets no season, a wrong one or something else, without a request', async () => {
     // Each start is a process that loads TypeScript, so they run together and the test may take

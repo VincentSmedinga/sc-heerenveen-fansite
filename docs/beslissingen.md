@@ -1131,6 +1131,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De seizoenen in de deploy meenemen (de deploy leest dan elke keer Wikipedia).
   Een tweede cronjob (leest een afgelopen seizoen steeds opnieuw, zonder reden).
 
+### Alle afgelopen seizoenen vanaf een beginseizoen staan in één workflow en één opdracht
+
+- **Datum:** 1 november 2026
+- **Besluit:** een tweede workflow, `import-seasons.yml` (_Import seasons_), draait `import.mjs --from-season <seizoen>` op de host, met het beginseizoen als enige invoer.
+  De lus zit in de opdracht (`runSeasonsImport` in `apps/importer/src/import-season.ts`) en niet in de workflow.
+  - De opdracht leest elk afgelopen seizoen vanaf het beginseizoen tot en met het laatste afgelopen seizoen, het oudste eerst, één voor één.
+    Hij weigert een beginseizoen dat geen seizoen is, een seizoen dat nog niet begonnen is en het lopende seizoen (dan is er niets te lezen), voordat hij Wikipedia iets vraagt of iets schrijft.
+  - Alle seizoenen gebruiken dezelfde fetcher, dus de regels van `robots.txt` gelden over de hele run, en er loopt nooit meer dan één verzoek tegelijk.
+  - Elk seizoen neemt de lock van de import en laat hem weer los, zodat de import van cron er tussendoor kan lopen.
+  - De workflow heeft dezelfde omgeving, geheimen, SSH-opzet, controle van de invoer en `concurrency`-groep als `import-season.yml`, en een `timeout-minutes` van 30 in plaats van 10.
+- **Waarom:** na een wijziging in de importer start de projecteigenaar nu zes keer dezelfde workflow, en de lus hoort bij de opdracht, waar hij een test krijgt.
+- **Nadeel:** een lange import houdt de groep `acceptance` vast, dus een deploy wacht tot de import klaar is.
+  Een run van één seizoen duurde 10 tot 15 seconden, dus de wachttijd is een paar minuten.
+- **Alternatieven:** een matrix met een run per seizoen (de groep `acceptance` houdt één wachtende run vast, dus runs vervangen elkaar); een lus in bash in de workflow (zonder test); het bestaande `import-season.yml` met een tweede invoer (de workflow voor één seizoen blijft eenvoudig).
+
+### Een seizoen dat mislukt stopt de run niet, en maakt hem rood aan het eind
+
+- **Datum:** 1 november 2026
+- **Besluit:** `--from-season` gaat door met het volgende seizoen na een seizoen dat niet te lezen is of waarvan de lock bezet is.
+  Hij schrijft per seizoen één regel, sluit af met een samenvatting (hoeveel seizoenen zijn gelezen en welke niet, met de reden) en geeft exitcode 1 als één of meer seizoenen mislukten, anders 0.
+  De database van een mislukt seizoen blijft zoals ze was.
+- **Waarom:** een seizoen dat de lezer nog niet kan lezen (de seizoenen vóór 2020/21) mag de rest niet tegenhouden, en de projecteigenaar wil in één logboek zien wat ontbreekt.
+- **Alternatieven:** stoppen bij de eerste fout (de rest blijft dan ongelezen).
+
 ## Werkruimte
 
 ### Packages komen met het issue dat ze nodig heeft
