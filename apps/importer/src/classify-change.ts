@@ -82,6 +82,7 @@ export type MatchState = Pick<
   | 'home'
   | 'kickoffAt'
   | 'matchDate'
+  | 'note'
   | 'opponent'
   | 'penaltiesAgainst'
   | 'penaltiesFor'
@@ -111,7 +112,9 @@ export function describeState(match: MatchState, goals: GoalState[]): string {
       ? `${match.goalsFor}-${match.goalsAgainst}${match.extraTime ? ' a.e.t.' : ''}${match.afterNinetyFor === null ? '' : ` (90 min ${match.afterNinetyFor}-${match.afterNinetyAgainst})`}${match.penaltiesFor === null ? '' : ` pens ${match.penaltiesFor}-${match.penaltiesAgainst}`}`
       : match.status
   const when = match.kickoffAt === null ? (match.dateText ?? match.matchDate) : match.kickoffAt.toISOString()
-  const head = `${match.home ? 'home' : 'away'} ${match.opponent}, ${when}${match.stadium === null ? '' : `, ${match.stadium}`}: ${score}`
+  const venue = match.stadium === null ? '' : `, ${match.stadium}`
+  const note = match.note === null ? '' : ` (${match.note})`
+  const head = `${match.home ? 'home' : 'away'} ${match.opponent}, ${when}${venue}${note}: ${score}`
 
   return goals.length === 0 ? head : `${head}; ${goals.map(describeGoal).join(', ')}`
 }
@@ -307,6 +310,9 @@ function judge({ at, before, beforeGoals, now, nowGoals, previousReadAt }: Chang
   }
   if (before.stadium !== now.stadium) {
     judgement = worse(judgement, before.stadium === null ? part('stadium', 'new') : shown('stadium', 'the stadium'))
+  }
+  if (before.note !== now.note) {
+    judgement = worse(judgement, before.note === null ? part('note', 'new') : shown('note', 'the note'))
   }
   if (before.dateText !== now.dateText) {
     // The weekend that becomes a day, or a time, is news; a played match keeps its date.

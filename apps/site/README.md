@@ -273,6 +273,8 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een eerder seizoen begint bij de eerste wedstrijd (`resultsOfSeason` in `src/matches.ts`).
   Een wedstrijd zonder uitslag staat er ook in, en zegt twee uur na de aanvang "Gegevens nog niet beschikbaar" (zonder aanvangstijd vanaf de dag erna).
   De zin komt van `lacksResult` in `src/matches.ts` en de eigenschap `resultMissing` van `Match`, en verdwijnt zodra de wedstrijd een score heeft.
+  Een wedstrijd met een `note` in de database (een gestaakte wedstrijd die later is uitgespeeld) toont die tekst als laatste regel onder de wedstrijd, ook onder die zin.
+  `MatchLine` in `src/MatchViews.tsx` geeft hem door aan `Match`; de pagina's met `ShortMatch`, zoals die van een tegenstander, hebben er geen plek voor.
 - **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de eerste van Uitslagen, ook zonder uitslag) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
   Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten, en onder de tabel dezelfde regel "Gegevens nog niet bijgewerkt" als de kaart Stand op Wedstrijden.
   De blokken linken naar "Alle wedstrijden" en "De volledige stand" (`/wedstrijden#stand`).

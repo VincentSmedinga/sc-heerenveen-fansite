@@ -545,6 +545,7 @@ export async function listSeasonMatches(db: Database, season: string) {
       id: matches.id,
       kickoffAt: matches.kickoffAt,
       matchDate: matches.matchDate,
+      note: matches.note,
       opponent: matches.opponent,
       penaltiesAgainst: matches.penaltiesAgainst,
       penaltiesFor: matches.penaltiesFor,

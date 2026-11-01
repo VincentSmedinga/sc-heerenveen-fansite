@@ -29,6 +29,7 @@ const played: MatchState = {
   home: true,
   kickoffAt: kickoff,
   matchDate: '2026-10-24',
+  note: null,
   opponent: 'FC Twente',
   penaltiesAgainst: null,
   penaltiesFor: null,
@@ -336,6 +337,19 @@ describe('the rest of a match', () => {
       class: 'new',
       overwrites: false,
     })
+  })
+})
+
+describe('the note of a match', () => {
+  it('is new when it comes, and overwrites when it changes or goes', () => {
+    const noted = { ...played, note: 'Gestaakt, de volgende dag afgemaakt' }
+
+    expect(judge({ after: 10 * day, now: noted })).toMatchObject({ changed: ['note'], class: 'new', overwrites: false })
+    expect(
+      judge({ after: 10 * day, before: { ...noted, resultSetAt: kickoff }, now: { ...noted, note: 'Anders' } }),
+    ).toMatchObject({ changed: ['note'], class: 'suspicious', overwrites: true })
+    expect(judge({ after: 10 * day, before: { ...noted, resultSetAt: kickoff }, now: played }).class).toBe('suspicious')
+    expect(judge({ before: { ...noted, resultSetAt: kickoff }, now: played }).class).toBe('improvement')
   })
 })
 

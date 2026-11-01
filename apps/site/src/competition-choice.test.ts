@@ -54,6 +54,7 @@ const played = (
   home: true,
   kickoffAt: new Date(`${matchDate}T14:30:00Z`),
   matchDate,
+  note: null,
   opponent: `Club ${round}`,
   penaltiesAgainst: null,
   penaltiesFor: null,

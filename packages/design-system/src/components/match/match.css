@@ -12,6 +12,7 @@
   }
 
   .hf-match-label,
+  .hf-match-note,
   .hf-match-when {
     color: var(--hf-colour-text-secondary);
     margin-block: 0;
@@ -129,6 +130,14 @@
    */
   .hf-match-missing {
     color: var(--hf-colour-text-missing);
+    margin-block: 0.125rem 0;
+  }
+
+  /*
+   * The note is the very last line, in the same secondary colour as the lines above it, and a
+   * little apart from the line before.
+   */
+  .hf-match-note {
     margin-block: 0.125rem 0;
   }
 

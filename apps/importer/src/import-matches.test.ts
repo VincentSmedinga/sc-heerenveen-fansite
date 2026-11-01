@@ -461,6 +461,80 @@ describe('the score after 90 minutes of a cup tie', () => {
   })
 })
 
+describe('a match that was stopped and finished later', () => {
+  // The rest has no result here: the table of the page would stop agreeing with the matches.
+  const block = (fields: string) =>
+    `{{Footballbox2\n${fields}\n|goals1 =\n|goals2 =\n|location = [[Heerenveen (plaats)|Heerenveen]]\n|attendance =\n|referee =\n}}`
+  const began = block(
+    "|date = 31 oktober 2026\n|time = 18:45 uur\n|team1 = [[sc Heerenveen]]\n|score = Gestaakt 82' (1 – 0)\n|team2 = [[N.E.C.]]\n|stadium = [[Abe Lenstra Stadion]]",
+  )
+  const rest = block(
+    '|date = 3 november 2026\n|time = 14:30 uur\n|team1 = [[sc Heerenveen]]\n|score =  – \n|team2 = [[N.E.C.]]\n|stadium = [[Goffertstadion]]',
+  )
+  const plain = original.programme
+  const undone =
+    '|date = 31 oktober 2026\n|time = 18:45 uur\n|team1 = [[sc Heerenveen]]\n|score =  – \n|team2 = [[N.E.C.]]'
+  /** The programme with these blocks in place of the match of round 11. */
+  const withBlocks = (blocks: string) =>
+    plain.replace(/\{\{Footballbox2\n\|date = 31 oktober 2026[\s\S]*?\n\}\}/u, blocks)
+  const roundEleven = () => database.db.select().from(matches).where(eq(matches.round, 'Speelronde 11'))
+
+  it('stores the match as it began, with the line about the rest, and writes no note for the others', async () => {
+    const { server } = await serve({ programme: withBlocks(`${began}\n${rest}`) })
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'imported', warnings: [] })
+    expect(await roundEleven()).toMatchObject([
+      {
+        goalsAgainst: null,
+        goalsFor: null,
+        matchDate: '2026-10-31',
+        note: 'Gestaakt in minuut 82. Het restant wordt op 3 november gespeeld in het Goffertstadion.',
+        stadium: 'Abe Lenstra Stadion',
+        status: 'scheduled',
+      },
+    ])
+    expect((await database.db.select().from(matches)).filter((match) => match.note !== null)).toHaveLength(1)
+  })
+
+  it('fills a match stored before, from the next import, and then finds nothing changed', async () => {
+    const withRestOnly = withBlocks(rest)
+    const { pages, server } = await serve({ programme: withRestOnly })
+
+    await importAt(server, first)
+    expect(await roundEleven()).toMatchObject([{ matchDate: '2026-11-03', note: null, stadium: 'Goffertstadion' }])
+
+    pages.programme = withBlocks(`${began}\n${rest}`)
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, removed: 0, updated: 1 }, warnings: [] })
+    expect(await roundEleven()).toMatchObject([
+      {
+        matchDate: '2026-10-31',
+        note: expect.stringContaining('Gestaakt in minuut 82.'),
+        stadium: 'Abe Lenstra Stadion',
+      },
+    ])
+    expect(await importAt(server, new Date(first.getTime() + 2 * hours(1)))).toMatchObject({
+      matches: { unchanged: 35, updated: 0 },
+    })
+  })
+
+  it('keeps the last good copy when the page has the stopped block and nothing that finishes it', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    expect(plain).toContain(undone)
+
+    pages.programme = withBlocks(began)
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report.kind).toBe('error')
+    expect(await roundEleven()).toMatchObject([{ note: null, status: 'scheduled' }])
+  })
+})
+
 describe('extra time and a shoot-out in the cup', () => {
   const extraTimeCup = fixture('wikipedia-cup-extra-time.wiki')
   /** The shoot-out of the second round as it was before it was on the page. */

@@ -756,6 +756,8 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Bij een wedstrijd zonder `aet` leest hij `half time score` niet als stand na 90 minuten, ook niet met een komma erin.
   De stand bij de rust bewaart hij niet.
   Een play-offwedstrijd krijgt hem niet.
+- Bij een wedstrijd die gestaakt en later uitgespeeld is, bewaart hij een regel in `note` (zie _Een gestaakte wedstrijd_ hieronder).
+  Elke andere wedstrijd heeft geen `note`, en de volgende import van het seizoen vult hem bij een wedstrijd die al in de database stond.
 - De doelpuntenmakers van een gespeelde wedstrijd bewaart hij in `match_goals`, een rij per doelpunt.
   Wikipedia heeft ze in `goals1` (het eerste team van het sjabloon) en `goals2`: `[[Luca Oyen|Oyen]] {{goal|52}}` voor het eerste team en `{{goal|45}} [[Jacob Trenskow|Trenskow]]` voor het tweede, een speler per regel en de regels gescheiden door `<br />`.
   De import bewaart de naam zoals die op de pagina staat (de tekst achter de `|` in de link), de pagina waar de link naar wijst (`wikipedia_page`, zoals `Luca Oyen`), de minuut, de blessuretijd en of het een eigen doelpunt of een penalty was.
@@ -1144,12 +1146,19 @@ Op acceptatie start je dat in GitHub met de workflow _Import season_, zonder SSH
 #### Een gestaakte wedstrijd
 
 De pagina van 2025/26 heeft voor NAC Breda – sc Heerenveen (speelronde 33) twee blokken.
-Het eerste heeft de score "Gestaakt 82' (2 – 0)" op 10 mei 2026, het tweede de definitieve uitslag 2–0 op 11 mei, met een voetnoot bij de datum.
-De reader werkt zo:
+Het eerste heeft de score "Gestaakt 82' (2 – 0)" op 10 mei 2026 in Breda, het tweede de definitieve uitslag 2–0 op 11 mei in het Abe Lenstra Stadion, met een voetnoot bij de datum.
+De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_ in [`docs/beslissingen.md`](../../docs/beslissingen.md)):
 
-- Een blok waarvan de score met "Gestaakt" begint, telt niet mee zolang de pagina onder dezelfde kop voor dezelfde twee clubs een later blok heeft.
-  Het latere blok geldt, met zijn datum, zijn aftrap en zijn doelpunten.
+- Een blok waarvan de score met "Gestaakt" begint, is de wedstrijd.
+  Het geeft het stadion, thuis of uit, de datum en de aftrap, zodat de cijfers per stadion de wedstrijd tellen voor de plek waar hij begon.
+- Het laatste blok daarna onder dezelfde kop voor dezelfde twee clubs maakt de wedstrijd af en is zelf geen wedstrijd.
+  Het geeft de uitslag en de doelpunten, en de dag en het stadion voor de regel in `matches.note`: "Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion."
+  De minuut staat in de score van het gestaakte blok.
+  Een naam die op "Stadion" eindigt, krijgt "het" ervoor.
+  Heeft het blok nog geen uitslag, dan staat er "wordt gespeeld".
+  Over de reden van het staken of het publiek zegt de regel niets.
 - Heeft de pagina geen later blok, dan stopt de import met een fout die de wedstrijd noemt.
+  Dat geldt ook als het latere blok zelf gestaakt is, een dag of minuut heeft die we niet kennen, of een uitgestelde wedstrijd is.
   Een score die we niet kennen, geeft altijd een fout.
 - Gestaakte wedstrijden van andere clubs leest hij niet, want alleen de wedstrijden van sc Heerenveen komen in de database.
 - Een voetnoot (`<ref>...</ref>`) haalt hij weg voordat hij de pagina leest, dus een datum met een voetnoot leest als de datum.
