@@ -543,7 +543,16 @@ export type MatchStatus = (typeof matchStatuses)[number]
  * The most characters a column of `matches` holds. The importer checks them before it
  * stores.
  */
-export const matchLimits = { dateText: 60, note: 255, opponent: 100, round: 60, season: 7, stadium: 150 }
+export const matchLimits = {
+  attendance: 150000,
+  dateText: 60,
+  note: 255,
+  opponent: 100,
+  referee: 100,
+  round: 60,
+  season: 7,
+  stadium: 150,
+}
 
 /**
  * The most characters the Wikipedia page of a player or a club holds, in `players`,
@@ -636,6 +645,12 @@ export type NewClubName = typeof clubNames.$inferInsert
  * for where and when it began (`stadium`, `match_date`, `kickoff_at`, `home`), and the note is
  * the only place that holds where the rest was played.
  *
+ * `attendance` is the number of spectators and `referee` the full name of the referee, as the
+ * page gives them (no link, no photo). Both are empty when the page does not give them.
+ * `attendance` is 0 for a match without an audience, never above `matchLimits.attendance`, and
+ * only for a played match. For a match that was stopped and finished later they are the ones of
+ * the block of the stopped match, like the other facts of where and when it began.
+ *
  * `match_date` is the local day (Europe/Amsterdam), or the first day when Wikipedia only knows
  * a weekend. `kickoff_at` is the kick-off in UTC and is empty while the time is unknown: the
  * KNVB announces the times of rounds 22 to 32 on 22 December 2026. `date_text` then holds the
@@ -673,6 +688,8 @@ export const matches = mysqlTable(
     kickoffAt: datetime('kickoff_at'),
     dateText: varchar('date_text', { length: matchLimits.dateText }),
     note: varchar('note', { length: matchLimits.note }),
+    attendance: int('attendance', { unsigned: true }),
+    referee: varchar('referee', { length: matchLimits.referee }),
     resultSetAt: datetime('result_set_at'),
   },
   (table) => [
@@ -703,6 +720,11 @@ export const matches = mysqlTable(
       'matches_after_ninety_within_extra_time',
       sql`${table.afterNinetyFor} is null or (${table.extraTime} = 1 and ${table.afterNinetyFor} <= ${table.goalsFor} and ${table.afterNinetyAgainst} <= ${table.goalsAgainst})`,
     ),
+    check(
+      'matches_attendance_in_range_when_played',
+      sql`${table.attendance} is null or (${table.status} = 'played' and ${table.attendance} <= ${sql.raw(String(matchLimits.attendance))})`,
+    ),
+    check('matches_referee_not_empty', sql`${table.referee} is null or char_length(${table.referee}) > 0`),
   ],
 )
 

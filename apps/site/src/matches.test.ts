@@ -26,6 +26,7 @@ import {
 const match = (round: string, status: PublicMatch['status'], matchDate: string): PublicMatch => ({
   afterNinetyAgainst: null,
   afterNinetyFor: null,
+  attendance: null,
   competition: 'Eredivisie',
   dateText: null,
   extraTime: false,
@@ -39,6 +40,7 @@ const match = (round: string, status: PublicMatch['status'], matchDate: string):
   opponent: 'Testdorp FC',
   penaltiesAgainst: null,
   penaltiesFor: null,
+  referee: null,
   round,
   stadium: null,
   status,

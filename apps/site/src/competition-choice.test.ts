@@ -45,6 +45,7 @@ const played = (
 ): PublicMatch => ({
   afterNinetyAgainst: null,
   afterNinetyFor: null,
+  attendance: null,
   competition: 'Eredivisie',
   dateText: null,
   extraTime: false,
@@ -58,6 +59,7 @@ const played = (
   opponent: `Club ${round}`,
   penaltiesAgainst: null,
   penaltiesFor: null,
+  referee: null,
   round,
   stadium: null,
   status: 'played',

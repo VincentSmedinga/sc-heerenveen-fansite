@@ -6291,6 +6291,53 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De regel in de code van de site schrijven (de site kent de pagina van Wikipedia niet).
 - **Later:** zie _Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht_.
   Krijgt een gespeelde wedstrijd van drie dagen of langer geleden een ander stadion, een andere datum of een andere regel, dan wacht die wijziging zeven dagen of tot een mens besluit.
+  Het nadeel hierboven is opgelost: zie _De import bewaart het aantal toeschouwers en de scheidsrechter van elke wedstrijd, en geen enkele pagina toont ze_.
+  Voor een gestaakte wedstrijd komen ze uit het gestaakte blok.
+
+### De import bewaart het aantal toeschouwers en de scheidsrechter van elke wedstrijd, en geen enkele pagina toont ze
+
+- **Datum:** 1 november 2026
+- **Besluit:** `matches` krijgt twee kolommen, `attendance` en `referee`, met een migratie (`0028_add_match_attendance_and_referee`) en de uitkomst van `Footballbox2` voor de competitie, de beker en de play-offs (#558).
+  Een kolom per feit, geen aparte tabel.
+  Geen enkele pagina, kaart of verhaal toont ze; `PublicMatch` heeft de velden, zodat het tonen (#416 en #417) later alleen een pagina hoeft te bouwen.
+- **De kolommen:** `attendance` is een geheel getal van 0 tot en met 150.000 (`matches_attendance_in_range_when_played`), leeg als het onbekend is.
+  `0` is een wedstrijd zonder publiek, zoals het restant van NAC Breda – sc Heerenveen.
+  Alleen een gespeelde wedstrijd heeft een aantal.
+  `referee` is de volledige naam als tekst van hoogstens 100 tekens, leeg als hij onbekend is (en nooit een lege tekst: `matches_referee_not_empty`).
+- **Het aantal lezen:** punten, spaties en vaste spaties zijn duizendtallen ("21.022" is 21022).
+  Leeg, een streepje of "n.b." is niet bekend.
+  Tekst, een getal boven 150.000 of een getal dat niet te lezen is, geeft ook niet bekend, met een waarschuwing in het logboek.
+  Het is nooit een fout: dit is een bijzaak en mag de import van de uitslag niet tegenhouden.
+- **De scheidsrechter lezen:** bij een link de volledige naam uit het doel van de link ("Sander van der Eijk" voor `[[Sander van der Eijk|Van der Eijk]]`), een toevoeging tussen haakjes in de titel (`Jan Smit (scheidsrechter)`) weggelaten.
+  Staat er een vervanger achter ("(Kuipers 46')"), dan telt de eerste link.
+  Zonder link is het de tekst tot een haakje.
+  Opmaak, verwijzingen (`<ref>`) en besturingstekens vallen weg.
+  Tekst met vierkante haken, accolades, punthaken of een verticale streep, of langer dan 100 tekens, is niet te lezen: niet bekend, met een waarschuwing.
+- **Privacy:** we bewaren alleen de naam zoals Wikipedia hem geeft.
+  Geen foto, geen link en geen pagina van de scheidsrechter.
+  Een scheidsrechter is een publieke figuur in zijn werk, en zijn naam staat bij elke wedstrijd in de media en op Wikipedia.
+- **Een gestaakte wedstrijd:** het gestaakte blok is leidend, zoals voor het stadion (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_).
+  Voor NAC Breda – sc Heerenveen zijn dat 19.241 en Van der Eijk, niet de 0 van het restant.
+  Heeft het gestaakte blok niets, dan blijft het veld leeg.
+- **Een wijziging:** de regels van _Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht_ gelden, met drie toevoegingen in `classify-change.ts`.
+  Een leeg veld dat gevuld wordt, is nieuw en gaat door, ook in een seizoen dat voorbij is.
+  Een bijgesteld aantal toeschouwers is een verbetering (soort 2): het wordt na afloop vaak bijgesteld, ook na dagen, en geen verdachte wijziging.
+  Een andere scheidsrechter volgt de regel van het stadion: een verbetering bij een wedstrijd van de laatste drie dagen, daarna wacht hij.
+  Een veld dat een waarde had en leeg wordt, wacht altijd.
+  Een bijgesteld aantal in een seizoen dat voorbij is, wacht net als elke andere wijziging daar.
+  De regel waarmee `describeState` een wedstrijd beschrijft, noemt de twee velden als ze gevuld zijn, zodat een wijziging die wacht ze meeneemt.
+- **Waarom:** de gegevens zijn er nu op Wikipedia voor bijna elke wedstrijd van 2020/21 tot en met 2025/26.
+  Bewaren we ze nu, dan bouwen ze zich op terwijl het tonen wacht op de pagina per wedstrijd (#108).
+  Een leesfout in een bijzaak hoort de uitslag niet tegen te houden.
+  De rest volgt uit de regels voor een wijziging, zodat een vandaal geen aantal of naam kan zetten zonder dat het opvalt.
+- **Nadeel:** een bestaande wedstrijd krijgt zijn aantal en zijn scheidsrechter pas bij de volgende import van het seizoen.
+  Voor de seizoenen 2020/21 tot en met 2025/26 is dat de opdracht Import season op acceptatie, na het deployen.
+  Zonder eigen controle op het getal (een aantal boven de capaciteit van het stadion) neemt de import ook een foutief getal onder 150.000 over.
+- **Alternatieven:** een aparte tabel voor de gegevens van een wedstrijd (een kolom per feit is genoeg).
+  Een aantal boven 150.000 als fout laten staan (het houdt de uitslag tegen).
+  De achternaam uit de tekst van de link bewaren (niet uniek, en de volledige naam staat in het doel).
+  De link of de pagina van de scheidsrechter bewaren (nieuwe gegevens over een persoon die niemand vroeg).
+  Elke wijziging van de toeschouwers laten wachten (ze worden juist na afloop bijgesteld).
 
 ### Van een bericht met meerdere versies toont de site alleen de laatste kop
 

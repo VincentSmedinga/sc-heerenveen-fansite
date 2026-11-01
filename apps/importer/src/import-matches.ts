@@ -481,6 +481,8 @@ function isSame(before: Match, now: ReadMatch, clubId: number): boolean {
     before.opponent === now.opponent &&
     before.home === now.home &&
     before.stadium === now.stadium &&
+    before.attendance === now.attendance &&
+    before.referee === now.referee &&
     before.status === now.status &&
     before.goalsFor === now.goalsFor &&
     before.goalsAgainst === now.goalsAgainst &&
@@ -743,6 +745,9 @@ async function storeMatches(
     known.delete(key(match))
     if (scorers.warning !== undefined) {
       warnings.push(scorers.warning)
+    }
+    if (match.factsProblem !== null) {
+      warnings.push(match.factsProblem)
     }
 
     const proposal: Proposal = { clubId: club.id, goals: scorers.goals, match }

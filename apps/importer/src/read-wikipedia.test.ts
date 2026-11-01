@@ -92,9 +92,11 @@ describe('the programme and the results', () => {
     expect(matchOf(programme, 'Speelronde 1')).toEqual({
       afterNinetyAgainst: null,
       afterNinetyFor: null,
+      attendance: 21022,
       competition: 'Eredivisie',
       dateText: null,
       extraTime: false,
+      factsProblem: null,
       goals: [
         {
           minute: 52,
@@ -117,6 +119,7 @@ describe('the programme and the results', () => {
       opponentPage: 'FC Twente',
       penaltiesAgainst: null,
       penaltiesFor: null,
+      referee: null,
       round: 'Speelronde 1',
       stadium: 'Abe Lenstra Stadion',
       status: 'played',
@@ -529,9 +532,11 @@ describe('the cup', () => {
         {
           afterNinetyAgainst: null,
           afterNinetyFor: null,
+          attendance: null,
           competition: 'KNVB Beker',
           dateText: null,
           extraTime: false,
+          factsProblem: null,
           goals: null,
           goalsAgainst: null,
           goalsFor: null,
@@ -544,6 +549,7 @@ describe('the cup', () => {
           opponentPage: 'Excelsior Maassluis',
           penaltiesAgainst: null,
           penaltiesFor: null,
+          referee: null,
           round: 'Eerste ronde',
           stadium: 'Sportpark Dijkpolder',
           status: 'scheduled',
@@ -900,6 +906,179 @@ describe('the score after 90 minutes of a cup tie', () => {
   })
 })
 
+describe('the spectators and the referee', () => {
+  const played = (fields: Record<string, string>) => box({ score: '1 – 0', ...fields })
+  const facts = (fields: Record<string, string>) => {
+    const match = matchOf(leagueWith(played(fields)), 'Speelronde 12')
+
+    return { attendance: match?.attendance, factsProblem: match?.factsProblem, referee: match?.referee }
+  }
+
+  it('reads them from the real page of 2025/26 for every match: a name and a number each', () => {
+    const read = readLeague(seasonProgramme)
+
+    if (read.kind !== 'read') {
+      throw new Error(read.message)
+    }
+
+    expect(read.matches.every((match) => match.referee !== null && match.attendance !== null)).toBe(true)
+    expect(read.matches.every((match) => match.factsProblem === null)).toBe(true)
+    expect(read.matches.find((match) => match.round === 'Speelronde 1')).toMatchObject({
+      attendance: 23764,
+      referee: 'Marc Nagtegaal',
+    })
+  })
+
+  it('takes the facts of the block that began a match that was stopped: NAC Breda - sc Heerenveen, 19.241 and Van der Eijk', () => {
+    const read = readLeague(seasonProgramme)
+    const match = read.kind === 'read' ? read.matches.find((found) => found.round === 'Speelronde 33') : undefined
+
+    expect(match).toMatchObject({ attendance: 19241, factsProblem: null, referee: 'Sander van der Eijk' })
+  })
+
+  it('does not take the facts of the block that finished it, which had no audience and another referee', () => {
+    const stopped = box({
+      attendance: '19.241',
+      date: '10 mei 2026',
+      referee: '[[Sander van der Eijk|Van der Eijk]]',
+      score: "Gestaakt 82' (2 – 0)",
+      team1: '[[NAC Breda]]',
+      team2: '[[sc Heerenveen]]',
+    })
+    const finished = box({
+      attendance: '0',
+      date: '11 mei 2026',
+      referee: '[[Martin van den Kerkhof|Van den Kerkhof]]',
+      score: '2 – 0',
+      team1: '[[NAC Breda]]',
+      team2: '[[sc Heerenveen]]',
+    })
+
+    expect(matchOf(leagueWith(stopped, finished), 'Speelronde 12')).toMatchObject({
+      attendance: 19241,
+      referee: 'Sander van der Eijk',
+    })
+  })
+
+  it.each([
+    ['21.022', 21022],
+    ['21022', 21022],
+    ['21 022', 21022],
+    ['21&nbsp;022', 21022],
+    ['21 022', 21022],
+    ['21 022', 21022],
+    ['5.142', 5142],
+    ['950', 950],
+    ['0', 0],
+    ['150.000', 150000],
+    ['21.022<ref>De club, 14 november 2026</ref>', 21022],
+    ['<!-- onbekend -->21.022', 21022],
+  ])('reads the attendance %j as %j', (written, count) => {
+    expect(facts({ attendance: written })).toMatchObject({ attendance: count, factsProblem: null })
+  })
+
+  it.each(['', '-', '–', '—', 'n.b.', 'N.B.', 'nb'])(
+    'reads the attendance %j as not known, without a problem',
+    (written) => {
+      expect(facts({ attendance: written })).toMatchObject({ attendance: null, factsProblem: null })
+    },
+  )
+
+  it.each(['ongeveer 20.000', '21.02', '21,022', '1.2.3', '150.001', '1.000.000', '-5', '21.022 (uitverkocht)'])(
+    'reads the attendance %j as not known, and says so without stopping the import',
+    (written) => {
+      expect(facts({ attendance: written })).toEqual({
+        attendance: null,
+        factsProblem: 'Speelronde 12 (Eredivisie) the attendance is not a number we can use',
+        referee: null,
+      })
+    },
+  )
+
+  it('has no attendance for a match that is not played', () => {
+    const match = matchOf(leagueWith(box({ attendance: '21.022', score: '' })), 'Speelronde 12')
+
+    expect(match).toMatchObject({ attendance: null, factsProblem: null, status: 'scheduled' })
+  })
+
+  it('has neither when the box lacks the fields', () => {
+    expect(matchOf(leagueWith(played({})), 'Speelronde 12')).toMatchObject({
+      attendance: null,
+      factsProblem: null,
+      referee: null,
+    })
+  })
+
+  it.each([
+    ['[[Martin van den Kerkhof|Van den Kerkhof]]', 'Martin van den Kerkhof'],
+    ['[[Danny Makkelie]]', 'Danny Makkelie'],
+    ['[[Danny_Makkelie|Makkelie]]', 'Danny Makkelie'],
+    ['[[Stan Teuben|S.P.M. Teuben]]', 'Stan Teuben'],
+    ['[[Jan Smit (scheidsrechter)|Smit]]', 'Jan Smit'],
+    ["'''[[Bas Nijhuis|Nijhuis]]'''", 'Bas Nijhuis'],
+    ['[[Sander van der Eijk|Van der Eijk]]<ref>De KNVB, 14 november 2026</ref>', 'Sander van der Eijk'],
+    ["[[Serdar Gözübüyük|Gözübüyük]] ([[Joshua Kuipers|Kuipers]] <small>46'</small>)", 'Serdar Gözübüyük'],
+    ['Allard Lindhout', 'Allard Lindhout'],
+    ['Allard  Lindhout&nbsp;', 'Allard Lindhout'],
+    ["Allard Lindhout (Kuipers 46')", 'Allard Lindhout'],
+    ["''Allard Lindhout''", 'Allard Lindhout'],
+    ['Allard\u0007 Lindhout', 'Allard Lindhout'],
+  ])('reads the referee %j as %j', (written, name) => {
+    expect(facts({ referee: written })).toMatchObject({ factsProblem: null, referee: name })
+  })
+
+  it.each(['', '-', '–', 'n.b.', 'N.B.'])('reads the referee %j as not known, without a problem', (written) => {
+    expect(facts({ referee: written })).toMatchObject({ factsProblem: null, referee: null })
+  })
+
+  it.each(['{{flagicon|NED}} Danny Makkelie', 'A'.repeat(101)])(
+    'reads the referee %j as not known, and says so without stopping the import',
+    (written) => {
+      expect(facts({ referee: written })).toEqual({
+        attendance: null,
+        factsProblem: 'Speelronde 12 (Eredivisie) the referee is not a name we can use',
+        referee: null,
+      })
+    },
+  )
+
+  it('keeps the match and says what is wrong with both fields', () => {
+    const match = matchOf(leagueWith(played({ attendance: 'veel', referee: '{{x}}' })), 'Speelronde 12')
+
+    expect(match).toMatchObject({
+      attendance: null,
+      factsProblem:
+        'Speelronde 12 (Eredivisie) the attendance is not a number we can use and the referee is not a name we can use',
+      goalsFor: 1,
+      referee: null,
+      status: 'played',
+    })
+  })
+
+  it('reads them in the cup, where the page has no number for some matches', () => {
+    const read = readCup(seasonCup)
+
+    if (read.kind !== 'read') {
+      throw new Error(read.message)
+    }
+
+    expect(read.matches.map((match) => [match.round, match.attendance, match.referee])).toEqual([
+      ['Eerste ronde', null, 'Stan Teuben'],
+      ['Tweede ronde', null, 'Bas Nijhuis'],
+      ['Achtste finales', 16593, 'Martijn Vos'],
+      ['Kwartfinales', 26200, 'Joey Kooij'],
+    ])
+    expect(read.matches.every((match) => match.factsProblem === null)).toBe(true)
+  })
+
+  it('reads them in the play-offs', () => {
+    expect(readPlayoffs(playoffPages[2026] ?? '')).toMatchObject({
+      kind: 'read',
+      matches: [{ attendance: 19334, referee: 'Jannick van der Laan' }],
+    })
+  })
+})
+
 describe('the league table', () => {
   it('reads the 18 clubs in the order of the page, with the numbers worked out', () => {
     const read = readStandings(standingsPage)
@@ -1219,9 +1398,11 @@ describe('the play-offs for the Conference League', () => {
       {
         afterNinetyAgainst: null,
         afterNinetyFor: null,
+        attendance: 19334,
         competition: 'Play-offs Conference League',
         dateText: null,
         extraTime: false,
+        factsProblem: null,
         goals: [
           {
             minute: 46,
@@ -1280,6 +1461,7 @@ describe('the play-offs for the Conference League', () => {
         opponentPage: 'FC Utrecht',
         penaltiesAgainst: null,
         penaltiesFor: null,
+        referee: 'Jannick van der Laan',
         round: 'Halve finale',
         stadium: 'Stadion Galgenwaard',
         status: 'played',

@@ -21,6 +21,7 @@ const kickoff = new Date('2026-10-24T19:00:00Z')
 const played: MatchState = {
   afterNinetyAgainst: null,
   afterNinetyFor: null,
+  attendance: null,
   clubId: 1,
   dateText: null,
   extraTime: false,
@@ -33,6 +34,7 @@ const played: MatchState = {
   opponent: 'FC Twente',
   penaltiesAgainst: null,
   penaltiesFor: null,
+  referee: null,
   stadium: 'Abe Lenstra Stadion',
   status: 'played',
 }
@@ -353,6 +355,87 @@ describe('the note of a match', () => {
   })
 })
 
+describe('the spectators and the referee of a match', () => {
+  const known = { ...played, attendance: 21022, referee: 'Sander van der Eijk', resultSetAt: kickoff }
+
+  it('are new when they come, however old the match and even in a season that is over', () => {
+    expect(judge({ after: 10 * day, now: { ...played, attendance: 21022 } })).toMatchObject({
+      changed: ['attendance'],
+      class: 'new',
+      overwrites: false,
+    })
+    expect(judge({ after: 10 * day, now: { ...played, referee: 'Sander van der Eijk' } })).toMatchObject({
+      changed: ['referee'],
+      class: 'new',
+      overwrites: false,
+    })
+    expect(
+      judge({ after: 10 * day, now: { ...played, attendance: 0, referee: 'Sander van der Eijk' }, pastSeason: true }),
+    ).toMatchObject({ changed: ['attendance', 'referee'], class: 'new', overwrites: false })
+  })
+
+  it('are new for a match that is not played yet', () => {
+    expect(
+      judge({ before: { ...planned, resultSetAt: null }, now: { ...planned, referee: 'Sander van der Eijk' } }),
+    ).toMatchObject({ changed: ['referee'], class: 'new', overwrites: false })
+  })
+
+  it('count a revised attendance as a correction, also after days', () => {
+    expect(judge({ before: known, now: { ...known, attendance: 21100 } })).toMatchObject({
+      changed: ['attendance'],
+      class: 'improvement',
+      overwrites: true,
+      reason: 'the attendance was revised',
+    })
+    expect(judge({ after: 10 * day, before: known, now: { ...known, attendance: 0 } }).class).toBe('improvement')
+  })
+
+  it('count a revised attendance in a season that is over as a change that waits', () => {
+    expect(judge({ before: known, now: { ...known, attendance: 21100 }, pastSeason: true })).toMatchObject({
+      class: 'suspicious',
+      overwrites: true,
+    })
+  })
+
+  it('count another referee as a correction for a match of the last three days, and as a change that waits after that', () => {
+    const other = { ...known, referee: 'Serdar Gözübüyük' }
+
+    expect(judge({ before: known, now: other })).toMatchObject({
+      changed: ['referee'],
+      class: 'improvement',
+      overwrites: true,
+      reason: 'the referee of a match played 3 hours ago changed',
+    })
+    expect(judge({ after: 3 * day - 1, before: known, now: other }).class).toBe('improvement')
+    expect(judge({ after: 3 * day, before: known, now: other })).toMatchObject({
+      changed: ['referee'],
+      class: 'suspicious',
+      overwrites: true,
+    })
+  })
+
+  it('wait when a field that had a value is empty again', () => {
+    expect(judge({ before: known, now: { ...known, attendance: null } })).toMatchObject({
+      changed: ['attendance'],
+      class: 'suspicious',
+      overwrites: true,
+      reason: 'the attendance of a played match is no longer on the page',
+    })
+    expect(judge({ before: known, now: { ...known, referee: null } })).toMatchObject({
+      changed: ['referee'],
+      class: 'suspicious',
+      overwrites: true,
+      reason: 'the referee is no longer on the page',
+    })
+  })
+
+  it('make the worse of the two decide when both change', () => {
+    expect(
+      judge({ after: 10 * day, before: known, now: { ...known, attendance: 21100, referee: 'Serdar Gözübüyük' } }),
+    ).toMatchObject({ changed: ['attendance', 'referee'], class: 'suspicious' })
+  })
+})
+
 describe('a difference no rule knows', () => {
   it('is suspicious, and counts as an overwrite', () => {
     // The two matches are told apart by the caller, but nothing the rules look at differs.
@@ -450,6 +533,9 @@ describe('the helpers', () => {
     const text = describeState(played, [goal(45, 'Van Bergen', { page: 'Mats', playerId: 3, stoppageMinutes: 2 })])
 
     expect(text).toBe("home FC Twente, 2026-10-24T19:00:00.000Z, Abe Lenstra Stadion: 1-0; 45+2' Van Bergen (ours)")
+    expect(describeState({ ...played, attendance: 0, referee: 'Sander van der Eijk' }, [])).toBe(
+      'home FC Twente, 2026-10-24T19:00:00.000Z, Abe Lenstra Stadion, 0 spectators, referee Sander van der Eijk: 1-0',
+    )
     expect(describeState(planned, [])).toBe('home FC Twente, 2026-10-24T19:00:00.000Z, Abe Lenstra Stadion: scheduled')
   })
 })
