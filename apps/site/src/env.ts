@@ -1,22 +1,16 @@
 import { databaseEnvSchema } from '@fansite/db/env'
 import { parseEnv } from '@fansite/shared/env'
+import { mailEnvSchema, requireSmtpOutsideLocal } from '@fansite/shared/mail-env'
+import { siteEnvSchema, siteOrigins } from '@fansite/shared/site-env'
 import * as z from 'zod'
 
-import { mailEnvSchema, requireSmtpOutsideLocal } from './mail-env'
-
-const siteEnvSchema = z.object({
-  SITE_ENV: z.enum(['local', 'acceptance', 'production']),
-})
+// The mail code is shared with the importer. The site reads the settings through here still.
+export { readMailEnv } from '@fansite/shared/mail-env'
 
 const schema = databaseEnvSchema
   .extend(siteEnvSchema.shape)
   .extend(mailEnvSchema.shape)
   .superRefine(requireSmtpOutsideLocal)
-
-// What sendMail needs: the settings of the mail server, and SITE_ENV to know whether they may
-// be missing. It doesn't need the database, so the command that sends a test mail on the host
-// runs without DATABASE_URL.
-const mailSchema = siteEnvSchema.extend(mailEnvSchema.shape).superRefine(requireSmtpOutsideLocal)
 
 // Set by `pnpm review` (see scripts/review.js), and nowhere else. Optional, and not part of the
 // schema above: only the dev server reads it, and the site must start without it.
@@ -26,14 +20,6 @@ const reviewEnvSchema = z.object({
     .regex(/^[\w./-]+$/, 'must be the name of a branch')
     .optional(),
 })
-
-// The address of each environment (see the decision Adressen in docs/beslissingen.md). Locally
-// it is `next dev`.
-const origins = {
-  acceptance: 'https://acc.sc.heerenveen.org',
-  local: 'http://localhost:3000',
-  production: 'https://sc.heerenveen.org',
-} as const
 
 /**
  * Whether search engines may index this environment. Only production may be found. The same
@@ -49,7 +35,7 @@ export function isIndexable(source: Record<string, string | undefined> = process
  * feed. Like isIndexable, it reads SITE_ENV when the server runs, and only that.
  */
 export function originOf(source: Record<string, string | undefined> = process.env) {
-  return origins[parseEnv(siteEnvSchema, source).SITE_ENV]
+  return siteOrigins[parseEnv(siteEnvSchema, source).SITE_ENV]
 }
 
 /**
@@ -59,14 +45,6 @@ export function originOf(source: Record<string, string | undefined> = process.en
  */
 export function readEnv(source: Record<string, string | undefined> = process.env) {
   return parseEnv(schema, source)
-}
-
-/**
- * Reads the settings for sending mail (see sendMail) and checks them. Like isIndexable, it
- * reads them when the server runs, and only them and SITE_ENV.
- */
-export function readMailEnv(source: Record<string, string | undefined> = process.env) {
-  return parseEnv(mailSchema, source)
 }
 
 /**

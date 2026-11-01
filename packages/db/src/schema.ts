@@ -801,6 +801,26 @@ export const matchImports = mysqlTable('match_imports', {
 
 export type MatchImport = typeof matchImports.$inferSelect
 
+/** The longest `subject` of an alert: the kind of import and what it reads, as `feed:12`. */
+export const importAlertSubjectMaxLength = 100
+
+/**
+ * Where an import that keeps failing stands with the mails about it (see `alerts.ts`), one row
+ * per import: `matches:<season>`, `squad:<season>`, `feed:<id>` and `backup`. A row is there
+ * while the import is failing. `failures_in_a_row` counts the failed runs, `failing_since` is
+ * the first of them, and `mailed_at` is the last mail about it, empty until a mail went out.
+ * A success removes the row. Times are UTC.
+ */
+export const importAlerts = mysqlTable('import_alerts', {
+  subject: varchar('subject', { length: importAlertSubjectMaxLength }).primaryKey(),
+  failingSince: datetime('failing_since').notNull(),
+  failuresInARow: int('failures_in_a_row', { unsigned: true }).notNull().default(0),
+  lastError: varchar('last_error', { length: reasonMaxLength }),
+  mailedAt: datetime('mailed_at'),
+})
+
+export type ImportAlert = typeof importAlerts.$inferSelect
+
 /** The longest path `page_views` keeps. A path of the site is far shorter. */
 export const pageViewPathMaxLength = 100
 

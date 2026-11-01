@@ -1,7 +1,8 @@
+import { isMailbox } from '@fansite/shared/mail-env'
+
 import type { Mail } from './mail'
 
 import { email } from './contact'
-import { isMailbox } from './mail-env'
 
 /**
  * The answers of the Onderwerp list, with the value the form sends and the words the visitor

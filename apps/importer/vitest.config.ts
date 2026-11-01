@@ -10,4 +10,8 @@ if (existsSync(envFile)) {
   process.loadEnvFile(envFile)
 }
 
+// A test never mails the owner, whatever the .env of the developer says (see alerts.ts in the
+// database package): the tests that are about alerts give their own settings and a fake mailer.
+process.env['ALERT_MAIL_TO'] = ''
+
 export default defineConfig({})

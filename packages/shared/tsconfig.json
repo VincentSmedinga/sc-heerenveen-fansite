@@ -1,4 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // TypeScript 6 loads no @types package by itself. sendMail reads process.env, and its test starts a server.
+    "types": ["node"]
+  },
   "include": ["src"]
 }
