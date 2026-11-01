@@ -50,6 +50,15 @@ describe('ArticleCard', () => {
     expect(screen.getAllByRole('link')).toHaveLength(2)
   })
 
+  it('leaves out "Lees verder" in the short form, so the title is the one link', () => {
+    render(<ArticleCard {...props} short />)
+
+    expect(screen.getAllByRole('link')).toHaveLength(1)
+    expect(screen.getByRole('link', { name: 'Dit zijn wij' }).getAttribute('href')).toBe('/redactie/dit-zijn-wij')
+    expect(screen.queryByText('Lees verder')).toBeNull()
+    expect(screen.getByRole('region', { name: 'Van de redactie' }).textContent).toContain('Een verzonnen inleiding.')
+  })
+
   it('shows the title and the intro as text and not as HTML', () => {
     // Strings in braces: JSX would turn the &amp; in an attribute into a & itself.
     const { container } = render(<ArticleCard {...props} intro={'<i>y</i> &amp;'} title={'<script>z</script>'} />)
