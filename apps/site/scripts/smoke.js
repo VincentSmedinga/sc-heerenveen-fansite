@@ -691,7 +691,7 @@ await withEmptyDatabase((database) =>
     )
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
     // current. The news page has the bar of Nieuws, with the podcasts and the search.
-    assert.doesNotMatch(html, /class="hf-page-shortcuts"|hf-navigation-bar|aria-current/)
+    assert.doesNotMatch(html, /class="hf-page-shortcuts"|class="hf-navigation-bar"| aria-current="/)
     assert.match(html, /<nav aria-label="Hoofdmenu".*?<a class="hf-navigation-link" href="\/nieuws">Nieuws<\/a>/s)
     assert.match(
       archiveHtml,

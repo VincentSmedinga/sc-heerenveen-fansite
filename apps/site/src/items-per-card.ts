@@ -1,9 +1,18 @@
 /**
- * How many items a card with a list shows on the homepage: the discussions and the podcast
- * episodes. A card that comes later uses it too, so the cards stay level. The news card is the
- * main card of the page, so it has its own numbers.
+ * How many items a card with a list reads from the database: the discussions and the podcast
+ * episodes. It is also how many episodes the card on /nieuws shows. The news card is the main
+ * card of the page, so it has its own numbers.
  */
 export const itemsPerCard = 5
+
+/**
+ * How many discussions and episodes the cards in the sidebar of the homepage show. They are
+ * fewer than `itemsPerCard`, so that the sidebar is about as long as the main column next to it
+ * (see the decision in docs/beslissingen.md for the heights).
+ */
+export const homeDiscussions = 2
+
+export const homeEpisodes = 2
 
 /** How many headlines the news card shows. Older news is for the archive at /nieuws. */
 export const firstHeadlines = 10

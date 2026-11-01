@@ -17,6 +17,19 @@ vi.mock('../headlines', async (importOriginal) => ({ ...(await importOriginal<ob
 vi.mock('../articles', () => ({ getNewestArticle: vi.fn() }))
 vi.mock('../discussions', () => ({ getDiscussions: vi.fn() }))
 vi.mock('../podcasts', () => ({ getLatestEpisodes: vi.fn() }))
+// The sidebar shows fewer items than the database gives (see items-per-card.ts). The tests give
+// the cards all the made-up items, and one test below sets a lower number.
+const limits = vi.hoisted(() => ({ homeDiscussions: 3, homeEpisodes: 3 }))
+
+vi.mock('../items-per-card', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  get homeDiscussions() {
+    return limits.homeDiscussions
+  },
+  get homeEpisodes() {
+    return limits.homeEpisodes
+  },
+}))
 // The query is replaced; the split into the next match and the results is the real one.
 vi.mock('../matches', async (importOriginal) => ({ ...(await importOriginal<object>()), getMatchData: vi.fn() }))
 
@@ -113,6 +126,8 @@ beforeEach(() => {
   vi.mocked(getLatestEpisodes).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(noMatchData)
+  limits.homeDiscussions = 3
+  limits.homeEpisodes = 3
 })
 
 afterEach(() => {
@@ -505,6 +520,21 @@ describe('the discussions in the sidebar of the homepage', () => {
   beforeEach(() => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
     vi.mocked(getDiscussions).mockResolvedValue(discussions)
+  })
+
+  it('shows the first discussions and the first episodes only, as many as the numbers say', async () => {
+    limits.homeDiscussions = 1
+    limits.homeEpisodes = 2
+    vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
+
+    const html = await render()
+    const card = (id: string) =>
+      html.match(new RegExp(`<section class="hf-card" aria-labelledby="${id}">.*?</section>`))?.[0] ?? ''
+
+    expect(card('discussions-heading').match(/<li>/g)).toHaveLength(1)
+    expect(card('discussions-heading')).toContain('wie-wint-zondag')
+    expect(card('episodes-heading').match(/<li>/g)).toHaveLength(2)
+    expect(card('episodes-heading')).not.toContain('testpodcast.test/e/1"')
   })
 
   it('puts the block in the sidebar beside the news, named by its h2', async () => {

@@ -83,7 +83,7 @@ test.describe('the bar under the header of /statistieken', () => {
 
     await expect(bar.getByRole('link')).toHaveCount(9)
     await menu.getByRole('link', { name: 'Nieuws' }).click()
-    await expect(page).toHaveURL(/\/$/)
+    await expect(page).toHaveURL(/\/nieuws$/)
     await expect(page.locator('.hf-page-shortcuts')).toHaveCount(0)
 
     await menu.getByRole('link', { name: 'Statistieken' }).click()
