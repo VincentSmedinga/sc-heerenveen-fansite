@@ -13,7 +13,7 @@
   "scripts": {
     "admin:create": "pnpm --filter site run admin create",
     "admin:revoke": "pnpm --filter site run admin revoke",
-    "build": "pnpm -r --if-present run build",
+    "build": "pnpm -r --workspace-concurrency=2 --if-present run build",
     "db:backup": "pnpm --filter @fansite/db db:backup",
     "db:generate": "pnpm --filter @fansite/db db:generate",
     "db:migrate": "pnpm --filter @fansite/db db:migrate",
@@ -34,7 +34,7 @@
     "review:stop": "node scripts/review.js --stop",
     "rollover": "node scripts/rollover.js",
     "screenshots": "pnpm --filter site screenshots",
-    "test": "pnpm -r --if-present run test && node --test '.claude/hooks/*.test.js' 'baseline.test.js' 'scripts/*.test.js' 'templates.test.js'",
+    "test": "pnpm -r --workspace-concurrency=2 --if-present run test && node --test '.claude/hooks/*.test.js' 'baseline.test.js' 'scripts/*.test.js' 'templates.test.js'",
     "test:a11y": "pnpm --filter site test:a11y",
     "test:stories": "pnpm --filter @fansite/design-system test:stories",
     "typecheck": "tsc -b",

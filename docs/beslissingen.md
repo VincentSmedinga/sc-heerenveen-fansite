@@ -263,6 +263,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of reviews met de Claude GitHub Action; dat bekijken we later (#50).
 - **Later:** zie _De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job_.
   Sindsdien draait de reviewer `pnpm test:a11y` in plaats van `pnpm exec playwright test`, en toetst axe de pagina's.
+  Sinds 1 november 2026 draait hij ook die niet meer zelf: de uitkomst komt uit CI (zie _De zware controles delen de machine_).
 
 ### De reviewer start direct na het openen van de pull request
 
@@ -284,6 +285,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** wachten tot CI slaagt, zoals eerst; dan wacht de Builder op een seintje.
   Of de Builder CI laten volgen met een lus; dat staat de app niet toe, en elke keer kijken kost een beurt van het model.
   Of een akkoord voor elke push, ook voor herstel; dat is strenger, maar elk herstel wacht dan op de projecteigenaar.
+- **Later:** sinds 1 november 2026 draait de reviewer de zware controles niet meer zelf maar neemt hij ze uit CI over (zie _De zware controles delen de machine_).
+  Hij draait nog wel lint, typecontrole en de tests van de pakketten die de pull request raakt.
 
 ### Een agent start Storybook zelf, en werkt ook zonder
 
@@ -645,6 +648,39 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Of de poort laten kiezen door het systeem (poort 0); dan weet niemand welke poort een server heeft, en `.mcp.json` en de afspraken in `AGENTS.md` kunnen er niet naar verwijzen.
   Of niets doen en sessies laten wachten; dat is wat misging.
 - **Later:** een eigen server per werkmap, als de botsingen blijven; of de poorten laten kiezen door een bestand in de werkmap als twee namen vaak hetzelfde blok krijgen.
+
+### De zware controles delen de machine
+
+- **Datum:** 1 november 2026
+- **Besluit:** de zware controles gebruiken een vast, laag aantal processen en lopen om beurten, over alle worktrees heen.
+  Het aantal processen is lokaal twee, in de configuratie en niet in een omgevingsvariabele:
+  - `workers` in `apps/site/playwright.config.ts`;
+  - `maxWorkers` in de zes `vitest.config.ts`-bestanden (de site, het designsysteem, de MCP-server, `@fansite/db`, de importer en `@fansite/shared`);
+  - `--workspace-concurrency=2` voor `pnpm build` en `pnpm test` in de hoofdmap;
+  - `--concurrent 2` voor `lint-staged` in `.husky/pre-commit`.
+
+  In CI blijft alles zoals het was: een runner heeft één taak, en de caps gelden alleen als `CI` niet gezet is.
+  `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` en de Storybook-build nemen eerst een slot per computer (`scripts/heavy-lock.js`), een map in de temp-map van de gebruiker.
+  Wie het slot niet krijgt, meldt wie het heeft en wacht.
+  Een slot dat langer dan 30 minuten vastzit of waarvan het proces weg is, neemt de volgende over.
+  Wacht een run langer dan 30 minuten, dan draait hij zonder slot.
+  De time-out van de tests van `@fansite/db`, de importer en de site is 30 seconden, in plaats van de 5 van Vitest.
+
+- **Reviewer:** de Reviewer draait de zware controles niet meer zelf.
+  Hij draait `pnpm lint`, `pnpm typecheck` en de tests van de pakketten die de pull request raakt, en neemt `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` en de build van Storybook over uit CI, vlak voordat hij zijn verslag schrijft.
+  Heeft CI een controle overgeslagen die de wijziging wel kan raken, dan draait hij die zelf.
+  De hook van de Reviewer laat daarvoor ook `gh run list` en `gh run view` door.
+- **Waarom:** twee Builders en een Reviewer brachten de computer van de projecteigenaar (10 kernen) op een belasting van 15,9, en de tests van `packages/db` liepen dan op de time-out van 5 seconden.
+  De eigen database en poorten per worktree (zie _Elke werkmap heeft een eigen database en eigen poorten_) haalden de botsingen weg, maar verdelen de processor niet.
+  Elke zware controle nam een proces per kern, `pnpm -r` draaide er vier naast elkaar, en dezelfde controles liepen per pull request drie keer: bij de Builder, bij de Reviewer en in CI.
+- **Nadeel:** een lokale run van `pnpm test` duurt langer, en een Builder die het slot niet krijgt, wacht.
+  Dat kost minder dan een run die op een time-out faalt en opnieuw moet.
+- **Alternatieven:** een omgevingsvariabele voor het aantal processen; dat moet iemand onthouden, en de configuratie laat het vanzelf gelden.
+  Een snellere computer of een andere CI; dat staat buiten dit issue.
+  Minder Builders; het aantal blijft twee.
+  Het slot in de repository of in de database; het is een eigenschap van de computer en niet van een worktree, en de tests van de database zijn juist wat hier faalde.
+- **Later:** de getallen (twee processen, 30 minuten, 30 seconden) volgen uit een meting op deze computer.
+  Is de computer sneller of zijn er meer Builders, dan meten we opnieuw.
 
 ### Issue-formulieren in YAML, met drie soorten en zonder lege issues
 

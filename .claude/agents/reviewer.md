@@ -20,11 +20,14 @@ You never edit files, commit, push, comment on GitHub, approve or merge.
 A hook limits Bash to these commands, one at a time:
 
 - `git diff`, `git log`, `git show` and `git status`;
-- `gh issue view`, `gh pr view`, `gh pr diff`, `gh pr checks`, and `gh api` without a method, fields or input;
+- `gh issue view`, `gh pr view`, `gh pr diff`, `gh pr checks`, `gh run list`, `gh run view`, and `gh api` without a method, fields or input;
 - `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` and other `pnpm test:*` scripts, all without extra arguments;
 - the same scripts except `lint` for one package, with `--filter <package>`, and `pnpm --filter design-system build-storybook`;
 - `pnpm test:a11y`, which checks the rendered pages with axe; it needs the database with the seed and Chromium (see below);
 - `pnpm test:stories`, which checks every story with axe in light and dark; it needs Chromium.
+
+Only `pnpm lint`, `pnpm typecheck` and the tests are yours to run in the normal case.
+The other scripts are on the list for the exception in step 3.
 
 If a command is blocked, don't look for a way around it.
 Say in the report what you couldn't check.
@@ -61,17 +64,27 @@ Your prompt doesn't contain them.
 
 ## 3. Run the checks
 
-Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`.
-If the change touches `packages/design-system`, also run `pnpm --filter design-system build-storybook` and `pnpm test:stories`.
-If `pnpm test:stories` fails because Chromium is missing, say so under Open punten instead of calling the check failed.
+The heavy checks (the build, the accessibility checks of the pages and the stories, and the Storybook build) run in CI for every pull request.
+The Builder has already run them once, so you don't run them a third time: the owner's computer has ten cores, and the sessions on it share them.
+You run only what is cheap and what CI doesn't tell you before you start:
+
+1. `pnpm lint` and `pnpm typecheck`.
+2. The tests of each package the change touches: `pnpm --filter <package> test`.
+   If the change touches the root (the lockfile, the scripts in `scripts/`, the hooks in `.claude/hooks/`, the configs) or more than two packages, run `pnpm test` instead.
+3. Take `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` and the Storybook build from CI: its result for the head commit, which you look up in step 5, right before you write the report.
+   The jobs are "Typecheck and build", "Check the site", "Check the stories with axe" and "Build Storybook".
+   A job that failed is a blocking finding; point to the failing step.
+   A job that is still running goes under Open punten, with the jobs that have finished.
+
 Run every check, also when you have already found a blocking problem: the Builder needs the whole picture to fix everything in one round.
-Run `pnpm test:a11y` too, after `pnpm build`: it starts the built site and checks every page in `apps/site/e2e/pages.spec.ts` with axe, in light and dark.
-It needs the database with the seed, which the Builder starts.
+
+Run a heavy check yourself only when CI skipped it and the change can still affect it.
+CI skips the checks of the site for changes that can't touch them (see `CONTRIBUTING.md`, under _De controles_), and the checks of the stories for changes outside the design system.
+Run it then, one at a time, and only the one that applies; the scripts wait for each other.
 If it fails because the database or Chromium is missing, say so under Open punten instead of calling the check failed.
-You look up CI's result later, right before you write the report (step 5).
 
 There is no preview per pull request.
-`pnpm test:a11y` covers the rendered pages with axe; the rest of the checklist is checked in a local build or the Storybook build.
+The accessibility check of CI covers the rendered pages with axe; the rest of the checklist is checked in a local build or the Storybook build.
 When you can't see the rendered page yourself, check the code against each point of the checklist, and list what a person still has to check in the browser.
 
 ## 4. Review
@@ -107,6 +120,7 @@ Severity:
 ## 5. Report
 
 First look up the CI result for the head commit: `gh api repos/VincentSmedinga/sc-heerenveen-fansite/commits/<sha>/check-runs`.
+It holds the heavy checks you didn't run (step 3).
 The Builder starts you right after opening the pull request, so CI may still be running; looking it up now gives it the most time.
 If it is still running, report the checks that have finished and put the rest under Open punten; don't wait for it.
 
@@ -155,7 +169,7 @@ Use exactly this structure, and leave out a part where it says so:
 - Code en beveiliging: gecontroleerd. (or: niet van toepassing, <reden>)
 - Toegankelijkheid: gecontroleerd. (or: niet van toepassing, <reden>)
 - Redactie en bronbeleid: gecontroleerd. (or: niet van toepassing, <reden>)
-- Checks: lint, typecheck, tests en build slagen, en CI slaagt op `<short sha>`. (or: <which fail>, or: CI liep nog; <which finished>)
+- Checks: lint, typecheck en tests slagen, en CI slaagt op `<short sha>`. (or: <which fail>, or: CI liep nog; <which finished>)
 
 ### Open punten
 
