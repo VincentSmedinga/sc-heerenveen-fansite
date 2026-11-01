@@ -38,6 +38,7 @@ For a new source, also use the `add-source` skill.
 1. The checks from _De controles_ in `CONTRIBUTING.md`: `pnpm lint`, `typecheck`, `test`, `build`, `test:a11y`, with `docker compose up -d --wait` first.
    The smoke test when markup, page text or a log line changed.
    `pnpm --filter design-system build-storybook` and `pnpm test:stories` after a design system change.
+   `build`, `test:a11y`, `test:stories` and the Storybook build take a slot and wait for each other, also across worktrees (see _Heavy checks_ in `AGENTS.md`): run them once, one at a time, after the last commit.
 2. The pull request title: `printf '%s\n' '<title>' | pnpm exec commitlint`.
 3. The final check in `AGENTS.md`, point by point.
    The two that get missed most: `git grep` for what you removed or renamed (docs, READMEs, MDX, stories, comments, `.env.example`, `apps/site/scripts/smoke.js`), and the two commands for comment width and one sentence per line.
