@@ -23,6 +23,7 @@ const meta = preview.meta({
         component: [
           'Lopende tekst in de typestijlen van de site: Tekst voor een alinea, Inleiding voor de eerste alinea onder de paginatitel, en Meta voor het kleine werk eromheen, zoals een datum of een bronnaam.',
           'Een inleiding is alleen voor een `p`.',
+          'Zegt een regel dat gegevens ontbreken of achterlopen, geef hem dan de klasse `hf-text-missing` naast de typestijl.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -73,6 +74,23 @@ export const Meta = meta.story({
         vr 16/10
       </Text>{' '}
       · Omrop Fryslân
+    </Text>
+  ),
+})
+
+export const Missing = meta.story({
+  name: 'Ontbrekende gegevens',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De klasse `hf-text-missing` geeft een regel het gedempte rood van "Gegevens nog niet beschikbaar" bij een wedstrijd. Gebruik haar naast `appearance="meta"`. De woorden zeggen het zelf; het rood komt erbij.',
+      },
+    },
+  },
+  render: () => (
+    <Text appearance="meta" className="hf-text-missing">
+      Gegevens nog niet bijgewerkt
     </Text>
   ),
 })

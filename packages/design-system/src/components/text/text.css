@@ -70,4 +70,13 @@
     line-height: var(--hf-meta-line-height);
     text-transform: none;
   }
+
+  /*
+   * A line that says data is missing or behind, in the muted red of "Gegevens nog niet
+   * beschikbaar" in a match (see the token). Add it to a Text next to the type style. The
+   * colour only adds to the words.
+   */
+  .hf-text-missing {
+    color: var(--hf-colour-text-missing);
+  }
 }

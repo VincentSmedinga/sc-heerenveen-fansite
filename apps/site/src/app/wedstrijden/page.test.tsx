@@ -306,6 +306,56 @@ describe('the page /wedstrijden', () => {
     })
   })
 
+  describe('the line under the table when the data is behind', () => {
+    const lacking = (kickoff: string): PublicMatch => ({
+      ...matchData.matches[3]!,
+      goals: [],
+      goalsAgainst: null,
+      goalsFor: null,
+      kickoffAt: new Date(kickoff),
+      matchDate: kickoff.slice(0, 10),
+      round: 'Derde ronde',
+      status: 'scheduled',
+    })
+    const withMatch = (added: PublicMatch) =>
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, added] })
+
+    it('says the data is not up to date, in the meta style, when a match has no result two hours after its kick-off', async () => {
+      withMatch(lacking('2026-10-22T18:45:00Z'))
+      const table = section(await render(), 'stand')
+
+      expect(table.match(/Gegevens nog niet bijgewerkt/g)).toHaveLength(1)
+      expect(table).toContain(
+        '<p class="hf-meta hf-text-missing" data-hf-card-share-skip="">Gegevens nog niet bijgewerkt</p>',
+      )
+    })
+
+    it('puts the line straight under the table and above the link to our place in the league', async () => {
+      withMatch(lacking('2026-10-22T18:45:00Z'))
+      const table = section(await render(), 'stand')
+      const places = ['</table>', 'Gegevens nog niet bijgewerkt', 'Onze plek in de competitie'].map((part) =>
+        table.indexOf(part),
+      )
+
+      expect(places.every((place) => place >= 0)).toBe(true)
+      expect(places).toEqual([...places].sort((a, b) => a - b))
+    })
+
+    it('says nothing within the two hours of the kick-off, or when every result is there', async () => {
+      expect(await render()).not.toContain('Gegevens nog niet bijgewerkt')
+
+      withMatch(lacking('2026-10-23T12:00:00Z'))
+      expect(await render()).not.toContain('Gegevens nog niet bijgewerkt')
+    })
+
+    it('has no line in a card without a table', async () => {
+      withMatch(lacking('2026-10-22T18:45:00Z'))
+      vi.mocked(getMatchData).mockResolvedValue({ ...(await getMatchData()), standings: [] })
+
+      expect(await render()).not.toContain('Gegevens nog niet bijgewerkt')
+    })
+  })
+
   describe('a cup tie after extra time or penalties', () => {
     const tie = {
       ...matchData.matches[3]!,
