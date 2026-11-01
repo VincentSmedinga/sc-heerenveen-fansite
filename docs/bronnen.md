@@ -726,3 +726,17 @@ De pagina's met voorwaarden van de makers hebben we niet gelezen.
 - **`robots.txt`:** laat ons de feed toe.
 - **Besluit: afwijzen, voor nu.**
   De podcast gaat zelden over de club, en zonder pagina van de aflevering verwijzen we alleen naar een bestand.
+
+## Wikipedia, voor de wedstrijden
+
+De wedstrijden en de stand komen niet van een mediabron maar van de Nederlandse Wikipedia, onder CC BY-SA 4.0 (zie [`beslissingen.md`](beslissingen.md)).
+De import leest per seizoen vier pagina's, en de bronvermelding op de pagina's met wedstrijden noemt elke pagina die hij las:
+
+- `Eredivisie <seizoen> (mannenvoetbal)`: de stand;
+- `Eredivisie <seizoen> (mannenvoetbal)/Wedstrijden`: het programma en de uitslagen van de competitie;
+- `KNVB Beker <seizoen> (mannen)`: de bekerwedstrijden;
+- `Play-offs Nederlands voetbal <jaar>`: de play-offs voor de Conference League, met het jaar waarin het seizoen eindigt.
+  Die pagina komt pas in mei, en de bronvermelding noemt hem alleen als sc Heerenveen meespeelde.
+
+Van elke wedstrijd nemen we alleen de feiten: de namen, de stand, de minuten van de doelpunten, het stadion en de aftrap.
+Het verslag van de NOS in het sjabloon van de play-offs nemen we niet mee.

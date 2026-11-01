@@ -1,0 +1,281 @@
+<!--
+  The play-offs of 2022 (the season 2021/22). The semi-final of sc Heerenveen was played over two matches.
+  https://nl.wikipedia.org/wiki/Play-offs_Nederlands_voetbal_2022?action=raw, read on 1 November 2026, cut off after the first
+  match of the play-offs for promotion and relegation. The rest of the page is left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+De '''play-offs van het [[Voetbal in Nederland|Nederlands voetbal]] in 2022''' werden na afloop van de reguliere competitie gespeeld. Hierin streden 4 clubs uit de [[Eredivisie (mannenvoetbal)|Eredivisie]] voor deelname aan de [[UEFA Europa Conference League]]. Daarnaast speelden een zevental clubs voor [[Promotie en degradatie|promotie/handhaving]] naar/in de Eredivisie. Tijdens deze wedstrijden was er ook een video-assistent (VAR) aanwezig. Tevens werden deze play-offs over twee wedstrijden per ronde gespeeld met als regel dat bij een gelijke stand over die twee wedstrijden er werd verlengd en eventueel overgaan werd op het nemen van strafschoppen. De [[Uitdoelpunt|uitdoelpuntenregel]] werd vanaf dit seizoen niet meer toegepast. De club met de hoogste classificatie speelde in de tweede wedstrijd thuis.
+
+Daarnaast speelden een achttal clubs voor promotie/handhaving naar/in de [[Tweede divisie (voetbal Nederland)|Tweede divisie]] en een zestiental clubs voor promotie/handhaving naar/in de [[Derde divisie (voetbal Nederland)|Derde divisie]].
+
+== Play-offs voor de UEFA Europa Conference League ==
+Deze play-offs werden gespeeld door de nummers 5 tot en met 8 van de [[Eredivisie 2021/22 (mannenvoetbal)|Eredivisie]]. Aan het eind van het seizoen werden de volgende Europese tickets toegewezen:<!--<ref>[BRON KNVB SPEELSCHEMA EUROPA Speelschema Eredivisie play-offs voor Europees ticket 2021/22, Toelichting KNVB]</ref>-->
+
+* Eredivisie #1: groepsfase Champions League
+* Eredivisie #2: derde voorronde Champions League
+* Eredivisie #3: groepsfase Europa League (ticket van het KNVB Bekertoernooi) <sup>1</sup>
+* Eredivisie #4: derde voorronde Europa Conference League <sup>1</sup>
+* Eredivisie play-offs (#5, #6, #7 of #8): tweede voorronde Europa Conference League <sup>1</sup>
+
+<sup>1</sup> De clubs op de plekken vier tot en met zeven spelen normaliter in de play-offs om één ticket dat recht geeft tot toegang tot de tweede kwalificatieronde van de Europa Conference League. Dat zijn respectievelijk FC Twente, AZ, Vitesse en FC Utrecht. Feyenoord plaatste zich direct voor de groepsfase van de Europa League, omdat PSV de [[KNVB Beker|TOTO KNVB Beker]] heeft gewonnen, maar heeft zich geplaatst voor de derde voorronde van de Champions League. Het ticket voor de derde voorronde van de Europa Conference League werd doorgeschoven van de derde naar de vierde plaats in de reguliere ranglijst. In dit geval hoefde FC Twente de play-offs niet te spelen en daarom kreeg ook de nummer acht (sc Heerenveen) een ticket voor de play-offs.
+
+=== Wedstrijdschema ===
+{{Wedstrijdschema laatste 4 zonder 3 met 3 sets
+| RD1 = '''halve finales'''<br />19 en 22 mei
+| RD2 = '''finale'''<br />26 en 29 mei
+| RD1-seed1 = '''ERE7'''
+| RD1-team1 = [[FC Utrecht]]
+| RD1-score1-1 = 3
+| RD1-score1-2 = 0
+| RD1-score1-3 = 3
+| RD1-seed2 = '''ERE6'''
+| RD1-team2 = '''[[SBV Vitesse|Vitesse]] ([[Verlenging|w.n.v.]])'''
+| RD1-score2-1 = 1
+| RD1-score2-2 = 3
+| RD1-score2-3 = '''4'''
+| RD1-seed3 = '''ERE8'''
+| RD1-team3 = [[sc Heerenveen]]
+| RD1-score3-1 = 3
+| RD1-score3-2 = 0
+| RD1-score3-3 = 3
+| RD1-seed4 = '''ERE5'''
+| RD1-team4 = '''[[AZ (voetbalclub)|AZ]]'''
+| RD1-score4-1 = 2
+| RD1-score4-2 = 2
+| RD1-score4-3 = '''4'''
+| RD2-seed1 = '''B'''
+| RD2-team1 = [[SBV Vitesse|Vitesse]]
+| RD2-score1-1 = 2
+| RD2-score1-2 = 1
+| RD2-score1-3 = 3
+| RD2-seed2 = '''A'''
+| RD2-team2 = '''[[AZ (voetbalclub)|AZ]]'''
+| RD2-score2-1 = 1
+| RD2-score2-2 = 6
+| RD2-score2-3 = '''7'''
+}}
+
+=== Halve finales ===
+==== Wedstrijd A ====
+{{Footballbox2
+|round = Wedstrijd 1/2
+|date = 19 mei 2022
+|time = 18:45 uur
+|team1 = [[sc Heerenveen]]
+|score = 3 – 2
+|team2 = [[AZ (voetbalclub)|AZ]]
+|goals1 = [[Sydney van Hooijdonk|Van Hooijdonk]] {{goal|58}}<br />[[Amin Sarr|Sarr]] {{goal|90}}<br />[[Tibor Halilović|Halilović]] {{goal|90+5}}
+|goals2 = {{goal|59}} [[Håkon Evjen|Evjen]]<br />{{goal|65}} [[Vangelis Pavlidis|Pavlidis]]
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance = 15.765
+|referee = [[Jeroen Manschot|Manschot]]
+|videoreferee = [[Edwin van de Graaf|Van de Graaf]]
+|report = [https://nos.nl/artikel/2429497-heerenveen-verrast-az-met-twee-goals-in-slotminuten-en-zet-stapje-richting-europa Verslag]
+}}
+{{Footballbox2
+|round = Wedstrijd 2/2
+|date = 22 mei 2022
+|time = 14:30 uur
+|team1 = [[AZ (voetbalclub)|AZ]]
+|score = 2 – 0
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Dani de Wit|De Wit]] {{goal|5}}<br />[[Zakaria Aboukhlal|Aboukhlal]] {{goal|88}}
+|goals2 =
+|location = [[Alkmaar]]
+|stadium = [[AFAS Stadion]]
+|attendance = 11.521
+|referee = [[Danny Makkelie|Makkelie]]
+|videoreferee = [[Martin van den Kerkhof|Van den Kerkhof]]
+|report = [https://nos.nl/artikel/2429805-az-deelt-in-slotfase-genadeklap-uit-aan-heerenveen-en-bereikt-finale-play-offs Verslag]
+}}
+
+==== Wedstrijd B ====
+{{Footballbox2
+|round = Wedstrijd 1/2
+|date = 19 mei 2022
+|time = 21:00 uur
+|team1 = [[FC Utrecht]]
+|score = 3 – 1
+|team2 = [[SBV Vitesse|Vitesse]]
+|goals1 = [[Willem Janssen (voetballer)|Janssen]] {{goal|3}}<br />[[Sander van de Streek|Van de Streek]] {{goal|21}}<br />[[Simon Gustafson|Gustafson]] {{goal|81|pen.}}
+|goals2 = {{goal|85}} [[Patrick Vroegh|Vroegh]]
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance = 17.524
+|referee = [[Dennis Higler|Higler]]
+|videoreferee = [[Sander van der Eijk|Van der Eijk]]
+|report = [https://nos.nl/artikel/2429513-fc-utrecht-dicht-bij-finale-play-offs-na-ruime-zege-op-vitesse Verslag]
+}}
+{{Footballbox2
+|round = Wedstrijd 2/2
+|date = 22 mei 2022
+|time = 18:00 uur
+|team1 = [[SBV Vitesse|Vitesse]]
+|score = 3 – 0 ([[Verlenging|n.v.]])
+|team2 = [[FC Utrecht]]
+|goals1 = [[Million Manhoef|Manhoef]] {{goal|39}}<br />[[Sondre Tronstad|Tronstad]] {{goal|52}}<br />[[Nikolai Baden Frederiksen|Frederiksen]] {{goal|93}} {{rode kaart|2|120+1|120+3}}
+|goals2 =
+|location = [[Arnhem]]
+|stadium = [[GelreDome]]
+|attendance = 13.675
+|referee = [[Allard Lindhout|Lindhout]]
+|videoreferee = [[Jochem Kamphuis|Kamphuis]]
+|report = [https://nos.nl/artikel/2429853-vitesse-verslaat-zwak-utrecht-in-verlenging-met-3-0-en-bereikt-finale-play-offs Verslag]
+}}
+
+=== Finale ===
+==== Wedstrijd C ====
+{{Footballbox2
+|round = Wedstrijd 1/2
+|date = 26 mei 2022
+|time = 20:00 uur
+|team1 = [[SBV Vitesse|Vitesse]]
+|score = 2 – 1
+|team2 = [[AZ (voetbalclub)|AZ]]
+|goals1 = [[Thomas Buitink|Buitink]] {{goal|22}}<br />[[Loïs Openda|Openda]] {{goal|86}}
+|goals2 = {{goal|59}} [[Jordy Clasie|Clasie]]
+|location = [[Arnhem]]
+|stadium = [[GelreDome]]
+|attendance = 17.547
+|referee = [[Pol van Boekel|Van Boekel]]
+|videoreferee = [[Allard Lindhout|Lindhout]]
+|report = [https://nos.nl/artikel/2430356-openda-toont-wederom-zijn-klasse-en-schiet-vitesse-langs-az-in-eerste-play-offduel Verslag]
+}}
+{{Footballbox2
+|round = Wedstrijd 2/2
+|date = 29 mei 2022
+|time = 14:30 uur
+|team1 = [[AZ (voetbalclub)|AZ]]
+|score = 6 – 1
+|team2 = [[SBV Vitesse|Vitesse]]
+|goals1 = [[Vangelis Pavlidis|Pavlidis]] {{goal|3}}<br />[[Tijjani Reijnders|Reijnders]] {{goal|13||52}}<br />[[Dani de Wit|De Wit]] {{goal|41}}<br />[[Jesper Karlsson|Karlsson]] {{goal|75||89}}
+|goals2 = {{goal|78}} [[Riechedly Bazoer|Bazoer]]
+|location = [[Alkmaar]]
+|stadium = [[AFAS Stadion]]
+|attendance = 15.222
+|referee = [[Bas Nijhuis|Nijhuis]]
+|videoreferee = [[Jeroen Manschot|Manschot]]
+|report = [https://nos.nl/artikel/2430673-az-vermorzelt-vitesse-wiens-aanhang-dan-maar-zingt-zij-gaan-europa-in Verslag]
+|info = '''Bijz.:''' [[AZ (voetbalclub)|AZ]] plaatst zich voor de tweede voorronde van de [[UEFA Europa Conference League 2022/23|Europa Conference League]].
+}}
+
+== Play-offs om promotie/degradatie Eredivisie/Eerste divisie ==
+In de periode van 9 tot en met 29 mei werden de play-offs om promotie/degradatie tussen de [[Eerste divisie (voetbal Nederland)|Eerste divisie]] en de [[Eredivisie (mannenvoetbal)|Eredivisie]] gespeeld. De play-offs werden gespeeld door de nummer 16 van de [[Eredivisie 2021/22 (mannenvoetbal)|Eredivisie 2021/22]], aangevuld met zes clubs uit de [[Eerste divisie 2021/22]]. De nummer 17 en nummer 18 van de Eredivisie degradeerden direct. De kampioen en nummer 2 van de Eerste divisie promoveerden direct.
+
+Van de zes clubs uit de Eerste divisie 2021/22 kregen vier teams het recht tot deelname aan de play-offs op grond van de resultaten in de perioden. Dit waren:
+
+* Periode 1: [[ADO Den Haag]]
+* Periode 2: [[Excelsior Rotterdam|Excelsior]]
+* Periode 3: [[FC Emmen]]
+* Periode 4: [[FC Emmen]] (Het play-offticket werd gegeven aan [[Roda JC Kerkrade]], omdat FC Emmen al de derde periode had gewonnen)
+
+FC Emmen (kampioen) en FC Volendam (nummer 2) promoveerden direct naar de Eredivisie, daardoor werd de play-off tickets doorgeschoven naar de eerst volgende hoogst geklasseerde club (die het recht tot deelname aan de play-offs nog niet heeft verkregen) in de reguliere eindstand.
+
+De deelnemende clubs voor de eerste ronde waren zes clubs uit de Eerste divisie en dat waren: [[FC Eindhoven]] (ED3), [[ADO Den Haag]] (ED4), [[Roda JC Kerkrade]] (ED5), [[Excelsior Rotterdam|Excelsior]] (ED6), [[NAC Breda]] (ED8) en [[BV De Graafschap|De Graafschap]] (ED9).
+
+De deelnemende club voor de halve finales was de nummer 16 van de Eredivisie en dat was: [[Heracles Almelo]] (ERE16).
+
+De clubs uit de Eerste divisie kregen een classificatie mee op basis van de eindstand van de ranglijst. Zo was de club die derde eindigt aangeduid met ED3 en tot en met ED9 voor de clubs op de plaatsen tot en met 9. Op plaats 7 stond [[Jong Ajax]], maar dat was uitgesloten van de play-offs.<!--<ref>[BRON KNVB SPEELSCHEMA PROMOTIE Speelschema promotie/degradatie Eredivisie/Eerste divisie 2021/22, Toelichting KNVB]</ref>-->
+
+=== Wedstrijdschema ===
+<div style="overflow-x: auto; white-space: nowrap;">
+{{Wedstrijdschema laatste 8 zonder 3 met seeds, bye en agg
+| RD1 = '''eerste ronde'''<br />9/10 en 13/14 mei
+| RD2 = '''halve finales'''<br />17/18 en 21 mei
+| RD3 = '''finale'''<br />24 en 29 mei
+| RD1-header01 = '''Wedstrijd C'''
+| RD1-seed01 = '''ED6'''
+| RD1-team01 = '''[[Excelsior Rotterdam|Excelsior]] ([[Verlenging|w.n.v.]])'''
+| RD1-score01-1 = 2
+| RD1-score01-2 = 2
+| RD1-score01-agg = 4
+| RD1-seed02 = '''ED5'''
+| RD1-team02 = [[Roda JC Kerkrade]]
+| RD1-score02-1 = 2
+| RD1-score02-2 = 0
+| RD1-score02-agg = 2
+| RD1-seed03 = 
+| RD1-team03 = 
+| RD1-score03-1 = 
+| RD1-score03-2 = 
+| RD1-score03-agg = 
+| RD1-seed04 = 
+| RD1-team04 = 
+| RD1-score04-1 = 
+| RD1-score04-2 = 
+| RD1-score04-agg = 
+| RD1-header03 = '''Wedstrijd B'''
+| RD1-seed05 = '''ED8'''
+| RD1-team05 = [[NAC Breda]]
+| RD1-score05-1 = 1
+| RD1-score05-2 = 1
+| RD1-score05-agg = 2
+| RD1-seed06 = '''ED4'''
+| RD1-team06 = '''[[ADO Den Haag]]'''
+| RD1-score06-1 = 2
+| RD1-score06-2 = 2
+| RD1-score06-agg = 4
+| RD1-header04 = '''Wedstrijd A'''
+| RD1-seed07 = '''ED9'''
+| RD1-team07 = [[BV De Graafschap|De Graafschap]]
+| RD1-score07-1 = 1
+| RD1-score07-2 = 1
+| RD1-score07-agg = 2
+| RD1-seed08 = '''ED3'''
+| RD1-team08 = '''[[FC Eindhoven]]'''
+| RD1-score08-1 = 1
+| RD1-score08-2 = 3
+| RD1-score08-agg = 4
+| RD2-header01 = '''Wedstrijd E'''
+| RD2-seed01 = '''C'''
+| RD2-team01 = '''[[Excelsior Rotterdam|Excelsior]]'''
+| RD2-score01-1 = 3
+| RD2-score01-2 = 3
+| RD2-score01-agg = 6
+| RD2-seed02 = '''ERE16'''
+| RD2-team02 = [[Heracles Almelo]]
+| RD2-score02-1 = 0
+| RD2-score02-2 = 1
+| RD2-score02-agg = 1
+| RD2-header02 = '''Wedstrijd D'''
+| RD2-seed03 = '''B'''
+| RD2-team03 = '''[[ADO Den Haag]]'''
+| RD2-score03-1 = 2
+| RD2-score03-2 = 2
+| RD2-score03-agg = 4
+| RD2-seed04 = '''A'''
+| RD2-team04 = [[FC Eindhoven]]
+| RD2-score04-1 = 1
+| RD2-score04-2 = 1
+| RD2-score04-agg = 2
+| RD3-header01 = '''Wedstrijd F'''
+| RD3-seed01 = '''E'''
+| RD3-team01 = '''[[Excelsior Rotterdam|Excelsior]] ([[Strafschop#Strafschoppenserie|w.n.s. 7 – 8]])&#160;&#160;'''
+| RD3-score01-1 = 1
+| RD3-score01-2 = 4
+| RD3-score01-agg = 5
+| RD3-seed02 = '''D'''
+| RD3-team02 = [[ADO Den Haag]]
+| RD3-score02-1 = 1
+| RD3-score02-2 = 4
+| RD3-score02-agg = 5
+}}</div>
+
+=== Eerste ronde ===
+==== Wedstrijd A ====
+{{Footballbox2
+|round = Wedstrijd 1/2
+|date = 9 mei 2022
+|time = 20:00 uur
+|team1 = [[BV De Graafschap|De Graafschap]]
+|score = 1 – 1
+|team2 = [[FC Eindhoven]]
+|goals1 = [[Danzell Gravenberch|Gravenberch]] {{goal|73|pen.}}
+|goals2 = {{goal|12|pen.}} [[Joey Sleegers|Sleegers]]
+|location = [[Doetinchem (stad)|Doetinchem]]
+|stadium = [[Stadion De Vijverberg|De Vijverberg]]
+|attendance = 10.022
+|referee = [[Alex Bos|Bos]]
+|report = [https://nos.nl/artikel/2428150-ervaringsdeskundige-de-graafschap-start-23ste-play-offs-deelname-met-gelijkspel Verslag]
+}}

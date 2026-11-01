@@ -42,12 +42,13 @@ const range = /^(\d{1,2})(?: (\p{L}+))?\s*[-–]\s*(\d{1,2}) (\p{L}+)(?: \d{4})?
 const singleDay = /^(\d{1,2}) (\p{L}+)(?: \d{4})?$/u
 
 /**
- * What the link to a Wikipedia page says: the league table, the programme or the cup of the
- * season, such as "Eredivisie 2026/27".
+ * What the link to a Wikipedia page says: the league table, the programme, the cup or the
+ * play-offs of the season, such as "Eredivisie 2026/27".
  */
 export function creditName(kind: PublicWikipediaPage['kind'], season: string) {
   return {
     cup: `KNVB Beker ${season}`,
+    playoffs: `Play-offs Conference League ${season}`,
     programme: `Programma Eredivisie ${season}`,
     standings: `Eredivisie ${season}`,
   }[kind]

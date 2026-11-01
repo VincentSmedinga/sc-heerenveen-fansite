@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { checkGoals } from './check-wikipedia.ts'
-import { linkedPage, pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-wikipedia.ts'
+import { linkedPage, pageTitles, pageUrl, readCup, readLeague, readPlayoffs, readStandings } from './read-wikipedia.ts'
 
 const programme = readFileSync(new URL('./fixtures/wikipedia-programme.wiki', import.meta.url), 'utf8')
 const standingsPage = readFileSync(new URL('./fixtures/wikipedia-standings.wiki', import.meta.url), 'utf8')
@@ -13,6 +13,12 @@ const extraTimePage = readFileSync(new URL('./fixtures/wikipedia-cup-extra-time.
 const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
 const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
 const seasonCup = readFileSync(new URL('./fixtures/wikipedia-season-cup.wiki', import.meta.url), 'utf8')
+const playoffPages = Object.fromEntries(
+  [2022, 2024, 2025, 2026].map((year) => [
+    year,
+    readFileSync(new URL(`./fixtures/wikipedia-playoffs-${year}.wiki`, import.meta.url), 'utf8'),
+  ]),
+) as Record<number, string>
 const cupPages = Object.fromEntries(
   ['2021-22', '2022-23', '2023-24', '2024-25'].map((season) => [
     season,
@@ -55,6 +61,7 @@ describe('the pages of a season', () => {
   it('finds the titles of a season and the address of the raw text, which is under /wiki/', () => {
     expect(pageTitles('2027/28')).toEqual({
       cup: 'KNVB Beker 2027/28 (mannen)',
+      playoffs: 'Play-offs Nederlands voetbal 2028',
       programme: 'Eredivisie 2027/28 (mannenvoetbal)/Wedstrijden',
       standings: 'Eredivisie 2027/28 (mannenvoetbal)',
     })
@@ -716,12 +723,12 @@ describe('extra time and a shoot-out in the cup', () => {
     expect(JSON.stringify(read)).toContain(reason)
   })
 
-  it('fails on a league match with extra time or a shoot-out, which only the cup has', () => {
+  it('fails on a league match with extra time or a shoot-out, which only the cup and the play-offs have', () => {
     for (const fields of [{ aet: 'J' }, { penaltyscore: '4 – 3' }, { aet: 'J', penaltyscore: '4 – 3' }]) {
       const read = readLeague(leagueWith(box({ score: '1 – 1', ...fields })))
 
       expect(read).toMatchObject({ kind: 'error' })
-      expect(JSON.stringify(read)).toContain('which only the cup has')
+      expect(JSON.stringify(read)).toContain('which only the cup and the play-offs have')
     }
   })
 
@@ -1032,5 +1039,194 @@ describe('the page a link points to', () => {
     expect(pageOf('Oyen {{goal|52}}')).toBeNull()
     expect(pageOf('[[Luca Oyen|Oyen]] {{goal|52}}')).toBe('Luca Oyen')
     expect(pageOf('[[Pim Verbeek (voetballer, 1999)|Verbeek]] {{goal|52}}')).toBe('Pim Verbeek (voetballer, 1999)')
+  })
+})
+
+describe('the play-offs for the Conference League', () => {
+  const matchesOf = (year: number) => {
+    const read = readPlayoffs(playoffPages[year] ?? '')
+
+    if (read.kind === 'error') {
+      throw new Error(read.message)
+    }
+
+    return read.matches
+  }
+
+  it('reads the semi-final of 2026: FC Utrecht 3-2 sc Heerenveen, away, with the goals and the stadium', () => {
+    expect(matchesOf(2026)).toEqual([
+      {
+        competition: 'Play-offs Conference League',
+        dateText: null,
+        extraTime: false,
+        goals: [
+          {
+            minute: 46,
+            ours: false,
+            ownGoal: false,
+            penalty: false,
+            player: 'Stepanov',
+            playerPage: 'Artem Stepanov',
+            stoppageMinutes: null,
+          },
+          {
+            minute: 54,
+            ours: true,
+            ownGoal: false,
+            penalty: false,
+            player: 'Vente',
+            playerPage: 'Dylan Vente',
+            stoppageMinutes: null,
+          },
+          {
+            minute: 56,
+            ours: false,
+            ownGoal: false,
+            penalty: false,
+            player: 'Van der Hoorn',
+            playerPage: 'Mike van der Hoorn',
+            stoppageMinutes: null,
+          },
+          {
+            minute: 58,
+            ours: false,
+            ownGoal: false,
+            penalty: false,
+            player: 'El Karouani',
+            playerPage: 'Souffian El Karouani',
+            stoppageMinutes: null,
+          },
+          {
+            minute: 77,
+            ours: true,
+            ownGoal: false,
+            penalty: false,
+            player: 'Trenskow',
+            playerPage: 'Jacob Trenskow',
+            stoppageMinutes: null,
+          },
+        ],
+        goalsAgainst: 3,
+        goalsFor: 2,
+        goalsProblem: null,
+        home: false,
+        kickoffAt: new Date('2026-05-21T19:00:00Z'),
+        matchDate: '2026-05-21',
+        opponent: 'FC Utrecht',
+        opponentPage: 'FC Utrecht',
+        penaltiesAgainst: null,
+        penaltiesFor: null,
+        round: 'Halve finale',
+        stadium: 'Stadion Galgenwaard',
+        status: 'played',
+      },
+    ])
+  })
+
+  it('reads the semi-final of 2025: AZ 4-1 sc Heerenveen, with the hat-trick of the opponent', () => {
+    const [match, ...others] = matchesOf(2025)
+
+    expect(others).toEqual([])
+    expect(match).toMatchObject({
+      competition: 'Play-offs Conference League',
+      goalsAgainst: 4,
+      goalsFor: 1,
+      home: false,
+      matchDate: '2025-05-22',
+      opponent: 'AZ',
+      round: 'Halve finale',
+      stadium: 'AFAS Stadion',
+      status: 'played',
+    })
+    expect(match?.goals?.map((goal) => [goal.minute, goal.ours, goal.player])).toEqual([
+      [3, false, 'Meerdink'],
+      [21, false, 'Meerdink'],
+      [45, false, 'Meerdink'],
+      [66, false, 'Penetra'],
+      [74, true, 'Nicolaescu'],
+    ])
+  })
+
+  it('leaves out the matches of the other clubs and of the other play-offs on the page', () => {
+    expect(matchesOf(2026)).toHaveLength(1)
+    expect(matchesOf(2026).every((match) => match.opponent !== 'AFC Ajax')).toBe(true)
+  })
+
+  it('reads no match, and no fault, for a year in which sc Heerenveen did not play', () => {
+    expect(readPlayoffs(playoffPages[2024] ?? '')).toEqual({
+      hasTemplates: true,
+      kind: 'read',
+      lastPlayedOn: null,
+      matches: [],
+    })
+  })
+
+  it('reads the two matches of a semi-final that was played over two matches, each in a round of its own', () => {
+    expect(matchesOf(2022).map((match) => [match.round, match.home, match.goalsFor, match.goalsAgainst])).toEqual([
+      ['Halve finale, wedstrijd 1/2', true, 3, 2],
+      ['Halve finale, wedstrijd 2/2', false, 0, 2],
+    ])
+  })
+
+  it('reads a match that is not played yet as scheduled, without a result', () => {
+    const page = playoffPages[2026]?.replace('|score = 3 – 2', '|score =').replace(/^\|goals[12] = .*$/gmu, '|goals1 =')
+
+    expect(readPlayoffs(page ?? '')).toMatchObject({
+      matches: [{ goals: null, goalsAgainst: null, goalsFor: null, status: 'scheduled' }],
+    })
+  })
+
+  it('reads extra time and a shoot-out as the cup does', () => {
+    const page = playoffPages[2026]
+      ?.replace(
+        '|score = 3 – 2\n|team2 = [[sc Heerenveen]]',
+        '|score = 1 – 1\n|aet = ja\n|penaltyscore = 3 – 4\n|team2 = [[sc Heerenveen]]',
+      )
+      .replace(/^\|goals[12] = .*$/gmu, '|goals1 =')
+
+    expect(readPlayoffs(page ?? '')).toMatchObject({
+      matches: [{ extraTime: true, goalsAgainst: 1, goalsFor: 1, penaltiesAgainst: 3, penaltiesFor: 4 }],
+    })
+  })
+
+  it('reads the older heading, with Europa in it', () => {
+    const page = playoffPages[2026]?.replace(
+      '== Play-offs voor de UEFA Conference League ==',
+      '== Play-offs voor de UEFA Europa Conference League ==',
+    )
+
+    expect(readPlayoffs(page ?? '')).toMatchObject({ matches: [{ opponent: 'FC Utrecht' }] })
+  })
+
+  it('is an error when the heading of the Conference League has changed, since sc Heerenveen may be under it', () => {
+    const page = playoffPages[2026]?.replace(
+      '== Play-offs voor de UEFA Conference League ==',
+      '== Play-offs om Europees voetbal ==',
+    )
+
+    expect(readPlayoffs(page ?? '')).toEqual({
+      kind: 'error',
+      message: "the play-offs page has no section 'Play-offs voor de UEFA Conference League'",
+    })
+  })
+
+  it('is an error for a page that is no page of the play-offs at all', () => {
+    expect(readPlayoffs('Niets te zien.')).toMatchObject({ kind: 'error' })
+  })
+
+  it('is an error when the round above the match is not one we know', () => {
+    const page = playoffPages[2026]?.replace('=== Halve finales ===', '=== Kwartfinales ===')
+
+    expect(readPlayoffs(page ?? '')).toMatchObject({ kind: 'error' })
+    expect(JSON.stringify(readPlayoffs(page ?? ''))).toContain('has no usable round heading')
+  })
+
+  it('is an error when a match of ours has a date we do not know', () => {
+    const page = playoffPages[2026]?.replace(
+      '|date = 21 mei 2026\n|time = 21:00 uur',
+      '|date = ergens in mei\n|time = 21:00 uur',
+    )
+
+    expect(JSON.stringify(readPlayoffs(page ?? ''))).toContain('has a date we do not know')
   })
 })

@@ -12,7 +12,7 @@ import type { ReadGoal, ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
 import { checkGoals, checkMatches, checkStandings } from './check-wikipedia.ts'
 import { clubFullNames } from './club-names.ts'
 import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
-import { pageTitles, pageUrl, readCup, readLeague, readStandings } from './read-wikipedia.ts'
+import { pageTitles, pageUrl, readCup, readLeague, readPlayoffs, readStandings } from './read-wikipedia.ts'
 import { retryUnhealthyAfterMs, unhealthyAfter, waitLimits } from './run-log.ts'
 import { describeError, formatTime, printable } from './text.ts'
 
@@ -327,12 +327,17 @@ function describeResult(
     : `${result} (penalties ${match.penaltiesAgainst}-${match.penaltiesFor})`
 }
 
-/** Fetches the three pages one after the other, or says why one could not be read. */
+/**
+ * Fetches the pages one after the other, or says why one could not be read. The page of the
+ * play-offs may not be there: it comes in May, and a season that is going has none. Wikipedia
+ * answering 404 for it is no fault, and the pages are then the other three. Any other answer
+ * is a fault, as for the other pages.
+ */
 async function fetchPages(fetcher: Fetcher, season: string, origin: string): Promise<PageRead[] | Problem> {
   const titles = pageTitles(season)
   const pages: PageRead[] = []
 
-  for (const kind of ['programme', 'standings', 'cup'] as const) {
+  for (const kind of ['programme', 'standings', 'cup', 'playoffs'] as const) {
     const title = titles[kind]
     const outcome = await fetcher.fetch(pageUrl(origin, title))
 
@@ -340,6 +345,10 @@ async function fetchPages(fetcher: Fetcher, season: string, origin: string): Pro
       case 'blocked-by-robots':
         return { kind: 'blocked-by-robots', season, url: outcome.url }
       case 'error':
+        if (kind === 'playoffs' && outcome.reason === 'http-status' && outcome.status === 404) {
+          break
+        }
+
         return { kind: 'error', message: `${title}: ${outcome.message}`, season }
       case 'fetched':
         pages.push({
@@ -455,18 +464,19 @@ async function readAndStore(
   const league = readLeague(textOf('programme'))
   const cup = readCup(textOf('cup'))
   const table = readStandings(textOf('standings'))
+  const playoffs = pages.some((page) => page.kind === 'playoffs') ? readPlayoffs(textOf('playoffs')) : undefined
   const problems: string[] = []
 
-  for (const read of [league, cup, table]) {
-    if (read.kind === 'error') {
+  for (const read of [league, cup, table, playoffs]) {
+    if (read?.kind === 'error') {
       problems.push(read.message)
     }
   }
-  if (league.kind === 'error' || cup.kind === 'error' || table.kind === 'error') {
+  if (league.kind === 'error' || cup.kind === 'error' || table.kind === 'error' || playoffs?.kind === 'error') {
     return { kind: 'error', message: problems.join('; '), season }
   }
 
-  const found = [...league.matches, ...cup.matches]
+  const found = [...league.matches, ...cup.matches, ...(playoffs?.matches ?? [])]
 
   if (!cup.hasTemplates) {
     const problem = await checkEmptyCupPage(db, season, pageTitles(season).cup)
@@ -485,12 +495,18 @@ async function readAndStore(
   const now = clock()
   const validOn = league.lastPlayedOn ?? seasonStart(season)
   const stored = await db.transaction(async (transaction) => {
-    const result = await storeMatches(transaction, season, found, now)
+    const result = await storeMatches(transaction, season, found, now, playoffs !== undefined)
 
     await transaction.delete(standings).where(eq(standings.season, season))
     await transaction.insert(standings).values(table.rows.map((row) => standingsRow(season, row, validOn)))
 
     for (const page of pages) {
+      // A page of the play-offs without a match of ours is no source of the site.
+      if (page.kind === 'playoffs' && playoffs?.kind === 'read' && playoffs.matches.length === 0) {
+        await transaction.delete(wikipediaPages).where(eq(wikipediaPages.title, page.title))
+        continue
+      }
+
       const values = { kind: page.kind, readAt: now, season, version: page.version }
 
       await transaction
@@ -571,17 +587,20 @@ async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: 
  * players of the season as they are in the table now, so a goal gets its player as soon as the
  * squad has him, and a goal that is linked keeps its link until the table says otherwise. A
  * goal of ours that has no player is a warning too (once the squad has been read), and no
- * reason to keep the match out. Every match gets its club (`clubs.ts` in the database package):
- * the club with the article the match links, or else with the name, or a new one, by the full
- * names and spellings of `club-names.ts`. A club of that list that is in the database twice is
- * merged before the import reads a season (`repairKnownClubs`). What the import made or changed
- * comes back as lines for the log.
+ * reason to keep the match out. The play-offs have a page that may be missing (`fetchPages`),
+ * and then `playoffsRead` is false: the play-off matches we have stay, since a page that is not
+ * there tells us nothing about them. Every match gets its club (`clubs.ts` in the database
+ * package): the club with the article the match links, or else with the name, or a new one, by
+ * the full names and spellings of `club-names.ts`. A club of that list that is in the database
+ * twice is merged before the import reads a season (`repairKnownClubs`). What the import made
+ * or changed comes back as lines for the log.
  */
 async function storeMatches(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
   season: string,
   found: ReadMatch[],
   now: Date,
+  playoffsRead: boolean,
 ) {
   const clubLines: string[] = []
   const known = new Map(
@@ -666,7 +685,9 @@ async function storeMatches(
     }
   }
 
-  const gone = [...known.values()].map((row) => row.id)
+  const gone = [...known.values()]
+    .filter((row) => playoffsRead || row.competition !== 'Play-offs Conference League')
+    .map((row) => row.id)
 
   if (gone.length > 0) {
     counts.removed = gone.length

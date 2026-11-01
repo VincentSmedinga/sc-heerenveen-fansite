@@ -310,7 +310,7 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 
 | Kolom                                | Betekenis                                                                                                    |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `season`, `competition`              | Het seizoen en de competitie: `Eredivisie` of `KNVB Beker`                                                   |
+| `season`, `competition`              | Het seizoen en de competitie: `Eredivisie`, `KNVB Beker` of `Play-offs Conference League`                    |
 | `round`                              | De ronde zoals Wikipedia die noemt, zoals `Speelronde 12` of `Eerste ronde`; uniek per seizoen en competitie |
 | `opponent`, `home`, `stadium`        | De tegenstander zoals Wikipedia hem schrijft, of de wedstrijd thuis is, en het stadion (kan ontbreken)       |
 | `club_id`                            | De tegenstander als club (zie _De tabellen `clubs` en `club_names`_); verplicht                              |
@@ -327,7 +327,7 @@ Vijf CHECK-constraints houden de rijen heel:
 
 - een uitslag hoort bij `played` en nergens anders (`matches_result_only_when_played`);
 - een wedstrijd heeft een aftrap of een tekst voor de datum (`matches_time_or_text`);
-- verlenging hoort bij een gespeelde bekerwedstrijd en nergens anders (`matches_extra_time_only_in_played_cup`);
+- verlenging hoort bij een gespeelde wedstrijd van de beker of van de play-offs voor de Conference League en nergens anders (`matches_extra_time_only_in_played_knockout`);
 - strafschoppen komen in een paar (`matches_penalties_in_a_pair`);
 - strafschoppen horen bij verlenging en een gelijke stand (`matches_penalties_after_level_extra_time`).
 
@@ -367,7 +367,7 @@ De sleutel is het seizoen met de plaats.
 | `points`                                        | De punten                                                                        |
 | `valid_on`                                      | De dag waarvoor de stand geldt: die van de laatste gespeelde competitiewedstrijd |
 
-`wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme` en `cup` voor de wedstrijden, `squad` voor de selectie), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
+`wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme`, `cup` en `playoffs` voor de wedstrijden, `squad` voor de selectie), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
 Een pagina kan daarmee de bron noemen.
 `listWikipediaPages` geeft alleen de pagina's van de wedstrijden.
 

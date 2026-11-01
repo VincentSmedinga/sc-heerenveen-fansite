@@ -1,0 +1,250 @@
+<!--
+  The play-offs of 2026 (the season 2025/26), with the semi-final of sc Heerenveen against FC Utrecht.
+  https://nl.wikipedia.org/wiki/Play-offs_Nederlands_voetbal_2026?action=raw, read on 1 November 2026, cut off after the first
+  match of the play-offs for promotion and relegation. The rest of the page is left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+De '''play-offs van het [[Voetbal in Nederland|Nederlands voetbal]] in 2026''' werden na afloop van de reguliere competitie gespeeld. Hierin streden 4 clubs uit de [[Eredivisie (mannenvoetbal)|Eredivisie]] voor deelname aan de [[UEFA Conference League]]. Daarnaast speelden een zevental clubs voor [[Promotie en degradatie|promotie/handhaving]] naar/in de Eredivisie. Tijdens deze wedstrijden was er ook een video-assistent (VAR) aanwezig.
+
+Daarnaast speelden een achttal clubs voor promotie/handhaving naar/in de [[Tweede divisie (voetbal Nederland)|Tweede divisie]] en een zestiental clubs voor promotie/handhaving naar/in de [[Derde divisie (voetbal Nederland)|Derde divisie]].
+
+== Play-offs voor de UEFA Conference League ==
+Deze play-offs werden gespeeld door de nummers 5, 6, 8 en 9 van de [[Eredivisie 2025/26 (mannenvoetbal)|Eredivisie]]. Aan het eind van het seizoen werden de volgende Europese tickets toegewezen:<ref>[https://x.com/KNVB/status/2056025943076929552 Speelschema Eredivisie play-offs voor Europees ticket 2025/26, Toelichting KNVB]</ref>
+
+* Eredivisie #1: competitiefase Champions League
+* Eredivisie #2: competitiefase Champions League
+* Eredivisie #3: derde voorronde Champions League
+* Eredivisie #4: tweede voorronde Europa League
+* Bekerwinnaar(/Eredivisie #7): competitiefase Europa League (ticket van het KNVB Bekertoernooi) <sup>1</sup>
+* Eredivisie play-offs (#5, #6, #8 of #9): tweede voorronde Conference League <sup>1</sup>
+
+<sup>1</sup> De clubs op de plekken vijf tot en met acht spelen normaliter in de play-offs om één ticket dat recht geeft tot toegang tot de tweede kwalificatieronde van de Conference League. Dat zijn respectievelijk Ajax, FC Utrecht, AZ en sc Heerenveen. AZ plaatste zich echter direct voor de competitiefase van de Europa League, door de winst van de [[KNVB Beker]]. Daardoor schuift het ticket van AZ door en krijgt de nummer negen (FC Groningen) een ticket voor de play-offs.
+
+De play-offs werden over één wedstrijd per ronde gespeeld met als regel dat bij een gelijke stand na 90 minuten er werd verlengd en eventueel overgaan werd op het nemen van strafschoppen. De club met de hoogste classificatie speelde thuis.
+
+=== Wedstrijdschema ===
+{{Wedstrijdschema laatste 4 zonder 3 met seeds
+| RD1 = '''halve finales'''<br />21 mei
+| RD2 = '''finale'''<br />24 mei
+| score-width = 20
+| RD1-seed1 = '''ERE5'''
+| RD1-team1 = '''[[AFC Ajax|Ajax]]'''
+| RD1-score1-1 = '''2'''
+| RD1-seed2 = '''ERE9'''
+| RD1-team2 = [[FC Groningen]]
+| RD1-score2-1 = 0
+| RD1-seed3 = '''ERE6'''
+| RD1-team3 = '''[[FC Utrecht]]'''
+| RD1-score3-1 = '''3'''
+| RD1-seed4 = '''ERE8'''
+| RD1-team4 = [[sc Heerenveen]]
+| RD1-score4-1 = 2
+| RD2-seed1 = '''A'''
+| RD2-team1 = '''[[AFC Ajax|Ajax]] ([[Strafschop#Strafschoppenserie|w.n.s.]])'''
+| RD2-score1-1 = '''&#160;{{nowrap|1 (4)}}&#160;'''
+| RD2-seed2 = '''B'''
+| RD2-team2 = [[FC Utrecht]]
+| RD2-score2-1 = 1 (3)
+}}
+
+=== Halve finales ===
+==== Wedstrijd A ====
+{{Footballbox2
+|date = 21 mei 2026
+|time = 18:45 uur
+|team1 = [[AFC Ajax|Ajax]]
+|score = 2 – 0
+|team2 = [[FC Groningen]]
+|goals1 = [[Davy Klaassen|Klaassen]] {{goal|24}}<br />[[Jorthy Mokio|Mokio]] {{goal|57}}
+|goals2 =
+|location = [[Volendam]]<ref name="Ajax in Volendam">[https://www.espn.nl/voetbal/artikel/_/id/16613534/ajax-wijkt-bij-eventuele-play-offs-uit-naar-volendam Ajax wijkt bij eventuele play-offs uit naar Volendam], ESPN.nl, 23 april 2026</ref>
+|stadium = [[Kras Stadion]]
+|attendance = 6.776
+|referee = [[Marc Nagtegaal|Nagtegaal]]
+|videoreferee = [[Clay Ruperti|Ruperti]]
+|report = [https://nos.nl/artikel/2615320-ajax-is-in-volendam-te-sterk-voor-groningen-en-mag-nog-hopen-op-europees-voetbal Verslag]
+}}
+----
+
+==== Wedstrijd B ====
+{{Footballbox2
+|date = 21 mei 2026
+|time = 21:00 uur
+|team1 = [[FC Utrecht]]
+|score = 3 – 2
+|team2 = [[sc Heerenveen]]
+|goals1 = [[Artem Stepanov|Stepanov]] {{goal|46}}<br />[[Mike van der Hoorn|Van der Hoorn]] {{goal|56}}<br />[[Souffian El Karouani|El Karouani]] {{goal|58}}
+|goals2 = {{goal|54}} [[Dylan Vente|Vente]]<br />{{goal|77}} [[Jacob Trenskow|Trenskow]]
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance = 19.334
+|referee = [[Jannick van der Laan|Van der Laan]]
+|videoreferee = [[Erwin Blank|Blank]]
+|report = [https://nos.nl/artikel/2615337-fc-utrecht-door-zege-op-heerenveen-tegenstander-van-ajax-in-finale-play-offs Verslag]
+}}
+----
+
+=== Finale ===
+==== Wedstrijd C ====
+{{Footballbox2
+|date = 24 mei 2026
+|time = 12:15 uur<ref name="Vervroegd ivm uitsupporters">[https://www.knvb.nl/nieuws/betaald-voetbal/vriendenloterij-eredivisie/71849/finale-play-offs-vervroegd Finale play-offs vervroegd], KNVB.nl, 22 mei 2026</ref>
+|team1 = [[AFC Ajax|Ajax]]
+|score = 1 – 1
+|aet = ja
+|penaltyscore = 4 – 3
+|team2 = [[FC Utrecht]]
+|goals1 = [[Davy Klaassen|Klaassen]] {{goal|96}}
+|goals2 = {{goal|106}} [[Gjivai Zechiël|Zechiël]]
+|penalties1 = [[Davy Klaassen|Klaassen]] {{pengoal}}<br />[[Wout Weghorst|Weghorst]] {{pengoal}}<br />[[Mika Godts|Godts]] {{pengoal}}<br />[[Anton Gaaei|Gaaei]] {{pengoal}}
+|penalties2 = {{penmis|gepakt door de keeper}} [[Sébastien Haller|Haller]]<br />{{pengoal}} [[Rafik El Arguioui|El Arguioui]]<br />{{pengoal}} [[Gjivai Zechiël|Zechiël]]<br />{{pengoal}} [[Adrian Blake|Blake]]<br />{{penmis|gestopt door de keeper}} [[Souffian El Karouani|El Karouani]]
+|location = [[Volendam]]<ref name="Ajax in Volendam"/>
+|stadium = [[Kras Stadion]]
+|attendance = 5.648
+|referee = [[Allard Lindhout|Lindhout]]
+|videoreferee = [[Pol van Boekel|Van Boekel]]
+|report = [https://nos.nl/artikel/2615670-ajax-mag-na-treurig-seizoen-toch-europa-in-dankzij-penaltyzege-op-utrecht-in-play-offs Verslag]
+|info = '''Bijz.:''' '''Ajax''' plaatste zich voor de tweede voorronde van de [[UEFA Conference League 2026/27|Conference League]].
+}}
+
+== Play-offs om promotie/degradatie Eredivisie/Eerste divisie ==
+In de periode van 28 april tot en met 23 mei werden de play-offs om promotie/degradatie tussen de [[Eerste divisie (voetbal Nederland)|Eerste divisie]] en de [[Eredivisie (mannenvoetbal)|Eredivisie]] gespeeld. De play-offs werden gespeeld door de nummer 16 van de [[Eredivisie 2025/26 (mannenvoetbal)|Eredivisie 2025/26]], aangevuld met zes clubs uit de [[Eerste divisie 2025/26]]. De nummer 17 en nummer 18 van de Eredivisie degradeerden direct. De kampioen en nummer 2 van de Eerste divisie promoveerden direct.
+
+Dit seizoen kende eenmalig een wijziging voor de nummer 16 van de Eredivisie. Zij hoefden alleen in de finaleronde te spelen. Dit had mee te maken met de overvolle speeldagenkalender en in combinatie van [[Wereldkampioenschap voetbal 2026]]. De zes clubs in de Eerste divisie speelden in drie ronden tegen elkaar en de winnaar hiervan speelde tegen de nummer 16 van de Eredivisie om een plaats voor de Eredivisie.
+
+Van de zes clubs uit de Eerste divisie 2025/26 kregen vier teams het recht tot deelname aan de play-offs op grond van de resultaten in de perioden. Dit waren:
+
+* Periode 1: [[ADO Den Haag]]
+* Periode 2: [[ADO Den Haag]] (Het play-offticket werd doorgeschoven naar [[SC Cambuur]], omdat ADO Den Haag het al in de eerste periode heeft behaald)
+* Periode 3: [[SC Cambuur]] (Het play-offticket werd doorgeschoven naar [[Willem II (voetbalclub)|Willem II]], omdat SC Cambuur het al in de tweede periode heeft behaald)
+* Periode 4: [[Willem II (voetbalclub)|Willem II]] (Het play-offticket werd doorgeschoven naar de reguliere eindstand en dat is [[FC Den Bosch]], omdat Willem II het al in de derde periode heeft behaald)
+
+[[ADO Den Haag]] (kampioen) en [[SC Cambuur]] (nummer 2) promoveerden direct naar de Eredivisie, daardoor werden de play-offtickets doorgeschoven naar de eerstvolgende hoogst geklasseerde club (die het recht tot deelname aan de play-offs nog niet heeft verkregen) in de reguliere eindstand.
+
+De deelnemende clubs voor de eerste ronde waren vier clubs uit de Eerste divisie en dat waren: [[Almere City FC]] (ED5), [[RKC Waalwijk]] (ED6), [[Roda JC Kerkrade]] (ED8) en [[FC Den Bosch]] (ED9). Voor de tweede ronde stroomden twee clubs uit de Eerste divisie in en dat waren: [[Willem II (voetbalclub)|Willem II]] (ED3) en [[De Graafschap (voetbalclub)|De Graafschap]] (ED4). [[Jong PSV]] (ED7) was uitgesloten van deelname aan de play-offs.
+
+De deelnemende club voor de finale was de nummer 16 van de Eredivisie en dat was: [[FC Volendam]] (ERE16).
+
+De clubs uit de Eerste divisie kregen een classificatie mee op basis van de eindstand van de ranglijst. Zo was de club die derde eindigt aangeduid met ED3 en tot en met ED9 voor de clubs op de plaatsen tot en met 9.<ref>[https://x.com/KNVB/status/2047777967338598535 Speelschema promotie/degradatie Eredivisie/Eerste divisie 2025/26, Toelichting KNVB]</ref>
+
+Tevens waren deze play-offs over twee wedstrijden per ronde gespeeld met als regel dat bij een gelijke stand over die twee wedstrijden er werd verlengd en eventueel overgaan werd op het nemen van strafschoppen. De club met de hoogste classificatie speelde in de tweede wedstrijd thuis.
+
+=== Wedstrijdschema ===
+<div style="overflow-x: auto; white-space: nowrap;">
+{| style="width: 100%;"
+| style="width: 75%; text-align: left; vertical-align: top;" |
+{{Wedstrijdschema laatste 8 zonder 3 met seeds, bye en agg
+| RD1 = '''eerste ronde'''<br />28/29 april en 1/2 mei
+| RD2 = '''tweede ronde'''<br />5/6 en 9 mei
+| RD3 = '''halve finales'''<br />13 en 16 mei
+| RD1-header01 = '''Wedstrijd A'''
+| RD1-seed01 = '''ED9'''
+| RD1-team01 = [[FC Den Bosch]]
+| RD1-score01-1 = 2
+| RD1-score01-2 = 0
+| RD1-score01-agg = 2
+| RD1-seed02 = '''ED5'''
+| RD1-team02 = '''[[Almere City FC]]'''
+| RD1-score02-1 = 3
+| RD1-score02-2 = 3
+| RD1-score02-agg = 6
+| RD1-seed03 = 
+| RD1-team03 = 
+| RD1-score03-1 = 
+| RD1-score03-2 = 
+| RD1-score03-agg = 
+| RD1-seed04 = 
+| RD1-team04 = 
+| RD1-score04-1 = 
+| RD1-score04-2 = 
+| RD1-score04-agg = 
+| RD1-header03 = '''Wedstrijd B'''
+| RD1-seed05 = '''ED8'''
+| RD1-team05 = [[Roda JC Kerkrade]]
+| RD1-score05-1 = 1
+| RD1-score05-2 = 1
+| RD1-score05-agg = &#160;2 (1)&#160;
+| RD1-seed06 = '''ED6'''
+| RD1-team06 = '''[[RKC Waalwijk]] ([[Strafschop#Strafschoppenserie|w.n.s.]])'''
+| RD1-score06-1 = 1
+| RD1-score06-2 = 1
+| RD1-score06-agg = &#160;2 (3)&#160;
+| RD1-header04 = 
+| RD1-seed07 = 
+| RD1-team07 = 
+| RD1-score07-1 = 
+| RD1-score07-2 = 
+| RD1-score07-agg = 
+| RD1-seed08 = 
+| RD1-team08 = 
+| RD1-score08-1 = 
+| RD1-score08-2 = 
+| RD1-score08-agg = 
+| RD2-header01 = '''Wedstrijd C'''
+| RD2-seed01 = '''A'''
+| RD2-team01 = '''[[Almere City FC]]'''
+| RD2-score01-1 = 3
+| RD2-score01-2 = 2
+| RD2-score01-agg = 5
+| RD2-seed02 = '''ED4'''
+| RD2-team02 = [[De Graafschap (voetbalclub)|De Graafschap]]
+| RD2-score02-1 = 1
+| RD2-score02-2 = 2
+| RD2-score02-agg = 3
+| RD2-header02 = '''Wedstrijd D'''
+| RD2-seed03 = '''B'''
+| RD2-team03 = [[RKC Waalwijk]]
+| RD2-score03-1 = 0
+| RD2-score03-2 = 1
+| RD2-score03-agg = 1
+| RD2-seed04 = '''ED3'''
+| RD2-team04 = '''[[Willem II (voetbalclub)|Willem II]]'''
+| RD2-score04-1 = 1
+| RD2-score04-2 = 1
+| RD2-score04-agg = 2
+| RD3-header01 = '''Wedstrijd E'''
+| RD3-seed01 = '''C'''
+| RD3-team01 = [[Almere City FC]]
+| RD3-score01-1 = 0
+| RD3-score01-2 = 0
+| RD3-score01-agg = 0
+| RD3-seed02 = '''D'''
+| RD3-team02 = '''[[Willem II (voetbalclub)|Willem II]]'''
+| RD3-score02-1 = 1
+| RD3-score02-2 = 2
+| RD3-score02-agg = 3
+}}
+| style="width: 25%; text-align: left; vertical-align: top;" |
+{{Wedstrijdschema laatste 2 zonder 3 met 3 sets
+| RD1 = '''finale'''<br />20 en 23 mei
+| RD1-seed1 = '''E'''
+| RD1-team1 = '''[[Willem II (voetbalclub)|Willem II]] ([[Strafschop#Strafschoppenserie|w.n.s.]])'''
+| RD1-score1-1 = &#160;&#160;1&#160;&#160;
+| RD1-score1-2 = &#160;&#160;2&#160;&#160;
+| RD1-score1-3 = '''&#160;&#160;3 (5)&#160;&#160;'''
+| RD1-seed2 = '''ERE16'''
+| RD1-team2 = [[FC Volendam]]
+| RD1-score2-1 = &#160;&#160;2&#160;&#160;
+| RD1-score2-2 = &#160;&#160;1&#160;&#160;
+| RD1-score2-3 = '''&#160;&#160;3 (4)&#160;&#160;'''
+}}
+|}</div>
+
+=== Eerste ronde ===
+==== Wedstrijd A ====
+{{Footballbox2
+|round = Wedstrijd 1/2
+|date = 29 april 2026
+|time = 18:45 uur
+|team1 = [[FC Den Bosch]]
+|score = 2 – 3
+|team2 = [[Almere City FC]]
+|goals1 = [[Sebastian Karlsson Grach|Karlsson Grach]] {{goal|16}}<br />[[Kévin Monzialo|Monzialo]] {{goal|44}}
+|goals2 = {{goal|57}} [[Jamie Jacobs]]<br />{{goal|65}} [[Ferdy Druijf|Druijf]]<br />{{goal|88}} [[Marley Dors|Dors]]
+|location = [['s-Hertogenbosch]]
+|stadium = [[Stadion De Vliert]]
+|attendance = 5.317
+|referee = [[Martijn Vos|Vos]]
+|videoreferee = [[Erwin Blank|Blank]]
+|report = [https://nos.nl/artikel/2612445-almere-city-buigt-2-0-achterstand-om-wint-van-den-bosch-in-eerste-play-offduel Verslag]
+}}

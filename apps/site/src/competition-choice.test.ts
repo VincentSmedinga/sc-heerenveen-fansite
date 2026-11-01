@@ -8,7 +8,7 @@ import {
   competitionNames,
   extremesOf,
   goalsPerQuarter,
-  hasPlayedCupMatch,
+  hasPlayedExtraMatch,
   homeAwayOf,
   leagueResultsOf,
   matchFlowOf,
@@ -69,6 +69,14 @@ const cup = (
   extra: Partial<PublicMatch> = {},
 ) => played(round, matchDate, goalsFor, goalsAgainst, { competition: 'KNVB Beker', ...extra })
 
+const playoffs = (
+  round: string,
+  matchDate: string,
+  goalsFor: number,
+  goalsAgainst: number,
+  extra: Partial<PublicMatch> = {},
+) => played(round, matchDate, goalsFor, goalsAgainst, { competition: 'Play-offs Conference League', ...extra })
+
 describe('parseCompetition', () => {
   it('gives all the matches without a parameter, and the Eredivisie for eredivisie', () => {
     expect(parseCompetition(undefined)).toBe('all')
@@ -95,16 +103,37 @@ describe('competitionQuery', () => {
   })
 })
 
-describe('hasPlayedCupMatch and competitionNames', () => {
+describe('hasPlayedExtraMatch and competitionNames', () => {
   const league = played('Speelronde 1', '2026-08-01', 1, 0)
 
   it('is true only for a cup tie that was played and has a score', () => {
-    expect(hasPlayedCupMatch([league])).toBe(false)
-    expect(hasPlayedCupMatch([league, cup('Tweede ronde', '2026-09-23', 1, 0)])).toBe(true)
-    expect(hasPlayedCupMatch([cup('Tweede ronde', '2026-09-23', 1, 0, { status: 'scheduled' })])).toBe(false)
-    expect(hasPlayedCupMatch([cup('Tweede ronde', '2026-09-23', 1, 0, { goalsAgainst: null, goalsFor: null })])).toBe(
+    expect(hasPlayedExtraMatch([league])).toBe(false)
+    expect(hasPlayedExtraMatch([league, cup('Tweede ronde', '2026-09-23', 1, 0)])).toBe(true)
+    expect(hasPlayedExtraMatch([cup('Tweede ronde', '2026-09-23', 1, 0, { status: 'scheduled' })])).toBe(false)
+    expect(hasPlayedExtraMatch([cup('Tweede ronde', '2026-09-23', 1, 0, { goalsAgainst: null, goalsFor: null })])).toBe(
       false,
     )
+  })
+
+  it('is true for a match of the play-offs that was played, and not for one that was not', () => {
+    expect(hasPlayedExtraMatch([league, playoffs('Halve finale', '2027-05-20', 2, 3)])).toBe(true)
+    expect(hasPlayedExtraMatch([league, playoffs('Halve finale', '2027-05-20', 2, 3, { status: 'scheduled' })])).toBe(
+      false,
+    )
+  })
+
+  it('names the play-offs, and not the cup, when only the play-offs were played', () => {
+    const matches = [league, playoffs('Halve finale', '2027-05-20', 2, 3)]
+
+    expect(competitionNames(matches, 'all')).toBe('de Eredivisie en de play-offs')
+    expect(competitionNames(matches, 'league')).toBe('de Eredivisie')
+  })
+
+  it('names the Eredivisie, the cup and the play-offs when all three were played', () => {
+    const matches = [league, cup('Tweede ronde', '2026-09-23', 1, 0), playoffs('Halve finale', '2027-05-20', 2, 3)]
+
+    expect(competitionNames(matches, 'all')).toBe('de Eredivisie, de KNVB Beker en de play-offs')
+    expect(competitionNames(matches, 'league')).toBe('de Eredivisie')
   })
 
   it('names the cup only when it is counted and was played', () => {
@@ -113,6 +142,30 @@ describe('hasPlayedCupMatch and competitionNames', () => {
     expect(competitionNames(matches, 'all')).toBe('de Eredivisie en de KNVB Beker')
     expect(competitionNames(matches, 'league')).toBe('de Eredivisie')
     expect(competitionNames([league], 'all')).toBe('de Eredivisie')
+  })
+})
+
+describe('a match of the play-offs in the numbers', () => {
+  const season = [played('Speelronde 1', '2026-08-01', 2, 0), played('Speelronde 2', '2026-08-08', 1, 0)]
+  const lost = playoffs('Halve finale', '2027-05-20', 2, 3, { goals: [goal(54), goal(77), goal(46, { ours: false })] })
+  const matches = [...season, lost]
+
+  it('counts for all the matches, like the cup, and for nothing in the Eredivisie alone', () => {
+    expect(streaksOf(matches, 'all').played).toBe(3)
+    expect(streaksOf(matches, 'league').played).toBe(2)
+    expect(leagueResultsOf(matches)).toEqual(['W', 'W'])
+  })
+
+  it('leaves the home and away record of the Eredivisie as it was', () => {
+    expect(homeAwayOf(matches, 'league')).toEqual(homeAwayOf(season, 'league'))
+  })
+
+  it('leaves the top scorers of the Eredivisie as they were', () => {
+    expect(topScorersOf(matches, 'league')).toEqual(topScorersOf(season, 'league'))
+  })
+
+  it('has the goals of the match in the top scorers for all the matches', () => {
+    expect(topScorersOf(matches, 'all')[0]).toMatchObject({ goals: 2 })
   })
 })
 

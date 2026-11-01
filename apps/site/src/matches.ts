@@ -23,29 +23,50 @@ import { type NameParts, pageTitleName, splitPageName, splitPlayerName, surnameO
 /** The name of our own club in the table. */
 const ourClub = 'sc Heerenveen'
 
-/** Whether a match counts for the choice: the league alone, or the league and the cup. */
+/**
+ * Whether a match counts for the choice: the league alone, or the league, the cup and the
+ * play-offs for the Conference League.
+ */
 const countsFor = (match: PublicMatch, choice: CompetitionChoice) =>
   choice === 'all' || match.competition === 'Eredivisie'
 
-/** Whether a match is a cup tie that was played and has a score, so one the choice can add. */
-const isPlayedCupMatch = (match: PublicMatch) =>
+/**
+ * Whether a match of another competition than the league was played and has a score, so one the
+ * choice can add.
+ */
+const isPlayedExtraMatch = (match: PublicMatch) =>
   match.competition !== 'Eredivisie' &&
   match.status === 'played' &&
   match.goalsFor !== null &&
   match.goalsAgainst !== null
 
 /**
- * Whether the season has a cup tie that was played, so whether there is anything to choose:
- * without one, the two choices count the same matches and the page has no switch.
+ * Whether the season has a cup tie or a match of the play-offs that was played, so whether
+ * there is anything to choose: without one, the two choices count the same matches and the page
+ * has no switch.
  */
-export const hasPlayedCupMatch = (matches: PublicMatch[]) => matches.some(isPlayedCupMatch)
+export const hasPlayedExtraMatch = (matches: PublicMatch[]) => matches.some(isPlayedExtraMatch)
 
 /**
- * The competitions a card counts, as the captions of the cards name them: the cup is in only
- * when the choice is `all` and a cup tie was played, because then it is in the numbers.
+ * The competitions a card counts, as the captions of the cards name them: the cup and the
+ * play-offs are in only when the choice is `all` and a match of theirs was played, because then
+ * it is in the numbers.
  */
-export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoice) =>
-  choice === 'all' && hasPlayedCupMatch(matches) ? 'de Eredivisie en de KNVB Beker' : 'de Eredivisie'
+export const competitionNames = (matches: PublicMatch[], choice: CompetitionChoice) => {
+  if (choice === 'league') {
+    return 'de Eredivisie'
+  }
+
+  const played = (competition: PublicMatch['competition']) =>
+    matches.some((match) => match.competition === competition && isPlayedExtraMatch(match))
+  const names = [
+    'de Eredivisie',
+    ...(played('KNVB Beker') ? ['de KNVB Beker'] : []),
+    ...(played('Play-offs Conference League') ? ['de play-offs'] : []),
+  ]
+
+  return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`
+}
 
 export type MatchData = {
   /** The head coaches of the season, in the order their periods began. */

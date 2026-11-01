@@ -34,7 +34,7 @@ export type ReadMatch = {
   competition: Competition
   /** The date as Wikipedia writes it, only when the time is unknown. */
   dateText: null | string
-  /** Whether a played cup match went to extra time. Only the cup has it. */
+  /** Whether a played match went to extra time. Only the cup and the play-offs have it. */
   extraTime: boolean
   /**
    * The goals in the order of the clock, both clubs together. Null when the page names no
@@ -58,7 +58,7 @@ export type ReadMatch = {
    * `[[Telstar (voetbalclub)|Telstar]]`, or null when the name has no link (`linkedPage`).
    */
   opponentPage: null | string
-  /** The shoot-out of a cup match level after extra time, from our side. Both or neither. */
+  /** The shoot-out of a match level after extra time, from our side. Both or neither. */
   penaltiesAgainst: null | number
   penaltiesFor: null | number
   /** As Wikipedia has it: `Speelronde 12`, `Eerste ronde`. */
@@ -94,7 +94,7 @@ export type ReadStandingsRow = {
   won: number
 }
 
-export type SeasonPages = { cup: string; programme: string; standings: string }
+export type SeasonPages = { cup: string; playoffs: string; programme: string; standings: string }
 
 type Heading = { index: number; title: string }
 
@@ -102,6 +102,9 @@ type Template = { heading: null | string; index: number; params: Map<string, str
 
 /** The name Wikipedia knows us by in the links of a match. */
 const ourClub = 'sc Heerenveen'
+
+/** The heading of the play-offs for the Conference League on the page of the play-offs. */
+const playoffHeading = /^Play-offs voor de UEFA (?:Europa )?Conference League$/iu
 
 const months = [
   'januari',
@@ -158,10 +161,15 @@ export function linkedPage(value: string): null | string {
   return title.charAt(0).toUpperCase() + title.slice(1)
 }
 
-/** The titles of the three pages of a season, such as `2026/27`. */
+/**
+ * The titles of the pages of a season, such as `2026/27`. The play-offs have a page for the
+ * year the season ends in: `Play-offs Nederlands voetbal 2027`. That page comes in May, so a
+ * season that is still going has no such page yet.
+ */
 export function pageTitles(season: string): SeasonPages {
   return {
     cup: `KNVB Beker ${season} (mannen)`,
+    playoffs: `Play-offs Nederlands voetbal ${Number(season.slice(0, 4)) + 1}`,
     programme: `Eredivisie ${season} (mannenvoetbal)/Wedstrijden`,
     standings: `Eredivisie ${season} (mannenvoetbal)`,
   }
@@ -267,6 +275,48 @@ export function readLeague(text: string): ReadProgramme {
   return problems.length > 0
     ? { kind: 'error', message: problems.join('; ') }
     : { hasTemplates: true, kind: 'read', lastPlayedOn, matches }
+}
+
+/**
+ * Reads the page of the play-offs of a year for the matches of sc Heerenveen under the heading
+ * of the Conference League, and nowhere else: the other play-offs on the page are for promotion
+ * and relegation, and are no business of ours. The round is the heading of the level above the
+ * match, `Halve finales` as `Halve finale` and `Finale`. In the years the semi-finals were
+ * played over two matches, each box says which one it is (`Wedstrijd 1/2`), and the round says
+ * so too. A year in which sc Heerenveen did not play has the section and no match, and that is
+ * a page without a fault. A page without the section is an error: it has changed shape.
+ */
+export function readPlayoffs(text: string): ReadProgramme {
+  const cleaned = clean(text)
+  const section = playoffSection(cleaned)
+
+  if (section === undefined) {
+    return { kind: 'error', message: `the play-offs page has no section 'Play-offs voor de UEFA Conference League'` }
+  }
+
+  const rounds: Heading[] = [...section.matchAll(/^===[ \t]*([^=\n].*?)[ \t]*===[ \t]*$/gmu)].map((heading) => ({
+    index: heading.index,
+    title: plain(heading[1] ?? ''),
+  }))
+  const boxes = findTemplates(section, /\{\{\s*Footballbox2\s*(?=\||\n)/giu)
+  const matches: ReadMatch[] = []
+  const problems: string[] = []
+
+  for (const box of boxes.filter((found) => isOurs(found) && !isSuperseded(found, boxes))) {
+    const heading = rounds.findLast((candidate) => candidate.index < box.index)?.title
+    const round = heading === undefined ? null : playoffRound(heading, plain(box.params.get('round') ?? ''))
+    const match = readMatch(box, 'Play-offs Conference League', round)
+
+    if (typeof match === 'string') {
+      problems.push(match)
+    } else {
+      matches.push(match)
+    }
+  }
+
+  return problems.length > 0
+    ? { kind: 'error', message: problems.join('; ') }
+    : { hasTemplates: boxes.length > 0, kind: 'read', lastPlayedOn: null, matches }
 }
 
 /**
@@ -622,6 +672,36 @@ function parsePenalties(
 }
 
 /**
+ * The round of a play-off match from the heading above it, with the leg when the box says
+ * which: `Halve finale, wedstrijd 1/2`. Null when the heading is not a round we know.
+ */
+function playoffRound(heading: string, leg: string): null | string {
+  const name = /^halve finales?$/iu.test(heading) ? 'Halve finale' : /^finale$/iu.test(heading) ? 'Finale' : null
+  const part = /^wedstrijd (\d)\/(\d)$/iu.exec(leg)
+
+  return name === null ? null : part === null ? name : `${name}, wedstrijd ${part[1]}/${part[2]}`
+}
+
+/**
+ * The text under the heading of the play-offs for the Conference League, up to the next heading
+ * of the same level, or undefined when the page has none. The heading was `UEFA Europa
+ * Conference League` for the first years.
+ */
+function playoffSection(text: string): string | undefined {
+  const headings = [...text.matchAll(/^==[ \t]*([^=\n].*?)[ \t]*==[ \t]*$/gmu)]
+  const start = headings.findIndex((heading) => playoffHeading.test(plain(heading[1] ?? '')))
+  const found = headings[start]
+
+  if (found === undefined) {
+    return undefined
+  }
+
+  const next = headings[start + 1]
+
+  return text.slice(found.index + found[0].length, next?.index)
+}
+
+/**
  * What is wrong with the brackets of a score, or null: a part of the match cannot be higher
  * than what follows it, and a score after 90 minutes needs extra time.
  */
@@ -768,8 +848,8 @@ function readMatch(box: Template, competition: Competition, round: null | string
       return `${name} has a score ${problem}: '${plain(box.params.get('score') ?? '').slice(0, 40)}'`
     }
   }
-  if (competition !== 'KNVB Beker' && (extraTimeSaid || penalties.kind !== 'none')) {
-    return `${name} has extra time or a shoot-out, which only the cup has`
+  if (competition === 'Eredivisie' && (extraTimeSaid || penalties.kind !== 'none')) {
+    return `${name} has extra time or a shoot-out, which only the cup and the play-offs have`
   }
   if (penalties.kind === 'unknown') {
     return `${name} has a shoot-out score we do not know: '${penalties.text.slice(0, 40)}'`

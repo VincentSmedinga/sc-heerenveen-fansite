@@ -65,15 +65,37 @@ describe('the extra time and the shoot-out of a match', () => {
     ])
   })
 
+  it('keeps extra time and a shoot-out in the play-offs for the Conference League, like in the cup', async () => {
+    await database.db.insert(matches).values(
+      await clubbed({
+        ...cupMatch,
+        competition: 'Play-offs Conference League',
+        extraTime: true,
+        penaltiesAgainst: 3,
+        penaltiesFor: 4,
+        round: 'Finale',
+      }),
+    )
+
+    const [row] = await database.db.select().from(matches)
+
+    expect(row).toMatchObject({
+      competition: 'Play-offs Conference League',
+      extraTime: true,
+      penaltiesAgainst: 3,
+      penaltiesFor: 4,
+    })
+  })
+
   it.each([
     [
       'extra time in the league',
-      'matches_extra_time_only_in_played_cup',
+      'matches_extra_time_only_in_played_knockout',
       { competition: 'Eredivisie', extraTime: true, round: 'Speelronde 1' },
     ],
     [
       'extra time before the match is played',
-      'matches_extra_time_only_in_played_cup',
+      'matches_extra_time_only_in_played_knockout',
       { extraTime: true, goalsAgainst: null, goalsFor: null, status: 'scheduled' },
     ],
     [

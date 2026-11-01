@@ -40,6 +40,13 @@ const hours = (count: number) => count * 60 * 60 * 1000
 
 type Pages = { cup: string; programme: string; standings: string }
 
+/**
+ * The page of the play-offs is not always there, and it is served as a text, as a status
+ * Wikipedia answers with (500, say), or as nothing: 404, the answer for a page that does not
+ * exist.
+ */
+type ServedPages = Pages & { playoffs: null | number | string }
+
 const original: Pages = {
   cup: fixture('wikipedia-cup.wiki'),
   programme: fixture('wikipedia-programme.wiki'),
@@ -89,7 +96,7 @@ function pageRequests(server: TestServer) {
 }
 
 /** A page of the season, served the way Wikipedia serves the raw text. */
-function route(season: string, kind: keyof Pages, handler: Handler) {
+function route(season: string, kind: keyof ServedPages, handler: Handler) {
   const path = pageUrl('', pageTitles(season)[kind])
 
   return { [path]: handler }
@@ -99,18 +106,19 @@ function route(season: string, kind: keyof Pages, handler: Handler) {
  * Starts a web server on this computer that serves the three pages of the seasons as Wikipedia
  * does, from `pages`, which a test can change between runs. The tests ask no real site.
  */
-async function serve(pages: { [Kind in keyof Pages]?: null | string } = {}, { robots = '' } = {}) {
-  const current = { ...original, ...pages } as Pages
+async function serve(pages: { [Kind in keyof ServedPages]?: null | ServedPages[Kind] } = {}, { robots = '' } = {}) {
+  const current = { ...original, playoffs: null, ...pages } as ServedPages
   const routes: Record<string, Handler> = { '/robots.txt': reply(200, robots, { 'Content-Type': 'text/plain' }) }
 
   for (const season of ['2026/27', '2027/28']) {
-    for (const kind of ['cup', 'programme', 'standings'] as const) {
+    for (const kind of ['cup', 'playoffs', 'programme', 'standings'] as const) {
       Object.assign(
         routes,
         route(season, kind, (_request, response) => {
-          const text: null | string = current[kind]
+          const served: null | number | string = current[kind]
+          const text = typeof served === 'string' ? served : null
 
-          response.writeHead(text === null ? 404 : 200, wiki)
+          response.writeHead(text === null ? (typeof served === 'number' ? served : 404) : 200, wiki)
           response.end(text ?? 'Niet gevonden')
         }),
       )
@@ -244,6 +252,7 @@ describe('the first import, into an empty database', () => {
       '/wiki/Eredivisie_2026/27_(mannenvoetbal)/Wedstrijden?action=raw',
       '/wiki/Eredivisie_2026/27_(mannenvoetbal)?action=raw',
       '/wiki/KNVB_Beker_2026/27_(mannen)?action=raw',
+      '/wiki/Play-offs_Nederlands_voetbal_2027?action=raw',
     ])
     expect(server.requests.every((request) => request.url?.startsWith('/w/') === false)).toBe(true)
     expect(String(server.requests[0]?.headers['user-agent'])).toMatch(
@@ -462,7 +471,7 @@ describe('extra time and a shoot-out in the cup', () => {
     [
       'extra time in a league match',
       (pages) => ({ programme: pages.programme.replace('|score = 1 – 0', '|score = 1 – 0\n|aet = J') }),
-      'which only the cup has',
+      'which only the cup and the play-offs have',
     ],
   ]
 
@@ -1703,6 +1712,172 @@ describe('the warning about goals without a player', () => {
 
     expect(unlinkedWarning(names.map((name) => goal(name)))).toBe(
       '9 goals of ours have no player in the squad table: A, B, C, D, E, F, G, H, …',
+    )
+  })
+})
+
+describe('the play-offs for the Conference League', () => {
+  const playoffs = fixture('wikipedia-playoffs-2026.wiki')
+  const withoutUs = fixture('wikipedia-playoffs-2024.wiki')
+  const playoffPage = 'Play-offs Nederlands voetbal 2027'
+  const stored = () => database.db.select().from(matches).where(eq(matches.competition, 'Play-offs Conference League'))
+  const playoffPages = () => database.db.select().from(wikipediaPages).where(eq(wikipediaPages.kind, 'playoffs'))
+  const health = async () => (await database.db.select().from(matchImports))[0]
+
+  it('stores the match of sc Heerenveen with its goals, and the page it came from', async () => {
+    const { server } = await serve({ playoffs })
+
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 36, removed: 0, unchanged: 0, updated: 0 } })
+    expect(await stored()).toMatchObject([
+      {
+        competition: 'Play-offs Conference League',
+        goalsAgainst: 3,
+        goalsFor: 2,
+        home: false,
+        matchDate: '2026-05-21',
+        opponent: 'FC Utrecht',
+        round: 'Halve finale',
+        season,
+        stadium: 'Stadion Galgenwaard',
+        status: 'played',
+      },
+    ])
+
+    const goals = await database.db
+      .select({ minute: matchGoals.minute, ours: matchGoals.ours, player: matchGoals.player })
+      .from(matchGoals)
+      .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+      .where(eq(matches.competition, 'Play-offs Conference League'))
+      .orderBy(asc(matchGoals.id))
+
+    expect(goals).toEqual([
+      { minute: 46, ours: false, player: 'Stepanov' },
+      { minute: 54, ours: true, player: 'Vente' },
+      { minute: 56, ours: false, player: 'Van der Hoorn' },
+      { minute: 58, ours: false, player: 'El Karouani' },
+      { minute: 77, ours: true, player: 'Trenskow' },
+    ])
+    expect(await playoffPages()).toMatchObject([{ season, title: playoffPage }])
+  })
+
+  it('does not change the table or the numbers of the league', async () => {
+    const { server } = await serve({ playoffs })
+
+    await importAt(server, first)
+
+    const [ours] = await database.db.select().from(standings).where(eq(standings.club, 'sc Heerenveen'))
+    const league = await database.db.select().from(matches).where(eq(matches.competition, 'Eredivisie'))
+
+    expect(league).toHaveLength(34)
+    expect(ours).toMatchObject({ played: league.filter((match) => match.status === 'played').length })
+  })
+
+  it('does not call a page that is not there a failure: no match, no page, and no failed run', async () => {
+    const { server } = await serve({ playoffs: null })
+
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 35 } })
+    expect(pageRequests(server)).toContain('/wiki/Play-offs_Nederlands_voetbal_2027?action=raw')
+    expect(await stored()).toEqual([])
+    expect(await playoffPages()).toEqual([])
+    expect(await health()).toMatchObject({ failuresInARow: 0, lastError: null, lastOutcome: 'imported' })
+  })
+
+  it('does not call a year without sc Heerenveen a failure, and credits no page', async () => {
+    const { server } = await serve({ playoffs: withoutUs })
+
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 35 } })
+    expect(await stored()).toEqual([])
+    expect(await playoffPages()).toEqual([])
+    expect(await health()).toMatchObject({ failuresInARow: 0, lastOutcome: 'imported' })
+  })
+
+  it('keeps the play-off match it has when the page is gone, since a page that is not there says nothing', async () => {
+    const { pages, server } = await serve({ playoffs })
+
+    await importAt(server, first)
+    Object.assign(pages, { playoffs: null })
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, removed: 0, unchanged: 35 } })
+    expect(await stored()).toHaveLength(1)
+    expect(await playoffPages()).toHaveLength(1)
+    expect(await health()).toMatchObject({ failuresInARow: 0 })
+  })
+
+  it('removes the play-off match and the credit when the page no longer has sc Heerenveen', async () => {
+    const { pages, server } = await serve({ playoffs })
+
+    await importAt(server, first)
+    Object.assign(pages, { playoffs: withoutUs })
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, removed: 1, unchanged: 35 } })
+    expect(await stored()).toEqual([])
+    expect(await playoffPages()).toEqual([])
+  })
+
+  it('takes over a changed result, like the other matches', async () => {
+    const { pages, server } = await serve({ playoffs })
+
+    await importAt(server, first)
+    Object.assign(pages, {
+      playoffs: playoffs
+        .replace('|score = 3 – 2', '|score = 4 – 2')
+        .replace('{{goal|58}}', '{{goal|58}}<br />[[Test|Tester]] {{goal|88}}'),
+    })
+
+    const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, unchanged: 35, updated: 1 } })
+    expect(await stored()).toMatchObject([{ goalsAgainst: 4, goalsFor: 2 }])
+  })
+
+  describe('an error that is a failure', () => {
+    const failures: [string, Partial<ServedPages>, string][] = [
+      ['an answer of 500 for the page', { playoffs: 500 }, 'HTTP 500'],
+      [
+        'a page whose heading for the Conference League has changed',
+        { playoffs: playoffs.replace('== Play-offs voor de UEFA Conference League ==', '== Play-offs voor Europa ==') },
+        "the play-offs page has no section 'Play-offs voor de UEFA Conference League'",
+      ],
+      [
+        'a match of ours with a date we do not know',
+        {
+          playoffs: playoffs.replace(
+            '|date = 21 mei 2026\n|time = 21:00 uur',
+            '|date = laat in mei\n|time = 21:00 uur',
+          ),
+        },
+        'has a date we do not know',
+      ],
+    ]
+
+    it.each(failures)(
+      'leaves the last good copy, says why and counts the failure: %s',
+      async (_name, change, reason) => {
+        const { pages, server } = await serve({ playoffs })
+
+        await importAt(server, first)
+
+        const before = await snapshot()
+
+        Object.assign(pages, change)
+
+        const report = await importAt(server, new Date(first.getTime() + hours(1)))
+
+        expect(report.kind).toBe('error')
+        expect(formatMatchReport(report)).toContain(reason)
+        expect(await snapshot()).toEqual(before)
+        expect(await health()).toMatchObject({ failuresInARow: 1, lastOutcome: 'error' })
+      },
     )
   })
 })

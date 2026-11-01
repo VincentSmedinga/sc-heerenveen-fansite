@@ -1,0 +1,226 @@
+<!--
+  The play-offs of 2024 (the season 2023/24), a year in which sc Heerenveen played none.
+  https://nl.wikipedia.org/wiki/Play-offs_Nederlands_voetbal_2024?action=raw, read on 1 November 2026, cut off after the first
+  match of the play-offs for promotion and relegation. The rest of the page is left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+De '''play-offs van het [[Voetbal in Nederland|Nederlands voetbal]] in 2024''' werden na afloop van de reguliere competitie gespeeld. Hierin streden 4 clubs uit de [[Eredivisie (mannenvoetbal)|Eredivisie]] voor deelname aan de [[UEFA Conference League]]. Daarnaast speelden een zevental clubs voor [[Promotie en degradatie|promotie/handhaving]] naar/in de Eredivisie. Tijdens deze wedstrijden was er ook een video-assistent (VAR) aanwezig.
+
+Daarnaast speelden een achttal clubs voor promotie/handhaving naar/in de [[Tweede divisie (voetbal Nederland)|Tweede divisie]] en een zestiental clubs voor promotie/handhaving naar/in de [[Derde divisie (voetbal Nederland)|Derde divisie]].
+
+== Play-offs voor de UEFA Conference League ==
+Deze play-offs werden gespeeld door de nummers 6 tot en met 9 van de [[Eredivisie 2023/24 (mannenvoetbal)|Eredivisie]]. Aan het eind van het seizoen werden de volgende Europese tickets toegewezen:<ref>[https://x.com/KNVB/status/1792205804189434037 Speelschema Eredivisie play-offs voor Europees ticket 2023/24, Toelichting KNVB]</ref>
+
+* Eredivisie #1: competitiefase Champions League
+* Eredivisie #2: competitiefase Champions League
+* Eredivisie #3: derde voorronde Champions League
+* Eredivisie #4: competitiefase Europa League (ticket van het KNVB Bekertoernooi) <sup>1</sup>
+* Eredivisie #5: tweede voorronde Europa League <sup>1</sup>
+* Eredivisie play-offs (#6, #7, #8 of #9): tweede voorronde Conference League <sup>1</sup>
+
+<sup>1</sup> De clubs op de plekken vijf tot en met acht spelen normaliter in de play-offs om één ticket dat recht geeft tot toegang tot de tweede kwalificatieronde van de Conference League. Dat zijn respectievelijk Ajax, N.E.C., FC Utrecht en Sparta Rotterdam. AZ plaatst zich direct voor de competitiefase van de Europa League, omdat Feyenoord de [[KNVB Beker|TOTO KNVB Beker]] heeft gewonnen, maar zich voor de competitiefase van de Champions League heeft geplaatst. Het ticket voor de tweede voorronde van de Europa League werd doorgeschoven van de vierde naar de vijfde plaats in de reguliere ranglijst. In dit geval hoeft Ajax de play-offs niet te spelen en daarom kreeg ook de nummer negen (Go Ahead Eagles) een ticket voor de play-offs.
+
+Vanaf dit seizoen werden de play-offs over één wedstrijd per ronde gespeeld met als regel dat bij een gelijke stand na 90 minuten er werd verlengd en eventueel overgaan werd op het nemen van strafschoppen. De club met de hoogste classificatie speelde thuis.
+
+=== Wedstrijdschema ===
+{{Wedstrijdschema laatste 4 zonder 3 met seeds
+| RD1 = '''halve finales'''<br />23 mei
+| RD2 = '''finale'''<br />26 mei
+| score-width = 20
+| RD1-seed1 = '''ERE7'''
+| RD1-team1 = '''[[FC Utrecht]]'''
+| RD1-score1-1 = '''3'''
+| RD1-seed2 = '''ERE8'''
+| RD1-team2 = [[Sparta Rotterdam]]
+| RD1-score2-1 = 1
+| RD1-seed3 = '''ERE6'''
+| RD1-team3 = [[N.E.C.]]
+| RD1-score3-1 = 1
+| RD1-seed4 = '''ERE9'''
+| RD1-team4 = '''[[Go Ahead Eagles]]'''
+| RD1-score4-1 = '''2'''
+| RD2-seed1 = '''B'''
+| RD2-team1 = [[FC Utrecht]]
+| RD2-score1-1 = 1
+| RD2-seed2 = '''A'''
+| RD2-team2 = '''[[Go Ahead Eagles]] ([[Verlenging|w.n.v.]])'''
+| RD2-score2-1 = '''2'''
+}}
+
+=== Halve finales ===
+==== Wedstrijd A ====
+{{Footballbox2
+|date = 23 mei 2024
+|time = 18:45 uur
+|team1 = [[N.E.C.]]
+|score = 1 – 2
+|team2 = [[Go Ahead Eagles]]
+|goals1 = [[Kodai Sano|Sano]] {{goal|57}}
+|goals2 = {{goal|77}} [[Finn Stokkers|Stokkers]]<br />{{goal|86}} [[Philippe Rommens|Rommens]]
+|location = [[Nijmegen]]
+|stadium = [[Goffertstadion]]
+|attendance = 12.036
+|referee = [[Bas Nijhuis|Nijhuis]]
+|videoreferee = [[Jeroen Manschot|Manschot]]
+|report = [https://nos.nl/artikel/2521624-go-ahead-verrast-nec-in-play-offs-fout-cillessen-wordt-thuisploeg-fataal Verslag]
+}}
+
+==== Wedstrijd B ====
+{{Footballbox2
+|date = 23 mei 2024
+|time = 21:00 uur
+|team1 = [[FC Utrecht]]
+|score = 3 – 1
+|team2 = [[Sparta Rotterdam]]
+|goals1 = [[Ryan Flamingo|Flamingo]] {{goal|41}}<br />[[Sam Lammers|Lammers]] {{goal|70}}<br />[[Fredrik Jensen|Jensen]] {{goal|90+2}}
+|goals2 = {{goal|38}} [[Tobias Lauritsen|Lauritsen]]
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance = 20.092
+|referee = [[Danny Makkelie|Makkelie]]
+|videoreferee = [[Clay Ruperti|Ruperti]]
+|report = [https://nos.nl/artikel/2521644-fc-utrecht-vecht-zich-naar-finale-play-offs-seizoen-sparta-zit-erop Verslag]
+}}
+
+=== Finale ===
+==== Wedstrijd C ====
+{{Footballbox2
+|date = 26 mei 2024
+|time = 18:00 uur
+|team1 = [[FC Utrecht]]
+|score = 1 – 2
+|aet = ja
+|team2 = [[Go Ahead Eagles]]
+|goals1 = [[Nick Viergever|Viergever]] {{goal|31}}<br />[[Oscar Fraulo|Fraulo]] {{rode kaart|0|87}}
+|goals2 = {{goal|90+1|e.d.}} [[Nick Viergever|Viergever]]<br />{{goal|117}} [[Joris Kramer|Kramer]]
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance = 22.574
+|referee = [[Allard Lindhout|Lindhout]]
+|videoreferee = [[Dennis Higler|Higler]]
+|report = [https://nos.nl/artikel/2522011-go-ahead-eagles-gaat-europa-in-na-hectische-finale-tegen-fc-utrecht Verslag]
+|info = '''Bijz.:''' [[Go Ahead Eagles]] plaatste zich voor de tweede voorronde van de [[UEFA Conference League 2024/25|Conference League]].
+}}
+
+== Play-offs om promotie/degradatie Eredivisie/Eerste divisie ==
+In de periode van 13 mei tot en met 2 juni werden de play-offs om promotie/degradatie tussen de [[Eerste divisie (voetbal Nederland)|Eerste divisie]] en de [[Eredivisie (mannenvoetbal)|Eredivisie]] gespeeld. De play-offs werden gespeeld door de nummer 16 van de [[Eredivisie 2023/24 (mannenvoetbal)|Eredivisie 2023/24]], aangevuld met zes clubs uit de [[Eerste divisie 2023/24]]. De nummer 17 en nummer 18 van de Eredivisie degradeerden direct. De kampioen en nummer 2 van de Eerste divisie promoveerden direct.
+
+Van de zes clubs uit de Eerste divisie 2023/24 kregen vier teams het recht tot deelname aan de play-offs op grond van de resultaten in de perioden. Dit waren:
+
+* Periode 1: [[Roda JC Kerkrade]]
+* Periode 2: [[Willem II (voetbalclub)|Willem II]]
+* Periode 3: [[FC Groningen]]
+* Periode 4: [[FC Groningen]] (Het play-offticket werd doorgeschoven naar de reguliere eindstand, omdat FC Groningen al de derde periode had gewonnen)
+
+[[Willem II (voetbalclub)|Willem II]] (kampioen) en [[FC Groningen]] (nummer 2) promoveerden direct naar de Eredivisie, daardoor werden de play-offtickets doorgeschoven naar de eerstvolgende hoogst geklasseerde club (die het recht tot deelname aan de play-offs nog niet heeft verkregen) in de reguliere eindstand.
+
+De deelnemende clubs voor de eerste ronde waren zes clubs uit de Eerste divisie en dat waren: [[Roda JC Kerkrade]] (ED3), [[FC Dordrecht]] (ED4), [[ADO Den Haag]] (ED5), [[BV De Graafschap|De Graafschap]] (ED6), [[FC Emmen]] (ED7) en [[NAC Breda]] (ED8).
+
+De deelnemende club voor de halve finales was de nummer 16 van de Eredivisie en dat was: [[Excelsior Rotterdam]] (ERE16).
+
+De clubs uit de Eerste divisie kregen een classificatie mee op basis van de eindstand van de ranglijst. Zo was de club die derde eindigt aangeduid met ED3 en tot en met ED8 voor de clubs op de plaatsen tot en met 8.<ref>[https://x.com/KNVB/status/1792206679624327662 Speelschema promotie/degradatie Eredivisie/Eerste divisie 2023/24, Toelichting KNVB]</ref>
+
+Tevens werden deze play-offs over twee wedstrijden per ronde gespeeld met als regel dat bij een gelijke stand over die twee wedstrijden er werd verlengd en eventueel overgaan werd op het nemen van strafschoppen. De club met de hoogste classificatie speelde in de tweede wedstrijd thuis.
+
+=== Wedstrijdschema ===
+<div style="overflow-x: auto; white-space: nowrap;">
+{{Wedstrijdschema laatste 8 zonder 3 met seeds, bye en agg
+| RD1 = '''eerste ronde'''<br />13/14 en 17/18 mei
+| RD2 = '''halve finales'''<br />21/22 en 25 mei
+| RD3 = '''finale'''<br />28 mei en 2 juni
+| RD1-header01 = '''Wedstrijd A'''
+| RD1-seed01 = '''ED8'''
+| RD1-team01 = '''[[NAC Breda]]'''
+| RD1-score01-1 = 3
+| RD1-score01-2 = 5
+| RD1-score01-agg = 8
+| RD1-seed02 = '''ED3'''
+| RD1-team02 = [[Roda JC Kerkrade]]
+| RD1-score02-1 = 1
+| RD1-score02-2 = 0
+| RD1-score02-agg = 1
+| RD1-header02 = '''Wedstrijd B'''
+| RD1-seed03 = '''ED7'''
+| RD1-team03 = '''[[FC Emmen]]'''
+| RD1-score03-1 = 2
+| RD1-score03-2 = 1
+| RD1-score03-agg = 3
+| RD1-seed04 = '''ED4'''
+| RD1-team04 = [[FC Dordrecht]]
+| RD1-score04-1 = 2
+| RD1-score04-2 = 0
+| RD1-score04-agg = 2
+| RD1-header03 = '''Wedstrijd C'''
+| RD1-seed05 = '''ED6'''
+| RD1-team05 = [[BV De Graafschap|De Graafschap]]
+| RD1-score05-1 = 2
+| RD1-score05-2 = 2
+| RD1-score05-agg = 4
+| RD1-seed06 = '''ED5'''
+| RD1-team06 = '''[[ADO Den Haag]]'''
+| RD1-score06-1 = 3
+| RD1-score06-2 = 2
+| RD1-score06-agg = 5
+| RD1-seed07 = 
+| RD1-team07 = 
+| RD1-score07-1 = 
+| RD1-score07-2 = 
+| RD1-score07-agg = 
+| RD1-seed08 = 
+| RD1-team08 = 
+| RD1-score08-1 = 
+| RD1-score08-2 = 
+| RD1-score08-agg = 
+| RD2-header01 = '''Wedstrijd D'''
+| RD2-seed01 = '''A'''
+| RD2-team01 = '''[[NAC Breda]]'''
+| RD2-score01-1 = 1
+| RD2-score01-2 = 3
+| RD2-score01-agg = 4
+| RD2-seed02 = '''B'''
+| RD2-team02 = [[FC Emmen]]
+| RD2-score02-1 = 1
+| RD2-score02-2 = 0
+| RD2-score02-agg = 1
+| RD2-header02 = '''Wedstrijd E'''
+| RD2-seed03 = '''C'''
+| RD2-team03 = [[ADO Den Haag]]
+| RD2-score03-1 = 1
+| RD2-score03-2 = 1
+| RD2-score03-agg = 2
+| RD2-seed04 = '''ERE16'''
+| RD2-team04 = '''[[Excelsior Rotterdam]]'''
+| RD2-score04-1 = 2
+| RD2-score04-2 = 7
+| RD2-score04-agg = 9
+| RD3-header01 = '''Wedstrijd F'''
+| RD3-seed01 = '''D'''
+| RD3-team01 = '''[[NAC Breda]]'''
+| RD3-score01-1 = 6
+| RD3-score01-2 = 1
+| RD3-score01-agg = 7
+| RD3-seed02 = '''E'''
+| RD3-team02 = [[Excelsior Rotterdam]]
+| RD3-score02-1 = 2
+| RD3-score02-2 = 4
+| RD3-score02-agg = 6
+}}</div>
+
+=== Eerste ronde ===
+==== Wedstrijd A ====
+{{Footballbox2
+|round = Wedstrijd 1/2
+|date = 13 mei 2024
+|time = 20:00 uur
+|team1 = [[NAC Breda]]
+|score = 3 – 1
+|team2 = [[Roda JC Kerkrade]]
+|goals1 = [[Sigurd Haugen|Haugen]] {{goal|16}}<br />[[Dominik Janosek|Janosek]] {{goal|55|pen.|58}}
+|goals2 = {{goal|87}} [[Brian Koglin|Koglin]]
+|location = [[Breda]]
+|stadium = [[Rat Verlegh Stadion]]
+|attendance = 17.153
+|referee = [[Ingmar Oostrom|Oostrom]]
+|videoreferee = [[Dennis Higler|Higler]]
+|report = [https://nos.nl/artikel/2520367-volgende-dreun-voor-roda-dat-play-offs-om-promotie-begint-met-nederlaag-bij-nac Verslag]
+}}
