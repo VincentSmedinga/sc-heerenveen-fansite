@@ -58,6 +58,12 @@ export type ReadMatch = {
   kickoffAt: Date | null
   /** The local day, or the first day when only a weekend is known: `2026-10-24`. */
   matchDate: string
+  /**
+   * A line about the match as the page tells it, now only for a match that was stopped and
+   * finished later: the minute it stopped and the day and the stadium of the rest. Null for
+   * every other match.
+   */
+  note: null | string
   opponent: string
   /**
    * The article of the opponent as the match links it: `Telstar (voetbalclub)` for
@@ -134,7 +140,7 @@ type ParsedScore =
   | (Pair & { afterNinety: null | Pair; halfTime: null | Pair; kind: 'score' })
   | { kind: 'none' }
   | { kind: 'postponed' }
-  | { kind: 'stopped' }
+  | { kind: 'stopped'; minute: null | number }
   | { kind: 'unknown'; text: string }
 
 /**
@@ -221,8 +227,8 @@ export function readCup(text: string): ReadProgramme {
   const matches: ReadMatch[] = []
   const problems: string[] = []
 
-  for (const box of boxes.filter((found) => isOurs(found) && !isSuperseded(found, boxes))) {
-    const match = readMatch(box, 'KNVB Beker', box.heading)
+  for (const box of boxes.filter((found) => isOurs(found) && !isRestOfStopped(found, boxes))) {
+    const match = readMatch(box, 'KNVB Beker', box.heading, restOf(box, boxes))
 
     if (typeof match === 'string') {
       problems.push(match)
@@ -240,8 +246,8 @@ export function readCup(text: string): ReadProgramme {
  * Reads the programme and the results of the league: the matches of sc Heerenveen, and
  * the day of the last match anyone played, which is the day the table holds for. A match
  * under a heading that is not a round of the league (a play-off) is not part of the
- * league and is left out. A block for a match that was stopped does not count when the round
- * has a later block for the same two clubs (see `isSuperseded`).
+ * league and is left out. A block for a match that was stopped is the match, and the later
+ * block for the same two clubs only finishes it (see `restOf`).
  */
 export function readLeague(text: string): ReadProgramme {
   const boxes = matchBoxes(text)
@@ -267,8 +273,8 @@ export function readLeague(text: string): ReadProgramme {
     if (played.kind === 'score' && day !== undefined && (lastPlayedOn === null || day.isoDate > lastPlayedOn)) {
       lastPlayedOn = day.isoDate
     }
-    if (isOurs(box) && !isSuperseded(box, boxes)) {
-      const match = readMatch(box, 'Eredivisie', round)
+    if (isOurs(box) && !isRestOfStopped(box, boxes)) {
+      const match = readMatch(box, 'Eredivisie', round, restOf(box, boxes))
 
       if (typeof match === 'string') {
         problems.push(match)
@@ -308,10 +314,10 @@ export function readPlayoffs(text: string): ReadProgramme {
   const matches: ReadMatch[] = []
   const problems: string[] = []
 
-  for (const box of boxes.filter((found) => isOurs(found) && !isSuperseded(found, boxes))) {
+  for (const box of boxes.filter((found) => isOurs(found) && !isRestOfStopped(found, boxes))) {
     const heading = rounds.findLast((candidate) => candidate.index < box.index)?.title
     const round = heading === undefined ? null : playoffRound(heading, plain(box.params.get('round') ?? ''))
-    const match = readMatch(box, 'Play-offs Conference League', round)
+    const match = readMatch(box, 'Play-offs Conference League', round, restOf(box, boxes))
 
     if (typeof match === 'string') {
       problems.push(match)
@@ -438,6 +444,14 @@ function closingBraces(text: string, start: number): number | undefined {
   return undefined
 }
 
+/** The two clubs of a block as one text, whichever is named first. */
+function clubsOf(box: Template): string {
+  return [box.params.get('team1') ?? '', box.params.get('team2') ?? '']
+    .map((team) => linkTarget(team).toLowerCase())
+    .sort()
+    .join('|')
+}
+
 /**
  * Finds the templates that start with this pattern, with their parameters and the heading above
  * each. A template ends at its own `}}`, so templates inside it (`{{goal|52}}`) and links
@@ -483,21 +497,17 @@ function isOurs(box: Template): boolean {
 }
 
 /**
- * Whether a block is for a match that was stopped (`Gestaakt 82' (2 – 0)`) and a later block
- * under the same heading is for the same two clubs. The later block has the match as it was
- * finished, with its own date and time, and it is the one that counts. A stopped block without
- * a later one is not superseded: `readMatch` gives an error for it.
+ * Whether a block finishes a match that was stopped: an earlier block under the same heading
+ * is for the same two clubs and has a score like `Gestaakt 82' (2 – 0)`. That earlier block is
+ * the match (see `restOf`), so this one is not a match of its own.
  */
-function isSuperseded(box: Template, boxes: Template[]): boolean {
-  const clubs = (found: Template) =>
-    [found.params.get('team1') ?? '', found.params.get('team2') ?? '']
-      .map((team) => linkTarget(team).toLowerCase())
-      .sort()
-      .join('|')
-
-  return (
-    parseScore(box.params.get('score') ?? '').kind === 'stopped' &&
-    boxes.some((other) => other.index > box.index && other.heading === box.heading && clubs(other) === clubs(box))
+function isRestOfStopped(box: Template, boxes: Template[]): boolean {
+  return boxes.some(
+    (other) =>
+      other.index < box.index &&
+      other.heading === box.heading &&
+      clubsOf(other) === clubsOf(box) &&
+      parseScore(other.params.get('score') ?? '').kind === 'stopped',
   )
 }
 
@@ -744,7 +754,9 @@ function parseScore(value: string): ParsedScore {
     return { kind: 'none' }
   }
   if (/^gestaakt\b/iu.test(text)) {
-    return { kind: 'stopped' }
+    const minute = /^gestaakt\s+(\d{1,3})\s*['’′]/iu.exec(text)?.[1]
+
+    return { kind: 'stopped', minute: minute === undefined ? null : Number(minute) }
   }
 
   const score = new RegExp(`^${pairPattern}(?: ?\\(${pairPattern}(?:, ?${pairPattern})?\\))?$`, 'u').exec(text)
@@ -816,8 +828,14 @@ function readGoals(box: Template, home: boolean): { goals: null | ReadGoal[]; pr
 /**
  * Turns a `Footballbox2` of ours into a match, or says in a text what is wrong with it.
  * The round is what the caller found above it.
+ *
+ * A match that was stopped is the block that says `Gestaakt 82' (2 – 0)`, with `rest` the
+ * later block that finished it (see `restOf`). The stopped block gives where and when the
+ * match began: the stadium, the date, the kick-off and who was at home, so the statistics per
+ * stadium count the match for the place it began. The rest gives the result and the goals, and
+ * the day and the stadium for the note (see `stoppedNote`).
  */
-function readMatch(box: Template, competition: Competition, round: null | string): ReadMatch | string {
+function readMatch(box: Template, competition: Competition, round: null | string, rest?: Template): ReadMatch | string {
   const name = `${round ?? 'a match'} (${competition})`
   const [team1, team2] = [box.params.get('team1') ?? '', box.params.get('team2') ?? '']
   const home = linkTarget(team1).toLowerCase() === ourClub.toLowerCase()
@@ -825,9 +843,14 @@ function readMatch(box: Template, competition: Competition, round: null | string
   const stadium = plain(box.params.get('stadium') ?? '') || null
   const day = parseDate(box.params.get('date') ?? '')
   const time = parseTime(box.params.get('time') ?? '')
-  const score = parseScore(box.params.get('score') ?? '')
-  const penalties = parsePenalties(box.params.get('penaltyscore') ?? '')
-  const extraTimeSaid = plain(box.params.get('aet') ?? '') !== ''
+  const began = parseScore(box.params.get('score') ?? '')
+  // The block with the result, and who is at home in it: the rest may name the clubs the other
+  // way round.
+  const result = rest ?? box
+  const resultHome = linkTarget(result.params.get('team1') ?? '').toLowerCase() === ourClub.toLowerCase()
+  const score = parseScore(result.params.get('score') ?? '')
+  const penalties = parsePenalties(result.params.get('penaltyscore') ?? '')
+  const extraTimeSaid = plain(result.params.get('aet') ?? '') !== ''
 
   if (round === null || round.length > matchLimits.round) {
     return `${name} has no usable round heading`
@@ -850,11 +873,26 @@ function readMatch(box: Template, competition: Competition, round: null | string
   if (score.kind === 'unknown') {
     return `${name} has a score we do not know: '${score.text.slice(0, 40)}'`
   }
+
+  let note: null | string = null
+
+  if (began.kind === 'stopped' && rest !== undefined) {
+    if (score.kind !== 'score' && score.kind !== 'none') {
+      return `${name} was stopped, and the block that finishes it has no score we can use`
+    }
+
+    const problem = stoppedNote(began.minute, rest, score.kind === 'score')
+
+    if (typeof problem === 'string') {
+      return `${name} ${problem}`
+    }
+    note = problem.note
+  }
   if (score.kind === 'score') {
     const problem = scoreProblem(score, extraTimeSaid)
 
     if (problem !== null) {
-      return `${name} has a score ${problem}: '${plain(box.params.get('score') ?? '').slice(0, 40)}'`
+      return `${name} has a score ${problem}: '${plain(result.params.get('score') ?? '').slice(0, 40)}'`
     }
   }
   if (competition === 'Eredivisie' && (extraTimeSaid || penalties.kind !== 'none')) {
@@ -874,17 +912,17 @@ function readMatch(box: Template, competition: Competition, round: null | string
 
   const kickoffAt = time === null || !day.single ? null : amsterdamToUtc(day, time)
   const status: MatchStatus = score.kind === 'score' ? 'played' : score.kind === 'postponed' ? 'postponed' : 'scheduled'
-  const ours = score.kind === 'score' ? (home ? score.home : score.away) : null
-  const theirs = score.kind === 'score' ? (home ? score.away : score.home) : null
-  const scorers = status === 'played' ? readGoals(box, home) : { goals: null, problem: null }
+  const ours = score.kind === 'score' ? (resultHome ? score.home : score.away) : null
+  const theirs = score.kind === 'score' ? (resultHome ? score.away : score.home) : null
+  const scorers = status === 'played' ? readGoals(result, resultHome) : { goals: null, problem: null }
   const afterNinety =
     competition === 'KNVB Beker' && extraTimeSaid && score.kind === 'score'
-      ? scoreAfterNinety(score, box.params.get('half time score') ?? '')
+      ? scoreAfterNinety(score, result.params.get('half time score') ?? '')
       : null
 
   return {
-    afterNinetyAgainst: afterNinety === null ? null : home ? afterNinety.away : afterNinety.home,
-    afterNinetyFor: afterNinety === null ? null : home ? afterNinety.home : afterNinety.away,
+    afterNinetyAgainst: afterNinety === null ? null : resultHome ? afterNinety.away : afterNinety.home,
+    afterNinetyFor: afterNinety === null ? null : resultHome ? afterNinety.home : afterNinety.away,
     competition,
     dateText: kickoffAt === null ? day.text.slice(0, matchLimits.dateText) : null,
     extraTime: extraTimeSaid && score.kind === 'score',
@@ -895,14 +933,29 @@ function readMatch(box: Template, competition: Competition, round: null | string
     home,
     kickoffAt,
     matchDate: day.isoDate,
+    note,
     opponent,
     opponentPage: linkedPage(home ? team2 : team1),
-    penaltiesAgainst: penalties.kind === 'score' ? (home ? penalties.away : penalties.home) : null,
-    penaltiesFor: penalties.kind === 'score' ? (home ? penalties.home : penalties.away) : null,
+    penaltiesAgainst: penalties.kind === 'score' ? (resultHome ? penalties.away : penalties.home) : null,
+    penaltiesFor: penalties.kind === 'score' ? (resultHome ? penalties.home : penalties.away) : null,
     round,
     stadium,
     status,
   }
+}
+
+/**
+ * The block that finishes a match that was stopped: the last block under the same heading for
+ * the same two clubs after it, or undefined when the box is not stopped or nothing follows.
+ * The block is the one with the result, as the stopped block has only the score up to the
+ * minute it stopped.
+ */
+function restOf(box: Template, boxes: Template[]): Template | undefined {
+  return parseScore(box.params.get('score') ?? '').kind === 'stopped'
+    ? boxes.findLast(
+        (other) => other.index > box.index && other.heading === box.heading && clubsOf(other) === clubsOf(box),
+      )
+    : undefined
 }
 
 /**
@@ -956,4 +1009,28 @@ function splitParameters(inner: string): string[] {
   parts.push(current)
 
   return parts
+}
+
+/**
+ * The line under a match that was stopped: the minute, and when and where the rest was played.
+ * It says what the page says and nothing about why, and nothing about who was there. A rest
+ * without a result yet is still to be played. A name that ends in "Stadion" gets "het" before
+ * it, as in "in het Abe Lenstra Stadion"; any other name is written as the page has it, since
+ * its article can't be told from the name. The answer is a text when the page does not give
+ * what the line needs.
+ */
+function stoppedNote(minute: null | number, rest: Template, played: boolean): string | { note: string } {
+  const day = parseDate(rest.params.get('date') ?? '')
+  const stadium = plain(rest.params.get('stadium') ?? '')
+
+  if (minute === null) {
+    return 'was stopped at a minute we do not know'
+  }
+  if (day === undefined || !day.single) {
+    return `was finished on a day we do not know: '${plain(rest.params.get('date') ?? '').slice(0, 40)}'`
+  }
+
+  const note = `Gestaakt in minuut ${minute}. Het restant ${played ? 'is' : 'wordt'} op ${day.day} ${months[day.month - 1]} gespeeld${stadium === '' ? '' : ` in ${/stadion$/iu.test(stadium) ? 'het ' : ''}${stadium}`}.`
+
+  return note.length > matchLimits.note ? 'has a note that is too long' : { note }
 }

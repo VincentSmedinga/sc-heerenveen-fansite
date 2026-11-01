@@ -603,6 +603,13 @@ describe('the made-up matches', () => {
     ).toBe(true)
     expect(has((match) => match.extraTime && match.afterNinetyFor === match.goalsFor)).toBe(true)
     expect(has((match) => match.extraTime && match.afterNinetyFor === null)).toBe(true)
+    // One played match was stopped and finished the next day, and has a note; no other has one.
+    expect(rows.filter((match) => match.note !== null).map((match) => [match.round, match.home])).toEqual([
+      ['Speelronde 2', false],
+    ])
+    expect(rows.find((match) => match.note !== null)?.note).toBe(
+      'Gestaakt in minuut 82. Het restant is op 19 oktober gespeeld in het Stadion Proeflaan.',
+    )
     // The dates of the made-up matches count from the day of the seed: this one is 10 days on.
     expect(rows.find((match) => match.dateText !== null)?.dateText).toBe('4-6 november 2026')
   })

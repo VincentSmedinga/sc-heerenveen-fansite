@@ -5953,6 +5953,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een gok bij een onbekende score is erger dan een fout.
 - **Alternatieven:** de gestaakte wedstrijd houden en het latere blok overslaan (de datum en de aftrap kloppen dan niet met de definitieve uitslag).
   Elke "Gestaakt"-score als fout laten staan (het vorige seizoen is dan niet te lezen).
+- **Later:** zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_: het gestaakte blok telt nu voor het stadion, de datum, de aftrap en thuis of uit; het latere blok geeft nog de uitslag en de doelpunten.
+  Zonder later blok blijft het een fout.
 
 ### Een kop over de tegenstander is `relevant` in de week voor en na de wedstrijd
 
@@ -6077,6 +6079,29 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een aparte tabel voor de play-offs (alle lijsten en cijfers moeten dan twee bronnen lezen).
   De play-offwedstrijden verwijderen als de pagina er niet is (een hernoemde pagina laat dan stil wedstrijden verdwijnen).
   De pagina pas vragen na 1 mei (een regel en een test erbij voor één verzoek per uur).
+
+### Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel
+
+- **Datum:** 1 november 2026
+- **Besluit:** van twee blokken voor dezelfde wedstrijd, het gestaakte ("Gestaakt 82' (2 – 0)") en het latere dat de wedstrijd afmaakt, is het gestaakte blok de wedstrijd (#548).
+  Het geeft het stadion, thuis of uit, de datum en de aftrap.
+  Het latere blok geeft de uitslag, de doelpunten en de gegevens voor een regel onder de wedstrijd.
+  Zonder later blok, of als het latere blok zelf gestaakt is of een score heeft die we niet kennen, blijft het een fout die de wedstrijd noemt.
+- **De regel:** `matches` krijgt een kolom `note` (tekst, hoogstens 255 tekens, leeg voor elke andere wedstrijd), met een migratie (`0025_add_match_note`).
+  De import schrijft hem uit de feiten van de pagina: "Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion."
+  Heeft het latere blok nog geen uitslag, dan staat er "wordt gespeeld" in plaats van "is gespeeld".
+  Een naam die op "Stadion" eindigt, krijgt "het" ervoor; een andere naam staat er zoals de pagina hem schrijft, want het lidwoord is niet uit de naam af te leiden.
+  Er staat niets over de reden van het staken of over het publiek, want de pagina zegt dat niet.
+  `Match` toont de regel met de eigenschap `note`, als laatste regel in de kleine tekst, onder "Gegevens nog niet beschikbaar" als die er ook staat.
+- **Waarom:** de projecteigenaar wil dat de cijfers per stadion kloppen: de wedstrijd van 10 mei 2026 begon in het Rat Verlegh Stadion in Breda, en het restant in Heerenveen hoort daar niet bij.
+  Een kolom met tekst is de kleinste oplossing voor één uitzondering; een tweede stadion in de tabel (`stadium2`) vraagt een tweede plek in elke vraag naar stadions voor een wedstrijd die één keer voorkwam.
+  De rest is wat een bezoeker wil weten, en dat is dat de wedstrijd gestaakt en uitgespeeld is.
+- **Nadeel:** de toeschouwers en de scheidsrechter van het begin komen niet mee, want de import bewaart die nog niet.
+  Gebeurt dat later, dan komen ze uit het gestaakte blok.
+  Een bestaande wedstrijd krijgt zijn nieuwe stadion, datum en regel pas bij de volgende import van het seizoen; voor 2025/26 is dat de opdracht Import season.
+- **Alternatieven:** een tweede stadion in `matches` (een kolom voor één wedstrijd, en elke vraag per stadion moet kiezen welke telt).
+  De reden van het staken noemen (die staat alleen in het verslag van de NOS, en dat nemen we niet over).
+  De regel in de code van de site schrijven (de site kent de pagina van Wikipedia niet).
 
 ## Redactie
 

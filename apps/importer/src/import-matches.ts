@@ -418,7 +418,8 @@ function isSame(before: Match, now: ReadMatch, clubId: number): boolean {
     before.afterNinetyAgainst === now.afterNinetyAgainst &&
     before.matchDate === now.matchDate &&
     before.kickoffAt?.getTime() === now.kickoffAt?.getTime() &&
-    before.dateText === now.dateText
+    before.dateText === now.dateText &&
+    before.note === now.note
   )
 }
 

@@ -905,6 +905,7 @@ function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
   const common = {
     competition: match.competition,
     home: match.home,
+    note: match.note,
     opponent: match.opponent,
     round: match.round,
     stadium: match.stadium,

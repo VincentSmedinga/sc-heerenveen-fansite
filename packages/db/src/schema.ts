@@ -527,7 +527,7 @@ export type MatchStatus = (typeof matchStatuses)[number]
  * The most characters a column of `matches` holds. The importer checks them before it
  * stores.
  */
-export const matchLimits = { dateText: 60, opponent: 100, round: 60, season: 7, stadium: 150 }
+export const matchLimits = { dateText: 60, note: 255, opponent: 100, round: 60, season: 7, stadium: 150 }
 
 /**
  * The most characters the Wikipedia page of a player or a club holds, in `players`,
@@ -614,6 +614,12 @@ export type NewClubName = typeof clubNames.$inferInsert
  * give that score. They can equal the final score, because extra time can pass without a goal,
  * but never exceed it.
  *
+ * `note` is a line under the match, from facts the page gives, and is empty for nearly every
+ * match. The importer writes it for a match that was stopped and finished later: "Gestaakt in
+ * minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion." Such a match counts
+ * for where and when it began (`stadium`, `match_date`, `kickoff_at`, `home`), and the note is
+ * the only place that holds where the rest was played.
+ *
  * `match_date` is the local day (Europe/Amsterdam), or the first day when Wikipedia only knows
  * a weekend. `kickoff_at` is the kick-off in UTC and is empty while the time is unknown: the
  * KNVB announces the times of rounds 22 to 32 on 22 December 2026. `date_text` then holds the
@@ -650,6 +656,7 @@ export const matches = mysqlTable(
     matchDate: date('match_date', { mode: 'string' }).notNull(),
     kickoffAt: datetime('kickoff_at'),
     dateText: varchar('date_text', { length: matchLimits.dateText }),
+    note: varchar('note', { length: matchLimits.note }),
     resultSetAt: datetime('result_set_at'),
   },
   (table) => [

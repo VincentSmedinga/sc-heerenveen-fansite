@@ -422,6 +422,45 @@ describe('Match', () => {
     })
   })
 
+  describe('a note', () => {
+    const note = 'Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Voorbeeldpark.'
+
+    it('is the last line, plain text in the small text of the other lines', () => {
+      const { container } = render(<Match {...played} note={note} />)
+      const line = container.querySelector('.hf-match-note')
+
+      expect(line?.textContent).toBe(note)
+      expect(line?.tagName).toBe('P')
+      expect(line?.className).toMatch(/hf-meta/u)
+      expect(line?.getAttribute('aria-hidden')).toBeNull()
+      expect(line?.nextElementSibling).toBeNull()
+      expect(container.querySelector('.hf-match-when + .hf-match-note')).not.toBeNull()
+    })
+
+    it('comes after "Gegevens nog niet beschikbaar" when both are shown', () => {
+      const { container } = render(<Match {...scheduled} note={note} resultMissing />)
+
+      expect(container.querySelector('.hf-match-missing + .hf-match-note')?.textContent).toBe(note)
+    })
+
+    it('says nothing without a note, with an empty one or with null', () => {
+      for (const none of [undefined, null, '']) {
+        const { container, unmount } = render(<Match {...played} note={none} />)
+
+        expect(container.querySelector('.hf-match-note')).toBeNull()
+        unmount()
+      }
+    })
+
+    it('shows the text as text, not as HTML, and does not pass it on to the element', () => {
+      const { container } = render(<Match {...played} note={'<b>Gestaakt</b>'} />)
+
+      expect(container.querySelector('.hf-match-note')?.textContent).toBe('<b>Gestaakt</b>')
+      expect(container.querySelector('b')).toBeNull()
+      expect(container.firstElementChild?.hasAttribute('note')).toBe(false)
+    })
+  })
+
   it('leaves out the stadium when it has none', () => {
     const { container } = render(<Match {...scheduled} stadium={null} />)
 

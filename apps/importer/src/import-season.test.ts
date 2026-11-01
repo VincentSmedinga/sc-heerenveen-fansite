@@ -192,10 +192,13 @@ describe('the command', () => {
       goalsAgainst: 2,
       goalsFor: 0,
       home: false,
-      kickoffAt: new Date('2026-05-11T12:30:00Z'),
-      matchDate: '2026-05-11',
+      kickoffAt: new Date('2026-05-10T14:45:00Z'),
+      matchDate: '2026-05-10',
+      note: 'Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion.',
       opponent: 'NAC Breda',
+      stadium: 'Rat Verlegh Stadion',
     })
+    expect(stored.filter((match) => match.note !== null)).toHaveLength(1)
 
     const table = await database.db.select().from(standings).orderBy(asc(standings.position))
 
