@@ -8,7 +8,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De pictogrammen van het designsysteem: een pijl naar rechts, een pijl naar links, een envelop, het pictogram voor een externe link, een schakel van een ketting, een plus, een zon en een maan.',
+          'De pictogrammen van het designsysteem: een pijl naar rechts, een pijl naar links, een camera, een envelop, het pictogram voor een externe link, een schakel van een ketting, een plus, een zon en een maan.',
           'We tekenen ze zelf, als SVG in de code. Er komt niets van buiten bij en er is geen pictogrammenbibliotheek.',
           'Je zet een pictogram niet zelf op een pagina: een `Link`, een `Button`, een `SegmentedControl` en een `Heading` met een anker tekenen het voor je.',
           '',
