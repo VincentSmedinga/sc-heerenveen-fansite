@@ -2233,6 +2233,18 @@ describe('the play-offs for the Conference League', () => {
     expect(await playoffPages()).toMatchObject([{ season, title: playoffPage }])
   })
 
+  it('stores the score after 90 minutes of a tie with extra time, from our side', async () => {
+    const { server } = await serve({ playoffs: fixture('wikipedia-playoffs-after-ninety.wiki') })
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'imported', warnings: [] })
+    expect(
+      (await stored()).map((match) => [match.round, match.extraTime, match.afterNinetyFor, match.afterNinetyAgainst]),
+    ).toEqual([
+      ['Halve finale', true, 1, 1],
+      ['Finale', true, 2, 2],
+    ])
+  })
+
   it('does not change the table or the numbers of the league', async () => {
     const { server } = await serve({ playoffs })
 

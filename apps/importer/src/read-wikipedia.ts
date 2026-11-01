@@ -32,7 +32,7 @@ export type ReadGoal = {
 /** What the import keeps of one match of sc Heerenveen. */
 export type ReadMatch = {
   /**
-   * The score after 90 minutes of a cup match with extra time, from our side, when the page
+   * The score after 90 minutes of a match with extra time, from our side, when the page
    * gives it. Both or neither. It may equal the result, and is never above it.
    */
   afterNinetyAgainst: null | number
@@ -740,6 +740,18 @@ function within(part: null | Pair, whole: Pair): boolean {
 const pairPattern = '(\\d{1,2}) ?[–-] ?(\\d{1,2})'
 
 /**
+ * Whether a match of this competition and round keeps the score after 90 minutes when it goes
+ * to extra time: the cup and the play-offs for the Conference League, and in the play-offs only
+ * a round played over one match. In the years the semi-final was played over two matches, extra
+ * time came after the second one, and the round says which leg it is (see `playoffRound`).
+ */
+function keepsScoreAfterNinety(competition: Competition, round: string): boolean {
+  return (
+    competition === 'KNVB Beker' || (competition === 'Play-offs Conference League' && !round.includes(', wedstrijd'))
+  )
+}
+
+/**
  * The score of a box: none yet, a score, called off, or something we do not know. A score is
  * the final score. The older cup pages add the score at half time in brackets
  * (`2 – 1 (1 – 0)`), or after extra time the score after 90 minutes and then the score at half
@@ -916,7 +928,7 @@ function readMatch(box: Template, competition: Competition, round: null | string
   const theirs = score.kind === 'score' ? (resultHome ? score.away : score.home) : null
   const scorers = status === 'played' ? readGoals(result, resultHome) : { goals: null, problem: null }
   const afterNinety =
-    competition === 'KNVB Beker' && extraTimeSaid && score.kind === 'score'
+    keepsScoreAfterNinety(competition, round) && extraTimeSaid && score.kind === 'score'
       ? scoreAfterNinety(score, result.params.get('half time score') ?? '')
       : null
 

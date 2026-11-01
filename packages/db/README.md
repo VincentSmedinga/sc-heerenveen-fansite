@@ -316,9 +316,9 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 | `club_id`                                  | De tegenstander als club (zie _De tabellen `clubs` en `club_names`_); verplicht                              |
 | `status`                                   | `scheduled`, `played` of `postponed`                                                                         |
 | `goals_for`, `goals_against`               | De doelpunten van sc Heerenveen en van de tegenstander; alleen gevuld bij `played`                           |
-| `extra_time`                               | Of een gespeelde bekerwedstrijd in verlenging ging; anders `false`                                           |
+| `extra_time`                               | Of een gespeelde wedstrijd van de beker of de play-offs in verlenging ging; anders `false`                   |
 | `penalties_for`, `penalties_against`       | De strafschoppen van sc Heerenveen en van de tegenstander; leeg zonder strafschoppen, anders allebei gevuld  |
-| `after_ninety_for`, `after_ninety_against` | De stand na 90 minuten bij een bekerwedstrijd met verlenging, als de pagina hem geeft; anders allebei leeg   |
+| `after_ninety_for`, `after_ninety_against` | De stand na 90 minuten bij een wedstrijd met verlenging, als de pagina hem geeft; anders allebei leeg        |
 | `note`                                     | Een regel onder de wedstrijd, nu alleen voor een gestaakte wedstrijd die later is uitgespeeld; anders leeg   |
 | `match_date`                               | De dag in Nederland, of de eerste dag als alleen een weekend bekend is                                       |
 | `kickoff_at`                               | De aftrap in UTC; leeg zolang de tijd niet bekend is                                                         |

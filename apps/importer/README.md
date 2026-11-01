@@ -780,6 +780,7 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Verlenging zonder strafschoppen mag, ook bij een gelijke stand: de strafschoppen komen er bij de volgende lezing bij.
   Zo'n nieuwe score van strafschoppen is geen verandering van de uitslag en geeft geen waarschuwing; een score die verandert wel.
 - Bij een bekerwedstrijd met `aet` bewaart hij ook de stand na 90 minuten (`after_ninety_for` en `after_ninety_against`, van sc Heerenveen en van de tegenstander).
+  Hetzelfde geldt voor een wedstrijd van de play-offs voor de Conference League met `aet`, als de ronde in één wedstrijd is gespeeld.
   Op de pagina van 2025/26 staat hij in `half time score`, als twee paren gescheiden door een komma: eerst de stand na 90 minuten en dan de rust, zoals "2 – 2, 1 – 1".
   Hij neemt het eerste paar over als het tweede paar er niet boven ligt en het eerste niet boven de eindstand ligt.
   Dat is de enige manier om de paren te herkennen, want een paar redacteuren schreven ze omgekeerd (de rust eerst).
@@ -787,7 +788,8 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   De stand na 90 minuten mag gelijk zijn aan de eindstand, want de verlenging kan zonder doelpunt voorbijgaan.
   Bij een wedstrijd zonder `aet` leest hij `half time score` niet als stand na 90 minuten, ook niet met een komma erin.
   De stand bij de rust bewaart hij niet.
-  Een play-offwedstrijd krijgt hem niet.
+  Een ronde van de play-offs met een heen- en terugwedstrijd ("Halve finale, wedstrijd 1/2") krijgt hem niet, want de verlenging komt na de tweede wedstrijd.
+  Een wedstrijd van de competitie krijgt hem ook niet.
 - Bij een wedstrijd die gestaakt en later uitgespeeld is, bewaart hij een regel in `note` (zie _Een gestaakte wedstrijd_ hieronder).
   Elke andere wedstrijd heeft geen `note`, en de volgende import van het seizoen vult hem bij een wedstrijd die al in de database stond.
 - De doelpuntenmakers van een gespeelde wedstrijd bewaart hij in `match_goals`, een rij per doelpunt.
@@ -1387,6 +1389,7 @@ Er staan alle 34 wedstrijden van sc Heerenveen in en een paar van andere clubs.
 De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs, de scheidsrechters en de verslagen zijn leeggemaakt.
 [`wikipedia-playoffs-2026.wiki`](src/fixtures/wikipedia-playoffs-2026.wiki) en `wikipedia-playoffs-2025.wiki` zijn het begin van de echte pagina's van de play-offs, gelezen op 1 november 2026, met de halve finale van sc Heerenveen tegen FC Utrecht en tegen AZ.
 `wikipedia-playoffs-2024.wiki` is een jaar zonder sc Heerenveen, en `wikipedia-playoffs-2022.wiki` een jaar met een halve finale over twee wedstrijden.
+[`wikipedia-playoffs-after-ninety.wiki`](src/fixtures/wikipedia-playoffs-after-ninety.wiki) heeft twee verzonnen wedstrijden met verlenging in de lay-out van de echte pagina, met `half time score` zoals de bekerpagina het schrijft, omdat de echte play-offpagina's dat veld nog niet hebben.
 [`wikipedia-cup-goals.wiki`](src/fixtures/wikipedia-cup-goals.wiki) heeft de vier bekerwedstrijden van sc Heerenveen uit het seizoen 2025/26, gelezen op 26 oktober 2026, met een eigen doelpunt, twee doelpunten van één speler in één sjabloon, blessuretijd en een gemiste penalty.
 `src/read-wikipedia.test.ts` leest ze zonder database en `src/check-wikipedia.test.ts` toetst de controles.
 `src/import-matches.test.ts` draait op een echte MariaDB met een eigen webserver die de pagina's geeft, en laat zien dat een falende controle de database ongemoeid laat.

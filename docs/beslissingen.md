@@ -7521,6 +7521,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het issue schreef dat hij nooit gelijk is; dat klopt dus niet, en de database eist het niet.
   Omgedraaide paren zijn aan de regel te herkennen, en dan blijft de stand onbekend.
 - **Alternatieven:** de stand na 90 minuten uit de doelpunten (#297) uitrekenen (vraagt de minuten van elk doelpunt, die niet altijd kloppen); alleen "n.v." tonen (de supporter weet niet hoe het ervoor stond); omgedraaide paren omdraaien (dat is raden); een veld dat niet klopt als fout behandelen (de import van de hele pagina zou stoppen voor één verkeerd veld).
+- **Later:** zie _De stand na 90 minuten geldt ook voor een play-offwedstrijd in één keer_: de play-offs voor de Conference League hebben hem nu ook, voor een ronde in één wedstrijd.
+
+### De stand na 90 minuten geldt ook voor een play-offwedstrijd in één keer
+
+- **Datum:** 1 november 2026
+- **Besluit:** de import leest en bewaart de stand na 90 minuten ook bij een wedstrijd van de play-offs voor de Conference League met verlenging (`aet`), volgens dezelfde regels als bij de beker.
+  Dat gaat door dezelfde code (`scoreAfterNinety`), zodat er geen tweede kopie van de leesregels komt.
+  De regel geldt voor een ronde die in één wedstrijd is gespeeld.
+  Een ronde met een heen- en terugwedstrijd, zoals de halve finale van 2021/22 en 2022/23 ("Halve finale, wedstrijd 1/2"), houdt geen stand na 90 minuten.
+  De wedstrijd van de competitie heeft hem nog steeds niet.
+- **Opslag:** er is geen migratie nodig.
+  De controles `matches_after_ninety_in_a_pair` en `matches_after_ninety_within_extra_time` noemen alleen de verlenging en de eindstand, geen competitie, dus ze lieten de play-offs al toe.
+  `Match` toont de stand na 90 minuten voor elke wedstrijd die hem heeft, dus ook die verandert niet.
+- **Waarom:** de play-offs hebben op Wikipedia dezelfde sjabloon met `aet` en `half time score` als de beker, en een halve finale of finale kan in de verlenging eindigen.
+  Zonder deze regel staat zo'n wedstrijd anders dan een bekerwedstrijd: "2–1 n.v." zonder te zeggen hoe het ervoor stond.
+  Bij een tweeluik komt de verlenging na de tweede wedstrijd en gaat het om de stand over twee duels.
+  De stand na 90 minuten van de tweede wedstrijd zegt dan weinig over wie er door was, en die wedstrijden blijven zoals ze zijn.
+- **Gevolg:** er is nu geen wedstrijd van sc Heerenveen met verlenging in de play-offs, dus er verandert niets zichtbaars.
+  Wie de play-offs van een eerder seizoen opnieuw binnenhaalt, ziet de stand pas bij een wedstrijd die verlenging had.
+  De echte pagina's van de play-offs hebben `half time score` nog niet in hun sjablonen; de test gebruikt een verkleinde, verzonnen pagina (`wikipedia-playoffs-after-ninety.wiki`).
+- **Alternatieven:** ook de wedstrijden van een tweeluik (de stand over twee duels is moeilijker te lezen, en het issue sloot ze uit); een eigen leesregel voor de play-offs (twee kopieën die uit elkaar gaan lopen); de play-offs voor promotie en degradatie (buiten de import).
 
 ### We tellen paginaweergaven en unieke bezoekers per dag, met een kenmerk dat elke dag wisselt
 

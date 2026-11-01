@@ -119,6 +119,24 @@ describe('the extra time and the shoot-out of a match', () => {
     ])
   })
 
+  it('keeps the score after 90 minutes in the play-offs for the Conference League, like in the cup', async () => {
+    await database.db.insert(matches).values(
+      await clubbed({
+        ...cupMatch,
+        afterNinetyAgainst: 1,
+        afterNinetyFor: 1,
+        competition: 'Play-offs Conference League',
+        extraTime: true,
+        goalsFor: 2,
+        round: 'Finale',
+      }),
+    )
+
+    const [row] = await database.db.select().from(matches)
+
+    expect(row).toMatchObject({ afterNinetyAgainst: 1, afterNinetyFor: 1, competition: 'Play-offs Conference League' })
+  })
+
   it.each([
     [
       'extra time in the league',
