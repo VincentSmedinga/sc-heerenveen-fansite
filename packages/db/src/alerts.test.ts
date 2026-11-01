@@ -333,6 +333,12 @@ describe('scrubError', () => {
     )
   })
 
+  it('drops the value of a header, also after a scheme such as Bearer', () => {
+    expect(scrubError('sent Authorization: Bearer abc123 and failed')).toBe('sent Authorization: … and failed')
+    expect(scrubError('Authorization: Basic dXNlcjpwdw==')).toBe('Authorization: …')
+    expect(scrubError('password=hunter2 failed')).toBe('password=… failed')
+  })
+
   it('leaves text without anything secret alone, and cuts a long text', () => {
     expect(scrubError('nothing changed and the last good copy stays')).toBe(
       'nothing changed and the last good copy stays',

@@ -118,7 +118,7 @@ export function scrubError(text: string): string {
     .replaceAll(/\b[a-z][a-z0-9+.-]*:\/\/[^\s<>"')\]]+/giu, scrubAddress)
     .replaceAll(/[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+/gu, '[e-mailadres]')
     .replaceAll(
-      /\b(password|passwd|pwd|secret|token|api[_-]?key|apikey|key|auth|authorization)\b(\s*[=:]\s*)\S+/giu,
+      /\b(password|passwd|pwd|secret|token|api[_-]?key|apikey|key|auth|authorization)\b(\s*[=:]\s*)(?:(?:bearer|basic|digest)\s+)?\S+/giu,
       '$1$2…',
     )
     .replaceAll(/(?<![\w:/.…])\/(?:[^\s/:]+\/)+([^\s/:]+)/gu, '…/$1')
