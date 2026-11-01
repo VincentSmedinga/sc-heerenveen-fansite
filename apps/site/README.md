@@ -681,8 +681,9 @@ Lokaal log je zo in:
 
    Open de link, en kies Inloggen.
 
-Het cookie van het beheer is `Secure`, ook lokaal.
-Chrome en Firefox nemen dat aan op `localhost`; Safari niet, dus log lokaal in met Chrome of Firefox.
+Het cookie van het beheer is `Secure`, behalve in de ontwikkelserver (`pnpm --filter site dev` en `pnpm review`).
+Daar werkt het beheer lokaal in elke browser, ook in Safari, dat een `Secure`-cookie niet bewaart op `http://localhost`.
+Een gebouwde site (`pnpm build`, acceptatie en productie) zet het cookie altijd met `Secure`.
 
 - `requireRole` in `src/beheer/require-role.ts` is de ene controle van het beheer.
   Elke pagina, route en serveractie onder `/beheer` roept hem als eerste aan, behalve de pagina's en acties om in te loggen.

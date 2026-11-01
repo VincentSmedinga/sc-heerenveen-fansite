@@ -17,13 +17,18 @@ export const loginPath = '/beheer/inloggen'
  * The browser sends it only under /beheer, never to a page of the site, and a script on a page
  * can't read it. It lasts as long as a session can, but the server decides: a session that has
  * ended or been revoked doesn't work, whatever the browser still holds.
+ *
+ * It is `Secure` everywhere but in the development server, because Safari doesn't keep a
+ * `Secure` cookie on http://localhost. The choice comes from `NODE_ENV` and never from the
+ * `Host` header or the protocol of the request, which the sender picks. A built site, on
+ * acceptance, in production and in the checks, always sets `Secure`.
  */
 export const sessionCookieOptions = {
   httpOnly: true,
   maxAge: absoluteLifetime / 1000,
   path: '/beheer',
   sameSite: 'lax',
-  secure: true,
+  secure: process.env.NODE_ENV !== 'development',
 } as const
 
 /** The account that is logged in. */

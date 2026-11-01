@@ -3776,6 +3776,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `Path=/beheer` houdt het uit verzoeken naar de rest van de site, en het is nog steeds het enige cookie dat de site zet.
   `Secure` geldt ook lokaal: Chrome en Firefox nemen het aan op `localhost`, Safari niet.
 - **Alternatieven:** de token zelf bewaren (een gelekte database logt dan in); een ondertekend cookie met een einddatum (niet in te trekken zonder lijst op de server).
+- **Later:** zie _Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure_ (1 november 2026): `Secure` geldt niet meer onder `NODE_ENV=development`, omdat Safari het cookie anders niet bewaart op `http://localhost`.
+  De rest van deze beslissing blijft.
 
 ### Het antwoord op een verzoek om een link is voor elk adres hetzelfde
 
@@ -3857,6 +3859,18 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de host heeft alleen de standalone build en Node, geen pnpm, en een SSH-sessie krijgt de variabelen van de Node.js-app niet (zie _De site draait de migraties als ze start_ en `docs/acceptatieomgeving.md`, stap 8 tot en met 10).
   Eén bestand en één bestand met `DATABASE_URL` is wat de importer al gebruikt, dus de eigenaar leert niets nieuws.
 - **Alternatieven:** een beheerpagina om accounts te maken (een aanvalsvlak, en buiten dit issue); de opdracht in `apps/site/server.js` laten draaien (dat vraagt de variabelen van de site, en meer van de host).
+
+### Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure
+
+- **Datum:** 1 november 2026
+- **Besluit:** het cookie `beheer-sessie` is `Secure` behalve onder `NODE_ENV=development`.
+  `sessionCookieOptions` in `apps/site/src/beheer/require-role.ts` kiest dat op één plek, en inloggen en uitloggen gebruiken die opties.
+- **Waarom:** Safari bewaart een `Secure`-cookie niet op `http://localhost`, dus de projecteigenaar kon lokaal niet inloggen in zijn eigen browser.
+  De ontwikkelserver (`pnpm --filter site dev` en `pnpm review`) draait alleen op de computer van de ontwikkelaar.
+  Wat echt gebruikt wordt, houdt `Secure`: acceptatie, productie en elke gebouwde site, ook die van de rooktest en de e2e-tests.
+  Een afweging op `NODE_ENV` kan een verzoek niet beïnvloeden, een afweging op de `Host`-header wel.
+- **Alternatieven:** `Secure` weglaten wanneer het verzoek `http` is op `localhost` (de header is door de verzender te kiezen); lokaal HTTPS met een zelfgemaakt certificaat (een extra stap voor elke ontwikkelaar); alles laten zoals het is en Chrome of Firefox gebruiken.
+- **Later:** vervangt de regel "`Secure` geldt ook lokaal" van _Een link en een sessie bewaren we als SHA-256, in de database_; de rest van die beslissing blijft.
 
 ### De privacyverklaring noemt het cookie van het beheer
 
