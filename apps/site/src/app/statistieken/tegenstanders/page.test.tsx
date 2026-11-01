@@ -157,7 +157,8 @@ describe('the page /statistieken/tegenstanders', () => {
   it('credits the Wikipedia pages of the seasons we have, with the licence', async () => {
     const html = await render()
 
-    expect(html).toContain('Bron: Wikipedia')
+    expect(html).toContain('<summary>Bron: Wikipedia</summary>')
+    expect(html).not.toMatch(/<details class="hf-meta hf-wikipedia-credit"[^>]* open/)
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/Eredivisie_2022/23_(mannenvoetbal)"')
     expect(html).toContain('CC BY-SA 4.0')
   })

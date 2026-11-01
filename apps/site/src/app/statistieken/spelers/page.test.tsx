@@ -158,7 +158,7 @@ describe('the page /statistieken/spelers', () => {
 
   it('has no link to itself and no link to another page but the heading and the credit', async () => {
     const html = await render()
-    const outside = html.replace(/<p class="hf-meta hf-wikipedia-credit".*?<\/p>/s, '')
+    const outside = html.replace(/<details class="hf-meta hf-wikipedia-credit".*?<\/details>/s, '')
 
     expect(outside).not.toContain('Alle doelpuntenmakers')
     expect(outside).not.toMatch(/https?:|<img|src=/)
