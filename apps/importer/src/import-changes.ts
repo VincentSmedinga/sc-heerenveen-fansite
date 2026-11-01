@@ -36,7 +36,7 @@ export function describeWaitingChange(change: MatchChange): string[] {
 
 /** One line to name a change: its number, its match and what changed. */
 export function nameChange(change: MatchChange): string {
-  return `#${change.id} ${change.round} (${change.competition} ${change.season})`
+  return `#${change.id} ${printable(change.round)} (${change.competition} ${change.season})`
 }
 
 /** Reads the arguments: nothing, or `accept`/`reject` with the numbers of changes or `all`. */

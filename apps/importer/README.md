@@ -966,6 +966,7 @@ Een wijziging is verdacht als:
 - een uitslag pas komt nadat de import de pagina na de eerste drie dagen zag zonder uitslag;
 - een wedstrijd weer de waarde krijgt die hij eerder had (A, dan B, dan A), of een eerder afgewezen waarde terugkomt: dat kan een bewerkingsoorlog zijn;
 - de wedstrijd bij een afgelopen seizoen hoort en de wijziging iets overschrijft: zijn wedstrijden veranderen niet meer;
+- de wedstrijd verschilt op een manier die geen regel kent;
 - meer dan zes wedstrijden in één run iets overschrijven wat we al hadden (zie hieronder).
 
 Een grens is strikt: een uitslag die precies 24 uur of precies drie dagen vaststond, valt buiten het venster.

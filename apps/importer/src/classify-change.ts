@@ -222,8 +222,15 @@ export function classifyChange(input: ChangeInput): Judgement {
 
   const base = judge(input)
 
-  if (base.class === 'new' && base.changed.length === 0) {
-    return base
+  if (base.changed.length === 0) {
+    // The matches differ and no rule knows how: that is the kind nobody foresaw.
+    return {
+      ...base,
+      changed: ['unknown'],
+      class: 'suspicious',
+      overwrites: true,
+      reason: 'the match differs in a way the rules do not know',
+    }
   }
   // A match of a season that is over may get what it lacked, but nothing else changes.
   if (pastSeason && (base.class !== 'new' || base.overwrites)) {

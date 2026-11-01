@@ -858,6 +858,7 @@ async function storeMatches(
   // The changes that waited already and are still on the page count: the page stays held until
   // they are decided or have stood for seven days.
   const heldAll = isMassChange(overwrites + waiting)
+  const mass = overwrites + waiting
 
   for (const entry of entries) {
     if (entry.kind === 'add') {
@@ -890,9 +891,7 @@ async function storeMatches(
     if (waits) {
       counts.held++
 
-      const reason = heldAll
-        ? `${overwrites} matches changed at once: it looks like an edit of the page`
-        : judgement.reason
+      const reason = heldAll ? `${mass} matches changed at once: it looks like an edit of the page` : judgement.reason
 
       await recordChange(
         db,
@@ -956,5 +955,5 @@ async function storeMatches(
     warnings.push(unlinked)
   }
 
-  return { clubs: clubLines, counts, heldAll, overwrites: overwrites + waiting, warnings }
+  return { clubs: clubLines, counts, heldAll, overwrites: mass, warnings }
 }

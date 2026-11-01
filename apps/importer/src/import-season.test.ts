@@ -1,3 +1,4 @@
+import type { MatchChange } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { lockNameFor, withLock } from '@fansite/db/lock'
@@ -13,7 +14,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { Handler, TestServer } from './test-server.ts'
 
-import { changesUsage, parseChangesArguments, runChangesCommand } from './import-changes.ts'
+import { changesUsage, nameChange, parseChangesArguments, runChangesCommand } from './import-changes.ts'
 import { importMatches, importPastSeason } from './import-matches.ts'
 import { parseSeason, runSeasonImport, seasonUsage } from './import-season.ts'
 import { pageTitles, pageUrl } from './read-wikipedia.ts'
@@ -496,6 +497,14 @@ describe('the command that decides the changes', () => {
 
     expect(request.kind === 'refused' ? request.message : '').toContain(reason)
     expect(request.kind === 'refused' ? request.message : '').toContain(changesUsage)
+  })
+
+  it('cleans the round of control characters, like the rest of the text from Wikipedia', async () => {
+    await held()
+
+    const [change] = await database.db.select().from(matchChanges)
+
+    expect(nameChange({ ...(change as MatchChange), round: 'Eerste\u001b[31m ronde' })).not.toContain('\u001b')
   })
 
   it('lists the changes that wait, with the old and the new value and when they are taken over', async () => {

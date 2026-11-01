@@ -339,6 +339,22 @@ describe('the rest of a match', () => {
   })
 })
 
+describe('a difference no rule knows', () => {
+  it('is suspicious, and counts as an overwrite', () => {
+    // The two matches are told apart by the caller, but nothing the rules look at differs.
+    expect(judge({ now: { ...played } })).toMatchObject({
+      changed: ['unknown'],
+      class: 'suspicious',
+      overwrites: true,
+      reason: 'the match differs in a way the rules do not know',
+    })
+  })
+
+  it('is still new on the first read of a season', () => {
+    expect(judge({ firstRead: true, now: { ...played } }).class).toBe('new')
+  })
+})
+
 describe('a match that goes back and forth', () => {
   const lost = { ...played, goalsAgainst: 2 }
 

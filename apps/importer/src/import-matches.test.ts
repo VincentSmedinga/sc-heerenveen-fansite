@@ -1365,6 +1365,22 @@ describe('a result that changes', () => {
       expect(await changes()).toHaveLength(6)
     })
 
+    it('counts the changes that wait for the limit, and says the same number everywhere', async () => {
+      const { pages, server } = await serve()
+
+      await importAt(server, first)
+      pages.programme = later(pages.programme, 3)
+      expect(await importAt(server, after(first, hours(1)))).toMatchObject({ matches: { held: 3 } })
+
+      // Three still wait and four more come: seven in all.
+      pages.programme = later(original.programme, 7)
+
+      const report = await importAt(server, after(first, hours(2)))
+
+      expect(report).toMatchObject({ kind: 'error', message: expect.stringContaining('7 matches changed at once') })
+      expect((await changes()).filter((change) => change.reason.includes('7 matches changed at once'))).toHaveLength(4)
+    })
+
     it('holds the seventh too, and the whole page with them: the last good copy stays', async () => {
       const { pages, server } = await serve()
 
