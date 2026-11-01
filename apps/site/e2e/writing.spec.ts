@@ -281,6 +281,10 @@ for (const [name, javaScriptEnabled] of [
       await page.getByLabel('Minuut, doelpunt 1', { exact: true }).fill('40')
       await page.getByLabel('Speler, doelpunt 1', { exact: true }).selectOption('andere')
       await page.getByLabel('Naam van de andere speler, doelpunt 1').fill('Sibbing')
+      if (javaScriptEnabled) {
+        // The form with a goal in it, which the checks of all the pages never open.
+        expect(await checkPage(page)).toEqual([])
+      }
       await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
       await expect(page).toHaveURL(/\?gedaan=opgeslagen$/u)
       await expect(page.getByRole('heading', { level: 2, name: 'Opgeslagen' })).toBeVisible()

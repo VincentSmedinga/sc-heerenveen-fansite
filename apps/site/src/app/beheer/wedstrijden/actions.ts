@@ -54,8 +54,7 @@ export async function submitMatch(
     return {
       errors: {},
       // The focus goes to the goal that took the place of the removed one, or else to the
-      // button
-      // that adds one: the button that was pressed is gone.
+      // button that adds one: the button that was pressed is gone.
       focus: doelpunten.length >= button.number ? goalFieldId(button.number, 'kant') : addGoalId,
       values: { ...values, doelpunten },
     }

@@ -120,7 +120,7 @@ describe('the list', () => {
       expect.stringContaining('Speelronde 1: sc Heerenveen - FC Twente'),
     ])
     expect(html).toContain('Uitslag ontbreekt')
-    expect(html).toContain('sc Heerenveen 1-0 FC Twente')
+    expect(html).toContain('sc Heerenveen 1–0 FC Twente')
   })
 
   it('labels a match with an entry "Aangepast door de redactie", in words and not by colour', async () => {

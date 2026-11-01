@@ -337,7 +337,7 @@ export function validate(
     const theirs = values.doelpunten.length - ours
 
     if (ours !== score.for || theirs !== score.against) {
-      errors.doelpunten = `De doelpunten geven ${ours}-${theirs} en de uitslag is ${score.for}-${score.against}. Pas de doelpunten of de uitslag aan.`
+      errors.doelpunten = `De doelpunten geven ${ours}–${theirs} en de uitslag is ${score.for}–${score.against}. Pas de doelpunten of de uitslag aan.`
     }
   }
 

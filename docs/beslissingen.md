@@ -6328,10 +6328,12 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     Anders zou `pnpm run import:changes accept` de invoer later ongemerkt overschrijven.
   - "Weghalen" zet alleen terug wat nog een markering heeft.
     Een onderdeel dat Wikipedia al overnam, blijft zoals het is.
+    Vult een redacteur zo'n onderdeel later opnieuw in, dan wordt de momentopname van dat onderdeel ververst met wat Wikipedia toen had: weghalen zet het terug naar Wikipedia en niet naar vóór de eerste invoer.
     De import leest daarna weer wat Wikipedia zegt.
   - De onderdelen zonder markering volgen Wikipedia zoals bij elke wedstrijd, maar zonder de beoordeling van _Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht_: de beoordeling kijkt naar de hele wedstrijd, en de wedstrijd is al van de redactie.
     Een wedstrijd met een markering telt niet mee voor de grens van zes wedstrijden in een run, en wordt niet verwijderd als hij van de pagina verdwijnt.
   - Voor de import is een aangepaste wedstrijd eigen invoer, ook voor `import:season`: dezelfde code leest elk seizoen.
+  - Een uitslag staat in de lijst, het logboek en de waarschuwing met een en-streep ("2–1"), zoals de schrijfwijzer van Redactie het vraagt.
   - Er is geen scherm voor het verleden: de lijst toont het lopende seizoen, en alleen een beheerder ziet haar.
 - **Later:** vervangt voor de plaats van de opslag de beslissing van 25 oktober 2026 uit het issue (een aanpassing naast de gelezen waarde); de rest ervan blijft: een aanpassing geldt tot Wikipedia hetzelfde zegt of een beheerder haar weghaalt.
 - **Alternatieven:** een aparte tabel met aanpassingen die elke query eroverheen legt (veel plekken en een groot risico op vergeten); de gelezen waarde overschrijven zonder markering (de volgende import maakt de verbetering ongedaan, en niemand ziet wat van de redactie is).

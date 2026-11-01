@@ -200,7 +200,7 @@ describe('submitMatch', () => {
     const goals = await threeGoals()
 
     expect(await submit(matchId, form({ ...goals, 'uitslag-wij': '3' }))).toMatchObject({
-      errors: { doelpunten: expect.stringContaining('De doelpunten geven 2-1') },
+      errors: { doelpunten: expect.stringContaining('De doelpunten geven 2–1') },
     })
     expect(await edits()).toEqual([])
   })

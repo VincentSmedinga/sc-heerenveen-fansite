@@ -219,7 +219,6 @@ export function MatchForm({
             return (
               <Card
                 aria-labelledby={`${id('kant')}-kop`}
-                as="div"
                 key={`${number}:${Object.values(goal).join('|')}`}
                 surface="soft"
               >

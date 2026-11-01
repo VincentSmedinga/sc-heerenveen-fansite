@@ -141,16 +141,30 @@ export function describeEntryResult(match: ResultFields): string {
   const ours = match.goalsFor ?? 0
   const theirs = match.goalsAgainst ?? 0
   const score = match.home
-    ? `sc Heerenveen ${ours}-${theirs} ${match.opponent}`
-    : `${match.opponent} ${theirs}-${ours} sc Heerenveen`
+    ? `sc Heerenveen ${ours}–${theirs} ${match.opponent}`
+    : `${match.opponent} ${theirs}–${ours} sc Heerenveen`
   const extra = [
     match.extraTime ? 'na verlenging' : undefined,
-    match.afterNinetyFor === null ? undefined : `${match.afterNinetyFor}-${match.afterNinetyAgainst} na 90 minuten`,
-    match.penaltiesFor === null ? undefined : `strafschoppen ${match.penaltiesFor}-${match.penaltiesAgainst}`,
+    match.afterNinetyFor === null ? undefined : `${match.afterNinetyFor}–${match.afterNinetyAgainst} na 90 minuten`,
+    match.penaltiesFor === null ? undefined : `strafschoppen ${match.penaltiesFor}–${match.penaltiesAgainst}`,
   ].filter((part) => part !== undefined)
 
   return extra.length === 0 ? score : `${score} (${extra.join(', ')})`
 }
+
+const kickoffKeys = ['dateText', 'kickoffAt', 'matchDate'] as const
+
+const resultKeys = [
+  'afterNinetyAgainst',
+  'afterNinetyFor',
+  'extraTime',
+  'goalsAgainst',
+  'goalsFor',
+  'penaltiesAgainst',
+  'penaltiesFor',
+  'resultSetAt',
+  'status',
+] as const
 
 /** The goals as `before_goals` keeps them, in the order they are shown. */
 export function encodeGoals(goals: MatchGoal[]): string {
@@ -199,6 +213,28 @@ export function isMarked(
 /** The parts of the match the editors still hold, in the order of `matchParts`. */
 export function markedParts(edit: Pick<MatchEdit, 'goalsEdited' | 'kickoffEdited' | 'resultEdited'>): MatchPart[] {
   return matchParts.filter((part) => isMarked(edit, part))
+}
+
+/**
+ * The snapshot of `before_match` and `before_goals` with the parts that get a marker again
+ * taken from the match as it is now. A part that Wikipedia took over and the editors enter
+ * again must go back to what Wikipedia has then, not to what it had before the first entry.
+ */
+export function refreshSnapshot(edit: MatchEdit, match: Match, goals: MatchGoal[], parts: MatchPart[]) {
+  const next = JSON.parse(edit.beforeMatch) as Record<string, unknown>
+  const now = JSON.parse(encodeMatch(match)) as Record<string, unknown>
+
+  for (const key of [
+    ...(parts.includes('kickoff') ? kickoffKeys : []),
+    ...(parts.includes('result') ? resultKeys : []),
+  ]) {
+    next[key] = now[key]
+  }
+
+  return {
+    beforeGoals: parts.includes('goals') ? encodeGoals(goals) : edit.beforeGoals,
+    beforeMatch: JSON.stringify(next),
+  }
 }
 
 /**

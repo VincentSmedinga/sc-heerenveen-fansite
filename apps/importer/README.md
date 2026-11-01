@@ -1162,7 +1162,7 @@ Voor de import is zo'n wedstrijd eigen invoer, ook voor `pnpm run import:season`
 - Hetzelfde is bij de uitslag: de status, de score, de verlenging, de stand na 90 minuten en de strafschoppen zijn gelijk.
   Bij de doelpunten zijn de kant, de minuut, de blessuretijd, de soort en de speler gelijk, in elke volgorde.
   Een speler van ons is dezelfde als hij hetzelfde `player_id` heeft, een andere speler als de naam overeenkomt.
-- Een verschil staat één keer in het logboek (`audit_log`, zonder account, dus "de import") en één keer in de waarschuwing van het seizoen, met beide waarden: "held, Speelronde 1 (Eredivisie): Wikipedia differs from the entry of the editors in the result: ours sc Heerenveen 2-0 FC Twente, Wikipedia sc Heerenveen 1-0 FC Twente".
+- Een verschil staat één keer in het logboek (`audit_log`, zonder account, dus "de import") en één keer in de waarschuwing van het seizoen, met beide waarden: "held, Speelronde 1 (Eredivisie): Wikipedia differs from the entry of the editors in the result: ours sc Heerenveen 2–0 FC Twente, Wikipedia sc Heerenveen 1–0 FC Twente".
   `match_edits.reported_*` bewaart wat Wikipedia zei, zodat de volgende run zwijgt zolang Wikipedia hetzelfde zegt.
   Zegt Wikipedia iets anders dan de vorige keer, dan is het weer nieuws.
   Het melden aan een redacteur en het besluit in het beheer volgen in #577; tot dan blijft de invoer staan tot een beheerder haar weghaalt.

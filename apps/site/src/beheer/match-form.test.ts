@@ -158,7 +158,7 @@ describe('validate', () => {
     const checked = validate(filled({}, [ours]), league)
 
     expect(checked.errors?.doelpunten).toBe(
-      'De doelpunten geven 1-0 en de uitslag is 2-1. Pas de doelpunten of de uitslag aan.',
+      'De doelpunten geven 1–0 en de uitslag is 2–1. Pas de doelpunten of de uitslag aan.',
     )
     expect(
       validate(filled({ status: 'scheduled', 'uitslag-wij': '', 'uitslag-zij': '' }, [ours]), league).errors,

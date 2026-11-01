@@ -232,11 +232,11 @@ describe('the lines the log and the page use', () => {
     }
 
     expect(describeEntryResult({ ...match, ...score, goalsAgainst: 1, goalsFor: 2, status: 'played' })).toBe(
-      'sc Heerenveen 2-1 N.E.C.',
+      'sc Heerenveen 2–1 N.E.C.',
     )
     expect(
       describeEntryResult({ ...match, ...score, goalsAgainst: 1, goalsFor: 2, home: false, status: 'played' }),
-    ).toBe('N.E.C. 1-2 sc Heerenveen')
+    ).toBe('N.E.C. 1–2 sc Heerenveen')
     expect(
       describeEntryResult({
         ...match,
@@ -249,7 +249,7 @@ describe('the lines the log and the page use', () => {
         penaltiesFor: 4,
         status: 'played',
       }),
-    ).toBe('sc Heerenveen 1-1 N.E.C. (na verlenging, 1-1 na 90 minuten, strafschoppen 4-3)')
+    ).toBe('sc Heerenveen 1–1 N.E.C. (na verlenging, 1–1 na 90 minuten, strafschoppen 4–3)')
     expect(describeEntryResult({ ...match, ...score, goalsAgainst: null, goalsFor: null, status: 'postponed' })).toBe(
       'uitgesteld',
     )

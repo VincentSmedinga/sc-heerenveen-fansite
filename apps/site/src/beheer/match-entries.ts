@@ -9,6 +9,7 @@ import {
   encodeMatch,
   markedParts,
   type MatchPart,
+  refreshSnapshot,
   removeEntry,
 } from '@fansite/db/match-edits'
 import { adminUsers, matchChanges, matchEdits, matches, matchGoals, players } from '@fansite/db/schema'
@@ -190,9 +191,19 @@ export async function saveEntry(
         reason,
       })
     } else {
+      // A part that comes back after Wikipedia took it over is kept as Wikipedia has it now.
+      const newly = parts.filter((part) => !markedParts(edit).includes(part))
+
       await transaction
         .update(matchEdits)
-        .set({ ...marks, ...forgotten, editedAt: now, editedBy: userId, reason })
+        .set({
+          ...marks,
+          ...forgotten,
+          ...(newly.length === 0 ? {} : refreshSnapshot(edit, match, goals, newly)),
+          editedAt: now,
+          editedBy: userId,
+          reason,
+        })
         .where(eq(matchEdits.matchId, id))
     }
 

@@ -1,7 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { markedParts } from '@fansite/db/match-edits'
+import { clearParts, markedParts } from '@fansite/db/match-edits'
 import {
   adminUsers,
   auditLog,
@@ -141,7 +141,7 @@ describe('saveEntry', () => {
       {
         action: 'match.edit',
         createdAt: t0,
-        detail: 'Uitslag: gepland → sc Heerenveen 2-1 N.E.C.',
+        detail: 'Uitslag: gepland → sc Heerenveen 2–1 N.E.C.',
         id: expect.any(Number),
         itemId: id,
         reason: 'Wikipedia is achter',
@@ -211,6 +211,30 @@ describe('saveEntry', () => {
     expect(JSON.parse(marker?.beforeMatch ?? '')).toMatchObject({ status: 'scheduled' })
     expect((await stored(id))?.resultSetAt).toEqual(t0)
     expect((await log()).map((line) => line.reason)).toEqual(['Eerst', 'Daarna de doelpunten'])
+  })
+
+  it('takes a part that comes back after Wikipedia took it over as Wikipedia has it, when the entry is taken away', async () => {
+    const id = await addMatch()
+    const goals = [goal(), goal({ minute: 50, ours: false }), goal({ minute: 80 })]
+
+    await saveEntry(database.db, userId, id, entry({ goals }), 'Eerst', t0)
+    // Wikipedia took over the result, and the importer cleared its marker: 3-1 is Wikipedia's.
+    await database.db.update(matches).set({ goalsAgainst: 1, goalsFor: 3 }).where(eq(matches.id, id))
+    await clearParts(database.db, (await edit(id))!, ['result'])
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      entry({ goals, result: { ...entry().result, goalsAgainst: 1, goalsFor: 4 } }),
+      'Wikipedia heeft het mis',
+      t1,
+    )
+
+    expect(await stored(id)).toMatchObject({ goalsFor: 4 })
+    expect(await undoEntry(database.db, userId, id, 'Toch niet', t1)).toBe('done')
+    expect(await stored(id)).toMatchObject({ goalsAgainst: 1, goalsFor: 3, status: 'played' })
+    // The goals were never taken over: they go back to what they were before the first entry.
+    expect(await goalsOf(id)).toEqual([])
   })
 
   it('forgets what Wikipedia was reported to say about a part that is entered again', async () => {

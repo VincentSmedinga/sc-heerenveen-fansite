@@ -310,20 +310,20 @@ describe('Wikipedia has something else', () => {
 
     expect(report.kind === 'imported' ? report.warnings : []).toEqual([
       'held, Speelronde 1 (Eredivisie): Wikipedia differs from the entry of the editors in the result: ' +
-        'ours sc Heerenveen 2-0 FC Twente, Wikipedia sc Heerenveen 1-0 FC Twente',
+        'ours sc Heerenveen 2–0 FC Twente, Wikipedia sc Heerenveen 1–0 FC Twente',
     ])
     expect(await row(roundOne)).toMatchObject({ goalsAgainst: 0, goalsFor: 2, resultSetAt: first })
     expect(await log()).toMatchObject([
       {
         action: 'match.differs',
         createdAt: second,
-        detail: 'Uitslag: onze invoer: sc Heerenveen 2-0 FC Twente; Wikipedia: sc Heerenveen 1-0 FC Twente',
+        detail: 'Uitslag: onze invoer: sc Heerenveen 2–0 FC Twente; Wikipedia: sc Heerenveen 1–0 FC Twente',
         itemId: id,
         reason: 'Wikipedia wijkt af van de invoer van de redactie (uitslag)',
         userId: null,
       },
     ])
-    expect(await warningOf()).toContain('ours sc Heerenveen 2-0 FC Twente, Wikipedia sc Heerenveen 1-0 FC Twente')
+    expect(await warningOf()).toContain('ours sc Heerenveen 2–0 FC Twente, Wikipedia sc Heerenveen 1–0 FC Twente')
 
     // The same difference at the next runs is not written again.
     for (const count of [3, 4, 50]) {
@@ -340,8 +340,8 @@ describe('Wikipedia has something else', () => {
     await importAt(server, later(first, 60))
 
     expect((await log()).map((line) => line.detail)).toEqual([
-      expect.stringContaining('Wikipedia: sc Heerenveen 1-0 FC Twente'),
-      expect.stringContaining('Wikipedia: sc Heerenveen 1-1 FC Twente'),
+      expect.stringContaining('Wikipedia: sc Heerenveen 1–0 FC Twente'),
+      expect.stringContaining('Wikipedia: sc Heerenveen 1–1 FC Twente'),
     ])
     expect(await row(roundOne)).toMatchObject({ goalsAgainst: 0, goalsFor: 2 })
   })
