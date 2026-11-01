@@ -9,6 +9,7 @@ import ClubOpponentPage, { generateMetadata } from './page'
 
 vi.mock('../../../../matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getEditedMatches: () => Promise.resolve(false),
   getMatchSeasons: vi.fn(),
 }))
 vi.mock('../../../../opponents', async (importOriginal) => ({

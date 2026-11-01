@@ -152,7 +152,7 @@ export async function StatisticsPage({
         <MatchFlowCard matches={data.matches} season={imageSeason} />
         <ExtremesCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
         {(data.matches.length > 0 || data.standings.length > 0) && (
-          <SourceCredit pages={data.pages} season={data.season} />
+          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} />
         )}
       </Page.Sidebar>
     </>

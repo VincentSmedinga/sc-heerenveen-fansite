@@ -1627,7 +1627,14 @@ describe('the page /statistieken', () => {
   })
 
   it('says in a sentence for visitors that there is nothing yet when the importer has not run', async () => {
-    vi.mocked(getMatchData).mockResolvedValue({ coaches: [], matches: [], pages: [], season: '2026/27', standings: [] })
+    vi.mocked(getMatchData).mockResolvedValue({
+      coaches: [],
+      edited: false,
+      matches: [],
+      pages: [],
+      season: '2026/27',
+      standings: [],
+    })
 
     const html = await render()
 

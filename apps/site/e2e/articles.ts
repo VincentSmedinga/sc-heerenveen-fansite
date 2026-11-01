@@ -51,7 +51,7 @@ export const earlierVersions = [
   },
 ] as const
 
-const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])
+export const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])
 
 /**
  * Puts the made-up articles, and an account for them, in the database and returns the function
@@ -184,7 +184,7 @@ export async function articleIdOf(slug: string) {
  * Connects with the DATABASE_URL of the environment or the .env in the root, like the server of
  * the check does.
  */
-function databaseEnv() {
+export function databaseEnv() {
   try {
     process.loadEnvFile(path.resolve(import.meta.dirname, '../../../.env'))
   } catch {

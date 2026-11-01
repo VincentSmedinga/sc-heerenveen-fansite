@@ -66,6 +66,7 @@ describe('the admin', () => {
     expect(renderToStaticMarkup(await AdminPage()).match(/<a [^>]*>(.*?)<\/a>/g)).toEqual([
       '<a href="/beheer/berichten">Berichten verbergen of weer tonen</a>',
       '<a href="/beheer/artikelen">Artikelen schrijven en publiceren</a>',
+      '<a href="/beheer/wedstrijden">Wedstrijden invullen of verbeteren</a>',
       '<a href="/beheer/bezoek">Cijfers over het bezoek</a>',
     ])
 

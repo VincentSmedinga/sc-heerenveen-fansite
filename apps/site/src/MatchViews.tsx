@@ -623,7 +623,15 @@ export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
  * lines up with the text in the cards above. It is nothing when the importer has read none,
  * which can't be so with data that came from the importer.
  */
-export function SourceCredit({ pages, season }: { pages: PublicWikipediaPage[]; season: string }) {
+export function SourceCredit({
+  edited,
+  pages,
+  season,
+}: {
+  edited: boolean
+  pages: PublicWikipediaPage[]
+  season: string
+}) {
   const credited = pages.map((page) => ({
     href: wikipediaUrl(page.title),
     name: creditName(page.kind, season),
@@ -639,7 +647,12 @@ export function SourceCredit({ pages, season }: { pages: PublicWikipediaPage[]; 
 
   return (
     <Card as="div" surface="transparent">
-      <WikipediaCredit pages={[first, ...rest]} readAt={formatReadAt(readAt)} readAtDateTime={readAt.toISOString()} />
+      <WikipediaCredit
+        edited={edited}
+        pages={[first, ...rest]}
+        readAt={formatReadAt(readAt)}
+        readAtDateTime={readAt.toISOString()}
+      />
     </Card>
   )
 }

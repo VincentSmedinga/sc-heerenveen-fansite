@@ -30,6 +30,9 @@ export default async function AdminPage() {
                 <Link href="/beheer/artikelen">Artikelen schrijven en publiceren</Link>
               </List.Item>
               <List.Item>
+                <Link href="/beheer/wedstrijden">Wedstrijden invullen of verbeteren</Link>
+              </List.Item>
+              <List.Item>
                 <Link href="/beheer/bezoek">Cijfers over het bezoek</Link>
               </List.Item>
             </>
