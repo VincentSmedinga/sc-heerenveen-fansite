@@ -57,6 +57,7 @@ beforeEach(async () => {
     'players',
     'squad_imports',
     'wikipedia_pages',
+    'match_changes',
     'matches',
     'standings',
     'match_imports',

@@ -18,8 +18,10 @@ import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 
 import type { ImportOptions } from './import-feeds.ts'
 
+import { describeWaitingChange } from './import-changes.ts'
 import { isUnhealthy } from './import-matches.ts'
 import { isGoalOfOurPlayer } from './link-players.ts'
+import { waitingChanges } from './match-changes.ts'
 import { unhealthyAfter } from './run-log.ts'
 import { formatTime, printable } from './text.ts'
 
@@ -27,9 +29,9 @@ import { formatTime, printable } from './text.ts'
  * Shows the health of each feed of the sources that are switched on: the source, the address,
  * the last run that succeeded, the failed runs in a row, the last error and whether the feed
  * is healthy. Above it is the last run, so you can see that cron starts the import. After the
- * feeds comes the health of the match import and of the squad import for the current season, in
- * the same words, each with the Wikipedia pages it read. It only reads, and changes nothing in
- * the database.
+ * feeds comes the health of the match import and of the squad import for the current season,
+ * in the same words, each with the Wikipedia pages it read, and the changes of a match that
+ * wait for a decision. It only reads, and changes nothing in the database.
  *
  * Returns the exit code: 1 when a feed or one of the two Wikipedia imports is unhealthy, so a
  * check can tell.
@@ -103,6 +105,8 @@ export async function showStatus(
 
     const matchesUnhealthy = await showMatchStatus(db, now, write)
     const squadUnhealthy = await showSquadStatus(db, now, write)
+
+    await showWaitingChanges(db, write)
 
     return matchesUnhealthy || squadUnhealthy || unhealthy > 0 ? 1 : 0
   } finally {
@@ -210,4 +214,26 @@ async function showUnlinkedGoals(db: Database, season: string, write: (line: str
   write(
     `  goals of ours without a player: ${unlinked.length} of ${ours.length}${names.length === 0 ? '' : ` (${printable(names.join(', '))})`}`,
   )
+}
+
+/**
+ * Shows the changes of a match that wait: what Wikipedia shows now against what the site shows,
+ * and when the import takes the change over. They are information and no fault: the site shows
+ * the old value until the change has stood for seven days or a person decides
+ * (`pnpm run import:changes`). It says nothing when none wait.
+ */
+async function showWaitingChanges(db: Database, write: (line: string) => void): Promise<void> {
+  const waiting = await waitingChanges(db)
+
+  if (waiting.length === 0) {
+    return
+  }
+
+  write('')
+  write(`Changes of matches that wait: ${waiting.length}`)
+  for (const change of waiting) {
+    for (const line of describeWaitingChange(change)) {
+      write(`  ${line}`)
+    }
+  }
 }

@@ -301,7 +301,7 @@ De importer haalt runs weg die ouder zijn dan 30 dagen.
 
 ## De wedstrijden en de stand
 
-De importer vult deze vier tabellen met de gegevens van de Nederlandse Wikipedia (zie de [README van de importer](../../apps/importer/README.md), _De wedstrijden en de stand_).
+De importer vult deze vijf tabellen met de gegevens van de Nederlandse Wikipedia (zie de [README van de importer](../../apps/importer/README.md), _De wedstrijden en de stand_).
 Ze gelden voor sc Heerenveen 1 (mannen).
 Een seizoen begint op 1 juli en staat als `2026/27` in `season`; `seasonOf` en `seasonStart` in `@fansite/db/season` rekenen het uit.
 Een rij van een eerder seizoen verandert of verdwijnt nooit.
@@ -321,7 +321,7 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 | `match_date`                         | De dag in Nederland, of de eerste dag als alleen een weekend bekend is                                       |
 | `kickoff_at`                         | De aftrap in UTC; leeg zolang de tijd niet bekend is                                                         |
 | `date_text`                          | De datum zoals Wikipedia die geeft, zoals `12-14 februari 2027`; gevuld als er geen aftrap is                |
-| `result_set_at`                      | Sinds wanneer de uitslag zo staat, in UTC; de import vergelijkt dat met drie dagen                           |
+| `result_set_at`                      | Sinds wanneer de uitslag zo staat, in UTC; de import vergelijkt dat met 24 uur                               |
 
 Vijf CHECK-constraints houden de rijen heel:
 
@@ -370,6 +370,26 @@ De sleutel is het seizoen met de plaats.
 `wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme`, `cup` en `playoffs` voor de wedstrijden, `squad` voor de selectie), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
 Een pagina kan daarmee de bron noemen.
 `listWikipediaPages` geeft alleen de pagina's van de wedstrijden.
+
+`match_changes` bewaart de wijzigingen van een wedstrijd die de importer beoordeelde (zie de README van de importer, _Hoe betrouwbaar een wijziging is_).
+
+| Kolom                            | Betekenis                                                                                                               |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `season`, `competition`, `round` | De wedstrijd; blijft staan als de wedstrijd verdwijnt                                                                   |
+| `match_id`                       | De wedstrijd in `matches`; leeg als de wedstrijd weg is                                                                 |
+| `changed`                        | Wat er veranderde: `result`, `goals`, `date`, `opponent`, `stadium` of `removed`                                        |
+| `class`                          | `improvement`: een verbetering van kort geleden die de import overnam; `suspicious`: een wijziging die wacht            |
+| `reason`                         | Waarom de wijziging niet gewoon nieuw is, in het Engels                                                                 |
+| `old_value`, `new_value`         | De wedstrijd en zijn doelpunten als één regel, vóór en na de wijziging; `new_value` is leeg bij een verdwenen wedstrijd |
+| `proposal`                       | De nieuwe wedstrijd en zijn doelpunten als JSON, zodat een mens de wijziging kan accepteren zonder Wikipedia            |
+| `status`                         | `pending` (wacht), `accepted` of `rejected`                                                                             |
+| `resolution`                     | Hoe het besluit viel: `applied`, `stood` (zeven dagen), `person`, `reverted` of `replaced`; leeg zolang het wacht       |
+| `first_seen_at`, `last_seen_at`  | De eerste en de laatste run die deze nieuwe waarde zag, in UTC                                                          |
+| `times_seen`                     | Het aantal runs dat deze nieuwe waarde zag                                                                              |
+| `decided_at`                     | Wanneer de wijziging werd overgenomen of afgewezen, in UTC                                                              |
+
+Een wijziging die niets bijzonders is (een nieuwe uitslag, een doelpunt erbij, een aanvangstijd) krijgt geen rij.
+De rijen blijven staan: ze laten zien hoe vaak Wikipedia iets verdachts deed.
 
 `match_imports` heeft per seizoen de gezondheid van de import: `last_success_at`, `last_outcome`, `failures_in_a_row`, `last_error`, `last_warning` en `retry_at`, de tijd waarvoor de import Wikipedia niet opnieuw vraagt.
 Het zijn dezelfde velden als bij een feed.
