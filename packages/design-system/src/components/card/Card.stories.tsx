@@ -51,6 +51,34 @@ const meta = preview.meta({
           'Met `shareable` krijgt de kaart rechtsboven een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron eronder.',
           'De bezoeker deelt die afbeelding of bewaart hem, en er gaat niets naar een server.',
           'Gebruik hem alleen voor een kaart met cijfers en feiten die we mogen laten rondgaan, nooit voor het werk van journalisten.',
+          '',
+          'De vier vlakken en het doorzichtige vlak hebben elk een betekenis.',
+          'Loop de regels op volgorde door: de eerste die past, wint.',
+          '',
+          '- **Wit** (`default`): de kaart is waar de pagina voor bestaat.',
+          '  Dat zijn de hoofdinhoud van de pagina, zoals de lijsten met nieuws, het programma en de uitslagen, en het overzicht van ons seizoen.',
+          '  De blokken van de homepage zijn allemaal wit, want elk blok is er de inhoud.',
+          '- **Sterk** (`strong`): de kaart gaat over de mensen of organisaties achter de inhoud, of is aan hen gericht.',
+          '  Denk aan de hoofdtrainer, "Ben je zelf een bron?" en later het officiële clubnieuws.',
+          '- **Warm** (`warm`): iets opmerkelijks.',
+          '  Een kaart die bijzonder of oorspronkelijk is, zoals de grafieken van het seizoen en de ringen van Doelpunten per kwartier, of een uitnodiging, zoals de nieuwsbrief van de LC.',
+          '  Ongeveer één kaart op de zes is warm, zonder vast maximum per pagina, en nooit om buren van elkaar te onderscheiden.',
+          '- **Zacht** (`soft`): ranglijsten, lijsten en records die bij de hoofdinhoud horen, zoals de stand, de doelpuntenmakers en de uitersten, de filters, de kaart van de eerste zoekvraag en al het andere dat de pagina aanvult.',
+          '- **Transparant** (`transparent`): bronvermeldingen.',
+          '  De schakelaar voor de competitie blijft zoals hij is, zonder vlak.',
+          '- **Buurkaarten mogen dezelfde kleur hebben.**',
+          '  Moeten twee kaarten uit elkaar, verander dan de volgorde of de kop, niet de kleur.',
+          '- **Kleur is nooit het enige teken.**',
+          '  In donker zijn zacht en wit gelijk, en warm en sterk ook, dus de betekenis moet ook uit de plaats en de kop komen.',
+          '',
+          '**Welk vlak kies ik?**',
+          'Stel de vragen op volgorde, en neem het vlak van het eerste ja.',
+          '',
+          '1. Is de kaart waar de pagina voor bestaat? Kies wit.',
+          '2. Gaat de kaart over de mensen of organisaties achter de inhoud, of is hij aan hen gericht? Kies sterk.',
+          '3. Is de kaart bijzonder of oorspronkelijk, of is hij een uitnodiging? Kies warm.',
+          '4. Hoort de kaart bij de hoofdinhoud, of vult hij de pagina aan, als ranglijst, lijst, record, filter of eerste zoekvraag? Kies zacht.',
+          '5. Is het een bronvermelding? Kies transparant.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -99,21 +127,30 @@ export const Default = meta.story({
   ),
 })
 
-const surfaces: { label: string; surface: CardSurface }[] = [
-  { label: 'Vlak', surface: 'default' },
-  { label: 'Sterk vlak', surface: 'strong' },
-  { label: 'Zacht vlak', surface: 'soft' },
-  { label: 'Warm vlak', surface: 'warm' },
+const surfaces: { label: string; purpose: string; surface: CardSurface }[] = [
+  { label: 'Vlak', purpose: 'De hoofdinhoud van de pagina.', surface: 'default' },
+  {
+    label: 'Sterk vlak',
+    purpose: 'De mensen of organisaties achter de inhoud, of een kaart die aan hen gericht is.',
+    surface: 'strong',
+  },
+  {
+    label: 'Zacht vlak',
+    purpose: 'Een ranglijst, lijst, record of filter die bij de hoofdinhoud hoort, en wat de pagina aanvult.',
+    surface: 'soft',
+  },
+  { label: 'Warm vlak', purpose: 'Iets opmerkelijks: iets bijzonders of een uitnodiging.', surface: 'warm' },
 ]
 
 const renderSurfaces = () => (
   <Page.Body>
     <Page.Main>
-      {surfaces.map(({ label, surface }) => (
+      {surfaces.map(({ label, purpose, surface }) => (
         <Card aria-labelledby={`surface-${surface}`} key={surface} surface={surface}>
           <Heading appearance={3} id={`surface-${surface}`} level={2}>
             {label}
           </Heading>
+          <Text>{purpose}</Text>
           {newsItems}
         </Card>
       ))}

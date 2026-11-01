@@ -309,7 +309,7 @@ Alleen de pagina's van Statistieken hebben een route in het slot, en zij worden 
 Op `/statistieken` is geen subpagina de huidige; op `/statistieken/spelers` en zijn seizoenen is Spelers het wel, op `/statistieken/tegenstanders` en de pagina's van de clubs is Tegenstanders het wel, en Statistieken blijft het huidige onderdeel van het menu.
 Op een breed scherm is de balk er niet.
 De balk volgt de pagina, zoals die van Wedstrijden.
-De stand, de reeksen, de doelpuntenmakers, de nul gehouden, hoe de wedstrijden verlopen en de uitersten hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen, thuis en uit en de doelpunten per kwartier een warm vlak (`surface="warm"`), en onze plek in de competitie is wit.
+De stand, de reeksen, de doelpuntenmakers, de nul gehouden, hoe de wedstrijden verlopen en de uitersten hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen en de doelpunten per kwartier een warm vlak (`surface="warm"`), en onze plek in de competitie en thuis en uit zijn wit.
 
 De pagina deelt met Wedstrijden alles rond het seizoen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, en de onderdelen van `src/seasons.ts`.
 Elk seizoen heeft één adres: `/statistieken` is het lopende seizoen en `/statistieken/2025-26` een eerder seizoen (`app/statistieken/[seizoen]`), en de kiezer gaat via `app/statistieken/kies`, die doorverwijst (303).
@@ -533,7 +533,7 @@ De queries nemen de slugs als `podcasts` (`listPodcastEpisodes` en `countPodcast
 De functies die het adres lezen en maken staan in `src/podcasts-query.ts`; ze delen hun werk met `/nieuws` in `src/filter-query.ts`.
 Met precies één vinkje staat de naam van de podcast niet bij elke aflevering (`showSource` van `NewsItem`), want de kop van de pagina noemt hem al; een schermlezer hoort hem nog wel.
 De titel en de kop noemen de gekozen podcasts, zoals "Podcasts van Omroep Abe en Radio Camataru".
-Bij precies één vinkje staat onder de kaart met de vakjes een tweede kaart op een warm vlak (`surface="warm"`), zodat hij anders is dan de lichtblauwe kaart erboven, met de kop "Over Omroep Abe", de beschrijving van de podcast uit het register (`sources.description`, de tekst van de maker uit zijn feed, dezelfde als op Onze bronnen), en daarna "Luister ook op" met een lijst met een tekstlink per adres dat de podcast heeft.
+Bij precies één vinkje staat onder de kaart met de vakjes een tweede kaart op een warm vlak (`surface="warm"`), met de kop "Over Omroep Abe", de beschrijving van de podcast uit het register (`sources.description`, de tekst van de maker uit zijn feed, dezelfde als op Onze bronnen), en daarna "Luister ook op" met een lijst met een tekstlink per adres dat de podcast heeft.
 Heeft de podcast geen adressen, dan staat de beschrijving er alleen.
 Bij geen vinkje en bij meer dan één vinkje staat er geen kaart "Over".
 Op een smal scherm staat de zijbalk onder de lijst, zoals bij de andere pagina's.

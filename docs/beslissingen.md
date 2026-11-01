@@ -3106,6 +3106,43 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een tweede maat-eigenschap voor de schakelaar (de kleine maat is al één mechanisme voor alle knoppen en velden).
 - **Later:** zie _Een SegmentedControl bewaart niets, en de ingedrukte knop is gevuld_: de ingedrukte knop is niet meer gevuld, maar de gekozen keuze heeft een knop en dikkere letters.
 
+### De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past
+
+- **Datum:** 1 november 2026
+- **Besluit:** de vier vlakken van een kaart, `default` (wit), `strong`, `warm` en `soft`, en het doorzichtige vlak hebben een vaste betekenis.
+  Een kaart krijgt het vlak van de eerste regel die past:
+  1. **Wit** (`default`): de kaart is waar de pagina voor bestaat.
+     Dat zijn de hoofdinhoud van de pagina, zoals de lijsten met nieuws, het programma en de uitslagen, en het overzicht van ons seizoen.
+     De blokken van de homepage zijn allemaal wit, want elk blok is er de inhoud.
+  2. **Sterk** (`strong`): de kaart gaat over de mensen of organisaties achter de inhoud, of is aan hen gericht.
+     Voorbeelden zijn de hoofdtrainer, "Ben je zelf een bron?" en later het officiële clubnieuws.
+  3. **Warm** (`warm`): iets opmerkelijks, zoals een kaart die bijzonder of oorspronkelijk is of een uitnodiging.
+     Voorbeelden zijn de grafieken van het seizoen, de ringen van Doelpunten per kwartier en de nieuwsbrief van de LC.
+     Ongeveer één kaart op de zes, zonder vast maximum per pagina, en nooit om buren van elkaar te onderscheiden.
+  4. **Zacht** (`soft`): ranglijsten, lijsten en records die bij de hoofdinhoud horen, de filters, de kaart van de eerste zoekvraag en al het andere dat de pagina aanvult.
+  5. **Transparant** (`transparent`): bronvermeldingen.
+     De schakelaar voor de competitie blijft zoals hij is, zonder vlak.
+  6. **Buurkaarten mogen dezelfde kleur hebben.**
+     Moeten twee kaarten uit elkaar, verander dan de volgorde of de kop, niet de kleur.
+  7. **Kleur is nooit het enige teken.**
+     In donker zijn zacht en wit gelijk, en warm en sterk ook, dus de betekenis moet ook uit de plaats en de kop komen.
+- **Wat verandert:** bijna niets.
+  Thuis en uit op Statistieken wordt wit (was warm).
+  De filters op `/nieuws` en `/nieuws/podcasts` en de kaart van de eerste zoekvraag blijven zacht: te veel witte kaarten maken de pagina's saai en geven minder aanwijzingen over wat belangrijk is.
+  Alle andere kaarten houden hun vlak, ook de homepage en `ArticleCard` (zacht).
+- **Waarom:** de kleuren van de kaarten waren vooral gekozen om buurkaarten van elkaar te onderscheiden en zeiden niets.
+  Ze wisselden om en om, zes kaarten op vijf pagina's waren warm, en zacht was de vuilnisbak geworden voor ongeveer vijftien kaarten.
+  Met een betekenis kan een agent bij een nieuwe kaart kiezen zonder te raden, en weet de bezoeker dat warm iets bijzonders is.
+- **Nadeel:** het oordeel "opmerkelijk" blijft van een mens.
+  Er komt geen test die de regels afdwingt, en een kaart kan dus ten onrechte warm blijven.
+  Naast elkaar kunnen twee witte of twee zachte kaarten staan, zodat de rand en de kop het onderscheid moeten maken.
+- **Gevolg:** de regels staan in de Storybook-pagina van `Card`, met het lijstje "Welk vlak kies ik?".
+  De vlakken, de tokens en het contrast veranderen niet.
+- **Alternatieven:** de kleuren laten wisselen om buren te onderscheiden (zoals het was: geen betekenis, en elke nieuwe kaart vraagt een gok).
+  Een vast maximum aan warme kaarten per pagina (een getal dat niets zegt over wat opmerkelijk is).
+  Een test die de regels afdwingt (een machine kan niet bepalen wat opmerkelijk is).
+  Een tweede soort vlak, of nieuwe kleuren (niet nodig voor de regels; de projecteigenaar probeert later vier kleuren in donker).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -5279,6 +5316,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de kaart "Over" ook tonen bij meer podcasts (dan zijn het er meer dan de zijbalk aankan, en de teksten zijn per podcast).
   De maten van `/nieuws` ook hier gebruiken (dat vraagt de projecteigenaar apart).
   Alle vakjes aangevinkt als een eigen adres laten bestaan (twee adressen voor dezelfde pagina).
+- **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de kaart "Over A" blijft warm, maar niet meer om de twee kaarten uit elkaar te houden: een beschrijving van de maker met links om te luisteren is een uitnodiging.
 
 ### De duur, het seizoen en het nummer van een aflevering tonen we wel
 
@@ -7739,6 +7777,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de plaatsen als extra kolommen in de stand (de stand wordt breed op een telefoon).
   De lijnen wel tonen (de projecteigenaar wil nu geen voorspellingen, zie #418).
   Een zacht of warm vlak (dezelfde kleur als een buurkaart).
+- **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de kaart blijft wit, maar de reden is nu de regel dat het overzicht van ons seizoen wit is, en niet meer dat de buurkaarten zacht en warm zijn.
 
 ### Tiptap is de teksteditor voor de artikelen van de redactie
 
@@ -7852,6 +7891,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De nieuwste eerst (past bij Uitslagen en De nul gehouden, maar dan loopt de volgorde tegen die van de letters in).
   Een warm vlak (komt naast Verloop van het seizoen, dat al warm is).
 - **Later:** een eerder seizoen toont alleen de langste reeksen, zonder de lengte van nu en zonder de laatste vijf wedstrijden, zie _Een eerder seizoen toont bij de reeksen alleen de langste_ (30 oktober 2026).
+- **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de reden dat het zachte vlak de volgende kaart warm laat worden, zodat de kaarten om en om wisselen, vervalt.
+  Reeksen blijft zacht, omdat het een lijst is die bij de hoofdinhoud hoort.
 
 ### De toon en de schrijfwijzer staan in het hoofdstuk Redactie
 
@@ -7915,6 +7956,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rij met de wedstrijden zonder tegendoelpunt heet "Zonder tegendoelpunt", zodat ze niet lijkt op de kaart De nul gehouden, die ook de beker telt.
 - **Alternatieven:** een grafiek met twee staven per onderdeel (een nieuw component voor één kaart).
   Alleen de punten tonen (de doelpunten zeggen veel over de manier van spelen).
+- **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de kaart is wit en niet meer warm.
+  De reden "zodat de buurkaarten niet dezelfde kleur hebben" vervalt: Thuis en uit hoort bij het overzicht van ons seizoen, naast Onze plek in de competitie.
 
 ### Het eerste doelpunt en de stand bij de rust komen uit de doelpunten op minuut, met een regel voor gelijke minuten
 
