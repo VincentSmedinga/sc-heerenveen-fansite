@@ -188,13 +188,14 @@ Sessions work next to each other on one computer, and these checks take every co
 So they run one at a time, over all worktrees: the scripts take a slot first (`scripts/heavy-lock.js`), and when another session holds it they say so and wait.
 Don't work around it, and don't kill the process that holds the slot.
 A slot that is held for more than 30 minutes, or whose process has gone, is taken over.
-The other checks (`pnpm test`, lint, typecheck) cap their processes, so they can run next to a heavy one.
+The other checks are capped too, so they can run next to a heavy one: `pnpm test` runs at most two packages at a time with two test processes each, Playwright uses two, and the commit hook runs two tasks at a time.
 The decision is in `docs/beslissingen.md`, under _De zware controles delen de machine_.
 
 - The Builder runs the heavy checks before it asks for the go-ahead, once, after the last commit.
 - The Reviewer doesn't run them again when CI has: it runs lint, typecheck and the tests of the packages the change touches, and reads the rest from CI.
   It runs a heavy check itself only when CI skipped it and the change can still affect it.
-- CI is not affected: a runner has one job, so the slot and the caps don't apply there (`CI` is set).
+- CI skips the slot and keeps the default number of test processes of Vitest and Playwright, because a runner has one job (`CI` is set).
+  The limit of two packages at a time in `pnpm build` and `pnpm test`, and the time-out of 30 seconds for the database tests, apply in CI too.
 
 ## Screenshots
 

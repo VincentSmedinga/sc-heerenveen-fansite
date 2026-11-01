@@ -78,8 +78,9 @@ Daarom lopen `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` en `pnpm --filt
 Ze nemen eerst een slot (`scripts/heavy-lock.js`) en melden "Waiting for the slot of the heavy checks" als een andere sessie het heeft.
 Wacht dan, en stop dat proces niet.
 Een slot dat langer dan 30 minuten vastzit, of waarvan het proces weg is, neemt de volgende over.
-De andere controles, zoals `pnpm test`, gebruiken hoogstens twee processen tegelijk.
-In CI telt dit alles niet: daar staat `CI` aan, en een runner heeft één taak.
+De andere controles zijn begrensd: `pnpm test` draait hoogstens twee pakketten tegelijk, met elk hoogstens twee testprocessen, Playwright gebruikt er twee, en de commit-hook draait hoogstens twee taken tegelijk.
+In CI telt het slot niet, en de testprocessen van Vitest en Playwright houden hun standaard: daar staat `CI` aan, en een runner heeft één taak.
+De grens van twee pakketten tegelijk bij `pnpm build` en `pnpm test`, en de time-out van 30 seconden bij de tests van de database, gelden ook in CI.
 Werk je in een worktree, dan krijg je een eigen database en eigen poorten, zodat twee sessies naast elkaar kunnen werken.
 `scripts/worktree-env.js` leidt ze af van de naam van de map, en de opdrachten hierboven gebruiken ze zonder dat je iets doet.
 Een gewone checkout en CI houden de poorten 3000, 6006, 3123, 3124, 3125 en 2525 en de database `fansite`.

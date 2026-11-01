@@ -659,7 +659,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - `--workspace-concurrency=2` voor `pnpm build` en `pnpm test` in de hoofdmap;
   - `--concurrent 2` voor `lint-staged` in `.husky/pre-commit`.
 
-  In CI blijft alles zoals het was: een runner heeft één taak, en de caps gelden alleen als `CI` niet gezet is.
+  In CI slaan de runs het slot over en houden Vitest en Playwright hun standaard aantal processen, want een runner heeft één taak: de caps van de configuraties gelden alleen als `CI` niet gezet is.
+  `--workspace-concurrency=2` in `package.json` en de time-out van 30 seconden gelden ook in CI; de job _Migrate, seed and test_ duurde met deze wijziging 1 minuut 59 tegen 2 minuten 46 op `main`, dus CI werd er niet trager van.
   `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` en de Storybook-build nemen eerst een slot per computer (`scripts/heavy-lock.js`), een map in de temp-map van de gebruiker.
   Wie het slot niet krijgt, meldt wie het heeft en wacht.
   Een slot dat langer dan 30 minuten vastzit of waarvan het proces weg is, neemt de volgende over.
