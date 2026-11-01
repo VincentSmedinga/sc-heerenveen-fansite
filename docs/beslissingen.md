@@ -1307,6 +1307,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   We laten dat zo (besloten op 20 oktober 2026).
   Voor release-please maakt een `fix` een patch-release en een `chore` geen release (zie _Eén versie voor de hele site, met release-please_).
   Een update van een dependency in productie verandert wat bezoekers krijgen, bijvoorbeeld bij een beveiligingsfix, dus die hoort in de changelog.
+- **Later:** sinds 1 november 2026 laat Renovate MariaDB en Node op de versie van de host staan (zie _Renovate blijft bij MariaDB 10.11 en Node 24_).
+  De rest van dit besluit blijft gelden.
 - **Alternatieven:** Dependabot, ingebouwd en zonder extra app.
   Dat bekijken we opnieuw zodra het pnpm 12 ondersteunt.
   Of Renovate zelf draaien als GitHub Action: geen app van een ander, maar wel een token en onderhoud.
@@ -1392,6 +1394,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `@stylistic/max-len`; dat is een nieuwe dependency voor een regel die ESLint zelf nog heeft.
 - **Let op:** ESLint heeft `max-len` als verouderd gemarkeerd, en hij kan in een volgende hoofdversie verdwijnen.
   Dan kiezen we opnieuw.
+
+### Renovate blijft bij MariaDB 10.11 en Node 24
+
+- **Datum:** 1 november 2026
+- **Besluit:** Renovate stelt geen MariaDB 11 of nieuwer voor en geen Node 25 of nieuwer.
+  Dat staat in `.github/renovate.json5`, in twee regels naast die voor TypeScript.
+  MariaDB blijft onder 11, voor de image in `compose.yaml` en in de workflows.
+  Node en `@types/node` blijven onder 25, voor `.nvmrc` en `engines`.
+  Updates binnen MariaDB 10.x en Node 24 blijven komen, en andere grote updates ook, zoals `entities` 9.
+  We halen de regels weg als de host een nieuwere versie biedt en we bewust verhuizen.
+  Dan veranderen de versies in `compose.yaml`, de workflows, `.nvmrc`, `engines` en `@types/node` in dezelfde pull request.
+- **Waarom:** de host draait MariaDB 10.11 en Node 24.20 en kiest niet voor ons.
+  Een stap naar MariaDB 13 of Node 26 is dus geen update maar een verhuizing, en de tests en de rooktest draaien nu op de versies van de host.
+  Het overzicht van #463 toonde beide sprongen elke week, en iemand kon ze per ongeluk aanvinken.
+- **Gevolg:** de pull request voor MariaDB 13 en Node 26 komt niet meer.
+  Een nieuwe versie van de host moeten we zelf zien, bijvoorbeeld in _Setup Node.js App_.
+- **Alternatieven:** de sprongen elke week laten staan en niet aanvinken, wat ruis in het overzicht geeft en een kans op een vergissing.
+  Of de major-updates van deze pakketten uitzetten; dat werkt ook, maar de grens zegt dan niet welke versie de host heeft, en de regel voor TypeScript noemt de versie wel.
 
 ## Designsysteem
 

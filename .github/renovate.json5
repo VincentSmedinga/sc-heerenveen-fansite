@@ -25,5 +25,19 @@
       allowedVersions: '<7',
       matchPackageNames: ['typescript'],
     },
+    {
+      // The host runs MariaDB 10.11, so the image in compose.yaml and the workflows stays on
+      // 10.x until we move on purpose; see "Renovate blijft bij MariaDB 10.11 en Node 24" in
+      // docs/beslissingen.md. A regular expression, because the Docker versioning of Renovate
+      // doesn't read ranges.
+      allowedVersions: '/^10\\./',
+      matchPackageNames: ['mariadb'],
+    },
+    {
+      // The host runs Node 24, so Node (.nvmrc, engines) and its types stay under 25 until we
+      // move on purpose; see the same decision.
+      allowedVersions: '<25',
+      matchPackageNames: ['node', '@types/node'],
+    },
   ],
 }
