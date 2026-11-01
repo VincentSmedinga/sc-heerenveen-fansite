@@ -12,8 +12,8 @@ import { matchId } from './matches'
 // the admin, checked as the moderator or the beheerder that the global setup logs in (see
 // admin.ts).
 // `{draft}` and `{published}` in a path stand for the number of the made-up draft and the
-// made-up published article, and `{match}` for the first made-up match of this season, which
-// the database gives.
+// made-up published article, and `{match}` for the first made-up match of this season that
+// is still to be played, which the database gives.
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
   // The news archive: all sources, one source, more sources, the second page (the made-up

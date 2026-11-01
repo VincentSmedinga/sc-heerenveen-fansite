@@ -68,6 +68,10 @@ export function MatchForm({
     }
   }, [state])
 
+  // A select that is already on the page ignores a new `defaultValue`, and React resets the
+  // form after every action, so a select that keeps its own value would fall back to the first
+  // one. Its key is its value, so it comes back with what the server returned. The rows of the
+  // goals have a key of their values for the same reason.
   const field = (name: MatchFieldName) => ({ defaultValue: velden[name], name })
 
   return (
@@ -121,7 +125,7 @@ export function MatchForm({
             Status en uitslag
           </Heading>
           <Field error={errors.status} id="status" label="Status">
-            <Select {...field('status')}>
+            <Select {...field('status')} key={velden.status}>
               {choices.statuses.map((status) => (
                 <Select.Option key={status.value} value={status.value}>
                   {status.label}
@@ -149,7 +153,7 @@ export function MatchForm({
           {choices.knockout ? (
             <>
               <Field error={errors.verlenging} id="verlenging" label="Verlenging">
-                <Select {...field('verlenging')}>
+                <Select {...field('verlenging')} key={velden.verlenging}>
                   <Select.Option value="nee">Nee</Select.Option>
                   <Select.Option value="ja">Ja</Select.Option>
                 </Select>
@@ -305,7 +309,7 @@ export function MatchForm({
         </Card>
         <Card aria-labelledby="reden-kop">
           <Heading id="reden-kop" level={2}>
-            Reden
+            Logboek
           </Heading>
           <Field
             error={errors.reden}

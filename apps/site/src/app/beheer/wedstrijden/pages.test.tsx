@@ -180,7 +180,7 @@ describe('the match', () => {
         'h2 Aftrap',
         'h2 Status en uitslag',
         'h2 Doelpunten',
-        'h2 Reden',
+        'h2 Logboek',
       ]),
     )
     for (const label of [
