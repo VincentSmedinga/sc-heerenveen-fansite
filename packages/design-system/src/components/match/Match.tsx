@@ -102,6 +102,13 @@ type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   competition: string
   /** Whether sc Heerenveen plays at home. The home club is named first. */
   home: boolean
+  /**
+   * A line of plain text under the match, in the small text of the other lines: something about
+   * this match that the other lines do not say, such as that it was stopped and finished later.
+   * Leave it out for a match that has nothing to add. It comes after "Gegevens nog niet
+   * beschikbaar" when that is shown too.
+   */
+  note?: null | string | undefined
   /** The club sc Heerenveen plays, as plain text. */
   opponent: string
   /** The round as the source has it, such as `Speelronde 12` or `Tweede ronde`. */
@@ -171,7 +178,9 @@ const separator = (
  * A postponed match says "Uitgesteld" where the time would be. A match that has begun long ago
  * and has no result yet (`resultMissing`) says "Gegevens nog niet beschikbaar" as the last
  * line, under the time and the place, in a muted red, and not bold. The words are the sign;
- * the colour only adds to them.
+ * the colour only adds to them. A `note` is one more line of plain text at the very end, in the
+ * small text of the line with the time, for the match that needs a word more, such as "Gestaakt
+ * in minuut 82. Het restant is op 11 mei gespeeld in het Abe Lenstra Stadion."
  *
  * The scorers of a played match are one line between the clubs and the time, in the order of
  * the clock with the goals of both clubs: "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen". The
@@ -192,6 +201,7 @@ export const Match = ({
   goalsAgainst,
   goalsFor,
   home,
+  note,
   opponent,
   penaltiesAgainst,
   penaltiesFor,
@@ -307,6 +317,11 @@ export const Match = ({
       {resultMissing ? (
         <Text appearance="meta" className="hf-match-missing">
           Gegevens nog niet beschikbaar
+        </Text>
+      ) : null}
+      {note ? (
+        <Text appearance="meta" className="hf-match-note">
+          {note}
         </Text>
       ) : null}
     </div>

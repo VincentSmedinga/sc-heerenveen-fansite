@@ -18,6 +18,7 @@ const base = {
   goalsAgainst: null,
   goalsFor: null,
   kickoffAt: null,
+  note: null,
   penaltiesAgainst: null,
   penaltiesFor: null,
   stadium: null,

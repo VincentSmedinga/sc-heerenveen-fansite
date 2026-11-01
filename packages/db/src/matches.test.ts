@@ -4,7 +4,7 @@ import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { matches, matchGoals } from './schema.ts'
+import { matches, matchGoals, matchLimits } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -167,6 +167,23 @@ describe('the extra time and the shoot-out of a match', () => {
 
     // Drizzle wraps the error of the database, which names the constraint.
     expect(String((failure as Error | undefined)?.cause)).toContain(constraint)
+  })
+})
+
+describe('the note of a match', () => {
+  it('is empty unless the importer wrote one', async () => {
+    await database.db.insert(matches).values(await clubbed(cupMatch))
+
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ note: null })
+  })
+
+  it('keeps a line of text with a stadium of the longest name', async () => {
+    const note = `Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het ${'S'.repeat(150)}.`
+
+    expect(note.length).toBeLessThanOrEqual(matchLimits.note)
+    await database.db.insert(matches).values(await clubbed({ ...cupMatch, note }))
+
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ note })
   })
 })
 

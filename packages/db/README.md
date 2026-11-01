@@ -319,6 +319,7 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 | `extra_time`                               | Of een gespeelde bekerwedstrijd in verlenging ging; anders `false`                                           |
 | `penalties_for`, `penalties_against`       | De strafschoppen van sc Heerenveen en van de tegenstander; leeg zonder strafschoppen, anders allebei gevuld  |
 | `after_ninety_for`, `after_ninety_against` | De stand na 90 minuten bij een bekerwedstrijd met verlenging, als de pagina hem geeft; anders allebei leeg   |
+| `note`                                     | Een regel onder de wedstrijd, nu alleen voor een gestaakte wedstrijd die later is uitgespeeld; anders leeg   |
 | `match_date`                               | De dag in Nederland, of de eerste dag als alleen een weekend bekend is                                       |
 | `kickoff_at`                               | De aftrap in UTC; leeg zolang de tijd niet bekend is                                                         |
 | `date_text`                                | De datum zoals Wikipedia die geeft, zoals `12-14 februari 2027`; gevuld als er geen aftrap is                |

@@ -51,6 +51,10 @@ const meta = preview.meta({
           'De tijd blijft staan.',
           'Het is een eerlijke melding van wat we niet weten, zonder gok naar de uitslag.',
           '',
+          'Heeft een wedstrijd iets te melden dat de andere regels niet zeggen, zoals dat hij gestaakt is en later is uitgespeeld, dan zet je dat in `note`: gewone tekst in de kleine letter, als laatste regel onder de wedstrijd.',
+          'Staat "Gegevens nog niet beschikbaar" er ook, dan komt de regel daaronder.',
+          'Zonder `note` verandert er niets.',
+          '',
           '- `competition`, `round` en `opponent` zijn gewone tekst, zoals de bron ze heeft.',
           '- `home` zegt of sc Heerenveen thuis speelt.',
           '- `status` is `scheduled`, `played` of `postponed`.',
@@ -537,6 +541,63 @@ const renderMissing = () => (
   </div>
 )
 
+// A match with a line under it, one without to compare, and one with the line under "Gegevens
+// nog niet beschikbaar". The clubs and the stadiums are made up.
+const renderNote = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="regel-eronder-kop">
+      <Heading id="regel-eronder-kop" level={2}>
+        Met een regel eronder
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-05-10"
+            goalsAgainst={0}
+            goalsFor={2}
+            home={false}
+            note="Gestaakt in minuut 82. Het restant is op 11 mei gespeeld in het Voorbeeldpark."
+            opponent="Testdorp FC"
+            round="Speelronde 33"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="zo 10 mei"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-05-03"
+            goalsAgainst={1}
+            goalsFor={1}
+            home
+            opponent="Voorbeeld United"
+            round="Speelronde 32"
+            stadium="Voorbeeldpark"
+            status="played"
+            time="zo 3 mei"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-10-25T14:30:00Z"
+            home
+            note="Gestaakt in minuut 64. Het restant wordt op 28 oktober gespeeld in het Voorbeeldpark."
+            opponent="Proefstad SV"
+            resultMissing
+            round="Speelronde 11"
+            stadium="Voorbeeldpark"
+            status="scheduled"
+            time="zo 25 okt 15:30"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
 export const Light = meta.story({
   globals: { theme: 'light' },
   name: 'Zijbalk, met de vorige en de volgende wedstrijd, licht',
@@ -631,4 +692,9 @@ export const SidebarMissingDark = meta.story({
   globals: { theme: 'dark' },
   name: 'Zijbalk, de vorige wedstrijd zonder uitslag en de volgende, donker',
   render: renderSidebarMissing,
+})
+
+export const WithNote = meta.story({
+  name: 'Met een regel eronder: gestaakt en later uitgespeeld, zonder regel, en naast "Gegevens nog niet beschikbaar"',
+  render: renderNote,
 })

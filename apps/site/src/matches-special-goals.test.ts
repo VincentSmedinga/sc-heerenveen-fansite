@@ -33,6 +33,7 @@ const played = (goals: Goal[], options: Partial<PublicMatch> = {}): PublicMatch 
   home: true,
   kickoffAt: new Date('2026-08-01T14:30:00Z'),
   matchDate: '2026-08-01',
+  note: null,
   opponent: 'Testdorp FC',
   penaltiesAgainst: null,
   penaltiesFor: null,
