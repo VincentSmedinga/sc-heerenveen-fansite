@@ -863,7 +863,7 @@ describe('the encoding', () => {
   })
 })
 
-describe('the paywall of the Algemeen Dagblad', () => {
+describe('the paywall of the Algemeen Dagblad and De Gelderlander', () => {
   const dpp = 'https://www.dpgmedia.cloud/paidrss'
 
   /** A feed with these items, and the namespaces on the `rss` element. */
@@ -946,6 +946,7 @@ describe('the paywall of the Algemeen Dagblad', () => {
 
   it('knows the namespace by the domain of the source and by nothing else', () => {
     expect(paywallNamespaceFor('www.ad.nl')).toBe(dpp)
+    expect(paywallNamespaceFor('www.gelderlander.nl')).toBe(dpp)
     expect(paywallNamespaceFor('www.lc.nl')).toBeUndefined()
     expect(paywallNamespaceFor('www.vi.nl')).toBeUndefined()
   })

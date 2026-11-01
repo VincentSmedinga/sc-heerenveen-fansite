@@ -123,10 +123,10 @@ export function cleanHeadline(raw: string): string {
 
 /**
  * How a source says an item is behind a paywall, by the domain of the source. Voetbal
- * International gives such an item a category with this `domain`, and the Algemeen Dagblad an
- * element `paid` in a namespace with this address (see `paywallNamespaces`); every other source
- * uses the `<premium>` element of the Leeuwarder Courant. A feed without any of these signs has
- * no paywall.
+ * International gives such an item a category with this `domain`, and the Algemeen Dagblad and
+ * De Gelderlander an element `paid` in a namespace with this address (see `paywallNamespaces`);
+ * every other source uses the `<premium>` element of the Leeuwarder Courant. A feed without any
+ * of these signs has no paywall.
  */
 const paywallCategories: Record<string, string> = {
   'www.vi.nl': 'https://www.vi.nl/pro',
@@ -134,11 +134,13 @@ const paywallCategories: Record<string, string> = {
 
 /**
  * The namespaces of the `<paid>` element, by the domain of the source. DPG Media, the publisher
- * of the Algemeen Dagblad, puts `<dpp:paid>true</dpp:paid>` in an item behind the paywall. The
- * namespace is known by its address, because the feed may choose another prefix than `dpp`.
+ * of the Algemeen Dagblad and De Gelderlander, puts `<dpp:paid>true</dpp:paid>` in an item
+ * behind the paywall. The namespace is known by its address, because the feed may choose
+ * another prefix than `dpp`.
  */
 const paywallNamespaces: Record<string, string> = {
   'www.ad.nl': 'https://www.dpgmedia.cloud/paidrss',
+  'www.gelderlander.nl': 'https://www.dpgmedia.cloud/paidrss',
 }
 
 /**

@@ -7802,6 +7802,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** wachten op schriftelijke toestemming van Disney (voorzichtiger, maar Disney antwoordt zelden); `EST` voor alle feeds als Nederlandse tijd lezen (verkeerd voor een feed waar het echt EST is); de tijd van deze bron negeren en alleen het moment van eerste zien gebruiken (de berichten staan dan niet op hun echte tijd).
 - **Daarna:** schriftelijk toestemming vragen aan Disney hoort bij #35; de projecteigenaar nam het voorbehoud van Disney aan bij het goedkeuren van het issue.
 
+### We nemen De Gelderlander na het relevantiefilter
+
+- **Datum:** 1 november 2026
+- **Besluit:** het register krijgt de sportfeed van De Gelderlander (`https://www.gelderlander.nl/sport/rss.xml`) met het filter `club`.
+  De bron toont alleen de kop, de link, de bronnaam en de tijd, met "voor abonnees" bij een bericht achter de betaalmuur.
+  De beschrijving, de auteur, de afbeeldingen en het logo in de feed bewaart de importer niet en toont de site niet.
+  De importer leest `<dpp:paid>true</dpp:paid>` met dezelfde regel als bij het Algemeen Dagblad: het domein `www.gelderlander.nl` staat erbij in `paywallNamespaces`.
+  Er komt geen nieuw codepad en geen term in de lijsten van het filter.
+- **Waarom:** de projecteigenaar wil De Gelderlander vooral voor de koppen over N.E.C. en Go Ahead Eagles rond een wedstrijd tegen hen.
+  De krant staat daar dichtbij, en het filter laat een kop over de tegenstander toe van 3 dagen voor tot 3 dagen na de wedstrijd (zie _Een kop over de tegenstander is `relevant` van 3 dagen voor tot 3 dagen na de wedstrijd, en alleen als hij geen andere profclub noemt_).
+  De feed is het sportnieuws van de regio, met schaatsen, ijshockey en de wereldtop van het voetbal, dus zonder het filter zouden de meeste koppen niets met de club te maken hebben.
+  Buiten de dagen rond zo'n wedstrijd toont de site alleen wat over sc Heerenveen zelf gaat.
+- **Gemeten op de echte feed** (1 november 2026, één run van de importer): 30 berichten bewaard, waarvan 2 `relevant`, 0 `doubtful` en 28 `irrelevant`, en 9 herkend als betaalmuur.
+  De twee `relevant` berichten zijn de verslagen van N.E.C. – sc Heerenveen.
+  Een kop over Thialf of over Nijmegen Devils, ook een die beide noemt, bleef `irrelevant`; een test houdt dat vast.
+  De wedstrijden in de lokale database waren die van de seed, dus de regel van de tegenstander had in deze run niets te doen; de tests met een verzonnen feed laten hem zien.
+- **Voorwaarden:** niet gelezen.
+  De pagina's van DPG Media en van de krant stuurden ons naar een toestemmingspagina, die we niet hebben doorgeklikt.
+  Het `robots.txt` heeft hetzelfde voorbehoud als dat van het Algemeen Dagblad tegen scrapen en andere geautomatiseerde manieren om gegevens te verzamelen, en laat de feed toe.
+  Het blijft een risico dat geen jurist heeft getoetst.
+  We nemen één feed, alleen een kop en een link, en we stoppen op verzoek.
+- **Alternatieven:** wachten op schriftelijke toestemming van DPG Media (voorzichtiger, maar DPG antwoordt zelden); de bron zonder het filter nemen (de feed is breed, en de meeste koppen gaan over ander sport); een term voor Thialf en Nijmegen Devils in de lijsten (niet nodig, want de echte koppen daarover bleven `irrelevant`).
+- **Daarna:** schriftelijk toestemming vragen aan DPG Media hoort bij #35; de projecteigenaar nam het voorbehoud van de bron aan bij het goedkeuren van het issue.
+
 ### De echte bronnen komen op productie via de seed
 
 - **Datum:** 23 oktober 2026

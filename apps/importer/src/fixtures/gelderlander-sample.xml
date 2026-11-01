@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A small, made-up feed in the shape of the sport feed of De Gelderlander (see docs/bronnen.md,
+  De Gelderlander): RSS 2.0 with the namespaces `dpp` (the paywall) and `media`, a channel with an
+  image, times in GMT, a guid that is the link, and per item a description, an author, a
+  media:content and a media:thumbnail. The headlines, links and texts are invented; none is copied
+  from a real feed. The description, the author and the images are here to show that the importer
+  does not read them. `dpp:paid` is true or false, and the last item has none: an item without it
+  is open. The items are about the club, the nearby opponents N.E.C. and Go Ahead Eagles, and two
+  things that name no club: the ice rink Thialf and the ice hockey club Nijmegen Devils.
+-->
+<rss xmlns:dpp="https://www.dpgmedia.cloud/paidrss" xmlns:media="http://search.yahoo.com/mrss/" version="2.0">
+  <channel>
+    <title>Sport (verzonnen)</title>
+    <link>https://gld.test</link>
+    <description>Een verzonnen feed om de importer mee te testen.</description>
+    <language>nl-NL</language>
+    <copyright>Verzonnen</copyright>
+    <pubDate>Sun, 01 Nov 2026 11:55:01 GMT</pubDate>
+    <lastBuildDate>Sun, 01 Nov 2026 11:55:01 GMT</lastBuildDate>
+    <image>
+      <title>Sport (verzonnen)</title>
+      <url>https://statics.gld.test/img/logo.png</url>
+      <link>https://gld.test</link>
+      <width>90</width>
+      <height>90</height>
+    </image>
+    <item>
+      <title>Heerenveen wint met 1-0 van Utrecht dankzij een late treffer</title>
+      <link>https://gld.test/sport/heerenveen-wint-van-utrecht~ag2000001/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sat, 31 Oct 2026 18:50:00 GMT</pubDate>
+      <author>Verzonnen Sportredactie</author>
+      <guid>https://gld.test/sport/heerenveen-wint-van-utrecht~ag2000001/</guid>
+      <media:content type="image/jpeg" url="https://images.gld.test/foto/2000001/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.gld.test/foto/2000001/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>false</dpp:paid>
+    </item>
+    <item>
+      <title>N.E.C. wil na een lange reeks eindelijk weer winnen</title>
+      <link>https://gld.test/sport/nec-wil-weer-winnen~ag2000002/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 01 Nov 2026 07:30:00 GMT</pubDate>
+      <author>Verzonnen Sportredactie</author>
+      <guid>https://gld.test/sport/nec-wil-weer-winnen~ag2000002/</guid>
+      <media:content type="image/jpeg" url="https://images.gld.test/foto/2000002/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.gld.test/foto/2000002/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>N.E.C. kijkt terug op een vervelende maand</title>
+      <link>https://gld.test/sport/nec-kijkt-terug~ag2000003/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Thu, 15 Oct 2026 12:00:00 GMT</pubDate>
+      <author>Verzonnen Sportredactie</author>
+      <guid>https://gld.test/sport/nec-kijkt-terug~ag2000003/</guid>
+      <media:content type="image/jpeg" url="https://images.gld.test/foto/2000003/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.gld.test/foto/2000003/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>false</dpp:paid>
+    </item>
+    <item>
+      <title>Go Ahead Eagles houdt vast aan de ervaren keeper</title>
+      <link>https://gld.test/sport/go-ahead-houdt-vast~ag2000004/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 01 Nov 2026 10:00:00 GMT</pubDate>
+      <author>Verzonnen Sportredactie</author>
+      <guid>https://gld.test/sport/go-ahead-houdt-vast~ag2000004/</guid>
+      <media:content type="image/jpeg" url="https://images.gld.test/foto/2000004/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.gld.test/foto/2000004/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>Nijmegen Devils laat in de ijshal een punt liggen</title>
+      <link>https://gld.test/sport/devils-laat-punt-liggen~ag2000005/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 01 Nov 2026 07:49:00 GMT</pubDate>
+      <author>Verzonnen Sportredactie</author>
+      <guid>https://gld.test/sport/devils-laat-punt-liggen~ag2000005/</guid>
+      <media:content type="image/jpeg" url="https://images.gld.test/foto/2000005/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.gld.test/foto/2000005/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>Schaatsers strijden in Thialf om de laatste WK-tickets</title>
+      <link>https://gld.test/sport/schaatsers-in-thialf~ag2000006/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sun, 01 Nov 2026 09:51:00 GMT</pubDate>
+      <author>Verzonnen Sportredactie</author>
+      <guid>https://gld.test/sport/schaatsers-in-thialf~ag2000006/</guid>
+      <media:content type="image/jpeg" url="https://images.gld.test/foto/2000006/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.gld.test/foto/2000006/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>false</dpp:paid>
+    </item>
+    <item>
+      <title>Feyenoord wint in de slotfase van Fortuna</title>
+      <link>https://gld.test/sport/feyenoord-wint-van-fortuna~ag2000007/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sat, 31 Oct 2026 16:28:00 GMT</pubDate>
+      <author>Verzonnen Sportredactie</author>
+      <guid>https://gld.test/sport/feyenoord-wint-van-fortuna~ag2000007/</guid>
+      <media:content type="image/jpeg" url="https://images.gld.test/foto/2000007/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.gld.test/foto/2000007/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>Veldman denkt na over zijn toekomst bij de club</title>
+      <link>https://gld.test/sport/veldman-denkt-na~ag2000008/</link>
+      <description>Een verzonnen intro die we niet bewaren.</description>
+      <pubDate>Sat, 31 Oct 2026 12:15:00 GMT</pubDate>
+      <author>Verzonnen Sportredactie</author>
+      <guid>https://gld.test/sport/veldman-denkt-na~ag2000008/</guid>
+      <media:content type="image/jpeg" url="https://images.gld.test/foto/2000008/fit-width/400/een-verzonnen-bijschrift.jpg"><media:thumbnail url="https://images.gld.test/foto/2000008/fit-width/100/een-verzonnen-bijschrift.jpg"/></media:content>
+    </item>
+  </channel>
+</rss>

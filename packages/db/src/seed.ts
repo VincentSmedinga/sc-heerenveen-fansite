@@ -224,6 +224,15 @@ export const realSources = [
   },
   {
     description:
+      'Regionaal dagblad voor Gelderland. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
+    domain: 'www.gelderlander.nl',
+    feeds: [{ filter: 'club', url: 'https://www.gelderlander.nl/sport/rss.xml' }],
+    kind: 'news',
+    name: 'De Gelderlander',
+    slug: 'de-gelderlander',
+  },
+  {
+    description:
       'Nederlandse nieuwssite van de sportzender ESPN. In de voetbalfeed staat het voetbalnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'www.espn.nl',
     feeds: [{ filter: 'club', url: 'https://www.espn.nl/espn/rss/soccer/news' }],
