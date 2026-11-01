@@ -55,15 +55,24 @@
      * jumps, which is the whole of the credit. With reduced motion the duration is 0s, so the
      * fold jumps there too. `content-visibility` stays visible until the end of a closing
      * transition and is hidden after it, so closed text is out of the tab order and the
-     * reading order.
+     * reading order. The fold clips its height, so it has padding as wide as the focus ring
+     * (3px thick, 2px away) and the same negative margin, which leaves its height as it was.
      */
     @supports (interpolate-size: allow-keywords) and selector(::details-content) {
+      /* The negative margins below stay inside the fold, so the fold is as high as it was. */
+      --hf-wikipedia-credit-ring: calc(0.1875rem + 0.125rem);
+
+      display: flow-root;
       interpolate-size: allow-keywords;
 
       &::details-content {
         block-size: 0;
+
+        /* Room for the focus ring of a link on the first or last line, which the clip would cut. */
+        margin-block: calc(-1 * var(--hf-wikipedia-credit-ring));
         opacity: 0;
         overflow-y: clip;
+        padding-block: var(--hf-wikipedia-credit-ring);
         transition:
           block-size var(--hf-motion-duration-short) var(--hf-motion-ease-change),
           content-visibility var(--hf-motion-duration-short) var(--hf-motion-ease-change) allow-discrete,

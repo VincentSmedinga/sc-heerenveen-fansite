@@ -29,6 +29,15 @@ describe('the fold of the Wikipedia credit in wikipedia-credit.css', () => {
     expect(open).toMatch(/opacity: 1;/)
   })
 
+  it('leaves room for the focus ring in the clipped box, and keeps the height as it was', () => {
+    // The ring is 0.1875rem thick and 0.125rem away (base/focus.css): the padding gives it room
+    // and the margin takes that back.
+    expect(block).toContain('--hf-wikipedia-credit-ring: calc(0.1875rem + 0.125rem);')
+    expect(content).toContain('padding-block: var(--hf-wikipedia-credit-ring);')
+    expect(content).toContain('margin-block: calc(-1 * var(--hf-wikipedia-credit-ring));')
+    expect(block).toMatch(/display: flow-root;/)
+  })
+
   it('moves the height and the opacity with the duration and curve of the arrow', () => {
     const duration = 'var(--hf-motion-duration-short) var(--hf-motion-ease-change)'
 
