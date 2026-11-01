@@ -93,18 +93,20 @@ Het bronnenregister legt per bron vast wat we mogen tonen.
 Een kop, de link en de naam van de bron mogen altijd, dus daar zit geen kolom voor.
 Al het andere staat uit tot de bron toestemming geeft (principe 1 en 2 in het hoofdstuk Redactie van Storybook).
 
-| Kolom                                            | Betekenis                                                                                          | Standaard |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------- | --------- |
-| `name`, `domain`, `kind`                         | De naam, het domein (uniek) en de soort: `news`, `podcast`, `forum`, `club`, `video`               | geen      |
-| `description`                                    | Wat de bron is, in een of twee zinnen van onszelf, voor de pagina 'Onze bronnen'                   | leeg      |
-| `intro_max_length`                               | Hoeveel tekens van een intro we tonen; 0 is geen intro                                             | 0         |
-| `allow_image`, `allow_embed`                     | Of we een afbeelding tonen, en of we de bron insluiten                                             | onwaar    |
-| `attribution`                                    | De bronvermelding zoals de bron die wil; leeg betekent de naam van de bron                         | leeg      |
-| `slug`                                           | De vaste naam in een adres, zoals `omroep-abe`; uniek, en een andere naam verandert het adres niet | leeg      |
-| `apple_podcasts_url`, `spotify_url`              | Waar een podcast staat op Apple Podcasts en Spotify; alleen `https`, hoogstens 300 tekens          | leeg      |
-| `consent_status`, `consent_date`, `consent_note` | De toestemming: `none`, `asked` of `given`, sinds welke dag, en wat is afgesproken                 | `none`    |
-| `enabled`                                        | Zet de bron uit zonder hem te verwijderen                                                          | waar      |
-| `created_at`                                     | Wanneer de bron is toegevoegd, in UTC                                                              | nu        |
+| Kolom                                            | Betekenis                                                                                                                  | Standaard |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `name`, `domain`, `kind`                         | De naam, het domein (uniek) en de soort: `news`, `podcast`, `forum`, `club`, `video`                                       | geen      |
+| `description`                                    | Wat de bron is, in een of twee zinnen van onszelf, voor de pagina 'Onze bronnen'                                           | leeg      |
+| `intro_max_length`                               | Hoeveel tekens van een intro we tonen; 0 is geen intro                                                                     | 0         |
+| `allow_image`, `allow_embed`                     | Of we een afbeelding tonen, en of we de bron insluiten                                                                     | onwaar    |
+| `attribution`                                    | De bronvermelding zoals de bron die wil; leeg betekent de naam van de bron                                                 | leeg      |
+| `slug`                                           | De vaste naam in een adres, zoals `omroep-abe`; uniek, en een andere naam verandert het adres niet                         | leeg      |
+| `publisher`                                      | De uitgever van de bron, zoals `dpg-media`; bronnen met dezelfde uitgever tonen een artikel dat ze allebei hebben één keer | leeg      |
+| `local`                                          | Of de bron de lokale krant van zijn uitgever is; die gaat voor als twee bronnen hetzelfde artikel hebben                   | onwaar    |
+| `apple_podcasts_url`, `spotify_url`              | Waar een podcast staat op Apple Podcasts en Spotify; alleen `https`, hoogstens 300 tekens                                  | leeg      |
+| `consent_status`, `consent_date`, `consent_note` | De toestemming: `none`, `asked` of `given`, sinds welke dag, en wat is afgesproken                                         | `none`    |
+| `enabled`                                        | Zet de bron uit zonder hem te verwijderen                                                                                  | waar      |
+| `created_at`                                     | Wanneer de bron is toegevoegd, in UTC                                                                                      | nu        |
 
 Een bron met alleen een naam, een domein en een soort krijgt dus de strengste waarden.
 De CHECK-constraint `sources_display_needs_consent` weigert een bron met een intro, een afbeelding of insluiten zolang `consent_status` niet `given` is.
@@ -179,10 +181,27 @@ De site toont per bron en sleutel het nieuwste bericht (de nieuwste `published_a
 
 - een verhaal is te zien als een van zijn versies `relevant` is, en het toont de laatste kop, ook als die niet `relevant` is;
 - een verborgen versie telt niet mee: het verhaal toont de nieuwste versie die niet verborgen is, en verdwijnt als er geen over is;
-- twee bronnen met dezelfde sleutel zijn twee verhalen;
+- twee bronnen met dezelfde sleutel zijn twee verhalen, behalve als ze dezelfde `publisher` hebben (zie _Eén artikel van twee kranten_);
 - een bericht zonder sleutel is zijn eigen verhaal en gaat door de gewone voorwaarde.
 
 De oudere versies blijven in de tabel, en het beheer toont ze allemaal.
+
+### Eén artikel van twee kranten
+
+Twee kranten van één uitgever kunnen hetzelfde artikel geven onder één artikelcode: het Algemeen Dagblad en De Gelderlander (beide `publisher` `dpg-media`) zetten het verslag van een wedstrijd van N.E.C. allebei in hun feed.
+Beide hebben dan dezelfde `thread_key`.
+Bij een bron met een `publisher` toont de lijst van berichten van alle bronnen, dus `/nieuws` zonder keuze van een bron, de homepage en de zoekresultaten, zo'n verhaal één keer (`isShownOnce` in `queries.ts`, via `isShown(until, { merge: true })`):
+
+- elke bron zet haar nieuwste bericht van het verhaal dat niet verborgen is naar voren, en bronnen die aanstaan en geen podcast zijn doen mee;
+- het bericht van de bron met `local` gaat voor; zijn er twee lokale bronnen of geen, dan het bericht met de vroegste `published_at`, en bij dezelfde tijd het laagste `id`;
+- de naam, de link, de tijd en de betaalmuur zijn die van het bericht dat wint;
+- het verhaal is te zien als een van zijn berichten `relevant` is, bij welke bron ook, en niet verborgen;
+- verbergt een moderator het bericht dat wint, of heeft zijn bron het nooit in de feed gehad, dan staat het bericht van de andere bron er;
+- bronnen van verschillende uitgevers, en bronnen zonder `publisher`, worden nooit samengevoegd, ook niet bij dezelfde kop of dezelfde sleutel.
+
+Kiest de bezoeker één of meer bronnen (`/nieuws?bron=…`), dan toont de lijst alles wat die bronnen zelf hebben, ook wat een lokale krant zou vervangen.
+Het aantal en de pagina's volgen de lijst die de bezoeker ziet.
+De filterlijst van bronnen (`listArchiveSources`) kijkt naar de berichten van de bron zelf.
 
 ### Een bericht verbergen
 
@@ -614,7 +633,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
 - `@fansite/db/client`: `connect(url)` geeft een Drizzle-verbinding en een functie om hem te sluiten;
 - `@fansite/db/queries`: `listEnabledSources(db)` geeft de bronnen die aanstaan, op naam, met hun beschrijving en zonder het beleid of de toestemming;
-  `listRecentItems(db, { limit, until })` geeft de nieuwste `limit` berichten van die bronnen tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam), en geen afleveringen van bronnen van het soort podcast;
+  `listRecentItems(db, { limit, until })` geeft de nieuwste `limit` berichten van die bronnen (een artikel van twee bronnen van één uitgever één keer, zie _Eén artikel van twee kranten_) tot en met `until` (geef het moment van nu mee, want een tijd in de toekomst hoort er niet), het nieuwste eerst, met alleen de kop, de link, de tijd, de betaalmuur en de bronnaam (de `attribution`, of anders de naam), en geen afleveringen van bronnen van het soort podcast;
   `listPodcastEpisodes(db, { limit, offset, podcast, until })` geeft juist de afleveringen van de podcasts die aanstaan, het nieuwste eerst, met alleen de titel, de link, de tijd, de naam van de podcast en de duur, het seizoen en het nummer van de aflevering, en `countPodcastEpisodes` geeft het totaal; `podcast` is de `slug` van één podcast;
   `listArchivePage(db, { limit, offset, source, until })` geeft dezelfde berichten als `listRecentItems`, maar vanaf `offset` en zonder grens in leeftijd, voor het nieuwsarchief op `/nieuws`; `countArchiveItems` geeft het totaal, en `listArchiveSources` de bronnen met een `slug` en minstens één bericht voor het filter; `source` is de `slug` van één bron;
   `findPublishedArticle(db, slug, until)`, `findNewestArticle(db, until)` en `listPublishedArticles(db, until)` geven de gepubliceerde artikelen van de redactie (zie _De tabel `articles`_);

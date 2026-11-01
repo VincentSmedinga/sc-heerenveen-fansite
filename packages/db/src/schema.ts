@@ -74,6 +74,13 @@ export const sources = mysqlTable(
     allowEmbed: boolean('allow_embed').notNull().default(false),
     // How the source wants to be credited. Empty means the name of the source.
     attribution: varchar('attribution', { length: 150 }),
+    // The publisher that owns the source, such as `dpg-media`, for sources that print the same
+    // article under one article code. Empty means the source has none and is never merged with
+    // another.
+    publisher: varchar('publisher', { length: 100 }),
+    // Whether the source is the local paper of its publisher: of two sources with the same
+    // publisher, the lists show the story of the local one.
+    local: boolean('local').notNull().default(false),
 
     // The permission: whether we asked, whether the source gave it, since when and what was
     // agreed.

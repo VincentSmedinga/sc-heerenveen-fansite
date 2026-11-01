@@ -126,6 +126,12 @@ export const testSources = [
  * episode is an item whose link is the page of the episode. The enclosure, the MP3 file, is
  * never read.
  *
+ * A `publisher` names the company that publishes several of the sources, such as `dpg-media`
+ * for the Algemeen Dagblad and De Gelderlander, which print one article under one article code.
+ * The lists show such an article once, from the source that is `local`, the paper closest to
+ * the news (De Gelderlander for N.E.C.). A source with no publisher is never merged with
+ * another.
+ *
  * The forum's "feed" is the list of discussions of its API, which the importer reads as a guest
  * (see `read-forum.ts`).
  *
@@ -220,6 +226,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.ad.nl/voetbal/rss.xml' }],
     kind: 'news',
     name: 'Algemeen Dagblad',
+    publisher: 'dpg-media',
     slug: 'algemeen-dagblad',
   },
   {
@@ -228,7 +235,9 @@ export const realSources = [
     domain: 'www.gelderlander.nl',
     feeds: [{ filter: 'club', url: 'https://www.gelderlander.nl/sport/rss.xml' }],
     kind: 'news',
+    local: true,
     name: 'De Gelderlander',
+    publisher: 'dpg-media',
     slug: 'de-gelderlander',
   },
   {
