@@ -8,9 +8,7 @@ import {
 
 import { cacheFor, cacheForKey } from './cache'
 import { getDatabase } from './database'
-
-/** The number of headlines on a page of /nieuws. */
-export const headlinesPerPage = 50
+import { headlinesPerPage } from './items-per-card'
 
 const fiveMinutes = 5 * 60 * 1000
 

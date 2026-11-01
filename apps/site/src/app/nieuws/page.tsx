@@ -28,6 +28,7 @@ import { reviewBranch } from '../../env'
 import { reasonOf } from '../../errors'
 import { pageMetadata } from '../../metadata'
 import { dateTimeOf, formatNewsTime } from '../../news'
+import { EditorsCard, EpisodesCard, loadArticle, loadEpisodes } from '../../NewsCards'
 import { ServerError, serverErrorTitle } from '../../ServerError'
 import { withBranch } from '../../title'
 
@@ -41,11 +42,18 @@ export const dynamic = 'force-dynamic'
  * and the text only after JavaScript runs. So this page catches the error and shows the error
  * page itself, in the HTML. `cache` makes the page and its metadata share one call per request;
  * its arguments are plain values, because `cache` compares objects by identity: the slugs are
- * a JSON text, so that an empty slug stays one.
+ * a JSON text, so that an empty slug stays one. The article of the editors and the podcast
+ * episodes are extras: when one is missing, the page shows the headlines without its card.
  */
 const loadPage = cache(async (sources: string, page: number) => {
   try {
-    return (await getArchivePage(JSON.parse(sources) as string[], page)) ?? 'unknown'
+    const [archive, article, episodes] = await Promise.all([
+      getArchivePage(JSON.parse(sources) as string[], page),
+      loadArticle('/nieuws'),
+      loadEpisodes('/nieuws'),
+    ])
+
+    return archive === undefined ? 'unknown' : { ...archive, article, episodes }
   } catch (error) {
     console.error(`Could not read the headlines for /nieuws: ${reasonOf(error)}`)
 
@@ -53,14 +61,33 @@ const loadPage = cache(async (sources: string, page: number) => {
   }
 })
 
-export default async function ArchivePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
+  const { content, page } = await loadFor(searchParams)
+
+  // A page that failed answers 200, so noindex keeps search engines from keeping it.
+  return content === undefined
+    ? { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
+    : pageMetadata(
+        '/nieuws',
+        archiveTitle(
+          content.selected.map((item) => item.name),
+          page,
+        ),
+        archiveQuery(
+          content.selected.map((item) => item.slug),
+          page,
+        ),
+      )
+}
+
+export default async function NewsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { chosen, content, page } = await loadFor(searchParams)
 
   if (content === undefined) {
     return <ServerError retryHref={archiveHref(chosen, page)} />
   }
 
-  const { headlines, pageCount, selected, sources } = content
+  const { article, episodes, headlines, pageCount, selected, sources } = content
   const now = new Date()
   // The addresses of the pages are those of the sources that limit the list: all sources have
   // none, so the address of the list is the same however the visitor reached it.
@@ -102,46 +129,32 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
           )}
         </Card>
       </Page.Main>
-      {sources.length > 0 && (
-        // The sidebar is second in the source, so on a narrow screen the filter sits under the
-        // list and the pagination. The form is a GET to this page, so it works without
-        // JavaScript and a choice is an address that can be shared. The button stays with
-        // JavaScript too: a page that reloads at each tick takes the focus with it.
-        <Page.Sidebar aria-label="Bronnen" narrow>
-          <Card as="div" surface="soft">
-            <Form action="/nieuws" autoComplete="off" method="get">
-              <CheckboxGroup
-                legend="Bronnen"
-                name="bron"
-                options={sources.map((item) => ({ label: item.name, value: item.slug }))}
-                value={chosen}
-              />
-              <Button type="submit">Toon</Button>
-            </Form>
-          </Card>
+      {/* The sidebar is second in the source, so on a narrow screen the filter, the article and
+          the podcasts sit under the list and the pagination, in the order of the keyboard. The
+          form is a GET to this page, so it works without JavaScript and a choice is an address
+          that can be shared. The button stays with JavaScript too: a page that reloads at each
+          tick takes the focus with it. */}
+      {(sources.length > 0 || article !== undefined || episodes !== undefined) && (
+        <Page.Sidebar aria-label="Het filter, de redactie en de podcasts" narrow>
+          {sources.length > 0 && (
+            <Card as="div" surface="soft">
+              <Form action="/nieuws" autoComplete="off" method="get">
+                <CheckboxGroup
+                  legend="Bronnen"
+                  name="bron"
+                  options={sources.map((item) => ({ label: item.name, value: item.slug }))}
+                  value={chosen}
+                />
+                <Button type="submit">Toon</Button>
+              </Form>
+            </Card>
+          )}
+          {article !== undefined && <EditorsCard article={article} now={now} />}
+          {episodes !== undefined && <EpisodesCard episodes={episodes} heading="Podcasts" now={now} />}
         </Page.Sidebar>
       )}
     </>
   )
-}
-
-export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
-  const { content, page } = await loadFor(searchParams)
-
-  // A page that failed answers 200, so noindex keeps search engines from keeping it.
-  return content === undefined
-    ? { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
-    : pageMetadata(
-        '/nieuws',
-        archiveTitle(
-          content.selected.map((item) => item.name),
-          page,
-        ),
-        archiveQuery(
-          content.selected.map((item) => item.slug),
-          page,
-        ),
-      )
 }
 
 /**

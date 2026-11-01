@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu dertien pagina's, en een pagina per tegenstander: de homepage met de nieuwste koppen, `/nieuws` met het nieuwsarchief, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/statistieken/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/statistieken/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu dertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, het forum en de wedstrijden, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/statistieken/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/statistieken/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 
 ## Draaien
@@ -86,7 +86,7 @@ Verzonnen wedstrijden van een eerdere run haalt hij na de laatste test wel weg.
 Een test die de opmaak meet of naar een kaart scrolt, wacht eerst op `hydrated(page)` uit `e2e/hydrated.ts`: tot React de pagina heeft opgebouwd, toont de kiezer nog zijn label en zijn knop, en is de pagina langer.
 `e2e/card-image.spec.ts` klikt op die knop en toetst in de browser dat er een PNG komt, dat er niets naar een ander domein gaat en dat de CSP de afbeelding toestaat.
 Of de homepage een bericht van een uitgezette bron weglaat en het getal in de vraag aan de database klopt, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
-De controle toetst ook `/nieuws` met een tweede pagina, zodat de oudere koppen van het archief langs axe komen.
+De controle toetst ook `/nieuws` met een tweede pagina, zodat de oudere koppen van het nieuws langs axe komen.
 Hier gaat het om axe op de pagina's met nieuws.
 Draait de database van de controle ook echte berichten, door `pnpm run import`, dan staan die er gewoon tussen.
 Playwright wacht tot `/robots.txt` antwoordt en niet tot de homepage, want die bewaart haar koppen vijf minuten in het geheugen.
@@ -174,15 +174,17 @@ De header, met het logo, de themaknop en het hoofdmenu, en de footer staan in `s
 
 ## Het hoofdmenu en de balk van Nieuws
 
-Het hoofdmenu (`src/SiteNavigation.tsx`) heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum (extern).
-Nieuws heeft een balk met subpagina's onder het menu: Archief (`/nieuws`), Podcasts (`/nieuws/podcasts`) en Zoeken (`/nieuws/zoeken`), in die volgorde.
+Het hoofdmenu (`src/SiteNavigation.tsx`) heeft vier onderdelen: Nieuws (`/nieuws`), Wedstrijden, Statistieken en Forum (extern).
+De homepage (`/`) staat niet in het menu: het logo wijst ernaartoe.
+Nieuws heeft een balk met subpagina's onder het menu: Podcasts (`/nieuws/podcasts`) en Zoeken (`/nieuws/zoeken`), in die volgorde.
+Nieuws is zelf het overzicht van alle koppen, dus er is geen apart item Archief.
 De balk komt uit `Navigation` van het designsysteem (`subitems`), dus het menu en de balk zijn één navigatie, "Hoofdmenu".
 `currentOf` in hetzelfde bestand kiest uit het pad het huidige onderdeel en de huidige subpagina:
 
-- Nieuws is het huidige onderdeel op `/`, `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en Wedstrijden en Statistieken op hun pagina en elke pagina eronder, zoals een seizoen.
+- Nieuws is het huidige onderdeel op `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en Wedstrijden en Statistieken op hun pagina en elke pagina eronder, zoals een seizoen.
 - Staat de bezoeker op een subpagina, dan is die `aria-current="page"` en heeft het item Nieuws `aria-current="true"`.
-  Op `/` en op een artikel van de redactie is alleen Nieuws het huidige onderdeel, met `aria-current="page"`, en is er geen huidige subpagina.
-- Een ander pad, zoals `/bronnen` of een adres dat niet bestaat, heeft geen huidig onderdeel en geen balk.
+  Op `/nieuws` en op een artikel van de redactie is alleen Nieuws het huidige onderdeel, met `aria-current="page"`, en is er geen huidige subpagina.
+- Een ander pad, zoals `/`, `/bronnen` of een adres dat niet bestaat, heeft geen huidig onderdeel en geen balk.
 
 De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen.md`).
 De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf Wedstrijden kunt zoeken.
@@ -191,16 +193,20 @@ De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf We
 
 De `h1` van de homepage is "sc Heerenveen Fansite", maar die zie je niet: het logo erboven zegt het al.
 Hij heeft de klasse `hf-visually-hidden` uit het designsysteem, dus een schermlezer leest hem wel voor.
+Bovenaan de hoofdkolom staat de kaart "Van de redactie": het nieuwste artikel van onze eigen redactie, in de lange vorm van `ArticleCard`, met de titel, de datum, de inleiding en de link "Lees verder".
 Daaronder staat het blok "Laatste nieuws": de tien nieuwste berichten van de bronnen die aanstaan, het nieuwste eerst, in één lijst zonder kop per dag, hoe oud ze ook zijn.
 Een bericht is een `NewsItem` uit het designsysteem: links de korte dag en de tijd, zoals "wo 14:05" (op een smalle regel boven de kop), dan de kop als link naar de bron, en daaronder de bronnaam en, achter een betaalmuur, "voor abonnees".
 Zijn er geen berichten, dan staat er een tekst voor bezoekers.
-Onder de lijst staat de link "Alle koppen" naar het archief op `/nieuws` (zie _Het nieuwsarchief_): ouder nieuws is daarvoor.
-Het aantal staat op één plek, `firstHeadlines` (10) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
-De homepage kent geen parameters: een adres als `/?nieuws=15`, dat de knop "Laad 5 meer" vroeger maakte, laat gewoon de homepage zien.
+Onder de lijst staat de link "Alle nieuws" naar `/nieuws` (zie _De nieuwspagina_): ouder nieuws is daarvoor.
+Het aantal staat op één plek, `firstHeadlines` (10, uit `listSizes`) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
+De homepage kent geen parameters, geen filter, geen paginering en geen balk met subpagina's: een adres als `/?nieuws=15`, dat de knop "Laad 5 meer" vroeger maakte, laat gewoon de homepage zien.
 
-De kaarten met discussies en podcasts tonen vijf items: het aantal staat op één plek, `itemsPerCard` in `src/items-per-card.ts`.
+Elke kaart met een lijst toont standaard vijf items: de discussies en de afleveringen op de homepage en de afleveringen op `/nieuws` (`itemsPerCard` in `src/items-per-card.ts`); het nieuws is de hoofdkaart en toont tien koppen.
+De toegestane maten staan op één plek, `listSizes`: 5, 10, 20 en 50, en elk aantal in dat bestand komt daaruit; een test (`src/items-per-card.test.ts`) zegt dat.
+Een bezoeker kiest geen maat.
+De hoofdkolom en de zijbalk zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 805 pixels hoog en de zijbalk 2055.
 
-In de zijbalk naast het nieuws staat het blok "Nieuwste discussies": de vijf discussies van het forum waar het laatst op is gereageerd.
+In de zijbalk naast het nieuws staat bovenaan het blok "Nieuwste discussies", want het forum is onze zustersite: de vijf discussies van het forum waar het laatst op is gereageerd.
 Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar het laatste bericht van de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1 · 13:28".
 Van vandaag staat alleen de tijd, van de zes dagen ervoor de korte dag en de tijd, en daarvoor de datum.
 Onder de discussies staat de link "Naar het forum"; zijn er geen discussies, dan staat er een tekst voor bezoekers boven die link.
@@ -214,11 +220,11 @@ Het haalt alleen berichten op die `relevant` zijn en niet verborgen (`isShown`);
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
-Onder de discussies staat het blok "Nieuwste podcasts": de vijf nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
+Onderaan de zijbalk staat het blok "Nieuwste podcasts": de vijf nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/nieuws/podcasts`.
 
-Onder de podcasts staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
+Tussen de discussies en de podcasts staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
 Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan onderaan de pagina.
 Zonder gegevens van de wedstrijden staat er een zin voor bezoekers.
 Lukt het lezen van de wedstrijden niet, dan verdwijnen de twee blokken en schrijft de site de reden in het logboek, zoals bij het artikel; de rest van de pagina blijft werken.
@@ -474,13 +480,22 @@ De balk onder het hoofdmenu houdt het seizoen en de keuze wel vast (zie _Het hoo
 De telling zelf gebeurt na het lezen: `getMatchData` bewaart de wedstrijden van een seizoen vijf minuten (of een uur voor een afgelopen seizoen), en de keuze filtert die lijst.
 Er is dus geen sleutel per keuze in de cache nodig, en de ene keuze kan de andere niet overschrijven.
 
-## Het nieuwsarchief
+## De nieuwspagina
 
-`/nieuws` toont alle koppen die we hebben opgehaald, nieuwste eerst, 50 per pagina, elk als `NewsItem`, zonder indeling per dag: elke regel heeft zijn eigen dag en tijd (`formatNewsTime`).
+`/nieuws` heet "Nieuws" en toont alle koppen die we hebben opgehaald, nieuwste eerst, 50 per pagina, elk als `NewsItem`, zonder indeling per dag: elke regel heeft zijn eigen dag en tijd (`formatNewsTime`).
+De hoofdkolom heeft alleen nieuws: geen wedstrijden en geen discussies.
 Het zijn dezelfde koppen als op de homepage, ook met "voor abonnees" bij een kop achter een betaalmuur, maar zonder grens in leeftijd.
 Een intro of foto staat er niet, net als op de homepage.
 De query is `listArchivePage` in `packages/db/src/queries.ts`, met `countArchiveItems` voor het aantal en `listArchiveSources` voor het filter; beide nemen een lijst slugs als `sources`.
 Ze delen met `listRecentItems` de voorwaarden (`newsFilter`): relevant, niet verborgen, van een bron die aanstaat, geen podcast en niet na nu.
+De zijbalk heeft drie kaarten, in deze volgorde, ook op een telefoon:
+
+- het filter per bron;
+- "Van de redactie": het nieuwste artikel als één nieuwsregel (`NewsItem`, `EditorsCard` in `src/NewsCards.tsx`): de titel als link naar `/redactie/<naam>`, de dag, en "Van de redactie" als bron, zonder pictogram voor een andere site en zonder inleiding.
+  Is er geen artikel, dan staat er geen kaart;
+- "Podcasts": de nieuwste afleveringen, met de link "Alle podcasts" naar `/nieuws/podcasts`.
+  Het artikel en de podcasts zijn extra's: lukt het lezen ervan niet, dan staat de kaart er niet en schrijft de site de reden in het logboek.
+
 Het filter staat in een lichtblauwe kaart (`surface="soft"`) in de zijbalk: een formulier met een GET naar `/nieuws`, met een groep selectievakjes (`CheckboxGroup`, een `fieldset` met de `legend` "Bronnen") en de knop "Toon".
 Er is een vakje per bron met minstens één kop in het archief, op alfabet, met de `slug` als waarde.
 De knop blijft ook met JavaScript, en het formulier werkt zonder.
@@ -489,7 +504,7 @@ Met één of meer vinkjes (maar niet alle) staan er alleen koppen van die bronne
 Met precies één vinkje staat de naam van de bron niet bij elke kop (`showSource` van `NewsItem`), want de kop van de pagina noemt hem al; een schermlezer hoort hem nog wel.
 De functies die het adres lezen en maken staan in `src/archive-query.ts`.
 Op een smal scherm staat de zijbalk onder de lijst en de paginering, want de zijbalk komt na de hoofdkolom in de bron en het designsysteem laat de volgorde van de bron en van het scherm gelijk.
-Zonder koppen is er geen filter en geen zijbalk.
+Zonder bronnen is er geen filter, en zonder artikel en afleveringen geen zijbalk.
 De pagina heeft een hoofdkolom van 46 rem, 2 rem ruimte en een zijbalk van 16 rem (`narrow` op `Page.Sidebar`), samen de 64 rem van de pagina.
 Zonder zijbalk heeft de hoofdkolom de gewone breedte van 38 rem.
 De slug komt uit de kolom `slug` van `sources`, die de seed voor elke bron met koppen vastlegt (`packages/db/src/seed.ts`), dus een andere naam verandert het adres niet.
@@ -497,10 +512,10 @@ Een bron zonder slug staat niet in het filter, maar haar koppen staan wel bij al
 Onder de lijst staat de paginering (`Pagination`), als er meer dan één pagina is: `/nieuws?pagina=2`, en met bronnen `/nieuws?bron=leeuwarder-courant&bron=nos&pagina=2`.
 Een nieuwe kop schuift de inhoud van de pagina's op; de bronnen en het filter blijven vast, en een nieuwe keuze begint op pagina 1.
 Een bron die niet in het filter staat, een bron die twee keer in het adres staat en een `pagina` die geen positief geheel getal is of na de laatste komt, geven de pagina "niet gevonden" met status 404.
-De titel en de kop noemen de bronnen en de pagina, zoals "Nieuwsarchief van NOS en Omrop Fryslân, pagina 3", en elke pagina is zijn eigen canonieke adres.
+De titel en de kop noemen de bronnen en de pagina, zoals "Nieuws van NOS en Omrop Fryslân, pagina 3", en elke pagina is zijn eigen canonieke adres.
 De server bewaart elke combinatie van bronnen en pagina vijf minuten, maar alleen na de controle van het adres (`src/archive.ts`).
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/nieuws/podcasts`.
-De pagina staat als Archief in de balk van Nieuws, onder het hoofdmenu (zie _Het hoofdmenu en de balk van Nieuws_).
+De pagina is het item Nieuws in het hoofdmenu, met de balk van Nieuws eronder (zie _Het hoofdmenu en de balk van Nieuws_).
 
 `pnpm test:a11y` zet verzonnen koppen op de testbronnen, genoeg voor een tweede pagina (`e2e/headlines.ts`).
 

@@ -75,8 +75,8 @@ describe('RootLayout', () => {
     expect(html.match(/<nav aria-label="Hoofdmenu"/g)).toHaveLength(1)
   })
 
-  it('draws the fixed bar of Nieuws on the home page, whatever the slot holds', () => {
-    vi.mocked(usePathname).mockReturnValue('/')
+  it('draws the fixed bar of Nieuws on /nieuws, whatever the slot holds', () => {
+    vi.mocked(usePathname).mockReturnValue('/nieuws')
     const html = renderToStaticMarkup(
       <RootLayout shortcuts={null} subnav={<div className="hf-navigation-bar">Balk van de slot</div>}>
         Inhoud
@@ -85,6 +85,19 @@ describe('RootLayout', () => {
 
     expect(html).not.toContain('Balk van de slot')
     expect(html).toContain('href="/nieuws/podcasts"')
+  })
+
+  it('draws no bar on the home page, and links the logo to it', () => {
+    vi.mocked(usePathname).mockReturnValue('/')
+    const html = renderToStaticMarkup(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
+
+    expect(html).not.toContain('hf-navigation-bar')
+    expect(html).not.toContain('href="/nieuws/podcasts"')
+    expect(html).toMatch(/<header class="hf-page-header"><a href="\/">/)
   })
 
   it('puts the two sentences of the footer in a paragraph each, before the links', () => {

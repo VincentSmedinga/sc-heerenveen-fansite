@@ -84,7 +84,7 @@ async function renderDiscussions() {
   const html = await renderSidebar()
   const start = html.indexOf('<section class="hf-card" aria-labelledby="discussions-heading">')
 
-  return html.slice(start, html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'))
+  return html.slice(start, html.indexOf('<section class="hf-card" aria-labelledby="matches-heading">'))
 }
 
 /** The main column alone: the news, without the sidebar. */
@@ -94,7 +94,7 @@ async function renderMain() {
   return html.slice(0, html.indexOf('</main>') + '</main>'.length)
 }
 
-/** The sidebar alone: the discussions of the forum and the podcast episodes. */
+/** The sidebar alone: the forum, the matches, the table and the podcast episodes. */
 async function renderSidebar() {
   const html = await render()
 
@@ -122,7 +122,7 @@ afterEach(() => {
 })
 
 describe('the homepage', () => {
-  it('has one h1, for screen readers only, and an h2 for the news, the discussions, the podcasts, the matches and the table, and no heading for a day', async () => {
+  it('has one h1, for screen readers only, and an h2 for the news, the discussions, the matches, the table and the podcasts, and no heading for a day', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await render()
@@ -133,9 +133,9 @@ describe('the homepage', () => {
       '<h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite</h1>',
       '<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>',
       '<h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies</h2>',
-      '<h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts</h2>',
       '<h2 class="hf-heading-2" id="matches-heading">Wedstrijden</h2>',
       '<h2 class="hf-heading-2" id="standings-heading">Stand</h2>',
+      '<h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts</h2>',
     ])
   })
 
@@ -281,11 +281,11 @@ describe('the homepage', () => {
 
     const html = await renderMain()
 
-    expect(withoutIcons(html)).toMatch(/<\/ul><p><a href="\/nieuws">Alle koppen<\/a><\/p><\/section><\/main>$/)
+    expect(withoutIcons(html)).toMatch(/<\/ul><p><a href="\/nieuws">Alle nieuws<\/a><\/p><\/section><\/main>$/)
     expect(html.match(/href="\/nieuws"/g)).toHaveLength(1)
   })
 
-  it('draws an arrow to the right behind "Alle koppen", hidden from screen readers', async () => {
+  it('draws an arrow to the right behind "Alle nieuws", hidden from screen readers', async () => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
 
     const html = await renderMain()
@@ -293,14 +293,14 @@ describe('the homepage', () => {
 
     expect(link).toContain('<path d="M2.5 8h11"></path><path d="M9 3.5 13.5 8 9 12.5"></path>')
     expect(link).toContain('aria-hidden="true"')
-    expect(link.replace(/<[^>]*>/g, '')).toBe('Alle koppen')
+    expect(link.replace(/<[^>]*>/g, '')).toBe('Alle nieuws')
   })
 
   it('keeps the link to the archive when there is no news yet, like the card of the podcasts', async () => {
     vi.mocked(getHeadlines).mockResolvedValue([])
 
     expect(withoutIcons(await renderMain())).toContain(
-      '<p>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</p><p><a href="/nieuws">Alle koppen</a></p></section>',
+      '<p>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</p><p><a href="/nieuws">Alle nieuws</a></p></section>',
     )
   })
 
@@ -396,11 +396,14 @@ const episodes: PublicEpisode[] = [
   },
 ]
 
-/** The block of podcasts alone: the second card of the sidebar. */
+/** The block of podcasts alone: the last card of the sidebar. */
 async function renderEpisodes() {
   const html = await renderSidebar()
 
-  return html.slice(html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'))
+  return html.slice(
+    html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'),
+    html.indexOf('</aside>'),
+  )
 }
 
 describe('the podcast episodes in the sidebar of the homepage', () => {
@@ -408,14 +411,14 @@ describe('the podcast episodes in the sidebar of the homepage', () => {
     vi.mocked(getHeadlines).mockResolvedValue([])
   })
 
-  it('puts the block under the forum, named by its h2, with the link to all podcasts under the list', async () => {
+  it('puts the block at the end of the sidebar, named by its h2, with the link to all podcasts under the list', async () => {
     vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
 
     const html = await renderSidebar()
 
-    expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('episodes-heading'))
+    expect(html.indexOf('standings-heading')).toBeLessThan(html.indexOf('episodes-heading'))
     expect(await renderEpisodes()).toMatch(
-      /^<section class="hf-card" aria-labelledby="episodes-heading"><h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts<\/h2><ul role="list">.*<\/ul><p><a href="\/nieuws\/podcasts">Alle <span class="hf-icon-tail">podcasts<svg [^>]*class="hf-icon"[^>]*>.*?<\/svg><\/span><\/a><\/p><\/section><section class="hf-card" aria-labelledby="matches-heading">/,
+      /^<section class="hf-card" aria-labelledby="episodes-heading"><h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts<\/h2><ul role="list">.*<\/ul><p><a href="\/nieuws\/podcasts">Alle <span class="hf-icon-tail">podcasts<svg [^>]*class="hf-icon"[^>]*>.*?<\/svg><\/span><\/a><\/p><\/section>$/,
     )
   })
 
@@ -510,7 +513,7 @@ describe('the discussions in the sidebar of the homepage', () => {
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(withoutIcons(await renderSidebar())).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="Het forum, de podcasts en de wedstrijden"><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><section class="hf-card" aria-labelledby="matches-heading">.*<\/section><section class="hf-card" aria-labelledby="standings-heading">.*<\/section><\/aside>$/,
+      /^<aside class="hf-page-sidebar" aria-label="Het forum, de wedstrijden, de stand en de podcasts"><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><section class="hf-card" aria-labelledby="matches-heading">.*<\/section><section class="hf-card" aria-labelledby="standings-heading">.*<\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/aside>$/,
     )
   })
 
@@ -763,15 +766,16 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(vi.mocked(getMatchData).mock.calls[0]).toEqual([])
   })
 
-  it('puts the two cards at the bottom of the sidebar, under the discussions and the podcasts, and after the news', async () => {
+  it('puts the two cards in the sidebar under the discussions and above the podcasts, and after the news', async () => {
     const html = await render()
 
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('matches-heading'))
-    expect(html.indexOf('episodes-heading')).toBeLessThan(html.indexOf('matches-heading'))
+    expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('matches-heading'))
     expect(html.indexOf('matches-heading')).toBeLessThan(html.indexOf('standings-heading'))
+    expect(html.indexOf('standings-heading')).toBeLessThan(html.indexOf('episodes-heading'))
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.lastIndexOf('<section')).toBe(
-      html.indexOf('<section class="hf-card" aria-labelledby="standings-heading">'),
+      html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'),
     )
   })
 
