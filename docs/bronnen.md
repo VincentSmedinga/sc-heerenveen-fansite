@@ -87,7 +87,9 @@ Al in het register (#72).
 
 - **Domein:** `www.lc.nl`
 - **Soort:** nieuws, regionaal dagblad
-- **Uitgever:** geen in het register. De Leeuwarder Courant hoort bij Mediahuis, net als De Telegraaf, maar de twee feeds delen geen artikelcode: op 1 november 2026 hadden ze elk 50 berichten, met geen enkele gelijke code (de getallen aan het eind van de link) en geen gelijke kop (#567)
+- **Uitgever:** geen in het register (#567).
+  De Leeuwarder Courant hoort bij Mediahuis, net als De Telegraaf, maar de twee feeds delen geen artikelcode.
+  Op 1 november 2026 hadden ze elk 50 berichten, met geen enkele gelijke code (de getallen aan het eind van de link) en geen gelijke kop.
 - **Feed:** `https://www.lc.nl/sport/sc-heerenveen/rss/`
   - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 23 oktober 2026, het oudste van 15 augustus 2026.
   - Over sc Heerenveen: 47 van de 50 noemen Heerenveen in de kop of de categorieën.
