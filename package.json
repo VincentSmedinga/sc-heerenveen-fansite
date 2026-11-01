@@ -21,6 +21,7 @@
     "db:seed": "pnpm --filter @fansite/db db:seed",
     "format": "prettier --write .",
     "import": "pnpm --filter @fansite/importer run import",
+    "import:changes": "pnpm --filter @fansite/importer run import:changes",
     "import:season": "pnpm --filter @fansite/importer run import:season",
     "import:status": "pnpm --filter @fansite/importer run import:status",
     "lint": "pnpm run lint:js && pnpm run lint:css && pnpm run lint:format",

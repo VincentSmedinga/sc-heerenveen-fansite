@@ -160,6 +160,7 @@ describe('the overview', () => {
           'import_runs',
           'import_results',
           'items',
+          'match_changes',
           'match_imports',
           'matches',
           'players',

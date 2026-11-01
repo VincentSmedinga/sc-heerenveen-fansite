@@ -183,6 +183,13 @@
       "when": 1793525680211,
       "tag": "0025_add_match_note",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1793529997706,
+      "tag": "0026_add_match_changes",
+      "breakpoints": true
     }
   ]
 }

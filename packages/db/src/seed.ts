@@ -348,8 +348,8 @@ export type MadeUpMatch = Omit<NewMatch, 'clubId'>
  * a win on penalties and a loss on penalties. The first has the score after 90 minutes, the
  * loss on penalties has it too (equal to the result: no goal in extra time), and the win on
  * penalties has none, as a page without it. The away win of round 2 was stopped and finished
- * the next day, so it has a note. `result_set_at` stays empty, so the import never warns about
- * a made-up result it replaces.
+ * the next day, so it has a note. `result_set_at` stays empty. The first read of the season
+ * replaces the made-up matches at once, since no page of it has been read yet.
  */
 export function madeUpMatches(now: Date): MadeUpMatch[] {
   const season = seasonOf(now)

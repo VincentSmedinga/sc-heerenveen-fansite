@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "import": "node --env-file-if-exists=../../.env src/import.ts",
+    "import:changes": "node --env-file-if-exists=../../.env src/import.ts --changes",
     "import:season": "node --env-file-if-exists=../../.env src/import.ts --season",
     "import:status": "node --env-file-if-exists=../../.env src/import.ts --status",
     "test": "node ../../scripts/worktree-env.js run -- vitest run",

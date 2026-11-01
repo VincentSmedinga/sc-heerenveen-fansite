@@ -6,6 +6,7 @@ import {
   clubs,
   feeds,
   items,
+  matchChanges,
   matches,
   matchGoals,
   matchImports,
@@ -25,6 +26,7 @@ import type { Handler, TestServer } from './test-server.ts'
 
 import { runImport } from './import-feeds.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, unlinkedWarning } from './import-matches.ts'
+import { acceptChanges, rejectChanges } from './match-changes.ts'
 import { pageTitles, pageUrl } from './read-wikipedia.ts'
 import { showStatus } from './status.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
@@ -67,6 +69,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   for (const table of [
+    'match_changes',
     'matches',
     'club_names',
     'clubs',
@@ -141,6 +144,21 @@ async function snapshot() {
   }
 }
 
+const goalsCup = fixture('wikipedia-cup-goals.wiki')
+
+/** The scorers of the match of a round, in the order they are shown. */
+const scorersOf = async (round: string) =>
+  (
+    await database.db
+      .select({ goal: matchGoals })
+      .from(matchGoals)
+      .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+      .where(eq(matches.round, round))
+      .orderBy(asc(matchGoals.id))
+  ).map(({ goal }) => [goal.minute, goal.stoppageMinutes, goal.player, goal.ours, goal.ownGoal, goal.penalty])
+
+const health = async () => (await database.db.select().from(matchImports))[0]
+
 const season = '2026/27'
 
 describe('the first import, into an empty database', () => {
@@ -152,7 +170,7 @@ describe('the first import, into an empty database', () => {
     expect(report).toEqual({
       clubs: expect.any(Array),
       kind: 'imported',
-      matches: { added: 35, removed: 0, unchanged: 0, updated: 0 },
+      matches: { added: 35, held: 0, removed: 0, unchanged: 0, updated: 0 },
       season,
       standings: 18,
       validOn: '2026-10-24',
@@ -300,7 +318,7 @@ describe('reading again', () => {
     expect(await database.db.select().from(matches)).toHaveLength(35)
   })
 
-  it('takes over a new kick-off, a new score and a removed match, and keeps the rest', async () => {
+  it('takes over a new kick-off, and holds a match that leaves the page', async () => {
     const { pages, server } = await serve()
 
     await importAt(server, first)
@@ -314,11 +332,14 @@ describe('reading again', () => {
 
     const report = await importAt(server, new Date(first.getTime() + hours(1)))
 
-    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, removed: 1, unchanged: 33, updated: 1 } })
+    expect(report).toMatchObject({
+      kind: 'imported',
+      matches: { added: 0, held: 1, removed: 0, unchanged: 33, updated: 1 },
+    })
     expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 11'))).toMatchObject([
       { kickoffAt: new Date('2026-10-31T19:00:00Z') },
     ])
-    expect(await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))).toEqual([])
+    expect(await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))).toHaveLength(1)
   })
 
   it('takes over a new date for a postponed match', async () => {
@@ -564,7 +585,7 @@ describe('extra time and a shoot-out in the cup', () => {
     ])
   })
 
-  it('warns, with the shoot-out in it, when a shoot-out that had stood for days changes', async () => {
+  it('holds, with the shoot-out in the warning, a shoot-out that had stood for days and changes', async () => {
     const { pages, server } = await serve({ cup: extraTimeCup })
 
     await importAt(server, first)
@@ -574,10 +595,14 @@ describe('extra time and a shoot-out in the cup', () => {
 
     expect(report).toMatchObject({
       kind: 'imported',
+      matches: { held: 1, updated: 0 },
       warnings: [
-        'the result of Tweede ronde (KNVB Beker) changed after 4 days, from sc Heerenveen 1-1 Voorbeeld United (penalties 4-3) to sc Heerenveen 1-1 Voorbeeld United (penalties 3-4)',
+        'held, Tweede ronde (KNVB Beker): the result changed after 4 days, from sc Heerenveen 1-1 Voorbeeld United (penalties 4-3) to sc Heerenveen 1-1 Voorbeeld United (penalties 3-4)',
       ],
     })
+    expect(await database.db.select().from(matches).where(eq(matches.round, 'Tweede ronde'))).toMatchObject([
+      { penaltiesAgainst: 3, penaltiesFor: 4 },
+    ])
   })
 
   const failures: [string, (pages: Pages) => Partial<Pages>, string][] = [
@@ -621,16 +646,6 @@ describe('extra time and a shoot-out in the cup', () => {
 })
 
 describe('the goal scorers', () => {
-  const goalsCup = fixture('wikipedia-cup-goals.wiki')
-  const scorersOf = async (round: string) =>
-    (
-      await database.db
-        .select({ goal: matchGoals })
-        .from(matchGoals)
-        .innerJoin(matches, eq(matchGoals.matchId, matches.id))
-        .where(eq(matches.round, round))
-        .orderBy(asc(matchGoals.id))
-    ).map(({ goal }) => [goal.minute, goal.stoppageMinutes, goal.player, goal.ours, goal.ownGoal, goal.penalty])
   const goalIds = async () =>
     (await database.db.select({ id: matchGoals.id }).from(matchGoals).orderBy(asc(matchGoals.id))).map((row) => row.id)
   /** The scorers of the match against Ajax, as the page has them. */
@@ -753,19 +768,20 @@ describe('the goal scorers', () => {
     expect(await goalIds()).toEqual(ids)
 
     pages.programme = late.replace('Trenskow]]', 'Trenskov]]')
+    // The match was played in August, so a correction of a scorer's name waits.
     expect(await importAt(server, new Date(first.getTime() + hours(3)))).toMatchObject({
-      matches: { unchanged: 34, updated: 1 },
-      warnings: [],
+      matches: { held: 1, unchanged: 34, updated: 0 },
+      warnings: [expect.stringContaining('held, Speelronde 2 (Eredivisie): the goals changed')],
     })
     expect((await scorersOf('Speelronde 2')).map((goal) => goal[2])).toEqual([
       'Klaverboer',
       'Ouazane',
-      'Trenskov',
+      'Trenskow',
       'Rivera',
     ])
   })
 
-  it('takes the scorers away with a match that leaves the page', async () => {
+  it('keeps the scorers of a match that leaves the page, while the removal waits', async () => {
     const { pages, server } = await serve({ cup: goalsCup })
 
     await importAt(server, first)
@@ -773,6 +789,10 @@ describe('the goal scorers', () => {
 
     pages.cup = goalsCup.replaceAll('sc Heerenveen', 'FC Volendam')
     await importAt(server, new Date(first.getTime() + hours(1)))
+    expect(await scorersOf('Eerste ronde')).toHaveLength(3)
+    expect(await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))).toHaveLength(4)
+
+    await importAt(server, new Date(first.getTime() + 8 * 24 * hours(1)))
     expect(await scorersOf('Eerste ronde')).toEqual([])
     expect(await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))).toEqual([])
   })
@@ -895,7 +915,11 @@ describe('the clubs of the opponents', () => {
     const { server: later } = await serve({ programme: renamed })
     const report = await importAt(later, new Date(first.getTime() + hours(1)))
 
-    expect(report).toMatchObject({ clubs: ["club 'Telstar' is now called 'Telstar 1963'"], matches: { updated: 1 } })
+    // The club is renamed at once; the name on the old match is a change that waits.
+    expect(report).toMatchObject({
+      clubs: ["club 'Telstar' is now called 'Telstar 1963'"],
+      matches: { held: 1, updated: 0 },
+    })
     expect(await database.db.select().from(clubs).where(eq(clubs.slug, 'telstar'))).toMatchObject([
       { name: 'Telstar 1963', wikipediaPage: 'Telstar (voetbalclub)' },
     ])
@@ -1143,7 +1167,7 @@ describe('the clubs of the opponents', () => {
 
 describe('the lines of a report', () => {
   it('cleans text from Wikipedia of control characters, in a warning as in an error', () => {
-    const counts = { added: 0, removed: 0, unchanged: 1, updated: 1 }
+    const counts = { added: 0, held: 0, removed: 0, unchanged: 1, updated: 1 }
     const warning = 'the result of Speelronde 1 (Eredivisie) changed\u001b[31m from x\nto y'
     const imported = formatMatchReport({
       clubs: [],
@@ -1165,11 +1189,11 @@ describe('the lines of a report', () => {
 
 describe('a result that changes', () => {
   /** The match of round 1 ends 1-1 instead of 1-0, and the scorers and the table agree. */
-  function drawn(pages: Pages) {
+  function drawn(pages: Pages, minute = 88) {
     return {
       programme: pages.programme
         .replace('|score = 1 – 0', '|score = 1 – 1')
-        .replace('{{goal|52}}\n|goals2 =', '{{goal|52}}\n|goals2 = {{goal|88}} [[Test Speler|Speler]]'),
+        .replace('{{goal|52}}\n|goals2 =', `{{goal|52}}\n|goals2 = {{goal|${minute}}} [[Test Speler|Speler]]`),
       standings: pages.standings
         .replace(
           '|win_HEE=4 |draw_HEE=3 |loss_HEE=3 |gf_HEE=18 |ga_HEE=13',
@@ -1182,57 +1206,377 @@ describe('a result that changes', () => {
     }
   }
 
-  it('warns, with the old and the new result, when it had stood for three days or more, and takes the new one over', async () => {
+  /** Round 1 was played on 9 August 2026, and this is half an hour after it ended. */
+  const roundOne = new Date('2026-08-09T17:30:00Z')
+  const after = (at: Date, ...spans: number[]) => new Date(at.getTime() + spans.reduce((sum, span) => sum + span, 0))
+  const days = (count: number) => count * 24 * hours(1)
+  const roundOneRow = async () => (await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1')))[0]
+  const changes = () => database.db.select().from(matchChanges).orderBy(asc(matchChanges.id))
+
+  it('takes a correction of a few hours old over, with a warning, and keeps it in match_changes', async () => {
     const { pages, server } = await serve()
 
-    await importAt(server, first)
+    await importAt(server, roundOne)
     Object.assign(pages, drawn(pages))
 
-    const report = await importAt(server, new Date(first.getTime() + 4 * 24 * hours(1)))
+    const at = after(roundOne, hours(3))
+    const report = await importAt(server, at)
 
     expect(report).toMatchObject({
       kind: 'imported',
-      matches: { updated: 1 },
+      matches: { held: 0, updated: 1 },
       warnings: [
-        'the result of Speelronde 1 (Eredivisie) changed after 4 days, from sc Heerenveen 1-0 FC Twente to sc Heerenveen 1-1 FC Twente',
+        'Speelronde 1 (Eredivisie): the result changed after 3 hours, from sc Heerenveen 1-0 FC Twente to sc Heerenveen 1-1 FC Twente',
       ],
     })
-    expect(formatMatchReport(report)).toContain('Matches 2026/27: warning, the result of Speelronde 1')
-    expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
-      { goalsAgainst: 1, goalsFor: 1, resultSetAt: new Date(first.getTime() + 4 * 24 * hours(1)) },
+    expect(formatMatchReport(report)).toContain('Matches 2026/27: warning, Speelronde 1 (Eredivisie): the result')
+    expect(await roundOneRow()).toMatchObject({ goalsAgainst: 1, goalsFor: 1, resultSetAt: at })
+    expect(await changes()).toMatchObject([
+      {
+        changed: 'result, goals',
+        class: 'improvement',
+        decidedAt: at,
+        firstSeenAt: at,
+        newValue: expect.stringContaining('1-1'),
+        oldValue: expect.stringContaining('1-0'),
+        resolution: 'applied',
+        round: 'Speelronde 1',
+        status: 'accepted',
+      },
     ])
     expect((await database.db.select().from(matchImports))[0]).toMatchObject({
       lastWarning: expect.stringContaining('from sc Heerenveen 1-0 FC Twente to sc Heerenveen 1-1 FC Twente'),
     })
   })
 
-  it('takes a correction over without a warning when the result had stood for less than three days', async () => {
-    const { pages, server } = await serve()
-
-    await importAt(server, first)
-    Object.assign(pages, drawn(pages))
-
-    const report = await importAt(server, new Date(first.getTime() + 2 * 24 * hours(1)))
-
-    expect(report).toMatchObject({ kind: 'imported', matches: { updated: 1 }, warnings: [] })
-    expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
-      { goalsAgainst: 1, goalsFor: 1 },
-    ])
-  })
-
   it('does not move the day a result was first seen when only the time changes', async () => {
     const { pages, server } = await serve()
 
-    await importAt(server, first)
+    await importAt(server, roundOne)
     pages.programme = pages.programme.replace(
       '|time = 16:45 uur\n|team1 = [[sc Heerenveen]]\n|score = 1 – 0',
       '|time = 17:00 uur\n|team1 = [[sc Heerenveen]]\n|score = 1 – 0',
     )
-    await importAt(server, new Date(first.getTime() + hours(1)))
+    await importAt(server, after(roundOne, hours(1)))
 
-    expect(await database.db.select().from(matches).where(eq(matches.round, 'Speelronde 1'))).toMatchObject([
-      { kickoffAt: new Date('2026-08-09T15:00:00Z'), resultSetAt: first },
+    expect(await roundOneRow()).toMatchObject({ kickoffAt: new Date('2026-08-09T15:00:00Z'), resultSetAt: roundOne })
+  })
+
+  it('holds a change that comes more than a day after the result was first seen', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, roundOne)
+    Object.assign(pages, drawn(pages))
+
+    const report = await importAt(server, after(roundOne, hours(30)))
+
+    expect(report).toMatchObject({ matches: { held: 1, unchanged: 34, updated: 0 } })
+    expect(await roundOneRow()).toMatchObject({ goalsAgainst: 0, goalsFor: 1, resultSetAt: roundOne })
+    expect(await changes()).toMatchObject([
+      { class: 'suspicious', reason: 'the result changed after 30 hours', status: 'pending', timesSeen: 1 },
     ])
+  })
+
+  it('holds a result that changes after four days, keeps the old one, and says so', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, roundOne)
+    Object.assign(pages, drawn(pages))
+
+    const at = after(roundOne, days(4))
+    const report = await importAt(server, at)
+
+    expect(report).toMatchObject({
+      kind: 'imported',
+      matches: { held: 1, updated: 0 },
+      warnings: [
+        'held, Speelronde 1 (Eredivisie): the result changed after 4 days, from sc Heerenveen 1-0 FC Twente to sc Heerenveen 1-1 FC Twente',
+      ],
+    })
+    expect(formatMatchReport(report)).toContain('1 held;')
+    expect(formatMatchReport(report)).toContain('warning, held, Speelronde 1 (Eredivisie)')
+    expect(await roundOneRow()).toMatchObject({ goalsAgainst: 0, goalsFor: 1, resultSetAt: roundOne })
+    expect(await scorersOf('Speelronde 1')).toHaveLength(1)
+    expect(await changes()).toMatchObject([
+      {
+        changed: 'result, goals',
+        class: 'suspicious',
+        decidedAt: null,
+        firstSeenAt: at,
+        lastSeenAt: at,
+        newValue: expect.stringContaining('1-1'),
+        oldValue: expect.stringContaining('1-0'),
+        reason: 'the result changed after 4 days',
+        resolution: null,
+        status: 'pending',
+        timesSeen: 1,
+      },
+    ])
+  })
+
+  it('takes a held change over when the page keeps it for seven days, and not before', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, roundOne)
+    Object.assign(pages, drawn(pages))
+
+    const heldAt = after(roundOne, days(4))
+
+    await importAt(server, heldAt)
+    expect(await importAt(server, after(heldAt, days(7), -hours(1)))).toMatchObject({
+      matches: { held: 1, updated: 0 },
+    })
+    expect(await roundOneRow()).toMatchObject({ goalsAgainst: 0, goalsFor: 1 })
+    expect(await changes()).toMatchObject([{ status: 'pending', timesSeen: 2 }])
+
+    const takenAt = after(heldAt, days(7))
+    const report = await importAt(server, takenAt)
+
+    expect(report).toMatchObject({ matches: { held: 0, unchanged: 34, updated: 1 }, warnings: [] })
+    expect(await roundOneRow()).toMatchObject({ goalsAgainst: 1, goalsFor: 1, resultSetAt: takenAt })
+    expect(await scorersOf('Speelronde 1')).toHaveLength(2)
+    expect(await changes()).toMatchObject([{ decidedAt: takenAt, resolution: 'stood', status: 'accepted' }])
+  })
+
+  it('drops a held change when Wikipedia puts the old result back', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, roundOne)
+
+    const edited = { ...pages }
+
+    Object.assign(pages, drawn(pages))
+    await importAt(server, after(roundOne, days(4)))
+    Object.assign(pages, edited)
+
+    const at = after(roundOne, days(5))
+
+    expect(await importAt(server, at)).toMatchObject({ matches: { held: 0, unchanged: 35, updated: 0 } })
+    expect(await roundOneRow()).toMatchObject({ goalsAgainst: 0, goalsFor: 1 })
+    expect(await changes()).toMatchObject([{ decidedAt: at, resolution: 'reverted', status: 'rejected' }])
+  })
+
+  it('starts again when Wikipedia changes the held result into something else', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, roundOne)
+    Object.assign(pages, drawn(pages))
+    await importAt(server, after(roundOne, days(4)))
+    Object.assign(pages, drawn(pages, 87))
+
+    const at = after(roundOne, days(5))
+
+    await importAt(server, at)
+    expect(await changes()).toMatchObject([
+      { resolution: 'replaced', status: 'rejected' },
+      { firstSeenAt: at, status: 'pending', timesSeen: 1 },
+    ])
+  })
+
+  it('holds a match that flips back to an earlier value, as a sign of an edit war', async () => {
+    const { pages, server } = await serve()
+    const original = { ...pages }
+
+    await importAt(server, roundOne)
+    Object.assign(pages, drawn(pages))
+    await importAt(server, after(roundOne, hours(3)))
+    Object.assign(pages, original)
+
+    const report = await importAt(server, after(roundOne, hours(6)))
+
+    expect(report).toMatchObject({
+      matches: { held: 1, updated: 0 },
+      warnings: [
+        expect.stringContaining('held, Speelronde 1 (Eredivisie): the match is back at a value it had before'),
+      ],
+    })
+    expect(await roundOneRow()).toMatchObject({ goalsAgainst: 1, goalsFor: 1 })
+  })
+
+  it('takes everything over the first time a season is read, since nothing stored comes from Wikipedia', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, roundOne)
+    // The made-up matches of the seed are in the database, and no page has been read.
+    await database.pool.query('DELETE FROM wikipedia_pages')
+    Object.assign(pages, drawn(pages))
+
+    expect(await importAt(server, after(roundOne, days(4)))).toMatchObject({ matches: { held: 0, updated: 1 } })
+    expect(await roundOneRow()).toMatchObject({ goalsAgainst: 1, goalsFor: 1 })
+    expect(await changes()).toEqual([])
+  })
+
+  describe('more matches than six that overwrite what we have', () => {
+    /** Moves the kick-off of the first `count` rounds, played long ago, by an hour. */
+    function later(programme: string, count: number) {
+      let result = programme
+
+      for (let round = 1; round <= count; round++) {
+        const block = new RegExp(
+          `(== Speelronde ${round} ==\\n\\{\\{Footballbox2\\n\\|date = [^\\n]+\\n\\|time = )(\\d\\d):(\\d\\d)`,
+          'u',
+        )
+
+        result = result.replace(
+          block,
+          (_, head: string, hour: string, minute: string) =>
+            `${head}${String(Number(hour) + 1).padStart(2, '0')}:${minute}`,
+        )
+      }
+
+      return result
+    }
+
+    it('holds six of them one by one, and the page goes through', async () => {
+      const { pages, server } = await serve()
+
+      await importAt(server, first)
+      pages.programme = later(pages.programme, 6)
+
+      const report = await importAt(server, after(first, hours(1)))
+
+      expect(report).toMatchObject({ kind: 'imported', matches: { held: 6, unchanged: 29, updated: 0 } })
+      expect(await changes()).toHaveLength(6)
+    })
+
+    it('counts the changes that wait for the limit, and says the same number everywhere', async () => {
+      const { pages, server } = await serve()
+
+      await importAt(server, first)
+      pages.programme = later(pages.programme, 3)
+      expect(await importAt(server, after(first, hours(1)))).toMatchObject({ matches: { held: 3 } })
+
+      // Three still wait and four more come: seven in all.
+      pages.programme = later(original.programme, 7)
+
+      const report = await importAt(server, after(first, hours(2)))
+
+      expect(report).toMatchObject({ kind: 'error', message: expect.stringContaining('7 matches changed at once') })
+      expect((await changes()).filter((change) => change.reason.includes('7 matches changed at once'))).toHaveLength(4)
+    })
+
+    it('holds the seventh too, and the whole page with them: the last good copy stays', async () => {
+      const { pages, server } = await serve()
+
+      await importAt(server, first)
+
+      const stored = await snapshot()
+
+      pages.programme = later(pages.programme, 7)
+
+      const at = after(first, hours(1))
+      const report = await importAt(server, at)
+
+      expect(report).toEqual({
+        kind: 'error',
+        message: expect.stringContaining('7 matches changed at once'),
+        season,
+      })
+      expect(await snapshot()).toEqual(stored)
+      expect(await changes()).toMatchObject(
+        Array.from({ length: 7 }, () => ({ class: 'suspicious', status: 'pending' })),
+      )
+      expect((await changes())[0]?.reason).toContain('7 matches changed at once')
+      expect(await health()).toMatchObject({ failuresInARow: 1, lastOutcome: 'error' })
+
+      // The changes that wait count: the page stays held while they are on it.
+      expect(await importAt(server, after(first, hours(2)))).toMatchObject({
+        kind: 'error',
+        message: expect.stringContaining('7 matches changed at once'),
+      })
+      expect(await snapshot()).toEqual(stored)
+      expect(await changes()).toMatchObject(Array.from({ length: 7 }, () => ({ status: 'pending', timesSeen: 2 })))
+
+      // After seven days of the same page they are taken over, and the page goes through.
+      const taken = await importAt(server, after(at, days(7)))
+
+      expect(taken).toMatchObject({ kind: 'imported', matches: { held: 0, unchanged: 28, updated: 7 } })
+      expect(await changes()).toMatchObject(
+        Array.from({ length: 7 }, () => ({ resolution: 'stood', status: 'accepted' })),
+      )
+    })
+  })
+
+  it('leaves the last good copy alone when the judgement fails', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, roundOne)
+
+    const stored = await snapshot()
+
+    Object.assign(pages, drawn(pages))
+    await database.pool.query('RENAME TABLE match_changes TO match_changes_away')
+
+    try {
+      expect(await importAt(server, after(roundOne, days(4)))).toMatchObject({
+        kind: 'error',
+        message: expect.stringContaining('database error'),
+      })
+    } finally {
+      await database.pool.query('RENAME TABLE match_changes_away TO match_changes')
+    }
+
+    expect(await snapshot()).toEqual(stored)
+  })
+
+  describe('a person decides', () => {
+    async function held() {
+      const { pages, server } = await serve()
+
+      await importAt(server, roundOne)
+      Object.assign(pages, drawn(pages))
+      await importAt(server, after(roundOne, days(4)))
+
+      return { pages, server }
+    }
+
+    it('accepts a change: the match and its scorers become the proposal', async () => {
+      await held()
+
+      const at = after(roundOne, days(5))
+      const [change] = await changes()
+      const decisions = await acceptChanges(database.db, [change?.id ?? 0], at)
+
+      expect(decisions).toMatchObject([{ message: 'accepted', ok: true }])
+      expect(await roundOneRow()).toMatchObject({ goalsAgainst: 1, goalsFor: 1, resultSetAt: at })
+      expect(await scorersOf('Speelronde 1')).toHaveLength(2)
+      expect(await changes()).toMatchObject([{ decidedAt: at, resolution: 'person', status: 'accepted' }])
+    })
+
+    it('says so when a change waits no more', async () => {
+      await held()
+
+      const [change] = await changes()
+
+      await acceptChanges(database.db, 'all', roundOne)
+      expect(await acceptChanges(database.db, [change?.id ?? 0], roundOne)).toEqual([])
+      expect(await rejectChanges(database.db, 'all', roundOne)).toEqual([])
+    })
+
+    it('rejects a change: the match stays, and the import stays quiet while the page shows the same', async () => {
+      const { server } = await held()
+
+      const at = after(roundOne, days(5))
+
+      expect(await rejectChanges(database.db, 'all', at)).toMatchObject([{ message: 'rejected', ok: true }])
+      expect(await importAt(server, after(roundOne, days(6)))).toMatchObject({
+        matches: { held: 0, unchanged: 35, updated: 0 },
+        warnings: [],
+      })
+      expect(await roundOneRow()).toMatchObject({ goalsAgainst: 0, goalsFor: 1 })
+      expect(await changes()).toMatchObject([{ decidedAt: at, resolution: 'person', status: 'rejected' }])
+    })
+
+    it('accepts the removal of a match: the match goes with its scorers', async () => {
+      const { pages, server } = await serve({ cup: goalsCup })
+
+      await importAt(server, first)
+      pages.cup = goalsCup.replaceAll('sc Heerenveen', 'FC Volendam')
+      await importAt(server, after(first, hours(1)))
+      expect(await acceptChanges(database.db, 'all', after(first, hours(2)))).toHaveLength(4)
+      expect(await database.db.select().from(matches).where(eq(matches.competition, 'KNVB Beker'))).toEqual([])
+      expect(await scorersOf('Eerste ronde')).toEqual([])
+    })
   })
 })
 
@@ -1850,7 +2194,6 @@ describe('the play-offs for the Conference League', () => {
   const playoffPage = 'Play-offs Nederlands voetbal 2027'
   const stored = () => database.db.select().from(matches).where(eq(matches.competition, 'Play-offs Conference League'))
   const playoffPages = () => database.db.select().from(wikipediaPages).where(eq(wikipediaPages.kind, 'playoffs'))
-  const health = async () => (await database.db.select().from(matchImports))[0]
 
   it('stores the match of sc Heerenveen with its goals, and the page it came from', async () => {
     const { server } = await serve({ playoffs })
@@ -1939,7 +2282,7 @@ describe('the play-offs for the Conference League', () => {
     expect(await health()).toMatchObject({ failuresInARow: 0 })
   })
 
-  it('removes the play-off match and the credit when the page no longer has sc Heerenveen', async () => {
+  it('removes the play-off match and the credit when the page has not had sc Heerenveen for seven days', async () => {
     const { pages, server } = await serve({ playoffs })
 
     await importAt(server, first)
@@ -1947,12 +2290,17 @@ describe('the play-offs for the Conference League', () => {
 
     const report = await importAt(server, new Date(first.getTime() + hours(1)))
 
-    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, removed: 1, unchanged: 35 } })
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, held: 1, removed: 0, unchanged: 35 } })
+    expect(await stored()).toHaveLength(1)
+    expect(await playoffPages()).toHaveLength(1)
+
+    // After seven days of the same page the removal is taken over, and the credit goes with it.
+    await importAt(server, new Date(first.getTime() + 8 * 24 * hours(1)))
     expect(await stored()).toEqual([])
     expect(await playoffPages()).toEqual([])
   })
 
-  it('takes over a changed result, like the other matches', async () => {
+  it('holds a changed result, like the other matches', async () => {
     const { pages, server } = await serve({ playoffs })
 
     await importAt(server, first)
@@ -1964,8 +2312,8 @@ describe('the play-offs for the Conference League', () => {
 
     const report = await importAt(server, new Date(first.getTime() + hours(1)))
 
-    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, unchanged: 35, updated: 1 } })
-    expect(await stored()).toMatchObject([{ goalsAgainst: 4, goalsFor: 2 }])
+    expect(report).toMatchObject({ kind: 'imported', matches: { added: 0, held: 1, unchanged: 35, updated: 0 } })
+    expect(await stored()).toMatchObject([{ goalsAgainst: 3, goalsFor: 2 }])
   })
 
   describe('an error that is a failure', () => {
