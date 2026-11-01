@@ -11,6 +11,10 @@ const secondRoundPage = readFileSync(new URL('./fixtures/wikipedia-cup-second-ro
 const goalsCupPage = readFileSync(new URL('./fixtures/wikipedia-cup-goals.wiki', import.meta.url), 'utf8')
 const extraTimePage = readFileSync(new URL('./fixtures/wikipedia-cup-extra-time.wiki', import.meta.url), 'utf8')
 const afterNinetyPage = readFileSync(new URL('./fixtures/wikipedia-cup-after-ninety.wiki', import.meta.url), 'utf8')
+const playoffAfterNinetyPage = readFileSync(
+  new URL('./fixtures/wikipedia-playoffs-after-ninety.wiki', import.meta.url),
+  'utf8',
+)
 const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
 const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
 const seasonCup = readFileSync(new URL('./fixtures/wikipedia-season-cup.wiki', import.meta.url), 'utf8')
@@ -894,17 +898,6 @@ describe('the score after 90 minutes of a cup tie', () => {
   it('does not read it of a match that has no score yet', () => {
     expect(afterNinetyOf(tie({ 'half time score': '1 – 1, 0 – 0' }, ''))).toEqual([[null, null]])
   })
-
-  it('does not read it in the play-offs, which this does not cover', () => {
-    const page = playoffPages[2026]?.replace(
-      '|score = 3 – 2\n|team2 = [[sc Heerenveen]]',
-      '|score = 2 – 2\n|half time score = 1 – 1, 0 – 0\n|aet = ja\n|penaltyscore = 3 – 4\n|team2 = [[sc Heerenveen]]',
-    )
-
-    expect(readPlayoffs(page ?? '')).toMatchObject({
-      matches: [{ afterNinetyAgainst: null, afterNinetyFor: null, extraTime: true }],
-    })
-  })
 })
 
 describe('the league table', () => {
@@ -1400,5 +1393,60 @@ describe('the play-offs for the Conference League', () => {
     )
 
     expect(JSON.stringify(readPlayoffs(page ?? ''))).toContain('has a date we do not know')
+  })
+})
+
+describe('the score after 90 minutes of a play-off tie', () => {
+  const afterNinetyOf = (page: string) => {
+    const read = readPlayoffs(page)
+
+    return read.kind === 'error'
+      ? read
+      : read.matches.map((match) => [match.round, match.afterNinetyFor, match.afterNinetyAgainst])
+  }
+
+  it('reads it for a tie played over one match, from our side, as the cup does', () => {
+    expect(afterNinetyOf(playoffAfterNinetyPage)).toEqual([
+      ['Halve finale', 1, 1],
+      ['Finale', 2, 2],
+    ])
+  })
+
+  it('reads it from the brackets of the score too, from our side', () => {
+    const page = playoffAfterNinetyPage
+      .replace(
+        '|score = 1&nbsp;–&nbsp;2\n|half time score = 1&nbsp;–&nbsp;1, 0&nbsp;–&nbsp;1',
+        '|score = 1 – 3 (1 – 2, 0 – 1)',
+      )
+      .replace('|half time score = 2&nbsp;–&nbsp;2, 1&nbsp;–&nbsp;0\n', '')
+
+    expect(afterNinetyOf(page)).toEqual([
+      ['Halve finale', 2, 1],
+      ['Finale', null, null],
+    ])
+  })
+
+  it('has none without extra time, or when the page does not give it', () => {
+    const page = playoffAfterNinetyPage
+      .replace("|aet = ja\n|team2 = '''[[sc Heerenveen]]'''", "|aet =\n|team2 = '''[[sc Heerenveen]]'''")
+      .replace('|half time score = 2&nbsp;–&nbsp;2, 1&nbsp;–&nbsp;0', '|half time score = 1&nbsp;–&nbsp;0')
+
+    expect(afterNinetyOf(page)).toEqual([
+      ['Halve finale', null, null],
+      ['Finale', null, null],
+    ])
+  })
+
+  it('has none for a tie played over two matches, which stays as it was', () => {
+    const page = playoffPages[2022]?.replace(
+      '|score = 2 – 0\n|team2 = [[sc Heerenveen]]',
+      '|score = 2 – 0\n|half time score = 2 – 0, 1 – 0\n|aet = ja\n|team2 = [[sc Heerenveen]]',
+    )
+
+    expect(page).toContain('|half time score = 2 – 0, 1 – 0')
+    expect(afterNinetyOf(page ?? '')).toMatchObject([
+      ['Halve finale, wedstrijd 1/2', null, null],
+      ['Halve finale, wedstrijd 2/2', null, null],
+    ])
   })
 })
