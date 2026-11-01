@@ -66,7 +66,11 @@ function match(ours: number, theirs: number, more: Partial<PublicClubMatch> = {}
   }
 }
 
-/** Testclub: four matches in the Eredivisie and one in the cup, one under an old name. */
+/**
+ * Testclub: four matches in the Eredivisie and one in the cup, one under an old name. We
+ * visited it twice in the Eredivisie, in two stadiums, and once in the cup at a neutral ground;
+ * the stadium of the matches at home is ours.
+ */
 export const testclub: ClubPage = {
   club: {
     id: 3,
@@ -76,18 +80,38 @@ export const testclub: ClubPage = {
     wikipediaPage: null,
   },
   matches: [
-    match(0, 1, { competition: 'KNVB Beker', home: false, matchDate: '2026-09-20', season: '2026/27' }),
-    match(3, 0, { matchDate: '2025-10-24' }),
-    match(1, 1, { home: false, matchDate: '2025-03-01', opponent: 'Oude Testclub', season: '2024/25' }),
-    match(2, 0, { matchDate: '2024-11-09', season: '2024/25' }),
-    match(4, 2, { home: false, matchDate: '2023-04-02', season: '2022/23' }),
+    match(0, 1, {
+      competition: 'KNVB Beker',
+      home: false,
+      matchDate: '2026-09-20',
+      season: '2026/27',
+      stadium: 'Neutraal Stadion',
+    }),
+    match(3, 0, { matchDate: '2025-10-24', stadium: 'Abe Lenstra Stadion' }),
+    match(1, 1, {
+      home: false,
+      matchDate: '2025-03-01',
+      opponent: 'Oude Testclub',
+      season: '2024/25',
+      stadium: 'Nieuw Testpark',
+    }),
+    match(2, 0, { matchDate: '2024-11-09', season: '2024/25', stadium: 'Abe Lenstra Stadion' }),
+    match(4, 2, { home: false, matchDate: '2023-04-02', season: '2022/23', stadium: 'Oud Testpark' }),
   ],
 }
 
-/** A club with a single match, in the cup. */
+/** A club with a single match, in the cup, at its stadium: not a name for the card Stadion. */
 export const beker: ClubPage = {
   club: { id: 1, name: 'Beker United', otherNames: [], slug: 'beker-united', wikipediaPage: null },
-  matches: [match(0, 2, { competition: 'KNVB Beker', home: false, matchDate: '2026-09-20', season: '2026/27' })],
+  matches: [
+    match(0, 2, {
+      competition: 'KNVB Beker',
+      home: false,
+      matchDate: '2026-09-20',
+      season: '2026/27',
+      stadium: 'Bekerveld',
+    }),
+  ],
 }
 
 const readAt = new Date('2026-10-25T12:00:00Z')

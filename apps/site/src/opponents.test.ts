@@ -2,7 +2,7 @@ import type { PublicClubMatch } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { earlierNames, meetingsOf, seasonsOf, summaryOf, tallyOf } from './opponents'
+import { earlierNames, meetingsOf, seasonsOf, stadiumsOf, summaryOf, tallyOf } from './opponents'
 
 let id = 0
 
@@ -161,5 +161,100 @@ describe('earlierNames', () => {
 describe('seasonsOf', () => {
   it('gives each season once, the newest first', () => {
     expect(seasonsOf(matches)).toEqual(['2026/27', '2025/26', '2024/25', '2023/24', '2021/22'])
+  })
+})
+
+describe('stadiumsOf', () => {
+  /** A league match we played away, at the stadium the club had on that day. */
+  const visit = (matchDate: string, stadium: null | string, more: Partial<PublicClubMatch> = {}) =>
+    match(1, 0, { home: false, matchDate, stadium, ...more })
+
+  it('gives the one name of a club that never changed, from the first to the last visit', () => {
+    const visits = [visit('2025-03-01', 'Stadion Test'), visit('2022-10-02', 'Stadion Test')]
+
+    expect(stadiumsOf(visits)).toEqual([{ firstDay: '2022-10-02', lastDay: '2025-03-01', name: 'Stadion Test' }])
+  })
+
+  it('gives the names in the order of the matches, whatever the order they come in', () => {
+    const visits = [
+      visit('2026-02-01', 'Nieuwe Arena'),
+      visit('2024-11-10', 'Nieuwe Arena'),
+      visit('2023-04-02', 'Oud Stadion'),
+      visit('2021-09-12', 'Oud Stadion'),
+    ]
+
+    expect(stadiumsOf(visits)).toEqual([
+      { firstDay: '2021-09-12', lastDay: '2023-04-02', name: 'Oud Stadion' },
+      { firstDay: '2024-11-10', lastDay: '2026-02-01', name: 'Nieuwe Arena' },
+    ])
+  })
+
+  it('puts the kick-off in order when two matches have the same day', () => {
+    const visits = [
+      visit('2025-05-04', 'Late Naam', { kickoffAt: new Date('2025-05-04T18:00:00Z') }),
+      visit('2025-05-04', 'Vroege Naam', { kickoffAt: new Date('2025-05-04T12:00:00Z') }),
+    ]
+
+    expect(stadiumsOf(visits).map((stadium) => stadium.name)).toEqual(['Vroege Naam', 'Late Naam'])
+  })
+
+  it('gives a name that returns as a line of its own', () => {
+    const visits = [visit('2024-01-01', 'A'), visit('2023-01-01', 'B'), visit('2022-01-01', 'A')]
+
+    expect(stadiumsOf(visits).map((stadium) => stadium.name)).toEqual(['A', 'B', 'A'])
+  })
+
+  it('leaves out a cup tie and a play-off, which can be at a neutral ground', () => {
+    const visits = [
+      visit('2025-05-17', 'Neutraal Stadion', { competition: 'KNVB Beker' }),
+      visit('2025-05-10', 'Play-offstadion', { competition: 'Play-offs Conference League' }),
+      visit('2025-03-01', 'Stadion Test'),
+    ]
+
+    expect(stadiumsOf(visits).map((stadium) => stadium.name)).toEqual(['Stadion Test'])
+  })
+
+  it('leaves out the matches we played at home, where the stadium is ours', () => {
+    expect(stadiumsOf([match(2, 0, { stadium: 'Abe Lenstra Stadion' })])).toEqual([])
+  })
+
+  it('leaves out a match that is not played, and a match without a stadium', () => {
+    const visits = [
+      visit('2026-04-04', 'Komend Stadion', { goalsAgainst: null, goalsFor: null, status: 'scheduled' }),
+      visit('2026-03-03', 'Uitgesteld Stadion', { goalsAgainst: null, goalsFor: null, status: 'postponed' }),
+      visit('2025-03-01', null),
+      visit('2025-02-01', '  '),
+    ]
+
+    expect(stadiumsOf(visits)).toEqual([])
+  })
+
+  it('counts a stopped match for where it began: it is a played match with the stadium of the club', () => {
+    // The match was stopped in minute 82 and finished in another stadium; the match keeps the
+    // stadium where it began (see `matches.note`).
+    const stopped = visit('2025-10-19', 'Stadion Test', { goalsAgainst: 0, goalsFor: 6 })
+
+    expect(stadiumsOf([stopped])).toEqual([{ firstDay: '2025-10-19', lastDay: '2025-10-19', name: 'Stadion Test' }])
+  })
+
+  it('takes spellings that differ in capitals, spaces or hyphens for one name, as the first match wrote it', () => {
+    const visits = [
+      visit('2026-02-01', 'stadion  de-kuip'),
+      visit('2025-02-01', 'Stadion de kuip'),
+      visit('2024-02-01', 'Stadion De Kuip'),
+    ]
+
+    expect(stadiumsOf(visits)).toEqual([{ firstDay: '2024-02-01', lastDay: '2026-02-01', name: 'Stadion De Kuip' }])
+  })
+
+  it('keeps two names that may be one, such as one with "Stadion" in front', () => {
+    const visits = [visit('2025-02-01', 'Galgenwaard'), visit('2024-02-01', 'Stadion Galgenwaard')]
+
+    expect(stadiumsOf(visits).map((stadium) => stadium.name)).toEqual(['Stadion Galgenwaard', 'Galgenwaard'])
+  })
+
+  it('gives an empty list for a club we never visited in the league', () => {
+    expect(stadiumsOf([])).toEqual([])
+    expect(stadiumsOf(matches.filter((item) => item.competition === 'KNVB Beker'))).toEqual([])
   })
 })

@@ -1458,7 +1458,7 @@ describe('the matches and the table of a season', () => {
       const rows = await listSeasonStandings(database.db, '2026/27')
 
       expect(rows.map((row) => row.position)).toEqual([1, 2, 3, 4, 5, 6])
-      expect(rows[0]).toMatchObject({ club: 'sc Heerenveen', goalDifference: 12, points: 6, validOn: '2026-10-18' })
+      expect(rows[0]).toMatchObject({ club: 'sc Heerenveen', goalDifference: 12, points: 7, validOn: '2026-10-18' })
     })
 
     it('gives only the season it is asked for, so a table of an earlier season is not shown', async () => {

@@ -348,8 +348,10 @@ export type MadeUpMatch = Omit<NewMatch, 'clubId'>
  * a win on penalties and a loss on penalties. The first has the score after 90 minutes, the
  * loss on penalties has it too (equal to the result: no goal in extra time), and the win on
  * penalties has none, as a page without it. The away win of round 2 was stopped and finished
- * the next day, so it has a note. `result_set_at` stays empty. The first read of the season
- * replaces the made-up matches at once, since no page of it has been read yet.
+ * the next day, so it has a note. Voorbeeld United is visited twice in the Eredivisie, in a
+ * stadium that changed its name (round 0 and round 2), so the page of that club has the card
+ * Stadions; the other clubs have none or one name. `result_set_at` stays empty. The first read
+ * of the season replaces the made-up matches at once, since no page of it has been read yet.
  */
 export function madeUpMatches(now: Date): MadeUpMatch[] {
   const season = seasonOf(now)
@@ -428,6 +430,19 @@ export function madeUpMatches(now: Date): MadeUpMatch[] {
       opponent: 'Oefenstad FC',
       round: 'Halve finale',
       stadium: 'Stadion Voorbeeldlaan',
+      status: 'played',
+    },
+    {
+      ...base,
+      competition: 'Eredivisie',
+      goalsAgainst: 0,
+      goalsFor: 0,
+      home: false,
+      kickoffAt: at(-21, 18, 45),
+      matchDate: dayOf(at(-21, 18, 45)),
+      opponent: 'Voorbeeld United',
+      round: 'Speelronde 0',
+      stadium: 'Oud Voorbeeldpark',
       status: 'played',
     },
     {
@@ -656,16 +671,16 @@ export function madeUpSquadPage(now: Date): NewWikipediaPage {
 
 /**
  * A made-up league table that agrees with `madeUpMatches`: six made-up clubs and sc Heerenveen,
- * two rounds played, and the day of the last match as the day it holds for.
+ * round 0 and two rounds played, and the day of the last match as the day it holds for.
  */
 export function madeUpTable(now: Date): NewStandingsRow[] {
   const season = seasonOf(now)
   const validOn = new Date(now.getTime() - 7 * day).toISOString().slice(0, 10)
   const rows: [string, number, number, number, number, number][] = [
-    ['sc Heerenveen', 2, 0, 0, 12, 0],
+    ['sc Heerenveen', 2, 1, 0, 12, 0],
     ['Demo Boys', 1, 1, 0, 5, 4],
     ['Proefstad SV', 1, 1, 0, 2, 1],
-    ['Voorbeeld United', 0, 1, 1, 1, 7],
+    ['Voorbeeld United', 0, 2, 1, 1, 7],
     ['Testdorp FC', 0, 1, 1, 2, 8],
     ['Nepstad Rangers', 0, 0, 2, 2, 4],
   ]
