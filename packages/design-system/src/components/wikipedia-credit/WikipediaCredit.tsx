@@ -105,8 +105,8 @@ export const WikipediaCredit = ({
             <Link href={page.href}>{page.name}</Link>
           </span>
         ))}
-        . Overweeg eens een donatie. Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn
-        ook CC BY-SA 4.0.
+        . Overweeg een donatie. Laatst gelezen op <Time dateTime={readAtDateTime}>{readAt}</Time>. Onze {data} zijn ook
+        CC BY-SA 4.0.
       </p>
     </details>
   )

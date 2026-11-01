@@ -60,7 +60,7 @@ const releases = releasesOf(existsSync(changelogFile) ? readFileSync(changelogFi
 // attribute after its class), with "Bron: Wikipedia" in the summary, and the licence, the
 // donation sentence and the time of the last reading in the fold.
 const closedWikipediaCredit =
-  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Overweeg eens een donatie\. Laatst gelezen op/s
+  /<details class="hf-meta hf-wikipedia-credit"><summary>Bron: Wikipedia<svg.*?<\/svg><\/summary><p>Licentie: .*CC BY-SA 4\.0.*Overweeg een donatie\. Laatst gelezen op/s
 
 // The layers of the design system, from weak to strong, as layers.css declares them. The build
 // must keep that order.
