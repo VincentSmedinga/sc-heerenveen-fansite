@@ -1030,7 +1030,9 @@ describe('the line under the table in the sidebar of the homepage', () => {
     const html = await renderStandingsCard()
 
     expect(html.match(/Gegevens nog niet bijgewerkt/g)).toHaveLength(1)
-    expect(html).toContain('<p class="hf-meta" data-hf-card-share-skip="">Gegevens nog niet bijgewerkt</p>')
+    expect(html).toContain(
+      '<p class="hf-meta hf-text-missing" data-hf-card-share-skip="">Gegevens nog niet bijgewerkt</p>',
+    )
   })
 
   it('puts the line straight under the table and above the link to the full table', async () => {

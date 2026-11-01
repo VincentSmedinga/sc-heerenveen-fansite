@@ -325,7 +325,9 @@ describe('the page /wedstrijden', () => {
       const table = section(await render(), 'stand')
 
       expect(table.match(/Gegevens nog niet bijgewerkt/g)).toHaveLength(1)
-      expect(table).toContain('<p class="hf-meta" data-hf-card-share-skip="">Gegevens nog niet bijgewerkt</p>')
+      expect(table).toContain(
+        '<p class="hf-meta hf-text-missing" data-hf-card-share-skip="">Gegevens nog niet bijgewerkt</p>',
+      )
     })
 
     it('puts the line straight under the table and above the link to our place in the league', async () => {

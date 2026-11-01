@@ -8356,7 +8356,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 ### De Stand zegt dat een uitslag nog ontbreekt, zonder datum op de kaarten
 
 - **Datum:** 1 november 2026
-- **Besluit:** de kaart Stand op de homepage en op Wedstrijden toont onder de tabel "Gegevens nog niet bijgewerkt" (#542), in `Text appearance="meta"` en boven de link, zodra een wedstrijd van het lopende seizoen geen uitslag heeft twee uur na de aanvang.
+- **Besluit:** de kaart Stand op de homepage en op Wedstrijden toont onder de tabel "Gegevens nog niet bijgewerkt" (#542), in `Text appearance="meta"` en in hetzelfde rood als "Gegevens nog niet beschikbaar" bij een wedstrijd (het token `--hf-colour-text-missing`, de projecteigenaar vroeg erom op 1 november 2026), boven de link, zodra een wedstrijd van het lopende seizoen geen uitslag heeft twee uur na de aanvang.
   Dezelfde grens als de zin "Gegevens nog niet beschikbaar" bij een wedstrijd: `standingsLag` in `src/matches.ts` roept `lacksResult` aan, dus er is geen tweede kopie van de twee uur.
   Een Eindstand krijgt de regel niet, ook niet met wedstrijden zonder uitslag (de projecteigenaar koos dit op 1 november 2026), een kaart zonder tabel ook niet, en de afbeelding van de kaart laat de regel weg (`data-hf-card-share-skip`).
   De regel verdwijnt zodra de uitslag er is.

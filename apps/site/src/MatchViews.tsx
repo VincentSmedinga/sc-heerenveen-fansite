@@ -645,12 +645,13 @@ export function SourceCredit({ pages, season }: { pages: PublicWikipediaPage[]; 
 
 /**
  * The line under the table of the current season when it may be behind (see `standingsLag`):
- * the matches of the season say whether a result is missing. It is a temporary state, so the
- * image of the card leaves it out. The sentence is here for both cards Stand.
+ * the matches of the season say whether a result is missing. It has the red of "Gegevens nog
+ * niet beschikbaar" at a match. It is a temporary state, so the card's image leaves it out.
+ * The sentence is here for both cards Stand.
  */
 export function StandingsBehind({ matches, now }: { matches: PublicMatch[]; now: Date }) {
   return standingsLag(matches, now) ? (
-    <Text appearance="meta" data-hf-card-share-skip="">
+    <Text appearance="meta" className="hf-text-missing" data-hf-card-share-skip="">
       Gegevens nog niet bijgewerkt
     </Text>
   ) : null

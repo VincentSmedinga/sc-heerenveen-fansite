@@ -267,7 +267,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 - **Stand:** de volledige tabel met een balk naast de punten, en een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.
   Een eerder seizoen noemt de kaart en het bijschrift "Eindstand", met het anker `eindstand`.
   De balk verdwijnt op een smalle plek.
-  Is bij een wedstrijd van het lopende seizoen de uitslag er twee uur na de aanvang nog niet (`standingsLag` in `src/matches.ts`, op `lacksResult`), dan staat onder de tabel "Gegevens nog niet bijgewerkt" (`StandingsBehind` in `src/MatchViews.tsx`), in `Text appearance="meta"` en boven de link.
+  Is bij een wedstrijd van het lopende seizoen de uitslag er twee uur na de aanvang nog niet (`standingsLag` in `src/matches.ts`, op `lacksResult`), dan staat onder de tabel "Gegevens nog niet bijgewerkt" (`StandingsBehind` in `src/MatchViews.tsx`), in `Text appearance="meta"`, in hetzelfde rood als "Gegevens nog niet beschikbaar" (`hf-text-missing`) en boven de link.
   Een Eindstand krijgt de regel niet, een kaart zonder tabel ook niet, en de afbeelding van de kaart laat haar weg (`data-hf-card-share-skip`).
 - **Uitslagen:** alle wedstrijden die zijn begonnen, de nieuwste bovenaan.
   Een eerder seizoen begint bij de eerste wedstrijd (`resultsOfSeason` in `src/matches.ts`).
