@@ -137,7 +137,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
       {(sources.length > 0 || article !== undefined || episodes !== undefined) && (
         <Page.Sidebar aria-label="Het filter, de redactie en de podcasts" narrow>
           {sources.length > 0 && (
-            <Card as="div" surface="soft">
+            <Card as="div">
               <Form action="/nieuws" autoComplete="off" method="get">
                 <CheckboxGroup
                   legend="Bronnen"

@@ -388,7 +388,7 @@ export function HomeAwayCard({
   })
 
   return (
-    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0, season)} surface="warm">
+    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0, season)}>
       <Heading anchor id="thuis-en-uit" level={2}>
         Thuis en uit
       </Heading>

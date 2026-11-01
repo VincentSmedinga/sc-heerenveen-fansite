@@ -123,13 +123,13 @@ describe('the page Podcasts', () => {
     expect(html).not.toMatch(/<img|<audio|<iframe|<script|\.mp3/)
   })
 
-  it('puts the filter in a card on a soft surface in the sidebar, after the main, with a name for the sidebar', async () => {
+  it('puts the filter in a card on the white surface in the sidebar, after the main, with a name for the sidebar', async () => {
     const html = await render()
 
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(html.slice(html.indexOf('<aside'))).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="Podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws\/podcasts" method="get"><fieldset class="hf-checkbox-group"><legend class="hf-heading-2">Podcasts<\/legend>/,
+      /^<aside class="hf-page-sidebar" aria-label="Podcasts"><div class="hf-card"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws\/podcasts" method="get"><fieldset class="hf-checkbox-group"><legend class="hf-heading-2">Podcasts<\/legend>/,
     )
   })
 

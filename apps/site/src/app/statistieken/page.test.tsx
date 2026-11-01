@@ -209,7 +209,7 @@ describe('the page /statistieken', () => {
     }
   })
 
-  it('gives our place in the league the white surface, the streaks, the goal scorers, the clean sheets, how the matches go and the extremes the soft one, and the season, home and away and the goals per quarter the warm one', async () => {
+  it('gives our place in the league and home and away the white surface, the streaks, the goal scorers, the clean sheets, how the matches go and the extremes the soft one, and the season and the goals per quarter the warm one', async () => {
     const html = await render()
 
     for (const [id, surface] of [
@@ -218,7 +218,7 @@ describe('the page /statistieken', () => {
       ['de-nul-gehouden', 'hf-card hf-card-soft hf-card-shareable'],
       ['verloop-van-het-seizoen', 'hf-card hf-card-warm hf-card-shareable'],
       ['reeksen', 'hf-card hf-card-soft hf-card-shareable'],
-      ['thuis-en-uit', 'hf-card hf-card-warm hf-card-shareable'],
+      ['thuis-en-uit', 'hf-card hf-card-shareable'],
       ['doelpunten-per-kwartier', 'hf-card hf-card-warm hf-card-shareable'],
       ['hoe-de-wedstrijden-verlopen', 'hf-card hf-card-soft hf-card-shareable'],
       ['uitersten', 'hf-card hf-card-soft hf-card-shareable'],
