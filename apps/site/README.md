@@ -201,9 +201,11 @@ Onder de lijst staat de link "Alle nieuws" naar `/nieuws` (zie _De nieuwspagina_
 Het aantal staat op één plek, `firstHeadlines` (10) in `src/items-per-card.ts`, en de lijst staat vijf minuten in het geheugen van de server (`src/headlines.ts`).
 De homepage kent geen parameters, geen filter, geen paginering en geen balk met subpagina's: een adres als `/?nieuws=15`, dat de knop "Laad 5 meer" vroeger maakte, laat gewoon de homepage zien.
 
-De kaarten met discussies en podcasts tonen vijf items: het aantal staat op één plek, `itemsPerCard` in `src/items-per-card.ts`.
+De server leest vijf discussies en vijf afleveringen (`itemsPerCard` in `src/items-per-card.ts`), en de kaarten in de zijbalk tonen er twee van elk (`homeDiscussions` en `homeEpisodes`), zodat de zijbalk ongeveer even lang is als de hoofdkolom.
+Bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 1339 pixels hoog en de zijbalk 1371.
+De kaart "Podcasts" op `/nieuws` toont alle vijf.
 
-In de zijbalk naast het nieuws staat bovenaan het blok "Nieuwste discussies", want het forum is onze zustersite: de vijf discussies van het forum waar het laatst op is gereageerd.
+In de zijbalk naast het nieuws staat bovenaan het blok "Nieuwste discussies", want het forum is onze zustersite: de twee discussies van het forum waar het laatst op is gereageerd.
 Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar het laatste bericht van de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1 · 13:28".
 Van vandaag staat alleen de tijd, van de zes dagen ervoor de korte dag en de tijd, en daarvoor de datum.
 Onder de discussies staat de link "Naar het forum"; zijn er geen discussies, dan staat er een tekst voor bezoekers boven die link.
@@ -217,7 +219,7 @@ Het haalt alleen berichten op die `relevant` zijn en niet verborgen (`isShown`);
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
-Onderaan de zijbalk staat het blok "Nieuwste podcasts": de vijf nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
+Onderaan de zijbalk staat het blok "Nieuwste podcasts": de twee nieuwste afleveringen van alle podcasts, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/nieuws/podcasts`.
 

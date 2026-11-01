@@ -3221,6 +3221,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _Het hoofdmenu staat in een eigen rij onder de sitenaam_ voor de opmaak van het menu: de onderdelen staan niet meer in halfvet en in de lichtblauwe kleur maar in gewicht 500 en de lichtste kleur van de header, en de huidige pagina heeft alleen de rode streep.
   De onderdelen van het menu zelf en de rode streep blijven.
 - **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): Podcasts komt niet meer in het menu maar onder Nieuws, en Statistieken komt erbij.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): het item Nieuws wijst naar `/nieuws` en niet naar de homepage, en de homepage heeft geen huidig onderdeel in het menu.
+  De rode streep blijft.
 
 ### Een eigen foutpagina bij een fout op de server
 
@@ -3835,6 +3837,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** de projecteigenaar koos dit bij het bouwen van #271.
   De specificatie van 25 oktober had ze bovenaan, boven de discussies en de podcasts, omdat de volgende wedstrijd het eerste is wat supporters willen weten.
 - **Alternatieven:** bovenaan de zijbalk, boven de discussies en de podcasts (de eerste specificatie van 25 oktober); in de hoofdkolom boven het nieuws (valt het meest op, maar verdringt het nieuws).
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): de zijbalk begint met het forum, dan Wedstrijden en Stand, en eindigt met de podcasts.
 
 ### Het programma, de volgende wedstrijd en de uitslagen volgen uit de status
 
@@ -4456,6 +4459,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _Op `/nieuws` kies je bronnen met selectievakjes in een fieldset_: het filter per bron is een groep selectievakjes met een knop "Toon", en "Alle bronnen" als link vervalt.
   `?bron=<slug>` mag vaker voorkomen, en zonder `bron` zijn het alle bronnen.
 - **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): het archief krijgt een plek in de balk met subpagina's van Nieuws, onder de naam Archief.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): `/nieuws` heet "Nieuws" in plaats van "Nieuwsarchief", de homepage linkt met "Alle nieuws", en de zijbalk heeft ook een artikel van de redactie en de podcasts.
 
 ### De homepage heeft geen knop "Laad 5 meer" meer, maar de link "Alle koppen"
 
@@ -4468,6 +4472,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De homepage heeft zo geen parameters meer, en de lijst heeft nog maar één plek in het geheugen.
 - **Gevolg:** de koppen van de homepage hebben geen `id` meer, en de knop blijft op de pagina met de gehouden nullen en op `/zoeken`.
 - **Alternatieven:** de knop houden naast de link (twee manieren om meer koppen te zien, en de knop en de link raken elkaar onder de lijst).
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): de link heet "Alle nieuws".
 
 ### Het filter van het nieuwsarchief staat in een lichtblauwe kaart in de zijbalk
 
@@ -4584,6 +4589,41 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** de balk van Nieuws heeft op verzoek van de projecteigenaar (31 oktober 2026) de volgorde Archief, Podcasts en Zoeken, en niet Podcasts, Archief en Zoeken.
 - **Later:** de top 5 en Spelers staan sinds 31 oktober 2026 op `/statistieken` en `/statistieken/spelers`; zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_.
 - **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): Tegenstanders is er, naast Spelers, in de balk van Statistieken.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): `/` is niet meer Nieuws en heeft geen balk, Nieuws is `/nieuws` en is het archief (dat item vervalt), en de balk van Nieuws heeft Podcasts en Zoeken.
+  De rest van dit besluit blijft gelden.
+
+### De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage
+
+- **Datum:** 1 november 2026
+- **Besluit:** `/` en `/nieuws` zijn twee pagina's met elk hun eigen inhoud.
+  - **De homepage `/`** is de voorpagina van de hele site.
+    Ze staat niet in het hoofdmenu (het logo wijst ernaartoe) en heeft geen balk met subpagina's.
+    De hoofdkolom heeft bovenaan "Van de redactie", in de lange vorm, want daar komt de aankondiging van de livegang, en daaronder "Laatste nieuws" met tien koppen en de link "Alle nieuws" naar `/nieuws`.
+    De zijbalk heeft bovenaan het forum ("Nieuwste discussies"), onze zustersite, en daaronder Wedstrijden, Stand en "Nieuwste podcasts".
+  - **Het nieuws `/nieuws`** heet "Nieuws" en is het archief: de hoofdkolom heeft alleen koppen, 50 per pagina, met `?bron=` en `?pagina=` zoals eerder.
+    De zijbalk heeft van boven naar beneden het filter per bron, één artikel van de redactie in de korte vorm van `ArticleCard` (`short`: de titel als link, de datum en de inleiding, zonder "Lees verder"; zonder artikel geen kaart) en de kaart "Podcasts" met de nieuwste afleveringen.
+    Er staan geen wedstrijdkaarten op.
+  - **Het hoofdmenu** heeft Nieuws op `/nieuws`.
+    Het is het huidige onderdeel op `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en de homepage heeft geen huidig onderdeel.
+    De balk van Nieuws heeft Podcasts en Zoeken, in die volgorde, op die pagina's; het item Archief vervalt.
+  - **Adressen:** geen omleidingen en `?nieuws=` is weg, want er zijn nog geen openbare links (#33).
+  - **De aantallen:** de kaarten met discussies en podcasts in de zijbalk van de homepage tonen twee items (`homeDiscussions` en `homeEpisodes` in `apps/site/src/items-per-card.ts`).
+    Bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 1339 pixels hoog en de zijbalk 1371.
+    Met vijf items per kaart was de zijbalk 2055 pixels.
+    Met drie discussies en twee afleveringen was hij 1482 pixels, en met drie van elk 1623.
+- **Waarom:** de homepage is het overzicht met de aankondiging bovenaan en het forum prominent, en het nieuws krijgt één plek met zijn eigen balk.
+  Een item Nieuws dat naar de homepage wees, gaf op de homepage een balk met subpagina's die de projecteigenaar niet verwachtte.
+  Zo bestaat er niets dubbel: Nieuws is het archief, dus een item Archief erbij is overbodig.
+  Twee items per kaart maken de twee kolommen van de homepage ongeveer even lang, zonder dat een kaart leeg is.
+- **Nadeel:** de homepage toont minder discussies en afleveringen dan vroeger.
+  De hoogte hangt van de gegevens af: lange titels maken een kaart hoger, dus de kolommen zijn alleen bij benadering gelijk.
+  Op een telefoon staat de zijbalk van `/nieuws` na de 50 koppen en de paginering, dus het filter staat ver onderaan (zie #206).
+- **Gevolg:** de pagina's en tests van `/` en `/nieuws`, het menu, de e2e-tests en de rooktest zijn bijgewerkt, en de kaarten voor discussies en podcasts zijn onderdelen in `apps/site/src/NewsCards.tsx` die beide pagina's gebruiken.
+  Wat verderop in de tijd komt, zoals vijf wedstrijden op de kaart Wedstrijden (#516), verandert de hoogte van de zijbalk en kan de aantallen opnieuw laten kiezen.
+- **Alternatieven:** het item Nieuws op `/` laten staan met alleen de balk verborgen op de homepage (twee pagina's op één adres, en Nieuws is dan nooit een eigen plek).
+  Een apart item Archief houden naast Nieuws (twee plekken voor dezelfde koppen).
+  Omleidingen van de oude adressen (er zijn geen openbare links).
+  Vijf items per kaart houden (de zijbalk is dan meer dan anderhalf keer zo lang als de hoofdkolom).
 
 ### De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
 
@@ -5160,6 +5200,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het blok boven het forum, of in de hoofdkolom onder het nieuws.
 - **Later:** zie _Elke kaart op de homepage toont vijf items, uit één gedeelde waarde_: het blok toont nu vijf afleveringen.
 - **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de link van het blok gaat naar `/nieuws/podcasts`.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): het blok staat onderaan de zijbalk en toont twee afleveringen; de kaart "Podcasts" op `/nieuws` toont er vijf.
 
 ### Het filter is een Navigation, en de paginering verdwijnt bij één pagina
 
@@ -6353,6 +6394,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** per kaart een eigen aantal, zoals nu; ook `/podcasts` op vijf zetten (meer pagina's voor dezelfde afleveringen).
 - **Later:** het nieuws begint sinds 25 oktober 2026 met tien koppen en laadt er vijf bij; de kaarten met discussies en podcasts blijven op vijf.
   Zie _De nieuwskaart begint met tien koppen_.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): de kaarten met discussies en podcasts in de zijbalk van de homepage tonen twee items; `itemsPerCard` blijft het aantal dat de server leest.
 
 ### "Laad 5 meer" werkt zonder JavaScript
 
@@ -6645,6 +6687,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een artikel krijgt geen eigen afbeelding bij een gedeelde link; het heeft hetzelfde plaatje als elke pagina: het schild op het donkerblauw van de kop, zoals de app-iconen (zie _Het schild van de site, als PNG van ons eigen domein, is de afbeelding bij het delen van links_).
   De projecteigenaar koos dit op 25 oktober 2026; het issue (#263) zegt dat "geen afbeelding bij de link" geen eigen afbeelding per artikel betekende.
   Een eigen afbeelding per artikel kan later.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): het nieuwste artikel staat ook in een korte vorm in de zijbalk van `/nieuws`.
 
 ### Artikeltekst heeft een kleine eigen opmaak, die een eigen functie omzet
 
