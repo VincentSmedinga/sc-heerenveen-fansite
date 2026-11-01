@@ -43,6 +43,8 @@ const played = (
   goalsAgainst: number,
   extra: Partial<PublicMatch> = {},
 ): PublicMatch => ({
+  afterNinetyAgainst: null,
+  afterNinetyFor: null,
   competition: 'Eredivisie',
   dateText: null,
   extraTime: false,

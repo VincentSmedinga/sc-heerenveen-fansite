@@ -1307,6 +1307,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   We laten dat zo (besloten op 20 oktober 2026).
   Voor release-please maakt een `fix` een patch-release en een `chore` geen release (zie _Eén versie voor de hele site, met release-please_).
   Een update van een dependency in productie verandert wat bezoekers krijgen, bijvoorbeeld bij een beveiligingsfix, dus die hoort in de changelog.
+- **Later:** sinds 1 november 2026 laat Renovate MariaDB en Node op de versie van de host staan (zie _Renovate blijft bij MariaDB 10.11 en Node 24_).
+  De rest van dit besluit blijft gelden.
 - **Alternatieven:** Dependabot, ingebouwd en zonder extra app.
   Dat bekijken we opnieuw zodra het pnpm 12 ondersteunt.
   Of Renovate zelf draaien als GitHub Action: geen app van een ander, maar wel een token en onderhoud.
@@ -1392,6 +1394,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `@stylistic/max-len`; dat is een nieuwe dependency voor een regel die ESLint zelf nog heeft.
 - **Let op:** ESLint heeft `max-len` als verouderd gemarkeerd, en hij kan in een volgende hoofdversie verdwijnen.
   Dan kiezen we opnieuw.
+
+### Renovate blijft bij MariaDB 10.11 en Node 24
+
+- **Datum:** 1 november 2026
+- **Besluit:** Renovate stelt geen MariaDB 11 of nieuwer voor en geen Node 25 of nieuwer.
+  Dat staat in `.github/renovate.json5`, in twee regels naast die voor TypeScript.
+  MariaDB blijft onder 11, voor de image in `compose.yaml` en in de workflows.
+  Node en `@types/node` blijven onder 25, voor `.nvmrc` en `engines`.
+  Updates binnen MariaDB 10.x en Node 24 blijven komen, en andere grote updates ook, zoals `entities` 9.
+  We halen de regels weg als de host een nieuwere versie biedt en we bewust verhuizen.
+  Dan veranderen de versies in `compose.yaml`, de workflows, `.nvmrc`, `engines` en `@types/node` in dezelfde pull request.
+- **Waarom:** de host draait MariaDB 10.11 en Node 24.20 en kiest niet voor ons.
+  Een stap naar MariaDB 13 of Node 26 is dus geen update maar een verhuizing, en de tests en de rooktest draaien nu op de versies van de host.
+  Het overzicht van #463 toonde beide sprongen elke week, en iemand kon ze per ongeluk aanvinken.
+- **Gevolg:** de pull request voor MariaDB 13 en Node 26 komt niet meer.
+  Een nieuwe versie van de host moeten we zelf zien, bijvoorbeeld in _Setup Node.js App_.
+- **Alternatieven:** de sprongen elke week laten staan en niet aanvinken, wat ruis in het overzicht geeft en een kans op een vergissing.
+  Of de major-updates van deze pakketten uitzetten; dat werkt ook, maar de grens zegt dan niet welke versie de host heeft, en de regel voor TypeScript noemt de versie wel.
 
 ## Designsysteem
 
@@ -5794,7 +5814,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een parameter van `pnpm run import` zelf (een foutje met de opdracht raakt dan de uurlijkse run).
   Ook de selectie van 2025/26 importeren (nodig voor spelers bij doelpunten, maar niet voor deze vergelijking).
 - **Later:** zie _Een wijziging van Wikipedia krijgt een betrouwbaarheid, en een verdachte wijziging wacht_.
-  Een seizoen dat al in de database staat, verandert niet zomaar meer: een verschil bij een tweede lezing wacht tot een mens besluit (`pnpm run import:changes`) of tot de opdracht het na zeven dagen weer leest.
+  Een seizoen dat al in de database staat, verandert niet zomaar meer: een verschil dat iets overschrijft wacht bij een tweede lezing tot een mens besluit (`pnpm run import:changes`) of tot de opdracht het na zeven dagen weer leest.
   Een eerste lezing en een lezing zonder verschil werken zoals hier staat.
 
 ### De cijfers van een speler staan in een eigen tabel, per seizoen en competitie
@@ -5837,6 +5857,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De haakjes werken ook voor de competitie, want de lezer van een score is voor beide dezelfde; de competitiepagina's van 2021/22 tot en met 2024/25 hebben ze niet.
 - **Alternatieven:** de haakjes weggooien (de stand na 90 minuten gaat dan verloren en #300 moet de pagina opnieuw lezen).
   Elke onbekende vorm als fout laten staan (de import van eerdere seizoenen mislukt).
+- **Later:** zie _De stand na 90 minuten komt uit het eerste paar van `half time score`_: de stand na 90 minuten uit de haakjes wordt nu bewaard en getoond; de stand bij de rust niet.
 
 ### Een club is één artikel op Wikipedia, met een vaste slug voor zijn adres
 
@@ -6095,8 +6116,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     Daarvoor bewaart de import ook de verbeteringen die hij overnam.
   - De eerste lezing van een seizoen neemt alles over.
     Er staat dan nog niets in de database dat van Wikipedia komt, want de verzonnen wedstrijden van de seed worden zo vervangen.
-  - Een afgelopen seizoen verandert niet meer, dus elke wijziging daarin is verdacht.
-    Een nieuwe wedstrijd niet.
+  - Een afgelopen seizoen verandert niet meer, dus een wijziging daarin die iets overschrijft is verdacht.
+    Wat leeg was invullen mag wel (de stand na 90 minuten van #300, doelpuntenmakers bij een wedstrijd die er geen had), en een nieuwe wedstrijd ook.
+    Zo hoeft een nieuwe kolom geen opdracht van de eigenaar om een seizoen bij te werken.
     De uurlijkse import leest zo'n seizoen niet, dus de zeven dagen tellen pas bij de volgende `pnpm run import:season`, of een mens besluit.
   - Een andere link of spelling voor dezelfde tegenstander, een ander stadion en een doelpunt dat alleen zijn speler of pagina krijgt, zijn nieuwe informatie.
   - De stand en de selectie volgen Wikipedia zoals voorheen, tenzij de hele pagina vastgehouden wordt.
@@ -7387,6 +7409,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het staat op de pagina van de beker in aparte velden (`aet`, `penaltyscore`), dus inlezen is geen gokwerk, en de gewone `score` blijft zoals ze was.
 - **Alternatieven:** het niet bewaren (dan blijft een gelijke stand in de beker vaag); de strafschoppen als gewone doelpunten bij de stand optellen (verkeerd: 1–1 wordt dan 5–3); de volle woorden "na verlenging" en "na strafschoppen" in beeld (de projecteigenaar koos op 26 oktober 2026 voor afkortingen, omdat de volle woorden de regel drukker maken).
   Daarom staan de volle woorden wel voor een schermlezer en in de `title`, want een schermlezer leest een afkorting slecht.
+- **Later:** zie _De stand na 90 minuten komt uit het eerste paar van `half time score`_: is die stand bekend, dan staat er bij strafschoppen ook "n.v.", als "3–3 n.v. (2–2), 5–3 n.s.".
 
 ### Een strafschop die we niet kunnen lezen laat de import niet doorgaan
 
@@ -7399,6 +7422,33 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Een nieuwe score van strafschoppen is geen verandering van de uitslag:** komen de strafschoppen er later bij, dan neemt de import ze over zonder waarschuwing.
   Verandert een score van strafschoppen die er al was, nadat de uitslag drie dagen of langer vaststond, dan waarschuwt hij, met de strafschoppen in de tekst.
 - **Alternatieven:** de wedstrijd bewaren zonder strafschoppen en doorgaan (de fout gaat dan onopgemerkt).
+
+### De stand na 90 minuten komt uit het eerste paar van `half time score`
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** bij een bekerwedstrijd met verlenging (`aet`) is het eerste getallenpaar van `half time score` de stand na 90 minuten, en `Match` toont die achter "n.v." tussen haakjes: "2–1 n.v. (1–1)".
+  Ontbreekt hij of is hij niet te vertrouwen, dan staat er alleen "n.v.", en dat is geen fout.
+  De stand bij de rust, het tweede paar, bewaart de import niet.
+- **Opslag:** `matches` krijgt `after_ninety_for` en `after_ninety_against`, met een migratie (`0024_add_score_after_ninety`).
+  Twee CHECK-constraints houden ze heel: ze zijn allebei leeg of allebei gevuld (`matches_after_ninety_in_a_pair`), en ze horen bij een wedstrijd met verlenging en zijn niet hoger dan de eindstand (`matches_after_ninety_within_extra_time`).
+- **Inlezen:** de bekerpagina van 2025/26 heeft het in `half time score`, de oudere pagina's in de haakjes achter de score (zie _De bekerpagina's van eerdere seizoenen_).
+  Een wedstrijd zonder `aet` heeft geen stand na 90 minuten, ook niet als er een komma in `half time score` staat.
+  De import neemt het eerste paar alleen over als het tweede paar er niet boven ligt, want de rust kan niet later zijn dan minuut 90, en als het eerste paar niet boven de eindstand ligt.
+  Een veld met één paar, een leeg veld of een veld dat we niet kunnen lezen geeft "niet bekend".
+  Alleen de beker heeft het, zoals het issue vraagt; de play-offs voor de Conference League hebben dezelfde sjablonen, maar blijven buiten dit besluit.
+- **Toon:** de stand staat tussen haakjes direct achter "n.v.", in de volgorde van de clubs, met een vaste spatie ertussen en voor "n.s.", zodat een smalle kaart de regel tussen de delen afbreekt.
+  Bij strafschoppen volgt "3–3 n.v. (2–2), 5–3 n.s."; is de stand na 90 minuten niet bekend, dan blijft de vorm "3–3 (5–3 n.s.)".
+  Een schermlezer hoort "2 tegen 1, na verlenging; na 90 minuten 1 tegen 1", en met strafschoppen "3 tegen 3, na verlenging; na 90 minuten 2 tegen 2; na strafschoppen 5 tegen 3".
+  De kleur volgt de eindstand en de strafschoppen, zoals voorheen.
+  De uitleg onder de lijst noemt "n.v." ook bij een wedstrijd met strafschoppen waar de stand na 90 minuten bij staat.
+- **Waarom:** het veld heet "rust" maar bevat bij verlenging twee paren: de stand na 90 minuten en de rust.
+  Dat blijkt uit de wedstrijden van 2025/26 waar we de eindstand en de strafschoppen naast kunnen leggen.
+  De stand na 90 minuten zegt of een wedstrijd na reguliere tijd gelijk stond of al beslist leek.
+- **De pagina is niet overal gelijk:** van de 25 wedstrijden met verlenging op de pagina (gelezen op 1 november 2026) hebben er 13 twee paren in de volgorde van het besluit, 6 hebben het veld niet of één paar, en 6 hebben de paren omgedraaid (de rust eerst, bijvoorbeeld "1 – 2, 3 – 3" bij een eindstand van 3 – 3).
+  Bij 3 van de 13 is de stand na 90 minuten gelijk aan de eindstand, omdat de verlenging zonder doelpunt bleef.
+  Het issue schreef dat hij nooit gelijk is; dat klopt dus niet, en de database eist het niet.
+  Omgedraaide paren zijn aan de regel te herkennen, en dan blijft de stand onbekend.
+- **Alternatieven:** de stand na 90 minuten uit de doelpunten (#297) uitrekenen (vraagt de minuten van elk doelpunt, die niet altijd kloppen); alleen "n.v." tonen (de supporter weet niet hoe het ervoor stond); omgedraaide paren omdraaien (dat is raden); een veld dat niet klopt als fout behandelen (de import van de hele pagina zou stoppen voor één verkeerd veld).
 
 ### We tellen paginaweergaven en unieke bezoekers per dag, met een kenmerk dat elke dag wisselt
 

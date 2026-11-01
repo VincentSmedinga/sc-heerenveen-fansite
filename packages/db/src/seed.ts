@@ -345,7 +345,9 @@ export type MadeUpMatch = Omit<NewMatch, 'clubId'>
  * It covers every case a page must show: played at home and away, still to be played
  * with a kick-off, still to be played without one (the weekend as text), postponed, and
  * a cup tie, and three played cup ties with extra time or a shoot-out: a win after extra time,
- * a win on penalties and a loss on penalties. `result_set_at` stays empty. The first read of
+ * a win on penalties and a loss on penalties. The first has the score after 90 minutes, the
+ * loss on penalties has it too (equal to the result: no goal in extra time), and the win on
+ * penalties has none, as a page without it. `result_set_at` stays empty. The first read of
  * the season replaces the made-up matches at once, since no page of it has been read yet.
  */
 export function madeUpMatches(now: Date): MadeUpMatch[] {
@@ -366,6 +368,8 @@ export function madeUpMatches(now: Date): MadeUpMatch[] {
   return [
     {
       ...base,
+      afterNinetyAgainst: 1,
+      afterNinetyFor: 1,
       competition: 'KNVB Beker',
       extraTime: true,
       goalsAgainst: 1,
@@ -396,6 +400,8 @@ export function madeUpMatches(now: Date): MadeUpMatch[] {
     },
     {
       ...base,
+      afterNinetyAgainst: 2,
+      afterNinetyFor: 2,
       competition: 'KNVB Beker',
       extraTime: true,
       goalsAgainst: 2,

@@ -22,6 +22,8 @@ const goal = (player: string, options: Partial<Goal> = {}): Goal => ({
 
 /** A played match of ours with these goals, and the result they add up to. */
 const played = (goals: Goal[], options: Partial<PublicMatch> = {}): PublicMatch => ({
+  afterNinetyAgainst: null,
+  afterNinetyFor: null,
   competition: 'Eredivisie',
   dateText: null,
   extraTime: false,

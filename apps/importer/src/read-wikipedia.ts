@@ -31,6 +31,12 @@ export type ReadGoal = {
 
 /** What the import keeps of one match of sc Heerenveen. */
 export type ReadMatch = {
+  /**
+   * The score after 90 minutes of a cup match with extra time, from our side, when the page
+   * gives it. Both or neither. It may equal the result, and is never above it.
+   */
+  afterNinetyAgainst: null | number
+  afterNinetyFor: null | number
   competition: Competition
   /** The date as Wikipedia writes it, only when the time is unknown. */
   dateText: null | string
@@ -706,9 +712,6 @@ function playoffSection(text: string): string | undefined {
  * than what follows it, and a score after 90 minutes needs extra time.
  */
 function scoreProblem(score: Extract<ParsedScore, { kind: 'score' }>, extraTimeSaid: boolean): null | string {
-  const within = (part: null | Pair, whole: Pair) =>
-    part === null || (part.home <= whole.home && part.away <= whole.away)
-
   if (score.afterNinety !== null && !extraTimeSaid) {
     return 'after 90 minutes but no extra time'
   }
@@ -716,6 +719,11 @@ function scoreProblem(score: Extract<ParsedScore, { kind: 'score' }>, extraTimeS
   const afterNinety = score.afterNinety ?? score
 
   return within(score.afterNinety, score) && within(score.halfTime, afterNinety) ? null : 'that does not add up'
+}
+
+/** Whether no number of a part of the match is higher than the same number of the whole. */
+function within(part: null | Pair, whole: Pair): boolean {
+  return part === null || (part.home <= whole.home && part.away <= whole.away)
 }
 
 /** A pair of numbers such as `2 – 1`, after the spaces and the dashes of Wikipedia. */
@@ -726,7 +734,8 @@ const pairPattern = '(\\d{1,2}) ?[–-] ?(\\d{1,2})'
  * the final score. The older cup pages add the score at half time in brackets
  * (`2 – 1 (1 – 0)`), or after extra time the score after 90 minutes and then the score at half
  * time (`2 – 4 (2 – 2, 1 – 1)`). The final score is the score of the match; the brackets are
- * read and checked, and `readMatch` keeps nothing of them yet.
+ * read and checked, and `readMatch` keeps the score after 90 minutes (see `scoreAfterNinety`),
+ * not the half time score.
  */
 function parseScore(value: string): ParsedScore {
   const text = plain(value)
@@ -868,8 +877,14 @@ function readMatch(box: Template, competition: Competition, round: null | string
   const ours = score.kind === 'score' ? (home ? score.home : score.away) : null
   const theirs = score.kind === 'score' ? (home ? score.away : score.home) : null
   const scorers = status === 'played' ? readGoals(box, home) : { goals: null, problem: null }
+  const afterNinety =
+    competition === 'KNVB Beker' && extraTimeSaid && score.kind === 'score'
+      ? scoreAfterNinety(score, box.params.get('half time score') ?? '')
+      : null
 
   return {
+    afterNinetyAgainst: afterNinety === null ? null : home ? afterNinety.away : afterNinety.home,
+    afterNinetyFor: afterNinety === null ? null : home ? afterNinety.home : afterNinety.away,
     competition,
     dateText: kickoffAt === null ? day.text.slice(0, matchLimits.dateText) : null,
     extraTime: extraTimeSaid && score.kind === 'score',
@@ -888,6 +903,32 @@ function readMatch(box: Template, competition: Competition, round: null | string
     stadium,
     status,
   }
+}
+
+/**
+ * The score after 90 minutes of a match with extra time, or null when the page does not give
+ * it. The older pages put it in the brackets of the score (read by `parseScore`). The newer
+ * ones have it in `half time score` as two pairs, the score after 90 minutes first and then
+ * the score at half time: `2 – 2, 1 – 1`. A field with one pair, an empty one or one we cannot
+ * read gives null, and so does one where the pairs are the other way round or above the final
+ * score, because half time cannot be later than the 90th minute. That is not a fault: the
+ * match is kept without that score. It may equal the final score, when extra time had no goal.
+ */
+function scoreAfterNinety(score: Extract<ParsedScore, { kind: 'score' }>, field: string): null | Pair {
+  if (score.afterNinety !== null) {
+    return score.afterNinety
+  }
+
+  const pairs = new RegExp(`^${pairPattern}, ?${pairPattern}$`, 'u').exec(plain(field))
+
+  if (pairs === null) {
+    return null
+  }
+
+  const afterNinety = { away: Number(pairs[2]), home: Number(pairs[1]) }
+  const halfTime = { away: Number(pairs[4]), home: Number(pairs[3]) }
+
+  return within(halfTime, afterNinety) && within(afterNinety, score) ? afterNinety : null
 }
 
 /** Cuts the inside of a template at the `|` that belong to it, not to a link or a template. */

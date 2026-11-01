@@ -1265,6 +1265,17 @@ describe('the matches and the table of a season', () => {
       expect(league).toMatchObject({ extraTime: false, penaltiesAgainst: null, penaltiesFor: null })
     })
 
+    it('gives a cup match with extra time the score after 90 minutes when the seed has it', async () => {
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
+
+      const rows = await listSeasonMatches(database.db, '2026/27')
+      const byRound = (round: string) => rows.find((match) => match.round === round)
+
+      expect(byRound('Eerste ronde')).toMatchObject({ afterNinetyAgainst: 1, afterNinetyFor: 1 })
+      expect(byRound('Achtste finale')).toMatchObject({ afterNinetyAgainst: null, afterNinetyFor: null })
+      expect(byRound('Speelronde 1')).toMatchObject({ afterNinetyAgainst: null, afterNinetyFor: null })
+    })
+
     it('gives a played match its scorers in the order of the clock, and the others none', async () => {
       await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
 
@@ -1418,6 +1429,8 @@ describe('the matches and the table of a season', () => {
       const [row] = await listSeasonMatches(database.db, '2026/27')
 
       expect(Object.keys(row ?? {}).sort()).toEqual([
+        'afterNinetyAgainst',
+        'afterNinetyFor',
         'competition',
         'dateText',
         'extraTime',

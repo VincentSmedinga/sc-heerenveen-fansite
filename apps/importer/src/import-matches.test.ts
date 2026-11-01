@@ -407,6 +407,60 @@ describe('a cup round with days instead of a day', () => {
   })
 })
 
+describe('the score after 90 minutes of a cup tie', () => {
+  const afterNinetyCup = fixture('wikipedia-cup-after-ninety.wiki')
+  const afterNinetyOf = async () =>
+    (
+      await database.db
+        .select()
+        .from(matches)
+        .where(eq(matches.competition, 'KNVB Beker'))
+        .orderBy(asc(matches.matchDate))
+    ).map((match) => [match.round, match.afterNinetyFor, match.afterNinetyAgainst])
+
+  it('stores it from our side, or nothing when the page does not give it', async () => {
+    const { server } = await serve({ cup: afterNinetyCup })
+
+    expect(await importAt(server, first)).toMatchObject({ kind: 'imported', matches: { added: 39 }, warnings: [] })
+    expect(await afterNinetyOf()).toEqual([
+      ['Eerste ronde', 1, 1],
+      ['Tweede ronde', 2, 2],
+      ['Derde ronde', null, null],
+      ['Achtste finale', null, null],
+      ['Kwartfinale', null, null],
+    ])
+  })
+
+  it('takes it over when it comes on the page later, and changes nothing else', async () => {
+    const withoutField = afterNinetyCup.replace('|half time score = 1&nbsp;–&nbsp;1, 0&nbsp;–&nbsp;0\n', '')
+    const { pages, server } = await serve({ cup: withoutField })
+
+    await importAt(server, first)
+    expect((await afterNinetyOf())[0]).toEqual(['Eerste ronde', null, null])
+
+    pages.cup = afterNinetyCup
+
+    const report = await importAt(server, new Date(first.getTime() + 5 * 24 * hours(1)))
+
+    expect(report).toMatchObject({ kind: 'imported', matches: { unchanged: 38, updated: 1 }, warnings: [] })
+    expect((await afterNinetyOf())[0]).toEqual(['Eerste ronde', 1, 1])
+    expect(await database.db.select().from(matches).where(eq(matches.round, 'Eerste ronde'))).toMatchObject([
+      { goalsAgainst: 1, goalsFor: 2, resultSetAt: first },
+    ])
+  })
+
+  it('stores nothing for a match without extra time, whatever its half time score says', async () => {
+    const { server } = await serve({
+      cup: afterNinetyCup
+        .replace('|half time score = 1&nbsp;–&nbsp;0\n|aet = J', '|half time score = 1&nbsp;–&nbsp;1, 0&nbsp;–&nbsp;0')
+        .replace('|aet = J\n|team2 = [[Maquette FC]]', '|team2 = [[Maquette FC]]'),
+    })
+
+    await importAt(server, first)
+    expect((await afterNinetyOf())[4]).toEqual(['Kwartfinale', null, null])
+  })
+})
+
 describe('extra time and a shoot-out in the cup', () => {
   const extraTimeCup = fixture('wikipedia-cup-extra-time.wiki')
   /** The shoot-out of the second round as it was before it was on the page. */

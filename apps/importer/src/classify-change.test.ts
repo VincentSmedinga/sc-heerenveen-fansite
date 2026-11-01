@@ -19,6 +19,8 @@ const day = 24 * hour
 const kickoff = new Date('2026-10-24T19:00:00Z')
 
 const played: MatchState = {
+  afterNinetyAgainst: null,
+  afterNinetyFor: null,
   clubId: 1,
   dateText: null,
   extraTime: false,
@@ -131,7 +133,14 @@ describe('a result that changes', () => {
 
   it('is suspicious in a season that is over, and counts as an overwrite', () => {
     expect(judge({ now: lost, pastSeason: true })).toMatchObject({ class: 'suspicious', overwrites: true })
-    expect(judge({ now: { ...played, stadium: 'Elders' }, pastSeason: true }).class).toBe('suspicious')
+    expect(judge({ now: { ...played, kickoffAt: new Date(kickoff.getTime() + hour) }, pastSeason: true }).class).toBe(
+      'suspicious',
+    )
+  })
+
+  it('is new in a season that is over when it only fills in what was empty', () => {
+    expect(judge({ nowGoals: [goal(12)], pastSeason: true })).toMatchObject({ class: 'new', overwrites: false })
+    expect(judge({ now: { ...played, stadium: 'Elders' }, pastSeason: true }).class).toBe('new')
   })
 
   it('is new on the first read of a season, whatever it is', () => {
@@ -163,6 +172,20 @@ describe('extra time and a shoot-out', () => {
         now: { ...cup, penaltiesAgainst: 3, penaltiesFor: 4 },
       }).class,
     ).toBe('new')
+  })
+
+  it('arrive with the score after 90 minutes as news, and a score after 90 minutes that changes is a change', () => {
+    const level = { ...cup, afterNinetyAgainst: 1, afterNinetyFor: 1 }
+
+    expect(judge({ after: 30 * day, before: { ...cup, resultSetAt: kickoff }, now: level }).class).toBe('new')
+    expect(
+      judge({
+        after: 30 * day,
+        before: { ...level, resultSetAt: kickoff },
+        now: { ...level, afterNinetyAgainst: 0 },
+      }).class,
+    ).toBe('suspicious')
+    expect(judge({ after: 30 * day, before: { ...level, resultSetAt: kickoff }, now: cup }).class).toBe('suspicious')
   })
 
   it('are a change when they differ or go away', () => {

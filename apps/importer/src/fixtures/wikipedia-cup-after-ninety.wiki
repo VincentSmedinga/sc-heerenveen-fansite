@@ -1,0 +1,76 @@
+<!--
+  Five cup ties of ours that went to extra time, with the five ways the Dutch Wikipedia writes `half time score` in
+  https://nl.wikipedia.org/wiki/KNVB_Beker_2025/26_(mannen)?action=raw, read on 1 November 2026: two pairs with the score
+  after 90 minutes first and then half time, the same with no goal in extra time, no field at all, two pairs the other way
+  round (the editor put half time first), and one pair. Cut down from the boxes of that page; the clubs, the results and
+  the dates are made up, and the goal scorers, referees and reports are left out.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl). See the tests.
+-->
+== Wedstrijden ==
+
+=== Hoofdtoernooi ===
+==== Eerste ronde ====
+{{Footballbox2
+|date = 28 oktober 2026
+|time = 20:00 uur
+|team1 = [[Testdorp FC]]
+|score = 1&nbsp;–&nbsp;2
+|half time score = 1&nbsp;–&nbsp;1, 0&nbsp;–&nbsp;0
+|aet = J
+|team2 = '''[[sc Heerenveen]]'''
+|location = [[Testdorp]]
+|stadium = [[Sportpark Proefdorp]]
+}}
+
+==== Tweede ronde ====
+{{Footballbox2
+|date = 2 december 2026
+|time = 20:00 uur
+|team1 = '''[[sc Heerenveen]]'''
+|score = 2&nbsp;–&nbsp;2
+|half time score = 2&nbsp;–&nbsp;2, 2&nbsp;–&nbsp;0
+|aet = J
+|team2 = [[Voorbeeld United]]
+|penaltyscore = 3&nbsp;–&nbsp;4
+|location = [[Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+}}
+
+==== Derde ronde ====
+{{Footballbox2
+|date = 16 december 2026
+|time = 20:00 uur
+|team1 = '''[[sc Heerenveen]]'''
+|score = 0&nbsp;–&nbsp;1
+|aet = J
+|team2 = [[Oefenstad FC]]
+|location = [[Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+}}
+
+==== Achtste finale ====
+{{Footballbox2
+|date = 20 januari 2027
+|time = 20:45 uur
+|team1 = '''[[Proefstad SV]]'''
+|score = 3&nbsp;–&nbsp;3
+|half time score = 1&nbsp;–&nbsp;2, 3&nbsp;–&nbsp;3
+|aet = J
+|team2 = [[sc Heerenveen]]
+|penaltyscore = 5&nbsp;–&nbsp;4
+|location = [[Proefstad]]
+|stadium = [[Stadion Proeflaan]]
+}}
+
+==== Kwartfinale ====
+{{Footballbox2
+|date = 3 februari 2027
+|time = 20:45 uur
+|team1 = '''[[sc Heerenveen]]'''
+|score = 2&nbsp;–&nbsp;1
+|half time score = 1&nbsp;–&nbsp;0
+|aet = J
+|team2 = [[Maquette FC]]
+|location = [[Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+}}

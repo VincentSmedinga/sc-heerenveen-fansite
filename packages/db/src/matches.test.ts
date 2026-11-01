@@ -88,6 +88,37 @@ describe('the extra time and the shoot-out of a match', () => {
     })
   })
 
+  it('keeps the score after 90 minutes of a match with extra time, from our side', async () => {
+    await database.db.insert(matches).values(
+      await clubbed({
+        ...cupMatch,
+        afterNinetyAgainst: 1,
+        afterNinetyFor: 1,
+        extraTime: true,
+        goalsFor: 2,
+      }),
+    )
+    // No goal in extra time: the score after 90 minutes is the result.
+    await database.db.insert(matches).values(
+      await clubbed({
+        ...cupMatch,
+        afterNinetyAgainst: 1,
+        afterNinetyFor: 1,
+        extraTime: true,
+        round: 'Derde ronde',
+      }),
+    )
+    await database.db.insert(matches).values(await clubbed({ ...cupMatch, extraTime: true, round: 'Vierde ronde' }))
+
+    const rows = await database.db.select().from(matches).orderBy(matches.id)
+
+    expect(rows.map((row) => [row.afterNinetyFor, row.afterNinetyAgainst])).toEqual([
+      [1, 1],
+      [1, 1],
+      [null, null],
+    ])
+  })
+
   it.each([
     [
       'extra time in the league',
@@ -110,6 +141,22 @@ describe('the extra time and the shoot-out of a match', () => {
       { extraTime: true, goalsFor: 2, penaltiesAgainst: 3, penaltiesFor: 4 },
     ],
     ['half a shoot-out', 'matches_penalties_in_a_pair', { extraTime: true, penaltiesFor: 4 }],
+    ['half a score after 90 minutes', 'matches_after_ninety_in_a_pair', { afterNinetyFor: 1, extraTime: true }],
+    [
+      'a score after 90 minutes without extra time',
+      'matches_after_ninety_within_extra_time',
+      { afterNinetyAgainst: 1, afterNinetyFor: 1 },
+    ],
+    [
+      'a score after 90 minutes above the result of our side',
+      'matches_after_ninety_within_extra_time',
+      { afterNinetyAgainst: 1, afterNinetyFor: 2, extraTime: true },
+    ],
+    [
+      'a score after 90 minutes above the result of the opponent',
+      'matches_after_ninety_within_extra_time',
+      { afterNinetyAgainst: 2, afterNinetyFor: 1, extraTime: true },
+    ],
   ] satisfies [string, string, Partial<NewMatch>][])('refuses %s', async (_name, constraint, change) => {
     const failure = await database.db
       .insert(matches)

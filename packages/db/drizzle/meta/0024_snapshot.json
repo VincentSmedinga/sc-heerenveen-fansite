@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "64f40027-4d12-42b0-b5f6-63f94eeee73f",
+  "id": "a6d81af3-6e23-4b1d-af68-3b3d81b86eee",
   "prevId": "143253cd-8407-4a26-821e-97247cd746cf",
   "tables": {
     "admin_login_attempts": {
@@ -1384,175 +1384,6 @@
       },
       "checkConstraint": {}
     },
-    "match_changes": {
-      "name": "match_changes",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "season": {
-          "name": "season",
-          "type": "varchar(7)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "competition": {
-          "name": "competition",
-          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "round": {
-          "name": "round",
-          "type": "varchar(60)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "match_id": {
-          "name": "match_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "changed": {
-          "name": "changed",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "class": {
-          "name": "class",
-          "type": "enum('improvement','suspicious')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "reason": {
-          "name": "reason",
-          "type": "varchar(300)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "old_value": {
-          "name": "old_value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "new_value": {
-          "name": "new_value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "proposal": {
-          "name": "proposal",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "status": {
-          "name": "status",
-          "type": "enum('pending','accepted','rejected')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "resolution": {
-          "name": "resolution",
-          "type": "enum('applied','stood','person','reverted','replaced')",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "first_seen_at": {
-          "name": "first_seen_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "last_seen_at": {
-          "name": "last_seen_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "times_seen": {
-          "name": "times_seen",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 1
-        },
-        "decided_at": {
-          "name": "decided_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "match_changes_season_status_idx": {
-          "name": "match_changes_season_status_idx",
-          "columns": [
-            "season",
-            "status"
-          ],
-          "isUnique": false
-        },
-        "match_changes_match_idx": {
-          "name": "match_changes_match_idx",
-          "columns": [
-            "season",
-            "competition",
-            "round"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "match_changes_match_id_matches_id_fk": {
-          "name": "match_changes_match_id_matches_id_fk",
-          "tableFrom": "match_changes",
-          "tableTo": "matches",
-          "columnsFrom": [
-            "match_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "match_changes_id": {
-          "name": "match_changes_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
     "match_goals": {
       "name": "match_goals",
       "columns": {
@@ -1872,6 +1703,20 @@
           "notNull": false,
           "autoincrement": false
         },
+        "after_ninety_for": {
+          "name": "after_ninety_for",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "after_ninety_against": {
+          "name": "after_ninety_against",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "match_date": {
           "name": "match_date",
           "type": "date",
@@ -1964,6 +1809,14 @@
         "matches_penalties_after_level_extra_time": {
           "name": "matches_penalties_after_level_extra_time",
           "value": "`matches`.`penalties_for` is null or (`matches`.`extra_time` = 1 and `matches`.`goals_for` = `matches`.`goals_against`)"
+        },
+        "matches_after_ninety_in_a_pair": {
+          "name": "matches_after_ninety_in_a_pair",
+          "value": "(`matches`.`after_ninety_for` is null and `matches`.`after_ninety_against` is null) or (`matches`.`after_ninety_for` is not null and `matches`.`after_ninety_against` is not null)"
+        },
+        "matches_after_ninety_within_extra_time": {
+          "name": "matches_after_ninety_within_extra_time",
+          "value": "`matches`.`after_ninety_for` is null or (`matches`.`extra_time` = 1 and `matches`.`after_ninety_for` <= `matches`.`goals_for` and `matches`.`after_ninety_against` <= `matches`.`goals_against`)"
         }
       }
     },

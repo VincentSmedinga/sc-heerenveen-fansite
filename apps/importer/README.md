@@ -747,6 +747,15 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Een wedstrijd van de competitie met `aet` of `penaltyscore` is een fout, zoals strafschoppen zonder verlenging, strafschoppen bij een stand die niet gelijk is, en een score van de strafschoppen die geen "N – N" is.
   Verlenging zonder strafschoppen mag, ook bij een gelijke stand: de strafschoppen komen er bij de volgende lezing bij.
   Zo'n nieuwe score van strafschoppen is geen verandering van de uitslag en geeft geen waarschuwing; een score die verandert wel.
+- Bij een bekerwedstrijd met `aet` bewaart hij ook de stand na 90 minuten (`after_ninety_for` en `after_ninety_against`, van sc Heerenveen en van de tegenstander).
+  Op de pagina van 2025/26 staat hij in `half time score`, als twee paren gescheiden door een komma: eerst de stand na 90 minuten en dan de rust, zoals "2 – 2, 1 – 1".
+  Hij neemt het eerste paar over als het tweede paar er niet boven ligt en het eerste niet boven de eindstand ligt.
+  Dat is de enige manier om de paren te herkennen, want een paar redacteuren schreven ze omgekeerd (de rust eerst).
+  Een veld met één paar, een leeg veld, een veld dat we niet kunnen lezen en paren die niet kloppen geven "niet bekend": de wedstrijd blijft bewaard zonder die stand, en het is geen fout.
+  De stand na 90 minuten mag gelijk zijn aan de eindstand, want de verlenging kan zonder doelpunt voorbijgaan.
+  Bij een wedstrijd zonder `aet` leest hij `half time score` niet als stand na 90 minuten, ook niet met een komma erin.
+  De stand bij de rust bewaart hij niet.
+  Een play-offwedstrijd krijgt hem niet.
 - De doelpuntenmakers van een gespeelde wedstrijd bewaart hij in `match_goals`, een rij per doelpunt.
   Wikipedia heeft ze in `goals1` (het eerste team van het sjabloon) en `goals2`: `[[Luca Oyen|Oyen]] {{goal|52}}` voor het eerste team en `{{goal|45}} [[Jacob Trenskow|Trenskow]]` voor het tweede, een speler per regel en de regels gescheiden door `<br />`.
   De import bewaart de naam zoals die op de pagina staat (de tekst achter de `|` in de link), de pagina waar de link naar wijst (`wikipedia_page`, zoals `Luca Oyen`), de minuut, de blessuretijd en of het een eigen doelpunt of een penalty was.
@@ -956,7 +965,7 @@ Een wijziging is verdacht als:
 - de datum of de tegenstander van een gespeelde wedstrijd van drie dagen of langer geleden verandert;
 - een uitslag pas komt nadat de import de pagina na de eerste drie dagen zag zonder uitslag;
 - een wedstrijd weer de waarde krijgt die hij eerder had (A, dan B, dan A), of een eerder afgewezen waarde terugkomt: dat kan een bewerkingsoorlog zijn;
-- de wedstrijd bij een afgelopen seizoen hoort: zijn wedstrijden veranderen niet meer;
+- de wedstrijd bij een afgelopen seizoen hoort en de wijziging iets overschrijft: zijn wedstrijden veranderen niet meer;
 - meer dan zes wedstrijden in één run iets overschrijven wat we al hadden (zie hieronder).
 
 Een grens is strikt: een uitslag die precies 24 uur of precies drie dagen vaststond, valt buiten het venster.
@@ -1046,8 +1055,8 @@ Wat de regels niet noemen, is verdacht, dus die wijziging wacht.
 Heeft de import een seizoen nog nooit goed gelezen (er staat geen pagina in `wikipedia_pages`), dan komt niets in de database van Wikipedia.
 Zulke wedstrijden zijn de verzonnen wedstrijden van de seed, en de eerste echte lezing vervangt ze zonder te wachten.
 
-Een afgelopen seizoen verandert niet meer, dus elke wijziging daarin is verdacht.
-Een nieuwe wedstrijd in zo'n seizoen niet.
+Een afgelopen seizoen verandert niet meer, dus een wijziging daarin die iets overschrijft is verdacht.
+Wat leeg was invullen mag wel, zoals de stand na 90 minuten of doelpuntenmakers bij een wedstrijd die er geen had, en een nieuwe wedstrijd ook.
 De uurlijkse import leest een afgelopen seizoen niet, dus een wijziging daarin wacht tot iemand haar besluit, of tot `pnpm run import:season` het seizoen na zeven dagen weer leest en de pagina nog dezelfde waarde toont.
 
 #### De stand en de selectie
@@ -1082,10 +1091,10 @@ De lezer kent deze vormen:
 | `20:00 uur` en `20:00`               | dezelfde tijd                                                                  |
 
 - De eindstand is de score van de wedstrijd, met de score van de strafschoppen er los van in `penaltyscore`.
-- De import leest de waarden in de haakjes en controleert ze, maar bewaart ze niet.
+- De import leest de waarden in de haakjes en controleert ze.
   Een stand bij de rust kan niet hoger zijn dan de stand daarvoor, en een stand na 90 minuten kan niet hoger zijn dan de eindstand.
   Een stand na 90 minuten zonder verlenging (`aet`) is ook een fout.
-  De stand na 90 minuten bewaren en tonen is #300.
+  De stand na 90 minuten bewaart hij (zie _Wat de import bewaart_ hierboven), de stand bij de rust niet.
 - Een score of een tijd in een andere vorm blijft een fout met de naam van de wedstrijd, en de database blijft zoals ze was.
 - De fixtures `wikipedia-cup-2021-22.wiki` tot en met `wikipedia-cup-2024-25.wiki` in `src/fixtures/` zijn de wedstrijden van sc Heerenveen uit die vier pagina's.
 
@@ -1110,7 +1119,7 @@ pnpm run import:season 2025/26
   Probeer het dan na een paar minuten opnieuw.
 - De exitcode is 0 als het seizoen is opgeslagen, en 1 als de opdracht het seizoen weigert, een controle faalt of Wikipedia om te wachten vraagt of het niet toestaat.
   Bij een fout blijft de database zoals ze was, en de rij in `match_imports` van dat seizoen noemt de fout.
-- Staat het seizoen al in de database, dan is elke wijziging daarin verdacht en wacht ze (zie _Hoe betrouwbaar een wijziging is_).
+- Staat het seizoen al in de database, dan wacht een wijziging die iets overschrijft (zie _Hoe betrouwbaar een wijziging is_).
   Een eerste lezing en een lezing zonder verschil schrijven alles of niets, zoals hierboven.
 - De selectie van dat seizoen leest ze niet.
   De doelpunten hebben dus geen speler (`player_id` is leeg), met de naam en de pagina van de speler zoals Wikipedia ze heeft.
@@ -1144,7 +1153,7 @@ De reader werkt zo:
 ### Wat de import niet doet
 
 - De versie van een pagina bewaart hij als de `Last-Modified` van Wikipedia (`wikipedia_pages.version`), want de ruwe tekst komt zonder versienummer.
-- De schutters bij de strafschoppen en de stand na 90 minuten bewaart hij niet (die laatste komt met #300): alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging en de score van de strafschoppen.
+- De schutters bij de strafschoppen en de stand bij de rust bewaart hij niet: alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging, de stand na 90 minuten als de pagina die geeft en de score van de strafschoppen.
 - Een puntenaftrek rekent hij niet mee.
   De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
 - Scheidsrechter, toeschouwers en opstellingen leest hij niet, en ook geen kaarten, wissels of assists.

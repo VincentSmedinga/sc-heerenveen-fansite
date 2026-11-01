@@ -308,28 +308,31 @@ Een rij van een eerder seizoen verandert of verdwijnt nooit.
 
 `matches` heeft een rij per wedstrijd.
 
-| Kolom                                | Betekenis                                                                                                    |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `season`, `competition`              | Het seizoen en de competitie: `Eredivisie`, `KNVB Beker` of `Play-offs Conference League`                    |
-| `round`                              | De ronde zoals Wikipedia die noemt, zoals `Speelronde 12` of `Eerste ronde`; uniek per seizoen en competitie |
-| `opponent`, `home`, `stadium`        | De tegenstander zoals Wikipedia hem schrijft, of de wedstrijd thuis is, en het stadion (kan ontbreken)       |
-| `club_id`                            | De tegenstander als club (zie _De tabellen `clubs` en `club_names`_); verplicht                              |
-| `status`                             | `scheduled`, `played` of `postponed`                                                                         |
-| `goals_for`, `goals_against`         | De doelpunten van sc Heerenveen en van de tegenstander; alleen gevuld bij `played`                           |
-| `extra_time`                         | Of een gespeelde bekerwedstrijd in verlenging ging; anders `false`                                           |
-| `penalties_for`, `penalties_against` | De strafschoppen van sc Heerenveen en van de tegenstander; leeg zonder strafschoppen, anders allebei gevuld  |
-| `match_date`                         | De dag in Nederland, of de eerste dag als alleen een weekend bekend is                                       |
-| `kickoff_at`                         | De aftrap in UTC; leeg zolang de tijd niet bekend is                                                         |
-| `date_text`                          | De datum zoals Wikipedia die geeft, zoals `12-14 februari 2027`; gevuld als er geen aftrap is                |
-| `result_set_at`                      | Sinds wanneer de uitslag zo staat, in UTC; de import vergelijkt dat met 24 uur                               |
+| Kolom                                      | Betekenis                                                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `season`, `competition`                    | Het seizoen en de competitie: `Eredivisie`, `KNVB Beker` of `Play-offs Conference League`                    |
+| `round`                                    | De ronde zoals Wikipedia die noemt, zoals `Speelronde 12` of `Eerste ronde`; uniek per seizoen en competitie |
+| `opponent`, `home`, `stadium`              | De tegenstander zoals Wikipedia hem schrijft, of de wedstrijd thuis is, en het stadion (kan ontbreken)       |
+| `club_id`                                  | De tegenstander als club (zie _De tabellen `clubs` en `club_names`_); verplicht                              |
+| `status`                                   | `scheduled`, `played` of `postponed`                                                                         |
+| `goals_for`, `goals_against`               | De doelpunten van sc Heerenveen en van de tegenstander; alleen gevuld bij `played`                           |
+| `extra_time`                               | Of een gespeelde bekerwedstrijd in verlenging ging; anders `false`                                           |
+| `penalties_for`, `penalties_against`       | De strafschoppen van sc Heerenveen en van de tegenstander; leeg zonder strafschoppen, anders allebei gevuld  |
+| `after_ninety_for`, `after_ninety_against` | De stand na 90 minuten bij een bekerwedstrijd met verlenging, als de pagina hem geeft; anders allebei leeg   |
+| `match_date`                               | De dag in Nederland, of de eerste dag als alleen een weekend bekend is                                       |
+| `kickoff_at`                               | De aftrap in UTC; leeg zolang de tijd niet bekend is                                                         |
+| `date_text`                                | De datum zoals Wikipedia die geeft, zoals `12-14 februari 2027`; gevuld als er geen aftrap is                |
+| `result_set_at`                            | Sinds wanneer de uitslag zo staat, in UTC; de import vergelijkt dat met 24 uur                               |
 
-Vijf CHECK-constraints houden de rijen heel:
+Zeven CHECK-constraints houden de rijen heel:
 
 - een uitslag hoort bij `played` en nergens anders (`matches_result_only_when_played`);
 - een wedstrijd heeft een aftrap of een tekst voor de datum (`matches_time_or_text`);
 - verlenging hoort bij een gespeelde wedstrijd van de beker of van de play-offs voor de Conference League en nergens anders (`matches_extra_time_only_in_played_knockout`);
 - strafschoppen komen in een paar (`matches_penalties_in_a_pair`);
-- strafschoppen horen bij verlenging en een gelijke stand (`matches_penalties_after_level_extra_time`).
+- strafschoppen horen bij verlenging en een gelijke stand (`matches_penalties_after_level_extra_time`);
+- de stand na 90 minuten komt in een paar (`matches_after_ninety_in_a_pair`);
+- de stand na 90 minuten hoort bij verlenging en is niet hoger dan de eindstand, maar mag er gelijk aan zijn (`matches_after_ninety_within_extra_time`).
 
 `goals_for` en `goals_against` blijven de stand zoals Wikipedia die geeft, zonder de strafschoppen.
 

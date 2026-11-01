@@ -72,6 +72,8 @@ export type MatchHistory = {
 /** A match as the importer compares it: the stored row and the match from the page fit. */
 export type MatchState = Pick<
   Match,
+  | 'afterNinetyAgainst'
+  | 'afterNinetyFor'
   | 'clubId'
   | 'dateText'
   | 'extraTime'
@@ -106,7 +108,7 @@ export function describeSpan(milliseconds: number): string {
 export function describeState(match: MatchState, goals: GoalState[]): string {
   const score =
     match.status === 'played'
-      ? `${match.goalsFor}-${match.goalsAgainst}${match.extraTime ? ' a.e.t.' : ''}${match.penaltiesFor === null ? '' : ` pens ${match.penaltiesFor}-${match.penaltiesAgainst}`}`
+      ? `${match.goalsFor}-${match.goalsAgainst}${match.extraTime ? ' a.e.t.' : ''}${match.afterNinetyFor === null ? '' : ` (90 min ${match.afterNinetyFor}-${match.afterNinetyAgainst})`}${match.penaltiesFor === null ? '' : ` pens ${match.penaltiesFor}-${match.penaltiesAgainst}`}`
       : match.status
   const when = match.kickoffAt === null ? (match.dateText ?? match.matchDate) : match.kickoffAt.toISOString()
   const head = `${match.home ? 'home' : 'away'} ${match.opponent}, ${when}${match.stadium === null ? '' : `, ${match.stadium}`}: ${score}`
@@ -174,13 +176,22 @@ function resultChange(before: MatchState, now: MatchState): 'appears' | 'changes
   const penaltiesCome = before.penaltiesFor === null && now.penaltiesFor !== null
   const samePenalties = before.penaltiesFor === now.penaltiesFor && before.penaltiesAgainst === now.penaltiesAgainst
   const sameExtraTime = before.extraTime === now.extraTime
+  const sameNinety =
+    before.afterNinetyFor === now.afterNinetyFor && before.afterNinetyAgainst === now.afterNinetyAgainst
+  const ninetyComes = before.afterNinetyFor === null && now.afterNinetyFor !== null
 
-  if (sameScore && sameExtraTime && samePenalties) {
+  if (sameScore && sameExtraTime && samePenalties && sameNinety) {
     return 'same'
   }
 
-  // A shoot-out or extra time that arrives with the same score is news, not a change.
-  return sameScore && (extraTimeComes || sameExtraTime) && (penaltiesCome || samePenalties) ? 'appears' : 'changes'
+  // A shoot-out, extra time or the score after 90 minutes that arrives with the same score is
+  // news, not a change.
+  return sameScore &&
+    (extraTimeComes || sameExtraTime) &&
+    (penaltiesCome || samePenalties) &&
+    (ninetyComes || sameNinety)
+    ? 'appears'
+    : 'changes'
 }
 
 /** The more doubtful of two judgements, with the first reason of the worse one. */
@@ -214,7 +225,8 @@ export function classifyChange(input: ChangeInput): Judgement {
   if (base.class === 'new' && base.changed.length === 0) {
     return base
   }
-  if (pastSeason) {
+  // A match of a season that is over may get what it lacked, but nothing else changes.
+  if (pastSeason && (base.class !== 'new' || base.overwrites)) {
     return {
       ...base,
       class: 'suspicious',

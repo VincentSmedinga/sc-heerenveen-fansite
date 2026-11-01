@@ -609,6 +609,11 @@ export type NewClubName = typeof clubNames.$inferInsert
  * or neither. Only the cup and the play-offs have them, and `goals_for` and `goals_against`
  * stay the score as Wikipedia gives it, shoot-out not included.
  *
+ * `after_ninety_for` and `after_ninety_against` hold the score after 90 minutes of a match with
+ * extra time, from the same two sides: both or neither. They are empty when the page does not
+ * give that score. They can equal the final score, because extra time can pass without a goal,
+ * but never exceed it.
+ *
  * `match_date` is the local day (Europe/Amsterdam), or the first day when Wikipedia only knows
  * a weekend. `kickoff_at` is the kick-off in UTC and is empty while the time is unknown: the
  * KNVB announces the times of rounds 22 to 32 on 22 December 2026. `date_text` then holds the
@@ -640,6 +645,8 @@ export const matches = mysqlTable(
     extraTime: boolean('extra_time').notNull().default(false),
     penaltiesFor: int('penalties_for', { unsigned: true }),
     penaltiesAgainst: int('penalties_against', { unsigned: true }),
+    afterNinetyFor: int('after_ninety_for', { unsigned: true }),
+    afterNinetyAgainst: int('after_ninety_against', { unsigned: true }),
     matchDate: date('match_date', { mode: 'string' }).notNull(),
     kickoffAt: datetime('kickoff_at'),
     dateText: varchar('date_text', { length: matchLimits.dateText }),
@@ -664,6 +671,14 @@ export const matches = mysqlTable(
     check(
       'matches_penalties_after_level_extra_time',
       sql`${table.penaltiesFor} is null or (${table.extraTime} = 1 and ${table.goalsFor} = ${table.goalsAgainst})`,
+    ),
+    check(
+      'matches_after_ninety_in_a_pair',
+      sql`(${table.afterNinetyFor} is null and ${table.afterNinetyAgainst} is null) or (${table.afterNinetyFor} is not null and ${table.afterNinetyAgainst} is not null)`,
+    ),
+    check(
+      'matches_after_ninety_within_extra_time',
+      sql`${table.afterNinetyFor} is null or (${table.extraTime} = 1 and ${table.afterNinetyFor} <= ${table.goalsFor} and ${table.afterNinetyAgainst} <= ${table.goalsAgainst})`,
     ),
   ],
 )
