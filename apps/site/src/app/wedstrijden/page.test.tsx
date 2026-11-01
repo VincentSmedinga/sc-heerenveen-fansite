@@ -448,6 +448,36 @@ describe('the page /wedstrijden', () => {
       expect(results).not.toContain('n.s.')
     })
 
+    it('shows the score after 90 minutes behind "n.v.", and names the abbreviation under the results', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [
+          ...matchData.matches,
+          { ...tie, afterNinetyAgainst: 1, afterNinetyFor: 0, goalsFor: 2, penaltiesAgainst: null, penaltiesFor: null },
+        ],
+      })
+
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).toContain('<abbr title="Na verlenging">n.v.</abbr>')
+      expect(results).toContain('</abbr>\u00a0(1–0)')
+      expect(results).toContain('1 tegen 2, na verlenging; na 90 minuten 1 tegen 0')
+      expect(results).toContain('n.v. na verlenging')
+    })
+
+    it('names both abbreviations when a shoot-out follows the score after 90 minutes', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: [...matchData.matches, { ...tie, afterNinetyAgainst: 1, afterNinetyFor: 1 }],
+      })
+
+      const results = section(await render(), 'uitslagen')
+
+      expect(results).toContain('1 tegen 1, na verlenging; na 90 minuten 1 tegen 1; na strafschoppen 3 tegen 4')
+      expect(results).toContain('n.v. na verlenging')
+      expect(results).toContain('n.s. na strafschoppen')
+    })
+
     it('has no abbreviations and no explanation when no line needs them', async () => {
       const results = section(await render(), 'uitslagen')
 

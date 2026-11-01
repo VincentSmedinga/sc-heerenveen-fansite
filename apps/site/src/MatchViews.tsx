@@ -517,7 +517,8 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
 /** A list of matches, each as a line with its own day or time. */
 export function MatchLines({ matches, now }: { matches: PublicMatch[]; now: Date }) {
   const shootOut = matches.some(hasShootOut)
-  const extraTime = matches.some((match) => match.extraTime && !hasShootOut(match))
+  // A shoot-out is written without "n.v.", unless the score after 90 minutes follows it.
+  const extraTime = matches.some((match) => match.extraTime && (!hasShootOut(match) || hasAfterNinety(match)))
   const goals = matches.flatMap((match) => match.goals)
   const legend = [
     extraTime && 'n.v. na verlenging',
@@ -889,6 +890,11 @@ function goalLine({ goal }: ExtremeGoal) {
   )
 }
 
+/** Whether the score after 90 minutes of a match is known, which has both scores. */
+function hasAfterNinety(match: PublicMatch): boolean {
+  return match.afterNinetyFor !== null && match.afterNinetyAgainst !== null
+}
+
 /** Whether a played match was decided in a shoot-out, which has both scores. */
 function hasShootOut(match: PublicMatch): boolean {
   return match.penaltiesFor !== null && match.penaltiesAgainst !== null
@@ -918,10 +924,15 @@ function MatchLine({ match, now }: { match: PublicMatch; now: Date }) {
       status: 'played',
     } as const
 
+    const afterNinety =
+      match.afterNinetyFor !== null && match.afterNinetyAgainst !== null
+        ? { afterNinetyAgainst: match.afterNinetyAgainst, afterNinetyFor: match.afterNinetyFor }
+        : {}
+
     return match.penaltiesFor !== null && match.penaltiesAgainst !== null ? (
-      <Match {...result} penaltiesAgainst={match.penaltiesAgainst} penaltiesFor={match.penaltiesFor} />
+      <Match {...result} {...afterNinety} penaltiesAgainst={match.penaltiesAgainst} penaltiesFor={match.penaltiesFor} />
     ) : (
-      <Match {...result} />
+      <Match {...result} {...afterNinety} />
     )
   }
 

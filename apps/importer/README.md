@@ -746,6 +746,15 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Een wedstrijd van de competitie met `aet` of `penaltyscore` is een fout, zoals strafschoppen zonder verlenging, strafschoppen bij een stand die niet gelijk is, en een score van de strafschoppen die geen "N – N" is.
   Verlenging zonder strafschoppen mag, ook bij een gelijke stand: de strafschoppen komen er bij de volgende lezing bij.
   Zo'n nieuwe score van strafschoppen is geen verandering van de uitslag en geeft geen waarschuwing; een score die verandert wel.
+- Bij een bekerwedstrijd met `aet` bewaart hij ook de stand na 90 minuten (`after_ninety_for` en `after_ninety_against`, van sc Heerenveen en van de tegenstander).
+  Op de pagina van 2025/26 staat hij in `half time score`, als twee paren gescheiden door een komma: eerst de stand na 90 minuten en dan de rust, zoals "2 – 2, 1 – 1".
+  Hij neemt het eerste paar over als het tweede paar er niet boven ligt en het eerste niet boven de eindstand ligt.
+  Dat is de enige manier om de paren te herkennen, want een paar redacteuren schreven ze omgekeerd (de rust eerst).
+  Een veld met één paar, een leeg veld, een veld dat we niet kunnen lezen en paren die niet kloppen geven "niet bekend": de wedstrijd blijft bewaard zonder die stand, en het is geen fout.
+  De stand na 90 minuten mag gelijk zijn aan de eindstand, want de verlenging kan zonder doelpunt voorbijgaan.
+  Bij een wedstrijd zonder `aet` leest hij `half time score` niet als stand na 90 minuten, ook niet met een komma erin.
+  De stand bij de rust bewaart hij niet.
+  Een play-offwedstrijd krijgt hem niet.
 - De doelpuntenmakers van een gespeelde wedstrijd bewaart hij in `match_goals`, een rij per doelpunt.
   Wikipedia heeft ze in `goals1` (het eerste team van het sjabloon) en `goals2`: `[[Luca Oyen|Oyen]] {{goal|52}}` voor het eerste team en `{{goal|45}} [[Jacob Trenskow|Trenskow]]` voor het tweede, een speler per regel en de regels gescheiden door `<br />`.
   De import bewaart de naam zoals die op de pagina staat (de tekst achter de `|` in de link), de pagina waar de link naar wijst (`wikipedia_page`, zoals `Luca Oyen`), de minuut, de blessuretijd en of het een eigen doelpunt of een penalty was.
@@ -955,10 +964,10 @@ De lezer kent deze vormen:
 | `20:00 uur` en `20:00`               | dezelfde tijd                                                                  |
 
 - De eindstand is de score van de wedstrijd, met de score van de strafschoppen er los van in `penaltyscore`.
-- De import leest de waarden in de haakjes en controleert ze, maar bewaart ze niet.
+- De import leest de waarden in de haakjes en controleert ze.
   Een stand bij de rust kan niet hoger zijn dan de stand daarvoor, en een stand na 90 minuten kan niet hoger zijn dan de eindstand.
   Een stand na 90 minuten zonder verlenging (`aet`) is ook een fout.
-  De stand na 90 minuten bewaren en tonen is #300.
+  De stand na 90 minuten bewaart hij (zie _Wat de import bewaart_ hierboven), de stand bij de rust niet.
 - Een score of een tijd in een andere vorm blijft een fout met de naam van de wedstrijd, en de database blijft zoals ze was.
 - De fixtures `wikipedia-cup-2021-22.wiki` tot en met `wikipedia-cup-2024-25.wiki` in `src/fixtures/` zijn de wedstrijden van sc Heerenveen uit die vier pagina's.
 
@@ -1015,7 +1024,7 @@ De reader werkt zo:
 ### Wat de import niet doet
 
 - De versie van een pagina bewaart hij als de `Last-Modified` van Wikipedia (`wikipedia_pages.version`), want de ruwe tekst komt zonder versienummer.
-- De schutters bij de strafschoppen en de stand na 90 minuten bewaart hij niet (die laatste komt met #300): alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging en de score van de strafschoppen.
+- De schutters bij de strafschoppen en de stand bij de rust bewaart hij niet: alleen de score zoals Wikipedia die in `score` heeft, met of de wedstrijd in verlenging ging, de stand na 90 minuten als de pagina die geeft en de score van de strafschoppen.
 - Een puntenaftrek rekent hij niet mee.
   De stand zou dan niet meer kloppen met de uitslagen, en de import blijft op de laatste goede versie staan tot iemand ingrijpt.
 - Scheidsrechter, toeschouwers en opstellingen leest hij niet, en ook geen kaarten, wissels of assists.

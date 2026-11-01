@@ -10,6 +10,8 @@ import type { MatchData } from './matches'
 const noGoals: PublicMatch['goals'] = []
 
 const base = {
+  afterNinetyAgainst: null,
+  afterNinetyFor: null,
   dateText: null,
   extraTime: false,
   goals: noGoals,

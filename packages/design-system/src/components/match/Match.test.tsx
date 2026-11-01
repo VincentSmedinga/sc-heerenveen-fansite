@@ -140,6 +140,132 @@ describe('Match', () => {
       expect(seen(container)?.textContent).not.toContain('n.v.')
     })
 
+    it('puts the score after 90 minutes in brackets after "n.v.", in the order of the clubs', () => {
+      const { container } = render(<Match {...cup} afterNinetyAgainst={1} afterNinetyFor={0} extraTime />)
+
+      expect(seen(container)?.textContent).toBe('1–1 n.v.\u00a0(0–1)')
+    })
+
+    it('hears the whole sentence after the result, without brackets or abbreviations', () => {
+      const { container } = render(<Match {...cup} afterNinetyAgainst={1} afterNinetyFor={1} extraTime goalsFor={2} />)
+
+      expect(seen(container)?.textContent).toBe('2–1 n.v.\u00a0(1–1)')
+      expect(seen(container)?.querySelector('abbr')?.getAttribute('title')).toBe('Na verlenging')
+      expect(heard(container)).toBe('2 tegen 1, na verlenging; na 90 minuten 1 tegen 1')
+    })
+
+    it('turns the score after 90 minutes round when we play away', () => {
+      const { container } = render(
+        <Match
+          {...cup}
+          afterNinetyAgainst={2}
+          afterNinetyFor={1}
+          extraTime
+          goalsAgainst={2}
+          goalsFor={3}
+          home={false}
+        />,
+      )
+
+      expect(seen(container)?.textContent).toBe('2–3 n.v.\u00a0(2–1)')
+      expect(heard(container)).toBe('2 tegen 3, na verlenging; na 90 minuten 2 tegen 1')
+    })
+
+    it('shows a score after 90 minutes that equals the result, since extra time can pass without a goal', () => {
+      const { container } = render(
+        <Match {...cup} afterNinetyAgainst={0} afterNinetyFor={0} extraTime goalsAgainst={0} goalsFor={0} />,
+      )
+
+      expect(seen(container)?.textContent).toBe('0–0 n.v.\u00a0(0–0)')
+    })
+
+    it('puts the shoot-out after the score after 90 minutes, and keeps the form of a shoot-out without it', () => {
+      const { container, rerender } = render(
+        <Match
+          {...cup}
+          afterNinetyAgainst={2}
+          afterNinetyFor={2}
+          extraTime
+          goalsAgainst={3}
+          goalsFor={3}
+          penaltiesAgainst={3}
+          penaltiesFor={5}
+        />,
+      )
+
+      expect(seen(container)?.textContent).toBe('3–3 n.v.\u00a0(2–2), 5–3\u00a0n.s.')
+      expect(heard(container)).toBe('3 tegen 3, na verlenging; na 90 minuten 2 tegen 2; na strafschoppen 5 tegen 3')
+      expect(seen(container)?.querySelectorAll('abbr')).toHaveLength(2)
+      expect(score(container)?.className).toBe('hf-match-score hf-match-win')
+
+      rerender(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={5} />)
+
+      expect(seen(container)?.textContent).toBe('1–1 (5–3 n.s.)')
+      expect(heard(container)).toBe('1 tegen 1, na strafschoppen 5 tegen 3')
+    })
+
+    it('says only "n.v." when the score after 90 minutes is not known, as before', () => {
+      const { container } = render(<Match {...cup} extraTime goalsFor={2} />)
+
+      expect(seen(container)?.textContent).toBe('2–1 n.v.')
+      expect(heard(container)).toBe('2 tegen 1, na verlenging')
+    })
+
+    it('leaves the colour to the result, whatever the score after 90 minutes was', () => {
+      const { container } = render(<Match {...cup} afterNinetyAgainst={1} afterNinetyFor={1} extraTime goalsFor={2} />)
+
+      expect(score(container)?.className).toBe('hf-match-score hf-match-win')
+    })
+
+    it('shows no score after 90 minutes for a match without extra time', () => {
+      const { container } = render(<Match {...cup} afterNinetyAgainst={0} afterNinetyFor={0} />)
+
+      expect(seen(container)?.textContent).toBe('1–1')
+      expect(heard(container)).toBe('1 tegen 1')
+    })
+
+    it('needs both scores after 90 minutes, and has none for a match that is not played', () => {
+      const half = (
+        // @ts-expect-error A score after 90 minutes has two numbers.
+        <Match
+          afterNinetyFor={1}
+          competition="KNVB Beker"
+          dateTime="2026-11-01"
+          extraTime
+          goalsAgainst={1}
+          goalsFor={2}
+          home
+          opponent="Testdorp FC"
+          round="Tweede ronde"
+          status="played"
+          time="zo 1 nov"
+        />
+      )
+      const early = (
+        // @ts-expect-error A match that is not played has no score after 90 minutes.
+        <Match
+          afterNinetyAgainst={1}
+          afterNinetyFor={1}
+          competition="KNVB Beker"
+          dateTime="2026-11-01"
+          home
+          opponent="Testdorp FC"
+          round="Tweede ronde"
+          status="scheduled"
+          time="zo 1 nov"
+        />
+      )
+
+      expect(half).toBeTruthy()
+      expect(early).toBeTruthy()
+    })
+
+    it('does not pass the score after 90 minutes on to the element', () => {
+      const { container } = render(<Match {...cup} afterNinetyAgainst={1} afterNinetyFor={1} extraTime goalsFor={2} />)
+
+      expect(container.firstElementChild?.hasAttribute('afterninetyfor')).toBe(false)
+    })
+
     it('keeps the label to the competition and the round, and adds nothing to a match without extra time', () => {
       const { container } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
 
