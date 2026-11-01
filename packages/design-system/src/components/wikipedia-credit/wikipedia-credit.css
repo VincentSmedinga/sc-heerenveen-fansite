@@ -65,10 +65,16 @@
       display: flow-root;
       interpolate-size: allow-keywords;
 
+      /* The fold reaches up under the line, so the line stays above it and takes every press. */
+      > summary {
+        position: relative;
+        z-index: 1;
+      }
+
       &::details-content {
         block-size: 0;
 
-        /* Room for the focus ring of a link on the first or last line, which the clip would cut. */
+        /* Room for the focus ring of a link on the first or last line, which the clip cuts. */
         margin-block: calc(-1 * var(--hf-wikipedia-credit-ring));
         opacity: 0;
         overflow-y: clip;

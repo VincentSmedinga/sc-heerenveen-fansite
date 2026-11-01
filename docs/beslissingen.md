@@ -4033,8 +4033,11 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Hoe:** alleen CSS, in `wikipedia-credit.css`, achter `@supports (interpolate-size: allow-keywords) and selector(::details-content)`.
   `interpolate-size: allow-keywords` laat de browser naar `auto` bewegen, en `::details-content` is het vak dat de browser met de hoogte en de doorzichtigheid laat bewegen.
   `content-visibility` gaat mee in de overgang (`allow-discrete`): tijdens het sluiten blijft de tekst zichtbaar, en daarna is hij weg voor het toetsenbord en de schermlezer, zoals bij een gewone dichte `details`.
-  Het vak knipt zijn hoogte af, dus het heeft opvulling zo breed als de focusring (3 pixels dik, 2 pixels ervandaan) en een gelijke negatieve marge, zodat de ring van een link op de eerste of de laatste regel niet wordt afgesneden en het vak even hoog blijft.
-  Daarvoor heeft de `details` `display: flow-root`, anders valt de negatieve marge onderaan samen met die van de `details` zelf.
+  Het vak knipt zijn hoogte af.
+  Daarom heeft het opvulling zo breed als de focusring (3 pixels dik, 2 pixels ervandaan) en een gelijke negatieve marge.
+  Zo wordt de ring van een link op de eerste of de laatste regel niet afgesneden, en blijft het vak even hoog.
+  De `details` heeft `display: flow-root`, anders valt de negatieve marge onderaan samen met die van de `details` zelf.
+  De `summary` heeft `position: relative` en `z-index: 1`, want het vak reikt 5 pixels onder de regel en nam anders de onderste 5 pixels van een klik weg.
   Het element en de bediening zijn niet veranderd: Enter en spatie, de melding "uitgeklapt" en "ingeklapt" en de zoekfunctie van de browser werken zoals eerst.
   Een test (`wikipedia-credit-css.test.ts`) bewaakt de middelen en dat de duur en curve gelijk zijn aan die van het pijltje.
 - **Browsers:** gemeten in Chromium 152 (de browser van het Browser-paneel van Claude en die van Playwright) en in WebKit van Playwright, op 390 en 900 pixels breed.

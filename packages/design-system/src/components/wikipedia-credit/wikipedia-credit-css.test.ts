@@ -36,6 +36,8 @@ describe('the fold of the Wikipedia credit in wikipedia-credit.css', () => {
     expect(content).toContain('padding-block: var(--hf-wikipedia-credit-ring);')
     expect(content).toContain('margin-block: calc(-1 * var(--hf-wikipedia-credit-ring));')
     expect(block).toMatch(/display: flow-root;/)
+    // The fold overlaps the line by that much, so the line has to paint above it.
+    expect(block).toMatch(/> summary \{\s*position: relative;\s*z-index: 1;\s*\}/)
   })
 
   it('moves the height and the opacity with the duration and curve of the arrow', () => {
