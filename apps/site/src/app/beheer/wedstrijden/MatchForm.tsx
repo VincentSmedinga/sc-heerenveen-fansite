@@ -363,33 +363,37 @@ export function MatchFormProvider({
 }
 
 /**
- * The save panel for the sidebar: the reason, "Opslaan" and "Annuleren". Its field and button
- * belong to the form of the cards by its `id`, so they save it, with or without JavaScript.
+ * The save panel for the sidebar: the reason and "Opslaan" in a card, and "Annuleren" in a cell
+ * of its own under it. Under the button it would be too close to be a target of its own at the
+ * size of the compact admin (WCAG 2.5.8). Its field and button belong to the form of the cards
+ * by its `id`, so they save it, with or without JavaScript.
  */
 export function MatchSavePanel({ cancelHref }: { cancelHref: string }) {
   const { pending, state } = useMatchForm()
 
   return (
-    <Card aria-labelledby="opslaan-kop">
-      <Heading id="opslaan-kop" level={2}>
-        Opslaan
-      </Heading>
-      <Text appearance="meta">Wat je opslaat, staat meteen op de site.</Text>
-      <Field
-        error={state.errors.reden}
-        hint="Waarom vul je dit in of pas je het aan? Komt in het logboek, hoogstens 300 tekens."
-        id="reden"
-        label="Reden"
-      >
-        <Input autoComplete="off" defaultValue={state.values.reden} form={formId} name="reden" />
-      </Field>
-      <Button disabled={pending} form={formId} name="knop" type="submit" value="opslaan">
-        Opslaan
-      </Button>
+    <>
+      <Card aria-labelledby="opslaan-kop">
+        <Heading id="opslaan-kop" level={2}>
+          Opslaan
+        </Heading>
+        <Text appearance="meta">Wat je opslaat, staat meteen op de site.</Text>
+        <Field
+          error={state.errors.reden}
+          hint="Waarom vul je dit in of pas je het aan? Komt in het logboek, hoogstens 300 tekens."
+          id="reden"
+          label="Reden"
+        >
+          <Input autoComplete="off" defaultValue={state.values.reden} form={formId} name="reden" />
+        </Field>
+        <Button disabled={pending} form={formId} name="knop" type="submit" value="opslaan">
+          Opslaan
+        </Button>
+      </Card>
       <Text>
         <Link href={cancelHref}>Annuleren</Link>
       </Text>
-    </Card>
+    </>
   )
 }
 
