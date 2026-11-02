@@ -711,7 +711,7 @@ await withEmptyDatabase((database) =>
     // for each score.
     assert.match(
       matchesHtml,
-      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<p>\d+ keer (?:gewonnen|gelijk|verloren)[^<]*<\/p><div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col">Winst<\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
+      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<p>\d+ keer (?:gewonnen|gelijk|verloren)[^<]*<\/p><div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col">Winst<\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
     )
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
     // current. The news page has the bar of Nieuws, with the podcasts and the search.

@@ -677,7 +677,7 @@ export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; s
       ) : (
         <>
           <Text>{scoreCountsSentence(counts)}</Text>
-          <DonutChart apart labels={false} mirror slices={slices} />
+          <DonutChart labels={false} ranked slices={slices} />
           <DataTable.Group>
             {outcomes.map(({ caption, heading, outcome }) => {
               const rows = counts.flatMap((count, index) => (count.outcome === outcome ? [{ count, index }] : []))
@@ -690,7 +690,7 @@ export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; s
                   rows={rows.map(({ count, index }) => ({
                     cells: [`${count.count}×`],
                     header: slices[index]!.label,
-                    marker: <DonutChart.Swatch index={index} mirror slices={slices} />,
+                    marker: <DonutChart.Swatch index={index} ranked slices={slices} />,
                     note: outcomeWords[outcome],
                   }))}
                 />

@@ -231,7 +231,7 @@ describe('DonutChart with a colour for each slice', () => {
   })
 })
 
-describe('DonutChart apart and mirror', () => {
+describe('DonutChart ranked', () => {
   const results: DonutChartSlice[] = [
     { label: '4–0', tone: 'positive', value: 2 },
     { label: '3–0', tone: 'positive', value: 2 },
@@ -239,74 +239,74 @@ describe('DonutChart apart and mirror', () => {
     { label: '0–1', tone: 'negative', value: 3 },
     { label: '0–2', tone: 'negative', value: 2 },
   ]
-  const transforms = (container: HTMLElement) =>
-    [...container.querySelectorAll('.hf-donut-chart-slice')].map((slice) => slice.getAttribute('transform'))
+  const styleOf = (container: HTMLElement) =>
+    [...container.querySelectorAll<SVGPathElement>('.hf-donut-chart-slice')].map((slice) => [
+      slice.style.getPropertyValue('--hf-donut-strength'),
+      slice.style.getPropertyValue('--hf-donut-deepen'),
+    ])
 
-  it('moves each group out of the ring when apart, the slices of a group by the same amount', () => {
-    const { container } = render(<DonutChart apart labels={false} slices={results} />)
-    const moves = transforms(container)
+  it('runs the green from the strongest to the weakest, and the red from the weakest to the strongest', () => {
+    const { container } = render(<DonutChart labels={false} ranked slices={results} />)
 
-    expect(moves.every((move) => move?.startsWith('translate('))).toBe(true)
-    expect(moves[0]).toBe(moves[1])
-    expect(moves[3]).toBe(moves[4])
-    expect(new Set(moves).size).toBe(3)
+    expect(styleOf(container)).toEqual([
+      ['100%', '35%'],
+      ['70%', ''],
+      ['80%', ''],
+      ['70%', ''],
+      ['100%', '35%'],
+    ])
   })
 
-  it('moves nothing without apart, and a ring with one tone does not move either', () => {
-    expect(transforms(render(<DonutChart labels={false} slices={results} />).container)).toEqual(
-      results.map(() => null),
-    )
-    expect(
-      transforms(
-        render(<DonutChart apart labels={false} slices={results.map((slice) => ({ ...slice, tone: 'positive' }))} />)
-          .container,
-      ),
-    ).toEqual(results.map(() => 'translate(0 0)'))
+  it('does not mix in the colour of the text without ranked, and keeps the strengths of before', () => {
+    const { container } = render(<DonutChart labels={false} slices={results} />)
+
+    expect(styleOf(container)).toEqual([
+      ['70%', ''],
+      ['100%', ''],
+      ['80%', ''],
+      ['70%', ''],
+      ['100%', ''],
+    ])
   })
 
-  it('draws a larger part of the drawing for a ring that is pulled apart, so nothing is cut off', () => {
-    const together = render(<DonutChart labels={false} slices={results} />).container
-    const apart = render(<DonutChart apart labels={false} slices={results} />).container
-
-    expect(together.querySelector('svg')?.getAttribute('viewBox')).toBe('74 64 172 172')
-    expect(apart.querySelector('svg')?.getAttribute('viewBox')).toBe('66 56 188 188')
-  })
-
-  it('runs the green from the strongest to the weakest with mirror, and the red as before', () => {
-    const { container } = render(<DonutChart labels={false} mirror slices={results} />)
-
-    expect(
-      [...container.querySelectorAll<SVGPathElement>('.hf-donut-chart-slice')].map((slice) =>
-        slice.style.getPropertyValue('--hf-donut-strength'),
-      ),
-    ).toEqual(['100%', '70%', '80%', '70%', '100%'])
-  })
-
-  it('gives the swatch of a slice the same strength with mirror', () => {
+  it('gives the swatch of a slice the same strength as its slice', () => {
     const { container } = render(
       <>
-        <DonutChart labels={false} mirror slices={results} />
-        <DonutChart.Swatch index={0} mirror slices={results} />
+        <DonutChart labels={false} ranked slices={results} />
+        <DonutChart.Swatch index={0} ranked slices={results} />
         <DonutChart.Swatch index={0} slices={results} />
       </>,
     )
     const swatches = [...container.querySelectorAll<HTMLElement>('.hf-donut-chart-swatch')]
 
-    expect(swatches.map((swatch) => swatch.style.getPropertyValue('--hf-donut-strength'))).toEqual(['100%', '70%'])
+    expect(
+      swatches.map((swatch) => [
+        swatch.style.getPropertyValue('--hf-donut-strength'),
+        swatch.style.getPropertyValue('--hf-donut-deepen'),
+      ]),
+    ).toEqual([
+      ['100%', '35%'],
+      ['70%', ''],
+    ])
   })
 })
 
 describe('strengthsOf', () => {
-  it('turns the positive tones round with mirror, and leaves the others as they were', () => {
+  it('goes past the full colour with ranked, and turns the positive tones round', () => {
     expect(strengthsOf(['positive', 'positive', 'positive', 'neutral', 'negative', 'negative'], true)).toEqual([
-      100, 85, 70, 80, 70, 100,
+      { deepen: 35, strength: 100 },
+      { deepen: 3, strength: 100 },
+      { deepen: 0, strength: 70 },
+      { deepen: 0, strength: 80 },
+      { deepen: 0, strength: 70 },
+      { deepen: 35, strength: 100 },
     ])
   })
 
   it('goes from 70% to 100% within a tone, and from 80% for the grey of a draw', () => {
-    expect(strengthsOf(['positive', 'positive', 'positive', 'neutral', 'neutral', 'negative'])).toEqual([
-      70, 85, 100, 80, 100, 70,
-    ])
+    expect(strengthsOf(['positive', 'positive', 'positive', 'neutral', 'neutral', 'negative'])).toEqual(
+      [70, 85, 100, 80, 100, 70].map((strength) => ({ deepen: 0, strength })),
+    )
   })
 })
 

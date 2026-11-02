@@ -12,12 +12,6 @@ export const drawing = { height: 300, width: 320 } as const
  */
 export const bare = { size: 172, x: 74, y: 64 } as const
 
-/** How far a group of slices moves out of the ring when the groups are pulled apart. */
-export const apartDistance = 8
-
-/** The part of the drawing for a ring with its groups pulled apart: `bare` plus the move. */
-export const bareApart = { size: 188, x: 66, y: 56 } as const
-
 const centre = { x: drawing.width / 2, y: drawing.height / 2 }
 
 /** The outer and the inner radius of the ring. */
@@ -39,40 +33,6 @@ export type Slice = {
   /** The angle where the slice starts. */
   start: number
   value: number
-}
-
-/**
- * How far each slice moves so that the groups of slices with the same key are pulled out of the
- * ring, each along the direction of its own middle: the slices of a group move together, and a
- * new group begins where the key changes. A ring with one group does not move, because it would
- * only leave the middle. The offsets come in the order of `slices`; `keys` has a key for every
- * place of the list, as `Slice.index` gives it.
- */
-export function offsetsOf(slices: readonly Slice[], keys: readonly string[], distance: number) {
-  const runs: Slice[][] = []
-
-  for (const slice of slices) {
-    const run = runs.at(-1)
-
-    if (run !== undefined && keys[run[0]!.index] === keys[slice.index]) {
-      run.push(slice)
-    } else {
-      runs.push([slice])
-    }
-  }
-
-  if (runs.length < 2) {
-    return slices.map(() => ({ x: 0, y: 0 }))
-  }
-
-  const origin = pointAt(0, 0)
-
-  return runs.flatMap((run) => {
-    const { x, y } = pointAt((run[0]!.start + run.at(-1)!.end) / 2, distance)
-    const offset = { x: x - origin.x, y: y - origin.y }
-
-    return run.map(() => offset)
-  })
 }
 
 /** The point at this angle (degrees clockwise from the top) and distance from the centre. */

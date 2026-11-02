@@ -157,7 +157,7 @@
   .hf-data-table-group {
     align-items: start;
     display: grid;
-    gap: var(--hf-space-m);
+    gap: var(--hf-space-m) var(--hf-space-l);
     grid-template-columns: repeat(auto-fit, minmax(min(5.5rem, 100%), 1fr));
     margin-block: 0 var(--hf-space-l);
 

@@ -63,15 +63,15 @@ const meta = preview.meta({
           '- `slices` zijn de plakken met een `label`, een `value` en eventueel een eigen `tone`.',
           '- `tone` kiest tussen groen (`positive`) en rood (`negative`) voor alle plakken die geen eigen `tone` hebben.',
           '- `labels={false}` laat de tekst rond de ring weg.',
-          '- `apart` trekt elke groep plakken van één kleur een stukje uit de ring.',
-          '- `mirror` draait de sterkte van het groen om.',
+          '- `ranked` zegt dat de plakken van goed naar slecht gaan en geeft de uitersten de sterkste kleur.',
           '',
           'Een plak kan een kleur van zichzelf hebben: groen (`positive`), grijs (`neutral`) of rood (`negative`), zoals de uitslagen van een seizoen.',
           'Plakken van dezelfde kleur lopen onderling van zwak naar sterk, zodat ze te onderscheiden blijven.',
           'Zonder tekst rond de ring is de ring zelf kleiner en past hij zich aan de plek aan, en staat de naam van elke plak in een tabel ernaast.',
-          'Met `apart` gaat elke groep plakken van één kleur een stukje uit de ring, zodat hij leest als een paar delen met elk hun eigen plakken, zoals de winsten, de gelijke spelen en de verliezen.',
-          'Met `mirror` loopt het groen van de sterkste kleur naar de zwakste, zodat de grootste winst en het grootste verlies in een ring van goed naar slecht allebei het donkerst zijn.',
-          'Het vlakje voor een rij van een tabel is een `DonutChart.Swatch`, met precies de kleur van de plak, en met dezelfde `mirror`.',
+          'Met `ranked` gaan de plakken van goed naar slecht, zoals de uitslagen van een seizoen van de grootste winst tot het grootste verlies.',
+          'De sterkte van de kleur groeit dan naar beide kanten: de eerste plak is het sterkste groen en de laatste het sterkste rood.',
+          'Het bereik is ook groter, want de sterkste plakken gaan voorbij de volle kleur naar de kleur van de tekst, die in licht donker is en in donker licht, zodat het verschil met de zwakste plak goed te zien is.',
+          'Het vlakje voor een rij van een tabel is een `DonutChart.Swatch`, met precies de kleur van de plak, en met dezelfde `ranked`.',
           'Een rij van een `DataTable` krijgt het vlakje als `marker` en de uitkomst in woorden als `note`, en drie kleine tabellen naast elkaar staan in een `DataTable.Group`.',
           '',
           'Meer diagrammen naast elkaar zet je in een `DonutChart.Group`.',
@@ -259,7 +259,7 @@ const ScoresCard = ({
       <Heading id="uitslagen-kop" level={2}>
         Hoe vaak welke uitslag
       </Heading>
-      <DonutChart apart labels={false} mirror slices={slices} />
+      <DonutChart labels={false} ranked slices={slices} />
       <DataTable.Group>
         {outcomes.map(({ heading, tone, word }) => {
           const rows = slices.flatMap((slice, index) => (slice.tone === tone ? [{ index, slice }] : []))
@@ -272,7 +272,7 @@ const ScoresCard = ({
               rows={rows.map(({ index, slice }) => ({
                 cells: [`${slice.value}×`],
                 header: slice.label,
-                marker: <DonutChart.Swatch index={index} mirror slices={slices} />,
+                marker: <DonutChart.Swatch index={index} ranked slices={slices} />,
                 note: word,
               }))}
             />

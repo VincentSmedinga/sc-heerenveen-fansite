@@ -25,7 +25,7 @@ describe('donut-chart.css', () => {
 
   it('makes a slice a part of the colour, with a light outline round it and not the colour of the surface', () => {
     expect(declarationsOf('.hf-donut-chart-slice')).toMatch(
-      /fill: color-mix\(in srgb, var\(--hf-donut-colour\) var\(--hf-donut-strength\), transparent\)/u,
+      /fill: color-mix\(\s*in srgb,\s*var\(--hf-colour-text-default\) var\(--hf-donut-deepen, 0%\),\s*color-mix\(in srgb, var\(--hf-donut-colour\) var\(--hf-donut-strength\), transparent\)\s*\)/u,
     )
     expect(declarationsOf('.hf-donut-chart-slice')).toMatch(/stroke: var\(--hf-colour-border-chart-slice\)/u)
     expect(declarationsOf('.hf-donut-chart-slice')).not.toMatch(/--hf-colour-background-/u)
@@ -36,7 +36,7 @@ describe('donut-chart.css', () => {
     expect(declarationsOf('.hf-donut-chart-slice-neutral')).toMatch(/--hf-colour-outcome-draw/u)
     expect(declarationsOf('.hf-donut-chart-slice-negative')).toMatch(/--hf-colour-outcome-loss/u)
     expect(declarationsOf('.hf-donut-chart-swatch')).toMatch(
-      /background-color: color-mix\(in srgb, var\(--hf-donut-colour\) var\(--hf-donut-strength\), transparent\)/u,
+      /background-color: color-mix\(\s*in srgb,\s*var\(--hf-colour-text-default\) var\(--hf-donut-deepen, 0%\),\s*color-mix\(in srgb, var\(--hf-donut-colour\) var\(--hf-donut-strength\), transparent\)\s*\)/u,
     )
   })
 

@@ -3,31 +3,12 @@ import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
 import type { ChartTone } from '../chart/tones'
 
 import { classNames } from '../classNames'
-import {
-  apartDistance,
-  bare,
-  bareApart,
-  drawing,
-  labelDistance,
-  labelGap,
-  offsetsOf,
-  pointAt,
-  ring,
-  slicePath,
-  slicesOf,
-  spreadAngles,
-} from './geometry'
+import { bare, drawing, labelDistance, labelGap, pointAt, ring, slicePath, slicesOf, spreadAngles } from './geometry'
 
 /** The tones a donut chart can have: a positive one and a negative one. */
 export const donutChartTones = ['positive', 'negative'] as const
 
 export type DonutChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
-  /**
-   * Pulls each run of slices with the same tone a little out of the ring, so the ring reads as
-   * a few parts, each with its own slices, such as the wins, the draws and the losses. It does
-   * nothing for a ring with one tone, and it is meant for a ring without `labels`.
-   */
-  apart?: boolean
   /** A donut chart has no children: everything it shows comes from the props below. */
   children?: never
   /**
@@ -37,11 +18,13 @@ export type DonutChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> 
    */
   labels?: boolean
   /**
-   * Runs the strength of the `positive` slices from the full colour to the weakest, and not the
-   * other way round, so the first slice is the darkest green and the last the darkest red in a
-   * ring that goes from the best result to the worst. `DonutChart.Swatch` takes it too.
+   * Says the slices go from the best to the worst, such as the scores of a season from the
+   * biggest win to the biggest loss. The strength of the colour then grows towards both ends:
+   * the first slice is the strongest green and the last the strongest red, and the range is
+   * wider, going past the full colour towards the colour of the text, so the extremes stand
+   * out. `DonutChart.Swatch` takes it too.
    */
-  mirror?: boolean
+  ranked?: boolean
   /** The slices in the order they go round, clockwise from the top. */
   slices: readonly DonutChartSlice[]
   /** The title above the ring, such as `Aanmeldingen`. Without it the ring has no title. */
@@ -76,30 +59,48 @@ export type DonutChartTone = (typeof donutChartTones)[number]
 const weakest = { negative: 70, neutral: 80, positive: 70 } as const
 
 /**
- * The strength of the colour of each slice, in percent: the slices of one tone go from the
- * weakest strength of the tone to the full colour in the order they are given, so slices of
- * one colour can be told apart. With `mirror` the `positive` slices run the other way, from the
- * full colour to the weakest, so a ring that goes from the best to the worst is strongest at
- * both ends. `DonutChart.Swatch` uses it too, so the two always agree.
+ * How far past the full colour the strongest slice goes in a ranked ring, in percent of the
+ * colour of the text mixed in. The colour of the text is dark on a light surface and light on a
+ * dark one, so it adds contrast on both.
  */
-export const strengthsOf = (tones: readonly ChartTone[], mirror = false): number[] =>
+const deepest = 35
+
+export type Strength = {
+  /** The percent of the colour of the text mixed into the slice, above the full colour. */
+  deepen: number
+  /** The percent of the colour of the tone the slice takes, from the weakest to the full. */
+  strength: number
+}
+
+/**
+ * The strength of the colour of each slice: the slices of one tone go from the weakest strength
+ * of the tone to the full colour in the order they are given, so slices of one colour can be
+ * told apart. In a `ranked` ring the range is wider, because it goes on past the full colour,
+ * and the `positive` slices run the other way, from the strongest to the weakest, so the first
+ * and the last slice are the strongest. `DonutChart.Swatch` uses it too, so the two always
+ * agree.
+ */
+export const strengthsOf = (tones: readonly ChartTone[], ranked = false): Strength[] =>
   tones.map((tone, index) => {
     const same = tones.map((other, place) => (other === tone ? place : -1)).filter((place) => place >= 0)
-    const rank = mirror && tone === 'positive' ? same.length - 1 - same.indexOf(index) : same.indexOf(index)
+    const place = same.indexOf(index)
+    const rank = ranked && tone === 'positive' ? same.length - 1 - place : place
+    const top = ranked ? 100 + deepest : 100
+    const value = Math.round(weakest[tone] + ((top - weakest[tone]) * rank) / Math.max(1, same.length - 1))
 
-    return Math.round(weakest[tone] + ((100 - weakest[tone]) * rank) / Math.max(1, same.length - 1))
+    return { deepen: Math.max(0, value - 100), strength: Math.min(100, value) }
   })
+
+/** The custom properties that give a slice or a swatch its strength. */
+const strengthStyle = ({ deepen, strength }: Strength) =>
+  ({
+    '--hf-donut-strength': `${strength}%`,
+    ...(deepen > 0 && { '--hf-donut-deepen': `${deepen}%` }),
+  }) as CSSProperties
 
 /** The tone of every slice: its own, or the one of the chart. */
 const tonesOf = (slices: readonly DonutChartSlice[], tone: DonutChartTone | undefined): ChartTone[] =>
   slices.map((slice) => slice.tone ?? tone ?? 'neutral')
-
-/** The part of the drawing the chart shows: all of it with labels, the ring alone without. */
-const viewBoxOf = (labels: boolean, apart: boolean) => {
-  const box = labels ? { size: 0, x: 0, y: 0 } : apart ? bareApart : bare
-
-  return labels ? `0 0 ${drawing.width} ${drawing.height}` : `${box.x} ${box.y} ${box.size} ${box.size}`
-}
 
 /**
  * A donut chart: a ring of slices, each as wide as its share of the total, with the total in
@@ -112,10 +113,9 @@ const viewBoxOf = (labels: boolean, apart: boolean) => {
  * donut-chart.css gives the look. Several charts go in a `DonutChart.Group`.
  */
 export const DonutChart = ({
-  apart = false,
   className,
   labels = true,
-  mirror = false,
+  ranked = false,
   slices,
   title,
   tone,
@@ -124,8 +124,7 @@ export const DonutChart = ({
   const total = slices.reduce((sum, slice) => sum + Math.max(0, slice.value), 0)
   const drawn = slicesOf(slices.map((slice) => slice.value))
   const tones = tonesOf(slices, tone)
-  const strengths = strengthsOf(tones, mirror)
-  const offsets = apart ? offsetsOf(drawn, tones, apartDistance) : undefined
+  const strengths = strengthsOf(tones, ranked)
   const angles = spreadAngles(
     drawn.map((slice) => slice.middle),
     labelGap,
@@ -144,11 +143,15 @@ export const DonutChart = ({
     >
       {title === undefined ? null : <p className="hf-donut-chart-title">{title}</p>}
       <div className="hf-donut-chart-plot">
-        <svg className="hf-donut-chart-drawing" focusable="false" viewBox={viewBoxOf(labels, apart)}>
+        <svg
+          className="hf-donut-chart-drawing"
+          focusable="false"
+          viewBox={labels ? `0 0 ${drawing.width} ${drawing.height}` : `${bare.x} ${bare.y} ${bare.size} ${bare.size}`}
+        >
           {total === 0 && (
             <path className="hf-donut-chart-track" d={slicePath({ end: 360, start: 0 })} fillRule="evenodd" />
           )}
-          {drawn.map((slice, position) => (
+          {drawn.map((slice) => (
             <path
               className={classNames(
                 'hf-donut-chart-slice',
@@ -157,10 +160,7 @@ export const DonutChart = ({
               d={slicePath(slice)}
               fillRule="evenodd"
               key={slice.index}
-              style={{ '--hf-donut-strength': `${strengths[slice.index]}%` } as CSSProperties}
-              transform={
-                offsets === undefined ? undefined : `translate(${offsets[position]!.x} ${offsets[position]!.y})`
-              }
+              style={strengthStyle(strengths[slice.index]!)}
             />
           ))}
           {labels &&
@@ -211,7 +211,7 @@ export const DonutChart = ({
 const Swatch = ({
   className,
   index,
-  mirror = false,
+  ranked = false,
   slices,
   tone,
   ...props
@@ -219,8 +219,8 @@ const Swatch = ({
   children?: never
   /** The place of the slice in `slices`. */
   index: number
-  /** The same as `mirror` of the chart. */
-  mirror?: boolean
+  /** The same as `ranked` of the chart. */
+  ranked?: boolean
   /** The slices of the chart, with the same tones as the chart has. */
   slices: readonly DonutChartSlice[]
   /** The tone of the chart, when its slices have none of their own. */
@@ -233,7 +233,7 @@ const Swatch = ({
       {...props}
       aria-hidden="true"
       className={classNames('hf-donut-chart-swatch', `hf-donut-chart-slice-${tones[index]}`, className)}
-      style={{ '--hf-donut-strength': `${strengthsOf(tones, mirror)[index]}%` } as CSSProperties}
+      style={strengthStyle(strengthsOf(tones, ranked)[index]!)}
     />
   )
 }

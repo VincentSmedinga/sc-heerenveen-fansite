@@ -85,7 +85,11 @@
    * so each slice stands out from the next without a contrast between their colours.
    */
   .hf-donut-chart-slice {
-    fill: color-mix(in srgb, var(--hf-donut-colour) var(--hf-donut-strength), transparent);
+    fill: color-mix(
+      in srgb,
+      var(--hf-colour-text-default) var(--hf-donut-deepen, 0%),
+      color-mix(in srgb, var(--hf-donut-colour) var(--hf-donut-strength), transparent)
+    );
     stroke: var(--hf-colour-border-chart-slice);
     stroke-linejoin: round;
     stroke-width: 3;
@@ -96,7 +100,11 @@
    * outline, so it is exactly what the slice looks like on the surface of the card.
    */
   .hf-donut-chart-swatch {
-    background-color: color-mix(in srgb, var(--hf-donut-colour) var(--hf-donut-strength), transparent);
+    background-color: color-mix(
+      in srgb,
+      var(--hf-colour-text-default) var(--hf-donut-deepen, 0%),
+      color-mix(in srgb, var(--hf-donut-colour) var(--hf-donut-strength), transparent)
+    );
     block-size: 1rem;
     border-radius: 0.25rem;
     display: inline-block;
