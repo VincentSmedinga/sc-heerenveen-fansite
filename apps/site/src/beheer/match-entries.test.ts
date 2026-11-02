@@ -251,6 +251,22 @@ describe('saveEntry', () => {
     })
   })
 
+  it('sees no change in a kick-off that has seconds the form can not show', async () => {
+    const id = await addMatch({ kickoffAt: new Date('2026-10-31T17:45:30Z') })
+
+    expect(
+      await saveEntry(
+        database.db,
+        userId,
+        id,
+        entry({ result: { ...entry().result, goalsAgainst: 1, goalsFor: 2 } }),
+        'Alleen de uitslag',
+        t0,
+      ),
+    ).toEqual({ parts: ['result'], status: 'saved' })
+    expect((await stored(id))?.kickoffAt).toEqual(new Date('2026-10-31T17:45:30Z'))
+  })
+
   it('stores and logs nothing for a save that changes nothing', async () => {
     const id = await addMatch()
 

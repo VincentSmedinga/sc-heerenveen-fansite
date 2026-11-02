@@ -342,13 +342,16 @@ export async function waitingDifferences(db: Pick<Database, 'select'>, matchId: 
   return found.filter((change): change is Difference => change.part !== null)
 }
 
+/** A kick-off to the minute: the form has no seconds, so a stored second is no difference. */
+const minuteOf = (moment: Date | null) => (moment === null ? null : Math.floor(moment.getTime() / 60_000))
+
 /** The parts of the entry that differ from what is stored. */
 function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry): MatchPart[] {
   const parts: MatchPart[] = []
   const { kickoff, result } = entry
 
   if (
-    match.kickoffAt?.getTime() !== kickoff.kickoffAt?.getTime() ||
+    minuteOf(match.kickoffAt) !== minuteOf(kickoff.kickoffAt) ||
     match.dateText !== kickoff.dateText ||
     match.matchDate !== kickoff.matchDate
   ) {
