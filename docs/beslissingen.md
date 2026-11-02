@@ -206,6 +206,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Dat is eenvoudig, maar de Reviewer deelt dan de blinde vlekken van de Builder en de specificaties krijgen geen sterker oordeel.
   Of overal het sterkste model; dat kost meer van de limiet van het abonnement voor werk dat een goede specificatie al grotendeels bepaalt.
 - **Herzien:** als het verschil in de praktijk niet opweegt tegen de kosten, of de limiet van het abonnement knelt.
+- **Later:** zie _Een Specifier voor een lang gesprek, en de Action List voor de status_ en _Zuinig werken is een regel, met harde grenzen_.
+  Er is een rol bijgekomen, de Specifier, en de Coordinator start een verse sessie bij ongeveer 300.000 tokens in plaats van per taak.
 
 ### Bouwen in plakken, per release
 
@@ -695,6 +697,33 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een lege optie laat de formulieren omzeilen.
 - **Alternatieven:** sjablonen in Markdown (eenvoudiger, maar niets is verplicht en ze vullen zich met gedeeltelijke teksten).
   Een lege optie laten staan voor de Coordinator; de Coordinator maakt issues met `gh`, dus daar is geen web-optie voor nodig.
+
+### Zuinig werken is een regel, met harde grenzen
+
+- **Datum:** 2 november 2026
+- **Besluit:** zuinig werken met tokens is een regel voor alle agents, met een eigen hoofdstuk in `AGENTS.md` (_Working efficiently_), een tabel met grenzen en een overzicht van de werkstroom.
+  De grenzen: hooguit twee Builders tegelijk (een Builder telt mee terwijl hij bouwt of zijn Reviewer draait), twee reviewrondes per pull request, een nieuwe Coordinator-sessie bij ongeveer 300.000 tokens of na een reeks samenvoegingen, hooguit vier vragen per ronde bij het specificeren (de Coordinator één ronde, een Specifier twee), één bericht per gebeurtenis die om een besluit vraagt, Fable alleen waar `AGENTS.md` het noemt, en een tempo van ongeveer 14% van het weekplafond per dag (boven de 20%: één Builder en de rij wacht).
+  Controles draaien op de voorgrond en één keer, zonder achtergrondmonitors, en een briefing is kort.
+- **Waarom:** op 2 november 2026 waarschuwde de pagina met het gebruik dat het weekplafond donderdag op zou zijn, twee dagen voor de reset.
+  Elke beurt van een sessie leest de hele context opnieuw, en elk bericht van een andere sessie start een beurt.
+  Een Coordinator-sessie van zo'n 470.000 tokens, meldingen over niets ("een late regel van een monitor") en drie of vier Builders tegelijk maakten dat duur.
+- **Alternatieven:** het bij richtlijnen houden zonder cijfers (een wachtrij of een vrije plek was elke keer een reden om ze te passeren).
+  Een vast aantal Builders van één (te langzaam voor de week).
+  Een Coordinator-sessie per dag (een natuurlijk breekpunt is beter dan een kloktijd).
+- **Herzien:** als de grenzen te strak blijken voor de snelheid die we willen, of als het plafond niet meer knelt.
+
+### Een Specifier voor een lang gesprek, en de Action List voor de status
+
+- **Datum:** 2 november 2026
+- **Besluit:** een gesprek over één issue dat meer dan één ronde vraagt, gaat naar een Specifier: een sessie die het issue specificeert met de projecteigenaar en dan eindigt.
+  De Coordinator blijft dun (het bord, sessies starten, de status en wat op een samenvoeging volgt) en houdt de Action List bij: een privépagina met wat op de eigenaar wacht, wat gebouwd wordt en wat in de rij staat, in plaats van statusberichten in de chat.
+- **Waarom:** een lang gesprek in de sessie van de Coordinator wordt bij elke volgende beurt in zijn volle omvang meegedragen.
+  De projecteigenaar wil in de chat van de Coordinator alleen besluiten en vragen, en een rij op een pagina bijwerken kost veel minder dan een bericht.
+- **Alternatieven:** geneste, kortlevende Coordinators (elk laadt dezelfde context opnieuw en het geeft meer sessies om bij te houden).
+  Een aparte sessie voor projectbeheer of een persoonlijke assistent (die heeft dezelfde gegevens nodig, dus elke bijwerking wekt hem ook).
+  Alles in de sessie van de Coordinator laten (de situatie van vandaag).
+- **Later:** dit herziet het deel over de Coordinator in _Een model per rol_: de Specifier krijgt Sonnet, of een sterker model bij veel oordeel, en de Coordinator start een verse sessie bij ongeveer 300.000 tokens en niet per taak.
+- **Herzien:** als de Specifier in de praktijk te veel van de Coordinator vraagt om over te dragen.
 
 ## Hosting en data
 

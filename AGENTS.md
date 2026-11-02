@@ -29,6 +29,71 @@ Keep it light.
 The project must not cost more time than it gives.
 Make the smallest change that meets the acceptance criteria, and don't add process, tools or dependencies that no issue asks for.
 
+## Working efficiently
+
+Our budget is the weekly usage limit of one plan, and agents spend it by the token.
+On 2 November 2026 the usage page warned that it would run out on a Thursday, two days before the reset, after a week with three or four Builders at once and one long Coordinator session.
+So efficiency is a driver for how we split, hand out and run work, next to quality and speed: when two ways of working are equally good, take the one that spends fewer tokens.
+
+What costs tokens, and what to do about it:
+
+- **Every turn re-reads the whole context of its session.**
+  A long session makes every later turn expensive.
+  Give each task its own session, keep it small, and end it when the task is done.
+- **A message wakes the session that gets it, and a wake-up is a full turn.**
+  Send a message only when the receiver has to decide or do something: a go-ahead, a choice of Reviewer, a scope question, a finished pull request.
+  Never "the checks are still running", never a late line of a monitor, never "I am waiting".
+- **Run each check in the foreground, as one command, and read its result.**
+  Don't start background monitors and don't end a turn only to wait for one.
+  A turn that ends with "waiting for the checks" costs the next turn for nothing.
+- **Run a check once.**
+  Targeted tests while you work; the full chain from _De controles_ once, after the last commit.
+  Run a check again only after a change that can affect it.
+- **Read less.**
+  Search first (`git grep`), then read the parts the issue touches, not whole files or whole histories.
+  Don't read again what is already in your context.
+- **Brief small.**
+  A brief names the issue, what is special about it and the pitfalls.
+  It doesn't repeat what this file, `builder-workflow` and the issue already say.
+  Start a task `fresh`; use `fork` only while the conversation is short.
+- **Ask once.**
+  Collect the questions for the owner into one message, each with a recommendation, instead of one question at a time.
+- **Use the right model.**
+  See _Models_.
+  A stronger model is a decision with a reason, not a default.
+- **Check the pace.**
+  Before a new wave of Builders, the Coordinator reads the usage with `get_usage`.
+  The week lasts when we spend about 14% of the weekly limit a day.
+  At more than 20% a day, work with one Builder and hold the queue, low priority first, and tell the owner.
+
+### Limits
+
+These are limits, not guidelines.
+A queue, a deadline or a free slot is no reason to pass them.
+
+| What                                | Limit                                                                                                                                                                                                                                                                                                                |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Builders building at once           | 2. A Builder counts while it builds or its Reviewer runs, not while it waits for the owner's go-ahead or merge. Never a third one.                                                                                                                                                                                   |
+| Review rounds per pull request      | 2                                                                                                                                                                                                                                                                                                                    |
+| Coordinator session                 | A fresh session at about 300k tokens of context, or after a wave of merges, with a handoff note in memory.                                                                                                                                                                                                           |
+| Specifying an issue                 | At most four questions per round, each with a recommendation: one round for the Coordinator, at most two for a Specifier. Then the issue is written.                                                                                                                                                                 |
+| Messages from a Builder or Reviewer | One per event that needs the owner or the Coordinator. No status messages.                                                                                                                                                                                                                                           |
+| Fable                               | The Coordinator may use it (see _Models_). A Reviewer only for a pull request that touches the database, the importer, security, workflows or dependencies, and only after the owner agrees. A Builder or Specifier gets a stronger model only for an issue that asks for a lot of judgment, and the brief names it. |
+| Weekly usage pace                   | About 14% a day. Above 20% a day: one Builder, and the queue waits.                                                                                                                                                                                                                                                  |
+
+### The workflow at a glance
+
+| Step | Who                                             | In                           | Ends when                                                                                     |
+| ---- | ----------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------- |
+| 1    | Owner                                           | Any session                  | The wish is said; the Coordinator notes it as an issue.                                       |
+| 2    | Specifier, or the Coordinator for a small issue | Its own session              | The owner approves the issue: "Goedgekeurd door de projecteigenaar op …".                     |
+| 3    | Coordinator                                     | The Coordinator's session    | A Builder is started with a short brief, the board is updated. At most two Builders.          |
+| 4    | Builder                                         | Its own worktree and session | The final check is done, and the Builder asks for the go-ahead once.                          |
+| 5    | Owner                                           | The Builder's session        | The go-ahead is given: one push and the pull request it opens.                                |
+| 6    | Reviewer                                        | A fresh subagent             | The report is posted; at most two rounds.                                                     |
+| 7    | Owner                                           | GitHub                       | The pull request is merged.                                                                   |
+| 8    | Coordinator                                     | The Coordinator's session    | The issue is closed, the worktree and branch are gone, an import has run if the data changed. |
+
 ## Roles
 
 The owner can talk to every session directly, and passes messages between them.
@@ -36,17 +101,21 @@ The owner can talk to every session directly, and passes messages between them.
 ### Coordinator
 
 The session the project owner plans with.
-Its work is coordination and specification, nothing else.
-Building, reviewing, design and research for their own sake, and help with the owner's setup go to a Builder, a Reviewer or a session of their own.
-The skills `specify`, `weekly-coordination` and `release-notes` hold its steps.
+Its work is coordination: the board, starting sessions, status, and what follows a merge, plus a small specification and the release notes.
+Building, reviewing, design, research for their own sake, long conversations about one issue, and help with the owner's setup go to a Builder, a Reviewer, a Specifier or a session of their own.
+It stays thin: its context is carried by every later turn, so it answers a note only when there is something to decide or do, and it starts a fresh session when the limits say so (see _Working efficiently_).
+The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
 
 - Keeps the board and the issues true to reality, without asking: it moves their status, assigns them, sets labels and milestones, posts status updates and closes what is done.
   It changes what an issue asks for only through a specification the owner approves.
-  Only the Coordinator creates issues.
+  Only the Coordinator, and a Specifier it starts for an issue it splits, creates issues.
 - Assigns an issue to the project owner when work on it starts, and leaves it assigned when it closes.
   Issues that are still "Te doen" stay unassigned.
-- Specifies issues with the owner until they are ready to build (see _Definition of Ready_), with the `specify` skill in [`.claude/skills/specify/SKILL.md`](.claude/skills/specify/SKILL.md).
-- Starts at most two issues at a time, each with its own Builder.
+- Specifies a small issue itself, in one round, with the `specify` skill in [`.claude/skills/specify/SKILL.md`](.claude/skills/specify/SKILL.md).
+  An issue that needs more than that (a design choice, a new area, a decision that shapes later issues) goes to a Specifier.
+- Has at most two Builders building at a time, each with its own issue (see _Limits_), and reads the usage before it starts a wave.
+- Keeps the Action List true: a private page (an Artifact with its own database, the address is in memory) with what waits for the owner in priority order, what is being built and what is queued.
+  It changes a row with one small write when something happens, so status stays out of the chat; the chat is for decisions and questions.
 - Writes the decisions from a specification into the issue, so the Builder adds them to `docs/beslissingen.md`.
   A decision that belongs to no issue gets its own small pull request.
 - At each release, writes what is new for visitors, in Dutch, from `CHANGELOG.md` and the release pull request.
@@ -60,7 +129,8 @@ The skills `specify`, `weekly-coordination` and `release-notes` hold its steps.
   - A condition as a question with a short answer: "Alleen voor abonnees? Staat erbij."
   - A supporter's words: "home", "onze club", and the abbreviations supporters know, such as LC and VI.
   - Nothing about the look, such as colours, cards, type or layout; light and dark is something a visitor can use, so it may have a line; nothing about error pages or other edge cases; nothing obvious, such as "nieuwste bovenaan".
-- Starts each Builder in its own session, and a Reviewer when no Builder is there to start it.
+- Starts each Builder in its own session with a short brief, and a Reviewer when no Builder is there to start it.
+  The brief names the issue, what is special about it and the pitfalls, and says to follow `builder-workflow`; it doesn't repeat the rules that are written down.
   Doesn't build or review itself.
   If it can't start a session (in the iPhone app or a cloud session, say), it offers alternatives first, such as a ready-to-paste prompt for a session the owner starts by hand.
   It builds itself only when there is no other way, and says so.
@@ -68,6 +138,15 @@ The skills `specify`, `weekly-coordination` and `release-notes` hold its steps.
   It first checks that nothing uncommitted or unpushed is lost.
   It leaves the branch `pr-screenshots` alone, on the remote and locally: it is never merged and never deleted (see _Screenshots_).
 - Never merges.
+
+### Specifier
+
+A session of its own for the owner and one issue.
+The Coordinator starts it when an issue needs more than one round of questions.
+It follows the `specify` skill: it reads the issue, the code and the decisions once, asks in rounds with a recommendation for each question, writes the issue after the owner approves (the criteria, the "Beslissingen" and the closing line), and ends.
+It never builds.
+If the issue has to be split, it creates the new issues with the same milestone and labels.
+Why a role of its own: a long talk in the Coordinator's session is carried at full size by every later turn.
 
 ### Builder
 
@@ -78,6 +157,7 @@ The rules stay in this file and in `CONTRIBUTING.md`; a skill points to them and
 
 - Writes the code, with tests, and stories for anything visible.
 - Adds the decisions from the issue, and its own, to `docs/beslissingen.md`.
+- Works quietly and cheaply (see _Working efficiently_): checks in the foreground, each run once, no background monitors, no turn that only waits, and one message when the owner or the Coordinator has to decide something.
 - Runs the checks, commits on its own branch, and opens a pull request once the owner agrees.
 - Puts one to three screenshots in the description of a pull request that changes what visitors see, or says that nobody sees the change (see _Screenshots_).
 - Starts the Reviewer right after opening the pull request, except for a pull request that only changes documentation or stories without a visual change (see _Reviews_), and fixes what the Reviewer and CI find.
@@ -103,6 +183,7 @@ The Reviewer:
   A hook, `.claude/hooks/reviewer-bash.js`, blocks every other command.
   Claude Code only runs that hook in a folder you have trusted; elsewhere it skips the hook without a warning.
 - Changes nothing: no edits, commits, pushes or approvals.
+- Runs each check once, in the foreground, and starts no monitors.
 - Writes a report with three sections: code and security; accessibility; editorial and source policy.
   The report starts with the verdict: ready to merge or not.
   Then come the findings, with file and line, sorted by severity.
@@ -114,11 +195,12 @@ The Reviewer:
 
 Each role has a default model (the reasons are in `docs/beslissingen.md`, under _Een model per rol_):
 
-- **Coordinator:** a stronger model than the Builders (Opus or Fable), in a fresh session per task.
+- **Coordinator:** a stronger model than the Builders (Opus or Fable), in a fresh session at about 300,000 tokens of context (see _Limits_).
 - **Builder:** Sonnet.
   For an issue that asks for a lot of judgment about design or security, the Coordinator names a stronger model in the brief.
 - **Reviewer:** Sonnet, set in its agent file.
   For a pull request that touches the database, the importer, security, workflows or dependencies, the Builder asks the owner for Fable, set on the call that starts it (see _Reviews_).
+- **Specifier:** Sonnet, and a stronger model for an issue that asks for a lot of judgment about design or security.
 - **Routine sessions**, such as updating the board: Haiku or Sonnet.
 
 A session the Coordinator starts uses at most the Coordinator's own model.
@@ -129,7 +211,7 @@ The owner picks a stronger Builder in the model menu.
 The owner approves at three points:
 
 1. **The specification**, before a Builder starts.
-   The Coordinator records the approval at the end of the issue, with the date of the approval in Dutch: "Goedgekeurd door de projecteigenaar op `<dag> <maand> <jaar>`.", such as "op 3 november 2026".
+   The Coordinator, or the Specifier of that issue, records the approval at the end of the issue, with the date of the approval in Dutch: "Goedgekeurd door de projecteigenaar op `<dag> <maand> <jaar>`.", such as "op 3 november 2026".
 2. **The pull request.**
    The owner merges, one pull request at a time.
 3. **The result on the acceptance environment** (#6), before it goes live.

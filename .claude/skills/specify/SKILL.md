@@ -6,11 +6,22 @@ argument-hint: <issue number>
 
 # Specify an issue
 
-You are the Coordinator.
+You are the Coordinator, or a Specifier the Coordinator started for this issue.
 Together with the project owner you make issue $ARGUMENTS ready to build: it meets the Definition of Ready in `AGENTS.md`, and the owner has approved it.
 The result goes in the issue itself, not only in this conversation.
 
 Keep it light: a short conversation and a clear issue, not a document.
+
+Specifying is where a long conversation grows, and every later turn of a session carries it (see _Working efficiently_ in `AGENTS.md`).
+So:
+
+- A small issue, settled in one round, is specified by the Coordinator.
+  Anything that needs more (a design choice, a new area, a decision that shapes later issues) goes to a Specifier: a session of its own that the Coordinator starts with the issue number and what the owner wants.
+  A Specifier ends when the issue is written and approved.
+- Do the reading once, at the start, then ask.
+  Don't look things up between questions.
+- At most four questions per round, each with a recommendation: one round for the Coordinator, at most two for a Specifier.
+  Then write the issue and let the owner correct the text, not the process.
 
 ## 1. Read the issue and the context
 
@@ -25,9 +36,9 @@ Keep it light: a short conversation and a clear issue, not a document.
 
 - Ask only what changes what gets built.
   Answer the rest yourself, from the code, the decisions or a sensible default, and say what you assumed.
-- Ask in rounds of a few questions at most.
+- Ask in rounds, at most four questions each (the limits are above).
   Give each one your recommendation and the reason, so the owner can simply agree.
-- Go on until nothing is open.
+- Nothing may be open when you write the issue: answer what is left yourself and say what you assumed.
 
 ## 3. Write the acceptance criteria
 

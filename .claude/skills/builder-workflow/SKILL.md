@@ -11,6 +11,15 @@ This skill is the order of the steps and the places where earlier Builders slipp
 The rules themselves are in `AGENTS.md` (_Working on an issue_, _The final check_, _Screenshots_) and `CONTRIBUTING.md`; read both when you haven't this session, and follow them where this skill is short.
 For a new source, also use the `add-source` skill.
 
+## Work cheaply and quietly
+
+The rules are in _Working efficiently_ in `AGENTS.md`.
+The ones Builders break most:
+
+- Run each check in the foreground, once, and start no background monitors; never end a turn only to wait.
+- While you work, run the tests of what you touch; run the full chain once, after the last commit.
+- Send one message when the owner or the Coordinator has to decide something, and none for status.
+
 ## Start
 
 1. `gh issue view $ARGUMENTS` (or `gh api repos/VincentSmedinga/sc-heerenveen-fansite/issues/$ARGUMENTS`).
