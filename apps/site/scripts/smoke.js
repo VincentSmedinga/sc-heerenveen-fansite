@@ -739,14 +739,14 @@ await withEmptyDatabase((database) =>
     // five matches: the whole season is the current one, and the links end on the card.
     assert.match(
       matchesHtml,
-      /<div aria-label="Welke stand"[^>]*role="group"[^>]*><a aria-current="page" href="\/wedstrijden#stand">.*?Hele seizoen.*?<a href="\/wedstrijden\?stand=laatste-5#stand">.*?Laatste 5/s,
+      /<div aria-label="Welke stand"[^>]*role="group"[^>]*><a aria-current="page" href="\/wedstrijden#stand"[^>]*>.*?Hele seizoen.*?<a href="\/wedstrijden\?stand=laatste-5#stand"[^>]*>.*?Laatste 5/s,
     )
     const lastFiveHtml = await (await fetch(`${origin}/wedstrijden?stand=laatste-5`)).text()
     assert.match(
       lastFiveHtml,
       /<caption class="hf-visually-hidden">Stand over de laatste vijf wedstrijden op \d+ \w+ \d{4}<\/caption>/,
     )
-    assert.match(lastFiveHtml, /<a aria-current="page" href="\/wedstrijden\?stand=laatste-5#stand">/)
+    assert.match(lastFiveHtml, /<a aria-current="page" href="\/wedstrijden\?stand=laatste-5#stand"[^>]*>/)
     // sc Heerenveen won twice and drew once, so it is first with seven points, and Nepstad
     // Rangers lost both matches and is last.
     assert.deepEqual(
@@ -808,14 +808,14 @@ await withEmptyDatabase((database) =>
     // Eredivisie, with all the matches chosen. The choice is in the address of the other link.
     assert.match(
       statisticsHtml,
-      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="\/statistieken"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a href="\/statistieken\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><\/div>/,
+      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-thumb-name:hf-segmented-thumb-statistieken;--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="\/statistieken" style="--hf-segmented-option-name:hf-segmented-option-statistieken-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a href="\/statistieken\?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-statistieken-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><\/div>/,
     )
     const leagueResponse = await fetch(`${origin}/statistieken?competitie=eredivisie`)
     const leagueHtml = await leagueResponse.text()
     assert.equal(leagueResponse.status, 200)
     assert.match(
       leagueHtml,
-      /<a href="\/statistieken"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a aria-current="page" href="\/statistieken\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a>/,
+      /<a href="\/statistieken" style="--hf-segmented-option-name:hf-segmented-option-statistieken-1"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a aria-current="page" href="\/statistieken\?competitie=eredivisie" style="--hf-segmented-option-name:hf-segmented-option-statistieken-2"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a>/,
     )
     assert.equal((await fetch(`${origin}/statistieken?competitie=onzin`)).status, 404)
     // The bar under the menu keeps the choice, and the items of the menu itself do not.

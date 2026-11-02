@@ -18,6 +18,10 @@ const union = (values: readonly string[]) => ({ type: { summary: values.map((val
 
 const meta = preview.meta({
   argTypes: {
+    place: {
+      control: 'text',
+      description: 'De plek van de schakelaar op de pagina, voor de overgang tussen pagina’s.',
+    },
     size: {
       control: 'radio',
       description: 'De maat van de schakelaar.',
@@ -35,7 +39,11 @@ const meta = preview.meta({
           '',
           'Elke optie is een link, en de optie die de pagina nu toont heeft `aria-current="page"` en dikkere letters.',
           'De pagina wordt opnieuw geladen, dus de knop schuift alleen als de browser een overgang tussen pagina’s kent; anders springt hij naar de nieuwe keuze.',
-          'Zet niet twee van deze schakelaars op één pagina.',
+          'Geef de schakelaar met `place` een plek, een woord dat bij de plek op de pagina hoort, zoals `stand`.',
+          'Dan schuift de knop als de volgende pagina dezelfde schakelaar met een andere keuze heeft.',
+          'Een schakelaar op een andere plek van een andere pagina heeft een andere plek, zodat de knop niet over de pagina vliegt.',
+          'Twee schakelaars op één pagina hebben twee plekken.',
+          'Zonder plek doet de schakelaar niet mee aan de overgang.',
           'Het component bewaart niets: de pagina geeft de waarde en de adressen.',
         ].join('\n'),
       },
@@ -47,7 +55,7 @@ const meta = preview.meta({
 })
 
 export const Default = meta.story({
-  args: { label: 'Welke wedstrijden', options, size: 'default', value: 'all' },
+  args: { label: 'Welke wedstrijden', options, place: 'wedstrijden', size: 'default', value: 'all' },
   name: 'Een keuze in het adres',
 })
 

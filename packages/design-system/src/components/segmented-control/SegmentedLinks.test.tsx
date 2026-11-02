@@ -55,4 +55,48 @@ describe('SegmentedLinks', () => {
       '<span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span>',
     )
   })
+
+  describe('the names for the slide between two pages', () => {
+    it('has none without a place, so the switch does not take part', () => {
+      render(<SegmentedLinks label="Welke wedstrijden" options={options} value="all" />)
+
+      expect(screen.getByRole('group').getAttribute('style')).not.toContain('name')
+      expect(screen.getAllByRole('link').every((link) => !link.hasAttribute('style'))).toBe(true)
+    })
+
+    it('gives the thumb and each option a name that holds the place', () => {
+      render(<SegmentedLinks label="Welke wedstrijden" options={options} place="stand" value="all" />)
+
+      expect(screen.getByRole('group').style.getPropertyValue('--hf-segmented-thumb-name')).toBe(
+        'hf-segmented-thumb-stand',
+      )
+      expect(
+        screen.getAllByRole('link').map((link) => link.style.getPropertyValue('--hf-segmented-option-name')),
+      ).toEqual(['hf-segmented-option-stand-1', 'hf-segmented-option-stand-2'])
+    })
+
+    it('keeps the names when another option is chosen, so the thumb slides, and differs per place', () => {
+      const names = (place: string, value: string) => {
+        const { unmount } = render(<SegmentedLinks label="Welke" options={options} place={place} value={value} />)
+        const group = screen.getByRole('group')
+        const result = [
+          group.style.getPropertyValue('--hf-segmented-thumb-name'),
+          ...screen.getAllByRole('link').map((link) => link.style.getPropertyValue('--hf-segmented-option-name')),
+        ]
+
+        unmount()
+
+        return result
+      }
+
+      expect(names('stand', 'all')).toEqual(names('stand', 'league'))
+      expect(names('stand', 'all')).not.toEqual(names('statistieken', 'all'))
+    })
+
+    it('leaves the style of the caller in place', () => {
+      render(<SegmentedLinks label="Welke" options={options} place="stand" style={{ color: 'red' }} value="all" />)
+
+      expect(screen.getByRole('group').style.color).toBe('red')
+    })
+  })
 })
