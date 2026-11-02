@@ -60,6 +60,8 @@ export { Heading, headingLevels } from './components/heading/Heading'
 export type { HeadingLevel, HeadingProps } from './components/heading/Heading'
 export { Honeypot } from './components/honeypot/Honeypot'
 export type { HoneypotProps } from './components/honeypot/Honeypot'
+export { IconButton, iconButtonIcons } from './components/icon-button/IconButton'
+export type { IconButtonIcon, IconButtonProps } from './components/icon-button/IconButton'
 export { InputTable } from './components/input-table/InputTable'
 export type {
   InputTableButton,
