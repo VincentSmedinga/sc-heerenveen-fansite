@@ -252,7 +252,7 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 
 ## De wedstrijden
 
-`/wedstrijden` toont onder drie kopjes het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) in het lopende seizoen, en daarnaast de hoofdtrainers en hoe vaak welke uitslag voorkwam.
+`/wedstrijden` toont het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) in het lopende seizoen, en daarnaast de hoofdtrainers en hoe vaak welke uitslag voorkwam.
 De negen andere kaarten met cijfers staan op `/statistieken` (zie _De statistieken_).
 Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder de hoofdtrainers in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
 Onder de stand en onder de uitslagen staat een link naar de kaart op de pagina Statistieken waar ze bij hoort, voor hetzelfde seizoen: de stand naar "Onze plek in de competitie" en de uitslagen naar "Het verloop van het seizoen".
