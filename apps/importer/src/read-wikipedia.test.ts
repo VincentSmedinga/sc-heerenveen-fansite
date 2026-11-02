@@ -25,6 +25,7 @@ const playoffAfterNinetyPage = readFileSync(
   'utf8',
 )
 const seasonProgramme = readFileSync(new URL('./fixtures/wikipedia-season-programme.wiki', import.meta.url), 'utf8')
+const catchUpProgramme = readFileSync(new URL('./fixtures/wikipedia-catch-up-2022-23.wiki', import.meta.url), 'utf8')
 const seasonStandings = readFileSync(new URL('./fixtures/wikipedia-season-standings.wiki', import.meta.url), 'utf8')
 const seasonCup = readFileSync(new URL('./fixtures/wikipedia-season-cup.wiki', import.meta.url), 'utf8')
 const playoffPages = Object.fromEntries(
@@ -444,6 +445,93 @@ describe('the results of every club in the league', () => {
         'Speelronde 12: FC Utrecht - Feyenoord has no date or no club names we can use',
       ],
     })
+  })
+})
+
+describe('a match that was postponed and played under an Inhaalronde', () => {
+  const read = (text: string) => {
+    const found = readLeague(text)
+
+    if (found.kind === 'error') {
+      throw new Error(found.message)
+    }
+
+    return found
+  }
+
+  it('reads the matches of other clubs under Inhaalronde 17 and 25 as results of those rounds', () => {
+    expect(catchUpProgramme).toContain('== Inhaalronde 17 ==')
+    expect(readLeagueResults(catchUpProgramme).results).toEqual(
+      expect.arrayContaining([
+        {
+          awayClub: 'Go Ahead Eagles',
+          awayGoals: 1,
+          homeClub: 'RKC Waalwijk',
+          homeGoals: 3,
+          playedOn: '2023-02-01',
+          round: 17,
+        },
+        {
+          awayClub: 'RKC Waalwijk',
+          awayGoals: 2,
+          homeClub: 'Go Ahead Eagles',
+          homeGoals: 3,
+          playedOn: '2023-04-19',
+          round: 25,
+        },
+      ]),
+    )
+  })
+
+  it('gives no result for the block without a score in the original round', () => {
+    const { results, unread } = readLeagueResults(catchUpProgramme)
+
+    // Two results of RKC Waalwijk and Go Ahead Eagles, and two of sc Heerenveen.
+    expect(
+      results.filter((result) => result.homeClub.includes('Waalwijk') || result.awayClub.includes('Waalwijk')),
+    ).toHaveLength(2)
+    expect(results).toHaveLength(4)
+    expect(unread).toEqual([])
+  })
+
+  it('counts the match of sc Heerenveen under Inhaalronde 17 once, in round 17, with the day and the score it was played with', () => {
+    const matches = read(catchUpProgramme).matches.filter((match) => match.round === 'Speelronde 17')
+
+    expect(matches).toHaveLength(2)
+    expect(matches.find((match) => match.opponent === 'FC Utrecht')).toMatchObject({
+      goalsAgainst: 1,
+      goalsFor: 3,
+      home: false,
+      matchDate: '2023-02-08',
+      status: 'played',
+    })
+    expect(matches.find((match) => match.opponent === 'FC Twente')).toMatchObject({ matchDate: '2023-01-21' })
+  })
+
+  it('does not let a block without a score under an Inhaalronde replace the postponed match', () => {
+    const matches = read(catchUpProgramme).matches.filter((match) => match.round === 'Speelronde 25')
+
+    expect(matches).toHaveLength(1)
+    expect(matches[0]).toMatchObject({ matchDate: '2023-03-11', opponent: 'AZ', status: 'postponed' })
+  })
+
+  it('counts a match under an Inhaalronde for the day of the last match, and a block without a score for nothing', () => {
+    expect(read(catchUpProgramme).lastPlayedOn).toBe('2023-04-19')
+  })
+
+  it('leaves the postponed block alone when no block under an Inhaalronde has a score for the same two clubs', () => {
+    const page = `== Speelronde 12 ==\n${box({ score: 'Uitgesteld' })}\n== Inhaalronde 12 ==\n${box({ score: '2 – 1', team2: '[[FC Utrecht]]' })}`
+
+    expect(read(page).matches.map((match) => [match.opponent, match.status])).toEqual([
+      ['FC Twente', 'postponed'],
+      ['FC Utrecht', 'played'],
+    ])
+  })
+
+  it('leaves out a match under a heading that only looks like an Inhaalronde', () => {
+    const page = `== Speelronde 12 ==\n${box({})}\n== Inhaalronde ==\n${box({ score: '2 – 1', team2: '[[FC Utrecht]]' })}\n== Play-offs Inhaalronde 3 ==\n${box({ score: '2 – 1', team2: '[[PSV (voetbalclub)|PSV]]' })}`
+
+    expect(read(page).matches.map((match) => match.opponent)).toEqual(['FC Twente'])
   })
 })
 

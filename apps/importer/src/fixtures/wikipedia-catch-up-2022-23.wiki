@@ -1,0 +1,153 @@
+<!--
+  A trimmed piece of https://nl.wikipedia.org/wiki/Eredivisie_2022/23_(mannenvoetbal)/Wedstrijden?action=raw, read on 2 November 2026.
+  Text of the Dutch Wikipedia, licence CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/deed.nl).
+  Left out: all matches except the four of RKC Waalwijk and Go Ahead Eagles that the page has under Speelronde 17 and 25 and
+  under Inhaalronde 17 and 25, the text around the templates, the footnotes, and the referees, attendances and reports (emptied).
+  The two matches were postponed, and the page has each twice: a block without a score under the round it was postponed from,
+  and a block with the score under the heading Inhaalronde with the same number.
+  Made up for the tests: the matches of sc Heerenveen below (the real page has none under an Inhaalronde): one that was
+  postponed and played under Inhaalronde 17, one that was postponed and has a block without a score under Inhaalronde 25,
+  and the match of sc Heerenveen and FC Twente in Speelronde 17 that is played as planned. Their dates and scores are not the page's.
+-->
+== Speelronde 17 ==
+{{Footballbox2
+|date = 21 januari 2023
+|time = 21:00 uur
+|team1 = [[RKC Waalwijk]]
+|score = Afgelast
+|team2 = [[Go Ahead Eagles]]
+|goals1 =
+|goals2 =
+|location = [[Waalwijk (gemeente)|Waalwijk]]
+|stadium = [[Mandemakers Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+{{Footballbox2
+|date = 21 januari 2023
+|time = 18:45 uur
+|team1 = [[sc Heerenveen]]
+|score = 2 – 0
+|team2 = [[FC Twente]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+{{Footballbox2
+|date = 22 januari 2023
+|time = 14:30 uur
+|team1 = [[FC Utrecht]]
+|score = Afgelast
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Inhaalronde 17 ==
+{{Footballbox2
+|date = 1 februari 2023
+|time = 20:00 uur
+|team1 = [[RKC Waalwijk]]
+|score = 3 – 1
+|team2 = [[Go Ahead Eagles]]
+|goals1 = [[Mats Seuntjens|Seuntjens]] {{goal|24}}<br />[[Michiel Kramer|Kramer]] {{goal|71}}<br />[[Yassin Oukili|Oukili]] {{goal|78}}
+|goals2 = {{goal|45+1}} [[José Fontán|Fontán]]
+|location = [[Waalwijk (gemeente)|Waalwijk]]
+|stadium = [[Mandemakers Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+{{Footballbox2
+|date = 8 februari 2023
+|time = 20:00 uur
+|team1 = [[FC Utrecht]]
+|score = 1 – 3
+|team2 = [[sc Heerenveen]]
+|goals1 =
+|goals2 =
+|location = [[Utrecht (stad)|Utrecht]]
+|stadium = [[Stadion Galgenwaard]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Speelronde 25 ==
+{{Footballbox2
+|date = 10 maart 2023
+|time = 20:00 uur
+|team1 = [[Go Ahead Eagles]]
+|score = Afgelast
+|team2 = [[RKC Waalwijk]]
+|goals1 =
+|goals2 =
+|location = [[Deventer]]
+|stadium = [[De Adelaarshorst]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+{{Footballbox2
+|date = 11 maart 2023
+|time = 18:45 uur
+|team1 = [[sc Heerenveen]]
+|score = Uitgesteld
+|team2 = [[AZ (voetbalclub)|AZ]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+
+== Inhaalronde 25 ==
+{{Footballbox2
+|date = 19 april 2023
+|time = 18:45 uur
+|team1 = [[Go Ahead Eagles]]
+|score = 3 – 2
+|team2 = [[RKC Waalwijk]]
+|goals1 = [[Evert Linthorst|Linthorst]] {{goal|15}}<br />[[Mats Deijl|Deijl]] {{goal|23}}<br />[[Isac Lidberg|Lidberg]] {{goal|90+5}}
+|goals2 = {{goal|8||55}} [[Michiel Kramer|Kramer]]
+|location = [[Deventer]]
+|stadium = [[De Adelaarshorst]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
+{{Footballbox2
+|date = 26 april 2023
+|time = 20:00 uur
+|team1 = [[sc Heerenveen]]
+|score =
+|team2 = [[AZ (voetbalclub)|AZ]]
+|goals1 =
+|goals2 =
+|location = [[Heerenveen (plaats)|Heerenveen]]
+|stadium = [[Abe Lenstra Stadion]]
+|attendance =
+|referee =
+|videoreferee =
+|report =
+}}
