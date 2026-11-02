@@ -705,13 +705,13 @@ await withEmptyDatabase((database) =>
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       ['#programma', '#uitslagen', '#stand', '#hoofdtrainer', '#hoe-vaak-welke-uitslag'],
     )
-    // The card with how often each score was played is the last card of the sidebar. The seed
-    // has no match, so it is the sentence and no chart.
+    // The card with how often each score was played is the last card of the sidebar: the
+    // sentence with the sums, the chart without text round the ring (hidden from a screen
+    // reader), and the table that is its key, with the outcome in words for each score.
     assert.match(
       matchesHtml,
-      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?href="#hoe-vaak-welke-uitslag">Hoe vaak welke uitslag<\/a><\/h2><p>We hebben nog geen uitslagen van dit seizoen\.<\/p><\/section>/s,
+      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<p>\d+ keer (?:gewonnen|gelijk|verloren)[^<]*<\/p><div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
     )
-    assert.doesNotMatch(matchesHtml, /hf-donut-chart/)
     // The home page has no bar of shortcuts and no bar of sub-pages, and no item of the menu is
     // current. The news page has the bar of Nieuws, with the podcasts and the search.
     assert.doesNotMatch(html, /class="hf-page-shortcuts"|class="hf-navigation-bar"| aria-current="/)
