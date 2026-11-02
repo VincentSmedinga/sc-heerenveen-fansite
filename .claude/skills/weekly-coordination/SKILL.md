@@ -27,8 +27,8 @@ The limits are in _Working efficiently_ in `AGENTS.md`; these are the habits tha
   A brief to a Builder is the issue number, what is special about it, the pitfalls, and "follow `builder-workflow`".
   Everything else is in `AGENTS.md`, the skills and the issue.
   Start `fresh`, not `fork`, once the conversation is long.
-- **A Specifier for a long talk.**
-  An issue that needs more than one round with the owner goes to a session of its own (see the `specify` skill), not into your context.
+- **A Specifier for every new issue.**
+  When the owner asks for an issue, start a Specifier at once (see the `specify` skill), not a talk in your context.
 - **Look things up once, narrowly.**
   Use one `gh` call with `--jq` for what you need, not whole bodies; save a project list to a file and filter it.
 - **Start fresh at the limit.**

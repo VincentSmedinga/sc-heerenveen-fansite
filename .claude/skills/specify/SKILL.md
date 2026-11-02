@@ -6,7 +6,8 @@ argument-hint: <issue number>
 
 # Specify an issue
 
-You are the Coordinator, or a Specifier the Coordinator started for this issue.
+You are a Specifier the Coordinator started for this issue, or for a wish of the owner that has no issue yet.
+Then you create the issue first, with the milestone and labels that fit, and put it on the board as "Te doen".
 Together with the project owner you make issue $ARGUMENTS ready to build: it meets the Definition of Ready in `AGENTS.md`, and the owner has approved it.
 The result goes in the issue itself, not only in this conversation.
 
@@ -15,12 +16,12 @@ Keep it light: a short conversation and a clear issue, not a document.
 Specifying is where a long conversation grows, and every later turn of a session carries it (see _Working efficiently_ in `AGENTS.md`).
 So:
 
-- A small issue, settled in one round, is specified by the Coordinator.
-  Anything that needs more (a design choice, a new area, a decision that shapes later issues) goes to a Specifier: a session of its own that the Coordinator starts with the issue number and what the owner wants.
+- Every issue is specified in a session of its own, which the Coordinator starts as soon as the owner asks for it, with the issue number or the wish and what the owner wants.
+  The Coordinator writes an issue itself only when the owner says to just write it.
   A Specifier ends when the issue is written and approved.
 - Do the reading once, at the start, then ask.
   Don't look things up between questions.
-- At most four questions per round, each with a recommendation: one round for the Coordinator, at most two for a Specifier.
+- At most four questions per round, each with a recommendation: at most two rounds.
   Then write the issue and let the owner correct the text, not the process.
 
 ## 1. Read the issue and the context
