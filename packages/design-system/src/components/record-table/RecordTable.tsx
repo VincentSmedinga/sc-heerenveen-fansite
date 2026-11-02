@@ -5,7 +5,7 @@ import { classNames } from '../classNames'
 export type RecordTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /**
    * The text of the table's caption, which names the table and says what it holds, such as
-   * `De uitslagen van sc Heerenveen tegen Demo Boys, in thuis, uit en totaal`. Only a screen
+   * `De uitslagen van sc Heerenveen tegen Demo Boys, thuis, uit en in totaal`. Only a screen
    * reader gets it: the caption is not shown.
    */
   caption: string

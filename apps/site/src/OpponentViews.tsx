@@ -143,12 +143,11 @@ export function ClubsCard({
 /**
  * The card of the page of a club with our record against it: a table in the form of the
  * standings, with a row for the matches at home and away and the total under them, and a column
- * for the matches played, won, drawn and lost, the goal difference and, with the choice
- * Eredivisie, the points (the cup gives none). Under it stand the biggest win and the biggest
- * loss against this club. It has the
- * button for an image, with the name of the club in the heading, so the image says who it is
- * about. It is figures and records that belong to the main content, so it has the soft surface,
- * in the sidebar.
+ * for the matches played, won, drawn and lost, the points (with the choice Eredivisie only, the
+ * cup gives none) and the goal difference. Under it stand the biggest win and the biggest loss
+ * against this club. It has the button for an image, with the name of the club in the heading,
+ * so the image says who it is about. It is figures and records that belong to the main content,
+ * so it has the soft surface, in the sidebar.
  */
 export function ClubSummaryCard({
   choice,

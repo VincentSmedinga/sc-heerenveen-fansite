@@ -9814,7 +9814,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     De naam van de rij is de rijkop.
   - **De kolommen:** G (gespeeld), W (gewonnen), L (gelijk), V (verloren), P (punten) en D (doelsaldo), elk met één eigen letter, op verzoek van de projecteigenaar op 2 november 2026.
     De doelpunten voor en tegen zijn één kolom geworden, het doelsaldo met teken (`+6`, `−2`, `0`).
-    De L van gelijk en de D van doelsaldo zijn nieuw: G was al gespeeld, en de D is die van doelsaldo in de kaart Stand.
+    L voor gelijk en D voor doelsaldo zijn nieuwe letters, want G is al gespeeld en deze tabel heeft elke letter maar één keer.
     Onder de tabel staan de woorden van de afkortingen, en een schermlezer hoort de hele woorden, zoals bij de kaart Stand.
   - **De punten** zijn vet en staan er alleen bij de keuze Eredivisie, want de beker geeft er geen: 3 voor een winst en 1 voor een gelijkspel (`pointsOf`), zoals in de lijst op Tegenstanders.
     Bij de keuze Alle wedstrijden is er geen kolom P.
