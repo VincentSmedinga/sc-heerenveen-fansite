@@ -369,6 +369,61 @@ describe('reading again', () => {
   })
 })
 
+describe('a match that was postponed and played under an Inhaalronde', () => {
+  const later = new Date(first.getTime() + hours(1))
+  const zwolle = /(\|team1 = \[\[sc Heerenveen\]\]\n)\|score = 0 – 2(\n\|team2 = \[\[PEC Zwolle\]\])/u
+  const cambuur = '|team1 = [[SC Cambuur]]\n|score = 0 – 4'
+  /** Two matches moved: the block in the round has no score, the Inhaalronde block has. */
+  const caughtUp = original.programme
+    .replace(zwolle, '$1|score = Uitgesteld$2')
+    .replace(cambuur, '|team1 = [[SC Cambuur]]\n|score = Afgelast')
+    .concat(
+      '\n== Inhaalronde 3 ==\n{{Footballbox2\n|date = 21 oktober 2026\n|time = 20:00 uur\n|team1 = [[sc Heerenveen]]\n|score = 0 – 2\n|team2 = [[PEC Zwolle]]\n|location = [[Heerenveen (plaats)|Heerenveen]]\n|stadium = [[Abe Lenstra Stadion]]\n|attendance = 20.100\n}}\n',
+      '\n== Inhaalronde 1 ==\n{{Footballbox2|date=14 oktober 2026|time=20:00 uur|team1=[[SC Cambuur]]|score=0 – 4|team2=[[Excelsior Rotterdam]]}}\n',
+    )
+  const matchOf = async (round: string) => (await database.db.select().from(matches).where(eq(matches.round, round)))[0]
+  const resultOf = (home: string, away: string) =>
+    database.db
+      .select()
+      .from(leagueResults)
+      .where(and(eq(leagueResults.homeClub, home), eq(leagueResults.awayClub, away)))
+
+  it('stores the match of sc Heerenveen once, with the day and the score of the Inhaalronde, and the result of the other club', async () => {
+    expect(caughtUp).not.toBe(original.programme)
+
+    const { server } = await serve({ programme: caughtUp })
+    const report = await importAt(server, first)
+
+    expect(report).toMatchObject({ kind: 'imported', results: { added: 90 }, warnings: [] })
+    expect(await database.db.select().from(matches)).toHaveLength(35)
+    expect(await matchOf('Speelronde 3')).toMatchObject({
+      goalsAgainst: 2,
+      goalsFor: 0,
+      matchDate: '2026-10-21',
+      status: 'played',
+    })
+    expect(await resultOf('SC Cambuur', 'Excelsior Rotterdam')).toMatchObject([
+      { awayGoals: 4, homeGoals: 0, playedOn: '2026-10-14', round: 1 },
+    ])
+  })
+
+  it('finds nothing changed in a second import', async () => {
+    const { server } = await serve({ programme: caughtUp })
+
+    await importAt(server, first)
+
+    const before = await snapshot()
+    const report = await importAt(server, later)
+
+    expect(report).toMatchObject({
+      matches: { added: 0, removed: 0, unchanged: 35, updated: 0 },
+      results: { added: 0, removed: 0, unchanged: 90, updated: 0 },
+    })
+    expect((await snapshot()).matches).toEqual(before.matches)
+    expect((await snapshot()).leagueResults).toEqual(before.leagueResults)
+  })
+})
+
 describe('the results of every club in the league', () => {
   const results = () =>
     database.db.select().from(leagueResults).orderBy(asc(leagueResults.round), asc(leagueResults.homeClub))
