@@ -150,6 +150,20 @@ describe('the list', () => {
     expect(html).toContain('Speelronde 11')
   })
 
+  it('is a table of five columns, where the date and the competition fold under the match on a phone', async () => {
+    await addMatch()
+
+    const html = await list()
+
+    expect(html).toContain('<div class="hf-data-table-fold">')
+    expect(
+      [...html.matchAll(/<th class="hf-data-table-fold-column" scope="col">(.*?)<\/th>/g)].map(([, name]) => name),
+    ).toEqual(['Datum', 'Competitie'])
+    expect(html).toContain('<span class="hf-data-table-secondary hf-data-table-folded">')
+    expect(html).toContain('Eredivisie, Speelronde 11')
+    expect(html).toContain('hf-page-main hf-page-main-wide hf-density-compact')
+  })
+
   it('shows the filter with the numbers, as links with the choice in the address', async () => {
     await addMatch(playedAway)
     await addMatch()

@@ -90,6 +90,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           </Text>
         </>
       }
+      wide
     >
       {notice === undefined ? null : <Notice>{notice}</Notice>}
       {rows.length === 0 ? (
@@ -117,7 +118,13 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <DataTable
               appearance="text"
               caption={`Wedstrijden in het seizoen ${season}`}
-              columns={['Wedstrijd', 'Uitslag', 'Status']}
+              columns={[
+                'Wedstrijd',
+                { fold: true, name: 'Datum' },
+                { fold: true, name: 'Competitie' },
+                'Uitslag',
+                'Status',
+              ]}
               rows={tableRows(shown)}
             />
           )}
@@ -155,10 +162,14 @@ function tableRows(matches: readonly AdminMatchRow[]) {
     const clubs = names[index] as string
 
     return {
-      cells: [<ResultCell key="uitslag" match={match} />, <StatusCell key="status" match={match} />],
+      cells: [
+        describeEntryKickoff(match),
+        competitionOf(match),
+        <ResultCell key="uitslag" match={match} />,
+        <StatusCell key="status" match={match} />,
+      ],
       header: names.indexOf(clubs) === names.lastIndexOf(clubs) ? clubs : `${clubs} (${match.round})`,
       href: matchPath(match.id),
-      secondary: `${describeEntryKickoff(match)} · ${competitionOf(match)}`,
     }
   })
 }
