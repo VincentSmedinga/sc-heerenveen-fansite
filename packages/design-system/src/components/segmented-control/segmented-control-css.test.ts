@@ -169,7 +169,8 @@ describe('the slide between two pages', () => {
 })
 
 describe('the space below a switch in a card', () => {
-  it('is the large space, so a table or a list under it does not touch it', () => {
-    expect(css).toMatch(/\.hf-card > \.hf-segmented-control \{\s*margin-block-end: var\(--hf-space-l\);/u)
+  it('comes from the flow of the card: the switch sets no margin of its own', () => {
+    expect(css).not.toMatch(/\.hf-card > \.hf-segmented-control/u)
+    expect(css).not.toMatch(/margin-block/u)
   })
 })

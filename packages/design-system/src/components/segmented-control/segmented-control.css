@@ -117,12 +117,6 @@
     }
   }
 
-  /* A switch straight in a card, such as the one above a table, keeps the large space to what follows. */
-  .hf-card > .hf-segmented-control {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block-end: var(--hf-space-l);
-  }
-
   /*
    * The text of an option, with a copy of it in bold below that takes no height, so the option
    * is as wide for its bold letters as for its regular ones.

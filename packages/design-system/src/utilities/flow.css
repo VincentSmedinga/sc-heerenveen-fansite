@@ -36,17 +36,17 @@
     }
 
     /*
-     * The large building blocks: a table, a group of data tables, the table of the standings,
-     * of the top scorers or of a record without a legend (with one, the block ends in a line
-     * of text, so the medium step follows), a bar chart, a donut chart on its own or in a
-     * group, the chart of the form, the table of a form and the grid of tiles. A new large
-     * block goes in this list, and the test in flow-css.test.ts checks the list.
+     * The large building blocks: a table, a group of data tables, the place of the table of
+     * the standings, of the top scorers or of a record (the table with its legend, which bar.css
+     * keeps the medium step from), a bar chart, a donut chart on its own or in a group, the
+     * chart of the form, the table of a form and the grid of tiles. A new large block goes in
+     * this list, and the test in flow-css.test.ts checks the list.
      */
     > :is(h1, h2, h3, h4, h5, h6),
     > :where(
       table,
       .hf-data-table-group,
-      .hf-bar-place:not(:has(.hf-bar-legend)),
+      .hf-bar-place,
       .hf-bar-chart,
       .hf-donut-chart,
       .hf-donut-chart-group,

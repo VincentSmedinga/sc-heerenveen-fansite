@@ -1606,6 +1606,7 @@
   Een nieuwe stap tussen `l` en `xl` (zeven stappen is te veel, zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_).
 - **Later:** zie _De kaart of de cel bepaalt de verticale witruimte tussen wat erin staat_ (2 november 2026).
   De grote ruimte onder een kop en onder een groot blok staat nu in de stroom, `utilities/flow.css`, en niet meer in `heading.css`, `table.css` en de CSS van de grafieken; de kaart of de cel zet haar, en het laatste kind krijgt geen ruimte van de stroom zelf.
+  Tussen de tabel van de stand en haar legenda staat nu de gemiddelde ruimte, en de grote staat onder de legenda.
   `tokens/space-below-css.test.ts` is vervangen door `utilities/flow-css.test.ts`.
 
 ## Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat
@@ -2170,7 +2171,9 @@
   De container bepaalt de ruimte tussen zijn directe kinderen: `Card`, `Page.Cell`, `Page.Intro`, `Article`, de inhoud van `Disclosure` en elk element met `hf-flow`.
   Dat is de stroom, in `utilities/flow.css`, in een eigen laag `hf.flow` tussen `hf.components` en `hf.utilities`.
   Elk kind krijgt ruimte onder zich volgens wat het is: groot onder een kop, onder een groot blok en voor een kop of een lijn, gemiddeld onder de rest, en geen onder het laatste kind.
-  De grote blokken staan in één lijst in `flow.css`: `table`, `DataTable.Group`, `StandingsTable`, `TopScorersTable` en `RecordTable` zonder legenda, `BarChart`, `DonutChart` los en als groep, `FormChart`, `InputTable` en `Tile.Grid`.
+  De grote blokken staan in één lijst in `flow.css`: `table`, `DataTable.Group`, `StandingsTable`, `TopScorersTable` en `RecordTable` met hun legenda, `BarChart`, `DonutChart` los en als groep, `FormChart`, `InputTable` en `Tile.Grid`.
+  Een tabel met een legenda is met zijn legenda één blok: tussen de tabel en de legenda staat de gemiddelde ruimte, en onder de legenda de grote.
+  De legenda blijft een alinea en wordt geen `caption` onderaan: een tabel heeft één `caption`, en die is de naam van de tabel, die een schermlezer bij elke tabel voorleest; de afkortingen zijn voor een schermlezer al voluit in de kolomkoppen.
   Eén exemplaar krijgt een andere ruimte met de hulpklasse `hf-space-end-0`, `-xs`, `-s`, `-m` of `-l`, in de laag `hf.utilities`, die altijd wint.
   De regels voor het eerste en het laatste kind in `card.css`, `page.css`, `article.css` en `disclosure.css` zijn weg, en de inhoud van `Disclosure` is een gewoon blok, geen raster met `gap`.
 - **Waarom:** een onderdeel kent zijn omgeving niet.
@@ -2184,6 +2187,9 @@
   Ruimte boven elk kind, met `* + *` (dan werkt een klasse op het element erboven niet).
   Een flex-kolom met `gap` (één maat voor elke twee buren).
   Een klasse op elk groot blok in plaats van een lijst in `flow.css` (de regels staan dan niet meer op één plek).
+  De legenda als `caption` onderaan de tabel, met `caption-side: bottom` (de legenda wordt dan de naam van de tabel).
+  De gemiddelde ruimte onder een tabel met een legenda, zoals het issue eerst zei (de projecteigenaar koos op 2 november 2026 voor de tabel en de legenda als één blok).
+  De grote ruimte onder de schakelaar boven de stand, zoals `segmented-control.css` zette (die regel is weg; de schakelaar krijgt de gemiddelde ruimte van de stroom).
 
 ## Boven een kop in een kaart of cel staat de grote ruimte, alleen in een artikel de extra grote
 
