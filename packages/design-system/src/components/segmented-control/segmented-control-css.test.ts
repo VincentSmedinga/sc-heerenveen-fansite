@@ -122,3 +122,9 @@ describe('the slide between two pages', () => {
     expect(transitions).toContain('animation-timing-function: var(--hf-motion-ease-change);')
   })
 })
+
+describe('the space below a switch in a card', () => {
+  it('is the large space, so a table or a list under it does not touch it', () => {
+    expect(css).toMatch(/\.hf-card > \.hf-segmented-control \{\s*margin-block-end: var\(--hf-space-l\);/u)
+  })
+})
