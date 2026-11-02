@@ -70,7 +70,7 @@
 
   li:first-child > .hf-discussion-item {
     border-block-start: 0;
-    padding-block-start: 0;
+    padding-block-start: 1px;
   }
 
   li:last-child > .hf-discussion-item {
