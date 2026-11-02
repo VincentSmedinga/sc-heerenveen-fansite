@@ -22,6 +22,8 @@ const meta = preview.meta({
           'Met `size="small"` is het veld lager, voor een kiezer naast de inhoud; in het hoofdstuk Maten van knoppen en velden staat wanneer je welke maat kiest.',
           'Heeft het veld een fout (`aria-invalid`), dan is de rand dikker en heeft hij de kleur van fouten.',
           '',
+          'Met `width="natural"` is de lijst zo breed als de keuze die hij laat zien, voor een korte lijst met korte woorden zoals een status.',
+          '',
           'Met `className="hf-select-styled"` krijgt de lijst de opmaak van de site, gesloten en open: ruimte tussen het pijltje en de rand, en een lijst met keuzes in onze kleuren, waarin de gekozen keuze een vinkje heeft.',
           'Dat werkt in een browser die dat kan; een andere browser houdt zijn eigen lijst.',
           'De seizoenskiezer gebruikt het al.',
@@ -68,4 +70,17 @@ export const SmallDark = meta.story({
 export const SmallStyled = meta.story({
   name: 'Kleine maat met de opmaak van de site',
   render: () => render('hf-select-styled', 'small'),
+})
+
+export const Natural = meta.story({
+  name: 'Zo breed als de keuze',
+  render: () => (
+    <Field id="soort" label="Soort">
+      <Select defaultValue="gewoon" name="soort" width="natural">
+        <Select.Option value="gewoon">Gewoon</Select.Option>
+        <Select.Option value="strafschop">Strafschop</Select.Option>
+        <Select.Option value="eigen">Eigen doelpunt</Select.Option>
+      </Select>
+    </Field>
+  ),
 })

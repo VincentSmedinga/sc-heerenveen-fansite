@@ -68,8 +68,8 @@ export type {
   InputTableProps,
   InputTableRow,
 } from './components/input-table/InputTable'
-export { Input, inputTypes } from './components/input/Input'
-export type { InputProps, InputType } from './components/input/Input'
+export { Input, inputTypes, inputWidths } from './components/input/Input'
+export type { InputProps, InputType, InputWidth } from './components/input/Input'
 export { Link, linkIcons } from './components/link/Link'
 export type { LinkIcon, LinkProps } from './components/link/Link'
 export { List, listElements } from './components/list/List'
@@ -118,8 +118,8 @@ export { SegmentedControl } from './components/segmented-control/SegmentedContro
 export type { SegmentedControlOption, SegmentedControlProps } from './components/segmented-control/SegmentedControl'
 export { SegmentedLinks } from './components/segmented-control/SegmentedLinks'
 export type { SegmentedLinksOption, SegmentedLinksProps } from './components/segmented-control/SegmentedLinks'
-export { Select } from './components/select/Select'
-export type { SelectOptionProps, SelectProps } from './components/select/Select'
+export { Select, selectWidths } from './components/select/Select'
+export type { SelectOptionProps, SelectProps, SelectWidth } from './components/select/Select'
 export { ShortFact } from './components/short-fact/ShortFact'
 export type { ShortFactProps } from './components/short-fact/ShortFact'
 export { ShortMatch } from './components/short-match/ShortMatch'
