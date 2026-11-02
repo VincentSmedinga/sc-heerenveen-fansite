@@ -76,7 +76,7 @@ A queue, a deadline or a free slot is no reason to pass them.
 | Builders building at once           | 2. A Builder counts while it builds or its Reviewer runs, not while it waits for the owner's go-ahead or merge. Never a third one.                   |
 | Review rounds per pull request      | 2                                                                                                                                                    |
 | Coordinator session                 | A fresh session at about 300k tokens of context, or after a wave of merges, with a handoff note in memory.                                           |
-| Specifying an issue                 | At most two rounds of at most four questions, each with a recommendation, then the issue is written. A longer talk goes to a Specifier.              |
+| Specifying an issue                 | At most four questions per round, each with a recommendation: one round for the Coordinator, at most two for a Specifier. Then the issue is written. |
 | Messages from a Builder or Reviewer | One per event that needs the owner or the Coordinator. No status messages.                                                                           |
 | Fable                               | Only for a Reviewer of a pull request that touches the database, the importer, security, workflows or dependencies, and only after the owner agrees. |
 | Weekly usage pace                   | About 14% a day. Above 20% a day: one Builder, and the queue waits.                                                                                  |
@@ -101,7 +101,7 @@ The owner can talk to every session directly, and passes messages between them.
 ### Coordinator
 
 The session the project owner plans with.
-Its work is coordination, nothing else: the board, starting sessions, status, and what follows a merge.
+Its work is coordination: the board, starting sessions, status, and what follows a merge, plus a small specification and the release notes.
 Building, reviewing, design, research for their own sake, long conversations about one issue, and help with the owner's setup go to a Builder, a Reviewer, a Specifier or a session of their own.
 It stays thin: its context is carried by every later turn, so it answers a note only when there is something to decide or do, and it starts a fresh session when the limits say so (see _Working efficiently_).
 The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
@@ -199,7 +199,7 @@ Each role has a default model (the reasons are in `docs/beslissingen.md`, under 
   For an issue that asks for a lot of judgment about design or security, the Coordinator names a stronger model in the brief.
 - **Reviewer:** Sonnet, set in its agent file.
   For a pull request that touches the database, the importer, security, workflows or dependencies, the Builder asks the owner for Fable, set on the call that starts it (see _Reviews_).
-- **Specifier:** Sonnet for a small issue, a stronger model for one that asks for a lot of judgment about design or security.
+- **Specifier:** Sonnet, and a stronger model for an issue that asks for a lot of judgment about design or security.
 - **Routine sessions**, such as updating the board: Haiku or Sonnet.
 
 A session the Coordinator starts uses at most the Coordinator's own model.
@@ -210,7 +210,7 @@ The owner picks a stronger Builder in the model menu.
 The owner approves at three points:
 
 1. **The specification**, before a Builder starts.
-   The Coordinator records the approval at the end of the issue, with the date of the approval in Dutch: "Goedgekeurd door de projecteigenaar op `<dag> <maand> <jaar>`.", such as "op 3 november 2026".
+   The Coordinator, or the Specifier of that issue, records the approval at the end of the issue, with the date of the approval in Dutch: "Goedgekeurd door de projecteigenaar op `<dag> <maand> <jaar>`.", such as "op 3 november 2026".
 2. **The pull request.**
    The owner merges, one pull request at a time.
 3. **The result on the acceptance environment** (#6), before it goes live.

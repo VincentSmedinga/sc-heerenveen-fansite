@@ -20,7 +20,7 @@ So:
   A Specifier ends when the issue is written and approved.
 - Do the reading once, at the start, then ask.
   Don't look things up between questions.
-- At most two rounds of at most four questions, each with a recommendation.
+- At most four questions per round, each with a recommendation: one round for the Coordinator, at most two for a Specifier.
   Then write the issue and let the owner correct the text, not the process.
 
 ## 1. Read the issue and the context
