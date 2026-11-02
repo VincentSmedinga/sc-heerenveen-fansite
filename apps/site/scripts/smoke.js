@@ -730,7 +730,7 @@ await withEmptyDatabase((database) =>
     // five matches: the whole season is the current one, and the links end on the card.
     assert.match(
       matchesHtml,
-      /<div aria-label="Welke stand"[^>]*role="group"><a aria-current="page" href="\/wedstrijden#stand">.*?Hele seizoen.*?<a href="\/wedstrijden\?stand=laatste-5#stand">.*?Laatste 5/s,
+      /<div aria-label="Welke stand"[^>]*role="group"[^>]*><a aria-current="page" href="\/wedstrijden#stand">.*?Hele seizoen.*?<a href="\/wedstrijden\?stand=laatste-5#stand">.*?Laatste 5/s,
     )
     const lastFiveHtml = await (await fetch(`${origin}/wedstrijden?stand=laatste-5`)).text()
     assert.match(
