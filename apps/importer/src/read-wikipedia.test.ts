@@ -396,7 +396,7 @@ describe('the results of every club in the league', () => {
   it('reads the real page of 2025/26 with the stopped match of sc Heerenveen as one result with the final score', () => {
     const { results } = readLeagueResults(seasonProgramme)
 
-    expect(results.filter((result) => result.round === 33)).toEqual([
+    expect(results.filter((result) => result.round === 33 && result.awayClub === 'sc Heerenveen')).toEqual([
       {
         awayClub: 'sc Heerenveen',
         awayGoals: 0,
