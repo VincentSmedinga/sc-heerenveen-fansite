@@ -327,6 +327,8 @@ Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
   Twee namen van dezelfde club zijn één club.
   Een tegenstander die niet in de lijst staat, telt niet mee als club uit de lijst: "Excelsior Maassluis" is niet "Excelsior" uit Rotterdam.
   Een club in het buitenland met dezelfde naam telt niet als de tegenstander: "Sparta Praag" is niet Sparta Rotterdam (`namesakeClubs` in `src/relevance-terms.ts`).
+  Ook een gewoon woord dat op een clubnaam lijkt, staat daar: "De treffers van Napoli, Koopmeiners en Lang" gaat over doelpunten en niet over De Treffers.
+  De vergelijking let niet op hoofdletters, dus de zin "de treffers van" scheidt die kop van "De Treffers verrast in de beker".
   Een kop met "Heerenveen" valt onder de andere regels en wordt niet slechter van een tweede club.
 - **De naam van de tegenstander:** de naam in `matches.opponent` ("N.E.C.", "ADO Den Haag", "Almere City FC") hoort bij de namen die het filter voor die club kent.
   Dat verband staat op één plek: `otherClubGroups` in [`src/relevance-terms.ts`](src/relevance-terms.ts), met de namen van één club bij elkaar.
@@ -335,6 +337,8 @@ Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
   Een club die naar een plaats heet, telt alleen met zijn volledige naam ("FC Twente", niet "Twente"), zodat een kop over de stad niet `relevant` wordt.
 - **Een tegenstander die niet in de lijst staat:** een amateurclub in de beker telt met zijn naam uit de wedstrijd, zonder voor- of achtervoegsel.
   Bij twee woorden of meer telt de naam altijd: "Excelsior Maassluis", "Quick Boys", "De Treffers".
+  De regel kijkt niet naar de bron: hij geldt voor elke feed op `club`, en een bron kiest geen eigen clubs.
+  Een wedstrijd van meer dagen, zoals "1–3 december 2026" bij de beker, telt met de eerste dag die de importer bewaart.
   Bij één woord telt hij ook ("IJsselmeervogels", "ASWH"), tenzij het een gewoon woord is (`ordinaryClubWords`: Quick, Victoria en dergelijke) of alleen een voorvoegsel ("AFC").
   Komt een club vaak voor in een kop die er niet over gaat, zet hem dan in `ordinaryClubWords`, of zijn volledige naam in `otherClubGroups`.
 
@@ -492,7 +496,8 @@ De tests van de regel zelf staan in `src/read-feed.test.ts`.
 De Gelderlander is een bron met de feed `https://www.gelderlander.nl/sport/rss.xml`, het sportnieuws van de regionale krant.
 Een feed van de hele krant bestaat niet.
 De club is er een klein deel van, dus de feed staat in de seed op `club`.
-De krant staat dicht bij N.E.C. en Go Ahead Eagles: rond een wedstrijd tegen een van hen telt een kop over de tegenstander mee (zie _Het relevantiefilter_), en daarbuiten alleen een kop over sc Heerenveen.
+De krant staat dicht bij N.E.C., Go Ahead Eagles en De Treffers (Groesbeek, bij Nijmegen): rond een wedstrijd tegen een van hen telt een kop over de tegenstander mee (zie _Het relevantiefilter_), en daarbuiten alleen een kop over sc Heerenveen.
+Dat is de regel van de tegenstander, die voor elke feed op `club` geldt en niet per bron is; er is geen lijst met clubs bij de krant.
 De feed is RSS 2.0, met tijden in GMT en een `guid` die de link is.
 De krant is van DPG Media, net als het Algemeen Dagblad, en de feed markeert een bericht achter de betaalmuur op dezelfde manier, met `<dpp:paid>` (zie _Wat de adapter bewaart_).
 De adapter heeft daar geen nieuwe regel voor: het domein `www.gelderlander.nl` staat bij het adres van de naamruimte in `paywallNamespaces`.
@@ -504,6 +509,8 @@ De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden 
 De test in `src/import-feeds.test.ts` ("importing the sport feed of De Gelderlander, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/gelderlander-sample.xml`](src/fixtures/gelderlander-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft koppen over N.E.C. en Go Ahead Eagles, over Thialf en Nijmegen Devils en over een andere club, een kop over de club, en een bericht zonder `dpp:paid`.
 De test geeft de feed een wedstrijd tegen N.E.C. en dan een tegen Go Ahead Eagles, en laat zien dat alleen de kop over die tegenstander rond de wedstrijd `relevant` wordt.
+Een tweede reeks tests ("around the cup match against De Treffers on 1 December 2026") gebruikt een eigen verzonnen feed met koppen op de randen van het venster, 27 en 28 november en 4 en 5 december, bij een bekerwedstrijd tegen De Treffers op 1 december 2026.
+Ze laten zien dat de koppen van 28 november tot en met 4 december `relevant` zijn, dat dezelfde koppen zonder de wedstrijd `irrelevant` zijn, en dat "De treffers van Napoli, Koopmeiners en Lang" `irrelevant` blijft, ook in het venster.
 
 ## De sportfeed van Rijnmond
 

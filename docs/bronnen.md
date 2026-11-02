@@ -376,7 +376,10 @@ Al in het register (#561), met het filter `club`.
     Een derde bericht noemt Heerenveen alleen in de beschrijving, bij een bericht over Thialf en de ijshockeyclub Nijmegen Devils.
     Het filter kijkt alleen naar de kop.
     De feed is het sportnieuws van de regio: schaatsen, ijshockey, de wereldtop van het voetbal en de Formule 1.
-    Een kop over N.E.C. of Go Ahead Eagles, de clubs bij de krant in de buurt, telt rond een wedstrijd tegen hen mee (#315).
+    Een kop over N.E.C., Go Ahead Eagles of De Treffers (Groesbeek, bij Nijmegen), de clubs bij de krant in de buurt, telt rond een wedstrijd tegen hen mee (#315).
+    De regel geldt voor elke feed op `club`, niet alleen voor deze, en er is geen lijst met clubs per bron.
+    De bekerwedstrijd tegen De Treffers staat op Wikipedia als "1–3 december 2026" (gelezen op 2 november 2026), en de importer bewaart de eerste dag.
+    "De treffers van Napoli, Koopmeiners en Lang" gaat over doelpunten en telt niet: de zin "de treffers van" staat in `namesakeClubs` (#644).
   - Betaalmuur: ja, 9 van de 30 berichten hebben `<dpp:paid>true</dpp:paid>`, de rest `false`.
     De importer herkende dezelfde 9 berichten als betaalmuur.
   - Het filter, op 1 november 2026: van de 30 berichten kreeg 2 de waarde `relevant`, 0 `doubtful` en 28 `irrelevant`.
@@ -405,7 +408,7 @@ Al in het register (#561), met het filter `club`.
   De beschrijving, de auteur, de afbeeldingen en het logo in de feed bewaren we niet en tonen we niet.
 - **Besluit: nemen, met het filter `club`.**
   De feed is het sportnieuws van de regio, dus het filter laat alleen de berichten over de club door en, rond een wedstrijd, die over de tegenstander.
-  De krant staat dicht bij N.E.C. en Go Ahead Eagles, dus we verwachten daar de meeste koppen over de tegenstander.
+  De krant staat dicht bij N.E.C., Go Ahead Eagles en De Treffers, dus we verwachten daar de meeste koppen over de tegenstander.
   DPG Media biedt de feed zelf aan, met een eigen teken voor de betaalmuur, en we nemen alleen de kop en de link.
   Het voorbehoud tegen scrapen en geautomatiseerd verzamelen is een risico dat geen jurist heeft getoetst; de projecteigenaar nam het aan bij het goedkeuren van het issue (1 november 2026).
   Zegt DPG Media dat we moeten stoppen, dan zetten we de bron meteen uit (`enabled` in het register), zoals bij elke bron.

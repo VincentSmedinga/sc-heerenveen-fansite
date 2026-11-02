@@ -9072,6 +9072,10 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   We nemen één feed, alleen een kop en een link, en we stoppen op verzoek.
 - **Alternatieven:** wachten op schriftelijke toestemming van DPG Media (voorzichtiger, maar DPG antwoordt zelden); de bron zonder het filter nemen (de feed is breed, en de meeste koppen gaan over ander sport); een term voor Thialf en Nijmegen Devils in de lijsten (niet nodig, want de echte koppen daarover bleven `irrelevant`).
 - **Daarna:** schriftelijk toestemming vragen aan DPG Media hoort bij #35; de projecteigenaar nam het voorbehoud van de bron aan bij het goedkeuren van het issue.
+- **Later:** zie _Een kop met "de treffers" als gewoon woord telt niet als kop over De Treffers_.
+  De regel van de tegenstander geldt voor elke feed op `club` en niet per bron.
+  Dus ook een kop over De Treffers (Groesbeek, bij Nijmegen) telt bij De Gelderlander rond de bekerwedstrijd van 1 december 2026, naast N.E.C. en Go Ahead Eagles, zonder dat er iets in de lijsten bij komt.
+  Alleen "de treffers van" kreeg een zin in `namesakeClubs`.
 
 ### We nemen Rijnmond na het relevantiefilter, voor de Rotterdamse tegenstanders
 
@@ -9097,6 +9101,21 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** de bron toont per wedstrijd alleen wat de regionale omroep over de Rotterdamse tegenstander schrijft, en bijna niets over sc Heerenveen.
   Een kop over de tegenstander die de club niet noemt, zoals een vraaggesprek met een trainer van Feyenoord, kan dus op de site staan.
 - **Alternatieven:** de bron afgewezen laten (een regionale omroep met nieuws over de volgende tegenstander gaat dan verloren); het regionieuws erbij nemen (geen enkel bericht ging over de club, en het filter laat alleen de dagen rond een wedstrijd door); alleen Feyenoord in het filter (Sparta en Excelsior hebben dezelfde regel nodig, en de lijst met clubs bestond al).
+
+### Een kop met "de treffers" als gewoon woord telt niet als kop over De Treffers
+
+- **Datum:** 2 november 2026
+- **Besluit:** de regel van de tegenstander laat de zin "de treffers van" eerst weg, zoals hij "sparta praag" weglaat (`namesakeClubs` in `apps/importer/src/relevance-terms.ts`).
+  Een kop over de club, zoals "De Treffers verrast in de beker" of "De Treffers-trainer Janssen kijkt vooruit", blijft `relevant` in de dagen rond de wedstrijd.
+  De vergelijking blijft zonder hoofdletters, en De Treffers zelf komt niet in de lijsten: de naam komt uit `matches`, zoals bij elke amateurclub in de beker (#315).
+  De regel geldt voor elke feed op `club`, niet per bron (#644).
+- **Waarom:** de beker brengt sc Heerenveen op 1 december 2026 tegen De Treffers uit Groesbeek, en Wikipedia schrijft "1–3 december 2026".
+  De importer bewaart de eerste dag, dus het venster loopt van 28 november tot en met 4 december.
+  "De treffers" is ook het woord voor doelpunten: "De treffers van Napoli, Koopmeiners en Lang" noemt geen profclub uit de lijst en zou in die dagen `relevant` worden, bij elke bron op `club`.
+  De zin is de kleinste oplossing en laat de koppen over de club met rust.
+- **Nadeel:** een kop over de club die met "De Treffers van" begint, zoals "De Treffers van trainer Janssen winnen", telt niet mee.
+  Dat zijn er weinig, en de kop staat nog gewoon in de bron.
+- **Alternatieven:** niets doen en de kleine kans op een verkeerde kop accepteren (lichter, maar elke kop daarvan staat een paar dagen op `/nieuws`); de vergelijking hoofdlettergevoelig maken, zodat alleen "Treffers" met een hoofdletter telt (een kop in hoofdletters of met elk woord een hoofdletter, "De Treffers Van Napoli", is dan niet te scheiden, en het maakt van het filter, dat nergens op hoofdletters let, een uitzondering voor één club; zie _De regels van het filter: hele woorden, zonder hoofdletters en accenten_); `treffers` helemaal uit de naam halen (dan telt ook "De Treffers verrast" niet meer); een lijst met clubs per bron (veel meer werk, en hier niet nodig).
 
 ### De echte bronnen komen op productie via de seed
 

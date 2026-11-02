@@ -535,6 +535,27 @@ describe('the opponent of a match', () => {
       expect(judgeRelevance(title, [opponent])).toBe(expected)
     })
 
+    it.each([
+      // "De treffers" is the club in Groesbeek and also the plural of the word for a goal.
+      ['De Treffers', 'De Treffers verrast in de beker', 'relevant'],
+      ['De Treffers', 'De Treffers-trainer Janssen kijkt vooruit', 'relevant'],
+      // Another professional club in the headline makes it about another match.
+      ['De Treffers', 'De Treffers verrast Heracles', 'irrelevant'],
+      ['De Treffers', 'Trainer van De Treffers kijkt vooruit', 'relevant'],
+      ['De Treffers', 'De treffers van Napoli, Koopmeiners en Lang', 'irrelevant'],
+      ['De Treffers', 'DE TREFFERS VAN NAPOLI, KOOPMEINERS EN LANG', 'irrelevant'],
+      // The phrase is left out, so the rest of the headline counts as it did.
+      ['De Treffers', 'De treffers van Napoli, en De Treffers verrast', 'relevant'],
+      ['De Treffers', 'De treffers van Napoli in de topper tegen Ajax', 'irrelevant'],
+      // It touches no other opponent: the headline names the club by its own name.
+      ['N.E.C.', 'De treffers van N.E.C. in de laatste minuten', 'relevant'],
+      ['Sparta Rotterdam', 'Sparta verrast met de treffers van de spits', 'relevant'],
+      // Another opponent's window: a headline that uses the phrase is not about De Treffers.
+      ['Ajax', 'De treffers van Napoli, Koopmeiners en Lang', 'irrelevant'],
+    ] as [string, string, ItemRelevance][])('%s: %j is %s', (opponent, title, expected) => {
+      expect(judgeRelevance(title, [opponent])).toBe(expected)
+    })
+
     it('does not count a headline that names two opponents of the window of one item', () => {
       expect(judgeRelevance('ADO en N.E.C. bereiden zich voor', ['ADO Den Haag', 'N.E.C.'])).toBe('irrelevant')
       expect(judgeRelevance('ADO bereidt zich voor', ['ADO Den Haag', 'N.E.C.'])).toBe('relevant')
