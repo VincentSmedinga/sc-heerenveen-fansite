@@ -586,7 +586,9 @@ describe('the results of every club in the league', () => {
       expect(await importAt(server, first)).toMatchObject({
         kind: 'imported',
         results: { added: 90 },
-        warnings: ["league results left out: Speelronde 12: a score we do not know: '2 – 2 [1 – 1]'"],
+        warnings: [
+          "league results left out: Speelronde 12: SC Cambuur - FC Utrecht has a score we do not know: '2 – 2 [1 – 1]'",
+        ],
       })
     })
   })

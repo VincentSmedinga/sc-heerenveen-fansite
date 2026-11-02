@@ -418,6 +418,12 @@ describe('the results of every club in the league', () => {
     expect(readLeague(page)).toMatchObject({ kind: 'read' })
   })
 
+  it('keeps the results of sc Heerenveen while the matches of the other clubs are still to be played', () => {
+    const page = leagueWith(box({ score: '1 – 0' }), other({ score: ' – ' }))
+
+    expect(readLeagueResults(page).results).toMatchObject([{ awayClub: 'FC Twente', homeClub: 'sc Heerenveen' }])
+  })
+
   it('leaves out a match under a heading that is not a round of the league', () => {
     const page = `== Play-offs ==\n${other({})}\n${leagueWith(other({ team1: '[[FC Utrecht]]' }))}`
 
@@ -434,7 +440,7 @@ describe('the results of every club in the league', () => {
     expect(readLeagueResults(page)).toEqual({
       results: [expect.objectContaining({ homeClub: 'PEC Zwolle' })],
       unread: [
-        "Speelronde 12: a score we do not know: '2 – 2 [1 – 1]'",
+        "Speelronde 12: Ajax - Feyenoord has a score we do not know: '2 – 2 [1 – 1]'",
         'Speelronde 12: FC Utrecht - Feyenoord has no date or no club names we can use',
       ],
     })

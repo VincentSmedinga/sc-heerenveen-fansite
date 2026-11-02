@@ -354,16 +354,20 @@ export function readLeagueResults(text: string): ReadResults {
 
     const result = restOf(box, boxes) ?? box
     const score = parseScore(result.params.get('score') ?? '')
+    const [homeClub, awayClub] = [plain(box.params.get('team1') ?? ''), plain(box.params.get('team2') ?? '')]
 
+    // A match of another club on the page makes it a page with every club, played or not yet.
+    others ||= !isOurs(box)
     if (score.kind !== 'score') {
       if (score.kind === 'unknown') {
-        unread.push(`${box.heading}: a score we do not know: '${score.text.slice(0, 40)}'`)
+        unread.push(
+          `${box.heading}: ${homeClub} - ${awayClub} has a score we do not know: '${score.text.slice(0, 40)}'`,
+        )
       }
       continue
     }
 
     const day = parseDate(result.params.get('date') ?? '')
-    const [homeClub, awayClub] = [plain(box.params.get('team1') ?? ''), plain(box.params.get('team2') ?? '')]
     const sameSides =
       linkTarget(result.params.get('team1') ?? '').toLowerCase() ===
       linkTarget(box.params.get('team1') ?? '').toLowerCase()
@@ -373,7 +377,6 @@ export function readLeagueResults(text: string): ReadResults {
       continue
     }
 
-    others ||= !isOurs(box)
     results.push({
       awayClub,
       awayGoals: sameSides ? score.away : score.home,
