@@ -626,6 +626,21 @@ const outcomeTones = { draw: 'neutral', loss: 'negative', win: 'positive' } as c
 
 const outcomeWords = { draw: 'gelijk', loss: 'verlies', win: 'winst' } as const
 
+/** The three tables of the card, in the order of the chart: a table for each outcome. */
+const outcomes = [
+  {
+    caption: 'Uitslagen van gewonnen wedstrijden en hoe vaak ze voorkwamen, met onze doelpunten eerst',
+    heading: 'Winst',
+    outcome: 'win',
+  },
+  { caption: 'Uitslagen van gelijke spelen en hoe vaak ze voorkwamen', heading: 'Gelijk', outcome: 'draw' },
+  {
+    caption: 'Uitslagen van verloren wedstrijden en hoe vaak ze voorkwamen, met onze doelpunten eerst',
+    heading: 'Verlies',
+    outcome: 'loss',
+  },
+] as const
+
 /**
  * The caption of the table over the latest five matches, which only a screen reader gets: what
  * it is, and the day of the last result in our data, which can be before the day of the table.
@@ -662,17 +677,26 @@ export function ScoreCountsCard({ matches, season }: { matches: PublicMatch[]; s
       ) : (
         <>
           <Text>{scoreCountsSentence(counts)}</Text>
-          <DonutChart labels={false} slices={slices} />
-          <DataTable
-            caption="Hoe vaak sc Heerenveen elke uitslag haalde dit seizoen, van de beste naar de slechtste, met onze doelpunten eerst"
-            columns={['Uitslag', 'Keer']}
-            rows={counts.map(({ count, outcome }, index) => ({
-              cells: [count],
-              header: slices[index]!.label,
-              marker: <DonutChart.Swatch index={index} slices={slices} />,
-              note: outcomeWords[outcome],
-            }))}
-          />
+          <DonutChart apart labels={false} mirror slices={slices} />
+          <DataTable.Group>
+            {outcomes.map(({ caption, heading, outcome }) => {
+              const rows = counts.flatMap((count, index) => (count.outcome === outcome ? [{ count, index }] : []))
+
+              return rows.length === 0 ? null : (
+                <DataTable
+                  caption={caption}
+                  columns={[heading, { hidden: true, name: 'Keer' }]}
+                  key={outcome}
+                  rows={rows.map(({ count, index }) => ({
+                    cells: [`${count.count}×`],
+                    header: slices[index]!.label,
+                    marker: <DonutChart.Swatch index={index} mirror slices={slices} />,
+                    note: outcomeWords[outcome],
+                  }))}
+                />
+              )
+            })}
+          </DataTable.Group>
           <BasedOn known={played} played={played} />
         </>
       )}

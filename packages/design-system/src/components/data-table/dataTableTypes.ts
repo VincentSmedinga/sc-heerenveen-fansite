@@ -12,6 +12,12 @@ export type DataTableColumn = {
    * `name` itself, as it does for a column given as a string.
    */
   abbreviation?: string
+  /**
+   * Hides the header from the eye and keeps it for a screen reader, for a column whose cells
+   * say what it is, such as `3×`. It does not work for a `sortable` column, which needs its
+   * button.
+   */
+  hidden?: boolean
   /** The whole word, as a screen reader says it, such as `gelijk`. It must be unique. */
   name: string
   /**

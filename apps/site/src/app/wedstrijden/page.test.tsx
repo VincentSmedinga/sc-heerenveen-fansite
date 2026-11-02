@@ -264,20 +264,47 @@ describe('the page /wedstrijden', () => {
       )
     })
 
-    it('counts the played matches of the list Uitslagen, best first, with the outcome in words and a swatch for each', async () => {
-      const rows = [
-        ...(await card()).matchAll(/<tr><th scope="row">(.*?)<\/th><td class="hf-numeric">(\d+)<\/td><\/tr>/g),
-      ]
+    it('counts the played matches of the list Uitslagen in three tables, best first, with a swatch and the outcome in words', async () => {
+      const html = await card()
+      const tables = [...html.matchAll(/<table.*?<\/table>/g)].map(([table]) => table)
+      const rowsOf = (table: string) =>
+        [...table.matchAll(/<tr><th scope="row">(.*?)<\/th><td class="hf-numeric">([^<]*)<\/td><\/tr>/g)].map(
+          ([, header, count]) => [header?.replaceAll(/<[^>]*>/g, ''), count],
+        )
 
-      expect(rows.map(([, header, count]) => [header?.replaceAll(/<[^>]*>/g, ''), count])).toEqual([
-        ['3–1, winst', '1'],
-        ['2–0, winst', '1'],
-        ['1–0, winst', '1'],
-        ['2–2, gelijk', '1'],
+      expect(tables.map((table) => table.match(/<th scope="col">([^<]*)<\/th>/)?.[1])).toEqual(['Winst', 'Gelijk'])
+      expect(rowsOf(tables[0]!)).toEqual([
+        ['3–1, winst', '1×'],
+        ['2–0, winst', '1×'],
+        ['1–0, winst', '1×'],
       ])
-      expect(rows.map(([, header]) => header)).toSatisfy((headers: string[]) =>
-        headers.every((header) => header.startsWith('<span aria-hidden="true" class="hf-donut-chart-swatch ')),
-      )
+      expect(rowsOf(tables[1]!)).toEqual([['2–2, gelijk', '1×']])
+      expect(html.match(/<tr><th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch /g)).toHaveLength(4)
+    })
+
+    it('has a table for each outcome that happened, in green, grey and red order, and none for an outcome that did not', async () => {
+      const played = matchData.matches.filter((match) => match.status === 'played')
+      const loss: PublicMatch = { ...played[0]!, goalsAgainst: 3, goalsFor: 0, round: 'Speelronde 6' }
+
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, loss] })
+
+      const html = await card()
+
+      expect(html.match(/<th scope="col">([^<]*)<\/th>/g)).toEqual([
+        '<th scope="col">Winst</th>',
+        '<th scope="col">Gelijk</th>',
+        '<th scope="col">Verlies</th>',
+      ])
+      expect(html).toContain('0–3<span class="hf-visually-hidden">, verlies</span>')
+
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        matches: matchData.matches.filter(
+          (match) => match.status !== 'played' || match.goalsFor !== match.goalsAgainst,
+        ),
+      })
+
+      expect(await card()).not.toContain('Gelijk')
     })
 
     it('says how often the club won, drew and lost above the chart, and on how many matches it is based', async () => {
@@ -293,8 +320,9 @@ describe('the page /wedstrijden', () => {
       const html = await card()
 
       expect(html).toContain('<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">')
-      expect(html).toContain('<caption class="hf-visually-hidden">Hoe vaak sc Heerenveen elke uitslag haalde')
-      expect(html).toContain('<th scope="col">Uitslag</th><th class="hf-numeric" scope="col">Keer</th>')
+      expect(html.match(/<caption class="hf-visually-hidden">Uitslagen van /g)).toHaveLength(2)
+      expect(html).toContain('<th class="hf-numeric" scope="col"><span class="hf-visually-hidden">Keer</span></th>')
+      expect(html).toContain('<div class="hf-data-table-group">')
     })
 
     it('says that there are no results yet, without a chart, when no match is played', async () => {

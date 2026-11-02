@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { pointAt, slicePath, slicesOf, spreadAngles } from './geometry'
+import { offsetsOf, pointAt, slicePath, slicesOf, spreadAngles } from './geometry'
 
 describe('slicesOf', () => {
   it('gives each value a slice as wide as its share of 360 degrees, from the top and clockwise', () => {
@@ -93,5 +93,44 @@ describe('spreadAngles', () => {
   it('takes one angle or none as they are', () => {
     expect(spreadAngles([], 40)).toEqual([])
     expect(spreadAngles([10], 40)).toEqual([10])
+  })
+})
+
+describe('offsetsOf', () => {
+  const slices = slicesOf([1, 1, 1, 1])
+  const origin = pointAt(0, 0)
+  const move = (angle: number) => {
+    const { x, y } = pointAt(angle, 10)
+
+    return { x: x - origin.x, y: y - origin.y }
+  }
+
+  it('moves the slices of a group together, out along the middle of the group', () => {
+    const offsets = offsetsOf(slices, ['a', 'a', 'b', 'b'], 10)
+
+    expect(offsets[0]).toEqual(offsets[1])
+    expect(offsets[2]).toEqual(offsets[3])
+    expect(offsets[0]!.x).toBeCloseTo(move(90).x)
+    expect(offsets[0]!.y).toBeCloseTo(move(90).y)
+    expect(offsets[2]!.x).toBeCloseTo(move(270).x)
+    expect(offsets[2]!.y).toBeCloseTo(move(270).y)
+  })
+
+  it('starts a new group where the key changes, also for a key that comes back', () => {
+    const offsets = offsetsOf(slices, ['a', 'b', 'b', 'a'], 10)
+
+    expect(offsets[1]).toEqual(offsets[2])
+    expect(offsets[0]).not.toEqual(offsets[3])
+  })
+
+  it('does not move a ring with one group, which would only leave the middle', () => {
+    expect(offsetsOf(slices, ['a', 'a', 'a', 'a'], 10)).toEqual(slices.map(() => ({ x: 0, y: 0 })))
+  })
+
+  it('uses the place of a slice in the list for its key, so a value of zero leaves a hole', () => {
+    const drawn = slicesOf([1, 0, 1])
+
+    expect(offsetsOf(drawn, ['a', 'b', 'b'], 10)).toHaveLength(2)
+    expect(offsetsOf(drawn, ['a', 'b', 'b'], 10)[0]).not.toEqual(offsetsOf(drawn, ['a', 'b', 'b'], 10)[1])
   })
 })

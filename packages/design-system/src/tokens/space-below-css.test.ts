@@ -93,7 +93,16 @@ describe('the large space below a large building block', () => {
   })
 
   it('leaves the data table to the rule for every table: it sets no margin of its own', () => {
-    expect(read('components/data-table/data-table.css')).not.toMatch(/margin-block|margin:/u)
+    const css = read('components/data-table/data-table.css')
+
+    expect(css.slice(0, css.indexOf('.hf-data-table-group'))).not.toMatch(/margin-block|margin:/u)
+  })
+
+  it('is below a group of data tables: the group has the space and its tables have none', () => {
+    const group = block('components/data-table/data-table.css', '.hf-data-table-group')
+
+    expect(group).toContain('margin-block: 0 var(--hf-space-l);')
+    expect(group).toMatch(/& > table \{\s*margin-block-end: 0;/u)
   })
 
   it('is below a chart: the bar chart, the group of donut charts and the chart of the form', () => {

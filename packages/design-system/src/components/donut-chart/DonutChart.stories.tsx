@@ -63,12 +63,16 @@ const meta = preview.meta({
           '- `slices` zijn de plakken met een `label`, een `value` en eventueel een eigen `tone`.',
           '- `tone` kiest tussen groen (`positive`) en rood (`negative`) voor alle plakken die geen eigen `tone` hebben.',
           '- `labels={false}` laat de tekst rond de ring weg.',
+          '- `apart` trekt elke groep plakken van één kleur een stukje uit de ring.',
+          '- `mirror` draait de sterkte van het groen om.',
           '',
           'Een plak kan een kleur van zichzelf hebben: groen (`positive`), grijs (`neutral`) of rood (`negative`), zoals de uitslagen van een seizoen.',
           'Plakken van dezelfde kleur lopen onderling van zwak naar sterk, zodat ze te onderscheiden blijven.',
           'Zonder tekst rond de ring is de ring zelf kleiner en past hij zich aan de plek aan, en staat de naam van elke plak in een tabel ernaast.',
-          'Het vlakje voor een rij van die tabel is een `DonutChart.Swatch`, met precies de kleur van de plak.',
-          'Een rij van een `DataTable` krijgt het vlakje als `marker` en de uitkomst in woorden als `note`.',
+          'Met `apart` gaat elke groep plakken van één kleur een stukje uit de ring, zodat hij leest als een paar delen met elk hun eigen plakken, zoals de winsten, de gelijke spelen en de verliezen.',
+          'Met `mirror` loopt het groen van de sterkste kleur naar de zwakste, zodat de grootste winst en het grootste verlies in een ring van goed naar slecht allebei het donkerst zijn.',
+          'Het vlakje voor een rij van een tabel is een `DonutChart.Swatch`, met precies de kleur van de plak, en met dezelfde `mirror`.',
+          'Een rij van een `DataTable` krijgt het vlakje als `marker` en de uitkomst in woorden als `note`, en drie kleine tabellen naast elkaar staan in een `DataTable.Group`.',
           '',
           'Meer diagrammen naast elkaar zet je in een `DonutChart.Group`.',
           'Is er niet genoeg ruimte voor ze naast elkaar, zoals op een telefoon, dan komen ze onder elkaar.',
@@ -237,44 +241,63 @@ const scores = [
   { label: '0–1', tone: 'negative', value: 5 },
 ] as const satisfies DonutChartSlice[]
 
-const outcomeWords = { negative: 'verlies', neutral: 'gelijk', positive: 'winst' } as const
+const outcomes = [
+  { heading: 'Winst', tone: 'positive', word: 'winst' },
+  { heading: 'Gelijk', tone: 'neutral', word: 'gelijk' },
+  { heading: 'Verlies', tone: 'negative', word: 'verlies' },
+] as const
 
-const ScoresCard = ({ slices }: { slices: readonly DonutChartSlice[] }) => (
-  <div style={{ maxInlineSize: '24rem' }}>
+const ScoresCard = ({
+  maxInlineSize = '24rem',
+  slices,
+}: {
+  maxInlineSize?: string
+  slices: readonly DonutChartSlice[]
+}) => (
+  <div style={{ maxInlineSize }}>
     <Card aria-labelledby="uitslagen-kop" surface="warm">
       <Heading id="uitslagen-kop" level={2}>
         Hoe vaak welke uitslag
       </Heading>
-      <DonutChart labels={false} slices={slices} />
-      <DataTable
-        caption="Hoe vaak elke uitslag voorkwam, van de beste naar de slechtste"
-        columns={['Uitslag', 'Keer']}
-        rows={slices.map((slice, index) => ({
-          cells: [slice.value],
-          header: slice.label,
-          marker: <DonutChart.Swatch index={index} slices={slices} />,
-          note: outcomeWords[slice.tone ?? 'neutral'],
-        }))}
-      />
+      <DonutChart apart labels={false} mirror slices={slices} />
+      <DataTable.Group>
+        {outcomes.map(({ heading, tone, word }) => {
+          const rows = slices.flatMap((slice, index) => (slice.tone === tone ? [{ index, slice }] : []))
+
+          return rows.length === 0 ? null : (
+            <DataTable
+              caption={`Uitslagen met ${word} en hoe vaak ze voorkwamen`}
+              columns={[heading, { hidden: true, name: 'Keer' }]}
+              key={tone}
+              rows={rows.map(({ index, slice }) => ({
+                cells: [`${slice.value}×`],
+                header: slice.label,
+                marker: <DonutChart.Swatch index={index} mirror slices={slices} />,
+                note: word,
+              }))}
+            />
+          )
+        })}
+      </DataTable.Group>
     </Card>
   </div>
 )
 
 export const ScoresLight = meta.story({
   globals: { theme: 'light' },
-  name: 'Een plak per uitslag in groen, grijs en rood, met een tabel, licht',
+  name: 'Een plak per uitslag in groen, grijs en rood, met drie tabellen, licht',
   render: () => <ScoresCard slices={scores} />,
 })
 
 export const ScoresDark = meta.story({
   globals: { theme: 'dark' },
-  name: 'Een plak per uitslag in groen, grijs en rood, met een tabel, donker',
+  name: 'Een plak per uitslag in groen, grijs en rood, met drie tabellen, donker',
   render: () => <ScoresCard slices={scores} />,
 })
 
 export const ScoresOneSlice = meta.story({
   globals: { theme: 'light' },
-  name: 'Eén uitslag, de ring is één plak met een tabel van één rij',
+  name: 'Eén uitslag, de ring is één plak met één tabel van één rij',
   render: () => <ScoresCard slices={[{ label: '2–1', tone: 'positive', value: 1 }]} />,
 })
 
@@ -296,7 +319,7 @@ export const ScoresNoValues = meta.story({
 
 export const ScoresTwelve = meta.story({
   globals: { theme: 'light' },
-  name: 'Twaalf uitslagen, de plakken van één kleur lopen van zwak naar sterk',
+  name: 'Twaalf uitslagen, de grootste winst en het grootste verlies zijn het donkerst',
   render: () => (
     <ScoresCard
       slices={[
@@ -315,4 +338,10 @@ export const ScoresTwelve = meta.story({
       ]}
     />
   ),
+})
+
+export const ScoresNarrow = meta.story({
+  globals: { theme: 'light' },
+  name: 'Een smalle plek, de drie tabellen onder elkaar waar ze niet naast elkaar passen',
+  render: () => <ScoresCard maxInlineSize="15rem" slices={scores} />,
 })

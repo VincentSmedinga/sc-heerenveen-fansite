@@ -3607,17 +3607,20 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 2 november 2026
 - **Besluit:** het diagram van de kaart "Hoe vaak welke uitslag" heeft een plak per uitslag in de kleur van de uitkomst (groen, grijs, rood), zonder tekst rond de ring (#638).
-  De tabel eronder heeft een vlakje in de kleur van elke plak en is voor de schermlezer de weergave van de cijfers.
+  De tabellen eronder, een voor winst, een voor gelijk en een voor verlies, naast elkaar, hebben een vlakje in de kleur van elke plak en zijn voor de schermlezer de weergave van de cijfers.
   - `DonutChart` krijgt daarvoor een `tone` per plak (`positive`, `neutral` of `negative`, de `ChartTone` van de andere grafieken) en `labels={false}`, dat de tekst en de streepjes rond de ring weglaat.
     De `tone` van het diagram blijft voor de plakken die er geen hebben, en `title` mag ontbreken.
   - Plakken van één kleur lopen onderling van het zwakste tot de volle kleur, zoals nu, en het grijs van een gelijkspel begint bij 80%, zoals in `chart.css`.
+    Met `mirror` loopt het groen de andere kant op, zodat de grootste winst en het grootste verlies allebei de sterkste kleur hebben, en met `apart` gaat elke groep van één kleur 8 eenheden van de tekening uit de ring (`offsetsOf` in `geometry.ts`), zodat de ring leest als drie delen met plakken.
     Zonder tekst is de ring een eigen, kleinere tekening (`bare` in `geometry.ts`), zodat hij de plek vult.
   - Het vlakje in de tabel is `DonutChart.Swatch`, dat dezelfde plakken en de plaats van zijn plak krijgt en daaruit dezelfde kleur en sterkte haalt (`strengthsOf`).
     Een rij van `DataTable` krijgt het als `marker` (voor de rijkop) en de uitkomst in woorden als `note` (alleen voor de schermlezer, "4–0, winst").
+  - De drie tabellen staan in een `DataTable.Group`, die ze naast elkaar zet zolang ze 5,5 rem breed kunnen zijn en anders onder elkaar.
+    Het aantal staat als "4×" onder een kop `Keer` die alleen de schermlezer hoort (`hidden` op de kolom), want een kolomkop mag niet ontbreken.
 - **Waarom:** een seizoen heeft zo'n acht tot twaalf verschillende uitslagen, en zoveel teksten passen niet rond een ring (ze schuiven tot 40 graden uit elkaar).
   De cijfers staan toch al in de tabel, en kleur is niet het enige: de tabel noemt de uitslag en de uitkomst in woorden.
   Eén functie voor de sterkte houdt het vlakje en de plak gelijk, ook als de regel voor de sterkte verandert.
-- **Alternatieven:** drie plakken (winst, gelijk, verlies) met tekst rond de ring; alleen de grote plakken benoemen (een verborgen regel over wat er een naam krijgt); een eigen tabelonderdeel voor de uitslagen in plaats van `marker` en `note` op `DataTable` (een tweede tabel met dezelfde opmaak).
+- **Alternatieven:** drie plakken (winst, gelijk, verlies) met tekst rond de ring; alleen de grote plakken benoemen (een verborgen regel over wat er een naam krijgt); een eigen tabelonderdeel voor de uitslagen in plaats van `marker` en `note` op `DataTable` (een tweede tabel met dezelfde opmaak); één tabel met alle uitslagen onder elkaar (de eerste versie van deze pull request, tot de projecteigenaar drie tabellen naast elkaar vroeg).
 
 ## Site
 

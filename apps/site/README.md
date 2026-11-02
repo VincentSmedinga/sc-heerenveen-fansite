@@ -287,9 +287,11 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Het zijn dezelfde gespeelde wedstrijden als in de lijst Uitslagen, de Eredivisie en de beker, zonder schakelaar.
   Een bekerwedstrijd telt met de stand na verlenging, dus 1–1 en dan winnen na strafschoppen is gelijk.
   Elke uitslag staat vanuit sc Heerenveen gezien, onze doelpunten eerst ("4–0" is een winst en "0–1" een nederlaag), en de volgorde is eerst alle winsten, dan de gelijke spelen, dan de nederlagen, binnen een groep van groot naar klein doelsaldo en dan het grootste aantal doelpunten eerst (`scoreCountsOf` in `src/matches.ts`).
-  Het diagram (`DonutChart` met `labels={false}`) heeft een plak per uitslag, groen voor winst, grijs voor gelijk en rood voor verlies, zonder tekst rond de ring en verborgen voor een schermlezer.
-  De tabel eronder (`DataTable`) is de legenda en de bron van de cijfers: elke rij heeft een vlakje in precies de kleur van de plak (`DonutChart.Swatch`), de uitslag en het aantal, met de uitkomst in woorden voor een schermlezer ("4–0, winst").
-  Boven het diagram staat een zin met de optelling ("8 keer gewonnen, 1 keer gelijk, 5 keer verloren"), onder de tabel "Gebaseerd op alle 14 gespeelde wedstrijden".
+  Het diagram (`DonutChart` met `labels={false}`, `apart` en `mirror`) heeft een plak per uitslag, groen voor winst, grijs voor gelijk en rood voor verlies, zonder tekst rond de ring en verborgen voor een schermlezer.
+  Elke groep van één kleur staat een stukje buiten de ring, zodat de ring leest als drie delen met elk hun eigen plakken, en de grootste winst en het grootste verlies hebben de sterkste kleur.
+  Eronder staan drie kleine tabellen naast elkaar (`DataTable.Group`), Winst, Gelijk en Verlies, en een tabel zonder uitslagen ontbreekt; op een smalle plek staan ze onder elkaar.
+  Samen zijn ze de legenda en de bron van de cijfers: elke rij heeft een vlakje in precies de kleur van de plak (`DonutChart.Swatch`), de uitslag en het aantal ("4×", onder een kop die alleen een schermlezer hoort), met de uitkomst in woorden voor een schermlezer ("4–0, winst").
+  Boven het diagram staat een zin met de optelling ("8 keer gewonnen, 1 keer gelijk, 5 keer verloren"), onder de tabellen "Gebaseerd op alle 14 gespeelde wedstrijden".
   Zonder gespeelde wedstrijd staat er "We hebben nog geen uitslagen van dit seizoen." en geen diagram.
   De kaart heeft de knop voor een afbeelding en de bronvermelding van de pagina; een eerder seizoen zet zijn seizoen op de afbeelding.
 - **Stand:** de volledige tabel met een balk naast de punten, en een bijschrift met de dag waarvoor de stand geldt; alleen een schermlezer krijgt dat bijschrift.

@@ -22,4 +22,14 @@ describe('data-table.css', () => {
     expect(css.slice(start)).toMatch(/\.hf-data-table-folded \{\s*display: block;/u)
     expect(css).toMatch(/\.hf-data-table-text \.hf-data-table-folded \{\s*display: none;/u)
   })
+
+  it('puts small tables side by side only as far as they fit, by the width of their place and not the screen', () => {
+    const start = css.indexOf('.hf-data-table-group {')
+
+    expect(start).not.toBe(-1)
+    expect(css.slice(start, css.indexOf('\n  }\n', start))).toMatch(
+      /grid-template-columns: repeat\(auto-fit, minmax\(min\(\d+(?:\.\d+)?rem, 100%\), 1fr\)\)/u,
+    )
+    expect(css).not.toMatch(/@media \((?:min|max)-width/u)
+  })
 })
