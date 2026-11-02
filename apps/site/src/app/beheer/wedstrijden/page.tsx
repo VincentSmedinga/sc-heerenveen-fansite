@@ -23,7 +23,7 @@ import { listAdminMatches } from '../../../beheer/match-entries'
 import { requireRole } from '../../../beheer/require-role'
 import { getDatabase } from '../../../database'
 import { seasonChoices, seasonFromSlug, seasonSlug } from '../../../seasons'
-import { matchesPath, matchPath } from './paths'
+import { listPath, matchesPath, matchPath } from './paths'
 
 // Render on each request: who is logged in and which matches have an entry are not known when
 // the site is built.
@@ -66,7 +66,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const lacking = rows.filter((match) => match.lacksResult)
   const edited = rows.filter((match) => match.edited.length > 0)
   const shown = { aangepast: edited, alles: rows, 'zonder-uitslag': lacking }[show]
-  const address = (choice: Show) => listPath(season === current ? undefined : season, choice)
+  const address = (choice: Show) =>
+    listPath(season === current ? undefined : season, choice === defaultShow ? undefined : choice)
   const notice = typeof fout === 'string' ? notices[fout] : undefined
 
   return (
@@ -138,20 +139,6 @@ const emptyTexts: Record<Show, string> = {
   aangepast: 'De redactie heeft in dit seizoen nog geen wedstrijd aangepast.',
   alles: '',
   'zonder-uitslag': 'Alle wedstrijden hebben een uitslag.',
-}
-
-/** The address of the list for a season (none is the current one) and a choice of filter. */
-function listPath(season: string | undefined, show: Show) {
-  const query = new URLSearchParams()
-
-  if (season !== undefined) {
-    query.set('seizoen', seasonSlug(season))
-  }
-  if (show !== defaultShow) {
-    query.set('tonen', show)
-  }
-
-  return query.size === 0 ? matchesPath : `${matchesPath}?${query}`
 }
 
 /** The rows of the table. The clubs are the row header, so a second meeting gets its round. */
