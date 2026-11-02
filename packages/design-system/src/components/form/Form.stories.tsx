@@ -1,7 +1,9 @@
 import preview from '#.storybook/preview'
 
 import { Button } from '../button/Button'
+import { Card } from '../card/Card'
 import { Field } from '../field/Field'
+import { Heading } from '../heading/Heading'
 import { Input } from '../input/Input'
 import { Form } from './Form'
 
@@ -22,6 +24,8 @@ const meta = preview.meta({
           '',
           'Het formulier verstuur je met `action` en `method`, of met een actie van de server.',
           'Een formulier dat gegevens verstuurt, gebruikt `method="post"`.',
+          '',
+          'Een formulier van kaarten, zoals een wedstrijd in het beheer, zet de ruimte van de pagina tussen de kaarten.',
         ].join('\n'),
       },
     },
@@ -42,3 +46,26 @@ const render = () => (
 export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
+
+const cards = () => (
+  <Form onSubmit={(event) => event.preventDefault()}>
+    <Card aria-labelledby="kaart-a">
+      <Heading id="kaart-a" level={2}>
+        Aftrap
+      </Heading>
+      <Field id="datum" label="Datum">
+        <Input name="datum" />
+      </Field>
+    </Card>
+    <Card aria-labelledby="kaart-b">
+      <Heading id="kaart-b" level={2}>
+        Uitslag
+      </Heading>
+      <Field id="stand" label="Stand">
+        <Input name="stand" />
+      </Field>
+    </Card>
+  </Form>
+)
+
+export const Cards = meta.story({ globals: { theme: 'light' }, name: 'Kaarten', render: cards })

@@ -13,4 +13,13 @@
   .hf-form:has(.hf-input-table) {
     max-inline-size: none;
   }
+
+  /*
+   * A form of cards, such as the match of the admin: the cards have no margin, so the form puts
+   * the space of the page between them. A form of fields is as it was.
+   */
+  .hf-form:has(> .hf-card) {
+    display: grid;
+    gap: var(--hf-space-xl);
+  }
 }

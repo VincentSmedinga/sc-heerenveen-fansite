@@ -1,12 +1,18 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
-import type { DataTableColumn, DataTableRow, DataTableTextRow } from './dataTableTypes'
+import type { DataTableColumn, DataTableRow, DataTableTextColumn, DataTableTextRow } from './dataTableTypes'
 
 import { classNames } from '../classNames'
 import { columnOf, ColumnText, TableRows, TextTableRows } from './dataTableParts'
 import { SortableDataTable } from './SortableDataTable'
 
-export type { DataTableCell, DataTableColumn, DataTableRow, DataTableTextRow } from './dataTableTypes'
+export type {
+  DataTableCell,
+  DataTableColumn,
+  DataTableRow,
+  DataTableTextColumn,
+  DataTableTextRow,
+} from './dataTableTypes'
 
 export type DataTableProps =
   | (DataTableBaseProps & {
@@ -15,8 +21,12 @@ export type DataTableProps =
        * start, a row header can have a second line, and a cell can hold any content.
        */
       appearance: 'text'
-      /** The column headers, in order, as plain text. The first holds the row headers. */
-      columns: readonly string[]
+      /**
+       * The column headers, in order, as plain text. The first holds the row headers. A column
+       * given as `{ fold: true, name }` folds under the name of the row where the table is too
+       * narrow for it, such as the date of a match on a phone.
+       */
+      columns: readonly (DataTableTextColumn | string)[]
       /** The rows of the table, from the first down. They can't be sorted. */
       rows: readonly DataTableTextRow[]
     })
@@ -65,20 +75,34 @@ type DataTableBaseProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & 
 export const DataTable = ({ appearance = 'numbers', caption, className, columns, rows, ...props }: DataTableProps) => {
   // The union of the props is lost by taking them apart, so the two kinds are told apart here.
   if (appearance === 'text') {
-    return (
+    const textColumns = (columns as readonly (DataTableTextColumn | string)[]).map((column) =>
+      typeof column === 'string' ? { name: column } : column,
+    )
+    const table = (
       <table {...props} className={classNames('hf-data-table', 'hf-data-table-text', className)}>
         <caption className="hf-visually-hidden">{caption}</caption>
         <thead>
           <tr>
-            {(columns as readonly string[]).map((column) => (
-              <th key={column} scope="col">
-                {column}
+            {textColumns.map((column) => (
+              <th
+                className={column.fold === true ? 'hf-data-table-fold-column' : undefined}
+                key={column.name}
+                scope="col"
+              >
+                {column.name}
               </th>
             ))}
           </tr>
         </thead>
-        <TextTableRows rows={rows as readonly DataTableTextRow[]} />
+        <TextTableRows columns={textColumns} rows={rows as readonly DataTableTextRow[]} />
       </table>
+    )
+
+    // The room of the table itself decides when a column folds, so it needs a container.
+    return textColumns.some((column) => column.fold === true) ? (
+      <div className="hf-data-table-fold">{table}</div>
+    ) : (
+      table
     )
   }
 

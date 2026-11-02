@@ -245,8 +245,9 @@ for (const [name, javaScriptEnabled] of [
       const address = `/beheer/wedstrijden/${await matchId()}`
 
       await page.goto(address)
-      await expect(page.getByRole('heading', { level: 1 })).toHaveText('Wedstrijd invullen')
-      await expect(page.getByText('Aangepast door de redactie')).toHaveCount(0)
+      await expect(page.getByRole('heading', { level: 1 })).toContainText(' - ')
+      await expect(page.getByRole('navigation', { name: 'Kruimelpad' })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'Laatste invoer' })).toHaveCount(0)
 
       // A result of 0-1 with a goal that is not filled in: the errors are in the summary and at
       // the goal, the summary has the focus, and what was typed is still there.
@@ -255,7 +256,7 @@ for (const [name, javaScriptEnabled] of [
       await page.locator('#uitslag-zij').fill('1')
       await page.getByLabel('Reden', { exact: true }).fill('Wikipedia is achter')
       await page.getByRole('button', { name: 'Doelpunt toevoegen' }).click()
-      await expect(page.getByRole('heading', { level: 3, name: 'Doelpunt 1' })).toBeVisible()
+      await expect(page.locator('#doelpunt-1-kant')).toBeVisible()
       await expect(page.locator('#uitslag-zij')).toHaveValue('1')
 
       if (javaScriptEnabled) {
@@ -265,10 +266,7 @@ for (const [name, javaScriptEnabled] of [
 
       await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
       await expect(page.locator('#fouten')).toBeVisible()
-      await expect(page.getByLabel('Voor welk team, doelpunt 1', { exact: true })).toHaveAttribute(
-        'aria-invalid',
-        'true',
-      )
+      await expect(page.getByLabel('Team, doelpunt 1', { exact: true })).toHaveAttribute('aria-invalid', 'true')
       await expect(page.getByLabel('Minuut, doelpunt 1', { exact: true })).toHaveAttribute('aria-invalid', 'true')
       await expect(page.locator('#uitslag-zij')).toHaveValue('1')
 
@@ -277,40 +275,41 @@ for (const [name, javaScriptEnabled] of [
       }
 
       // The goal of the opponent, by a player we don't have: saved, with a notice.
-      await page.getByLabel('Voor welk team, doelpunt 1', { exact: true }).selectOption('zij')
+      await page.getByLabel('Team, doelpunt 1', { exact: true }).selectOption('zij')
       await page.getByLabel('Minuut, doelpunt 1', { exact: true }).fill('40')
       await page.getByLabel('Speler, doelpunt 1', { exact: true }).selectOption('andere')
-      await page.getByLabel('Naam van de andere speler, doelpunt 1').fill('Sibbing')
+      await page.getByLabel('Andere speler, doelpunt 1').fill('Sibbing')
       if (javaScriptEnabled) {
         // The form with a goal in it, which the checks of all the pages never open.
         expect(await checkPage(page)).toEqual([])
       }
       await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
       await expect(page).toHaveURL(/\?gedaan=opgeslagen$/u)
-      await expect(page.getByRole('heading', { level: 2, name: 'Opgeslagen' })).toBeVisible()
-      await expect(page.getByRole('heading', { level: 2, name: 'Aangepast door de redactie' })).toBeVisible()
+      await expect(page.getByRole('status').filter({ hasText: 'Opgeslagen.' })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'Laatste invoer' })).toBeVisible()
       await expect(page.getByLabel('Minuut, doelpunt 1', { exact: true })).toHaveValue('40')
 
       // A goal that is taken away leaves the focus on the button that adds one.
-      await page.getByRole('button', { name: 'Doelpunt 1 weghalen' }).click()
-      await expect(page.getByRole('heading', { level: 3, name: 'Doelpunt 1' })).toHaveCount(0)
+      await page.getByRole('button', { name: 'Weghalen doelpunt 1' }).click()
+      await expect(page.locator('#doelpunt-1-kant')).toHaveCount(0)
 
       if (javaScriptEnabled) {
         await expect(page.getByRole('button', { name: 'Doelpunt toevoegen' })).toBeFocused()
       }
 
       // The list says so in words.
-      await page.goto('/beheer/wedstrijden')
-      await expect(page.getByText('Aangepast door de redactie').first()).toBeVisible()
+      await page.goto('/beheer/wedstrijden?tonen=aangepast')
+      await expect(page.getByText('Aangepast', { exact: true }).first()).toBeVisible()
 
       // Taking the entry away asks for a reason, and brings the match back.
       await page.goto(address)
+      await page.locator('summary', { hasText: 'Invoer weghalen' }).click()
       await page.getByRole('button', { name: /^Invoer weghalen voor/u }).click()
       await expect(page.locator('#weghalen-reden')).toHaveAttribute('aria-invalid', 'true')
       await page.getByLabel('Reden om de invoer weg te halen').fill('Het was een test')
       await page.getByRole('button', { name: /^Invoer weghalen voor/u }).click()
-      await expect(page.getByRole('heading', { level: 2, name: 'Invoer weggehaald' })).toBeVisible()
-      await expect(page.getByText('Aangepast door de redactie')).toHaveCount(0)
+      await expect(page.getByRole('status').filter({ hasText: 'Invoer weggehaald.' })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: 'Laatste invoer' })).toHaveCount(0)
     })
   })
 }

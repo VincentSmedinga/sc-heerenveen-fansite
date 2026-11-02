@@ -1,13 +1,15 @@
 'use client'
 
-import { Button, Field, Form, Input } from '@fansite/design-system'
+import { Button, Disclosure, Field, Form, Input, Text } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
 import type { RemoveFormState } from './actions'
 
 /**
- * The form that takes the entry of a match away. It asks for a reason, as every change does,
- * and names the match in the button, so a list of such buttons would still be told apart.
+ * The block that takes the entry of a match away: a Disclosure, so the red button is not one
+ * press away, with a reason, as every change asks for one. The button names the match. A
+ * missing reason comes back as an error, and the block is open then, also without JavaScript,
+ * where the server makes the page again and a closed block would hide the error.
  */
 export function RemoveEntryForm({
   action,
@@ -25,18 +27,24 @@ export function RemoveEntryForm({
   }, [state])
 
   return (
-    <Form action={formAction}>
-      <Field
-        error={state.error}
-        hint="Waarom haal je de invoer weg? Komt in het logboek, hoogstens 300 tekens."
-        id="weghalen-reden"
-        label="Reden om de invoer weg te halen"
-      >
-        <Input autoComplete="off" name="reden" />
-      </Field>
-      <Button appearance="soft" disabled={pending} type="submit">
-        Invoer weghalen voor {title}
-      </Button>
-    </Form>
+    <Disclosure open={state.error === undefined ? undefined : true} summary="Invoer weghalen">
+      <Text>
+        Dit zet de wedstrijd terug naar wat er stond voor de eerste invoer. Daarna leest de import weer wat Wikipedia
+        zegt.
+      </Text>
+      <Form action={formAction}>
+        <Field
+          error={state.error}
+          hint="Waarom haal je de invoer weg? Komt in het logboek, hoogstens 300 tekens."
+          id="weghalen-reden"
+          label="Reden om de invoer weg te halen"
+        >
+          <Input autoComplete="off" name="reden" />
+        </Field>
+        <Button appearance="danger" aria-label={`Invoer weghalen voor ${title}`} disabled={pending} type="submit">
+          Invoer weghalen
+        </Button>
+      </Form>
+    </Disclosure>
   )
 }

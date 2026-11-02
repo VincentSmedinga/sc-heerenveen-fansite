@@ -40,10 +40,12 @@
   /*
    * With a sign between the first two fields, such as the dash of a score, the fields stay in
    * a row, whatever the width. The sign stands level with the fields, as tall as one, and the
-   * label of a field may wrap above it.
+   * label of a field may wrap above it. The tracks stay together at the start, or the sign
+   * would take the room that is left over and push the second field away.
    */
   .hf-field-group-separated {
     align-items: end;
+    justify-content: start;
     grid-template-columns: minmax(0, 16rem) auto minmax(0, 16rem);
   }
 

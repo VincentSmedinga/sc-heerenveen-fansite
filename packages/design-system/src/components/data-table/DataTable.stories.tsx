@@ -90,6 +90,9 @@ const meta = preview.meta({
           'Met `appearance="text"` is het een tabel met tekst, zoals een lijst van wedstrijden.',
           'De kolommen beginnen aan het begin, de rijkop kan een tweede regel met secundaire tekst hebben (`secondary`), en een cel kan elke inhoud hebben, zoals een link.',
           'Zo’n tabel kan niet sorteren.',
+          'Een kolom die je als `{ fold: true, name }` geeft, vouwt op naar de rijkop waar de tabel te smal voor is, zoals de datum en de competitie van een wedstrijd op een telefoon.',
+          'Waar de tabel ruimte heeft, is het een kolom, en waar niet, staat de tekst van de cellen op één regel onder de naam van de rij.',
+          'De ruimte is die van de tabel zelf, niet die van het venster.',
         ].join('\n'),
       },
     },
@@ -374,6 +377,66 @@ export const TextTable = meta.story({
         columns={['Wedstrijd', 'Uitslag', 'Status']}
         rows={matches}
       />
+    </Card>
+  ),
+})
+
+const foldMatches: DataTableTextRow[] = [
+  {
+    cells: ['1 november 2026 om 14:30', 'Eredivisie, Speelronde 11', '2 - 1', 'Gespeeld'],
+    header: 'Testclub - FC Voorbeeld',
+    href: '#wedstrijd-1',
+  },
+  {
+    cells: ['28 oktober 2026 om 20:00', 'KNVB Beker, Tweede ronde', '–', <a href="#uitslag">Uitslag ontbreekt</a>],
+    header: 'Proefstad SV - Testclub',
+    href: '#wedstrijd-2',
+  },
+]
+
+const foldColumns = [
+  'Wedstrijd',
+  { fold: true, name: 'Datum' },
+  { fold: true, name: 'Competitie' },
+  'Uitslag',
+  'Status',
+]
+
+export const FoldingColumns = meta.story({
+  name: 'Kolommen die opvouwen',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Hier is de tabel breed genoeg voor vijf kolommen. In een smallere ruimte, zoals op een telefoon, staan de datum en de competitie onder de naam van de wedstrijd.',
+      },
+    },
+  },
+  render: () => (
+    <Card aria-labelledby="vouw-kop">
+      <Heading id="vouw-kop" level={2}>
+        Wedstrijden
+      </Heading>
+      <DataTable appearance="text" caption="Wedstrijden van Testclub" columns={foldColumns} rows={foldMatches} />
+    </Card>
+  ),
+})
+
+export const FoldedColumns = meta.story({
+  name: 'Kolommen opgevouwen',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Dezelfde tabel in een smalle ruimte: drie kolommen, met de datum en de competitie onder de wedstrijd.',
+      },
+    },
+  },
+  render: () => (
+    <Card aria-labelledby="gevouwen-kop" style={{ maxInlineSize: '30rem' }}>
+      <Heading id="gevouwen-kop" level={2}>
+        Wedstrijden
+      </Heading>
+      <DataTable appearance="text" caption="Wedstrijden van Testclub" columns={foldColumns} rows={foldMatches} />
     </Card>
   ),
 })

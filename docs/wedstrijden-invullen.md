@@ -8,21 +8,26 @@ Op `/beheer/wedstrijden` vul je de wedstrijd zelf in, en iedereen ziet het metee
 ## Invullen
 
 1. Open `/beheer/wedstrijden`.
-   De wedstrijden zonder uitslag, twee uur na de aftrap, staan bovenaan.
+   De lijst opent op "Zonder uitslag": de wedstrijden zonder uitslag, twee uur na de aftrap.
+   Kies "Alles" voor alle wedstrijden van het seizoen, met die zonder uitslag bovenaan, of "Aangepast" voor wat de redactie aanpaste.
+   Een ouder seizoen kies je naast de titel.
 2. Kies de wedstrijd.
-   De naam van de koppeling zegt welke het is.
+   De naam in de eerste kolom is de koppeling.
 3. Vul in wat je weet.
    Je hoeft niet alles in te vullen:
    - de **aftrap**: de datum en de tijd, of de datum en een tekst als de tijd nog niet bekend is (zoals "12-14 februari 2027");
    - de **status**: gepland, gespeeld of uitgesteld;
    - de **uitslag**, bij een gespeelde wedstrijd.
-     Bij de beker en de play-offs ook de verlenging, de stand na 90 minuten en de strafschoppen;
-   - de **doelpunten**: per doelpunt het team dat het krijgt, de minuut met eventueel blessuretijd, de soort (gewoon, strafschop of eigen doelpunt) en de speler.
+     De clubs staan in de volgorde van de wedstrijd: bij een uitwedstrijd staat de tegenstander voorop.
+     Bij de beker en de play-offs staat er een kaart met de verlenging, de stand na 90 minuten en de strafschoppen;
+   - de **doelpunten**, in een tabel: per doelpunt het team dat het krijgt, de minuut met eventueel blessuretijd, de soort (gewoon, strafschop of eigen doelpunt) en de speler.
+     Met "Doelpunt toevoegen" komt er een rij bij, en met "Weghalen" gaat een rij weg.
      Een speler van sc Heerenveen kies je uit de selectie.
      Maakte een speler van de tegenstander het doelpunt, kies dan "Andere speler" en schrijf zijn naam zoals Wikipedia hem schrijft.
 4. Schrijf bij "Reden" waarom je dit invult.
    Dat is verplicht, en het komt in het logboek.
-5. Kies "Opslaan".
+   Het veld staat in het blok "Opslaan" naast het formulier, en op een telefoon onder het formulier.
+5. Kies "Opslaan", in hetzelfde blok.
 
 De doelpunten moeten samen de uitslag geven.
 Een uitslag zonder doelpunten mag: voeg ze toe als je ze weet.
@@ -41,11 +46,11 @@ De import leest Wikipedia elk uur, en kijkt voor elk onderdeel dat jij invulde (
 - **Wikipedia heeft nog niets:** jouw invoer blijft staan.
   Je hoeft niets te doen.
 - **Wikipedia heeft hetzelfde:** de wedstrijd is niet meer van de redactie, en het onderdeel volgt Wikipedia.
-  "Aangepast door de redactie" verdwijnt als alle onderdelen zo zijn overgenomen.
+  Het label "Aangepast" verdwijnt als alle onderdelen zo zijn overgenomen.
   Het logboek zegt dat Wikipedia is bijgekomen.
 - **Wikipedia zegt iets anders:** jouw invoer blijft staan.
   De import schrijft het verschil één keer op, met beide waarden, in het logboek en in de waarschuwing van de import (`pnpm run import:status`).
-  De beheerders krijgen een mail, en op `/beheer/wedstrijden` staat bij de wedstrijd "Wikipedia wijkt af".
+  De beheerders krijgen een mail, en op `/beheer/wedstrijden` staat bij de wedstrijd het label "Wikipedia wijkt af".
   De startpagina van het beheer zegt hoeveel afwijkingen op een besluit wachten.
 
 De uitslag en de doelpunten tellen apart.
@@ -53,12 +58,12 @@ Wikipedia zet meestal eerst de uitslag, en pas later de doelpuntenmakers.
 
 ## Een afwijking beslissen
 
-Open de wedstrijd met "Wikipedia wijkt af".
+Open de wedstrijd met het label "Wikipedia wijkt af".
 Per onderdeel dat afwijkt, staan onze invoer en wat Wikipedia zegt naast elkaar.
 Schrijf bij "Reden" waarom je beslist, en kies:
 
 - **Neem Wikipedia over:** het onderdeel wordt wat Wikipedia zegt en volgt Wikipedia weer.
-  "Aangepast door de redactie" verdwijnt als er geen onderdeel van jullie meer over is.
+  Het label "Aangepast" verdwijnt als er geen onderdeel van jullie meer over is.
 - **Houd onze invoer:** jullie invoer blijft staan.
   De import meldt dit verschil niet nog eens, tenzij Wikipedia iets anders gaat zeggen.
 
@@ -71,8 +76,9 @@ Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` ne
 
 ## Invoer weghalen
 
-Op de pagina van de wedstrijd, onder het formulier, staat "Invoer weghalen".
-Dat zet wat jij invulde terug naar wat er stond voor de eerste invoer, en vraagt een reden.
+Op de pagina van een wedstrijd met een invoer staat naast het formulier, onder "Laatste invoer", een blok "Invoer weghalen".
+Klap het open, schrijf een reden en kies de rode knop.
+Dat zet wat jij invulde terug naar wat er stond voor de eerste invoer.
 Daarna leest de import weer wat Wikipedia zegt, zoals bij elke andere wedstrijd.
 Een afwijking die nog wachtte, vervalt.
 
