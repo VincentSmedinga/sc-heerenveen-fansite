@@ -52,10 +52,10 @@ type Column = {
 const columns: Column[] = [
   { abbreviation: 'G', id: 'played', name: 'gespeeld' },
   { abbreviation: 'W', figureClass: 'hf-match-win', id: 'won', name: 'gewonnen' },
-  { abbreviation: 'GL', figureClass: 'hf-match-draw', id: 'drawn', name: 'gelijk' },
+  { abbreviation: 'L', figureClass: 'hf-match-draw', id: 'drawn', name: 'gelijk' },
   { abbreviation: 'V', figureClass: 'hf-match-loss', id: 'lost', name: 'verloren' },
-  { abbreviation: 'DS', id: 'goalDifference', name: 'doelsaldo' },
   { abbreviation: 'P', figureClass: 'hf-bar-value', id: 'points', name: 'punten' },
+  { abbreviation: 'D', id: 'goalDifference', name: 'doelsaldo' },
 ]
 
 /** A goal difference with its sign: `+6`, `−2` (a real minus sign) or `0`. */

@@ -5264,7 +5264,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): de pagina van een club heeft sindsdien een hoofdkolom en een zijkolom.
   Wedstrijden staat in de hoofdkolom en is wit, Onze uitslagen staat in de zijkolom en is zacht (niet meer warm), en de kaart Stadion(s) en de bronvermelding staan daaronder.
   De volgorde van de kaarten en hun vlakken zijn dus niet meer die van hier.
-- **Later:** zie _De tabel in "Onze uitslagen tegen …" heeft Thuis en Uit als rijen met Totaal eronder, zoals de kaart Stand_ (2 november 2026): de tabel op de kaart heeft Thuis, Uit en Totaal als rijen en G, W, GL, V, DS en P als kolommen, met de woorden onder de tabel, en niet meer de zes onderdelen als rijen.
+- **Later:** zie _De tabel in "Onze uitslagen tegen …" heeft Thuis en Uit als rijen met Totaal eronder, zoals de kaart Stand_ (2 november 2026): de tabel op de kaart heeft Thuis, Uit en Totaal als rijen en G, W, L, V, P en D als kolommen, met de woorden onder de tabel, en niet meer de zes onderdelen als rijen.
   De rest van de kaart blijft.
 
 ### De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
@@ -9812,12 +9812,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** de tabel op de kaart "Onze uitslagen tegen …" op de pagina van een club draait om (#623).
   - **De rijen:** Thuis en Uit, en eronder Totaal in een `tfoot`, in vet en met een dikkere lijn erboven.
     De naam van de rij is de rijkop.
-  - **De kolommen:** G (gespeeld), W (gewonnen), GL (gelijk), V (verloren), DS (doelsaldo) en P (punten).
-    De doelpunten voor en tegen zijn één kolom geworden, het doelsaldo met teken (`+6`, `−2`, `0`), op verzoek van de projecteigenaar op 2 november 2026.
+  - **De kolommen:** G (gespeeld), W (gewonnen), L (gelijk), V (verloren), P (punten) en D (doelsaldo), elk met één eigen letter, op verzoek van de projecteigenaar op 2 november 2026.
+    De doelpunten voor en tegen zijn één kolom geworden, het doelsaldo met teken (`+6`, `−2`, `0`).
+    De L van gelijk en de D van doelsaldo zijn nieuw: G was al gespeeld, en de D is die van doelsaldo in de kaart Stand.
     Onder de tabel staan de woorden van de afkortingen, en een schermlezer hoort de hele woorden, zoals bij de kaart Stand.
   - **De punten** zijn vet en staan er alleen bij de keuze Eredivisie, want de beker geeft er geen: 3 voor een winst en 1 voor een gelijkspel (`pointsOf`), zoals in de lijst op Tegenstanders.
     Bij de keuze Alle wedstrijden is er geen kolom P.
-  - **De kleuren:** de getallen in W, GL en V hebben de kleur van de uitslag, groen, grijs en rood (`hf-match-win`, `hf-match-draw` en `hf-match-loss`), zoals de regels met wedstrijden.
+  - **De kleuren:** de getallen in W, L en V hebben de kleur van de uitslag, groen, grijs en rood (`hf-match-win`, `hf-match-draw` en `hf-match-loss`), zoals de regels met wedstrijden.
     De kolomkop zegt wat het is, dus kleur is niet het enige.
   - **Het component:** een nieuw component `RecordTable` in het designsysteem, naast `StandingsTable` en niet als algemenere versie ervan.
     Hij heeft dezelfde lijnen, letters, rijkoppen en legenda: de tabel komt uit `base/table.css`, en de plek, de nowrap en de legenda komen uit `bar/bar.css` (`hf-bar-place`, `hf-bar-table` en `hf-bar-legend`).

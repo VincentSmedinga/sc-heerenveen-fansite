@@ -58,7 +58,7 @@ const plain = (html: string) =>
 
 /**
  * The rows of the summary, in the order they are on the page, as [name, figures]: the figures
- * are G, W, GL, V and DS, and P when the table has points. The minus sign of the goal
+ * are G, W, L, V, P when the table has points, and D. The minus sign of the goal
  * difference is read as a minus, and the plus as nothing.
  */
 const summaryOf = (html: string): [string, number[]][] =>
@@ -102,11 +102,11 @@ describe('the page of a club', () => {
       [...html.matchAll(/<th [^>]*scope="col"[^>]*>(?:<abbr[^>]*><span aria-hidden="true">([^<]*)<)?/g)].map(
         ([, header]) => header,
       ),
-    ).toEqual([undefined, 'G', 'W', 'GL', 'V', 'DS'])
+    ).toEqual([undefined, 'G', 'W', 'L', 'V', 'D'])
     expect(plain(html.slice(html.indexOf('hf-bar-legend')))).toMatch(
-      /^[^>]*> G gespeeld , W gewonnen , GL gelijk , V verloren , DS doelsaldo/,
+      /^[^>]*> G gespeeld , W gewonnen , L gelijk , V verloren , D doelsaldo/,
     )
-    // G, W, GL, V, DS: Thuis and Uit in the body, Totaal in the foot.
+    // G, W, L, V, D: Thuis and Uit in the body, Totaal in the foot.
     expect(summaryOf(html)).toEqual([
       ['Thuis', [2, 2, 0, 0, 5]],
       ['Uit', [3, 1, 1, 1, 1]],
@@ -147,7 +147,7 @@ describe('the page of a club', () => {
     const html = await render('testclub', { competitie: 'eredivisie' })
 
     expect(html).toContain('>P</span><span class="hf-visually-hidden">punten</span>')
-    expect(summaryOf(html).map(([name, figures]) => [name, figures.at(-1)])).toEqual([
+    expect(summaryOf(html).map(([name, figures]) => [name, figures.at(-2)])).toEqual([
       ['Thuis', 6],
       ['Uit', 4],
       ['Totaal', 10],

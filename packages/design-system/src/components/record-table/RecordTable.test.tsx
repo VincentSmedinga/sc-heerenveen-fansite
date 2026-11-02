@@ -25,12 +25,12 @@ describe('RecordTable', () => {
     expect(document.querySelector('caption')?.className).toBe('hf-visually-hidden')
   })
 
-  it('has the columns G, W, GL, V, DS and P, with a column header with scope for each', () => {
+  it('has the columns G, W, L, V, P and D, with a column header with scope for each', () => {
     render(<RecordTable {...props} />)
 
     expect(
       screen.getAllByRole('columnheader').map((header) => header.querySelector('[aria-hidden="true"]')?.textContent),
-    ).toEqual([undefined, 'G', 'W', 'GL', 'V', 'DS', 'P'])
+    ).toEqual([undefined, 'G', 'W', 'L', 'V', 'P', 'D'])
     expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true)
   })
 
@@ -45,7 +45,7 @@ describe('RecordTable', () => {
   it('names every column header by its full word for a screen reader', () => {
     render(<RecordTable {...props} />)
 
-    for (const name of ['gespeeld', 'gewonnen', 'gelijk', 'verloren', 'doelsaldo', 'punten']) {
+    for (const name of ['gespeeld', 'gewonnen', 'gelijk', 'verloren', 'punten', 'doelsaldo']) {
       expect(screen.getByRole('columnheader', { name })).toBeTruthy()
     }
   })
@@ -62,9 +62,9 @@ describe('RecordTable', () => {
   it('writes the figures of a row in the columns of the headers', () => {
     render(<RecordTable {...props} />)
 
-    expect(figures('Thuis')).toEqual(['2', '2', '0', '0', '+5', '6'])
-    expect(figures('Uit')).toEqual(['3', '1', '1', '1', '+1', '4'])
-    expect(figures('Totaal')).toEqual(['5', '3', '1', '1', '+6', '10'])
+    expect(figures('Thuis')).toEqual(['2', '2', '0', '0', '6', '+5'])
+    expect(figures('Uit')).toEqual(['3', '1', '1', '1', '4', '+1'])
+    expect(figures('Totaal')).toEqual(['5', '3', '1', '1', '10', '+6'])
   })
 
   it('writes the goal difference with its sign: plus, a real minus sign, or a bare zero', () => {
@@ -78,8 +78,8 @@ describe('RecordTable', () => {
       />,
     )
 
-    expect(figures('Thuis')[4]).toBe('−2')
-    expect(figures('Uit')[4]).toBe('0')
+    expect(figures('Thuis').at(-1)).toBe('−2')
+    expect(figures('Uit').at(-1)).toBe('0')
   })
 
   it('shows zeros as figures', () => {
@@ -105,8 +105,8 @@ describe('RecordTable', () => {
       'hf-numeric hf-match-win',
       'hf-numeric hf-match-draw',
       'hf-numeric hf-match-loss',
-      'hf-numeric',
       'hf-numeric hf-bar-value',
+      'hf-numeric',
     ])
   })
 
@@ -122,7 +122,7 @@ describe('RecordTable', () => {
     expect(screen.queryByRole('columnheader', { name: 'punten' })).toBeNull()
     expect(figures('Totaal')).toEqual(['5', '3', '1', '1', '+6'])
     expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, W gewonnen, GL gelijk, V verloren, DS doelsaldo',
+      'G gespeeld, W gewonnen, L gelijk, V verloren, D doelsaldo',
     )
   })
 
@@ -140,11 +140,11 @@ describe('RecordTable', () => {
       'Gewonnen',
       'Gelijk',
       'Verloren',
-      'Doelsaldo',
       'Punten',
+      'Doelsaldo',
     ])
     expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, W gewonnen, GL gelijk, V verloren, DS doelsaldo, P punten',
+      'G gespeeld, W gewonnen, L gelijk, V verloren, P punten, D doelsaldo',
     )
   })
 

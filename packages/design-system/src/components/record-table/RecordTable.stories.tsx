@@ -12,7 +12,7 @@ const meta = preview.meta({
           'De uitslagen van sc Heerenveen tegen één tegenstander, als echte `table`: een rij voor thuis en uit, en eronder de rij met het totaal.',
           'De tabel heeft een bijschrift dat zegt waarover hij gaat, maar alleen een schermlezer krijgt het: bezienden zien de kop van de kaart.',
           'Verder heeft de tabel kolomkoppen met `scope` en een rijkop met de naam van elke rij.',
-          'De kolommen zijn G (gespeeld), W (gewonnen), GL (gelijk), V (verloren), DS (doelsaldo) en P (punten).',
+          'De kolommen zijn G (gespeeld), W (gewonnen), L (gelijk), V (verloren), P (punten) en D (doelsaldo), met elk een eigen letter.',
           'De punten staan er alleen als alle rijen ze hebben: een beker geeft er geen, dus een tabel met bekerwedstrijden laat de kolom weg.',
           'De koppen zijn afkortingen, en onder de tabel staan de volle woorden: "G gespeeld, W gewonnen, …".',
           'De afkorting zelf heeft ook een `title` met het volle woord, maar die verschijnt alleen onder een muis en een telefoon heeft er niets aan.',
