@@ -6569,6 +6569,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - Een uitslag staat in de lijst, het logboek en de waarschuwing met een en-streep ("2–1"), zoals de schrijfwijzer van Redactie het vraagt.
   - Er is geen scherm voor het verleden: de lijst toont het lopende seizoen, en alleen een beheerder ziet haar.
 - **Later:** vervangt voor de plaats van de opslag de beslissing van 25 oktober 2026 uit het issue (een aanpassing naast de gelezen waarde); de rest ervan blijft: een aanpassing geldt tot Wikipedia hetzelfde zegt of een beheerder haar weghaalt.
+- **Later:** zie _De beheerschermen voor een wedstrijd zijn een tabel met een filter en een brede pagina met een zijbalk_: de lijst toont nu ook oudere seizoenen, met een seizoenskeuze.
+  De rest blijft: alleen een beheerder ziet haar.
 - **Alternatieven:** een aparte tabel met aanpassingen die elke query eroverheen legt (veel plekken en een groot risico op vergeten); de gelezen waarde overschrijven zonder markering (de volgende import maakt de verbetering ongedaan, en niemand ziet wat van de redactie is).
 
 ### Bij een verschil blijft de invoer staan en schrijft de import het op
@@ -6938,7 +6940,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het attribuut `form` is HTML en werkt zonder JavaScript.
   De Enter-toets in een veld van de kaarten slaat nog op met de verborgen eerste knop, en de knop in de zijbalk verstuurt hetzelfde formulier.
 - **Nadeel:** de pagina is een client-eiland van drie delen die een provider delen.
-  Een zijbalk die hoger is dan het venster, wordt onderaan afgesneden: de zijbalk blijft kort.
+  Een zijbalk die hoger is dan het venster, scrolt zelf; dat is een tweede scrollgebied naast de pagina.
 - **Alternatieven:** het hele formulier om `Page.Body` heen; dat verandert de indeling van de site, die de layout tekent.
   Het blok om op te slaan twee keer maken, een in de hoofdkolom en een in de zijbalk; dan zijn er twee velden "Reden" met dezelfde naam.
   Een vaste balk onderaan met JavaScript; dat werkt niet zonder JavaScript en het ontwerp wil geen vaste balk op een telefoon.

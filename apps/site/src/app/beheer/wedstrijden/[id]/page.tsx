@@ -153,7 +153,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
         ))}
         <MatchFields />
       </Page.Main>
-      <Page.Sidebar sticky>
+      <Page.Sidebar aria-label="Opslaan en invoer" sticky>
         <MatchSavePanel cancelHref={matchesPath} />
         {edit === undefined ? null : (
           <>
