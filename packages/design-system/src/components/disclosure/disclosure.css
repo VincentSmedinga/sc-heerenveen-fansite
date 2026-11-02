@@ -1,0 +1,63 @@
+/*
+ * A disclosure: a `details` in a border, with a summary that is at least 44px high to press
+ * with a thumb. The browser's own marker is gone, the arrow is the mark, and the summary is
+ * the colour of a link because it does something. The focus ring is the ordinary one of the
+ * page.
+ */
+
+@layer hf.components {
+  .hf-disclosure {
+    border: 1px solid var(--hf-colour-border-surface-soft);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+
+    > summary {
+      align-items: center;
+      color: var(--hf-colour-text-link);
+      cursor: pointer;
+      display: flex;
+      font-weight: var(--hf-strong-font-weight);
+      gap: var(--hf-space-s);
+      justify-content: space-between;
+      list-style: none;
+      min-block-size: 2.75rem;
+      padding-inline: var(--hf-space-m);
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
+      /* Only with a mouse, so nothing stays lit after a tap. */
+      @media (hover: hover) {
+        &:hover {
+          color: var(--hf-colour-text-link-hover);
+        }
+      }
+
+      /* The arrow points down while it is closed, and up when it is open. */
+      .hf-icon {
+        flex: none;
+        transition: transform var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+      }
+    }
+
+    &[open] > summary .hf-icon {
+      transform: rotate(180deg);
+    }
+  }
+
+  .hf-disclosure-content {
+    display: grid;
+    gap: var(--hf-space-m);
+    padding-block-end: var(--hf-space-m);
+    padding-inline: var(--hf-space-m);
+
+    > :first-child {
+      margin-block-start: 0;
+    }
+
+    > :last-child {
+      margin-block-end: 0;
+    }
+  }
+}

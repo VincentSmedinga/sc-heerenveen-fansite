@@ -33,8 +33,12 @@
 @import url('./components/page/shortcuts.css');
 @import url('./components/page/top-link.css');
 @import url('./components/card/card.css');
+@import url('./components/tag/tag.css');
+@import url('./components/notice/notice.css');
+@import url('./components/disclosure/disclosure.css');
 @import url('./components/card/card-share.css');
 @import url('./components/navigation/navigation.css');
+@import url('./components/breadcrumb/breadcrumb.css');
 @import url('./components/checkbox-group/checkbox-group.css');
 @import url('./components/filter/filter.css');
 @import url('./components/pagination/pagination.css');
