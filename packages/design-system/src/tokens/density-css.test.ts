@@ -117,8 +117,15 @@ describe('the components and the density', () => {
     }
   })
 
+  // The made-up addresses in the examples and tests of a component, such as the trail of a
+  // breadcrumb, are no knowledge of the admin.
   it('does not know where the density is used', () => {
-    for (const file of all.filter((file) => /\.(css|tsx?|mdx)$/.test(file) && !file.startsWith('tokens/density'))) {
+    const code = all.filter(
+      (file) =>
+        /\.(css|tsx?|mdx)$/.test(file) && !/\.(?:stories|test)\.tsx?$/.test(file) && !file.startsWith('tokens/density'),
+    )
+
+    for (const file of code) {
       expect(read(file), file).not.toContain('/beheer')
     }
   })
@@ -146,6 +153,7 @@ describe('the components and the density', () => {
       'components/select/select.css',
       'components/segmented-control/segmented-control.css',
       'components/pagination/pagination.css',
+      'components/disclosure/disclosure.css',
     ]) {
       expect(css(file), file).not.toContain('2.75rem')
       expect(css(file), file).toContain('var(--hf-size-control')

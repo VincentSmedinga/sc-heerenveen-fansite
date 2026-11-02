@@ -3377,7 +3377,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     `apps/site/src/beheer/density.test.ts` zoekt de pagina's zelf op en faalt voor een pagina die de klasse vergeet.
   - Een keuze van de bezoeker of de redacteur om de dichtheid aan of uit te zetten, en het opslaan daarvan, zit er niet in.
 - **Hoe:** de vaste maten die het thema niet bereikte, zijn tokens geworden met als waarde wat ze waren, zodat de publieke site niet verandert.
-  - `--hf-size-control` is de standaardhoogte van knoppen en velden (2,75 rem), in `button.css`, `forms.css`, `select.css`, `segmented-control.css` en `pagination.css`, naast `--hf-size-control-small`.
+  - `--hf-size-control` is de standaardhoogte van knoppen en velden (2,75 rem), in `button.css`, `forms.css`, `select.css`, `segmented-control.css`, `pagination.css` en `disclosure.css`, naast `--hf-size-control-small`.
   - Vijf lettergroottes zijn tokens, in `typography.css`: `--hf-menu-font-size`, `--hf-submenu-font-size` en `--hf-anchor-font-size` voor de menu's en de balk "Op deze pagina", en `--hf-figure-font-size` en `--hf-figure-large-font-size` voor een teken in een rij en het totaal in een donut.
   - De icoonknoppen (de themaknop, de knop naar boven, de deelknop van een kaart) en de links van het hoofdmenu en de bronvermelding van Wikipedia houden hun 44 pixels: ze staan in de kop, de voet of een hoek, waar een vinger ze moet raken, en het beheer heeft ze niet.
   - Een kolom van `Page` (`Page.Main`, de cellen en de zijbalk) neemt de ruimte tussen de cellen weer uit `--hf-space-xl`, op zijn eigen element.

@@ -20,7 +20,7 @@
       gap: var(--hf-space-s);
       justify-content: space-between;
       list-style: none;
-      min-block-size: 2.75rem;
+      min-block-size: var(--hf-size-control);
       padding-inline: var(--hf-space-m);
 
       &::-webkit-details-marker {
