@@ -1,13 +1,14 @@
 ---
 name: specify
 description: Specify a GitHub issue with the project owner until it meets the Definition of Ready in AGENTS.md, then write the result into the issue. Use at the start of every issue, or when the owner asks to specify, refine or split one.
-argument-hint: <issue number>
+argument-hint: <issue number, or the wish in a few words>
 ---
 
 # Specify an issue
 
-You are the Coordinator, or a Specifier the Coordinator started for this issue.
-Together with the project owner you make issue $ARGUMENTS ready to build: it meets the Definition of Ready in `AGENTS.md`, and the owner has approved it.
+You are a Specifier the Coordinator started for this issue, or for a wish of the owner that has no issue yet.
+Then you create the issue first, with the milestone and labels that fit, and put it on the board as "Te doen".
+Together with the project owner you make $ARGUMENTS (an issue number, or a wish that has no issue yet) ready to build: it meets the Definition of Ready in `AGENTS.md`, and the owner has approved it.
 The result goes in the issue itself, not only in this conversation.
 
 Keep it light: a short conversation and a clear issue, not a document.
@@ -15,17 +16,18 @@ Keep it light: a short conversation and a clear issue, not a document.
 Specifying is where a long conversation grows, and every later turn of a session carries it (see _Working efficiently_ in `AGENTS.md`).
 So:
 
-- A small issue, settled in one round, is specified by the Coordinator.
-  Anything that needs more (a design choice, a new area, a decision that shapes later issues) goes to a Specifier: a session of its own that the Coordinator starts with the issue number and what the owner wants.
+- Every issue is specified in a session of its own, which the Coordinator starts as soon as the owner asks for it, with the issue number or the wish and what the owner wants.
+  The Coordinator writes an issue itself only when the owner says to just write it.
   A Specifier ends when the issue is written and approved.
 - Do the reading once, at the start, then ask.
   Don't look things up between questions.
-- At most four questions per round, each with a recommendation: one round for the Coordinator, at most two for a Specifier.
+- At most four questions per round, each with a recommendation: at most two rounds.
   Then write the issue and let the owner correct the text, not the process.
 
 ## 1. Read the issue and the context
 
 - The issue and its comments: `gh issue view <number> --comments`.
+  A wish has no number yet, so there is nothing to read here: read the rest of this list, then create the issue (with a first title and a short description) before you ask your questions, so it has a number.
   If GraphQL isn't available, use `gh api repos/VincentSmedinga/sc-heerenveen-fansite/issues/<number>` and `.../issues/<number>/comments`.
 - The issues it mentions, and whether they are done.
   Waiting on an open issue is an open question.
@@ -82,3 +84,12 @@ If one is no, go back to the step it needs.
 - A decision that belongs to no single issue, such as one about the way of working, gets its own small pull request to `docs/beslissingen.md`, with the owner's go-ahead.
 
 Finish with a short summary for the owner: the link to the issue, the Definition of Ready, the decisions, and whether a Builder can start.
+
+## 8. Archive your session
+
+When the issue has the owner's approval line and the board shows it, and nothing else is open (such as a small pull request for a decision that belongs to no issue), you are done.
+Write the summary above as your last message, then archive your own session (`archive_session` with `session_id` "self") as the very last thing you do.
+The app tells the Coordinator that your turn has ended, so you send no separate message.
+The session has nothing left to say, and an open one only adds to the list.
+The owner can still reopen it from the archive.
+If the owner has not approved yet, if anything is still open, or if the session is waiting for an answer, don't archive.
