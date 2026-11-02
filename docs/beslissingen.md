@@ -3940,6 +3940,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de token zelf bewaren (een gelekte database logt dan in); een ondertekend cookie met een einddatum (niet in te trekken zonder lijst op de server).
 - **Later:** zie _Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure_ (1 november 2026): `Secure` geldt niet meer onder `NODE_ENV=development`, omdat Safari het cookie anders niet bewaart op `http://localhost`.
   De rest van deze beslissing blijft.
+- **Later:** zie _Het hoofdmenu toont Beheer voor wie ingelogd is, met een teken in `localStorage`_ (2 november 2026): het cookie blijft het enige cookie en gaat nog steeds alleen naar `/beheer`, maar de browser bewaart daarnaast een teken in `localStorage` dat alleen het menu verandert.
 
 ### Het antwoord op een verzoek om een link is voor elk adres hetzelfde
 
@@ -5231,6 +5232,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een seizoen dat bij de ene pagina bestaat, bestaat ook bij de andere, dus een meegenomen seizoen leidt nooit naar "niet gevonden".
 - **Alternatieven:** een parameter `?seizoen=` (de pagina's hebben al een adres per seizoen, dus dat zou een tweede adres voor dezelfde pagina zijn); het gekozen seizoen onthouden in een cookie (we volgen bezoekers niet, en een cookie maakt het adres afhankelijk van een eerder bezoek).
 - **Later:** zie _Het hoofdmenu leest het pad in een clientcomponent_ (22 oktober 2026): het menu leest het pad nu ook voor de adressen van twee onderdelen, niet alleen voor de markering.
+
+### Het hoofdmenu toont Beheer voor wie ingelogd is, met een teken in `localStorage`
+
+- **Datum:** 2 november 2026
+- **Besluit:** de browser van wie in het beheer komt met een geldige sessie, bewaart een teken in `localStorage`, onder de sleutel `fansite-beheer` met de waarde `1`.
+  Het hoofdmenu (`SiteNavigation`) leest het teken en toont dan voor Forum het item Beheer.
+  Het laatste item van het menu staat rechts, dus zo blijft Forum waar het stond.
+  - **Zetten en weghalen:** `app/beheer/layout.tsx` controleert de sessie op de server (`sessionToken` en `findSession`) en geeft het antwoord aan `AdminMarker`, een clientcomponent die het teken zet of weghaalt.
+    De inlogpagina haalt het ook weg: na een zachte navigatie naar een pagina die doorverwijst, wordt de layout niet opnieuw gevraagd.
+    Uitloggen leidt naar de inlogpagina, en daar gaat het teken weg.
+  - **Lezen:** `useSyncExternalStore` met `false` op de server, dus de HTML is voor elke bezoeker hetzelfde en er is geen hydratiefout.
+    Zonder JavaScript is er geen item.
+  - **Geen toegang:** het teken is een hulp om een koppeling te tonen.
+    Wie het zelf maakt, komt bij de inlogpagina uit.
+  - **Inhoud:** alleen het teken.
+    Geen geheim, geen rol en geen adres, en het gaat nooit naar de server.
+- **Waarom:** een redacteur komt zo vanuit het menu bij het beheer, zonder `/beheer` te typen.
+  Het cookie van het beheer is `HttpOnly` en geldt alleen onder `/beheer`, dus de server ziet op een publieke pagina niet wie ingelogd is.
+  Kon hij dat wel, dan werd elke pagina een pagina per bezoeker en werkte de cache niet meer.
+  De themakeuze staat al zo in `localStorage`, en het past bij de bereidheid om voorkeuren op te slaan.
+- **Nadeel:** het item verschijnt een moment na het laden, want de browser leest het teken pas na het hydrateren.
+  Een redacteur die in een andere browser inlogt, ziet het item daar pas na een bezoek aan het beheer.
+- **Gevolg:** het hoofdstuk Cookies op `/privacy` en de README van de site zeggen dat de browser van een redacteur dit teken bewaart.
+- **Alternatieven:** een tweede cookie dat bij elk verzoek meegaat (een tweede cookie naast het enige cookie van de site); een verzoek naar `/beheer` bij elke paginaweergave van elke bezoeker (extra verkeer voor iedereen, en het beheer ziet elk bezoek); het cookie van het beheer voor de hele site laten gelden (elke pagina wordt een pagina per bezoeker, en het geheim gaat bij elk verzoek mee).
 
 ## Importer
 

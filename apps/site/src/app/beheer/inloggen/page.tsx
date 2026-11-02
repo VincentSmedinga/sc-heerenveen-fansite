@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Button, ErrorSummary, Field, Form, Heading, Input, Page, Text } from '@fansite/design-system'
 import { redirect } from 'next/navigation'
 
+import { AdminMarker } from '../../../AdminMarker'
 import { compact } from '../../../beheer/density'
 import { sessionToken } from '../../../beheer/require-role'
 import { findSession } from '../../../beheer/sessions'
@@ -44,21 +45,26 @@ export default async function LoginPage({
   const notice = fout === 'ongeldig' ? undefined : message
 
   return (
-    <Page.Main className={compact}>
-      <Page.Cell>
-        <Heading level={1}>Inloggen voor beheer</Heading>
-        <Text appearance="intro">
-          Vul het e-mailadres van je account in. We mailen je een link om in te loggen. Je hebt geen wachtwoord nodig.
-        </Text>
-        {notice === undefined ? null : <Text>{notice}</Text>}
-        <ErrorSummary errors={error === undefined ? [] : [{ id: 'e-mail', message: error }]} level={2} />
-        <Form action={requestLoginLink}>
-          <Field error={error} hint="De link werkt 15 minuten en één keer." id="e-mail" label="E-mailadres">
-            <Input autoComplete="email" name="email" spellCheck={false} type="email" />
-          </Field>
-          <Button type="submit">Stuur me een link</Button>
-        </Form>
-      </Page.Cell>
-    </Page.Main>
+    <>
+      {/* Somebody without a session gets here. The layout may still hold the answer of an earlier
+          page, after a soft navigation, so this page takes the mark away itself. */}
+      <AdminMarker loggedIn={false} />
+      <Page.Main className={compact}>
+        <Page.Cell>
+          <Heading level={1}>Inloggen voor beheer</Heading>
+          <Text appearance="intro">
+            Vul het e-mailadres van je account in. We mailen je een link om in te loggen. Je hebt geen wachtwoord nodig.
+          </Text>
+          {notice === undefined ? null : <Text>{notice}</Text>}
+          <ErrorSummary errors={error === undefined ? [] : [{ id: 'e-mail', message: error }]} level={2} />
+          <Form action={requestLoginLink}>
+            <Field error={error} hint="De link werkt 15 minuten en één keer." id="e-mail" label="E-mailadres">
+              <Input autoComplete="email" name="email" spellCheck={false} type="email" />
+            </Field>
+            <Button type="submit">Stuur me een link</Button>
+          </Form>
+        </Page.Cell>
+      </Page.Main>
+    </>
   )
 }

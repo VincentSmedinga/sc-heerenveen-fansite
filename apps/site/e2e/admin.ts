@@ -64,15 +64,7 @@ const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])
  * makes the tables, and global-setup.ts puts the test sources in (see test-sources.ts).
  */
 export async function addAdmin() {
-  const { DATABASE_URL } = databaseEnv()
-  const { hostname } = new URL(DATABASE_URL)
-
-  if (!loopback.has(hostname)) {
-    throw new Error(
-      `The checks of the admin only write to a database on this computer, and DATABASE_URL names ${hostname}. ` +
-        'They put an account with a session in it, which must never reach acceptance or production.',
-    )
-  }
+  const DATABASE_URL = localDatabaseUrl()
 
   const { close, db, pool } = connect(DATABASE_URL)
 
@@ -139,6 +131,38 @@ export async function addAdmin() {
 }
 
 /**
+ * A session of its own for the moderator or the beheerder of the check, as the cookie for the
+ * browser. The session of the global setup is shared by every test, so a test that logs out or
+ * revokes uses this one: it goes with the account when the check is over (the sessions of an
+ * account are removed with it).
+ */
+export async function addAdminSession(host: string, role: E2eRole = 'moderator') {
+  const { close, db } = connect(localDatabaseUrl())
+
+  try {
+    const [user] = await db
+      .select({ id: adminUsers.id })
+      .from(adminUsers)
+      .where(eq(adminUsers.email, accounts[role].email))
+
+    if (user === undefined) {
+      throw new Error(`The account of the ${role} is not there: the global setup of the checks makes it.`)
+    }
+
+    const token = newToken()
+    const now = new Date()
+
+    await db
+      .insert(adminSessions)
+      .values({ createdAt: now, lastSeenAt: now, tokenHash: hashOf(token), userId: user.id })
+
+    return { ...adminCookie(host, role), value: token }
+  } finally {
+    await close()
+  }
+}
+
+/**
  * The cookie that logs the browser in as the moderator of the check, or as the beheerder when
  * the role says so. It has the attributes the site sets, and `Secure` works on 127.0.0.1 in
  * Chromium.
@@ -173,6 +197,25 @@ function databaseEnv() {
   }
 
   return readDatabaseEnv()
+}
+
+/**
+ * The DATABASE_URL of the check, if it names a database on this computer, and otherwise an
+ * error: whatever it says by mistake, the checks never write to the database of acceptance or
+ * production.
+ */
+function localDatabaseUrl() {
+  const { DATABASE_URL } = databaseEnv()
+  const { hostname } = new URL(DATABASE_URL)
+
+  if (!loopback.has(hostname)) {
+    throw new Error(
+      `The checks of the admin only write to a database on this computer, and DATABASE_URL names ${hostname}. ` +
+        'They put an account with a session in it, which must never reach acceptance or production.',
+    )
+  }
+
+  return DATABASE_URL
 }
 
 /**

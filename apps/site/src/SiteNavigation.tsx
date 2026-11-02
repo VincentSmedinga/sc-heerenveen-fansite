@@ -4,7 +4,9 @@ import type { ReactNode } from 'react'
 
 import { Navigation } from '@fansite/design-system'
 import { usePathname } from 'next/navigation'
+import { useSyncExternalStore } from 'react'
 
+import { readAdminMarker, subscribeToAdminMarker } from './admin-marker'
 import { seasonFromSlug, seasonSlug } from './seasons'
 
 // The sub-pages of Nieuws, in the bar under the menu: the podcasts and the search. Nieuws
@@ -28,12 +30,27 @@ const seasonPages = ['/statistieken/spelers', statisticsPath, matchesPath]
 
 const newsPath = '/nieuws'
 
-const items = [
+type MenuItem = {
+  external?: true
+  href: string
+  label: string
+  subitems?: { href: string; label: string }[]
+}
+
+const adminPath = '/beheer'
+
+const items: MenuItem[] = [
   { href: newsPath, label: 'Nieuws', subitems: newsSubitems },
   { href: matchesPath, label: 'Wedstrijden' },
   { href: statisticsPath, label: 'Statistieken', subitems: statisticsSubitems },
   { external: true, href: 'https://forum.heerenveen.org', label: 'Forum' },
 ]
+
+// Before Forum, only in the browser of somebody who is logged in (see admin-marker.ts). The
+// last item of the menu is drawn on the right edge, so Forum stays there and does not move.
+const adminItem: MenuItem = { href: adminPath, label: 'Beheer' }
+
+const itemsWithAdmin = [...items.slice(0, -1), adminItem, ...items.slice(-1)]
 
 /**
  * The item of the menu and the sub-page that a path belongs to, each as an href, or undefined.
@@ -54,6 +71,10 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
 
   if (pathname === newsPath || pathname.startsWith('/redactie/')) {
     return { item: newsPath }
+  }
+
+  if (pathname === adminPath || pathname.startsWith(`${adminPath}/`)) {
+    return { item: adminPath }
   }
 
   if (pathname === '/wedstrijden' || pathname.startsWith('/wedstrijden/')) {
@@ -103,9 +124,13 @@ export function seasonOfPath(pathname: string): string | undefined {
 
 /**
  * The main menu of the site, under the header: the news, the matches, the statistics and the
- * forum. The news and the statistics have a bar with their sub-pages under the menu. The menu
- * marks the item the visitor is on, and the bar the sub-page. A layout gets no path, so this is
- * a client component: usePathname gives the path, also when the server renders the HTML.
+ * forum, and for somebody who is logged in to the admin Beheer before the forum. The server
+ * never renders Beheer: the HTML is the same for every visitor, and the browser adds the item
+ * after hydrating when it finds the mark of admin-marker.ts.
+ *
+ * The news and the statistics have a bar with their sub-pages under the menu. The menu marks
+ * the item the visitor is on, and the bar the sub-page. A layout gets no path, so this is a
+ * client component: usePathname gives the path, also when the server renders the HTML.
  *
  * The addresses of the items are fixed, except Wedstrijden and Statistieken on the page of a
  * season: they take the season of the page along (see `hrefOf`). The links of the bar of
@@ -124,11 +149,14 @@ export function seasonOfPath(pathname: string): string | undefined {
 export function SiteNavigation({ statisticsBar }: { statisticsBar?: ReactNode }) {
   const pathname = usePathname()
   const here = currentOf(pathname)
+  // The server and the first render in the browser have no item: the HTML is the same for
+  // everyone, and the mark is read right after hydrating.
+  const loggedIn = useSyncExternalStore(subscribeToAdminMarker, readAdminMarker, () => false)
 
   return (
     <Navigation
       appearance="header"
-      items={items.map((item) => ({
+      items={(loggedIn ? itemsWithAdmin : items).map((item) => ({
         ...item,
         href: hrefOf(item.href, pathname),
         ...(item.href === statisticsPath && statisticsBar !== undefined && { bar: statisticsBar }),
