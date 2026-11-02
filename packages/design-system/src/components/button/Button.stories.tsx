@@ -53,6 +53,7 @@ const meta = preview.meta({
           '',
           '- `default`: de gevulde knop, voor de hoofdactie van een formulier of pagina, zoals "Versturen" of "Inloggen". Zonder `appearance` krijg je deze.',
           '- `soft`: de zachte knop, voor wat daarnaast kan, zoals "Laad 5 meer". Is de knop niet de hoofdactie, gebruik dan deze.',
+          '- `danger`: de rode knop, alleen voor wat je weghaalt, zoals "Invoer weghalen". Hij doet verder niets anders dan de andere knoppen, en hoort niet bij een gewone opslagactie.',
           '',
           'Met `icon` zet je een pictogram vóór de tekst, omdat het zegt wat de knop doet:',
           '',
@@ -82,6 +83,11 @@ export const Default = meta.story({
   name: 'Knop',
 })
 
+export const Danger = meta.story({
+  args: { appearance: 'danger', children: 'Invoer weghalen', type: 'button' },
+  name: 'Gevaarlijke knop',
+})
+
 const surfaceLabels = {
   default: 'Vlak',
   soft: 'Zacht vlak',
@@ -99,15 +105,18 @@ const render = () => (
           <Button appearance="soft" type="button">
             Laad 5 meer
           </Button>
+          <Button appearance="danger" type="button">
+            Invoer weghalen
+          </Button>
         </div>
       </Card>
     ))}
   </div>
 )
 
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Gevuld en zacht, licht', render })
+export const Light = meta.story({ globals: { theme: 'light' }, name: 'Gevuld, zacht en gevaarlijk, licht', render })
 
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Gevuld en zacht, donker', render })
+export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Gevuld, zacht en gevaarlijk, donker', render })
 
 const withIcons = () => (
   <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '1rem', maxInlineSize: '40rem' }}>

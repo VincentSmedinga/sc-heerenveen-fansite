@@ -2386,6 +2386,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** `Button` krijgt een prop `appearance` met de waarden `default` (de gevulde knop) en `soft` (een lichtblauwe vulling met blauwe tekst), in de geëxporteerde lijst `buttonAppearances`. De gevulde knop heeft geen eigen klasse, de zachte heeft `hf-button-soft`. De vulling haalt 3:1 tegen de kaart niet, dus de zachte knop heeft een rand met een eigen kleur die dat wel haalt. De zachte knop gebruikt vier nieuwe tokens: `--hf-colour-background-button-soft`, `--hf-colour-background-button-soft-hover`, `--hf-colour-text-on-button-soft` en `--hf-colour-border-button-soft`.
 - **Waarom:** de zachte vulling is rustig genoeg naast de koppen en blijft toch herkenbaar als knop. Een prop past bij hoe `Text` en `Card` hun uitvoering kiezen. Gemeten in licht: blauw-100 op wit haalt 1,21:1 en blauw-200 1,48:1, dus een vulling alleen is te zwak. De rand blauw-500 haalt 3,84:1 of meer op de vier vlakken (wit, sterk, zacht en warm) en 3,86:1 tegen de vulling. In donker haalt blauw-700 op de donkere vlakken 1,69:1 en 1,33:1, de rand blauw-400 dan 5,28:1 en 4,16:1. De tekst haalt 10,25:1 op de vulling in licht en 8,38:1 onder de muis, in donker 8,57:1 en 6,34:1. Onder de muis wordt de vulling in licht donkerder (blauw-200) en in donker lichter (blauw-600), zoals de gevulde knop dat doet: de knop wordt dan sterker. De rand blijft bij de muis gelijk. De focusrand is die van `base/focus.css`, dus net zo zichtbaar als bij de gevulde knop. De rand houdt de knop in geforceerde kleuren zichtbaar, en een rand van 1 pixel maakt de knop even groot als de gevulde.
 - **Alternatieven:** de vulling zo donker maken dat ze 3:1 haalt; dan lijkt de knop weer op de gevulde en valt de zachte knop niet meer terug. Een uitvoering met alleen een rand, of alleen tekst; die lijkt op een link. Een apart onderdeel zoals `SecondaryButton`; dat geeft dubbel werk bij elke wijziging aan knoppen.
+- **Later:** zie _De gevaarlijke knop is rood en gevuld, alleen voor wat je weghaalt_ (2 november 2026): `appearance` heeft er een derde waarde bij, `danger`; `default` en `soft` blijven zoals ze waren.
 
 ### De strepen staan aan het einde van de pagina en scrollen mee
 
@@ -3246,6 +3247,80 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Halverwege de overgang naar hover is het contrast niet lager dan aan het begin.
 - **Alternatieven:** het pictogram doorzichtig maken; het contrast verschilt dan per vlak en haalt 3:1 niet overal.
   De knop pas bij hover tonen; op een aanraakscherm is er geen hover, dus de knop zou er niet zijn.
+
+### Een Tag is een label met een korte tekst in drie tonen, en `highlight` heeft een eigen rand
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem krijgt `Tag` (#594): een `span` met een korte tekst in drie tonen, `attention`, `highlight` en `neutral` (de lijst `tagTones`).
+  - **De tekst:** hij zegt altijd wat er aan de hand is, zoals "Uitslag ontbreekt".
+    De kleur komt erbij en draagt niets alleen.
+  - **De rand:** elke toon heeft een rand in de kleur van zijn tekst, behalve `highlight`.
+    Die heeft het nieuwe token `--hf-colour-border-highlight`: blauw-500 in licht en blauw-400 in donker.
+  - **De kleuren van de tekst:** bestaande tokens.
+    `attention` is `--hf-colour-text-missing`, `highlight` is `--hf-colour-text-highlight` op `--hf-colour-background-highlight`, en `neutral` is `--hf-colour-text-secondary`.
+- **Waarom:** de beheerschermen voor een wedstrijd (#592) tonen in een lijst wat ontbreekt of is aangepast, en een lezer die de kleur niet ziet, moet het in de tekst lezen.
+  De rand van `highlight` is een eigen token en geen hergebruik van de rand van de zachte knop, want hij hoort bij een label en niet bij een knop; de kleuren zijn dezelfde.
+  Gemeten haalt de rand 3,86:1 tegen de vulling in licht en 4,16:1 in donker, en 3:1 en meer op de vier vlakken.
+  De tekst haalt 4,5:1 of meer: `attention` 8,21:1 in licht en 6,18:1 in donker op het slechtste vlak, `neutral` 5,31:1 en 8,38:1, en `highlight` 10,26:1 en 11,40:1.
+  Een test (`tag-css.test.ts`) houdt deze getallen vast.
+- **Alternatieven:** één onderdeel `Badge` met een kleurprop (de naam zegt niets over wanneer je het kiest); de rand van de zachte knop hergebruiken (een knoprol voor een label); een label met alleen kleur of een pictogram (de kleur zou dan alles dragen).
+
+### De gevaarlijke knop is rood en gevuld, alleen voor wat je weghaalt
+
+- **Datum:** 2 november 2026
+- **Besluit:** `Button` krijgt een derde uitvoering, `appearance="danger"`, met de klasse `hf-button-danger`.
+  De knop is rood en gevuld en is alleen voor een actie die iets weghaalt, zoals "Invoer weghalen".
+  Hij heeft verder geen ander gedrag dan de andere knoppen.
+  - **Twee nieuwe tokens:** `--hf-colour-background-button-danger` en `--hf-colour-background-button-danger-hover`.
+    Het vlak is rood-700 in licht en rood-300 in donker, en onder de muis rood-800 in licht en rood-200 in donker.
+  - **Dezelfde tekst:** de tekst is die van de gevulde knop, `--hf-colour-text-on-button`, dus er komt geen token voor de tekst bij.
+  - **De rand:** de rand heeft de kleur van het vlak, zoals bij de gevulde knop.
+- **Waarom:** de beheerschermen voor een wedstrijd (#592) hebben een actie die een invoer terugzet.
+  Dat moet er anders uitzien dan "Opslaan" en een eigen stap kosten, dus rood en gevuld.
+  Gemeten haalt de tekst 7,48:1 op het vlak in licht en 9,97:1 onder de muis, in donker 9,06:1 en 12,19:1 (eis 4,5:1).
+  Het vlak zelf haalt 3:1 en meer tegen de pagina en de vier vlakken van een kaart: in licht 6,16:1 tot 7,48:1, in donker 6,18:1 tot 9,06:1.
+  Onder de muis gaat het vlak een stap verder in dezelfde richting als bij de gevulde knop: donkerder in licht, lichter in donker.
+  Een test (`button-danger-css.test.ts`) houdt deze getallen vast.
+- **Alternatieven:** de gevulde knop met rode tekst eromheen (de kleur draagt dan alles en de knop lijkt op een gewone actie); een rode zachte knop (even rustig als "Annuleren", dus geen stap die je opvalt); een eigen onderdeel zoals `DangerButton` (dubbel werk bij elke wijziging aan knoppen, zie _Button heeft een zachte uitvoering, met een rand die het contrast draagt_); `red-600` als vlak (haalt met witte tekst ook 5,79:1, maar rood-700 is het rood van het accent en van een verloren wedstrijd, zodat het rood één familie blijft).
+
+### Een Notice is een melding met `role="status"`, zonder kop
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem krijgt `Notice` (#594): een `p` met `role="status"` en alleen tekst.
+  De rol is geen prop, dus een melding is altijd een status.
+- **Waarom:** na het opslaan van een wedstrijd (#592) komt een melding als "Opgeslagen."
+  Zonder kop voegt elke melding niets toe aan de opzet van de pagina.
+  Een schermlezer leest de tekst voor die in een status komt, maar alleen als de status al op de pagina stond.
+  Een melding na een actie staat dus eerst leeg op de pagina, en een lege melding laat niets zien (`.hf-notice:empty`).
+  Een melding die al gevuld op de pagina staat als hij laadt, leest hij op zijn plek, zoals andere tekst.
+  Beide gevallen staan in de stories.
+  Het vlak is het zachte vlak met zijn rand, zodat de melding op een witte kaart en op de pagina te zien is.
+- **Alternatieven:** een melding met een kop (elke opslag zou een kop aan de pagina toevoegen); een kaart met `role="status"` (een kaart is een blok van de pagina, een melding is een regel); `role="alert"` (die onderbreekt de lezer, en een opgeslagen invoer is geen fout).
+
+### Een Disclosure is een `details` met een samenvatting van minstens 44 pixels
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem krijgt `Disclosure` (#594): een `details` met een samenvatting en een pijl die omdraait als het blok open is.
+  - **Het doel:** de samenvatting is minstens 44 pixels hoog, zoals de knoppen en de velden.
+  - **Zonder JavaScript:** het blok werkt met alleen HTML, en het toetsenbord en de schermlezer doen de rest.
+  - **Geen animatie van de hoogte:** de pijl draait, het blok springt open.
+- **Waarom:** in de beheerschermen (#592) hoort een actie als "Invoer weghalen" achter een bewuste stap.
+  Een `details` is daar het element voor, en het kost geen script.
+  `WikipediaCredit` animeert de hoogte met `interpolate-size` en `::details-content`; dat is veel CSS voor een blok dat zelden opent.
+- **Alternatieven:** een animatie zoals `WikipediaCredit` (zie boven); een knop die een blok toont met JavaScript (werkt zonder script niet); het blok altijd open (de rode knop staat dan altijd in beeld).
+
+### Een Breadcrumb is een eigen onderdeel, met een teken dat geen tekst is
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem krijgt `Breadcrumb` (#594): een `nav` met een `ol`, met de klasse `hf-navigation` zoals `Filter`.
+  - **De props:** `items` (de pagina's erboven, de hoogste eerst), `current` (de huidige pagina, als tekst) en `label` (de naam voor schermlezers).
+  - **De huidige pagina:** het laatste item, zonder link, met `aria-current="page"`.
+  - **Het teken:** het teken tussen twee items is met randen getekend, een pijlpunt die bij zijn item hoort.
+    Het is dus geen tekst voor een schermlezer, en het begint nooit een regel.
+  - **Smal scherm:** de items breken om, en een lange naam breekt binnen het woord.
+- **Waarom:** `Breadcrumb` is een eigen onderdeel en geen uitvoering van `Navigation`, want de laatste pagina is geen link en `Navigation` maakt van elk item een link.
+  Het teken met randen is gekozen boven `content: '›'`: een teken in CSS leest een schermlezer soms voor, en de variant `content: '›' / ''` is nog niet Baseline 'widely available'.
+- **Alternatieven:** een uitvoering van `Navigation` (past niet: zie boven); een teken in de HTML met `aria-hidden` (het blijft kopieerbare tekst); een teken met `content` (zie boven).
 
 ### Een pagina kan breed zijn, met een hoofdkolom van 58 rem en de zijbalk van 24 rem
 

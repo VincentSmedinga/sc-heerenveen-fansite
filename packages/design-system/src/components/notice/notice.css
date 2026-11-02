@@ -1,0 +1,25 @@
+/*
+ * A notice: a short line on the soft surface, with its border. The border and the text tell
+ * it apart from a card by more than colour.
+ */
+
+@layer hf.components {
+  .hf-notice {
+    background-color: var(--hf-colour-background-surface-soft);
+    border: 1px solid var(--hf-colour-border-surface-soft);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    margin-block: 0;
+    padding-block: var(--hf-space-s);
+    padding-inline: var(--hf-space-m);
+  }
+
+  /*
+   * A notice without text stays in the page, so a screen reader knows the status before the
+   * text comes into it, and takes no room and shows nothing.
+   */
+  .hf-notice:empty {
+    border-width: 0;
+    padding-block: 0;
+  }
+}
