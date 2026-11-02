@@ -37,6 +37,7 @@ const components = [
   'Select',
   'StandingsTable',
   'Strong',
+  'Tag',
   'Text',
   'Textarea',
   'TopScorersTable',
@@ -82,6 +83,7 @@ describe('the JavaScript entry of the package', () => {
     expect(designSystem.inputTypes).toContain('email')
     expect(designSystem.listElements).toEqual(['ul', 'ol'])
     expect(designSystem.matchStatuses).toEqual(['scheduled', 'played', 'postponed'])
+    expect(designSystem.tagTones).toEqual(['attention', 'highlight', 'neutral'])
     expect(designSystem.textElements).toEqual(['p', 'span'])
   })
 

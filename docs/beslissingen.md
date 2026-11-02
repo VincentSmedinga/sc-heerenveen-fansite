@@ -3245,6 +3245,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** het pictogram doorzichtig maken; het contrast verschilt dan per vlak en haalt 3:1 niet overal.
   De knop pas bij hover tonen; op een aanraakscherm is er geen hover, dus de knop zou er niet zijn.
 
+### Een Tag is een label met een korte tekst in drie tonen, en `highlight` heeft een eigen rand
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem krijgt `Tag` (#594): een `span` met een korte tekst in drie tonen, `attention`, `highlight` en `neutral` (de lijst `tagTones`).
+  - **De tekst:** hij zegt altijd wat er aan de hand is, zoals "Uitslag ontbreekt".
+    De kleur komt erbij en draagt niets alleen.
+  - **De rand:** elke toon heeft een rand in de kleur van zijn tekst, behalve `highlight`.
+    Die heeft het nieuwe token `--hf-colour-border-highlight`: blauw-500 in licht en blauw-400 in donker.
+  - **De kleuren van de tekst:** bestaande tokens.
+    `attention` is `--hf-colour-text-missing`, `highlight` is `--hf-colour-text-highlight` op `--hf-colour-background-highlight`, en `neutral` is `--hf-colour-text-secondary`.
+- **Waarom:** de beheerschermen voor een wedstrijd (#592) tonen in een lijst wat ontbreekt of is aangepast, en een lezer die de kleur niet ziet, moet het in de tekst lezen.
+  De rand van `highlight` is een eigen token en geen hergebruik van de rand van de zachte knop, want hij hoort bij een label en niet bij een knop; de kleuren zijn dezelfde.
+  Gemeten haalt de rand 3,86:1 tegen de vulling in licht en 4,16:1 in donker, en 3:1 en meer op de vier vlakken.
+  De tekst haalt 4,5:1 of meer: `attention` 8,21:1 in licht en 6,18:1 in donker op het slechtste vlak, `neutral` 5,31:1 en 8,38:1, en `highlight` 10,26:1 en 11,40:1.
+  Een test (`tag-css.test.ts`) houdt deze getallen vast.
+- **Alternatieven:** één onderdeel `Badge` met een kleurprop (de naam zegt niets over wanneer je het kiest); de rand van de zachte knop hergebruiken (een knoprol voor een label); een label met alleen kleur of een pictogram (de kleur zou dan alles dragen).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

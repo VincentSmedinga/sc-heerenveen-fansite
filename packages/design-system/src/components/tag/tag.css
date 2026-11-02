@@ -1,0 +1,37 @@
+/*
+ * A tag: a small label with a rim in the colour of its text. It never carries meaning by
+ * colour alone, because its text says it. The attention tone is the colour of text that says
+ * data is missing, the highlight tone is the highlighted row with a rim of its own, and the
+ * neutral tone is secondary text. Each tone reaches 4.5:1 for the text and 3:1 for the rim,
+ * on the page and on the four surfaces, in light and in dark.
+ */
+
+@layer hf.components {
+  .hf-tag {
+    border: 1px solid;
+    border-radius: 62.4375rem;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-secondary);
+    display: inline-block;
+    font-size: var(--hf-meta-font-size);
+    font-weight: var(--hf-strong-font-weight);
+    line-height: 1.25;
+    padding-block: 0.125rem;
+    padding-inline: var(--hf-space-s);
+  }
+
+  .hf-tag-attention {
+    color: var(--hf-colour-text-missing);
+  }
+
+  .hf-tag-highlight {
+    background-color: var(--hf-colour-background-highlight);
+    border-color: var(--hf-colour-border-highlight);
+    color: var(--hf-colour-text-highlight);
+
+    /* A fill is not painted in forced colours, so the rim is the system's text colour there. */
+    @media (forced-colors: active) {
+      border-color: CanvasText;
+    }
+  }
+}
