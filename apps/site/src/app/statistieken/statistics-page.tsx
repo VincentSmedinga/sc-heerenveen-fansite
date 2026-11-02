@@ -4,10 +4,10 @@ import { seasonOf } from '@fansite/db/season'
 import { Heading, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { competitionQuery, parseCompetition } from '../../competition'
-import { competitionFields, CompetitionSwitch } from '../../CompetitionSwitch'
-import { reviewBranch } from '../../env'
-import { parseCleanSheetCount } from '../../matches'
+import { competitionQuery, parseCompetition } from '#src/competition'
+import { competitionFields, CompetitionSwitch } from '#src/CompetitionSwitch'
+import { reviewBranch } from '#src/env'
+import { parseCleanSheetCount } from '#src/matches'
 import {
   CleanSheetsCard,
   ExtremesCard,
@@ -19,14 +19,14 @@ import {
   SourceCredit,
   StreaksCard,
   TopScorersCard,
-} from '../../MatchViews'
-import { pageMetadata, seasonPageMetadata } from '../../metadata'
-import { noteworthy, parseNoteworthyNumber } from '../../noteworthy'
-import { NoteworthyCard } from '../../NoteworthyCard'
-import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams, statisticsPath } from '../../season-page'
-import { seasonAddress, seasonChoices, seasonSlug } from '../../seasons'
-import { ServerError, serverErrorTitle } from '../../ServerError'
-import { withBranch } from '../../title'
+} from '#src/MatchViews'
+import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { noteworthy, parseNoteworthyNumber } from '#src/noteworthy'
+import { NoteworthyCard } from '#src/NoteworthyCard'
+import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams, statisticsPath } from '#src/season-page'
+import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
+import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { withBranch } from '#src/title'
 
 /** The route that sends the season picker on to its season (app/statistieken/kies). */
 export const pickerPath = pickerPathOf(statisticsPath)

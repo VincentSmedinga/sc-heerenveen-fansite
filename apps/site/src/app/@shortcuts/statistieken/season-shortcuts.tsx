@@ -1,11 +1,11 @@
 import { seasonOf } from '@fansite/db/season'
 import { Page, type PageShortcutsItem } from '@fansite/design-system'
 
-import type { SearchParams } from '../../../season-page'
+import type { SearchParams } from '#src/season-page'
 
-import { parseCompetition } from '../../../competition'
-import { getMatchData, getMatchSeasons } from '../../../matches'
-import { statisticsShortcuts } from '../../../statisticsShortcuts'
+import { parseCompetition } from '#src/competition'
+import { getMatchData, getMatchSeasons } from '#src/matches'
+import { statisticsShortcuts } from '#src/statisticsShortcuts'
 
 /**
  * The bar of the page of a season: a link to each of the nine cards, in the order of a narrow

@@ -1,6 +1,6 @@
 import { seasonOf } from '@fansite/db/season'
 
-import type { SearchParams } from '../../../season-page'
+import type { SearchParams } from '#src/season-page'
 
 import { SeasonShortcuts } from './season-shortcuts'
 

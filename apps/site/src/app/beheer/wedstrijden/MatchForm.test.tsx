@@ -2,7 +2,8 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { emptyFields, emptyGoal, type MatchFormState, type MatchValues, padGoals } from '../../../beheer/match-fields'
+import { emptyFields, emptyGoal, type MatchFormState, type MatchValues, padGoals } from '#src/beheer/match-fields'
+
 import { MatchFields, type MatchFormChoices, MatchFormProvider } from './MatchForm'
 
 afterEach(() => {

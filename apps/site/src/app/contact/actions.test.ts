@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as MailModule from '../../mail'
+import type * as MailModule from '#src/mail'
 
-import { emptyState } from '../../contact-message'
-import { MailError } from '../../mail'
+import { emptyState } from '#src/contact-message'
+import { MailError } from '#src/mail'
 
 const sendMail = vi.hoisted(() => vi.fn())
 const requestHeaders = vi.hoisted(() => ({ current: new Headers() }))
 
-vi.mock('../../mail', async (importOriginal) => ({
+vi.mock('#src/mail', async (importOriginal) => ({
   ...(await importOriginal<typeof MailModule>()),
   sendMail,
 }))

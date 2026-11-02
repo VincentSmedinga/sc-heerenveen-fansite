@@ -1,11 +1,12 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getReleases } from '../../releases'
-import { headingAnchors, withoutHeadingLinks } from '../../without-icons'
+import { getReleases } from '#src/releases'
+import { headingAnchors, withoutHeadingLinks } from '#src/without-icons'
+
 import UpdatesPage, { generateMetadata } from './page'
 
-vi.mock('../../releases', () => ({ getReleases: vi.fn() }))
+vi.mock('#src/releases', () => ({ getReleases: vi.fn() }))
 
 const releases = [
   { date: '2026-11-03', sentences: ['Een verandering.', 'Nog een verandering.'], version: '0.2.0' },

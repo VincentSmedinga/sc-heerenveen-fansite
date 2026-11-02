@@ -33,7 +33,7 @@ import {
   type MatchValues,
   type ScorerForm,
   scorerFormOf,
-} from '../../../beheer/match-fields'
+} from '#src/beheer/match-fields'
 
 const summaryId = 'fouten'
 

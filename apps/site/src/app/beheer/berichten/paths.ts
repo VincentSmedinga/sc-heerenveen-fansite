@@ -1,4 +1,4 @@
-import { type ItemGroup, notOnSiteValue } from '../../../beheer/items'
+import { type ItemGroup, notOnSiteValue } from '#src/beheer/items'
 
 /** What the list shows: the group, the box for what editors hid, and the search. */
 export type ListView = {

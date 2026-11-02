@@ -10,8 +10,8 @@ import VisitPage, { metadata } from './page'
 
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
 
-vi.mock('../../../database', () => ({ getDatabase: () => database }))
-vi.mock('../../../beheer/require-role', () => ({ requireRole }))
+vi.mock('#src/database', () => ({ getDatabase: () => database }))
+vi.mock('#src/beheer/require-role', () => ({ requireRole }))
 
 let database: TestDatabase
 

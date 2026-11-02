@@ -4,9 +4,10 @@ import { adminLoginAttempts, adminLoginLinks, adminSessions, adminUsers } from '
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createAccount } from '../../beheer/accounts'
-import { sessionCookieName, sessionCookieOptions } from '../../beheer/require-role'
-import { hashOf } from '../../beheer/sessions'
+import { createAccount } from '#src/beheer/accounts'
+import { sessionCookieName, sessionCookieOptions } from '#src/beheer/require-role'
+import { hashOf } from '#src/beheer/sessions'
+
 import { logOut } from './actions'
 import { logIn, requestLoginLink } from './inloggen/actions'
 
@@ -47,14 +48,14 @@ vi.mock('next/navigation', () => ({
   },
 }))
 vi.mock('next/server', () => ({ after: (task: () => Promise<void>) => deferred.push(task) }))
-vi.mock('../../beheer/login-mail', () => ({
+vi.mock('#src/beheer/login-mail', () => ({
   sendLoginMail: (mail: { to: string; url: string }) => {
     sent.push(mail)
 
     return Promise.resolve()
   },
 }))
-vi.mock('../../database', () => ({ getDatabase: () => database }))
+vi.mock('#src/database', () => ({ getDatabase: () => database }))
 
 let database: TestDatabase
 

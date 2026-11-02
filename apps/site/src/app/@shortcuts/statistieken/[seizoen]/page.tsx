@@ -1,5 +1,6 @@
-import { type SearchParams } from '../../../../season-page'
-import { seasonFromSlug } from '../../../../seasons'
+import { type SearchParams } from '#src/season-page'
+import { seasonFromSlug } from '#src/seasons'
+
 import { SeasonShortcuts } from '../season-shortcuts'
 
 // Render on each request, like the page it belongs to, so the build never reads the database.

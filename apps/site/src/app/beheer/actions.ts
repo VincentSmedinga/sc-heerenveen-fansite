@@ -4,15 +4,9 @@ import { adminRoles } from '@fansite/db/schema'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import {
-  loginPath,
-  requireRole,
-  sessionCookieName,
-  sessionCookieOptions,
-  sessionToken,
-} from '../../beheer/require-role'
-import { endSession } from '../../beheer/sessions'
-import { getDatabase } from '../../database'
+import { loginPath, requireRole, sessionCookieName, sessionCookieOptions, sessionToken } from '#src/beheer/require-role'
+import { endSession } from '#src/beheer/sessions'
+import { getDatabase } from '#src/database'
 
 /**
  * Logs out: the session is removed on the server, so the token stops working, and the cookie

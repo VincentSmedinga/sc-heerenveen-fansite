@@ -16,22 +16,16 @@ import {
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
-import type { SearchParams } from '../../../filter-query'
+import type { SearchParams } from '#src/filter-query'
 
-import { reviewBranch } from '../../../env'
-import { reasonOf } from '../../../errors'
-import { pageMetadata } from '../../../metadata'
-import { dateTimeOf, episodeDetails, formatEpisodeTime } from '../../../news'
-import { getPodcastPage } from '../../../podcasts'
-import {
-  parsePodcastsQuery,
-  podcastsHeading,
-  podcastsHref,
-  podcastsQuery,
-  podcastsTitle,
-} from '../../../podcasts-query'
-import { ServerError, serverErrorTitle } from '../../../ServerError'
-import { withBranch } from '../../../title'
+import { reviewBranch } from '#src/env'
+import { reasonOf } from '#src/errors'
+import { pageMetadata } from '#src/metadata'
+import { dateTimeOf, episodeDetails, formatEpisodeTime } from '#src/news'
+import { getPodcastPage } from '#src/podcasts'
+import { parsePodcastsQuery, podcastsHeading, podcastsHref, podcastsQuery, podcastsTitle } from '#src/podcasts-query'
+import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { withBranch } from '#src/title'
 
 // Render on each request, so the build never reads the database. getPodcastPage caches the
 // lists itself.

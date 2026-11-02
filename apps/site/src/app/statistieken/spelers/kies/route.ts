@@ -1,4 +1,4 @@
-import { pickedSeasonResponse, playersPath } from '../../../../season-page'
+import { pickedSeasonResponse, playersPath } from '#src/season-page'
 
 // Reads the seasons from the database on each request, like the page it sends visitors to.
 export const dynamic = 'force-dynamic'

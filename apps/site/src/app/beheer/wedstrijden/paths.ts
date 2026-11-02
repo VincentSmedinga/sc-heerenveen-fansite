@@ -1,4 +1,4 @@
-import { seasonSlug } from '../../../seasons'
+import { seasonSlug } from '#src/seasons'
 
 export const matchesPath = '/beheer/wedstrijden'
 

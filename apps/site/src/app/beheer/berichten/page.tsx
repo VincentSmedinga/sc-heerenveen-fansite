@@ -20,7 +20,7 @@ import {
   Text,
 } from '@fansite/design-system'
 
-import { compact } from '../../../beheer/density'
+import { compact } from '#src/beheer/density'
 import {
   findItem,
   type ItemGroup,
@@ -32,10 +32,11 @@ import {
   parseItemId,
   parseSearch,
   searchMaxLength,
-} from '../../../beheer/items'
-import { requireRole } from '../../../beheer/require-role'
-import { getDatabase } from '../../../database'
-import { dateTimeOf, formatNewsTime } from '../../../news'
+} from '#src/beheer/items'
+import { requireRole } from '#src/beheer/require-role'
+import { getDatabase } from '#src/database'
+import { dateTimeOf, formatNewsTime } from '#src/news'
+
 import { submitHide, submitShow } from './actions'
 import { itemsPath, type ListView } from './paths'
 

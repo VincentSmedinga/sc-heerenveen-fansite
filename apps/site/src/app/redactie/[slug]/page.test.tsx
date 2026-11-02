@@ -1,11 +1,12 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getArticle } from '../../../articles'
-import { withoutIcons } from '../../../without-icons'
+import { getArticle } from '#src/articles'
+import { withoutIcons } from '#src/without-icons'
+
 import ArticlePage, { generateMetadata } from './page'
 
-vi.mock('../../../articles', () => ({ getArticle: vi.fn() }))
+vi.mock('#src/articles', () => ({ getArticle: vi.fn() }))
 
 const article = {
   author: 'de redactie',

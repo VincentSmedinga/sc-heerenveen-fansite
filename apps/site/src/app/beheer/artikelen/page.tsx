@@ -2,11 +2,12 @@ import type { Metadata } from 'next'
 
 import { Button, Card, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
-import { listArticles, listLength } from '../../../beheer/articles'
-import { compact } from '../../../beheer/density'
-import { requireRole } from '../../../beheer/require-role'
-import { getDatabase } from '../../../database'
-import { formatArticleDate } from '../../../news'
+import { listArticles, listLength } from '#src/beheer/articles'
+import { compact } from '#src/beheer/density'
+import { requireRole } from '#src/beheer/require-role'
+import { getDatabase } from '#src/database'
+import { formatArticleDate } from '#src/news'
+
 import { articlePath, previewPath } from './paths'
 
 // Render on each request: who is logged in and which articles exist are not known when the site

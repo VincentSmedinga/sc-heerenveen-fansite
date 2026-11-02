@@ -3,9 +3,9 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { type ContactState, honeypotName, isOwnOrigin, readValues, toMail, validate } from '../../contact-message'
-import { MailError, sendMail } from '../../mail'
-import { createLimit } from '../../rate-limit'
+import { type ContactState, honeypotName, isOwnOrigin, readValues, toMail, validate } from '#src/contact-message'
+import { MailError, sendMail } from '#src/mail'
+import { createLimit } from '#src/rate-limit'
 
 // At most ten messages an hour for the whole form, counted in the memory of the server.
 const limit = createLimit({ max: 10, perMilliseconds: 60 * 60 * 1000 })

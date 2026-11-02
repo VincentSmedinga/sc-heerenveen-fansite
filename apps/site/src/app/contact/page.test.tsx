@@ -1,7 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { withoutIcons } from '../../without-icons'
+import { withoutIcons } from '#src/without-icons'
+
 import ContactPage, { generateMetadata } from './page'
 import SentPage, { metadata as sentMetadata } from './verstuurd/page'
 

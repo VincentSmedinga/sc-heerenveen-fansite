@@ -2,7 +2,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { type ContactState, emptyState } from '../../contact-message'
+import { type ContactState, emptyState } from '#src/contact-message'
+
 import { ContactForm } from './ContactForm'
 
 const send = vi.hoisted(() => vi.fn<(previous: ContactState, formData: FormData) => Promise<ContactState>>())

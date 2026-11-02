@@ -1,6 +1,6 @@
-import { originOf } from '../../../env'
-import { feedOf } from '../../../feed'
-import { getReleases } from '../../../releases'
+import { originOf } from '#src/env'
+import { feedOf } from '#src/feed'
+import { getReleases } from '#src/releases'
 
 // Reads SITE_ENV on every request, for the address of the site in the links. The versions are
 // in the build.

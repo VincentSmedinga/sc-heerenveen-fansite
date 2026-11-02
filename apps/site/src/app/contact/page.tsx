@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 
 import { Heading, Link, Page, Text } from '@fansite/design-system'
 
-import { pageMetadata } from '../../metadata'
+import { pageMetadata } from '#src/metadata'
+
 import { ContactForm } from './ContactForm'
 
 // Render on each request: the canonical URL and the Open Graph address come from SITE_ENV,

@@ -2,12 +2,13 @@
 
 import { redirect } from 'next/navigation'
 
-import { type ArticleFormState } from '../../../beheer/article-fields'
-import { readValues, validate } from '../../../beheer/article-form'
-import { createArticle, saveArticle, withdrawArticle } from '../../../beheer/articles'
-import { parseItemId } from '../../../beheer/items'
-import { requireRole } from '../../../beheer/require-role'
-import { getDatabase } from '../../../database'
+import { type ArticleFormState } from '#src/beheer/article-fields'
+import { readValues, validate } from '#src/beheer/article-form'
+import { createArticle, saveArticle, withdrawArticle } from '#src/beheer/articles'
+import { parseItemId } from '#src/beheer/items'
+import { requireRole } from '#src/beheer/require-role'
+import { getDatabase } from '#src/database'
+
 import { articlePath, articlesPath } from './paths'
 
 // The actions of the articles. Only a beheerder writes: a moderator hides messages and has no

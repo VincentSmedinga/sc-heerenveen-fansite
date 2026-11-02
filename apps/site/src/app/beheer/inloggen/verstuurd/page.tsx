@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { Heading, Link, Page, Text } from '@fansite/design-system'
 
-import { compact } from '../../../../beheer/density'
+import { compact } from '#src/beheer/density'
 
 export const dynamic = 'force-dynamic'
 

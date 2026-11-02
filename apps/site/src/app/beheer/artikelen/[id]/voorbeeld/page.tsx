@@ -3,14 +3,14 @@ import type { Metadata } from 'next'
 import { Article, Card, Heading, Link, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { ArticleText } from '../../../../../ArticleText'
-import { findArticle } from '../../../../../beheer/articles'
-import { compact } from '../../../../../beheer/density'
-import { parseItemId } from '../../../../../beheer/items'
-import { requireRole } from '../../../../../beheer/require-role'
-import { getDatabase } from '../../../../../database'
-import { dayOf, formatArticleDate } from '../../../../../news'
-import { articlePath } from '../../paths'
+import { articlePath } from '#src/app/beheer/artikelen/paths'
+import { ArticleText } from '#src/ArticleText'
+import { findArticle } from '#src/beheer/articles'
+import { compact } from '#src/beheer/density'
+import { parseItemId } from '#src/beheer/items'
+import { requireRole } from '#src/beheer/require-role'
+import { getDatabase } from '#src/database'
+import { dayOf, formatArticleDate } from '#src/news'
 
 // Render on each request, and never keep it: a preview shows a draft. The admin sends
 // `Cache-Control: no-store` and `X-Robots-Tag: noindex` for every path under /beheer (see

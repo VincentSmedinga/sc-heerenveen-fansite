@@ -3,14 +3,15 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '../../matches'
-import { statisticsShortcuts } from '../../statisticsShortcuts'
-import { matchData } from '../../test-matches'
-import { withoutIcons } from '../../without-icons'
+import { getMatchData, getMatchSeasons } from '#src/matches'
+import { statisticsShortcuts } from '#src/statisticsShortcuts'
+import { matchData } from '#src/test-matches'
+import { withoutIcons } from '#src/without-icons'
+
 import StatisticsPage, { generateMetadata } from './page'
 
 // Only the query is replaced: the split into the programme and the results is the real one.
-vi.mock('../../matches', async (importOriginal) => ({
+vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),

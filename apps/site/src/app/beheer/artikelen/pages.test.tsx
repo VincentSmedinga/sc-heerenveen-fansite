@@ -5,8 +5,9 @@ import { createTestDatabase } from '@fansite/db/test-database'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createAccount } from '../../../beheer/accounts'
-import { createArticle, saveArticle, withdrawArticle } from '../../../beheer/articles'
+import { createAccount } from '#src/beheer/accounts'
+import { createArticle, saveArticle, withdrawArticle } from '#src/beheer/articles'
+
 import ArticlePage, { metadata as articleMetadata } from './[id]/page'
 import VersionPage, { metadata as versionMetadata } from './[id]/versies/[nummer]/page'
 import PreviewPage, { metadata as previewMetadata } from './[id]/voorbeeld/page'
@@ -15,8 +16,8 @@ import ArticlesPage, { metadata as listMetadata } from './page'
 
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
 
-vi.mock('../../../database', () => ({ getDatabase: () => database }))
-vi.mock('../../../beheer/require-role', () => ({ requireRole }))
+vi.mock('#src/database', () => ({ getDatabase: () => database }))
+vi.mock('#src/beheer/require-role', () => ({ requireRole }))
 vi.mock('next/navigation', () => ({
   notFound: () => {
     throw new Error('not found')

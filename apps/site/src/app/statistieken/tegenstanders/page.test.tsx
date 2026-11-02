@@ -1,18 +1,19 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getEditedMatches, getMatchSeasons } from '../../../matches'
-import { getClubRecords, getSourcePages } from '../../../opponents'
-import { allRecords, leagueRecords, matchSeasons, sourcePages } from '../../../test-opponents'
-import { withoutIcons } from '../../../without-icons'
+import { getEditedMatches, getMatchSeasons } from '#src/matches'
+import { getClubRecords, getSourcePages } from '#src/opponents'
+import { allRecords, leagueRecords, matchSeasons, sourcePages } from '#src/test-opponents'
+import { withoutIcons } from '#src/without-icons'
+
 import OpponentsPage, { generateMetadata } from './page'
 
-vi.mock('../../../matches', async (importOriginal) => ({
+vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getEditedMatches: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
-vi.mock('../../../opponents', async (importOriginal) => ({
+vi.mock('#src/opponents', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getClubRecords: vi.fn(),
   getSourcePages: vi.fn(),

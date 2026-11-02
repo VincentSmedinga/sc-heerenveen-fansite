@@ -1,14 +1,15 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '../../../../matches'
-import { playersShortcuts } from '../../../../statisticsShortcuts'
-import { matchData } from '../../../../test-matches'
-import { withoutIcons } from '../../../../without-icons'
+import { getMatchData, getMatchSeasons } from '#src/matches'
+import { playersShortcuts } from '#src/statisticsShortcuts'
+import { matchData } from '#src/test-matches'
+import { withoutIcons } from '#src/without-icons'
+
 import SeasonPlayersPage, { generateMetadata } from './page'
 
 // Only the queries are replaced: the page of a season is the real one.
-vi.mock('../../../../matches', async (importOriginal) => ({
+vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),

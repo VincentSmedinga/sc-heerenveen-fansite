@@ -3,17 +3,18 @@ import type { PublicArchiveItem, PublicArchiveSource, PublicEpisode } from '@fan
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { ArchivePage as Content } from '../../archive'
+import type { ArchivePage as Content } from '#src/archive'
 
-import { getArchivePage } from '../../archive'
-import { getNewestArticle } from '../../articles'
-import { getLatestEpisodes } from '../../podcasts'
-import { withoutIcons } from '../../without-icons'
+import { getArchivePage } from '#src/archive'
+import { getNewestArticle } from '#src/articles'
+import { getLatestEpisodes } from '#src/podcasts'
+import { withoutIcons } from '#src/without-icons'
+
 import NewsPage, { generateMetadata } from './page'
 
-vi.mock('../../archive', () => ({ getArchivePage: vi.fn() }))
-vi.mock('../../articles', () => ({ getNewestArticle: vi.fn() }))
-vi.mock('../../podcasts', () => ({ getLatestEpisodes: vi.fn() }))
+vi.mock('#src/archive', () => ({ getArchivePage: vi.fn() }))
+vi.mock('#src/articles', () => ({ getNewestArticle: vi.fn() }))
+vi.mock('#src/podcasts', () => ({ getLatestEpisodes: vi.fn() }))
 
 // The moment of now is the afternoon of Friday 30 October 2026 in the Netherlands.
 const now = new Date('2026-10-30T13:40:00Z')

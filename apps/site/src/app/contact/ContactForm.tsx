@@ -16,8 +16,9 @@ import {
 } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
-import { email } from '../../contact'
-import { type ContactState, emptyState, fieldNames, honeypotName, maxLengths, subjects } from '../../contact-message'
+import { email } from '#src/contact'
+import { type ContactState, emptyState, fieldNames, honeypotName, maxLengths, subjects } from '#src/contact-message'
+
 import { sendContactMessage } from './actions'
 
 const summaryId = 'fouten'

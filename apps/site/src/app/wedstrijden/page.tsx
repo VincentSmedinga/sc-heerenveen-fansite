@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
 
-import type { SearchParams } from '../../season-page'
+import type { SearchParams } from '#src/season-page'
 
 import { matchesMetadata, MatchesPage } from './matches-page'
 

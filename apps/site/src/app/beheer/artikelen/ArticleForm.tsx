@@ -9,7 +9,7 @@ import {
   fieldNames,
   slugMaxLength,
   suggestSlug,
-} from '../../../beheer/article-fields'
+} from '#src/beheer/article-fields'
 
 const summaryId = 'fouten'
 

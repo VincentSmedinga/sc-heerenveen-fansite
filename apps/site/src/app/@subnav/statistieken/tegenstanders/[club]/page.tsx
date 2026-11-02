@@ -1,6 +1,6 @@
-import type { SearchParams } from '../../../../../season-page'
+import type { SearchParams } from '#src/season-page'
 
-import { StatisticsBar } from '../../../../../statisticsBar'
+import { StatisticsBar } from '#src/statisticsBar'
 
 // Render on each request, like the page it belongs to: the bar reads `?competitie=`.
 export const dynamic = 'force-dynamic'
