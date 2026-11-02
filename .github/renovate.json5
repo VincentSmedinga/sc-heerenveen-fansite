@@ -21,7 +21,8 @@
   osvVulnerabilityAlerts: true,
   packageRules: [
     {
-      // TypeScript 7 has no JavaScript API yet; see "TypeScript 6 in plaats van 7" in docs/beslissingen/designsysteem.md.
+      // TypeScript 7 has no JavaScript API yet; see "TypeScript 6 in plaats van 7" in
+      // docs/beslissingen/designsysteem.md.
       allowedVersions: '<7',
       matchPackageNames: ['typescript'],
     },
