@@ -88,10 +88,8 @@ export default async function AdminPage() {
       </Page.Main>
       {todo.length === 0 ? null : (
         <Page.Sidebar aria-label="Te doen">
-          <Card aria-labelledby="te-doen" surface="soft">
-            <Heading id="te-doen" level={2}>
-              Te doen
-            </Heading>
+          <Card as="div" surface="soft">
+            <Heading level={2}>Te doen</Heading>
             <List role="list">
               {todo.map((item) => (
                 <List.Item key={item.href + item.text}>
