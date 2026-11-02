@@ -303,7 +303,7 @@ for (const [name, javaScriptEnabled] of [
 
       // Taking the entry away asks for a reason, and brings the match back.
       await page.goto(address)
-      await page.getByText('Invoer weghalen', { exact: true }).click()
+      await page.locator('summary', { hasText: 'Invoer weghalen' }).click()
       await page.getByRole('button', { name: /^Invoer weghalen voor/u }).click()
       await expect(page.locator('#weghalen-reden')).toHaveAttribute('aria-invalid', 'true')
       await page.getByLabel('Reden om de invoer weg te halen').fill('Het was een test')
