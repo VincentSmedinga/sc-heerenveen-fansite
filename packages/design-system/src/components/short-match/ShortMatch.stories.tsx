@@ -6,29 +6,33 @@ import { Form } from '../form/Form'
 import { Heading } from '../heading/Heading'
 import { List } from '../list/List'
 import { Text } from '../text/Text'
-import { ShortMatch } from './ShortMatch'
+import { ShortMatch, type ShortMatchProps } from './ShortMatch'
 
 const meta = preview.meta({
   parameters: {
     docs: {
       description: {
         component: [
-          'Een gespeelde wedstrijd van sc Heerenveen 1 als korte regel in een lijst: de dag, de tegenstander met "thuis" of "uit", en de uitslag vanuit onze kant, zoals "za 24 okt Testdorp FC · thuis 3–0".',
+          'Een gespeelde wedstrijd van sc Heerenveen 1 als korte regel in een lijst: de dag en de twee clubs met de uitslag ertussen, zoals "za 24 okt sc Heerenveen 3–0 Testdorp FC".',
+          'De thuisclub staat altijd eerst, en het eerste getal is dat van de thuisclub, zoals in de krant en in een `Match`.',
+          'Een uitwedstrijd die wij met 3–0 winnen staat dus als "Testdorp FC 0–3 sc Heerenveen".',
+          'Er staat geen "thuis" of "uit" bij: de volgorde zegt het al.',
+          'Een schermlezer hoort dezelfde volgorde met de namen van de clubs, als "Testdorp FC 0 tegen 3 sc Heerenveen".',
           'Het is voor een lijst die over onze club gaat, zoals de wedstrijden waarin we de nul hielden of de wedstrijden tegen één club.',
-          'Onze eigen naam staat dus niet in de regel.',
+          'Onze eigen naam staat vet, zoals in een `Match`.',
           '',
-          'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen, zoals in een `Match`: groen bij winst, rood bij verlies en neutraal bij gelijkspel, thuis en uit.',
+          'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen, niet van de thuisclub: groen bij winst, rood bij verlies en neutraal bij gelijkspel, thuis en uit.',
           'De uitkomst volgt uit `goalsFor` en `goalsAgainst`, met dezelfde regel als `Match`, dus er is geen eigenschap voor.',
-          'De kleur is nooit het enige teken: de cijfers zijn de uitslag, ze staan in een zwaarder gewicht, en een schermlezer hoort de uitslag als "3 tegen 0".',
+          'De kleur is nooit het enige teken: de cijfers zijn de uitslag en ze staan in een zwaarder gewicht.',
           'In geforceerde kleuren vervangt de browser de kleur en blijft het gewicht.',
           'Een bekerwedstrijd die op strafschoppen is beslist, staat hier als gelijkspel, want het onderdeel kent de strafschoppen niet.',
           '',
           'De regel heeft geen competitie, ronde, stadion, tijd of doelpuntenmakers: dat is een `Match`.',
           '- `time` is de dag zoals een bezoeker hem leest, zoals "za 24 okt", en `dateTime` is de waarde voor machines, zoals "2026-10-24".',
-          '- `home` zegt of sc Heerenveen thuis speelde.',
-          '- `goalsFor` zijn de doelpunten van sc Heerenveen, `goalsAgainst` die van de tegenstander.',
+          '- `home` zegt of sc Heerenveen thuis speelde, en dus welke club vooraan staat.',
+          '- `goalsFor` zijn de doelpunten van sc Heerenveen, `goalsAgainst` die van de tegenstander, ook bij een uitwedstrijd. Het component zet ze zelf in de volgorde van de wedstrijd.',
           '',
-          'De regel past op één regel en breekt op een smalle plek: de uitslag gaat dan naar de volgende regel voordat een naam wordt afgebroken.',
+          'De regel past op één regel en breekt op een smalle plek: de clubs gaan dan over twee regels, en de uitslag blijft in één stuk.',
           'Een lange naam breekt in plaats van de pagina zijwaarts te laten scrollen.',
           'Het component is een `div`.',
           'Zet hem in een `List.Item` en geef de `List` `role="list"`: Safari noemt een lijst zonder opsommingstekens anders geen lijst meer.',
@@ -59,18 +63,27 @@ const shortList = [
   { dateTime: '2026-10-04', goalsAgainst: 0, goalsFor: 0, home: true, opponent: 'Proefstad SV', time: 'zo 4 okt' },
 ] as const
 
-const longName = {
-  dateTime: '2026-09-20',
-  goalsAgainst: 0,
-  goalsFor: 2,
-  home: false,
-  opponent: 'Koninklijke Sportvereniging Proefdorp-Nepstad-Voorbeeldhoek Combinatie',
-  time: 'zo 20 sep',
-} as const
+// A long name at either end of the line: first when we play away, last when we play at home.
+const longNames = [
+  {
+    dateTime: '2026-09-20',
+    goalsAgainst: 0,
+    goalsFor: 2,
+    home: false,
+    opponent: 'Koninklijke Sportvereniging Proefdorp-Nepstad-Voorbeeldhoek Combinatie',
+    time: 'zo 20 sep',
+  },
+  {
+    dateTime: '2026-09-13',
+    goalsAgainst: 1,
+    goalsFor: 1,
+    home: true,
+    opponent: 'Koninklijke Sportvereniging Proefdorp-Nepstad-Voorbeeldhoek Combinatie',
+    time: 'zo 13 sep',
+  },
+] as const
 
-const renderCard = (
-  matches: readonly (typeof shortList)[number][] | readonly [...typeof shortList, typeof longName],
-) => (
+const renderCard = (matches: readonly ShortMatchProps[]) => (
   <div style={{ maxInlineSize: '20rem' }}>
     <Card aria-labelledby="nul-kop">
       <Heading id="nul-kop" level={2}>
@@ -118,7 +131,7 @@ const renderNamed = () => (
   </div>
 )
 
-const renderLongName = () => renderCard([...shortList, longName])
+const renderLongName = () => renderCard([...shortList, ...longNames])
 
 // Ten lines and the button under them, as the page has it when there are more.
 const renderWithButton = () => (
@@ -162,11 +175,12 @@ const renderNone = () => (
   </div>
 )
 
-// Each outcome, home and away, from the side of sc Heerenveen: 0–2 away is a win.
+// Each outcome, home and away. The colour is from the side of sc Heerenveen: 0–2 away is a win.
 const outcomes = [
   { dateTime: '2026-10-24', goalsAgainst: 0, goalsFor: 3, home: true, opponent: 'Testdorp FC', time: 'za 24 okt' },
   { dateTime: '2026-10-17', goalsAgainst: 2, goalsFor: 0, home: true, opponent: 'Voorbeeld United', time: 'za 17 okt' },
   { dateTime: '2026-10-10', goalsAgainst: 1, goalsFor: 1, home: false, opponent: 'Proefstad SV', time: 'za 10 okt' },
+  { dateTime: '2026-10-07', goalsAgainst: 0, goalsFor: 0, home: true, opponent: 'Nepstad United', time: 'wo 7 okt' },
   { dateTime: '2026-10-03', goalsAgainst: 0, goalsFor: 2, home: false, opponent: 'Nepdorp FC', time: 'za 3 okt' },
   {
     dateTime: '2026-09-26',

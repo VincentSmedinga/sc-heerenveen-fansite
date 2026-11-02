@@ -264,11 +264,13 @@ describe('the page /statistieken', () => {
       expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(2)
       expect(sheets.indexOf('SV Proefdorp')).toBeLessThan(sheets.indexOf('Testdorp FC'))
       expect(sheets).toContain('di 20 okt')
-      expect(sheets).toContain('<span class="hf-short-match-where">uit</span>')
-      expect(sheets).toContain('<span class="hf-short-match-where">thuis</span>')
-      expect(sheets).toContain('1–0')
+      expect(sheets).not.toContain('hf-short-match-where')
+      // Away, the home club and its goals come first: our 1–0 is "SV Proefdorp 0–1".
+      expect(sheets).toContain('<span>SV Proefdorp</span> <span class="hf-short-match-score hf-match-win">')
+      expect(sheets).toContain('0–1')
+      expect(sheets).toContain('0 tegen 1')
       expect(sheets).toContain('2–0')
-      expect(sheets).toContain('1 tegen 0')
+      expect(sheets).toContain('2 tegen 0')
       expect(sheets).not.toContain('Oud Resultaat')
       expect(sheets).not.toContain('Voorbeeld United')
     })
@@ -585,8 +587,8 @@ describe('the page /statistieken', () => {
         'Club 5',
         'Club 6',
       ])
-      expect(lines[0]).toContain('uit')
-      expect(lines[0]).toContain('1 tegen 0')
+      // Club 2 won 1–0 for us, away, so the home club and its goal come first: 0–1.
+      expect(lines[0]).toMatch(/Club 2<\/span>.*0–1.*0 tegen 1.*sc Heerenveen/)
       expect(lines[4]).toContain('0 tegen 0')
     })
 
@@ -1059,10 +1061,10 @@ describe('the page /statistieken', () => {
       expect(card.match(/<ul[^>]*role="list"/g)).toHaveLength(1)
       expect(card.match(/class="hf-short-match"/g)).toHaveLength(4)
       expect(lines(card)).toEqual([
-        expect.stringMatching(/^Grootste overwinning .*Testdorp FC.* thuis 2–0 2 tegen 0$/),
-        expect.stringMatching(/^Meeste doelpunten .*Voorbeeld United.* uit 2–2 2 tegen 2$/),
-        expect.stringMatching(/^Vroegste doelpunt · minuut 34 · Proefman .*Testdorp FC · thuis 2–0 2 tegen 0$/),
-        expect.stringMatching(/^Laatste doelpunt · minuut 63 · Kopie .*Voorbeeld United · uit 2–2 2 tegen 2$/),
+        expect.stringMatching(/^Grootste overwinning .*sc Heerenveen 2–0 2 tegen 0 Testdorp FC$/),
+        expect.stringMatching(/^Meeste doelpunten .*Voorbeeld United 2–2 2 tegen 2 sc Heerenveen$/),
+        expect.stringMatching(/^Vroegste doelpunt · minuut 34 · Proefman .*sc Heerenveen 2–0 2 tegen 0 Testdorp FC$/),
+        expect.stringMatching(/^Laatste doelpunt · minuut 63 · Kopie .*Voorbeeld United 2–2 2 tegen 2 sc Heerenveen$/),
       ])
     })
 
@@ -1115,7 +1117,7 @@ describe('the page /statistieken', () => {
 
       expect(lines(card)).toEqual([
         expect.stringMatching(/^Grootste overwinning .*Testdorp FC/),
-        expect.stringMatching(/^Grootste nederlaag .*Oud Resultaat.* thuis 1–5 1 tegen 5$/),
+        expect.stringMatching(/^Grootste nederlaag .*sc Heerenveen 1–5 1 tegen 5 Oud Resultaat$/),
         expect.stringMatching(/^Meeste doelpunten .*Oud Resultaat/),
         expect.stringMatching(/^Vroegste doelpunt · minuut 34 · Proefman /),
         expect.stringMatching(/^Laatste doelpunt · minuut 90\+4 · Teststraat \(eigen doelpunt\) .*Oud Resultaat/),
