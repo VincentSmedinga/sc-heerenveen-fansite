@@ -246,10 +246,18 @@
    * A grid item sticks within its grid area, which is as tall as the main column, so the
    * sidebar can follow the reader from the top to the bottom of it. Under 52rem the sidebar is
    * under the main column and scrolls with the page.
+   * A sidebar that is taller than the window scrolls on its own, so every part of it can be
+   * reached, with the keyboard too (WCAG 2.4.11). The little padding, which the negative margin
+   * takes back, leaves room for the focus ring of a link at the edge, which a scrolling box
+   * would cut off.
    */
   @media (width >= 52rem) {
     .hf-page-sidebar-sticky {
       inset-block-start: var(--hf-space-m);
+      margin: -0.25rem;
+      max-block-size: calc(100dvh - 2 * var(--hf-space-m));
+      overflow-y: auto;
+      padding: 0.25rem;
       position: sticky;
     }
   }

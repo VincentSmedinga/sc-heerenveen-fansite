@@ -71,8 +71,8 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
   /**
    * Keeps the sidebar in view while the main column scrolls, from the width where it stands
    * beside it. For a sidebar with something the reader needs while filling in a long main
-   * column, such as the save panel of a form. Keep it short: a sidebar that is taller than the
-   * window would be cut off at the bottom. Under the main column it scrolls with the page.
+   * column, such as the save panel of a form. A sidebar that is taller than the window scrolls
+   * on its own. Under the main column it scrolls with the page.
    */
   sticky?: boolean
   /**
