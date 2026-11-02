@@ -12,6 +12,7 @@ import {
   listArchivePage,
   listArchiveSources,
   listEnabledSources,
+  listLeagueResults,
   listMatchSeasons,
   listNewestDiscussions,
   listPodcastEpisodes,
@@ -26,6 +27,7 @@ import {
   discussions,
   feeds,
   items,
+  leagueResults,
   matches,
   matchGoals,
   players,
@@ -1908,6 +1910,41 @@ describe('the matches and the table of a season', () => {
       const rows = await listSeasonStandings(database.db, '2026/27')
 
       expect(rows.at(-1)?.goalDifference).toBe(-2)
+    })
+  })
+
+  describe('listLeagueResults', () => {
+    const result = (overrides: Partial<typeof leagueResults.$inferInsert>): typeof leagueResults.$inferInsert => ({
+      awayClub: 'FC Twente',
+      awayGoals: 0,
+      homeClub: 'Ajax',
+      homeGoals: 1,
+      playedOn: '2026-10-18',
+      round: 9,
+      season: '2026/27',
+      ...overrides,
+    })
+
+    beforeEach(async () => {
+      await database.pool.query('DELETE FROM league_results')
+    })
+
+    it('gives the results of the season by day and round, and leaves out the other seasons', async () => {
+      await database.db
+        .insert(leagueResults)
+        .values([
+          result({ awayClub: 'PSV', homeClub: 'Feyenoord', playedOn: '2026-10-25', round: 10 }),
+          result({ playedOn: '2026-10-18', round: 9 }),
+          result({ playedOn: '2025-10-19', round: 9, season: '2025/26' }),
+        ])
+
+      const rows = await listLeagueResults(database.db, '2026/27')
+
+      expect(rows).toEqual([
+        { awayClub: 'FC Twente', awayGoals: 0, homeClub: 'Ajax', homeGoals: 1, playedOn: '2026-10-18', round: 9 },
+        { awayClub: 'PSV', awayGoals: 0, homeClub: 'Feyenoord', homeGoals: 1, playedOn: '2026-10-25', round: 10 },
+      ])
+      expect(await listLeagueResults(database.db, '2027/28')).toEqual([])
     })
   })
 
