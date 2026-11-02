@@ -3246,6 +3246,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `@view-transition` alleen op pagina's met een schakelaar (CSS kan dat niet kiezen; het zou een script of een eigen stylesheet per pagina kosten).
   Een tweede maat-eigenschap voor de schakelaar (de kleine maat is al één mechanisme voor alle knoppen en velden).
 - **Later:** zie _Een SegmentedControl bewaart niets, en de ingedrukte knop is gevuld_: de ingedrukte knop is niet meer gevuld, maar de gekozen keuze heeft een knop en dikkere letters.
+- **Later:** zie _De baan van de schakelaar is een doorzichtige tint_: de baan is niet meer grijs-200 en blauw-800, maar een doorzichtige tint, en de rand en de letters halen hun verhouding over elk vlak.
+  De vorm, de maten, de beweging en de knop blijven zoals ze zijn.
 
 ### De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past
 
@@ -3600,6 +3602,27 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Alleen de volgorde van de kolommen en de regel onder de tabel maken het verschil voor wie ziet.
 - **Gevolg:** de kolommen worden smaller, want alle koppen zijn één letter (#630 bouwt daarop).
 - **Alternatieven:** "=" voor gelijk (uniek en eenletterig, maar de uitslagen krijgen dan een ander teken dan de supporter kent); "Wed" voor gespeeld (de gewone kop in Nederlandse tabellen, maar drie letters en een bredere kolom); een bal als pictogram voor gespeeld (een nieuw pictogram dat moeilijker te lezen is); GL of L voor gelijk (twee letters, of een letter die van niets komt); een lege kop (niet toegankelijk); "±" of "+/−" voor het doelsaldo (geen letter, of drie tekens breed); gewonnen en verloren als woorden (dan moeten de uitslagen en het verloop mee).
+
+### De baan van de schakelaar is een doorzichtige tint
+
+- **Datum:** 2 november 2026
+- **Besluit:** `--hf-colour-background-track` is `color-mix(in srgb, <kleur uit een schaal> n%, transparent)`, in licht en in donker (#628).
+  - **In licht** is het grijs-400 met 15%, **in donker** blauw-300 met 10%.
+    Dat is het kleinste percentage in stappen van 5 waarbij de baan op de pagina en op elk vlak minstens 1,1:1 afwijkt van wat eronder ligt, zodat hij als een groef te zien blijft.
+    De baan was in licht tussen 1,09:1 (warm) en 1,33:1 (wit) van de ondergrond en in donker tussen 1,00:1 (sterk en warm, de baan was daar onzichtbaar) en 1,47:1.
+    De verhoudingen voor de rand en de letters zijn er al bij 5%, en zeggen niets over de zichtbaarheid van de baan zelf.
+    De ondergrens van 1,1:1 is dus onze keuze.
+  - **De verhoudingen** gelden over de pagina, wit, `soft`, `strong` en `warm`, in licht en in donker: de rand van de knop 3:1 tegen de baan en tegen de knop, de letters van de opties 4,5:1 op de baan, en 4,5:1 voor de gekozen keuze op de knop.
+    `segmented-control-css.test.ts` legt de baan met een kleine hulpfunctie over elk vlak en meet die uitkomsten, in plaats van één kleur.
+  - **Zonder `light-dark()` of `color-mix()`** houdt de baan de oude vaste kleur: grijs-200, uit het blok `@supports not (color: light-dark(#000, #fff))` in `colour.css`.
+    Elke browser met `light-dark()` kent ook `color-mix()`, dus één blok is genoeg.
+  - **Een tint is geen stap uit een schaal:** wat de baan op een ondergrond wordt, verschilt per ondergrond.
+    Dat nemen we aan, zoals bij de strepen.
+- **Waarom:** de vaste baan was warm grijs en lag op een zachte kaart (blauw-50) op een koele blauwe ondergrond, en dat zag er mis uit.
+  Een tint neemt de kleur van de ondergrond over, dus de baan past op de pagina en op elk vlak, ook een vlak dat er later bijkomt, zonder dat `Card` iets hoeft te zetten.
+  In donker was de baan op de sterke en de warme kaart (blauw-800) even donker als de kaart en dus onzichtbaar; een lichte tint maakt hem daar wel een groef.
+- **Nadeel:** de uitkomst is geen vaste kleur uit het palet, dus er is geen vaste tabelrij met een verhouding voor de baan: de test meet elke ondergrond.
+- **Alternatieven:** een vaste kleur per vlak, gezet door `Card` (echte paletkleuren en eenvoudige metingen, maar elke nieuwe ondergrond vraagt een nieuwe regel); de baan laten zoals hij is; in donker een donkere tint (blauw-950, onzichtbaar op de pagina, die dezelfde kleur heeft).
 
 ## Site
 
