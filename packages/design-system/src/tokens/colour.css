@@ -118,17 +118,19 @@
      * The track of a segmented control and the thumb under the chosen option. The track is a
      * see-through tint of a scale colour, made with color-mix(), so it takes the colour of what
      * it lies on and fits the page and every surface. It is no step of a scale, and what it
-     * comes to differs per surface. In light it is grey-400 at 15% and in dark blue-300 at 10%:
-     * the least that keeps the track at least 1.1:1 away from the page and from each surface,
-     * so it reads as a groove. The thumb is white in light and blue-700 in dark. Its border is
-     * the border of a field (--hf-colour-border-input), which reaches 3:1 against the thumb
+     * comes to differs per surface. In light it is grey-400 at 20% and in dark blue-300 at 15%,
+     * chosen by eye as a groove that is clearly there on every surface. The letters of the
+     * other options (4.5:1) cap it at about 24% in light, and the border of the thumb (3:1) at
+     * about 16% in dark. It stays at least 1.1:1 away from the page and from each surface. The
+     * thumb is white in light and blue-700 in dark. Its border is the border of a field
+     * (--hf-colour-border-input), which reaches 3:1 against the thumb
      * itself in both themes and against the track on every surface. The shadow is a light edge
      * below the thumb. A browser without light-dark() or color-mix() gets the solid track from
      * the @supports block below.
      */
     --hf-colour-background-track: light-dark(
-      color-mix(in srgb, var(--hf-colour-grey-400) 15%, transparent),
-      color-mix(in srgb, var(--hf-colour-blue-300) 10%, transparent)
+      color-mix(in srgb, var(--hf-colour-grey-400) 20%, transparent),
+      color-mix(in srgb, var(--hf-colour-blue-300) 15%, transparent)
     );
     --hf-colour-background-thumb: light-dark(var(--hf-colour-white), var(--hf-colour-blue-700));
     --hf-colour-shadow-thumb: light-dark(

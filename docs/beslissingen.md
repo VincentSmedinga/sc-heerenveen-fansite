@@ -3607,11 +3607,13 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 2 november 2026
 - **Besluit:** `--hf-colour-background-track` is `color-mix(in srgb, <kleur uit een schaal> n%, transparent)`, in licht en in donker (#628).
-  - **In licht** is het grijs-400 met 15%, **in donker** blauw-300 met 10%.
-    Dat is het kleinste percentage in stappen van 5 waarbij de baan op de pagina en op elk vlak minstens 1,1:1 afwijkt van wat eronder ligt, zodat hij als een groef te zien blijft.
+  - **In licht** is het grijs-400 met 20%, **in donker** blauw-300 met 15%.
+    Een eerste keuze, 15% en 10%, was de projecteigenaar te licht; deze zijn op het oog gekozen.
     De baan was in licht tussen 1,09:1 (warm) en 1,33:1 (wit) van de ondergrond en in donker tussen 1,00:1 (sterk en warm, de baan was daar onzichtbaar) en 1,47:1.
-    De verhoudingen voor de rand en de letters zijn er al bij 5%, en zeggen niets over de zichtbaarheid van de baan zelf.
-    De ondergrens van 1,1:1 is dus onze keuze.
+    Nu is hij in licht tussen 1,14:1 en 1,18:1 en in donker tussen 1,33:1 en 1,35:1.
+    Sterker kan niet veel: in licht halen de letters van de andere keuzes (grijs-600) 4,5:1 tot ongeveer 24%, en in donker haalt de rand van de knop 3:1 tegen de baan tot ongeveer 16%.
+  - **De ondergrens** is 1,1:1 van de pagina en van elk vlak, zodat de baan als een groef te zien blijft.
+    De verhoudingen voor de rand en de letters zijn er al bij 5%, en zeggen niets over de zichtbaarheid van de baan zelf, dus die ondergrens is onze keuze.
   - **De verhoudingen** gelden over de pagina, wit, `soft`, `strong` en `warm`, in licht en in donker: de rand van de knop 3:1 tegen de baan en tegen de knop, de letters van de opties 4,5:1 op de baan, en 4,5:1 voor de gekozen keuze op de knop.
     `segmented-control-css.test.ts` legt de baan met een kleine hulpfunctie over elk vlak en meet die uitkomsten, in plaats van één kleur.
   - **Zonder `light-dark()` of `color-mix()`** houdt de baan de oude vaste kleur: grijs-200, uit het blok `@supports not (color: light-dark(#000, #fff))` in `colour.css`.
