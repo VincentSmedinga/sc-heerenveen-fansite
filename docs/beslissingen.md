@@ -4103,6 +4103,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De lijst gebruikt alleen componenten die er al zijn, dus er is geen nieuw onderdeel in het designsysteem.
   De zinnen "Staat binnen vijf minuten niet meer op de site" en "weer op de site" kloppen: de homepage en `/podcasts` bewaren hun lijsten vijf minuten (`src/headlines.ts`, `src/podcasts.ts`), en `src/headlines-hidden.test.ts` bewijst met een echte database en de klok van de cache dat een bericht na 4 minuten en 59 seconden nog staat en na 5 minuten weg is.
 - **Alternatieven:** de cache leeghalen bij het verbergen (alleen in het proces dat de actie draait, en op de host kunnen er meer zijn); een vertraging in de zin (we zouden iets beloven wat we niet kennen); een client-component met `useActionState` zoals het contactformulier (de fout blijft dan alleen bij het veld, en 50 formulieren met JavaScript erbij zijn zwaarder); de reden in een tekstvak (een reden is één regel).
+- **Later:** zie _De lijst in het beheer heeft een schakelaar voor wel en niet op de site_ (2 november 2026): de lijst is nu twee groepen van elk de nieuwste 50, het zoekveld en de acties houden de groep vast, en bij een verborgen bericht staat ook wie het verborg.
 
 ### Het beheer stuurt een referrer naar de eigen site, zodat formulieren zonder JavaScript werken
 
@@ -5232,6 +5233,38 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** een parameter `?seizoen=` (de pagina's hebben al een adres per seizoen, dus dat zou een tweede adres voor dezelfde pagina zijn); het gekozen seizoen onthouden in een cookie (we volgen bezoekers niet, en een cookie maakt het adres afhankelijk van een eerder bezoek).
 - **Later:** zie _Het hoofdmenu leest het pad in een clientcomponent_ (22 oktober 2026): het menu leest het pad nu ook voor de adressen van twee onderdelen, niet alleen voor de markering.
 
+### De lijst in het beheer heeft een schakelaar voor wel en niet op de site
+
+- **Datum:** 2 november 2026
+- **Besluit:** `/beheer/berichten` toont de nieuwste 50 berichten van één groep, met een schakelaar (`SegmentedLinks`, kleine maat, naam "Welke berichten") met "Op de site" en "Niet op de site".
+  - **De groep:** "Op de site" is de standaard en heeft niets in het adres.
+    "Niet op de site" is `?toon=niet-op-de-site`.
+    Een andere waarde valt terug op de standaard.
+  - **De regel:** `isOnSite` in `apps/site/src/beheer/items.ts` zegt dat een bericht op de site staat als het niet verborgen is, de import het `relevant` vond en de publicatietijd niet in de toekomst ligt.
+    Alle andere berichten staan niet op de site: de verborgen, de twijfelgevallen, de berichten die niet over de club gaan en de berichten met een tijd die nog komt.
+    `listItems` gebruikt alleen die functie, en haalt "niet op de site" uit hetzelfde zoekwerk met `not`, dus een bericht staat in precies één groep.
+  - **Het vakje:** onder "Niet op de site" staat in het zoekformulier "Alleen door de redactie verborgen" (`?redactie=1`), dat alleen de berichten toont die een redacteur verborg.
+    Onder "Op de site" is er geen vakje en telt `redactie` niet, want daar kan geen verborgen bericht staan.
+    De schakelaar naar "Op de site" laat het vakje los, die naar "Niet op de site" houdt het vast als het aangevinkt was, en "Toon alle berichten" wist alleen de zoekopdracht.
+    Het formulier is een GET-formulier zonder JavaScript met één knop "Zoeken", die de groep meestuurt (`name="toon"` en `value="niet-op-de-site"` op de knop, want het designsysteem heeft geen verborgen veld).
+  - **Wie verborg het:** bij een verborgen bericht staat "Verborgen op {tijd} door {e-mailadres}. Reden: …", uit het account in `hidden_by`.
+    Bestaat het account niet meer, dan staat er "een verwijderd account".
+  - **Geen formulier waar het niets doet:** een bericht dat de import niet op de site zet en dat niemand verborg, krijgt geen formulier om te verbergen.
+    De vermelding "twijfelgeval, niet op de site" of "niet over de club, niet op de site" blijft.
+    Een bericht met een tijd die nog komt, houdt het formulier en krijgt de vermelding "nog niet gepubliceerd, niet op de site".
+  - **Verbergen en tonen:** de acties krijgen de groep, het vakje en de zoekopdracht mee en eindigen op dezelfde groep.
+    Het bericht staat daarna in de andere groep, en de melding "Verborgen" of "Weer getoond" zegt wat er gebeurde.
+    De acties, de logregels en de rechten zijn niet veranderd.
+- **Waarom:** een moderator die iets wil verbergen, scrolde langs berichten die er nooit op stonden, en wie iets weer wil tonen, zocht tussen alles.
+  De lengte van 50 geldt per groep, zodat de twijfelgevallen de berichten die wel op de site staan niet wegdrukken.
+- **Het verschil met de site:** `isShown` in `packages/db/src/queries.ts` (zie _De site toont alleen `relevant`, en het beheer toont alles met een woord erbij_) is geen losse voorwaarde.
+  Hij kijkt ook of de bron aanstaat, laat bij een bericht met een `thread_key` alleen de laatste versie van het verhaal door en voegt een verhaal van twee bronnen van één uitgever samen.
+  `isOnSite` doet dat niet, en kijkt per bericht.
+  Een bericht dat de site samenvouwt met een nieuwer bericht van dezelfde krant (zelfde onderwerp), of dat van een bron staat die uit is, kan hier dus "op de site" staan terwijl de bezoeker het niet ziet.
+  We nemen dat voor lief: de groep is er om een bericht te vinden dat een redacteur wil verbergen, en dat bericht staat er dan nog steeds.
+- **Nadeel:** de groep "Op de site" kan een bericht tonen dat de bezoeker door de samenvouwregel of een bron die uitstaat niet ziet.
+- **Alternatieven:** `isShown` hergebruiken (hij is geen losse voorwaarde: hij hoort bij de query van de homepage en heeft de bron en de andere versies van het verhaal nodig); een derde keuze "Alles" (de projecteigenaar koos twee groepen); een apart vakje voor de twijfelgevallen (een eigen issue als het nodig blijkt).
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
@@ -5839,6 +5872,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** één plek voor de voorwaarde voorkomt dat een nieuwe query er een vergeet.
   De moderator moet een bericht kunnen vinden dat het filter ten onrechte weghoudt.
 - **Alternatieven:** de voorwaarde in elke query zelf (zoals bij `hidden_at` tot nu toe); een apart scherm voor twijfelgevallen (een eigen issue).
+- **Later:** zie _De lijst in het beheer heeft een schakelaar voor wel en niet op de site_ (2 november 2026): het beheer toont nog steeds alles, maar verdeeld over de groepen "Op de site" en "Niet op de site", en een twijfelgeval staat onder de tweede.
 - **Later:** zie _Van een bericht met meerdere versies toont de site alleen de laatste kop_ (1 november 2026): `isShown` kijkt bij een bericht met een `thread_key` naar het hele verhaal.
   Een bericht zonder sleutel gaat door dezelfde voorwaarde als hier.
 

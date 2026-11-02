@@ -696,7 +696,7 @@ Een gebouwde site (`pnpm build`, acceptatie en productie) zet het cookie altijd 
   `src/beheer/routes.test.ts` zoekt ze zelf op in de mappen (en elk bestand met `'use server'`, waar ook), en laat zien dat een aanroep zonder sessie naar de inlogpagina gaat.
   Een nieuwe pagina of actie die `requireRole` niet aanroept, laat die test falen.
   Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
-- `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen, met bron, kop als link, tijd en of ze verborgen zijn (zie _Berichten verbergen_).
+- `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
 - `/beheer/wedstrijden` is voor beheerders alleen: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
 - `/beheer/bezoek` is voor beheerders alleen: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
@@ -716,12 +716,22 @@ Een gebouwde site (`pnpm build`, acceptatie en productie) zet het cookie altijd 
 ### Berichten verbergen
 
 `/beheer/berichten` (`src/app/beheer/berichten`) is voor beheerders en moderators.
-Boven de lijst staat een zoekveld: een formulier met `method="get"` dat `?q=` vult en op een deel van de kop of van de link zoekt, zonder letters- of hoofdlettergevoeligheid en zonder dat `%` of `_` een patroon zijn (`listItems` in `src/beheer/items.ts`).
-Bij elk bericht dat te zien is staat een veld voor de reden en de knop "Verberg"; bij een verborgen bericht staat de reden en de knop "Toon weer".
+Boven de lijst staat een schakelaar met twee keuzes: "Op de site" en "Niet op de site" (`SegmentedLinks`, zoals `CompetitionSwitch`).
+Het zijn gewone links, dus hij werkt zonder JavaScript, en de huidige keuze heeft `aria-current="page"`.
+"Op de site" is de standaard en heeft niets in het adres, "Niet op de site" is `?toon=niet-op-de-site`, en een andere waarde valt terug op de standaard.
+Wat "op de site" is, zegt `isOnSite` in `src/beheer/items.ts`: niet verborgen, door de import `relevant` gevonden en al gepubliceerd.
+`isShown` in `@fansite/db/queries` is strenger voor de bezoeker (een bron die uitstaat, en een verhaal dat de site samenvouwt), dus een bericht dat hier "op de site" staat, kan voor een bezoeker ontbreken.
+De lijst telt per groep de nieuwste 50 berichten, en de tekst erboven zegt welke groep het is.
+Onder de schakelaar staat een zoekveld: een formulier met `method="get"` dat `?q=` vult en op een deel van de kop of van de link zoekt, zonder letters- of hoofdlettergevoeligheid en zonder dat `%` of `_` een patroon zijn (`listItems`).
+Onder "Niet op de site" staat daarin ook het vakje "Alleen door de redactie verborgen" (`?redactie=1`), dat alleen de berichten toont die een redacteur verborg; zonder het vakje staan er ook de twijfelgevallen en de berichten die niet over de club gaan.
+De knop "Zoeken" past de zoekopdracht en het vakje samen toe, en de knop stuurt de groep mee (`name="toon"` op de knop, want het designsysteem heeft geen verborgen veld).
+Bij elk bericht dat op de site kan staan staat een veld voor de reden en de knop "Verberg"; een bericht dat de import niet op de site zet, heeft geen formulier, want verbergen doet daar niets.
+Bij een verborgen bericht staat wie het verborg ("Verborgen op … door …"), de reden en de knop "Toon weer".
 Alle formulieren zijn gewone posts van een serveractie (`actions.ts`), dus ze werken zonder JavaScript.
 
 - De reden is verplicht en hoogstens 300 tekens.
   Een reden zonder tekst of te lang laat het bericht staan en brengt je terug op de lijst, met de fout in een `ErrorSummary` bovenaan en bij het veld (`?fout=reden-leeg&bericht=<nummer>`, zoals het inloggen met `?fout=` doet).
+- Verbergen en tonen eindigen op dezelfde groep, hetzelfde vakje en dezelfde zoekopdracht als waar je vandaan kwam (`itemsPath` in `paths.ts`), dus het bericht staat daarna in de andere groep.
 - Na het verbergen of tonen staat bovenaan wat er gebeurde: "Staat binnen vijf minuten niet meer op de site" of "weer op de site".
   Dat is waar, want de homepage, `/nieuws` en `/nieuws/podcasts` bewaren hun lijsten vijf minuten in het geheugen van de server; `src/headlines-hidden.test.ts` bewijst het tegen een echte database.
   De melding komt uit de database van dat moment, niet uit het adres: `?verborgen=<nummer>` zegt alleen iets over een bericht dat echt verborgen is.
