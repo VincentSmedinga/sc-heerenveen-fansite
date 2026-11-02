@@ -2,14 +2,13 @@ import type { Metadata } from 'next'
 
 import { adminRoles } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { Button, Card, Form, Heading, Link, List, Page, Text, Tile } from '@fansite/design-system'
+import { Card, Heading, Link, List, Page, Text, Tile } from '@fansite/design-system'
 
 import { compact } from '#src/beheer/density'
 import { countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
-import { logOut } from './actions'
 import { listPath, matchesPath } from './wedstrijden/paths'
 
 // Render on each request: who is logged in is not known when the site is built.
@@ -22,9 +21,9 @@ type TodoItem = { href: string; text: string }
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
 
-// The start of the admin: who is logged in, a tile for every screen, what is left to do in a
-// card in the sidebar, and the button to log out. The card is only there when something waits,
-// and a next screen adds a line to it by adding an item to `todo`.
+// The start of the admin: who is logged in, a tile for every screen, and what is left to do in
+// a card in the sidebar. The button to log out is in the bar (AdminScreens). The card is only
+// there when something waits, and a next screen adds a line to it by adding an item to `todo`.
 export default async function AdminPage() {
   const { email, role } = await requireRole(...adminRoles)
   const beheerder = role === 'beheerder'
@@ -82,9 +81,6 @@ export default async function AdminPage() {
             </>
           ) : null}
         </Tile.Grid>
-        <Form action={logOut}>
-          <Button type="submit">Uitloggen</Button>
-        </Form>
       </Page.Main>
       {todo.length === 0 ? null : (
         <Page.Sidebar aria-label="Te doen">

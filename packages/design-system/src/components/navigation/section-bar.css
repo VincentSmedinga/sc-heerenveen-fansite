@@ -19,4 +19,37 @@
     padding-inline: calc(max(var(--hf-page-inset), env(safe-area-inset-left, 0px)) - var(--hf-space-s))
       max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
   }
+
+  /*
+   * The row is as wide as the bar when its items are fewer than fit, so the button comes to
+   * rest at the end of the bar (the start side of its margin takes the free room). When the
+   * items are wider than the bar, the list is as wide as they are and the button is the last
+   * thing the row scrolls to. The list counts its padding in its width, or it would be 10px
+   * wider than the row and scroll for nothing.
+   */
+  .hf-section-bar-list {
+    box-sizing: border-box;
+    min-inline-size: 100%;
+  }
+
+  .hf-section-bar-end {
+    margin-inline-start: auto;
+  }
+
+  /*
+   * The button is a pill like the links (.hf-navigation-sublink), without the look of a button
+   * of the browser or the size of the Button (36px high, not 44px). The rules have no weight of
+   * their own (:where), so the pill's own rules for pressing stay in charge.
+   */
+  :where(.hf-section-bar-end .hf-navigation-sublink) {
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    margin: 0;
+    min-block-size: 0;
+    min-inline-size: 0;
+    padding-block: 0;
+  }
 }

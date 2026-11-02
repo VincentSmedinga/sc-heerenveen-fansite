@@ -2018,6 +2018,7 @@
   `SectionBar` heeft dezelfde uitstraling (de pillen van de submenubalk, dezelfde rij die zijwaarts scrolt) en hoort bij een onderdeel dat niet op elke pagina in het menu staat.
 - **Alternatieven:** een eigen schil met een andere kop (veel werk, en de moderator verliest het menu); alleen de koppeling "Terug naar het beheer" op elke pagina houden (wijst niet naar de andere schermen); de balk als subitems van het item Beheer in het hoofdmenu (het item hangt af van de markering in de browser, dus een redacteur zonder `localStorage` ziet geen balk, en het menu kent de rol niet); de balk in `Page.Body` met CSS naar buiten trekken (zie _De balk komt via een slot in de layout, een parallelle route_).
 - **Later:** zie _De balk komt via een slot in de layout, een parallelle route_ (27 oktober 2026): ook `/beheer` vult het slot `@shortcuts`, met een route voor de startpagina en een voor alles eronder.
+- **Later:** zie _Uitloggen is de laatste knop van de balk van het beheer_ (2 november 2026): Uitloggen staat niet op de startpagina maar in de balk, op elke pagina; wie is ingelogd (het adres en de rol) blijft onder de kop op de startpagina.
 
 ## Een ontwerp voor een telefoon is het ontwerp voor het hele beheer
 
@@ -2048,3 +2049,17 @@
 - **Nadeel:** op een telefoon moet je langs de tegels scrollen voor wat wacht; met vier tegels is dat kort.
   Een tegel Wedstrijden die niet meer naar `?tonen=aangepast` wijst, is een klik meer voor wie alleen de afwijkingen wil zien, maar de kaart heeft die link.
 - **Alternatieven:** een doorverwijzing naar het vaakst gebruikte scherm (werkt niet voor twee rollen met andere schermen); alleen de lijst houden (blijft onduidelijk wat wacht); de kaart boven de tegels op een telefoon met `order` (breekt de leesvolgorde en vraagt een aanpassing aan `Page`); het aantal als label op de tegel (een tegel is één link, en een label zegt niet waar het naartoe gaat); een lege kaart "Niets te doen" (een kaart die niets zegt, naast de lege hoofdkolom).
+- **Later:** zie _Uitloggen is de laatste knop van de balk van het beheer_ (2 november 2026): de knop Uitloggen staat niet meer onder de tegels maar in de balk van het beheer.
+
+## Uitloggen is de laatste knop van de balk van het beheer
+
+- **Datum:** 2 november 2026
+- **Besluit:** Uitloggen is een knop in een formulier, het laatste item van de balk van het beheer (#650).
+  - **De plek:** `SectionBar` heeft de prop `end` voor één knop die geen scherm is (`action` en `label`), als laatste item van de rij, in dezelfde `nav`.
+    Op een bureaublad staat de knop aan het rechteruiteinde van de balk; op een telefoon schuift hij mee met de schermen en bereik je hem door te scrollen of met het toetsenbord.
+  - **De knop:** een pil als de koppelingen, in een formulier met de serveractie `logOut`, dus een POST die ook zonder JavaScript werkt.
+    Een koppeling die uitlogt kan een andere site laten uitvoeren.
+  - **Het adres en de rol** blijven onder de kop Beheer op `/beheer`, en komen niet in de balk.
+- **Waarom:** wie uitlogt hoeft dat niet elk moment te kunnen, en de balk blijft één regel hoog zonder extra plek of aparte regel.
+  In de balk passen het adres en de rol niet op een telefoon, en wie wil weten met welk account hij is ingelogd, vindt het op de startpagina.
+- **Alternatieven:** Uitloggen vast in beeld aan het rechteruiteinde, buiten de scrollende rij (neemt op een telefoon ruimte van de schermen); een tweede regel onder de koppelingen (de balk wordt twee regels hoog op elke pagina); een koppeling naar een uitlogpagina (een extra stap en een pagina erbij); het adres als `title` of verborgen tekst bij de knop (een tooltip bestaat niet op een telefoon).

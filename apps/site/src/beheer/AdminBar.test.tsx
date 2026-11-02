@@ -10,6 +10,7 @@ let pathname = '/beheer'
 
 vi.mock('next/navigation', () => ({ usePathname: () => pathname }))
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
+vi.mock('#src/app/beheer/actions', () => ({ logOut: vi.fn() }))
 vi.mock('./require-role', () => ({ sessionToken: vi.fn() }))
 vi.mock('#src/beheer/sessions', () => ({ findSession: vi.fn() }))
 
@@ -44,6 +45,20 @@ describe('the bar of the admin', () => {
     expect(html).toMatch(
       /aria-current="page"[^>]*href="\/beheer\/artikelen"|href="\/beheer\/artikelen"[^>]*aria-current="page"/,
     )
+  })
+
+  it('ends with a button Uitloggen in a form, in the same navigation, for a beheerder and a moderator', async () => {
+    for (const role of ['beheerder', 'moderator'] as const) {
+      vi.mocked(findSession).mockResolvedValue({ email: 'sanne@example.org', role, userId: 1 })
+
+      const html = await render('/beheer/berichten')
+
+      expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
+        '<button class="hf-navigation-sublink" type="submit">Uitloggen</button>',
+      ])
+      expect(html).toMatch(/<nav[^>]*aria-label="Beheer"[\s\S]*<form[^>]*>\s*<button[\s\S]*<\/form>[\s\S]*<\/nav>/)
+      expect(html.lastIndexOf('<a ')).toBeLessThan(html.indexOf('<button'))
+    }
   })
 
   it('shows a moderator Berichten only', async () => {
