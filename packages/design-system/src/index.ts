@@ -64,6 +64,8 @@ export type { NavigationItem, NavigationProps, NavigationSubitem } from './compo
 export { NavigationBar } from './components/navigation/NavigationBar'
 export { NewsItem } from './components/news-item/NewsItem'
 export type { NewsItemProps } from './components/news-item/NewsItem'
+export { Notice } from './components/notice/Notice'
+export type { NoticeProps } from './components/notice/Notice'
 export { Page } from './components/page/Page'
 export type {
   PageBodyProps,

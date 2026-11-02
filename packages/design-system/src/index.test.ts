@@ -31,6 +31,7 @@ const components = [
   'Match',
   'Navigation',
   'NewsItem',
+  'Notice',
   'Page',
   'Pagination',
   'Root',
