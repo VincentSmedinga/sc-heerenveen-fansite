@@ -86,6 +86,36 @@ test('Stylelint accepts a width of 100%, and 100vw in a property that is not a w
   assert.deepEqual(await lintCss('a {\n  inline-size: 100%;\n  min-block-size: 100vh;\n}\n'), [])
 })
 
+// The container sets the vertical space (utilities/flow.css): a component sets no vertical
+// margin of its own, except 0.
+test('Stylelint reports a vertical margin in the CSS of a component, and accepts 0 and an inline margin', async () => {
+  for (const declaration of [
+    'margin-block-end: var(--hf-space-m)',
+    'margin-block-start: var(--hf-space-s)',
+    'margin-block: 0 var(--hf-space-l)',
+    'margin: 0 0 var(--hf-space-s)',
+    'margin: calc(-1 * var(--hf-space-xs))',
+  ]) {
+    assert.deepEqual(
+      await lintCss(`a {\n  ${declaration};\n}\n`),
+      ['error declaration-property-value-allowed-list'],
+      declaration,
+    )
+  }
+  assert.deepEqual(await lintCss('a {\n  margin: 0;\n  margin-block: 0;\n  margin-inline: auto;\n}\n'), [])
+})
+
+test('Stylelint accepts a vertical margin in the flow and in the space utilities, with their file names', async () => {
+  for (const file of ['utilities/flow.css', 'utilities/space-end.css']) {
+    const { results } = await stylelint.lint({
+      code: 'a {\n  margin-block-end: var(--hf-space-m);\n}\n',
+      codeFilename: join(root, 'packages/design-system/src', file),
+      configFile: join(root, 'stylelint.config.js'),
+    })
+    assert.deepEqual(results[0].warnings, [], file)
+  }
+})
+
 test('ESLint reports a method that is not widely available in the design system', async () => {
   const messages = await lintJs(
     "export const a = screen.orientation.lock('portrait')\n",

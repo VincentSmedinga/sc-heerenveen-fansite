@@ -65,10 +65,13 @@
     }
   }
 
-  /* The text of an article has the extra large step before a heading or a rule. */
+  /*
+   * The text of an article has the extra large step before a heading or a rule. A rule as the
+   * last child keeps none: this rule is more specific than the one for the last child above.
+   */
   .hf-article {
     > :has(+ :is(h1, h2, h3, h4, h5, h6, hr)),
-    > hr {
+    > hr:not(:last-child) {
       margin-block-end: var(--hf-space-xl);
     }
   }

@@ -107,10 +107,17 @@ describe('the flow', () => {
   })
 
   it('gives the text of an article the extra large step before a heading or a rule', () => {
-    const article = rules(block(flow, '.hf-article')).find((rule) => rule.selectors.includes('> hr'))
+    const article = rules(block(flow, '.hf-article')).find((rule) => rule.selectors.includes('> hr:not(:last-child)'))
 
     expect(article?.body).toBe('margin-block-end: var(--hf-space-xl);')
     expect(article?.selectors).toContain(`> :has(+ ${headings.replace('h6)', 'h6, hr)')})`)
+  })
+
+  it('gives a rule that is the last child of an article no space: the article rule leaves it out', () => {
+    const article = rules(block(flow, '.hf-article')).flatMap((rule) => rule.selectors)
+
+    expect(article).not.toContain('> hr')
+    expect(article).toContain('> hr:not(:last-child)')
   })
 
   it('has no step above a child anywhere: the space is only under a child', () => {
