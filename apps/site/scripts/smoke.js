@@ -1025,10 +1025,7 @@ await withEmptyDatabase((database) =>
       clubHtml,
       /<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen tegen Testdorp FC, in totaal, thuis en uit<\/caption>/,
     )
-    assert.match(
-      clubHtml,
-      /<th [^>]*scope="col"[^>]*>Totaal<\/th><th [^>]*scope="col"[^>]*>Thuis<\/th><th [^>]*scope="col"[^>]*>Uit<\/th>/,
-    )
+    assert.match(clubHtml, /<th scope="row">Totaal<\/th>.*<th scope="row">Thuis<\/th>.*<th scope="row">Uit<\/th>/)
     assert.match(clubHtml, /<h2[^>]*id="wedstrijden">/)
     // The matches are in the main column, the results in the sidebar after it. Testdorp FC was
     // only met in the league at home, so the stadium is ours and there is no card Stadion.

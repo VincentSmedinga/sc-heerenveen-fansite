@@ -4,8 +4,6 @@ import { expect, type Page, test } from '@playwright/test'
 // FC is met in the league, FC Maquette in the cup only, and Voorbeeld United is visited twice
 // in the league in a stadium with two names.
 
-const columns = ['Gespeeld', 'Gewonnen', 'Gelijk', 'Verloren'] as const
-
 /** The first four figures of the row of a club in the list: played, won, drawn and lost. */
 async function listRow(page: Page, club: string) {
   const row = page.getByRole('row').filter({ has: page.getByRole('rowheader', { name: club }) })
@@ -14,18 +12,12 @@ async function listRow(page: Page, club: string) {
   return cells.slice(0, 4).map(Number)
 }
 
-/** The Totaal column of the summary of a club: played, won, drawn and lost. */
+/** The Totaal row of the summary of a club: played, won, drawn and lost. */
 async function totals(page: Page) {
   const table = page.getByRole('table', { name: /^De uitslagen van sc Heerenveen tegen/ })
-  const figures: number[] = []
+  const row = table.getByRole('row').filter({ has: page.getByRole('rowheader', { exact: true, name: 'Totaal' }) })
 
-  for (const name of columns) {
-    const row = table.getByRole('row').filter({ has: page.getByRole('rowheader', { exact: true, name }) })
-
-    figures.push(Number(await row.getByRole('cell').first().innerText()))
-  }
-
-  return figures
+  return (await row.getByRole('cell').allInnerTexts()).slice(0, 4).map(Number)
 }
 
 for (const choice of ['', '?competitie=eredivisie']) {
