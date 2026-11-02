@@ -35,7 +35,10 @@ describe('Article', () => {
     const { container } = render(<Article {...props} />)
     const paragraphs = [...container.querySelectorAll('p')]
 
-    expect(paragraphs.map((paragraph) => paragraph.className)).toEqual(['hf-meta hf-article-meta', 'hf-intro'])
+    expect(paragraphs.map((paragraph) => paragraph.className)).toEqual([
+      'hf-meta hf-article-meta hf-space-end-l',
+      'hf-intro',
+    ])
     expect(paragraphs[1]?.textContent).toBe('Een verzonnen inleiding.')
   })
 

@@ -46,7 +46,7 @@ const meta = preview.meta({
           'Een kaart zet een blok van de pagina op een eigen vlak, met een rand en ronde hoeken.',
           'Zo staat elk blok los op de pagina, en dat geeft de pagina rust en richting.',
           'Een kaart met het vlak `transparent` heeft geen rand en achtergrond die je ziet, en geen binnenruimte boven en onder: de tekst erin staat op één lijn met de tekst in de andere kaarten, zonder dat de ruimte tussen de kaarten groter wordt.',
-          'Staat er direct onder de kop een lijst, dan is de ruimte daartussen groter dan bij tekst, zodat de eerste regel van de lijst niet tegen de kop zit.',
+          'De kaart bepaalt de ruimte tussen wat erin staat: groot onder een kop en onder een tabel of een grafiek, gemiddeld onder de rest, en geen onder het laatste (zie _Ruimte tussen onderdelen_ in het hoofdstuk Ruimte).',
           'Onder de lijst kan een formulier met een knop staan, zoals "Laad 5 meer" in de kaart met de nul gehouden op Wedstrijden.',
           'Met `shareable` krijgt de kaart rechtsboven een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron eronder.',
           'De bezoeker deelt die afbeelding of bewaart hem, en er gaat niets naar een server.',

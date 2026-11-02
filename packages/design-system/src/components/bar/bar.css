@@ -27,6 +27,7 @@
    * the space would stay inside it: it has none then.
    */
   .hf-bar-place > table {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the table and its legend becomes a gap in #655. */
     margin-block-end: var(--hf-space-l);
 
     &:last-child {

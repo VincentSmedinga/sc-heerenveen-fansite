@@ -26,6 +26,7 @@
   .hf-match-clubs {
     font-size: var(--hf-body-font-size);
     font-weight: var(--hf-headline-font-weight);
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
     margin-block: 0.125rem;
   }
 
@@ -95,6 +96,7 @@
    */
   .hf-match-goals {
     font-size: var(--hf-meta-font-size);
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
     margin-block: 0.125rem;
   }
 
@@ -130,6 +132,7 @@
    */
   .hf-match-missing {
     color: var(--hf-colour-text-missing);
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
     margin-block: 0.125rem 0;
   }
 
@@ -138,6 +141,7 @@
    * little apart from the line before.
    */
   .hf-match-note {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
     margin-block: 0.125rem 0;
   }
 

@@ -26,13 +26,50 @@ Twijfel je, neem dan `--hf-space-m`.
   Hij staat tussen twee gelijke of vergelijkbare kleine onderdelen, zoals twee knoppen of twee items in een lijst.
 - **Groot** (`--hf-space-l`) zit tussen gemiddeld en het raster.
   Neem hem als een onderdeel meer lucht om zich heen wil dan gemiddeld, zoals de opvulling van een kaart op een breed scherm.
-  Het is ook de ruimte onder elke kop en onder een grote bouwsteen, een tabel met cijfers of een grafiek, als er iets op volgt.
+  Het is ook de ruimte onder elke kop en onder een groot blok, zoals een tabel met cijfers of een grafiek, als er iets op volgt (zie _Ruimte tussen onderdelen_).
 - **Extra groot** (`--hf-space-xl`) is de ruimte in het raster van de pagina, en het maximum.
   Niets in een onderdeel is groter.
   Alleen de maten van de pagina zelf gaan erboven, zoals de ruimte onder de kolommen.
 
+## Ruimte tussen onderdelen
+
+Een onderdeel zet zelf geen ruimte naar buiten, want het kent zijn omgeving niet.
+De kaart of de cel bepaalt de ruimte tussen wat erin staat: dat is de stroom.
+Ze geldt voor de directe kinderen van `Card`, `Page.Cell`, `Page.Intro`, `Article` en de inhoud van `Disclosure`, en van elk element met de klasse `hf-flow`.
+Elk kind krijgt ruimte onder zich, naar wat het is, en geen ruimte boven zich:
+
+- onder een kop staat de grote ruimte;
+- onder een groot blok, zoals een tabel of een grafiek, staat de grote ruimte;
+- wat voor een kop of een lijn staat, krijgt de grote ruimte onder zich, en in de tekst van een artikel de extra grote;
+- onder een lijn staat dezelfde ruimte als erboven;
+- onder al het andere staat de gemiddelde ruimte;
+- onder het laatste kind staat geen ruimte.
+
+Tekst vlak boven een groot blok houdt de gemiddelde ruimte, en tussen twee grote blokken staat de grote.
+Een tabel met een legenda eindigt met een regel tekst, dus daaronder staat de gemiddelde ruimte.
+De extra grote ruimte staat verder alleen tussen de cellen van een pagina.
+De grote blokken staan in één lijst in `utilities/flow.css`; een nieuw groot blok komt in die lijst.
+
+<Story of={SpaceStories.Flow} />
+
+<Story of={SpaceStories.FlowBelowHeading} />
+
+<Story of={SpaceStories.FlowBelowLargeBlock} />
+
+<Story of={SpaceStories.FlowBeforeHeading} />
+
+Wil één exemplaar een andere ruimte onder zich, zet dan een hulpklasse op dat element: `hf-space-end-0`, `hf-space-end-xs`, `hf-space-end-s`, `hf-space-end-m` of `hf-space-end-l`.
+Ze winnen altijd van de stroom.
+Er is geen hulpklasse voor de extra grote ruimte.
+Een onderdeel dat zelf een kaart is, zoals `ArticleCard`, houdt zo de ruimte tussen zijn eigen delen.
+
+<Story of={SpaceStories.FlowUtility} />
+
 ## Regels
 
+- **De container bepaalt de ruimte:** de CSS van een onderdeel zet geen `margin` naar boven of naar beneden, en geen `padding` om ruimte naar een buur te maken.
+  stylelint weigert zo'n marge; alleen `utilities/flow.css` en `utilities/space-end.css` zetten er een.
+  De ruimte tussen de eigen delen van een onderdeel komt van `gap`.
 - **Alleen de tokens:** voor `padding`, `margin` en `gap` gebruikt de CSS van een onderdeel een token, `0`, `auto` of `inherit`.
   Een test in het designsysteem, `tokens/space-css.test.ts`, faalt op een getal dat daar niet uit komt.
   De test kijkt naar de CSS van alle onderdelen, de basisstijlen en de documentatie, en kent geen uitzonderingen.

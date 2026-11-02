@@ -69,6 +69,7 @@
   Dat wordt lastiger naarmate er meer componenten zijn.
 - **Later:** er is een vijfde laag, `hf.utilities`, na `hf.components`; zie _Hulpklassen zitten in de sterkste laag_.
 - **Later:** de volgorde van de lagen staat in een eigen bestand; zie _De volgorde van de lagen staat in een eigen bestand_.
+- **Later:** er is een zesde laag, `hf.flow`, tussen `hf.components` en `hf.utilities`; zie _De kaart of de cel bepaalt de verticale witruimte tussen wat erin staat_.
 
 ## Typestijl los van het HTML-niveau
 
@@ -482,6 +483,9 @@
   Een kolom zonder inleiding blijft een eigen raster, zoals hierboven staat.
 - **Later:** zie _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_.
   De cellen van de zijbalk staan nu standaard onder elkaar; alleen met `split` staan ze, onder de hoofdkolom, in twee gelijke kolommen.
+- **Later:** zie _De kaart of de cel bepaalt de verticale witruimte tussen wat erin staat_ (2 november 2026).
+  De ruimte in een `Page.Cell` komt nu van de stroom in `utilities/flow.css`, die elk kind ruimte onder zich geeft en het laatste geen; de regel voor het eerste en het laatste kind in `page.css` is weg.
+  De ruimte tussen de cellen blijft de `gap` van `Page.Body`.
 
 ## Een regel met padding of een rand zet zelf `box-sizing: border-box`
 
@@ -1600,6 +1604,9 @@
   Een regel per plek of per kaart (laat de pagina's uit elkaar lopen).
   Een eigen klasse voor de kop met de grote ruimte (dan moet elke kop de klasse nog krijgen).
   Een nieuwe stap tussen `l` en `xl` (zeven stappen is te veel, zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_).
+- **Later:** zie _De kaart of de cel bepaalt de verticale witruimte tussen wat erin staat_ (2 november 2026).
+  De grote ruimte onder een kop en onder een groot blok staat nu in de stroom, `utilities/flow.css`, en niet meer in `heading.css`, `table.css` en de CSS van de grafieken; de kaart of de cel zet haar, en het laatste kind krijgt geen ruimte van de stroom zelf.
+  `tokens/space-below-css.test.ts` is vervangen door `utilities/flow-css.test.ts`.
 
 ## Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat
 
@@ -2155,3 +2162,69 @@
 - **Nadeel:** de tekst in een tegel is niet te selecteren, want het `::after` van de link ligt erover.
   Een tegel met een tweede link erin kan niet; dat is de bedoeling, want een tegel is één bestemming.
 - **Alternatieven:** de hele tegel in een `a` (de kop, de beschrijving en het pictogram worden samen de naam van de link, die dan lang is en de beschrijving twee keer voorleest bij een lijst van koppen); een kaart met een knop of link eronder (twee Tab-stops voor één plek); een `Card` met `onClick` (werkt niet zonder JavaScript en niet met het toetsenbord); `:has()` om de rand van de tegel te tekenen als de link focus heeft (werkt, maar het `::after` van de link doet hetzelfde zonder een selector van de ouder); een eigen vlak per tegel, zoals `soft` of `warm` (de kleur zegt hier niets).
+
+## De kaart of de cel bepaalt de verticale witruimte tussen wat erin staat
+
+- **Datum:** 2 november 2026
+- **Besluit:** een element of onderdeel zet zelf geen verticale witruimte naar buiten (#653).
+  De container bepaalt de ruimte tussen zijn directe kinderen: `Card`, `Page.Cell`, `Page.Intro`, `Article`, de inhoud van `Disclosure` en elk element met `hf-flow`.
+  Dat is de stroom, in `utilities/flow.css`, in een eigen laag `hf.flow` tussen `hf.components` en `hf.utilities`.
+  Elk kind krijgt ruimte onder zich volgens wat het is: groot onder een kop, onder een groot blok en voor een kop of een lijn, gemiddeld onder de rest, en geen onder het laatste kind.
+  De grote blokken staan in één lijst in `flow.css`: `table`, `DataTable.Group`, `StandingsTable`, `TopScorersTable` en `RecordTable` zonder legenda, `BarChart`, `DonutChart` los en als groep, `FormChart`, `InputTable` en `Tile.Grid`.
+  Eén exemplaar krijgt een andere ruimte met de hulpklasse `hf-space-end-0`, `-xs`, `-s`, `-m` of `-l`, in de laag `hf.utilities`, die altijd wint.
+  De regels voor het eerste en het laatste kind in `card.css`, `page.css`, `article.css` en `disclosure.css` zijn weg, en de inhoud van `Disclosure` is een gewoon blok, geen raster met `gap`.
+- **Waarom:** een onderdeel kent zijn omgeving niet.
+  Zette het zelf een marge, dan ontstonden gaten van 0, zoals onder de legenda van de kaart Stand.
+  Met één regel in de container komt de ruimte vanzelf goed, en is een uitzondering één klasse.
+  De laag maakt de volgorde van de regels vast, los van hoe specifiek een selector is.
+  De ruimte staat alleen onder een kind, dus een hulpklasse op het element erboven zet altijd de hele ruimte.
+- **Hoe:** `ArticleCard` zet `hf-space-end-xs` op zijn titel en `Article` zet `hf-space-end-l` op de regel met de auteur en de datum, zodat die twee de ruimte houden die ze hadden.
+  `utilities/flow-css.test.ts` faalt als een kop, een groot blok uit de lijst, het kind voor een kop of het laatste kind een andere ruimte krijgt, als de tekst van een artikel geen extra grote ruimte voor een kop heeft, of als de hulpklassen niet in de laatste laag staan.
+- **Alternatieven:** alleen hulpklassen op elk exemplaar (veel klassen, en een Builder vergeet ze).
+  Ruimte boven elk kind, met `* + *` (dan werkt een klasse op het element erboven niet).
+  Een flex-kolom met `gap` (één maat voor elke twee buren).
+  Een klasse op elk groot blok in plaats van een lijst in `flow.css` (de regels staan dan niet meer op één plek).
+
+## Boven een kop in een kaart of cel staat de grote ruimte, alleen in een artikel de extra grote
+
+- **Datum:** 2 november 2026
+- **Besluit:** het kind voor een kop of een lijn (`hr`) heeft de grote ruimte onder zich in een kaart of cel, en de extra grote in de tekst van een artikel (#653).
+  Extra groot staat verder alleen tussen cellen.
+- **Waarom:** de projecteigenaar wil extra groot zo veel mogelijk alleen tussen cellen.
+  In een kaart zette een kop extra groot boven zich, zoals tussen "Van de redactie" en de titel van het artikel.
+  Een lange tekst heeft wel een duidelijke pauze tussen de delen nodig.
+- **Gevolg:** op Over ons, Privacy, Toegankelijkheid en Updates staat tussen tekst en de kop erna nu de grote ruimte in plaats van de extra grote.
+- **Alternatieven:** overal extra groot, zoals het was.
+  Overal groot, ook in een artikel.
+
+## Alleen de stroom en de hulpklassen zetten een marge; stylelint bewaakt dat
+
+- **Datum:** 2 november 2026
+- **Besluit:** stylelint weigert in de CSS van het designsysteem `margin`, `margin-block`, `margin-block-start` en `margin-block-end` met een andere waarde dan `0`, behalve in `flow.css` en `space-end.css` (#653).
+  De CSS van de documentatie (`docs/docs.css`) valt erbuiten.
+  De ruimte tussen de eigen delen van een onderdeel komt van `gap`.
+  Een marge die moet blijven, zoals een negatieve marge voor een focusrand, staat in een commentaar dat de regel voor die ene regel uitzet, met de reden.
+  `padding-block` is alleen de binnenruimte van een vlak met een zichtbare rand of achtergrond, of van iets om aan te klikken, en nooit ruimte naar een buur.
+  De reviewer kijkt dat na.
+- **Waarom:** een regel die een machine controleert, blijft gelden zonder dat iemand eraan denkt.
+  stylelint zit al in het project, en `reportNeedlessDisables` meldt een uitzondering die niet meer nodig is.
+  Of een marge op de buitenkant van een onderdeel staat of op een deel ervan, kan stylelint niet zien.
+  Daarom geldt de regel voor elke marge.
+- **Hoe:** de regel is `declaration-property-value-allowed-list` in `stylelint.config.js`, met `null` voor de twee bestanden en voor de documentatie.
+- **Alternatieven:** alleen een marge op de buitenkant van een onderdeel weigeren (stylelint ziet niet welk element dat is).
+  Een test in Vitest met een lijst van bestanden (meer code voor hetzelfde).
+  Ook `padding-block` weigeren (een kaart, een knop en een tabelcel hebben het nodig).
+
+## De omzetting gaat in drie issues: de stroom, dan de elementen, dan de onderdelen
+
+- **Datum:** 2 november 2026
+- **Besluit:** #653 maakt de stroom, de hulpklassen, de regel in stylelint en de documentatie.
+  Het zet een commentaar met #654 of #655 bij elke marge die er nog staat.
+  #654 haalt de marges weg van de elementen en de tekst, en #655 die van de onderdelen en de formulieren.
+  Daarna wijst geen commentaar meer naar een issue.
+- **Waarom:** de stroom wint van de marges in de onderdelen, dus #653 verandert de site in één keer en alleen waar het moet.
+  De pull requests daarna halen marges weg die in een kaart of cel al niets meer doen.
+  Zo blijft elke pull request te reviewen.
+  Splitsen per pagina past niet: de wijzigingen staan in gedeelde CSS en raken elke pagina tegelijk.
+- **Alternatieven:** alles in één pull request (te groot om te reviewen).
+  Per groep pagina's, zoals home, wedstrijden en statistieken (de CSS is gedeeld, dus dat kan niet los).

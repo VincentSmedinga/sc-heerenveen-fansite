@@ -63,14 +63,23 @@ Wat elk component doet, staat in de hoofdstukken Componenten en Patronen van Sto
 - **Puur CSS:** custom properties, cascade layers en geneste regels.
   Geen Sass, CSS-in-JS of Tailwind.
 - **Voorvoegsel `hf-`** (Heerenveen Fansite) voor klassen en custom properties: `.hf-heading-3`, `--hf-colour-text-default`.
-- **Lagen:** `hf.tokens`, `hf.base`, `hf.typography`, `hf.components`, `hf.utilities`.
+- **Lagen:** `hf.tokens`, `hf.base`, `hf.typography`, `hf.components`, `hf.flow`, `hf.utilities`.
   Een hulpklasse zit in `hf.utilities`, de sterkste laag, zodat een component of typestijl haar niet ongedaan maakt.
+  De stroom, de verticale ruimte tussen de kinderen van een kaart of een cel, zit in `hf.flow`: ze wint van een component en verliest van een hulpklasse.
   CSS buiten een laag wint altijd.
   Het CSS-bestand van een component mag regels in meer dan één laag hebben: `heading/heading.css` heeft een basislaag en een typografielaag.
   De volgorde van de lagen staat in `src/layers.css`, dat `src/index.css` als eerste importeert.
   De volgorde van de overige imports in `src/index.css` is de volgorde van de regels binnen een laag.
 - **Box-model:** een regel die padding of een rand zet op een element met een maat, zet ook `box-sizing: border-box`.
   Er is geen globale regel op `*`.
+- **Verticale ruimte:** een onderdeel zet geen marge en geen `padding-block` naar buiten.
+  De container bepaalt de ruimte tussen zijn kinderen: `Card`, `Page.Cell`, `Page.Intro`, `Article`, de inhoud van `Disclosure` en elk element met `hf-flow`, met de regels in `src/utilities/flow.css` en in het hoofdstuk Ruimte van Storybook.
+  Een uitzondering voor één exemplaar krijgt een hulpklasse `hf-space-end-0`, `-xs`, `-s`, `-m` of `-l` (`src/utilities/space-end.css`).
+  Een nieuw groot blok, zoals een tabel of een grafiek, komt in de lijst in `flow.css`.
+  De ruimte tussen de eigen delen van een onderdeel komt van `gap`.
+  stylelint weigert `margin`, `margin-block`, `margin-block-start` en `margin-block-end` met een andere waarde dan `0` buiten die twee bestanden; een marge die moet blijven, zoals een negatieve marge voor een focusrand, krijgt een `stylelint-disable-next-line` met de reden.
+  `padding-block` is alleen de binnenruimte van een vlak met een zichtbare rand of achtergrond, of van iets om aan te klikken: een kaart, een melding, een tabelcel, een knop, een veld, de kop en de voet van de pagina.
+  Het maakt nooit ruimte naar een buur; stylelint ziet dat niet, dus de reviewer kijkt het na.
 - **Logische eigenschappen:** `margin-inline-start` in plaats van `margin-left`.
   Stylelint controleert dit.
 - **Kleur:** gebruik semantische tokens, zoals `--hf-colour-text-secondary`, nooit de primitieven (`--hf-colour-grey-600`) in componenten.

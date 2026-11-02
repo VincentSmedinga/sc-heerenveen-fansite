@@ -21,6 +21,7 @@
     container-type: inline-size;
 
     > table {
+      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
       margin-block-end: var(--hf-space-m);
     }
   }

@@ -119,6 +119,7 @@
 
   /* A switch straight in a card, such as the one above a table, keeps the large space to what follows. */
   .hf-card > .hf-segmented-control {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
     margin-block-end: var(--hf-space-l);
   }
 

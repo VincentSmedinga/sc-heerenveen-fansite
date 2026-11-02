@@ -645,7 +645,7 @@ describe('the card with the newest article of the editors', () => {
 
     expect(html).toMatch(/<h2 class="hf-heading-2" id="[^"]+">Van de redactie<\/h2>/)
     expect(html).toContain(
-      '<h3 class="hf-heading-3 hf-article-card-title"><a href="/redactie/dit-zijn-wij">Dit zijn wij &lt;i&gt;allemaal&lt;/i&gt;</a></h3>',
+      '<h3 class="hf-heading-3 hf-article-card-title hf-space-end-xs"><a href="/redactie/dit-zijn-wij">Dit zijn wij &lt;i&gt;allemaal&lt;/i&gt;</a></h3>',
     )
   })
 

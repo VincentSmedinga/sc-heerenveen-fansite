@@ -1,0 +1,75 @@
+/*
+ * The flow: the vertical space between the direct children of a container. A card, a cell, an
+ * introduction, an article, the content of a disclosure and any element with hf-flow decide
+ * the space between what is in them. An element or a component sets no space to the outside
+ * of its own, because it does not know its surroundings; stylelint keeps it that way (see
+ * stylelint.config.js). The chapter Ruimte in Storybook says the rules in words.
+ *
+ * Each child gets space under it, by what it is, and none above it:
+ * - a heading: the large step;
+ * - a large building block, from the list below: the large step;
+ * - the child before a heading or a rule (hr): the large step in a card or a cell, and the
+ *   extra large step in the text of an article, where a long text needs a clear pause;
+ * - a rule: the same space as above it;
+ * - anything else: the medium step;
+ * - the last child: none, also when only a hidden line for the screen reader
+ *   (hf-visually-hidden) follows it.
+ * Text just above a large block keeps the medium step, and between two large blocks is the
+ * large step. The extra large step is otherwise only between cells, in Page.Body.
+ *
+ * The rules are in a layer of their own, hf.flow, between hf.components and hf.utilities: the
+ * flow wins over the rules of a component, whatever their specificity, and loses to a utility
+ * class such as hf-space-end-l (see space-end.css), which sets the space under one instance.
+ * The space is only under a child, so a utility class on the element above always sets the
+ * whole space. The order of the rules in this file matters within the layer: the rule for the
+ * last child comes last, and the container is in :where(), so it adds no specificity.
+ *
+ * A flow container is an ordinary block, not a grid or a flex container: there a margin adds
+ * to the gap. A component that is a card itself, such as a tile, keeps the space between its
+ * own parts with a utility class on the part, or with its parts in an element of their own.
+ */
+
+@layer hf.flow {
+  :where(.hf-card, .hf-page-cell, .hf-page-intro, .hf-article, .hf-disclosure-content, .hf-flow) {
+    > * {
+      margin-block: 0 var(--hf-space-m);
+    }
+
+    /*
+     * The large building blocks: a table, a group of data tables, the table of the standings,
+     * of the top scorers or of a record without a legend (with one, the block ends in a line
+     * of text, so the medium step follows), a bar chart, a donut chart on its own or in a
+     * group, the chart of the form, the table of a form and the grid of tiles. A new large
+     * block goes in this list, and the test in flow-css.test.ts checks the list.
+     */
+    > :is(h1, h2, h3, h4, h5, h6),
+    > :where(
+      table,
+      .hf-data-table-group,
+      .hf-bar-place:not(:has(.hf-bar-legend)),
+      .hf-bar-chart,
+      .hf-donut-chart,
+      .hf-donut-chart-group,
+      .hf-form-chart,
+      .hf-input-table,
+      .hf-tile-grid
+    ),
+    > :has(+ :is(h1, h2, h3, h4, h5, h6, hr)),
+    > hr {
+      margin-block-end: var(--hf-space-l);
+    }
+
+    > :last-child,
+    > :has(+ .hf-visually-hidden:last-child) {
+      margin-block-end: 0;
+    }
+  }
+
+  /* The text of an article has the extra large step before a heading or a rule. */
+  .hf-article {
+    > :has(+ :is(h1, h2, h3, h4, h5, h6, hr)),
+    > hr {
+      margin-block-end: var(--hf-space-xl);
+    }
+  }
+}

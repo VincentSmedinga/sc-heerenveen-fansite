@@ -6,14 +6,15 @@
 
 @layer hf.base {
   /*
-   * A table is a large building block: the large space is under it when something follows.
-   * When it is the last in its cell, a card or a column takes that space away (see card.css
-   * and page.css).
+   * A table is a large building block: in a card or a cell the flow (utilities/flow.css) puts
+   * the large space under it when something follows, and none when it is the last. The margin
+   * here is for a table outside the flow.
    */
   table {
     border-collapse: collapse;
     font-variant-numeric: tabular-nums;
     inline-size: 100%;
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
     margin-block: 0 var(--hf-space-l);
 
     /*
@@ -29,6 +30,7 @@
   caption {
     color: var(--hf-colour-text-heading);
     font-weight: var(--hf-strong-font-weight);
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between a caption and its table becomes a gap in #654. */
     margin-block-end: var(--hf-space-s);
     text-align: start;
   }

@@ -1,0 +1,29 @@
+/*
+ * Utility classes for the space under one instance, where the flow (flow.css) gives the wrong
+ * step: hf-space-end-0, -xs, -s, -m and -l. They are in the strongest layer, so they always
+ * win over the flow and over the rules of a component. There is no class for the extra large
+ * step: that one is only between cells, in Page.Body. The space is under the element, so the
+ * class goes on the element above the gap.
+ */
+
+@layer hf.utilities {
+  .hf-space-end-0 {
+    margin-block-end: 0;
+  }
+
+  .hf-space-end-xs {
+    margin-block-end: var(--hf-space-xs);
+  }
+
+  .hf-space-end-s {
+    margin-block-end: var(--hf-space-s);
+  }
+
+  .hf-space-end-m {
+    margin-block-end: var(--hf-space-m);
+  }
+
+  .hf-space-end-l {
+    margin-block-end: var(--hf-space-l);
+  }
+}

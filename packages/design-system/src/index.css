@@ -2,7 +2,8 @@
  * Entry point of the design system's CSS.
  *
  * Cascade layers, from weak to strong: tokens, base (HTML elements), typography (type styles),
- * components, utilities (classes that do one thing, such as hf-visually-hidden).
+ * components, flow (the vertical space between the children of a card or a cell), utilities
+ * (classes that do one thing, such as hf-visually-hidden).
  * Styles outside a layer, such as an app's own, always win over these.
  * Class prefix: hf- (Heerenveen Fansite).
  *
@@ -87,4 +88,6 @@
 @import url('./components/button/button.css');
 @import url('./components/icon-button/icon-button.css');
 @import url('./components/error-summary/error-summary.css');
+@import url('./utilities/flow.css');
+@import url('./utilities/space-end.css');
 @import url('./utilities/visually-hidden.css');

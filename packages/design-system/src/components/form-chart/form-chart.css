@@ -6,11 +6,13 @@
 @layer hf.components {
   /* The large space of a chart is under it, and none when it is the last in its cell. */
   .hf-form-chart {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
     margin-block-end: var(--hf-space-l);
   }
 
   .hf-form-chart-key,
   .hf-form-chart-line {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
     margin-block: var(--hf-space-xs) 0;
   }
 

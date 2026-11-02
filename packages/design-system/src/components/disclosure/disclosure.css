@@ -46,18 +46,9 @@
     }
   }
 
+  /* The content is a flow container (see utilities/flow.css): an ordinary block, not a grid. */
   .hf-disclosure-content {
-    display: grid;
-    gap: var(--hf-space-m);
     padding-block-end: var(--hf-space-m);
     padding-inline: var(--hf-space-m);
-
-    > :first-child {
-      margin-block-start: 0;
-    }
-
-    > :last-child {
-      margin-block-end: 0;
-    }
   }
 }
