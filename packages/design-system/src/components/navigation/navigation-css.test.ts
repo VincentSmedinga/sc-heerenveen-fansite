@@ -8,6 +8,7 @@ const css = strip(readFileSync(join(import.meta.dirname, 'navigation.css'), 'utf
 // The part of the file about the bar of sub-pages, which comes last.
 const sub = css.slice(css.indexOf('  .hf-navigation-bar {'))
 const shortcuts = strip(readFileSync(join(import.meta.dirname, '../page/shortcuts.css'), 'utf8'))
+const typography = strip(readFileSync(join(import.meta.dirname, '../../tokens/typography.css'), 'utf8'))
 const colours = strip(readFileSync(join(import.meta.dirname, '../../tokens/colour.css'), 'utf8'))
 
 // jsdom has no cascade layers, so the test reads the text of the file.
@@ -133,7 +134,8 @@ describe('a sub-page link in navigation.css', () => {
   it('is a pill 36 pixels high at the usual text size, of 1rem in regular weight, on one line', () => {
     expect(link).toContain('block-size: 2.25rem;')
     expect(link).toContain('border-radius: 999px;')
-    expect(link).toContain('font-size: 1rem;')
+    expect(link).toContain('font-size: var(--hf-submenu-font-size);')
+    expect(typography).toContain('--hf-submenu-font-size: 1rem;')
     expect(link).toContain('font-weight: var(--hf-submenu-font-weight);')
     expect(link).toContain('white-space: nowrap;')
     expect(link).toContain('color: var(--hf-colour-text-on-header);')

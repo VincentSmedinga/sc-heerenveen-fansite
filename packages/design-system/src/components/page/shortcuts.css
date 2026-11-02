@@ -225,7 +225,7 @@
     box-sizing: border-box;
     color: var(--hf-colour-text-shortcuts-link);
     display: inline-flex;
-    font-size: 1rem;
+    font-size: var(--hf-anchor-font-size);
     font-weight: var(--hf-anchor-font-weight);
     line-height: 1;
     padding-inline: var(--hf-space-s);

@@ -46,7 +46,7 @@
     inline-size: 100%;
     margin-block: var(--hf-space-xs) var(--hf-space-m);
     max-inline-size: 30rem;
-    min-block-size: 2.75rem;
+    min-block-size: var(--hf-size-control);
     padding-block: var(--hf-space-s);
     padding-inline: var(--hf-space-s);
   }

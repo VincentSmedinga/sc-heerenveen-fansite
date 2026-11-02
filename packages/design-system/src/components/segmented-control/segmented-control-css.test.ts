@@ -94,7 +94,7 @@ describe('the thumb of the segmented control', () => {
 
 describe('the sizes of the segmented control', () => {
   it('is 44 pixels high, and the small size takes its height from the token', () => {
-    expect(css).toContain('min-block-size: 2.75rem;')
+    expect(css).toContain('min-block-size: var(--hf-size-control);')
     expect(css.slice(css.indexOf('&.hf-size-small'))).toContain('min-block-size: var(--hf-size-control-small);')
   })
 })

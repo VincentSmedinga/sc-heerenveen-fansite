@@ -17,7 +17,7 @@
   .hf-pagination-link {
     align-items: center;
     display: inline-flex;
-    min-block-size: 2.75rem;
+    min-block-size: var(--hf-size-control);
   }
 
   /* The small size: the links are lower and have the size of the text between them. */

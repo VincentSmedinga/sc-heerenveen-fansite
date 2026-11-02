@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { ArticleText } from '../../../../../../ArticleText'
 import { findVersion } from '../../../../../../beheer/article-versions'
 import { findArticle } from '../../../../../../beheer/articles'
+import { compact } from '../../../../../../beheer/density'
 import { parseItemId } from '../../../../../../beheer/items'
 import { requireRole } from '../../../../../../beheer/require-role'
 import { getDatabase } from '../../../../../../database'
@@ -41,7 +42,7 @@ export default async function ArticleVersionPage({ params }: { params: Promise<{
   const moment = article.publishedAt ?? new Date()
 
   return (
-    <Page.Main>
+    <Page.Main className={compact}>
       <Card aria-labelledby="versie-kop" surface="soft">
         <Heading id="versie-kop" level={2}>
           Versie {version.version}

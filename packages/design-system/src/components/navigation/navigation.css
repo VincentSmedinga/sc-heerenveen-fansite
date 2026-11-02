@@ -94,7 +94,7 @@
 
   .hf-navigation-header .hf-navigation-link {
     color: var(--hf-colour-text-on-header);
-    font-size: clamp(1rem, 0.93rem + 0.34vw, 1.125rem);
+    font-size: var(--hf-menu-font-size);
     font-weight: var(--hf-menu-font-weight);
     text-decoration-line: none;
 
@@ -296,7 +296,7 @@
     box-sizing: border-box;
     color: var(--hf-colour-text-on-header);
     display: inline-flex;
-    font-size: 1rem;
+    font-size: var(--hf-submenu-font-size);
     font-weight: var(--hf-submenu-font-weight);
     line-height: 1;
     padding-inline: var(--hf-space-s);

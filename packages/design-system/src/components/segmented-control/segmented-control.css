@@ -32,7 +32,7 @@
     isolation: isolate;
     justify-self: start;
     max-inline-size: 100%;
-    min-block-size: 2.75rem;
+    min-block-size: var(--hf-size-control);
     position: relative;
 
     /* The thumb. */

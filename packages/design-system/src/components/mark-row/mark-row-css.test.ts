@@ -3,6 +3,10 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const css = readFileSync(join(import.meta.dirname, 'mark-row.css'), 'utf8').replaceAll(/\/\*.*?\*\//gsu, '')
+const typography = readFileSync(join(import.meta.dirname, '../../tokens/typography.css'), 'utf8').replaceAll(
+  /\/\*.*?\*\//gsu,
+  '',
+)
 
 /** The declarations of the first rule with this selector. */
 function declarationsOf(selector: string) {
@@ -14,7 +18,8 @@ function declarationsOf(selector: string) {
 describe('mark-row.css', () => {
   it('writes a mark bold in the full colour of its tone, at 1.125rem', () => {
     expect(declarationsOf('.hf-mark-row-mark')).toMatch(/color: var\(--hf-chart-colour\)/u)
-    expect(declarationsOf('.hf-mark-row-mark')).toMatch(/font-size: 1\.125rem/u)
+    expect(declarationsOf('.hf-mark-row-mark')).toMatch(/font-size: var\(--hf-figure-font-size\)/u)
+    expect(typography).toMatch(/--hf-figure-font-size: 1\.125rem;/u)
     expect(declarationsOf('.hf-mark-row-mark')).toMatch(/font-weight: var\(--hf-figure-font-weight\)/u)
   })
 

@@ -151,8 +151,14 @@ describe('Navigation', () => {
 
   it('sets the links in the header in a size that grows with the window, from 16px at 320px to 18px at 900px', () => {
     const css = readFileSync(join(import.meta.dirname, 'navigation.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+    const tokens = readFileSync(join(import.meta.dirname, '../../tokens/typography.css'), 'utf8').replace(
+      /\/\*.*?\*\//gs,
+      '',
+    )
     const [, minimum, offset, slope, maximum] =
-      css.match(/font-size: clamp\(([\d.]+)rem, ([\d.]+)rem \+ ([\d.]+)vw, ([\d.]+)rem\);/) ?? []
+      tokens.match(/--hf-menu-font-size: clamp\(([\d.]+)rem, ([\d.]+)rem \+ ([\d.]+)vw, ([\d.]+)rem\);/) ?? []
+
+    expect(css).toContain('font-size: var(--hf-menu-font-size);')
     const at = (width: number) => Number(offset) * 16 + (Number(slope) / 100) * width
 
     expect(Number(minimum) * 16).toBe(16)

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Button, Card, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
 import { listArticles, listLength } from '../../../beheer/articles'
+import { compact } from '../../../beheer/density'
 import { requireRole } from '../../../beheer/require-role'
 import { getDatabase } from '../../../database'
 import { formatArticleDate } from '../../../news'
@@ -28,6 +29,7 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Pro
 
   return (
     <Page.Main
+      className={compact}
       intro={
         <>
           <Heading level={1}>Artikelen</Heading>

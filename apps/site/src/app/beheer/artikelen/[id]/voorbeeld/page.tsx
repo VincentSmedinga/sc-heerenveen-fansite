@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 
 import { ArticleText } from '../../../../../ArticleText'
 import { findArticle } from '../../../../../beheer/articles'
+import { compact } from '../../../../../beheer/density'
 import { parseItemId } from '../../../../../beheer/items'
 import { requireRole } from '../../../../../beheer/require-role'
 import { getDatabase } from '../../../../../database'
@@ -37,7 +38,7 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
   const live = article.publishedAt !== null && article.publishedAt <= now
 
   return (
-    <Page.Main>
+    <Page.Main className={compact}>
       <Card aria-labelledby="voorbeeld-kop" surface="soft">
         <Heading id="voorbeeld-kop" level={2}>
           Voorbeeld

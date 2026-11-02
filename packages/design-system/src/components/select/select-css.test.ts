@@ -30,7 +30,7 @@ describe('the styled list in select.css', () => {
   })
 
   it('gives each option a target of 44 pixels and no colour that is not a token', () => {
-    expect(css).toContain('min-block-size: 2.75rem')
+    expect(css).toContain('min-block-size: var(--hf-size-control)')
     expect(css).not.toMatch(/#[0-9a-f]{3,8}\b|rgb\(|hsl\(/i)
   })
 })
