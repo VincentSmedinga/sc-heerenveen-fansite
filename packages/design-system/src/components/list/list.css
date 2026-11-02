@@ -3,17 +3,12 @@
 @layer hf.base {
   ul,
   ol {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
-    margin-block: 0 var(--hf-space-m);
+    margin-block: 0;
     padding-inline-start: 1.5em;
   }
 
   ul {
     list-style-type: square;
-  }
-
-  li > :is(ul, ol) {
-    margin-block-end: 0;
   }
 
   /* Not Baseline widely available yet. Without it, a marker keeps the colour and weight of its item. */
@@ -31,8 +26,7 @@
   }
 
   dl {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
-    margin-block: 0 var(--hf-space-m);
+    margin-block: 0;
   }
 
   dt {
@@ -41,24 +35,27 @@
   }
 
   dd {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the items of a list becomes a gap in #654. */
+    /*
+     * A gap can't put space between a description and the next term, and none between a term
+     * and its description, without a wrapper around each pair.
+     */
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- see above */
     margin-block-end: var(--hf-space-s);
     margin-inline-start: 0;
+
+    &:last-child {
+      margin-block-end: 0;
+    }
   }
 }
 
 /*
- * A loose list: the space belongs to the item, not to the paragraph in it.
- * The last item and the last element in an item have none, so the list ends with the same space as a tight one.
+ * A loose list: the space belongs between the items, not in the paragraph in them. The list
+ * ends with the same space as a tight one, because a gap is only between two items.
  */
 @layer hf.components {
-  .hf-list-loose > li {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the items of a list becomes a gap in #654. */
-    margin-block-end: var(--hf-space-m);
-
-    &:last-child,
-    > :last-child {
-      margin-block-end: 0;
-    }
+  .hf-list-loose {
+    display: grid;
+    gap: var(--hf-space-m);
   }
 }

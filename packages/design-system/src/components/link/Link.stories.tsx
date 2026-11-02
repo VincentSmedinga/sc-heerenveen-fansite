@@ -57,7 +57,7 @@ export const Icons = meta.story({
     },
   },
   render: () => (
-    <>
+    <div className="hf-flow">
       <Text>
         <Link href="#alle-podcasts" icon="arrow-right">
           Alle podcasts
@@ -82,7 +82,7 @@ export const Icons = meta.story({
           Vorige
         </Link>
       </Text>
-    </>
+    </div>
   ),
 })
 
@@ -102,7 +102,7 @@ export const States = meta.story({
     },
   },
   render: () => (
-    <>
+    <div className="hf-flow">
       <Text>
         <Link href="#nog-niet-bezocht">Gewone link</Link>
       </Text>
@@ -121,6 +121,6 @@ export const States = meta.story({
           Link met focus
         </Link>
       </Text>
-    </>
+    </div>
   ),
 })

@@ -90,6 +90,7 @@ const GoalsCard = ({ trend = true }: { trend?: boolean }) => (
           columnGap: '1.5rem',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(14rem, 100%), 1fr))',
+          rowGap: '1.5rem',
         }}
       >
         {[goals.slice(0, 6), goals.slice(6)].map((half, part) => (

@@ -138,7 +138,7 @@ const RichTextEditorBody = ({
         'aria-labelledby': `${id}-label`,
         'aria-multiline': 'true',
         'aria-required': String(required === true),
-        class: 'hf-rich-text-editor-content',
+        class: 'hf-rich-text-editor-content hf-flow',
         id,
         role: 'textbox',
         ...(describedBy === undefined ? {} : { 'aria-describedby': describedBy }),

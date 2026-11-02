@@ -49,6 +49,9 @@ Tekst vlak boven een groot blok houdt de gemiddelde ruimte, en tussen twee grote
 Een tabel met een legenda, zoals de stand, is met zijn legenda één groot blok: tussen de tabel en de legenda staat de gemiddelde ruimte, en onder de legenda de grote.
 De extra grote ruimte staat verder alleen tussen de cellen van een pagina.
 De grote blokken staan in één lijst in `utilities/flow.css`; een nieuw groot blok komt in die lijst.
+De basiselementen zetten zelf geen ruimte naar buiten: een alinea, een lijst, een kop, een tabel, een citaat, een figuur en een lijn.
+Staat zo'n element niet in een kaart, een cel of een ander blok met een stroom, zet dan `hf-flow` op het element eromheen, ook in een story.
+De ruimte tussen de delen van een element zelf, zoals de items van een ruime lijst of een figuur en zijn onderschrift, komt van `gap`.
 
 <Story of={SpaceStories.Flow} />
 

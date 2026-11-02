@@ -61,9 +61,9 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Pro
             : `${found.length === listLength ? `De laatste ${listLength}` : found.length} ${found.length === 1 ? 'artikel' : 'artikelen'}.`}
         </Text>
         {found.length === 0 ? null : (
-          <List role="list">
+          <List className="hf-flow" role="list">
             {found.map((article) => (
-              <List.Item key={article.id}>
+              <List.Item className="hf-flow" key={article.id}>
                 <Heading appearance={4} level={2}>
                   <Link href={articlePath(article.id)}>{article.title}</Link>
                 </Heading>

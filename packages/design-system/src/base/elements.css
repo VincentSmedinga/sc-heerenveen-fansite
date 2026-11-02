@@ -16,14 +16,11 @@
     border-inline-start: 0.25rem solid;
     border-inline-start-color: var(--hf-colour-marker-graphic);
     box-sizing: border-box;
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
-    margin-block: 0 var(--hf-space-m);
+    display: grid;
+    gap: var(--hf-space-m);
+    margin-block: 0;
     margin-inline: 0;
     padding-inline-start: var(--hf-space-m);
-
-    > :last-child {
-      margin-block-end: 0;
-    }
 
     footer {
       color: var(--hf-colour-text-secondary);
@@ -53,8 +50,7 @@
     border-radius: 0.25rem;
     box-sizing: border-box;
     line-height: 1.45;
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
-    margin-block: 0 var(--hf-space-m);
+    margin-block: 0;
     overflow: auto;
     padding-block: var(--hf-space-s);
     padding-inline: var(--hf-space-m);
@@ -71,13 +67,14 @@
     border-block-start: 1px solid;
     border-block-start-color: var(--hf-colour-border-default);
     box-sizing: border-box;
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
-    margin-block: var(--hf-space-xl);
+    margin-block: 0;
   }
 
   figure {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
-    margin-block: 0 var(--hf-space-m);
+    display: grid;
+    gap: var(--hf-space-s);
+    grid-template-columns: minmax(0, 1fr);
+    margin-block: 0;
     margin-inline: 0;
   }
 
@@ -85,8 +82,6 @@
     color: var(--hf-colour-text-secondary);
     font-size: var(--hf-meta-font-size);
     line-height: var(--hf-meta-line-height);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between a figure and its caption becomes a gap in #654. */
-    margin-block-start: var(--hf-space-s);
   }
 
   img,

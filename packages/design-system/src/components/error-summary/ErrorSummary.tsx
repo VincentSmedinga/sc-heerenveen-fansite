@@ -35,7 +35,7 @@ export const ErrorSummary = ({ className, errors, level, title = 'Er is iets mis
   }
 
   return (
-    <section aria-labelledby={headingId} className={classNames('hf-error-summary', className)} {...props}>
+    <section aria-labelledby={headingId} className={classNames('hf-error-summary hf-flow', className)} {...props}>
       <Heading appearance={3} id={headingId} level={level}>
         {title}
       </Heading>

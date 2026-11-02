@@ -16,7 +16,7 @@ const labels = { default: 'Standaard', small: 'Klein' } as const
 
 const Row = ({ size }: { size: (typeof sizes)[number] }) => (
   <section aria-label={labels[size]} style={{ display: 'grid', gap: '1rem', justifyItems: 'start' }}>
-    <h3 className="hf-heading-4">{labels[size]}</h3>
+    <h3 className="hf-heading-4 hf-space-end-l">{labels[size]}</h3>
     <div style={{ alignItems: 'end', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
       <div style={{ display: 'flex', gap: '1rem', marginBlockEnd: '1rem' }}>
         <Button size={size} type="button">

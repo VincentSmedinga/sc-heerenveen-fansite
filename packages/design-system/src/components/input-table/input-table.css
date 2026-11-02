@@ -19,11 +19,10 @@
     --hf-input-table-control: var(--hf-size-control);
 
     container-type: inline-size;
-
-    > table {
-      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-      margin-block-end: var(--hf-space-m);
-    }
+    display: grid;
+    gap: var(--hf-space-m);
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
   }
 
   /* The block of a row: the default, for a table that is narrower than 40rem. */

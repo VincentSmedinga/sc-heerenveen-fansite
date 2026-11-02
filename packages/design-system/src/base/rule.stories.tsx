@@ -15,7 +15,7 @@ const meta = preview.meta({
 export const Rule = meta.story({
   name: 'Scheidingslijn',
   render: () => (
-    <div style={{ maxInlineSize: '40rem' }}>
+    <div className="hf-flow" style={{ maxInlineSize: '40rem' }}>
       <p>Vorige wedstrijd: sc Heerenveen – Excelsior 4-0, eredivisie.</p>
       <hr />
       <p>Volgende wedstrijd: ADO Den Haag – sc Heerenveen, zaterdag 24 oktober, 21:00.</p>

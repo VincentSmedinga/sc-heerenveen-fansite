@@ -76,7 +76,7 @@ export const ColourScales = () => {
   return (
     <div className="_hf-docs-stack">
       {scales.map(({ description, label, name, steps = scaleSteps }) => (
-        <section aria-labelledby={`scale-${name}`} key={name}>
+        <section aria-labelledby={`scale-${name}`} className="hf-flow" key={name}>
           <h3 className="hf-heading-3" id={`scale-${name}`}>
             {label}
           </h3>
@@ -230,7 +230,7 @@ const PairRow = ({ pair, text }: { pair: Pair; text: boolean }) => {
 const themeLabels: Record<Theme, string> = { dark: 'Donker', light: 'Licht' }
 
 export const ContrastTables = ({ theme }: { theme: Theme }) => (
-  <section aria-labelledby={`contrast-${theme}`} className="_hf-docs-theme-panel" data-theme={theme}>
+  <section aria-labelledby={`contrast-${theme}`} className="_hf-docs-theme-panel hf-flow" data-theme={theme}>
     <h3 className="hf-heading-3" id={`contrast-${theme}`}>
       {themeLabels[theme]}
     </h3>
