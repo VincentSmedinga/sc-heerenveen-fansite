@@ -30,14 +30,13 @@ describe('SectionBar', () => {
     expect(screen.getByRole('link', { name: 'Beheer' }).hasAttribute('aria-current')).toBe(false)
   })
 
-  it('draws the account beside the navigation, not inside it', () => {
+  it('draws the account inside the navigation, so no text of the bar is outside a landmark', () => {
     render(<SectionBar account={<button type="button">Uitloggen</button>} items={items} label="Beheer" />)
 
     const nav = screen.getByRole('navigation', { name: 'Beheer' })
-    const button = screen.getByRole('button', { name: 'Uitloggen' })
 
-    expect(nav.contains(button)).toBe(false)
-    expect(nav.parentElement?.contains(button)).toBe(true)
+    expect(within(nav).getByRole('button', { name: 'Uitloggen' })).toBeTruthy()
+    expect(screen.getAllByRole('navigation')).toHaveLength(1)
   })
 
   it('draws no empty account without one', () => {

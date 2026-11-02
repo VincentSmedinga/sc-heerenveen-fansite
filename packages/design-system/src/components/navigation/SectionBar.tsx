@@ -32,12 +32,13 @@ export type SectionBarProps = {
  * The bar with the screens of a part of the site that has several, such as the admin. It goes
  * between the main menu and the Page.Body, outside the Page.Body, and looks like the bar with
  * the sub-pages of the main menu (`NavigationBar`), but it is a navigation of its own, for a
- * part that is not an item of the main menu on every page. The current screen has
+ * part that is not an item of the main menu on every page. The account is in the same
+ * navigation, so no text of the bar is outside a landmark. The current screen has
  * `aria-current="page"`.
  */
 export const SectionBar = ({ account, items, label }: SectionBarProps) => (
-  <div className="hf-section-bar">
-    <nav aria-label={label} className="hf-section-bar-nav">
+  <nav aria-label={label} className="hf-section-bar">
+    <div className="hf-section-bar-links">
       <ShortcutsRow follow={false}>
         <ul className="hf-page-shortcuts-list" role="list">
           {items.map((item) => (
@@ -49,7 +50,7 @@ export const SectionBar = ({ account, items, label }: SectionBarProps) => (
           ))}
         </ul>
       </ShortcutsRow>
-    </nav>
+    </div>
     {account === undefined ? null : <div className="hf-section-bar-account">{account}</div>}
-  </div>
+  </nav>
 )
