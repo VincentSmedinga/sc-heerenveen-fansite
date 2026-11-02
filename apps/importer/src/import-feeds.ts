@@ -6,6 +6,7 @@ import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 import { recordRun } from '@fansite/db/alerts'
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
+import { mailConflicts } from '@fansite/db/match-conflict-mail'
 import { discussions, feeds, items, matches, sources } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { removeVisitorData } from '@fansite/db/visits'
@@ -18,6 +19,7 @@ import type { ForumDiscussion } from './read-forum.ts'
 import type { MatchDay } from './relevance.ts'
 
 import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-runs.ts'
+import { reliability } from './classify-change.ts'
 import { createFetcher } from './fetcher.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
@@ -508,6 +510,15 @@ async function importWikipedia(
   } catch (error) {
     lines.push(`Squad: warning, not imported: ${describeError(error)}`)
   }
+
+  // The beheerders hear of a difference with an entry of the editors, also one that an earlier
+  // run could not mail. A mail that fails is a line here, never a failed import.
+  await mailConflicts(db, {
+    ...alerts,
+    clock,
+    standsMs: reliability.suspiciousStands,
+    write: (line) => void lines.push(line),
+  })
 
   return lines
 }

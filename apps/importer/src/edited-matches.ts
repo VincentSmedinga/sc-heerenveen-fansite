@@ -7,8 +7,11 @@
 // - Wikipedia has the same: the marker of the part is cleared and the log says that Wikipedia
 //   caught up. The part follows Wikipedia from then on.
 // - Wikipedia has something else: the entry stays, and the difference goes in the log and in
-//   the warning of the import, once, with both values. A person decides (issue 577); until then
-//   it stays until an administrator removes the entry.
+//   the warning of the import, once, with both values. The difference is also kept as a change
+//   that waits in `match_changes` (once, per part), and the beheerders are mailed about it
+//   (`mailConflicts`). A person decides in the admin or with `pnpm run import:changes`; when
+//   nobody does and Wikipedia says the same for seven days, the importer takes Wikipedia over
+//   and mails again. When Wikipedia puts the value of the editors back, the change lapses.
 //
 // The parts without a marker follow Wikipedia as for any match, without the judgement of
 // `classify-change.ts`.
@@ -16,25 +19,32 @@ import type { Database } from '@fansite/db/client'
 import type { Match, MatchEdit, MatchGoal } from '@fansite/db/schema'
 
 import { recordAction } from '@fansite/db/audit-log'
+import { decideConflict, encodePartProposal } from '@fansite/db/match-conflicts'
 import {
   clearParts,
   describeEntryGoals,
   describeEntryKickoff,
   describeEntryResult,
   type GoalFields,
+  type GoalSnapshot,
   type KickoffFields,
   markedParts,
   type MatchPart,
   type ResultFields,
 } from '@fansite/db/match-edits'
-import { matchEdits, matches } from '@fansite/db/schema'
-import { eq, inArray } from 'drizzle-orm'
+import { matchChanges, matchEdits, matches } from '@fansite/db/schema'
+import { and, eq, inArray, isNotNull } from 'drizzle-orm'
 
 import type { LinkedGoal } from './match-changes.ts'
 import type { ReadMatch } from './read-wikipedia.ts'
 
+import { decide, hasStood, noteSeen } from './match-changes.ts'
+
 /** What Wikipedia says about a part, compared with the entry of the editors. */
 export type Verdict = 'different' | 'nothing' | 'same'
+
+/** Why a difference is kept as a change that waits. */
+export const conflictReason = 'wijkt af van de invoer van de redactie'
 
 const partNames: Record<MatchPart, { dutch: string; english: string }> = {
   goals: { dutch: 'doelpunten', english: 'goals' },
@@ -92,7 +102,18 @@ export async function importEditedMatch(
   }
 
   const caughtUp: MatchPart[] = []
+  const takenOver: MatchPart[] = []
   const reported: Partial<Record<MatchPart, null | string>> = {}
+  const waiting = new Map(
+    (
+      await db
+        .select()
+        .from(matchChanges)
+        .where(
+          and(eq(matchChanges.matchId, before.id), eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part)),
+        )
+    ).map((change) => [change.part as MatchPart, change]),
+  )
 
   for (const part of ['kickoff', 'result', 'goals'] as const) {
     const found = judged[part]
@@ -103,6 +124,7 @@ export async function importEditedMatch(
 
     const previous =
       part === 'kickoff' ? edit.reportedKickoff : part === 'result' ? edit.reportedResult : edit.reportedGoals
+    const pending = waiting.get(part)
 
     if (found.verdict === 'same') {
       caughtUp.push(part)
@@ -111,7 +133,7 @@ export async function importEditedMatch(
         {
           action: 'match.caught-up',
           detail: clean(
-            `${capital(partNames[part].dutch)}: Wikipedia heeft nu hetzelfde als de invoer: ${found.wikipedia}`,
+            `${capital(partNames[part].dutch)}: Wikipedia heeft nu hetzelfde als de invoer: ${found.wikipedia}${pending === undefined ? '' : '. De afwijking is vervallen.'}`,
           ),
           itemId: before.id,
           reason: `Wikipedia heeft de ${partNames[part].dutch} van de wedstrijd overgenomen`,
@@ -119,7 +141,40 @@ export async function importEditedMatch(
         },
         now,
       )
+      if (pending !== undefined) {
+        await decide(db, pending, 'rejected', 'reverted', now)
+      }
     } else if (found.verdict === 'different') {
+      const proposal = encodePartProposal(part, { goals: snapshotsOf(wikipediaGoals), match: wikipedia })
+
+      if (pending?.newValue === found.wikipedia) {
+        // The difference that waits is still on the page: see it again, and take Wikipedia over
+        // when it has stood for seven days and nobody decided.
+        await db.update(matchChanges).set({ proposal }).where(eq(matchChanges.id, pending.id))
+        await noteSeen(db, pending, now)
+
+        if (
+          hasStood(pending, now) &&
+          (await decideConflict(
+            db,
+            pending.id,
+            {
+              kind: 'take-over',
+              reason: 'Niemand besliste in zeven dagen, dus de import nam Wikipedia over',
+              resolution: 'stood',
+              userId: null,
+            },
+            now,
+          )) === 'done'
+        ) {
+          takenOver.push(part)
+        }
+
+        continue
+      }
+      if (pending !== undefined) {
+        await decide(db, pending, 'rejected', 'replaced', now)
+      }
       if (previous !== found.wikipedia) {
         reported[part] = found.wikipedia
         await recordAction(
@@ -138,10 +193,19 @@ export async function importEditedMatch(
         warnings.push(
           `held, ${before.round} (${before.competition}): Wikipedia differs from the entry of the editors in the ${partNames[part].english}: ours ${found.entry}, Wikipedia ${found.wikipedia}`,
         )
+        await keepDifference(db, before, part, found, proposal, now)
+      } else if (!(await hasDecided(db, before.id, part, found.wikipedia))) {
+        // Reported before there were changes for it: keep it now, without saying it again.
+        await keepDifference(db, before, part, found, proposal, now)
       }
-    } else if (previous !== null) {
-      // Wikipedia took its different value back, so the next difference is news again.
-      reported[part] = null
+    } else {
+      if (previous !== null) {
+        // Wikipedia took its different value back, so the next difference is news again.
+        reported[part] = null
+      }
+      if (pending !== undefined) {
+        await decide(db, pending, 'rejected', 'reverted', now)
+      }
     }
   }
 
@@ -158,10 +222,15 @@ export async function importEditedMatch(
       .where(eq(matchEdits.matchId, edit.matchId))
   }
   if (caughtUp.length > 0) {
-    await clearParts(db, edit, caughtUp)
+    // Taking a part over cleared its marker already, so read the row as it is now.
+    const [current] = await db.select().from(matchEdits).where(eq(matchEdits.matchId, edit.matchId))
+
+    if (current !== undefined) {
+      await clearParts(db, current, caughtUp)
+    }
   }
 
-  return { keep: markedParts(edit).filter((part) => !caughtUp.includes(part)), warnings }
+  return { keep: markedParts(edit).filter((part) => !caughtUp.includes(part) && !takenOver.includes(part)), warnings }
 }
 
 /**
@@ -264,4 +333,47 @@ function capital(text: string): string {
 /** A text for the log: no control characters, one line. */
 function clean(text: string): string {
   return text.replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ').trim()
+}
+
+/** Whether a change for this part and this value of Wikipedia exists, decided or not. */
+async function hasDecided(db: Pick<Database, 'select'>, matchId: number, part: MatchPart, wikipedia: string) {
+  const found = await db
+    .select({ id: matchChanges.id })
+    .from(matchChanges)
+    .where(and(eq(matchChanges.matchId, matchId), eq(matchChanges.part, part), eq(matchChanges.newValue, wikipedia)))
+    .limit(1)
+
+  return found.length > 0
+}
+
+/** Keeps a difference as a change that waits, for the beheerders to decide. */
+async function keepDifference(
+  db: Pick<Database, 'insert'>,
+  match: Match,
+  part: MatchPart,
+  found: { entry: string; wikipedia: string },
+  proposal: string,
+  now: Date,
+) {
+  await db.insert(matchChanges).values({
+    changed: partNames[part].dutch,
+    class: 'suspicious',
+    competition: match.competition,
+    firstSeenAt: now,
+    lastSeenAt: now,
+    matchId: match.id,
+    newValue: found.wikipedia,
+    oldValue: found.entry,
+    part,
+    proposal,
+    reason: conflictReason,
+    round: match.round,
+    season: match.season,
+    status: 'pending',
+  })
+}
+
+/** The goals of Wikipedia as `match_goals` keeps them. */
+function snapshotsOf(goals: LinkedGoal[]): GoalSnapshot[] {
+  return goals.map(({ playerPage, ...goal }) => ({ ...goal, wikipediaPage: playerPage }))
 }

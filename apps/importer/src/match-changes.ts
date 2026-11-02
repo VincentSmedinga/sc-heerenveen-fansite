@@ -4,8 +4,9 @@
 import type { Database } from '@fansite/db/client'
 import type { Match, MatchChange, NewMatchChange, NewMatchGoal } from '@fansite/db/schema'
 
+import { decideConflict } from '@fansite/db/match-conflicts'
 import { matchChanges, matches, matchGoals } from '@fansite/db/schema'
-import { and, asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNull } from 'drizzle-orm'
 
 import type { Judgement, MatchHistory } from './classify-change.ts'
 import type { ReadGoal, ReadMatch } from './read-wikipedia.ts'
@@ -107,7 +108,12 @@ export async function noteSeen(db: Pick<Database, 'update'>, change: MatchChange
 
 /** Reads the changes of a season, with what the judgement needs of the last week. */
 export async function readSeasonChanges(db: Writer, season: string, now: Date): Promise<SeasonChanges> {
-  const rows = await db.select().from(matchChanges).where(eq(matchChanges.season, season)).orderBy(asc(matchChanges.id))
+  // A difference with an entry of the editors has its own judgement (`edited-matches.ts`).
+  const rows = await db
+    .select()
+    .from(matchChanges)
+    .where(and(eq(matchChanges.season, season), isNull(matchChanges.part)))
+    .orderBy(asc(matchChanges.id))
   const since = now.getTime() - reliability.warLookback
   const pending = new Map<string, MatchChange>()
   const recent = new Map<string, MatchChange[]>()
@@ -180,14 +186,16 @@ export async function recordChange(
 }
 
 /** Rejects the waiting changes with these numbers, or all of them: the match stays as it is. */
-export async function rejectChanges(
-  db: Pick<Database, 'select' | 'update'>,
-  ids: 'all' | number[],
-  now: Date,
-): Promise<Decision[]> {
+export async function rejectChanges(db: Database, ids: 'all' | number[], now: Date): Promise<Decision[]> {
   const decisions: Decision[] = []
 
   for (const change of await changesToDecide(db, ids)) {
+    if (change.part !== null) {
+      // A difference with an entry of the editors: keep the entry, as the admin does.
+      decisions.push(await db.transaction((transaction) => decideDifference(transaction, change, 'keep', now)))
+      continue
+    }
+
     await decide(db, change, 'rejected', 'person', now)
     decisions.push({ change, message: 'rejected', ok: true })
   }
@@ -246,6 +254,11 @@ export async function waitingChanges(db: Pick<Database, 'select'>): Promise<Matc
 
 /** Takes one waiting change over. */
 async function acceptChange(db: Writer, change: MatchChange, now: Date): Promise<Decision> {
+  if (change.part !== null) {
+    // A difference with an entry of the editors: take that part over, as the admin does.
+    return decideDifference(db, change, 'take-over', now)
+  }
+
   const [row] = await db
     .select()
     .from(matches)
@@ -293,4 +306,35 @@ async function changesToDecide(db: Pick<Database, 'select'>, ids: 'all' | number
         : and(eq(matchChanges.status, 'pending'), inArray(matchChanges.id, ids)),
     )
     .orderBy(asc(matchChanges.id))
+}
+
+/** Decides a difference with an entry of the editors, with the code the admin uses. */
+async function decideDifference(
+  db: Writer,
+  change: MatchChange,
+  kind: 'keep' | 'take-over',
+  now: Date,
+): Promise<Decision> {
+  const outcome = await decideConflict(
+    db,
+    change.id,
+    {
+      kind,
+      reason: 'Besloten met het commando import:changes',
+      resolution: 'person',
+      userId: null,
+    },
+    now,
+  )
+
+  switch (outcome) {
+    case 'done':
+      return { change, message: kind === 'keep' ? 'rejected' : 'accepted', ok: true }
+    case 'gone':
+      return { change, message: 'the match is not in the database any more', ok: false }
+    case 'no-proposal':
+      return { change, message: 'the change has no proposal to apply', ok: false }
+    case 'not-waiting':
+      return { change, message: 'the change does not wait any more', ok: false }
+  }
 }

@@ -1,7 +1,9 @@
+import type { AlertMail } from '@fansite/db/alerts'
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { decideConflict } from '@fansite/db/match-conflicts'
 import { encodeGoals, encodeMatch, type MatchPart } from '@fansite/db/match-edits'
-import { adminUsers, auditLog, matchEdits, matches, matchGoals, matchImports } from '@fansite/db/schema'
+import { adminUsers, auditLog, matchChanges, matchEdits, matches, matchGoals, matchImports } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -9,6 +11,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { Handler, TestServer } from './test-server.ts'
 
+import { runChangesCommand } from './import-changes.ts'
+import { runImport } from './import-feeds.ts'
 import { importMatches, importPastSeason } from './import-matches.ts'
 import { pageTitles, pageUrl } from './read-wikipedia.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
@@ -406,5 +410,307 @@ describe('a season that is over (import:season)', () => {
 
     expect(await log()).toMatchObject([{ action: 'match.differs' }])
     expect(await log()).toHaveLength(1)
+  })
+})
+
+describe('a difference becomes a change that waits (issue 577)', () => {
+  const days = (count: number) => count * 24 * hours(1)
+  const changes = () => database.db.select().from(matchChanges).orderBy(asc(matchChanges.id))
+
+  /** Round 1 as the editors have it: 2-0, Oyen in minute 53. Wikipedia: 1-0 and minute 52. */
+  async function enterRoundOne() {
+    await enter(
+      roundOne,
+      { goalsAgainst: 0, goalsFor: 2, resultSetAt: first },
+      ['result', 'goals'],
+      [{ minute: 53, ours: true, player: 'Oyen' }],
+    )
+  }
+
+  it('keeps each part that differs once, with both values and what Wikipedia proposes', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await enterRoundOne()
+
+    for (const count of [2, 3, 50]) {
+      await importAt(server, later(first, count))
+    }
+
+    const id = (await row(roundOne))?.id
+
+    expect(await changes()).toMatchObject([
+      {
+        changed: 'uitslag',
+        class: 'suspicious',
+        matchId: id,
+        newValue: 'sc Heerenveen 1–0 FC Twente',
+        oldValue: 'sc Heerenveen 2–0 FC Twente',
+        part: 'result',
+        reason: 'wijkt af van de invoer van de redactie',
+        status: 'pending',
+        timesSeen: 3,
+      },
+      { changed: 'doelpunten', part: 'goals', status: 'pending', timesSeen: 3 },
+    ])
+    expect(JSON.parse((await changes())[0]?.proposal ?? '{}')).toMatchObject({ goalsFor: 1, part: 'result' })
+    expect(JSON.parse((await changes())[1]?.proposal ?? '{}')).toMatchObject({
+      goals: [{ minute: 52, player: 'Oyen' }],
+      part: 'goals',
+    })
+    expect(await row(roundOne)).toMatchObject({ goalsFor: 2 })
+    expect(await goalsOf(roundOne)).toEqual([[53, 'Oyen', true]])
+  })
+
+  it('records a difference that the log and the warning knew from before, without saying it again', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await enterRoundOne()
+    await database.db
+      .update(matchEdits)
+      .set({ reportedResult: 'sc Heerenveen 1–0 FC Twente' })
+      .where(eq(matchEdits.matchId, (await row(roundOne))?.id ?? 0))
+
+    const report = await importAt(server, later(first, 2))
+
+    expect(report.kind === 'imported' ? report.warnings.join('') : '').not.toContain('in the result')
+    expect(await changes()).toMatchObject([{ part: 'result', status: 'pending' }, { part: 'goals' }])
+    expect(await log()).toHaveLength(1)
+  })
+
+  it('takes Wikipedia over for the part after seven days, and says so in the log', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await enterRoundOne()
+    await importAt(server, later(first, 2))
+
+    const seen = later(first, 2).getTime()
+
+    await importAt(server, new Date(seen + days(7) - hours(1)))
+    expect(await row(roundOne)).toMatchObject({ goalsFor: 2 })
+
+    const stood = new Date(seen + days(7))
+
+    await importAt(server, stood)
+
+    expect(await row(roundOne)).toMatchObject({ goalsAgainst: 0, goalsFor: 1 })
+    expect(await goalsOf(roundOne)).toEqual([[52, 'Oyen', true]])
+    expect(await edits()).toEqual([])
+    expect(await changes()).toMatchObject([
+      { decidedAt: stood, resolution: 'stood', status: 'accepted' },
+      { resolution: 'stood', status: 'accepted' },
+    ])
+    expect((await log()).filter((line) => line.action === 'match.take-over')).toMatchObject([
+      {
+        createdAt: stood,
+        detail: expect.stringContaining('Uitslag: onze invoer'),
+        reason: expect.stringContaining('zeven dagen'),
+        userId: null,
+      },
+      { detail: expect.stringContaining('Doelpunten: onze invoer'), userId: null },
+    ])
+  })
+
+  it('does not take over a value that Wikipedia changed again, but keeps the new one', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    await enterRoundOne()
+    await importAt(server, later(first, 2))
+    Object.assign(pages, drawn(pages))
+    await importAt(server, new Date(later(first, 2).getTime() + days(7)))
+
+    expect(await row(roundOne)).toMatchObject({ goalsFor: 2 })
+    expect(await changes()).toMatchObject([
+      { newValue: 'sc Heerenveen 1–0 FC Twente', resolution: 'replaced', status: 'rejected' },
+      { newValue: "52' Oyen", resolution: 'replaced', status: 'rejected' },
+      { newValue: 'sc Heerenveen 1–1 FC Twente', status: 'pending' },
+      { status: 'pending' },
+    ])
+  })
+
+  it('lets the change lapse when Wikipedia puts the value of the editors back', async () => {
+    const { pages, server } = await serve()
+
+    await importAt(server, first)
+    await enter(roundOne, { goalsAgainst: 1, goalsFor: 1, resultSetAt: first }, ['result'])
+    await importAt(server, later(first, 2))
+    expect(await changes()).toMatchObject([{ status: 'pending' }])
+
+    Object.assign(pages, drawn(pages))
+    await importAt(server, later(first, 3))
+
+    expect(await changes()).toMatchObject([{ resolution: 'reverted', status: 'rejected' }])
+    expect(await edits()).toEqual([])
+    expect((await log()).map((line) => line.action)).toEqual(['match.differs', 'match.caught-up'])
+    expect((await log())[1]?.detail).toContain('De afwijking is vervallen')
+  })
+
+  it('does not ask again after an editor decided to keep the entry', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await enterRoundOne()
+    await importAt(server, later(first, 2))
+    await database.db.transaction(async (transaction) => {
+      const [change] = await transaction.select().from(matchChanges).where(eq(matchChanges.part, 'result'))
+
+      expect(
+        await decideConflict(
+          transaction,
+          change?.id ?? 0,
+          { kind: 'keep', reason: 'Wij hebben het goed', resolution: 'person', userId: adminId },
+          later(first, 3),
+        ),
+      ).toBe('done')
+    })
+    await importAt(server, later(first, 4))
+    await importAt(server, new Date(later(first, 2).getTime() + days(8)))
+
+    expect(await row(roundOne)).toMatchObject({ goalsFor: 2 })
+    expect(await changes()).toMatchObject([{ resolution: 'person', status: 'rejected' }, { part: 'goals' }])
+    expect((await log()).filter((line) => line.action === 'match.keep')).toMatchObject([
+      { reason: 'Wij hebben het goed', userId: adminId },
+    ])
+  })
+
+  it.each(['command', 'admin'] as const)(
+    'gives the same outcome when the %s takes Wikipedia over for the result',
+    async (route) => {
+      const { server } = await serve()
+
+      await importAt(server, first)
+      await enterRoundOne()
+      await importAt(server, later(first, 2))
+
+      const [result] = await database.db.select().from(matchChanges).where(eq(matchChanges.part, 'result'))
+      const decidedAt = later(first, 3)
+
+      if (route === 'command') {
+        const clock = () => decidedAt
+
+        expect(await runChangesCommand(database.url, ['accept', String(result?.id)], { clock, write: () => {} })).toBe(
+          0,
+        )
+      } else {
+        await database.db.transaction((transaction) =>
+          decideConflict(
+            transaction,
+            result?.id ?? 0,
+            { kind: 'take-over', reason: 'Wikipedia heeft gelijk', resolution: 'person', userId: adminId },
+            decidedAt,
+          ),
+        )
+      }
+
+      // The result is Wikipedia's, the goals are still the editors', and the change is decided.
+      expect(await row(roundOne)).toMatchObject({
+        goalsAgainst: 0,
+        goalsFor: 1,
+        resultSetAt: decidedAt,
+        status: 'played',
+      })
+      expect(await goalsOf(roundOne)).toEqual([[53, 'Oyen', true]])
+      expect(await edits()).toMatchObject([{ goalsEdited: true, resultEdited: false }])
+      expect((await changes()).map((change) => [change.part, change.status, change.resolution])).toEqual([
+        ['result', 'accepted', 'person'],
+        ['goals', 'pending', null],
+      ])
+      expect((await log()).filter((line) => line.action === 'match.take-over')).toMatchObject([
+        {
+          createdAt: decidedAt,
+          detail: expect.stringContaining('Uitslag: onze invoer'),
+          userId: route === 'admin' ? adminId : null,
+        },
+      ])
+    },
+  )
+
+  it('keeps the entry and says so when the command rejects a difference', async () => {
+    const { server } = await serve()
+
+    await importAt(server, first)
+    await enterRoundOne()
+    await importAt(server, later(first, 2))
+
+    expect(
+      await runChangesCommand(database.url, ['reject', 'all'], { clock: () => later(first, 3), write: () => {} }),
+    ).toBe(0)
+    expect(await row(roundOne)).toMatchObject({ goalsFor: 2 })
+    expect(await edits()).toMatchObject([{ goalsEdited: true, resultEdited: true }])
+    expect(await changes()).toMatchObject([{ resolution: 'person', status: 'rejected' }, { status: 'rejected' }])
+    expect((await log()).filter((line) => line.action === 'match.keep')).toHaveLength(2)
+  })
+
+  describe('the mail to the beheerders', () => {
+    const env = {
+      MAIL_FROM: 'fansite@example.org',
+      SITE_ENV: 'acceptance',
+      SMTP_HOST: 'mail.example.org',
+      SMTP_PASSWORD: 'geheim',
+      SMTP_PORT: '465',
+      SMTP_USER: 'fansite@example.org',
+    }
+
+    /** One run of the whole import, as cron starts it, with a mailer that sends nothing. */
+    async function runAt(server: TestServer, at: Date, send: (mail: AlertMail) => Promise<void>) {
+      const lines: string[] = []
+      const code = await runImport(database.url, {
+        alerts: { env, send },
+        clock: () => at,
+        makeFetcher: (robots) => fetcherFor([server], { robots }),
+        wikipediaOrigin: server.origin,
+        write: (line) => lines.push(line),
+      })
+
+      return { code, lines }
+    }
+
+    it('mails once for each difference, not at the next run, and the import goes on when a mail fails', async () => {
+      const { server } = await serve()
+      const mails: AlertMail[] = []
+      const collect = (mail: AlertMail) => Promise.resolve(void mails.push(mail))
+      const fail = () => Promise.reject(new Error('De server is weg'))
+
+      await runAt(server, first, collect)
+      await enterRoundOne()
+
+      const broken = await runAt(server, later(first, 2), fail)
+
+      expect(broken.code).toBe(0)
+      expect(broken.lines.filter((line) => line.startsWith('Conflict mail:'))).toHaveLength(2)
+      expect(await changes()).toMatchObject([{ mailedAt: null }, { mailedAt: null }])
+
+      // The next run tries again and gets through; the run after that has nothing left to mail.
+      await runAt(server, later(first, 3), collect)
+      await runAt(server, later(first, 4), collect)
+
+      expect(mails.map((mail) => mail.to)).toEqual(['redactie@example.org', 'redactie@example.org'])
+      expect(mails.map((mail) => mail.subject.split(':')[0])).toEqual([
+        '[acceptatie] Wikipedia wijkt af van onze invoer',
+        '[acceptatie] Wikipedia wijkt af van onze invoer',
+      ])
+      expect(mails[0]?.text).toContain('Wikipedia: sc Heerenveen 1–0 FC Twente')
+    })
+
+    it('mails again when the import takes Wikipedia over after seven days', async () => {
+      const { server } = await serve()
+      const mails: AlertMail[] = []
+      const collect = (mail: AlertMail) => Promise.resolve(void mails.push(mail))
+
+      await runAt(server, first, collect)
+      await enterRoundOne()
+      await runAt(server, later(first, 2), collect)
+      await runAt(server, new Date(later(first, 2).getTime() + days(7)), collect)
+
+      expect(mails.map((mail) => mail.subject.split(':')[0])).toEqual([
+        '[acceptatie] Wikipedia wijkt af van onze invoer',
+        '[acceptatie] Wikipedia wijkt af van onze invoer',
+        '[acceptatie] De import nam Wikipedia over',
+        '[acceptatie] De import nam Wikipedia over',
+      ])
+    })
   })
 })
