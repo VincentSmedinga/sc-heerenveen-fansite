@@ -3606,12 +3606,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 ### De baan van de schakelaar is een doorzichtige tint
 
 - **Datum:** 2 november 2026
-- **Besluit:** `--hf-colour-background-track` is `color-mix(in srgb, <kleur uit een schaal> n%, transparent)`, in licht en in donker (#628).
-  - **In licht** is het grijs-400 met 20%, **in donker** blauw-300 met 15%.
-    Een eerste keuze, 15% en 10%, was de projecteigenaar te licht; deze zijn op het oog gekozen.
+- **Besluit:** `--hf-colour-background-track` is `color-mix(in srgb, <zwart of wit> n%, transparent)`, in licht en in donker (#628).
+  - **In licht** is het zwart met 6% (een schaduw van de ondergrond), **in donker** wit met 10% (een lichtere tint ervan).
+    Zwart en wit laten de tint van de ondergrond intact, dus de baan blijft blauw op blauw en zand op zand.
+    Een grijs, zoals grijs-400 met 20% (de eerste keuze, naast blauw-300 met 15% in donker), werd op een blauwe ondergrond grijs.
+    `--hf-colour-black` is nieuw, als primitief naast `--hf-colour-white`: het is geen stap uit een schaal, dus het issue noemde het niet.
+    De sterkte is op het oog gekozen, na twee keer te licht: eerst 15% en 10%, dan 20% en 15%.
     De baan was in licht tussen 1,09:1 (warm) en 1,33:1 (wit) van de ondergrond en in donker tussen 1,00:1 (sterk en warm, de baan was daar onzichtbaar) en 1,47:1.
-    Nu is hij in licht tussen 1,14:1 en 1,18:1 en in donker tussen 1,33:1 en 1,35:1.
-    Sterker kan niet veel: in licht halen de letters van de andere keuzes (grijs-600) 4,5:1 tot ongeveer 24%, en in donker haalt de rand van de knop 3:1 tegen de baan tot ongeveer 16%.
+    Nu is hij in licht 1,14:1 en in donker tussen 1,30:1 en 1,33:1.
+    Sterker kan niet veel: de rand van de knop haalt 3:1 tegen de baan tot ongeveer 6% in licht en 12% in donker, en de letters van de andere keuzes (grijs-600) halen 4,5:1 tot ongeveer 7% in licht.
   - **De ondergrens** is 1,1:1 van de pagina en van elk vlak, zodat de baan als een groef te zien blijft.
     De verhoudingen voor de rand en de letters zijn er al bij 5%, en zeggen niets over de zichtbaarheid van de baan zelf, dus die ondergrens is onze keuze.
   - **De verhoudingen** gelden over de pagina, wit, `soft`, `strong` en `warm`, in licht en in donker: de rand van de knop 3:1 tegen de baan en tegen de knop, de letters van de opties 4,5:1 op de baan, en 4,5:1 voor de gekozen keuze op de knop.
@@ -3624,7 +3627,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een tint neemt de kleur van de ondergrond over, dus de baan past op de pagina en op elk vlak, ook een vlak dat er later bijkomt, zonder dat `Card` iets hoeft te zetten.
   In donker was de baan op de sterke en de warme kaart (blauw-800) even donker als de kaart en dus onzichtbaar; een lichte tint maakt hem daar wel een groef.
 - **Nadeel:** de uitkomst is geen vaste kleur uit het palet, dus er is geen vaste tabelrij met een verhouding voor de baan: de test meet elke ondergrond.
-- **Alternatieven:** een vaste kleur per vlak, gezet door `Card` (echte paletkleuren en eenvoudige metingen, maar elke nieuwe ondergrond vraagt een nieuwe regel); de baan laten zoals hij is; in donker een donkere tint (blauw-950, onzichtbaar op de pagina, die dezelfde kleur heeft).
+- **Alternatieven:** een grijs of een blauw uit een schaal als tint (de baan wordt dan grijs of vlak op een blauwe ondergrond); een vaste kleur per vlak, gezet door `Card` (echte paletkleuren en eenvoudige metingen, maar elke nieuwe ondergrond vraagt een nieuwe regel); de baan laten zoals hij is; in donker een donkere tint (blauw-950, onzichtbaar op de pagina, die dezelfde kleur heeft); zwart in donker (dezelfde reden, en een groef die donkerder is dan de pagina bestaat niet).
 
 ## Site
 

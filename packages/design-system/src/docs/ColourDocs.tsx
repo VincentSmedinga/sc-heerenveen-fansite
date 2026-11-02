@@ -17,6 +17,7 @@ const primitiveName = (scale: ScaleName, step: number) => `--hf-colour-${scale}-
 
 const primitiveNames = [
   '--hf-colour-white',
+  '--hf-colour-black',
   ...scales.flatMap(({ name, steps = scaleSteps }) => steps.map((step) => primitiveName(name, step))),
 ]
 
@@ -61,6 +62,7 @@ const primitiveLabeller = () => {
     const name = Object.entries(values).find(([, value]) => key !== undefined && colourKey(value) === key)?.[0]
     if (!name) return colour
     if (name === '--hf-colour-white') return 'wit'
+    if (name === '--hf-colour-black') return 'zwart'
 
     const [, scale, step] = /^--hf-colour-([a-z-]+)-(\d+)$/.exec(name) ?? []
     return `${scaleLabels[scale as ScaleName]}-${step}`
