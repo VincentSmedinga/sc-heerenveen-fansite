@@ -4,6 +4,7 @@ import { expect, userEvent } from 'storybook/test'
 import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
+import { Card, type CardSurface } from '../card/Card'
 import { type Size, sizes } from '../size'
 import { SegmentedControl, type SegmentedControlOption } from './SegmentedControl'
 
@@ -56,6 +57,7 @@ const meta = preview.meta({
           'Met minder beweging springt hij.',
           'De gekozen keuze heeft ook dikkere letters en `aria-pressed`, dus wie de knop niet ziet, mist niets.',
           'Een optie kan een `icon` hebben, vóór de tekst; op de gekozen keuze is het pictogram gevuld en op de andere alleen een lijn.',
+          'De baan is doorzichtig, dus hij neemt de kleur van het vlak over en past op de pagina en in elke kaart.',
           'De kleine maat is voor een schakelaar naast de inhoud, zoals in een zijkolom of een werkbalk.',
           'Het component bewaart niets: de pagina geeft de waarde en handelt de wijziging af.',
         ].join('\n'),
@@ -125,6 +127,40 @@ export const LongLabels = meta.story({
   render: ({ label, options, size = 'default', value }) => (
     <Example label={label} options={options} size={size} start={value} />
   ),
+})
+
+const surfaces: { label: string; surface: CardSurface }[] = [
+  { label: 'Wit vlak', surface: 'default' },
+  { label: 'Sterk vlak', surface: 'strong' },
+  { label: 'Zacht vlak', surface: 'soft' },
+  { label: 'Warm vlak', surface: 'warm' },
+]
+
+const renderSurfaces = () => (
+  <div style={{ display: 'grid', gap: '1rem' }}>
+    <Example label="Thema op de pagina" options={themes} size="default" start="light" />
+    {surfaces.map(({ label, surface }) => (
+      <Card as="div" key={surface} surface={surface}>
+        <Example label={`Thema op het ${label.toLowerCase()}`} options={themes} size="default" start="light" />
+      </Card>
+    ))}
+  </div>
+)
+
+const onSurfaces = 'De baan is doorzichtig, dus hij past op de pagina en op elk vlak van een kaart.'
+
+export const OnSurfacesLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Op elk vlak, licht',
+  parameters: { docs: { description: { story: onSurfaces } } },
+  render: renderSurfaces,
+})
+
+export const OnSurfacesDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Op elk vlak, donker',
+  parameters: { docs: { description: { story: onSurfaces } } },
+  render: renderSurfaces,
 })
 
 export const Choosing = meta.story({
