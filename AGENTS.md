@@ -71,15 +71,15 @@ What costs tokens, and what to do about it:
 These are limits, not guidelines.
 A queue, a deadline or a free slot is no reason to pass them.
 
-| What                                | Limit                                                                                                                                                |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Builders building at once           | 2. A Builder counts while it builds or its Reviewer runs, not while it waits for the owner's go-ahead or merge. Never a third one.                   |
-| Review rounds per pull request      | 2                                                                                                                                                    |
-| Coordinator session                 | A fresh session at about 300k tokens of context, or after a wave of merges, with a handoff note in memory.                                           |
-| Specifying an issue                 | At most four questions per round, each with a recommendation: one round for the Coordinator, at most two for a Specifier. Then the issue is written. |
-| Messages from a Builder or Reviewer | One per event that needs the owner or the Coordinator. No status messages.                                                                           |
-| Fable                               | Only for a Reviewer of a pull request that touches the database, the importer, security, workflows or dependencies, and only after the owner agrees. |
-| Weekly usage pace                   | About 14% a day. Above 20% a day: one Builder, and the queue waits.                                                                                  |
+| What                                | Limit                                                                                                                                                                                                                                                                                                                |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Builders building at once           | 2. A Builder counts while it builds or its Reviewer runs, not while it waits for the owner's go-ahead or merge. Never a third one.                                                                                                                                                                                   |
+| Review rounds per pull request      | 2                                                                                                                                                                                                                                                                                                                    |
+| Coordinator session                 | A fresh session at about 300k tokens of context, or after a wave of merges, with a handoff note in memory.                                                                                                                                                                                                           |
+| Specifying an issue                 | At most four questions per round, each with a recommendation: one round for the Coordinator, at most two for a Specifier. Then the issue is written.                                                                                                                                                                 |
+| Messages from a Builder or Reviewer | One per event that needs the owner or the Coordinator. No status messages.                                                                                                                                                                                                                                           |
+| Fable                               | The Coordinator may use it (see _Models_). A Reviewer only for a pull request that touches the database, the importer, security, workflows or dependencies, and only after the owner agrees. A Builder or Specifier gets a stronger model only for an issue that asks for a lot of judgment, and the brief names it. |
+| Weekly usage pace                   | About 14% a day. Above 20% a day: one Builder, and the queue waits.                                                                                                                                                                                                                                                  |
 
 ### The workflow at a glance
 
@@ -194,7 +194,7 @@ The Reviewer:
 
 Each role has a default model (the reasons are in `docs/beslissingen.md`, under _Een model per rol_):
 
-- **Coordinator:** a stronger model than the Builders (Opus or Fable), in a fresh session per task.
+- **Coordinator:** a stronger model than the Builders (Opus or Fable), in a fresh session at about 300,000 tokens of context (see _Limits_).
 - **Builder:** Sonnet.
   For an issue that asks for a lot of judgment about design or security, the Coordinator names a stronger model in the brief.
 - **Reviewer:** Sonnet, set in its agent file.

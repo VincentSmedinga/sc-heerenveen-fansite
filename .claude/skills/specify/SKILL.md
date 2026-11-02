@@ -36,9 +36,9 @@ So:
 
 - Ask only what changes what gets built.
   Answer the rest yourself, from the code, the decisions or a sensible default, and say what you assumed.
-- Ask in rounds of a few questions at most.
+- Ask in rounds, at most four questions each (the limits are above).
   Give each one your recommendation and the reason, so the owner can simply agree.
-- Go on until nothing is open.
+- Nothing may be open when you write the issue: answer what is left yourself and say what you assumed.
 
 ## 3. Write the acceptance criteria
 
