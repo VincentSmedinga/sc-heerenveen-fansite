@@ -13,4 +13,13 @@
     padding-block: var(--hf-space-s);
     padding-inline: var(--hf-space-m);
   }
+
+  /*
+   * A notice without text stays in the page, so a screen reader knows the status before the
+   * text comes into it, and takes no room and shows nothing.
+   */
+  .hf-notice:empty {
+    border-width: 0;
+    padding-block: 0;
+  }
 }

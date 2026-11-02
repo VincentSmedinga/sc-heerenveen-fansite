@@ -3288,8 +3288,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De rol is geen prop, dus een melding is altijd een status.
 - **Waarom:** na het opslaan van een wedstrijd (#592) komt een melding als "Opgeslagen."
   Zonder kop voegt elke melding niets toe aan de opzet van de pagina.
-  Een melding die pas na een actie in de pagina komt, leest een schermlezer voor als status.
-  Een melding die al op de pagina staat als hij laadt, leest hij op zijn plek, zoals andere tekst.
+  Een schermlezer leest de tekst voor die in een status komt, maar alleen als de status al op de pagina stond.
+  Een melding na een actie staat dus eerst leeg op de pagina, en een lege melding laat niets zien (`.hf-notice:empty`).
+  Een melding die al gevuld op de pagina staat als hij laadt, leest hij op zijn plek, zoals andere tekst.
   Beide gevallen staan in de stories.
   Het vlak is het zachte vlak met zijn rand, zodat de melding op een witte kaart en op de pagina te zien is.
 - **Alternatieven:** een melding met een kop (elke opslag zou een kop aan de pagina toevoegen); een kaart met `role="status"` (een kaart is een blok van de pagina, een melding is een regel); `role="alert"` (die onderbreekt de lezer, en een opgeslagen invoer is geen fout).

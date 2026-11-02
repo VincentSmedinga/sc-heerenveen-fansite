@@ -16,8 +16,9 @@ const meta = preview.meta({
       description: {
         component: [
           'Een melding na een actie, zoals "Opgeslagen." Het is een blok met alleen tekst en `role="status"`, zonder kop, zodat elke melding de opzet van de pagina met rust laat.',
-          'Een schermlezer leest de tekst voor als hij verschijnt, zonder de focus te verplaatsen.',
-          'Een melding die al op de pagina staat als hij laadt, wordt niet als status voorgelezen maar op zijn plek gelezen, zoals andere tekst.',
+          'Een schermlezer leest de tekst voor die in de melding komt, zonder de focus te verplaatsen, maar alleen als de melding al op de pagina stond.',
+          'Zet een melding na een actie daarom eerst leeg op de pagina en vul hem als de actie klaar is. Een lege melding laat niets zien.',
+          'Een melding die al gevuld op de pagina staat als hij laadt, wordt op zijn plek gelezen, zoals andere tekst.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -52,7 +53,7 @@ const AfterAction = () => {
           Opslaan
         </Button>
       </div>
-      {saved ? <Notice>Opgeslagen. Je invoer staat nu op de site.</Notice> : null}
+      <Notice>{saved ? 'Opgeslagen. Je invoer staat nu op de site.' : ''}</Notice>
     </div>
   )
 }
@@ -62,7 +63,8 @@ export const AfterAnAction = meta.story({
   parameters: {
     docs: {
       description: {
-        story: 'De melding komt in de pagina als de actie klaar is. Een schermlezer leest hem dan voor.',
+        story:
+          'De melding staat al leeg op de pagina en krijgt zijn tekst als de actie klaar is. Een schermlezer leest hem dan voor.',
       },
     },
   },
