@@ -45,17 +45,36 @@ De import leest Wikipedia elk uur, en kijkt voor elk onderdeel dat jij invulde (
   Het logboek zegt dat Wikipedia is bijgekomen.
 - **Wikipedia zegt iets anders:** jouw invoer blijft staan.
   De import schrijft het verschil één keer op, met beide waarden, in het logboek en in de waarschuwing van de import (`pnpm run import:status`).
-  Op de pagina van de wedstrijd staat dan "Wikipedia zegt iets anders", met wat Wikipedia zegt.
-  Tot er een besluit is (dat volgt in #577), blijft jouw invoer staan tot je hem weghaalt.
+  De beheerders krijgen een mail, en op `/beheer/wedstrijden` staat bij de wedstrijd "Wikipedia wijkt af".
+  De startpagina van het beheer zegt hoeveel afwijkingen op een besluit wachten.
 
 De uitslag en de doelpunten tellen apart.
 Wikipedia zet meestal eerst de uitslag, en pas later de doelpuntenmakers.
+
+## Een afwijking beslissen
+
+Open de wedstrijd met "Wikipedia wijkt af".
+Per onderdeel dat afwijkt, staan onze invoer en wat Wikipedia zegt naast elkaar.
+Schrijf bij "Reden" waarom je beslist, en kies:
+
+- **Neem Wikipedia over:** het onderdeel wordt wat Wikipedia zegt en volgt Wikipedia weer.
+  "Aangepast door de redactie" verdwijnt als er geen onderdeel van jullie meer over is.
+- **Houd onze invoer:** jullie invoer blijft staan.
+  De import meldt dit verschil niet nog eens, tenzij Wikipedia iets anders gaat zeggen.
+
+Het besluit komt in het logboek, met wie en waarom.
+Beslist niemand, dan neemt de import het onderdeel over na zeven dagen, als Wikipedia dan nog hetzelfde zegt.
+De beheerders krijgen daarover een mail.
+Zet Wikipedia zelf de waarde van de redactie terug, dan vervalt de afwijking.
+
+Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` neemt Wikipedia over, `reject` houdt de invoer.
 
 ## Invoer weghalen
 
 Op de pagina van de wedstrijd, onder het formulier, staat "Invoer weghalen".
 Dat zet wat jij invulde terug naar wat er stond voor de eerste invoer, en vraagt een reden.
 Daarna leest de import weer wat Wikipedia zegt, zoals bij elke andere wedstrijd.
+Een afwijking die nog wachtte, vervalt.
 
 Een onderdeel dat Wikipedia al had overgenomen, blijft zoals het is.
 

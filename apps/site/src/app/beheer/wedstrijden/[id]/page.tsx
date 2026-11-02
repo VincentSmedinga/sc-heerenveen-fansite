@@ -50,9 +50,9 @@ const notices: Record<string, { text: string; title: string }> = {
   },
 }
 
-// The form of one match, with what the editors entered of it so far, what Wikipedia said when
-// it differed, and the button that takes the entry away. The page tells what the last action
-// did from the word in the address.
+// The form of one match, with what the editors entered of it so far, the differences with
+// Wikipedia that wait for a decision, and the button that takes the entry away. The page tells
+// what the last action did from the word in the address.
 export default async function MatchPage({ params, searchParams }: Props) {
   await requireRole('beheerder')
 
@@ -76,7 +76,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
           <Text appearance="intro">{title}</Text>
           <Text>
             Alles wat je hier opslaat, staat meteen op de site. Zegt Wikipedia later hetzelfde, dan neemt de import het
-            over. Zegt Wikipedia iets anders, dan blijft jouw invoer staan en schrijft de import het verschil op.
+            over. Zegt Wikipedia iets anders, dan blijft jouw invoer staan en beslis je hier wat er gebeurt.
           </Text>
         </>
       }

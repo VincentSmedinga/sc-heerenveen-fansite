@@ -1082,8 +1082,8 @@ pnpm run import:changes accept all
   Ze vragen niets aan Wikipedia: een geaccepteerde wijziging wordt wat de import zag op het moment van de wijziging.
   Ze nemen de lock van de import, zoals `pnpm run import:season`.
 - De exitcode is 0 als alles besloten is, en 1 bij een weigering, een nummer dat niet wacht of een import die de lock houdt.
-- Een melding per mail komt er niet bij: de eigenaar kijkt in het overzicht en in het logboek.
-  Het beheer komt met #272.
+- Een melding per mail komt er niet bij voor een gewone wijziging: de eigenaar kijkt in het overzicht en in het logboek.
+  Een afwijking met de invoer van de redactie krijgt wel een mail (zie _Een afwijking met de invoer van de redactie_).
 
 #### Veel wijzigingen tegelijk
 
@@ -1153,11 +1153,11 @@ De invoer staat in `matches` en `match_goals`, en de tabel `match_edits` markeer
 Voor de import is zo'n wedstrijd eigen invoer, ook voor `pnpm run import:season`.
 `src/edited-matches.ts` beoordeelt elk onderdeel met een markering apart, want Wikipedia zet meestal eerst de uitslag en pas later de doelpuntenmakers:
 
-| Wikipedia heeft                                                             | De import doet                                                                                                  |
-| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Nog niets voor het onderdeel: geen tijd, de status gepland, geen doelpunten | Niets: de invoer blijft staan en er wordt niets gemeld.                                                         |
-| Hetzelfde                                                                   | Wist de markering, haalt de rij uit `match_edits` als er geen markering meer is, en schrijft `match.caught-up`. |
-| Iets anders                                                                 | Laat de invoer staan, en schrijft `match.differs` en een waarschuwing in `match_imports`, één keer.             |
+| Wikipedia heeft                                                             | De import doet                                                                                                    |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Nog niets voor het onderdeel: geen tijd, de status gepland, geen doelpunten | Niets: de invoer blijft staan en er wordt niets gemeld.                                                           |
+| Hetzelfde                                                                   | Wist de markering, haalt de rij uit `match_edits` als er geen markering meer is, en schrijft `match.caught-up`.   |
+| Iets anders                                                                 | Laat de invoer staan, schrijft `match.differs` en een waarschuwing in `match_imports`, en legt de afwijking vast. |
 
 - Hetzelfde is bij de uitslag: de status, de score, de verlenging, de stand na 90 minuten en de strafschoppen zijn gelijk.
   Bij de doelpunten zijn de kant, de minuut, de blessuretijd, de soort en de speler gelijk, in elke volgorde.
@@ -1165,10 +1165,27 @@ Voor de import is zo'n wedstrijd eigen invoer, ook voor `pnpm run import:season`
 - Een verschil staat één keer in het logboek (`audit_log`, zonder account, dus "de import") en één keer in de waarschuwing van het seizoen, met beide waarden: "held, Speelronde 1 (Eredivisie): Wikipedia differs from the entry of the editors in the result: ours sc Heerenveen 2–0 FC Twente, Wikipedia sc Heerenveen 1–0 FC Twente".
   `match_edits.reported_*` bewaart wat Wikipedia zei, zodat de volgende run zwijgt zolang Wikipedia hetzelfde zegt.
   Zegt Wikipedia iets anders dan de vorige keer, dan is het weer nieuws.
-  Het melden aan een redacteur en het besluit in het beheer volgen in #577; tot dan blijft de invoer staan tot een beheerder haar weghaalt.
+  De afwijking wordt ook een wachtende wijziging in `match_changes`, per onderdeel (zie _Een afwijking met de invoer van de redactie_ hieronder).
 - De onderdelen zonder markering volgen Wikipedia zoals bij elke wedstrijd, zonder de beoordeling van _Hoe betrouwbaar een wijziging is_.
   De wedstrijd telt niet mee voor de grens van zes wedstrijden in een run, en blijft staan als hij van de pagina verdwijnt.
 - Een wijziging die voor de wedstrijd wachtte in `match_changes`, vervalt bij een invoer.
+
+#### Een afwijking met de invoer van de redactie
+
+Zegt Wikipedia iets anders dan de invoer, dan komt er een rij in `match_changes` met `part` (`kickoff`, `result` of `goals`), `old_value` (de invoer), `new_value` (Wikipedia) en in `proposal` dat onderdeel zoals Wikipedia het heeft.
+De rij komt één keer, en bij elke run die dezelfde waarde ziet telt `times_seen` op.
+Wat daarna gebeurt:
+
+- **De beheerders krijgen een mail.**
+  Na elke run mailt `mailConflicts` (`packages/db/src/match-conflict-mail.ts`) elk account met de rol `beheerder` dat niet is uitgezet, een eigen mail per afwijking.
+  Er staan de wedstrijd, beide waarden, de koppeling naar het beheer en de dag van overname in, en geen naam of adres van een redacteur.
+  Een mail die niet uit kan, is een regel `Conflict mail: …` in het logboek van de import; de import slaagt, en de volgende run probeert het opnieuw.
+- **Een redacteur beslist** op de pagina van de wedstrijd (zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)), of de eigenaar met `pnpm run import:changes`.
+  `accept` neemt Wikipedia over voor dat onderdeel, `reject` houdt de invoer.
+  Beide gebruiken `decideConflict` uit `packages/db/src/match-conflicts.ts`, en schrijven `match.take-over` of `match.keep` in het logboek, het commando zonder account.
+- **Beslist niemand** en staat dezelfde waarde zeven dagen op Wikipedia (de regel van _Een verdachte wijziging wacht_), dan neemt de import het onderdeel over (`resolution` is `stood`, `match.take-over` zonder account) en mailen de beheerders daarover.
+- **Zet Wikipedia de waarde van de redactie terug**, dan vervalt de afwijking (`reverted`) en staat dat in het logboek (`match.caught-up`).
+  Maakt Wikipedia er iets anders van, dan is de oude afwijking `replaced` en begint een nieuwe.
 
 ### Oudere bekerpagina's
 
