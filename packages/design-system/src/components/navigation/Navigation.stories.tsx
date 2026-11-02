@@ -55,6 +55,12 @@ const meta = preview.meta({
           'Moet de pagina de links van de balk zelf maken, omdat ze iets uit het adres van de pagina meenemen, dan tekent de pagina de balk met `NavigationBar` en geeft hem aan het onderdeel als `bar`.',
           'De balk staat dan op dezelfde plek en ziet er hetzelfde uit; de `subitems` blijven nodig, want die zeggen welke subpagina de huidige is.',
           '',
+          'Een onderdeel van de site dat meer dan één scherm heeft, maar niet op elke pagina in het menu staat, zoals het beheer, tekent de balk met een `label`.',
+          'Dan staat de balk op zichzelf: een `nav` met die naam, tussen het hoofdmenu en de `Page.Body`, een band van rand tot rand die direct onder het menu past.',
+          'De naam verschilt van die van het hoofdmenu.',
+          'Hij heeft dezelfde pillen, rij en kleuren als de balk in het menu, en eindigt vanaf een breed scherm aan de rand van de kolom, in lijn met het menu.',
+          'Een knop die geen scherm is, zoals Uitloggen, staat met `end` achteraan in de rij: op een bureaublad aan het rechteruiteinde van de balk, op een telefoon aan het eind van wat zijwaarts scrolt.',
+          '',
           'Is de huidige pagina een onderdeel van het menu, dan heeft dat onderdeel `aria-current="page"`.',
           'Is het een subpagina, dan heeft de subpagina `aria-current="page"` en het onderdeel `aria-current="true"`.',
           'Het onderdeel blijft dan even vet en houdt de rode streep.',
@@ -413,4 +419,78 @@ export const MoreEscape = meta.story({
     await expect(button).toHaveFocus()
   },
   render: longMenu('Nieuws'),
+})
+
+const screens = [
+  { href: '#beheer', label: 'Beheer' },
+  { href: '#berichten', label: 'Berichten' },
+  { current: true, href: '#artikelen', label: 'Artikelen' },
+  { href: '#wedstrijden', label: 'Wedstrijden' },
+  { href: '#bezoek', label: 'Bezoek' },
+]
+
+// A function as the action keeps the story on the page; the site passes a server action.
+const logOut = () => undefined
+
+// The bar on its own goes under the main menu, so the stories show it there.
+const aloneBar = (subitems: typeof screens, button: boolean) => () => (
+  <>
+    <Navigation appearance="header" items={exampleMenuAt('Forum')} label="Hoofdmenu" />
+    <NavigationBar
+      {...(button ? { end: { action: logOut, label: 'Uitloggen' } } : {})}
+      label="Beheer"
+      subitems={subitems}
+    />
+  </>
+)
+
+const aloneStory = (story: string) => ({ ...fullscreen, docs: { description: { story } } })
+
+export const AloneFive = meta.story({
+  globals: { theme: 'light' },
+  name: 'Losse balk: vijf schermen',
+  parameters: aloneStory(
+    'De balk van een onderdeel op zichzelf, onder het hoofdmenu: een `nav` met de naam "Beheer" en de huidige pagina met `aria-current="page"`.',
+  ),
+  render: aloneBar(screens, false),
+})
+
+export const AloneOne = meta.story({
+  globals: { theme: 'light' },
+  name: 'Losse balk: één scherm',
+  parameters: aloneStory('Heeft het onderdeel één scherm voor deze rol, dan is de balk een rij van één link.'),
+  render: aloneBar([screens[1]!], false),
+})
+
+export const AloneWithButton = meta.story({
+  globals: { theme: 'light' },
+  name: 'Losse balk: met een knop aan het eind',
+  parameters: aloneStory(
+    'De knop Uitloggen is een knop in een formulier en staat achteraan in de rij: aan het eind van de balk, in lijn met het menu.',
+  ),
+  render: aloneBar(screens, true),
+})
+
+export const AloneOneWithButton = meta.story({
+  globals: { theme: 'light' },
+  name: 'Losse balk: één scherm met een knop',
+  parameters: aloneStory('Met één scherm staat de knop op het uiteinde en het scherm aan het begin.'),
+  render: aloneBar([screens[1]!], true),
+})
+
+export const AloneDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Losse balk: donker',
+  parameters: aloneStory('De balk op zichzelf in het donker.'),
+  render: aloneBar(screens, true),
+})
+
+export const AloneWrapped = meta.story({
+  ...phone,
+  globals: { theme: 'light', viewport: { value: 'mobile1' } },
+  name: 'Losse balk: smal scherm, de rij loopt om',
+  parameters: aloneStory(
+    'Op een heel smal scherm, of bij sterk inzoomen, scrolt de rij niet meer maar loopt om, met de eerste link in lijn met het menu.',
+  ),
+  render: aloneBar(screens, true),
 })

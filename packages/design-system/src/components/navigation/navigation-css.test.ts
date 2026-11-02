@@ -29,6 +29,7 @@ describe('the colours of the bar of sub-pages', () => {
         'var(--hf-colour-background-submenu)',
         'var(--hf-colour-background-submenu)',
         'var(--hf-colour-background-submenu-pressed)',
+        'var(--hf-colour-focus-on-header)',
         'var(--hf-colour-text-on-header)',
         'var(--hf-colour-text-submenu-link-hover)',
         'var(--hf-colour-text-submenu-link-hover)',
@@ -64,7 +65,9 @@ describe('the colours of the bar of sub-pages', () => {
 })
 
 describe('the bar of sub-pages in navigation.css', () => {
-  const bar = rule('.hf-navigation-bar')
+  // What the two bars have in common, and what only the bar in the menu has.
+  const common = rule('.hf-navigation-bar')
+  const bar = common + rule('.hf-navigation-header .hf-navigation-bar')
 
   it('is on the colour of its own role, with no line under it or above it, and as wide as the page', () => {
     expect(bar).toContain('background-color: var(--hf-colour-background-submenu);')
@@ -75,8 +78,9 @@ describe('the bar of sub-pages in navigation.css', () => {
     expect(bar).not.toMatch(/max-inline-size|max-width|(?<![a-z-])inline-size:/)
   })
 
-  it('has the ring of the header, set on the band of the menu that the bar is in', () => {
+  it('has the ring of the header, set on the band of the menu that the bar is in, and on the bar itself', () => {
     expect(rule('.hf-navigation-header')).toContain('--hf-colour-focus: var(--hf-colour-focus-on-header);')
+    expect(common).toContain('--hf-colour-focus: var(--hf-colour-focus-on-header);')
   })
 
   it('puts the text of the first link on the inset of the page, in line with the logo and the menu', () => {
@@ -125,6 +129,58 @@ describe('the bar of sub-pages in navigation.css', () => {
   it('leaves the stuck bar of anchors its room, which only that bar needs', () => {
     expect(shortcuts).toMatch(/html:has\(\.hf-page-shortcuts\) \{\s*scroll-padding-block-start/)
     expect(shortcuts).not.toContain('submenu')
+  })
+})
+
+describe('the bar on its own in navigation.css', () => {
+  const common = rule('.hf-navigation-bar')
+  const inMenu = rule('.hf-navigation-header .hf-navigation-bar')
+  const alone = rule('.hf-navigation-bar-alone')
+
+  it('has the tint, the row and the ring in the rule that both bars share, and nothing of the band of the menu', () => {
+    expect(common).toContain('background-color: var(--hf-colour-background-submenu);')
+    expect(common).toContain('display: flex;')
+    expect(common).not.toMatch(/--hf-navigation-|(?<![a-z-])(flex|order):|margin|clip-path|box-shadow|padding/)
+  })
+
+  it('keeps what hangs on the band of the menu in a rule of its own, which the bar on its own does not need', () => {
+    for (const property of ['box-shadow', 'clip-path', 'flex', 'margin-block', 'margin-inline', 'order']) {
+      expect(inMenu).toContain(`${property}:`)
+      expect(alone).not.toContain(`${property}:`)
+    }
+    expect(inMenu).toContain('--hf-navigation-gutter-start')
+  })
+
+  it('depends on nothing of the band of the menu', () => {
+    expect(alone).not.toMatch(/--hf-navigation-|hf-navigation-header/)
+    expect(common).not.toContain('hf-navigation-header')
+    expect(alone).toContain('--hf-page-inset')
+  })
+
+  it('puts the text of the first link on the inset of the page, and keeps clear of a notch on both sides', () => {
+    expect(alone).toContain(
+      'padding-inline: calc(max(var(--hf-page-inset), env(safe-area-inset-left, 0px)) - var(--hf-space-s))',
+    )
+    expect(alone).toContain('env(safe-area-inset-right, 0);')
+  })
+
+  it('runs on to the edge of the screen under 66rem and ends at the edge of the column from 66rem', () => {
+    expect(alone).toMatch(
+      /@media \(width >= 66rem\) \{\s*padding-inline-end: max\(var\(--hf-page-inset\), env\(safe-area-inset-right, 0px\)\);/,
+    )
+  })
+
+  it('wraps at 20em like the bar in the menu, with the end of the row at the margin of the page', () => {
+    const narrow = css.match(/@media \(width <= 20em\) \{(.*)\n\s*\}\n\}/s)?.[1] ?? ''
+
+    expect(narrow).toMatch(/\.hf-navigation-bar-alone \{\s*padding-inline-end: max\(var\(--hf-page-margin\)/)
+    expect(narrow).toMatch(/\.hf-navigation-header \.hf-navigation-bar,/)
+  })
+
+  it('puts the button at the end of a bar that is wider than the row, and keeps it a pill', () => {
+    expect(css).toMatch(/\.hf-navigation-bar-list \{[^}]*min-inline-size: 100%/)
+    expect(css).toMatch(/\.hf-navigation-bar-end \{[^}]*margin-inline-start: auto/)
+    expect(css).toMatch(/:where\(\.hf-navigation-bar-end \.hf-navigation-sublink\) \{[^}]*border: 0/)
   })
 })
 

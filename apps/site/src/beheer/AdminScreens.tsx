@@ -2,7 +2,7 @@
 
 import type { AdminRole } from '@fansite/db/schema'
 
-import { SectionBar } from '@fansite/design-system'
+import { NavigationBar } from '@fansite/design-system'
 import { usePathname } from 'next/navigation'
 
 import { logOut } from '#src/app/beheer/actions'
@@ -25,10 +25,10 @@ export function AdminScreens({ role }: { role: AdminRole }) {
   const current = currentScreen(pathname)
 
   return (
-    <SectionBar
+    <NavigationBar
       end={{ action: logOut, label: 'Uitloggen' }}
-      items={screensFor(role).map(({ href, label }) => ({ current: href === current, href, label }))}
       label="Beheer"
+      subitems={screensFor(role).map(({ href, label }) => ({ current: href === current, href, label }))}
     />
   )
 }

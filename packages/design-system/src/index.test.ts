@@ -40,7 +40,6 @@ const components = [
   'Pagination',
   'RecordTable',
   'Root',
-  'SectionBar',
   'Select',
   'StandingsTable',
   'Strong',
