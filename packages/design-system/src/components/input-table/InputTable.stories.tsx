@@ -70,7 +70,7 @@ const meta = preview.meta({
 })
 
 const render = (args: InputTableProps) => (
-  <Form onSubmit={(event) => event.preventDefault()}>
+  <Form className="hf-flow" onSubmit={(event) => event.preventDefault()}>
     <Heading appearance={3} level={2}>
       Doelpunten
     </Heading>

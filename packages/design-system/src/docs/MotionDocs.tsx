@@ -121,7 +121,7 @@ const Example = ({ children, group, hint }: { children: ReactNode; group: Motion
   const { label } = motionGroups.find(({ id }) => id === group) ?? { label: group }
 
   return (
-    <section aria-label={label} className="_hf-docs-motion-example">
+    <section aria-label={label} className="_hf-docs-motion-example hf-flow">
       <p className="_hf-docs-secondary">{hint}</p>
       <div className="_hf-docs-motion-stage">{children}</div>
     </section>

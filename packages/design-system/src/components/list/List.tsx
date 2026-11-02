@@ -22,8 +22,8 @@ export type ListProps =
 
 type LooseProps = {
   /**
-   * A loose list, as Markdown calls it: every item has space below it, with or without a
-   * paragraph in it.
+   * A loose list, as Markdown calls it: there is space between the items, with or
+   * without a paragraph in them.
    */
   loose?: boolean
 }

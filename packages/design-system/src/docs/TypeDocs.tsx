@@ -128,7 +128,7 @@ const text: CSSProperties = { fontFamily: 'var(--hf-font-family-text)', marginBl
 
 export const FontSpecimens = () => (
   <div className="_hf-docs-stack">
-    <section aria-labelledby="font-truculenta">
+    <section aria-labelledby="font-truculenta" className="hf-flow">
       <h3 className="hf-heading-3" id="font-truculenta">
         Truculenta
       </h3>
@@ -147,7 +147,7 @@ export const FontSpecimens = () => (
         </p>
       ))}
     </section>
-    <section aria-labelledby="font-atkinson">
+    <section aria-labelledby="font-atkinson" className="hf-flow">
       <h3 className="hf-heading-3" id="font-atkinson">
         Atkinson Hyperlegible Next
       </h3>
@@ -161,7 +161,7 @@ export const FontSpecimens = () => (
         </p>
       ))}
     </section>
-    <section aria-labelledby="font-characters">
+    <section aria-labelledby="font-characters" className="hf-flow">
       <h3 className="hf-heading-3" id="font-characters">
         Nederlands en Fries
       </h3>
@@ -176,7 +176,7 @@ export const FontSpecimens = () => (
         gewone letters. Zo leest een schermlezer woorden en geen losse letters.
       </p>
     </section>
-    <section aria-labelledby="font-figures">
+    <section aria-labelledby="font-figures" className="hf-flow">
       <h3 className="hf-heading-3" id="font-figures">
         Tabelcijfers
       </h3>

@@ -2,18 +2,13 @@
 
 @layer hf.base {
   /*
-   * Colour and spacing of headings. Their type styles follow below, in the typography layer.
-   * In a card or a cell the flow (utilities/flow.css) sets the space under a heading, the large
-   * step, and none under the last one. The margin here is for a heading outside the flow.
+   * Colour of headings. Their type styles follow below, in the typography layer. A heading sets
+   * no space of its own: in a card or a cell the flow (utilities/flow.css) sets the space under
+   * it, the large step, and none under the last one.
    */
   :is(h1, h2, h3, h4, h5, h6) {
     color: var(--hf-colour-text-heading);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
-    margin-block: var(--hf-space-xl) var(--hf-space-l);
-
-    &:first-child {
-      margin-block-start: 0;
-    }
+    margin-block: 0;
   }
 
   /* Heading 6 is a fallback, like heading 5 in the typography layer: heading 4 in the colour of secondary text. */

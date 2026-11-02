@@ -81,13 +81,10 @@
     padding-block: var(--hf-space-s);
     padding-inline: var(--hf-space-s);
 
-    /* The text has no margin to the outside: the field decides the space around it. */
-    > :first-child {
-      margin-block-start: 0;
-    }
-
-    > :last-child {
-      margin-block-end: 0;
+    /* Every item is a paragraph of its own, so the items are as far apart as two paragraphs. */
+    ul {
+      display: grid;
+      gap: var(--hf-space-m);
     }
 
     &[aria-invalid='true'] {

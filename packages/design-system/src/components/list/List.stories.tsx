@@ -73,12 +73,12 @@ export const Loose = meta.story({
     docs: {
       description: {
         story:
-          'De ruimte hoort bij het item, dus een item zonder alinea krijgt evenveel als een item met een alinea. Onder de lijst staat evenveel ruimte als onder een gewone lijst.',
+          'De ruimte staat tussen de items, dus een item zonder alinea krijgt evenveel als een item met een alinea. Onder de lijst staat evenveel ruimte als onder een gewone lijst.',
       },
     },
   },
   render: () => (
-    <>
+    <div className="hf-flow">
       <List loose>
         <List.Item>
           <Link href="#testkrant">Testkrant</Link>
@@ -93,6 +93,6 @@ export const Loose = meta.story({
         </List.Item>
       </List>
       <Text>Onder de lijst staat evenveel ruimte als onder een gewone lijst.</Text>
-    </>
+    </div>
   ),
 })

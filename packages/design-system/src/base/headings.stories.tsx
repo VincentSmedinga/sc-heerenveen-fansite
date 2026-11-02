@@ -16,7 +16,7 @@ const meta = preview.meta({
 export const AllLevels = meta.story({
   name: 'Alle niveaus',
   render: () => (
-    <>
+    <div className="hf-flow">
       <h1>ADO Den Haag – sc Heerenveen</h1>
       <p className="hf-meta">h1 · kop 1</p>
       <h2>Laatste nieuws</h2>
@@ -25,7 +25,7 @@ export const AllLevels = meta.story({
       <p className="hf-meta">h3 · kop 3</p>
       <h4>Hoe we bronnen kiezen</h4>
       <p className="hf-meta">h4 · kop 4</p>
-    </>
+    </div>
   ),
 })
 
@@ -40,7 +40,7 @@ export const StyleApartFromLevel = meta.story({
     },
   },
   render: () => (
-    <section aria-labelledby="discussies" className="_hf-docs-card" style={{ maxInlineSize: '24rem' }}>
+    <section aria-labelledby="discussies" className="_hf-docs-card hf-flow" style={{ maxInlineSize: '24rem' }}>
       <h2 className="hf-heading-3" id="discussies">
         Nieuwste discussies
       </h2>

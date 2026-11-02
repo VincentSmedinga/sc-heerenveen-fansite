@@ -77,7 +77,7 @@ const renderForm = (withErrors: boolean) => (
         <Textarea name="toelichting" rows={4} />
       </Field>
 
-      <fieldset>
+      <fieldset className="hf-space-end-m">
         <legend>Mogen we je mailen over je verzoek?</legend>
         <div>
           <input defaultChecked id="mailen-ja" name="mailen" type="radio" value="ja" />
@@ -89,7 +89,7 @@ const renderForm = (withErrors: boolean) => (
         </div>
       </fieldset>
 
-      <p>
+      <p className="hf-space-end-m">
         <input id="kopie" name="kopie" type="checkbox" />
         <label htmlFor="kopie">Stuur mij een kopie van dit verzoek</label>
       </p>

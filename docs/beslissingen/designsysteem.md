@@ -341,6 +341,8 @@
   Een eigenschap is voorspelbaar: de pagina krijgt wat ze vraagt, los van wat er in de items staat.
 - **Alternatieven:** de ruimte automatisch geven zodra een item in de lijst een alinea bevat, met `:has()`.
   Dan hoeft een pagina niets te kiezen, maar de inhoud van één item verandert dan de hele lijst.
+- **Later:** zie _Elementen en tekst zetten geen verticale witruimte naar buiten_ (2 november 2026).
+  De ruimte van een ruime lijst is nu de `gap` van de lijst, een raster, en geen marge onder elk item; de uitkomst is dezelfde.
 
 ## De header loopt over de hele breedte van het venster
 
@@ -1608,6 +1610,8 @@
   De grote ruimte onder een kop en onder een groot blok staat nu in de stroom, `utilities/flow.css`, en niet meer in `heading.css`, `table.css` en de CSS van de grafieken; de kaart of de cel zet haar, en het laatste kind krijgt geen ruimte van de stroom zelf.
   Tussen de tabel van de stand en haar legenda staat nu de gemiddelde ruimte, en de grote staat onder de legenda.
   `tokens/space-below-css.test.ts` is vervangen door `utilities/flow-css.test.ts`.
+- **Later:** zie _Elementen en tekst zetten geen verticale witruimte naar buiten_ (2 november 2026).
+  De regels voor de koppen in `heading.css` en voor elke tabel in `base/table.css` zijn weg; de stroom is nu de enige plek voor de ruimte onder een kop en onder een tabel.
 
 ## Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat
 
@@ -2234,3 +2238,26 @@
   Splitsen per pagina past niet: de wijzigingen staan in gedeelde CSS en raken elke pagina tegelijk.
 - **Alternatieven:** alles in één pull request (te groot om te reviewen).
   Per groep pagina's, zoals home, wedstrijden en statistieken (de CSS is gedeeld, dus dat kan niet los).
+
+## Elementen en tekst zetten geen verticale witruimte naar buiten
+
+- **Datum:** 2 november 2026
+- **Besluit:** de basisstijlen en de tekst zetten geen verticale marge meer naar buiten (#654).
+  Het gaat om `p`, `ul`, `ol`, `dl`, `blockquote`, `pre`, `figure`, `hr`, `fieldset`, `table` en de koppen `h1` tot en met `h6`.
+  De ruimte tussen twee buren komt van de stroom (zie _De kaart of de cel bepaalt de verticale witruimte tussen wat erin staat_).
+  De ruimte tussen de delen van een element komt van `gap`: een citaat en een ruime lijst zijn een raster met `gap` gemiddeld, en een figuur een raster met `gap` klein tussen zijn inhoud en zijn onderschrift.
+  Twee marges blijven, elk met een reden bij de regel: het onderschrift (`caption`) van een tabel, omdat een `gap` een onderdeel van de tabel zelf niet bereikt, en de beschrijving (`dd`) van een lijst met beschrijvingen, omdat een `gap` geen ruimte tussen een beschrijving en de volgende term kan zetten zonder er ruimte tussen een term en zijn beschrijving bij te zetten.
+  Een onderdeel dat zelf geen stroomcontainer is, krijgt de klasse `hf-flow` of een `gap`: `ErrorSummary` en de tekst in `RichTextEditor` de klasse, en `InputTable` een `gap`.
+  Een story zonder container zet zijn voorbeeld in een element met `hf-flow`.
+- **Waarom:** een element kent zijn omgeving niet.
+  Zette een alinea of een kop zelf een marge, dan hing de ruimte af van wat er toevallig naast stond, en moest de stroom die marge overschrijven.
+  Na deze omzetting is de stroom de enige plek, en stylelint bewaakt dat.
+- **Niet gedaan:** de marge van `input`, `select` en `textarea` in `base/forms.css` blijft.
+  Ze delen één regel, en de ruimte onder een veld hoort bij `Field`, het onderdeel dat #655 omzet.
+- **Gevolg:** op de site verandert niets, op één plek na: op de pagina Artikelen van het beheer staat onder de lijst in de kaart 12 pixels minder ruimte, omdat de marge van de laatste alinea in het laatste item niet meer onder de lijst uitsteekt.
+  In de stories staat onder het laatste element van een voorbeeld geen ruimte meer.
+  Een scheidingslijn in een kaart of een cel heeft de grote ruimte aan weerskanten, zoals de stroom al zei, en niet de extra grote.
+  Een figuur met een citaat heeft de kleine ruimte tussen het citaat en het onderschrift, in plaats van de gemiddelde.
+- **Alternatieven:** de basiselementen een eigen `margin-block: 0` in elke kaart laten zetten (dan moet elk onderdeel het kennen).
+  `hf-flow` op `body` of op elk onderdeel zetten (de stroom hoort bij een container die weet wat er in staat).
+  Een `dd` zonder marge, met een wrapper om elke term en beschrijving (de HTML wordt omslachtiger voor een lijst die de site niet gebruikt).

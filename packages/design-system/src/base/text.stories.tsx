@@ -15,7 +15,7 @@ const meta = preview.meta({
 export const Paragraph = meta.story({
   name: 'Alinea',
   render: () => (
-    <div style={{ maxInlineSize: '40rem' }}>
+    <div className="hf-flow" style={{ maxInlineSize: '40rem' }}>
       <p>
         De sc Heerenveen Fansite verzamelt sinds 15 maart 1997 het nieuws over de club uit It Hearrenfean. We tonen de
         kop, de bron en de tijd, en linken naar het bericht van de journalist.
@@ -28,7 +28,7 @@ export const Paragraph = meta.story({
 export const InlineElements = meta.story({
   name: 'Nadruk en kleine tekst',
   render: () => (
-    <div style={{ maxInlineSize: '40rem' }}>
+    <div className="hf-flow" style={{ maxInlineSize: '40rem' }}>
       <p>
         Het <abbr title="Koninklijke Nederlandse Voetbalbond">KNVB</abbr>-bekerduel tegen Excelsior Maassluis begint om{' '}
         <strong>20:00</strong>. Kaarten zijn <em>alleen</em> te koop via de club.

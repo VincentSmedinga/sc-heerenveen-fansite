@@ -61,7 +61,7 @@ describe('ErrorSummary', () => {
   it('keeps its own class next to the other attributes', () => {
     render(<ErrorSummary className="extra" errors={errors} id="fouten" level={2} />)
 
-    expect(screen.getByRole('region').className).toBe('hf-error-summary extra')
+    expect(screen.getByRole('region').className).toBe('hf-error-summary hf-flow extra')
     expect(screen.getByRole('region').id).toBe('fouten')
   })
 })
