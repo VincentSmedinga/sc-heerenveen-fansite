@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   cleanSheetsOf,
+  describeShowDelay,
   extremesOf,
   goalsPerQuarter,
   goalsWithInitials,
@@ -58,6 +59,18 @@ const season = [
 
 /** Between round 4 and the postponed round 5: the schedule has two matches still to come. */
 const between = new Date('2026-08-25T12:00:00Z')
+
+describe('describeShowDelay', () => {
+  const now = new Date('2026-11-02T12:00:00Z')
+
+  it('says five minutes for the current season, as long as its data is kept', () => {
+    expect(describeShowDelay('2026/27', now)).toBe('binnen vijf minuten')
+  })
+
+  it('says an hour for a season that is over, as long as its data is kept', () => {
+    expect(describeShowDelay('2025/26', now)).toBe('binnen een uur')
+  })
+})
 
 describe('resultsOfSeason', () => {
   const newestFirst = overviewOf(season, between).results
