@@ -293,7 +293,9 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De links eindigen op het anker van de kaart, en de seizoenskiezer neemt de keuze niet mee.
   De tabel van "Laatste 5" telt per club de vijf wedstrijden die het laatst zijn gespeeld (`lastFiveStandings` in `src/last-five.ts`).
   De wedstrijden van sc Heerenveen komen uit `matches` en die van de andere clubs uit `league_results`, en `getLeagueResults` in `src/matches.ts` bewaart die per seizoen zoals `getMatchData`.
-  De schakelaar staat er alleen als voor elke club het aantal uitslagen gelijk is aan het aantal gespeelde wedstrijden in de stand (`hasAllLeagueResults`); anders blijft de kaart zoals hij was.
+  De schakelaar staat er alleen in het lopende seizoen: een Eindstand heeft hem niet, en `?stand=laatste-5` geeft daar de gewone kaart.
+  Hij staat er als elke club hoogstens één uitslag minder heeft dan het aantal gespeelde wedstrijden in de stand, omdat de pagina's van Wikipedia los van elkaar worden bijgewerkt (`hasEnoughLeagueResults`); anders blijft de kaart zoals hij was.
+  Het bijschrift van "Laatste 5" noemt de dag van de laatste uitslag in onze gegevens, niet de dag van de stand.
 - **Uitslagen:** alle wedstrijden die zijn begonnen, de nieuwste bovenaan.
   Een eerder seizoen begint bij de eerste wedstrijd (`resultsOfSeason` in `src/matches.ts`).
   Een wedstrijd zonder uitslag staat er ook in, en zegt twee uur na de aanvang "Gegevens nog niet beschikbaar" (zonder aanvangstijd vanaf de dag erna).

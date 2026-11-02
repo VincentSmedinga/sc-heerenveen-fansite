@@ -619,14 +619,10 @@ export function CoachesCard({ coaches }: { coaches: PublicStaff[] }) {
 
 /**
  * The caption of the table over the latest five matches, which only a screen reader gets: what
- * it is, and the day the table of the season holds for, which is the day of the last match.
+ * it is, and the day of the last result in our data, which can be before the day of the table.
  */
-export function lastFiveCaption(rows: PublicStandingsRow[]) {
-  const [first] = rows
-
-  return first === undefined
-    ? 'Stand over de laatste vijf wedstrijden'
-    : `Stand over de laatste vijf wedstrijden op ${formatTableDay(first.validOn)}`
+export function lastFiveCaption(lastResultOn: string) {
+  return `Stand over de laatste vijf wedstrijden op ${formatTableDay(lastResultOn)}`
 }
 
 /**

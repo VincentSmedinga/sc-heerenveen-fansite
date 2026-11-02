@@ -65,9 +65,9 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('the switch of the card Eindstand of an earlier season', () => {
+describe('the card Eindstand of an earlier season', () => {
   // The table of the earlier season has two clubs that played each other twice, and the two
-  // results say so.
+  // results say so: a season that is over is complete, but it has no switch all the same.
   const table = matchData.standings.slice(0, 2).map((row) => ({ ...row, played: 2 }))
   const results = [
     { awayClub: 'sc Heerenveen', awayGoals: 0, homeClub: 'Demo Boys', homeGoals: 1, playedOn: '2025-09-20', round: 7 },
@@ -79,27 +79,20 @@ describe('the switch of the card Eindstand of an earlier season', () => {
     vi.mocked(getLeagueResults).mockResolvedValue(results)
   })
 
-  it('has links that end on the card Eindstand and stay on the page of the season', async () => {
+  it('has no switch, and does not ask for the results of the clubs', async () => {
     const html = await render()
 
-    expect(getLeagueResults).toHaveBeenCalledExactlyOnceWith('2025/26')
-    expect(html).toContain('<a aria-current="page" href="/wedstrijden/2025-26#eindstand">')
-    expect(html).toContain('<a href="/wedstrijden/2025-26?stand=laatste-5#eindstand">')
+    expect(html).toContain('id="eindstand"')
+    expect(html).not.toContain('Welke stand')
+    expect(getLeagueResults).not.toHaveBeenCalled()
   })
 
-  it('shows the latest five matches for ?stand=laatste-5, and keeps the name Eindstand for the card', async () => {
+  it('shows the whole season for ?stand=laatste-5, as the normal card', async () => {
     const html = await render('2025-26', { stand: 'laatste-5' })
 
-    expect(html).toContain(
-      '<caption class="hf-visually-hidden">Stand over de laatste vijf wedstrijden op 18 oktober 2026</caption>',
-    )
-    expect(html).toContain('id="eindstand"')
-  })
-
-  it('has no switch for a season whose results are missing, so one that was not imported again', async () => {
-    vi.mocked(getLeagueResults).mockResolvedValue(results.slice(0, 1))
-
-    expect(await render('2025-26', { stand: 'laatste-5' })).not.toContain('Welke stand')
+    expect(html).toContain('<caption class="hf-visually-hidden">Eindstand op 18 oktober 2026</caption>')
+    expect(html).not.toContain('Welke stand')
+    expect(html).not.toContain('laatste vijf wedstrijden')
   })
 })
 

@@ -939,8 +939,9 @@ describe('the switch of the card Stand, between the whole season and the latest 
   it('shows the table over the latest five matches for ?stand=laatste-5, with its own caption and the current choice', async () => {
     const card = await stand({ stand: 'laatste-5' })
 
+    // The day of the last result in our data, not the 18th of October the table holds for.
     expect(card).toContain(
-      '<caption class="hf-visually-hidden">Stand over de laatste vijf wedstrijden op 18 oktober 2026</caption>',
+      '<caption class="hf-visually-hidden">Stand over de laatste vijf wedstrijden op 11 oktober 2026</caption>',
     )
     expect(card).toContain('<a aria-current="page" href="/wedstrijden?stand=laatste-5#stand">')
     // Heerenveen has 3 + 3 + 1 points in three matches, the other two one point in two matches.
@@ -975,8 +976,26 @@ describe('the switch of the card Stand, between the whole season and the latest 
     }
   })
 
-  it('has no switch when a club has fewer results than the table says it played', async () => {
+  it('has the switch when a club has one result fewer than the table says it played', async () => {
+    // Testdorp FC and Demo Boys played 2 and have 1 result: the results are a round behind.
     vi.mocked(getLeagueResults).mockResolvedValue(leagueResultsData.slice(0, 2))
+    const card = await stand({ stand: 'laatste-5' })
+
+    expect(card).toContain('Welke stand')
+    expect(card).toContain('Stand over de laatste vijf wedstrijden op')
+  })
+
+  it('has no switch when a club has two results fewer than the table says it played', async () => {
+    vi.mocked(getLeagueResults).mockResolvedValue(leagueResultsData.slice(0, 1))
+
+    expect(await stand({ stand: 'laatste-5' })).not.toContain('Welke stand')
+  })
+
+  it('has no switch when a club has more results than the table says it played', async () => {
+    vi.mocked(getLeagueResults).mockResolvedValue([
+      ...leagueResultsData,
+      { awayClub: 'Demo Boys', awayGoals: 0, homeClub: 'Testdorp FC', homeGoals: 0, playedOn: '2026-10-18', round: 10 },
+    ])
 
     expect(await stand({ stand: 'laatste-5' })).not.toContain('Welke stand')
   })
