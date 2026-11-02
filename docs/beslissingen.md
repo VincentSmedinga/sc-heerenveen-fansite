@@ -3406,6 +3406,23 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De projecteigenaar koos dat op 2 november 2026, omdat de pagina's onder `/beheer` dan allemaal hetzelfde zijn en er geen uitzondering is om te onthouden.
 - **Alternatieven:** een prop `density` op elk component (elk component kent het thema, en elk nieuw component moet het erbij doen); een tweede stylesheet voor het beheer (twee stijlen om gelijk te houden); `zoom` of een kleinere `font-size` op de wikkel (maakt ook de breedtes en de kleine tekst kleiner, en haalt de grenzen niet); de klasse op `body` of `html` (kop en voet van de site worden ook compact); één wikkel in `app/beheer/layout.tsx` (zie hierboven); de waarden in de klasse op de `Page.Body` (de root-layout kent het pad niet); de kop en de voet ook compact (de publieke site blijft zoals ze is); de dichtheid laten kiezen door de redacteur (een eigen issue, met opslaan).
 
+### Een kolom van een tabel met tekst kan opvouwen onder de rijkop
+
+- **Datum:** 2 november 2026
+- **Besluit:** een kolom van `DataTable` met `appearance="text"` kan als `{ fold: true, name }` worden gegeven.
+  Waar de tabel minder dan 44 rem breed is, verdwijnen de kop en de cellen van die kolom, en staat de tekst van de cellen op één regel in secundaire tekst onder de rijkop, in de volgorde van de kolommen.
+  Waar de tabel ruimte heeft, is het een kolom en is de regel weg.
+  Een tabel zonder zo'n kolom blijft zoals hij was, ook in zijn opbouw: alleen een tabel met een kolom die opvouwt krijgt een element eromheen, dat de ruimte meet.
+- **Waarom:** de lijst van wedstrijden in het beheer (#592) heeft vijf kolommen op een brede pagina en drie op een telefoon.
+  De projecteigenaar koos voor een kleine toevoeging aan de tabel boven een lijst met drie kolommen op elke breedte.
+  De ruimte van de tabel zelf beslist, zoals bij de tabel om in te vullen (_Een tabel om in te vullen wordt een blok per rij waar hij niet past, naar de breedte van de tabel zelf_), zodat het klopt in een smalle kolom op een breed scherm.
+  De verborgen cellen zijn weg voor een schermlezer (`display: none`), dus er wordt niets twee keer voorgelezen.
+- **Nadeel:** de grens van 44 rem staat vast.
+  De inhoud van de cellen staat dan twee keer in de pagina, één keer verborgen.
+- **Alternatieven:** twee tabellen, een voor een breed en een voor een smal scherm; dat zet de gegevens twee keer in de pagina en een schermlezer leest ze allebei.
+  Alleen drie kolommen op elke breedte, met de datum en de competitie onder de wedstrijd; dat verspilt de ruimte van een brede pagina.
+  Een media query op het venster; die klopt niet in een smalle kolom.
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
@@ -3940,6 +3957,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Alternatieven:** de token zelf bewaren (een gelekte database logt dan in); een ondertekend cookie met een einddatum (niet in te trekken zonder lijst op de server).
 - **Later:** zie _Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure_ (1 november 2026): `Secure` geldt niet meer onder `NODE_ENV=development`, omdat Safari het cookie anders niet bewaart op `http://localhost`.
   De rest van deze beslissing blijft.
+- **Later:** zie _Het hoofdmenu toont Beheer voor wie ingelogd is, met een teken in `localStorage`_ (2 november 2026): het cookie blijft het enige cookie en gaat nog steeds alleen naar `/beheer`, maar de browser bewaart daarnaast een teken in `localStorage` dat alleen het menu verandert.
 
 ### Het antwoord op een verzoek om een link is voor elk adres hetzelfde
 
@@ -5265,6 +5283,30 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** de groep "Op de site" kan een bericht tonen dat de bezoeker door de samenvouwregel of een bron die uitstaat niet ziet.
 - **Alternatieven:** `isShown` hergebruiken (hij is geen losse voorwaarde: hij hoort bij de query van de homepage en heeft de bron en de andere versies van het verhaal nodig); een derde keuze "Alles" (de projecteigenaar koos twee groepen); een apart vakje voor de twijfelgevallen (een eigen issue als het nodig blijkt).
 
+### Het hoofdmenu toont Beheer voor wie ingelogd is, met een teken in `localStorage`
+
+- **Datum:** 2 november 2026
+- **Besluit:** de browser van wie in het beheer komt met een geldige sessie, bewaart een teken in `localStorage`, onder de sleutel `fansite-beheer` met de waarde `1`.
+  Het hoofdmenu (`SiteNavigation`) leest het teken en toont dan voor Forum het item Beheer.
+  Het laatste item van het menu staat rechts, dus zo blijft Forum waar het stond.
+  - **Zetten en weghalen:** `app/beheer/layout.tsx` controleert de sessie op de server (`sessionToken` en `findSession`) en geeft het antwoord aan `AdminMarker`, een clientcomponent die het teken zet of weghaalt.
+    De inlogpagina haalt het ook weg: na een zachte navigatie naar een pagina die doorverwijst, wordt de layout niet opnieuw gevraagd.
+    Uitloggen leidt naar de inlogpagina, en daar gaat het teken weg.
+  - **Lezen:** `useSyncExternalStore` met `false` op de server, dus de HTML is voor elke bezoeker hetzelfde en er is geen hydratiefout.
+    Zonder JavaScript is er geen item.
+  - **Geen toegang:** het teken is een hulp om een koppeling te tonen.
+    Wie het zelf maakt, komt bij de inlogpagina uit.
+  - **Inhoud:** alleen het teken.
+    Geen geheim, geen rol en geen adres, en het gaat nooit naar de server.
+- **Waarom:** een redacteur komt zo vanuit het menu bij het beheer, zonder `/beheer` te typen.
+  Het cookie van het beheer is `HttpOnly` en geldt alleen onder `/beheer`, dus de server ziet op een publieke pagina niet wie ingelogd is.
+  Kon hij dat wel, dan werd elke pagina een pagina per bezoeker en werkte de cache niet meer.
+  De themakeuze staat al zo in `localStorage`, en het past bij de bereidheid om voorkeuren op te slaan.
+- **Nadeel:** het item verschijnt een moment na het laden, want de browser leest het teken pas na het hydrateren.
+  Een redacteur die in een andere browser inlogt, ziet het item daar pas na een bezoek aan het beheer.
+- **Gevolg:** het hoofdstuk Cookies op `/privacy` en de README van de site zeggen dat de browser van een redacteur dit teken bewaart.
+- **Alternatieven:** een tweede cookie dat bij elk verzoek meegaat (een tweede cookie naast het enige cookie van de site); een verzoek naar `/beheer` bij elke paginaweergave van elke bezoeker (extra verkeer voor iedereen, en het beheer ziet elk bezoek); het cookie van het beheer voor de hele site laten gelden (elke pagina wordt een pagina per bezoeker, en het geheim gaat bij elk verzoek mee).
+
 ## Importer
 
 ### Een herkenbare fetcher die zich aan robots.txt houdt
@@ -6586,6 +6628,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   - Een uitslag staat in de lijst, het logboek en de waarschuwing met een en-streep ("2–1"), zoals de schrijfwijzer van Redactie het vraagt.
   - Er is geen scherm voor het verleden: de lijst toont het lopende seizoen, en alleen een beheerder ziet haar.
 - **Later:** vervangt voor de plaats van de opslag de beslissing van 25 oktober 2026 uit het issue (een aanpassing naast de gelezen waarde); de rest ervan blijft: een aanpassing geldt tot Wikipedia hetzelfde zegt of een beheerder haar weghaalt.
+- **Later:** zie _De beheerschermen voor een wedstrijd zijn een tabel met een filter en een brede pagina met een zijbalk_: de lijst toont nu ook oudere seizoenen, met een seizoenskeuze.
+  De rest blijft: alleen een beheerder ziet haar.
 - **Alternatieven:** een aparte tabel met aanpassingen die elke query eroverheen legt (veel plekken en een groot risico op vergeten); de gelezen waarde overschrijven zonder markering (de volgende import maakt de verbetering ongedaan, en niemand ziet wat van de redactie is).
 
 ### Bij een verschil blijft de invoer staan en schrijft de import het op
@@ -6646,6 +6690,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** het beheer werkt zonder JavaScript, zoals de artikelen, en een formulier met rijen die je toevoegt en weghaalt kan dat met een rondje naar de server.
   Eén speler-veld voorkomt dat een redacteur twee velden moet leren die elkaar uitsluiten.
 - **Alternatieven:** een knop die met JavaScript een rij toevoegt (werkt niet zonder, en de focus is dan ons eigen werk); twee velden naast elkaar voor de speler (de redacteur moet weten welk veld bij welk doelpunt hoort); de Enter-toets laten zoals hij is (hij haalt het eerste doelpunt weg).
+- **Later:** zie _De beheerschermen voor een wedstrijd zijn een tabel met een filter en een brede pagina met een zijbalk_ en _Het blok om op te slaan staat in de zijbalk en hoort bij het formulier met het attribuut `form`_.
+  De knop voor een doelpunt heet nu "Weghalen doelpunt 2", de doelpunten zijn een tabel en geen kaart per doelpunt, en "Invoer weghalen" is een uitklapblok in de zijbalk.
+  De rest blijft: een formulier dat zonder JavaScript werkt, de verborgen eerste knop, de focus en de ene speler.
 
 ### Onder de bronvermelding staat een zin zolang de redactie gegevens zelf invulde
 
@@ -6897,6 +6944,66 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De dag van een gestaakte wedstrijd is die van het restant, en `matches.match_date` heeft die van het begin (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_): voor de vorm telt het einde.
   Na het samenvoegen is de tabel leeg voor de eerdere seizoenen tot de Coördinator `Import season` heeft gedraaid.
 - **Alternatieven:** de wedstrijden van andere clubs in `matches` (die tabel is voor sc Heerenveen, met doelpunten, club, beoordeling en vermeldingen, en alle queries van de site zouden ze moeten uitsluiten); `clubs` en een sleutel met `club_id` (de stand heeft die niet, en de koppeling zou een tweede plek zijn waar de namen kunnen verschillen); de uitslagen elke keer uit de pagina lezen op de site (de site leest Wikipedia niet); een fout bij een afwijking van de stand (een uur verschil tussen twee pagina's houdt dan de hele import tegen).
+
+### De beheerschermen voor een wedstrijd zijn een tabel met een filter en een brede pagina met een zijbalk
+
+- **Datum:** 2 november 2026
+- **Besluit:** de lijst `/beheer/wedstrijden` en het formulier `/beheer/wedstrijden/<nummer>` krijgen een nieuw ontwerp (#592), als een echt CMS.
+  - **De lijst** is één tabel met de wedstrijd als enige koppeling, de uitslag en de status in woorden, en een label voor wat de redactie moet zien: "Uitslag ontbreekt", "Aangepast" en "Wikipedia wijkt af".
+    Er staan geen koppen in de rijen.
+    Een filter met aantallen (Alles, Zonder uitslag, Aangepast) kiest wat de lijst toont, met koppelingen die een zoekopdracht in het adres zetten, zodat het zonder JavaScript werkt.
+    De lijst opent op "Zonder uitslag", en "Alles" houdt die wedstrijden bovenaan.
+    Is er niets zonder uitslag, dan staat er één regel in plaats van de tabel.
+    Naast de titel staat de seizoenskeuze, en de lijst toont ook oudere seizoenen.
+  - **Het formulier** is de brede pagina met een zijbalk.
+    De kop is de wedstrijd, met daaronder de competitie, de ronde en de aftrap, en een label als de redactie iets aanpaste of de uitslag ontbreekt.
+    De hoofdkolom heeft de kaarten Aftrap, Uitslag en Doelpunten, en bij de beker en de play-offs een kaart voor de verlenging en de strafschoppen.
+    De zijbalk heeft het blok om op te slaan, de laatste invoer en "Invoer weghalen".
+  - **De stand** staat in de volgorde van de wedstrijd: bij een uitwedstrijd staat de tegenstander voorop, zoals in de kop.
+    De labels zijn de namen van de teams.
+  - **De doelpunten** zijn een tabel om in te vullen op een brede pagina en een blok per doelpunt op een telefoon.
+  - **"Invoer weghalen"** is een uitklapblok met een rode knop.
+  - **Een melding** na een actie is een Notice zonder kop, en het kruimelpad vervangt de koppelingen "Terug naar".
+  - **Op een telefoon** is het blok om op te slaan de kaart na het formulier, zonder vaste balk.
+  - De namen van de velden, de acties, de valideringen, de teksten van de foutmeldingen en de logboekregels veranderen niet.
+- **Waarom:** de lijst was een rij koppelingen met een kop in elk item, en het formulier zes velden onder elkaar per doelpunt.
+  De projecteigenaar wil schermen die gebruiksvriendelijker en professioneler zijn.
+  Een tabel laat in één blik zien wat nog ontbreekt.
+  Een zijbalk houdt de knop om op te slaan in beeld bij een lang formulier.
+  Een doelpunt van één rij neemt 60 pixels in plaats van een scherm.
+- **Hoe:** de teksten komen uit het ontwerp (het Artifact "Wedstrijden in het beheer"), korter waar het kon.
+  De onderdelen zijn die van #594, #595 en #599: `Tag`, `Notice`, `Disclosure`, `Breadcrumb`, de gevaarlijke `Button`, `Page.Main` met `wide`, `FieldGroup`, `InputTable`, `DataTable` met `appearance="text"` en de dichtheid `hf-density-compact`.
+- **Gevolg:** de lijst heeft vijf kolommen als de tabel breed genoeg is (wedstrijd, datum, competitie, uitslag en status), en drie op een telefoon.
+  Daarvoor kreeg `DataTable` een kolom die kan opvouwen (zie _Een kolom van een tabel met tekst kan opvouwen onder de rijkop_).
+  De wedstrijd is de eerste kolom, want de rijkop is altijd de eerste.
+- **Alternatieven:** een lijst van koppelingen houden en alleen de opmaak verbeteren; dat laat de koppen in de rijen en het scannen van wat ontbreekt.
+  Sorteren, zoeken en bulkacties: het ontwerp laat ze op bewuste gronden weg, want de volgorde is het punt, een seizoen heeft zo'n 34 wedstrijden en er is niets in bulk te doen.
+  Een vaste balk om op te slaan op een telefoon; het blok bevat de reden en staat daarom als kaart na het formulier.
+
+### Het blok om op te slaan staat in de zijbalk en hoort bij het formulier met het attribuut `form`
+
+- **Datum:** 2 november 2026
+- **Besluit:** het veld "Reden" en de knop "Opslaan" staan in de zijbalk, buiten het `form`-element van de kaarten, en horen er met het attribuut `form="wedstrijd"` bij.
+  - `MatchFormProvider` houdt de toestand van het formulier (`useActionState`) en deelt hem met drie delen: de foutenlijst, de kaarten en het blok om op te slaan.
+    De pagina zelf blijft een servercomponent en zet `Page.Main` en `Page.Sidebar` om de delen heen.
+  - `Page.Sidebar` heeft een nieuwe eigenschap `sticky`: vanaf 52 rem blijft de zijbalk in beeld terwijl de hoofdkolom scrolt.
+    Een gridelement blijft binnen zijn gridgebied, en dat is zo hoog als de hoofdkolom.
+  - Een `Form` met kaarten erin zet de ruimte van de pagina tussen de kaarten.
+  - Een `FieldGroup` met een teken (het streepje in een stand) houdt zijn sporen bij elkaar aan het begin, zodat de twee velden naast elkaar staan.
+  - "Invoer weghalen" is een eigen formulier in een `Disclosure`, in de zijbalk.
+    Het blok staat open als de reden ontbreekt, ook zonder JavaScript, want dan maakt de server de pagina opnieuw.
+  - De knoppen van een doelpunt zijn die van `InputTable`.
+    De knop "Doelpunt toevoegen" heeft geen `id`, dus de pagina zoekt hem op zijn waarde om hem de focus te geven.
+- **Waarom:** het blok om op te slaan moet naast een lange hoofdkolom in beeld blijven.
+  `Page.Main` en `Page.Sidebar` zijn twee kolommen van de `Page.Body` die geen gemeenschappelijk element hebben.
+  Het attribuut `form` is HTML en werkt zonder JavaScript.
+  De Enter-toets in een veld van de kaarten slaat nog op met de verborgen eerste knop, en de knop in de zijbalk verstuurt hetzelfde formulier.
+- **Nadeel:** de pagina is een client-eiland van drie delen die een provider delen.
+  Een zijbalk die hoger is dan het venster, scrolt zelf; dat is een tweede scrollgebied naast de pagina.
+- **Alternatieven:** het hele formulier om `Page.Body` heen; dat verandert de indeling van de site, die de layout tekent.
+  Het blok om op te slaan twee keer maken, een in de hoofdkolom en een in de zijbalk; dan zijn er twee velden "Reden" met dezelfde naam.
+  Een vaste balk onderaan met JavaScript; dat werkt niet zonder JavaScript en het ontwerp wil geen vaste balk op een telefoon.
+  De seizoenen van de lijst uit de cache van de publieke pagina's halen; een wedstrijd die een minuut geleden is toegevoegd, staat er dan niet, en de redactie moet hem zien.
 
 ## Redactie
 

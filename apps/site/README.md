@@ -691,6 +691,20 @@ Het cookie van het beheer is `Secure`, behalve in de ontwikkelserver (`pnpm --fi
 Daar werkt het beheer lokaal in elke browser, ook in Safari, dat een `Secure`-cookie niet bewaart op `http://localhost`.
 Een gebouwde site (`pnpm build`, acceptatie en productie) zet het cookie altijd met `Secure`.
 
+Het hoofdmenu toont het item Beheer voor wie ingelogd is.
+De publieke pagina's zijn voor elke bezoeker hetzelfde en het cookie van het beheer gaat er nooit heen, dus de server weet daar niet wie ingelogd is.
+Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, onder de sleutel `fansite-beheer`, zoals de themakeuze onder `fansite-theme`:
+
+- `src/app/beheer/layout.tsx` controleert bij elke aanvraag onder `/beheer` de sessie op de server en geeft het antwoord aan `AdminMarker` (`src/AdminMarker.tsx`).
+  Dat zet het teken bij een geldige sessie en haalt het weg bij een ongeldige.
+  De inlogpagina haalt het zelf ook weg, voor een sessie die verloopt terwijl de redacteur in het beheer bladert: de layout wordt dan niet opnieuw gevraagd.
+- `SiteNavigation` leest het teken met `useSyncExternalStore` (`src/admin-marker.ts`), met `false` op de server en bij het hydrateren.
+  De HTML van de server heeft het item dus nooit, en de browser voegt het toe zodra de pagina geladen is.
+  Zonder JavaScript is er geen item.
+- Het teken bevat geen geheim en geen gegevens, en gaat nergens heen.
+  Wie het zelf maakt, ziet een koppeling naar `/beheer` en komt bij de inlogpagina uit.
+- De rooktest controleert dat het HTML van geen enkele publieke pagina naar het beheer verwijst.
+
 - `requireRole` in `src/beheer/require-role.ts` is de ene controle van het beheer.
   Elke pagina, route en serveractie onder `/beheer` roept hem als eerste aan, behalve de pagina's en acties om in te loggen.
   `src/beheer/routes.test.ts` zoekt ze zelf op in de mappen (en elk bestand met `'use server'`, waar ook), en laat zien dat een aanroep zonder sessie naar de inlogpagina gaat.
@@ -763,8 +777,12 @@ De fouten staan in een `ErrorSummary` en bij het veld, en met JavaScript krijgt 
 ### Wedstrijden invullen
 
 `/beheer/wedstrijden` (`src/app/beheer/wedstrijden`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
-De lijst toont de wedstrijden van het lopende seizoen, die zonder uitslag eerst (twee uur na de aftrap, zoals `lacksResult`), met "Aangepast door de redactie" bij een wedstrijd met een invoer.
-De pagina van een wedstrijd (`/beheer/wedstrijden/<nummer>`) heeft het formulier (`MatchForm.tsx`) en, bij een invoer, wat de redactie invulde, wat Wikipedia zei toen het afweek, en een eigen formulier om de invoer weg te halen.
+De lijst is één tabel van de wedstrijden van een seizoen, met de wedstrijd als enige koppeling in een rij, de uitslag en de status in woorden, en een label voor wat de redactie moet zien: "Uitslag ontbreekt", "Aangepast" en "Wikipedia wijkt af".
+Een filter met de aantallen kiest wat de lijst toont: `?tonen=alles`, `?tonen=aangepast` en, zonder zoekopdracht, de wedstrijden zonder uitslag (twee uur na de aftrap, zoals `lacksResult`), met de wedstrijden zonder uitslag eerst bij "Alles".
+Het zijn gewone koppelingen, dus het werkt zonder JavaScript.
+`?seizoen=2025-26` kiest een ouder seizoen, en een seizoen zonder wedstrijden valt terug op het huidige.
+De pagina van een wedstrijd (`/beheer/wedstrijden/<nummer>`) is de brede pagina met een zijbalk: de kaarten van het formulier staan in de hoofdkolom (`MatchFields` in `MatchForm.tsx`) en het blok om op te slaan, de laatste invoer en het uitklapblok "Invoer weghalen" in de zijbalk, die op een brede pagina in beeld blijft.
+De velden van het blok om op te slaan horen bij het formulier met het attribuut `form`, en `MatchFormProvider` deelt de toestand van het formulier met de drie delen.
 Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md); de import is beschreven in de [README van de importer](../importer/README.md).
 
 - Het formulier is een client-component met `useActionState`, en een gewone post die zonder JavaScript werkt.

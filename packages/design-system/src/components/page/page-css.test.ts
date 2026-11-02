@@ -402,3 +402,17 @@ describe('the wide page in page.css', () => {
     expect(58 + 2 + 24).toBe(84)
   })
 })
+
+describe('the sticky sidebar in page.css', () => {
+  const rule = css.match(/\.hf-page-sidebar-sticky \{([^}]*)\}/)?.[1] ?? ''
+
+  it('sticks to the top, from the width where the sidebar stands beside the main column', () => {
+    expect(rule).toContain('position: sticky;')
+    expect(css).toMatch(/@media \(width >= 52rem\) \{\s*\.hf-page-sidebar-sticky/)
+  })
+
+  it('scrolls on its own when it is taller than the window, so every part of it can be reached', () => {
+    expect(rule).toContain('overflow-y: auto;')
+    expect(rule).toMatch(/max-block-size: calc\(100dvh - 2 \* var\(--hf-space-m\)\);/)
+  })
+})

@@ -29,6 +29,7 @@ export type {
   DataTableColumn,
   DataTableProps,
   DataTableRow,
+  DataTableTextColumn,
   DataTableTextRow,
 } from './components/data-table/DataTable'
 export { Disclosure } from './components/disclosure/Disclosure'

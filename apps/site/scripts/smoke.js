@@ -621,9 +621,14 @@ await withEmptyDatabase((database) =>
     const sitemap = await checkSitemap('https://acc.sc.heerenveen.org', { clubs: true })
     const shareImageResponse = await checkShareImage()
 
-    // Every page points to the manifest and the icons, and the site serves them itself.
+    // Every page points to the manifest and the icons, and the site serves them itself. No
+    // public page mentions the admin: the item Beheer in the menu comes from a mark in the
+    // browser (src/admin-marker.ts), so the HTML is the same for every visitor.
     for (const { path } of pages) {
-      checkIconTags(path, await (await fetch(origin + path)).text())
+      const pageHtml = await (await fetch(origin + path)).text()
+
+      checkIconTags(path, pageHtml)
+      assert.doesNotMatch(pageHtml, /\/beheer|Beheer/, `${path} mentions the admin`)
     }
 
     const iconResponses = await checkIcons()

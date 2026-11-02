@@ -161,6 +161,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // The matches are for a beheerder: the list, the notice for a match that is gone, the form of
   // a match with and without a notice, and the addresses that say "niet gevonden".
   { admin: 'beheerder', path: '/beheer/wedstrijden', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden?tonen=alles', status: 200 },
+  { admin: 'beheerder', path: '/beheer/wedstrijden?tonen=aangepast', status: 200 },
+  { admin: 'beheerder', path: `/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=alles`, status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden?fout=weg', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}', status: 200 },
   { admin: 'beheerder', path: '/beheer/wedstrijden/{match}?gedaan=ongewijzigd', status: 200 },

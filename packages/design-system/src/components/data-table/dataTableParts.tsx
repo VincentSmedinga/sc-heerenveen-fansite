@@ -1,4 +1,14 @@
-import type { DataTableCell, DataTableColumn, DataTableRow, DataTableTextRow } from './dataTableTypes'
+import type { ReactNode } from 'react'
+
+import { Fragment } from 'react'
+
+import type {
+  DataTableCell,
+  DataTableColumn,
+  DataTableRow,
+  DataTableTextColumn,
+  DataTableTextRow,
+} from './dataTableTypes'
 
 import { Link } from '../link/Link'
 
@@ -56,23 +66,50 @@ export const TableRows = ({
   </tbody>
 )
 
+const textOfNode = (cell: ReactNode) => (typeof cell === 'number' ? numberFormat.format(cell) : cell)
+
 /**
  * The rows of a table with text: the cells start at the start and can hold any content, and the
- * row header can have a second line of secondary text under it.
+ * row header can have a second line of secondary text under it. The cells of a column that
+ * folds are repeated in a line under the row header, which is only there where the column is
+ * gone.
  */
-export const TextTableRows = ({ rows }: { rows: readonly DataTableTextRow[] }) => (
+export const TextTableRows = ({
+  columns,
+  rows,
+}: {
+  columns: readonly DataTableTextColumn[]
+  rows: readonly DataTableTextRow[]
+}) => (
   <tbody>
-    {rows.map((row) => (
-      <tr key={row.header}>
-        <th scope="row">
-          {row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}
-          {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
-        </th>
-        {row.cells.map((cell, index) => (
-          // The cells have no names, so the position is the only key; the rows do not reorder.
-          <td key={index}>{typeof cell === 'number' ? numberFormat.format(cell) : cell}</td>
-        ))}
-      </tr>
-    ))}
+    {rows.map((row) => {
+      const folded = row.cells.filter((_cell, index) => columns[index + 1]?.fold === true)
+
+      return (
+        <tr key={row.header}>
+          <th scope="row">
+            {row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}
+            {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
+            {folded.length === 0 ? null : (
+              <span className="hf-data-table-secondary hf-data-table-folded">
+                {folded.map((cell, index) => (
+                  // The cells have no names, so the position is the only key.
+                  <Fragment key={index}>
+                    {index === 0 ? null : ' · '}
+                    {textOfNode(cell)}
+                  </Fragment>
+                ))}
+              </span>
+            )}
+          </th>
+          {row.cells.map((cell, index) => (
+            // The cells have no names, so the position is the only key; rows do not reorder.
+            <td className={columns[index + 1]?.fold === true ? 'hf-data-table-fold-column' : undefined} key={index}>
+              {textOfNode(cell)}
+            </td>
+          ))}
+        </tr>
+      )
+    })}
   </tbody>
 )

@@ -37,6 +37,19 @@ export type DataTableRow = {
   href?: string
 }
 
+/** A column of a table with text, given as an object when it can fold. */
+export type DataTableTextColumn = {
+  /**
+   * Lets the column fold where the table has no room: its header and cells are gone then, and
+   * the text of its cells stands under the name of the row, in secondary text, on one line in
+   * the order of the columns. Where the table has room, the column is a column and the line is
+   * gone. Without it, the column is always there.
+   */
+  fold?: boolean
+  /** The header of the column, as plain text. It must be unique. */
+  name: string
+}
+
 export type DataTableTextRow = {
   /**
    * The cells of the row, one for each column after the first. A cell is text, a number or any

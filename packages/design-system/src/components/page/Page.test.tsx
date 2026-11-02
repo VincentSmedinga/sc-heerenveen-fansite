@@ -300,6 +300,17 @@ describe('Page.Sidebar', () => {
     expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
   })
 
+  it('adds a class for the sticky sidebar only with `sticky`, and passes no `sticky` on to the element', () => {
+    const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" sticky />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-sticky extra')
+    expect(screen.getByRole('complementary').hasAttribute('sticky')).toBe(false)
+
+    rerender(<Page.Sidebar aria-label="Zijbalk" sticky={false} />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
+  })
+
   it('adds a class for the narrow sidebar only with `narrow`, and passes no `narrow` on to the element', () => {
     const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" narrow />)
 
