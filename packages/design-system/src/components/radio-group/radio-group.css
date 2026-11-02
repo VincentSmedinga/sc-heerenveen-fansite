@@ -1,0 +1,38 @@
+/*
+ * A group of radio buttons: a fieldset without the border and the padding the base styles
+ * give it, because the group sits in a card that has its own. The legend is the label of the
+ * group and looks like the label of a field, so the group stands level with the fields around
+ * it. The radio buttons are next to each other where they fit, and each is a row as high as a
+ * field (--hf-size-control), so the group lines up with a field next to it and a finger can
+ * hit it. The whole label can be clicked. The space under the group is the space under a
+ * field.
+ */
+
+@layer hf.components {
+  .hf-radio-group {
+    border: 0;
+    margin-block: 0 var(--hf-space-m);
+    min-inline-size: 0;
+    padding: 0;
+
+    > legend {
+      padding: 0;
+    }
+  }
+
+  .hf-radio-group-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--hf-space-l);
+    margin-block-start: var(--hf-space-xs);
+  }
+
+  .hf-radio-group-label {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    font-weight: var(--hf-body-font-weight);
+    min-block-size: var(--hf-size-control);
+    overflow-wrap: anywhere;
+  }
+}

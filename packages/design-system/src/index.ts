@@ -112,6 +112,8 @@ export type { PullIndicatorProps } from './components/pull-to-refresh/PullIndica
 export { PullToRefresh } from './components/pull-to-refresh/PullToRefresh'
 export { RefreshButton } from './components/pull-to-refresh/RefreshButton'
 export type { RefreshButtonProps } from './components/pull-to-refresh/RefreshButton'
+export { RadioGroup } from './components/radio-group/RadioGroup'
+export type { RadioGroupOption, RadioGroupProps } from './components/radio-group/RadioGroup'
 export { Root } from './components/root/Root'
 export type { RootProps } from './components/root/Root'
 export { choosesByKey, SeasonPicker } from './components/season-picker/SeasonPicker'
