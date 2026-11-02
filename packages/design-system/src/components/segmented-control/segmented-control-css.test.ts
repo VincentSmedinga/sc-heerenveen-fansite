@@ -30,18 +30,47 @@ const role = (name: string) => {
   return { dark: scale(dark ?? ''), light: scale(light ?? '') }
 }
 
+type Rgb = [number, number, number]
+
 const channel = (value: number) =>
   value / 255 <= 0.04045 ? value / 255 / 12.92 : ((value / 255 + 0.055) / 1.055) ** 2.4
-const luminance = (hex: string) => {
+const rgb = (hex: string): Rgb => {
   const n = Number.parseInt(hex.slice(1), 16)
 
-  return 0.2126 * channel(n >> 16) + 0.7152 * channel((n >> 8) & 255) + 0.0722 * channel(n & 255)
+  return [n >> 16, (n >> 8) & 255, n & 255]
 }
-const contrast = (a: string, b: string) => {
+const luminance = ([r, g, b]: Rgb) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+const contrast = (a: Rgb, b: Rgb) => {
   const [high = 0, low = 0] = [luminance(a), luminance(b)].sort((x, y) => y - x)
 
   return (high + 0.05) / (low + 0.05)
 }
+
+// The track is a tint of one scale colour, in light and in dark:
+// color-mix(in srgb, <colour> n%, transparent).
+const tint = Object.fromEntries(
+  ['light', 'dark'].map((theme, index) => {
+    const mixes = [
+      ...(colour
+        .match(/--hf-colour-background-track: light-dark\(([^;]*)\);/s)?.[1]
+        ?.matchAll(/color-mix\(in srgb, var\(--hf-colour-([a-z0-9-]+)\) (\d+)%, transparent\)/g) ?? []),
+    ]
+    const [, name = '', percentage = '0'] = mixes[index] ?? []
+
+    return [theme, { colour: rgb(scale(name)), share: Number(percentage) / 100 }]
+  }),
+) as Record<'dark' | 'light', { colour: Rgb; share: number }>
+
+// What the track comes to over a surface: the tint laid over the surface, channel by channel.
+const overTrack = (theme: 'dark' | 'light', surface: Rgb): Rgb => {
+  const { colour: tinted, share } = tint[theme]
+
+  return surface.map((value, index) => (tinted[index] ?? 0) * share + value * (1 - share)) as Rgb
+}
+
+// Everything a switch can lie on: the page, the surface and the soft, strong and warm surfaces.
+const surfaces = ['page', 'surface', 'surface-soft', 'surface-strong', 'surface-warm'] as const
+const surface = (theme: 'dark' | 'light', name: (typeof surfaces)[number]) => rgb(role(`background-${name}`)[theme])
 
 describe('the thumb of the segmented control', () => {
   it('takes its fill, its border and its shadow from colour roles, never from a scale', () => {
@@ -52,29 +81,45 @@ describe('the thumb of the segmented control', () => {
     expect(css).not.toMatch(/var\(--hf-colour-(?:blue|grey|steel|sand)-/)
   })
 
-  it.each(['light', 'dark'] as const)(
-    'has a border that reaches 3:1 against the track and the thumb in %s',
-    (theme) => {
-      const border = role('border-input')[theme]
-      const track = role('background-track')[theme]
-      const fill = role('background-thumb')[theme]
-
-      expect(contrast(border, track)).toBeGreaterThanOrEqual(3)
-      expect(contrast(border, fill)).toBeGreaterThanOrEqual(3)
-    },
-  )
-
-  it.each(['light', 'dark'] as const)('has labels that reach 4.5:1 on the track and on the thumb in %s', (theme) => {
-    expect(contrast(role('text-secondary')[theme], role('background-track')[theme])).toBeGreaterThanOrEqual(4.5)
-    expect(contrast(role('text-default')[theme], role('background-thumb')[theme])).toBeGreaterThanOrEqual(4.5)
+  it.each(['light', 'dark'] as const)('has a track that is a see-through tint, in %s', (theme) => {
+    expect(colour).toMatch(
+      /--hf-colour-background-track: light-dark\(\s*color-mix\(in srgb, var\(--hf-colour-[a-z0-9-]+\) \d+%, transparent\),\s*color-mix\(in srgb, var\(--hf-colour-[a-z0-9-]+\) \d+%, transparent\)\s*\);/,
+    )
+    expect(tint[theme].share).toBeGreaterThan(0)
+    expect(tint[theme].share).toBeLessThan(1)
   })
 
-  it('has the fallback colours for a browser without light-dark(), the same as the light ones', () => {
-    for (const name of ['background-track', 'background-thumb']) {
-      const fallback = colour.match(new RegExp(`      --hf-colour-${name}: var\\(--hf-colour-([a-z0-9-]+)\\);`))?.[1]
+  it.each(['light', 'dark'] as const)('has a border that reaches 3:1 against the thumb in %s', (theme) => {
+    expect(contrast(rgb(role('border-input')[theme]), rgb(role('background-thumb')[theme]))).toBeGreaterThanOrEqual(3)
+  })
 
-      expect(scale(fallback ?? ''), name).toBe(role(name).light)
-    }
+  describe.each(['light', 'dark'] as const)('in %s', (theme) => {
+    it.each(surfaces)('has a border that reaches 3:1 against the track on %s', (name) => {
+      const track = overTrack(theme, surface(theme, name))
+
+      expect(contrast(rgb(role('border-input')[theme]), track)).toBeGreaterThanOrEqual(3)
+    })
+
+    it.each(surfaces)('has labels that reach 4.5:1 on the track on %s, and on the thumb', (name) => {
+      const track = overTrack(theme, surface(theme, name))
+
+      expect(contrast(rgb(role('text-secondary')[theme]), track)).toBeGreaterThanOrEqual(4.5)
+      expect(contrast(rgb(role('text-default')[theme]), rgb(role('background-thumb')[theme]))).toBeGreaterThanOrEqual(
+        4.5,
+      )
+    })
+
+    it.each(surfaces)('has a track that stays 1.1:1 away from %s, so it reads as a groove', (name) => {
+      expect(contrast(overTrack(theme, surface(theme, name)), surface(theme, name))).toBeGreaterThanOrEqual(1.1)
+    })
+  })
+
+  it('has the old solid colours for a browser without light-dark() or color-mix(), where the track is grey-200 and the thumb white', () => {
+    const fallback = (name: string) =>
+      scale(colour.match(new RegExp(`      --hf-colour-${name}: var\\(--hf-colour-([a-z0-9-]+)\\);`))?.[1] ?? '')
+
+    expect(fallback('background-track')).toBe(scale('grey-200'))
+    expect(fallback('background-thumb')).toBe(role('background-thumb').light)
   })
 
   it('slides with a transition on translate that takes its time and curve from the motion tokens', () => {

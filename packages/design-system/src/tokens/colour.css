@@ -23,6 +23,7 @@
 
     /* Scales: the primitive tokens */
     --hf-colour-white: #fff;
+    --hf-colour-black: #000;
     --hf-colour-blue-50: #eff6ff;
     --hf-colour-blue-100: #dcebfe;
     --hf-colour-blue-200: #bbd7f8;
@@ -116,13 +117,23 @@
 
     /*
      * The track of a segmented control and the thumb under the chosen option. The track is a
-     * step darker than the page and the surfaces in light (grey-200) and a step lighter than
-     * them in dark (blue-800), so it reads as a groove. The thumb is white in light and
-     * blue-700 in dark. Its border is the border of a field (--hf-colour-border-input), which
-     * reaches 3:1 against the track and against the thumb itself in both themes. The shadow is
-     * a light edge below the thumb.
+     * see-through tint made with color-mix(), so it takes the colour of what it lies on and
+     * fits the page and every surface. It is black in light, a shade of the surface, and white
+     * in dark, a tint of it, so it keeps the hue of the surface and never turns grey on blue.
+     * It is no step of a scale, and what it comes to differs per surface. It is 6% in light
+     * and 10% in dark, chosen by eye as a groove that is clearly there on every surface. The
+     * border of the thumb (3:1) caps it at about 6% in light and 12% in dark, and the letters
+     * of the other options (4.5:1) at about 7% in light. It stays at least 1.1:1 away from the
+     * page and from each surface. The thumb is white in light and blue-700 in dark. Its border
+     * is the border of a field (--hf-colour-border-input), which reaches 3:1 against the thumb
+     * itself in both themes and against the track on every surface. The shadow is a light edge
+     * below the thumb. A browser without light-dark() or color-mix() gets the solid track from
+     * the @supports block below.
      */
-    --hf-colour-background-track: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-800));
+    --hf-colour-background-track: light-dark(
+      color-mix(in srgb, var(--hf-colour-black) 6%, transparent),
+      color-mix(in srgb, var(--hf-colour-white) 10%, transparent)
+    );
     --hf-colour-background-thumb: light-dark(var(--hf-colour-white), var(--hf-colour-blue-700));
     --hf-colour-shadow-thumb: light-dark(
       color-mix(in srgb, var(--hf-colour-grey-900) 22%, transparent),
