@@ -31,11 +31,16 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/nieuws?pagina=99999', status: 404 },
   { path: '/nieuws?pagina=0', status: 404 },
   { path: '/wedstrijden', status: 200 },
+  // The card Stand over the latest five matches, and the value that falls back to the whole
+  // season.
+  { path: '/wedstrijden?stand=laatste-5', status: 200 },
+  { path: '/wedstrijden?stand=onzin', status: 200 },
   // The matches of an earlier season (made up, see earlier-season.ts), the route behind the
   // season picker, which sends the visitor on, and the addresses that say "niet gevonden": a
   // season in the future and an address that is no season. The route and the address of the
   // current season end on /wedstrijden, which answers 200.
   { path: `/wedstrijden/${earlierSeasonSlug()}`, status: 200 },
+  { path: `/wedstrijden/${earlierSeasonSlug()}?stand=laatste-5`, status: 200 },
   { path: `/wedstrijden/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
   { path: '/wedstrijden/kies?seizoen=onzin', status: 200 },
   { path: '/wedstrijden/kies', status: 200 },

@@ -1,8 +1,8 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { matches, standings, wikipediaPages } from '@fansite/db/schema'
-import { madeUpMatches, madeUpTable } from '@fansite/db/seed'
+import { leagueResults, matches, standings, wikipediaPages } from '@fansite/db/schema'
+import { madeUpLeagueResults, madeUpMatches, madeUpTable } from '@fansite/db/seed'
 import { seedStaff } from '@fansite/db/staff-seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -34,6 +34,7 @@ beforeEach(async () => {
   vi.setSystemTime(now)
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM standings')
+  await database.pool.query('DELETE FROM league_results')
   await database.pool.query('DELETE FROM wikipedia_pages')
   await database.pool.query('DELETE FROM staff')
   await seedStaff(database.db)
@@ -41,6 +42,8 @@ beforeEach(async () => {
   await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(earlier).slice(0, 3)))
   await database.db.insert(standings).values(madeUpTable(now))
   await database.db.insert(standings).values(madeUpTable(earlier).slice(0, 4))
+  await database.db.insert(leagueResults).values(madeUpLeagueResults(now))
+  await database.db.insert(leagueResults).values(madeUpLeagueResults(earlier).slice(0, 2))
   await database.db.insert(wikipediaPages).values([
     { kind: 'standings', readAt: now, season: '2026/27', title: 'Eredivisie 2026/27' },
     { kind: 'standings', readAt: earlier, season: '2025/26', title: 'Eredivisie 2025/26' },
@@ -50,6 +53,33 @@ beforeEach(async () => {
 
 afterEach(() => {
   vi.useRealTimers()
+})
+
+describe('getLeagueResults', () => {
+  it('gives the results of the season it is asked for and of no other', async () => {
+    const { getLeagueResults } = await import('./matches')
+
+    expect(await getLeagueResults('2026/27')).toHaveLength(madeUpLeagueResults(now).length)
+    expect(await getLeagueResults('2025/26')).toHaveLength(2)
+    expect(await getLeagueResults('2010/11')).toEqual([])
+  })
+
+  it('keeps the current season for five minutes and an earlier season for an hour', async () => {
+    const { getLeagueResults } = await import('./matches')
+    const first = await getLeagueResults('2026/27')
+    const firstEarlier = await getLeagueResults('2025/26')
+
+    vi.setSystemTime(new Date(now.getTime() + 4 * 60 * 1000))
+    expect(await getLeagueResults('2026/27')).toBe(first)
+    expect(await getLeagueResults('2025/26')).toBe(firstEarlier)
+
+    vi.setSystemTime(new Date(now.getTime() + 6 * 60 * 1000))
+    expect(await getLeagueResults('2026/27')).not.toBe(first)
+    expect(await getLeagueResults('2025/26')).toBe(firstEarlier)
+
+    vi.setSystemTime(new Date(now.getTime() + 61 * 60 * 1000))
+    expect(await getLeagueResults('2025/26')).not.toBe(firstEarlier)
+  })
 })
 
 describe('getMatchData', () => {
