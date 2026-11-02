@@ -14,10 +14,11 @@ const meta = preview.meta({
 })
 
 // The same card twice. The ids differ, so the labels of the two fields stay tied to their own
-// field.
+// field, and the card is a `div`: the two sections around the cards are the landmarks, and two
+// cards with the same heading would be two landmarks with the same name.
 const Sample = ({ id }: { id: string }) => (
-  <Card aria-labelledby={`${id}-kop`}>
-    <Heading appearance={3} id={`${id}-kop`} level={2}>
+  <Card as="div">
+    <Heading appearance={3} level={2}>
       Artikel nakijken
     </Heading>
     <Text>De redactie leest elk artikel na voordat het verschijnt.</Text>

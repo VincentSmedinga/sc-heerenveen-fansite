@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { Card, DataTable, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
+import { compact } from '../../../beheer/density'
 import { requireRole } from '../../../beheer/require-role'
 import { days, shortDays, topLength, visitNumbers } from '../../../beheer/visits'
 import { getDatabase } from '../../../database'
@@ -34,6 +35,7 @@ export default async function VisitPage() {
 
   return (
     <Page.Main
+      className={compact}
       intro={
         <>
           <Heading level={1}>Bezoek</Heading>

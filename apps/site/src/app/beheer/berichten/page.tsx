@@ -18,6 +18,7 @@ import {
   Text,
 } from '@fansite/design-system'
 
+import { compact } from '../../../beheer/density'
 import { findItem, listItems, listLength, parseItemId, parseSearch, searchMaxLength } from '../../../beheer/items'
 import { requireRole } from '../../../beheer/require-role'
 import { getDatabase } from '../../../database'
@@ -78,6 +79,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
 
   return (
     <Page.Main
+      className={compact}
       intro={
         <>
           <Heading level={1}>Berichten</Heading>

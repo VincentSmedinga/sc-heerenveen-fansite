@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { adminRoles } from '@fansite/db/schema'
 import { Button, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
+import { compact } from '../../beheer/density'
 import { countWaitingDifferences } from '../../beheer/match-entries'
 import { requireRole } from '../../beheer/require-role'
 import { getDatabase } from '../../database'
@@ -19,7 +20,7 @@ export default async function AdminPage() {
   const waiting = role === 'beheerder' ? await countWaitingDifferences(getDatabase().db) : 0
 
   return (
-    <Page.Main>
+    <Page.Main className={compact}>
       <Page.Cell>
         <Heading level={1}>Beheer</Heading>
         <Text>Je bent ingelogd als {email}.</Text>

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Heading, Link, Page, Text } from '@fansite/design-system'
 
 import { emptyValues } from '../../../../beheer/article-fields'
+import { compact } from '../../../../beheer/density'
 import { requireRole } from '../../../../beheer/require-role'
 import { submitNewArticle } from '../actions'
 import { ArticleForm } from '../ArticleForm'
@@ -21,6 +22,7 @@ export default async function NewArticlePage() {
 
   return (
     <Page.Main
+      className={compact}
       intro={
         <>
           <Heading level={1}>Nieuw artikel</Heading>

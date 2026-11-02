@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { Button, Form, Heading, Link, Page, Text } from '@fansite/design-system'
 
+import { compact } from '../../../../beheer/density'
 import { loginLinkWorks } from '../../../../beheer/sessions'
 import { getDatabase } from '../../../../database'
 import { logIn } from '../actions'
@@ -21,7 +22,7 @@ export default async function ConfirmPage({
   const works = typeof token === 'string' && (await loginLinkWorks(getDatabase().db, token))
 
   return (
-    <Page.Main>
+    <Page.Main className={compact}>
       <Page.Cell>
         {works ? (
           <>

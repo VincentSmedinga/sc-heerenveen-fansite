@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Button, ErrorSummary, Field, Form, Heading, Input, Page, Text } from '@fansite/design-system'
 import { redirect } from 'next/navigation'
 
+import { compact } from '../../../beheer/density'
 import { sessionToken } from '../../../beheer/require-role'
 import { findSession } from '../../../beheer/sessions'
 import { getDatabase } from '../../../database'
@@ -43,7 +44,7 @@ export default async function LoginPage({
   const notice = fout === 'ongeldig' ? undefined : message
 
   return (
-    <Page.Main>
+    <Page.Main className={compact}>
       <Page.Cell>
         <Heading level={1}>Inloggen voor beheer</Heading>
         <Text appearance="intro">

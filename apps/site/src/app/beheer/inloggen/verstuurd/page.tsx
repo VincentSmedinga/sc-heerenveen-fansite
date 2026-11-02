@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 
 import { Heading, Link, Page, Text } from '@fansite/design-system'
 
+import { compact } from '../../../../beheer/density'
+
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Kijk in je mail' }
@@ -9,7 +11,7 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 // What every request for a login link leads to, whether the address has an account or not.
 export default function SentPage() {
   return (
-    <Page.Main>
+    <Page.Main className={compact}>
       <Page.Cell>
         <Heading level={1}>Kijk in je mail</Heading>
         <Text appearance="intro">Als dit adres een account heeft, hebben we een link gemaild.</Text>

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 
 import { listVersions } from '../../../../beheer/article-versions'
 import { findArticle } from '../../../../beheer/articles'
+import { compact } from '../../../../beheer/density'
 import { parseItemId } from '../../../../beheer/items'
 import { requireRole } from '../../../../beheer/require-role'
 import { getDatabase } from '../../../../database'
@@ -49,6 +50,7 @@ export default async function ArticlePage({ params, searchParams }: Props) {
 
   return (
     <Page.Main
+      className={compact}
       intro={
         <>
           <Heading level={1}>Artikel bewerken</Heading>

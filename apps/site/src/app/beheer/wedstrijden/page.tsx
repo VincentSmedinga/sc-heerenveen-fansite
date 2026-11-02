@@ -4,6 +4,7 @@ import { describeEntryKickoff, describeEntryResult } from '@fansite/db/match-edi
 import { seasonOf } from '@fansite/db/season'
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
+import { compact } from '../../../beheer/density'
 import { listAdminMatches } from '../../../beheer/match-entries'
 import { requireRole } from '../../../beheer/require-role'
 import { getDatabase } from '../../../database'
@@ -30,6 +31,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 
   return (
     <Page.Main
+      className={compact}
       intro={
         <>
           <Heading level={1}>Wedstrijden</Heading>

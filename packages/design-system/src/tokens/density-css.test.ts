@@ -117,6 +117,12 @@ describe('the components and the density', () => {
     }
   })
 
+  it('does not know where the density is used', () => {
+    for (const file of all.filter((file) => /\.(css|tsx?|mdx)$/.test(file) && !file.startsWith('tokens/density'))) {
+      expect(read(file), file).not.toContain('/beheer')
+    }
+  })
+
   it('writes no size of letters of its own, only a token, inherit or a size relative to the text around it', () => {
     let seen = 0
 

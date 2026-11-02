@@ -5,6 +5,7 @@ import { markedParts } from '@fansite/db/match-edits'
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { compact } from '../../../../beheer/density'
 import { parseItemId } from '../../../../beheer/items'
 import { findMatch } from '../../../../beheer/match-entries'
 import { goalKinds, statusChoices, valuesOf } from '../../../../beheer/match-form'
@@ -70,6 +71,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
   const title = `${match.round} (${match.competition}): ${clubs}`
   return (
     <Page.Main
+      className={compact}
       intro={
         <>
           <Heading level={1}>Wedstrijd invullen</Heading>
