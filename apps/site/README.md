@@ -172,6 +172,22 @@ Dat geldt voor elk `.tsx`-bestand in `src`, behalve tests.
 `pnpm lint` faalt op een HTML-element, zoals `<p>` of `<li>`.
 De header, met het logo, de themaknop en het hoofdmenu, en de footer staan in `src/app/layout.tsx`, dus elke pagina heeft ze.
 
+## Imports
+
+Een bestand in `src` noem je met het voorvoegsel `#src/`, zodra het pad twee of meer mappen omhoog zou gaan: `#src/archive` in plaats van `../../archive`.
+Een bestand in dezelfde map (`./page`) of in de map erboven (`../matches-page`) schrijf je zoals je gewend bent.
+Dit geldt in `src` en in `e2e`, niet in `apps/importer` en de pakketten.
+`pnpm lint` faalt op een nieuwe import van `../../`, ook in `vi.mock`.
+Het voorvoegsel staat in `package.json` (`imports`, voor Node en Vitest) en in `tsconfig.json` (`paths`, voor TypeScript), en `docs/beslissingen.md` zegt waarom.
+
+Een bestand dat Node zelf laadt, zoals `src/icon-sets.ts` voor de scripts in `scripts`, schrijft de extensie erbij: `#src/icon-sets.ts`.
+Een branch met oude imports zet je om met het script:
+
+```sh
+node scripts/use-import-prefix.js
+git diff --name-only -- src e2e | xargs pnpm exec eslint --fix
+```
+
 ## Het hoofdmenu en de balk van Nieuws
 
 Het hoofdmenu (`src/SiteNavigation.tsx`) heeft vier onderdelen: Nieuws (`/nieuws`), Wedstrijden, Statistieken en Forum (extern).

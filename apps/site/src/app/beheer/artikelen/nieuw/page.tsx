@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 
 import { Heading, Link, Page, Text } from '@fansite/design-system'
 
-import { emptyValues } from '../../../../beheer/article-fields'
-import { compact } from '../../../../beheer/density'
-import { requireRole } from '../../../../beheer/require-role'
+import { emptyValues } from '#src/beheer/article-fields'
+import { compact } from '#src/beheer/density'
+import { requireRole } from '#src/beheer/require-role'
+
 import { submitNewArticle } from '../actions'
 import { ArticleForm } from '../ArticleForm'
 import { FormatHelp } from '../FormatHelp'

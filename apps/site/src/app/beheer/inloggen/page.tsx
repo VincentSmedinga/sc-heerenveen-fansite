@@ -3,11 +3,12 @@ import type { Metadata } from 'next'
 import { Button, ErrorSummary, Field, Form, Heading, Input, Page, Text } from '@fansite/design-system'
 import { redirect } from 'next/navigation'
 
-import { AdminMarker } from '../../../AdminMarker'
-import { compact } from '../../../beheer/density'
-import { sessionToken } from '../../../beheer/require-role'
-import { findSession } from '../../../beheer/sessions'
-import { getDatabase } from '../../../database'
+import { AdminMarker } from '#src/AdminMarker'
+import { compact } from '#src/beheer/density'
+import { sessionToken } from '#src/beheer/require-role'
+import { findSession } from '#src/beheer/sessions'
+import { getDatabase } from '#src/database'
+
 import { requestLoginLink } from './actions'
 
 // Render on each request: somebody who is logged in already goes on to the admin.

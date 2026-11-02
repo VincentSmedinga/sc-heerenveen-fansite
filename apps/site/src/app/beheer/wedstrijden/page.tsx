@@ -16,14 +16,15 @@ import {
   Text,
 } from '@fansite/design-system'
 
-import type { AdminMatchRow } from '../../../beheer/match-entries'
+import type { AdminMatchRow } from '#src/beheer/match-entries'
 
-import { compact } from '../../../beheer/density'
-import { listAdminMatches } from '../../../beheer/match-entries'
-import { requireRole } from '../../../beheer/require-role'
-import { getDatabase } from '../../../database'
-import { describeShowDelay } from '../../../matches'
-import { seasonChoices, seasonFromSlug, seasonSlug } from '../../../seasons'
+import { compact } from '#src/beheer/density'
+import { listAdminMatches } from '#src/beheer/match-entries'
+import { requireRole } from '#src/beheer/require-role'
+import { getDatabase } from '#src/database'
+import { describeShowDelay } from '#src/matches'
+import { seasonChoices, seasonFromSlug, seasonSlug } from '#src/seasons'
+
 import { listPath, matchesPath, matchPath } from './paths'
 
 // Render on each request: who is logged in and which matches have an entry are not known when

@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 import { Card, DataTable, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
-import { compact } from '../../../beheer/density'
-import { requireRole } from '../../../beheer/require-role'
-import { days, shortDays, topLength, visitNumbers } from '../../../beheer/visits'
-import { getDatabase } from '../../../database'
+import { compact } from '#src/beheer/density'
+import { requireRole } from '#src/beheer/require-role'
+import { days, shortDays, topLength, visitNumbers } from '#src/beheer/visits'
+import { getDatabase } from '#src/database'
 
 // Render on each request: who is logged in and what the counters say are not known when the
 // site is built.

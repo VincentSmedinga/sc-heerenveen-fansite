@@ -5,6 +5,9 @@
   "description": "De site van de sc Heerenveen Fansite, met het beheer erbij.",
   "license": "EUPL-1.2",
   "type": "module",
+  "imports": {
+    "#src/*": "./src/*"
+  },
   "scripts": {
     "admin": "node --env-file-if-exists=../../.env src/admin.ts",
     "assemble": "node scripts/assemble.js",

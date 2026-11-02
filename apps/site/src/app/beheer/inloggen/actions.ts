@@ -4,12 +4,12 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { after } from 'next/server'
 
-import { handleLoginRequest } from '../../../beheer/login'
-import { sendLoginMail } from '../../../beheer/login-mail'
-import { sessionCookieName, sessionCookieOptions } from '../../../beheer/require-role'
-import { redeemLoginLink } from '../../../beheer/sessions'
-import { getDatabase } from '../../../database'
-import { originOf } from '../../../env'
+import { handleLoginRequest } from '#src/beheer/login'
+import { sendLoginMail } from '#src/beheer/login-mail'
+import { sessionCookieName, sessionCookieOptions } from '#src/beheer/require-role'
+import { redeemLoginLink } from '#src/beheer/sessions'
+import { getDatabase } from '#src/database'
+import { originOf } from '#src/env'
 
 // The only two actions of the admin that a visitor without a session may call.
 // require-role.test.ts names this file as the exception; every other action under /beheer

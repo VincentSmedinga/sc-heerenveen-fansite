@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
-import { matchesPath, type SearchParams, seasonOfAddress } from '../../../season-page'
+import { matchesPath, type SearchParams, seasonOfAddress } from '#src/season-page'
+
 import { matchesMetadata, MatchesPage } from '../matches-page'
 
 // Render on each request, so the build never reads the database. getMatchData caches the data

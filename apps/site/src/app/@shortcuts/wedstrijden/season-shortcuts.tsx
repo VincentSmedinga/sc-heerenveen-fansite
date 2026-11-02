@@ -1,8 +1,8 @@
 import { seasonOf } from '@fansite/db/season'
 import { Page } from '@fansite/design-system'
 
-import { getMatchData, getMatchSeasons } from '../../../matches'
-import { matchShortcutsOf } from '../../../matchShortcuts'
+import { getMatchData, getMatchSeasons } from '#src/matches'
+import { matchShortcutsOf } from '#src/matchShortcuts'
 
 /**
  * The bar of the page of a season: a link to each card the page has, in the order of a narrow

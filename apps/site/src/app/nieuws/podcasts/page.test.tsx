@@ -3,13 +3,14 @@ import type { PublicEpisode, PublicPodcast } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { PodcastPage as Content } from '../../../podcasts'
+import type { PodcastPage as Content } from '#src/podcasts'
 
-import { getPodcastPage } from '../../../podcasts'
-import { withoutIcons } from '../../../without-icons'
+import { getPodcastPage } from '#src/podcasts'
+import { withoutIcons } from '#src/without-icons'
+
 import PodcastsPage, { generateMetadata } from './page'
 
-vi.mock('../../../podcasts', () => ({ getPodcastPage: vi.fn() }))
+vi.mock('#src/podcasts', () => ({ getPodcastPage: vi.fn() }))
 
 // The moment of now is the afternoon of Friday 23 October 2026 in the Netherlands.
 const now = new Date('2026-10-23T13:40:00Z')

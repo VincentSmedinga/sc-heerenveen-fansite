@@ -5,10 +5,11 @@ import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createAccount, revokeAccount } from '../../../beheer/accounts'
-import { emptyValues } from '../../../beheer/article-fields'
-import { sessionCookieName } from '../../../beheer/require-role'
-import { startSession } from '../../../beheer/sessions'
+import { createAccount, revokeAccount } from '#src/beheer/accounts'
+import { emptyValues } from '#src/beheer/article-fields'
+import { sessionCookieName } from '#src/beheer/require-role'
+import { startSession } from '#src/beheer/sessions'
+
 import { submitArticle, submitNewArticle, submitWithdraw } from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
@@ -34,7 +35,7 @@ vi.mock('next/navigation', () => ({
     throw new Redirect(url)
   },
 }))
-vi.mock('../../../database', () => ({ getDatabase: () => database }))
+vi.mock('#src/database', () => ({ getDatabase: () => database }))
 
 let database: TestDatabase
 let userId: number

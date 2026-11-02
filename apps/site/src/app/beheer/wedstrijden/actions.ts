@@ -2,12 +2,13 @@
 
 import { redirect } from 'next/navigation'
 
-import { parseItemId, parseReason } from '../../../beheer/items'
-import { decideDifference, findDifference, findMatch, saveEntry, undoEntry } from '../../../beheer/match-entries'
-import { addGoalId, goalFieldId, isUntouchedGoal, type MatchFormState, padGoals } from '../../../beheer/match-fields'
-import { newGoal, readButton, readValues, validate } from '../../../beheer/match-form'
-import { requireRole } from '../../../beheer/require-role'
-import { getDatabase } from '../../../database'
+import { parseItemId, parseReason } from '#src/beheer/items'
+import { decideDifference, findDifference, findMatch, saveEntry, undoEntry } from '#src/beheer/match-entries'
+import { addGoalId, goalFieldId, isUntouchedGoal, type MatchFormState, padGoals } from '#src/beheer/match-fields'
+import { newGoal, readButton, readValues, validate } from '#src/beheer/match-form'
+import { requireRole } from '#src/beheer/require-role'
+import { getDatabase } from '#src/database'
+
 import { matchesPath, matchPath } from './paths'
 
 // The actions of the matches. Only a beheerder fills in a match, as with the articles. The

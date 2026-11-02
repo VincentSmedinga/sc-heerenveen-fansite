@@ -4,11 +4,11 @@ import { seasonOf } from '@fansite/db/season'
 import { Card, Heading, Link, Page, SeasonPicker, StandingsTable, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { reviewBranch } from '../../env'
-import { reasonOf } from '../../errors'
-import { lastFiveOf } from '../../last-five'
-import { getLeagueResults, type MatchData, overviewOf, resultsOfSeason } from '../../matches'
-import { coachesCardOf, standingsCardOf } from '../../matchShortcuts'
+import { reviewBranch } from '#src/env'
+import { reasonOf } from '#src/errors'
+import { lastFiveOf } from '#src/last-five'
+import { getLeagueResults, type MatchData, overviewOf, resultsOfSeason } from '#src/matches'
+import { coachesCardOf, standingsCardOf } from '#src/matchShortcuts'
 import {
   CoachesCard,
   imageCredit,
@@ -17,14 +17,14 @@ import {
   SourceCredit,
   StandingsBehind,
   standingsCaption,
-} from '../../MatchViews'
-import { pageMetadata, seasonPageMetadata } from '../../metadata'
-import { loadSeasonPage, matchesPath, pickerPathOf, type SearchParams, statisticsPath } from '../../season-page'
-import { seasonAddress, seasonChoices, seasonSlug } from '../../seasons'
-import { ServerError, serverErrorTitle } from '../../ServerError'
-import { parseStandingsView, standingsViewParam } from '../../standings-view'
-import { StandingsSwitch } from '../../StandingsSwitch'
-import { withBranch } from '../../title'
+} from '#src/MatchViews'
+import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { loadSeasonPage, matchesPath, pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
+import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
+import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { parseStandingsView, standingsViewParam } from '#src/standings-view'
+import { StandingsSwitch } from '#src/StandingsSwitch'
+import { withBranch } from '#src/title'
 
 /** The route that sends the season picker on to its season (app/wedstrijden/kies). */
 export const pickerPath = pickerPathOf(matchesPath)

@@ -3,12 +3,12 @@ import type { Metadata } from 'next'
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
-import { email } from '../../contact'
-import { reasonOf } from '../../errors'
-import { pageMetadata } from '../../metadata'
-import { groupByKind, kindAnchors, websiteOf } from '../../register'
-import { ServerError, serverErrorTitle } from '../../ServerError'
-import { getSources } from '../../sources'
+import { email } from '#src/contact'
+import { reasonOf } from '#src/errors'
+import { pageMetadata } from '#src/metadata'
+import { groupByKind, kindAnchors, websiteOf } from '#src/register'
+import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { getSources } from '#src/sources'
 
 // Render on each request, so the build never reads the database. getSources caches the list
 // itself.

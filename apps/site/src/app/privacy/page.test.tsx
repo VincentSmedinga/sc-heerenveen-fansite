@@ -1,7 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { headingAnchors, withoutHeadingLinks, withoutIcons } from '../../without-icons'
+import { headingAnchors, withoutHeadingLinks, withoutIcons } from '#src/without-icons'
+
 import PrivacyPage, { generateMetadata } from './page'
 
 const html = renderToStaticMarkup(<PrivacyPage />)

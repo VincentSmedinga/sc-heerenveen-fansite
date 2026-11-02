@@ -16,11 +16,12 @@ import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createAccount } from '../../../beheer/accounts'
-import { type MatchFormState } from '../../../beheer/match-fields'
-import { emptyFields, emptyGoal } from '../../../beheer/match-fields'
-import { sessionCookieName } from '../../../beheer/require-role'
-import { startSession } from '../../../beheer/sessions'
+import { createAccount } from '#src/beheer/accounts'
+import { type MatchFormState } from '#src/beheer/match-fields'
+import { emptyFields, emptyGoal } from '#src/beheer/match-fields'
+import { sessionCookieName } from '#src/beheer/require-role'
+import { startSession } from '#src/beheer/sessions'
+
 import { submitConflict, submitMatch, submitRemoveEntry } from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
@@ -46,7 +47,7 @@ vi.mock('next/navigation', () => ({
     throw new Redirect(url)
   },
 }))
-vi.mock('../../../database', () => ({ getDatabase: () => database }))
+vi.mock('#src/database', () => ({ getDatabase: () => database }))
 
 let database: TestDatabase
 let userId: number

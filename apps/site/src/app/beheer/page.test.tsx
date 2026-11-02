@@ -15,10 +15,10 @@ const { countWaitingDifferences, findSession, loginLinkWorks, requireRole, sessi
   sessionToken: vi.fn(),
 }))
 
-vi.mock('../../database', () => ({ getDatabase: () => ({ db: {} }) }))
-vi.mock('../../beheer/match-entries', () => ({ countWaitingDifferences }))
-vi.mock('../../beheer/require-role', () => ({ requireRole, sessionToken }))
-vi.mock('../../beheer/sessions', () => ({ findSession, loginLinkWorks }))
+vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
+vi.mock('#src/beheer/match-entries', () => ({ countWaitingDifferences }))
+vi.mock('#src/beheer/require-role', () => ({ requireRole, sessionToken }))
+vi.mock('#src/beheer/sessions', () => ({ findSession, loginLinkWorks }))
 vi.mock('next/navigation', () => ({
   redirect: (url: string) => {
     throw new Error(`redirect to ${url}`)

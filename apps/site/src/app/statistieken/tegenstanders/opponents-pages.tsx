@@ -4,14 +4,14 @@ import { Heading, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
-import type { SearchParams } from '../../../season-page'
+import type { SearchParams } from '#src/season-page'
 
-import { competitionQuery, parseCompetition } from '../../../competition'
-import { CompetitionLinks } from '../../../CompetitionSwitch'
-import { reviewBranch } from '../../../env'
-import { reasonOf } from '../../../errors'
-import { getEditedMatches, getMatchSeasons } from '../../../matches'
-import { pageMetadata, seasonPageMetadata } from '../../../metadata'
+import { competitionQuery, parseCompetition } from '#src/competition'
+import { CompetitionLinks } from '#src/CompetitionSwitch'
+import { reviewBranch } from '#src/env'
+import { reasonOf } from '#src/errors'
+import { getEditedMatches, getMatchSeasons } from '#src/matches'
+import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import {
   earlierNames,
   getClubPage,
@@ -22,10 +22,10 @@ import {
   seasonsOf,
   stadiumsOf,
   summaryOf,
-} from '../../../opponents'
-import { ClubMeetingsCard, ClubsCard, ClubSummaryCard, OpponentsCredit, StadiumsCard } from '../../../OpponentViews'
-import { ServerError, serverErrorTitle } from '../../../ServerError'
-import { withBranch } from '../../../title'
+} from '#src/opponents'
+import { ClubMeetingsCard, ClubsCard, ClubSummaryCard, OpponentsCredit, StadiumsCard } from '#src/OpponentViews'
+import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { withBranch } from '#src/title'
 
 /**
  * What the two pages of the opponents read, or that it went wrong. A page that throws gets an

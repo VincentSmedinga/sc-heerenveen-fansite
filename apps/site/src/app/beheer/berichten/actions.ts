@@ -3,9 +3,10 @@
 import { adminRoles } from '@fansite/db/schema'
 import { redirect } from 'next/navigation'
 
-import { hideItem, parseItemId, parseReason, parseSearch, showItem } from '../../../beheer/items'
-import { requireRole } from '../../../beheer/require-role'
-import { getDatabase } from '../../../database'
+import { hideItem, parseItemId, parseReason, parseSearch, showItem } from '#src/beheer/items'
+import { requireRole } from '#src/beheer/require-role'
+import { getDatabase } from '#src/database'
+
 import { itemsPath, type ListView } from './paths'
 
 // The actions of the list of items. The page binds the number of the item and what the list

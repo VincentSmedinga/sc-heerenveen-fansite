@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import type { SearchParams } from '../../../../season-page'
+import type { SearchParams } from '#src/season-page'
 
 import { clubMetadata, ClubPage } from '../opponents-pages'
 

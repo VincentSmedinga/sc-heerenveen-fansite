@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 
-import { AdminMarker } from '../../AdminMarker'
-import { sessionToken } from '../../beheer/require-role'
-import { findSession } from '../../beheer/sessions'
-import { getDatabase } from '../../database'
+import { AdminMarker } from '#src/AdminMarker'
+import { sessionToken } from '#src/beheer/require-role'
+import { findSession } from '#src/beheer/sessions'
+import { getDatabase } from '#src/database'
 
 // Render on each request: who is logged in is not known when the site is built.
 export const dynamic = 'force-dynamic'

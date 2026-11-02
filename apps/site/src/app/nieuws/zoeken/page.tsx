@@ -3,12 +3,12 @@ import type { Metadata } from 'next'
 import { Heading, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
-import { reviewBranch } from '../../../env'
-import { reasonOf } from '../../../errors'
-import { getSquad, parseResultCount, parseSearch, searchHref, searchSite, type Squad } from '../../../search'
-import { SearchCard, SquadCard } from '../../../SearchViews'
-import { ServerError, serverErrorTitle } from '../../../ServerError'
-import { withBranch } from '../../../title'
+import { reviewBranch } from '#src/env'
+import { reasonOf } from '#src/errors'
+import { getSquad, parseResultCount, parseSearch, searchHref, searchSite, type Squad } from '#src/search'
+import { SearchCard, SquadCard } from '#src/SearchViews'
+import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { withBranch } from '#src/title'
 
 type SearchParams = Record<string, string | string[] | undefined>
 

@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getReleases } from '../../../releases'
+import { getReleases } from '#src/releases'
+
 import { GET } from './route'
 
-vi.mock('../../../releases', () => ({ getReleases: vi.fn() }))
+vi.mock('#src/releases', () => ({ getReleases: vi.fn() }))
 
 beforeEach(() => {
   vi.mocked(getReleases).mockReturnValue([{ date: '2026-10-21', sentences: ['De eerste versie.'], version: '0.1.0' }])

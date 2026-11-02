@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 
 import { Button, Form, Heading, Link, Page, Text } from '@fansite/design-system'
 
-import { compact } from '../../../../beheer/density'
-import { loginLinkWorks } from '../../../../beheer/sessions'
-import { getDatabase } from '../../../../database'
+import { compact } from '#src/beheer/density'
+import { loginLinkWorks } from '#src/beheer/sessions'
+import { getDatabase } from '#src/database'
+
 import { logIn } from '../actions'
 
 export const dynamic = 'force-dynamic'

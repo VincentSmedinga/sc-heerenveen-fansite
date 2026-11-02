@@ -3,9 +3,9 @@ import type { Metadata } from 'next'
 import { Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
-import { pageMetadata } from '../../metadata'
-import { getReleases } from '../../releases'
-import { anchorOf, dateOf, feedPath, oldAnchorOf, updatesPath, updatesTitle } from '../../updates'
+import { pageMetadata } from '#src/metadata'
+import { getReleases } from '#src/releases'
+import { anchorOf, dateOf, feedPath, oldAnchorOf, updatesPath, updatesTitle } from '#src/updates'
 
 // Render on each request: the canonical URL and the Open Graph address come from SITE_ENV,
 // which the build doesn't know. The versions are still those in the build (see releases.ts).

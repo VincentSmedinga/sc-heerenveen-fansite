@@ -4,10 +4,11 @@ import { adminRoles } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { Button, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
-import { compact } from '../../beheer/density'
-import { countWaitingDifferences } from '../../beheer/match-entries'
-import { requireRole } from '../../beheer/require-role'
-import { getDatabase } from '../../database'
+import { compact } from '#src/beheer/density'
+import { countWaitingDifferences } from '#src/beheer/match-entries'
+import { requireRole } from '#src/beheer/require-role'
+import { getDatabase } from '#src/database'
+
 import { logOut } from './actions'
 import { listPath, matchesPath } from './wedstrijden/paths'
 

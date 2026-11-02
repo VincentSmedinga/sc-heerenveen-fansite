@@ -1,12 +1,13 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '../../../../matches'
-import { matchShortcutsOf } from '../../../../matchShortcuts'
-import { matchData } from '../../../../test-matches'
+import { getMatchData, getMatchSeasons } from '#src/matches'
+import { matchShortcutsOf } from '#src/matchShortcuts'
+import { matchData } from '#src/test-matches'
+
 import SeasonMatchesShortcuts from './page'
 
-vi.mock('../../../../matches', async (importOriginal) => ({
+vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),

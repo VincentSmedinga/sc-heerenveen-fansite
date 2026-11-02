@@ -7,15 +7,16 @@ import { createTestDatabase } from '@fansite/db/test-database'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createAccount } from '../../../beheer/accounts'
-import { saveEntry } from '../../../beheer/match-entries'
+import { createAccount } from '#src/beheer/accounts'
+import { saveEntry } from '#src/beheer/match-entries'
+
 import MatchPage, { metadata as matchMetadata } from './[id]/page'
 import MatchesPage, { metadata as listMetadata } from './page'
 
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
 
-vi.mock('../../../database', () => ({ getDatabase: () => database }))
-vi.mock('../../../beheer/require-role', () => ({ requireRole }))
+vi.mock('#src/database', () => ({ getDatabase: () => database }))
+vi.mock('#src/beheer/require-role', () => ({ requireRole }))
 vi.mock('next/navigation', () => ({
   notFound: () => {
     throw new Error('not found')

@@ -1,6 +1,6 @@
 import { articleLimits } from '@fansite/db/schema'
 
-import { bodyMaxLength } from '../../../beheer/article-form'
+import { bodyMaxLength } from '#src/beheer/article-form'
 
 /**
  * How long each field may be, as the hints of the form say it. The text has its limit as a

@@ -3,14 +3,15 @@ import type { PublicPlayer, PublicSearchHit } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { Squad } from '../../../search'
+import type { Squad } from '#src/search'
 
-import { getSquad, searchSite } from '../../../search'
-import { withoutIcons } from '../../../without-icons'
+import { getSquad, searchSite } from '#src/search'
+import { withoutIcons } from '#src/without-icons'
+
 import SearchPage, { generateMetadata } from './page'
 
 // Only the two queries are replaced: the checks of the search and the groups are the real ones.
-vi.mock('../../../search', async (importOriginal) => ({
+vi.mock('#src/search', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getSquad: vi.fn(),
   searchSite: vi.fn(),

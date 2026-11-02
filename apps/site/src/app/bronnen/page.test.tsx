@@ -4,11 +4,12 @@ import { realSources } from '@fansite/db/seed'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getSources } from '../../sources'
-import { headingAnchors, withoutHeadingLinks, withoutIcons } from '../../without-icons'
+import { getSources } from '#src/sources'
+import { headingAnchors, withoutHeadingLinks, withoutIcons } from '#src/without-icons'
+
 import SourcesPage, { generateMetadata } from './page'
 
-vi.mock('../../sources', () => ({ getSources: vi.fn() }))
+vi.mock('#src/sources', () => ({ getSources: vi.fn() }))
 
 const sources: PublicSource[] = [
   { description: 'Een podcast.', domain: 'testpodcast.test', kind: 'podcast', name: 'Testpodcast' },

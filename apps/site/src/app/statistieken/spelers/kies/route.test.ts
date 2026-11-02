@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchSeasons } from '../../../../matches'
+import { getMatchSeasons } from '#src/matches'
+
 import { GET } from './route'
 
-vi.mock('../../../../matches', () => ({ getMatchSeasons: vi.fn() }))
+vi.mock('#src/matches', () => ({ getMatchSeasons: vi.fn() }))
 
 // The afternoon of Friday 23 October 2026, in the season 2026/27.
 const now = new Date('2026-10-23T13:40:00Z')

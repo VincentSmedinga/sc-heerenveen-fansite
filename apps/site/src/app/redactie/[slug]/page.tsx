@@ -4,14 +4,14 @@ import { Article, Page } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
-import { getArticle } from '../../../articles'
-import { ArticleText } from '../../../ArticleText'
-import { reviewBranch } from '../../../env'
-import { reasonOf } from '../../../errors'
-import { articleMetadata } from '../../../metadata'
-import { dayOf, formatArticleDate } from '../../../news'
-import { ServerError, serverErrorTitle } from '../../../ServerError'
-import { withBranch } from '../../../title'
+import { getArticle } from '#src/articles'
+import { ArticleText } from '#src/ArticleText'
+import { reviewBranch } from '#src/env'
+import { reasonOf } from '#src/errors'
+import { articleMetadata } from '#src/metadata'
+import { dayOf, formatArticleDate } from '#src/news'
+import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { withBranch } from '#src/title'
 
 // Render on each request, so the build never reads the database, and a withdrawn article is
 // gone at once. The canonical URL and the Open Graph address come from SITE_ENV too.

@@ -15,7 +15,7 @@ import {
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
-import { getArchivePage } from '../../archive'
+import { getArchivePage } from '#src/archive'
 import {
   archiveHeading,
   archiveHref,
@@ -23,14 +23,14 @@ import {
   archiveTitle,
   parseArchiveQuery,
   type SearchParams,
-} from '../../archive-query'
-import { reviewBranch } from '../../env'
-import { reasonOf } from '../../errors'
-import { pageMetadata } from '../../metadata'
-import { dateTimeOf, formatNewsTime } from '../../news'
-import { EditorsCard, EpisodesCard, loadArticle, loadEpisodes } from '../../NewsCards'
-import { ServerError, serverErrorTitle } from '../../ServerError'
-import { withBranch } from '../../title'
+} from '#src/archive-query'
+import { reviewBranch } from '#src/env'
+import { reasonOf } from '#src/errors'
+import { pageMetadata } from '#src/metadata'
+import { dateTimeOf, formatNewsTime } from '#src/news'
+import { EditorsCard, EpisodesCard, loadArticle, loadEpisodes } from '#src/NewsCards'
+import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { withBranch } from '#src/title'
 
 // Render on each request, so the build never reads the database. getArchivePage caches the
 // lists itself.
