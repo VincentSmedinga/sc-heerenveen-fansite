@@ -92,7 +92,7 @@ const knownFalsePositives: Case[] = [
    * Made up (verzonnen). The owner said "not relevant", but "wint" is a football word on
    * purpose: a club headline we miss is worse than a headline a moderator hides (see the
    * decision "Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden" in
-   * `docs/beslissingen.md`).
+   * `docs/beslissingen/importer.md`).
    */
   ['Man wint loterij in Heerenveen', 'relevant'],
 ]

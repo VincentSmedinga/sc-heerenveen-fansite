@@ -569,7 +569,7 @@ Zo kan niemand nagaan wie een account heeft.
 
 ## Bezoekers tellen
 
-De site telt per dag de paginaweergaven per pagina en het aantal unieke bezoekers (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in [`beslissingen.md`](beslissingen.md)).
+De site telt per dag de paginaweergaven per pagina en het aantal unieke bezoekers (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in [`beslissingen/redactie.md`](beslissingen/redactie.md)).
 Hij zet er geen cookie voor en laadt er geen script voor.
 Het IP-adres en de browsertekst staan nergens, ook niet in het logboek van de app.
 
@@ -608,7 +608,7 @@ De eerste deploy, op 21 oktober 2026, en de eerste run van de importer, op 23 ok
   Node laadt op de host één bestand van Next.js via het pad van de link, en zoekt de pakketten naast Next.js dan op de verkeerde plek.
   Lokaal en in CI gebeurt dat niet, dus de rooktest zag het niet.
   Waarom Node dat op de host doet, is niet uitgezocht.
-  `assemble` maakt daarom een platte `node_modules` van echte mappen (zie `docs/beslissingen.md`).
+  `assemble` maakt daarom een platte `node_modules` van echte mappen (zie `docs/beslissingen/hosting-en-data.md`).
 - Een bestand in `public_html` gaat voor de app.
   De plaatsvervangende pagina `index.html` verborg daarom de site op `/`, tot we hem verwijderden.
 

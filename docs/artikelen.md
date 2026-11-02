@@ -84,7 +84,7 @@ Voor een artikel betekent het:
 - **Schrijf in eigen woorden.**
   Neem geen alinea's over van een ander.
   Een korte zin tussen aanhalingstekens kan, met de naam van de bron erbij.
-  Een kop van een ander citeer je zoals hij is gepubliceerd, ook met SC Heerenveen met hoofdletters (zie _sc Heerenveen met kleine letters_ in `beslissingen.md`).
+  Een kop van een ander citeer je zoals hij is gepubliceerd, ook met SC Heerenveen met hoofdletters (zie _sc Heerenveen met kleine letters_ in `beslissingen/redactie.md`).
 - **Eigen tekst schrijft de club als sc Heerenveen**, met een kleine s en c, ook aan het begin van een zin.
 - **Alles komt van onze server** (principe 3).
   Een link naar een andere site mag, want die volgt de lezer pas na een klik.
@@ -172,7 +172,7 @@ Lokaal werkt `docker compose exec mariadb mariadb fansite`, en dan eerst `SET NA
 
 ### 1. Zoek het nummer van je account
 
-Het artikel hoort bij een account van het beheer (zie _Inloggen voor het beheer met een link per e-mail, zonder wachtwoord_ en _Accounts voor het beheer maken we met een opdracht op de host_ in `beslissingen.md`).
+Het artikel hoort bij een account van het beheer (zie _Inloggen voor het beheer met een link per e-mail, zonder wachtwoord_ en _Accounts voor het beheer maken we met een opdracht op de host_ in `beslissingen/site.md`).
 Zoek het nummer op:
 
 ```sql

@@ -84,12 +84,12 @@ Wat elk component doet, staat in de hoofdstukken Componenten en Patronen van Sto
   Elk component heeft in zijn map een eigen CSS-bestand (`heading/heading.css`), stories, een pagina in Storybook en tests met Vitest en Testing Library.
 - **Taal:** code en commentaar in Brits Engels (`colour`, `initialise`); alles wat bezoekers en lezers van Storybook zien in het Nederlands.
 
-De keuzes en hun redenen staan in [`docs/beslissingen.md`](../../docs/beslissingen.md).
+De keuzes en hun redenen staan in [`docs/beslissingen/designsysteem.md`](../../docs/beslissingen/designsysteem.md).
 
 ## Een pagina in Storybook
 
 De pagina van een component is kort: een titel, een alinea, het voorbeeld met controls en de stories die nodig zijn.
-Wat de code en [`docs/beslissingen.md`](../../docs/beslissingen.md) al zeggen, staat er niet nog eens.
+Wat de code en [`docs/beslissingen/designsysteem.md`](../../docs/beslissingen/designsysteem.md) al zeggen, staat er niet nog eens.
 
 - **Tekst:** één alinea over waarom het component er is en wanneer je het kiest.
   Geen regels over marges, maten of afstanden, en geen waarden in rem, pixels of breakpoints: die horen in de code.

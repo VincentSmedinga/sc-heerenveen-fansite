@@ -24,7 +24,7 @@ The ones Builders break most:
 
 1. `gh issue view $ARGUMENTS` (or `gh api repos/VincentSmedinga/sc-heerenveen-fansite/issues/$ARGUMENTS`).
    No acceptance criteria, open questions or no line "Goedgekeurd door de projecteigenaar op …": stop and say so.
-   Read the "Beslissingen" in the issue, the parts of `docs/beslissingen.md` that touch it, and the issues it mentions.
+   Read the "Beslissingen" in the issue, the file in `docs/beslissingen/` of the section it touches, and the issues it mentions.
 2. Rename a `claude/` branch before the first commit, without asking: `git branch -m <type>/<issue>-<description>` (see _Afspraken_ in `CONTRIBUTING.md`).
    Or make a worktree from `origin/main` as `AGENTS.md` says.
    Run `pnpm install`, and copy `.env.example` to `.env` if the code reads variables.
@@ -37,7 +37,7 @@ The ones Builders break most:
   Something else you notice goes to the Coordinator as a note, not in the branch.
 - A scope change from the owner in your session ("do it this way instead"): tell the Coordinator, so the issue gets an "Aangevuld" line before the review.
 - Tests for new behaviour, a story for anything visible (the theme switch shows light and dark), a new page in `apps/site/e2e/pages.spec.ts`.
-- The decisions from the issue and your own go in `docs/beslissingen.md`, in the fixed format.
+- The decisions from the issue and your own go at the end of the file of their section in `docs/beslissingen/`, in the fixed format.
   Read each older decision you touch, and add a **Later:** line where it no longer holds.
 - Commit.
   The hooks fix the formatting and check the message (Conventional Commits, British English, imperative).

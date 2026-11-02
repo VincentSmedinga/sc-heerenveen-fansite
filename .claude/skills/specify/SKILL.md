@@ -31,7 +31,7 @@ So:
   If GraphQL isn't available, use `gh api repos/VincentSmedinga/sc-heerenveen-fansite/issues/<number>` and `.../issues/<number>/comments`.
 - The issues it mentions, and whether they are done.
   Waiting on an open issue is an open question.
-- `AGENTS.md`, `CONTRIBUTING.md`, the parts of `docs/beslissingen.md` that touch the issue, and the code and Storybook chapters it touches.
+- `AGENTS.md`, `CONTRIBUTING.md`, the file in `docs/beslissingen/` of the section the issue touches, and the code and Storybook chapters it touches.
   Find out what already exists, so the criteria don't ask for it again or contradict a decision.
 
 ## 2. Ask the open questions
@@ -79,9 +79,9 @@ If one is no, go back to the step it needs.
 
 ## 7. Record the decisions
 
-- Write each decision from the conversation in the issue, under the heading "Beslissingen", in the format of `docs/beslissingen.md`: date, decision, why and the alternatives.
-  The Builder adds them to `docs/beslissingen.md` in the pull request.
-- A decision that belongs to no single issue, such as one about the way of working, gets its own small pull request to `docs/beslissingen.md`, with the owner's go-ahead.
+- Write each decision from the conversation in the issue, under the heading "Beslissingen", in the format of `docs/beslissingen/`: date, decision, why and the alternatives.
+  The Builder adds them to the file of their section in `docs/beslissingen/` in the pull request.
+- A decision that belongs to no single issue, such as one about the way of working, gets its own small pull request to the file of its section in `docs/beslissingen/`, with the owner's go-ahead.
 
 Finish with a short summary for the owner: the link to the issue, the Definition of Ready, the decisions, and whether a Builder can start.
 

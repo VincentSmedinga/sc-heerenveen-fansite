@@ -21,8 +21,8 @@ AI agents write most of the code; the project owner directs.
   `apps/importer` is the importer: the fetcher, the RSS and Atom adapter, and the import command that cron runs on acceptance, with a lock, a run log and feed health.
   `apps/design-system-mcp` is the public MCP server of the design system, at `https://ds.heerenveen.org/mcp`.
 - The site will run on shared web hosting at mijn.host, so there is no preview per pull request.
-- [`docs/beslissingen.md`](docs/beslissingen.md) records what we decided and why.
-  Read the parts that touch your issue.
+- [`docs/beslissingen/`](docs/beslissingen/) records what we decided and why, in a file for each section; `index.md` lists them.
+  Read the file of the section that touches your issue, not the whole folder: `designsysteem.md` for `packages/design-system`, `hosting-en-data.md` for `packages/db`, `packages/shared` and `apps/design-system-mcp`, `site.md` for `apps/site`, `importer.md` for `apps/importer`, and `redactie.md` for what visitors read and see.
 - The editorial principles are in the Redactie chapter of Storybook: by default only the headline, the link and the source name; intros and photos only with permission; no requests to third parties; always credit the source.
 
 Keep it light.
@@ -119,7 +119,7 @@ The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
 - Has at most two Builders building at a time, each with its own issue (see _Limits_), and reads the usage before it starts a wave.
 - Keeps the Action List true: a private page (an Artifact with its own database, the address is in memory) with what waits for the owner in priority order, what is being built and what is queued.
   It changes a row with one small write when something happens, so status stays out of the chat; the chat is for decisions and questions.
-- Gets the decisions of a specification into the issue (a Specifier writes them there; the Coordinator does it only for an issue it writes itself), so the Builder adds them to `docs/beslissingen.md`.
+- Gets the decisions of a specification into the issue (a Specifier writes them there; the Coordinator does it only for an issue it writes itself), so the Builder adds them to the file of their section in `docs/beslissingen/`.
   A decision that belongs to no issue gets its own small pull request.
 - At each release, writes what is new for visitors, in Dutch, from `CHANGELOG.md` and the release pull request.
   They are short lines, not full sentences: _Nederlands schrijven_ in `CONTRIBUTING.md` applies to the words, not to the sentence length.
@@ -161,7 +161,7 @@ The skills in `.claude/skills/` hold the order of the steps: `builder-workflow` 
 The rules stay in this file and in `CONTRIBUTING.md`; a skill points to them and adds the steps that were missed before.
 
 - Writes the code, with tests, and stories for anything visible.
-- Adds the decisions from the issue, and its own, to `docs/beslissingen.md`.
+- Adds the decisions from the issue, and its own, to the file of its section in `docs/beslissingen/`.
 - Works quietly and cheaply (see _Working efficiently_): checks in the foreground, each run once, no background monitors, no turn that only waits, and one message when the owner or the Coordinator has to decide something.
 - Runs the checks, commits on its own branch, and opens a pull request once the owner agrees.
 - Puts one to three screenshots in the description of a pull request that changes what visitors see, or says that nobody sees the change (see _Screenshots_).
@@ -198,7 +198,7 @@ The Reviewer:
 
 ## Models
 
-Each role has a default model (the reasons are in `docs/beslissingen.md`, under _Een model per rol_):
+Each role has a default model (the reasons are in `docs/beslissingen/werkwijze.md`, under _Een model per rol_):
 
 - **Coordinator:** a stronger model than the Builders (Opus or Fable), in a fresh session at about 300,000 tokens of context (see _Limits_).
 - **Builder:** Sonnet.
@@ -236,7 +236,7 @@ A pull request is done when:
 
 - CI passes;
 - the Reviewer has checked all three checklists, with evidence, and its report says so (or the pull request has no Reviewer, see _Reviews_);
-- the decisions it makes are in `docs/beslissingen.md`.
+- the decisions it makes are in the file of their section in `docs/beslissingen/`.
 
 ## Reviews
 
@@ -276,7 +276,7 @@ So they run one at a time, over all worktrees: the scripts take a slot first (`s
 Don't work around it, and don't kill the process that holds the slot.
 A slot that is held for more than 30 minutes, or whose process has gone, is taken over.
 The other checks are capped too, so they can run next to a heavy one: `pnpm test` runs at most two packages at a time with two test processes each, Playwright uses two, and the commit hook runs two tasks at a time.
-The decision is in `docs/beslissingen.md`, under _De zware controles delen de machine_.
+The decision is in `docs/beslissingen/werkwijze.md`, under _De zware controles delen de machine_.
 
 - The Builder runs the heavy checks before it asks for the go-ahead, once, after the last commit.
 - The Reviewer doesn't run them again when CI has: it runs lint, typecheck and the tests of the packages the change touches, and reads the rest from CI.
@@ -289,7 +289,7 @@ The decision is in `docs/beslissingen.md`, under _De zware controles delen de ma
 A pull request that changes what visitors see shows it in its description, so the owner and the Reviewer see the change at a glance.
 They are one to three images, not a gallery.
 The Builder makes them right after the owner agrees to open the pull request.
-The decisions are in `docs/beslissingen.md`, under _Screenshots staan op een eigen branch, niet in de repository_ and the three decisions after it.
+The decisions are in `docs/beslissingen/werkwijze.md`, under _Screenshots staan op een eigen branch, niet in de repository_ and the three decisions after it.
 
 - **What:** light, on a phone (390 pixels wide) and on a small desktop (900 pixels wide), at one device pixel per CSS pixel.
   Take only the widths that show the change.
@@ -392,7 +392,7 @@ The first run that needs the database makes it and runs the migrations (`pnpm de
 - If a port of your block is busy, the command stops and names the port and the worktree.
   It never picks another port.
 - Never drop or empty another worktree's database, and never stop another worktree's servers.
-- `packages/db/README.md` has the details and the decision is in `docs/beslissingen.md`.
+- `packages/db/README.md` has the details and the decision is in `docs/beslissingen/werkwijze.md`.
 
 ## The review folder
 
@@ -453,7 +453,7 @@ Each point is an action, not a reminder.
   Update every hit, or know why it stays.
 - **Smoke test:** if the change alters the markup or text of a page, or a line in the log, run the smoke test as `CONTRIBUTING.md` says under _De controles_.
   `pnpm test` doesn't run it, and CI does.
-- **Decisions:** the decisions from the issue and your own are in `docs/beslissingen.md`, in the fixed format, with the date of the decision.
+- **Decisions:** the decisions from the issue and your own are in the file of their section in `docs/beslissingen/`, in the fixed format, with the date of the decision.
   Read each older decision that your change touches.
   Where it says something the code no longer does, add a **Later:** line.
 - **Claims:** check the file names, test names, numbers and words like "every" or "always" in the documentation, comments, stories and release notes you wrote against the code.

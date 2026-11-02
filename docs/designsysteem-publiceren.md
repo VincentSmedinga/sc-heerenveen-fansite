@@ -4,7 +4,7 @@ Storybook, het designsysteem met zijn documentatie, staat op <https://ds.heerenv
 Het is een eigen website op de gedeelde hosting van mijn.host, naast het forum en de acceptatieomgeving.
 Op hetzelfde adres staat de MCP-server van het designsysteem, op <https://ds.heerenveen.org/mcp>: openbaar en alleen-lezen, voor agents in andere repositories.
 Dit bestand zegt hoe dat werkt, wat de eigenaar eenmalig zelf instelt, en hoe je controleert dat het klopt.
-De keuzes erachter staan in [`beslissingen.md`](beslissingen.md), onder _Storybook staat op ds.heerenveen.org_ en _De MCP-server van het designsysteem staat op ds.heerenveen.org/mcp_.
+De keuzes erachter staan in [`beslissingen/hosting-en-data.md`](beslissingen/hosting-en-data.md), onder _Storybook staat op ds.heerenveen.org_ en _De MCP-server van het designsysteem staat op ds.heerenveen.org/mcp_.
 
 ## Zo werkt het
 

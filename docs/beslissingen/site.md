@@ -1,0 +1,2050 @@
+# Site
+
+## Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de sjablonen in `apps/site` (de layouts, de pagina's en de pagina voor een onbekend adres) bevatten geen HTML-elementen, alleen componenten uit het designsysteem.
+  Een ESLint-regel bewaakt dat.
+- **Waarom:** de opmaak en de toegankelijkheid zitten dan op één plek.
+  Een pagina kan niet om het designsysteem heen, en een kop, een link of een lijst is overal gelijk en wordt alleen daar gecontroleerd.
+- **Alternatieven:** HTML in de sjablonen, met de CSS-klassen van het designsysteem.
+  Dat is vrijer, maar elke pagina kan dan eigen opmaak en eigen toegankelijkheidsfouten maken.
+
+## De ESLint-regel herkent HTML aan de kleine letter
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de regel `no-restricted-syntax` van ESLint zelf meldt elk JSX-element waarvan de naam met een kleine letter begint, zoals `<main>` of `<li>`.
+  In JSX is dat een HTML- of SVG-element.
+  Een component begint met een hoofdletter, ook met een punt erin, zoals `List.Item`.
+  De regel geldt voor alle `.tsx`-bestanden in `apps/site/src`, behalve tests.
+  `templates.test.js` controleert dat hij werkt.
+- **Waarom:** het is één regel in `eslint.config.js`, zonder nieuwe dependency.
+  Omdat hij voor de hele site geldt en niet alleen voor de sjablonen, kan een pagina haar HTML niet naar een eigen component verplaatsen.
+- **Alternatieven:** `react/forbid-elements` uit `eslint-plugin-react`.
+  Dat is een nieuwe dependency, en je moet elk element zelf opsommen.
+  Of een eigen ESLint-plugin; dat is meer code voor hetzelfde.
+  Of de regel alleen voor `layout.tsx`, `page.tsx` en `not-found.tsx`; dan kan HTML in een ander bestand toch.
+
+## Een Content Security Policy die derden blokkeert, zonder nonces
+
+- **Datum:** 21 oktober 2026
+- **Besluit:** de CSP stelt `default-src 'self'` in, met dezelfde grens voor de andere soorten verzoeken.
+  Inline scripts en stijlen blijven toegestaan voor Next.js.
+- **Hoe:** `apps/site/src/proxy.ts` zet de header, net als `X-Robots-Tag`.
+  De proxy draait voor elk verzoek, dus ook een statisch bestand en de 404 krijgen hem.
+  Hij noemt `script-src`, `style-src`, `img-src`, `font-src`, `connect-src`, `frame-src` en `form-action` apart, en `base-uri 'self'`, zodat een ingespoten `base` de adressen niet naar een ander domein kan sturen.
+  Alleen `next dev` krijgt ook `'unsafe-eval'`, voor het herladen van code tijdens het werk.
+  De rooktest controleert de header op elk soort antwoord, en dat de gebouwde pagina's niets van een ander domein laden.
+- **Waarom:** het doel is dat een pagina niets van een ander domein laadt (principe 3 van de Redactie).
+  Een CSP met nonces maakt elke pagina per verzoek anders, dus niets is nog te cachen, en dat kost snelheid op de gedeelde hosting en botst met de gecachete homepage (#73).
+- **Alternatieven:** nonces vanaf het begin.
+  Dat is strenger tegen ingespoten scripts.
+  We bewaren het voor de beheerpagina's, waar inloggen het de moeite waard maakt (#30).
+  Voor de plek: `headers()` in `next.config.ts`; maar de headers staan nu al in de proxy, en zo blijven ze op één plek.
+- **Later:** zie _De CSP laat afbeeldingen van het type `data:` toe_ (28 oktober 2026): `img-src` is nu `'self' data:`.
+  De rest van de lijst blijft zoals hij was.
+
+## De lijst met bronnen staat een uur in het geheugen van de server
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de server maakt `/bronnen` bij elk bezoek opnieuw, maar vraagt de bronnen hoogstens één keer per uur aan de database.
+  `cacheFor` in `apps/site/src/cache.ts` bewaart de lijst een uur in het geheugen van het serverproces.
+  Daarna haalt het eerstvolgende bezoek hem opnieuw op.
+  Een query die mislukt, bewaart het niet.
+- **Waarom:** een wijziging in het register staat zo altijd binnen een uur op de pagina, ook na een rustige periode.
+  De build leest de database niet, dus hij heeft geen database nodig en bevat geen testbronnen uit CI.
+  De pagina opmaken kost weinig; de query is wat we besparen.
+- **Let op:** draait de host meer processen, dan heeft elk proces een eigen lijst en doet elk hoogstens één query per uur.
+- **Alternatieven:** `unstable_cache` van Next.js.
+  Next.js 16 vervangt die door `'use cache'`.
+  Hij geeft na het uur eerst nog de oude lijst en haalt de nieuwe op de achtergrond, dus na een rustige periode ziet de eerste bezoeker een lijst die ouder is dan een uur.
+  Of `'use cache'` met Cache Components.
+  Dat verandert hoe Next.js elke pagina maakt: de lijst komt dan bij het bouwen in de pagina, of in een Suspense-grens die zonder JavaScript verborgen blijft.
+  Of ISR met `revalidate = 3600` op de pagina; dan leest de build de database en komen de bronnen van CI in de build.
+
+## Het hoofdmenu leest het pad in een clientcomponent
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `SiteNavigation` is een clientcomponent die met `usePathname` de huidige pagina markeert, met `aria-current="page"`.
+  De layout zet het menu in de header van elke pagina.
+- **Waarom:** in Next.js krijgt een layout het pad niet, en de header hoort in de layout, zodat elke pagina hem heeft.
+  De server zet de markering al in de HTML.
+- **Alternatieven:** de header in elke pagina, met de huidige pagina als prop; dan herhaalt elke pagina de header.
+  Of het pad lezen uit de headers van het verzoek; dan maakt de server elke pagina per bezoek, ook de homepage.
+  Of de huidige pagina niet markeren.
+- **Later:** zie _Het hoofdmenu kiest het onderdeel en de subpagina uit het pad_ (31 oktober 2026): `SiteNavigation` markeert nu ook een subpagina in de balk, en een onderdeel is ook huidig op de pagina's eronder.
+
+## Het hoofdmenu kiest het onderdeel en de subpagina uit het pad
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** `currentOf` in `SiteNavigation.tsx` kiest uit het pad het huidige onderdeel en de huidige subpagina.
+  Een subpagina is huidig op precies haar eigen pad: `/nieuws/podcasts`, `/nieuws` en `/nieuws/zoeken`.
+  Nieuws is het huidige onderdeel op die paden, op `/` en op elk artikel van de redactie (`/redactie/<naam>`), en Wedstrijden op `/wedstrijden` en elk pad eronder, zoals een seizoen.
+  Op `/` en op een artikel is Nieuws zelf `aria-current="page"` en is er geen huidige subpagina; op een subpagina is die `aria-current="page"` en Nieuws `aria-current="true"`.
+  Een ander pad, zoals `/bronnen` of een pad dat niet bestaat, heeft geen huidig onderdeel en geen balk.
+- **Waarom:** de balk laat zien waar je bent binnen Nieuws, dus een artikel hoort bij Nieuws en een seizoen bij Wedstrijden.
+  Een lijst van paden voor Nieuws laat een adres dat niet bestaat, zoals `/nieuws/bestaat-niet`, zonder markering, in plaats van dat het onder Nieuws valt.
+  Onder `/wedstrijden` bestaat alleen wat bij de pagina hoort, dus daar telt elk pad.
+- **Nadeel:** op een artikel van de redactie wijst `aria-current="page"` op een link naar `/`, terwijl het artikel een andere pagina is.
+  `Navigation` toont de balk alleen bij een onderdeel dat huidig is of een huidige subpagina heeft, en heeft geen tussenvorm voor "hier, maar niet precies hier".
+- **Alternatieven:** elk pad dat met `/nieuws/` begint onder Nieuws laten vallen (korter, maar een adres dat niet bestaat staat dan onder Nieuws).
+  Op een artikel geen balk en Nieuws niet huidig (dan weet de bezoeker niet waar hij is).
+  Een eigenschap op `Navigation` voor "in dit onderdeel" met `aria-current="true"` (juister, maar een wijziging in het designsysteem voor één pagina).
+
+## Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** het hoofdmenu toont Nieuws (de homepage), Onze bronnen en Forum, halfvet.
+  De huidige pagina staat in de lichtste kleur van de header, met een rode streep van 3 pixels eronder.
+  De andere onderdelen staan in de lichtblauwe kleur van de header, zonder onderstreping, en worden onderstreept onder de muis.
+- **Waarom:** met Nieuws in het menu heeft ook de homepage een onderdeel dat de huidige pagina aanwijst.
+  De streep wijst de huidige pagina aan met een vorm, niet alleen met een kleur.
+  Over ons hoort bij de site, niet bij de inhoud, en blijft in de footer.
+  Wedstrijden en Podcasts komen in het menu met hun eigen pagina's.
+- **Hoe:** de opmaak van de header geldt voor de links van een `Navigation` die in een `Page.Header` staat, via `navigation.css`.
+  Het menu in de footer heeft er geen last van en blijft zoals het was: de huidige pagina is vetter, met een dikkere onderstreping.
+  De streep is de onderstreping van de link, zonder afbreking bij letters met een staart, en een nieuw token geeft hem zijn kleur: `--hf-colour-accent-on-header`, rood-400 in licht en donker.
+  Rood-400 haalt 5,34:1 op de header in licht en 4,20:1 in donker, en nodig is 3:1 (WCAG 1.4.11).
+  Het palet verandert niet.
+  Het contrast staat bij Tokens › Kleur in Storybook.
+- **Alternatieven:** het menu laten zoals het is, met alleen Onze bronnen en Forum; dan heeft de homepage geen onderdeel.
+  Of Over ons ook in het menu, zoals op de artboard.
+  Of een prop op `Navigation` voor de opmaak van de header; dan moet elke plek die het menu in een header zet, eraan denken.
+- **Later:** zie _Het hoofdmenu staat in een eigen rij onder de sitenaam_ voor de opmaak van het menu: de onderdelen staan niet meer in halfvet en in de lichtblauwe kleur maar in gewicht 500 en de lichtste kleur van de header, en de huidige pagina heeft alleen de rode streep.
+  De onderdelen van het menu zelf en de rode streep blijven.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): Podcasts komt niet meer in het menu maar onder Nieuws, en Statistieken komt erbij.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): het item Nieuws wijst naar `/nieuws` en niet naar de homepage, en de homepage heeft geen huidig onderdeel in het menu.
+  De rode streep blijft.
+
+## Een eigen foutpagina bij een fout op de server
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** lukt een pagina niet door een fout op de server, dan toont de site een eigen foutpagina in de paginaopbouw.
+  Die zegt dat het aan ons ligt en wat de bezoeker kan doen: later opnieuw proberen, naar de homepage gaan, of het op het forum melden.
+  Een pagina die een fout verwacht, zoals `/bronnen` zonder database, vangt hem zelf op en zet de foutpagina in de HTML.
+  Ze antwoordt dan met 200, met `noindex` in de HTML, en werkt zonder JavaScript.
+  Een fout die niemand opvangt, valt terug op `app/error.tsx`: dezelfde tekst, met status 500, maar pas nadat de browser JavaScript heeft uitgevoerd.
+- **Waarom:** een bezoeker moet weten dat de fout bij ons ligt, en wat er te doen is.
+  De rest van de site blijft werken, dus alleen de pagina die de database nodig heeft, valt uit.
+  Next.js 16 kan niet allebei: een pagina die gooit, geeft een 500 met een lege `body`, want `error.tsx` en `global-error.tsx` zijn clientcomponenten.
+  Een pagina kan haar eigen statuscode niet kiezen (alleen 404, 403, 401 en een redirect).
+  We kozen voor de tekst in de HTML boven de 5xx: ook zonder JavaScript weet de bezoeker wat er aan de hand is.
+- **Let op:** een zoekmachine die de pagina binnenkrijgt terwijl de database uitvalt, haalt haar uit de index tot hij weer langskomt.
+  Met een 5xx zou hij de oude versie houden.
+- **Alternatieven:** de pagina laten gooien, met een echte 500 en de tekst pas na JavaScript; dan ziet een bezoeker zonder JavaScript een lege pagina.
+  Of de pagina doorsturen naar `/fout`, dat de proxy met een 503 herschrijft; dan komen de HTML en de 5xx samen, maar verandert het adres en vraagt elke pagina een eigen terugpad.
+  Of de standaardpagina van Next.js; die is Engels en legt niets uit.
+  Of de oorzaak noemen, zoals de database; dat klopt niet bij elke fout, want de pagina weet de oorzaak niet.
+
+## De homepage toont het nieuws van de afgelopen week, per dag
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de homepage toont alle berichten van vandaag en de zes dagen ervoor, in Nederlandse tijd, het nieuwste eerst, zonder maximum.
+  Ze staan per dag onder een kop met de dag, zoals "woensdag 21 oktober", en elk bericht krijgt de tijd, zoals "14:05".
+- **Waarom:** een week laat zien wat er speelt, ook als een bezoeker een paar dagen niet keek.
+  Een kop per dag maakt een lange week overzichtelijk.
+  Een vaste dag en tijd blijft kloppen in een pagina uit de cache en zonder JavaScript, anders dan "2 uur geleden".
+- **Alternatieven:** een vast aantal, zoals de nieuwste 10 of 20.
+  Of een maximum van 50 bij een drukke week.
+  Of één lijst met de datum bij elk bericht.
+  Of "vandaag" en "gisteren", of een relatieve tijd.
+- **Later:** zie _Het nieuws staat in één lijst, met dag en tijd in een eigen kolom_.
+  De kop per dag is weg; de week en het ontbreken van een maximum blijven.
+- **Later:** zie _De homepage toont het nieuws van twee weken_.
+  De lijst beslaat nu twee weken in plaats van een week; het ontbreken van een maximum blijft.
+
+## Voorlopig is de query de poort voor het weergavebeleid
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de query voor de homepage geeft alleen de kop, de link, de tijd, de betaalmuur en de bronnaam.
+  Het component voor een nieuwsregel heeft geen props voor een intro of foto.
+  Het component dat het weergavebeleid van een bron leest, komt met de eerste bron die toestemming geeft.
+- **Waarom:** de importer bewaart geen intro of foto, dus er valt nu niets te kiezen.
+  Een component dat altijd hetzelfde beslist, is code zonder werking.
+  Wat de query niet ophaalt, kan geen pagina tonen.
+- **Alternatieven:** het component nu al bouwen, zoals #9 voorstelde, met het bericht en het beleid als invoer.
+
+## De koppen staan vijf minuten in het geheugen van de server
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de server maakt de homepage bij elk bezoek, en vraagt de berichten hoogstens één keer per vijf minuten aan de database, met `cacheFor`, zoals bij `/bronnen`.
+- **Waarom:** nieuws moet snel op de pagina staan, en één query per vijf minuten kost de gedeelde hosting niets.
+  De build leest de database niet, net als bij `/bronnen`.
+- **Alternatieven:** een uur, zoals de lijst met bronnen; dan staat een nieuw bericht er pas na een uur.
+  Of ISR of `'use cache'`; die vielen om dezelfde redenen af als bij _De lijst met bronnen staat een uur in het geheugen van de server_.
+
+## De toegankelijkheidscontrole zet zelf verzonnen koppen in de database
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** `pnpm test:a11y` zet vóór de eerste test verzonnen koppen in de database, op de testbronnen van de seed, en haalt ze er na de laatste test weer uit (`apps/site/e2e/headlines.ts`).
+  De seed bevat ze niet.
+  Playwright wacht tot de site `/robots.txt` beantwoordt, en niet tot de homepage: een verzoek aan de homepage voor de koppen er staan, bewaart een lege lijst voor vijf minuten.
+- **Waarom:** de seed draait ook op acceptatie, waar verzonnen koppen tussen de echte van de Leeuwarder Courant zouden staan.
+  Zo toetst axe de homepage met berichten, op de gebouwde site en met de echte query.
+  De test maakt de koppen ook zo dat ze altijd in de week vallen.
+  Dat een bericht van ouder dan een week of van een uitgezette bron wegblijft, toetst `queries.test.ts` van `@fansite/db` op een echte MariaDB.
+- **Alternatieven:** de koppen in de seed zetten.
+  Of de pagina in een test renderen met een nepquery; dan toetst axe niet de gebouwde site en niet de query.
+  Of de cache voor de test uitzetten; dat is een codepad dat alleen de test gebruikt.
+
+## De Coordinator schrijft per release wat er nieuw is, in het Nederlands
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de pagina Wat is er nieuw toont per versie een paar zinnen in gewone taal.
+  Bij elke release schrijft de Coordinator die uit `CHANGELOG.md` en de release-pull request, en de eigenaar keurt ze goed.
+  Een kleine pull request zet ze in een bestand in de repository, vóór de release.
+  Het nummer en de datum komen uit `CHANGELOG.md`, dus een versie verschijnt pas als ze is uitgebracht.
+  De pagina begint bij de eerste versie, 0.1.0.
+- **Waarom:** commitberichten blijven Engels en gaan over code; bezoekers willen weten wat ze merken.
+  Eén stap per release kost minder dan een regel in elke pull request.
+  Omdat release-please het nummer en de datum al schrijft, kunnen ze niet uit elkaar lopen.
+  De site wordt in het openbaar gebouwd, dus ook de versies vóór de lancering horen erbij.
+- **Alternatieven:** elke pull request die iets merkbaars verandert, schrijft zelf een zin onder "Binnenkort"; dan wordt niets vergeten, maar elke pull request krijgt een taak erbij.
+  Of commitberichten in het Nederlands, zodat de changelog de pagina is; dat verandert een afspraak in `CONTRIBUTING.md`, en een commit gaat dan ook over bezoekers.
+  Of de pagina pas laten beginnen bij 1.0.0, de lancering.
+- **Later:** sinds 0.1.0 zijn het korte regels in plaats van hele zinnen.
+  Hoe je ze schrijft, staat in `AGENTS.md`.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
+
+## Wat is er nieuw leest `CHANGELOG.md` bij de build
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de Nederlandse zinnen staan in `apps/site/src/release-notes.ts`, een object met per versie een lijst zinnen.
+  De tekst van `CHANGELOG.md` zet de bundler bij de build in de code, met `import.meta.glob` en een regel voor `?raw` in `next.config.ts`.
+  Next.js maakt de pagina bij de build.
+  De smoke test vergelijkt de pagina met de `CHANGELOG.md` in de checkout.
+- **Waarom:** TypeScript leest het bestand zonder parser en controleert de vorm, en een zin per regel geeft een kleine diff.
+  Zo heeft de server geen bestand nodig, en een versie staat pas op de site als de build haar heeft.
+  Zolang er nog geen release is, bestaat `CHANGELOG.md` niet; `import.meta.glob` vindt dan niets, waar een gewone `import` de build zou breken.
+  Lukt het de bundler niet, dan toont de pagina zonder foutmelding geen versies; dat merkt alleen de vergelijking in de smoke test.
+- **Alternatieven:** de zinnen in JSON, zonder commentaar en zonder controle van de vorm, of in Markdown, waar een parser bij hoort.
+  Of `CHANGELOG.md` lezen als de server draait, en het bestand met `assemble.js` meekopiëren, zoals de migraties; dan zoekt de server een bestand, en een vergeten kopie geeft ook een lege pagina.
+  Of een script dat vóór de build een TypeScript-bestand maakt; dat is een stap en een bestand meer.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
+
+## De feed van Wat is er nieuw kiest zijn adres met `SITE_ENV`
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** de feed op `/wat-is-er-nieuw/feed.xml` leest bij elk verzoek `SITE_ENV`, en begint elke link met het adres van die omgeving: `https://acc.sc.heerenveen.org` op acceptatie, `https://sc.heerenveen.org` op productie en `http://localhost:3000` lokaal.
+  De versies komen uit de build, zoals bij de pagina.
+  De smoke test controleert de links op acceptatie en op productie.
+- **Waarom:** een feedlezer heeft volledige adressen nodig.
+  Dezelfde build draait op acceptatie en later op productie, dus het adres kan niet in de build staan.
+  De adressen liggen vast (zie _Adressen_), en `SITE_ENV` kan een bezoeker niet veranderen.
+- **Alternatieven:** het adres uit de `Host`-header van het verzoek; die kiest de bezoeker zelf, en een cache bewaart dan zijn adres.
+  Of een variabele met het adres; die moet dan op elke omgeving kloppen met `SITE_ENV`.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
+
+## Eén korte pagina Over ons, met het bronnenbeleid en de privacyverklaring
+
+- **Datum:** 22 oktober 2026
+- **Besluit:** wie we zijn, hoe we werken (met verwijderverzoeken) en privacy staan op één korte pagina, `/over-ons`, elk onder een eigen kop en in een paar zinnen.
+  De geschiedenis is een paar zinnen, met de oprichter, Vincent Smedinga, bij naam, en de mensen die meehielpen.
+  De footer linkt naar de pagina en naar het onderdeel privacy.
+- **Hoe:** de links staan onder elke pagina in de navigatie "Over de site", vóór Wat is er nieuw.
+  Het onderdeel privacy heeft het vaste anker `#privacy`.
+- **Waarom:** een korte pagina wordt gelezen, en een bezoeker of uitgever vindt alles op één plek.
+  De details van het bronnenbeleid staan in het hoofdstuk Redactie van Storybook en op Onze bronnen.
+  De AVG vraagt een privacyverklaring die makkelijk te vinden en te begrijpen is, geen lange of aparte pagina.
+- **Alternatieven:** drie of vier pagina's (Over ons, Bronnenbeleid, Verwijderverzoeken en Privacy), zoals #24 eerst noemde.
+  Of één uitgebreide pagina, met de hele geschiedenis, de importer en `robots.txt`, en een privacyverklaring met een vaste bewaartermijn.
+- **Later:** privacy staat niet meer op deze pagina maar op een eigen pagina; zie _Privacy staat op een eigen pagina_.
+- **Later:** de pagina heet nu Updates en staat op `/updates`; zie _De pagina Wat is er nieuw heet Updates, op `/updates`_.
+
+## De homepage verbergt zijn `h1` voor het oog, en het blok heet Laatste nieuws
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** de `h1` "sc Heerenveen Fansite" blijft op de homepage, maar alleen voor schermlezers.
+  Het blok met het nieuws uit de media heet "Laatste nieuws".
+- **Hoe:** de `h1` heeft de klasse `hf-visually-hidden` uit het designsysteem (zie _Hulpklassen zitten in de sterkste laag_).
+- **Waarom:** het logo in de header zegt al "sc Heerenveen Fansite", vlak boven de kop.
+  Een schermlezer heeft de `h1` nodig om te weten waar hij is, en elke pagina heeft er precies één.
+  "Laatste nieuws" zegt wat er in het blok staat; dat het over sc Heerenveen gaat, zegt de site al.
+- **Alternatieven:** de `h1` weghalen; dan heeft de homepage geen `h1`.
+  Of "sc Heerenveen in de media" de `h1` maken; dan vallen latere blokken, zoals het forum of podcasts, onder die kop.
+  Of een andere zichtbare `h1`, zoals "Nieuws over sc Heerenveen".
+  Voor het blok: "In de media", of "sc Heerenveen in de media", zoals het eerst heette.
+
+## Privacy staat op een eigen pagina
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de privacytekst staat op een eigen pagina, `/privacy`, en niet meer als onderdeel van Over ons.
+  De footer linkt ernaar, en Over ons verwijst er met één zin naar.
+- **Waarom:** een link "Privacy" naar een onderdeel van de pagina waar je al op staat, verwart: er verandert niets zichtbaars.
+  Een eigen pagina met een link in de footer is makkelijk te vinden, en korter dan Over ons met alles erin.
+  De AVG vraagt een privacyverklaring die makkelijk te vinden en te begrijpen is.
+  Dat blijft zo, want de tekst wordt niet langer.
+  Er zijn geen oude links, want de site staat nog niet op productie.
+- **Alternatieven:** het onderdeel met anker op Over ons houden, zoals op 22 oktober besloten; dat verwart een bezoeker die al op die pagina is.
+  Of de footerlink weghalen en alleen in Over ons verwijzen; dan is de privacytekst minder vindbaar.
+  Of een omleiding voor `#privacy`; dat kan niet, want een server ziet het deel na de `#` niet.
+- **Later:** zie _Eén korte pagina Over ons, met het bronnenbeleid en de privacyverklaring_ (22 oktober 2026): daarvan blijven Over ons en het bronnenbeleid, en vervalt het onderdeel privacy op die pagina.
+
+## Licht of donker: twee knoppen, drie toestanden, en een keuze gelijk aan het systeem wordt vergeten
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de footer heeft een schakelaar met twee knoppen, Licht en Donker, in een groep met de naam "Thema". De knop van het thema dat je ziet is ingedrukt. Achter de knoppen staan drie toestanden: `system`, `light` en `dark`. Is het ingedrukte thema wat het systeem al geeft, dan vergeet de pagina de keuze en volgt hij het systeem. Dat gebeurt alleen als een knop wordt ingedrukt, nooit als het systeem verandert. Zonder JavaScript staat de schakelaar er niet.
+- **Waarom:** twee van de drie knoppen van "Systeem, Licht, Donker" zien er meestal hetzelfde uit, en een knop die niets lijkt te doen, is verwarrend. Zo is het systeem nooit buiten bereik, en blijft een keuze die toevallig gelijk wordt aan het systeem (een telefoon die donker wordt) staan. We volgen de aanpak van Lea Verou, [Dark mode toggles: two states are enough](https://lea.verou.me/blog/2026/dark-mode-toggles-two-states-are-enough/), en die van een eerder project van de projecteigenaar. Een knop die zonder JavaScript niets doet, is erger dan geen knop.
+- **Alternatieven:** drie knoppen, zoals dat eerdere project eerst had. Of één knop die naar het tegenovergestelde schakelt; die zegt minder duidelijk welk thema je ziet. Of geen schakelaar, want het systeem beslist al; dat laat wie de site donker wil op een licht apparaat in de kou staan.
+- **Later:** zie _De themaschakelaar is één knop rechtsboven in de header_ voor de plek en het aantal knoppen: één knop in de header, niet twee in de footer.
+  De drie toestanden en het vergeten van een keuze gelijk aan het systeem blijven.
+
+## De keuze staat in `localStorage`, en `data-theme` staat alleen op `html` als er een keuze is
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de keuze staat in `localStorage` onder de sleutel `fansite-theme`, alleen als de bezoeker iets anders koos dan het systeem. `public/theme.js`, een script in de `head` (via `Head`), zet `data-theme` op `html` vóór de eerste weergave, en alleen als er een keuze is. Zonder keuze en zonder JavaScript volgt de CSS het systeem. `src/theme.ts` neemt het over zodra de pagina geladen is. De sleutel en de regel in het script en in de module moeten gelijk blijven; de tests lezen ze allebei.
+- **Hoe:** `html` heeft `suppressHydrationWarning`, omdat het script het attribuut zet voordat React start. De schakelaar toont niets op de server en tijdens het hydrateren, dus de HTML is voor iedereen gelijk en de pagina's blijven cachebaar. De `theme-color` van de browser volgt het thema dat de bezoeker ziet: bij een keuze krijgen beide tags de kleur van de header, en bij het systeem komen de tags van de server terug. De privacyverklaring noemt de opslag.
+- **Waarom:** geen cookie, dus geen toestemming en niets naar de server, en een pagina die voor iedereen gelijk is, blijft te cachen. Het attribuut alleen zetten bij een keuze laat het gedrag voor wie niets koos gelijk aan dat van nu, en laat het script weinig beslissen.
+- **Gecontroleerd:** een e2e-test blokkeert de scripts van de app en ziet dat `public/theme.js` alleen al `data-theme` zet, en dat de keuze na vernieuwen blijft. axe slaagt met een keuze die afwijkt van het systeem, in beide richtingen.
+- **Alternatieven:** een functioneel cookie; dat laat de server het goede thema meteen tonen zonder script, maar maakt elke pagina per bezoeker anders en vraagt de privacyverklaring bij te werken (een vraag van #149). Of `data-theme` altijd zetten; dat laat het script meer beslissen en vraagt dat het script en de pagina's elkaar overal gelijk houden.
+
+## De site test componenten met jsdom en Testing Library
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `apps/site` heeft `jsdom`, `@testing-library/dom` en `@testing-library/react` als devDependencies, in dezelfde exacte versies als het designsysteem. Een test die een DOM nodig heeft, zet bovenaan `// @vitest-environment jsdom`; de andere tests blijven in Node.
+- **Waarom:** de schakelaar werkt met `localStorage`, `matchMedia` en `document`, en alleen een DOM laat zien dat een knop de keuze bewaart en dat de pagina het volgt. Het zijn geen nieuwe pakketten in de werkruimte, dus de lockfile kreeg alleen regels voor de site erbij.
+- **Alternatieven:** de logica van de schakelaar in het designsysteem testen, waar jsdom al staat; dan staat de opslag in een component dat niets mag bewaren. Of alleen `renderToStaticMarkup`, zoals de andere tests van de site; dat ziet geen klik.
+
+## De site mailt via SMTP van de hosting, vanaf de brievenbus van de redactie
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** `sendMail` in `apps/site/src/mail.ts` verstuurt platte tekst via SMTP van de hosting, vanaf `fansite@heerenveen.org`, en niet via een dienst van een derde.
+  Het contactformulier (#99) en de inloglink van het beheer (#30) gebruiken dezelfde functie.
+- **Waarom:** de mail bevat berichten van bezoekers en inloglinks.
+  Een mailbezorger zou die lezen en bewaren, en we sturen geen gegevens naar een derde.
+- **Let op:** dit is de brievenbus die de redactie ook leest, dus het wachtwoord ervan staat nu ook op de host, in de app.
+  Kan mijn.host een apart SMTP-wachtwoord of een tweede brievenbus maken, dan is dat veiliger.
+  Dat verandert de code niet.
+- **Alternatieven:** een mailbezorger zoals Postmark of Mailgun, die betrouwbaarder bezorgt maar een derde partij is en geld kost.
+  Of `sendmail` op de server: geen dependency, maar afhankelijk van hoe de hosting het instelt, en zonder foutmeldingen.
+- **Later:** zie _De importer mailt de projecteigenaar als dezelfde import drie runs achter elkaar faalt_.
+  `sendMail` staat nu in `packages/shared/src/mail.ts`, en de site importeert hem nog uit `apps/site/src/mail.ts`; de rest blijft zoals het was.
+
+## Voor SMTP gebruiken we nodemailer 10.0.16
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `apps/site` heeft `nodemailer` 10.0.16 als dependency.
+  Licentie MIT-0, past bij de EUPL-1.2 (een vrije licentie zonder voorwaarden).
+  Het pakket heeft zelf geen dependencies en geen installatiescript: `prepare` staat in zijn `package.json`, maar pnpm draait dat alleen voor pakketten uit een git-repository, niet voor die uit het register.
+  `allowBuilds` blijft dus ongewijzigd.
+- **Waarom:** een paar regels zijn niet genoeg.
+  SMTP vraagt om STARTTLS, inloggen, de juiste codering van accenten in onderwerp en tekst (`=?UTF-8?…?=`, quoted-printable), een regel die met een punt begint, regels van hoogstens 998 tekens, en antwoordcodes die goed of fout zijn.
+  Een eigen client daarvoor moeten we zelf bewaken, en de bezoekers schrijven in het Nederlands, dus accenten komen vaak voor.
+  Nodemailer wordt onderhouden, en de bibliotheek doet precies dit en niets meer.
+- **Versie:** 10.0.16 van 7 oktober 2026.
+  De nieuwste versies zijn van de afgelopen dagen: er komt elke paar dagen een versie uit, en een versie die al een paar weken oud is, heeft de tijd gehad om fouten te laten zien.
+- **Alternatieven:** een eigen SMTP-client op `node:tls`.
+  Dat is geen dependency, maar de coderingen en de randgevallen zijn dan van ons.
+  Of een andere bibliotheek; nodemailer is de gangbare keuze voor Node en heeft zelf geen dependencies.
+- **Later:** zie _De importer mailt de projecteigenaar als dezelfde import drie runs achter elkaar faalt_.
+  `nodemailer` is een dependency van `@fansite/shared`, waar `sendMail` nu staat, en niet meer van `apps/site`.
+
+## Mail gaat altijd over TLS, en zonder instellingen alleen lokaal naar het logboek
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** poort 465 begint met TLS; elke andere poort moet naar TLS overschakelen (STARTTLS) voordat `sendMail` inlogt, en een server die dat niet kan, krijgt geen mail en geen wachtwoord.
+  Een mislukte poging wordt niet herhaald; de aanroeper vangt de `MailError` op.
+  De vijf variabelen `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` en `MAIL_FROM` zijn op `acceptance` en `production` verplicht, dus de site start er niet zonder.
+  Lokaal horen ze alle vijf te ontbreken of alle vijf te staan; dan schrijft `sendMail` de mail in het logboek van de ontwikkelaar en verstuurt niets.
+- **Waarom:** een mailserver die geen TLS spreekt, zou het wachtwoord en de berichten van bezoekers in het openbaar sturen.
+  Een site die zonder instellingen start, merkt pas bij het eerste contactbericht dat er niets verstuurd wordt.
+  Alles of niets lokaal, omdat een half ingevulde set een vergissing is die de ontwikkelaar anders pas bij het versturen ziet.
+- **Gevolg:** de rooktest en de toegankelijkheidscontrole starten de site met `SITE_ENV=acceptance`; ze krijgen verzonnen instellingen mee, want ze vragen geen mail aan (de inlogpagina mailt alleen voor een account, en de testdatabase heeft er geen).
+- **Alternatieven:** ongecodeerd mailen als de server geen TLS kent (onveilig); de instellingen op acceptatie optioneel laten (de site start dan, maar mailt niet).
+- **Later:** het contactformulier (#99) mailt nu, en de toegankelijkheidscontrole stuurt die mail naar een nepserver; zie _De browsertest mailt naar een eigen nepserver die de mails in een map zet_.
+  De rooktest houdt de verzonnen instellingen, want hij laadt geen pagina die mailt.
+
+## Een foutmelding van `sendMail` bevat alleen een code, en een adres is precies één adres
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `sendMail` weigert een nieuwe regel in de afzender, de ontvanger, het antwoordadres en het onderwerp, en elk van de drie adressen moet precies één adres zijn (zonder komma of puntkomma).
+  Een mislukte verzending geeft een `MailError` met een vast bericht en alleen de code van de bibliotheek, zoals `EAUTH` of `ESOCKET`, zonder de oorspronkelijke fout als `cause`.
+  `sendMail` zet niets van een verzonden mail in het logboek; alleen het logboek van de ontwikkelaar, zonder SMTP-instellingen, krijgt de hele mail.
+- **Waarom:** een nieuwe regel zou een kopregel inspuiten, bijvoorbeeld een `Bcc`.
+  Het antwoordadres komt van een bezoeker; met een komma zou hij een tweede ontvanger toevoegen.
+  De foutmelding van de bibliotheek noemt het adres van de ontvanger en het antwoord van de server, en de aanroeper zet de fout in het logboek.
+  Daar horen het wachtwoord, het adres en de tekst van een bezoeker niet te staan.
+- **Alternatieven:** de nieuwe regels weghalen in plaats van weigeren; dat verbergt een fout van de aanroeper.
+  Alleen een nieuwe regel weigeren, zoals het issue vraagt; dan blijven er meer ontvangers mogelijk via het antwoordadres.
+
+## De test mailt naar een nepserver op de computer van de test
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `mail.test.ts` start een kleine SMTP-server in de test zelf (`node:net` en `node:tls`) met STARTTLS en inloggen, en laat `sendMail` daar naartoe mailen.
+  Het certificaat maakt de test bij het starten met `openssl` en vertrouwt alleen de test (`tls.setDefaultCACertificates`).
+  De opdracht voor de eigenaar is `send-test-mail.mjs`, dat `pnpm --filter site assemble` naast de importer in `apps/site` zet.
+- **Waarom:** geen echte mail, geen echte gegevens en geen verzoek aan een derde.
+  Er staat geen privésleutel in de repository, en geen extra dependency voor een testserver.
+  De standalone build neemt alleen mee wat een pagina importeert, en geen pagina mailt nog; één bestand met alles erin werkt op de host zonder `node_modules`, zoals de importer.
+- **Niet getest:** poort 465 (TLS vanaf het begin) en een echte mailserver; de test dekt STARTTLS, en de eigenaar controleert de rest met de proefmail op acceptatie.
+- **Alternatieven:** `smtp-server` als devDependency; dat brengt een tweede versie van nodemailer mee, en `assemble` weigert twee versies van één pakket.
+  Of een certificaat in de repository.
+- **Later:** het contactformulier (#99) importeert `sendMail`, dus de standalone build neemt nodemailer nu mee; zie _De browsertest mailt naar een eigen nepserver die de mails in een map zet_.
+
+## Het contactformulier mailt de redactie en slaat niets op
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** een bericht via het formulier gaat alleen als mail naar de redactie, en komt niet in de database.
+  We bewaren het tot de zaak is afgehandeld, hoogstens een jaar.
+- **Waarom:** de redactie leest mail al, en het formulier hoeft dan niet te wachten op het beheer (#30).
+  Er staan geen persoonsgegevens op de site zelf; de mailbox ruimt de redactie zelf op.
+  Een belofte van "hoogstens een jaar" kunnen vrijwilligers houden.
+- **Alternatieven:** opslaan in de database en lezen in het beheer (we zien dan ook wat er binnenkwam als mail verloren gaat, maar het hangt af van #30 en voegt een tabel met persoonsgegevens toe); of allebei.
+
+## Spam weren met een val-veld en een limiet voor het hele formulier
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** spam weren met een val-veld en een limiet voor het hele formulier, zonder diensten van derden en zonder IP-adressen te bewaren.
+- **Waarom:** reCAPTCHA en dergelijke sturen bezoekers naar een derde (principe 3 van de Redactie).
+  Een limiet per IP-adres vraagt om IP-adressen te bewaren.
+  Dit is eenvoudig en dekt de meeste robots; komt er toch veel spam, dan bekijken we het opnieuw.
+- **Alternatieven:** een rekensom of puzzel (kost toegankelijkheid, WCAG 3.3.8); een limiet per IP-adres; een tijdcontrole met een getekend tijdstip.
+
+## Het formulier is een server action met een eigen bevestigingspagina
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `/contact` heeft een formulier dat een server action aanroept (`useActionState`, in `app/contact/actions.ts`).
+  Zonder JavaScript is dat een gewone POST naar dezelfde pagina; met een fout komt de pagina terug met de fouten en het ingevulde, met succes stuurt de actie door (`redirect`, status 303) naar `/contact/verstuurd`.
+  Die pagina staat niet in de sitemap en krijgt `noindex`.
+  De actie controleert zelf dat de `Origin` bij de host hoort (`x-forwarded-host`, anders `host`) en weigert een verzoek zonder `Origin`; Next.js doet dezelfde controle ook al.
+  Een verzoek van een andere site krijgt dezelfde melding als een mislukte verzending.
+- **Waarom:** een server action werkt zonder JavaScript en geeft de pagina met de fouten terug, met de layout van de site eromheen.
+  Een route handler kan geen pagina met fouten tonen zonder de ingevulde gegevens in een cookie of in de URL te zetten, en persoonsgegevens horen niet in een URL.
+  Na het versturen stuurt de actie door naar een eigen adres, dus vernieuwen haalt alleen die pagina opnieuw op en verstuurt het formulier niet nog eens.
+- **Alternatieven:** een route handler die bij een fout terugstuurt met de gegevens in een cookie of de URL; een bevestiging op dezelfde pagina na de POST, waarbij vernieuwen het formulier opnieuw verstuurt; of alleen controleren zoals Next.js dat doet, zonder eigen controle van `Origin`.
+
+## Het val-veld heet `website`, en een robot krijgt dezelfde bevestiging als een bezoeker
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** het `Honeypot` heeft de naam `website`.
+  Is het ingevuld, dan stuurt de actie door naar de bevestiging en verstuurt niets.
+  Zo'n bericht telt niet mee voor de limiet.
+- **Waarom:** robots vullen een veld met zo'n naam graag in.
+  Een foutmelding zou de robot leren dat hij is herkend.
+- **Alternatieven:** een foutmelding of een lege pagina voor een robot.
+
+## De limiet is tien berichten per uur in het geheugen van de server
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `createLimit` (`apps/site/src/rate-limit.ts`) onthoudt de tijden van de laatste berichten, voor het hele formulier samen.
+  Een bericht met fouten, een robot en een geweigerde poging tellen niet mee; een bericht dat wel wordt verstuurd, ook als de mail mislukt, telt wel.
+  De limiet begint opnieuw als de server herstart.
+- **Waarom:** de eis is een bescherming tegen een stortvloed, geen exacte telling.
+  Een bezoeker die een typefout herstelt, hoort niet tegen de limiet aan te lopen.
+  Op gedeelde hosting kan er meer dan één proces zijn, dan telt elk proces apart; dat is hier acceptabel, omdat het alleen een bovengrens per proces is.
+- **Alternatieven:** de tijden in de database of in een bestand (bewaart gegevens, voor weinig winst).
+
+## Een leeg eerste antwoord bij het onderwerp, en de naam en link in de tekst van de mail
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** de keuzelijst Onderwerp begint met "Kies een onderwerp" (waarde leeg), en de server weigert die keuze.
+  De mail heeft het antwoord-adres van de bezoeker als `Reply-To` (alleen het adres, zonder naam), de onderwerpregel "Contact: <onderwerp>" met de woorden uit de lijst, en naam, adres, onderwerp en link in de tekst.
+- **Waarom:** een lijst met een voorgekozen antwoord laat bezoekers het onderwerp verkeerd laten staan zonder dat ze het merken.
+  Een naam in de kop `Reply-To` kan tekens bevatten die `sendMail` weigert (een komma, aanhalingstekens), dus de naam staat in de tekst.
+- **Alternatieven:** "Een bericht laten verwijderen" als voorgekozen antwoord; de naam in de kop `Reply-To`.
+
+## Bij een fout gaat de focus naar het blok met fouten
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** na een verzending met fouten, of een mislukte verzending, krijgt het blok bovenaan de focus (`tabIndex={-1}`, `focus()` in een effect van `ContactForm`).
+  Mislukt het versturen of is de limiet bereikt, dan staat dat in een `Card` met een kop, met een link `mailto:` naar de redactie, en geen `ErrorSummary`: er is geen veld om naartoe te linken.
+  Die `Card` heeft ook `tabIndex={-1}`, en krijgt dan de focus.
+- **Waarom:** met JavaScript laadt de pagina niet opnieuw, dus een schermlezer begint niet bovenaan en hoort anders niets (zie _Een formulier laat de controle aan de site_).
+  Zonder JavaScript laadt de pagina opnieuw en staat het blok bovenaan; het effect doet dan na het laden hetzelfde.
+- **Alternatieven:** `role="alert"` op het blok; dat leest op een pagina die opnieuw laadt niet betrouwbaar voor.
+
+## De browsertest mailt naar een eigen nepserver die de mails in een map zet
+
+- **Datum:** 24 oktober 2026
+- **Besluit:** `e2e/contact.spec.ts` verstuurt het formulier naar `scripts/fake-smtp.js`, een kleine SMTP-server met STARTTLS die Playwright start en die elke mail als bestand in `.next/fake-smtp` zet.
+  De test leest die map.
+  De server maakt zelf een certificaat met `openssl`, en de sites in de test vertrouwen het via `NODE_EXTRA_CA_CERTS`.
+- **Waarom:** de site draait in een ander proces dan de test, dus de test kan een mail alleen zien als de server die opslaat.
+  Geen echte mail en geen verzoek aan een derde.
+  `NODE_TLS_REJECT_UNAUTHORIZED=0` zou de controle van het certificaat voor het hele proces uitzetten.
+- **Alternatieven:** de nepserver van `mail.test.ts` hergebruiken; die draait in het testproces zelf en kan de site niet bedienen.
+  Of de verzending stubben; dan test de e2e-test de mail niet.
+
+## Inloggen voor het beheer met een link per e-mail, zonder wachtwoord
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het beheer logt in met een inloglink per e-mail, zonder wachtwoord.
+- **Waarom:** het beheer heeft een paar mensen.
+  Een wachtwoord moet bewaard, gereset en tegen raden beschermd worden; een link per e-mail laat de mailserver de identiteit bewijzen, en we kunnen sessies intrekken.
+- **Alternatieven:** wachtwoorden met een sterke hash en tweestapsverificatie (meer code en meer beveiligingsrisico); inloggen met het forum (#36, nog niet); een gedeeld wachtwoord zoals het prototype (geen persoonlijke verantwoording).
+
+## Accounts voor het beheer maken we met een opdracht op de host
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** accounts maken we met een opdracht op de host (`admin:create`), niet met een aanmeldpagina.
+  Hoe die opdracht draait, staat onder _De opdrachten voor accounts zijn één bestand in de build_.
+- **Waarom:** een aanmeldpagina is een aanvalsvlak en nog niet nodig voor een handvol mensen.
+- **Alternatieven:** uitnodigen vanuit het beheer; dat kan later, met #31.
+
+## Het logboek van beheeracties komt met de eerste beheeractie
+
+- **Datum:** 23 oktober 2026
+- **Besluit:** het logboek van beheeracties komt met de eerste beheeractie (#75), niet met het inloggen (#30).
+- **Waarom:** het inloggen heeft nog geen acties om te loggen, en een logboek zonder gebruik is ongetest.
+- **Alternatieven:** het logboek bij het inloggen bouwen, zoals het oorspronkelijke issue stond.
+
+## Inloggen voor het beheer is eigen code, geen Better Auth
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het inloggen (`apps/site/src/beheer`) is eigen code op `node:crypto` en Drizzle, zonder bibliotheek.
+  Het issue stelde Better Auth voor met de Drizzle-adapter, de plug-in voor inloglinks en zijn rate limiting.
+  Dat hebben we eerst op MariaDB 10.11 geprobeerd (versie 1.7.12, MIT).
+- **Wat werkte:** de Drizzle-adapter schrijft naar MariaDB, de plug-in maakt een link die één keer werkt (een tweede keer geeft `INVALID_TOKEN`), en het cookie is `HttpOnly`, `Secure` en `SameSite=Lax`.
+  Het pakket heeft geen installatiescript, dus `allowBuilds` bleef gelijk.
+- **Waarom toch niet:** vier eisen van het issue moesten we er alsnog omheen bouwen, en de rest is weinig code.
+  - De rate limiting telt per IP-adres en route, en bewaart dat adres in de database.
+    Het issue wil een telling per e-mailadres en voor de hele site, zonder IP-adressen.
+  - De plug-in maakt een token, schrijft het in de database en roept `sendMagicLink` ook aan voor een adres zonder account.
+    Dat een adres geen account heeft, blijkt pas bij het gebruik van de link.
+    De controle op het account, het gelijk houden van de mail en de tijd van het antwoord zijn dan ons werk.
+  - Een sessie loopt bij Better Auth op bij gebruik, met één `expiresIn`.
+    "12 uur zonder activiteit én 7 dagen hoe dan ook" kent hij niet; we hadden een eigen controle bij elke aanroep nodig.
+  - Standaard schrijft hij het IP-adres en de user agent van het verzoek in elke sessie; dat kan uit, maar het is een instelling die we moeten kennen en bewaken.
+  - Het pakket brengt tientallen pakketten mee, waaronder adapters voor Prisma en MongoDB die we niet gebruiken, en een module die telemetrie kan versturen (uit, tenzij je haar aanzet).
+    Wat overblijft is een willekeurige token, een hash ervan in de database, drie tabellen en een cookie: ongeveer 250 regels die we kunnen lezen en testen.
+    Het project houdt het licht, en voegt geen dependency toe als een paar regels genoeg zijn (zie `CONTRIBUTING.md`).
+- **Gevolg:** een nieuwe dependency is er niet: alleen `drizzle-orm` (dezelfde versie als het andere pakket) staat nu ook in `apps/site`.
+  Een geheim voor het inloggen is er ook niet: een link en een sessie zijn 256 willekeurige bits, die we als SHA-256 bewaren, en niets wordt ondertekend.
+  Er is dus geen nieuwe omgevingsvariabele.
+- **Alternatieven:** Better Auth met veel eigen code eromheen, die de plug-in vooral overschrijft.
+  Auth.js of Lucia: ook een bibliotheek voor een handvol accounts, en een rate limiting per e-mailadres is daar ook eigen werk.
+
+## Een link en een sessie bewaren we als SHA-256, in de database
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** een inloglink en een sessie zijn 32 willekeurige bytes (base64url).
+  De tabellen `admin_login_links` en `admin_sessions` bewaren alleen de SHA-256 ervan.
+  Een link werkt 15 minuten en één keer: de site verwijdert de rij en gaat alleen door als er precies één rij weg was, dus twee verzoeken tegelijk loggen niet allebei in.
+  Een sessie is geldig zolang het minder dan 12 uur geleden is dat hij is gebruikt én minder dan 7 dagen geleden dat hij begon; `findSession` rekent dat bij elk verzoek na met `created_at` en `last_seen_at`, dus de 7 dagen zijn echt absoluut, ook voor een sessie die elk uur wordt gebruikt.
+  Een sessie die is afgelopen, wordt weggehaald.
+  `admin:revoke` zet het account uit en verwijdert zijn sessies en links; elk volgend verzoek vindt geen sessie meer.
+  Uitloggen verwijdert de rij.
+- **Waarom:** een kopie van de database logt dan niemand in, en 256 willekeurige bits raad je niet, dus een hash zonder zout is genoeg.
+  Op de server bewaren maakt intrekken meteen werkzaam; een token met een einddatum erin (JWT) kan dat niet.
+- **Het cookie:** `beheer-sessie`, `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/beheer`, `Max-Age` 7 dagen, met alleen de token erin.
+  `Path=/beheer` houdt het uit verzoeken naar de rest van de site, en het is nog steeds het enige cookie dat de site zet.
+  `Secure` geldt ook lokaal: Chrome en Firefox nemen het aan op `localhost`, Safari niet.
+- **Alternatieven:** de token zelf bewaren (een gelekte database logt dan in); een ondertekend cookie met een einddatum (niet in te trekken zonder lijst op de server).
+- **Later:** zie _Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure_ (1 november 2026): `Secure` geldt niet meer onder `NODE_ENV=development`, omdat Safari het cookie anders niet bewaart op `http://localhost`.
+  De rest van deze beslissing blijft.
+- **Later:** zie _Het hoofdmenu toont Beheer voor wie ingelogd is, met een teken in `localStorage`_ (2 november 2026): het cookie blijft het enige cookie en gaat nog steeds alleen naar `/beheer`, maar de browser bewaart daarnaast een teken in `localStorage` dat alleen het menu verandert.
+
+## Het antwoord op een verzoek om een link is voor elk adres hetzelfde
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `requestLoginLink` stuurt elk goed gevormd adres naar `/beheer/inloggen/verstuurd`, met of zonder account, en mailt alleen voor een account dat aanstaat.
+  De mail gaat na het antwoord weg (`after` van Next.js), en het antwoord duurt minstens 400 milliseconden, voor elk adres.
+  Een adres zonder account krijgt geen mail en geen rij in `admin_login_links`.
+  Een adres dat geen adres is, en de rate limit, sturen terug naar het formulier met een melding.
+- **Waarom:** wie de pagina bekijkt, kan zo niet nagaan wie een account heeft: niet aan de tekst, niet aan de doorverwijzing, niet aan de tijd.
+  Een mail versturen duurt seconden, dus een bekend adres zou anders trager antwoorden.
+  De limiet geldt voor elk adres, ook een onbekend, dus de melding "te veel links gevraagd" verraadt ook niets.
+- **Beperking:** wie de mailbox van een adres leest, ziet wel of er een mail kwam.
+  Dat is de eigenaar van het adres, en geen aanvaller.
+  Een mailserver die uitvalt, geeft de bezoeker geen fout: de site schrijft `Could not mail a login link` in het logboek, zonder het adres.
+- **Alternatieven:** de mail vóór het antwoord versturen en de tijd gelijktrekken met een vaste wachttijd (de mailserver is dan te traag en te wisselvallig); een mail "er is geen account voor dit adres" sturen naar een onbekend adres (meer mail, en het adres is van een derde).
+
+## De rate limit van het inloggen staat in een eigen tabel
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `admin_login_attempts` houdt per verzoek de SHA-256 van het adres (in kleine letters, zonder spaties) en de tijd bij, voor bekende en onbekende adressen.
+  Een verzoek mag als er in de laatste 15 minuten minder dan 5 verzoeken voor dat adres waren, en minder dan 30 voor de hele site.
+  De site schrijft de rij eerst en telt daarna; staat het verzoek boven de limiet, dan verwijdert hij zijn eigen rij weer.
+  Zo glippen twee verzoeken tegelijk niet allebei onder de limiet door, en houdt een stroom verzoeken het venster niet dicht.
+  Rijen ouder dan 15 minuten gaan weg bij het volgende verzoek.
+  Er is geen IP-adres in de tabel.
+- **Waarom:** de limiet moet werken als de host meer processen start, dus hij staat in de database.
+  Een IP-adres is een persoonsgegeven en zegt weinig: achter één router zitten veel mensen, en een aanvaller wisselt van adres.
+  De hash van het adres is geen geheim (een adres is te raden), maar de rijen bestaan 15 minuten en de adressen van het beheer staan toch al in `admin_users`.
+- **Gevolg:** wie 30 verzoeken in een kwartier stuurt, sluit het inloggen voor iedereen voor een kwartier.
+  Dat is wat "30 voor de hele site" betekent; bij een handvol beheerders is het acceptabel, en tegen raden helpt het.
+- **Alternatieven:** de limiet per IP-adres (bewaart IP-adressen, en een aanvaller omzeilt hem); een teller in het geheugen (werkt niet bij meer processen).
+
+## De link in de mail toont een knop; de knop logt in
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `/beheer/inloggen/bevestigen?token=…` logt niet in als je hem opent, maar toont de knop Inloggen; de knop gebruikt de link op en begint de sessie.
+  De pagina controleert of de link nog werkt, zonder hem te gebruiken, en zegt anders "Deze link werkt niet".
+- **Waarom:** een virusscanner of voorbeeldweergave opent een link in een mail voordat de persoon dat doet (Microsoft 365 heeft dat), en zou een link die maar één keer werkt opgebruiken.
+  Dat is één klik meer voor wie inlogt.
+- **Alternatieven:** inloggen bij het openen van de link (kortste weg, maar breekbaar bij mailscanners).
+
+## `requireRole` is de ene controle, en een test loopt het beheer zelf na
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `requireRole(...rollen)` in `apps/site/src/beheer/require-role.ts` leest het cookie, zoekt de sessie en stuurt een bezoeker zonder sessie naar `/beheer/inloggen`.
+  Een sessie met een rol die niet mag, krijgt "niet gevonden".
+  Elke pagina, route en serveractie onder `/beheer` roept hem als eerste aan, behalve drie pagina's en twee acties om in te loggen, die een lijst in de test met naam noemt.
+  `routes.test.ts` zoekt de bestanden zelf op: elke `page.tsx` en `route.ts` onder `app/beheer`, en elk bestand in de hele site met `'use server'`.
+  Voor elk bestand dat niet open staat, controleert hij twee dingen: de tekst roept `requireRole(` aan, en de bestanden worden echt aangeroepen zonder cookie en zonder database en moeten naar de inlogpagina sturen.
+  Een nieuwe pagina, route of actie die `requireRole` niet als eerste aanroept, laat de test falen, ook als niemand haar in een lijst heeft gezet.
+- **Waarom:** de proxy ziet een pad, niet welke actie een verzoek aanroept, en een pad dat de matcher mist, staat open.
+  De test hoeft niet te weten welke acties er zijn.
+  Dat de database onaangeroerd blijft, bewijst dat de weigering vóór alles komt.
+- **Beperking:** de test roept een actie zonder argumenten aan; een actie die haar argumenten leest vóór `requireRole`, faalt dus ook.
+  Dat is bedoeld.
+- **Alternatieven:** de controle in de proxy (te makkelijk te omzeilen); een lijst van acties in de test (vergeet iemand).
+
+## Het beheer krijgt zijn eigen headers, en `robots.txt` weigert het overal
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de proxy geeft elk antwoord onder `/beheer` (en `/beheer` zelf) `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: no-referrer`, op elke omgeving, productie ook.
+  De `Referrer-Policy` is sinds #75 `same-origin`; zie _Het beheer stuurt een referrer naar de eigen site, zodat formulieren zonder JavaScript werken_.
+  `/robots.txt` heeft `Disallow: /beheer` op elke omgeving.
+  Next.js stuurt voor een pagina die het per verzoek rendert een eigen, langere waarde (`private, no-cache, no-store, max-age=0, must-revalidate`); die bevat `no-store` ook, en de rooktest controleert dat.
+  De pagina's zeggen ook `noindex, nofollow` in de HTML, en staan niet in de sitemap.
+- **Waarom:** de inloglink staat in het adres van een pagina; zonder `Referrer-Policy` zou hij als referrer naar een andere site kunnen gaan, en een cache mag niets van het beheer bewaren.
+- **Alternatieven:** alleen `noindex` in de HTML (een zoekmachine ziet dat pas na het ophalen); de headers in `next.config.ts` (dezelfde plek als de andere headers is de proxy).
+
+## De opdrachten voor accounts zijn één bestand in de build, dat alleen `DATABASE_URL` leest
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `apps/site/src/admin.ts` is de opdracht (`create` en `revoke`).
+  Lokaal draaien `pnpm admin:create <e-mailadres> <rol>` en `pnpm admin:revoke <e-mailadres>` hem met Node en de `.env` in de root.
+  `assemble` bundelt hem met esbuild in `apps/site/admin.mjs`, naast de proefmail, en de host draait hem met het volledige pad van Node en `--env-file=~/fansite-acceptatie.env`, zoals de importer.
+  Hij leest alleen `DATABASE_URL` (met `readDatabaseEnv`, net als de importer) en heeft geen `SITE_ENV` of mailinstellingen nodig.
+  `create` voor een adres dat al aanstaat, verandert niets en stopt met 1; voor een uitgezet account zet hij het weer aan met de nieuwe rol.
+  `revoke` zet het account uit (`disabled_at`) en verwijdert zijn sessies en links; de rij blijft, zodat het account niet verdwijnt uit het zicht.
+  Een test (`apps/importer/src/bundle-admin.test.ts`) bundelt hem zoals `assemble` doet, draait hem buiten de repository met `--env-file` en zonder `node_modules` of `DATABASE_URL` in de omgeving, en controleert beide opdrachten tegen de testdatabase.
+- **Waarom:** de host heeft alleen de standalone build en Node, geen pnpm, en een SSH-sessie krijgt de variabelen van de Node.js-app niet (zie _De site draait de migraties als ze start_ en `docs/acceptatieomgeving.md`, stap 8 tot en met 10).
+  Eén bestand en één bestand met `DATABASE_URL` is wat de importer al gebruikt, dus de eigenaar leert niets nieuws.
+- **Alternatieven:** een beheerpagina om accounts te maken (een aanvalsvlak, en buiten dit issue); de opdracht in `apps/site/server.js` laten draaien (dat vraagt de variabelen van de site, en meer van de host).
+
+## Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure
+
+- **Datum:** 1 november 2026
+- **Besluit:** het cookie `beheer-sessie` is `Secure` behalve onder `NODE_ENV=development`.
+  `sessionCookieOptions` in `apps/site/src/beheer/require-role.ts` kiest dat op één plek, en inloggen en uitloggen gebruiken die opties.
+- **Waarom:** Safari bewaart een `Secure`-cookie niet op `http://localhost`, dus de projecteigenaar kon lokaal niet inloggen in zijn eigen browser.
+  De ontwikkelserver (`pnpm --filter site dev` en `pnpm review`) draait alleen op de computer van de ontwikkelaar.
+  Wat echt gebruikt wordt, houdt `Secure`: acceptatie, productie en elke gebouwde site, ook die van de rooktest en de e2e-tests.
+  Een afweging op `NODE_ENV` kan een verzoek niet beïnvloeden, een afweging op de `Host`-header wel.
+- **Alternatieven:** `Secure` weglaten wanneer het verzoek `http` is op `localhost` (de header is door de verzender te kiezen); lokaal HTTPS met een zelfgemaakt certificaat (een extra stap voor elke ontwikkelaar); alles laten zoals het is en Chrome of Firefox gebruiken.
+- **Later:** vervangt de regel "`Secure` geldt ook lokaal" van _Een link en een sessie bewaren we als SHA-256, in de database_; de rest van die beslissing blijft.
+
+## De privacyverklaring noemt het cookie van het beheer
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `/privacy` zegt nog steeds "De site zet geen cookies" bovenaan, en heeft een alinea dat wie inlogt in het beheer één cookie krijgt: alleen een nummer voor de sessie, alleen naar de pagina's van het beheer, hooguit 7 dagen, en nooit voor een bezoeker.
+- **Waarom:** de eerste zin klopt voor bezoekers, en de rest zegt wat voor de redactie anders is.
+  De alinea staat bij de andere dingen die we moeten noemen, en het cookie is geen tracking.
+- **Alternatieven:** de eerste zin veranderen in "De site zet geen cookies voor bezoekers"; die zin is al waar, en de intro hoeft niet te veranderen.
+
+## Een bericht verbergen zet drie kolommen op `items`, en elke query die berichten toont sluit het uit
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `items` krijgt `hidden_at`, `hidden_by` (het account, een foreign key op `admin_users`) en `hidden_reason` (hoogstens 300 tekens), alle drie leeg voor een bericht dat te zien is.
+  Elke query die berichten toont sluit een verborgen bericht uit met `hidden_at IS NULL`: de koppen van de homepage, de afleveringen en hun aantal, en de podcasts die in het filter staan.
+  Een test per query bewijst het.
+  "Toon weer" maakt de drie kolommen leeg; wie het verborg en waarom, staat dan nog in het logboek.
+  De sitemap toont geen berichten, alleen pagina's, dus daar valt niets te verbergen.
+- **Waarom:** het bericht moet in de tabel blijven, zodat de importer het niet opnieuw als nieuw ziet en weer neerzet.
+  Een kolom op `items` houdt de query eenvoudig: een bericht is te zien of niet, en de koppen van de homepage hoeven geen tweede tabel te lezen.
+- **Let op:** een nieuwe query op `items` voor een pagina moet `hidden_at IS NULL` ook hebben.
+  De opmerking bij `listRecentItems` zegt het, en het beheer zelf (`listItems`) is de enige die verborgen berichten toont.
+- **Alternatieven:** een aparte tabel `hidden_items` (een join in elke query, en het bericht en zijn verbergen kunnen uit elkaar lopen); het bericht verwijderen (de importer zet het bij de volgende run terug).
+- **Later:** de voorwaarde staat nu in `isShown`, samen met `relevance = 'relevant'`; zie _De site toont alleen `relevant`, en het beheer toont alles met een woord erbij_.
+
+## De importer laat een verborgen bericht met rust, in de query zelf
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** het `INSERT … ON DUPLICATE KEY UPDATE` van `storeItems` zet elke kolom op de nieuwe waarde alleen als `hidden_at` leeg is (`unlessHidden`).
+  Een verborgen bericht verandert dus niet: niet de kop, de link, de tijd of de betaalmuur, en ook `last_seen_at` niet.
+  Het telt als ongewijzigd in het verslag.
+- **Waarom:** de moderator verborg het om een reden, bijvoorbeeld een fout in de kop of een verzoek van de bron, en de bron biedt het bericht bij elke run opnieuw aan.
+  Een controle op de rij die de importer eerst las, mist een bericht dat een moderator tijdens de run verbergt; de voorwaarde in de query zelf mist dat niet.
+- **Alternatieven:** een bericht met `hidden_at` vooraf uit de lijst halen (snel, maar met die kleine kans op een bericht dat net verborgen is); een tabel met verborgen sleutels (een tweede plek om bij te houden).
+
+## Het logboek van het beheer krijgt één schrijffunctie, en alleen toevoegen
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `audit_log` heeft per actie één rij: `created_at`, `user_id`, `action` (`item.hide` of `item.show`), `item_id` en `reason`.
+  Alleen `recordAction` (`apps/site/src/beheer/audit-log.ts`) schrijft erin, binnen dezelfde transactie als de wijziging zelf, dus er is geen wijziging zonder regel en geen regel zonder wijziging.
+  Een actie die niets verandert, zoals een bericht verbergen dat al verborgen is, schrijft niets.
+  Er is geen code die een rij wijzigt of verwijdert, en `audit-log.test.ts` leest de broncode van de site, de importer en het databasepakket om dat vast te houden: alleen `schema.ts` en `audit-log.ts` noemen de tabel, en `audit-log.ts` doet alleen een `INSERT`.
+- **Wat erin staat, en wat niet:** het nummer van het account en niet het e-mailadres, want de rij blijft bewaard en het adres van een ander is niet nodig om te weten wie het was (`admin_users` heeft het adres).
+  De reden is tekst van een moderator, hoogstens 300 tekens, en de pagina toont haar als tekst.
+  `recordAction` kopieert alleen die vier velden, dus een verzoek of een token kan er niet per ongeluk in komen.
+  `item_id` heeft geen foreign key, zodat de rij blijft als het bericht verdwijnt (bijvoorbeeld als zijn bron wordt verwijderd).
+  `user_id` heeft er wel een, zonder `ON DELETE`: een account met regels in het logboek is niet te verwijderen, en `admin:revoke` zet het uit.
+- **Waarom:** het logboek moet bewijzen wat een moderator deed, ook als die het later anders zegt, en daarvoor mag de site het niet kunnen aanpassen.
+- **Beperking:** "alleen toevoegen" is een afspraak in de code met een test, geen recht in de database.
+  De databasegebruiker van de site kan een rij nog wijzigen met eigen SQL, en een trigger of een gebruiker zonder `UPDATE` en `DELETE` verandert dat.
+  Dat kan later, als we het logboek tegen iemand met toegang tot de database moeten bewijzen.
+- **Alternatieven:** triggers die `UPDATE` en `DELETE` weigeren (de gebruiker met het recht `TRIGGER` kan ze weer weghalen, en het is meer om te onderhouden dan dit issue vraagt); het e-mailadres in het logboek zetten (persoonsgegevens, en een adres dat verandert).
+- **Later:** het logboek heeft ook de acties van de artikelen; zie _Een artikel schrijven geeft vier acties in het logboek, en schrijft alleen als er iets veranderde_.
+- **Later:** het logboek heeft ook regels van de import, zonder account, en de functie staat in het databasepakket; zie _Het logboek van het beheer heeft ook regels van de import, zonder account_.
+- **Lezen:** er is nog geen scherm voor.
+  `docs/acceptatieomgeving.md` heeft de vraag voor phpMyAdmin.
+
+## `/beheer/berichten` is een lijst met gewone formulieren, en toont wat de database nu zegt
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `/beheer/berichten` toont de 50 nieuwste berichten van alle bronnen, verborgen ook, als `NewsItem` met eronder het formulier om te verbergen (een veld voor de reden en de knop Verberg) of de reden en de knop Toon weer.
+  Het zoeken is een formulier met `method="get"` (`?q=`): `LIKE` op de kop en de link, met `%`, `_` en `|` als gewone tekens, hoogstens 100 tekens.
+  Verbergen en tonen zijn serveracties met het nummer van het bericht en de zoekopdracht gebonden aan de actie (zoals `logIn` het token), en worden toch opnieuw gecontroleerd, want ze komen van buiten.
+  De reden wordt één regel (besturingstekens en dubbele spaties worden één spatie), is verplicht en is hoogstens 300 tekens, geteld in tekens zoals de kolom ze telt.
+  Na elke actie gaat de pagina terug naar de lijst, met dezelfde zoekopdracht: een fout in het adres (`?fout=reden-leeg&bericht=<nummer>`), zoals het inloggen doet, en een melding dat het gelukt is (`?verborgen=<nummer>`).
+  De fout staat in een `ErrorSummary` bovenaan en bij het veld van dat bericht, de melding in een kaart met een kop.
+  Die melding komt uit de database van dat moment: `?verborgen=` zegt alleen iets over een bericht dat echt verborgen is, en een gemaakt adres kan de pagina dus niets laten beweren wat niet gebeurde.
+- **Waarom:** het werkt zonder JavaScript, en een moderator die een bericht uit een verwijderverzoek zoekt, vindt het met een stukje van de kop of de link.
+  De lijst gebruikt alleen componenten die er al zijn, dus er is geen nieuw onderdeel in het designsysteem.
+  De zinnen "Staat binnen vijf minuten niet meer op de site" en "weer op de site" kloppen: de homepage en `/podcasts` bewaren hun lijsten vijf minuten (`src/headlines.ts`, `src/podcasts.ts`), en `src/headlines-hidden.test.ts` bewijst met een echte database en de klok van de cache dat een bericht na 4 minuten en 59 seconden nog staat en na 5 minuten weg is.
+- **Alternatieven:** de cache leeghalen bij het verbergen (alleen in het proces dat de actie draait, en op de host kunnen er meer zijn); een vertraging in de zin (we zouden iets beloven wat we niet kennen); een client-component met `useActionState` zoals het contactformulier (de fout blijft dan alleen bij het veld, en 50 formulieren met JavaScript erbij zijn zwaarder); de reden in een tekstvak (een reden is één regel).
+- **Later:** zie _De lijst in het beheer heeft een schakelaar voor wel en niet op de site_ (2 november 2026): de lijst is nu twee groepen van elk de nieuwste 50, het zoekveld en de acties houden de groep vast, en bij een verborgen bericht staat ook wie het verborg.
+
+## Het beheer stuurt een referrer naar de eigen site, zodat formulieren zonder JavaScript werken
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** de `Referrer-Policy` van alles onder `/beheer` is `same-origin` en niet `no-referrer`.
+- **Waarom:** met `no-referrer` stuurt Chromium bij een formulier dat post `Origin: null`, en Next.js weigert dan elke serveractie ("Invalid Server Actions request").
+  Elk formulier van het beheer, het inloggen ook, werkte daardoor niet zonder JavaScript; met JavaScript gebruikt de pagina `fetch`, en dat stuurt het goede `Origin`.
+  Een browsertest zonder JavaScript liet het zien.
+  `same-origin` doet voor de inloglink hetzelfde als `no-referrer`: naar een andere site gaat geen referrer, dus de link in het adres blijft van ons.
+- **Alternatieven:** bij `no-referrer` blijven en het beheer alleen met JavaScript laten werken (dan haperen de formulieren juist bij wie geen JavaScript kan gebruiken); `Origin: null` toestaan in `serverActions.allowedOrigins` (de controle tegen vervalste verzoeken wordt dan zwakker).
+
+## De browsertest van het beheer zet een moderator met een sessie in de testdatabase
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** `e2e/admin.ts` maakt vóór de eerste test een moderator (`e2e-moderator@example.test`) en zijn sessie in de database van de controle, op dezelfde manier als `startSession`, en geeft de browser het cookie.
+  De token is voor elke run nieuw (`newToken`), staat in `E2E_ADMIN_TOKEN` voor de processen van de tests, en het account, de sessie, de logregels en de verzonnen berichten gaan er na de laatste test weer uit.
+  De opzet schrijft alleen naar een database op deze computer (`127.0.0.1`, `::1` of `localhost`) en stopt met een fout voor elke andere host.
+  `pages.spec.ts` kent een regel met `admin: true` voor een pagina van het beheer, en `admin.spec.ts` verbergt en toont een verzonnen bericht, met en zonder JavaScript.
+  De verzonnen berichten staan op de uitgezette testbron, zodat de homepage en `/podcasts` ze nooit tonen en een test die er een verbergt, niets verandert voor een andere.
+- **Waarom:** een inloglink is een mail, en een browsertest kan er geen volgen zonder mailbox.
+  De site krijgt er niets voor: geen route, geen omgevingsvariabele en geen vaste token, dus er is niets dat op acceptatie of productie een sessie kan maken.
+  `e2e/` zit niet in de build, en de weigering voor een andere host houdt een verkeerde `DATABASE_URL` tegen.
+  Een sessie die de controle zelf in de database zet, toetst wel `requireRole`, de cookie en de pagina, want de site leest de sessie net zo.
+- **Beperking:** de teardown verwijdert de logregels van het testaccount met een eigen `DELETE`, anders weigert de foreign key het account te verwijderen.
+  Dat mag alleen hier, op de database op deze computer; de site heeft geen manier om een regel te verwijderen.
+- **Alternatieven:** de inloglink uit de nepmailserver van het contactformulier halen en echt inloggen (dichter bij de werkelijkheid, maar elke test mailt dan en wacht, en de limiet van 5 links per kwartier raakt het); een route in de site die in testmodus inlogt (een deur die op acceptatie open kan staan); `SITE_ENV` als sleutel gebruiken (de controle draait met `acceptance`, dus dat zou juist die omgeving openzetten).
+
+## De pagina van de inloglink zegt dat de link klopt
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** boven de knop Inloggen staat "Deze link klopt. Kies hieronder Inloggen om binnen te komen." in plaats van "Je bent bijna binnen. Kies Inloggen om door te gaan."
+- **Waarom:** de extra klik na de link in de mail voelde als een fout (zie _De link in de mail toont een knop; de knop logt in_).
+  De pagina zegt eerst dat het goed gaat, en dan wat er nu moet gebeuren, in de woorden van de knop.
+- **Alternatieven:** de knop weghalen en bij het openen inloggen (breekt bij mailscanners, zie hetzelfde besluit).
+
+## Eén pagina `/wedstrijden` voor programma, uitslagen en stand
+
+- **Datum:** 25 oktober 2026
+- **Besluit:** programma, uitslagen en stand staan samen op één pagina, `/wedstrijden`, onder drie kopjes.
+  De blokken op de homepage linken er direct naartoe, de stand naar `/wedstrijden#stand`.
+- **Waarom:** supporters zoeken ze samen en één pagina is minder om te bouwen en te onderhouden.
+- **Alternatieven:** een pagina `/stand` apart (kortere pagina's, maar twee menu-items en twee keer een bronvermelding).
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de kaarten met cijfers staan niet meer op die pagina maar op `/statistieken`.
+  Programma, uitslagen en stand blijven op `/wedstrijden`.
+
+## Blokken onderaan de zijbalk
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de blokken "Wedstrijden" en "Stand" staan onderaan de zijbalk van de homepage, onder de discussies en de podcasts.
+  Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan dan onderaan de pagina.
+- **Waarom:** de projecteigenaar koos dit bij het bouwen van #271.
+  De specificatie van 25 oktober had ze bovenaan, boven de discussies en de podcasts, omdat de volgende wedstrijd het eerste is wat supporters willen weten.
+- **Alternatieven:** bovenaan de zijbalk, boven de discussies en de podcasts (de eerste specificatie van 25 oktober); in de hoofdkolom boven het nieuws (valt het meest op, maar verdringt het nieuws).
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): de zijbalk begint met het forum, dan Wedstrijden en Stand, en eindigt met de podcasts.
+
+## Het programma, de volgende wedstrijd en de uitslagen volgen uit de status
+
+- **Datum:** 26 oktober 2026
+- **Besluit:**
+  - het programma is elke wedstrijd van het lopende seizoen die niet gespeeld is (`scheduled` en `postponed`), op volgorde van de dag;
+  - een uitgestelde wedstrijd staat erin met "Uitgesteld" in plaats van een tijd, op haar oorspronkelijke dag;
+  - een wedstrijd blijft in het programma tot Wikipedia de uitslag heeft;
+  - de volgende wedstrijd van de homepage is de eerste wedstrijd van het programma met de status `scheduled`, dus niet een uitgestelde wedstrijd zonder nieuwe datum;
+  - de uitslagen zijn de gespeelde wedstrijden, de nieuwste bovenaan;
+  - het blok "Wedstrijden" op de homepage heeft alleen de vorige en de volgende wedstrijd, in één lijst van twee: de nieuwste uitslag en de volgende wedstrijd.
+    De projecteigenaar koos dit op 26 oktober 2026; de specificatie had de volgende wedstrijd en de laatste drie uitslagen.
+- **Waarom:** een uitgestelde wedstrijd zonder nieuwe datum is geen volgende wedstrijd, maar een supporter wil wel zien dat hij is uitgesteld.
+  Wie op de datum afgaat, laat een wedstrijd verdwijnen waarvan Wikipedia de uitslag nog niet heeft.
+- **Alternatieven:** een wedstrijd uit het programma halen zodra de dag voorbij is (de wedstrijd verdwijnt dan zonder uitslag); een uitgestelde wedstrijd als volgende wedstrijd tonen (staat dan weken bovenaan zonder datum).
+- **Later:** zie _De vorige en de volgende wedstrijd volgen uit de aanvangstijd, en een wedstrijd zonder uitslag zegt dat na twee uur_.
+  De uitgestelde wedstrijd zonder nieuwe datum, het blok met twee wedstrijden en de statistieken op de status `played` blijven zoals ze waren.
+
+## Een wedstrijd is een regel zonder link en zonder clubwapen
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het component `Match` toont de competitie en de ronde, de twee clubs met de uitslag ertussen, en daaronder de aftrap, "Thuis" of "Uit" en het stadion.
+  De thuisclub staat eerst en de regel zegt ook "Thuis" of "Uit", zodat een bezoeker niet hoeft af te leiden uit de volgorde.
+  De uitslag is "2–0" vanaf de kant van de thuisclub, en een schermlezer hoort "2 tegen 0".
+  De aftrap is een `Time` in Nederlandse tijd, het weekend ("weekend 12–14 februari", met de eerste dag voor machines) zolang de tijd niet bekend is, en bij een uitslag alleen de dag.
+  De wedstrijd heeft geen link, want een pagina per wedstrijd is #108, en er zijn alleen namen, geen clubwapens.
+- **Waarom:** de namen dragen de regel voor iedereen, ook met een schermlezer, en een wapen is een afbeelding van een ander, met rechten die we niet hebben.
+- **Alternatieven:** alleen de volgorde van de clubs voor thuis en uit (niet te zien voor wie het niet weet); een kolommentabel voor de wedstrijden (breed, en op een telefoon moet hij zijwaarts scrollen).
+
+## De stand is een tabel met een scrollgebied en een korte vorm voor de zijbalk
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** het component `StandingsTable` is een echte `table` met een bijschrift met de dag waarvoor de stand geldt, kolomkoppen met `scope` en een rijkop met de club.
+  - De kolommen zijn: positie, club, gespeeld, gewonnen, gelijk, verloren, doelpunten voor, doelpunten tegen, doelsaldo en punten.
+    De punten staan achteraan, zoals bij elke stand, en zijn vet, omdat de stand daarop is gesorteerd.
+  - De koppen zijn afkortingen met één letter waar dat kan: G, W, G, V en P, en DV, DT en DS.
+    G staat voor gespeeld en voor gelijk.
+    De projecteigenaar koos dit op 26 oktober 2026, want supporters begrijpen twee keer G beter dan een andere letter voor gespeeld.
+  - Wie ziet, leest de afkorting; de `title` geeft het volle woord onder een muis.
+    Een schermlezer hoort in elke kop het volle woord (verborgen tekst naast de afkorting), dus de twee G's klinken verschillend.
+    De volledige tabel heeft ook een regel eronder met alle afkortingen en hun woorden, want een `title` laat een telefoon niet zien.
+    De korte vorm in de zijbalk heeft die regel niet (de projecteigenaar, 26 oktober 2026).
+  - Het bijschrift is kort, "Stand op 18 oktober 2026", omdat het met de tabel meescrolt in het gebied en anders afgeknipt wordt op een telefoon.
+    Het is nu niet meer te zien, zie _De stand toont de dag niet_.
+  - Met alle kolommen staat de tabel in een eigen gebied dat zijwaarts scrolt, met `role="region"`, een naam en `tabindex="0"`, zodat het toetsenbord erbij kan en de pagina zelf niet zijwaarts scrolt.
+  - De korte vorm (`columns="compact"`) laat gewonnen, gelijk, verloren en de doelpunten weg en past in de zijbalk zonder te scrollen.
+    Het blok "Stand" op de homepage toont maar drie clubs, met sc Heerenveen in het midden: de club erboven en de club eronder, met hun echte plaats.
+    Staat sc Heerenveen bovenaan of onderaan, dan zijn het de eerste of de laatste drie (`standingsAround` in `src/matches.ts`).
+    De projecteigenaar koos dit op 26 oktober 2026; de volledige stand staat op `/wedstrijden`.
+  - De rij van sc Heerenveen is vet, heeft een balk aan het begin en een schermlezer hoort "(onze club)" achter de naam.
+- **Waarom:** de volledige tabel is op een telefoon te breed voor de pagina, en het scrollgebied houdt hem bruikbaar tot 400% inzoomen (1.4.10).
+  De korte vorm laat op de homepage zien waar het om draait: positie, gespeeld, punten en doelsaldo.
+- **Alternatieven:** de tabel kolommen laten weglaten met CSS op een telefoon (de volle woorden en de kolommen zijn dan niet te bereiken); altijd de korte vorm (de volledige stand ontbreekt dan op de pagina).
+- **Later:** zie _De stand toont alleen gespeeld en punten, en de volledige stand heeft een balk voor de punten_.
+  De kolommen W, G, V en D zijn vervallen, het scrollgebied met `label` ook, en de korte vorm verschilt nog door de balk en de uitleg van de afkortingen.
+- **Later:** zie _De stand toont geen doelpunten voor en tegen_.
+  De kolommen DV en DT zijn vervallen en DS heet nu D, en het bijschrift met de dag is niet meer te zien (zie _De stand toont de dag niet_); de tabel heeft nog positie, club, G, W, G, V, D en P, en de korte vorm laat alleen gewonnen, gelijk en verloren weg.
+- **Later:** zie _De punten staan voor het doelsaldo in de standtabel_.
+  De punten staan niet meer achteraan: de kolommen zijn nu positie, club, G, W, G, V, P en D.
+- **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
+  De afkortingen DV, DT en DS bestaan niet meer; het doelsaldo is S, en de letters komen uit één lijst.
+
+## De bronvermelding van Wikipedia is een component met een link per pagina
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `WikipediaCredit` zegt "Bron: Wikipedia (CC BY-SA 4.0)", linkt naar elke pagina waar het blok gegevens van heeft en naar de geschiedenis ervan, noemt de tijd van de laatste keer lezen in Nederlandse tijd en zegt dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
+  `/wedstrijden` heeft die volledige vorm, voor alle pagina's die de import las.
+  De tijd is de laatste `read_at` van die pagina's uit `wikipedia_pages`.
+  De twee kleine blokken op de homepage zeggen alleen "Bron: Wikipedia", zonder links (de projecteigenaar, 26 oktober 2026), want de volledige bronvermelding staat een klik verder, op `/wedstrijden`.
+  `WikipediaCredit` heeft daarvoor de korte vorm `compact`.
+  De link naar de geschiedenis zegt voor een schermlezer van welke pagina hij is.
+  "CC BY-SA 4.0" linkt naar de licentie.
+  Zijn er geen pagina's gelezen, zoals bij een lege database, dan staan er geen gegevens en dus ook geen bronvermelding.
+- **Waarom:** principe 4 van de Redactie vraagt altijd de bron, en de licentie vraagt de naam en een link.
+  Een component zorgt dat een pagina er niet omheen kan.
+  De geschiedenis van de pagina noemt de auteurs, zoals de licentie vraagt.
+- **Alternatieven:** de volledige vorm onder elk blok (de specificatie; lang voor een kaart in de zijbalk); één vaste link naar de pagina van het seizoen (de beker en het programma staan op andere pagina's); de licentie niet linken (dat vraagt de licentie wel).
+- **Hoe:** de seed zet ook de pagina's van de verzonnen wedstrijden in `wikipedia_pages` (`madeUpWikipediaPages`), zodat de bronvermelding er op acceptatie en in de toegankelijkheidscontrole ook is.
+- **Later:** zie _De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis_.
+  De bronvermelding linkt niet meer naar de geschiedenis van de pagina's en staat op `/wedstrijden` in een kaart zonder zichtbare rand en achtergrond.
+
+## De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de bronvermelding van Wikipedia staat in een kaart met dezelfde opvulling aan de zijkanten als de andere kaarten maar zonder zichtbare rand en achtergrond (`Card` met `surface="transparent"`), en linkt alleen naar de pagina van Wikipedia, niet naar zijn geschiedenis.
+  Ze zegt dus "Bron: Wikipedia (CC BY-SA 4.0), pagina: Eredivisie 2026/27", de tijd van de laatste keer lezen en dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.
+  `WikipediaCredit` heeft de eigenschap `historyHref` niet meer.
+- **Waarom:** de tekst staat dan op één lijn met de tekst in de kaarten erboven.
+  Eén link is rustiger, en Wikipedia aanvaardt een link naar het artikel als bronvermelding.
+- **Hoe:** de kaart zit in `SourceCredit` van de site, niet in `WikipediaCredit`, want de korte vorm onder de blokken op de homepage staat al in een kaart en die tekst staat al op één lijn met de rest.
+  De rand van de doorzichtige kaart blijft in de lay-out, zodat de tekst op dezelfde plek staat als in een kaart met een rand.
+  Boven en onder heeft hij geen opvulling: die telde bij de ruimte van 2 rem tussen de cellen op en gaf bijna 3,5 rem tussen de laatste kaart en de tekst, wat de projecteigenaar te veel vond (26 oktober 2026).
+  In forced colours heeft hij de kleur van de achtergrond, zodat hij ook daar niet te zien is.
+- **Alternatieven:** de bronvermelding zonder kaart laten (de tekst staat dan aan de rand van de kolom, naast de tekst in de kaarten); de link naar de geschiedenis houden (volledig, maar twee links in een zin die voor het oog een bijzaak is).
+  **Let op:** de CC BY-SA vraagt een aanduiding van de auteurs op een redelijke manier; een link naar het artikel voldoet volgens de uitleg van Wikipedia over hergebruik, maar geen jurist heeft dat getoetst.
+- **Later:** zie _De bronvermelding van Wikipedia staat dicht in een uitklap_.
+  De volledige vorm is een `details` met "Bron: Wikipedia" in de `summary`; de licentie, de pagina's, de tijd van het lezen en de zin over onze gegevens staan in de uitklap.
+  De doorzichtige kaart, het ontbreken van een link naar de geschiedenis en de korte vorm blijven.
+
+## De bronvermelding van Wikipedia staat dicht in een uitklap
+
+- **Datum:** 1 november 2026
+- **Besluit:** de volledige vorm van `WikipediaCredit` is een `details` met een `summary` die "Bron: Wikipedia" zegt, en staat dicht voor elke pagina, ook als er maar één is (de projecteigenaar, 1 november 2026).
+  De uitklap heeft de licentie "CC BY-SA 4.0" met zijn link, de pagina's met hun links, "Laatst gelezen op …" en de zin dat onze gegevens ook CC BY-SA 4.0 zijn.
+  De `summary` heeft geen link, want een klik doet dan twee dingen.
+  De korte vorm (`compact`) verandert niet.
+- **Waarom:** op Tegenstanders staat een link naar elk seizoen, en de bronvermelding was langer dan de lijst erboven.
+  "Bron: Wikipedia" is zonder klik te zien, zoals principe 4 van de Redactie vraagt, en de licentie en de pagina's zijn één klik verder.
+  Eén vorm is makkelijker te leren dan een vorm die afhangt van het aantal pagina's.
+- **Hoe:** een gewone `details`, zonder script: het werkt met het toetsenbord (Enter en spatie), een schermlezer meldt dat hij is in- of uitgeklapt en de browser zoekt ook in de dichte tekst.
+  Het pijltje is het icoon `arrow-down` in de kleur van de metatekst; het draait een halve slag als hij open is, met de tijden van de beweging, dus bij "minder beweging" klapt het om zonder te draaien.
+  De regel van de `summary` is minstens 44 pixels hoog om te raken met een duim.
+  De controle op de pagina's (`checkPage`) klapt elke `details` open voor axe, want axe slaat ingeklapte tekst over.
+- **Alternatieven:** alleen inklappen bij veel pagina's (twee vormen om te leren, en de grens is willekeurig); "Bron: Wikipedia (CC BY-SA 4.0)" met een link in de `summary` (een klik doet twee dingen); de pagina's weglaten (de licentie vraagt een aanduiding van de auteurs, en die staat in de link naar het artikel).
+- **Later:** zie _De uitklap van de bronvermelding van Wikipedia gaat zacht open en dicht_.
+  De uitklap springt niet meer, maar gaat over met zijn hoogte en zijn doorzichtigheid.
+
+## De uitklap van de bronvermelding van Wikipedia gaat zacht open en dicht
+
+- **Datum:** 1 november 2026
+- **Besluit:** de uitklap van `WikipediaCredit` gaat over met zijn hoogte en zijn doorzichtigheid, bij openen en bij sluiten, met `--hf-motion-duration-short` en `--hf-motion-ease-change`: dezelfde duur en curve als het pijltje.
+  Een browser die het niet kan, laat de uitklap springen zoals voorheen.
+  Wie om minder beweging vraagt, ziet geen overgang, want de duur is dan 0 s.
+  Dit is de ene uitzondering op de regel van het hoofdstuk Beweging dat wat opent of sluit niet van hoogte wisselt (de projecteigenaar, 1 november 2026).
+- **Waarom:** het pijltje draaide zacht terwijl de tekst sprong, en dat voelde ongemaakt.
+  De uitklap is een klik van de bezoeker zelf.
+  Hij staat onderaan een pagina en de tekst ervan is kort.
+  Daarom is een hoogte die meebeweegt hier te dragen, en elders blijft de regel gelden.
+- **Hoe:** alleen CSS, in `wikipedia-credit.css`, achter `@supports (interpolate-size: allow-keywords) and selector(::details-content)`.
+  `interpolate-size: allow-keywords` laat de browser naar `auto` bewegen, en `::details-content` is het vak dat de browser met de hoogte en de doorzichtigheid laat bewegen.
+  `content-visibility` gaat mee in de overgang (`allow-discrete`): tijdens het sluiten blijft de tekst zichtbaar, en daarna is hij weg voor het toetsenbord en de schermlezer, zoals bij een gewone dichte `details`.
+  Het vak knipt zijn hoogte af.
+  Daarom heeft het opvulling zo breed als de focusring (3 pixels dik, 2 pixels ervandaan) en een gelijke negatieve marge.
+  Zo wordt de ring van een link op de eerste of de laatste regel niet afgesneden, en blijft het vak even hoog.
+  De `details` heeft `display: flow-root`, anders valt de negatieve marge onderaan samen met die van de `details` zelf.
+  De `summary` heeft `position: relative` en `z-index: 1`, want het vak reikt 5 pixels onder de regel en nam anders de onderste 5 pixels van een klik weg.
+  Het element en de bediening zijn niet veranderd: Enter en spatie, de melding "uitgeklapt" en "ingeklapt" en de zoekfunctie van de browser werken zoals eerst.
+  Een test (`wikipedia-credit-css.test.ts`) bewaakt de middelen en dat de duur en curve gelijk zijn aan die van het pijltje.
+- **Browsers:** gemeten in Chromium 152 (de browser van het Browser-paneel van Claude en die van Playwright) en in WebKit van Playwright, op 390 en 900 pixels breed.
+  In Chromium gaat de uitklap zacht over.
+  WebKit kent `::details-content`, maar nog niet `interpolate-size`, dus daar springt de uitklap, en dat is de bedoelde terugval.
+  Firefox en Safari op een iPhone zijn niet gemeten.
+  Firefox kent `interpolate-size` ook niet, dus daar springt hij naar verwachting ook.
+  Zodra Safari en Firefox beide kennen, gaat de uitklap daar vanzelf zacht.
+- **Geen schokjes:** de pagina zelf springt niet.
+  Bij het openen blijft de `summary` op dezelfde plek op het scherm en groeit de pagina eronder; bij het sluiten, ook midden op de pagina, blijft hij op zijn plek en krimpt de pagina eronder.
+  Dat is gemeten per beeld met `requestAnimationFrame` op `/statistieken/tegenstanders`, met de scrollpositie, de hoogte van het document en de plaats van de `summary`.
+  Eén geval blijft over: de bezoeker staat helemaal onderaan met de uitklap open en sluit hem.
+  Het document wordt dan korter dan de pagina is gescrold, en de browser trekt de scrollpositie elk beeld mee.
+  De pagina schuift dan soepel mee in dezelfde 0,2 seconde en de `summary` zakt 156 pixels op een telefoon, tot het document zijn nieuwe lengte heeft.
+  Er is geen sprong, maar de `summary` blijft in dat ene geval niet op zijn plek, en de projecteigenaar neemt dat voor lief (1 november 2026).
+  Dat te voorkomen vraagt ruimte onderaan de pagina die voor elke bezoeker verandert hoe de pagina eindigt, of een script.
+- **Alternatieven:** een script dat de hoogte meet en zet (kost een clientcomponent voor één uitklap, en bewaart staat); `max-block-size` met een vaste waarde (een getal dat verkeerd wordt zodra de tekst langer is, en een eigen getal naast de tokens); alleen de doorzichtigheid laten bewegen (de uitklap blijft dan springen, en dat vroeg de projecteigenaar niet); extra ruimte onderaan de pagina (zie hierboven); `scrollIntoView` na het openen (de tekst staat al in beeld, want de footer geeft ruimte, en het is een script).
+- **Later:** vult _Beweging heeft vaste duren en curves, en valt bij minder beweging op één plek weg_ (27 oktober 2026) aan: de regel dat wat opent of sluit niet van hoogte wisselt, kent nu deze ene uitzondering.
+- **Later:** vult _De bronvermelding van Wikipedia staat dicht in een uitklap_ (1 november 2026) aan: de uitklap springt niet meer, hij gaat over met zijn hoogte en zijn doorzichtigheid.
+
+## Zoeken in koppen, afleveringen en artikelen, met LIKE
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** de zoekpagina zoekt in de titels van berichten en podcastafleveringen die de site toont en in de titel en inleiding van de artikelen van de redactie, met `LIKE` waarbij alle woorden moeten voorkomen.
+  De resultaten staan met de nieuwste bovenaan.
+- **Waarom:** het zijn de teksten die we zelf bewaren en tonen.
+  Forumonderwerpen bewaren we maar een handvol van, dus de dekking zou slecht zijn.
+  `LIKE` vindt ook woorden van twee letters (LC, VI, AZ) en een deel van een woord, en hangt niet af van een instelling van de hosting.
+  Bij enkele duizenden berichten per jaar is een zoekopdracht zonder index snel genoeg: op een database met 10.000 berichten duurt ze 7 tot 14 milliseconden.
+- **Hoe:** `searchPublic` in `packages/db/src/queries.ts` doet twee vragen, een op `items` en een op `articles`, en voegt de nieuwste resultaten samen.
+  Het aantal resultaten komt uit dezelfde vraag, met `count(*) over ()`.
+  Elk woord is `LIKE '%woord%' escape '|'`: `%`, `_` en `|` krijgen een escape-teken, zodat `%`, `_` en `\` zichzelf zoeken.
+  Hoofdletters en accenten tellen niet door de collatie `utf8mb4_unicode_ci` van de kolommen, die `search.test.ts` van `@fansite/db` controleert.
+  Een bericht telt mee onder dezelfde voorwaarden als op de homepage (`isShown`, een bron die aanstaat, niet later dan nu), een artikel als het gepubliceerd is.
+- **Alternatieven:** FULLTEXT in MariaDB (rangschikt op passendheid, maar vindt woorden korter dan de minimale lengte niet en hangt af van een serverinstelling die we niet kennen); alleen koppen (podcasts en artikelen blijven onvindbaar); ook forumonderwerpen (onvolledig).
+
+## De zoekpagina staat in de footer, met de lijst met spelers in de zijbalk
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** "Zoeken" is een item van het menu in de footer, het eerste, en leidt naar `/zoeken`, met het formulier en de resultaten in de hoofdkolom en de lijst met spelers in de zijbalk (op een smal scherm eronder).
+  Het hoofdmenu verandert niet.
+- **Waarom:** er is nog weinig inhoud, en de header moet nog een nieuw ontwerp krijgen, zei de projecteigenaar op 26 oktober 2026.
+  Een gewone link werkt zonder JavaScript, en de footer heeft al de andere pagina's over de site zelf.
+  De lijst helpt als je niet weet waar je naar zoekt, en zonder vraag staat ze direct onder het formulier.
+- **Nadeel:** de zoekpagina is minder zichtbaar dan in het hoofdmenu, en het menu in de footer wijst de huidige pagina niet aan.
+- **Hoe:** het formulier en de resultaten staan samen in één kaart, zodat de zijbalk er op een breed scherm gelijk mee begint.
+  Voor een zoekvraag, als er nog geen resultaten zijn, heeft de kaart het blauwe vlak (`surface="soft"`); met resultaten is ze wit, zoals de andere kaarten.
+  Boven de lijst met spelers staat "Zoek snel op een achternaam."
+  De lijst staat na de resultaten in de bron, dus onder de resultaten op een smal scherm, en ze is van `players` van het lopende seizoen (`listSquad`), per positie.
+  Elke naam is een gewone link naar `/zoeken?q=<achternaam>`, met de zoekterm uit de tabel.
+  De bronvermelding onder de lijst is `WikipediaCredit`, met het woord `selectiegegevens` voor onze eigen gegevens (eigenschap `data`), want de standaardzin noemt de wedstrijdgegevens.
+  `listSquad` is de ene plek die bepaalt wie in de lijst staat: de vlag `in_squad` van #333 is één voorwaarde in de `where` van die vraag (zie _Spelers hebben een vaste `id`, en doelpunten verwijzen ernaar_).
+- **Alternatieven:** een item in het hoofdmenu (zoals het issue voorstelde: zichtbaarder, maar het menu breekt op een telefoon al af en de header krijgt een nieuw ontwerp); een zoekveld in de kop op elke pagina (altijd een stap dichtbij, maar breed en het vraagt een ontwerp van de kop); de lijst altijd boven de resultaten (prominent, maar op een telefoon schuiven de resultaten naar beneden).
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de pagina staat op `/nieuws/zoeken` en staat ook in de balk van Nieuws.
+  Het item "Zoeken" in de footer blijft en wijst naar het nieuwe adres; `/zoeken` vervalt zonder omleiding.
+
+## De zoekpagina laat woorden van één teken niet toe, toont hoogstens 100 resultaten en staat niet in de sitemap
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** een vraag met een woord van één teken, zoals "a" of een los streepje in "Heerenveen - Ajax", krijgt een uitleg bij het veld en doet niets in de database.
+  De pagina laadt in stappen van vijf tot hoogstens 100 resultaten, en zegt daarna dat dit de nieuwste zijn en dat meer woorden minder resultaten geven.
+  `/zoeken` staat niet in `pages.ts` en dus niet in de sitemap, maar de teller van het bezoek telt de pagina, zonder de vraag.
+- **Waarom:** het issue zegt "woorden van minstens 2 tekens", en een woord van één teken vindt vrijwel alles en kost de hosting het meeste.
+  Zwijgend weglaten zou een andere vraag stellen dan de bezoeker typte.
+  Zonder grens zou `?aantal=` de hosting op te veel rijen laten werken; 100 is ook wat de homepage toont.
+  Een pagina met resultaten is `noindex`, dus een zoekmachine heeft niets aan een regel in de sitemap.
+- **Nadeel:** "Heerenveen - Ajax" werkt niet; de bezoeker moet het streepje weglaten.
+  Er is geen archief voor wie verder terug wil zoeken (#26).
+- **Alternatieven:** woorden van één teken stilzwijgend negeren (de vraag verandert zonder dat de bezoeker het ziet); geen grens aan het aantal resultaten (een bezoeker kan de database zwaar belasten met een adres); de pagina in de sitemap (een zoekmachine zou pagina's overslaan die `noindex` zijn).
+- **Hoe:** `Input` van het designsysteem krijgt het type `hidden`, voor de knop "Laad 5 meer", die de vraag meeneemt in een `GET`-formulier.
+  `NewsItem` krijgt `internal` voor een artikel van de redactie, zodat het pictogram voor een link naar een andere site wegblijft.
+- **Later:** er is nu een archief voor wie verder terug wil, zie _Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron_; het zoeken blijft `/zoeken`.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de pagina staat op `/nieuws/zoeken` en niet meer op `/zoeken`.
+  De regels voor woorden van één teken, de grens van 100 resultaten, de sitemap en de teller blijven.
+
+## Een gepubliceerd anker staat in `src/anchors.ts`, en de rooktest bewaakt het
+
+- **Datum:** 26 oktober 2026
+- **Besluit:** `apps/site/src/anchors.ts` bevat per pagina de ankers die we hebben gepubliceerd.
+  De rooktest (`checkAnchors`) faalt als een van die ankers niet meer op zijn pagina staat, als een kop met een anker er niet in staat, en als een `id` twee keer op een pagina voorkomt, ook als het botst met het `id` van iets anders, zoals `nieuws-3` op de homepage.
+  Een pagina die verhuisd is, moet blijvend doorverwijzen (301 of 308), en de rooktest zoekt het anker op de pagina waar de doorverwijzing eindigt.
+  Een anker weghalen is een keuze: je haalt het uit de lijst, of je laat het als oud anker (`aliases`) staan.
+  Op Updates hoort bij elke versie in `CHANGELOG.md` een anker, dus een nieuwe versie hoeft niet in de lijst.
+- **Waarom:** een anker is een belofte aan wie ernaar linkt.
+  Een lijst in de repository en één controle in de rooktest, die de gebouwde pagina's al ophaalt, is de lichtste vorm die een verdwenen anker vangt.
+  De lijst is ook de plek waar je ziet wat we beloven.
+- **Gevolg:** de kop van een versie op Updates heet nu `versie-0-1-0`, want een punt hoort niet in een anker.
+  Het oude `versie-0.1.0` blijft als oud anker, en de feed linkt er nog naar, omdat die link de `guid` is en een nieuwe `guid` elke versie als nieuw toont in een feedlezer.
+  De kop van `/wedstrijden` met de wedstrijden zonder tegendoelpunt heet nu `de-nul-gehouden`, met `nul-gehouden` als oud anker.
+  `/bronnen` heeft ankers voor elk soort bron (`nieuws`, `podcasts`, `forum`, `club`, `video`) en voor de twee kaarten in de zijbalk (`voorstellen`, `uitgever`).
+  De Engelse `id`'s die daar alleen voor `aria-labelledby` dienden (`news-heading`) zijn daarvoor vervangen, want een kop met een anker heeft een Nederlands `id`.
+  `/podcasts` heeft geen anker: de kop "Over" met de naam van de podcast staat er alleen bij een gekozen podcast, en niemand linkt naar dat deel.
+- **Alternatieven:** een controle op de bronbestanden in plaats van de gebouwde pagina's (ziet niet wat de bezoeker krijgt, en niet de ankers die uit gegevens komen); alle ankers uit de pagina's halen en bewaren in een bestand dat de build maakt (de lijst is dan geen keuze meer, maar een afspiegeling); een toets in de e2e-controle in de browser (trager, en axe toetst dit niet).
+- **Later:** op `/bronnen` staat een derde kaart in de zijbalk, de nieuwsbrief van de LC, met het anker `nieuwsbrief-lc`.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de ankers van de negen kaarten met cijfers, zoals `de-nul-gehouden` met het oude `nul-gehouden`, verhuizen naar `/statistieken`.
+  Op `/wedstrijden` breken ze, zonder omleiding.
+
+## De themaschakelaar is één knop rechtsboven in de header
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de header heeft rechtsboven één schakelknop zonder tekst, met een gevulde zon in het lichte thema en een gevulde maan in het donkere.
+  De knop is rond.
+  In rust is hij ingehouden: alleen het pictogram, zonder rand en vulling.
+  Onder de muis (alleen met een muis), ingedrukt en bij focus komen de rand en de vulling terug.
+  De footer heeft geen schakelaar meer.
+  De drie toestanden achter de knop blijven zoals ze waren.
+- **Hoe:** de knop is het nieuwe component `ThemeButton` van het designsysteem, want de sjablonen van de site bevatten geen HTML.
+  De naam is "Donker" en `aria-pressed` is waar in het donkere thema, dus een schermlezer hoort de naam en de stand.
+  Het pictogram is 26 pixels in een knop van 44 bij 44 pixels.
+  In rust is het pictogram blue-400 (5,3:1 in licht en 4,2:1 in donker op de header, boven de 3:1).
+  Onder de muis, ingedrukt en bij `:focus-visible` is het blue-50, met een rand van blue-200 op 55% en een vulling van blue-200 op 14%.
+  De overgang duurt 0,2 seconde en valt bij "minder beweging" weg.
+  Onder de muis geldt alleen met `hover: hover`, zodat er na een tik op een telefoon niets blijft oplichten.
+  Ingedrukt (`:active`) geldt ook op touch.
+  De focusrand is blue-300, 3 pixels, met 2 pixels ruimte.
+  Vier nieuwe tokens geven de kleuren: `--hf-colour-icon-on-header-quiet`, `--hf-colour-border-on-header-strong`, `--hf-colour-background-on-header-hover` en, voor de lijn boven het menu, `--hf-colour-border-on-header`.
+  `ThemeToggle` van de site houdt de logica (`theme.ts`, `public/theme.js` en de sleutel `fansite-theme` veranderen niet) en tekent nu een `ThemeButton`.
+  De knop is er pas na het hydrateren, dus zonder JavaScript heeft de eerste rij alleen het logo en is de HTML voor iedereen gelijk.
+  De focus gaat van het logo naar de themaknop en dan naar het menu.
+  Dat is ook de volgorde op het scherm: de knop staat in de eerste rij en het menu in de tweede.
+- **Waarom:** de knop staat op de eerste plek waar een bezoeker hem verwacht, en wie hem zoekt hoeft niet naar de footer.
+  Het menu krijgt de ruimte die de twee knoppen nodig hadden.
+  Het pictogram toont het thema dat je ziet en `aria-pressed` zegt het ook; zo is de stand niet alleen aan kleur te zien.
+  Het besluit van 24 oktober 2026 koos twee knoppen omdat een knop die naar het tegenovergestelde schakelt minder duidelijk zegt welk thema je ziet.
+  Een schakelknop met een pictogram voor de stand en `aria-pressed` lost dat op.
+- **Alternatieven:** twee knoppen in de header; die nemen de ruimte in die het menu nodig heeft.
+  Of één knop waarvan het pictogram het thema toont waar je naartoe gaat (een maan in het lichte thema); dat wordt vaak verkeerd gelezen als de stand.
+  Of de schakelaar ook in de footer houden; dat zijn twee plekken die gelijk moeten blijven.
+  Of de knop met `SegmentedControl` bouwen; dat component is voor een keuze uit een paar opties met tekst, en blijft in het designsysteem voor andere plekken.
+- **Later:** vervangt _Licht of donker: twee knoppen, drie toestanden, en een keuze gelijk aan het systeem wordt vergeten_ (24 oktober 2026) voor de plek en het aantal knoppen.
+  De drie toestanden en het vergeten van een keuze gelijk aan het systeem blijven.
+- **Later:** zie _Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat_ (27 oktober 2026).
+  Het pictogram in rust, de naam, `aria-pressed` en de kleuren blijven; alleen onder de muis en bij focus is het pictogram dat van het andere thema.
+
+## Het hoofdmenu staat in een eigen rij onder de sitenaam
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** het hoofdmenu staat in een eigen rij onder het logo, met een dunne lijn erboven (1 pixel, blue-200 op 35%).
+  Alle onderdelen staan in blue-50 (14,5:1 in licht en 11,4:1 in donker op de header), gewicht 500 en een lettergrootte die meegroeit met het venster (`clamp(1rem, 0.86rem + 0.69vw, 1.25rem)`: 16 pixels op 320 pixels breed, 20 pixels vanaf 900 pixels), met 1 rem tussen de onderdelen en minstens 44 pixels hoog.
+  De huidige pagina heeft dezelfde tekstkleur en een rode streep van 3 pixels op 0,35em onder de tekst, zonder afbreking bij letters met een staart.
+  Forum staat rechts en houdt zijn pictogram; er staat geen scheidingslijn tussen de onderdelen.
+  Hoe een onderdeel eruitziet onder de muis, ingedrukt of bezocht, blijft zoals het was, behalve dat de streep onder de muis nu op dezelfde plek staat als de rode streep van de huidige pagina (0,35em onder de tekst, zonder afbreking).
+- **Hoe:** de header is een raster met twee kolommen, de eerste voor het logo en de tweede voor de themaknop, en het menu beslaat beide kolommen op een eigen rij.
+  Zo staat het menu op elke breedte onder het logo, ook als er naast het logo plek over is, en blijft het in de kolom van de pagina, in lijn met de inhoud.
+  Forum staat rechts doordat het laatste onderdeel van het menu in de header een automatische marge aan het begin heeft.
+  Tussen de lijn en het menu zit 0,25 rem, en onder het menu 0,4375 rem.
+  Boven het logo zit 0,75 rem, tussen het logo en de lijn 0,25 rem en tussen het logo en de knop 0,5 rem, zodat de header ongeveer 128 pixels hoog is op een breed scherm.
+  Op 320 pixels past "FANSITE sinds 1997" door die 0,5 rem net op één regel; met 1 rem miste het 2 pixels, en kwam "sinds 1997" op een eigen regel.
+  `text-wrap: balance` op de tekst van het logo verdeelt de regels over de breedte.
+  Het logo staat in de link om het logo bovenaan de regel (`vertical-align: top`), zodat de link zo hoog is als het logo en niet als een regel tekst: daarvoor zat er 7 pixels onder het logo.
+  Een flexcontainer om het logo zou de onderstreping van de link op het logo doorgeven, dus het logo blijft een inline-element.
+  Op 390 pixels staan de vier onderdelen op één rij; op 320 pixels gaat Forum naar een tweede rij en blijft rechts staan.
+- **Waarom:** naast het logo had het menu weinig ruimte, vooral op een smal scherm, waar het onder het logo ombrak.
+  Een eigen rij geeft elk onderdeel dezelfde plek op elke breedte.
+- **Alternatieven:** het menu naast het logo houden; dan blijft de ruimte krap.
+  Of de onderdelen in het halfvet houden (gewicht 600) of in een eigen, lichtere balk zetten; de eigenaar koos op het canvas voor een lijn erboven, en bij het bouwen voor gewicht 500 (eerst 400).
+  Of grotere afstanden tussen de onderdelen; dan valt Forum op 390 pixels op een tweede rij.
+  Of het menu inklappen achter een knop op een smal scherm; dat verbergt de belangrijkste links.
+- **Later:** vervangt de opmaak van _Het hoofdmenu begint met Nieuws, en de huidige pagina krijgt een rode streep_ (22 oktober 2026): halfvet en de lichtblauwe kleur zijn gewicht 500 en de lichtste kleur geworden.
+- **Later:** zie _Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter_ (27 oktober 2026) voor de maat en het gewicht: nu 600 en 16 tot 18 pixels, en de huidige pagina op 800 met zijn rode streep.
+- **Later:** zie _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_ (28 oktober 2026): het menu staat niet meer in de `header` maar in een `nav` direct erna, op hetzelfde blauw.
+  De rij, de lijn erboven, de afstanden, het gewicht en de maten blijven zoals ze zijn.
+- **Later:** zie _Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen_ (28 oktober 2026): een menu met zes of meer onderdelen en een `moreLabel` heeft op een smal scherm de knop "Meer" in plaats van een rij die omloopt.
+  Bij vijf onderdelen of minder blijft de rij zoals hij was, en de knop "Meer" is een knop in de rij, geen menuknop die alles verbergt.
+- **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de ruimte boven het logo is 1 rem, niet 0,75 rem.
+  De ruimte onder het logo en naast de knop blijft 0,25 en 0,5 rem, nu als `--hf-space-xs` en `--hf-space-s`.
+
+## Onder de muis en bij focus toont de themaknop het thema waar je naartoe gaat
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** in rust toont de themaknop het thema dat je ziet.
+  Onder de muis (met een muis) en bij focus met het toetsenbord gaat het pictogram over in dat van het andere thema.
+  Na een klik blijft het pictogram van het nieuwe thema staan tot de aanwijzer of de focus weggaat.
+- **Hoe:** de zon wordt de maan en de maan wordt de zon in 0,4 seconde.
+  De duur staat op één plek, in de eigenschap `--hf-theme-button-morph` in `theme-button.css`.
+  De kleur, de rand en de vulling blijven 0,2 seconde.
+  De schijf van de zon groeit uit tot de maan, en een tweede schijf schuift er van rechtsboven in en drukt de deuk erin.
+  De stralen lossen naar buiten op, de knop in.
+  Van maan naar zon krimpt de schijf weer, en de stralen komen uit de schijf naar buiten en worden zichtbaar.
+  Dat zijn alleen verschuivingen en schalen van twee cirkels en acht lijnen, die allemaal volgen uit één getal (0 is de zon, 1 is de maan).
+  Daarom tekent elke browser hetzelfde: Chromium en WebKit, de engine van Safari, getest; Firefox niet getest.
+  Met "minder beweging" wisselt het pictogram zonder overgang.
+  Het voorbeeld onder de muis is dan nog steeds te zien, en dat is waar het om gaat; een knop die niet wisselt zou onder de muis niets zeggen.
+  De knop onthoudt een klik in `data-settled`, en haalt dat weg bij `pointerleave` en `blur`.
+  Ingedrukt (`:active`) laat het pictogram niet wisselen: op een apparaat zonder muis blijft het de toestand van het besluit van de themaknop.
+  De zon en de maan van de knop zijn eigen tekeningen in `ThemeButton`, want `Icon` tekent maar één pictogram tegelijk.
+  Wat een schermlezer hoort, verandert niet: de naam is "Donker", `aria-pressed` volgt het thema dat je ziet, en het pictogram blijft verborgen voor hulpsoftware.
+  De zon en de maan zelf blijven dekkend en hebben dezelfde kleur, dus ze halen ook halverwege 3:1 op de header; alleen de stralen worden doorzichtig terwijl ze oplossen.
+- **Waarom:** een knop zonder tekst moet laten zien wat er gebeurt als je erop drukt.
+  Het pictogram in rust zegt welk thema het is, het voorbeeld onder de muis zegt wat je kiest.
+  Zo gaat het niet fout met de vraag wat een zon bedoelt: "nu licht" of "naar licht".
+- **Alternatieven:** het pictogram altijd het thema laten tonen waar je naartoe gaat; dat wordt vaak gelezen als de stand, en dat was de reden voor het besluit over de themaknop.
+  Of het pictogram niet laten veranderen en alleen een titel (tooltip) tonen; dat is traag, werkt niet met het toetsenbord en niet op touch.
+  Of de vorm van de zon laten overgaan in die van de maan met de CSS-eigenschap `d`; Safari kent die niet, en dan is een tweede overgang nodig.
+- **Later:** vult het besluit _De themaschakelaar is één knop rechtsboven in de header_ (27 oktober 2026) aan: het pictogram toont het thema dat je ziet in rust, en het andere thema onder de muis en bij focus.
+
+## Een balk onder de kop voor de links naar de kaarten, alleen op een smal scherm
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** `/wedstrijden` krijgt op een smal scherm een zandkleurige balk direct onder de kop, buiten `main`, met het label "Op deze pagina:" en een rij links naar de kaarten die zijwaarts scrolt.
+  Op een breed scherm is ze er niet: vanaf 56 rem, de breedte waarop `Page.Body` twee kolommen heeft, is ze `display: none`, dus ook voor een schermlezer weg.
+  Dit vervangt de rij links als blok in de hoofdkolom, die de projecteigenaar te groot en een beetje kleurloos vond, en waarin de links verdwijnen in de ruimte.
+- **Waarom:** de balk staat bij het menu, en daarmee bij de andere navigatie, in een eigen `nav` buiten `main`.
+  Een navigatie na de kaart Programma helpt niet om langs het lange programma te komen.
+  Bovenaan staat de balk er meteen, met het label erbij.
+- **Hoe:** het onderdeel is `Page.Shortcuts`, een label en een lijst links, niet gebonden aan ankers.
+  Het getal 56 rem staat in `shortcuts.css`, en `shortcuts-css.test.ts` controleert dat het hetzelfde is als dat van de twee kolommen in `page.css`.
+  De zes links staan in `apps/site/src/matchShortcuts.ts`, en een test controleert dat elke link naar een kop op de pagina gaat.
+  Een link naar een kaart is het anker op de kop (`#stand`).
+  De browser scrolt de kop in beeld en zet het beginpunt voor Tab daar, dus de volgende Tab gaat naar de link in de kop.
+- **Alternatieven:** een rij links als blok in de hoofdkolom (het eerste ontwerp); een navigatie die altijd zichtbaar is (neemt ruimte op een breed scherm waar het niet nodig is); een samenvatting met openklappende kaarten (JavaScript en meer klikken); de kaarten opnieuw ordenen met de stand bovenaan (de stand is niet wat de meeste supporters het eerst zoeken).
+- **Later:** de balk kent nu een huidige plek: de link naar de kaart waar de bezoeker is, heeft `aria-current="location"` en een rode streep (zie _De balk met links naar de kaarten volgt de pagina_, 28 oktober 2026).
+  #286 zei nog dat geen link is gemarkeerd.
+- **Later:** zie _Het submenu is een tweede balk in een tint van de kop, zonder label_ (27 oktober 2026).
+  Dit besluit zei dat dezelfde balk later de subpagina's kon tonen.
+  Dat wordt een eigen onderdeel, `Page.Submenu`, onder het menu en voor deze balk, in een tint van de kop.
+  Deze balk blijft zandkleurig in licht, blijft voor ankers, plakt als enige en is vanaf 56 rem nog steeds weg.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de balk geldt voor `/wedstrijden` en voor `/statistieken`, elk met de links naar zijn eigen kaarten.
+
+## De balk komt via een slot in de layout, een parallelle route
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** `layout.tsx` zet een slot `@shortcuts` tussen `Page.Header` en `Page.Body`, en `app/@shortcuts/wedstrijden/page.tsx` vult het met de balk.
+  Een pagina zonder eigen route in het slot krijgt een leeg slot (`@shortcuts/page.tsx` voor de homepage, `@shortcuts/[...rest]/page.tsx` voor de rest, en `default.tsx`).
+- **Waarom:** de layout zet de inhoud van elke pagina in `Page.Body`, en de balk moet erbuiten staan, over de hele breedte, tussen de kop en `main`.
+  Een slot doet dat in de HTML van de server, zonder JavaScript dat de balk verzet, met de leesvolgorde en de tabvolgorde van de pagina.
+  De route in het slot hoort bij het pad van de pagina, dus een pagina krijgt de balk door één bestand erbij te zetten.
+  Op een pagina waarvan de gegevens niet te lezen zijn, toont de balk niets, want de foutpagina heeft geen kaarten om naartoe te springen.
+- **Nadeel:** de lege routes zijn nodig, omdat een slot bij een klik op een link binnen de site anders de balk van de vorige pagina houdt.
+  De map `@shortcuts` is geen pagina en geen adres: de tests van het sitemap, de bezoekregels en de gereserveerde adressen slaan hem over.
+  Het slot is een segment onder de layout, dus de titelsjabloon van de layout bereikt nu ook de homepage.
+  De foutpagina van de homepage zet haar titel daarom met `absolute`, zodat die blijft zoals hij was.
+- **Alternatieven:** de balk in `Page.Body` zetten en met CSS naar buiten trekken (breedte, marges en de randen van het scherm moeten dan kloppen op elke breedte); de balk met JavaScript naar de goede plek verzetten (de balk springt na het laden, en zonder JavaScript staat hij verkeerd); `Page.Body` uit de layout halen en elke pagina de eigen laten zetten (elke pagina verandert voor één balk); een routegroep met een eigen layout voor `/wedstrijden` (alle pagina's verhuizen).
+- **Later:** zie _Het beheer heeft een balk onder de kop met de schermen, en geen eigen schil_ (2 november 2026): ook `/beheer` heeft een route in het slot, voor de balk met de schermen van het beheer.
+
+## Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** de links in het hoofdmenu van de kop zijn 16 pixels op 320 pixels breed en 18 pixels vanaf 900 pixels (`clamp(1rem, 0.93rem + 0.34vw, 1.125rem)`), op gewicht 600.
+  De huidige pagina staat op gewicht 800 en heeft zijn rode streep.
+  Het menu in de footer en elders blijft zoals het was.
+- **Waarom:** 20 pixels is te groot.
+  Onder het menu komt een submenu (#363) en op een telefoon is de maat gelijk, dus het gewicht moet het niveau tonen.
+  Een zwaardere huidige pagina is beter te zien dan alleen een streep.
+- **Alternatieven:** een kleiner submenu (15 pixels) en gewicht 500 voor beide; dat is leesbaar maar laat het gewicht gelijk.
+  Maat en gewicht tegelijk veranderen, wat het submenu op blauw te zwak maakt.
+- **Later:** vervangt de maat en het gewicht van _Het hoofdmenu staat in een eigen rij onder de sitenaam_ (27 oktober 2026): niet 500 en 16 tot 20 pixels, maar 600 en 16 tot 18 pixels, en de huidige pagina niet alleen met de rode streep maar ook op gewicht 800.
+  De rij, de kleur, de streep en de ruimte blijven.
+- **Later:** zie _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026): de gewichten 600 en 800 blijven, maar staan nu in `--hf-menu-font-weight` en `--hf-menu-current-font-weight`.
+
+## De balk met links naar de kaarten volgt de pagina
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** de link naar de kaart waar de bezoeker is, krijgt `aria-current="location"` en een rode streep van 3 pixels onder de tekst, en staat vooraan in de rij.
+  Welke kaart dat is, bepaalt de kop die als laatste langs een lijn net onder de plakkende balk is gekomen.
+  Vóór de eerste kop is er geen huidige link.
+  De rij scrolt zelf (nooit de pagina), vloeiend en zonder animatie bij "minder beweging", en niet terwijl de bezoeker de rij aanraakt of de focus erin heeft.
+  Het is een kleine clientcomponent in `ShortcutsRow`.
+- **Waarom:** op een telefoon staan de kaarten onder elkaar en is de pagina lang.
+  De bezoeker ziet zo welk deel hij leest en heeft de link naar het volgende deel bij de hand.
+  Het gewicht verandert niet, zodat de rij niet verspringt als de huidige link wisselt.
+  `aria-current="location"` is voor een plek op een pagina, `page` voor een pagina in het menu.
+- **Hoe:** `followPage.ts` zoekt de koppen via de `href` van de links (`#stand` wijst naar het element met dat `id`) en zet er een `IntersectionObserver` op.
+  De lijn ligt waar een klik op de link de kop neerzet, plus één pixel, zodat een kop na een klik meteen de huidige is.
+  Dat is de ruimte die de pagina onder de balk houdt (`scroll-padding-block-start`) plus de ruimte die de kop voor zichzelf houdt (`scroll-margin-block-start`).
+  Die tweede ruimte verschilt per kop, dus elke kop krijgt een eigen observer met een eigen lijn.
+  Elke observer kijkt van de lijn tot het einde van de pagina.
+  Zo meldt de browser ook een kop die de pagina overslaat bij een sprong, en meldt hij alleen wanneer een kop de lijn passeert.
+  De component meet de pagina niet tijdens het scrollen.
+  Het venster krijgt een andere maat of de tekst wordt groter: dan meet de component de lijnen opnieuw.
+  Onderaan de pagina kan de laatste kaart niet tot de lijn komen, en dan passeert er geen kop meer.
+  Daarom kijkt één controle per beeld (`requestAnimationFrame`) of de pagina op de bodem is.
+  Staat de kop van de laatste kaart dan in beeld, dan is de laatste link de huidige.
+  Een klik op een link maakt die link de huidige, tot de bezoeker zelf weer scrolt (`wheel`, `touchstart` of een toets).
+  Zo loopt de balk niet langs de kaarten die een sprong passeert.
+  De streep is de onderstreping van de tekst, dus ze blijft in geforceerde kleuren.
+  Ze heeft een eigen rol, `--hf-colour-accent-shortcuts`: rood-600 in licht (4,77:1 op de balk) en rood-400 in donker (5,34:1).
+  Het rood van de header, `--hf-colour-accent-on-header`, haalt op de zandkleurige balk maar 2,43:1.
+  Vanaf 56 rem is de balk `display: none` en luistert de component niet naar het scrollen.
+- **Alternatieven:** de huidige link vet maken (de link wordt breder en de rij verspringt).
+  Een rij die niet meescrolt (de huidige link kan buiten beeld zijn).
+  CSS met `scroll-target-group` en `:target-current` (geen JavaScript, maar alleen Chrome kent het nu).
+  De rij die altijd op de uiterste plek scrolt, of op de dichtstbijzijnde rand: onvoorspelbaarder dan altijd vooraan.
+  Een `scroll`-handler die per beeld de koppen meet: dat kost meer dan een observer.
+- **Later:** vult het besluit _Een balk onder de kop voor de links naar de kaarten, alleen op een smal scherm_ (27 oktober 2026) aan: de balk kent nu een huidige plek.
+- **Later:** zie _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026): het gewicht verandert nu wel.
+  De huidige link staat op 700 tegen 500 voor de andere links, en de rij scrolt daarna nog altijd zo dat hij vooraan staat.
+
+## Het submenu is een tweede balk in een tint van de kop, zonder label
+
+- **Datum:** 27 oktober 2026
+- **Besluit:** subpagina's staan in een balk onder het hoofdmenu in een tint van de kop (licht blauw-800, donker blauw-700), op elk scherm, met een onzichtbare naam en zonder zichtbaar label.
+  De huidige pagina is vet met de rode streep van het menu.
+  Een pagina met ankers en subpagina's heeft drie balken en alleen de ankerbalk plakt.
+- **Waarom:** zo is het submenu zichtbaar verbonden met het menu en los van de zandkleurige ankerbalk, die bij de pagina hoort.
+  Een label zou "Wedstrijden" drie keer onder elkaar zetten (menu, label, paginatitel).
+  De eigenaar verbergt geen navigatie.
+- **Alternatieven:** de zandkleurige balk van de ankers (lijkt te veel op de ankerbalk).
+  Eén balk waarin de subpagina's winnen (de lezer mist dan de ankers).
+  Een knop "Meer" in het hoofdmenu (#378, uitgesteld).
+- **Later:** zie _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_ (28 oktober 2026): de balk is de geneste lijst van het hoofdmenu en geen eigen `nav` meer.
+  De tint, de maten, de gewichten en het ontbreken van een label blijven.
+
+## De submenubalk is een eigen onderdeel, `Page.Submenu`, en hergebruikt de rij van `Page.Shortcuts`
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** de balk is een nieuw onderdeel, `Page.Submenu`, en geen variant van `Page.Shortcuts`.
+  Het is een `nav` met een `aria-label`, een lijst links (`href`, `label`, `current`) en geen label.
+  De rij, de lijst, de vervaging, het snappen en het omlopen zijn die van `Page.Shortcuts`: dezelfde klassen en dezelfde `ShortcutsRow`, met `follow={false}`.
+  Die rij begint dan zo gescrold dat de link met `aria-current="page"` op de plek staat waar de rij snapt, en volgt de pagina niet.
+- **Waarom:** de twee balken verschillen in bijna alles wat een variant zou zetten: de kleur, het label, het plakken, het verdwijnen vanaf 56 rem, het soort markering (`aria-current="page"` van de server tegen `aria-current="location"` van het scrollen) en de gewichten.
+  Een variant had een prop voor elk daarvan nodig, en `Page.Shortcuts` zou voor beide balken verdeeld hebben moeten worden over `display: none` en `position: sticky`.
+  Hergebruik van de rij houdt het scrollen, de vervaging en het toetsenbord op één plek.
+- **Hoe:** de kleuren hebben rollen in de tokens: `--hf-colour-background-submenu` (licht blauw-800, donker blauw-700), `--hf-colour-text-submenu-link-hover` (wit) en `--hf-colour-background-submenu-pressed` (blauw-200 op 18%).
+  De links zijn `--hf-colour-text-on-header` (blauw-50: 11,4:1 op het vlak in licht en 8,6:1 in donker), de focusring is `--hf-colour-focus-on-header` (blauw-300: 6,2:1 en 4,7:1) en de streep onder de huidige pagina is `--hf-colour-accent-on-header` (rood-400: 4,2:1 in licht en 3,2:1 in donker, en een grafisch deel heeft 3:1 nodig).
+  Het issue noemde voor licht `#c22826`; dat rood haalt op blauw-800 maar 2,1:1 en is de kleur voor de zandkleurige balk, dus de streep is in beide thema's het rood van het menu.
+  Op de vulling van een ingedrukte link haalt dat rood geen 3:1 (2,2:1 in donker), dus de huidige pagina krijgt geen vulling als je hem indrukt: een druk op de pagina waar je bent gaat nergens heen.
+  De balk is 46 pixels hoog en de links zijn 36 pixels hoog (`2.25rem`), zonder lijn tussen kop en balk.
+  De balk staat in de HTML na de kop en voor de ankerbalk, en plakt niet: de bestaande `scroll-padding-block-start` voor de ankerbalk blijft kloppen, want alleen die balk kan de focus bedekken.
+- **Nadeel:** de klassen van de rij heten `hf-page-shortcuts-row` en `hf-page-shortcuts-list`, ook in het submenu.
+  Een naam die voor beide balken past, kost een hernoeming van `Page.Shortcuts` die niets aan het gedrag verandert.
+- **Alternatieven:** een variant van `Page.Shortcuts` met een prop (zie hierboven).
+  De rij kopiëren in een eigen onderdeel (twee plekken die het scrollen en de vervaging gelijk moeten houden).
+  Een lijn tussen kop en balk (de stap van 1,27:1 in licht en 1,33:1 in donker is genoeg, en het menu heeft al een lijn boven zich).
+- **Later:** zie _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_ (28 oktober 2026): `Page.Submenu` is vervangen door de eigenschap `subitems` van `Navigation`.
+  De rij van `Page.Shortcuts` blijft hergebruikt, zonder kopie, en de kleuren, de maten en de rollen in de tokens blijven.
+  De balk staat niet meer in een eigen `nav` na de kop, maar in het `li` van zijn onderdeel.
+
+## De CSP laat afbeeldingen van het type `data:` toe
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** `img-src` wordt `'self' data:`.
+  Een `data:`-afbeelding is een afbeelding in de pagina zelf en vraagt niets van een ander domein.
+  Dit vult _Een Content Security Policy die derden blokkeert, zonder nonces_ aan.
+- **Waarom:** de bibliotheek tekent de kaart als een SVG-afbeelding in een `data:`-adres (zie _De afbeelding van een kaart wordt in de browser gemaakt_).
+  Zonder dit staat de CSP dat niet toe.
+  Het principe blijft: een pagina laadt niets van een ander domein.
+  `blob:` is niet nodig: de bibliotheek werkt zonder web worker (`workerNumber: 0`), want een worker zou van een `blob:`-adres starten.
+- **Alternatieven:** `blob:` toelaten (alleen als de bibliotheek het echt nodig heeft, en dat is niet zo); `img-src *` (zou verzoeken naar elk domein toelaten, en dat doen we niet).
+
+## Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** het hoofdmenu verlaat de `header` en wordt één `nav` ("Hoofdmenu") direct na de `header`.
+  De subpagina's van het huidige onderdeel staan in een geneste lijst in zijn `li` en zien eruit als de balk van #363.
+  `Page.Submenu` verdwijnt.
+  Het bovenliggende item heeft `aria-current="true"` als een subpagina de huidige is, en het subitem heeft `aria-current="page"`.
+  De kop ziet er hetzelfde uit.
+- **Waarom:** de opmaak zegt zo dat het submenu bij een onderdeel van het menu hoort, en een schermlezer vindt één menu in plaats van twee.
+  De `header` is zo alleen nog het banner met het logo en de themaknop.
+  Het ontwerp van #363 en #380 blijft.
+- **Hoe:** `Navigation` krijgt de eigenschap `appearance="header"` voor het hoofdmenu van de kop, en `subitems` bij een item (`href`, `label`, `current`).
+  Alleen dat menu toont subitems; het menu in de footer negeert ze.
+  De geneste lijst is er alleen bij het item dat de huidige pagina is of een huidige subpagina heeft.
+  De kop is een raster met alleen het logo en de themaknop, met 0,25 rem eronder.
+  Het menu is een flexrij op dezelfde achtergrond, met de lijn erboven als eerste item (`::before`, een rand, dus ook zichtbaar in geforceerde kleuren) en 0,4375 rem eronder.
+  Zo is de som van de ruimtes gelijk aan die van de kop met het menu erin, en zijn de pixels gelijk (gemeten op 320, 390 en 900 pixels, licht en donker, ook met de insets van een iPhone nagebootst).
+  Alleen op de rand van de balk, op een plek met een halve pixel, verschilt één rij pixels een paar tinten door de schaduw.
+  De `ul` en de `li` van het menu hebben `display: contents`.
+  De links zijn dan items van de `nav`, en de balk, die in het `li` van zijn link staat, is er ook een.
+  De balk heeft `order: 1` en `flex-basis` over de hele rij, dus hij staat onder alle links, ook als de link van zijn item naar een tweede rij is omgelopen.
+  De inset van de pagina zit als padding op de `nav`.
+  Een percentage in de marge van een flex-item is van de breedte van de `nav` zonder die padding, dus de balk kan de inset niet met een negatieve marge terughalen: op een breed scherm stopte hij dan voor de rand.
+  De balk haalt daarom alleen de marge van de pagina terug (of de uitsparing, als die groter is), en zijn kleur loopt door tot de rand als een schaduw zonder vervaging die ver uitwaaiert (`box-shadow: 0 0 0 100vmax`), boven en onder afgesneden met `clip-path`.
+  Een schaduw telt niet mee voor wat scrolt, dus de pagina scrolt niet zijwaarts.
+  Vanaf 66 rem eindigt de rij op de rand van de kolom, in lijn met het menu.
+  `Navigation` geeft de `ul` en de `li` in dit menu `role="list"` en `role="listitem"`, want Safari liet lijsten met `display: contents` lang uit de toegankelijkheidsboom vallen.
+  De tint, de maten, de gewichten en de rij met vervaging en snappen (`ShortcutsRow`) zijn die van #363.
+  `watchTopEdge` kijkt naar de kop en naar het menu: de strook voor de statusbalk blijft zolang een van beide in beeld is, zoals voor deze wijziging de kop met het menu erin.
+- **Nadeel:** de volgorde van de focus is de volgorde van de code: een link, zijn subpagina's, dan de volgende link.
+  Staat het huidige onderdeel in het midden van het menu, dan springt de focus uit de balk terug naar de links die erboven staan.
+  Een schermlezer leest wel de nesting zoals bedoeld.
+  Het issue schreef voor dat het toetsenbord eerst door het menu loopt en dan door de geneste lijst; dat kan met een geneste lijst alleen als het huidige onderdeel het laatste is.
+- **Alternatieven:** alleen de balk uit de `header` halen en het hoofdmenu erin laten (twee navs, de nesting is dan verdeeld over twee landmarks).
+  `Page.Submenu` bewaren en in de `li` zetten (twee onderdelen voor één lijst, de stijlen blijven verdeeld).
+  Alleen het subitem `aria-current` geven (het hoofdmenu zegt dan niet meer in welk onderdeel de bezoeker is).
+  De balk in het `li` met `position: absolute` onder de rij zetten (de hoogte van de balk is niet bekend zodra de rij omloopt, en de pagina eronder zou eronder schuiven).
+  Een subgrid (de rij van het menu loopt om op de breedte van de inhoud, en een raster kan dat niet).
+- **Later:** zie _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026): de huidige pagina in de geneste lijst is nu 600 in plaats van 700, tegen 400 voor de andere links, en het menu in de footer heeft hetzelfde.
+  De gewichten van de kop blijven.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): de site gebruikt de balk met subpagina's nu voor Nieuws (Podcasts, Archief en Zoeken).
+  Het eerste subitem is geen overzichtspagina: het item Nieuws is zelf de link terug.
+- **Later:** zie _De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast_ (31 oktober 2026): de balk van Statistieken wordt door een pagina getekend (`NavigationBar`) en via het slot `@subnav` aan het item gegeven.
+  Hij blijft in het `li` van zijn onderdeel, in de ene `nav`, dus de nesting blijft zoals hier besloten.
+- **Later:** zie _De statusbalk van Safari heeft altijd één van de twee blauwen, tot de modus wisselt_ (1 november 2026): `watchTopEdge` is weg, en de strook voor de statusbalk blijft ook als het menu en de kop uit beeld zijn.
+
+## Het hoofdmenu krijgt een knop "Meer" bij zes of meer onderdelen
+
+- **Datum:** 28 oktober 2026
+- **Besluit:** een hoofdmenu (`appearance="header"`) met zes of meer onderdelen en een `moreLabel` toont op een smal scherm het eerste onderdeel, de knop "Meer" en het laatste onderdeel (het forum).
+  De onderdelen ertussen staan in een lijst onder de knop.
+  Die lijst gaat open in de pagina en duwt de rest naar beneden.
+  Vanaf 44rem staan alle onderdelen op één rij en is de knop weg.
+  De huidige pagina komt naar voren in de rij, tussen het eerste onderdeel en "Meer", met de rode streep en zijn subpagina's eronder.
+  Past hij niet, dan blijft hij in de lijst en krijgt "Meer" de rode streep.
+  Bij vijf onderdelen of minder, of zonder `moreLabel`, verandert er niets.
+  De site gebruikt de knop nog niet: het hoofdmenu heeft nu vier onderdelen.
+- **Hoe:** de instelling heet `moreLabel`, de tekst van de knop, bijvoorbeeld "Meer".
+  Zonder tekst is er geen knop, zoals `label` ook van de aanroeper komt.
+  Het onderdeel kiest zelf het aantal: de constante `itemsFromMore` is 6.
+  De knop is een `details` met een `summary`, zodat hij zonder JavaScript opent en sluit.
+  `NavigationMore` is een clientcomponent en voegt toe: Escape sluit de lijst en zet de focus terug op de knop, een klik op een link of ernaast sluit hem, en een andere huidige pagina begint met een gesloten lijst (de `key` van de component is het adres van de huidige pagina).
+  De klik buiten de lijst is een `click` en geen `pointerdown`: de pagina schuift omhoog als de lijst sluit, en een druk die onder de vinger uit schuift, gaat verloren.
+  `aria-expanded` staat op de knop zodra de pagina geladen is, en volgt de lijst.
+  Voor het laden zegt de browser zelf of het `details` open is, en een attribuut dat de browser niet bijhoudt, zou bij de eerste klik zonder JavaScript verkeerd blijven staan.
+  `aria-controls` wijst naar de lijst.
+  De pijl is `arrow-up` van `Icon`, omgedraaid als de lijst dicht is, met de bewegingstokens.
+  Een nieuw pictogram was niet nodig.
+  De breedte is een container query op de `nav` (`container: hf-navigation / inline-size`), omdat het menu zo breed is als de pagina en niet als het venster.
+  De `nav` is die container alleen als het menu "Meer" heeft.
+  Een query kan geen custom property gebruiken, dus de twee getallen staan in `navigation.css`, in drie queries en nergens anders: 44rem voor de rij, en 20rem voor de huidige pagina achter de knop.
+  De acht voorbeeldonderdelen van de verhalen hebben ongeveer 41rem nodig op één rij bij de grootste letters, dus 44rem laat ruimte voor iets langere namen.
+  Met de namen van de site moet het getal opnieuw gemeten worden.
+  Op 20rem passen het eerste onderdeel, een huidige pagina, de knop en het forum niet meer naast elkaar (gemeten: 18,7rem met de langste voorbeeldnaam, Wedstrijden).
+  Onder 44rem is de lijst van het menu een raster van vijf kolommen: het eerste onderdeel, de huidige pagina achter de knop, de knop, vrije ruimte en het forum rechts.
+  De lijst staat in de cel van de knop en loopt door tot de rechterkant, dus hij begint onder de tekst van "Meer", op een eigen rij onder de andere.
+  De balk met subpagina's staat op de rij daaronder en gaat dus mee naar beneden.
+  De onderdelen achter de knop staan twee keer in de HTML: als link in de rij (`hf-navigation-wide`) en als link in de lijst.
+  De stijlen tonen één van de twee.
+  Het andere exemplaar is `display: none`, dus een schermlezer en het toetsenbord komen elk onderdeel één keer tegen, en niet twee keer `aria-current`.
+  Alleen het exemplaar in de rij heeft de subpagina's.
+  Past de huidige pagina niet in de rij (onder 20rem), dan verbergt de stijl alleen zijn link en niet zijn balk, zodat de subpagina's bereikbaar blijven.
+  Een verhaal met een play-functie controleert dat in de browser.
+- **Waarom:** zeven of acht links passen niet op één rij op een telefoon, en een menuknop die alles verbergt maakt de navigatie moeilijker te vinden.
+  Het forum blijft rechts, zoals nu, en de belangrijkste links blijven zichtbaar.
+  Het onderdeel is klaar voor het moment dat het menu groeit en kost de bezoeker nu niets.
+  Een `details` werkt zonder JavaScript, en de site draait op gedeelde hosting waar we geen werk voor de browser willen dat ook zonder die werkt.
+  De huidige pagina verdwijnt zo nooit achter een knop.
+- **Nadeel:** de onderdelen achter de knop staan twee keer in de HTML.
+  Wie de HTML leest zonder stijlen, ziet ze twee keer.
+  Past een langere naam niet naast de knop, dan loopt de rij over: de drempel van 20rem is gemeten met de voorbeeldnamen en kijkt niet naar de lengte van een naam.
+  Is de huidige pagina een onderdeel achter de knop dat niet past, dan staan zijn subpagina's op een andere plek dan zijn link: de balk staat in het `li` van de rij, de link in de lijst.
+  De balk staat in de HTML in het `li` van zijn onderdeel, vóór "Meer", dus het toetsenbord komt altijd eerst langs de balk en daarna langs "Meer".
+  Dat geldt ook als de huidige pagina wel in de rij past, en het is dezelfde volgorde als bij een menu zonder knop.
+- **Alternatieven:** een menuknop met alles erachter (verbergt de navigatie).
+  Het menu zijwaarts laten scrollen (de bezoeker ziet niet dat er meer is).
+  Alleen de balk voor subpagina's (#363), die het hoofdmenu klein houdt maar niet helpt als het menu zelf groeit.
+  Een `button` met een lijst die `hidden` is (werkt niet zonder JavaScript).
+  Het `details` zelf in de rij zetten met `::details-content { display: contents }` en geen tweede exemplaar (één keer in de HTML, maar de lijst en de rij hebben dan dezelfde nesting en de techniek is nog jong).
+  Een instelling die het aantal bepaalt, zoals `moreFrom={6}` (het issue wil dat het onderdeel zelf kiest).
+  Een tweede getal voor het aantal onderdelen in de rij: het is er één, het eerste.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): het hoofdmenu van de site blijft bij vier onderdelen, dus de knop blijft ongebruikt.
+  Nieuwe pagina's komen als subpagina in de balk.
+
+## Uitersten staan als vijf regels in een lijst, en bij gelijke stand telt de laatste wedstrijd
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart "Uitersten" op `/wedstrijden` toont de grootste overwinning, de grootste nederlaag, de wedstrijd met de meeste doelpunten, ons vroegste en ons laatste doelpunt van de Eredivisie.
+  Bij een gelijke stand kiest hij de laatst gespeelde wedstrijd.
+  Een regel zonder wedstrijd ontbreekt, en de kaart zegt niet "geen".
+  De eerste drie regels tellen elke gespeelde wedstrijd van de Eredivisie, de laatste twee alleen de wedstrijden met bekende doelpunten (zoals `goalsPerQuarter`), zonder verlenging en zonder minuut 0.
+  Een doelpunt in de blessuretijd telt met die tijd erbij: 45+2 komt na minuut 46.
+  De kaart volgt verder de regels uit _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_.
+- **Waarom:** het zijn wedstrijden die supporters onthouden, en de gegevens zijn er al.
+  Eén wedstrijd per regel houdt de kaart kort.
+  De laatste wedstrijd is de nieuwste, dus de kaart verandert als er iets nieuws gebeurt.
+- **Vlak en plaats:** de kaart staat als laatste in de zijbalk, met een zacht vlak (`surface="soft"`), want de kaart ervoor, Doelpunten per kwartier, is warm.
+  De balk "Op deze pagina:" heeft een link "Uitersten" naar `#uitersten`, als laatste.
+- **Vorm:** elke regel is een `ShortMatch` met de naam van de regel eronder in kleine letters (`hf-meta`), bij een doelpunt met de minuut en de speler erbij.
+  De naam staat niet erboven, omdat `ShortMatch` in een lijst een lijn boven zichzelf tekent: een naam erboven zou van die lijn een streep onder de naam maken in plaats van tussen de regels.
+  De naam erboven vraagt een wijziging in het designsysteem, en het issue vraagt er geen.
+- **Alternatieven:** alle wedstrijden met hetzelfde verschil tonen (de kaart wordt lang).
+  De doelpunten van de tegenstander ook (dubbel zoveel regels, minder interessant).
+  De naam boven de wedstrijd (zie Vorm).
+- **Later:** zie _De naam van een regel in Uitersten staat boven de wedstrijd_.
+  De naam staat nu boven de wedstrijd, met een middenpunt in plaats van een komma en een dubbele punt.
+
+## De vorige en de volgende wedstrijd volgen uit de aanvangstijd, en een wedstrijd zonder uitslag zegt dat na twee uur
+
+- **Datum:** 29 oktober 2026
+- **Besluit:** de kaart Wedstrijden toont de laatste wedstrijd die is begonnen en de eerste die nog niet is begonnen, op aanvangstijd.
+  Een wedstrijd zonder uitslag toont twee uur na de aanvang (zonder aanvangstijd vanaf de dag erna) "Gegevens nog niet beschikbaar".
+  De kaart op de homepage en de kaarten Programma en Uitslagen delen die verdeling.
+  Een wedstrijd die is begonnen, staat in Uitslagen, ook zonder uitslag.
+- **Waarom:** een bekerwedstrijd zonder uitslag stond als volgende wedstrijd op de kaart, terwijl hij al was gespeeld.
+  Wikipedia kan uren of dagen achterlopen, en een supporter wil toch zien wat de volgende wedstrijd is.
+  Twee uur is de grens die de projecteigenaar koos.
+  Een gewone wedstrijd is dan afgelopen, een bekerwedstrijd met verlenging en strafschoppen soms nog niet; de zin kan daar dus iets te vroeg komen.
+- **Hoe:** `overviewOf(matches, now)` in `src/matches.ts` verdeelt de wedstrijden en krijgt het moment van het verzoek mee, zodat een test het kan zetten.
+  - Een wedstrijd is begonnen als zijn aanvangstijd (`kickoffAt`) voorbij is.
+    Zonder aanvangstijd is hij begonnen als zijn dag (`matchDate`) in Nederlandse tijd voorbij is, ook rond middernacht en bij het wisselen van de zomertijd.
+    Bij een weekend ("12–14 februari") is dat de laatste dag van het bereik (`lastDayOf` in `src/match-format.ts`), want `matchDate` is dan de eerste dag.
+  - Een gespeelde wedstrijd is altijd begonnen, een uitgestelde wedstrijd zonder nieuwe datum nooit: die blijft in het programma als "Uitgesteld" en is nooit de vorige of de volgende.
+  - `lacksResult` kiest de zin: de wedstrijd heeft geen score en de aanvang is twee uur of langer geleden.
+    `Match` heeft daarvoor de eigenschap `resultMissing`; de zin staat onderaan, onder de tijd en de plaats, in een gedempt rood maar niet vet, en de tijd blijft staan.
+    Dat rood is het token `--hf-colour-text-missing`: stap 800 van de roodschaal in licht, rustiger dan het rood van "Uitgesteld" (`--hf-colour-text-accent`), dat de projecteigenaar daar te fel vond.
+    In donker is het stap 300, hetzelfde als dat rood.
+    Het token gebruikt bestaande stappen; er komt geen nieuwe kleur bij.
+    De tekst zegt het zelf, het rood komt erbij; het haalt 4,5:1 op elk vlak, in licht en donker.
+  - De statistiekkaarten tellen alleen wedstrijden met de status `played` en een score, en veranderen niet.
+- **Alternatieven:** de status laten bepalen (nu; het probleem van de bekerwedstrijd).
+  De wedstrijd verbergen tot er een uitslag is (de kaart zegt dan niets over de laatste wedstrijd).
+  Een grens van drie uur (dekt verlenging en strafschoppen, maar laat de melding bij een gewone wedstrijd lang weg).
+- **Later:** zie _De Stand zegt dat een uitslag nog ontbreekt, zonder datum op de kaarten_.
+  Dezelfde twee uur bepalen ook of de Stand zegt dat hij achterloopt, via `standingsLag`.
+
+## Over ons zegt waar de gegevens vandaan komen en wat er mis kan gaan
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** Over ons krijgt een compacte kaart in de zijbalk die zegt dat het nieuws en de wedstrijden door een importer binnenkomen, dat de uitslagen van de Nederlandse Wikipedia komen en kunnen achterlopen, dat namen anders gespeld kunnen zijn dan bij de club, en dat het filter een kop kan missen.
+  De kaart is een kop per onderwerp met een korte alinea, zonder lijst, want de koppen geven de onderdelen al aan, en haar koppen zijn kleiner dan die van andere zijbalken: de h2 heeft de stijl van Kop 3 en de h3's die van Kop 4.
+  De kaart noemt geen getal dat per omgeving verschilt: het nieuws wordt "regelmatig" opgehaald, en Wikipedia "hoogstens één keer per uur", want dat is de grens in de code (`match_imports.retry_at`) en geen instelling van de host.
+- **Waarom:** een bezoeker die een achterlopende uitslag of een afwijkende spelling ziet, moet kunnen lezen waarom.
+  Het past bij onze regel om open te zijn over onze bronnen, en bespaart vragen en misverstanden.
+- **Alternatieven:** een deel in de hoofdkolom onder _Hoe we werken_ (de projecteigenaar wil de uitleg compact en naast de hoofdtekst, niet erin).
+  De uitleg bij elke kaart zetten (veel herhaling op de pagina, en we hebben net vaste teksten ingekort).
+  Een aparte pagina "Hoe het werkt" (een pagina meer om bij te houden, en bezoekers vinden hem minder snel).
+  Niets zeggen (de achterstand en de spelling blijven onverklaard).
+
+## De naam van een regel in Uitersten staat boven de wedstrijd
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** in de kaart Uitersten staat de naam van elke regel ("Grootste overwinning", "Vroegste doelpunt, …") als toelichting (`<Text appearance="meta">`) boven de wedstrijd en niet eronder.
+  De naam en de wedstrijd staan in dezelfde `List.Item`, en de naam komt eerst in de HTML, dus een schermlezer leest eerst de naam.
+- **Waarom:** de naam werkt als kopje van de regel.
+  Boven de wedstrijd zegt hij wat de lezer gaat zien, en onder de wedstrijd leest hij als aanvulling.
+- **Scheiding:** bij een doelpunt scheidt een middenpunt de naam, de minuut en de speler: "Vroegste doelpunt · minuut 3 · Kemper", in plaats van een komma en een dubbele punt.
+  Een middenpunt gebruikt de site al voor losse onderdelen op een regel, zoals "83 reacties · laatst 13:28" bij een discussie.
+  Het teken staat, zoals daar en in `ShortMatch`, in een `span` met `aria-hidden="true"`, met de spaties erbuiten: een schermlezer slaat het over en de delen groeien niet aan elkaar.
+- **Hoe:** de lijn tussen de regels, die `ShortMatch` eerst boven zichzelf tekende, staat in `short-match.css` boven alles wat in dezelfde `li` voor de wedstrijd staat.
+  Zo blijft de lijn tussen de regels en niet tussen een naam en zijn wedstrijd, wat de vorige beslissing hierover tegenhield.
+  De naam staat dicht bij zijn wedstrijd (`0.25rem`), en heeft meer ruimte naar de lijn erboven (`0.75rem` boven de lijn, `0.5rem` eronder).
+  Samen met de ruimte onder de vorige wedstrijd (`0.5rem`) is de ruimte tussen twee regels even groot als eerst.
+- **Alternatieven:** de naam onder de wedstrijd laten (nu).
+  Een `h3` boven elke regel (zes koppen in een kleine kaart, te zwaar).
+  Een eigenschap voor de naam op `ShortMatch` (een nieuwe API in het designsysteem, terwijl de CSS al genoeg is).
+
+## Het nieuwsarchief staat op `/nieuws`, met 50 koppen per pagina en een filter per bron
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** `/nieuws` toont alle koppen die we hebben opgehaald (relevant, niet verborgen, van een bron die aanstaat, geen podcast), met 50 per pagina, de nieuwste eerst en zonder indeling per dag.
+  Er is een filter per bron (`?bron=<slug>`) en paginering (`?pagina=N`), zoals bij `/podcasts`.
+  De homepage linkt ernaar met "Alle koppen", onder de koppen in de kaart Laatste nieuws.
+  Het menu verandert niet tot de opbouw van de site is vastgesteld (#431).
+- **Waarom:** de homepage houdt de laatste weken, en wie verder terug wil, heeft een archief nodig.
+  Dezelfde onderdelen en adressen als de podcasts houden de site voorspelbaar en besparen werk.
+  50 per pagina geeft minder pagina's dan 25, en elke regel toont zijn eigen dag, dus een indeling per dag is overbodig.
+  Een bron met een vaste `slug` houdt zijn adres als de naam verandert.
+- **Gevolg:** elke bron in de seed die koppen kan hebben, heeft een vaste `slug`; het forum niet, want dat heeft discussies en geen koppen.
+  De seed zet de `slug` ook bij een bron die al in het register staat zonder.
+  Een bron zonder `slug` staat niet in het filter, maar haar koppen staan wel bij "Alle bronnen".
+  Een nieuwe kop schuift de inhoud van de pagina's op (pagina 2 van gisteren is pagina 3 van vandaag).
+  Dat is zo bij elk archief en niet te voorkomen met adressen met een paginanummer; de bron en het filter blijven wel vast.
+  `nieuws` staat bij de gereserveerde adressen voor een artikel van de redactie.
+- **Alternatieven:** laden met "Laad meer", zoals de homepage (geen vaste adressen, terwijl het issue ze vraagt).
+  Een indeling per dag (langere pagina's met kopjes die weinig toevoegen).
+  Een grens van 12 maanden (oudere koppen verdwijnen van de site terwijl ze in de database staan).
+  Meteen een plek in het menu (de opbouw is nog niet gekozen).
+- **Later:** zie _Op `/nieuws` kies je bronnen met selectievakjes in een fieldset_: het filter per bron is een groep selectievakjes met een knop "Toon", en "Alle bronnen" als link vervalt.
+  `?bron=<slug>` mag vaker voorkomen, en zonder `bron` zijn het alle bronnen.
+- **Later:** zie _De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum_ (31 oktober 2026): het archief krijgt een plek in de balk met subpagina's van Nieuws, onder de naam Archief.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): `/nieuws` heet "Nieuws" in plaats van "Nieuwsarchief", de homepage linkt met "Alle nieuws", en de zijbalk heeft ook een artikel van de redactie en de podcasts.
+
+## De homepage heeft geen knop "Laad 5 meer" meer, maar de link "Alle koppen"
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** de kaart Laatste nieuws op de homepage toont de tien nieuwste koppen, en onder de lijst staat de link "Alle koppen" naar `/nieuws`.
+  De knop "Laad 5 meer" is weg, met `?nieuws=`, de ankers `#nieuws-N` bij de koppen, `parseHeadlineCount`, `maxHeadlines` en `moreHeadlines`.
+  Een adres als `/?nieuws=15` laat de homepage zien.
+- **Waarom:** het archief op `/nieuws` is er voor ouder nieuws, met vaste adressen en paginering.
+  Een tweede manier om meer koppen te laden maakt de pagina langer en de code groter, zonder iets wat het archief niet beter doet.
+  De homepage heeft zo geen parameters meer, en de lijst heeft nog maar één plek in het geheugen.
+- **Gevolg:** de koppen van de homepage hebben geen `id` meer, en de knop blijft op de pagina met de gehouden nullen en op `/zoeken`.
+- **Alternatieven:** de knop houden naast de link (twee manieren om meer koppen te zien, en de knop en de link raken elkaar onder de lijst).
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): de link heet "Alle nieuws".
+
+## Het filter van het nieuwsarchief staat in een lichtblauwe kaart in de zijbalk
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** op `/nieuws` staat het filter per bron in een kaart op een zacht vlak (`surface="soft"`) in de zijbalk, met de kop "Bronnen", en niet meer onder de kop van de pagina.
+  De naam "Bronnen filteren" en de markering van de huidige bron blijven zoals ze waren.
+  Zonder koppen is er geen filter en dus geen zijbalk.
+  Op een smal scherm staat de zijbalk onder de lijst en de paginering.
+- **Waarom:** het filter hoort bij de lijst en niet boven alles, en de pagina krijgt zo een zijbalk zoals `/podcasts` die heeft bij een gekozen podcast, met dezelfde kaart.
+  De zijbalk staat in de bron na de hoofdkolom, en het designsysteem houdt de volgorde van de bron en van het scherm gelijk (geen `order`).
+- **Nadeel:** op een telefoon moet de bezoeker voorbij de lijst en de paginering scrollen om een andere bron te kiezen.
+  Een balk met een link naar het filter (`Page.Shortcuts`), of een zijbalk die op een smal scherm boven de lijst staat, lost dat op, maar vraagt iets van het designsysteem en is aan de projecteigenaar.
+- **Alternatieven:** het filter boven de lijst laten (het was zo, en de zijbalk blijft dan leeg).
+  Het filter twee keer op de pagina zetten, boven de lijst op een smal scherm en in de zijbalk op een breed scherm (een dubbele navigatie voor een schermlezer).
+- **Later:** zie _Op `/nieuws` kies je bronnen met selectievakjes in een fieldset_: de kaart blijft, maar bevat een formulier met een `fieldset` en een `legend` "Bronnen" in plaats van de kop en de navigatie "Bronnen filteren".
+- **Later:** zie _/nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem_.
+  De zijbalk met het filter is 16 rem breed en de lijst 46 rem.
+
+## /nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** op `/nieuws` is de hoofdkolom 46 rem breed, met 2 rem ruimte en een zijbalk van 16 rem, samen de 64 rem van de pagina.
+  Andere pagina's houden hun verdeling (38, 2 en 24 rem, of 31, 2 en 31 rem op `/wedstrijden`).
+  Een `/nieuws` zonder koppen heeft geen zijbalk en dus de gewone hoofdkolom van 38 rem.
+- **Waarom:** de projecteigenaar vindt dat het archief meer aandacht moet krijgen, en de zijbalk heeft alleen een filter nodig.
+  De lijst krijgt daarom de breedte en de zijbalk niet meer dan het filter vraagt.
+- **Hoe:** de pagina kiest de verdeling met `narrow` op de `Page.Sidebar`, zoals `/wedstrijden` `wide` kiest, want de `Page.Body` staat in de layout van de site en is voor alle pagina's dezelfde.
+  `Page.Body` ziet de smalle zijbalk met `:has()`.
+  De maten staan als tokens in `layout.css`: `--hf-content-max-width-broad` (46 rem) en `--hf-sidebar-width-narrow` (16 rem).
+  Vanaf 52 rem is het raster `minmax(24rem, 46rem)` en 16 rem.
+  Tot 66 rem breed krimpt alleen de hoofdkolom mee, tot 24 rem, en de zijbalk blijft 16 rem.
+  Samen passen de minima (40 rem) in de 42,25 rem die een telefoon op zijn kant bij 52 rem overhoudt.
+  Onder 52 rem is er één spoor van hoogstens 38 rem, zoals op elke pagina, en staat de zijbalk onder de lijst en de paginering, in de volgorde van de bron.
+  Op een telefoon staat het filter dus onder de lijst, zoals de beslissing _Het filter van het nieuwsarchief staat in een lichtblauwe kaart in de zijbalk_ al zei; dat verandert hier niet.
+- **Alternatieven:** de verdeling aan `Page.Body` meegeven (kan niet: de layout van de site rendert hem voor alle pagina's).
+  Een eigenschap `size` met namen als `wide` en `narrow` (voor twee waarden meer dan nodig).
+  De breedte van 46 rem ook onder 52 rem gebruiken (op een tablet zou de pagina breder zijn dan alle andere pagina's).
+
+## Op `/nieuws` kies je bronnen met selectievakjes in een fieldset
+
+- **Datum:** 30 oktober 2026
+- **Besluit:** het filter per bron op `/nieuws` is een formulier met `method="get"` naar `/nieuws`, met een `fieldset` en een `legend` "Bronnen", een selectievakje per bron (`name="bron"`, de `slug` als waarde) en een knop "Toon".
+  - **Geen vinkje betekent alle bronnen**, en alle vinkjes ook.
+    Vanaf het eerste vinkje toont de pagina alleen de aangevinkte bronnen.
+    "Alle bronnen" als link vervalt.
+  - **Het adres** is `?bron=a&bron=b`, in de volgorde van de lijst, en `?pagina=N` blijft.
+    Een adres met alle bronnen is dezelfde pagina als het adres zonder `bron`: de pagina toont alle koppen, de vakjes staan aangevinkt zoals het adres zegt, en het canonieke adres en de adressen van de paginering hebben geen `bron`.
+    Een andere volgorde in het adres geeft dezelfde pagina.
+    Een onbekende slug, een slug die twee keer voorkomt en een verkeerde `pagina` geven "niet gevonden".
+    Een nieuwe keuze begint op pagina 1, omdat het formulier geen `pagina` verstuurt.
+  - **De knop blijft altijd staan**, ook met JavaScript, anders dan bij de seizoenskiezer.
+    Een pagina die bij elk vinkje opnieuw laadt, neemt de focus mee en is lastig voor toetsenbord en schermlezer.
+  - **Eén bron aangevinkt:** de naam van de bron staat niet bij elke kop, want hij staat in de kop van de pagina ("Nieuwsarchief van A") en in het vakje.
+    De naam blijft in elke regel voor een schermlezer, omdat we de bron altijd noemen (principe 4 van de Redactie).
+  - **De titel en de kop** noemen de gekozen bronnen: "Nieuwsarchief van A en B", bij meer bronnen "A, B en C".
+- **Waarom:** met links kun je één bron kiezen en met vakjes meer, en een formulier met een GET geeft een adres dat je kunt delen en werkt zonder JavaScript, zoals de seizoenskiezer.
+  Dat alle vakjes en geen vakje dezelfde pagina zijn, geeft een bezoeker die alles aanvinkt dezelfde pagina als een bezoeker die niets doet, op één adres.
+- **Gevolg:** het designsysteem krijgt `CheckboxGroup` (in de subgroep Formulier), een `fieldset` met een `legend` en een vakje per optie, en `NewsItem` krijgt `showSource` om de naam van de bron te verbergen zonder hem uit de HTML te halen.
+  De queries `listArchivePage` en `countArchiveItems` nemen `sources`, een lijst slugs, in plaats van `source`.
+  De server bewaart de pagina's per keuze, met de bronnen in de volgorde van de lijst, zodat dezelfde keuze in een andere volgorde dezelfde plek in het geheugen heeft.
+  `Filter` blijft, want `/podcasts` gebruikt hem.
+- **Alternatieven:** de bron laten staan bij elke kop met een schermlezer (de naam is dan vaker te horen dan nodig) of hem helemaal weglaten (de bron staat dan alleen in de kop).
+  Het formulier met JavaScript laten verzenden bij elk vinkje, zoals de seizoenskiezer (de pagina laadt dan opnieuw tijdens het kiezen).
+  Een doorverwijzing naar `/nieuws` bij alle vinkjes (een extra stap, en de vakjes staan dan niet aangevinkt zoals de bezoeker koos).
+
+## De site heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Statistieken en Forum (extern).
+  Dit is optie 4 van het ontwerp van #431.
+  - **Nieuws** is `/`, en blijft de homepage.
+    Onder het menu staat een balk met de subpagina's Podcasts, Archief en Zoeken, in die volgorde.
+  - **Podcasts** staat op `/nieuws/podcasts` en het archief op `/nieuws` (#26).
+    `/podcasts` vervalt zonder omleiding: productie en lancering (#33, #34) staan nog open, dus er zijn geen openbare links.
+  - **Zoeken** staat op `/nieuws/zoeken`, zonder omleiding, om dezelfde reden als bij Podcasts: productie is niet live en er zijn geen openbare links.
+    `/zoeken` vervalt.
+    De link in de footer blijft en wijst naar het nieuwe adres.
+    Zoekt het later ook in spelers en tegenstanders, dan kan het uit Nieuws terug.
+  - **Wedstrijden** blijft één pagina met Programma, Uitslagen, Stand en de hoofdtrainers.
+    De Beker (#404) hoort erbij.
+    Komen er subpagina's, dan krijgt de pagina een balk.
+  - **Statistieken** staat op `/statistieken`, met een eigen seizoenskiezer zoals Wedstrijden.
+    Later komen Spelers, Tegenstanders en Seizoenen als subpagina's in een balk.
+  - **De scheiding:** Wedstrijden is wat je opzoekt: een lijst van wedstrijden, de stand zoals hij is en de hoofdtrainers.
+    Statistieken is wat uit veel wedstrijden volgt: een telling, een gemiddelde, een rangorde of een verloop.
+  - **De negen kaarten met cijfers** verhuizen van `/wedstrijden` naar `/statistieken`: Onze plek in de competitie, Verloop van het seizoen, Reeksen, Thuis en uit, Doelpuntenmakers, De nul gehouden, Doelpunten per kwartier, Hoe de wedstrijden verlopen en Uitersten.
+    De Stand blijft op Wedstrijden, met een link naar de kaarten waar hij bij hoort.
+    Ze staan op Statistieken in twee gelijke kolommen, vanaf het breekpunt voor twee kolommen.
+  - **De ankers** van die negen kaarten breken, zonder omleiding: een server kan een anker niet omleiden, en er zijn geen openbare links.
+  - **De afbeelding van een korte vorm**, zoals de top 5 van Doelpuntenmakers, mag worden gedeeld, met "top 5" in de kop.
+  - **De kaart Stand op de homepage** krijgt geen regel met de topscorer: de projecteigenaar wil dat niet.
+- **Waarom:** de balk met Podcasts staat op `/` op het eerste scherm, dus Podcasts blijft één tik van de homepage.
+  Het menu blijft kort en past op 390 pixels.
+  Zonder de negen kaarten is Wedstrijden een korte pagina.
+  Optie 4 is optie 1 in stappen, dus wat we nu bouwen gaat niet verloren als Wedstrijden groeit.
+  Het zoeken doorzoekt koppen, afleveringen van podcasts en artikelen van de redactie, dus het is een zoekopdracht in het nieuws.
+  In de balk van Nieuws is het makkelijker te vinden dan in de footer.
+- **Nadeel:** we geven op dat alle onderdelen hetzelfde patroon hebben: Wedstrijden krijgt nog geen korte kaarten en balk.
+  Podcasts is vanaf Wedstrijden en Statistieken twee tikken.
+  De ankers van negen kaarten breken.
+  Met Statistieken is het menu 345 pixels breed, en op een telefoon van 375 pixels valt Forum naar een tweede rij.
+- **Gevolg:** de bouw volgt in #482 (Podcasts verhuist en Nieuws krijgt een balk) en #483 (de pagina Statistieken).
+  De top 5, Spelers, Tegenstanders en Seizoenen, de wedstrijdpagina en een balk voor Wedstrijden volgen als eigen issues.
+- **Alternatieven:** de drie andere opties van het ontwerp.
+  - Optie 1: elk onderdeel een hoofdpagina met korte kaarten en een balk.
+    Dat is nu te veel werk: negen nieuwe adressen en korte vormen voor een pagina met drie kaarten.
+  - Optie 2: Podcasts en Statistieken als eigen onderdelen in een menu van vijf, zonder balk.
+    Dat schaalt niet: bij acht onderdelen staan Wedstrijden en Statistieken op een telefoon achter "Meer".
+  - Optie 3: elk onderdeel een hub met "Alle …"-knoppen, zonder balk.
+    Een stap naar een zusterpagina kost dan twee tikken, en Podcasts staat laag op de homepage.
+  - De Stand naar Statistieken: er is geen goede reden voor, want de stand hoort bij de lijsten.
+  - `/podcasts` houden en `/nieuws/podcasts` met een omleiding laten verwijzen: zonder openbare links is een omleiding niet nodig.
+  - Het zoeken in de footer laten op `/zoeken`: het is daar moeilijk te vinden, en het adres past niet bij de andere pagina's van Nieuws.
+- **Later:** de balk van Nieuws heeft op verzoek van de projecteigenaar (31 oktober 2026) de volgorde Archief, Podcasts en Zoeken, en niet Podcasts, Archief en Zoeken.
+- **Later:** de top 5 en Spelers staan sinds 31 oktober 2026 op `/statistieken` en `/statistieken/spelers`; zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_.
+- **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): Tegenstanders is er, naast Spelers, in de balk van Statistieken.
+- **Later:** zie _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026): `/` is niet meer Nieuws en heeft geen balk, Nieuws is `/nieuws` en is het archief (dat item vervalt), en de balk van Nieuws heeft Podcasts en Zoeken.
+  De rest van dit besluit blijft gelden.
+- **Later:** zie _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026): `/wedstrijden` houdt toch een kaart met cijfers, "Hoe vaak welke uitslag", onder de stand en boven de hoofdtrainer in de zijbalk.
+
+## De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage
+
+- **Datum:** 1 november 2026
+- **Besluit:** `/` en `/nieuws` zijn twee pagina's met elk hun eigen inhoud.
+  - **De homepage `/`** is de voorpagina van de hele site.
+    Ze staat niet in het hoofdmenu (het logo wijst ernaartoe) en heeft geen balk met subpagina's.
+    De hoofdkolom heeft bovenaan "Van de redactie", in de lange vorm, want daar komt de aankondiging van de livegang, en daaronder "Laatste nieuws" met tien koppen en de link "Alle nieuws" naar `/nieuws`.
+    De zijbalk heeft bovenaan het forum ("Nieuwste discussies"), onze zustersite, en daaronder Wedstrijden, Stand en "Nieuwste podcasts".
+  - **Het nieuws `/nieuws`** heet "Nieuws" en is het archief: de hoofdkolom heeft alleen koppen, 50 per pagina, met `?bron=` en `?pagina=` zoals eerder.
+    De zijbalk heeft van boven naar beneden het filter per bron, één artikel van de redactie als één nieuwsregel (`NewsItem` met de bron "Van de redactie", zonder inleiding en zonder pictogram voor een andere site; zonder artikel geen kaart) en de kaart "Podcasts" met de nieuwste afleveringen.
+    Er staan geen wedstrijdkaarten op.
+  - **Het hoofdmenu** heeft Nieuws op `/nieuws`.
+    Het is het huidige onderdeel op `/nieuws`, `/nieuws/podcasts`, `/nieuws/zoeken` en `/redactie/<naam>`, en de homepage heeft geen huidig onderdeel.
+    De balk van Nieuws heeft Podcasts en Zoeken, in die volgorde, op die pagina's; het item Archief vervalt.
+  - **Adressen:** geen omleidingen en `?nieuws=` is weg, want er zijn nog geen openbare links (#33).
+  - **De aantallen:** elke kaart met een lijst toont standaard vijf items: de discussies en de afleveringen op de homepage, en de afleveringen op `/nieuws` (`itemsPerCard` in `apps/site/src/items-per-card.ts`).
+    Het nieuws is de hoofdkaart: "Laatste nieuws" op de homepage blijft tien koppen (`firstHeadlines`), en de lijst op `/nieuws` blijft 50 per pagina (`headlinesPerPage`).
+    Kaarten van een eigen soort, zoals de vorige en de volgende wedstrijd en de stand met drie clubs, houden hun eigen aantal.
+    De toegestane maten zijn 5, 10, 20 en 50, vast in de code (`listSizes`), en elk aantal in dat bestand komt daaruit; een test zegt dat.
+    Een bezoeker kiest geen maat.
+    De kolommen zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom van de homepage 1339 pixels hoog en de zijbalk 2055.
+- **Waarom:** de homepage is het overzicht met de aankondiging bovenaan en het forum prominent, en het nieuws krijgt één plek met zijn eigen balk.
+  Een item Nieuws dat naar de homepage wees, gaf op de homepage een balk met subpagina's die de projecteigenaar niet verwachtte.
+  Zo bestaat er niets dubbel: Nieuws is het archief, dus een item Archief erbij is overbodig.
+  Vijf items per kaart in de zijbalk zijn genoeg om te zien wat er is, en dezelfde maat op elke kaart houdt de pagina's gelijk.
+  Een gelijke lengte van de kolommen is minder belangrijk dan genoeg items en gelijke aantallen.
+- **Nadeel:** de hoofdkolom van de homepage is korter dan de zijbalk (1339 tegen 2055 pixels bij 1100 pixels), dus onder het nieuws staat leeg vlak naast de zijbalk.
+  De hoogte hangt van de gegevens af: lange titels maken een kaart hoger.
+  Op een telefoon staat de zijbalk van `/nieuws` na de 50 koppen en de paginering, dus het filter staat ver onderaan (zie #206).
+- **Gevolg:** de pagina's en tests van `/` en `/nieuws`, het menu, de e2e-tests en de rooktest zijn bijgewerkt, en de kaarten voor discussies en podcasts zijn onderdelen in `apps/site/src/NewsCards.tsx` die beide pagina's gebruiken.
+  Wat verderop in de tijd komt, zoals vijf wedstrijden op de kaart Wedstrijden (#516), verandert de hoogte van de zijbalk.
+  De afleveringen van `/nieuws/podcasts` staan op 25 per pagina (`episodesPerPage` in `apps/site/src/podcasts.ts`), en dat is geen maat uit `listSizes`.
+- **Alternatieven:** het item Nieuws op `/` laten staan met alleen de balk verborgen op de homepage (twee pagina's op één adres, en Nieuws is dan nooit een eigen plek).
+  Een apart item Archief houden naast Nieuws (twee plekken voor dezelfde koppen).
+  Omleidingen van de oude adressen (er zijn geen openbare links).
+  Twee items per kaart in de zijbalk van de homepage, om de kolommen even lang te maken (de projecteigenaar koos op 1 november 2026 voor vijf per kaart; de eerste versie van dit besluit had twee).
+  Een bezoeker laten kiezen tussen 5, 10, 20 en 50 (meer knoppen en een adres per keuze, terwijl de code de maten vastlegt).
+  Een korte vorm van `ArticleCard` met de inleiding in de zijbalk van `/nieuws`, zonder "Lees verder" (een tweede vorm van een onderdeel voor één plek; de projecteigenaar koos op 1 november 2026 voor de nieuwsregel, zoals de andere kaarten).
+
+## De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de pagina Statistieken maakt zijn twee gelijke kolommen met wat het designsysteem al heeft: een `Page.Main` met de kop en de kiezer als `intro`, en een `Page.Sidebar` met `wide`.
+  Er komt geen nieuwe variant van `Page.Body`, alleen een verhaal (_Met twee gelijke kolommen_ bij Patronen › Pagina) en een regel in de documentatie van `Page.Sidebar` en van het patroon.
+  - **De verdeling:** de eerste vier kaarten in de volgorde van de balk "Op deze pagina:" staan links in de hoofdkolom (Onze plek in de competitie, Verloop van het seizoen, Reeksen en Thuis en uit).
+    De andere vijf staan rechts in de zijbalk (Doelpuntenmakers, De nul gehouden, Doelpunten per kwartier, Hoe de wedstrijden verlopen en Uitersten), met de bronvermelding als laatste.
+  - **De volgorde:** de broncode is de volgorde van de balk en van een telefoon, dus eerst de hoofdkolom en dan de zijbalk.
+    De kolommen volgen de broncode van boven naar beneden, zonder rijen die elkaar in de weg zitten.
+  - **De naam van de zijbalk** is "Meer cijfers over het seizoen", want de zijbalk is een `aside` en krijgt een naam.
+- **Waarom:** `wide` maakt de zijbalk even breed als de hoofdkolom en doet dat vanaf het breekpunt dat het designsysteem voor twee kolommen heeft, precies wat Wedstrijden al had.
+  Een nieuwe variant zou hetzelfde doen onder een andere naam.
+  Een pagina heeft één `main`, dus een tweede hoofdkolom kan niet.
+  Gemeten op 1100 pixels breed, met de verzonnen gegevens van de controle, is de linker kolom 2107 pixels hoog en de rechter 2651, met de bronvermelding erbij.
+  De kaarten zijn 191 tot 665 pixels hoog, met 32 pixels ertussen.
+  Bij een andere verdeling is het verschil groter: bij 5 en 4 is de linker kolom 2773 en de rechter 1985, en bij 3 en 6 is de linker 1547 en de rechter 3211.
+  Met 4 en 5 is het verschil het kleinst, 544 pixels.
+  De hoogte hangt af van de gegevens: meer doelpuntenmakers of meer wedstrijden met de nul gehouden maken de rechter kolom hoger.
+  Dat nemen we aan, want een andere verdeling per seizoen zou de volgorde van de balk breken.
+- **Alternatieven:** de kolommen laten vullen door de browser met CSS-kolommen (`columns: 2`).
+  Die verdelen de kaarten zelf over de kolommen, maar een kaart die groeit, zoals De nul gehouden met "Laad 5 meer", springt dan naar de andere kolom, en een lange kaart laat een gat achter.
+  Een raster met rijen van twee kaarten: de volgorde op een telefoon (links, rechts, links, rechts) is dan niet die van de kolommen, en de kaarten van een rij zijn niet even hoog.
+  Een nieuwe prop op `Page.Body` of `Page.Main` voor twee kolommen: dubbel werk naast `wide`.
+
+## Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de kaart Doelpuntenmakers op `/statistieken` toont de top 5, en de volledige lijst staat op een nieuwe pagina Spelers, de eerste subpagina van Statistieken.
+  - **De kaart op Statistieken** houdt zijn naam, zijn anker `doelpuntenmakers` (met het oude `topscorers`), zijn afbeeldingsknop, "Gebaseerd op" en de bronvermelding.
+    Onder de kop staat "De top 5 van 17 spelers die scoorden", zodat de afbeelding "top 5" zegt, en onder de tabel de link "Alle doelpuntenmakers" naar de pagina Spelers van hetzelfde seizoen.
+  - **De gelijke plekken:** de kaart toont iedereen die op een van de eerste vijf plekken staat.
+    Delen twee spelers de vijfde plek, dan staan ze er allebei in, en de kaart kan meer dan vijf namen tonen.
+    Staan er drie spelers op de vierde plek, dan blijven ze alle drie en is er geen vijfde plek.
+    Er is geen grens aan het aantal rijen.
+    Is er niemand weggelaten, omdat vijf spelers of minder scoorden of omdat iedereen gelijk staat, dan staat er geen "top 5" maar het aantal spelers, zoals op de pagina Spelers: "4 spelers hebben gescoord".
+  - **De adressen** van Spelers zijn `/statistieken/spelers` voor het lopende seizoen en `/statistieken/spelers/2025-26` voor een eerder seizoen, met de kiezer op `/statistieken/spelers/kies`.
+    De regels zijn die van Statistieken: één adres per seizoen, een onbekend seizoen geeft "niet gevonden", en lukt het lezen niet, dan staat er de foutpagina.
+    De pagina gebruikt `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` uit `src/season-page.ts`, dus er is niets gekopieerd.
+  - **De pagina Spelers** heeft de kaart die op Statistieken stond, met alle spelers, hetzelfde anker en dezelfde kaart (`TopScorersCard`), zonder de link.
+    De bezoekteller telt een seizoen van Spelers als een bezoek aan `/statistieken/spelers`, zoals bij Statistieken.
+  - **De balk met subpagina's** van Statistieken heeft Spelers.
+    Op `/statistieken` is geen subpagina de huidige; op `/statistieken/spelers` is Spelers dat wel (`aria-current="page"`), en Statistieken is op beide pagina's het huidige onderdeel van het menu.
+    De balk "Op deze pagina:" van Spelers heeft één link, naar de kaart.
+- **Waarom:** de lijst met doelpuntenmakers is met zestien tot twintig rijen te lang voor een pagina met negen kaarten, en het is de kaart die het meest groeit.
+  De top 5 laat zien wie er bovenaan staat en is kort genoeg om als afbeelding te delen.
+  Wie de rest wil, heeft één tik nodig.
+  Gelijke plekken horen er helemaal bij: de zesde speler met evenveel doelpunten als de vijfde weglaten, zou een willekeurige keuze zijn.
+  Een grens van acht rijen, zoals de kaart ooit had, geeft hetzelfde probleem een andere plek.
+  Het gedeelde stuk maakt dat de top 5 en de lijst nooit uit elkaar lopen: ze komen uit dezelfde telling (`topScorersOf`), en de top 5 is er het begin van (`topFiveOf`).
+- **Nadeel:** de kaart op Statistieken heeft een wisselende hoogte, want de gelijke plekken tellen mee: in een seizoen waarin iedereen één doelpunt maakte, staan alle spelers erin.
+  De afbeelding van de kaart bevat ook de link "Alle doelpuntenmakers", als tekst, omdat de knop de kaart kopieert.
+  De balk "Op deze pagina:" van Spelers heeft één link, naar de enige kaart; hij krijgt er meer als de extra's van #403 en #407 erbij komen.
+- **Alternatieven:** de volledige lijst houden en de kaart inklappen met een knop (kost JavaScript of een extra adres, en de afbeelding toont dan de hele lijst); de top 5 op een vaste hoogte afkappen en een speler met evenveel doelpunten weglaten (willekeurig); de vijf met gelijkstaanden tot hoogstens acht rijen, zoals de kaart eerder had (een grens die de gelijke plekken toch afkapt); Spelers alleen met de lijst, zonder balk met subpagina's (de pagina is dan alleen via de link te vinden).
+- **Later:** zie _De kaart met topscorers toont alle doelpuntenmakers_ (26 oktober 2026): sinds 31 oktober 2026 toont `/statistieken` weer de top 5, nu met alle gelijke plekken en zonder grens, en de volledige lijst staat op `/statistieken/spelers`.
+- **Later:** zie _De pagina Spelers toont bijzondere doelpunten_ (31 oktober 2026): Spelers heeft sinds die dag een tweede kaart, en de balk "Op deze pagina:" van Spelers heeft twee links.
+- **Later:** zie _Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken_ (31 oktober 2026): de balk met subpagina's van Statistieken heeft sindsdien ook Tegenstanders, en op de pagina's daarvan is Tegenstanders de huidige subpagina.
+
+## Tegenstanders is een lijst van alle clubs en een pagina per club, onder Statistieken
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** onder Statistieken komen de lijst `/statistieken/tegenstanders` en een pagina per club, `/statistieken/tegenstanders/<club>`, met de onderlinge resultaten over alle seizoenen die we hebben (#415).
+  - **De lijst** heeft elke club die in de gegevens staat, zonder minimum aantal wedstrijden, van A tot Z.
+    De kolommen zijn Club, Gespeeld, Gewonnen, Gelijk, Verloren en Doelpunten (voor–tegen).
+    De vijf cijferkolommen hebben een afkorting (G, W, GL, V, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit, zodat de tabel op een telefoon past.
+    Elke clubnaam is een link; de tabel heeft geen knop om te sorteren en geen paginering.
+    Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
+  - **De pagina van een club** heeft de naam als h1, met "Eerder: …" eronder als Wikipedia de club onder andere namen schrijft.
+    De kaart "Onze uitslagen tegen …" heeft een tabel met Totaal, Thuis en Uit en de rijen gespeeld, gewonnen, gelijk, verloren, doelpunten voor en doelpunten tegen, zonder punten, omdat de beker er geen geeft.
+    Eronder staan de grootste overwinning en de grootste nederlaag, als regels zoals op de kaart Uitersten; bij twee even grote wint de latere, zoals daar.
+    De kaart heeft de afbeeldingsknop, en de naam van de club staat in de kop, zodat de afbeelding zegt waarover hij gaat.
+    De kaart Wedstrijden toont elke gespeelde wedstrijd, de nieuwste eerst, als korte regel (`ShortMatch`) met het seizoen en de competitie erboven.
+    De regel noemt de club zoals Wikipedia hem in die wedstrijd schreef, dus een oude naam is zichtbaar.
+    Een wedstrijd die nog niet is gespeeld, staat er niet in.
+  - **De zin over het aantal** houdt de vorm van de andere kaarten, "Gebaseerd op alle 12 gespeelde wedstrijden", en krijgt "sinds 2010/11" erachter: het eerste seizoen waarvan we wedstrijden hebben, ook als de eerste wedstrijd tegen deze club later was.
+    Bij de keuze Eredivisie staat er "in de Eredivisie" bij.
+    De vorm van die zin is onderdeel van #494 en verandert hier niet.
+  - **De schakelaar van #406** werkt op beide pagina's, met `?competitie=eredivisie` in elke link, en staat er alleen als er een gespeelde bekerwedstrijd is (bij de club: tegen die club).
+    Een club die we alleen in de beker troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt "In de Eredivisie hebben we nog niet tegen deze club gespeeld."
+    Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden", en een slug die geen club heeft ook.
+    De pagina's hebben geen seizoenskiezer, want ze tellen alle seizoenen.
+  - **De balk van Statistieken** heeft Tegenstanders naast Spelers.
+    Op de lijst en op elke clubpagina is Tegenstanders de huidige subpagina (`aria-current="page"`), en Statistieken is het huidige onderdeel van het menu.
+  - **De bezoekteller en de sitemap:** de lijst staat in `pages.ts`, dus in de sitemap en de teller.
+    Elke clubpagina staat in de sitemap, uit de database zoals de artikelen, en telt mee onder zijn eigen adres, nadat de database heeft bevestigd dat de club bestaat, zoals bij een artikel.
+    Een verzonnen adres is dus geen rij in de tellers.
+  - **De bron:** onderaan staat de volledige bronvermelding van Wikipedia met een link naar de pagina's van alle seizoenen die in de cijfers zitten (op de lijst alle seizoenen, bij een club de seizoenen waarin we hem troffen), met de licentie CC BY-SA 4.0.
+    Daarvoor is er een query, `listAllWikipediaPages`, die de pagina's van alle seizoenen in één keer geeft.
+- **Waarom:** een supporter wil weten hoe vaak we van een club wonnen, en de clubs hebben sinds #496 een adres dat blijft werken.
+  Een lijst van alle clubs zonder minimum laat zien wat we hebben; de pagina's vullen zich vanzelf als #414 oudere seizoenen importeert.
+  De afkortingen houden de tabel op een telefoon smal, en de zin "sinds …" laat zien hoe ver de cijfers teruggaan.
+  Een bron die alle seizoenen noemt, is de eerlijke vermelding voor cijfers die uit al die pagina's komen.
+- **Hoe:** de cijfers van de lijst komen uit `listClubRecords` en die van een club uit `listClubMatches`, via `src/opponents.ts`.
+  Daar staan ook de optelling van een lijst wedstrijden (`tallyOf`, `summaryOf`) en de gecachete lezingen.
+  De lijst heeft twee sleutels in de cache, alle wedstrijden en de Eredivisie, en de wedstrijden van een club staan per slug in de cache, pas nadat de slug is gecontroleerd tegen de bekende clubs, want een bezoeker kan elk adres verzinnen.
+  Een test laat zien dat Totaal gelijk is aan Thuis plus Uit en dat gewonnen, gelijk en verloren samen het aantal gespeelde wedstrijden zijn, voor alle wedstrijden en voor de Eredivisie, en een e2e-test dat de cijfers van een club in de lijst die van zijn pagina zijn.
+  `DataTable` kreeg `href` op een rij, zodat de rijkop een link is.
+  `CompetitionSwitch` kreeg een zusje, `CompetitionLinks`, voor een pagina die zelf weet of er iets te kiezen valt.
+- **Nadeel:** de bronvermelding wordt lang zodra #414 de oudere seizoenen importeert, want elk seizoen heeft tot drie pagina's.
+  Een cel als "7–5" leest een schermlezer als twee getallen zonder het woord "tegen"; de kolomkop zegt "doelpunten" en de regel onder de tabel "voor–tegen".
+  De lijst heeft clubs met nullen zolang we alleen een wedstrijd uit de toekomst tegen ze hebben.
+- **Alternatieven:** alleen clubs met een minimum aantal wedstrijden (de projecteigenaar koos er geen); hele woorden als kolomkop (past niet op een telefoon); de lijst sorteerbaar of met paginering (te veel voor een lijst van enkele tientallen clubs); een kaart met tegenstanders op de pagina Statistieken (de pagina is al vol); de bronvermelding in korte vorm, "Bron: Wikipedia" (zegt niet uit welke pagina's de cijfers komen); in de cache een sleutel per verzonnen slug (laat het geheugen volgroeien).
+- **Later:** zie _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026): de lijst sorteert sindsdien met JavaScript op elke kolom en heeft bij de keuze Eredivisie de kolom Punten.
+  De tabel van de server blijft van A tot Z, zonder knoppen.
+- **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): de pagina van een club heeft sindsdien een hoofdkolom en een zijkolom.
+  Wedstrijden staat in de hoofdkolom en is wit, Onze uitslagen staat in de zijkolom en is zacht (niet meer warm), en de kaart Stadion(s) en de bronvermelding staan daaronder.
+  De volgorde van de kaarten en hun vlakken zijn dus niet meer die van hier.
+- **Later:** zie _De tabel in "Onze uitslagen tegen …" heeft Thuis en Uit als rijen met Totaal eronder, zoals de kaart Stand_ (2 november 2026): de tabel op de kaart heeft Thuis, Uit en Totaal als rijen en G, W, L, V, P en D als kolommen, met de woorden onder de tabel, en niet meer de zes onderdelen als rijen.
+  De rest van de kaart blijft.
+- **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
+  De kolommen zijn nu G, W, G, V, D en (bij de Eredivisie) P, met de woorden winst en verlies in plaats van gewonnen en verloren, en G gelijk in plaats van GL.
+- **Later:** zie _De kaart Wedstrijden op de pagina van een club heeft een rij met de laatste vijf uitslagen_ (2 november 2026): de kaart Wedstrijden heeft sindsdien direct onder de kop de rij Laatste wedstrijden, bij ten minste vijf gespeelde wedstrijden in de gekozen competitie.
+  De lijst eronder blijft.
+
+## De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
+
+- **Datum:** 31 oktober 2026
+- **Besluit:** de links van de balk onder het hoofdmenu bij Statistieken, Spelers en Tegenstanders, houden het seizoen en de keuze tussen alle wedstrijden en de Eredivisie vast (#498).
+  De balk komt uit een nieuw slot van de layout, `@subnav`, en niet meer uit de vaste lijst in `SiteNavigation`.
+  - **De adressen:** op `/statistieken/2025-26?competitie=eredivisie` gaat Spelers naar `/statistieken/spelers/2025-26?competitie=eredivisie`, en op Spelers gaat Tegenstanders naar `/statistieken/tegenstanders?competitie=eredivisie`.
+    Het lopende seizoen heeft zoals overal één adres zonder seizoen, en zonder keuze is er geen parameter.
+    Tegenstanders telt alle seizoenen, dus die link houdt alleen de keuze vast.
+    Een keuze die de pagina niet kent is de pagina "niet gevonden", en dan wijzen de links naar de standaard.
+  - **Het hoofdmenu** houdt niets vast: Statistieken in het menu is altijd `/statistieken`, het lopende seizoen met alle wedstrijden.
+    De balk heeft geen link terug naar Statistieken; dat is het item van het menu.
+  - **Het slot:** `layout.tsx` zet `@subnav` naast `@shortcuts` en geeft het aan `SiteNavigation` (`statisticsBar`), dat het aan het item Statistieken geeft.
+    Alleen de pagina's van Statistieken hebben een route in het slot: `/statistieken`, `/statistieken/<seizoen>`, `/statistieken/spelers`, `/statistieken/spelers/<seizoen>`, `/statistieken/tegenstanders` en `/statistieken/tegenstanders/<club>`.
+    Elke route leest `?competitie=` en het seizoen uit het adres op de server en tekent de balk met dezelfde functie, `StatisticsBar` in `src/statisticsBar.tsx`.
+    Elk ander adres, ook de homepage, krijgt een leeg slot (`[...rest]`, `page.tsx` en `default.tsx`).
+  - **Het designsysteem:** een item van `Navigation` kreeg de eigenschap `bar`, een `ReactNode` die de balk vervangt die `Navigation` uit `subitems` tekent, onder dezelfde voorwaarden.
+    De balk zelf is nu een eigen onderdeel, `NavigationBar`, zodat een pagina hem kan tekenen.
+    De `subitems` blijven nodig, want die zeggen welke subpagina de huidige is.
+    Zonder `bar` is de uitvoer gelijk aan die van vroeger, dus de balk van Nieuws verandert niet; een test laat dat zien.
+- **Waarom:** de keuze staat in de query string, en die lezen kan alleen een pagina of een slot op de server, of een clientcomponent met `useSearchParams`.
+  `useSearchParams` in een clientcomponent van de root-layout vraagt een Suspense-grens in de layout, en die raakt elke pagina van de site; zonder JavaScript kent de balk de keuze dan ook niet.
+  Een slot doet dat in de HTML van de server, voor alleen de pagina's die het nodig hebben, zoals `@shortcuts` dat voor de balk "Op deze pagina:" al doet.
+  De balk blijft zo in het `li` van zijn onderdeel in de ene `nav`, zoals _Het hoofdmenu en het submenu zijn één `nav` tussen de `header` en de `main`, met een geneste lijst_ wil.
+- **Gemeten:** de build van deze branch en die van `main` hebben dezelfde vier statische routes (`/_global-error`, `/_not-found`, `/contact/verstuurd` en `/manifest.webmanifest`).
+  Alle andere pagina's waren al dynamisch en zijn dat gebleven; geen pagina is dynamisch geworden.
+  De pagina's van Statistieken lezen al `searchParams`, dus het slot kost daar geen extra render.
+- **Nadeel:** de negen kleine bestanden in `app/@subnav` (zes routes en drie lege) volgen de pagina's van Statistieken; een nieuwe pagina op een dieper adres krijgt zonder route in het slot geen balk.
+  Een pagina op één niveau onder `/statistieken` valt onder `[seizoen]`, en een adres dat geen seizoen is, krijgt daar de balk naar het lopende seizoen.
+  Een "niet gevonden" onder een diepere map heeft geen balk meer, waar de vaste lijst hem wel liet zien.
+  Het slot en de zichtbare balk zijn los van elkaar: het slot tekent de links, `SiteNavigation` kiest uit het pad of ze getoond worden.
+  Komt er ooit `next/link`, dan wordt de balk bij een klik vervangen door de balk van de volgende pagina en gaat de focus verloren.
+  Nu laadt elke klik de hele pagina, want de site heeft geen `next/link`: de balk is met elke pagina nieuw en de focus begint bovenaan, zoals na elke andere link.
+  Een e2e-test controleert de volgorde van het toetsenbord in het menu en de balk.
+- **Alternatieven:** `useSearchParams` met een Suspense-grens in `SiteNavigation` (raakt elke pagina en werkt niet zonder JavaScript).
+  Het hele menu als slot, `@menu` (het menu wordt bij elke pagina een nieuw onderdeel).
+  De balk als tweede `nav` in `@shortcuts` (twee landmarks en een nieuw onderdeel in plaats van de geneste lijst).
+  De URL van het verzoek in een header lezen in de layout (elke pagina wordt dynamisch; zie _Het hoofdmenu leest het pad in een clientcomponent_).
+  De keuze onthouden in een cookie (zie _De statistieken tellen standaard alle wedstrijden_).
+- **Later:** zie _Het hoofdmenu neemt het seizoen van de pagina mee_ (1 november 2026): op de pagina van een afgelopen seizoen is Statistieken in het menu het adres van dat seizoen (`/statistieken/2025-26`) en niet meer altijd `/statistieken`, en Wedstrijden is dat ook; de keuze tussen alle wedstrijden en de Eredivisie houdt het menu nog steeds niet vast.
+
+## De pagina van een club toont de namen van zijn stadion en heeft een zijkolom
+
+- **Datum:** 1 november 2026
+- **Besluit:** de pagina van een tegenstander (`/statistieken/tegenstanders/<club>`) krijgt de kaart "Stadion" of "Stadions" en een nieuwe indeling (#557).
+  - **De namen** komen uit de Eredivisie-wedstrijden waarin de tegenstander thuis speelde, dus onze uitwedstrijden, want daar is het stadion dat van de club.
+    Bekerwedstrijden en play-offs tellen niet mee, omdat die op een neutraal veld kunnen zijn, zoals een finale.
+    Een gestaakte wedstrijd telt voor zijn begin (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_), dus ook daar is het stadion dat van de club.
+    De kaart staat er ook bij de keuze Eredivisie en bij alle wedstrijden, want de keuze verandert de namen niet.
+  - **De namen staan in de volgorde van de wedstrijden**, zoals Wikipedia ze toen schreef.
+    Spellingen die alleen verschillen in hoofdletters, spaties of een koppelteken zijn één naam, geschreven zoals de eerste wedstrijd met die naam hem schreef.
+    Een twijfelgeval, zoals "Galgenwaard" naast "Stadion Galgenwaard", blijft liever twee regels dan een foute samenvoeging.
+    Een naam die na een andere terugkomt (A, B, A) staat als drie regels.
+    Een wedstrijd zonder stadion telt niet mee.
+  - **De perioden** volgen die van de kaart Hoofdtrainers (`stadiumPeriods` in `src/match-format.ts`): bij één naam staat alleen de naam, bij meer heeft elke naam behalve de laatste "tot" en de dag van de laatste wedstrijd met die naam, en de laatste "vanaf" en de dag van de eerste wedstrijd met die naam.
+    Het zijn de dagen van onze wedstrijden, niet van de dag dat de naam veranderde, en een regel onder de lijst zegt dat.
+    Bij één naam geen "vanaf", want dat zou zeggen dat het stadion pas toen begon, terwijl onze gegevens maar tot een bepaald seizoen teruggaan.
+  - **De kaart** is sterk (regel 2 van _De vier vlakken van een kaart hebben een betekenis_: de organisaties achter de inhoud), heeft een `h2` met het anker `#stadion` voor beide titels en een lijst met `ShortStaff`-regels, zoals Hoofdtrainers.
+    Een club zonder wedstrijd waarin hij thuis speelde, of zonder stadion in die wedstrijden, heeft geen kaart.
+    De bronvermelding onderaan geldt ook voor deze kaart.
+  - **De indeling:** de hoofdkolom heeft de keuze voor de competitie en de kaart Wedstrijden, nu op het witte vlak (regel 1: de hoofdinhoud).
+    De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Statistieken) heeft Onze uitslagen op het zachte vlak (regel 4: cijfers en records die bij de hoofdinhoud horen), dan de kaart Stadion(s) en dan de bronvermelding.
+    Op een telefoon volgt de zijkolom op de hoofdkolom.
+    Onze uitslagen houdt de tabel, de tekst en de afbeeldingsknop; alleen het vlak en de plaats veranderen.
+    De pagina heeft geen warme kaart meer.
+    Een club zonder wedstrijden toont dezelfde zin als eerst, zonder kaarten en zonder zijkolom.
+- **Waarom:** een stadion krijgt vaak een nieuwe naam, en supporters willen weten hoe het eerder heette.
+  Wikipedia noemt in elke wedstrijd de naam die toen gold, dus de wedstrijden die we al hebben, zeggen het al.
+  Er is geen nieuwe bron en geen nieuwe tabel nodig.
+  De uitwedstrijden in de competitie zijn de enige wedstrijden waarvan het stadion zeker dat van de tegenstander is.
+  De wedstrijden zijn de hoofdinhoud van de pagina, dus wit; de cijfers over onze uitslagen zijn het gewone voorbeeld van "records die bij de hoofdinhoud horen".
+- **Nadeel:** de periodes zijn zo precies als onze wedstrijden: een stadion dat van naam veranderde tussen twee uitwedstrijden, heeft de overgang ergens in die tussentijd.
+  Een club die we nooit in de Eredivisie bezochten, heeft geen kaart, ook al kennen we zijn stadion uit de beker.
+  Twee spellingen die we niet samenvoegen, staan als twee namen met een eigen periode.
+- **Alternatieven:** ook de bekerwedstrijden en play-offs tellen (een finale op een neutraal veld zou het stadion van de club lijken); "vanaf" ook bij één naam (zegt dat het stadion pas toen begon); alle spellingen in één naam samenvoegen met een lijst van afkortingen en voorvoegsels (een foute samenvoeging is erger dan twee regels); een eigen tabel met stadions en de datum waarop we een naam het eerst zagen (#549, een groter werk dat dit issue niet nodig heeft); Onze uitslagen warm laten (de kaart is geen uitnodiging of iets opmerkelijks, en de pagina heeft dan twee kaarten die de aandacht vragen).
+- **Later:** een eigen lijst met stadions per club (#549) zou de namen uit deze kaart kunnen halen, met de datum waarop we een naam het eerst zagen in plaats van de dag van een wedstrijd.
+
+## Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom
+
+- **Datum:** 1 november 2026
+- **Besluit:** op de pagina Spelers (`/statistieken/spelers` en de pagina's van een seizoen) is Doelpuntenmakers de inhoud van de pagina en heeft het witte vlak.
+  Bijzondere doelpunten staat in de zijkolom op het zachte vlak.
+  Op Statistieken blijft de top 5 in de zijkolom op het zachte vlak (#583).
+  - **Het vlak:** `TopScorersCard` krijgt een eigenschap `surface`, `soft` als niets is opgegeven en `default` (wit) op Spelers, zodat Statistieken niet verandert.
+  - **De zijkolom:** een `Page.Sidebar` van de gewone breedte, want de kaart is een lijst van korte regels en heeft de breedte van een tabel niet nodig.
+    Hij heet "Meer cijfers over de spelers" en volgt op een telefoon op de hoofdkolom, dus de volgorde is er dezelfde.
+    De bronvermelding sluit de zijkolom af, zoals op Statistieken.
+  - **Ongewijzigd:** de inhoud van de kaart Bijzondere doelpunten, het anker `#bijzondere-doelpunten`, de balk "Op deze pagina:" en de knop voor een afbeelding van beide kaarten.
+    Alleen de plaats en het vlak van de kaarten veranderen.
+    De balk is vanaf 52 rem weg, en dat is ook de breedte waarop de zijkolom naast de hoofdkolom komt.
+- **Waarom:** op Spelers is de ranglijst waarvoor de bezoeker komt, dus wit past bij de inhoud van de pagina (regel 1 van _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_).
+  Bijzondere doelpunten is een record en een bijzaak, dus de zijkolom en het zachte vlak.
+- **Alternatieven:** beide kaarten wit onder elkaar (de bijzaak weegt dan even zwaar als de lijst); alles zoals nu; de zijkolom zo breed als de hoofdkolom (de kaart heeft die breedte niet nodig, en de lijst met doelpuntenmakers wordt er smaller van).
+- **Later:** vult voor de pagina Spelers de beslissing _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (#537) aan, waarin een ranglijst op het zachte vlak staat.
+
+## Het hoofdmenu neemt het seizoen van de pagina mee
+
+- **Datum:** 1 november 2026
+- **Besluit:** op een pagina met een seizoen in het adres wijzen de menu-items Wedstrijden en Statistieken naar het adres van datzelfde seizoen.
+  Het seizoen komt uit het pad en niet uit een parameter of een cookie.
+  - **Welke pagina's:** `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/statistieken/spelers/<seizoen>`.
+    Op elke andere pagina, ook op die van het lopende seizoen, blijven de adressen zoals ze waren.
+  - **Hoe:** `seasonOfPath` in `SiteNavigation.tsx` leest het seizoen uit het pad met `seasonFromSlug`, dezelfde controle als de pagina's, dus `/wedstrijden/kies` of `/wedstrijden/2023-25` verandert niets.
+    `hrefOf` zet het seizoen achter het adres van het menu-item.
+    Welk item huidig is (`aria-current`) verandert niet.
+  - **De keuze voor de competitie gaat niet mee:** die hoort bij Statistieken, en Wedstrijden heeft haar niet.
+    Het menu kan haar niet lezen zonder `useSearchParams` en een Suspense-grens, en de balk onder Statistieken houdt haar al vast.
+- **Waarom:** een bezoeker die een afgelopen seizoen bekijkt, verwacht dat de pagina's die erbij horen hetzelfde seizoen tonen.
+  Een clientcomponent leest het pad ook op de server, dus het kost geen Suspense-grens en geen onthouden voorkeur.
+  Een seizoen dat bij de ene pagina bestaat, bestaat ook bij de andere, dus een meegenomen seizoen leidt nooit naar "niet gevonden".
+- **Alternatieven:** een parameter `?seizoen=` (de pagina's hebben al een adres per seizoen, dus dat zou een tweede adres voor dezelfde pagina zijn); het gekozen seizoen onthouden in een cookie (we volgen bezoekers niet, en een cookie maakt het adres afhankelijk van een eerder bezoek).
+- **Later:** zie _Het hoofdmenu leest het pad in een clientcomponent_ (22 oktober 2026): het menu leest het pad nu ook voor de adressen van twee onderdelen, niet alleen voor de markering.
+
+## De lijst in het beheer heeft een schakelaar voor wel en niet op de site
+
+- **Datum:** 2 november 2026
+- **Besluit:** `/beheer/berichten` toont de nieuwste 50 berichten van één groep, met een schakelaar (`SegmentedLinks`, kleine maat, naam "Welke berichten") met "Op de site" en "Niet op de site".
+  - **De groep:** "Op de site" is de standaard en heeft niets in het adres.
+    "Niet op de site" is `?toon=niet-op-de-site`.
+    Een andere waarde valt terug op de standaard.
+  - **De regel:** `isOnSite` in `apps/site/src/beheer/items.ts` zegt dat een bericht op de site staat als het niet verborgen is, de import het `relevant` vond en de publicatietijd niet in de toekomst ligt.
+    Alle andere berichten staan niet op de site: de verborgen, de twijfelgevallen, de berichten die niet over de club gaan en de berichten met een tijd die nog komt.
+    `listItems` gebruikt alleen die functie, en haalt "niet op de site" uit hetzelfde zoekwerk met `not`, dus een bericht staat in precies één groep.
+  - **Het vakje:** onder "Niet op de site" staat in het zoekformulier "Alleen door de redactie verborgen" (`?redactie=1`), dat alleen de berichten toont die een redacteur verborg.
+    Onder "Op de site" is er geen vakje en telt `redactie` niet, want daar kan geen verborgen bericht staan.
+    De schakelaar naar "Op de site" laat het vakje los, die naar "Niet op de site" houdt het vast als het aangevinkt was, en "Toon alle berichten" wist alleen de zoekopdracht.
+    Het formulier is een GET-formulier zonder JavaScript met één knop "Zoeken", die de groep meestuurt (`name="toon"` en `value="niet-op-de-site"` op de knop, want het designsysteem heeft geen verborgen veld).
+  - **Wie verborg het:** bij een verborgen bericht staat "Verborgen op {tijd} door {e-mailadres}. Reden: …", uit het account in `hidden_by`.
+    Bestaat het account niet meer, dan staat er "een verwijderd account".
+  - **Geen formulier waar het niets doet:** een bericht dat de import niet op de site zet en dat niemand verborg, krijgt geen formulier om te verbergen.
+    De vermelding "twijfelgeval, niet op de site" of "niet over de club, niet op de site" blijft.
+    Een bericht met een tijd die nog komt, houdt het formulier en krijgt de vermelding "nog niet gepubliceerd, niet op de site".
+  - **Verbergen en tonen:** de acties krijgen de groep, het vakje en de zoekopdracht mee en eindigen op dezelfde groep.
+    Het bericht staat daarna in de andere groep, en de melding "Verborgen" of "Weer getoond" zegt wat er gebeurde.
+    De acties, de logregels en de rechten zijn niet veranderd.
+- **Waarom:** een moderator die iets wil verbergen, scrolde langs berichten die er nooit op stonden, en wie iets weer wil tonen, zocht tussen alles.
+  De lengte van 50 geldt per groep, zodat de twijfelgevallen de berichten die wel op de site staan niet wegdrukken.
+- **Het verschil met de site:** `isShown` in `packages/db/src/queries.ts` (zie _De site toont alleen `relevant`, en het beheer toont alles met een woord erbij_) is geen losse voorwaarde.
+  Hij kijkt ook of de bron aanstaat, laat bij een bericht met een `thread_key` alleen de laatste versie van het verhaal door en voegt een verhaal van twee bronnen van één uitgever samen.
+  `isOnSite` doet dat niet, en kijkt per bericht.
+  Een bericht dat de site samenvouwt met een nieuwer bericht van dezelfde krant (zelfde onderwerp), of dat van een bron staat die uit is, kan hier dus "op de site" staan terwijl de bezoeker het niet ziet.
+  We nemen dat voor lief: de groep is er om een bericht te vinden dat een redacteur wil verbergen, en dat bericht staat er dan nog steeds.
+- **Nadeel:** de groep "Op de site" kan een bericht tonen dat de bezoeker door de samenvouwregel of een bron die uitstaat niet ziet.
+- **Alternatieven:** `isShown` hergebruiken (hij is geen losse voorwaarde: hij hoort bij de query van de homepage en heeft de bron en de andere versies van het verhaal nodig); een derde keuze "Alles" (de projecteigenaar koos twee groepen); een apart vakje voor de twijfelgevallen (een eigen issue als het nodig blijkt).
+
+## Het hoofdmenu toont Beheer voor wie ingelogd is, met een teken in `localStorage`
+
+- **Datum:** 2 november 2026
+- **Besluit:** de browser van wie in het beheer komt met een geldige sessie, bewaart een teken in `localStorage`, onder de sleutel `fansite-beheer` met de waarde `1`.
+  Het hoofdmenu (`SiteNavigation`) leest het teken en toont dan voor Forum het item Beheer.
+  Het laatste item van het menu staat rechts, dus zo blijft Forum waar het stond.
+  - **Zetten en weghalen:** `app/beheer/layout.tsx` controleert de sessie op de server (`sessionToken` en `findSession`) en geeft het antwoord aan `AdminMarker`, een clientcomponent die het teken zet of weghaalt.
+    De inlogpagina haalt het ook weg: na een zachte navigatie naar een pagina die doorverwijst, wordt de layout niet opnieuw gevraagd.
+    Uitloggen leidt naar de inlogpagina, en daar gaat het teken weg.
+  - **Lezen:** `useSyncExternalStore` met `false` op de server, dus de HTML is voor elke bezoeker hetzelfde en er is geen hydratiefout.
+    Zonder JavaScript is er geen item.
+  - **Geen toegang:** het teken is een hulp om een koppeling te tonen.
+    Wie het zelf maakt, komt bij de inlogpagina uit.
+  - **Inhoud:** alleen het teken.
+    Geen geheim, geen rol en geen adres, en het gaat nooit naar de server.
+- **Waarom:** een redacteur komt zo vanuit het menu bij het beheer, zonder `/beheer` te typen.
+  Het cookie van het beheer is `HttpOnly` en geldt alleen onder `/beheer`, dus de server ziet op een publieke pagina niet wie ingelogd is.
+  Kon hij dat wel, dan werd elke pagina een pagina per bezoeker en werkte de cache niet meer.
+  De themakeuze staat al zo in `localStorage`, en het past bij de bereidheid om voorkeuren op te slaan.
+- **Nadeel:** het item verschijnt een moment na het laden, want de browser leest het teken pas na het hydrateren.
+  Een redacteur die in een andere browser inlogt, ziet het item daar pas na een bezoek aan het beheer.
+- **Gevolg:** het hoofdstuk Cookies op `/privacy` en de README van de site zeggen dat de browser van een redacteur dit teken bewaart.
+- **Alternatieven:** een tweede cookie dat bij elk verzoek meegaat (een tweede cookie naast het enige cookie van de site); een verzoek naar `/beheer` bij elke paginaweergave van elke bezoeker (extra verkeer voor iedereen, en het beheer ziet elk bezoek); het cookie van het beheer voor de hele site laten gelden (elke pagina wordt een pagina per bezoeker, en het geheim gaat bij elk verzoek mee).
+
+## De kaart Stand heeft een schakelaar voor de stand over de laatste vijf wedstrijden
+
+- **Datum:** 2 november 2026
+- **Besluit:** op `/wedstrijden` heeft de kaart Stand (en Eindstand) onder de kop een schakelaar met "Hele seizoen" en "Laatste 5" (#602).
+  - **De weergave:** "Hele seizoen" is de standaard en heeft geen opdracht in het adres.
+    "Laatste 5" is `?stand=laatste-5`.
+    Elke andere waarde, een lege en een die twee keer staat, is "Hele seizoen" en geeft nooit "niet gevonden" (`parseStandingsView` in `src/standings-view.ts`).
+    De links zijn koppelingen die op het anker van de kaart eindigen, zodat de pagina niet naar boven springt.
+  - **De berekening:** `lastFiveStandings` in `src/last-five.ts` telt per club de vijf competitiewedstrijden die het laatst zijn gespeeld, op dag en bij dezelfde dag op speelronde.
+    Een club met minder dan vijf telt wat hij heeft, en de kolom G laat zien hoeveel dat is.
+    Een winst geeft drie punten, een gelijkspel één.
+    De volgorde is punten, doelsaldo, gemaakte doelpunten, en dan de naam van de club van A tot Z.
+    De plaatsen lopen van 1 tot en met 18, zonder gedeelde plaatsen.
+  - **Waar de wedstrijden vandaan komen:** de wedstrijden van sc Heerenveen uit `matches`, dus met wat de redactie zelf invulde, en die van de andere clubs uit `league_results` (zie _De import bewaart de uitslagen van alle clubs_).
+    Een wedstrijd van ons staat ook in `league_results`: die rij vervangt de site door die uit `matches`.
+    De naam van de tegenstander volgt de rij van dezelfde speelronde waar sc Heerenveen in staat (`leagueResultsOfAllClubs`), want `matches.opponent` schrijft `Excelsior` waar de stand `Excelsior Rotterdam` heeft.
+    Een speelronde zonder rij houdt de naam van de wedstrijd.
+  - **Wanneer de schakelaar er staat:** alleen als voor elke club het aantal uitslagen in `league_results` gelijk is aan het aantal gespeelde wedstrijden in de stand, er geen uitslag is van een club die de stand niet heeft en er een gespeelde wedstrijd is (`hasAllLeagueResults`).
+    Een seizoen waar dat niet zo is, bijvoorbeeld omdat het nog niet opnieuw is geïmporteerd, toont de kaart zoals tot nu toe.
+    Dat de uitslagen niet te lezen zijn is een regel in het logboek en geen foutpagina.
+  - **De kaart:** dezelfde kolommen en opmaak.
+    Het bijschrift voor een schermlezer is "Stand over de laatste vijf wedstrijden op 18 oktober 2026", met de dag waarvoor de stand van het seizoen geldt.
+    Een eerder seizoen houdt de naam Eindstand voor de kaart.
+    "Gegevens nog niet bijgewerkt" blijft onder de tabel.
+    De afbeelding van de kaart maakt een kopie van de kaart, dus de schakelaar staat erin en laat zien welke weergave het is.
+  - **Het geheugen:** de uitslagen hebben een eigen cache per seizoen (`getLeagueResults` in `src/matches.ts`), vijf minuten voor het lopende seizoen en een uur voor een afgelopen seizoen, zoals `getMatchData`.
+    De andere pagina's vragen ze niet.
+    De keuze zit niet in de sleutel van de cache: de berekening is een rekensom op de lijsten die er al zijn.
+  - **Wat niet verandert:** de canonieke koppeling, de adreslijst en de seizoenskiezer.
+    De kiezer stuurt de keuze niet mee, want een ander seizoen heeft misschien geen schakelaar.
+    De kleine tabel op de homepage en de pagina Statistieken blijven zoals ze zijn.
+- **Waarom:** de projecteigenaar wil zien wie er nu goed staat, ongeacht het hele seizoen.
+  Een eigen berekening uit de uitslagen kan dat, en de stand zelf kan het niet.
+  De schakelaar is een koppeling zoals bij `CompetitionSwitch`, zodat hij zonder JavaScript werkt en de keuze te delen is.
+  Een schakelaar die alleen verschijnt bij een volledig seizoen voorkomt een tabel die er goed uitziet en niet klopt: de eerdere seizoenen misten soms een paar uitslagen (#608).
+  De vergelijking met `played` is dezelfde als die van de import voor zijn waarschuwing.
+- **Nadeel:** staat de redactie een uitslag van sc Heerenveen in die Wikipedia nog niet heeft, dan telt die mee in "Laatste 5" en nog niet in de stand van het hele seizoen.
+  Tot de volgende import verschillen de twee dan een wedstrijd.
+  De schakelaar verdwijnt niet door zo'n uitslag, want de controle telt de uitslagen van de import.
+  Een speelronde van sc Heerenveen zonder rij in `league_results` kan de naam van de tegenstander niet corrigeren.
+  Dan telt de wedstrijd niet voor die tegenstander als de naam anders is dan in de stand.
+- **Alternatieven:** de uitslagen bij de wedstrijden van het seizoen in `getMatchData` laden (elke pagina betaalt voor een vraag die alleen deze kaart nodig heeft); de schakelaar altijd tonen en bij een onvolledig seizoen een melding geven (een tabel die verkeerd kan zijn, of een kaart met een melding die bezoekers niets zegt); de uitslagen van sc Heerenveen uit `league_results` nemen (de uitslag die de redactie invulde zou dan niet meetellen); de keuze in de seizoenskiezer meenemen (een seizoen zonder schakelaar zou dan een keuze krijgen die het niet kent); een onbekende waarde "niet gevonden" laten geven, zoals `?competitie=` (een gedeelde koppeling naar een seizoen dat later geen schakelaar meer heeft, werkt dan niet meer).
+- **Later:** de schakelaar staat er alleen in het lopende seizoen, en een club mag één uitslag minder hebben dan de stand zegt; het bijschrift noemt de dag van de laatste uitslag, zie _De schakelaar Laatste 5 hoort bij het lopende seizoen en accepteert één uitslag minder_ (2 november 2026).
+
+## De schakelaar Laatste 5 hoort bij het lopende seizoen en accepteert één uitslag minder
+
+- **Datum:** 2 november 2026
+- **Besluit:** op `/wedstrijden` staat de schakelaar "Laatste 5" alleen bij het lopende seizoen, en in het lopende seizoen verschijnt hij ook als de uitslagen één wedstrijd achterlopen (#622).
+  - **Een afgelopen seizoen:** de kaart heet Eindstand en heeft geen schakelaar.
+    `?stand=laatste-5` geeft daar de gewone kaart, en de pagina vraagt de uitslagen van de clubs niet op.
+  - **Het lopende seizoen:** de schakelaar staat er als elke club hoogstens één uitslag minder heeft dan het aantal gespeelde wedstrijden in de stand (`hasEnoughLeagueResults` in `src/last-five.ts`).
+    Meer dan één uitslag minder, een uitslag méér dan de stand, een uitslag van een club die niet in de stand staat en een seizoen zonder uitslagen verbergen hem zoals eerst.
+  - **Het bijschrift:** "Stand over de laatste vijf wedstrijden op 1 november 2026" noemt de dag van de laatste uitslag in onze gegevens (`lastResultOn` van `lastFiveOf`), niet de dag van de stand.
+- **Waarom:** de pagina's van Wikipedia worden los van elkaar bijgewerkt, dus de uitslagen lopen soms een dag of een speelronde achter de stand.
+  De strikte regel van _De kaart Stand heeft een schakelaar voor de stand over de laatste vijf wedstrijden_ verborg de schakelaar daardoor vaak in het lopende seizoen.
+  Een eerlijk bijschrift met de werkelijke dag is beter dan geen schakelaar.
+  De stand over de laatste vijf wedstrijden zegt aan het eind van een seizoen weinig, net als de laatste vijf wedstrijden bij de reeksen (zie _Een eerder seizoen toont bij de reeksen alleen de langste_).
+- **Nadeel:** een club met één uitslag minder mist in "Laatste 5" zijn laatste wedstrijd, tot de bron is bijgewerkt.
+  Het bijschrift noemt de dag van de laatste uitslag, maar alleen een schermlezer krijgt dat bijschrift: wie ziet, merkt het niet.
+- **Alternatieven:** de strikte regel houden (de schakelaar verschijnt zelden); nooit controleren (een ontbrekende wedstrijd kan onopgemerkt een verkeerde stand geven); de schakelaar in elk seizoen laten staan, zoals #602 deed (een eindstand over vijf wedstrijden zegt weinig).
+
+## In de site noemt een import een bestand in `src` met `#src/`, niet met `../../`
+
+- **Datum:** 2 november 2026
+- **Besluit:** in `apps/site/src` en `apps/site/e2e` gebruikt elke import die twee of meer mappen omhoog gaat het voorvoegsel `#src/`: `#src/archive` in plaats van `../../archive`.
+  - **Wat blijft:** een import uit dezelfde map (`./x`) of de map erboven (`../x`) blijft zoals hij is.
+    Dat geldt ook voor een pad naar buiten `src`, zoals `new URL('../../../packages/…', import.meta.url)`: dat is een bestandspad en geen import.
+  - **Waar het staat:** `imports` in `apps/site/package.json` (`"#src/*": "./src/*"`) en `paths` in `apps/site/tsconfig.json` (`"#src/*": ["./src/*"]`).
+    Ze zeggen hetzelfde.
+    Node en Vitest lezen `imports`.
+    TypeScript probeert bij het doel van `imports` geen extensies, dus `#src/archive` zonder `.ts` vindt het alleen via `paths`.
+  - **Wat Node rechtstreeks laadt:** een bestand dat Node zelf laadt, zoals `src/icon-sets.ts` en wat de scripts in `apps/site/scripts` importeren, schrijft de extensie erbij (`#src/icon-sets.ts`), net als bij `./x.ts` nu.
+    Die bestanden gebruiken nu alleen `./`.
+  - **De lintregel:** `fansite/site-import-prefix` in `eslint.config.js` weigert een nieuwe import van `../../` in de site, ook de module in `vi.mock` en `vi.importActual`, en noemt het voorvoegsel in de melding.
+    Een dynamische `import('../../x')` ziet de regel niet, het script zet hem wel om.
+  - **De omzetting:** `apps/site/scripts/use-import-prefix.js` zette 394 imports in 105 bestanden om, met ESLint `--fix` achteraf voor de volgorde.
+    Het script blijft staan voor een branch die na de samenvoeging nog zulke imports heeft.
+  - **Waar het niet geldt:** `apps/importer` en `packages/*`, waar de paden kort zijn.
+    Een pakket in de werkruimte heet al `@fansite/…` en blijft zo.
+- **Waarom:** `../../../season-page` zegt niet waar een bestand staat, breekt als je een bestand verplaatst, en maakt elk nieuw bestand diep in `app/` lastiger te lezen.
+  Het kwam naar boven toen de Builder van #599 dertien van zulke regels schreef.
+  Eén afspraak voor de hele site is beter dan een oplossing per pull request.
+  `#` is het enige voorvoegsel dat `imports` in `package.json` toestaat, en het botst niet met een pakket zoals `@fansite/db`.
+- **Nadeel:** het voorvoegsel staat op twee plaatsen (`package.json` en `tsconfig.json`).
+  `#src` is voor de volgorde van imports een eigen groep, tussen de pakketten en de `../`-imports, met een lege regel erboven en eronder.
+  Een branch die vóór deze wijziging is gemaakt, krijgt een samenvoegconflict in elk bestand waar de importregels zijn omgezet.
+- **Alternatieven:** alleen `paths` in `tsconfig.json` met `@/` of `~/` (Node laadt `scripts` en `vitest.config.ts` rechtstreeks en kent het niet, en Vitest heeft er een plug-in voor nodig); alleen `imports` met `#src/*` (TypeScript vindt een import zonder `.ts` dan niet); overal `.ts` schrijven bij het voorvoegsel (honderden regels meer om te wijzigen, en een andere schrijfwijze dan de rest van de code); een `baseUrl` met kale paden als `season-page` (botst met pakketnamen); de regels laten zoals ze zijn en alleen een lintregel tegen drie mappen omhoog (de helft van het probleem blijft).
+
+## De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen
+
+- **Datum:** 2 november 2026
+- **Besluit:** de kaart "Hoe vaak welke uitslag" staat in de zijbalk van `/wedstrijden`, direct onder de stand en boven de hoofdtrainer, en telt de gespeelde wedstrijden van de competitie en de beker die de lijst Uitslagen toont, zonder schakelaar (#638).
+  Een bekerwedstrijd telt met de stand na verlenging, zonder strafschoppen.
+  De balk "Op deze pagina:" heeft er een link naar, na Stand.
+- **Waarom:** de projecteigenaar wil de kaart op Wedstrijden, naast de lijst van de uitslagen die hij samenvat.
+  Een telling die minder wedstrijden telt dan de lijst ernaast, zou verwarren.
+  De pagina heeft geen schakelaar tussen Eredivisie en alle wedstrijden.
+- **Alternatieven:** de kaart op Statistieken, in de kolom met cijfers, met de schakelaar en de regel dat een kaart alleen de Eredivisie telt (#397, #431), waar hij past bij de andere negen kaarten; alleen de Eredivisie tellen op Wedstrijden (het totaal verschilt dan van de lijst).
+
+## Uitslagen staan van goed naar slecht: winst, gelijk, verlies, dan doelsaldo, dan doelpunten
+
+- **Datum:** 2 november 2026
+- **Besluit:** de uitslagen staan vanuit sc Heerenveen gezien en gesorteerd op uitkomst (winst, gelijk, verlies), dan op doelsaldo (groot naar klein), dan op het aantal doelpunten in de wedstrijd (veel naar weinig) (`scoreCountsOf` in `src/matches.ts`).
+- **Waarom:** het beste resultaat staat bovenaan, zoals de projecteigenaar vroeg.
+  Doelsaldo en aantal doelpunten leggen de uitslag vast, dus er is geen gelijke stand om op te lossen.
+  Een nederlaag met één doelpunt verschil staat vóór een zwaardere.
+- **Alternatieven:** sorteren op doelpunten voor (3–0 vóór 4–1); de nederlagen van slecht naar goed.
+
+## Het beheer heeft een balk onder de kop met de schermen, en geen eigen schil
+
+- **Datum:** 2 november 2026
+- **Besluit:** het beheer houdt de kop en de voet van de site, met onder het hoofdmenu een balk met de schermen op elke pagina onder `/beheer`, behalve de inlogpagina's.
+  Een beheerder ziet Beheer, Berichten, Artikelen, Wedstrijden en Bezoek, een moderator Berichten.
+  Wie is ingelogd en de knop Uitloggen staan niet in de balk maar op de startpagina van het beheer, onder de kop: één plek is genoeg, en in de balk passen ze niet op een telefoon (de projecteigenaar koos dat op 2 november 2026).
+  De lijst van schermen per rol staat op één plek (`apps/site/src/beheer/screens.ts`), zodat een nieuw scherm één regel erbij krijgt.
+  De balk is `SectionBar` in het designsysteem, en de site tekent hem op de server uit de sessie (`AdminBar`), via het slot `@shortcuts` (`app/@shortcuts/beheer`).
+  De balk is geen toegangscontrole: elke pagina roept `requireRole` zelf aan, en zonder geldige sessie is er geen balk.
+- **Waarom:** er zijn nog maar vier of vijf schermen en de redactie kent de site, dus een eigen schil loont pas bij meer dan zes schermen.
+  Wie in het beheer is, moet zien waar hij is en bij de andere schermen kunnen komen, ook op een telefoon.
+  De balk staat niet in `app/beheer/layout.tsx`, zoals het issue (#617) zei: een layout tekent in de `Page.Body`, en een extra kind daar breekt de indeling van het raster en de kolommen, vooral bij een pagina met een introductie.
+  Het slot staat tussen het hoofdmenu en de `Page.Body`, en leest de sessie op de server, dus de balk is er ook zonder JavaScript en zonder de markering in `localStorage` (die het menu alleen gebruikt om Beheer te tonen).
+  `Page.Main` blijft een direct kind van `Page.Body`.
+  Een nieuw onderdeel was nodig: `NavigationBar` hoort bij een onderdeel van het hoofdmenu en heeft de ruimte van die `nav` nodig.
+  `SectionBar` heeft dezelfde uitstraling (de pillen van de submenubalk, dezelfde rij die zijwaarts scrolt) en hoort bij een onderdeel dat niet op elke pagina in het menu staat.
+- **Alternatieven:** een eigen schil met een andere kop (veel werk, en de moderator verliest het menu); alleen de koppeling "Terug naar het beheer" op elke pagina houden (wijst niet naar de andere schermen); de balk als subitems van het item Beheer in het hoofdmenu (het item hangt af van de markering in de browser, dus een redacteur zonder `localStorage` ziet geen balk, en het menu kent de rol niet); de balk in `Page.Body` met CSS naar buiten trekken (zie _De balk komt via een slot in de layout, een parallelle route_).
+- **Later:** zie _De balk komt via een slot in de layout, een parallelle route_ (27 oktober 2026): ook `/beheer` vult het slot `@shortcuts`, met een route voor de startpagina en een voor alles eronder.
+
+## Een ontwerp voor een telefoon is het ontwerp voor het hele beheer
+
+- **Datum:** 2 november 2026
+- **Besluit:** de telefoon is een eersteklas apparaat voor het hele beheer.
+  Wat een pagina daar nodig heeft, maakt ook de bureaubladvorm beter: kortere regels, grotere doelen en minder kolommen.
+- **Waarom:** moderators verbergen berichten ook onderweg, en een ontwerp dat op een telefoon werkt, werkt breed ook.
+- **Alternatieven:** het beheer voor het bureaublad ontwerpen en de telefoon alleen laten werken (moderators zijn ook onderweg aan het werk).
+
+## De startpagina van het beheer toont tegels in de hoofdkolom en een kaart Te doen in de zijbalk
+
+- **Datum:** 2 november 2026
+- **Besluit:** de startpagina van het beheer (`/beheer`) heeft in de hoofdkolom een tegel (zie _De tegel is een kaart die één link is, in een lijst van tegels_) voor elk scherm van de rol, en in de zijbalk de kaart "Te doen", die alleen verschijnt als er iets wacht (#616).
+  - **De tegels:** een moderator ziet Berichten, een beheerder ook Artikelen, Wedstrijden en Bezoek.
+    Elke tegel heeft een beschrijving van een regel in gewone woorden.
+  - **De kaart Te doen** heeft een regel per wat wacht, elk een link met het aantal erin: afwijkingen van Wikipedia die op een besluit wachten, naar de lijst "Aangepast" van het seizoen dat ze heeft (zoals bij de lijst van de wedstrijden), en wedstrijden van het lopende seizoen zonder uitslag (`countMatchesWithoutResult`, met dezelfde regel als de lijst: twee uur na de aftrap), naar de lijst die opent op die wedstrijden.
+    Een volgend scherm voegt een regel toe door een item aan `todo` in `src/app/beheer/page.tsx` toe te voegen.
+  - **Wacht er niets,** dan is er geen kaart en geen zijbalk.
+    Een moderator heeft nu niets dat wacht, dus die ziet nooit een kaart.
+  - **Op een telefoon** staat de kaart onder de tegels.
+    `Page` zet de zijbalk in de volgorde van de bron na de hoofdkolom, en gebruikt bewust geen `order`, zodat de leesvolgorde en de volgorde van het toetsenbord gelijk blijven aan wat je ziet.
+  - **Het kopje** zegt het adres en de rol: "Je bent ingelogd als jelle@voorbeeld.nl (beheerder)."
+    De knop Uitloggen blijft onder de tegels.
+- **Waarom:** wie inlogt, wil zien waar hij nodig is.
+  Een lijst met koppelingen zegt dat niet, en een tegel laat zien wat er te vinden is.
+  Wat wacht, hoort bij elkaar op één plek die je meteen ziet, en niet als een zin achter een koppeling.
+  Een zijbalk die alleen er is als er iets wacht, laat de pagina leeg als er niets te doen is.
+- **Nadeel:** op een telefoon moet je langs de tegels scrollen voor wat wacht; met vier tegels is dat kort.
+  Een tegel Wedstrijden die niet meer naar `?tonen=aangepast` wijst, is een klik meer voor wie alleen de afwijkingen wil zien, maar de kaart heeft die link.
+- **Alternatieven:** een doorverwijzing naar het vaakst gebruikte scherm (werkt niet voor twee rollen met andere schermen); alleen de lijst houden (blijft onduidelijk wat wacht); de kaart boven de tegels op een telefoon met `order` (breekt de leesvolgorde en vraagt een aanpassing aan `Page`); het aantal als label op de tegel (een tegel is één link, en een label zegt niet waar het naartoe gaat); een lege kaart "Niets te doen" (een kaart die niets zegt, naast de lege hoofdkolom).

@@ -1,7 +1,7 @@
 // Lets the heavy checks run one at a time on one computer, whatever the worktree. Sessions that
 // work next to each other each start `next build`, the accessibility checks, the story checks
 // and the Storybook build, and together they take every core. The decision "De zware controles
-// delen de machine" in docs/beslissingen.md says why.
+// delen de machine" in docs/beslissingen/werkwijze.md says why.
 //
 //   node scripts/heavy-lock.js -- <command> [...]
 //

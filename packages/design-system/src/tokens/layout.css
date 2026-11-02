@@ -21,8 +21,8 @@
      * between them (2rem) it fills the column of the page, 64rem. These sizes come from
      * the length of a line of running text, not from a limit on characters; the
      * decisions _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_ and _De
-     * hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk_ in docs/beslissingen.md
-     * say why.
+     * hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk_ in
+     * docs/beslissingen/designsysteem.md say why.
      */
     --hf-content-max-width: 38rem;
 

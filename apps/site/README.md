@@ -3,6 +3,7 @@
 De site van de sc Heerenveen Fansite.
 Er zijn nu dertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, het forum en de wedstrijden, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/statistieken` met de cijfers over het seizoen, `/statistieken/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/statistieken/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
+De keuzes over de site staan in [`docs/beslissingen/site.md`](../../docs/beslissingen/site.md).
 
 ## Draaien
 
@@ -178,7 +179,7 @@ Een bestand in `src` noem je met het voorvoegsel `#src/`, zodra het pad twee of 
 Een bestand in dezelfde map (`./page`) of in de map erboven (`../matches-page`) schrijf je zoals je gewend bent.
 Dit geldt in `src` en in `e2e`, niet in `apps/importer` en de pakketten.
 `pnpm lint` faalt op een nieuwe import van `../../`, ook in `vi.mock`.
-Het voorvoegsel staat in `package.json` (`imports`, voor Node en Vitest) en in `tsconfig.json` (`paths`, voor TypeScript), en `docs/beslissingen.md` zegt waarom.
+Het voorvoegsel staat in `package.json` (`imports`, voor Node en Vitest) en in `tsconfig.json` (`paths`, voor TypeScript), en `docs/beslissingen/site.md` zegt waarom.
 
 Een bestand dat Node zelf laadt, zoals `src/icon-sets.ts` voor de scripts in `scripts`, schrijft de extensie erbij: `#src/icon-sets.ts`.
 Een branch met oude imports zet je om met het script:
@@ -205,7 +206,7 @@ De balk komt uit `Navigation` van het designsysteem (`subitems`), dus het menu e
 Op `/wedstrijden/<seizoen>`, `/statistieken/<seizoen>` en `/statistieken/spelers/<seizoen>` nemen de items Wedstrijden en Statistieken het seizoen van de pagina mee (`seasonOfPath` en `hrefOf`), zodat een bezoeker in een afgelopen seizoen daarin blijft.
 Een pad zonder seizoen, of met een waarde die geen seizoen is (`seasonFromSlug`), laat de adressen zoals ze zijn.
 
-De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen.md`).
+De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen/site.md`).
 De link "Zoeken" in de footer wijst naar `/nieuws/zoeken`, zodat je ook vanaf Wedstrijden kunt zoeken.
 
 ## De homepage
@@ -338,7 +339,7 @@ De andere clubs hebben er minder en hebben geen rij.
 ## De statistieken
 
 `/statistieken` toont onder negen kopjes de kaarten met cijfers over sc Heerenveen 1 (mannen) in het lopende seizoen: onze plek in de competitie, het verloop van het seizoen, de reeksen, thuis en uit, de doelpuntenmakers, de wedstrijden waarin we de nul hielden, de doelpunten per kwartier, hoe de wedstrijden verlopen en de uitersten.
-Wedstrijden is wat je opzoekt, een lijst van wedstrijden en de stand; Statistieken is wat uit veel wedstrijden volgt, een telling, een rangorde of een verloop (de beslissing staat in `docs/beslissingen.md`, _De site heeft vier onderdelen_).
+Wedstrijden is wat je opzoekt, een lijst van wedstrijden en de stand; Statistieken is wat uit veel wedstrijden volgt, een telling, een rangorde of een verloop (de beslissing staat in `docs/beslissingen/site.md`, _De site heeft vier onderdelen_).
 De kaarten staan in twee gelijke kolommen: de eerste vier in de hoofdkolom, onder de kop met de seizoenskiezer, en de andere vijf in een brede zijbalk (`wide` op `Page.Sidebar`), die even breed is als de hoofdkolom.
 De verdeling is 4 en 5, omdat de kolommen dan het minst in hoogte verschillen.
 Links staan onze plek, het verloop, de reeksen en thuis en uit.
@@ -768,7 +769,7 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
   De proxy is geen toegangscontrole.
 - De proxy telt ook de bezoeken (`src/visits.ts`): per dag de paginaweergaven per pagina en het aantal unieke bezoekers, zonder cookie, script of opslag in de browser.
   Hij doet dat na het antwoord, dus een pagina wacht er niet op, en ook als de pagina uit een cache komt.
-  Zie _We tellen paginaweergaven en unieke bezoekers per dag_ in `docs/beslissingen.md`.
+  Zie _We tellen paginaweergaven en unieke bezoekers per dag_ in `docs/beslissingen/redactie.md`.
   Kijk de tellers in phpMyAdmin na met `SELECT * FROM page_views ORDER BY day DESC, views DESC` en `SELECT * FROM daily_visitors`.
   Lokaal stuurt `next dev` het adres van je eigen computer mee, dat niet telt als bezoeker: je ziet dan wel weergaven en geen bezoekers.
 - Een inloglink, een sessie en een teller van pogingen staan in de database (`admin_login_links`, `admin_sessions`, `admin_login_attempts`).
@@ -883,7 +884,7 @@ Daarom vangt een pagina die een fout verwacht, hem zelf op en toont `ServerError
 Dat antwoord is een 200, met `noindex` in de HTML, zodat zoekmachines de pagina niet bewaren.
 Een fout die niemand opvangt, valt terug op `app/error.tsx`, met dezelfde tekst en een 500, maar alleen met JavaScript.
 Een nieuwe pagina die de database leest, doet wat `src/app/bronnen/page.tsx` doet: de query vangen, de reden loggen met `reasonOf`, en `ServerError` tonen, met `robots: { index: false }` in de metadata.
-De beslissing en de alternatieven staan in `docs/beslissingen.md`.
+De beslissing en de alternatieven staan in `docs/beslissingen/site.md`.
 
 ## Content Security Policy
 
@@ -913,7 +914,7 @@ Hoe de acceptatieomgeving op de hosting staat, staat in [`docs/acceptatieomgevin
 ## Icoon en manifest
 
 De site is installeerbaar: een bezoeker kan hem als app op een computer zetten of op het beginscherm van een telefoon.
-Er is geen service worker, dus de site werkt niet offline (zie `docs/beslissingen.md`).
+Er is geen service worker, dus de site werkt niet offline (zie `docs/beslissingen/redactie.md`).
 Het manifest is `src/app/manifest.ts`, dat Next.js op `/manifest.webmanifest` zet.
 De iconen en de `theme-color` staan in `src/app/layout.tsx`.
 

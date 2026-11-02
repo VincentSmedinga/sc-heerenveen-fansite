@@ -34,7 +34,7 @@ De opdracht `backup`:
    Ligt de map in `public_html`, dan weigert hij ook.
 2. Draait `mysqldump` met `--single-transaction`, zodat de site tijdens de dump gewoon werkt en er niets vergrendeld wordt.
    Hij draait het twee keer, achter elkaar in hetzelfde bestand: eerst alle tabellen met hun rijen, behalve de vijf hieronder, en dan alleen de structuur van die vijf.
-   - `visitor_salts` en `visitor_hashes`: het zout en de kenmerken van de bezoekers van de dag gooit de site aan het eind van de dag weg (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in `beslissingen.md`).
+   - `visitor_salts` en `visitor_hashes`: het zout en de kenmerken van de bezoekers van de dag gooit de site aan het eind van de dag weg (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in `beslissingen/redactie.md`).
      Met het zout reken je de kenmerken terug naar adressen.
    - `discussions`: de schermnaam van de laatste reageerder vervangt de importer bij elke run (zie het hoofdstuk Redactie in Storybook).
    - `admin_sessions` en `admin_login_links`: een teruggezette sessie of inloglink zou een toegang herstellen die na de dump is ingetrokken.

@@ -25,7 +25,7 @@ export default defineConfig({
     hookTimeout: 30_000,
     testTimeout: 30_000,
     // Two test files at a time while sessions share the computer. CI keeps the default, because
-    // a runner has the computer to itself (see docs/beslissingen.md).
+    // a runner has the computer to itself (see docs/beslissingen/werkwijze.md).
     ...(process.env['CI'] === undefined ? { maxWorkers: 2 } : {}),
     // The same colour of the header that next.config.ts puts into the code (see
     // src/colours.ts).

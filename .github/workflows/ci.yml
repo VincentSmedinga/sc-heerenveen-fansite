@@ -1,7 +1,7 @@
 # Lints, typechecks, tests and builds every pull request and main, in jobs that run side by side. The last job, "Lint,
 # typecheck, test and build", waits for all the others and is the check that the rules for main require, so a pull
-# request with a type error or a failing test can't be merged. docs/beslissingen.md (CI draait in parallelle jobs) says
-# why it is built this way.
+# request with a type error or a failing test can't be merged. docs/beslissingen/werkwijze.md (CI draait in
+# parallelle jobs) says why it is built this way.
 #
 #   changes         decides which checks of the site and the stories run (scripts/ci-changes.js)
 #   lint            lint

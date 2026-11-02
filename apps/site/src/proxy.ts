@@ -6,8 +6,8 @@ import { countVisit } from './visits'
 /**
  * Blocks requests to other domains: a page loads everything from our own server (editorial
  * principle 3). Next.js needs inline scripts and styles. We allow them rather than use nonces,
- * so a page is the same for every visitor and can be cached (see docs/beslissingen.md). `next
- * dev` also needs eval, for reloading code while you work. Images may also be `data:`
+ * so a page is the same for every visitor and can be cached (see docs/beslissingen/site.md).
+ * `next dev` also needs eval, for reloading code while you work. Images may also be `data:`
  * addresses: the image of a card is drawn from one in the browser (see CardShare in the design
  * system), and a `data:` image is in the page itself and asks nothing of another domain.
  */

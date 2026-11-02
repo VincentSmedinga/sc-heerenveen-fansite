@@ -116,7 +116,7 @@ CI draait die controles in jobs naast elkaar, zodat een run niet langer duurt da
   Hij wordt rood door drie dingen:
   een job die niet draaide terwijl hij had moeten draaien, een deel dat geen test draaide en een run die is afgebroken.
   De regels staan in `scripts/ci-gate.js` en `scripts/ci-e2e-report.js`.
-  De beslissing _CI draait in parallelle jobs, met één afsluitende controle_ in `docs/beslissingen.md` zegt waarom.
+  De beslissing _CI draait in parallelle jobs, met één afsluitende controle_ in `docs/beslissingen/werkwijze.md` zegt waarom.
 
 Hernoem je een job, dan hoeft alleen de naam van de laatste te blijven kloppen met de regels voor `main`.
 Draai je `pnpm test:a11y` lokaal, dan draait alles in een keer; de verdeling in delen is er alleen voor CI.
@@ -166,7 +166,7 @@ printf '%s\n' '<titel>' | pnpm exec commitlint
   Koppen uit de media houden hun eigen spelling.
 - **Woorden:** zeg "import" of "importer".
   Nooit "ingestion".
-- **Beslissingen:** een echte keuze tussen alternatieven komt in [`docs/beslissingen.md`](docs/beslissingen.md), in het Nederlands en in het vaste formaat: datum, besluit, waarom en alternatieven.
+- **Beslissingen:** een echte keuze tussen alternatieven komt in het bestand van het onderdeel in [`docs/beslissingen/`](docs/beslissingen/) (`index.md` noemt ze), in het Nederlands en in het vaste formaat: datum, besluit, waarom en alternatieven.
 - **Dependencies:** alleen exacte versies.
   Voeg er geen toe als een paar regels code genoeg zijn.
 

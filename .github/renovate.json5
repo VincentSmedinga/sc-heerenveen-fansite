@@ -1,5 +1,5 @@
 // Renovate keeps the dependencies, pnpm, Node and the GitHub Actions up to date. Why Renovate and not Dependabot is in
-// docs/beslissingen.md.
+// docs/beslissingen/werkruimte.md.
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   // Actions stay pinned to a full commit SHA; Renovate updates the SHA and the version comment together.
@@ -21,15 +21,16 @@
   osvVulnerabilityAlerts: true,
   packageRules: [
     {
-      // TypeScript 7 has no JavaScript API yet; see "TypeScript 6 in plaats van 7" in docs/beslissingen.md.
+      // TypeScript 7 has no JavaScript API yet; see "TypeScript 6 in plaats van 7" in
+      // docs/beslissingen/designsysteem.md.
       allowedVersions: '<7',
       matchPackageNames: ['typescript'],
     },
     {
       // The host runs MariaDB 10.11, so the image in compose.yaml and the workflows stays on
       // 10.x until we move on purpose; see "Renovate blijft bij MariaDB 10.11 en Node 24" in
-      // docs/beslissingen.md. A regular expression, because the Docker versioning of Renovate
-      // doesn't read ranges.
+      // docs/beslissingen/werkruimte.md. A regular expression, because the Docker versioning of
+      // Renovate doesn't read ranges.
       allowedVersions: '/^10\\./',
       matchPackageNames: ['mariadb'],
     },

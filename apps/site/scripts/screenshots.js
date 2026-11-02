@@ -4,7 +4,7 @@
 // unless you ask for dark, at one device pixel per CSS pixel. It starts no server and takes
 // nothing but the Playwright that the accessibility checks use. The decisions "Screenshots
 // staan op een eigen branch, niet in de repository" and "Licht is genoeg, donker alleen met een
-// reden" in docs/beslissingen.md say why.
+// reden" in docs/beslissingen/werkwijze.md say why.
 //
 //   pnpm screenshots <address of the build> <path or story id>... [--dark] [--full-page]
 //     [--out <folder>]

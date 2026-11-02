@@ -102,7 +102,8 @@ export default defineConfig([
     // A specifier that climbs two or more folders says nothing about where the file is and
     // breaks when a file moves. In the site, a file in src is reached with the prefix #src,
     // which `imports` in package.json and `paths` in tsconfig.json both define (see
-    // docs/beslissingen.md). One folder up (../x) and the same folder (./x) stay as they are.
+    // docs/beslissingen/site.md). One folder up (../x) and the same folder (./x) stay as they
+    // are.
     files: ['apps/site/{e2e,src}/**/*.{ts,tsx}'],
     name: 'fansite/site-import-prefix',
     rules: {
@@ -138,7 +139,7 @@ export default defineConfig([
   },
   {
     // The site's templates hold no HTML, only components from the design system (see
-    // docs/beslissingen.md). In JSX a lowercase name is an HTML or SVG element, and a
+    // docs/beslissingen/site.md). In JSX a lowercase name is an HTML or SVG element, and a
     // capitalised one a component. This covers every component in the site, so a page can't
     // move its HTML into a component of its own.
     files: ['apps/site/src/**/*.tsx'],
