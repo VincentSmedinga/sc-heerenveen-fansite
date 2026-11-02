@@ -7173,6 +7173,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het filter laten beoordelen op de laatste kop alleen (een liveblog van een wedstrijd van de club valt weg als de laatste kop de club niet noemt).
 - **Later:** zie _Een artikel van twee kranten van één uitgever staat één keer in de lijst, bij de lokale krant_ (1 november 2026).
   De regel "alleen binnen een bron" geldt nog voor bronnen zonder `publisher`, en voor het filter per bron; bronnen met dezelfde `publisher` tonen een verhaal met dezelfde sleutel samen één keer.
+- **Later:** zie _De artikelcode van DPG Media heeft acht of negen letters en cijfers_ (2 november 2026).
+  De code is nu van acht of negen letters en cijfers, niet alleen acht; de rest van de regel blijft.
 
 ### Een artikel van twee kranten van één uitgever staat één keer in de lijst, bij de lokale krant
 
@@ -7436,6 +7438,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** de tekst noemt het ergste geval, en een bezoeker kan de wijziging eerder zien.
 - **Alternatieven:** de gegevens van het seizoen vers laden bij het opslaan; dat vraagt een nieuwe manier om de cache van de publieke pagina's te legen, en het issue vroeg er niet om.
   Een vaste tekst; dan klopt hij niet meer als een periode verandert.
+
+### De artikelcode van DPG Media heeft acht of negen letters en cijfers
+
+- **Datum:** 2 november 2026
+- **Besluit:** `dpgMediaThread` leest een code van acht of negen letters en cijfers achter de `~` aan het eind van het pad.
+  Elke andere lengte geeft geen sleutel.
+- **Waarom:** op 2 november 2026 hadden in drie feeds van het Algemeen Dagblad en De Gelderlander (66 verschillende codes) alle codes 8 of 9 tekens, 10 van de 90 links had er negen, en geen enkele een andere lengte.
+  Het artikel over St. Juste (`~a25b60e29`) stond daardoor twee keer op `/nieuws`, want zonder sleutel voegt de bewaking niets samen.
+  De bestaande berichten krijgen hun sleutel bij de eerstvolgende import (`backfillThreadKeys`), zonder handwerk.
+- **Alternatieven:** acht of meer tekens (kan het id van iets anders pakken).
+  Alleen hexadecimale tekens met een `a` voorop (strenger dan nodig, en de verzonnen feeds gebruiken `ag…`).
+  Acht tot en met tien (een gok boven wat we zagen).
+  Een sleutel uit de kop (de kop verandert juist).
 
 ## Redactie
 

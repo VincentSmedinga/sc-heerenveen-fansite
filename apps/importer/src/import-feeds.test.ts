@@ -50,9 +50,20 @@ afterEach(async () => {
 /** Puts a source with a feed in the register and gives the feed as the importer reads it. */
 async function addFeed(
   url: string,
-  { domain = 'krant.test', enabled = true, filter = 'none' as FeedFilter, kind = 'news' as SourceKind } = {},
+  {
+    domain = 'krant.test',
+    enabled = true,
+    filter = 'none' as FeedFilter,
+    kind = 'news' as SourceKind,
+    local = false,
+    publisher = null as null | string,
+    slug = null as null | string,
+  } = {},
 ) {
-  const [source] = await database.db.insert(sources).values({ domain, enabled, kind, name: domain }).$returningId()
+  const [source] = await database.db
+    .insert(sources)
+    .values({ domain, enabled, kind, local, name: domain, publisher, slug })
+    .$returningId()
   const [feed] = await database.db
     .insert(feeds)
     .values({ filter, sourceId: source?.id ?? 0, url })
@@ -1440,6 +1451,66 @@ describe('the versions of a story', () => {
       ['verborgen', null],
     ])
     expect(await shownTitles()).toEqual(['twee', 'zonder'])
+  })
+
+  it('gives the key to the items with a code of nine letters and digits that were stored before', async () => {
+    const feed = await addKeyedFeed('http://unused.test')
+    const stored = { feedId: feed.id, publishedAt: new Date('2026-10-22T08:00:00Z'), sourceId: feed.sourceId }
+
+    await database.db.insert(items).values([
+      { ...stored, key: 'negen', title: 'negen', url: 'https://krant.test/regio/negen~aaaa11112/' },
+      { ...stored, key: 'tien', title: 'tien', url: 'https://krant.test/regio/tien~aaaa111122/' },
+      {
+        ...stored,
+        hiddenAt: firstRun,
+        key: 'verborgen',
+        title: 'verborgen',
+        url: 'https://krant.test/regio/verborgen~aaaa11112/',
+      },
+    ])
+
+    await importBody(feed, feedWith(entry('anders')), later)
+
+    expect((await itemsInDatabase()).map((row) => [row.title, row.threadKey])).toEqual([
+      ['negen', '~aaaa11112'],
+      ['tien', null],
+      ['verborgen', null],
+      ['Kop anders', null],
+    ])
+  })
+
+  it('shows an article that both newspapers of DPG Media have under one code of nine characters once', async () => {
+    const link = 'https://krant.test/sport/een-verzonnen-kop~a25b60e29/'
+    const pubDate = 'Thu, 22 Oct 2026 08:00:00 GMT'
+    const dagblad = await addFeed('http://ad.test/rss/', {
+      domain: 'www.ad.nl',
+      publisher: 'dpg-media',
+      slug: 'algemeen-dagblad',
+    })
+    const regio = await addFeed('http://gld.test/rss/', {
+      domain: 'www.gelderlander.nl',
+      local: true,
+      publisher: 'dpg-media',
+      slug: 'de-gelderlander',
+    })
+
+    await importBody(
+      dagblad,
+      feedWith(entry('ad', { link: link.replace('krant', 'ad'), pubDate, title: 'Een verzonnen kop (AD)' })),
+    )
+    await importBody(
+      regio,
+      feedWith(entry('gld', { link: link.replace('krant', 'gld'), pubDate, title: 'Een verzonnen kop (GLD)' })),
+    )
+
+    expect((await itemsInDatabase()).map((row) => row.threadKey)).toEqual(['~a25b60e29', '~a25b60e29'])
+    expect(await shownTitles()).toEqual(['Een verzonnen kop (GLD)'])
+    expect(await countArchiveItems(database.db, { until: later })).toBe(1)
+    expect(
+      (await listArchivePage(database.db, { limit: 50, sources: ['algemeen-dagblad'], until: later })).map(
+        (item) => item.title,
+      ),
+    ).toEqual(['Een verzonnen kop (AD)'])
   })
 
   it('counts an item with a key as unchanged when the next import finds it the same', async () => {

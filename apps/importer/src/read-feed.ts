@@ -178,12 +178,13 @@ export function paywallNamespaceFor(sourceDomain: string): string | undefined {
 
 /**
  * The code of DPG Media, the publisher of the Algemeen Dagblad and De Gelderlander: a tilde and
- * eight letters and digits at the end of the path, as in `/regio/een-kop~a40dbd48/`. The text
- * before the tilde is the headline and changes with every version, the code does not. It is the
- * same code at both newspapers for an article they share, which is why the key only joins items
- * of one source.
+ * eight or nine letters and digits at the end of the path, as in `/regio/een-kop~a40dbd48/` or
+ * `/regio/een-kop~a25b60e29/`. The feeds of 2 November 2026 held both lengths and no other. The
+ * text before the tilde is the headline and changes with every version, the code does not. It
+ * is the same code at both newspapers for an article they share, which is why the key only
+ * joins items of one source.
  */
-const dpgMediaThread: ThreadRule = /~([a-z0-9]{8})\/?$/iu
+const dpgMediaThread: ThreadRule = /~([a-z0-9]{8,9})\/?$/iu
 
 /**
  * The rules for the versions of a story, by the domain of the source. A source without a rule

@@ -991,10 +991,15 @@ describe('the key of the versions of a story', () => {
     expect(threadKeyOf('https://krant.test/regio/een-kop~A40DBD48/?ref=feed#top', rule!)).toBe('~a40dbd48')
   })
 
-  it('is null for a link without a code of eight letters and digits at the end', () => {
+  it('is the code of nine letters and digits as well as the code of eight', () => {
+    expect(threadKeyOf('https://krant.test/regio/een-kop~a25b60e29/', rule!)).toBe('~a25b60e29')
+    expect(threadKeyOf('https://krant.test/regio/een-kop~A25B60E29', rule!)).toBe('~a25b60e29')
+  })
+
+  it('is null for a link without a code of eight or nine letters and digits at the end', () => {
     expect(threadKeyOf('https://krant.test/regio/een-kop/', rule!)).toBeNull()
     expect(threadKeyOf('https://krant.test/regio/een-kop~a40dbd4/', rule!)).toBeNull()
-    expect(threadKeyOf('https://krant.test/regio/een-kop~a40dbd489/', rule!)).toBeNull()
+    expect(threadKeyOf('https://krant.test/regio/een-kop~a25b60e290/', rule!)).toBeNull()
     expect(threadKeyOf('https://krant.test/regio/een~a40dbd48/kop', rule!)).toBeNull()
     expect(threadKeyOf('https://krant.test/regio/een-kop?id=~a40dbd48', rule!)).toBeNull()
     expect(threadKeyOf('geen link', rule!)).toBeNull()

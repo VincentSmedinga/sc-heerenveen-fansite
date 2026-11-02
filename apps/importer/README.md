@@ -251,7 +251,7 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
 - **Versies van een verhaal:** een bron kan een verhaal steeds onder een nieuwe kop in de feed zetten, zoals een liveblog dat bij elke update een nieuwe kop krijgt.
   Elke versie is dan een bericht met een eigen link en sleutel.
   De adapter kiest aan het domein van de bron of die versies een gedeelde sleutel krijgen (`threadRules` in [`src/read-feed.ts`](src/read-feed.ts)), en zet hem in `items.thread_key`.
-  Bij het Algemeen Dagblad en De Gelderlander (DPG Media) is het de code `~` met acht letters en cijfers aan het eind van het pad, zoals `~a40dbd48` in `…/een-kop~a40dbd48/`: de kop in de link verandert, de code niet.
+  Bij het Algemeen Dagblad en De Gelderlander (DPG Media) is het de code `~` met acht of negen letters en cijfers aan het eind van het pad, zoals `~a40dbd48` in `…/een-kop~a40dbd48/`: de kop in de link verandert, de code niet.
   Een bron zonder regel, en een link zonder die code, krijgt geen sleutel; zo'n bericht is zijn eigen verhaal.
   Dezelfde code bij twee bronnen is geen verband, tenzij de bronnen dezelfde `publisher` hebben: het Algemeen Dagblad en De Gelderlander hebben `dpg-media`, en De Gelderlander is `local`.
   Dan toont de site een artikel dat beide geven één keer, bij de lokale krant (zie de [README van de database](../../packages/db/README.md), _Eén artikel van twee kranten_).
