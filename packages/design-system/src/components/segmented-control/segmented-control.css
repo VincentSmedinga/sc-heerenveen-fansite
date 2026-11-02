@@ -15,8 +15,8 @@
  * of itself in bold (see SegmentedLabel), so the track does not change width with the choice.
  *
  * Between two pages, when the options are links, the thumb slides if the browser supports view
- * transitions between documents and the links have a place (SegmentedLinks); see the end of this
- * file. Without that support it jumps to the new choice.
+ * transitions between documents and the links have a place (SegmentedLinks); see the end of
+ * this file. Without that support it jumps to the new choice.
  */
 
 @layer hf.components {
@@ -152,11 +152,12 @@
  * once, as it did before. With reduced motion the pages are not joined, so the thumb jumps. A
  * browser without support loads the next page as ever.
  *
- * The browser joins elements with the same name on the old and the new page. So the names belong
- * to the place of the switch on the page, which the page gives to SegmentedLinks as `place`, and
- * not to the component: the same switch after another choice has the same names, and the thumb
- * slides, but a switch that stands elsewhere on another page has other names, and nothing flies
- * between the two. A name is used by one element, so two switches on a page need two places.
+ * The browser joins elements with the same name on the old and the new page. So the names
+ * belong to the place of the switch on the page, which the page gives to SegmentedLinks as
+ * `place`, and not to the component: the same switch after another choice has the same names,
+ * and the thumb slides, but a switch that stands elsewhere on another page has other names, and
+ * nothing flies between the two. A name is used by one element, so two switches on a page need
+ * two places.
  * A switch without a place has no names and does not take part.
  */
 @supports (view-transition-name: none) {
@@ -205,7 +206,7 @@
 
   /*
    * A name that only one of the two pages has, because the switch is not on the other page, is
-   * not joined to anything: the old one is gone at once and the new one is there without a fade.
+   * not joined to anything: the old one is gone at once, and the new one has no fade.
    */
   ::view-transition-old(*):only-child {
     display: none;
