@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import type { ReadPlayer } from './read-squad.ts'
 import type { ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
 
-import { checkGoals, checkMatches, checkSquad, checkStandings } from './check-wikipedia.ts'
+import { checkGoals, checkMatches, checkResults, checkSquad, checkStandings } from './check-wikipedia.ts'
 import { readSquad } from './read-squad.ts'
 import { readCup, readLeague, readStandings } from './read-wikipedia.ts'
 
@@ -69,6 +69,36 @@ describe('the checks of the matches', () => {
     const twice = league.map((match, index) => (index === 1 ? { ...match, round: 'Speelronde 1' } : match))
 
     expect(checkMatches(twice)).toContain('two league matches are in the same round')
+  })
+})
+
+describe('the checks of the results', () => {
+  const result = {
+    awayClub: 'Feyenoord',
+    awayGoals: 0,
+    homeClub: 'Ajax',
+    homeGoals: 1,
+    playedOn: '2026-08-09',
+    round: 1,
+  }
+
+  it('finds nothing wrong with the two matches of a pair of clubs', () => {
+    expect(checkResults([result, { ...result, awayClub: 'Ajax', homeClub: 'Feyenoord', round: 18 }])).toEqual([])
+  })
+
+  it('refuses a club at home against another club twice, whatever the case of the name', () => {
+    expect(checkResults([result, { ...result, awayClub: 'FEYENOORD', round: 18 }])).toEqual([
+      'Ajax is at home against FEYENOORD twice in the results',
+    ])
+  })
+
+  it('refuses a club that plays itself and a round that is not one of the 34', () => {
+    expect(
+      checkResults([
+        { ...result, awayClub: 'Ajax' },
+        { ...result, awayClub: 'PSV', round: 35 },
+      ]),
+    ).toEqual(['Ajax plays itself in round 1', 'Ajax - PSV is in round 35, not 1 to 34'])
   })
 })
 

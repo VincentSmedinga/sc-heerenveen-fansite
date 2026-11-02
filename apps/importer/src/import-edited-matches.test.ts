@@ -58,6 +58,7 @@ beforeEach(async () => {
     'club_names',
     'clubs',
     'players',
+    'league_results',
     'standings',
     'wikipedia_pages',
     'match_imports',

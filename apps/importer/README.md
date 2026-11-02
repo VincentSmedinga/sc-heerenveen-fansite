@@ -726,7 +726,7 @@ De fetcher hoefde niet te veranderen: hij leest elk soort antwoord als bytes, en
 
 ## De wedstrijden en de stand
 
-De import leest het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, en bewaart ze in `matches`, `standings`, `wikipedia_pages` en `match_imports` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
+De import leest het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) bij de Nederlandse Wikipedia, en bewaart ze in `matches`, `standings`, `league_results`, `wikipedia_pages` en `match_imports` (zie de [README van `@fansite/db`](../../packages/db/README.md)).
 Waarom Wikipedia en niet de club of een betaalde dienst, staat in [`docs/beslissingen.md`](../../docs/beslissingen.md).
 De gegevens vallen onder CC BY-SA 4.0.
 Het gaat om de Eredivisie, de KNVB Beker en de play-offs voor de Conference League van het lopende seizoen.
@@ -837,8 +837,40 @@ De import bewaart de wedstrijden van sc Heerenveen als competitie `Play-offs Con
   Een datum zonder jaar, een laatste dag voor de eerste of een dag die niet bestaat kent de import niet: dat is een fout, en de import verandert niets (zie _Slaagt of mislukt_).
 - De stand heeft alleen gewonnen, gelijk, verloren en de doelpunten; gespeeld en punten rekent de import uit.
   `valid_on` is de dag van de laatste competitiewedstrijd die iemand speelde.
+- Van elke club in de competitie bewaart hij de uitslag van de gespeelde competitiewedstrijden in `league_results`, uit dezelfde pagina met het programma (zie _De uitslagen van alle clubs_).
 - Een rij van een eerder seizoen verandert of verdwijnt nooit, en de import leest die seizoenen niet.
-  In het lopende seizoen vervangt hij de wedstrijden en de stand door wat Wikipedia nu heeft.
+  In het lopende seizoen vervangt hij de wedstrijden, de stand en de uitslagen door wat Wikipedia nu heeft.
+
+### De uitslagen van alle clubs
+
+De stand over de laatste wedstrijden (#602) heeft de uitslag van elke club nodig.
+`readLeagueResults` in [`src/read-wikipedia.ts`](src/read-wikipedia.ts) leest ze uit de pagina met het programma, die de import al leest, en [`src/league-results.ts`](src/league-results.ts) schrijft ze in `league_results`.
+
+- Er komt een rij voor elk blok `Footballbox2` onder een kop `Speelronde <nummer>` met een score: seizoen, ronde als getal, dag, thuisclub, uitclub en de doelpunten van allebei.
+  De sleutel is het seizoen met de thuisclub en de uitclub.
+- Een wedstrijd zonder score, uitgesteld of afgelast heeft geen rij.
+  Wordt hij gespeeld, dan komt de rij bij de volgende import.
+- Een wedstrijd die gestaakt en later afgemaakt is, telt één keer, met de eindstand en de dag van het blok dat hem afmaakt.
+  Wie thuis speelde, volgt het blok waarmee de wedstrijd begon (zie _Een gestaakte wedstrijd_).
+  Staat er geen blok dat hem afmaakt, dan heeft de wedstrijd geen uitslag en geen rij.
+- De beker en de play-offs staan er niet in, en de doelpuntenmakers van andere clubs ook niet.
+- Een pagina met alleen de wedstrijden van sc Heerenveen, zoals de oudere pagina's, geeft geen uitslagen: de tabel blijft dan leeg voor dat seizoen en dat is geen fout.
+- Een gespeelde wedstrijd waarvan de score of de dag niet te lezen is, blijft weg en komt in een waarschuwing.
+- De rijen van het seizoen worden in dezelfde transactie vervangen als de stand.
+  Verschilt er niets, dan schrijft de import niets.
+
+De namen van de clubs zijn die van `standings.club`, zodat de site de twee aan elkaar kan koppelen.
+`matchClubNames` schrijft een naam van de uitslagen zoals de stand als de twee op de hoofdletters na gelijk zijn, of als [`src/club-names.ts`](src/club-names.ts) ze als één club kent.
+Een naam die de stand niet heeft, blijft staan zoals de pagina hem schrijft en komt in de waarschuwing.
+
+De regel van de uitslagen staat onder de regel van de wedstrijden:
+
+```text
+Matches 2026/27: league results of all clubs: 90 new, 0 updated, 0 unchanged, 0 removed
+```
+
+De controles weigeren een club die tegen zichzelf speelt, een ronde buiten 1 tot en met 34 en een thuisclub die twee keer tegen dezelfde uitclub speelt (`checkResults` in [`src/check-wikipedia.ts`](src/check-wikipedia.ts)).
+Dan verandert er niets, zoals bij elke controle.
 
 ### De doelpunten koppelen aan de spelers
 
@@ -971,6 +1003,17 @@ Een wedstrijd die van de pagina verdwijnt, neemt haar doelpuntenmakers mee.
 Het aantal gespeelde wedstrijden vergelijkt de import niet tussen clubs.
 Midden in een speelronde verschilt het per club, en dan zou elke controle falen.
 De controles kloppen op elk moment.
+
+De uitslagen van alle clubs hebben een eigen controle, die de import niet laat mislukken.
+Per club telt de import de uitslagen en vergelijkt hij dat met `played` in de stand van dezelfde lezing.
+Wijkt het af, dan staat er een waarschuwing in het logboek en in `match_imports.last_warning`, en de gegevens blijven staan.
+Wikipedia werkt de stand en het programma niet op hetzelfde moment bij, dus zo'n verschil kan een uur duren:
+
+```text
+Matches 2026/27: warning, league results: the results do not agree with the table: SC Cambuur 9 results against 10 played, Excelsior Rotterdam 9 results against 10 played
+```
+
+Een pagina zonder uitslagen van andere clubs geeft geen waarschuwing, want de tabel is dan leeg zonder dat er iets mis is.
 
 ### Slaagt of mislukt
 
@@ -1284,7 +1327,8 @@ De reader werkt zo (zie _Een gestaakte wedstrijd telt voor zijn begin, het resta
 - Heeft de pagina geen later blok, dan stopt de import met een fout die de wedstrijd noemt.
   Dat geldt ook als het latere blok zelf gestaakt is, een dag of minuut heeft die we niet kennen, of een uitgestelde wedstrijd is.
   Een score die we niet kennen, geeft altijd een fout.
-- Gestaakte wedstrijden van andere clubs leest hij niet, want alleen de wedstrijden van sc Heerenveen komen in de database.
+- Een gestaakte wedstrijd van een andere club komt niet in `matches`, want daar staan alleen de wedstrijden van sc Heerenveen.
+  De uitslag komt wel in `league_results`, als de pagina een blok heeft dat hem afmaakt.
 - Een voetnoot (`<ref>...</ref>`) haalt hij weg voordat hij de pagina leest, dus een datum met een voetnoot leest als de datum.
 - Een rode kaart met een VAR-controle (`{{rode kaart VAR|...}}`) is net als een andere rode kaart geen doelpunt.
 
@@ -1474,8 +1518,10 @@ De tests van de wedstrijden lezen verkleinde stukken van de pagina's van Wikiped
 De tests van de opdracht voor een afgelopen seizoen lezen stukken van de echte pagina's van 2025/26, op 29 oktober 2026 gelezen: [`wikipedia-season-programme.wiki`](src/fixtures/wikipedia-season-programme.wiki), [`wikipedia-season-standings.wiki`](src/fixtures/wikipedia-season-standings.wiki) en [`wikipedia-season-cup.wiki`](src/fixtures/wikipedia-season-cup.wiki).
 Het programma heeft alle wedstrijden van sc Heerenveen, de twee blokken van NAC Breda – sc Heerenveen, de gestaakte wedstrijden van andere clubs met het blok dat ze afmaakt, en de laatste wedstrijd van het seizoen.
 Ze zijn gelezen op 25 oktober 2026, en bovenaan staat de herkomst en de licentie (CC BY-SA 4.0).
-Er staan alle 34 wedstrijden van sc Heerenveen in en een paar van andere clubs.
+Er staan alle wedstrijden van sc Heerenveen in en een paar van andere clubs.
 De doelpuntenmakers van sc Heerenveen staan erin zoals de pagina ze heeft; die van andere clubs, de verslagen en de scheidsrechters en toeschouwers van andere clubs zijn leeggemaakt.
+De overige uitslagen van andere clubs zijn verzonnen, op één regel per wedstrijd, zodat elke club evenveel uitslagen heeft als de stand zegt: tien in `wikipedia-programme.wiki` (ronde 1 tot en met 10) en 34 in `wikipedia-season-programme.wiki`.
+Alleen de clubs, de dagen en de rondes volgen de pagina; de paren en de scores niet.
 [`wikipedia-playoffs-2026.wiki`](src/fixtures/wikipedia-playoffs-2026.wiki) en `wikipedia-playoffs-2025.wiki` zijn het begin van de echte pagina's van de play-offs, gelezen op 1 november 2026, met de halve finale van sc Heerenveen tegen FC Utrecht en tegen AZ.
 `wikipedia-playoffs-2024.wiki` is een jaar zonder sc Heerenveen, en `wikipedia-playoffs-2022.wiki` een jaar met een halve finale over twee wedstrijden.
 [`wikipedia-playoffs-after-ninety.wiki`](src/fixtures/wikipedia-playoffs-after-ninety.wiki) heeft twee verzonnen wedstrijden met verlenging in de lay-out van de echte pagina, met `half time score` zoals de bekerpagina het schrijft, omdat de echte play-offpagina's dat veld nog niet hebben.
