@@ -2,8 +2,9 @@
 
 @layer hf.components {
   /*
-   * The tiles stand side by side as far as they fit, each at least 15rem wide, and under each other on a narrow screen. The
-   * cells of a row are as high as the highest one, so the row has an even edge.
+   * The tiles stand side by side as far as they fit, each at least 15rem wide, and under each
+   * other on a narrow screen. The cells of a row are as high as the highest one, so the row
+   * has an even edge.
    */
   .hf-tile-grid {
     display: grid;
@@ -19,8 +20,9 @@
   }
 
   /*
-   * The card is the tile. The icon stands in front of the text, at the top, and the text takes the rest of the width.
-   * Under the mouse the border takes the colour of a highlight, so the tile shows it is a link, without moving.
+   * The card is the tile. The icon stands in front of the text, at the top, and the text takes
+   * the rest of the width. Under the mouse the border takes the colour of a highlight, so the
+   * tile shows it is a link, without moving.
    */
   .hf-tile {
     align-items: flex-start;
@@ -32,7 +34,10 @@
     }
   }
 
-  /* The icon is as large as the large space, so it follows the density, and keeps the colour of secondary text. */
+  /*
+   * The icon is as large as the large space, so it follows the density, and keeps the colour
+   * of secondary text.
+   */
   .hf-tile-icon {
     color: var(--hf-colour-text-secondary);
     flex-shrink: 0;
@@ -55,7 +60,10 @@
     }
   }
 
-  /* The heading sits close to its line of text, closer than a heading sits to the text of a card. */
+  /*
+   * The heading sits close to its line of text, closer than a heading sits to the text of a
+   * card.
+   */
   .hf-tile-title {
     margin-block: 0 var(--hf-space-xs);
   }
@@ -65,8 +73,9 @@
   }
 
   /*
-   * The link has no underline, until the mouse is over it. Its area is the whole tile: the empty ::after covers the card,
-   * which is the one that is positioned (see card.css), so a click or a tap anywhere on the tile goes to the link.
+   * The link has no underline, until the mouse is over it. Its area is the whole tile: the
+   * empty ::after covers the card, which is the one that is positioned (see card.css), so a
+   * click or a tap anywhere on the tile goes to the link.
    */
   .hf-tile-link {
     text-decoration: none;
@@ -82,8 +91,8 @@
     }
 
     /*
-     * One focus ring, around the whole tile, instead of one around the words of the heading. The ring is the one of
-     * focus.css, drawn on the ::after that covers the tile.
+     * One focus ring, around the whole tile, instead of one around the words of the heading.
+     * The ring is the one of focus.css, drawn on the ::after that covers the tile.
      */
     &:focus-visible {
       outline: none;
