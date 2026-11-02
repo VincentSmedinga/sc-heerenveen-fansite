@@ -61,7 +61,7 @@ describe('the admin', () => {
   const tileList = (html: string) =>
     (html.match(/<ul[^>]*aria-label="Schermen van het beheer"[\s\S]*?<\/ul>/) ?? [])[0] ?? ''
 
-  it('says who is logged in with the role, shows a tile for the screen and has a button to log out', async () => {
+  it('says who is logged in with the role and shows a tile for the screen, and has no button to log out', async () => {
     requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'moderator', userId: 1 })
 
     const html = renderToStaticMarkup(await AdminPage())
@@ -69,7 +69,9 @@ describe('the admin', () => {
     expect(requireRole).toHaveBeenCalledWith('beheerder', 'moderator')
     expect(headings(html)).toEqual(['h1 Beheer', expect.stringMatching(/^h2 <a[^>]*>Berichten<\/a>$/)])
     expect(html).toContain('Je bent ingelogd als jelle@example.org (moderator).')
-    expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual(['<button type="submit">Uitloggen</button>'])
+    // Logging out is in the bar of the admin (AdminScreens), on every page.
+    expect(html).not.toContain('<button')
+    expect(html).not.toContain('Uitloggen')
     expect(links(html)).toEqual(['<a class="hf-tile-link" href="/beheer/berichten">Berichten</a>'])
     expect(html).toContain('Verberg berichten die niet op de site horen.')
   })
