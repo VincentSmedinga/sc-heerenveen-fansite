@@ -241,6 +241,19 @@
     }
   }
 
+  /*
+   * A sticky sidebar (Page.Sidebar with `sticky`) stays in view while the main column scrolls.
+   * A grid item sticks within its grid area, which is as tall as the main column, so the sidebar
+   * can follow the reader from the top to the bottom of it. Under 52rem the sidebar is under
+   * the main column and scrolls with the page.
+   */
+  @media (width >= 52rem) {
+    .hf-page-sidebar-sticky {
+      inset-block-start: var(--hf-space-m);
+      position: sticky;
+    }
+  }
+
   .hf-page-sidebar-split {
     grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
   }

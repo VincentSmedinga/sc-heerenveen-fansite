@@ -230,13 +230,15 @@ export const ExampleMainWithIntro = () => (
 export const ExampleSidebar = ({
   narrow = false,
   split = false,
+  sticky = false,
   wide = false,
 }: {
   narrow?: boolean
   split?: boolean
+  sticky?: boolean
   wide?: boolean
 }) => (
-  <Page.Sidebar aria-label="Naast het nieuws" narrow={narrow} split={split} wide={wide}>
+  <Page.Sidebar aria-label="Naast het nieuws" narrow={narrow} split={split} sticky={sticky} wide={wide}>
     <Page.Cell>
       <Heading appearance={3} level={2}>
         Volgende wedstrijd

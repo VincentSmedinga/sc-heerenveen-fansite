@@ -69,6 +69,13 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
    */
   split?: boolean
   /**
+   * Keeps the sidebar in view while the main column scrolls, from the width where it stands
+   * beside it. For a sidebar with something the reader needs while filling in a long main
+   * column, such as the save panel of a form. Keep it short: a sidebar that is taller than the
+   * window would be cut off at the bottom. Under the main column it scrolls with the page.
+   */
+  sticky?: boolean
+  /**
    * A sidebar as wide as the main column, which is narrower than on other pages, for a page
    * whose sidebar holds a table or another cell that needs the width. The columns stay as wide
    * together as without it. It is the Page.Sidebar that tells the Page.Body, so a page can
@@ -176,14 +183,22 @@ const Main = ({ children, className, intro, wide = false, ...props }: PageMainPr
 /**
  * The sidebar, an `aside`: beside the Page.Main, or under it on a narrow screen. Each of its
  * children is a cell, and the cells sit under each other. With `split` they sit side by side
- * where two fit, with `wide` the sidebar is as wide as the main column, and with `narrow` it is
- * narrower than usual and the main column broader.
+ * where two fit, with `wide` the sidebar is as wide as the main column, with `narrow` it is
+ * narrower than usual and the main column broader, and with `sticky` it stays in view.
  */
-const Sidebar = ({ className, narrow = false, split = false, wide = false, ...props }: PageSidebarProps) => (
+const Sidebar = ({
+  className,
+  narrow = false,
+  split = false,
+  sticky = false,
+  wide = false,
+  ...props
+}: PageSidebarProps) => (
   <aside
     className={classNames(
       'hf-page-sidebar',
       split && 'hf-page-sidebar-split',
+      sticky && 'hf-page-sidebar-sticky',
       wide && 'hf-page-sidebar-wide',
       narrow && 'hf-page-sidebar-narrow',
       className,
