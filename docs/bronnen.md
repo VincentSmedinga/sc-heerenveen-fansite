@@ -821,10 +821,13 @@ De wedstrijden en de stand komen niet van een mediabron maar van de Nederlandse 
 De import leest per seizoen vier pagina's, en de bronvermelding op de pagina's met wedstrijden noemt elke pagina die hij las:
 
 - `Eredivisie <seizoen> (mannenvoetbal)`: de stand;
-- `Eredivisie <seizoen> (mannenvoetbal)/Wedstrijden`: het programma en de uitslagen van de competitie;
+- `Eredivisie <seizoen> (mannenvoetbal)/Wedstrijden`: het programma en de uitslagen van de competitie, van sc Heerenveen en van de andere clubs;
 - `KNVB Beker <seizoen> (mannen)`: de bekerwedstrijden;
 - `Play-offs Nederlands voetbal <jaar>`: de play-offs voor de Conference League, met het jaar waarin het seizoen eindigt.
   Die pagina komt pas in mei, en de bronvermelding noemt hem alleen als sc Heerenveen meespeelde.
+
+De uitslagen van de andere clubs bewaren we ook, in de tabel `league_results`: de ronde, de dag, de twee clubs en de doelpunten van allebei, voor de stand over de laatste wedstrijden.
+Een andere pagina is er niet voor nodig.
 
 Van elke wedstrijd nemen we alleen de feiten: de namen, de stand, de minuten van de doelpunten, het stadion en de aftrap.
 Het verslag van de NOS in het sjabloon van de play-offs nemen we niet mee.

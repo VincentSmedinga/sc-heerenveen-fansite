@@ -6703,6 +6703,46 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Zonder één beheerder met een actief account gaat er niets uit, en de run zegt dat in het logboek.
 - **Alternatieven:** één mail naar `ALERT_MAIL_TO` (de eigenaar is niet altijd de redacteur die de wedstrijd invulde); één mail met alle beheerders in `To` (de adressen staan bij elkaar, en `sendMail` weigert het); de mail in de transactie van de import (een mail die faalt zou de wedstrijden terugdraaien); een mail bij elke run die de afwijking ziet (honderden mails voor één afwijking).
 
+### De import bewaart de uitslagen van alle clubs in de Eredivisie, in een tabel naast de stand
+
+- **Datum:** 2 november 2026
+- **Besluit:** de tabel `league_results` (migratie `0032_add_league_results`) heeft een rij voor elke gespeelde competitiewedstrijd van elke club (#601).
+  De rij heeft het seizoen, de ronde als getal, de dag, de thuisclub, de uitclub en de doelpunten van allebei.
+  De sleutel is het seizoen met de thuisclub en de uitclub, want een paar speelt per seizoen één keer thuis en één keer uit.
+  - **Waar vandaan:** dezelfde pagina als de wedstrijden van sc Heerenveen, `Eredivisie <seizoen> (mannenvoetbal)/Wedstrijden`.
+    `readLeagueResults` in `read-wikipedia.ts` leest elk blok `Footballbox2` onder een kop `Speelronde <nummer>` met een score.
+    Er komt dus geen pagina bij, geen verzoek en geen bronvermelding: de pagina stond er al.
+  - **Wat erin komt:** een wedstrijd zonder score (gepland of uitgesteld) staat er niet in, en komt erbij als hij is gespeeld.
+    Een wedstrijd die gestaakt en later afgemaakt is, telt één keer, met de eindstand en de dag van het blok dat hem afmaakt.
+    Wie thuis speelde, volgt het blok waarmee hij begon.
+    Een gestaakte wedstrijd zonder blok dat hem afmaakt heeft geen uitslag en staat er dus niet in.
+    De beker en de play-offs staan er niet in, en ook geen doelpuntenmakers, kaarten of toeschouwers.
+  - **Hoe hij wordt geschreven:** de import vervangt de rijen van het seizoen in dezelfde transactie als de stand, en schrijft niets als er niets verschilt.
+    Het logboek heeft een regel: `Matches 2026/27: league results of all clubs: 90 new, 0 updated, 0 unchanged, 0 removed`.
+    Een rij van een eerder seizoen verandert pas bij `Import season`.
+  - **Een pagina zonder uitslagen van andere clubs:** de oudere pagina's hebben alleen de wedstrijden van sc Heerenveen.
+    Dan blijft de tabel voor dat seizoen leeg en is dat geen fout, want de vorm over de laatste wedstrijden heeft alle clubs nodig.
+  - **De namen:** de namen van de clubs zijn die van `standings.club`.
+    `matchClubNames` in `league-results.ts` schrijft een naam van de uitslagen zoals de stand als de twee gelijk zijn op de hoofdletters na, of als `club-names.ts` ze als één club kent (`Excelsior` voor `Excelsior Rotterdam`).
+    Die lijst is de enige plek waar een verschil in schrijfwijze wordt rechtgezet.
+    De site koppelt de uitslagen en de stand dus op de naam, zonder `clubs`.
+    Een naam die de stand niet heeft, blijft staan zoals de pagina hem schrijft en komt in de waarschuwing.
+  - **De controles:** een club die tegen zichzelf speelt, een ronde buiten 1 tot en met 34 en een thuisclub die twee keer tegen dezelfde uitclub speelt zijn een fout, zoals een andere controle die faalt.
+    De import schrijft dan niets en de laatste goede versie blijft staan.
+  - **De waarschuwing:** de import telt per club de uitslagen en vergelijkt dat met `played` in de stand van dezelfde lezing.
+    Wijkt het af, dan komt er een waarschuwing in het logboek en in `match_imports.last_warning`, en geen fout: de gegevens blijven staan.
+    Een gespeelde wedstrijd die de pagina noemt maar die we niet kunnen lezen, komt in een eigen waarschuwing.
+- **Waarom:** de projecteigenaar wil op de kaart Stand ook een stand over de laatste vijf wedstrijden (#602).
+  Daarvoor hebben we de uitslag, de dag en de ronde van alle 18 clubs nodig, en de import las ze al en gooide ze weg.
+  Een eigen tabel naast `standings` houdt de wedstrijden van sc Heerenveen met hun doelpuntenmakers, stadion en beoordeling van wijzigingen gescheiden van een lijst uitslagen die we alleen tellen.
+  Het verschil met de stand is een waarschuwing en geen fout, want Wikipedia werkt de stand en het programma niet op hetzelfde moment bij.
+  Een verschil van een uur is geen reden om de hele import tegen te houden.
+- **Nadeel:** de uitslag van een andere club gaat zonder het oordeel van `classify-change.ts` door: een slordige of kwaadwillende wijziging staat tot de volgende import in de tabel.
+  De volgende import zet de tabel weer zoals de pagina dan is, en de waarschuwing wijst op een verschil met de stand.
+  De dag van een gestaakte wedstrijd is die van het restant, en `matches.match_date` heeft die van het begin (zie _Een gestaakte wedstrijd telt voor zijn begin, het restant geeft de uitslag en een regel_): voor de vorm telt het einde.
+  Na het samenvoegen is de tabel leeg voor de eerdere seizoenen tot de Coördinator `Import season` heeft gedraaid.
+- **Alternatieven:** de wedstrijden van andere clubs in `matches` (die tabel is voor sc Heerenveen, met doelpunten, club, beoordeling en vermeldingen, en alle queries van de site zouden ze moeten uitsluiten); `clubs` en een sleutel met `club_id` (de stand heeft die niet, en de koppeling zou een tweede plek zijn waar de namen kunnen verschillen); de uitslagen elke keer uit de pagina lezen op de site (de site leest Wikipedia niet); een fout bij een afwijking van de stand (een uur verschil tussen twee pagina's houdt dan de hele import tegen).
+
 ## Redactie
 
 ### sc Heerenveen met kleine letters

@@ -426,6 +426,20 @@ De sleutel is het seizoen met de plaats.
 | `points`                                        | De punten                                                                        |
 | `valid_on`                                      | De dag waarvoor de stand geldt: die van de laatste gespeelde competitiewedstrijd |
 
+`league_results` heeft een rij voor elke gespeelde competitiewedstrijd van elke club van de Eredivisie, uit de pagina met het programma.
+De sleutel is het seizoen met de thuisclub en de uitclub.
+
+| Kolom                      | Betekenis                                                                                       |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| `home_club`, `away_club`   | De namen van de clubs, geschreven zoals `standings.club` ze schrijft, zodat je ze kunt koppelen |
+| `home_goals`, `away_goals` | De doelpunten van de thuisclub en van de uitclub                                                |
+| `round`                    | Het nummer van de speelronde waaronder Wikipedia de wedstrijd noemt                             |
+| `played_on`                | De dag van de wedstrijd, of de eerste dag als alleen een weekend bekend is                      |
+
+Een wedstrijd zonder uitslag heeft geen rij, en de beker en de play-offs staan er niet in.
+Een seizoen waarvan de pagina alleen de wedstrijden van sc Heerenveen heeft, heeft geen rijen.
+De rijen van een seizoen worden in één keer vervangen, zoals de stand (zie de [README van de importer](../../apps/importer/README.md)).
+
 `wikipedia_pages` bewaart per gelezen pagina de `title`, de `kind` (`standings`, `programme`, `cup` en `playoffs` voor de wedstrijden, `squad` voor de selectie), de `version` (de `Last-Modified` van Wikipedia, want de ruwe tekst heeft geen versienummer) en `read_at`, het tijdstip van de laatste keer dat de pagina goed gelezen is.
 Een pagina kan daarmee de bron noemen.
 `listWikipediaPages` geeft alleen de pagina's van de wedstrijden.
@@ -647,7 +661,7 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `standings`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/clubs`: `createClubBook(db, { fullNames })` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft, en een naam uit de lijst met volledige namen eerst als de volledige naam neemt; `repairClubs(db, fullNames)` voegt een club uit die lijst samen die er twee keer staat; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
 - `@fansite/db/season`: `seasonOf(moment)` geeft het seizoen waarin een moment valt, zoals `2026/27`, en `seasonStart(season)` de eerste dag;
