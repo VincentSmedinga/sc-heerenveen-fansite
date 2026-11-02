@@ -6,12 +6,19 @@ import { findSession } from '#src/beheer/sessions'
 import { AdminBar } from './AdminBar'
 import { sessionToken } from './require-role'
 
+let pathname = '/beheer'
+
+vi.mock('next/navigation', () => ({ usePathname: () => pathname }))
 vi.mock('#src/app/beheer/actions', () => ({ logOut: () => undefined }))
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
 vi.mock('./require-role', () => ({ sessionToken: vi.fn() }))
 vi.mock('#src/beheer/sessions', () => ({ findSession: vi.fn() }))
 
-const render = async (pathname: string) => renderToStaticMarkup(await AdminBar({ pathname }))
+const render = async (path: string) => {
+  pathname = path
+
+  return renderToStaticMarkup(await AdminBar())
+}
 const links = (html: string) =>
   [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label])
 
@@ -51,6 +58,11 @@ describe('the bar of the admin', () => {
 
     expect(html).toContain('sanne@example.org, beheerder')
     expect(html).toMatch(/<button[^>]*type="submit"[^>]*>Uitloggen<\/button>/)
+  })
+
+  it('draws no bar on the login pages, whatever the session', async () => {
+    expect(await render('/beheer/inloggen')).toBe('')
+    expect(await render('/beheer/inloggen/verstuurd')).toBe('')
   })
 
   it('draws nothing without a cookie or with a session that has ended', async () => {

@@ -1,18 +1,19 @@
-import { Button, Form, SectionBar, Text } from '@fansite/design-system'
+import { Button, Form, Text } from '@fansite/design-system'
 
 import { logOut } from '#src/app/beheer/actions'
 import { sessionToken } from '#src/beheer/require-role'
 import { findSession } from '#src/beheer/sessions'
 import { getDatabase } from '#src/database'
 
-import { currentScreen, screensFor } from './screens'
+import { AdminScreens } from './AdminScreens'
 
 /**
- * The bar with the screens of the admin, under the main menu. It reads the session on the
- * server, so the screens are those of the role of the account, and without a valid session
- * there is no bar. It is no guard: the pages check the role themselves (requireRole).
+ * The bar with the screens of the admin, under the main menu (the slot @shortcuts draws it on
+ * every page under /beheer, see app/@shortcuts/beheer). It reads the session on the server, so
+ * the screens are those of the role of the account, and without a valid session there is no
+ * bar. It is no guard: the pages check the role themselves (requireRole).
  */
-export async function AdminBar({ pathname }: { pathname: string }) {
+export async function AdminBar() {
   const token = await sessionToken()
   const session = token === undefined ? undefined : await findSession(getDatabase().db, token)
 
@@ -20,10 +21,8 @@ export async function AdminBar({ pathname }: { pathname: string }) {
     return null
   }
 
-  const current = currentScreen(pathname)
-
   return (
-    <SectionBar
+    <AdminScreens
       account={
         <>
           <Text as="span">
@@ -36,8 +35,7 @@ export async function AdminBar({ pathname }: { pathname: string }) {
           </Form>
         </>
       }
-      items={screensFor(session.role).map(({ href, label }) => ({ current: href === current, href, label }))}
-      label="Beheer"
+      role={session.role}
     />
   )
 }

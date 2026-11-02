@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { currentScreen, screens, screensFor } from './screens'
+import { currentScreen, isLoginPage, screens, screensFor } from './screens'
 
 describe('the screens of the admin', () => {
   it('shows a moderator Berichten only', () => {
@@ -37,5 +37,12 @@ describe('the screens of the admin', () => {
     expect(currentScreen('/beheer/onbekend')).toBeUndefined()
     expect(currentScreen('/beheer/berichtenlijst')).toBeUndefined()
     expect(currentScreen('/over-ons')).toBeUndefined()
+  })
+
+  it('knows the login pages, and no other page', () => {
+    expect(isLoginPage('/beheer/inloggen')).toBe(true)
+    expect(isLoginPage('/beheer/inloggen/bevestigen')).toBe(true)
+    expect(isLoginPage('/beheer/inloggenx')).toBe(false)
+    expect(isLoginPage('/beheer')).toBe(false)
   })
 })

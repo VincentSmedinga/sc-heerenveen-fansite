@@ -27,6 +27,15 @@ export function currentScreen(pathname: string): string | undefined {
     .toSorted((a, b) => b.href.length - a.href.length)[0]?.href
 }
 
+/**
+ * Whether a path is one of the login pages, where nobody is logged in and so the bar has no
+ * place. It is the address of `loginPath` (src/beheer/require-role.ts), written out because
+ * that file can't go into the browser.
+ */
+export function isLoginPage(pathname: string): boolean {
+  return isAtOrBelow(pathname, '/beheer/inloggen')
+}
+
 /** The screens a role may see. */
 export function screensFor(role: AdminRole): Screen[] {
   return screens.filter((screen) => screen.roles.includes(role))
