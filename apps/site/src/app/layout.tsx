@@ -75,7 +75,7 @@ export const viewport: Viewport = {
 // there itself. The slot `@shortcuts` (a parallel route, see app/@shortcuts) lets a page add
 // it: the route of the same path in the slot renders the bar, in the HTML, before the
 // Page.Body, without JavaScript to move it. A page without a route in the slot gets an empty
-// one.
+// one. The pages under /beheer fill it with the bar of the admin (app/@shortcuts/beheer).
 //
 // The slot `@subnav` works the same way for the bar of sub-pages of Statistieken, which is part
 // of the main menu and so goes into it, not between the menu and the Page.Body. Its links keep

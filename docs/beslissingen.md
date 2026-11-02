@@ -4779,6 +4779,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het slot is een segment onder de layout, dus de titelsjabloon van de layout bereikt nu ook de homepage.
   De foutpagina van de homepage zet haar titel daarom met `absolute`, zodat die blijft zoals hij was.
 - **Alternatieven:** de balk in `Page.Body` zetten en met CSS naar buiten trekken (breedte, marges en de randen van het scherm moeten dan kloppen op elke breedte); de balk met JavaScript naar de goede plek verzetten (de balk springt na het laden, en zonder JavaScript staat hij verkeerd); `Page.Body` uit de layout halen en elke pagina de eigen laten zetten (elke pagina verandert voor één balk); een routegroep met een eigen layout voor `/wedstrijden` (alle pagina's verhuizen).
+- **Later:** zie _Het beheer heeft een balk onder de kop met de schermen, en geen eigen schil_ (2 november 2026): ook `/beheer` heeft een route in het slot, voor de balk met de schermen van het beheer.
 
 ### Het hoofdmenu is 16 tot 18 pixels en wordt vetter, de huidige pagina nog vetter
 
@@ -5657,6 +5658,33 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Doelsaldo en aantal doelpunten leggen de uitslag vast, dus er is geen gelijke stand om op te lossen.
   Een nederlaag met één doelpunt verschil staat vóór een zwaardere.
 - **Alternatieven:** sorteren op doelpunten voor (3–0 vóór 4–1); de nederlagen van slecht naar goed.
+
+### Het beheer heeft een balk onder de kop met de schermen, en geen eigen schil
+
+- **Datum:** 2 november 2026
+- **Besluit:** het beheer houdt de kop en de voet van de site, met onder het hoofdmenu een balk met de schermen op elke pagina onder `/beheer`, behalve de inlogpagina's.
+  Een beheerder ziet Beheer, Berichten, Artikelen, Wedstrijden en Bezoek, een moderator Berichten.
+  Rechts staat wie is ingelogd, met de rol, en een knop Uitloggen; op een telefoon staan ze onder de links.
+  De lijst van schermen per rol staat op één plek (`apps/site/src/beheer/screens.ts`), zodat een nieuw scherm één regel erbij krijgt.
+  De balk is `SectionBar` in het designsysteem, en de site tekent hem op de server uit de sessie (`AdminBar`), via het slot `@shortcuts` (`app/@shortcuts/beheer`).
+  De balk is geen toegangscontrole: elke pagina roept `requireRole` zelf aan, en zonder geldige sessie is er geen balk.
+- **Waarom:** er zijn nog maar vier of vijf schermen en de redactie kent de site, dus een eigen schil loont pas bij meer dan zes schermen.
+  Wie in het beheer is, moet zien waar hij is en bij de andere schermen kunnen komen, ook op een telefoon.
+  De balk staat niet in `app/beheer/layout.tsx`, zoals het issue (#617) zei: een layout tekent in de `Page.Body`, en een extra kind daar breekt de indeling van het raster en de kolommen, vooral bij een pagina met een introductie.
+  Het slot staat tussen het hoofdmenu en de `Page.Body`, en leest de sessie op de server, dus de balk is er ook zonder JavaScript en zonder de markering in `localStorage` (die het menu alleen gebruikt om Beheer te tonen).
+  `Page.Main` blijft een direct kind van `Page.Body`.
+  Een nieuw onderdeel was nodig: `NavigationBar` hoort bij een onderdeel van het hoofdmenu en heeft de ruimte van die `nav` nodig.
+  `SectionBar` heeft dezelfde uitstraling (de pillen van de submenubalk, dezelfde rij die zijwaarts scrolt) en hoort bij een onderdeel dat niet op elke pagina in het menu staat.
+- **Alternatieven:** een eigen schil met een andere kop (veel werk, en de moderator verliest het menu); alleen de koppeling "Terug naar het beheer" op elke pagina houden (wijst niet naar de andere schermen); de balk als subitems van het item Beheer in het hoofdmenu (het item hangt af van de markering in de browser, dus een redacteur zonder `localStorage` ziet geen balk, en het menu kent de rol niet); de balk in `Page.Body` met CSS naar buiten trekken (zie _De balk komt via een slot in de layout, een parallelle route_).
+- **Later:** zie _De balk komt via een slot in de layout, een parallelle route_ (27 oktober 2026): ook `/beheer` vult het slot `@shortcuts`, met een route voor de startpagina en een voor alles eronder.
+
+### Een ontwerp voor een telefoon is het ontwerp voor het hele beheer
+
+- **Datum:** 2 november 2026
+- **Besluit:** de telefoon is een eersteklas apparaat voor het hele beheer.
+  Wat een pagina daar nodig heeft, maakt ook de bureaubladvorm beter: kortere regels, grotere doelen en minder kolommen.
+- **Waarom:** moderators verbergen berichten ook onderweg, en een ontwerp dat op een telefoon werkt, werkt breed ook.
+- **Alternatieven:** het beheer voor het bureaublad ontwerpen en de telefoon alleen laten werken (moderators zijn ook onderweg aan het werk).
 
 ## Importer
 

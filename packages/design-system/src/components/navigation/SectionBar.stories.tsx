@@ -1,0 +1,87 @@
+import preview from '#.storybook/preview'
+
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
+import { exampleMenuAt } from '../../docs/ExamplePage'
+import { Button } from '../button/Button'
+import { Form } from '../form/Form'
+import { Navigation } from './Navigation'
+import { SectionBar, type SectionBarProps } from './SectionBar'
+
+const meta = preview.meta({
+  argTypes: {
+    account: {
+      description:
+        'Wat aan het eind van de balk staat, apart van de links, zoals wie is ingelogd en een knop om uit te loggen.',
+      table: { type: { summary: 'ReactNode' } },
+    },
+    items: {
+      description: 'De schermen van het onderdeel, elk met een `href`, een `label` en `current`.',
+      table: { type: { summary: 'SectionBarItem[]' } },
+    },
+    label: {
+      description: 'De naam van de navigatie voor schermlezers. Ze verschilt van die van het hoofdmenu.',
+    },
+  },
+  component: SectionBar,
+  parameters: {
+    docs: {
+      description: {
+        component: [
+          'Een balk met de schermen van een onderdeel van de site dat er meer dan één heeft, zoals het beheer.',
+          'Hij staat direct onder het hoofdmenu, buiten de `Page.Body`, en ziet eruit als de balk met subpagina’s van het hoofdmenu, maar hoort bij het onderdeel en niet bij een onderdeel van het menu.',
+          'Wie op een telefoon is, ziet de links in een rij die zijwaarts scrolt; wat eronder of ernaast staat (`account`) komt op een smal scherm onder de links.',
+        ].join('\n'),
+      },
+      page: ControlsDocsPage,
+    },
+    layout: 'fullscreen',
+  },
+  tags: ['autodocs'],
+  title: 'Componenten/Navigatie/SectionBar',
+})
+
+const items = [
+  { href: '#beheer', label: 'Beheer' },
+  { href: '#berichten', label: 'Berichten' },
+  { current: true, href: '#artikelen', label: 'Artikelen' },
+  { href: '#wedstrijden', label: 'Wedstrijden' },
+  { href: '#bezoek', label: 'Bezoek' },
+]
+
+const account = (
+  <>
+    <span>redacteur@example.org, beheerder</span>
+    <Form action="#">
+      <Button appearance="soft" size="small" type="submit">
+        Uitloggen
+      </Button>
+    </Form>
+  </>
+)
+
+// The bar goes under the main menu, so the stories show it there.
+const render = (args: SectionBarProps) => (
+  <>
+    <Navigation appearance="header" items={exampleMenuAt('Forum')} label="Hoofdmenu" />
+    <SectionBar {...args} />
+  </>
+)
+
+export const Beheerder = meta.story({
+  args: { account, items, label: 'Beheer' },
+  name: 'Met wie is ingelogd',
+  render,
+})
+
+export const Moderator = meta.story({
+  args: { items: [items[1]!], label: 'Beheer' },
+  name: 'Eén scherm, zonder account',
+  render,
+})
+
+export const Donker = meta.story({
+  args: { account, items, label: 'Beheer' },
+  globals: { theme: 'dark' },
+  name: 'Donker',
+  render,
+})
