@@ -6,10 +6,10 @@ import { Icon } from '../icon/Icon'
 import { type Size, sizeClassName } from '../size'
 
 /**
- * The looks a Button can have: the filled one, and the soft one for an action next to the main
- * one.
+ * The looks a Button can have: the filled one, the soft one for an action next to the main one,
+ * and the danger one for what you take away.
  */
-export const buttonAppearances = ['default', 'soft'] as const
+export const buttonAppearances = ['default', 'soft', 'danger'] as const
 
 /** The icons a Button can have, in front of its text. */
 export const buttonIcons = ['envelope', 'plus'] as const
@@ -24,7 +24,8 @@ export type ButtonIcon = (typeof buttonIcons)[number]
 export type ButtonProps = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
   /**
    * `default` is the filled button, for the main action. `soft` is quieter, for an action next
-   * to the main one.
+   * to the main one. `danger` is red, only for an action that takes something away, such as
+   * "Invoer weghalen". It behaves like the others.
    */
   appearance?: ButtonAppearance
   /**
@@ -48,8 +49,8 @@ export type ButtonType = (typeof buttonTypes)[number]
 
 /**
  * A button. Its text says what it does ("Versturen"), also on its own. button.css gives it its
- * look; the filled button has no class of its own, the soft one has `hf-button-soft`, and the
- * small size has `hf-size-small`.
+ * look; the filled button has no class of its own, the soft one has `hf-button-soft`, the
+ * danger one has `hf-button-danger`, and the small size has `hf-size-small`.
  */
 export const Button = ({
   appearance = 'default',

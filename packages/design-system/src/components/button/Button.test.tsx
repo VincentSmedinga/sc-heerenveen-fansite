@@ -32,6 +32,18 @@ describe('Button', () => {
     expect(screen.getByRole('button').className).toBe(appearance === 'default' ? '' : `hf-button-${appearance}`)
   })
 
+  it('has the danger appearance, with a class of its own and no other behaviour', () => {
+    render(
+      <Button appearance="danger" type="submit">
+        Invoer weghalen
+      </Button>,
+    )
+    const button = screen.getByRole('button', { name: 'Invoer weghalen' })
+
+    expect(button.className).toBe('hf-button-danger')
+    expect(button.getAttribute('type')).toBe('submit')
+  })
+
   it('adds a class of its own to the one of the appearance', () => {
     render(
       <Button appearance="soft" className="extra" type="button">

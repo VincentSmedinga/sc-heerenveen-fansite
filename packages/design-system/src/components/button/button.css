@@ -5,6 +5,9 @@
  *
  * The soft button (.hf-button-soft) is for an action next to the main one. It has the same size and the same border
  * width, so it is as easy to hit. Its fill is pale, so its border has a colour of its own that stands out from the card.
+ *
+ * The danger button (.hf-button-danger) is red and filled, only for an action that takes
+ * something away. It has the text of the filled button, and a fill and a hover of its own.
  */
 
 @layer hf.base {
@@ -39,6 +42,18 @@
     &:hover {
       background-color: var(--hf-colour-background-button-soft-hover);
       border-color: var(--hf-colour-border-button-soft);
+    }
+  }
+}
+
+@layer hf.components {
+  .hf-button-danger {
+    background-color: var(--hf-colour-background-button-danger);
+    border-color: var(--hf-colour-background-button-danger);
+
+    &:hover {
+      background-color: var(--hf-colour-background-button-danger-hover);
+      border-color: var(--hf-colour-background-button-danger-hover);
     }
   }
 }

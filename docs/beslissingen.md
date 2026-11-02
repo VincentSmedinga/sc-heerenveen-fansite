@@ -2384,6 +2384,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Besluit:** `Button` krijgt een prop `appearance` met de waarden `default` (de gevulde knop) en `soft` (een lichtblauwe vulling met blauwe tekst), in de geëxporteerde lijst `buttonAppearances`. De gevulde knop heeft geen eigen klasse, de zachte heeft `hf-button-soft`. De vulling haalt 3:1 tegen de kaart niet, dus de zachte knop heeft een rand met een eigen kleur die dat wel haalt. De zachte knop gebruikt vier nieuwe tokens: `--hf-colour-background-button-soft`, `--hf-colour-background-button-soft-hover`, `--hf-colour-text-on-button-soft` en `--hf-colour-border-button-soft`.
 - **Waarom:** de zachte vulling is rustig genoeg naast de koppen en blijft toch herkenbaar als knop. Een prop past bij hoe `Text` en `Card` hun uitvoering kiezen. Gemeten in licht: blauw-100 op wit haalt 1,21:1 en blauw-200 1,48:1, dus een vulling alleen is te zwak. De rand blauw-500 haalt 3,84:1 of meer op de vier vlakken (wit, sterk, zacht en warm) en 3,86:1 tegen de vulling. In donker haalt blauw-700 op de donkere vlakken 1,69:1 en 1,33:1, de rand blauw-400 dan 5,28:1 en 4,16:1. De tekst haalt 10,25:1 op de vulling in licht en 8,38:1 onder de muis, in donker 8,57:1 en 6,34:1. Onder de muis wordt de vulling in licht donkerder (blauw-200) en in donker lichter (blauw-600), zoals de gevulde knop dat doet: de knop wordt dan sterker. De rand blijft bij de muis gelijk. De focusrand is die van `base/focus.css`, dus net zo zichtbaar als bij de gevulde knop. De rand houdt de knop in geforceerde kleuren zichtbaar, en een rand van 1 pixel maakt de knop even groot als de gevulde.
 - **Alternatieven:** de vulling zo donker maken dat ze 3:1 haalt; dan lijkt de knop weer op de gevulde en valt de zachte knop niet meer terug. Een uitvoering met alleen een rand, of alleen tekst; die lijkt op een link. Een apart onderdeel zoals `SecondaryButton`; dat geeft dubbel werk bij elke wijziging aan knoppen.
+- **Later:** zie _De gevaarlijke knop is rood en gevuld, alleen voor wat je weghaalt_ (2 november 2026): `appearance` heeft er een derde waarde bij, `danger`; `default` en `soft` blijven zoals ze waren.
 
 ### De strepen staan aan het einde van de pagina en scrollen mee
 
@@ -3261,6 +3262,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De tekst haalt 4,5:1 of meer: `attention` 8,21:1 in licht en 6,18:1 in donker op het slechtste vlak, `neutral` 5,31:1 en 8,38:1, en `highlight` 10,26:1 en 11,40:1.
   Een test (`tag-css.test.ts`) houdt deze getallen vast.
 - **Alternatieven:** één onderdeel `Badge` met een kleurprop (de naam zegt niets over wanneer je het kiest); de rand van de zachte knop hergebruiken (een knoprol voor een label); een label met alleen kleur of een pictogram (de kleur zou dan alles dragen).
+
+### De gevaarlijke knop is rood en gevuld, alleen voor wat je weghaalt
+
+- **Datum:** 2 november 2026
+- **Besluit:** `Button` krijgt een derde uitvoering, `appearance="danger"`, met de klasse `hf-button-danger`.
+  De knop is rood en gevuld en is alleen voor een actie die iets weghaalt, zoals "Invoer weghalen".
+  Hij heeft verder geen ander gedrag dan de andere knoppen.
+  - **Twee nieuwe tokens:** `--hf-colour-background-button-danger` en `--hf-colour-background-button-danger-hover`.
+    Het vlak is rood-700 in licht en rood-300 in donker, en onder de muis rood-800 in licht en rood-200 in donker.
+  - **Dezelfde tekst:** de tekst is die van de gevulde knop, `--hf-colour-text-on-button`, dus er komt geen token voor de tekst bij.
+  - **De rand:** de rand heeft de kleur van het vlak, zoals bij de gevulde knop.
+- **Waarom:** de beheerschermen voor een wedstrijd (#592) hebben een actie die een invoer terugzet.
+  Dat moet er anders uitzien dan "Opslaan" en een eigen stap kosten, dus rood en gevuld.
+  Gemeten haalt de tekst 7,48:1 op het vlak in licht en 9,97:1 onder de muis, in donker 9,06:1 en 12,19:1 (eis 4,5:1).
+  Het vlak zelf haalt 3:1 en meer tegen de pagina en de vier vlakken van een kaart: in licht 6,16:1 tot 7,48:1, in donker 6,18:1 tot 9,06:1.
+  Onder de muis gaat het vlak een stap verder in dezelfde richting als bij de gevulde knop: donkerder in licht, lichter in donker.
+  Een test (`button-danger-css.test.ts`) houdt deze getallen vast.
+- **Alternatieven:** de gevulde knop met rode tekst eromheen (de kleur draagt dan alles en de knop lijkt op een gewone actie); een rode zachte knop (even rustig als "Annuleren", dus geen stap die je opvalt); een eigen onderdeel zoals `DangerButton` (dubbel werk bij elke wijziging aan knoppen, zie _Button heeft een zachte uitvoering, met een rand die het contrast draagt_); `red-600` als vlak (haalt met witte tekst ook 5,79:1, maar rood-700 is het rood van het accent en van een verloren wedstrijd, zodat het rood één familie blijft).
 
 ## Site
 

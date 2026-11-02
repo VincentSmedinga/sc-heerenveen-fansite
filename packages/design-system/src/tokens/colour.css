@@ -103,6 +103,15 @@
     --hf-colour-background-button-hover: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-200));
     --hf-colour-background-button-soft: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-700));
     --hf-colour-background-button-soft-hover: light-dark(var(--hf-colour-blue-200), var(--hf-colour-blue-600));
+
+    /*
+     * The danger button, for what you take away: red-700 under white text in light and red-300
+     * under blue-950 text in dark, so the text is the one of the filled button
+     * (--hf-colour-text-on-button). Under the mouse it goes a step further the same way as the
+     * filled button does: darker in light, lighter in dark.
+     */
+    --hf-colour-background-button-danger: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
+    --hf-colour-background-button-danger-hover: light-dark(var(--hf-colour-red-800), var(--hf-colour-red-200));
     --hf-colour-background-hover: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
 
     /*
@@ -327,6 +336,8 @@
       --hf-colour-background-button-hover: var(--hf-colour-blue-900);
       --hf-colour-background-button-soft: var(--hf-colour-blue-100);
       --hf-colour-background-button-soft-hover: var(--hf-colour-blue-200);
+      --hf-colour-background-button-danger: var(--hf-colour-red-700);
+      --hf-colour-background-button-danger-hover: var(--hf-colour-red-800);
       --hf-colour-background-hover: var(--hf-colour-grey-50);
       --hf-colour-background-track: var(--hf-colour-grey-200);
       --hf-colour-background-thumb: var(--hf-colour-white);
