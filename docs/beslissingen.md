@@ -9287,9 +9287,9 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Het zachte vlak laat de volgende kaart (Thuis en uit, #399) warm worden, zodat de kaarten daarna om en om wisselen.
 - **Alternatieven:** de reeksen in de kaart Verloop van het seizoen zetten (een lange kaart met twee onderwerpen).
   Alleen de laatste vijf wedstrijden tonen (geen reeksen, en die zoeken supporters juist).
-- **Later:** zie _Een uitslag van één wedstrijd staat met de thuisclub eerst, ook in `ShortMatch`_ (2 november 2026): de korte regels noemen sindsdien beide clubs, met de thuisclub en zijn doelpunten eerst, en niet meer de tegenstander met de uitslag vanuit onze kant.
   De nieuwste eerst (past bij Uitslagen en De nul gehouden, maar dan loopt de volgorde tegen die van de letters in).
   Een warm vlak (komt naast Verloop van het seizoen, dat al warm is).
+- **Later:** zie _Een uitslag van één wedstrijd staat met de thuisclub eerst, ook in `ShortMatch`_ (2 november 2026): de korte regels noemen sindsdien beide clubs, met de thuisclub en zijn doelpunten eerst, en niet meer de tegenstander met de uitslag vanuit onze kant.
 - **Later:** een eerder seizoen toont alleen de langste reeksen, zonder de lengte van nu en zonder de laatste vijf wedstrijden, zie _Een eerder seizoen toont bij de reeksen alleen de langste_ (30 oktober 2026).
 - **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026): de reden dat het zachte vlak de volgende kaart warm laat worden, zodat de kaarten om en om wisselen, vervalt.
   Reeksen blijft zacht, omdat het een lijst is die bij de hoofdinhoud hoort.
