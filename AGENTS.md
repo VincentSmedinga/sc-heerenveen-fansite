@@ -149,6 +149,7 @@ The Coordinator starts it as soon as the owner asks for a new issue or for one t
 It creates a new issue with the milestone and labels that fit, puts it on the board as "Te doen", and tells the owner where it is.
 It follows the `specify` skill: it reads the issue, the code and the decisions once, asks in rounds with a recommendation for each question, writes the issue after the owner approves (the criteria, the "Beslissingen" and the closing line), and ends.
 It never builds.
+Once the issue has the owner's approval, it archives its own session as its last step.
 If the issue has to be split, it creates the new issues with the same milestone and labels.
 Why a role of its own: a long talk in the Coordinator's session is carried at full size by every later turn.
 

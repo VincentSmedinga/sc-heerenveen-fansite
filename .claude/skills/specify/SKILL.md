@@ -83,3 +83,10 @@ If one is no, go back to the step it needs.
 - A decision that belongs to no single issue, such as one about the way of working, gets its own small pull request to `docs/beslissingen.md`, with the owner's go-ahead.
 
 Finish with a short summary for the owner: the link to the issue, the Definition of Ready, the decisions, and whether a Builder can start.
+
+## 8. Archive your session
+
+When the issue has the owner's approval line and the board shows it, you are done: archive your own session (`archive_session` with `session_id` "self"), as the last thing you do.
+The session has nothing left to say, and an open one only adds to the list.
+The owner can still reopen it from the archive.
+If the owner has not approved yet, or the session is waiting for an answer, don't archive.
