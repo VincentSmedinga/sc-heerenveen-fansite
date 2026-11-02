@@ -1,8 +1,9 @@
 /*
- * A field with its label, hint and error. The label, the hint and the error sit above the field, close to each other, in
- * a block of their own (hf-field-text); the field is a little further away. The space under the field is not the field's:
- * the form or the group it is in sets it (see utilities/flow.css). The status "(niet verplicht)", only on a field that is
- * not required, is in the weight and colour of secondary text, so the name of the field stands out.
+ * A field with its label, hint and error. The label, the hint and the error sit above the
+ * field, close to each other, in a block of their own (hf-field-text); the field is a little
+ * further away. The space under the field is not the field's: the form or the group it is in
+ * sets it (see utilities/flow.css). The status "(niet verplicht)", only on a field that is not
+ * required, is in the weight and colour of secondary text, so the name of the field stands out.
  */
 
 @layer hf.components {
@@ -16,7 +17,10 @@
     }
   }
 
-  /* The label, the hint and the error: close to each other. A group of options has the hint and the error in one too. */
+  /*
+   * The label, the hint and the error: close to each other. A group of options has the hint and
+   * the error in one too.
+   */
   .hf-field-text {
     display: grid;
     gap: 0.125rem;
