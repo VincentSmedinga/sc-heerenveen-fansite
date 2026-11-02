@@ -19,7 +19,6 @@ import type { ForumDiscussion } from './read-forum.ts'
 import type { MatchDay } from './relevance.ts'
 
 import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-runs.ts'
-import { reliability } from './classify-change.ts'
 import { createFetcher } from './fetcher.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
@@ -516,7 +515,6 @@ async function importWikipedia(
   await mailConflicts(db, {
     ...alerts,
     clock,
-    standsMs: reliability.suspiciousStands,
     write: (line) => void lines.push(line),
   })
 

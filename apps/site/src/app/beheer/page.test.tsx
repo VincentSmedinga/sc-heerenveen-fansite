@@ -6,7 +6,8 @@ import LoginPage, { metadata as loginMetadata } from './inloggen/page'
 import SentPage, { metadata as sentMetadata } from './inloggen/verstuurd/page'
 import AdminPage, { metadata as adminMetadata } from './page'
 
-const { findSession, loginLinkWorks, requireRole, sessionToken } = vi.hoisted(() => ({
+const { countWaitingDifferences, findSession, loginLinkWorks, requireRole, sessionToken } = vi.hoisted(() => ({
+  countWaitingDifferences: vi.fn(),
   findSession: vi.fn(),
   loginLinkWorks: vi.fn(),
   requireRole: vi.fn(),
@@ -14,6 +15,7 @@ const { findSession, loginLinkWorks, requireRole, sessionToken } = vi.hoisted(()
 }))
 
 vi.mock('../../database', () => ({ getDatabase: () => ({ db: {} }) }))
+vi.mock('../../beheer/match-entries', () => ({ countWaitingDifferences }))
 vi.mock('../../beheer/require-role', () => ({ requireRole, sessionToken }))
 vi.mock('../../beheer/sessions', () => ({ findSession, loginLinkWorks }))
 vi.mock('next/navigation', () => ({
@@ -23,6 +25,8 @@ vi.mock('next/navigation', () => ({
 }))
 
 beforeEach(() => {
+  countWaitingDifferences.mockReset()
+  countWaitingDifferences.mockResolvedValue(0)
   findSession.mockReset()
   loginLinkWorks.mockReset()
   requireRole.mockReset()
@@ -75,6 +79,23 @@ describe('the admin', () => {
     expect(renderToStaticMarkup(await AdminPage()).match(/<a [^>]*>(.*?)<\/a>/g)).toEqual([
       '<a href="/beheer/berichten">Berichten verbergen of weer tonen</a>',
     ])
+  })
+
+  it('tells a beheerder how many differences with Wikipedia wait for a decision, and nobody else', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    countWaitingDifferences.mockResolvedValue(1)
+    expect(renderToStaticMarkup(await AdminPage())).toContain('(1 afwijking van Wikipedia wacht op een besluit)')
+
+    countWaitingDifferences.mockResolvedValue(3)
+    expect(renderToStaticMarkup(await AdminPage())).toContain('(3 afwijkingen van Wikipedia wachten op een besluit)')
+
+    countWaitingDifferences.mockResolvedValue(0)
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('afwijking')
+
+    countWaitingDifferences.mockResolvedValue(3)
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('afwijking')
+    expect(countWaitingDifferences).toHaveBeenCalledTimes(3)
   })
 
   it('shows nothing to somebody without a session', async () => {

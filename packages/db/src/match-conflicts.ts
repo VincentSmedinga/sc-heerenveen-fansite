@@ -51,6 +51,13 @@ export type PartProposal =
 
 type Writer = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 
+/**
+ * How long a difference stays before the importer takes Wikipedia over, when nobody decides:
+ * seven days, the rule of the changes that wait (issue 460). The importer, the mails and the
+ * admin all read it here.
+ */
+export const conflictStandsMs = 7 * 24 * 60 * 60 * 1000
+
 /** The parts of a match in the words of the admin, the log and the mails. */
 export const partLabels: Record<MatchPart, string> = {
   goals: 'doelpunten',

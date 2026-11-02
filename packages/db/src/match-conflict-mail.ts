@@ -12,14 +12,11 @@ import type { Database } from './client.ts'
 import type { Match, MatchChange } from './schema.ts'
 
 import { describeProblem, environmentNames, formatDateTime } from './alerts.ts'
-import { partLabels } from './match-conflicts.ts'
+import { conflictStandsMs, partLabels } from './match-conflicts.ts'
 import { adminUsers, matchChanges, matches } from './schema.ts'
 
 /** How a run mails about the differences. A test gives its own mailer: nothing real is sent. */
-export type ConflictMailOptions = Pick<AlertOptions, 'clock' | 'env' | 'send' | 'write'> & {
-  /** How long a difference stays before the importer takes Wikipedia over, in milliseconds. */
-  standsMs: number
-}
+export type ConflictMailOptions = Pick<AlertOptions, 'clock' | 'env' | 'send' | 'write'>
 
 type Kind = 'difference' | 'taken-over'
 
@@ -67,7 +64,6 @@ export async function mailConflicts(db: Pick<Database, 'select' | 'update'>, opt
       const mail = compose(kind, change, match, {
         address: siteOrigins[SITE_ENV],
         environment: environmentNames[SITE_ENV],
-        standsMs: options.standsMs,
       })
       let sent = 0
 
@@ -92,12 +88,7 @@ export async function mailConflicts(db: Pick<Database, 'select' | 'update'>, opt
   }
 }
 
-function compose(
-  kind: Kind,
-  change: MatchChange,
-  match: Match,
-  context: { address: string; environment: string; standsMs: number },
-) {
+function compose(kind: Kind, change: MatchChange, match: Match, context: { address: string; environment: string }) {
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
   const part = change.part === null ? '' : partLabels[change.part]
@@ -128,7 +119,7 @@ function compose(
       '',
       'Onze invoer blijft staan tot iemand beslist.',
       `Beslis op de pagina van de wedstrijd: ${link}`,
-      `Beslist niemand, dan neemt de import de waarde van Wikipedia over vanaf ${formatDateTime(new Date(change.firstSeenAt.getTime() + context.standsMs))}, als Wikipedia die dan nog zegt.`,
+      `Beslist niemand, dan neemt de import de waarde van Wikipedia over vanaf ${formatDateTime(new Date(change.firstSeenAt.getTime() + conflictStandsMs))}, als Wikipedia die dan nog zegt.`,
       ...footer,
     ].join('\n'),
   }

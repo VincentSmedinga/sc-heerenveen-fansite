@@ -12,8 +12,6 @@ import { mailConflicts } from './match-conflict-mail.ts'
 import { matchChanges, matches } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
-const week = 7 * 24 * 60 * 60 * 1000
-
 const settings = {
   MAIL_FROM: 'fansite@example.org',
   SITE_ENV: 'acceptance',
@@ -97,7 +95,6 @@ const run = (options: { env?: Record<string, string>; send?: (mail: Mail) => Pro
     clock: () => new Date('2026-11-02T11:00:00Z'),
     env: options.env ?? settings,
     send: options.send ?? collect,
-    standsMs: week,
     write: (line) => void lines.push(line),
   })
 

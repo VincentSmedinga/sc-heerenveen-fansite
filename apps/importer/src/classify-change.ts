@@ -5,6 +5,8 @@
 // something for the first time. The boundaries are in `reliability`.
 import type { Match, MatchGoal } from '@fansite/db/schema'
 
+import { conflictStandsMs } from '@fansite/db/match-conflicts'
+
 import type { ReadGoal } from './read-wikipedia.ts'
 
 const hour = 60 * 60 * 1000
@@ -22,7 +24,7 @@ export const reliability = {
   /** A match this recent still gets corrections, and its first result is news. */
   recentMatch: 3 * day,
   /** A suspicious change that stays on the page this long is taken over. */
-  suspiciousStands: 7 * day,
+  suspiciousStands: conflictStandsMs,
   /** How far back a change counts when we look for a match that flips back and forth. */
   warLookback: 7 * day,
 }

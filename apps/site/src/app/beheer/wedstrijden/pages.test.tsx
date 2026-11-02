@@ -1,7 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, matchEdits, matches, type NewMatch, players } from '@fansite/db/schema'
+import { adminUsers, matchChanges, matches, type NewMatch, players } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -289,38 +289,102 @@ describe('the match', () => {
     expect(html).toContain('Reden om de invoer weg te halen')
   })
 
-  it('shows what Wikipedia said when it differed from the entry', async () => {
-    const id = await addMatch()
+  describe('a difference with Wikipedia that waits', () => {
+    /** A match with an entry of the result, and a waiting difference about it. */
+    async function withDifference() {
+      const id = await addMatch()
 
-    await saveEntry(
-      database.db,
-      userId,
-      id,
-      {
-        goals: [],
-        kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
-        result: {
-          afterNinetyAgainst: null,
-          afterNinetyFor: null,
-          extraTime: false,
-          goalsAgainst: 0,
-          goalsFor: 0,
-          penaltiesAgainst: null,
-          penaltiesFor: null,
-          status: 'played',
+      await saveEntry(
+        database.db,
+        userId,
+        id,
+        {
+          goals: [],
+          kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
+          result: {
+            afterNinetyAgainst: null,
+            afterNinetyFor: null,
+            extraTime: false,
+            goalsAgainst: 0,
+            goalsFor: 2,
+            penaltiesAgainst: null,
+            penaltiesFor: null,
+            status: 'played',
+          },
         },
-      },
-      'Wikipedia is achter',
-    )
-    await database.db.update(matchEdits).set({ reportedResult: 'sc Heerenveen 1-1 N.E.C.' })
+        'Wikipedia is achter',
+      )
+      await database.db.insert(matchChanges).values({
+        changed: 'uitslag',
+        class: 'suspicious',
+        competition: 'Eredivisie',
+        firstSeenAt: new Date('2026-11-02T10:00:00Z'),
+        lastSeenAt: new Date('2026-11-02T10:00:00Z'),
+        matchId: id,
+        newValue: 'sc Heerenveen 1–1 N.E.C.',
+        oldValue: 'sc Heerenveen 2–0 N.E.C.',
+        part: 'result',
+        reason: 'wijkt af van de invoer van de redactie',
+        round: 'Speelronde 11',
+        season,
+        status: 'pending',
+      })
 
-    const html = await form(id)
+      return id
+    }
 
-    expect(headings(html)).toContain('h3 Wikipedia zegt iets anders')
-    expect(html).toContain('Voor de uitslag zegt Wikipedia: sc Heerenveen 1-1 N.E.C.')
+    it('shows both values side by side on the page of the match, with the day the import takes over', async () => {
+      const id = await withDifference()
+      const html = await form(id)
+
+      expect(headings(html)).toContain('h2 Wikipedia wijkt af: uitslag')
+      expect(html).toContain('Onze invoer: sc Heerenveen 2–0 N.E.C.')
+      expect(html).toContain('Wikipedia: sc Heerenveen 1–1 N.E.C.')
+      expect(html).toContain('9 nov')
+    })
+
+    it('has two buttons, each with a name that says which match and part it is for, and one reason', async () => {
+      const html = await form(await withDifference())
+      const buttons = [...html.matchAll(/<button[^>]*aria-label="([^"]*)"[^>]*>(.*?)<\/button>/g)].map(
+        ([, name, text]) => [text, name],
+      )
+
+      expect(buttons).toEqual([
+        ['Neem Wikipedia over', expect.stringMatching(/^Neem Wikipedia over: de uitslag van Speelronde 11/)],
+        ['Houd onze invoer', expect.stringMatching(/^Houd onze invoer: de uitslag van Speelronde 11/)],
+      ])
+      expect(html).toContain('Reden voor je besluit over de uitslag')
+      expect(html.match(/id="besluit-\d+-reden"/g)).toHaveLength(1)
+    })
+
+    it('shows nothing about a difference when none waits, or when it was decided', async () => {
+      const id = await withDifference()
+
+      await database.db.update(matchChanges).set({ status: 'rejected' })
+
+      expect(await form(id)).not.toContain('Wikipedia wijkt af')
+      expect(await form(await addMatch({ round: 'Speelronde 12' }))).not.toContain('Wikipedia wijkt af')
+    })
+
+    it('labels the match in the list in words, and not a match without a difference', async () => {
+      await withDifference()
+      await addMatch({ round: 'Speelronde 12' })
+
+      const html = await list()
+
+      expect(html.match(/Wikipedia wijkt af/g)).toHaveLength(1)
+      expect(html).toContain('Aangepast door de redactie · Wikipedia wijkt af')
+    })
+
+    it('tells the editor on the list that a difference was decided already', async () => {
+      expect(await list({ fout: 'besloten' })).toContain('Al beslist')
+    })
   })
 
   it.each([
+    ['gehouden', 'Invoer gehouden'],
+    ['niet-gelukt', 'Niet overgenomen'],
+    ['overgenomen', 'Wikipedia overgenomen'],
     ['opgeslagen', 'Opgeslagen'],
     ['ongewijzigd', 'Niets veranderd'],
     ['weggehaald', 'Invoer weggehaald'],

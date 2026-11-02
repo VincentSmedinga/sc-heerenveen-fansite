@@ -1,7 +1,17 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, auditLog, matchEdits, matches, matchGoals, type NewMatch, players } from '@fansite/db/schema'
+import { encodePartProposal } from '@fansite/db/match-conflicts'
+import {
+  adminUsers,
+  auditLog,
+  matchChanges,
+  matchEdits,
+  matches,
+  matchGoals,
+  type NewMatch,
+  players,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -11,7 +21,7 @@ import { type MatchFormState } from '../../../beheer/match-fields'
 import { emptyFields, emptyGoal } from '../../../beheer/match-fields'
 import { sessionCookieName } from '../../../beheer/require-role'
 import { startSession } from '../../../beheer/sessions'
-import { submitMatch, submitRemoveEntry } from './actions'
+import { submitConflict, submitMatch, submitRemoveEntry } from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
 
@@ -65,6 +75,7 @@ const scheduled: Omit<NewMatch, 'clubId'> = {
 beforeEach(async () => {
   jar.clear()
   await database.pool.query('DELETE FROM audit_log')
+  await database.pool.query('DELETE FROM match_changes')
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.db.delete(adminUsers)
@@ -309,5 +320,117 @@ describe('submitRemoveEntry', () => {
 
     await expect(remove(matchId, 'Waarom')).rejects.toThrow('not found')
     expect(await edits()).toHaveLength(1)
+  })
+})
+
+describe('submitConflict', () => {
+  /** A match the editors entered as 2-1 and Wikipedia says 3-1 about: the difference waits. */
+  async function waiting() {
+    await submit(matchId, form())
+
+    const [match] = await database.db.select().from(matches)
+    const wikipedia = { ...match!, goalsFor: 3 }
+
+    await database.db.insert(matchChanges).values({
+      changed: 'uitslag',
+      class: 'suspicious',
+      competition: 'Eredivisie',
+      firstSeenAt: new Date('2026-11-02T10:00:00Z'),
+      lastSeenAt: new Date('2026-11-02T10:00:00Z'),
+      matchId,
+      newValue: 'sc Heerenveen 3–1 N.E.C.',
+      oldValue: 'sc Heerenveen 2–1 N.E.C.',
+      part: 'result',
+      proposal: encodePartProposal('result', { goals: [], match: wikipedia }),
+      reason: 'wijkt af van de invoer van de redactie',
+      round: 'Speelronde 11',
+      season: '2026/27',
+      status: 'pending',
+    })
+
+    return (await database.db.select().from(matchChanges))[0]?.id ?? 0
+  }
+
+  const decide = (changeId: number | string, fields: Record<string, string>) => {
+    const formData = new FormData()
+
+    for (const [name, value] of Object.entries(fields)) {
+      formData.set(name, value)
+    }
+
+    return resultOf(() => submitConflict(changeId as number, {}, formData))
+  }
+
+  it('takes Wikipedia over for the part, with the reason and the account in the log', async () => {
+    const id = await waiting()
+
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Wikipedia heeft de bron' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=overgenomen`,
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 3, status: 'played' })
+    expect(await edits()).toEqual([])
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ resolution: 'person', status: 'accepted' }])
+    expect((await log()).map((line) => [line.action, line.reason, line.userId])).toEqual([
+      ['match.edit', 'Wikipedia is achter', userId],
+      ['match.take-over', 'Wikipedia heeft de bron', userId],
+    ])
+  })
+
+  it('keeps the entry, with the reason and the account in the log', async () => {
+    const id = await waiting()
+
+    expect(await decide(id, { besluit: 'houden', reden: 'Wij zagen de uitslag zelf' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=gehouden`,
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({ goalsFor: 2 })
+    expect(await edits()).toMatchObject([{ resultEdited: true }])
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ resolution: 'person', status: 'rejected' }])
+    expect((await log()).at(-1)).toMatchObject({
+      action: 'match.keep',
+      reason: 'Wij zagen de uitslag zelf',
+      userId,
+    })
+  })
+
+  it('asks for a reason and for a choice, and decides nothing without them', async () => {
+    const id = await waiting()
+
+    expect(await decide(id, { besluit: 'overnemen', reden: '  ' })).toEqual({ error: 'Schrijf waarom je dit beslist.' })
+    expect(await decide(id, { besluit: 'houden', reden: 'x'.repeat(301) })).toEqual({
+      error: 'Schrijf hoogstens 300 tekens.',
+    })
+    expect(await decide(id, { besluit: 'misschien', reden: 'Waarom' })).toEqual({
+      error: 'Kies of je Wikipedia overneemt of je invoer houdt.',
+    })
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
+    expect(await log()).toHaveLength(1)
+  })
+
+  it('decides a difference once: the second time leads to the list with a notice', async () => {
+    const id = await waiting()
+
+    await decide(id, { besluit: 'houden', reden: 'Eerste' })
+
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Tweede' })).toEqual({
+      redirect: '/beheer/wedstrijden?fout=besloten',
+    })
+    expect(await decide(99_999, { besluit: 'overnemen', reden: 'Tweede' })).toEqual({
+      redirect: '/beheer/wedstrijden?fout=besloten',
+    })
+    expect(await decide('abc', { besluit: 'overnemen', reden: 'Tweede' })).toEqual({
+      redirect: '/beheer/wedstrijden?fout=besloten',
+    })
+    expect((await log()).map((line) => line.action)).toEqual(['match.edit', 'match.keep'])
+  })
+
+  it('is for the beheerder, and sends somebody without a session to the login page', async () => {
+    const id = await waiting()
+
+    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    await expect(decide(id, { besluit: 'overnemen', reden: 'Waarom' })).rejects.toThrow('not found')
+
+    jar.clear()
+    expect(await decide(id, { besluit: 'overnemen', reden: 'Waarom' })).toEqual({ redirect: '/beheer/inloggen' })
+    expect(await database.db.select().from(matchChanges)).toMatchObject([{ status: 'pending' }])
   })
 })

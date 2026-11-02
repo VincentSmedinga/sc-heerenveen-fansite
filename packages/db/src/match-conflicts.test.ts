@@ -43,7 +43,20 @@ const scheduled: Omit<NewMatch, 'clubId'> = {
   status: 'scheduled',
 }
 
-const wikipedia = { ...scheduled, goalsAgainst: 1, goalsFor: 3, status: 'played' } as const
+/** The match as Wikipedia has it: played, 3-1. */
+const wikipedia = {
+  afterNinetyAgainst: null,
+  afterNinetyFor: null,
+  dateText: null,
+  extraTime: false,
+  goalsAgainst: 1,
+  goalsFor: 3,
+  kickoffAt: scheduled.kickoffAt ?? null,
+  matchDate: '2026-10-31',
+  penaltiesAgainst: null,
+  penaltiesFor: null,
+  status: 'played',
+} as const
 
 /**
  * A match the editors filled in as 2-1 with a goal of ours, with a waiting difference for each
@@ -94,7 +107,7 @@ async function difference() {
       part: 'result',
       proposal: encodePartProposal('result', {
         goals: [],
-        match: { ...before!, ...wikipedia, kickoffAt: before!.kickoffAt },
+        match: wikipedia,
       }),
     },
     {
@@ -115,7 +128,7 @@ async function difference() {
             wikipediaPage: null,
           },
         ],
-        match: { ...before!, ...wikipedia },
+        match: wikipedia,
       }),
     },
   ])
@@ -224,10 +237,8 @@ describe('decideConflict', () => {
 
 describe('the proposal of a part', () => {
   it('goes through JSON and back, for each part', () => {
-    const match = { ...scheduled, ...wikipedia, afterNinetyAgainst: null, afterNinetyFor: null } as never
-
     for (const part of ['kickoff', 'result', 'goals'] as const) {
-      expect(decodePartProposal(encodePartProposal(part, { goals: [], match }))).toMatchObject({ part })
+      expect(decodePartProposal(encodePartProposal(part, { goals: [], match: wikipedia }))).toMatchObject({ part })
     }
 
     expect(decodePartProposal(null)).toBeUndefined()

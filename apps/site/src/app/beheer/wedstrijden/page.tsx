@@ -48,6 +48,14 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           <Text>Er is niets veranderd. Kies hieronder een wedstrijd.</Text>
         </Card>
       ) : null}
+      {fout === 'besloten' ? (
+        <Card aria-labelledby="besloten-kop" surface="soft">
+          <Heading id="besloten-kop" level={2}>
+            Al beslist
+          </Heading>
+          <Text>Over deze afwijking is al beslist, door iemand anders of door de import. Er is niets veranderd.</Text>
+        </Card>
+      ) : null}
       <Card as="div">
         <Text appearance="meta">
           {rows.length === 0
@@ -72,6 +80,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                         ? 'Uitgesteld'
                         : 'Gepland'}
                   {match.edited.length === 0 ? null : ' · Aangepast door de redactie'}
+                  {match.differs === 0 ? null : ' · Wikipedia wijkt af'}
                 </Text>
               </List.Item>
             ))}
