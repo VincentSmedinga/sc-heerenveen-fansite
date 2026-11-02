@@ -1085,6 +1085,14 @@ describe('importing the sport feed of De Gelderlander, the way the register has 
     const treffersRun = new Date('2026-12-06T12:00:00Z')
     const cupMatch = [{ matchDate: '2026-12-01', opponent: 'De Treffers', status: 'scheduled' as const }]
 
+    const treffersItem = (slug: string, published: string, title: string) => `<item>
+      <title>${title}</title>
+      <link>https://gld.test/sport/${slug}~ag3000000/</link>
+      <pubDate>${published}</pubDate>
+      <guid>https://gld.test/sport/${slug}~ag3000000/</guid>
+      <dpp:paid>false</dpp:paid>
+    </item>`
+
     /** A made-up feed: a headline at each edge of the window, and one about goals. */
     const treffersFeed = `<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:dpp="https://www.dpgmedia.cloud/paidrss" version="2.0">
@@ -1092,23 +1100,11 @@ describe('importing the sport feed of De Gelderlander, the way the register has 
     <title>Sport (verzonnen)</title>
     <link>https://gld.test</link>
     <description>Een verzonnen feed.</description>
-    ${[
-      ['27 november', 'Fri, 27 Nov 2026 12:00:00 GMT', 'De Treffers bereidt zich voor op de beker'],
-      ['28 november', 'Sat, 28 Nov 2026 12:00:00 GMT', 'De Treffers kijkt uit naar de beker'],
-      ['4 december', 'Fri, 04 Dec 2026 12:00:00 GMT', 'De Treffers kijkt terug op de beker'],
-      ['5 december', 'Sat, 05 Dec 2026 12:00:00 GMT', 'De Treffers pakt de competitie weer op'],
-      ['30 november', 'Mon, 30 Nov 2026 12:00:00 GMT', 'De treffers van Napoli, Koopmeiners en Lang'],
-    ]
-      .map(
-        ([day, published, title]) => `<item>
-      <title>${title}</title>
-      <link>https://gld.test/sport/${day.replace(' ', '-')}~ag3000000/</link>
-      <pubDate>${published}</pubDate>
-      <guid>https://gld.test/sport/${day.replace(' ', '-')}~ag3000000/</guid>
-      <dpp:paid>false</dpp:paid>
-    </item>`,
-      )
-      .join('\n    ')}
+    ${treffersItem('27-november', 'Fri, 27 Nov 2026 12:00:00 GMT', 'De Treffers bereidt zich voor op de beker')}
+    ${treffersItem('28-november', 'Sat, 28 Nov 2026 12:00:00 GMT', 'De Treffers kijkt uit naar de beker')}
+    ${treffersItem('4-december', 'Fri, 04 Dec 2026 12:00:00 GMT', 'De Treffers kijkt terug op de beker')}
+    ${treffersItem('5-december', 'Sat, 05 Dec 2026 12:00:00 GMT', 'De Treffers pakt de competitie weer op')}
+    ${treffersItem('30-november', 'Mon, 30 Nov 2026 12:00:00 GMT', 'De treffers van Napoli, Koopmeiners en Lang')}
   </channel>
 </rss>`
 
