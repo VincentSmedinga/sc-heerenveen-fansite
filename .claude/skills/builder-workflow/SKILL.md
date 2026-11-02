@@ -11,6 +11,22 @@ This skill is the order of the steps and the places where earlier Builders slipp
 The rules themselves are in `AGENTS.md` (_Working on an issue_, _The final check_, _Screenshots_) and `CONTRIBUTING.md`; read both when you haven't this session, and follow them where this skill is short.
 For a new source, also use the `add-source` skill.
 
+## Work cheaply and quietly
+
+Every turn re-reads your whole session, and every message wakes the session that gets it (see _Working efficiently_ in `AGENTS.md`).
+So:
+
+- Run each check in the foreground, as one command, and read the result.
+  Start no background monitors, and never end a turn only to wait for a check.
+- While you work, run the tests of what you touch.
+  Run the full chain from _De controles_ once, after the last commit, and again only after a change that can affect a check.
+- Search before you read (`git grep`), and read the parts the issue touches, not whole files.
+  Don't read again what you already have.
+- Send one message when the owner or the Coordinator has to decide something: the go-ahead, the model of the Reviewer, a question that changes the scope, a finished pull request.
+  No status messages, no "still running".
+- Auto-fix wakes you for a failed check, a conflict and a comment.
+  Don't poll CI yourself.
+
 ## Start
 
 1. `gh issue view $ARGUMENTS` (or `gh api repos/VincentSmedinga/sc-heerenveen-fansite/issues/$ARGUMENTS`).
