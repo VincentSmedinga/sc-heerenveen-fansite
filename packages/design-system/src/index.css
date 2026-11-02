@@ -18,6 +18,7 @@
 @import url('./tokens/motion.css');
 @import url('./tokens/space.css');
 @import url('./tokens/size.css');
+@import url('./tokens/density.css');
 
 /*
  * Every component has its own file, base/ holds the elements without a component, and utilities/ the utility classes.

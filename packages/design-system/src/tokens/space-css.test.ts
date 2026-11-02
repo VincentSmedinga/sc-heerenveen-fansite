@@ -16,8 +16,9 @@ const cssFiles = (dir: string): string[] =>
         : [],
   )
 
-// The tokens define the steps. Every other CSS file is checked, the documentation's too.
-const outside = ['fonts.css', 'tokens/space.css']
+// The tokens define the steps, and the density gives them other values for its subtree. Every
+// other CSS file is checked, the documentation's too.
+const outside = ['fonts.css', 'tokens/space.css', 'tokens/density.css']
 const components = cssFiles(src).filter((file) => !outside.includes(file))
 
 const read = (file: string) => strip(readFileSync(join(src, file), 'utf8'))
