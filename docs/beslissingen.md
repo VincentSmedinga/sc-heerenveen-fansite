@@ -3327,6 +3327,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** elke nieuwe beheerpagina moet de klasse zelf zetten.
   De test vangt het, maar het is een regel per pagina.
   De ruimte boven en onder de kolommen is die van de `Page.Body`, buiten de klasse, en blijft dus ruim.
+  Ook het voorbeeld en de versie van een artikel (`/beheer/artikelen/[id]/voorbeeld` en `/beheer/artikelen/[id]/versies/[nummer]`) zijn compact, dus het artikel staat daar kleiner dan op de pagina van een bezoeker.
+  De projecteigenaar koos dat op 2 november 2026, omdat de pagina's onder `/beheer` dan allemaal hetzelfde zijn en er geen uitzondering is om te onthouden.
 - **Alternatieven:** een prop `density` op elk component (elk component kent het thema, en elk nieuw component moet het erbij doen); een tweede stylesheet voor het beheer (twee stijlen om gelijk te houden); `zoom` of een kleinere `font-size` op de wikkel (maakt ook de breedtes en de kleine tekst kleiner, en haalt de grenzen niet); de klasse op `body` of `html` (kop en voet van de site worden ook compact); één wikkel in `app/beheer/layout.tsx` (zie hierboven); de waarden in de klasse op de `Page.Body` (de root-layout kent het pad niet); de kop en de voet ook compact (de publieke site blijft zoals ze is); de dichtheid laten kiezen door de redacteur (een eigen issue, met opslaan).
 
 ## Site
