@@ -5,6 +5,8 @@ import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { ListView } from './paths'
+
 import { createAccount, revokeAccount } from '../../../beheer/accounts'
 import { sessionCookieName } from '../../../beheer/require-role'
 import { startSession } from '../../../beheer/sessions'
@@ -75,17 +77,29 @@ async function redirectOf(action: () => Promise<void>) {
   throw new Error('The action did not redirect')
 }
 
-const hide = (id: unknown, search: string, fields: Record<string, string> = { reden: 'Fout in het bericht' }) => {
+const onSite = (search: string, overrides: Partial<ListView> = {}): ListView => ({
+  editorsOnly: false,
+  group: 'on-site',
+  search,
+  ...overrides,
+})
+
+const hide = (
+  id: unknown,
+  view: ListView | string,
+  fields: Record<string, string> = { reden: 'Fout in het bericht' },
+) => {
   const formData = new FormData()
 
   for (const [name, value] of Object.entries(fields)) {
     formData.set(name, value)
   }
 
-  return redirectOf(() => submitHide(id as number, search, formData))
+  return redirectOf(() => submitHide(id as number, typeof view === 'string' ? onSite(view) : view, formData))
 }
 
-const show = (id: unknown, search: string) => redirectOf(() => submitShow(id as number, search))
+const show = (id: unknown, view: ListView | string) =>
+  redirectOf(() => submitShow(id as number, typeof view === 'string' ? onSite(view) : view))
 
 const stored = async () => (await database.db.select().from(items).where(eq(items.id, itemId)))[0]
 
@@ -128,6 +142,26 @@ describe('submitHide', () => {
     expect(await hide(itemId, '', fields)).toBe(`/beheer/berichten?bericht=${itemId}&fout=${error}`)
     expect((await stored())?.hiddenAt).toBeNull()
     expect(await database.db.select().from(auditLog)).toEqual([])
+  })
+
+  it('keeps the group, the box and the search on the way back', async () => {
+    const view: ListView = { editorsOnly: true, group: 'not-on-site', search: 'wint van' }
+
+    expect(await hide(itemId, view)).toBe(
+      `/beheer/berichten?q=wint+van&toon=niet-op-de-site&redactie=1&verborgen=${itemId}`,
+    )
+    expect(await hide(itemId, { ...view, editorsOnly: false }, { reden: '' })).toBe(
+      `/beheer/berichten?q=wint+van&toon=niet-op-de-site&bericht=${itemId}&fout=reden-leeg`,
+    )
+  })
+
+  it('checks the group and the box it is given, which come from outside', async () => {
+    const view = { editorsOnly: true, group: 'alles', search: 'x' } as unknown as ListView
+
+    expect(await hide(itemId, view, { reden: '' })).toBe(`/beheer/berichten?q=x&bericht=${itemId}&fout=reden-leeg`)
+    expect(await hide(itemId, { editorsOnly: 'ja', group: 'not-on-site', search: 'x' } as unknown as ListView)).toBe(
+      `/beheer/berichten?q=x&toon=niet-op-de-site&verborgen=${itemId}`,
+    )
   })
 
   it('keeps the search when it refuses', async () => {
@@ -187,6 +221,14 @@ describe('submitShow', () => {
     await hide(itemId, '')
 
     expect(await show(itemId, 'wint')).toBe(`/beheer/berichten?q=wint&getoond=${itemId}`)
+  })
+
+  it('keeps the group, the box and the search on the way back', async () => {
+    await hide(itemId, '')
+
+    expect(await show(itemId, { editorsOnly: true, group: 'not-on-site', search: 'wint' })).toBe(
+      `/beheer/berichten?q=wint&toon=niet-op-de-site&redactie=1&getoond=${itemId}`,
+    )
   })
 
   it.each([0, 'abc', undefined])('refuses %j as an item', async (id) => {

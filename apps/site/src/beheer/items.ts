@@ -1,7 +1,7 @@
 import type { Database } from '@fansite/db/client'
 
-import { hiddenReasonMaxLength, items, sources } from '@fansite/db/schema'
-import { and, desc, eq, isNotNull, isNull, or, sql } from 'drizzle-orm'
+import { adminUsers, hiddenReasonMaxLength, items, sources } from '@fansite/db/schema'
+import { and, desc, eq, isNotNull, isNull, lte, not, or, sql } from 'drizzle-orm'
 
 import { recordAction } from './audit-log'
 
@@ -16,6 +16,12 @@ export const searchMaxLength = 100
 
 /** What the list shows of an item. */
 export type AdminItem = Awaited<ReturnType<typeof listItems>>[number]
+
+/**
+ * The two groups of the list: the items that are on the site and the items that are not. The
+ * address says `?toon=niet-op-de-site` for the second.
+ */
+export type ItemGroup = 'not-on-site' | 'on-site'
 
 /**
  * What a hide or a show did: the item was changed, it already was as asked, or there is no such
@@ -58,19 +64,52 @@ export async function hideItem(
   })
 }
 
+/** The value of `toon` in the address for the group of items that are not on the site. */
+export const notOnSiteValue = 'niet-op-de-site'
+
+/** Which items the list shows: the group, and under `not-on-site` only what editors hid. */
+export type ItemFilter = {
+  /** Only the items an editor hid. It has an effect under `not-on-site` only. */
+  editorsOnly?: boolean
+  group?: ItemGroup
+  /** When it is: an item is not on the site before its publication time. */
+  now?: Date
+}
+
 /**
- * The newest `listLength` items, from every source, hidden or not and of every relevance (the
- * importer keeps `doubtful` and `irrelevant` items too, which the site does not show), newest
- * first. With a search,
+ * The condition that makes an item "on the site" for the list: no moderator hid it, the
+ * importer found it `relevant` and it is published already. Every other item is not on the
+ * site: the hidden ones, the `doubtful` and `irrelevant` ones the importer leaves off, and the
+ * ones with a time to come. The pages of visitors add more (see `isShown` in
+ * `@fansite/db/queries`): a source that is switched off, a story that a live blog puts in the
+ * feed again and a story that two sources of one publisher both have are shown once. The list
+ * doesn't follow that, so such an item can be here on the site while the pages of visitors
+ * show a newer one of its story instead.
+ */
+export function isOnSite(now: Date) {
+  return sql`(${isNull(items.hiddenAt)} and ${eq(items.relevance, 'relevant')} and ${lte(items.publishedAt, now)})`
+}
+
+/**
+ * The newest `listLength` items of a group, from every source, newest first. Under `on-site`
+ * (the default) these are the items of `isOnSite`. Under `not-on-site` they are all the others,
+ * of which `editorsOnly` keeps the ones a moderator hid (the importer keeps `doubtful` and
+ * `irrelevant` items too, and an item can have a time to come). Each has the email address of
+ * the account that hid it, if it is hidden and the account still exists. With a search,
  * only the items whose headline or link contains the text, in any case. The text is a plain
  * text and no pattern: `%` and `_` stand for themselves.
  */
-export function listItems(db: Pick<Database, 'select'>, search: string) {
+export function listItems(
+  db: Pick<Database, 'select'>,
+  search: string,
+  { editorsOnly = false, group = 'on-site', now = new Date() }: ItemFilter = {},
+) {
   const pattern = `%${search.replaceAll(/[%_|]/gu, '|$&')}%`
 
   return db
     .select({
       hiddenAt: items.hiddenAt,
+      hiddenByEmail: adminUsers.email,
       hiddenReason: items.hiddenReason,
       id: items.id,
       paywalled: items.paywalled,
@@ -82,13 +121,34 @@ export function listItems(db: Pick<Database, 'select'>, search: string) {
     })
     .from(items)
     .innerJoin(sources, eq(items.sourceId, sources.id))
+    .leftJoin(adminUsers, eq(items.hiddenBy, adminUsers.id))
     .where(
-      search === ''
-        ? undefined
-        : or(sql`${items.title} like ${pattern} escape '|'`, sql`${items.url} like ${pattern} escape '|'`),
+      and(
+        group === 'on-site' ? isOnSite(now) : not(isOnSite(now)),
+        group === 'not-on-site' && editorsOnly ? isNotNull(items.hiddenAt) : undefined,
+        search === ''
+          ? undefined
+          : or(sql`${items.title} like ${pattern} escape '|'`, sql`${items.url} like ${pattern} escape '|'`),
+      ),
     )
     .orderBy(desc(items.publishedAt), desc(items.id))
     .limit(listLength)
+}
+
+/**
+ * Whether the list keeps to what editors hid: `redactie=1` under `not-on-site`. Under `on-site`
+ * nothing is hidden, so the box is not there and the value is ignored.
+ */
+export function parseEditorsOnly(value: string | string[] | undefined, group: ItemGroup) {
+  return group === 'not-on-site' && value === '1'
+}
+
+/**
+ * The group from the address: `niet-op-de-site` for `not-on-site`, and anything else, such as
+ * no value, an unknown one or more than one, for `on-site`.
+ */
+export function parseGroup(value: string | string[] | undefined): ItemGroup {
+  return value === notOnSiteValue ? 'not-on-site' : 'on-site'
 }
 
 /**

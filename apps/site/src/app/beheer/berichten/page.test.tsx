@@ -46,6 +46,9 @@ beforeEach(async () => {
 const render = async (searchParams: Record<string, string | string[]> = {}) =>
   renderToStaticMarkup(await ItemsPage({ searchParams: Promise.resolve(searchParams) }))
 
+/** The markup without the comments React puts between pieces of text. */
+const text = (html: string) => html.replaceAll('<!-- -->', '')
+
 const headings = (html: string) =>
   [...html.matchAll(/<h([1-6])[^>]*>(.*?)<\/h\1>/g)].map(([, level, text]) => `h${level} ${text}`)
 
@@ -76,7 +79,7 @@ describe('the page', () => {
     expect(html).toContain('“Fout in het bericht”, “Past niet bij de site” of “Op verzoek van de bron”')
     expect(html).toContain('hoogstens 300 tekens')
     expect(html).toContain('binnen vijf minuten niet meer op de site')
-    expect(html).toContain('Er zijn nog geen berichten.')
+    expect(html).toContain('Er zijn geen berichten op de site.')
   })
 
   it('has a search that is a form with method get, so it works without JavaScript', async () => {
@@ -107,7 +110,7 @@ describe('the list', () => {
     expect(html).toContain('krant.test')
     expect(html).toContain('<time')
     expect(html).toContain('dateTime="2025-02-03T08:00:00.000Z"')
-    expect(html).toContain('2 berichten.')
+    expect(html).toContain('2 berichten op de site.')
   })
 
   it('gives each item that is shown a field for the reason and a button Verberg that names the item', async () => {
@@ -131,12 +134,26 @@ describe('the list', () => {
     await addItem(database, ids, 'twijfel', { publishedAt: new Date('2026-10-20T08:00:00Z'), relevance: 'doubtful' })
     await addItem(database, ids, 'elders', { publishedAt: new Date('2026-10-19T08:00:00Z'), relevance: 'irrelevant' })
 
-    const html = await render()
+    const html = await render({ toon: 'niet-op-de-site' })
 
+    expect(html).not.toContain('Kop club')
     expect(html).toContain('Kop twijfel')
     expect(html).toContain('Kop elders')
     expect(html.match(/twijfelgeval, niet op de site/g)).toHaveLength(1)
     expect(html.match(/niet over de club, niet op de site/g)).toHaveLength(1)
+    // Hiding what is not on the site already does nothing, so those two have no form for it.
+    expect(html).not.toContain('aria-label="Verberg:')
+    expect(html).not.toContain('for="reden-')
+  })
+
+  it('says of an item that is published later that it is not on the site yet, and lets it be hidden', async () => {
+    await addItem(database, ids, 'straks', { publishedAt: new Date(Date.now() + 3_600_000) })
+
+    const html = await render({ toon: 'niet-op-de-site' })
+
+    expect(html).toContain('nog niet gepubliceerd, niet op de site')
+    expect(hasButton(html, 'Verberg: Kop straks', 'Verberg')).toBe(true)
+    expect(await render()).not.toContain('Kop straks')
   })
 
   it('gives the weekday and the date of an old item, with no time of day', async () => {
@@ -150,14 +167,26 @@ describe('the list', () => {
 
     await hideItem(database.db, userId, id, 'Op verzoek van de bron')
 
-    const html = await render()
+    const html = await render({ toon: 'niet-op-de-site' })
 
     expect(html).toContain('verborgen')
-    expect(html).toMatch(/Verborgen op [^<]*\. Reden: (<!-- -->)?Op verzoek van de bron/)
+    expect(text(html)).toMatch(/Verborgen op [^<]* door jelle@example\.org\. Reden: Op verzoek van de bron/)
     expect(hasButton(html, 'Toon weer: Kop een', 'Toon weer')).toBe(true)
     expect(buttons(html)).toHaveLength(1)
     expect(html).not.toContain('for="reden-')
-    expect(html).toContain('1 bericht.')
+    expect(html).toContain('1 bericht dat niet op de site staat.')
+    expect(await render()).not.toContain('Kop een')
+  })
+
+  it('says of a hidden item whose account is gone that a deleted account hid it', async () => {
+    await addItem(database, ids, 'een', {
+      hiddenAt: new Date('2026-10-22T08:00:00Z'),
+      hiddenReason: 'Fout in het bericht',
+    })
+
+    expect(text(await render({ toon: 'niet-op-de-site' }))).toMatch(
+      /Verborgen op [^<]* door een verwijderd account\. Reden:/,
+    )
   })
 
   it('shows what comes from outside as text and never as markup: headline, reason, source and search', async () => {
@@ -165,7 +194,7 @@ describe('the list', () => {
 
     await hideItem(database.db, userId, id, '<script>alert(2)</script>')
 
-    const html = await render({ q: '"><script>alert(3)</script>' })
+    const html = await render({ q: '"><script>alert(3)</script>', toon: 'niet-op-de-site' })
 
     expect(html).not.toContain('<script')
     expect(html).not.toContain('<img')
@@ -178,7 +207,7 @@ describe('the list', () => {
 
     await hideItem(database.db, userId, id, 'Reden <i>schuin</i>')
 
-    const html = await render()
+    const html = await render({ toon: 'niet-op-de-site' })
 
     expect(html).not.toContain('<b>vet')
     expect(html).not.toContain('<i>schuin')
@@ -194,7 +223,144 @@ describe('the list', () => {
     const html = await render()
 
     expect(html.match(/<li>/g)).toHaveLength(50)
-    expect(html).toContain('De nieuwste 50 berichten.')
+    expect(html).toContain('De nieuwste 50 berichten op de site.')
+  })
+})
+
+describe('the switch', () => {
+  const links = (html: string) =>
+    [...html.matchAll(/<a ([^>]*)><span class="hf-segmented-label"[^>]*>([^<]*)<\/span><\/a>/g)].map(
+      ([, attributes, label]) => ({
+        current: attributes?.includes('aria-current="page"') ?? false,
+        href: /href="([^"]*)"/.exec(attributes ?? '')?.[1]?.replaceAll('&amp;', '&'),
+        label,
+      }),
+    )
+
+  it('is a group named Welke berichten with two links, and shows the group on the site by default', async () => {
+    const html = await render()
+
+    expect(html).toMatch(/<div aria-label="Welke berichten"[^>]*role="group"/)
+    expect(links(html)).toEqual([
+      { current: true, href: '/beheer/berichten', label: 'Op de site' },
+      { current: false, href: '/beheer/berichten?toon=niet-op-de-site', label: 'Niet op de site' },
+    ])
+  })
+
+  it('shows the group off the site for toon=niet-op-de-site', async () => {
+    expect(links(await render({ toon: 'niet-op-de-site' }))).toEqual([
+      { current: false, href: '/beheer/berichten', label: 'Op de site' },
+      { current: true, href: '/beheer/berichten?toon=niet-op-de-site', label: 'Niet op de site' },
+    ])
+  })
+
+  it.each(['alles', '', ['niet-op-de-site', 'x']])('falls back to the group on the site for toon=%j', async (toon) => {
+    expect(links(await render({ toon })).map((link) => link.current)).toEqual([true, false])
+  })
+
+  it('keeps the search when the group changes, in both directions', async () => {
+    expect(links(await render({ q: 'wint van' })).map((link) => link.href)).toEqual([
+      '/beheer/berichten?q=wint+van',
+      '/beheer/berichten?q=wint+van&toon=niet-op-de-site',
+    ])
+    expect(links(await render({ q: 'wint van', toon: 'niet-op-de-site' })).map((link) => link.href)).toEqual([
+      '/beheer/berichten?q=wint+van',
+      '/beheer/berichten?q=wint+van&toon=niet-op-de-site',
+    ])
+  })
+
+  it('keeps the box in the link to the group off the site, and drops it in the link to the group on the site', async () => {
+    expect(links(await render({ redactie: '1', toon: 'niet-op-de-site' })).map((link) => link.href)).toEqual([
+      '/beheer/berichten',
+      '/beheer/berichten?toon=niet-op-de-site&redactie=1',
+    ])
+  })
+
+  it('says which group the list is of, and says in words when a group is empty', async () => {
+    expect(await render()).toContain('Er zijn geen berichten op de site.')
+    expect(await render({ toon: 'niet-op-de-site' })).toContain('Er zijn geen berichten die niet op de site staan.')
+    expect(await render({ redactie: '1', toon: 'niet-op-de-site' })).toContain(
+      'Er zijn geen berichten die door de redactie zijn verborgen.',
+    )
+    expect(await render({ q: 'wint', toon: 'niet-op-de-site' })).toContain(
+      'Geen berichten gevonden met “wint” die niet op de site staan.',
+    )
+  })
+
+  it('counts the length of the list per group: the newest 50 that are not on the site', async () => {
+    for (let number = 0; number < 55; number++) {
+      await addItem(database, ids, `k${number}`, {
+        publishedAt: new Date(Date.UTC(2026, 9, 1, 0, number)),
+        relevance: 'irrelevant',
+      })
+    }
+
+    const html = await render({ toon: 'niet-op-de-site' })
+
+    expect(html.match(/<li>/g)).toHaveLength(50)
+    expect(html).toContain('De nieuwste 50 berichten die niet op de site staan.')
+  })
+})
+
+describe('the box for what editors hid', () => {
+  beforeEach(async () => {
+    const hidden = await addItem(database, ids, 'verborgen', { publishedAt: new Date('2026-10-21T08:00:00Z') })
+
+    await hideItem(database.db, userId, hidden, 'Fout in het bericht')
+    await addItem(database, ids, 'twijfel', { publishedAt: new Date('2026-10-20T08:00:00Z'), relevance: 'doubtful' })
+  })
+
+  it('is in the search form under Niet op de site with its own label, and the button sends the group', async () => {
+    const html = await render({ toon: 'niet-op-de-site' })
+
+    expect(html).toMatch(/<legend[^>]*>Filter<\/legend>/)
+    expect(html).toMatch(
+      /<input[^>]*type="checkbox"[^>]*name="redactie"[^>]*value="1"[^>]*\/><span>Alleen door de redactie verborgen<\/span>/,
+    )
+    expect(html).toMatch(/<button[^>]*name="toon"[^>]*>Zoeken<\/button>/)
+    expect(html).toMatch(/<button[^>]*value="niet-op-de-site"[^>]*>Zoeken<\/button>/)
+    expect(html).not.toMatch(/<input[^>]*name="redactie"[^>]*checked/)
+    // One form, one button: the search and the box are applied together.
+    expect(html.match(/<button[^>]*>Zoeken<\/button>/g)).toHaveLength(1)
+    expect(html.indexOf('name="q"')).toBeLessThan(html.indexOf('name="redactie"'))
+    expect(html.indexOf('name="redactie"')).toBeLessThan(html.indexOf('>Zoeken</button>'))
+  })
+
+  it('is not there under Op de site, and the button sends no group', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('name="redactie"')
+    expect(html).not.toContain('name="toon"')
+    expect(html).not.toContain('Alleen door de redactie verborgen')
+  })
+
+  it('is ignored under Op de site when the address asks for it', async () => {
+    const html = await render({ redactie: '1' })
+
+    expect(html).not.toContain('name="redactie"')
+    expect(html).not.toContain('Kop verborgen')
+  })
+
+  it('shows the doubtful items too without the box, and only what editors hid with it', async () => {
+    const without = await render({ toon: 'niet-op-de-site' })
+    const checked = await render({ redactie: '1', toon: 'niet-op-de-site' })
+
+    expect(without).toContain('Kop verborgen')
+    expect(without).toContain('Kop twijfel')
+    expect(checked).toContain('Kop verborgen')
+    expect(checked).not.toContain('Kop twijfel')
+    expect(checked).toMatch(/<input[^>]*name="redactie"[^>]*checked/)
+    expect(checked).toContain('1 bericht dat door de redactie is verborgen.')
+  })
+
+  it('keeps the group, and the box when it was checked, in the link that clears the search', async () => {
+    expect(await render({ q: 'verborgen', redactie: '1', toon: 'niet-op-de-site' })).toContain(
+      '<a href="/beheer/berichten?toon=niet-op-de-site&amp;redactie=1">Toon alle berichten</a>',
+    )
+    expect(await render({ q: 'verborgen', toon: 'niet-op-de-site' })).toContain(
+      '<a href="/beheer/berichten?toon=niet-op-de-site">Toon alle berichten</a>',
+    )
+    expect(await render({ q: 'kop' })).toContain('<a href="/beheer/berichten">Toon alle berichten</a>')
   })
 })
 
@@ -210,16 +376,16 @@ describe('the search', () => {
     expect(html).toContain('Heerenveen wint van Ajax')
     expect(html).not.toContain('Bestuur kiest')
     expect(html).toMatch(/<input[^>]*value="wint"/)
-    expect(html).toContain('1 bericht met “wint”.')
+    expect(html).toContain('1 bericht op de site met “wint”.')
     expect(html).toContain('<a href="/beheer/berichten">Toon alle berichten</a>')
   })
 
   it('says when nothing matches', async () => {
-    expect(await render({ q: 'bestaat niet' })).toContain('Geen berichten gevonden met “bestaat niet”.')
+    expect(await render({ q: 'bestaat niet' })).toContain('Geen berichten gevonden met “bestaat niet” op de site.')
   })
 
   it('ignores a search that is given twice', async () => {
-    expect(await render({ q: ['wint', 'voorzitter'] })).toContain('2 berichten.')
+    expect(await render({ q: ['wint', 'voorzitter'] })).toContain('2 berichten op de site.')
   })
 })
 

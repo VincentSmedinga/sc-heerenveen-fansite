@@ -6,6 +6,7 @@ import { adminRoles, hiddenReasonMaxLength } from '@fansite/db/schema'
 import {
   Button,
   Card,
+  CheckboxGroup,
   ErrorSummary,
   Field,
   Form,
@@ -15,15 +16,28 @@ import {
   List,
   NewsItem,
   Page,
+  SegmentedLinks,
   Text,
 } from '@fansite/design-system'
 
 import { compact } from '../../../beheer/density'
-import { findItem, listItems, listLength, parseItemId, parseSearch, searchMaxLength } from '../../../beheer/items'
+import {
+  findItem,
+  type ItemGroup,
+  listItems,
+  listLength,
+  notOnSiteValue,
+  parseEditorsOnly,
+  parseGroup,
+  parseItemId,
+  parseSearch,
+  searchMaxLength,
+} from '../../../beheer/items'
 import { requireRole } from '../../../beheer/require-role'
 import { getDatabase } from '../../../database'
 import { dateTimeOf, formatNewsTime } from '../../../news'
 import { submitHide, submitShow } from './actions'
+import { itemsPath, type ListView } from './paths'
 
 // Render on each request: who is logged in and which items are hidden are not known when the
 // site is built.
@@ -45,6 +59,38 @@ const isFieldError = (value: string | string[] | undefined): value is keyof type
 const summaryId = 'fouten'
 
 /**
+ * The words that say which group the list shows, after "berichten" (or "bericht" for one):
+ * "op de site", or the items that are not, of which the box keeps the ones editors hid.
+ */
+function groupWords({ editorsOnly, group }: Pick<ListView, 'editorsOnly' | 'group'>, plural: boolean) {
+  if (group === 'on-site') {
+    return 'op de site'
+  }
+
+  if (editorsOnly) {
+    return plural ? 'die door de redactie zijn verborgen' : 'dat door de redactie is verborgen'
+  }
+
+  return plural ? 'die niet op de site staan' : 'dat niet op de site staat'
+}
+
+/** The line above the list: what it holds, and which group and search it is of. */
+function listSummary(view: ListView, count: number) {
+  const { search } = view
+  const quoted = search === '' ? '' : ` met “${search}”`
+
+  if (count === 0) {
+    return search === ''
+      ? `Er zijn geen berichten ${groupWords(view, true)}.`
+      : `Geen berichten gevonden${quoted} ${groupWords(view, true)}.`
+  }
+
+  const number = count === listLength ? `De nieuwste ${listLength}` : count
+
+  return `${number} ${count === 1 ? 'bericht' : 'berichten'} ${groupWords(view, count !== 1)}${quoted}.`
+}
+
+/**
  * What the list says of an item the importer did not find about the club. A `relevant` item
  * has nothing to say. These are not on the site, whatever the moderator does.
  */
@@ -61,11 +107,14 @@ const relevanceDetails = {
 export default async function ItemsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole(...adminRoles)
 
-  const { bericht, fout, getoond, q: rawSearch, verborgen } = await searchParams
+  const { bericht, fout, getoond, q: rawSearch, redactie, toon, verborgen } = await searchParams
   const search = parseSearch(rawSearch)
+  const group: ItemGroup = parseGroup(toon)
+  const editorsOnly = parseEditorsOnly(redactie, group)
+  const view: ListView = { editorsOnly, group, search }
   const { db } = getDatabase()
-  const found = await listItems(db, search)
   const now = new Date()
+  const found = await listItems(db, search, { editorsOnly, group, now })
 
   const failedId = parseItemId(bericht)
   const fieldError = isFieldError(fout) ? fieldErrors[fout] : undefined
@@ -91,11 +140,43 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
             Schrijf bij de reden kort wat er mis is, in hoogstens {hiddenReasonMaxLength} tekens. Bijvoorbeeld “Fout in
             het bericht”, “Past niet bij de site” of “Op verzoek van de bron”.
           </Text>
+          <SegmentedLinks
+            label="Welke berichten"
+            options={[
+              {
+                href: itemsPath({ ...view, editorsOnly: false, group: 'on-site' }),
+                label: 'Op de site',
+                value: 'on-site',
+              },
+              {
+                href: itemsPath({ ...view, group: 'not-on-site' }),
+                label: 'Niet op de site',
+                value: 'not-on-site',
+              },
+            ]}
+            size="small"
+            value={group}
+          />
           <Form action="/beheer/berichten" method="get">
             <Field hint="Een deel van de kop of van de link." id="zoek" label="Zoeken" required={false}>
               <Input defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
             </Field>
-            <Button type="submit">Zoeken</Button>
+            {group === 'not-on-site' ? (
+              <CheckboxGroup
+                legend="Filter"
+                name="redactie"
+                options={[{ label: 'Alleen door de redactie verborgen', value: '1' }]}
+                value={editorsOnly ? ['1'] : []}
+              />
+            ) : null}
+            {/* The button sends the group: the design system has no hidden field. */}
+            <Button
+              name={group === 'not-on-site' ? 'toon' : undefined}
+              type="submit"
+              value={group === 'not-on-site' ? notOnSiteValue : undefined}
+            >
+              Zoeken
+            </Button>
           </Form>
         </>
       }
@@ -140,15 +221,11 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
       ) : null}
       <Card as="div">
         <Text appearance="meta">
-          {found.length === 0
-            ? search === ''
-              ? 'Er zijn nog geen berichten.'
-              : `Geen berichten gevonden met “${search}”.`
-            : `${found.length === listLength ? `De nieuwste ${listLength}` : found.length} ${found.length === 1 ? 'bericht' : 'berichten'}${search === '' ? '' : ` met “${search}”`}.`}
+          {listSummary(view, found.length)}
           {search === '' ? null : (
             <>
               {' '}
-              <Link href="/beheer/berichten">Toon alle berichten</Link>
+              <Link href={itemsPath({ ...view, search: '' })}>Toon alle berichten</Link>
             </>
           )}
         </Text>
@@ -156,21 +233,29 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
           <List role="list">
             {found.map((item) => {
               const hidden = item.hiddenAt !== null
+              // An item the import leaves off the site is not on it, so hiding it does nothing.
+              const canHide = !hidden && item.relevance === 'relevant'
               const error = item.id === failedItem?.id ? fieldError : undefined
 
               return (
                 <List.Item key={item.id}>
                   <NewsItem
                     dateTime={dateTimeOf(item.publishedAt)}
-                    details={[...(hidden ? ['verborgen'] : []), ...relevanceDetails[item.relevance]]}
+                    details={[
+                      ...(hidden ? ['verborgen'] : []),
+                      ...relevanceDetails[item.relevance],
+                      ...(!hidden && item.relevance === 'relevant' && item.publishedAt > now
+                        ? ['nog niet gepubliceerd, niet op de site']
+                        : []),
+                    ]}
                     headline={item.title}
                     href={item.url}
                     paywalled={item.paywalled}
                     source={item.sourceName}
                     time={formatNewsTime(item.publishedAt, now)}
                   />
-                  {item.hiddenAt === null ? (
-                    <Form action={submitHide.bind(null, item.id, search)}>
+                  {canHide ? (
+                    <Form action={submitHide.bind(null, item.id, view)}>
                       <Field
                         error={error}
                         id={`reden-${item.id}`}
@@ -189,12 +274,14 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                         Verberg
                       </Button>
                     </Form>
-                  ) : (
+                  ) : null}
+                  {item.hiddenAt === null ? null : (
                     <>
                       <Text>
-                        Verborgen op {formatNewsTime(item.hiddenAt, now)}. Reden: {item.hiddenReason}
+                        Verborgen op {formatNewsTime(item.hiddenAt, now)} door{' '}
+                        {item.hiddenByEmail ?? 'een verwijderd account'}. Reden: {item.hiddenReason}
                       </Text>
-                      <Form action={submitShow.bind(null, item.id, search)}>
+                      <Form action={submitShow.bind(null, item.id, view)}>
                         <Button appearance="soft" aria-label={`Toon weer: ${item.title}`} type="submit">
                           Toon weer
                         </Button>
