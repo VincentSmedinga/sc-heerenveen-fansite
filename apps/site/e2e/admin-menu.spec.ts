@@ -32,7 +32,7 @@ test.describe('the item Beheer in the main menu', () => {
     expect(html).not.toContain('Beheer')
   })
 
-  test('comes behind Forum once an editor has opened the admin, and leads back to it', async ({
+  test('comes before Forum once an editor has opened the admin, and leads back to it', async ({
     baseURL,
     context,
     page,
@@ -44,13 +44,15 @@ test.describe('the item Beheer in the main menu', () => {
 
     await page.goto(publicPage)
     await expect(item(page)).toBeVisible()
-    await expect(menu(page).getByRole('link')).toHaveText(['Nieuws', 'Wedstrijden', 'Statistieken', 'Forum', 'Beheer'])
+    await expect(menu(page).getByRole('link')).toHaveText(['Nieuws', 'Wedstrijden', 'Statistieken', 'Beheer', 'Forum'])
     await expect(item(page)).not.toHaveAttribute('aria-current')
 
-    // The focus goes from Forum to Beheer, like between the other items.
-    await menu(page).getByRole('link', { name: 'Forum' }).focus()
+    // The focus goes from Statistieken to Beheer and on to Forum, like between the other items.
+    await menu(page).getByRole('link', { name: 'Statistieken' }).focus()
     await page.keyboard.press('Tab')
     await expect(item(page)).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(menu(page).getByRole('link', { name: 'Forum' })).toBeFocused()
     expect(await checkPage(page)).toEqual([])
 
     await item(page).click()
@@ -60,14 +62,17 @@ test.describe('the item Beheer in the main menu', () => {
 
   test('does not move the other items, and is in the menu on a phone too', async ({ baseURL, context, page }) => {
     await page.goto(publicPage)
-    const before = await menu(page).getByRole('link', { name: 'Nieuws' }).boundingBox()
+    const names = ['Nieuws', 'Wedstrijden', 'Statistieken', 'Forum']
+    const boxes = () => Promise.all(names.map((name) => menu(page).getByRole('link', { name }).boundingBox()))
+    const before = await boxes()
 
     await context.addCookies([adminCookie(host(baseURL))])
     await page.goto('/beheer')
     await expect.poll(() => mark(page)).toBe('1')
     await page.goto(publicPage)
     await expect(item(page)).toBeVisible()
-    expect(await menu(page).getByRole('link', { name: 'Nieuws' }).boundingBox()).toEqual(before)
+    // Forum stays on the right edge, where the menu draws its last item.
+    expect(await boxes()).toEqual(before)
 
     await page.setViewportSize({ height: 812, width: 390 })
     await expect(item(page)).toBeVisible()

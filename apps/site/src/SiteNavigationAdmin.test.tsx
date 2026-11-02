@@ -41,11 +41,11 @@ describe('the item Beheer in the main menu', () => {
     expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Statistieken', 'Forum'])
   })
 
-  it('comes behind Forum, as a plain link to /beheer, when the browser has the mark', () => {
+  it('comes before Forum, which stays last, as a plain link to /beheer, when the browser has the mark', () => {
     saveAdminMarker(true)
     render(<SiteNavigation />)
 
-    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Statistieken', 'Forum', 'Beheer'])
+    expect(names()).toEqual(['Nieuws', 'Wedstrijden', 'Statistieken', 'Beheer', 'Forum'])
     expect(screen.getByRole('link', { name: 'Beheer' })).toHaveProperty('pathname', '/beheer')
     expect(screen.getByRole('link', { name: 'Beheer' }).hasAttribute('target')).toBe(false)
     expect(screen.getByRole('link', { name: 'Beheer' }).querySelector('svg')).toBeNull()

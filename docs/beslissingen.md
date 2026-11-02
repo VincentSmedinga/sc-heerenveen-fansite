@@ -5237,7 +5237,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 
 - **Datum:** 2 november 2026
 - **Besluit:** de browser van wie in het beheer komt met een geldige sessie, bewaart een teken in `localStorage`, onder de sleutel `fansite-beheer` met de waarde `1`.
-  Het hoofdmenu (`SiteNavigation`) leest het teken en toont dan achter Forum het item Beheer.
+  Het hoofdmenu (`SiteNavigation`) leest het teken en toont dan voor Forum het item Beheer.
+  Het laatste item van het menu staat rechts, dus zo blijft Forum waar het stond.
   - **Zetten en weghalen:** `app/beheer/layout.tsx` controleert de sessie op de server (`sessionToken` en `findSession`) en geeft het antwoord aan `AdminMarker`, een clientcomponent die het teken zet of weghaalt.
     De inlogpagina haalt het ook weg: na een zachte navigatie naar een pagina die doorverwijst, wordt de layout niet opnieuw gevraagd.
     Uitloggen leidt naar de inlogpagina, en daar gaat het teken weg.
