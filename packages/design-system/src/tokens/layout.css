@@ -38,7 +38,8 @@
     /*
      * The widest the main column gets on a wide page (Page.Main with `wide`), for a page whose
      * main column holds a table with fields in it. With the space between the columns (2rem)
-     * and the usual sidebar (24rem) the page is 84rem wide, wider than the 64rem of other pages.
+     * and the usual sidebar (24rem) the page is 84rem wide, wider than the 64rem of other
+     * pages.
      */
     --hf-content-max-width-wide: 58rem;
     --hf-page-max-width-wide: 84rem;

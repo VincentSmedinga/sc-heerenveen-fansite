@@ -1,11 +1,11 @@
 /*
- * A table of rows of fields. Where the table has room, it is a table: the headers of the columns
- * are the labels, and the label of each field is only for a screen reader. Where it has not,
- * every row is a block, with all the labels in view. The room is that of the table itself, not
- * of the window, so the table is right on any page, also in a narrow column. A table has the
- * room when it is 48rem wide: the row header and the button take 15rem, and eight fields of 6rem
- * more or less fill the rest. The width is also the one where a wide page (Page.Main with
- * `wide`), with its main column of 58rem, keeps the table in one piece.
+ * A table of rows of fields. Where the table has room, it is a table: the headers of the
+ * columns are the labels, and the label of each field is only for a screen reader. Where it has
+ * not, every row is a block, with all the labels in view. The room is that of the table itself,
+ * not of the window, so the table is right on any page, also in a narrow column. A table has
+ * the room when it is 48rem wide: the row header and the button take 14.5rem, and the fields
+ * share the 33.5rem that is left. That is also less than the main column of a wide page
+ * (Page.Main with `wide`), so the table stays in one piece there.
  *
  * On a phone the table elements get another `display`. Some screen readers then drop the table
  * from the page. That costs nothing here, because every field has a full label of its own, with
