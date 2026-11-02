@@ -3619,12 +3619,15 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
     De kolom is nooit smaller dan de knop plus de opvulling, dus de winst zit in de opvulling.
     De regels van `SortableDataTable` voor de opvulling (de helft van `--hf-space-xs` onder 24 rem) blijven zoals ze zijn.
 - **Waarom:** met de letters van _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_ zijn de koppen één letter, dus de breedte van een kolom wordt bepaald door de opvulling en de getallen.
-  Smalle kolommen laten de tabellen beter op een telefoon passen, ook bij de grootste tekstgrootte.
+  Smalle kolommen maken de kolommen met getallen van twee cijfers smaller en alle kolommen met getallen gelijker, en laten zo de meeste tabellen beter op een telefoon passen.
   De pagina weet welke getallen klein blijven, en de data raden maakt de breedte van een kolom afhankelijk van wat er toevallig in staat.
   De opvulling is een token, dus de waarde blijft gelijk met de rest van het designsysteem.
 - **Nadeel:** wie een kolom toevoegt, moet eraan denken `short` te zetten, en een kolom die later boven de 99 komt, moet het weer weghalen.
   Zonder dat is de kolom gewoon breed, dus er breekt niets.
-- **Alternatieven:** elke `hf-numeric` smal maken en brede kolommen laten afzien (een nieuwe kolom is dan smal zonder dat iemand dat koos, en een uitslag of een bezoekersaantal moet eraan denken uit te zetten); de breedte uit de gegevens afleiden (onvoorspelbaar en niet te testen met een verhaal); de helft van `--hf-space-xs` ook boven 24 rem (getallen van naburige kolommen komen dan dicht op elkaar).
+  Een kolom met alleen getallen van één cijfer wordt met `2ch` iets breder dan eerst, omdat de kleine opvulling maar 8 pixels per kolom scheelt: de tabel op de pagina van een club 110,9 → 116,4 pixels en de topscorers 125,8 → 130 pixels, bij 100% tekstgrootte.
+  Bij 150% tekstgrootte op 320 pixels was de tabel op de pagina van een club al te breed en wordt hij iets breder (363 → 371 pixels).
+  De projecteigenaar koos dit voor gelijkere kolommen.
+- **Alternatieven:** een minimum van `1ch` in plaats van `2ch` (de tabellen met getallen van één cijfer worden dan ook smaller, 79,3 pixels voor de tabel op de pagina van een club, maar de kolommen zijn dan minder gelijk, omdat een kolom met één cijfer al aan `1ch` voldoet); elke `hf-numeric` smal maken en brede kolommen laten afzien (een nieuwe kolom is dan smal zonder dat iemand dat koos, en een uitslag of een bezoekersaantal moet eraan denken uit te zetten); de breedte uit de gegevens afleiden (onvoorspelbaar en niet te testen met een verhaal); de helft van `--hf-space-xs` ook boven 24 rem (getallen van naburige kolommen komen dan dicht op elkaar).
 
 ## Site
 
