@@ -20,6 +20,7 @@ const meta = preview.meta({
           'De getallen van de winst, het gelijkspel en het verlies hebben de kleur van de uitslag, zoals de regels met wedstrijden: groen, grijs en rood.',
           'De kolomkop zegt wat ze zijn, dus kleur is niet het enige.',
           'Het doelsaldo heeft een teken: `+6`, `−2` of `0`.',
+          'De kolommen G, W, G en V zijn smal, want die getallen blijven klein; de punten en het doelsaldo houden hun ruimte, omdat ze meer kunnen zijn.',
           'De punten en de rij met het totaal zijn vet, zwaarder dan de andere getallen, en boven het totaal staat een dikkere lijn.',
           '',
           'Hij heeft de vorm van de stand (`StandingsTable`): dezelfde letters, lijnen en rijkoppen, de getallen rechts uitgelijnd met tabelcijfers.',

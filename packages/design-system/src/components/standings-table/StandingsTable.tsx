@@ -81,7 +81,7 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
         <caption className="hf-visually-hidden">{caption}</caption>
         <thead>
           <tr>
-            <th className="hf-numeric" scope="col">
+            <th className="hf-numeric hf-numeric-short" scope="col">
               <abbr title="Positie">
                 <span aria-hidden="true">#</span>
                 <span className="hf-visually-hidden">positie</span>
@@ -90,7 +90,10 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
             <th scope="col">Club</th>
             {columns.map((column) => (
               <th
-                className={classNames('hf-numeric', column.id === 'points' && shares !== null && 'hf-bar-head')}
+                className={classNames(
+                  'hf-numeric hf-numeric-short',
+                  column.id === 'points' && shares !== null && 'hf-bar-head',
+                )}
                 key={column.id}
                 scope="col"
               >
@@ -105,13 +108,16 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
         <tbody>
           {rows.map((row, index) => (
             <tr className={row.club === ourClub ? 'hf-highlight hf-standings-table-own' : undefined} key={row.position}>
-              <td className="hf-numeric hf-rank">{row.position}</td>
+              <td className="hf-numeric hf-numeric-short hf-rank">{row.position}</td>
               <th scope="row">
                 {row.club}
                 {row.club === ourClub ? <span className="hf-visually-hidden"> (onze club)</span> : null}
               </th>
               {columns.map((column) => (
-                <td className={classNames('hf-numeric', column.id === 'points' && 'hf-bar-value')} key={column.id}>
+                <td
+                  className={classNames('hf-numeric hf-numeric-short', column.id === 'points' && 'hf-bar-value')}
+                  key={column.id}
+                >
                   {column.value(row)}
                   {column.id === 'points' && shares !== null ? <Bar share={shares[index]!} /> : null}
                 </td>

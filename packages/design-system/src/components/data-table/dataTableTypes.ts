@@ -15,6 +15,12 @@ export type DataTableColumn = {
   /** The whole word, as a screen reader says it, such as `gelijk`. It must be unique. */
   name: string
   /**
+   * Makes the column narrow: for numbers that stay below 100, such as the matches played. A
+   * number of three digits still fits, because the column grows with it. Leave it out for a
+   * column that can hold more, such as a score like `35–17` or the visitors of a day.
+   */
+  short?: boolean
+  /**
    * Lets the visitor sort the table on this column. It only works with JavaScript: without it
    * the header is plain text and the table keeps the order of `rows`.
    */

@@ -2,6 +2,7 @@
  * Tables: tabular figures, a thin line between rows. Hooks for tables: .hf-numeric aligns a
  * cell to the end, .hf-highlight marks a row, such as sc Heerenveen in the standings, and
  * .hf-rank is a position in a ranking. The StandingsTable component uses all three.
+ * .hf-numeric-short goes on top of .hf-numeric for a column of small numbers.
  */
 
 @layer hf.base {
@@ -56,6 +57,17 @@
 
   .hf-numeric {
     text-align: end;
+  }
+
+  /*
+   * A column of numbers that stay below 100, such as the matches played: the maker of the page
+   * or the component says so, because the data can't tell. The room is a minimum, so a number
+   * of three digits makes the column wider and nothing is cut off. The closer padding is a
+   * token, so it keeps in line with the rest of the design system.
+   */
+  .hf-numeric-short {
+    min-inline-size: 2ch;
+    padding-inline: var(--hf-space-xs);
   }
 
   .hf-rank {

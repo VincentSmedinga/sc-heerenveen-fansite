@@ -10,6 +10,7 @@ import type {
   DataTableTextRow,
 } from './dataTableTypes'
 
+import { classNames } from '../classNames'
 import { Link } from '../link/Link'
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
@@ -17,6 +18,10 @@ const numberFormat = new Intl.NumberFormat('nl-NL')
 /** A column given as a string is a column with that name and nothing else. */
 export const columnOf = (column: DataTableColumn | string): DataTableColumn =>
   typeof column === 'string' ? { name: column } : column
+
+/** The class of a header or cell: the first column holds row headers, the others numbers. */
+export const numericClass = (column: DataTableColumn | undefined, index: number) =>
+  index === 0 ? undefined : classNames('hf-numeric', column?.short === true && 'hf-numeric-short')
 
 /** What a cell shows: a number the Dutch way, text as it is. */
 const textOf = (cell: DataTableCell) => {
@@ -57,7 +62,7 @@ export const TableRows = ({
       <tr key={row.header}>
         <th scope="row">{row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}</th>
         {row.cells.map((cell, index) => (
-          <td className="hf-numeric" key={columns[index + 1]?.name ?? index}>
+          <td className={numericClass(columns[index + 1], index + 1)} key={columns[index + 1]?.name ?? index}>
             {textOf(cell)}
           </td>
         ))}

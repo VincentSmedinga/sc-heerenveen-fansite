@@ -50,14 +50,14 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
         <caption className="hf-visually-hidden">{caption}</caption>
         <thead>
           <tr>
-            <th className="hf-numeric" scope="col">
+            <th className="hf-numeric hf-numeric-short" scope="col">
               <abbr title="Plaats">
                 <span aria-hidden="true">#</span>
                 <span className="hf-visually-hidden">plaats</span>
               </abbr>
             </th>
             <th scope="col">Speler</th>
-            <th className={classNames('hf-numeric', shares !== null && 'hf-bar-head')} scope="col">
+            <th className={classNames('hf-numeric hf-numeric-short', shares !== null && 'hf-bar-head')} scope="col">
               <abbr title="Doelpunten">
                 <span aria-hidden="true">{tableColumns.goals.abbreviation}</span>
                 <span className="hf-visually-hidden">{tableColumns.goals.name}</span>
@@ -68,11 +68,11 @@ export const TopScorersTable = ({ caption, className, rows, ...props }: TopScore
         <tbody>
           {rows.map((row, index) => (
             <tr key={row.id}>
-              <td className="hf-numeric hf-rank">{row.position}</td>
+              <td className="hf-numeric hf-numeric-short hf-rank">{row.position}</td>
               <th scope="row">
                 <PlayerName givenName={row.givenName} surname={row.surname} />
               </th>
-              <td className="hf-numeric hf-bar-value">
+              <td className="hf-numeric hf-numeric-short hf-bar-value">
                 {row.goals}
                 {shares !== null ? <Bar share={shares[index]!} /> : null}
               </td>

@@ -20,6 +20,7 @@ const meta = preview.meta({
           '',
           'De rij van sc Heerenveen valt op met meer dan kleur: ze is vet, ze heeft een balk aan het begin van de rij en een schermlezer hoort "(onze club)" achter de naam.',
           'De punten zijn vet, zwaarder dan de andere getallen, want daarop is de stand gesorteerd.',
+          'De kolommen van de positie, G en P zijn smal, want die getallen blijven onder de honderd; een score van meer cijfers maakt de kolom gewoon breder.',
           'De positie heeft de kleur van markeringen, de getallen staan rechts uitgelijnd en hebben tabelcijfers, zodat ze recht onder elkaar staan.',
           '',
           'In de volledige tabel staat in de cel van de punten, rechts van het getal, een balk.',

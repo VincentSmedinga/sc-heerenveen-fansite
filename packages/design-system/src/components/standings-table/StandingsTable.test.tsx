@@ -167,8 +167,8 @@ describe('StandingsTable', () => {
     const cells = [...container.querySelectorAll('tbody tr:nth-child(2) td')]
 
     expect(cells.at(-1)?.textContent).toBe('6')
-    expect(cells.at(-1)?.className).toBe('hf-numeric hf-bar-value')
-    expect(cells.at(-2)?.className).toBe('hf-numeric')
+    expect(cells.at(-1)?.className).toBe('hf-numeric hf-numeric-short hf-bar-value')
+    expect(cells.at(-2)?.className).toBe('hf-numeric hf-numeric-short')
     expect(container.querySelectorAll('.hf-bar-value')).toHaveLength(4)
   })
 

@@ -30,6 +30,13 @@ describe('bar.css', () => {
     expect(declarationsOf('.hf-bar-table td.hf-bar-value')).toMatch(/font-weight: var\(--hf-figure-font-weight\)/u)
   })
 
+  it('keeps the room of the bar in the header of a short column, with the closer padding of its cells', () => {
+    expect(css).toMatch(
+      /&\.hf-numeric-short \{\s*padding-inline-end: calc\(var\(--hf-space-xs\) \+ var\(--hf-bar-gap\) \+ var\(--hf-bar-size\)\)/u,
+    )
+    expect(css).toMatch(/&\.hf-numeric-short \{\s*padding-inline-end: var\(--hf-space-xs\);/u)
+  })
+
   it('draws the bar as long as the share the component gives, from the start side', () => {
     expect(declarationsOf('&::before')).toMatch(/inline-size: calc\(var\(--hf-bar-share\) \* 1%\)/u)
   })

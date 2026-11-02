@@ -6,7 +6,7 @@ import type { DataTableColumn, DataTableRow } from './dataTableTypes'
 
 import { classNames } from '../classNames'
 import { Icon } from '../icon/Icon'
-import { ColumnText, TableRows } from './dataTableParts'
+import { ColumnText, numericClass, TableRows } from './dataTableParts'
 import { describeSorting, firstDirection, isNumericColumn, type Sorting, sortRows } from './sortRows'
 
 export type SortableDataTableProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & {
@@ -66,7 +66,7 @@ export const SortableDataTable = ({ caption, className, columns, rows, ...props 
               return (
                 <th
                   aria-sort={sortable ? (active ? sorting.direction : 'none') : undefined}
-                  className={index === 0 ? undefined : 'hf-numeric'}
+                  className={numericClass(column, index)}
                   key={column.name}
                   scope="col"
                 >

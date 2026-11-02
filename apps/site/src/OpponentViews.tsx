@@ -43,10 +43,11 @@ const clubColumns = (choice: CompetitionChoice) =>
   [
     { name: 'Club', sortable: true },
     ...[
-      tableColumns.played,
-      tableColumns.won,
-      tableColumns.drawn,
-      tableColumns.lost,
+      { ...tableColumns.played, short: true },
+      { ...tableColumns.won, short: true },
+      { ...tableColumns.drawn, short: true },
+      { ...tableColumns.lost, short: true },
+      // A score such as 35–17 and the points can pass 99, so these two keep their room.
       tableColumns.goals,
       ...(choice === 'league' ? [tableColumns.points] : []),
     ].map((column) => ({ ...column, sortable: true })),

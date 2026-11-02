@@ -3601,6 +3601,31 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Gevolg:** de kolommen worden smaller, want alle koppen zijn één letter (#630 bouwt daarop).
 - **Alternatieven:** "=" voor gelijk (uniek en eenletterig, maar de uitslagen krijgen dan een ander teken dan de supporter kent); "Wed" voor gespeeld (de gewone kop in Nederlandse tabellen, maar drie letters en een bredere kolom); een bal als pictogram voor gespeeld (een nieuw pictogram dat moeilijker te lezen is); GL of L voor gelijk (twee letters, of een letter die van niets komt); een lege kop (niet toegankelijk); "±" of "+/−" voor het doelsaldo (geen letter, of drie tekens breed); gewonnen en verloren als woorden (dan moeten de uitslagen en het verloop mee).
 
+### Een kolom met kleine getallen is smal als de maker van de pagina of het component dat zegt
+
+- **Datum:** 2 november 2026
+- **Besluit:** een kolom met getallen die meestal onder de 100 blijven, zoals gespeeld, gewonnen en doelpunten, is smaller dan andere getalkolommen (#630).
+  - **De klasse:** `hf-numeric-short` in `base/table.css`, bovenop `hf-numeric`, met `min-inline-size: 2ch` en `padding-inline: var(--hf-space-xs)`.
+    De getallen blijven rechts uitgelijnd met tabelcijfers.
+    `2ch` is een minimum: een getal van drie cijfers, zoals 102 punten, maakt de kolom breder en wordt nergens afgekapt.
+  - **Wie kiest:** de maker van de pagina of het component, niet de data.
+    `StandingsTable` (#, G, P) en `TopScorersTable` (#, D) zetten de klasse zelf op hun kolommen, en `RecordTable` doet dat voor G, W, G en V.
+    Een kolom van `DataTable` krijgt `short: true`, in de gewone en in de sorteerbare tabel.
+  - **Welke kolommen:** G, W, G en V in de lijst van tegenstanders en in de tabellen over het eerste doelpunt en de rust; Voor en Tegen per kwartier; Nu en Langste bij de reeksen; Thuis, Uit en Totaal in de kaart Wedstrijden; Wedstrijden bij de uitslagen met de punten.
+    Een kolom die de 99 kan passen blijft zoals hij was: een score als "35–17", de punten in de lijst van tegenstanders en bij de uitslagen, de waarde in "De plek van sc Heerenveen …", het doelsaldo van `RecordTable`, het beheer, `InputTable` en `DataTable` met `appearance="text"`.
+    De punten van `StandingsTable` doen wel mee: 34 speelrondes geven hoogstens 102 punten, en de kolom wordt dan breder.
+  - **De balk:** de kop van de punten naast een balk houdt zijn ruimte voor de balk, met de smalle opvulling aan het eind (`bar.css`).
+  - **De sorteerknop** in de kop blijft minstens 24 bij 24 pixels (WCAG 2.5.8), ook in een smalle kolom.
+    De kolom is nooit smaller dan de knop plus de opvulling, dus de winst zit in de opvulling.
+    De regels van `SortableDataTable` voor de opvulling (de helft van `--hf-space-xs` onder 24 rem) blijven zoals ze zijn.
+- **Waarom:** met de letters van _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_ zijn de koppen één letter, dus de breedte van een kolom wordt bepaald door de opvulling en de getallen.
+  Smalle kolommen laten de tabellen beter op een telefoon passen, ook bij de grootste tekstgrootte.
+  De pagina weet welke getallen klein blijven, en de data raden maakt de breedte van een kolom afhankelijk van wat er toevallig in staat.
+  De opvulling is een token, dus de waarde blijft gelijk met de rest van het designsysteem.
+- **Nadeel:** wie een kolom toevoegt, moet eraan denken `short` te zetten, en een kolom die later boven de 99 komt, moet het weer weghalen.
+  Zonder dat is de kolom gewoon breed, dus er breekt niets.
+- **Alternatieven:** elke `hf-numeric` smal maken en brede kolommen laten afzien (een nieuwe kolom is dan smal zonder dat iemand dat koos, en een uitslag of een bezoekersaantal moet eraan denken uit te zetten); de breedte uit de gegevens afleiden (onvoorspelbaar en niet te testen met een verhaal); de helft van `--hf-space-xs` ook boven 24 rem (getallen van naburige kolommen komen dan dicht op elkaar).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem

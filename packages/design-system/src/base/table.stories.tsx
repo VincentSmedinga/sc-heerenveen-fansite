@@ -7,7 +7,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          'Tabellen gebruiken tabelcijfers, zodat getallen recht onder elkaar staan. De klasse `hf-numeric` lijnt een cel uit aan het eind, `hf-highlight` markeert een rij en `hf-rank` geeft een positie de kleur van markeringen. De stand van de competitie heeft een eigen component, `StandingsTable`, dat deze klassen gebruikt; de klassen blijven voor andere tabellen.',
+          'Tabellen gebruiken tabelcijfers, zodat getallen recht onder elkaar staan. De klasse `hf-numeric` lijnt een cel uit aan het eind, `hf-numeric-short` maakt een kolom smal voor getallen die onder de honderd blijven, `hf-highlight` markeert een rij en `hf-rank` geeft een positie de kleur van markeringen. De stand van de competitie heeft een eigen component, `StandingsTable`, dat deze klassen gebruikt; de klassen blijven voor andere tabellen.',
       },
     },
   },

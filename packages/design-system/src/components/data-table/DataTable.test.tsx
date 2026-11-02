@@ -51,6 +51,26 @@ describe('DataTable', () => {
     expect(document.querySelectorAll('.hf-numeric')).toHaveLength(2 + 4)
   })
 
+  it('gives the header and the cells of a short column the class for narrow numbers, and no other column', () => {
+    render(
+      <DataTable
+        caption="Uitslagen"
+        columns={['Stand', { name: 'Wedstrijden', short: true }, 'Bezoekers']}
+        rows={[{ cells: [2, 1234], header: 'Voor' }]}
+      />,
+    )
+
+    expect(screen.getAllByRole('columnheader').map((header) => header.className)).toEqual([
+      '',
+      'hf-numeric hf-numeric-short',
+      'hf-numeric',
+    ])
+    expect(screen.getAllByRole('cell').map((cell) => cell.className)).toEqual([
+      'hf-numeric hf-numeric-short',
+      'hf-numeric',
+    ])
+  })
+
   it('shows text in a cell as it is', () => {
     render(<DataTable {...props} rows={[{ cells: ['n.v.t.', 3], header: 'Een rij' }]} />)
 

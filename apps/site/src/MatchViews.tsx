@@ -260,7 +260,7 @@ export function GoalsPerQuarterCard({
           </DonutChart.Group>
           <DataTable
             caption="Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd"
-            columns={['Kwartier', 'Voor', 'Tegen']}
+            columns={['Kwartier', { name: 'Voor', short: true }, { name: 'Tegen', short: true }]}
             rows={quarterLabels.map((label, index) => ({
               cells: [scored[index] ?? 0, conceded[index] ?? 0],
               header: label,
@@ -283,10 +283,10 @@ const flowCells = (row: FlowRow) => [row.matches, row.won, row.drawn, row.lost, 
  * the same letters and words as every other table (`tableColumns`).
  */
 const flowColumns = [
-  tableColumns.played,
-  tableColumns.won,
-  tableColumns.drawn,
-  tableColumns.lost,
+  { ...tableColumns.played, short: true },
+  { ...tableColumns.won, short: true },
+  { ...tableColumns.drawn, short: true },
+  { ...tableColumns.lost, short: true },
   tableColumns.points,
 ] as const
 
@@ -401,7 +401,12 @@ export function HomeAwayCard({
         <>
           <DataTable
             caption="De uitslagen van sc Heerenveen thuis en uit dit seizoen"
-            columns={['Onderdeel', 'Thuis', 'Uit', 'Totaal']}
+            columns={[
+              'Onderdeel',
+              { name: 'Thuis', short: true },
+              { name: 'Uit', short: true },
+              { name: 'Totaal', short: true },
+            ]}
             rows={[
               row('Gespeeld', (side) => side.played),
               row('Gewonnen', (side) => side.won),
@@ -567,7 +572,7 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
           <FormChart results={results} />
           <DataTable
             caption="Uitslagen van sc Heerenveen dit seizoen, met de punten"
-            columns={['Uitslag', 'Wedstrijden', 'Punten']}
+            columns={['Uitslag', { name: 'Wedstrijden', short: true }, 'Punten']}
             rows={[
               { cells: [won, won * 3], header: 'Winst' },
               { cells: [drawn, drawn], header: 'Gelijk' },
@@ -761,7 +766,11 @@ export function StreaksCard({
           <Text appearance="meta">Aantal wedstrijden achter elkaar</Text>
           <DataTable
             caption={`De reeksen van sc Heerenveen in ${competitionNames(matches, competition)} ${when}`}
-            columns={over ? ['Reeks', 'Langste'] : ['Reeks', 'Nu', 'Langste']}
+            columns={
+              over
+                ? ['Reeks', { name: 'Langste', short: true }]
+                : ['Reeks', { name: 'Nu', short: true }, { name: 'Langste', short: true }]
+            }
             rows={streaks.map(({ current, label, longest }) => ({
               cells: over ? [longest] : [current, longest],
               header: label,

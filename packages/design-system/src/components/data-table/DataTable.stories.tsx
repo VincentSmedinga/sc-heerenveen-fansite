@@ -81,6 +81,11 @@ const meta = preview.meta({
           'De tabel is voor een lijst van dingen met elk een paar getallen, niet voor samengevoegde cellen of cellen met meer dan tekst.',
           'De stand van de competitie heeft een eigen component, `StandingsTable`.',
           '',
+          'Een kolom met getallen die klein blijven, zoals gespeeld of gewonnen, geef je met `short: true` in de kolom, bijvoorbeeld `{ abbreviation: "G", name: "gespeeld", short: true }`.',
+          'De kolom is dan smal, zodat er meer kolommen op een telefoon passen.',
+          'Past een getal van drie cijfers toch, dan wordt de kolom breder en wordt er niets afgekapt.',
+          'Laat `short` weg bij een kolom die meer kan hebben, zoals een uitslag als “35–17” of het aantal bezoekers: de tabel kan niet raden hoe groot de getallen worden.',
+          '',
           'Kies sorteerbare kolommen (`sortable`) voor een tabel met veel rijen, als de bezoeker een uiterste zoekt: de club waartegen we de meeste wedstrijden speelden, of de meeste doelpunten maakten.',
           'Bij een tabel van een paar rijen is sorteren overbodig.',
           'Sorteren werkt met JavaScript: de server stuurt de hele tabel in de volgorde van `rows`, en in de browser worden de koppen van die kolommen knoppen.',
@@ -173,6 +178,31 @@ const results: DataTableRow[] = [
   { cells: [8, 5, 2, 1, 17], header: 'Wij scoren eerst' },
   { cells: [4, 1, 1, 2, 4], header: 'De tegenstander scoort eerst' },
 ]
+
+const renderShort = () => (
+  <div style={{ maxInlineSize: '20rem' }}>
+    <Card aria-labelledby="smal-kop">
+      <Heading id="smal-kop" level={2}>
+        Een smalle en een brede kolom
+      </Heading>
+      <DataTable
+        caption="Gespeelde wedstrijden en bezoekers per maand, met een smalle en een brede kolom"
+        columns={['Maand', { abbreviation: 'G', name: 'gespeeld', short: true }, 'Bezoekers']}
+        rows={[
+          { cells: [4, 12_034], header: 'augustus' },
+          { cells: [5, 8340], header: 'september' },
+          { cells: [102, 950], header: 'oktober' },
+        ]}
+      />
+    </Card>
+  </div>
+)
+
+export const ShortLight = meta.story({
+  globals: { theme: 'light' },
+  name: 'Een smalle en een brede kolom, licht',
+  render: renderShort,
+})
 
 const renderAbbreviations = () => (
   <div style={{ maxInlineSize: '20rem' }}>

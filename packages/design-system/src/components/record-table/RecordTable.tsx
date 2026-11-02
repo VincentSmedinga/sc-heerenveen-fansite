@@ -46,13 +46,15 @@ type Column = TableColumn & {
   figureClass?: string
   /** What the column is, for the key of its cells. */
   id: 'drawn' | 'goalDifference' | 'lost' | 'played' | 'points' | 'won'
+  /** Whether the figures stay below 100, so the column is narrow (see `hf-numeric-short`). */
+  short?: true
 }
 
 const columns: Column[] = [
-  { ...tableColumns.played, id: 'played' },
-  { ...tableColumns.won, figureClass: 'hf-match-win', id: 'won' },
-  { ...tableColumns.drawn, figureClass: 'hf-match-draw', id: 'drawn' },
-  { ...tableColumns.lost, figureClass: 'hf-match-loss', id: 'lost' },
+  { ...tableColumns.played, id: 'played', short: true },
+  { ...tableColumns.won, figureClass: 'hf-match-win', id: 'won', short: true },
+  { ...tableColumns.drawn, figureClass: 'hf-match-draw', id: 'drawn', short: true },
+  { ...tableColumns.lost, figureClass: 'hf-match-loss', id: 'lost', short: true },
   { ...tableColumns.points, figureClass: 'hf-bar-value', id: 'points' },
   { ...tableColumns.goalDifference, id: 'goalDifference' },
 ]
@@ -81,7 +83,7 @@ export const RecordTable = ({ caption, className, rows, total, ...props }: Recor
 
   const cells = (row: RecordTableRow) =>
     shown.map((column) => (
-      <td className={classNames('hf-numeric', column.figureClass)} key={column.id}>
+      <td className={classNames('hf-numeric', column.short && 'hf-numeric-short', column.figureClass)} key={column.id}>
         {column.id === 'goalDifference' ? signed(row.goalDifference) : row[column.id]}
       </td>
     ))
@@ -96,7 +98,7 @@ export const RecordTable = ({ caption, className, rows, total, ...props }: Recor
               <span className="hf-visually-hidden">Onderdeel</span>
             </th>
             {shown.map((column) => (
-              <th className="hf-numeric" key={column.id} scope="col">
+              <th className={classNames('hf-numeric', column.short && 'hf-numeric-short')} key={column.id} scope="col">
                 <abbr title={capitalise(column.name)}>
                   <span aria-hidden="true">{column.abbreviation}</span>
                   <span className="hf-visually-hidden">{column.name}</span>

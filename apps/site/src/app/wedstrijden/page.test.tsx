@@ -945,7 +945,9 @@ describe('the switch of the card Stand, between the whole season and the latest 
     )
     expect(card).toContain('<a aria-current="page" href="/wedstrijden?stand=laatste-5#stand">')
     // Heerenveen has 3 + 3 + 1 points in three matches, the other two one point in two matches.
-    const rows = [...card.matchAll(/<tr[^>]*><td class="hf-numeric hf-rank">(\d+)<\/td><th scope="row">([^<]+)/g)]
+    const rows = [
+      ...card.matchAll(/<tr[^>]*><td class="hf-numeric hf-numeric-short hf-rank">(\d+)<\/td><th scope="row">([^<]+)/g),
+    ]
 
     expect(rows.map(([, place, club]) => [place, club])).toEqual([
       ['1', 'sc Heerenveen'],

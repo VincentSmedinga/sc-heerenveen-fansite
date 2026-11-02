@@ -101,11 +101,25 @@ describe('RecordTable', () => {
         .getAllByRole('cell')
         .map((cell) => cell.className),
     ).toEqual([
-      'hf-numeric',
-      'hf-numeric hf-match-win',
-      'hf-numeric hf-match-draw',
-      'hf-numeric hf-match-loss',
+      'hf-numeric hf-numeric-short',
+      'hf-numeric hf-numeric-short hf-match-win',
+      'hf-numeric hf-numeric-short hf-match-draw',
+      'hf-numeric hf-numeric-short hf-match-loss',
       'hf-numeric hf-bar-value',
+      'hf-numeric',
+    ])
+  })
+
+  it('makes the columns G, W, G and V narrow in the header as well, and the points and the goal difference not', () => {
+    render(<RecordTable {...props} />)
+
+    expect(screen.getAllByRole('columnheader').map((header) => header.className)).toEqual([
+      '',
+      'hf-numeric hf-numeric-short',
+      'hf-numeric hf-numeric-short',
+      'hf-numeric hf-numeric-short',
+      'hf-numeric hf-numeric-short',
+      'hf-numeric',
       'hf-numeric',
     ])
   })

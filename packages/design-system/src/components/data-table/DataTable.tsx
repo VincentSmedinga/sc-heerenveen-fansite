@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import type { DataTableColumn, DataTableRow, DataTableTextColumn, DataTableTextRow } from './dataTableTypes'
 
 import { classNames } from '../classNames'
-import { columnOf, ColumnText, TableRows, TextTableRows } from './dataTableParts'
+import { columnOf, ColumnText, numericClass, TableRows, TextTableRows } from './dataTableParts'
 import { SortableDataTable } from './SortableDataTable'
 
 export type {
@@ -119,7 +119,7 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
       <thead>
         <tr>
           {all.map((column, index) => (
-            <th className={index === 0 ? undefined : 'hf-numeric'} key={column.name} scope="col">
+            <th className={numericClass(column, index)} key={column.name} scope="col">
               <ColumnText column={column} />
             </th>
           ))}

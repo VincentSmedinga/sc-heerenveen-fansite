@@ -244,6 +244,31 @@ describe('DataTable with sortable columns', () => {
     expect(screen.queryByRole('status')).toBeNull()
   })
 
+  it('gives a short sortable column the class for narrow numbers in the header and the cells, and keeps its button', () => {
+    render(
+      <DataTable
+        caption="Een tabel"
+        columns={[
+          'Club',
+          { abbreviation: 'G', name: 'gespeeld', short: true, sortable: true },
+          { name: 'Bezoekers', sortable: true },
+        ]}
+        rows={[{ cells: [4, 1234], header: 'Alkmaar' }]}
+      />,
+    )
+
+    expect(screen.getAllByRole('columnheader').map((header) => header.className)).toEqual([
+      '',
+      'hf-numeric hf-numeric-short',
+      'hf-numeric',
+    ])
+    expect(screen.getAllByRole('cell').map((cell) => cell.className)).toEqual([
+      'hf-numeric hf-numeric-short',
+      'hf-numeric',
+    ])
+    expect(screen.getByRole('button', { name: 'G gespeeld' })).toBeTruthy()
+  })
+
   it('passes on a class and other attributes to the table', () => {
     render(<DataTable {...props} className="extra" id="tabel" />)
 

@@ -95,6 +95,12 @@
    */
   .hf-bar-table th.hf-bar-head {
     padding-inline-end: calc(var(--hf-space-s) + var(--hf-bar-gap) + var(--hf-bar-size));
+
+    /* A short column has the closer padding of base/table.css in its cells,
+       so its header does too. */
+    &.hf-numeric-short {
+      padding-inline-end: calc(var(--hf-space-xs) + var(--hf-bar-gap) + var(--hf-bar-size));
+    }
   }
 
   /* In forced colours a background colour is replaced, unless it is a system colour. */
@@ -116,6 +122,10 @@
 
     .hf-bar-table th.hf-bar-head {
       padding-inline-end: var(--hf-space-s);
+
+      &.hf-numeric-short {
+        padding-inline-end: var(--hf-space-xs);
+      }
     }
   }
 

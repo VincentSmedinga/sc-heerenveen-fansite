@@ -921,12 +921,12 @@ describe('the matches and the table in the sidebar of the homepage', () => {
       '<th scope="row">sc Heerenveen',
       '<th scope="row">Testdorp FC',
     ])
-    expect(html.match(/<td class="hf-numeric hf-rank">\d/g)).toEqual([
-      '<td class="hf-numeric hf-rank">1',
-      '<td class="hf-numeric hf-rank">2',
-      '<td class="hf-numeric hf-rank">3',
+    expect(html.match(/<td class="hf-numeric hf-numeric-short hf-rank">\d/g)).toEqual([
+      '<td class="hf-numeric hf-numeric-short hf-rank">1',
+      '<td class="hf-numeric hf-numeric-short hf-rank">2',
+      '<td class="hf-numeric hf-numeric-short hf-rank">3',
     ])
-    expect(html.match(/<th class="hf-numeric" scope="col">/g)).toHaveLength(3)
+    expect(html.match(/<th class="hf-numeric hf-numeric-short( hf-bar-head)?" scope="col">/g)).toHaveLength(3)
     expect(html).not.toContain('role="region"')
     expect(html.match(/class="hf-highlight hf-standings-table-own"/g)).toHaveLength(1)
     expect(html).toContain(

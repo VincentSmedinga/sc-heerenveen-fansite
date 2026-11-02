@@ -128,10 +128,10 @@ describe('the page of a club', () => {
     const classes = [...row.slice(0, row.indexOf('</tr>')).matchAll(/<td class="([^"]*)"/g)].map(([, name]) => name)
 
     expect(classes).toEqual([
-      'hf-numeric',
-      'hf-numeric hf-match-win',
-      'hf-numeric hf-match-draw',
-      'hf-numeric hf-match-loss',
+      'hf-numeric hf-numeric-short',
+      'hf-numeric hf-numeric-short hf-match-win',
+      'hf-numeric hf-numeric-short hf-match-draw',
+      'hf-numeric hf-numeric-short hf-match-loss',
       'hf-numeric',
     ])
   })

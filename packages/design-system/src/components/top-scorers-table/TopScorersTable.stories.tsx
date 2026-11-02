@@ -18,6 +18,7 @@ const meta = preview.meta({
           'De afkorting zelf heeft ook een `title`, maar die verschijnt alleen onder een muis en een telefoon heeft er niets aan.',
           '',
           'Spelers met evenveel doelpunten hebben dezelfde plaats.',
+          'De kolommen van de plaats en de doelpunten zijn smal, want die getallen blijven onder de honderd; een getal van drie cijfers maakt de kolom gewoon breder.',
           'Het aantal doelpunten is vet, zwaarder dan de andere getallen, want daarop is de lijst gesorteerd.',
           'De getallen staan rechts uitgelijnd en hebben tabelcijfers, zodat ze recht onder elkaar staan.',
           '',

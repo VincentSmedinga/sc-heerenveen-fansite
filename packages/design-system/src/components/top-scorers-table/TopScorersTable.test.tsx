@@ -93,7 +93,7 @@ describe('TopScorersTable', () => {
     const { container } = render(<TopScorersTable {...props} />)
     const cells = [...container.querySelectorAll('tbody tr:first-child td')]
 
-    expect(cells.at(-1)?.className).toBe('hf-numeric hf-bar-value')
+    expect(cells.at(-1)?.className).toBe('hf-numeric hf-numeric-short hf-bar-value')
     expect(container.querySelectorAll('td.hf-bar-value')).toHaveLength(4)
   })
 

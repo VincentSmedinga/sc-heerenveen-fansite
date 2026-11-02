@@ -679,7 +679,7 @@ describe('the page /statistieken', () => {
         '<caption class="hf-visually-hidden">De uitslagen van sc Heerenveen thuis en uit dit seizoen</caption>',
       )
       expect(card).toContain(
-        '<th class="hf-numeric" scope="col">Thuis</th><th class="hf-numeric" scope="col">Uit</th><th class="hf-numeric" scope="col">Totaal</th>',
+        '<th class="hf-numeric hf-numeric-short" scope="col">Thuis</th><th class="hf-numeric hf-numeric-short" scope="col">Uit</th><th class="hf-numeric hf-numeric-short" scope="col">Totaal</th>',
       )
       expect(card).not.toContain('hf-donut-chart')
       expect(card).not.toContain('hf-form-chart')
@@ -785,7 +785,7 @@ describe('the page /statistieken', () => {
       ]
 
       expect(table).toContain(
-        '<th class="hf-numeric" scope="col">Voor</th><th class="hf-numeric" scope="col">Tegen</th>',
+        '<th class="hf-numeric hf-numeric-short" scope="col">Voor</th><th class="hf-numeric hf-numeric-short" scope="col">Tegen</th>',
       )
       expect(rows.map(([, quarter, scored, conceded]) => [quarter, scored, conceded])).toEqual([
         ['1–15', '0', '1'],

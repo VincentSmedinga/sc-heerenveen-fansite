@@ -741,9 +741,9 @@ await withEmptyDatabase((database) =>
     // sc Heerenveen won twice and drew once, so it is first with seven points, and Nepstad
     // Rangers lost both matches and is last.
     assert.deepEqual(
-      [...lastFiveHtml.matchAll(/<td class="hf-numeric hf-rank">(\d)<\/td><th scope="row">([^<]+)/g)].map(
-        ([, place, club]) => `${place} ${club}`,
-      ),
+      [
+        ...lastFiveHtml.matchAll(/<td class="hf-numeric hf-numeric-short hf-rank">(\d)<\/td><th scope="row">([^<]+)/g),
+      ].map(([, place, club]) => `${place} ${club}`),
       ['1 sc Heerenveen', '2 Demo Boys', '3 Proefstad SV', '4 Voorbeeld United', '5 Testdorp FC', '6 Nepstad Rangers'],
     )
     // In the line of the scorers of one match the two are told apart by an initial.
@@ -871,7 +871,7 @@ await withEmptyDatabase((database) =>
     assert.match(statisticsHtml, /<a href="\/statistieken\/spelers">Alle <span class="hf-icon-tail">doelpuntenmakers</)
     assert.match(
       statisticsHtml,
-      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
+      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-numeric-short hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
     )
     // The menu has the bar of Statistieken, with Spelers and no sub-page as the current page.
     assert.match(
@@ -931,7 +931,7 @@ await withEmptyDatabase((database) =>
     )
     assert.match(
       playersHtml,
-      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
+      /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-numeric-short hf-bar-value">2<span aria-hidden="true" class="hf-bar"/,
     )
     // Two players called Testvoort are two rows, each with his full name.
     assert.match(playersHtml, /hf-player-name-given">Joris<\/span> <span class="hf-player-name-surname">Testvoort</)
@@ -993,7 +993,7 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z/)
     assert.match(
       opponentsHtml,
-      /<th scope="row"><a href="\/statistieken\/tegenstanders\/testdorp-fc">Testdorp FC<\/a><\/th><td class="hf-numeric">\d+<\/td>/,
+      /<th scope="row"><a href="\/statistieken\/tegenstanders\/testdorp-fc">Testdorp FC<\/a><\/th><td class="hf-numeric hf-numeric-short">\d+<\/td>/,
     )
     // The server sends the whole table in the given order, with plain headers: sorting is for
     // the browser, so there is no button or aria-sort yet, and no column Punten for the cup.
