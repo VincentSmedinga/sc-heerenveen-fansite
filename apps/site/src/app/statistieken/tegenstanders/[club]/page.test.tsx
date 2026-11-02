@@ -57,10 +57,11 @@ const plain = (html: string) =>
     .trim()
 
 /** The rows of the summary: the figure (with _ for a space) and its Totaal, Thuis and Uit. */
+/** The summary by row: the figures G, W, GL, V, DV and DT of Totaal, Thuis and Uit. */
 const summaryOf = (html: string) =>
   Object.fromEntries(
-    [...html.matchAll(/<tr><th scope="row">([^<]*)<\/th>((?:<td[^>]*>\d+<\/td>){3})<\/tr>/g)].map(([, name, cells]) => [
-      (name ?? '').replaceAll(' ', '_'),
+    [...html.matchAll(/<tr><th scope="row">([^<]*)<\/th>((?:<td[^>]*>\d+<\/td>){6})<\/tr>/g)].map(([, name, cells]) => [
+      name,
       [...(cells ?? '').matchAll(/>(\d+)</g)].map(([, cell]) => Number(cell)),
     ]),
   )
@@ -92,28 +93,31 @@ describe('the page of a club', () => {
     expect(await render('beker-united')).not.toContain('Eerder:')
   })
 
-  it('has the summary, with the name of the club in the heading, and a column each for Totaal, Thuis and Uit', async () => {
+  it('has the summary, with the name of the club in the heading, and a row each for Totaal, Thuis and Uit', async () => {
     const html = await render()
 
     expect(html).toMatch(/<h2[^>]*id="onze-uitslagen"[^>]*>.*Onze uitslagen tegen Testclub/)
-    expect([...html.matchAll(/<th [^>]*scope="col"[^>]*>([^<]*)</g)].map(([, header]) => header)).toEqual([
-      'Onderdeel',
-      'Totaal',
-      'Thuis',
-      'Uit',
-    ])
+    expect(
+      [...html.matchAll(/<th [^>]*scope="col"[^>]*>(?:<abbr[^>]*><span aria-hidden="true">([^<]*)<)?/g)].map(
+        ([, header]) => header,
+      ),
+    ).toEqual([undefined, 'G', 'W', 'GL', 'V', 'DV', 'DT'])
+    expect(plain(html.slice(html.indexOf('hf-bar-legend')))).toMatch(
+      /^[^>]*> G gespeeld , W gewonnen , GL gelijk , V verloren , DV doelpunten voor , DT doelpunten tegen/,
+    )
+    // G, W, GL, V, DV, DT.
     expect(summaryOf(html)).toEqual({
-      Doelpunten_tegen: [4, 0, 4],
-      Doelpunten_voor: [10, 5, 5],
-      Gelijk: [1, 0, 1],
-      Gespeeld: [5, 2, 3],
-      Gewonnen: [3, 2, 1],
-      Verloren: [1, 0, 1],
+      Thuis: [2, 2, 0, 0, 5, 0],
+      Totaal: [5, 3, 1, 1, 10, 4],
+      Uit: [3, 1, 1, 1, 5, 4],
     })
   })
 
-  it('has no row for points, because the cup gives none', async () => {
-    expect(await render()).not.toContain('Punten')
+  it('has no column for points, because the cup gives none', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('Punten')
+    expect(html).not.toContain('>P</span>')
   })
 
   it.each([[undefined], ['eredivisie']])(
@@ -121,14 +125,15 @@ describe('the page of a club', () => {
     async (competitie) => {
       const rows = summaryOf(await render('testclub', competitie === undefined ? {} : { competitie }))
 
-      for (const [name, [total, home, away]] of Object.entries(rows) as [string, [number, number, number]][]) {
-        expect(total, name).toBe(home + away)
-      }
+      const [total, home, away] = ['Totaal', 'Thuis', 'Uit'].map((row): number[] => rows[row] ?? [])
 
-      for (const column of [0, 1, 2]) {
-        expect(
-          (rows['Gewonnen']?.[column] ?? NaN) + (rows['Gelijk']?.[column] ?? NaN) + (rows['Verloren']?.[column] ?? NaN),
-        ).toBe(rows['Gespeeld']?.[column])
+      expect(total).toHaveLength(6)
+      expect(total).toEqual(total!.map((_, column) => (home![column] ?? NaN) + (away![column] ?? NaN)))
+
+      for (const figures of [total, home, away]) {
+        const [played, won, drawn, lost] = figures ?? []
+
+        expect((won ?? NaN) + (drawn ?? NaN) + (lost ?? NaN)).toBe(played)
       }
     },
   )
@@ -196,7 +201,11 @@ describe('the page of a club', () => {
   })
 
   it('shows the summary for that same club with all the matches, a single cup tie', async () => {
-    expect(summaryOf(await render('beker-united'))).toMatchObject({ Gespeeld: [1, 0, 1], Verloren: [1, 0, 1] })
+    expect(summaryOf(await render('beker-united'))).toMatchObject({
+      Thuis: [0, 0, 0, 0, 0, 0],
+      Totaal: [1, 0, 0, 1, 0, 2],
+      Uit: [1, 0, 0, 1, 0, 2],
+    })
   })
 
   it('has no switch for a club that was not met in the cup', async () => {

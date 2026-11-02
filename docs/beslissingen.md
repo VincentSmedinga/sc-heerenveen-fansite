@@ -5264,6 +5264,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Later:** zie _De pagina van een club toont de namen van zijn stadion en heeft een zijkolom_ (1 november 2026): de pagina van een club heeft sindsdien een hoofdkolom en een zijkolom.
   Wedstrijden staat in de hoofdkolom en is wit, Onze uitslagen staat in de zijkolom en is zacht (niet meer warm), en de kaart Stadion(s) en de bronvermelding staan daaronder.
   De volgorde van de kaarten en hun vlakken zijn dus niet meer die van hier.
+- **Later:** zie _De tabel in "Onze uitslagen tegen …" heeft Totaal, Thuis en Uit als rijen, zoals de kaart Stand_ (2 november 2026): de tabel op de kaart heeft Totaal, Thuis en Uit als rijen en G, W, GL, V, DV en DT als kolommen, met de woorden onder de tabel, en niet meer de zes onderdelen als rijen.
+  De rest van de kaart blijft.
 
 ### De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
 
@@ -9803,3 +9805,24 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** dezelfde dag geeft dezelfde volgorde voor iedereen.
   Het derde feit van de dag is niet te vinden zonder drie keer te klikken.
 - **Alternatieven:** een willekeurig feit bij elk bezoek (de pagina verandert bij verversen, en de cache werkt niet); een husselvolgorde met een zaadgetal (elk feit dat erbij komt verschuift alle andere); het volgende feit met een script en een cookie (we bewaren niets over een bezoeker); alle feiten onder elkaar (te lang, en de kaart is er voor één feit); een deelknop (de kaart heeft geen vaste inhoud om te delen); een link naar de pagina van de tegenstander (nieuwe query, zie hierboven); vijf thuiswedstrijden achter elkaar zonder meer (komt in de Eredivisie niet voor); de naam Weetjes (de eerste naam, die de projecteigenaar liet vervangen door Opmerkelijk).
+
+### De tabel in "Onze uitslagen tegen …" heeft Totaal, Thuis en Uit als rijen, zoals de kaart Stand
+
+- **Datum:** 2 november 2026
+- **Besluit:** de tabel op de kaart "Onze uitslagen tegen …" op de pagina van een club draait om (#623).
+  - **De rijen:** Totaal, Thuis en Uit, in die volgorde, met de naam van de rij als rijkop.
+  - **De kolommen:** G (gespeeld), W (gewonnen), GL (gelijk), V (verloren), DV (doelpunten voor) en DT (doelpunten tegen), zonder punten, omdat de beker er geen geeft.
+    Onder de tabel staan de woorden van de afkortingen, en een schermlezer hoort de hele woorden, zoals bij de kaart Stand.
+  - **Het component:** een nieuw component `RecordTable` in het designsysteem, naast `StandingsTable` en niet als algemenere versie ervan.
+    Hij heeft dezelfde lijnen, letters, rijkoppen en legenda: de tabel komt uit `base/table.css`, en de plek, de nowrap en de legenda komen uit `bar/bar.css` (`hf-bar-place`, `hf-bar-table` en `hf-bar-legend`).
+  - **De getallen** zijn dezelfde als voor de omslag: `ClubSummary` en `Tally` in `src/opponents.ts` veranderen niet.
+    De tests van de pagina van een club laten zien dat Totaal de som is van Thuis en Uit, en dat G gelijk is aan W + GL + V in elke rij.
+  - **Wat blijft:** de afbeeldingsknop, de grootste overwinning en nederlaag en de zin "Gebaseerd op …".
+- **Waarom:** een rij per plek leest als de tabel in Stand, en past beter op een smalle kolom dan zes rijen met drie kolommen.
+  Het totaal staat bovenaan, want dat willen supporters het eerst weten.
+  `StandingsTable` is gebouwd rond een plaats, een club en punten met een balk, en heeft een eigen rij voor sc Heerenveen: daar zijn de rijen en kolommen van deze tabel niets mee gemeen.
+  Een algemene `StandingsTable` zou kolommen, rijen, balken en markering als eigenschappen krijgen, en dat is meer dan twee tabellen vragen.
+  Een eigen component houdt elk van de twee eenvoudig en laat ze er toch hetzelfde uitzien, doordat ze de stijlen delen.
+- **Nadeel:** de gedeelde klassen heten `hf-bar-*`, ook al heeft deze tabel geen balk.
+  Een wijziging aan de stijl van de ene tabel kan de andere raken.
+- **Alternatieven:** de tabel laten zoals hij is; alleen Thuis en Uit als rijen (dan ontbreekt het totaal); `DataTable` met andere koppen (dan lijken de twee tabellen niet op elkaar); `StandingsTable` algemener maken (zie _Waarom_).

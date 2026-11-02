@@ -38,6 +38,7 @@ const components = [
   'Notice',
   'Page',
   'Pagination',
+  'RecordTable',
   'Root',
   'Select',
   'StandingsTable',
