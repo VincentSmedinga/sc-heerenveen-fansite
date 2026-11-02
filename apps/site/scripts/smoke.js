@@ -90,9 +90,12 @@ async function checkAdmin() {
     responses.push(response)
   }
 
-  // The pages of the articles, the preview of a draft and the versions among them, and the
-  // numbers of the visit, are no page for a visitor without a session either.
+  // The list of items in both of its groups, the pages of the articles, the preview of a draft
+  // and the versions among them, and the numbers of the visit, are no page for a visitor
+  // without a session either.
   for (const path of [
+    '/beheer/berichten',
+    '/beheer/berichten?toon=niet-op-de-site&redactie=1&q=kop',
     '/beheer/artikelen',
     '/beheer/artikelen/nieuw',
     '/beheer/artikelen/1',
