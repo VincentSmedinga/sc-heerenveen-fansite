@@ -3,6 +3,10 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const css = readFileSync(join(import.meta.dirname, 'donut-chart.css'), 'utf8').replaceAll(/\/\*.*?\*\//gsu, '')
+const typography = readFileSync(join(import.meta.dirname, '../../tokens/typography.css'), 'utf8').replaceAll(
+  /\/\*.*?\*\//gsu,
+  '',
+)
 
 /** The declarations of the first rule with this selector. */
 function declarationsOf(selector: string) {
@@ -44,7 +48,8 @@ describe('donut-chart.css', () => {
   })
 
   it('sizes the texts in rem, so they follow the size of the text of the page and not the size of the drawing', () => {
-    expect(declarationsOf('.hf-donut-chart-total')).toMatch(/font-size: [\d.]+rem/u)
+    expect(declarationsOf('.hf-donut-chart-total')).toMatch(/font-size: var\(--hf-figure-large-font-size\)/u)
+    expect(typography).toMatch(/--hf-figure-large-font-size: [\d.]+rem;/u)
     expect(declarationsOf('.hf-donut-chart-name')).toMatch(/font-size: var\(--hf-meta-font-size\)/u)
   })
 })
