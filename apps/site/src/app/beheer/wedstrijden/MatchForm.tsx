@@ -12,20 +12,27 @@ import {
   InputTable,
   type InputTableRow,
   Link,
+  RadioGroup,
   Select,
   Text,
 } from '@fansite/design-system'
-import { createContext, type ReactNode, use, useActionState, useEffect } from 'react'
+import { type ChangeEvent, createContext, type ReactNode, use, useActionState, useEffect, useState } from 'react'
 
 import {
   addGoalId,
+  emptyGoal,
   goalFieldId,
+  type GoalFieldName,
   goalFieldNames,
+  goalTotalOf,
+  type GoalValues,
+  isUntouchedGoal,
   type MatchFieldName,
   matchFieldNames,
   type MatchFormState,
   type MatchValues,
-  otherPlayer,
+  type ScorerForm,
+  scorerFormOf,
 } from '../../../beheer/match-fields'
 
 const summaryId = 'fouten'
@@ -43,6 +50,8 @@ export type MatchFormChoices = {
   /** Whether the competition has extra time: the cup and the play-offs. */
   knockout: boolean
   opponent: string
+  /** How soon what is saved shows on the site, as "binnen vijf minuten". */
+  showDelay: string
   squad: readonly { id: number; name: string }[]
   statuses: readonly { label: string; value: string }[]
 }
@@ -55,6 +64,9 @@ type MatchFormContext = {
 }
 
 const MatchFormContext = createContext<MatchFormContext | undefined>(undefined)
+
+/** What the form knows before the server answers: how many goals it has and who scored. */
+type LiveGoals = { count: number; for: MatchFormState; scorers: ScorerForm[] }
 
 /** The list of the errors of the last save, which gets the focus when there are any. */
 export function MatchErrorSummary() {
@@ -80,11 +92,24 @@ export function MatchErrorSummary() {
  * first button in the form is a hidden "Opslaan", so the Enter key in a field saves, and never
  * removes the first goal. The goals are a table of fields, and every field and button of it
  * names the goal it belongs to.
+ *
+ * With JavaScript the goals follow the form while it is filled in: a new end result gives as
+ * many goals as it adds up to, and the team and the kind of a goal decide which field asks for
+ * the scorer (see `scorerFormOf`). The field that does not ask stays in the page, hidden and
+ * not sent, so a mistake does not wipe it. Without JavaScript the server shows the same after
+ * each button, because it has the same rules.
  */
 export function MatchFields() {
   const { choices, formAction, state } = useMatchForm()
+  const [live, setLive] = useState<LiveGoals>()
   const { errors, values } = state
   const velden = values.velden
+  // What the form said before the server answered is only good until the server answers.
+  const current = live?.for === state ? live : undefined
+  const goals = Array.from(
+    { length: current?.count ?? values.doelpunten.length },
+    (_nothing, index) => values.doelpunten[index] ?? emptyGoal,
+  )
   // The two sides in the order of the match, as the title has the clubs.
   const sides = choices.home ? (['wij', 'zij'] as const) : (['zij', 'wij'] as const)
   const club = (side: 'wij' | 'zij') => (side === 'wij' ? ours : choices.opponent)
@@ -97,35 +122,60 @@ export function MatchFields() {
     sides.map((side) => (
       <Field
         error={errors[`${prefix}-${side}`]}
+        hideOptional
         id={`${prefix}-${side}`}
         key={side}
         label={club(side)}
         required={false}
       >
-        <Input {...field(`${prefix}-${side}`)} autoComplete="off" inputMode="numeric" />
+        <Input {...field(`${prefix}-${side}`)} autoComplete="off" inputMode="numeric" width="narrow" />
       </Field>
     ))
 
-  const rows: InputTableRow[] = values.doelpunten.map((goal, index) => {
+  // The form tells how many goals it has and who scored, from what is in it now. The goals only
+  // change with the end result: a goal that was added with the button stays.
+  const follow = (event: ChangeEvent<HTMLFormElement>) => {
+    const { elements } = event.currentTarget
+    const read = (name: string) => {
+      const element = elements.namedItem(name)
+
+      return element !== null && 'value' in element ? element.value.trim() : ''
+    }
+    const goalOf = (number: number) =>
+      Object.fromEntries(goalFieldNames.map((name) => [name, read(goalFieldId(number, name))])) as GoalValues
+    const total =
+      event.target instanceof HTMLInputElement && /^uitslag-(?:wij|zij)$/u.test(event.target.name)
+        ? goalTotalOf({ 'uitslag-wij': read('uitslag-wij'), 'uitslag-zij': read('uitslag-zij') })
+        : undefined
+    let count = goals.length
+
+    if (total !== undefined) {
+      count = Math.max(count, total)
+
+      // Goals that nobody filled in go, from the end. One that has something in it never does.
+      while (count > total && isUntouchedGoal(goalOf(count))) {
+        count -= 1
+      }
+    }
+
+    setLive({
+      count,
+      for: state,
+      scorers: Array.from({ length: count }, (_nothing, index) => {
+        const goal = goalOf(index + 1)
+
+        return scorerFormOf(goal.kant, goal.soort)
+      }),
+    })
+  }
+
+  const rows: InputTableRow[] = goals.map((goal, index) => {
     const number = index + 1
-    const id = (name: (typeof goalFieldNames)[number]) => goalFieldId(number, name)
+    const id = (name: GoalFieldName) => goalFieldId(number, name)
+    const scorer = current?.scorers[index] ?? scorerFormOf(goal.kant, goal.soort)
 
     return {
       fields: [
-        {
-          control: (
-            <Select defaultValue={goal.kant} key={goal.kant} name={id('kant')}>
-              <Select.Option value="">Kies een team</Select.Option>
-              {sides.map((side) => (
-                <Select.Option key={side} value={side}>
-                  {club(side)}
-                </Select.Option>
-              ))}
-            </Select>
-          ),
-          error: errors[id('kant')],
-          id: id('kant'),
-        },
         {
           control: (
             <Input
@@ -154,7 +204,7 @@ export function MatchFields() {
         },
         {
           control: (
-            <Select defaultValue={goal.soort} key={goal.soort} name={id('soort')}>
+            <Select defaultValue={goal.soort} key={goal.soort} name={id('soort')} width="natural">
               {choices.goalKinds.map((kind) => (
                 <Select.Option key={kind.value} value={kind.value}>
                   {kind.label}
@@ -166,6 +216,20 @@ export function MatchFields() {
           id: id('soort'),
         },
         {
+          group: (legend) => (
+            <RadioGroup
+              error={errors[id('kant')]}
+              id={id('kant')}
+              key={goal.kant}
+              legend={legend}
+              name={id('kant')}
+              options={sides.map((side) => ({ label: club(side), value: side }))}
+              value={goal.kant}
+            />
+          ),
+          id: id('kant'),
+        },
+        {
           control: (
             <Select defaultValue={goal.speler} key={goal.speler} name={id('speler')}>
               <Select.Option value="">Kies een speler</Select.Option>
@@ -174,25 +238,27 @@ export function MatchFields() {
                   {player.name}
                 </Select.Option>
               ))}
-              <Select.Option value={otherPlayer}>Andere speler</Select.Option>
             </Select>
           ),
           error: errors[id('speler')],
+          hidden: scorer !== 'squad',
           id: id('speler'),
         },
         {
           control: <Input autoComplete="off" defaultValue={goal.naam} key={goal.naam} name={id('naam')} />,
           error: errors[id('naam')],
+          hidden: scorer !== 'name',
           id: id('naam'),
         },
       ],
       header: `Doelpunt ${number}`,
+      mark: String(number),
       remove: { name: 'knop', value: `doelpunt-weghalen-${number}` },
     }
   })
 
   return (
-    <Form action={formAction} id={formId}>
+    <Form action={formAction} id={formId} onChange={follow}>
       {/* The first button decides what Enter does: it saves. It is not on the screen. */}
       <Button aria-hidden="true" className="hf-visually-hidden" name="knop" tabIndex={-1} type="submit" value="opslaan">
         Opslaan
@@ -201,26 +267,27 @@ export function MatchFields() {
         <Heading id="aftrap-kop" level={2}>
           Aftrap
         </Heading>
-        <FieldGroup legend="Datum en tijd">
+        <FieldGroup
+          legend={
+            <Text as="span" className="hf-visually-hidden">
+              Datum en tijd
+            </Text>
+          }
+        >
           <Field
             error={errors['aftrap-datum']}
-            hint="Is alleen het weekend bekend, vul dan de eerste dag in."
+            hint="Is alleen het weekend bekend? Vul de eerste dag in."
             id="aftrap-datum"
             label="Datum"
           >
-            <Input {...field('aftrap-datum')} type="date" />
+            <Input {...field('aftrap-datum')} type="date" width="natural" />
           </Field>
-          <Field
-            error={errors['aftrap-tijd']}
-            hint="Zoals 20:00. Laat leeg als de tijd nog niet bekend is."
-            id="aftrap-tijd"
-            label="Tijd"
-            required={false}
-          >
-            <Input {...field('aftrap-tijd')} type="time" />
+          <Field error={errors['aftrap-tijd']} hideOptional id="aftrap-tijd" label="Tijd" required={false}>
+            <Input {...field('aftrap-tijd')} type="time" width="natural" />
           </Field>
           <Field
             error={errors['aftrap-tekst']}
+            hideOptional
             hint="Alleen als de tijd niet bekend is, zoals 12-14 februari 2027."
             id="aftrap-tekst"
             label="Weekend of dag zonder tijd"
@@ -235,7 +302,7 @@ export function MatchFields() {
           Uitslag
         </Heading>
         <Field error={errors.status} id="status" label="Status">
-          <Select {...field('status')} key={velden.status}>
+          <Select {...field('status')} key={velden.status} width="natural">
             {choices.statuses.map((status) => (
               <Select.Option key={status.value} value={status.value}>
                 {status.label}
@@ -243,11 +310,7 @@ export function MatchFields() {
             ))}
           </Select>
         </Field>
-        <FieldGroup
-          hint="Met verlenging erbij, zonder strafschoppen. Alleen bij een gespeelde wedstrijd."
-          legend="Eindstand"
-          separator="-"
-        >
+        <FieldGroup hint="Met verlenging, zonder strafschoppen." legend="Eindstand" separator="-">
           {score('uitslag')}
         </FieldGroup>
       </Card>
@@ -256,21 +319,27 @@ export function MatchFields() {
           <Heading id="verlenging-kop" level={2}>
             Verlenging en strafschoppen
           </Heading>
-          <Field error={errors.verlenging} id="verlenging" label="Was er verlenging?">
-            <Select {...field('verlenging')} key={velden.verlenging}>
-              <Select.Option value="nee">Nee</Select.Option>
-              <Select.Option value="ja">Ja</Select.Option>
-            </Select>
-          </Field>
+          <RadioGroup
+            error={errors.verlenging}
+            id="verlenging"
+            key={velden.verlenging}
+            legend="Was er verlenging?"
+            name="verlenging"
+            options={[
+              { label: 'Nee', value: 'nee' },
+              { label: 'Ja', value: 'ja' },
+            ]}
+            value={velden.verlenging}
+          />
           <FieldGroup
-            hint="Alleen bij verlenging, en alleen als je de stand weet: voor allebei de teams of voor geen van beide."
+            hint="Alleen bij verlenging, voor allebei de teams of voor geen van beide."
             legend="Stand na 90 minuten"
             separator="-"
           >
             {score('na90')}
           </FieldGroup>
           <FieldGroup
-            hint="Alleen als de stand na verlenging gelijk was: voor allebei de teams of voor geen van beide."
+            hint="Alleen bij een gelijke stand na verlenging, voor allebei de teams of voor geen van beide."
             legend="Strafschoppen"
             separator="-"
           >
@@ -283,9 +352,12 @@ export function MatchFields() {
           Doelpunten
         </Heading>
         <Text appearance="meta">
-          Kies bij Team het team dat het doelpunt krijgt, ook bij een eigen doelpunt. Bij 45+1 vul je 45 in als minuut
-          en 1 bij blessuretijd. Kies bij een speler van de tegenstander Andere speler, en schrijf zijn naam bij Andere
-          speler zoals Wikipedia hem schrijft. De doelpunten moeten optellen tot de eindstand.
+          Team is het team dat het doelpunt krijgt, ook bij een eigen doelpunt. Bij 45+1 vul je 45 in als minuut en 1
+          bij blessuretijd. Schrijf de naam van een speler van de tegenstander zoals Wikipedia hem schrijft.
+        </Text>
+        {/* The goals change by themselves with the end result, so a screen reader is told. */}
+        <Text className="hf-visually-hidden" role="status">
+          {current === undefined || current.count === values.doelpunten.length ? '' : describeCount(current.count)}
         </Text>
         {errors.doelpunten === undefined ? null : (
           <Text className="hf-field-error">
@@ -299,18 +371,14 @@ export function MatchFields() {
           add={{ label: 'Doelpunt toevoegen', name: 'knop', value: 'doelpunt-toevoegen' }}
           caption="Doelpunten"
           columns={[
-            { name: 'Team' },
             { name: 'Minuut', width: 'narrow' },
-            { name: 'Blessuretijd', required: false, width: 'narrow' },
-            { name: 'Soort' },
-            { name: 'Speler' },
-            { name: 'Andere speler', required: false },
+            { hideOptional: true, name: 'Blessuretijd', required: false, width: 'narrow' },
+            { name: 'Soort', width: 'natural' },
+            { line: 2, name: 'Team', width: 'natural' },
+            { line: 2, name: 'Speler' },
+            { line: 2, name: 'Andere speler' },
           ]}
-          empty={
-            <Text>
-              Er zijn geen doelpunten. Een uitslag zonder doelpunten mag; voeg ze toe als je de doelpuntenmakers weet.
-            </Text>
-          }
+          empty={<Text>Er zijn geen doelpunten. Dat mag, ook bij een uitslag.</Text>}
           removeLabel="Weghalen"
           rows={rows}
         />
@@ -369,7 +437,7 @@ export function MatchFormProvider({
  * by its `id`, so they save it, with or without JavaScript.
  */
 export function MatchSavePanel({ cancelHref }: { cancelHref: string }) {
-  const { pending, state } = useMatchForm()
+  const { choices, pending, state } = useMatchForm()
 
   return (
     <>
@@ -377,16 +445,11 @@ export function MatchSavePanel({ cancelHref }: { cancelHref: string }) {
         <Heading id="opslaan-kop" level={2}>
           Opslaan
         </Heading>
-        <Text appearance="meta">Wat je opslaat, staat meteen op de site.</Text>
-        <Field
-          error={state.errors.reden}
-          hint="Waarom vul je dit in of pas je het aan? Komt in het logboek, hoogstens 300 tekens."
-          id="reden"
-          label="Reden"
-        >
+        <Text appearance="meta">Staat {choices.showDelay} op de site.</Text>
+        <Field error={state.errors.reden} hint="Komt in het logboek, hoogstens 300 tekens." id="reden" label="Reden">
           <Input autoComplete="off" defaultValue={state.values.reden} form={formId} name="reden" />
         </Field>
-        <Button disabled={pending} form={formId} name="knop" type="submit" value="opslaan">
+        <Button disabled={pending} form={formId} icon="save" name="knop" type="submit" value="opslaan">
           Opslaan
         </Button>
       </Card>
@@ -395,6 +458,11 @@ export function MatchSavePanel({ cancelHref }: { cancelHref: string }) {
       </Text>
     </>
   )
+}
+
+/** What a screen reader hears when the form changes the number of goals by itself. */
+function describeCount(count: number) {
+  return `Het formulier heeft nu ${count === 0 ? 'geen doelpunten' : count === 1 ? '1 doelpunt' : `${count} doelpunten`}.`
 }
 
 function useMatchForm() {

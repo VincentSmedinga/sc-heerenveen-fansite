@@ -22,6 +22,7 @@ import { compact } from '../../../beheer/density'
 import { listAdminMatches } from '../../../beheer/match-entries'
 import { requireRole } from '../../../beheer/require-role'
 import { getDatabase } from '../../../database'
+import { describeShowDelay } from '../../../matches'
 import { seasonChoices, seasonFromSlug, seasonSlug } from '../../../seasons'
 import { listPath, matchesPath, matchPath } from './paths'
 
@@ -86,8 +87,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             />
           </Page.Title>
           <Text appearance="intro">
-            Vul een wedstrijd in of verbeter hem, als Wikipedia achterloopt of een fout heeft. Wat je opslaat, staat
-            meteen op de site.
+            Vul een wedstrijd in of verbeter hem, als Wikipedia achterloopt of een fout heeft. Wat je opslaat, staat{' '}
+            {describeShowDelay(season, now)} op de site.
           </Text>
         </>
       }

@@ -249,35 +249,53 @@ for (const [name, javaScriptEnabled] of [
       await expect(page.getByRole('navigation', { name: 'Kruimelpad' })).toBeVisible()
       await expect(page.getByRole('heading', { level: 2, name: 'Laatste invoer' })).toHaveCount(0)
 
-      // A result of 0-1 with a goal that is not filled in: the errors are in the summary and at
-      // the goal, the summary has the focus, and what was typed is still there.
+      // A result of 0-1 asks for one goal.
       await page.getByLabel('Status', { exact: true }).selectOption('played')
       await page.locator('#uitslag-wij').fill('0')
       await page.locator('#uitslag-zij').fill('1')
       await page.getByLabel('Reden', { exact: true }).fill('Wikipedia is achter')
-      await page.getByRole('button', { name: 'Doelpunt toevoegen' }).click()
+
+      if (javaScriptEnabled) {
+        // The form has the goal already. A goal that is added comes after it, with the focus.
+        await expect(page.locator('#doelpunt-1-kant')).toBeVisible()
+        await page.getByRole('button', { name: 'Doelpunt toevoegen' }).click()
+        await expect(page.locator('#doelpunt-2-kant')).toBeFocused()
+        // A goal that is taken away leaves the focus on the button that adds one.
+        await page.getByRole('button', { name: 'Doelpunt 2 weghalen' }).click()
+        await expect(page.locator('#doelpunt-2-kant')).toHaveCount(0)
+        await expect(page.getByRole('button', { name: 'Doelpunt toevoegen' })).toBeFocused()
+      } else {
+        await page.getByRole('button', { name: 'Doelpunt toevoegen' }).click()
+      }
+
       await expect(page.locator('#doelpunt-1-kant')).toBeVisible()
       await expect(page.locator('#uitslag-zij')).toHaveValue('1')
 
-      if (javaScriptEnabled) {
-        // The focus is on the first field of the new goal.
-        await expect(page.locator('#doelpunt-1-kant')).toBeFocused()
-      }
-
+      // A goal with only the added time filled in: the errors are in the summary and at the
+      // goal, the summary has the focus, and what was typed is still there.
+      await page.getByLabel('Blessuretijd, doelpunt 1', { exact: true }).fill('1')
       await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
       await expect(page.locator('#fouten')).toBeVisible()
-      await expect(page.getByLabel('Team, doelpunt 1', { exact: true })).toHaveAttribute('aria-invalid', 'true')
+      await expect(page.locator('#doelpunt-1-kant-error')).toBeVisible()
       await expect(page.getByLabel('Minuut, doelpunt 1', { exact: true })).toHaveAttribute('aria-invalid', 'true')
       await expect(page.locator('#uitslag-zij')).toHaveValue('1')
+      await expect(page.getByLabel('Blessuretijd, doelpunt 1', { exact: true })).toHaveValue('1')
 
       if (javaScriptEnabled) {
         await expect(page.locator('#fouten')).toBeFocused()
       }
 
       // The goal of the opponent, by a player we don't have: saved, with a notice.
-      await page.getByLabel('Team, doelpunt 1', { exact: true }).selectOption('zij')
+      await page.locator('input[name="doelpunt-1-kant"][value="zij"]').check()
       await page.getByLabel('Minuut, doelpunt 1', { exact: true }).fill('40')
-      await page.getByLabel('Speler, doelpunt 1', { exact: true }).selectOption('andere')
+
+      if (!javaScriptEnabled) {
+        // Without JavaScript the field for the name shows when the form comes back.
+        await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+        await expect(page.locator('#doelpunt-1-naam-error')).toBeVisible()
+      }
+
+      await expect(page.getByLabel('Speler, doelpunt 1', { exact: true })).toBeHidden()
       await page.getByLabel('Andere speler, doelpunt 1').fill('Sibbing')
       if (javaScriptEnabled) {
         // The form with a goal in it, which the checks of all the pages never open.
@@ -289,8 +307,8 @@ for (const [name, javaScriptEnabled] of [
       await expect(page.getByRole('heading', { level: 2, name: 'Laatste invoer' })).toBeVisible()
       await expect(page.getByLabel('Minuut, doelpunt 1', { exact: true })).toHaveValue('40')
 
-      // A goal that is taken away leaves the focus on the button that adds one.
-      await page.getByRole('button', { name: 'Weghalen doelpunt 1' }).click()
+      // A goal that is taken away is gone: the form does not make a new row for it.
+      await page.getByRole('button', { name: 'Doelpunt 1 weghalen' }).click()
       await expect(page.locator('#doelpunt-1-kant')).toHaveCount(0)
 
       if (javaScriptEnabled) {

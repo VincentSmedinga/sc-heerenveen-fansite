@@ -11,7 +11,7 @@ import { findMatch } from '../../../../beheer/match-entries'
 import { goalKinds, statusChoices, valuesOf } from '../../../../beheer/match-form'
 import { requireRole } from '../../../../beheer/require-role'
 import { getDatabase } from '../../../../database'
-import { lacksResult } from '../../../../matches'
+import { describeShowDelay, lacksResult } from '../../../../matches'
 import { formatVersionTime } from '../../../../news'
 import { submitConflict, submitMatch, submitRemoveEntry } from '../actions'
 import { ConflictForm } from '../ConflictForm'
@@ -41,7 +41,6 @@ const notices: Record<string, { text: string; title: string }> = {
     title: 'Niet overgenomen',
   },
   ongewijzigd: { text: 'Je had niets veranderd, dus er is niets opgeslagen.', title: 'Niets veranderd' },
-  opgeslagen: { text: 'Je invoer is bewaard en staat nu op de site.', title: 'Opgeslagen' },
   overgenomen: {
     text: 'Dit onderdeel is nu wat Wikipedia zegt en volgt Wikipedia weer.',
     title: 'Wikipedia overgenomen',
@@ -68,7 +67,13 @@ export default async function MatchPage({ params, searchParams }: Props) {
 
   const { differences, edit, goals, match, squad } = found
   const { gedaan } = await searchParams
-  const notice = typeof gedaan === 'string' ? notices[gedaan] : undefined
+  const showDelay = describeShowDelay(match.season)
+  const notice =
+    gedaan === 'opgeslagen'
+      ? { text: `Je invoer is bewaard. Staat ${showDelay} op de site.`, title: 'Opgeslagen' }
+      : typeof gedaan === 'string'
+        ? notices[gedaan]
+        : undefined
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
   const lacking = lacksResult(match, new Date())
@@ -87,6 +92,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
         home: match.home,
         knockout: match.competition !== 'Eredivisie',
         opponent: match.opponent,
+        showDelay,
         squad,
         statuses: statusChoices,
       }}

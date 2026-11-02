@@ -14,7 +14,8 @@ import {
   type MatchFieldName,
   matchFieldNames,
   type MatchValues,
-  otherPlayer,
+  padGoals,
+  scorerFormOf,
 } from './match-fields'
 
 // Reading and checking the form of a match. The checks repeat what the database enforces
@@ -100,7 +101,9 @@ export function readButton(formData: FormData): Button {
 
 /**
  * What the request holds, as text. The goals are the numbers that the request has fields for,
- * in order, so a goal that is removed leaves no gap.
+ * in order, so a goal that is removed leaves no gap. Of the two fields that ask for the scorer,
+ * only the one that fits the team and the kind counts, so the other is wiped (see
+ * `scorerFormOf`): a form without JavaScript can send both.
  */
 export function readValues(formData: FormData): MatchValues {
   const numbers = new Set<number>()
@@ -117,8 +120,12 @@ export function readValues(formData: FormData): MatchValues {
     doelpunten: [...numbers]
       .toSorted((a, b) => a - b)
       .map((number) =>
-        Object.fromEntries(goalFieldNames.map((field) => [field, text(formData, goalFieldId(number, field))])),
-      ) as GoalValues[],
+        withoutOtherScorerForm(
+          Object.fromEntries(
+            goalFieldNames.map((field) => [field, text(formData, goalFieldId(number, field))]),
+          ) as GoalValues,
+        ),
+      ),
     reden: text(formData, 'reden'),
     velden: Object.fromEntries(matchFieldNames.map((name) => [name, text(formData, name)])) as Record<
       MatchFieldName,
@@ -284,25 +291,20 @@ export function validate(
 
     // The scorer is one of our players for a goal of ours and for an own goal of the opponent
     // that benefits them (listed under the opponent): then the player is chosen from the squad.
-    const scorerIsOurs = (goal.kant === 'wij') !== (kind === 'eigen')
+    // The field that does not ask for the scorer has been wiped (see `readValues`).
     const chosen = squad.get(goal.speler)
     let player: null | SquadPlayer = null
     let name = ''
 
     if (goal.kant !== 'wij' && goal.kant !== 'zij') {
       // The side is not known, so who scored can't be checked.
-    } else if (scorerIsOurs) {
+    } else if (scorerFormOf(goal.kant, goal.soort) === 'squad') {
       if (chosen === undefined) {
         errors[id('speler')] = `Kies bij doelpunt ${number} de speler uit de selectie.`
-      } else if (goal.naam !== '') {
-        errors[id('naam')] = `Laat de naam bij doelpunt ${number} leeg: de speler is een speler van sc Heerenveen.`
       } else {
         player = chosen
         name = chosen.name
       }
-    } else if (goal.speler !== '' && goal.speler !== otherPlayer) {
-      errors[id('speler')] =
-        `Bij doelpunt ${number} scoorde een speler van de tegenstander. Kies hier ‘Andere speler’ en schrijf de naam.`
     } else if (goal.naam === '') {
       errors[id('naam')] = `Schrijf bij doelpunt ${number} de naam van de speler.`
     } else if (goal.naam.length > matchGoalPlayerMaxLength) {
@@ -377,20 +379,24 @@ export function validate(
   }
 }
 
-/** The values of the form for a match as it is stored, for the first view of the page. */
+/**
+ * The values of the form for a match as it is stored, for the first view of the page. A result
+ * with more goals than are stored gets empty goals for the rest, so the editor sees what is
+ * missing.
+ */
 export function valuesOf(match: Match, goals: MatchGoal[]): MatchValues {
   const local = match.kickoffAt === null ? undefined : utcToAmsterdam(match.kickoffAt)
   const number = (value: null | number) => (value === null ? '' : String(value))
   const played = match.status === 'played'
 
-  return {
+  return padGoals({
     doelpunten: goals.map((goal) => ({
       extra: number(goal.stoppageMinutes),
       kant: goal.ours ? 'wij' : 'zij',
       minuut: String(goal.minute),
       naam: goal.playerId === null ? goal.player : '',
       soort: goal.ownGoal ? 'eigen' : goal.penalty ? 'strafschop' : 'gewoon',
-      speler: goal.playerId === null ? otherPlayer : String(goal.playerId),
+      speler: goal.playerId === null ? '' : String(goal.playerId),
     })),
     reden: '',
     velden: {
@@ -407,7 +413,7 @@ export function valuesOf(match: Match, goals: MatchGoal[]): MatchValues {
       'uitslag-zij': played ? number(match.goalsAgainst) : '',
       verlenging: match.extraTime ? 'ja' : 'nee',
     },
-  }
+  })
 }
 
 /** Whether the text is a real day, `2026-11-14`. */
@@ -438,4 +444,16 @@ function text(formData: FormData, name: string) {
 /** A whole number from 0 to `most`, or undefined for anything else. */
 function wholeNumber(value: string, most: number): number | undefined {
   return /^\d{1,3}$/u.test(value) && Number(value) <= most ? Number(value) : undefined
+}
+
+/**
+ * The goal without the answer of the field that does not ask for the scorer, as the team and
+ * the kind decide. Without a team, neither is wiped: it is not known which field fits.
+ */
+function withoutOtherScorerForm(goal: GoalValues): GoalValues {
+  if (goal.kant !== 'wij' && goal.kant !== 'zij') {
+    return goal
+  }
+
+  return scorerFormOf(goal.kant, goal.soort) === 'squad' ? { ...goal, naam: '' } : { ...goal, speler: '' }
 }

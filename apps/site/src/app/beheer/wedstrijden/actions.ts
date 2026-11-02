@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 
 import { parseItemId, parseReason } from '../../../beheer/items'
 import { decideDifference, findDifference, findMatch, saveEntry, undoEntry } from '../../../beheer/match-entries'
-import { addGoalId, goalFieldId, type MatchFormState } from '../../../beheer/match-fields'
+import { addGoalId, goalFieldId, isUntouchedGoal, type MatchFormState, padGoals } from '../../../beheer/match-fields'
 import { newGoal, readButton, readValues, validate } from '../../../beheer/match-form'
 import { requireRole } from '../../../beheer/require-role'
 import { getDatabase } from '../../../database'
@@ -114,14 +114,17 @@ export async function submitMatch(
     }
   }
 
-  const checked = validate(values, {
+  // A goal nobody filled in is a row the form made for the result, and is not a goal.
+  const given = { ...values, doelpunten: values.doelpunten.filter((goal) => !isUntouchedGoal(goal)) }
+  const checked = validate(given, {
     competition: found.match.competition,
     opponent: found.match.opponent,
     squad: found.squad,
   })
 
   if (checked.errors !== undefined) {
-    return { errors: checked.errors, values }
+    // The form comes back with as many goals as the result asks for, as the page opens.
+    return { errors: checked.errors, values: padGoals(given) }
   }
 
   const outcome = await saveEntry(getDatabase().db, userId, id, checked.entry, checked.reason)
