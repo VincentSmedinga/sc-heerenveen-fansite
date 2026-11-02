@@ -739,14 +739,14 @@ await withEmptyDatabase((database) =>
     // five matches: the whole season is the current one, and the links end on the card.
     assert.match(
       matchesHtml,
-      /<div aria-label="Welke stand"[^>]*role="group"[^>]*><a aria-current="page" href="\/wedstrijden#stand">.*?Hele seizoen.*?<a href="\/wedstrijden\?stand=laatste-5#stand">.*?Laatste 5/s,
+      /<div aria-label="Welke stand"[^>]*role="group"[^>]*><a aria-current="page" href="\/wedstrijden#stand"[^>]*>.*?Hele seizoen.*?<a href="\/wedstrijden\?stand=laatste-5#stand"[^>]*>.*?Laatste 5/s,
     )
     const lastFiveHtml = await (await fetch(`${origin}/wedstrijden?stand=laatste-5`)).text()
     assert.match(
       lastFiveHtml,
       /<caption class="hf-visually-hidden">Stand over de laatste vijf wedstrijden op \d+ \w+ \d{4}<\/caption>/,
     )
-    assert.match(lastFiveHtml, /<a aria-current="page" href="\/wedstrijden\?stand=laatste-5#stand">/)
+    assert.match(lastFiveHtml, /<a aria-current="page" href="\/wedstrijden\?stand=laatste-5#stand"[^>]*>/)
     // sc Heerenveen won twice and drew once, so it is first with seven points, and Nepstad
     // Rangers lost both matches and is last.
     assert.deepEqual(
