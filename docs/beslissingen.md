@@ -732,7 +732,7 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Datum:** 2 november 2026
 - **Besluit:** vraagt de projecteigenaar om een nieuw issue, of om een bestaand issue uit te werken, dan start de Coordinator meteen een Specifier in een eigen sessie, zonder keuzekaart.
   De Specifier maakt het issue aan, zet het op het bord als "Te doen", werkt het uit in hooguit twee rondes en archiveert zichzelf als het issue is goedgekeurd en er niets meer openstaat.
-  De Specifier meldt de goedkeuring in één bericht aan de Coordinator, die de Action List bijwerkt.
+  De app meldt de Coordinator dat de beurt van de Specifier is afgelopen, en die werkt de Action List bij.
   De Coordinator schrijft alleen zelf een issue als de projecteigenaar zegt dat hij het gewoon moet opschrijven.
 - **Waarom:** de projecteigenaar vroeg erom op 2 november 2026.
   Een issue schrijven vraagt code en beslissingen lezen, en die context draagt de Coordinator daarna bij elke beurt mee.
