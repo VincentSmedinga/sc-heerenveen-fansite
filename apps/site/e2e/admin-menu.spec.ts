@@ -107,7 +107,7 @@ test.describe('the item Beheer in the main menu', () => {
     // The cookie is gone, as when the session ended: the next page of the admin, reached
     // without a new load of the layout, sends the editor to the login page.
     await context.clearCookies()
-    await page.getByRole('link', { name: 'Berichten verbergen of weer tonen' }).click()
+    await page.getByRole('link', { exact: true, name: 'Berichten' }).click()
     await expect(page).toHaveURL(/\/beheer\/inloggen$/)
     await expect.poll(() => mark(page)).toBeNull()
     await expect(item(page)).toHaveCount(0)

@@ -8,9 +8,9 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De pictogrammen van het designsysteem: een pijl naar rechts, een pijl naar links, een camera, een envelop, het pictogram voor een externe link, een schakel van een ketting, een plus, een diskette om op te slaan, een zon, een maan en een prullenbak.',
+          'De pictogrammen van het designsysteem: een pijl naar rechts, een pijl naar links, een voetbal, een camera, een staafdiagram, een pagina met tekst, een envelop, het pictogram voor een externe link, een schakel van een ketting, een plus, een diskette om op te slaan, een tekstballon, een zon, een maan en een prullenbak.',
           'We tekenen ze zelf, als SVG in de code. Er komt niets van buiten bij en er is geen pictogrammenbibliotheek.',
-          'Je zet een pictogram niet zelf op een pagina: een `Link`, een `Button`, een `IconButton`, een `SegmentedControl` en een `Heading` met een anker tekenen het voor je.',
+          'Je zet een pictogram niet zelf op een pagina: een `Link`, een `Button`, een `IconButton`, een `SegmentedControl` en een `Heading` met een anker en een `Tile` tekenen het voor je.',
           '',
           '**De stijl.**',
           'Een pictogram is een lijn met ronde uiteinden en ronde hoeken, zonder vulling, en het blijft binnen zijn vierkant.',
@@ -48,13 +48,17 @@ const labels: Record<IconName, string> = {
   'arrow-left': 'Pijl naar links',
   'arrow-right': 'Pijl naar rechts',
   'arrow-up': 'Pijl omhoog',
+  ball: 'Voetbal',
   camera: 'Camera',
+  chart: 'Staafdiagram',
+  document: 'Pagina met tekst',
   envelope: 'Envelop',
   'external-link': 'Externe link',
   link: 'Schakel',
   moon: 'Maan',
   plus: 'Plus',
   save: 'Diskette',
+  speech: 'Tekstballon',
   sun: 'Zon',
   trash: 'Prullenbak',
 }

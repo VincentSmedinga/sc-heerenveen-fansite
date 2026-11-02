@@ -44,6 +44,31 @@ export type RemoveOutcome = 'done' | 'missing' | 'none'
 export type SaveOutcome = { parts: MatchPart[]; status: 'saved' } | { status: 'missing' } | { status: 'unchanged' }
 
 /**
+ * How many matches of a season have no result two hours after their kick-off (`lacksResult`,
+ * as the list has it). The start page tells the number and links to the list, which opens on
+ * those matches.
+ */
+export async function countMatchesWithoutResult(
+  db: Pick<Database, 'select'>,
+  season: string,
+  now: Date,
+): Promise<number> {
+  const found = await db
+    .select({
+      dateText: matches.dateText,
+      goalsAgainst: matches.goalsAgainst,
+      goalsFor: matches.goalsFor,
+      kickoffAt: matches.kickoffAt,
+      matchDate: matches.matchDate,
+      status: matches.status,
+    })
+    .from(matches)
+    .where(eq(matches.season, season))
+
+  return found.filter((match) => lacksResult(match, now)).length
+}
+
+/**
  * The differences that wait for a decision, in all seasons: how many, and the seasons they are
  * in, the newest first. The start page tells the number and links to a season in the list.
  */

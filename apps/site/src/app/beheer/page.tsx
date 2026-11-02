@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 import { adminRoles } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { Button, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
+import { Button, Card, Form, Heading, Link, List, Page, Text, Tile } from '@fansite/design-system'
 
 import { compact } from '#src/beheer/density'
-import { countWaitingDifferences } from '#src/beheer/match-entries'
+import { countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -17,47 +17,89 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Beheer' }
 
-// The start of the admin: who is logged in, the way to the screens, and the button to log out.
+/** One line of the card Te doen: a link that says what waits, with the number in it. */
+type TodoItem = { href: string; text: string }
+
+const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
+
+// The start of the admin: who is logged in, a tile for every screen, what is left to do in a
+// card in the sidebar, and the button to log out. The card is only there when something waits,
+// and a next screen adds a line to it by adding an item to `todo`.
 export default async function AdminPage() {
   const { email, role } = await requireRole(...adminRoles)
-  const { seasons, total: waiting } =
-    role === 'beheerder' ? await countWaitingDifferences(getDatabase().db) : { seasons: [], total: 0 }
-  // The list that holds them: this season's if it has any, else the newest season that has.
-  const current = seasonOf(new Date())
+  const beheerder = role === 'beheerder'
+  const now = new Date()
+  // The list that holds the differences: this season's if it has any, else the newest season
+  // that has.
+  const current = seasonOf(now)
+  const { db } = getDatabase()
+  const { seasons, total: waiting } = beheerder ? await countWaitingDifferences(db) : { seasons: [], total: 0 }
   const season = seasons.includes(current) ? current : seasons[0]
+  const withoutResult = beheerder ? await countMatchesWithoutResult(db, current, now) : 0
+  const todo: TodoItem[] = []
+
+  if (waiting > 0) {
+    todo.push({
+      href: season === undefined ? matchesPath : listPath(season, 'aangepast'),
+      text: `${plural(waiting, 'afwijking van Wikipedia wacht', 'afwijkingen van Wikipedia wachten')} op een besluit`,
+    })
+  }
+  if (withoutResult > 0) {
+    todo.push({
+      href: matchesPath,
+      text: plural(withoutResult, 'wedstrijd zonder uitslag', 'wedstrijden zonder uitslag'),
+    })
+  }
 
   return (
-    <Page.Main className={compact}>
-      <Page.Cell>
-        <Heading level={1}>Beheer</Heading>
-        <Text>Je bent ingelogd als {email}.</Text>
-        <List role="list">
-          <List.Item>
-            <Link href="/beheer/berichten">Berichten verbergen of weer tonen</Link>
-          </List.Item>
-          {role === 'beheerder' ? (
+    <>
+      <Page.Main
+        className={compact}
+        intro={
+          <>
+            <Heading level={1}>Beheer</Heading>
+            <Text>
+              Je bent ingelogd als {email} ({role}).
+            </Text>
+          </>
+        }
+      >
+        <Tile.Grid aria-label="Schermen van het beheer">
+          <Tile href="/beheer/berichten" icon="speech" level={2} title="Berichten">
+            Verberg berichten die niet op de site horen.
+          </Tile>
+          {beheerder ? (
             <>
-              <List.Item>
-                <Link href="/beheer/artikelen">Artikelen schrijven en publiceren</Link>
-              </List.Item>
-              <List.Item>
-                <Link href={season === undefined ? matchesPath : listPath(season, 'aangepast')}>
-                  Wedstrijden invullen of verbeteren
-                </Link>
-                {waiting === 0
-                  ? null
-                  : ` (${waiting} ${waiting === 1 ? 'afwijking van Wikipedia wacht' : 'afwijkingen van Wikipedia wachten'} op een besluit)`}
-              </List.Item>
-              <List.Item>
-                <Link href="/beheer/bezoek">Cijfers over het bezoek</Link>
-              </List.Item>
+              <Tile href="/beheer/artikelen" icon="document" level={2} title="Artikelen">
+                Schrijf artikelen en publiceer ze.
+              </Tile>
+              <Tile href={matchesPath} icon="ball" level={2} title="Wedstrijden">
+                Vul wedstrijden in of verbeter ze.
+              </Tile>
+              <Tile href="/beheer/bezoek" icon="chart" level={2} title="Bezoek">
+                Bekijk hoeveel mensen de site bezoeken.
+              </Tile>
             </>
           ) : null}
-        </List>
+        </Tile.Grid>
         <Form action={logOut}>
           <Button type="submit">Uitloggen</Button>
         </Form>
-      </Page.Cell>
-    </Page.Main>
+      </Page.Main>
+      {todo.length === 0 ? null : (
+        <Page.Sidebar aria-label="Te doen">
+          <Card as="div" surface="soft">
+            <Heading level={2}>Te doen</Heading>
+            <List role="list">
+              {todo.map((item) => (
+                <List.Item key={item.href + item.text}>
+                  <Link href={item.href}>{item.text}</Link>
+                </List.Item>
+              ))}
+            </List>
+          </Card>
+        </Page.Sidebar>
+      )}
+    </>
   )
 }

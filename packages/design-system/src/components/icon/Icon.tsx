@@ -6,13 +6,17 @@ export const iconNames = [
   'arrow-left',
   'arrow-right',
   'arrow-up',
+  'ball',
   'camera',
+  'chart',
+  'document',
   'envelope',
   'external-link',
   'link',
   'moon',
   'plus',
   'save',
+  'speech',
   'sun',
   'trash',
 ] as const
@@ -73,11 +77,42 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M3.5 7 8 2.5 12.5 7" />
     </>
   ),
+  // A football from the front: the ball, the pentagon in the middle and a line from each corner
+  // of it to the edge.
+  ball: (
+    <>
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="M8 6l1.9 1.38-.73 2.24H6.83L6.1 7.38Z" />
+      <path d="M8 6V2.5" />
+      <path d="M9.9 7.38l3.33-1.08" />
+      <path d="M9.17 9.62l2.06 2.83" />
+      <path d="M6.83 9.62l-2.06 2.83" />
+      <path d="M6.1 7.38 2.77 6.3" />
+    </>
+  ),
   // A camera from the front: the body with the bump of the viewfinder on top, and the lens.
   camera: (
     <>
       <path d="M3.5 4.5h2l1-2h3l1 2h2A1.5 1.5 0 0 1 14 6v6a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12V6a1.5 1.5 0 0 1 1.5-1.5Z" />
       <circle cx="8" cy="9" r="2.25" />
+    </>
+  ),
+  // Three bars on the corner of two axes: a chart of numbers, such as the visit.
+  chart: (
+    <>
+      <path d="M2.5 2.5v11h11" />
+      <path d="M6 11V8" />
+      <path d="M8.75 11V5.5" />
+      <path d="M11.5 11V7" />
+    </>
+  ),
+  // A page with a folded corner and two lines of text: an article.
+  document: (
+    <>
+      <path d="M4 2.5h5.5l3 3V13a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Z" />
+      <path d="M9.5 2.5v3h3" />
+      <path d="M5.5 8.5h5" />
+      <path d="M5.5 11h5" />
     </>
   ),
   envelope: (
@@ -118,6 +153,14 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M5 13.5v-4h6v4" />
     </>
   ),
+  // A speech bubble with a tail at the bottom left and two lines in it: a message.
+  speech: (
+    <>
+      <path d="M3.5 2.5h9A1.5 1.5 0 0 1 14 4v5.5a1.5 1.5 0 0 1-1.5 1.5H8l-3 2.5V11H3.5A1.5 1.5 0 0 1 2 9.5V4a1.5 1.5 0 0 1 1.5-1.5Z" />
+      <path d="M5 5.5h6" />
+      <path d="M5 8h3.5" />
+    </>
+  ),
   sun: (
     <>
       <circle cx="8" cy="8" r="3" />
@@ -150,7 +193,7 @@ const drawings: Record<IconName, ReactNode> = {
  * never the only sign of something. The size, the space beside it and its place in the line are
  * in icon.css. It is not exported from the package: Link, Button, IconButton, SegmentedControl,
  * NewsItem, Navigation, a Heading with an anchor, the button for an image of a Card,
- * Page.TopLink and WikipediaCredit draw it for the visitor. ThemeButton draws
+ * Page.TopLink, Tile and WikipediaCredit draw it for the visitor. ThemeButton draws
  * its own sun and moon, because they turn into each other.
  */
 export const Icon = ({ appearance = 'line', name }: IconProps) => (
