@@ -45,7 +45,7 @@ export type AlertRun = ({ error: string; ok: false } | { ok: true }) & { label: 
 
 type Executor = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 
-const environmentNames = { acceptance: 'acceptatie', local: 'lokaal', production: 'productie' } as const
+export const environmentNames = { acceptance: 'acceptatie', local: 'lokaal', production: 'productie' } as const
 
 const timeZone = 'Europe/Amsterdam'
 
@@ -55,6 +55,22 @@ type Context = {
   environment: string
   label: string
   to: string
+}
+
+/** Why an alert could not be kept or sent, without anything that came with the error. */
+export function describeProblem(error: unknown): string {
+  const cause = error instanceof Error && error.cause instanceof Error ? error.cause : error
+
+  if (cause instanceof Error && 'code' in cause && typeof cause.code === 'string') {
+    return `error ${cause.code}`
+  }
+
+  return scrubError(cause instanceof Error ? cause.message : String(cause))
+}
+
+/** The date and the time, in Dutch time: "1 november 2026 om 10:00". */
+export function formatDateTime(time: Date): string {
+  return new Intl.DateTimeFormat('nl-NL', { dateStyle: 'long', timeStyle: 'short', timeZone }).format(time)
 }
 
 /**
@@ -150,17 +166,6 @@ async function deliver(
   }
 }
 
-/** Why an alert could not be kept or sent, without anything that came with the error. */
-function describeProblem(error: unknown): string {
-  const cause = error instanceof Error && error.cause instanceof Error ? error.cause : error
-
-  if (cause instanceof Error && 'code' in cause && typeof cause.code === 'string') {
-    return `error ${cause.code}`
-  }
-
-  return scrubError(cause instanceof Error ? cause.message : String(cause))
-}
-
 /** The mail for an import that keeps failing, or the reminder of it. */
 function failureMail(
   context: Context,
@@ -191,11 +196,6 @@ function failureMail(
 /** The date as a supporter reads it, in Dutch time: "1 november 2026". */
 function formatDate(time: Date): string {
   return new Intl.DateTimeFormat('nl-NL', { dateStyle: 'long', timeZone }).format(time)
-}
-
-/** The date and the time, in Dutch time: "1 november 2026 om 10:00". */
-function formatDateTime(time: Date): string {
-  return new Intl.DateTimeFormat('nl-NL', { dateStyle: 'long', timeStyle: 'short', timeZone }).format(time)
 }
 
 /**

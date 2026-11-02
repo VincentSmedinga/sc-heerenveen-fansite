@@ -406,6 +406,8 @@ export const auditActions = [
   'match.undo',
   'match.caught-up',
   'match.differs',
+  'match.take-over',
+  'match.keep',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -429,7 +431,10 @@ export const auditDetailMaxLength = 1000
  *
  * `user_id` is empty for a line the importer writes: it has no account. The `match.caught-up`
  * and `match.differs` actions are only ever written by the importer, and have no account, which
- * the log shows as "de import".
+ * the log shows as "de import". `match.take-over` and `match.keep` are the decision about a
+ * difference between Wikipedia and an entry: an editor decides in the admin, the command
+ * `import:changes` decides without an account, and the importer takes Wikipedia over after
+ * seven days with `match.take-over`, also without one.
  */
 export const auditLog = mysqlTable(
   'audit_log',
@@ -944,6 +949,15 @@ export const matchImports = mysqlTable('match_imports', {
 
 export type MatchImport = typeof matchImports.$inferSelect
 
+/**
+ * The parts of a match an editor fills in, and the importer judges one by one: the kick-off,
+ * the result (with the status) and the goals. Wikipedia often has the result long before the
+ * goals.
+ */
+export const matchParts = ['kickoff', 'result', 'goals'] as const
+
+export type MatchPart = (typeof matchParts)[number]
+
 export const matchChangeStatuses = ['pending', 'accepted', 'rejected'] as const
 
 export type MatchChangeStatus = (typeof matchChangeStatuses)[number]
@@ -955,8 +969,8 @@ export type MatchChangeClass = (typeof matchChangeClasses)[number]
 /**
  * How a change was decided: `applied` is an improvement of a few hours old that the import took
  * over at once, `stood` a suspicious change that stayed on the page for seven days, `person` a
- * decision with `pnpm run import:changes`, `reverted` a change that Wikipedia undid, and
- * `replaced` one that Wikipedia changed again into something else.
+ * decision with `pnpm run import:changes` or in the admin, `reverted` a change that Wikipedia
+ * undid, and `replaced` one that Wikipedia changed again into something else.
  */
 export const matchChangeResolutions = ['applied', 'stood', 'person', 'reverted', 'replaced'] as const
 
@@ -980,6 +994,13 @@ export type MatchChangeResolution = (typeof matchChangeResolutions)[number]
  * `season`, `competition` and `round` name the match and stay when the match is deleted,
  * `match_id` then becomes empty. `first_seen_at` and `last_seen_at` are the first and the last
  * run that saw this new value, `times_seen` the number of runs. Times are UTC.
+ *
+ * A change with a `part` is a difference between Wikipedia and an entry of the editors
+ * (`match_edits`): the entry stays, `old_value` is the entry for that part, `new_value` what
+ * Wikipedia says, and `proposal` that part as Wikipedia has it (see `match-conflicts.ts`).
+ * `mailed_at` is when the beheerders were mailed about the difference, and
+ * `taken_over_mailed_at` when they were mailed that the importer took Wikipedia over; both stay
+ * empty until a mail went out.
  */
 export const matchChanges = mysqlTable(
   'match_changes',
@@ -990,6 +1011,7 @@ export const matchChanges = mysqlTable(
     round: varchar('round', { length: matchLimits.round }).notNull(),
     matchId: int('match_id', { unsigned: true }).references(() => matches.id, { onDelete: 'set null' }),
     changed: varchar('changed', { length: 100 }).notNull(),
+    part: mysqlEnum('part', matchParts),
     class: mysqlEnum('class', matchChangeClasses).notNull(),
     reason: varchar('reason', { length: reasonMaxLength }).notNull(),
     oldValue: text('old_value').notNull(),
@@ -1001,6 +1023,8 @@ export const matchChanges = mysqlTable(
     lastSeenAt: datetime('last_seen_at').notNull(),
     timesSeen: int('times_seen', { unsigned: true }).notNull().default(1),
     decidedAt: datetime('decided_at'),
+    mailedAt: datetime('mailed_at'),
+    takenOverMailedAt: datetime('taken_over_mailed_at'),
   },
   (table) => [
     index('match_changes_season_status_idx').on(table.season, table.status),

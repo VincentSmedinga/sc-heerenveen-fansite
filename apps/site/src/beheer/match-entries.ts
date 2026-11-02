@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
-import type { Match, MatchEdit, MatchGoal } from '@fansite/db/schema'
+import type { Match, MatchChange, MatchEdit, MatchGoal } from '@fansite/db/schema'
 
+import { type ConflictOutcome, decideConflict } from '@fansite/db/match-conflicts'
 import {
   describeEntryGoals,
   describeEntryKickoff,
@@ -13,7 +14,7 @@ import {
   removeEntry,
 } from '@fansite/db/match-edits'
 import { adminUsers, matchChanges, matchEdits, matches, matchGoals, players } from '@fansite/db/schema'
-import { and, asc, eq } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
 
 import type { EntryGoal, MatchEntry, SquadPlayer } from './match-form'
 
@@ -33,11 +34,52 @@ export type AdminMatch = NonNullable<Awaited<ReturnType<typeof findMatch>>>
 /** One match as the list shows it, with the parts the editors hold. */
 export type AdminMatchRow = Awaited<ReturnType<typeof listAdminMatches>>['rows'][number]
 
+/** A difference between Wikipedia and an entry of the editors that waits for a decision. */
+export type Difference = MatchChange & { part: MatchPart }
+
 /** What removing an entry did: it is gone, there was none, or there is no such match. */
 export type RemoveOutcome = 'done' | 'missing' | 'none'
 
 /** What an entry did. */
 export type SaveOutcome = { parts: MatchPart[]; status: 'saved' } | { status: 'missing' } | { status: 'unchanged' }
+
+/** How many differences wait for a decision, in all seasons: the number on the start page. */
+export async function countWaitingDifferences(db: Pick<Database, 'select'>): Promise<number> {
+  const [row] = await db
+    .select({ total: count() })
+    .from(matchChanges)
+    .where(and(eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part), isNotNull(matchChanges.matchId)))
+
+  return row?.total ?? 0
+}
+
+/**
+ * An editor decides a difference: Wikipedia is taken over for the part, or the entry stays.
+ * This is the code the command `import:changes` uses too (`decideConflict`), in one
+ * transaction with its line in the log.
+ */
+export async function decideDifference(
+  db: Database,
+  userId: number,
+  id: number,
+  kind: 'keep' | 'take-over',
+  reason: string,
+  now = new Date(),
+): Promise<ConflictOutcome> {
+  return db.transaction((transaction) =>
+    decideConflict(transaction, id, { kind, reason, resolution: 'person', userId }, now),
+  )
+}
+
+/** The difference with this number if it waits, or undefined. */
+export async function findDifference(db: Pick<Database, 'select'>, id: number): Promise<Difference | undefined> {
+  const [change] = await db
+    .select()
+    .from(matchChanges)
+    .where(and(eq(matchChanges.id, id), eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part)))
+
+  return change === undefined || change.part === null ? undefined : { ...change, part: change.part }
+}
 
 /** The match with this number, for the form, or `undefined` for none. */
 export async function findMatch(db: Pick<Database, 'select'>, id: number) {
@@ -60,6 +102,7 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
     .orderBy(asc(players.name))
 
   return {
+    differences: await waitingDifferences(db, id),
     edit: edit === undefined ? undefined : { ...edit.row, editedByEmail: edit.editedByEmail },
     goals,
     match,
@@ -70,7 +113,8 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
 /**
  * The matches of a season for the list: the matches without a result two hours after their
  * kick-off first (`lacksResult`, as the pages of visitors have it), then the rest in the order
- * of the season. `edited` says which parts the editors hold.
+ * of the season. `edited` says which parts the editors hold, and `differs` how many of them
+ * Wikipedia says something else about, which waits for a decision.
  */
 export async function listAdminMatches(db: Database, season: string, now: Date) {
   const found = await db
@@ -96,8 +140,13 @@ export async function listAdminMatches(db: Database, season: string, now: Date) 
     .where(eq(matches.season, season))
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
   const edits = new Map((await db.select().from(matchEdits)).map((edit) => [edit.matchId, edit]))
+  const differing = await db
+    .select({ matchId: matchChanges.matchId, part: matchChanges.part })
+    .from(matchChanges)
+    .where(and(eq(matchChanges.season, season), eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part)))
   const rows = found.map((match) => ({
     ...match,
+    differs: differing.filter((change) => change.matchId === match.id).length,
     edited: edits.has(match.id) ? markedParts(edits.get(match.id) as MatchEdit) : [],
     lacksResult: lacksResult(match, now),
   }))
@@ -210,10 +259,17 @@ export async function saveEntry(
     }
 
     // A change that waited for Wikipedia's word on this match is stale: the entry replaces it.
+    // A difference with the entry is stale for the parts that are entered again only.
     await transaction
       .update(matchChanges)
       .set({ decidedAt: now, resolution: 'replaced', status: 'rejected' })
-      .where(and(eq(matchChanges.matchId, id), eq(matchChanges.status, 'pending')))
+      .where(
+        and(
+          eq(matchChanges.matchId, id),
+          eq(matchChanges.status, 'pending'),
+          or(isNull(matchChanges.part), inArray(matchChanges.part, parts)),
+        ),
+      )
 
     await recordAction(
       transaction,
@@ -254,6 +310,11 @@ export async function undoEntry(
     const parts = markedParts(edit)
 
     await removeEntry(transaction, edit)
+    // The differences with the entry have nothing left to decide.
+    await transaction
+      .update(matchChanges)
+      .set({ decidedAt: now, resolution: 'replaced', status: 'rejected' })
+      .where(and(eq(matchChanges.matchId, id), eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part)))
     await recordAction(
       transaction,
       {
@@ -268,6 +329,17 @@ export async function undoEntry(
 
     return 'done'
   })
+}
+
+/** The differences of one match that wait, in the order of the parts of a match. */
+export async function waitingDifferences(db: Pick<Database, 'select'>, matchId: number): Promise<Difference[]> {
+  const found = await db
+    .select()
+    .from(matchChanges)
+    .where(and(eq(matchChanges.matchId, matchId), eq(matchChanges.status, 'pending'), isNotNull(matchChanges.part)))
+    .orderBy(asc(matchChanges.id))
+
+  return found.filter((change): change is Difference => change.part !== null)
 }
 
 /** The parts of the entry that differ from what is stored. */

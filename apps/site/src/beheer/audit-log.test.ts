@@ -125,6 +125,8 @@ describe('recordAction', () => {
       'match.undo',
       'match.caught-up',
       'match.differs',
+      'match.take-over',
+      'match.keep',
     ])
   })
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
-import { markedParts, type MatchPart } from '@fansite/db/match-edits'
+import { conflictStandsMs, partLabels } from '@fansite/db/match-conflicts'
+import { markedParts } from '@fansite/db/match-edits'
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
@@ -10,7 +11,8 @@ import { goalKinds, statusChoices, valuesOf } from '../../../../beheer/match-for
 import { requireRole } from '../../../../beheer/require-role'
 import { getDatabase } from '../../../../database'
 import { formatVersionTime } from '../../../../news'
-import { submitMatch, submitRemoveEntry } from '../actions'
+import { submitConflict, submitMatch, submitRemoveEntry } from '../actions'
+import { ConflictForm } from '../ConflictForm'
 import { MatchForm } from '../MatchForm'
 import { matchesPath } from '../paths'
 import { RemoveEntryForm } from '../RemoveEntryForm'
@@ -25,22 +27,32 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-const partNames: Record<MatchPart, string> = { goals: 'doelpunten', kickoff: 'aftrap', result: 'uitslag' }
-
 /** What the last action says, by the word in the address. */
 const notices: Record<string, { text: string; title: string }> = {
   'geen-invoer': { text: 'Er was geen invoer van de redactie om weg te halen.', title: 'Niets weggehaald' },
+  gehouden: {
+    text: 'Onze invoer blijft staan. De import meldt dit verschil niet nog eens, tenzij Wikipedia iets anders gaat zeggen.',
+    title: 'Invoer gehouden',
+  },
+  'niet-gelukt': {
+    text: 'Er is niets veranderd: van deze afwijking is niet te lezen wat Wikipedia zegt. Houd de invoer, of haal hem weg.',
+    title: 'Niet overgenomen',
+  },
   ongewijzigd: { text: 'Je had niets veranderd, dus er is niets opgeslagen.', title: 'Niets veranderd' },
   opgeslagen: { text: 'Je invoer is bewaard en staat nu op de site.', title: 'Opgeslagen' },
+  overgenomen: {
+    text: 'Dit onderdeel is nu wat Wikipedia zegt en volgt Wikipedia weer.',
+    title: 'Wikipedia overgenomen',
+  },
   weggehaald: {
     text: 'De wedstrijd is teruggezet naar wat er stond voor de eerste invoer. De import leest bij de volgende keer weer wat Wikipedia zegt.',
     title: 'Invoer weggehaald',
   },
 }
 
-// The form of one match, with what the editors entered of it so far, what Wikipedia said when
-// it differed, and the button that takes the entry away. The page tells what the last action
-// did from the word in the address.
+// The form of one match, with what the editors entered of it so far, the differences with
+// Wikipedia that wait for a decision, and the button that takes the entry away. The page tells
+// what the last action did from the word in the address.
 export default async function MatchPage({ params, searchParams }: Props) {
   await requireRole('beheerder')
 
@@ -51,19 +63,11 @@ export default async function MatchPage({ params, searchParams }: Props) {
     notFound()
   }
 
-  const { edit, goals, match, squad } = found
+  const { differences, edit, goals, match, squad } = found
   const { gedaan } = await searchParams
   const notice = typeof gedaan === 'string' ? notices[gedaan] : undefined
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
-  const reported = [
-    edit?.reportedKickoff === null || edit?.reportedKickoff === undefined
-      ? undefined
-      : ['aftrap', edit.reportedKickoff],
-    edit?.reportedResult === null || edit?.reportedResult === undefined ? undefined : ['uitslag', edit.reportedResult],
-    edit?.reportedGoals === null || edit?.reportedGoals === undefined ? undefined : ['doelpunten', edit.reportedGoals],
-  ].filter((line) => line !== undefined)
-
   return (
     <Page.Main
       intro={
@@ -72,7 +76,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
           <Text appearance="intro">{title}</Text>
           <Text>
             Alles wat je hier opslaat, staat meteen op de site. Zegt Wikipedia later hetzelfde, dan neemt de import het
-            over. Zegt Wikipedia iets anders, dan blijft jouw invoer staan en schrijft de import het verschil op.
+            over. Zegt Wikipedia iets anders, dan blijft jouw invoer staan en beslis je hier wat er gebeurt.
           </Text>
         </>
       }
@@ -93,31 +97,38 @@ export default async function MatchPage({ params, searchParams }: Props) {
           <Text>
             Van deze wedstrijd heeft de redactie ingevuld:{' '}
             {markedParts(edit)
-              .map((part) => partNames[part])
+              .map((part) => partLabels[part])
               .join(', ')}
             . De laatste invoer was van {edit.editedByEmail} op {formatVersionTime(edit.editedAt)}. Reden: {edit.reason}
           </Text>
-          {reported.length === 0 ? null : (
-            <>
-              <Heading appearance={4} level={3}>
-                Wikipedia zegt iets anders
-              </Heading>
-              <List role="list">
-                {reported.map(([name, value]) => (
-                  <List.Item key={name}>
-                    <Text>
-                      Voor de {name} zegt Wikipedia: {value}
-                    </Text>
-                  </List.Item>
-                ))}
-              </List>
-              <Text appearance="meta">
-                Jouw invoer blijft staan tot je hem weghaalt of tot je hem nog eens aanpast.
-              </Text>
-            </>
-          )}
         </Card>
       )}
+      {differences.map((difference) => (
+        <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
+          <Heading id={`afwijking-${difference.id}-kop`} level={2}>
+            Wikipedia wijkt af: {partLabels[difference.part]}
+          </Heading>
+          <List role="list">
+            <List.Item>
+              <Text>Onze invoer: {difference.oldValue}</Text>
+            </List.Item>
+            <List.Item>
+              <Text>Wikipedia: {difference.newValue}</Text>
+            </List.Item>
+          </List>
+          <Text appearance="meta">
+            Onze invoer blijft staan tot je beslist. Beslist niemand, dan neemt de import Wikipedia over op{' '}
+            {formatVersionTime(new Date(difference.firstSeenAt.getTime() + conflictStandsMs))}, als Wikipedia dan nog
+            hetzelfde zegt.
+          </Text>
+          <ConflictForm
+            action={submitConflict.bind(null, difference.id)}
+            id={difference.id}
+            part={`de ${partLabels[difference.part]}`}
+            title={title}
+          />
+        </Card>
+      ))}
       <MatchForm
         action={submitMatch.bind(null, match.id)}
         choices={{

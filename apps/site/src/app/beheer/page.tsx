@@ -3,7 +3,9 @@ import type { Metadata } from 'next'
 import { adminRoles } from '@fansite/db/schema'
 import { Button, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
+import { countWaitingDifferences } from '../../beheer/match-entries'
 import { requireRole } from '../../beheer/require-role'
+import { getDatabase } from '../../database'
 import { logOut } from './actions'
 
 // Render on each request: who is logged in is not known when the site is built.
@@ -14,6 +16,7 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 // The start of the admin: who is logged in, the way to the screens, and the button to log out.
 export default async function AdminPage() {
   const { email, role } = await requireRole(...adminRoles)
+  const waiting = role === 'beheerder' ? await countWaitingDifferences(getDatabase().db) : 0
 
   return (
     <Page.Main>
@@ -31,6 +34,9 @@ export default async function AdminPage() {
               </List.Item>
               <List.Item>
                 <Link href="/beheer/wedstrijden">Wedstrijden invullen of verbeteren</Link>
+                {waiting === 0
+                  ? null
+                  : ` (${waiting} ${waiting === 1 ? 'afwijking van Wikipedia wacht' : 'afwijkingen van Wikipedia wachten'} op een besluit)`}
               </List.Item>
               <List.Item>
                 <Link href="/beheer/bezoek">Cijfers over het bezoek</Link>

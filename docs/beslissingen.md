@@ -6413,6 +6413,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Nadeel:** tot #577 klaar is, staat de invoer tot een beheerder haar weghaalt, en ziet een redacteur het verschil alleen op de pagina van de wedstrijd ("Wikipedia zegt iets anders") en in `pnpm run import:status`.
   De stand na 90 minuten telt mee in "hetzelfde": heeft Wikipedia hem niet en de redactie wel, dan is dat een verschil.
 - **Alternatieven:** Wikipedia wint zodra het iets heeft (een vandaal op Wikipedia overschrijft de redactie); het verschil meteen als wachtende wijziging vastleggen (dat is #577, om #272 in één pull request te houden); het verschil bij elke run opnieuw schrijven (honderden regels voor één afwijking).
+- **Later:** zie _Een afwijking van Wikipedia komt bij een redacteur, die beslist_ en _Een afwijking is een wachtende wijziging per onderdeel, en één functie beslist ze_: het verschil wordt ook een wachtende wijziging, de beheerders krijgen een mail en een redacteur beslist, of de import neemt Wikipedia over na zeven dagen.
+  Wat blijft: de invoer blijft staan, het verschil staat één keer in het logboek en in de waarschuwing, en `match_edits.reported_*` houdt dat bij.
 
 ### Het logboek van het beheer heeft ook regels van de import, zonder account
 
@@ -6605,6 +6607,61 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De landelijke krant laten winnen (het nieuws staat dan minder dicht bij de lezer).
   Een instelling per wedstrijd om te kiezen welke krant lokaal is (meer werk voor één wedstrijd, en niet nodig voor het eerste geval).
   De oudere versies verwijderen (de importer verwijdert geen berichten).
+
+### Een afwijking van Wikipedia komt bij een redacteur, die beslist
+
+- **Datum:** 1 november 2026
+- **Besluit:** zegt Wikipedia iets anders dan een aangepaste wedstrijd, dan blijft de invoer van de redactie staan, krijgen de beheerders een mail en beslist een redacteur in het beheer (#577).
+  Beslist niemand, dan neemt de import Wikipedia over na zeven dagen, met een mail.
+- **Waarom:** de redactie weet vaak meer dan een anonieme bewerking op Wikipedia, maar kan zich ook vergissen, dus het verschil hoort bij een mens en niet bij toeval.
+  De zeven dagen zorgen dat een vergeten afwijking niet eindeloos blijft staan.
+- **Alternatieven:** de invoer wint tot een mens hem weghaalt (een fout van de redactie blijft staan); Wikipedia wint zodra het iets heeft (een vandaal op Wikipedia overschrijft de redactie); alleen een melding in het beheer zonder mail (een redacteur die niet kijkt, ziet het niet).
+
+### Een afwijking is een wachtende wijziging per onderdeel, en één functie beslist ze
+
+- **Datum:** 2 november 2026
+- **Besluit:** een verschil tussen Wikipedia en een onderdeel van een aangepaste wedstrijd is een rij in `match_changes` (#577):
+  - **Per onderdeel:** de nieuwe kolom `part` (`kickoff`, `result` of `goals`) zegt welk onderdeel het is, en is leeg bij een gewone wijziging.
+    De klasse is `suspicious`, de reden "wijkt af van de invoer van de redactie", `old_value` is de invoer en `new_value` wat Wikipedia zegt.
+    `proposal` is dat onderdeel zoals Wikipedia het heeft, als JSON, zodat het besluit niets van Wikipedia hoeft te vragen.
+    De beoordeling van gewone wijzigingen (`readSeasonChanges`) negeert rijen met een `part`: een afwijking heeft haar eigen beoordeling in `edited-matches.ts`.
+  - **Eén keer:** de import legt een afwijking vast zodra `match_edits.reported_*` zegt dat het nieuws is.
+    Staat de afwijking al in `reported_*` maar nog niet in `match_changes` (gemeld vóór dit besluit), dan legt de import haar vast zonder haar nog eens in het logboek te zetten.
+    Zegt Wikipedia hetzelfde als een wijziging die wacht, dan telt de run mee (`times_seen`) en ververst `proposal`.
+  - **Eén functie:** `decideConflict` in `packages/db/src/match-conflicts.ts` beslist een afwijking, in de transactie van de aanroeper en met haar regel in het logboek.
+    "Neem Wikipedia over" schrijft dat onderdeel, wist de markering (en de rij in `match_edits` als er geen over is) en schrijft `match.take-over`.
+    "Houd onze invoer" laat alles staan en schrijft `match.keep`.
+    Het beheer, het commando `pnpm run import:changes` en de zeven dagen van de import roepen haar aan, dus een besluit heeft overal dezelfde uitkomst.
+  - **Zonder account:** het commando en de import hebben geen account, dus hun regel in het logboek heeft een lege `user_id` ("de import"), met de reden "Besloten met het commando import:changes" of "Niemand besliste in zeven dagen, dus de import nam Wikipedia over".
+    Het commando `accept` neemt Wikipedia over, `reject` houdt de invoer.
+  - **Zeven dagen:** de regel van #460 blijft, en staat nu op één plek (`conflictStandsMs`).
+    Staat de waarde na zeven dagen nog op Wikipedia en heeft niemand beslist, dan neemt `importEditedMatch` het onderdeel over (`resolution` is `stood`).
+    Zet Wikipedia de waarde van de redactie terug, dan wordt de wijziging afgewezen (`reverted`) en schrijft de import `match.caught-up` met "De afwijking is vervallen".
+    Maakt Wikipedia er iets anders van, dan is de oude afwijking `replaced` en begint een nieuwe.
+  - **Een invoer vervangt:** slaat een redacteur een onderdeel opnieuw op, dan vervalt de afwijking van dat onderdeel (`replaced`), en haalt hij de hele invoer weg, dan vervallen ze allemaal.
+- **Waarom:** de import en het beheer moeten hetzelfde besluit nemen, en de rij in `match_changes` is de plek waar het commando al op leest.
+  Een kolom `part` houdt de afwijking per onderdeel, zoals #272 het beoordeelt, en laat de gewone wijzigingen ongemoeid.
+- **Alternatieven:** de afwijking alleen in `match_edits.reported_*` laten staan en het besluit daarop bouwen (het commando en het zeven-dagenrecht hebben dan een eigen tijdlijn, en `match_changes` toont niet wat wacht); een eigen tabel voor afwijkingen (twee plekken die een redacteur moet lezen); het besluit in de site en een eigen versie in het commando (twee uitkomsten voor hetzelfde besluit).
+
+### De beheerders krijgen een eigen mail per afwijking, en de import faalt er niet om
+
+- **Datum:** 2 november 2026
+- **Besluit:** `mailConflicts` (`packages/db/src/match-conflict-mail.ts`) mailt na elke run van de Wikipedia-import (#577):
+  - **Wie:** elk account met de rol `beheerder` dat niet is uitgezet, elk met een eigen mail.
+    `ALERT_MAIL_TO` is het adres van de eigenaar voor een import die stilvalt, en dus niet voor dit.
+  - **Wanneer:** één mail per afwijking, en één mail als de import een afwijking na zeven dagen overneemt.
+    `match_changes.mailed_at` en `taken_over_mailed_at` onthouden dat de mail uit is, zodat de volgende run zwijgt.
+  - **Wat erin staat:** de wedstrijd, het onderdeel, beide waarden, de koppeling naar de pagina in het beheer en de dag waarop de import Wikipedia overneemt.
+    Geen naam of adres van een redacteur, en geen reden: het adres van de ontvanger is het enige persoonsgegeven.
+  - **Als het mislukt:** een mail die niet te versturen is, laat de import niet falen en niet stoppen.
+    De run schrijft een regel in het logboek van de import, zonder wachtwoord en zonder adres, en probeert het bij de volgende run opnieuw, want de wijziging blijft ongemaild.
+    Een afwijking telt als gemaild zodra één beheerder de mail kreeg: de anderen krijgen hem niet nog eens.
+  - **Buiten de transactie:** de mail gaat nadat de wedstrijden zijn opgeslagen, zodat een mailserver die hapert nooit een wedstrijd terugdraait.
+- **Waarom:** een redacteur die niet in het beheer kijkt, ziet een afwijking niet.
+  Een mail per ontvanger houdt elk adres uit de aanhef van de ander, en `sendMail` laat toch maar één ontvanger per mail toe.
+- **Nadeel:** wie een mail kreeg terwijl een andere beheerder hem niet kreeg, merkt dat niet; de afwijking staat wel in het beheer.
+  Zonder één beheerder met een actief account gaat er niets uit, en de run zegt dat in het logboek.
+- **Alternatieven:** één mail naar `ALERT_MAIL_TO` (de eigenaar is niet altijd de redacteur die de wedstrijd invulde); één mail met alle beheerders in `To` (de adressen staan bij elkaar, en `sendMail` weigert het); de mail in de transactie van de import (een mail die faalt zou de wedstrijden terugdraaien); een mail bij elke run die de afwijking ziet (honderden mails voor één afwijking).
 
 ## Redactie
 

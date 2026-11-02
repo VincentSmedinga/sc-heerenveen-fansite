@@ -5,16 +5,12 @@ import { eq, inArray } from 'drizzle-orm'
 // The site writes the entries; the importer reads the markers and clears them (see the
 // importer's `edited-matches.ts`).
 import type { Database } from './client.ts'
-import type { Match, MatchEdit, MatchGoal, NewMatchGoal } from './schema.ts'
+import type { Match, MatchEdit, MatchGoal, MatchPart, NewMatchGoal } from './schema.ts'
 
-import { matchEdits, matches, matchGoals, players } from './schema.ts'
+import { matchEdits, matches, matchGoals, matchParts, players } from './schema.ts'
 
-/**
- * The parts of a match an editor fills in, and the importer judges one by one: the kick-off,
- * the result (with the status) and the goals. Wikipedia often has the result long before the
- * goals.
- */
-export const matchParts = ['kickoff', 'result', 'goals'] as const
+export { matchParts }
+export type { MatchPart }
 
 /** The goals that are stored, as the comparison needs them. */
 export type GoalFields = Pick<
@@ -27,8 +23,6 @@ export type GoalSnapshot = Omit<NewMatchGoal, 'id' | 'matchId'>
 
 /** The kick-off of one match, for a judgement and a line of text. */
 export type KickoffFields = Pick<Match, 'dateText' | 'kickoffAt' | 'matchDate'>
-
-export type MatchPart = (typeof matchParts)[number]
 
 /** The fields of a match that `before_match` keeps, with the moments as ISO text. */
 export type MatchSnapshot = {
@@ -202,6 +196,32 @@ export function encodeMatch(match: Match): string {
   return JSON.stringify(snapshot)
 }
 
+/**
+ * Writes these goals for the match, in this order. A player that was deleted since is no link
+ * any more, as `on delete set null` has it.
+ */
+export async function insertGoals(db: Pick<Database, 'insert' | 'select'>, matchId: number, goals: GoalSnapshot[]) {
+  if (goals.length === 0) {
+    return
+  }
+
+  const ids = goals.flatMap((goal) => (goal.playerId === null || goal.playerId === undefined ? [] : [goal.playerId]))
+  const known = new Set(
+    ids.length === 0
+      ? []
+      : (await db.select({ id: players.id }).from(players).where(inArray(players.id, ids))).map((row) => row.id),
+  )
+
+  await db.insert(matchGoals).values(
+    goals.map((goal) => ({
+      ...goal,
+      matchId,
+      playerId:
+        goal.playerId !== null && goal.playerId !== undefined && known.has(goal.playerId) ? goal.playerId : null,
+    })),
+  )
+}
+
 /** Whether the editors hold this part of the match. */
 export function isMarked(
   edit: Pick<MatchEdit, 'goalsEdited' | 'kickoffEdited' | 'resultEdited'>,
@@ -274,30 +294,8 @@ export async function removeEntry(db: Writer, edit: MatchEdit) {
       .where(eq(matches.id, edit.matchId))
   }
   if (parts.includes('goals')) {
-    const goals = JSON.parse(edit.beforeGoals) as GoalSnapshot[]
-
     await db.delete(matchGoals).where(eq(matchGoals.matchId, edit.matchId))
-
-    if (goals.length > 0) {
-      // A player that was deleted since is no link any more, as `on delete set null` has it.
-      const ids = goals.flatMap((goal) =>
-        goal.playerId === null || goal.playerId === undefined ? [] : [goal.playerId],
-      )
-      const known = new Set(
-        ids.length === 0
-          ? []
-          : (await db.select({ id: players.id }).from(players).where(inArray(players.id, ids))).map((row) => row.id),
-      )
-
-      await db.insert(matchGoals).values(
-        goals.map((goal) => ({
-          ...goal,
-          matchId: edit.matchId,
-          playerId:
-            goal.playerId !== null && goal.playerId !== undefined && known.has(goal.playerId) ? goal.playerId : null,
-        })),
-      )
-    }
+    await insertGoals(db, edit.matchId, JSON.parse(edit.beforeGoals) as GoalSnapshot[])
   }
 
   await clearParts(db, edit, parts)

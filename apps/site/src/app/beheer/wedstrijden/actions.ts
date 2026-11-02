@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 
 import { parseItemId, parseReason } from '../../../beheer/items'
-import { findMatch, saveEntry, undoEntry } from '../../../beheer/match-entries'
+import { decideDifference, findDifference, findMatch, saveEntry, undoEntry } from '../../../beheer/match-entries'
 import { addGoalId, goalFieldId, type MatchFormState } from '../../../beheer/match-fields'
 import { newGoal, readButton, readValues, validate } from '../../../beheer/match-form'
 import { requireRole } from '../../../beheer/require-role'
@@ -17,8 +17,62 @@ import { matchesPath, matchPath } from './paths'
 // both work without JavaScript. Adding and removing a goal are buttons of the same form, which
 // the server answers with the form again.
 
+/** Where the form that decides a difference comes back to, with its error. */
+export type ConflictFormState = { error?: string }
+
 /** Where the form for removing the entry of a match comes back to, with its error. */
 export type RemoveFormState = { error?: string }
+
+/**
+ * Decides a difference between Wikipedia and the entry of the editors: "overnemen" takes
+ * Wikipedia over for that part, "houden" keeps the entry. It asks for a reason, as every change
+ * does. The number of the difference is bound to the action and checked again, and one that is
+ * decided already (by someone else, or by the import after seven days) ends on the list with a
+ * notice.
+ */
+export async function submitConflict(
+  changeId: number,
+  _previous: ConflictFormState,
+  formData: FormData,
+): Promise<ConflictFormState> {
+  const { userId } = await requireRole('beheerder')
+  const id = parseItemId(changeId)
+  const difference = id === undefined ? undefined : await findDifference(getDatabase().db, id)
+
+  if (id === undefined || difference === undefined || difference.matchId === null) {
+    redirect(`${matchesPath}?fout=besloten`)
+  }
+
+  const decision = formData.get('besluit')
+
+  if (decision !== 'overnemen' && decision !== 'houden') {
+    return { error: 'Kies of je Wikipedia overneemt of je invoer houdt.' }
+  }
+
+  const reason = parseReason(formData.get('reden'))
+
+  if ('error' in reason) {
+    return {
+      error: reason.error === 'leeg' ? 'Schrijf waarom je dit beslist.' : 'Schrijf hoogstens 300 tekens.',
+    }
+  }
+
+  const outcome = await decideDifference(
+    getDatabase().db,
+    userId,
+    id,
+    decision === 'overnemen' ? 'take-over' : 'keep',
+    reason.reason,
+  )
+
+  redirect(
+    outcome === 'done'
+      ? matchPath(difference.matchId, decision === 'overnemen' ? 'overgenomen' : 'gehouden')
+      : outcome === 'no-proposal'
+        ? matchPath(difference.matchId, 'niet-gelukt')
+        : `${matchesPath}?fout=besloten`,
+  )
+}
 
 /**
  * What a button of the form of a match does: a goal is added or removed and the form comes back
