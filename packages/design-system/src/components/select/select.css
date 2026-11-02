@@ -55,6 +55,7 @@
         border-radius: 0.25rem;
         box-sizing: border-box;
         color: var(--hf-colour-text-default);
+        /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
         margin-block: var(--hf-space-xs);
         padding: var(--hf-space-xs);
       }

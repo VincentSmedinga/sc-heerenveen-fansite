@@ -40,7 +40,7 @@ const separator = (
 export const Article = ({ author, children, className, date, dateTime, intro, title, ...props }: ArticleProps) => (
   <article {...props} className={classNames('hf-article', className)}>
     <Heading level={1}>{title}</Heading>
-    <Text appearance="meta" className="hf-article-meta">
+    <Text appearance="meta" className="hf-article-meta hf-space-end-l">
       Door {author}
       {separator}
       <Time dateTime={dateTime}>{date}</Time>

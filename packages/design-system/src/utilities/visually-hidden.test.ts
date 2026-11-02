@@ -55,7 +55,9 @@ describe('hf-visually-hidden', () => {
   })
 
   it('is in the strongest layer of the design system, so a component or type style can not undo it', () => {
-    expect(read('../layers.css')).toContain('@layer hf.tokens, hf.base, hf.typography, hf.components, hf.utilities;')
+    expect(read('../layers.css')).toContain(
+      '@layer hf.tokens, hf.base, hf.typography, hf.components, hf.flow, hf.utilities;',
+    )
     expect(read('../index.css')).toContain("@import url('./utilities/visually-hidden.css');")
   })
 })

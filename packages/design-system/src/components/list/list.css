@@ -3,6 +3,7 @@
 @layer hf.base {
   ul,
   ol {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
     margin-block: 0 var(--hf-space-m);
     padding-inline-start: 1.5em;
   }
@@ -30,6 +31,7 @@
   }
 
   dl {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #654 takes this margin away. */
     margin-block: 0 var(--hf-space-m);
   }
 
@@ -39,6 +41,7 @@
   }
 
   dd {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the items of a list becomes a gap in #654. */
     margin-block-end: var(--hf-space-s);
     margin-inline-start: 0;
   }
@@ -50,6 +53,7 @@
  */
 @layer hf.components {
   .hf-list-loose > li {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the items of a list becomes a gap in #654. */
     margin-block-end: var(--hf-space-m);
 
     &:last-child,

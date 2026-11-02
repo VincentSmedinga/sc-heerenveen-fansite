@@ -5,4 +5,4 @@
  * block. An imported file is placed where its import is.
  */
 
-@layer hf.tokens, hf.base, hf.typography, hf.components, hf.utilities;
+@layer hf.tokens, hf.base, hf.typography, hf.components, hf.flow, hf.utilities;

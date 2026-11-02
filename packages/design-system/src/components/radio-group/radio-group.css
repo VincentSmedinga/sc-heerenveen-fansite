@@ -11,6 +11,7 @@
 @layer hf.components {
   .hf-radio-group {
     border: 0;
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
     margin-block: 0 var(--hf-space-m);
     min-inline-size: 0;
     padding: 0;
@@ -26,6 +27,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0 var(--hf-space-l);
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
     margin-block-start: var(--hf-space-xs);
   }
 

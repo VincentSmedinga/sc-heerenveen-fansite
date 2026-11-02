@@ -63,7 +63,7 @@ describe('Tile', () => {
     const icon = container.querySelector('.hf-tile-icon svg')
 
     expect(icon?.getAttribute('aria-hidden')).toBe('true')
-    expect(container.querySelector('.hf-tile')?.firstElementChild?.className).toBe('hf-tile-icon')
+    expect(container.querySelector('.hf-tile')?.firstElementChild?.className).toBe('hf-tile-icon hf-space-end-0')
   })
 
   it('has no icon, and no space for it, when it has none', () => {

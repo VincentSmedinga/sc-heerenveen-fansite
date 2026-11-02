@@ -3,8 +3,8 @@
 @layer hf.components {
   /*
    * The padding and the border count in the size of the card. A card has no margin: the space between cards is the gap
-   * of the column they are in. Its first and last child have none against the padding either, so a heading at the top
-   * has no space above it.
+   * of the column they are in. The space between what is in the card comes from the flow
+   * (utilities/flow.css), which gives the last child none against the padding.
    * The padding is the large space (24px) on all sides, and the medium one (16px) on a screen
    * narrower than 40rem.
    */
@@ -27,14 +27,6 @@
     @media (width >= 40rem) {
       --hf-card-padding-block: var(--hf-space-l);
       --hf-card-padding-inline: var(--hf-space-l);
-    }
-
-    > :first-child {
-      margin-block-start: 0;
-    }
-
-    > :last-child {
-      margin-block-end: 0;
     }
   }
 

@@ -15,7 +15,7 @@ const meta = preview.meta({
           'Het is een `div` zonder rol.',
           '',
           '- Elk kind van een `Page.Main` of een `Page.Sidebar` is al een cel. Een `Page.Cell` maakt van meer dingen één cel.',
-          '- Wat erin staat houdt de ruimte die het zelf heeft, zoals tussen een kop en de tekst eronder, en heeft geen marge naar buiten.',
+          '- De cel bepaalt de ruimte tussen wat erin staat, zoals tussen een kop en de tekst eronder (zie _Ruimte tussen onderdelen_ in het hoofdstuk Ruimte), en niets erin heeft een marge naar buiten.',
           '- De ruimte tussen de cellen komt van de `Page.Body`.',
         ].join('\n'),
       },
@@ -35,7 +35,7 @@ const render = () => (
     <Page.Main>
       <Page.Cell>
         <Heading level={1}>Een kop met een inleiding</Heading>
-        <Text>De kop en deze tekst zijn samen één cel, dus de ruimte ertussen is die van de tekst zelf.</Text>
+        <Text>De kop en deze tekst zijn samen één cel, dus de cel bepaalt de ruimte ertussen.</Text>
       </Page.Cell>
       <Text>Deze tekst is een cel op zich. De ruimte tussen de cellen is overal even groot.</Text>
       <Page.Cell>

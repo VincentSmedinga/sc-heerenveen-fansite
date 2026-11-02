@@ -2,6 +2,7 @@
 
 @layer hf.components {
   .hf-filter {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
     margin-block-end: var(--hf-space-s);
   }
 }

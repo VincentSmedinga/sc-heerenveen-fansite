@@ -82,6 +82,7 @@
       border-block-start: 1px solid var(--hf-colour-border-on-header);
       content: '';
       flex: 0 0 100%;
+      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
       margin-block-end: var(--hf-space-xs);
       order: -1;
     }
@@ -269,6 +270,7 @@
     clip-path: inset(0 -100vmax);
     display: flex;
     flex: 0 0 calc(100% + var(--hf-navigation-gutter-start) + var(--hf-navigation-gutter-end));
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The bar pulls itself to the bottom edge of the band with a negative margin, which takes back the space under the menu; this margin stays. */
     margin-block: var(--hf-navigation-space-end) calc(-1 * var(--hf-navigation-space-end));
     margin-inline: calc(-1 * var(--hf-navigation-gutter-start)) calc(-1 * var(--hf-navigation-gutter-end));
     min-inline-size: 0;

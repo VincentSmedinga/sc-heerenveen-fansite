@@ -44,6 +44,7 @@
     color: var(--hf-colour-text-default);
     display: block;
     inline-size: 100%;
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
     margin-block: var(--hf-space-xs) var(--hf-space-m);
     max-inline-size: 30rem;
     min-block-size: var(--hf-size-control);
@@ -100,6 +101,7 @@
     border-color: var(--hf-colour-border-surface);
     border-radius: 0.25rem;
     box-sizing: border-box;
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
     margin-block: 0 var(--hf-space-m);
     margin-inline: 0;
     padding-block: var(--hf-space-s) var(--hf-space-m);

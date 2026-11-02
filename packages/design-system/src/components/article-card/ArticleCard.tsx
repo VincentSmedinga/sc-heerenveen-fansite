@@ -41,7 +41,7 @@ export const ArticleCard = ({ className, date, dateTime, href, intro, title, ...
       <Heading id={headingId} level={2}>
         Van de redactie
       </Heading>
-      <Heading appearance={3} className="hf-article-card-title" level={3}>
+      <Heading appearance={3} className="hf-article-card-title hf-space-end-xs" level={3}>
         <Link href={href}>{title}</Link>
       </Heading>
       <Text appearance="meta">

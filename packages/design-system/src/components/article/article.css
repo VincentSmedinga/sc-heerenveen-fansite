@@ -1,26 +1,18 @@
 /*
  * An article of our own editors: a title, a line with the author and the date, an introduction
- * and the text. The line with the author and the date sits close under the title and has room
- * before the introduction. What is in the article has no margin to the outside, so the page
- * decides the space around it.
+ * and the text. The article is a flow container (see utilities/flow.css): it sets the space
+ * between its parts, with the extra large step before a heading in the text, and the page
+ * decides the space around it. The line with the author and the date has the large step
+ * before the introduction, with the class hf-space-end-l on it.
  */
 
 @layer hf.components {
   .hf-article {
     /* A long word, such as an address in the text, breaks instead of making the page scroll. */
     overflow-wrap: anywhere;
-
-    > :first-child {
-      margin-block-start: 0;
-    }
-
-    > :last-child {
-      margin-block-end: 0;
-    }
   }
 
   .hf-article-meta {
     color: var(--hf-colour-text-secondary);
-    margin-block: var(--hf-space-s) var(--hf-space-l);
   }
 }

@@ -58,7 +58,7 @@ export const Tile = ({ children, className, href, icon, level, title, ...props }
   <li className={classNames('hf-tile-item', className)} {...props}>
     <Card as="div" className="hf-tile">
       {icon === undefined ? null : (
-        <span className="hf-tile-icon">
+        <span className="hf-tile-icon hf-space-end-0">
           <Icon name={icon} />
         </span>
       )}

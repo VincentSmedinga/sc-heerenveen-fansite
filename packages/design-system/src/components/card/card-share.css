@@ -90,6 +90,7 @@
   /* The message is for a screen reader, except when something went wrong: then it is a sentence for everyone. */
   .hf-card-share-status:not(.hf-visually-hidden) {
     color: var(--hf-colour-text-default);
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
     margin-block: var(--hf-space-s) 0;
   }
 

@@ -27,6 +27,7 @@ Follow _Afspraken_ in the README of the design system:
 - pure CSS in the component's own file (`heading/heading.css`), classes and custom properties with `hf-`, the right cascade layer, logical properties, semantic colour tokens (never the primitives);
 - one React component per element or part, with typed props; a part that belongs to one parent is a property of it (`List.Item`, `Page.Header`); no hooks or state means it stays a server component;
 - only Baseline 'widely available' features: `pnpm lint` fails otherwise, and a newer one goes in `@supports`;
+- no vertical margin and no `padding-block` to the outside: the container (a card, a cell, an article, `hf-flow`) sets the space between its children with the flow in `src/utilities/flow.css`; an exception for one instance gets a class `hf-space-end-0`, `-xs`, `-s`, `-m` or `-l`; the space between the parts of a component comes from `gap`; a new large block, such as a table or a chart, goes in the list in `flow.css`; `pnpm lint` fails on a margin elsewhere;
 - no request to a third party: no fonts, scripts, images or embeds from another domain.
 
 ## 3. The stories

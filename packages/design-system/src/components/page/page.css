@@ -254,6 +254,7 @@
   @media (width >= 52rem) {
     .hf-page-sidebar-sticky {
       inset-block-start: var(--hf-space-m);
+      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The negative margin takes back the padding that makes room for the focus ring, so the sidebar stays in its column; this margin stays. */
       margin: calc(-1 * var(--hf-space-xs));
       max-block-size: calc(100dvh - 2 * var(--hf-space-m));
       overflow-y: auto;
@@ -317,19 +318,10 @@
   }
 
   /*
-   * Several things in one cell keep the space they have between them, and the first and last have none to the outside.
-   * A cell is a grid item, so margins of what is in it don't collapse out of it and would add to the gap.
+   * A cell and an introduction are flow containers: the flow (utilities/flow.css) sets the
+   * space between what is in them, and gives the last child none to the outside. A cell is a
+   * grid item, so margins of what is in it don't collapse out of it and would add to the gap.
    */
-  .hf-page-cell,
-  .hf-page-intro {
-    > :first-child {
-      margin-block-start: 0;
-    }
-
-    > :last-child {
-      margin-block-end: 0;
-    }
-  }
 
   /*
    * The title row (Page.Title): the heading of the page and one control, side by side, with
@@ -490,6 +482,7 @@
     }
 
     > .hf-navigation {
+      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
       margin-block-start: var(--hf-space-s);
     }
 
