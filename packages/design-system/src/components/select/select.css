@@ -55,7 +55,7 @@
         border-radius: 0.25rem;
         box-sizing: border-box;
         color: var(--hf-colour-text-default);
-        /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
+        /* stylelint-disable-next-line declaration-property-value-allowed-list -- The margin moves the open list away from the closed one; the list is a popover, outside the flow, and a gap does not reach it. */
         margin-block: var(--hf-space-xs);
         padding: var(--hf-space-xs);
       }

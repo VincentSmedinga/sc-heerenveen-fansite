@@ -32,7 +32,7 @@ const meta = preview.meta({
 // The two answers of the radio buttons and the checkbox have no component yet, so they are bare
 // elements here.
 const renderForm = (withErrors: boolean) => (
-  <>
+  <div className="hf-flow">
     {withErrors ? (
       <ErrorSummary
         errors={[
@@ -98,7 +98,7 @@ const renderForm = (withErrors: boolean) => (
 
       <Button type="submit">Versturen</Button>
     </Form>
-  </>
+  </div>
 )
 
 export const RemovalRequest = meta.story({

@@ -482,7 +482,7 @@
     }
 
     > .hf-navigation {
-      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
+      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The links come after two lines of text in a grid; a gap would also open between the two lines, and this space is only before the links. */
       margin-block-start: var(--hf-space-s);
     }
 

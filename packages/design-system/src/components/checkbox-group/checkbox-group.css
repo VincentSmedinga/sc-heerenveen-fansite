@@ -9,16 +9,12 @@
 @layer hf.components {
   .hf-checkbox-group {
     border: 0;
-
-    /* Room under the last checkbox, before the button of the form. */
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin: 0 0 var(--hf-space-s);
     min-inline-size: 0;
     padding: 0;
   }
 
   .hf-checkbox-group > legend {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- A gap does not reach the legend of a fieldset, so the space under the legend is a margin. */
     margin-block-end: var(--hf-space-m);
     padding: 0;
   }
@@ -33,8 +29,8 @@
 
     > input {
       flex: none;
-      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-      margin-block-start: 0.125rem;
+      inset-block-start: 0.125rem;
+      position: relative;
     }
   }
 }

@@ -2278,6 +2278,8 @@
 - **Waarom:** de reeks waarmee een afgelopen seizoen eindigde verandert niet meer en zegt weinig.
   De langste reeks is wat de moeite waard blijft.
 - **Alternatieven:** de laatste vijf wedstrijden in een afgelopen seizoen laten staan (ze zeggen over dat seizoen niets bijzonders).
+- **Later:** zie _Onderdelen en formulieren zetten geen verticale witruimte naar buiten_ in `designsysteem.md` (3 november 2026).
+  De regel in `mark-row.css` voor een lijst direct onder een `MarkRow` is weg; de stroom zet de gemiddelde ruimte onder de rij, en dat is dezelfde ruimte.
   De kolom hernoemen naar "Aan het eind" (houdt een getal dat nauwelijks informatie geeft).
   De kolom laten staan (verwarrend: "Nu" in een seizoen van vorig jaar).
 

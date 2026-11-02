@@ -7,8 +7,13 @@
 @layer hf.components {
   /* A long word in a title or a name breaks instead of making the page scroll sideways. */
   .hf-discussion-item {
+    display: grid;
+    gap: 0.125rem;
+    grid-template-columns: minmax(0, 1fr);
     overflow-wrap: anywhere;
-    padding-block: var(--hf-space-m);
+
+    /* The title stood in a line of text, which put it 1px lower than its box; the 1px stays. */
+    padding-block: calc(var(--hf-space-m) + 1px) var(--hf-space-m);
   }
 
   /*
@@ -26,6 +31,7 @@
    */
   .hf-discussion-item-title {
     display: inline-block;
+    justify-self: start;
     font-size: var(--hf-body-font-size);
     font-weight: var(--hf-headline-font-weight);
     min-block-size: 1.5rem;
@@ -46,8 +52,6 @@
 
   .hf-discussion-item-meta {
     color: var(--hf-colour-text-secondary);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: 0.125rem 0;
   }
 
   /*

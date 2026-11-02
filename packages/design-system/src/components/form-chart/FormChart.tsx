@@ -44,12 +44,17 @@ export const FormChart = ({ className, matches = 34, results, window: span = 5, 
   const latest = line.at(-1) ?? null
 
   return (
-    <div {...props} className={classNames('hf-form-chart', className)}>
-      <MarkRow empty="Nog geen wedstrijden gespeeld." marks={formOf(played, 5)} title="Vorm" />
+    <div {...props} className={classNames('hf-form-chart hf-flow', className)}>
+      <MarkRow
+        className="hf-space-end-s"
+        empty="Nog geen wedstrijden gespeeld."
+        marks={formOf(played, 5)}
+        title="Vorm"
+      />
       <BarChart axis={{ title: 'Speelronde' }} bars={slots(played, matches)} max={3} ticks={[0, 1, 3]}>
         <BarChart.Trend values={Array.from({ length: matches }, (_, index) => line[index] ?? null)} />
       </BarChart>
-      <Text appearance="meta" className="hf-form-chart-key">
+      <Text appearance="meta" className="hf-form-chart-key hf-space-end-xs">
         <b>{tableColumns.won.abbreviation}</b> {tableColumns.won.name} (3 punten),{' '}
         <b>{tableColumns.drawn.abbreviation}</b> {tableColumns.drawn.name} (1), <b>{tableColumns.lost.abbreviation}</b>{' '}
         {tableColumns.lost.name} (0).

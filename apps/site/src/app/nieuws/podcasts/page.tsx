@@ -135,6 +135,7 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
           <Card as="div" surface="soft">
             <Form action="/nieuws/podcasts" autoComplete="off" method="get">
               <CheckboxGroup
+                className="hf-space-end-s"
                 legend="Podcasts"
                 name="podcast"
                 options={podcasts.map((item) => ({ label: item.name, value: item.slug }))}

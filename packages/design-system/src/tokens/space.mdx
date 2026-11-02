@@ -35,7 +35,7 @@ Twijfel je, neem dan `--hf-space-m`.
 
 Een onderdeel zet zelf geen ruimte naar buiten, want het kent zijn omgeving niet.
 De kaart of de cel bepaalt de ruimte tussen wat erin staat: dat is de stroom.
-Ze geldt voor de directe kinderen van `Card`, `Page.Cell`, `Page.Intro`, `Article` en de inhoud van `Disclosure`, en van elk element met de klasse `hf-flow`.
+Ze geldt voor de directe kinderen van `Card`, `Page.Cell`, `Page.Intro`, `Article`, de inhoud van `Disclosure` en een `Form` met velden, en van elk element met de klasse `hf-flow`.
 Elk kind krijgt ruimte onder zich, naar wat het is, en geen ruimte boven zich:
 
 - onder een kop staat de grote ruimte;
@@ -51,7 +51,8 @@ De extra grote ruimte staat verder alleen tussen de cellen van een pagina.
 De grote blokken staan in één lijst in `utilities/flow.css`; een nieuw groot blok komt in die lijst.
 De basiselementen zetten zelf geen ruimte naar buiten: een alinea, een lijst, een kop, een tabel, een citaat, een figuur en een lijn.
 Staat zo'n element niet in een kaart, een cel of een ander blok met een stroom, zet dan `hf-flow` op het element eromheen, ook in een story.
-De ruimte tussen de delen van een element zelf, zoals de items van een ruime lijst of een figuur en zijn onderschrift, komt van `gap`.
+De ruimte tussen de delen van een element of een onderdeel zelf, zoals de items van een ruime lijst, een figuur en zijn onderschrift of het label en het veld van een `Field`, komt van `gap`.
+Een marge blijft alleen met een reden, zoals de ruimte onder de legenda van een fieldset, die een `gap` niet bereikt.
 
 <Story of={SpaceStories.Flow} />
 

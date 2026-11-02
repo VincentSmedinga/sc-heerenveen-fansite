@@ -1,10 +1,27 @@
 /*
- * A field with its label, hint and error. The label, the hint and the error sit above the field, close to each other; the
- * space under the field comes from the field itself (base/forms.css). The status "(niet verplicht)", only on a field that is not required, is
- * in the weight and colour of secondary text, so the name of the field stands out.
+ * A field with its label, hint and error. The label, the hint and the error sit above the field, close to each other, in
+ * a block of their own (hf-field-text); the field is a little further away. The space under the field is not the field's:
+ * the form or the group it is in sets it (see utilities/flow.css). The status "(niet verplicht)", only on a field that is
+ * not required, is in the weight and colour of secondary text, so the name of the field stands out.
  */
 
 @layer hf.components {
+  .hf-field {
+    display: grid;
+    gap: var(--hf-space-xs);
+
+    /* A field with a width of its own keeps it, instead of being stretched over the column. */
+    > :is(input, select, textarea) {
+      justify-self: start;
+    }
+  }
+
+  /* The label, the hint and the error: close to each other. A group of options has the hint and the error in one too. */
+  .hf-field-text {
+    display: grid;
+    gap: 0.125rem;
+  }
+
   .hf-field-label {
     display: block;
   }
@@ -12,12 +29,6 @@
   .hf-field-status {
     color: var(--hf-colour-text-secondary);
     font-weight: var(--hf-body-font-weight);
-  }
-
-  .hf-field-hint,
-  .hf-field-error {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: 0.125rem 0;
   }
 
   /* In the colour of errors and strong: the text says "Fout:", so colour is not alone. */

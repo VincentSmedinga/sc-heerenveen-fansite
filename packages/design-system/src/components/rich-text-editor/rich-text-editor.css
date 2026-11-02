@@ -8,12 +8,17 @@
  */
 
 @layer hf.components {
+  /* The toolbar, the form for a link and the text are a step apart. */
+  .hf-rich-text-editor {
+    display: grid;
+    gap: var(--hf-space-s);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .hf-rich-text-editor-toolbar {
     display: flex;
     flex-wrap: wrap;
     gap: var(--hf-space-s);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: var(--hf-space-xs) var(--hf-space-s);
 
     > button {
       background-color: transparent;
@@ -51,10 +56,11 @@
     border-color: var(--hf-colour-border-surface-soft);
     border-radius: 0.25rem;
     box-sizing: border-box;
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: 0 var(--hf-space-s);
+    display: grid;
+    gap: var(--hf-space-m);
+    grid-template-columns: minmax(0, 1fr);
     max-inline-size: 40rem;
-    padding-block: var(--hf-space-m) var(--hf-space-xs);
+    padding-block: var(--hf-space-m) calc(var(--hf-space-xs) + var(--hf-space-s));
     padding-inline: var(--hf-space-m);
   }
 
@@ -62,8 +68,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--hf-space-s);
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block-end: var(--hf-space-s);
   }
 
   .hf-rich-text-editor-content {

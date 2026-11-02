@@ -130,7 +130,7 @@ describe('the page Podcasts', () => {
     expect(html.match(/<aside/g)).toHaveLength(1)
     expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
     expect(html.slice(html.indexOf('<aside'))).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="Podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws\/podcasts" method="get"><fieldset class="hf-checkbox-group"><legend class="hf-heading-2">Podcasts<\/legend>/,
+      /^<aside class="hf-page-sidebar" aria-label="Podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws\/podcasts" method="get"><fieldset class="hf-checkbox-group hf-space-end-s"><legend class="hf-heading-2">Podcasts<\/legend>/,
     )
   })
 

@@ -1,21 +1,10 @@
 /*
  * The chart of a season: the form, the bars and two lines of text. The look of the parts is
- * in their own files; this file only gives the texts under the chart their spacing.
+ * in their own files. The space between the parts is the flow of the chart (hf-flow, see
+ * utilities/flow.css), with a utility class where a part keeps closer to the one before it.
  */
 
 @layer hf.components {
-  /* The large space of a chart is under it, and none when it is the last in its cell. */
-  .hf-form-chart {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block-end: var(--hf-space-l);
-  }
-
-  .hf-form-chart-key,
-  .hf-form-chart-line {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space between the parts of the component becomes a gap in #655. */
-    margin-block: var(--hf-space-xs) 0;
-  }
-
   /* The letters of the key are heavier than the words, so they are easy to find. */
   .hf-form-chart-key b {
     font-weight: var(--hf-strong-font-weight);

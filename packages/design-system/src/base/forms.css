@@ -44,8 +44,6 @@
     color: var(--hf-colour-text-default);
     display: block;
     inline-size: 100%;
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- The space to a neighbour comes from the flow; #655 takes this margin away. */
-    margin-block: var(--hf-space-xs) var(--hf-space-m);
     max-inline-size: 30rem;
     min-block-size: var(--hf-size-control);
     padding-block: var(--hf-space-s);
