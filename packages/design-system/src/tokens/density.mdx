@@ -1,0 +1,38 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks'
+
+import * as DensityStories from './density.stories'
+
+<Meta of={DensityStories} />
+
+# Dichtheid
+
+De ruimte en de letters van de site zijn gemaakt om te lezen.
+Voor schermen waar mensen lang achter zitten en veel velden en rijen zien, zoals het beheer, is dat te ruim.
+Daarom is er een tweede dichtheid: compact.
+Je zet hem aan met de klasse `hf-density-compact` op een element, en dan geldt hij voor alles daarbinnen.
+
+<Story of={DensityStories.SideBySide} />
+
+## Hoe het werkt
+
+- **Alleen tokens:** de klasse geeft nieuwe waarden aan de tokens voor de ruimte, de letters en de hoogte van knoppen en velden.
+  Een onderdeel leest zijn tokens, en doet binnen de klasse hetzelfde als erbuiten.
+  Geen onderdeel kent de klasse, en geen onderdeel heeft er een prop voor.
+  Een test, `tokens/density-css.test.ts`, bewaakt dat.
+- **Een app kiest:** het designsysteem zegt niet waar de klasse hoort.
+  De app zet hem op de inhoud van de schermen die hem nodig hebben, en laat de kop en de voet van de site zoals ze zijn.
+- **Los van licht en donker:** de kleuren veranderen niet.
+  Het kleurthema en de dichtheid kun je dus onafhankelijk van elkaar kiezen.
+- **De breedtes blijven:** de pagina is even breed, en de regelhoogte van de tekst blijft staan.
+
+## Wat blijft
+
+Wat het thema verkleint, blijft goed bruikbaar.
+De kleinste tekst blijft leesbaar, lopende tekst ook, en een knop of veld blijft ruim boven de minimale maat van WCAG 2.5.8.
+De waarden en de afwegingen staan in `docs/beslissingen.md`, niet hier.
+
+## Een eigen maat nodig?
+
+Past een maat niet bij een token, bedenk dan geen eigen getal in het onderdeel.
+Maak er een token van, met als waarde wat het nu is, zodat de site er niet door verandert.
+Daarna kan de dichtheid er een andere waarde aan geven.
