@@ -3306,6 +3306,19 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   `WikipediaCredit` animeert de hoogte met `interpolate-size` en `::details-content`; dat is veel CSS voor een blok dat zelden opent.
 - **Alternatieven:** een animatie zoals `WikipediaCredit` (zie boven); een knop die een blok toont met JavaScript (werkt zonder script niet); het blok altijd open (de rode knop staat dan altijd in beeld).
 
+### Een Breadcrumb is een eigen onderdeel, met een teken dat geen tekst is
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem krijgt `Breadcrumb` (#594): een `nav` met een `ol`, met de klasse `hf-navigation` zoals `Filter`.
+  - **De props:** `items` (de pagina's erboven, de hoogste eerst), `current` (de huidige pagina, als tekst) en `label` (de naam voor schermlezers).
+  - **De huidige pagina:** het laatste item, zonder link, met `aria-current="page"`.
+  - **Het teken:** het teken tussen twee items is met randen getekend, een pijlpunt die bij zijn item hoort.
+    Het is dus geen tekst voor een schermlezer, en het begint nooit een regel.
+  - **Smal scherm:** de items breken om, en een lange naam breekt binnen het woord.
+- **Waarom:** `Breadcrumb` is een eigen onderdeel en geen uitvoering van `Navigation`, want de laatste pagina is geen link en `Navigation` maakt van elk item een link.
+  Het teken met randen is gekozen boven `content: '›'`: een teken in CSS leest een schermlezer soms voor, en de variant `content: '›' / ''` is nog niet Baseline 'widely available'.
+- **Alternatieven:** een uitvoering van `Navigation` (past niet: zie boven); een teken in de HTML met `aria-hidden` (het blijft kopieerbare tekst); een teken met `content` (zie boven).
+
 ## Site
 
 ### Sjablonen bevatten geen HTML, alleen componenten uit het designsysteem
