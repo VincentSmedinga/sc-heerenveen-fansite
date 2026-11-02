@@ -1,0 +1,56 @@
+/*
+ * A group of fields in a fieldset. Unlike the fieldset of base/forms.css it has no border and
+ * no padding, so the fields stand where they would stand without the group, and the legend is
+ * the label of the group. The space under the group is the space under a field.
+ */
+
+@layer hf.components {
+  .hf-field-group {
+    border: 0;
+    margin-block: 0 var(--hf-space-m);
+    min-inline-size: 0;
+    padding: 0;
+
+    > legend {
+      padding: 0;
+    }
+  }
+
+  .hf-field-group-hint {
+    margin-block: 0.125rem 0;
+  }
+
+  /*
+   * The fields are in columns of at least 12rem, as many as fit, and of 16rem at the most, so a
+   * date and a time are not stretched over the whole width. Two of them do not fit side by side
+   * in the 22.5rem of a phone, so they sit under each other there. The space under a field
+   * comes from the group (the gap), and not from the field.
+   */
+  .hf-field-group-fields {
+    display: grid;
+    gap: var(--hf-space-m) var(--hf-space-l);
+    grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 16rem));
+    margin-block-start: var(--hf-space-xs);
+
+    > .hf-field > :is(input, select, textarea) {
+      margin-block-end: 0;
+    }
+  }
+
+  /*
+   * With a sign between the first two fields, such as the dash of a score, the fields stay in
+   * a row, whatever the width. The sign stands level with the fields, as tall as one, and the
+   * label of a field may wrap above it.
+   */
+  .hf-field-group-separated {
+    align-items: end;
+    grid-template-columns: minmax(0, 16rem) auto minmax(0, 16rem);
+  }
+
+  .hf-field-group-separator {
+    align-items: center;
+    color: var(--hf-colour-text-secondary);
+    display: flex;
+    min-block-size: 2.75rem;
+  }
+}

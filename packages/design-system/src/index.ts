@@ -24,7 +24,13 @@ export type { TrendCurve } from './components/chart/trend'
 export { CheckboxGroup } from './components/checkbox-group/CheckboxGroup'
 export type { CheckboxGroupOption, CheckboxGroupProps } from './components/checkbox-group/CheckboxGroup'
 export { DataTable } from './components/data-table/DataTable'
-export type { DataTableCell, DataTableColumn, DataTableProps, DataTableRow } from './components/data-table/DataTable'
+export type {
+  DataTableCell,
+  DataTableColumn,
+  DataTableProps,
+  DataTableRow,
+  DataTableTextRow,
+} from './components/data-table/DataTable'
 export { Disclosure } from './components/disclosure/Disclosure'
 export type { DisclosureProps } from './components/disclosure/Disclosure'
 export { DiscussionItem } from './components/discussion-item/DiscussionItem'
@@ -34,6 +40,8 @@ export type { DonutChartProps, DonutChartSlice, DonutChartTone } from './compone
 export { Emphasis } from './components/emphasis/Emphasis'
 export { ErrorSummary } from './components/error-summary/ErrorSummary'
 export type { ErrorSummaryError, ErrorSummaryProps } from './components/error-summary/ErrorSummary'
+export { FieldGroup } from './components/field-group/FieldGroup'
+export type { FieldGroupProps } from './components/field-group/FieldGroup'
 export { Field } from './components/field/Field'
 export type { FieldProps } from './components/field/Field'
 export { Filter } from './components/filter/Filter'
@@ -51,6 +59,14 @@ export { Heading, headingLevels } from './components/heading/Heading'
 export type { HeadingLevel, HeadingProps } from './components/heading/Heading'
 export { Honeypot } from './components/honeypot/Honeypot'
 export type { HoneypotProps } from './components/honeypot/Honeypot'
+export { InputTable } from './components/input-table/InputTable'
+export type {
+  InputTableButton,
+  InputTableColumn,
+  InputTableField,
+  InputTableProps,
+  InputTableRow,
+} from './components/input-table/InputTable'
 export { Input, inputTypes } from './components/input/Input'
 export type { InputProps, InputType } from './components/input/Input'
 export { Link, linkIcons } from './components/link/Link'

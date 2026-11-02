@@ -1,14 +1,44 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
-import type { DataTableColumn, DataTableRow } from './dataTableTypes'
+import type { DataTableColumn, DataTableRow, DataTableTextRow } from './dataTableTypes'
 
 import { classNames } from '../classNames'
-import { columnOf, ColumnText, TableRows } from './dataTableParts'
+import { columnOf, ColumnText, TableRows, TextTableRows } from './dataTableParts'
 import { SortableDataTable } from './SortableDataTable'
 
-export type { DataTableCell, DataTableColumn, DataTableRow } from './dataTableTypes'
+export type { DataTableCell, DataTableColumn, DataTableRow, DataTableTextRow } from './dataTableTypes'
 
-export type DataTableProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & {
+export type DataTableProps =
+  | (DataTableBaseProps & {
+      /**
+       * `text` is a table with text in it, such as a list of matches: the columns start at the
+       * start, a row header can have a second line, and a cell can hold any content.
+       */
+      appearance: 'text'
+      /** The column headers, in order, as plain text. The first holds the row headers. */
+      columns: readonly string[]
+      /** The rows of the table, from the first down. They can't be sorted. */
+      rows: readonly DataTableTextRow[]
+    })
+  | (DataTableBaseProps & {
+      /** `numbers` is the table of numbers, which is the default. */
+      appearance?: 'numbers'
+      /**
+       * The column headers, in order. The first column holds the row headers (a day, a path),
+       * and the others hold numbers, aligned to the end. Keep a header short: it only wraps at
+       * a space, so a long word makes the table wider than a phone. A table with many columns,
+       * which does not fit a phone with whole words, gives a column as
+       * `{ abbreviation, name }`: the header shows the abbreviation, and the page explains it
+       * in a line under the table.
+       * A column given as `{ name, sortable: true }` lets the visitor sort the table on it.
+       */
+      columns: readonly (DataTableColumn | string)[]
+      /** The rows of the table, from the first down. */
+      rows: readonly DataTableRow[]
+    })
+
+/** What a table of numbers and a table with text have in common. */
+type DataTableBaseProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & {
   /**
    * The text of the table's caption, which names the table and says what it holds, such as
    * `Bezoekers per dag, de laatste 30 dagen`. Only a screen reader gets it: the caption is not
@@ -17,17 +47,6 @@ export type DataTableProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'>
   caption: string
   /** A data table has no children: everything it shows comes from the props below. */
   children?: never
-  /**
-   * The column headers, in order. The first column holds the row headers (a day, a path), and
-   * the others hold numbers, aligned to the end. Keep a header short: it only wraps at a space,
-   * so a long word makes the table wider than a phone. A table with many columns, which does
-   * not fit a phone with whole words, gives a column as `{ abbreviation, name }`: the header
-   * shows the abbreviation, and the page explains it in a line under the table. A column given
-   * as `{ name, sortable: true }` lets the visitor sort the table on it.
-   */
-  columns: readonly (DataTableColumn | string)[]
-  /** The rows of the table, from the first down. */
-  rows: readonly DataTableRow[]
 }
 
 /**
@@ -43,11 +62,31 @@ export type DataTableProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'>
  * in the browser the headers of the sortable columns become buttons (see SortableDataTable). A
  * table without a sortable column is the same plain table as ever and sends no script.
  */
-export const DataTable = ({ caption, className, columns, rows, ...props }: DataTableProps) => {
-  const all = columns.map(columnOf)
+export const DataTable = ({ appearance = 'numbers', caption, className, columns, rows, ...props }: DataTableProps) => {
+  // The union of the props is lost by taking them apart, so the two kinds are told apart here.
+  if (appearance === 'text') {
+    return (
+      <table {...props} className={classNames('hf-data-table', 'hf-data-table-text', className)}>
+        <caption className="hf-visually-hidden">{caption}</caption>
+        <thead>
+          <tr>
+            {(columns as readonly string[]).map((column) => (
+              <th key={column} scope="col">
+                {column}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <TextTableRows rows={rows as readonly DataTableTextRow[]} />
+      </table>
+    )
+  }
+
+  const all = (columns as readonly (DataTableColumn | string)[]).map(columnOf)
+  const numberRows = rows as readonly DataTableRow[]
 
   if (all.some((column) => column.sortable === true)) {
-    return <SortableDataTable {...props} caption={caption} className={className} columns={all} rows={rows} />
+    return <SortableDataTable {...props} caption={caption} className={className} columns={all} rows={numberRows} />
   }
 
   return (
@@ -62,7 +101,7 @@ export const DataTable = ({ caption, className, columns, rows, ...props }: DataT
           ))}
         </tr>
       </thead>
-      <TableRows columns={all} rows={rows} />
+      <TableRows columns={all} rows={numberRows} />
     </table>
   )
 }

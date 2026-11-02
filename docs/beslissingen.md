@@ -2133,6 +2133,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   De pagina breder maken; dat raakt de header, de footer en het logo.
 - **Later:** zie _/wedstrijden heeft een zijbalk van 32 rem met de stand en de uitslagen_.
   Een pagina kan met `wide` op de `Page.Sidebar` een hoofdkolom van 30 rem en een zijbalk van 32 rem kiezen; elke andere pagina houdt 38, 2 en 24 rem.
+- **Later:** zie _Een pagina kan breed zijn, met een hoofdkolom van 58 rem en de zijbalk van 24 rem_.
+  Een pagina kan met `wide` op de `Page.Main` een pagina van 84 rem kiezen; elke andere pagina houdt 64 rem.
 - **Later:** zie _De kolommen van `/wedstrijden` zijn even breed_.
   De hoofdkolom en de zijbalk met `wide` zijn allebei 31 rem breed, met 2 rem ertussen.
 - **Later:** zie _/nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem_.
@@ -3319,6 +3321,44 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
 - **Waarom:** `Breadcrumb` is een eigen onderdeel en geen uitvoering van `Navigation`, want de laatste pagina is geen link en `Navigation` maakt van elk item een link.
   Het teken met randen is gekozen boven `content: '›'`: een teken in CSS leest een schermlezer soms voor, en de variant `content: '›' / ''` is nog niet Baseline 'widely available'.
 - **Alternatieven:** een uitvoering van `Navigation` (past niet: zie boven); een teken in de HTML met `aria-hidden` (het blijft kopieerbare tekst); een teken met `content` (zie boven).
+
+### Een pagina kan breed zijn, met een hoofdkolom van 58 rem en de zijbalk van 24 rem
+
+- **Datum:** 2 november 2026
+- **Besluit:** een pagina kiest zelf voor een brede variant met `wide` op `Page.Main`.
+  De pagina is dan 84 rem breed: een hoofdkolom van 58 rem, 2 rem ruimte en de gewone zijbalk van 24 rem.
+  Alleen de pagina's die het kiezen veranderen; elke andere pagina van de site en het beheer houdt 64 rem.
+  Op een telefoon is er geen verschil met een gewone pagina.
+  De kop, het menu en de voet blijven in de kolom van 64 rem.
+- **Waarom:** de beheerschermen voor een wedstrijd (#592) hebben een tabel met invoervelden voor de doelpunten.
+  Zes velden en een knop naast elkaar passen niet in een hoofdkolom van 38 rem, en onder elkaar vult één doelpunt een heel scherm.
+  58 rem is breed genoeg voor de tabel zonder dat hij opzij schuift, en de zijbalk van 24 rem blijft zoals op elke pagina.
+  Het is `Page.Main` die het zegt, zoals bij `wide` en `narrow` op `Page.Sidebar`, zodat een pagina het kan kiezen zonder de `Page.Body` te bezitten, die de indeling van de site tekent.
+- **Hoe:** de tokens zijn `--hf-content-max-width-wide` (58 rem) en `--hf-page-max-width-wide` (84 rem) in `layout.css`.
+  Vanaf 52 rem heeft `Page.Body` twee sporen, `minmax(24rem, 58rem)` en `minmax(16rem, 24rem)`, die meekrimpen tot 86 rem (84 rem plus 1 rem marge aan beide kanten) en onder die breedte net zo als bij andere pagina's.
+  `Page.Body` rekent de ruimte aan de zijkanten uit de bredere kolom (`--hf-page-inset`), zodat de sporen gecentreerd staan.
+  Een formulier met een `InputTable` is zo breed als zijn ouder, want `Form` hield het op 30 rem.
+- **Nadeel:** de kop, het menu en de voet staan in een kolom van 64 rem, dus op een scherm breder dan 84 rem staat de brede pagina aan beide kanten 10 rem buiten de lijn van het logo.
+  Een pagina die dat wil rechttrekken, vraagt een eigen beslissing: de hang van het schild en de grens van 66 rem in het menu staan nu als vast getal in de CSS.
+- **Alternatieven:** de hele site breder maken; dat raakt elke pagina, en de regels van de tekstpagina's worden dan te lang.
+  Een eigen tweede `Page.Body` voor het beheer; dat zet de indeling twee keer in de code, en de pagina's van het beheer gebruiken de indeling van de site.
+  De kop, het menu en de voet ook breder maken; dat raakt de hang van het schild en het menu, en de projecteigenaar vroeg er niet om.
+  `wide` op `Page.Sidebar` hergebruiken; dat betekent al "een zijbalk even breed als de hoofdkolom".
+
+### Een tabel om in te vullen wordt een blok per rij waar hij niet past, naar de breedte van de tabel zelf
+
+- **Datum:** 2 november 2026
+- **Besluit:** `InputTable` is een tabel zolang hij 48 rem breed is, en daaronder is elke rij een blok met alle labels in beeld.
+  De breedte is die van de tabel zelf (een `@container`-regel), niet die van het venster.
+  `DataTable` heeft een tweede uiterlijk, `appearance="text"`, voor kolommen met tekst die links beginnen, een rijkop met een tweede regel en cellen met vrije inhoud; het is geen tweede tabel.
+- **Waarom:** een tabel met acht kolommen van invoervelden past op een telefoon niet, en zijwaarts schuiven maakt velden onbereikbaar.
+  Het venster zegt niet hoeveel ruimte de tabel heeft: op een middelbaar scherm van 52 tot 76 rem is de hoofdkolom van een brede pagina smaller dan 48 rem, en dan zou een regel voor het venster een tabel tonen die niet past.
+  Een container query volgt de ruimte die er is, op elke pagina.
+  Elk veld heeft een volledig label (kolomnaam en rij: "Minuut, doelpunt 2"), dus een schermlezer mist niets als een browser de tabel op de telefoon niet als tabel voorleest.
+- **Nadeel:** de grens van 48 rem staat vast en volgt het aantal kolommen niet; een tabel met drie kolommen wordt eerder een blok dan nodig.
+- **Alternatieven:** een media query op de breedte van het venster; die klopt niet in een smalle kolom.
+  Een lijst met kaarten op elke breedte, zoals nu; dat vult een scherm met een paar doelpunten.
+  Rollen (`role`) op de tabel en zijn rijen zetten om de tabelbetekenis op de telefoon te houden; elk veld is al volledig benoemd, dus ze voegen niets toe en moeten we bijhouden.
 
 ## Site
 

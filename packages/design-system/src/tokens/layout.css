@@ -36,6 +36,15 @@
     --hf-sidebar-width-narrow: 16rem;
 
     /*
+     * The widest the main column gets on a wide page (Page.Main with `wide`), for a page whose
+     * main column holds a table with fields in it. With the space between the columns (2rem)
+     * and the usual sidebar (24rem) the page is 84rem wide, wider than the 64rem of other
+     * pages.
+     */
+    --hf-content-max-width-wide: 58rem;
+    --hf-page-max-width-wide: 84rem;
+
+    /*
      * The logo: the gap between the shield and the wordmark, the size of the shield, and how far the shield hangs outside
      * the column when the text of the page lines up with the wordmark (see .hf-page-header in page.css). The shield is
      * 1.55 times the font size of the wordmark.
