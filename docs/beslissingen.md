@@ -3093,6 +3093,8 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Een derde maat, groot (niemand vraagt erom).
   Een kleine maat van 32 pixels (haalt 2.5.8 ook, maar laat minder ruimte voor een vinger).
   Alle bedieningselementen kleiner maken (een formulier op een telefoon heeft de 44 pixels nodig).
+- **Later:** zie _Dichtheid is een klasse die tokens verandert, los van het kleurthema_ (2 november 2026): de standaardhoogte is nu ook een token, `--hf-size-control`, en in het compacte thema zijn de standaardmaat en de kleine maat 36 en 32 pixels hoog.
+  Zonder de klasse blijft alles zoals hier staat.
 
 ### Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn
 
@@ -3244,6 +3246,48 @@ Iets wat _voorlopig_ heet, staat nog open; dat besluit volgt.
   Halverwege de overgang naar hover is het contrast niet lager dan aan het begin.
 - **Alternatieven:** het pictogram doorzichtig maken; het contrast verschilt dan per vlak en haalt 3:1 niet overal.
   De knop pas bij hover tonen; op een aanraakscherm is er geen hover, dus de knop zou er niet zijn.
+
+### Dichtheid is een klasse die tokens verandert, los van het kleurthema
+
+- **Datum:** 2 november 2026
+- **Besluit:** het designsysteem heeft een tweede dichtheid, compact, voor schermen waar mensen lang achter zitten en veel velden en rijen zien.
+  Je zet hem aan met de klasse `hf-density-compact` op een element, en hij geldt voor alles daarbinnen.
+  - De klasse staat alleen in `tokens/density.css`, in de laag `hf.tokens`, en zet alleen eigenschappen met `--hf-`: de vijf stappen van de ruimte, de maten van de letters, en de hoogte van knoppen en velden.
+  - Geen component, geen component-CSS en geen component-API kent de klasse.
+    `tokens/density-css.test.ts` bewaakt dat, en dat `density.css` niets anders zet dan tokens die al bestaan.
+  - De breedtes van de pagina, de kleuren, de gewichten en de regelhoogten blijven zoals ze zijn.
+    De dichtheid heeft ook niets met `data-theme` te maken: licht en donker zijn een andere keuze.
+  - De site, niet het designsysteem, zet de klasse op de `Page.Main` van elke pagina onder `/beheer` (`apps/site/src/beheer/density.ts`).
+    De kop en de voet van de site houden de ruimte van de publieke pagina's.
+    `apps/site/src/beheer/density.test.ts` zoekt de pagina's zelf op en faalt voor een pagina die de klasse vergeet.
+  - Een keuze van de bezoeker of de redacteur om de dichtheid aan of uit te zetten, en het opslaan daarvan, zit er niet in.
+- **Hoe:** de vaste maten die het thema niet bereikte, zijn tokens geworden met als waarde wat ze waren, zodat de publieke site niet verandert.
+  - `--hf-size-control` is de standaardhoogte van knoppen en velden (2,75 rem), in `button.css`, `forms.css`, `select.css`, `segmented-control.css` en `pagination.css`, naast `--hf-size-control-small`.
+  - Vijf lettergroottes zijn tokens, in `typography.css`: `--hf-menu-font-size`, `--hf-submenu-font-size` en `--hf-anchor-font-size` voor de menu's en de balk "Op deze pagina", en `--hf-figure-font-size` en `--hf-figure-large-font-size` voor een teken in een rij en het totaal in een donut.
+  - De icoonknoppen (de themaknop, de knop naar boven, de deelknop van een kaart) en de links van het hoofdmenu en de bronvermelding van Wikipedia houden hun 44 pixels: ze staan in de kop, de voet of een hoek, waar een vinger ze moet raken, en het beheer heeft ze niet.
+  - Een kolom van `Page` (`Page.Main`, de cellen en de zijbalk) neemt de ruimte tussen de cellen weer uit `--hf-space-xl`, op zijn eigen element.
+    Een eigen eigenschap die naar een andere eigenschap verwijst, krijgt zijn waarde op het element waar hij staat, en dat is anders de `Page.Body`, buiten de klasse.
+    Zonder klasse is de waarde dezelfde: 2 rem.
+- **De waarden:** drie kwart van elke stap van de ruimte (0,125, 0,375, 0,75, 1,125 en 1,5 rem), zeven achtste van de koppen 1 tot en met 3 op dezelfde vloeiende schaal, en een stap omlaag voor de rest.
+  - Tekst: Tekst 15 pixels (was 16), Meta en Label 13 pixels (was 14), Nieuwskop 16 pixels (was 18), Inleiding 18 pixels (was 20) en Kop 4 15 pixels (was 16).
+  - Cijfers: 16 en 20 pixels (was 18 en 24).
+  - Knoppen en velden: 36 pixels in de standaardmaat (was 44) en 32 pixels in de kleine maat (was 36).
+  - De regelhoogten, de gewichten en de breedtes van de pagina blijven.
+- **Waarom:** de beheerschermen hebben veel velden en rijen en mensen zitten er lang achter, terwijl de ruimte van de publieke site is gemaakt om te lezen.
+  - Een klasse die tokens verandert, laat elk component in het beheer hetzelfde doen als erbuiten: er is geen prop en geen tweede stijl om bij te houden, en een nieuw component of scherm krijgt de dichtheid vanzelf, zoals de wedstrijdschermen (#592) na #594 en #595.
+  - De grenzen zijn de leesbaarheid en WCAG 2.5.8: de kleinste tekst is niet onder 0,75 rem (nu 0,8125 rem) en lopende tekst niet onder 0,875 rem (nu 0,9375 rem), en een knop of veld blijft ruim boven de 24 bij 24 pixels (32 pixels is een derde meer, en 36 pixels de helft).
+  - De ruimte gaat met een vaste factor omlaag, en de volgorde van de stappen blijft.
+    Een kleinere factor spaart te weinig om op te vallen, een grotere laat velden en teksten tegen elkaar kleven.
+  - De koppen krijgen dezelfde factor op de vloeiende schaal, zodat de verhouding tussen twee koppen gelijk blijft en kop 3 groter blijft dan kop 4.
+  - De standaardhoogte van 36 pixels is de kleine maat van de publieke site, die daar al bruikbaar bleek (zie _Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat_).
+    De kleine maat gaat mee omlaag naar 32 pixels, zodat hij lager blijft dan de standaard.
+  - De breedtes van de pagina blijven, omdat een andere kolombreedte een andere pagina is en geen dichtheid.
+    De eigenschappen die een stap bij `:root` overnemen, zoals `--hf-page-margin`, houden de waarde van `:root`, en dat is hier de bedoeling.
+  - De klasse op `Page.Main` van elke beheerpagina, en niet één wikkel in een `layout.tsx` voor `/beheer`: `Page.Main` en `Page.Sidebar` moeten rechtstreeks in de `Page.Body` staan, en een `div` ertussen breekt de kolommen en de selectors met `:has(> …)`.
+- **Nadeel:** elke nieuwe beheerpagina moet de klasse zelf zetten.
+  De test vangt het, maar het is een regel per pagina.
+  De ruimte boven en onder de kolommen is die van de `Page.Body`, buiten de klasse, en blijft dus ruim.
+- **Alternatieven:** een prop `density` op elk component (elk component kent het thema, en elk nieuw component moet het erbij doen); een tweede stylesheet voor het beheer (twee stijlen om gelijk te houden); `zoom` of een kleinere `font-size` op de wikkel (maakt ook de breedtes en de kleine tekst kleiner, en haalt de grenzen niet); de klasse op `body` of `html` (kop en voet van de site worden ook compact); één wikkel in `app/beheer/layout.tsx` (zie hierboven); de waarden in de klasse op de `Page.Body` (de root-layout kent het pad niet); de kop en de voet ook compact (de publieke site blijft zoals ze is); de dichtheid laten kiezen door de redacteur (een eigen issue, met opslaan).
 
 ## Site
 

@@ -86,6 +86,7 @@ Zo test je het: bekijk de lijst met koppen in de toegankelijkheidsboom van je br
       Met `size="small"` zijn ze 36 pixels hoog, voor een secundair bedieningselement naast de inhoud, zoals een kiezer of een schakelaar in een zijkolom of een werkbalk.
       Dat mag, want 36 pixels haalt de 24 bij 24 pixels van 2.5.8 ruim, en de kleine maat houdt dezelfde zichtbare focus en hetzelfde toetsenbord.
       Formulieren, de hoofdhandeling op een telefoon en wat alleen staat houden de standaardmaat; Storybook zegt het in het hoofdstuk Maten van knoppen en velden.
+      Het compacte thema (`hf-density-compact`, in het beheer) maakt ze 36 pixels hoog, en 32 pixels in de kleine maat: dat haalt 2.5.8 ook ruim.
 
 Zo test je het: tab door de pagina met een schermlezer aan, of bekijk de naam van elk element in de toegankelijkheidsboom.
 
